@@ -11,15 +11,16 @@
 
 #include "android/skin/qt/extended-pages/record-screen-page.h"
 
-#include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/ffmpeg-muxer.h"
 #include "android/globals.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/utils/debug.h"
 
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -35,15 +36,54 @@ const char RecordScreenPage::kTmpMediaName[] = "tmp.webm";
 RecordScreenPage::RecordScreenPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordScreenPage) {
     mUi->setupUi(this);
+
+    // Resize format combobox width to the largest item
+    mUi->rec_formatSwitch->setMinimumContentsLength(5);
+    int width = mUi->rec_formatSwitch->minimumSizeHint().width();
+    mUi->rec_formatSwitch->setMinimumWidth(width);
+
+    // Create widget for video player
+    mVideoWidget.reset(new android::videoplayer::VideoPlayerWidget(this));
+    mUi->rec_playerOverlayLayout->addWidget(mVideoWidget.get());
+    // Need to call show() on the parent widget to notify mVideoWidget to resize
+    // to match the size of rec_playerOverlayWidget.
+    mUi->rec_playerOverlayWidget->show();
+
     setRecordState(RecordState::Ready);
 
     mTmpFilePath = PathUtils::join(avdInfo_getContentPath(android_avdInfo),
                                    &kTmpMediaName[0]);
+    qRegisterMetaType<RecordStopStatus>();
     QObject::connect(&mTimer, &QTimer::timeout, this,
                      &RecordScreenPage::updateElapsedTime);
+    QObject::connect(this, &RecordScreenPage::recordingStopped, this,
+                     &RecordScreenPage::slot_recordingStopped);
 }
 
-RecordScreenPage::~RecordScreenPage() {}
+RecordScreenPage::~RecordScreenPage() {
+    // Remove the tmp video file if one exists
+    if (!removeFileIfExists(QString(mTmpFilePath.c_str()))) {
+        derror("Unable to clean up temp media file.");
+    }
+}
+
+bool RecordScreenPage::removeFileIfExists(const QString& file) {
+    if (QFile::exists(file)) {
+        return QFile::remove(file);
+    }
+    return true;
+}
+
+static void onRecordingStoppedCallback(void* opaque, RecordStopStatus status) {
+    RecordScreenPage* rsInst = (RecordScreenPage*)opaque;
+    if (rsInst) {
+        rsInst->emitRecordingStopped(status);
+    }
+}
+
+void RecordScreenPage::emitRecordingStopped(RecordStopStatus status) {
+    emit(recordingStopped(status));
+}
 
 void RecordScreenPage::setRecordScreenAgent(
         const QAndroidRecordScreenAgent* agent) {
@@ -52,6 +92,7 @@ void RecordScreenPage::setRecordScreenAgent(
 
 void RecordScreenPage::setRecordState(RecordState newState) {
     mState = newState;
+
     switch (mState) {
         case RecordState::Ready:
             mUi->rec_recordOverlayWidget->show();
@@ -62,6 +103,7 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(QString("START RECORDING"));
             mUi->rec_recordButton->show();
+            mVideoWidget->setVisible(false);
             break;
         case RecordState::Recording:
             mUi->rec_recordDotLabel->setPixmap(QPixmap(QString::fromUtf8(":/light/recordCircle")));
@@ -74,6 +116,7 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(QString("STOP RECORDING"));
             mUi->rec_recordButton->show();
+            mVideoWidget->setVisible(false);
 
             // Update every second
             mSec = 0;
@@ -98,9 +141,15 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_formatSwitch->setCurrentIndex(0);
             break;
         }
+        case RecordState::Playing:
+            mUi->rec_recordOverlayWidget->hide();
+            // Change the icon on the play/stop button.
+            mUi->rec_playStopButton->show();
+            mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
+            mUi->rec_playStopButton->setProperty("themeIconName", "stop");
+            mUi->rec_saveButton->hide();
+            break;
         case RecordState::Stopped:
-            // TODO: Need to only show this when hovering over the video
-            // widget, which we don't have yet.
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->show();
@@ -117,6 +166,11 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_playStopButton->setEnabled(true);
             mUi->rec_formatSwitch->setEnabled(true);
             mUi->rec_saveButton->setEnabled(true);
+            mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+            mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
+            // Display preview frame
+            mVideoPreview->show();
+            mVideoWidget->setVisible(true);
             break;
         case RecordState::Converting:
         {
@@ -147,8 +201,22 @@ void RecordScreenPage::updateElapsedTime() {
 }
 
 void RecordScreenPage::on_rec_playStopButton_clicked() {
-    QString url = QString("file://%1").arg(mTmpFilePath.c_str());
-    QDesktopServices::openUrl(QUrl(url));
+    if (mState == RecordState::Stopped) {
+        mVideoPlayerNotifier.reset(new android::videoplayer::VideoPlayerNotifier());
+        mVideoPlayer = android::videoplayer::VideoPlayer::create(mTmpFilePath, mVideoWidget.get(), mVideoPlayerNotifier.get());
+        connect(mVideoPlayerNotifier.get(), SIGNAL(updateWidget()), this, SLOT(updateVideoView()));
+        connect(mVideoPlayerNotifier.get(), SIGNAL(videoFinished()), this, SLOT(videoPlayingFinished()));
+
+        mVideoPlayer->scheduleRefresh(20);
+        mVideoPlayer->start();
+        setRecordState(RecordState::Playing);
+    } else if (mState == RecordState::Playing) {
+        mVideoPlayer->stop();
+        mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+        mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
+        // stop call will cause videoPlayingFinished() method to be called
+        // where we update the button state
+    }
 }
 
 void RecordScreenPage::on_rec_recordButton_clicked() {
@@ -160,32 +228,33 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
     }
 
     switch (mState) {
-        case RecordState::Ready:
+        case RecordState::Ready: {
             // startRecording() will determine which codec to use based on the
             // file extension.
-            if (mRecordScreenAgent->startRecording(mTmpFilePath.c_str())) {
+            RecordingInfo info = {};
+            info.fileName = mTmpFilePath.c_str();
+            info.cb = &onRecordingStoppedCallback;
+            info.opaque = this;
+            if (mRecordScreenAgent->startRecording(&info)) {
                 newState = RecordState::Recording;
             } else {
                 // User probably started recording from command-line.
                 // TODO: show MessageBox saying "already recording."
             }
             break;
+        }
         case RecordState::Recording:
         {
-            auto thread = new QThread();
-            auto task = new StopRecordingTask(mRecordScreenAgent);
-            task->moveToThread(thread);
-            connect(thread, SIGNAL(started()), task, SLOT(run()));
-            connect(task, SIGNAL(started()), this, SLOT(stopRecordingStarted()));
-            connect(task, SIGNAL(finished(bool)), this, SLOT(stopRecordingFinished(bool)));
-            connect(task, SIGNAL(finished(bool)), thread, SLOT(quit()));
-            connect(thread, SIGNAL(finished()), task, SLOT(deleteLater()));
-            connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-            thread->start();
+            mRecordScreenAgent->stopRecording();
             return;
         }
         case RecordState::Stopped:  // we can combine this state into readystate
-            if (mRecordScreenAgent->startRecording(mTmpFilePath.c_str())) {
+        {
+            RecordingInfo info = {};
+            info.fileName = mTmpFilePath.c_str();
+            info.cb = &onRecordingStoppedCallback;
+            info.opaque = this;
+            if (mRecordScreenAgent->startRecording(&info)) {
                 newState = RecordState::Recording;
             } else {
                 // User probably started recording from command-line.
@@ -193,6 +262,7 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
             }
             newState = RecordState::Recording;
             break;
+        }
         default:;
     }
 
@@ -202,7 +272,7 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
 void RecordScreenPage::on_rec_saveButton_clicked() {
     QSettings settings;
 
-    QString ext = mUi->rec_formatSwitch->currentText();
+    QString ext = mUi->rec_formatSwitch->currentText().toLower();
     QString savePath = QDir::toNativeSeparators(getRecordingSaveDirectory());
     QString recordingName = QFileDialog::getSaveFileName(
             this, tr("Save Recording"),
@@ -225,10 +295,7 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
 
     settings.setValue(Ui::Settings::SCREENREC_SAVE_PATH, dirName);
 
-    // move temp recording file
-    // TODO: Copy the file to the save location since the user may want to save
-    // in multiple formats. Since the initial encoding is webm, we need to do a
-    // conversion if the user selects something else.
+    // Copy the media file to the save location
     if (ext == "gif") {
         auto thread = new QThread();
         auto task = new ConvertingTask(mTmpFilePath, recordingName.toStdString());
@@ -241,9 +308,17 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
         connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
         thread->start();
     } else {
-        int rc = rename(mTmpFilePath.c_str(), recordingName.toStdString().c_str());
-        if (rc != 0) {
-            QString errStr = tr("Unknown error while saving<br>") + recordingName;
+        QString errStr;
+
+        if (removeFileIfExists(recordingName)) {
+            if (!QFile::copy(QString(mTmpFilePath.c_str()), recordingName)) {
+                errStr = tr("Unknown error while saving<br>") + recordingName;
+                showErrorDialog(errStr, tr("Save Recording"));
+            }
+        } else {
+            errStr = tr("Unable to remove existing file before copying new "
+                        "file<br>") +
+                     recordingName;
             showErrorDialog(errStr, tr("Save Recording"));
         }
     }
@@ -265,17 +340,26 @@ void RecordScreenPage::updateTheme() {
     }
 }
 
-void RecordScreenPage::stopRecordingStarted() {
-    setRecordState(RecordState::Stopping);
-}
-
-void RecordScreenPage::stopRecordingFinished(bool success) {
-    if (!success) {
-        QString errStr = tr("An error occurred while recording.");
-        showErrorDialog(errStr, tr("Save Recording"));
+void RecordScreenPage::slot_recordingStopped(RecordStopStatus status) {
+    switch (status) {
+        case RECORD_STOP_INITIATED:
+            setRecordState(RecordState::Stopping);
+            break;
+        case RECORD_STOP_FINISHED:
+            // Setup the preview frame. Needs to be initialized before
+            // setRecordState() or the preview frame will not be shown.
+            mVideoPreview.reset(new android::videoplayer::VideoPreview(
+                    mVideoWidget.get(), mTmpFilePath));
+            connect(mVideoPreview.get(), SIGNAL(updateWidget()), this,
+                    SLOT(updateVideoView()));
+            setRecordState(RecordState::Stopped);
+            break;
+        case RECORD_STOP_FAILED:
+            QString errStr = tr("An error occurred while recording.");
+            showErrorDialog(errStr, tr("Save Recording"));
+            setRecordState(RecordState::Ready);
+            break;
     }
-
-    setRecordState(RecordState::Stopped);
 }
 
 void RecordScreenPage::convertingStarted() {
@@ -315,4 +399,12 @@ void ConvertingTask::run() {
                                             mEndFilename.c_str(),
                                             64 * 1024);
     emit(finished(!rc));
+}
+
+void RecordScreenPage::updateVideoView() {
+    mVideoWidget->repaint();
+}
+
+void RecordScreenPage::videoPlayingFinished() {
+    setRecordState(RecordState::Stopped);
 }

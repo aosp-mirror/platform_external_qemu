@@ -52,6 +52,7 @@ typedef struct coreaudioVoiceBase {
     int live;
     int decr;
     int pos;
+    bool shuttingDown;
 } coreaudioVoiceBase;
 
 typedef struct coreaudioVoiceOut {
@@ -460,6 +461,7 @@ static int coreaudio_init_base(coreaudioVoiceBase *core,
     CoreaudioConf *conf = drv_opaque;
 
     core->isInput = isInput;
+    core->shuttingDown = false;
 
     /* create mutex */
     err = pthread_mutex_init(&core->mutex, NULL);
@@ -578,6 +580,8 @@ static void coreaudio_fini_base (coreaudioVoiceBase *core)
     OSStatus status;
     int err;
 
+    core->shuttingDown = true;
+
     if (!audio_is_cleaning_up()) {
         /* stop playback */
         if (isPlaying(core->deviceID, core->isInput)) {
@@ -686,6 +690,10 @@ static OSStatus audioOutputDeviceIOProc(
     const float scale = UINT_MAX;
 #endif
 #endif
+
+    if (core->shuttingDown) {
+        return 0;
+    }
 
     if (coreaudio_lock (core, "audioOutputDeviceIOProc")) {
         inInputTime = 0;
@@ -803,6 +811,10 @@ static OSStatus audioInputDeviceIOProc(
     const float scale = UINT_MAX;
 #endif
 #endif
+
+    if (core->shuttingDown) {
+        return 0;
+    }
 
     if (coreaudio_lock (core, "audioInputDeviceIOProc")) {
         inInputTime = 0;

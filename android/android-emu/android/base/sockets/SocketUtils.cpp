@@ -16,6 +16,9 @@
 #include "android/base/files/Fd.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketErrors.h"
+#include "android/base/system/System.h"
+#include "android/utils/sockets.h"
+#include "android/utils/system.h"
 
 #ifdef _WIN32
 #include "android/base/sockets/Winsock.h"
@@ -597,11 +600,58 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
     SockAddressStorage addr;
     addr.initLoopbackFor(port, domain);
 
-    if (::connect(s.get(), &addr.generic, addr.size()) < 0) {
-        return -1;
-    }
+    // Get all our select()-related friends together---
+    // |connres| the result of connect(),
+    // a timeval to hold the timeout |tv|,
+    // and a fd_set |my_set| to specify our socket fd.
+    int connres;
+    struct timeval tv;
+    fd_set my_set;
 
-    return s.release();
+    memset(&tv, 0, sizeof(timeval));
+    FD_ZERO(&my_set);
+
+    // Allow an entire 250ms to connect to "loopback" address :thinkingface:
+    tv.tv_usec = 1000 * 250;
+    int fd = s.get();
+    FD_SET(fd, &my_set);
+
+    // The initial connection needs to be nonblocking since simple configs like
+    // firewalls can make connect() hang. The initial connect() is in a VCPU
+    // thread and we don't really want to hang the entire emulator for usecases
+    // like connecting to adb, so make this socket non-blocking at first.
+    socketSetNonBlocking(fd);
+
+    connres = socket_connect_posix(s.get(), &addr.generic, addr.size());
+
+    // Different OSes / setups will have all sorts of different errno's that
+    // indicate that the connect() did not fail, it's just a non-blocking
+    // connect() that needs to be select()'ed. These are the ones that we have
+    // seen so far. Any other errno means we're probably cooked.
+    if (connres < 0 &&
+        (errno == EWOULDBLOCK ||
+         errno == EAGAIN ||
+         errno == EINPROGRESS)) {
+        int selectRes = HANDLE_EINTR(::select(fd + 1, 0, &my_set, 0, &tv));
+        if (selectRes > 0) {
+            socketSetBlocking(fd);
+            return s.release();
+        } else {
+            // select() failed.
+            return -1;
+        }
+    } else {
+        // Either connect() succeeded, or we have some failure errno
+        // in connect() that tells us to proceed no further.
+        if (connres > 0) {
+            // connect() succeeded even on a nonblocking socket, much wow.
+            socketSetBlocking(fd);
+            return s.release();
+        } else {
+            // Some other errno issued on connect().
+            return -1;
+        }
+    }
 }
 
 int socketTcp4LoopbackClient(int port) {

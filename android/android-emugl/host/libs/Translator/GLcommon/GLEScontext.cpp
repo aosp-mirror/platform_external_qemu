@@ -2037,6 +2037,15 @@ void GLEScontext::initDefaultFBO(
         dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, getFBOGlobalName(prevDrawFBOBinding));
     if (prevReadFBOBinding)
         dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBOGlobalName(prevReadFBOBinding));
+
+    // We might be initializing a surfaceless context underneath
+    // where the viewport is initialized to 0x0 width and height.
+    // Set to our wanted pbuffer dimensions if this is the first time
+    // the viewport has been set.
+    if (!m_isViewport) {
+        setViewport(0, 0, width, height);
+        dispatcher().glViewport(0, 0, width, height);
+    }
 }
 
 
@@ -2213,18 +2222,11 @@ void main() {
 
 static const char kTexImageEmulationVShaderSrcFlipped[] = R"(
 precision highp float;
+layout (location = 0) in vec2 a_pos;
 out vec2 v_texcoord;
 void main() {
-    const vec2 quad_pos[6] = vec2[6](
-        vec2(0.0, 0.0),
-        vec2(0.0, 1.0),
-        vec2(1.0, 0.0),
-        vec2(0.0, 1.0),
-        vec2(1.0, 0.0),
-        vec2(1.0, 1.0));
-
-    gl_Position = vec4((quad_pos[gl_VertexID] * 2.0) - 1.0, 0.0, 1.0);
-    v_texcoord = quad_pos[gl_VertexID];
+    gl_Position = vec4((a_pos.xy) * 2.0 - 1.0, 0.0, 1.0);
+    v_texcoord = a_pos;
     v_texcoord.y = 1.0 - v_texcoord.y;
 })";
 
@@ -2334,7 +2336,13 @@ void GLEScontext::copyTexImageWithEmulation(
     gl.glDisable(GL_RASTERIZER_DISCARD);
 
     gl.glViewport(0, 0, width, height);
-    gl.glDepthRange(0.0f, 1.0f);
+
+    if (isGles2Gles()) {
+        gl.glDepthRangef(0.0f, 1.0f);
+    } else {
+        gl.glDepthRange(0.0f, 1.0f);
+    }
+
     gl.glColorMask(1, 1, 1, 1);
 
     gl.glBindTexture(GL_TEXTURE_2D, m_textureEmulationTextures[0]);
@@ -2409,10 +2417,49 @@ GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
     return program;
 }
 
-void GLEScontext::setupImageBlitState() {
-    if (m_blitState.program) return;
+int GLEScontext::getReadBufferSamples() {
+    GLuint readFboBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+    bool defaultFboReadBufferBound = readFboBinding == 0;
+    if (defaultFboReadBufferBound) {
+        return m_defaultFBOSamples;
+    } else {
+        FramebufferData* fbData = (FramebufferData*)(getFBODataPtr(readFboBinding).get());
+        return fbData ? fbData->getAttachmentSamples(this, fbData->getReadBuffer()) : 0;
+    }
+}
 
+int GLEScontext::getReadBufferInternalFormat() {
+    GLuint readFboBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+    bool defaultFboReadBufferBound = readFboBinding == 0;
+    if (defaultFboReadBufferBound) {
+        return m_defaultFBOColorFormat;
+    } else {
+        FramebufferData* fbData = (FramebufferData*)(getFBODataPtr(readFboBinding).get());
+        return fbData ? fbData->getAttachmentInternalFormat(this, fbData->getReadBuffer()) : 0;
+    }
+}
+
+void GLEScontext::getReadBufferDimensions(GLint* width, GLint* height) {
+    GLuint readFboBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+    bool defaultFboReadBufferBound = readFboBinding == 0;
+    if (defaultFboReadBufferBound) {
+        *width = m_defaultFBOWidth;
+        *height = m_defaultFBOHeight;
+    } else {
+        FramebufferData* fbData = (FramebufferData*)(getFBODataPtr(readFboBinding).get());
+        if (fbData) {
+            fbData->getAttachmentDimensions(
+                this, fbData->getReadBuffer(), width, height);
+        }
+    }
+}
+
+void GLEScontext::setupImageBlitState() {
     auto& gl = dispatcher();
+    m_blitState.prevSamples = m_blitState.samples;
+    gl.glGetIntegerv(GL_SAMPLE_BUFFERS, (GLint*)&m_blitState.samples);
+
+    if (m_blitState.program) return;
 
     std::string vshaderSrc =
         isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
@@ -2435,30 +2482,88 @@ void GLEScontext::setupImageBlitState() {
     gl.glGenFramebuffers(1, &m_blitState.resolveFbo);
     gl.glGenTextures(1, &m_blitState.tex);
     gl.glGenVertexArrays(1, &m_blitState.vao);
-    gl.glGetIntegerv(GL_SAMPLE_BUFFERS, (GLint*)&m_blitState.samples);
+
+    gl.glGenBuffers(1, &m_blitState.vbo);
+    float blitVbo[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+    };
+
+    GLint buf;
+    gl.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &buf);
+
+    gl.glBindBuffer(GL_ARRAY_BUFFER, m_blitState.vbo);
+    gl.glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), blitVbo, GL_STATIC_DRAW);
+
+    gl.glBindVertexArray(m_blitState.vao);
+    gl.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    gl.glEnableVertexAttribArray(0);
+
+    gl.glBindBuffer(GL_ARRAY_BUFFER, buf);
 }
 
-void GLEScontext::setupImageBlitForTexture(uint32_t width,
+bool GLEScontext::setupImageBlitForTexture(uint32_t width,
                                            uint32_t height,
                                            GLint internalFormat) {
+    GLint read_iformat = getReadBufferInternalFormat();
+
+    GLint sizedInternalFormat = GL_RGBA8;
+    if (internalFormat != GL_RGBA8 &&
+        internalFormat != GL_RGB8 &&
+        internalFormat != GL_RGB565) {
+        switch (internalFormat) {
+        case GL_RGB:
+            sizedInternalFormat = GL_RGB8;
+            break;
+        case GL_RGBA:
+            sizedInternalFormat = GL_RGBA8;
+            break;
+        default:
+            break;
+        }
+    }
+
     auto& gl = dispatcher();
     gl.glBindTexture(GL_TEXTURE_2D, m_blitState.tex);
 
+    if (isIntegerInternalFormat(read_iformat) ||
+        read_iformat == GL_RGB10_A2) {
+        // Is not a blittable format. Just create the texture for now to
+        // make image blit state consistent.
+        gl.glTexImage2D(GL_TEXTURE_2D, 0, sizedInternalFormat, width, height, 0, internalFormat, GL_UNSIGNED_BYTE, 0);
+        return false;
+    }
+
     if (width != m_blitState.width || height != m_blitState.height ||
-        internalFormat != m_blitState.internalFormat) {
+        internalFormat != m_blitState.internalFormat ||
+        m_blitState.samples != m_blitState.prevSamples) {
+
         m_blitState.width = width;
         m_blitState.height = height;
         m_blitState.internalFormat = internalFormat;
 
-        gl.glCopyTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
-                            0, 0, width, height, 0);
         if (m_blitState.samples > 0) {
+            gl.glTexImage2D(GL_TEXTURE_2D, 0, sizedInternalFormat, width, height, 0, internalFormat, GL_UNSIGNED_BYTE, 0);
             gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.resolveFbo);
             gl.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                     GL_TEXTURE_2D, m_blitState.tex, 0);
+        } else {
+            gl.glTexImage2D(GL_TEXTURE_2D, 0, sizedInternalFormat, width, height, 0, internalFormat, GL_UNSIGNED_BYTE, 0);
         }
+
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
+    GLint rWidth = width;
+    GLint rHeight = height;
+    getReadBufferDimensions(&rWidth, &rHeight);
     if (m_blitState.samples > 0) {
         gl.glBindTexture(GL_TEXTURE_2D, 0);
         gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.resolveFbo);
@@ -2468,6 +2573,8 @@ void GLEScontext::setupImageBlitForTexture(uint32_t width,
     } else {
         gl.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
     }
+
+    return true;
 }
 
 void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
@@ -2485,10 +2592,14 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     getViewport(prevViewport);
 
     setupImageBlitState();
-    setupImageBlitForTexture(width, height, internalFormat);
+    bool shouldBlit = setupImageBlitForTexture(width, height, internalFormat);
+
+    if (!shouldBlit) return;
 
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.fbo);
     gl.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -2505,7 +2616,11 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     gl.glDisable(GL_RASTERIZER_DISCARD);
 
     gl.glViewport(0, 0, width, height);
-    gl.glDepthRange(0.0f, 1.0f);
+    if (isGles2Gles()) {
+        gl.glDepthRangef(0.0f, 1.0f);
+    } else {
+        gl.glDepthRange(0.0f, 1.0f);
+    }
     gl.glColorMask(1, 1, 1, 1);
 
     gl.glUseProgram(m_blitState.program);
@@ -2551,7 +2666,11 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     gl.glViewport(prevViewport[0], prevViewport[1],
                   prevViewport[2], prevViewport[3]);
 
-    gl.glDepthRange(m_zNear, m_zFar);
+    if (isGles2Gles()) {
+        gl.glDepthRangef(m_zNear, m_zFar);
+    } else {
+        gl.glDepthRange(m_zNear, m_zFar);
+    }
 
     gl.glColorMask(m_colorMaskR, m_colorMaskG, m_colorMaskB, m_colorMaskA);
 

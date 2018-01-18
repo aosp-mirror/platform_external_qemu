@@ -348,6 +348,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::PLAY_STORE_IMAGE;
         case android::featurecontrol::LogcatPipe:
             return android_studio::EmulatorFeatureFlagState::LOGCAT_PIPE;
+        case android::featurecontrol::SystemAsRoot:
+            return android_studio::EmulatorFeatureFlagState::SYSTEM_AS_ROOT;
         case android::featurecontrol::HYPERV:
             return android_studio::EmulatorFeatureFlagState::HYPERV;
         case android::featurecontrol::HVF:
@@ -362,6 +364,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::SCREEN_RECORDING;
         case android::featurecontrol::VirtualScene:
             return android_studio::EmulatorFeatureFlagState::VIRTUAL_SCENE;
+        case android::featurecontrol::IgnoreHostOpenGLErrors:
+            return android_studio::EmulatorFeatureFlagState::IGNORE_HOST_OPENGL_ERRORS;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }

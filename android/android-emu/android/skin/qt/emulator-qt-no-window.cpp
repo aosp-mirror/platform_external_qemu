@@ -18,6 +18,7 @@
 #include "android/globals.h"
 #include "android/metrics/metrics.h"
 #include "android/skin/qt/QtLooper.h"
+#include "android/test/checkboot.h"
 #include "android/utils/filelock.h"
 
 #include <QObject>
@@ -62,6 +63,9 @@ EmulatorQtNoWindow::EmulatorQtNoWindow(QObject* parent)
     QObject::connect(this, &EmulatorQtNoWindow::requestClose, this,
                      &EmulatorQtNoWindow::slot_requestClose);
     android_metrics_start_adb_liveness_checker(mAdbInterface.get());
+    if (android_hw->test_quitAfterBootTimeOut > 0) {
+        android_test_start_boot_complete_timer(android_hw->test_quitAfterBootTimeOut);
+    }
 }
 
 EmulatorQtNoWindow::Ptr EmulatorQtNoWindow::getInstancePtr() {

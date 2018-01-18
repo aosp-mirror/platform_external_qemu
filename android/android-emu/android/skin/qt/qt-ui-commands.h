@@ -45,6 +45,19 @@ enum class QtUICommand {
     ROTATE_LEFT,
     TABLET_MODE,
     TOGGLE_TRACKBALL,
+    VIRTUAL_SCENE_MOVE_FORWARD,
+    VIRTUAL_SCENE_MOVE_LEFT,
+    VIRTUAL_SCENE_MOVE_BACKWARD,
+    VIRTUAL_SCENE_MOVE_RIGHT,
+    VIRTUAL_SCENE_MOVE_DOWN,
+    VIRTUAL_SCENE_MOVE_UP,
+    VIRTUAL_SCENE_CONTROL,
+};
+
+enum class QtKeyEventSource {
+    ExtendedWindow,
+    EmulatorWindow,
+    VirtualSceneControlWindow
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command);

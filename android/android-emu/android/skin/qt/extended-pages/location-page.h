@@ -30,7 +30,8 @@ public:
     explicit LocationPage(QWidget *parent = 0);
     ~LocationPage();
 
-    void setLocationAgent(const QAndroidLocationAgent* agent);
+    static void setLocationAgent(const QAndroidLocationAgent* agent);
+
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
 
@@ -82,13 +83,18 @@ private:
 
     void updateControlsAfterLoading();
 
+    static void getDeviceLocation(double* pOutLatitude,
+                                  double* pOutLongitude,
+                                  double* pOutAltitude);
+    static void sendLocationToDevice();
     static bool validateCell(QTableWidget* table,
                              int row,
                              int col,
                              QString* outErrorMessage);
 
+    static const QAndroidLocationAgent* sLocationAgent;
+
     std::unique_ptr<Ui::LocationPage> mUi;
-    const QAndroidLocationAgent* mLocationAgent;
     QDoubleValidator mAltitudeValidator;
     GpsFixArray          mGpsFixesArray;
     int                  mGpsNextPopulateIndex = 0;

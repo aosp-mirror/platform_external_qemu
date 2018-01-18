@@ -45,4 +45,10 @@
                         return ret;                                              \
                     }
 
+#define SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(func) \
+            SET_ERROR_IF(!ctx->dispatcher().func, GL_INVALID_OPERATION)
+
+#define RET_AND_SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(func, ret) \
+            RET_AND_SET_ERROR_IF(!ctx->dispatcher().func, GL_INVALID_OPERATION, ret)
+
 #endif

@@ -55,6 +55,9 @@ static bool checkAndTranformState(
 }
 
 bool LazyInstanceState::needConstruction() {
+    if (mState.load(std::memory_order_acquire) == State::Done) {
+        return false;
+    }
     return checkAndTranformState<State::Init, State::Constructing, State::Done>(
             &mState);
 }

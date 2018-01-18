@@ -1422,6 +1422,8 @@ static void *qemu_hax_cpu_thread_fn(void *arg)
     CPUState *cpu = arg;
     int r;
 
+    assert(hax_enabled() && hax_ug_platform());
+
     qemu_mutex_lock_iothread();
     qemu_thread_get_self(cpu->thread);
 
@@ -1600,6 +1602,11 @@ static void qemu_cpu_kick_thread(CPUState *cpu)
         atomic_mb_set(&cpu->exit_request, 1);
     }
 #endif /* __APPLE__ */
+#ifdef CONFIG_HAX
+    if (hax_enabled() && hax_ug_platform()) {
+        cpu_exit(cpu);
+    }
+#endif /* CONFIG_HAX */
 #ifdef CONFIG_HVF
     if (hvf_enabled()) { cpu_exit(cpu); }
 #endif /* CONFIG_HVf */
@@ -1617,7 +1624,11 @@ static void qemu_cpu_kick_thread(CPUState *cpu)
 void qemu_cpu_kick(CPUState *cpu)
 {
     qemu_cond_broadcast(cpu->halt_cond);
+#ifdef CONFIG_HAX
+    if (tcg_enabled() && !(hax_enabled() && hax_ug_platform())) {
+#else
     if (tcg_enabled()) {
+#endif
         cpu_exit(cpu);
         /* NOP unless doing single-thread RR */
         qemu_cpu_kick_rr_cpu();
@@ -1665,7 +1676,7 @@ void qemu_mutex_lock_iothread(void)
 
 void qemu_mutex_unlock_iothread(void)
 {
-    g_assert(qemu_mutex_iothread_locked());    
+    g_assert(qemu_mutex_iothread_locked());
     QEMU_THREAD_LOCAL_SET(iothread_locked, false);
     qemu_mutex_unlock(&qemu_global_mutex);
 }
@@ -1746,6 +1757,20 @@ static void qemu_tcg_init_vcpu(CPUState *cpu)
     static QemuCond *single_tcg_halt_cond;
     static QemuThread *single_tcg_cpu_thread;
 
+#ifdef CONFIG_HAX
+    if (hax_enabled()) {
+        /* HAX is not tested agaist mttcg, so force it off now. */
+        if (qemu_tcg_mttcg_enabled())
+            mttcg_enabled = false;
+        /* This code path should only be taken when HAX is enabled but the
+         * CPU doesn't support "unrestricted guest" mode. */
+        assert(!hax_ug_platform());
+        /* Initialize HAX-related state for the TCG thread. This is required for
+         * cpu_exec() to work correctly when HAX is enabled. */
+        hax_init_vcpu(cpu);
+    }
+#endif /* CONFIG_HAX */
+
     if (qemu_tcg_mttcg_enabled() || !single_tcg_cpu_thread) {
         cpu->thread = g_malloc0(sizeof(QemuThread));
         cpu->halt_cond = g_malloc0(sizeof(QemuCond));
@@ -1786,6 +1811,13 @@ static void qemu_tcg_init_vcpu(CPUState *cpu)
 static void qemu_hax_start_vcpu(CPUState *cpu)
 {
     char thread_name[VCPU_THREAD_NAME_SIZE];
+
+    /* This function shall only be called when HAX is enabled, and the host CPU
+     * supports "unrestricted guest" mode. This allows emulation of "real mode"
+     * and completely avoids the use of TCG. It's only the only way to get
+     * multi-core accelerated emulation with HAX. */
+    assert(hax_enabled());
+    assert(hax_ug_platform());
 
     cpu->thread = g_malloc0(sizeof(QemuThread));
     cpu->halt_cond = g_malloc0(sizeof(QemuCond));
@@ -1876,7 +1908,7 @@ void qemu_init_vcpu(CPUState *cpu)
 
     if (kvm_enabled()) {
         qemu_kvm_start_vcpu(cpu);
-    } else if (hax_enabled()) {
+    } else if (hax_enabled() && hax_ug_platform()) {
         qemu_hax_start_vcpu(cpu);
 #ifdef CONFIG_HVF
     } else if (hvf_enabled()) {

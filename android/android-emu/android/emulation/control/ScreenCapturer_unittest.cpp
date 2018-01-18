@@ -26,6 +26,10 @@
 using android::base::System;
 using android::emulation::captureScreenshot;
 
+extern "C" EmulatorWindow* emulator_window_get(void) {
+    return NULL;
+}
+
 class ScreenCapturerTest : public ::testing::Test {
 public:
     ScreenCapturerTest()
@@ -113,15 +117,73 @@ private:
 };
 
 TEST_F(ScreenCapturerTest, badRenderer) {
-    EXPECT_FALSE(captureScreenshot(nullptr, mScreenshotPath.c_str()));
+    EXPECT_FALSE(captureScreenshot(nullptr, nullptr, mScreenshotPath.c_str()));
 }
 
 TEST_F(ScreenCapturerTest, rendererCaptureFailure) {
     MockRenderer renderer(false);
-    EXPECT_FALSE(captureScreenshot(&renderer, mScreenshotPath.c_str()));
+    EXPECT_FALSE(captureScreenshot(&renderer, nullptr, mScreenshotPath.c_str()));
 }
 
 TEST_F(ScreenCapturerTest, success) {
     MockRenderer renderer(true);
-    EXPECT_TRUE(captureScreenshot(&renderer, mScreenshotPath.c_str()));
+    EXPECT_TRUE(captureScreenshot(&renderer, nullptr, mScreenshotPath.c_str()));
 }
+
+TEST_F(ScreenCapturerTest, badGetFrameBufferWidth) {
+    EXPECT_FALSE(captureScreenshot(nullptr,
+            [](int* w, int* h, int* lineSize,
+               int* bytesPerPixel, uint8_t** frameBufferData) {
+                *w = 0;
+            },
+            mScreenshotPath.c_str()));
+}
+
+TEST_F(ScreenCapturerTest, badGetFrameBufferBpp) {
+    EXPECT_FALSE(captureScreenshot(nullptr,
+            [](int* w, int* h, int* lineSize,
+               int* bytesPerPixel, uint8_t** frameBufferData) {
+                *bytesPerPixel = 0;
+            },
+            mScreenshotPath.c_str()));
+}
+
+TEST_F(ScreenCapturerTest, getFrameBufferRgb565) {
+    uint8_t buffer[2] = {0, 0};
+    EXPECT_TRUE(captureScreenshot(nullptr,
+            [&buffer](int* w, int* h, int* lineSize,
+               int* bytesPerPixel, uint8_t** frameBufferData) {
+                *w = 1;
+                *h = 1;
+                *bytesPerPixel = 2;
+                *frameBufferData = buffer;
+            },
+            mScreenshotPath.c_str()));
+}
+
+TEST_F(ScreenCapturerTest, getFrameBufferRgb888) {
+    uint8_t buffer[3] = {0, 0, 0};
+    EXPECT_TRUE(captureScreenshot(nullptr,
+            [&buffer](int* w, int* h, int* lineSize,
+               int* bytesPerPixel, uint8_t** frameBufferData) {
+                *w = 1;
+                *h = 1;
+                *bytesPerPixel = 3;
+                *frameBufferData = buffer;
+            },
+            mScreenshotPath.c_str()));
+}
+
+TEST_F(ScreenCapturerTest, getFrameBufferRgba888) {
+    uint8_t buffer[4] = {0, 0, 0, 0};
+    EXPECT_TRUE(captureScreenshot(nullptr,
+            [&buffer](int* w, int* h, int* lineSize,
+               int* bytesPerPixel, uint8_t** frameBufferData) {
+                *w = 1;
+                *h = 1;
+                *bytesPerPixel = 4;
+                *frameBufferData = buffer;
+            },
+            mScreenshotPath.c_str()));
+}
+

@@ -14,10 +14,9 @@
 
 const qreal SizeTweaker::BaselineDpi = 96.0;
 
-SizeTweaker::SizeTweaker(QWidget* widget) :
-        mSubject(widget),
-        mCurrentScaleFactor(1.0, 1.0) {
-//We don't need size tweaking on OS X, but we need
+SizeTweaker::SizeTweaker(QWidget* widget)
+    : mSubject(widget), mCurrentScaleFactor(1.0, 1.0) {
+// We don't need size tweaking on OS X, but we need
 // it for Windows/Linux.
 #ifndef Q_OS_MAC
     if (mSubject) {
@@ -26,8 +25,44 @@ SizeTweaker::SizeTweaker(QWidget* widget) :
 #endif
 }
 
+QVector2D SizeTweaker::scaleFactor(QWidget* widget) {
+#ifdef Q_OS_MAC
+    return {1, 1};
+#else
+    if (!widget) {
+        return {1, 1};
+    }
+    int screen_number = QApplication::desktop()->screenNumber(widget);
+    // sometimes, screen_number may be -1 if widget is not yet visible
+    // this fixes tiny toolbar on 4k displays
+    if (screen_number < 0)
+        screen_number = 0;
+
+    // QDesktopWidget::screenNumber returns -1 if the widget is not on a screen.
+    // The returned index *may* be out of bounds if the screen change event was
+    // triggered as a result of turning off one of the screens.
+    if (screen_number < 0 || screen_number >= QApplication::screens().size()) {
+        return {1, 1};
+    }
+    QScreen* screen = QApplication::screens().at(screen_number);
+    if (!screen) {
+        return {1, 1};
+    }
+
+    // Calculate the scale factors relative to baseline DPI.
+    auto scale_factor = QVector2D(screen->logicalDotsPerInchX() / BaselineDpi,
+                                  screen->logicalDotsPerInchY() / BaselineDpi);
+    return scale_factor;
+#endif
+}
+
+QVector2D SizeTweaker::scaleFactor() const {
+    return scaleFactor(mSubject);
+}
+
 bool SizeTweaker::eventFilter(QObject* o, QEvent* event) {
-    if (event->type() == QEvent::Show || event->type() == QEvent::ScreenChangeInternal) {
+    if (event->type() == QEvent::Show ||
+        event->type() == QEvent::ScreenChangeInternal) {
         adjustSizesAndPositions();
     }
     return QObject::eventFilter(o, event);
@@ -47,21 +82,28 @@ static QString getTweakedStylesheet(const QVector2D& scale_factor) {
     static const int custom_headerview_baseline_padding = 16;
 
     std::ostringstream custom_ctrl_stylesheet;
-    custom_ctrl_stylesheet << "\nQRadioButton::indicator { "
-                           << "width: " << custom_radiobtn_baseline_size * scale_factor.x() << "; "
-                           << "height: " << custom_radiobtn_baseline_size * scale_factor.y() << ";"
-                           << "}\n"
-                           << "QCheckBox::indicator { "
-                           << "width: " << custom_checkbox_baseline_width * scale_factor.x() << "; "
-                           << "height: " << custom_checkbox_baseline_height * scale_factor.y() << ";"
-                           << "}\n"
-                           << "QComboBox::down-arrow { "
-                           << "width: " << custom_radiobtn_baseline_size * scale_factor.x() << "; "
-                           << "height: " << custom_radiobtn_baseline_size * scale_factor.y() << ";"
-                           << "}\n"
-                           << "QHeaderView::section { padding: "
-                           << custom_headerview_baseline_padding * scale_factor.y() << "; "
-                           << "}\n";
+    custom_ctrl_stylesheet
+            << "\nQRadioButton::indicator { "
+            << "width: " << custom_radiobtn_baseline_size * scale_factor.x()
+            << "; "
+            << "height: " << custom_radiobtn_baseline_size * scale_factor.y()
+            << ";"
+            << "}\n"
+            << "QCheckBox::indicator { "
+            << "width: " << custom_checkbox_baseline_width * scale_factor.x()
+            << "; "
+            << "height: " << custom_checkbox_baseline_height * scale_factor.y()
+            << ";"
+            << "}\n"
+            << "QComboBox::down-arrow { "
+            << "width: " << custom_radiobtn_baseline_size * scale_factor.x()
+            << "; "
+            << "height: " << custom_radiobtn_baseline_size * scale_factor.y()
+            << ";"
+            << "}\n"
+            << "QHeaderView::section { padding: "
+            << custom_headerview_baseline_padding * scale_factor.y() << "; "
+            << "}\n";
     return QString::fromStdString(custom_ctrl_stylesheet.str());
 }
 
@@ -69,8 +111,8 @@ static void scaleWidgetBy(QWidget* widget, const QVector2D& scale_by) {
     // First, calculate the expected new size (using QWidget::width and
     // QWidget::height after fiddling with min/max sizes is unpredictable
     // since changing min/max sizes may actually resize the widget).
-    QVector2D new_size {widget->width() * scale_by.x(),
-                        widget->height() * scale_by.y()};
+    QVector2D new_size{widget->width() * scale_by.x(),
+                       widget->height() * scale_by.y()};
     // For size-limited widgets, set new limits. The check for QWIDGETSIZE_MAX
     // is to avoid potential LOTS of logspam.
     widget->setMinimumWidth(widget->minimumWidth() * scale_by.x());
@@ -117,28 +159,7 @@ void SizeTweaker::adjustSizesAndPositions() {
         return;
     }
 
-    int screen_number = QApplication::desktop()->screenNumber(mSubject.data());
-    // sometimes, screen_number may be -1 if widget is not yet visible
-    // this fixes tiny toolbar on 4k displays
-    if (screen_number < 0)
-        screen_number = 0;
-
-    // QDesktopWidget::screenNumber returns -1 if the widget is not on a screen.
-    // The returned index *may* be out of bounds if the screen change event was
-    // triggered as a result of turning off one of the screens.
-    if (screen_number < 0 ||
-        screen_number >= QApplication::screens().size()) {
-        return;
-    }
-    QScreen* screen = QApplication::screens().at(screen_number);
-    if (!screen) {
-        return;
-    }
-
-    // Calculate the scale factors relative to baseline DPI.
-    QVector2D scale_factor =
-        QVector2D(screen->logicalDotsPerInchX() / BaselineDpi,
-                screen->logicalDotsPerInchY() / BaselineDpi);
+    QVector2D scale_factor = scaleFactor();
 
     // Calculate how much the size needs to be changed. For example,
     // if we're going from 192 DPI to 96 DPI, the sizes should be changed
@@ -164,24 +185,22 @@ void SizeTweaker::adjustSizesAndPositions() {
     // Scale and reposition child widgets.
     for (QWidget* w : mSubject->findChildren<QWidget*>()) {
         // Apply QCheckbox / QRadioButton styles if needed.
-        if (qobject_cast<QCheckBox*>(w) ||
-            qobject_cast<QRadioButton*>(w) ||
-            qobject_cast<QComboBox*>(w) ||
-            qobject_cast<QTableWidget*>(w)) {
+        if (qobject_cast<QCheckBox*>(w) || qobject_cast<QRadioButton*>(w) ||
+            qobject_cast<QComboBox*>(w) || qobject_cast<QTableWidget*>(w)) {
             w->setStyleSheet(tweaked_stylesheet);
 
             // Ensure new stylesheet is applied.
             w->style()->unpolish(w);
             w->style()->polish(w);
         }
-        if (QAbstractButton* button = qobject_cast<QAbstractButton*>(w)) {
+        if (auto button = qobject_cast<QAbstractButton*>(w)) {
             // Make sure to use large icons on buttons.
-            button->setIconSize(QSize(button->iconSize().width() * scale_by.x(),
-                                      button->iconSize().height() * scale_by.y()));
+            button->setIconSize(
+                    QSize(button->iconSize().width() * scale_by.x(),
+                          button->iconSize().height() * scale_by.y()));
         }
         scaleWidgetBy(w, scale_by);
         w->move(w->x() * scale_by.x(), w->y() * scale_by.y());
     }
 #endif
 }
-

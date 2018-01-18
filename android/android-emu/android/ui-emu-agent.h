@@ -18,6 +18,7 @@ typedef struct UiEmuAgent {
     const struct QAndroidBatteryAgent* battery;
     const struct QAndroidCellularAgent* cellular;
     const struct QAndroidClipboardAgent* clipboard;
+    const struct QAndroidDisplayAgent* display;
     const struct QAndroidEmulatorWindowAgent* window;
     const struct QAndroidFingerAgent* finger;
     const struct QAndroidLocationAgent* location;

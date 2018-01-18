@@ -75,4 +75,6 @@ TextureSwizzle concatSwizzles(const TextureSwizzle& first,
 
 bool isSwizzleParam(GLenum pname);
 
+bool isIntegerInternalFormat(GLint internalFormat);
+
 #endif

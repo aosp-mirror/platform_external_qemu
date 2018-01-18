@@ -130,9 +130,9 @@ static SkinKeyMod keycode_to_mod(int key) {
     return 0;
 }
 
-/* If it's running chrome os images, remapping key code here so
- * the emulator toolbar also does the "expected" thing for chrome os.
- * Also fix some incorrected key codes.
+/* If it's running Chrome OS images, enable some special keys for it.
+ * Also remap some key code here so the emulator toolbar does the
+ * "expected" thing for Chrome OS.
  */
 static int map_cros_key(int* code) {
     /* Android emulator uses Qt, and it maps qt key to linux key and
@@ -149,26 +149,15 @@ static int map_cros_key(int* code) {
      */
     if ((*code >= LINUX_KEY_F1 && *code <= LINUX_KEY_F10) ||
         *code ==  LINUX_KEY_ESC ||
-        *code ==  LINUX_KEY_TAB) return 0;
+        *code ==  LINUX_KEY_TAB ||
+        *code ==  LINUX_KEY_UP ||
+        *code == LINUX_KEY_DOWN ||
+        *code == LINUX_KEY_LEFT ||
+        *code == LINUX_KEY_RIGHT ||
+        *code == LINUX_KEY_VOLUMEUP ||
+        *code == LINUX_KEY_VOLUMEDOWN) return 0;
+
     switch (*code) {
-    case LINUX_KEY_UP:
-        *code = 0xc8;
-        return 0;
-    case LINUX_KEY_DOWN:
-        *code = 0xd0;
-        return 0;
-    case LINUX_KEY_LEFT:
-        *code = 0xcb;
-        return 0;
-    case LINUX_KEY_RIGHT:
-        *code = 0xcd;
-        return 0;
-    case LINUX_KEY_VOLUMEUP:
-        *code = LINUX_KEY_F10;
-        return 0;
-    case LINUX_KEY_VOLUMEDOWN:
-        *code = LINUX_KEY_F9;
-        return 0;
     case LINUX_KEY_BACK:
         *code = LINUX_KEY_F1;
         return 0;

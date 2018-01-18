@@ -312,9 +312,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     fb->m_fastBlitSupported =
+        System::get()->getProgramBitness() != 32 &&
         (dispatchMaxVersion > GLES_DISPATCH_MAX_VERSION_2) &&
         (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
-         // TODO: Swiftshader issues 0x502
+         // TODO: Swiftshader has rendering errors (fixed in ToT master
+         // of Swiftshader, but ToT master has other regressions)
          // emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
          emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
 
@@ -515,8 +517,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // Keep the singleton framebuffer pointer
     //
     s_theFrameBuffer = fb.release();
-    if (!useSubWindow) {
-        GL_LOG("Not using subwindow");
+    {
         // Nothing else to do - we're ready to rock!
         AutoLock lock(sGlobals->lock);
         sInitialized.store(true, std::memory_order_release);
@@ -1685,8 +1686,6 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
                     m_readbackThread.enqueue({ReadbackCmd::Init});
                     m_readbackThread.waitQueuedItems();
                 }
-                // do post callback just once to initialize things
-                doPostCallback(m_fbImage);
             } else {
                 m_readbackWorker->doNextReadback(cb.get(), m_fbImage);
             }
@@ -1776,6 +1775,7 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
 
 void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
         unsigned int* height, std::vector<unsigned char>& pixels) {
+    AutoLock mutex(m_lock);
     if (nChannels != 3 && nChannels != 4) {
         fprintf(stderr, "Screenshot only support 3(RGB) or 4(RGBA) channels");
         *width = 0;

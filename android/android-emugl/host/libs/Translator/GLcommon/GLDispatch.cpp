@@ -31,12 +31,20 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unordered_map>
 
 typedef GlLibrary::GlFunctionPointer GL_FUNC_PTR;
 
 static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
     return glLib->findSymbol(funcName);
 }
+
+static const std::unordered_map<std::string, std::string> sAliasExtra = {
+    {"glDepthRange", "glDepthRangef"},
+    {"glDepthRangef", "glDepthRange"},
+    {"glClearDepth", "glClearDepthf"},
+    {"glClearDepthf", "glClearDepth"},
+};
 
 #define LOAD_GL_FUNC(return_type, func_name, signature, args)  do { \
         if (!func_name) { \
@@ -53,6 +61,12 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
             if (!address) { \
                 address = (void *)getGLFuncAddress(#func_name "ARB", glLib); \
                 if (address) GL_LOG("%s not found, using %sARB", #func_name, #func_name); \
+            } \
+            if (!address) { \
+                const auto& it = sAliasExtra.find(#func_name); \
+                if (it != sAliasExtra.end()) { \
+                    address = (void *)getGLFuncAddress(it->second.c_str(), glLib); \
+                } \
             } \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \

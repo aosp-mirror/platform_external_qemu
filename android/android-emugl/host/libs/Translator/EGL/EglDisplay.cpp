@@ -436,7 +436,7 @@ EglConfig* EglDisplay::getConfig(EGLint id) const {
 }
 
 EglConfig* EglDisplay::getDefaultConfig() const {
-    return getConfig(3); // rgba8888
+    return getConfig(2); // rgba8888
 }
 
 int EglDisplay::getConfigs(EGLConfig* configs,int config_size) const {

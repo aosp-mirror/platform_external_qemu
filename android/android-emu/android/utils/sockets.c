@@ -1059,11 +1059,11 @@ socket_recvfrom(int  fd, void*  buf, int  len, SockAddress*  from)
 }
 
 int
-socket_connect_no_sigalrm(int socket, const struct sockaddr *address, socklen_t address_len)
+socket_connect_no_sigalrm(int socket, const void *address, uint32_t address_len)
 {
     int ret;
     BEGIN_NOSIGALRM
-    ret = connect(socket, address, address_len);
+    ret = connect(socket, (const struct sockaddr*)address, (socklen_t)address_len);
     END_NOSIGALRM
     return ret;
 }
@@ -1078,6 +1078,12 @@ socket_connect( int  fd, const SockAddress*  address )
         return -1;
 
     SOCKET_CALL(socket_connect_no_sigalrm(fd,addr.sa,addrlen));
+}
+
+int
+socket_connect_posix(int fd, const void *address, uint32_t address_len)
+{
+    SOCKET_CALL(socket_connect_no_sigalrm(fd, (const struct sockaddr*)address, (socklen_t)address_len));
 }
 
 int

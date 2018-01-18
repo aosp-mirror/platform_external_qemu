@@ -152,72 +152,100 @@ GL_APICALL void GL_APIENTRY glGetActiveUniformBlockName(GLuint program, GLuint u
 
 GL_APICALL void GL_APIENTRY glUniform1ui(GLint location, GLuint v0) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniform1ui(location, v0);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniform1ui(hostLoc, v0);
 }
 
 GL_APICALL void GL_APIENTRY glUniform2ui(GLint location, GLuint v0, GLuint v1) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniform2ui(location, v0, v1);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniform2ui(hostLoc, v0, v1);
 }
 
 GL_APICALL void GL_APIENTRY glUniform3ui(GLint location, GLuint v0, GLuint v1, GLuint v2) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniform3ui(location, v0, v1, v2);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniform3ui(hostLoc, v0, v1, v2);
 }
 
 extern "C" GL_APICALL void GL_APIENTRY glUniform4ui(GLint location, GLint v0, GLuint v1, GLuint v2, GLuint v3) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniform4ui(location, v0, v1, v2, v3);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniform4ui(hostLoc, v0, v1, v2, v3);
 }
 
 GL_APICALL void GL_APIENTRY glUniform1uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniform1uiv(location, count, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniform1uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform2uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniform2uiv(location, count, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniform2uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform3uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniform3uiv(location, count, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniform3uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform4uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniform4uiv(location, count, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniform4uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniformMatrix2x3fv(location, count, transpose, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniformMatrix2x3fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniformMatrix3x2fv(location, count, transpose, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniformMatrix3x2fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniformMatrix2x4fv(location, count, transpose, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniformMatrix2x4fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniformMatrix4x2fv(location, count, transpose, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniformMatrix4x2fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniformMatrix3x4fv(location, count, transpose, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniformMatrix3x4fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    ctx->dispatcher().glUniformMatrix4x3fv(location, count, transpose, value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    ctx->dispatcher().glUniformMatrix4x3fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glGetUniformuiv(GLuint program, GLint location, GLuint * params) {
@@ -233,7 +261,9 @@ GL_APICALL void GL_APIENTRY glGetUniformuiv(GLuint program, GLint location, GLui
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
         SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
-        ctx->dispatcher().glGetUniformuiv(globalProgramName, location, params);
+        int hostLoc = s_getHostLocOrSetError(location);
+        SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+        ctx->dispatcher().glGetUniformuiv(globalProgramName, hostLoc, params);
     }
 }
 
@@ -364,10 +394,75 @@ GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuin
     }
 }
 
-GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
+// GuestSyncs: Tracks the system-wide set of GL syncs, puts them in a
+// distinguished namespace from EGL syncs. This is in its own class as opposed
+// to a NameSpace because a) no real need to snapshot save/load those and b) it
+// needs to span all contexts and give the same names across the entire system,
+// as sync objects live outside of GL context state.
+// This is to fix dEQP negative_api tests that delete sync object 0x1 but fail due
+// to it colliding with an EGL fence name.
+class GuestSyncs {
+public:
+    GuestSyncs() { }
+
+    GLsync create(GLsync newHostSync) {
+        GLsync res = (GLsync)(uintptr_t)mNameCounter;
+        mSyncs[res] = newHostSync;
+        mNameCounter++;
+        if (!mNameCounter) mNameCounter = 0x1000;
+        return res;
+    }
+
+    GLsync lookupWithError(GLsync guestSync, GLint* err) {
+        *err = GL_NO_ERROR;
+        GLsync host = (GLsync)0x0;
+
+        const auto& it = mSyncs.find(guestSync);
+        if (it == mSyncs.end()) {
+            *err = GL_INVALID_VALUE;
+            return host;
+        } else {
+            host = it->second;
+        }
+        return host;
+    }
+
+    GLsync removeWithError(GLsync guestSyncToDelete, GLint* err) {
+        *err = GL_NO_ERROR;
+        GLsync host = (GLsync)0x0;
+
+        if (!guestSyncToDelete) {
+            return host;
+        }
+
+        const auto& it = mSyncs.find(guestSyncToDelete);
+        if (it == mSyncs.end()) {
+            *err = GL_INVALID_VALUE;
+            return host;
+        } else {
+            host = it->second;
+        }
+
+        mSyncs.erase(it);
+        return host;
+    }
+
+    bool isSync(GLsync guestSync) {
+        return mSyncs.find(guestSync) != mSyncs.end();
+    }
+
+    emugl::Mutex& lock() { return mLock; }
+
+private:
+    std::unordered_map<GLsync, GLsync> mSyncs;
+    mutable emugl::Mutex mLock;
+    uint32_t mNameCounter = 0x1;
+};
+
+static android::base::LazyInstance<GuestSyncs> sSyncs = LAZY_INSTANCE_INIT;
+
+static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags) {
     GET_CTX_V2_RET(0);
-    gles30usages->set_is_used(true);
-    gles30usages->set_fence_sync(true);
     if (!ctx->dispatcher().glFenceSync) {
         ctx->dispatcher().glFinish();
         return (GLsync)0x42;
@@ -376,9 +471,8 @@ GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
     return glFenceSyncRET;
 }
 
-GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
     GET_CTX_V2_RET(GL_WAIT_FAILED);
-    gles30usages->set_is_used(true);
     if (!ctx->dispatcher().glFenceSync) {
         return GL_ALREADY_SIGNALED;
     }
@@ -386,16 +480,15 @@ GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags,
     return glClientWaitSyncRET;
 }
 
-GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+static void internal_glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
     GET_CTX_V2();
-    gles30usages->set_is_used(true);
     if (!ctx->dispatcher().glFenceSync) {
         return;
     }
     ctx->dispatcher().glWaitSync(wait_on, flags, timeout);
 }
 
-GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
+static void internal_glDeleteSync(GLsync to_delete) {
     GET_CTX_V2();
     if (!ctx->dispatcher().glFenceSync) {
         return;
@@ -403,15 +496,66 @@ GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
     ctx->dispatcher().glDeleteSync(to_delete);
 }
 
+GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
+    GET_CTX_V2_RET(0);
+    gles30usages->set_is_used(true);
+    gles30usages->set_fence_sync(true);
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = internal_glFenceSync(condition, flags);
+    GLsync guestSync = sSyncs->create(hostSync);
+    return guestSync;
+}
+
+GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+    GET_CTX_V2_RET(GL_WAIT_FAILED);
+    gles30usages->set_is_used(true);
+    GLint err = GL_NO_ERROR;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = sSyncs->lookupWithError(wait_on, &err);
+    RET_AND_SET_ERROR_IF(err != GL_NO_ERROR, err, GL_WAIT_FAILED);
+    return internal_glClientWaitSync(hostSync, flags, timeout);
+}
+
+GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+    GET_CTX_V2();
+    gles30usages->set_is_used(true);
+    GLint err = GL_NO_ERROR;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = sSyncs->lookupWithError(wait_on, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+    internal_glWaitSync(hostSync, flags, timeout);
+}
+
+GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
+    GET_CTX_V2();
+    gles30usages->set_is_used(true);
+    GLint err = GL_NO_ERROR;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = sSyncs->removeWithError(to_delete, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+    internal_glDeleteSync(hostSync);
+}
+
 GL_APICALL GLboolean GL_APIENTRY glIsSync(GLsync sync) {
     GET_CTX_V2_RET(0);
-    GLboolean glIsSyncRET = ctx->dispatcher().glIsSync(sync);
-    return glIsSyncRET;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    gles30usages->set_is_used(true);
+    return sSyncs->isSync(sync) ? GL_TRUE : GL_FALSE;
 }
 
 GL_APICALL void GL_APIENTRY glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei * length, GLint * values) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetSynciv(sync, pname, bufSize, length, values);
+    GLint err = GL_NO_ERROR;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = sSyncs->lookupWithError(sync, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+    ctx->dispatcher().glGetSynciv(hostSync, pname, bufSize, length, values);
 }
 
 GL_APICALL void GL_APIENTRY glDrawBuffers(GLsizei n, const GLenum * bufs) {
@@ -562,7 +706,7 @@ GL_APICALL void GL_APIENTRY glRenderbufferStorageMultisample(GLenum target, GLsi
     gles30usages->set_is_used(true);
     gles30usages->set_renderbuffer_storage_multisample(true);
     GLint err = GL_NO_ERROR;
-    internalformat = sPrepareRenderbufferStorage(internalformat, width, height, &err);
+    internalformat = sPrepareRenderbufferStorage(internalformat, width, height, samples, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
 }
@@ -578,7 +722,7 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
     GLint err = GL_NO_ERROR;
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
-    sPrepareTexImage2D(target, 0, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
+    sPrepareTexImage2D(target, 0, (GLint)internalformat, width, height, 0, format, type, 0, NULL, &type, (GLint*)&internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;

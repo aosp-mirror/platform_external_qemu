@@ -200,6 +200,62 @@ static void cat_close(BlockDriverState *bs)
     }
 }
 
+static int cat_snapshot_create(BlockDriverState *bs, QEMUSnapshotInfo *sn_info)
+{
+     BDRVCATState* s = bs->opaque;
+     int i, ret;
+     for (i = 0; i < s->count; i++) {
+         ret = bdrv_snapshot_create(s->backings[i]->bs, sn_info);
+         if (ret) return ret;
+     }
+     return 0;
+}
+
+static int cat_snapshot_goto(BlockDriverState *bs, const char *snapshot_id)
+{
+     BDRVCATState* s = bs->opaque;
+     int i, ret;
+     for (i = 0; i < s->count; i++) {
+         ret = bdrv_snapshot_goto(s->backings[i]->bs, snapshot_id);
+         if (ret) return ret;
+     }
+     return 0;
+}
+
+static int cat_snapshot_delete(BlockDriverState *bs, const char *snapshot_id,
+                               const char*name, Error **errp)
+{
+     BDRVCATState* s = bs->opaque;
+     int i, ret;
+     for (i = 0; i < s->count; i++) {
+         ret = bdrv_snapshot_delete(s->backings[i]->bs, snapshot_id, name, errp);
+         // We have to finish all deletes even error happens.
+     }
+     return ret;
+}
+
+static int cat_snapshot_list(BlockDriverState *bs, QEMUSnapshotInfo **psn_tab)
+{
+     BDRVCATState* s = bs->opaque;
+     // Use snapshot list from last backing file.
+     return bdrv_snapshot_list(s->backings[s->count - 1]->bs, psn_tab);
+}
+
+static int cat_save_vmstate(BlockDriverState *bs, QEMUIOVector *qiov,
+                            int64_t pos)
+{
+    BDRVCATState *s = bs->opaque;
+    // Use first backing file to save.
+    return bdrv_writev_vmstate(s->backings[0]->bs, qiov, pos);
+}
+
+static int cat_load_vmstate(BlockDriverState *bs, QEMUIOVector *qiov,
+                            int64_t pos)
+{
+    BDRVCATState *s = bs->opaque;
+    return bdrv_readv_vmstate(s->backings[0]->bs, qiov, pos);
+}
+
 static BlockDriver bdrv_cat = {
     .format_name            = "cat",
     .protocol_name          = "cat",
@@ -213,6 +269,14 @@ static BlockDriver bdrv_cat = {
 
     .bdrv_co_readv          = cat_co_readv,
     .bdrv_co_writev         = cat_co_writev,
+
+    .bdrv_snapshot_create   = cat_snapshot_create,
+    .bdrv_snapshot_goto     = cat_snapshot_goto,
+    .bdrv_snapshot_delete   = cat_snapshot_delete,
+    .bdrv_snapshot_list     = cat_snapshot_list,
+
+    .bdrv_save_vmstate      = cat_save_vmstate,
+    .bdrv_load_vmstate      = cat_load_vmstate,
 };
 
 static void bdrv_cat_init(void)

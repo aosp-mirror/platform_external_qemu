@@ -27,7 +27,11 @@
 
 int hax_sync_vcpus(void);
 int hax_init_vcpu(CPUState *cpu);
+int hax_vcpu_exec(CPUState *cpu);
 int hax_smp_cpu_exec(CPUState *cpu);
+int hax_vcpu_emulation_mode(CPUState *cpu);
+int hax_stop_emulation(CPUState *cpu);
+int hax_stop_translate(CPUState *cpu);
 int hax_populate_ram(uint64_t va, uint32_t size);
 
 void hax_cpu_synchronize_state(CPUState *cpu);
@@ -37,6 +41,7 @@ void hax_cpu_synchronize_post_init(CPUState *cpu);
 #ifdef CONFIG_HAX
 
 int hax_enabled(void);
+int hax_ug_platform(void);
 
 #include "hw/hw.h"
 #include "qemu/bitops.h"
@@ -50,6 +55,7 @@ void hax_reset_vcpu_state(void *opaque);
 #else /* CONFIG_HAX */
 
 #define hax_enabled() (0)
+#define hax_ug_platform() (0)
 
 #endif /* CONFIG_HAX */
 

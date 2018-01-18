@@ -204,6 +204,9 @@ message AndroidStudioEvent {
   // set when kind = TEMPLATE_RENDER
   optional KotlinSupport kotlin_support = 54;
 
+  // set when kind = CONNECTION_ASSISTANT_EVENT
+  optional ConnectionAssistantEvent connection_assistant_event = 55;
+
   // Describes a group of event kinds related to each other.
   // This is redundant in the presence of EventKind + event specific message,
   // and is only necessary for events originally sent to GA.
@@ -545,6 +548,9 @@ message AndroidStudioEvent {
 
     // Android Profiler database statistics
     ANDROID_PROFILER_DB_STATS = 125;
+
+    // Connection Assistant event
+    CONNECTION_ASSISTANT_EVENT = 126;
   }
 
   // Represents different Performance Monitoring types.
@@ -797,6 +803,9 @@ message LldbSessionEndDetails {
   // Number of times the program was stopped by the debugger.
   // Proxy for use of the session to compute error rates.
   optional uint64 stops = 3;
+  // Number of errors encountered during the session.
+  // Includes both fatal and non-fatal errors.
+  optional uint64 errors = 4;
 }
 
 message StudioExceptionDetails {
@@ -953,7 +962,9 @@ message EmulatorFeatureFlagState {
     FAST_SNAPSHOT_V1 = 17;
     SCREEN_RECORDING = 18;
     VIRTUAL_SCENE = 19;
-    // Next tag: 20
+    SYSTEM_AS_ROOT = 20;
+    IGNORE_HOST_OPENGL_ERRORS = 21;
+    // Next tag: 22
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
@@ -986,6 +997,81 @@ enum EmulatorSnapshotFlags {
   SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT = 2;
 }
 
+// Generic snapshot save states. Distinguished
+// from Quickboot save states.
+enum EmulatorSnapshotSaveState {
+  // Successful saving.
+  EMULATOR_SNAPSHOT_SAVE_SUCCEEDED_NORMAL = 0;
+  // Generic failure when saving state.
+  EMULATOR_SNAPSHOT_SAVE_FAILED = 1;
+  // Saving skipped: not supported in current configuration.
+  EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED = 2;
+  // Saving skipped: Not booted yet.
+  EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED = 3;
+  // Saving skipped: No snapshot name given.
+  EMULATOR_SNAPSHOT_SAVE_SKIPPED_NO_SNAPSHOT = 4;
+  // Next tag: 5
+}
+
+// Generic snapshot load states. Distinguished
+// from Quickboot load states.
+enum EmulatorSnapshotLoadState {
+  // Successful load.
+  EMULATOR_SNAPSHOT_LOAD_SUCCEEDED_NORMAL = 0;
+  // Generic failure when loading state.
+  EMULATOR_SNAPSHOT_LOAD_FAILED = 1;
+  // Loading snapshots not supported in current configuration.
+  EMULATOR_SNAPSHOT_LOAD_SKIPPED_UNSUPPORTED = 2;
+  // Loading snapshot failed because it doesn't exist.
+  EMULATOR_SNAPSHOT_LOAD_NO_SNAPSHOT = 3;
+  // Loading snapshot failed because the snapshot is too old.
+  EMULATOR_SNAPSHOT_LOAD_OLD_SNAPSHOT = 4;
+  // The snapshot load hung.
+  EMULATOR_SNAPSHOT_LOAD_HUNG = 5;
+}
+
+// Detailed lists of snapshot operation failure reasons.
+// Shared between load and save operations.
+enum EmulatorSnapshotFailureReason {
+  EMULATOR_SNAPSHOT_FAILURE_REASON_UNSPECIFIED = 0;
+
+  EMULATOR_SNAPSHOT_FAILURE_REASON_CORRUPTED_DATA = 1;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_NO_SNAPSHOT_PB = 2;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_BAD_SNAPSHOT_PB = 3;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_INCOMPATIBLE_VERSION = 4;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_NO_RAM_FILE = 5;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_NO_TEXTURES_FILE = 6;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_SNAPSHOTS_NOT_SUPPORTED = 7;
+
+  // Next unrecoverable error here: 8
+
+  EMULATOR_SNAPSHOT_FAILURE_REASON_UNRECOVERABLE_ERROR_LIMIT = 10000;
+
+  EMULATOR_SNAPSHOT_FAILURE_REASON_NO_SNAPSHOT_IN_IMAGE = 10001;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_CONFIG_MISMATCH_HOST_HYPERVISOR = 10002;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_CONFIG_MISMATCH_HOST_GPU = 10003;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_CONFIG_MISMATCH_RENDERER = 10004;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_CONFIG_MISMATCH_FEATURES = 10005;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_CONFIG_MISMATCH_AVD = 10006;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_SYSTEM_IMAGE_CHANGED = 10007;
+
+  // Next validation error here: here: 10008
+
+  EMULATOR_SNAPSHOT_FAILURE_REASON_VALIDATION_ERROR_LIMIT = 20000;
+
+  EMULATOR_SNAPSHOT_FAILURE_REASON_INTERNAL_ERROR = 20001;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_EMULATION_ENGINE_FAILED = 20002;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_RAM_FAILED = 20003;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_TEXTURES_FAILED = 20004;
+  EMULATOR_SNAPSHOT_FAILURE_REASON_ADB_OFFLINE = 20005;
+
+  // Next other kind of error here: 20006
+
+  EMULATOR_SNAPSHOT_FAILURE_REASON_IN_PROGRESS_LIMIT = 30000;
+
+  // Next new type of error here: 30001
+};
+
 // Emulator snapshot description.
 message EmulatorSnapshot {
   // Anonymized snapshot name (SHA256 + salted).
@@ -994,6 +1080,31 @@ message EmulatorSnapshot {
   optional int32 flags = 2;
   // Total size on disk, in bytes.
   optional int64 size_bytes = 3;
+  // Snapshot save/load states.
+  optional EmulatorSnapshotSaveState save_state = 4;
+  optional EmulatorSnapshotLoadState load_state = 5;
+  // Detailed reason for non-success of snapshot load.
+  optional EmulatorSnapshotFailureReason load_failure_reason = 6;
+  // Detailed reason for non-success of snapshot save.
+  optional EmulatorSnapshotFailureReason save_failure_reason = 7;
+  // Whether or not it was lazy loaded.
+  optional bool lazy_loaded = 8;
+  // Whether or not it was incrementally saved.
+  optional bool incrementally_saved = 9;
+  // Size of RAM (possibly incl. incremental / compression)
+  optional int64 ram_size_bytes = 10;
+  // Size of textures (possibly incl. incremental / compression)
+  optional int64 textures_size_bytes = 11;
+  // Duration of load / save (total).
+  optional uint64 load_duration_ms = 12;
+  optional uint64 save_duration_ms = 13;
+  // Duration of load / save (ram).
+  optional uint64 ram_load_duration_ms = 14;
+  optional uint64 ram_save_duration_ms = 15;
+  // Duration of load / save (textures).
+  optional uint64 textures_load_duration_ms = 16;
+  optional uint64 textures_save_duration_ms = 17;
+  // Next tag: 18
 }
 
 // Description of emulator's quickboot load.
@@ -1020,6 +1131,7 @@ message EmulatorQuickbootLoad {
     // Specified snapshot is too old for loading, fallback to cold boot.
     EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT = 8;
   }
+
   // The state of the quickboot load operation.
   optional EmulatorQuickbootLoadState state = 1;
   // How long it took, milliseconds.
@@ -1028,6 +1140,9 @@ message EmulatorQuickbootLoad {
   optional EmulatorSnapshot snapshot = 3;
   // Flag is set when on demand RAM loading was enabled for the load.
   optional bool on_demand_ram_enabled = 4;
+  // ADB connection retries.
+  optional uint32 adb_connection_retries = 6;
+  // Next tag: 7
 }
 
 // Description of emulator's quickboot saving.
@@ -1048,7 +1163,9 @@ message EmulatorQuickbootSave {
     EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED = 5;
     // Saving skipped: too low guest uptime.
     EMULATOR_QUICKBOOT_SAVE_SKIPPED_LOW_UPTIME = 6;
+    // Saving skipped: Used the UI to skip saving.
     EMULATOR_QUICKBOOT_SAVE_DISABLED_UI = 7;
+    // Saving skipped: Not booted yet.
     EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED = 8;
   }
   // The state of the quickboot save operation.
@@ -1089,8 +1206,146 @@ message EmulatorGLESv30Usages {
 
 // Track whether a GLES command is used or not
 message EmulatorGLESUsages {
+  // GLES 1 usage report
   optional EmulatorGLEScmUsages gles_1_usages = 1;
+  // GLES 3.0 usage report
   optional EmulatorGLESv30Usages gles_3_0_usages = 2;
+}
+
+// Per-session counts of snapshot UI interactions.
+message EmulatorSnapshotUICounts {
+  // Quickboot selection for exit behavior
+  optional uint32 quickboot_selection_yes = 1;
+  optional uint32 quickboot_selection_no = 2;
+  optional uint32 quickboot_selection_ask = 3;
+  // Next for quickboot selection: 4
+
+  // Ask dialog
+  optional uint32 quickboot_ask_canceled = 10;
+  optional uint32 quickboot_ask_yes = 11;
+  optional uint32 quickboot_ask_no = 12;
+  optional uint32 quickboot_ask_total_time_ms = 13;
+  // Next for ask dialog: 14
+
+  // Quickboot "save now" metrics
+  optional uint32 quickboot_save_now = 100;
+  // Next for "save now": 101
+
+  // Generic snapshot dialog
+  optional uint32 generic_save = 1000;
+  optional uint32 generic_load = 1001;
+  optional uint32 generic_delete = 1002;
+  optional uint32 generic_clone = 1003;
+  optional uint32 generic_edit = 1004;
+  optional uint32 generic_edited_name = 1005;
+  optional uint32 generic_edited_description = 1006;
+  optional uint32 generic_export = 1007;
+  optional uint32 generic_import = 1008;
+  optional uint32 generic_flat_view = 1009;
+  optional uint32 generic_tree_view = 1010;
+  optional uint32 generic_total_time_flat_view_ms = 1011;
+  optional uint32 generic_total_time_tree_view_ms = 1012;
+  optional uint32 generic_total_time_ms = 1013;
+  // Next for generic snapshot dialog: 1014
+}
+
+// Metrics on camera usage.
+message EmulatorCameraSession {
+  // List of possible camera types.
+  enum EmulatorCameraType {
+    // Unspecified camera source.
+    EMULATOR_CAMERA_TYPE_UNSPECIFIED = 0;
+    // Camera source is the host's webcam.
+    EMULATOR_CAMERA_TYPE_WEBCAM = 1;
+    // Camera source is the virtual scene camera.
+    EMULATOR_CAMERA_TYPE_VIRTUAL_SCENE = 2;
+  }
+
+  // List of possible camera directions.
+  enum EmulatorCameraDirection {
+    // Unspecified direction.
+    EMULATOR_CAMERA_DIRECTION_UNSPECIFIED = 0;
+    // Back-facing camera.
+    EMULATOR_CAMERA_DIRECTION_BACK = 1;
+    // Front-facing camera.
+    EMULATOR_CAMERA_DIRECTION_FRONT = 2;
+  }
+
+  // Camera start result, successful values are positive, failures are negative.
+  enum EmulatorCameraStartResult {
+    // Camera was started successfully.
+    EMULATOR_CAMERA_START_SUCCESS = 0;
+    // The camera was already started.
+    EMULATOR_CAMERA_START_ALREADY_STARTED = 1;
+
+    // Failures.
+    // Camera start failed with an unspecified error.
+    EMULATOR_CAMERA_START_FAILED = -1;
+    // The camera was already started, but the parameters don't match.
+    EMULATOR_CAMERA_START_PARAMETER_MISMATCH = -2;
+    // The requested pixel format is unknown.
+    EMULATOR_CAMERA_START_UNKNOWN_PIXEL_FORMAT = -3;
+    // No pixel conversion available.
+    EMULATOR_CAMERA_START_NO_PIXEL_CONVERSION = -4;
+    // Out of memory when starting the camera.
+    EMULATOR_CAMERA_START_OUT_OF_MEMORY = -5;
+  }
+
+  // The camera source used for the camera session.
+  optional EmulatorCameraType type = 1;
+  // The camera direction.
+  optional EmulatorCameraDirection direction = 2;
+
+  // Width of the camera frame in pixels.
+  optional uint32 width = 3;
+  // Height of the camera frame in pixels.
+  optional uint32 height = 4;
+  // FOURCC pixel format requested.
+  optional fixed32 pixel_format = 5;
+
+  // Camera start result.
+  optional EmulatorCameraStartResult start_result = 6;
+  // How long the camera session took to initialize.
+  optional uint64 startup_time_ms = 7;
+
+  // How long the session was running, in milliseconds.
+  optional uint64 duration_ms = 8;
+  // Average framerate of the camera.
+  optional double average_framerate = 9;
+
+  // set when type = EMULATOR_CAMERA_TYPE_VIRTUAL_SCENE
+  // Name of the virtual scene that is loaded.
+  optional string virtual_scene_name = 10;
+}
+
+// Metrics for virtual scene camera sessions.
+message EmulatorVirtualSceneSession {
+  // How long the session was running, in milliseconds.
+  optional uint64 duration_ms = 1;
+
+  // Minimum sensor update delay in milliseconds.
+  optional uint32 min_sensor_delay_ms = 2;
+  // Total tap count when the camera is running.
+  optional uint32 tap_count = 3;
+  // The number of times the orientation changed during the session.
+  optional uint32 orientation_change_count = 4;
+  // Whether the virtual sensors window was visible at any point during the
+  // session.
+  optional bool virtual_sensors_visible = 5;
+  // How many interactions were performed on the virtual sensors page.
+  optional uint32 virtual_sensors_interaction_count = 6;
+
+  // Invocation count of WASD/Mouselook hotkey.
+  optional uint32 hotkey_invoke_count = 7;
+  // Total time the user was in WASD/Mouselook mode during this session.
+  optional uint64 hotkey_duration_ms = 8;
+  // Taps shortly after a hotkey invoke, to determine how much the user
+  // alternates between modes to tap.
+  optional uint32 taps_after_hotkey_invoke = 9;
+  // Total rotation performed in the virtual scene.
+  optional double total_rotation_radians = 10;
+  // Total translation performed in the virtual scene.
+  optional double total_translation_meters = 11;
 }
 
 // Metrics related to the Emulator.
@@ -1138,6 +1393,16 @@ message EmulatorDetails {
   optional EmulatorQuickbootSave quickboot_save = 22;
   // Track GLES command usages
   optional EmulatorGLESUsages gles_usages = 23;
+  // Metrics on all generic emulator snapshot saves and loads.
+  repeated EmulatorSnapshot snapshot_loads = 24;
+  repeated EmulatorSnapshot snapshot_saves = 25;
+  // Metrics on all snapshot UI.
+  optional EmulatorSnapshotUICounts snapshot_ui_counts = 26;
+  // Metrics on camera usage.
+  optional EmulatorCameraSession camera = 27;
+  // Metrics for virtual scene camera sessions.
+  optional EmulatorVirtualSceneSession virtual_scene = 28;
+  // Next tag: 29
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
@@ -1660,6 +1925,9 @@ message GradleBuildProject {
   // e.g. '1.1.3'
   optional string kotlin_plugin_version = 11;
 
+  // The project options as set by the user or by studio.
+  optional GradleProjectOptionsSettings options = 12;
+
   enum PluginType {
     UNKNOWN_PLUGIN_TYPE = 0;
     // The 'com.android.application' or 'com.android.model.application' plugins.
@@ -1683,6 +1951,67 @@ message GradleBuildProject {
     // The 'com.android.model.[application,library]' plugins
     COMPONENT_MODEL = 2;
   }
+}
+
+// Configuration flags for the gradle plugin.
+//
+// These are set by studio when invoking the gradle plugin, or manually by the
+// end user.
+//
+// The Android Gradle Plugin will only report options that are explictly set.
+// See tools/analytics-library/protos/src/main/proto/analytics_enums.proto for
+// the enums for these option classes.
+message GradleProjectOptionsSettings {
+  // Boolean options that are explictly set.
+  // Note that boolean options have defaults. This is not captured here,
+  // only what is overridden either manually by the developer or by studio.
+  // A reference to the proto enum in android git, see BooleanOption in
+  // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
+  // Boolean options that are explicitly set to true.
+  repeated int32 true_boolean_options = 1;
+  // Boolean options that are explicitly set to false.
+  // (see above description of true_boolean_options)
+  repeated int32 false_boolean_options = 2;
+
+  // Optional boolean options that are explictly set.
+  // A reference to the proto enum in android git, see OptionalBooleanOption in
+  // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
+  // Optional boolean options that are explicitly set to true.
+  repeated int32 true_optional_boolean_options = 3;
+  // Optional boolean options that are explicitly set to false.
+  // (see above description of true_optional_boolean_options)
+  repeated int32 false_optional_boolean_options = 4;
+
+  // Integer option values that are explicitly set, with their values.
+  // Contains a reference to the proto enum in android git, see IntegerOption in
+  // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
+  repeated GradleIntegerOptionEntry integer_option_values = 5;
+
+  // Long options that are explicitly set. Values are not included.
+  // A reference to the proto enum in android git, see LongOption in
+  // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
+  repeated int32 long_options = 6;
+
+  // String options that are explicitly set. Values are not recorded as they
+  // could include arbitrary information.
+  // A reference to the proto enum in android git, see StringOption in
+  // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
+  repeated int32 string_options = 7;
+}
+
+// An explicitly set integer option in the gradle plugin, with its value.
+message GradleIntegerOptionEntry {
+  // The integer option, set by studio or the user.
+  // A reference to the proto enum in android git, see IntegerOption in
+  // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
+  optional int32 integer_option = 1;
+  // The value set by the user for this integer option.
+  // Integer options are of one of two forms, and do not identify users.
+  //   1. Software and protocol versions, such as the build target device API
+  //      level, or the type of model requested by studio.
+  //   2. Performance tuning settings, such as test shard counts, thread pool
+  //      sizes and buffer sizes.
+  optional int32 integer_option_value = 2;
 }
 
 message GradleBuildSplits {
@@ -2245,6 +2574,8 @@ message InstantRunStatus {
     // abstract method became implemented | method with code became abstract.
     ABSTRACT_METHOD_CHANGE = 30;
 
+    // a synthetic constructor was changed.
+    SYNTHETIC_CONSTRUCTOR_CHANGE = 31;
   }
 }
 
@@ -3072,6 +3403,9 @@ message AndroidProfilerEvent {
     SELECT_DETAILS_RESPONSE = 403;
     SELECT_DETAILS_HEADERS = 404;
     SELECT_DETAILS_STACK = 405;
+    SELECT_DETAILS_OVERVIEW = 406;
+    SELECT_DETAILS_REQUEST = 407;
+    SELECT_DETAILS_ERROR = 408;
   }
 }
 
@@ -3173,4 +3507,35 @@ message KotlinSupport {
 
   // Kotlin version used for Kotlin support; e.g., "1.1.3-2".
   optional string kotlin_support_version = 2;
+}
+
+
+// Details for connection assistant event
+message ConnectionAssistantEvent {
+  enum ConnectionAssistantEventType {
+    UNKNOWN_EVENT_TYPE = 0;
+    // Assistant is opened
+    OPEN = 1;
+    // Scan USB devices button clicked
+    SCAN_USB_DEVICES_CLICKED = 2;
+    // USB devices detected
+    USB_DEVICES_DETECTED = 3;
+    // Restart ADB devices button clicked
+    RESTART_ADB_CLICKED = 4;
+    // ADB devices detected
+    ADB_DEVICES_DETECTED = 5;
+    // Report issue button clicked, opens report dialog
+    REPORT_ISSUE_CLICKED = 6;
+    // Issue reported
+    ISSUE_REPORTED = 7;
+  }
+
+  // Type of event
+  optional ConnectionAssistantEventType type = 1;
+
+  // defined if ConnectionAssistantEventType = USB_DEVICES_DETECTED, ADB_DEVICES_DETECTEd
+  optional int32 usb_devices_detected = 2;
+
+  // defined if ConnectionAssistantEventType = USB_DEVICES_DETECTED, ADB_DEVICES_DETECTEd
+  optional int32 adb_devices_detected = 3;
 }

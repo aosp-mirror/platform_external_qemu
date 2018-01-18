@@ -22,38 +22,14 @@
 namespace android {
 namespace base {
 
-namespace {
-
-// Helper class to enter/leave a critical section on scope enter/exit.
-// Equivalent to android::base::AutoLock but do not use it to reduce
-// coupling.
-class ScopedLocker {
-public:
-    ScopedLocker(CRITICAL_SECTION* section) : mSection(section) {
-        EnterCriticalSection(mSection);
-    }
-
-    ~ScopedLocker() {
-        LeaveCriticalSection(mSection);
-    }
-private:
-    CRITICAL_SECTION* mSection;
-};
-
-}  // namespace
-
-Thread::Thread(ThreadFlags flags, int stackSize) :
-    mStackSize(stackSize),
-    mFlags(flags) {
-    InitializeCriticalSection(&mLock);
-}
+Thread::Thread(ThreadFlags flags, int stackSize)
+    : mStackSize(stackSize), mFlags(flags) {}
 
 Thread::~Thread() {
     if (mThread) {
         assert(!mStarted || mFinished);
         CloseHandle(mThread);
     }
-    DeleteCriticalSection(&mLock);
 }
 
 bool Thread::start() {
@@ -61,16 +37,16 @@ bool Thread::start() {
         return false;
     }
 
-    ScopedLocker locker(&mLock);
     bool ret = true;
     mStarted = true;
-    mThread = CreateThread(NULL, mStackSize,
-                           &Thread::thread_main, this, 0, &mThreadId);
+    DWORD threadId = 0;
+    mThread = CreateThread(NULL, mStackSize, &Thread::thread_main, this, 0,
+                           &threadId);
     if (!mThread) {
         // don't reset mStarted: we're artifically limiting the user's
         // ability to retry the failed starts here.
         ret = false;
-        mFinished = false;
+        mFinished = true;
     }
     return ret;
 }
@@ -98,9 +74,8 @@ bool Thread::tryWait(intptr_t* exitStatus) {
         return false;
     }
 
-    ScopedLocker locker(&mLock);
-    if (!mFinished ||
-        WaitForSingleObject(mThread, 0) != WAIT_OBJECT_0) {
+    AutoLock locker(mLock);
+    if (!mFinished || WaitForSingleObject(mThread, 0) != WAIT_OBJECT_0) {
         return false;
     }
 
@@ -111,17 +86,18 @@ bool Thread::tryWait(intptr_t* exitStatus) {
 }
 
 // static
-DWORD WINAPI Thread::thread_main(void *arg) {
+DWORD WINAPI Thread::thread_main(void* arg) {
     {
         // no need to call maskAllSignals() here: we know
         // that on Windows it's a noop
         Thread* self = reinterpret_cast<Thread*>(arg);
         auto ret = self->main();
 
-        EnterCriticalSection(&self->mLock);
-        self->mFinished = true;
-        self->mExitStatus = ret;
-        LeaveCriticalSection(&self->mLock);
+        {
+            AutoLock lock(self->mLock);
+            self->mFinished = true;
+            self->mExitStatus = ret;
+        }
 
         self->onExit();
         // |self| is not valid beyond this point

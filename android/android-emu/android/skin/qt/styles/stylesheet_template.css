@@ -48,6 +48,9 @@
 *[ColorGroup="Overlay"] {
     background: %%BKG_COLOR_OVERLAY%%;
 }
+*[ColorGroup="Inactive"] {
+    color: %%INACTIVE_TEXT_COLOR%%;
+}
 *{
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
@@ -241,6 +244,14 @@ RaisedMaterialButton {
 }
 RaisedMaterialButton:pressed {
     background: %%TAB_DARKENED_COLOR%%;
+}
+RaisedMaterialButton[ColorGroup="RaisedColoredButton"] {
+    padding: 0 16px;
+    color: %%RAISED_COLORED_COLOR%%;
+    background: %%RAISED_COLORED_BKG_COLOR%%
+}
+RaisedMaterialButton[ColorGroup="RaisedColoredButton"]:pressed {
+    background: %%RAISED_COLORED_PRESSED_COLOR%%
 }
 QAbstractSpinBox {
     border-top: 0px;

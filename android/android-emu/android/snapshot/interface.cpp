@@ -11,7 +11,10 @@
 
 #include "android/snapshot/interface.h"
 
+#include "android/emulation/CpuAccelerator.h"
+#include "android/snapshot/Loader.h"
 #include "android/snapshot/Snapshotter.h"
+
 #include "android/utils/debug.h"
 
 using android::snapshot::FailureReason;
@@ -28,31 +31,11 @@ AndroidSnapshotStatus androidSnapshot_prepareForLoading(const char* name) {
 }
 
 AndroidSnapshotStatus androidSnapshot_load(const char* name) {
-    auto res = Snapshotter::get().load(false /* is not Quickboot */, name);
-    if (res != OperationStatus::Ok) {
-        // Check if the error is about something done as just a check or
-        // we've started actually loading the VM data
-        if (auto failureReason =
-                    Snapshotter::get().loader().snapshot().failureReason()) {
-            if (*failureReason != FailureReason::Empty &&
-                *failureReason < FailureReason::ValidationErrorLimit) {
-                dwarning(
-                        "Snapshot '%s' can not be loaded (%d), state is "
-                        "unchanged.",
-                        name, int(*failureReason));
-                return SNAPSHOT_STATUS_ERROR_NOT_CHANGED;
-            } else {
-                derror("Snapshot '%s' can not be loaded (%d), emulator "
-                       "stopped.",
-                       name, int(*failureReason));
-            }
-        } else {
-            derror("Snapshot '%s' can not be loaded (reason not set), emulator "
-                   "stopped.",
-                   name);
-        }
-    }
-    return AndroidSnapshotStatus(res);
+    return AndroidSnapshotStatus(Snapshotter::get().loadGeneric(name));
+}
+
+const char* androidSnapshot_loadedSnapshotFile() {
+    return Snapshotter::get().loadedSnapshotFile().c_str();
 }
 
 AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
@@ -60,7 +43,12 @@ AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
 }
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {
-    return AndroidSnapshotStatus(Snapshotter::get().save(name));
+    // TODO: HAXM generic + at-exit snapshot support
+    if (android::GetCurrentCpuAccelerator() ==
+        android::CPU_ACCELERATOR_HAX) {
+        androidSnapshot_setQuickbootSaveNoGood();
+    }
+    return AndroidSnapshotStatus(Snapshotter::get().saveGeneric(name));
 }
 
 void androidSnapshot_delete(const char* name) {
@@ -69,4 +57,28 @@ void androidSnapshot_delete(const char* name) {
 
 int64_t androidSnapshot_lastLoadUptimeMs() {
     return Snapshotter::get().lastLoadUptimeMs();
+}
+
+static int sStdoutLineConsumer(void* opaque, const char* buf, int strlen) {
+    (void)opaque;
+    printf("%s", buf);
+    return strlen;
+}
+
+static int sStderrLineConsumer(void* opaque, const char* buf, int strlen) {
+    (void)opaque;
+    fprintf(stderr, "%s", buf);
+    return strlen;
+}
+
+void androidSnapshot_listStdout() {
+    androidSnapshot_list(nullptr,
+                         sStdoutLineConsumer,
+                         sStderrLineConsumer);
+}
+
+void androidSnapshot_list(void* opaque,
+                          int (*cbOut)(void*, const char*, int),
+                          int (*cbErr)(void*, const char*, int)) {
+    Snapshotter::get().listSnapshots(opaque, cbOut, cbErr);
 }

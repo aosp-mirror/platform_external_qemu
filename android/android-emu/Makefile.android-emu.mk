@@ -75,6 +75,11 @@ include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
 # SIM access rules protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/telephony/proto/SimAccessRulesProto.mk
 
+###############################################################################
+#
+# Physics protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/physics/proto/PhysicsProto.mk
+
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -176,6 +181,7 @@ LOCAL_SRC_FILES := \
     android/utils/property_file.c \
     android/utils/reflist.c \
     android/utils/refset.c \
+    android/utils/sockets.c \
     android/utils/stralloc.c \
     android/utils/stream.cpp \
     android/utils/string.cpp \
@@ -260,9 +266,10 @@ LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
     $(LIBKEYMASTER3_INCLUDES) \
     $(LIBPNG_INCLUDES) \
-    $(LZ4_INCLUDES) \
     $(TINYOBJLOADER_INCLUDES) \
+    $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
+    $(MURMURHASH_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -289,6 +296,7 @@ LOCAL_SRC_FILES := \
     android/camera/camera-common.cpp \
     android/camera/camera-format-converters.c \
     android/camera/camera-list.cpp \
+    android/camera/camera-metrics.cpp \
     android/camera/camera-service.c \
     android/camera/camera-virtualscene.cpp \
     android/car.cpp \
@@ -337,6 +345,7 @@ LOCAL_SRC_FILES := \
     android/emulation/LogcatPipe.cpp \
     android/emulation/Keymaster3.cpp \
     android/emulation/FakeRotatingCameraSensor.cpp \
+    android/emulation/QemuMiscPipe.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
@@ -420,6 +429,7 @@ LOCAL_SRC_FILES := \
     android/physics/PhysicalModel.cpp \
     android/process_setup.cpp \
     android/protobuf/DelimitedSerialization.cpp \
+    android/protobuf/LoadSave.cpp \
     android/protobuf/ProtobufLogging.cpp \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
@@ -438,13 +448,17 @@ LOCAL_SRC_FILES := \
     android/shaper.c \
     android/snaphost-android.c \
     android/snapshot.c \
+    android/snapshot/common.cpp \
     android/snapshot/Compressor.cpp \
     android/snapshot/Decompressor.cpp \
+    android/snapshot/GapTracker.cpp \
+    android/snapshot/IncrementalStats.cpp \
     android/snapshot/interface.cpp \
     android/snapshot/Loader.cpp \
     android/snapshot/MemoryWatch_common.cpp \
     android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
     android/snapshot/PathUtils.cpp \
+    android/snapshot/Hierarchy.cpp \
     android/snapshot/Quickboot.cpp \
     android/snapshot/RamLoader.cpp \
     android/snapshot/RamSaver.cpp \
@@ -464,6 +478,7 @@ LOCAL_SRC_FILES := \
     android/telephony/sms.c \
     android/telephony/sysdeps.c \
     android/telephony/TagLengthValue.cpp \
+    android/test/checkboot.cpp \
     android/uncompress.cpp \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
@@ -474,10 +489,12 @@ LOCAL_SRC_FILES := \
     android/utils/sockets.c \
     android/utils/looper.cpp \
     android/virtualscene/Renderer.cpp \
+    android/virtualscene/RenderTarget.cpp \
+    android/virtualscene/Scene.cpp \
     android/virtualscene/SceneCamera.cpp \
     android/virtualscene/SceneObject.cpp \
-    android/virtualscene/Texture.cpp \
-    android/virtualscene/VirtualScene.cpp \
+    android/virtualscene/TextureUtils.cpp \
+    android/virtualscene/VirtualSceneManager.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \
@@ -504,10 +521,11 @@ ifeq ($(BUILD_TARGET_OS),windows)
 endif
 
 LOCAL_COPY_COMMON_PREBUILT_RESOURCES := \
-  virtualscene/Toren1BD/Toren1BD_Decor.obj \
-  virtualscene/Toren1BD/Toren1BD_Decor_BakedLighting.png \
-  virtualscene/Toren1BD/Toren1BD_Main.obj \
-  virtualscene/Toren1BD/Toren1BD_Main_BakedLighting.png \
+  virtualscene/Toren1BD/Toren1BD.mtl \
+  virtualscene/Toren1BD/Toren1BD.obj \
+  virtualscene/Toren1BD/Toren1BD_Decor.png \
+  virtualscene/Toren1BD/Toren1BD_Main.png \
+  virtualscene/Toren1BD/Toren1BD_TV.png \
 
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
@@ -534,7 +552,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,AppKit
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,Accelerate
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,IOKit
-    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,Hypervisor
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-weak_framework,Hypervisor
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,OpenGL
 endif
 
@@ -554,6 +572,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libwebp \
     emulator-tinyobjloader \
     emulator-zlib \
+    emulator-murmurhash \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
@@ -561,6 +580,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(SNAPSHOT_PROTO_STATIC_LIBRARIES) \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
+    $(PHYSICS_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
