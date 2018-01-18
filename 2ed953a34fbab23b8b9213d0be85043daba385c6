@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "675c843f_e99bbb12",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1139,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-01-18T07:32:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3e37559e_7aaf729c",
+      "range": {
+        "startLine": 1137,
+        "startChar": 0,
+        "endLine": 1139,
+        "endChar": 5
+      },
+      "revId": "2ed953a34fbab23b8b9213d0be85043daba385c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9f150b2_b2dddd91",
         "filename": "android/emulator/main-emulator.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "2ed953a34fbab23b8b9213d0be85043daba385c6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09221f54_4675aa31",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-01-18T07:32:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9f150b2_b2dddd91",
+      "range": {
+        "startLine": 824,
+        "startChar": 34,
+        "endLine": 824,
+        "endChar": 37
+      },
+      "revId": "2ed953a34fbab23b8b9213d0be85043daba385c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
