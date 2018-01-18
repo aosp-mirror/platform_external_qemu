@@ -612,11 +612,7 @@ void AdbGuestPipe::waitForHostConnection() {
     // restarted on the host, but could not see the current emulator
     // instance because it's listening on a 'non-standard' ADB port.
     mHostAgent->startListening();
-
-    // Async notify the server (guard against connect() hangs)
-    android::base::async([this] {
-        mHostAgent->notifyServer();
-    });
+    mHostAgent->notifyServer();
 }
 
 }  // namespace emulation
