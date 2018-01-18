@@ -82,6 +82,7 @@ typedef struct QAndroidVmOperations {
     bool (*vmStop)(void);
     bool (*vmStart)(void);
     void (*vmReset)(void);
+    void (*vmShutdown)(void);
 
     bool (*vmIsRunning)(void);
 
@@ -109,6 +110,14 @@ typedef struct QAndroidVmOperations {
 
     // Fills in the supplied |out| with current VM configuration.
     void (*getVmConfiguration)(VmConfiguration* out);
+
+    // Notifies QEMU of failed operations according to our own
+    // android::snapshot::FailureReason.
+    void (*setFailureReason)(const char* name, int failureReason);
+
+    // Notifies QEMU that the emulator is exiting, can impact how
+    // QEMU snapshot save calls work.
+    void (*setExiting)(void);
 
 } QAndroidVmOperations;
 

@@ -24,20 +24,54 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/utils/compiler.h"
-#include "android/virtualscene/SceneCamera.h"
-#include "android/virtualscene/SceneObject.h"
-#include "android/virtualscene/Texture.h"
+#include "android/virtualscene/VertexTypes.h"
 
+#include <memory>
 #include <vector>
 
 namespace android {
 namespace virtualscene {
 
+struct Material {
+    int id = -1;
+
+    bool isValid() const { return id >= 0; }
+};
+
+struct Mesh {
+    int id = -1;
+
+    bool isValid() const { return id >= 0; }
+};
+
+struct Texture {
+    int id = -1;
+
+    bool isValid() const { return id >= 0; }
+};
+
+struct Renderable {
+    Material material;
+    Mesh mesh;
+    Texture texture;
+};
+
+struct RenderableObject {
+    glm::mat4 modelViewProj;
+    Renderable renderable;
+};
+
+// Forward declarations.
+class SceneObject;
+
 class Renderer {
     DISALLOW_COPY_AND_ASSIGN(Renderer);
 
+protected:
+    Renderer();
+
 public:
-    ~Renderer();
+    virtual ~Renderer();
 
     // Create a virtual scene Renderer.
     //
@@ -45,56 +79,95 @@ public:
     //
     // Returns a Renderer instance if the renderer was successfully created or
     // null if there was an error.
-    static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2);
+    static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2,
+                                            int width, int height);
 
-    const SceneCamera& getCamera() const;
-    const GLESv2Dispatch* getGLESv2Dispatch();
-
-    // Compile a shader from source.
-    // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
-    // |shaderSource| - Shader source code.
+    // Release rendering state associated with a SceneObject, should be called
+    // before destroying a SceneObject.
     //
-    // Returns a non-zero shader handle on success, or zero on failure.
-    // The result must be released with glDeleteShader.
-    GLuint compileShader(GLenum type, const char* shaderSource);
+    // |parent| - SceneObject pointer, used as an opaque identifier.
+    virtual void releaseObjectResources(const SceneObject* sceneObject) = 0;
 
-    // Link a vertex and fragment shader and return a program.
-    // |vertexId| - GL vertex shader handle, must be non-zero.
-    // |fragmentId| - GL fragment shader handle, must be non-zero.
+    // Create a standard material for rendering a test checkerboard texture.
+    // This is a standard material and will be automatically cleaned up when the
+    // Renderer is destroyed.
     //
-    // After this call, it is valid to call glDeleteShader; if the program was
-    // successfully linked the program will keep them alive.
+    // Returns a Material instance or an invalid value if there was an error.
+    virtual Material createMaterialCheckerboard(const SceneObject* parent) = 0;
+
+    // Create a standard material for rendering with a texture. This is a
+    // standard material and will be automatically cleaned up when the Renderer
+    // is destroyed.
     //
-    // Returns a non-zero program handle on success, or zero on failure.
-    // The result must be released with glDeleteProgram.
-    GLuint linkShaders(GLuint vertexId, GLuint fragmentId);
+    // Returns a Material instance or an invalid value if there was an error.
+    virtual Material createMaterialTextured() = 0;
 
-    GLint getAttribLocation(GLuint program, const char* name);
-    GLint getUniformLocation(GLuint program, const char* name);
-
-    void render();
-
-private:
-    // Private constructor, use Renderer::create to create an
-    // instance.
-    Renderer(const GLESv2Dispatch* gles2);
-
-    // Initial helper to initialize the Renderer.
-    bool initialize();
-
-    // Helper to create a SceneObject from an obj file and texture.
-    // |objFile| - Filename of the obj file to load.
-    // |textureFile| - Filename of the texture to load.
+    // Create a material for rendering a screen-space effect with a custom
+    // fragment shader, used by Effect.
     //
-    // Returns the SceneObject is loading was successful, or null otherwise.
-    std::unique_ptr<SceneObject> loadSceneObject(const char* objFile,
-                                                 const char* textureFile);
+    // |parent| - Parent SceneObject, which controls the lifetime of the
+    // material. |frag| - Frament shader to use for effect.
+    //
+    // Returns a Material instance or an invalid value if there was an error.
+    virtual Material createMaterialScreenSpace(const SceneObject* parent,
+                                               const char* frag) = 0;
 
-    const GLESv2Dispatch* const mGles2;
+    // Helper method to create a mesh given std::vectors containing the vertices
+    // and indices.
+    //
+    // |parent| - Parent SceneObject, which controls the lifetime of the mesh.
+    // |vertices| - Vertex array.
+    // |indices| - Index array.
+    //
+    // Returns a Mesh instance or an invalid value if there was an error.
+    Mesh createMesh(const SceneObject* parent,
+                    const std::vector<VertexPositionUV>& vertices,
+                    const std::vector<GLuint>& indices) {
+        return createMesh(parent, vertices.data(), vertices.size(),
+                          indices.data(), indices.size());
+    }
 
-    SceneCamera mCamera;
+    // Helper method to create a mesh given fixed-size arrays.
+    //
+    // |parent| - Parent SceneObject, which controls the lifetime of the mesh.
+    // |vertices| - Vertex array.
+    // |indices| - Index array.
+    //
+    // Returns a Mesh instance or an invalid value if there was an error.
+    template <size_t verticesSize, size_t indicesSize>
+    Mesh createMesh(const SceneObject* parent,
+                    const VertexPositionUV (&vertices)[verticesSize],
+                    const GLuint (&indices)[indicesSize]) {
+        return createMesh(parent, vertices, verticesSize, indices, indicesSize);
+    }
 
-    std::vector<std::unique_ptr<SceneObject>> mSceneObjects;
+    // Create a mesh given a list of vertices and indices.
+    //
+    // |parent| - Parent SceneObject, which controls the lifetime of the mesh.
+    // |vertices| - Pointer to an array of vertices.
+    // |verticesSize| - Number of elements in the vertices array.
+    // |indices| - Pointer to an array of indices.
+    // |indicesSize| - Number of elements in the indices array.
+    //
+    // Returns a Mesh instance or an invalid value if there was an error.
+    virtual Mesh createMesh(const SceneObject* parent,
+                            const VertexPositionUV* vertices,
+                            size_t verticesSize,
+                            const GLuint* indices,
+                            size_t indicesSize) = 0;
+
+    // Load a PNG image from a file and create a Texture from it.
+    //
+    // |parent| - Parent SceneObject, which controls the lifetime of the
+    // texture. |filename| - Filename to load.
+    //
+    // Returns a Texture instance or an invalid value if there was an error.
+    virtual Texture loadTexture(const SceneObject* parent,
+                                const char* filename) = 0;
+
+    // Render a frame.
+    virtual void render(const std::vector<RenderableObject>& renderables,
+                        float time) = 0;
 };
 
 }  // namespace virtualscene

@@ -18,6 +18,9 @@ extern "C" {
     #include "ui/console.h"
 }
 
+#include <algorithm>
+#include <vector>
+
 static void getFrameBuffer(int* w, int* h, int* lineSize, int* bytesPerPixel,
                            uint8_t** frameBufferData) {
     DisplayState* const ds = get_displaystate();
@@ -39,20 +42,31 @@ static void getFrameBuffer(int* w, int* h, int* lineSize, int* bytesPerPixel,
     }
 }
 
+static std::vector<DisplayUpdateListener*> listeners;
+
 static void registerUpdateListener(AndroidDisplayUpdateCallback callback,
                                    void* opaque) {
     const auto listener = new DisplayUpdateListener();
     listener->dpy_update = callback;
     listener->opaque = opaque;
+    listeners.push_back(listener);
 
     DisplayState* const ds = get_displaystate();
     register_displayupdatelistener(ds, listener);
 }
 
+static void unregisterUpdateListener(AndroidDisplayUpdateCallback callback) {
+    listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
+                                   [callback](const DisplayUpdateListener* l) {
+                                       return l->dpy_update == callback;
+                                   }),
+                    listeners.end());
+}
 
 static const QAndroidDisplayAgent displayAgent = {
         .getFrameBuffer = &getFrameBuffer,
-        .registerUpdateListener = &registerUpdateListener
+        .registerUpdateListener = &registerUpdateListener,
+        .unregisterUpdateListener = &unregisterUpdateListener,
 };
 
 const QAndroidDisplayAgent* const gQAndroidDisplayAgent = &displayAgent;

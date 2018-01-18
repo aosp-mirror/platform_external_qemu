@@ -157,7 +157,7 @@ TextureDraw::TextureDraw() :
     s_gles2.glEnableVertexAttribArray(mInCoordSlot);
 
     mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, "translation");
-    mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "texture");
+    mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "tex");
 
 #if 0
     printf("SLOTS position=%d inCoord=%d texture=%d translation=%d\n",

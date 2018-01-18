@@ -102,6 +102,11 @@ public:
     size_type capacity() const { return mCapacity; }
     bool empty() const { return begin() == end(); }
 
+    reference front() { return *begin(); }
+    const_reference front() const { return *cbegin(); }
+    reference back() { return *(end() - 1); }
+    const_reference back() const { return *(cend() - 1); }
+
     reference operator[](size_t i) { return *(begin() + i); }
     const_reference operator[](size_t i) const { return *(cbegin() + i); }
 
@@ -118,6 +123,11 @@ public:
 
     void push_back(const T& t) { emplace_back(t); }
     void push_back(T&& t) { emplace_back(std::move(t)); }
+
+    void pop_back() {
+        destruct(mEnd - 1, mEnd);
+        --mEnd;
+    }
 
     void clear() {
         destruct(begin(), end());
@@ -298,11 +308,9 @@ public:
     explicit SmallFixedVector(Range&& r)
         : SmallFixedVector(std::make_move_iterator(std::begin(r)),
                            std::make_move_iterator(std::end(r))) {}
-    template <class U,
-              class = enable_if_convertible<U, T>>
+    template <class U, class = enable_if_convertible<U, T>>
     SmallFixedVector(std::initializer_list<U> list)
         : SmallFixedVector(std::begin(list), std::end(list)) {}
-
 
     SmallFixedVector(const SmallFixedVector& other)
         : SmallFixedVector(other.begin(), other.end()) {}

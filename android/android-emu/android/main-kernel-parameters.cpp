@@ -41,12 +41,24 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
                                    mem_map ramoops,
-                                   bool isQemu2) {
+                                   bool isQemu2,
+                                   bool isCros) {
     android::ParameterList params;
+    if (isCros) {
+      std::string cmdline(StringFormat(
+          "ro noresume noswap loglevel=7 noinitrd root=/dev/sda3 no_timer_check"
+          "cros_legacy cros_debug console=%s",
+          opts->show_kernel ? "ttyS0" : ""));
+      return strdup(cmdline.c_str());
+    }
+
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
 
     // We always force qemu=1 when running inside QEMU.
     params.add("qemu=1");
+
+    // Disable apic timer check. b/33963880
+    params.add("no_timer_check");
 
     params.addFormat("androidboot.hardware=%s",
                      isQemu2 ? "ranchu" : "goldfish");
@@ -56,6 +68,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (isX86ish) {
         params.add("clocksource=pit");
+        // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
+        // in goldfish kernel which caused surfaceflinger hanging in the guest
+        // system. To workaround, start the kernel with no kvmclock. Currently,
+        // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
+        params.add("no-kvmclock");
     }
 
     android::setupVirtualSerialPorts(
@@ -143,6 +160,16 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         // x86 and x86_64 platforms use an alternative Android DT directory that
         // mimics the layout of /proc/device-tree/firmware/android/
         params.addFormat("androidboot.android_dt_dir=%s", kSysfsAndroidDtDir);
+    }
+
+    if (isQemu2) {
+        if (android::featurecontrol::isEnabled(android::featurecontrol::SystemAsRoot)) {
+            params.add("skip_initramfs");
+            params.add("rootwait");
+            params.add("ro");
+            params.add("init=/init");
+            params.add("root=/dev/vda1");
+        }
     }
 
     if (avdKernelParameters && avdKernelParameters[0]) {

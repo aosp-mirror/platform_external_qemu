@@ -38,7 +38,7 @@ struct GLUniformDesc {
     GLenum mType = (GLenum)0;
     std::vector<unsigned char> mVal;
 
-    std::string mName = {};
+    std::string mGuestName = {};
 
     void onSave(android::base::Stream* stream) const;
 };
@@ -49,6 +49,7 @@ struct AttachedShader {
     // linkedSource is only updated when glLinkProgram
     // This is the "real" source the hardware is using for the compiled program.
     std::string linkedSource = {};
+    ANGLEShaderParser::ShaderLinkInfo linkInfo = {};
 };
 
 class ProgramData:public ObjectData{
@@ -83,6 +84,7 @@ public:
 
     void appendValidationErrMsg(std::ostringstream& ss);
     bool validateLink(ShaderParser* frag, ShaderParser* vert);
+    // setLinkStatus resets uniform location virtualization as well
     void setLinkStatus(GLint status);
     GLint getLinkStatus() const;
 
@@ -102,6 +104,16 @@ public:
     std::unordered_map<std::string, GLuint> boundAttribLocs;
     virtual GenNameInfo getGenNameInfo() const override;
     void addProgramName(GLuint name) { ProgramName = name; }
+    GLuint getProgramName() const { return ProgramName; }
+
+    // Virtualize uniform locations
+    // It handles location -1 as well
+    void initGuestUniformLocForKey(android::base::StringView key);
+    void initGuestUniformLocForKey(android::base::StringView key,
+                                   android::base::StringView key2);
+    int getGuestUniformLocation(const char* uniName);
+    int getHostUniformLocation(int guestLocation);
+
 private:
     // linkedAttribLocs stores the attribute locations the guest might
     // know about. It includes all boundAttribLocs before the previous
@@ -121,5 +133,15 @@ private:
 
     int mGlesMajorVersion = 2;
     int mGlesMinorVersion = 0;
+    std::unordered_map<GLuint, GLUniformDesc> collectUniformInfo() const;
+    void getUniformValue(const GLchar *name, GLenum type,
+            std::unordered_map<GLuint, GLUniformDesc> &uniformsOnSave) const;
+
+    std::unordered_map<std::string, int> mUniNameToGuestLoc;
+    std::unordered_map<int, int> mGuestLocToHostLoc;
+
+    int mCurrUniformBaseLoc = 0;
+    bool mUseUniformLocationVirtualization = true;
+    bool mUseDirectDriverUniformInfo = false;
 };
 #endif

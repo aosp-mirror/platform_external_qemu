@@ -89,4 +89,16 @@ message Snapshot {
 
     // Number of successful loads.
     optional int32 successful_loads = 11;
+
+    // The name given to the snapshot by the user. Independent of the
+    // file name.
+    optional string logical_name = 12;
+
+    // The file name of this snapshot's parent. The parent is the
+    // snapshot that was loaded into the AVD prior to this snapshot
+    // being taken
+    optional string parent = 13;
+
+    // Arbitrary description added by the user
+    optional string description = 14;
 }

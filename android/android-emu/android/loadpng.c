@@ -2,6 +2,7 @@
 
 #include <png.h>
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -163,6 +164,87 @@ void savepng(const char* fn, unsigned int nChannels, unsigned int width,
     fclose(fp);
 }
 
+static void putUint32_t(unsigned char* dst, uint32_t data) {
+    dst[0] = (unsigned char)data;
+    dst[1] = (unsigned char)(data >> 8);
+    dst[2] = (unsigned char)(data >> 16);
+    dst[3] = (unsigned char)(data >> 24);
+}
+
+static void putUint16_t(unsigned char* dst, uint16_t data) {
+    dst[0] = (unsigned char)data;
+    dst[1] = (unsigned char)(data >> 8);
+}
+
+
+void savebmp(const char* fn, unsigned int nChannels, unsigned int width,
+        unsigned int height, void* pixels) {
+    if (nChannels != 1 && nChannels != 3 && nChannels != 4) {
+        fprintf(stderr, "savebmp only support 1, 3 or 4 channel images\n");
+        return;
+    }
+    FILE *fp = fopen(fn, "wb");
+    if (!fp) {
+        LOG("Unable to write to file %s.\n", fn);
+        return;
+    }
+    uint32_t w = (uint32_t)width;
+    uint32_t h = (uint32_t)height;
+    const uint32_t dibHeaderSize = 40;
+    const uint32_t offset = 14 + dibHeaderSize;
+    uint32_t imgSize = nChannels * w * h;
+    uint32_t fileSize = offset + imgSize;
+    uint16_t nClrPln = 1;
+    uint16_t nBpp = (uint16_t)nChannels * 8;
+    uint32_t comp = 0;
+    uint32_t reso = 0;
+    uint32_t nClrPalette = 0;
+    uint32_t nImptClr = 0;
+    unsigned char header[offset];
+    header[0] = 'B';
+    header[1] = 'M';
+    putUint32_t(header + 2, fileSize);
+    // bit 6~10 are reserved
+    putUint32_t(header + 10, offset);
+    // bitmap information header
+    putUint32_t(header + 14, dibHeaderSize);
+    putUint32_t(header + 18, w);
+    putUint32_t(header + 22, h);
+    putUint16_t(header + 26, nClrPln);
+    putUint16_t(header + 28, nBpp);
+    putUint32_t(header + 30, comp);
+    putUint32_t(header + 34, imgSize);
+    putUint32_t(header + 38, reso);
+    putUint32_t(header + 42, reso);
+    putUint32_t(header + 46, nClrPalette);
+    putUint32_t(header + 50, nImptClr);
+    fwrite(header, 1, offset, fp);
+    const unsigned char* src = pixels + nChannels * w * (h - 1);
+    unsigned char padding[3] = {0, 0, 0};
+    unsigned char* data = (unsigned char*)malloc(nChannels * w);
+    int paddingBytes = (4 - nChannels * w % 4) % 4;
+    int r = 0;
+    int c = 0;
+    for (r = 0; r < h; r++) {
+        if (nChannels == 1) {
+            fwrite(src, 1, w, fp);
+        } else {
+            for (c = 0; c < w; c++) { // flip rgb
+                data[c * nChannels + 0] = src[c * nChannels + 2];
+                data[c * nChannels + 1] = src[c * nChannels + 1];
+                data[c * nChannels + 2] = src[c * nChannels + 0];
+                if (nChannels == 4) {
+                    data[c * nChannels + 3] = src[c * nChannels + 3];
+                }
+            }
+            fwrite(data, 1, w * nChannels, fp);
+        }
+        fwrite(padding, 1, paddingBytes, fp);
+        src -= w * nChannels;
+    }
+    free(data);
+    fclose(fp);
+}
 
 typedef struct
 {

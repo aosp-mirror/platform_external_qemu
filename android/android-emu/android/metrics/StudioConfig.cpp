@@ -224,38 +224,55 @@ base::Version lastestAndroidStudioVersion() {
                    : extractAndroidStudioVersion(std::string(basename).c_str());
 }
 
+struct UpdateChannelInfo {
+    UpdateChannel updateChannel = UpdateChannel::Unknown;
+    bool initialized = false;
+};
+
+static LazyInstance<UpdateChannelInfo> sUpdateChannelInfo =
+    LAZY_INSTANCE_INIT;
+
 UpdateChannel updateChannel() {
-    static const StudioXml channelInfo = {
-            .filename = "updates.xml",
-            .nodename = "option",
-            .propname = "name",
-            .propvalue = "UPDATE_CHANNEL_TYPE",
-            .keyname = "value",
-    };
-    const auto channelStr = parseStudioXML(&channelInfo);
-    if (!channelStr) {
+    // Only interact with other files if
+    // a) this is the first time calling updateChannel()
+    // b) a previous call to updateChannel() did not succeed
+    if (!sUpdateChannelInfo->initialized) {
+        static const StudioXml channelInfo = {
+                .filename = "updates.xml",
+                .nodename = "option",
+                .propname = "name",
+                .propvalue = "UPDATE_CHANNEL_TYPE",
+                .keyname = "value",
+        };
+        const auto channelStr = parseStudioXML(&channelInfo);
+        if (!channelStr) {
+            return UpdateChannel::Unknown;
+        }
+
+        static const struct NamedChannel {
+            StringView name;
+            UpdateChannel channel;
+        } channelNames[] = {
+                {"", UpdateChannel::Canary},  // this is the current default
+                {"eap", UpdateChannel::Canary},
+                {"release", UpdateChannel::Stable},
+                {"beta", UpdateChannel::Beta},
+                {"milestone", UpdateChannel::Dev}};
+
+        const auto channelIt =
+                std::find_if(std::begin(channelNames), std::end(channelNames),
+                             [&channelStr](const NamedChannel& channel) {
+                                 return channel.name == *channelStr;
+                             });
+        if (channelIt != std::end(channelNames)) {
+            sUpdateChannelInfo->initialized = true;
+            sUpdateChannelInfo->updateChannel = channelIt->channel;
+            return channelIt->channel;
+        }
         return UpdateChannel::Unknown;
+    } else {
+        return sUpdateChannelInfo->updateChannel;
     }
-
-    static const struct NamedChannel {
-        StringView name;
-        UpdateChannel channel;
-    } channelNames[] = {
-            {"", UpdateChannel::Canary},  // this is the current default
-            {"eap", UpdateChannel::Canary},
-            {"release", UpdateChannel::Stable},
-            {"beta", UpdateChannel::Beta},
-            {"milestone", UpdateChannel::Dev}};
-
-    const auto channelIt =
-            std::find_if(std::begin(channelNames), std::end(channelNames),
-                         [&channelStr](const NamedChannel& channel) {
-                             return channel.name == *channelStr;
-                         });
-    if (channelIt != std::end(channelNames)) {
-        return channelIt->channel;
-    }
-    return UpdateChannel::Unknown;
 }
 
 /*****************************************************************************/

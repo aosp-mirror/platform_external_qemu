@@ -364,6 +364,10 @@ OPT_CLANG=
 option_register_var "--clang" OPT_CLANG \
        "Compile using clang when available."
 
+OPT_NO_TESTS=
+option_register_var "--no-tests" OPT_NO_TESTS \
+       "Do not run tests after build completes."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -491,8 +495,10 @@ ln -s "$AOSP_ROOT"/prebuilts "$AOSP_TMPDIR"/prebuilts
 ln -s "$AOSP_ROOT"/external/qemu "$AOSP_TMPDIR"/external/qemu
 ln -s "$AOSP_ROOT"/external/gtest "$AOSP_TMPDIR"/external/gtest
 ln -s "$AOSP_ROOT"/external/google-benchmark "$AOSP_TMPDIR"/external/google-benchmark
+ln -s "$AOSP_ROOT"/external/libyuv "$AOSP_TMPDIR"/external/libyuv
+ln -s "$AOSP_ROOT"/external/tinyobjloader "$AOSP_TMPDIR"/external/tinyobjloader
 
-AOSP_SOURCE_SUBDIRS="external/qemu external/gtest external/google-benchmark"
+AOSP_SOURCE_SUBDIRS="external/qemu external/gtest external/google-benchmark external/libyuv external/tinyobjloader"
 
 for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
     extract_subdir_git_history \
@@ -678,6 +684,9 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_BUILD_PREBUILTS"/protobuf \
             "$DARWIN_BUILD_PREBUILTS"/protobuf
 
+    copy_directory "$AOSP_BUILD_PREBUILTS"/common/virtualscene \
+            "$DARWIN_BUILD_PREBUILTS"/common/virtualscene
+
     run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR" --strip-components 1
 
     if [ "$AOSP_PREBUILTS_DIR" ]; then
@@ -699,6 +708,9 @@ build_darwin_binaries_on () {
     fi
     if [ "$OPT_PREBUILT_QEMU2" ]; then
         var_append DARWIN_BUILD_FLAGS "--prebuilt-qemu2"
+    fi
+    if [ "$OPT_NO_TESTS" ]; then
+        var_append DARWIN_BUILD_FLAGS "--no-tests"
     fi
     if [ "$OPT_CRASH_STAGING" ]; then
         var_append DARWIN_BUILD_FLAGS "--crash-staging"
@@ -782,6 +794,10 @@ if [ "$OPT_PREBUILT_QEMU2" ]; then
     var_append REBUILD_FLAGS "--prebuilt-qemu2"
 fi
 
+if [ "$OPT_NO_TESTS" ]; then
+    var_append REBUILD_FLAGS "--no-tests"
+fi
+
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
     PKG_NAME="$PKG_REVISION-$SYSTEM"
     dump "[$PKG_NAME] Rebuilding binaries from sources."
@@ -825,6 +841,7 @@ if [ "$OPT_COPY_PREBUILTS" ]; then
             "emulator$BITNESS-*$EXEEXT" \
             lib/ca-bundle.pem \
             lib/advancedFeatures.ini \
+            lib/advancedFeaturesCanary.ini \
             lib/pc-bios \
             "qemu/$SYSTEM-*/*" \
             "bin$BITNESS/*" \

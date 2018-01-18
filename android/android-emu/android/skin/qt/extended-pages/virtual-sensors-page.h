@@ -20,6 +20,7 @@
 #include "android/skin/rect.h"
 
 #include <QDoubleValidator>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <QWidget>
 
@@ -37,6 +38,8 @@ public:
     explicit VirtualSensorsPage(QWidget* parent = 0);
     ~VirtualSensorsPage();
 
+    void showEvent(QShowEvent* event) override;
+
     void setSensorsAgent(const QAndroidSensorsAgent* agent);
 
 private slots:
@@ -52,26 +55,30 @@ private slots:
     void on_magEastWidget_valueChanged(double value);
     void on_magVerticalWidget_valueChanged(double value);
 
+    void updateTargetState();
+
     void propagateAccelWidgetChange();
     void propagateSlidersChange();
 
-    void updateAccelWidgetFromSliders();
-    void updateSlidersFromAccelWidget();
     void updateModelFromAccelWidget(PhysicalInterpolation mode);
-    void updateAccelWidgetAndSlidersFromModel();
+    void updateModelFromSliders(PhysicalInterpolation mode);
+    void updateUIFromModelCurrentState();
 
     void updateSensorValuesInUI();
-
-    void onDragStarted();
-    void onDragStopped();
 
 signals:
     void coarseOrientationChanged(SkinRotation);
     void updateResultingValuesRequired(glm::vec3 acceleration,
                                        glm::vec3 gyroscope,
                                        glm::vec3 device_magnetic_vector);
+    void updateTargetStateRequired();
     void startSensorUpdateTimerRequired();
     void stopSensorUpdateTimerRequired();
+    void windowVisible();
+    void virtualSensorsInteraction();
+
+public slots:
+    void onVirtualSceneControlsEngaged(bool engaged);
 
 private slots:
     void on_rotateToPortrait_clicked();
@@ -97,8 +104,9 @@ private slots:
 
     void startSensorUpdateTimer();
     void stopSensorUpdateTimer();
-
 private:
+    void reportVirtualSensorsInteraction();
+
     void resetDeviceRotation(const glm::quat&);
 
     void setPhysicalParameterTarget(PhysicalParameter parameter_id,
@@ -118,9 +126,8 @@ private:
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
     QDoubleValidator mMagFieldValidator;
-    const QAndroidSensorsAgent* mSensorsAgent;
+    const QAndroidSensorsAgent* mSensorsAgent = nullptr;
     QTimer mAccelerationTimer;
-    bool mIsDragging = false;
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation = SKIN_ROTATION_0;
     bool mVirtualSensorsUsed = false;
@@ -128,5 +135,12 @@ private:
 
     QAndroidPhysicalStateAgent mQAndroidPhysicalStateAgent;
     bool mIsUIModifyingPhysicalState = false;
-    bool mIsUpdatingUIFromModel = false;
+
+    bool mSlidersUseCurrent = true;
+    glm::vec3 mSlidersTargetPosition;
+    glm::vec3 mSlidersTargetRotation;
+
+    bool mBypassOrientationChecks = false;
+    bool mVirtualSceneControlsEngaged = false;
+    QElapsedTimer mLastInteractionElapsed;
 };

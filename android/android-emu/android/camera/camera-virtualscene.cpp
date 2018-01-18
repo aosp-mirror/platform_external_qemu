@@ -18,7 +18,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/camera/camera-format-converters.h"
-#include "android/virtualscene/VirtualScene.h"
+#include "android/virtualscene/VirtualSceneManager.h"
 #include "emugl/common/OpenGLDispatchLoader.h"
 
 #include <vector>
@@ -154,10 +154,11 @@ int VirtualSceneCameraDevice::startCapturing(uint32_t pixelFormat,
     if (initializeEgl()) {
         auto context = makeEglCurrent();
         if (context.isValid()) {
-            if (VirtualScene::initialize(mGles2)) {
+            if (VirtualSceneManager::initialize(mGles2, frameWidth,
+                                                frameHeight)) {
                 succeeded = true;
             } else {
-                E("%s: VirtualScene initialize failed", __FUNCTION__);
+                E("%s: VirtualSceneManager initialize failed", __FUNCTION__);
             }
         }
     }
@@ -180,7 +181,7 @@ void VirtualSceneCameraDevice::stopCapturing() {
         // loop when eglMakeCurrent fails.
         auto context = makeEglCurrent();
         if (context.isValid()) {
-            VirtualScene::uninitialize();
+            VirtualSceneManager::uninitialize();
         }
     }
 
@@ -209,9 +210,7 @@ int VirtualSceneCameraDevice::readFrame(ClientFrame* resultFrame,
         return -1;
     }
 
-    mGles2->glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
-
-    VirtualScene::render();
+    resultFrame->frame_time = VirtualSceneManager::render();
     mEglDispatch->eglSwapBuffers(mEglDisplay, mEglSurface);
     mGles2->glReadPixels(0, 0, mFramebufferWidth, mFramebufferHeight, GL_RGBA,
                          GL_UNSIGNED_BYTE, mFramebufferData.data());
@@ -281,9 +280,9 @@ bool VirtualSceneCameraDevice::initializeEgl() {
     }
 
     // Finally, create a window surface associated with this widget.
-    static const EGLint pbufferAttribs[] = {EGL_WIDTH, mFramebufferWidth,
-                                            EGL_HEIGHT, mFramebufferHeight,
-                                            EGL_NONE};
+    const EGLint pbufferAttribs[] = {EGL_WIDTH, mFramebufferWidth,
+                                     EGL_HEIGHT, mFramebufferHeight,
+                                     EGL_NONE};
     mEglSurface = mEglDispatch->eglCreatePbufferSurface(mEglDisplay, eglConfig,
                                                         pbufferAttribs);
     if (mEglSurface == EGL_NO_SURFACE) {

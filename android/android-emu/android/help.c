@@ -42,6 +42,16 @@ help_studio_params(stralloc_t*  out)
     );
 }
 
+#ifdef __linux__
+static void
+help_bluetooth(stralloc_t*  out)
+{
+    PRINTF(
+    "  Sets up bluetooth forwarding to the usb device indicated by vendorid:productid.\n\n"
+    );
+}
+#endif
+
 static void
 help_virtual_device( stralloc_t*  out )
 {
@@ -1583,6 +1593,7 @@ help_sim_access_rules_file(stralloc_t* out)
 #define  help_partition_size NULL
 
 #define help_skip_adb_auth NULL
+#define help_quit_after_boot NULL
 
 #define help_phone_number_prefix NULL
 

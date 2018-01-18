@@ -15,12 +15,12 @@
 
 #include <QMessageBox>
 
-using Dialog = android::base::MemberOnDemandT<QMessageBox,
-                                              QMessageBox::Icon,
-                                              QString,
-                                              QString,
-                                              QMessageBox::StandardButton,
-                                              QWidget*>;
+using Dialog = android::base::AtomicMemberOnDemandT<QMessageBox,
+                                                    QMessageBox::Icon,
+                                                    QString,
+                                                    QString,
+                                                    QMessageBox::StandardButton,
+                                                    QWidget*>;
 
 static Dialog* sErrorDialog = nullptr;
 
@@ -28,10 +28,8 @@ void initErrorDialog(QWidget* parent) {
     // This dialog will be deleted when the parent is deleted, which occurs
     // when the emulator closes.
     if (!sErrorDialog) {
-        sErrorDialog = new Dialog([parent] {
-            return std::make_tuple(QMessageBox::Warning, "", "",
-                                   QMessageBox::Ok, parent);
-        });
+        sErrorDialog = new Dialog(QMessageBox::Warning, "", "", QMessageBox::Ok,
+                                  parent);
     }
 }
 

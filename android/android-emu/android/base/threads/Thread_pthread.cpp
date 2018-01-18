@@ -25,41 +25,18 @@
 namespace android {
 namespace base {
 
-namespace {
-
-// Helper class to automatically lock / unlock a mutex on scope enter/exit.
-// Equivalent to android::base::AutoLock, but avoid using it to reduce
-// coupling.
-class ScopedLocker {
-public:
-    ScopedLocker(pthread_mutex_t* mutex) : mLock(mutex) {
-        pthread_mutex_lock(mLock);
-    }
-
-    ~ScopedLocker() {
-        pthread_mutex_unlock(mLock);
-    }
-private:
-    pthread_mutex_t* mLock;
-};
-
-}  // namespace
-
-Thread::Thread(ThreadFlags flags, int stackSize) :
-    mThread((pthread_t)NULL),
-    mStackSize(stackSize),
-    mFlags(flags) {
-    pthread_mutex_init(&mLock, NULL);
-}
+Thread::Thread(ThreadFlags flags, int stackSize)
+    : mThread((pthread_t)NULL),
+      mStackSize(stackSize),
+      mFlags(flags) {}
 
 Thread::~Thread() {
     assert(!mStarted || mFinished);
-    if ((mFlags & ThreadFlags::Detach) == ThreadFlags::NoFlags
-        && mStarted && !mJoined) {
+    if ((mFlags & ThreadFlags::Detach) == ThreadFlags::NoFlags && mStarted &&
+        !mJoined) {
         // Make sure we reclaim the OS resources.
         pthread_join(mThread, nullptr);
     }
-    pthread_mutex_destroy(&mLock);
 }
 
 bool Thread::start() {
@@ -76,8 +53,8 @@ bool Thread::start() {
         pthread_attr_setstacksize(&attr, mStackSize);
     }
 
-    if (pthread_create(&mThread, mStackSize ? &attr : nullptr,
-                       thread_main, this)) {
+    if (pthread_create(&mThread, mStackSize ? &attr : nullptr, thread_main,
+                       this)) {
         ret = false;
         // We _do not_ need to guard this access to |mFinished| because we're
         // sure that the launched thread failed, so there can't be parallel
@@ -92,7 +69,7 @@ bool Thread::start() {
     return ret;
 }
 
-bool Thread::wait(intptr_t *exitStatus) {
+bool Thread::wait(intptr_t* exitStatus) {
     if (!mStarted || (mFlags & ThreadFlags::Detach) != ThreadFlags::NoFlags) {
         return false;
     }
@@ -111,12 +88,12 @@ bool Thread::wait(intptr_t *exitStatus) {
     return true;
 }
 
-bool Thread::tryWait(intptr_t *exitStatus) {
+bool Thread::tryWait(intptr_t* exitStatus) {
     if (!mStarted || (mFlags & ThreadFlags::Detach) != ThreadFlags::NoFlags) {
         return false;
     }
 
-    ScopedLocker locker(&mLock);
+    AutoLock locker(mLock);
     if (!mFinished) {
         return false;
     }
@@ -133,7 +110,7 @@ bool Thread::tryWait(intptr_t *exitStatus) {
 }
 
 // static
-void* Thread::thread_main(void *arg) {
+void* Thread::thread_main(void* arg) {
     intptr_t ret;
 
     {
@@ -151,10 +128,11 @@ void* Thread::thread_main(void *arg) {
 
         ret = self->main();
 
-        pthread_mutex_lock(&self->mLock);
-        self->mFinished = true;
-        self->mExitStatus = ret;
-        pthread_mutex_unlock(&self->mLock);
+        {
+            AutoLock lock(self->mLock);
+            self->mFinished = true;
+            self->mExitStatus = ret;
+        }
 
         self->onExit();
         // |self| is not valid beyond this point

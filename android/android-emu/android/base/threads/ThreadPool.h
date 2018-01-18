@@ -70,15 +70,15 @@ public:
         if (threads < 1) {
             threads = System::get()->getCpuCoreCount();
         }
-        mWorkers.resize(threads);
+        mWorkers = std::vector<Optional<Worker>>(threads);
         for (auto& workerPtr : mWorkers) {
-            workerPtr.reset(new Worker([this](Optional<Item>&& item) {
+            workerPtr.emplace([this](Optional<Item>&& item) {
                 if (!item) {
                     return Worker::Result::Stop;
                 }
                 mProcessor(std::move(item.value()));
                 return Worker::Result::Continue;
-            }));
+            });
         }
     }
     explicit ThreadPool(Processor&& processor)
@@ -113,9 +113,11 @@ public:
         mWorkers[currentIndex % mWorkers.size()]->enqueue(std::move(item));
     }
 
+    int numWorkers() const { return mWorkers.size(); }
+
 private:
     Processor mProcessor;
-    std::vector<std::unique_ptr<Worker>> mWorkers;
+    std::vector<Optional<Worker>> mWorkers;
     std::atomic<int> mNextWorkerIndex{0};
 };
 

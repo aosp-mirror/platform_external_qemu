@@ -115,8 +115,11 @@ void parse_gpu_info_list_linux(const std::string& contents,
 
 void getGpuInfoListNative(GpuInfoList* gpulist) {
     // Load it in a traditional way - by parsing output of external process.
-    std::string gpu_info = load_gpu_info();
-    parse_gpu_info_list_linux(gpu_info, gpulist);
+    // TODO: Don't do GPU info detection on Linux for now---lspci can be
+    // inaccurate as to what GPU the user is actually using.
+    (void)load_gpu_info; // Make Werror happy
+    // std::string gpu_info = load_gpu_info();
+    // parse_gpu_info_list_linux(gpu_info, gpulist);
 
     // Unfortunately, even to obtain a driver version on Linux one has to either
     // create a full rendering context (very slow, 150+ms) or hardcode specific

@@ -137,5 +137,37 @@ struct is_range<
         typename std::enable_if<details::is_range_helper<T>::value>::type>
         : std::true_type {};
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// A class to incapsulate integer sequence 0, 1, ..., <num_args>
+//      Seq<int...>
+// Useful to pass function parameters in an array/tuple to call it later.
+//
+
+template <int...>
+struct Seq {};
+
+// A 'maker' class to construct Seq<int...> given only <num_args>
+//    value.
+//      MakeSeq<N, S...> works this way, e.g.
+//
+//      MakeSeq<2> inherits MakeSeq<2 - 1, 2 - 1> == MakeSeq<1, 1>
+//          MakeSeq<1, 1> : MakeSeq<1 - 1, 1 - 1, 1> == MakeSeq<0, 0, 1>
+//          MakeSeq<0, 0, 1> == MakeSeq<0, S...> and defines |type| = Seq<0, 1>
+
+template <int N, int... S>
+struct MakeSeq : MakeSeq<N - 1, N - 1, S...> {};
+
+template <int... S>
+struct MakeSeq<0, S...> {
+    using type = Seq<S...>;
+};
+
+//
+// MakeSeqT alias to quickly create Seq<...>:
+//      MakeSeqT<3> == Seq<0, 1, 2>
+template <int... S>
+using MakeSeqT = typename MakeSeq<S...>::type;
+
 }  // namespace base
 }  // namespace android

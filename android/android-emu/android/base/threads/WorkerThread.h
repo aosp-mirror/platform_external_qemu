@@ -68,7 +68,7 @@ class WorkerThread {
 public:
     using Result = WorkerProcessingResult;
     // A function that's called for each enqueued item in a separate thread.
-    using Processor = std::function<Result(Item&& item)>;
+    using Processor = std::function<Result(Item&&)>;
 
     WorkerThread(Processor&& processor)
         : mProcessor(std::move(processor)), mThread([this]() { worker(); }) {
@@ -77,42 +77,54 @@ public:
     ~WorkerThread() { join(); }
 
     // Starts the worker thread.
-    void start() { mThread.start(); mStarted = true; }
+    void start() {
+        mThread.start();
+        mStarted = true;
+    }
     bool isStarted() const { return mStarted; }
     // Waits for all enqueue()'d items to finish.
     void waitQueuedItems() {
-        if (!mStarted || mFinished) return;
+        if (!mStarted || mFinished)
+            return;
 
         SyncPoint sync;
         enqueueImpl(&sync);
-
-        {
-            base::AutoLock lock(mSyncLock);
-            while (!sync.signaled) {
-                sync.cv.wait(&lock);
-            }
-        }
+        base::AutoLock lock(sync.lock);
+        sync.cv.wait(&lock, [&sync] { return sync.signaled; });
     }
     // Waits for worker thread to complete.
     void join() { mThread.wait(); }
 
     // Moves the |item| into internal queue for processing.
-    void enqueue(Item&& item) {
-        enqueueImpl(std::move(item));
-    }
+    void enqueue(Item&& item) { enqueueImpl(std::move(item)); }
 
 private:
     struct SyncPoint {
         bool signaled = false;
         base::ConditionVariable cv;
+        base::Lock lock;
     };
     struct Command {
-        Command(Item&& it) :
-            workItem(std::move(it)) { }
-        Command(SyncPoint* sp) :
-            syncPoint(sp) { }
-        SyncPoint* syncPoint = nullptr;
-        Item workItem;
+        Command(Item&& it) : hasItem(true), workItem(std::move(it)) {}
+        Command(SyncPoint* sp) : hasItem(false), syncPoint(sp) {}
+        Command(Command&& other) : hasItem(other.hasItem) {
+            if (hasItem) {
+                new (&workItem) Item(std::move(other.workItem));
+            } else {
+                syncPoint = other.syncPoint;
+            }
+        }
+        ~Command() {
+            if (hasItem) {
+                workItem.~Item();
+            }
+        }
+
+        bool hasItem;
+        union {
+            SyncPoint* syncPoint;
+            Item workItem;
+        };
     };
 
     template <class T>
@@ -138,14 +150,16 @@ private:
             }
 
             for (Command& item : todo) {
-                if (item.syncPoint) { // Sync point
-                    base::AutoLock lock(mSyncLock);
-                    item.syncPoint->signaled = true;
-                    item.syncPoint->cv.signalAndUnlock(&lock);
-                } else { // Normal work item
+                if (item.hasItem) {
+                    // Normal work item
                     if (mProcessor(std::move(item.workItem)) == Result::Stop) {
                         return;
                     }
+                } else {
+                    // Sync point
+                    base::AutoLock lock(item.syncPoint->lock);
+                    item.syncPoint->signaled = true;
+                    item.syncPoint->cv.signalAndUnlock(&lock);
                 }
             }
 
@@ -158,7 +172,6 @@ private:
     base::FunctorThread mThread;
     std::vector<Command> mQueue;
     base::Lock mLock;
-    base::Lock mSyncLock;
     base::ConditionVariable mCv;
 
     bool mStarted = false;

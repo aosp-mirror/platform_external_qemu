@@ -56,7 +56,7 @@ void physicalModel_free(PhysicalModel* model);
  * Update the current time on the physical model. Time values must be
  * non-decreasing.
  */
-void physicalModel_setCurrentTime(PhysicalModel* model, uint64_t time_ns);
+void physicalModel_setCurrentTime(PhysicalModel* model, int64_t time_ns);
 
 /* Target setters for all physical parameters */
 #define SET_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
@@ -96,6 +96,12 @@ SENSORS_LIST
 #undef SENSOR_
 #undef GET_FUNCTION_NAME
 
+/* Getter for simulatenous physical rotation and translation */
+void physicalModel_getTransform(PhysicalModel* model,
+    float* out_translation_x, float* out_translation_y, float* out_translation_z,
+    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
+    int64_t* out_timestamp);
+
 /* Sets or unsets the callbacks used to signal changing state */
 void physicalModel_setPhysicalStateAgent(PhysicalModel* model,
         const struct QAndroidPhysicalStateAgent* agent);
@@ -105,5 +111,20 @@ void physicalModel_save(PhysicalModel* model, Stream* f);
 
 /* Load the physical model state from the specified stream. */
 int physicalModel_load(PhysicalModel* model, Stream* f);
+
+/* Start recording physical changes to the specified file.
+ * Returns 0 if successful.
+ */
+int physicalModel_record(PhysicalModel* model, const char* filename);
+
+/* Start playing back physical changes from the specified file.
+ * Returns 0 if successful.
+ */
+int physicalModel_playback(PhysicalModel* model, const char* filename);
+
+/* Stop all active recording and playback.
+ * Returns 0 if successful.
+ */
+int physicalModel_stopRecordAndPlayback(PhysicalModel* model);
 
 ANDROID_END_HEADER

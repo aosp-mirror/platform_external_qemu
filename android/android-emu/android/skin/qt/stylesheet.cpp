@@ -241,7 +241,7 @@ struct StylesheetValues {
     QHash<QString, QString> lightValues = {
         {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
         {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
-        {"BKG_COLOR_OVERLAY", "rgba(236,236,236,255)"},  // Overlay background
+        {"BKG_COLOR_OVERLAY", "rgba(236,236,236,175)"},  // Overlay background
         {"BUTTON_BKG_COLOR",                "#F9F9F9"},  // Background of push buttons
         {"BUTTON_COLOR",                    "#757575"},  // Text in push buttons
         {"DISABLED_BUTTON_COLOR",           "#bbbbbb"},  // Text in disabled push buttons
@@ -259,18 +259,22 @@ struct StylesheetValues {
         {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
         {"TAB_DARKENED_COLOR",              "#e6e6e6"},
         {"TABLE_BOTTOM_COLOR",              "#e0e0e0"},
-        {"TEXT_COLOR",                      "#212121"},  // Main page text
+        {"TEXT_COLOR",                "rgb(33,33,33)"},  // Main page text
+        {"INACTIVE_TEXT_COLOR",  "rgba(33,33,33,50%)"},
         {"TITLE_COLOR",                     "#757575"},  // Main page titles
         {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
         {"TOOL_ON_COLOR",                   "#d6d6d6"},  // Main toolbar button ON
         {"LINK_COLOR",                      "#0288D1"},  // Highlighted link
+        {"RAISED_COLORED_BKG_COLOR",        "#459388"},  // Colored raised button background color.
+        {"RAISED_COLORED_PRESSED_COLOR",    "#5faca0"},  // Colored raised button pressed color.
+        {"RAISED_COLORED_COLOR",            "#ffffff"},  // Colored raised button text color.
         {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
     };
 
     QHash<QString, QString> darkValues = {
         {"BOX_COLOR",                    "#414a50"},
         {"BKG_COLOR",                    "#273238"},
-        {"BKG_COLOR_OVERLAY", "rgba(35,46,52,255)"},
+        {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
         {"BUTTON_BKG_COLOR",             "#37474f"},
         {"BUTTON_COLOR",                 "#bec1c3"},
         {"DISABLED_BUTTON_COLOR",        "#5f6162"},
@@ -288,11 +292,15 @@ struct StylesheetValues {
         {TAB_SELECTED_COLOR_VAR,         "#313c42"},
         {"TAB_DARKENED_COLOR",           "#20292e"},
         {"TABLE_BOTTOM_COLOR",           "#1d272c"},
-        {"TEXT_COLOR",                   "#eeeeee"},
+        {"TEXT_COLOR",          "rgb(238,238,238)"},
+        {"INACTIVE_TEXT_COLOR", "rgba(238,238,238,50%)"},
         {"TITLE_COLOR",                  "#bec1c3"},
         {"TOOL_COLOR",                   "#00bea4"},
         {"TOOL_ON_COLOR",                "#586670"},
         {"LINK_COLOR",                   "#29B6F6"},
+        {"RAISED_COLORED_BKG_COLOR",     "#459388"},
+        {"RAISED_COLORED_PRESSED_COLOR", "#5faca0"},
+        {"RAISED_COLORED_COLOR",         "#ffffff"},
         {THEME_PATH_VAR,                    "dark"},
     };
 

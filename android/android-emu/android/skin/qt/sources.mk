@@ -69,6 +69,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
     android/skin/qt/extended-window.cpp \
+    android/skin/qt/FramelessDetector.cpp \
     android/skin/qt/ModalOverlay.cpp \
     android/skin/qt/OverlayMessageCenter.cpp \
     android/skin/qt/qt-ui-commands.cpp \
@@ -79,7 +80,15 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/ui-event-recorder.cpp \
     android/skin/qt/user-actions-counter.cpp \
     android/skin/qt/virtualscene-control-window.cpp \
-    android/skin/qt/wavefront-obj-parser.cpp
+    android/skin/qt/VirtualSceneInfoDialog.cpp \
+    android/skin/qt/wavefront-obj-parser.cpp \
+    android/skin/qt/video-player/Clock.cpp \
+    android/skin/qt/video-player/FrameQueue.cpp \
+    android/skin/qt/video-player/PacketQueue.cpp \
+    android/skin/qt/video-player/VideoPlayer.cpp \
+    android/skin/qt/video-player/VideoPlayerNotifier.cpp \
+    android/skin/qt/video-player/VideoPlayerWidget.cpp \
+    android/skin/qt/video-player/VideoPreview.cpp
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/accelerometer-3d-widget.h \
@@ -115,10 +124,14 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/ModalOverlay.h \
     android/skin/qt/OverlayMessageCenter.h \
     android/skin/qt/QtLooperImpl.h \
+    android/skin/qt/VirtualSceneInfoDialog.h \
     android/skin/qt/size-tweaker.h \
     android/skin/qt/tool-window.h \
     android/skin/qt/user-actions-counter.h \
-    android/skin/qt/virtualscene-control-window.h
+    android/skin/qt/virtualscene-control-window.h \
+    android/skin/qt/video-player/VideoPlayerNotifier.h \
+    android/skin/qt/video-player/VideoPlayerWidget.h \
+    android/skin/qt/video-player/VideoPreview.h
 
 ANDROID_SKIN_QT_RESOURCES := \
     android/skin/qt/static_resources.qrc \
@@ -145,4 +158,6 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/virtual-sensors-page.ui \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui \
     android/skin/qt/tools.ui \
+    android/skin/qt/virtualscene-controls.ui \
+    android/skin/qt/virtualscene-info-dialog.ui \
 

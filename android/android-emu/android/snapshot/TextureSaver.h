@@ -39,6 +39,7 @@ public:
     virtual bool hasError() const = 0;
     virtual uint64_t diskSize() const = 0;
     virtual bool compressed() const = 0;
+    virtual bool getDuration(base::System::Duration* duration) = 0;
 };
 
 class TextureSaver final : public ITextureSaver {
@@ -53,6 +54,21 @@ public:
     bool hasError() const override { return mHasError; }
     uint64_t diskSize() const override { return mDiskSize; }
     bool compressed() const override { return mIndex.version > 1; }
+
+    // getDuration():
+    // Returns true if there was save with measurable time
+    // (and writes it to |duration| if |duration| is not null),
+    // otherwise returns false.
+    bool getDuration(base::System::Duration* duration) {
+        if (mEndTime < mStartTime) {
+            return false;
+        }
+
+        if (duration) {
+            *duration = mEndTime - mStartTime;
+        }
+        return true;
+    }
 
 private:
     struct FileIndex {
@@ -77,9 +93,8 @@ private:
     bool mFinished = false;
     bool mHasError = false;
 
-#if SNAPSHOT_PROFILE > 1
-    android::base::System::WallDuration mStartTime = 0;
-#endif
+    android::base::System::Duration mStartTime = 0;
+    android::base::System::Duration mEndTime = 0;
 };
 
 }  // namespace snapshot

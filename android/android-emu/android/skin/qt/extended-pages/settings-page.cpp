@@ -12,9 +12,15 @@
 #include "android/skin/qt/extended-pages/settings-page.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
+#include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/snapshot/interface.h"
+#include "android/utils/looper.h"
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -22,6 +28,15 @@
 
 using Ui::Settings::SaveSnapshotOnExit;
 using Ui::Settings::SaveSnapshotOnExitUiOrder;
+using android::metrics::MetricsReporter;
+namespace pb = android_studio;
+
+static SaveSnapshotOnExit getSaveOnExitChoice();
+
+// Globally accessable
+bool userSettingIsDontSaveSnapshot() {
+    return getSaveOnExitChoice() == SaveSnapshotOnExit::Never;
+}
 
 // Helper function to set the contents of a QLineEdit.
 static void setElidedText(QLineEdit* line_edit, const QString& text) {
@@ -59,11 +74,7 @@ SettingsPage::SettingsPage(QWidget* parent)
     setElidedText(mUi->set_adbPathBox, adbPath);
 
     // Dark/Light theme
-    SettingsTheme theme =
-        static_cast<SettingsTheme>(settings.value(Ui::Settings::UI_THEME, 0).toInt());
-    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
-        theme = static_cast<SettingsTheme>(0);
-    }
+    SettingsTheme theme = getSelectedTheme();
     mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
 
     connect(mUi->set_forwardShortcutsToDevice, SIGNAL(currentIndexChanged(int)),
@@ -77,7 +88,8 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     // Show a frame around the device?
     mUi->set_frameAlways->setChecked(
-            settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool());
+        FramelessDetector::isFramelessOk() ?
+            settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true);
 
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
@@ -120,21 +132,12 @@ SettingsPage::SettingsPage(QWidget* parent)
     }
 
     // Save snapshot on exit
-    mUi->saveOnExitTitle->setTitle(QString(tr("Save quick-boot state on exit for AVD "))
-                                   + android_hw->avd_name);
-    // This setting belongs to the AVD, not to the entire Emulator.
-    SaveSnapshotOnExit saveOnExitChoice(SaveSnapshotOnExit::Always);
+    QString avdNameWithUnderscores(android_hw->avd_name);
 
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
-    if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
-        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+    mUi->set_saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
+                                   + avdNameWithUnderscores.replace('_', ' '));
 
-        saveOnExitChoice = static_cast<SaveSnapshotOnExit>(
-            avdSpecificSettings.value(
-                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
-                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
-    }
+    SaveSnapshotOnExit saveOnExitChoice = getSaveOnExitChoice();
     switch (saveOnExitChoice) {
         case SaveSnapshotOnExit::Always:
             mUi->set_saveSnapshotOnExit->setCurrentIndex(
@@ -162,6 +165,8 @@ SettingsPage::SettingsPage(QWidget* parent)
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
     }
+    // Enable SAVE NOW if we won't overwrite the state on exit
+    mUi->set_saveSnapNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
 
     // OpenGL ES renderer
     for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
@@ -345,6 +350,12 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     setElidedText(mUi->set_saveLocBox, dirName);
 }
 
+void SettingsPage::on_set_saveSnapNowButton_clicked() {
+    // Invoke the snapshot save function.
+    // But don't run it on the UI thread.
+    android_runOnMainLooper( []() { androidSnapshot_save("default_boot"); } );
+}
+
 void SettingsPage::on_set_adbPathButton_clicked() {
     QSettings settings;
     QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
@@ -420,9 +431,10 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
 
 void SettingsPage::on_set_frameAlways_toggled(bool checked) {
     QSettings settings;
-    settings.setValue(Ui::Settings::FRAME_ALWAYS, checked);
-
-    emit(frameAlwaysChanged(checked));
+    if (FramelessDetector::isFramelessOk()) {
+        settings.setValue(Ui::Settings::FRAME_ALWAYS, checked);
+        emit(frameAlwaysChanged(checked));
+    }
 }
 
 void SettingsPage::on_set_autoFindAdb_toggled(bool checked) {
@@ -462,19 +474,33 @@ void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
     SaveSnapshotOnExit preferenceValue;
     switch(static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
         case SaveSnapshotOnExitUiOrder::Never:
+            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_no(1 + counts->quickboot_selection_no());
+            });
             preferenceValue = SaveSnapshotOnExit::Never;
             android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExitUiOrder::Ask:
+            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_ask(1 + counts->quickboot_selection_ask());
+            });
             preferenceValue = SaveSnapshotOnExit::Ask;
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         default:
         case SaveSnapshotOnExitUiOrder::Always:
+            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_yes(1 + counts->quickboot_selection_yes());
+            });
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             preferenceValue = SaveSnapshotOnExit::Always;
             break;
     }
+    // Enable SAVE STATE NOW if we won't overwrite the state on exit
+    mUi->set_saveSnapNowButton->setEnabled(preferenceValue != SaveSnapshotOnExit::Always);
 
     // Save for only this AVD
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
@@ -485,6 +511,22 @@ void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
         avdSpecificSettings.setValue(Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
                                      static_cast<int>(preferenceValue));
     }
+}
+
+static SaveSnapshotOnExit getSaveOnExitChoice() {
+    // This setting belongs to the AVD, not to the entire Emulator.
+    SaveSnapshotOnExit userChoice(SaveSnapshotOnExit::Always);
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        userChoice = static_cast<SaveSnapshotOnExit>(
+            avdSpecificSettings.value(
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+    }
+    return userChoice;
 }
 
 static void set_glesBackend_to(WinsysPreferredGlesBackend v) {
@@ -525,6 +567,14 @@ void SettingsPage::on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index
     default:
         break;
     }
+}
+
+void SettingsPage::on_set_resetNotifications_pressed() {
+    QSettings settings;
+    settings.remove(Ui::Settings::SHOW_AVD_ARCH_WARNING);
+    settings.remove(Ui::Settings::SHOW_GPU_WARNING);
+    settings.remove(Ui::Settings::SHOW_ADB_WARNING);
+    settings.remove(Ui::Settings::SHOW_VIRTUALSCENE_INFO);
 }
 
 void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {

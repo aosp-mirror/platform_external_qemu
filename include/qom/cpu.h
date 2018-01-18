@@ -404,15 +404,13 @@ struct CPUState {
        offset from AREG0.  Leave this field at the end so as to make the
        (absolute value) offset as small as possible.  This reduces code
        size, especially for hosts without large memory offsets.  */
-#ifdef CONFIG_HVF
     // HVF
     bool hvf_vcpu_dirty;
-    uint64_t hvf_fd; // fd of vcpu created by HVF
+    uint32_t hvf_fd; // fd of vcpu created by HVF
     // Supporting data structures for VMCS capabilities
     // and x86 emulation state
     struct hvf_vcpu_caps* hvf_caps;
     struct hvf_x86_state* hvf_x86;
-#endif
     union {
         uint32_t u32;
         icount_decr_u16 u16;

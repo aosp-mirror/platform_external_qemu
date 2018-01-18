@@ -113,8 +113,7 @@ typedef struct ClientFrameBuffer {
     void*       framebuffer;
 } ClientFrameBuffer;
 
-/* Defines an array of framebuffers, used to convert the frame into the required
- * formats. */
+/* Defines framebuffers and metadata associated with a specific camera frame. */
 typedef struct ClientFrame {
     /* Number of entries in the framebuffers array. */
     uint32_t framebuffers_count;
@@ -129,6 +128,9 @@ typedef struct ClientFrame {
     uint8_t* staging_framebuffer;
     /* Size of the staging_framebuffer, in bytes. */
     size_t staging_framebuffer_size;
+
+    /* The time at which the frame was produced. */
+    int64_t frame_time;
 } ClientFrame;
 
 /* Describes frame dimensions.
@@ -197,5 +199,17 @@ typedef struct CameraDevice {
     /* Opaque pointer used by the camera capturing API. */
     void*       opaque;
 } CameraDevice;
+
+enum ClientStartResult {
+    CLIENT_START_RESULT_SUCCESS = 2,
+    CLIENT_START_RESULT_ALREADY_STARTED = 1,
+    CLIENT_START_RESULT_PARAMETER_MISMATCH = -1,
+    CLIENT_START_RESULT_UNKNOWN_PIXEL_FORMAT = -2,
+    CLIENT_START_RESULT_NO_PIXEL_CONVERSION = -3,
+    CLIENT_START_RESULT_OUT_OF_MEMORY = -4,
+    CLIENT_START_RESULT_FAILED = -5,
+};
+
+typedef enum ClientStartResult ClientStartResult;
 
 ANDROID_END_HEADER

@@ -61,6 +61,10 @@ std::string ConfigDirs::getUserDirectory() {
 std::string ConfigDirs::getAvdRootDirectory() {
     System* system = System::get();
 
+    // The search order here should match that in AndroidLocation.java
+    // in Android Studio. Otherwise, Studio and the Emulator may find
+    // different AVDs. Or one may find an AVD when the other doesn't.
+
     std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
     if ( !avdRoot.empty() && system->pathIsDir(avdRoot) ) {
         return avdRoot;
@@ -80,8 +84,15 @@ std::string ConfigDirs::getAvdRootDirectory() {
             return PathUtils::join(avdRoot, kAvdSubDir);
         }
         // ANDROID_SDK_HOME is defined but bad. In this case,
-        // Android Studio tries $USER_HOME and $HOME. We'll
-        // do the same.
+        // Android Studio tries $TEST_TMPDIR, $USER_HOME, and
+        // $HOME. We'll do the same.
+        avdRoot = system->envGet("TEST_TMPDIR");
+        if ( !avdRoot.empty() ) {
+            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+            if (isValidAvdRoot(avdRoot)) {
+                return PathUtils::join(avdRoot, kAvdSubDir);
+            }
+        }
         avdRoot = system->envGet("USER_HOME");
         if ( !avdRoot.empty() ) {
             avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
@@ -98,8 +109,8 @@ std::string ConfigDirs::getAvdRootDirectory() {
         }
     }
 
-    // No luck with ANDROID_SDK_HOME / USER_HOME / HOME
-    // Try even more.
+    // No luck with ANDROID_AVD_HOME, ANDROID_SDK_HOME,
+    // TEST_TMPDIR, USER_HOME, or HOME. Try even more.
     avdRoot = PathUtils::join(getUserDirectory(), kAvdSubDir);
     return avdRoot;
 }

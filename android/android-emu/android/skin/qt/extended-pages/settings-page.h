@@ -49,6 +49,7 @@ private slots:
     void on_set_autoFindAdb_toggled(bool checked);
     void on_set_saveLocBox_textEdited(const QString&);
     void on_set_saveLocFolderButton_clicked();
+    void on_set_saveSnapNowButton_clicked();
     void on_set_adbPathBox_textEdited(const QString&);
     void on_set_adbPathButton_clicked();
     void on_set_themeBox_currentIndexChanged(int index);
@@ -56,6 +57,7 @@ private slots:
     void on_set_saveSnapshotOnExit_currentIndexChanged(int index);
     void on_set_glesBackendPrefComboBox_currentIndexChanged(int index);
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
+    void on_set_resetNotifications_pressed();
 
     // HTTP Proxy
     void on_set_hostName_editingFinished();

@@ -25,18 +25,20 @@
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/protobuf/LoadSave.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/Quickboot.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/fd.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 
-#include "google/protobuf/io/zero_copy_stream_impl.h"
-
 #include <fcntl.h>
 #include <sys/mman.h>
 
 #include <algorithm>
+
+#define ALLOW_CHANGE_RENDERER
 
 using android::base::IniFile;
 using android::base::Optional;
@@ -48,6 +50,11 @@ using android::base::StringView;
 using android::base::System;
 using android::base::endsWith;
 using android::base::makeCustomScopedPtr;
+
+using android::protobuf::loadProtobuf;
+using android::protobuf::ProtobufLoadResult;
+using android::protobuf::saveProtobuf;
+using android::protobuf::ProtobufSaveResult;
 
 namespace pb = emulator_snapshot;
 
@@ -113,12 +120,21 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
             continue;  // these contain absolute paths and will be checked
                        // separately.
         }
+#ifdef ALLOW_CHANGE_RENDERER
+        if (!actual.hasKey(key) || actual.getString(key, "$$$")
+                != expected.getString(key, "$$$")) {
+            if (key != "hw.gpu.mode") {
+                return false;
+            }
+        }
+#else // ALLOW_CHANGE_RENDERER
         if (!actual.hasKey(key)) {
             return false;
         }
         if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             return false;
         }
+#endif // ALLOW_CHANGE_RENDERER
     }
 
     for (auto&& key : actual) {
@@ -129,12 +145,21 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
             continue;  // these contain absolute paths and will be checked
                        // separately.
         }
+#ifdef ALLOW_CHANGE_RENDERER
+        if (!expected.hasKey(key) || actual.getString(key, "$$$")
+                != expected.getString(key, "$$$")) {
+            if (key != "hw.gpu.mode") {
+                return false;
+            }
+        }
+#else // ALLOW_CHANGE_RENDERER
         if (!expected.hasKey(key)) {
             return false;
         }
         if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             return false;
         }
+#endif // ALLOW_CHANGE_RENDERER
     }
 
     return numPathActual == numPathExpected;
@@ -194,15 +219,14 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
         saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
-    if (config.has_cpu_core_count() &&
-        config.cpu_core_count() != vmConfig.numberOfCpuCores) {
-        saveFailure(FailureReason::ConfigMismatchAvd);
-        return false;
-    }
     if (config.has_selected_renderer() &&
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
+#ifdef ALLOW_CHANGE_RENDERER
+        fprintf(stderr, "WARNING: change of renderer detected.\n");
+#else // ALLOW_CHANGE_RENDERER
         saveFailure(FailureReason::ConfigMismatchRenderer);
         return false;
+#endif // ALLOW_CHANGE_RENDERER
     }
 
     const auto enabledFeatures = android::featurecontrol::getEnabled();
@@ -220,17 +244,12 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
-    google::protobuf::io::FileOutputStream stream(
-            ::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
-                   O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0755));
-    stream.SetCloseOnDelete(true);
-    if (mSnapshotPb.SerializeToZeroCopyStream(&stream)) {
-        mSize = uint64_t(stream.ByteCount());
-        return true;
-    } else {
-        mSize = 0;
-        return false;
-    }
+    auto res =
+        saveProtobuf(
+            PathUtils::join(mDataDir, "snapshot.pb"),
+            mSnapshotPb,
+            &mSize);
+    return res == ProtobufSaveResult::Success;
 }
 
 struct {
@@ -251,15 +270,35 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 10;
+static constexpr int kVersion = 19;
 
 base::StringView Snapshot::dataDir(const char* name) {
     return getSnapshotDir(name);
 }
 
+base::Optional<std::string> Snapshot::parent() {
+    auto info = getGeneralInfo();
+    if (!info || !info->has_parent()) return base::kNullopt;
+    auto parentName = info->parent();
+    if (parentName == "") return base::kNullopt;
+    return parentName;
+}
+
 Snapshot::Snapshot(const char* name)
     : mName(name), mDataDir(getSnapshotDir(name)) {}
 
+// static
+std::vector<Snapshot> Snapshot::getExistingSnapshots() {
+    std::vector<Snapshot> res = {};
+    auto snapshotFiles = getSnapshotDirEntries();
+    for (const auto& filename : snapshotFiles) {
+        Snapshot s(filename.c_str());
+        if (s.load()) {
+            res.push_back(s);
+        }
+    }
+    return res;
+}
 bool Snapshot::save() {
     // In saving, we assume the state is different,
     // so we reset the invalid/successful counters.
@@ -300,17 +339,43 @@ bool Snapshot::save() {
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
 
+    auto parentSnapshot = Snapshotter::get().loadedSnapshotFile();
+    // We want to maintain the default_boot snapshot as outside
+    // the hierarchy. For that reason, don't set parent if default
+    // boot is involved either as the current snapshot or the parent snapshot.
+    if (mName != Quickboot::kDefaultBootSnapshot &&
+        parentSnapshot != "" &&
+        parentSnapshot != Quickboot::kDefaultBootSnapshot) {
+        if (mName != parentSnapshot) {
+            mSnapshotPb.set_parent(parentSnapshot);
+        }
+    }
+
     return writeSnapshotToDisk();
 }
 
 bool Snapshot::saveFailure(FailureReason reason) {
+    if (reason == FailureReason::Empty) {
+        mLatestFailureReason = reason;
+        // Don't write this to disk
+        return true;
+    }
+    if (reason == mLatestFailureReason) {
+        // Nothing to do
+        return true;
+    }
     mSnapshotPb.set_failed_to_load_reason_code(int64_t(reason));
     if (!mSnapshotPb.has_version()) {
         mSnapshotPb.set_version(kVersion);
     }
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
-    return writeSnapshotToDisk();
+    if (writeSnapshotToDisk()) {
+        // Success
+        mLatestFailureReason = reason;
+        return true;
+    }
+    return false;
 }
 
 static bool isUnrecoverableReason(FailureReason reason) {
@@ -318,9 +383,28 @@ static bool isUnrecoverableReason(FailureReason reason) {
            reason < FailureReason::UnrecoverableErrorLimit;
 }
 
+// preload(): Obtain the protobuf metadata. Logic for deciding
+// whether or not to load based on it, plus initialization
+// of properties like skin rotation, is done afterward in load().
+// Checks whether or not the version of the protobuf is compatible.
 bool Snapshot::preload() {
+    loadProtobufOnce();
+
+    return (mSnapshotPb.has_version() && mSnapshotPb.version() == kVersion);
+}
+
+const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
+    loadProtobufOnce();
+    if (isUnrecoverableReason(
+            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+        return nullptr;
+    }
+    return &mSnapshotPb;
+}
+
+void Snapshot::loadProtobufOnce() {
     if (mSnapshotPb.has_version()) {
-        return true;
+        return;
     }
     const auto file =
             ScopedFd(::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
@@ -328,7 +412,7 @@ bool Snapshot::preload() {
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
         saveFailure(FailureReason::NoSnapshotPb);
-        return false;
+        return;
     }
     mSize = size;
 
@@ -341,25 +425,26 @@ bool Snapshot::preload() {
             });
     if (!fileMap || fileMap.get() == MAP_FAILED) {
         saveFailure(FailureReason::BadSnapshotPb);
-        return false;
+        return;
     }
     if (!mSnapshotPb.ParseFromArray(fileMap.get(), size)) {
         saveFailure(FailureReason::BadSnapshotPb);
-        return false;
+        return;
     }
     if (mSnapshotPb.has_failed_to_load_reason_code() &&
         isUnrecoverableReason(
                 FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
-        return false;
+        return;
     }
     if (!mSnapshotPb.has_version() || mSnapshotPb.version() != kVersion) {
         saveFailure(FailureReason::IncompatibleVersion);
-        return false;
+        return;
     }
-
-    return true;
+    // Success
 }
 
+// load(): Loads all snapshot metadata and checks it against other files
+// for integrity.
 bool Snapshot::load() {
     if (!preload()) {
         return false;
@@ -393,7 +478,7 @@ bool Snapshot::load() {
         } else {
             // Should match an empty image info
             if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
-                saveFailure(FailureReason::SystemImageChanged);
+                saveFailure(FailureReason::NoSnapshotInImage);
                 return false;
             }
         }

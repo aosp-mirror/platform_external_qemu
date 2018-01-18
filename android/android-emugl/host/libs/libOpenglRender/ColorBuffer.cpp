@@ -26,6 +26,8 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "emugl/common/misc.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -207,6 +209,13 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     }
 
     cb->m_fastBlitSupported = fastBlitSupported;
+
+    // desktop GL only: use GL_UNSIGNED_INT_8_8_8_8_REV for faster readback.
+    if (emugl::getRenderer() == SELECTED_RENDERER_HOST) {
+#define GL_UNSIGNED_INT_8_8_8_8           0x8035
+#define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
+        cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
+    }
 
     s_gles2.glFinish();
     return cb;
@@ -483,7 +492,7 @@ GLuint ColorBuffer::scale() {
 
 void ColorBuffer::waitSync() {
     if (m_sync) {
-        s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+        s_egl.eglWaitImageFenceANDROID(m_display, m_sync);
     }
 }
 
@@ -508,8 +517,6 @@ void ColorBuffer::readback(unsigned char* img) {
     }
 }
 
-#define GL_UNSIGNED_INT_8_8_8_8           0x8035
-#define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
 void ColorBuffer::readbackAsync(GLuint buffer) {
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
@@ -521,7 +528,7 @@ void ColorBuffer::readbackAsync(GLuint buffer) {
 
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
+        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, m_asyncReadbackType, 0);
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
         unbindFbo();
     }
@@ -538,7 +545,7 @@ void ColorBuffer::readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* i
 
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer1);
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
+        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, m_asyncReadbackType, 0);
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
         s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, buffer2);

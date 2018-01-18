@@ -118,7 +118,3 @@ void android_pipe_add_type(const char* pipeName,
             new android::LegacyPipeService(pipeName, pipeOpaque, pipeFuncs);
     android::Service::add(service);
 }
-
-void android_pipe_reset_service(void) {
-    android::Service::resetAll();
-}

@@ -128,7 +128,13 @@ QString getRecordingSaveDirectory()
 
 SettingsTheme getSelectedTheme() {
     QSettings settings;
-    return (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
+    SettingsTheme theme =
+            (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
+    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
+        theme = SETTINGS_THEME_LIGHT;
+    }
+
+    return theme;
 }
 
 void adjustAllButtonsForTheme(SettingsTheme theme)
@@ -145,11 +151,7 @@ void adjustAllButtonsForTheme(SettingsTheme theme)
             // Adjust shadow color for material buttons depending on theme.
             if (RaisedMaterialButton* material_btn =
                     qobject_cast<RaisedMaterialButton*>(pB)) {
-                material_btn
-                    ->shadowEffect()
-                    ->setColor(theme == SETTINGS_THEME_LIGHT ?
-                                   QColor(200, 200, 200) :
-                                   QColor(25, 25, 25));
+                material_btn->setTheme(theme);
             }
         }
     }

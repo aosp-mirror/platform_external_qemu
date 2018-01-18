@@ -43,6 +43,7 @@ struct ConfigDirs {
     // - Else if $ANDROID_SDK_HOME/.android/avd is a valid root, it is returned.
     //
     // - Else if $ANDROID_SDK_HOME is defined but does not lead to a valid root
+    //   - $TEST_TMPDIR/.android/avd is returned if it is valid, or
     //   - $USER_HOME/.android/avd is returned if it is valid, or
     //   - $HOME/.android/avd is returned if it is valid
     //

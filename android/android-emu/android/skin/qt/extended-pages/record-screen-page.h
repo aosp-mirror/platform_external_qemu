@@ -11,33 +11,47 @@
 #pragma once
 
 #include "ui_record-screen-page.h"
+
+#include "android/screen-recorder.h"
+#include "android/skin/qt/video-player/VideoPlayer.h"
+#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
+#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#include "android/skin/qt/video-player/VideoPreview.h"
+
 #include <QTimer>
 #include <QWidget>
 #include <memory>
 
 struct QAndroidRecordScreenAgent;
+
+Q_DECLARE_METATYPE(RecordStopStatus);
+
 class RecordScreenPage : public QWidget {
     Q_OBJECT
 public:
-    enum class RecordState { Ready, Recording, Stopping, Stopped, Converting };
+    enum class RecordState { Ready, Recording, Stopping, Stopped, Converting, Playing };
 
     explicit RecordScreenPage(QWidget* parent = 0);
     ~RecordScreenPage();
 
     void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
     void updateTheme();
+    void emitRecordingStopped(RecordStopStatus status);
+    static bool removeFileIfExists(const QString& file);
 
 signals:
+    void recordingStopped(RecordStopStatus status);
 
 private slots:
     void on_rec_playStopButton_clicked();
     void on_rec_recordButton_clicked();
     void on_rec_saveButton_clicked();
     void updateElapsedTime();
-    void stopRecordingStarted();
-    void stopRecordingFinished(bool success);
+    void slot_recordingStopped(RecordStopStatus status);
     void convertingStarted();
     void convertingFinished(bool success);
+    void updateVideoView();
+    void videoPlayingFinished();
 
 public slots:
 
@@ -48,6 +62,10 @@ private:
     static const char kTmpMediaName[]; // tmp name for unsaved media file
     std::string mTmpFilePath;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
+    std::unique_ptr<android::videoplayer::VideoPlayerWidget> mVideoWidget;
+    std::unique_ptr<android::videoplayer::VideoPlayerNotifier> mVideoPlayerNotifier;
+    std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
+    std::unique_ptr<android::videoplayer::VideoPreview> mVideoPreview;
     const QAndroidRecordScreenAgent* mRecordScreenAgent;
     RecordState mState;
     QTimer mTimer;

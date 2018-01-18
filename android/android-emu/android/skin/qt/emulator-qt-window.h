@@ -203,6 +203,7 @@ public:
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
+    EmulatorContainer* containerWindow();
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
     QRect deviceGeometry() const;
@@ -212,6 +213,7 @@ public:
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
+                          const QPoint& gPos,
                           bool skipSync = false);
     void panHorizontal(bool left);
     void panVertical(bool up);
@@ -368,9 +370,6 @@ private:
     android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
     bool mStartupDone = false;
 
-    QTimer mExitSavingTimer;
-    QTimer mLoadingTimer;
-
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingImage;
     QPixmap* mRawSkinPixmap = nullptr; // For masking frameless AVDs
@@ -379,6 +378,10 @@ private:
     QQueue<SkinEvent*> mSkinEventQueue;
     android::base::Lock mSkinEventQueueLock;
 
+    // Snapshot state
+    bool mShouldShowSnapshotModalOverlay = false;
+    android::base::Lock mSnapshotStateLock;
+
     ToolWindow* mToolWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
@@ -386,13 +389,15 @@ private:
 
     // Window flags to use for frameless and framed appearance
 
-    static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (Qt::Window |
-                                                                Qt::FramelessWindowHint);
-    static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (Qt::Window               |
-                                                                Qt::WindowTitleHint      |
-                                                                Qt::CustomizeWindowHint    );
-    static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (FRAMELESS_WINDOW_FLAGS |
-                                                                FRAMED_WINDOW_FLAGS     );
+    static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (  Qt::Window
+                                                                | Qt::NoDropShadowWindowHint
+                                                                | Qt::FramelessWindowHint);
+    static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (  Qt::Window
+                                                                | Qt::NoDropShadowWindowHint
+                                                                | Qt::WindowTitleHint
+                                                                | Qt::CustomizeWindowHint);
+    static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (  FRAMELESS_WINDOW_FLAGS
+                                                                | FRAMED_WINDOW_FLAGS);
 
     QPointF mFocus;
     QPoint mViewportFocus;

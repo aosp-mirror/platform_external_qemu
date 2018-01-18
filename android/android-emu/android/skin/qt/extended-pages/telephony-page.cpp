@@ -53,9 +53,7 @@ TelephonyPage::~TelephonyPage() {
 
 void TelephonyPage::on_tel_startEndButton_clicked()
 {
-    QSettings settings;
-    SettingsTheme theme =
-        (SettingsTheme)settings.value(Ui::Settings::UI_THEME, 0).toInt();
+    SettingsTheme theme = getSelectedTheme();
     if (mCallActivity == CallActivity::Inactive) {
         // Start a call
         if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
@@ -127,9 +125,7 @@ void TelephonyPage::on_tel_startEndButton_clicked()
 
 void TelephonyPage::on_tel_holdCallButton_clicked()
 {
-    QSettings settings;
-    SettingsTheme theme =
-        (SettingsTheme)settings.value(Ui::Settings::UI_THEME, 0).toInt();
+    SettingsTheme theme = getSelectedTheme();
     switch (mCallActivity) {
         case CallActivity::Active:
             // Active --> On hold

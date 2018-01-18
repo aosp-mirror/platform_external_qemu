@@ -64,6 +64,7 @@ public:
     int32_t crop_rect[4] = {};
     GLenum target;
     unsigned int texStorageLevels = 0;
+    int samples;
     // globalName is used for snapshot when reading data from GPU
     int globalName = 0;
     void onSave(android::base::Stream* stream,

@@ -30,6 +30,9 @@ public:
     // displays.
     explicit SizeTweaker(QWidget* widget);
 
+    QVector2D scaleFactor() const;
+    static QVector2D scaleFactor(QWidget* widget);
+
 private:
     // Intercepts show and move events from the managed widget.
     bool eventFilter(QObject*, QEvent* event) override;

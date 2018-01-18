@@ -12,6 +12,7 @@
 #include "android/skin/qt/emulator-container.h"
 
 #include "android/skin/qt/ModalOverlay.h"
+#include "android/skin/qt/VirtualSceneInfoDialog.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/utils/debug.h"
@@ -36,8 +37,7 @@
 static constexpr int kEventBufferSize = 8;
 
 EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
-    : mEmulatorWindow(window),
-      mMessages([this] { return std::make_tuple(this); }) {
+    : mEmulatorWindow(window), mMessages(this) {
     mEventBuffer.reserve(kEventBufferSize);
     setFrameShape(QFrame::NoFrame);
     setWidget(window);
@@ -51,11 +51,14 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 #ifdef __APPLE__
     // Digging into the Qt source code reveals that if the above flags are set
     // on OSX, the created window will be given a style mask that removes the
-    // resize handles from the window. The hint below is the specific
+    // resize handles from the window. The "Maximize" hint below is the specific
     // customization flag that ensures the window will have resize handles.
-    // So, we add the button for now, then immediately disable it when the
-    // window is first shown.
-    setWindowFlags(this->windowFlags() | Qt::WindowMaximizeButtonHint);
+    // The "Minimize" hint is needed to get the window to respond to our
+    // programmatic minimize operation.
+    // We add "Minimize" and "Maximize" now, then immediately disable them when
+    // the window is first shown.
+    setWindowFlags(this->windowFlags() | Qt::WindowMinimizeButtonHint
+                                       | Qt::WindowMaximizeButtonHint);
 
     // On OS X the native scrollbars disappear when not in use which
     // makes the zoomed-in emulator window look unscrollable. Also, due
@@ -78,10 +81,15 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
             SLOT(slot_showModalOverlay(QString)));
     connect(this, SIGNAL(hideModalOverlay()), this,
             SLOT(slot_hideModalOverlay()));
+    connect(this, SIGNAL(showVirtualSceneInfoDialog()), this,
+            SLOT(slot_showVirtualSceneInfoDialog()));
+    connect(this, SIGNAL(hideVirtualSceneInfoDialog()), this,
+            SLOT(slot_hideVirtualSceneInfoDialog()));
 }
 
 EmulatorContainer::~EmulatorContainer() {
     slot_hideModalOverlay();
+    slot_hideVirtualSceneInfoDialog();
 
     // This object is owned directly by |window|.  Avoid circular
     // destructor calls by explicitly unsetting the widget.
@@ -160,6 +168,9 @@ void EmulatorContainer::changeEvent(QEvent* event) {
             if (mModalOverlay) {
                 mModalOverlay->showNormal();
             }
+            if (mVirtualSceneInfo) {
+                mVirtualSceneInfo->showNormal();
+            }
             mMessages->showNormal();
         } else if (windowState() & Qt::WindowMinimized) {
             // In case the window was minimized without pressing the toolbar's
@@ -170,6 +181,9 @@ void EmulatorContainer::changeEvent(QEvent* event) {
             if (mModalOverlay) {
                 mModalOverlay->hide();
             }
+            if (mVirtualSceneInfo) {
+                mVirtualSceneInfo->hide();
+            }
             mMessages->hide();
         }
     }
@@ -177,6 +191,7 @@ void EmulatorContainer::changeEvent(QEvent* event) {
 
 void EmulatorContainer::closeEvent(QCloseEvent* event) {
     slot_hideModalOverlay();
+    slot_hideVirtualSceneInfoDialog();
     mEmulatorWindow->closeEvent(event);
 }
 
@@ -185,9 +200,10 @@ void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     if (mModalOverlay) {
         mModalOverlay->raise();
     }
-    if (mMessages.hasInstance()) {
-        mMessages->raise();
+    if (mVirtualSceneInfo) {
+        mVirtualSceneInfo->raise();
     }
+    mMessages.ifExists([this] { mMessages->raise(); });
     if (mEmulatorWindow->isInZoomMode()) {
         mEmulatorWindow->showZoomIfNotUserHidden();
     }
@@ -206,6 +222,7 @@ void EmulatorContainer::moveEvent(QMoveEvent* event) {
     mEmulatorWindow->simulateWindowMoved(event->pos());
     mEmulatorWindow->toolWindow()->dockMainWindow();
     adjustModalOverlayGeometry();
+    adjustVirtualSceneDialogGeometry();
     adjustMessagesOverlayGeometry();
 }
 
@@ -213,6 +230,7 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     QScrollArea::resizeEvent(event);
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
     adjustModalOverlayGeometry();
+    adjustVirtualSceneDialogGeometry();
     adjustMessagesOverlayGeometry();
 
     if (mRotating) {
@@ -230,8 +248,8 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
 }
 
 void EmulatorContainer::showEvent(QShowEvent* event) {
-// Disable to maximize button on OSX. See the comment in the constructor for an
-// explanation of why this is necessary.
+// Disable the minimize and maximize buttons on OSX. See the comment in the
+// constructor for an explanation of why this is necessary.
 #ifdef __APPLE__
     WId wid = effectiveWinId();
     wid = (WId)getNSWindow((void*)wid);
@@ -254,12 +272,6 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     Q_ASSERT(tool_wid && wid);
     tool_wid = (WId)getNSWindow((void*)tool_wid);
     nsWindowAdopt((void*)wid, (void*)tool_wid);
-
-    if (mEmulatorWindow->toolWindow()
-                ->virtualSceneControlWindow()
-                ->isVisible()) {
-        virtualSceneControlWindowVisible();
-    }
 #endif  // __APPLE__
 
     // showEvent() gets called when the emulator is minimized because we are
@@ -292,9 +304,10 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
         if (mModalOverlay) {
             mModalOverlay->showNormal();
         }
-        if (mMessages.hasInstance()) {
-            mMessages->showNormal();
+        if (mVirtualSceneInfo) {
+            mVirtualSceneInfo->showNormal();
         }
+        mMessages.ifExists([&] { mMessages->showNormal(); });
     }
 }
 
@@ -333,24 +346,6 @@ Ui::OverlayMessageCenter& EmulatorContainer::messageCenter() {
     return mMessages.get();
 }
 
-void EmulatorContainer::virtualSceneControlWindowVisible() {
-#ifdef __APPLE__
-    VirtualSceneControlWindow* vsc =
-            mEmulatorWindow->toolWindow()->virtualSceneControlWindow();
-    Q_ASSERT(vsc);
-    if (isVisible() && vsc->isVisible()) {
-        WId wid = effectiveWinId();
-        wid = (WId)getNSWindow((void*)wid);
-
-        vsc->showNormal();  // force creation of native window id
-        WId vsc_wid = vsc->effectiveWinId();
-        Q_ASSERT(vsc_wid && wid);
-        vsc_wid = (WId)getNSWindow((void*)vsc_wid);
-        nsWindowAdopt((void*)wid, (void*)vsc_wid);
-    }
-#endif  // __APPLE__
-}
-
 #ifdef __linux__
 // X11 doesn't have a getter for current mouse button state. Use the Qt's
 // synchronous mouse state tracking that might be a little bit off.
@@ -386,6 +381,7 @@ void EmulatorContainer::slot_resizeDone() {
 
 void EmulatorContainer::slot_showModalOverlay(QString text) {
     slot_hideModalOverlay();
+    slot_hideVirtualSceneInfoDialog();
     mModalOverlay = new Ui::ModalOverlay(text, this);
     adjustModalOverlayGeometry();
     mModalOverlay->show();
@@ -398,6 +394,42 @@ void EmulatorContainer::slot_hideModalOverlay() {
     if (mModalOverlay) {
         mModalOverlay->hide([](Ui::ModalOverlay* mo) { mo->deleteLater(); });
         mModalOverlay = nullptr;
+
+        if (mShouldCreateVirtualSceneInfo) {
+            mShouldCreateVirtualSceneInfo = false;
+            slot_showVirtualSceneInfoDialog();
+        }
+    }
+}
+
+void EmulatorContainer::slot_showVirtualSceneInfoDialog() {
+    if (mVirtualSceneInfo) {
+        return;
+    }
+
+    // If there's an existing modal overlay, defer creating the virtual scene
+    // info dialog until that is dismissed.
+    if (mModalOverlay) {
+        mShouldCreateVirtualSceneInfo = true;
+    } else {
+        mVirtualSceneInfo = new VirtualSceneInfoDialog(this);
+        connect(mVirtualSceneInfo, SIGNAL(closeButtonPressed()), this,
+                SIGNAL(hideVirtualSceneInfoDialog()));
+
+        adjustVirtualSceneDialogGeometry();
+
+        mVirtualSceneInfo->show();
+        if (windowState() & Qt::WindowMinimized) {
+            mVirtualSceneInfo->hide();
+        }
+    }
+}
+
+void EmulatorContainer::slot_hideVirtualSceneInfoDialog() {
+    if (mVirtualSceneInfo) {
+        mVirtualSceneInfo->hide(
+                [](VirtualSceneInfoDialog* info) { info->deleteLater(); });
+        mVirtualSceneInfo = nullptr;
     }
 }
 
@@ -427,12 +459,28 @@ void EmulatorContainer::adjustModalOverlayGeometry() {
                          (height() - mModalOverlay->height()) / 2}));
 }
 
+void EmulatorContainer::adjustVirtualSceneDialogGeometry() {
+    if (!mVirtualSceneInfo) {
+        return;
+    }
+
+    auto overlaySize =
+            QSize(std::min(300, width() - 5), std::min(300, height() - 5));
+    mVirtualSceneInfo->resize(overlaySize, size());
+    mVirtualSceneInfo->move(
+            mapToGlobal({(width() - mVirtualSceneInfo->width()) / 2,
+                         (height() - mVirtualSceneInfo->height()) / 2}));
+}
+
 void EmulatorContainer::adjustMessagesOverlayGeometry() {
     if (!mMessages.hasInstance()) {
         return;
     }
 
-    auto w = std::min(width() - 2 * 15, std::max(300, (width() - 2 * 150)));
+    auto scaleFactor = SizeTweaker::scaleFactor(this).x();
+    auto w = std::min<int>(width() - 2 * 30 * scaleFactor,
+                           std::max<int>(300 * scaleFactor,
+                                         (width() - 2 * 150 * scaleFactor)));
     mMessages->setFixedWidth(w);
     mMessages->adjustSize();
     mMessages->move(mapToGlobal({}) += {(width() - mMessages->width()) / 2, 0});

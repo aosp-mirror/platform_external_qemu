@@ -90,8 +90,7 @@ void DPadPage::toggleButtonPressed(
     }
 
     QSettings settings;
-    SettingsTheme theme =
-        (SettingsTheme)settings.value(Ui::Settings::UI_THEME, 0).toInt();
+    SettingsTheme theme = getSelectedTheme();
 
     QString iconName =
         button->property(pressed ? "themeIconNamePressed" : "themeIconName").toString();

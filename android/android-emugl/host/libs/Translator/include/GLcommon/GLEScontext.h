@@ -617,7 +617,6 @@ private:
 
     bool m_primitiveRestartEnabled = false;
 
-
     struct ImageBlitState {
         GLuint program = 0;
         GLuint samplerLoc = 0;
@@ -634,11 +633,15 @@ private:
         uint32_t height = 0;
         GLint internalFormat = 0;
         uint32_t samples = 0;
+        uint32_t prevSamples = 0;
     };
 
     ImageBlitState m_blitState = {};
+    GLint getReadBufferSamples();
+    GLint getReadBufferInternalFormat();
+    void getReadBufferDimensions(GLint* width, GLint* height);
     void setupImageBlitState();
-    void setupImageBlitForTexture(uint32_t width, uint32_t height,
+    bool setupImageBlitForTexture(uint32_t width, uint32_t height,
                                   GLint internalFormat);
 };
 

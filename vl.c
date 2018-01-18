@@ -28,6 +28,7 @@
 #include "qemu/uuid.h"
 #include "block/block_int.h"
 #include "sysemu/ranchu.h"
+#include "sysemu/rng-random-generic.h"
 
 #ifdef CONFIG_SECCOMP
 #include "sysemu/seccomp.h"
@@ -173,6 +174,7 @@ int main(int argc, char **argv)
 #include "android/utils/filelock.h"
 #include "android/utils/ini.h"
 #include "android/utils/lineinput.h"
+#include "android/utils/looper.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/system.h"
@@ -989,6 +991,7 @@ static int create_qcow2_images(void) {
     const char* const image_paths_hw_arc[] = {
         android_hw->disk_systemPartition_initPath,
         android_hw->disk_vendorPartition_initPath,
+        android_hw->disk_dataPartition_path,
     };
     int count = ARRAY_SIZE(image_paths);
     const char* const * images = image_paths;
@@ -3230,6 +3233,14 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
     }
 #endif // defined(CONFIG_ANDROID) && defined(_WIN32) && !defined(_WIN64)
 
+#ifdef _WIN32
+    // Limit max RAM to 4093 MB on Windows.
+#define HAX_SNAPSHOT_MAX_RAM 4093ULL * 1024ULL * 1024ULL
+    if (ram_size > HAX_SNAPSHOT_MAX_RAM) {
+        ram_size = HAX_SNAPSHOT_MAX_RAM;
+    }
+#endif
+
     int ram_size_meg = ram_size / (1024 * 1024);
     if (ram_size_meg < requested_meg) {
         fprintf(stderr, "Warning: requested RAM %dM too high for your system. "
@@ -3402,6 +3413,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     int optind;
     const char *optarg;
     const char *loadvm = NULL;
+#ifdef CONFIG_ANDROID
+    bool snapshot_list = false;
+#endif
     MachineClass *machine_class;
     const char *cpu_model;
     const char *vga_model = NULL;
@@ -4105,6 +4119,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_loadvm:
                 loadvm = optarg;
                 break;
+#ifdef CONFIG_ANDROID
+            case QEMU_OPTION_snapshot_list:
+                snapshot_list = true;
+                break;
+#endif
             case QEMU_OPTION_full_screen:
                 full_screen = 1;
                 break;
@@ -4627,6 +4646,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
     qemu_device_tree_setup_callback(ranchu_device_tree_setup);
 #endif
+    qemu_set_rng_random_generic_random_func(rng_random_generic_read_random_bytes);
     if (!qemu_android_emulation_early_setup()) {
         return 1;
     }
@@ -4645,6 +4665,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     socket_drainer_start(looper_getForThread());
     android_wear_agent_start(looper_getForThread());
+    android_registerMainLooper(looper_getForThread());
 
     if (!android_hw_file) {
         error_report("Missing -android-hw <file> option!");
@@ -5400,6 +5421,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     if (!qemu_android_emulation_setup()) {
         return 1;
+    }
+
+    if (snapshot_list) {
+        androidSnapshot_listStdout();
     }
 
     extern void android_emulator_set_base_port(int);

@@ -21,6 +21,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
+#include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/system.h"
@@ -217,9 +218,22 @@ void FeatureControlImpl::create() {
 }
 
 FeatureControlImpl::FeatureControlImpl() {
-    std::string defaultIniHostName =
+    const auto updateChannel = studio::updateChannel();
+
+    std::string defaultIniHostName;
+
+    if (updateChannel == studio::UpdateChannel::Stable) {
+        defaultIniHostName =
             base::PathUtils::join(base::System::get()->getLauncherDirectory(),
                                   "lib", "advancedFeatures.ini");
+    } else {
+        // TODO: If we ever use beta/dev channels, disambiguate them
+        // with separate files here.
+        defaultIniHostName =
+            base::PathUtils::join(base::System::get()->getLauncherDirectory(),
+                                  "lib", "advancedFeaturesCanary.ini");
+    }
+
     ScopedCPtr<char> defaultIniGuestName;
     if (android_avdInfo) {
         defaultIniGuestName.reset(

@@ -23,5 +23,7 @@ extern void *readpng(const unsigned char*  base, size_t  size, unsigned *_width,
         unsigned *_height);
 extern void savepng(const char* fn, unsigned int nChannels, unsigned int width,
         unsigned int height, void* pixels);
+extern void savebmp(const char* fn, unsigned int nChannels, unsigned int width,
+        unsigned int height, void* pixels);
 
 ANDROID_END_HEADER

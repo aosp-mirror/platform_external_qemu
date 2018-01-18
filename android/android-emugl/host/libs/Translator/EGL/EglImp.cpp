@@ -101,6 +101,7 @@ EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display);
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags);
 EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
 EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
+EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
@@ -122,6 +123,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglBlitFromCurrentReadBufferANDROID },
         {"eglSetImageFenceANDROID",
                 (__eglMustCastToProperFunctionPointerType)eglSetImageFenceANDROID },
+        {"eglWaitImageFenceANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglWaitImageFenceANDROID },
 };
 
 static const int s_eglExtensionsSize =
@@ -1512,6 +1515,11 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
     return (void*)res;
 }
 
+EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay dpy, void* fence) {
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    iface->waitSync((GLsync)fence, 0, -1);
+}
+
 /*********************************************************************************/
 
 EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream) {
@@ -1555,7 +1563,13 @@ EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream)
     VALIDATE_DISPLAY(display);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     EGLint cfgId = stm->getBe32();
-    return static_cast<EGLConfig>(dpy->getConfig(cfgId));
+    EglConfig* cfg = dpy->getConfig(cfgId);
+    if (!cfg) {
+        fprintf(stderr,
+                "WARNING: EGL config mismatch, fallback to default configs\n");
+        cfg = dpy->getDefaultConfig();
+    }
+    return static_cast<EGLConfig>(cfg);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,

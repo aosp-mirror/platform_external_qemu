@@ -39,6 +39,15 @@ AndroidSnapshotStatus androidSnapshot_save(const char* name);
 
 void androidSnapshot_delete(const char* name);
 
+// Returns the name of the snapshot file that was loaded to start
+// the current image.
+// Returns an empty string if the AVD was cold-booted.
+const char* androidSnapshot_loadedSnapshotFile();
+
+// Some hypervisors do not support generic AND quickboot save.
+void androidSnapshot_setQuickbootSaveNoGood();
+bool androidSnapshot_isQuickbootSaveNoGood();
+
 // These two functions implement a quickboot feature: load() tries to load from
 // the |name| snapshot (or default one if it is null or empty) and save() saves
 // the current state into it.
@@ -50,5 +59,13 @@ bool androidSnapshot_quickbootSave(const char* name);
 // For when we want to skip quickboot AND skip loading it next time, such as
 // in the case of a power-off and restart.
 void androidSnapshot_quickbootInvalidate(const char* name);
+
+// List snapshots to stdout.
+void androidSnapshot_listStdout();
+
+// List snapshots with a custom callback for consuming the lines.
+void androidSnapshot_list(void* opaque,
+                          int (*cbOut)(void* opaque, const char* buf, int strlen),
+                          int (*cbErr)(void* opaque, const char* buf, int strlen));
 
 ANDROID_END_HEADER

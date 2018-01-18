@@ -104,6 +104,7 @@ typedef enum{
     PHYSICAL_PARAMETER_(PRESSURE,"pressure",Pressure,float) \
     PHYSICAL_PARAMETER_(HUMIDITY,"humidity",Humidity,float) \
     PHYSICAL_PARAMETER_(VELOCITY,"velocity",Velocity,vec3) \
+    PHYSICAL_PARAMETER_(AMBIENT_MOTION,"ambientMotion",AmbientMotion,float) \
 
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
@@ -143,10 +144,22 @@ extern const char* android_sensors_get_name_from_id( int sensor_id );
 /* Get sensor from sensor id */
 extern uint8_t android_sensors_get_sensor_status( int sensor_id );
 
+/* Get the host-to-guest time offset */
+extern int64_t android_sensors_get_time_offset();
+
+/* Get the current sensor delay (determines update rate) */
+extern int32_t android_sensors_get_delay_ms();
+
 /* Get physical model values */
 extern int android_physical_model_get(
     int physical_parameter, float* out_a, float* out_b, float* out_c,
     ParameterValueType parameter_value_type);
+
+/* Getter for simulatenous physical rotation and translation */
+extern int android_physical_model_get_transform(
+    float* out_translation_x, float* out_translation_y, float* out_translation_z,
+    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
+    int64_t* out_timestamp);
 
 /* Set physical model target values */
 extern int android_physical_model_set(
@@ -164,5 +177,14 @@ extern int android_physical_model_get_parameter_id_from_name(
 /* Get physical parameter name from id */
 extern const char* android_physical_model_get_parameter_name_from_id(
     int physical_parameter_id );
+
+/* Start recording physical changes to the specified file */
+extern int android_physical_model_record(const char* file_name);
+
+/* Start playing back physical changes from the specified file */
+extern int android_physical_model_playback(const char* file_name);
+
+/* Stop all active recording and playback */
+extern int android_physical_model_stop_record_and_playback();
 
 ANDROID_END_HEADER

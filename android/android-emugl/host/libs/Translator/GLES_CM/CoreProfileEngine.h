@@ -48,16 +48,47 @@ public:
         GLint projMatrixLoc;
         GLint modelviewMatrixLoc;
         GLint textureMatrixLoc;
+        GLint modelviewInvTrLoc;
         GLint textureSamplerLoc;
         GLint textureCubeSamplerLoc;
 
         GLint enableTextureLoc;
         GLint enableLightingLoc;
+        GLint enableRescaleNormalLoc;
+        GLint enableNormalizeLoc;
+        GLint enableColorMaterialLoc;
         GLint enableFogLoc;
         GLint enableReflectionMapLoc;
 
         GLint textureEnvModeLoc;
         GLint textureFormatLoc;
+
+        GLint materialAmbientLoc;
+        GLint materialDiffuseLoc;
+        GLint materialSpecularLoc;
+        GLint materialEmissiveLoc;
+        GLint materialSpecularExponentLoc;
+
+        GLint lightModelSceneAmbientLoc;
+        GLint lightModelTwoSidedLoc;
+
+        GLint lightEnablesLoc;
+        GLint lightAmbientsLoc;
+        GLint lightDiffusesLoc;
+        GLint lightSpecularsLoc;
+        GLint lightPositionsLoc;
+        GLint lightDirectionsLoc;
+        GLint lightSpotlightExponentsLoc;
+        GLint lightSpotlightCutoffAnglesLoc;
+        GLint lightAttenuationConstsLoc;
+        GLint lightAttenuationLinearsLoc;
+        GLint lightAttenuationQuadraticsLoc;
+
+        GLint fogModeLoc;
+        GLint fogDensityLoc;
+        GLint fogStartLoc;
+        GLint fogEndLoc;
+        GLint fogColorLoc;
 
         GLuint posVbo;
         GLuint normalVbo;
@@ -93,6 +124,9 @@ public:
 
     void preDrawVertexSetup();
     void postDrawVertexSetup();
+
+    void setupLighting();
+    void setupFog();
 
     // GLES 1 API (deprecated + incompatible with core only)
 
@@ -156,4 +190,21 @@ private:
 
     // If we are on a gles impl.
     bool mOnGles = false;
+
+    static constexpr int kMaxLights = 8;
+    struct LightingBuffer {
+        GLint lightEnables[kMaxLights];
+        GLfloat lightAmbients[4 * kMaxLights];
+        GLfloat lightDiffuses[4 * kMaxLights];
+        GLfloat lightSpeculars[4 * kMaxLights];
+        GLfloat lightPositions[4 * kMaxLights];
+        GLfloat lightDirections[3 * kMaxLights];
+        GLfloat spotlightExponents[kMaxLights];
+        GLfloat spotlightCutoffAngles[kMaxLights];
+        GLfloat attenuationConsts[kMaxLights];
+        GLfloat attenuationLinears[kMaxLights];
+        GLfloat attenuationQuadratics[kMaxLights];
+    };
+
+    LightingBuffer m_lightingBuffer;
 };

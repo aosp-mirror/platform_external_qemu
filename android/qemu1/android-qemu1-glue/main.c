@@ -138,6 +138,12 @@ int main(int argc, char **argv) {
         opts->logcat = NULL;
     }
 
+#ifdef _WIN32
+    // Windows qemu1 is 32bit. Don't use any advanced GL features.
+    feature_set_enabled_override(kFeature_GLAsyncSwap, false);
+    feature_set_enabled_override(kFeature_GLESDynamicVersion, false);
+#endif
+
     // Overide default null SerialLine implementation
     // before android_kmsg_init()
     qemu1_android_serialline_init();
@@ -162,7 +168,7 @@ int main(int argc, char **argv) {
         rendererConfig.bootPropOpenglesVersion, /* ro.opengles.version */
         0ULL, /* glFramebufferSizeBytes */
         mem,
-        false /* isQemu2 */);
+        false /* isQemu2 */, false /* isCros */);
 
     if (hw->hw_cpu_ncore > 1) {
         // Avoid printing this warning all the time because the default
@@ -241,6 +247,7 @@ int main(int argc, char **argv) {
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;
     uiEmuAgent.cellular = gQAndroidCellularAgent;
+    uiEmuAgent.display = gQAndroidDisplayAgent;
     uiEmuAgent.finger = gQAndroidFingerAgent;
     uiEmuAgent.location = gQAndroidLocationAgent;
     uiEmuAgent.proxy = gQAndroidHttpProxyAgent;

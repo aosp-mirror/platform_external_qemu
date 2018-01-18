@@ -69,9 +69,14 @@ enum class FailureReason {
     EmulationEngineFailed,
     RamFailed,
     TexturesFailed,
+    AdbOffline,
 
     InProgressLimit = 30000,
 };
+
+FailureReason errnoToFailure(int error);
+const char* failureReasonToString(FailureReason failure,
+                                  SnapshotOperation op);
 
 template <class Operation>
 bool isComplete(const Operation& op) {
@@ -79,6 +84,8 @@ bool isComplete(const Operation& op) {
 }
 
 bool isBufferZeroed(const void* ptr, int32_t size);
+
+constexpr int32_t kDefaultPageSize = 4096;
 
 }  // namespace snapshot
 }  // namespace android

@@ -87,9 +87,11 @@ private slots:
     void lineEditValueChanged();
 
 private:
-    double mValue;
-    double mMinimum;
-    double mMaximum;
+    void updateValidatorStyle(QString colorGroup);
+
+    double mValue = 0.0f;
+    double mMinimum = 0.0f;
+    double mMaximum = 0.0f;
     QHBoxLayout mMainLayout;
     QVBoxLayout mAnnotatedSliderLayout;
     QVBoxLayout mEditBoxLayout;
@@ -99,5 +101,9 @@ private:
     QSlider mSlider;
     QLineEdit mLineEdit;
     QDoubleValidator mLineEditValidator;
+
+    bool mValueChangeIgnored = false;
+    QString mLineEditOriginalValue;
+    bool mLineEditFocused = false;
 };
 

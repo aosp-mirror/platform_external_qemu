@@ -1049,8 +1049,10 @@ struct SkinWindow {
     double        scale;
 
     // For dragging and resizing the window
-    int           drag_x_start;    // Relative to the top left of the emulator window
+    int           drag_x_start;
     int           drag_y_start;
+    int           window_x_start;
+    int           window_y_start;
 
     // Zoom-related parameters
     double        zoom;
@@ -1960,8 +1962,9 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                 }
             } else if (!skin_winsys_window_has_frame()) {
                 // Drag or resize the device window
-                window->drag_x_start = ev->u.mouse.x;
-                window->drag_y_start = ev->u.mouse.y;
+                window->drag_x_start = ev->u.mouse.x_global;
+                window->drag_y_start = ev->u.mouse.y_global;
+                skin_winsys_get_frame_pos(&window->window_x_start, &window->window_y_start);
                 if (finger->at_corner) {
                     skin_winsys_set_window_overlay_for_resize(finger->which_corner);
                 }
@@ -1991,8 +1994,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             skin_winsys_get_frame_pos(&window_pos_x, &window_pos_y);
             skin_winsys_get_window_size(&window_width, &window_height);
 
-            int delta_x = ev->u.mouse.x - window->drag_x_start;
-            int delta_y = ev->u.mouse.y - window->drag_y_start;
+            int delta_x = ev->u.mouse.x_global - window->drag_x_start;
+            int delta_y = ev->u.mouse.y_global - window->drag_y_start;
 
             window->drag_x_start = 0;
             window->drag_y_start = 0;
@@ -2078,10 +2081,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                 break;
             }
             // The user is dragging the window
-            int posX, posY;
-            skin_winsys_get_frame_pos(&posX, &posY);
-            posX += ev->u.mouse.x - window->drag_x_start;
-            posY += ev->u.mouse.y - window->drag_y_start;
+            int posX = window->window_x_start + ev->u.mouse.x_global - window->drag_x_start;
+            int posY = window->window_y_start + ev->u.mouse.y_global - window->drag_y_start;
             skin_winsys_set_window_pos(posX, posY);
             break;
         }
@@ -2113,6 +2114,11 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         // Re-setup the OpenGL ES subwindow with a potentially different
         // framebuffer size (e.g., 2x for retina screens).
         skin_window_show_opengles(window, true);
+        break;
+
+    case kEventWindowChanged:
+        // The window changed (such as a resize or rotation)
+        skin_window_show_opengles(window, false);
         break;
 
     default:

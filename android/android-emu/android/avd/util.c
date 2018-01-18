@@ -62,33 +62,15 @@ path_getAvdContentPath(const char* avdName)
     char*    iniPath = path_getRootIniPath(avdName);
     char*    avdPath = NULL;
 
-    if (iniPath != NULL) {
-        ini = iniFile_newFromFile(iniPath);
-        if (ini == NULL) {
-            APANIC("Could not parse file: %s\n", iniPath);
-        }
-        AFREE(iniPath);
-    } else {
-        static const char kHomeSearchDir[] = "$HOME" PATH_SEP ".android" PATH_SEP "avd";
-        static const char kSdkHomeSearchDir[] = "$ANDROID_SDK_HOME" PATH_SEP "avd";
-        const char* envName = "HOME";
-        const char* searchDir = kHomeSearchDir;
-        if (getenv("ANDROID_AVD_HOME")) {
-            envName = "ANDROID_AVD_HOME";
-            searchDir = "$ANDROID_AVD_HOME";
-        } else if (getenv("ANDROID_SDK_HOME")) {
-            envName = "ANDROID_SDK_HOME";
-            searchDir = kSdkHomeSearchDir;
-        }
-        fprintf(stderr, "WARNING: Unknown AVD name [%s], use -list-avds to see "
-               "valid list.\n"
-               "%s is defined but there is no file %s.ini in %s\n"
-               "(Note: Directories are searched in the order $ANDROID_AVD_HOME, "
-               "%s and %s)\n",
-               avdName, envName, avdName, searchDir, kSdkHomeSearchDir,
-               kHomeSearchDir);
+    if (!iniPath) {
         return NULL;
     }
+
+    ini = iniFile_newFromFile(iniPath);
+    if (ini == NULL) {
+        APANIC("Could not parse file: %s\n", iniPath);
+    }
+    AFREE(iniPath);
 
     avdPath = iniFile_getString(ini, ROOT_ABS_PATH_KEY, NULL);
 
@@ -117,12 +99,15 @@ propertyFile_getTargetAbi(const FileData* data) {
                                       data->size,
                                       "ro.product.cpu.abi");
     if (abi && !strcmp(abi, "mips")) {
-        // mips32r6 images show cpu.abi as just mips,
+        // mips32[r5|r6] images show cpu.abi as just mips,
         // but give correct abi in a dalvik property.
         char* abi2 = propertyFile_getValue((const char*)data->data,
                                            data->size,
                                            "dalvik.vm.isa.mips.variant");
         if (abi2 && !strcmp(abi2, "mips32r6")) {
+            AFREE(abi);
+            abi = abi2;
+        } else if (abi2 && !strcmp(abi2, "mips32r5")) {
             AFREE(abi);
             abi = abi2;
         } else {
@@ -145,6 +130,7 @@ propertyFile_getTargetArch(const FileData* data) {
             { "armeabi", "arm" },
             { "armeabi-v7a", "arm" },
             { "arm64-v8a", "arm64" },
+            { "mips32r5", "mips" },
             { "mips32r6", "mips" },
         };
         size_t n;
@@ -221,7 +207,7 @@ AvdFlavor propertyFile_getAvdFlavor(const FileData* data) {
 
     const char* phone_names[] = {"phone"};
     const char* tv_names[] = {"atv"};
-    const char* wear_names[] = {"aw"};
+    const char* wear_names[] = {"aw", "wear"};
     const char* car_names[] = {"car_emu"};
 
     if (IN_PRODUCT_NAME(data, phone_names)) {

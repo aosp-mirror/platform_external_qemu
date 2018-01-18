@@ -3416,6 +3416,16 @@ STEXI
 Start right away with a saved state (@code{loadvm} in monitor)
 ETEXI
 
+DEF("snapshot-list", 0, QEMU_OPTION_snapshot_list, \
+    "-snapshot-list\n" \
+    "                list snapshots of current AVD on startup\n",
+    QEMU_ARCH_ALL)
+STEXI
+@item -snapshot-list
+@findex -snapshot-list
+List snapshots for current AVD on startup.
+ETEXI
+
 #ifndef _WIN32
 DEF("daemonize", 0, QEMU_OPTION_daemonize, \
     "-daemonize      daemonize QEMU after initializing\n", QEMU_ARCH_ALL)

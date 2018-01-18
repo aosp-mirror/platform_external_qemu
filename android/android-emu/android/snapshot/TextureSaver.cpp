@@ -36,11 +36,11 @@ TextureSaver::~TextureSaver() {
 }
 
 void TextureSaver::saveTexture(uint32_t texId, const saver_t& saver) {
-#if SNAPSHOT_PROFILE > 1
+
     if (!mStartTime) {
         mStartTime = System::get()->getHighResTimeUs();
     }
-#endif
+
     assert(mIndex.textures.end() ==
            std::find_if(mIndex.textures.begin(), mIndex.textures.end(),
                         [texId](FileIndex::Texture& tex) {
@@ -58,9 +58,10 @@ void TextureSaver::done() {
     }
     mIndex.startPosInFile = ftello64(mStream.get());
     writeIndex();
+    mEndTime = System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1
     printf("Texture saving time: %.03f\n",
-           (System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
+           (mEndTime - mStartTime) / 1000.0);
 #endif
     mHasError = ferror(mStream.get()) != 0;
     mFinished = true;

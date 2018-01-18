@@ -28,6 +28,8 @@ extern struct hax_state hax_global;
 struct hax_vcpu_state {
     hax_fd fd;
     int vcpu_id;
+    int resync;
+    int emulation_state;
     struct hax_tunnel *tunnel;
     unsigned char *iobuf;
 };

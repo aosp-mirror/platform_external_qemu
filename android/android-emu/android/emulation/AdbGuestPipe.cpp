@@ -20,6 +20,7 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringView.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/threads/Async.h"
 #include "android/emulation/VmLock.h"
 #include "android/globals.h"
 #include "android/utils/debug.h"
@@ -217,7 +218,7 @@ AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
 }
 
 void AdbGuestPipe::Service::resetActiveGuestPipeConnection() {
-    if (mCurrentActivePipe->isProxyingData()) {
+    if (mCurrentActivePipe && mCurrentActivePipe->isProxyingData()) {
         mCurrentActivePipe->resetConnection();
         mCurrentActivePipe = nullptr;
     }

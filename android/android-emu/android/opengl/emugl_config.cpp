@@ -277,11 +277,6 @@ bool emuglConfig_init(EmuglConfig* config,
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader_indirect";
         }
-        else if (!host_set_in_hwconfig && !no_window && !hasUiPreference &&
-                   async_query_host_gpu_AngleWhitelisted()) {
-                gpu_mode = "angle_indirect";
-                D("%s use Angle for Intel GPU HD 3000\n", __FUNCTION__);
-        }
         else if (no_window || (blacklisted && !hasUiPreference)) {
             if (!no_window &&
                 stringVectorContains(sBackendList->names(), "swiftshader")) {

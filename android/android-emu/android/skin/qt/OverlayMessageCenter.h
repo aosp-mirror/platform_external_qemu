@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/skin/qt/size-tweaker.h"
+
 #include <QFrame>
 #include <QPixmap>
 #include <QString>
@@ -75,8 +77,10 @@ private:
     void showEvent(QShowEvent*) override;
 
     void reattachToParent();
-    QPixmap icon(Icon type);
     void dismissMessage(OverlayChildWidget* messageWidget);
+    QPixmap icon(Icon type);
+
+    SizeTweaker mSizeTweaker;
 };
 
 }  // namespace Ui

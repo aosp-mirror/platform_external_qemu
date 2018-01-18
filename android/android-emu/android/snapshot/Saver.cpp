@@ -14,6 +14,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
+#include "android/snapshot/RamLoader.h"
 #include "android/snapshot/TextureSaver.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -25,17 +26,13 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
-Saver::Saver(const Snapshot& snapshot)
+Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (path_mkdir_if_needed(mSnapshot.dataDir().c_str(), 0777) != 0) {
         return;
     }
     {
-        const auto ram = fopen(
-                PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "wb");
-        if (!ram) {
-            return;
-        }
+        const auto ramFile = PathUtils::join(mSnapshot.dataDir(), "ram.bin");
         auto flags = RamSaver::Flags::None;
         const auto compressEnvVar =
                 System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
@@ -49,6 +46,10 @@ Saver::Saver(const Snapshot& snapshot)
         } else if (compressEnvVar == "0" || compressEnvVar == "no" ||
                    compressEnvVar == "false") {
             // don't enable compression
+            VERBOSE_PRINT(snapshot,
+                          "autoconfig: forced no snapshot RAM compression from "
+                          "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
+                          compressEnvVar.c_str());
         } else {
             // Check if it's faster to save RAM with compression. Currently
             // the heuristics are as following:
@@ -71,7 +72,8 @@ Saver::Saver(const Snapshot& snapshot)
                 } else {
                     // Disk kind calculation is potentially the slowest: do it
                     // last.
-                    const auto diskKind = System::get()->diskKind(fileno(ram));
+                    const auto diskKind =
+                            System::get()->pathDiskKind(mSnapshot.dataDir());
                     if (diskKind.valueOr(System::DiskKind::Ssd) ==
                         System::DiskKind::Hdd) {
                         flags |= RamSaver::Flags::Compress;
@@ -82,8 +84,23 @@ Saver::Saver(const Snapshot& snapshot)
                 }
             }
         }
-        mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
+
+        const bool tryIncremental =
+            isOnExit && loader && !loader->hasError() && loader->hasGaps();
+
+        if (loader && !isOnExit) {
+            loader->join();
+            loader->invalidateGaps();
+        }
+
+        mRamSaver.emplace(ramFile, flags, tryIncremental ? loader : nullptr,
+                          isOnExit);
+        if (mRamSaver->hasError()) {
+            mRamSaver.clear();
+            return;
+        }
     }
+
     {
         const auto textures = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
@@ -100,8 +117,8 @@ Saver::Saver(const Snapshot& snapshot)
 }
 
 Saver::~Saver() {
-    const bool deleteDirectory = mStatus != OperationStatus::Ok &&
-                                 (mRamSaver || mTextureSaver);
+    const bool deleteDirectory =
+            mStatus != OperationStatus::Ok && (mRamSaver || mTextureSaver);
     mRamSaver.clear();
     mTextureSaver.reset();
     if (deleteDirectory) {
@@ -109,7 +126,9 @@ Saver::~Saver() {
     }
 }
 
-ITextureSaverPtr Saver::textureSaver() const { return mTextureSaver; }
+ITextureSaverPtr Saver::textureSaver() const {
+    return mTextureSaver;
+}
 
 void Saver::prepare() {
     // TODO: run asynchronous saving preparation here (e.g. screenshot,
@@ -124,6 +143,7 @@ void Saver::complete(bool succeeded) {
     if (!mRamSaver || mRamSaver->hasError()) {
         return;
     }
+    mRamSaver->join();
     if (!mTextureSaver ||
         (static_cast<void>(mTextureSaver->done()), mTextureSaver->hasError())) {
         return;

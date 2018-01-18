@@ -21,6 +21,7 @@
 #include <QtCore>
 
 class EmulatorQtWindow;
+class VirtualSceneInfoDialog;
 namespace Ui {
 class ModalOverlay;
 }
@@ -54,23 +55,28 @@ public:
 signals:
     void showModalOverlay(QString text);
     void hideModalOverlay();
-
-public slots:
-    void virtualSceneControlWindowVisible();
+    void showVirtualSceneInfoDialog();
+    void hideVirtualSceneInfoDialog();
 
 private slots:
     void slot_resizeDone();
     void slot_showModalOverlay(QString text);
     void slot_hideModalOverlay();
+    void slot_showVirtualSceneInfoDialog();
+    void slot_hideVirtualSceneInfoDialog();
     void slot_messagesResized();
 
 private:
     void startResizeTimer();
     void adjustModalOverlayGeometry();
+    void adjustVirtualSceneDialogGeometry();
     void adjustMessagesOverlayGeometry();
 
     EmulatorQtWindow* mEmulatorWindow;
     Ui::ModalOverlay* mModalOverlay = nullptr;
+    VirtualSceneInfoDialog* mVirtualSceneInfo = nullptr;
+    bool mShouldCreateVirtualSceneInfo = false;
+    bool mVirtualSceneWindowShown = false;
     android::base::MemberOnDemandT<Ui::OverlayMessageCenter, QWidget*>
             mMessages;
     QList<QEvent::Type> mEventBuffer;

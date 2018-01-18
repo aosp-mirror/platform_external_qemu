@@ -16,6 +16,7 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/globals.h"
 #include "android/snapshot/MacSegvHandler.h"
 
 #include <signal.h>
@@ -44,7 +45,7 @@ public:
     }
 
     ~Impl() {
-        mBackgroundLoadingThread.wait();
+        join();
     }
 
     static void MacDoAccessCallback(void* ptr) {
@@ -66,6 +67,10 @@ public:
         mprotect(start, length, PROT_NONE);
         mSegvHandler.registerMemoryRange(start, length);
         return true;
+    }
+
+    void join() {
+        mBackgroundLoadingThread.wait();
     }
 
     void doneRegistering() {
@@ -137,6 +142,8 @@ public:
 
 // static
 bool MemoryAccessWatch::isSupported() {
+    // TODO: b/71596968
+    if (android_hw->hw_arc) return false;
     // TODO: HAXM
     return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HVF;
 }
@@ -170,6 +177,10 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
     if (!mImpl) return false;
     return mImpl->fillPage(ptr, length, data, isQuickboot);
+}
+
+void MemoryAccessWatch::join() {
+    if (mImpl) { mImpl->join(); }
 }
 
 }  // namespace snapshot

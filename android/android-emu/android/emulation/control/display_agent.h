@@ -43,6 +43,10 @@ typedef struct QAndroidDisplayAgent {
     // |opaque| - user data to pass to the callback
     void (*registerUpdateListener)(AndroidDisplayUpdateCallback callback,
                                    void* opaque);
+
+    // Unregisters a callback that was registered.
+    // |callback| - the callback to unregister
+    void (*unregisterUpdateListener)(AndroidDisplayUpdateCallback callback);
 } QAndroidDisplayAgent;
 
 ANDROID_END_HEADER

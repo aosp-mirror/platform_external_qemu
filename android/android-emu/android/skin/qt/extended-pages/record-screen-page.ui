@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>580</height>
+    <width>672</width>
+    <height>611</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,9 +16,9 @@
   <widget class="QWidget" name="rec_recordOverlayWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>161</x>
+     <x>20</x>
      <y>24</y>
-     <width>300</width>
+     <width>582</width>
      <height>516</height>
     </rect>
    </property>
@@ -28,7 +28,7 @@
    <widget class="RaisedMaterialButton" name="rec_recordButton">
     <property name="geometry">
      <rect>
-      <x>84</x>
+      <x>225</x>
       <y>240</y>
       <width>132</width>
       <height>36</height>
@@ -64,7 +64,7 @@
    <widget class="QWidget" name="rec_timeElapsedWidget" native="true">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>141</x>
       <y>218</y>
       <width>300</width>
       <height>20</height>
@@ -139,126 +139,204 @@
      </item>
     </layout>
    </widget>
-   <zorder>rec_recordButton</zorder>
-   <zorder>rec_recordDotLabel_2</zorder>
-   <zorder>rec_timeElapsedWidget</zorder>
   </widget>
-  <widget class="RaisedMaterialButton" name="rec_playStopButton">
+  <widget class="QWidget" name="rec_playerOverlayWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>161</x>
-     <y>550</y>
-     <width>36</width>
-     <height>36</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
-   <property name="themeIconName" stdset="0">
-    <string>play_arrow</string>
-   </property>
-   <property name="themeIconName_disabled" stdset="0">
-    <string>play_arrow_disabled</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Tool</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="rec_formatSwitch">
-   <property name="geometry">
-    <rect>
-     <x>328</x>
-     <y>550</y>
-     <width>60</width>
-     <height>36</height>
-    </rect>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-   <item>
-    <property name="text">
-     <string>webm</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>gif</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="RaisedMaterialButton" name="rec_saveButton">
-   <property name="geometry">
-    <rect>
-     <x>401</x>
-     <y>550</y>
-     <width>60</width>
-     <height>36</height>
+     <x>20</x>
+     <y>24</y>
+     <width>582</width>
+     <height>516</height>
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>SAVE</string>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
-   </property>
    <property name="ColorGroup" stdset="0">
-    <string>Tool</string>
+    <string>Overlay</string>
    </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
+   <layout class="QHBoxLayout" name="rec_playerOverlayLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="margin">
+     <number>0</number>
+    </property>
+   </layout>
   </widget>
-  <widget class="QLabel" name="rec_timeResLabel">
+  <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>
-     <x>207</x>
+     <x>161</x>
      <y>550</y>
-     <width>111</width>
-     <height>36</height>
+     <width>304</width>
+     <height>40</height>
     </rect>
    </property>
-   <property name="text">
-    <string>21s / 1920 x 1080</string>
+   <property name="styleSheet">
+    <string notr="true"/>
    </property>
+   <layout class="QGridLayout" name="gridLayout" rowminimumheight="0">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetNoConstraint</enum>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>4</number>
+    </property>
+    <property name="bottomMargin">
+     <number>4</number>
+    </property>
+    <property name="horizontalSpacing">
+     <number>8</number>
+    </property>
+    <property name="verticalSpacing">
+     <number>0</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="RaisedMaterialButton" name="rec_playStopButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>36</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../resources.qrc">
+        <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>24</width>
+        <height>24</height>
+       </size>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>play_arrow</string>
+      </property>
+      <property name="themeIconName_disabled" stdset="0">
+       <string>play_arrow_disabled</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>Tool</string>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QComboBox" name="rec_formatSwitch">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QComboBox::AdjustToContents</enum>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <item>
+       <property name="text">
+        <string>WEBM</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>GIF</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="RaisedMaterialButton" name="rec_saveButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>60</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SAVE</string>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>Tool</string>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="rec_timeResLabel">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>21s / 1920 x 1080</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
   </widget>
-  <zorder>recordOverlayWidget</zorder>
-  <zorder>rec_playStopButton</zorder>
-  <zorder>rec_formatSwitch</zorder>
-  <zorder>rec_saveButton</zorder>
-  <zorder>rec_timeResLabel</zorder>
-  <zorder>rec_recordDotLabel</zorder>
+ <zorder>rec_playerOverlayWidget</zorder>
+ <zorder>rec_recordOverlayWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>
