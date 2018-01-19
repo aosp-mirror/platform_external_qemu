@@ -159,8 +159,8 @@ GLEScmContext::GLEScmContext(int maj, int min,
         mProjMatrices.resize(1, glm::mat4());
         mModelviewMatrices.resize(1, glm::mat4());
         mTextureMatrices.resize(kMaxTextureUnits, { glm::mat4() });
-        mTexUnitEnvs.resize(kMaxTextureUnits, {});
-        mTexGens.resize(kMaxTextureUnits, {});
+        mTexUnitEnvs.resize(kMaxTextureUnits, TexEnv());
+        mTexGens.resize(kMaxTextureUnits, TexEnv());
 
         for (int i = 0; i < kMaxTextureUnits; i++) {
             mTexUnitEnvs[i][GL_TEXTURE_ENV_MODE].val.intVal[0] = GL_MODULATE;

@@ -190,7 +190,7 @@ gen_wrapper_program ()
       ld|ld.bfd|ld.gold)
         FLAGS=$FLAGS" $EXTRA_LDFLAGS"
         case $CURRENT_HOST in
-          linux*|windows*) DST_PROG=gcc;;
+          linux*|windows*) DST_PROG=g++;;
           darwin*)
             DST_PREFIX=$CLANG_BINDIR/
             DST_PROG=clang
@@ -395,16 +395,17 @@ prepare_build_for_host () {
         linux-x86_64)
             GNU_CONFIG_HOST=x86_64-linux
             EXTRA_CFLAGS="-m64"
-            EXTRA_CXXFLAGS="-m64 -D__OLD_STD_VERSION__=1"
-            POST_CFLAGS="-I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include -I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/x86_64-linux-gnu"
-            POST_CXXFLAGS="-I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include -I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/x86_64-linux-gnu"
-            ;;
-        linux-x86)
-            GNU_CONFIG_HOST=i686-linux
-            EXTRA_CFLAGS="-m32"
-            EXTRA_CXXFLAGS="-m32 -D__OLD_STD_VERSION__=1"
-            POST_CFLAGS="-I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include -I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/i386-linux-gnu"
-            POST_CXXFLAGS="-I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include -I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/i386-linux-gnu"
+            EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -m64 -D__OLD_STD_VERSION__=1"
+
+            if [ "$OPT_CLANG" ]; then
+              EXTRA_CFLAGS="$EXTRA_CFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include"
+              EXTRA_CFLAGS="$EXTRA_CFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/x86_64-linux-gnu"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS --gcc-toolchain=$PREBUILT_TOOLCHAIN_DIR/libexec/gcc/x86_64-linux/4.8/"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/x86_64-linux/include/c++/4.8/"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/x86_64-linux/include/c++/4.8/x86_64-linux/"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/x86_64-linux-gnu/"
+            fi
             ;;
         windows-x86)
             GNU_CONFIG_HOST=i686-w64-mingw32
