@@ -1,0 +1,9 @@
+Verified+1: Tim Psiaki <tpsiaki@google.com>
+Code-Review+1: Tim Psiaki <tpsiaki@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Tim Psiaki <tpsiaki@google.com>
+Submitted-at: Fri, 19 Jan 2018 19:24:16 +0000
+Reviewed-on: https://android-review.googlesource.com/594195
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.6-release
