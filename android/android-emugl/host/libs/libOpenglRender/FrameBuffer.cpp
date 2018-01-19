@@ -1629,7 +1629,9 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     return res;
 }
 
-bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
+bool FrameBuffer::postImpl(HandleType p_colorbuffer,
+                           bool needLockAndBind,
+                           bool repaint) {
     if (needLockAndBind) {
         m_lock.lock();
     }
@@ -1686,9 +1688,9 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
                     m_readbackThread.enqueue({ReadbackCmd::Init});
                     m_readbackThread.waitQueuedItems();
                 }
-            } else {
-                m_readbackWorker->doNextReadback(cb.get(), m_fbImage);
             }
+
+            m_readbackWorker->doNextReadback(cb.get(), m_fbImage, repaint);
         } else {
             (*c).second.cb->readback(m_fbImage);
             doPostCallback(m_fbImage);
@@ -1731,7 +1733,8 @@ bool FrameBuffer::repost(bool needLockAndBind) {
     if (m_lastPostedColorBuffer &&
         sInitialized.load(std::memory_order_relaxed)) {
         GL_LOG("Has last posted colorbuffer and is initialized; post.");
-        return postImpl(m_lastPostedColorBuffer, needLockAndBind);
+        return postImpl(m_lastPostedColorBuffer, needLockAndBind,
+                        true /* need repaint */);
     } else {
         GL_LOG("No repost: no last posted color buffer");
         if (!sInitialized.load(std::memory_order_relaxed)) {
