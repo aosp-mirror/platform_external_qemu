@@ -29,7 +29,9 @@ public:
     // This will trigger an async glReadPixels of the current framebuffer.
     // The post callback of Framebuffer will also be triggered, but
     // in async mode it should do minimal work that involves |fbImage|.
-    void doNextReadback(ColorBuffer* cb, void* fbImage);
+    // |repaint|: flag to prime async readback with multiple iterations
+    // so that the consumer of readback doesn't lag behind.
+    void doNextReadback(ColorBuffer* cb, void* fbImage, bool repaint);
 
     // getPixels(): Run this on a separate GL thread. This retrieves the
     // latest framebuffer that has been posted and read with doNextReadback.

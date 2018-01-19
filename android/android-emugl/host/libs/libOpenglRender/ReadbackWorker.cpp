@@ -34,7 +34,16 @@ ReadbackWorker::~ReadbackWorker() {
     mFb->unbindAndDestroyTrivialSharedContext(mContext, mSurf);
 }
 
-void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage) {
+void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
+                                    bool repaint) {
+
+    // if |repaint|, make sure that the current frame is immediately sent down
+    // the pipeline and made available to the consumer by priming async
+    // readback; doing 4 consecutive reads in a row, which should be enough to
+    // fill the 3 buffers in the triple buffering setup and on the 4th, trigger
+    // a post callback.
+    int numIter = repaint ? 4 : 1;
+
     // Mailbox-style triple buffering setup:
     // We want to avoid glReadPixels while in the middle of doing
     // memcpy to the consumer, but also want to avoid latency while
@@ -57,52 +66,54 @@ void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage) {
     //   glReadPixels on it (avoid simultaneous map + glReadPixels)
     // - glReadPixels and then immediately map/copy the same buffer
     //   doesn't happen either (avoid sync point in glMapBufferRange)
-    android::base::AutoLock lock(mLock);
-    if (mIsCopying) {
-        switch (mMapCopyIndex) {
-        // To keep double buffering effect on
-        // glReadPixels, need to keep even/oddness of
-        // mReadPixelsIndexEven and mReadPixelsIndexOdd.
-        case 0:
-            mReadPixelsIndexEven = 2;
-            mReadPixelsIndexOdd = 1;
-            break;
-        case 1:
+    for (int i = 0; i < numIter; i++) {
+        android::base::AutoLock lock(mLock);
+        if (mIsCopying) {
+            switch (mMapCopyIndex) {
+                // To keep double buffering effect on
+                // glReadPixels, need to keep even/oddness of
+                // mReadPixelsIndexEven and mReadPixelsIndexOdd.
+                case 0:
+                    mReadPixelsIndexEven = 2;
+                    mReadPixelsIndexOdd = 1;
+                    break;
+                case 1:
+                    mReadPixelsIndexEven = 0;
+                    mReadPixelsIndexOdd = 2;
+                    break;
+                case 2:
+                    mReadPixelsIndexEven = 0;
+                    mReadPixelsIndexOdd = 1;
+                    break;
+            }
+        } else {
             mReadPixelsIndexEven = 0;
-            mReadPixelsIndexOdd = 2;
-            break;
-        case 2:
-            mReadPixelsIndexEven = 0;
             mReadPixelsIndexOdd = 1;
-            break;
+            mMapCopyIndex = mPrevReadPixelsIndex;
         }
-    } else {
-        mReadPixelsIndexEven = 0;
-        mReadPixelsIndexOdd = 1;
-        mMapCopyIndex = mPrevReadPixelsIndex;
+
+        // Double buffering on buffer A / B part
+        uint32_t readAt;
+        if (m_readbackCount % 2 == 0) {
+            readAt = mReadPixelsIndexEven;
+        } else {
+            readAt = mReadPixelsIndexOdd;
+        }
+        lock.unlock();
+
+        cb->readbackAsync(mBuffers[readAt]);
+
+        // It's possible to post callback before any of the async readbacks
+        // have written any data yet, which results in a black frame.  Safer
+        // option to avoid this glitch is to wait until all 3 potential
+        // buffers in our triple buffering setup have had chances to readback.
+        if (m_readbackCount > 2) {
+            mFb->doPostCallback(fbImage);
+        }
+        m_readbackCount++;
+
+        mPrevReadPixelsIndex = readAt;
     }
-
-    // Double buffering on buffer A / B part
-    uint32_t readAt;
-    if (m_readbackCount % 2 == 0) {
-        readAt = mReadPixelsIndexEven;
-    } else {
-        readAt = mReadPixelsIndexOdd;
-    }
-    lock.unlock();
-
-    cb->readbackAsync(mBuffers[readAt]);
-
-    // It's possible to post callback before any of the async readbacks
-    // have written any data yet, which results in a black frame.  Safer
-    // option to avoid this glitch is to wait until all 3 potential
-    // buffers in our triple buffering setup have had chances to readback.
-    if (m_readbackCount > 3) {
-        mFb->doPostCallback(fbImage);
-    }
-    m_readbackCount++;
-
-    mPrevReadPixelsIndex = readAt;
 }
 
 void ReadbackWorker::getPixels(void* buf, uint32_t bytes) {
