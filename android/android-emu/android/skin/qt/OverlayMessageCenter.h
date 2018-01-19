@@ -78,6 +78,7 @@ private:
 
     void reattachToParent();
     void dismissMessage(OverlayChildWidget* messageWidget);
+    void dismissMessageImmediately(OverlayChildWidget* messageWidget);
     QPixmap icon(Icon type);
 
     SizeTweaker mSizeTweaker;
