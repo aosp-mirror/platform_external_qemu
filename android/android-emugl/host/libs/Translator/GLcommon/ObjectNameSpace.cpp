@@ -237,6 +237,14 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
     }
 }
 
+ObjectDataMap::const_iterator NameSpace::objDataMapBegin() const {
+    return m_objectDataMap.begin();
+}
+
+ObjectDataMap::const_iterator NameSpace::objDataMapEnd() const {
+    return m_objectDataMap.end();
+}
+
 static android::base::LazyInstance<ObjectDataPtr> nullObjectData = {};
 
 const ObjectDataPtr& NameSpace::getObjectDataPtr(

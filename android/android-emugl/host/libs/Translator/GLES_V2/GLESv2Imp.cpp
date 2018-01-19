@@ -2943,6 +2943,7 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
     // its underlying texture.
     //
     rbData->eglImageGlobalTexObject.reset();
+    rbData->saveableTexture.reset();
 
     *err = GL_NO_ERROR;
 
@@ -3650,6 +3651,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     // acquire the texture in the renderbufferData that it is an eglImage target
     //
     rbData->eglImageGlobalTexObject = img->globalTexObj;
+    rbData->saveableTexture = img->saveableTexture;
     img->saveableTexture->makeDirty();
 
     //

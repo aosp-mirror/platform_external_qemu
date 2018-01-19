@@ -10,7 +10,7 @@
 
 class ColorBuffer;
 class FrameBuffer;
-class RenderThreadInfo;
+struct RenderThreadInfo;
 
 // This class implements async readback of emugl ColorBuffers.
 // It is meant to run on both the emugl framebuffer posting thread

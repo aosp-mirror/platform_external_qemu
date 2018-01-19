@@ -10,7 +10,7 @@
 
 class ColorBuffer;
 class FrameBuffer;
-class RenderThreadInfo;
+struct RenderThreadInfo;
 
 class PostWorker {
 public:

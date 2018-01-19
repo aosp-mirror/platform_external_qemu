@@ -2149,6 +2149,7 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
     // acquire the texture in the renderbufferData that it is an eglImage target
     //
     rbData->eglImageGlobalTexObject = img->globalTexObj;
+    rbData->saveableTexture = img->saveableTexture;
     img->saveableTexture->makeDirty();
 
     //
@@ -2318,6 +2319,7 @@ GL_API void GLAPIENTRY glRenderbufferStorageOES(GLenum target, GLenum internalfo
     // its underlying texture.
     //
     rbData->eglImageGlobalTexObject.reset();
+    rbData->saveableTexture.reset();
 
     ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
 }

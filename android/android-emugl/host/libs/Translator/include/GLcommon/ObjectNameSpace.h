@@ -107,6 +107,8 @@ public:
     void postLoadRestore(const ObjectData::getGlobalName_t& getGlobalName);
     void preSave(GlobalNameSpace *globalNameSpace);
     void onSave(android::base::Stream* stream);
+    ObjectDataMap::const_iterator objDataMapBegin() const;
+    ObjectDataMap::const_iterator objDataMapEnd() const;
 private:
     ObjectLocalName m_nextName = 0;
     NamesMap m_localToGlobalMap;
