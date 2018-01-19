@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "68b7efba_822818e5",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1903,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-01-19T00:30:28Z",
+      "side": 1,
+      "message": "This function is confusing as the function name says \"guest\" while \"software\" defaults to a host renderer. Could we remove !strcmp(choice, \"software\")?",
+      "range": {
+        "startLine": 1902,
+        "startChar": 47,
+        "endLine": 1903,
+        "endChar": 49
+      },
+      "revId": "67cc90c85778907bf39c038fbb1abca1e793c0f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
