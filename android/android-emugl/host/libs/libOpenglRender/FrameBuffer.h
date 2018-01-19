@@ -436,7 +436,7 @@ private:
     void eraseDelayedCloseColorBufferLocked(
             HandleType cb, android::base::System::Duration ts);
 
-    bool postImpl(HandleType p_colorbuffer, bool needLockAndBind = true);
+    bool postImpl(HandleType p_colorbuffer, bool needLockAndBind = true, bool repaint = false);
     void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
 
 private:
