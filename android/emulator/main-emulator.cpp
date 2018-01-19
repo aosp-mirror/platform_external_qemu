@@ -1005,6 +1005,12 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
         }
         asprintf(&kernel_file, "%s/%s", systemImagePath.c_str(),
                  "kernel-ranchu");
+        result = path_exists(kernel_file);
+        if (result == false) {
+            AFREE(kernel_file);
+            asprintf(&kernel_file, "%s/%s", systemImagePath.c_str(),
+                    "kernel-ranchu-64");
+        }
     }
     result = path_exists(kernel_file);
     D("Probing for %s: file %s", kernel_file, result ? "exists" : "missing");
