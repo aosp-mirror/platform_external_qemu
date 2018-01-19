@@ -22,6 +22,30 @@
       "revId": "67cc90c85778907bf39c038fbb1abca1e793c0f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94d1e603_77c10b22",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1903,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-01-19T16:39:33Z",
+      "side": 1,
+      "message": "I was unsure if \"guest\" should be included here. I think you\u0027re right that it does not. I\u0027ll revert this test.",
+      "parentUuid": "68b7efba_822818e5",
+      "range": {
+        "startLine": 1902,
+        "startChar": 47,
+        "endLine": 1903,
+        "endChar": 49
+      },
+      "revId": "67cc90c85778907bf39c038fbb1abca1e793c0f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
