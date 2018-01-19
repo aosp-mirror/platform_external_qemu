@@ -240,6 +240,7 @@ static bool isDismissing(const QWidget* widget) {
     return widget->property(kDismissProperty).toBool();
 }
 
+// Get rid of the overlay message by fading it away
 void OverlayMessageCenter::dismissMessage(OverlayChildWidget* messageWidget) {
     if (isDismissing(messageWidget)) {
         return;
@@ -275,6 +276,15 @@ void OverlayMessageCenter::dismissMessage(OverlayChildWidget* messageWidget) {
                            [messageWidget] { messageWidget->deleteLater(); });
 }
 
+// Get rid of the overlay message ASAP
+void OverlayMessageCenter::dismissMessageImmediately(OverlayChildWidget* messageWidget) {
+    if (isDismissing(messageWidget)) {
+        return;
+    }
+    messageWidget->setProperty(kDismissProperty, true);
+    messageWidget->deleteLater();
+}
+
 void OverlayMessageCenter::addMessage(QString message,
                                       Icon icon,
                                       int timeoutMs) {
@@ -292,7 +302,7 @@ void OverlayMessageCenter::addMessage(QString message,
                                      &QLabel::linkActivated,
                                      [this, widgetPtr](const QString&) {
                                          if (widgetPtr) {
-                                             dismissMessage(widgetPtr);
+                                             dismissMessageImmediately(widgetPtr);
                                          }
                                      });
 
