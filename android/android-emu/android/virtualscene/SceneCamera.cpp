@@ -61,10 +61,10 @@ static glm::mat4 poseToOpenGl(glm::quat rotation, glm::vec3 translation) {
 SceneCamera::SceneCamera() {
     mProjection = projectionMatrixForCameraIntrinsics(640.0f,    // width
                                                       480.0f,    // height
-                                                      478.818f,  // fx
-                                                      478.745f,  // fy
-                                                      320.398f,  // cx
-                                                      241.369f,  // cy
+                                                      480.0f,  // fx
+                                                      480.0f,  // fy
+                                                      320.0f,  // cx
+                                                      240.0f,  // cy
                                                       0.1f,      // zNear
                                                       100.0f);   // zFar
 
