@@ -241,6 +241,13 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     mVmOperations.snapshotLoad(name, this, nullptr);
     mIsQuickboot = false;
     mLastLoadDuration.emplace(sw.elapsedUs() / 1000);
+
+    // if we end up deleting in the loader (for whatever reaosn),
+    // at least make sure mLoader is not null.
+    if (!mLoader) {
+        onLoadingFailed(name, -EINVAL);
+    }
+
     mLoadedSnapshotFile =
             (mLoader->status() == OperationStatus::Ok) ? name : "";
     return mLoader->status();
