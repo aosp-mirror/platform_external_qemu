@@ -556,7 +556,7 @@ else
 ifeq (true,$(_HAS_WINPTHREAD))
 LOCAL_LDLIBS += -Wl,-Bstatic -lstdc++ -lwinpthread -Wl,-Bdynamic
 else # !libwinpthread
-LOCAL_LD := $(call local-build-var,CXX)
+LOCAL_LD := $(call local-build-var,LD)
 LOCAL_LDLIBS += -static-libstdc++
 endif  # !_HAS_WINPTHREAD
 endif  # BUILD_TARGET_OS != darwin

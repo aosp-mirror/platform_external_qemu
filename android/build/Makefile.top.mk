@@ -75,6 +75,11 @@ endif
 # suppressing most warnings.
 CLANG_COMPILER_FLAGS= \
                       -D__STDC_CONSTANT_MACROS \
+                      -D_LIBCPP_VERSION=__GLIBCPP__ \
+                      -Wno-mismatched-tags \
+                      -Wno-unused-variable \
+                      -Wno-deprecated-declarations \
+                      -Wno-c++14-extensions \
                       -Wno-array-bounds \
                       -Wno-builtin-requires-header \
                       -Wno-constant-conversion \
