@@ -936,7 +936,7 @@ again:
                 if ((idtvec_info & VMCS_IDT_VEC_VALID) == 0 && (exit_qual & EXIT_QUAL_NMIUDTI) != 0)
                     vmx_set_nmi_blocking(cpu);
 
-                slot = hvf_find_overlap_slot(gpa, gpa);
+                slot = hvf_find_overlap_slot(gpa, gpa + 1);
                 // mmio
                 if (ept_emulation_fault(exit_qual) && !slot) {
                     struct x86_decode decode;
