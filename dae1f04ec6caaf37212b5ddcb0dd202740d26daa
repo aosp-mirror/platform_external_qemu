@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e95dd333_84987e8f",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-20T01:23:13Z",
+      "side": 1,
+      "message": "any partiular reason for the 2 *?",
+      "range": {
+        "startLine": 118,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 12
+      },
+      "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
