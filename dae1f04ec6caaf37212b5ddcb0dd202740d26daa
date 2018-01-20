@@ -22,6 +22,30 @@
       "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25febacf_82a81f12",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-01-20T01:25:09Z",
+      "side": 1,
+      "message": "This is to keep is as same as old logic, the old logic is keeping\nextracma + glEs... size buffer.\nThat\u0027s actully   means  2 * gles...size , or actually it\u0027s a bug of old code?",
+      "parentUuid": "e95dd333_84987e8f",
+      "range": {
+        "startLine": 118,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 12
+      },
+      "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
