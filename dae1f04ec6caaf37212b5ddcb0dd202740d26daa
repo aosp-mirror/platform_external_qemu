@@ -46,6 +46,30 @@
       "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "788913ba_c9ec8d82",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-20T01:27:35Z",
+      "side": 1,
+      "message": "don\u0027t get it; 2 * gles...size !\u003d  gles...size?",
+      "parentUuid": "25febacf_82a81f12",
+      "range": {
+        "startLine": 118,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 12
+      },
+      "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
