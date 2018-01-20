@@ -118,6 +118,30 @@
       "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "404a9a76_2ac72eee",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-20T02:26:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b8de653e_62cb15d5",
+      "range": {
+        "startLine": 118,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 12
+      },
+      "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
