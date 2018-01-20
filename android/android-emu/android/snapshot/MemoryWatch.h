@@ -15,7 +15,8 @@
 #include <memory>
 
 typedef void* (*gpa2hva_t)(uint64_t gpa, bool* found);
-typedef uint64_t (*hva2gpa_t)(void* hva, bool* found);
+typedef int (*hva2gpa_t)(void* hva, uint64_t length, int max,
+                         uint64_t* gpa, uint64_t* size);
 
 typedef int (*guest_mem_map_t)(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
 typedef int (*guest_mem_unmap_t)(uint64_t gpa, uint64_t size);
