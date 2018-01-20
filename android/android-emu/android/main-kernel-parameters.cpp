@@ -117,11 +117,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     // 3. Additional contiguous memory reservation for DMA and software framebuffers,
     // specified in MB
-    const int extraCma =
-        glEstimatedFramebufferMemUsageMB +
+    const int Cma =
+        2 * glEstimatedFramebufferMemUsageMB +
         (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
-    if (extraCma) {
-        params.addFormat("cma=%" PRIu64 "M", glEstimatedFramebufferMemUsageMB + extraCma);
+    if (Cma) {
+        params.addFormat("cma=%" PRIu64 "M@0-4G", Cma);
     }
 
     if (opts->logcat) {
