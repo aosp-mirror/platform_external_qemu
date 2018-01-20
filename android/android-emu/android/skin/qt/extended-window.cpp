@@ -31,7 +31,7 @@
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
     ToolWindow *tW) :
-    QFrame(eW->containerWindow()),
+    QFrame(nullptr),
     mEmulatorWindow(eW),
     mToolWindow(tW),
     mExtendedUi(new Ui::ExtendedControls),
