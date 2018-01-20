@@ -94,6 +94,30 @@
       "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8de653e_62cb15d5",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-01-20T01:30:14Z",
+      "side": 1,
+      "message": "The old code keep such size memory:\nglEstimatedFramebufferMemUsageMB + extraCma  \nAnd extraCma \u003d  glEstimatedFramebufferMemUsageMB + gldma_size\nSo actually old code is keeping such size ram:\n\n2 * glEstimatedFramebufferMemUsageMB  + gldma_size\n\nI just renamed extraCma to Cma and put the calculation in one place.",
+      "parentUuid": "788913ba_c9ec8d82",
+      "range": {
+        "startLine": 118,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 12
+      },
+      "revId": "dae1f04ec6caaf37212b5ddcb0dd202740d26daa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
