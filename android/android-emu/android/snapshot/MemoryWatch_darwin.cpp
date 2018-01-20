@@ -58,10 +58,12 @@ public:
 
     bool registerMemoryRange(void* start, size_t length) {
         if (mAccel == CPU_ACCELERATOR_HVF) {
-            bool found = false;
-            uint64_t gpa = hva2gpa_call(start, &found);
-            if (found) {
-                guest_mem_protect_call(gpa, length, 0);
+            // The maxium slot number is 32 for HVF.
+            uint64_t gpa[32];
+            uint64_t size[32];
+            int count = hva2gpa_call(start, length, 32, gpa, size);
+            for (int i = 0; i < count; ++i) {
+                guest_mem_protect_call(gpa[i], size[i], 0);
             }
         }
         mprotect(start, length, PROT_NONE);
@@ -99,9 +101,9 @@ public:
             memcpy(start, data, length);
         }
         if (mAccel == CPU_ACCELERATOR_HVF) {
-            bool found = false;
-            uint64_t gpa = hva2gpa_call(start, &found);
-            if (found) {
+            uint64_t gpa, size;
+            int count = hva2gpa_call(start, 1, 1, &gpa, &size);
+            if (count) {
                 // Restore the mapping because we might have re-mapped above.
                 if (remapNeeded) {
                     guest_mem_remap_call(start, gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);

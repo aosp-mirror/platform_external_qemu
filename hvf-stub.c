@@ -22,8 +22,8 @@ void* hvf_gpa2hva(uint64_t gpa, bool* found) {
     return 0;
 }
 
-uint64_t hvf_hva2gpa(void* hva, bool* found) {
-    *found = false;
+int hvf_hva2gpa(void* hva, uint64_t length, int max,
+                uint64_t* gpa, uint64_t* size) {
     return 0;
 }
 
