@@ -176,9 +176,11 @@ void* hvf_gpa2hva(uint64_t gpa, bool* found) {
     return 0;
 }
 
-uint64_t hvf_hva2gpa(void* hva, bool* found) {
+#define min(a, b) ((a) < (b) ? (a) : (b))
+int hvf_hva2gpa(void* hva, uint64_t length, int array_size,
+                uint64_t* gpa, uint64_t* size) {
     struct mac_slot *mslot;
-    *found = false;
+    int count = 0;
 
     for (uint32_t i = 0; i < MAC_SLOTS_COUNT; i++) {
         mslot = &mac_slots[i];
@@ -186,14 +188,35 @@ uint64_t hvf_hva2gpa(void* hva, bool* found) {
 
         uintptr_t hva_start_num = (uintptr_t)mslot->hva;
         uintptr_t hva_num = (uintptr_t)hva;
+        // Start of this hva region is in this slot.
         if (hva_num >= hva_start_num &&
             hva_num < hva_start_num + mslot->size) {
-            *found = true;
-            return mslot->gpa_start + (hva_num - hva_start_num);
+            if (count < array_size) {
+                gpa[count] = mslot->gpa_start + (hva_num - hva_start_num);
+                size[count] = min(length,
+                                  mslot->size - (hva_num - hva_start_num));
+            }
+            count++;
+        // End of this hva region is in this slot.
+        // Its start is outside of this slot.
+        } else if (hva_num + length <= hva_start_num + mslot->size &&
+                   hva_num + length > hva_start_num) {
+            if (count < array_size) {
+                gpa[count] = mslot->gpa_start;
+                size[count] = hva_num + length - hva_start_num;
+            }
+            count++;
+        // This slot belongs to this hva region completely.
+        } else if (hva_num + length > hva_start_num +  mslot->size &&
+                   hva_num < hva_start_num)  {
+            if (count < array_size) {
+                gpa[count] = mslot->gpa_start;
+                size[count] = mslot->size;
+            }
+            count++;
         }
     }
-
-    return 0;
+    return count;
 }
 
 int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
