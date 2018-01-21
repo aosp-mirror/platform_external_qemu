@@ -1704,5 +1704,6 @@ void x86_cpu_dump_local_apic_state(CPUState *cs, FILE *f,
 
 /* cpu.c */
 bool cpu_is_bsp(X86CPU *cpu);
+void x86_update_hflags(CPUX86State* env);
 
 #endif /* I386_CPU_H */
