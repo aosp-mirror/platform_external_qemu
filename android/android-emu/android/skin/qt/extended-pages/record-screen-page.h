@@ -59,6 +59,8 @@ public:
     void setRecordState(RecordState r);
 
 private:
+    void stopRecordingOrPlaying();
+
     static const char kTmpMediaName[]; // tmp name for unsaved media file
     std::string mTmpFilePath;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
