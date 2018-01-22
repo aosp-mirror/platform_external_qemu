@@ -30,6 +30,7 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
+#include <unordered_set>
 
 using android::base::ScopedCPtr;
 
@@ -39,6 +40,12 @@ static constexpr char kIniSettingDefault[] = "default";
 
 static android::base::LazyInstance<android::featurecontrol::FeatureControlImpl>
         s_featureControl = LAZY_INSTANCE_INIT;
+
+#define FEATURE_CONTROL_ITEM(item) #item,
+static const std::unordered_set<std::string> kExpectedGuestFeatures = {
+    #include "FeatureControlDefGuest.h"
+};
+#undef FEATURE_CONTROL_ITEM
 
 static IniSetting ParseIniStr(const std::string& str) {
     if (strcasecmp(str.c_str(), "on") == 0) {
@@ -154,6 +161,23 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
         if (base::System::get()->pathCanRead(defaultIniGuestPath)) {
             base::IniFile defaultIniGuest(defaultIniGuestPath);
             if (defaultIniGuest.read()) {
+                std::unordered_set<std::string> unexpectedGuestFeatures = {};
+                for (const auto& guestFeature : defaultIniGuest) {
+                    if (!kExpectedGuestFeatures.count(guestFeature)) {
+                        unexpectedGuestFeatures.insert(guestFeature);
+                    }
+                }
+                if (unexpectedGuestFeatures.size()) {
+                    fprintf(stderr,
+                            "WARNING: unexpected system image feature string, "
+                            "emulator might not function correctly, "
+                            "please try updating the emulator.\n");
+                    fprintf(stderr, "Unexpected feature list:");
+                    for (const auto& guestFeature : unexpectedGuestFeatures) {
+                        fprintf(stderr, " %s", guestFeature.c_str());
+                    }
+                    fprintf(stderr, "\n");
+                }
 #define FEATURE_CONTROL_ITEM(item)                                         \
                 initGuestFeatureAndParseDefault(defaultIniHost, defaultIniGuest, item, #item);
 #include "FeatureControlDefGuest.h"
