@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "311acc40_87de951e",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-01-22T12:09:24Z",
+      "side": 1,
+      "message": "You have already mapped the guest buffer for i \u003d 0 case a couple lines above, so you will have 2 calls to map_guest_buffer() for the same mapping. This brings unnecessary overhead and creates leaks, since you will have unmatched calls to map_guest_buffer() and cpu_physical_memory_unmap().",
+      "range": {
+        "startLine": 858,
+        "startChar": 21,
+        "endLine": 858,
+        "endChar": 22
+      },
+      "revId": "bf53477a313d981c1573ff9a470d02f16a754598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "33638d19_bc923d08",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 880,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-01-22T12:09:24Z",
+      "side": 1,
+      "message": "This is your fast path, but I do not see the benefit of this implementation since you have already made sure you map the CMA region below the 4G with your other patch:\nhttps://android-review.googlesource.com/#/c/platform/external/qemu/+/594773/\n\nOr am I missing something else?",
+      "range": {
+        "startLine": 874,
+        "startChar": 0,
+        "endLine": 880,
+        "endChar": 21
+      },
+      "revId": "bf53477a313d981c1573ff9a470d02f16a754598",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
