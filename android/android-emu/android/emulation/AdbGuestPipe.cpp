@@ -417,8 +417,15 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
             ssize_t len;
             {
                 ScopedVmUnlock unlockBql;
-                len = android::base::socketRecv(mHostSocket->fd(),
-                                                data, dataSize);
+                // Possible that the host socket has been reset.
+                if (mHostSocket) {
+                    len = android::base::socketRecv(mHostSocket->fd(),
+                            data, dataSize);
+                } else {
+                    fprintf(stderr, "WARNING: AdbGuestPipe socket closed in the middle of recv\n");
+                    mState = State::ClosedByHost;
+                    len = -1;
+                }
             }
             if (len > 0) {
                 data += len;
@@ -468,8 +475,15 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
             ssize_t len;
             {
                 ScopedVmUnlock unlockBql;
-                len = android::base::socketSend(mHostSocket->fd(),
-                                                data, dataSize);
+                // Possible that the host socket has been reset.
+                if (mHostSocket) {
+                    len = android::base::socketSend(mHostSocket->fd(),
+                                                    data, dataSize);
+                } else {
+                    fprintf(stderr, "WARNING: AdbGuestPipe socket closed in the middle of send\n");
+                    mState = State::ClosedByHost;
+                    len = -1;
+                }
             }
             if (len > 0) {
                 data += len;
