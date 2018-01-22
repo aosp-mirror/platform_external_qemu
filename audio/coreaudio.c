@@ -660,7 +660,7 @@ static int coreaudio_run_out (HWVoiceOut *hw, int live)
     decr = audio_MIN (core->decr, live);
     core->decr -= decr;
 
-    core->live = live - decr;
+    core->live = live;
     hw->rpos = core->pos;
 
     coreaudio_unlock (core, "coreaudio_run_out");
@@ -731,6 +731,7 @@ static OSStatus audioOutputDeviceIOProc(
 
     rpos = (rpos + frameCount) % hw->samples;
     core->decr += frameCount;
+    core->live -= frameCount;
     core->pos = rpos;
 
     coreaudio_unlock (core, "audioOutputDeviceIOProc");
