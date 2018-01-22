@@ -838,13 +838,6 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             GoldfishPipeBuffer buffers[
                     COMMAND_BUFFER_SIZE / (sizeof(*rwPtrs) + sizeof(*rwSizes))];
 
-            buffers[0].size = rwSizes[0];
-            buffers[0].data = map_guest_buffer(
-                                  rwPtrs[0], rwSizes[0], willModifyData);
-            if (!buffers[0].data) {
-                pipe->command_buffer->status = GOLDFISH_PIPE_ERROR_INVAL;
-                break;
-            }
             // All passed buffers are allocated in the same guest process, so
             // know they all have the same offset from the host address if they
             // are in the same region: below 4G or over 4G. Use '1' as invalid
