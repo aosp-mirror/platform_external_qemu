@@ -1871,10 +1871,12 @@ void FrameBuffer::onSave(Stream* stream,
             s_egl.eglPostSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
                     stream);
         }
-        if (m_eglContextInitialized) {
-            // We need to run the post save step for m_eglContext and m_pbufContext
-            // to mark their texture handles dirty
+        // We need to run the post save step for m_eglContext and m_pbufContext
+        // to mark their texture handles dirty
+        if (m_eglContext != EGL_NO_CONTEXT) {
             s_egl.eglPostSaveContext(m_eglDisplay, m_eglContext, stream);
+        }
+        if (m_pbufContext != EGL_NO_CONTEXT) {
             s_egl.eglPostSaveContext(m_eglDisplay, m_pbufContext, stream);
         }
     }

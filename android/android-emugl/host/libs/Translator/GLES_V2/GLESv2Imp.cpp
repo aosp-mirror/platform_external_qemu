@@ -220,6 +220,7 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
         return;
     }
 
+    img->saveableTexture->makeDirty();
     GLuint globalTexObj = img->globalTexObj->getGlobalName();
     ctx->blitFromReadBufferToTextureFlipped(
             globalTexObj, img->width, img->height,
