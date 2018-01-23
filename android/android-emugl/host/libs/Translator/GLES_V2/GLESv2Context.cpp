@@ -206,10 +206,10 @@ void GLESv2Context::postLoadRestoreCtx() {
 
     // vertex attribute pointers
     for (const auto& vaoIte : m_vaoStateMap) {
+        if (vaoIte.first != 0) {
+            genVAOName(vaoIte.first, false);
+        }
         if (m_glesMajorVersion >= 3) {
-            if (vaoIte.first != 0) {
-                genVAOName(vaoIte.first, false);
-            }
             dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         }
         for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
