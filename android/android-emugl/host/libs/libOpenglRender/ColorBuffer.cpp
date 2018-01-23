@@ -77,6 +77,22 @@ void unbindFbo() {
 
 ColorBuffer::Helper::~Helper() = default;
 
+static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
+    switch (format) {
+        case GL_RGB8:
+        case GL_RGB565:
+        case GL_RGBA8:
+        case GL_RGB16F:
+            return GL_RGB;
+        case GL_RGB5_A1_OES:
+        case GL_RGBA4_OES:
+        case GL_UNSIGNED_INT_10_10_10_2_OES:
+        case GL_RGBA16F:
+            return GL_RGB;
+        default:
+            return format;
+    }
+}
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
@@ -262,9 +278,7 @@ void ColorBuffer::readPixels(int x,
         return;
     }
 
-    if (p_format == GL_RGB565) {
-        p_format = GL_RGB;
-    }
+    p_format = sGetUnsizedColorBufferFormat(p_format);
 
     touch();
     if (bindFbo(&m_fbo, m_tex)) {
@@ -276,9 +290,7 @@ void ColorBuffer::readPixels(int x,
 void ColorBuffer::reformat(GLint internalformat,
                            GLenum format, GLenum type) {
 
-    if (format == GL_RGB565) {
-        format = GL_RGB;
-    }
+    format = sGetUnsizedColorBufferFormat(format);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
@@ -320,9 +332,7 @@ void ColorBuffer::subUpdate(int x,
         return;
     }
 
-    if (p_format == GL_RGB565) {
-        p_format = GL_RGB;
-    }
+    p_format = sGetUnsizedColorBufferFormat(p_format);
 
     touch();
 
