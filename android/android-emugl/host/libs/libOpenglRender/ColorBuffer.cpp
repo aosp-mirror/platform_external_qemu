@@ -262,6 +262,10 @@ void ColorBuffer::readPixels(int x,
         return;
     }
 
+    if (p_format == GL_RGB565) {
+        p_format = GL_RGB;
+    }
+
     touch();
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
@@ -271,6 +275,11 @@ void ColorBuffer::readPixels(int x,
 
 void ColorBuffer::reformat(GLint internalformat,
                            GLenum format, GLenum type) {
+
+    if (format == GL_RGB565) {
+        format = GL_RGB;
+    }
+
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
                          0, format, type, nullptr);
@@ -306,8 +315,13 @@ void ColorBuffer::subUpdate(int x,
                             GLenum p_type,
                             void* pixels) {
     RecursiveScopedHelperContext context(m_helper);
+
     if (!context.isOk()) {
         return;
+    }
+
+    if (p_format == GL_RGB565) {
+        p_format = GL_RGB;
     }
 
     touch();
