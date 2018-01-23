@@ -88,14 +88,15 @@ public:
             // Remapping:
             // Is zero data, so try to use an existing zero page in the OS
             // instead of memset which might cause more memory to be resident.
-            if (!isQuickboot &&
-                (MAP_FAILED == mmap(start, length,
-                                   PROT_READ | PROT_WRITE | PROT_EXEC,
-                                   MAP_FIXED | MAP_PRIVATE | MAP_ANON, -1, 0))) {
-                memset(start, 0x0, length);
-                remapNeeded = false;
-            } else {
-                remapNeeded = true;
+            if (!isQuickboot) {
+                if(MAP_FAILED ==
+                       mmap(start, length,
+                            PROT_READ | PROT_WRITE | PROT_EXEC,
+                            MAP_FIXED | MAP_PRIVATE | MAP_ANON, -1, 0)) {
+                    memset(start, 0x0, length);
+                } else {
+                    remapNeeded = true;
+                }
             }
         } else {
             memcpy(start, data, length);
