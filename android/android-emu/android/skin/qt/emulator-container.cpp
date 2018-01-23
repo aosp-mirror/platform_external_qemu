@@ -464,9 +464,7 @@ void EmulatorContainer::adjustVirtualSceneDialogGeometry() {
         return;
     }
 
-    auto overlaySize =
-            QSize(std::min(300, width() - 5), std::min(300, height() - 5));
-    mVirtualSceneInfo->resize(overlaySize, size());
+    mVirtualSceneInfo->resize(size());
     mVirtualSceneInfo->move(
             mapToGlobal({(width() - mVirtualSceneInfo->width()) / 2,
                          (height() - mVirtualSceneInfo->height()) / 2}));

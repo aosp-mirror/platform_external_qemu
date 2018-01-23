@@ -6,36 +6,36 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>300</height>
+    <width>356</width>
+    <height>299</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <layout class="QGridLayout" name="dialogGrid">
-   <property name="leftMargin">
-    <number>0</number>
+   <property name="sizeConstraint">
+    <enum>QLayout::SetMinimumSize</enum>
    </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item row="0" column="0">
     <widget class="QFrame" name="infoFrameContainer">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <layout class="QVBoxLayout" name="horizontalLayout" stretch="0,0,0">
-      <property name="leftMargin">
-       <number>0</number>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
       </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
+      <property name="margin">
        <number>0</number>
       </property>
       <item>
@@ -43,31 +43,40 @@
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::MinimumExpanding</enum>
+        </property>
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>40</height>
+          <height>1</height>
          </size>
         </property>
        </spacer>
       </item>
       <item>
        <widget class="QFrame" name="infoFrame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <layout class="QVBoxLayout" name="verticalLayout">
-         <property name="leftMargin">
-          <number>24</number>
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
          </property>
-         <property name="topMargin">
-          <number>24</number>
-         </property>
-         <property name="rightMargin">
-          <number>24</number>
-         </property>
-         <property name="bottomMargin">
+         <property name="margin">
           <number>24</number>
          </property>
          <item>
           <widget class="QLabel" name="titleLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="font">
             <font>
              <family>Roboto</family>
@@ -84,7 +93,7 @@
          <item>
           <widget class="QLabel" name="infoLabel">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -104,6 +113,9 @@
          </item>
          <item>
           <layout class="QGridLayout" name="infoIconLayout" columnstretch="0,0,1">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMinimumSize</enum>
+           </property>
            <property name="bottomMargin">
             <number>8</number>
            </property>
@@ -128,6 +140,12 @@
            </item>
            <item row="0" column="2">
             <widget class="QLabel" name="mouseInfo">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="font">
               <font>
                <family>Roboto</family>
@@ -140,6 +158,12 @@
            </item>
            <item row="2" column="2">
             <widget class="QLabel" name="wasdInfo">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="font">
               <font>
                <family>Roboto</family>
@@ -229,15 +253,21 @@
          </item>
          <item>
           <layout class="QHBoxLayout" name="buttonLayout" stretch="0,0">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMinimumSize</enum>
+           </property>
            <item>
             <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::MinimumExpanding</enum>
+             </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>40</width>
-               <height>20</height>
+               <width>1</width>
+               <height>1</height>
               </size>
              </property>
             </spacer>
@@ -290,10 +320,13 @@
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::MinimumExpanding</enum>
+        </property>
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>40</height>
+          <height>1</height>
          </size>
         </property>
        </spacer>

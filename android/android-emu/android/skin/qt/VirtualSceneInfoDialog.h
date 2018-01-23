@@ -35,7 +35,7 @@ public:
     void hide(CompletionFunc onHidden);
     using QWidget::hide;
 
-    void resize(const QSize& size, const QSize& parentSize);
+    void resize(const QSize& parentSize);
 
 private slots:
     void on_closeButton_pressed();
@@ -52,6 +52,7 @@ private:
     QString getInfoText();
 
     std::unique_ptr<Ui::VirtualSceneInfoDialog> mUi;
+    QSize mLastSize;
 
     EmulatorContainer* mContainer = nullptr;
     int mBorderRadius = -1;
