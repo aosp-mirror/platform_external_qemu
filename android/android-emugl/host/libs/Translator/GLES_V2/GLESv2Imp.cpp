@@ -2826,16 +2826,6 @@ GL_APICALL void  GL_APIENTRY glPolygonOffset(GLfloat factor, GLfloat units){
 
 GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels){
     GET_CTX_V2();
-
-    // b/72328074
-    // HACK FOR CTS VERIFIER RUNNING ON MAC
-    // Silently replace GL_RGB565 |format| with GL_RGB
-    // Definitely will break dEQP negative tests
-    // Real fix is to fix the test
-#ifdef __APPLE__
-    if (format == GL_RGB565) format = GL_RGB;
-#endif
-
     SET_ERROR_IF(!(GLESv2Validate::pixelOp(format,type)),GL_INVALID_OPERATION);
     SET_ERROR_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, GL_INVALID_FRAMEBUFFER_OPERATION);
 
@@ -3124,15 +3114,6 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
 
-    // b/72328074
-    // HACK FOR CTS VERIFIER RUNNING ON MAC
-    // Silently replace GL_RGB565 |format| with GL_RGB
-    // Definitely will break dEQP negative tests
-    // Real fix is to fix the test
-#ifdef __APPLE__
-    if (format == GL_RGB565) format = GL_RGB;
-#endif
-
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, 0, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
 
@@ -3236,16 +3217,6 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
 
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){
     GET_CTX_V2();
-
-    // b/72328074
-    // HACK FOR CTS VERIFIER RUNNING ON MAC
-    // Silently replace GL_RGB565 |format| with GL_RGB
-    // Definitely will break dEQP negative tests
-    // Real fix is to fix the test
-#ifdef __APPLE__
-    if (format == GL_RGB565) format = GL_RGB;
-#endif
-
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
