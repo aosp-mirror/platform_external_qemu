@@ -76,14 +76,18 @@ void VirtualSceneInfoDialog::hide(CompletionFunc onHidden) {
     });
 }
 
-void VirtualSceneInfoDialog::resize(const QSize& size,
-                                    const QSize& parentSize) {
-    QWidget::resize(size);
-    const auto diff = std::max(parentSize.width() - size.width(),
-                               parentSize.height() - size.height());
-    const auto newBorderRadius =
-            std::min(std::max(0, diff), kDefaultBorderRadius);
-    updateStylesheet(newBorderRadius);
+void VirtualSceneInfoDialog::resize(const QSize& parentSize) {
+    if (parentSize != mLastSize) {
+        mLastSize = parentSize;
+
+        updateStylesheet();
+
+        const QSize hint = minimumSizeHint();
+        const QSize overlaySize =
+                QSize(std::min(hint.width(), parentSize.width()),
+                      std::min(hint.height(), parentSize.height()));
+        QWidget::resize(overlaySize);
+    }
 }
 
 void VirtualSceneInfoDialog::showEvent(QShowEvent* event) {
@@ -119,18 +123,22 @@ void VirtualSceneInfoDialog::on_closeButton_pressed() {
     emit closeButtonPressed();
 }
 
-void VirtualSceneInfoDialog::updateStylesheet(int borderRadius) {
-    if (borderRadius == mBorderRadius) {
-        return;
-    }
+void VirtualSceneInfoDialog::updateStylesheet() {
+#ifdef Q_OS_MAC
+    const int fontSize = 13;
+#else
+    const int fontSize = 10;
+#endif
 
-    mBorderRadius = borderRadius;
     setStyleSheet(QString("%1 QWidget, QVBoxLayout, QHBoxLayout, QLabel, "
                           "QGridLayout { background-color: transparent; }"
                           "#infoFrame { background-color: rgba(39, 50, 56, "
-                          "191); border-radius: %2px; }")
+                          "191); border-radius: %2px; }"
+                          "* { font-size: %3pt }"
+                          "#titleLabel { font-size: 18pt }")
                           .arg(Ui::stylesheetForTheme(SETTINGS_THEME_DARK))
-                          .arg(mBorderRadius));
+                          .arg(kDefaultBorderRadius)
+                          .arg(fontSize));
 }
 
 QString VirtualSceneInfoDialog::getInfoText() {
