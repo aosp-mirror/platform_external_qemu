@@ -587,6 +587,7 @@ void SaveableTexture::onSave(
             }
         }
         dispatcher.glBindTexture(m_target, prevTex);
+        m_isDirty = false;
     } else if (m_target != 0) {
         // SaveableTexture is uninitialized iff a texture hasn't been bound,
         // which will give m_target==0
