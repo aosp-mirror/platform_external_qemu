@@ -10,6 +10,7 @@
 #include "qemu/osdep.h"
 #include "sysemu/block-backend.h"
 #include "sysemu/dma.h"
+#include "sysemu/sysemu.h"
 #include "trace-root.h"
 #include "qemu/thread.h"
 #include "qemu/main-loop.h"
@@ -146,6 +147,10 @@ static void dma_blk_cb(void *opaque, int ret)
         mem = dma_memory_map(dbs->sg->as, cur_addr, &cur_len, dbs->dir);
         if (!mem)
             break;
+        // We need to load mem eagerly under lazy snapshot RAM loading
+        // with at least Hypervisor.Framework (likely with HAXM as well).
+        // Touch them here.
+        qemu_ram_load(mem, cur_len);
         qemu_iovec_add(&dbs->iov, mem, cur_len);
         dbs->sg_cur_byte += cur_len;
         if (dbs->sg_cur_byte == dbs->sg->sg[dbs->sg_cur_index].len) {
