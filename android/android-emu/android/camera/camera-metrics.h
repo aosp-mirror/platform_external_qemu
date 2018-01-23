@@ -80,6 +80,9 @@ public:
 private:
     android::base::Lock mLock;
 
+    uint64_t mReportWindowStartUs = 0;
+    uint32_t mReportWindowCount = 0;
+
     bool mSessionActive = false;
     uint64_t mStartTimeUs = 0;
     uint64_t mCameraInitializedUs = 0;
