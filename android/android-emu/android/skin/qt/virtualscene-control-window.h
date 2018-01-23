@@ -126,6 +126,9 @@ private:
 
     bool mKeysHeld[Held_Count] = {};
 
+    uint64_t mReportWindowStartUs = 0;
+    uint32_t mReportWindowCount = 0;
+
     // Aggregate metrics to determine how the virtual scene window is used.
     // Metrics are collected while the window is visible, and reported when the
     // session ends.

@@ -35,6 +35,10 @@ using EmulatorCameraStartResult =
 #define D(...) VERBOSE_PRINT(camera, __VA_ARGS__)
 #define D_ACTIVE VERBOSE_CHECK(camera)
 
+// Allow at most 5 reports every 60 seconds.
+static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;
+static constexpr uint32_t kMaxReportsPerWindow = 5;
+
 namespace android {
 namespace camera {
 
@@ -98,8 +102,22 @@ void CameraMetrics::stopSession(uint64_t frameCount) {
     android_studio::EmulatorCameraSession cameraSession = mCameraSession;
     mCameraSession.Clear();
 
-    const uint64_t durationMs =
-            durationUsToMs(mStartTimeUs, System::get()->getHighResTimeUs());
+    const uint64_t now = System::get()->getHighResTimeUs();
+
+    // Reset the metrics reporting limiter if enough time has passed.
+    if (mReportWindowStartUs + kReportWindowDurationUs < now) {
+        mReportWindowStartUs = now;
+        mReportWindowCount = 0;
+    }
+
+    if (mReportWindowCount > kMaxReportsPerWindow) {
+        W("%s: Dropping metrics, too many recent reports.", __FUNCTION__);
+        return;
+    }
+
+    ++mReportWindowCount;
+
+    const uint64_t durationMs = durationUsToMs(mStartTimeUs, now);
     cameraSession.set_duration_ms(durationMs);
 
     if (durationMs > 0) {
