@@ -81,14 +81,14 @@ static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
     switch (format) {
         case GL_RGB8:
         case GL_RGB565:
-        case GL_RGBA8:
         case GL_RGB16F:
             return GL_RGB;
+        case GL_RGBA8:
         case GL_RGB5_A1_OES:
         case GL_RGBA4_OES:
         case GL_UNSIGNED_INT_10_10_10_2_OES:
         case GL_RGBA16F:
-            return GL_RGB;
+            return GL_RGBA;
         default:
             return format;
     }
