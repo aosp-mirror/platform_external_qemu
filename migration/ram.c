@@ -603,7 +603,7 @@ ram_addr_t migration_bitmap_find_dirty(RAMBlock *rb,
     }
 
     *ram_addr_abs = ((ram_addr_t)next) << TARGET_PAGE_BITS;
-    return (next - base) << TARGET_PAGE_BITS;
+    return (ram_addr_t)(next - base) << TARGET_PAGE_BITS;
 }
 
 static inline bool migration_bitmap_clear_dirty(ram_addr_t addr)
