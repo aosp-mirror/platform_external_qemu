@@ -11,11 +11,13 @@
 
 #include "android/skin/qt/virtualscene-control-window.h"
 
+#include "android/base/system/System.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/utils/debug.h"
 
 #include <QDesktopWidget>
 #include <QPainter>
@@ -28,6 +30,12 @@
 #endif
 
 #include <glm/gtx/euler_angles.hpp>
+
+#define W(...) dwarning(__VA_ARGS__)
+
+// Allow at most 5 reports every 60 seconds.
+static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;
+static constexpr uint32_t kMaxReportsPerWindow = 5;
 
 static constexpr int kMousePollIntervalMilliseconds = 16;
 static constexpr int kWindowHeight = 50;
@@ -269,6 +277,21 @@ void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
 
     mMetricsAggregateTimer.stop();
     slot_metricsAggregator();  // Perform final metrics aggregation.
+
+    const uint64_t now = android::base::System::get()->getHighResTimeUs();
+
+    // Reset the metrics reporting limiter if enough time has passed.
+    if (mReportWindowStartUs + kReportWindowDurationUs < now) {
+        mReportWindowStartUs = now;
+        mReportWindowCount = 0;
+    }
+
+    if (mReportWindowCount > kMaxReportsPerWindow) {
+        W("%s: Dropping metrics, too many recent reports.", __FUNCTION__);
+        return;
+    }
+
+    ++mReportWindowCount;
 
     android_studio::EmulatorVirtualSceneSession metrics;
     metrics.set_duration_ms(mOverallDuration.elapsed());
