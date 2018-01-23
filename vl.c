@@ -5614,8 +5614,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     socket_drainer_stop();
 #endif
 
-    bdrv_close_all();
     pause_all_vcpus();
+    bdrv_close_all();
 
     if (on_main_loop_done) {
         on_main_loop_done();
