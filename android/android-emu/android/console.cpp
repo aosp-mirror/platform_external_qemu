@@ -2875,8 +2875,12 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {"time-limit", required_argument, NULL, 't'},
             {NULL, 0, NULL, 0}};
 
-    if (emulator_window_get()->opts->no_window) {
-        control_write(client, "KO: Screen recording not supported in no-window mode\r\n");
+    if (emulator_window_get()->opts->no_window &&
+        (!android_hw->hw_gpu_enabled ||
+         !strcmp(android_hw->hw_gpu_mode, "guest"))) {
+        control_write(client,
+                      "KO: Screen recording in no-window mode "
+                      "not supported in -gpu guest mode.\r\n");
         return -1;
     }
 
@@ -3000,8 +3004,12 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
-    if (emulator_window_get()->opts->no_window) {
-        control_write(client, "KO: Screen recording not supported in no-window mode\r\n");
+    if (emulator_window_get()->opts->no_window &&
+        (!android_hw->hw_gpu_enabled ||
+         !strcmp(android_hw->hw_gpu_mode, "guest"))) {
+        control_write(client,
+                      "KO: Screen recording in no-window mode "
+                      "not supported in -gpu guest mode.\r\n");
         return -1;
     }
 
