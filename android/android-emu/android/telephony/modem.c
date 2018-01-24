@@ -2235,7 +2235,7 @@ handleQueryPDPContext( const char* cmd, AModem modem )
      * both WiFi and radio networks to coexist on the single ethernet connection
      * connecting the guest to the outside world */
     const char* gateway = feature_is_enabled(kFeature_Wifi) ? "192.168.200.2"
-                                                            : "10.0.2.15";
+                                                            : "10.0.2.15/24";
     int  nn;
 
     amodem_begin_line(modem);
