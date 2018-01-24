@@ -1024,12 +1024,12 @@ int VideoPlayerImpl::play() {
         }
     }
 
-    // this disables audio playing
-    audioStream = -1;
-
     if (videoStream == -1 && audioStream == -1) {
         return -1;  // no audio or video stream found
     }
+
+    // we do this before mAudioClock since audio callback uses it
+    mExternalClock.init(mExternalClock.getSerialPtr());
 
     if (audioStream != -1) {
         mAudioOutputEngine = AudioOutputEngine::get();
@@ -1147,8 +1147,6 @@ int VideoPlayerImpl::play() {
         mVideoDecoder->start();
     }
 
-    mExternalClock.init(mExternalClock.getSerialPtr());
-
     // Read frames from the video file
     int ret = 0;
     AVPacket packet;
@@ -1228,7 +1226,7 @@ int VideoPlayerImpl::getConvertedAudioFrame() {
         return -1;
     }
 
-    Frame* af = mAudioFrameQueue->peekReadable();
+    Frame* af = mAudioFrameQueue->peekReadableNoWait();
     if (af == nullptr) {
         return -1;
     }
@@ -1284,6 +1282,7 @@ int VideoPlayerImpl::getConvertedAudioFrame() {
     return resampled_data_size;
 }
 
+// we can't block here, otherwise cause the whole emulator to freeze
 void VideoPlayerImpl::audioCallback(void* opaque, int len) {
     VideoPlayerImpl* pThis = (VideoPlayerImpl*)opaque;
     pThis->mAudioCallbackTime = av_gettime_relative();
@@ -1291,7 +1290,9 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
         if (pThis->mAudioBufIndex >= pThis->mAudioBufSize) {
             int audio_size = pThis->getConvertedAudioFrame();
             if (audio_size < 0) {
-                // if error, should we output silent buffer?
+                // if error, we output silent buffer
+                std::string silent(len, '\0');
+                pThis->mAudioOutputEngine->write((void *)silent.data(), len);
                 break;
             } else {
                 pThis->mAudioBufSize = audio_size;
@@ -1311,6 +1312,12 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
     }
 
     pThis->mAudioWriteBufSize = pThis->mAudioBufSize - pThis->mAudioBufIndex;
+
+    if (!std::isnan(pThis->mAudioClockValue)) {
+        int bytes_per_sec = av_samples_get_buffer_size(NULL, 2, 48000, AV_SAMPLE_FMT_S16, 1);
+        pThis->mAudioClock.setAt(pThis->mAudioClockValue - (double)(2 * 1024 + pThis->mAudioWriteBufSize) / bytes_per_sec, pThis->mAudioClockSerial, pThis->mAudioCallbackTime / 1000000.0);
+        pThis->mExternalClock.syncToSlave(&pThis->mAudioClock);
+    }
 }
 
 void VideoPlayerImpl::start() {
