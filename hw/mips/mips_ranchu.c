@@ -132,8 +132,8 @@ struct mips_boot_info {
     const char* kernel_filename;
     const char* kernel_cmdline;
     const char* initrd_filename;
-    unsigned ram_size;
-    unsigned highmem_size;
+    uint64_t ram_size;
+    uint64_t highmem_size;
 };
 
 typedef struct machine_params {
@@ -282,7 +282,7 @@ static int64_t android_load_kernel(ranchu_params *rp)
     /* Setup Highmem */
     char kernel_cmd2[1024];
     if (rp->bootinfo.highmem_size) {
-        sprintf (kernel_cmd2, "%s mem=%um@0x0 mem=%um@0x%x",
+        sprintf (kernel_cmd2, "%s mem=%um@0x0 mem=%" PRIu64 "m@0x%x",
                  kernel_cmd,
                  GOLDFISH_IO_SPACE / (1024 * 1024),
                  rp->bootinfo.highmem_size / (1024 * 1024),
@@ -445,11 +445,13 @@ static void mips_ranchu_init(MachineState *machine)
 
     qemu_register_reset(main_cpu_reset, rp);
 
+#if !defined(TARGET_MIPS64)
     if (ram_size > (MAX_RAM_SIZE_MB << 20)) {
         fprintf(stderr, "qemu: Too much memory for this machine. "
                         "RAM size reduced to %lu MB\n", MAX_RAM_SIZE_MB);
         ram_size = MAX_RAM_SIZE_MB << 20;
     }
+#endif
 
     fdt = create_device_tree(&fdt_size);
 
