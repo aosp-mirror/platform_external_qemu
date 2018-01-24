@@ -1,0 +1,8 @@
+Verified+1: Tao Wu <lepton@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Submitted-by: Tao Wu <lepton@google.com>
+Submitted-at: Wed, 24 Jan 2018 00:50:38 +0000
+Reviewed-on: https://android-review.googlesource.com/595966
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
