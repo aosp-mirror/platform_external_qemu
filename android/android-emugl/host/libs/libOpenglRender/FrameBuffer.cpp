@@ -1101,7 +1101,7 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
     // reached zero, unless it has been opened at least once already.
     // Instead, put it on a 'delayed close' list to return to it later.
     if (--c->second.refcount == 0) {
-        if (c->second.opened || forced) {
+        if (forced) {
             eraseDelayedCloseColorBufferLocked(c->first, c->second.closedTs);
             m_colorbuffers.erase(c);
         } else {
