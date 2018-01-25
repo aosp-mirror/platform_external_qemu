@@ -283,10 +283,6 @@ emulator_window_setup( EmulatorWindow*  emulator )
                                     _emulator_window_on_gpu_frame);
     }
 
-    screen_recorder_init(
-            android_hw->hw_lcd_width, android_hw->hw_lcd_height,
-            s_use_emugl_subwindow ? NULL : emulator->uiEmuAgent->display);
-
     skin_ui_reset_title(emulator->ui);
 }
 
@@ -378,14 +374,6 @@ int emulator_window_init(EmulatorWindow* emulator,
     if (!opts->no_window) {
         emulator->layout_file = skin_file_create_from_aconfig(aconfig, basepath,
                                                               &skin_fb_funcs);
-    } else {
-        // No-window mode. Initialize the screen-recorder only if we aren't in
-        // gpu guest mode.
-        if (android_hw->hw_gpu_enabled &&
-            strcmp(android_hw->hw_gpu_mode, "guest")) {
-            screen_recorder_init(android_hw->hw_lcd_width,
-                                 android_hw->hw_lcd_height, NULL);
-        }
     }
 
     emulator->ui = NULL;
