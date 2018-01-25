@@ -81,18 +81,31 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
 
-        # Simple dependencies
-        for dep in readline expat dbus libffi
-        do
-         install_simple_package $dep
-        done
-
+        # GCC 6.3 doesn't like to compile ncurses without this flag
+        export CPPFLAGS="-P"
 
         install_simple_package  ncurses "--without-progs \
               --without-manpages \
               --without-tests \
               --with-shared"
 
+        # Readline needs this with our current toolchain
+        # Simple dependencies
+        for dep in readline expat dbus libffi
+        do
+         install_simple_package $dep
+        done
+
+        # Of course libffi places the libs in lib64 vs lib, so we need to
+        # to copy them back in. see https://github.com/libffi/libffi/issues/55
+        # for more complaints about ignoring --libdir flag in configure.
+        cp $_SHU_BUILDER_PREFIX/lib64/* $_SHU_BUILDER_PREFIX/lib
+
+        # Similary glib gets confused about directories..
+        PKG_NAME=$(package_list_get_src_dir glib)
+        PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
+        PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
+        export LDFLAGS="-Wl,-rpath -Wl,$PKG_BUILD_DIR/gmodule/.libs"
         install_simple_package glib "\
               --disable-always-build-tests \
               --disable-compile-warnings \

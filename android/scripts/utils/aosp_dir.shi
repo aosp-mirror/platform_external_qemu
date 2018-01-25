@@ -112,8 +112,7 @@ aosp_prebuilt_clang_dir_for () {
 aosp_prebuilt_toolchain_subdir_for () {
     case $1 in
         linux*)
-            local GLIBC="$(aosp_linux_glibc_version)"
-            printf "prebuilts/gcc/linux-x86/host/x86_64-linux-$GLIBC"
+            printf "prebuilts/gcc/linux-x86/host/x86_64-ubuntu16.04-linux-gnu"
             ;;
         darwin*)
             local CLANG_VERSION="$(aosp_clang_version)"
@@ -137,15 +136,14 @@ aosp_prebuilt_breakpad_subdir_for () {
 aosp_prebuilt_toolchain_sysroot_subdir_for () {
     case $1 in
         linux*)
-            local GLIBC="$(aosp_linux_glibc_version)"
-            printf "prebuilts/gcc/linux-x86/host/x86_64-linux-$GLIBC/x86_64-linux"
+            printf "prebuilts/gcc/linux-x86/host/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/sysroot"
             ;;
         darwin*)
             # We use the developer machine's system SDK.
             printf ""
             ;;
         windows*)
-            printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/x86_64-w64-mingw32"
+            printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-6.3/x86_64-w64-mingw32"
             ;;
     esac
 }
@@ -153,7 +151,7 @@ aosp_prebuilt_toolchain_sysroot_subdir_for () {
 aosp_prebuilt_toolchain_prefix_for () {
     case $1 in
         linux*)
-            printf "x86_64-linux-"
+            printf "x86_64-ubuntu16.04-linux-gnu-"
             ;;
         darwin*)
             printf ""

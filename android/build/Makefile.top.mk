@@ -108,8 +108,17 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-private-field \
                       -Wno-unused-value \
 
-BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS))
-BUILD_HOST_CFLAGS   += $(call if-host-clang,$(CLANG_COMPILER_FLAGS))
+ifeq (linux,$(BUILD_TARGET_OS))
+# GCC 6.3 upped their warning game.
+  GCC_COMPILER_FLAGS= \
+                      -Wno-error=maybe-uninitialized \
+                      -Wno-error=misleading-indentation \
+                      -Wno-error=unused-but-set-variable \
+                      -Wno-error=unused-variable
+endif
+
+BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS), $(GCC_COMPILER_FLAGS))
+BUILD_HOST_CFLAGS   += $(call if-host-clang,$(CLANG_COMPILER_FLAGS), $(GCC_COMPILER_FLAGS))
 
 ifeq (true,$(BUILD_ENABLE_LTO))
   BUILD_OPT_CFLAGS += -flto
@@ -131,7 +140,7 @@ endif
 
 # Ensure that <inttypes.h> always defines all interesting macros.
 BUILD_TARGET_CFLAGS += -D__STDC_LIMIT_MACROS=1 -D__STDC_FORMAT_MACROS=1
-BUILD_HOST_CFLAGS   += -D__STDC_LIMIT_MACROS=1 -D__STDC_FORMAT_MACROS=1
+BUILD_HOST_CFLAGS   += -D__STDC_LIMIT_MACROS=1 -D__STDC_FORMAT_MACROS=1 -m64
 
 # Ensure we treat warnings as errors. For third-party libraries, this must
 # be disabled with -Wno-error

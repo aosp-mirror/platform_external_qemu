@@ -18,6 +18,7 @@
 #define SYSTEM_KEYMASTER_ANDROID_KEYMASTER_MESSAGES_H_
 
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

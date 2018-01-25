@@ -24,6 +24,7 @@
 #include "GLcommon/TextureUtils.h"
 
 #include <algorithm>
+#include <math.h>
 
 static const GLenum kTexParam[] = {
     GL_TEXTURE_MIN_FILTER,

@@ -16,6 +16,8 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#define BIT(n) (1 <<(n))
+
 #undef __user
 #define __xuser  /* nothing */
 #include <linux/kvm.h>

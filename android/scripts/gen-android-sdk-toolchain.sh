@@ -233,7 +233,7 @@ gen_wrapper_program ()
                 # let those use 'gcc' directly.
                 DST_PROG=gcc
                 if [ ! -f "${DST_PREFIX}$DST_PROG" ]; then
-                    log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program, even gcc]"
+                    log "  Skipping: ${SRC_PREFIX}$PROG  [missing destination program in ${DST_PREFIX}, even gcc]"
                     return
                 fi
                 ;;
@@ -395,16 +395,15 @@ prepare_build_for_host () {
         linux-x86_64)
             GNU_CONFIG_HOST=x86_64-linux
             EXTRA_CFLAGS="-m64"
-            EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -m64 -D__OLD_STD_VERSION__=1"
+            EXTRA_CXXFLAGS="-m64"
 
             if [ "$OPT_CLANG" ]; then
-              EXTRA_CFLAGS="$EXTRA_CFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include"
-              EXTRA_CFLAGS="$EXTRA_CFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/x86_64-linux-gnu"
-              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS --gcc-toolchain=$PREBUILT_TOOLCHAIN_DIR/libexec/gcc/x86_64-linux/4.8/"
-              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/x86_64-linux/include/c++/4.8/"
-              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/x86_64-linux/include/c++/4.8/x86_64-linux/"
-              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/"
-              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/x86_64-linux-gnu/"
+              SYSROOT="$AOSP_DIR/$(aosp_prebuilt_toolchain_sysroot_subdir_for "${CURRENT_HOST}")"
+              EXTRA_CFLAGS="$EXTRA_CFLAGS -isystem $SYSROOT/usr/include"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS --gcc-toolchain=$PREBUILT_TOOLCHAIN_DIR/libexec/gcc/x86_64-ubuntu16.04-linux-gnu/6.3.0/"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/x86_64-ubuntu16.04-linux-gnu/include/c++/6.3.0/"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $PREBUILT_TOOLCHAIN_DIR/x86_64-ubuntu16.04-linux-gnu/include/c++/6.3.0/x86_64-ubuntu16.04-linux-gnu/"
+              EXTRA_CXXFLAGS="$EXTRA_CXXFLAGS -isystem $SYSROOT/usr/include/"
             fi
             ;;
         windows-x86)
@@ -447,6 +446,9 @@ prepare_build_for_host () {
     if [ "$OPT_CXX11" ]; then
       case $CURRENT_HOST in
         darwin*)
+          var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
+          ;;
+        linux*)
           var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
           ;;
         *)
@@ -496,7 +498,8 @@ prepare_build_for_host () {
         # Create pkgconfig link for other scripts.
         case $CURRENT_HOST in
             linux-*)
-                ln -sfn "$PREBUILT_TOOLCHAIN_DIR"/sysroot/usr/lib/pkgconfig "$INSTALL_DIR"/pkgconfig
+              SYSROOT="$AOSP_DIR/$(aosp_prebuilt_toolchain_sysroot_subdir_for "${CURRENT_HOST}")"
+                ln -sfn "$SYSROOT/usr/lib/pkgconfig" "$INSTALL_DIR/pkgconfig"
                 ;;
         esac
     fi

@@ -1,0 +1,578 @@
+# Copyright 2018 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Task and dependency management - do not execute directly.
+
+# returns 0 iff the string in $2 matches the pattern in $1
+# $1: pattern
+# $2: string
+pattern_match ()
+{
+    echo "$2" | grep -q -E -e "$1"
+}
+
+# Find if a given shell program is available.
+# We need to take care of the fact that the 'which <foo>' command
+# may return either an empty string (Linux) or something like
+# "no <foo> in ..." (Darwin). Also, we need to redirect stderr
+# to /dev/null for Cygwin
+#
+# $1: variable name
+# $2: program name
+#
+# Result: set $1 to the full path of the corresponding command
+#         or to the empty/undefined string if not available
+#
+find_program ()
+{
+    local PROG
+    PROG=`which $2 2>/dev/null`
+    if [ -n "$PROG" ] ; then
+        if pattern_match '^no ' "$PROG"; then
+            PROG=
+        fi
+    fi
+    eval $1="$PROG"
+}
+
+find_program CMD_WGET wget
+find_program CMD_CURL curl
+find_program CMD_SCP  scp
+
+
+stamp_check () {
+    [ -f "$TIMESTAMPS_DIR/$1" ]
+}
+
+stamp_clear () {
+    rm -f "$TIMESTAMPS_DIR/$1"
+}
+
+stamp_set () {
+    touch "$TIMESTAMPS_DIR/$1"
+}
+
+
+# Return the value of a given named variable
+# $1: variable name
+#
+# example:
+#    FOO=BAR
+#    BAR=ZOO
+#    echo `var_value $FOO`
+#    will print 'ZOO'
+#
+var_value ()
+{
+    eval echo \$$1
+}
+
+var_list_append ()
+{
+    local VARNAME=$1
+    local VARVAL=`var_value $VARNAME`
+    shift
+    if [ -z "$VARVAL" ] ; then
+        eval $VARNAME=\"$@\"
+    else
+        eval $VARNAME=\"$VARVAL $@\"
+    fi
+}
+
+var_list_prepend ()
+{
+    local VARNAME=$1
+    local VARVAL=`var_value $VARNAME`
+    shift
+    if [ -z "$VARVAL" ] ; then
+        eval $VARNAME=\"$@\"
+    else
+        eval $VARNAME=\"$@ $VARVAL\"
+    fi
+}
+
+_list_first ()
+{
+    echo $1
+}
+
+_list_rest ()
+{
+    shift
+    echo "$@"
+}
+
+_list_reverse ()
+{
+    local I1 I2 I3 I4 I5 I6 I7 I8 I9 REST RET
+    I1=$1; I2=$2; I3=$3; I4=$I4; I5=$I5; I6=$I6; I7=$I7; I8=$I8; I9=$I9
+    shift 9
+    RET=$I9${I8:+" "}$I8${I7:+" "}$I7${I6:+" "}$I6${I5:+" "}$I5${I4:+" "}$I4${I3:+" "}$I3${I2:+" "}$I2${I1:+" "}$I1
+    REST="$*"
+    if [ "$REST" ]; then
+        RET=$(_list_reverse $REST)$RET
+    fi
+    echo "$RET"
+}
+
+var_list_pop_first ()
+{
+    local VARNAME=$1
+    local VARVAL=`var_value $VARNAME`
+    local FIRST=`_list_first $VARVAL`
+    eval $VARNAME=\"`_list_rest $VARVAL`\"
+    echo "$FIRST"
+}
+
+_list_first ()
+{
+    echo $1
+}
+
+_list_rest ()
+{
+    shift
+    echo "$@"
+}
+
+var_list_first ()
+{
+    local VAL=`var_value $1`
+    _list_first $VAL
+}
+
+var_list_rest ()
+{
+    local VAL=`var_value $1`
+    _list_rest $VAL
+}
+
+ALL_TASKS=
+
+# Define a new task for this build script
+# $1: Task name (e.g. build_stuff)
+# $2: Task description
+# $3: Optional: command name (will be cmd_$1 by default)
+#
+task_define ()
+{
+    local TASK="$1"
+    local DESCR="$2"
+    local COMMAND="${3:-cmd_$1}"
+
+    var_list_append ALL_TASKS $TASK
+    task_set $TASK name "$TASK"
+    task_set $TASK descr "$DESCR"
+    task_set $TASK cmd "$COMMAND"
+    task_set $TASK deps ""
+}
+
+# Variant of task define for dual tasks
+# This really defines two tasks named '<task>_1' and '<task>_2"
+# $1: Task base name
+# $2: Task description
+# $3: Optional: command name (will be cmd_$1 by default)
+task2_define ()
+{
+    local TASK="$1"
+    local DESCR="$2"
+    local COMMAND="${3:-cmd_$1}"
+
+    task_define "${TASK}_1" "$DESCR 1/2" "phase_1 $COMMAND"
+    task_define "${TASK}_2" "$DESCR 2/2" "phase_2 $COMMAND"
+}
+
+task_set ()
+{
+    local TASK="$1"
+    local FIELD="$2"
+    shift; shift;
+    eval TASK_${TASK}__${FIELD}=\"$@\"
+}
+
+task_get ()
+{
+    var_value TASK_$1__$2
+}
+
+# return the list of dependencies for a given task
+task_get_deps ()
+{
+    task_get $1 deps
+}
+
+task_get_cmd ()
+{
+    task_get $1 cmd
+}
+
+task_get_descr ()
+{
+    task_get $1 descr
+}
+
+# $1: task name
+# $2+: other tasks this task depends on.
+task_depends ()
+{
+    local TASK="$1"
+    shift;
+    var_list_append TASK_${TASK}__deps $@
+}
+
+# $1: dual task name
+# $2+: other non-dual tasks this dual task depends on
+task2_depends1 ()
+{
+    local TASK="$1"
+    shift
+    var_list_append TASK_${TASK}_1__deps $@
+    var_list_append TASK_${TASK}_2__deps $@
+}
+
+# $1: dual task name
+# $2+: other dual tasks this dual task depends on
+task2_depends2 ()
+{
+    local TASK="$1"
+    local DEP
+    shift
+    for DEP; do
+        var_list_append TASK_${TASK}_1__deps ${DEP}_1
+        var_list_append TASK_${TASK}_2__deps ${DEP}_2
+    done
+}
+
+task_dump ()
+{
+    local TASK
+    for TASK in $ALL_TASKS; do
+        local DEPS="`task_get_deps $TASK`"
+        local CMD="`task_get_cmd $TASK`"
+        local DESCR="`task_get_descr $TASK`"
+        echo "TASK $TASK: $DESCR: $CMD"
+        echo ">  $DEPS"
+    done
+}
+
+task_visit ()
+{
+    task_set $TASK visit 1
+}
+
+task_unvisit ()
+{
+    task_set $TASK visit 0
+}
+
+task_is_visited ()
+{
+    [ `task_get $TASK visit` = 1 ]
+}
+
+task_queue_reset ()
+{
+    TASK_QUEUE=
+}
+
+task_queue_push ()
+{
+    var_list_append TASK_QUEUE $1
+}
+
+task_queue_pop ()
+{
+    local FIRST=`var_list_first TASK_QUEUE`
+    TASK_QUEUE=`var_list_rest TASK_QUEUE`
+}
+
+do_all_tasks ()
+{
+    local TASK
+    local TASK_LIST=
+    task_queue_reset
+    # Clear visit flags
+    for TASK in $ALL_TASKS; do
+        task_unvisit $TASK
+    done
+    task_queue_push $1
+    while [ -n "$TASK_QUEUE" ] ; do
+        TASK=`task_queue_pop`
+        if task_is_visited $TASK; then
+            continue
+        fi
+        # Prepend the task to the list if its timestamp is not set
+        if stamp_check $TASK; then
+            var_list_prepend TASK_LIST $TASK
+        fi
+        # Add all dependencies to the work-queue
+        local SUBTASK
+        for SUBTASK in `task_get_deps $TASK`; do
+            task_queue_push $SUBTASK
+        done
+        task_visit $TASK
+    done
+
+    # Now, TASK_LIST contains the
+}
+
+
+# Return the first item of a space-separated list
+list_first () {
+    set -- "$@"
+    echo "$1"
+}
+
+# Append an item to a given list
+list_append () {
+    local ITEM=$1
+    shift;
+    echo $@${@:+" "}$1
+}
+
+# Return the second-to-last items of a space-separated list
+list_rest () {
+    set -- "$@"
+    shift
+    echo "$@"
+}
+
+# Reverse a space-separated list
+list_reverse ()
+{
+    set -- "$@"
+    local I1 I2 I3 I4 I5 I6 I7 I8 I9 REST RET
+    I1=$1; I2=$2; I3=$3; I4=$4; I5=$5; I6=$6; I7=$7; I8=$8; I9=$9
+    shift; shift; shift; shift; shift; shift; shift; shift; shift;
+    RET=$I9${I9:+" "}$I8${I8:+" "}$I7${I7:+" "}$I6${I6:+" "}$I5${I5:+" "}$I4${I4:+" "}$I3${I3:+" "}$I2${I2:+" "}$I1
+    REST="$*"
+    if [ -n "$REST" ]; then
+        RET=$(list_reverse $REST)" "$RET
+    fi
+    echo "$RET"
+}
+
+# Used to build the list of tasks with a tree post-order traversal, i.e.
+# the list starts at the leaves and finishes with the top level task,
+# so that if task(A) depends on task(B), then A will always appear _after_
+# B in the result.
+#
+# $1: space-separated list of tasks to visit
+# Out: list of all tasks in post-order
+#
+task_build_postorder_list ()
+{
+    local TASK
+    local STACK="$1"
+    local RET=""
+    for TASK in $ALL_TASKS; do
+        stamp_clear $TASK.visit
+    done
+    while true; do
+        # Peek at stack
+        TASK=$(list_first $STACK)
+        #echo >&2 "STACK: ($TASK) '$STACK'"
+        if [ -z "$TASK" ]; then
+            break
+        fi
+        HAS_DEPS=
+        for DEP in $(task_get_deps $TASK); do
+            #echo >&2 "CHECK: '$DEP'"
+            if ! stamp_check $DEP.visit; then
+                STACK=$DEP" "$STACK
+                #echo >&2 "PUSH: '$DEP' => '$STACK'"
+                HAS_DEPS=1
+            fi
+        done
+
+        if [ -z "$HAS_DEPS" ]; then
+            #echo >&2 "ADD: $TASK -> '$RET'"
+            STACK=$(list_rest $STACK)
+            if ! stamp_check $TASK.visit; then
+                RET=$RET${RET:+" "}$TASK
+                stamp_set $TASK.visit
+            fi
+        fi
+    done
+    for TASK in $ALL_TASKS; do
+        stamp_clear $TASK.visit
+    done
+    echo "$RET"
+}
+
+run_task ()
+{
+    # Build the list of tasks, in reverse order (from leafs to last)
+    local TASKS=$(task_build_postorder_list $1)
+    # Do all tasks
+    local TASK DEP DESCR
+
+    # Dump list of tasks:
+#     echo "ALL TASKS:"
+#     for TASK in $TASKS; do
+#         echo "  $TASK"
+#     done
+
+    # Clean timestamps of any tasks whose any of its dependents needs
+    # to be re-done.
+    #
+    for TASK in $TASKS; do
+       for DEP in $(task_get_deps $TASK); do
+            if ! stamp_check $DEP; then
+                #echo "Redo: $TASK due to $DEP"
+                stamp_clear $TASK
+                break
+            fi
+       done
+    done
+
+    for TASK in $TASKS; do
+        DESCR=$(task_get_descr $TASK)
+        if stamp_check $TASK; then
+            echo "Skipping: $DESCR"
+            continue
+        fi
+        echo "Running: $DESCR"
+        if [ "$(get_verbosity)" -ge 1 ]; then
+            (eval $(task_get_cmd $TASK))
+        else
+            (eval $(task_get_cmd $TASK)) >> $TMPLOG 2>&1
+        fi
+        if [ $? != 0 ] ; then
+            panic "ERROR: Cannot $DESCR"
+            exit 1
+        fi
+
+        stamp_set $TASK
+    done
+}
+
+no_trailing_slash ()
+{
+    echo ${1##/}
+}
+
+# Download a file with either 'curl', 'wget' or 'scp'
+#
+# $1: source URL (e.g. http://foo.com, ssh://blah, /some/path)
+# $2: target file
+download_file ()
+{
+    # Is this HTTP, HTTPS or FTP ?
+    if pattern_match "^(http|https|ftp):.*" "$1"; then
+        if [ -n "$CMD_WGET" ] ; then
+            run $CMD_WGET -O $2 $1
+        elif [ -n "$CMD_CURL" ] ; then
+            run $CMD_CURL -o $2 $1
+        else
+            echo "Please install wget or curl on this machine"
+            exit 1
+        fi
+        return
+    fi
+
+    # Is this SSH ?
+    # Accept both ssh://<path> or <machine>:<path>
+    #
+    if pattern_match "^(ssh|[^:]+):.*" "$1"; then
+        if [ -n "$CMD_SCP" ] ; then
+            scp_src=`echo $1 | sed -e s%ssh://%%g`
+            run $CMD_SCP $scp_src $2
+        else
+            echo "Please install scp on this machine"
+            exit 1
+        fi
+        return
+    fi
+
+    # Is this a file copy ?
+    # Accept both file://<path> or /<path>
+    #
+    if pattern_match "^(file://|/).*" "$1"; then
+        cp_src=`echo $1 | sed -e s%^file://%%g`
+        run cp -f $cp_src $2
+        return
+    fi
+
+    # Unknown schema
+    echo "ERROR: Unsupported source URI: $1"
+    exit 1
+}
+
+# A variant of 'download_file' used to specify the target directory
+# $1: source URL
+# $2: target directory
+download_file_to ()
+{
+    local URL="$1"
+    local DIR="$2"
+    local DST="$DIR/`basename $URL`"
+    mkdir -p $DIR
+    download_file "$URL" "$DST"
+}
+
+#
+# $1: archive file path (including extension)
+# $2: source directory for archive content
+# $3+: list of files (including patterns), all if empty
+pack_archive ()
+{
+    local ARCHIVE="$1"
+    local SRCDIR="$2"
+    local SRCFILES
+    local TARFLAGS ZIPFLAGS
+    shift; shift;
+    if [ -z "$1" ] ; then
+        SRCFILES="*"
+    else
+        SRCFILES="$@"
+    fi
+    if [ "`basename $ARCHIVE`" = "$ARCHIVE" ] ; then
+        ARCHIVE="`pwd`/$ARCHIVE"
+    fi
+    mkdir -p `dirname $ARCHIVE`
+    if [ "$(get_verbosity)" -ge 2 ] ; then
+        TARFLAGS="vcf"
+        ZIPFLAGS="-9r"
+    else
+        TARFLAGS="cf"
+        ZIPFLAGS="-9qr"
+    fi
+    case "$ARCHIVE" in
+        *.zip)
+            (cd $SRCDIR && run zip $ZIPFLAGS "$ARCHIVE" $SRCFILES)
+            ;;
+        *.tar)
+            (cd $SRCDIR && run tar $TARFLAGS "$ARCHIVE" $SRCFILES)
+            ;;
+        *.tar.gz)
+            (cd $SRCDIR && run tar z$TARFLAGS "$ARCHIVE" $SRCFILES)
+            ;;
+        *.tar.bz2)
+            (cd $SRCDIR && run tar j$TARFLAGS "$ARCHIVE" $SRCFILES)
+            ;;
+        *)
+            panic "Unsupported archive format: $ARCHIVE"
+            ;;
+    esac
+}
+
+# Return the list of all symbolic links in a given directory, excluding
+# any links in its sub-directories.
+# $1: Sub-directory path.
+find_symlinks_in () {
+    (cd $1 && find . -maxdepth 1 -type l) | sed -e 's|^\./||g'
+}
+
+
