@@ -489,6 +489,13 @@ void RenderWindow::setTranslation(float px, float py) {
     D("Exiting\n");
 }
 
+void RenderWindow::setScreenMask(int width, int height, const unsigned char* rgbaData) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (fb) {
+        fb->getTextureDraw()->setScreenMask(width, height, rgbaData);
+    }
+}
+
 void RenderWindow::repaint() {
     D("Entering\n");
     RenderWindowMessage msg = {};
