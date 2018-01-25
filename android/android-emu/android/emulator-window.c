@@ -36,6 +36,8 @@
 /* EmulatorWindow structure instance. */
 static EmulatorWindow   qemulator[1];
 
+static EmulatorScreenMask emulator_screen_mask = { 0, 0, NULL };
+
 // Our very own stash of a pointer to a device that handles user events.
 const QAndroidUserEventAgent* user_event_agent;
 
@@ -269,6 +271,12 @@ emulator_window_setup( EmulatorWindow*  emulator )
             &my_ui_funcs, &my_ui_params, s_use_emugl_subwindow);
     if (!emulator->ui) {
         return;
+    }
+
+    if (s_use_emugl_subwindow) {
+        android_setOpenglesScreenMask(emulator_screen_mask.width,
+                                      emulator_screen_mask.height,
+                                      emulator_screen_mask.rgbaData);
     }
 
     // Set the coarse orientation of the modeled device to match the skin
@@ -518,4 +526,13 @@ emulator_window_rotate(SkinRotation rot) {
         return false;
     }
     return skin_ui_rotate(qemulator->ui, rot);
+}
+
+void
+emulator_window_set_screen_mask(int width, int height, const unsigned char* rgbaData) {
+    // Save this info for later. This gets called too early
+    // for us to invoke android_setOpenglesScreenMask() now.
+    emulator_screen_mask.width  = width;
+    emulator_screen_mask.height = height;
+    emulator_screen_mask.rgbaData = rgbaData;
 }

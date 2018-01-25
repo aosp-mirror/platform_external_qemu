@@ -39,9 +39,20 @@ public:
     // clockwise rotation angle in degrees (clockwise in the GL Y-upwards
     // coordinate space; only supported values are 0, 90, 180, 270). |dx,dy| is
     // the translation of the image towards the origin.
-    bool draw(GLuint texture, float rotationDegrees, float dx, float dy);
+    bool draw(GLuint texture, float rotationDegrees, float dx, float dy) {
+        return drawImpl(texture, rotationDegrees, dx, dy, false);
+    }
+    // Same as 'draw()', but if an overlay has been provided, that overlay is
+    // drawn on top of everything else.
+    bool drawWithOverlay(GLuint texture, float rotationDegrees, float dx, float dy) {
+        return drawImpl(texture, rotationDegrees, dx, dy, true);
+    }
+
+    void setScreenMask(int width, int height, const unsigned char* rgbaData);
 
 private:
+    bool drawImpl(GLuint texture, float rotationDegrees, float dx, float dy, bool wantOverlay);
+
     GLuint mVertexShader;
     GLuint mFragmentShader;
     GLuint mProgram;
@@ -51,6 +62,13 @@ private:
     GLint mTranslationSlot;
     GLuint mVertexBuffer;
     GLuint mIndexBuffer;
+
+    GLuint mMaskTexture;
+    int    mMaskWidth;
+    int    mMaskHeight;
+    bool   mHaveNewMask;
+    bool   mMaskIsValid;
+    const unsigned char* mMaskPixels;
 };
 
 #endif  // TEXTURE_DRAW_H

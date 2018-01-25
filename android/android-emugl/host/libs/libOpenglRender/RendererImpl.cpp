@@ -360,6 +360,11 @@ void RendererImpl::repaintOpenGLDisplay() {
     mRenderWindow->repaint();
 }
 
+void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgbaData) {
+    assert(mRenderWindow);
+    mRenderWindow->setScreenMask(width, height, rgbaData);
+}
+
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
     mCleanupThread->cleanup(puid);
 }

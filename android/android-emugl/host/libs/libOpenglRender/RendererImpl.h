@@ -64,6 +64,7 @@ public:
     void setOpenGLDisplayRotation(float zRot) final;
     void setOpenGLDisplayTranslation(float px, float py) final;
     void repaintOpenGLDisplay() final;
+    void setScreenMask(int width, int height, const unsigned char* rgbaData) final;
     void cleanupProcGLObjects(uint64_t puid) final;
 
     void pauseAllPreSave() final;

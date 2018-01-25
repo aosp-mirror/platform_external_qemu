@@ -125,6 +125,9 @@ public:
     // the framebuffer with the top right of the subwindow."
     void setTranslation(float px, float py);
 
+    // Receive a screen mask and pass it to TextureDraw
+    void setScreenMask(int width, int height, const unsigned char* rgbaData);
+
     // Force a repaint of the whole content into the sub-window.
     void repaint();
 
