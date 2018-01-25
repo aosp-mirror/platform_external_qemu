@@ -49,13 +49,16 @@ LOCAL_LDLIBS := \
     $(call local-build-var,LDLIBS$(LOCAL_BITS))
 
 # Ensure only one of -m32 or -m64 is being used and place it first.
-LOCAL_CFLAGS := \
-    -m$(LOCAL_BITS) \
-    $(filter-out -m32 -m64, $(LOCAL_CFLAGS))
+# This breaks cross compilation, as we cannot distinguish between guest and host.
+ LOCAL_CFLAGS := \
+     -m$(LOCAL_BITS) \
+     $(LOCAL_CFLAGS) 
+#     $(filter-out -m32 -m64, $(LOCAL_CFLAGS))
 
 LOCAL_LDFLAGS := \
     -m$(LOCAL_BITS) \
-    $(filter-out -m32 -m64, $(LOCAL_LDFLAGS))
+    $(LOCAL_LDFLAGS)
+#     $(filter-out -m32 -m64, $(LOCAL_LDFLAGS))
 
 LOCAL_CPP_EXTENSIONS := .cpp .cc .C .cxx .c++
 LOCAL_CXX_EXTENSION_PATTERNS := $(foreach pattern,$(LOCAL_CPP_EXTENSIONS),%$(pattern))

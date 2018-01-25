@@ -80,18 +80,23 @@ build_angle_package () {
     run mkdir -p "$PKG_BUILD_DIR" &&
     run cd "$PKG_BUILD_DIR" &&
     export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
-    export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+    export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include -Wno-error=deprecated-declarations" &&
     export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
     export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
 
     # Ensure the gclient command is available.
+    if [ ! -d $PWD/depot_tools ]; then
     git_clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools c55ba20c629ef702cd4bb06da9235c4bb7217f96 &&
+      git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+    fi
+
     export PATH=`pwd`/depot_tools:"$PATH" &&
+
 
     # Ensure ninja, included in the depot tools, is used to generator the build
     # files, since it is a cross-platform solution.
     export GYP_GENERATORS=ninja &&
-
+    export PYTHONPATH=tools/gyp/pylib &&
     # Create gclient file and sync the build files
     run python scripts/bootstrap.py &&
 

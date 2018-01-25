@@ -767,10 +767,11 @@ builder_build_autotools_package_full_install () {
     (
         run mkdir -p "$PKG_BUILD_DIR" &&
         run cd "$PKG_BUILD_DIR" &&
-        export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
-        export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+        export LDFLAGS="${LDFLAGS} -L$_SHU_BUILDER_PREFIX/lib" &&
+        export CPPFLAGS="${CPPFLAGS} -I$_SHU_BUILDER_PREFIX/include" &&
         export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
         export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+        log2 "LDFLAGS=${LDFLAGS}, CPPFLAGS=${CPPFLAGS}"
         run "$PKG_SRC_DIR"/configure \
             --prefix=$_SHU_BUILDER_PREFIX \
             $_SHU_BUILDER_GNU_CONFIG_HOST_FLAG \

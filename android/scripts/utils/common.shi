@@ -71,6 +71,7 @@ dump_n () {
     if [ "$LEVEL" -lt "$_SHU_VERBOSE" ]; then
         printf "%s\n" "$@"
     fi
+    [[ -z "$TMPLOG" ]] || (echo  "$@"  >> $TMPLOG)
 }
 
 # Dump a message to standard output.

@@ -1026,7 +1026,6 @@ if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
             log "Copying toolchain libraries to bundle with the program"
             for BUNDLED_LIB in libstdc++; do
                 log "  Bundling ${BUNDLED_LIB}"
-                copy_toolchain_lib "${OUT_DIR}/lib/libstdc++" "${TOOLCHAIN_SYSROOT}/lib32" "${BUNDLED_LIB}"
                 copy_toolchain_lib "${OUT_DIR}/lib64/libstdc++" "${TOOLCHAIN_SYSROOT}/lib64" "${BUNDLED_LIB}"
             done
         ;;

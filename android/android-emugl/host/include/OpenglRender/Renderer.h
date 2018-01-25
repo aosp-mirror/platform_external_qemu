@@ -21,6 +21,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace android_studio {
     class EmulatorGLESUsages;

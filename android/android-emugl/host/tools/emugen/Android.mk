@@ -3,6 +3,7 @@
 LOCAL_PATH:=$(call my-dir)
 
 $(call emugl-begin-host-executable,emugen)
+LOCAL_LDFLAGS=-m64
 LOCAL_SRC_FILES := \
     ApiGen.cpp \
     EntryPoint.cpp \
@@ -20,6 +21,7 @@ $(call emugl-end-module)
 EMUGL_EMUGEN := $(LOCAL_BUILT_MODULE)
 
 $(call emugl-begin-host-executable,emugen_unittests)
+LOCAL_LDFLAGS=-m64
 LOCAL_SRC_FILES := \
     Parser.cpp \
     Parser_unittest.cpp

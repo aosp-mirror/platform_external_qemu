@@ -57,6 +57,12 @@
     do { } while (0)
 #endif
 
+#ifdef BIT
+  #undef BIT
+  #define BIT(n) (1 << (n))
+#endif
+
+
 #define MSR_KVM_WALL_CLOCK  0x11
 #define MSR_KVM_SYSTEM_TIME 0x12
 
