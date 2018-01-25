@@ -821,6 +821,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
 
     std::string status;
 
+#if !HAVE_KVM
     if (!android::hasModernX86VirtualizationFeatures()) {
         // TODO: Support snapshots when UG is not supported.
         fprintf(stderr, "Warning: Quick Boot / Snapshots not supported on this machine. "
@@ -829,6 +830,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         featurecontrol::setEnabledOverride(
             featurecontrol::FastSnapshotV1, false);
     }
+#endif
 
 #if HAVE_KVM
     AndroidCpuAcceleration status_code = ProbeKVM(&status);
