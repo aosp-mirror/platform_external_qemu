@@ -87,6 +87,12 @@ int hax_ug_platform(void)
       return ug_support;
 }
 
+int hax_vcpu_active(CPUState* cpu)
+{
+    return ug_support ||
+           cpu->hax_vcpu->emulation_state == HAX_EMULATE_STATE_NONE;
+}
+
 /* Currently non-PG modes are emulated by QEMU */
 int hax_vcpu_emulation_mode(CPUState * cpu)
 {
@@ -145,6 +151,7 @@ int hax_stop_emulation(CPUState * cpu)
          * Sync the vcpu state to HAX kernel module
          */
         hax_vcpu_sync_state(env, 1);
+        cpu->hax_vcpu_dirty = false;
         return 1;
     }
 
