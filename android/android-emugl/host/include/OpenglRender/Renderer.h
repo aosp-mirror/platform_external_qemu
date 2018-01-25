@@ -148,6 +148,11 @@ public:
     //    latest framebuffer content.
     virtual void repaintOpenGLDisplay() = 0;
 
+    // setScreenMask -
+    //    provide the image that should be overlayed on the
+    //    device screen to mask that screen
+    virtual void setScreenMask(int width, int height, const unsigned char* rgbaData) = 0;
+
     // cleanupProcGLObjects -
     //    clean up all per-process resources when guest process exits (or is
     // killed). Such resources include color buffer handles and EglImage handles.

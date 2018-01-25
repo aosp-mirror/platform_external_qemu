@@ -526,6 +526,12 @@ bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
     return m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
 }
 
+bool ColorBuffer::postWithOverlay(GLuint tex, float rotation, float dx, float dy) {
+    // NOTE: Do not call m_helper->setupContext() here!
+    waitSync();
+    return m_helper->getTextureDraw()->drawWithOverlay(tex, rotation, dx, dy);
+}
+
 void ColorBuffer::readback(unsigned char* img) {
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {

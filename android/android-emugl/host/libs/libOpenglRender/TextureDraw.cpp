@@ -125,7 +125,10 @@ TextureDraw::TextureDraw() :
         mPositionSlot(-1),
         mInCoordSlot(-1),
         mTextureSlot(-1),
-        mTranslationSlot(-1) {
+        mTranslationSlot(-1),
+        mMaskTexture(0),
+        mHaveNewMask(false),
+        mMaskIsValid(false) {
     // Create shaders and program.
     mVertexShader = createShader(GL_VERTEX_SHADER, kVertexShaderSource);
     mFragmentShader = createShader(GL_FRAGMENT_SHADER, kFragmentShaderSource);
@@ -183,9 +186,13 @@ TextureDraw::TextureDraw() :
     s_gles2.glDisableVertexAttribArray(mInCoordSlot);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    // Create a texture handle for use with an overlay mask
+    s_gles2.glGenTextures(1, &mMaskTexture);
 }
 
-bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
+bool TextureDraw::drawImpl(GLuint texture, float rotation,
+                           float dx, float dy, bool wantOverlay) {
     if (!mProgram) {
         ERR("%s: no program\n", __FUNCTION__);
         return false;
@@ -280,6 +287,33 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
 
     s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
                            (const GLvoid*)indexShift);
+
+    if (wantOverlay && mHaveNewMask) {
+        // Create a texture from the mask image and make it
+        // available to be blended
+        s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
+
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mMaskWidth, mMaskHeight, 0,
+                             GL_RGBA, GL_UNSIGNED_BYTE, mMaskPixels);
+
+        s_gles2.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        s_gles2.glEnable(GL_BLEND);
+
+        mHaveNewMask = false;
+        mMaskIsValid = true;
+    }
+
+    if (wantOverlay && mMaskIsValid) {
+        s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
+        s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
+                               (const GLvoid*)indexShift);
+        // Reset to the "normal" texture
+        s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
+    }
+
 #ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
@@ -310,4 +344,17 @@ TextureDraw::~TextureDraw() {
     if (mVertexShader) {
         s_gles2.glDeleteShader(mVertexShader);
     }
+}
+
+void TextureDraw::setScreenMask(int width, int height, const unsigned char* rgbaData) {
+    if (width <= 0 || height <= 0 || rgbaData == nullptr) {
+        mMaskIsValid = false;
+        return;
+    }
+    // Save the data for use in the right context
+    mMaskPixels = rgbaData;
+    mMaskWidth = width;
+    mMaskHeight = height;
+
+    mHaveNewMask = true;
 }

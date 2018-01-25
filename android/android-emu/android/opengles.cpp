@@ -305,6 +305,14 @@ android_setOpenglesTranslation(float px, float py)
     }
 }
 
+void
+android_setOpenglesScreenMask(int width, int height, const unsigned char* rgbaData)
+{
+    if (sRenderer) {
+        sRenderer->setScreenMask(width, height, rgbaData);
+    }
+}
+
 int
 android_hideOpenglesWindow(void)
 {
