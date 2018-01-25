@@ -73,6 +73,8 @@ int android_hideOpenglesWindow(void);
 
 void android_setOpenglesTranslation(float px, float py);
 
+void android_setOpenglesScreenMask(int width, int height, const unsigned char* rgbaData);
+
 void android_redrawOpenglesWindow(void);
 
 /* Stop the renderer process */
