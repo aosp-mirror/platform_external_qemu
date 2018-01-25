@@ -50,6 +50,7 @@
 #include "android/utils/looper.h"
 #include "android/utils/sockets.h"
 #include "android/utils/stralloc.h"
+#include "android/utils/string.h"
 #include "android/utils/utf8_utils.h"
 
 #include "config-host.h"
@@ -2988,6 +2989,13 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     }
 
     info.fileName = sarray[optind];
+    std::string tmpfile = info.fileName;
+    std::transform(tmpfile.begin(), tmpfile.end(), tmpfile.begin(), ::tolower);
+    if (!str_ends_with(tmpfile.c_str(), ".webm")) {
+        control_write(client, "KO: file must have a .webm extension\r\n");
+        return -1;
+    }
+
     info.cb = &on_screenrecord_stop;
     info.opaque = client->global;
 
