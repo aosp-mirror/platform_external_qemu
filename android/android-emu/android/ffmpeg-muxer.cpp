@@ -38,6 +38,7 @@
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/ffmpeg-audio-capture.h"
 #include "android/utils/debug.h"
+#include "android/utils/string.h"
 
 extern "C" {
 #include "libavformat/avformat.h"
@@ -533,13 +534,6 @@ static void close_video_stream(AVFormatContext* oc, VideoOutputStream* ost) {
     sws_freeContext(ost->sws_ctx);
 }
 
-/*
-static bool has_suffix(const std::string& str, const std::string& suffix) {
-    return str.size() >= suffix.size() &&
-           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-*/
-
 static bool sIsRegistered = false;
 
 ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
@@ -547,6 +541,13 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
                                         int fb_height) {
     if (info == NULL || info->fileName == NULL)
         return NULL;
+
+    std::string tmpfile = info->fileName;
+    std::transform(tmpfile.begin(), tmpfile.end(), tmpfile.begin(), ::tolower);
+    if (!str_ends_with(tmpfile.c_str(), ".webm")) {
+        derror("%s must have a .webm extension\n", info->fileName);
+        return NULL;
+    }
 
     ffmpeg_recorder* recorder = new ffmpeg_recorder();
     if (recorder == NULL) {
