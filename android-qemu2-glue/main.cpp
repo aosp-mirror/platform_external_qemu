@@ -41,6 +41,7 @@
 #include "android/opengl/gpuinfo.h"
 #include "android/opengles.h"
 #include "android/process_setup.h"
+#include "android/screen-recorder.h"
 #include "android/session_phase_reporter.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -1235,6 +1236,13 @@ extern "C" int main(int argc, char** argv) {
         RendererConfig rendererConfig;
         configAndStartRenderer(avd, opts, hw, uiPreferredGlesBackend,
                                &rendererConfig);
+
+        // Gpu configuration is set, now initialize the screen recorder
+        bool isGuestMode = (!hw->hw_gpu_enabled ||
+                            !strcmp(hw->hw_gpu_mode, "guest"));
+        screen_recorder_init(hw->hw_lcd_width,
+                             hw->hw_lcd_height,
+                             isGuestMode ? uiEmuAgent.display : nullptr);
 
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =

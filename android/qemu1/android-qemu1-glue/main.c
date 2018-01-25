@@ -21,6 +21,7 @@
 #include "android/main-kernel-parameters.h"
 #include "android/main-qemu-parameters.h"
 #include "android/process_setup.h"
+#include "android/screen-recorder.h"
 #include "android/skin/winsys.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/debug.h"
@@ -160,6 +161,30 @@ int main(int argc, char **argv) {
         avd, opts, hw, WINSYS_GLESBACKEND_PREFERENCE_AUTO,
         &rendererConfig);
 
+    static UiEmuAgent uiEmuAgent;
+    uiEmuAgent.battery = gQAndroidBatteryAgent;
+    uiEmuAgent.cellular = gQAndroidCellularAgent;
+    uiEmuAgent.display = gQAndroidDisplayAgent;
+    uiEmuAgent.finger = gQAndroidFingerAgent;
+    uiEmuAgent.location = gQAndroidLocationAgent;
+    uiEmuAgent.proxy = gQAndroidHttpProxyAgent;
+    uiEmuAgent.record = gQAndroidRecordScreenAgent;
+    uiEmuAgent.sensors = gQAndroidSensorsAgent;
+    uiEmuAgent.telephony = gQAndroidTelephonyAgent;
+    uiEmuAgent.userEvents = gQAndroidUserEventAgent;
+    uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
+    uiEmuAgent.car = gQCarDataAgent;
+
+    // for now there's no uses of SettingsAgent, so we don't set it
+    uiEmuAgent.settings = NULL;
+
+    // Gpu configuration is set, now initialize the screen recorder
+    bool isGuestMode = (!hw->hw_gpu_enabled ||
+                        !strcmp(hw->hw_gpu_mode, "guest"));
+    screen_recorder_init(hw->hw_lcd_width,
+                         hw->hw_lcd_height,
+                         isGuestMode ? uiEmuAgent.display : NULL);
+
     int apiLevel = avdInfo_getApiLevel(avd);
     mem_map mem = { 0 };
     char* kernelParameters = emulator_getKernelParameters(
@@ -243,23 +268,6 @@ int main(int argc, char **argv) {
     if (!qemuParams) {
         return 1;
     }
-
-    static UiEmuAgent uiEmuAgent;
-    uiEmuAgent.battery = gQAndroidBatteryAgent;
-    uiEmuAgent.cellular = gQAndroidCellularAgent;
-    uiEmuAgent.display = gQAndroidDisplayAgent;
-    uiEmuAgent.finger = gQAndroidFingerAgent;
-    uiEmuAgent.location = gQAndroidLocationAgent;
-    uiEmuAgent.proxy = gQAndroidHttpProxyAgent;
-    uiEmuAgent.record = gQAndroidRecordScreenAgent;
-    uiEmuAgent.sensors = gQAndroidSensorsAgent;
-    uiEmuAgent.telephony = gQAndroidTelephonyAgent;
-    uiEmuAgent.userEvents = gQAndroidUserEventAgent;
-    uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
-    uiEmuAgent.car = gQCarDataAgent;
-
-    // for now there's no uses of SettingsAgent, so we don't set it
-    uiEmuAgent.settings = NULL;
 
     /* Setup SDL UI just before calling the code */
 #ifdef __linux__
