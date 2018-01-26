@@ -19,6 +19,8 @@
 
 #include "android/base/memory/LazyInstance.h"
 
+#include "emugl/common/dma_device.h"
+
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -111,6 +113,11 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glMapBufferRangeAEMU = s_glMapBufferRangeAEMU;
     glUnmapBufferAEMU = s_glUnmapBufferAEMU;
     glFlushMappedBufferRangeAEMU = s_glFlushMappedBufferRangeAEMU;
+
+    glMapBufferRangeDirectAEMU = s_glMapBufferRangeDirectAEMU;
+    glUnmapBufferDirectAEMU = s_glUnmapBufferDirectAEMU;
+    glFlushMappedBufferRangeDirectAEMU = s_glFlushMappedBufferRangeDirectAEMU;
+
     glCompressedTexImage2DOffsetAEMU = s_glCompressedTexImage2DOffsetAEMU;
     glCompressedTexSubImage2DOffsetAEMU = s_glCompressedTexSubImage2DOffsetAEMU;
     glTexImage2DOffsetAEMU = s_glTexImage2DOffsetAEMU;
@@ -354,6 +361,27 @@ void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GL
     // |offset| was the absolute offset into the mapping, so just flush offset 0.
     ctx->glFlushMappedBufferRange(target, 0, length);
     ctx->glUnmapBuffer(target);
+}
+
+void GLESv2Decoder::s_glMapBufferRangeDirectAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t hostmem_handle)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+    g_emugl_dma_hostmem_set_ptr(hostmem_handle, gpu_ptr, length, GL_TRUE /* status code default */);
+}
+
+void GLESv2Decoder::s_glUnmapBufferDirectAEMU(void* self, GLenum target, uint64_t hostmem_handle)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    GLboolean res = ctx->glUnmapBuffer(target);
+    g_emugl_dma_hostmem_unset_ptr(hostmem_handle, res);
+}
+
+void GLESv2Decoder::s_glFlushMappedBufferRangeDirectAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, uint64_t hostmem_handle) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glFlushMappedBufferRange(target, offset, length);
+    // TODO: maybe something cool can happen with hostmem here
+    (void)hostmem_handle;
 }
 
 void GLESv2Decoder::s_glCompressedTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLuint offset) {
