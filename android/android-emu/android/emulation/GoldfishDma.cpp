@@ -3,6 +3,7 @@
 
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/DmaMap.h"
+#include "android/emulation/HostmemAlloc.h"
 
 #include "android/emulation/android_pipe_host.h"
 #include "android/utils/assert.h"
@@ -34,6 +35,14 @@ static void android_goldfish_dma_reset_host_mappings() {
     android::DmaMap::get()->resetHostMappings();
 }
 
+static void android_goldfish_dma_hostmem_set_ptr(uint64_t hostmem_id, void* host_ptr, uint64_t length, uint64_t status_code) {
+    android::HostmemAlloc::get()->setHostPtr(hostmem_id, host_ptr, length);
+}
+
+static void android_goldfish_dma_hostmem_unset_ptr(uint64_t hostmem_id, uint64_t status_code) {
+    android::HostmemAlloc::get()->unsetHostPtr(hostmem_id);
+}
+
 static void android_goldfish_dma_save_mappings(android::base::Stream* stream) {
     android::DmaMap::get()->save(stream);
 }
@@ -49,6 +58,8 @@ GoldfishDmaOps android_goldfish_dma_ops = {
     .invalidate_host_mappings = android_goldfish_dma_invalidate_host_mappings,
     .unlock = android_goldfish_dma_unlock,
     .reset_host_mappings = android_goldfish_dma_reset_host_mappings,
+    .hostmem_set_ptr = android_goldfish_dma_hostmem_set_ptr,
+    .hostmem_unset_ptr = android_goldfish_dma_hostmem_unset_ptr,
     .save_mappings = android_goldfish_dma_save_mappings,
     .load_mappings = android_goldfish_dma_load_mappings,
 };

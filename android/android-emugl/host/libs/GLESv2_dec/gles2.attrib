@@ -1412,4 +1412,15 @@ glGetProgramResourceLocation
 glGetProgramResourceName
     flag custom_decoder
 
+glMapBufferRangeDirectAEMU
+    flag custom_decoder
+    flag not_api
+
+glUnmapBufferDirectAEMU
+    flag custom_decoder
+    flag not_api
+
+glFlushMappedBufferRangeDirectAEMU
+    flag custom_decoder
+    flag not_api
 

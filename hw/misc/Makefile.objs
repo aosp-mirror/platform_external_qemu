@@ -59,6 +59,7 @@ obj-$(CONFIG_HYPERV_TESTDEV) += hyperv_testdev.o
 obj-$(CONFIG_AUX) += auxbus.o
 obj-$(CONFIG_ASPEED_SOC) += aspeed_scu.o aspeed_sdmc.o
 obj-$(CONFIG_GOLDFISH) += goldfish_battery.o
+obj-$(CONFIG_GOLDFISH) += goldfish_hostmem.o
 obj-$(CONFIG_GOLDFISH) += goldfish_pipe.o
 obj-$(CONFIG_GOLDFISH) += goldfish_sync.o
 obj-$(CONFIG_GOLDFISH) += goldfish_pstore.o

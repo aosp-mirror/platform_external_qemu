@@ -56,6 +56,9 @@ void (*unlock)(uint64_t guest_paddr);
 // reset_host_mappings();
 // Not only invalidates the mappings, but also removes them from the record.
 void (*reset_host_mappings)(void);
+// Host memory mapping.
+void (*hostmem_set_ptr)(uint64_t bufferid, void* hostmem, uint64_t length, uint64_t status_code);
+void (*hostmem_unset_ptr)(uint64_t bufferid, uint64_t status_code);
 // For snapshots.
 void (*save_mappings)(android::base::Stream* stream);
 void (*load_mappings)(android::base::Stream* stream);
