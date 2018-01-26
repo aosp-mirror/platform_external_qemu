@@ -557,3 +557,12 @@ GL_ENTRY(void, glGetFramebufferParameteriv, GLenum target, GLenum pname, GLint *
 # Already used in Translator's validations, just need encoder.
 GL_ENTRY(void, glGetTexLevelParameterfv, GLenum target, GLint level, GLenum pname, GLfloat * params)
 GL_ENTRY(void, glGetTexLevelParameteriv, GLenum target, GLint level, GLenum pname, GLint * params)
+
+# Direct-mapped buffers
+# glMapBufferRangeDirectAEMU:
+# To reduce overhead from round trips in the pipe protocol, the pointer / map result are 
+# actually returned in a separate goldfish pipe interrupt.
+# The guest calls a IOCTL / mmap combo after issuing glMapBufferRangeDirectAEMU.
+GL_ENTRY(void, glMapBufferRangeDirectAEMU, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t hostmem_handle)
+GL_ENTRY(void, glUnmapBufferDirectAEMU, GLenum target, uint64_t hostmem_handle)
+GL_ENTRY(void, glFlushMappedBufferRangeDirectAEMU, GLenum target, GLintptr offset, GLsizeiptr length, uint64_t hostmem_handle)

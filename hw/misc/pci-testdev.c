@@ -253,6 +253,8 @@ static void pci_testdev_realize(PCIDevice *pci_dev, Error **errp)
     pci_register_bar(pci_dev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &d->mmio);
     pci_register_bar(pci_dev, 1, PCI_BASE_ADDRESS_SPACE_IO, &d->portio);
 
+    fprintf(stderr, "%s: romfile %p\n", __func__, pci_dev->romfile);
+
     d->current = -1;
     d->tests = g_malloc0(IOTEST_MAX * sizeof *d->tests);
     for (i = 0; i < IOTEST_MAX; ++i) {
