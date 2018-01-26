@@ -318,7 +318,12 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
+#ifndef _WIN32
+    // bug: 70566718
+    // for now, just use software keymaster3 in the guest
+    // on windows.
     android_init_keymaster3();
+#endif
     android_init_fake_camera_sensor();
     android_init_qemu_misc_pipe();
 
