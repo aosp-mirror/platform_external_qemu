@@ -7,6 +7,8 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include "emugl/common/dma_device.h"
+
 PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
     mFb(FrameBuffer::getFB()),
     mBindSubwin(cb) {}
@@ -37,6 +39,8 @@ void PostWorker::post(ColorBuffer* cb) {
     // finally, compute translation values
     float dx = px * fx;
     float dy = py * fy;
+
+    g_emugl_dma_hostmem_set_ptr(0, nullptr, 0x1000, GL_TRUE /* status code default */);
 
     //
     // render the color buffer to the window and apply the overlay

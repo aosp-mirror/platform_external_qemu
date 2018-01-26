@@ -71,6 +71,8 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
     set_emugl_dma_get_host_addr(ops.get_host_addr);
     set_emugl_dma_invalidate_host_mappings(ops.invalidate_host_mappings);
     set_emugl_dma_unlock(ops.unlock);
+    set_emugl_dma_hostmem_set_ptr(ops.hostmem_set_ptr);
+    set_emugl_dma_hostmem_unset_ptr(ops.hostmem_unset_ptr);
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,
