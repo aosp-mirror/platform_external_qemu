@@ -30,6 +30,7 @@
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
+#include "android-qemu2-glue/emulation/goldfish_hostmem.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
 #include "android-qemu2-glue/base/async/CpuLooper.h"
@@ -140,6 +141,11 @@ bool qemu_android_emulation_early_setup() {
 
     // Initialize host sync service.
     if (!qemu_android_sync_init(vmLock)) {
+        return false;
+    }
+
+    // Initial hostmem service
+    if (!qemu_android_hostmem_init(vmLock)) {
         return false;
     }
 

@@ -24,7 +24,9 @@ LOCAL_SRC_FILES := \
     emulation/charpipe.c \
     emulation/CharSerialLine.cpp \
     emulation/DmaMap.cpp \
+    emulation/goldfish_hostmem.cpp \
     emulation/goldfish_sync.cpp \
+    emulation/HostmemAlloc.cpp \
     emulation/serial_line.cpp \
     emulation/VmLock.cpp \
     looper-qemu.cpp \

@@ -34,6 +34,14 @@ static void android_goldfish_dma_reset_host_mappings() {
     android::DmaMap::get()->resetHostMappings();
 }
 
+static void android_goldfish_dma_hostmem_set_ptr(uint64_t hostmem_id, void* host_ptr, uint64_t length, uint64_t status_code) {
+    fprintf(stderr, "%s: TODO\n", __func__);
+}
+
+static void android_goldfish_dma_hostmem_unset_ptr(uint64_t hostmem_id, uint64_t status_code) {
+    fprintf(stderr, "%s: TODO\n", __func__);
+}
+
 static void android_goldfish_dma_save_mappings(android::base::Stream* stream) {
     android::DmaMap::get()->save(stream);
 }
@@ -51,4 +59,6 @@ GoldfishDmaOps android_goldfish_dma_ops = {
     .reset_host_mappings = android_goldfish_dma_reset_host_mappings,
     .save_mappings = android_goldfish_dma_save_mappings,
     .load_mappings = android_goldfish_dma_load_mappings,
+    .hostmem_set_ptr = android_goldfish_dma_hostmem_set_ptr,
+    .hostmem_unset_ptr = android_goldfish_dma_hostmem_unset_ptr,
 };

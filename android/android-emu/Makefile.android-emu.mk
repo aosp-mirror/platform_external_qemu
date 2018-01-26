@@ -340,8 +340,11 @@ LOCAL_SRC_FILES := \
     android/emulation/CpuAccelerator.cpp \
     android/emulation/DmaMap.cpp \
     android/emulation/GoldfishDma.cpp \
+    android/emulation/GoldfishHostmemCommandQueue.cpp \
     android/emulation/GoldfishSyncCommandQueue.cpp \
+    android/emulation/goldfish_hostmem.cpp \
     android/emulation/goldfish_sync.cpp \
+    android/emulation/HostmemAlloc.cpp \
     android/emulation/LogcatPipe.cpp \
     android/emulation/Keymaster3.cpp \
     android/emulation/FakeRotatingCameraSensor.cpp \

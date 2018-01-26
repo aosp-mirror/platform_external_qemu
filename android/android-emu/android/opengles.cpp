@@ -166,6 +166,8 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.get_host_addr = android_goldfish_dma_ops.get_host_addr;
     dma_ops.invalidate_host_mappings = android_goldfish_dma_ops.invalidate_host_mappings;
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
+    dma_ops.hostmem_set_ptr = android_goldfish_dma_ops.hostmem_set_ptr;
+    dma_ops.hostmem_unset_ptr = android_goldfish_dma_ops.hostmem_unset_ptr;
     sRenderLib->setDmaOps(dma_ops);
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);

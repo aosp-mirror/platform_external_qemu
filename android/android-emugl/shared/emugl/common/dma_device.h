@@ -22,9 +22,13 @@ extern emugl_dma_add_buffer_t g_emugl_dma_add_buffer;
 extern emugl_dma_remove_buffer_t g_emugl_dma_remove_buffer;
 extern emugl_dma_get_host_addr_t g_emugl_dma_get_host_addr;
 extern emugl_dma_unlock_t g_emugl_dma_unlock;
+extern emugl_dma_hostmem_set_ptr_t g_emugl_dma_hostmem_set_ptr;
+extern emugl_dma_hostmem_unset_ptr_t g_emugl_dma_hostmem_unset_ptr;
 
 void set_emugl_dma_add_buffer(emugl_dma_add_buffer_t);
 void set_emugl_dma_remove_buffer(emugl_dma_remove_buffer_t);
 void set_emugl_dma_get_host_addr(emugl_dma_get_host_addr_t);
 void set_emugl_dma_invalidate_host_mappings(emugl_dma_invalidate_host_mappings_t);
 void set_emugl_dma_unlock(emugl_dma_unlock_t);
+void set_emugl_dma_hostmem_set_ptr(emugl_dma_hostmem_set_ptr_t);
+void set_emugl_dma_hostmem_unset_ptr(emugl_dma_hostmem_unset_ptr_t);
