@@ -1114,6 +1114,10 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    // hostmem
+    args.add("-device");
+    args.add("goldfish_hostmem");
+
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     args.add("-device");

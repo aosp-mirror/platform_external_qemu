@@ -451,6 +451,7 @@ QEMU2_TARGET_SOURCES := \
     hw/intc/goldfish_pic.c \
     hw/misc/edu.c \
     hw/misc/goldfish_battery.c \
+    hw/misc/goldfish_hostmem.c \
     hw/misc/goldfish_pipe.c \
     hw/misc/goldfish_pstore.c \
     hw/misc/goldfish_sync.c \

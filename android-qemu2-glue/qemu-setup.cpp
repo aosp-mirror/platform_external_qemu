@@ -30,7 +30,9 @@
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
+#include "android-qemu2-glue/emulation/goldfish_hostmem.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
+#include "android-qemu2-glue/emulation/HostmemAlloc.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
 #include "android-qemu2-glue/base/async/CpuLooper.h"
 #include "android-qemu2-glue/base/async/Looper.h"
@@ -63,6 +65,7 @@ extern char* op_http_proxy;
 
 using android::VmLock;
 using android::DmaMap;
+using android::HostmemAlloc;
 
 extern "C" void ranchu_device_tree_setup(void *fdt) {
     /* fstab */
@@ -133,6 +136,11 @@ bool qemu_android_emulation_early_setup() {
     DmaMap* prevDmaMap = DmaMap::set(dmaMap);
     CHECK(prevDmaMap == nullptr) << "Another DmaMap was already installed!";
 
+    // Ensure the HostmemAlloc implementation is setup.
+    HostmemAlloc* hostmemAlloc = new qemu2::HostmemAlloc();
+    HostmemAlloc* prevHostmemAlloc = HostmemAlloc::set(hostmemAlloc);
+    CHECK(prevHostmemAlloc == nullptr) << "Another HostmemAlloc was already installed!";
+
     // Initialize host pipe service.
     if (!qemu_android_pipe_init(vmLock)) {
         return false;
@@ -140,6 +148,11 @@ bool qemu_android_emulation_early_setup() {
 
     // Initialize host sync service.
     if (!qemu_android_sync_init(vmLock)) {
+        return false;
+    }
+
+    // Initial hostmem service
+    if (!qemu_android_hostmem_init(vmLock)) {
         return false;
     }
 

@@ -52,10 +52,16 @@ typedef void* (*emugl_dma_get_host_addr_t)(uint64_t);
 typedef void (*emugl_dma_invalidate_host_mappings_t)(void);
 typedef void (*emugl_dma_unlock_t)(uint64_t);
 
+// Functions for mapping host memory into the guest (other way around)
+typedef void (*emugl_dma_hostmem_set_ptr_t)(uint64_t, void*, uint64_t, uint64_t);
+typedef void (*emugl_dma_hostmem_unset_ptr_t)(uint64_t, uint64_t);
+
 typedef struct {
     emugl_dma_add_buffer_t add_buffer;
     emugl_dma_remove_buffer_t remove_buffer;
     emugl_dma_get_host_addr_t get_host_addr;
     emugl_dma_invalidate_host_mappings_t invalidate_host_mappings;
     emugl_dma_unlock_t unlock;
+    emugl_dma_hostmem_set_ptr_t hostmem_set_ptr;
+    emugl_dma_hostmem_unset_ptr_t hostmem_unset_ptr;
 } emugl_dma_ops;
