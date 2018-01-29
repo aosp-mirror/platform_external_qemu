@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4614c142_50571391",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 856,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-01-29T18:19:24Z",
+      "side": 1,
+      "message": "add a explicit check for arm here so we will trigger compiler error if arch !\u003d arm and !\u003dx86 and !\u003d mips. So if some day we upstream this or adding some new arch support we don\u0027t create a new bug that treat other arch as arm.",
+      "range": {
+        "startLine": 856,
+        "startChar": 5,
+        "endLine": 856,
+        "endChar": 0
+      },
+      "revId": "4c70758026f0b53143a7cd60d088b0b83d0053cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
