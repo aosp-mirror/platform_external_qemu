@@ -30,6 +30,7 @@
 #include "android/hw-sensors.h"
 #include "android/boot-properties.h"
 #include "android/utils/debug.h"
+#include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
 
@@ -290,6 +291,8 @@ static void _virtualscenecamera_setup(CameraServiceDesc* csd) {
     /* Array containing emulated camera frame dimensions
      * expected by framework. */
     static const CameraFrameDim kEmulateDims[] = {
+            {1280, 960},
+            {1280, 720},
             {640, 480},
             /* The following dimensions are required by the camera framework. */
             {352, 288},
@@ -1262,7 +1265,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     frame.framebuffers = fbs;
     frame.staging_framebuffer = cc->staging_framebuffer;
     frame.staging_framebuffer_size = cc->staging_framebuffer_size;
-    frame.frame_time = 0L;
+    frame.frame_time =
+            looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
     repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
                             exp_comp);

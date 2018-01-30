@@ -28,6 +28,8 @@
 #define D(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
 #define D_ACTIVE VERBOSE_CHECK(virtualscene)
 
+constexpr float kDefaultAspectRatio = 640.0f / 480.0f;
+
 namespace android {
 namespace virtualscene {
 
@@ -59,14 +61,7 @@ static glm::mat4 poseToOpenGl(glm::quat rotation, glm::vec3 translation) {
 }
 
 SceneCamera::SceneCamera() {
-    mProjection = projectionMatrixForCameraIntrinsics(640.0f,    // width
-                                                      480.0f,    // height
-                                                      480.0f,  // fx
-                                                      480.0f,  // fy
-                                                      320.0f,  // cx
-                                                      240.0f,  // cy
-                                                      0.1f,      // zNear
-                                                      100.0f);   // zFar
+    setAspectRatio(kDefaultAspectRatio);
 
     const glm::mat4 openGlFromSensors = poseToOpenGl(
             glm::quat(sqrt(2.0f) / 2.0f, 0.0f, 0.0f, sqrt(2.0f) / 2.0f),
@@ -81,6 +76,17 @@ SceneCamera::SceneCamera() {
 }
 
 SceneCamera::~SceneCamera() = default;
+
+void SceneCamera::setAspectRatio(float aspectRatio) {
+    mProjection = projectionMatrixForCameraIntrinsics(aspectRatio,  // width
+                                                      1.0f,         // height
+                                                      1.0f,         // fx
+                                                      1.0f,         // fy
+                                                      aspectRatio / 2.0f,  // cx
+                                                      0.5f,                // cy
+                                                      0.1f,     // zNear
+                                                      100.0f);  // zFar
+}
 
 void SceneCamera::update() {
     int64_t timestamp;
