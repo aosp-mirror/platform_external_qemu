@@ -70,6 +70,30 @@
       "revId": "73d6cfefde87770838dc52bd6e80f6ef80c1c6ac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71569fc2_1d40c9a7",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-01-30T22:58:57Z",
+      "side": 1,
+      "message": "Preview and capture resolution are chosen at APP level, I feel the AOSP camera considers aspect ratio...",
+      "parentUuid": "ef1ca17f_9386e123",
+      "range": {
+        "startLine": 607,
+        "startChar": 0,
+        "endLine": 607,
+        "endChar": 24
+      },
+      "revId": "73d6cfefde87770838dc52bd6e80f6ef80c1c6ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
