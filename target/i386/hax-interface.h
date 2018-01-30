@@ -325,6 +325,15 @@ struct hax_set_ram_info {
     uint64_t va;
 } __attribute__ ((__packed__));
 
+struct hax_set_ram_info2 {
+    uint64_t pa_start;
+    uint64_t size;
+    uint64_t va;
+    uint32_t flags;
+    uint32_t reserved1;
+    uint64_t reserved2;
+} __attribute__ ((__packed__));
+
 #define HAX_CAP_STATUS_WORKING     0x1
 #define HAX_CAP_STATUS_NOTWORKING  0x0
 #define HAX_CAP_WORKSTATUS_MASK    0x1
@@ -335,6 +344,7 @@ struct hax_set_ram_info {
 #define HAX_CAP_MEMQUOTA           0x2
 #define HAX_CAP_UG                 0x4
 #define HAX_CAP_64BIT_RAMBLOCK     0x8
+#define HAX_CAP_64BIT_SETRAM       0x10
 
 struct hax_capabilityinfo {
     /* bit 0: 1 - working
