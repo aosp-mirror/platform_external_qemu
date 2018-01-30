@@ -22,6 +22,30 @@
       "revId": "73d6cfefde87770838dc52bd6e80f6ef80c1c6ac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ec469ff_39dd41f0",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-30T20:43:04Z",
+      "side": 1,
+      "message": "1280x960 is not required for the camera app, I added that as an option for the virtual scene so that we can have a higher resolution with the same 4:3 aspect ratio.",
+      "parentUuid": "eb2507a2_f414a629",
+      "range": {
+        "startLine": 607,
+        "startChar": 0,
+        "endLine": 607,
+        "endChar": 24
+      },
+      "revId": "73d6cfefde87770838dc52bd6e80f6ef80c1c6ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
