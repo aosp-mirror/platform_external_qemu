@@ -21,6 +21,7 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
 #include "android/emulation/VmLock.h"
+#include "android/emulator-window.h"
 #include "android/ffmpeg-muxer.h"
 #include "android/framebuffer.h"
 #include "android/gpu_frame.h"
@@ -83,6 +84,7 @@ struct Globals {
     ::android::base::MessageChannel<Frame, kMaxFrames> channel;
     RecordingInfo recordingInfo;
     CVInfo encodingCVInfo;  // Used to signal encoding thread completion
+    QFrameBuffer dummyQf;
 };
 
 android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
@@ -112,7 +114,7 @@ static void screen_recorder_fb_update(void* opaque,
     if (!globals.guestFrame) {
         globals.guestFrame.reset(new Frame(
                 w, h, android::base::System::get()->getHighResTimeUs(),
-                RecordPixFmt::RGB565, px));
+                bpp == 4 ? RecordPixFmt::BGRA8888 : RecordPixFmt::RGB565, px));
     } else if (w == globals.guestFrame->width &&
                h == globals.guestFrame->height) {
         memcpy(static_cast<void*>(globals.guestFrame->pixels.get()), px,
@@ -149,7 +151,7 @@ static intptr_t sendFrames(int fps) {
             if (globals.guestFrame) {
                 f.emplace(globals.guestFrame->width, globals.guestFrame->height,
                           android::base::System::get()->getHighResTimeUs(),
-                          RecordPixFmt::RGB565,
+                          globals.guestFrame->pix_fmt,
                           globals.guestFrame->pixels.get());
             }
         }
@@ -272,6 +274,14 @@ void screen_recorder_init(int w, int h, const QAndroidDisplayAgent* dpy_agent) {
     globals.fbWidth = w;
     globals.fbHeight = h;
     if (dpy_agent) {
+        if (emulator_window_get()->opts->no_window) {
+            // Need to make a dummy producer to use the invalidate and fb check
+            // callbacks, so we can request for a repost when we start
+            // recording.
+            qframebuffer_init_no_window(&globals.dummyQf);
+            qframebuffer_fifo_add(&globals.dummyQf);
+            dpy_agent->initFrameBufferNoWindow(&globals.dummyQf);
+        }
         globals.displayAgent = *dpy_agent;
         globals.isGuestMode = true;
     } else {
