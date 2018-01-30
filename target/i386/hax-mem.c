@@ -38,7 +38,7 @@
  */
 typedef struct HAXMapping {
     uint64_t start_pa;
-    uint32_t size;
+    uint64_t size;
     uint64_t host_va;
     int flags;
     QTAILQ_ENTRY(HAXMapping) entry;
@@ -76,7 +76,7 @@ static void hax_mapping_dump_list(void)
 }
 
 static void hax_insert_mapping_before(HAXMapping *next, uint64_t start_pa,
-                                      uint32_t size, uint64_t host_va,
+                                      uint64_t size, uint64_t host_va,
                                       uint8_t flags)
 {
     HAXMapping *entry;
@@ -102,7 +102,7 @@ static bool hax_mapping_is_opposite(HAXMapping *entry, uint64_t host_va,
     return (entry->host_va == host_va) && nop_flags;
 }
 
-static void hax_update_mapping(uint64_t start_pa, uint32_t size,
+static void hax_update_mapping(uint64_t start_pa, uint64_t size,
                                uint64_t host_va, uint8_t flags)
 {
     uint64_t end_pa = start_pa + size;
@@ -199,7 +199,7 @@ static void hax_process_section(MemoryRegionSection *section, uint8_t flags)
     }
 
     /* the kernel module interface uses 32-bit sizes (but we could split...) */
-    g_assert(size <= UINT32_MAX);
+    g_assert(hax_global.supports_64bit_setram || size <= UINT32_MAX);
 
     hax_update_mapping(start_pa, size, host_va, flags);
 }
@@ -240,7 +240,7 @@ static void hax_transaction_commit(MemoryListener *listener)
             if (hax_set_ram(entry->start_pa, entry->size,
                             entry->host_va, entry->flags)) {
                 fprintf(stderr, "%s: Failed mapping @0x%016" PRIx64 "+0x%"
-                        PRIx32 " flags %02x\n", __func__, entry->start_pa,
+                        PRIx64 " flags %02x\n", __func__, entry->start_pa,
                         entry->size, entry->flags);
             }
             QTAILQ_REMOVE(&mappings, entry, entry);
