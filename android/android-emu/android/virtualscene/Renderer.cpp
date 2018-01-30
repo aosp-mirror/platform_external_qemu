@@ -247,6 +247,8 @@ public:
     bool initialize();
 
     // Renderer public API.
+    float getAspectRatio() override;
+
     void releaseObjectResources(const SceneObject* sceneObject) override;
 
     Material createMaterialCheckerboard(const SceneObject* parent) override;
@@ -411,6 +413,10 @@ RendererImpl::~RendererImpl() {
     for (const auto& meshIt : mMeshes) {
         W("%s: Leaked mesh with id %d", __FUNCTION__, meshIt.first);
     }
+}
+
+float RendererImpl::getAspectRatio() {
+    return static_cast<float>(mRenderWidth) / mRenderHeight;
 }
 
 void RendererImpl::releaseObjectResources(const SceneObject* sceneObject) {

@@ -82,6 +82,9 @@ public:
     static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2,
                                             int width, int height);
 
+    // Get the aspect ratio of the frame, w/h.
+    virtual float getAspectRatio() = 0;
+
     // Release rendering state associated with a SceneObject, should be called
     // before destroying a SceneObject.
     //
