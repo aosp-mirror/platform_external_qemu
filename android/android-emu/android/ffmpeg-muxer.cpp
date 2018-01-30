@@ -51,6 +51,7 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,57 +82,68 @@ extern "C" {
 using namespace android::emulation;
 
 // a wrapper around a single output AVStream
-struct VideoOutputStream {
-    AVStream* st;
+class VideoOutputStream {
+public:
+    AVStream* st = nullptr;
 
     AVCodecID codec_id;
 
     // video width and height
-    int width;
-    int height;
+    int width = 0;
+    int height = 0;
 
-    int bit_rate;
-    int fps;
+    int bit_rate = 0;
+    int fps = 0;
 
 #if DEBUG_VIDEO
-    int64_t frame_count;
-    int64_t write_frame_count;
+    int64_t frame_count = 0ll;
+    int64_t write_frame_count = 0ll;
 #endif
 
     // pts of the next frame that will be generated
-    int64_t next_pts;
+    int64_t next_pts = 0ll;
 
-    AVFrame* frame;
-    AVFrame* tmp_frame;
+    AVFrame* frame = nullptr;
+    AVFrame* tmp_frame = nullptr;
 
     struct SwsContext* sws_ctx;
 };
 
-struct AudioOutputStream {
-    AVStream* st;
+class AudioOutputStream {
+public:
+    AVStream* st = nullptr;
 
     AVCodecID codec_id;
 
-    int bit_rate;
-    int sample_rate;
+    int bit_rate = 0;
+    int sample_rate = 0;
 
 #if DEBUG_AUDIO
-    int64_t frame_count;
-    int64_t write_frame_count;
+    int64_t frame_count = 0ll;
+    int64_t write_frame_count = 0ll;
 #endif
 
     // pts of the next frame that will be generated
-    int64_t next_pts;
+    int64_t next_pts = 0ll;
 
-    int samples_count;
+    int samples_count = 0;
 
-    AVFrame* frame;
-    AVFrame* tmp_frame;
+    AVFrame* frame = nullptr;
+    AVFrame* tmp_frame = nullptr;
 
-    uint8_t* audio_leftover;
-    int audio_leftover_len;
+    uint8_t* audio_leftover = nullptr;
+    int audio_leftover_len = 0;
 
-    struct SwrContext* swr_ctx;
+    struct SwrContext* swr_ctx = nullptr;
+
+    // A single lock to protect writing audio frames
+    android::base::Lock audio_out_pkt_lock;
+
+    // last audio frame write time in us, relative to system start time
+    uint64_t last_audio_frame_write_time = 0;
+
+    // silent audio samples, i.e., all zeros
+    std::string silent_buf;
 };
 
 class ffmpeg_recorder {
@@ -142,7 +154,7 @@ public:
     VideoOutputStream video_st;
     AudioOutputStream audio_st;
     // A single lock to protect writing audio and video frames to the video file
-    mutable android::base::Lock out_pkt_lock;
+    android::base::Lock out_pkt_lock;
     bool have_video = false;
     bool has_video_frames = false;
     bool have_audio = false;
@@ -284,6 +296,12 @@ static int open_audio(AVFormatContext* oc,
     ost->tmp_frame = alloc_audio_frame(AV_SAMPLE_FMT_S16, c->channel_layout,
                                        c->sample_rate, nb_samples);
 
+    // frame_size is usually 4096, sample rate is usally 48000
+    int frame_size = ost->tmp_frame->nb_samples * c->channels * sizeof(int16_t);
+    // silent buffer is used to inject silence to the recording, 4 frames
+    // total is 16384 byte
+    ost->silent_buf = std::string(4 * frame_size, '\0');
+
     // create resampler context
     ost->swr_ctx = swr_alloc();
     if (!ost->swr_ctx) {
@@ -369,6 +387,8 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
         log_packet(oc, &pkt);
 #endif
 
+        ost->last_audio_frame_write_time =
+                android::base::System::get()->getHighResTimeUs();
         ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",
@@ -509,6 +529,17 @@ static int write_video_frame(ffmpeg_recorder* recorder,
             log_packet(oc, &pkt);
 #endif
             ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
+            if (ret == 0 && recorder->have_audio) {
+                uint64_t interval =
+                        android::base::System::get()->getHighResTimeUs() -
+                        recorder->audio_st.last_audio_frame_write_time;
+                if (interval >= 50000) {  // 21.33 msec, one frame silence
+                    ffmpeg_encode_audio_frame(
+                            recorder,
+                            (uint8_t*)recorder->audio_st.silent_buf.data(),
+                            recorder->audio_st.silent_buf.size());
+                }
+            }
         } else {
             ret = 0;
         }
@@ -1018,6 +1049,8 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
 
     if (recorder->oc == NULL)
         return -1;
+
+    android::base::AutoLock lock(ost->audio_out_pkt_lock);
 
     AVFrame* frame = ost->tmp_frame;
     int frame_size = frame->nb_samples * ost->st->codec->channels *
