@@ -39,7 +39,6 @@ struct hax_state {
     uint32_t version;
     struct hax_vm *vm;
     uint64_t mem_quota;
-    bool supports_64bit_ramblock;
 };
 
 #define HAX_MAX_VCPU 0x10

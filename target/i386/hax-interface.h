@@ -308,13 +308,6 @@ struct hax_alloc_ram_info {
     uint32_t pad;
     uint64_t va;
 } __attribute__ ((__packed__));
-
-struct hax_ramblock_info {
-    uint64_t start_va;
-    uint64_t size;
-    uint64_t reserved;
-} __attribute__ ((__packed__));
-
 #define HAX_RAM_INFO_ROM     0x01 /* Read-Only */
 #define HAX_RAM_INFO_INVALID 0x80 /* Unmapped, usually used for MMIO */
 struct hax_set_ram_info {
@@ -334,7 +327,6 @@ struct hax_set_ram_info {
 
 #define HAX_CAP_MEMQUOTA           0x2
 #define HAX_CAP_UG                 0x4
-#define HAX_CAP_64BIT_RAMBLOCK     0x8
 
 struct hax_capabilityinfo {
     /* bit 0: 1 - working
