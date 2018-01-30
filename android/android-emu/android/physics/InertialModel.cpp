@@ -880,7 +880,6 @@ glm::vec3 InertialModel::calculateInertialState(
         const glm::mat4x3& cubicTransform,
         const glm::mat4x3& afterEndCubicTransform,
         ParameterValueType parameterValueType) const {
-    assert(mModelTimeNs >= mPositionChangeStartTime);
     const uint64_t requestedTimeNs =
             parameterValueType == PARAMETER_VALUE_TYPE_TARGET ?
                     mPositionChangeEndTime : mModelTimeNs;
@@ -907,7 +906,6 @@ glm::vec4 InertialModel::calculateRotationalState(
         const glm::mat4x4& cubicTransform,
         const glm::mat4x4& afterEndCubicTransform,
         ParameterValueType parameterValueType) const {
-    assert(mModelTimeNs >= mRotationChangeStartTime);
     const uint64_t requestedTimeNs =
             parameterValueType == PARAMETER_VALUE_TYPE_TARGET ?
                     mRotationChangeEndTime : mModelTimeNs;
@@ -928,7 +926,6 @@ glm::vec4 InertialModel::calculateRotationalState(
 
 float InertialModel::getAmbientMotionBoundsValue(
         ParameterValueType parameterValueType) const {
-    assert(mModelTimeNs >= mAmbientMotionChangeStartTime);
     if (parameterValueType != PARAMETER_VALUE_TYPE_TARGET &&
             mModelTimeNs < mAmbientMotionChangeEndTime) {
         const float time1 = nsToSeconds(mModelTimeNs - mAmbientMotionChangeStartTime);
@@ -947,7 +944,6 @@ float InertialModel::getAmbientMotionBoundsValue(
 
 float InertialModel::getAmbientMotionBoundsDeriv(
         ParameterValueType parameterValueType) const {
-    assert(mModelTimeNs >= mAmbientMotionChangeStartTime);
     if (parameterValueType != PARAMETER_VALUE_TYPE_TARGET &&
             mModelTimeNs < mAmbientMotionChangeEndTime) {
         const float time1 = nsToSeconds(mModelTimeNs - mAmbientMotionChangeStartTime);
@@ -966,7 +962,6 @@ float InertialModel::getAmbientMotionBoundsDeriv(
 
 float InertialModel::getAmbientMotionBoundsSecondDeriv(
         ParameterValueType parameterValueType) const {
-    assert(mModelTimeNs >= mAmbientMotionChangeStartTime);
     if (parameterValueType != PARAMETER_VALUE_TYPE_TARGET &&
             mModelTimeNs < mAmbientMotionChangeEndTime) {
         const float time1 = nsToSeconds(mModelTimeNs - mAmbientMotionChangeStartTime);
