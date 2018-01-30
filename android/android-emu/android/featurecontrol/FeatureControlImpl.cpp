@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <set>
 #include <stdio.h>
 #include <string.h>
 #include <unordered_set>
@@ -161,7 +162,7 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
         if (base::System::get()->pathCanRead(defaultIniGuestPath)) {
             base::IniFile defaultIniGuest(defaultIniGuestPath);
             if (defaultIniGuest.read()) {
-                std::unordered_set<std::string> unexpectedGuestFeatures = {};
+                std::set<std::string> unexpectedGuestFeatures = {};
                 for (const auto& guestFeature : defaultIniGuest) {
                     if (!kExpectedGuestFeatures.count(guestFeature)) {
                         unexpectedGuestFeatures.insert(guestFeature);
