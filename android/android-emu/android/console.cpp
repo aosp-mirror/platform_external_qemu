@@ -2861,15 +2861,6 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {"time-limit", required_argument, NULL, 't'},
             {NULL, 0, NULL, 0}};
 
-    if (emulator_window_get()->opts->no_window &&
-        (!android_hw->hw_gpu_enabled ||
-         !strcmp(android_hw->hw_gpu_mode, "guest"))) {
-        control_write(client,
-                      "KO: Screen recording in no-window mode "
-                      "not supported in -gpu guest mode.\r\n");
-        return -1;
-    }
-
     switch (client->global->record_agent->getRecorderState()) {
         case RECORDER_READY:
             break;
@@ -2999,15 +2990,6 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
-    if (emulator_window_get()->opts->no_window &&
-        (!android_hw->hw_gpu_enabled ||
-         !strcmp(android_hw->hw_gpu_mode, "guest"))) {
-        control_write(client,
-                      "KO: Screen recording in no-window mode "
-                      "not supported in -gpu guest mode.\r\n");
-        return -1;
-    }
-
     switch (client->global->record_agent->getRecorderState()) {
         case RECORDER_RECORDING:
             break;
