@@ -72,6 +72,17 @@ _get_bytes_per_pixel(QFrameBufferFormat  format)
     }
 }
 
+int qframebuffer_init_no_window(QFrameBuffer* qfbuff) {
+    memset(qfbuff, 0, sizeof(*qfbuff));
+
+    qfbuff->extra = calloc(1, sizeof(QFrameBufferExtra));
+    if (qfbuff->extra == NULL) {
+        return -1;
+    }
+
+    return 0;
+}
+
 int
 qframebuffer_init( QFrameBuffer*       qfbuff,
                    int                 width,
