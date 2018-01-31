@@ -712,6 +712,10 @@ static int cmd_camera_enumerate_devices(CameraInfo* cis, int max) {
     * So, we can just use a small set of frame dimensions to emulate.
     */
     static const CameraFrameDim _emulate_dims[] = {
+            /* Emulates 1280x960 frame. */
+            {1280, 960},
+            /* Emulates 1280x720 frame. */
+            {1280, 720},
             /* Emulates 640x480 frame. */
             {640, 480},
             /* Emulates 352x288 frame (required by camera framework). */
