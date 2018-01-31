@@ -94,6 +94,30 @@
       "revId": "73d6cfefde87770838dc52bd6e80f6ef80c1c6ac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fa3baf1_9884041e",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-31T03:21:50Z",
+      "side": 1,
+      "message": "Yes, that is true.  At the moment I\u0027m optimizing for the AOSP camera app.  Ideally we shouldn\u0027t have to stop/start capturing to change resolution, but that\u0027s a limitation of the current stack.",
+      "parentUuid": "71569fc2_1d40c9a7",
+      "range": {
+        "startLine": 607,
+        "startChar": 0,
+        "endLine": 607,
+        "endChar": 24
+      },
+      "revId": "73d6cfefde87770838dc52bd6e80f6ef80c1c6ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
