@@ -3234,10 +3234,9 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
 #endif // defined(CONFIG_ANDROID) && defined(_WIN32) && !defined(_WIN64)
 
 #ifdef _WIN32
-    // Limit max RAM to 4093 MB on Windows.
-#define HAX_SNAPSHOT_MAX_RAM 4093ULL * 1024ULL * 1024ULL
-    if (ram_size > HAX_SNAPSHOT_MAX_RAM) {
-        ram_size = HAX_SNAPSHOT_MAX_RAM;
+    uint64_t hax_limit = hax_mem_limit();
+    if (ram_size > hax_limit) {
+        ram_size = hax_limit;
     }
 #endif
 
