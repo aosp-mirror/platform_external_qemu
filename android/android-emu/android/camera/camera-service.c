@@ -291,13 +291,14 @@ static void _virtualscenecamera_setup(CameraServiceDesc* csd) {
     /* Array containing emulated camera frame dimensions
      * expected by framework. */
     static const CameraFrameDim kEmulateDims[] = {
-            {1280, 960},
-            {1280, 720},
             {640, 480},
             /* The following dimensions are required by the camera framework. */
             {352, 288},
             {320, 240},
-            {176, 144}};
+            {176, 144},
+            {1280, 720},
+            /* Additional resolutions. */
+            {1280, 960}};
 
     csd->camera_info[csd->camera_count].frame_sizes =
             (CameraFrameDim*)malloc(sizeof(kEmulateDims));
