@@ -492,6 +492,31 @@ static int hax_accel_init(MachineState *ms)
     return ret;
 }
 
+uint64_t hax_mem_limit(void)
+{
+    uint64_t limit = (uint64_t)(-1);
+    int ret = 0;
+    struct hax_capabilityinfo capinfo, *cap = &capinfo;
+    struct hax_state dummy;
+
+    dummy.fd = hax_mod_open();
+    /* if there is no hax, return max mem limit */
+    if (hax_invalid_fd(dummy.fd))
+        return limit;
+
+    ret = hax_capability(&dummy, cap);
+    if (!ret) {
+        limit = 4093ULL*1024*1024;
+        if (cap->winfo & HAX_CAP_64BIT_RAMBLOCK)
+            limit = 6ULL*1024*1024*1024;
+        if (cap->winfo & HAX_CAP_64BIT_SETRAM)
+            limit = (uint64_t)(-1);
+    }
+
+    hax_close_fd(dummy.fd);
+    return limit;
+}
+
 static int hax_handle_fastmmio(CPUArchState *env, struct hax_fastmmio *hft)
 {
     if (hft->direction < 2) {

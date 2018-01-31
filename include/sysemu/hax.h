@@ -42,6 +42,7 @@ void hax_cpu_synchronize_post_init(CPUState *cpu);
 
 int hax_enabled(void);
 int hax_ug_platform(void);
+uint64_t hax_mem_limit(void);
 
 #include "hw/hw.h"
 #include "qemu/bitops.h"
@@ -56,6 +57,7 @@ void hax_reset_vcpu_state(void *opaque);
 
 #define hax_enabled() (0)
 #define hax_ug_platform() (0)
+#define hax_mem_limit() ((uint64_t)(-1))
 
 #endif /* CONFIG_HAX */
 
