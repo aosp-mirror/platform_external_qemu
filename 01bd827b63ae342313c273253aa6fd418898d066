@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0c25f84a_65138eff",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-31T16:15:04Z",
+      "side": 1,
+      "message": "why mutable? Let\u0027s also change these \"struct\"\u0027s to \"class\"\u0027es with public members and default constructor, just to preclude the problem last time when a struct with a lock was used as POD",
+      "range": {
+        "startLine": 136,
+        "startChar": 4,
+        "endLine": 138,
+        "endChar": 0
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48d3d051_8fbc27b8",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-31T16:15:04Z",
+      "side": 1,
+      "message": "Why 50 ms? Is it possible to have a 49 ms pause, not insert a silent buffer, and make Chrome desync by +49 ms every time you have a 49ms pause (until it becomes seconds)?\n\nAlso, does the insertion of of the silent buffer ever add any extra delay?\n If so, this is going to regress behavior on browsers where audio playback can deal with not having silent buffers.",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
