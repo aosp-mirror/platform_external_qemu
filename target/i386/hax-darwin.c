@@ -67,17 +67,31 @@ int hax_populate_ram(uint64_t va, uint64_t size)
     return 0;
 }
 
-int hax_set_ram(uint64_t start_pa, uint32_t size, uint64_t host_va, int flags)
+int hax_set_ram(uint64_t start_pa, uint64_t size, uint64_t host_va, int flags)
 {
-    struct hax_set_ram_info info;
     int ret;
 
-    info.pa_start = start_pa;
-    info.size = size;
-    info.va = host_va;
-    info.flags = (uint8_t) flags;
+    if (hax_global.supports_64bit_setram) {
+        struct hax_set_ram_info2 info = {
+            .pa_start = start_pa,
+            .size = size,
+            .va = host_va,
+            .flags = flags,
+            .reserved1 = 0,
+            .reserved2 = 0
+        };
 
-    ret = ioctl(hax_global.vm->fd, HAX_VM_IOCTL_SET_RAM, &info);
+        ret = ioctl(hax_global.vm->fd, HAX_VM_IOCTL_SET_RAM2, &info);
+    } else {
+        struct hax_set_ram_info info = {
+            .pa_start = start_pa,
+            .size = size,
+            .va = host_va,
+            .flags = (uint8_t)flags
+        };
+        ret = ioctl(hax_global.vm->fd, HAX_VM_IOCTL_SET_RAM, &info);
+    }
+
     if (ret < 0) {
         return -errno;
     }

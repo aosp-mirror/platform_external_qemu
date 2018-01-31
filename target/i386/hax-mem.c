@@ -38,7 +38,7 @@
  */
 typedef struct HAXMapping {
     uint64_t start_pa;
-    uint32_t size;
+    uint64_t size;
     uint64_t host_va;
     int flags;
     QTAILQ_ENTRY(HAXMapping) entry;
@@ -76,7 +76,7 @@ static void hax_mapping_dump_list(void)
 }
 
 static void hax_insert_mapping_before(HAXMapping *next, uint64_t start_pa,
-                                      uint32_t size, uint64_t host_va,
+                                      uint64_t size, uint64_t host_va,
                                       uint8_t flags)
 {
     HAXMapping *entry;
@@ -102,7 +102,7 @@ static bool hax_mapping_is_opposite(HAXMapping *entry, uint64_t host_va,
     return (entry->host_va == host_va) && nop_flags;
 }
 
-static void hax_update_mapping(uint64_t start_pa, uint32_t size,
+static void hax_update_mapping(uint64_t start_pa, uint64_t size,
                                uint64_t host_va, uint8_t flags)
 {
     uint64_t end_pa = start_pa + size;
@@ -171,7 +171,6 @@ static void hax_process_section(MemoryRegionSection *section, uint8_t flags)
     ram_addr_t size = int128_get64(section->size);
     unsigned int delta;
     uint64_t host_va;
-    uint32_t max_mapping_size;
 
     /* We only care about RAM pages */
     if (!memory_region_is_ram(mr)) {
@@ -199,23 +198,10 @@ static void hax_process_section(MemoryRegionSection *section, uint8_t flags)
         flags |= HAX_RAM_INFO_ROM;
     }
 
-    /*
-     * The kernel module interface uses 32-bit sizes:
-     * https://github.com/intel/haxm/blob/master/API.md#hax_vm_ioctl_set_ram
-     *
-     * If the mapping size is longer than 32 bits, we can't process it in one
-     * call into the kernel. Instead, we split the mapping into smaller ones,
-     * and call hax_update_mapping() on each.
-     */
-    max_mapping_size = UINT32_MAX & qemu_real_host_page_mask;
-    while (size > max_mapping_size) {
-        hax_update_mapping(start_pa, max_mapping_size, host_va, flags);
-        start_pa += max_mapping_size;
-        size -= max_mapping_size;
-        host_va += max_mapping_size;
-    }
-    /* Now size <= max_mapping_size */
-    hax_update_mapping(start_pa, (uint32_t)size, host_va, flags);
+    /* the kernel module interface uses 32-bit sizes (but we could split...) */
+    g_assert(hax_global.supports_64bit_setram || size <= UINT32_MAX);
+
+    hax_update_mapping(start_pa, size, host_va, flags);
 }
 
 static void hax_region_add(MemoryListener *listener,
@@ -254,7 +240,7 @@ static void hax_transaction_commit(MemoryListener *listener)
             if (hax_set_ram(entry->start_pa, entry->size,
                             entry->host_va, entry->flags)) {
                 fprintf(stderr, "%s: Failed mapping @0x%016" PRIx64 "+0x%"
-                        PRIx32 " flags %02x\n", __func__, entry->start_pa,
+                        PRIx64 " flags %02x\n", __func__, entry->start_pa,
                         entry->size, entry->flags);
             }
             QTAILQ_REMOVE(&mappings, entry, entry);
@@ -289,16 +275,12 @@ static MemoryListener hax_memory_listener = {
 static void hax_ram_block_added(RAMBlockNotifier *n, void *host, size_t size)
 {
     /*
-     * We must register each RAM block with the HAXM kernel module, or
-     * hax_set_ram() will fail for any mapping into the RAM block:
-     * https://github.com/intel/haxm/blob/master/API.md#hax_vm_ioctl_alloc_ram
-     *
-     * Old versions of the HAXM kernel module (< 6.2.0) used to preallocate all
-     * host physical pages for the RAM block as part of this registration
-     * process, hence the name hax_populate_ram().
+     * In HAX, QEMU allocates the virtual address, and HAX kernel
+     * populates the memory with physical memory. Currently we have no
+     * paging, so user should make sure enough free memory in advance.
      */
     if (hax_populate_ram((uint64_t)(uintptr_t)host, size) < 0) {
-        fprintf(stderr, "HAX failed to populate RAM\n");
+        fprintf(stderr, "HAX failed to populate RAM");
         abort();
     }
 }
