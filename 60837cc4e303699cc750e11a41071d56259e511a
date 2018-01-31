@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b24c9a42_1df7c15f",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-31T01:39:16Z",
+      "side": 1,
+      "message": "when will be the time to start removing items from the list, not adding them? :)",
+      "range": {
+        "startLine": 111,
+        "startChar": 1,
+        "endLine": 118,
+        "endChar": 5
+      },
+      "revId": "60837cc4e303699cc750e11a41071d56259e511a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d2b1c08e_b7f8041e",
+        "filename": "android/build/emulator/binary.make",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-31T01:39:16Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 55,
+        "startChar": 20,
+        "endLine": 55,
+        "endChar": 21
+      },
+      "revId": "60837cc4e303699cc750e11a41071d56259e511a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d26c9b3e_ca1f0ace",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-31T01:39:16Z",
+      "side": 1,
+      "message": "change to C++14 here as well?",
+      "range": {
+        "startLine": 455,
+        "startChar": 0,
+        "endLine": 455,
+        "endChar": 71
+      },
+      "revId": "60837cc4e303699cc750e11a41071d56259e511a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33a17e81_6064de29",
+        "filename": "android/scripts/utils/common.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-31T01:39:16Z",
+      "side": 1,
+      "message": "what is this for?",
+      "range": {
+        "startLine": 74,
+        "startChar": 3,
+        "endLine": 74,
+        "endChar": 50
+      },
+      "revId": "60837cc4e303699cc750e11a41071d56259e511a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc75769d_474ce7f2",
+        "filename": "target/i386/kvm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-31T01:39:16Z",
+      "side": 1,
+      "message": "1. what\u0027s wrong with the original definition?\n2. It\u0027s better to have this as a separate change for upstreaming/rebasing",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 6
+      },
+      "revId": "60837cc4e303699cc750e11a41071d56259e511a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
