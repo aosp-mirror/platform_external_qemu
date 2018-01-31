@@ -36,6 +36,10 @@ public:
     SceneCamera();
     ~SceneCamera();
 
+    // Set the aspect ratio of the camera projection.
+    // |aspectRatio| - w/h of the camera frame.
+    void setAspectRatio(float aspectRatio);
+
     // Update the scene camera based on the current physical state.
     void update();
 

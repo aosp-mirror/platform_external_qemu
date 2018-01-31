@@ -58,6 +58,8 @@ std::unique_ptr<Scene> Scene::create(Renderer& renderer) {
 bool Scene::initialize(Renderer& renderer) {
     CameraMetrics::instance().setVirtualSceneName(kObjFiles[0]);
 
+    mCamera.setAspectRatio(renderer.getAspectRatio());
+
     for (const char* objFile : kObjFiles) {
         std::unique_ptr<SceneObject> sceneObject =
                 SceneObject::loadFromObj(renderer, objFile);
