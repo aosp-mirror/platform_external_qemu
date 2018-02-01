@@ -15,6 +15,7 @@
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"
+#include "qemu/abort.h"
 
 #define DEBUG_HAX_MEM 0
 
@@ -25,228 +26,217 @@
         } \
     } while (0)
 
-/**
- * HAXMapping: describes a pending guest physical memory mapping
- *
- * @start_pa: a guest physical address marking the start of the region; must be
- *            page-aligned
- * @size: a guest physical address marking the end of the region; must be
- *          page-aligned
- * @host_va: the host virtual address of the start of the mapping
- * @flags: mapping parameters e.g. HAX_RAM_INFO_ROM or HAX_RAM_INFO_INVALID
- * @entry: additional fields for linking #HAXMapping instances together
- */
-typedef struct HAXMapping {
-    uint64_t start_pa;
-    uint64_t size;
-    uint64_t host_va;
-    int flags;
-    QTAILQ_ENTRY(HAXMapping) entry;
-} HAXMapping;
+// Memory slots/////////////////////////////////////////////////////////////////
 
-/*
- * A doubly-linked list (actually a tail queue) of the pending page mappings
- * for the ongoing memory transaction.
- *
- * It is used to optimize the number of page mapping updates done through the
- * kernel module. For example, it's effective when a driver is digging an MMIO
- * hole inside an existing memory mapping. It will get a deletion of the whole
- * region, then the addition of the 2 remaining RAM areas around the hole and
- * finally the memory transaction commit. During the commit, it will effectively
- * send to the kernel only the removal of the pages from the MMIO hole after
- * having computed locally the result of the deletion and additions.
- */
-static QTAILQ_HEAD(HAXMappingListHead, HAXMapping) mappings =
-    QTAILQ_HEAD_INITIALIZER(mappings);
-
-/**
- * hax_mapping_dump_list: dumps @mappings to stdout (for debugging)
- */
-static void hax_mapping_dump_list(void)
+static void hax_dump_memslot(void)
 {
-    HAXMapping *entry;
+    hax_slot *slot;
+    int x = 0;
 
-    DPRINTF("%s updates:\n", __func__);
-    QTAILQ_FOREACH(entry, &mappings, entry) {
-        DPRINTF("\t%c 0x%016" PRIx64 "->0x%016" PRIx64 " VA 0x%016" PRIx64
-                "%s\n", entry->flags & HAX_RAM_INFO_INVALID ? '-' : '+',
-                entry->start_pa, entry->start_pa + entry->size, entry->host_va,
-                entry->flags & HAX_RAM_INFO_ROM ? " ROM" : "");
-    }
-}
-
-static void hax_insert_mapping_before(HAXMapping *next, uint64_t start_pa,
-                                      uint64_t size, uint64_t host_va,
-                                      uint8_t flags)
-{
-    HAXMapping *entry;
-
-    entry = g_malloc0(sizeof(*entry));
-    entry->start_pa = start_pa;
-    entry->size = size;
-    entry->host_va = host_va;
-    entry->flags = flags;
-    if (!next) {
-        QTAILQ_INSERT_TAIL(&mappings, entry, entry);
-    } else {
-        QTAILQ_INSERT_BEFORE(next, entry, entry);
-    }
-}
-
-static bool hax_mapping_is_opposite(HAXMapping *entry, uint64_t host_va,
-                                    uint8_t flags)
-{
-    /* removed then added without change for the read-only flag */
-    bool nop_flags = (entry->flags ^ flags) == HAX_RAM_INFO_INVALID;
-
-    return (entry->host_va == host_va) && nop_flags;
-}
-
-static void hax_update_mapping(uint64_t start_pa, uint64_t size,
-                               uint64_t host_va, uint8_t flags)
-{
-    uint64_t end_pa = start_pa + size;
-    uint32_t chunk_sz;
-    HAXMapping *entry, *next;
-
-    QTAILQ_FOREACH_SAFE(entry, &mappings, entry, next) {
-        if (start_pa >= entry->start_pa + entry->size) {
+    for (; x < HAX_SLOTS_COUNT; ++x) {
+        slot = &hax_global.hax_slots[x];
+        if (slot->flags & HAX_RAM_INFO_INVALID)
             continue;
+        DPRINTF("Slot %d start %016llx end %016llx hva %p flags %x\n",
+                x,
+                slot->start,
+                slot->size + slot->start,
+                slot->hva,
+                slot->flags);
+    }
+}
+
+hax_slot *hax_find_overlap_slot(uint64_t start, uint64_t end) {
+    hax_slot *slot;
+    int x = 0;
+    for (; x < HAX_SLOTS_COUNT; ++x) {
+        slot = &hax_global.hax_slots[x];
+        if (slot->size && start < (slot->start + slot->size) && end > slot->start)
+            return slot;
+    }
+    return NULL;
+}
+
+#define ALIGN(x, y)  (((x)+(y)-1) & ~((y)-1))
+
+void* hax_gpa2hva(uint64_t gpa, bool* found) {
+    struct hax_slot *hslot;
+    *found = false;
+    int i = 0;
+
+    for (; i < HAX_SLOTS_COUNT; i++) {
+        hslot = &hax_global.hax_slots[i];
+        if (!(hslot->flags | HAX_RAM_INFO_INVALID)) continue;
+        if (gpa >= hslot->start &&
+            gpa < hslot->start + hslot->size) {
+            *found = true;
+            return (void*)((char*)(hslot->hva) + (gpa - hslot->start));
         }
-        if (start_pa < entry->start_pa) {
-            chunk_sz = end_pa <= entry->start_pa ? size
-                                                 : entry->start_pa - start_pa;
-            hax_insert_mapping_before(entry, start_pa, chunk_sz,
-                                      host_va, flags);
-            start_pa += chunk_sz;
-            host_va += chunk_sz;
-            size -= chunk_sz;
-        } else if (start_pa > entry->start_pa) {
-            chunk_sz = start_pa - entry->start_pa;
-            hax_insert_mapping_before(entry, entry->start_pa, chunk_sz,
-                                      entry->host_va, entry->flags);
-            entry->start_pa += chunk_sz;
-            entry->host_va += chunk_sz;
-            entry->size -= chunk_sz;
-        }
-        chunk_sz = MIN(size, entry->size);
-        if (chunk_sz) {
-            bool nop = hax_mapping_is_opposite(entry, host_va, flags);
-            bool partial = chunk_sz < entry->size;
-            if (partial) {
-                /* remove the beginning of the existing chunk */
-                entry->start_pa += chunk_sz;
-                entry->host_va += chunk_sz;
-                entry->size -= chunk_sz;
-                if (!nop) {
-                    hax_insert_mapping_before(entry, start_pa, chunk_sz,
-                                              host_va, flags);
-                }
-            } else { /* affects the full mapping entry */
-                if (nop) { /* no change to this mapping, remove it */
-                    QTAILQ_REMOVE(&mappings, entry, entry);
-                    g_free(entry);
-                } else { /* update mapping properties */
-                    entry->host_va = host_va;
-                    entry->flags = flags;
-                }
+    }
+
+    return 0;
+}
+
+int hax_hva2gpa(void* hva, uint64_t length, int array_size,
+                uint64_t* gpa, uint64_t* size) {
+    struct hax_slot *hslot;
+    int count = 0, i = 0;
+
+    for (; i < HAX_SLOTS_COUNT; i++) {
+        hslot = &hax_global.hax_slots[i];
+        if (!(hslot->flags | HAX_RAM_INFO_INVALID)) continue;
+
+        uintptr_t hva_start_num = (uintptr_t)hslot->hva;
+        uintptr_t hva_num = (uintptr_t)hva;
+        // Start of this hva region is in this slot.
+        if (hva_num >= hva_start_num &&
+            hva_num < hva_start_num + hslot->size) {
+            if (count < array_size) {
+                gpa[count] = hslot->start + (hva_num - hva_start_num);
+                size[count] = min(length,
+                                  hslot->size - (hva_num - hva_start_num));
             }
-            start_pa += chunk_sz;
-            host_va += chunk_sz;
-            size -= chunk_sz;
+            count++;
+        // End of this hva region is in this slot.
+        // Its start is outside of this slot.
+        } else if (hva_num + length <= hva_start_num + hslot->size &&
+                   hva_num + length > hva_start_num) {
+            if (count < array_size) {
+                gpa[count] = hslot->start;
+                size[count] = hva_num + length - hva_start_num;
+            }
+            count++;
+        // This slot belongs to this hva region completely.
+        } else if (hva_num + length > hva_start_num +  hslot->size &&
+                   hva_num < hva_start_num)  {
+            if (count < array_size) {
+                gpa[count] = hslot->start;
+                size[count] = hslot->size;
+            }
+            count++;
         }
-        if (!size) { /* we are done */
+    }
+    return count;
+}
+
+void hax_set_phys_mem(MemoryRegionSection* section, bool add) {
+    hax_slot *mem;
+    MemoryRegion *area = section->mr;
+    uint64_t start, size;
+    void *hva;
+
+    if (!memory_region_is_ram(area)) return;
+
+    start = section->offset_within_address_space;
+    size = int128_get64(section->size);
+    hva = memory_region_get_ram_ptr(area) + section->offset_within_region;
+
+    mem = hax_find_overlap_slot(start, start + size);
+
+    if (mem && add) {
+        if (mem->size == size && mem->start == start && mem->hva == hva)
+            return; // Same region was attempted to register, go away.
+    }
+
+    if (!(add || (mem->start <= start &&
+                mem->start + mem->size >= start + size)))
+        qemu_abort("%s: slot to be deleted not fully within existing slots\n",
+                __func__);
+
+    // Region needs to be reset. set the hva to 0 and remap it.
+    if (mem) {
+        if (hax_set_ram(start, size, 0, HAX_RAM_INFO_INVALID)) {
+            qemu_abort("%s: Failed to reset overlapping slot\n", __func__);
+        }
+        if (mem->start == start && mem->size == size) {
+            mem->start = mem->size = 0;
+            mem->hva = 0;
+            mem->flags = HAX_RAM_INFO_INVALID;
+        } else if (mem->start == start) {
+            g_assert(mem->size - size);
+            mem->start += size;
+            mem->hva += size;
+            mem->size = mem->size - size;
+        } else {
+            uint64_t size2 = mem->start + mem->size - start - size;
+            void *hva2 = mem->hva + mem->size - start - size;
+            mem->size = start - mem->start;
+            if (size2) {
+                int x, flags = mem->flags;
+
+                for (x = 0; x < HAX_SLOTS_COUNT; ++x) {
+                    mem = &hax_global.hax_slots[x];
+                    if (mem->flags & HAX_RAM_INFO_INVALID)
+                        break;
+                }
+                if (x == HAX_SLOTS_COUNT) {
+                    qemu_abort("%s: no free slots\n", __func__);
+                }
+                mem->start = start + size;
+                mem->size = size2;
+                mem->hva = hva2;
+                mem->flags = flags;
+            }
+        }
+#ifdef HAX_SLOT_DEBUG
+        fprintf(stderr, "Dump Memslot After Removal\n");
+        hax_dump_memslot();
+#endif
+    }
+
+    if (!add) return;
+
+    // Now make a new slot.
+    int x, flags = 0;
+
+    if (memory_region_is_rom(area))
+        flags = HAX_RAM_INFO_ROM;
+
+    for (x = 0; x < HAX_SLOTS_COUNT; ++x) {
+        mem = &hax_global.hax_slots[x];
+        if (mem->flags == flags &&
+                mem->start + mem->size == start &&
+                mem->hva + mem->size == hva)
             break;
+    }
+
+    if (x == HAX_SLOTS_COUNT)
+        for (x = 0; x < HAX_SLOTS_COUNT; ++x) {
+            mem = &hax_global.hax_slots[x];
+            if (mem->flags & HAX_RAM_INFO_INVALID)
+                break;
         }
+
+    if (x == HAX_SLOTS_COUNT) {
+        qemu_abort("%s: no free slots\n", __func__);
     }
-    if (size) { /* add the leftover */
-        hax_insert_mapping_before(NULL, start_pa, size, host_va, flags);
+
+    if (mem->flags & HAX_RAM_INFO_INVALID) {
+        mem->start = start;
+        mem->hva = hva;
     }
+    mem->flags = flags;
+    mem->size += size;
+
+    if (hax_set_ram(start, size, (uint64_t)(size_t)hva, flags)) {
+        qemu_abort("%s: error regsitering new memory slot\n", __func__);
+    }
+#ifdef HAX_SLOT_DEBUG
+    fprintf(stderr, "Dump Memslot After Insertion\n");
+    hax_dump_memslot();
+#endif
 }
 
-static void hax_process_section(MemoryRegionSection *section, uint8_t flags)
+static void hax_region_add(MemoryListener * listener,
+                           MemoryRegionSection * section)
 {
-    MemoryRegion *mr = section->mr;
-    hwaddr start_pa = section->offset_within_address_space;
-    ram_addr_t size = int128_get64(section->size);
-    unsigned int delta;
-    uint64_t host_va;
-
-    /* We only care about RAM pages */
-    if (!memory_region_is_ram(mr)) {
-        return;
-    }
-
-    /* Adjust start_pa and size so that they are page-aligned. (Cf
-     * kvm_set_phys_mem() in kvm-all.c).
-     */
-    delta = qemu_real_host_page_size - (start_pa & ~qemu_real_host_page_mask);
-    delta &= ~qemu_real_host_page_mask;
-    if (delta > size) {
-        return;
-    }
-    start_pa += delta;
-    size -= delta;
-    size &= qemu_real_host_page_mask;
-    if (!size || (start_pa & ~qemu_real_host_page_mask)) {
-        return;
-    }
-
-    host_va = (uintptr_t)memory_region_get_ram_ptr(mr)
-            + section->offset_within_region + delta;
-    if (memory_region_is_rom(section->mr)) {
-        flags |= HAX_RAM_INFO_ROM;
-    }
-
-    /* the kernel module interface uses 32-bit sizes (but we could split...) */
-    g_assert(hax_global.supports_64bit_setram || size <= UINT32_MAX);
-
-    hax_update_mapping(start_pa, size, host_va, flags);
+    hax_set_phys_mem(section, true);
 }
 
-static void hax_region_add(MemoryListener *listener,
-                           MemoryRegionSection *section)
+static void hax_region_del(MemoryListener * listener,
+                           MemoryRegionSection * section)
 {
-    memory_region_ref(section->mr);
-    hax_process_section(section, 0);
-}
-
-static void hax_region_del(MemoryListener *listener,
-                           MemoryRegionSection *section)
-{
-    hax_process_section(section, HAX_RAM_INFO_INVALID);
-    memory_region_unref(section->mr);
-}
-
-static void hax_transaction_begin(MemoryListener *listener)
-{
-    g_assert(QTAILQ_EMPTY(&mappings));
-}
-
-static void hax_transaction_commit(MemoryListener *listener)
-{
-    if (!QTAILQ_EMPTY(&mappings)) {
-        HAXMapping *entry, *next;
-
-        if (DEBUG_HAX_MEM) {
-            hax_mapping_dump_list();
-        }
-        QTAILQ_FOREACH_SAFE(entry, &mappings, entry, next) {
-            if (entry->flags & HAX_RAM_INFO_INVALID) {
-                /* for unmapping, put the values expected by the kernel */
-                entry->flags = HAX_RAM_INFO_INVALID;
-                entry->host_va = 0;
-            }
-            if (hax_set_ram(entry->start_pa, entry->size,
-                            entry->host_va, entry->flags)) {
-                fprintf(stderr, "%s: Failed mapping @0x%016" PRIx64 "+0x%"
-                        PRIx64 " flags %02x\n", __func__, entry->start_pa,
-                        entry->size, entry->flags);
-            }
-            QTAILQ_REMOVE(&mappings, entry, entry);
-            g_free(entry);
-        }
-    }
+    hax_set_phys_mem(section, false);
 }
 
 /* currently we fake the dirty bitmap sync, always dirty */
@@ -264,11 +254,13 @@ static void hax_log_sync(MemoryListener *listener,
 }
 
 static MemoryListener hax_memory_listener = {
-    .begin = hax_transaction_begin,
-    .commit = hax_transaction_commit,
     .region_add = hax_region_add,
     .region_del = hax_region_del,
     .log_sync = hax_log_sync,
+    .priority = 10,
+};
+
+static MemoryListener hax_io_listener = {
     .priority = 10,
 };
 
