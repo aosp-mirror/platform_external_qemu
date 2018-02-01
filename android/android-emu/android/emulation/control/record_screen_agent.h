@@ -25,9 +25,17 @@ typedef struct QAndroidRecordScreenAgent {
     // the minimum, the filename cannot be null. For the other parameters, if
     // the value is invalid, default values will be used in place of them.
     bool (*startRecording)(const RecordingInfo* recordingInfo);
+    // Async version of startRecording(). Use |recordingInfo->cb| to get the
+    // recording state.
+    bool (*startRecordingAsync)(const RecordingInfo* recordingInfo);
 
     // Stop recording.
-    void (*stopRecording)(void);
+    bool (*stopRecording)(void);
+    // Async version of stopRecording(). Use |recordingInfo->cb| to get the
+    // recording state.
+    bool (*stopRecordingAsync)(void);
+    // Get the state of the recorder.
+    RecorderState (*getRecorderState)(void);
 } QAndroidRecordScreenAgent;
 
 ANDROID_END_HEADER

@@ -33,12 +33,23 @@ ANDROID_BEGIN_HEADER
 // call to the callback once the encoding is finished, with success set to 1. If
 // any errors occur while stopping the recording, success will be set to -1.
 typedef enum {
+    RECORD_START_INITIATED,
+    RECORD_STARTED,
+    RECORD_START_FAILED,
     RECORD_STOP_INITIATED,
-    RECORD_STOP_FINISHED,
+    RECORD_STOPPED,
     RECORD_STOP_FAILED,
-} RecordStopStatus;
+} RecordingStatus;
 
-typedef void (*RecordingStoppedCallback)(void* opaque, RecordStopStatus status);
+typedef enum {
+    RECORDER_READY,
+    RECORDER_STARTING,
+    RECORDER_RECORDING,
+    RECORDER_STOPPING,
+    RECORDER_INVALID,
+} RecorderState;
+
+typedef void (*RecordingCallback)(void* opaque, RecordingStatus status);
 
 typedef struct RecordingInfo {
     const char* fileName;
@@ -46,7 +57,7 @@ typedef struct RecordingInfo {
     uint32_t height;
     uint32_t videoBitrate;
     uint32_t timeLimit;
-    RecordingStoppedCallback cb;
+    RecordingCallback cb;
     void* opaque;
 } RecordingInfo;
 
@@ -58,15 +69,18 @@ extern void screen_recorder_init(int w,
                                  int h,
                                  const QAndroidDisplayAgent* dpy_agent);
 // Starts recording the screen. When stopped, the file will be saved as
-// |info->filename|. Returns true if recorder started recording, false if it
-// failed.
-extern int screen_recorder_start(const RecordingInfo* info);
+// |info->filename|. Set |async| true do not block as recording initialization
+// takes time. Returns true if recorder started recording, false if it failed.
+extern bool screen_recorder_start(const RecordingInfo* info, bool async);
 // Stop recording. After calling this function, the encoder will stop processing
 // frames. The encoder still needs to process any remaining frames it has, so
 // calling this does not mean that the encoder has finished and |filename| is
 // ready. Attach a RecordingStoppedCallback to get an update when the encoder
-// has finished.
-extern void screen_recorder_stop_async(void);
+// has finished. Set |async| to false if you want to block until recording is
+// finished.
+extern bool screen_recorder_stop(bool async);
+// Get the recorder's current state.
+extern RecorderState screen_recorder_state_get(void);
 ANDROID_END_HEADER
 
 
