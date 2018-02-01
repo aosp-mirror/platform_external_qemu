@@ -721,9 +721,7 @@ static int cmd_camera_enumerate_devices(CameraInfo* cis, int max) {
             /* Emulates 176x144 frame (required by camera framework). */
             {176, 144},
             /* Emulates 1280x720 frame (required by camera framework). */
-            {1280, 720},
-            /* Emulates 1280x960 frame. */
-            {1280, 960}};
+            {1280, 720},};
     int inp_channel, found = 0;
 
     for (inp_channel = 0; inp_channel < 10 && found < max; inp_channel++) {
