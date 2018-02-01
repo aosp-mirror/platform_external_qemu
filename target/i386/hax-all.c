@@ -428,11 +428,16 @@ static int hax_init(ram_addr_t ram_size)
     struct hax_state *hax = NULL;
     struct hax_qemu_version qversion;
     int ret;
+    int i;
 
     hax = &hax_global;
 
     memset(hax, 0, sizeof(struct hax_state));
     hax->mem_quota = ram_size;
+    for (i = 0; i < HAX_MAX_SLOTS; ++i) {
+        hax->memslots[i].id = i;
+        hax->memslots[i].flags = HAX_RAM_INFO_INVALID;
+    }
 
     hax->fd = hax_mod_open();
     if (hax_invalid_fd(hax->fd)) {

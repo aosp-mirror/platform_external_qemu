@@ -24,6 +24,16 @@ typedef int hax_fd;
 typedef HANDLE hax_fd;
 #endif
 
+typedef struct hax_slot {
+    uint64_t size;
+    uint64_t start;
+    void *hva;
+    uint32_t flags;
+    int id;
+} hax_slot;
+
+#define HAX_MAX_SLOTS 32
+
 extern struct hax_state hax_global;
 struct hax_vcpu_state {
     hax_fd fd;
@@ -41,6 +51,7 @@ struct hax_state {
     uint64_t mem_quota;
     bool supports_64bit_ramblock;
     bool supports_64bit_setram;
+    struct hax_slot memslots[HAX_MAX_SLOTS];
 };
 
 #define HAX_MAX_VCPU 0x10
