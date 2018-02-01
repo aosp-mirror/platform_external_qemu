@@ -59,7 +59,6 @@ struct Frame {
     }
 };
 
-enum class RecordState { Ready, Recording, Stopping };
 
 struct CVInfo {
     android::base::Lock lock;
@@ -75,7 +74,7 @@ struct Globals {
     int fbBpp = 0;
     bool isGuestMode = false;
     std::string fileName = {};
-    std::atomic<RecordState> recordState{RecordState::Ready};
+    std::atomic<RecorderState> recorderState{RECORDER_INVALID};
     ::android::base::Lock guestFBLock;
     int frameCount = 0;
     std::unique_ptr<Frame> guestFrame;
@@ -131,7 +130,7 @@ static intptr_t sendFrames(int fps) {
     // The assumption here when starting is that globals.frame contains a
     // valid frame when is_recording is true.
     long long startMs = android::base::System::get()->getHighResTimeUs() / 1000;
-    while (globals.recordState == RecordState::Recording) {
+    while (globals.recorderState == RECORDER_RECORDING) {
         long long currTimeMs =
                 android::base::System::get()->getHighResTimeUs() / 1000;
 
@@ -169,7 +168,7 @@ static intptr_t sendFrames(int fps) {
         if (newTimeMs - startMs >= globals.recordingInfo.timeLimit * 1000) {
             D("Time limit reached (%lld ms). Stopping the recording",
               newTimeMs - startMs);
-            screen_recorder_stop_async();
+            screen_recorder_stop(true);
             break;
         }
 
@@ -217,11 +216,20 @@ intptr_t encodeFrames() {
     return 0;
 }
 
+// Simple function to check callback for null before using
+static void sendRecordingStatus(const RecordingInfo& info,
+                                RecordingStatus status) {
+    if (info.cb) {
+        info.cb(info.opaque, status);
+    }
+}
+
 // Function to stop the recording
 static intptr_t stopRecording() {
     auto& globals = *sGlobals;
 
-    globals.recordState = RecordState::Stopping;
+    sendRecordingStatus(globals.recordingInfo, RECORD_STOP_INITIATED);
+
     // Need to wait for encoding thread to finish before deleting the
     // encoder.
     globals.encodingCVInfo.lock.lock();
@@ -241,17 +249,20 @@ static intptr_t stopRecording() {
         globals.guestFrame.reset(nullptr);
     }
 
-    if (globals.recordingInfo.cb) {
-        globals.recordingInfo.cb(globals.recordingInfo.opaque,
-                                 has_frames ? RECORD_STOP_FINISHED : RECORD_STOP_FAILED);
-    }
     globals.recordingInfo.fileName = nullptr;
     globals.recorder = nullptr;
 
-    globals.recordState = RecordState::Ready;
-    return 0;
+    globals.recorderState = RECORDER_READY;
+    sendRecordingStatus(globals.recordingInfo,
+                        has_frames ? RECORD_STOPPED : RECORD_STOP_FAILED);
+
+    return has_frames ? 0 : -1;
 }
 }  // namespace
+
+RecorderState screen_recorder_state_get() {
+    return sGlobals->recorderState;
+}
 
 void screen_recorder_init(int w, int h, const QAndroidDisplayAgent* dpy_agent) {
     auto& globals = *sGlobals;
@@ -266,6 +277,7 @@ void screen_recorder_init(int w, int h, const QAndroidDisplayAgent* dpy_agent) {
         // In guest mode, the bpp is set when calling the getFrameBuffer()
         // method, so just use whatever bpp it gives us.
     }
+    globals.recorderState = RECORDER_READY;
     D("%s(w=%d, h=%d, isGuestMode=%d)", __func__, w, h, globals.isGuestMode);
 }
 
@@ -317,24 +329,21 @@ bool parseRecordingInfo(const RecordingInfo* info) {
     return true;
 }
 
-int screen_recorder_start(const RecordingInfo* info) {
+static intptr_t startRecording() {
     auto& globals = *sGlobals;
 
-    if (globals.recorder) {
-        derror("Recorder already started");
-        return false;
-    }
+    assert(!globals.recorder);
 
-    if (!parseRecordingInfo(info)) {
-        return false;
-    }
+    sendRecordingStatus(globals.recordingInfo, RECORD_START_INITIATED);
 
     globals.frameCount = 0;
     globals.recorder = ffmpeg_create_recorder(
             &globals.recordingInfo, globals.fbWidth, globals.fbHeight);
     if (!globals.recorder) {
         derror("ffmpeg_create_recorder failed");
-        return false;
+        globals.recorderState = RECORDER_READY;
+        sendRecordingStatus(globals.recordingInfo, RECORD_START_FAILED);
+        return -1;
     }
     D("created recorder");
 
@@ -346,7 +355,6 @@ int screen_recorder_start(const RecordingInfo* info) {
     ffmpeg_add_audio_track(globals.recorder, kAudioBitrate, kAudioSampleRate);
     D("Added AV tracks");
 
-    globals.recordState = RecordState::Recording;
     gpu_frame_set_record_mode(true);
 
     // Force a repost to setup the first frame
@@ -358,30 +366,57 @@ int screen_recorder_start(const RecordingInfo* info) {
         android_redrawOpenglesWindow();
     }
 
+    // Need to set recorderState before sendFramesFunc is called so it knows we
+    // are recording.
+    globals.recorderState = RECORDER_RECORDING;
+    sendRecordingStatus(globals.recordingInfo, RECORD_STARTED);
+
     // Start the two threads that will fetch and encode the frames
     auto sendFramesFunc = std::bind(&sendFrames, kFPS);
     android::base::async(sendFramesFunc);
     android::base::async(&encodeFrames);
 
+    return 0;
+}
+
+bool screen_recorder_start(const RecordingInfo* info, bool async) {
+    if (!parseRecordingInfo(info)) {
+        derror("Unable to parse recording info");
+        return -1;
+    }
+
+    auto& globals = *sGlobals;
+    auto current = RECORDER_READY;
+    if (!globals.recorderState.compare_exchange_strong(current,
+                                                       RECORDER_STARTING)) {
+        derror("Screen recording already started");
+        return false;
+    }
+
+    if (async) {
+        android::base::async(&startRecording);
+    } else {
+        return !startRecording();
+    }
+
     return true;
 }
 
-void screen_recorder_stop_async() {
+bool screen_recorder_stop(bool async) {
     auto& globals = *sGlobals;
 
-    if (!globals.recorder) {
-        derror("Screen recording was never started");
-        return;
+    auto current = RECORDER_RECORDING;
+    if (!globals.recorderState.compare_exchange_strong(current,
+                                                       RECORDER_STOPPING)) {
+        derror("No recording to stop or already stopping");
+        return false;
     }
 
-    if (globals.recordState != RecordState::Recording) {
-        derror("Already stopping the recording");
-        return;
+    if (async) {
+        android::base::async(&stopRecording);
+    } else {
+        return !stopRecording();
     }
 
-    if (globals.recordingInfo.cb) {
-        globals.recordingInfo.cb(globals.recordingInfo.opaque,
-                                 RECORD_STOP_INITIATED);
-    }
-    android::base::async(&stopRecording);
+    return true;
 }
