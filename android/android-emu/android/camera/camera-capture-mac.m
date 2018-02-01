@@ -603,10 +603,6 @@ int camera_enumerate_devices(CameraInfo* cis, int max) {
     /* Array containing emulated webcam frame dimensions
      * expected by framework. */
     static const CameraFrameDim _emulate_dims[] = {
-            /* Emulates 1280x960 frame. */
-            {1280, 960},
-            /* Emulates 1280x720 frame. */
-            {1280, 720},
             /* Emulates 640x480 frame. */
             {640, 480},
             /* Emulates 352x288 frame (required by camera framework). */
@@ -614,7 +610,11 @@ int camera_enumerate_devices(CameraInfo* cis, int max) {
             /* Emulates 320x240 frame (required by camera framework). */
             {320, 240},
             /* Emulates 176x144 frame (required by camera framework). */
-            {176, 144}};
+            {176, 144},
+            /* Emulates 1280x720 frame (required by camera framework). */
+            {1280, 720},
+            /* Emulates 1280x960 frame. */
+            {1280, 960}};
 
     /* Obtain default video device. There is a AVCaptureDevice::uniqueId
      * method that supposedly allows query of specific devices.
