@@ -78,7 +78,15 @@ bool emulator_window_rotate(SkinRotation rotation);
 /* Start recording the screen. Returns false if recording is already
  * running. */
 bool emulator_window_start_recording(const RecordingInfo* info);
+/* Async version of emulator_window_start_recording. Use |info->cb| for
+ * recording status. */
+bool emulator_window_start_recording_async(const RecordingInfo* info);
 /* Stop recording the screen. */
-void emulator_window_stop_recording(void);
+bool emulator_window_stop_recording(void);
+/* Async version of emulator_window_stop_recording. Use |info->cb| for recording
+ * status. */
+bool emulator_window_stop_recording_async(void);
+/* Returns the current state of the screen recorder. */
+RecorderState emulator_window_recorder_state_get(void);
 
 ANDROID_END_HEADER
