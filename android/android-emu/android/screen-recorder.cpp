@@ -20,6 +20,7 @@
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
+#include "android/emulation/VmLock.h"
 #include "android/ffmpeg-muxer.h"
 #include "android/framebuffer.h"
 #include "android/gpu_frame.h"
@@ -35,6 +36,7 @@ namespace {
 
 using android::base::AutoLock;
 using android::base::Optional;
+using android::RecursiveScopedVmLock;
 
 // The maximum number of frames we will buffer
 constexpr int kMaxFrames = 16;
@@ -362,6 +364,14 @@ static intptr_t startRecording() {
         globals.displayAgent.registerUpdateListener(&screen_recorder_fb_update,
                                                     nullptr);
         qframebuffer_invalidate_all();
+
+        // qframebuffer_check_updates() must be under the
+        // qemu_mutex_iothread_lock so graphic_hw_update() can update the memory
+        // section for the framebuffer.
+        {
+            RecursiveScopedVmLock lock;
+            qframebuffer_check_updates();
+        }
     } else {
         android_redrawOpenglesWindow();
     }
