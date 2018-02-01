@@ -270,7 +270,7 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 20;
+static constexpr int kVersion = 21;
 
 base::StringView Snapshot::dataDir(const char* name) {
     return getSnapshotDir(name);
