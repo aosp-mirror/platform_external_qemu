@@ -22,6 +22,30 @@
       "revId": "541354287e3ba0ac20b035e98aa3a77cc1e64422",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12bce26b_3fad11b8",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-02T07:29:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c593dc9c_5014be1e",
+      "range": {
+        "startLine": 372,
+        "startChar": 0,
+        "endLine": 379,
+        "endChar": 9
+      },
+      "revId": "541354287e3ba0ac20b035e98aa3a77cc1e64422",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
