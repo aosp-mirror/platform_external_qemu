@@ -43,6 +43,7 @@ static const struct fs_path_config android_dirs[] = {
     { 00771, AID_SYSTEM,       AID_SYSTEM,       0, "data/data" },
     { 00771, AID_SHELL,        AID_SHELL,        0, "data/local/tmp" },
     { 00771, AID_SHELL,        AID_SHELL,        0, "data/local" },
+    { 00770, AID_SYSTEM,       AID_SHELL,        0, "data/misc/adb" },
     { 00770, AID_DHCP,         AID_DHCP,         0, "data/misc/dhcp" },
     { 00771, AID_SHARED_RELRO, AID_SHARED_RELRO, 0, "data/misc/shared_relro" },
     { 01771, AID_SYSTEM,       AID_MISC,         0, "data/misc" },
