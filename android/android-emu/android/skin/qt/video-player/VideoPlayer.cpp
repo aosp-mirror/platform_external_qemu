@@ -606,7 +606,16 @@ VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
     notifier->initTimer();
 }
 
-VideoPlayerImpl::~VideoPlayerImpl() {}
+VideoPlayerImpl::~VideoPlayerImpl() {
+    stop();
+    if (mVideoDecoder) {
+        mVideoDecoder->wait();
+    }
+    if (mAudioDecoder) {
+        mAudioDecoder->wait();
+    }
+    mWorkerThread.wait();
+}
 
 // adjust window size to fit the video apect ratio
 void VideoPlayerImpl::adjustWindowSize(AVCodecContext* c,
