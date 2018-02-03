@@ -29,7 +29,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "android/skin/qt/video-player/VideoPreview.h"
+#include "android/skin/qt/video-player/VideoInfo.h"
 
 #include "android/base/memory/ScopedPtr.h"
 #include "android/skin/qt/video-player/PacketQueue.h"
@@ -47,46 +47,39 @@ extern "C" {
 namespace android {
 namespace videoplayer {
 
-// VideoPreview implementations
+// VideoInfo implementations
 
-VideoPreview::VideoPreview(VideoPlayerWidget* widget, std::string videoFile)
+VideoInfo::VideoInfo(VideoPlayerWidget* widget, std::string videoFile)
     : mVideoFile(videoFile), mWidget(widget) {
-    getPreviewFrame(mVideoFile, &mPreviewFrame, mWidget);
+    initialize();
 }
 
-VideoPreview::~VideoPreview() {
+VideoInfo::~VideoInfo() {
     if (mPreviewFrame.buf != nullptr) {
         delete[] mPreviewFrame.buf;
     }
 }
 
-bool VideoPreview::getPreviewFrame(std::string videoFile,
-                                   Frame* frame,
-                                   VideoPlayerWidget* widget) {
-    if (frame->buf != nullptr) {
-        derror("frame->buf is not null\n");
-        return false;
-    }
-
+void VideoInfo::initialize() {
     // Register all formats and codecs
     av_register_all();
     avformat_network_init();
 
     AVFormatContext* fmtCtx = nullptr;
-    if (avformat_open_input(&fmtCtx, videoFile.c_str(), NULL, NULL) != 0) {
+    if (avformat_open_input(&fmtCtx, mVideoFile.c_str(), NULL, NULL) != 0) {
         derror("Failed to open video file\n");
-        return false;  // failed to open video file
+        return;  // failed to open video file
     }
     auto pFmtCtx = android::base::makeCustomScopedPtr(
             fmtCtx, [=](AVFormatContext* f) { avformat_close_input(&f); });
 
     if (avformat_find_stream_info(fmtCtx, NULL) < 0) {
         derror("Failed to find video stream info\n");
-        return false;  // failed to find stream info
+        return;  // failed to find stream info
     }
 
     // dump video format
-    av_dump_format(fmtCtx, 0, videoFile.c_str(), false);
+    av_dump_format(fmtCtx, 0, mVideoFile.c_str(), false);
 
     // Find the first video stream
     int videoStreamIdx = -1;
@@ -99,8 +92,10 @@ bool VideoPreview::getPreviewFrame(std::string videoFile,
 
     if (videoStreamIdx == -1) {
         derror("Couldn't located the video stream\n");
-        return false;  // no audio or video stream found
+        return;  // no audio or video stream found
     }
+
+    mDurationSecs = calculateDurationSecs(fmtCtx);
 
     AVCodecContext* videoCodecCtx = fmtCtx->streams[videoStreamIdx]->codec;
 
@@ -108,13 +103,13 @@ bool VideoPreview::getPreviewFrame(std::string videoFile,
     AVCodec* videoCodec = avcodec_find_decoder(videoCodecCtx->codec_id);
     if (videoCodec == nullptr) {
         derror("Unable to find the video decoder\n");
-        return false;
+        return;
     }
 
     // Open codec
     if (avcodec_open2(videoCodecCtx, videoCodec, NULL) < 0) {
         derror("Unable to open the video codec\n");
-        return false;
+        return;
     }
     auto pVideoCodecCtx = android::base::makeCustomScopedPtr(
             videoCodecCtx, [=](AVCodecContext* c) { avcodec_close(c); });
@@ -122,7 +117,7 @@ bool VideoPreview::getPreviewFrame(std::string videoFile,
     // Calculate the dimensions for the widget
     int dst_w = videoCodecCtx->width;
     int dst_h = videoCodecCtx->height;
-    adjustWindowSize(videoCodecCtx, widget, &dst_w, &dst_h);
+    adjustWindowSize(videoCodecCtx, mWidget, &dst_w, &dst_h);
 
     // create image convert context
     AVPixelFormat dst_fmt = AV_PIX_FMT_RGB24;
@@ -131,7 +126,7 @@ bool VideoPreview::getPreviewFrame(std::string videoFile,
             dst_w, dst_h, dst_fmt, SWS_FAST_BILINEAR, NULL, NULL, NULL);
     if (imgConvertCtx == nullptr) {
         derror("Could not allocate image convert context\n");
-        return false;
+        return;
     }
     auto pImgConvertCtx = android::base::makeCustomScopedPtr(
             imgConvertCtx, [=](SwsContext* i) { sws_freeContext(i); });
@@ -143,7 +138,7 @@ bool VideoPreview::getPreviewFrame(std::string videoFile,
     AVFrame* avframe = av_frame_alloc();
     if (avframe == nullptr) {
         derror("Unable to allocate AVFrame\n");
-        return false;
+        return;
     }
     auto pavframe = android::base::makeCustomScopedPtr(
             avframe, [=](AVFrame* f) { av_frame_free(&f); });
@@ -161,7 +156,7 @@ bool VideoPreview::getPreviewFrame(std::string videoFile,
                     if (ret < 0) {
                         // Something went wrong
                         derror("Error while decoding frame\n");
-                        return false;
+                        return;
                     }
                 }
                 av_free_packet(&packet);
@@ -176,32 +171,34 @@ bool VideoPreview::getPreviewFrame(std::string videoFile,
     if (!got_frame) {
         // no valid frame
         derror("No valid frames were found\n");
-        return false;
+        return;
     }
 
     // Determine required buffer size and allocate buffer
     int numBytes = avpicture_get_size(AV_PIX_FMT_RGB24, dst_w, dst_h);
     int headerlen = 0;
-    frame->buf = new unsigned char[numBytes + 64];
+    mPreviewFrame.buf = new unsigned char[numBytes + 64];
     // simply append a ppm header to become ppm image format
-    headerlen = sprintf((char*)frame->buf, "P6\n%d %d\n255\n", dst_w, dst_h);
-    frame->headerlen = headerlen;
-    frame->len = numBytes + headerlen;
+    headerlen = sprintf((char*)mPreviewFrame.buf, "P6\n%d %d\n255\n", dst_w, dst_h);
+    mPreviewFrame.headerlen = headerlen;
+    mPreviewFrame.len = numBytes + headerlen;
 
     // assign appropriate parts of buffer to image planes
     AVPicture pict;
-    avpicture_fill(&pict, frame->buf + frame->headerlen, AV_PIX_FMT_RGB24,
+    avpicture_fill(&pict, mPreviewFrame.buf + mPreviewFrame.headerlen, AV_PIX_FMT_RGB24,
                    dst_w, dst_h);
 
     // Convert the image to RGB format
     sws_scale(imgConvertCtx, avframe->data, avframe->linesize, 0,
               videoCodecCtx->height, pict.data, pict.linesize);
+}
 
-    return true;
+int VideoInfo::getDurationSecs() {
+    return mDurationSecs;
 }
 
 // adjust window size to fit the video aspect ratio
-void VideoPreview::adjustWindowSize(AVCodecContext* c,
+void VideoInfo::adjustWindowSize(AVCodecContext* c,
                                     VideoPlayerWidget* widget,
                                     int* pWidth,
                                     int* pHeight) {
@@ -230,15 +227,20 @@ void VideoPreview::adjustWindowSize(AVCodecContext* c,
     if (widget->width() != w || widget->height() != h) {
         widget->move(x, y);
         widget->setFixedSize(w, h);
-        printf("widget(%d, %d, %d, %d)\n", x, y, w, h);
     }
 
     *pWidth = w;
     *pHeight = h;
 }
 
+int VideoInfo::calculateDurationSecs(AVFormatContext* f) {
+    // Code from av_dump_format to calulate the duration
+    int64_t duration = f->duration + (f->duration <= INT64_MAX - 5000 ? 5000 : 0);
+    return duration / AV_TIME_BASE;
+}
+
 // Show the frame
-void VideoPreview::show() {
+void VideoInfo::show() {
     mWidget->setPixelBuffer(mPreviewFrame.buf, mPreviewFrame.len);
     emit updateWidget();
 }
