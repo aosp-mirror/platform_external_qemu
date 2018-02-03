@@ -401,7 +401,7 @@ static intptr_t startRecording() {
 
 bool screen_recorder_start(const RecordingInfo* info, bool async) {
     if (!parseRecordingInfo(info)) {
-        derror("Unable to parse recording info");
+        D("Unable to parse recording info");
         return -1;
     }
 
@@ -409,7 +409,7 @@ bool screen_recorder_start(const RecordingInfo* info, bool async) {
     auto current = RECORDER_READY;
     if (!globals.recorderState.compare_exchange_strong(current,
                                                        RECORDER_STARTING)) {
-        derror("Screen recording already started");
+        D("Screen recording already started");
         return false;
     }
 
@@ -428,7 +428,7 @@ bool screen_recorder_stop(bool async) {
     auto current = RECORDER_RECORDING;
     if (!globals.recorderState.compare_exchange_strong(current,
                                                        RECORDER_STOPPING)) {
-        derror("No recording to stop or already stopping");
+        D("No recording to stop or already stopping");
         return false;
     }
 
