@@ -41,29 +41,31 @@
 namespace android {
 namespace videoplayer {
 
-// Class to preview a video by grabbing the first frame of a video.
-class VideoPreview : public QObject {
+// Class to grab any useful metadata from a video. Also grabs the first frame
+// of a video file for displaying to a widget.
+class VideoInfo : public QObject {
     Q_OBJECT
 
 public:
-    VideoPreview(VideoPlayerWidget* widget, std::string videoFile);
-    virtual ~VideoPreview();
+    VideoInfo(VideoPlayerWidget* widget, std::string videoFile);
+    virtual ~VideoInfo();
 
+    int getDurationSecs();
     void show();
 
 private:
-    static bool getPreviewFrame(std::string videoFile,
-                                Frame* frame,
-                                VideoPlayerWidget* widget);
+    void initialize();
     static void adjustWindowSize(AVCodecContext* c,
                                  VideoPlayerWidget* widget,
                                  int* pWidth,
                                  int* pHeight);
+    static int calculateDurationSecs(AVFormatContext* f);
 
 private:
     std::string mVideoFile;
     VideoPlayerWidget* mWidget = nullptr;
     Frame mPreviewFrame;
+    int mDurationSecs;
 
 signals:
     void updateWidget();
