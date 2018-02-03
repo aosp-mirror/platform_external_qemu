@@ -163,7 +163,6 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->show();
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
             mUi->rec_playStopButton->setProperty("themeIconName", "stop");
-            mUi->rec_saveButton->hide();
             break;
         case RecordUiState::Stopped:
             mUi->rec_recordOverlayWidget->show();
@@ -278,6 +277,11 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
 
 void RecordScreenPage::on_rec_saveButton_clicked() {
     QSettings settings;
+
+    // Stop the video player if it's running
+    if (mVideoPlayer->isRunning()) {
+        mVideoPlayer->stop();
+    }
 
     QString ext = mUi->rec_formatSwitch->currentText().toLower();
     QString savePath = QDir::toNativeSeparators(getRecordingSaveDirectory());
