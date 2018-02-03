@@ -91,7 +91,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/video-player/VideoPlayer.cpp \
     android/skin/qt/video-player/VideoPlayerNotifier.cpp \
     android/skin/qt/video-player/VideoPlayerWidget.cpp \
-    android/skin/qt/video-player/VideoPreview.cpp
+    android/skin/qt/video-player/VideoInfo.cpp
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/accelerometer-3d-widget.h \
@@ -136,7 +136,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/virtualscene-control-window.h \
     android/skin/qt/video-player/VideoPlayerNotifier.h \
     android/skin/qt/video-player/VideoPlayerWidget.h \
-    android/skin/qt/video-player/VideoPreview.h
+    android/skin/qt/video-player/VideoInfo.h
 
 ANDROID_SKIN_QT_RESOURCES := \
     android/skin/qt/static_resources.qrc \

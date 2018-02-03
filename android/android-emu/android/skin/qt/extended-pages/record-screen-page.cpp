@@ -169,6 +169,8 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->show();
             mUi->rec_formatSwitch->show();
             mUi->rec_saveButton->show();
+            // Get the video duration from the video's metadata.
+            mSec = mVideoInfo->getDurationSecs();
             mUi->rec_timeResLabel->setText(
                     QString("%1s / %2 x %3")
                             .arg(mSec)
@@ -183,7 +185,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
             // Display preview frame
-            mVideoPreview->show();
+            mVideoInfo->show();
             mVideoWidget->setVisible(true);
             break;
         case RecordUiState::Converting: {
@@ -371,9 +373,9 @@ void RecordScreenPage::slot_recordingStatusChange(RecordingStatus status) {
         case RECORD_STOPPED:
             // Setup the preview frame. Needs to be initialized before
             // setRecordUiState() or the preview frame will not be shown.
-            mVideoPreview.reset(new android::videoplayer::VideoPreview(
+            mVideoInfo.reset(new android::videoplayer::VideoInfo(
                     mVideoWidget.get(), mTmpFilePath));
-            connect(mVideoPreview.get(), SIGNAL(updateWidget()), this,
+            connect(mVideoInfo.get(), SIGNAL(updateWidget()), this,
                     SLOT(updateVideoView()));
             setRecordUiState(RecordUiState::Stopped);
             break;
