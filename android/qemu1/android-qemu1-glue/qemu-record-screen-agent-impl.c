@@ -19,10 +19,7 @@
 
 static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
         .startRecording = emulator_window_start_recording,
-        .stopRecording = emulator_window_stop_recording,
-        .startRecordingAsync = emulator_window_start_recording_async,
-        .stopRecordingAsync = emulator_window_stop_recording_async,
-        .getRecorderState = emulator_window_recorder_state_get};
+        .stopRecording = emulator_window_stop_recording};
 
 const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent =
         &sQAndroidRecordScreenAgent;

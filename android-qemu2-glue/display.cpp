@@ -146,12 +146,6 @@ static int last_graphic_console_index() {
 
 static DisplayChangeListenerOps dclOps = {};
 
-void android_display_init_no_window(QFrameBuffer* qf) {
-    // Only need to attach the check and invalidate callbacks in no-window mode
-    // to request for a refresh of the framebuffer.
-    qframebuffer_set_producer(qf, nullptr, android_display_producer_check,
-                              android_display_producer_invalidate, nullptr);
-}
 
 bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     QemuConsole* con = find_graphic_console();

@@ -31,4 +31,4 @@ constexpr int kDefaultVideoBitrate = 4 * 1000 * 1000;  // bps
 constexpr int kDefaultTimeLimit = kMaxTimeLimit;
 
 // The list of supported pixel formats
-enum class RecordPixFmt { RGB565, RGBA8888, BGRA8888, INVALID_FMT };
+enum class RecordPixFmt { RGB565, RGBA8888, INVALID_FMT };

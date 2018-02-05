@@ -82,11 +82,6 @@ qframebuffer_init( QFrameBuffer*       qfbuff,
                    int                 rotation,
                    QFrameBufferFormat  format );
 
-/* initializes a dummy framebuffer object with no pixel buffer. */
-/* This is simply to set up the callbacks to invalidate and fetch the */
-/* current frame in no-window mode for screen recording. */
-extern int qframebuffer_init_no_window(QFrameBuffer* qtbuff);
-
 /* recompute phys_width_mm and phys_height_mm according to the emulated
  * screen DPI settings */
 extern void

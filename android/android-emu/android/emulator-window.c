@@ -154,23 +154,11 @@ static void emulator_window_opengles_redraw_window(void) {
 }
 
 bool emulator_window_start_recording(const RecordingInfo* info) {
-    return screen_recorder_start(info, false);
+    return screen_recorder_start(info);
 }
 
-bool emulator_window_start_recording_async(const RecordingInfo* info) {
-    return screen_recorder_start(info, true);
-}
-
-bool emulator_window_stop_recording(void) {
-    return screen_recorder_stop(false);
-}
-
-bool emulator_window_stop_recording_async(void) {
-    return screen_recorder_stop(true);
-}
-
-RecorderState emulator_window_recorder_state_get(void) {
-    return screen_recorder_state_get();
+void emulator_window_stop_recording(void) {
+    screen_recorder_stop_async();
 }
 
 // Used as an emugl callback to get each frame of GPU display.

@@ -85,6 +85,8 @@
 
 #define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+enum class RecordState { Ready, Recording, Stopping };
+
 typedef struct ControlGlobalRec_*  ControlGlobal;
 
 typedef struct ControlClientRec_*  ControlClient;
@@ -133,6 +135,8 @@ typedef struct ControlGlobalRec_
     Redir     redirs;
     int       num_redirs;
     int       max_redirs;
+
+    std::atomic<RecordState> record_state{RecordState::Ready};
 } ControlGlobalRec;
 
 static inline const QAndroidVmOperations* vmopers(ControlClient client) {
@@ -2851,6 +2855,17 @@ static bool parseValueWithUnit(const char* str, uint32_t* pValue) {
     }
 }
 
+static void on_screenrecord_stop(void* opaque, RecordStopStatus status) {
+    if (status != RECORD_STOP_INITIATED) {
+        // Recording is finished (failure or success)
+        D(("Finished recording!\n"));
+        auto global = (ControlGlobal)opaque;
+        if (global) {
+            global->record_state = RecordState::Ready;
+        }
+    }
+}
+
 static int do_screenrecord_start(ControlClient client, char* args) {
     // kMaxArgs is max number of arguments that we have to process (options +
     // parameters, if any, and the filename)
@@ -2861,15 +2876,18 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {"time-limit", required_argument, NULL, 't'},
             {NULL, 0, NULL, 0}};
 
-    switch (client->global->record_agent->getRecorderState()) {
-        case RECORDER_READY:
-            break;
-        case RECORDER_INVALID:
-            control_write(client, "KO: Recorder not initialized\r\n");
-            return -1;
-        default:
-            control_write(client, "KO: Recording has already started\r\n");
-            return -1;
+    if (emulator_window_get()->opts->no_window &&
+        (!android_hw->hw_gpu_enabled ||
+         !strcmp(android_hw->hw_gpu_mode, "guest"))) {
+        control_write(client,
+                      "KO: Screen recording in no-window mode "
+                      "not supported in -gpu guest mode.\r\n");
+        return -1;
+    }
+
+    if (client->global->record_state != RecordState::Ready) {
+        control_write(client, "KO: Recording has already started\r\n");
+        return -1;
     }
 
     if (!args) {
@@ -2978,6 +2996,9 @@ static int do_screenrecord_start(ControlClient client, char* args) {
         return -1;
     }
 
+    info.cb = &on_screenrecord_stop;
+    info.opaque = client->global;
+
     bool success = client->global->record_agent->startRecording(&info);
     if (!success) {
         control_write(client, "KO: Error while trying to start recording\r\n");
@@ -2985,25 +3006,34 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     }
 
     D(("Recording started\n"));
+    client->global->record_state = RecordState::Recording;
 
     return 0;
 }
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
-    switch (client->global->record_agent->getRecorderState()) {
-        case RECORDER_RECORDING:
-            break;
-        case RECORDER_READY:
-        case RECORDER_INVALID:
-            control_write(client, "KO: No recording has been started.\r\n");
-            return -1;
-        default:
-            control_write(client,
-                          "KO: Recording already in process of stopping.\r\n");
-            return -1;
+    if (emulator_window_get()->opts->no_window &&
+        (!android_hw->hw_gpu_enabled ||
+         !strcmp(android_hw->hw_gpu_mode, "guest"))) {
+        control_write(client,
+                      "KO: Screen recording in no-window mode "
+                      "not supported in -gpu guest mode.\r\n");
+        return -1;
+    }
+
+    if (client->global->record_state == RecordState::Ready) {
+        control_write(client, "KO: No recording has been started.\r\n");
+        return -1;
+    }
+
+    if (client->global->record_state == RecordState::Stopping) {
+        control_write(client,
+                      "KO: Recording already in process of stopping.\r\n");
+        return -1;
     }
 
     D(("Stopping the recording ...\n"));
+    client->global->record_state = RecordState::Stopping;
     client->global->record_agent->stopRecording();
 
     return 0;
