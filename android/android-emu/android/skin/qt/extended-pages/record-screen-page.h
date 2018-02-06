@@ -24,30 +24,38 @@
 
 struct QAndroidRecordScreenAgent;
 
-Q_DECLARE_METATYPE(RecordStopStatus);
+Q_DECLARE_METATYPE(RecordingStatus);
 
 class RecordScreenPage : public QWidget {
     Q_OBJECT
 public:
-    enum class RecordState { Ready, Recording, Stopping, Stopped, Converting, Playing };
+    enum class RecordUiState {
+        Ready,
+        Starting,
+        Recording,
+        Stopping,
+        Stopped,
+        Converting,
+        Playing
+    };
 
     explicit RecordScreenPage(QWidget* parent = 0);
     ~RecordScreenPage();
 
     void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
     void updateTheme();
-    void emitRecordingStopped(RecordStopStatus status);
+    void emitRecordingStatusChange(RecordingStatus status);
     static bool removeFileIfExists(const QString& file);
 
 signals:
-    void recordingStopped(RecordStopStatus status);
+    void recordingStatusChange(RecordingStatus status);
 
 private slots:
     void on_rec_playStopButton_clicked();
     void on_rec_recordButton_clicked();
     void on_rec_saveButton_clicked();
     void updateElapsedTime();
-    void slot_recordingStopped(RecordStopStatus status);
+    void slot_recordingStatusChange(RecordingStatus status);
     void convertingStarted();
     void convertingFinished(bool success);
     void updateVideoView();
@@ -56,7 +64,7 @@ private slots:
 public slots:
 
 public:
-    void setRecordState(RecordState r);
+    void setRecordUiState(RecordUiState r);
 
 private:
     static const char kTmpMediaName[]; // tmp name for unsaved media file
@@ -67,7 +75,7 @@ private:
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoPreview> mVideoPreview;
     const QAndroidRecordScreenAgent* mRecordScreenAgent;
-    RecordState mState;
+    RecordUiState mState;
     QTimer mTimer;
     int mSec;  // number of elapsed seconds
 };
