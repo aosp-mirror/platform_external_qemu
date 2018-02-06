@@ -25,6 +25,52 @@
     },
     {
       "key": {
+        "uuid": "f8cf24b9_eff5784f",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-06T18:27:52Z",
+      "side": 1,
+      "message": "use an std::vector\u003c\u003e?",
+      "range": {
+        "startLine": 299,
+        "startChar": 9,
+        "endLine": 299,
+        "endChar": 19
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25f06594_2c7752df",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-06T18:27:52Z",
+      "side": 1,
+      "message": "please replace with assert()",
+      "range": {
+        "startLine": 300,
+        "startChar": 1,
+        "endLine": 300,
+        "endChar": 26
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48d3d051_8fbc27b8",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
@@ -45,6 +91,29 @@
       "revId": "01bd827b63ae342313c273253aa6fd418898d066",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "763a4e79_ea9d3cdf",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1055,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-06T18:27:52Z",
+      "side": 1,
+      "message": "I strongly encourage you to switch to AutoLock here: now there\u0027s more than a page of code between lock() and unlock(), so it will be easy for someone to add a return with no unlocking",
+      "range": {
+        "startLine": 1055,
+        "startChar": 3,
+        "endLine": 1055,
+        "endChar": 35
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
