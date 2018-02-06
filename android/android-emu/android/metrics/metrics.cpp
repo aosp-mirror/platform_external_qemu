@@ -366,6 +366,10 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VIRTUAL_SCENE;
         case android::featurecontrol::IgnoreHostOpenGLErrors:
             return android_studio::EmulatorFeatureFlagState::IGNORE_HOST_OPENGL_ERRORS;
+        case android::featurecontrol::GenericSnapshotsUI:
+            return android_studio::EmulatorFeatureFlagState::GENERIC_SNAPSHOTS_UI;
+        case android::featurecontrol::AllowSnapshotMigration:
+            return android_studio::EmulatorFeatureFlagState::ALLOW_SNAPSHOT_MIGRATION;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }

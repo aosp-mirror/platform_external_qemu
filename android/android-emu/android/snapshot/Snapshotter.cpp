@@ -390,7 +390,9 @@ void Snapshotter::showError(const std::string& message) {
 
 bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     const bool shouldTrySaving =
-        metrics::AdbLivenessChecker::isEmulatorBooted();
+        metrics::AdbLivenessChecker::isEmulatorBooted() ||
+        android::featurecontrol::isEnabled(
+            android::featurecontrol::AllowSnapshotMigration);
 
     if (!shouldTrySaving) {
         showError("Skipping snapshot save: "

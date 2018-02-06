@@ -149,7 +149,9 @@ void Quickboot::startLivenessMonitor() {
 }
 
 void Quickboot::onLivenessTimer() {
-    if (metrics::AdbLivenessChecker::isEmulatorBooted()) {
+    if (metrics::AdbLivenessChecker::isEmulatorBooted() ||
+        android::featurecontrol::isEnabled(
+            android::featurecontrol::AllowSnapshotMigration)) {
         VERBOSE_PRINT(snapshot, "Guest came online %.3f sec after loading",
                       (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
                               1000.0);
@@ -337,7 +339,9 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
 bool Quickboot::save(StringView name) {
     // TODO: detect if emulator was restarted since loading.
     const bool shouldTrySaving =
-            mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted();
+            mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted() ||
+            android::featurecontrol::isEnabled(
+                android::featurecontrol::AllowSnapshotMigration);
 
     if (!shouldTrySaving) {
         // Emulator hasn't booted yet, and this isn't a quickboot-loaded
