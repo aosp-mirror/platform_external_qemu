@@ -694,7 +694,7 @@ struct CameraClient
     int                 height;
     /* Number of pixels in a frame buffer. */
     int                 pixel_num;
-    /* Status of video and preview frame cache. */
+    /* Status of preview frame cache. */
     int                 frames_cached;
     /* Queries being sent from the guest can be interrupted, resulting in the camera receiving
        the partial text of a query.  (This can be detected by the query not ending with a
@@ -1306,7 +1306,9 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     }
 
     /* We have cached something... */
-    cc->frames_cached = 1;
+    if (preview_size) {
+        cc->frames_cached = 1;
+    }
     ++cc->frame_count;
 
     /*
@@ -1331,6 +1333,14 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     /* After that send video frame (if requested). */
     if (video_size) {
+        if (repeat == 1 && cc->frames_cached) {
+            // Device has no frame update reported. Use cached preview frame.
+            // Convert preview frame format to video frame format.
+            convert_frame(cc->preview_frame, V4L2_PIX_FMT_RGB32,
+                          cc->preview_frame_size,
+                          cc->width, cc->height,
+                          &frame, r_scale, g_scale, b_scale, exp_comp);
+        }
         qemud_client_send(qc, cc->video_frame, video_size);
     }
 
