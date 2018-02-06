@@ -14,12 +14,16 @@
 
 #include "android-qemu1-glue/qemu-control-impl.h"
 
+#include "android/framebuffer.h"
+
 extern "C" {
     #include "ui/console.h"
 }
 
 #include <algorithm>
 #include <vector>
+
+static void initFrameBufferNoWindow(QFrameBuffer* qf) {}
 
 static void getFrameBuffer(int* w, int* h, int* lineSize, int* bytesPerPixel,
                            uint8_t** frameBufferData) {
@@ -67,6 +71,7 @@ static const QAndroidDisplayAgent displayAgent = {
         .getFrameBuffer = &getFrameBuffer,
         .registerUpdateListener = &registerUpdateListener,
         .unregisterUpdateListener = &unregisterUpdateListener,
+        .initFrameBufferNoWindow = &initFrameBufferNoWindow,
 };
 
 const QAndroidDisplayAgent* const gQAndroidDisplayAgent = &displayAgent;
