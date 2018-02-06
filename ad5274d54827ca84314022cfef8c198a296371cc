@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b21b952a_0fba3a3e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-06T17:41:38Z",
+      "side": 1,
+      "message": "a generic nit for this kind of changes:\nif adding a bool parameter that controls the way function behaves, it\u0027s usually better to create a special enum for it:\nenum class DelayedCloseMode { Regular, Forced };\n\nthis way all calls to the function will become self-documenting:\n\nperformDelayedColorBufferCloseLocked(DelayedCloseMode::Regular);\n\nvs\n\nperformDelayedColorBufferCloseLocked(false);",
+      "range": {
+        "startLine": 437,
+        "startChar": 46,
+        "endLine": 437,
+        "endChar": 65
+      },
+      "revId": "ad5274d54827ca84314022cfef8c198a296371cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
