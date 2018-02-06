@@ -450,6 +450,11 @@ bool Snapshot::load() {
         return false;
     }
 
+    if (android::featurecontrol::isEnabled(
+            android::featurecontrol::AllowSnapshotMigration)) {
+        return true;
+    }
+
     if (mSnapshotPb.has_host() && !verifyHost(mSnapshotPb.host())) {
         return false;
     }

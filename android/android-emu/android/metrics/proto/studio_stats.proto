@@ -964,7 +964,9 @@ message EmulatorFeatureFlagState {
     VIRTUAL_SCENE = 19;
     SYSTEM_AS_ROOT = 20;
     IGNORE_HOST_OPENGL_ERRORS = 21;
-    // Next tag: 22
+    GENERIC_SNAPSHOTS_UI = 22;
+    ALLOW_SNAPSHOT_MIGRATION = 23;
+    // Next tag: 24
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
