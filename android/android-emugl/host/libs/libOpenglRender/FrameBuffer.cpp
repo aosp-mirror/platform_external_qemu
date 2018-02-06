@@ -1111,10 +1111,10 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
         }
     }
 
-    performDelayedColorBufferCloseLocked();
+    performDelayedColorBufferCloseLocked(false);
 }
 
-void FrameBuffer::performDelayedColorBufferCloseLocked() {
+void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
     // Let's wait just long enough to make sure it's not because of instant
     // timestamp change (end of previous second -> beginning of a next one),
     // but not for long - this is a workaround for race conditions, and they
@@ -1124,7 +1124,8 @@ void FrameBuffer::performDelayedColorBufferCloseLocked() {
     const auto now = System::get()->getUnixTime();
     auto it = m_colorBufferDelayedCloseList.begin();
     while (it != m_colorBufferDelayedCloseList.end() &&
-           it->ts + kColorBufferClosingDelaySec <= now) {
+           (forced ||
+           it->ts + kColorBufferClosingDelaySec <= now)) {
         if (it->cbHandle != 0) {
             m_colorbuffers.erase(it->cbHandle);
         }
@@ -1915,6 +1916,7 @@ bool FrameBuffer::onLoad(Stream* stream,
                 cleanupProcGLObjects_locked(
                         m_procOwnedRenderContext.begin()->first, true);
             }
+            performDelayedColorBufferCloseLocked(true);
         }
         m_colorBufferDelayedCloseList.clear();
         assert(m_contexts.empty());

@@ -432,7 +432,9 @@ private:
 
     void markOpened(ColorBufferRef* cbRef);
     void closeColorBufferLocked(HandleType p_colorbuffer, bool forced = false);
-    void performDelayedColorBufferCloseLocked();
+    // Close all expired color buffers for real.
+    // Treat all delayed color buffers as expired if forced=true
+    void performDelayedColorBufferCloseLocked(bool forced = false);
     void eraseDelayedCloseColorBufferLocked(
             HandleType cb, android::base::System::Duration ts);
 
