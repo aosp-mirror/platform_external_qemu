@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "376b402f_f4f98d32",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1339,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-02-06T23:32:39Z",
+      "side": 1,
+      "message": "Thanks, Done.",
+      "parentUuid": "20e9fffe_901f0add",
+      "range": {
+        "startLine": 1339,
+        "startChar": 12,
+        "endLine": 1339,
+        "endChar": 25
+      },
+      "revId": "b3ff64419e5158ae431dca3a28022d8e317ac63d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2426dadf_018dc844",
         "filename": "android/android-emu/android/camera/camera-service.c",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "b3ff64419e5158ae431dca3a28022d8e317ac63d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0aaf07ce_fd16b6e5",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1342,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-02-06T23:32:39Z",
+      "side": 1,
+      "message": "Thanks, Done.",
+      "parentUuid": "2426dadf_018dc844",
+      "range": {
+        "startLine": 1342,
+        "startChar": 34,
+        "endLine": 1342,
+        "endChar": 69
+      },
+      "revId": "b3ff64419e5158ae431dca3a28022d8e317ac63d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
