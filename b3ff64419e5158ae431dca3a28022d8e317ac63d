@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20e9fffe_901f0add",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1339,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-06T23:03:58Z",
+      "side": 1,
+      "message": "Nit: Handle return result?",
+      "range": {
+        "startLine": 1339,
+        "startChar": 12,
+        "endLine": 1339,
+        "endChar": 25
+      },
+      "revId": "b3ff64419e5158ae431dca3a28022d8e317ac63d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2426dadf_018dc844",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1342,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-06T23:03:58Z",
+      "side": 1,
+      "message": "The rgb scale and exp comp will already be applied to preview_frame, they shouldn\u0027t be applied again.",
+      "range": {
+        "startLine": 1342,
+        "startChar": 34,
+        "endLine": 1342,
+        "endChar": 69
+      },
+      "revId": "b3ff64419e5158ae431dca3a28022d8e317ac63d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
