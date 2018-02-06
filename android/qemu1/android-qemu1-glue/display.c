@@ -91,12 +91,6 @@ android_display_refresh(DisplayState *ds)
     }
 }
 
-void android_display_init_no_window(QFrameBuffer* qf) {
-    // Only need to attach the check and invalidate callbacks in no-window mode
-    // to request for a refresh of the framebuffer.
-    qframebuffer_set_producer(qf, NULL, android_display_producer_check,
-                              android_display_producer_invalidate, NULL);
-}
 
 void android_display_init(DisplayState* ds, QFrameBuffer* qf)
 {

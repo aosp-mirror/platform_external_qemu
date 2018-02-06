@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android-qemu2-glue/display.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 
 extern "C" {
@@ -24,10 +23,6 @@ extern "C" {
 
 #include <algorithm>
 #include <vector>
-
-static void initFrameBufferNoWindow(QFrameBuffer* qf) {
-    android_display_init_no_window(qf);
-}
 
 static void getFrameBuffer(int* w, int* h, int* lineSize, int* bytesPerPixel,
                            uint8_t** frameBufferData) {
@@ -141,7 +136,6 @@ static const QAndroidDisplayAgent displayAgent = {
         .getFrameBuffer = &getFrameBuffer,
         .registerUpdateListener = &registerUpdateListener,
         .unregisterUpdateListener = &unregisterUpdateListener,
-        .initFrameBufferNoWindow = &initFrameBufferNoWindow,
 };
 
 const QAndroidDisplayAgent* const gQAndroidDisplayAgent = &displayAgent;

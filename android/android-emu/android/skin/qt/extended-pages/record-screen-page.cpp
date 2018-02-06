@@ -49,15 +49,15 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
     // to match the size of rec_playerOverlayWidget.
     mUi->rec_playerOverlayWidget->show();
 
-    setRecordUiState(RecordUiState::Ready);
+    setRecordState(RecordState::Ready);
 
     mTmpFilePath = PathUtils::join(avdInfo_getContentPath(android_avdInfo),
                                    &kTmpMediaName[0]);
-    qRegisterMetaType<RecordingStatus>();
+    qRegisterMetaType<RecordStopStatus>();
     QObject::connect(&mTimer, &QTimer::timeout, this,
                      &RecordScreenPage::updateElapsedTime);
-    QObject::connect(this, &RecordScreenPage::recordingStatusChange, this,
-                     &RecordScreenPage::slot_recordingStatusChange);
+    QObject::connect(this, &RecordScreenPage::recordingStopped, this,
+                     &RecordScreenPage::slot_recordingStopped);
 }
 
 RecordScreenPage::~RecordScreenPage() {
@@ -75,15 +75,15 @@ bool RecordScreenPage::removeFileIfExists(const QString& file) {
     return true;
 }
 
-static void onRecordingStatusChanged(void* opaque, RecordingStatus status) {
+static void onRecordingStoppedCallback(void* opaque, RecordStopStatus status) {
     RecordScreenPage* rsInst = (RecordScreenPage*)opaque;
     if (rsInst) {
-        rsInst->emitRecordingStatusChange(status);
+        rsInst->emitRecordingStopped(status);
     }
 }
 
-void RecordScreenPage::emitRecordingStatusChange(RecordingStatus status) {
-    emit(recordingStatusChange(status));
+void RecordScreenPage::emitRecordingStopped(RecordStopStatus status) {
+    emit(recordingStopped(status));
 }
 
 void RecordScreenPage::setRecordScreenAgent(
@@ -91,11 +91,11 @@ void RecordScreenPage::setRecordScreenAgent(
     mRecordScreenAgent = agent;
 }
 
-void RecordScreenPage::setRecordUiState(RecordUiState newState) {
+void RecordScreenPage::setRecordState(RecordState newState) {
     mState = newState;
 
     switch (mState) {
-        case RecordUiState::Ready:
+        case RecordState::Ready:
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->hide();
@@ -106,22 +106,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_recordButton->show();
             mVideoWidget->setVisible(false);
             break;
-        case RecordUiState::Starting: {
-            SettingsTheme theme = getSelectedTheme();
-            QMovie* movie = new QMovie(this);
-            movie->setFileName(":/" +
-                               Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
-                               "/circular_spinner");
-            if (movie->isValid()) {
-                movie->start();
-                mUi->rec_recordDotLabel->setMovie(movie);
-            }
-            mUi->rec_timeElapsedLabel->setText("Starting the recorder");
-            mUi->rec_timeElapsedWidget->show();
-            mUi->rec_recordButton->hide();
-            break;
-        }
-        case RecordUiState::Recording:
+        case RecordState::Recording:
             mUi->rec_recordDotLabel->setPixmap(QPixmap(QString::fromUtf8(":/light/recordCircle")));
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_timeElapsedLabel->setText("0s Recording...");
@@ -140,7 +125,8 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             // SLOT(updateElapsedTime()));
             mTimer.start(1000);
             break;
-        case RecordUiState::Stopping: {
+        case RecordState::Stopping:
+        {
             mTimer.stop();
             SettingsTheme theme = getSelectedTheme();
             QMovie* movie = new QMovie(this);
@@ -156,7 +142,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_formatSwitch->setCurrentIndex(0);
             break;
         }
-        case RecordUiState::Playing:
+        case RecordState::Playing:
             mUi->rec_recordOverlayWidget->hide();
             // Change the icon on the play/stop button.
             mUi->rec_playStopButton->show();
@@ -164,7 +150,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->setProperty("themeIconName", "stop");
             mUi->rec_saveButton->hide();
             break;
-        case RecordUiState::Stopped:
+        case RecordState::Stopped:
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->show();
@@ -187,7 +173,8 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mVideoPreview->show();
             mVideoWidget->setVisible(true);
             break;
-        case RecordUiState::Converting: {
+        case RecordState::Converting:
+        {
             SettingsTheme theme = getSelectedTheme();
             QMovie* movie = new QMovie(this);
             movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
@@ -215,7 +202,7 @@ void RecordScreenPage::updateElapsedTime() {
 }
 
 void RecordScreenPage::on_rec_playStopButton_clicked() {
-    if (mState == RecordUiState::Stopped) {
+    if (mState == RecordState::Stopped) {
         mVideoPlayerNotifier.reset(new android::videoplayer::VideoPlayerNotifier());
         mVideoPlayer = android::videoplayer::VideoPlayer::create(mTmpFilePath, mVideoWidget.get(), mVideoPlayerNotifier.get());
         connect(mVideoPlayerNotifier.get(), SIGNAL(updateWidget()), this, SLOT(updateVideoView()));
@@ -223,8 +210,8 @@ void RecordScreenPage::on_rec_playStopButton_clicked() {
 
         mVideoPlayer->scheduleRefresh(20);
         mVideoPlayer->start();
-        setRecordUiState(RecordUiState::Playing);
-    } else if (mState == RecordUiState::Playing) {
+        setRecordState(RecordState::Playing);
+    } else if (mState == RecordState::Playing) {
         mVideoPlayer->stop();
         mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
         mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
@@ -234,7 +221,7 @@ void RecordScreenPage::on_rec_playStopButton_clicked() {
 }
 
 void RecordScreenPage::on_rec_recordButton_clicked() {
-    RecordUiState newState = RecordUiState::Ready;
+    RecordState newState = RecordState::Ready;
 
     if (!mRecordScreenAgent) {
         // agent not ready yet
@@ -242,37 +229,45 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
     }
 
     switch (mState) {
-        case RecordUiState::Ready:
-        case RecordUiState::Stopped: {
+        case RecordState::Ready: {
             // startRecording() will determine which codec to use based on the
             // file extension.
             RecordingInfo info = {};
             info.fileName = mTmpFilePath.c_str();
-            info.cb = &onRecordingStatusChanged;
+            info.cb = &onRecordingStoppedCallback;
             info.opaque = this;
-            if (!mRecordScreenAgent->startRecordingAsync(&info)) {
-                QString errStr =
-                        tr("Failed to start the recording. If you are "
-                           "recording from the command-line, you must stop "
-                           "that recording to record from here.");
-                showErrorDialog(errStr, tr("Start Recording"));
+            if (mRecordScreenAgent->startRecording(&info)) {
+                newState = RecordState::Recording;
+            } else {
+                // User probably started recording from command-line.
+                // TODO: show MessageBox saying "already recording."
             }
             break;
         }
-        case RecordUiState::Recording: {
-            if (!mRecordScreenAgent->stopRecordingAsync()) {
-                QString errStr =
-                        tr("Failed to stop the recording. Recording was either "
-                           "stopped from the command-line or the time limit "
-                           "was reached.\n");
-                setRecordUiState(RecordUiState::Ready);
-            }
+        case RecordState::Recording:
+        {
+            mRecordScreenAgent->stopRecording();
             return;
+        }
+        case RecordState::Stopped:  // we can combine this state into readystate
+        {
+            RecordingInfo info = {};
+            info.fileName = mTmpFilePath.c_str();
+            info.cb = &onRecordingStoppedCallback;
+            info.opaque = this;
+            if (mRecordScreenAgent->startRecording(&info)) {
+                newState = RecordState::Recording;
+            } else {
+                // User probably started recording from command-line.
+                // TODO: show MessageBox saying "already recording."
+            }
+            newState = RecordState::Recording;
+            break;
         }
         default:;
     }
 
-    setRecordUiState(newState);
+    setRecordState(newState);
 }
 
 void RecordScreenPage::on_rec_saveButton_clicked() {
@@ -331,8 +326,8 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
 }
 
 void RecordScreenPage::updateTheme() {
-    if (mState != RecordUiState::Stopping &&
-        mState != RecordUiState::Converting) {
+    if (mState != RecordState::Stopping &&
+        mState != RecordState::Converting) {
         return;
     }
 
@@ -346,46 +341,30 @@ void RecordScreenPage::updateTheme() {
     }
 }
 
-void RecordScreenPage::slot_recordingStatusChange(RecordingStatus status) {
+void RecordScreenPage::slot_recordingStopped(RecordStopStatus status) {
     switch (status) {
-        case RECORD_START_INITIATED:
-            setRecordUiState(RecordUiState::Starting);
-            break;
-        case RECORD_STARTED:
-            setRecordUiState(RecordUiState::Recording);
-            break;
-        case RECORD_START_FAILED: {
-            QString errStr =
-                    tr("An error occurred while trying to start the recorder.");
-            showErrorDialog(errStr, tr("Start Recording"));
-            setRecordUiState(RecordUiState::Ready);
-            break;
-        }
         case RECORD_STOP_INITIATED:
-            setRecordUiState(RecordUiState::Stopping);
+            setRecordState(RecordState::Stopping);
             break;
-        case RECORD_STOPPED:
+        case RECORD_STOP_FINISHED:
             // Setup the preview frame. Needs to be initialized before
-            // setRecordUiState() or the preview frame will not be shown.
+            // setRecordState() or the preview frame will not be shown.
             mVideoPreview.reset(new android::videoplayer::VideoPreview(
                     mVideoWidget.get(), mTmpFilePath));
             connect(mVideoPreview.get(), SIGNAL(updateWidget()), this,
                     SLOT(updateVideoView()));
-            setRecordUiState(RecordUiState::Stopped);
+            setRecordState(RecordState::Stopped);
             break;
-        case RECORD_STOP_FAILED: {
+        case RECORD_STOP_FAILED:
             QString errStr = tr("An error occurred while recording.");
             showErrorDialog(errStr, tr("Save Recording"));
-            setRecordUiState(RecordUiState::Ready);
-            break;
-        }
-        default:
+            setRecordState(RecordState::Ready);
             break;
     }
 }
 
 void RecordScreenPage::convertingStarted() {
-    setRecordUiState(RecordUiState::Converting);
+    setRecordState(RecordState::Converting);
 }
 
 void RecordScreenPage::convertingFinished(bool success) {
@@ -394,7 +373,7 @@ void RecordScreenPage::convertingFinished(bool success) {
         showErrorDialog(errStr, tr("Save Recording"));
     }
 
-    setRecordUiState(RecordUiState::Stopped);
+    setRecordState(RecordState::Stopped);
 }
 
 StopRecordingTask::StopRecordingTask(const QAndroidRecordScreenAgent* agent)
@@ -428,5 +407,5 @@ void RecordScreenPage::updateVideoView() {
 }
 
 void RecordScreenPage::videoPlayingFinished() {
-    setRecordUiState(RecordUiState::Stopped);
+    setRecordState(RecordState::Stopped);
 }

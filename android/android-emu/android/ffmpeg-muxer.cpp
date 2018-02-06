@@ -176,8 +176,6 @@ static AVPixelFormat to_ffmpeg_pix_fmt(RecordPixFmt r) {
             return AV_PIX_FMT_RGB565;
         case RecordPixFmt::RGBA8888:
             return AV_PIX_FMT_RGBA;
-        case RecordPixFmt::BGRA8888:
-            return AV_PIX_FMT_BGRA;
         default:
             return AV_PIX_FMT_NONE;
     };
@@ -1402,7 +1400,6 @@ int get_record_pixel_size(RecordPixFmt r) {
         case RecordPixFmt::RGB565:
             return 2;
         case RecordPixFmt::RGBA8888:
-        case RecordPixFmt::BGRA8888:
             return 4;
         default:
             return -1;

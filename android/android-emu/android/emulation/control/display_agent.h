@@ -15,7 +15,6 @@
 #pragma once
 
 #include "android/utils/compiler.h"
-#include "android/framebuffer.h"
 
 #include <stdint.h>
 
@@ -48,11 +47,6 @@ typedef struct QAndroidDisplayAgent {
     // Unregisters a callback that was registered.
     // |callback| - the callback to unregister
     void (*unregisterUpdateListener)(AndroidDisplayUpdateCallback callback);
-
-    // Initializes the callback for invalidating and checking updates on a
-    // framebuffer in no-window mode (gpu guest). |qf| is simply a dummy
-    // framebuffer. It just needs to attach the necessary callbacks.
-    void (*initFrameBufferNoWindow)(QFrameBuffer* qf);
 } QAndroidDisplayAgent;
 
 ANDROID_END_HEADER
