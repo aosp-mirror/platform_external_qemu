@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40e1edd4_be255bac",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 695,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-07T16:33:00Z",
+      "side": 1,
+      "message": "deleting a null object doesn\u0027t crash - it\u0027s a noop by the standard. Something else is wrong",
+      "range": {
+        "startLine": 693,
+        "startChar": 0,
+        "endLine": 695,
+        "endChar": 5
+      },
+      "revId": "00bde5a183bc0b84f918f25f698968f083ce15af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
