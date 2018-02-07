@@ -61,7 +61,9 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
 }
 
 RecordScreenPage::~RecordScreenPage() {
-    mRecordScreenAgent->stopRecording();
+    if (mRecordScreenAgent) {
+        mRecordScreenAgent->stopRecording();
+    }
     // Remove the tmp video file if one exists
     if (!removeFileIfExists(QString(mTmpFilePath.c_str()))) {
         derror("Unable to clean up temp media file.");
