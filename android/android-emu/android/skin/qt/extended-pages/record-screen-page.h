@@ -74,7 +74,7 @@ private:
     std::unique_ptr<android::videoplayer::VideoPlayerNotifier> mVideoPlayerNotifier;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoPreview> mVideoPreview;
-    const QAndroidRecordScreenAgent* mRecordScreenAgent;
+    const QAndroidRecordScreenAgent* mRecordScreenAgent = nullptr;
     RecordUiState mState;
     QTimer mTimer;
     int mSec;  // number of elapsed seconds
