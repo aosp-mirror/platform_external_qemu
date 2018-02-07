@@ -39,11 +39,14 @@ public:
     void prepare();
     void complete(bool succeeded);
 
+    bool incrementallySaved() const { return mIncrementallySaved; }
+
 private:
     OperationStatus mStatus;
     Snapshot mSnapshot;
     base::Optional<RamSaver> mRamSaver;
     std::shared_ptr<TextureSaver> mTextureSaver;
+    bool mIncrementallySaved = false;
 };
 
 }  // namespace snapshot
