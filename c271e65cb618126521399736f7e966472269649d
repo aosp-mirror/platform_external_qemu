@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ab5c484c_6208c9be",
+        "filename": "android/android-emu/android/emulation/android_qemud.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-08T23:08:20Z",
+      "side": 1,
+      "message": "We do, I\u0027ve removed it.",
+      "parentUuid": "a51a2407_ade12bfd",
+      "range": {
+        "startLine": 113,
+        "startChar": 23,
+        "endLine": 113,
+        "endChar": 33
+      },
+      "revId": "c271e65cb618126521399736f7e966472269649d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12e5e00a_83c1d9ec",
         "filename": "android/build/Makefile.top.mk",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-02-08T16:38:48Z",
       "side": 1,
       "message": "hmm, this doesn\u0027t look right to me. What should it mean?",
+      "range": {
+        "startLine": 110,
+        "startChar": 22,
+        "endLine": 111,
+        "endChar": 69
+      },
+      "revId": "c271e65cb618126521399736f7e966472269649d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ee87fd8a_3446b66d",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-08T23:08:20Z",
+      "side": 1,
+      "message": "The last one is not applicable to clang5 (will come in newer version). The #warning is to suppress:\n\n#warning: macro min is incompatible with C++.  #undefing min\n\nWe define min ourselves, so I will fix this one immediately.",
+      "parentUuid": "12e5e00a_83c1d9ec",
       "range": {
         "startLine": 110,
         "startChar": 22,
