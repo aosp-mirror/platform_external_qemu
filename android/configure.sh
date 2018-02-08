@@ -440,9 +440,6 @@ if [ "$CCACHE" ]; then
 else
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
 fi
-if [ "$OPTION_CLANG" = "yes" ]; then
-    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --clang"
-fi
 SDK_TOOLCHAIN_DIR=$OUT_DIR/build/toolchain
 GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
 "$GEN_SDK" $GEN_SDK_FLAGS "--verbosity=$VERBOSITY" "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
@@ -1023,12 +1020,9 @@ if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
     #       bundling, since we don't have a uniform libraries to begin with.
     case $HOST_OS in
         linux*)
-            log "Copying toolchain libraries to bundle with the program"
-            for BUNDLED_LIB in libstdc++; do
-                log "  Bundling ${BUNDLED_LIB}"
-                copy_toolchain_lib "${OUT_DIR}/lib/libstdc++" "${TOOLCHAIN_SYSROOT}/lib32" "${BUNDLED_LIB}"
-                copy_toolchain_lib "${OUT_DIR}/lib64/libstdc++" "${TOOLCHAIN_SYSROOT}/lib64" "${BUNDLED_LIB}"
-            done
+          LIBCPLUSPLUS=$("$GEN_SDK" $GEN_SDK_FLAGS --print=libcplusplus unused_parameter)
+          log "Bundling ${LIBCPLUSPLUS}"
+          copy_toolchain_lib "${OUT_DIR}/lib64" "$(dirname ${LIBCPLUSPLUS})" libc++
         ;;
         *) log "Not copying toolchain libraries for ${HOST_OS}";;
     esac

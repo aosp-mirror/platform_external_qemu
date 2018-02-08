@@ -451,7 +451,7 @@ $$(MOC_SRC): PRIVATE_DST := $$(MOC_SRC)
 $$(MOC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(MOC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt moc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
+	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
 
 $$(eval $$(call compile-generated-cxx-source,$$(MOC_SRC)))
 endef
@@ -470,7 +470,7 @@ $$(RCC_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
 $$(RCC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc (static): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
+	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
 
 $$(eval $$(call compile-generated-cxx-source,$$(RCC_SRC)))
 endef
@@ -489,7 +489,7 @@ $$(RCC_OUT): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
 $$(RCC_OUT): $$(LOCAL_PATH)/$$(SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc (dynamic): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(QT_RCC_TOOL) -binary -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
+	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_RCC_TOOL) -binary -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
 
 $$(eval $$(call install-file,$$(RCC_OUT),$$(call local-resource-install-path,$$(notdir $$(RCC_OUT)))))
 endef
@@ -550,6 +550,10 @@ _HAS_WINPTHREAD := $(if $(filter %libwinpthread-1.dll,$(PREBUILT_PATH_PAIRS)),tr
 
 local-link-static-c++lib = $(eval $(ev-local-link-static-c++lib))
 define ev-local-link-static-c++lib
+ifeq (linux,$(BUILD_TARGET_OS))
+LOCAL_LDLIBS += $(CXX_STD_LIB)
+LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64
+else
 ifeq (darwin,$(BUILD_TARGET_OS))
 LOCAL_LDLIBS += $(CXX_STD_LIB)
 else
@@ -557,9 +561,10 @@ ifeq (true,$(_HAS_WINPTHREAD))
 LOCAL_LDLIBS += -Wl,-Bstatic -lstdc++ -lwinpthread -Wl,-Bdynamic
 else # !libwinpthread
 LOCAL_LD := $(call local-build-var,LD)
-LOCAL_LDLIBS += -static-libstdc++
+# LOCAL_LDLIBS += -static-libstdc++
 endif  # !_HAS_WINPTHREAD
 endif  # BUILD_TARGET_OS != darwin
+endif  # BUILD_TARGET_OS != linux
 endef
 
 ifneq (,$(BUILD_SYSTEM_UNIT_TESTS))

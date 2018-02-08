@@ -11,6 +11,10 @@ LOCAL_SRC_FILES := \
     strUtils.cpp \
     TypeFactory.cpp \
 
+ifeq ($(BUILD_TARGET_OS),linux)
+  LOCAL_LDFLAGS=-Wl,-rpath=$(BUILD_OBJS_DIR)/lib64
+endif
+
 LOCAL_INSTALL := false
 
 $(call emugl-end-module)
@@ -25,4 +29,7 @@ LOCAL_SRC_FILES := \
     Parser_unittest.cpp
 LOCAL_INSTALL := false
 $(call emugl-import,libemugl_gtest_host)
+ifeq ($(BUILD_TARGET_OS),linux)
+  LOCAL_LDFLAGS=-Wl,-rpath=$(BUILD_OBJS_DIR)/lib64
+endif
 $(call emugl-end-module)

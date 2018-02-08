@@ -107,6 +107,8 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-lambda-capture \
                       -Wno-unused-private-field \
                       -Wno-unused-value \
+                      -Wno-\#warnings \
+                      #-Wno-tautological-unsigned-enum-zero-compare \
 
 BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS))
 BUILD_HOST_CFLAGS   += $(call if-host-clang,$(CLANG_COMPILER_FLAGS))
@@ -367,10 +369,10 @@ ifeq ($(BUILD_TARGET_OS),darwin)
   QEMU_SYSTEM_LDLIBS += $(QEMU_SYSTEM_FRAMEWORKS:%=-Wl,-framework,%)
 endif
 
-ifeq ($(BUILD_TARGET_OS),darwin)
-    CXX_STD_LIB := -lc++
-else
+ifeq ($(BUILD_TARGET_OS),windows)
     CXX_STD_LIB := -lstdc++
+else
+    CXX_STD_LIB := -lc++
 endif
 
 ifdef EMULATOR_BUILD_32BITS

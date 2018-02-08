@@ -147,7 +147,7 @@ LOCAL_CFLAGS := \
     -fno-strict-aliasing \
     -Wno-unused-parameter \
     -D_XOPEN_SOURCE=600 \
-    -D_BSD_SOURCE=1 \
+    -D_DEFAULT_SOURCE=1 \
     -DCONFIG_BDRV_WHITELIST=\"\" \
     $(call if-target-clang,\
             -Wno-address-of-packed-member \
