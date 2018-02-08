@@ -293,6 +293,8 @@ start-emulator-program = \
 # A variant of end-emulator-library for host programs instead
 end-emulator-program = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
+    $(if $(filter linux,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64:\$$$$ORIGIN/lib)) \
     $(eval $(end-emulator-module-ev)) \
 
 # Same thing for shared libraries
@@ -367,26 +369,17 @@ ifeq ($(BUILD_TARGET_OS),darwin)
   QEMU_SYSTEM_LDLIBS += $(QEMU_SYSTEM_FRAMEWORKS:%=-Wl,-framework,%)
 endif
 
-ifeq ($(BUILD_TARGET_OS),darwin)
-    CXX_STD_LIB := -lc++
-else
+ifeq ($(BUILD_TARGET_OS),windows)
     CXX_STD_LIB := -lstdc++
+else
+    CXX_STD_LIB := -lc++
 endif
 
-ifdef EMULATOR_BUILD_32BITS
-BUILD_TARGET_BITS := 32
-BUILD_TARGET_ARCH := x86
-BUILD_TARGET_SUFFIX :=
-include $(LOCAL_PATH)/android/build/Makefile.common.mk
-endif
-
-ifdef EMULATOR_BUILD_64BITS
+# We only support 64 bits.
 BUILD_TARGET_BITS := 64
 BUILD_TARGET_ARCH := x86_64
 BUILD_TARGET_SUFFIX := 64
-
 include $(LOCAL_PATH)/android/build/Makefile.common.mk
-endif
 
 $(foreach prebuilt_pair,$(PREBUILT_PATH_PAIRS), \
     $(eval $(call install-prebuilt, $(prebuilt_pair))))
