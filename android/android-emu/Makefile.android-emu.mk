@@ -588,8 +588,8 @@ ANDROID_EMU_LDLIBS := \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
 ifeq ($(BUILD_TARGET_OS),windows)
-# For capCreateCaptureWindow used in camera-capture-windows.cpp
-ANDROID_EMU_LDLIBS += -lvfw32
+# For CoTaskMemFree used in camera-capture-windows.cpp
+ANDROID_EMU_LDLIBS += -lole32
 # For GetPerformanceInfo in CrashService_windows.cpp
 ANDROID_EMU_LDLIBS += -lpsapi
 # Winsock functions
