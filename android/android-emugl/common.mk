@@ -51,6 +51,8 @@ emugl-begin-module = \
 
 # Used to end a module definition, see function definitions above
 emugl-end-module = \
+    $(if $(filter linux,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64:\$$$$ORIGIN/lib)) \
     $(if $(_emugl_HOST),$(eval LOCAL_HOST_BUILD := true))\
     $(eval $(end-emulator-module-ev)) \
     $(eval LOCAL_BUILD_FILE :=) \

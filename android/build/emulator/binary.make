@@ -49,13 +49,17 @@ LOCAL_LDLIBS := \
     $(call local-build-var,LDLIBS$(LOCAL_BITS))
 
 # Ensure only one of -m32 or -m64 is being used and place it first.
+# This forces target/host to have same bitness, breaking 64-bit only compilers
+# on windows. We rely on build system to setup bitness properly.
 LOCAL_CFLAGS := \
     -m$(LOCAL_BITS) \
     $(filter-out -m32 -m64, $(LOCAL_CFLAGS))
+    # $(LOCAL_CFLAGS)
 
 LOCAL_LDFLAGS := \
     -m$(LOCAL_BITS) \
     $(filter-out -m32 -m64, $(LOCAL_LDFLAGS))
+    # $(LOCAL_LDFLAGS)
 
 LOCAL_CPP_EXTENSIONS := .cpp .cc .C .cxx .c++
 LOCAL_CXX_EXTENSION_PATTERNS := $(foreach pattern,$(LOCAL_CPP_EXTENSIONS),%$(pattern))

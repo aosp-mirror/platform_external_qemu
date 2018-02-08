@@ -212,14 +212,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         fi
 
         case $SYSTEM in
-            linux-x86)
-                var_append EXTRA_CONFIGURE_FLAGS \
-                        -qt-xcb \
-                        -platform linux-g++-32
-                ;;
             linux-x86_64)
                 var_append EXTRA_CONFIGURE_FLAGS \
                         -qt-xcb \
+                        -no-use-gold-linker \
                         -platform linux-g++-64
                 ;;
             windows*)
@@ -342,6 +338,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         "$(builder_install_prefix)" \
                         "$INSTALL_DIR/$SYSTEM" \
                         lib/libqtmain.a
+                ;;
+            linux*)
+                # Copy over libc++.so, so we can use it during build.
+                cp $(aosp_clang_libcplusplus) "$INSTALL_DIR/$SYSTEM/lib"
                 ;;
         esac
 

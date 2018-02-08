@@ -19,6 +19,7 @@
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
