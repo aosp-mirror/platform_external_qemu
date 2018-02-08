@@ -34,6 +34,24 @@
       "revId": "721f1b9ec209508f9b20447a10ba6e13e7864343",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a789bde2_7832fe5b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-08T20:08:57Z",
+      "side": 1,
+      "message": "Potential correctness issue could be because texturedraw is used in a lot of contexts, but here, it\u0027s only in the posting context. so probably the optimal place to set the blend state and blend func is when the texture is initially created (line 291).",
+      "parentUuid": "ae3551f2_6c6fc4b3",
+      "revId": "721f1b9ec209508f9b20447a10ba6e13e7864343",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
