@@ -19,7 +19,8 @@
      <x>20</x>
      <y>24</y>
      <width>582</width>
-     <height>516</height>
+     <!-- 4 px height for seeking bar -->
+     <height>520</height>
     </rect>
    </property>
    <property name="ColorGroup" stdset="0">
@@ -158,7 +159,7 @@
    <property name="ColorGroup" stdset="0">
     <string>Overlay</string>
    </property>
-   <layout class="QHBoxLayout" name="rec_playerOverlayLayout">
+   <layout class="QGridLayout" name="rec_playerOverlayLayout">
     <property name="spacing">
      <number>0</number>
     </property>

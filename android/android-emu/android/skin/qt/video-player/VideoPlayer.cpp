@@ -30,6 +30,7 @@
 // THE SOFTWARE.
 
 #include "android/skin/qt/video-player/VideoPlayer.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/FunctorThread.h"
@@ -38,6 +39,7 @@
 #include "android/skin/qt/video-player/Clock.h"
 #include "android/skin/qt/video-player/FrameQueue.h"
 #include "android/skin/qt/video-player/PacketQueue.h"
+#include "android/skin/qt/video-player/VideoSeek.h"
 #include "android/utils/debug.h"
 
 extern "C" {
@@ -158,7 +160,8 @@ enum class AvSyncMaster {
 class VideoPlayerImpl : public VideoPlayer {
 public:
     VideoPlayerImpl(std::string videoFile,
-                    VideoPlayerWidget* widget,
+                    VideoPlayerWidget* vpWidget,
+                    VideoSeekWidget* seekWidget,
                     VideoPlayerNotifier* notifier);
     virtual ~VideoPlayerImpl();
 
@@ -167,6 +170,8 @@ public:
     virtual bool isRunning() const { return mRunning; }
     virtual void scheduleRefresh(int delayMs);
     virtual void videoRefresh();
+
+    virtual void showPreviewFrame();
 
     AvSyncMaster getMasterSyncType();
     double getMasterClock();
@@ -177,6 +182,8 @@ public:
                      int64_t pos,
                      int serial);
 
+    int getDurationSecs();
+
 private:
     int play();
     void adjustWindowSize(AVCodecContext* c, int* pWidth, int* pHeight);
@@ -184,6 +191,8 @@ private:
     static bool isRealTimeFormat(AVFormatContext* s);
     void checkExternalClockSpeed();
     void displayVideoFrame(Frame* vp);
+    int calculateDurationSecs(AVFormatContext* f);
+    void getPreviewFrame();
 
     // get an audio frame from the decoded queue, and convert it to buffer
     int getConvertedAudioFrame();
@@ -220,7 +229,8 @@ public:
 
 private:
     std::string mVideoFile;
-    VideoPlayerWidget* mWidget = nullptr;
+    VideoPlayerWidget* mVideoPlayerWidget = nullptr;
+    VideoSeekWidget* mVideoSeekWidget = nullptr;
     VideoPlayerNotifier* mNotifier = nullptr;
 
     // this is a real time stream, e.g., rtsp
@@ -260,6 +270,8 @@ private:
     // queue to store decoded video frames
     std::unique_ptr<FrameQueue> mVideoFrameQueue = nullptr;
 
+    std::unique_ptr<VideoSeek> mVideoSeek = nullptr;
+
     AvSyncMaster mAvSyncType = AvSyncMaster::Audio;
 
     // maximum duration of a frame
@@ -291,6 +303,9 @@ private:
 
     // A separate worker thread for the player
     base::FunctorThread mWorkerThread;
+
+    Frame mPreviewFrame = {};
+    int mDurationSecs = 0;
 };
 
 // Decoder implementations
@@ -580,10 +595,11 @@ void VideoDecoder::workerThreadFunc() {
 // display, and the notifier to receive updates
 std::unique_ptr<VideoPlayer> VideoPlayer::create(
         std::string videoFile,
-        VideoPlayerWidget* widget,
+        VideoPlayerWidget* vpWidget,
+        VideoSeekWidget* seekWidget,
         VideoPlayerNotifier* notifier) {
     std::unique_ptr<VideoPlayerImpl> player;
-    player.reset(new VideoPlayerImpl(videoFile, widget, notifier));
+    player.reset(new VideoPlayerImpl(videoFile, vpWidget, seekWidget, notifier));
     return std::move(player);
 }
 
@@ -595,19 +611,34 @@ std::unique_ptr<VideoPlayer> VideoPlayer::create(
 // VideoPlayerImpl implementations
 
 VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
-                                 VideoPlayerWidget* widget,
+                                 VideoPlayerWidget* vpWidget,
+                                 VideoSeekWidget* seekWidget,
                                  VideoPlayerNotifier* notifier)
     : mVideoFile(videoFile),
-      mWidget(widget),
+      mVideoPlayerWidget(vpWidget),
+      mVideoSeekWidget(seekWidget),
       mNotifier(notifier),
       mRunning(true),
       mWorkerThread([this]() { workerThreadFunc(); }) {
+    mVideoSeek.reset(new VideoSeek());
+    mVideoSeek->setVideoSeekWidget(seekWidget);
     notifier->setVideoPlayer(this);
     notifier->initTimer();
+    getPreviewFrame();
+    mVideoPlayerWidget->show();
+    mVideoSeek->setDurationSecs(mDurationSecs);
+    mVideoSeekWidget->show();
+    showPreviewFrame();
 }
 
 VideoPlayerImpl::~VideoPlayerImpl() {
-    stop();
+    if (mPreviewFrame.buf) {
+        delete[] mPreviewFrame.buf;
+    }
+
+    if (mVideoSeek) {
+        mVideoSeek->stop();
+    }
     if (mVideoDecoder) {
         mVideoDecoder->wait();
     }
@@ -615,6 +646,162 @@ VideoPlayerImpl::~VideoPlayerImpl() {
         mAudioDecoder->wait();
     }
     mWorkerThread.wait();
+}
+
+int VideoPlayerImpl::getDurationSecs() {
+    return mDurationSecs;
+}
+
+int VideoPlayerImpl::calculateDurationSecs(AVFormatContext* f) {
+    // Code from av_dump_format to calulate the duration
+    int64_t duration = f->duration + (f->duration <= INT64_MAX - 5000 ? 5000 : 0);
+    return duration / AV_TIME_BASE;
+}
+
+void VideoPlayerImpl::showPreviewFrame() {
+    if (mPreviewFrame.buf != nullptr) {
+        displayVideoFrame(&mPreviewFrame);
+        return;
+    }
+    getPreviewFrame();
+    displayVideoFrame(&mPreviewFrame);
+}
+
+void VideoPlayerImpl::getPreviewFrame() {
+    if (mPreviewFrame.buf != nullptr) {
+        return;
+    }
+
+    // Register all formats and codecs
+    av_register_all();
+    avformat_network_init();
+
+    AVFormatContext* fmtCtx = nullptr;
+    if (avformat_open_input(&fmtCtx, mVideoFile.c_str(), NULL, NULL) != 0) {
+        derror("Failed to open video file\n");
+        return;  // failed to open video file
+    }
+    auto pFmtCtx = android::base::makeCustomScopedPtr(
+            fmtCtx, [=](AVFormatContext* f) { avformat_close_input(&f); });
+
+    if (avformat_find_stream_info(fmtCtx, NULL) < 0) {
+        derror("Failed to find video stream info\n");
+        return;  // failed to find stream info
+    }
+
+    // dump video format
+    av_dump_format(fmtCtx, 0, mVideoFile.c_str(), false);
+
+    // Find the first video stream
+    int videoStreamIdx = -1;
+    for (int i = 0; i < fmtCtx->nb_streams; i++) {
+        if (fmtCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+            videoStreamIdx = i;
+            break;
+        }
+    }
+
+    if (videoStreamIdx == -1) {
+        derror("Couldn't located the video stream\n");
+        return;  // no audio or video stream found
+    }
+
+    mDurationSecs = calculateDurationSecs(fmtCtx);
+
+    AVCodecContext* videoCodecCtx = fmtCtx->streams[videoStreamIdx]->codec;
+
+    // Find the decoder for the video stream
+    AVCodec* videoCodec = avcodec_find_decoder(videoCodecCtx->codec_id);
+    if (videoCodec == nullptr) {
+        derror("Unable to find the video decoder\n");
+        return;
+    }
+
+    // Open codec
+    if (avcodec_open2(videoCodecCtx, videoCodec, NULL) < 0) {
+        derror("Unable to open the video codec\n");
+        return;
+    }
+    auto pVideoCodecCtx = android::base::makeCustomScopedPtr(
+            videoCodecCtx, [=](AVCodecContext* c) { avcodec_close(c); });
+
+    // Calculate the dimensions for the widget
+    int dst_w = videoCodecCtx->width;
+    int dst_h = videoCodecCtx->height;
+    adjustWindowSize(videoCodecCtx, &dst_w, &dst_h);
+
+    // create image convert context
+    AVPixelFormat dst_fmt = AV_PIX_FMT_RGB24;
+    SwsContext* imgConvertCtx = sws_getContext(
+            videoCodecCtx->width, videoCodecCtx->height, videoCodecCtx->pix_fmt,
+            dst_w, dst_h, dst_fmt, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    if (imgConvertCtx == nullptr) {
+        derror("Could not allocate image convert context\n");
+        return;
+    }
+    auto pImgConvertCtx = android::base::makeCustomScopedPtr(
+            imgConvertCtx, [=](SwsContext* i) { sws_freeContext(i); });
+
+    // Get the first valid packet from the video file
+    int ret = 0;
+    int got_frame = 0;
+    AVPacket packet = {0};
+    AVFrame* avframe = av_frame_alloc();
+    if (avframe == nullptr) {
+        derror("Unable to allocate AVFrame\n");
+        return;
+    }
+    auto pavframe = android::base::makeCustomScopedPtr(
+            avframe, [=](AVFrame* f) { av_frame_free(&f); });
+
+    while ((ret = av_read_frame(fmtCtx, &packet)) >= 0) {
+        if (packet.stream_index == videoStreamIdx) {
+            if (packet.data != PacketQueue::sFlushPkt.data) {
+                ret = 0;
+                while (!got_frame) {
+                    // Keep running decoder until we get the first frame.
+                    // Decoder may not give us the first frame in the first
+                    // decode call.
+                    ret = avcodec_decode_video2(videoCodecCtx, avframe,
+                                                &got_frame, &packet);
+                    if (ret < 0) {
+                        // Something went wrong
+                        derror("Error while decoding frame\n");
+                        return;
+                    }
+                }
+                av_free_packet(&packet);
+                break;
+            }
+        } else {
+            // stream that we don't handle, simply free and ignore it
+            av_free_packet(&packet);
+        }
+    }
+
+    if (!got_frame) {
+        // no valid frame
+        derror("No valid frames were found\n");
+        return;
+    }
+
+    // Determine required buffer size and allocate buffer
+    int numBytes = avpicture_get_size(AV_PIX_FMT_RGB24, dst_w, dst_h);
+    int headerlen = 0;
+    mPreviewFrame.buf = new unsigned char[numBytes + 64];
+    // simply append a ppm header to become ppm image format
+    headerlen = sprintf((char*)mPreviewFrame.buf, "P6\n%d %d\n255\n", dst_w, dst_h);
+    mPreviewFrame.headerlen = headerlen;
+    mPreviewFrame.len = numBytes + headerlen;
+
+    // assign appropriate parts of buffer to image planes
+    AVPicture pict;
+    avpicture_fill(&pict, mPreviewFrame.buf + mPreviewFrame.headerlen, AV_PIX_FMT_RGB24,
+                   dst_w, dst_h);
+
+    // Convert the image to RGB format
+    sws_scale(imgConvertCtx, avframe->data, avframe->linesize, 0,
+              videoCodecCtx->height, pict.data, pict.linesize);
 }
 
 // adjust window size to fit the video apect ratio
@@ -633,23 +820,28 @@ void VideoPlayerImpl::adjustWindowSize(AVCodecContext* c,
         aspect_ratio = (float)c->width / (float)c->height;
     }
 
-    int h = mWidget->height();
-    int w = ((int)(h * aspect_ratio)) & -3;
-    if (w > mWidget->width()) {
-        w = mWidget->width();
-        h = ((int)(w / aspect_ratio)) & -3;
+    int containerH = mVideoPlayerWidget->parentWidget()->height();
+    int containerW = mVideoPlayerWidget->parentWidget()->width();
+    int vph = containerH - VideoSeekWidget::VIDEO_SEEKBAR_HEIGHT;
+    int vpw = ((int)(vph * aspect_ratio)) & -3;
+    if (vpw > containerW) {
+        vpw = containerW;
+        vph = ((int)(vpw / aspect_ratio)) & -3;
     }
 
-    int x = (mWidget->width() - w) / 2;
-    int y = (mWidget->height() - h) / 2;
+    int vpx = (containerW - vpw) / 2;
+    int vpy = (containerH - vph) / 2;
 
-    if (mWidget->width() != w || mWidget->height() != h) {
-        mWidget->move(x, y);
-        mWidget->setFixedSize(w, h);
+    if (mVideoPlayerWidget->geometry() != QRect(vpx, vpy, vpw, vph)) {
+        printf("move(%d, %d)\n", vpx, vpy);
+        mVideoPlayerWidget->move(vpx, vpy);
+        mVideoPlayerWidget->setFixedSize(vpw, vph);
+        mVideoSeekWidget->move(vpx, vpy + vph);
+        mVideoSeekWidget->setFixedSize(vpw, VideoSeekWidget::VIDEO_SEEKBAR_HEIGHT);
     }
 
-    *pWidth = w;
-    *pHeight = h;
+    *pWidth = vpw;
+    *pHeight = vph;
 }
 
 AvSyncMaster VideoPlayerImpl::getMasterSyncType() {
@@ -784,7 +976,7 @@ int VideoPlayerImpl::queuePicture(AVFrame* src_frame,
 
 // render the video
 void VideoPlayerImpl::displayVideoFrame(Frame* vp) {
-    mWidget->setPixelBuffer(vp->buf, vp->len);
+    mVideoPlayerWidget->setPixelBuffer(vp->buf, vp->len);
 
     mNotifier->emitUpdateWidget();
 }
@@ -1330,11 +1522,18 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
 }
 
 void VideoPlayerImpl::start() {
+    if (mVideoSeek) {
+        mVideoSeek->start();
+    }
     mWorkerThread.start();
 }
 
 void VideoPlayerImpl::stop() {
     mRunning = false;
+
+    if (mVideoSeek) {
+        mVideoSeek->stop();
+    }
 
     mNotifier->stopTimer();
 
@@ -1392,7 +1591,7 @@ void VideoPlayerImpl::cleanup() {
         // mVideoFrameQueue.reset();
     }
 
-    mWidget->setPixelBuffer(nullptr, 0);
+    mVideoPlayerWidget->setPixelBuffer(nullptr, 0);
 
     if (mImgConvertCtx != nullptr) {
         sws_freeContext(mImgConvertCtx);

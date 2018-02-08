@@ -1,4 +1,4 @@
-// Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -16,27 +16,28 @@
 namespace android {
 namespace videoplayer {
 
-class VideoPlayerWidget : public QWidget {
+class VideoSeekWidget : public QWidget {
     Q_OBJECT
 
 public:
-    VideoPlayerWidget(QWidget* parent = nullptr);
-    ~VideoPlayerWidget();
+    VideoSeekWidget(QWidget* parent = nullptr);
+    ~VideoSeekWidget();
 
-    void setPixelBuffer(const unsigned char* buf, size_t len) {
-        mBuffer = buf;
-        mBufferLen = len;
+    // |percent| should be between 0 and 1
+    void setPercentage(float percent) {
+        mPercentage = percent;
     }
 
 private:
-    // pinter to the pixel buffer, don't free within this class
-    const unsigned char* mBuffer;
-    size_t mBufferLen;
+    void paintEvent(QPaintEvent*);
 
 private:
-    void paintEvent(QPaintEvent*);
-    void moveEvent(QMoveEvent*);
+    float mPercentage = 0;
+
+public:
+    static constexpr int VIDEO_SEEKBAR_HEIGHT = 4;
 };
 
 }  // namespace videoplayer
 }  // namespace android
+

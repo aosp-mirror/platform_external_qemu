@@ -33,6 +33,7 @@
 
 #include "android/skin/qt/video-player/VideoPlayerNotifier.h"
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#include "android/skin/qt/video-player/VideoSeekWidget.h"
 #include "android/utils/compiler.h"
 
 #include <memory>
@@ -52,7 +53,8 @@ public:
     // create a video player instance the input video file, the output widget to
     // display, and the notifier to receive updates
     static std::unique_ptr<VideoPlayer> create(std::string videoFile,
-                                               VideoPlayerWidget* widget,
+                                               VideoPlayerWidget* vpWidget,
+                                               VideoSeekWidget* seekWidget,
                                                VideoPlayerNotifier* notifier);
 
     virtual void start() = 0;
@@ -60,6 +62,8 @@ public:
     virtual bool isRunning() const = 0;
     virtual void videoRefresh() = 0;
     virtual void scheduleRefresh(int delayMs) = 0;
+    virtual int getDurationSecs() = 0;
+    virtual void showPreviewFrame() = 0;
 };
 
 }  // namespace videoplayer
