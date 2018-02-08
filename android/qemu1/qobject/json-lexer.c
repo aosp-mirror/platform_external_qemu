@@ -63,7 +63,7 @@ enum json_lexer_state {
 };
 
 /* Ensure GCC doesn't complain when parsing the initialization values below. */
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverride-init"
 #endif  // __GNUC__
