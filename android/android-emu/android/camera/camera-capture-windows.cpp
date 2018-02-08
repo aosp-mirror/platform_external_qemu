@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,55 +15,36 @@
  */
 
 /*
- * Contains code capturing video frames from a camera device on Windows.
- * This code uses capXxx API, available via capCreateCaptureWindow.
- */
-
-/* NOTE: On Windows, we make certain assumptions about * how many threads
- * are accessing * the camera capture API at a time:
- *
- * Namely, that only ONE camera thread is accessing the camera capture API
- * at any time.
- *
- * More details:
- *
- * First, some background. The windows camera capture library (vfw32)
- * cannot be operated on from multiple threads,
- * or stranges freezes/crashes will result.
- *
- * Therefore, all vfw32 calls will go through a single thread,
- * and the CameraDevice API on windows
- * merely sets arguments and signals that thread.
- *
- * The state machine running on that thread
- * then assumes that only one other thread is interacting
- * with it at a time. This is because
- * we assume the existence of only one camera client,
- * which results in only serial access to the underlying
- * camera API.
+ * Contains code capturing video frames from a camera device on Windows using
+ * the Media Foundation SourceReader API.
  */
 
 #include "android/camera/camera-capture.h"
 
+#include "android/base/ArraySize.h"
+#include "android/base/Compiler.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/threads/Thread.h"
+#include "android/base/system/Win32UnicodeString.h"
 #include "android/camera/camera-format-converters.h"
 
-using Thread = android::base::Thread;
+#include <initguid.h>
+#include <mfapi.h>
+#include <mfidl.h>
+#include <mfreadwrite.h>
 
-#include <stdio.h>
-#include <vfw.h>
-#include <winsock2.h>
-#include <windows.h>
+#include <wrl/client.h>
 
-#define  E(...)    derror(__VA_ARGS__)
-#define  W(...)    dwarning(__VA_ARGS__)
-#define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#define  D_ACTIVE  VERBOSE_CHECK(camera)
+#include <map>
+#include <set>
+#include <vector>
+
+#define E(...) derror(__VA_ARGS__)
+#define W(...) dwarning(__VA_ARGS__)
+#define D(...) VERBOSE_PRINT(camera, __VA_ARGS__)
+#define D_ACTIVE VERBOSE_CHECK(camera)
 
 /* the T(...) macro is used to dump traffic */
-#define  T_ACTIVE   0
+#define T_ACTIVE 0
 
 #if T_ACTIVE
 #define  T(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
@@ -71,923 +52,912 @@ using Thread = android::base::Thread;
 #define  T(...)    ((void)0)
 #endif
 
-/* Default name for the capture window. */
-static const char* _default_window_name = "AndroidEmulatorVC";
+static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE = {
+        0xc60ac5fe,
+        0x252a,
+        0x478f,
+        {0xa0, 0xef, 0xbc, 0x8f, 0xa5, 0xf7, 0xca, 0xd3}};
+static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK = {
+        0x58f0aad8,
+        0x22bf,
+        0x4f8a,
+        {0xbb, 0x3d, 0xd2, 0xc4, 0x97, 0x8c, 0x6e, 0x2f}};
+static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID = {
+        0x8ac3587a,
+        0x4ae7,
+        0x42d8,
+        {0x99, 0xe0, 0x0a, 0x60, 0x13, 0xee, 0xf9, 0x0f}};
 
-typedef struct WndCameraDevice WndCameraDevice;
-/* Windows-specific camera device descriptor. */
-struct WndCameraDevice {
-    /* Common camera device descriptor. */
-    CameraDevice        header;
-    /* Capture window name. (default is AndroidEmulatorVC) */
-    char*               window_name;
-    /* Input channel (video driver index). (default is 0) */
-    int                 input_channel;
+// Note: These are only available on Win8 and above.
+static constexpr GUID MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING = {
+        0xf81da2c,
+        0xb537,
+        0x4672,
+        {0xa8, 0xb2, 0xa6, 0x81, 0xb1, 0x73, 0x7, 0xa3}};
+static constexpr GUID CLSID_VideoProcessorMFT = {
+        0x88753b26,
+        0x5b24,
+        0x49bd,
+        {0xb2, 0xe7, 0xc, 0x44, 0x5c, 0x78, 0xc9, 0x82}};
 
-    /*
-     * Set when framework gets initialized.
-     */
+static constexpr GUID kGuidNull = {};
 
-    /* Video capturing window. Null indicates that device is not connected. */
-    HWND                cap_window;
-    /* DC for frame bitmap manipulation. Null indicates that frames are not
-     * being capturing. */
-    HDC                 dc;
-    /* Bitmap info for the frames obtained from the video capture driver. */
-    BITMAPINFO*         frame_bitmap;
-     /* Bitmap info to use for GetDIBits calls. We can't really use bitmap info
-      * obtained from the video capture driver, because of the two issues. First,
-      * the driver may return an incompatible 'biCompresstion' value. For instance,
-      * sometimes it returns a "fourcc' pixel format value instead of BI_XXX,
-      * which causes GetDIBits to fail. Second, the bitmap that represents a frame
-      * that has been actually obtained from the device is not necessarily matches
-      * bitmap info that capture driver has returned. Sometimes the captured bitmap
-      * is a 32-bit RGB, while bit count reported by the driver is 16. So, to
-      * address these issues we need to have another bitmap info, that can be used
-      * in GetDIBits calls. */
-    BITMAPINFO*         gdi_bitmap;
-    /* Framebuffer large enough to fit the frame. */
-    uint8_t*            framebuffer;
-    /* Framebuffer size. */
-    size_t              framebuffer_size;
-    /* Framebuffer's pixel format. */
-    uint32_t            pixel_format;
-    /* If != 0, frame bitmap is "top-down". If 0, frame bitmap is "bottom-up". */
-    int                 is_top_down;
-    /* Flags whether frame should be captured using clipboard (1), or via frame
-     * callback (0) */
-    int                 use_clipboard;
-    /* Contains last frame captured via frame callback. */
-    void*               last_frame;
-    /* Byte size of the 'last_frame' buffer. */
-    uint32_t            last_frame_size;
+// The mingw headers don't include this function, declare it here.
+STDAPI MFCreateDeviceSource(IMFAttributes* pAttributes,
+                            IMFMediaSource** ppSource);
+
+
+// Required emulator webcam dimensions. The webcam must either natively support
+// each dimension or the SourceReader must support the advanced video processing
+// flag which would enable it to scale to the requested resolution (implemented
+// on Win8 and above).
+static constexpr CameraFrameDim kRequiredDimensions[] = {{640, 480},
+                                                         {352, 288},
+                                                         {320, 240},
+                                                         {176, 144},
+                                                         {1280, 720}};
+
+// Extra dimensions that, if supported, improve the camera capture experience by
+// allowing photos to both preview and capture at the same resolution, so that
+// capture doesn't need to stop/start to take a photo.
+static constexpr CameraFrameDim kExtraDimensions[] = {{1280, 960}};
+
+struct CameraFormatMapping {
+    GUID mfSubtype;
+    uint32_t v4l2Format;
 };
 
-/*******************************************************************************
- *                     CameraDevice routines
- ******************************************************************************/
+// In order of preference.
+static const CameraFormatMapping kSupportedPixelFormats[] = {
+        {MFVideoFormat_NV12, V4L2_PIX_FMT_NV12},
+        {MFVideoFormat_RGB32, V4L2_PIX_FMT_BGR32},
+        {MFVideoFormat_ARGB32, V4L2_PIX_FMT_BGR32},
+        {MFVideoFormat_RGB24, V4L2_PIX_FMT_BGR24},
+        {MFVideoFormat_I420, V4L2_PIX_FMT_YUV420},
+};
 
-/* Allocates an instance of WndCameraDevice structure.
- * Return:
- *  Allocated instance of WndCameraDevice structure. Note that this routine
- *  also sets 'opaque' field in the 'header' structure to point back to the
- *  containing WndCameraDevice instance.
- */
-static WndCameraDevice*
-_camera_device_alloc(void)
-{
-    WndCameraDevice* cd = (WndCameraDevice*)malloc(sizeof(WndCameraDevice));
-    if (cd != NULL) {
-        memset(cd, 0, sizeof(WndCameraDevice));
-        cd->header.opaque = cd;
-    } else {
-        E("%s: Unable to allocate WndCameraDevice instance", __FUNCTION__);
-    }
-    return cd;
-}
+using namespace Microsoft::WRL;
+using namespace android::base;
 
-/* Uninitializes and frees WndCameraDevice descriptor.
- * Note that upon return from this routine memory allocated for the descriptor
- * will be freed.
- */
-static void
-_camera_device_free(WndCameraDevice* cd)
-{
-    if (cd != NULL) {
-        if (cd->cap_window != NULL) {
-            /* Disconnect from the driver. */
-            capDriverDisconnect(cd->cap_window);
-
-            if (cd->dc != NULL) {
-                W("%s: Frames should not be capturing at this point",
-                  __FUNCTION__);
-                ReleaseDC(cd->cap_window, cd->dc);
-                cd->dc = NULL;
+template <typename Type>
+class DelayLoad {
+public:
+    DelayLoad(const char* dll, const char* name) {
+        mModule = LoadLibraryA(dll);
+        if (mModule) {
+            FARPROC fn = GetProcAddress(mModule, name);
+            if (fn) {
+                mFunction = reinterpret_cast<Type*>(fn);
             }
-            /* Destroy the capturing window. */
-            DestroyWindow(cd->cap_window);
-            cd->cap_window = NULL;
-        }
-        if (cd->gdi_bitmap != NULL) {
-            free(cd->gdi_bitmap);
-        }
-        if (cd->frame_bitmap != NULL) {
-            free(cd->frame_bitmap);
-        }
-        if (cd->window_name != NULL) {
-            free(cd->window_name);
-        }
-        if (cd->framebuffer != NULL) {
-            free(cd->framebuffer);
-        }
-        if (cd->last_frame != NULL) {
-            free(cd->last_frame);
-        }
-        AFREE(cd);
-    } else {
-        W("%s: No descriptor", __FUNCTION__);
-    }
-}
-
-/* Resets camera device after capturing.
- * Since new capture request may require different frame dimensions we must
- * reset frame info cached in the capture window. The only way to do that would
- * be closing, and reopening it again. */
-static void
-_camera_device_reset(WndCameraDevice* cd)
-{
-    if (cd != NULL && cd->cap_window != NULL) {
-        capDriverDisconnect(cd->cap_window);
-        if (cd->dc != NULL) {
-            ReleaseDC(cd->cap_window, cd->dc);
-            cd->dc = NULL;
-        }
-        if (cd->gdi_bitmap != NULL) {
-            free(cd->gdi_bitmap);
-            cd->gdi_bitmap = NULL;
-        }
-        if (cd->frame_bitmap != NULL) {
-            free(cd->frame_bitmap);
-            cd->frame_bitmap = NULL;
-        }
-        if (cd->framebuffer != NULL) {
-            free(cd->framebuffer);
-            cd->framebuffer = NULL;
-        }
-        if (cd->last_frame != NULL) {
-            free(cd->last_frame);
-            cd->last_frame = NULL;
-        }
-        cd->last_frame_size = 0;
-
-        /* Recreate the capturing window. */
-        DestroyWindow(cd->cap_window);
-        cd->cap_window = capCreateCaptureWindow(cd->window_name, WS_CHILD, 0, 0,
-                                                0, 0, HWND_MESSAGE, 1);
-        if (cd->cap_window != NULL) {
-            /* Save capture window descriptor as window's user data. */
-            capSetUserData(cd->cap_window, cd);
         }
     }
-}
 
-/* Gets an absolute value out of a signed integer. */
-static __inline__ int
-_abs(int val)
-{
-    return (val < 0) ? -val : val;
-}
-
-/* Callback that is invoked when a frame gets captured in capGrabFrameNoStop */
-static LRESULT CALLBACK
-_on_captured_frame(HWND hwnd, LPVIDEOHDR hdr)
-{
-    /* Capture window descriptor is saved in window's user data. */
-    WndCameraDevice* wcd = (WndCameraDevice*)capGetUserData(hwnd);
-
-    /* Reallocate frame buffer (if needed) */
-    if (wcd->last_frame_size < hdr->dwBytesUsed) {
-        wcd->last_frame_size = hdr->dwBytesUsed;
-        if (wcd->last_frame != NULL) {
-            free(wcd->last_frame);
+    ~DelayLoad() {
+        if (mModule) {
+            FreeLibrary(mModule);
         }
-        wcd->last_frame = malloc(wcd->last_frame_size);
     }
 
-    /* Copy captured frame. */
-    memcpy(wcd->last_frame, hdr->lpData, hdr->dwBytesUsed);
+    bool isValid() const { return mFunction != nullptr; }
 
-    /* If biCompression is set to default (RGB), set correct pixel format
-     * for converters. */
-    if (wcd->frame_bitmap->bmiHeader.biCompression == BI_RGB) {
-        if (wcd->frame_bitmap->bmiHeader.biBitCount == 32) {
-            wcd->pixel_format = V4L2_PIX_FMT_BGR32;
-        } else if (wcd->frame_bitmap->bmiHeader.biBitCount == 16) {
-            wcd->pixel_format = V4L2_PIX_FMT_RGB565;
+    template <typename... Args>
+    HRESULT operator()(Args... args) {
+        if (mFunction) {
+            return mFunction(std::forward<Args>(args)...);
         } else {
-            wcd->pixel_format = V4L2_PIX_FMT_BGR24;
+            return E_NOTIMPL;
         }
-    } else {
-        wcd->pixel_format = wcd->frame_bitmap->bmiHeader.biCompression;
     }
 
-    return (LRESULT)0;
+private:
+    HMODULE mModule = nullptr;
+    Type* mFunction = nullptr;
+};
+
+class MFApi {
+public:
+    MFApi()
+        : mfStartup("mfplat.dll", "MFStartup"),
+          mfShutdown("mfplat.dll", "MFShutdown"),
+          mfCreateAttributes("mfplat.dll", "MFCreateAttributes"),
+          mfEnumDeviceSources("mf.dll", "MFEnumDeviceSources"),
+          mfCreateDeviceSource("mf.dll", "MFCreateDeviceSource"),
+          mfCreateSourceReaderFromMediaSource(
+                  "mfreadwrite.dll",
+                  "MFCreateSourceReaderFromMediaSource"),
+          mfCreateMediaType("mfplat.dll", "MFCreateMediaType") {
+        if (isValid()) {
+            // Detect if this platform supports the VideoProcessorMFT, used by
+            // MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING.
+            ComPtr<IUnknown> obj;
+            mSupportsVideoProcessor = SUCCEEDED(
+                    CoCreateInstance(CLSID_VideoProcessorMFT, nullptr,
+                                     CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&obj)));
+        }
+    }
+
+    bool isValid() {
+        return mfStartup.isValid() && mfShutdown.isValid() &&
+               mfCreateAttributes.isValid() && mfEnumDeviceSources.isValid() &&
+               mfCreateDeviceSource.isValid() &&
+               mfCreateSourceReaderFromMediaSource.isValid() &&
+               mfCreateMediaType.isValid();
+    }
+
+    bool supportsVideoProcessor() const { return mSupportsVideoProcessor; }
+
+    DelayLoad<decltype(MFStartup)> mfStartup;
+    DelayLoad<HRESULT()> mfShutdown;
+    DelayLoad<decltype(MFCreateAttributes)> mfCreateAttributes;
+    DelayLoad<decltype(MFEnumDeviceSources)> mfEnumDeviceSources;
+    DelayLoad<decltype(MFCreateDeviceSource)> mfCreateDeviceSource;
+    DelayLoad<decltype(MFCreateSourceReaderFromMediaSource)>
+            mfCreateSourceReaderFromMediaSource;
+    DelayLoad<decltype(MFCreateMediaType)> mfCreateMediaType;
+
+private:
+    bool mSupportsVideoProcessor = false;
+};
+
+static LazyInstance<MFApi> sMF = LAZY_INSTANCE_INIT;
+
+static std::vector<CameraFrameDim> getAllFrameDims() {
+    std::vector<CameraFrameDim> allDims(std::begin(kRequiredDimensions),
+                                        std::end(kRequiredDimensions));
+    for (const auto& dim : kExtraDimensions) {
+        allDims.push_back(dim);
+    }
+
+    return allDims;
+}
+
+/// Map a V4L2 pixel format to a MediaFoundation subtype.
+/// If a format is not supported, 0 is returned.
+static uint32_t subtypeToPixelFormat(REFGUID subtype) {
+    for (const auto& supportedFormat : kSupportedPixelFormats) {
+        if (supportedFormat.mfSubtype == subtype) {
+            return supportedFormat.v4l2Format;
+        }
+    }
+
+    return 0;
+}
+
+static HRESULT getMediaHandler(const ComPtr<IMFMediaSource>& source,
+                               ComPtr<IMFMediaTypeHandler>* outMediaHandler) {
+    ComPtr<IMFPresentationDescriptor> presentationDesc;
+    HRESULT hr = source->CreatePresentationDescriptor(&presentationDesc);
+
+    if (SUCCEEDED(hr)) {
+        BOOL selected;
+        ComPtr<IMFStreamDescriptor> streamDesc;
+        hr = presentationDesc->GetStreamDescriptorByIndex(0, &selected,
+                                                          &streamDesc);
+
+        if (SUCCEEDED(hr)) {
+            hr = streamDesc->GetMediaTypeHandler(
+                    outMediaHandler->ReleaseAndGetAddressOf());
+        }
+    }
+
+    return hr;
+}
+
+bool operator==(const CameraFrameDim& lhs, const CameraFrameDim& rhs) {
+    return lhs.height == rhs.height && lhs.width == rhs.width;
+}
+
+bool operator!=(const CameraFrameDim& lhs, const CameraFrameDim& rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator<(const CameraFrameDim& lhs, const CameraFrameDim& rhs) {
+    return lhs.height < rhs.height ||
+           (lhs.height == rhs.height && lhs.width < rhs.width);
+}
+
+bool operator<(REFGUID lhs, REFGUID rhs) {
+    return memcmp(&lhs, &rhs, sizeof(GUID)) < 0;
 }
 
 /*******************************************************************************
- *                     CameraDevice API implementation
+ *                     MediaFoundationCameraDevice routines
  ******************************************************************************/
 
-static CameraDevice*
-cmd_camera_device_open(const char* name, int inp_channel)
-{
-    WndCameraDevice* wcd;
+class MediaFoundationCameraDevice {
+    DISALLOW_COPY_AND_ASSIGN(MediaFoundationCameraDevice);
 
-    /* Allocate descriptor and initialize windows-specific fields. */
-    wcd = _camera_device_alloc();
-    if (wcd == NULL) {
-        E("%s: Unable to allocate WndCameraDevice instance", __FUNCTION__);
-        return NULL;
-    }
-    wcd->window_name = (name != NULL) ? ASTRDUP(name) :
-                                        ASTRDUP(_default_window_name);
-    if (wcd->window_name == NULL) {
-        E("%s: Unable to save window name", __FUNCTION__);
-        _camera_device_free(wcd);
-        return NULL;
-    }
-    wcd->input_channel = inp_channel;
+public:
+    MediaFoundationCameraDevice(const char* name, int inputChannel);
+    ~MediaFoundationCameraDevice();
 
-    /* Create capture window that is a child of HWND_MESSAGE window.
-     * We make it invisible, so it doesn't mess with the UI. Also
-     * note that we supply standard HWND_MESSAGE window handle as
-     * the parent window, since we don't want video capturing
-     * machinery to be dependent on the details of our UI. */
-    wcd->cap_window = capCreateCaptureWindow(wcd->window_name, WS_CHILD, 0, 0,
-                                             0, 0, HWND_MESSAGE, 1);
-    if (wcd->cap_window == NULL) {
-        E("%s: Unable to create video capturing window '%s': %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        _camera_device_free(wcd);
-        return NULL;
-    }
-    /* Save capture window descriptor as window's user data. */
-    capSetUserData(wcd->cap_window, wcd);
+    static int enumerateDevices(CameraInfo* cameraInfoList, int maxCount);
 
-    return &wcd->header;
+    CameraDevice* getCameraDevice() { return &mHeader; }
+
+    int startCapturing(uint32_t pixelFormat, int frameWidth, int frameHeight);
+    void stopCapturing();
+
+    int readFrame(ClientFrame* resultFrame,
+                  float rScale,
+                  float gScale,
+                  float bScale,
+                  float expComp);
+
+private:
+    HRESULT ConfigureMediaSource(const ComPtr<IMFMediaSource>& source);
+    HRESULT CreateSourceReader(const ComPtr<IMFMediaSource>& source);
+
+    struct WebcamInfo {
+        std::vector<CameraFrameDim> dims;
+        GUID subtype = {};
+    };
+
+    static WebcamInfo getWebcamInfo(const ComPtr<IMFMediaSource>& source);
+    static bool webcamSupportedWithoutConverters(const WebcamInfo& source);
+
+    // Common camera header.
+    CameraDevice mHeader;
+
+    // Device name, used to create the webcam media source.
+    std::string mDeviceName;
+
+    // Input channel, video driver index.  The default is 0.
+    int mInputChannel = 0;
+
+    // SourceReader used to read video samples.
+    ComPtr<IMFSourceReader> mSourceReader;
+
+    // Video subtype pixel format returned by the source reader.
+    GUID mSubtype = {};
+
+    // Framebuffer width and height.
+    int mFramebufferWidth = 0;
+    int mFramebufferHeight = 0;
+};
+
+MediaFoundationCameraDevice::MediaFoundationCameraDevice(const char* name,
+                                                         int inputChannel)
+    : mDeviceName(name), mInputChannel(inputChannel) {
+    mHeader.opaque = this;
 }
 
-static int
-cmd_camera_device_start_capturing(CameraDevice* cd,
-                              uint32_t pixel_format,
-                              int frame_width,
-                              int frame_height)
-{
-    WndCameraDevice* wcd;
-    HBITMAP bm_handle;
-    BITMAP  bitmap;
-    size_t format_info_size;
-    CAPTUREPARMS cap_param;
-
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-        return -1;
-    }
-    wcd = (WndCameraDevice*)cd->opaque;
-
-    /* wcd->dc is an indicator of capturing: !NULL - capturing, NULL - not */
-    if (wcd->dc != NULL) {
-        W("%s: Capturing is already on on device '%s'",
-          __FUNCTION__, wcd->window_name);
-        return 0;
-    }
-
-    /* Connect capture window to the video capture driver. */
-    if (!capDriverConnect(wcd->cap_window, wcd->input_channel)) {
-        return -1;
-    }
-
-    /* Get current frame information from the driver. */
-    format_info_size = capGetVideoFormatSize(wcd->cap_window);
-    if (format_info_size == 0) {
-        E("%s: Unable to get video format size: %d",
-          __FUNCTION__, GetLastError());
-        _camera_device_reset(wcd);
-        return -1;
-    }
-    wcd->frame_bitmap = (BITMAPINFO*)malloc(format_info_size);
-    if (wcd->frame_bitmap == NULL) {
-        E("%s: Unable to allocate frame bitmap info buffer", __FUNCTION__);
-        _camera_device_reset(wcd);
-        return -1;
-    }
-    if (!capGetVideoFormat(wcd->cap_window, wcd->frame_bitmap,
-                           format_info_size)) {
-        E("%s: Unable to obtain video format: %d", __FUNCTION__, GetLastError());
-        _camera_device_reset(wcd);
-        return -1;
-    }
-
-    /* Lets see if we need to set different frame dimensions */
-    if (wcd->frame_bitmap->bmiHeader.biWidth != frame_width ||
-            abs(wcd->frame_bitmap->bmiHeader.biHeight) != frame_height) {
-        /* Dimensions don't match. Set new frame info. */
-        wcd->frame_bitmap->bmiHeader.biWidth = frame_width;
-        wcd->frame_bitmap->bmiHeader.biHeight = frame_height;
-        /* We need to recalculate image size, since the capture window / driver
-         * will use image size provided by us. */
-        if (wcd->frame_bitmap->bmiHeader.biBitCount == 24) {
-            /* Special case that may require WORD boundary alignment. */
-            uint32_t bpl = (frame_width * 3 + 1) & ~1;
-            wcd->frame_bitmap->bmiHeader.biSizeImage = bpl * frame_height;
-        } else {
-            wcd->frame_bitmap->bmiHeader.biSizeImage =
-                (frame_width * frame_height * wcd->frame_bitmap->bmiHeader.biBitCount) / 8;
-        }
-        if (!capSetVideoFormat(wcd->cap_window, wcd->frame_bitmap,
-                               format_info_size)) {
-            E("%s: Unable to set video format: %d", __FUNCTION__, GetLastError());
-            _camera_device_reset(wcd);
-            return -1;
-        }
-    }
-
-    if (wcd->frame_bitmap->bmiHeader.biCompression > BI_PNG) {
-        D("%s: Video capturing driver has reported pixel format %.4s",
-          __FUNCTION__, (const char*)&wcd->frame_bitmap->bmiHeader.biCompression);
-    }
-
-    /* Most of the time frame bitmaps come in "bottom-up" form, where its origin
-     * is the lower-left corner. However, it could be in the normal "top-down"
-     * form with the origin in the upper-left corner. So, we must adjust the
-     * biHeight field, since the way "top-down" form is reported here is by
-     * setting biHeight to a negative value. */
-    if (wcd->frame_bitmap->bmiHeader.biHeight < 0) {
-        wcd->frame_bitmap->bmiHeader.biHeight =
-            -wcd->frame_bitmap->bmiHeader.biHeight;
-        wcd->is_top_down = 1;
-    } else {
-        wcd->is_top_down = 0;
-    }
-
-    /* Get DC for the capturing window that will be used when we deal with
-     * bitmaps obtained from the camera device during frame capturing. */
-    wcd->dc = GetDC(wcd->cap_window);
-    if (wcd->dc == NULL) {
-        E("%s: Unable to obtain DC for %s: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        _camera_device_reset(wcd);
-        return -1;
-    }
-
-    /* Setup some capture parameters. */
-    if (capCaptureGetSetup(wcd->cap_window, &cap_param, sizeof(cap_param))) {
-        /* Use separate thread to capture video stream. */
-        cap_param.fYield = TRUE;
-        /* Don't show any dialogs. */
-        cap_param.fMakeUserHitOKToCapture = FALSE;
-        capCaptureSetSetup(wcd->cap_window, &cap_param, sizeof(cap_param));
-    }
-
-    /*
-     * At this point we need to grab a frame to properly setup framebuffer, and
-     * calculate pixel format. The problem is that bitmap information obtained
-     * from the driver doesn't necessarily match the actual bitmap we're going to
-     * obtain via capGrabFrame / capEditCopy / GetClipboardData
-     */
-
-    /* Grab a frame, and post it to the clipboard. Not very effective, but this
-     * is how capXxx API is operating. */
-    if (!capGrabFrameNoStop(wcd->cap_window) ||
-        !capEditCopy(wcd->cap_window) ||
-        !OpenClipboard(wcd->cap_window)) {
-        E("%s: Device '%s' is unable to save frame to the clipboard: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        _camera_device_reset(wcd);
-        return -1;
-    }
-
-    /* Get bitmap handle saved into clipboard. Note that bitmap is still
-     * owned by the clipboard here! */
-    bm_handle = (HBITMAP)GetClipboardData(CF_BITMAP);
-    if (bm_handle == NULL) {
-        E("%s: Device '%s' is unable to obtain frame from the clipboard: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        CloseClipboard();
-        _camera_device_reset(wcd);
-        return -1;
-    }
-
-    /* Get bitmap object that is initialized with the actual bitmap info. */
-    if (!GetObject(bm_handle, sizeof(BITMAP), &bitmap)) {
-        E("%s: Device '%s' is unable to obtain frame's bitmap: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        EmptyClipboard();
-        CloseClipboard();
-        _camera_device_reset(wcd);
-        return -1;
-    }
-
-    /* Now that we have all we need in 'bitmap' */
-    EmptyClipboard();
-    CloseClipboard();
-
-    /* Make sure that dimensions match. Othewise - fail. */
-    if (wcd->frame_bitmap->bmiHeader.biWidth != bitmap.bmWidth ||
-        wcd->frame_bitmap->bmiHeader.biHeight != bitmap.bmHeight ) {
-        E("%s: Requested dimensions %dx%d do not match the actual %dx%d",
-          __FUNCTION__, frame_width, frame_height,
-          wcd->frame_bitmap->bmiHeader.biWidth,
-          wcd->frame_bitmap->bmiHeader.biHeight);
-        _camera_device_reset(wcd);
-        return -1;
-    }
-
-    /* Create bitmap info that will be used with GetDIBits. */
-    wcd->gdi_bitmap = (BITMAPINFO*)malloc(wcd->frame_bitmap->bmiHeader.biSize);
-    if (wcd->gdi_bitmap == NULL) {
-        E("%s: Unable to allocate gdi bitmap info", __FUNCTION__);
-        _camera_device_reset(wcd);
-        return -1;
-    }
-    memcpy(wcd->gdi_bitmap, wcd->frame_bitmap,
-           wcd->frame_bitmap->bmiHeader.biSize);
-    wcd->gdi_bitmap->bmiHeader.biCompression = BI_RGB;
-    wcd->gdi_bitmap->bmiHeader.biBitCount = bitmap.bmBitsPixel;
-    wcd->gdi_bitmap->bmiHeader.biSizeImage = bitmap.bmWidthBytes * bitmap.bmWidth;
-    /* Adjust GDI's bitmap biHeight for proper frame direction ("top-down", or
-     * "bottom-up") We do this trick in order to simplify pixel format conversion
-     * routines, where we always assume "top-down" frames. The trick he is to
-     * have negative biHeight in 'gdi_bitmap' if driver provides "bottom-up"
-     * frames, and positive biHeight in 'gdi_bitmap' if driver provides "top-down"
-     * frames. This way GetGDIBits will always return "top-down" frames. */
-    if (wcd->is_top_down) {
-        wcd->gdi_bitmap->bmiHeader.biHeight =
-            wcd->frame_bitmap->bmiHeader.biHeight;
-    } else {
-        wcd->gdi_bitmap->bmiHeader.biHeight =
-            -wcd->frame_bitmap->bmiHeader.biHeight;
-    }
-
-    /* Allocate framebuffer. */
-    wcd->framebuffer = (uint8_t*)malloc(wcd->gdi_bitmap->bmiHeader.biSizeImage);
-    if (wcd->framebuffer == NULL) {
-        E("%s: Unable to allocate %d bytes for framebuffer",
-          __FUNCTION__, wcd->gdi_bitmap->bmiHeader.biSizeImage);
-        _camera_device_reset(wcd);
-        return -1;
-    }
-
-    /* Lets see what pixel format we will use. */
-    if (wcd->gdi_bitmap->bmiHeader.biBitCount == 16) {
-        wcd->pixel_format = V4L2_PIX_FMT_RGB565;
-    } else if (wcd->gdi_bitmap->bmiHeader.biBitCount == 24) {
-        wcd->pixel_format = V4L2_PIX_FMT_BGR24;
-    } else if (wcd->gdi_bitmap->bmiHeader.biBitCount == 32) {
-        wcd->pixel_format = V4L2_PIX_FMT_BGR32;
-    } else {
-        E("%s: Unsupported number of bits per pixel %d",
-          __FUNCTION__, wcd->gdi_bitmap->bmiHeader.biBitCount);
-        _camera_device_reset(wcd);
-        return -1;
-    }
-
-    D("%s: Capturing device '%s': %d bits per pixel in %.4s [%dx%d] frame",
-      __FUNCTION__, wcd->window_name, wcd->gdi_bitmap->bmiHeader.biBitCount,
-      (const char*)&wcd->pixel_format, wcd->frame_bitmap->bmiHeader.biWidth,
-      wcd->frame_bitmap->bmiHeader.biHeight);
-
-    /* Try to setup capture frame callback. */
-    wcd->use_clipboard = 1;
-    if (capSetCallbackOnFrame(wcd->cap_window, _on_captured_frame)) {
-        /* Callback is set. Don't use clipboard when capturing frames. */
-        wcd->use_clipboard = 0;
-    }
-
-    return 0;
+MediaFoundationCameraDevice::~MediaFoundationCameraDevice() {
+    stopCapturing();
 }
 
-static int
-cmd_camera_device_stop_capturing(CameraDevice* cd)
-{
-    WndCameraDevice* wcd;
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-        return -1;
-    }
-    wcd = (WndCameraDevice*)cd->opaque;
+MediaFoundationCameraDevice::WebcamInfo
+MediaFoundationCameraDevice::getWebcamInfo(
+        const ComPtr<IMFMediaSource>& source) {
+    ComPtr<IMFMediaTypeHandler> mediaHandler;
+    HRESULT hr = getMediaHandler(source, &mediaHandler);
 
-    /* Disable frame callback. */
-    capSetCallbackOnFrame(wcd->cap_window, NULL);
-
-    /* wcd->dc is the indicator of capture. */
-    if (wcd->dc == NULL) {
-        W("%s: Device '%s' is not capturing video",
-          __FUNCTION__, wcd->window_name);
-        return 0;
-    }
-    ReleaseDC(wcd->cap_window, wcd->dc);
-    wcd->dc = NULL;
-
-    /* Reset the device in preparation for the next capture. */
-    _camera_device_reset(wcd);
-
-    return 0;
-}
-
-/* Capture frame using frame callback.
- * Parameters and return value for this routine matches _camera_device_read_frame
- */
-static int _camera_device_read_frame_callback(WndCameraDevice* wcd,
-                                              ClientFrame* result_frame,
-                                              float r_scale,
-                                              float g_scale,
-                                              float b_scale,
-                                              float exp_comp) {
-    /* Grab the frame. Note that this call will cause frame callback to be
-     * invoked before capGrabFrameNoStop returns. */
-    if (!capGrabFrameNoStop(wcd->cap_window) || wcd->last_frame == NULL) {
-        E("%s: Device '%s' is unable to grab a frame: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        return -1;
+    DWORD mediaTypeCount;
+    if (SUCCEEDED(hr)) {
+        hr = mediaHandler->GetMediaTypeCount(&mediaTypeCount);
     }
 
-    /* Convert framebuffer. */
-    return convert_frame(wcd->last_frame, wcd->pixel_format,
-                         wcd->frame_bitmap->bmiHeader.biSizeImage,
-                         wcd->frame_bitmap->bmiHeader.biWidth,
-                         wcd->frame_bitmap->bmiHeader.biHeight, result_frame,
-                         r_scale, g_scale, b_scale, exp_comp);
-}
+    std::vector<CameraFrameDim> allDims = getAllFrameDims();
+    std::map<CameraFrameDim, std::set<GUID>> supportedDimsAndFormats;
+    if (SUCCEEDED(hr)) {
+        for (DWORD i = 0; i < mediaTypeCount; ++i) {
+            ComPtr<IMFMediaType> type;
+            hr = mediaHandler->GetMediaTypeByIndex(i, &type);
 
-/* Capture frame using clipboard.
- * Parameters and return value for this routine matches _camera_device_read_frame
- */
-static int _camera_device_read_frame_clipboard(WndCameraDevice* wcd,
-                                               ClientFrame* result_frame,
-                                               float r_scale,
-                                               float g_scale,
-                                               float b_scale,
-                                               float exp_comp) {
-    HBITMAP bm_handle;
-
-    /* Grab a frame, and post it to the clipboard. Not very effective, but this
-     * is how capXxx API is operating. */
-    if (!capGrabFrameNoStop(wcd->cap_window) ||
-        !capEditCopy(wcd->cap_window) ||
-        !OpenClipboard(wcd->cap_window)) {
-        E("%s: Device '%s' is unable to save frame to the clipboard: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        return -1;
-    }
-
-    /* Get bitmap handle saved into clipboard. Note that bitmap is still
-     * owned by the clipboard here! */
-    bm_handle = (HBITMAP)GetClipboardData(CF_BITMAP);
-    if (bm_handle == NULL) {
-        E("%s: Device '%s' is unable to obtain frame from the clipboard: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        EmptyClipboard();
-        CloseClipboard();
-        return -1;
-    }
-
-    /* Get bitmap buffer. */
-    if (wcd->gdi_bitmap->bmiHeader.biHeight > 0) {
-        wcd->gdi_bitmap->bmiHeader.biHeight = -wcd->gdi_bitmap->bmiHeader.biHeight;
-    }
-
-    if (!GetDIBits(wcd->dc, bm_handle, 0, wcd->frame_bitmap->bmiHeader.biHeight,
-                   wcd->framebuffer, wcd->gdi_bitmap, DIB_RGB_COLORS)) {
-        E("%s: Device '%s' is unable to transfer frame to the framebuffer: %d",
-          __FUNCTION__, wcd->window_name, GetLastError());
-        EmptyClipboard();
-        CloseClipboard();
-        return -1;
-    }
-
-    if (wcd->gdi_bitmap->bmiHeader.biHeight < 0) {
-        wcd->gdi_bitmap->bmiHeader.biHeight = -wcd->gdi_bitmap->bmiHeader.biHeight;
-    }
-
-    EmptyClipboard();
-    CloseClipboard();
-
-    /* Convert framebuffer. */
-    return convert_frame(wcd->framebuffer, wcd->pixel_format,
-                         wcd->gdi_bitmap->bmiHeader.biSizeImage,
-                         wcd->frame_bitmap->bmiHeader.biWidth,
-                         wcd->frame_bitmap->bmiHeader.biHeight, result_frame,
-                         r_scale, g_scale, b_scale, exp_comp);
-}
-
-static int cmd_camera_device_read_frame(CameraDevice* cd,
-                                        ClientFrame* result_frame,
-                                        float r_scale,
-                                        float g_scale,
-                                        float b_scale,
-                                        float exp_comp) {
-    WndCameraDevice* wcd;
-
-    /* Sanity checks. */
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-        return -1;
-    }
-    wcd = (WndCameraDevice*)cd->opaque;
-    if (wcd->dc == NULL) {
-        W("%s: Device '%s' is not captuing video",
-          __FUNCTION__, wcd->window_name);
-        return -1;
-    }
-
-    /* Dispatch the call to an appropriate routine: grabbing a frame using
-     * clipboard, or using a frame callback. */
-    return wcd->use_clipboard
-                   ? _camera_device_read_frame_clipboard(wcd, result_frame,
-                                                         r_scale, g_scale,
-                                                         b_scale, exp_comp)
-                   : _camera_device_read_frame_callback(wcd, result_frame,
-                                                        r_scale, g_scale,
-                                                        b_scale, exp_comp);
-}
-
-static void
-cmd_camera_device_close(CameraDevice* cd)
-{
-    /* Sanity checks. */
-    if (cd == NULL || cd->opaque == NULL) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
-    } else {
-        WndCameraDevice* wcd = (WndCameraDevice*)cd->opaque;
-        _camera_device_free(wcd);
-    }
-}
-
-static int cmd_camera_enumerate_devices(CameraInfo* cis, int max) {
-    /* Array containing emulated webcam frame dimensions.
-    * capXxx API provides device independent frame dimensions, by scaling frames
-    * received from the device to whatever dimensions were requested by the
-    * user.
-    * So, we can just use a small set of frame dimensions to emulate.
-    */
-    static const CameraFrameDim _emulate_dims[] = {
-            /* Emulates 640x480 frame. */
-            {640, 480},
-            /* Emulates 352x288 frame (required by camera framework). */
-            {352, 288},
-            /* Emulates 320x240 frame (required by camera framework). */
-            {320, 240},
-            /* Emulates 176x144 frame (required by camera framework). */
-            {176, 144},
-            /* Emulates 1280x720 frame (required by camera framework). */
-            {1280, 720},};
-    int inp_channel, found = 0;
-
-    for (inp_channel = 0; inp_channel < 10 && found < max; inp_channel++) {
-        char name[256];
-        CameraDevice* cd;
-
-        snprintf(name, sizeof(name), "%s%d", _default_window_name, found);
-        cd = cmd_camera_device_open(name, inp_channel);
-        if (cd != NULL) {
-            WndCameraDevice* wcd = (WndCameraDevice*)cd->opaque;
-
-            /* Unfortunately, on Windows we have to start capturing in order to get the
-             * actual frame properties. */
-            if (!cmd_camera_device_start_capturing(cd, V4L2_PIX_FMT_RGB32, 640, 480)) {
-                cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
-                if (cis[found].frame_sizes != NULL) {
-                    char disp_name[24];
-                    snprintf(disp_name, sizeof(disp_name), "webcam%d", found);
-                    cis[found].display_name = ASTRDUP(disp_name);
-                    cis[found].device_name = ASTRDUP(name);
-                    cis[found].direction = ASTRDUP("front");
-                    cis[found].inp_channel = inp_channel;
-                    cis[found].frame_sizes_num = sizeof(_emulate_dims) / sizeof(*_emulate_dims);
-                    memcpy(cis[found].frame_sizes, _emulate_dims, sizeof(_emulate_dims));
-                    cis[found].pixel_format = wcd->pixel_format;
-                    cis[found].in_use = 0;
-                    found++;
-                } else {
-                    E("%s: Unable to allocate dimensions", __FUNCTION__);
+            if (SUCCEEDED(hr)) {
+                GUID major = {};
+                GUID subtype = {};
+                UINT32 width = 0;
+                UINT32 height = 0;
+                if (FAILED(type->GetGUID(MF_MT_MAJOR_TYPE, &major)) ||
+                    FAILED(type->GetGUID(MF_MT_SUBTYPE, &subtype)) ||
+                    FAILED(MFGetAttributeSize(type.Get(), MF_MT_FRAME_SIZE,
+                                              &width, &height))) {
+                    continue;
                 }
-                cmd_camera_device_stop_capturing(cd);
-            } else {
-                /* No more cameras. */
-                cmd_camera_device_close(cd);
-                break;
+
+                const CameraFrameDim dim = {static_cast<int>(width),
+                                            static_cast<int>(height)};
+                if (major == MFMediaType_Video && subtype != kGuidNull &&
+                    std::find(allDims.begin(), allDims.end(), dim) !=
+                            allDims.end()) {
+                    supportedDimsAndFormats[dim].insert(subtype);
+                }
             }
-            cmd_camera_device_close(cd);
-        } else {
-            /* No more cameras. */
+        }
+    }
+
+    // Aggregate the webcam info, producing a sorted list of dims and preferred
+    // pixel format.
+    WebcamInfo info;
+    std::set<GUID> subtypes;
+    for (const auto& item : kSupportedPixelFormats) {
+        subtypes.insert(item.mfSubtype);
+    }
+
+    for (const auto& dim : allDims) {
+        auto item = supportedDimsAndFormats.find(dim);
+        if (item == supportedDimsAndFormats.end()) {
+            continue;
+        }
+
+        info.dims.push_back(item->first);
+
+        std::set<GUID> intersection;
+        std::set_intersection(
+                subtypes.begin(), subtypes.end(), item->second.begin(),
+                item->second.end(),
+                std::inserter(intersection, intersection.begin()));
+        subtypes = intersection;
+    }
+
+    // Find the first supported subtype pixel format that matches all cameras.
+    for (const auto& item : kSupportedPixelFormats) {
+        if (subtypes.count(item.mfSubtype)) {
+            info.subtype = item.mfSubtype;
             break;
         }
     }
 
+    return info;
+}
+
+bool MediaFoundationCameraDevice::webcamSupportedWithoutConverters(
+        const WebcamInfo& info) {
+    if (info.subtype == kGuidNull) {
+        return false;
+    }
+
+    auto it = info.dims.begin();
+    for (auto& dim : kRequiredDimensions) {
+        // All required dims should appear in the dims list, in order, before
+        // any other dims.
+        if (it == info.dims.end() || *it != dim) {
+            return false;
+        }
+
+        ++it;
+    }
+
+    return true;
+}
+
+int MediaFoundationCameraDevice::enumerateDevices(CameraInfo* cameraInfoList,
+                                                  int maxCount) {
+    if (!sMF->isValid()) {
+        W("%s: Media Foundation could not be loaded, no cameras available.",
+          __FUNCTION__);
+        return -1;
+    }
+
+    ComPtr<IMFAttributes> attributes;
+    HRESULT hr = sMF->mfCreateAttributes(&attributes, 1);
+    if (FAILED(hr)) {
+        E("%s: Failed to create attributes, hr = 0x%08X", __FUNCTION__, hr);
+        return -1;
+    }
+
+    // Get webcam media sources.
+    hr = attributes->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    if (FAILED(hr)) {
+        E("%s: Failed setting attributes, hr = 0x%08X", __FUNCTION__, hr);
+        return -1;
+    }
+
+    // Array of devices, each must be released and pointer should be freed with
+    // CoTaskMemFree.
+    IMFActivate** devices = nullptr;
+    UINT32 deviceCount = 0;
+    hr = sMF->mfEnumDeviceSources(attributes.Get(), &devices, &deviceCount);
+    if (FAILED(hr)) {
+        E("%s: MFEnumDeviceSources, hr = 0x%08X", __FUNCTION__, hr);
+        return -1;
+    }
+
+    int found = 0;
+    for (DWORD i = 0; i < deviceCount && found < maxCount; ++i) {
+        // Attaching to ComPtr to take ownership and ensure that the reference
+        // is released when it goes out of scope.
+        ComPtr<IMFActivate> device;
+        device.Attach(devices[i]);
+
+        Win32UnicodeString deviceName;
+        {
+            WCHAR* symbolicLink = nullptr;
+            UINT32 symbolicLinkLength = 0;
+            hr = devices[i]->GetAllocatedString(
+                    MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                    &symbolicLink, &symbolicLinkLength);
+
+            if (SUCCEEDED(hr)) {
+                deviceName = Win32UnicodeString(symbolicLink);
+                CoTaskMemFree(symbolicLink);
+            }
+        }
+
+        WebcamInfo webcamInfo;
+        if (SUCCEEDED(hr)) {
+            ComPtr<IMFMediaSource> source;
+            hr = device->ActivateObject(IID_PPV_ARGS(&source));
+            if (SUCCEEDED(hr)) {
+                webcamInfo = getWebcamInfo(source);
+                hr = device->ShutdownObject();
+            }
+
+            if (FAILED(hr)) {
+                E("%s: Failed to get webcam info for device '%s', hr = 0x%08X",
+                  __FUNCTION__, deviceName.toString().c_str(), hr);
+                continue;
+            }
+
+            if (sMF->supportsVideoProcessor()) {
+                webcamInfo.dims = getAllFrameDims();
+
+                if (webcamInfo.subtype == kGuidNull) {
+                    // Fall back to RGB32 which can be automatically converted.
+                    webcamInfo.subtype = MFVideoFormat_RGB32;
+                }
+            } else if (!webcamSupportedWithoutConverters(webcamInfo)) {
+                W("%s: Webcam device '%s' does not support required "
+                  "dimensions.",
+                  __FUNCTION__, deviceName.toString().c_str());
+                // Skip to next camera.
+                continue;
+            }
+        }
+
+        if (SUCCEEDED(hr)) {
+            CameraInfo& info = cameraInfoList[found];
+
+            info.frame_sizes = reinterpret_cast<CameraFrameDim*>(
+                    malloc(webcamInfo.dims.size() * sizeof(CameraFrameDim)));
+            if (!info.frame_sizes) {
+                E("%s: Unable to allocate dimensions", __FUNCTION__);
+                break;
+            }
+
+            char displayName[24];
+            snprintf(displayName, sizeof(displayName), "webcam%d", found);
+            info.display_name = ASTRDUP(displayName);
+            info.device_name = ASTRDUP(deviceName.toString().c_str());
+            info.direction = ASTRDUP("front");
+            info.inp_channel = 0;
+            info.frame_sizes_num = static_cast<int>(webcamInfo.dims.size());
+            for (size_t j = 0; j < webcamInfo.dims.size(); ++j) {
+                info.frame_sizes[j] = webcamInfo.dims[j];
+            }
+            info.pixel_format = subtypeToPixelFormat(webcamInfo.subtype);
+            info.in_use = 0;
+
+            ++found;
+        }
+    }
+
+    // Free devices list array, freeing a null pointer is a no-op.
+    CoTaskMemFree(devices);
+
     return found;
 }
 
-// Camera thread state
+int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
+                                                int frameWidth,
+                                                int frameHeight) {
+    D("%s: Start capturing at %d x %d", __FUNCTION__, frameWidth, frameHeight);
 
-typedef enum {
-  CAMERA_CMD_NOP,
-  CAMERA_CMD_OPEN,
-  CAMERA_CMD_START_CAPTURING,
-  CAMERA_CMD_STOP_CAPTURING,
-  CAMERA_CMD_READ_FRAME,
-  CAMERA_CMD_CLOSE,
-  CAMERA_CMD_ENUMERATE_DEVICES
-} camera_cmd_t;
+    ComPtr<IMFAttributes> attributes;
+    HRESULT hr = sMF->mfCreateAttributes(&attributes, 2);
+    if (FAILED(hr)) {
+        E("%s: Failed to create attributes, hr = 0x%08X", __FUNCTION__, hr);
+        return -1;
+    }
 
-// Structure used to model a command sent from the main thread to
-// the camera thread. The process() method handles the command and
-// returns a result as an intptr_t, since the result of CAMERA_CMD_OPEN
-// is a pointer to a CameraDevice* instance.
-struct CameraCommand {
-    camera_cmd_t cmd;
-    union {
-        // CAMERA_CMD_OPEN
-        // NOTE: The result is a CameraDevice* cast as an intptr_t
-        struct {
-            const char* name;
-            int channel;
-        } open;
+    // Specify that we want to create a webcam with a specific id.
+    hr = attributes->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    if (FAILED(hr)) {
+        E("%s: Failed setting attributes, hr = 0x%08X", __FUNCTION__, hr);
+        return -1;
+    }
 
-        // CAMERA_CMD_START_CAPTURING
-        struct {
-            CameraDevice* device;
-            uint32_t pixel_format;
-            int frame_width;
-            int frame_height;
-        } start;
+    hr = attributes->SetString(
+            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+            Win32UnicodeString(mDeviceName).data());
+    if (FAILED(hr)) {
+        E("%s: Failed setting attributes, hr = 0x%08X", __FUNCTION__, hr);
+        return -1;
+    }
 
-        // CAMERA_CMD_STOP_CAPTURING
-        struct {
-            CameraDevice* device;
-        } stop;
+    ComPtr<IMFMediaSource> source;
+    hr = sMF->mfCreateDeviceSource(attributes.Get(), &source);
+    if (FAILED(hr)) {
+        E("%s: Webcam source creation failed, hr = 0x%08X", __FUNCTION__, hr);
+        return -1;
+    }
 
-        // CAMERA_CMD_READ_FRAME
-        struct {
-            CameraDevice* device;
-            ClientFrame* result_frame;
-            float r_scale;
-            float g_scale;
-            float b_scale;
-            float exp_comp;
-        } read_frame;
+    WebcamInfo info = getWebcamInfo(source);
+    if (sMF->supportsVideoProcessor()) {
+        // If the video processor is supported, allow all resolutions.
+        info.dims = getAllFrameDims();
+    }
 
-        // CAMERA_CMD_CLOSE
-        struct {
-            CameraDevice* device;
-        } close;
-
-        // CAMERA_CMD_ENUMERATE_DEVICES
-        struct {
-            CameraInfo* info;
-            int max;
-        } enumerate;
-    };
-
-    // Process a command (i.e. execute it). Must be called in the camera
-    // thread context.
-    intptr_t process() const {
-        const CameraCommand& cmd = *this;
-        intptr_t result = 0;
-
-        // Execute the command
-        switch (cmd.cmd) {
-            case CAMERA_CMD_NOP:
-                break;
-
-            case CAMERA_CMD_OPEN:
-                result = reinterpret_cast<intptr_t>(cmd_camera_device_open(
-                        cmd.open.name, cmd.open.channel));
-                break;
-
-            case CAMERA_CMD_START_CAPTURING:
-                result = cmd_camera_device_start_capturing(
-                        cmd.start.device, cmd.start.pixel_format,
-                        cmd.start.frame_width, cmd.start.frame_height);
-                break;
-
-            case CAMERA_CMD_STOP_CAPTURING:
-                result = cmd_camera_device_stop_capturing(cmd.stop.device);
-                break;
-
-            case CAMERA_CMD_READ_FRAME:
-                result = cmd_camera_device_read_frame(
-                        cmd.read_frame.device, cmd.read_frame.result_frame,
-                        cmd.read_frame.r_scale, cmd.read_frame.g_scale,
-                        cmd.read_frame.b_scale, cmd.read_frame.exp_comp);
-                break;
-
-            case CAMERA_CMD_CLOSE:
-                cmd_camera_device_close(cmd.close.device);
-                break;
-
-            case CAMERA_CMD_ENUMERATE_DEVICES:
-                result = cmd_camera_enumerate_devices(cmd.enumerate.info,
-                                                      cmd.enumerate.max);
-                break;
+    bool foundDim = false;
+    for (const auto& dim : info.dims) {
+        if (dim.width == frameWidth && dim.height == frameHeight) {
+            foundDim = true;
+            break;
         }
-        return result;
-    }
-};
-
-// The camera thead instance.
-class CameraThread : public android::base::Thread {
-public:
-    // Constructor, called from the main thread.
-    CameraThread() : mInput(), mOutput() {
-        this->start();
     }
 
-    // Main thread function, runs in the camera thread context.
-    virtual intptr_t main() override {
-        bool running = true;
-        while (running) {
-            CameraCommand cmd = {};
-            mInput.receive(&cmd);
-            intptr_t result = cmd.process();
-            mOutput.send(result);
-
-            // TODO: Stop the thread at some point?
-        }
-        return 0;
+    if (!foundDim) {
+        E("%s: Unsupported resolution %dx%d", __FUNCTION__, frameWidth,
+          frameHeight);
+        return -1;
     }
 
-    // Call from the main thread to send a command and wait for its result.
-    intptr_t sendCommandAndGetResult(const CameraCommand& cmd) {
-        mInput.send(cmd);
-        intptr_t result = 0;
-        mOutput.receive(&result);
-        return result;
+    mFramebufferWidth = frameWidth;
+    mFramebufferHeight = frameHeight;
+    mSubtype = info.subtype;
+
+    hr = ConfigureMediaSource(source);
+    if (FAILED(hr)) {
+        E("%s: Configure webcam source failed, hr = 0x%08X", __FUNCTION__, hr);
+        stopCapturing();
+        return -1;
     }
 
-private:
-    // message channel used to send commands from the main thread
-    // to the camera thread.
-    android::base::MessageChannel<CameraCommand, 4U> mInput;
+    hr = CreateSourceReader(source);
+    if (FAILED(hr)) {
+        E("%s: Configure source reader failed, hr = 0x%08X", __FUNCTION__, hr);
 
-    // message channel used to send results from the camera
-    // thread to the main one.
-    android::base::MessageChannel<intptr_t, 4U> mOutput;
-};
+        // Normally the SourceReader automatically calls Shutdown on the source,
+        // but since that failed we should do it manually.
+        (void)source->Shutdown();
+        stopCapturing();
+        return -1;
+    }
 
-static android::base::LazyInstance<CameraThread> sCameraThread =
-        LAZY_INSTANCE_INIT;
+    // Try to read a sample and see if the stream worked, so that failures will
+    // originate here instead of in readFrame().
+    ComPtr<IMFSample> sample;
+    DWORD streamFlags = 0;
+    hr = mSourceReader->ReadSample((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                   0, nullptr, &streamFlags, nullptr, &sample);
+    if (FAILED(hr) || streamFlags & (MF_SOURCE_READERF_ERROR |
+                                     MF_SOURCE_READERF_ENDOFSTREAM)) {
+        E("%s: ReadSample failed, hr = 0x%08X, streamFlags = %d", __FUNCTION__,
+          hr, streamFlags);
+        stopCapturing();
+        return -1;
+    }
 
-extern "C" int windows_camera_thread_init() {
-    // Force thread creation and start.
-    (void)sCameraThread.ptr();
     return 0;
+}
+
+void MediaFoundationCameraDevice::stopCapturing() {
+    mSourceReader.Reset();
+    mFramebufferWidth = 0;
+    mFramebufferHeight = 0;
+    mSubtype = {};
+}
+
+int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
+                                           float rScale,
+                                           float gScale,
+                                           float bScale,
+                                           float expComp) {
+    if (!mSourceReader) {
+        E("%s: No webcam source reader, read frame failed.", __FUNCTION__);
+        return -1;
+    }
+
+    ComPtr<IMFSample> sample;
+    DWORD streamFlags = 0;
+    HRESULT hr = mSourceReader->ReadSample(
+            (DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr,
+            &streamFlags, nullptr, &sample);
+    if (FAILED(hr) || streamFlags & (MF_SOURCE_READERF_ERROR |
+                                     MF_SOURCE_READERF_ENDOFSTREAM)) {
+        E("%s: ReadSample failed, hr = 0x%08X, streamFlags = %d", __FUNCTION__,
+          hr, streamFlags);
+        stopCapturing();
+        return -1;
+    }
+
+    if (streamFlags & MF_SOURCE_READERF_STREAMTICK) {
+        // Gap in the stream, retry.
+        return 1;
+    }
+
+    ComPtr<IMFMediaBuffer> buffer;
+    hr = sample->ConvertToContiguousBuffer(&buffer);
+    if (FAILED(hr)) {
+        E("%s: ConvertToContiguousBuffer failed, hr = 0x%08X", __FUNCTION__,
+          hr);
+        stopCapturing();
+        return -1;
+    }
+
+    BYTE* data = nullptr;
+    DWORD maxLength = 0;
+    DWORD currentLength = 0;
+    hr = buffer->Lock(&data, &maxLength, &currentLength);
+    if (FAILED(hr)) {
+        E("%s: Locking the webcam buffer failed, hr = 0x%08X", __FUNCTION__,
+          hr);
+        stopCapturing();
+        return -1;
+    }
+
+    // Convert frame to the receiving buffers.
+    const int result =
+            convert_frame(data, subtypeToPixelFormat(mSubtype), currentLength,
+                          mFramebufferWidth, mFramebufferHeight, resultFrame,
+                          rScale, gScale, bScale, expComp);
+    (void)buffer->Unlock();
+
+    return result;
+}
+
+HRESULT MediaFoundationCameraDevice::ConfigureMediaSource(
+        const ComPtr<IMFMediaSource>& source) {
+    ComPtr<IMFMediaTypeHandler> mediaHandler;
+    HRESULT hr = getMediaHandler(source, &mediaHandler);
+
+    DWORD mediaTypeCount;
+    if (SUCCEEDED(hr)) {
+        hr = mediaHandler->GetMediaTypeCount(&mediaTypeCount);
+    }
+
+    ComPtr<IMFMediaType> bestMediaType;
+    UINT32 bestScore = 0;
+    if (SUCCEEDED(hr)) {
+        for (DWORD i = 0; i < mediaTypeCount; ++i) {
+            ComPtr<IMFMediaType> type;
+            hr = mediaHandler->GetMediaTypeByIndex(i, &type);
+
+            if (SUCCEEDED(hr)) {
+                GUID major = {};
+                GUID subtype = {};
+                UINT32 width = 0;
+                UINT32 height = 0;
+                UINT32 frameRateNum = 0;
+                UINT32 frameRateDenom = 0;
+                if (FAILED(type->GetGUID(MF_MT_MAJOR_TYPE, &major)) ||
+                    FAILED(type->GetGUID(MF_MT_SUBTYPE, &subtype)) ||
+                    FAILED(MFGetAttributeSize(type.Get(), MF_MT_FRAME_SIZE,
+                                              &width, &height)) ||
+                    FAILED(MFGetAttributeRatio(type.Get(), MF_MT_FRAME_RATE,
+                                               &frameRateNum,
+                                               &frameRateDenom))) {
+                    continue;
+                }
+
+                if (major != MFMediaType_Video) {
+                    continue;
+                }
+
+                const float frameRate =
+                        static_cast<float>(frameRateNum) / frameRateDenom;
+
+                // If the host supports video processor, we can choose the
+                // closest resolution and a non-matching pixel format.
+                UINT32 score = 0;
+                if (sMF->supportsVideoProcessor()) {
+                    // Prefer matching resolution, then by matching aspect
+                    // ratio.  Don't check for the subtype, it can be converted
+                    // by the VideoProcessor.
+                    if (width == static_cast<UINT32>(mFramebufferWidth) &&
+                        height == static_cast<UINT32>(mFramebufferHeight)) {
+                        score += 1000;
+                    } else if (width * mFramebufferHeight ==
+                               height * mFramebufferWidth) {
+                        // Matching aspect ratio, but prefer larger sizes.
+                        if (width > static_cast<UINT32>(mFramebufferWidth)) {
+                            score += 250;
+                        } else {
+                            score += static_cast<UINT32>(250.0f * width /
+                                                         mFramebufferWidth);
+                        }
+                    }
+                } else {
+                    // If the video processor isn't supported, require the exact
+                    // resolution and pixel format requested.
+                    if (width != static_cast<UINT32>(mFramebufferWidth) ||
+                        height != static_cast<UINT32>(mFramebufferHeight) ||
+                        subtype != mSubtype) {
+                        continue;
+                    }
+                }
+
+                // Prefer 30 FPS, but accept the greatest one.
+                if (frameRate > 60.0f) {
+                    // Ignore high frame rates, we only need 30 FPS.
+                } else if (frameRate > 29.0f && frameRate < 31.0f) {
+                    score += 100;
+                } else {
+                    // Prefer higher frame rates, but prefer 30 FPS more.
+                    score += static_cast<UINT32>(frameRate);
+                }
+
+                if (score > bestScore) {
+                    // Prefer the first media type in the list with a given
+                    // score.
+                    bestMediaType = type;
+                    bestScore = score;
+                }
+            }
+        }
+    }
+
+    if (SUCCEEDED(hr) && bestMediaType) {
+        // Trace the selected type. Ignore errors and use default values since
+        // this is debug-only code.
+        GUID subtype = {};
+        UINT32 width = 0;
+        UINT32 height = 0;
+        UINT32 frameRateNum = 0;
+        UINT32 frameRateDenom = 0;
+        (void)bestMediaType->GetGUID(MF_MT_SUBTYPE, &subtype);
+        (void)MFGetAttributeSize(bestMediaType.Get(), MF_MT_FRAME_SIZE, &width,
+                                 &height);
+        (void)MFGetAttributeRatio(bestMediaType.Get(), MF_MT_FRAME_RATE,
+                                  &frameRateNum, &frameRateDenom);
+        // Note that the subtype may not have a mapping in the camera format
+        // mapping list, so subtypeToPixelFormat cannot be used here. In this
+        // situation, the SourceReader's advanced video processing will convert
+        // to a supported format.
+        D("%s: SetCurrentMediaType to subtype "
+          "{%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%"
+          "02hhX}, size %dx%d, frame rate %d/%d "
+          "(~%f fps)",
+          __FUNCTION__, subtype.Data1, subtype.Data2, subtype.Data3,
+          subtype.Data4[0], subtype.Data4[1], subtype.Data4[2],
+          subtype.Data4[3], subtype.Data4[4], subtype.Data4[5],
+          subtype.Data4[6], subtype.Data4[7], width, height, frameRateNum,
+          frameRateDenom, static_cast<float>(frameRateNum) / frameRateDenom);
+
+        hr = mediaHandler->SetCurrentMediaType(bestMediaType.Get());
+    }
+
+    return hr;
+}
+
+HRESULT MediaFoundationCameraDevice::CreateSourceReader(
+        const ComPtr<IMFMediaSource>& source) {
+    ComPtr<IMFAttributes> attributes;
+    HRESULT hr = sMF->mfCreateAttributes(&attributes, 1);
+    if (SUCCEEDED(hr) && sMF->supportsVideoProcessor()) {
+        hr = attributes->SetUINT32(
+                MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, TRUE);
+    }
+
+    if (SUCCEEDED(hr)) {
+        hr = sMF->mfCreateSourceReaderFromMediaSource(
+                source.Get(), attributes.Get(), &mSourceReader);
+    }
+
+    if (SUCCEEDED(hr)) {
+        ComPtr<IMFMediaType> type;
+        hr = sMF->mfCreateMediaType(&type);
+
+        if (SUCCEEDED(hr)) {
+            hr = type->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+        }
+
+        if (SUCCEEDED(hr)) {
+            hr = type->SetGUID(MF_MT_SUBTYPE, mSubtype);
+        }
+
+        if (SUCCEEDED(hr)) {
+            hr = MFSetAttributeSize(type.Get(), MF_MT_FRAME_SIZE,
+                                    static_cast<UINT32>(mFramebufferWidth),
+                                    static_cast<UINT32>(mFramebufferHeight));
+        }
+
+        // Try to set this type on the source reader.
+        if (SUCCEEDED(hr)) {
+            const uint32_t pixelFormat = subtypeToPixelFormat(mSubtype);
+            D("%s: SetCurrentMediaType to format %.4s, size %dx%d",
+              __FUNCTION__, reinterpret_cast<const char*>(&pixelFormat),
+              static_cast<uint32_t>(mFramebufferWidth),
+              static_cast<uint32_t>(mFramebufferHeight));
+
+            hr = mSourceReader->SetCurrentMediaType(
+                    static_cast<DWORD>(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+                    nullptr, type.Get());
+        }
+    }
+
+    return hr;
 }
 
 /*******************************************************************************
  *                     CameraDevice API
  ******************************************************************************/
 
-CameraDevice* camera_device_open(const char* name, int channel) {
-    CameraCommand cmd = {};
-    cmd.cmd = CAMERA_CMD_OPEN;
-    cmd.open.name = name;
-    cmd.open.channel = channel;
+static MediaFoundationCameraDevice* toMediaFoundationCameraDevice(
+        CameraDevice* ccd) {
+    if (!ccd || !ccd->opaque) {
+        return nullptr;
+    }
 
-    return reinterpret_cast<CameraDevice*>(
-            sCameraThread->sendCommandAndGetResult(cmd));
+    return reinterpret_cast<MediaFoundationCameraDevice*>(ccd->opaque);
 }
 
-int camera_device_start_capturing(CameraDevice* cd,
+CameraDevice* camera_device_open(const char* name, int inp_channel) {
+    const HRESULT hr = sMF->mfStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+    if (FAILED(hr)) {
+        E("%s: MFStartup failed, hr = 0x%08X", __FUNCTION__, hr);
+        return nullptr;
+    }
+
+    MediaFoundationCameraDevice* cd =
+            new MediaFoundationCameraDevice(name, inp_channel);
+    return cd ? cd->getCameraDevice() : nullptr;
+}
+
+int camera_device_start_capturing(CameraDevice* ccd,
                                   uint32_t pixel_format,
                                   int frame_width,
                                   int frame_height) {
-    CameraCommand cmd = {};
-    cmd.cmd = CAMERA_CMD_START_CAPTURING;
-    cmd.start.device = cd;
-    cmd.start.pixel_format = pixel_format;
-    cmd.start.frame_width = frame_width;
-    cmd.start.frame_height = frame_height;
+    MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
+    if (!cd) {
+        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        return -1;
+    }
 
-    return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
+    return cd->startCapturing(pixel_format, frame_width, frame_height);
 }
 
-int camera_device_stop_capturing(CameraDevice* cd) {
-    CameraCommand cmd = {};
-    cmd.cmd = CAMERA_CMD_STOP_CAPTURING;
-    cmd.stop.device = cd;
-    return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
+int camera_device_stop_capturing(CameraDevice* ccd) {
+    MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
+    if (!cd) {
+        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        return -1;
+    }
+
+    cd->stopCapturing();
+
+    return 0;
 }
 
-int camera_device_read_frame(CameraDevice* cd,
+int camera_device_read_frame(CameraDevice* ccd,
                              ClientFrame* result_frame,
                              float r_scale,
                              float g_scale,
                              float b_scale,
                              float exp_comp) {
-    CameraCommand cmd = {};
-    cmd.cmd = CAMERA_CMD_READ_FRAME;
-    cmd.read_frame.device = cd;
-    cmd.read_frame.result_frame = result_frame;
-    cmd.read_frame.r_scale = r_scale;
-    cmd.read_frame.g_scale = g_scale;
-    cmd.read_frame.b_scale = b_scale;
-    cmd.read_frame.exp_comp = exp_comp;
+    MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
+    if (!cd) {
+        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        return -1;
+    }
 
-    return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
+    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp);
 }
 
-void camera_device_close(CameraDevice* cd) {
-    CameraCommand cmd = {};
-    cmd.cmd = CAMERA_CMD_CLOSE;
-    cmd.close.device = cd;
-    (void)sCameraThread->sendCommandAndGetResult(cmd);
+void camera_device_close(CameraDevice* ccd) {
+    MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
+    if (!cd) {
+        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        return;
+    }
+
+    delete cd;
+
+    (void)sMF->mfShutdown();
 }
 
 int camera_enumerate_devices(CameraInfo* cis, int max) {
-    CameraCommand cmd = {};
-    cmd.cmd = CAMERA_CMD_ENUMERATE_DEVICES;
-    cmd.enumerate.info = cis;
-    cmd.enumerate.max = max;
-    return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
+    const HRESULT hr = sMF->mfStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+    if (FAILED(hr)) {
+        E("%s: MFStartup failed, hr = 0x%08X", __FUNCTION__, hr);
+        return -1;
+    }
+
+    const int result = MediaFoundationCameraDevice::enumerateDevices(cis, max);
+
+    (void)sMF->mfShutdown();
+    return result;
 }
