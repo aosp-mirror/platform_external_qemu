@@ -209,14 +209,12 @@ elif [ "$HOST_OS" = "Linux" ]; then
     # run on newer Linux distributions.
     run_test32 () {
         (
-            LD_LIBRARY_PATH=$OUT_DIR/lib/libstdc++:$LD_LIBRARY_PATH
             run $TEST_SHELL "$@"
         )
     }
 
     run_test64 () {
         (
-            LD_LIBRARY_PATH=$OUT_DIR/lib64/libstdc++:$LD_LIBRARY_PATH
             run $TEST_SHELL "$@"
         )
     }
@@ -348,6 +346,8 @@ if [ -z "$NO_TESTS" ]; then
         run android/scripts/tests/gen-entries/run-tests.sh ||
             FAILURES="$FAILURES gen-entries_tests"
     fi
+
+    echo "completd gen-entries.py test suite. FAILURES=[${FAILURES}]"
 
     # Check that the windows executables all have icons.
     # First need to locate the windres tool.

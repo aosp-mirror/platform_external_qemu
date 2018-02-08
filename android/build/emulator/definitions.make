@@ -451,7 +451,7 @@ $$(MOC_SRC): PRIVATE_DST := $$(MOC_SRC)
 $$(MOC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(MOC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt moc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
+	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
 
 $$(eval $$(call compile-generated-cxx-source,$$(MOC_SRC)))
 endef
@@ -470,7 +470,7 @@ $$(RCC_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
 $$(RCC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc (static): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
+	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
 
 $$(eval $$(call compile-generated-cxx-source,$$(RCC_SRC)))
 endef
@@ -489,7 +489,7 @@ $$(RCC_OUT): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
 $$(RCC_OUT): $$(LOCAL_PATH)/$$(SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc (dynamic): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(QT_RCC_TOOL) -binary -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
+	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_RCC_TOOL) -binary -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
 
 $$(eval $$(call install-file,$$(RCC_OUT),$$(call local-resource-install-path,$$(notdir $$(RCC_OUT)))))
 endef
@@ -535,31 +535,23 @@ $$(OUT_SRC): $$(LOCAL_PATH)/$$(SRC) $$(PROTOC_TOOL)
 $$(eval $$(call compile-generated-cxx-source,$$(OUT_SRC)))
 endef
 
-# Call this function to force a module to link statically to the C++ standard
-# library on platforms that support it (i.e. Linux and Windows).
-#
-# NOTE: On Windows, recent Mingw versions add support for std::thread through
-#       the libwinpthread-1 library, which libstdc++ depends on, requiring
-#       special link-time flags (instead of the classic -static-libstdc++).
-#
-#       We detect whether this is the case by inspecting the content of
-#       PREBUILT_PATH_PAIRS, which is set by config.make, the auto-generated
-#       file that comes from running 'android/configure.sh --mingw'
-#
-_HAS_WINPTHREAD := $(if $(filter %libwinpthread-1.dll,$(PREBUILT_PATH_PAIRS)),true)
 
+# Call this function to link statically against c++ on Windows.
+# On linux it will set the rpath to look for lib64/lib from executable directory.
+# On Mac it will merely link
 local-link-static-c++lib = $(eval $(ev-local-link-static-c++lib))
 define ev-local-link-static-c++lib
-ifeq (darwin,$(BUILD_TARGET_OS))
-LOCAL_LDLIBS += $(CXX_STD_LIB)
-else
-ifeq (true,$(_HAS_WINPTHREAD))
-LOCAL_LDLIBS += -Wl,-Bstatic -lstdc++ -lwinpthread -Wl,-Bdynamic
-else # !libwinpthread
-LOCAL_LD := $(call local-build-var,LD)
-LOCAL_LDLIBS += -static-libstdc++
-endif  # !_HAS_WINPTHREAD
-endif  # BUILD_TARGET_OS != darwin
+    ifeq (linux,$(BUILD_TARGET_OS))
+        LOCAL_LDLIBS += $(CXX_STD_LIB)
+        LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64:\$$$$ORIGIN/lib
+    endif # BUILD_TARGET_OS = linux
+    ifeq (darwin,$(BUILD_TARGET_OS))
+        LOCAL_LDLIBS += $(CXX_STD_LIB)
+    endif # BUILD_TARGET_OS = darwin
+    ifeq (windows,$(BUILD_TARGET_OS))
+        LOCAL_LDLIBS += -Wl,-Bstatic -lstdc++ -lwinpthread -Wl,-Bdynamic
+    endif # BUILD_TARGET_OS = windows
+    LOCAL_LD := $(call local-build-var,LD)
 endef
 
 ifneq (,$(BUILD_SYSTEM_UNIT_TESTS))
