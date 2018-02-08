@@ -110,7 +110,7 @@ _qemudPipe_init(void* hwpipe, void* _looper, const char* args) {
      * service name wit ':'. Separate service name from the client param. */
     client_args = strchr(args, ':');
     if (client_args != NULL) {
-        srv_name_len = std::min(client_args - args,\
+        srv_name_len = (std::min)(client_args - args,\
                                 (intptr_t) sizeof(service_name) - 1);
         client_args++;  // Past the ':'
         if (*client_args == '\0') {
@@ -118,7 +118,7 @@ _qemudPipe_init(void* hwpipe, void* _looper, const char* args) {
             client_args = NULL;
         }
     } else {
-        srv_name_len = std::min(strlen(args), sizeof(service_name) - 1);
+        srv_name_len = (std::min)(strlen(args), sizeof(service_name) - 1);
     }
     memcpy(service_name, args, srv_name_len);
     service_name[srv_name_len] = '\0';
@@ -232,7 +232,7 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
     while (buff != endbuff && *msg_list != NULL) {
         QemudPipeMessage* msg = *msg_list;
         /* Message data fiting the current pipe's buffer. */
-        size_t to_copy = std::min(msg->size - msg->offset,
+        size_t to_copy = (std::min)(msg->size - msg->offset,
                                   buff->size - off_in_buff);
         memcpy(buff->data + off_in_buff, msg->message + msg->offset, to_copy);
         /* Update offsets. */
