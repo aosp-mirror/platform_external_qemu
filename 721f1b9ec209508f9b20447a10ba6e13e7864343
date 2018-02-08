@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02fe4489_11729d58",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-02-08T19:01:32Z",
+      "side": 1,
+      "message": "maybe glDisable(GL_BLEND) after drawing?",
+      "revId": "721f1b9ec209508f9b20447a10ba6e13e7864343",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
