@@ -1468,24 +1468,11 @@ static void
 help_use_system_libs(stralloc_t* out)
 {
     PRINTF(
-    "  Use -use-system-libs to use the system's libstdc++ instead of the one that\n"
-    "  comes bundled with the emulator. This should only be used if the emulator\n"
-    "  doesn't normally start on your system for some reason (e.g. some Linux Radeon\n"
-    "  GL driver libraries require a more recent libstdc++.so).\n\n"
-
-    "  One can also define ANDROID_EMULATOR_USE_SYSTEM_LIBS to 1 in the environment\n"
-    "  to apply this option.\n\n"
-
-    "  NOTE: There is no guarantee that using this flag makes the emulator runnable\n"
-    "  it's a work-around for potential confusing system library issues, that should\n"
-    "  only affect a small amount of users.\n\n"
-
-    "  NOTE2: For now, it's not possible to use system Qt libraries for reasons\n"
-    "  that are currently difficult to debug. This option may however allow to use\n"
-    "  them too in the future.\n\n"
-
-    "  For details, see: https://code.google.com/p/android/issues/detail?id=197254\n\n"
-
+    "  (DEPRECATED)\n\n"
+    "  The emulator now uses libc++ and is no longer relying on libstdc++.\n"
+    "  This parameter no longer has any effect and might be removed in future versions.\n\n"
+    "  NOTE2: For now, it's not possible to use system Qt libraries as the ones\n"
+    "  shipped with the emulator are compiled against libc++.\n"
     "\n"
     );
 }
