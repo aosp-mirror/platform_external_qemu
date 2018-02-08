@@ -16,6 +16,24 @@
       "revId": "721f1b9ec209508f9b20447a10ba6e13e7864343",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae3551f2_6c6fc4b3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-08T19:50:17Z",
+      "side": 1,
+      "message": "May want to test frame times before and after that since changing blend state very often is expensive.",
+      "parentUuid": "02fe4489_11729d58",
+      "revId": "721f1b9ec209508f9b20447a10ba6e13e7864343",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
