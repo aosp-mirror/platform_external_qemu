@@ -85,6 +85,16 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             chmod a+x configure install-sh
         ) || panic "Could not set 'configure' and 'install-sh' as executables"
 
+        case $SYSTEM in
+            linux*)
+                # Passing in $ORIGIN does not work due to multiple variable
+                # rewrites, instead we will fix the rpath later, of now
+                # we make sure we have enough space for the overwrite
+                export CXXFLAGS='-Wl,-rpath=TO_BE_REPLACED/../lib'
+                ;;
+            *) ;;
+        esac
+
         builder_build_autotools_package protobuf \
                 --disable-shared \
                 --without-zlib \
@@ -93,6 +103,15 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         copy_directory \
                 "$(builder_install_prefix)" \
                 "$INSTALL_DIR/$SYSTEM"
+
+        case $SYSTEM in
+            linux*)
+                # We need to fixup the rpath to make sure we can find libc++.so
+                cp "$(aosp_clang_libcplusplus)" "$INSTALL_DIR/$SYSTEM/lib"
+                chrpath  -r \$ORIGIN/../lib  "$INSTALL_DIR/$SYSTEM/bin/protoc"
+                ;;
+            *) ;;
+        esac
 
     ) || panic "[$SYSTEM] Could not build protobuf!"
 
