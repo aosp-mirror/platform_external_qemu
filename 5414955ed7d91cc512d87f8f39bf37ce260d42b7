@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "01c1b0c5_e079f7e7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-09T18:42:11Z",
+      "side": 1,
+      "message": "The problem is due to the following:\n\n- During build we generate executable for the HOST (linux-x86_64) to produce more source for TARGET (windows_x86)\n- libc++.so for clang is ELF64, we don\u0027t have ELF32 version\n- Due to some bugs in our build scripts the bitness of TARGET and HOST must match. \n\nThe last part is the problem. Previously our toolchain could create a 32 bit executable on linux. Now we cannot. \n\nSo for now we just disable it, and re-introduce it later when we are ready to fix the build scripts.",
+      "parentUuid": "9309746e_fe91ff2b",
+      "range": {
+        "startLine": 14,
+        "startChar": 2,
+        "endLine": 16,
+        "endChar": 28
+      },
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e9ae99b6_eac27679",
         "filename": "android/build/Makefile.top.mk",
         "patchSetId": 3
@@ -45,6 +69,30 @@
       "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b63828db_764e1374",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-09T18:42:11Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e9ae99b6_eac27679",
+      "range": {
+        "startLine": 378,
+        "startChar": 5,
+        "endLine": 378,
+        "endChar": 9
+      },
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
