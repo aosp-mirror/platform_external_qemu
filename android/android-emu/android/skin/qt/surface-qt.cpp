@@ -230,10 +230,43 @@ extern void skin_surface_get_scaled_rect(SkinSurface *surface, const SkinRect *f
     int h = surface->h;
     int original_w = surface->bitmap->size().width();
     int original_h = surface->bitmap->size().height();
+
     to->pos.x = from->pos.x * w / original_w;
     to->pos.y = from->pos.y * h / original_h;
-    to->size.w = from->size.w * w / original_w;
-    to->size.h = from->size.h * h / original_h;
+
+    // The skin surface may not be the same dimensions as the emulator
+    // subwindow.  In these cases, the emulator subwindow is usually smaller,
+    // which means that if we do simple scaling of the emulator subwindow
+    // according to the skin surface's size ratio versus original skin surface
+    // size, the part of the skin surface that should coincide with the
+    // emulator window will often be bigger than the emulator subwindow by a
+    // few pixels (or even partial pixels in the case of high DPI displays),
+    // resulting in peeking of skin surface pixels out from underneath the
+    // subwindow.  This can look bad if, for example, the skin surface is a
+    // Pixel XL Silver.  To address this, we ensure that the subwindow is
+    // scaled up a bit more, so that it always covers the part of the skin
+    // surface underneath. We don't play with the x/y offset since those are
+    // biased to be a bit small too, but they are the left/top offsets, so if
+    // they are too small, they cover more of what's underneath, which is
+    // actually the kind of bias we like.
+
+    double fudge = original_w == fromw ? 0.0f : 1.0f;
+
+    double surfaceFactorW = ((double)w) / ((double)original_w);
+    double surfaceFactorH = ((double)h) / ((double)original_h);
+
+    double wantedFactor = surfaceFactorW > surfaceFactorH ? surfaceFactorW : surfaceFactorH;
+
+    if (fromw <= fromh) {
+        to->size.w = (int)(from->size.w * wantedFactor + fudge + 0.5f);
+        double originalAspect = ((double)fromh) / ((double)fromw);
+        to->size.h = to->size.w * originalAspect + 0.5f;
+    } else {
+        to->size.h = (int)(from->size.h * wantedFactor + fudge + 0.5f);
+        double originalAspect = ((double)fromw) / ((double)fromh);
+        to->size.w = to->size.h * originalAspect + 0.5f;
+    }
+
     D("skin_surface_get_scaled_rect %d: %d, %d, %d, %d => %d, %d, %d, %d", surface->id, fromx, fromy, fromw, fromh, to->pos.x, to->pos.y, to->size.w, to->size.h);
 }
 
