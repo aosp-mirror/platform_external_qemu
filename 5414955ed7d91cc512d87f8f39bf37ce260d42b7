@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9309746e_fe91ff2b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2018-02-09T08:01:14Z",
+      "side": 1,
+      "message": "I\u0027d expect Clang to be able to compile for 32-bit Windows.  Can you share the flags that cause failure?",
+      "range": {
+        "startLine": 14,
+        "startChar": 2,
+        "endLine": 16,
+        "endChar": 28
+      },
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9ae99b6_eac27679",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2018-02-09T08:01:14Z",
+      "side": 1,
+      "message": "only",
+      "range": {
+        "startLine": 378,
+        "startChar": 5,
+        "endLine": 378,
+        "endChar": 9
+      },
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
