@@ -26,6 +26,12 @@
 
 ANDROID_BEGIN_HEADER
 
+typedef struct EmulatorScreenMask {
+    int    width;
+    int    height;
+    const unsigned char* rgbaData;
+} EmulatorScreenMask;
+
 typedef struct EmulatorWindow {
     const AConfig* aconfig;
     SkinFile*      layout_file;
@@ -88,5 +94,7 @@ bool emulator_window_stop_recording(void);
 bool emulator_window_stop_recording_async(void);
 /* Returns the current state of the screen recorder. */
 RecorderState emulator_window_recorder_state_get(void);
+
+void emulator_window_set_screen_mask(int width, int height, const unsigned char* rgbaData);
 
 ANDROID_END_HEADER
