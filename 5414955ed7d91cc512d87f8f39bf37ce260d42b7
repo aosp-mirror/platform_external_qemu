@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "bbbb1b50_bdf6fd22",
+        "filename": "android/android-emugl/host/tools/emugen/Android.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-09T21:35:42Z",
+      "side": 1,
+      "message": "Turns out you\u0027re right. Will remove the CXX_FLAGS",
+      "parentUuid": "84f06e6f_98b10b69",
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e9ae99b6_eac27679",
         "filename": "android/build/Makefile.top.mk",
         "patchSetId": 3
@@ -153,6 +171,24 @@
     },
     {
       "key": {
+        "uuid": "50033c4a_0e0ae422",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-09T21:35:42Z",
+      "side": 1,
+      "message": "Actually, this can be cleaned up, we use CXX as our linker but that should be configured in our configure script. not the wrapper.",
+      "parentUuid": "fb0ac54b_d6664fe4",
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "108ab11a_21be1383",
         "filename": "android/scripts/gen-android-sdk-toolchain.sh",
         "patchSetId": 3
@@ -173,6 +209,30 @@
       "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9e81596_726ae6c0",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-09T21:35:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "108ab11a_21be1383",
+      "range": {
+        "startLine": 318,
+        "startChar": 16,
+        "endLine": 318,
+        "endChar": 23
+      },
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
