@@ -49,6 +49,46 @@
     },
     {
       "key": {
+        "uuid": "aa028d6e_d77a8ce2",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1473,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2018-02-09T18:57:03Z",
+      "side": 1,
+      "message": "longer",
+      "range": {
+        "startLine": 1473,
+        "startChar": 25,
+        "endLine": 1473,
+        "endChar": 30
+      },
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84f06e6f_98b10b69",
+        "filename": "android/android-emugl/host/tools/emugen/Android.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2018-02-09T18:57:03Z",
+      "side": 1,
+      "message": "I can\u0027t tell if this is Android.mk for the NDK or the platform (or if they have a difference here), but for the platform, LOCAL_CFLAGS are also passed to C++ compilations. Thus the LOCAL_CXXFLAGS is probably unnecessary here. (If you want C-only flags, you use LOCAL_CONLYFLAGS)",
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e9ae99b6_eac27679",
         "filename": "android/build/Makefile.top.mk",
         "patchSetId": 3
@@ -93,6 +133,69 @@
       "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb0ac54b_d6664fe4",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2018-02-09T18:57:03Z",
+      "side": 1,
+      "message": "Doesn\u0027t this keep linux on g++ too, or is this handled by the next block below that remaps gcc-\u003eclang?",
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "108ab11a_21be1383",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2018-02-09T18:57:03Z",
+      "side": 1,
+      "message": "darwin",
+      "range": {
+        "startLine": 318,
+        "startChar": 16,
+        "endLine": 318,
+        "endChar": 23
+      },
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8004b37_bf39d0d7",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2018-02-09T18:57:03Z",
+      "side": 1,
+      "message": "parameter",
+      "range": {
+        "startLine": 460,
+        "startChar": 37,
+        "endLine": 460,
+        "endChar": 45
+      },
+      "revId": "5414955ed7d91cc512d87f8f39bf37ce260d42b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
