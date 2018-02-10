@@ -22,7 +22,7 @@ class CellularPage : public QWidget
 
 public:
     explicit CellularPage(QWidget *parent = nullptr);
-    void setCellularAgent(const QAndroidCellularAgent* agent);
+    static void setCellularAgent(const QAndroidCellularAgent* agent);
     static bool simIsPresent(); // Returns true if the user wants a SIM present,
                                 // considering both command line and UI.
 
@@ -37,5 +37,4 @@ private slots:
 
 private:
     std::unique_ptr<Ui::CellularPage> mUi;
-    const QAndroidCellularAgent* mCellularAgent = nullptr;
 };

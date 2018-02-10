@@ -12,6 +12,7 @@
 #include "android/skin/qt/extended-pages/telephony-page.h"
 
 #include "android/emulation/control/telephony_agent.h"
+#include "android/emulation/VmLock.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
@@ -24,6 +25,8 @@
 #define MAX_SMS_MSG_SIZE 1024 // Arbitrary emulator limitation
 #define MAX_SMS_MSG_SIZE_STRING "1024"
 
+static const QAndroidTelephonyAgent* sTelephonyAgent = nullptr;
+
 class TelephonyEvent : public QEvent {
 public:
     TelephonyEvent(QEvent::Type typeId, int nActive) :
@@ -33,21 +36,36 @@ public:
     int numActiveCalls;
 };
 
+extern "C" {
+static void telephony_callback(void* userData, int numActiveCalls) {
+    TelephonyPage* tpInst = (TelephonyPage*)userData;
+    if (tpInst) {
+        tpInst->eventLauncher(numActiveCalls);
+    }
+}
+}
+
 TelephonyPage::TelephonyPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::TelephonyPage()),
-    mTelephonyAgent(nullptr),
     mCallActivity(TelephonyPage::CallActivity::Inactive)
 {
     mUi->setupUi(this);
     mUi->tel_numberBox->setValidator(new PhoneNumberValidator());
     mCustomEventType = (QEvent::Type)QEvent::registerEventType();
+
+    android::RecursiveScopedVmLock vmlock;
+    if (sTelephonyAgent  &&  sTelephonyAgent->setNotifyCallback) {
+        // Notify the agent that we want call-backs to tell us when the
+        // telephone state changes
+        sTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
+    }
 }
 
 TelephonyPage::~TelephonyPage() {
-    if (mTelephonyAgent  &&  mTelephonyAgent->setNotifyCallback) {
+    if (sTelephonyAgent  &&  sTelephonyAgent->setNotifyCallback) {
         // Tell the agent that we do not want any more call-backs
-        mTelephonyAgent->setNotifyCallback(0, 0);
+        sTelephonyAgent->setNotifyCallback(0, 0);
     }
 }
 
@@ -56,23 +74,26 @@ void TelephonyPage::on_tel_startEndButton_clicked()
     SettingsTheme theme = getSelectedTheme();
     if (mCallActivity == CallActivity::Inactive) {
         // Start a call
-        if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
-            // Command the emulator
-            TelephonyResponse tResp;
+        {
+            android::RecursiveScopedVmLock vmlock;
+            if (sTelephonyAgent && sTelephonyAgent->telephonyCmd) {
+                // Command the emulator
+                TelephonyResponse tResp;
 
-            // Get rid of spurious characters from the phone number
-            // (Allow only '+' and '0'..'9')
-            // Note: phoneNumberValidator validates the user's input, but
-            // allows some human-readable characters like '.' and ')'.
-            // Here we remove that meaningless punctuation.
-            QString cleanNumber = mUi->tel_numberBox->currentText().
-                                     remove(QRegularExpression("[^+0-9]"));
+                // Get rid of spurious characters from the phone number
+                // (Allow only '+' and '0'..'9')
+                // Note: phoneNumberValidator validates the user's input, but
+                // allows some human-readable characters like '.' and ')'.
+                // Here we remove that meaningless punctuation.
+                QString cleanNumber = mUi->tel_numberBox->currentText().
+                                         remove(QRegularExpression("[^+0-9]"));
 
-            tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
-                                                  cleanNumber.toStdString().c_str());
-            if (tResp != Tel_Resp_OK) {
-                showErrorDialog(tr("The call failed."), tr("Telephony"));
-                return;
+                tResp = sTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
+                                                      cleanNumber.toStdString().c_str());
+                if (tResp != Tel_Resp_OK) {
+                    showErrorDialog(tr("The call failed."), tr("Telephony"));
+                    return;
+                }
             }
         }
 
@@ -104,20 +125,23 @@ void TelephonyPage::on_tel_startEndButton_clicked()
         mUi->tel_startEndButton->setIcon(theIcon);
         mUi->tel_startEndButton->setText(tr("CALL DEVICE"));
 
-        if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
-            // Command the emulator
-            QString cleanNumber = mUi->tel_numberBox->currentText().
-                                    remove(QRegularExpression("[^+0-9]"));
-            TelephonyResponse tResp;
-            tResp = mTelephonyAgent->telephonyCmd(Tel_Op_Disconnect_Call,
-                                                  cleanNumber.toStdString().c_str());
-            if (tResp != Tel_Resp_OK  &&
-                tResp != Tel_Resp_Invalid_Action)
-            {
-                // Don't show an error for Invalid Action: that
-                // just means that the AVD already hanged up.
-                showErrorDialog(tr("The end-call failed."), tr("Telephony"));
-                return;
+        {
+            android::RecursiveScopedVmLock vmlock;
+            if (sTelephonyAgent && sTelephonyAgent->telephonyCmd) {
+                // Command the emulator
+                QString cleanNumber = mUi->tel_numberBox->currentText().
+                                        remove(QRegularExpression("[^+0-9]"));
+                TelephonyResponse tResp;
+                tResp = sTelephonyAgent->telephonyCmd(Tel_Op_Disconnect_Call,
+                                                      cleanNumber.toStdString().c_str());
+                if (tResp != Tel_Resp_OK  &&
+                    tResp != Tel_Resp_Invalid_Action)
+                {
+                    // Don't show an error for Invalid Action: that
+                    // just means that the AVD already hanged up.
+                    showErrorDialog(tr("The end-call failed."), tr("Telephony"));
+                    return;
+                }
             }
         }
     }
@@ -149,7 +173,8 @@ void TelephonyPage::on_tel_holdCallButton_clicked()
             break;
         default:;
     }
-    if (mTelephonyAgent && mTelephonyAgent->telephonyCmd) {
+    android::RecursiveScopedVmLock vmlock;
+    if (sTelephonyAgent && sTelephonyAgent->telephonyCmd) {
         // Command the emulator
         QString cleanNumber = mUi->tel_numberBox->currentText().
                                 remove(QRegularExpression("[^+0-9]"));
@@ -158,7 +183,7 @@ void TelephonyPage::on_tel_holdCallButton_clicked()
                                      Tel_Op_Place_Call_On_Hold :
                                      Tel_Op_Take_Call_Off_Hold;
 
-        tResp = mTelephonyAgent->telephonyCmd(tOp,
+        tResp = sTelephonyAgent->telephonyCmd(tOp,
                                               cleanNumber.toStdString().c_str());
         if (tResp != Tel_Resp_OK) {
             showErrorDialog(tr("The call hold failed."), tr("Telephony"));
@@ -246,38 +271,28 @@ void TelephonyPage::on_sms_sendButton_clicked()
         return;
     }
 
-    if (mTelephonyAgent && mTelephonyAgent->getModem) {
-        AModem modem = mTelephonyAgent->getModem();
-        if (modem == NULL) {
-            showErrorDialog(tr("Cannot send message, modem emulation not running."), tr("SMS"));
-            return;
-        }
+    {
+        android::RecursiveScopedVmLock vmlock;
+        if (sTelephonyAgent && sTelephonyAgent->getModem) {
+            AModem modem = sTelephonyAgent->getModem();
+            if (modem == NULL) {
+                showErrorDialog(tr("Cannot send message, modem emulation not running."), tr("SMS"));
+                return;
+            }
 
-        for (int idx = 0; pdus[idx] != NULL; idx++) {
-            amodem_receive_sms(modem, pdus[idx]);
+            for (int idx = 0; pdus[idx] != NULL; idx++) {
+                amodem_receive_sms(modem, pdus[idx]);
+            }
         }
     }
 
     smspdu_free_list( pdus );
 }
 
-extern "C" {
-static void telephony_callback(void* userData, int numActiveCalls) {
-    TelephonyPage* tpInst = (TelephonyPage*)userData;
-    if (tpInst) {
-        tpInst->eventLauncher(numActiveCalls);
-    }
-}
-}
-
+// static
 void TelephonyPage::setTelephonyAgent(const QAndroidTelephonyAgent* agent) {
-    mTelephonyAgent = agent;
-
-    if (mTelephonyAgent  &&  mTelephonyAgent->setNotifyCallback) {
-        // Notify the agent that we want call-backs to tell us when the
-        // telephone state changes
-        mTelephonyAgent->setNotifyCallback(telephony_callback, (void*)this);
-    }
+    android::RecursiveScopedVmLock vmlock;
+    sTelephonyAgent = agent;
 }
 
 void TelephonyPage::eventLauncher(int numActiveCalls) {

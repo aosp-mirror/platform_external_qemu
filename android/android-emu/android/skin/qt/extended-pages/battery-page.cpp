@@ -16,8 +16,11 @@
 #include <vector>
 #include <utility>
 
+// Must be protected by the BQL!
+static const QAndroidBatteryAgent* sBatteryAgent = nullptr;
+
 BatteryPage::BatteryPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::BatteryPage()), mBatteryAgent(nullptr) {
+    : QWidget(parent), mUi(new Ui::BatteryPage()) {
     mUi->setupUi(this);
     populateListBox(
             mUi->bat_chargerBox,
@@ -46,13 +49,6 @@ BatteryPage::BatteryPage(QWidget* parent)
                             {BATTERY_STATUS_NOT_CHARGING, "Not charging"},
                             {BATTERY_STATUS_FULL, "Full"},
                     });
-}
-
-void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
-    {
-        android::RecursiveScopedVmLock vmlock;
-        mBatteryAgent = agent;
-    }
 
     int chargeLevel = 50;
     BatteryCharger bCharger = BATTERY_CHARGER_AC;
@@ -68,45 +64,47 @@ void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
     // virtual device explicitly.
     {
         android::RecursiveScopedVmLock vmlock;
-        if (mBatteryAgent && mBatteryAgent->chargeLevel) {
-            chargeLevel = mBatteryAgent->chargeLevel();
+        if (sBatteryAgent && sBatteryAgent->chargeLevel) {
+            chargeLevel = sBatteryAgent->chargeLevel();
         }
 
-        if (mBatteryAgent && mBatteryAgent->charger) {
-            bCharger = mBatteryAgent->charger();
+        if (sBatteryAgent && sBatteryAgent->charger) {
+            bCharger = sBatteryAgent->charger();
         }
-
-        int chargeLevel = 50;
-        if (mBatteryAgent && mBatteryAgent->chargeLevel) {
-            chargeLevel = mBatteryAgent->chargeLevel();
-        }
-        mUi->bat_levelSlider->setValue(chargeLevel);
 
         chargeIdx = mUi->bat_chargerBox->findData(bCharger);
         if (chargeIdx < 0)
             chargeIdx = 0;  // In case the saved value wasn't found
 
-        if (mBatteryAgent && mBatteryAgent->health) {
-            bHealth = mBatteryAgent->health();
+        if (sBatteryAgent && sBatteryAgent->health) {
+            bHealth = sBatteryAgent->health();
         }
 
         healthIdx = mUi->bat_healthBox->findData(bHealth);
         if (healthIdx < 0)
             healthIdx = 0;  // In case the saved value wasn't found
 
-        if (mBatteryAgent && mBatteryAgent->status) {
-            bStatus = mBatteryAgent->status();
+        if (sBatteryAgent && sBatteryAgent->status) {
+            bStatus = sBatteryAgent->status();
         }
-
-        statusIdx = mUi->bat_statusBox->findData(bStatus);
-        if (statusIdx < 0)
-            statusIdx = 0;  // In case the saved value wasn't found
     }
+
+    statusIdx = mUi->bat_statusBox->findData(bStatus);
+    if (statusIdx < 0)
+        statusIdx = 0;  // In case the saved value wasn't found
 
     mUi->bat_levelSlider->setValue(chargeLevel);
     mUi->bat_chargerBox->setCurrentIndex(chargeIdx);
     mUi->bat_healthBox->setCurrentIndex(healthIdx);
     mUi->bat_statusBox->setCurrentIndex(statusIdx);
+}
+
+// static
+void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
+    {
+        android::RecursiveScopedVmLock vmlock;
+        sBatteryAgent = agent;
+    }
 }
 
 void BatteryPage::populateListBox(
@@ -124,8 +122,8 @@ void BatteryPage::on_bat_chargerBox_activated(int index) {
 
     android::RecursiveScopedVmLock vmlock;
     if (bCharger >= 0 && bCharger < BATTERY_CHARGER_NUM_ENTRIES) {
-        if (mBatteryAgent && mBatteryAgent->setCharger) {
-            mBatteryAgent->setCharger(bCharger);
+        if (sBatteryAgent && sBatteryAgent->setCharger) {
+            sBatteryAgent->setCharger(bCharger);
         }
     }
 }
@@ -135,8 +133,8 @@ void BatteryPage::on_bat_levelSlider_valueChanged(int value) {
     mUi->bat_chargeLevelText->setText(QString::number(value) + "%");
 
     android::RecursiveScopedVmLock vmlock;
-    if (mBatteryAgent && mBatteryAgent->setChargeLevel) {
-        mBatteryAgent->setChargeLevel(value);
+    if (sBatteryAgent && sBatteryAgent->setChargeLevel) {
+        sBatteryAgent->setChargeLevel(value);
     }
 }
 
@@ -146,8 +144,8 @@ void BatteryPage::on_bat_healthBox_activated(int index) {
 
     android::RecursiveScopedVmLock vmlock;
     if (bHealth >= 0 && bHealth < BATTERY_HEALTH_NUM_ENTRIES) {
-        if (mBatteryAgent && mBatteryAgent->setHealth) {
-            mBatteryAgent->setHealth(bHealth);
+        if (sBatteryAgent && sBatteryAgent->setHealth) {
+            sBatteryAgent->setHealth(bHealth);
         }
     }
 }
@@ -158,8 +156,8 @@ void BatteryPage::on_bat_statusBox_activated(int index) {
 
     android::RecursiveScopedVmLock vmlock;
     if (bStatus >= 0 && bStatus < BATTERY_STATUS_NUM_ENTRIES) {
-        if (mBatteryAgent && mBatteryAgent->setStatus) {
-            mBatteryAgent->setStatus(bStatus);
+        if (sBatteryAgent && sBatteryAgent->setStatus) {
+            sBatteryAgent->setStatus(bStatus);
         }
     }
 }

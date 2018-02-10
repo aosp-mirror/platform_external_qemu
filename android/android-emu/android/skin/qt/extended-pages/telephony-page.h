@@ -25,7 +25,7 @@ public:
     explicit TelephonyPage(QWidget *parent = 0);
     ~TelephonyPage();
 
-    void setTelephonyAgent(const QAndroidTelephonyAgent* agent);
+    static void setTelephonyAgent(const QAndroidTelephonyAgent* agent);
     void eventLauncher(int);
 
 private slots:
@@ -51,7 +51,6 @@ private:
     };
 
     std::unique_ptr<Ui::TelephonyPage> mUi;
-    const QAndroidTelephonyAgent* mTelephonyAgent;
     CallActivity mCallActivity;
     QString mPhoneNumber;
     QEvent::Type mCustomEventType;
