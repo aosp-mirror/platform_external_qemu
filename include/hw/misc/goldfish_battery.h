@@ -32,6 +32,7 @@ enum {
 enum power_supply_property {
     /* Properties of type `int' */
     POWER_SUPPLY_PROP_STATUS = 0,
+    POWER_SUPPLY_PROP_HAS_BATTERY,
     POWER_SUPPLY_PROP_HEALTH,
     POWER_SUPPLY_PROP_PRESENT,
     POWER_SUPPLY_PROP_ONLINE,

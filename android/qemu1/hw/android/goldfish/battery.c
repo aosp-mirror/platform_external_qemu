@@ -177,8 +177,8 @@ void goldfish_battery_init(int has_battery)
         s->present = 1;     // battery is present
         s->capacity = 50;   // 50% charged
     } else {
-        s->status = POWER_SUPPLY_STATUS_NOT_CHARGING;
-        s->health = POWER_SUPPLY_HEALTH_DEAD;
+        s->status = POWER_SUPPLY_STATUS_UNKNOWN;
+        s->health = POWER_SUPPLY_HEALTH_UNKNOWN;
         s->present = 0;
         s->capacity = 0;
     }
@@ -200,7 +200,7 @@ int goldfish_battery_read_prop(int property)
 {
     int retVal = 0;
 
-    if (!battery_state || !battery_state->hw_has_battery) {
+    if (!battery_state) {
         return 0;
     }
 
@@ -213,6 +213,9 @@ int goldfish_battery_read_prop(int property)
             break;
         case POWER_SUPPLY_PROP_HEALTH:
             retVal = battery_state->health;
+            break;
+        case POWER_SUPPLY_PROP_HAS_BATTERY:
+            retVal = battery_state->hw_has_battery;
             break;
         case POWER_SUPPLY_PROP_PRESENT:
             retVal = battery_state->present;
