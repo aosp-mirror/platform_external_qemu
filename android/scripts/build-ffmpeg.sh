@@ -115,11 +115,13 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --enable-gpl \
                 --enable-asm \
                 --enable-yasm \
-                --disable-avdevice \
                 --enable-avresample \
                 --enable-libx264 \
                 --enable-libvpx \
+                --enable-libv4l2 \
+                --enable-encoder=v4l2 \
                 --disable-protocol=tls \
+                --enable-indev=v4l2 \
                 --disable-protocol=tls_securetransport \
                 --disable-openssl
 
