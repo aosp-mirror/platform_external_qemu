@@ -878,6 +878,11 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     EMULATOR_LIBUI_LDLIBS += -lbz2
 endif
 
+# FFMpeg on linux needs a lot of extras for the WEBRTC prototyp
+ifeq ($(BUILD_TARGET_OS),linux)
+    EMULATOR_LIBUI_LDLIBS += -lasound -lv4l2 -lv4lconvert -lturbojpeg
+endif
+
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \

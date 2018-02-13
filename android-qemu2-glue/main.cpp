@@ -1270,6 +1270,8 @@ extern "C" int main(int argc, char** argv) {
         screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                              isGuestMode ? uiEmuAgent.display : nullptr);
 
+        screen_recorder_start(NULL, true);
+
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
