@@ -242,7 +242,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 CURL_LIBS=LIBS="-lcrypt32"
                 ;;
             *)
-                CURL_LIBS=LIBS="-ldl -lpthread -lstdc++ "
+                CURL_LIBS=LIBS="-ldl -lpthread"
                 ;;
         esac
 

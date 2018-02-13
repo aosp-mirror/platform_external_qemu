@@ -29,10 +29,6 @@
 #define  TRACE(...)    ((void)0)
 #endif
 
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
 /* define SUPPORT_LEGACY_QEMUD to 1 if you want to support
  * talking to a legacy qemud daemon. See docs/ANDROID-QEMUD.TXT
  * for details.

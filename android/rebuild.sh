@@ -16,6 +16,7 @@ VERBOSE=1
 MINGW=
 NO_TESTS=
 OUT_DIR=objs
+HELP=
 
 for OPT; do
     case $OPT in
@@ -42,6 +43,7 @@ for OPT; do
             ;;
         --help|-?)
             VERBOSE=2
+            HELP=y
             ;;
         --debug)
             OPTDEBUG=true
@@ -51,7 +53,7 @@ done
 
 panic () {
     # don't print error message if we just came back from printing the help message
-   if [ "$VERBOSE" -ne 2 ]; then
+   if [ -z "$HELP" ]; then
        echo "ERROR: $@"
    fi
    exit 1
@@ -176,7 +178,7 @@ if [ "$MINGW" ]; then
         else
             WINE_VERSION=$("$WINE_CMD" --version 2>/dev/null)
             case $WINE_VERSION in
-                wine-1.8.*|wine-1.9.*|wine-1.1?.*)
+                wine-1.8.*|wine-1.9.*|wine-1.1?.*|wine-2.*)
                     ;;
                 *)
                     echo "WARNING: Your Wine version ($WINE_VERSION) is too old, >= 1.8 required"
@@ -187,7 +189,8 @@ if [ "$MINGW" ]; then
         fi
     fi
 
-    RUN_32BIT_TESTS=true
+    # 32 bit tests are obsolete.
+    RUN_32BIT_TESTS=
 fi
 
 if [ "$MINGW" ]; then
@@ -204,19 +207,16 @@ if [ "$MINGW" ]; then
         run $TEST_SHELL "$@")
     }
 elif [ "$HOST_OS" = "Linux" ]; then
-    # Ensure that our custom libstdc++.so is in LD_LIBRARY_PATH before
-    # trying to run our unit-test programs. Otherwise, they will fail to
-    # run on newer Linux distributions.
     run_test32 () {
         (
-            LD_LIBRARY_PATH=$OUT_DIR/lib/libstdc++:$LD_LIBRARY_PATH
+            LD_LIBRARY_PATH=$OUT_DIR/lib/:$LD_LIBRARY_PATH
             run $TEST_SHELL "$@"
         )
     }
 
     run_test64 () {
         (
-            LD_LIBRARY_PATH=$OUT_DIR/lib64/libstdc++:$LD_LIBRARY_PATH
+            LD_LIBRARY_PATH=$OUT_DIR/lib64/:$LD_LIBRARY_PATH
             run $TEST_SHELL "$@"
         )
     }

@@ -17,6 +17,7 @@
 #ifndef SYSTEM_KEYMASTER_ANDROID_KEYMASTER_MESSAGES_H_
 #define SYSTEM_KEYMASTER_ANDROID_KEYMASTER_MESSAGES_H_
 
+#include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

@@ -17,6 +17,9 @@
 #include "android/utils/eintr_wrapper.h"
 
 #include <string.h>
+#include <stdio.h>
+
+#include <string>
 
 #define  DEBUG  1
 

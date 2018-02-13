@@ -440,9 +440,6 @@ if [ "$CCACHE" ]; then
 else
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
 fi
-if [ "$OPTION_CLANG" = "yes" ]; then
-    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --clang"
-fi
 SDK_TOOLCHAIN_DIR=$OUT_DIR/build/toolchain
 GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
 "$GEN_SDK" $GEN_SDK_FLAGS "--verbosity=$VERBOSITY" "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
@@ -450,7 +447,7 @@ BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
 CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
 CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
 AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
-LD="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ld"
+LD=$CXX
 OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
 TOOLCHAIN_SYSROOT="$("${GEN_SDK}" $GEN_SDK_FLAGS --print=sysroot "${SDK_TOOLCHAIN_DIR}")"
 
@@ -490,9 +487,9 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
         echo "Sorry, but mingw compilation is only supported on Linux !"
         exit 1
     fi
-    GEN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows-x86_64"
-    "$GEN_SDK" $GEN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
-    BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
+    WIN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows-x86_64"
+    "$GEN_SDK" $WIN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+    BINPREFIX=$("$GEN_SDK" $WIN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
     CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
     CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
     LD=$CC
@@ -1021,14 +1018,11 @@ if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
     # - mingw: Statically links all libraries (b.android.com/191369)
     # - darwin: We use the development machine's installed SDK. No point
     #       bundling, since we don't have a uniform libraries to begin with.
-    case $HOST_OS in
+    case $BUILD_OS in
         linux*)
-            log "Copying toolchain libraries to bundle with the program"
-            for BUNDLED_LIB in libstdc++; do
-                log "  Bundling ${BUNDLED_LIB}"
-                copy_toolchain_lib "${OUT_DIR}/lib/libstdc++" "${TOOLCHAIN_SYSROOT}/lib32" "${BUNDLED_LIB}"
-                copy_toolchain_lib "${OUT_DIR}/lib64/libstdc++" "${TOOLCHAIN_SYSROOT}/lib64" "${BUNDLED_LIB}"
-            done
+          LIBCPLUSPLUS=$("$GEN_SDK" $GEN_SDK_FLAGS --print=libcplusplus unused_parameter)
+          log "Bundling ${LIBCPLUSPLUS}"
+          copy_toolchain_lib "${OUT_DIR}/lib64" "$(dirname ${LIBCPLUSPLUS})" libc++
         ;;
         *) log "Not copying toolchain libraries for ${HOST_OS}";;
     esac
