@@ -13,7 +13,12 @@
 
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/threads/Async.h"
 #include "android/base/threads/ThreadStore.h"
+
+#include "android/utils/looper.h"
 
 namespace android {
 namespace base {
@@ -80,6 +85,48 @@ void ThreadLooper::setLooper(Looper* looper, bool own) {
 
     sStore->setLooper(looper, own);
 }
+
+struct MainLooperRunInfo {
+    Lock lock;
+    ConditionVariable runCompletedCv;
+    std::function<void()> toRun;
+    bool completed = false;
+};
+
+static LazyInstance<MainLooperRunInfo> sMainLooperRunInfo = LAZY_INSTANCE_INIT;
+
+static void setMainLooperRunInfo(const std::function<void()>& func) {
+    sMainLooperRunInfo->toRun = func;
+}
+
+static void mainLooperClosureRunner() {
+    auto& runInfo = sMainLooperRunInfo.get();
+
+    AutoLock lock(runInfo.lock);
+    runInfo.toRun();
+    runInfo.completed = true;
+    runInfo.runCompletedCv.signal();
+}
+
+// static
+void ThreadLooper::runOnMainLooperSync(const std::function<void()>& func) {
+    auto& runInfo = sMainLooperRunInfo.get();
+
+    AutoLock lock(runInfo.lock);
+
+    setMainLooperRunInfo(func);
+
+    android_runOnMainLooper(mainLooperClosureRunner);
+
+    while (!runInfo.completed) {
+        runInfo.runCompletedCv.wait(&runInfo.lock);
+    }
+}
+
+void ThreadLooper::runOnMainLooper(const std::function<void()>& func) {
+    android::base::async([func] { runOnMainLooperSync(func); });
+}
+
 
 }  // namespace base
 }  // namespace android
