@@ -1275,6 +1275,8 @@ extern "C" int main(int argc, char** argv) {
             android::emulation::captureScreenshot(dirname, nullptr);
         });
 
+        screen_recorder_start(NULL, true);
+
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
