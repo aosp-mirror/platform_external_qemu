@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "58e52c7f_7b4149df",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/battery-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-02-13T23:51:40Z",
+      "side": 1,
+      "message": "I would prefer static in cpp. I don\u0027t remember the details but last time zyy@ mentioned there are performance issues if we put static variable declarations in class headers.",
+      "parentUuid": "db7c7136_d278b9c0",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 53
+      },
+      "revId": "943e2a75c833ab3e971f4abeb6bcce3339f4e18e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cf1f52a7_db7dca3a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.h",
         "patchSetId": 2
