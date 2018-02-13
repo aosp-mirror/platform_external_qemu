@@ -13,7 +13,12 @@
 
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/base/threads/ThreadStore.h"
+#include "android/utils/debug.h"
+#include "android/utils/looper.h"
+
+#include <memory>
 
 namespace android {
 namespace base {
@@ -80,6 +85,46 @@ void ThreadLooper::setLooper(Looper* looper, bool own) {
 
     sStore->setLooper(looper, own);
 }
+
+class MainLoopClosureRunner {
+public:
+    MainLoopClosureRunner() :
+        mTimer(((Looper*)android_getMainLooper())->createTimer(
+            [](void* obj, Looper::Timer*) {
+                ((MainLoopClosureRunner*)obj)->runClosures(); },
+            (void*)this)) { }
+
+    void appendAndWake(ThreadLooper::Closure&& func) {
+        mPendingClosures.send(std::move(func));
+        if (!mTimer->isActive()) {
+            mTimer->startRelative(0);
+        }
+    }
+
+private:
+    void runClosures() {
+        ThreadLooper::Closure f;
+        while (mPendingClosures.tryReceive(&f)) { f(); }
+    }
+
+    std::unique_ptr<Looper::Timer> mTimer = {};
+    MessageChannel<ThreadLooper::Closure, 24> mPendingClosures;
+};
+
+static LazyInstance<MainLoopClosureRunner> sMainRunner = LAZY_INSTANCE_INIT;
+
+// static
+void ThreadLooper::runOnMainLooper(ThreadLooper::Closure&& func) {
+
+    if (!android_getMainLooper()) {
+        derror("ERROR: trying to run on main looper "
+               "without a main looper!");
+        return;
+    }
+
+    sMainRunner->appendAndWake(std::move(func));
+}
+
 
 }  // namespace base
 }  // namespace android
