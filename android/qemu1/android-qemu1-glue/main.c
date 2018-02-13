@@ -161,6 +161,10 @@ int main(int argc, char **argv) {
         avd, opts, hw, WINSYS_GLESBACKEND_PREFERENCE_AUTO,
         &rendererConfig);
 
+    if (gQAndroidBatteryAgent && gQAndroidBatteryAgent->setHasBattery) {
+        gQAndroidBatteryAgent->setHasBattery(android_hw->hw_battery);
+    }
+
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;
     uiEmuAgent.cellular = gQAndroidCellularAgent;

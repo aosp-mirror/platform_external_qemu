@@ -1155,6 +1155,10 @@ extern "C" int main(int argc, char** argv) {
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
 
+    if (gQAndroidBatteryAgent && gQAndroidBatteryAgent->setHasBattery) {
+        gQAndroidBatteryAgent->setHasBattery(android_hw->hw_battery);
+    }
+
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
     const UiEmuAgent uiEmuAgent = {
