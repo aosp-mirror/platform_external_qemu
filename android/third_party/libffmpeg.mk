@@ -10,6 +10,10 @@ $(call define-emulator-prebuilt-library,\
     $(FFMPEG_TOP_DIR)/lib/libavcodec.a)
 
 $(call define-emulator-prebuilt-library,\
+    emulator-libavdevice,\
+    $(FFMPEG_TOP_DIR)/lib/libavdevice.a)
+
+$(call define-emulator-prebuilt-library,\
     emulator-libavfilter,\
     $(FFMPEG_TOP_DIR)/lib/libavfilter.a)
 
@@ -37,13 +41,17 @@ $(call define-emulator-prebuilt-library,\
     emulator-libswresample,\
     $(FFMPEG_TOP_DIR)/lib/libswresample.a)
 
+
 FFMPEG_INCLUDES := $(FFMPEG_TOP_DIR)/include
 FFMPEG_STATIC_LIBRARIES := \
     emulator-libavformat \
+    emulator-libavdevice \
     emulator-libavfilter \
     emulator-libavcodec \
+    emulator-libavresample \
     emulator-libswresample \
     emulator-libswscale \
     emulator-libavutil \
+    emulator-libpostproc \
 
 LOCAL_PATH := $(FFMPEG_OLD_LOCAL_PATH)

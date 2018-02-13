@@ -41,6 +41,7 @@
 
 extern "C" {
 #include "libavformat/avformat.h"
+#include "libavdevice/avdevice.h"
 #include "libavutil/avassert.h"
 #include "libavutil/channel_layout.h"
 #include "libavutil/mathematics.h"
@@ -544,12 +545,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
     if (info == NULL || info->fileName == NULL)
         return NULL;
 
-    std::string tmpfile = info->fileName;
-    std::transform(tmpfile.begin(), tmpfile.end(), tmpfile.begin(), ::tolower);
-    if (!str_ends_with(tmpfile.c_str(), ".webm")) {
-        derror("%s must have a .webm extension\n", info->fileName);
-        return NULL;
-    }
+    std::string devfile = "/dev/video0";
 
     ffmpeg_recorder* recorder = new ffmpeg_recorder();
     if (recorder == NULL) {
@@ -563,12 +559,19 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
     // to register multiple times
     if (!sIsRegistered) {
         av_register_all();
+        avcodec_register_all();
+        avdevice_register_all();
         sIsRegistered = true;
     }
 
     // allocate the output media context
+    AVOutputFormat *ofmt = NULL;
+    while ((ofmt = av_oformat_next(ofmt))) {
+      derror("Available format: %s", ofmt->name);
+    }
     AVFormatContext* oc = NULL;
-    avformat_alloc_output_context2(&oc, NULL, NULL, recorder->path.c_str());
+
+    avformat_alloc_output_context2(&oc, NULL, "v4l2", devfile.c_str());
     if (oc == NULL) {
         delete recorder;
         return NULL;
@@ -577,9 +580,9 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
     AVOutputFormat* fmt = oc->oformat;
     // open the output file, if needed
     if (!(fmt->flags & AVFMT_NOFILE)) {
-        int ret = avio_open(&oc->pb, recorder->path.c_str(), AVIO_FLAG_WRITE);
+        int ret = avio_open(&oc->pb, devfile.c_str(), AVIO_FLAG_WRITE);
         if (ret < 0) {
-            derror("Could not open '%s': %s\n", recorder->path.c_str(),
+            derror("Could not open '%s': %s\n", devfile.c_str(),
                    avErr2Str(ret).c_str());
             avformat_free_context(oc);
             delete recorder;
@@ -591,7 +594,8 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
     recorder->start_time = android::base::System::get()->getHighResTimeUs();
 
     recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
-    recorder->video_st.codec_id = AV_CODEC_ID_VP9;
+    // recorder->video_st.codec_id = AV_CODEC_ID_VP9;
+    recorder->video_st.codec_id = AV_CODEC_ID_RAWVIDEO;
 
     recorder->fb_width = fb_width;
     recorder->fb_height = fb_height;

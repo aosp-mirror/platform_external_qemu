@@ -159,7 +159,7 @@ static intptr_t sendFrames(int fps) {
         if (f) {
             D("sending frame %d", i++);
             if (!globals.channel.trySend(std::move(*f))) {
-                dwarning("Frame queue full. Frame dropped");
+                derror("Frame queue full. Frame dropped");
             }
         }
 
@@ -172,7 +172,7 @@ static intptr_t sendFrames(int fps) {
         if (newTimeMs - startMs >= globals.recordingInfo.timeLimit * 1000) {
             D("Time limit reached (%lld ms). Stopping the recording",
               newTimeMs - startMs);
-            screen_recorder_stop(true);
+            // screen_recorder_stop(true);
             break;
         }
 
@@ -364,7 +364,8 @@ static intptr_t startRecording() {
                            globals.recordingInfo.height,
                            globals.recordingInfo.videoBitrate, kFPS,
                            kIntraSpacing);
-    ffmpeg_add_audio_track(globals.recorder, kAudioBitrate, kAudioSampleRate);
+    // We cannot write audio track to /dev/video0, so let's disable it for now.
+    // ffmpeg_add_audio_track(globals.recorder, kAudioBitrate, kAudioSampleRate);
     D("Added AV tracks");
 
     gpu_frame_set_record_mode(true);
@@ -400,12 +401,14 @@ static intptr_t startRecording() {
 }
 
 bool screen_recorder_start(const RecordingInfo* info, bool async) {
-    if (!parseRecordingInfo(info)) {
-        D("Unable to parse recording info");
-        return -1;
-    }
-
     auto& globals = *sGlobals;
+    RecordingInfo* sinfo = &globals.recordingInfo;
+    sinfo->fileName = "/dev/video0";
+    sinfo->width = globals.fbWidth;
+    sinfo->height = globals.fbHeight;
+    sinfo->videoBitrate = kMaxVideoBitrate;
+    sinfo->timeLimit = ULONG_MAX;
+
     auto current = RECORDER_READY;
     if (!globals.recorderState.compare_exchange_strong(current,
                                                        RECORDER_STARTING)) {
