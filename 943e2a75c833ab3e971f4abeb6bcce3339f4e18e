@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "db7c7136_d278b9c0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/battery-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-13T23:48:06Z",
+      "side": 1,
+      "message": "I also like having the declaration in the cpp, it is probly not going to save on compilation time, but I\u0027m a fan of keeping things in .cpp when possible / isn\u0027t painfil to do.",
+      "parentUuid": "e0fa5eac_61aa6d62",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 53
+      },
+      "revId": "943e2a75c833ab3e971f4abeb6bcce3339f4e18e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cf1f52a7_db7dca3a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.h",
         "patchSetId": 2
