@@ -13,7 +13,11 @@
 
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/MessageChannel.h"
+#include "android/base/threads/Async.h"
 #include "android/base/threads/ThreadStore.h"
+#include "android/utils/debug.h"
+#include "android/utils/looper.h"
 
 namespace android {
 namespace base {
@@ -80,6 +84,54 @@ void ThreadLooper::setLooper(Looper* looper, bool own) {
 
     sStore->setLooper(looper, own);
 }
+
+static void closureRunner();
+
+class MainLooperClosureRunner {
+public:
+    MainLooperClosureRunner() :
+        mLooper((Looper*)(android_getMainLooper())),
+        mTimer(
+            mLooper->createTimer(
+                [](void* f, Looper::Timer*) { ((void (*)())f)(); },
+                (void*)closureRunner)) { }
+
+    ~MainLooperClosureRunner() { delete mTimer; }
+
+    void appendAndWake(std::function<void()>&& func) {
+        toRun.send(std::move(func));
+        if (!mTimer->isActive()) {
+            mTimer->startRelative(0);
+        }
+    }
+
+    MessageChannel<std::function<void()>, 24> toRun;
+
+private:
+    Looper* mLooper = nullptr;
+    Looper::Timer* mTimer = nullptr;
+};
+
+static LazyInstance<MainLooperClosureRunner> sMainRunner = LAZY_INSTANCE_INIT;
+
+static void closureRunner() {
+    auto& runner = sMainRunner.get();
+
+    std::function<void()> f;
+    while (runner.toRun.tryReceive(&f)) { f(); }
+}
+
+// static
+void ThreadLooper::runOnMainLooper(std::function<void()>&& func) {
+
+    if (!android_getMainLooper()) {
+        derror("ERROR: trying to run on main looper "
+               "without a main looper!");
+    }
+
+    sMainRunner->appendAndWake(std::move(func));
+}
+
 
 }  // namespace base
 }  // namespace android
