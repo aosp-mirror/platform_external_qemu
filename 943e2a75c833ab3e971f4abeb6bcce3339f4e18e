@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a9e8d63_ac3331b6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/battery-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-02-13T21:48:34Z",
+      "side": 1,
+      "message": "could we remove the declaration from here and make it local to battery-page.cpp?",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 53
+      },
+      "revId": "943e2a75c833ab3e971f4abeb6bcce3339f4e18e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf1f52a7_db7dca3a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-02-13T21:48:34Z",
+      "side": 1,
+      "message": "same, would you remove the declaration here and make it local to the .cpp?",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 55
+      },
+      "revId": "943e2a75c833ab3e971f4abeb6bcce3339f4e18e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9853900_8054384f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/finger-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-02-13T21:48:34Z",
+      "side": 1,
+      "message": "move the declaration to cpp?",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 33,
+        "endChar": 51
+      },
+      "revId": "943e2a75c833ab3e971f4abeb6bcce3339f4e18e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc15f77f_095bb265",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-02-13T21:48:34Z",
+      "side": 1,
+      "message": "move to cpp?",
+      "range": {
+        "startLine": 54,
+        "startChar": 4,
+        "endLine": 54,
+        "endChar": 57
+      },
+      "revId": "943e2a75c833ab3e971f4abeb6bcce3339f4e18e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
