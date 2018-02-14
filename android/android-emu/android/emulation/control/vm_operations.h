@@ -26,6 +26,7 @@ typedef struct {
     int (*onStart)(void* opaque, const char* name);
     void (*onEnd)(void* opaque, const char* name, int res);
     void (*onQuickFail)(void* opaque, const char* name, int res);
+    bool (*isCanceled)(void* opaque, const char* name);
 } SnapshotCallbackSet;
 
 typedef enum {

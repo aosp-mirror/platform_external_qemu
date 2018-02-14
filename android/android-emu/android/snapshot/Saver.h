@@ -41,6 +41,10 @@ public:
 
     bool incrementallySaved() const { return mIncrementallySaved; }
 
+    void cancel();
+
+    bool canceled() const { return mStatus == OperationStatus::Canceled; }
+
 private:
     OperationStatus mStatus;
     Snapshot mSnapshot;

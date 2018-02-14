@@ -13,11 +13,11 @@
 #include "android/skin/qt/emulator-qt-window.h"
 
 #include "android/android.h"
+#include "android/base/Optional.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Async.h"
 #include "android/cpu_accelerator.h"
@@ -27,8 +27,8 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
-#include "android/metrics/metrics.h"
 #include "android/metrics/PeriodicReporter.h"
+#include "android/metrics/metrics.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
@@ -43,6 +43,7 @@
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
 #include "android/snapshot/Snapshotter.h"
+#include "android/snapshot/common.h"
 #include "android/test/checkboot.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
@@ -579,6 +580,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                         op == Snapshotter::Operation::Save ?
                                             tr("Saving state...") :
                                             tr("Loading state..."));
+                                    if (op == Snapshotter::Operation::Save) {
+                                        mContainer.setModalOverlayFunc(
+                                                tr("CANCEL"), [] {
+                                                    androidSnapshot_cancelSave();
+                                                });
+                                    }
                                 }
                             });
                         if (mToolWindow) {

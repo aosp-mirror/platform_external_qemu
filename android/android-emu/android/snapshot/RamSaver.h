@@ -28,6 +28,7 @@
 #include "android/snapshot/common.h"
 
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -60,6 +61,7 @@ public:
     void savePage(int64_t blockOffset, int64_t pageOffset, int32_t pageSize);
     void complete();
     void join();
+    void cancel();
     bool hasError() const { return mHasError; }
     bool compressed() const {
         return mIndex.flags & int32_t(IndexFlags::CompressedPages);
@@ -150,6 +152,8 @@ private:
     int mLastBlockIndex = -1;
     int64_t mCurrentStreamPos = 8;
 
+    std::atomic<bool> mCanceled{false};
+    std::atomic<bool> mStopping{false};
     base::Optional<base::ThreadPool<QueuedPageInfo>> mWorkers;
     base::Optional<base::WorkerThread<WriteInfo>> mWriter;
 

@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <QBoxLayout>
 #include <QString>
 #include <QWidget>
 
@@ -28,6 +29,7 @@ class ModalOverlay : public QWidget {
 public:
     // A callback to call when some operation completes.
     using CompletionFunc = std::function<void(ModalOverlay* self)>;
+    using OverlayButtonFunc = std::function<void()>;
 
     explicit ModalOverlay(QString message, QWidget* parent = nullptr);
 
@@ -37,12 +39,22 @@ public:
 
     void resize(const QSize& size, const QSize& parentSize);
 
+    // Displays a secondary, clickable link to perform some action.
+    void showButtonFunc(QString text, OverlayButtonFunc&& func);
+
+public slots:
+    void slot_handleButtonFunc();
+
 private:
     void showEvent(QShowEvent* event) override;
     void updateStylesheet(int borderRaduis);
 
     QFrame* mTopFrame = nullptr;
+    QVBoxLayout* mInnerLayout = nullptr;
+
     int mBorderRadius = -1;
+
+    OverlayButtonFunc mButtonFunc;
 };
 
 }  // namespace Ui

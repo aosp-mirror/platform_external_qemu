@@ -110,49 +110,65 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
             // ops
             {
                     // save
-                    {// start
+                    {// onStart
                      [](void* opaque, const char* name) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          return snapshot->onStartSaving(name) ? 0 : -1;
                      },
-                     // end
+                     // onEnd
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onSavingComplete(name, res);
                      },
-                     // quick fail
+                     // onQuickFail
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onSavingFailed(name, res);
+                     },
+                     // isCanceled
+                     [](void* opaque, const char* name) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         return snapshot->isSavingCanceled(name);
                      }},
                     // load
-                    {// start
+                    {// onStart
                      [](void* opaque, const char* name) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          return snapshot->onStartLoading(name) ? 0 : -1;
                      },
-                     // end
+                     // onEnd
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onLoadingComplete(name, res);
-                     },  // quick fail
+                     },
+                     // onQuickFail
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onLoadingFailed(name, res);
+                     },
+                     // isCanceled
+                     [](void* opaque, const char* name) {
+                         // TODO: Implement load cancel if necessary
+                         return false;
                      }},
                     // del
-                    {// start
+                    {// onStart
                      [](void* opaque, const char* name) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          return snapshot->onStartDelete(name) ? 0 : -1;
                      },
-                     // end
+                     // onEnd
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onDeletingComplete(name, res);
                      },
-                     // quick fail
-                     [](void*, const char*, int) {}},
+                     // onQuickFail
+                     [](void*, const char*, int) {},
+                     // isCanceled
+                     [](void* opaque, const char* name) {
+                         // TODO: Implement delete cancel if necessary
+                         return false;
+                     }},
             },
             // ramOps
             {// registerBlock
@@ -497,18 +513,27 @@ void Snapshotter::handleGenericSave(const char* name,
             StringFormat(
                 "Snapshot save for snapshot '%s' failed. "
                 "Cleaning it out", name));
-        deleteSnapshot(name);
+
         if (reportMetrics) {
-            if (auto failureReason = saver().snapshot().failureReason()) {
-                appendFailedSave(pb::EmulatorSnapshotSaveState::
-                                     EMULATOR_SNAPSHOT_SAVE_FAILED,
-                                 *failureReason);
+            if (mSaver) {
+                if (auto failureReason = saver().snapshot().failureReason()) {
+                    appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                             EMULATOR_SNAPSHOT_SAVE_FAILED,
+                                     *failureReason);
+                } else {
+                    appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                             EMULATOR_SNAPSHOT_SAVE_FAILED,
+                                     FailureReason::InternalError);
+                }
             } else {
                 appendFailedSave(pb::EmulatorSnapshotSaveState::
-                                     EMULATOR_SNAPSHOT_SAVE_FAILED,
+                                         EMULATOR_SNAPSHOT_SAVE_FAILED,
                                  FailureReason::InternalError);
             }
         }
+
+        deleteSnapshot(name);
+
     } else {
         if (reportMetrics) {
             appendSuccessfulSave(name,
@@ -591,6 +616,24 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
     return mSaver->status();
 }
 
+void Snapshotter::cancelSave() {
+    if (!mSaver)
+        return;
+
+    mSaver->cancel();
+}
+
+bool Snapshotter::isSavingCanceled(const char* name) const {
+    if (!mSaver)
+        return false;
+
+    if (name && (mSaver->snapshot().name() != base::StringView(name))) {
+        return false;
+    }
+
+    return false;
+}
+
 OperationStatus Snapshotter::saveGeneric(const char* name) {
     OperationStatus res = OperationStatus::Error;
     if (checkSafeToSave(name)) {
@@ -667,10 +710,13 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     mSaver->complete(res == 0);
     CrashReporter::get()->hangDetector().pause(false);
     callCallbacks(Operation::Save, Stage::End);
-    bool good = mSaver->status() != OperationStatus::Error;
+    bool good = mSaver->status() != OperationStatus::Error &&
+                mSaver->status() != OperationStatus::Canceled;
+
     if (good) {
         Hierarchy::get()->currentInfo();
     }
+
     return good;
 }
 
