@@ -22,7 +22,7 @@ class FingerPage : public QWidget
 
 public:
     explicit FingerPage(QWidget *parent = 0);
-    void setFingerAgent(const QAndroidFingerAgent* agent);
+    static void setFingerAgent(const QAndroidFingerAgent* agent);
 
 private slots:
     void on_finger_touchButton_pressed();
@@ -30,5 +30,4 @@ private slots:
 
 private:
     std::unique_ptr<Ui::FingerPage> mUi;
-    const QAndroidFingerAgent* mFingerAgent;
 };

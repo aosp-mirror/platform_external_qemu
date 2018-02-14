@@ -16,12 +16,14 @@
 #include <memory>
 
 struct QAndroidBatteryAgent;
+
 class BatteryPage : public QWidget {
     Q_OBJECT
 
 public:
     explicit BatteryPage(QWidget *parent = 0);
-    void setBatteryAgent(const QAndroidBatteryAgent* agent);
+
+    static void setBatteryAgent(const QAndroidBatteryAgent* agent);
 
 private slots:
     void on_bat_chargerBox_activated(int value);
@@ -36,7 +38,4 @@ private:
 
 private:
     std::unique_ptr<Ui::BatteryPage> mUi;
-
-    // Must be protected by the BQL!
-    const QAndroidBatteryAgent* mBatteryAgent;
 };

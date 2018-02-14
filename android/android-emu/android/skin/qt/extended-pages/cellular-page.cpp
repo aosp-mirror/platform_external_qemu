@@ -11,6 +11,7 @@
 #include "android/skin/qt/extended-pages/cellular-page.h"
 
 #include "android/emulation/control/cellular_agent.h"
+#include "android/emulation/VmLock.h"
 #include "android/emulator-window.h"
 #include "android/main-common.h"
 #include "android/skin/qt/qt-settings.h"
@@ -18,13 +19,16 @@
 
 #include <QSettings>
 
+// Must be protected by the BQL!
+static const QAndroidCellularAgent* sCellularAgent = nullptr;
+
 CellularPage::CellularPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::CellularPage())
 {
     mUi->setupUi(this);
 
-    // Restore previous values
+    // Restore previous setting values to the UI widgets
     QSettings settings;
 
     // Network type
@@ -63,11 +67,14 @@ bool CellularPage::simIsPresent() {
     return true;
 }
 
+// static
 void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
 
     if (!agent) return;
 
-    mCellularAgent = agent;
+    android::RecursiveScopedVmLock vmlock;
+
+    sCellularAgent = agent;
 
     // Network parameters
 
@@ -83,24 +90,32 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
     QSettings settings;
 
     // Network type
-    int cStandard = settings.value(Ui::Settings::CELLULAR_NETWORK_TYPE,
-                                   Cellular_Std_full).toInt();
-    mCellularAgent->setStandard((CellularStandard)cStandard);
+    if (sCellularAgent->setStandard) {
+        int cStandard = settings.value(Ui::Settings::CELLULAR_NETWORK_TYPE,
+                                       Cellular_Std_full).toInt();
+        sCellularAgent->setStandard((CellularStandard)cStandard);
+    }
 
     // Signal strength
-    int cStrength = settings.value(Ui::Settings::CELLULAR_SIGNAL_STRENGTH,
-                                   Cellular_Signal_Moderate).toInt();
-    mCellularAgent->setSignalStrengthProfile((CellularSignal)cStrength);
+    if (sCellularAgent->setSignalStrengthProfile) {
+        int cStrength = settings.value(Ui::Settings::CELLULAR_SIGNAL_STRENGTH,
+                                       Cellular_Signal_Moderate).toInt();
+        sCellularAgent->setSignalStrengthProfile((CellularSignal)cStrength);
+    }
 
     // Voice status
-    int voiceStatus = settings.value(Ui::Settings::CELLULAR_VOICE_STATUS,
-                                     Cellular_Stat_Home).toInt();
-    mCellularAgent->setVoiceStatus((CellularStatus)voiceStatus);
+    if (sCellularAgent->setVoiceStatus) {
+        int voiceStatus = settings.value(Ui::Settings::CELLULAR_VOICE_STATUS,
+                                         Cellular_Stat_Home).toInt();
+        sCellularAgent->setVoiceStatus((CellularStatus)voiceStatus);
+    }
 
     // Data status
-    int dataStatus = settings.value(Ui::Settings::CELLULAR_DATA_STATUS,
-                                    Cellular_Stat_Home).toInt();
-    mCellularAgent->setDataStatus((CellularStatus)dataStatus);
+    if (sCellularAgent->setDataStatus) {
+        int dataStatus = settings.value(Ui::Settings::CELLULAR_DATA_STATUS,
+                                        Cellular_Stat_Home).toInt();
+        sCellularAgent->setDataStatus((CellularStatus)dataStatus);
+    }
 }
 
 void CellularPage::on_cell_standardBox_currentIndexChanged(int index)
@@ -108,9 +123,10 @@ void CellularPage::on_cell_standardBox_currentIndexChanged(int index)
     QSettings settings;
     settings.setValue(Ui::Settings::CELLULAR_NETWORK_TYPE, index);
 
-    if (mCellularAgent && mCellularAgent->setStandard) {
+    android::RecursiveScopedVmLock vmlock;
+    if (sCellularAgent && sCellularAgent->setStandard) {
         CellularStandard cStandard = (CellularStandard)index;
-        mCellularAgent->setStandard(cStandard);
+        sCellularAgent->setStandard(cStandard);
     }
 }
 
@@ -119,9 +135,10 @@ void CellularPage::on_cell_voiceStatusBox_currentIndexChanged(int index)
     QSettings settings;
     settings.setValue(Ui::Settings::CELLULAR_VOICE_STATUS, index);
 
-    if (mCellularAgent && mCellularAgent->setVoiceStatus) {
+    android::RecursiveScopedVmLock vmlock;
+    if (sCellularAgent && sCellularAgent->setVoiceStatus) {
         CellularStatus vStatus = (CellularStatus)index;
-        mCellularAgent->setVoiceStatus(vStatus);
+        sCellularAgent->setVoiceStatus(vStatus);
     }
 }
 
@@ -130,9 +147,10 @@ void CellularPage::on_cell_dataStatusBox_currentIndexChanged(int index)
     QSettings settings;
     settings.setValue(Ui::Settings::CELLULAR_DATA_STATUS, index);
 
-    if (mCellularAgent && mCellularAgent->setDataStatus) {
+    android::RecursiveScopedVmLock vmlock;
+    if (sCellularAgent && sCellularAgent->setDataStatus) {
         CellularStatus dStatus = (CellularStatus)index;
-        mCellularAgent->setDataStatus(dStatus);
+        sCellularAgent->setDataStatus(dStatus);
     }
 }
 
@@ -141,8 +159,9 @@ void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index)
     QSettings settings;
     settings.setValue(Ui::Settings::CELLULAR_SIGNAL_STRENGTH, index);
 
-    if (mCellularAgent && mCellularAgent->setSignalStrengthProfile) {
+    android::RecursiveScopedVmLock vmlock;
+    if (sCellularAgent && sCellularAgent->setSignalStrengthProfile) {
         CellularSignal signal = (CellularSignal)index;
-        mCellularAgent->setSignalStrengthProfile(signal);
+        sCellularAgent->setSignalStrengthProfile(signal);
     }
 }

@@ -11,8 +11,11 @@
 
 #include "android/skin/qt/extended-pages/finger-page.h"
 #include "android/emulation/control/finger_agent.h"
+#include "android/emulation/VmLock.h"
 
 #include "android/globals.h"
+
+static const QAndroidFingerAgent* sFingerAgent = nullptr;
 
 FingerPage::FingerPage(QWidget *parent) :
     QWidget(parent),
@@ -64,19 +67,23 @@ void FingerPage::on_finger_touchButton_pressed()
     // Send the ID associated with the selected fingerprint
     int fingerID = mUi->finger_pickBox->currentData().toInt();
 
-    if (mFingerAgent && mFingerAgent->setTouch) {
-        mFingerAgent->setTouch(true, fingerID);
+    android::RecursiveScopedVmLock vmlock;
+    if (sFingerAgent && sFingerAgent->setTouch) {
+        sFingerAgent->setTouch(true, fingerID);
     }
 }
 
 void FingerPage::on_finger_touchButton_released()
 {
-    if (mFingerAgent && mFingerAgent->setTouch) {
-        mFingerAgent->setTouch(false, 0);
+    android::RecursiveScopedVmLock vmlock;
+    if (sFingerAgent && sFingerAgent->setTouch) {
+        sFingerAgent->setTouch(false, 0);
     }
 }
 
+// static
 void FingerPage::setFingerAgent(const QAndroidFingerAgent* agent)
 {
-    mFingerAgent = agent;
+    android::RecursiveScopedVmLock vmlock;
+    sFingerAgent = agent;
 }
