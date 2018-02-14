@@ -12,6 +12,7 @@
 
 #include "android/android.h"
 #include "android/boot-properties.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
@@ -42,7 +43,7 @@
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
-int qemu_main(int argc, char **argv);
+extern "C" int qemu_main(int argc, char **argv);
 
 void enter_qemu_main_loop(int argc, char **argv) {
 #ifndef _WIN32
@@ -62,7 +63,7 @@ void enter_qemu_main_loop(int argc, char **argv) {
 #define main qt_main
 #endif
 
-int main(int argc, char **argv) {
+extern "C" int main(int argc, char **argv) {
     char* args[128];
     AndroidHwConfig* hw = android_hw;
     AvdInfo* avd;
@@ -298,7 +299,9 @@ int main(int argc, char **argv) {
                              qemu_parameters_size(qemuParams),
                              qemu_parameters_array(qemuParams));
 
+    android::crashreport::CrashReporter::get()->hangDetector().pause(false);
     skin_winsys_enter_main_loop(opts->no_window);
+    android::crashreport::CrashReporter::get()->hangDetector().pause(true);
 
     stopRenderer();
     emulator_finiUserInterface();

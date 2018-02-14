@@ -13,8 +13,11 @@
 #pragma once
 
 #include "android/emulation/serial_line.h"
+#include "android/utils/compiler.h"
 
 #include <stdbool.h>
+
+ANDROID_BEGIN_HEADER
 
 /* this chardriver is used to read the kernel messages coming
  * from the first serial port (i.e. /dev/ttyS0) and store them
@@ -29,3 +32,5 @@ typedef enum {
 extern bool  android_kmsg_init(AndroidKmsgFlags flags);
 
 extern CSerialLine* android_kmsg_get_serial_line(void);
+
+ANDROID_END_HEADER
