@@ -288,7 +288,6 @@ void stream_get_timer(Stream* stream, LoopTimer* timer);
 // as the main looper).
 void android_registerMainLooper(Looper* looper);
 Looper* android_getMainLooper();
-void android_runOnMainLooper(void (*func)());
 
 /* */
 

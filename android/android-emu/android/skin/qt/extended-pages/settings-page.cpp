@@ -11,6 +11,7 @@
 
 #include "android/skin/qt/extended-pages/settings-page.h"
 
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
@@ -19,7 +20,6 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/snapshot/interface.h"
-#include "android/utils/looper.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -353,7 +353,7 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
 void SettingsPage::on_set_saveSnapNowButton_clicked() {
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
-    android_runOnMainLooper( []() { androidSnapshot_save("default_boot"); } );
+    android::base::ThreadLooper::runOnMainLooper( []() { androidSnapshot_save("default_boot"); } );
 }
 
 void SettingsPage::on_set_adbPathButton_clicked() {

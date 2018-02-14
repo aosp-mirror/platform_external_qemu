@@ -36,6 +36,10 @@ public:
     // Note that |looper| will be stored in thread-local storage but will
     // not be destroyed when the thread exits (unless |own| is true).
     static void setLooper(Looper* looper, bool own = false);
+
+    // Run the specified std::function on the main loop.
+    using Closure = std::function<void()>;
+    static void runOnMainLooper(Closure&& func);
 };
 
 }  // namespace base
