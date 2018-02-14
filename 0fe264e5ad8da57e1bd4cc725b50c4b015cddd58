@@ -72,6 +72,54 @@
     },
     {
       "key": {
+        "uuid": "aa679e8d_dfac70a2",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T15:58:37Z",
+      "side": 1,
+      "message": "Done\n\n- folded implementation of runOnMainLooper into here\n- we Ain\u0027t Gonna Need the synchronous version for now",
+      "parentUuid": "068d5d0b_8add6b69",
+      "range": {
+        "startLine": 119,
+        "startChar": 4,
+        "endLine": 119,
+        "endChar": 27
+      },
+      "revId": "0fe264e5ad8da57e1bd4cc725b50c4b015cddd58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c62dc699_c5abaa4f",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T15:58:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59e1ea77_642376e2",
+      "range": {
+        "startLine": 119,
+        "startChar": 4,
+        "endLine": 119,
+        "endChar": 27
+      },
+      "revId": "0fe264e5ad8da57e1bd4cc725b50c4b015cddd58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ef658cc_dab1441b",
         "filename": "android/android-emu/android/base/async/ThreadLooper.h",
         "patchSetId": 1
@@ -83,6 +131,30 @@
       "writtenOn": "2018-02-14T00:25:20Z",
       "side": 1,
       "message": "what people usually pass here is a temporary object constructed right there. That\u0027s why having a function\u0026\u0026 is usually more efficient than const \u0026",
+      "range": {
+        "startLine": 41,
+        "startChar": 37,
+        "endLine": 41,
+        "endChar": 64
+      },
+      "revId": "0fe264e5ad8da57e1bd4cc725b50c4b015cddd58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0493eb81_da7cf310",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T15:58:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ef658cc_dab1441b",
       "range": {
         "startLine": 41,
         "startChar": 37,
