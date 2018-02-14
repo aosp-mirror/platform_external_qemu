@@ -18,6 +18,7 @@
 #include <QLabel>
 #include <QMovie>
 #include <QPropertyAnimation>
+#include <QPushButton>
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -80,6 +81,7 @@ ModalOverlay::ModalOverlay(QString message, QWidget* parent) : QWidget(parent) {
     }
     innerLayout->addStretch();
     mTopFrame->setLayout(innerLayout);
+    mInnerLayout = innerLayout;
 }
 
 void ModalOverlay::show() {
@@ -113,6 +115,22 @@ void ModalOverlay::resize(const QSize& size, const QSize& parentSize) {
     const auto newBorderRadius =
             std::min(std::max(0, diff), kDefaultBorderRadius);
     updateStylesheet(newBorderRadius);
+}
+
+void ModalOverlay::showButtonFunc(QString text,
+                                  ModalOverlay::OverlayButtonFunc&& f) {
+    mButtonFunc = f;
+
+    auto funcButton = new QPushButton(text, mTopFrame);
+    funcButton->setStyleSheet(
+            QString("font-size: %1;")
+                    .arg(Ui::stylesheetFontSize(Ui::FontSize::Huge)));
+    connect(funcButton, SIGNAL (released()), this, SLOT(slot_handleButtonFunc()));
+    mInnerLayout->addWidget(funcButton);
+}
+
+void ModalOverlay::slot_handleButtonFunc() {
+    mButtonFunc();
 }
 
 void ModalOverlay::showEvent(QShowEvent* event) {
