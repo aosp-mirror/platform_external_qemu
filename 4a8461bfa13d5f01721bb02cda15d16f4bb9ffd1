@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "08c24b82_f8f4e613",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/battery-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-14T18:19:45Z",
+      "side": 1,
+      "message": "general question: why did we pick BQL for this kind of variables? BQL is a very high-contended and performance-critical lock, so choosing it for UI-related variables looks strange to me",
+      "range": {
+        "startLine": 19,
+        "startChar": 28,
+        "endLine": 19,
+        "endChar": 31
+      },
+      "revId": "4a8461bfa13d5f01721bb02cda15d16f4bb9ffd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
