@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f9598574_872c84e2",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T18:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c39a1050_44b735bb",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 39
+      },
+      "revId": "3042bbbf7a2db3b8166b7341299621f0bc448d88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "42c6fcaa_6e28bc00",
         "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "043c4b58_38a81f78",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T18:47:33Z",
+      "side": 1,
+      "message": "This is needed to retrieve the main looper.",
+      "parentUuid": "42c6fcaa_6e28bc00",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 33
+      },
+      "revId": "3042bbbf7a2db3b8166b7341299621f0bc448d88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4b9cc77e_cc138eef",
         "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2018-02-14T18:09:27Z",
       "side": 1,
       "message": "nit: pass |this| as |f| here, and call this-\u003erunPendingFunctions() there.\nthis way you wouldn\u0027t need to have a separate closureRunner()",
+      "range": {
+        "startLine": 96,
+        "startChar": 17,
+        "endLine": 97,
+        "endChar": 41
+      },
+      "revId": "3042bbbf7a2db3b8166b7341299621f0bc448d88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2cd75296_de8847c2",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T18:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4b9cc77e_cc138eef",
       "range": {
         "startLine": 96,
         "startChar": 17,
@@ -117,6 +189,54 @@
     },
     {
       "key": {
+        "uuid": "c716dde3_4cc54988",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T18:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77e7c48a_863ce72c",
+      "range": {
+        "startLine": 108,
+        "startChar": 46,
+        "endLine": 108,
+        "endChar": 51
+      },
+      "revId": "3042bbbf7a2db3b8166b7341299621f0bc448d88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4cb7ef50_f2d9692f",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T18:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "902a13ca_778554ee",
+      "range": {
+        "startLine": 108,
+        "startChar": 22,
+        "endLine": 108,
+        "endChar": 40
+      },
+      "revId": "3042bbbf7a2db3b8166b7341299621f0bc448d88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3135e9fd_7df41c74",
         "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2018-02-14T18:09:27Z",
       "side": 1,
       "message": "not sure if is ever used other than in the ctor",
+      "range": {
+        "startLine": 111,
+        "startChar": 4,
+        "endLine": 111,
+        "endChar": 30
+      },
+      "revId": "3042bbbf7a2db3b8166b7341299621f0bc448d88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289f3688_4dccfcfd",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T18:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3135e9fd_7df41c74",
       "range": {
         "startLine": 111,
         "startChar": 4,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "7c1279ab_52bca6d4",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T18:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4db52b8a_ef8718a3",
+      "range": {
+        "startLine": 112,
+        "startChar": 28,
+        "endLine": 112,
+        "endChar": 35
+      },
+      "revId": "3042bbbf7a2db3b8166b7341299621f0bc448d88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ff450f64_57157c6b",
         "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
         "patchSetId": 2
@@ -174,6 +342,30 @@
       "writtenOn": "2018-02-14T18:09:27Z",
       "side": 1,
       "message": "add a return here?",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 41
+      },
+      "revId": "3042bbbf7a2db3b8166b7341299621f0bc448d88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8345ad05_566e7204",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T18:47:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ff450f64_57157c6b",
       "range": {
         "startLine": 128,
         "startChar": 0,
