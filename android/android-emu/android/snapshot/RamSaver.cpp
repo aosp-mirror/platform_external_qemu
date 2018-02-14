@@ -132,6 +132,8 @@ void RamSaver::registerBlock(const RamBlock& block) {
 void RamSaver::savePage(int64_t blockOffset,
                         int64_t /*pageOffset*/,
                         int32_t /*pageSize*/) {
+    if (mCanceled) return;
+
     if (mLastBlockIndex < 0) {
         mLastBlockIndex = 0;
 #if SNAPSHOT_PROFILE > 1
@@ -180,6 +182,11 @@ void RamSaver::join() {
     passToSaveHandler({kStopMarkerIndex, 0});
     mJoined = true;
     mIndex.clear();
+}
+
+void RamSaver::cancel() {
+    mCanceled = true;
+    join();
 }
 
 void RamSaver::calcHash(FileIndex::Block::Page& page,
@@ -244,6 +251,8 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
 }
 
 bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
+    if (mCanceled) return false;
+
     assert(pi.blockIndex != kStopMarkerIndex);
 
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];

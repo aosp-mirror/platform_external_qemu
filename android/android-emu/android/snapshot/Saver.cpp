@@ -158,5 +158,18 @@ void Saver::complete(bool succeeded) {
     mStatus = OperationStatus::Ok;
 }
 
+void Saver::cancel() {
+    mStatus = OperationStatus::Canceled;
+
+    if (mRamSaver) {
+        mRamSaver->cancel();
+    }
+
+    fprintf(stderr, "%s: now cancel texts\n", __func__);
+    // TODO next: texture saver cancel
+
+    path_delete_dir(mSnapshot.dataDir().c_str());
+}
+
 }  // namespace snapshot
 }  // namespace android

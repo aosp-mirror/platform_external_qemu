@@ -60,6 +60,7 @@ public:
     void savePage(int64_t blockOffset, int64_t pageOffset, int32_t pageSize);
     void complete();
     void join();
+    void cancel();
     bool hasError() const { return mHasError; }
     bool compressed() const {
         return mIndex.flags & int32_t(IndexFlags::CompressedPages);
@@ -144,6 +145,7 @@ private:
     base::StdioStream mStream;
     int mStreamFd;
     Flags mFlags;
+    bool mCanceled = false;
     bool mJoined = false;
     bool mHasError = false;
     bool mLoaderOnDemand = false;

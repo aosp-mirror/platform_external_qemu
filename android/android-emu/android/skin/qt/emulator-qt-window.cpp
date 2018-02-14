@@ -579,6 +579,11 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                         op == Snapshotter::Operation::Save ?
                                             tr("Saving state...") :
                                             tr("Loading state..."));
+                                    QTimer::singleShot(500, QApplication::instance(),
+                                        [this]() {
+                                            mContainer.setModalOverlayFunc(
+                                                "Cancel save",
+                                                [] { androidSnapshot_cancelSave(); }); });
                                 }
                             });
                         if (mToolWindow) {

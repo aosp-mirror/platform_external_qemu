@@ -1033,6 +1033,8 @@ void qemu_savevm_state_begin(QEMUFile *f,
     }
 }
 
+static QEMUSnapshotCallbacks s_snapshot_callbacks = {};
+
 /*
  * this function has three return values:
  *   negative: there was one error, and we have -errno.
@@ -1046,6 +1048,12 @@ int qemu_savevm_state_iterate(QEMUFile *f, bool postcopy)
 
     trace_savevm_state_iterate();
     QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
+        if (s_snapshot_callbacks.savevm.query_canceled) {
+            if (s_snapshot_callbacks.savevm.query_canceled(0)) {
+                fprintf(stderr, "%s: canceled!!!!!!!!!!!!!\n", __func__);
+                return 0;
+            }
+        }
         if (!se->ops || !se->ops->save_live_iterate) {
             continue;
         }
@@ -2175,8 +2183,6 @@ int qemu_loadvm_state(QEMUFile *f)
     return ret;
 }
 
-static QEMUSnapshotCallbacks s_snapshot_callbacks = {};
-
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks)
 {
     if (callbacks) {
@@ -2241,6 +2247,11 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
     struct tm tm;
     Error *local_err = NULL;
     AioContext *aio_context;
+
+    if (s_snapshot_callbacks.savevm.query_canceled) {
+        fprintf(stderr, "%s: queryCancel callback avail. curr %d\n", __func__,
+                s_snapshot_callbacks.savevm.query_canceled(name));
+    }
 
     if (!bdrv_all_can_snapshot(&bs)) {
         if (s_snapshot_callbacks.savevm.on_quick_fail) {

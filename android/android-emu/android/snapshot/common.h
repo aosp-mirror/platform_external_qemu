@@ -39,7 +39,8 @@ enum class IndexFlags {
 enum class OperationStatus {
     NotStarted = SNAPSHOT_STATUS_NOT_STARTED,
     Ok = SNAPSHOT_STATUS_OK,
-    Error = SNAPSHOT_STATUS_ERROR
+    Error = SNAPSHOT_STATUS_ERROR,
+    Canceled = SNAPSHOT_STATUS_CANCELED,
 };
 
 enum class FailureReason {
