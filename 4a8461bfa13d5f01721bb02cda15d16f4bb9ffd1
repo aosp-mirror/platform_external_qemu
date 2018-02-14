@@ -46,6 +46,30 @@
       "revId": "4a8461bfa13d5f01721bb02cda15d16f4bb9ffd1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28ca0b90_be650379",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/battery-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-14T21:32:49Z",
+      "side": 1,
+      "message": "then I believe that we need to have a general wrapper class for these kind of agents, so the BQL lock is a part of the call and is transparent to the user. Knowing implementation details of the agent just doesn\u0027t scale to all use places and all team members",
+      "parentUuid": "d64b6c48_fd0c9399",
+      "range": {
+        "startLine": 19,
+        "startChar": 28,
+        "endLine": 19,
+        "endChar": 31
+      },
+      "revId": "4a8461bfa13d5f01721bb02cda15d16f4bb9ffd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
