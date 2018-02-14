@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ccc48c7f_4fe1175b",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-14T00:25:20Z",
+      "side": 1,
+      "message": "this one already creates a thread to run the code. In the async version you\u0027re creating another thread to create this thread and wait for it. This is getting out of hand :)\n\nWhat about a MessageChannel for a set of functions to run, and a timer create on the main looper that runs those? You would be able to submit a function to run asyncronously, or wrap the function user passed into your own one, that releases the semaphore object (like with Qt signals) and try acquiring it after starting the timer? something like this:\n\nglobal MessageChannel\u003cFunction\u003e functionsToRun\nglobal timer runnerTimer \u003d mainLoop.createTimer([] { while (functionsToRun.tryReceive(\u0026f)) { f(); }})\n\nrunAsync(function f) { functionsToRun.send(f); if (!runnerTimer.isActive()) runnerTimer.startRelative(0); }\n\nrunSync(function f) {\nSemaphore s;\nfunctionsToRun.send([\u0026s, f \u003d std::move(f)] {\n    f();\n    s.release();\n});\nif (!runnerTimer.isActive()) runnerTimer.startRelative(0);\ns.acquire();\n}",
+      "range": {
+        "startLine": 119,
+        "startChar": 4,
+        "endLine": 119,
+        "endChar": 27
+      },
+      "revId": "0fe264e5ad8da57e1bd4cc725b50c4b015cddd58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ef658cc_dab1441b",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-14T00:25:20Z",
+      "side": 1,
+      "message": "what people usually pass here is a temporary object constructed right there. That\u0027s why having a function\u0026\u0026 is usually more efficient than const \u0026",
+      "range": {
+        "startLine": 41,
+        "startChar": 37,
+        "endLine": 41,
+        "endChar": 64
+      },
+      "revId": "0fe264e5ad8da57e1bd4cc725b50c4b015cddd58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
