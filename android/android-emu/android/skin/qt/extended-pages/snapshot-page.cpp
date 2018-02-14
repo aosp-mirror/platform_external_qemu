@@ -68,7 +68,7 @@ void SnapshotPage::on_snapshotDisplay_itemClicked(QTreeWidgetItem* theItem, int 
         QAction* actionClone  = nullptr;
 //        QAction* actionEdit   = nullptr;
 
-        QAction* actionLoad   = menu.addAction(tr("Load"));
+//        QAction* actionLoad   = menu.addAction(tr("Load"));
         if (theSnapItem->fileName() == "default_boot") {
             actionClone = menu.addAction(tr("Clone"));
 //        } else {
@@ -93,13 +93,17 @@ void SnapshotPage::on_snapshotDisplay_itemClicked(QTreeWidgetItem* theItem, int 
 //            editSnapshot(theSnapItem);
         } else if (theAction == actionExport) {
             exportSnapshot(theSnapItem);
-        } else if (theAction == actionLoad) {
-            loadSnapshot(theSnapItem);
+//        } else if (theAction == actionLoad) {
+//            loadSnapshot(theSnapItem);
         }
     }
 }
 
-void SnapshotPage::deleteSnapshot(WidgetSnapshotItem* theItem) {
+void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
+    if (!theItem) {
+        return;
+    }
+
     QString logicalName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
     QString fileName = theItem->fileName();
 
@@ -129,16 +133,11 @@ void SnapshotPage::exportSnapshot(WidgetSnapshotItem* theItem) {
     printf("snapshot-page.cpp: exportSnapshot() is not implemented\n");
 }
 
-void SnapshotPage::loadSnapshot(WidgetSnapshotItem* theItem) {
-    QString fileName = theItem->fileName();
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    android::base::ThreadLooper::runOnMainLooper([fileName] {
-        androidSnapshot_load(fileName.toStdString().c_str()); } );
-    populateSnapshotDisplay();
-    QApplication::restoreOverrideCursor();
-}
+void SnapshotPage::editSnapshot(const WidgetSnapshotItem* theItem) {
+    if (!theItem) {
+        return;
+    }
 
-void SnapshotPage::editSnapshot(WidgetSnapshotItem* theItem) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
 
@@ -239,28 +238,34 @@ QString SnapshotPage::getDescription(QString fileName) {
     return QString(protobuf->description().c_str());
 }
 
-void SnapshotPage::on_editSnapshot_clicked() {
+const SnapshotPage::WidgetSnapshotItem* SnapshotPage::getSelectedSnapshot() {
     const QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
 
     if (selectedItems.size() == 0) {
         // Nothing selected
-        return;
+        return nullptr;
     }
-    // Grab the first selected element--multiple selections are not allowed
-    WidgetSnapshotItem* theItem = static_cast<WidgetSnapshotItem*>(selectedItems[0]);
-    editSnapshot(theItem);
+    // Return the first selected element--multiple selections are not allowed
+    return static_cast<WidgetSnapshotItem*>(selectedItems[0]);
+}
+
+void SnapshotPage::on_editSnapshot_clicked() {
+    editSnapshot(getSelectedSnapshot());
 }
 
 void SnapshotPage::on_deleteSnapshot_clicked() {
-    const QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
+    deleteSnapshot(getSelectedSnapshot());
+}
 
-    if (selectedItems.size() == 0) {
-        // Nothing selected
-        return;
-    }
-    // Grab the first selected element--multiple selections are not allowed
-    WidgetSnapshotItem* theItem = static_cast<WidgetSnapshotItem*>(selectedItems[0]);
-    deleteSnapshot(theItem);
+void SnapshotPage::on_loadSnapshot_clicked() {
+    const WidgetSnapshotItem* theItem = getSelectedSnapshot();
+    if (!theItem) return;
+
+    QString fileName = theItem->fileName();
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    androidSnapshot_load(fileName.toStdString().c_str());
+    populateSnapshotDisplay();
+    QApplication::restoreOverrideCursor();
 }
 
 void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
@@ -350,12 +355,8 @@ void SnapshotPage::showEvent(QShowEvent* ee) {
     // The snapshot preview image does not render correctly if its
     // widget isn't visible. Now that the widget is visible, we
     // can show that image.
-    const QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
-    if (selectedItems.size() == 0) {
-        return;
-    }
-    // Grab the first selected element--multiple selections are not allowed
-    const WidgetSnapshotItem* theItem = static_cast<const WidgetSnapshotItem*>(selectedItems[0]);
+    const WidgetSnapshotItem* theItem = getSelectedSnapshot();
+    if (!theItem) return;
     QString simpleName = theItem->fileName();
 
     const char *avdPath = avdInfo_getContentPath(android_avdInfo);

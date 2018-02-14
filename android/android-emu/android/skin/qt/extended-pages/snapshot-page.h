@@ -36,13 +36,11 @@ signals:
     void deleteCompleted();
 
 private slots:
-
-
-private slots:
     void on_snapshotDisplay_itemSelectionChanged();
     void on_deleteSnapshot_clicked();
     void on_snapshotDisplay_itemClicked(QTreeWidgetItem* theItem, int theColumn);
     void on_editSnapshot_clicked();
+    void on_loadSnapshot_clicked();
     void on_takeSnapshotButton_clicked();
 
 private:
@@ -107,14 +105,15 @@ private:
     QString getDescription(QString fileName);
 
     void    cloneSnapshot(WidgetSnapshotItem* theItem);
-    void    deleteSnapshot(WidgetSnapshotItem* theItem);
-    void    editSnapshot(WidgetSnapshotItem* theItem);
+    void    deleteSnapshot(const WidgetSnapshotItem* theItem);
+    void    editSnapshot(const WidgetSnapshotItem* theItem);
     void    exportSnapshot(WidgetSnapshotItem* theItem);
-    void    loadSnapshot(WidgetSnapshotItem* theItem);
     void    showPreviewImage(QString snapshotPath, QString snapshotName);
     void    writeLogicalNameToProtobuf(QString fileName, QString logicalName);
     void    writeParentToProtobuf(QString fileName, QString parentName);
     void    writeLogicalNameAndParentToProtobuf(QString fileName, QString logicalName, QString parentName);
+
+    const WidgetSnapshotItem* getSelectedSnapshot();
 
     emulator_snapshot::Snapshot* loadProtobuf(QString fileName);
     void                         writeProtobuf(QString fileName, emulator_snapshot::Snapshot* protobuf);
