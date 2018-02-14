@@ -23,6 +23,7 @@ typedef enum {
     SNAPSHOT_STATUS_OK,
     SNAPSHOT_STATUS_ERROR,
     SNAPSHOT_STATUS_ERROR_NOT_CHANGED,
+    SNAPSHOT_STATUS_CANCELED,
 } AndroidSnapshotStatus;
 
 void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations,
@@ -36,6 +37,8 @@ int64_t androidSnapshot_lastLoadUptimeMs();
 
 AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name);
 AndroidSnapshotStatus androidSnapshot_save(const char* name);
+
+void androidSnapshot_cancelSave();
 
 void androidSnapshot_delete(const char* name);
 
