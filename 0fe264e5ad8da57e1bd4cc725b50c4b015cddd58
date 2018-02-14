@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "068d5d0b_8add6b69",
+        "filename": "android/android-emu/android/base/async/ThreadLooper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T00:37:30Z",
+      "side": 1,
+      "message": "Yeah right now the process\u0027 thread structure is the message channel :\u003e\n\nI like this idea, will get on it.",
+      "parentUuid": "ccc48c7f_4fe1175b",
+      "range": {
+        "startLine": 119,
+        "startChar": 4,
+        "endLine": 119,
+        "endChar": 27
+      },
+      "revId": "0fe264e5ad8da57e1bd4cc725b50c4b015cddd58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8ef658cc_dab1441b",
         "filename": "android/android-emu/android/base/async/ThreadLooper.h",
         "patchSetId": 1
@@ -82,6 +106,30 @@
       "writtenOn": "2018-02-14T00:28:08Z",
       "side": 1,
       "message": "by the way, this lambda has no capture, so it is convertible to a pointer to a function - so you don\u0027t need to be able to run the whole std::function objects to just run it",
+      "range": {
+        "startLine": 356,
+        "startChar": 50,
+        "endLine": 356,
+        "endChar": 96
+      },
+      "revId": "0fe264e5ad8da57e1bd4cc725b50c4b015cddd58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a651495c_f95bcf73",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-14T00:37:30Z",
+      "side": 1,
+      "message": "Right; this CL is mostly just to make it easier in the case of generic snapshots UI code, to put something like [this]() { androidSnapshot_save(this-\u003eselectedSnapshot.c_str()); } in there.",
+      "parentUuid": "7bf32075_3949aec6",
       "range": {
         "startLine": 356,
         "startChar": 50,
