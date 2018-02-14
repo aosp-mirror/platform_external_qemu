@@ -23,6 +23,7 @@
 #include "android/opengl/emugl_config.h"
 #include "android/snapshot/Hierarchy.h"
 #include "android/snapshot/Loader.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Quickboot.h"
 #include "android/snapshot/Saver.h"
 #include "android/snapshot/TextureLoader.h"
@@ -597,6 +598,10 @@ void Snapshotter::deleteSnapshot(const char* name) {
         mLoadedSnapshotFile.clear();
     }
     mVmOperations.snapshotDelete(name, this, nullptr);
+
+    // then delete the folder and refresh hierarchy
+    path_delete_dir(getSnapshotDir(name).c_str());
+    Hierarchy::get()->currentInfo();
 }
 
 void Snapshotter::listSnapshots(void* opaque,
