@@ -1033,6 +1033,8 @@ void qemu_savevm_state_begin(QEMUFile *f,
     }
 }
 
+static QEMUSnapshotCallbacks s_snapshot_callbacks = {};
+
 /*
  * this function has three return values:
  *   negative: there was one error, and we have -errno.
@@ -1046,6 +1048,11 @@ int qemu_savevm_state_iterate(QEMUFile *f, bool postcopy)
 
     trace_savevm_state_iterate();
     QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
+        if (s_snapshot_callbacks.savevm.is_canceled) {
+            if (s_snapshot_callbacks.savevm.is_canceled(0)) {
+                return 0;
+            }
+        }
         if (!se->ops || !se->ops->save_live_iterate) {
             continue;
         }
@@ -2174,8 +2181,6 @@ int qemu_loadvm_state(QEMUFile *f)
 
     return ret;
 }
-
-static QEMUSnapshotCallbacks s_snapshot_callbacks = {};
 
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks)
 {

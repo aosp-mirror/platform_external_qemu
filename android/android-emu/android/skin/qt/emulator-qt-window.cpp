@@ -42,6 +42,7 @@
 #include "android/skin/qt/screen-mask.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
+#include "android/snapshot/common.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/test/checkboot.h"
 #include "android/ui-emu-agent.h"
@@ -568,6 +569,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     Snapshotter::get().addOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
                 if (stage == Snapshotter::Stage::Start) {
+
                     runOnUiThread([this, op]() {
                         AutoLock lock(mSnapshotStateLock);
                         mShouldShowSnapshotModalOverlay = true;
@@ -579,6 +581,11 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                         op == Snapshotter::Operation::Save ?
                                             tr("Saving state...") :
                                             tr("Loading state..."));
+                                    if (op == Snapshotter::Operation::Save) {
+                                        mContainer.setModalOverlayFunc(
+                                                tr("CANCEL"),
+                                                [] { androidSnapshot_cancelSave(); });
+                                    }
                                 }
                             });
                         if (mToolWindow) {

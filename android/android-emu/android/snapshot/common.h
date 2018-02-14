@@ -39,7 +39,8 @@ enum class IndexFlags {
 enum class OperationStatus {
     NotStarted = SNAPSHOT_STATUS_NOT_STARTED,
     Ok = SNAPSHOT_STATUS_OK,
-    Error = SNAPSHOT_STATUS_ERROR
+    Error = SNAPSHOT_STATUS_ERROR,
+    Canceled = SNAPSHOT_STATUS_CANCELED,
 };
 
 enum class FailureReason {
@@ -52,6 +53,7 @@ enum class FailureReason {
     NoRamFile,
     NoTexturesFile,
     SnapshotsNotSupported,
+    Canceled,
 
     UnrecoverableErrorLimit = 10000,
 
@@ -87,6 +89,8 @@ bool isComplete(const Operation& op) {
 bool isBufferZeroed(const void* ptr, int32_t size);
 
 constexpr int32_t kDefaultPageSize = 4096;
+
+constexpr int32_t kCancelTimeoutMs = 15000;
 
 }  // namespace snapshot
 }  // namespace android

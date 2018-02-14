@@ -81,6 +81,7 @@ typedef struct {
     int (*on_start)(const char* name);
     void (*on_end)(const char* name, int res);
     void (*on_quick_fail)(const char* name, int res);
+    bool (*is_canceled)(const char* name);
 } QEMUCallbackSet;
 
 typedef struct {

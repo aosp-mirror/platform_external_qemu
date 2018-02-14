@@ -72,6 +72,11 @@ public:
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(bool isOnExit, const char* name);
 
+    // Cancels the current save operation, and queries
+    // whether saving was canceled.
+    void cancelSave();
+    bool isSavingCanceled(const char* name) const;
+
     // Generic snapshot functions. These differ from normal
     // save() / load() in that they perform validation and
     // metrics reporting, and are meant to be used as part of

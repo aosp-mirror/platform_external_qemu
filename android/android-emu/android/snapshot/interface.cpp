@@ -51,6 +51,10 @@ AndroidSnapshotStatus androidSnapshot_save(const char* name) {
     return AndroidSnapshotStatus(Snapshotter::get().saveGeneric(name));
 }
 
+void androidSnapshot_cancelSave() {
+    Snapshotter::get().cancelSave();
+}
+
 void androidSnapshot_delete(const char* name) {
     Snapshotter::get().deleteSnapshot(name);
 }
