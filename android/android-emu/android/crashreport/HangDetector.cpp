@@ -123,7 +123,9 @@ HangDetector::~HangDetector() {
 void HangDetector::addWatchedLooper(base::Looper* looper) {
     base::AutoLock lock(mLock);
     mLoopers.emplace_back(new LooperWatcher(looper));
-    mLoopers.back()->startHangCheck();
+    if (!mPaused && !mStopping) {
+        mLoopers.back()->startHangCheck();
+    }
 }
 
 void HangDetector::pause(bool paused) {
