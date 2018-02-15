@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "907f7e78_b7d011c2",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-15T20:45:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0c25f84a_65138eff",
+      "range": {
+        "startLine": 136,
+        "startChar": 4,
+        "endLine": 138,
+        "endChar": 0
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8cf24b9_eff5784f",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "1e596482_7cc563b9",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-15T20:45:11Z",
+      "side": 1,
+      "message": "Thanks, I changed it to std::string",
+      "parentUuid": "25f06594_2c7752df",
+      "range": {
+        "startLine": 300,
+        "startChar": 1,
+        "endLine": 300,
+        "endChar": 26
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48d3d051_8fbc27b8",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "4f14478a_ade97480",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-15T20:45:11Z",
+      "side": 1,
+      "message": "This is more like a practical value. In theory, it should be 48000 * 4 bytes per second (with sampling rate of 48000 hz, 2 channels, 16-bit), which corresponds to 9600 bytes per 50 msec. Somehow, we actually inserted more than this value, we insert 4 * 4096 \u003d 16,384 bytes per 50 msec to make chrome to work well.\n\nYou are right about that 50 msec may cause delays if we get real audio while inserting silence. One thing to note the time to insert silent does not take 50 msec, it\u0027s instant, like a couple of msec, so it real audio arrives, the silence in queue may not fully save to the final video file. ffmpeg queues audio samples, and process them based on timestamp. My guess is if there are overlaps, the previous audio sample will get shortened.",
+      "parentUuid": "48d3d051_8fbc27b8",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "763a4e79_ea9d3cdf",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
@@ -105,6 +177,30 @@
       "writtenOn": "2018-02-06T18:27:52Z",
       "side": 1,
       "message": "I strongly encourage you to switch to AutoLock here: now there\u0027s more than a page of code between lock() and unlock(), so it will be easy for someone to add a return with no unlocking",
+      "range": {
+        "startLine": 1055,
+        "startChar": 3,
+        "endLine": 1055,
+        "endChar": 35
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b27f165_97c22488",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1055,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-15T20:45:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "763a4e79_ea9d3cdf",
       "range": {
         "startLine": 1055,
         "startChar": 3,
