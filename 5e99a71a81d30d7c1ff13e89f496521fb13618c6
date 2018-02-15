@@ -140,6 +140,30 @@
     },
     {
       "key": {
+        "uuid": "cb642250_9d0a71e9",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Protocol will remain 0 in case of failure, will add check and change the function signature to make this explicit.",
+      "parentUuid": "2c577659_986744ed",
+      "range": {
+        "startLine": 130,
+        "startChar": 4,
+        "endLine": 130,
+        "endChar": 92
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c37e3515_3512899a",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -174,6 +198,30 @@
       "writtenOn": "2018-02-15T19:02:55Z",
       "side": 1,
       "message": "please return an explicit value here, otherwise a simple \"return running\" almost feels like the function returns success",
+      "range": {
+        "startLine": 202,
+        "startChar": 15,
+        "endLine": 202,
+        "endChar": 22
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c85c9b23_e31bdc53",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Will change the signature of the function to make this explicit.",
+      "parentUuid": "0803704c_809e3e0a",
       "range": {
         "startLine": 202,
         "startChar": 15,
@@ -278,6 +326,30 @@
     },
     {
       "key": {
+        "uuid": "0497509d_b973881a",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "baee6bbc_cf693e4c",
+      "range": {
+        "startLine": 223,
+        "startChar": 0,
+        "endLine": 227,
+        "endChar": 6
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a10b068e_dd977549",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -289,6 +361,30 @@
       "writtenOn": "2018-02-15T19:02:55Z",
       "side": 1,
       "message": "please add a comment explaining that you are collecting all potential ADB executables here to pick the best one later. Otherwise it might feel that the order to look up ADBs for is important, while it\u0027s not",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 61
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ba46d6b_3dd6f569",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a10b068e_dd977549",
       "range": {
         "startLine": 237,
         "startChar": 4,
@@ -324,6 +420,30 @@
     },
     {
       "key": {
+        "uuid": "1f4ef877_402ba404",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Ok, let me make sure this will work as expected on Win32.",
+      "parentUuid": "3cdf7f6e_455a43a1",
+      "range": {
+        "startLine": 259,
+        "startChar": 29,
+        "endLine": 259,
+        "endChar": 45
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fe2f38a8_8682372e",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -335,6 +455,30 @@
       "writtenOn": "2018-02-15T19:02:55Z",
       "side": 1,
       "message": "this can be replaced with options.emplace_back(\"\", adb_exe.get()); (I believe)",
+      "range": {
+        "startLine": 261,
+        "startChar": 16,
+        "endLine": 261,
+        "endChar": 40
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "621d3c9e_4efede7a",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "fe2f38a8_8682372e",
       "range": {
         "startLine": 261,
         "startChar": 16,
@@ -370,6 +514,30 @@
     },
     {
       "key": {
+        "uuid": "d1a4cfdf_41cea98b",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "00301cf3_e33f0d71",
+      "range": {
+        "startLine": 269,
+        "startChar": 13,
+        "endLine": 269,
+        "endChar": 17
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "38ee7415_932a7a9b",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -381,6 +549,30 @@
       "writtenOn": "2018-02-15T19:02:55Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 270,
+        "startChar": 12,
+        "endLine": 270,
+        "endChar": 16
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62d8646c_b5be6a00",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "38ee7415_932a7a9b",
       "range": {
         "startLine": 270,
         "startChar": 12,
@@ -416,6 +608,30 @@
     },
     {
       "key": {
+        "uuid": "4d6785dc_d29f4405",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6a99adb2_a4f6dc9c",
+      "range": {
+        "startLine": 287,
+        "startChar": 9,
+        "endLine": 287,
+        "endChar": 12
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ebe88a0c_4fad679c",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -439,6 +655,30 @@
     },
     {
       "key": {
+        "uuid": "19356442_d9250aad",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "That is by design, as it was the behavior what we had previously.  Let me see if I can simplify this.",
+      "parentUuid": "ebe88a0c_4fad679c",
+      "range": {
+        "startLine": 292,
+        "startChar": 7,
+        "endLine": 292,
+        "endChar": 50
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed4fdc82_aa6b84df",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 2
@@ -450,6 +690,30 @@
       "writtenOn": "2018-02-15T19:02:55Z",
       "side": 1,
       "message": "nit: :)",
+      "range": {
+        "startLine": 302,
+        "startChar": 4,
+        "endLine": 302,
+        "endChar": 10
+      },
+      "revId": "5e99a71a81d30d7c1ff13e89f496521fb13618c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59423aed_f1f6d93a",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T20:52:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ed4fdc82_aa6b84df",
       "range": {
         "startLine": 302,
         "startChar": 4,
