@@ -25,6 +25,7 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/base/threads/Thread.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/path.h"
 
 #ifdef _WIN32
 #include "android/base/files/ScopedRegKey.h"
@@ -1033,6 +1034,29 @@ public:
 
     bool fileSize(int fd, FileSize* outFileSize) const override {
         return fileSizeInternal(fd, outFileSize);
+    }
+
+    virtual Optional<std::string> which(StringView command) const {
+#ifdef WIN32
+      std::string cmd = command ;
+      if (!extractFullPath(&cmd)) {
+        return {};
+      }
+      return cmd;
+#else
+      if (PathUtils::isAbsolute(command)) {
+        if (!pathCanExec(command))
+          return {};
+
+        return Optional<std::string>(command);
+      }
+
+      ScopedCPtr<char> exe(::path_search_exec(command.c_str()));
+      if (exe && pathCanExec(exe.get())) {
+        return Optional<std::string>(exe.get());
+      }
+      return {};
+#endif
     }
 
     Optional<Duration> pathCreationTime(StringView path) const override {

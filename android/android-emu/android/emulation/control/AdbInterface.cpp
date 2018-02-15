@@ -14,14 +14,24 @@
 
 #include "android/emulation/control/AdbInterface.h"
 
+#include "android/base/ArraySize.h"
+#include "android/base/Log.h"
+#include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/base/Uuid.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/files/ScopedFd.h"
+#include "android/base/memory/ScopedPtr.h"
+#include "android/base/misc/FileUtils.h"
+#include "android/base/sockets/ScopedSocket.h"
+#include "android/base/sockets/SocketWaiter.h"
 #include "android/base/system/System.h"
+#include "android/emulation/AdbHostServer.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
+#include "android/utils/sockets.h"
 
 #include <cstdio>
 #include <fstream>
@@ -30,9 +40,14 @@
 
 using android::base::AutoLock;
 using android::base::Looper;
+using android::base::Optional;
 using android::base::ParallelTask;
 using android::base::PathUtils;
 using android::base::RunOptions;
+using android::base::ScopedCPtr;
+using android::base::ScopedPtr;
+using android::base::ScopedSocket;
+using android::base::SocketWaiter;
 using android::base::System;
 using android::base::Uuid;
 using android::base::Version;
@@ -40,9 +55,20 @@ using android::base::Version;
 namespace android {
 namespace emulation {
 
+// We consider adb shipped with 23.1.0 or later to be modern enough
+// to not notify people to upgrade adb. 23.1.0 ships with adb protocol 32
+static const int kMinAdbProtocol = 32;
+
+class AdbDaemonImpl : public AdbDaemon {
+public:
+    virtual Optional<int> getProtocolVersion() override {
+        return AdbHostServer::getProtocolVersion();
+    }
+};
+
 class AdbInterfaceImpl final : public AdbInterface {
 public:
-    explicit AdbInterfaceImpl(Looper* looper);
+    friend AdbInterface::Builder;
 
     bool isAdbVersionCurrent() const final { return mAdbVersionCurrent; }
 
@@ -52,9 +78,7 @@ public:
 
     const std::string& detectedAdbPath() const final { return mAutoAdbPath; }
 
-    const std::string& adbPath() const final {
-        return mCustomAdbPath.empty() ? mAutoAdbPath : mCustomAdbPath;
-    }
+    const std::string& adbPath() final;
 
     virtual void setSerialNumberPort(int port) final {
         mSerialString = std::string("emulator-") + std::to_string(port);
@@ -68,81 +92,186 @@ public:
                                 bool want_output = true) final;
 
 private:
+    explicit AdbInterfaceImpl(Looper* looper,
+                              AdbLocator* locator,
+                              AdbDaemon* daemon);
+    void discoverAdbInstalls();
+    void selectAdbPath();
+
     Looper* mLooper;
+    std::unique_ptr<AdbLocator> mLocator;
+    std::unique_ptr<AdbDaemon> mDaemon;
     std::string mAutoAdbPath;
     std::string mCustomAdbPath;
     std::string mSerialString;
+    std::vector<std::pair<std::string, Optional<int>>> mAvailableAdbInstalls;
     bool mAdbVersionCurrent = false;
 };
 
 std::unique_ptr<AdbInterface> AdbInterface::create(Looper* looper) {
-    return std::unique_ptr<AdbInterface>{new AdbInterfaceImpl(looper)};
+    return AdbInterface::Builder().setLooper(looper).build();
 }
 
-// Helper function, checks if the version of adb in the given SDK is
-// fresh enough.
-static bool checkAdbVersion(const std::string& sdk_root_directory,
-                            const std::string& adb_path) {
-    static const int kMinAdbVersionMajor = 23;
-    static const int kMinAdbVersionMinor = 1;
-    static const Version kMinAdbVersion(kMinAdbVersionMajor,
-                                        kMinAdbVersionMinor, 0);
-    if (sdk_root_directory.empty()) {
-        return false;
+// A locator that will scan the filesystem for available ADB installs
+class AdbLocatorImpl : public AdbLocator {
+    std::vector<std::string> availableAdb() override;
+
+    Optional<int> getAdbProtocolVersion(StringView adbPath) override;
+};
+
+// Construct the platform path with adb executable, or Nothing if it doesn't
+// exist.
+static Optional<std::string> platformPath(base::StringView root) {
+    if (root.empty()) {
+        LOG(VERBOSE) << " no root specified: ";
+        return Optional<std::string>();
     }
 
-    if (!System::get()->pathCanExec(adb_path)) {
-        return false;
-    }
-
-    Version version = android::getCurrentSdkVersion(
-            sdk_root_directory, android::SdkComponentType::PlatformTools);
-
-    if (version.isValid()) {
-        return !(version < kMinAdbVersion);
-
-    } else {
-        // If the version is invalid, assume the tools directory is broken in
-        // some way, and updating should fix the problem.
-        return false;
-    }
+    auto path = PathUtils::join(root, "platform-tools",
+                                PathUtils::toExecutableName("adb"));
+    return System::get()->pathCanExec(path) ? base::makeOptional(path)
+                                            : base::kNullopt;
 }
 
-AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper)
-    : mLooper(looper) {
+std::vector<std::string> AdbLocatorImpl::availableAdb() {
+    std::vector<std::string> available = {};
     // First try finding ADB by the environment variable.
-    auto sdk_root_by_env = android::ConfigDirs::getSdkRootDirectoryByEnv();
-    if (!sdk_root_by_env.empty()) {
-        // If ANDROID_SDK_ROOT is defined, the user most likely wanted to use
-        // that ADB. Store it for later - if the second potential ADB path
-        // also fails, we'll warn the user about this one.
-        auto adb_path = PathUtils::join(sdk_root_by_env, "platform-tools",
-                                        PathUtils::toExecutableName("adb"));
-        if (checkAdbVersion(sdk_root_by_env, adb_path)) {
-            mAutoAdbPath = adb_path;
-            mAdbVersionCurrent = true;
-            return;
+    auto adb = platformPath(android::ConfigDirs::getSdkRootDirectoryByEnv());
+    if (adb) {
+        available.push_back(std::move(*adb));
+    }
+
+    // Try finding it based on the emulator executable
+    adb = platformPath(android::ConfigDirs::getSdkRootDirectoryByPath());
+    if (adb) {
+        available.push_back(std::move(*adb));
+    }
+
+    // See if it is on the path.
+    adb = System::get()->which(PathUtils::toExecutableName("adb"));
+    if (adb) {
+        available.push_back(std::move(*adb));
+    }
+
+    LOG(VERBOSE) << "Found: " << available.size() << " adb executables";
+    for (const auto& install : available) {
+        LOG(VERBOSE) << "Adb: " << install;
+    }
+
+    return available;
+}
+
+// Gets the reported adb protocol version from the given executable
+// This is the last digit in the adb version string.
+Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
+    const std::vector<std::string> adbVersion = {adbPath, "version"};
+    int protocol = 0;
+    std::string tmp_dir = System::get()->getTempDir();
+
+    // Get temporary file path
+    constexpr base::StringView temp_filename_pattern = "adbversion_XXXXXX";
+    std::string temp_file_path =
+            PathUtils::join(tmp_dir, temp_filename_pattern);
+
+    auto tmpfd = android::base::ScopedFd(mkstemp((char*)temp_file_path.data()));
+    if (!tmpfd.valid()) {
+        return {};
+    }
+    // We have to close the handle. On windows we will not be able to write to
+    // this file, resulting in strange behavior.
+    tmpfd.close();
+    temp_file_path.resize(strlen(temp_file_path.c_str()));
+    auto tmpFileDeleter = base::makeCustomScopedPtr(
+            &temp_file_path,
+            [](const std::string* name) { remove(name->c_str()); });
+
+    // Retrieve the adb version.
+    const int maxAdbRetrievalTimeMs = 500;
+    if (!System::get()->runCommand(
+                adbVersion,
+                RunOptions::WaitForCompletion | RunOptions::TerminateOnTimeout |
+                        RunOptions::DumpOutputToFile,
+                maxAdbRetrievalTimeMs, nullptr, nullptr, temp_file_path)) {
+        return {};
+    }
+
+    std::string read = android::readFileIntoString(temp_file_path).valueOr({});
+    if (sscanf(read.c_str(), "Android Debug Bridge version %*d.%*d.%d",
+               &protocol) != 1) {
+        LOG(VERBOSE) << "Failed obtain protocol version from: " << read;
+        return {};
+    }
+    LOG(VERBOSE) << "Path:" << adbPath << " protocol version: " << protocol;
+    return Optional<int>(protocol);
+}
+
+
+std::unique_ptr<AdbInterface> AdbInterface::Builder::build() {
+    if (!mLocator) {
+        setAdbLocator(new AdbLocatorImpl());
+    }
+    if (!mDaemon) {
+        setAdbDaemon(new AdbDaemonImpl());
+    }
+
+    AdbInterface* adb = new AdbInterfaceImpl(mLooper, mLocator.release(),
+                                    mDaemon.release());
+    return std::unique_ptr<AdbInterface>(adb);
+}
+
+// Discovers which adb executables are available.
+void AdbInterfaceImpl::discoverAdbInstalls() {
+    auto adbs = mLocator->availableAdb();
+    for (const auto& install : adbs) {
+        mAvailableAdbInstalls.push_back(std::make_pair(
+                install, mLocator->getAdbProtocolVersion(install)));
+    }
+}
+
+const std::string& AdbInterfaceImpl::adbPath() {
+    if (!mCustomAdbPath.empty())
+        return mCustomAdbPath;
+
+    selectAdbPath();
+    return mAutoAdbPath;
+}
+
+void AdbInterfaceImpl::selectAdbPath() {
+    // Running without ADB! I too like to live on the edge.
+    if (mAvailableAdbInstalls.empty()) {
+        return;
+    }
+
+    Optional<int> adbVersion;
+    std::string adbPath;
+
+    // Maybe we can find one matching the current active version.
+    // Even if this might be an ancient adb version.
+    Optional<int> daemon = mDaemon->getProtocolVersion();
+    if (daemon) {
+        for (const auto& choice : mAvailableAdbInstalls) {
+            std::tie(adbPath, adbVersion) = choice;
+            if (daemon == adbVersion) {
+                assert(adbVersion); // Clearly true..
+                mAdbVersionCurrent = *adbVersion >= kMinAdbProtocol;
+                mAutoAdbPath = adbPath;
+                return;
+            }
         }
     }
 
-    // If the first path was non-existent or a bad version, try to infer the
-    // path based on the emulator executable location.
-    auto sdk_root_by_path = android::ConfigDirs::getSdkRootDirectoryByPath();
-    if (sdk_root_by_path != sdk_root_by_env && !sdk_root_by_path.empty()) {
-        auto adb_path = PathUtils::join(sdk_root_by_path, "platform-tools",
-                                        PathUtils::toExecutableName("adb"));
-        if (checkAdbVersion(sdk_root_by_path, adb_path)) {
-            mAutoAdbPath = adb_path;
-            mAdbVersionCurrent = true;
-            return;
-        }
-    }
+    // A locator that will scan the filesystem for available ADB installs
+    // Just take the first (likely the one from the SDK, our dir)
+    std::tie(mAutoAdbPath, adbVersion) = mAvailableAdbInstalls.front();
+    mAdbVersionCurrent = adbVersion ? *adbVersion >= kMinAdbProtocol : false;
+}
 
-    // TODO(zyy): check if there's an adb binary on %PATH% and use that as a
-    //  last line of defense.
-
-    // If no ADB has been found at this point, an error message will warn the
-    // user and direct them to the custom adb path setting.
+AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper,
+                                   AdbLocator* locator,
+                                   AdbDaemon* daemon)
+    : mLooper(looper), mLocator(locator), mDaemon(daemon) {
+    discoverAdbInstalls();
+    selectAdbPath();
 }
 
 AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
@@ -150,11 +279,11 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         ResultCallback&& result_callback,
         System::Duration timeout_ms,
         bool want_output) {
-    auto command = std::shared_ptr<AdbCommand>(new AdbCommand(
-            mLooper, mCustomAdbPath.empty() ? mAutoAdbPath : mCustomAdbPath,
-            mSerialString, args, want_output, timeout_ms,
-            std::move(result_callback)));
+    auto command = std::shared_ptr<AdbCommand>(
+            new AdbCommand(mLooper, adbPath(), mSerialString, args, want_output,
+                           timeout_ms, std::move(result_callback)));
     command->start();
+
     return command;
 }
 

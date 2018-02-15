@@ -31,6 +31,9 @@
 namespace android {
 namespace emulation {
 
+using base::Optional;
+using base::StringView;
+
 class AdbCommand;
 using AdbCommandPtr = std::shared_ptr<AdbCommand>;
 
@@ -56,10 +59,25 @@ private:
 };
 using OptionalAdbCommandResult = android::base::Optional<AdbCommandResult>;
 
+// Class capable of finding all availabe adb executables.
+class AdbLocator {
+public:
+    virtual std::vector<std::string> availableAdb() = 0;
+
+    virtual base::Optional<int> getAdbProtocolVersion(StringView adbPath) = 0;
+};
+
+class AdbDaemon {
+public:
+    virtual Optional<int> getProtocolVersion() = 0;
+};
+
 // A utility interface used to automatically locate the ADB binary and
 // asynchronously run ADB commands.
 class AdbInterface {
 public:
+    class Builder;
+
     virtual ~AdbInterface() noexcept = default;
 
     // Returns true is the ADB version is fresh enough.
@@ -72,7 +90,7 @@ public:
     virtual const std::string& detectedAdbPath() const = 0;
 
     // Returns the path to adb binary
-    virtual const std::string& adbPath() const = 0;
+    virtual const std::string& adbPath() = 0;
 
     // Setup the port this interface is connected to
     virtual void setSerialNumberPort(int port) = 0;
@@ -101,13 +119,11 @@ public:
 };
 
 class AdbInterfaceImpl;
-class TestAdbInterface;
 
 // Representation of an asynchronously running ADB command.
 // These shouldn't be created directly, use AdbInterface::runAdbCommand.
 class AdbCommand : public std::enable_shared_from_this<AdbCommand> {
     friend android::emulation::AdbInterfaceImpl;
-    friend android::emulation::TestAdbInterface;
 
 public:
     using ResultCallback = AdbInterface::ResultCallback;
@@ -147,6 +163,34 @@ private:
     // To signal the command completion.
     base::Lock mLock;
     base::ConditionVariable mCv;
+};
+
+// Builder that can be used by unit tests to inject different behaviors,
+// note that AdbInterface will take ownership of all pointers execpt
+// the looper.
+class AdbInterface::Builder {
+public:
+    Builder& setLooper(android::base::Looper* looper) {
+        mLooper = looper;
+        return *this;
+    };
+    // The builder will take ownership of the locator.
+    Builder& setAdbLocator(AdbLocator* locator) {
+        mLocator.reset(locator);
+        return *this;
+    }
+    // The builder will take ownership of the daemon.
+    Builder& setAdbDaemon(AdbDaemon* daemon) {
+        mDaemon.reset(daemon);
+        return *this;
+    }
+
+    std::unique_ptr<AdbInterface> build();
+
+private:
+    android::base::Looper* mLooper;
+    std::unique_ptr<AdbLocator> mLocator;
+    std::unique_ptr<AdbDaemon> mDaemon;
 };
 
 }  // namespace emulation
