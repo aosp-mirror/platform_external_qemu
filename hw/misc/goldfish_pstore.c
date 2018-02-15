@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "qemu/osdep.h"
+#include "qemu/log.h"
 #include "qapi/error.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
@@ -101,8 +102,12 @@ static void goldfish_pstore_save_restore(goldfish_pstore *store, bool write) {
   }
 
 Error:
-  if (local_err) {
-    error_report_err(local_err);
+  if (local_err && qemu_loglevel_mask(LOG_TRACE)) {
+      // pstore is best effort, users frequently see warnings which is confusing.
+      // pstore support is usually only needed for those that do low-level development
+      // and need the reporting upon reboot. Those developers should enable tracing to
+      // see the error messages
+      error_report_err(local_err);
   }
 
   if (file) {
