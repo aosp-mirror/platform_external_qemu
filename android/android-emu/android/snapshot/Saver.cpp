@@ -86,11 +86,12 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
         }
 
         const bool tryIncremental =
-            isOnExit && loader && !loader->hasError() && loader->hasGaps();
+            loader && !loader->hasError() && loader->hasGaps();
 
-        if (loader && !isOnExit) {
-            loader->join();
-            loader->invalidateGaps();
+        if (tryIncremental) {
+            fprintf(stderr, "%s: being incremental.\n", __func__);
+        } else {
+            fprintf(stderr, "%s: not being incremental.\n", __func__);
         }
 
         mIncrementallySaved = tryIncremental;
@@ -119,6 +120,9 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
 }
 
 Saver::~Saver() {
+
+    fprintf(stderr, "%s: destroy saver (%p)\n", __func__, this);
+
     const bool deleteDirectory =
             mStatus != OperationStatus::Ok && (mRamSaver || mTextureSaver);
     mRamSaver.clear();

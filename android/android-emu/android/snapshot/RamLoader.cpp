@@ -35,8 +35,22 @@ void RamLoader::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
-RamLoader::RamLoader(base::StdioStream&& stream)
-    : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
+RamLoader::RamLoader(base::StdioStream&& stream,
+                     bool indexOnly,
+                     const RamLoader::RamBlockStructure& blockStructure)
+    : mStream(std::move(stream)),
+      mReaderThread([this]() { readerWorker(); }),
+      mIndexOnly(indexOnly) {
+
+    if (mIndexOnly) {
+        fprintf(stderr, "%s: index only.\n", __func__);
+        applyRamBlockStructure(blockStructure);
+        readIndex();
+        mStream.close();
+        fprintf(stderr, "%s: index only end\n", __func__);
+        return;
+    }
+    
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
                              [this]() { return backgroundPageLoad(); });
@@ -59,6 +73,25 @@ RamLoader::~RamLoader() {
             mAccessWatch.clear();
         }
         assert(hasError() || !mAccessWatch);
+    }
+}
+
+RamLoader::RamBlockStructure RamLoader::getRamBlockStructure() const {
+    RamBlockStructure res;
+    res.pageSize = mPageSize;
+
+    for (const auto& blockInfo : mIndex.blocks) {
+        res.blocks.push_back(blockInfo.ramBlock);
+    } 
+
+    return res;
+}
+
+void RamLoader::applyRamBlockStructure(const RamBlockStructure& blockStructure) {
+    mPageSize = blockStructure.pageSize;
+    mIndex.clear();
+    for (const auto ramBlock : blockStructure.blocks) {
+        mIndex.blocks.push_back({ ramBlock, {}, {}});
     }
 }
 
@@ -116,6 +149,7 @@ void RamLoader::join() {
         mAccessWatch->join();
         mAccessWatch.clear();
     }
+    fprintf(stderr, "RamLoader::%s\n closing stream", __func__);
     mStream.close();
 }
 
@@ -127,6 +161,7 @@ void RamLoader::interrupt() {
         mAccessWatch->join();
         mAccessWatch.clear();
     }
+    fprintf(stderr, "RamLoader::%s\n closing stream", __func__);
     mStream.close();
 }
 
@@ -205,6 +240,7 @@ bool RamLoader::readIndex() {
                        &prevPageSizeOnDisk);
     }
 
+    fprintf(stderr, "%s: load gaps\n", __func__);
     if (mVersion > 1) {
         mGaps = compressed ? GapTracker::Ptr(new GenericGapTracker())
                            : GapTracker::Ptr(new OneSizeGapTracker());
@@ -246,6 +282,9 @@ void RamLoader::readBlockPages(base::Stream* stream,
             page.sizeOnDisk = 0;
             page.filePos = 0;
         } else {
+            if (mIndexOnly) {
+                page.state.store(uint8_t(State::Filled), std::memory_order_relaxed);
+            }
             page.blockIndex = uint16_t(blockIndex);
             page.sizeOnDisk = uint32_t(sizeOnDisk);
             auto posDelta = stream->getPackedSignedNum();

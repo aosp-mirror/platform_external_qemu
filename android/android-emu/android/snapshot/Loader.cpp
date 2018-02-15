@@ -135,5 +135,27 @@ void Loader::onInvalidSnapshotLoad() {
     }
 }
 
+void Loader::prepareForSaving(bool isOnExit) {
+    if (mTextureLoader) {
+        mTextureLoader->join();
+    }
+
+    if (!isOnExit) {
+        if (mRamLoader && !mRamLoader->hasError()) {
+            fprintf(stderr, "%s: prepare for saving. join ram loader.\n", __func__);
+            mRamLoader->join();
+            fprintf(stderr, "%s: ram loader joined.\n", __func__);
+            fprintf(stderr, "%s: refresh ram loader index.\n", __func__);
+
+            const auto ram = fopen(
+                    PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
+            mRamLoader.emplace(
+                StdioStream(ram, StdioStream::kOwner),
+                true /* saving only */,
+                mRamLoader->getRamBlockStructure());
+        }
+    }
+}
+
 }  // namespace snapshot
 }  // namespace android

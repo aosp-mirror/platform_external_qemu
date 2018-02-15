@@ -403,6 +403,8 @@ void RamSaver::writeIndex() {
             "RAM: index %d, total %lld bytes, wasted %d (compressed: %s)\n",
             int(end - start), (long long)mDiskSize, int(bytesWasted),
             compressed ? "yes" : "no");
+
+    fprintf(stderr, "%s: saved gaps.\n", __func__);
 }
 
 void RamSaver::writePage(WriteInfo&& wi) {

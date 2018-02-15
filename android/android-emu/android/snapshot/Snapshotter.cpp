@@ -255,13 +255,17 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
 }
 
 void Snapshotter::prepareLoaderForSaving(const char* name) {
+
+    fprintf(stderr, "%s: call\n", __func__);
+
     if (!mLoader) {
         return;
     }
+
     if (mLoader->snapshot().name() != name) {
         mLoader.reset();
-    } else if (auto texLoader = mLoader->textureLoader()) {
-        texLoader->join();
+    } else {
+        mLoader->prepareForSaving(mIsOnExit);
     }
 }
 
