@@ -70,7 +70,9 @@ void HangDetector::LooperWatcher::startHangCheck() {
 void HangDetector::LooperWatcher::cancelHangCheck() {
     base::AutoLock l(*mLock);
 
-    mTask->cancel();
+    if (mTask) {
+        mTask->cancel();
+    }
     mIsTaskRunning = false;
     mLastCheckTimeUs = base::System::get()->getUnixTimeUs();
 }
