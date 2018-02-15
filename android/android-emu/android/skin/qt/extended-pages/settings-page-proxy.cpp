@@ -15,6 +15,7 @@
 #include "android/skin/qt/extended-pages/settings-page.h"
 
 #include "android/emulation/control/http_proxy_agent.h"
+#include "android/emulation/VmLock.h"
 #include "android/emulator-window.h"
 #include "android/proxy/proxy_common.h"
 #include "android/proxy/proxy_errno.h"
@@ -22,6 +23,17 @@
 
 #include <QFile>
 #include <QSettings>
+
+static QString sHttpProxyResults;
+static QString sStudioProxyString;
+static const QAndroidHttpProxyAgent* sHttpProxyAgent = nullptr;
+
+static void getStudioProxyString();
+static void sendProxySettingsToAgent(QString password);
+static QString proxyStringFromParts(QString hostName,
+                                    int     port,
+                                    QString userName,
+                                    QString password);
 
 void SettingsPage::initProxy() {
 
@@ -46,8 +58,10 @@ void SettingsPage::initProxy() {
     mUi->set_proxyAuth->setChecked(proxyAuth);
     mUi->set_loginName->setText(proxyUsername);
     mUi->set_loginPassword->setText(""); // Password is not saved
+    mUi->set_proxyResults->setText(sHttpProxyResults);
 
-    mProxyInitComplete = true;
+    disableProxyApply();
+
     grayOutProxy();
 }
 
@@ -64,14 +78,20 @@ void SettingsPage::proxyDtor() {
     }
 }
 
+// static
 void SettingsPage::setHttpProxyAgent(const QAndroidHttpProxyAgent* agent) {
-    mHttpProxyAgent = agent;
+    {
+        android::RecursiveScopedVmLock vmlock;
+        sHttpProxyAgent = agent;
+    }
     getStudioProxyString();
-    sendProxySettingsToAgent();
+    sendProxySettingsToAgent("");
 }
 
 void SettingsPage::on_set_proxyApply_clicked() {
-    sendProxySettingsToAgent();
+    disableProxyApply();
+    sendProxySettingsToAgent(mUi->set_loginPassword->text());
+    mUi->set_proxyResults->setText(sHttpProxyResults);
 }
 
 void SettingsPage::on_set_hostName_textChanged(QString /* unused */) {
@@ -165,59 +185,62 @@ void SettingsPage::grayOutProxy() {
 // decide what to tell the agent.
 //
 // But only if there is an agent.
-void SettingsPage::sendProxySettingsToAgent() {
-    if (!mProxyInitComplete) {
-        return;
-    }
-
-    disableProxyApply();
-
-    if (mHttpProxyAgent == nullptr || mHttpProxyAgent->httpProxySet == nullptr) {
+static void sendProxySettingsToAgent(QString password) {
+    android::RecursiveScopedVmLock vmlock;
+    if (sHttpProxyAgent == nullptr || sHttpProxyAgent->httpProxySet == nullptr) {
         return;
     }
 
     EmulatorWindow* const ew = emulator_window_get();
     if (ew && ew->opts && ew->opts->http_proxy) {
         // There is HTTP proxy information on the command line.
-        // This take precendence over the UI and the back end
+        // This takes precendence over the UI, and the back end
         // is already using these settings.
-        mUi->set_proxyResults->setText(tr("From command line"));
+        sHttpProxyResults = SettingsPage::tr("From command line");
         return;
     }
 
+    // There is no proxy info on the command line. Use the UI values.
+
     QString proxyString;
 
-    if (mUi->set_useStudio->isChecked()) {
-        // Use the settings from Android Studio
-        proxyString = mStudioProxyString;
-    } else if (mUi->set_noProxy->isChecked()) {
-        // Use our local setting, which is "None"
-        proxyString = "";
-    } else if (mUi->set_manualConfig->isChecked()) {
-        // Use our local setting, which is "Manual"
-        QString user;
-        QString pass;
-        if (mUi->set_proxyAuth->isChecked()) {
-            user = mUi->set_loginName->text();
-            pass = mUi->set_loginPassword->text();
-        }
+    QSettings settings;
+    bool useStudio = settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
+    bool proxyAuth = settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false).toBool();
+    enum Ui::Settings::HTTP_PROXY_TYPE proxyType =
+            (enum Ui::Settings::HTTP_PROXY_TYPE)settings.value(
+                    Ui::Settings::HTTP_PROXY_TYPE,
+                    Ui::Settings::HTTP_PROXY_TYPE_NONE).toInt();
+    QString proxyHost = settings.value(Ui::Settings::HTTP_PROXY_HOST, "").toString();
+    int proxyPort = settings.value(Ui::Settings::HTTP_PROXY_PORT, 80).toInt();
+    QString proxyUsername = settings.value(Ui::Settings::HTTP_PROXY_USERNAME, "").toString();
 
-        proxyString = proxyStringFromParts(mUi->set_hostName->text(),
-                                           QString::number(mUi->set_portNumber->value()),
-                                           user, pass);
+    if (useStudio) {
+        // Use the settings from Android Studio
+        proxyString = sStudioProxyString;
+    } else if (proxyType == Ui::Settings::HTTP_PROXY_TYPE_NONE) {
+        proxyString = "";
+    } else if (proxyType == Ui::Settings::HTTP_PROXY_TYPE_MANUAL) {
+        if (!proxyAuth) {
+            // No authentication. Don't send user name or password.
+            proxyUsername = "";
+            password = "";
+        }
+        proxyString = proxyStringFromParts(proxyHost, proxyPort,
+                                           proxyUsername, password);
     } else {
         // Should never get here. Default to "no proxy."
         proxyString = "";
     }
     // Send the proxy selection to the agent
-    int proxyResult = mHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
+    int proxyResultCode = sHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
 
-    // Report the results
-    if (proxyString.isEmpty() && proxyResult == PROXY_ERR_OK) {
+    // Make the results available to the GUI
+    if (proxyString.isEmpty() && proxyResultCode == PROXY_ERR_OK) {
         // Don't say "Success" when we're not using a proxy
-        mUi->set_proxyResults->setText(tr("No proxy"));
+        sHttpProxyResults = SettingsPage::tr("No proxy");
     } else {
-        mUi->set_proxyResults->setText(tr(proxy_error_string(proxyResult)));
+        sHttpProxyResults = SettingsPage::tr(proxy_error_string(proxyResultCode));
     }
 }
 
@@ -232,7 +255,8 @@ void SettingsPage::disableProxyApply() {
 // If Android Studio gave us a file with HTTP Proxy
 // settings, read those into memory and delete the
 // file.
-void SettingsPage::getStudioProxyString() {
+
+static void getStudioProxyString() {
     EmulatorWindow* const ew = emulator_window_get();
     if (!ew || !ew->opts || !ew->opts->studio_params) {
         // No file to read
@@ -250,7 +274,7 @@ void SettingsPage::getStudioProxyString() {
     }
 
     QString host;
-    QString port;
+    int     port = 0;
     QString username;
     QString password;
 
@@ -265,7 +289,7 @@ void SettingsPage::getStudioProxyString() {
                 host = value;
             } else if (key == "http.proxyPort" ||
                        key == "https.proxyPort") {
-                port =  value;
+                port = value.toInt();
             } else if (key == "proxy.authentication.username") {
                 username = value;
             } else if (key == "proxy.authentication.password") {
@@ -277,14 +301,14 @@ void SettingsPage::getStudioProxyString() {
     (void)paramFile.remove();
     ew->opts->studio_params = nullptr;
 
-    mStudioProxyString = proxyStringFromParts(host, port, username, password);
+    sStudioProxyString = proxyStringFromParts(host, port, username, password);
 }
 
 // Construct a string like "myname:password@host.com:80"
-QString SettingsPage:: proxyStringFromParts(QString hostName,
-                                            QString port,
-                                            QString userName,
-                                            QString password) {
+static QString proxyStringFromParts(QString hostName,
+                                    int     port,
+                                    QString userName,
+                                    QString password) {
 
     if (hostName.isEmpty()) {
         // Without a host name, we have nothing
@@ -296,7 +320,6 @@ QString SettingsPage:: proxyStringFromParts(QString hostName,
         proxyString += userName + ":" + password + "@";
     }
 
-    proxyString += hostName + ":" + port;
-
+    proxyString += hostName + ":" + QString::number(port);
     return proxyString;
 }

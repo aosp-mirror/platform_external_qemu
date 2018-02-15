@@ -29,7 +29,7 @@ public:
     ~SettingsPage();
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
-    void setHttpProxyAgent(const QAndroidHttpProxyAgent* agent);
+    static void setHttpProxyAgent(const QAndroidHttpProxyAgent* agent);
 
 public slots:
     void setHaveClipboardSharing(bool haveSharing);
@@ -83,17 +83,8 @@ private:
     void enableProxyApply();
     void initProxy();
     void proxyDtor();
-    void sendProxySettingsToAgent();
-    void getStudioProxyString();
-    QString proxyStringFromParts(QString hostName,
-                                 QString port,
-                                 QString userName,
-                                 QString password);
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
-    const   QAndroidHttpProxyAgent* mHttpProxyAgent;
-    bool    mProxyInitComplete;
     bool    mDisableANGLE = false;
-    QString mStudioProxyString;
 };

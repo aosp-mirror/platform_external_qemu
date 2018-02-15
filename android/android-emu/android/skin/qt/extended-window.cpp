@@ -174,13 +174,13 @@ void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
         CellularPage::setCellularAgent(agentPtr->cellular);
         FingerPage::setFingerAgent(agentPtr->finger);
         LocationPage::setLocationAgent(agentPtr->location);
+        SettingsPage::setHttpProxyAgent(agentPtr->proxy);
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
     }
 }
 
 void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
     if (agentPtr) {
-        mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
