@@ -135,5 +135,44 @@ void Loader::onInvalidSnapshotLoad() {
     }
 }
 
+void Loader::prepareForSaving(bool isOnExit) {
+    if (mTextureLoader) {
+        mTextureLoader->join();
+    }
+
+    // Prepare ram loader for incremental save.
+    //
+    // It is important that the gap tracker of the ram loader
+    // is in a good state.
+    //
+    // a. if this is on exit, we can simply interrupt reading and use the ram
+    // loader's current gap tracker, if any, because a precondition of this
+    // function running is that we are saving the same snapshot as we are
+    // loading.
+    // b. if this is not on exit, then we first need to make the loader finish
+    // whatever it was doing, and invalidate gaps because we don't know if the
+    // particular version of this loader's gaps was replaced by the gaps from
+    // the loader from another snapshot and then put back to our snapshot's
+    // loader, etc etc.
+
+    if (mRamLoader && !mRamLoader->hasError()) {
+        if (isOnExit) {
+            mRamLoader->interrupt();
+        } else {
+            mRamLoader->join();
+            mRamLoader->invalidateGaps();
+        }
+
+        if (!mRamLoader->hasGaps()) {
+            const auto ram = fopen(
+                    PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
+            mRamLoader.emplace(
+                    StdioStream(ram, StdioStream::kOwner),
+                    true /* saving only */,
+                    mRamLoader->getRamBlockStructure());
+        }
+    }
+}
+
 }  // namespace snapshot
 }  // namespace android

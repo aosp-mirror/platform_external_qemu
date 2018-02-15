@@ -86,12 +86,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
         }
 
         const bool tryIncremental =
-            isOnExit && loader && !loader->hasError() && loader->hasGaps();
-
-        if (loader && !isOnExit) {
-            loader->join();
-            loader->invalidateGaps();
-        }
+            loader && !loader->hasError() && loader->hasGaps();
 
         mIncrementallySaved = tryIncremental;
 
