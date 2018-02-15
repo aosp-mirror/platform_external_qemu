@@ -22,6 +22,30 @@
       "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c6c013f8_48b64a1d",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-15T22:48:07Z",
+      "side": 1,
+      "message": "Yes, this is just a default.  Passing -camera-back webcam0 sets it up as a back camera.",
+      "parentUuid": "3238a1d2_cae7f974",
+      "range": {
+        "startLine": 524,
+        "startChar": 43,
+        "endLine": 524,
+        "endChar": 44
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
