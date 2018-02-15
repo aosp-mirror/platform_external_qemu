@@ -50,6 +50,7 @@ private slots:
     void on_set_saveLocBox_textEdited(const QString&);
     void on_set_saveLocFolderButton_clicked();
     void on_set_saveSnapNowButton_clicked();
+    void on_set_loadSnapNowButton_clicked();
     void on_set_adbPathBox_textEdited(const QString&);
     void on_set_adbPathButton_clicked();
     void on_set_themeBox_currentIndexChanged(int index);
