@@ -32,7 +32,7 @@ public:
     virtual const std::string& detectedAdbPath() const override final {
         return mAdbPath;
     }
-    virtual const std::string& adbPath() const override final {
+    virtual const std::string& adbPath() override final {
         return mAdbPath;
     }
     virtual void setSerialNumberPort(int port) override final {}
