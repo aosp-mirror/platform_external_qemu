@@ -13,6 +13,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/async/Looper.h"
+#include "android/skin/qt/QtThreading.h"
 
 #include <QThread>
 #include <QTimer>
@@ -34,6 +35,8 @@ class TimerImpl : public QTimer {
 public:
     TimerImpl(BaseTimer::Callback callback, void* opaque, BaseTimer* timer)
         : mCallback(callback), mOpaque(opaque), mTimer(timer) {
+        moveToMainThread(this);
+
         connect(this, &QTimer::timeout, this, &TimerImpl::slot_timeout);
         connect(this, &TimerImpl::signalStart, this,
                 static_cast<void (QTimer::*)(int)>(&QTimer::start));
@@ -77,6 +80,8 @@ public:
              bool selfDeleting = false)
         : BaseLooper::Task(looper, std::move(callback)),
           mSelfDeleting(selfDeleting) {
+        moveToMainThread(this);
+
         // Queued connections schedule themselves to run on the target thread's
         // event loop, so this is exactly what we need for the Task
         // implementation.

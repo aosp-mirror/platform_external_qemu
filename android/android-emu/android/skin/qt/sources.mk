@@ -74,6 +74,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/OverlayMessageCenter.cpp \
     android/skin/qt/qt-ui-commands.cpp \
     android/skin/qt/QtLooper.cpp \
+    android/skin/qt/QtThreading.cpp \
     android/skin/qt/screen-mask.cpp \
     android/skin/qt/size-tweaker.cpp \
     android/skin/qt/stylesheet.cpp \
