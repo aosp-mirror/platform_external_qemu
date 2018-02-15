@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3238a1d2_cae7f974",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 524,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-02-15T22:39:44Z",
+      "side": 1,
+      "message": "Can we setup the direction later by the commandline input?",
+      "range": {
+        "startLine": 524,
+        "startChar": 43,
+        "endLine": 524,
+        "endChar": 44
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
