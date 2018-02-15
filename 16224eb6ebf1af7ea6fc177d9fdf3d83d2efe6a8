@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4d61383_ac5ffdc0",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-15T03:55:17Z",
+      "side": 1,
+      "message": "If you take off the -- it will print just the version instead of going down the default help path that prints a lot more lines.",
+      "range": {
+        "startLine": 103,
+        "startChar": 61,
+        "endLine": 103,
+        "endChar": 70
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec473262_102d3b01",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-15T03:55:17Z",
+      "side": 1,
+      "message": "512 enough?",
+      "range": {
+        "startLine": 168,
+        "startChar": 0,
+        "endLine": 168,
+        "endChar": 21
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5091da1_4703855a",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-15T03:55:17Z",
+      "side": 1,
+      "message": "We should try to share code with\n\nint AdbHostServer::getClientPort()\n\nif possible.",
+      "range": {
+        "startLine": 186,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 5
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef3a9a7b_2c7c3901",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-15T03:55:17Z",
+      "side": 1,
+      "message": "Probably could collaborate with AdbHostServer / AdbHostListener here as well.",
+      "range": {
+        "startLine": 196,
+        "startChar": 0,
+        "endLine": 201,
+        "endChar": 5
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d30ca46_2410268d",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-15T03:55:17Z",
+      "side": 1,
+      "message": "four?",
+      "range": {
+        "startLine": 213,
+        "startChar": 45,
+        "endLine": 213,
+        "endChar": 48
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af07aae4_957ab6aa",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-15T03:55:17Z",
+      "side": 1,
+      "message": "One more option, maybe explicitly detect whether in build environment and look for build env adb.",
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
