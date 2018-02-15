@@ -70,7 +70,9 @@ void HangDetector::LooperWatcher::startHangCheck() {
 void HangDetector::LooperWatcher::cancelHangCheck() {
     base::AutoLock l(*mLock);
 
-    mTask->cancel();
+    if (mTask) {
+        mTask->cancel();
+    }
     mIsTaskRunning = false;
     mLastCheckTimeUs = base::System::get()->getUnixTimeUs();
 }
@@ -123,7 +125,9 @@ HangDetector::~HangDetector() {
 void HangDetector::addWatchedLooper(base::Looper* looper) {
     base::AutoLock lock(mLock);
     mLoopers.emplace_back(new LooperWatcher(looper));
-    mLoopers.back()->startHangCheck();
+    if (!mPaused && !mStopping) {
+        mLoopers.back()->startHangCheck();
+    }
 }
 
 void HangDetector::pause(bool paused) {

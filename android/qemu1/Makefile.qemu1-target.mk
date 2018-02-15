@@ -67,7 +67,7 @@ LOCAL_C_INCLUDES += \
     $(EMULATOR_TARGET_INCLUDES) \
 
 LOCAL_SRC_FILES += \
-    android-qemu1-glue/main.c \
+    android-qemu1-glue/main.cpp \
     android-qemu1-glue/qemu-battery-agent-impl.c \
     android-qemu1-glue/qemu-user-event-agent-impl.c \
     android-qemu1-glue/qemu-vm-operations-impl.c \

@@ -23,6 +23,7 @@
 #include "android/config/BluetoothConfig.h"
 #include "android/constants.h"
 #include "android/cpu_accelerator.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/ParameterList.h"
@@ -77,11 +78,11 @@ extern "C" {
 #define TARGET_X86
 #endif
 
-#include <algorithm>
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <algorithm>
 
 #include "android/version.h"
 #define D(...)                   \
@@ -296,8 +297,9 @@ static int createUserData(AvdInfo* avd,
         // or non-ascii path on Windows. Fall back to default userdata.img if
         // it fails.
         System::FileSize diskSize;
-        if (System::get()->pathFileSize(hw->disk_dataPartition_path, &diskSize)
-                && diskSize > 0) {
+        if (System::get()->pathFileSize(hw->disk_dataPartition_path,
+                                        &diskSize) &&
+            diskSize > 0) {
             // We do not need to copy userdata.img if partition creation
             // succeeded.
             needCopyDataPartition = false;
@@ -315,7 +317,7 @@ static int createUserData(AvdInfo* avd,
 
         if (!hw->hw_arc) {
             resizeExt4Partition(android_hw->disk_dataPartition_path,
-                    android_hw->disk_dataPartition_size);
+                                android_hw->disk_dataPartition_size);
         }
     } else {
         derror("Missing initial data partition file: %s",
@@ -336,25 +338,25 @@ static std::string get_qcow2_image_basename(const std::string& image) {
  * Class that's capable of creating that partition parameters
  */
 class PartitionParameters {
- public:
+public:
     static android::ParameterList create(AndroidHwConfig* hw, AvdInfo* avd) {
         return PartitionParameters(hw, avd).create();
     }
 
- private:
+private:
     PartitionParameters(AndroidHwConfig* hw, AvdInfo* avd)
         : m_hw(hw), m_avd(avd), m_driveIndex(0) {}
 
     android::ParameterList create() {
-      android::ParameterList args;
-      for (auto type : kTarget.imagePartitionTypes) {
-        bool writable =
-            (type == IMAGE_TYPE_SYSTEM || type == IMAGE_TYPE_VENDOR)
-            ? android_op_writable_system
-            : true;
-        args.add(createPartionParameters(type, writable));
-      }
-      return args;
+        android::ParameterList args;
+        for (auto type : kTarget.imagePartitionTypes) {
+            bool writable =
+                    (type == IMAGE_TYPE_SYSTEM || type == IMAGE_TYPE_VENDOR)
+                            ? android_op_writable_system
+                            : true;
+            args.add(createPartionParameters(type, writable));
+        }
+        return args;
     }
 
     android::ParameterList createPartionParameters(ImageType type,
@@ -381,20 +383,24 @@ class PartitionParameters {
                 if (apiLevel <= 15) {
                     writable = true;
                 }
-                sysImagePath = std::string(avdInfo_getSystemImagePath(m_avd) ?:
-                avdInfo_getSystemInitImagePath(m_avd));
+                sysImagePath = std::string(
+                        avdInfo_getSystemImagePath(m_avd)
+                                ?: avdInfo_getSystemInitImagePath(m_avd));
                 if (writable) {
                     const char* systemDir = avdInfo_getContentPath(m_avd);
-                    filePath = path_join(systemDir, get_qcow2_image_basename(sysImagePath).c_str());
+                    filePath = path_join(
+                            systemDir,
+                            get_qcow2_image_basename(sysImagePath).c_str());
                     driveParam += StringFormat("index=%d,id=system,file=%s",
-                                           m_driveIndex++, filePath);
+                                               m_driveIndex++, filePath);
                     allocatedPath.reset(filePath.c_str());
                 } else {
                     qCow2Format = false;
                     filePath = sysImagePath.c_str();
-                    driveParam += StringFormat("index=%d,id=system,file=%s"
-                                           ",read-only",
-                                           m_driveIndex++, filePath);
+                    driveParam += StringFormat(
+                            "index=%d,id=system,file=%s"
+                            ",read-only",
+                            m_driveIndex++, filePath);
                 }
                 deviceParam = StringFormat("%s,drive=system",
                                            kTarget.storageDeviceType);
@@ -405,23 +411,27 @@ class PartitionParameters {
                     // we do not have a vendor image to mount
                     return {};
                 }
-                vendorImagePath = std::string(avdInfo_getVendorImagePath(m_avd) ?:
-                    avdInfo_getVendorInitImagePath(m_avd));
+                vendorImagePath = std::string(
+                        avdInfo_getVendorImagePath(m_avd)
+                                ?: avdInfo_getVendorInitImagePath(m_avd));
                 if (writable) {
                     const char* systemDir = avdInfo_getContentPath(m_avd);
-                    filePath = path_join(systemDir, get_qcow2_image_basename(vendorImagePath).c_str());
+                    filePath = path_join(
+                            systemDir,
+                            get_qcow2_image_basename(vendorImagePath).c_str());
                     driveParam += StringFormat("index=%d,id=vendor,file=%s",
-                                           m_driveIndex++, filePath);
+                                               m_driveIndex++, filePath);
                     allocatedPath.reset(filePath.c_str());
                 } else {
                     qCow2Format = false;
                     filePath = vendorImagePath.c_str();
-                    driveParam += StringFormat("index=%d,id=vendor,file=%s"
-                                           ",read-only",
-                                           m_driveIndex++, filePath);
+                    driveParam += StringFormat(
+                            "index=%d,id=vendor,file=%s"
+                            ",read-only",
+                            m_driveIndex++, filePath);
                 }
                 deviceParam = StringFormat("%s,drive=vendor",
-                                       kTarget.storageDeviceType);
+                                           kTarget.storageDeviceType);
                 break;
             case IMAGE_TYPE_CACHE:
                 filePath = m_hw->disk_cachePartition_path;
@@ -563,7 +573,8 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     hw->disk_encryptionKeyPartition_path =
             path_join(userdata_dir.get(), "encryptionkey.img");
     if (path_exists(hw->disk_systemPartition_initPath)) {
-        ScopedCPtr<char> sysimg_dir(path_dirname(hw->disk_systemPartition_initPath));
+        ScopedCPtr<char> sysimg_dir(
+                path_dirname(hw->disk_systemPartition_initPath));
         if (!sysimg_dir.get()) {
             derror("no sysimg_dir %s", hw->disk_systemPartition_initPath);
             return false;
@@ -647,8 +658,7 @@ extern "C" int main(int argc, char** argv) {
     const char* snapshotLockFilePath = avdInfo_getSnapshotLockFilePath(avd);
     // 10 seconds
     FileLock* snapshotLock =
-        filelock_create_timeout(snapshotLockFilePath,
-                                10000 /* ms */);
+            filelock_create_timeout(snapshotLockFilePath, 10000 /* ms */);
     if (!snapshotLock) {
         // Some snapshot operation took too long.
         derror("A snapshot operation for '%s' is pending "
@@ -658,11 +668,11 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (filelock_create(coreHwIniPath) == NULL) {
-            // The AVD is already in use
-            derror("There's another emulator instance running with "
-                    "the current AVD '%s'. Exiting...\n",
-                    avdInfo_getName(avd));
-            return 1;
+        // The AVD is already in use
+        derror("There's another emulator instance running with "
+               "the current AVD '%s'. Exiting...\n",
+               avdInfo_getName(avd));
+        return 1;
     }
 
     if (snapshotLock) {
@@ -737,8 +747,7 @@ extern "C" int main(int argc, char** argv) {
 
     // Generic snapshots command line option
 
-    if (opts->snapshot &&
-        feature_is_enabled(kFeature_FastSnapshotV1)) {
+    if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
         if (!opts->no_snapshot_load) {
             args.add2("-loadvm", opts->snapshot);
         }
@@ -768,9 +777,9 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (fc::isEnabled(fc::LogcatPipe) && opts->logcat) {
-                boot_property_add_logcat_pipe(opts->logcat);
-                // we have done with -logcat option.
-                opts->logcat = NULL;
+        boot_property_add_logcat_pipe(opts->logcat);
+        // we have done with -logcat option.
+        opts->logcat = NULL;
     }
 
     // Always setup a single serial port, that can be connected
@@ -883,8 +892,9 @@ extern "C" int main(int argc, char** argv) {
                       .size = GOLDFISH_PSTORE_MEM_SIZE};
 
     args.add("-device");
-    args.addFormat("goldfish_pstore,addr=0x%" PRIx64 ",size=0x%" PRIx64 ",file=%s",
-             pstore.start, pstore.size, pstoreFile.c_str());
+    args.addFormat("goldfish_pstore,addr=0x%" PRIx64 ",size=0x%" PRIx64
+                   ",file=%s",
+                   pstore.start, pstore.size, pstoreFile.c_str());
 
     // studio avd manager does not allow user to change
     // partition size, set a lower limit to 2GB
@@ -897,9 +907,9 @@ extern "C" int main(int argc, char** argv) {
 
     // Create userdata file from init version if needed.
     if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
-      int ret = createUserData(avd, dataPath, hw);
-      if (ret != 0)
-        return ret;
+        int ret = createUserData(avd, dataPath, hw);
+        if (ret != 0)
+            return ret;
     } else if (!hw->hw_arc) {
         // Resize userdata-qemu.img if the size is smaller than what
         // config.ini says. This can happen as user wants a larger data
@@ -940,7 +950,8 @@ extern "C" int main(int argc, char** argv) {
 
     // Make sure there's a temp cache partition if there wasn't a permanent one
     if ((!hw->disk_cachePartition_path ||
-         strcmp(hw->disk_cachePartition_path, "") == 0) && !hw->hw_arc) {
+         strcmp(hw->disk_cachePartition_path, "") == 0) &&
+        !hw->hw_arc) {
         str_reset(&hw->disk_cachePartition_path,
                   tempfile_path(tempfile_create()));
         createEmptyCacheFile = true;
@@ -1047,8 +1058,8 @@ extern "C" int main(int argc, char** argv) {
 
     // Support for changing default lcd-density
     if (hw->hw_lcd_density) {
-                args.add("-lcd-density");
-                args.addFormat("%d", hw->hw_lcd_density);
+        args.add("-lcd-density");
+        args.addFormat("%d", hw->hw_lcd_density);
     }
 
     // Kernel image, ramdisk
@@ -1074,18 +1085,21 @@ extern "C" int main(int argc, char** argv) {
         // instead of virtio block device
         args.add("-drive");
         const char* avd_dir = avdInfo_getContentPath(avd);
-        args.addFormat("index=0,format=raw,id=system,file=cat:%s" PATH_SEP "system.img.qcow2|"
-                       "%s" PATH_SEP "userdata-qemu.img.qcow2|"
-                       "%s" PATH_SEP "vendor.img.qcow2", avd_dir, avd_dir, avd_dir);
+        args.addFormat("index=0,format=raw,id=system,file=cat:%s" PATH_SEP
+                       "system.img.qcow2|"
+                       "%s" PATH_SEP
+                       "userdata-qemu.img.qcow2|"
+                       "%s" PATH_SEP "vendor.img.qcow2",
+                       avd_dir, avd_dir, avd_dir);
     }
 
     // Network
     args.add("-netdev");
     if (opts->net_tap) {
-        const char* upScript = opts->net_tap_script_up ?
-            opts->net_tap_script_up : "no";
-        const char* downScript = opts->net_tap_script_down ?
-            opts->net_tap_script_down : "no";
+        const char* upScript =
+                opts->net_tap_script_up ? opts->net_tap_script_up : "no";
+        const char* downScript =
+                opts->net_tap_script_down ? opts->net_tap_script_down : "no";
         args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
                        upScript, downScript, opts->net_tap);
     } else {
@@ -1215,7 +1229,7 @@ extern "C" int main(int argc, char** argv) {
                                                      true);
             }
             if (skin_winsys_get_preferred_gles_apilevel() ==
-                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT ||
+                        WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT ||
                 System::get()->getProgramBitness() == 32) {
                 fc::setEnabledOverride(fc::GLESDynamicVersion, false);
             }
@@ -1238,10 +1252,9 @@ extern "C" int main(int argc, char** argv) {
                                &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder
-        bool isGuestMode = (!hw->hw_gpu_enabled ||
-                            !strcmp(hw->hw_gpu_mode, "guest"));
-        screen_recorder_init(hw->hw_lcd_width,
-                             hw->hw_lcd_height,
+        bool isGuestMode =
+                (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
+        screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                              isGuestMode ? uiEmuAgent.display : nullptr);
 
         /* Disable the GLAsyncSwap for ANGLE so far */
@@ -1294,7 +1307,7 @@ extern "C" int main(int argc, char** argv) {
     // Generate a hardware-qemu.ini for this AVD.
     int ret = genHwIniFile(hw, coreHwIniPath);
     if (ret != 0)
-      return ret;
+        return ret;
 
     args.add2("-android-hw", coreHwIniPath);
     crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
@@ -1310,7 +1323,9 @@ extern "C" int main(int argc, char** argv) {
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
+    android::crashreport::CrashReporter::get()->hangDetector().pause(false);
     skin_winsys_enter_main_loop(opts->no_window);
+    android::crashreport::CrashReporter::get()->hangDetector().pause(true);
 
     stopRenderer();
     emulator_finiUserInterface();

@@ -79,6 +79,7 @@
 /* Declaration of ffs() is missing in MinGW's strings.h. */
 int ffs(int i);
 
+#if defined(gmtime_r) || defined(localtime_r)
 /* Missing POSIX functions. Don't use MinGW-w64 macros. */
 #undef gmtime_r
 struct tm *gmtime_r(const time_t *timep, struct tm *result);
@@ -86,6 +87,7 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result);
 struct tm *localtime_r(const time_t *timep, struct tm *result);
 #undef strtok_r
 char *strtok_r(char *str, const char *delim, char **saveptr);
+#endif
 
 /* Polling handling */
 
