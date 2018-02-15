@@ -260,8 +260,8 @@ void Snapshotter::prepareLoaderForSaving(const char* name) {
     }
     if (mLoader->snapshot().name() != name) {
         mLoader.reset();
-    } else if (auto texLoader = mLoader->textureLoader()) {
-        texLoader->join();
+    } else {
+        mLoader->prepareForSaving(mIsOnExit);
     }
 }
 

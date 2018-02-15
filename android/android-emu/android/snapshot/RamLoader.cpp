@@ -35,8 +35,20 @@ void RamLoader::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
-RamLoader::RamLoader(base::StdioStream&& stream)
-    : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
+RamLoader::RamLoader(base::StdioStream&& stream,
+                     bool indexOnly,
+                     const RamLoader::RamBlockStructure& blockStructure)
+    : mStream(std::move(stream)),
+      mReaderThread([this]() { readerWorker(); }),
+      mIndexOnly(indexOnly) {
+
+    if (mIndexOnly) {
+        applyRamBlockStructure(blockStructure);
+        readIndex();
+        mStream.close();
+        return;
+    }
+
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
                              [this]() { return backgroundPageLoad(); });
@@ -59,6 +71,30 @@ RamLoader::~RamLoader() {
             mAccessWatch.clear();
         }
         assert(hasError() || !mAccessWatch);
+    }
+}
+
+RamLoader::RamBlockStructure RamLoader::getRamBlockStructure() const {
+    RamBlockStructure res;
+    res.pageSize = mPageSize;
+
+    res.blocks.reserve(mIndex.blocks.size());
+
+    for (const auto& blockInfo : mIndex.blocks) {
+        res.blocks.push_back(blockInfo.ramBlock);
+    }
+
+    return res;
+}
+
+void RamLoader::applyRamBlockStructure(const RamBlockStructure& blockStructure) {
+    mPageSize = blockStructure.pageSize;
+
+    mIndex.clear();
+    mIndex.blocks.reserve(blockStructure.blocks.size());
+
+    for (const auto ramBlock : blockStructure.blocks) {
+        mIndex.blocks.push_back({ ramBlock, {}, {}});
     }
 }
 
@@ -246,6 +282,9 @@ void RamLoader::readBlockPages(base::Stream* stream,
             page.sizeOnDisk = 0;
             page.filePos = 0;
         } else {
+            if (mIndexOnly) {
+                page.state.store(uint8_t(State::Filled), std::memory_order_relaxed);
+            }
             page.blockIndex = uint16_t(blockIndex);
             page.sizeOnDisk = uint32_t(sizeOnDisk);
             auto posDelta = stream->getPackedSignedNum();

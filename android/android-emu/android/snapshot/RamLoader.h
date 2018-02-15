@@ -25,6 +25,7 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -36,10 +37,39 @@ class RamLoader {
 
 public:
     enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
-    struct Page;
 
-    RamLoader(base::StdioStream&& stream);
+    struct Page;
+    using Pages = std::vector<Page>;
+
+    struct FileIndex {
+        struct Block {
+            RamBlock ramBlock;
+            Pages::iterator pagesBegin;
+            Pages::iterator pagesEnd;
+        };
+
+        using Blocks = std::vector<Block>;
+
+        IndexFlags flags;
+        Blocks blocks;
+        Pages pages;
+
+        void clear();
+    };
+
+    struct RamBlockStructure {
+        uint64_t pageSize;
+        std::vector<RamBlock> blocks;
+    };
+
+    RamLoader(base::StdioStream&& stream,
+              bool indexOnly = false,
+              const RamBlockStructure& blockStructure = {});
+
     ~RamLoader();
+
+    RamBlockStructure getRamBlockStructure() const;
+    void applyRamBlockStructure(const RamBlockStructure& blockStructure);
 
     void loadRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
@@ -64,6 +94,7 @@ public:
 
     const Page* findPage(int blockIndex, const char* id, int pageIndex) const;
 
+    void acquireGapTracker(GapTracker::Ptr gaps) { mGaps = std::move(gaps); }
     GapTracker::Ptr releaseGapTracker() { return std::move(mGaps); }
 
     bool getDuration(base::System::Duration* duration) {
@@ -78,23 +109,6 @@ public:
     }
 
 private:
-    using Pages = std::vector<Page>;
-
-    struct FileIndex {
-        struct Block {
-            RamBlock ramBlock;
-            Pages::iterator pagesBegin;
-            Pages::iterator pagesEnd;
-        };
-
-        using Blocks = std::vector<Block>;
-
-        IndexFlags flags;
-        Blocks blocks;
-        Pages pages;
-
-        void clear();
-    };
 
     bool readIndex();
     void readBlockPages(base::Stream* stream,
@@ -156,6 +170,9 @@ private:
     // Whether or not this ram load is part of
     // quickboot load.
     bool mIsQuickboot = false;
+
+    // Whether or not we just want to reload the index.
+    bool mIndexOnly = false;
 };
 
 struct RamLoader::Page {
