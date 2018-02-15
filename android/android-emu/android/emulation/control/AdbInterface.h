@@ -72,7 +72,7 @@ public:
     virtual const std::string& detectedAdbPath() const = 0;
 
     // Returns the path to adb binary
-    virtual const std::string& adbPath() const = 0;
+    virtual const std::string& adbPath() = 0;
 
     // Setup the port this interface is connected to
     virtual void setSerialNumberPort(int port) = 0;
