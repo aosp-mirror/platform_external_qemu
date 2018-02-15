@@ -31,8 +31,9 @@
 using android::base::PathUtils;
 using android::base::StringView;
 using android::base::System;
-using android::emulation::TestAdbInterface;
+using android::emulation::AdbInterface;
 using android::emulation::FilePusher;
+using android::emulation::StaticAdbLocator;
 using std::shared_ptr;
 using std::string;
 using std::vector;
@@ -46,7 +47,8 @@ public:
         mTestSystem.reset(new android::base::TestSystem(
                 PATH_SEP "progdir", System::kProgramBitness, PATH_SEP "homedir", PATH_SEP "appdir"));
         mLooper = new android::base::TestLooper();
-        mAdb.reset(new TestAdbInterface(mLooper, "adb"));
+        mAdb = AdbInterface::Builder().setLooper(mLooper).setAdbLocator(new StaticAdbLocator({ {"adb", 40 }})).build();
+        mAdb->setSerialNumberPort(0);
         mFilePusher.reset(
             new FilePusher(mAdb.get(),
                            [this](StringView filePath, FilePusher::Result result) {
@@ -114,7 +116,7 @@ public:
 protected:
     std::unique_ptr<android::base::TestSystem> mTestSystem;
     android::base::TestLooper* mLooper;
-    std::unique_ptr<TestAdbInterface> mAdb;
+    std::unique_ptr<AdbInterface> mAdb;
     std::unique_ptr<FilePusher> mFilePusher;
 
     // Fake runCommand support.

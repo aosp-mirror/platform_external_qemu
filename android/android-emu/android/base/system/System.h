@@ -273,6 +273,9 @@ public:
         return fileSize(fd, &res) ? makeOptional(res) : kNullopt;
     }
 
+    // Locate a command if it is not an absolute path.
+    virtual Optional<std::string> which(StringView executable) const = 0;
+
     // Gets the file creation timestamp as a Unix epoch time with microsecond
     // resolution. Returns an empty optional for systems that don't support
     // creation times (Linux) or if the operation failed.

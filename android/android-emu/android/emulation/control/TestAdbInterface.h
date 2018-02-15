@@ -15,72 +15,41 @@
 #pragma once
 
 #include "android/emulation/control/AdbInterface.h"
+#include <map>
 
 namespace android {
 namespace emulation {
 
-class TestAdbInterface final : public AdbInterface {
+using base::Optional;
+
+// Adb locator that knows all the adbs passed into the constructor.
+class StaticAdbLocator : public AdbLocator {
 public:
-    explicit TestAdbInterface(android::base::Looper* looper,
-                              android::base::StringView adbPath = "adb")
-        : mLooper(looper), mAdbPath(adbPath), mSerialString("emulator-0") {}
-
-    virtual bool isAdbVersionCurrent() const override final {
-        return mIsAdbVersionCurrent;
-    }
-    void setCustomAdbPath(const std::string& path) override final {}
-    virtual const std::string& detectedAdbPath() const override final {
-        return mAdbPath;
-    }
-    virtual const std::string& adbPath() const override final {
-        return mAdbPath;
-    }
-    virtual void setSerialNumberPort(int port) override final {}
-    // Returns the path to emulator name
-    virtual const std::string& serialString() const override final {
-        return mSerialString;
-    }
-
-    void setAdbOptions(android::base::StringView path, bool isVersionCurrent) {
-        mIsAdbVersionCurrent = isVersionCurrent;
-        mAdbPath = path;
-    }
-
-    virtual AdbCommandPtr runAdbCommand(
-            const std::vector<std::string>& args,
-            ResultCallback&& result_callback,
-            base::System::Duration timeout_ms,
-            bool want_output = true) override final {
-        if (mRunCommandCallback) {
-            // make sure we allow the testing code to verify the arguments
-            mRunCommandCallback(args, result_callback, timeout_ms, want_output);
+    StaticAdbLocator(std::map<std::string, int> map) : mAdb(map) {
+        for (auto const& path : map) {
+            mAvailable.push_back(path.first);
         }
-        // Just do what the real one did - mLooper is the thing that controls
-        // the command execution.
-        auto command = std::shared_ptr<AdbCommand>(
-                new AdbCommand(mLooper, mAdbPath, mSerialString, args, want_output,
-                               timeout_ms, std::move(result_callback)));
-        command->start(1);
-        return command;
+    }
+    std::vector<std::string> availableAdb() override { return mAvailable; }
+
+    base::Optional<int> getAdbProtocolVersion(StringView adbPath) override {
+        if (mAdb.find(adbPath) == mAdb.end())
+            return {};
+        return base::makeOptional(mAdb[adbPath]);
     }
 
-    using RunCommandCallback = std::function<void(
-            const std::vector<std::string>&,
-            std::function<void(const OptionalAdbCommandResult&)>,
-            base::System::Duration,
-            bool)>;
-
-    void setRunCommandCallback(RunCommandCallback cb) {
-        mRunCommandCallback = cb;
-    }
-
-private:
-    android::base::Looper* mLooper;
-    bool mIsAdbVersionCurrent = false;
-    std::string mAdbPath;
-    RunCommandCallback mRunCommandCallback;
-    std::string mSerialString;
+    std::map<std::string, int> mAdb;
+    std::vector<std::string> mAvailable;
 };
 
-}
-}
+class FakeAdbDaemon : public AdbDaemon {
+ public:
+    Optional<int> getProtocolVersion() override { return mVersion; }
+
+    void setProtocolVersion(Optional<int> version) { mVersion = version; }
+
+ private:
+    Optional<int> mVersion;
+};
+}  // namespace emulation
+}  // namespace android
