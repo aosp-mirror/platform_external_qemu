@@ -198,6 +198,7 @@ void OneSizeGapTracker::load(base::Stream& in) {
     mGapStarts.clear();
     mCurrentPos = 0;
     auto gapsCount = in.getBe32();
+
     assert(gapsCount == 0 || gapsCount == 1);
     if (gapsCount > 0) {
         mSize = int(in.getPackedNum());

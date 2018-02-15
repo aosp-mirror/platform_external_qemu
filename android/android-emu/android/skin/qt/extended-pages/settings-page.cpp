@@ -355,6 +355,12 @@ void SettingsPage::on_set_saveSnapNowButton_clicked() {
     android::base::ThreadLooper::runOnMainLooper( []() { androidSnapshot_save("default_boot"); } );
 }
 
+void SettingsPage::on_set_loadSnapNowButton_clicked() {
+    // Invoke the snapshot load function.
+    // But don't run it on the UI thread.
+    android::base::ThreadLooper::runOnMainLooper( []() { androidSnapshot_load("default_boot"); } );
+}
+
 void SettingsPage::on_set_adbPathButton_clicked() {
     QSettings settings;
     QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
