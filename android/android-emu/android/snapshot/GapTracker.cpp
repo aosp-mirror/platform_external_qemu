@@ -39,9 +39,11 @@ static auto tryEmplace(std::map<Key, Value>& map,
 }
 
 void GenericGapTracker::load(base::Stream& in) {
+    fprintf(stderr, "GenericGapTracker::%s: call\n", __func__);
     mByStart.clear();
     mBySize.clear();
     auto gapsCount = in.getBe32();
+    fprintf(stderr, "count %u\n", gapsCount);
     for (int i = 0; i < gapsCount; ++i) {
         const auto size = int(in.getPackedNum());
         assert(size != 0);
@@ -71,6 +73,7 @@ void GenericGapTracker::load(base::Stream& in) {
 }
 
 void GenericGapTracker::save(base::Stream& out) {
+    fprintf(stderr, "GenericGapTracker::%s: call\n", __func__);
     out.putBe32(mBySize.size());
     for (auto&& pair : mBySize) {
         out.putPackedNum(pair.first);
@@ -198,6 +201,7 @@ void OneSizeGapTracker::load(base::Stream& in) {
     mGapStarts.clear();
     mCurrentPos = 0;
     auto gapsCount = in.getBe32();
+
     assert(gapsCount == 0 || gapsCount == 1);
     if (gapsCount > 0) {
         mSize = int(in.getPackedNum());
