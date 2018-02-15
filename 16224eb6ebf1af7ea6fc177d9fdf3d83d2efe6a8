@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "64969bae_de71ebd3",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T18:48:54Z",
+      "side": 1,
+      "message": "I\u0027m cleaning this up.",
+      "parentUuid": "ec473262_102d3b01",
+      "range": {
+        "startLine": 168,
+        "startChar": 0,
+        "endLine": 168,
+        "endChar": 21
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d5091da1_4703855a",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2018-02-15T03:55:17Z",
       "side": 1,
       "message": "We should try to share code with\n\nint AdbHostServer::getClientPort()\n\nif possible.",
+      "range": {
+        "startLine": 186,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 5
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5f9655e_113e83fc",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T18:48:54Z",
+      "side": 1,
+      "message": "Didn\u0027t know about this. Will look into this!",
+      "parentUuid": "d5091da1_4703855a",
       "range": {
         "startLine": 186,
         "startChar": 0,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "032f765a_055779dd",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T18:48:54Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ef3a9a7b_2c7c3901",
+      "range": {
+        "startLine": 196,
+        "startChar": 0,
+        "endLine": 201,
+        "endChar": 5
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d30ca46_2410268d",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 1
@@ -117,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "593c22e9_5f8b0612",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T18:48:54Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4d30ca46_2410268d",
+      "range": {
+        "startLine": 213,
+        "startChar": 45,
+        "endLine": 213,
+        "endChar": 48
+      },
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af07aae4_957ab6aa",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
         "patchSetId": 1
@@ -128,6 +224,24 @@
       "writtenOn": "2018-02-15T03:55:17Z",
       "side": 1,
       "message": "One more option, maybe explicitly detect whether in build environment and look for build env adb.",
+      "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "caf5fed7_11f9f3cb",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-15T18:48:54Z",
+      "side": 1,
+      "message": "It should be first on the path after executing lunch sdk_gphone_x86-userdebug",
+      "parentUuid": "af07aae4_957ab6aa",
       "revId": "16224eb6ebf1af7ea6fc177d9fdf3d83d2efe6a8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
