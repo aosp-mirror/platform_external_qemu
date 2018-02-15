@@ -11,6 +11,9 @@
 
 #pragma once
 
+#include "android/base/Optional.h"
+
+
 namespace android {
 namespace emulation {
 
@@ -32,6 +35,9 @@ struct AdbHostServer {
     // either |kDefaultAdbClientPort| or an over-riden value from an environment
     // variable.
     static int getClientPort();
+
+    // Returns the ADB protocol version reported by the running daemon.
+    static android::base::Optional<int> getProtocolVersion();
 };
 
 }  // namespace emulation
