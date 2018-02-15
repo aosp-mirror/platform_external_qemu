@@ -44,7 +44,16 @@ Loader::Loader(const Snapshot& snapshot, int error)
             mSnapshot.saveFailure(FailureReason::NoRamFile);
             return;
         }
-        mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner));
+
+        // TODO: RamLoader constructor can just have the first argument if we
+        // can figure out a way to get it to compile for windows. It currently
+        // doesn't like {} being put as an argument for the ram block structure
+        // directly.
+
+        RamLoader::RamBlockStructure emptyRamBlockStructure = {};
+        mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner),
+                           false /* not for saving only */,
+                           emptyRamBlockStructure);
     }
     {
         const auto textures = fopen(
@@ -132,6 +141,47 @@ void Loader::onInvalidSnapshotLoad() {
         mSnapshot.saveFailure(FailureReason::CorruptedData);
     } else {
         mSnapshot.saveFailure(FailureReason::InternalError);
+    }
+}
+
+void Loader::prepareForSaving(bool isOnExit) {
+    if (mTextureLoader) {
+        mTextureLoader->join();
+    }
+
+    // Prepare ram loader for incremental save.
+    //
+    // It is important that the gap tracker of the ram loader is in a good
+    // state.
+    //
+    // a. If this is on exit, we can simply interrupt reading and use the ram
+    // loader's current gap tracker, if any, because a precondition of this
+    // function running is that we are saving the same snapshot as we have
+    // loaded.
+    //
+    // b. If this is not on exit, then we first need to make the loader finish
+    // whatever it was doing, because the emulator will need valid ram after
+    // the save. Then, we also need to invalidate the loader's gap tracker
+    // because it's unknown whether the particular version of this loader's
+    // gaps corresponds properly to the gaps in the ram.bin file on disk (e.g.,
+    // we might have saved more than once after a load).
+
+    if (mRamLoader && !mRamLoader->hasError()) {
+        if (isOnExit) {
+            mRamLoader->interrupt();
+        } else {
+            mRamLoader->join();
+            mRamLoader->invalidateGaps();
+        }
+
+        if (!mRamLoader->hasGaps()) {
+            const auto ram = fopen(
+                    PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
+            mRamLoader.emplace(
+                    StdioStream(ram, StdioStream::kOwner),
+                    true /* saving only */,
+                    mRamLoader->getRamBlockStructure());
+        }
     }
 }
 

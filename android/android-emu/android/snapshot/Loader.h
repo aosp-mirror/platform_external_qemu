@@ -42,6 +42,7 @@ public:
     void complete(bool succeeded);
     void onInvalidSnapshotLoad();
 
+    void prepareForSaving(bool isOnExit);
 private:
     OperationStatus mStatus;
     Snapshot mSnapshot;
