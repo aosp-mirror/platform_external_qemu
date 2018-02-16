@@ -334,6 +334,30 @@
     },
     {
       "key": {
+        "uuid": "d8265e12_73846949",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T17:22:14Z",
+      "side": 1,
+      "message": "Wouldn\u0027t there be no silence packet inserted in the 45 ms case? Then chrome will be ahead by 45 ms. All we\u0027re doing around line 533 is calculating time since last audio packet write, and only inserting silence if that time is greater than 50ms.",
+      "parentUuid": "46cf12b8_d359f255",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "763a4e79_ea9d3cdf",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
