@@ -74,6 +74,7 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <dirent.h>
 #include <pwd.h>
 #include <signal.h>
+#include <sys/statvfs.h>
 #include <sys/times.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -1026,6 +1027,10 @@ public:
         return pathFileSizeInternal(path, outFileSize);
     }
 
+    virtual bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const override {
+        return pathFreeSpaceInternal(path, spaceInBytes);
+    }
+
     bool fileSize(int fd, FileSize* outFileSize) const override {
         return fileSizeInternal(fd, outFileSize);
     }
@@ -1760,6 +1765,27 @@ bool System::deleteFileInternal(StringView path) {
     }
 
     return remove_res == 0;
+}
+
+bool System::pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes) {
+#ifdef _WIN32
+    ULARGE_INTEGER freeBytesAvailableToUser;
+    bool result = GetDiskFreeSpaceEx(path.c_str(), &freeBytesAvailableToUser, NULL, NULL);
+    if (!result) {
+        return false;
+    }
+    *spaceInBytes = freeBytesAvailableToUser.QuadPart;
+    return true;
+#else
+    struct statvfs fsStatus;
+    int result = statvfs(path.c_str(), &fsStatus);
+    if (result != 0) {
+        return false;
+    }
+    // Available space is (block size) * (# free blocks)
+    *spaceInBytes = ((FileSize)fsStatus.f_frsize) * fsStatus.f_bavail;
+    return true;
+#endif
 }
 
 // static

@@ -250,6 +250,10 @@ public:
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
     }
 
+    virtual bool pathFreeSpace(StringView path, FileSize* sizeInBytes) const override {
+        return pathFreeSpaceInternal(toTempRoot(path), sizeInBytes);
+    }
+
     virtual bool fileSize(int fd, FileSize* outFileSize) const override {
         return fileSizeInternal(fd, outFileSize);
     }
