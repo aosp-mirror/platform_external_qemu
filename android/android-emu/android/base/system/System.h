@@ -273,6 +273,10 @@ public:
         return fileSize(fd, &res) ? makeOptional(res) : kNullopt;
     }
 
+    // Get the amount of free disk space, in bytes, at |path|.
+    // Returns 'false' on error.
+    virtual bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const = 0;
+
     // Gets the file creation timestamp as a Unix epoch time with microsecond
     // resolution. Returns an empty optional for systems that don't support
     // creation times (Linux) or if the operation failed.
@@ -411,6 +415,7 @@ protected:
     static bool deleteFileInternal(StringView path);
     static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
     static bool fileSizeInternal(int fd, FileSize* outFileSize);
+    static bool pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes);
     static Optional<Duration> pathCreationTimeInternal(StringView path);
     static Optional<Duration> pathModificationTimeInternal(StringView path);
     static Optional<DiskKind> diskKindInternal(StringView path);

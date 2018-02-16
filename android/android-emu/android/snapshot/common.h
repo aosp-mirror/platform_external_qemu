@@ -70,6 +70,7 @@ enum class FailureReason {
     RamFailed,
     TexturesFailed,
     AdbOffline,
+    OutOfDiskSpace,
 
     InProgressLimit = 30000,
 };
