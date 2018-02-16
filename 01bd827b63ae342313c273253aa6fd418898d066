@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "62c81832_8da7c8ef",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-16T02:28:26Z",
+      "side": 1,
+      "message": "by the way, why std::string and not std::vector\u003cuint8_t\u003e? The latter is much more clear about the purpose, while having std::string could make the reader think it\u0027s an actual text string.",
+      "parentUuid": "1e596482_7cc563b9",
+      "range": {
+        "startLine": 300,
+        "startChar": 1,
+        "endLine": 300,
+        "endChar": 26
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48d3d051_8fbc27b8",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
