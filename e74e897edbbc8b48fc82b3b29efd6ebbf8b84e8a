@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "36f724c1_f6552383",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T16:19:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "acb6ee2b_696afc25",
+      "range": {
+        "startLine": 81,
+        "startChar": 3,
+        "endLine": 83,
+        "endChar": 6
+      },
+      "revId": "e74e897edbbc8b48fc82b3b29efd6ebbf8b84e8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4787263_516a7a43",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2018-02-16T02:10:20Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 91,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 5
+      },
+      "revId": "e74e897edbbc8b48fc82b3b29efd6ebbf8b84e8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd4eaa01_67563ed2",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T16:19:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4787263_516a7a43",
       "range": {
         "startLine": 91,
         "startChar": 0,
