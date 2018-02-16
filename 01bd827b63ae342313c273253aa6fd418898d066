@@ -262,6 +262,30 @@
     },
     {
       "key": {
+        "uuid": "57c285be_a074a6aa",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T17:04:01Z",
+      "side": 1,
+      "message": "I\u0027m aware of that; the problem is if from 0 ms to 49 ms, there is no real audio, and we also do not insert pkt1 there.",
+      "parentUuid": "51499869_6d39415b",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "763a4e79_ea9d3cdf",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
