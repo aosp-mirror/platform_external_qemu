@@ -358,6 +358,30 @@
     },
     {
       "key": {
+        "uuid": "38fc0312_3088a25d",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-16T17:47:22Z",
+      "side": 1,
+      "message": "you are right, I mis-understood you. There will be no silence inserted at 45 msec, instead we insert real audio at 45 msec, and will wait another 50 msec to insert silence if there is no real audio. chrome uses audio as reference clock, as long as we don\u0027t have a longer period without audio, chrome is ok in a/v sync.",
+      "parentUuid": "d8265e12_73846949",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "763a4e79_ea9d3cdf",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
