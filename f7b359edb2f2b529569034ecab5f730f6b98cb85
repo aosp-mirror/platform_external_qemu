@@ -117,6 +117,29 @@
       "revId": "f7b359edb2f2b529569034ecab5f730f6b98cb85",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c086ec8_38476fa9",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-16T18:01:22Z",
+      "side": 1,
+      "message": "Sorry, pkt-\u003epts. If the ffmpeg library is buffering packets, than the current time will not be right.",
+      "range": {
+        "startLine": 391,
+        "startChar": 8,
+        "endLine": 392,
+        "endChar": 65
+      },
+      "revId": "f7b359edb2f2b529569034ecab5f730f6b98cb85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
