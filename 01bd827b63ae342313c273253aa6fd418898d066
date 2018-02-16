@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "9e4cf6fc_6ec15f7a",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-16T16:59:54Z",
+      "side": 1,
+      "message": "I used std::string in video player to keep a buffer (based on your comments too), so make it to be consistent. Chromium src code uses std::string to keep unint8_t buffer in a lot of places. I can easily change to vector, of course.",
+      "parentUuid": "62c81832_8da7c8ef",
+      "range": {
+        "startLine": 300,
+        "startChar": 1,
+        "endLine": 300,
+        "endChar": 26
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "48d3d051_8fbc27b8",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
@@ -202,6 +226,30 @@
       "side": 1,
       "message": "\"One thing to note the time to insert silent does not take 50 msec, it\u0027s instant, like a couple of msec\"\n\nI\u0027m aware that the actual encoding of this packet shouldn\u0027t take 50 msec, but I think this doesn\u0027t address the concern I had about the 49ms problem. There\u0027s still the possibility of a 49 ms pause (in the real audio source, not encoding) causing a 49ms shift in time on Chrome anyway since silence will not be inserted, right?\n\nAlso, is the plan to submit this CL as is? What about when we talked about doing this in a separate pass over the video preview\u0027s audio track when the save button for that is clicked? Then that would let us insert exact silences in the finished audio track without having to worry about writing code that satisfies those kinds of couple-ms timing constraints.",
       "parentUuid": "4f14478a_ade97480",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51499869_6d39415b",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-16T16:59:54Z",
+      "side": 1,
+      "message": "Frank, it\u0027s like this:\n\n0 ms  --------- 50 msec -------- 51 msec ------- 100 mesec\n                pkt1:  insert silence worth of 50 msec --|\n                                 pkt 2: Real audio\n\nlet assume silent pkt1 is inserted at 50 msec, the insertion itself takes 1 msec, silent audio is 50 msec length.\n\nlet assume at interval 51 msec, there is a real audio arrives, real audio get inserted, two packets are in queue, ffmpeg should audo handle this situation by shortening pkt1 to 1 msec, and then real audio starts at 51 msec. This is pretty much what a timestamp is for.\n\nWe can use transcoding approach, but result should be same. the transcoding pass will take extra time and user will wait while saving.\n\nOnce Josh\u0027s CL on moving audio encoding into a separate thread is ready, I will move the silence insertion code to that thread too, making it even better.",
+      "parentUuid": "3d5b75ef_bf59c954",
       "range": {
         "startLine": 536,
         "startChar": 16,
