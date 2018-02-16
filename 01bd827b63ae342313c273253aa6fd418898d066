@@ -310,6 +310,30 @@
     },
     {
       "key": {
+        "uuid": "46cf12b8_d359f255",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-16T17:19:43Z",
+      "side": 1,
+      "message": "It will be exactly same if audio arrives at 45 msec, along as the insertion itself is instant. Then silence will be 45 msec, then real audio follows. The situation is same as inserted at 51 msec. In other words, ffmpeg will determine what samples to save to the final movie file according to timestamps. some packets may get dropped, some gets shorted.\n\nOnce offline audio encoding is on, the above situation should not happen, as we will schedule the audio encoding, if there is no real audio, then insert silence. This way, silence and real audio is automated.",
+      "parentUuid": "67448c5b_c23bb5e6",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "763a4e79_ea9d3cdf",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
