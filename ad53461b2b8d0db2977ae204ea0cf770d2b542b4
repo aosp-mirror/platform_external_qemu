@@ -46,6 +46,98 @@
       "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f507a169_42ec0a4f",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T23:33:42Z",
+      "side": 1,
+      "message": "I wonder if it could be worth using all IMFSample::GetBufferCount buffers here to take advantage of any async flipping setup that might exist, if it ends up making readFrame faster.",
+      "range": {
+        "startLine": 653,
+        "startChar": 0,
+        "endLine": 653,
+        "endChar": 48
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51090ee1_5de6dc11",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T23:33:42Z",
+      "side": 1,
+      "message": "Should we memcpy and unlock first, then convert_frame in order to give the \n underlying webcam capture more time to continue reading out frames?\n\nThough convert_frame_fast should be pretty fast now so it might not matter so much.",
+      "range": {
+        "startLine": 671,
+        "startChar": 0,
+        "endLine": 676,
+        "endChar": 29
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5155d718_55ea0d19",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T23:33:42Z",
+      "side": 1,
+      "message": "It might be a good idea to trace out in debug/verbose prints as to which configuration was selected, for better debuggability.",
+      "range": {
+        "startLine": 681,
+        "startChar": 0,
+        "endLine": 681,
+        "endChar": 58
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c48528e_b5145f08",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T23:33:42Z",
+      "side": 1,
+      "message": "move comment below (and the other one too maybe) ?",
+      "range": {
+        "startLine": 753,
+        "startChar": 0,
+        "endLine": 753,
+        "endChar": 68
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
