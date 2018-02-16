@@ -140,6 +140,30 @@
       "revId": "f7b359edb2f2b529569034ecab5f730f6b98cb85",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79188de7_b1ca3fce",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-16T22:29:24Z",
+      "side": 1,
+      "message": "audio pts is also calculated from the time audio is inserted. For silent audio, we do the same, inside ffmpeg_encode_audio_frame(), exactly same as real audio. The interval (50 msec) is calculated from last time audio is saved, so this interval can be an estimate, it\u0027s not used for timestamp.",
+      "parentUuid": "3c086ec8_38476fa9",
+      "range": {
+        "startLine": 391,
+        "startChar": 8,
+        "endLine": 392,
+        "endChar": 65
+      },
+      "revId": "f7b359edb2f2b529569034ecab5f730f6b98cb85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
