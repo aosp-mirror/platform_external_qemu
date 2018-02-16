@@ -624,7 +624,7 @@
     <widget class="RaisedMaterialButton" name="set_saveSnapNowButton">
      <property name="geometry">
       <rect>
-       <x>169</x>
+       <x>20</x>
        <y>370</y>
        <width>132</width>
        <height>36</height>
@@ -690,6 +690,35 @@
      </property>
      <property name="text">
       <string>RESET NOTIFICATION PREFERENCES</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="set_loadSnapNowButton">
+     <property name="geometry">
+      <rect>
+       <x>169</x>
+       <y>370</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>LOAD NOW</string>
      </property>
      <property name="flat">
       <bool>true</bool>
