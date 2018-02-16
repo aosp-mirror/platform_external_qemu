@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "5b35b797_289ea34e",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T23:42:51Z",
+      "side": 1,
+      "message": "This is really far out and more of a v2 thing, but if the webcam\u0027s \u0027native\u0027 res is something a lot bigger than our required dimenisions, like 1080p, I wonder if we could compare the speeds of:\n\na. using current path that might end up rescaling it to a particular resolution that we require\nb. advertising that native dimension directly, and passing it through to android framework\nc. (b) but we also rescale it ourselves back to our android resolutions with libyuv or opengl magic.",
+      "range": {
+        "startLine": 361,
+        "startChar": 0,
+        "endLine": 365,
+        "endChar": 17
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3238a1d2_cae7f974",
         "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
         "patchSetId": 2
