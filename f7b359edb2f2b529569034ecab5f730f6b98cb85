@@ -46,6 +46,30 @@
       "revId": "f7b359edb2f2b529569034ecab5f730f6b98cb85",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8af6a9f_a69be71e",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-16T17:29:06Z",
+      "side": 1,
+      "message": "you can move the content out of the string with std::move(), or get a pointer to internal buffer as \u0026s.front(). Where would that extra copy be in the current code?",
+      "parentUuid": "573955d6_da40aa86",
+      "range": {
+        "startLine": 146,
+        "startChar": 15,
+        "endLine": 146,
+        "endChar": 16
+      },
+      "revId": "f7b359edb2f2b529569034ecab5f730f6b98cb85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
