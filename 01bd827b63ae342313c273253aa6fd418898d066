@@ -286,6 +286,30 @@
     },
     {
       "key": {
+        "uuid": "67448c5b_c23bb5e6",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-16T17:06:33Z",
+      "side": 1,
+      "message": "(as in, silence from 0 ms to 49 ms, then real audio at 50 ms)\n\nThe user also doesn\u0027t necessarily have to wait while saving, since we also recently made the screen recording UI async.",
+      "parentUuid": "57c285be_a074a6aa",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "763a4e79_ea9d3cdf",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
