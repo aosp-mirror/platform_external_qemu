@@ -406,6 +406,30 @@
     },
     {
       "key": {
+        "uuid": "f184e15b_499ec9a3",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-02-17T01:11:49Z",
+      "side": 1,
+      "message": "yes, I tried a lot of difference settings. like 20 msec, for about 2 frames. Theoretically, 1 msec is 192 byte, so 50 msec, it\u0027s 9600 byte silence, for some unknown reason, if I add just the theoretical values, chrome still has trouble. I needed to add more silence to make chrome happy.\n\n50 msec with 4 frames makes chrome to work well on all platforms, which is the why I pick 50 msec with 4-frames.\n\nWith audio encoding in a separate thread, it should be better.",
+      "parentUuid": "bf718833_38f9f944",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "763a4e79_ea9d3cdf",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
