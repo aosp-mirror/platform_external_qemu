@@ -536,6 +536,7 @@ void Snapshotter::handleGenericLoad(const char* name,
                                  FailureReason::InternalError);
             }
         }
+        return;
     }
 
     if (reportMetrics) {
@@ -624,6 +625,12 @@ bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Save, Stage::Start);
     prepareLoaderForSaving(name);
+
+    if (mCancelAvailableCallback) {
+        fprintf(stderr, "%s: cancel avail\n", __func__);
+        mCancelAvailableCallback();
+    }
+
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.reset(new Saver(
                 name, (mLoader && mLoader->status() != OperationStatus::Error)
@@ -631,6 +638,7 @@ bool Snapshotter::onStartSaving(const char* name) {
                               : nullptr,
                 mIsOnExit));
     }
+
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);
         return false;
