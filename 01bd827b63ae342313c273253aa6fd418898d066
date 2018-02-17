@@ -382,6 +382,30 @@
     },
     {
       "key": {
+        "uuid": "bf718833_38f9f944",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-17T00:07:00Z",
+      "side": 1,
+      "message": "Ah, so it\u0027s really reliant on the fact that Chrome\u0027s audio clock tick assumes a maximum gap of 50ms between samples, or it will just skip to the next one. Thanks for the clarification!\n\nIn that case, I think hardcoding this to 50ms introduces unnecessary coupling to the current version of Chrome that uses 50ms as the current criteria. So it looks like the most compatible thing to do in the end is to still encode the exact amount of silence between packets with no gaps.",
+      "parentUuid": "38fc0312_3088a25d",
+      "range": {
+        "startLine": 536,
+        "startChar": 16,
+        "endLine": 540,
+        "endChar": 17
+      },
+      "revId": "01bd827b63ae342313c273253aa6fd418898d066",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "763a4e79_ea9d3cdf",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
