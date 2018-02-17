@@ -536,11 +536,11 @@ void Snapshotter::handleGenericLoad(const char* name,
                                  FailureReason::InternalError);
             }
         }
-    }
-
-    if (reportMetrics) {
-        appendSuccessfulLoad(name,
-                             mLastLoadDuration ? *mLastLoadDuration : 0);
+    } else {
+        if (reportMetrics) {
+            appendSuccessfulLoad(name,
+                    mLastLoadDuration ? *mLastLoadDuration : 0);
+        }
     }
 }
 
