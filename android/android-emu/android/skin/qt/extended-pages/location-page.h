@@ -83,6 +83,19 @@ private:
 
     void updateControlsAfterLoading();
 
+    void writeLocationPlaybackFilePathToSettings(const QString& file);
+    QString getLocationPlaybackFilePathFromSettings();
+
+    void writeLocationPlaybackSpeedToSettings(int speed);
+    int getLocationPlaybackSpeedFromSettings();
+
+    static void getDeviceLocationFromSettings(double* pOutLatitude,
+                                              double* pOutLongitude,
+                                              double* pOutAltitude);
+    static void writeDeviceLocationToSettings(double lat,
+                                              double lon,
+                                              double alt);
+
     static void getDeviceLocation(double* pOutLatitude,
                                   double* pOutLongitude,
                                   double* pOutAltitude);
