@@ -2415,6 +2415,12 @@ do_geo_nmea( ControlClient  client, char*  args )
     return 0;
 }
 
+static location_qt_settings_writer location_agent_qt_settings_func = 0;
+
+void location_registerQtSettingsWriter(location_qt_settings_writer f) {
+    location_agent_qt_settings_func = f;
+}
+
 static int
 do_geo_fix( ControlClient  client, char*  args )
 {
@@ -2489,8 +2495,13 @@ do_geo_fix( ControlClient  client, char*  args )
     memset(&tVal, 0, sizeof(tVal));
     gettimeofday(&tVal, NULL);
 
+    // Also update the settings.
+    if (location_agent_qt_settings_func) {
+        location_agent_qt_settings_func(params[GEO_LAT], params[GEO_LONG], altitude);
+    }
     client->global->location_agent->gpsSendLoc(params[GEO_LAT], params[GEO_LONG],
                                                altitude, n_satellites, &tVal);
+
     return 0;
 }
 
