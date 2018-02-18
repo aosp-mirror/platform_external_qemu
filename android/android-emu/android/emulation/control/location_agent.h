@@ -19,6 +19,13 @@
 
 ANDROID_BEGIN_HEADER
 
+typedef void (*location_qt_settings_writer)(double, double, double);
+
+extern location_qt_settings_writer location_agent_qt_settings_func;
+
+// Register callback to sync Qt settings
+void location_registerQtSettingsWriter(location_qt_settings_writer);
+
 typedef struct QAndroidLocationAgent {
     // Query whether the device implementation supports GPS.
     bool (*gpsIsSupported)(void);

@@ -35,6 +35,9 @@ public:
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
 
+    static void writeDeviceLocationToSettings(double lat,
+                                              double lon,
+                                              double alt);
 signals:
     void locationUpdateRequired(double latitude, double longitude, double altitude);
     void populateNextGeoDataChunk();
@@ -82,6 +85,16 @@ private:
         bool ignore_error);
 
     void updateControlsAfterLoading();
+
+    void writeLocationPlaybackFilePathToSettings(const QString& file);
+    QString getLocationPlaybackFilePathFromSettings();
+
+    void writeLocationPlaybackSpeedToSettings(int speed);
+    int getLocationPlaybackSpeedFromSettings();
+
+    static void getDeviceLocationFromSettings(double* pOutLatitude,
+                                              double* pOutLongitude,
+                                              double* pOutAltitude);
 
     static void getDeviceLocation(double* pOutLatitude,
                                   double* pOutLongitude,
