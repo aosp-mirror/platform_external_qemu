@@ -13,6 +13,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/globals.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/metrics/MetricsReporter.h"
@@ -29,10 +30,18 @@
 #include <utility>
 #include <unistd.h>
 
+using android::base::LazyInstance;
+
 static const double kGplexLon = -122.084;
 static const double kGplexLat =   37.422;
 
 const QAndroidLocationAgent* LocationPage::sLocationAgent = nullptr;
+
+struct LocationPageGlobals {
+    LocationPage* locationPagePtr = nullptr;
+};
+
+static LazyInstance<LocationPageGlobals> sGlobals = LAZY_INSTANCE_INIT;
 
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
@@ -50,6 +59,7 @@ LocationPage::LocationPage(QWidget *parent) :
         mUpdateThreadLock.unlock();
     })
 {
+    sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
     mTimer.setSingleShot(true);
 
@@ -81,10 +91,10 @@ LocationPage::LocationPage(QWidget *parent) :
 
     QSettings settings;
     mUi->loc_playbackSpeed->setCurrentIndex(
-            settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
+            getLocationPlaybackSpeedFromSettings());
     mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     QString location_data_file =
-        settings.value(Ui::Settings::LOCATION_PLAYBACK_FILE, "").toString();
+        getLocationPlaybackFilePathFromSettings();
     mGeoDataLoader = GeoDataLoaderThread::newInstance(
             this,
             SLOT(geoDataThreadStarted()),
@@ -109,6 +119,8 @@ LocationPage::LocationPage(QWidget *parent) :
 }
 
 LocationPage::~LocationPage() {
+    sGlobals->locationPagePtr = nullptr;
+
     mUpdateThreadLock.lock();
     mShouldCloseUpdateThread = true;
     mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
@@ -123,17 +135,22 @@ LocationPage::~LocationPage() {
     mUi->loc_pathTable->clear();
 }
 
+static void locationAgentQtSettingsWriter(double lat, double lon, double alt) {
+    LocationPage::writeDeviceLocationToSettings(lat, lon, alt);
+    if (sGlobals->locationPagePtr) {
+        sGlobals->locationPagePtr->locationUpdateRequired(lat, lon, alt);
+    }
+}
+
 // static
 void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
     sLocationAgent = agent;
 
+    location_registerQtSettingsWriter(locationAgentQtSettingsWriter);
+
     double curLat, curLon, curAlt;
     getDeviceLocation(&curLat, &curLon, &curAlt);
-
-    QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE,  curLat);
-    settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, curLon);
-    settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE,  curAlt);
+    writeDeviceLocationToSettings(curLat, curLon, curAlt);
 
     sendLocationToDevice();
 }
@@ -192,10 +209,11 @@ void LocationPage::on_loc_sendPointButton_clicked() {
 
     double altitude = mUi->loc_altitudeInput->text().toDouble();
     if (altitude < -1000.0 || altitude > 10000.0) {
-        QSettings settings;
-        mUi->loc_altitudeInput->setText(QString::number(
-                settings.value(Ui::Settings::LOCATION_ENTERED_ALTITUDE, 0.0)
-                        .toDouble()));
+        double lat;
+        double lon;
+        double validAltitude;
+        getDeviceLocationFromSettings(&lat, &lon, &validAltitude);
+        mUi->loc_altitudeInput->setText(QString::number(validAltitude));
     }
 
     mUpdateThreadLock.lock();
@@ -210,32 +228,23 @@ void LocationPage::updateDisplayedLocation(double lat, double lon, double alt) {
     QString curLoc = tr("Longitude: %1\nLatitude: %2\nAltitude: %3")
                      .arg(lon, 0, 'f', 4).arg(lat, 0, 'f', 4).arg(alt, 0, 'f', 1);
     mUi->loc_currentLoc->setPlainText(curLoc);
-    QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE, lat);
-    settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, lon);
-    settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE, alt);
-
+    writeDeviceLocationToSettings(lat, lon, alt);
 }
 
 void LocationPage::on_loc_longitudeInput_valueChanged(double value) {
-    QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_ENTERED_LONGITUDE, value);
+    // no-op
 }
 
 void LocationPage::on_loc_latitudeInput_valueChanged(double value) {
-    QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_ENTERED_LATITUDE, value);
+    // no-op
 }
 
 void LocationPage::on_loc_altitudeInput_editingFinished() {
-    QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_ENTERED_ALTITUDE,
-                      mUi->loc_altitudeInput->text().toDouble());
+    // no-op
 }
 
 void LocationPage::on_loc_playbackSpeed_currentIndexChanged(int index) {
-    QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_PLAYBACK_SPEED, index);
+    writeLocationPlaybackSpeedToSettings(index);
 }
 
 bool LocationPage::validateCell(QTableWidget* table,
@@ -521,8 +530,7 @@ void LocationPage::finishGeoDataLoading(
         return;
     }
 
-    QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_PLAYBACK_FILE, file_name);
+    writeLocationPlaybackFilePathToSettings(file_name);
     mGpsNextPopulateIndex = 0;
     populateTableByChunks();
 }
@@ -544,6 +552,106 @@ void LocationPage::updateControlsAfterLoading() {
     mNowLoadingGeoData = false;
 }
 
+// static
+void LocationPage::writeLocationPlaybackFilePathToSettings(const QString& file) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_LOC_PLAYBACK_FILE, file);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::LOCATION_PLAYBACK_FILE, file);
+    }
+}
+
+// static
+QString LocationPage::getLocationPlaybackFilePathFromSettings() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        return avdSpecificSettings.value(Ui::Settings::PER_AVD_LOC_PLAYBACK_FILE, "").toString();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        return settings.value(Ui::Settings::LOCATION_PLAYBACK_FILE, "").toString();
+    }
+}
+
+// static
+void LocationPage::writeLocationPlaybackSpeedToSettings(int speed) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_LOC_PLAYBACK_SPEED, speed);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::LOCATION_PLAYBACK_SPEED, speed);
+    }
+}
+
+// static
+int LocationPage::getLocationPlaybackSpeedFromSettings() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        return avdSpecificSettings.value(Ui::Settings::PER_AVD_LOC_PLAYBACK_SPEED, 0).toInt();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        return settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt();
+    }
+}
+
+// static
+void LocationPage::getDeviceLocationFromSettings(double* pOutLatitude,
+                                                 double* pOutLongitude,
+                                                 double* pOutAltitude) {
+
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        *pOutLatitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_LATITUDE, kGplexLat).toDouble();
+        *pOutLongitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_LONGITUDE, kGplexLon).toDouble();
+        *pOutAltitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_ALTITUDE, 0.0).toDouble();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        *pOutLatitude  = settings.value(Ui::Settings::LOCATION_RECENT_LATITUDE,
+                                     kGplexLat).toDouble();
+        *pOutLongitude = settings.value(Ui::Settings::LOCATION_RECENT_LONGITUDE,
+                                     kGplexLon).toDouble();
+        *pOutAltitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
+                                     0.0).toDouble();
+    }
+}
+
+// static
+void LocationPage::writeDeviceLocationToSettings(double lat,
+                                                 double lon,
+                                                 double alt) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_LATITUDE, lat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_LONGITUDE, lon);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_ALTITUDE, alt);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE, lat);
+        settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, lon);
+        settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE, alt);
+    }
+}
+
 // Get the current location from the device. If that fails, use
 // the saved location from this UI.
 // (static function)
@@ -559,14 +667,7 @@ void LocationPage::getDeviceLocation(double* pLatitude,
     }
 
     if (!gotDeviceLoc) {
-        // Use the saved settings
-        QSettings settings;
-        *pLatitude  = settings.value(Ui::Settings::LOCATION_RECENT_LATITUDE,
-                                     kGplexLat).toDouble();
-        *pLongitude = settings.value(Ui::Settings::LOCATION_RECENT_LONGITUDE,
-                                     kGplexLon).toDouble();
-        *pAltitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
-                                     0.0).toDouble();
+        getDeviceLocationFromSettings(pLatitude, pLongitude, pAltitude);
     }
 }
 
@@ -575,13 +676,11 @@ void LocationPage::getDeviceLocation(double* pLatitude,
 void LocationPage::sendLocationToDevice() {
     if (sLocationAgent && sLocationAgent->gpsSendLoc) {
         // Send these to the device
-        QSettings settings;
-        double latitude  = settings.value(Ui::Settings::LOCATION_RECENT_LATITUDE,
-                                     kGplexLat).toDouble();
-        double longitude = settings.value(Ui::Settings::LOCATION_RECENT_LONGITUDE,
-                                     kGplexLon).toDouble();
-        double altitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
-                                     0.0).toDouble();
+        double latitude;
+        double longitude;
+        double altitude;
+        getDeviceLocation(&latitude, &longitude, &altitude);
+
         timeval timeVal = {};
         gettimeofday(&timeVal, nullptr);
         sLocationAgent->gpsSendLoc(latitude, longitude, altitude, 4, &timeVal);

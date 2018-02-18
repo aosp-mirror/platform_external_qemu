@@ -85,10 +85,6 @@ constexpr char HTTP_PROXY_PORT[] = "set/proxy/port";
 constexpr char HTTP_PROXY_AUTHENTICATION[] = "set/proxy/authentication";
 constexpr char HTTP_PROXY_USERNAME[] = "set/proxy/username";
 
-
-constexpr char LOCATION_ENTERED_ALTITUDE[] = "loc/altitude";
-constexpr char LOCATION_ENTERED_LATITUDE[] = "loc/latitude";
-constexpr char LOCATION_ENTERED_LONGITUDE[] = "loc/longitude";
 constexpr char LOCATION_PLAYBACK_FILE[] = "loc/playback_file_path";
 constexpr char LOCATION_PLAYBACK_SPEED[] = "loc/playback_speed";
 constexpr char LOCATION_RECENT_ALTITUDE[] = "loc/recent_altitude";
@@ -102,11 +98,17 @@ constexpr char SCREENREC_SAVE_PATH[] = "rec/savePath";
 constexpr char PER_AVD_SETTINGS_NAME[] = "/AVD.conf";
 
 constexpr char SAVE_SNAPSHOT_ON_EXIT[] = "perAvd/set/saveSnapshotOnExit";
-
-// Enum values saved in the settings
+// Enum values saved in the settings for save snapshot on exit
 enum class SaveSnapshotOnExit { Always, Never, Ask };
-// Order of the items on the GUI
+// Order of the items on the GUI for save snapshot on exit
 enum class SaveSnapshotOnExitUiOrder { Always, Never, Ask };
+
+constexpr char PER_AVD_LONGITUDE[] = "perAvd/loc/longitude";
+constexpr char PER_AVD_LATITUDE[] = "perAvd/loc/latitude";
+constexpr char PER_AVD_ALTITUDE[] = "perAvd/loc/altitude";
+
+constexpr char PER_AVD_LOC_PLAYBACK_FILE[] = "perAvd/loc/playback_file_path";
+constexpr char PER_AVD_LOC_PLAYBACK_SPEED[] = "perAvd/loc/playback_speed";
 
 }  // namespace Settings
 }  // namespace Ui
