@@ -1,4 +1,4 @@
-#!/bin/sh
+!/bin/sh
 #
 # this script is used to rebuild all QEMU binaries for the host
 # platforms.
@@ -178,7 +178,7 @@ if [ "$MINGW" ]; then
         else
             WINE_VERSION=$("$WINE_CMD" --version 2>/dev/null)
             case $WINE_VERSION in
-                wine-1.8.*|wine-1.9.*|wine-1.1?.*|wine-2.*)
+                wine-1.8.*|wine-1.9.*|wine-1.1?.*)
                     ;;
                 *)
                     echo "WARNING: Your Wine version ($WINE_VERSION) is too old, >= 1.8 required"

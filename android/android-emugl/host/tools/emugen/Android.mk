@@ -16,7 +16,7 @@ LOCAL_CFLAGS += -m64
 
 ifeq ($(BUILD_HOST_OS),linux)
   # Make sure libc++.so can be found
-  LOCAL_LDFLAGS +=-Wl,-rpath=$(BUILD_OBJS_DIR)/lib64
+  LOCAL_LDFLAGS +=-Wl,-rpath=$(BUILD_OBJS_DIR)/intermediates64
 endif
 
 LOCAL_INSTALL := false
@@ -40,6 +40,6 @@ LOCAL_INSTALL := false
 $(call emugl-import,libemugl_gtest_host)
 ifeq ($(BUILD_HOST_OS),linux)
   # Make sure libc++.so can be found
-  LOCAL_LDFLAGS +=-Wl,-rpath=$(BUILD_OBJS_DIR)/lib64 -m64
+  LOCAL_LDFLAGS +=-Wl,-rpath=$(BUILD_OBJS_DIR)/intermediates64 -m64
 endif
 $(call emugl-end-module)
