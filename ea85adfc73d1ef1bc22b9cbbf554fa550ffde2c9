@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "f8c70ed5_4c4c0248",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T21:53:18Z",
+      "side": 1,
+      "message": "Yep, like running in the build system or any number of other weird configs that happen internally.",
+      "parentUuid": "9065deab_4ebfdd7c",
+      "range": {
+        "startLine": 563,
+        "startChar": 35,
+        "endLine": 563,
+        "endChar": 44
+      },
+      "revId": "ea85adfc73d1ef1bc22b9cbbf554fa550ffde2c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d60ce172_929f0a09",
         "filename": "android/android-emu/android/skin/qt/qt-settings.h",
         "patchSetId": 3
