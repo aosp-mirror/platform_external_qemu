@@ -280,6 +280,30 @@
       "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72824d4c_850c0945",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-20T23:57:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0c48528e_b5145f08",
+      "range": {
+        "startLine": 753,
+        "startChar": 0,
+        "endLine": 753,
+        "endChar": 68
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
