@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5015729b_f6cb3b0c",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-20T22:29:42Z",
+      "side": 1,
+      "message": "Yeah, I think it\u0027s worth benchmarking.  The QEMU transport doesn\u0027t appear to be a bottleneck, so sending the highest available resolution through may be the best.  The biggest pain point is that changing resolutions requires restarting the camera, which can add several seconds of latency when taking a picture or toggling between photo/video.  Changing resolutions here (and in the other cameras) requires some reconfiguring, and may be slow, so I\u0027m leaning towards a custom scaler implemented either alongside convert_frame or within the QEMU camera so that we can change resolutions on-the-fly.",
+      "parentUuid": "5b35b797_289ea34e",
+      "range": {
+        "startLine": 361,
+        "startChar": 0,
+        "endLine": 365,
+        "endChar": 17
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3238a1d2_cae7f974",
         "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
         "patchSetId": 2
@@ -72,6 +96,29 @@
     },
     {
       "key": {
+        "uuid": "31033c9a_4928931a",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-20T22:29:42Z",
+      "side": 1,
+      "message": "I\u0027ll get rid of this \"sp\" hungarian notation.  Reflex :-)",
+      "range": {
+        "startLine": 652,
+        "startChar": 27,
+        "endLine": 652,
+        "endChar": 35
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f507a169_42ec0a4f",
         "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
         "patchSetId": 2
@@ -83,6 +130,30 @@
       "writtenOn": "2018-02-16T23:33:42Z",
       "side": 1,
       "message": "I wonder if it could be worth using all IMFSample::GetBufferCount buffers here to take advantage of any async flipping setup that might exist, if it ends up making readFrame faster.",
+      "range": {
+        "startLine": 653,
+        "startChar": 0,
+        "endLine": 653,
+        "endChar": 48
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8cc9f5bd_cb1be937",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-20T22:29:42Z",
+      "side": 1,
+      "message": "For video, I\u0027ve never seen more than buffer used.  It\u0027s one of those features that MF supports to be super flexible.  The only time I\u0027ve seen multiple buffers used was for audio, where there are multiple buffers to prevent allocating more memory when the data is too large to fit into one.\n\nIn most of these cases, the caller simply calls sample-\u003eConvertToContiguousBuffer(\u0026spBuffer) which concats all the buffers together.  Come to think of it, that\u0027s probably a good idea here-- there may be a strange webcam out there that treats planar formats as different buffers.",
+      "parentUuid": "f507a169_42ec0a4f",
       "range": {
         "startLine": 653,
         "startChar": 0,
@@ -118,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "4c050a70_137fc6db",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-20T22:29:42Z",
+      "side": 1,
+      "message": "I think doing an extra memcpy will do more harm than good.  Internally sources use a IMFVideoSampleAllocator to create and recycle samples on-demand, which can have many outstanding samples if necessary-- returning the sample immediately is not a big concern.",
+      "parentUuid": "51090ee1_5de6dc11",
+      "range": {
+        "startLine": 671,
+        "startChar": 0,
+        "endLine": 676,
+        "endChar": 29
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5155d718_55ea0d19",
         "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
         "patchSetId": 2
@@ -129,6 +224,30 @@
       "writtenOn": "2018-02-16T23:33:42Z",
       "side": 1,
       "message": "It might be a good idea to trace out in debug/verbose prints as to which configuration was selected, for better debuggability.",
+      "range": {
+        "startLine": 681,
+        "startChar": 0,
+        "endLine": 681,
+        "endChar": 58
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00dedb82_f4020e61",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-02-20T22:29:42Z",
+      "side": 1,
+      "message": "Good idea, will do.",
+      "parentUuid": "5155d718_55ea0d19",
       "range": {
         "startLine": 681,
         "startChar": 0,
