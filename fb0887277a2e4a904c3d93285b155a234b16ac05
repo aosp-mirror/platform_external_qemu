@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8627a551_95b51865",
+        "filename": "android/android-emu/android/emulation/control/location_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-02-20T19:04:30Z",
+      "side": 1,
+      "message": "did you only use it in one cpp? if so, put it as static?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 6
+      },
+      "revId": "fb0887277a2e4a904c3d93285b155a234b16ac05",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
