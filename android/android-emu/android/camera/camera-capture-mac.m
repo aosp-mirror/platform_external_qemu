@@ -114,7 +114,7 @@ FourCCToInternal(uint32_t cm_pix_format)
  * Return:
  *  Pointer to initialized instance on success, or nil on failure.
  */
-- (MacCamera*)init;
+- (MacCamera*)init:(const char*)name;
 
 /* Undoes 'init' */
 - (void)free;
@@ -148,15 +148,21 @@ FourCCToInternal(uint32_t cm_pix_format)
 
 @implementation MacCamera
 
-- (MacCamera*)init
+- (MacCamera*)init:(const char*)name
 {
     NSError *error;
     BOOL success;
 
     /* Obtain the capture device, make sure it's not used by another
      * application, and open it. */
-    capture_device =
-        [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    if (name == nil || *name  == '\0') {
+        capture_device =
+            [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    }
+    else {
+        NSString *deviceName = [NSString stringWithFormat:@"%s", name];
+        capture_device = [AVCaptureDevice deviceWithUniqueID:deviceName];
+    }
     if (capture_device == nil) {
         E("There are no available video devices found.");
         [self release];
@@ -429,6 +435,8 @@ struct MacCameraDevice {
     CameraDevice  header;
     /* Actual camera device object. */
     MacCamera*    device;
+    char* device_name;
+    int input_channel;
     int started;
     int frame_width;
     int frame_height;
@@ -465,6 +473,9 @@ _camera_device_free(MacCameraDevice* cd)
             [cd->device release];
             cd->device = nil;
         }
+        if (cd->device_name != nil) {
+            free(cd->device_name);
+        }
         AFREE(cd);
     } else {
         W("%s: No descriptor", __FUNCTION__);
@@ -480,7 +491,7 @@ _camera_device_reset(MacCameraDevice* cd)
 {
     if (cd != NULL && cd->device) {
         [cd->device free];
-        cd->device = [cd->device init];
+        cd->device = [cd->device init:cd->device_name];
         cd->started = 0;
     }
 }
@@ -499,9 +510,11 @@ camera_device_open(const char* name, int inp_channel)
         E("%s: Unable to allocate MacCameraDevice instance", __FUNCTION__);
         return NULL;
     }
-    mcd->device = [[MacCamera alloc] init];
+    mcd->device_name = ASTRDUP(name);
+    mcd->device = [[MacCamera alloc] init:name];
     if (mcd->device == nil) {
         E("%s: Unable to initialize camera device.", __FUNCTION__);
+        _camera_device_free(mcd);
         return NULL;
     } else {
         D("%s: successfuly initialized camera device\n", __func__);
@@ -616,41 +629,46 @@ int camera_enumerate_devices(CameraInfo* cis, int max) {
             /* Emulates 1280x960 frame. */
             {1280, 960}};
 
-    /* Obtain default video device. There is a AVCaptureDevice::uniqueId
-     * method that supposedly allows query of specific devices.
-     * For now, stick to using only one (default) camera for emulation. */
-    AVCaptureDevice* video_dev =
-        [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    if (video_dev == nil) {
+    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    if (videoDevices == nil) {
         E("No web cameras are connected to the host.");
         return 0;
     }
+    int found = 0;
+    for (AVCaptureDevice *videoDevice in videoDevices) {
+        for(AVCaptureDeviceFormat *vFormat in [videoDevice formats]) {
+            CMFormatDescriptionRef description= vFormat.formatDescription;
+            cis[found].pixel_format = FourCCToInternal(CMFormatDescriptionGetMediaSubType(description));
+            if (cis[found].pixel_format) break;
+        }
+        if (cis[found].pixel_format == 0) {
+            /* Unsupported pixel format. */
+            E("Pixel format reported by the camera device is unsupported");
+            continue;
+        }
 
-    /* Obtain FOURCC pixel format for the device. */
-    AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-    for(AVCaptureDeviceFormat *vFormat in [videoDevice formats]) {
-        CMFormatDescriptionRef description= vFormat.formatDescription;
-        cis[0].pixel_format = FourCCToInternal(CMFormatDescriptionGetMediaSubType(description));
-        if (cis[0].pixel_format) break;
+        /* Initialize camera info structure. */
+        cis[found].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
+        if (cis[found].frame_sizes != NULL) {
+            char user_name[24];
+            char *device_name = [[videoDevice uniqueID] UTF8String];
+            snprintf(user_name, sizeof(user_name), "webcam%d", found);
+            cis[found].frame_sizes_num = sizeof(_emulate_dims) / sizeof(*_emulate_dims);
+            memcpy(cis[found].frame_sizes, _emulate_dims, sizeof(_emulate_dims));
+            cis[found].device_name = ASTRDUP(device_name);
+            cis[found].inp_channel = 0;
+            cis[found].display_name = ASTRDUP(user_name);
+            cis[found].in_use = 0;
+            found++;
+            if (found == max) {
+                W("Number of Cameras exceeds max limit %d", max);
+                return found;
+            }
+            D("Found Video Device %s id %s for %s", [[videoDevice manufacturer] UTF8String], device_name, user_name);
+        } else {
+            E("Unable to allocate memory for camera information.");
+            return 0;
+        }
     }
-    if (cis[0].pixel_format == 0) {
-        /* Unsupported pixel format. */
-        E("Pixel format reported by the camera device is unsupported");
-        return 0;
-    }
-
-    /* Initialize camera info structure. */
-    cis[0].frame_sizes = (CameraFrameDim*)malloc(sizeof(_emulate_dims));
-    if (cis[0].frame_sizes != NULL) {
-        cis[0].frame_sizes_num = sizeof(_emulate_dims) / sizeof(*_emulate_dims);
-        memcpy(cis[0].frame_sizes, _emulate_dims, sizeof(_emulate_dims));
-        cis[0].device_name = ASTRDUP("webcam0");
-        cis[0].inp_channel = 0;
-        cis[0].display_name = ASTRDUP("webcam0");
-        cis[0].in_use = 0;
-        return 1;
-    } else {
-        E("Unable to allocate memory for camera information.");
-        return 0;
-    }
+    return found;
 }
