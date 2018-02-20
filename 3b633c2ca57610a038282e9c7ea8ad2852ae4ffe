@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d896affc_c2aa28c0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T20:28:58Z",
+      "side": 1,
+      "message": "What should the lifetime of |protobuf| be here? Is it safe to unique_ptr delete when it goes out of scope?",
+      "range": {
+        "startLine": 145,
+        "startChar": 0,
+        "endLine": 167,
+        "endChar": 5
+      },
+      "revId": "3b633c2ca57610a038282e9c7ea8ad2852ae4ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf47000c_38b2c8f2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T20:28:58Z",
+      "side": 1,
+      "message": "needed for the flat display?",
+      "range": {
+        "startLine": 363,
+        "startChar": 10,
+        "endLine": 363,
+        "endChar": 18
+      },
+      "revId": "3b633c2ca57610a038282e9c7ea8ad2852ae4ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20f75286_3ee40c4b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T20:28:58Z",
+      "side": 1,
+      "message": "const QString\u0026?",
+      "range": {
+        "startLine": 382,
+        "startChar": 9,
+        "endLine": 382,
+        "endChar": 16
+      },
+      "revId": "3b633c2ca57610a038282e9c7ea8ad2852ae4ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83b53d67_3150b995",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T20:28:58Z",
+      "side": 1,
+      "message": "Can we mark with a TODO: so it\u0027s clear what\u0027s the next step for the commented code?",
+      "range": {
+        "startLine": 436,
+        "startChar": 1,
+        "endLine": 439,
+        "endChar": 22
+      },
+      "revId": "3b633c2ca57610a038282e9c7ea8ad2852ae4ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a44d85a_9c7b1a5e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T20:28:58Z",
+      "side": 1,
+      "message": "It seems like a good idea to add further comments as to what the writable copy is used for, plus when to delete it.",
+      "range": {
+        "startLine": 596,
+        "startChar": 0,
+        "endLine": 596,
+        "endChar": 27
+      },
+      "revId": "3b633c2ca57610a038282e9c7ea8ad2852ae4ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5016c6ea_fa2b165e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T20:28:58Z",
+      "side": 1,
+      "message": "Whats 9.94 for?",
+      "range": {
+        "startLine": 643,
+        "startChar": 29,
+        "endLine": 643,
+        "endChar": 45
+      },
+      "revId": "3b633c2ca57610a038282e9c7ea8ad2852ae4ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "246a38c3_1c61a6c8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T20:28:58Z",
+      "side": 1,
+      "message": "Since there\u0027s lots of stuff in private here including a new class, it seems better to save on compile times and reduce risk by creating some kind of SnapshotDisplayImpl class in the .cpp and making the WidgetSnapshotItem local to the .cpp file as well.",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 120,
+        "endChar": 67
+      },
+      "revId": "3b633c2ca57610a038282e9c7ea8ad2852ae4ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
