@@ -443,7 +443,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     System::FileSize availableSpace;
     bool success = System::get()->pathFreeSpace(getSnapshotDir(name).c_str(),
                                                 &availableSpace);
-    if (!success || availableSpace < TWO_GB) {
+    if (success && availableSpace < TWO_GB) {
         showError("Not saving snapshot: Disk space < 2 GB");
         if (reportMetrics) {
             appendFailedSave(
