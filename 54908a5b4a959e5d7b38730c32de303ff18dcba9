@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5473022e_5b245027",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-20T16:17:06Z",
+      "side": 1,
+      "message": "Should this be 2147483648ULL as a single number to reduce dependence on implicit conversions and to avoid putting ULL all over the place? Also I thought ULL is more appropriate since IIRC, UL (unsigned long) is 32 bit in a lot of cases. Also, can we lift this out as a top-level constant?",
+      "range": {
+        "startLine": 445,
+        "startChar": 38,
+        "endLine": 445,
+        "endChar": 62
+      },
+      "revId": "54908a5b4a959e5d7b38730c32de303ff18dcba9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
