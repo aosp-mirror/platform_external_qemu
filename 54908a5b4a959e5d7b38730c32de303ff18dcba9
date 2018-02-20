@@ -22,6 +22,30 @@
       "revId": "54908a5b4a959e5d7b38730c32de303ff18dcba9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61beca8a_c9f9862f",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-02-20T17:14:04Z",
+      "side": 1,
+      "message": "Good suggestion. I also modified Snapshotter.cpp to do an explicit conversion to avoid overflow.\n\nI left the constant here to keep it close to the error text, which need to match.",
+      "parentUuid": "5473022e_5b245027",
+      "range": {
+        "startLine": 445,
+        "startChar": 38,
+        "endLine": 445,
+        "endChar": 62
+      },
+      "revId": "54908a5b4a959e5d7b38730c32de303ff18dcba9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
