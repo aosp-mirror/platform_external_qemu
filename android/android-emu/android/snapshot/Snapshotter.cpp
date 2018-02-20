@@ -435,6 +435,25 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
         return false;
     }
 
+    // Check the disk capacity.
+    // Snapshots vary in size. They can be close to a GB.
+    // Rather than taking all the remaining disk space,
+    // save only if we have 2 GB of space available.
+    static const System::FileSize TWO_GB = 2147483648ULL;
+    System::FileSize availableSpace;
+    bool success = System::get()->pathFreeSpace(getSnapshotDir(name).c_str(),
+                                                &availableSpace);
+    if (!success || availableSpace < TWO_GB) {
+        showError("Not saving snapshot: Disk space < 2 GB");
+        if (reportMetrics) {
+            appendFailedSave(
+                pb::EmulatorSnapshotSaveState::
+                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED,
+                FailureReason::OutOfDiskSpace);
+        }
+        return false;
+    }
+
     return true;
 }
 
