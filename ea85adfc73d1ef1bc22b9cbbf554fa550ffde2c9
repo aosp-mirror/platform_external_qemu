@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7b21853_95dd96f1",
+        "filename": "android/android-emu/android/emulation/control/location_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-02-20T21:46:24Z",
+      "side": 1,
+      "message": "I\u0027d like to see the parameter names so I know (here) what parameters are expected.",
+      "range": {
+        "startLine": 22,
+        "startChar": 44,
+        "endLine": 22,
+        "endChar": 66
+      },
+      "revId": "ea85adfc73d1ef1bc22b9cbbf554fa550ffde2c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0904b30c_73e376f0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-02-20T21:46:24Z",
+      "side": 1,
+      "message": "You can just remove these functions (also from the .h)",
+      "range": {
+        "startLine": 233,
+        "startChar": 0,
+        "endLine": 244,
+        "endChar": 1
+      },
+      "revId": "ea85adfc73d1ef1bc22b9cbbf554fa550ffde2c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9065deab_4ebfdd7c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-02-20T21:46:24Z",
+      "side": 1,
+      "message": "Is this possible?",
+      "range": {
+        "startLine": 563,
+        "startChar": 35,
+        "endLine": 563,
+        "endChar": 44
+      },
+      "revId": "ea85adfc73d1ef1bc22b9cbbf554fa550ffde2c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d60ce172_929f0a09",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-02-20T21:46:24Z",
+      "side": 1,
+      "message": "Needed only if we handle (!avd)",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 0
+      },
+      "revId": "ea85adfc73d1ef1bc22b9cbbf554fa550ffde2c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
