@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/audio/AudioCaptureThread.h"
+#include "android/recording/audio/AudioProducer.h"
 
-#include "android/audio/AudioPacket.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/emulation/AudioCapture.h"
@@ -23,8 +22,10 @@
 
 #include <memory>
 
+#define D(...) VERBOSE_PRINT(audio_producer, __VA_ARGS__);
+
 namespace android {
-namespace audio {
+namespace recording {
 
 using android::base::MessageChannel;
 using android::emulation::AudioCaptureEngine;
@@ -77,54 +78,57 @@ private:
     Callback mCallback;
 };  // class AudioCapturerImpl
 
-// Real implementation of AudioCaptureThread
-class AudioCaptureThreadImpl : public AudioCaptureThread {
+// Implementation of Producer class for audio data
+class AudioProducer : public Producer {
 public:
-    AudioCaptureThreadImpl(Callback cb,
-                           int sampleRate,
+    explicit AudioProducer(int sampleRate,
                            int nbSamples,
-                           int bits,
+                           AudioFormat format,
                            int nchannels)
-        : mCallback(std::move(cb)),
-          mSampleRate(sampleRate),
+        : mSampleRate(sampleRate),
           mNbSamples(nbSamples),
-          mBits(bits),
+          mAudioFormat(format),
           mChannels(nchannels) {
-        assert(bits == 8 || bits == 16);
-        assert(mCallback);
-        size_t szBytes = bits / CHAR_BIT;
+        size_t szBytes = getAudioFormatSize(mAudioFormat);
         // Prefill the free queue with empty packets
-        for (int i = 0; i < kMaxPackets; ++i) {
-            mFreeQueue.send(
-                    std::move(AudioPacket(mNbSamples * mChannels * szBytes)));
+        for (int i = 0; i < kMaxFrames; ++i) {
+            Frame f(mNbSamples * mChannels * szBytes);
+            f.audioFormat = mAudioFormat;
+            mFreeQueue.send(std::move(f));
         }
     }
 
-    ~AudioCaptureThreadImpl() {}
+    ~AudioProducer() { stop(); }
 
     intptr_t main() final {
+        assert(mCallback);
+
         // Start the audio capturer to start receiving audio frames.
         mAudioCapturer.reset(new AudioCapturerImpl(
                 [this](const void* buf, int size) -> int {
                     return onSample(buf, size);
                 },
-                mSampleRate, mBits, mChannels));
+                mSampleRate, getAudioFormatSize(mAudioFormat) * CHAR_BIT,
+                mChannels));
         if (!mAudioCapturer->start()) {
             derror("Unable to start audio capturer");
             return -1;
         }
 
-        while (1) {
+        int i = 0;
+        while (true) {
             // Consumer
-            // Blocks until either we get a packet or the queue is closed.
-            auto pkt = mDataQueue.receive();
-            if (!pkt) {
+            // Blocks until either we get a frame or the queue is closed.
+            auto frame = mDataQueue.receive();
+            if (!frame) {
                 break;
             }
 
-            mCallback(pkt->dataVec.data(), pkt->dataVec.size(), pkt->tsUs);
+            D("Encoding audio frame %d (size=%u, tsUs=%lu)\n", i++,
+              frame->dataVec.size(), frame->tsUs);
+            mCallback(&*frame);
             // Blocks until there is space in the queue or is closed.
-            if (!mFreeQueue.send(std::move(*pkt))) {
+            if (!mFreeQueue.send(std::move(*frame))) {
                 break;
             }
         }
@@ -132,7 +136,7 @@ public:
         return 0;
     }
 
-    void stop() {
+    virtual void stop() override {
         if (!mAudioCapturer) {
             return;
         }
@@ -156,58 +160,57 @@ private:
             // Get the timestamp first as dequeuing the buffer and memcpying
             // will take some time.
             auto tsUs = android::base::System::get()->getHighResTimeUs();
-            AudioPacket pkt;
+            Frame frame;
             // Use non-blocking call here because we want to avoid blocking the
             // io thread. If we can't get a packet, just let this audio packet
             // go.
-            if (!mFreeQueue.tryReceive(&pkt)) {
+            if (!mFreeQueue.tryReceive(&frame)) {
                 return -1;
             }
 
-            int sz = remaining > pkt.dataVec.capacity() ? pkt.dataVec.capacity()
-                                                        : remaining;
-            pkt.dataVec.assign(p, p + sz);
+            int sz = remaining > frame.dataVec.capacity()
+                             ? frame.dataVec.capacity()
+                             : remaining;
+            frame.dataVec.assign(p, p + sz);
             p += sz;
-            pkt.tsUs = tsUs;
+            frame.tsUs = tsUs;
             remaining -= sz;
             // MessageChannel::send is a blocking call, but since we should
-            // never be exceeding the capacity of the channel (kMaxPackets),
+            // never be exceeding the capacity of the channel (kMaxFrames),
             // this call should never block.
-            mDataQueue.send(std::move(pkt));
+            mDataQueue.send(std::move(frame));
         }
 
         return 0;
     }
 
-    Callback mCallback;
     int mSampleRate = 0;
     int mNbSamples = 0;
-    int mBits = 0;
+    AudioFormat mAudioFormat = AudioFormat::INVALID_FMT;
     int mChannels = 0;
     std::unique_ptr<AudioCapturerImpl> mAudioCapturer;
-    // mDataQueue contains filled audio packets and mFreeQueue has available
-    // audio packets that the producer can use. The workflow is as follows:
+    // mDataQueue contains filled audio frames and mFreeQueue has available
+    // audio frames that the producer can use. The workflow is as follows:
     // Producer:
-    //   1) get an audio packet from mFreeQueue
-    //   2) write data into packet
-    //   3) push packet to mDataQueue
+    //   1) get an audio frame from mFreeQueue
+    //   2) write data into frame
+    //   3) push frame to mDataQueue
     // Consumer:
-    //   1) wait for audio packet in mDataQueue
-    //   2) process audio packet
-    //   3) Push packet back to mFreeQueue
-    static constexpr int kMaxPackets = 3;
-    MessageChannel<AudioPacket, kMaxPackets> mDataQueue;
-    MessageChannel<AudioPacket, kMaxPackets> mFreeQueue;
-};  // class AudioCaptureThreadImpl
+    //   1) wait for audio frame in mDataQueue
+    //   2) process audio frame
+    //   3) Push frame back to mFreeQueue
+    static constexpr int kMaxFrames = 3;
+    MessageChannel<Frame, kMaxFrames> mDataQueue;
+    MessageChannel<Frame, kMaxFrames> mFreeQueue;
+};  // class AudioProducer
 }  // namespace
 
-AudioCaptureThread* AudioCaptureThread::create(Callback cb,
-                                               int sampleRate,
-                                               int nbSamples,
-                                               int bits,
-                                               int nchannels) {
-    return new AudioCaptureThreadImpl(std::move(cb), sampleRate, nbSamples,
-                                      bits, nchannels);
+Producer* createAudioProducer(int sampleRate,
+                              int nbSamples,
+                              AudioFormat format,
+                              int nchannels) {
+    return new AudioProducer(sampleRate, nbSamples, format, nchannels);
 }
-}  // namespace audio
+
+}  // namespace recording
 }  // namespace android
