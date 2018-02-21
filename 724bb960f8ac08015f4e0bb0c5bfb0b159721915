@@ -22,6 +22,30 @@
       "revId": "724bb960f8ac08015f4e0bb0c5bfb0b159721915",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6572595b_201c38f6",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-21T19:45:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68a40fd4_b184a248",
+      "range": {
+        "startLine": 616,
+        "startChar": 0,
+        "endLine": 616,
+        "endChar": 59
+      },
+      "revId": "724bb960f8ac08015f4e0bb0c5bfb0b159721915",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
