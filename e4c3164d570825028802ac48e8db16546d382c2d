@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46219890_206db158",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-02-21T04:35:01Z",
+      "side": 1,
+      "message": "does this work in build environment ?",
+      "range": {
+        "startLine": 421,
+        "startChar": 15,
+        "endLine": 421,
+        "endChar": 21
+      },
+      "revId": "e4c3164d570825028802ac48e8db16546d382c2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
