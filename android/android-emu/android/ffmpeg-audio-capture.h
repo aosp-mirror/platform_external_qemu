@@ -15,7 +15,7 @@
 #pragma once
 
 #include "android/emulation/AudioCapture.h"
-#include "android/ffmpeg-muxer.h"
+#include "android/ffmpeg-recorder.h"
 
 class FfmpegAudioCapturer : public android::emulation::AudioCapturer {
 public:
