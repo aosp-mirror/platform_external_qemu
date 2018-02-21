@@ -37,6 +37,18 @@
 #define MAC_OS_X_VERSION_10_6 1060
 #endif
 
+#define DEBUG_COREAUDIO 0
+
+#if DEBUG_COREAUDIO
+
+#define D(fmt,...) printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS_);
+
+#else
+
+#define D(...)
+
+#endif
+
 typedef struct {
     int buffer_frames;
     int nbuffers;
@@ -75,9 +87,61 @@ static void coreaudio_atexit(void) {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
 /* The APIs used here only become available from 10.6 */
 
+void coreaudio_print_device_name(AudioDeviceID device) {
+    UInt32 size;
+    CFStringRef deviceName;
+    CFIndex deviceNameLen, deviceNameBufferSize;
+    OSStatus res;
+    bool deviceNameValid;
+    char* deviceNameBuf;
+
+    AudioObjectPropertyAddress addr = {
+        kAudioDevicePropertyDeviceNameCFString,
+        kAudioObjectPropertyScopeGlobal,
+        kAudioObjectPropertyElementMaster
+    };
+
+    size = sizeof(deviceName);
+    res = AudioObjectGetPropertyData(device,
+                                     &addr, 0, 0, &size, &deviceName);
+
+    if (res != kAudioHardwareNoError) return;
+
+    // Use a malloced temp array for the device name, so we
+    // don't take chances on stack space / buffer overflow.
+
+    deviceNameLen = CFStringGetLength(deviceName);
+    deviceNameBufferSize =
+        CFStringGetMaximumSizeForEncoding(deviceNameLen,
+                                          kCFStringEncodingUTF8) + 1;
+
+    deviceNameBuf = (char *)malloc(deviceNameBufferSize);
+
+    if (!deviceNameBuf) return;
+
+    memset(deviceNameBuf, 0x0, deviceNameBufferSize);
+
+    deviceNameValid =
+        CFStringGetCString(deviceName, deviceNameBuf,
+                           deviceNameBufferSize, kCFStringEncodingUTF8);
+
+    if (deviceNameValid) {
+        D("CoreAudio device name: %s", deviceNameBuf);
+    }
+
+    free(deviceNameBuf);
+}
+
 static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
 {
-    UInt32 size = sizeof(*id);
+    UInt32 size, numDevices, numStreams;
+    UInt32 transportType;
+    OSStatus res, transportTypeQueryRes, currentQueryResult;
+    AudioDeviceID* allDevices;
+
+    // Select the default input or output device
+
+    size = sizeof(*id);
     AudioObjectPropertyAddress addr = {
         isInput ? kAudioHardwarePropertyDefaultInputDevice
                 : kAudioHardwarePropertyDefaultOutputDevice,
@@ -85,12 +149,123 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
         kAudioObjectPropertyElementMaster
     };
 
-    return AudioObjectGetPropertyData(kAudioObjectSystemObject,
-                                      &addr,
-                                      0,
-                                      NULL,
-                                      &size,
-                                      id);
+    res =
+        AudioObjectGetPropertyData(kAudioObjectSystemObject,
+                                   &addr,
+                                   0,
+                                   NULL,
+                                   &size,
+                                   id);
+
+    if (!isInput) goto defaultExit;
+
+    // Bluetooth audio inputs should not be activated since they cause an
+    // unexpected drop in audio output quality. Protect users from this nasty
+    // surprise by avoiding such audio inputs.
+
+    // Check if this input device is bluetooth. If not, just go with that
+    // default input device.
+
+    addr.mSelector = kAudioDevicePropertyTransportType;
+    transportType = 0;
+    size = sizeof(UInt32);
+    transportTypeQueryRes =
+        AudioObjectGetPropertyData(*id, &addr, 0, 0, &size, &transportType);
+
+    // Can't query the transport type, just go with the previous behavior.
+    // Or, the input device is not Bluetooth.
+    if (transportTypeQueryRes != kAudioHardwareNoError ||
+        (transportType != kAudioDeviceTransportTypeBluetooth &&
+         transportType != kAudioDeviceTransportTypeBluetoothLE)) {
+        goto defaultExit;
+    }
+
+    // At this point, *id is a Bluetooth input device. Avoid at all costs.
+
+    D("Warning: Bluetooth microphone is currently "
+      "the default audio input device. "
+      "This can degrade audio output quality. "
+      "Attempting to find and use "
+      "an alternative non-Bluetooth audio input...");
+
+    // Try to find a different input device and fail with no audio input
+    // devices if it cannot be found.
+    *id = 0;
+    res = -1;
+
+    // Obtain the number and IDs of all audio devices
+    // (No way to reliably filter this to input devices
+    // at this level, unfortunately).
+    addr.mSelector = kAudioHardwarePropertyDevices;
+    currentQueryResult =
+        AudioObjectGetPropertyDataSize(kAudioObjectSystemObject,
+                                       &addr, 0, NULL, &size);
+
+    // Can't query number of audio devices, error out.
+    if (currentQueryResult != kAudioHardwareNoError) goto bluetoothFail;
+
+    // Alloc temp array for the devices.
+
+    numDevices = size / sizeof(AudioDeviceID);
+
+    allDevices = (AudioDeviceID*)malloc(size);
+    currentQueryResult =
+        AudioObjectGetPropertyData(kAudioObjectSystemObject,
+                                   &addr, 0, NULL, &size, allDevices);
+
+    // Can't query device IDs, error out.
+    if (currentQueryResult != kAudioHardwareNoError) goto freeDevicesBluetoothFail;
+
+    for (UInt32 i = 0; i < numDevices; i++) {
+        size = 4;
+        addr.mSelector = kAudioDevicePropertyTransportType;
+        currentQueryResult =
+            AudioObjectGetPropertyData(allDevices[i],
+                                       &addr, 0, 0, &size, &transportType);
+        if (currentQueryResult != kAudioHardwareNoError) continue;
+
+        addr.mScope = kAudioDevicePropertyScopeInput;
+        addr.mSelector = kAudioDevicePropertyStreams;
+        currentQueryResult =
+            AudioObjectGetPropertyDataSize(allDevices[i],
+                                           &addr, 0, NULL, &size);
+        if (currentQueryResult != kAudioHardwareNoError) continue;
+
+        numStreams = size / sizeof(AudioStreamID);
+
+        // Skip devices with no input streams.
+        if (numStreams == 0) continue;
+
+        // This is an input device. Do we use it?
+        switch (transportType) {
+        case kAudioDeviceTransportTypeBluetooth:
+        case kAudioDeviceTransportTypeBluetoothLE:
+            // Is bluetooth, continue to avoid.
+            break;
+        default:
+            // A valid non-bluetooth input. Use it.
+            D("Success: Found alternative non-bluetooth audio input.");
+            *id = allDevices[i];
+            // Print its name if possible.
+            coreaudio_print_device_name(allDevices[i]);
+            // Early out, we got what we came for.
+            goto freeDevicesBluetoothSuccess;
+        }
+    }
+
+// Failure cleanup path.
+freeDevicesBluetoothFail:
+    free(allDevices);
+bluetoothFail:
+    D("Failure: No alternative audio inputs available, deactivating audio input. "
+      "Consider connecting a microphone to line-in or using a USB microphone / headset.");
+    return -1;
+
+// Success cleanup path.
+freeDevicesBluetoothSuccess:
+    free(allDevices);
+defaultExit:
+    return kAudioHardwareNoError;
 }
 
 static OSStatus coreaudio_get_framesizerange(AudioDeviceID id,
