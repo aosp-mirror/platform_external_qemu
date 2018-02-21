@@ -22,6 +22,30 @@
       "revId": "e4c3164d570825028802ac48e8db16546d382c2d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ce7ab1f_09b83a52",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-02-21T17:18:13Z",
+      "side": 1,
+      "message": "I tried a different way which is to boot_property_add(\"persist.sys.timezone\", tzname) but it failed to change the property value in guest. \nI believe that if we are able to change the value of \"persist.sys.timezone\" from host, we don\u0027t need to even change the guest system anymore which is less maintenance cost.",
+      "parentUuid": "46219890_206db158",
+      "range": {
+        "startLine": 421,
+        "startChar": 15,
+        "endLine": 421,
+        "endChar": 21
+      },
+      "revId": "e4c3164d570825028802ac48e8db16546d382c2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
