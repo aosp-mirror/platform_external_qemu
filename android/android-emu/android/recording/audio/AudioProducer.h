@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
 
-#include "android/ffmpeg-audio-capture.h"
-#include "android/base/system/System.h"
+#include "android/recording/Frame.h"
+#include "android/recording/Producer.h"
 
-// This is the audio stream received from the capturer
-int FfmpegAudioCapturer::onSample(void *buf, int size)
-{
-    if (mRecorder != nullptr)
-        ffmpeg_encode_audio_frame(
-                mRecorder, (uint8_t*)buf, size,
-                android::base::System::get()->getHighResTimeUs());
+namespace android {
+namespace recording {
 
-    return 0;
-}
+// Create a new AudioProducer instance.
+Producer* createAudioProducer(int sampleRate,
+                              int nbSamples,
+                              AudioFormat format,
+                              int nchannels);
+
+}  // namespace recording
+}  // namespace android
