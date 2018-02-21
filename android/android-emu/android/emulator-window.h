@@ -14,7 +14,7 @@
 
 #include "android/cmdline-option.h"
 #include "android/framebuffer.h"
-#include "android/screen-recorder.h"
+#include "android/recording/screen-recorder.h"
 #include "android/skin/file.h"
 #include "android/skin/keyboard.h"
 #include "android/skin/window.h"
