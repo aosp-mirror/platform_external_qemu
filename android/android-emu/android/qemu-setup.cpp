@@ -12,6 +12,7 @@
 
 #include "android/android.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/boot-properties.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/console.h"
 #include "android/constants.h"
@@ -40,6 +41,7 @@
 #include "android/utils/sockets.h"
 #include "android/utils/system.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/timezone.h"
 #include "android/version.h"
 
 
@@ -412,10 +414,20 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
 
+    AvdFlavor flavor = avdInfo_getAvdFlavor(android_avdInfo);
     /* initialize the car data emulation if the system image is a Android Auto build */
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+    if (flavor == AVD_ANDROID_AUTO) {
         android_car_init();
+    } else if (flavor == AVD_TV) {
+    /* inject timezone property in guest system if the system image is a Android TV build */
+        char tzname[64];
+        char* end = tzname + sizeof(tzname);
+        char* p = bufprint_zoneinfo_timezone(tzname, end);
+        if (p < end) {
+            boot_property_add("qemu.timezone", tzname);
+        }
     }
+
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
