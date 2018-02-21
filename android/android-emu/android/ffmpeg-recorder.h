@@ -1,4 +1,4 @@
-// Copyright 2016 The Android Open Source Project
+// Copyright 2018 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -10,20 +10,33 @@
 // GNU General Public License for more details.
 
 ///
-// ffmpeg-muxer.h
+// ffmpeg-recorder.h
 //
-// a ffmpeg based muxer, mp4 container format, H264 video format and AAC audio
-// format
+// a ffmpeg based muxer, webm container format, VP9 video format and VORBIS
+// audio format
 //
 // example use:
 //
-//    ffmpeg_recorder *recorder = ffmpeg_create_recorder("~/test.mp4");
-//    ffmpeg_add_video_track(recorder, 1280, 720, 512*1024*1024, 30);
-//    ffmpeg_add_audio_track(recorder, 64*1024, 48000);
-//    ffmpeg_encode_video_frame(recorder, rgb, size);
-//    ffmpeg_encode_audio_frame(recorder, audio, audio_buf_size);
+//    // Create a ffmpeg_recorder instance
+//    ffmpeg_recorder *recorder = ffmpeg_create_recorder(fbWidth, fbHeight);
+//
+//    // Initialize the output context
+//    ffmpeg_recorder_init_output_context(recorder, &recordingInfo);
+//
+//    // Add audio/video tracks
+//    ffmpeg_add_video_track(recorder, ...);
+//    ffmpeg_add_audio_track(recorder, ...); // Optional
+//
+//    // Start the recording
+//    ffmpeg_recorder_start(recorder);
 //    ...
-//    ffmpeg_delete_recorder(recorder);
+//    // Encoding audio/video frames
+//    ffmpeg_encode_video_frame(recorder, ...);
+//    ffmpeg_encode_audio_frame(recorder, ...);
+//
+//    ...
+//    // Stop the recording
+//    ffmpeg_recorder_stop(recorder);
 //
 
 #pragma once
@@ -37,7 +50,7 @@
 
 ANDROID_BEGIN_HEADER
 
-typedef struct ffmpeg_recorder ffmpeg_recorder;
+typedef void* ffmpeg_recorder;
 
 // Create an instance of the ffmpeg recorder (mp4 container format)
 // params:
@@ -50,18 +63,43 @@ typedef struct ffmpeg_recorder ffmpeg_recorder;
 //   NULL if failed
 //
 // this method is thread safe
-ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
-                                        int fb_width,
-                                        int fb_height);
+ffmpeg_recorder ffmpeg_create_recorder(int fb_width, int fb_height);
 
-//
-// Save the output file and delete the recorder, this method must be called.
+// Initializes the recording output context
+// params:
+//   recorder - the recorder pointer returned from ffmpeg_create_recorder()
+//   info - a struct containing recording information
+// return:
+//   true if output context initialization was successful, false otherwise.
+bool ffmpeg_recorder_init_output_context(ffmpeg_recorder recorder,
+                                         const RecordingInfo* info);
+
+// Starts the recording. Sets the current time as the start time of the
+// recording.
+// params:
+//   recorder - the recorder pointer returned from ffmpeg_create_recorder()
+// return:
+//   true if recording successfully started, false otherwise.
+bool ffmpeg_recorder_start(ffmpeg_recorder recorder);
+
+// Stops a recording
+// params:
+//   recorder - the recorder pointer returned from ffmpeg_create_recorder()
+// return:
+//   true if recording successfully stopped, false otherwise
+bool ffmpeg_recorder_stop(ffmpeg_recorder recorder);
+
+// Delete the recorder.
 // params:
 //  recorder: the recorder pointer returned from ffmpeg_create_recorder()
+void ffmpeg_recorder_delete(ffmpeg_recorder* recorder);
+
 //
-// returns true if the recording was successful, false otherwise.
-// this method is thread safe
-bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder);
+// Abort the recording. This will not save any recording.
+//
+// params:
+//  recorder: the recorder pointer returned from ffmpeg_create_recorder()
+void ffmpeg_recorder_abort(ffmpeg_recorder* recorder);
 
 // Add an audio track from the specified format, audio track is optional
 // stero audio and PCM format are assumed
@@ -72,13 +110,13 @@ bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder);
 //              for example, 64000
 //   sample_rate - usually 48000 (system audio) or 44100 (mic)
 // return:
-//   0    if successful
-//   < 0  if failed
+//   true    if successful
+//   false  if failed
 //
 // this method is thread safe
-int ffmpeg_add_audio_track(ffmpeg_recorder* recorder,
-                           int bit_rate,
-                           int sample_rate);
+bool ffmpeg_add_audio_track(ffmpeg_recorder recorder,
+                            int bit_rate,
+                            int sample_rate);
 
 // Add a video track from the specified format, video track is required in
 // order to generate a correct mp4 file
@@ -93,16 +131,16 @@ int ffmpeg_add_audio_track(ffmpeg_recorder* recorder,
 //   fps - frame rate per second, 30 and 60 are good numbers
 //   intra_spacing - the intra-frame spacing (key frames)
 // return:
-//   0    if successful
-//   < 0  if failed
+//   true    if successful
+//   false  if failed
 //
 // this method is thread safe
-int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
-                           int width,
-                           int height,
-                           int bit_rate,
-                           int fps,
-                           int intra_spacing = 12);
+bool ffmpeg_add_video_track(ffmpeg_recorder recorder,
+                            int width,
+                            int height,
+                            int bit_rate,
+                            int fps,
+                            int intra_spacing = 12);
 
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
@@ -111,14 +149,14 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 //    size - the audio buffer size
 //    ptUs = the presentation time (in microseconds) of the audio data.
 // return:
-//   0    if successful
-//   < 0  if failed
+//   true    if successful
+//   false  if failed
 //
 // this method is thread safe
-int ffmpeg_encode_audio_frame(void* opaque,
-                              void* buffer,
-                              int size,
-                              uint64_t ptUs);
+bool ffmpeg_encode_audio_frame(ffmpeg_recorder recorder,
+                               void* buffer,
+                               int size,
+                               uint64_t ptUs);
 
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
@@ -130,15 +168,15 @@ int ffmpeg_encode_audio_frame(void* opaque,
 //    pixFmt - the pixel format
 //
 // return:
-//   0    if successful
-//   < 0  if failed
+//   true    if successful
+//   false  if failed
 //
 // this method is thread safe
-int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
-                              const uint8_t* rgb_pixels,
-                              int size,
-                              uint64_t ptUs,
-                              RecordPixFmt pixFmt);
+bool ffmpeg_encode_video_frame(ffmpeg_recorder recorder,
+                               const uint8_t* rgb_pixels,
+                               int size,
+                               uint64_t ptUs,
+                               RecordPixFmt pixFmt);
 
 // convert a mp4 or webm video into animated gif
 // params:
@@ -146,11 +184,11 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
 //     output_video_file - the output animated gif file
 //     gif_bit_rate - bit rate for the gif file, usually smaller number
 //                    to reduce the file size
-int ffmpeg_convert_to_animated_gif(const char* input_video_file,
-                                   const char* output_video_file,
-                                   int gif_bit_rate);
+bool ffmpeg_convert_to_animated_gif(const char* input_video_file,
+                                    const char* output_video_file,
+                                    int gif_bit_rate);
 
 // Returns the pixel size (in bytes) for pixel format |r|. If |r| is not a
 // supported format, then returns -1.
-int get_record_pixel_size(RecordPixFmt r);
+int ffmpeg_get_pixel_size(RecordPixFmt r);
 ANDROID_END_HEADER

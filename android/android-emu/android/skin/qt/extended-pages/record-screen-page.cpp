@@ -13,7 +13,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
-#include "android/ffmpeg-muxer.h"
+#include "android/ffmpeg-recorder.h"
 #include "android/globals.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -418,10 +418,9 @@ ConvertingTask::ConvertingTask(const std::string& startFilename,
 
 void ConvertingTask::run() {
     emit started();
-    int rc = ffmpeg_convert_to_animated_gif(mStartFilename.c_str(),
-                                            mEndFilename.c_str(),
-                                            64 * 1024);
-    emit(finished(!rc));
+    bool rc = ffmpeg_convert_to_animated_gif(mStartFilename.c_str(),
+                                             mEndFilename.c_str(), 64 * 1024);
+    emit(finished(rc));
 }
 
 void RecordScreenPage::updateVideoView() {
