@@ -41,7 +41,7 @@ TEST(Dns, ResolveLocalhost) {
 }
 
 TEST(Dns, ResolveUnknownHost) {
-    Dns::AddressList list = Dns::resolveName("does.not.exist.example.com");
+    Dns::AddressList list = Dns::resolveName("does.not.exist.for.realz.bc");
     EXPECT_TRUE(list.empty());
 }
 
