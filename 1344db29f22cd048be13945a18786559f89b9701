@@ -1,0 +1,302 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6f27e98_bc8abf4f",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1049,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "should this also check if it is executable?",
+      "range": {
+        "startLine": 1047,
+        "startChar": 0,
+        "endLine": 1049,
+        "endChar": 7
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82565c3e_b1aea7b0",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "const ref",
+      "range": {
+        "startLine": 42,
+        "startChar": 32,
+        "endLine": 42,
+        "endChar": 44
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c998706_5f477bfa",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "please cast this explicitly to unsigned int - size() is size_t which is ulong, which is 64 bits on x64",
+      "range": {
+        "startLine": 47,
+        "startChar": 45,
+        "endLine": 47,
+        "endChar": 59
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f81ce32_4f452710",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "x format scans unsigned integer - please change the |bytesToRead|\u0027s type",
+      "range": {
+        "startLine": 76,
+        "startChar": 59,
+        "endLine": 76,
+        "endChar": 62
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3057e77_db550c7a",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "+ return {}; ?",
+      "range": {
+        "startLine": 82,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 74
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05d8fc44_be28a2e6",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "+ return {}; ?",
+      "range": {
+        "startLine": 82,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 74
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d67b068_af982c65",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "unsigned",
+      "range": {
+        "startLine": 111,
+        "startChar": 8,
+        "endLine": 111,
+        "endChar": 11
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0428732_1472e584",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "nit: \"return version\" is enough",
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a736500_fae0fda0",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "nit: format please",
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "42fdf38b_4a2e5e85",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "btw: kNullopt or just {} works fine as empty optional",
+      "range": {
+        "startLine": 133,
+        "startChar": 46,
+        "endLine": 133,
+        "endChar": 70
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f92c7389_ba1083c1",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "here and later: std::move(*adb)",
+      "range": {
+        "startLine": 141,
+        "startChar": 29,
+        "endLine": 141,
+        "endChar": 32
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "195b1e88_e7b3f958",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "reference",
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8303281_0da93c6f",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "where is it used, by the way?",
+      "range": {
+        "startLine": 239,
+        "startChar": 0,
+        "endLine": 243,
+        "endChar": 2
+      },
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "376036a0_adbdb437",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-21T17:19:08Z",
+      "side": 1,
+      "message": "nit: please format",
+      "revId": "1344db29f22cd048be13945a18786559f89b9701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
