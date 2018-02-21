@@ -22,7 +22,7 @@
 #include "android/base/threads/Async.h"
 #include "android/emulation/VmLock.h"
 #include "android/emulator-window.h"
-#include "android/ffmpeg-muxer.h"
+#include "android/ffmpeg-recorder.h"
 #include "android/framebuffer.h"
 #include "android/gpu_frame.h"
 #include "android/opengles.h"
@@ -55,7 +55,7 @@ struct Frame {
     Frame(int w, int h, uint64_t pt, RecordPixFmt p, const void* px)
         : width(w), height(h), pix_fmt(p), pt_us(pt) {
         if (px) {
-            int sz = get_record_pixel_size(pix_fmt);
+            int sz = ffmpeg_get_pixel_size(pix_fmt);
             pixels.reset(new char[w * sz * h]);
             ::memcpy(static_cast<void*>(pixels.get()), px, w * sz * h);
         }
@@ -70,7 +70,7 @@ struct CVInfo {
 };
 
 struct Globals {
-    ffmpeg_recorder* recorder = nullptr;
+    ffmpeg_recorder recorder = nullptr;
     QAndroidDisplayAgent displayAgent;
     int fbWidth = 0;
     int fbHeight = 0;
@@ -118,7 +118,7 @@ static void screen_recorder_fb_update(void* opaque,
     } else if (w == globals.guestFrame->width &&
                h == globals.guestFrame->height) {
         memcpy(static_cast<void*>(globals.guestFrame->pixels.get()), px,
-               w * h * get_record_pixel_size(globals.guestFrame->pix_fmt));
+               w * h * ffmpeg_get_pixel_size(globals.guestFrame->pix_fmt));
     }
 }
 
@@ -204,7 +204,7 @@ intptr_t encodeFrames() {
             break;
         }
         D("Received frame %d", i++);
-        int pxSize = get_record_pixel_size(f.pix_fmt);
+        int pxSize = ffmpeg_get_pixel_size(f.pix_fmt);
         ffmpeg_encode_video_frame(
                 globals.recorder, (const uint8_t*)f.pixels.get(),
                 f.width * f.height * pxSize, f.pt_us, f.pix_fmt);
@@ -243,7 +243,7 @@ static intptr_t stopRecording() {
     globals.encodingCVInfo.done = false;
     globals.encodingCVInfo.lock.unlock();
 
-    bool has_frames = ffmpeg_delete_recorder(globals.recorder);
+    bool has_frames = ffmpeg_recorder_stop(globals.recorder);
     gpu_frame_set_record_mode(false);
 
     if (globals.isGuestMode) {
@@ -254,7 +254,6 @@ static intptr_t stopRecording() {
     }
 
     globals.recordingInfo.fileName = nullptr;
-    globals.recorder = nullptr;
 
     globals.recorderState = RECORDER_READY;
     sendRecordingStatus(globals.recordingInfo,
@@ -273,6 +272,10 @@ void screen_recorder_init(int w, int h, const QAndroidDisplayAgent* dpy_agent) {
 
     globals.fbWidth = w;
     globals.fbHeight = h;
+    // The recorder pointer is maintained by itself.
+    globals.recorder = ffmpeg_create_recorder(w, h);
+    assert(globals.recorder);
+
     if (dpy_agent) {
         if (emulator_window_get()->opts->no_window) {
             // Need to make a dummy producer to use the invalidate and fb check
@@ -344,20 +347,18 @@ bool parseRecordingInfo(const RecordingInfo* info) {
 static intptr_t startRecording() {
     auto& globals = *sGlobals;
 
-    assert(!globals.recorder);
-
     sendRecordingStatus(globals.recordingInfo, RECORD_START_INITIATED);
 
     globals.frameCount = 0;
-    globals.recorder = ffmpeg_create_recorder(
-            &globals.recordingInfo, globals.fbWidth, globals.fbHeight);
-    if (!globals.recorder) {
-        derror("ffmpeg_create_recorder failed");
+
+    if (!ffmpeg_recorder_init_output_context(globals.recorder,
+                                             &globals.recordingInfo)) {
+        derror("ffmpeg_recorder_init_output_context failed");
         globals.recorderState = RECORDER_READY;
         sendRecordingStatus(globals.recordingInfo, RECORD_START_FAILED);
         return -1;
     }
-    D("created recorder");
+    D("Initialized output context");
 
     // Add the video and audio tracks
     ffmpeg_add_video_track(globals.recorder, globals.recordingInfo.width,
@@ -366,6 +367,14 @@ static intptr_t startRecording() {
                            kIntraSpacing);
     ffmpeg_add_audio_track(globals.recorder, kAudioBitrate, kAudioSampleRate);
     D("Added AV tracks");
+
+    if (!ffmpeg_recorder_start(globals.recorder)) {
+        derror("ffmpeg_recorder_start failed");
+        globals.recorderState = RECORDER_READY;
+        sendRecordingStatus(globals.recordingInfo, RECORD_START_FAILED);
+        return -1;
+    }
+    D("Started recorder");
 
     gpu_frame_set_record_mode(true);
 

@@ -13,7 +13,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
-#include "android/ffmpeg-muxer.h"
+#include "android/ffmpeg-recorder.h"
 #include "android/globals.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
