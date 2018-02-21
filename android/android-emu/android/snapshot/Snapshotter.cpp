@@ -612,6 +612,10 @@ OperationStatus Snapshotter::loadGeneric(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
+    if (mLoader) {
+        mLoader->prepareForSaving(false /* not on exit */);
+    }
+
     if (name == mLoadedSnapshotFile) {
         // We're deleting the "loaded" snapshot
         mLoadedSnapshotFile.clear();
