@@ -9,14 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/android.h"
+#include "android/avd/hw-config.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
-#include "android/android.h"
-#include "android/avd/hw-config.h"
 #include "android/boot-properties.h"
 #include "android/cmdline-option.h"
 #include "android/config/BluetoothConfig.h"
@@ -42,7 +42,7 @@
 #include "android/opengl/gpuinfo.h"
 #include "android/opengles.h"
 #include "android/process_setup.h"
-#include "android/screen-recorder.h"
+#include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"

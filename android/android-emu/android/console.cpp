@@ -38,7 +38,7 @@
 #include "android/network/constants.h"
 #include "android/network/control.h"
 #include "android/network/globals.h"
-#include "android/screen-recorder-constants.h"
+#include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"

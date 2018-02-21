@@ -29,9 +29,8 @@ constexpr int kAudioSampleRate = 44100;  // Hz
 // The source number of samples per audio frame
 // In Qemu, 512 samples is fixed
 constexpr int kSrcNumSamples = 512;
+// We're always encoding audio in stereo format
+constexpr int kNumAudioChannels = 2;
 
 constexpr int kDefaultVideoBitrate = 4 * 1000 * 1000;  // bps
 constexpr int kDefaultTimeLimit = kMaxTimeLimit;
-
-// The list of supported pixel formats
-enum class RecordPixFmt { RGB565, RGBA8888, BGRA8888, INVALID_FMT };
