@@ -46,6 +46,30 @@
       "revId": "e4c3164d570825028802ac48e8db16546d382c2d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "038e7c93_7a2e21f8",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-02-21T18:28:09Z",
+      "side": 1,
+      "message": "I don\u0027t think we should modify \"persist.sys.timezone\" using qemu-props service because it requires root or equivalent I believe.",
+      "parentUuid": "8ce7ab1f_09b83a52",
+      "range": {
+        "startLine": 421,
+        "startChar": 15,
+        "endLine": 421,
+        "endChar": 21
+      },
+      "revId": "e4c3164d570825028802ac48e8db16546d382c2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
