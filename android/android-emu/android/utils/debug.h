@@ -60,12 +60,11 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(rotation, "Device rotation debugging")                        \
     _VERBOSE_TAG(goldfishsync, "Goldfish Sync Device")                         \
     _VERBOSE_TAG(syncthreads, "HostGPU Sync Threads")                          \
-    _VERBOSE_TAG(capture, "Video and audio capture debugging")                 \
     _VERBOSE_TAG(memory, "Memory Usage Report")                                \
     _VERBOSE_TAG(car, "Emulated car data")                                     \
     _VERBOSE_TAG(record, "Screen recording")                                   \
     _VERBOSE_TAG(snapshot, "Snapshots")                                        \
-    _VERBOSE_TAG(virtualscene, "virtual scene rendering")                      \
+    _VERBOSE_TAG(virtualscene, "virtual scene rendering")
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {

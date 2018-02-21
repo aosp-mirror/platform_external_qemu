@@ -43,7 +43,7 @@
 #include "android/opengl/gpuinfo.h"
 #include "android/opengles.h"
 #include "android/process_setup.h"
-#include "android/screen-recorder.h"
+#include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"

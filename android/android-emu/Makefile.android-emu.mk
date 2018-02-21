@@ -273,7 +273,6 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
-    android/audio/AudioCaptureThread.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -894,9 +893,15 @@ LOCAL_SRC_FILES += \
     android/window-agent-impl.cpp \
     android/main-common-ui.c \
     android/resource.c \
-    android/ffmpeg-audio-capture.cpp \
-    android/ffmpeg-muxer.cpp \
-    android/screen-recorder.cpp
+    android/recording/audio/AudioProducer.cpp \
+    android/recording/codecs/audio/VorbisCodec.cpp \
+    android/recording/codecs/video/VP9Codec.cpp \
+    android/recording/FfmpegRecorder.cpp \
+    android/recording/Frame.cpp \
+    android/recording/GifConverter.cpp \
+    android/recording/screen-recorder.cpp \
+    android/recording/video/GuestReadbackWorker.cpp \
+    android/recording/video/VideoProducer.cpp
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
