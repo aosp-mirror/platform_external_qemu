@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "android/screen-recorder.h"
+#include "android/recording/screen-recorder.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
