@@ -364,7 +364,7 @@ int ApiGen::genEncoderHeader(const std::string &filename)
     fprintf(fp, "\tChecksumCalculator *m_checksumCalculator;\n\n");
 
     fprintf(fp, "\t%s(IOStream *stream, ChecksumCalculator *checksumCalculator);\n", classname.c_str());
-    fprintf(fp, "\tvirtual uint64_t lockAndWriteDma(void* data, uint32_t sz) { return 0; }\n");
+    fprintf(fp, "\tvirtual uint64_t lockAndWriteDma(void* data __unused, uint32_t sz __unused) { return 0; }\n");
     fprintf(fp, "};\n\n");
 
     fprintf(fp, "#endif  // GUARD_%s\n", classname.c_str());
@@ -548,6 +548,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
     // unsupport printout
     fprintf(fp,
+            "void enc_unsupported() __unused;\n"
             "void enc_unsupported()\n"
             "{\n"
             "\tALOGE(\"Function is unsupported\\n\");\n"
