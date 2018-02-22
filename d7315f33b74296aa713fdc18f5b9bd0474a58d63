@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dd11259a_d0ffd7ac",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-22T01:28:10Z",
+      "side": 1,
+      "message": "might run into sync issues here if we want the currently loaded snapshot to be highlighted after it ends. recommend having a signal /  slot for loading completion that repops the list only after load is done",
+      "range": {
+        "startLine": 253,
+        "startChar": 0,
+        "endLine": 257,
+        "endChar": 42
+      },
+      "revId": "d7315f33b74296aa713fdc18f5b9bd0474a58d63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
