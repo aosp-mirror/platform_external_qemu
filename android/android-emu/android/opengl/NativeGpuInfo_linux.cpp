@@ -33,33 +33,10 @@ using android::base::System;
 static const int kGPUInfoQueryTimeoutMs = 5000;
 
 static std::string load_gpu_info() {
-    std::string tmp_dir = System::get()->getTempDir();
-
-    // Get temporary file path
-    constexpr StringView temp_filename_pattern = "gpuinfo_XXXXXX";
-    std::string temp_file_path =
-            PathUtils::join(tmp_dir, temp_filename_pattern);
-
-    auto tmpfd = ScopedFd(mkstemp((char*)temp_file_path.data()));
-    if (!tmpfd.valid()) {
-        return {};
-    }
-    temp_file_path.resize(strlen(temp_file_path.c_str()));
-    auto tmpFileDeleter = makeCustomScopedPtr(
-            &temp_file_path,
-            [](const std::string* name) { remove(name->c_str()); });
-
     // Execute the command to get GPU info.
-    if (!System::get()->runCommand({"lspci", "-mvnn"},
-                                   RunOptions::WaitForCompletion |
-                                           RunOptions::TerminateOnTimeout |
-                                           RunOptions::DumpOutputToFile,
-                                   kGPUInfoQueryTimeoutMs, nullptr, nullptr,
-                                   temp_file_path)) {
-        return {};
-    }
-
-    return android::readFileIntoString(temp_file_path).valueOr({});
+    return System::get()
+            ->runCommandWithResult({"lspci", "-mvnn"}, kGPUInfoQueryTimeoutMs)
+            .valueOr({});
 }
 
 static std::string parse_last_hexbrackets(const std::string& str) {
