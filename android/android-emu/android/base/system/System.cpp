@@ -1128,6 +1128,43 @@ public:
         Thread::yield();
     }
 
+    virtual Optional<std::string> runCommandWithResult(
+            const std::vector<std::string>& commandLine,
+            System::Duration timeoutMs = kInfinite,
+            System::ProcessExitCode* outExitCode = nullptr) override {
+        std::string tmp_dir = getTempDir();
+
+        // Get temporary file path
+        constexpr base::StringView temp_filename_pattern = "runCommand_XXXXXX";
+        std::string temp_file_path =
+                PathUtils::join(tmp_dir, temp_filename_pattern);
+
+        auto tmpfd =
+                android::base::ScopedFd(mkstemp((char*)temp_file_path.data()));
+        if (!tmpfd.valid()) {
+            return {};
+        }
+        //
+        // We have to close the handle. On windows we will not be able to write
+        // to this file, resulting in strange behavior.
+        tmpfd.close();
+        temp_file_path.resize(strlen(temp_file_path.c_str()));
+        auto tmpFileDeleter = base::makeCustomScopedPtr(
+                &temp_file_path,
+                [](const std::string* name) { remove(name->c_str()); });
+
+        if (!runCommand(commandLine,
+                        RunOptions::WaitForCompletion |
+                                RunOptions::TerminateOnTimeout |
+                                RunOptions::DumpOutputToFile,
+                        timeoutMs, outExitCode, nullptr, temp_file_path)) {
+            return {};
+        }
+
+        // Extract stderr/stdout
+        return android::readFileIntoString(temp_file_path).valueOr({});
+    }
+
     bool runCommand(const std::vector<std::string>& commandLine,
             RunOptions options,
             System::Duration timeoutMs,

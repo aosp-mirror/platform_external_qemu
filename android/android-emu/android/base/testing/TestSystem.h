@@ -368,6 +368,14 @@ public:
         return result;
     }
 
+    Optional<std::string> runCommandWithResult(
+            const std::vector<std::string>& commandLine,
+            System::Duration timeoutMs = kInfinite,
+            System::ProcessExitCode* outExitCode = nullptr) override {
+
+        return {};
+    }
+
     virtual std::string getTempDir() const override { return "/tmp"; }
 
     virtual time_t getUnixTime() const override {

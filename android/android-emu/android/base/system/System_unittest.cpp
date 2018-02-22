@@ -424,6 +424,45 @@ TEST(System, runCommandTrue) {
     EXPECT_GT(pid, 0U);
 }
 
+TEST(System, runCommandWithResultsSaysHello) {
+    // Let's say hello!
+#ifndef _WIN32
+    std::vector<std::string> cmd = {"echo", "hello world!"};
+#else
+    std::vector<std::string> cmd = {"cmd.exe", "/C", "echo", "hello", "world!"};
+#endif
+    auto run =  System::get()->runCommandWithResult(cmd);
+    EXPECT_NE(kNullopt, run);
+    EXPECT_EQ(0, run.valueOr({}).find("hello world!"));
+}
+
+TEST(System, runCommandWithResultsHasExitCode) {
+    // Let's set the exit code
+#ifndef _WIN32
+    std::vector<std::string> cmd = {"false"};
+#else
+    std::vector<std::string> cmd = {"cmd.exe", "/C", "EXIT /B 1"};
+#endif
+
+    System::ProcessExitCode exitCode = 0;
+    System::get()->runCommandWithResult(cmd, System::kInfinite, &exitCode);
+    EXPECT_EQ(1, exitCode);
+}
+
+TEST(System, runCommandWithResultsTimesOut) {
+    // Let us loop.
+#ifndef _WIN32
+    std::vector<std::string> cmd = {"sleep", "0.1"};
+#else
+    // 2 Attempts give us a delay of 1 second.
+    // 'ping' is not an internal cmd.exe command, but seems always being shipped
+    // on recent windows boxes and wine.
+    std::vector<std::string> cmd = {"ping", "-n", "2", "127.0.0.1"};
+#endif
+
+    auto result = System::get()->runCommandWithResult(cmd, 50);
+    EXPECT_EQ(kNullopt, result);
+}
 
 TEST(System, which) {
 #ifndef _WIN32

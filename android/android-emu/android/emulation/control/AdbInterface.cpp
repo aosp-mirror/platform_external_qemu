@@ -166,39 +166,12 @@ std::vector<std::string> AdbLocatorImpl::availableAdb() {
 Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
     const std::vector<std::string> adbVersion = {adbPath, "version"};
     int protocol = 0;
-    std::string tmp_dir = System::get()->getTempDir();
-
-    // Get temporary file path
-    constexpr base::StringView temp_filename_pattern = "adbversion_XXXXXX";
-    std::string temp_file_path =
-            PathUtils::join(tmp_dir, temp_filename_pattern);
-
-    auto tmpfd = android::base::ScopedFd(mkstemp((char*)temp_file_path.data()));
-    if (!tmpfd.valid()) {
-        return {};
-    }
-    // We have to close the handle. On windows we will not be able to write to
-    // this file, resulting in strange behavior.
-    tmpfd.close();
-    temp_file_path.resize(strlen(temp_file_path.c_str()));
-    auto tmpFileDeleter = base::makeCustomScopedPtr(
-            &temp_file_path,
-            [](const std::string* name) { remove(name->c_str()); });
-
     // Retrieve the adb version.
     const int maxAdbRetrievalTimeMs = 500;
-    if (!System::get()->runCommand(
-                adbVersion,
-                RunOptions::WaitForCompletion | RunOptions::TerminateOnTimeout |
-                        RunOptions::DumpOutputToFile,
-                maxAdbRetrievalTimeMs, nullptr, nullptr, temp_file_path)) {
-        return {};
-    }
-
-    std::string read = android::readFileIntoString(temp_file_path).valueOr({});
-    if (sscanf(read.c_str(), "Android Debug Bridge version %*d.%*d.%d",
+    auto read = System::get()->runCommandWithResult(adbVersion, maxAdbRetrievalTimeMs, nullptr);
+    if (!read || sscanf(read->c_str(), "Android Debug Bridge version %*d.%*d.%d",
                &protocol) != 1) {
-        LOG(VERBOSE) << "Failed obtain protocol version from: " << read;
+        LOG(VERBOSE) << "Failed obtain protocol version from " << adbPath;
         return {};
     }
     LOG(VERBOSE) << "Path:" << adbPath << " protocol version: " << protocol;

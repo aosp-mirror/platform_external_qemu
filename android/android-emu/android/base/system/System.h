@@ -399,6 +399,19 @@ public:
                             System::Pid* outChildPid = nullptr,
                             const std::string& outputFile = "") = 0;
 
+    // Run a shell command, and returning the generated stderr/stdout in a string.
+    //
+    // Args:
+    //     commandLine: Set of command to run + its arguments
+    //     timeoutMs: The maximum time to wait before aborting the
+    //             command. Waits forever if set to 0.
+    //     outExitCode: An optional pointer to an existing location where the
+    //             exit code for the launched process is returned.
+    //
+    // Returns kNullopt in case of failure, or the captured stdout/stderr.
+    virtual Optional<std::string> runCommandWithResult( const std::vector<std::string>& commandLine,
+                            System::Duration timeoutMs = kInfinite,
+                            System::ProcessExitCode* outExitCode = nullptr) = 0;
 protected:
     size_t mMemorySize = 0;
 
