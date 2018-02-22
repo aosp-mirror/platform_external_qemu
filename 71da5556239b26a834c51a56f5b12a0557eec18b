@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a6a282ad_1f1d9db9",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1159,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-22T20:38:24Z",
+      "side": 1,
+      "message": "nit:indent",
+      "range": {
+        "startLine": 1157,
+        "startChar": 0,
+        "endLine": 1159,
+        "endChar": 61
+      },
+      "revId": "71da5556239b26a834c51a56f5b12a0557eec18b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
