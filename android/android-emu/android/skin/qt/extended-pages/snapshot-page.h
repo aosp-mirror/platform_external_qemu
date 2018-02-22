@@ -40,15 +40,18 @@ signals:
 private slots:
     void on_snapshotDisplay_itemSelectionChanged();
     void on_deleteSnapshot_clicked();
+    void on_enlargeInfoButton_clicked();
     void on_editSnapshot_clicked();
     void on_loadSnapshot_clicked();
+    void on_reduceInfoButton_clicked();
     void on_takeSnapshotButton_clicked();
 
 private:
 
     class WidgetSnapshotItem;
 
-    static const int COLUMN_NAME = 0;
+    static const int COLUMN_ICON = 0;
+    static const int COLUMN_NAME = 1;
 
     void    showEvent(QShowEvent* ee) override;
 
@@ -73,6 +76,7 @@ private:
 
     const WidgetSnapshotItem* getSelectedSnapshot();
 
+    bool mUseBigInfoWindow;
     std::unique_ptr<emulator_snapshot::Snapshot> loadProtobuf(const QString& fileName);
 
     void writeProtobuf(const QString& fileName,
