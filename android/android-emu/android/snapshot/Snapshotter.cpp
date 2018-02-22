@@ -258,7 +258,8 @@ void Snapshotter::prepareLoaderForSaving(const char* name) {
     if (!mLoader) {
         return;
     }
-    if (mLoader->snapshot().name() != name) {
+    if (mLoader->snapshot().name() != name ||
+        mLoader->status() != OperationStatus::Ok) {
         mLoader.reset();
     } else {
         mLoader->prepareForSaving(mIsOnExit);
@@ -612,7 +613,7 @@ OperationStatus Snapshotter::loadGeneric(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
-    if (mLoader) {
+    if (mLoader && mLoader->status() == OperationStatus::Ok) {
         mLoader->prepareForSaving(false /* not on exit */);
     }
 
