@@ -21,6 +21,7 @@
 #include "android/snapshot/interface.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/proto/snapshot.pb.h"
+#include "android/snapshot/Quickboot.h"
 #include "android/snapshot/Snapshot.h"
 
 #include "android/skin/qt/stylesheet.h"
@@ -40,6 +41,9 @@
 using namespace android::base;
 using namespace android::snapshot;
 
+
+static const char CURRENT_SNAPSHOT_ICON_NAME[] = "current_snapshot";
+static const char CURRENT_SNAPSHOT_SELECTED_ICON_NAME[] = "current_snapshot_selected";
 
 // A class for items in the QTreeWidget.
 class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
@@ -71,6 +75,16 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         //     setText(COLUMN_NAME, logicalName);
         // }
 
+        // Customize the sort order
+        bool operator<(const QTreeWidgetItem &other)const {
+            WidgetSnapshotItem& otherItem = (WidgetSnapshotItem&)other;
+            // Make "default_boot" first. After that,
+            // sort based on date/time.
+            if (otherItem.mFileName == Quickboot::kDefaultBootSnapshot.c_str()) return false;
+            if (mFileName == Quickboot::kDefaultBootSnapshot.c_str()) return true;
+            return mDateTime < otherItem.mDateTime;
+        }
+
         QString fileName() const {
             return mFileName;
         }
@@ -96,12 +110,6 @@ SnapshotPage::SnapshotPage(QWidget* parent) :
     mUi->setupUi(this);
     mUi->snapshotDisplay->sortByColumn(COLUMN_NAME, Qt::AscendingOrder);
 
-    populateSnapshotDisplay();
-
-    if (mUi->snapshotDisplay->currentItem() == nullptr) {
-        mUi->snapshotDisplay->setCurrentItem(mUi->snapshotDisplay->topLevelItem(0));
-    }
-
     QObject::connect(this, SIGNAL(deleteCompleted()),
                      this, SLOT(slot_snapshotDeleteCompleted()));
     QObject::connect(this, SIGNAL(loadCompleted(int, QString)),
@@ -120,7 +128,8 @@ void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
 
     QMessageBox msgBox(QMessageBox::Question,
                        tr("Delete snapshot"),
-                       tr("Do you want to delete snapshot \"") + logicalName + "\"",
+                       tr("Do you want to permanently delete<br>snapshot \"%1\"?")
+                               .arg(logicalName),
                        QMessageBox::Cancel,
                        this);
     QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
@@ -233,6 +242,16 @@ const SnapshotPage::WidgetSnapshotItem* SnapshotPage::getSelectedSnapshot() {
     return static_cast<WidgetSnapshotItem*>(selectedItems[0]);
 }
 
+void SnapshotPage::on_enlargeInfoButton_clicked() {
+    mUseBigInfoWindow = true;
+    on_snapshotDisplay_itemSelectionChanged();
+}
+
+void SnapshotPage::on_reduceInfoButton_clicked() {
+    mUseBigInfoWindow = false;
+    on_snapshotDisplay_itemSelectionChanged();
+}
+
 void SnapshotPage::on_editSnapshot_clicked() {
     editSnapshot(getSelectedSnapshot());
 }
@@ -272,66 +291,92 @@ void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snap
 void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
-    const QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
+    // Adjust the icon for a selected vs non-selected row
+    QTreeWidgetItemIterator iter(mUi->snapshotDisplay);
+    for ( ; *iter; iter++) {
+        WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iter);
+        if (item->icon(COLUMN_ICON).isNull()) continue;
+        if (item->isSelected()) {
+            item->setIcon(COLUMN_ICON, getIconForCurrentTheme(CURRENT_SNAPSHOT_SELECTED_ICON_NAME));
+        } else {
+            item->setIcon(COLUMN_ICON, getIconForCurrentTheme(CURRENT_SNAPSHOT_ICON_NAME));
 
-    if (selectedItems.size() == 0) {
+        }
+    }
+
+    QString selectionInfoString;
+    QString simpleName;
+
+    const WidgetSnapshotItem* theItem = getSelectedSnapshot();
+
+    if (!theItem) {
         if (mUi->snapshotDisplay->topLevelItemCount() > 0) {
-            mUi->selectionInfo->setHtml(tr("<big>No snapshot selected"));
+            selectionInfoString = tr("<big>No snapshot selected");
         } else {
             // Nothing can be selected
-            mUi->selectionInfo->setHtml("");
+            selectionInfoString = "";
         }
-        QApplication::restoreOverrideCursor();
-        return;
+    } else {
+        QString logicalName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
+        simpleName = theItem->fileName();
+
+        System::FileSize snapSize = android::snapshot::folderSize(simpleName.toStdString());
+
+        selectionInfoString =
+                  tr("<big><b>%1</b></big><br>"
+                     "%2, captured %3<br>"
+                     "File: %4")
+                          .arg(logicalName,
+                               formattedSize(snapSize),
+                               theItem->dateTime().isValid() ?
+                                   theItem->dateTime().toString(Qt::SystemLocaleShortDate) :
+                                   tr("(unknown)"),
+                               simpleName);
+
+        QString description = getDescription(simpleName);
+        if (!description.isEmpty()) {
+            selectionInfoString += QString("<p><big>%1</big>")
+                                   .arg(description.replace('<', "&lt;").replace('\n', "<br>"));
+        }
     }
-    // Grab the first selected element--multiple selections are not allowed
-    const WidgetSnapshotItem* theItem = static_cast<const WidgetSnapshotItem*>(selectedItems[0]);
 
-    QString logicalName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
+    if (mUseBigInfoWindow) {
+        // Use the big window for displaying the info
+        mUi->bigSelectionInfo->setHtml(selectionInfoString);
+        mUi->bigSelectionInfo->setVisible(true);
+        mUi->reduceInfoButton->setVisible(true);
 
-    QString simpleName = theItem->fileName();
+        mUi->smallSelectionInfo->setVisible(false);
+        mUi->preview->setVisible(false);
+        mUi->enlargeInfoButton->setVisible(false);
+    } else {
+        // Use the small window for displaying the info
+        mUi->smallSelectionInfo->setHtml(selectionInfoString);
+        mUi->smallSelectionInfo->setVisible(true);
+        mUi->preview->setVisible(true);
+        mUi->enlargeInfoButton->setVisible(true);
 
-    const char *avdPath = avdInfo_getContentPath(android_avdInfo);
-    QString snapshotPath(PathUtils::join(avdPath, "snapshots").c_str());
-    // I see Snapshot::diskSize() always returning 999, so I calculate the size myself.
-    qint64 snapSize = recursiveSize(snapshotPath, simpleName);
+        mUi->bigSelectionInfo->setVisible(false);
+        mUi->reduceInfoButton->setVisible(false);
 
-    QString selectionInfoString =
-        + "<big><b>" + logicalName + "</b>";
-
-    if (simpleName == androidSnapshot_loadedSnapshotFile()) {
-        selectionInfoString += tr("<p><b>This image was used to start the current AVD instance.</b>");
-    }
-    QString dateTimeString = theItem->dateTime().isValid() ?
-                                   theItem->dateTime().toString(Qt::SystemLocaleLongDate) :
-                                   tr("(unknown)");
-
-    selectionInfoString += tr("<p>Captured ") + dateTimeString
-                           + "<p>" + formattedSize(snapSize) + tr(" on disk");
-    if (logicalName != simpleName) {
-        selectionInfoString += tr(" under ") + simpleName;
-    }
-    if (!theItem->parentName().isEmpty()) {
-        selectionInfoString += "<p>Derived from <b>" + theItem->parentName() + "</b>";
-    }
-    QString description = getDescription(simpleName);
-    if (!description.isEmpty()) {
-        selectionInfoString += "<p><pre>" + description + "</pre>";
-    }
-    mUi->selectionInfo->setHtml(selectionInfoString);
-
-    if (mUi->preview->isVisible()) {
-        showPreviewImage(snapshotPath, simpleName);
+        if (mUi->preview->isVisible()) {
+            showPreviewImage(simpleName);
+        }
     }
 
     QApplication::restoreOverrideCursor();
 }
 
 // Displays the preview image of the selected snapshot
-void SnapshotPage::showPreviewImage(const QString& snapshotPath, const QString& snapshotName) {
+void SnapshotPage::showPreviewImage(const QString& snapshotName) {
     mPreviewScene.clear(); // Frees previewItem
 
-    QPixmap pMap(PathUtils::join(snapshotPath.toStdString(),
+    if (snapshotName.isEmpty()) {
+        mUi->preview->items().clear();
+        return;
+    }
+
+    QPixmap pMap(PathUtils::join(getSnapshotBaseDir(),
                                  snapshotName.toStdString(),
                                  "screenshot.png").c_str());
 
@@ -343,20 +388,7 @@ void SnapshotPage::showPreviewImage(const QString& snapshotPath, const QString& 
 }
 
 void SnapshotPage::showEvent(QShowEvent* ee) {
-    if (!mUi->preview->isVisible()) {
-        return;
-    }
-    // The snapshot preview image does not render correctly if its
-    // widget isn't visible. Now that the widget is visible, we
-    // can show that image.
-    const WidgetSnapshotItem* theItem = getSelectedSnapshot();
-    if (!theItem) return;
-    QString simpleName = theItem->fileName();
-
-    const char *avdPath = avdInfo_getContentPath(android_avdInfo);
-    QString snapshotPath(PathUtils::join(avdPath, "snapshots").c_str());
-
-    showPreviewImage(snapshotPath, simpleName);
+    populateSnapshotDisplay();
 }
 
 void SnapshotPage::on_takeSnapshotButton_clicked() {
@@ -458,6 +490,7 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
             bigBold.setPointSize(bigBold.pointSize() + 2);
             bigBold.setBold(true);
             thisItem->setFont(COLUMN_NAME, bigBold);
+            thisItem->setIcon(COLUMN_ICON, getIconForCurrentTheme("current_snapshot"));
             mUi->snapshotDisplay->setCurrentItem(thisItem);
         } else {
             QFont biggish = thisItem->font(COLUMN_NAME);
@@ -478,6 +511,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     mUi->noneAvailableLabel->setVisible(false);
 
     mUi->snapshotDisplay->header()->setStretchLastSection(false);
+    mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_ICON, QHeaderView::Fixed);
+    mUi->snapshotDisplay->header()->resizeSection(COLUMN_ICON, 36);
     mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME, QHeaderView::Stretch);
     mUi->snapshotDisplay->setSortingEnabled(true);
 }
@@ -668,34 +703,10 @@ void SnapshotPage::writeProtobuf(const QString& fileName,
                                                 fileName.toStdString().c_str(),
                                                 "snapshot.pb");
     std::filebuf fileBuf;
-    fileBuf.open(protoFileName.c_str(), std::ios::out);
+    fileBuf.open(protoFileName.c_str(), std::ios::out | std::ios_base::binary);
     std::ostream outStream(&fileBuf);
 
     protobuf->SerializeToOstream(&outStream);
-}
-
-qint64 SnapshotPage::recursiveSize(const QString& base, const QString& fileName) {
-    QFileInfo thisFileInfo(base, fileName);
-    QString thisPath = thisFileInfo.filePath();
-    if (thisFileInfo.isSymLink()) {
-        return 0;
-    }
-    if (thisFileInfo.isFile()) {
-        QFile thisFile(thisPath);
-        return thisFile.size();
-    }
-    if (!thisFileInfo.isDir()) {
-        return 0;
-    }
-    // Directory: Count up all the included files
-    QDir thisDir(thisPath);
-    thisDir.setFilter(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList includedNames(thisDir.entryList());
-    qint64 totalSize = 0;
-    for (QString nextName : includedNames) {
-        totalSize += recursiveSize(thisPath, nextName);
-    }
-    return totalSize;
 }
 
 QString SnapshotPage::formattedSize(qint64 theSize) {
