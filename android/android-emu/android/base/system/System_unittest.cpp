@@ -424,6 +424,20 @@ TEST(System, runCommandTrue) {
     EXPECT_GT(pid, 0U);
 }
 
+
+TEST(System, which) {
+#ifndef _WIN32
+    std::string cmd = "ls";
+#else
+    std::string cmd = "cmd.exe";
+#endif
+  EXPECT_TRUE(System::get()->which(cmd));
+
+  // You can make this test fail..
+  EXPECT_FALSE(System::get()->which("okay_you_broke_the_test_please_rename_this_file"));
+}
+
+
 TEST(System, runCommandTimeout) {
 #ifndef _WIN32
     std::vector<std::string> cmd = {"sleep", "0.1"};

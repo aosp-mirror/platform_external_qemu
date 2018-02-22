@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/TestAdbInterface.h"
+#include "android/base/Optional.h"
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/testing/TestSystem.h"
@@ -22,17 +24,21 @@
 
 #include <fstream>
 
+using android::base::Optional;
 using android::base::PathUtils;
 using android::base::System;
 using android::base::TestSystem;
 using android::base::TestTempDir;
 using android::emulation::AdbInterface;
+using android::emulation::FakeAdbDaemon;
+using android::emulation::StaticAdbLocator;
 
 TEST(AdbInterface, create) {
+    // Default creation still works..
     EXPECT_NE(nullptr, AdbInterface::create(nullptr).get());
 }
 
-TEST(AdbInterface, freshAdbVersion) {
+TEST(AdbInterface, findAdbFromAndroidSdkRoot) {
     TestSystem system("/progdir", System::kProgramBitness, "/homedir",
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
@@ -43,101 +49,103 @@ TEST(AdbInterface, freshAdbVersion) {
             dir->makeSubFile(PathUtils::join("Sdk", "platform-tools",
                                              PathUtils::toExecutableName("adb"))
                                      .c_str()));
-    std::string output_file =
-            dir->makeSubPath("Sdk/platform-tools/source.properties");
-    std::ofstream ofs(output_file);
-    ASSERT_TRUE(ofs.is_open());
-    ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
-           "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=23.1.0\n"
-           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/"
-           "repository-12.xml\n";
-    ofs.close();
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
     system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    auto adb = AdbInterface::create(nullptr);
-    EXPECT_TRUE(adb->isAdbVersionCurrent());
+
+    auto adb = AdbInterface::Builder()
+                       .setAdbDaemon(new FakeAdbDaemon())
+                       .build();
     std::string expectedAdbPath = PathUtils::join(
             sdkRoot, "platform-tools", PathUtils::toExecutableName("adb"));
     EXPECT_EQ(expectedAdbPath, adb->detectedAdbPath());
 }
 
-TEST(AdbInterface, freshAdbVersionNoMinor) {
-    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+TEST(AdbInterface, deriveAdbFromExecutable) {
+    TestSystem system("", System::kProgramBitness, "/homedir",
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
+
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
+    ASSERT_TRUE(dir->makeSubDir("Sdk/tools"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platforms"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
     ASSERT_TRUE(
             dir->makeSubFile(PathUtils::join("Sdk", "platform-tools",
                                              PathUtils::toExecutableName("adb"))
                                      .c_str()));
-    std::string output_file =
-            dir->makeSubPath("Sdk/platform-tools/source.properties");
-    std::ofstream ofs(output_file);
-    ASSERT_TRUE(ofs.is_open());
-    ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
-           "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=24 rc1\n"
-           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/"
-           "repository-12.xml\n";
-    ofs.close();
+    system.envSet("ANDROID_EMULATOR_LAUNCHER_DIR", dir->path());
     std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
-    system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    auto adb = AdbInterface::create(nullptr);
-    EXPECT_TRUE(adb->isAdbVersionCurrent());
+    system.setLauncherDirectory(PathUtils::join(sdkRoot, "tools"));
+    EXPECT_EQ(PathUtils::join(sdkRoot, "tools"), system.getLauncherDirectory());
+    auto adb = AdbInterface::Builder()
+                       .setAdbDaemon(new FakeAdbDaemon())
+                       .build();
     std::string expectedAdbPath = PathUtils::join(
             sdkRoot, "platform-tools", PathUtils::toExecutableName("adb"));
     EXPECT_EQ(expectedAdbPath, adb->detectedAdbPath());
 }
 
-TEST(AdbInterface, staleAdbMinorVersion) {
-    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+TEST(AdbInterface, findAdbOnPath) {
+    TestSystem system("", System::kProgramBitness, "/homedir",
                       "/appdir");
     TestTempDir* dir = system.getTempRoot();
-    ASSERT_TRUE(dir->makeSubDir("Sdk"));
-    ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
+
+    ASSERT_TRUE(dir->makeSubDir("some_dir"));
     ASSERT_TRUE(
-            dir->makeSubFile(PathUtils::join("Sdk", "platform-tools",
+            dir->makeSubFile(PathUtils::join("some_dir",
                                              PathUtils::toExecutableName("adb"))
                                      .c_str()));
-    std::string output_file =
-            dir->makeSubPath("Sdk/platform-tools/source.properties");
-    std::ofstream ofs(output_file);
-    ASSERT_TRUE(ofs.is_open());
-    ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
-           "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=23.0.0\n"
-           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/"
-           "repository-12.xml\n";
-    ofs.close();
-    std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
-    system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    auto adb = AdbInterface::create(nullptr);
-    EXPECT_FALSE(adb->isAdbVersionCurrent());
-    EXPECT_EQ("", adb->detectedAdbPath());
+    std::string execPath = PathUtils::join(dir->path(), "some_dir");
+    std::string expectedAdbPath = PathUtils::join(execPath, PathUtils::toExecutableName("adb"));
+    system.setWhich(expectedAdbPath);
+    auto adb = AdbInterface::Builder()
+                       .setAdbDaemon(new FakeAdbDaemon())
+                       .build();
+    EXPECT_EQ(expectedAdbPath, adb->detectedAdbPath());
 }
 
-TEST(AdbInterface, staleAdbMajorVersion) {
-    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
-                      "/appdir");
-    TestTempDir* dir = system.getTempRoot();
-    ASSERT_TRUE(dir->makeSubDir("Sdk"));
-    ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
-    ASSERT_TRUE(
-            dir->makeSubFile(PathUtils::join("Sdk", "platform-tools",
-                                             PathUtils::toExecutableName("adb"))
-                                     .c_str()));
-    std::string output_file =
-            dir->makeSubPath("Sdk/platform-tools/source.properties");
-    std::ofstream ofs(output_file);
-    ASSERT_TRUE(ofs.is_open());
-    ofs << "### Comment\nArchive.HostOs=linux\nPkg.License=\\nNoliense\n"
-           "Pkg.LicenseRef=android-sdk-license\nPkg.Revision=22.1.0\n"
-           "Pkg.SourceUrl=https\\://dl.google.com/android/repository/"
-           "repository-12.xml\n";
-    ofs.close();
-    std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
-    system.envSet("ANDROID_SDK_ROOT", sdkRoot);
-    auto adb = AdbInterface::create(nullptr);
+TEST(AdbInterface, staleAdbVersion) {
+    auto daemon = new FakeAdbDaemon();
+    auto locator = new StaticAdbLocator({{"v1", 1}, {"v2", 2}, {"v3", 40}});
+    auto adb = AdbInterface::Builder()
+                       .setAdbLocator(locator)
+                       .setAdbDaemon(daemon)
+                       .build();
+
+    // We have selected an ancient adb version
     EXPECT_FALSE(adb->isAdbVersionCurrent());
-    EXPECT_EQ("", adb->detectedAdbPath());
+}
+
+TEST(AdbInterface, recentAdbVersion) {
+    auto daemon = new FakeAdbDaemon();
+    auto locator = new StaticAdbLocator({{"v1", 1}, {"v2", 2}, {"v3", 40}});
+    auto adb = AdbInterface::Builder()
+                       .setAdbLocator(locator)
+                       .setAdbDaemon(daemon)
+                       .build();
+
+    // We have selected a modern one
+    daemon->setProtocolVersion(android::base::makeOptional(40));
+    EXPECT_EQ("v3", adb->adbPath());
+    EXPECT_TRUE(adb->isAdbVersionCurrent());
+}
+
+
+TEST(AdbInterface, selectMatchingAdb) {
+    auto daemon = new FakeAdbDaemon();
+    auto locator = new StaticAdbLocator({{"v1", 1}, {"v2", 2}, {"v3", 3}});
+    auto adb = AdbInterface::Builder()
+                       .setAdbLocator(locator)
+                       .setAdbDaemon(daemon)
+                       .build();
+
+    // Unknown protocol, we should pick the first.
+    daemon->setProtocolVersion({});
+    EXPECT_EQ("v1", adb->adbPath());
+
+    daemon->setProtocolVersion(android::base::makeOptional(3));
+    EXPECT_EQ("v3", adb->adbPath());
+
+    daemon->setProtocolVersion(android::base::makeOptional(2));
+    EXPECT_EQ("v2", adb->adbPath());
 }

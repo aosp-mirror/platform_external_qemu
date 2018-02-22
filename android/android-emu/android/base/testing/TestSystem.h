@@ -258,6 +258,14 @@ public:
         return fileSizeInternal(fd, outFileSize);
     }
 
+    virtual Optional<std::string> which(StringView executable) const override {
+      return mWhich;
+    }
+
+    void setWhich(Optional<std::string> which) {
+      mWhich = which;
+    }
+
     virtual Optional<Duration> pathCreationTime(
             StringView path) const override {
         return pathCreationTimeInternal(toTempRoot(path));
@@ -453,6 +461,7 @@ private:
     bool mUnderWine = false;
     Pid mPid = 0;
     int mCoreCount = 4;
+    Optional<std::string> mWhich;
 };
 
 }  // namespace base
