@@ -213,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "7a494cea_7f8b8832",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-22T03:02:33Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4c050a70_137fc6db",
+      "range": {
+        "startLine": 671,
+        "startChar": 0,
+        "endLine": 676,
+        "endChar": 29
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5155d718_55ea0d19",
         "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
         "patchSetId": 2
@@ -257,6 +281,30 @@
       "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "231c310f_4aba8a0c",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-22T03:02:33Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "00dedb82_f4020e61",
+      "range": {
+        "startLine": 681,
+        "startChar": 0,
+        "endLine": 681,
+        "endChar": 58
+      },
+      "revId": "ad53461b2b8d0db2977ae204ea0cf770d2b542b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
