@@ -16,6 +16,29 @@
       "revId": "33f44ef749ff4d645d667a1058127cb8ff95fb62",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f90ba787_e01391b1",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1335,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-22T21:16:19Z",
+      "side": 1,
+      "message": "As long as we\u0027re in the C++, we could do some kind of scoped av_frame_free here (and in other places that use temp frames maybe) so that theres fewer places to check whether you\u0027ve av_frame_free\u0027ed something.",
+      "range": {
+        "startLine": 1326,
+        "startChar": 8,
+        "endLine": 1335,
+        "endChar": 62
+      },
+      "revId": "33f44ef749ff4d645d667a1058127cb8ff95fb62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
