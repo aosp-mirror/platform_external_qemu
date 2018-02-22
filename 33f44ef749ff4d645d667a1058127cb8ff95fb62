@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "885468e3_49173897",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-22T21:01:10Z",
+      "side": 1,
+      "message": "Can we have a high level overview of the changes? It\u0027s not as simple as keeping the current C interface but having a C++ class available underneath, since there\u0027s new interface stuff even at the C level; e.g., we used to create+start the recording in the same function call, but now it\u0027s split into two different functions.",
+      "revId": "33f44ef749ff4d645d667a1058127cb8ff95fb62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
