@@ -50,16 +50,13 @@ private:
 
     class WidgetSnapshotItem;
 
-    static const int COLUMN_ICON = 0;
-    static const int COLUMN_NAME = 1;
+    static constexpr int COLUMN_ICON = 0;
+    static constexpr int COLUMN_NAME = 1;
 
     void    showEvent(QShowEvent* ee) override;
 
     void    populateSnapshotDisplay();
     void    populateSnapshotDisplay_flat();
-    qint64  recursiveSize(const QString& base, const QString& fileName);
-    void    recursiveCopy(const QString& sourceDirPath,
-                          const QString& destinationDirPath);
 
     QString formattedSize(qint64 theSize);
     QString getDescription(const QString& fileName);
@@ -67,7 +64,7 @@ private:
     void    deleteSnapshot(const WidgetSnapshotItem* theItem);
     void    editSnapshot(const WidgetSnapshotItem* theItem);
     void    highlightItemWithFilename(const QString& fileName);
-    void    showPreviewImage(const QString& snapshotPath, const QString& snapshotName);
+    void    showPreviewImage(const QString& snapshotName);
     void    writeLogicalNameToProtobuf(const QString& fileName, const QString& logicalName);
     void    writeParentToProtobuf(const QString& fileName, const QString& parentName);
     void    writeLogicalNameAndParentToProtobuf(const QString& fileName,
@@ -76,7 +73,7 @@ private:
 
     const WidgetSnapshotItem* getSelectedSnapshot();
 
-    bool mUseBigInfoWindow;
+    bool mUseBigInfoWindow = false;
     std::unique_ptr<emulator_snapshot::Snapshot> loadProtobuf(const QString& fileName);
 
     void writeProtobuf(const QString& fileName,
