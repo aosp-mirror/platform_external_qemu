@@ -22,7 +22,6 @@
 #include "android/main-kernel-parameters.h"
 #include "android/main-qemu-parameters.h"
 #include "android/process_setup.h"
-#include "android/screen-recorder.h"
 #include "android/skin/winsys.h"
 #include "android/utils/aconfig-file.h"
 #include "android/utils/debug.h"

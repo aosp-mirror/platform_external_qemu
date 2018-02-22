@@ -33,6 +33,7 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(SHOW_PANE_PHONE, "Phone"),
         INIT_COMMAND(SHOW_PANE_MICROPHONE, "Microphone"),
         INIT_COMMAND(SHOW_PANE_VIRTSENSORS, "Virtual sensors"),
+        INIT_COMMAND(SHOW_PANE_SNAPSHOT, "Snapshots"),
         INIT_COMMAND(SHOW_PANE_DPAD, "D-Pad"),
         INIT_COMMAND(SHOW_PANE_FINGER, "Fingerprint"),
         INIT_COMMAND(SHOW_PANE_GPLAY, "Google Play"),
