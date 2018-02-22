@@ -18,8 +18,8 @@
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>341</width>
-     <height>562</height>
+     <width>285</width>
+     <height>516</height>
     </rect>
    </property>
    <property name="maximumSize">
@@ -27,6 +27,9 @@
      <width>341</width>
      <height>16777215</height>
     </size>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
    </property>
    <property name="columnCount">
     <number>2</number>
@@ -39,23 +42,26 @@
    </attribute>
    <column>
     <property name="text">
-     <string>Name</string>
+     <string notr="true">1</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string/>
+     <string notr="true">2</string>
     </property>
    </column>
   </widget>
-  <widget class="QTextEdit" name="selectionInfo">
+  <widget class="QTextEdit" name="smallSelectionInfo">
    <property name="geometry">
     <rect>
-     <x>385</x>
-     <y>332</y>
-     <width>219</width>
-     <height>154</height>
+     <x>315</x>
+     <y>450</y>
+     <width>289</width>
+     <height>86</height>
     </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
    </property>
    <property name="horizontalScrollBarPolicy">
     <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -102,11 +108,14 @@
   <widget class="QGraphicsView" name="preview">
    <property name="geometry">
     <rect>
-     <x>385</x>
+     <x>305</x>
      <y>20</y>
-     <width>219</width>
-     <height>312</height>
+     <width>299</width>
+     <height>430</height>
     </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
    </property>
   </widget>
   <widget class="QLabel" name="noneAvailableLabel">
@@ -131,14 +140,17 @@
   <widget class="QPushButton" name="deleteSnapshot">
    <property name="geometry">
     <rect>
-     <x>568</x>
-     <y>500</y>
+     <x>108</x>
+     <y>546</y>
      <width>36</width>
      <height>36</height>
     </rect>
    </property>
    <property name="toolTip">
     <string extracomment="Delete snapshot"/>
+   </property>
+   <property name="accessibleDescription">
+    <string>Delete snapshot</string>
    </property>
    <property name="text">
     <string/>
@@ -154,7 +166,7 @@
     </size>
    </property>
    <property name="flat">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="themeIconName" stdset="0">
     <string>delete</string>
@@ -163,14 +175,17 @@
   <widget class="QPushButton" name="editSnapshot">
    <property name="geometry">
     <rect>
-     <x>524</x>
-     <y>500</y>
+     <x>64</x>
+     <y>546</y>
      <width>36</width>
      <height>36</height>
     </rect>
    </property>
    <property name="toolTip">
     <string extracomment="Edit snapshot"/>
+   </property>
+   <property name="accessibleDescription">
+    <string>Edit snapshot</string>
    </property>
    <property name="text">
     <string/>
@@ -186,7 +201,7 @@
     </size>
    </property>
    <property name="flat">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="themeIconName" stdset="0">
     <string>edit</string>
@@ -195,8 +210,8 @@
   <widget class="QPushButton" name="loadSnapshot">
    <property name="geometry">
     <rect>
-     <x>480</x>
-     <y>500</y>
+     <x>20</x>
+     <y>546</y>
      <width>36</width>
      <height>36</height>
     </rect>
@@ -204,12 +219,50 @@
    <property name="toolTip">
     <string extracomment="Load snapshot"/>
    </property>
+   <property name="accessibleDescription">
+    <string>Load snapshot</string>
+   </property>
    <property name="text">
     <string/>
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/dark/load_snapshot</normaloff>:/dark/load_snapshot</iconset>
+     <normaloff>:/dark/play_arrow</normaloff>:/dark/play_arrow</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>play_arrow</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="enlargeInfoButton">
+   <property name="geometry">
+    <rect>
+     <x>568</x>
+     <y>450</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string extracomment="Delete snapshot"/>
+   </property>
+   <property name="accessibleDescription">
+    <string>Enlarge description area</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/arrow_up</normaloff>:/dark/arrow_up</iconset>
    </property>
    <property name="iconSize">
     <size>
@@ -221,9 +274,86 @@
     <bool>true</bool>
    </property>
    <property name="themeIconName" stdset="0">
-    <string>load_snapshot</string>
+    <string>arrow_up</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="reduceInfoButton">
+   <property name="geometry">
+    <rect>
+     <x>568</x>
+     <y>20</y>
+     <width>36</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string extracomment="Delete snapshot"/>
+   </property>
+   <property name="accessibleDescription">
+    <string>Reduce description area</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/arrow_down</normaloff>:/dark/arrow_down</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>20</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="themeIconName" stdset="0">
+    <string>arrow_down</string>
+   </property>
+  </widget>
+  <widget class="QTextEdit" name="bigSelectionInfo">
+   <property name="geometry">
+    <rect>
+     <x>315</x>
+     <y>20</y>
+     <width>289</width>
+     <height>516</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="lineWidth">
+    <number>0</number>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="undoRedoEnabled">
+    <bool>false</bool>
+   </property>
+   <property name="lineWrapMode">
+    <enum>QTextEdit::WidgetWidth</enum>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <zorder>bigSelectionInfo</zorder>
+  <zorder>snapshotDisplay</zorder>
+  <zorder>smallSelectionInfo</zorder>
+  <zorder>takeSnapshotButton</zorder>
+  <zorder>preview</zorder>
+  <zorder>noneAvailableLabel</zorder>
+  <zorder>deleteSnapshot</zorder>
+  <zorder>editSnapshot</zorder>
+  <zorder>loadSnapshot</zorder>
+  <zorder>enlargeInfoButton</zorder>
+  <zorder>reduceInfoButton</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -232,6 +362,18 @@
    <header>android/skin/qt/raised-material-button.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>snapshotDisplay</tabstop>
+  <tabstop>loadSnapshot</tabstop>
+  <tabstop>editSnapshot</tabstop>
+  <tabstop>deleteSnapshot</tabstop>
+  <tabstop>takeSnapshotButton</tabstop>
+  <tabstop>reduceInfoButton</tabstop>
+  <tabstop>enlargeInfoButton</tabstop>
+  <tabstop>smallSelectionInfo</tabstop>
+  <tabstop>preview</tabstop>
+  <tabstop>bigSelectionInfo</tabstop>
+ </tabstops>
  <resources>
   <include location="../resources.qrc"/>
  </resources>
