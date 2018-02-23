@@ -84,5 +84,28 @@ std::string Win32Utils::getErrorString(DWORD error_code) {
     return result;
 }
 
+// static
+DWORD Win32Utils::getWindowsVersion(OSVERSIONINFOW* lpVersionInfo) {
+    // Returns non-zero values in case of errors.
+    HMODULE hLib;
+    DWORD ret = -1;
+
+    typedef DWORD (WINAPI *RtlGetVersion_t) (OSVERSIONINFOW*);
+
+    hLib = LoadLibrary("Ntdll.dll");
+    if (hLib) {
+        RtlGetVersion_t f_RtlGetVersion = (
+            RtlGetVersion_t)GetProcAddress(hLib, "RtlGetVersion");
+        if (f_RtlGetVersion) {
+            ret = f_RtlGetVersion(lpVersionInfo);
+        }
+    }
+
+    if (hLib)
+        FreeLibrary(hLib);
+    return ret;
+}
+
+
 }  // namespace base
 }  // namespace android

@@ -1005,6 +1005,8 @@ extern "C" int main(int argc, char** argv) {
     CpuAccelMode accel_mode = ACCEL_AUTO;
     const bool accel_ok =
             handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
+    AndroidCpuAccelerator accelerator = androidCpuAcceleration_getAccelerator();
+    char* enableAccceleratorParam = getAcceleratorEnableParam(accelerator);
 
     if (accel_mode == ACCEL_ON) {  // 'accel on' is specified'
         if (!accel_ok) {
@@ -1014,14 +1016,14 @@ extern "C" int main(int argc, char** argv) {
             AFREE(accel_status);
             return 1;
         }
-        args.add(kEnableAccelerator);
+        args.add(enableAccceleratorParam);
     } else if (accel_mode == ACCEL_AUTO) {
         if (accel_ok) {
-            args.add(kEnableAccelerator);
+            args.add(enableAccceleratorParam);
         }
     } else if (accel_mode == ACCEL_HVF) {
 #if CONFIG_HVF
-        args.add(kEnableAcceleratorHVF);
+        args.add(enableAccceleratorParam);
 #endif
     }  // else, add other special situations to enable particular
        // acceleration backends (e.g., HyperV/KVM on Windows,

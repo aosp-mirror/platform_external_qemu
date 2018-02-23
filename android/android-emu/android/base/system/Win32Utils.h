@@ -56,6 +56,12 @@ public:
     // FormatMessage.
     static std::string getErrorString(DWORD error_code);
 
+    // This function dynamically loads "Ntdll.dll" and calls RtlGetVersion in order
+    // to properly identify the OS version. GetVersionEx will always return 6.2
+    // for Windows 8 and later versions (unless the binary is manifested for a
+    // specific OS version).
+    static DWORD getWindowsVersion(OSVERSIONINFOW* lpVersionInfo);
+
     // A small handy struct for an automatic HANDLE management
     struct HandleCloser {
         void operator()(HANDLE h) const { ::CloseHandle(h); }
