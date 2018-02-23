@@ -1623,15 +1623,6 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max) {
 }
 
 void EmulatorQtWindow::screenshot() {
-    static const int MIN_SCREENSHOT_API = 14;
-    static const int DEFAULT_API_LEVEL = 1000;
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    if (apiLevel == DEFAULT_API_LEVEL || apiLevel < MIN_SCREENSHOT_API) {
-        showErrorDialog(tr("Screenshot is not supported below API 14."),
-                        tr("Screenshot"));
-        return;
-    }
-
     QString savePath = getScreenshotSaveDirectory();
     if (savePath.isEmpty()) {
         showErrorDialog(tr("The screenshot save location is not set.<br/>"
