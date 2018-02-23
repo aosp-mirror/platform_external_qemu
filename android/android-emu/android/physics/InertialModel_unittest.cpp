@@ -396,6 +396,9 @@ TEST(InertialModel, IntermediateValuesDuringInterpolation) {
 }
 
 TEST(InertialModel, AmbientMotion) {
+    // Please remove this after fixing b/73819879
+    if (System::get()->isRunningUnderWine())
+      return;
     TestSystem testSystem("/", System::kProgramBitness);
 
     const glm::vec3 initialPosition (0.3f, 0.1f, -2.0f);
@@ -456,6 +459,8 @@ TEST(InertialModel, AmbientMotion) {
             inertialModel.setTargetAmbientMotion(0.0f, PHYSICAL_INTERPOLATION_SMOOTH);
         }
     }
+
+
     EXPECT_TRUE(foundNonZeroPosition);
     EXPECT_TRUE(isLatestPositionStable);
 
@@ -839,6 +844,10 @@ TEST(InertialModel, ManyTargetVelocities) {
 }
 
 TEST(InertialModel, Gyroscope30HzRotationSet) {
+    // Please remove this after fixing b/73819926
+    if (System::get()->isRunningUnderWine())
+      return;
+
     TestSystem testSystem("/", System::kProgramBitness);
 
     const glm::quat initialRotation(glm::eulerAngleXYZ(
