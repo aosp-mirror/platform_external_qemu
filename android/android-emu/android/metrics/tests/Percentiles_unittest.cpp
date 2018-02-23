@@ -167,13 +167,13 @@ TEST(PercentilesTest, tailQuantile) {
   const double actual99th = entries[(int)(0.99 * entries.size())];
 
   EXPECT_NEAR(actual1st, p.calcValueForTarget(0.01).valueOr(actual1st - 100),
-              0.4);
+              0.404);
   EXPECT_NEAR(actual99th, p.calcValueForTarget(0.99).valueOr(actual99th - 100),
-              0.4);
+              0.404);
   EXPECT_NEAR(actual1st, p.calcValueForTargetNo(0).valueOr(actual1st - 100),
-              0.4);
+              0.404);
   EXPECT_NEAR(actual99th, p.calcValueForTargetNo(1).valueOr(actual99th - 100),
-              0.4);
+              0.404);
 }
 
 TEST(PercentilesTest, exportTest) {
