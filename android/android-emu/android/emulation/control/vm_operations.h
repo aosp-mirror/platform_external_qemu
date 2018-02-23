@@ -70,6 +70,7 @@ typedef enum {
     HV_KVM,
     HV_HAXM,
     HV_HVF,
+    HV_WHPX,
 } VmHypervisorType;
 
 typedef struct {

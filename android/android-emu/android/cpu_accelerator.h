@@ -35,7 +35,7 @@ typedef enum {
     ANDROID_CPU_ACCELERATION_DEV_OPEN_FAILED          = 12, // /dev/kvm or HAXM device: open failed
     ANDROID_CPU_ACCELERATION_DEV_IOCTL_FAILED         = 13, // /dev/kvm or HAXM device: ioctl failed
     ANDROID_CPU_ACCELERATION_DEV_OBSOLETE             = 14, // KVM or HAXM supported API is too old
-    ANDROID_CPU_ACCELERATION_HYPERV_ENABLED           = 15, // HyperV must be disabled
+    ANDROID_CPU_ACCELERATION_HYPERV_ENABLED           = 15, // HyperV must be disabled, unless WHPX is available
     ANDROID_CPU_ACCELERATION_ERROR                    = 138, // Some other error occurred
 } AndroidCpuAcceleration;
 
@@ -84,7 +84,7 @@ typedef enum {
     ANDROID_CPU_ACCELERATOR_KVM,
     ANDROID_CPU_ACCELERATOR_HAX,
     ANDROID_CPU_ACCELERATOR_HVF,
-    ANDROID_CPU_ACCELERATOR_HYPERV,
+    ANDROID_CPU_ACCELERATOR_WHPX,
     ANDROID_CPU_ACCELERATOR_MAX,
 } AndroidCpuAccelerator;
 

@@ -45,6 +45,7 @@
 #include "android/base/files/ScopedFileHandle.h"
 #include "android/windows_installer.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/base/system/Win32Utils.h"
 #include "android/base/files/PathUtils.h"
 #endif
 
@@ -64,6 +65,12 @@
 #elif defined(_WIN32) || defined(__APPLE__)
 #  define HAVE_KVM 0
 #  define HAVE_HAX 1
+
+#if defined(_WIN32)
+#  define HAVE_WHPX 1
+#else
+#  define HAVE_WHPX 0
+#endif
 
 #if defined(__APPLE__)
 #  define HAVE_HVF 1
@@ -120,6 +127,77 @@ struct GlobalState {
 GlobalState gGlobals = {false,  false,  CPU_ACCELERATOR_NONE,
                         {'\0'}, {'\0'}, ANDROID_CPU_ACCELERATION_ERROR,
                         {}};
+
+
+// Windows Hypervisor Platform (WHPX) support
+
+#if HAVE_WHPX
+
+#include <windows.h>
+#include <WinHvPlatform.h>
+#include <WinHvEmulation.h>
+
+AndroidCpuAcceleration ProbeWHPX(std::string* status) {
+    HRESULT hr;
+    WHV_CAPABILITY whpx_cap;
+    UINT32 whpx_cap_size;
+    bool acc_available = true;
+    HMODULE hWinHvPlatform;
+
+    typedef HRESULT (WINAPI *WHvGetCapability_t) (
+        WHV_CAPABILITY_CODE, VOID*, UINT32, UINT32*);
+
+    hWinHvPlatform = LoadLibraryW(L"WinHvPlatform.dll");
+    if (hWinHvPlatform) {
+        WHvGetCapability_t f_WHvGetCapability = (
+            WHvGetCapability_t)GetProcAddress(hWinHvPlatform, "WHvGetCapability");
+        if (f_WHvGetCapability) {
+            hr = f_WHvGetCapability(WHvCapabilityCodeHypervisorPresent, &whpx_cap,
+                                    sizeof(whpx_cap), &whpx_cap_size);
+            if (FAILED(hr) || !whpx_cap.HypervisorPresent) {
+                StringAppendFormat(status,
+                                   "WHPX: No accelerator found, hr=%08lx.",
+                                   hr);
+                acc_available = false;
+            }
+        } else {
+            status->assign("Could not load library function 'WHvGetCapability'.");
+            acc_available = false;
+        }
+    } else {
+        status->assign("Could not load library 'WinHvPlatform.dll'.");
+        acc_available = false;
+    }
+
+    if (hWinHvPlatform)
+        FreeLibrary(hWinHvPlatform);
+
+    if (!acc_available)
+        return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
+
+    auto ver = android::base::Win32Utils::getWindowsVersion();
+    if (!ver) {
+        status->assign("Could not extract Windows version.");
+        return ANDROID_CPU_ACCELERATION_ERROR;
+    }
+
+    char version_str[32];
+    snprintf(version_str, sizeof(version_str), "%lu.%lu.%lu",
+             ver->dwMajorVersion,
+             ver->dwMinorVersion,
+             ver->dwBuildNumber);
+
+    StringAppendFormat(
+            status, "WHPX (%s) is installed and usable.",
+            version_str);
+    GlobalState* g = &gGlobals;
+    ::snprintf(g->version, sizeof(g->version), "%s",
+               version_str);
+    return ANDROID_CPU_ACCELERATION_READY;
+}
+
+#endif // HAVE_WHPX
+
 
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -838,12 +916,23 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         g->accel = CPU_ACCELERATOR_KVM;
         g->supported_accelerators[CPU_ACCELERATOR_KVM] = true;
     }
-#elif HAVE_HAX || HAVE_HVF
+#elif HAVE_HAX || HAVE_HVF || HAVE_WHPX
     AndroidCpuAcceleration status_code = ProbeHAX(&status);
     if (status_code == ANDROID_CPU_ACCELERATION_READY) {
         g->accel = CPU_ACCELERATOR_HAX;
         g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
     }
+#if HAVE_WHPX
+    // WHPX will supersede HAX, if available.
+    std::string statusWHPX;
+    AndroidCpuAcceleration status_code_WHPX = ProbeWHPX(&statusWHPX);
+    if (status_code_WHPX == ANDROID_CPU_ACCELERATION_READY) {
+        g->accel = CPU_ACCELERATOR_WHPX;
+        g->supported_accelerators[CPU_ACCELERATOR_WHPX] = true;
+        status_code = status_code_WHPX;
+        status = std::move(statusWHPX);
+    }
+#endif // HAVE_WHPX
 #if HAVE_HVF
     if (featurecontrol::isEnabled(featurecontrol::HVF)) {
         std::string statusHvf;
@@ -1075,9 +1164,13 @@ std::string CpuAcceleratorToString(CpuAccelerator type) {
             return "HAXM";
         case CPU_ACCELERATOR_HVF:
             return "HVF";
-        default:
+        case CPU_ACCELERATOR_WHPX:
+            return "WHPX";
+        case CPU_ACCELERATOR_NONE:
+        case CPU_ACCELERATOR_MAX:
             return "";
     }
+    return "";
 }
 
 Version GetCurrentCpuAcceleratorVersion() {
