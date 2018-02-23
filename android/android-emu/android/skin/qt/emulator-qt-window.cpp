@@ -1624,9 +1624,8 @@ void EmulatorQtWindow::slot_scrollRangeChanged(int min, int max) {
 
 void EmulatorQtWindow::screenshot() {
     static const int MIN_SCREENSHOT_API = 14;
-    static const int DEFAULT_API_LEVEL = 1000;
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    if (apiLevel == DEFAULT_API_LEVEL || apiLevel < MIN_SCREENSHOT_API) {
+    if (apiLevel < MIN_SCREENSHOT_API) {
         showErrorDialog(tr("Screenshot is not supported below API 14."),
                         tr("Screenshot"));
         return;
