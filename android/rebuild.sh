@@ -1,4 +1,4 @@
-!/bin/sh
+#!/bin/sh
 #
 # this script is used to rebuild all QEMU binaries for the host
 # platforms.
@@ -25,9 +25,6 @@ for OPT; do
             ;;
         --mingw)
             MINGW=true
-            ;;
-        --clang)
-            OPT_CLANG=--clang
             ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
@@ -110,28 +107,24 @@ check_file_type_substring () {
 # on the current target platform. Then EXPECTED_EMULATOR_BITNESS and
 # EXPECTED_EMULATOR_FILE_TYPE accordingly.
 if [ "$MINGW" ]; then
-    EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
     EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
-    EXPECTED_EMULATOR_BITNESS=32
-    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
     TARGET_OS=windows
 elif [ "$HOST_OS" = "Darwin" ]; then
-    EXPECTED_32BIT_FILE_TYPE="Mach-O executable i386"
     EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
-    EXPECTED_EMULATOR_BITNESS=64
-    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
     TARGET_OS=darwin
 else
-    EXPECTED_32BIT_FILE_TYPE="ELF 32-bit LSB +executable, Intel 80386"
     EXPECTED_64BIT_FILE_TYPE="ELF 64-bit LSB +executable, x86-64"
-    EXPECTED_EMULATOR_BITNESS=64
-    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
     TARGET_OS=linux
 fi
 
-# Build the binaries from sources.
-cd "$PROGDIR"/..
-rm -rf "$OUT_DIR"
+EXPECTED_EMULATOR_BITNESS=64
+EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
+
+# Let's not remove the build directory when someone asks for help
+if [ -z "$HELP" ]; then
+    cd "$PROGDIR"/..
+    rm -rf "$OUT_DIR"
+fi
 # If the user only wants to print the help message and exit
 # there is no point of printing Configuring Build
 if [ "$VERBOSE" -ne 2 ]; then
@@ -150,84 +143,13 @@ echo "Building sources."
 run make -j$HOST_NUM_CPUS BUILD_OBJS_DIR="$OUT_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
-RUN_32BIT_TESTS=
-RUN_64BIT_TESTS=true
 RUN_EMUGEN_TESTS=true
 RUN_GEN_ENTRIES_TESTS=true
 
-TEST_SHELL=
-TEST_SETUP=
-TEST_SETUP64=
 EXE_SUFFIX=
 
-if [ "$HOST_OS" = "Linux" ]; then
-    # Linux 32-bit binaries are obsolete.
-    RUN_32BIT_TESTS=
-fi
-
 if [ "$MINGW" ]; then
-    TEST_SHELL=wine
     EXE_SUFFIX=.exe
-
-    # Check for Wine on this machine.
-    if [ -z "$NO_TESTS" ]; then
-        WINE_CMD=$(which $TEST_SHELL 2>/dev/null || true)
-        if [ -z "$WINE_CMD" ]; then
-            echo "WARNING: Wine is not installed on this machine!! Unit tests will be ignored!!"
-            NO_TESTS=true
-        else
-            WINE_VERSION=$("$WINE_CMD" --version 2>/dev/null)
-            case $WINE_VERSION in
-                wine-1.8.*|wine-1.9.*|wine-1.1?.*)
-                    ;;
-                *)
-                    echo "WARNING: Your Wine version ($WINE_VERSION) is too old, >= 1.8 required"
-                    echo "Unit tests will be ignored!!"
-                    NO_TESTS=true
-                    ;;
-            esac
-        fi
-    fi
-
-    # 32 bit tests are obsolete.
-    RUN_32BIT_TESTS=
-fi
-
-if [ "$MINGW" ]; then
-    # Ensure that libwinpthread-1.dll is in WINEPATH before
-    # trying to run our unit-test programs. Otherwise, those that are not
-    # statically linked will fail.
-    run_test32 () {
-        (export WINEPATH=$OUT_DIR/lib
-        run $TEST_SHELL "$@")
-    }
-
-    run_test64 () {
-        (export WINEPATH=$OUT_DIR/lib64
-        run $TEST_SHELL "$@")
-    }
-elif [ "$HOST_OS" = "Linux" ]; then
-    run_test32 () {
-        (
-            LD_LIBRARY_PATH=$OUT_DIR/lib/:$LD_LIBRARY_PATH
-            run $TEST_SHELL "$@"
-        )
-    }
-
-    run_test64 () {
-        (
-            LD_LIBRARY_PATH=$OUT_DIR/lib64/:$LD_LIBRARY_PATH
-            run $TEST_SHELL "$@"
-        )
-    }
-else
-    run_test32 () {
-        run $TEST_SHELL "$@"
-    }
-
-    run_test64 () {
-        run $TEST_SHELL "$@"
-    }
 fi
 
 # Return the minimum OS X version that a Darwin binary targets.
@@ -242,11 +164,17 @@ OSX_DEPLOYMENT_TARGET=10.8
 
 # List all executables to check later.
 EXECUTABLES="emulator emulator64-arm emulator64-x86 emulator64-mips"
-if [ "$HOST_OS" != "Darwin" ]; then
+if [ "$HOST_OS" == "Linux" ]; then
+  if [ -z "$MINGW" ]; then
     EXECUTABLES="$EXECUTABLES emulator-arm emulator-x86 emulator-mips"
+  fi
 fi
 
 if [ -z "$NO_TESTS" ]; then
+    echo "Running tests"
+    run make tests BUILD_OBJS_DIR="$OUT_DIR" ||
+        panic "Failed to run unit tests, run make tests to see why."
+
     FAILURES=""
 
     echo "Checking for 'emulator' launcher program."
@@ -276,37 +204,6 @@ if [ -z "$NO_TESTS" ]; then
         done
     fi
 
-    # NOTE: lib[64]OpenglRender_unittests are temporarily disabled because they
-    #       fail to run on our build servers, which use a different libstdc++
-    #       version :-/
-
-    if [ "$RUN_32BIT_TESTS" ]; then
-        echo "Running 32-bit unit test suite."
-        for UNIT_TEST in android_emu_unittests emugl_common_host_unittests \
-                         emulator_libui_unittests \
-                         emulator_crashreport_unittests \
-                         libOpenglRender_unittests \
-                         libGLcommon_unittests; do
-            for TEST in $OUT_DIR/$UNIT_TEST$EXE_SUFFIX; do
-                echo "   - ${TEST#$OUT_DIR/}"
-                run_test32 $TEST || FAILURES="$FAILURES ${TEST#$OUT_DIR/}"
-            done
-        done
-    fi
-
-    if [ "$RUN_64BIT_TESTS" ]; then
-        echo "Running 64-bit unit test suite."
-        for UNIT_TEST in android_emu64_unittests emugl64_common_host_unittests \
-                         emulator64_libui_unittests \
-                         emulator64_crashreport_unittests \
-                         lib64OpenglRender_unittests \
-                         lib64GLcommon_unittests; do
-             for TEST in $OUT_DIR/$UNIT_TEST$EXE_SUFFIX; do
-                 echo "   - ${TEST#$OUT_DIR/}"
-                 run_test64 $TEST || FAILURES="$FAILURES ${TEST#$OUT_DIR/}"
-             done
-        done
-    fi
 
     if [ "$RUN_EMUGEN_TESTS" ]; then
         EMUGEN_UNITTESTS=$OUT_DIR/build/intermediates64/emugen_unittests/emugen_unittests
