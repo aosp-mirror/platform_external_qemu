@@ -3234,9 +3234,8 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
 #endif // defined(CONFIG_ANDROID) && defined(_WIN32) && !defined(_WIN64)
 
 #ifdef _WIN32
-    uint64_t hax_limit = hax_mem_limit();
-    if (ram_size > hax_limit) {
-        ram_size = hax_limit;
+    if (hax_enabled()) {
+        ram_size = MIN(ram_size, hax_mem_limit());
     }
 #endif
 
