@@ -365,7 +365,9 @@ all-subdir-makefiles = $(call all-makefiles-under,$(call my-dir))
 # -----------------------------------------------------------------------------
 ifeq ($(V),1)
 hide = $(empty)
+suppress =
 else
 hide = @
+suppress =  > /dev/null 2>&1
 endif
 
