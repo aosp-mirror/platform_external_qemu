@@ -157,6 +157,10 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
                                    &size,
                                    id);
 
+    // We're going to be using hardcoded return values later on, so if this is
+    // anything other than 'no error', return that right away.
+    if (res != kAudioHardwareNoError) return res;
+
     if (!isInput) goto defaultExit;
 
     // Bluetooth audio inputs should not be activated since they cause an
