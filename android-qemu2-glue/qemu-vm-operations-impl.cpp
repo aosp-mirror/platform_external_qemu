@@ -427,12 +427,20 @@ static void set_snapshot_callbacks(void* opaque,
   #define hax_enabled() (0)
 #endif
 
+#ifdef CONFIG_WHPX
+  extern "C" int whpx_enabled(void);
+#else
+  #define whpx_enabled() (0)
+#endif
+
 extern "C" int hvf_enabled(void);
 
 static void get_vm_config(VmConfiguration* out) {
     out->numberOfCpuCores = smp_cpus * smp_cores * smp_threads;
     out->ramSizeBytes = int64_t(ram_size);
-    if (hax_enabled()) {
+    if (whpx_enabled()) {
+        out->hypervisorType = HV_WHPX;
+    } else if (hax_enabled()) {
         out->hypervisorType = HV_HAXM;
     } else if (hvf_enabled()) {
         out->hypervisorType = HV_HVF;

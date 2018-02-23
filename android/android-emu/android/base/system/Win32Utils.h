@@ -18,6 +18,7 @@
 // nothing's here for Posix
 #else  // _WIN32
 
+#include "android/base/Optional.h"
 #include "android/base/StringView.h"
 
 #include <memory>
@@ -55,6 +56,12 @@ public:
     // Code.  String returned depends on current language id.  See
     // FormatMessage.
     static std::string getErrorString(DWORD error_code);
+
+    // This function dynamically loads "Ntdll.dll" and calls RtlGetVersion in order
+    // to properly identify the OS version. GetVersionEx will always return 6.2
+    // for Windows 8 and later versions (unless the binary is manifested for a
+    // specific OS version).
+    static Optional<_OSVERSIONINFOEXW> getWindowsVersion();
 
     // A small handy struct for an automatic HANDLE management
     struct HandleCloser {

@@ -27,6 +27,9 @@
 FEATURE_CONTROL_ITEM(GLPipeChecksum)
 FEATURE_CONTROL_ITEM(ForceANGLE)
 FEATURE_CONTROL_ITEM(ForceSwiftshader)
+// TODO(lpetrut): ensure that WHPX can be requested as an advanced feature.
+// We may rename the feature name from HYPERV to WHPX as that's the accelerator
+// name.
 FEATURE_CONTROL_ITEM(HYPERV)
 FEATURE_CONTROL_ITEM(HVF)
 FEATURE_CONTROL_ITEM(KVM)
