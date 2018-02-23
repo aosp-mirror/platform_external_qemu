@@ -35,12 +35,14 @@ namespace android {
 //  CPU_ACCELERATOR_HVF means Apple's Hypervisor.framework, which
 //  requres an Intel Mac running OS X 10.10+.
 //
+//  CPU_ACCELERATOR_WHPX means Windows Hypervisor Platform.
+//
 enum CpuAccelerator {
     CPU_ACCELERATOR_NONE = 0,
     CPU_ACCELERATOR_KVM,
     CPU_ACCELERATOR_HAX,
     CPU_ACCELERATOR_HVF,
-    CPU_ACCELERATOR_HYPERV,
+    CPU_ACCELERATOR_WHPX,
     CPU_ACCELERATOR_MAX,
 };
 
