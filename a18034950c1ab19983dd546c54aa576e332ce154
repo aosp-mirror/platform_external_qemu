@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "02c0d08f_6a43fbfd",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-24T15:02:22Z",
+      "side": 1,
+      "message": "Done. This information is only relevant to the capture engine and the codec. Putting the information in the packets seems useless.",
+      "parentUuid": "dd6010e3_f73b0f33",
+      "range": {
+        "startLine": 39,
+        "startChar": 33,
+        "endLine": 39,
+        "endChar": 40
+      },
+      "revId": "a18034950c1ab19983dd546c54aa576e332ce154",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5904d1ef_ecd3d545",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2017-12-29T19:29:39Z",
       "side": 1,
       "message": "this ctor leaves all fields uninitialized. is that ok?",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 20
+      },
+      "revId": "a18034950c1ab19983dd546c54aa576e332ce154",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec1f92f1_85882ec5",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-24T15:02:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5904d1ef_ecd3d545",
       "range": {
         "startLine": 42,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9002bb10_b5b68813",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-24T15:02:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd86f539_1f6b92f6",
+      "range": {
+        "startLine": 48,
+        "startChar": 11,
+        "endLine": 48,
+        "endChar": 68
+      },
+      "revId": "a18034950c1ab19983dd546c54aa576e332ce154",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6527a158_5729ef7d",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 5
@@ -82,6 +154,30 @@
       "writtenOn": "2017-12-29T19:29:39Z",
       "side": 1,
       "message": "should it be the other way: the engine creates and launches audio capturer, and passes itself as a parameter to create()\nAnother option would be to pass the engine into a start() method of the audio capturer. Generally it\u0027s better to not use singleton direct access unless there\u0027s no other simple way",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 99,
+        "endChar": 44
+      },
+      "revId": "a18034950c1ab19983dd546c54aa576e332ce154",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "26a26fcd_ceee45e1",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-24T15:02:22Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "6527a158_5729ef7d",
       "range": {
         "startLine": 99,
         "startChar": 8,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "57681fbb_ef000fa8",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-24T15:02:22Z",
+      "side": 1,
+      "message": "Done. No longer using messagechannel.",
+      "parentUuid": "c458900d_c2aca67f",
+      "range": {
+        "startLine": 132,
+        "startChar": 8,
+        "endLine": 134,
+        "endChar": 43
+      },
+      "revId": "a18034950c1ab19983dd546c54aa576e332ce154",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c1d490a9_3fd5c10c",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 5
@@ -128,6 +248,30 @@
       "writtenOn": "2017-12-29T19:29:39Z",
       "side": 1,
       "message": "if we actually encounter this warning there will be quite a few of them (I expect a full stream of warnings). IMO it\u0027s better to only print it once on the first dropped packet per capturing session",
+      "range": {
+        "startLine": 151,
+        "startChar": 12,
+        "endLine": 151,
+        "endChar": 63
+      },
+      "revId": "a18034950c1ab19983dd546c54aa576e332ce154",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c7d292a0_057286f6",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-24T15:02:22Z",
+      "side": 1,
+      "message": "Done. No longer using messagechannel.",
+      "parentUuid": "c1d490a9_3fd5c10c",
       "range": {
         "startLine": 151,
         "startChar": 12,
