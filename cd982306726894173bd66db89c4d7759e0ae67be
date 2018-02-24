@@ -1,0 +1,326 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d3bf7bbb_71b07e9a",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "nit: not used?",
+      "range": {
+        "startLine": 31,
+        "startChar": 21,
+        "endLine": 31,
+        "endChar": 35
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2adcf188_47179167",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "nit: final is enough",
+      "range": {
+        "startLine": 110,
+        "startChar": 20,
+        "endLine": 110,
+        "endChar": 34
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7830de0e_b201e94d",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "I believe create() could check for this much earlier",
+      "range": {
+        "startLine": 111,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 9
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e01276e_76015a04",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "are there any other types there?",
+      "range": {
+        "startLine": 129,
+        "startChar": 25,
+        "endLine": 130,
+        "endChar": 54
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aec2222_358ba3f7",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "please explicitly mention \"finish\" here",
+      "range": {
+        "startLine": 140,
+        "startChar": 14,
+        "endLine": 140,
+        "endChar": 24
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9df77d1_1ba55d48",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "static constexpr ... ?",
+      "range": {
+        "startLine": 170,
+        "startChar": 4,
+        "endLine": 170,
+        "endChar": 29
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b3e184a8_9f8b1250",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "please group the members by their purpose",
+      "range": {
+        "startLine": 209,
+        "startChar": 0,
+        "endLine": 213,
+        "endChar": 22
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0f8fc5f_d7fd9d63",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "is there a specific reason to use a pointer instead of a value here?",
+      "range": {
+        "startLine": 214,
+        "startChar": 4,
+        "endLine": 214,
+        "endChar": 72
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f5586fc7_6cffe784",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "I don\u0027t see this lock being used anywhere but to pass it into |mBufferQueue|. Why is it not inside of it?",
+      "range": {
+        "startLine": 215,
+        "startChar": 24,
+        "endLine": 215,
+        "endChar": 29
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d7bdfda_708c13d8",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "please use std::function\u003c\u003e for these cases - one can capture anything inside with no need to cast things back and forth, with signature only containing the actually interesting data being passed",
+      "range": {
+        "startLine": 45,
+        "startChar": 38,
+        "endLine": 46,
+        "endChar": 51
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f593e225_844435b5",
+        "filename": "android/android-emu/android/audio/AudioPacket.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "not sure if None should even exist - I believe if you ever encounter a packet with type None it\u0027s a bug. Removing \u0027none\u0027 would eliminate that class of bugs completely",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 45
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "688f245f_0f1d39fc",
+        "filename": "android/android-emu/android/audio/AudioPacket.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "this can be replaced with a single std::vector\u003c\u003e",
+      "range": {
+        "startLine": 30,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 34
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "925c6718_2d628d19",
+        "filename": "android/android-emu/android/audio/BufferQueue.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "1. Please move this out into a separate CL, and add a set of unit tests\n2. The class interface allows for a very simple misuse (overwriting buffers in use, deadlocking via external lock, using bad conditional function for acquireBuffer())\nHow different is this from MessageChannel or libOpenglRender\u0027s BufferQueue?\nCan we instead make one of those more general?",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 8
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6fe023b_7f068d15",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-24T22:08:24Z",
+      "side": 1,
+      "message": "why?",
+      "range": {
+        "startLine": 118,
+        "startChar": 31,
+        "endLine": 119,
+        "endChar": 43
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
