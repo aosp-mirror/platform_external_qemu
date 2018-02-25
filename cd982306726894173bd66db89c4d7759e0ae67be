@@ -301,6 +301,30 @@
     },
     {
       "key": {
+        "uuid": "9f65b653_de6a8c8d",
+        "filename": "android/android-emu/android/audio/BufferQueue.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-25T22:02:23Z",
+      "side": 1,
+      "message": "BufferQueue in opengl renderer is very similar to this BufferQueue actually. The only difference between the two (in the context of how it would be used for the audio capture thread) is one, it looks like the renderer BufferQueue would need two BufferQueues, one for the free buffers and one for buffers ready to be read, whereas this BufferQueue would use only one. The second thing is how the producer gets available packets to write into. Since we absolutely cannot block when we get an audio sample callback (on qemu main thread), if we use the renderer\u0027s version, we would discard the audio frame if there\u0027s no available packets. With this implementation, there\u0027s always guaranteed to be an available audio frame, assuming only one producer and consumer with two or more buffers.\n\nThose two differences should not affect the recording in any significant way, since discarding older or newer frames does not matter, and having one more BufferQueue will have a negligible impact on memory usage.\n\nSo I can probably just reuse the opengl BufferQueue class, but I will need to abstract out the snapshotting stuff first. I\u0027ll do it in a separate CL.",
+      "parentUuid": "925c6718_2d628d19",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 8
+      },
+      "revId": "cd982306726894173bd66db89c4d7759e0ae67be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6fe023b_7f068d15",
         "filename": "android/android-emu/android/ffmpeg-muxer.h",
         "patchSetId": 14
