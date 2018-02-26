@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
+#include "android/base/files/PathUtils.h"
 #include "android/utils/file_io.h"
 
 #ifdef _WIN32
@@ -59,7 +60,9 @@ public:
         }
         temp_dir += "XXXXXX";
         if (mkdtemp(&temp_dir[0])) {
-            mPath = temp_dir.c_str();
+          // Fix any Win32/Linux naming issues
+            auto parts = PathUtils::decompose(temp_dir);
+            mPath = PathUtils::recompose(parts);
         }
     }
 
