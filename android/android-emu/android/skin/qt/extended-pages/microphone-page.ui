@@ -41,6 +41,9 @@
      <height>24</height>
     </rect>
    </property>
+   <property name="accessibleDescription">
+    <string>Virtual headset plug inserted</string>
+   </property>
    <property name="iconSize">
     <size>
      <width>24</width>
@@ -68,6 +71,9 @@
      <width>211</width>
      <height>24</height>
     </rect>
+   </property>
+   <property name="accessibleDescription">
+    <string>Virtual headset has microphone</string>
    </property>
    <property name="iconSize">
     <size>

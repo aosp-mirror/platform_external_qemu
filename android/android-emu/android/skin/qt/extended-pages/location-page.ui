@@ -131,6 +131,9 @@
      <height>36</height>
     </rect>
    </property>
+   <property name="accessibleDescription">
+    <string>Play</string>
+   </property>
    <property name="text">
     <string/>
    </property>
@@ -409,6 +412,9 @@
      <width>280</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="accessibleDescription">
+    <string>Altitude in meters</string>
    </property>
    <property name="text">
     <string>0</string>

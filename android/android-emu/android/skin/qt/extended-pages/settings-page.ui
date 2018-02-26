@@ -41,6 +41,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="accessibleDescription">
+      <string>Use detected ADB location</string>
+     </property>
      <property name="iconSize">
       <size>
        <width>24</width>
@@ -89,6 +92,9 @@
        <width>32</width>
        <height>32</height>
       </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Select screenshot save location</string>
      </property>
      <property name="text">
       <string notr="true"/>
@@ -240,6 +246,9 @@
        <height>24</height>
       </rect>
      </property>
+     <property name="accessibleDescription">
+      <string>Show window frame around device</string>
+     </property>
      <property name="iconSize">
       <size>
        <width>24</width>
@@ -305,6 +314,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="accessibleDescription">
+      <string>ADB location</string>
+     </property>
      <property name="readOnly">
       <bool>false</bool>
      </property>
@@ -365,6 +377,9 @@
        <width>32</width>
        <height>32</height>
       </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Select ADB location</string>
      </property>
      <property name="text">
       <string notr="true"/>
@@ -431,6 +446,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="accessibleDescription">
+      <string>Screenshot save location</string>
+     </property>
      <property name="readOnly">
       <bool>false</bool>
      </property>
@@ -443,6 +461,9 @@
        <width>211</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Emulator always on top</string>
      </property>
      <property name="iconSize">
       <size>
@@ -492,6 +513,9 @@
        <width>211</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Enable clipboard sharing</string>
      </property>
      <property name="iconSize">
       <size>
@@ -565,6 +589,9 @@
        <width>211</width>
        <height>24</height>
       </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Disable mouse wheel</string>
      </property>
      <property name="iconSize">
       <size>
@@ -886,6 +913,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="accessibleDescription">
+      <string>Host name</string>
+     </property>
      <property name="readOnly">
       <bool>false</bool>
      </property>
@@ -910,6 +940,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="accessibleDescription">
+      <string>Password</string>
      </property>
      <property name="echoMode">
       <enum>QLineEdit::Password</enum>
@@ -938,6 +971,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="accessibleDescription">
+      <string>Login username</string>
      </property>
      <property name="readOnly">
       <bool>false</bool>
@@ -1002,6 +1038,9 @@
        <width>120</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Port number</string>
      </property>
      <property name="maximum">
       <number>65535</number>
@@ -1271,8 +1310,10 @@
   <tabstop>set_disableMouseWheel</tabstop>
   <tabstop>set_frameAlways</tabstop>
   <tabstop>set_saveSnapshotOnExit</tabstop>
-  <tabstop>set_saveSnapNowButton</tabstop>
   <tabstop>set_onTop</tabstop>
+  <tabstop>set_saveSnapNowButton</tabstop>
+  <tabstop>set_loadSnapNowButton</tabstop>
+  <tabstop>set_resetNotifications</tabstop>
   <tabstop>set_useStudio</tabstop>
   <tabstop>set_noProxy</tabstop>
   <tabstop>set_manualConfig</tabstop>
