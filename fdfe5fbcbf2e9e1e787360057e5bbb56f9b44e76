@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "407209f6_df99c0c6",
+        "filename": "android/android-emu/android/emulation/control/vm_operations.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T16:52:59Z",
+      "side": 1,
+      "message": "the name can be interpreted (by a non-native speaker) as either \u0027is operation canceled\u0027 or \u0027ask to cancel the operation\u0027. Could you please use a different word here, e.g. \"cancel\" or \"isCanceled\" ?",
+      "range": {
+        "startLine": 29,
+        "startChar": 11,
+        "endLine": 29,
+        "endChar": 24
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b97fe0a_0727ad2a",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T16:52:59Z",
+      "side": 1,
+      "message": "afaik Qt allows creating links with html tags in the label text - https://stackoverflow.com/questions/8427446/making-qlabel-behave-like-a-hyperlink\nyou could allow using html in the regular text and supply a map of \u003clink text\u003e -\u003e \u003chandler\u003e in the constructor",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 64
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8221a8d8_56b227ea",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 586,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T16:52:59Z",
+      "side": 1,
+      "message": "1. tr()\n2. There\u0027s already a \"save\" in the overlay window. Should this be just \"Cancel\"?",
+      "range": {
+        "startLine": 586,
+        "startChar": 48,
+        "endLine": 586,
+        "endChar": 61
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "597ef2e0_da8056af",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T16:52:59Z",
+      "side": 1,
+      "message": "nit: could you please reformat the CL?",
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db056b47_c1fd15cb",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T16:52:59Z",
+      "side": 1,
+      "message": "base::StringView(), please",
+      "range": {
+        "startLine": 611,
+        "startChar": 38,
+        "endLine": 611,
+        "endChar": 55
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
