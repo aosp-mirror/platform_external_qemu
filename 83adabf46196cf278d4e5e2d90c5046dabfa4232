@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0296ed54_0baca934",
+        "filename": "android/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 1370,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:42:12Z",
+      "side": 1,
+      "message": "nit: should we use \"run-tests\" or \"runtests\" here to indicate it won\u0027t build anything?",
+      "range": {
+        "startLine": 1370,
+        "startChar": 84,
+        "endLine": 1370,
+        "endChar": 89
+      },
+      "revId": "83adabf46196cf278d4e5e2d90c5046dabfa4232",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "184bdb0e_27f75f0c",
+        "filename": "android/rebuild.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:42:12Z",
+      "side": 1,
+      "message": "do we still build these for anything?",
+      "range": {
+        "startLine": 169,
+        "startChar": 30,
+        "endLine": 169,
+        "endChar": 69
+      },
+      "revId": "83adabf46196cf278d4e5e2d90c5046dabfa4232",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
