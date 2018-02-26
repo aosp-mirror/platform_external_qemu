@@ -1,0 +1,464 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3a1372b_45162cbf",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "you might want to add a new verbose flag into android/android-emu/android/utils/debug.h for the whole capturing machinery - this way you\u0027d be able to turn it on and off without recompiling, and even at runtime via the console",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 6
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87dfba14_f8bfb40e",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "it would be better to have this in a unique_ptr\u003c\u003e with a custom deleter set to the needed function",
+      "range": {
+        "startLine": 93,
+        "startChar": 4,
+        "endLine": 93,
+        "endChar": 21
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd6d38ab_a2107cc7",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "could you please use std::vector\u003c\u003e for this kind of buffers?",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 141,
+        "endChar": 25
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4972a845_f03dbbe5",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "nit: please explain what is this path to. |mEncodedOutputPath| ?",
+      "range": {
+        "startLine": 234,
+        "startChar": 16,
+        "endLine": 234,
+        "endChar": 21
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69a63189_9fdf50bd",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "nit: PathUtils::extension(tmpfile) \u003d\u003d \".webm\"",
+      "range": {
+        "startLine": 280,
+        "startChar": 8,
+        "endLine": 280,
+        "endChar": 48
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "387b4451_b2c7a929",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "you can use android::base::ScopedCustomPtr for |mOutputContext|, that way you won\u0027t need to free it explictily",
+      "range": {
+        "startLine": 308,
+        "startChar": 11,
+        "endLine": 308,
+        "endChar": 50
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a2305f5_33915b5b",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "this could even be an android::base::SmallVector\u003cuint8_t, 1024\u003e\nthis way any sizes under a kilobyte won\u0027t need an allocation at all",
+      "range": {
+        "startLine": 384,
+        "startChar": 9,
+        "endLine": 385,
+        "endChar": 43
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a1226b7_3f384b4e",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "this loop looks a little bit misleading - because of the |mHasAudioTrack| in the condition it\u0027s easy to think it will be reset to |false|; but later you keep checking for the same condition.\nIt is more clear to write an \"if\" + infinite for later, just for the sake of being explicit:\n\nif (mHasAudioTrack) {\n   for (;;) {\n      //flushing code\n   }\n}\n\nsame think applies to the other loops",
+      "range": {
+        "startLine": 392,
+        "startChar": 11,
+        "endLine": 392,
+        "endChar": 25
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "185947b1_0055881e",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "break out of the loop?",
+      "range": {
+        "startLine": 514,
+        "startChar": 15,
+        "endLine": 514,
+        "endChar": 44
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1dc4ee0_1cbab865",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 523,
+        "startChar": 19,
+        "endLine": 523,
+        "endChar": 33
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "108c1122_d7e62ec4",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "nit: please remove the commented code",
+      "range": {
+        "startLine": 530,
+        "startChar": 4,
+        "endLine": 530,
+        "endChar": 41
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6052cc67_e2138311",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "why do we set this to some constant? There\u0027s a System::getCpuCoreCount() call, and you could figure something from that and some fixed min and max instead",
+      "range": {
+        "startLine": 621,
+        "startChar": 4,
+        "endLine": 621,
+        "endChar": 24
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2158006_abcd5f5a",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "nit: sizeof(int16_t) is 2 by definition, IMO it\u0027s more clear to just write \"2\" for this - but that\u0027s close to a matter of taste :)",
+      "range": {
+        "startLine": 688,
+        "startChar": 19,
+        "endLine": 688,
+        "endChar": 35
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a80a6260_afc59bad",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 987,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "what\u0027s this 32?",
+      "range": {
+        "startLine": 987,
+        "startChar": 39,
+        "endLine": 987,
+        "endChar": 41
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "663037d7_f21ee768",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "this function is way too long and needs to be split into smaller chunks",
+      "range": {
+        "startLine": 1174,
+        "startChar": 25,
+        "endLine": 1174,
+        "endChar": 45
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d912b670_e19d0be5",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1318,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "nit: {0} has already done this",
+      "range": {
+        "startLine": 1317,
+        "startChar": 4,
+        "endLine": 1318,
+        "endChar": 20
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f390c74_9352c54a",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1401,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "please use smart pointers instead. makeCustomScopedPtr() could help",
+      "range": {
+        "startLine": 1393,
+        "startChar": 7,
+        "endLine": 1401,
+        "endChar": 38
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ad28608_a7a90161",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "curious if we still needs these, or everything can be done with C++-only interface",
+      "range": {
+        "startLine": 1531,
+        "startChar": 0,
+        "endLine": 1531,
+        "endChar": 69
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb34328e_703840b1",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1573,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "*r ?",
+      "range": {
+        "startLine": 1573,
+        "startChar": 8,
+        "endLine": 1573,
+        "endChar": 9
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa1a2369_ae2a9eca",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-26T18:27:32Z",
+      "side": 1,
+      "message": "why it is nonconst void* here, but const uint8_t* for the video frame?\nIt also looks similar enough to me to the level of defining of a \"struct Frame { const uint8_t* data, int size, uint64_t timestampUs }\"",
+      "range": {
+        "startLine": 106,
+        "startChar": 34,
+        "endLine": 106,
+        "endChar": 46
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
