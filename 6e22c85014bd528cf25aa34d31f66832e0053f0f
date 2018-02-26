@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "750ae7b8_6861fbdc",
+        "filename": "android/rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-02-26T10:52:11Z",
+      "side": 1,
+      "message": "I suppose removing # was unintentional?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 8
+      },
+      "revId": "6e22c85014bd528cf25aa34d31f66832e0053f0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
