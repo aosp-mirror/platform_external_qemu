@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9afeaa0c_10aca583",
+        "filename": "android/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 1370,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-26T19:30:19Z",
+      "side": 1,
+      "message": "Renaming this to \"check\" which is the convention used by qemu (and most other builds systems). To make this more clear.",
+      "parentUuid": "0296ed54_0baca934",
+      "range": {
+        "startLine": 1370,
+        "startChar": 84,
+        "endLine": 1370,
+        "endChar": 89
+      },
+      "revId": "83adabf46196cf278d4e5e2d90c5046dabfa4232",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "184bdb0e_27f75f0c",
         "filename": "android/rebuild.sh",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2018-02-26T18:42:12Z",
       "side": 1,
       "message": "do we still build these for anything?",
+      "range": {
+        "startLine": 169,
+        "startChar": 30,
+        "endLine": 169,
+        "endChar": 69
+      },
+      "revId": "83adabf46196cf278d4e5e2d90c5046dabfa4232",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e11de5b_bf342530",
+        "filename": "android/rebuild.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-02-26T19:30:19Z",
+      "side": 1,
+      "message": "No, let me remove these as well.",
+      "parentUuid": "184bdb0e_27f75f0c",
       "range": {
         "startLine": 169,
         "startChar": 30,
