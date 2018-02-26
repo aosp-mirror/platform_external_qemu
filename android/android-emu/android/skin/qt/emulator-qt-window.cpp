@@ -39,6 +39,7 @@
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/screen-mask.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
 #include "android/snapshot/Snapshotter.h"
@@ -560,6 +561,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             (*mAdbInterface)->setCustomAdbPath(adbPath.toStdString());
         }
     }
+
+    ScreenMask::loadMask(mAdbInterface->get());
 
     using android::snapshot::Snapshotter;
     Snapshotter::get().addOperationCallback(

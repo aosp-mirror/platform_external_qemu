@@ -39,9 +39,9 @@ void PostWorker::post(ColorBuffer* cb) {
     float dy = py * fy;
 
     //
-    // render the color buffer to the window
+    // render the color buffer to the window and apply the overlay
     //
-    cb->post(tex, zRot, dx, dy);
+    cb->postWithOverlay(tex, zRot, dx, dy);
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
