@@ -28,7 +28,7 @@
 namespace emugl {
 
 using Buffer = RenderChannel::Buffer;
-using IoResult = RenderChannel::IoResult;
+using IoResult = android::base::BufferQueueResult;
 using State = RenderChannel::State;
 using AutoLock = android::base::AutoLock;
 
