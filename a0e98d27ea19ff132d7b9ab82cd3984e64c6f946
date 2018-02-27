@@ -486,6 +486,30 @@
     },
     {
       "key": {
+        "uuid": "ed4f0825_c7e288dd",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-27T19:26:33Z",
+      "side": 1,
+      "message": "This was initially a part of the create_recorder(), but I split it out so we could reuse the object. It seems though doing so made it much more confusing so I will put it back in the create() call.",
+      "parentUuid": "68d0b5db_d67cf888",
+      "range": {
+        "startLine": 60,
+        "startChar": 17,
+        "endLine": 60,
+        "endChar": 34
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a7c9bab7_77690978",
         "filename": "android/android-emu/android/FfmpegRecorder.h",
         "patchSetId": 5
@@ -497,6 +521,30 @@
       "writtenOn": "2018-02-27T18:44:46Z",
       "side": 1,
       "message": "Is this in bits per second?",
+      "range": {
+        "startLine": 71,
+        "startChar": 9,
+        "endLine": 71,
+        "endChar": 16
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b4b477b_1fb1e826",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-02-27T19:26:33Z",
+      "side": 1,
+      "message": "Yes. I\u0027ll update this.",
+      "parentUuid": "a7c9bab7_77690978",
       "range": {
         "startLine": 71,
         "startChar": 9,
