@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c28b8640_b05962ba",
+        "filename": "android/android-emu/android/emulation/control/vm_operations.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-27T17:17:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "407209f6_df99c0c6",
+      "range": {
+        "startLine": 29,
+        "startChar": 11,
+        "endLine": 29,
+        "endChar": 24
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9af0f608_b172d0ce",
         "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "a7d97355_43737b82",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-27T17:17:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9af0f608_b172d0ce",
+      "range": {
+        "startLine": 128,
+        "startChar": 32,
+        "endLine": 128,
+        "endChar": 42
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b97fe0a_0727ad2a",
         "filename": "android/android-emu/android/skin/qt/ModalOverlay.h",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2018-02-26T16:52:59Z",
       "side": 1,
       "message": "afaik Qt allows creating links with html tags in the label text - https://stackoverflow.com/questions/8427446/making-qlabel-behave-like-a-hyperlink\nyou could allow using html in the regular text and supply a map of \u003clink text\u003e -\u003e \u003chandler\u003e in the constructor",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 64
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2721bc34_5b49fe17",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-27T17:17:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b97fe0a_0727ad2a",
       "range": {
         "startLine": 42,
         "startChar": 0,
@@ -118,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "e3b9ab9d_249d7230",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 586,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-27T17:17:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "945180fa_58d2bd55",
+      "range": {
+        "startLine": 586,
+        "startChar": 48,
+        "endLine": 586,
+        "endChar": 61
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "597ef2e0_da8056af",
         "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
         "patchSetId": 3
@@ -135,6 +231,24 @@
     },
     {
       "key": {
+        "uuid": "06333803_a68877b1",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-27T17:17:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "597ef2e0_da8056af",
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "db056b47_c1fd15cb",
         "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
         "patchSetId": 3
@@ -146,6 +260,30 @@
       "writtenOn": "2018-02-26T16:52:59Z",
       "side": 1,
       "message": "base::StringView(), please",
+      "range": {
+        "startLine": 611,
+        "startChar": 38,
+        "endLine": 611,
+        "endChar": 55
+      },
+      "revId": "fdfe5fbcbf2e9e1e787360057e5bbb56f9b44e76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11afbdd2_7b15b084",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-27T17:17:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db056b47_c1fd15cb",
       "range": {
         "startLine": 611,
         "startChar": 38,
