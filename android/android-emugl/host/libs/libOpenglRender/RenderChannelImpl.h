@@ -13,13 +13,15 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/containers/BufferQueue.h"
 #include "OpenglRender/RenderChannel.h"
-#include "BufferQueue.h"
 #include "RendererImpl.h"
 
 namespace emugl {
 
 class RenderThread;
+
+using android::base::BufferQueue;
 
 // Implementation of the RenderChannel interface that connects a guest
 // client thread (really an AndroidPipe implementation) to a host
@@ -104,8 +106,8 @@ private:
     mutable android::base::Lock mLock;
     State mState = State::Empty;
     State mWantedEvents = State::Empty;
-    BufferQueue mFromGuest;
-    BufferQueue mToGuest;
+    BufferQueue<RenderChannel::Buffer> mFromGuest;
+    BufferQueue<RenderChannel::Buffer> mToGuest;
 };
 
 }  // namespace emugl
