@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b562ec7_72e969f7",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-27T18:02:34Z",
+      "side": 1,
+      "message": "nit: remove the space",
+      "range": {
+        "startLine": 181,
+        "startChar": 61,
+        "endLine": 181,
+        "endChar": 62
+      },
+      "revId": "386fce9b72b87a3e06ff1b02f81502c70bcf4efc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8f5b186_5c51531c",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-27T18:02:34Z",
+      "side": 1,
+      "message": "there\u0027s space for just two lines, about five words each, on the message box. I don\u0027t think any single user will ever read this",
+      "range": {
+        "startLine": 179,
+        "startChar": 35,
+        "endLine": 181,
+        "endChar": 61
+      },
+      "revId": "386fce9b72b87a3e06ff1b02f81502c70bcf4efc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
