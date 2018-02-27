@@ -71,6 +71,9 @@ local-shared-library-path = $(call intermediates-dir-for,$(BUILD_TARGET_BITS),$(
 # Location of final (potentially stripped) executables.
 local-executable-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-build-var,EXEEXT)
 
+# Location of the test results
+local-test-result-path = $(BUILD_OBJS_DIR)/tests
+
 # Location of final (potentially stripped) shared libraries.
 local-shared-library-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR),lib$(BUILD_TARGET_SUFFIX))/$(1)$(call local-build-var,DLLEXT)
 
@@ -302,6 +305,20 @@ endif  # BUILD_TARGET_OS != darwin
 else  # BUILD_STRIP_BINARIES != true
 	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
 endif # BUILD_STRIP_BINARIES != true
+endef
+
+define run-test
+_TST := $(1)
+_DST := $(call local-test-result-path, $(1))/$1.success
+_BUILD_TESTS += $$(_DST)
+$$(_DST): PRIVATE_TST := $$(_TST)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): $$(_TST)
+	@echo "Running $$(PRIVATE_TST)"
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
+	$(hide) $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
+	@touch $$(PRIVATE_DST)
 endef
 
 # Installs a prebuilt library
