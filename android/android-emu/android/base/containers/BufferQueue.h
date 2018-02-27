@@ -13,12 +13,11 @@
 // limitations under the License.
 #pragma once
 
-#include "OpenglRender/RenderChannel.h"
 #include "android/base/Compiler.h"
 #include "android/base/files/Stream.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
 
 #include <iterator>
 #include <vector>
@@ -27,25 +26,37 @@
 #include <assert.h>
 #include <stddef.h>
 
-namespace emugl {
+namespace android {
+namespace base {
 
-// BufferQueue models a FIFO queue of RenderChannel::Buffer instances
+// Values corresponding to the result of BufferQueue operations.
+// |Ok| means everything went well.
+// |TryAgain| means the operation could not be performed and should be
+// tried later.
+// |Error| means an error happened (i.e. the BufferQueue is closed).
+enum class BufferQueueResult {
+    Ok = 0,
+    TryAgain = 1,
+    Error = 2,
+};
+
+// BufferQueue models a FIFO queue of <T> instances
 // that can be used between two different threads. Note that it depends,
 // for synchronization, on an external lock (passed as a reference in
 // the BufferQueue constructor).
 //
 // This allows one to use multiple BufferQueue instances whose content
 // are protected by a single lock.
+template <class T>
 class BufferQueue {
     using ConditionVariable = android::base::ConditionVariable;
     using Lock = android::base::Lock;
     using AutoLock = android::base::AutoLock;
 
 public:
-    using IoResult = RenderChannel::IoResult;
-    using Buffer = RenderChannel::Buffer;
+    using value_type = T;
 
-    // Constructor. |capacity| is the maximum number of Buffer instances in
+    // Constructor. |capacity| is the maximum number of T instances in
     // the queue, and |lock| is a reference to an external lock provided by
     // the caller.
     BufferQueue(int capacity, android::base::Lock& lock)
@@ -72,21 +83,21 @@ public:
         }
     }
 
-    // Try to send a buffer to the queue. On success, return IoResult::Ok
+    // Try to send a buffer to the queue. On success, return BufferQueueResult::Ok
     // and moves |buffer| to the queue. On failure, return
-    // IoResult::TryAgain if the queue was full, or IoResult::Error
+    // BufferQueueResult::TryAgain if the queue was full, or BufferQueueResult::Error
     // if it was closed.
     // Note: in snapshot mode it never returns TryAgain, but grows the max
     //   queue size instead.
-    IoResult tryPushLocked(Buffer&& buffer) {
+    BufferQueueResult tryPushLocked(T&& buffer) {
         if (mClosed) {
-            return IoResult::Error;
+            return BufferQueueResult::Error;
         }
         if (mCount >= (int)mBuffers.size()) {
             if (mSnapshotMode) {
                 grow();
             } else {
-                return IoResult::TryAgain;
+                return BufferQueueResult::TryAgain;
             }
         }
         int pos = mPos + mCount;
@@ -97,16 +108,16 @@ public:
         if (mCount++ == 0) {
             mCanPop.signal();
         }
-        return IoResult::Ok;
+        return BufferQueueResult::Ok;
     }
 
     // Push a buffer to the queue. This is a blocking call. On success,
-    // move |buffer| into the queue and return IoResult::Ok. On failure,
-    // return IoResult::Error meaning the queue was closed.
-    IoResult pushLocked(Buffer&& buffer) {
+    // move |buffer| into the queue and return BufferQueueResult::Ok. On failure,
+    // return BufferQueueResult::Error meaning the queue was closed.
+    BufferQueueResult pushLocked(T&& buffer) {
         while (mCount == (int)mBuffers.size() && !mSnapshotMode) {
             if (mClosed) {
-                return IoResult::Error;
+                return BufferQueueResult::Error;
             }
             mCanPush.wait(&mLock);
         }
@@ -114,13 +125,13 @@ public:
     }
 
     // Try to read a buffer from the queue. On success, moves item into
-    // |*buffer| and return IoResult::Ok. On failure, return IoResult::Error
+    // |*buffer| and return BufferQueueResult::Ok. On failure, return BufferQueueResult::Error
     // if the queue is empty and closed or in snapshot mode, and
-    // IoResult::TryAgain if it is empty but not closed.
-    IoResult tryPopLocked(Buffer* buffer) {
+    // BufferQueueResult::TryAgain if it is empty but not closed.
+    BufferQueueResult tryPopLocked(T* buffer) {
         if (mCount == 0) {
-            return (mClosed || mSnapshotMode) ? IoResult::Error
-                                              : IoResult::TryAgain;
+            return (mClosed || mSnapshotMode) ? BufferQueueResult::Error
+                                              : BufferQueueResult::TryAgain;
         }
         *buffer = std::move(mBuffers[mPos]);
         int pos = mPos + 1;
@@ -131,18 +142,18 @@ public:
         if (mCount-- == (int)mBuffers.size()) {
             mCanPush.signal();
         }
-        return IoResult::Ok;
+        return BufferQueueResult::Ok;
     }
 
     // Pop a buffer from the queue. This is a blocking call. On success,
-    // move item into |*buffer| and return IoResult::Ok. On failure,
-    // return IoResult::Error to indicate the queue was closed or is in
+    // move item into |*buffer| and return BufferQueueResult::Ok. On failure,
+    // return BufferQueueResult::Error to indicate the queue was closed or is in
     // snapshot mode.
-    IoResult popLocked(Buffer* buffer) {
+    BufferQueueResult popLocked(T* buffer) {
         while (mCount == 0 && !mSnapshotMode) {
             if (mClosed) {
                 // Closed queue is empty.
-                return IoResult::Error;
+                return BufferQueueResult::Error;
             }
             mCanPop.wait(&mLock);
         }
@@ -150,9 +161,9 @@ public:
     }
 
     // Close the queue, it is no longer possible to push new items
-    // to it (i.e. push() will always return IoResult::Error), or to
+    // to it (i.e. push() will always return BufferQueueResult::Error), or to
     // read from an empty queue (i.e. pop() will always return
-    // IoResult::Error once the queue becomes empty).
+    // BufferQueueResult::Error once the queue becomes empty).
     void closeLocked() {
         mClosed = true;
         wakeAllWaiters();
@@ -190,7 +201,7 @@ public:
 private:
     void grow() {
         assert(mCount == (int)mBuffers.size());
-        std::vector<Buffer> newBuffers;
+        std::vector<T> newBuffers;
         newBuffers.reserve(mBuffers.size() * 2);
         newBuffers.insert(newBuffers.end(),
                           std::make_move_iterator(mBuffers.begin() + mPos),
@@ -220,14 +231,14 @@ private:
     int mCount = 0;
     bool mClosed = false;
     bool mSnapshotMode = false;
-    std::vector<Buffer> mBuffers;
+    std::vector<T> mBuffers;
 
     Lock& mLock;
     ConditionVariable mCanPush;
     ConditionVariable mCanPop;
 
-    // This will force the same for RenderChannelImpl
     DISALLOW_COPY_ASSIGN_AND_MOVE(BufferQueue);
 };
 
-}  // namespace emugl
+}  // namespace base
+}  // namespace android

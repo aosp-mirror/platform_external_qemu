@@ -13,8 +13,9 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/containers/SmallVector.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/containers/BufferQueue.h"
+#include "android/base/containers/SmallVector.h"
 #include "android/base/files/Stream.h"
 
 #include <functional>
@@ -59,16 +60,7 @@ public:
         Stopped = 1 << 2,
     };
 
-    // Values corresponding to the result of i/o operations.
-    // |Ok| means everything went well.
-    // |TryAgain| means the operation could not be performed and should be
-    // tried later.
-    // |Error| means an error happened (i.e. the channel is stopped).
-    enum class IoResult {
-        Ok = 0,
-        TryAgain = 1,
-        Error = 2,
-    };
+    using IoResult = android::base::BufferQueueResult;
 
     // Type of a callback used to tell the guest when the RenderChannel
     // state changes. Used by setEventCallback(). The parameter contains

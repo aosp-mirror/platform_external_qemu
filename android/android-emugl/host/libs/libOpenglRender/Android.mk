@@ -94,7 +94,6 @@ LOCAL_STATIC_LIBRARIES += android-emu-base
 LOCAL_SYMBOL_FILE := render_api.entries
 
 LOCAL_SRC_FILES := \
-    BufferQueue_unittest.cpp \
     ../Translator/GLES_V2/ANGLEShaderParser.cpp \
     OpenGLTestContext.cpp \
     OpenGL_unittest.cpp \
