@@ -327,6 +327,7 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_type(texture.type),
       m_border(texture.border),
       m_texStorageLevels(texture.texStorageLevels),
+      m_maxMipmapLevel(texture.maxMipmapLevel),
       m_globalName(texture.globalName),
       m_isDirty(true) {}
 
@@ -348,11 +349,12 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     m_type = stream->getBe32();
     m_border = stream->getBe32();
     m_texStorageLevels = stream->getBe32();
+    m_maxMipmapLevel = stream->getBe32();
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
-                1 + floor(log2((float)std::max(m_width, m_height)));
+                m_maxMipmapLevel + 1;
         auto loadTex = [stream, numLevels](
                                std::unique_ptr<LevelImageData[]>& levelData,
                                bool isDepth) {
@@ -406,6 +408,7 @@ void SaveableTexture::onSave(
     stream->putBe32(m_type);
     stream->putBe32(m_border);
     stream->putBe32(m_texStorageLevels);
+    stream->putBe32(m_maxMipmapLevel);
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
@@ -449,7 +452,7 @@ void SaveableTexture::onSave(
         dispatcher.glBindTexture(m_target, m_globalName);
         // Get the number of mipmap levels.
         unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
-                1 + floor(log2((float)std::max(m_width, m_height)));
+                m_maxMipmapLevel + 1;
 
         bool isLowMem = android::base::System::isUnderMemoryPressure();
 
@@ -670,7 +673,7 @@ void SaveableTexture::restore() {
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Get the number of mipmap levels.
         unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
-                1 + floor(log2((float)std::max(m_width, m_height)));
+                m_maxMipmapLevel + 1;
         GLint resultInternalFormat = m_internalFormat;
         GLenum resultFormat = m_format;
         if (isCoreProfile() && isCoreProfileEmulatedFormat(m_format)) {
@@ -819,6 +822,7 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
     eglImage->type = m_type;
     eglImage->width = m_width;
     eglImage->texStorageLevels = m_texStorageLevels;
+    eglImage->maxMipmapLevel = m_maxMipmapLevel;
     eglImage->sync = nullptr;
 }
 

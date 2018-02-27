@@ -89,6 +89,7 @@ private:
     unsigned int m_type = GL_UNSIGNED_BYTE;
     unsigned int m_border = 0;
     unsigned int m_texStorageLevels = 0;
+    unsigned int m_maxMipmapLevel = 0;
     // Attributes used when saving a snapshot
     unsigned int m_globalName = 0;
     // Attributes used when loaded from a snapshot
