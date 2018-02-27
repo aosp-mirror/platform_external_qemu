@@ -555,6 +555,9 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-weak_framework,Hypervisor
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,OpenGL
 endif
+ifneq (,$(BUILD_SANITIZER))
+   ANDROID_EMU_BASE_LDLIBS += -lclang_rt.asan-x86_64 -ldl
+endif
 
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \

@@ -19,6 +19,10 @@ ifeq ($(BUILD_HOST_OS),linux)
   LOCAL_LDFLAGS +=-Wl,-rpath=$(BUILD_OBJS_DIR)/intermediates64
 endif
 
+ifneq (,$(BUILD_SANITIZER))
+   LOCAL_LDFLAGS += -lclang_rt.asan-x86_64 -ldl
+endif
+
 LOCAL_INSTALL := false
 
 $(call emugl-end-module)
