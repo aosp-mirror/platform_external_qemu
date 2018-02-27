@@ -92,6 +92,9 @@
      <property name="toolTip">
       <string>ROTATION_0</string>
      </property>
+     <property name="accessibleDescription">
+      <string>Device rotation upright</string>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -123,6 +126,9 @@
      </property>
      <property name="toolTip">
       <string>ROTATION_270</string>
+     </property>
+     <property name="accessibleDescription">
+      <string>Device rotation horizontal left</string>
      </property>
      <property name="text">
       <string/>
@@ -156,6 +162,9 @@
      <property name="toolTip">
       <string>ROTATION_180</string>
      </property>
+     <property name="accessibleDescription">
+      <string>Device rotation upside down</string>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -187,6 +196,9 @@
      </property>
      <property name="toolTip">
       <string>ROTATION_90</string>
+     </property>
+     <property name="accessibleDescription">
+      <string>Device rotation horizontal right</string>
      </property>
      <property name="text">
       <string/>
@@ -484,6 +496,9 @@
       </property>
       <item>
        <widget class="QDoubleSpinBox" name="magNorthWidget">
+        <property name="accessibleDescription">
+         <string>Magnetic field North</string>
+        </property>
         <property name="minimum">
          <double>-1000.000000000000000</double>
         </property>
@@ -500,6 +515,9 @@
       </item>
       <item>
        <widget class="QDoubleSpinBox" name="magEastWidget">
+        <property name="accessibleDescription">
+         <string>Magnetic field East</string>
+        </property>
         <property name="minimum">
          <double>-1000.000000000000000</double>
         </property>
@@ -516,6 +534,9 @@
       </item>
       <item>
        <widget class="QDoubleSpinBox" name="magVerticalWidget">
+        <property name="accessibleDescription">
+         <string>Magnetic field Up</string>
+        </property>
         <property name="minimum">
          <double>-1000.000000000000000</double>
         </property>
