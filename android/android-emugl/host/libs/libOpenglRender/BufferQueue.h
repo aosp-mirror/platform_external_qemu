@@ -15,6 +15,7 @@
 
 #include "OpenglRender/RenderChannel.h"
 #include "android/base/Compiler.h"
+#include "android/base/containers/BufferQueue.h"
 #include "android/base/files/Stream.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/synchronization/Lock.h"
@@ -29,6 +30,8 @@
 
 namespace emugl {
 
+using BufferQueueBase = android::base::BufferQueue<RenderChannel::Buffer>;
+
 // BufferQueue models a FIFO queue of RenderChannel::Buffer instances
 // that can be used between two different threads. Note that it depends,
 // for synchronization, on an external lock (passed as a reference in
@@ -36,31 +39,16 @@ namespace emugl {
 //
 // This allows one to use multiple BufferQueue instances whose content
 // are protected by a single lock.
-class BufferQueue {
-    using ConditionVariable = android::base::ConditionVariable;
-    using Lock = android::base::Lock;
-    using AutoLock = android::base::AutoLock;
-
+class BufferQueue : public BufferQueueBase {
 public:
-    using IoResult = RenderChannel::IoResult;
     using Buffer = RenderChannel::Buffer;
+    using IoResult = android::base::BufferQueueResult;
 
     // Constructor. |capacity| is the maximum number of Buffer instances in
     // the queue, and |lock| is a reference to an external lock provided by
     // the caller.
     BufferQueue(int capacity, android::base::Lock& lock)
-        : mBuffers(capacity), mLock(lock) {}
-
-    // Return true iff one can send a buffer to the queue, i.e. if it
-    // is not full or it would grow anyway.
-    bool canPushLocked() const { return !mClosed && mCount < (int)mBuffers.size(); }
-
-    // Return true iff one can receive a buffer from the queue, i.e. if
-    // it is not empty.
-    bool canPopLocked() const { return mCount > 0; }
-
-    // Return true iff the queue is closed.
-    bool isClosedLocked() const { return mClosed; }
+        : BufferQueueBase(capacity, lock) {}
 
     // Changes the operation mode to snapshot or back. In snapshot mode
     // BufferQueue accepts all write requests and accumulates the data, but
@@ -78,7 +66,7 @@ public:
     // if it was closed.
     // Note: in snapshot mode it never returns TryAgain, but grows the max
     //   queue size instead.
-    IoResult tryPushLocked(Buffer&& buffer) {
+    virtual IoResult tryPushLocked(Buffer&& buffer) override {
         if (mClosed) {
             return IoResult::Error;
         }
@@ -103,7 +91,7 @@ public:
     // Push a buffer to the queue. This is a blocking call. On success,
     // move |buffer| into the queue and return IoResult::Ok. On failure,
     // return IoResult::Error meaning the queue was closed.
-    IoResult pushLocked(Buffer&& buffer) {
+    virtual IoResult pushLocked(Buffer&& buffer) override {
         while (mCount == (int)mBuffers.size() && !mSnapshotMode) {
             if (mClosed) {
                 return IoResult::Error;
@@ -117,7 +105,7 @@ public:
     // |*buffer| and return IoResult::Ok. On failure, return IoResult::Error
     // if the queue is empty and closed or in snapshot mode, and
     // IoResult::TryAgain if it is empty but not closed.
-    IoResult tryPopLocked(Buffer* buffer) {
+    virtual IoResult tryPopLocked(Buffer* buffer) override {
         if (mCount == 0) {
             return (mClosed || mSnapshotMode) ? IoResult::Error
                                               : IoResult::TryAgain;
@@ -138,7 +126,7 @@ public:
     // move item into |*buffer| and return IoResult::Ok. On failure,
     // return IoResult::Error to indicate the queue was closed or is in
     // snapshot mode.
-    IoResult popLocked(Buffer* buffer) {
+    virtual IoResult popLocked(Buffer* buffer) override {
         while (mCount == 0 && !mSnapshotMode) {
             if (mClosed) {
                 // Closed queue is empty.
@@ -147,15 +135,6 @@ public:
             mCanPop.wait(&mLock);
         }
         return tryPopLocked(buffer);
-    }
-
-    // Close the queue, it is no longer possible to push new items
-    // to it (i.e. push() will always return IoResult::Error), or to
-    // read from an empty queue (i.e. pop() will always return
-    // IoResult::Error once the queue becomes empty).
-    void closeLocked() {
-        mClosed = true;
-        wakeAllWaiters();
     }
 
     // Save to a snapshot file
@@ -206,25 +185,8 @@ private:
         mPos = 0;
     }
 
-    void wakeAllWaiters() {
-        if (mCount == (int)mBuffers.size()) {
-            mCanPush.broadcast();
-        }
-        if (mCount == 0) {
-            mCanPop.broadcast();
-        }
-    }
-
 private:
-    int mPos = 0;
-    int mCount = 0;
-    bool mClosed = false;
     bool mSnapshotMode = false;
-    std::vector<Buffer> mBuffers;
-
-    Lock& mLock;
-    ConditionVariable mCanPush;
-    ConditionVariable mCanPop;
 
     // This will force the same for RenderChannelImpl
     DISALLOW_COPY_ASSIGN_AND_MOVE(BufferQueue);
