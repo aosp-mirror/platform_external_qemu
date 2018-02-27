@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "3d5a32d8_6b90fb18",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-27T18:44:46Z",
+      "side": 1,
+      "message": "+1 or uint8_t[] at least.",
+      "parentUuid": "bd6d38ab_a2107cc7",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 141,
+        "endChar": 25
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4972a845_f03dbbe5",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -432,6 +456,52 @@
         "startChar": 8,
         "endLine": 1573,
         "endChar": 9
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68d0b5db_d67cf888",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-27T18:44:46Z",
+      "side": 1,
+      "message": "Why do we have a separate function to set the output context? Can we pass it in create to prevent cases where a recorder has no output set?",
+      "range": {
+        "startLine": 60,
+        "startChar": 17,
+        "endLine": 60,
+        "endChar": 34
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7c9bab7_77690978",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-27T18:44:46Z",
+      "side": 1,
+      "message": "Is this in bits per second?",
+      "range": {
+        "startLine": 71,
+        "startChar": 9,
+        "endLine": 71,
+        "endChar": 16
       },
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
