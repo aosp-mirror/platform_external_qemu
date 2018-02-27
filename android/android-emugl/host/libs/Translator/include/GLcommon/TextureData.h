@@ -63,7 +63,15 @@ public:
     unsigned int compressedFormat;
     int32_t crop_rect[4] = {};
     GLenum target;
+    // texStorageLevels tracks the storage level explicitly set by
+    // glTexStorage* (GLES3)
+    // maxMipmapLevel tracks the implicit maximum mipmap level that needs to
+    // be snapshot (GLES2 and GLES3)
+    // They are very similar concepts. But texStorageLevels is GLES3 only (only
+    // for textures initialized with glTexStorage*), and maxMipmapLevel is for
+    // both GLES2 and 3.
     unsigned int texStorageLevels = 0;
+    unsigned int maxMipmapLevel = 0;
     int samples;
     // globalName is used for snapshot when reading data from GPU
     int globalName = 0;

@@ -1418,6 +1418,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->format = texData->format;
             img->type = texData->type;
             img->texStorageLevels = texData->texStorageLevels;
+            img->maxMipmapLevel = texData->maxMipmapLevel;
             img->saveableTexture = texData->getSaveableTexture();
             img->needRestore = false;
             img->sync = nullptr;

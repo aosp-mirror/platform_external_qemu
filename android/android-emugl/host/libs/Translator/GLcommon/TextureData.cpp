@@ -44,6 +44,7 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     compressedFormat = stream->getBe32();
     stream->read(crop_rect, sizeof(crop_rect));
     texStorageLevels = stream->getBe32();
+    maxMipmapLevel = stream->getBe32();
     globalName = stream->getBe32();
     loadCollection(stream, &m_texParam, [](android::base::Stream* stream) {
         GLenum item = stream->getBe32();
@@ -71,6 +72,7 @@ void TextureData::onSave(android::base::Stream* stream, unsigned int globalName)
     stream->putBe32(compressedFormat);
     stream->write(crop_rect, sizeof(crop_rect));
     stream->putBe32(texStorageLevels);
+    stream->putBe32(maxMipmapLevel);
     stream->putBe32(globalName);
     saveCollection(stream, m_texParam,
                    [](android::base::Stream* stream,
