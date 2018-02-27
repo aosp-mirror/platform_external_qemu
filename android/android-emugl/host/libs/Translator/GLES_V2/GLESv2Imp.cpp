@@ -754,6 +754,8 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
 
         if (texData) {
             texData->hasStorage = true;
+            texData->maxMipmapLevel = std::max(texData->maxMipmapLevel,
+                    static_cast<unsigned int>(level));
         }
 
         if (texData && level == 0) {
@@ -812,6 +814,8 @@ void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat,
 
         if (texData) {
             texData->hasStorage = true;
+            texData->maxMipmapLevel = std::max(texData->maxMipmapLevel,
+                    static_cast<unsigned int>(level));
         }
 
         if (texData && level == 0) {
@@ -3615,6 +3619,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->format = img->format;
             texData->type = img->type;
             texData->texStorageLevels = img->texStorageLevels;
+            texData->maxMipmapLevel = img->maxMipmapLevel;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(

@@ -590,6 +590,13 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
             if (needAutoMipmap) {
                 *needAutoMipmap = texData->requiresAutoMipmap;
             }
+            if (texData->requiresAutoMipmap) {
+                texData->maxMipmapLevel = 1 +
+                        floor(log2((float)std::max(width, height)));
+            } else {
+                texData->maxMipmapLevel = std::max(texData->maxMipmapLevel,
+                        static_cast<unsigned int>(level));
+            }
         }
 
         if (texData && level == 0) {
@@ -2043,7 +2050,7 @@ GL_API void GL_APIENTRY  glTexSubImage2D( GLenum target, GLint level, GLint xoff
         TextureData *texData = getTextureTargetData(target);
         if(texData && texData->requiresAutoMipmap)
         {
-                ctx->dispatcher().glGenerateMipmapEXT(target);
+            ctx->dispatcher().glGenerateMipmapEXT(target);
         }
         texData->makeDirty();
     }
@@ -2114,6 +2121,7 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
             texData->format = img->format;
             texData->type = img->type;
             texData->texStorageLevels = img->texStorageLevels;
+            texData->maxMipmapLevel = img->maxMipmapLevel;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
@@ -2616,6 +2624,8 @@ GL_API void GL_APIENTRY glGenerateMipmapOES(GLenum target) {
             SET_ERROR_IF(width == 0 || height == 0 ||
                          (width & (width - 1)) != 0 || (height & (height - 1)) != 0,
                          GL_INVALID_OPERATION);
+            texData->maxMipmapLevel = 1 + floor(log2((float)std::max(
+                    texData->width, texData->height)));
         }
     }
     ctx->dispatcher().glGenerateMipmapEXT(target);
