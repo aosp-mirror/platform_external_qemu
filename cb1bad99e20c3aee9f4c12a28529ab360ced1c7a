@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "411f9aba_2bf8a43d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderWindow.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-27T19:48:12Z",
+      "side": 1,
+      "message": "May be we should use C++ strings here?",
+      "range": {
+        "startLine": 75,
+        "startChar": 34,
+        "endLine": 75,
+        "endChar": 40
+      },
+      "revId": "cb1bad99e20c3aee9f4c12a28529ab360ced1c7a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "76bb289b_f73f1e83",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderWindow.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-27T19:48:12Z",
+      "side": 1,
+      "message": "May be we want to introduce a kind of a \"Picture\" class?",
+      "range": {
+        "startLine": 129,
+        "startChar": 23,
+        "endLine": 129,
+        "endChar": 75
+      },
+      "revId": "cb1bad99e20c3aee9f4c12a28529ab360ced1c7a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
