@@ -470,7 +470,7 @@ print_info () {
             fi
             ;;
         clang-dir)
-          printf "%s\n" "$(aosp_clang_libcplusplus)"
+          printf "%s\n" "${CLANG_DIR}"
             ;;
         clang-version)
             CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | head -n 1 | awk '{print $4}')
@@ -478,6 +478,9 @@ print_info () {
             ;;
         libcplusplus)
           printf "%s\n" "$CLANG_DIR/lib64/libc++.so"
+          ;;
+        libasan-dir)
+          printf "%s" "$CLANG_DIR/lib64/clang/5.0/lib/linux/"
           ;;
         *)
             printf "%s\n" "${BINPREFIX}$PRINT"

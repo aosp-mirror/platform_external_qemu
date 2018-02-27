@@ -1026,6 +1026,11 @@ if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
           log "Bundling ${LIBCPLUSPLUS}"
           copy_toolchain_lib "${OUT_DIR}/lib64" "$(dirname ${LIBCPLUSPLUS})" libc++
         fi
+        if [ "$OPTION_SANITIZER" != "no" ] ; then
+          LIBASAN=$("$GEN_SDK" $GEN_SDK_FLAGS --print=libasan-dir unused_parameter)
+          copy_toolchain_lib "${OUT_DIR}/intermediates64" "$LIBASAN" libclang_rt.asan-x86_64-android
+          copy_toolchain_lib "${OUT_DIR}/lib64" "$LIBASAN" libclang_rt.asan-x86_64-android
+        fi
         ;;
         *) log "Not copying toolchain libraries for ${BUILD_TARGET_OS}";;
     esac
