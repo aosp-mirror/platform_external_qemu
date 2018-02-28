@@ -12,6 +12,8 @@
 #pragma once
 
 #include "android/base/memory/OnDemand.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/skin/qt/ModalOverlay.h"
 #include "android/skin/qt/OverlayMessageCenter.h"
 
 #include <QObject>
@@ -55,6 +57,8 @@ public:
 signals:
     void showModalOverlay(QString text);
     void hideModalOverlay();
+    void setModalOverlayFunc(QString text,
+                             Ui::ModalOverlay::OverlayButtonFunc func);
     void showVirtualSceneInfoDialog();
     void hideVirtualSceneInfoDialog();
 
@@ -62,6 +66,8 @@ private slots:
     void slot_resizeDone();
     void slot_showModalOverlay(QString text);
     void slot_hideModalOverlay();
+    void slot_setModalOverlayFunc(QString text,
+                                  Ui::ModalOverlay::OverlayButtonFunc func);
     void slot_showVirtualSceneInfoDialog();
     void slot_hideVirtualSceneInfoDialog();
     void slot_messagesResized();

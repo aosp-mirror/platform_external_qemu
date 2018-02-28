@@ -182,6 +182,11 @@ void RamSaver::join() {
     mIndex.clear();
 }
 
+void RamSaver::cancel() {
+    mCanceled.store(true, std::memory_order_release);
+    join();
+}
+
 void RamSaver::calcHash(FileIndex::Block::Page& page,
                         const FileIndex::Block& block,
                         const void* ptr) {
@@ -227,6 +232,10 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
         }
         mWorkers->enqueue(std::move(pi));
     } else {
+        if (mStopping.load(std::memory_order_acquire))
+            return;
+        mStopping.store(true, std::memory_order_release);
+
         mWorkers.clear();
         mWriter->enqueue({});
         mWriter.clear();
@@ -244,6 +253,9 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
 }
 
 bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
+    if (mCanceled.load(std::memory_order_acquire))
+        return false;
+
     assert(pi.blockIndex != kStopMarkerIndex);
 
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];

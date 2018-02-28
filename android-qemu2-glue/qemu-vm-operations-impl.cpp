@@ -237,6 +237,11 @@ static void onSaveVmQuickFail(const char* name, int res) {
                                                       name, res);
 }
 
+static bool saveVmQueryCanceled(const char* name) {
+    return sSnapshotCallbacks.ops[SNAPSHOT_SAVE].isCanceled(
+            sSnapshotCallbacksOpaque, name);
+}
+
 static int onLoadVmStart(const char* name) {
     return sSnapshotCallbacks.ops[SNAPSHOT_LOAD].onStart(
             sSnapshotCallbacksOpaque, name);
@@ -250,6 +255,11 @@ static void onLoadVmEnd(const char* name, int res) {
 static void onLoadVmQuickFail(const char* name, int res) {
     sSnapshotCallbacks.ops[SNAPSHOT_LOAD].onQuickFail(sSnapshotCallbacksOpaque,
                                                       name, res);
+}
+
+static bool loadVmQueryCanceled(const char* name) {
+    return sSnapshotCallbacks.ops[SNAPSHOT_LOAD].isCanceled(
+            sSnapshotCallbacksOpaque, name);
 }
 
 static int onDelVmStart(const char* name) {
@@ -267,10 +277,18 @@ static void onDelVmQuickFail(const char* name, int res) {
                                                      name, res);
 }
 
+static bool delVmQueryCanceled(const char* name) {
+    return sSnapshotCallbacks.ops[SNAPSHOT_DEL].isCanceled(
+            sSnapshotCallbacksOpaque, name);
+}
+
 static const QEMUSnapshotCallbacks sQemuSnapshotCallbacks = {
-        .savevm = {onSaveVmStart, onSaveVmEnd, onSaveVmQuickFail},
-        .loadvm = {onLoadVmStart, onLoadVmEnd, onLoadVmQuickFail},
-        .delvm = {onDelVmStart, onDelVmEnd, onDelVmQuickFail}};
+        .savevm = {onSaveVmStart, onSaveVmEnd, onSaveVmQuickFail,
+                   saveVmQueryCanceled},
+        .loadvm = {onLoadVmStart, onLoadVmEnd, onLoadVmQuickFail,
+                   loadVmQueryCanceled},
+        .delvm = {onDelVmStart, onDelVmEnd, onDelVmQuickFail,
+                  delVmQueryCanceled}};
 
 static const QEMUFileHooks sSaveHooks = {
         // before_ram_iterate

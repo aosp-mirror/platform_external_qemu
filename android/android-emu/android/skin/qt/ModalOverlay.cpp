@@ -80,6 +80,7 @@ ModalOverlay::ModalOverlay(QString message, QWidget* parent) : QWidget(parent) {
     }
     innerLayout->addStretch();
     mTopFrame->setLayout(innerLayout);
+    mInnerLayout = innerLayout;
 }
 
 void ModalOverlay::show() {
@@ -113,6 +114,27 @@ void ModalOverlay::resize(const QSize& size, const QSize& parentSize) {
     const auto newBorderRadius =
             std::min(std::max(0, diff), kDefaultBorderRadius);
     updateStylesheet(newBorderRadius);
+}
+
+void ModalOverlay::showButtonFunc(QString text,
+                                  ModalOverlay::OverlayButtonFunc&& f) {
+    mButtonFunc = f;
+
+    auto clickableLabel = new QLabel(mTopFrame);
+    clickableLabel->setStyleSheet(
+            QString("font-size: %1;")
+                    .arg(Ui::stylesheetFontSize(Ui::FontSize::Huge)));
+    clickableLabel->setText(QString("<center><a href=\"unused.html\" "
+                                    "style=\"%1\">%2</a></center>")
+                                    .arg("text-decoration:none;color:#00bea4")
+                                    .arg(text));
+    connect(clickableLabel, SIGNAL(linkActivated(const QString&)), this,
+            SLOT(slot_handleButtonFunc()));
+    mInnerLayout->addWidget(clickableLabel);
+}
+
+void ModalOverlay::slot_handleButtonFunc() {
+    mButtonFunc();
 }
 
 void ModalOverlay::showEvent(QShowEvent* event) {

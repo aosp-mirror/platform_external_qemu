@@ -81,6 +81,12 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
             SLOT(slot_showModalOverlay(QString)));
     connect(this, SIGNAL(hideModalOverlay()), this,
             SLOT(slot_hideModalOverlay()));
+    connect(this,
+            SIGNAL(setModalOverlayFunc(QString,
+                                       Ui::ModalOverlay::OverlayButtonFunc)),
+            this,
+            SLOT(slot_setModalOverlayFunc(
+                    QString, Ui::ModalOverlay::OverlayButtonFunc)));
     connect(this, SIGNAL(showVirtualSceneInfoDialog()), this,
             SLOT(slot_showVirtualSceneInfoDialog()));
     connect(this, SIGNAL(hideVirtualSceneInfoDialog()), this,
@@ -385,6 +391,7 @@ void EmulatorContainer::slot_showModalOverlay(QString text) {
     mModalOverlay = new Ui::ModalOverlay(text, this);
     adjustModalOverlayGeometry();
     mModalOverlay->show();
+
     if (windowState() & Qt::WindowMinimized) {
         mModalOverlay->hide();
     }
@@ -399,6 +406,14 @@ void EmulatorContainer::slot_hideModalOverlay() {
             mShouldCreateVirtualSceneInfo = false;
             slot_showVirtualSceneInfoDialog();
         }
+    }
+}
+
+void EmulatorContainer::slot_setModalOverlayFunc(
+        QString text,
+        Ui::ModalOverlay::OverlayButtonFunc f) {
+    if (mModalOverlay) {
+        mModalOverlay->showButtonFunc(text, std::move(f));
     }
 }
 
