@@ -782,7 +782,7 @@ public:
 #endif
     }
 
-    MemUsage getMemUsage() override {
+    MemUsage getMemUsage() const override {
         MemUsage res = {};
 #ifdef _WIN32
         PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
@@ -2094,6 +2094,23 @@ static Optional<System::DiskKind> diskKind(const PathStat& st) {
 
     // Sill got no idea.
     return {};
+}
+
+int System::freeRamMb() const {
+    auto usage = getMemUsage();
+    uint64_t freePhysMb = usage.avail_phys_memory / (1024ULL * 1024ULL);
+    return freePhysMb;
+}
+
+bool System::isUnderMemoryPressure(int* freeRamMb_out) const {
+    auto usage = getMemUsage();
+    uint64_t currentFreeRam = freeRamMb();
+
+    if (freeRamMb_out) {
+        *freeRamMb_out = currentFreeRam;
+    }
+
+    return currentFreeRam < kMemoryPressureLimitMb;
 }
 
 Optional<System::DiskKind> System::diskKindInternal(StringView path) {
