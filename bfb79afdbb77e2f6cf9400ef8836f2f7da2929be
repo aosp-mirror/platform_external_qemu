@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34b5c277_d87a7137",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-28T20:58:48Z",
+      "side": 1,
+      "message": "initrd_size\u0027s type is int. Why casting to long int?",
+      "range": {
+        "startLine": 341,
+        "startChar": 17,
+        "endLine": 341,
+        "endChar": 38
+      },
+      "revId": "bfb79afdbb77e2f6cf9400ef8836f2f7da2929be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
