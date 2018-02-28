@@ -52,15 +52,19 @@ include $(EMUGL_PATH)/common.mk
 # module that hasn't been declared yet anyway.
 #
 
+
 # Required by our units test.
 include $(EMUGL_PATH)/googletest.mk
 
-# First, build the emugen host source-generation tool
+# First, build the emugen host source-generation tool. This only has to
+# happen once
 #
 # It will be used by other modules to generate wire protocol encode/decoder
 # source files (see all emugl-gen-decoder/encoder in common.mk)
 #
-include $(EMUGL_PATH)/host/tools/emugen/Android.mk
+ifndef EMUGL_EMUGEN
+    include $(EMUGL_PATH)/host/tools/emugen/Android.mk
+endif
 
 include $(EMUGL_PATH)/shared/emugl/common/Android.mk
 include $(EMUGL_PATH)/shared/OpenglCodecCommon/Android.mk
