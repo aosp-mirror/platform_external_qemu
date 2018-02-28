@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "69c78889_be80c824",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-28T18:42:39Z",
+      "side": 1,
+      "message": "nit: use static call here",
+      "range": {
+        "startLine": 454,
+        "startChar": 24,
+        "endLine": 454,
+        "endChar": 52
+      },
+      "revId": "9063f56c80704f5b4b6036e77369329954f41b30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b3ea1655_4cf2230f",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 3
