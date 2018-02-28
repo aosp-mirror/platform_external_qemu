@@ -61,8 +61,9 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
 }
 
 RecordScreenPage::~RecordScreenPage() {
-    stopRecordingOrPlaying();
-
+    if (mRecordScreenAgent) {
+        mRecordScreenAgent->stopRecording();
+    }
     // Remove the tmp video file if one exists
     if (!removeFileIfExists(QString(mTmpFilePath.c_str()))) {
         derror("Unable to clean up temp media file.");
@@ -163,7 +164,6 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->show();
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
             mUi->rec_playStopButton->setProperty("themeIconName", "stop");
-            mUi->rec_saveButton->hide();
             break;
         case RecordUiState::Stopped:
             mUi->rec_recordOverlayWidget->show();
@@ -171,6 +171,8 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->show();
             mUi->rec_formatSwitch->show();
             mUi->rec_saveButton->show();
+            // Get the video duration from the video's metadata.
+            mSec = mVideoInfo->getDurationSecs();
             mUi->rec_timeResLabel->setText(
                     QString("%1s / %2 x %3")
                             .arg(mSec)
@@ -185,7 +187,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
             // Display preview frame
-            mVideoPreview->show();
+            mVideoInfo->show();
             mVideoWidget->setVisible(true);
             break;
         case RecordUiState::Converting: {
@@ -279,6 +281,11 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
 void RecordScreenPage::on_rec_saveButton_clicked() {
     QSettings settings;
 
+    // Stop the video player if it's running
+    if (mVideoPlayer->isRunning()) {
+        mVideoPlayer->stop();
+    }
+
     QString ext = mUi->rec_formatSwitch->currentText().toLower();
     QString savePath = QDir::toNativeSeparators(getRecordingSaveDirectory());
     QString recordingName = QFileDialog::getSaveFileName(
@@ -368,9 +375,9 @@ void RecordScreenPage::slot_recordingStatusChange(RecordingStatus status) {
         case RECORD_STOPPED:
             // Setup the preview frame. Needs to be initialized before
             // setRecordUiState() or the preview frame will not be shown.
-            mVideoPreview.reset(new android::videoplayer::VideoPreview(
+            mVideoInfo.reset(new android::videoplayer::VideoInfo(
                     mVideoWidget.get(), mTmpFilePath));
-            connect(mVideoPreview.get(), SIGNAL(updateWidget()), this,
+            connect(mVideoInfo.get(), SIGNAL(updateWidget()), this,
                     SLOT(updateVideoView()));
             setRecordUiState(RecordUiState::Stopped);
             break;
@@ -430,14 +437,4 @@ void RecordScreenPage::updateVideoView() {
 
 void RecordScreenPage::videoPlayingFinished() {
     setRecordUiState(RecordUiState::Stopped);
-}
-
-void RecordScreenPage::stopRecordingOrPlaying() {
-    if (mRecordScreenAgent && mState == RecordUiState::Recording) {
-        mRecordScreenAgent->stopRecording();
-    }
-
-    if (mVideoPlayer && mState == RecordUiState::Playing) {
-        mVideoPlayer->stop();
-    }
 }

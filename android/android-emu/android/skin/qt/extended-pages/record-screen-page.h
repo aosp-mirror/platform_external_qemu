@@ -16,7 +16,7 @@
 #include "android/skin/qt/video-player/VideoPlayer.h"
 #include "android/skin/qt/video-player/VideoPlayerNotifier.h"
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
-#include "android/skin/qt/video-player/VideoPreview.h"
+#include "android/skin/qt/video-player/VideoInfo.h"
 
 #include <QTimer>
 #include <QWidget>
@@ -67,16 +67,14 @@ public:
     void setRecordUiState(RecordUiState r);
 
 private:
-    void stopRecordingOrPlaying();
-
     static const char kTmpMediaName[]; // tmp name for unsaved media file
     std::string mTmpFilePath;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
     std::unique_ptr<android::videoplayer::VideoPlayerWidget> mVideoWidget;
     std::unique_ptr<android::videoplayer::VideoPlayerNotifier> mVideoPlayerNotifier;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
-    std::unique_ptr<android::videoplayer::VideoPreview> mVideoPreview;
-    const QAndroidRecordScreenAgent* mRecordScreenAgent;
+    std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
+    const QAndroidRecordScreenAgent* mRecordScreenAgent = nullptr;
     RecordUiState mState;
     QTimer mTimer;
     int mSec;  // number of elapsed seconds
