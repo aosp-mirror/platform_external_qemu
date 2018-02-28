@@ -235,6 +235,29 @@
     },
     {
       "key": {
+        "uuid": "cdd922d2_bee92e50",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-28T17:20:38Z",
+      "side": 1,
+      "message": "by the way, recursiveSize() may potentially take some time, e.g. if user got many snapshots, or if the snapshots directory is compressed on NTFS, or if the disk is busy installing windows updates (pretty much all the time). I\u0027d prefer to have this done as an async task in background instead of blocking the whole UI for the calculation. Actually, there\u0027s a chance to trip HangDetector here if we get really unlucky",
+      "range": {
+        "startLine": 324,
+        "startChar": 26,
+        "endLine": 324,
+        "endChar": 39
+      },
+      "revId": "25a052b0d0c2c1b2a4d76fd9be85db76e4460284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1064e84b_462ac652",
         "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
         "patchSetId": 1
