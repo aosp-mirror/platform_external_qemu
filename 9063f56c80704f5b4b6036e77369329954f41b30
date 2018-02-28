@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3ea1655_4cf2230f",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-02-28T18:41:02Z",
+      "side": 1,
+      "message": "I thought we would like to keep those if not for memory pressure?",
+      "range": {
+        "startLine": 605,
+        "startChar": 0,
+        "endLine": 606,
+        "endChar": 19
+      },
+      "revId": "9063f56c80704f5b4b6036e77369329954f41b30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
