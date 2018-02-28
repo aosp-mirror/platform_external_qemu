@@ -17,7 +17,7 @@
 #
 
 # Sanity check
-LOCAL_BITS ?= 64
+LOCAL_BITS := $(call local-build-var,BITS)
 ifneq (,$(filter-out 32 64,$(LOCAL_BITS)))
     $(error LOCAL_BITS should be defined to either 32 or 64))
 endif
@@ -54,12 +54,10 @@ LOCAL_LDLIBS := \
 LOCAL_CFLAGS := \
     -m$(LOCAL_BITS) \
     $(filter-out -m32 -m64, $(LOCAL_CFLAGS))
-    # $(LOCAL_CFLAGS)
 
 LOCAL_LDFLAGS := \
     -m$(LOCAL_BITS) \
     $(filter-out -m32 -m64, $(LOCAL_LDFLAGS))
-    # $(LOCAL_LDFLAGS)
 
 LOCAL_CPP_EXTENSIONS := .cpp .cc .C .cxx .c++
 LOCAL_CXX_EXTENSION_PATTERNS := $(foreach pattern,$(LOCAL_CPP_EXTENSIONS),%$(pattern))

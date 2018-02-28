@@ -1,5 +1,12 @@
 BUILD_TARGET_TAG := $(BUILD_TARGET_OS)-$(BUILD_TARGET_ARCH)
 
+MAKEFILE_COMMON_INCLUDE += 1
+on-first-run = $(if $(findstring 1,$(words $(MAKEFILE_COMMON_INCLUDE))),$1,$2)
+$(eval \
+	$(call on-first-run,FIRST_INCLUDE:= true,FIRST_INCLUDE:=) \
+)
+
+
 # Build libext4_utils and related modules/
 include $(LOCAL_PATH)/android/third_party/zlib.mk
 include $(LOCAL_PATH)/android/third_party/libcurl.mk
