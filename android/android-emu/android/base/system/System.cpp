@@ -782,7 +782,7 @@ public:
 #endif
     }
 
-    MemUsage getMemUsage() override {
+    MemUsage getMemUsage() const override {
         MemUsage res = {};
 #ifdef _WIN32
         PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
@@ -2162,6 +2162,24 @@ std::string System::findBundledExecutable(StringView programName) {
 #endif
 
     return std::string();
+}
+
+// static
+int System::freeRamMb() {
+    auto usage = get()->getMemUsage();
+    uint64_t freePhysMb = usage.avail_phys_memory / (1024ULL * 1024ULL);
+    return freePhysMb;
+}
+
+// static
+bool System::isUnderMemoryPressure(int* freeRamMb_out) {
+    uint64_t currentFreeRam = freeRamMb();
+
+    if (freeRamMb_out) {
+        *freeRamMb_out = currentFreeRam;
+    }
+
+    return currentFreeRam < kMemoryPressureLimitMb;
 }
 
 std::string toString(OsType osType) {
