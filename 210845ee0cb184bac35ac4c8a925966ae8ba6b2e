@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c08bf780_17bc9e4d",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2106,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-28T18:34:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "47963c4f_1e04b925",
+      "range": {
+        "startLine": 2106,
+        "startChar": 4,
+        "endLine": 2106,
+        "endChar": 31
+      },
+      "revId": "210845ee0cb184bac35ac4c8a925966ae8ba6b2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b695cb46_b1cc8a12",
         "filename": "android/android-emu/android/base/system/System.h",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "210845ee0cb184bac35ac4c8a925966ae8ba6b2e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "870774b9_6cfe2a67",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-28T18:34:10Z",
+      "side": 1,
+      "message": "Made them static. A ram.h sounds good, but I\u0027d rather keep it in the same files for now and see if we need anything more advanced and re-evaluate later",
+      "parentUuid": "b695cb46_b1cc8a12",
+      "range": {
+        "startLine": 164,
+        "startChar": 3,
+        "endLine": 171,
+        "endChar": 63
+      },
+      "revId": "210845ee0cb184bac35ac4c8a925966ae8ba6b2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
