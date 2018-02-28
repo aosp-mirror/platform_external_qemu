@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3eb392e3_0f47de09",
+        "filename": "target/mips/cpu.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-28T17:49:49Z",
+      "side": 1,
+      "message": "Hi. I see MIPS_KSCRATCH_NUM is defined here. Could you please add a define for the amount of registers MIPSes have?",
+      "range": {
+        "startLine": 225,
+        "startChar": 24,
+        "endLine": 225,
+        "endChar": 26
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "928f4b6e_b1aa1536",
+        "filename": "target/mips/helper.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-28T17:49:49Z",
+      "side": 1,
+      "message": "Could you please add a \"const int cpu_index \u003d cs-\u003ecpu_index;\" to explicitly say we work with the same cpu and to prevent several memory accesses?",
+      "range": {
+        "startLine": 485,
+        "startChar": 33,
+        "endLine": 485,
+        "endChar": 46
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc296222_f9fd049c",
+        "filename": "target/mips/helper.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-28T17:49:49Z",
+      "side": 1,
+      "message": "Is \"env-\u003eCPU\" the same as one of the variables introduced on line 498-499?",
+      "range": {
+        "startLine": 515,
+        "startChar": 4,
+        "endLine": 515,
+        "endChar": 12
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b59c4c37_0ce8197a",
+        "filename": "target/mips/helper.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-28T17:49:49Z",
+      "side": 1,
+      "message": "Same as above.",
+      "range": {
+        "startLine": 527,
+        "startChar": 31,
+        "endLine": 527,
+        "endChar": 44
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9db6b78e_d3a0ddad",
+        "filename": "target/mips/translate.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1439,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-28T17:49:49Z",
+      "side": 1,
+      "message": "Could you please add a variable to avoid copying \"env-\u003eCPU\"?",
+      "range": {
+        "startLine": 1439,
+        "startChar": 4,
+        "endLine": 1439,
+        "endChar": 12
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
