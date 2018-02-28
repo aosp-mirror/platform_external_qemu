@@ -135,7 +135,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
 
 constexpr int kLivenessTimerTimeoutMs = 100;
 constexpr int kBootTimeoutMs = 7 * 1000;
-constexpr int kMaxAdbConnectionRetries = 1;
+constexpr int kMaxAdbConnectionRetries = 2;
 
 static int bootTimeoutMs() {
     if (avdInfo_is_x86ish(android_avdInfo)) {
@@ -174,10 +174,11 @@ void Quickboot::onLivenessTimer() {
             reportAdbConnectionRetries(mAdbConnectionRetries);
         } else {
             // The VM hasn't started for long enough since the end of snapshot
-            // loading, let's reset it.
+            // loading. Display a warning message.
             mWindow.showMessage(
-                    StringFormat("Guest isn't online after %d seconds, "
-                                 "deleting snapshot and restarting",
+                    StringFormat("Guest isn't online after %d seconds; "
+                                 "ADB cannot connect or snapshot corrupted. "
+                                 "Deleting quickboot snapshot ",
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
                     WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
@@ -185,7 +186,19 @@ void Quickboot::onLivenessTimer() {
             reportFailedLoad(
                     pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG,
                     FailureReason::AdbOffline);
-            mVmOps.vmReset();
+
+            // We used to reset the VM here in addition to deleting the
+            // quickboot snapshot, but it seems less jarring to let whatever is
+            // happening continue to happen and rely on the hang detector.
+            //
+            // Versus what may be an easy adb connection fix the user can work
+            // around resulting in a reboot of the emulator.
+            //
+            // The quickboot snapshot is deleted anyway, so the state is reset
+            // for next time.
+            //
+            // mVmOps.vmReset();
+
             return;
         }
     }
