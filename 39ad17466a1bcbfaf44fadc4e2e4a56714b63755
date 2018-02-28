@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18c8a258_6344493f",
+        "filename": "target/mips/translate_init.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-28T21:01:08Z",
+      "side": 1,
+      "message": "Do we happen to have named constants to replace all these numbers with?",
+      "range": {
+        "startLine": 433,
+        "startChar": 42,
+        "endLine": 433,
+        "endChar": 43
+      },
+      "revId": "39ad17466a1bcbfaf44fadc4e2e4a56714b63755",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
