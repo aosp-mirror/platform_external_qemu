@@ -22,6 +22,30 @@
       "revId": "67eaa8a9b9d357f06be396bfbf8e5b098b97c70a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce3c8570_f4143935",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-28T18:51:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3574c186_0d4078cc",
+      "range": {
+        "startLine": 662,
+        "startChar": 29,
+        "endLine": 662,
+        "endChar": 36
+      },
+      "revId": "67eaa8a9b9d357f06be396bfbf8e5b098b97c70a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
