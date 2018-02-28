@@ -211,6 +211,30 @@
     },
     {
       "key": {
+        "uuid": "2a5bfb27_9d228a0d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-28T17:11:47Z",
+      "side": 1,
+      "message": "Yeah, or both: keep the recursive size func in normal PathUtils, and have snapshot folder size use that recursive size function.",
+      "parentUuid": "8637b7f1_7f595e81",
+      "range": {
+        "startLine": 324,
+        "startChar": 0,
+        "endLine": 324,
+        "endChar": 66
+      },
+      "revId": "25a052b0d0c2c1b2a4d76fd9be85db76e4460284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1064e84b_462ac652",
         "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
         "patchSetId": 1
