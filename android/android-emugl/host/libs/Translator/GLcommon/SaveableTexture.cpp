@@ -19,6 +19,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/system/System.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureUtils.h"
@@ -449,7 +450,10 @@ void SaveableTexture::onSave(
         // Get the number of mipmap levels.
         unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
                 1 + floor(log2((float)std::max(m_width, m_height)));
-        auto saveTex = [this, stream, numLevels, &dispatcher](
+
+        bool isLowMem = android::base::System::isUnderMemoryPressure();
+
+        auto saveTex = [this, stream, numLevels, &dispatcher, isLowMem](
                                 GLenum target, bool isDepth,
                                 std::unique_ptr<LevelImageData[]>& imgData) {
             if (m_isDirty) {
@@ -514,6 +518,11 @@ void SaveableTexture::onSave(
                     stream->putBe32(imgData.get()[level].m_depth);
                 }
                 saveBuffer(stream, imgData.get()[level].m_data);
+            }
+
+            // If under memory pressure, delete this intermediate buffer.
+            if (isLowMem) {
+                imgData.reset();
             }
         };
         switch (m_target) {
@@ -587,7 +596,16 @@ void SaveableTexture::onSave(
             }
         }
         dispatcher.glBindTexture(m_target, prevTex);
-        m_isDirty = false;
+
+        // If we were under memory pressure, we deleted the intermediate
+        // buffer, so we need to maintain the invariant that m_isDirty = false
+        // textures requires that the intermediate buffer is still around.
+        // Therefore, mark as dirty if we were under memory pressure.
+        //
+        // TODO: Don't keep those around in memory regardless of memory
+        // pressure
+
+        m_isDirty = false || isLowMem;
     } else if (m_target != 0) {
         // SaveableTexture is uninitialized iff a texture hasn't been bound,
         // which will give m_target==0
