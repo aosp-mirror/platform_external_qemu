@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1553d808_2f3a3b98",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-28T16:57:23Z",
+      "side": 1,
+      "message": "Can use Quickboot::kDefaultBootSnapshot here",
+      "range": {
+        "startLine": 79,
+        "startChar": 29,
+        "endLine": 79,
+        "endChar": 43
+      },
+      "revId": "25a052b0d0c2c1b2a4d76fd9be85db76e4460284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0a62dfe_f4dd9feb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-28T16:57:23Z",
+      "side": 1,
+      "message": "nit: if (item-\u003eicon(COLUMN_ICON).isNull()) continue;\n\nsaves an indentation level",
+      "range": {
+        "startLine": 295,
+        "startChar": 0,
+        "endLine": 295,
+        "endChar": 48
+      },
+      "revId": "25a052b0d0c2c1b2a4d76fd9be85db76e4460284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a343ebb9_317c49a2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-28T16:57:23Z",
+      "side": 1,
+      "message": "Was thinking about this pattern here and I think we could reduce to \n getSnapshotBaseDir() from android/snapshot/PathUtils.h",
+      "range": {
+        "startLine": 321,
+        "startChar": 0,
+        "endLine": 323,
+        "endChar": 91
+      },
+      "revId": "25a052b0d0c2c1b2a4d76fd9be85db76e4460284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d3a4422_60182ced",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-02-28T16:57:23Z",
+      "side": 1,
+      "message": "Let\u0027s also just decide that the canonical snapshot size is the recursiveSize here and split it out into a new method, android::snapshot::folderSize(const char* snapshotName) in android/snapshot/PathUtils.h.",
+      "range": {
+        "startLine": 324,
+        "startChar": 0,
+        "endLine": 324,
+        "endChar": 66
+      },
+      "revId": "25a052b0d0c2c1b2a4d76fd9be85db76e4460284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
