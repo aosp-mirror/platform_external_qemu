@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3574c186_0d4078cc",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-02-28T18:41:57Z",
+      "side": 1,
+      "message": "nit: System::isUnderMemoryPressure()",
+      "range": {
+        "startLine": 662,
+        "startChar": 29,
+        "endLine": 662,
+        "endChar": 36
+      },
+      "revId": "67eaa8a9b9d357f06be396bfbf8e5b098b97c70a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
