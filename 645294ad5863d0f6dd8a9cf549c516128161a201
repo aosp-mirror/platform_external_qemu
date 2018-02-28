@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3e1996e_b9000444",
+        "filename": "target/mips/cpu.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-02-28T18:44:48Z",
+      "side": 1,
+      "message": "Is it ok to mix 64bit and 32bit fields? Will this create holes because of alignment?",
+      "range": {
+        "startLine": 501,
+        "startChar": 4,
+        "endLine": 501,
+        "endChar": 11
+      },
+      "revId": "645294ad5863d0f6dd8a9cf549c516128161a201",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
