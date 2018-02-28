@@ -159,7 +159,16 @@ public:
         uint64_t avail_phys_memory;
         uint64_t total_page_file;
     };
-    virtual MemUsage getMemUsage() = 0;
+    virtual MemUsage getMemUsage() const = 0;
+
+    // Returns just the free RAM on the system. Useful in many cases.
+    static int freeRamMb();
+
+    // Measures whether or not the system is considered in a memory pressure
+    // state, and returns true if so. Optionally, a freeRamMb output pointer
+    // can be given so the caller can see how much RAM is actually free.
+    static constexpr int kMemoryPressureLimitMb = 513;
+    static bool isUnderMemoryPressure(int* freeRamMb = nullptr);
 
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__

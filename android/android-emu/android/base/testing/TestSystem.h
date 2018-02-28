@@ -145,7 +145,7 @@ public:
 
     void setCpuCoreCount(int count) { mCoreCount = count; }
 
-    virtual MemUsage getMemUsage() override {
+    virtual MemUsage getMemUsage() const override {
         MemUsage res;
         res.resident = 4294967295ULL;
         res.resident_max = 4294967295ULL * 2;
