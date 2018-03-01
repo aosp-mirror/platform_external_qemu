@@ -229,6 +229,10 @@ public:
         return pathIsDirInternal(toTempRoot(path));
     }
 
+    virtual bool pathIsLink(StringView path) const override {
+        return pathIsLinkInternal(toTempRoot(path));
+    }
+
     virtual bool pathCanRead(StringView path) const override {
         return pathCanReadInternal(toTempRoot(path));
     }
@@ -248,6 +252,10 @@ public:
     virtual bool pathFileSize(StringView path,
                               FileSize* outFileSize) const override {
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
+    }
+
+    virtual FileSize recursiveSize(StringView path) const override {
+        return recursiveSizeInternal(toTempRoot(path));
     }
 
     virtual bool pathFreeSpace(StringView path, FileSize* sizeInBytes) const override {

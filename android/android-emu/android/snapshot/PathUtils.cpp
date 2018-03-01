@@ -41,5 +41,10 @@ std::vector<std::string> getSnapshotDirEntries() {
     return System::get()->scanDirEntries(getSnapshotBaseDir());
 }
 
+base::System::FileSize folderSize(const std::string& snapshotName) {
+    return System::get()->recursiveSize(
+            base::PathUtils::join(getSnapshotBaseDir(), snapshotName));
+}
+
 }  // namespace snapshot
 }  // namespace android

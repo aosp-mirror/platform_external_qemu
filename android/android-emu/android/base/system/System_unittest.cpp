@@ -43,6 +43,23 @@ static void make_subfile(const std::string& dir, const char* file) {
     ::close(fd);
 }
 
+static void write_file(const std::string& dir, const char* file, size_t nBytes) {
+    static constexpr size_t BLOCK_SIZE = 4096;
+    char theData[BLOCK_SIZE] = { 0 };
+    std::string path = dir;
+    path.append("/");
+    path.append(file);
+    int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
+    EXPECT_GE(fd, 0) << "Path: " << path.c_str();
+
+    while (nBytes > 0) {
+        size_t nToWrite = std::min(nBytes, BLOCK_SIZE);
+        ::write(fd, theData, nToWrite);
+        nBytes -= nToWrite;
+    }
+    ::close(fd);
+}
+
 TEST(System, get) {
     System* sys1 = System::get();
     EXPECT_TRUE(sys1);
@@ -171,6 +188,49 @@ TEST(System, scandDirEntries) {
     for (size_t n = 0; n < kCount; ++n) {
         EXPECT_STREQ(kExpected[n], entries[n].c_str()) << "#" << n;
     }
+}
+
+TEST(System, recursiveSize) {
+    static const char* const kDirs[] = {
+        "d1", "d2",
+        "d2/d2a", "d2/d2b"
+    };
+
+    static const char* const kFiles[] = {
+        "f1", "f2", "f3",
+        "d1/d1f1", "d1/d1f2", "d1/d1f3", "d1/d1f4",
+        "d2/d2f1", "d2/d2f2", "d2/d2f3", "d2/d2f4", "d2/d2f5",
+        "d2/d2a/d2af1", "d2/d2a/d2af2",
+        // (d2/d2b is empty)
+    };
+    static const System::FileSize kFileSizes[] = {
+        123, 55, 2345,
+        2222, 3333, 8329, 472,
+        4384, 54793, 234454, 113432, 4883232,
+        93, 834
+    };
+
+    // Create the directories
+    TestSystem testSys("/foo/bar", 32);
+    TestTempDir* myDir = testSys.getTempRoot();
+    size_t nItems = ARRAYLEN(kDirs);
+    for (size_t idx = 0; idx<nItems; idx++) {
+        myDir->makeSubDir(kDirs[idx]);
+    }
+
+    // Write files into the directories
+    System::FileSize expectedTotalSize = 0;
+    nItems = ARRAYLEN(kFiles);
+    for (size_t idx = 0; idx<nItems; idx++) {
+        write_file(myDir->path(), kFiles[idx], kFileSizes[idx]);
+        expectedTotalSize += kFileSizes[idx];
+    }
+
+    EXPECT_EQ(expectedTotalSize, System::get()->recursiveSize(myDir->path()));
+
+    // Test an individual file
+    EXPECT_EQ(kFileSizes[0],
+              System::get()-> recursiveSize(PathUtils::join(myDir->path(), kFiles[0])));
 }
 
 TEST(System, envGetAndSet) {

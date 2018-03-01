@@ -13,13 +13,15 @@
 
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
+//#include "android/base/files/SizeUtils.h" // ??
+#include "android/base/system/System.h" // ??
 #include "android/emulator-window.h"
 #include "android/globals.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/ui.h"
 #include "android/snapshot/interface.h"
-#include "android/snapshot/PathUtils.h"
+#include "android/snapshot/PathUtils.h" // ??
 #include "android/snapshot/proto/snapshot.pb.h"
 #include "android/snapshot/Snapshot.h"
 
@@ -295,6 +297,15 @@ void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
     QString snapshotPath(PathUtils::join(avdPath, "snapshots").c_str());
     // I see Snapshot::diskSize() always returning 999, so I calculate the size myself.
     qint64 snapSize = recursiveSize(snapshotPath, simpleName);
+    System::FileSize size2 = // ??
+            android::snapshot::folderSize(simpleName.toStdString()); // ??
+//            System::get()->recursiveSize(snapshotPath.toStdString().c_str(), // ??
+//                                         simpleName.  toStdString().c_str()); // ??
+#ifdef _WIN32
+    printf("s-p: Diff %lld, sizes %lld and %lld\n\n", (snapSize - size2), snapSize, size2); // ??
+#else
+    printf("s-p: Diff %lld, sizes %lld and %ld\n\n", (snapSize - size2), snapSize, size2); // ??
+#endif
 
     QString selectionInfoString =
         + "<big><b>" + logicalName + "</b>";
