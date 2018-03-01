@@ -1007,6 +1007,10 @@ public:
         return pathIsDirInternal(path);
     }
 
+    virtual bool pathIsLink(StringView path) const {
+        return pathIsLinkInternal(path);
+    }
+
     virtual bool pathCanRead(StringView path) const override {
         return pathCanReadInternal(path);
     }
@@ -1026,6 +1030,10 @@ public:
     virtual bool pathFileSize(StringView path,
             FileSize* outFileSize) const override {
         return pathFileSizeInternal(path, outFileSize);
+    }
+
+    virtual FileSize recursiveSize(StringView path) const override {
+        return recursiveSizeInternal(path);
     }
 
     virtual bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const override {
@@ -1743,6 +1751,22 @@ std::vector<std::string> System::scanDirInternal(StringView dirPath) {
 }
 
 // static
+bool System::pathIsLinkInternal(StringView path) {
+#ifdef _WIN32
+    // Supposedly GetFileAttributes() and FindFirstFile()
+    // can be used to detect symbolic links. In my tests,
+    // a symbolic link looked exactly like a regular file.
+    return false;
+#else
+    struct stat fileStatus;
+    if (lstat(path.c_str(), &fileStatus)) {
+        return false;
+    }
+    return S_ISLNK(fileStatus.st_mode);
+#endif
+}
+
+// static
 bool System::pathExistsInternal(StringView path) {
     if (path.empty()) {
         return false;
@@ -1864,6 +1888,34 @@ bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
     // play safe.
     *outFileSize = static_cast<FileSize>(st.st_size);
     return true;
+}
+
+// static
+System::FileSize System::recursiveSizeInternal(StringView path) {
+
+    std::vector<std::string> fileList;
+    fileList.push_back(path);
+
+    FileSize totalSize = 0;
+
+    while (fileList.size() > 0) {
+        const auto currentPath = std::move(fileList.back());
+        fileList.pop_back();
+        if (pathIsFileInternal(currentPath) || pathIsLinkInternal(currentPath)) {
+            // Regular file or link. Return its size.
+            FileSize theSize;
+            if (pathFileSizeInternal(currentPath, &theSize)) {
+                totalSize += theSize;
+            }
+        } else if (pathIsDirInternal(currentPath)) {
+            // Directory. Add its contents to the list.
+            std::vector<std::string> includedFiles = scanDirInternal(currentPath);
+            for (const auto& file : includedFiles) {
+                fileList.push_back(PathUtils::join(currentPath, file));
+            }
+        }
+    }
+    return totalSize;
 }
 
 bool System::fileSizeInternal(int fd, System::FileSize* outFileSize) {

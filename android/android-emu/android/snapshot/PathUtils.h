@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/base/system/System.h"
+
 #include <string>
 #include <vector>
 
@@ -21,6 +23,8 @@ std::string getSnapshotBaseDir();
 std::string getSnapshotDir(const char* snapshotName);
 std::string getSnapshotDepsFileName();
 std::vector<std::string> getSnapshotDirEntries();
+
+base::System::FileSize folderSize(const std::string& snapshotName);
 
 }  // namespace snapshot
 }  // namespace android
