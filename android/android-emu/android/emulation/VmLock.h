@@ -36,16 +36,13 @@ namespace android {
 //
 // 2) Glue code should call VmLock::set() to inject their own implementation
 //    into the process. The default implementation doesn't do anything.
-//clear
-
+//
 
 class VmLock {
+    DISALLOW_COPY_ASSIGN_AND_MOVE(VmLock);
 public:
-    // Constructor.
     VmLock() = default;
-
-    // Destructor.
-    virtual ~VmLock() = default;
+    virtual ~VmLock();
 
     // Lock the VM global mutex.
     virtual void lock() {}
@@ -70,12 +67,11 @@ public:
     // can be deleted by the caller. If |vmLock| is nullptr, a new default
     // instance is created. NOTE: not thread-safe with regards to get().
     static VmLock* set(VmLock* vmLock);
-
-    DISALLOW_COPY_ASSIGN_AND_MOVE(VmLock);
 };
 
 // Convenience class to perform scoped VM locking.
 class ScopedVmLock {
+    DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedVmLock);
 public:
     ScopedVmLock(VmLock* vmLock = VmLock::get()) : mVmLock(vmLock) {
         mVmLock->lock();
@@ -85,44 +81,43 @@ public:
         mVmLock->unlock();
     }
 
-    DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedVmLock);
-
 private:
-    VmLock* mVmLock;
+    VmLock* const mVmLock;
 };
 
 // Convenience class to perform scoped VM locking (but does not try
 // to lock twice).
 class RecursiveScopedVmLock {
+    DISALLOW_COPY_ASSIGN_AND_MOVE(RecursiveScopedVmLock);
 public:
-    RecursiveScopedVmLock(VmLock* vmLock = VmLock::get()) : mVmLock(vmLock) {
-        mShouldLock = !mVmLock->isLockedBySelf();
-        if (mShouldLock) {
-            mVmLock->lock();
+    RecursiveScopedVmLock(VmLock* vmLock = VmLock::get()) {
+        if (vmLock->isLockedBySelf()) {
+            mVmLock = nullptr;
+        } else {
+            mVmLock = vmLock;
+            vmLock->lock();
         }
     }
 
     ~RecursiveScopedVmLock() {
-        if (mShouldLock) {
+        if (mVmLock) {
             mVmLock->unlock();
         }
     }
 
-    DISALLOW_COPY_ASSIGN_AND_MOVE(RecursiveScopedVmLock);
-
 private:
-    bool mShouldLock = true;
     VmLock* mVmLock;
 };
 
 // Another convenience class for a code that may run either under a lock or not
 // but needs to ensure that some part of it runs without a VmLock.
 class ScopedVmUnlock {
+    DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedVmUnlock);
 public:
     ScopedVmUnlock(VmLock* vmLock = VmLock::get()) {
         if (vmLock->isLockedBySelf()) {
             mVmLock = vmLock;
-            mVmLock->unlock();
+            vmLock->unlock();
         } else {
             mVmLock = nullptr;
         }
@@ -133,8 +128,6 @@ public:
             mVmLock->lock();
         }
     }
-
-    DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedVmUnlock);
 
 private:
     VmLock* mVmLock;

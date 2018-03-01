@@ -14,11 +14,11 @@
 
 #include "android/emulation/VmLock.h"
 
-#include "android/base/memory/LazyInstance.h"
-
 namespace android {
 
 static VmLock* sInstance = nullptr;
+
+VmLock::~VmLock() = default;
 
 VmLock* VmLock::get() {
     if (!sInstance) {
