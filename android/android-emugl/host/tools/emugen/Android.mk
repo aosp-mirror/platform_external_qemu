@@ -11,9 +11,6 @@ LOCAL_SRC_FILES := \
     strUtils.cpp \
     TypeFactory.cpp \
 
-LOCAL_LDFLAGS += -m64
-LOCAL_CFLAGS += -m64
-
 ifeq ($(BUILD_HOST_OS),linux)
   # Make sure libc++.so can be found
   LOCAL_LDFLAGS +=-Wl,-rpath=$(BUILD_OBJS_DIR)/intermediates64
@@ -35,9 +32,6 @@ $(call emugl-begin-host-executable,emugen_unittests)
 LOCAL_SRC_FILES := \
     Parser.cpp \
     Parser_unittest.cpp
-
-LOCAL_LDFLAGS += -m64
-LOCAL_CFLAGS += -m64
 
 LOCAL_INSTALL := false
 

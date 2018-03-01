@@ -107,18 +107,23 @@ check_file_type_substring () {
 # on the current target platform. Then EXPECTED_EMULATOR_BITNESS and
 # EXPECTED_EMULATOR_FILE_TYPE accordingly.
 if [ "$MINGW" ]; then
+    EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
     EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
+    EXPECTED_EMULATOR_BITNESS=32
+    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
     TARGET_OS=windows
 elif [ "$HOST_OS" = "Darwin" ]; then
     EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
+    EXPECTED_EMULATOR_BITNESS=64
+    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
     TARGET_OS=darwin
 else
     EXPECTED_64BIT_FILE_TYPE="ELF 64-bit LSB +executable, x86-64"
+    EXPECTED_EMULATOR_BITNESS=64
+    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
     TARGET_OS=linux
 fi
 
-EXPECTED_EMULATOR_BITNESS=64
-EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
 
 # Let's not remove the build directory when someone asks for help
 if [ -z "$HELP" ]; then

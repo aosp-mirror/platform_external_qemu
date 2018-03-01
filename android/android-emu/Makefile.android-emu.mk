@@ -520,12 +520,17 @@ ifeq ($(BUILD_TARGET_OS),windows)
 
 endif
 
-LOCAL_COPY_COMMON_PREBUILT_RESOURCES := \
-  virtualscene/Toren1BD/Toren1BD.mtl \
-  virtualscene/Toren1BD/Toren1BD.obj \
-  virtualscene/Toren1BD/Toren1BD_Decor.png \
-  virtualscene/Toren1BD/Toren1BD_Main.png \
-  virtualscene/Toren1BD/Toren1BD_TV.png \
+# This file can get included multiple times, with different variable declarations.
+# We only want to set the LOCAL_COPY_COMMON_PREBUILT_RESOURCES once. GNUmake will
+# complain that we are overriding targets if we don't.
+ifdef FIRST_INCLUDE
+LOCAL_COPY_COMMON_PREBUILT_RESOURCES += \
+      virtualscene/Toren1BD/Toren1BD.mtl \
+      virtualscene/Toren1BD/Toren1BD.obj \
+      virtualscene/Toren1BD/Toren1BD_Decor.png \
+      virtualscene/Toren1BD/Toren1BD_Main.png \
+      virtualscene/Toren1BD/Toren1BD_TV.png
+endif
 
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
