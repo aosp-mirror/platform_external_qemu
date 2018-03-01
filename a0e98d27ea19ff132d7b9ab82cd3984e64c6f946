@@ -325,6 +325,30 @@
     },
     {
       "key": {
+        "uuid": "333feaed_139b702d",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-01T00:52:57Z",
+      "side": 1,
+      "message": "Maybe we want to introduce a constant like \"bytes per pixel\" instead of \"2\" or \"sizeof(int16_t)\"?",
+      "parentUuid": "d2158006_abcd5f5a",
+      "range": {
+        "startLine": 688,
+        "startChar": 19,
+        "endLine": 688,
+        "endChar": 35
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a80a6260_afc59bad",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
