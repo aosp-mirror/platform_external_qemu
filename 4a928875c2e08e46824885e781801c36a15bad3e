@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "162b620a_db80e1a3",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1900,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-01T15:58:22Z",
+      "side": 1,
+      "message": "nit:space",
+      "range": {
+        "startLine": 1900,
+        "startChar": 0,
+        "endLine": 1900,
+        "endChar": 8
+      },
+      "revId": "4a928875c2e08e46824885e781801c36a15bad3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99a76623_803ed857",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1901,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-01T15:58:22Z",
+      "side": 1,
+      "message": "To prevent possible issues with stack overflow, we can convert this recursion to an iteration by explicitly maintaining the intermediate results that would be on the call stack, using |includedFiles| as the \"to-do list\", roughly something like this:\n\nstd::vector\u003cstd::string\u003e includedFiles \u003d scanDirInternal(path);\n\nwhile (includedFiles.size() \u003e 0) {\n    const auto\u0026 path \u003d includedFiles.pop();\n    if (pathIsDirInternal(path)) {\n        std::vector\u003cstd::string\u003e moreFiles \u003d scanDirInternal(path);\n        includedFiles.insert(includedFiles.end(), moreFiles.start(), \n                             moreFiles.end());\n    } else if (pathIsFileInternal(path)) {\n        FileSize theSize;\n        if (pathFileSizeInternal(path, \u0026theSize)) {\n            totalSize +\u003d theSize;\n        }\n    }\n}",
+      "range": {
+        "startLine": 1901,
+        "startChar": 0,
+        "endLine": 1901,
+        "endChar": 54
+      },
+      "revId": "4a928875c2e08e46824885e781801c36a15bad3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
