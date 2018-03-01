@@ -1028,6 +1028,14 @@ public:
         return pathFileSizeInternal(path, outFileSize);
     }
 
+    virtual FileSize recursiveSize(StringView path) const override {
+        return recursiveSizeInternal(path);
+    }
+
+    virtual FileSize recursiveSize(StringView baseDir, StringView subDir) const override {
+        return recursiveSizeInternal(baseDir, subDir);
+    }
+
     virtual bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const override {
         return pathFreeSpaceInternal(path, spaceInBytes);
     }
@@ -1864,6 +1872,35 @@ bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
     // play safe.
     *outFileSize = static_cast<FileSize>(st.st_size);
     return true;
+}
+
+// static
+System::FileSize System::recursiveSizeInternal(StringView baseDir, StringView subDir) {
+    return recursiveSizeInternal(PathUtils::join(baseDir, subDir));
+}
+
+// static
+System::FileSize System::recursiveSizeInternal(StringView path) {
+    if (pathIsFileInternal(path)) {
+        // Regular file. Return its size.
+        FileSize theSize;
+        if (pathFileSizeInternal(path, &theSize)) {
+            return theSize;
+        }
+        return 0;
+    }
+
+    if (!pathIsDirInternal(path)) {
+        return 0;
+    }
+
+    // Directory: Count up all the included files
+    FileSize totalSize = 0;
+    std::vector<std::string> includedFiles = scanDirInternal(path);
+    for(std::vector<std::string>::iterator it = includedFiles.begin(); it != includedFiles.end(); it++) {
+        totalSize += recursiveSizeInternal(path, *it);
+    }
+    return totalSize;
 }
 
 bool System::fileSizeInternal(int fd, System::FileSize* outFileSize) {

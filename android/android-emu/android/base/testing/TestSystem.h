@@ -250,6 +250,14 @@ public:
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
     }
 
+    virtual FileSize recursiveSize(StringView path) const override {
+        return recursiveSizeInternal(toTempRoot(path));
+    }
+
+    virtual FileSize recursiveSize(StringView baseDir, StringView subDir) const override {
+        return recursiveSizeInternal(toTempRoot(baseDir), subDir);
+    }
+
     virtual bool pathFreeSpace(StringView path, FileSize* sizeInBytes) const override {
         return pathFreeSpaceInternal(toTempRoot(path), sizeInBytes);
     }
