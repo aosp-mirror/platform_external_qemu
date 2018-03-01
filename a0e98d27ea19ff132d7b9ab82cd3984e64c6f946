@@ -48,6 +48,23 @@
     },
     {
       "key": {
+        "uuid": "10ff8c7e_e3e97afa",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "nit, it looks like these are always positive.",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bd6d38ab_a2107cc7",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -95,6 +112,40 @@
     },
     {
       "key": {
+        "uuid": "b939d0cc_f2593fa8",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "it\u0027s already private :-)",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86e24b44_4102ab8d",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "Moving the gif out of this class would make this class easier to understand, as the 3 methods below can move out as well.",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4972a845_f03dbbe5",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -115,6 +166,40 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2892340a_b874338f",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "Just make them unsigned.",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aef637ee_b0fd6a02",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "Consider using C++ LOG(ERROR) (android/base/log.h) framework we have.",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     },
     {
       "key": {
@@ -164,6 +249,23 @@
     },
     {
       "key": {
+        "uuid": "dfa4a0dd_b4cb107e",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "This is very confusing! I was looking for who is setting this to false (is there some magical side effect somewhere?), until I saw that it is really about gotPacket becoming false.\n\nIt might be easier to understand for others to write it as: if we have video keep writing frames until they are gone.",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0a2305f5_33915b5b",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -175,6 +277,30 @@
       "writtenOn": "2018-02-26T18:27:32Z",
       "side": 1,
       "message": "this could even be an android::base::SmallVector\u003cuint8_t, 1024\u003e\nthis way any sizes under a kilobyte won\u0027t need an allocation at all",
+      "range": {
+        "startLine": 384,
+        "startChar": 9,
+        "endLine": 385,
+        "endChar": 43
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d6f5acc4_c63049a0",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "That\u0027s a cool data structure.",
+      "parentUuid": "0a2305f5_33915b5b",
       "range": {
         "startLine": 384,
         "startChar": 9,
@@ -204,6 +330,40 @@
         "endLine": 392,
         "endChar": 25
       },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "192c8d7e_0d25abfb",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "I don\u0027t understand why the return value equal to mHasVideoFrames.",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f093da3_3cf2474a",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "Why is the videocodec involved?",
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -279,6 +439,23 @@
     },
     {
       "key": {
+        "uuid": "0a254aa5_1988ae84",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "All this stuff below is codec configuration.\n\n- Consider moving this to a separate function\n- Consider using dependency injection so you can configure the recorder with your own codec of choice.",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6052cc67_e2138311",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -296,6 +473,23 @@
         "endLine": 621,
         "endChar": 24
       },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "948fc1b1_7a09bbf9",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "Isn\u0027t this always VP9?",
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -349,6 +543,23 @@
     },
     {
       "key": {
+        "uuid": "405ba959_78249bd7",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "this is outside the #if DEBUG_VIDEO, yet you are referring to starUs.\n\nIs DEBUG_VIDEO always true?",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a80a6260_afc59bad",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -366,6 +577,74 @@
         "endLine": 987,
         "endChar": 41
       },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc3f4442_73ab060d",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1000,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "customscoped ptr?",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce9f8f53_6beaa942",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1015,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "What does this magic number mean?",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5543620f_f8a85326",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1046,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "We now have a partially initialized mAudioStream object, is that ok?",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8179683c_8b95fec8",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "do we need to release mVideaStream.frame?",
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -412,6 +691,23 @@
         "endLine": 1318,
         "endChar": 20
       },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46333074_d4ecf0a3",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1328,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "Consider using scopedCPtr",
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -601,6 +897,40 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d47ebcdb_49bfeddf",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "Consider moving to separate class.",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6013019_33fe6c27",
+        "filename": "android/android-emu/android/ffmpeg-recorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-01T18:32:10Z",
+      "side": 1,
+      "message": "unsigned?",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
