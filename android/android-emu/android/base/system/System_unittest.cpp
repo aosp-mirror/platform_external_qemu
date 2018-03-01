@@ -34,12 +34,38 @@
 namespace android {
 namespace base {
 
+static void make_directory(const std::string& dir, const char* file) {
+    std::string path = dir;
+    path.append("/");
+    path.append(file);
+    int fd = ::mkdir(path.c_str(), 0777);
+    EXPECT_GE(fd, 0) << "Path: " << path.c_str();
+    ::close(fd);
+}
+
 static void make_subfile(const std::string& dir, const char* file) {
     std::string path = dir;
     path.append("/");
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
     EXPECT_GE(fd, 0) << "Path: " << path.c_str();
+    ::close(fd);
+}
+
+static void write_file(const std::string& dir, const char* file, size_t nBytes) {
+    static constexpr size_t BLOCK_SIZE = 4096;
+    static const char theData[BLOCK_SIZE] = { 0 };
+    std::string path = dir;
+    path.append("/");
+    path.append(file);
+    int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
+    EXPECT_GE(fd, 0) << "Path: " << path.c_str();
+
+    while (nBytes > 0) {
+        size_t nToWrite = std::min(nBytes, BLOCK_SIZE);
+        ::write(fd, theData, nToWrite);
+        nBytes -= nToWrite;
+    }
     ::close(fd);
 }
 
@@ -171,6 +197,41 @@ TEST(System, scandDirEntries) {
     for (size_t n = 0; n < kCount; ++n) {
         EXPECT_STREQ(kExpected[n], entries[n].c_str()) << "#" << n;
     }
+}
+
+TEST(System, recursiveSize) {
+    static const char* const kDirs[] = {
+        "d1", "d2",
+        "d2/d2a", "d2/d2b"
+    };
+
+    static const char* const kFiles[] = {
+        "f1", "f2", "f3",
+        "d1/d1f1", "d1/d1f2", "d1/d1f3", "d1/d1f4",
+        "d2/d2f1", "d2/d2f2", "d2/d2f3", "d2/d2f4", "d2/d2f5"
+    };
+    static const System::FileSize kFileSizes[] = {
+        123, 55, 2345,
+        2222, 3333, 8329, 472,
+        4384, 54793, 234454, 113432, 4883232
+    };
+
+    // Create the directories
+    TestTempDir myDir("TestDirectory");
+    size_t nItems = ARRAYLEN(kDirs);
+    for (size_t idx = 0; idx<nItems; idx++) {
+        make_directory(myDir.path(), kDirs[idx]);
+    }
+
+    // Write files into the directories
+    System::FileSize expectedTotalSize = 0;
+    nItems = ARRAYLEN(kFiles);
+    for (size_t idx = 0; idx<nItems; idx++) {
+        write_file(myDir.path(), kFiles[idx], kFileSizes[idx]);
+        expectedTotalSize += kFileSizes[idx];
+    }
+
+    EXPECT_EQ(expectedTotalSize, System::get()->recursiveSize(myDir.path()));
 }
 
 TEST(System, envGetAndSet) {

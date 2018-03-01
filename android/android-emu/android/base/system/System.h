@@ -282,6 +282,15 @@ public:
         return fileSize(fd, &res) ? makeOptional(res) : kNullopt;
     }
 
+    // Get the size of the directory at |path|. Include all files
+    // and subdirectories, recursively.
+    // If |path| is a regular file, return the size of that file.
+    virtual FileSize recursiveSize(StringView path) const = 0;
+
+    // Join |baseDir| and |subDir| into a directory path and return
+    // the size of all files at that directory and its subdirectories.
+    virtual FileSize recursiveSize(StringView baseDir, StringView subDir) const = 0;
+
     // Get the amount of free disk space, in bytes, at |path|.
     // Returns 'false' on error.
     virtual bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const = 0;
@@ -442,6 +451,8 @@ protected:
     static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
     static bool fileSizeInternal(int fd, FileSize* outFileSize);
     static bool pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes);
+    static FileSize recursiveSizeInternal(StringView path);
+    static FileSize recursiveSizeInternal(StringView baseDir, StringView subDir);
     static Optional<Duration> pathCreationTimeInternal(StringView path);
     static Optional<Duration> pathModificationTimeInternal(StringView path);
     static Optional<DiskKind> diskKindInternal(StringView path);
