@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "bb5b61a0_569bc9df",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-02T00:10:54Z",
+      "side": 1,
+      "message": "Point taken - error is just an ambiguous signal that would require additional syscalls to figure out anyway",
+      "parentUuid": "00e745c4_e2a25530",
+      "range": {
+        "startLine": 288,
+        "startChar": 12,
+        "endLine": 288,
+        "endChar": 20
+      },
+      "revId": "f562febe83e11fb455b72c0f864fcdcb1b771e8c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1124bbee_c0c6c637",
         "filename": "android/android-emu/android/base/system/System.h",
         "patchSetId": 2
