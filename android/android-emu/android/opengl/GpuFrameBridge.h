@@ -81,6 +81,10 @@ public:
     // Async version of getRecordFrame.
     virtual void* getRecordFrameAsync() = 0;
 
+    // Invalidates the recording buffers. Once called, getRecordFrame() and it's
+    // async version will return null until new data has been posted.
+    virtual void invalidateRecordingBuffers() = 0;
+
 protected:
     GpuFrameBridge() {}
     GpuFrameBridge(const GpuFrameBridge& other);

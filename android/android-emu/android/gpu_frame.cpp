@@ -126,6 +126,12 @@ bool gpu_frame_set_record_mode(bool on) {
     CHECK(sBridge);
 
     gpu_frame_set_post(on);
+    // Need to invalidate the recording buffers in GpuFrameBridge so on the next
+    // recording we only read the new data and not data from the previous
+    // recording. The buffers will be valid again once new data has been posted.
+    if (!on) {
+        sBridge->invalidateRecordingBuffers();
+    }
     return true;
 }
 
