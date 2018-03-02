@@ -37,8 +37,8 @@ static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
                 return Tel_Resp_Action_Failed;
             }
 
-            amodem_add_inbound_call(android_modem, phoneNumber);
-            return Tel_Resp_OK;
+            resp = amodem_add_inbound_call(android_modem, phoneNumber);
+            return resp ? Tel_Resp_Radio_Off : Tel_Resp_OK;
 
         case Tel_Op_Accept_Call:
         case Tel_Op_Reject_Call_Explicit:

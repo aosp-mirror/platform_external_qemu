@@ -1033,6 +1033,9 @@ amodem_send_calls_update( AModem  modem )
 int
 amodem_add_inbound_call( AModem  modem, const char*  number )
 {
+    if (modem->radio_state == A_RADIO_STATE_OFF)
+        return -1;
+
     AVoiceCall  vcall = amodem_alloc_call( modem );
     ACall       call  = &vcall->call;
     int         len;
