@@ -49,7 +49,11 @@ static void make_sized_file(const std::string& dir, const char* file, size_t nBy
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
     EXPECT_GE(fd, 0) << "Path: " << path.c_str();
+#ifdef _WIN32
+    _chsize(fd, nBytes);
+#else
     ::ftruncate(fd, nBytes);
+#endif
     ::close(fd);
 }
 
