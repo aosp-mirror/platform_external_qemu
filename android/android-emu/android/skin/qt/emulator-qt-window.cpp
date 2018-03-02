@@ -369,6 +369,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<SkinGenericFunction>();
     qRegisterMetaType<RunOnUiThreadFunc>();
     qRegisterMetaType<Ui::OverlayMessageIcon>();
+    qRegisterMetaType<Ui::OverlayChildWidget::DismissFunc>();
 
     mOrientation = !strcmp(android_hw->hw_initialOrientation, "landscape") ?
                        SKIN_ROTATION_270 : SKIN_ROTATION_0;
@@ -455,6 +456,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_runOnUiThread);
     QObject::connect(this, &EmulatorQtWindow::showMessage, this,
                      &EmulatorQtWindow::slot_showMessage);
+    QObject::connect(this, &EmulatorQtWindow::showMessageWithDismissCallback, this,
+                     &EmulatorQtWindow::slot_showMessageWithDismissCallback);
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit,
                      this, &EmulatorQtWindow::slot_clearInstance);
 
@@ -1733,6 +1736,15 @@ void EmulatorQtWindow::slot_showMessage(QString text,
                                         Ui::OverlayMessageIcon icon,
                                         int timeoutMs) {
     mContainer.messageCenter().addMessage(text, icon, timeoutMs);
+}
+
+void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
+                                                           Ui::OverlayMessageIcon icon,
+                                                           QString dismissText,
+                                                           RunOnUiThreadFunc func,
+                                                           int timeoutMs) {
+    auto msg = mContainer.messageCenter().addMessage(text, icon, timeoutMs);
+    msg->setDismissCallback(dismissText, std::move(func));
 }
 
 void EmulatorQtWindow::adbPushProgress(double progress, bool done) {

@@ -192,6 +192,11 @@ signals:
     void layoutChanged(SkinRotation rot);
 
     void showMessage(QString text, Ui::OverlayMessageIcon icon, int timeoutMs);
+    void showMessageWithDismissCallback(QString text,
+                                        Ui::OverlayMessageIcon icon,
+                                        QString dismissText,
+                                        RunOnUiThreadFunc func,
+                                        int timeoutMs);
 
     void showVirtualSceneControls(bool show);
 
@@ -311,6 +316,11 @@ private slots:
 
     void slot_showMessage(QString text, Ui::OverlayMessageIcon icon,
                           int timeoutMs);
+    void slot_showMessageWithDismissCallback(QString text,
+                                             Ui::OverlayMessageIcon icon,
+                                             QString dismissText,
+                                             Ui::OverlayChildWidget::DismissFunc func,
+                                             int timeoutMs);
 
 public slots:
     // Here are conventional slots that perform interesting high-level functions
