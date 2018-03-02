@@ -168,7 +168,6 @@ sdk {
             into 'lib/pc-bios'
         }
 
-/*-- Disable WIN32 
         item("$buildWindowsEmulator.output/emulator-arm.exe") {
             executable true
             builtBy buildWindowsEmulator
@@ -185,7 +184,6 @@ sdk {
             executable true
             builtBy buildWindowsEmulator
         }
----*/
 
         item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
             executable true
