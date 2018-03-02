@@ -90,10 +90,16 @@ void TelephonyPage::on_tel_startEndButton_clicked()
 
                 tResp = sTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
                                                       cleanNumber.toStdString().c_str());
-                if (tResp != Tel_Resp_OK) {
-                    showErrorDialog(tr("The call failed."), tr("Telephony"));
-                    return;
+                const char* errMsg = NULL;
+                if (tResp == Tel_Resp_Radio_Off) {
+                    errMsg = "The call failed: airplane mode is on.";
+                } else if (tResp == Tel_Resp_Action_Failed) {
+                    errMsg = "The call failed.";
                 }
+                if (tResp != Tel_Resp_OK) {
+                    showErrorDialog(tr(errMsg), tr("Telephony"));
+                }
+                return;
             }
         }
 
@@ -277,6 +283,11 @@ void TelephonyPage::on_sms_sendButton_clicked()
             AModem modem = sTelephonyAgent->getModem();
             if (modem == NULL) {
                 showErrorDialog(tr("Cannot send message, modem emulation not running."), tr("SMS"));
+                return;
+            }
+
+            if (amodem_get_radio_state(modem) == A_RADIO_STATE_OFF) {
+                showErrorDialog(tr("Cannot send message, airplane mode is on."), tr("SMS"));
                 return;
             }
 
