@@ -37,6 +37,10 @@ public:
         SKIP_TEST_ON_WINE();
 
         static const char kSubPath[] = "testImage.img";
+        // Code coverage can interfere with detection of the resize exectuable
+        // We explicitly set the launcher dir, as we expect the resize
+        // executable to be in a directory below us.
+        mSys->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", mSys->getProgramDirectory());
         mTempDir.reset(new TestTempDir("ext4resizetest"));
         ASSERT_TRUE(mTempDir->path());
         mFilePath = mTempDir->makeSubPath(kSubPath);
