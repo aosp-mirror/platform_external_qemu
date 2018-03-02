@@ -46,9 +46,10 @@ struct Frame {
     int width;
     int height;
     void* pixels;
+    bool isValid;
 
     Frame(int w, int h, const void* pixels) :
-            width(w), height(h), pixels(NULL) {
+            width(w), height(h), pixels(NULL), isValid(true) {
         this->pixels = ::calloc(w * 4, h);
         ::memcpy(this->pixels, pixels, w * 4 * h);
     }
@@ -152,8 +153,9 @@ public:
             AutoLock lock(mRecLock);
             memcpy(mRecFrame->pixels, mRecTmpFrame->pixels,
                    mRecFrame->width * mRecFrame->height * 4);
+            mRecFrame->isValid = true;
         }
-        return mRecFrame ? mRecFrame->pixels : nullptr;
+        return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
     }
 
     virtual void* getRecordFrameAsync() {
@@ -161,8 +163,19 @@ public:
             AutoLock lock(mRecLock);
             mReadPixelsFunc(mRecFrame->pixels,
                             mRecFrame->width * mRecFrame->height * 4);
+            mRecFrame->isValid = true;
         }
-        return mRecFrame ? mRecFrame->pixels : nullptr;
+        return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
+    }
+
+    virtual void invalidateRecordingBuffers() {
+        {
+            AutoLock lock(mRecLock);
+            if (mRecFrame) {
+                mRecFrame->isValid = false;
+            }
+        }
+        mRecFrameUpdated.store(false, std::memory_order_release);
     }
 
 private:
