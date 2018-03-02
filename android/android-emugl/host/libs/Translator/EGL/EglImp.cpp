@@ -807,6 +807,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreateWindowSurface(EGLDisplay display, EGLConf
         RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ALLOC);
     }
 
+    emugl::Mutex::AutoLock mutex(s_eglLock);
     unsigned int width,height;
     if(!dpy->nativeType()->checkWindowPixelFormatMatch(
             win, cfg->nativeFormat(), &width, &height)) {
@@ -869,6 +870,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
 
     tmpPbSurfacePtr->getAttrib(EGL_MIPMAP_TEXTURE, &pbinfo.hasMipmap);
 
+    emugl::Mutex::AutoLock mutex(s_eglLock);
     EglOS::Surface* pb = dpy->nativeType()->createPbufferSurface(
             cfg->nativeFormat(), &pbinfo);
     if(!pb) {
@@ -882,6 +884,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface surface) {
     VALIDATE_DISPLAY(display);
+    emugl::Mutex::AutoLock mutex(s_eglLock);
     SurfacePtr srfc = dpy->getSurface(surface);
     if(!srfc.get()) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
@@ -1032,6 +1035,8 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
         assert(shareGroupId);
     }
 
+    emugl::Mutex::AutoLock mutex(s_eglLock);
+
     ContextPtr ctx(new EglContext(dpy, shareGroupId, cfg,
                                   glesCtx, glesVersion,
                                   profile_mask,
@@ -1061,6 +1066,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyContext(EGLDisplay display, EGLContext c
     VALIDATE_DISPLAY(display);
     VALIDATE_CONTEXT(context);
 
+    emugl::Mutex::AutoLock mutex(s_eglLock);
     dpy->removeContext(context);
     return EGL_TRUE;
 }
@@ -1175,11 +1181,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         if(prevCtx.get()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
-        if (!dpy->nativeType()->makeCurrent(
-                newReadPtr->native(),
-                newDrawPtr->native(),
-                newCtx->nativeType())) {
-               RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
+        {
+            emugl::Mutex::AutoLock mutex(s_eglLock);
+            if (!dpy->nativeType()->makeCurrent(
+                        newReadPtr->native(),
+                        newDrawPtr->native(),
+                        newCtx->nativeType())) {
+                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
+            }
         }
         //TODO: handle the following errors
         // EGL_BAD_CURRENT_SURFACE , EGL_CONTEXT_LOST  , EGL_BAD_ACCESS
@@ -1272,6 +1281,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
 }
 
 EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
     ThreadInfo* thread = getThreadInfo();
     EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx    = thread->eglContext;
@@ -1288,6 +1298,7 @@ EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
 }
 
 EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
     if (!EglValidate::surfaceTarget(readdraw)) {
         return EGL_NO_SURFACE;
     }
