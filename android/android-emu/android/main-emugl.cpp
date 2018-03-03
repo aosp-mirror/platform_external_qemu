@@ -46,7 +46,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
         }
     } else if (!gpuOption) {
         // In the case of a platform build, use the 'auto' mode by default.
-        str_reset(hwGpuModePtr, "swiftshader_indirect");
+        str_reset(hwGpuModePtr, "auto");
         gpuEnabled = true;
     }
 
