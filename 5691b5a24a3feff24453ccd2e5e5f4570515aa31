@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4a779ab3_0f2b5872",
+        "filename": "target/mips/translate.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2891,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T20:36:47Z",
+      "side": 1,
+      "message": "This patch is taken from QEMU ToT, and we would like to keep it as close as possible to the original one, and to keep this code segment as is.",
+      "parentUuid": "fc36194d_057a39f6",
+      "range": {
+        "startLine": 2891,
+        "startChar": 4,
+        "endLine": 2891,
+        "endChar": 7
+      },
+      "revId": "5691b5a24a3feff24453ccd2e5e5f4570515aa31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "46afb654_4e7a9229",
         "filename": "target/mips/translate.c",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "022799bb_80c0b818",
+        "filename": "target/mips/translate.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3065,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T20:36:47Z",
+      "side": 1,
+      "message": "This patch is taken from QEMU ToT, and we would like to keep it as close as possible to the original one, and to keep this code segment as is.",
+      "parentUuid": "46afb654_4e7a9229",
+      "range": {
+        "startLine": 3065,
+        "startChar": 4,
+        "endLine": 3065,
+        "endChar": 7
+      },
+      "revId": "5691b5a24a3feff24453ccd2e5e5f4570515aa31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f32e79f1_a9c210c3",
         "filename": "target/mips/translate.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2018-02-28T18:57:17Z",
       "side": 1,
       "message": "Same as above.",
+      "range": {
+        "startLine": 3110,
+        "startChar": 4,
+        "endLine": 3110,
+        "endChar": 7
+      },
+      "revId": "5691b5a24a3feff24453ccd2e5e5f4570515aa31",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1560aec_596d98a7",
+        "filename": "target/mips/translate.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3110,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T20:36:47Z",
+      "side": 1,
+      "message": "This patch is taken from QEMU ToT, and we would like to keep it as close as possible to the original one, and to keep this code segment as is.",
+      "parentUuid": "f32e79f1_a9c210c3",
       "range": {
         "startLine": 3110,
         "startChar": 4,
