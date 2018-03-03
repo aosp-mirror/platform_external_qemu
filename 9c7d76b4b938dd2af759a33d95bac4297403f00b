@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "387b12d2_7c2824ce",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:20:32Z",
+      "side": 1,
+      "message": "This will be changed as you suggested in the next version of the patch set.",
+      "parentUuid": "a67d928c_af3be721",
+      "range": {
+        "startLine": 610,
+        "startChar": 4,
+        "endLine": 610,
+        "endChar": 11
+      },
+      "revId": "9c7d76b4b938dd2af759a33d95bac4297403f00b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "81481889_085f0ce9",
         "filename": "hw/mips/mips_ranchu.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-02-28T19:39:38Z",
       "side": 1,
       "message": "Is \u003cstdbool.h\u003e available on this platform?",
+      "range": {
+        "startLine": 613,
+        "startChar": 58,
+        "endLine": 613,
+        "endChar": 61
+      },
+      "revId": "9c7d76b4b938dd2af759a33d95bac4297403f00b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5391f48_80506e0c",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:20:32Z",
+      "side": 1,
+      "message": "\u003cstdbool.h\u003e is indeed indirectly available through a QEMU header. The type \"int\" for two arguments will be changed to \"bool\" in the next version of the patch set.",
+      "parentUuid": "81481889_085f0ce9",
       "range": {
         "startLine": 613,
         "startChar": 58,
