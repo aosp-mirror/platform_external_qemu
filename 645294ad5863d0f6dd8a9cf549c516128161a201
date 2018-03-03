@@ -22,6 +22,30 @@
       "revId": "645294ad5863d0f6dd8a9cf549c516128161a201",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8288111c_f8868a9f",
+        "filename": "target/mips/cpu.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T20:38:20Z",
+      "side": 1,
+      "message": "This line is not a part of the change from this patch, and it is best to leave it as is.",
+      "parentUuid": "e3e1996e_b9000444",
+      "range": {
+        "startLine": 501,
+        "startChar": 4,
+        "endLine": 501,
+        "endChar": 11
+      },
+      "revId": "645294ad5863d0f6dd8a9cf549c516128161a201",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
