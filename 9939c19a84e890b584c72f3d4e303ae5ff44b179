@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "42f91ef5_cc3cd0dc",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:17:36Z",
+      "side": 1,
+      "message": "In this case, we would like to keep using QEMU utility function qemu_stroul() that meets our needs.",
+      "parentUuid": "3d892fc8_c64be872",
+      "range": {
+        "startLine": 236,
+        "startChar": 14,
+        "endLine": 236,
+        "endChar": 26
+      },
+      "revId": "9939c19a84e890b584c72f3d4e303ae5ff44b179",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b96178df_c3da891f",
         "filename": "hw/mips/mips_ranchu.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-02-28T20:45:33Z",
       "side": 1,
       "message": "I don\u0027t think enum is the best type here. I believe just \"int\" is better.",
+      "range": {
+        "startLine": 244,
+        "startChar": 4,
+        "endLine": 244,
+        "endChar": 50
+      },
+      "revId": "9939c19a84e890b584c72f3d4e303ae5ff44b179",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d3497b1_06d81a7e",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:17:36Z",
+      "side": 1,
+      "message": "enum type is needed for future use and code clarity. There might be some differences down the road related to the kernel version, and enum type of supported kernels will be handy to have. We would like to keep it this way.",
+      "parentUuid": "b96178df_c3da891f",
       "range": {
         "startLine": 244,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1feb0d4c_952c5804",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:17:36Z",
+      "side": 1,
+      "message": "snprintf() is going to be used in the next version of the patch set.",
+      "parentUuid": "578b15f0_408935da",
+      "range": {
+        "startLine": 493,
+        "startChar": 4,
+        "endLine": 493,
+        "endChar": 11
+      },
+      "revId": "9939c19a84e890b584c72f3d4e303ae5ff44b179",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "acd8d9a0_0feeaee8",
         "filename": "hw/mips/mips_ranchu.c",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2018-02-28T20:45:33Z",
       "side": 1,
       "message": "Is this safe to use buffer in sprintf as an argument?",
+      "range": {
+        "startLine": 505,
+        "startChar": 8,
+        "endLine": 505,
+        "endChar": 15
+      },
+      "revId": "9939c19a84e890b584c72f3d4e303ae5ff44b179",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a18f1458_eeeded2a",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:17:36Z",
+      "side": 1,
+      "message": "This is a mistake, an unsafe code. This is going to be addressed in the next version of the patch set.",
+      "parentUuid": "acd8d9a0_0feeaee8",
       "range": {
         "startLine": 505,
         "startChar": 8,
