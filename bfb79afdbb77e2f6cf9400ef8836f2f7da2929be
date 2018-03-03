@@ -22,6 +22,30 @@
       "revId": "bfb79afdbb77e2f6cf9400ef8836f2f7da2929be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4aa127d_3ebe8baa",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:10:10Z",
+      "side": 1,
+      "message": "This casting and using %li format is truly unnecessary. This is going to be addressed in the next version of patch set, by removing casting and using %d format.",
+      "parentUuid": "34b5c277_d87a7137",
+      "range": {
+        "startLine": 341,
+        "startChar": 17,
+        "endLine": 341,
+        "endChar": 38
+      },
+      "revId": "bfb79afdbb77e2f6cf9400ef8836f2f7da2929be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
