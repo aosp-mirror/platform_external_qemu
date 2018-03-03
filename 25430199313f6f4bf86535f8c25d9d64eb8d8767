@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c95add5d_d71d8992",
+        "filename": "hw/intc/goldfish_pic.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:28:24Z",
+      "side": 1,
+      "message": "Will add appropriate comments.",
+      "parentUuid": "2cd80b35_6c16753d",
+      "range": {
+        "startLine": 128,
+        "startChar": 18,
+        "endLine": 128,
+        "endChar": 31
+      },
+      "revId": "25430199313f6f4bf86535f8c25d9d64eb8d8767",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "aa7b4034_e050d925",
         "filename": "hw/intc/goldfish_pic.c",
         "patchSetId": 1
@@ -64,6 +88,54 @@
         "startChar": 31,
         "endLine": 142,
         "endChar": 39
+      },
+      "revId": "25430199313f6f4bf86535f8c25d9d64eb8d8767",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aead268a_649fb546",
+        "filename": "hw/intc/goldfish_pic.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:28:24Z",
+      "side": 1,
+      "message": "There is nothing wrong with using \"const\" in this case, or similar cases. However, the QEMU code, in a vast majority of similar cases, does not use \"const\". If we start using it, this will create code inconsistencies, and may create maintenance problems. Therefore, in this case, we would like to keep the code as is.",
+      "parentUuid": "2098ef4b_b2e9eefd",
+      "range": {
+        "startLine": 142,
+        "startChar": 31,
+        "endLine": 142,
+        "endChar": 39
+      },
+      "revId": "25430199313f6f4bf86535f8c25d9d64eb8d8767",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b380fb93_957ccc82",
+        "filename": "hw/intc/goldfish_pic.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:28:24Z",
+      "side": 1,
+      "message": "We would like to keep more generic argument name \"value\". There is also difference in types between the argument and the variable mask used within the function. Also, in future, the argument \"value\" may have meanings other than mask.",
+      "parentUuid": "aa7b4034_e050d925",
+      "range": {
+        "startLine": 142,
+        "startChar": 40,
+        "endLine": 142,
+        "endChar": 45
       },
       "revId": "25430199313f6f4bf86535f8c25d9d64eb8d8767",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
