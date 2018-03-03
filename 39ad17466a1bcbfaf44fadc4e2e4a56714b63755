@@ -22,6 +22,30 @@
       "revId": "39ad17466a1bcbfaf44fadc4e2e4a56714b63755",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9dea7e0d_c1fecbfd",
+        "filename": "target/mips/translate_init.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1262984
+      },
+      "writtenOn": "2018-03-03T19:06:53Z",
+      "side": 1,
+      "message": "Hi, Roman. Thanks for the review of this patch set. As far as this code segment is concerned, the thing is that the format and the style of CPU descriptions are inherited from QEMU ToT code, and such style is present for a long time, and not planned to change. From maintenance point of view, it is very important for us to keep these parts of code in Android emulator as close as possible to the corresponding one in QEMU ToT, so we would like to keep this code as is.",
+      "parentUuid": "18c8a258_6344493f",
+      "range": {
+        "startLine": 433,
+        "startChar": 42,
+        "endLine": 433,
+        "endChar": 43
+      },
+      "revId": "39ad17466a1bcbfaf44fadc4e2e4a56714b63755",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
