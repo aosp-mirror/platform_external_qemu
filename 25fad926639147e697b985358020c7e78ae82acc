@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a7c507a8_daf54940",
+        "filename": "android/android-emu/android/base/system/System_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-04T00:12:42Z",
+      "side": 1,
+      "message": "afaik we\u0027ve got this function in android/base/misc/FileUtils.h - android::setFileSize()",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 28
+      },
+      "revId": "25fad926639147e697b985358020c7e78ae82acc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
