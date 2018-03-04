@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ff80cc98_24fc4a0a",
+        "filename": "android/android-emu/android/emulation/control/window_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-04T00:19:11Z",
+      "side": 1,
+      "message": "very nit: showMessageWithDismissCallback() ?",
+      "range": {
+        "startLine": 52,
+        "startChar": 11,
+        "endLine": 52,
+        "endChar": 39
+      },
+      "revId": "b36940863a4ec6176a5319d42b74892b53de510f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b4b4ad5_6874dbdc",
+        "filename": "android/android-emu/android/emulation/control/window_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-04T00:19:11Z",
+      "side": 1,
+      "message": "please always add a \"void* context\" argument to the callback + a separate void* parameter to pass it into the function - otherwise the only way to pass any custom data into the callback is to store it in a global variable, which is a horrible thing",
+      "range": {
+        "startLine": 55,
+        "startChar": 41,
+        "endLine": 55,
+        "endChar": 60
+      },
+      "revId": "b36940863a4ec6176a5319d42b74892b53de510f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
