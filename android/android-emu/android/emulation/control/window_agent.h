@@ -47,6 +47,14 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*showMessage)(const char* message,
                         WindowMessageType type,
                         int timeoutMs);
+
+    // Shows a message to the user + custom dismiss op.
+    void (*showMessageWithDismissCallback)(const char* message,
+                                           WindowMessageType type,
+                                           const char* dismissText,
+                                           void* context,
+                                           void (*func)(void*),
+                                           int timeoutMs);
 } QAndroidEmulatorWindowAgent;
 
 // Defined in android/window-agent-impl.cpp

@@ -18,6 +18,8 @@
 #include <QString>
 #include <QWidget>
 
+#include <functional>
+
 class QHBoxLayout;
 class QLabel;
 
@@ -31,6 +33,7 @@ enum class OverlayMessageIcon { None, Info, Warning, Error };
 class OverlayChildWidget : public QFrame {
     Q_OBJECT
 public:
+    using DismissFunc = std::function<void()>;
     OverlayChildWidget(OverlayMessageCenter* parent,
                        QString text,
                        QPixmap icon);
@@ -41,6 +44,10 @@ public:
     QHBoxLayout* layout() const;
 
     void setFixedWidth(int w);
+    void setDismissCallback(const QString& text, DismissFunc&& func);
+
+public slots:
+    void slot_handleDismissCallbackFunc();
 
 private:
     void updateDisplayedText();
@@ -49,6 +56,7 @@ private:
     QLabel* mLabel = nullptr;
     QLabel* mDismissButton = nullptr;
     QString mText;
+    DismissFunc mOverlayFunc = {};
 };
 
 // The "message center" widget - a container of messages to show in an overlay
@@ -57,6 +65,7 @@ class OverlayMessageCenter : public QWidget {
     Q_OBJECT
 
 public:
+
     explicit OverlayMessageCenter(QWidget* parent = nullptr);
 
     void adjustSize();
@@ -66,9 +75,9 @@ public:
     static constexpr int kDefaultTimeoutMs = 0;
     static constexpr int kInfiniteTimeout = -1;
 
-    void addMessage(QString message,
-                    OverlayMessageIcon icon,
-                    int timeoutMs = kDefaultTimeoutMs);
+    OverlayChildWidget* addMessage(QString message,
+                                   OverlayMessageIcon icon,
+                                   int timeoutMs = kDefaultTimeoutMs);
 
 signals:
     void resized();

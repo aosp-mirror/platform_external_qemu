@@ -59,7 +59,31 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                                   : &dprint;
                         printer("%s", message);
                     }
-                }};
+                },
+        .showMessageWithDismissCallback =
+                [](const char* message, WindowMessageType type,
+                   const char* dismissText, void* context,
+                   void (*func)(void*), int timeoutMs) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->showMessageWithDismissCallback(
+                                QString::fromUtf8(message),
+                                static_cast<Ui::OverlayMessageIcon>(type),
+                                QString::fromUtf8(dismissText),
+                                [func, context] { if (func) func(context); },
+                                timeoutMs);
+                    } else {
+                        const auto printer =
+                                (type == WINDOW_MESSAGE_ERROR)
+                                        ? &derror
+                                        : (type == WINDOW_MESSAGE_WARNING)
+                                                  ? &dwarning
+                                                  : &dprint;
+                        printer("%s", message);
+                        // Don't necessarily perform the func since the
+                        // user doesn't get a chance to dismiss.
+                    }
+                }
+};
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
         &sQAndroidEmulatorWindowAgent;

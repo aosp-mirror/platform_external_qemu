@@ -96,6 +96,20 @@ void OverlayChildWidget::setFixedWidth(int w) {
     updateDisplayedText();
 }
 
+void OverlayChildWidget::setDismissCallback(const QString& text,
+                                            OverlayChildWidget::DismissFunc&& func) {
+    if (!mDismissButton) return;
+
+    mOverlayFunc = std::move(func);
+    mDismissButton->setText(
+        QString("<a href=\"%1\" "
+                "style=\"text-decoration:none;color:#00bea4\">%2</a>")
+                .arg("customDismiss.html")
+                .arg(text));
+    connect(mDismissButton, SIGNAL(linkActivated(const QString&)),
+            this, SLOT(slot_handleDismissCallbackFunc()));
+}
+
 void OverlayChildWidget::updateDisplayedText() {
     // Use the Qt's low-level text layout engine to only display the first
     // two lines of the message; put the whole message into the tooltip
@@ -133,6 +147,11 @@ void OverlayChildWidget::updateDisplayedText() {
     mLabel->setText(mText);
     mLabel->setToolTip({});
 }
+
+void OverlayChildWidget::slot_handleDismissCallbackFunc() {
+    mOverlayFunc();
+}
+
 
 OverlayMessageCenter::OverlayMessageCenter(QWidget* parent)
     : QWidget(parent), mSizeTweaker(this) {
@@ -285,9 +304,9 @@ void OverlayMessageCenter::dismissMessageImmediately(OverlayChildWidget* message
     messageWidget->deleteLater();
 }
 
-void OverlayMessageCenter::addMessage(QString message,
-                                      Icon icon,
-                                      int timeoutMs) {
+OverlayChildWidget* OverlayMessageCenter::addMessage(QString message,
+                                                     Icon icon,
+                                                     int timeoutMs) {
     // Don't add too many items at once.
     const auto children =
             findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
@@ -346,6 +365,8 @@ void OverlayMessageCenter::addMessage(QString message,
     widget->show();
     show();
     emit resized();
+
+    return widget;
 }
 
 void OverlayMessageCenter::reattachToParent() {
