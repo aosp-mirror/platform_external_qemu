@@ -22,6 +22,30 @@
       "revId": "da6b2ea0a25392a8ec8d510d5d8294a43ff01fb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5b9a7a5_1541539c",
+        "filename": "android-qemu2-glue/qemu-telephony-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-03-05T00:39:53Z",
+      "side": 1,
+      "message": "We need to be consistent with how the return code works for, these functions: amodem_add_inbound_call(), amodem_disconnect_call(), and amodem_update_call().\nIt looks like there are 4 possible return codes. \n1, Call operation ok.\n2, Call operation exceed max number.\n3, Call operation number not found.\n4, Call operation radio off. \n\nI will update the return code with these constants.",
+      "parentUuid": "6e4ed61e_d47c37d9",
+      "range": {
+        "startLine": 41,
+        "startChar": 19,
+        "endLine": 41,
+        "endChar": 23
+      },
+      "revId": "da6b2ea0a25392a8ec8d510d5d8294a43ff01fb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
