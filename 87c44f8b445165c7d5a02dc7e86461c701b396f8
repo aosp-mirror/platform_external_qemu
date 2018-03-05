@@ -46,6 +46,30 @@
       "revId": "87c44f8b445165c7d5a02dc7e86461c701b396f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e2a13f6_417fe1f2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-03-05T22:22:14Z",
+      "side": 1,
+      "message": "sounds good",
+      "parentUuid": "d8805c69_46f37e8c",
+      "range": {
+        "startLine": 95,
+        "startChar": 47,
+        "endLine": 95,
+        "endChar": 55
+      },
+      "revId": "87c44f8b445165c7d5a02dc7e86461c701b396f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
