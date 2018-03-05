@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e7e9f0df_7d7dde76",
+        "filename": "android/android-emu/android/emulation/control/window_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-05T15:26:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ff80cc98_24fc4a0a",
+      "range": {
+        "startLine": 52,
+        "startChar": 11,
+        "endLine": 52,
+        "endChar": 39
+      },
+      "revId": "b36940863a4ec6176a5319d42b74892b53de510f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b4b4ad5_6874dbdc",
         "filename": "android/android-emu/android/emulation/control/window_agent.h",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "b36940863a4ec6176a5319d42b74892b53de510f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "556c07bf_eb6ee6d9",
+        "filename": "android/android-emu/android/emulation/control/window_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-05T15:26:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b4b4ad5_6874dbdc",
+      "range": {
+        "startLine": 55,
+        "startChar": 41,
+        "endLine": 55,
+        "endChar": 60
+      },
+      "revId": "b36940863a4ec6176a5319d42b74892b53de510f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
