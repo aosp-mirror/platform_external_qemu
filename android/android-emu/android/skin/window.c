@@ -1096,7 +1096,13 @@ skin_window_find_finger( SkinWindow*  window,
             int xDist = disp->rect.pos.x + disp->rect.size.w/2 - x;
             int yDist = disp->rect.pos.y + disp->rect.size.w/2 - y;
             int distSquared = xDist*xDist + yDist*yDist;
-            finger->inside = distSquared <= (disp->rect.size.w * disp->rect.size.w)/4;
+            // On circular devices with a chin, the bottom of the screen is cut off,
+            // so check to make sure that the touch is about the chin.
+            if (y >= disp->rect.pos.y + disp->rect.size.h) {
+                finger->inside = false;
+            } else {
+                finger->inside = distSquared <= (disp->rect.size.w * disp->rect.size.w)/4;
+            }
         } else {
             // Rectangular device
             finger->inside = skin_rect_contains( &disp->rect, x, y );
