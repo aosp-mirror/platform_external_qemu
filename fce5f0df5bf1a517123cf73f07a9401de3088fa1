@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5672cc0d_1806d5bc",
+        "filename": "android/android-emugl/host/include/OpenglRender/RenderChannel.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-05T23:42:02Z",
+      "side": 1,
+      "message": "please remove the comments as they\u0027re now not belong here",
+      "range": {
+        "startLine": 64,
+        "startChar": 4,
+        "endLine": 67,
+        "endChar": 69
+      },
+      "revId": "fce5f0df5bf1a517123cf73f07a9401de3088fa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58b0b289_8accf8aa",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderChannelImpl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-05T23:42:02Z",
+      "side": 1,
+      "message": "nit: extra space",
+      "range": {
+        "startLine": 110,
+        "startChar": 38,
+        "endLine": 110,
+        "endChar": 39
+      },
+      "revId": "fce5f0df5bf1a517123cf73f07a9401de3088fa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
