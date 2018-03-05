@@ -158,6 +158,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage)) {
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
     }
+    if (android::featurecontrol::isEnabled(android::featurecontrol::ScreenRecording)) {
+        default_shortcuts += "Ctrl+Shift+R SHOW_PANE_RECORD_SCREEN\n";
+    }
 
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
@@ -382,6 +385,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_GPLAY:
             if (down) {
                 showOrRaiseExtendedWindow(PANE_IDX_GOOGLE_PLAY);
+            }
+            break;
+        case QtUICommand::SHOW_PANE_RECORD_SCREEN:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_RECORD_SCREEN);
             }
             break;
         case QtUICommand::SHOW_PANE_SETTINGS:
