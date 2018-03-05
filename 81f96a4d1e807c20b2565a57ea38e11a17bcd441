@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "45e787a7_dc81b9e4",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1894,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-03-05T04:31:35Z",
+      "side": 1,
+      "message": "nit: how does it handle circular links to avoid double counting ?\nit is not clear to me",
+      "range": {
+        "startLine": 1894,
+        "startChar": 0,
+        "endLine": 1894,
+        "endChar": 49
+      },
+      "revId": "81f96a4d1e807c20b2565a57ea38e11a17bcd441",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
