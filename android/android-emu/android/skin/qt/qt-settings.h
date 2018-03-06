@@ -110,5 +110,13 @@ constexpr char PER_AVD_ALTITUDE[] = "perAvd/loc/altitude";
 constexpr char PER_AVD_LOC_PLAYBACK_FILE[] = "perAvd/loc/playback_file_path";
 constexpr char PER_AVD_LOC_PLAYBACK_SPEED[] = "perAvd/loc/playback_speed";
 
+bool hasAvdSpecificSettings();
+
+template <class T>
+void setPerAvdSettings(const char* key, T val);
+
+template <class T>
+T getPerAvdSettings(const char* key);
+
 }  // namespace Settings
 }  // namespace Ui
