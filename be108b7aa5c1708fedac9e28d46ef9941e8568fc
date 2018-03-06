@@ -22,6 +22,30 @@
       "revId": "be108b7aa5c1708fedac9e28d46ef9941e8568fc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b67d79ab_9fb2afdb",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1099,
+      "author": {
+        "id": 1117623
+      },
+      "writtenOn": "2018-03-06T20:33:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d5b730b_29c45989",
+      "range": {
+        "startLine": 1099,
+        "startChar": 16,
+        "endLine": 1099,
+        "endChar": 57
+      },
+      "revId": "be108b7aa5c1708fedac9e28d46ef9941e8568fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
