@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d5b730b_29c45989",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1099,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-06T17:07:55Z",
+      "side": 1,
+      "message": "Please add a comment that this is to deal with chin devices where (h \u003c w).",
+      "range": {
+        "startLine": 1099,
+        "startChar": 16,
+        "endLine": 1099,
+        "endChar": 57
+      },
+      "revId": "be108b7aa5c1708fedac9e28d46ef9941e8568fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
