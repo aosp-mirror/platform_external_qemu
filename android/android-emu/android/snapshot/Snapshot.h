@@ -64,6 +64,7 @@ private:
     uint64_t mSize = 0;
     int32_t mInvalidLoads = 0;
     int32_t mSuccessfulLoads = 0;
+    std::vector<emulator_snapshot::SaveStats> mSaveStats;
     FailureReason mLatestFailureReason = FailureReason::Empty;
 };
 
