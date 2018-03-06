@@ -17,6 +17,7 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
+#include "android/base/misc/FileUtils.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
@@ -49,7 +50,7 @@ static void make_sized_file(const std::string& dir, const char* file, size_t nBy
     path.append(file);
     int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0755);
     EXPECT_GE(fd, 0) << "Path: " << path.c_str();
-    ::ftruncate(fd, nBytes);
+    setFileSize(fd, nBytes);
     ::close(fd);
 }
 
