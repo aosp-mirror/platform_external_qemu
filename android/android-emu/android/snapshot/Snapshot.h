@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/containers/CircularBuffer.h"
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/snapshot/common.h"
@@ -64,6 +65,8 @@ private:
     uint64_t mSize = 0;
     int32_t mInvalidLoads = 0;
     int32_t mSuccessfulLoads = 0;
+
+    base::CircularBuffer<emulator_snapshot::SaveStats> mSaveStats;
     FailureReason mLatestFailureReason = FailureReason::Empty;
 };
 
