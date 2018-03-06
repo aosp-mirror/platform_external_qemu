@@ -1,0 +1,297 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "58d89c0c_6f108435",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "ditto about std::function\u003c\u003e here, and \u0027using\u0027 syntax",
+      "range": {
+        "startLine": 38,
+        "startChar": 13,
+        "endLine": 38,
+        "endChar": 47
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b05c51a_9d5b2159",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "nit: std::move(cb) saves you one allocation",
+      "range": {
+        "startLine": 43,
+        "startChar": 58,
+        "endLine": 43,
+        "endChar": 60
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd989f98_688a2fd8",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "nit: std::move(cb)",
+      "range": {
+        "startLine": 93,
+        "startChar": 20,
+        "endLine": 93,
+        "endChar": 22
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f2fb759_98025446",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "bits / CHAR_BIT ?",
+      "range": {
+        "startLine": 102,
+        "startChar": 8,
+        "endLine": 103,
+        "endChar": 0
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f4d5caa_70ee60c5",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "1. please use AutoLock - it\u0027s just safer in the long run\n2. Constructor is pretty much the only place where one can get away with not locking anything - there\u0027s no way any other thread could be accessing any object here",
+      "range": {
+        "startLine": 104,
+        "startChar": 7,
+        "endLine": 104,
+        "endChar": 25
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "212f4c6e_24bde88d",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "how does your use of the BufferQueue differs from the MessageChannel\u003c\u003e? I don\u0027t see any place where the corresponding locks protect something else, or have any grouping. MessageChannel\u003c\u003e provides the same kind of guarantees but also manages the locking inside",
+      "range": {
+        "startLine": 188,
+        "startChar": 26,
+        "endLine": 188,
+        "endChar": 36
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52cdc991_99a981fb",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "clear() + insert() could be replaced with a single assign() call",
+      "range": {
+        "startLine": 196,
+        "startChar": 19,
+        "endLine": 197,
+        "endChar": 69
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "450ff00d_118a2952",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "\"try...\" function without result check looks suspicuous",
+      "range": {
+        "startLine": 202,
+        "startChar": 31,
+        "endLine": 202,
+        "endChar": 44
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd2aca75_73282d2d",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "std::move(cb), please",
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3aff3869_511d6310",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "nit: if you decide to change it please use the new \u0027using\u0027 syntax:\n\nusing Callback \u003d std::function\u003cint(void* buf, int size, uint64_t timestampUs);",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 11
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af461e17_612fde74",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "curious if the |buf| can and should be const here",
+      "range": {
+        "startLine": 31,
+        "startChar": 26,
+        "endLine": 31,
+        "endChar": 30
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c814124_22a6c48e",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "IMO it\u0027s better to define the whole std::function\u003c...\u003e as a typedef here, this way one may create variables / members and cast functions directly",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 67
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ffc1c8c_e21751a1",
+        "filename": "android/android-emu/android/audio/AudioPacket.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-06T19:51:43Z",
+      "side": 1,
+      "message": "nit: insert(end, ...) -\u003e assign()",
+      "range": {
+        "startLine": 41,
+        "startChar": 11,
+        "endLine": 41,
+        "endChar": 40
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
