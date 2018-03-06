@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c05176e1_acd3ba43",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-06T17:14:53Z",
+      "side": 1,
+      "message": "This might use errMsg uninitialized. How about\nif (!\u003d OK) {\n    if (OFF)\n        errMsg \u003d \"failed. off\"\n    else\n        errMsg \u003d \"failed\"\n    showErrorDialog\n    return;\n}",
+      "range": {
+        "startLine": 94,
+        "startChar": 16,
+        "endLine": 101,
+        "endChar": 17
+      },
+      "revId": "b4105f6966b96223f52a6b60868b3c4aa53fafbd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
