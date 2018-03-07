@@ -46,6 +46,30 @@
       "revId": "ba6d2922f2baf78849273b74fc0e0670c256c117",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "58c1e306_952fc662",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-07T18:53:06Z",
+      "side": 1,
+      "message": "that\u0027s good to know, thanks!",
+      "parentUuid": "a7f2ff26_cdcf8723",
+      "range": {
+        "startLine": 705,
+        "startChar": 1,
+        "endLine": 707,
+        "endChar": 37
+      },
+      "revId": "ba6d2922f2baf78849273b74fc0e0670c256c117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
