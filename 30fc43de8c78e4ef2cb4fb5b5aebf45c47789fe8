@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c0a29875_f5744964",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "58d89c0c_6f108435",
+      "range": {
+        "startLine": 38,
+        "startChar": 13,
+        "endLine": 38,
+        "endChar": 47
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8b05c51a_9d5b2159",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 18
@@ -36,6 +60,30 @@
       "writtenOn": "2018-03-06T19:51:43Z",
       "side": 1,
       "message": "nit: std::move(cb) saves you one allocation",
+      "range": {
+        "startLine": 43,
+        "startChar": 58,
+        "endLine": 43,
+        "endChar": 60
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0125584f_7c1077b4",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b05c51a_9d5b2159",
       "range": {
         "startLine": 43,
         "startChar": 58,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "cf234f4f_74307aa8",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd989f98_688a2fd8",
+      "range": {
+        "startLine": 93,
+        "startChar": 20,
+        "endLine": 93,
+        "endChar": 22
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8f2fb759_98025446",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 18
@@ -82,6 +154,30 @@
       "writtenOn": "2018-03-06T19:51:43Z",
       "side": 1,
       "message": "bits / CHAR_BIT ?",
+      "range": {
+        "startLine": 102,
+        "startChar": 8,
+        "endLine": 103,
+        "endChar": 0
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c05168b_770c8a2d",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8f2fb759_98025446",
       "range": {
         "startLine": 102,
         "startChar": 8,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "5d4fdae9_b7af7162",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done. Yes, locking here is not needed.",
+      "parentUuid": "1f4d5caa_70ee60c5",
+      "range": {
+        "startLine": 104,
+        "startChar": 7,
+        "endLine": 104,
+        "endChar": 25
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "212f4c6e_24bde88d",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 18
@@ -128,6 +248,30 @@
       "writtenOn": "2018-03-06T19:51:43Z",
       "side": 1,
       "message": "how does your use of the BufferQueue differs from the MessageChannel\u003c\u003e? I don\u0027t see any place where the corresponding locks protect something else, or have any grouping. MessageChannel\u003c\u003e provides the same kind of guarantees but also manages the locking inside",
+      "range": {
+        "startLine": 188,
+        "startChar": 26,
+        "endLine": 188,
+        "endChar": 36
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5b5b310_c9a36ff2",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done. Changed to MessageChannel.",
+      "parentUuid": "212f4c6e_24bde88d",
       "range": {
         "startLine": 188,
         "startChar": 26,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "eee51e4d_c41f1406",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "52cdc991_99a981fb",
+      "range": {
+        "startLine": 196,
+        "startChar": 19,
+        "endLine": 197,
+        "endChar": 69
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "450ff00d_118a2952",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 18
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "58aaa8f5_2e8becca",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "450ff00d_118a2952",
+      "range": {
+        "startLine": 202,
+        "startChar": 31,
+        "endLine": 202,
+        "endChar": 44
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cd2aca75_73282d2d",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 18
@@ -197,6 +389,24 @@
       "writtenOn": "2018-03-06T19:51:43Z",
       "side": 1,
       "message": "std::move(cb), please",
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43d0dddd_bf32e53f",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cd2aca75_73282d2d",
       "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -272,6 +482,78 @@
     },
     {
       "key": {
+        "uuid": "6e77d7fb_85b284d2",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aff3869_511d6310",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 11
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68ab2102_26d1362c",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c814124_22a6c48e",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 67
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "62aa51cb_de1398e9",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af461e17_612fde74",
+      "range": {
+        "startLine": 31,
+        "startChar": 26,
+        "endLine": 31,
+        "endChar": 30
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8ffc1c8c_e21751a1",
         "filename": "android/android-emu/android/audio/AudioPacket.h",
         "patchSetId": 18
@@ -283,6 +565,30 @@
       "writtenOn": "2018-03-06T19:51:43Z",
       "side": 1,
       "message": "nit: insert(end, ...) -\u003e assign()",
+      "range": {
+        "startLine": 41,
+        "startChar": 11,
+        "endLine": 41,
+        "endChar": 40
+      },
+      "revId": "30fc43de8c78e4ef2cb4fb5b5aebf45c47789fe8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4dd50d05_6d8dcdd2",
+        "filename": "android/android-emu/android/audio/AudioPacket.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-07T18:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ffc1c8c_e21751a1",
       "range": {
         "startLine": 41,
         "startChar": 11,
