@@ -170,6 +170,13 @@ typedef struct {
     char        number[ A_CALL_NUMBER_MAX_SIZE+1 ];
 } ACallRec, *ACall;
 
+typedef enum {
+    A_CALL_OP_OK = 0,
+    A_CALL_NUMBER_NOT_FOUND = -1,
+    A_CALL_EXCEED_MAX_NUM = -2,
+    A_CALL_RADIO_OFF = -3,
+} ACallOpResult;
+
 extern int    amodem_get_call_count( AModem  modem );
 extern ACall  amodem_get_call( AModem  modem,  int  index );
 extern ACall  amodem_find_call_by_number( AModem  modem, const char*  number );

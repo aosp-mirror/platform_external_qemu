@@ -91,7 +91,13 @@ void TelephonyPage::on_tel_startEndButton_clicked()
                 tResp = sTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
                                                       cleanNumber.toStdString().c_str());
                 if (tResp != Tel_Resp_OK) {
-                    showErrorDialog(tr("The call failed."), tr("Telephony"));
+                    const char* errMsg = NULL;
+                    if (tResp == Tel_Resp_Radio_Off) {
+                        errMsg = "The call failed: radio is off.";
+                    } else {
+                        errMsg = "The call failed.";
+                    }
+                    showErrorDialog(tr(errMsg), tr("Telephony"));
                     return;
                 }
             }
@@ -277,6 +283,12 @@ void TelephonyPage::on_sms_sendButton_clicked()
             AModem modem = sTelephonyAgent->getModem();
             if (modem == NULL) {
                 showErrorDialog(tr("Cannot send message, modem emulation not running."), tr("SMS"));
+                return;
+            }
+
+            if (amodem_get_radio_state(modem) == A_RADIO_STATE_OFF) {
+                showErrorDialog(tr("Cannot send message, radio is off."),
+                                tr("SMS"));
                 return;
             }
 

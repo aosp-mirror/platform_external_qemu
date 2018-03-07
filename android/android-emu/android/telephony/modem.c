@@ -1029,16 +1029,18 @@ amodem_send_calls_update( AModem  modem )
     amodem_unsol( modem, "RING\r" );
 }
 
-
 int
 amodem_add_inbound_call( AModem  modem, const char*  number )
 {
+    if (modem->radio_state == A_RADIO_STATE_OFF)
+        return A_CALL_RADIO_OFF;
+
     AVoiceCall  vcall = amodem_alloc_call( modem );
     ACall       call  = &vcall->call;
     int         len;
 
     if (call == NULL)
-        return -1;
+        return A_CALL_EXCEED_MAX_NUM;
 
     call->dir   = A_CALL_INBOUND;
     call->state = A_CALL_INCOMING;
@@ -1055,7 +1057,7 @@ amodem_add_inbound_call( AModem  modem, const char*  number )
     call->number[len] = 0;
 
     amodem_send_calls_update( modem );
-    return 0;
+    return A_CALL_OP_OK;
 }
 
 ACall
@@ -1124,7 +1126,7 @@ amodem_update_call( AModem  modem, const char*  fromNumber, ACallState  state )
     AVoiceCall  vcall = (AVoiceCall) amodem_find_call_by_number(modem, fromNumber);
 
     if (vcall == NULL)
-        return -1;
+        return A_CALL_NUMBER_NOT_FOUND;
 
     acall_set_state( vcall, state );
     amodem_send_calls_update(modem);
@@ -1138,7 +1140,7 @@ amodem_disconnect_call( AModem  modem, const char*  number )
     AVoiceCall  vcall = (AVoiceCall) amodem_find_call_by_number(modem, number);
 
     if (!vcall)
-        return -1;
+        return A_CALL_NUMBER_NOT_FOUND;
 
     amodem_free_call( modem, vcall );
     amodem_send_calls_update(modem);

@@ -29,10 +29,11 @@ typedef enum {
 
 typedef enum {
     Tel_Resp_OK,
-    Tel_Resp_Bad_Operation,  // Enum out of range
-    Tel_Resp_Bad_Number,     // Mal-formed telephone number
-    Tel_Resp_Invalid_Action, // E.g., disconnect when no call is in progress
-    Tel_Resp_Action_Failed   // Internal error
+    Tel_Resp_Bad_Operation,   // Enum out of range
+    Tel_Resp_Bad_Number,      // Mal-formed telephone number
+    Tel_Resp_Invalid_Action,  // E.g., disconnect when no call is in progress
+    Tel_Resp_Action_Failed,   // Internal error
+    Tel_Resp_Radio_Off        // Radio power off
 } TelephonyResponse;
 
 typedef struct QAndroidTelephonyAgent {
