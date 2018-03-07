@@ -305,6 +305,15 @@ static bool setup_console_and_adb_ports(int console_port,
     return true;
 }
 
+static void inject_timezone_boot_property() {
+    char tzname[64];
+    char* end = tzname + sizeof(tzname);
+    char* p = bufprint_zoneinfo_timezone(tzname, end);
+    if (p < end) {
+        boot_property_add("qemu.timezone", tzname);
+    }
+}
+
 /* this function is called from qemu_main() once all arguments have been parsed
  * it should be used to setup any Android-specific items in the emulation before the
  * main loop runs
@@ -418,16 +427,11 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* initialize the car data emulation if the system image is a Android Auto build */
     if (flavor == AVD_ANDROID_AUTO) {
         android_car_init();
-    } else if (flavor == AVD_TV) {
-    /* inject timezone property in guest system if the system image is a Android TV build */
-        char tzname[64];
-        char* end = tzname + sizeof(tzname);
-        char* p = bufprint_zoneinfo_timezone(tzname, end);
-        if (p < end) {
-            boot_property_add("qemu.timezone", tzname);
-        }
     }
 
+    /* for TV/Wear/... and anything that does not use ril, this is needed
+       and the propertiy does not harm phone either */
+    inject_timezone_boot_property();
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
