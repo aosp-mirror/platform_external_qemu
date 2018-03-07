@@ -46,6 +46,30 @@
       "revId": "b4105f6966b96223f52a6b60868b3c4aa53fafbd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6d3a330_2278d016",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-07T01:30:25Z",
+      "side": 1,
+      "message": "My concern is that we pop up an error message if !OK, but we only provide a message if Radio_Off or Action_Failed.\n\nWe should provide some error text for the \u0027else\u0027. Otherwise we may pop up an error window with no text.\n\n(Radio_Off and Action_Failed may be the only possibilities now, but we may add more in the future.)",
+      "parentUuid": "27ff6975_ea2e8368",
+      "range": {
+        "startLine": 94,
+        "startChar": 16,
+        "endLine": 101,
+        "endChar": 17
+      },
+      "revId": "b4105f6966b96223f52a6b60868b3c4aa53fafbd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
