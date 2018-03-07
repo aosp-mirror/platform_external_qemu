@@ -22,6 +22,30 @@
       "revId": "ba6d2922f2baf78849273b74fc0e0670c256c117",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7f2ff26_cdcf8723",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-07T18:04:32Z",
+      "side": 1,
+      "message": "Switched to ofstream.\n\n(Didn\u0027t use LoadSave because it had trouble SerializeToZeroCopyStream\u0027ing a \u003cSnapshot\u003e)",
+      "parentUuid": "2d12da3c_c2fddc16",
+      "range": {
+        "startLine": 705,
+        "startChar": 1,
+        "endLine": 707,
+        "endChar": 37
+      },
+      "revId": "ba6d2922f2baf78849273b74fc0e0670c256c117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
