@@ -70,6 +70,30 @@
       "revId": "b4105f6966b96223f52a6b60868b3c4aa53fafbd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd951961_7fcb5792",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-03-07T04:20:04Z",
+      "side": 1,
+      "message": "In the newly updated CL, I think if !OK, error message would not be empty. It will have \"The call failed\" at least.",
+      "parentUuid": "b6d3a330_2278d016",
+      "range": {
+        "startLine": 94,
+        "startChar": 16,
+        "endLine": 101,
+        "endChar": 17
+      },
+      "revId": "b4105f6966b96223f52a6b60868b3c4aa53fafbd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
