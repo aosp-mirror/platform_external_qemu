@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "b48c715d_c1e73456",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T12:08:50Z",
+      "side": 1,
+      "message": "g_string* family of functions used instead as they are safe and more appropriate.",
+      "parentUuid": "1feb0d4c_952c5804",
+      "range": {
+        "startLine": 493,
+        "startChar": 4,
+        "endLine": 493,
+        "endChar": 11
+      },
+      "revId": "9939c19a84e890b584c72f3d4e303ae5ff44b179",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "acd8d9a0_0feeaee8",
         "filename": "hw/mips/mips_ranchu.c",
         "patchSetId": 1
@@ -178,6 +202,30 @@
       "side": 1,
       "message": "This is a mistake, an unsafe code. This is going to be addressed in the next version of the patch set.",
       "parentUuid": "acd8d9a0_0feeaee8",
+      "range": {
+        "startLine": 505,
+        "startChar": 8,
+        "endLine": 505,
+        "endChar": 15
+      },
+      "revId": "9939c19a84e890b584c72f3d4e303ae5ff44b179",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d66ce91_b2ede652",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T12:08:50Z",
+      "side": 1,
+      "message": "Reworked to use g_string* family of functions.",
+      "parentUuid": "a18f1458_eeeded2a",
       "range": {
         "startLine": 505,
         "startChar": 8,
