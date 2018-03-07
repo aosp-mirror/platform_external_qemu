@@ -418,8 +418,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* initialize the car data emulation if the system image is a Android Auto build */
     if (flavor == AVD_ANDROID_AUTO) {
         android_car_init();
-    } else if (flavor == AVD_TV) {
-    /* inject timezone property in guest system if the system image is a Android TV build */
+    }
+    {
+        /* inject timezone property in guest system */
         char tzname[64];
         char* end = tzname + sizeof(tzname);
         char* p = bufprint_zoneinfo_timezone(tzname, end);
