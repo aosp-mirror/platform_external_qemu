@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f77fb5a7_9ec61e99",
+        "filename": "target/mips/cpu.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T11:57:10Z",
+      "side": 1,
+      "message": "Ok, but the number of General purpose registers, or floating point registers, is unlikely to change in the future. The number of scratch registers may change.\nIf I introduce the new macro, I would need to change all the places where the reference to GPRs or FPRs occurs, which is not what this patch is dealing with and will again introduce discrepancy between upstream and Android emulator.\n\nI would like to keep this as is.",
+      "parentUuid": "3eb392e3_0f47de09",
+      "range": {
+        "startLine": 225,
+        "startChar": 24,
+        "endLine": 225,
+        "endChar": 26
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "928f4b6e_b1aa1536",
         "filename": "target/mips/helper.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-02-28T17:49:49Z",
       "side": 1,
       "message": "Could you please add a \"const int cpu_index \u003d cs-\u003ecpu_index;\" to explicitly say we work with the same cpu and to prevent several memory accesses?",
+      "range": {
+        "startLine": 485,
+        "startChar": 33,
+        "endLine": 485,
+        "endChar": 46
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d73e2cb_ba016e34",
+        "filename": "target/mips/helper.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T11:57:10Z",
+      "side": 1,
+      "message": "Will address this in next PS. Thanks.",
+      "parentUuid": "928f4b6e_b1aa1536",
       "range": {
         "startLine": 485,
         "startChar": 33,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "600aeeda_84b854a1",
+        "filename": "target/mips/helper.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T11:57:10Z",
+      "side": 1,
+      "message": "No, env-\u003eCPU is CPUInterpreterContext.",
+      "parentUuid": "bc296222_f9fd049c",
+      "range": {
+        "startLine": 515,
+        "startChar": 4,
+        "endLine": 515,
+        "endChar": 12
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b59c4c37_0ce8197a",
         "filename": "target/mips/helper.c",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2018-02-28T17:49:49Z",
       "side": 1,
       "message": "Same as above.",
+      "range": {
+        "startLine": 527,
+        "startChar": 31,
+        "endLine": 527,
+        "endChar": 44
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "364ff263_4d19e0b9",
+        "filename": "target/mips/helper.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T11:57:10Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "b59c4c37_0ce8197a",
       "range": {
         "startLine": 527,
         "startChar": 31,
@@ -114,6 +210,30 @@
       "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c730c7b4_0da9b3f6",
+        "filename": "target/mips/translate.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1439,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T11:57:10Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "9db6b78e_d3a0ddad",
+      "range": {
+        "startLine": 1439,
+        "startChar": 4,
+        "endLine": 1439,
+        "endChar": 12
+      },
+      "revId": "c887cfcc6c4a2466be7a1f942fd56e566b135c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
