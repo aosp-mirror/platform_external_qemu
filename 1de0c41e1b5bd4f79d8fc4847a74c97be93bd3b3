@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e6ef4ba7_0a1ec279",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-07T18:53:18Z",
+      "side": 1,
+      "message": "do we still need this scoping? otherwise it seems kind of inconsistent with the other initilizes",
+      "range": {
+        "startLine": 430,
+        "startChar": 1,
+        "endLine": 430,
+        "endChar": 5
+      },
+      "revId": "1de0c41e1b5bd4f79d8fc4847a74c97be93bd3b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
