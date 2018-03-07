@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "df47aca1_9a9c19a9",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T12:12:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ec0d4d53_c6bbf97e",
+      "range": {
+        "startLine": 610,
+        "startChar": 4,
+        "endLine": 610,
+        "endChar": 11
+      },
+      "revId": "847d5aaa1fe6f1ee05ac9f8b0d5f526da5d906fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91c3f1c1_4d123623",
         "filename": "hw/mips/mips_ranchu.c",
         "patchSetId": 1
@@ -190,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "b6516dc3_97e8fa56",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T12:12:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0e5c15a_8be6521a",
+      "range": {
+        "startLine": 913,
+        "startChar": 13,
+        "endLine": 913,
+        "endChar": 16
+      },
+      "revId": "847d5aaa1fe6f1ee05ac9f8b0d5f526da5d906fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "969216a2_f0d4911c",
         "filename": "hw/mips/mips_ranchu.c",
         "patchSetId": 1
@@ -225,6 +273,30 @@
       "side": 1,
       "message": "Will be addressed in the next version of the patch set.",
       "parentUuid": "969216a2_f0d4911c",
+      "range": {
+        "startLine": 927,
+        "startChar": 7,
+        "endLine": 927,
+        "endChar": 9
+      },
+      "revId": "847d5aaa1fe6f1ee05ac9f8b0d5f526da5d906fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6f7327f1_67cba073",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 927,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2018-03-07T12:12:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31fa4141_9dff89f8",
       "range": {
         "startLine": 927,
         "startChar": 7,
