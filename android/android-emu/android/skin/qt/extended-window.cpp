@@ -125,7 +125,14 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
-    mSidebarButtons.addButton(mExtendedUi->snapshotButton);
+
+    if (android::featurecontrol::isEnabled(android::featurecontrol::GenericSnapshotsUI)) {
+        mSidebarButtons.addButton(mExtendedUi->snapshotButton);
+        mExtendedUi->snapshotButton->setVisible(true);
+    } else {
+        mExtendedUi->snapshotButton->setVisible(false);
+    }
+
     mSidebarButtons.addButton(mExtendedUi->bugreportButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
