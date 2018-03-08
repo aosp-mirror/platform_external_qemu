@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a059bafd_19b8cf82",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-08T05:05:50Z",
+      "side": 1,
+      "message": "summarize improvement in the comment? Does this fix the issue Jim was having?",
+      "revId": "d6c8bc13d116242191245b20250f0f61f08651c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
