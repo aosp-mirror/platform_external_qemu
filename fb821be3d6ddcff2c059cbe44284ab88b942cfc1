@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8d2e8d95_6b9174da",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-08T16:59:47Z",
+      "side": 1,
+      "message": "having it in a header makes the function inline, which itself changes a few things:\n1. It\u0027s generated in each .cpp that includes the header\n2. It can\u0027t call dtor for forward-declared members - one has to #include their definitions into the header, and thus spread those out everywhere\n3. inline functions are much more prone to add more bytes to the binary size",
+      "parentUuid": "fbfa8440_581e64f3",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 34
+      },
+      "revId": "fb821be3d6ddcff2c059cbe44284ab88b942cfc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "94a19eb8_eac317f8",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ca317eba_fc59cf0d",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-08T16:59:47Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "94a19eb8_eac317f8",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 5
+      },
+      "revId": "fb821be3d6ddcff2c059cbe44284ab88b942cfc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "599b03d8_c291c21d",
         "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "fb821be3d6ddcff2c059cbe44284ab88b942cfc1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "567dca67_8fdd6bdf",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-08T16:59:47Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "599b03d8_c291c21d",
+      "range": {
+        "startLine": 71,
+        "startChar": 29,
+        "endLine": 71,
+        "endChar": 38
+      },
+      "revId": "fb821be3d6ddcff2c059cbe44284ab88b942cfc1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
