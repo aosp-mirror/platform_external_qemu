@@ -23,55 +23,66 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
+using android::base::makeCustomScopedPtr;
 using android::base::ScopedCPtr;
 using android::base::ScopedFd;
 using android::base::StringView;
 using android::base::System;
-using android::base::makeCustomScopedPtr;
 
 namespace android {
 namespace protobuf {
+namespace internal {
 
-ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
-                                        System::FileSize* bytesUsed,
-                                        ProtobufLoadCallback loadCb) {
-    const auto file =
-            ScopedFd(::open(fileName.c_str(),
-                            O_RDONLY | O_BINARY | O_CLOEXEC, 0644));
+LoadResult loadProtobufFileImpl(StringView fileName,
+                                System::FileSize* bytesUsed,
+                                LoadCallback loadCb) {
+    const auto file = ScopedFd(
+            ::open(fileName.c_str(), O_RDONLY | O_BINARY | O_CLOEXEC, 0644));
 
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
-        return ProtobufLoadResult::FileNotFound;
+        return LoadResult::FileNotFound;
     }
 
-    if (bytesUsed) *bytesUsed = size;
+    if (bytesUsed)
+        *bytesUsed = size;
 
-    const auto fileMap =
-        makeCustomScopedPtr(
+    const auto fileMap = makeCustomScopedPtr(
             mmap(nullptr, size, PROT_READ, MAP_PRIVATE, file.get(), 0),
-            [size](void* ptr) { if (ptr != MAP_FAILED) munmap(ptr, size); });
+            [size](void* ptr) {
+                if (ptr != MAP_FAILED)
+                    munmap(ptr, size);
+            });
 
     if (!fileMap || fileMap.get() == MAP_FAILED) {
-        return ProtobufLoadResult::FileMapFailed;
+        return LoadResult::FileMapFailed;
     }
 
-    return loadCb(fileMap.get(), size);
+    return loadCb(fileMap.get(), size) ? LoadResult::Success
+                                       : LoadResult::ParsingFailed;
 }
 
-ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
-                                        System::FileSize* bytesUsed,
-                                        ProtobufSaveCallback saveCb) {
-    if (bytesUsed) *bytesUsed = 0;
+SaveResult saveProtobufFileImpl(StringView fileName,
+                                System::FileSize* bytesUsed,
+                                SaveCallback saveCb) {
+    if (bytesUsed)
+        *bytesUsed = 0;
 
     google::protobuf::io::FileOutputStream stream(
             ::open(fileName.c_str(),
                    O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644));
-
     stream.SetCloseOnDelete(true);
 
-    return saveCb(stream, bytesUsed);
+    if (!saveCb(stream)) {
+        return SaveResult::Failure;
+    }
+
+    if (bytesUsed) {
+        *bytesUsed = System::FileSize(stream.ByteCount());
+    }
+    return SaveResult::Success;
 }
 
-} // namespace android
-} // namespace protobuf
-
+}  // namespace internal
+}  // namespace protobuf
+}  // namespace android
