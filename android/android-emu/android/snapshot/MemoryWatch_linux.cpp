@@ -85,9 +85,7 @@ public:
 
     void join() { mPagefaultThread.wait(); }
 
-    ~Impl() {
-        join();
-    }
+    ~Impl() { join(); }
 
     void* readNextPagefaultAddr() const {
         uffd_msg msg;
@@ -121,6 +119,10 @@ public:
     void pagefaultWorker() {
         assert(mUserfaultFd.valid());
         int timeoutNs = 0;
+        // Use the 'done' flag to run one more iteration on the userspacefd
+        // descriptor after unregistering all ranges: this way we can be sure
+        // there's no pending requests left.
+        bool done = false;
         for (;;) {
             pollfd pfd[] = {{mExitFd.get(), POLLIN},
                             {mUserfaultFd.get(), POLLIN}};
@@ -129,15 +131,24 @@ public:
                 derror("%s: userfault ppoll: %s", __func__, strerror(errno));
                 break;
             }
-            if (pfd[0].revents) {
-                break;
-            }
             if (pfd[1].revents) {
                 while (auto ptr = readNextPagefaultAddr()) {
                     mAccessCallback(ptr);
                 }
                 timeoutNs = 0;
-            } else {
+            }
+
+            if (done) {
+                break;
+            }
+
+            if (pfd[0].revents) {
+                unregisterAll();
+                done = true;
+                continue;
+            }
+
+            if (!pfd[1].revents) {
                 switch (mIdleCallback()) {
                     case IdleCallbackResult::RunAgain:
                         timeoutNs = 0;
@@ -146,10 +157,23 @@ public:
                         timeoutNs = 500 * 1000;
                         break;
                     case IdleCallbackResult::AllDone:
-                        return;
+                        unregisterAll();
+                        done = true;
+                        continue;
                 }
             }
         }
+    }
+
+    void unregisterAll() {
+        for (auto&& range : mRanges) {
+            uffdio_range rangeStruct{(uintptr_t)range.first, range.second};
+            if (ioctl(mUserfaultFd.get(), UFFDIO_UNREGISTER, &rangeStruct)) {
+                derror("%s: userfault unregister %p - %s", __func__,
+                       range.first, strerror(errno));
+            }
+        }
+        mRanges.clear();
     }
 
     void stop() { HANDLE_EINTR(eventfd_write(mExitFd.get(), 1)); }
@@ -159,6 +183,8 @@ public:
 
     base::ScopedFd mUserfaultFd;
     base::ScopedFd mExitFd;
+
+    std::vector<std::pair<void*, uint64_t>> mRanges;
 
     base::FunctorThread mPagefaultThread;
 };
@@ -190,6 +216,8 @@ bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
         return false;
     }
     madvise(start, length, MADV_DONTNEED);
+
+    mImpl->mRanges.emplace_back(start, length);
     return true;
 }
 
@@ -199,7 +227,9 @@ void MemoryAccessWatch::doneRegistering() {
     }
 }
 
-bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
+bool MemoryAccessWatch::fillPage(void* ptr,
+                                 size_t length,
+                                 const void* data,
                                  bool isQuickboot) {
     if (data) {
         uffdio_copy copyStruct = {uintptr_t(ptr), uintptr_t(data), length};
@@ -230,7 +260,9 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
 }
 
 void MemoryAccessWatch::join() {
-    if (mImpl) { mImpl->join(); }
+    if (mImpl) {
+        mImpl->join();
+    }
 }
 
 }  // namespace snapshot
