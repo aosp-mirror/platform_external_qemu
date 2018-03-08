@@ -11,82 +11,77 @@
 
 #pragma once
 
+#include "android/base/FunctionView.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 
-#include "google/protobuf/io/zero_copy_stream_impl.h"
+namespace google {
+namespace protobuf {
+namespace io {
 
-#include <functional>
+class ZeroCopyOutputStream;
+
+}  // namespace io
+}  // namespace protobuf
+}  // namespace google
 
 namespace android {
 namespace protobuf {
 
-enum class ProtobufLoadResult {
-    Success = 0,
-    FileNotFound = 1,
-    FileMapFailed = 2,
-    ProtobufParseFailed = 3,
+enum class LoadResult {
+    Success,
+    FileNotFound,
+    FileMapFailed,
+    ParsingFailed,
 };
 
-enum class ProtobufSaveResult {
-    Success = 0,
-    Failure = 1,
+enum class SaveResult {
+    Success,
+    Failure,
 };
+
+namespace internal {
 
 // We separate the file-related ops from the protobuf related ones because
 // 1. Not going to have separate .cpp implementations for templates
 // 2. Messy to expose all the file r/w related headers to users of LoadSave.h
 
-using ProtobufLoadCallback =
-    std::function<ProtobufLoadResult(void*, android::base::System::FileSize)>;
+using LoadCallback =
+        base::FunctionView<bool(void* data, base::System::FileSize size)>;
 
-using ProtobufSaveCallback =
-    std::function<ProtobufSaveResult(google::protobuf::io::FileOutputStream& stream,
-                                     android::base::System::FileSize*)>;
+using SaveCallback =
+        base::FunctionView<bool(google::protobuf::io::ZeroCopyOutputStream&)>;
 
-ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
-                                        android::base::System::FileSize* bytesUsed,
-                                        ProtobufLoadCallback loadCb);
-ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
-                                        android::base::System::FileSize* bytesUsed,
-                                        ProtobufSaveCallback saveCb);
+LoadResult loadProtobufFileImpl(base::StringView fileName,
+                                base::System::FileSize* bytesUsed,
+                                LoadCallback loadCb);
+SaveResult saveProtobufFileImpl(base::StringView fileName,
+                                base::System::FileSize* bytesUsed,
+                                SaveCallback saveCb);
 
-template <class T>
-ProtobufLoadResult loadProtobuf(android::base::StringView fileName,
-                                T& toLoad,
-                                android::base::System::FileSize*
-                                bytesUsed = nullptr) {
-    return
-        loadProtobufFileImpl(
-            fileName,
-            bytesUsed,
-            [&toLoad](void* ptr, android::base::System::FileSize size) {
-                if (!toLoad.ParseFromArray(ptr, size)) {
-                    return ProtobufLoadResult::ProtobufParseFailed;
-                } else {
-                    return ProtobufLoadResult::Success;
-                }
-            });
-}
+}  // namespace internal
 
 template <class T>
-ProtobufSaveResult saveProtobuf(android::base::StringView fileName,
-                                const T& toSave,
-                                android::base::System::FileSize*
-                                bytesUsed = nullptr) {
-    return
-        saveProtobufFileImpl(
+LoadResult loadProtobuf(base::StringView fileName,
+                        T& toLoad,
+                        base::System::FileSize* bytesUsed = nullptr) {
+    return internal::loadProtobufFileImpl(
             fileName, bytesUsed,
-            [&toSave](google::protobuf::io::FileOutputStream& stream,
-                      android::base::System::FileSize* bytesUsed) {
-               if (toSave.SerializeToZeroCopyStream(&stream)) {
-                   if (bytesUsed) *bytesUsed = (android::base::System::FileSize)stream.ByteCount();
-                   return ProtobufSaveResult::Success;
-               } else {
-                   return ProtobufSaveResult::Failure;
-               }
+            [&toLoad](void* ptr, base::System::FileSize size) {
+                return toLoad.ParseFromArray(ptr, size);
             });
 }
 
-} // namespace android
-} // namespace protobuf
+template <class T>
+SaveResult saveProtobuf(base::StringView fileName,
+                        const T& toSave,
+                        base::System::FileSize* bytesUsed = nullptr) {
+    return internal::saveProtobufFileImpl(
+            fileName, bytesUsed,
+            [&toSave](google::protobuf::io::ZeroCopyOutputStream& stream) {
+                return toSave.SerializeToZeroCopyStream(&stream);
+            });
+}
+
+}  // namespace protobuf
+}  // namespace android
