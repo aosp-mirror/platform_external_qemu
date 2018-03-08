@@ -204,7 +204,6 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
         mEmulatorWindow->containerWindow()->hideVirtualSceneInfoDialog();
 
         QCursor cursor(Qt::BlankCursor);
-        parentWidget()->activateWindow();
         parentWidget()->grabMouse(cursor);
 
         // Move cursor to the center of the window.
@@ -508,9 +507,6 @@ void VirtualSceneControlWindow::slot_virtualSceneInfoDialogHasBeenSeen() {
 }
 
 void VirtualSceneControlWindow::updateMouselook() {
-    QCursor cursor(Qt::BlankCursor);
-    parentWidget()->grabMouse(cursor);
-
     QPoint offset = QCursor::pos() - mPreviousMousePosition;
     mPreviousMousePosition = getMouseCaptureCenter();
     QCursor::setPos(mPreviousMousePosition);
