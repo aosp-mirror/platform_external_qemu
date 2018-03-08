@@ -16,6 +16,40 @@
       "revId": "d6c8bc13d116242191245b20250f0f61f08651c3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e731977_3f280cd4",
+        "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-08T17:23:06Z",
+      "side": 1,
+      "message": "nit: We have Optional\u003cFileSize\u003e fileSize(...)",
+      "revId": "d6c8bc13d116242191245b20250f0f61f08651c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b2ad7d2d_cc15abe4",
+        "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-08T17:23:06Z",
+      "side": 1,
+      "message": "Does this mean that we use 0 bytes on disk in case of save failures?",
+      "revId": "d6c8bc13d116242191245b20250f0f61f08651c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
