@@ -35,7 +35,9 @@ AndroidSnapshotStatus androidSnapshot_load(const char* name) {
 }
 
 const char* androidSnapshot_loadedSnapshotFile() {
-    return Snapshotter::get().loadedSnapshotFile().c_str();
+    return Snapshotter::get().currentSnapshot()
+                   ? Snapshotter::get().currentSnapshot()->name().c_str()
+                   : "";
 }
 
 AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
@@ -44,8 +46,7 @@ AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {
     // TODO: HAXM generic + at-exit snapshot support
-    if (android::GetCurrentCpuAccelerator() ==
-        android::CPU_ACCELERATOR_HAX) {
+    if (android::GetCurrentCpuAccelerator() == android::CPU_ACCELERATOR_HAX) {
         androidSnapshot_setQuickbootSaveNoGood();
     }
     return AndroidSnapshotStatus(Snapshotter::get().saveGeneric(name));
@@ -76,9 +77,7 @@ static int sStderrLineConsumer(void* opaque, const char* buf, int strlen) {
 }
 
 void androidSnapshot_listStdout() {
-    androidSnapshot_list(nullptr,
-                         sStdoutLineConsumer,
-                         sStderrLineConsumer);
+    androidSnapshot_list(nullptr, sStdoutLineConsumer, sStderrLineConsumer);
 }
 
 void androidSnapshot_list(void* opaque,

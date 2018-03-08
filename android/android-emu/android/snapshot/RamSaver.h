@@ -38,7 +38,9 @@ namespace snapshot {
 
 using namespace ::android::base::EnumFlags;
 
+class Loader;
 class RamLoader;
+class Snapshot;
 
 class RamSaver {
     DISALLOW_COPY_AND_ASSIGN(RamSaver);
@@ -51,10 +53,11 @@ public:
         Compress = 0x4,
     };
 
-    RamSaver(const std::string& fileName,
-             Flags preferredFlags,
-             RamLoader* loader,
-             bool isOnExit);
+    RamSaver(const Snapshot& snapshot,
+             OperationFlags saverFlags,
+             Flags preferredRamFlags,
+             Loader* loader,
+             const Snapshot* parent);
     ~RamSaver();
 
     void registerBlock(const RamBlock& block);
@@ -64,10 +67,13 @@ public:
     void cancel();
     bool hasError() const { return mHasError; }
     bool compressed() const {
-        return mIndex.flags & int32_t(IndexFlags::CompressedPages);
+        return mIndex.flags & int32_t(RamIndexFlags::CompressedPages);
     }
     uint64_t diskSize() const { return mDiskSize; }
-    bool incremental() const { return mLoader != nullptr; }
+    bool incremental() const { return mKind != Snapshot::Kind::Full; }
+    Snapshot::Kind kind() const { return mKind; }
+
+    GapTracker::Ptr releaseGapTracker() { return std::move(mGaps); }
 
     // getDuration():
     // Returns true if there was save with measurable time
@@ -108,6 +114,7 @@ private:
                 int32_t sizeOnDisk;  // 0 -> page is all zeroes
                 bool same;
                 bool hashFilled;
+                uint8_t fileIndex;
                 int64_t filePos;
                 Hash hash;
 
@@ -116,10 +123,10 @@ private:
             std::vector<Page> pages;
         };
 
-        using Flags = IndexFlags;
+        using Flags = RamIndexFlags;
 
         int64_t startPosInFile;
-        int32_t version = 2;
+        int32_t version = 3;
         int32_t flags = int32_t(Flags::Empty);
         int32_t totalPages = 0;
         std::vector<Block> blocks;
@@ -142,7 +149,9 @@ private:
     void writeIndex();
     void writePage(WriteInfo&& wi);
 
-    RamLoader* mLoader = nullptr;
+    const RamLoader::FileIndex* mParentIndex = nullptr;
+    bool mParentIndexAllocated = false;
+
     base::StdioStream mStream;
     int mStreamFd;
     Flags mFlags;
@@ -175,6 +184,7 @@ private:
     base::System::Duration mEndTime = 0;
 
     IncrementalStats mIncStats;
+    Snapshot::Kind mKind = Snapshot::Kind::Full;
 };
 
 }  // namespace snapshot

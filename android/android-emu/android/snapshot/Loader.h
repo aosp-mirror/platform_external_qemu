@@ -24,7 +24,7 @@ class Loader {
     DISALLOW_COPY_AND_ASSIGN(Loader);
 
 public:
-    Loader(const Snapshot& snapshot, int error = 0);
+    Loader(const Snapshot& snapshot, OperationFlags flags, int error = 0);
     ~Loader();
 
     void interrupt();
@@ -42,9 +42,11 @@ public:
     void complete(bool succeeded);
     void onInvalidSnapshotLoad();
 
-    void prepareForSaving(bool isOnExit);
+    void prepareForSaving(OperationFlags flags);
+
 private:
     OperationStatus mStatus;
+    OperationFlags mFlags;
     Snapshot mSnapshot;
     base::Optional<RamLoader> mRamLoader;
     std::shared_ptr<TextureLoader> mTextureLoader;

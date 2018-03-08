@@ -15,9 +15,11 @@
 #include "android/base/ArraySize.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/files/preadwrite.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
+#include "android/snapshot/Snapshot.h"
 #include "android/utils/debug.h"
 
 #include <algorithm>
@@ -35,20 +37,24 @@ void RamLoader::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
-RamLoader::RamLoader(base::StdioStream&& stream,
-                     bool indexOnly,
-                     const RamLoader::RamBlockStructure& blockStructure)
-    : mStream(std::move(stream)),
-      mReaderThread([this]() { readerWorker(); }),
-      mIndexOnly(indexOnly) {
-
-    if (mIndexOnly) {
-        applyRamBlockStructure(blockStructure);
-        readIndex();
-        mStream.close();
-        return;
+const RamLoader::Page* RamLoader::FileIndex::findPage(int blockIdx,
+                                                      int pageIdx) const {
+    if (blockIdx < 0 || blockIdx >= blocks.size()) {
+        return nullptr;
     }
+    const auto& block = blocks[blockIdx];
+    if (pageIdx < 0 || pageIdx > block.pagesEnd - block.pagesBegin) {
+        return nullptr;
+    }
+    return &*(block.pagesBegin + pageIdx);
+}
 
+RamLoader::RamLoader(const Snapshot& snapshot, OperationFlags flags)
+    : mStreams(snapshot.myHierarchy().size()),
+      mStreamFds(mStreams.size()),
+      mReaderThread([this]() { readerWorker(); }),
+      mFlags(flags),
+      mSnapshot(snapshot) {
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
                              [this]() { return backgroundPageLoad(); });
@@ -74,30 +80,6 @@ RamLoader::~RamLoader() {
     }
 }
 
-RamLoader::RamBlockStructure RamLoader::getRamBlockStructure() const {
-    RamBlockStructure res;
-    res.pageSize = mPageSize;
-
-    res.blocks.reserve(mIndex.blocks.size());
-
-    for (const auto& blockInfo : mIndex.blocks) {
-        res.blocks.push_back(blockInfo.ramBlock);
-    }
-
-    return res;
-}
-
-void RamLoader::applyRamBlockStructure(const RamBlockStructure& blockStructure) {
-    mPageSize = blockStructure.pageSize;
-
-    mIndex.clear();
-    mIndex.blocks.reserve(blockStructure.blocks.size());
-
-    for (const auto ramBlock : blockStructure.blocks) {
-        mIndex.blocks.push_back({ ramBlock, {}, {}});
-    }
-}
-
 void RamLoader::loadRam(void* ptr, uint64_t size) {
     uint32_t num_pages = (size + mPageSize - 1) / mPageSize;
     char* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
@@ -111,12 +93,10 @@ void RamLoader::registerBlock(const RamBlock& block) {
     mIndex.blocks.push_back({block, {}, {}});
 }
 
-bool RamLoader::start(bool isQuickboot) {
+bool RamLoader::start() {
     if (mWasStarted) {
         return !mHasError;
     }
-
-    mIsQuickboot = isQuickboot;
 
     mStartTime = base::System::get()->getHighResTimeUs();
 
@@ -152,7 +132,9 @@ void RamLoader::join() {
         mAccessWatch->join();
         mAccessWatch.clear();
     }
-    mStream.close();
+    for (auto&& stream : mStreams) {
+        stream.close();
+    }
 }
 
 void RamLoader::interrupt() {
@@ -163,21 +145,53 @@ void RamLoader::interrupt() {
         mAccessWatch->join();
         mAccessWatch.clear();
     }
-    mStream.close();
+    for (auto&& stream : mStreams) {
+        stream.close();
+    }
 }
 
-const RamLoader::Page* RamLoader::findPage(int blockIndex,
-                                           const char* id,
-                                           int pageIndex) const {
-    if (blockIndex < 0 || blockIndex >= mIndex.blocks.size()) {
-        return nullptr;
+static base::MemStream openIndex(base::StdioStream& stream,
+                                 base::System::FileSize size) {
+    auto fd = fileno(stream.get());
+    auto indexPos = stream.getBe64();
+
+    MemStream::Buffer buffer(size - indexPos);
+    if (base::pread(fd, buffer.data(), buffer.size(), indexPos) !=
+        buffer.size()) {
+        return false;
     }
-    const auto& block = mIndex.blocks[blockIndex];
-    assert(block.ramBlock.id == base::StringView(id));
-    if (pageIndex < 0 || pageIndex > block.pagesEnd - block.pagesBegin) {
-        return nullptr;
+
+    return MemStream{std::move(buffer)};
+}
+
+std::pair<RamLoader::FileIndex, GapTracker::Ptr> RamLoader::loadIndex(
+        const Snapshot& snapshot, base::System::FileSize* outSize) {
+    auto file = base::PathUtils::join(snapshot.dataDir(), "ram.bin");
+    auto stream = base::StdioStream(fopen(file.c_str(), "rb"),
+                                    base::StdioStream::kOwner);
+    if (!stream.get()) {
+        return {};
     }
-    return &*(block.pagesBegin + pageIndex);
+    auto fd = fileno(stream.get());
+    base::System::FileSize size;
+    if (!base::System::get()->fileSize(fd, &size)) {
+        return {};
+    }
+    if (outSize) {
+        *outSize = size;
+    }
+
+    auto indexStream = openIndex(stream, size);
+
+    FileIndex index;
+    GapTracker::Ptr gaps;
+    if (!RamLoader::readIndex(snapshot, indexStream, index, gaps, nullptr)) {
+        return {};
+    }
+
+    index.offset = size - indexStream.buffer().size();
+
+    return {std::move(index), std::move(gaps)};
 }
 
 void RamLoader::interruptReading() {
@@ -198,53 +212,28 @@ bool RamLoader::readIndex() {
 #if SNAPSHOT_PROFILE > 1
     auto start = base::System::get()->getHighResTimeUs();
 #endif
-    mStreamFd = fileno(mStream.get());
+
+    auto file = base::PathUtils::join(mSnapshot.dataDir(), "ram.bin");
+    mStreams[0] = base::StdioStream(fopen(file.c_str(), "rb"),
+                                    base::StdioStream::kOwner);
+    mStreamFds[0] = fileno(mStreams[0].get());
     base::System::FileSize size;
-    if (!base::System::get()->fileSize(mStreamFd, &size)) {
+    if (!base::System::get()->fileSize(mStreamFds[0], &size)) {
         return false;
     }
     mDiskSize = size;
-    mIndexPos = mStream.getBe64();
-
-    MemStream::Buffer buffer(size - mIndexPos);
-    if (base::pread(mStreamFd, buffer.data(), buffer.size(), mIndexPos) !=
-        buffer.size()) {
+    auto indexStream = openIndex(mStreams[0], size);
+    if (!RamLoader::readIndex(mSnapshot, indexStream, mIndex, mGaps,
+                              &mStreams)) {
         return false;
     }
 
-    MemStream stream(std::move(buffer));
+    mIndex.offset = mDiskSize - indexStream.buffer().size();
 
-    mVersion = stream.getBe32();
-    if (mVersion < 1 || mVersion > 2) {
-        return false;
-    }
-    mIndex.flags = IndexFlags(stream.getBe32());
-    const bool compressed = nonzero(mIndex.flags & IndexFlags::CompressedPages);
-    auto pageCount = stream.getBe32();
-    mIndex.pages.reserve(pageCount);
-    int64_t runningFilePos = 8;
-    int32_t prevPageSizeOnDisk = 0;
-    for (size_t loadedBlockCount = 0; loadedBlockCount < mIndex.blocks.size();
-         ++loadedBlockCount) {
-        const auto nameLength = stream.getByte();
-        char name[256];
-        stream.read(name, nameLength);
-        name[nameLength] = 0;
-        auto blockIt = std::find_if(mIndex.blocks.begin(), mIndex.blocks.end(),
-                                    [&name](const FileIndex::Block& b) {
-                                        return strcmp(b.ramBlock.id, name) == 0;
-                                    });
-        if (blockIt == mIndex.blocks.end()) {
-            return false;
+    for (int i = 1, size = mStreams.size(); i < size; ++i) {
+        if (mStreams[i].get()) {
+            mStreamFds[i] = fileno(mStreams[i].get());
         }
-        readBlockPages(&stream, blockIt, compressed, &runningFilePos,
-                       &prevPageSizeOnDisk);
-    }
-
-    if (mVersion > 1) {
-        mGaps = compressed ? GapTracker::Ptr(new GenericGapTracker())
-                           : GapTracker::Ptr(new OneSizeGapTracker());
-        mGaps->load(stream);
     }
 
 #if SNAPSHOT_PROFILE > 1
@@ -254,26 +243,169 @@ bool RamLoader::readIndex() {
     return true;
 }
 
+bool RamLoader::readIndex(const Snapshot& snapshot,
+                          base::Stream& indexStream,
+                          FileIndex& index,
+                          GapTracker::Ptr& gaps,
+                          std::vector<base::StdioStream>* streams) {
+    if (!readIndexPages(indexStream, 0, index)) {
+        return false;
+    }
+
+    if (index.version > 1) {
+        gaps = index.compressed() ? GapTracker::Ptr(new GenericGapTracker())
+                                  : GapTracker::Ptr(new OneSizeGapTracker());
+        gaps->load(indexStream);
+    } else {
+        gaps.reset(new NullGapTracker());
+    }
+
+    if (index.hasParents()) {
+        // now open and read all parents' indexes to fill in the gaps in pages
+        for (int parentIdx = 0; parentIdx < index.usedParents.size();
+             ++parentIdx) {
+            if (!index.usedParents[parentIdx]) {
+                continue;
+            }
+
+            auto parentFile = base::PathUtils::join(
+                    Snapshot::dataDir(snapshot.myHierarchy()[parentIdx]
+                                              .incremental()
+                                              .parent()
+                                              .name()),
+                    "ram.bin");
+            auto stream = base::StdioStream(fopen(parentFile.c_str(), "rb"),
+                                            base::StdioStream::kOwner);
+            auto fd = fileno(stream.get());
+
+            base::System::FileSize size = 0;
+            base::System::get()->fileSize(fd, &size);
+            auto indexStream = openIndex(stream, size);
+            if (!readIndexPages(indexStream, parentIdx + 1, index)) {
+                return false;
+            }
+
+            if (streams) {
+                assert(streams->size() > parentIdx + 1);
+                (*streams)[parentIdx + 1] = std::move(stream);
+            }
+        }
+    }
+
+    return true;
+}
+
+bool RamLoader::readIndexPages(base::Stream& indexStream,
+                               uint8_t fileNo,
+                               RamLoader::FileIndex& index) {
+    bool onlyPages = fileNo != 0;
+    bool incremental;
+    int version;
+    if (!onlyPages) {
+        // root file, populate all fields
+        version = index.version = indexStream.getBe32();
+        index.flags = RamIndexFlags(indexStream.getBe32());
+        incremental = index.hasParents();
+    } else {
+        version = indexStream.getBe32();
+        auto flags = RamIndexFlags(indexStream.getBe32());
+        incremental = nonzero(flags & RamIndexFlags::Incremental);
+    }
+    if (version < 1 || version > 3) {
+        return false;
+    }
+    if (incremental) {
+        auto parentsCount = indexStream.getPackedNum();
+        if (!onlyPages) {
+            index.usedParents.resize(parentsCount);
+        }
+        for (int i = 0; i < parentsCount; ++i) {
+            bool used = indexStream.getByte() != 0;
+            if (!onlyPages) {
+                index.usedParents[i] = used;
+            }
+        }
+    }
+
+    auto pageCount = indexStream.getBe32();
+    if (onlyPages) {
+        if (index.pages.size() != pageCount) {
+            return false;
+        }
+    } else {
+        index.pages.reserve(pageCount);
+    }
+    uint16_t blocksCount = index.blocks.size();
+    if (version >= 3) {
+        blocksCount = indexStream.getBe16();
+    } else if (index.blocks.empty()) {
+        return false;
+    }
+
+    int64_t runningFilePos = 8;
+    int32_t prevPageSizeOnDisk = 0;
+    for (size_t loadedBlockIdx = 0; loadedBlockIdx < blocksCount;
+         ++loadedBlockIdx) {
+        const auto nameLength = indexStream.getByte();
+        char name[256];
+        indexStream.read(name, nameLength);
+        name[nameLength] = 0;
+        auto blockIt = std::find_if(index.blocks.begin(), index.blocks.end(),
+                                    [&name](const FileIndex::Block& b) {
+                                        return strcmp(b.ramBlock.id, name) == 0;
+                                    });
+        if (blockIt == index.blocks.end()) {
+            if (onlyPages) {
+                return false;
+            } else {
+                // No registered block yet: add a placeholder to fill in later.
+                // TODO: deal with the leak
+                index.blocks.push_back(FileIndex::Block{
+                        {strdup(name), 0, nullptr, 0, kDefaultPageSize},
+                        {},
+                        {}});
+                blockIt = std::prev(index.blocks.end());
+            }
+        }
+        readBlockPages(&indexStream, index, blockIt, &runningFilePos,
+                       &prevPageSizeOnDisk, fileNo, incremental);
+    }
+    return true;
+}
+
 void RamLoader::readBlockPages(base::Stream* stream,
+                               FileIndex& index,
                                FileIndex::Blocks::iterator blockIt,
-                               bool compressed,
                                int64_t* runningFilePosPtr,
-                               int32_t* prevPageSizeOnDiskPtr) {
+                               int32_t* prevPageSizeOnDiskPtr,
+                               int fileIndex,
+                               bool incremental) {
     auto runningFilePos = *runningFilePosPtr;
     auto prevPageSizeOnDisk = *prevPageSizeOnDiskPtr;
 
-    const auto blockIndex = std::distance(mIndex.blocks.begin(), blockIt);
+    const auto blockIndex = std::distance(index.blocks.begin(), blockIt);
 
     const auto blockPagesCount = stream->getBe32();
     FileIndex::Block& block = *blockIt;
-    auto pageIt = mIndex.pages.end();
-    block.pagesBegin = pageIt;
-    mIndex.pages.resize(mIndex.pages.size() + blockPagesCount);
-    const auto endIt = mIndex.pages.end();
-    block.pagesEnd = endIt;
+    if (block.ramBlock.totalSize == 0) {
+        block.ramBlock.totalSize = blockPagesCount * block.ramBlock.pageSize;
+    }
+    auto pageIt = index.pages.end();
+    auto endIt = index.pages.end();
+    if (fileIndex == 0) {
+        block.pagesBegin = pageIt;
+        index.pages.resize(index.pages.size() + blockPagesCount);
+        endIt = index.pages.end();
+        block.pagesEnd = endIt;
+    } else {
+        pageIt = block.pagesBegin;
+        endIt = block.pagesEnd;
+    }
 
-    for (; pageIt != endIt; ++pageIt) {
-        Page& page = *pageIt;
+    auto readPage = [&]() -> Page {
+        Page page;
+        page.filled = true;
+        page.fileIndex = uint8_t(fileIndex);
         page.blockIndex = uint16_t(blockIndex);
         const auto sizeOnDisk = stream->getPackedNum();
         if (sizeOnDisk == 0) {
@@ -282,24 +414,41 @@ void RamLoader::readBlockPages(base::Stream* stream,
             page.sizeOnDisk = 0;
             page.filePos = 0;
         } else {
-            if (mIndexOnly) {
-                page.state.store(uint8_t(State::Filled), std::memory_order_relaxed);
-            }
-            page.blockIndex = uint16_t(blockIndex);
-            page.sizeOnDisk = uint32_t(sizeOnDisk);
+            page.sizeOnDisk = uint16_t(sizeOnDisk);
             auto posDelta = stream->getPackedSignedNum();
-            if (compressed) {
+            if (index.compressed()) {
                 posDelta += prevPageSizeOnDisk;
                 prevPageSizeOnDisk = int32_t(page.sizeOnDisk);
             } else {
                 page.sizeOnDisk *= uint32_t(block.ramBlock.pageSize);
                 posDelta *= block.ramBlock.pageSize;
             }
-            if (mVersion == 2) {
+            if (index.version >= 2) {
                 stream->read(page.hash.data(), page.hash.size());
             }
             runningFilePos += posDelta;
             page.filePos = uint64_t(runningFilePos);
+        }
+        return page;
+    };
+
+    if (incremental) {
+        const auto count = stream->getBe32();
+        for (int i = 0; i < count; ++i) {
+            auto deltaPos = stream->getPackedNum();
+            pageIt = std::next(pageIt, deltaPos);
+
+            auto page = readPage();
+            if (!pageIt->filled) {
+                *pageIt = std::move(page);
+            }
+        }
+    } else {
+        for (; pageIt != endIt; ++pageIt) {
+            auto page = readPage();
+            if (!pageIt->filled) {
+                *pageIt = std::move(page);
+            }
         }
     }
     *runningFilePosPtr = runningFilePos;
@@ -514,8 +663,8 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     uint8_t compressedBuf[compress::maxCompressedSize(kDefaultPageSize)];
     auto size = page.sizeOnDisk;
     const bool compressed =
-            nonzero(mIndex.flags & IndexFlags::CompressedPages) &&
-            (mVersion == 1 || page.sizeOnDisk < kDefaultPageSize);
+            nonzero(mIndex.flags & RamIndexFlags::CompressedPages) &&
+            (mIndex.version == 1 || page.sizeOnDisk < kDefaultPageSize);
 
     // We need to allocate a dynamic buffer if:
     // - page is compressed and there's a decompressing thread pool
@@ -526,8 +675,8 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
                           !preallocatedBuffer;
     auto buf = allocateBuffer ? new uint8_t[size]
                               : compressed ? compressedBuf : preallocatedBuffer;
-    auto read = HANDLE_EINTR(
-            base::pread(mStreamFd, buf, size, int64_t(page.filePos)));
+    auto read = HANDLE_EINTR(base::pread(mStreamFds[pagePtr->fileIndex], buf,
+                                         size, int64_t(page.filePos)));
     if (read != int64_t(size)) {
         VERBOSE_PRINT(snapshot,
                       "Error: (%d) Reading page %p from disk returned less "
@@ -590,8 +739,9 @@ void RamLoader::fillPageData(Page* pagePtr) {
     printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
     if (mAccessWatch) {
-        bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
-                                          page.data, mIsQuickboot);
+        bool res = mAccessWatch->fillPage(
+                this->pagePtr(page), pageSize(page), page.data,
+                nonzero(mFlags & OperationFlags::Quickboot));
         if (!res) {
             mHasError = true;
         }
@@ -604,7 +754,8 @@ bool RamLoader::readAllPages() {
 #if SNAPSHOT_PROFILE > 1
     auto startTime = base::System::get()->getHighResTimeUs();
 #endif
-    if (nonzero(mIndex.flags & IndexFlags::CompressedPages) && !mAccessWatch) {
+    if (nonzero(mIndex.flags & RamIndexFlags::CompressedPages) &&
+        !mAccessWatch) {
         startDecompressor();
     }
 
@@ -620,7 +771,7 @@ bool RamLoader::readAllPages() {
     for (Page& page : mIndex.pages) {
         if (page.sizeOnDisk) {
             sortedPages.emplace_back(&page);
-        } else if (!mIsQuickboot) {
+        } else if (!nonzero(mFlags & OperationFlags::Quickboot)) {
             zeroOutPage(page);
         }
     }

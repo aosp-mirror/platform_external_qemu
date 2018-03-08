@@ -24,14 +24,22 @@ namespace snapshot {
 
 class Snapshot final {
 public:
-    Snapshot(const char* name);
+    enum class Kind {
+        Full,
+        IncrementalInPlace,
+        IncrementalNew,
+    };
+
+    using Hierarchy = std::vector<emulator_snapshot::Snapshot>;
+
+    Snapshot(base::StringView name);
 
     static std::vector<Snapshot> getExistingSnapshots();
 
     base::StringView name() const { return mName; }
     base::StringView dataDir() const { return mDataDir; }
 
-    bool save();
+    bool save(OperationFlags flags);
     bool saveFailure(FailureReason reason);
     bool preload();
     bool load();
@@ -39,28 +47,50 @@ public:
     void incrementSuccessfulLoads();
     bool shouldInvalidate() const;
 
+    bool isQuickboot() const;
+
     uint64_t diskSize() const { return mSize; }
 
     // Returns the snapshot's Protobuf holding its metadata.
     // If Protobuf cannot be read, sets failure reason
     // and returns null.
-    const emulator_snapshot::Snapshot* getGeneralInfo();
+    emulator_snapshot::Snapshot* getGeneralInfo();
+
+    // Same thing but also returns nullptr if the snapshot is not read yet.
+    const emulator_snapshot::Snapshot* getGeneralInfo() const;
 
     base::Optional<FailureReason> failureReason() const;
 
-    static base::StringView dataDir(const char* name);
+    static std::string dataDir(base::StringView name);
 
     base::Optional<std::string> parent();
 
+    const Hierarchy& myHierarchy() const;
+
+    void setParent(const Snapshot& parent);
+
 private:
     void loadProtobufOnce();
+    bool loadParentsOnce();
     bool verifyHost(const emulator_snapshot::Host& host);
     bool verifyConfig(const emulator_snapshot::Config& config);
     bool writeSnapshotToDisk();
+    void fillProtoBasics();
+
+    emulator_snapshot::Snapshot& proto() {
+        assert(!mProtos.empty());
+        return mProtos.front();
+    }
+    const emulator_snapshot::Snapshot& proto() const {
+        assert(!mProtos.empty());
+        return mProtos.front();
+    }
 
     std::string mName;
     std::string mDataDir;
-    emulator_snapshot::Snapshot mSnapshotPb;
+    Hierarchy mProtos;
+    const Snapshot* mParent = nullptr;
+
     uint64_t mSize = 0;
     int32_t mInvalidLoads = 0;
     int32_t mSuccessfulLoads = 0;

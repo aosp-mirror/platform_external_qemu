@@ -37,9 +37,8 @@
 
 using android::base::LazyInstance;
 using android::protobuf::loadProtobuf;
-using android::protobuf::ProtobufLoadResult;
+using android::protobuf::LoadResult;
 using android::protobuf::saveProtobuf;
-using android::protobuf::ProtobufSaveResult;
 
 namespace pb = emulator_snapshot;
 
@@ -58,7 +57,7 @@ public:
                 getSnapshotDepsFileName(),
                 mSnapshotDepsPb);
 
-        if (loadRes != ProtobufLoadResult::Success) return;
+        if (loadRes != LoadResult::Success) return;
 
         for (int i = 0; i < mSnapshotDepsPb.dependencies_size(); i++) {
             D("previous parent map: %s --- parent of --> %s",
