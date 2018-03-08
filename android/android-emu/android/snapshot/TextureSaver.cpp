@@ -65,6 +65,7 @@ void TextureSaver::done() {
 #endif
     mHasError = ferror(mStream.get()) != 0;
     mFinished = true;
+    mStream.close();
 }
 
 void TextureSaver::writeIndex() {
