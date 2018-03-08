@@ -11,12 +11,13 @@
 
 #pragma once
 
+#include "android/base/EnumFlags.h"
 #include "android/base/StringView.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/interface.h"
 
-#include <memory>
 #include <stdint.h>
+#include <memory>
 
 namespace android {
 namespace snapshot {
@@ -31,9 +32,10 @@ using ITextureLoaderWPtr = std::weak_ptr<ITextureLoader>;
 
 using RamBlock = ::SnapshotRamBlock;
 
-enum class IndexFlags {
+enum class RamIndexFlags {
     Empty = 0,
     CompressedPages = 0x01,
+    Incremental = 0x02,
 };
 
 enum class OperationStatus {
@@ -42,6 +44,14 @@ enum class OperationStatus {
     Error = SNAPSHOT_STATUS_ERROR,
     Canceled = SNAPSHOT_STATUS_CANCELED,
 };
+
+enum class OperationFlags {
+    Empty = 0,
+    Quickboot = 1,
+    OnExit = 2,
+};
+
+using namespace android::base::EnumFlags;
 
 enum class FailureReason {
     Empty = 0,
@@ -53,7 +63,7 @@ enum class FailureReason {
     NoRamFile,
     NoTexturesFile,
     SnapshotsNotSupported,
-    Canceled,
+    MissingOrWrongParent,
 
     UnrecoverableErrorLimit = 10000,
 
@@ -73,13 +83,13 @@ enum class FailureReason {
     TexturesFailed,
     AdbOffline,
     OutOfDiskSpace,
+    Canceled,
 
     InProgressLimit = 30000,
 };
 
 FailureReason errnoToFailure(int error);
-const char* failureReasonToString(FailureReason failure,
-                                  SnapshotOperation op);
+const char* failureReasonToString(FailureReason failure, SnapshotOperation op);
 
 template <class Operation>
 bool isComplete(const Operation& op) {

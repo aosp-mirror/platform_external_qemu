@@ -13,11 +13,16 @@
 
 #include "android/base/Stopwatch.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/files/preadwrite.h"
 #include "android/base/memory/OnDemand.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/system/System.h"
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/snapshot/Loader.h"
+#include "android/snapshot/Quickboot.h"
 #include "android/snapshot/RamLoader.h"
+#include "android/snapshot/Snapshot.h"
 #include "android/utils/debug.h"
 
 #include "MurmurHash3.h"
@@ -40,54 +45,116 @@ void RamSaver::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
-RamSaver::RamSaver(const std::string& fileName,
-                   Flags preferredFlags,
-                   RamLoader* loader,
-                   bool isOnExit)
+RamSaver::RamSaver(const Snapshot& snapshot,
+                   OperationFlags saverFlags,
+                   Flags preferredRamFlags,
+                   Loader* loader,
+                   const Snapshot* parent)
     : mStream(nullptr) {
-    bool incremental = false;
-    if (loader) {
-        // check if we're ok to proceed with incremental saving
-        auto currentGaps = loader->releaseGapTracker();
-        assert(currentGaps);
-        const auto wastedSpace = currentGaps->wastedSpace();
-        if (wastedSpace <= loader->diskSize() * 0.30) {
-            incremental = true;
-            if (isOnExit) {
-                loader->interrupt();
+    // Let's figure out if we could reuse the parent snapshot...
+    if (nonzero(saverFlags & OperationFlags::Quickboot)) {
+        if (loader && loader->snapshot().isQuickboot()) {
+            // Quickboot won't be needed again, so we can rewrite it in-place
+            auto currentGaps = loader->ramLoader().releaseGapTracker();
+            if (currentGaps) {
+                auto size = loader->ramLoader().diskSize();
+                const auto wastedSpace = currentGaps->wastedSpace();
+                if (wastedSpace <= size * 0.30) {
+                    mKind = Snapshot::Kind::IncrementalInPlace;
+                    mGaps = std::move(currentGaps);
+                }
             }
-            mGaps = std::move(currentGaps);
-        } else {
-            loader->join();
-        }
-        VERBOSE_PRINT(snapshot,
-                      "%s incremental RAM saving (currently wasting %llu"
-                      " bytes of %llu bytes (%.2f%%)",
-                      incremental ? "Enabled" : "Disabled",
-                      (unsigned long long)wastedSpace,
-                      (unsigned long long)loader->diskSize(),
-                      wastedSpace * 100.0 / loader->diskSize());
-    }
-
-    if (incremental) {
-        mFlags = loader->compressed() ? RamSaver::Flags::Compress
-                                      : RamSaver::Flags::None;
-        mLoader = loader;
-        mLoaderOnDemand = loader->onDemandEnabled();
-        mStream = base::StdioStream(fopen(fileName.c_str(), "rb+"),
-                                    base::StdioStream::kOwner);
-        if (mStream.get()) {
-            // Seek to the old index position and start overwriting from there.
-            fseeko64(mStream.get(), loader->indexOffset(), SEEK_SET);
-            mCurrentStreamPos = loader->indexOffset();
         }
     } else {
-        mFlags = preferredFlags;
-        mStream = base::StdioStream(fopen(fileName.c_str(), "wb"),
-                                    base::StdioStream::kOwner);
-        if (mStream.get()) {
-            // Put a placeholder for the index offset right now.
-            mStream.putBe64(0);
+        // Otherwise there's a set of conditions:
+        // 0. The feature is enabled
+        // 1. A valid parent snapshot
+        // 2. Parent's incremental dependency chain that's not too long
+        // 3. Parent isn't a quickboot snapshot - otherwise it will quickly get
+        //    overwritten and make this snapshot bad too.
+        // 4. We're not overwriting any parent snapshot
+        // 5. TODO: figure out what else to check here for
+        if (isEnabled(android::featurecontrol::GenericIncrementalSnapshot)) {
+            static constexpr size_t kMaxIncrementalHierarchySize = 10;
+
+            if (parent && !parent->isQuickboot() &&
+                parent->myHierarchy().size() < kMaxIncrementalHierarchySize) {
+                if (std::find_if(
+                            parent->myHierarchy().begin(),
+                            parent->myHierarchy().end(),
+                            [&snapshot](
+                                    const emulator_snapshot::Snapshot& parent) {
+                                return parent.has_incremental() &&
+                                       parent.incremental().parent().name() ==
+                                               snapshot.name();
+                            }) == parent->myHierarchy().end()) {
+                    mKind = Snapshot::Kind::IncrementalNew;
+                }
+            }
+        }
+    }
+
+    if (!mGaps) {
+        mGaps.reset(new NullGapTracker());
+    }
+
+    if (loader) {
+        // Load whole RAM if we're going to save it as a whole, or if we will
+        // overwrite the current snapshot and won't be able to keep loading
+        // from it.
+        if (nonzero(saverFlags & OperationFlags::OnExit)) {
+            loader->ramLoader().interrupt();
+        } else {
+            loader->ramLoader().join();
+        }
+    }
+
+    const auto ramFile = base::PathUtils::join(snapshot.dataDir(), "ram.bin");
+    switch (mKind) {
+        case Snapshot::Kind::Full: {
+            mFlags = preferredRamFlags;
+            mStream = base::StdioStream(fopen(ramFile.c_str(), "wb"),
+                                        base::StdioStream::kOwner);
+            if (mStream.get()) {
+                // Put a placeholder for the index offset right now.
+                mStream.putBe64(0);
+            }
+            break;
+        }
+        case Snapshot::Kind::IncrementalInPlace: {
+            mParentIndex = &loader->ramLoader().index();
+            mLoaderOnDemand = loader->ramLoader().onDemandEnabled();
+            mFlags = mParentIndex->compressed() ? RamSaver::Flags::Compress
+                                                : RamSaver::Flags::None;
+            mStream = base::StdioStream(fopen(ramFile.c_str(), "rb+"),
+                                        base::StdioStream::kOwner);
+            if (mStream.get()) {
+                // Seek to the old index position and start overwriting from
+                // there.
+                fseeko64(mStream.get(), mParentIndex->offset, SEEK_SET);
+                mCurrentStreamPos = mParentIndex->offset;
+            }
+            break;
+        }
+        case Snapshot::Kind::IncrementalNew: {
+            if (loader && loader->snapshot().name() == parent->name()) {
+                mParentIndex = &loader->ramLoader().index();
+                mLoaderOnDemand = loader->ramLoader().onDemandEnabled();
+            } else {
+                mParentIndex = new RamLoader::FileIndex(
+                        RamLoader::loadIndex(*parent).first);
+                mParentIndexAllocated = true;
+            }
+            mFlags = mParentIndex->compressed() ? RamSaver::Flags::Compress
+                                                : RamSaver::Flags::None;
+            mStream = base::StdioStream(fopen(ramFile.c_str(), "wb"),
+                                        base::StdioStream::kOwner);
+            if (mStream.get()) {
+                // Put a placeholder for the index offset right now.
+                mStream.putBe64(0);
+            }
+            mIndex.flags |= int32_t(RamIndexFlags::Incremental);
+            break;
         }
     }
 
@@ -180,6 +247,10 @@ void RamSaver::join() {
     passToSaveHandler({kStopMarkerIndex, 0});
     mJoined = true;
     mIndex.clear();
+    if (mParentIndexAllocated) {
+        delete mParentIndex;
+    }
+    mParentIndex = nullptr;
 }
 
 void RamSaver::cancel() {
@@ -201,10 +272,11 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
         mIncStats.count(StatAction::TotalPages);
 
         // short-cirquit the fastest cases right here.
-        if (mLoader && mLoaderOnDemand) {
+        if (mParentIndex && mLoaderOnDemand) {
             FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
-            const RamLoader::Page* loaderPage = mLoader->findPage(
-                    pi.blockIndex, block.ramBlock.id, pi.pageIndex);
+            const RamLoader::Page* loaderPage =
+                    mParentIndex->findPage(pi.blockIndex, pi.pageIndex);
+            assert(loaderPage->filled);
             if (loaderPage &&
                 loaderPage->state.load(std::memory_order_relaxed) <
                         int(RamLoader::State::Filled)) {
@@ -216,8 +288,13 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
                 page.same = true;
                 page.filePos = loaderPage->filePos;
                 page.sizeOnDisk = loaderPage->sizeOnDisk;
-                if (page.sizeOnDisk) {
-                    if (mLoader->version() >= 2) {
+                if (!page.sizeOnDisk) {
+                    page.fileIndex = 0;
+                } else {
+                    if (mKind == Snapshot::Kind::IncrementalNew) {
+                        page.fileIndex = loaderPage->fileIndex + 1;
+                    }
+                    if (mParentIndex->version >= 2) {
                         page.hash = loaderPage->hash;
                         page.hashFilled = true;
                     } else {
@@ -264,29 +341,33 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
     auto ptr = block.ramBlock.hostPtr +
                int64_t(pi.pageIndex) * block.ramBlock.pageSize;
     auto isZeroed = base::makeOnDemand<bool>([&] {
-        return std::make_tuple(mIncStats.measure(StatTime::ZeroCheck, [&] {
+        return mIncStats.measure(StatTime::ZeroCheck, [&] {
             return isBufferZeroed(ptr, block.ramBlock.pageSize);
-        }));
+        });
     });
+    page.fileIndex = 0;
     page.filePos = 0;
     page.same = false;
     page.hashFilled = false;
     const RamLoader::Page* loaderPage = nullptr;
-    if (mLoader) {
-        loaderPage = mLoader->findPage(pi.blockIndex, block.ramBlock.id,
-                                       pi.pageIndex);
-        assert(loaderPage);
+    if (mParentIndex) {
+        loaderPage = mParentIndex->findPage(pi.blockIndex, pi.pageIndex);
+        assert(loaderPage->filled);
         if (loaderPage->zeroed()) {
             if (*isZeroed) {
                 mIncStats.count(StatAction::StillZeroPage);
                 page.same = true;
+                page.fileIndex = 0;
                 page.sizeOnDisk = 0;
             }
-        } else if (mLoader->version() >= 2) {
+        } else if (mParentIndex->version >= 2) {
             calcHash(page, block, ptr);
             if (page.hash == loaderPage->hash) {
                 mIncStats.count(StatAction::SameHashPage);
                 page.same = true;
+                if (mKind == Snapshot::Kind::IncrementalNew) {
+                    page.fileIndex = loaderPage->fileIndex + 1;
+                }
                 page.filePos = loaderPage->filePos;
                 page.sizeOnDisk = loaderPage->sizeOnDisk;
             }
@@ -332,7 +413,7 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 }
             }
 
-            if (loaderPage) {
+            if (mKind == Snapshot::Kind::IncrementalInPlace && loaderPage) {
                 if (page.sizeOnDisk <= loaderPage->sizeOnDisk) {
                     page.filePos = loaderPage->filePos;
                     mIncStats.count(StatAction::ReusedPos);
@@ -360,41 +441,94 @@ void RamSaver::writeIndex() {
     auto start = mIndex.startPosInFile;
 
     MemStream stream(512 + 16 * mIndex.totalPages);
-    bool compressed = (mIndex.flags & int(IndexFlags::CompressedPages)) != 0;
+    bool compressed = (mIndex.flags & int(RamIndexFlags::CompressedPages)) != 0;
     stream.putBe32(uint32_t(mIndex.version));
     stream.putBe32(uint32_t(mIndex.flags));
+    const bool incremental = mIndex.flags & int32_t(RamIndexFlags::Incremental);
+    if (incremental) {
+        // collect the used parents
+        decltype(mParentIndex->usedParents) usedParents;
+        usedParents.resize(mParentIndex->usedParents.size() + 1);
+        [&] {
+            int usedParentsCount = 0;
+            for (auto&& block : mIndex.blocks) {
+                for (auto&& page : block.pages) {
+                    if (page.fileIndex != 0) {
+                        if (!usedParents[page.fileIndex - 1]) {
+                            usedParents[page.fileIndex - 1] = true;
+                            if (++usedParentsCount == usedParents.size()) {
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }();
+
+        stream.putPackedNum(usedParents.size());
+        for (bool val : usedParents) {
+            stream.putByte(val);
+        }
+    }
+
     stream.putBe32(uint32_t(mIndex.totalPages));
+    stream.putBe16(uint16_t(mIndex.blocks.size()));
     int64_t prevFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
+
+    auto writePage = [&](const FileIndex::Block& b,
+                         const FileIndex::Block::Page& page) {
+        stream.putPackedNum(
+                uint64_t(compressed ? page.sizeOnDisk
+                                    : (page.sizeOnDisk / b.ramBlock.pageSize)));
+        if (!page.zeroed()) {
+            auto deltaPos = page.filePos - prevFilePos;
+            if (compressed) {
+                deltaPos -= prevPageSizeOnDisk;
+            } else {
+                assert(deltaPos % b.ramBlock.pageSize == 0);
+                deltaPos /= b.ramBlock.pageSize;
+            }
+            stream.putPackedSignedNum(deltaPos);
+            assert(page.hashFilled);
+            stream.write(page.hash.data(), page.hash.size());
+            prevFilePos = page.filePos;
+            prevPageSizeOnDisk = page.sizeOnDisk;
+        }
+    };
+
     for (const FileIndex::Block& b : mIndex.blocks) {
         auto id = base::StringView(b.ramBlock.id);
         stream.putByte(uint8_t(id.size()));
         stream.write(id.data(), id.size());
         stream.putBe32(uint32_t(b.pages.size()));
-        for (const FileIndex::Block::Page& page : b.pages) {
-            stream.putPackedNum(uint64_t(
-                    compressed ? page.sizeOnDisk
-                               : (page.sizeOnDisk / b.ramBlock.pageSize)));
-            if (!page.zeroed()) {
-                auto deltaPos = page.filePos - prevFilePos;
-                if (compressed) {
-                    deltaPos -= prevPageSizeOnDisk;
-                } else {
-                    assert(deltaPos % b.ramBlock.pageSize == 0);
-                    deltaPos /= b.ramBlock.pageSize;
+        if (incremental) {
+            // count how many pages have changed
+            auto changedPages =
+                    std::count_if(b.pages.begin(), b.pages.end(),
+                                  [](const FileIndex::Block::Page& p) {
+                                      return p.fileIndex == 0;
+                                  });
+            stream.putBe32(changedPages);
+            int prevIndex = 0;
+            for (int i = 0, size = b.pages.size(); i < size; ++i) {
+                auto&& page = b.pages[i];
+                if (page.fileIndex != 0) {
+                    continue;
                 }
-                stream.putPackedSignedNum(deltaPos);
-                assert(page.hashFilled);
-                stream.write(page.hash.data(), page.hash.size());
-                prevFilePos = page.filePos;
-                prevPageSizeOnDisk = page.sizeOnDisk;
+                stream.putPackedNum(i - prevIndex);
+                prevIndex = i;
+                writePage(b, page);
+            }
+        } else {
+            for (const FileIndex::Block::Page& page : b.pages) {
+                writePage(b, page);
             }
         }
     }
 
-    mIncStats.measure(StatTime::GapTrackingWriter, [&] {
-        incremental() ? mGaps->save(stream) : OneSizeGapTracker().save(stream);
-    });
+    mIncStats.measure(StatTime::GapTrackingWriter,
+                      [&] { mGaps->save(stream); });
 
     auto end = mIncStats.measure(StatTime::Disk, [&] {
         auto end = mIndex.startPosInFile + stream.writtenSize();
@@ -410,7 +544,7 @@ void RamSaver::writeIndex() {
         return end;
     });
 
-    auto bytesWasted = incremental() ? mGaps->wastedSpace() : 0;
+    auto bytesWasted = mGaps->wastedSpace();
     mIncStats.print(
             "RAM: index %d, total %lld bytes, wasted %d (compressed: %s)\n",
             int(end - start), (long long)mDiskSize, int(bytesWasted),
@@ -418,7 +552,7 @@ void RamSaver::writeIndex() {
 }
 
 void RamSaver::writePage(WriteInfo&& wi) {
-    if (incremental() && wi.page->filePos == 0) {
+    if (mKind == Snapshot::Kind::IncrementalInPlace && wi.page->filePos == 0) {
         if (auto gapPos = mIncStats.measure(StatTime::GapTrackingWriter, [&] {
                 return mGaps->allocate(wi.page->sizeOnDisk);
             })) {

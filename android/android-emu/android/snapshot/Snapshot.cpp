@@ -14,6 +14,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/Optional.h"
 #include "android/base/StringFormat.h"
+#include "android/base/Uuid.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedFd.h"
@@ -40,7 +41,9 @@
 
 #define ALLOW_CHANGE_RENDERER
 
+using android::base::endsWith;
 using android::base::IniFile;
+using android::base::makeCustomScopedPtr;
 using android::base::Optional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
@@ -48,18 +51,18 @@ using android::base::ScopedFd;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
-using android::base::endsWith;
-using android::base::makeCustomScopedPtr;
+using android::base::Uuid;
 
 using android::protobuf::loadProtobuf;
-using android::protobuf::ProtobufLoadResult;
 using android::protobuf::saveProtobuf;
-using android::protobuf::ProtobufSaveResult;
+using android::protobuf::SaveResult;
 
 namespace pb = emulator_snapshot;
 
 namespace android {
 namespace snapshot {
+
+static constexpr int kVersion = 23;
 
 static void fillImageInfo(pb::Image::Type type,
                           StringView path,
@@ -121,20 +124,20 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
                        // separately.
         }
 #ifdef ALLOW_CHANGE_RENDERER
-        if (!actual.hasKey(key) || actual.getString(key, "$$$")
-                != expected.getString(key, "$$$")) {
+        if (!actual.hasKey(key) ||
+            actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             if (key != "hw.gpu.mode") {
                 return false;
             }
         }
-#else // ALLOW_CHANGE_RENDERER
+#else   // ALLOW_CHANGE_RENDERER
         if (!actual.hasKey(key)) {
             return false;
         }
         if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             return false;
         }
-#endif // ALLOW_CHANGE_RENDERER
+#endif  // ALLOW_CHANGE_RENDERER
     }
 
     for (auto&& key : actual) {
@@ -146,20 +149,20 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
                        // separately.
         }
 #ifdef ALLOW_CHANGE_RENDERER
-        if (!expected.hasKey(key) || actual.getString(key, "$$$")
-                != expected.getString(key, "$$$")) {
+        if (!expected.hasKey(key) ||
+            actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             if (key != "hw.gpu.mode") {
                 return false;
             }
         }
-#else // ALLOW_CHANGE_RENDERER
+#else   // ALLOW_CHANGE_RENDERER
         if (!expected.hasKey(key)) {
             return false;
         }
         if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             return false;
         }
-#endif // ALLOW_CHANGE_RENDERER
+#endif  // ALLOW_CHANGE_RENDERER
     }
 
     return numPathActual == numPathExpected;
@@ -191,7 +194,8 @@ bool Snapshot::verifyHost(const pb::Host& host) {
         return false;
     }
     // Do not worry about backend if in swiftshader_indirect
-    if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+    if (emuglConfig_get_current_renderer() ==
+        SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
         return true;
     }
     if (auto gpuString = currentGpuDriverString()) {
@@ -223,10 +227,10 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
 #ifdef ALLOW_CHANGE_RENDERER
         fprintf(stderr, "WARNING: change of renderer detected.\n");
-#else // ALLOW_CHANGE_RENDERER
+#else   // ALLOW_CHANGE_RENDERER
         saveFailure(FailureReason::ConfigMismatchRenderer);
         return false;
-#endif // ALLOW_CHANGE_RENDERER
+#endif  // ALLOW_CHANGE_RENDERER
     }
 
     const auto enabledFeatures = android::featurecontrol::getEnabled();
@@ -244,12 +248,13 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
-    auto res =
-        saveProtobuf(
-            PathUtils::join(mDataDir, "snapshot.pb"),
-            mSnapshotPb,
-            &mSize);
-    return res == ProtobufSaveResult::Success;
+    if (!proto().has_version()) {
+        fillProtoBasics();
+    }
+
+    auto res = saveProtobuf(PathUtils::join(mDataDir, "snapshot.pb"), proto(),
+                            &mSize);
+    return res == SaveResult::Success;
 }
 
 struct {
@@ -270,36 +275,51 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 22;
-
-base::StringView Snapshot::dataDir(const char* name) {
+std::string Snapshot::dataDir(base::StringView name) {
     return getSnapshotDir(name);
 }
 
 base::Optional<std::string> Snapshot::parent() {
     auto info = getGeneralInfo();
-    if (!info || !info->has_parent()) return base::kNullopt;
+    if (!info || !info->has_parent())
+        return base::kNullopt;
     auto parentName = info->parent();
-    if (parentName == "") return base::kNullopt;
+    if (parentName.empty())
+        return base::kNullopt;
     return parentName;
 }
 
-Snapshot::Snapshot(const char* name)
-    : mName(name), mDataDir(getSnapshotDir(name)) {}
+const Snapshot::Hierarchy& Snapshot::myHierarchy() const {
+    return mProtos;
+}
+
+void Snapshot::setParent(const Snapshot& parent) {
+    mParent = &parent;
+}
+
+Snapshot::Snapshot(base::StringView name)
+    : mName(name), mDataDir(getSnapshotDir(name.c_str())), mProtos(1) {}
 
 // static
 std::vector<Snapshot> Snapshot::getExistingSnapshots() {
     std::vector<Snapshot> res = {};
     auto snapshotFiles = getSnapshotDirEntries();
     for (const auto& filename : snapshotFiles) {
-        Snapshot s(filename.c_str());
+        Snapshot s(filename);
         if (s.load()) {
             res.push_back(s);
         }
     }
     return res;
 }
-bool Snapshot::save() {
+void Snapshot::fillProtoBasics() {
+    proto().set_version(kVersion);
+    proto().mutable_revision()->set_value(Uuid::generateFast().bytes(),
+                                          Uuid::byteSize);
+    proto().set_creation_time(System::get()->getUnixTime());
+}
+
+bool Snapshot::save(OperationFlags flags) {
     // In saving, we assume the state is different,
     // so we reset the invalid/successful counters.
 
@@ -309,49 +329,63 @@ bool Snapshot::save() {
         return false;
     }
 
-    mSnapshotPb.Clear();
-    mSnapshotPb.set_version(kVersion);
-    mSnapshotPb.set_creation_time(System::get()->getUnixTime());
+    proto().Clear();
+    fillProtoBasics();
+
+    proto().set_is_quickboot(nonzero(flags & OperationFlags::Quickboot));
 
     VmConfiguration vmConfig;
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
-    mSnapshotPb.mutable_config()->set_cpu_core_count(vmConfig.numberOfCpuCores);
-    mSnapshotPb.mutable_config()->set_ram_size_bytes(vmConfig.ramSizeBytes);
-    mSnapshotPb.mutable_config()->set_selected_renderer(
+    proto().mutable_config()->set_cpu_core_count(vmConfig.numberOfCpuCores);
+    proto().mutable_config()->set_ram_size_bytes(vmConfig.ramSizeBytes);
+    proto().mutable_config()->set_selected_renderer(
             int(emuglConfig_get_current_renderer()));
-    mSnapshotPb.mutable_host()->set_hypervisor(vmConfig.hypervisorType);
+    proto().mutable_host()->set_hypervisor(vmConfig.hypervisorType);
     if (auto gpuString = currentGpuDriverString()) {
-        mSnapshotPb.mutable_host()->set_gpu_driver(*gpuString);
+        proto().mutable_host()->set_gpu_driver(*gpuString);
     }
     for (auto f : android::featurecontrol::getEnabled()) {
-        mSnapshotPb.mutable_config()->add_enabled_features(int(f));
+        proto().mutable_config()->add_enabled_features(int(f));
     }
 
     for (const auto& image : kImages) {
         ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
-        fillImageInfo(image.type, path.get(), mSnapshotPb.add_images());
+        fillImageInfo(image.type, path.get(), proto().add_images());
     }
 
-    mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
-    mSnapshotPb.set_rotation(
-            int(Snapshotter::get().windowAgent().getRotation()));
+    proto().set_guest_data_partition_mounted(guest_data_partition_mounted);
+    proto().set_rotation(int(Snapshotter::get().windowAgent().getRotation()));
 
-    mSnapshotPb.set_invalid_loads(mInvalidLoads);
-    mSnapshotPb.set_successful_loads(mSuccessfulLoads);
+    proto().set_invalid_loads(mInvalidLoads);
+    proto().set_successful_loads(mSuccessfulLoads);
 
-    auto parentSnapshot = Snapshotter::get().loadedSnapshotFile();
+    const auto& parentSnapshot = Snapshotter::get().currentSnapshot();
     // We want to maintain the default_boot snapshot as outside
     // the hierarchy. For that reason, don't set parent if default
-    // boot is involved either as the current snapshot or the parent snapshot.
-    if (mName != Quickboot::kDefaultBootSnapshot &&
-        parentSnapshot != "" &&
-        parentSnapshot != Quickboot::kDefaultBootSnapshot) {
-        if (mName != parentSnapshot) {
-            mSnapshotPb.set_parent(parentSnapshot);
+    // boot is involved either as the current snapshot or the parent
+    // snapshot.
+    if (!isQuickboot() && parentSnapshot && !parentSnapshot->isQuickboot()) {
+        if (mName != parentSnapshot->name()) {
+            proto().set_parent(parentSnapshot->name());
         }
     }
 
-    return writeSnapshotToDisk();
+    if (mParent) {
+        auto parent = proto().mutable_incremental()->mutable_parent();
+        parent->set_name(mParent->name());
+        parent->mutable_revision()->set_value(
+                mParent->getGeneralInfo()->revision().value());
+    }
+
+    if (!writeSnapshotToDisk()) {
+        return false;
+    }
+
+    if (!loadParentsOnce()) {
+        saveFailure(FailureReason::MissingOrWrongParent);
+        return false;
+    }
+    return true;
 }
 
 bool Snapshot::saveFailure(FailureReason reason) {
@@ -364,12 +398,9 @@ bool Snapshot::saveFailure(FailureReason reason) {
         // Nothing to do
         return true;
     }
-    mSnapshotPb.set_failed_to_load_reason_code(int64_t(reason));
-    if (!mSnapshotPb.has_version()) {
-        mSnapshotPb.set_version(kVersion);
-    }
-    mSnapshotPb.set_invalid_loads(mInvalidLoads);
-    mSnapshotPb.set_successful_loads(mSuccessfulLoads);
+    proto().set_failed_to_load_reason_code(int64_t(reason));
+    proto().set_invalid_loads(mInvalidLoads);
+    proto().set_successful_loads(mSuccessfulLoads);
     if (writeSnapshotToDisk()) {
         // Success
         mLatestFailureReason = reason;
@@ -390,57 +421,104 @@ static bool isUnrecoverableReason(FailureReason reason) {
 bool Snapshot::preload() {
     loadProtobufOnce();
 
-    return (mSnapshotPb.has_version() && mSnapshotPb.version() == kVersion);
+    return (proto().has_version() && proto().version() == kVersion);
 }
 
-const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
+pb::Snapshot* Snapshot::getGeneralInfo() {
     loadProtobufOnce();
     if (isUnrecoverableReason(
-            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+                FailureReason(proto().failed_to_load_reason_code()))) {
         return nullptr;
     }
-    return &mSnapshotPb;
+    return &proto();
 }
 
-void Snapshot::loadProtobufOnce() {
-    if (mSnapshotPb.has_version()) {
-        return;
+const pb::Snapshot* Snapshot::getGeneralInfo() const {
+    if (!proto().has_version()) {
+        return nullptr;
     }
-    const auto file =
-            ScopedFd(::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
-                            O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
-    System::FileSize size;
-    if (!System::get()->fileSize(file.get(), &size)) {
-        saveFailure(FailureReason::NoSnapshotPb);
-        return;
+    if (isUnrecoverableReason(
+                FailureReason(proto().failed_to_load_reason_code()))) {
+        return nullptr;
     }
-    mSize = size;
+    return &proto();
+}
+
+static base::Optional<FailureReason> loadProto(base::StringView filename,
+                                               pb::Snapshot* proto,
+                                               System::FileSize* size) {
+    const auto file = ScopedFd(
+            ::open(filename.c_str(), O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
+    if (!System::get()->fileSize(file.get(), size)) {
+        return FailureReason::NoSnapshotPb;
+    }
 
     const auto fileMap = makeCustomScopedPtr(
-            mmap(nullptr, size, PROT_READ, MAP_PRIVATE, file.get(), 0),
+            mmap(nullptr, *size, PROT_READ, MAP_PRIVATE, file.get(), 0),
             [size](void* ptr) {
                 if (ptr != MAP_FAILED) {
-                    munmap(ptr, size);
+                    munmap(ptr, *size);
                 }
             });
     if (!fileMap || fileMap.get() == MAP_FAILED) {
-        saveFailure(FailureReason::BadSnapshotPb);
-        return;
+        return FailureReason::BadSnapshotPb;
     }
-    if (!mSnapshotPb.ParseFromArray(fileMap.get(), size)) {
-        saveFailure(FailureReason::BadSnapshotPb);
-        return;
+    if (!proto->ParseFromArray(fileMap.get(), *size)) {
+        return FailureReason::BadSnapshotPb;
     }
-    if (mSnapshotPb.has_failed_to_load_reason_code() &&
+    if (proto->has_failed_to_load_reason_code() &&
         isUnrecoverableReason(
-                FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+                FailureReason(proto->failed_to_load_reason_code()))) {
+        return FailureReason(proto->failed_to_load_reason_code());
+    }
+    if (!proto->has_version() || proto->version() != kVersion) {
+        return FailureReason::IncompatibleVersion;
+    }
+
+    return {};
+}
+
+void Snapshot::loadProtobufOnce() {
+    if (proto().has_version()) {
         return;
     }
-    if (!mSnapshotPb.has_version() || mSnapshotPb.version() != kVersion) {
-        saveFailure(FailureReason::IncompatibleVersion);
+
+    // Load the root proto first
+    auto name = PathUtils::join(mDataDir, "snapshot.pb");
+    if (auto failure = loadProto(name, &proto(), &mSize)) {
+        saveFailure(*failure);
         return;
     }
-    // Success
+
+    if (!loadParentsOnce()) {
+        saveFailure(FailureReason::MissingOrWrongParent);
+    }
+}
+
+bool Snapshot::loadParentsOnce() {
+    if (mProtos.size() > 1) {
+        return true;
+    }
+
+    while (mProtos.back().has_incremental() &&
+           mProtos.back().incremental().has_parent()) {
+        const auto& parentRef = mProtos.back().incremental().parent();
+        auto parentPath = PathUtils::join(getSnapshotDir(parentRef.name()),
+                                          "snapshot.pb");
+        pb::Snapshot parent;
+        System::FileSize size;
+        if (auto failure = loadProto(parentPath, &parent, &size)) {
+            mProtos.resize(1);
+            return false;
+        }
+        if (parent.revision().value() != parentRef.revision().value()) {
+            mProtos.resize(1);
+            return false;
+        }
+        mProtos.push_back(std::move(parent));
+    }
+
+    return true;
 }
 
 // load(): Loads all snapshot metadata and checks it against other files
@@ -451,17 +529,17 @@ bool Snapshot::load() {
     }
 
     if (android::featurecontrol::isEnabled(
-            android::featurecontrol::AllowSnapshotMigration)) {
+                android::featurecontrol::AllowSnapshotMigration)) {
         return true;
     }
 
-    if (mSnapshotPb.has_host() && !verifyHost(mSnapshotPb.host())) {
+    if (proto().has_host() && !verifyHost(proto().host())) {
         return false;
     }
-    if (mSnapshotPb.has_config() && !verifyConfig(mSnapshotPb.config())) {
+    if (proto().has_config() && !verifyConfig(proto().config())) {
         return false;
     }
-    if (mSnapshotPb.images_size() > int(ARRAY_SIZE(kImages))) {
+    if (proto().images_size() > int(ARRAY_SIZE(kImages))) {
         saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
@@ -469,12 +547,12 @@ bool Snapshot::load() {
     for (const auto& image : kImages) {
         ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
         const auto type = image.type;
-        const auto it = std::find_if(
-                mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
-                [type](const pb::Image& im) {
-                    return im.has_type() && im.type() == type;
-                });
-        if (it != mSnapshotPb.images().end()) {
+        const auto it =
+                std::find_if(proto().images().begin(), proto().images().end(),
+                             [type](const pb::Image& im) {
+                                 return im.has_type() && im.type() == type;
+                             });
+        if (it != proto().images().end()) {
             if (!verifyImageInfo(image.type, path.get(), *it)) {
                 saveFailure(FailureReason::SystemImageChanged);
                 return false;
@@ -488,7 +566,7 @@ bool Snapshot::load() {
             }
         }
     }
-    if (matchedImages != mSnapshotPb.images_size()) {
+    if (matchedImages != proto().images_size()) {
         saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
@@ -514,25 +592,24 @@ bool Snapshot::load() {
         saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
-    if (mSnapshotPb.has_guest_data_partition_mounted()) {
-        guest_data_partition_mounted =
-                mSnapshotPb.guest_data_partition_mounted();
+    if (proto().has_guest_data_partition_mounted()) {
+        guest_data_partition_mounted = proto().guest_data_partition_mounted();
     }
-    if (mSnapshotPb.has_rotation() &&
+    if (proto().has_rotation() &&
         Snapshotter::get().windowAgent().getRotation() !=
-                SkinRotation(mSnapshotPb.rotation())) {
+                SkinRotation(proto().rotation())) {
         Snapshotter::get().windowAgent().rotate(
-                SkinRotation(mSnapshotPb.rotation()));
+                SkinRotation(proto().rotation()));
     }
 
-    if (mSnapshotPb.has_invalid_loads()) {
-        mInvalidLoads = mSnapshotPb.invalid_loads();
+    if (proto().has_invalid_loads()) {
+        mInvalidLoads = proto().invalid_loads();
     } else {
         mInvalidLoads = 0;
     }
 
-    if (mSnapshotPb.has_successful_loads()) {
-        mSuccessfulLoads = mSnapshotPb.successful_loads();
+    if (proto().has_successful_loads()) {
+        mSuccessfulLoads = proto().successful_loads();
     } else {
         mSuccessfulLoads = 0;
     }
@@ -542,34 +619,36 @@ bool Snapshot::load() {
 
 void Snapshot::incrementInvalidLoads() {
     ++mInvalidLoads;
-    mSnapshotPb.set_invalid_loads(mInvalidLoads);
-    if (!mSnapshotPb.has_version()) {
-        mSnapshotPb.set_version(kVersion);
-    }
+    proto().set_invalid_loads(mInvalidLoads);
     writeSnapshotToDisk();
 }
 
 void Snapshot::incrementSuccessfulLoads() {
     ++mSuccessfulLoads;
-    mSnapshotPb.set_successful_loads(mSuccessfulLoads);
-    if (!mSnapshotPb.has_version()) {
-        mSnapshotPb.set_version(kVersion);
-    }
+    proto().set_successful_loads(mSuccessfulLoads);
     writeSnapshotToDisk();
 }
 
 bool Snapshot::shouldInvalidate() const {
-    // Either there wasn't any successful loads,
-    // or there was more than one invalid load
-    // of this snapshot.
-    return !mSuccessfulLoads ||
-           mInvalidLoads > 1;
+    // Either there wasn't any successful loads, or there was more than one
+    // invalid load of this snapshot.
+    return !mSuccessfulLoads || mInvalidLoads > 1;
+}
+
+bool Snapshot::isQuickboot() const {
+    if (!getGeneralInfo()) {
+        return false;
+    }
+    if (getGeneralInfo()->has_is_quickboot()) {
+        return getGeneralInfo()->is_quickboot();
+    }
+    return name() == Quickboot::kDefaultBootSnapshot;
 }
 
 base::Optional<FailureReason> Snapshot::failureReason() const {
-    return mSnapshotPb.has_failed_to_load_reason_code()
+    return proto().has_failed_to_load_reason_code()
                    ? base::makeOptional(FailureReason(
-                             mSnapshotPb.failed_to_load_reason_code()))
+                             proto().failed_to_load_reason_code()))
                    : base::kNullopt;
 }
 

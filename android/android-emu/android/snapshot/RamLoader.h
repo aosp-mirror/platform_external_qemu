@@ -13,6 +13,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
+#include "android/base/files/MemStream.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
@@ -20,6 +21,7 @@
 #include "android/base/threads/ThreadPool.h"
 #include "android/snapshot/GapTracker.h"
 #include "android/snapshot/MemoryWatch.h"
+#include "android/snapshot/Snapshot.h"
 #include "android/snapshot/common.h"
 
 #include <array>
@@ -50,49 +52,47 @@ public:
 
         using Blocks = std::vector<Block>;
 
-        IndexFlags flags;
+        int version;
+        RamIndexFlags flags;
+        int64_t offset;
+        std::vector<bool> usedParents;
         Blocks blocks;
         Pages pages;
 
         void clear();
+
+        bool hasParents() const {
+            return nonzero(flags & RamIndexFlags::Incremental);
+        }
+        bool compressed() const {
+            return nonzero(flags & RamIndexFlags::CompressedPages);
+        }
+
+        const Page* findPage(int blockIdx, int pageIdx) const;
     };
 
-    struct RamBlockStructure {
-        uint64_t pageSize;
-        std::vector<RamBlock> blocks;
-    };
-
-    RamLoader(base::StdioStream&& stream,
-              bool indexOnly = false,
-              const RamBlockStructure& blockStructure = {});
-
+    RamLoader(const Snapshot& snapshot, OperationFlags flags);
     ~RamLoader();
-
-    RamBlockStructure getRamBlockStructure() const;
-    void applyRamBlockStructure(const RamBlockStructure& blockStructure);
 
     void loadRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
-    bool start(bool isQuickboot);
+    bool start();
     bool wasStarted() const { return mWasStarted; }
     void join();
     void interrupt();
 
     bool hasError() const { return mHasError; }
     void invalidateGaps() { mGaps.reset(nullptr); }
-    bool hasGaps() const { return mGaps ? 1 : 0; }
+    bool hasGaps() const { return mGaps != nullptr; }
     bool onDemandEnabled() const { return mOnDemandEnabled; }
     bool onDemandLoadingComplete() const {
         return mLoadingCompleted.load(std::memory_order_relaxed);
     }
-    bool compressed() const {
-        return (mIndex.flags & IndexFlags::CompressedPages) != 0;
-    }
+    bool compressed() const { return mIndex.compressed(); }
     uint64_t diskSize() const { return mDiskSize; }
-    int version() const { return mVersion; }
-    uint64_t indexOffset() const { return mIndexPos; }
+    int version() const { return mIndex.version; }
 
-    const Page* findPage(int blockIndex, const char* id, int pageIndex) const;
+    const FileIndex& index() const { return mIndex; }
 
     void acquireGapTracker(GapTracker::Ptr gaps) { mGaps = std::move(gaps); }
     GapTracker::Ptr releaseGapTracker() { return std::move(mGaps); }
@@ -108,14 +108,28 @@ public:
         return true;
     }
 
-private:
+    static std::pair<FileIndex, GapTracker::Ptr> loadIndex(
+            const Snapshot& snapshot,
+            base::System::FileSize* outSize = nullptr);
 
+private:
     bool readIndex();
-    void readBlockPages(base::Stream* stream,
-                        FileIndex::Blocks::iterator blockIt,
-                        bool compressed,
-                        int64_t* runningFilePos,
-                        int32_t* prevPageSizeOnDisk);
+
+    static bool readIndex(const Snapshot& snapshot,
+                          base::Stream& indexStream,
+                          FileIndex& index,
+                          GapTracker::Ptr& gaps,
+                          std::vector<base::StdioStream>* streams);
+    static bool readIndexPages(base::Stream& indexStream,
+                               uint8_t fileNo,
+                               FileIndex& index);
+    static void readBlockPages(base::Stream* stream,
+                               FileIndex& index,
+                               FileIndex::Blocks::iterator blockIt,
+                               int64_t* runningFilePos,
+                               int32_t* prevPageSizeOnDisk,
+                               int fileIndex,
+                               bool incremental);
     bool registerPageWatches();
 
     void zeroOutPage(const Page& page);
@@ -135,8 +149,10 @@ private:
     bool readAllPages();
     void startDecompressor();
 
-    base::StdioStream mStream;
-    int mStreamFd;  // An FD for the |mStream|'s underlying open file.
+    std::vector<base::StdioStream> mStreams;
+    // FDs for the |mStreams|' underlying open files.
+    std::vector<int> mStreamFds;
+
     bool mWasStarted = false;
     std::atomic<bool> mHasError{false};
 
@@ -155,30 +171,25 @@ private:
     GapTracker::Ptr mGaps;
     uint64_t mDiskSize = 0;
     uint64_t mIndexPos = 0;
-    int mVersion = 0;
 
     base::System::Duration mStartTime = 0;
     base::System::Duration mEndTime = 0;
 
-    // Assumed to be a power of 2 for convenient
-    // rounding and aligning
+    // Assumed to be a power of 2 for convenient rounding and aligning
     uint64_t mPageSize = kDefaultPageSize;
-    // Flag to stop lazy RAM loading if loading has
-    // completed.
+    // Flag to stop lazy RAM loading if loading has completed.
     std::atomic<bool> mLoadingCompleted{false};
 
-    // Whether or not this ram load is part of
-    // quickboot load.
-    bool mIsQuickboot = false;
-
-    // Whether or not we just want to reload the index.
-    bool mIndexOnly = false;
+    OperationFlags mFlags;
+    const Snapshot& mSnapshot;
 };
 
 struct RamLoader::Page {
     std::atomic<uint8_t> state{uint8_t(State::Empty)};
+    bool filled = false;
+    uint8_t fileIndex;
     uint16_t blockIndex;
-    uint32_t sizeOnDisk;
+    uint16_t sizeOnDisk;
     uint64_t filePos;
     std::array<char, 16> hash;
     uint8_t* data;
@@ -187,17 +198,23 @@ struct RamLoader::Page {
     Page(RamLoader::State state) : state(uint8_t(state)) {}
     Page(Page&& other)
         : state(other.state.load(std::memory_order_relaxed)),
+          filled(other.filled),
+          fileIndex(other.fileIndex),
           blockIndex(other.blockIndex),
           sizeOnDisk(other.sizeOnDisk),
           filePos(other.filePos),
+          hash(other.hash),
           data(other.data) {}
 
     Page& operator=(Page&& other) {
         state.store(other.state.load(std::memory_order_relaxed),
                     std::memory_order_relaxed);
+        filled = other.filled;
+        fileIndex = other.fileIndex;
         blockIndex = other.blockIndex;
         sizeOnDisk = other.sizeOnDisk;
         filePos = other.filePos;
+        hash = other.hash;
         data = other.data;
         return *this;
     }

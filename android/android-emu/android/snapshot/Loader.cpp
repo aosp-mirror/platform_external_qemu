@@ -23,7 +23,7 @@ using android::base::StdioStream;
 namespace android {
 namespace snapshot {
 
-Loader::Loader(const Snapshot& snapshot, int error)
+Loader::Loader(const Snapshot& snapshot, OperationFlags flags, int error)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (error) {
         mSnapshot.saveFailure(errnoToFailure(error));
@@ -37,24 +37,13 @@ Loader::Loader(const Snapshot& snapshot, int error)
     if (!mSnapshot.preload()) {
         return;
     }
-    {
-        const auto ram = fopen(
-                PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
-        if (!ram) {
-            mSnapshot.saveFailure(FailureReason::NoRamFile);
-            return;
-        }
 
-        // TODO: RamLoader constructor can just have the first argument if we
-        // can figure out a way to get it to compile for windows. It currently
-        // doesn't like {} being put as an argument for the ram block structure
-        // directly.
-
-        RamLoader::RamBlockStructure emptyRamBlockStructure = {};
-        mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner),
-                           false /* not for saving only */,
-                           emptyRamBlockStructure);
+    mRamLoader.emplace(mSnapshot, flags);
+    if (mRamLoader->hasError()) {
+        mSnapshot.saveFailure(FailureReason::NoRamFile);
+        return;
     }
+
     {
         const auto textures = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
@@ -144,12 +133,12 @@ void Loader::onInvalidSnapshotLoad() {
     }
 }
 
-void Loader::prepareForSaving(bool isOnExit) {
+void Loader::prepareForSaving(OperationFlags flags) {
     if (mTextureLoader) {
         mTextureLoader->join();
     }
 
-    // Prepare ram loader for incremental save.
+    // Prepare ram loader for potential incremental save.
     //
     // It is important that the gap tracker of the ram loader is in a good
     // state.
@@ -167,20 +156,11 @@ void Loader::prepareForSaving(bool isOnExit) {
     // we might have saved more than once after a load).
 
     if (mRamLoader && !mRamLoader->hasError()) {
-        if (isOnExit) {
+        if (nonzero(flags & OperationFlags::OnExit)) {
             mRamLoader->interrupt();
         } else {
             mRamLoader->join();
             mRamLoader->invalidateGaps();
-        }
-
-        if (!mRamLoader->hasGaps()) {
-            const auto ram = fopen(
-                    PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
-            mRamLoader.emplace(
-                    StdioStream(ram, StdioStream::kOwner),
-                    true /* saving only */,
-                    mRamLoader->getRamBlockStructure());
         }
     }
 }

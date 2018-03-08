@@ -90,7 +90,7 @@ public:
             }
             int version = stream->getBe32();
             (void)version;
-            renderer->load(stream, Snapshotter::get().loader().textureLoader());
+            renderer->load(stream, Snapshotter::get().loader()->textureLoader());
 #ifdef SNAPSHOT_PROFILE
             printf("OpenglEs preload time: %lld ms\n",
                    (long long)(mLoadMeter.elapsedUs() / 1000));
@@ -116,7 +116,7 @@ public:
                 stream->putByte(1);
                 stream->putBe32(OPENGL_SAVE_VERSION);
                 renderer->save(stream,
-                               Snapshotter::get().saver().textureSaver());
+                               Snapshotter::get().saver()->textureSaver());
 
                 writeScreenshot(*renderer);
             } else {
@@ -197,7 +197,7 @@ public:
 #endif
             if (width > 0 && height > 0) {
                 std::string dataDir =
-                        Snapshotter::get().saver().snapshot().dataDir();
+                        Snapshotter::get().saver()->snapshot().dataDir();
                 mScreenshotSaver.emplace([nChannels, width, height,
                                           dataDir = std::move(dataDir),
                                           pixels = std::move(pixels)] {

@@ -14,7 +14,6 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
-#include "android/snapshot/RamLoader.h"
 #include "android/snapshot/TextureSaver.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -26,14 +25,16 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
-Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
-    : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
+Saver::Saver(const Snapshot& snapshot,
+             OperationFlags flags,
+             const Snapshot* parent,
+             Loader* loader)
+    : mStatus(OperationStatus::Error), mFlags(flags), mSnapshot(snapshot) {
     if (path_mkdir_if_needed(mSnapshot.dataDir().c_str(), 0777) != 0) {
         return;
     }
     {
-        const auto ramFile = PathUtils::join(mSnapshot.dataDir(), "ram.bin");
-        auto flags = RamSaver::Flags::None;
+        auto ramFlags = RamSaver::Flags::None;
         const auto compressEnvVar =
                 System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
         if (compressEnvVar == "1" || compressEnvVar == "yes" ||
@@ -42,7 +43,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
                           "autoconfig: enabled snapshot RAM compression from "
                           "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
                           compressEnvVar.c_str());
-            flags |= RamSaver::Flags::Compress;
+            ramFlags |= RamSaver::Flags::Compress;
         } else if (compressEnvVar == "0" || compressEnvVar == "no" ||
                    compressEnvVar == "false") {
             // don't enable compression
@@ -56,14 +57,14 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
             // 1. Gather three variables: free RAM, number of CPU cores and
             //    the disk kind.
             // 2. Bad cases for uncompressed snapshots: little free RAM
-            //    and HDD disk.
+            //    or HDD disk.
             // 3. If there's a bad case and we have enough CPU cores (3+), let's
             //    enable compression.
             const auto cpuCount = System::get()->getCpuCoreCount();
             if (cpuCount > 2) {
                 const auto memUsage = System::get()->getMemUsage();
                 if (memUsage.avail_phys_memory < 1536 * 1024 * 1024) {
-                    flags |= RamSaver::Flags::Compress;
+                    ramFlags |= RamSaver::Flags::Compress;
                     VERBOSE_PRINT(
                             snapshot,
                             "Enabling RAM compression: only %u MB of free RAM",
@@ -76,7 +77,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
                             System::get()->pathDiskKind(mSnapshot.dataDir());
                     if (diskKind.valueOr(System::DiskKind::Ssd) ==
                         System::DiskKind::Hdd) {
-                        flags |= RamSaver::Flags::Compress;
+                        ramFlags |= RamSaver::Flags::Compress;
                         VERBOSE_PRINT(
                                 snapshot,
                                 "Enabling RAM compression: snapshot is on HDD");
@@ -85,16 +86,14 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
             }
         }
 
-        const bool tryIncremental =
-            loader && !loader->hasError() && loader->hasGaps();
-
-        mIncrementallySaved = tryIncremental;
-
-        mRamSaver.emplace(ramFile, flags, tryIncremental ? loader : nullptr,
-                          isOnExit);
+        mRamSaver.emplace(mSnapshot, flags, ramFlags, loader, parent);
         if (mRamSaver->hasError()) {
             mRamSaver.clear();
             return;
+        }
+        if (mRamSaver->kind() == Snapshot::Kind::IncrementalNew) {
+            mParent = parent;
+            mSnapshot.setParent(*parent);
         }
     }
 
@@ -142,11 +141,11 @@ void Saver::complete(bool succeeded) {
     }
     mRamSaver->join();
     if (!mTextureSaver ||
-        (static_cast<void>(mTextureSaver->done()), mTextureSaver->hasError())) {
+        ((void)mTextureSaver->done(), mTextureSaver->hasError())) {
         return;
     }
 
-    if (!mSnapshot.save()) {
+    if (!mSnapshot.save(mFlags)) {
         return;
     }
 

@@ -11,15 +11,15 @@
 
 #include "android/snapshot/Snapshotter.h"
 
-#include "android/base/memory/LazyInstance.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/StringFormat.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/metrics/StudioConfig.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
 #include "android/snapshot/Hierarchy.h"
 #include "android/snapshot/Loader.h"
@@ -41,7 +41,7 @@ extern "C" {
 }
 
 using android::base::LazyInstance;
-using android::base::Stopwatch;
+using android::base::measureMs;
 using android::base::StringFormat;
 using android::base::System;
 using android::crashreport::CrashReporter;
@@ -80,7 +80,7 @@ static bool buffer_zero_sse2(const void* buf, int len) {
 namespace android {
 namespace snapshot {
 
-static const System::Duration kSnapshotCrashThresholdMs = 120000; // 2 minutes
+static const System::Duration kSnapshotCrashThresholdMs = 2 * 60 * 1000;
 
 // TODO: implement an optimized SSE4 version and dynamically select it if host
 // supports SSE4.
@@ -110,17 +110,17 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
             // ops
             {
                     // save
-                    {// onStart
+                    {// start
                      [](void* opaque, const char* name) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          return snapshot->onStartSaving(name) ? 0 : -1;
                      },
-                     // onEnd
+                     // end
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onSavingComplete(name, res);
                      },
-                     // onQuickFail
+                     // quick fail
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onSavingFailed(name, res);
@@ -131,17 +131,16 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                          return snapshot->isSavingCanceled(name);
                      }},
                     // load
-                    {// onStart
+                    {// start
                      [](void* opaque, const char* name) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          return snapshot->onStartLoading(name) ? 0 : -1;
                      },
-                     // onEnd
+                     // end
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onLoadingComplete(name, res);
-                     },
-                     // onQuickFail
+                     },  // quick fail
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onLoadingFailed(name, res);
@@ -152,21 +151,21 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                          return false;
                      }},
                     // del
-                    {// onStart
+                    {// start
                      [](void* opaque, const char* name) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          return snapshot->onStartDelete(name) ? 0 : -1;
                      },
-                     // onEnd
+                     // end
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onDeletingComplete(name, res);
                      },
-                     // onQuickFail
+                     // quick fail
                      [](void*, const char*, int) {},
                      // isCanceled
                      [](void* opaque, const char* name) {
-                         // TODO: Implement delete cancel if necessary
+                         // TODO: Implement load cancel if necessary
                          return false;
                      }},
             },
@@ -184,7 +183,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
              // startLoading
              [](void* opaque) {
                  auto snapshot = static_cast<Snapshotter*>(opaque);
-                 snapshot->mLoader->ramLoader().start(snapshot->isQuickboot());
+                 snapshot->mLoader->ramLoader().start();
                  return snapshot->mLoader->ramLoader().hasError() ? -1 : 0;
              },
              // savePage
@@ -226,59 +225,64 @@ static constexpr int kDefaultMessageTimeoutMs = 10000;
 
 static void appendFailedSave(pb::EmulatorSnapshotSaveState state,
                              FailureReason failureReason) {
-    MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([state, failureReason](
+                                          pb::AndroidStudioEvent* event) {
         auto snap = event->mutable_emulator_details()->add_snapshot_saves();
         snap->set_save_state(state);
-        snap->set_save_failure_reason((pb::EmulatorSnapshotFailureReason)failureReason);
+        snap->set_save_failure_reason(
+                (pb::EmulatorSnapshotFailureReason)failureReason);
     });
 }
 
 static void appendFailedLoad(pb::EmulatorSnapshotLoadState state,
                              FailureReason failureReason) {
-    MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([state, failureReason](
+                                          pb::AndroidStudioEvent* event) {
         auto snap = event->mutable_emulator_details()->add_snapshot_loads();
         snap->set_load_state(state);
-        snap->set_load_failure_reason((pb::EmulatorSnapshotFailureReason)failureReason);
+        snap->set_load_failure_reason(
+                (pb::EmulatorSnapshotFailureReason)failureReason);
     });
 }
 
-OperationStatus Snapshotter::prepareForLoading(const char* name) {
+OperationStatus Snapshotter::prepareForLoading(const char* name,
+                                               OperationFlags flags) {
     if (mSaver && mSaver->snapshot().name() == name) {
         mSaver.reset();
     }
-    mLoader.reset(new Loader(name));
+    mFlags = flags;
+    mLoader.reset(new Loader({name}, mFlags));
     mLoader->prepare();
     return mLoader->status();
 }
 
-OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
-    mLastLoadDuration = android::base::kNullopt;
-    mIsQuickboot = isQuickboot;
-    Stopwatch sw;
-    mVmOperations.snapshotLoad(name, this, nullptr);
-    mIsQuickboot = false;
-    mLastLoadDuration.emplace(sw.elapsedUs() / 1000);
+OperationStatus Snapshotter::load(const char* name, OperationFlags flags) {
+    mLastLoadDuration.clear();
+    base::System::Duration loadDuration = 0;
+    measureMs(loadDuration, [this, flags, name] {
+        mFlags = flags;
+        mVmOperations.snapshotLoad(name, this, nullptr);
+        mFlags = OperationFlags::Empty;
+    });
+    mLastLoadDuration = loadDuration;
 
     // if we end up deleting in the loader (for whatever reaosn),
     // at least make sure mLoader is not null.
     if (!mLoader) {
         onLoadingFailed(name, -EINVAL);
     }
-
-    mLoadedSnapshotFile =
-            (mLoader->status() == OperationStatus::Ok) ? name : "";
     return mLoader->status();
 }
 
-void Snapshotter::prepareLoaderForSaving(const char* name) {
+void Snapshotter::prepareLoaderForSaving(const char* name,
+                                         OperationFlags flags) {
     if (!mLoader) {
         return;
     }
-    if (mLoader->snapshot().name() != name ||
-        mLoader->status() != OperationStatus::Ok) {
+    if (mLoader->status() != OperationStatus::Ok) {
         mLoader.reset();
     } else {
-        mLoader->prepareForSaving(mIsOnExit);
+        mLoader->prepareForSaving(flags);
     }
 }
 
@@ -301,30 +305,34 @@ void Snapshotter::fillSnapshotMetrics(pb::EmulatorSnapshot* snapshot,
     snapshot->set_lazy_loaded(stats.onDemandRamEnabled);
     snapshot->set_incrementally_saved(stats.incrementallySaved);
 
-    snapshot->set_size_bytes(int64_t(stats.diskSize +
-                                     stats.ramSize +
-                                     stats.texturesSize));
+    snapshot->set_size_bytes(
+            int64_t(stats.diskSize + stats.ramSize + stats.texturesSize));
     snapshot->set_ram_size_bytes(int64_t(stats.ramSize));
     snapshot->set_textures_size_bytes(int64_t(stats.texturesSize));
 
     if (stats.forSave) {
         snapshot->set_save_state(
-                pb::EmulatorSnapshotSaveState::EMULATOR_SNAPSHOT_SAVE_SUCCEEDED_NORMAL);
+                pb::EmulatorSnapshotSaveState::
+                        EMULATOR_SNAPSHOT_SAVE_SUCCEEDED_NORMAL);
         snapshot->set_save_duration_ms(uint64_t(stats.durationMs));
         snapshot->set_ram_save_duration_ms(int64_t(stats.ramDurationMs));
-        snapshot->set_textures_save_duration_ms(int64_t(stats.texturesDurationMs));
+        snapshot->set_textures_save_duration_ms(
+                int64_t(stats.texturesDurationMs));
     } else {
         snapshot->set_load_state(
-                pb::EmulatorSnapshotLoadState::EMULATOR_SNAPSHOT_LOAD_SUCCEEDED_NORMAL);
+                pb::EmulatorSnapshotLoadState::
+                        EMULATOR_SNAPSHOT_LOAD_SUCCEEDED_NORMAL);
         snapshot->set_load_duration_ms(uint64_t(stats.durationMs));
         snapshot->set_ram_load_duration_ms(int64_t(stats.ramDurationMs));
-        snapshot->set_textures_load_duration_ms(int64_t(stats.texturesDurationMs));
+        snapshot->set_textures_load_duration_ms(
+                int64_t(stats.texturesDurationMs));
     }
 }
 
-Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
-                                                              System::Duration durationMs) {
-    auto& save = saver();
+Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(
+        const char* name,
+        System::Duration durationMs) {
+    auto& save = *saver();
     const auto compressedRam = save.ramSaver().compressed();
     const auto compressedTextures = save.textureSaver()->compressed();
     const auto diskSize = save.snapshot().diskSize();
@@ -333,28 +341,31 @@ Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
 
     System::Duration ramDurationMs = 0;
     System::Duration texturesDurationMs = 0;
-    save.ramSaver().getDuration(&ramDurationMs); ramDurationMs /= 1000;
-    save.textureSaver()->getDuration(&texturesDurationMs); texturesDurationMs /= 1000;
+    save.ramSaver().getDuration(&ramDurationMs);
+    ramDurationMs /= 1000;
+    save.textureSaver()->getDuration(&texturesDurationMs);
+    texturesDurationMs /= 1000;
 
     return {
-        true /* for save */,
-        std::string(name),
-        durationMs,
-        false /* on-demand ram loading N/A for save */,
-        save.incrementallySaved(),
-        compressedRam,
-        compressedTextures,
-        (int64_t)diskSize,
-        (int64_t)ramSize,
-        (int64_t)texturesSize,
-        ramDurationMs,
-        texturesDurationMs,
+            true /* for save */,
+            std::string(name),
+            durationMs,
+            false /* on-demand ram loading N/A for save */,
+            save.ramSaver().incremental(),
+            compressedRam,
+            compressedTextures,
+            (int64_t)diskSize,
+            (int64_t)ramSize,
+            (int64_t)texturesSize,
+            ramDurationMs,
+            texturesDurationMs,
     };
 }
 
-Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
-                                                              System::Duration durationMs) {
-    auto& load = loader();
+Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(
+        const char* name,
+        System::Duration durationMs) {
+    auto& load = *loader();
     const auto onDemandRamEnabled = load.ramLoader().onDemandEnabled();
     const auto compressedRam = load.ramLoader().compressed();
     const auto compressedTextures = load.textureLoader()->compressed();
@@ -365,21 +376,20 @@ Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
     load.ramLoader().getDuration(&ramDurationMs);
     ramDurationMs /= 1000;
     return {
-        false /* not for save */,
-        name,
-        durationMs,
-        onDemandRamEnabled,
-        false /* not incrementally saved */,
-        compressedRam,
-        compressedTextures,
-        (int64_t)diskSize,
-        (int64_t)ramSize,
-        (int64_t)texturesSize,
-        ramDurationMs,
-        0 /* TODO: texture lazy/bg load duration */,
+            false /* not for save */,
+            name,
+            durationMs,
+            onDemandRamEnabled,
+            false /* not incrementally saved */,
+            compressedRam,
+            compressedTextures,
+            (int64_t)diskSize,
+            (int64_t)ramSize,
+            (int64_t)texturesSize,
+            ramDurationMs,
+            0 /* TODO: texture lazy/bg load duration */,
     };
 }
-
 
 void Snapshotter::appendSuccessfulSave(const char* name,
                                        System::Duration durationMs) {
@@ -392,7 +402,7 @@ void Snapshotter::appendSuccessfulSave(const char* name,
 
 void Snapshotter::appendSuccessfulLoad(const char* name,
                                        System::Duration durationMs) {
-    loader().reportSuccessful();
+    loader()->reportSuccessful();
     auto stats = getLoadStats(name, durationMs);
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         auto snapshot = event->mutable_emulator_details()->add_snapshot_loads();
@@ -408,45 +418,45 @@ void Snapshotter::showError(const std::string& message) {
 
 bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     const bool shouldTrySaving =
-        metrics::AdbLivenessChecker::isEmulatorBooted() ||
-        android::featurecontrol::isEnabled(
-            android::featurecontrol::AllowSnapshotMigration);
+            metrics::AdbLivenessChecker::isEmulatorBooted() ||
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::AllowSnapshotMigration);
 
     if (!shouldTrySaving) {
-        showError("Skipping snapshot save: "
-                  "Emulator not booted (or ADB not online)");
+        showError(
+                "Skipping snapshot save: "
+                "Emulator not booted (or ADB not online)");
         if (reportMetrics) {
-            appendFailedSave(
-                pb::EmulatorSnapshotSaveState::
-                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED,
-                FailureReason::AdbOffline);
+            appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                     EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED,
+                             FailureReason::AdbOffline);
         }
         return false;
     }
 
     if (!name) {
-        showError("Skipping snapshot save: "
-                  "Null snapshot name");
+        showError(
+                "Skipping snapshot save: "
+                "Null snapshot name");
         if (reportMetrics) {
-            appendFailedSave(
-                pb::EmulatorSnapshotSaveState::
-                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NO_SNAPSHOT,
-                FailureReason::NoSnapshotPb);
+            appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                     EMULATOR_SNAPSHOT_SAVE_SKIPPED_NO_SNAPSHOT,
+                             FailureReason::NoSnapshotPb);
         }
         return false;
     }
 
     if (!emuglConfig_current_renderer_supports_snapshot()) {
         showError(
-            StringFormat("Skipping snapshot save: "
-                         "Renderer type '%s' (%d) "
-                         "doesn't support snapshotting",
-                         emuglConfig_renderer_to_string(
-                                 emuglConfig_get_current_renderer()),
-                         int(emuglConfig_get_current_renderer())));
+                StringFormat("Skipping snapshot save: "
+                             "Renderer type '%s' (%d) "
+                             "doesn't support snapshotting",
+                             emuglConfig_renderer_to_string(
+                                     emuglConfig_get_current_renderer()),
+                             int(emuglConfig_get_current_renderer())));
         if (reportMetrics) {
             appendFailedSave(pb::EmulatorSnapshotSaveState::
-                                 EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED,
+                                     EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED,
                              FailureReason::SnapshotsNotSupported);
         }
         return false;
@@ -463,10 +473,9 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     if (success && availableSpace < TWO_GB) {
         showError("Not saving snapshot: Disk space < 2 GB");
         if (reportMetrics) {
-            appendFailedSave(
-                pb::EmulatorSnapshotSaveState::
-                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED,
-                FailureReason::OutOfDiskSpace);
+            appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                     EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED,
+                             FailureReason::OutOfDiskSpace);
         }
         return false;
     }
@@ -476,11 +485,12 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
 
 bool Snapshotter::checkSafeToLoad(const char* name, bool reportMetrics) {
     if (!name) {
-        showError("Skipping snapshot load: "
-                  "Null snapshot name");
+        showError(
+                "Skipping snapshot load: "
+                "Null snapshot name");
         if (reportMetrics) {
             appendFailedLoad(pb::EmulatorSnapshotLoadState::
-                                 EMULATOR_SNAPSHOT_LOAD_NO_SNAPSHOT,
+                                     EMULATOR_SNAPSHOT_LOAD_NO_SNAPSHOT,
                              FailureReason::NoSnapshotPb);
         }
         return false;
@@ -488,16 +498,16 @@ bool Snapshotter::checkSafeToLoad(const char* name, bool reportMetrics) {
 
     if (!emuglConfig_current_renderer_supports_snapshot()) {
         showError(
-            StringFormat("Skipping snapshot load of '%s': "
-                         "Renderer type '%s' (%d) "
-                         "doesn't support snapshotting",
-                         name,
-                         emuglConfig_renderer_to_string(
-                                 emuglConfig_get_current_renderer()),
-                         int(emuglConfig_get_current_renderer())));
+                StringFormat("Skipping snapshot load of '%s': "
+                             "Renderer type '%s' (%d) "
+                             "doesn't support snapshotting",
+                             name,
+                             emuglConfig_renderer_to_string(
+                                     emuglConfig_get_current_renderer()),
+                             int(emuglConfig_get_current_renderer())));
         if (reportMetrics) {
             appendFailedLoad(pb::EmulatorSnapshotLoadState::
-                                 EMULATOR_SNAPSHOT_LOAD_SKIPPED_UNSUPPORTED,
+                                     EMULATOR_SNAPSHOT_LOAD_SKIPPED_UNSUPPORTED,
                              FailureReason::SnapshotsNotSupported);
         }
         return false;
@@ -509,14 +519,11 @@ void Snapshotter::handleGenericSave(const char* name,
                                     OperationStatus saveStatus,
                                     bool reportMetrics) {
     if (saveStatus != OperationStatus::Ok) {
-        showError(
-            StringFormat(
-                "Snapshot save for snapshot '%s' failed. "
-                "Cleaning it out", name));
-
+        showError(StringFormat("Snapshot '%s' saving failed. Cleaning it out",
+                               name));
         if (reportMetrics) {
-            if (mSaver) {
-                if (auto failureReason = saver().snapshot().failureReason()) {
+            if (saver(true)) {
+                if (auto failureReason = saver(true)->snapshot().failureReason()) {
                     appendFailedSave(pb::EmulatorSnapshotSaveState::
                                              EMULATOR_SNAPSHOT_SAVE_FAILED,
                                      *failureReason);
@@ -531,9 +538,7 @@ void Snapshotter::handleGenericSave(const char* name,
                                  FailureReason::InternalError);
             }
         }
-
         deleteSnapshot(name);
-
     } else {
         if (reportMetrics) {
             appendSuccessfulSave(name,
@@ -548,71 +553,68 @@ void Snapshotter::handleGenericLoad(const char* name,
     if (loadStatus != OperationStatus::Ok) {
         // Check if the error is about something done as just a check or
         // we've started actually loading the VM data
-        if (auto failureReason = loader().snapshot().failureReason()) {
+        if (auto failureReason = loader()->snapshot().failureReason()) {
             if (reportMetrics) {
                 appendFailedLoad(pb::EmulatorSnapshotLoadState::
-                                     EMULATOR_SNAPSHOT_LOAD_FAILED,
+                                         EMULATOR_SNAPSHOT_LOAD_FAILED,
                                  *failureReason);
             }
             if (*failureReason != FailureReason::Empty &&
                 *failureReason < FailureReason::ValidationErrorLimit) {
                 showError(
-                    StringFormat(
-                        "Snapshot '%s' can not be loaded (%d). "
-                        "Continuing current session",
-                        name, int(*failureReason)));
+                        StringFormat("Snapshot '%s' can not be loaded (%d). "
+                                     "Continuing current session",
+                                     name, int(*failureReason)));
             } else {
                 showError(
-                    StringFormat(
-                        "Snapshot '%s' can not be loaded (%d). "
-                        "Fatal error, resetting current session",
-                        name, int(*failureReason)));
+                        StringFormat("Snapshot '%s' can not be loaded (%d). "
+                                     "Fatal error, resetting current session",
+                                     name, int(*failureReason)));
                 mVmOperations.vmReset();
             }
         } else {
-            showError(
-                StringFormat(
+            showError(StringFormat(
                     "Snapshot '%s' can not be loaded (reason not set). "
-                    "Fatal error, resetting current session", name));
+                    "Fatal error, resetting current session",
+                    name));
             mVmOperations.vmReset();
             if (reportMetrics) {
                 appendFailedLoad(pb::EmulatorSnapshotLoadState::
-                                     EMULATOR_SNAPSHOT_LOAD_FAILED,
+                                         EMULATOR_SNAPSHOT_LOAD_FAILED,
                                  FailureReason::InternalError);
             }
         }
     } else {
         if (reportMetrics) {
             appendSuccessfulLoad(name,
-                    mLastLoadDuration ? *mLastLoadDuration : 0);
+                                 mLastLoadDuration ? *mLastLoadDuration : 0);
         }
     }
 }
 
-OperationStatus Snapshotter::prepareForSaving(const char* name) {
-    prepareLoaderForSaving(name);
+OperationStatus Snapshotter::prepareForSaving(const char* name,
+                                              OperationFlags flags) {
+    prepareLoaderForSaving(name, flags);
     mVmOperations.vmStop();
-    mSaver.reset(new Saver(
-            name, (mLoader && mLoader->status() != OperationStatus::Error)
-                          ? &mLoader->ramLoader()
-                          : nullptr,
-            mIsOnExit));
+    mSaver.reset(new Saver({name}, mFlags, mCurrentSnapshot.ptr(), loader()));
     mVmOperations.vmStart();
     mSaver->prepare();
     return mSaver->status();
 }
 
-OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
-    mLastSaveDuration = android::base::kNullopt;
+OperationStatus Snapshotter::save(const char* name, OperationFlags flags) {
     mLastSaveUptimeMs =
-        System::Duration(System::get()->getProcessTimes().wallClockMs);
-    Stopwatch sw;
-    mIsOnExit = isOnExit;
-    if (mIsOnExit) {
-        mVmOperations.setExiting();
-    }
-    mVmOperations.snapshotSave(name, this, nullptr);
-    mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
+            System::Duration(System::get()->getProcessTimes().wallClockMs);
+    mLastSaveDuration.clear();
+    base::System::Duration saveDuration = 0;
+    measureMs(saveDuration, [this, flags, name] {
+        mFlags = flags;
+        if (nonzero(mFlags & OperationFlags::OnExit)) {
+            mVmOperations.setExiting();
+        }
+        mVmOperations.snapshotSave(name, this, nullptr);
+    });
+    mLastSaveDuration = saveDuration;
     return mSaver->status();
 }
 
@@ -637,35 +639,36 @@ bool Snapshotter::isSavingCanceled(const char* name) const {
 OperationStatus Snapshotter::saveGeneric(const char* name) {
     OperationStatus res = OperationStatus::Error;
     if (checkSafeToSave(name)) {
-        res = save(false /* not on exit */, name);
+        res = save(name);
         handleGenericSave(name, res);
     }
     return res;
 }
 
 OperationStatus Snapshotter::loadGeneric(const char* name) {
-    CrashReporter::get()->addCrashCallback([this, &name]() {
-        Snapshotter::get().onCrashedSnapshot(name);
+    CrashReporter::get()->addCrashCallback([this, name = std::string(name)]() {
+        Snapshotter::get().onCrashedSnapshot(name.c_str());
     });
-    OperationStatus res = OperationStatus::Error;
+    auto res = OperationStatus::Error;
     if (checkSafeToLoad(name)) {
-        res = load(false /* not quickboot */, name);
+        res = load(name);
         handleGenericLoad(name, res);
     }
     return res;
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
-    if (mLoader && mLoader->status() == OperationStatus::Ok) {
-        mLoader->prepareForSaving(false /* not on exit */);
+    if (mLoader && mLoader->status() == OperationStatus::Ok &&
+        mLoader->snapshot().name() == name) {
+        mLoader->interrupt();
     }
 
-    if (name == mLoadedSnapshotFile) {
-        // We're deleting the "loaded" snapshot
-        mLoadedSnapshotFile.clear();
-    }
     mVmOperations.snapshotDelete(name, this, nullptr);
 
+    if (mCurrentSnapshot && mCurrentSnapshot->name() == name) {
+        // We're deleting the "loaded" snapshot
+        mCurrentSnapshot.clear();
+    }
     // then delete the folder and refresh hierarchy
     path_delete_dir(getSnapshotDir(name).c_str());
     Hierarchy::get()->currentInfo();
@@ -687,16 +690,27 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
     }
 }
 
+Saver* Snapshotter::saver(bool includeFailed) {
+    return mSaver && (includeFailed ||
+                      mSaver->status() != OperationStatus::Error)
+                   ? mSaver.get()
+                   : nullptr;
+}
+
+Loader* Snapshotter::loader(bool includeFailed) {
+    return mLoader && (includeFailed ||
+                       mLoader->status() != OperationStatus::Error)
+                   ? mLoader.get()
+                   : nullptr;
+}
+
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Save, Stage::Start);
-    prepareLoaderForSaving(name);
+    prepareLoaderForSaving(name, mFlags);
     if (!mSaver || isComplete(*mSaver)) {
-        mSaver.reset(new Saver(
-                name, (mLoader && mLoader->status() != OperationStatus::Error)
-                              ? &mLoader->ramLoader()
-                              : nullptr,
-                mIsOnExit));
+        mSaver.reset(
+                new Saver({name}, mFlags, mCurrentSnapshot.ptr(), loader()));
     }
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);
@@ -712,11 +726,15 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     callCallbacks(Operation::Save, Stage::End);
     bool good = mSaver->status() != OperationStatus::Error &&
                 mSaver->status() != OperationStatus::Canceled;
-
     if (good) {
+        mCurrentSnapshot = mSaver->snapshot();
+        if (mSaver->ramSaver().incremental() && loader()) {
+            // update the loader's gap tracker
+            loader()->ramLoader().acquireGapTracker(
+                    mSaver->ramSaver().releaseGapTracker());
+        }
         Hierarchy::get()->currentInfo();
     }
-
     return good;
 }
 
@@ -725,7 +743,7 @@ void Snapshotter::onSavingFailed(const char* name, int res) {
 }
 
 bool Snapshotter::onStartLoading(const char* name) {
-    mLoadedSnapshotFile.clear();
+    mCurrentSnapshot.clear();
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Load, Stage::Start);
     mSaver.reset();
@@ -733,7 +751,7 @@ bool Snapshotter::onStartLoading(const char* name) {
         if (mLoader) {
             mLoader->interrupt();
         }
-        mLoader.reset(new Loader(name));
+        mLoader.reset(new Loader({name}, mFlags));
     }
     mLoader->start();
     if (mLoader->status() == OperationStatus::Error) {
@@ -752,14 +770,13 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     callCallbacks(Operation::Load, Stage::End);
     if (mLoader->status() == OperationStatus::Error) {
         auto failureReason = mLoader->snapshot().failureReason();
-        int failureReasonForQemu =
-            (int)(failureReason ?
-                  *failureReason : FailureReason::InternalError);
-        mVmOperations.setFailureReason(
-            name, failureReasonForQemu);
+        auto failureReasonForQemu =
+                int(failureReason.valueOr(FailureReason::InternalError));
+        mVmOperations.setFailureReason(name, failureReasonForQemu);
+        mCurrentSnapshot.clear();
         return false;
     }
-    mLoadedSnapshotFile = name;
+    mCurrentSnapshot = mLoader->snapshot();
     Hierarchy::get()->currentInfo();
     return true;
 }
@@ -770,17 +787,17 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
     if (err == -EINVAL) {  // corrupted snapshot. abort immediately,
                            // try not to do anything since this could be
                            // in the crash handler
-        if (mLoader) mLoader->onInvalidSnapshotLoad();
+        if (mLoader)
+            mLoader->onInvalidSnapshotLoad();
         return;
     }
-    mLoader.reset(new Loader(name, -err));
+    mLoader.reset(new Loader({name}, mFlags, -err));
     mLoader->complete(false);
-    mLoadedSnapshotFile.clear();
+    mCurrentSnapshot.clear();
 
     auto failureReason = mLoader->snapshot().failureReason();
     mVmOperations.setFailureReason(
-        name, (int)(failureReason ?
-                    *failureReason : errnoToFailure(-err)));
+            name, (int)(failureReason ? *failureReason : errnoToFailure(-err)));
 }
 
 bool Snapshotter::onStartDelete(const char*) {
@@ -796,6 +813,10 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
         if (mLoader && mLoader->snapshot().name() == name) {
             mLoader.reset();
         }
+        if (mCurrentSnapshot && mCurrentSnapshot->name() == name) {
+            mCurrentSnapshot.clear();
+        }
+
         path_delete_dir(Snapshot::dataDir(name).c_str());
     }
     CrashReporter::get()->hangDetector().pause(false);
@@ -806,6 +827,10 @@ void Snapshotter::addOperationCallback(Callback&& cb) {
     if (cb) {
         mCallbacks.emplace_back(std::move(cb));
     }
+}
+
+const Snapshot* Snapshotter::currentSnapshot() const {
+    return mCurrentSnapshot.ptr();
 }
 
 }  // namespace snapshot

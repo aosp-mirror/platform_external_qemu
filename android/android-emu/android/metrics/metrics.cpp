@@ -370,6 +370,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::GENERIC_SNAPSHOTS_UI;
         case android::featurecontrol::AllowSnapshotMigration:
             return android_studio::EmulatorFeatureFlagState::ALLOW_SNAPSHOT_MIGRATION;
+        case android::featurecontrol::GenericIncrementalSnapshot:
+            return android_studio::EmulatorFeatureFlagState::GENERIC_INCREMENTAL_SNAPSHOT;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }

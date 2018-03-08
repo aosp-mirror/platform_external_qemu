@@ -14,6 +14,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/base/system/System.h"
+#include "android/snapshot/Snapshot.h"
 #include "android/snapshot/common.h"
 
 #include "android/emulation/control/vm_operations.h"
@@ -27,7 +28,7 @@
 // Fwd-declare the snapshot protobuf class
 namespace android_studio {
 class EmulatorSnapshot;
-} // namespace android_studio
+}  // namespace android_studio
 
 namespace android {
 namespace snapshot {
@@ -58,19 +59,26 @@ public:
         base::System::Duration texturesDurationMs;
     };
 
-    static void fillSnapshotMetrics(
-        android_studio::EmulatorSnapshot* snapshot,
-        const SnapshotOperationStats& stats);
-    SnapshotOperationStats getLoadStats(const char* name, base::System::Duration durationMs);
-    SnapshotOperationStats getSaveStats(const char* name, base::System::Duration durationMs);
+    static void fillSnapshotMetrics(android_studio::EmulatorSnapshot* snapshot,
+                                    const SnapshotOperationStats& stats);
+    SnapshotOperationStats getLoadStats(const char* name,
+                                        base::System::Duration durationMs);
+    SnapshotOperationStats getSaveStats(const char* name,
+                                        base::System::Duration durationMs);
 
     void initialize(const QAndroidVmOperations& vmOperations,
                     const QAndroidEmulatorWindowAgent& windowAgent);
 
-    OperationStatus prepareForLoading(const char* name);
-    OperationStatus load(bool isQuickboot, const char* name);
-    OperationStatus prepareForSaving(const char* name);
-    OperationStatus save(bool isOnExit, const char* name);
+    OperationStatus prepareForLoading(
+            const char* name,
+            OperationFlags flags = OperationFlags::Empty);
+    OperationStatus load(const char* name,
+                         OperationFlags flags = OperationFlags::Empty);
+    OperationStatus prepareForSaving(
+            const char* name,
+            OperationFlags flags = OperationFlags::Empty);
+    OperationStatus save(const char* name,
+                         OperationFlags flags = OperationFlags::Empty);
 
     // Cancels the current save operation, and queries
     // whether saving was canceled.
@@ -92,9 +100,6 @@ public:
 
     void onCrashedSnapshot(const char* name);
 
-    // Returns an empty string if the AVD was Cold Booted
-    const std::string& loadedSnapshotFile() { return mLoadedSnapshotFile; }
-
     base::System::Duration lastLoadUptimeMs() const {
         return mLastLoadUptimeMs;
     }
@@ -103,8 +108,8 @@ public:
         return mLastSaveUptimeMs;
     }
 
-    Saver& saver() { return *mSaver; }
-    Loader& loader() { return *mLoader; }
+    Saver* saver(bool includeFailed = false);
+    Loader* loader(bool includeFailed = false);
 
     const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
     const QAndroidEmulatorWindowAgent& windowAgent() const {
@@ -118,7 +123,11 @@ public:
     using Callback = std::function<void(Operation, Stage)>;
     void addOperationCallback(Callback&& cb);
 
-    bool isQuickboot() const { return mIsQuickboot; }
+    bool isQuickboot() const {
+        return nonzero(mFlags & OperationFlags::Quickboot);
+    }
+
+    const Snapshot* currentSnapshot() const;
 
 private:
     bool onStartSaving(const char* name);
@@ -130,7 +139,7 @@ private:
     bool onStartDelete(const char* name);
     bool onDeletingComplete(const char* name, int res);
 
-    void prepareLoaderForSaving(const char* name);
+    void prepareLoaderForSaving(const char* name, OperationFlags flags);
     void callCallbacks(Operation op, Stage stage);
 
     void appendSuccessfulSave(const char* name,
@@ -139,24 +148,27 @@ private:
                               base::System::Duration durationMs);
     void showError(const std::string& msg);
     bool checkSafeToSave(const char* name, bool reportMetrics = true);
-    void handleGenericSave(const char* name, OperationStatus saveStatus, bool reportMetrics = true);
+    void handleGenericSave(const char* name,
+                           OperationStatus saveStatus,
+                           bool reportMetrics = true);
     bool checkSafeToLoad(const char* name, bool reportMetrics = true);
-    void handleGenericLoad(const char* name, OperationStatus loadStatus, bool reportMetrics = true);
+    void handleGenericLoad(const char* name,
+                           OperationStatus loadStatus,
+                           bool reportMetrics = true);
 
     QAndroidVmOperations mVmOperations;
     QAndroidEmulatorWindowAgent mWindowAgent;
     std::unique_ptr<Saver> mSaver;
     std::unique_ptr<Loader> mLoader;
     std::vector<Callback> mCallbacks;
-    std::string mLoadedSnapshotFile;
+    base::Optional<Snapshot> mCurrentSnapshot;
 
     base::System::Duration mLastSaveUptimeMs = 0;
     base::System::Duration mLastLoadUptimeMs = 0;
-    android::base::Optional<base::System::Duration> mLastSaveDuration = 0;
-    android::base::Optional<base::System::Duration> mLastLoadDuration = 0;
+    base::Optional<base::System::Duration> mLastSaveDuration = 0;
+    base::Optional<base::System::Duration> mLastLoadDuration = 0;
 
-    bool mIsQuickboot = false;
-    bool mIsOnExit = false;
+    OperationFlags mFlags = OperationFlags::Empty;
 };
 
 }  // namespace snapshot
