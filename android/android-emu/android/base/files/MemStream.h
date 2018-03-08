@@ -27,6 +27,9 @@ public:
     MemStream(int reserveSize = 512);
     MemStream(Buffer&& data);
 
+    MemStream(MemStream&& other) = default;
+    MemStream& operator=(MemStream&& other) = default;
+
     int writtenSize() const;
     int readPos() const;
     int readSize() const;

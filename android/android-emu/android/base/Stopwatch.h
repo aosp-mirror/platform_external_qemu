@@ -41,12 +41,12 @@ private:
 
 
 // A class for convenient time tracking in a scope.
-template <class Counter>
+template <class Counter, int Divisor = 1>
 class RaiiTimeTracker final {
     DISALLOW_COPY_ASSIGN_AND_MOVE(RaiiTimeTracker);
 public:
     RaiiTimeTracker(Counter& time) : mTime(time) {}
-    ~RaiiTimeTracker() { mTime += mSw.elapsedUs(); }
+    ~RaiiTimeTracker() { mTime += mSw.elapsedUs() / Divisor; }
 
 private:
     Stopwatch mSw;
@@ -68,6 +68,12 @@ private:
 template <class Counter, class Func>
 auto measure(Counter& time, Func&& f) -> decltype(f()) {
     RaiiTimeTracker<Counter> rtt(time);
+    return f();
+}
+
+template <class Counter, class Func>
+auto measureMs(Counter& time, Func&& f) -> decltype(f()) {
+    RaiiTimeTracker<Counter, 1000> rtt(time);
     return f();
 }
 
