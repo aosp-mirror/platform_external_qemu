@@ -22,6 +22,30 @@
       "revId": "36a4f09335a1025fcf94040eca9e1c5b7e15f8d8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3a1f32a_b40863c3",
+        "filename": "android/android-emu/android/base/Uuid.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-08T16:54:04Z",
+      "side": 1,
+      "message": "when using it it looks better IMO: Uuid::byteSize\nwhile \u0027uuidsize\u0027 spells Uuid twice",
+      "parentUuid": "95518e61_717561fd",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 39
+      },
+      "revId": "36a4f09335a1025fcf94040eca9e1c5b7e15f8d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
