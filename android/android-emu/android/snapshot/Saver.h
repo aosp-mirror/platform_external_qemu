@@ -13,21 +13,23 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
-#include "android/snapshot/common.h"
 #include "android/snapshot/RamSaver.h"
 #include "android/snapshot/Snapshot.h"
+#include "android/snapshot/common.h"
 
 namespace android {
 namespace snapshot {
 
-class RamLoader;
+class Loader;
 
 class Saver {
     DISALLOW_COPY_AND_ASSIGN(Saver);
 
 public:
-    Saver(const Snapshot& snapshot, RamLoader* loader,
-          bool isOnExit);
+    Saver(const Snapshot& snapshot,
+          OperationFlags flags,
+          const Snapshot* parent,
+          Loader* loader);
     ~Saver();
 
     RamSaver& ramSaver() { return *mRamSaver; }
@@ -39,18 +41,16 @@ public:
     void prepare();
     void complete(bool succeeded);
 
-    bool incrementallySaved() const { return mIncrementallySaved; }
-
     void cancel();
 
     bool canceled() const { return mStatus == OperationStatus::Canceled; }
-
 private:
     OperationStatus mStatus;
+    OperationFlags mFlags;
     Snapshot mSnapshot;
+    const Snapshot* mParent = nullptr;
     base::Optional<RamSaver> mRamSaver;
     std::shared_ptr<TextureSaver> mTextureSaver;
-    bool mIncrementallySaved = false;
 };
 
 }  // namespace snapshot

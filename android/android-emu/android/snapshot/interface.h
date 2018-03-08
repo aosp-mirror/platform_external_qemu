@@ -48,6 +48,7 @@ void androidSnapshot_delete(const char* name);
 const char* androidSnapshot_loadedSnapshotFile();
 
 // Some hypervisors do not support generic AND quickboot save.
+// "I solemnly swear that I am up to no good"
 void androidSnapshot_setQuickbootSaveNoGood();
 bool androidSnapshot_isQuickbootSaveNoGood();
 

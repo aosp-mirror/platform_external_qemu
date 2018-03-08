@@ -27,7 +27,7 @@ std::string getSnapshotBaseDir() {
     return path;
 }
 
-std::string getSnapshotDir(const char* snapshotName) {
+std::string getSnapshotDir(base::StringView snapshotName) {
     auto baseDir = getSnapshotBaseDir();
     auto path = base::PathUtils::join(baseDir, snapshotName);
     return path;
