@@ -70,6 +70,30 @@
       "revId": "a77cb56b86a729a17130deb939c2a0eb6311e0a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa3273fb_2434bb64",
+        "filename": "android/android-emu/android/snapshot/proto/snapshot.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-08T19:55:15Z",
+      "side": 1,
+      "message": "other protos have it outside, and I really prefer it outside: often you add a field not at the bottom, and having the next tag right at the beginning makes it a part of the general message comment, while moving it inside forces you to look for it, or even assume there\u0027s none\n\nAFAIK g3\u0027s best practice is to have it outside:\n\nhttps://yaqs.googleplex.com/eng/q/6519456151371776",
+      "parentUuid": "40ae1a43_275bb3b3",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 15
+      },
+      "revId": "a77cb56b86a729a17130deb939c2a0eb6311e0a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
