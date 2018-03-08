@@ -44,7 +44,38 @@ message Config {
     optional int64 ram_size_bytes = 4;
 }
 
+// This is a type alias for a UUID, so it's probably the only legit use of a
+// 'required' field in a protobuf
+message UUID {
+    required bytes value = 1;
+}
+
+message SnapshotReference {
+    // A disk name of the referenced snapshot
+    optional string name = 1;
+    optional UUID revision = 2;
+}
+
+message Incremental {
+    // Parent snapshot
+    optional SnapshotReference parent = 1;
+
+    // This serves as a reference counter for this snapshot: one may only
+    // delete it from the disk after all children are gone (or have different
+    // revisions)
+    repeated SnapshotReference children = 2;
+
+    // Set if this snapshot itself isn't used anymore and is supposed to be
+    // deleted from disk, but still have some children left alive
+    optional bool deleted = 3;
+}
+
+// Next tag: 18
 message Snapshot {
+    // Unique for every time you overwrite this snapshot - this way children
+    // can detect that their parent has changed.
+    optional UUID revision = 15;
+
     // Update every time when introducing some breaking changes that make the
     // previous loading code break when trying to load the new snapshot.
     // NOTE: if the old code is fine with just skipping the new fields or not
@@ -101,4 +132,8 @@ message Snapshot {
 
     // Arbitrary description added by the user
     optional string description = 14;
+
+    optional Incremental incremental = 16;
+
+    optional bool is_quickboot = 17;
 }
