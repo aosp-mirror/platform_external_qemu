@@ -80,6 +80,30 @@
       "revId": "36a4f09335a1025fcf94040eca9e1c5b7e15f8d8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d7dffb2_272c5d8e",
+        "filename": "android/android-emu/android/base/Uuid.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-08T18:01:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f3a1f32a_b40863c3",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 39
+      },
+      "revId": "36a4f09335a1025fcf94040eca9e1c5b7e15f8d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
