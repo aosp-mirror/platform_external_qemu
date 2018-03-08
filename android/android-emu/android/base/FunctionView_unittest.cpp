@@ -60,7 +60,8 @@ TEST(FunctionView, Call) {
     EXPECT_STREQ("ssss1", fs("ssss").c_str());
 
     std::string base;
-    FunctionView<std::string()> fs2 = [&base]() { return base + "1"; };
+    auto lambda = [&base]() { return base + "1"; };
+    FunctionView<std::string()> fs2 = lambda;
     base = "one";
     EXPECT_STREQ("one1", fs2().c_str());
     base = "forty two";
