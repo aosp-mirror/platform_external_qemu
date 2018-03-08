@@ -134,7 +134,8 @@ public:
         // used to remove duplicates.
         std::unordered_set<IpAddress> present;
 
-        //Get preferred DNS server IP from GetNetworkParams
+        //Get preferred DNS server IP from GetNetworkParams,
+        //which returns IPV4 DNS only
         std::string dnsBuffer;
         ULONG outBufLen = sizeof (FIXED_INFO);
         dnsBuffer.resize(static_cast<size_t>(outBufLen));
@@ -160,7 +161,7 @@ public:
                     }
                 }
                 ipAddr = ipAddr->Next;
-            };
+            }
         }
 
         std::string buffer;
@@ -207,6 +208,11 @@ public:
         //   entries in the result.
         //
 
+        // Windows automatic use of three well know site local DNS name server entries
+        // if no IPv6 name server is provided to an interface
+        const IpAddress siteLocalDns1("fec0:0:0:0:ffff::1");
+        const IpAddress siteLocalDns2("fec0:0:0:0:ffff::2");
+        const IpAddress siteLocalDns3("fec0:0:0:0:ffff::3");
         for (auto adapter = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(&buffer[0]);
              adapter != nullptr; adapter = adapter->Next) {
 #if DEBUG
@@ -231,6 +237,12 @@ public:
                         ip = IpAddress(sin6->sin6_addr.s6_addr);
                         break;
                     }
+                }
+                if (ip == siteLocalDns1 || ip == siteLocalDns2 || ip == siteLocalDns3) {
+#if DEBUG
+                    LOG(INFO) << "    Site Local DNS found, ignore: " << ip.toString();
+#endif
+                    continue;
                 }
 #if DEBUG
                 LOG(INFO) << "    " << ip.toString();
