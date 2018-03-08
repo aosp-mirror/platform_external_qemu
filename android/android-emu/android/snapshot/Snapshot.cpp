@@ -383,6 +383,11 @@ static bool isUnrecoverableReason(FailureReason reason) {
            reason < FailureReason::UnrecoverableErrorLimit;
 }
 
+static bool isValidationFailureReason(FailureReason reason) {
+    return reason != FailureReason::Empty &&
+           reason < FailureReason::ValidationErrorLimit;
+}
+
 // preload(): Obtain the protobuf metadata. Logic for deciding
 // whether or not to load based on it, plus initialization
 // of properties like skin rotation, is done afterward in load().
@@ -395,7 +400,7 @@ bool Snapshot::preload() {
 
 const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
     loadProtobufOnce();
-    if (isUnrecoverableReason(
+    if (isValidationFailureReason(
             FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
         return nullptr;
     }
