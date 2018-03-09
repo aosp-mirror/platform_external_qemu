@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18445823_e678819d",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-09T02:33:08Z",
+      "side": 1,
+      "message": "this may block as well, couldn\u0027t it?",
+      "range": {
+        "startLine": 174,
+        "startChar": 11,
+        "endLine": 174,
+        "endChar": 27
+      },
+      "revId": "f0b18dc3395dad329585cc2df7071e957fa91535",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
