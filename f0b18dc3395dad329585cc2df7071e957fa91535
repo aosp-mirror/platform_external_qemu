@@ -22,6 +22,30 @@
       "revId": "f0b18dc3395dad329585cc2df7071e957fa91535",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a014786d_ebe7833c",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-09T08:53:35Z",
+      "side": 1,
+      "message": "Yes, it could block, but I am only passing around |kMaxPackets| amount of audio packets between |mFreeQueue| and |mDataQueue|, so the channel should never be full. I\u0027ll add a comment on that. Thanks!",
+      "parentUuid": "18445823_e678819d",
+      "range": {
+        "startLine": 174,
+        "startChar": 11,
+        "endLine": 174,
+        "endChar": 27
+      },
+      "revId": "f0b18dc3395dad329585cc2df7071e957fa91535",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
