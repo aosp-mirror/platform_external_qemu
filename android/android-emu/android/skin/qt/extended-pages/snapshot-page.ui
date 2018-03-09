@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>20</y>
+     <y>44</y>
      <width>285</width>
-     <height>521</height>
+     <height>497</height>
     </rect>
    </property>
    <property name="maximumSize">
@@ -355,6 +355,69 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QTreeWidget" name="defaultSnapshotDisplay">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>285</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>341</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="columnCount">
+    <number>2</number>
+   </property>
+   <attribute name="headerVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="headerShowSortIndicator" stdset="0">
+    <bool>true</bool>
+   </attribute>
+   <column>
+    <property name="text">
+     <string notr="true">1</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string notr="true">2</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="Line" name="line">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>42</y>
+     <width>285</width>
+     <height>3</height>
+    </rect>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="lineWidth">
+    <number>1</number>
+   </property>
+   <property name="midLineWidth">
+    <number>0</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>HorizDivider2</string>
+   </property>
+  </widget>
   <zorder>bigSelectionInfo</zorder>
   <zorder>snapshotDisplay</zorder>
   <zorder>smallSelectionInfo</zorder>
@@ -366,6 +429,8 @@
   <zorder>loadSnapshot</zorder>
   <zorder>editSnapshot</zorder>
   <zorder>deleteSnapshot</zorder>
+  <zorder>defaultSnapshotDisplay</zorder>
+  <zorder>line</zorder>
  </widget>
  <customwidgets>
   <customwidget>
