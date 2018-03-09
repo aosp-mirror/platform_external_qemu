@@ -109,6 +109,7 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 //    recorder - the recorder instance
 //    buffer - the byte array for the audio buffer in PCM format
 //    size - the audio buffer size
+//    ptUs = the presentation time (in microseconds) of the audio data.
 // return:
 //   0    if successful
 //   < 0  if failed
@@ -116,7 +117,8 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // this method is thread safe
 int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
                               uint8_t* buffer,
-                              int size);
+                              int size,
+                              uint64_t ptUs);
 
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:

@@ -273,6 +273,7 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
+    android/audio/AudioCaptureThread.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -635,6 +636,7 @@ LOCAL_SRC_FILES := \
   android/base/async/RecurrentTask_unittest.cpp \
   android/base/async/ScopedSocketWatch_unittest.cpp \
   android/base/async/SubscriberList_unittest.cpp \
+  android/base/containers/BufferQueue_unittest.cpp \
   android/base/containers/CircularBuffer_unittest.cpp \
   android/base/containers/Lookup_unittest.cpp \
   android/base/containers/SmallVector_unittest.cpp \
