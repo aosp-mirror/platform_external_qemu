@@ -403,7 +403,6 @@ private:
                                                                 | Qt::NoDropShadowWindowHint
                                                                 | Qt::FramelessWindowHint);
     static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (  Qt::Window
-                                                                | Qt::NoDropShadowWindowHint
                                                                 | Qt::WindowTitleHint
                                                                 | Qt::CustomizeWindowHint);
     static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (  FRAMELESS_WINDOW_FLAGS
