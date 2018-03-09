@@ -45,6 +45,13 @@ public:
     //      xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
     std::string toString() const;
 
+    static constexpr int byteSize = 16;
+
+    // Returns the raw in-memory representation
+    const uint8_t* bytes() const {
+        return static_cast<const uint8_t*>(dataPtr());
+    }
+
     // A string form of the zeroed Uuid
     static const char* const nullUuidStr;
 
@@ -66,8 +73,8 @@ private:
     // The Uuid is 16-byte number, but underlying system types are different
     // on different OSes.
     // This type alias is able to store any of those
-    using data_t = typename std::aligned_storage<
-            16, std::alignment_of<int32_t>::value>::type;
+    using data_t = typename std::
+            aligned_storage<byteSize, std::alignment_of<int32_t>::value>::type;
 
     data_t mData;
 };

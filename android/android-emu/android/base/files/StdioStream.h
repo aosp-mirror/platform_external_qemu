@@ -25,8 +25,7 @@ class StdioStream : public Stream {
 public:
     enum Ownership { kNotOwner, kOwner };
 
-    StdioStream() = delete;
-    StdioStream(FILE* file, Ownership ownership = kNotOwner);
+    StdioStream(FILE* file = nullptr, Ownership ownership = kNotOwner);
     StdioStream(StdioStream&& other);
     StdioStream& operator=(StdioStream&& other);
 

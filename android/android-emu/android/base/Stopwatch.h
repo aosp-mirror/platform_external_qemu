@@ -28,25 +28,23 @@ public:
     // Restart the stopwatch and return the current elapsed time, microseconds.
     System::WallDuration restartUs();
 
-    static double sec(System::WallDuration us) {
-        return us / 1000000.0;
-    }
-    static double ms(System::WallDuration us) {
-        return us / 1000.0;
-    }
+    static double sec(System::WallDuration us) { return us / 1000000.0; }
+    static double ms(System::WallDuration us) { return us / 1000.0; }
 
 private:
     System::WallDuration mStartUs;
 };
 
-
 // A class for convenient time tracking in a scope.
-template <class Counter>
+template <class Counter, int Divisor = 1>
 class RaiiTimeTracker final {
+    static_assert(Divisor > 0, "Bad divisor value");
+
     DISALLOW_COPY_ASSIGN_AND_MOVE(RaiiTimeTracker);
+
 public:
     RaiiTimeTracker(Counter& time) : mTime(time) {}
-    ~RaiiTimeTracker() { mTime += mSw.elapsedUs(); }
+    ~RaiiTimeTracker() { mTime += mSw.elapsedUs() / Divisor; }
 
 private:
     Stopwatch mSw;
@@ -71,13 +69,20 @@ auto measure(Counter& time, Func&& f) -> decltype(f()) {
     return f();
 }
 
+template <class Counter, class Func>
+auto measureMs(Counter& time, Func&& f) -> decltype(f()) {
+    RaiiTimeTracker<Counter, 1000> rtt(time);
+    return f();
+}
 
 // Some macros to have standard format of time measurements printed out.
-#define STOPWATCH_PRINT_SPLIT(sw) \
-    fprintf(stderr, "%s:%d %.03f ms\n", __func__, __LINE__, (sw).restartUs() / 1000.0f);
+#define STOPWATCH_PRINT_SPLIT(sw)                           \
+    fprintf(stderr, "%s:%d %.03f ms\n", __func__, __LINE__, \
+            (sw).restartUs() / 1000.0f);
 
-#define STOPWATCH_PRINT(sw) \
-    fprintf(stderr, "%s:%d %.03f ms total\n", __func__, __LINE__, (sw).elapsedUs() / 1000.0f);
+#define STOPWATCH_PRINT(sw)                                       \
+    fprintf(stderr, "%s:%d %.03f ms total\n", __func__, __LINE__, \
+            (sw).elapsedUs() / 1000.0f);
 
 }  // namespace base
 }  // namespace android

@@ -355,6 +355,13 @@ public:
         return get();
     }
 
+    T* ptr() {
+        return this->constructed() ? &get() : nullptr;
+    }
+    constexpr const T* ptr() const {
+        return this->constructed() ? &get() : nullptr;
+    }
+
     // Value getter with fallback
     template <class U = T,
               class = enable_if_convertible<typename std::decay<U>::type, T>>
