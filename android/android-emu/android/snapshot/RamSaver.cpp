@@ -179,7 +179,6 @@ void RamSaver::join() {
     }
     passToSaveHandler({kStopMarkerIndex, 0});
     mJoined = true;
-    mIndex.clear();
 }
 
 void RamSaver::cancel() {
