@@ -674,6 +674,11 @@ static int hax_vcpu_hax_exec(CPUArchState *env, int ug_platform)
 
 vcpu_run:
     do {
+        if (cpu->hax_vcpu_dirty) {
+            hax_vcpu_sync_state(env, 1);
+            cpu->hax_vcpu_dirty = false;
+        }
+
         int hax_ret;
 
         if (cpu->exit_request) {
