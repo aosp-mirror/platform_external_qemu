@@ -293,7 +293,7 @@ std::vector<Snapshot> Snapshot::getExistingSnapshots() {
     auto snapshotFiles = getSnapshotDirEntries();
     for (const auto& filename : snapshotFiles) {
         Snapshot s(filename.c_str());
-        if (s.load()) {
+        if (s.preload()) {
             res.push_back(s);
         }
     }
