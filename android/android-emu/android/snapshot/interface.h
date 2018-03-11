@@ -47,10 +47,6 @@ void androidSnapshot_delete(const char* name);
 // Returns an empty string if the AVD was cold-booted.
 const char* androidSnapshot_loadedSnapshotFile();
 
-// Some hypervisors do not support generic AND quickboot save.
-void androidSnapshot_setQuickbootSaveNoGood();
-bool androidSnapshot_isQuickbootSaveNoGood();
-
 // These two functions implement a quickboot feature: load() tries to load from
 // the |name| snapshot (or default one if it is null or empty) and save() saves
 // the current state into it.

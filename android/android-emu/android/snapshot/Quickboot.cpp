@@ -485,26 +485,8 @@ bool androidSnapshot_quickbootLoad(const char* name) {
     return android::snapshot::Quickboot::get().load(name);
 }
 
-bool sQuickbootSaveNoGood = false;
-
-void androidSnapshot_setQuickbootSaveNoGood() {
-    sQuickbootSaveNoGood = true;
-}
-
-bool androidSnapshot_isQuickbootSaveNoGood() {
-    return sQuickbootSaveNoGood;
-}
-
 bool androidSnapshot_quickbootSave(const char* name) {
-    if (sQuickbootSaveNoGood) {
-        fprintf(stderr,
-                "NOTE: On-exit saves for HAXM not supported "
-                "after a mid-run snapshot save. "
-                "Emulator will use the last snapshot if applicable.\n");
-        return false;
-    } else {
-        return android::snapshot::Quickboot::get().save(name);
-    }
+    return android::snapshot::Quickboot::get().save(name);
 }
 
 void androidSnapshot_quickbootInvalidate(const char* name) {

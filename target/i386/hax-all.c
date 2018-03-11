@@ -773,9 +773,7 @@ static void do_hax_cpu_synchronize_state(CPUState *cpu, run_on_cpu_data arg)
 
 void hax_cpu_synchronize_state(CPUState *cpu)
 {
-    if (!cpu->hax_vcpu_dirty) {
-        run_on_cpu(cpu, do_hax_cpu_synchronize_state, RUN_ON_CPU_NULL);
-    }
+    run_on_cpu(cpu, do_hax_cpu_synchronize_state, RUN_ON_CPU_NULL);
 }
 
 static void do_hax_cpu_synchronize_post_reset(CPUState *cpu,
