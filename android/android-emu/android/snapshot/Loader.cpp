@@ -144,7 +144,7 @@ void Loader::onInvalidSnapshotLoad() {
     }
 }
 
-void Loader::prepareForSaving(bool isOnExit) {
+void Loader::synchronize(bool isOnExit) {
     if (mTextureLoader) {
         mTextureLoader->join();
     }
