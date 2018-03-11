@@ -43,11 +43,6 @@ AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
 }
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {
-    // TODO: HAXM generic + at-exit snapshot support
-    if (android::GetCurrentCpuAccelerator() ==
-        android::CPU_ACCELERATOR_HAX) {
-        androidSnapshot_setQuickbootSaveNoGood();
-    }
     return AndroidSnapshotStatus(Snapshotter::get().saveGeneric(name));
 }
 
