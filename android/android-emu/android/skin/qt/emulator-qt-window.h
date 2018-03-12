@@ -384,6 +384,7 @@ private:
     QPixmap mScaledBackingImage;
     QPixmap* mRawSkinPixmap = nullptr; // For masking frameless AVDs
     bool mBackingBitmapChanged = true;
+    bool mSkinPixmapIsPortrait = true;
 
     QQueue<SkinEvent*> mSkinEventQueue;
     android::base::Lock mSkinEventQueueLock;
