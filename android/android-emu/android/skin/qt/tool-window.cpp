@@ -656,28 +656,30 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
                 Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
                 static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
 
-    // Check whether it's a good idea to ask anyway, such as when the system
-    // has low RAM.
-
-    bool hasLowRam = System::isUnderMemoryPressure();
-
-    if (!hasLowRam &&
-        (saveOnExitChoice != SaveSnapshotOnExit::Ask)) {
-        // The flag should already be set
-        return true;
-    }
-
-    // The UI setting is ASK, or there is low RAM.
-    // But don't ask if the command line was used. That overrides the UI.
     if (android_cmdLineOptions->no_snapshot_save) {
+        // The command line was used, so don't ask. That overrides the UI.
         return true;
     }
+
+    if (saveOnExitChoice == SaveSnapshotOnExit::Never) {
+        // The avdParams flag should already be set
+        return true;
+    }
+
+    // If the setting is ALWAYS, we might want to ask anyway, such as
+    // when the system has low RAM.
+    bool hasLowRam = System::isUnderMemoryPressure();
+    if (!hasLowRam && (saveOnExitChoice == SaveSnapshotOnExit::Always)) {
+        return true;
+    }
+
+    // The setting is ASK or we decided to ask anyway.
 
     auto askMessageDefault =
         tr("Do you want to save the current state for the next quick boot?");
     auto askMessageLowRam =
-        tr("Do you want to save the current state for the next quick boot?\n"
-           "Note: Snapshot saving when free RAM is low may take longer. ");
+        tr("Do you want to save the current state for the next quick boot?\n\n"
+           "Note: Saving the snapshot may take longer because free RAM is low.");
 
     int64_t startTime = get_uptime_ms();
     QMessageBox msgBox(QMessageBox::Question,
