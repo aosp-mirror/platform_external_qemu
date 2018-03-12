@@ -16,6 +16,7 @@
 #include "android/base/StringFormat.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/emulation/VmLock.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
@@ -278,7 +279,7 @@ void Snapshotter::prepareLoaderForSaving(const char* name) {
         mLoader->status() != OperationStatus::Ok) {
         mLoader.reset();
     } else {
-        mLoader->prepareForSaving(mIsOnExit);
+        mLoader->synchronize(mIsOnExit);
     }
 }
 
@@ -656,14 +657,17 @@ OperationStatus Snapshotter::loadGeneric(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
-    if (mLoader && mLoader->status() == OperationStatus::Ok) {
-        mLoader->prepareForSaving(false /* not on exit */);
-    }
-
     if (name == mLoadedSnapshotFile) {
-        // We're deleting the "loaded" snapshot
+        // We're deleting the "loaded" snapshot, so first finish any pending
+        // load, and then clear the snapshot file.  Do it under the VM lock to
+        // finish background loading faster (i.e., no interference from VCPUs)
+        android::RecursiveScopedVmLock lock;
+        if (mLoader && mLoader->status() == OperationStatus::Ok) {
+            mLoader->synchronize(false /* not on exit */);
+        }
         mLoadedSnapshotFile.clear();
     }
+
     mVmOperations.snapshotDelete(name, this, nullptr);
 
     // then delete the folder and refresh hierarchy
