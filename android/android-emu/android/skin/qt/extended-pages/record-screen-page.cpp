@@ -282,7 +282,7 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
     QSettings settings;
 
     // Stop the video player if it's running
-    if (mVideoPlayer->isRunning()) {
+    if (mVideoPlayer && mVideoPlayer->isRunning()) {
         mVideoPlayer->stop();
     }
 
@@ -373,6 +373,7 @@ void RecordScreenPage::slot_recordingStatusChange(RecordingStatus status) {
             setRecordUiState(RecordUiState::Stopping);
             break;
         case RECORD_STOPPED:
+            mVideoPlayer.reset();
             // Setup the preview frame. Needs to be initialized before
             // setRecordUiState() or the preview frame will not be shown.
             mVideoInfo.reset(new android::videoplayer::VideoInfo(
