@@ -17,6 +17,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/emulation/VmLock.h"
+#include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
@@ -459,7 +460,8 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     // save only if we have 2 GB of space available.
     static const System::FileSize TWO_GB = 2147483648ULL;
     System::FileSize availableSpace;
-    bool success = System::get()->pathFreeSpace(getSnapshotDir(name).c_str(),
+    auto baseDir = avdInfo_getContentPath(android_avdInfo);
+    bool success = System::get()->pathFreeSpace(baseDir,
                                                 &availableSpace);
     if (success && availableSpace < TWO_GB) {
         showError("Not saving snapshot: Disk space < 2 GB");
