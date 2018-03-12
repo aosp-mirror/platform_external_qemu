@@ -353,6 +353,7 @@ bool Quickboot::save(StringView name) {
     // TODO: detect if emulator was restarted since loading.
     const bool shouldTrySaving =
             mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted() ||
+            guest_boot_completed ||
             android::featurecontrol::isEnabled(
                 android::featurecontrol::AllowSnapshotMigration);
 
