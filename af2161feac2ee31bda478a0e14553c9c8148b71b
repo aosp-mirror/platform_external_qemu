@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e7c9f369_d75f2f5c",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-12T21:40:13Z",
+      "side": 1,
+      "message": "static constexpr?",
+      "range": {
+        "startLine": 104,
+        "startChar": 8,
+        "endLine": 104,
+        "endChar": 23
+      },
+      "revId": "af2161feac2ee31bda478a0e14553c9c8148b71b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12ba409b_d06976af",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-12T21:40:13Z",
+      "side": 1,
+      "message": "We can use std::vector\u0027s fill constructor instead.",
+      "range": {
+        "startLine": 105,
+        "startChar": 8,
+        "endLine": 106,
+        "endChar": 92
+      },
+      "revId": "af2161feac2ee31bda478a0e14553c9c8148b71b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "45caff7f_d263201d",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-12T21:40:13Z",
+      "side": 1,
+      "message": "We can probably just use std::vector\u003cuint8_t\u003e here, since we aren\u0027t using the timestamp field in the AudioPacket. Or maybe add another constructor in AudioPacket so we can take advantage of std::vector\u0027s fill constructor (std::vector\u003cuint8_t\u003e zeros(size, 0);) instead of copying data over from std::string.",
+      "range": {
+        "startLine": 215,
+        "startChar": 4,
+        "endLine": 215,
+        "endChar": 44
+      },
+      "revId": "af2161feac2ee31bda478a0e14553c9c8148b71b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
