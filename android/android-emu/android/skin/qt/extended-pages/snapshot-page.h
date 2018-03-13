@@ -38,6 +38,7 @@ signals:
     void deleteCompleted();
 
 private slots:
+    void on_defaultSnapshotDisplay_itemSelectionChanged();
     void on_snapshotDisplay_itemSelectionChanged();
     void on_deleteSnapshot_clicked();
     void on_enlargeInfoButton_clicked();
@@ -61,10 +62,12 @@ private:
     QString formattedSize(qint64 theSize);
     QString getDescription(const QString& fileName);
 
+    void    adjustIcons(QTreeWidget* theDisplayList);
     void    deleteSnapshot(const WidgetSnapshotItem* theItem);
     void    editSnapshot(const WidgetSnapshotItem* theItem);
     void    highlightItemWithFilename(const QString& fileName);
-    void    showPreviewImage(const QString& snapshotName);
+    void    showPreviewImage(const QString& snapshotName, bool isValid);
+    void    updateAfterSelectionChanged();
     void    writeLogicalNameToProtobuf(const QString& fileName, const QString& logicalName);
     void    writeParentToProtobuf(const QString& fileName, const QString& parentName);
     void    writeLogicalNameAndParentToProtobuf(const QString& fileName,

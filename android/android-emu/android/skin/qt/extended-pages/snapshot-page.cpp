@@ -51,10 +51,12 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         // ctor for a top-level item
         WidgetSnapshotItem(const QString&   fileName,
                            const QString&   logicalName,
-                           const QDateTime& dateTime) :
+                           const QDateTime& dateTime,
+                                 bool       isValid) :
             QTreeWidgetItem((QTreeWidget*)0),
             mFileName(fileName),
-            mDateTime(dateTime)
+            mDateTime(dateTime),
+            mIsValid(isValid)
         {
             setText(COLUMN_NAME, logicalName);
         }
@@ -75,32 +77,39 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         //     setText(COLUMN_NAME, logicalName);
         // }
 
-        // Customize the sort order
+        // Customize the sort order: Sort by date
+        // (Put invalid items after valid items. Invalid items
+        // are sorted by name.)
         bool operator<(const QTreeWidgetItem &other)const {
             WidgetSnapshotItem& otherItem = (WidgetSnapshotItem&)other;
-            // Make "default_boot" first. After that,
-            // sort based on date/time.
-            if (otherItem.mFileName == Quickboot::kDefaultBootSnapshot.c_str()) return false;
-            if (mFileName == Quickboot::kDefaultBootSnapshot.c_str()) return true;
-            return mDateTime < otherItem.mDateTime;
+
+            if (mIsValid) {
+                if (!otherItem.mIsValid) return true;
+                return mDateTime < otherItem.mDateTime;
+            } else {
+                if (otherItem.mIsValid) return false;
+                return mFileName < otherItem.mFileName;
+            }
         }
 
         QString fileName() const {
             return mFileName;
         }
-
         QString parentName() const {
             return mParentName;
         }
-
         QDateTime dateTime() const {
             return mDateTime;
+        }
+        bool isValid() const {
+            return mIsValid;
         }
 
     private:
         QString   mFileName;
         QString   mParentName;
         QDateTime mDateTime;
+        bool      mIsValid;
 };
 
 SnapshotPage::SnapshotPage(QWidget* parent) :
@@ -108,6 +117,7 @@ SnapshotPage::SnapshotPage(QWidget* parent) :
     mUi(new Ui::SnapshotPage())
 {
     mUi->setupUi(this);
+    mUi->defaultSnapshotDisplay->sortByColumn(COLUMN_NAME, Qt::AscendingOrder);
     mUi->snapshotDisplay->sortByColumn(COLUMN_NAME, Qt::AscendingOrder);
 
     QObject::connect(this, SIGNAL(deleteCompleted()),
@@ -151,7 +161,6 @@ void SnapshotPage::slot_snapshotDeleteCompleted() {
     QApplication::restoreOverrideCursor();
 }
 
-
 void SnapshotPage::editSnapshot(const WidgetSnapshotItem* theItem) {
     if (!theItem) {
         return;
@@ -164,6 +173,7 @@ void SnapshotPage::editSnapshot(const WidgetSnapshotItem* theItem) {
     QLineEdit* nameEdit = new QLineEdit(this);
     QString oldName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
     nameEdit->setText(oldName);
+    nameEdit->selectAll();
     dialogLayout->addWidget(nameEdit);
 
     dialogLayout->addWidget(new QLabel(tr("Description")));
@@ -232,10 +242,13 @@ QString SnapshotPage::getDescription(const QString& fileName) {
 }
 
 const SnapshotPage::WidgetSnapshotItem* SnapshotPage::getSelectedSnapshot() {
-    const QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
+    QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
 
     if (selectedItems.size() == 0) {
-        // Nothing selected
+        // Nothing selected in the main list. Check the default snapshot's list.
+        selectedItems = mUi->defaultSnapshotDisplay->selectedItems();
+    }
+    if (selectedItems.size() == 0) {
         return nullptr;
     }
     // Return the first selected element--multiple selections are not allowed
@@ -288,26 +301,35 @@ void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snap
     QApplication::restoreOverrideCursor();
 }
 
+void SnapshotPage::on_defaultSnapshotDisplay_itemSelectionChanged() {
+    QList<QTreeWidgetItem *> selectedItems = mUi->defaultSnapshotDisplay->selectedItems();
+    if (selectedItems.size() > 0) {
+        // We have the selection, de-select the other list
+        mUi->snapshotDisplay->clearSelection();
+    }
+    updateAfterSelectionChanged();
+}
 void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
+    QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
+    if (selectedItems.size() > 0) {
+        // We have the selection, de-select the other list
+        mUi->defaultSnapshotDisplay->clearSelection();
+    }
+    updateAfterSelectionChanged();
+}
+
+void SnapshotPage::updateAfterSelectionChanged() {
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
-    // Adjust the icon for a selected vs non-selected row
-    QTreeWidgetItemIterator iter(mUi->snapshotDisplay);
-    for ( ; *iter; iter++) {
-        WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iter);
-        if (item->icon(COLUMN_ICON).isNull()) continue;
-        if (item->isSelected()) {
-            item->setIcon(COLUMN_ICON, getIconForCurrentTheme(CURRENT_SNAPSHOT_SELECTED_ICON_NAME));
-        } else {
-            item->setIcon(COLUMN_ICON, getIconForCurrentTheme(CURRENT_SNAPSHOT_ICON_NAME));
-
-        }
-    }
+    adjustIcons(mUi->defaultSnapshotDisplay);
+    adjustIcons(mUi->snapshotDisplay);
 
     QString selectionInfoString;
     QString simpleName;
 
     const WidgetSnapshotItem* theItem = getSelectedSnapshot();
+
+    bool validItem = false;
 
     if (!theItem) {
         if (mUi->snapshotDisplay->topLevelItemCount() > 0) {
@@ -317,26 +339,40 @@ void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
             selectionInfoString = "";
         }
     } else {
+        validItem = theItem->isValid();
         QString logicalName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
         simpleName = theItem->fileName();
 
         System::FileSize snapSize = android::snapshot::folderSize(simpleName.toStdString());
 
-        selectionInfoString =
-                  tr("<big><b>%1</b></big><br>"
-                     "%2, captured %3<br>"
-                     "File: %4")
-                          .arg(logicalName,
-                               formattedSize(snapSize),
-                               theItem->dateTime().isValid() ?
-                                   theItem->dateTime().toString(Qt::SystemLocaleShortDate) :
-                                   tr("(unknown)"),
-                               simpleName);
+        if (validItem) {
+            selectionInfoString =
+                      tr("<big><b>%1</b></big><br>"
+                         "%2, captured %3<br>"
+                         "File: %4")
+                              .arg(logicalName,
+                                   formattedSize(snapSize),
+                                   theItem->dateTime().isValid() ?
+                                       theItem->dateTime().toString(Qt::SystemLocaleShortDate) :
+                                       tr("(unknown)"),
+                                   simpleName);
 
-        QString description = getDescription(simpleName);
-        if (!description.isEmpty()) {
-            selectionInfoString += QString("<p><big>%1</big>")
-                                   .arg(description.replace('<', "&lt;").replace('\n', "<br>"));
+            QString description = getDescription(simpleName);
+            if (!description.isEmpty()) {
+                selectionInfoString += QString("<p><big>%1</big>")
+                                       .arg(description.replace('<', "&lt;").replace('\n', "<br>"));
+            }
+            mUi->loadSnapshot->setEnabled(true);
+            // Cannot edit the default snapshot
+            mUi->editSnapshot->setEnabled(simpleName != Quickboot::kDefaultBootSnapshot.c_str());
+        } else {
+            // Invalid snapshot directory
+            selectionInfoString =
+                      tr("<big><b>%1</b></big><br>"
+                         "Invalid snapshot: %2<br>")
+                              .arg(logicalName, formattedSize(snapSize));
+            mUi->loadSnapshot->setEnabled(false);
+            mUi->editSnapshot->setEnabled(false);
         }
     }
 
@@ -360,18 +396,33 @@ void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
         mUi->reduceInfoButton->setVisible(false);
 
         if (mUi->preview->isVisible()) {
-            showPreviewImage(simpleName);
+            showPreviewImage(simpleName, validItem);
         }
     }
 
     QApplication::restoreOverrideCursor();
 }
 
+// Adjust the icons for selected vs non-selected rows
+void SnapshotPage::adjustIcons(QTreeWidget* theDisplayList) {
+    QTreeWidgetItemIterator iter(theDisplayList);
+    for ( ; *iter; iter++) {
+        WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iter);
+        if (item->icon(COLUMN_ICON).isNull()) continue;
+        if (item->isSelected()) {
+            item->setIcon(COLUMN_ICON, getIconForCurrentTheme(CURRENT_SNAPSHOT_SELECTED_ICON_NAME));
+        } else {
+            item->setIcon(COLUMN_ICON, getIconForCurrentTheme(CURRENT_SNAPSHOT_ICON_NAME));
+
+        }
+    }
+}
+
 // Displays the preview image of the selected snapshot
-void SnapshotPage::showPreviewImage(const QString& snapshotName) {
+void SnapshotPage::showPreviewImage(const QString& snapshotName, bool isValid) {
     mPreviewScene.clear(); // Frees previewItem
 
-    if (snapshotName.isEmpty()) {
+    if (snapshotName.isEmpty() || !isValid) {
         mUi->preview->items().clear();
         return;
     }
@@ -434,22 +485,10 @@ void SnapshotPage::populateSnapshotDisplay() {
 // Populate the list of snapshot WITHOUT the hierarchy of parentage
 void SnapshotPage::populateSnapshotDisplay_flat() {
 
-    mUi->snapshotDisplay->setSortingEnabled(false); // Don't sort during modification
+    mUi->defaultSnapshotDisplay->setSortingEnabled(false); // Don't sort during modification
+    mUi->snapshotDisplay->setSortingEnabled(false);
+    mUi->defaultSnapshotDisplay->clear();
     mUi->snapshotDisplay->clear();
-
-    // TODO: jameskaye@ Enable this code if we decide to provide a hierarchical
-    //                  display. Remove this code if we decide not to.
-    // // Temporary structure for organizing the display of the snapshots
-    // // (used only for the hierarchical display)
-    // class treeItem {
-    //     public:
-    //         QString             fileName;
-    //         QString             logicalName;
-    //         QDateTime           dateTime;
-    //         QString             parent;
-    //         int                 parentIdx;
-    //         WidgetSnapshotItem* item;
-    // };
 
     std::string snapshotPath = getSnapshotBaseDir();
 
@@ -465,33 +504,46 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         Snapshot theSnapshot(fileName.toStdString().c_str());
 
         const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
-        if (protobuf == nullptr) continue;
-        QString logicalName;
-        if (protobuf->has_logical_name()) {
-            logicalName = protobuf->logical_name().c_str();
-        } else {
-            logicalName = fileName;
-        }
+        bool snapshotIsValid = (protobuf != nullptr);
 
+        QString logicalName;
         QDateTime snapshotDate;
-        if (protobuf->has_creation_time()) {
-            snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL * protobuf->creation_time());
+        if (!snapshotIsValid) {
+            logicalName = fileName;
+        } else {
+            if (protobuf->has_logical_name()) {
+                logicalName = protobuf->logical_name().c_str();
+            } else {
+                logicalName = fileName;
+            }
+
+            if (protobuf->has_creation_time()) {
+                snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL * protobuf->creation_time());
+            }
         }
 
         // Create a top-level item.
         WidgetSnapshotItem* thisItem =
-                new WidgetSnapshotItem(fileName, logicalName, snapshotDate);
+                new WidgetSnapshotItem(fileName, logicalName, snapshotDate, snapshotIsValid);
 
-        mUi->snapshotDisplay->addTopLevelItem(thisItem);
+        QTreeWidget* displayWidget = (fileName == Quickboot::kDefaultBootSnapshot.c_str()) ?
+                                     mUi->defaultSnapshotDisplay : mUi->snapshotDisplay;
 
-        if (fileName == androidSnapshot_loadedSnapshotFile()) {
+        displayWidget->addTopLevelItem(thisItem);
+
+        if (!snapshotIsValid) {
+            QFont italic = thisItem->font(COLUMN_NAME);
+            italic.setPointSize(italic.pointSize() + 1);
+            italic.setItalic(true);
+            thisItem->setFont(COLUMN_NAME, italic);
+        } else if (fileName == androidSnapshot_loadedSnapshotFile()) {
             // This snapshot was used to start the AVD
             QFont bigBold = thisItem->font(COLUMN_NAME);
             bigBold.setPointSize(bigBold.pointSize() + 2);
             bigBold.setBold(true);
             thisItem->setFont(COLUMN_NAME, bigBold);
             thisItem->setIcon(COLUMN_ICON, getIconForCurrentTheme("current_snapshot"));
-            mUi->snapshotDisplay->setCurrentItem(thisItem);
+            displayWidget->setCurrentItem(thisItem);
         } else {
             QFont biggish = thisItem->font(COLUMN_NAME);
             biggish.setPointSize(biggish.pointSize() + 1);
@@ -502,13 +554,21 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     }
 
     if (nItems <= 0) {
-        // Hide the tree display and say that there are no snapshots
+        // Hide the lists and say that there are no snapshots
+        mUi->defaultSnapshotDisplay->setVisible(false);
         mUi->snapshotDisplay->setVisible(false);
         mUi->noneAvailableLabel->setVisible(true);
         return;
     }
+    mUi->defaultSnapshotDisplay->setVisible(true);
     mUi->snapshotDisplay->setVisible(true);
     mUi->noneAvailableLabel->setVisible(false);
+
+    mUi->defaultSnapshotDisplay->header()->setStretchLastSection(false);
+    mUi->defaultSnapshotDisplay->header()->setSectionResizeMode(COLUMN_ICON, QHeaderView::Fixed);
+    mUi->defaultSnapshotDisplay->header()->resizeSection(COLUMN_ICON, 36);
+    mUi->defaultSnapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME, QHeaderView::Stretch);
+    mUi->defaultSnapshotDisplay->setSortingEnabled(true);
 
     mUi->snapshotDisplay->header()->setStretchLastSection(false);
     mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_ICON, QHeaderView::Fixed);
@@ -661,14 +721,24 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 // }
 
  void SnapshotPage::highlightItemWithFilename(const QString& fileName) {
-    QTreeWidgetItemIterator iter(mUi->snapshotDisplay);
-    for ( ; *iter; iter++) {
-        WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iter);
+    // Try the main list
+    QTreeWidgetItemIterator iterMain(mUi->snapshotDisplay);
+    for ( ; *iterMain; iterMain++) {
+        WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iterMain);
         if (fileName == item->fileName()) {
             mUi->snapshotDisplay->setCurrentItem(item);
-            break;
+            return;
         }
-      }
+    }
+    // Try the default snapshot list
+    QTreeWidgetItemIterator iterDefault(mUi->defaultSnapshotDisplay);
+    for ( ; *iterDefault; iterDefault++) {
+        WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iterDefault);
+        if (fileName == item->fileName()) {
+            mUi->defaultSnapshotDisplay->setCurrentItem(item);
+            return;
+        }
+    }
 }
 
 void SnapshotPage::writeParentToProtobuf(const QString& fileName,
