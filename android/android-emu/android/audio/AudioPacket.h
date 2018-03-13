@@ -33,6 +33,9 @@ struct AudioPacket {
     // For allocating the space but with no data
     AudioPacket(uint32_t cap) : dataVec(cap) {}
 
+    // For allocating the space but with no data
+    AudioPacket(uint32_t cap, uint8_t val) : dataVec(cap, val) {}
+
     // For allocating just enough space for the data
     AudioPacket(void* buf, uint32_t size_bytes) {
         if (buf != nullptr) {
