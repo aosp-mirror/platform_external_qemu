@@ -50,9 +50,9 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
+#include <assert.h>
 #include <memory>
 #include <string>
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,56 +83,56 @@ using android::audio::AudioCaptureThread;
 
 // a wrapper around a single output AVStream
 struct VideoOutputStream {
-    AVStream* st;
+    AVStream* st = nullptr;
 
-    AVCodecID codec_id;
+    AVCodecID codec_id = AV_CODEC_ID_VP9;
 
     // video width and height
-    int width;
-    int height;
+    int width = 0;
+    int height = 0;
 
-    int bit_rate;
-    int fps;
+    int bit_rate = 0;
+    int fps = 0;
 
 #if DEBUG_VIDEO
-    int64_t frame_count;
-    int64_t write_frame_count;
+    int64_t frame_count = 0ll;
+    int64_t write_frame_count = 0ll;
 #endif
 
     // pts of the next frame that will be generated
-    int64_t next_pts;
+    int64_t next_pts = 0ll;
 
-    AVFrame* frame;
-    AVFrame* tmp_frame;
+    AVFrame* frame = nullptr;
+    AVFrame* tmp_frame = nullptr;
 
-    struct SwsContext* sws_ctx;
+    struct SwsContext* sws_ctx = nullptr;
 };
 
 struct AudioOutputStream {
-    AVStream* st;
+    AVStream* st = nullptr;
 
-    AVCodecID codec_id;
+    AVCodecID codec_id = AV_CODEC_ID_VORBIS;
 
-    int bit_rate;
-    int sample_rate;
+    int bit_rate = 0;
+    int sample_rate = 0;
 
 #if DEBUG_AUDIO
-    int64_t frame_count;
-    int64_t write_frame_count;
+    int64_t frame_count = 0ll;
+    int64_t write_frame_count = 0ll;
 #endif
 
     // pts of the next frame that will be generated
-    int64_t next_pts;
+    int64_t next_pts = 0ll;
 
-    int samples_count;
+    int samples_count = 0;
 
-    AVFrame* frame;
-    AVFrame* tmp_frame;
+    AVFrame* frame = nullptr;
+    AVFrame* tmp_frame = nullptr;
 
-    uint8_t* audio_leftover;
-    int audio_leftover_len;
+    uint8_t* audio_leftover = nullptr;
+    int audio_leftover_len = 0;
 
-    struct SwrContext* swr_ctx;
+    struct SwrContext* swr_ctx = nullptr;
 };
 
 class ffmpeg_recorder {
@@ -142,7 +142,7 @@ public:
     VideoOutputStream video_st;
     AudioOutputStream audio_st;
     // A single lock to protect writing audio and video frames to the video file
-    mutable android::base::Lock out_pkt_lock;
+    android::base::Lock out_pkt_lock;
     bool have_video = false;
     bool has_video_frames = false;
     bool have_audio = false;
@@ -369,7 +369,6 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
 #if DEBUG_AUDIO
         log_packet(oc, &pkt);
 #endif
-
         ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",

@@ -93,10 +93,20 @@ public:
         assert(bits == 8 || bits == 16);
         assert(mCallback);
         size_t szBytes = bits / CHAR_BIT;
+
+        mFrameSize = mNbSamples * mChannels * szBytes;
+        double bytes_per_second = (double)mSampleRate * mChannels * szBytes;
+        double sec_per_frame = ((double)mFrameSize) / bytes_per_second;
+        mMicroSecondsPerFrame = (uint64_t)(sec_per_frame * 1000000);
+
+        // 4 silent frames makes Chrome very happy
+        mNbSilentFrames = 4;
+        mSilentPkt.reset(new AudioPacket(mNbSilentFrames * mFrameSize, 0));
+
         // Prefill the free queue with empty packets
         for (int i = 0; i < kMaxPackets; ++i) {
             mFreeQueue.send(
-                    std::move(AudioPacket(mNbSamples * mChannels * szBytes)));
+                    std::move(AudioPacket(mFrameSize)));
         }
     }
 
@@ -114,18 +124,29 @@ public:
             return -1;
         }
 
-        while (1) {
+        uint64_t last_pts = android::base::System::get()->getHighResTimeUs();
+        while (true) {
             // Consumer
-            // Blocks until either we get a packet or the queue is closed.
-            auto pkt = mDataQueue.receive();
+            auto start = android::base::System::get()->getHighResTimeUs();
+            auto future = base::System::get()->getUnixTimeUs() + mNbSilentFrames * mMicroSecondsPerFrame;
+            // Blocks until either we get a packet, timeout or the queue is closed.
+            auto pkt = mDataQueue.timedReceive(future);
             if (!pkt) {
-                break;
-            }
+                if (mDataQueue.isStopped()) {
+                    break;
+                }
+                // insert silent audio
+                uint64_t diff = android::base::System::get()->getHighResTimeUs() - start;
+                last_pts += diff;
+                mCallback(mSilentPkt->dataVec.data(), mSilentPkt->dataVec.size(), last_pts);
+            } else {
+                last_pts = pkt->tsUs;
+                mCallback(pkt->dataVec.data(), pkt->dataVec.size(), pkt->tsUs);
 
-            mCallback(pkt->dataVec.data(), pkt->dataVec.size(), pkt->tsUs);
-            // Blocks until there is space in the queue or is closed.
-            if (!mFreeQueue.send(std::move(*pkt))) {
-                break;
+                // Blocks until there is space in the queue or is closed.
+                if (!mFreeQueue.send(std::move(*pkt))) {
+                    break;
+                }
             }
         }
 
@@ -184,6 +205,13 @@ private:
     int mNbSamples = 0;
     int mBits = 0;
     int mChannels = 0;
+    int mFrameSize = 0;
+    // micro seconds per frame
+    uint64_t mMicroSecondsPerFrame = 0;
+
+    int mNbSilentFrames = 0;
+    std::unique_ptr<AudioPacket> mSilentPkt;
+
     std::unique_ptr<AudioCapturerImpl> mAudioCapturer;
     // mDataQueue contains filled audio packets and mFreeQueue has available
     // audio packets that the producer can use. The workflow is as follows:
