@@ -1411,6 +1411,7 @@ QEMU2_TARGET_i386_SOURCES_windows-x86 := \
     target/i386/hax-mem.c \
     target/i386/hax-windows.c \
     target/i386/kvm-stub.c \
+    target/i386/whpx-all.c \
 
 QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
     kvm-stub.c \
@@ -1418,6 +1419,7 @@ QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
     target/i386/hax-mem.c \
     target/i386/hax-windows.c \
     target/i386/kvm-stub.c \
+    target/i386/whpx-all.c \
 
 QEMU2_TARGET_mips64el_SOURCES_darwin-x86_64 := \
 
@@ -1502,6 +1504,7 @@ QEMU2_TARGET_x86_64_SOURCES_windows-x86 := \
     target/i386/hax-mem.c \
     target/i386/hax-windows.c \
     target/i386/kvm-stub.c \
+    target/i386/whpx-all.c \
 
 QEMU2_TARGET_x86_64_SOURCES_windows-x86_64 := \
     kvm-stub.c \
@@ -1509,4 +1512,5 @@ QEMU2_TARGET_x86_64_SOURCES_windows-x86_64 := \
     target/i386/hax-mem.c \
     target/i386/hax-windows.c \
     target/i386/kvm-stub.c \
+    target/i386/whpx-all.c \
 
