@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "172bffec_9544d8b7",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-03-13T20:46:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f63e87f0_c4be1cad",
+      "range": {
+        "startLine": 98,
+        "startChar": 15,
+        "endLine": 98,
+        "endChar": 31
+      },
+      "revId": "586395615da710cc54b808b215a2e99fa7c3e8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4c0e30c0_bfd4c6cf",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 10
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5c996c10_5182ee2c",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-03-13T20:46:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4c0e30c0_bfd4c6cf",
+      "range": {
+        "startLine": 109,
+        "startChar": 20,
+        "endLine": 109,
+        "endChar": 29
+      },
+      "revId": "586395615da710cc54b808b215a2e99fa7c3e8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ff75dc34_98de9d74",
         "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
         "patchSetId": 10
@@ -59,6 +107,30 @@
       "writtenOn": "2018-03-13T20:39:26Z",
       "side": 1,
       "message": "please use getHighResTimeUs() here as it\u0027s closer to the one used by the MessageChannel",
+      "range": {
+        "startLine": 131,
+        "startChar": 47,
+        "endLine": 131,
+        "endChar": 60
+      },
+      "revId": "586395615da710cc54b808b215a2e99fa7c3e8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1c417a4_772fcbce",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-03-13T20:46:14Z",
+      "side": 1,
+      "message": "I took a look of the timedWait() in ConditionalVariable.h, listed as below, which is in turn used by timedReceive()\n\n   bool timedWait(Lock *userLock, System::Duration waitUntilUs) {\n        const auto now \u003d System::get()-\u003egetUnixTimeUs();\n        const auto timeout \u003d\n                std::max\u003cSystem::Duration\u003e(0, waitUntilUs  - now) / 1000;\n        return ::SleepConditionVariableSRW(\n                    \u0026mCond, \u0026userLock-\u003emLock, timeout, 0) !\u003d 0;\n    }\n\nit uses getUnixTimeUs(), so I use it to get most accurate time diff.",
+      "parentUuid": "ff75dc34_98de9d74",
       "range": {
         "startLine": 131,
         "startChar": 47,
