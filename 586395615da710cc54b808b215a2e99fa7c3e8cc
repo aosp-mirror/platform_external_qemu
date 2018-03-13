@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f63e87f0_c4be1cad",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-13T20:39:26Z",
+      "side": 1,
+      "message": "nit: please use the same naming style as the rest of the file",
+      "range": {
+        "startLine": 98,
+        "startChar": 15,
+        "endLine": 98,
+        "endChar": 31
+      },
+      "revId": "586395615da710cc54b808b215a2e99fa7c3e8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4c0e30c0_bfd4c6cf",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-13T20:39:26Z",
+      "side": 1,
+      "message": "nit: move() is not necessary here: AudioPacket(..) is already a temporary, and all std::move() does is converting its argument to a temporary",
+      "range": {
+        "startLine": 109,
+        "startChar": 20,
+        "endLine": 109,
+        "endChar": 29
+      },
+      "revId": "586395615da710cc54b808b215a2e99fa7c3e8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff75dc34_98de9d74",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-13T20:39:26Z",
+      "side": 1,
+      "message": "please use getHighResTimeUs() here as it\u0027s closer to the one used by the MessageChannel",
+      "range": {
+        "startLine": 131,
+        "startChar": 47,
+        "endLine": 131,
+        "endChar": 60
+      },
+      "revId": "586395615da710cc54b808b215a2e99fa7c3e8cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
