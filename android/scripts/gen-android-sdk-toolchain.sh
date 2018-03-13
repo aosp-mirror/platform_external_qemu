@@ -241,6 +241,7 @@ gen_wrapper_program ()
 $EXTRA_ENV_SETUP
 # Tool invocation.
 ${DST_PREFIX}$DST_PROG $FLAGS "\$@" $POST_FLAGS
+
 EOF
     chmod +x "$DST_FILE"
     log "  Generating: ${SRC_PREFIX}$PROG"
@@ -429,7 +430,9 @@ prepare_build_for_linux() {
 }
 
 prepare_build_for_windows () {
-  case $CURRENT_HOST in
+    local GCC_LINK_FLAGS="-Wno-missing-braces -Wno-aggressive-loop-optimizations"
+
+    case $CURRENT_HOST in
       windows-x86)
           GNU_CONFIG_HOST=i686-w64-mingw32
           EXTRA_CFLAGS="-m32"
@@ -445,6 +448,9 @@ prepare_build_for_windows () {
     if [ "$OPT_CXX11" ]; then
         var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
     fi
+
+    var_append EXTRA_CFLAGS ${GCC_LINK_FLAGS}
+    var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
  }
 
 
