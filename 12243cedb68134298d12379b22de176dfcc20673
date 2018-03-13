@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e83b1f4_c13da31e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 725,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-13T16:02:08Z",
+      "side": 1,
+      "message": "nit: iterMain?",
+      "range": {
+        "startLine": 725,
+        "startChar": 28,
+        "endLine": 725,
+        "endChar": 33
+      },
+      "revId": "12243cedb68134298d12379b22de176dfcc20673",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1563b444_863cf094",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 734,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-13T16:02:08Z",
+      "side": 1,
+      "message": "nit: iterDefault?",
+      "range": {
+        "startLine": 734,
+        "startChar": 28,
+        "endLine": 734,
+        "endChar": 33
+      },
+      "revId": "12243cedb68134298d12379b22de176dfcc20673",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
