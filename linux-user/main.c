@@ -2141,55 +2141,6 @@ static const uint8_t mips_syscall_args[] = {
 #  undef MIPS_SYS
 # endif /* O32 */
 
-static int do_store_exclusive(CPUMIPSState *env)
-{
-    target_ulong addr;
-    target_ulong page_addr;
-    target_ulong val;
-    int flags;
-    int segv = 0;
-    int reg;
-    int d;
-
-    addr = env->lladdr;
-    page_addr = addr & TARGET_PAGE_MASK;
-    start_exclusive();
-    mmap_lock();
-    flags = page_get_flags(page_addr);
-    if ((flags & PAGE_READ) == 0) {
-        segv = 1;
-    } else {
-        reg = env->llreg & 0x1f;
-        d = (env->llreg & 0x20) != 0;
-        if (d) {
-            segv = get_user_s64(val, addr);
-        } else {
-            segv = get_user_s32(val, addr);
-        }
-        if (!segv) {
-            if (val != env->llval) {
-                env->active_tc.gpr[reg] = 0;
-            } else {
-                if (d) {
-                    segv = put_user_u64(env->llnewval, addr);
-                } else {
-                    segv = put_user_u32(env->llnewval, addr);
-                }
-                if (!segv) {
-                    env->active_tc.gpr[reg] = 1;
-                }
-            }
-        }
-    }
-    env->lladdr = -1;
-    if (!segv) {
-        env->active_tc.PC += 4;
-    }
-    mmap_unlock();
-    end_exclusive();
-    return segv;
-}
-
 /* Break codes */
 enum {
     BRK_OVERFLOW = 6,
@@ -2337,15 +2288,6 @@ done_syscall:
                     info.si_code = TARGET_TRAP_BRKPT;
                     queue_signal(env, info.si_signo, QEMU_SI_FAULT, &info);
                   }
-            }
-            break;
-        case EXCP_SC:
-            if (do_store_exclusive(env)) {
-                info.si_signo = TARGET_SIGSEGV;
-                info.si_errno = 0;
-                info.si_code = TARGET_SEGV_MAPERR;
-                info._sifields._sigfault._addr = env->active_tc.PC;
-                queue_signal(env, info.si_signo, QEMU_SI_FAULT, &info);
             }
             break;
         case EXCP_DSPDIS:

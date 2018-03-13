@@ -13,6 +13,8 @@
 #include "exec/cpu-defs.h"
 #include "fpu/softfloat.h"
 
+#define TCG_GUEST_DEFAULT_MO (0)
+
 struct CPUMIPSState;
 
 typedef struct r4k_tlb_t r4k_tlb_t;
@@ -218,6 +220,25 @@ struct TCState {
 
     float_status msa_fp_status;
 };
+
+typedef struct {
+    target_long gpr_reg[32];
+    uint32_t pc;
+    uint32_t branch_addr;
+    target_ulong CP0_EntryLo0;
+    target_ulong CP0_EntryLo1;
+    target_ulong CP0_BadVAddr;
+    target_ulong CP0_EntryHi;
+    target_ulong CP0_Context;
+    target_ulong CP0_XContext;
+    target_ulong CP0_PageMask;
+    target_ulong CP0_PageGrain;
+    target_ulong CP0_PageGrain_rw_bitmask;
+    target_ulong CP0_Cause;
+    int32_t CP0_Index;
+    target_ulong CP0_KScratch[MIPS_KSCRATCH_NUM];
+    int do_tlbwr;
+} CPUInterpreterContext;
 
 typedef struct CPUMIPSState CPUMIPSState;
 struct CPUMIPSState {
@@ -499,13 +520,12 @@ struct CPUMIPSState {
 #define CP0C5_NFExists   0
     int32_t CP0_Config6;
     int32_t CP0_Config7;
+    uint64_t CP0_LLAddr;
     uint64_t CP0_MAAR[MIPS_MAAR_MAX];
     int32_t CP0_MAARI;
     /* XXX: Maybe make LLAddr per-TC? */
-    uint64_t lladdr;
+    target_ulong lladdr; /* LL virtual address compared against SC */
     target_ulong llval;
-    target_ulong llnewval;
-    target_ulong llreg;
     uint64_t CP0_LLAddr_rw_bitmask;
     int CP0_LLAddr_shift;
     target_ulong CP0_WatchLo[8];
@@ -612,6 +632,7 @@ struct CPUMIPSState {
     uint32_t CP0_TCStatus_rw_bitmask; /* Read/write bits in CP0_TCStatus */
     int insn_flags; /* Supported instruction set */
 
+    CPUInterpreterContext CPU;
     /* Fields up to this point are cleared by a CPU reset */
     struct {} end_reset_fields;
 
@@ -670,27 +691,6 @@ void mips_cpu_do_unaligned_access(CPUState *cpu, vaddr addr,
                                   unsigned size);
 
 #if !defined(CONFIG_USER_ONLY)
-
-typedef struct {
-    target_long gpr_reg[32];
-    uint32_t pc;
-    uint32_t branch_addr;
-    target_ulong CP0_EntryLo0;
-    target_ulong CP0_EntryLo1;
-    target_ulong CP0_BadVAddr;
-    target_ulong CP0_EntryHi;
-    target_ulong CP0_Context;
-    target_ulong CP0_XContext;
-    target_ulong CP0_PageMask;
-    target_ulong CP0_PageGrain;
-    target_ulong CP0_PageGrain_rw_bitmask;
-    target_ulong CP0_Cause;
-    int32_t CP0_Index;
-    target_ulong CP0_KScratch[MIPS_KSCRATCH_NUM];
-    int do_tlbwr;
-} CPUInterpreterContext;
-
-extern CPUInterpreterContext CPU;
 
 int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *handler,
                               uint32_t size);
@@ -829,8 +829,6 @@ enum {
 
     EXCP_LAST = EXCP_TLBRI,
 };
-/* Dummy exception for conditional stores.  */
-#define EXCP_SC 0x100
 
 /*
  * This is an interrnally generated WAKE request line.

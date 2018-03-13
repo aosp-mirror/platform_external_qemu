@@ -449,32 +449,57 @@ static inline void dump_handler(TLBHandlerInfo *handler_info)
 }
 #endif
 
-static TLBHandlerInfo tlb_refill_info = { PROBE, "Refill" };
+#define MAX_CPUS 16
+#define DEFAULT_INTERPRETER_STATE PROBE
+
+static TLBHandlerInfo tlb_refill_info[MAX_CPUS] = {
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+    { DEFAULT_INTERPRETER_STATE, "Refill" },
+};
 
 /*
  * This function should save the TLB Refill handler to a
- * tlb_refill_info.handler buffer which will later
+ * tlb_refill_info[cpu_index].handler buffer which will later
  * be used for the Interpreter
  */
 static inline void tlb_refill_exception_prepare(CPUMIPSState *env)
 {
     MIPSCPU *cpu = mips_env_get_cpu(env);
     CPUState *cs = CPU(cpu);
+    const int cpu_index = cs->cpu_index;
     int i;
 
-    if (unlikely(tlb_refill_info.state == PROBE)) {
-        tlb_refill_info.ebase = env->CP0_EBase;
+    if (unlikely(tlb_refill_info[cpu_index].state == PROBE)) {
+        tlb_refill_info[cpu_index].ebase = env->CP0_EBase & ~0x3FF;
         for (i = 0; i < TLB_HANDLER_SIZE; i++) {
-            tlb_refill_info.handler[i] = ldl_phys(cs->as, tlb_refill_info.ebase - 0x80000000 + (i << 2));
-            CPU.do_tlbwr = 1;
+            tlb_refill_info[cpu_index].handler[i] = ldl_phys(cs->as, tlb_refill_info[cpu_index].ebase - 0x80000000 + (i << 2));
+            env->CPU.do_tlbwr = 1;
         }
-        tlb_refill_info.state = USEFASTTLB;
-        dump_handler(&tlb_refill_info);
+        tlb_refill_info[cpu_index].state = USEFASTTLB;
+        dump_handler(&tlb_refill_info[cpu_index]);
     }
 }
 
 static inline void tlb_exception_interpreter_prepare(CPUMIPSState *env, target_ulong address, int exception)
 {
+    MIPSCPU *cpu = mips_env_get_cpu(env);
+    CPUState *cs = CPU(cpu);
+    const int cpu_index = cs->cpu_index;
+
     env->CP0_BadVAddr = address;
     env->CP0_Context = (env->CP0_Context & ~0x007fffff) |
                        ((address >> 9) & 0x007ffff0);
@@ -489,7 +514,7 @@ static inline void tlb_exception_interpreter_prepare(CPUMIPSState *env, target_u
         /* BadVPN2 */   (extract64(address, 13, env->SEGBITS - 13) << 4);
 #endif
 
-    CPU.pc = 0;
+    env->CPU.pc = 0;
 #if defined(TARGET_MIPS64)
     int R = env->CP0_BadVAddr >> 62;
     int UX = (env->CP0_Status & (1 << CP0St_UX)) != 0;
@@ -498,10 +523,10 @@ static inline void tlb_exception_interpreter_prepare(CPUMIPSState *env, target_u
 
     if (((R == 0 && UX) || (R == 1 && SX) || (R == 3 && KX)) &&
         (!(env->insn_flags & (INSN_LOONGSON2E | INSN_LOONGSON2F))))
-        CPU.pc = 0x080 / 4;
+        env->CPU.pc = 0x080 / 4;
 #endif
 
-    if (likely(tlb_refill_info.state != PROBE))
+    if (likely(tlb_refill_info[cpu_index].state != PROBE))
         return;
 
     switch (exception) {
@@ -567,6 +592,7 @@ static inline int do_tlb_refill(CPUState *cs, vaddr address, int rw, int mmu_idx
     MIPSCPU *cpu = MIPS_CPU(cs);
     CPUMIPSState *env = &cpu->env;
     int tlbret = TLBRET_NOMATCH;
+    const int cpu_index = cs->cpu_index;
 
     target_ulong saved_badvaddr;
     target_ulong saved_entryhi;
@@ -582,12 +608,12 @@ static inline int do_tlb_refill(CPUState *cs, vaddr address, int rw, int mmu_idx
     saved_pagemask = env->CP0_PageMask;
     saved_pagegrain = env->CP0_PageGrain;
 
-    if (unlikely(tlb_refill_info.state == USESLOWTLB))
+    if (unlikely(tlb_refill_info[cpu_index].state == USESLOWTLB))
         goto out;
 
     tlb_exception_interpreter_prepare(env, address, EXCP_TLBF);
 
-    if (tlb_exception_interpreter(env, tlb_refill_info.handler, TLB_HANDLER_SIZE))
+    if (tlb_exception_interpreter(env, tlb_refill_info[cpu_index].handler, TLB_HANDLER_SIZE))
         goto out;
 
     tlbret = tlb_exception_return(cs, address, rw, mmu_idx);
@@ -607,6 +633,7 @@ hwaddr mips_cpu_get_phys_page_debug(CPUState *cs, vaddr addr)
 {
     MIPSCPU *cpu = MIPS_CPU(cs);
     CPUMIPSState *env = &cpu->env;
+    const int cpu_index = cs->cpu_index;
     hwaddr phys_addr;
     int prot, ret;
 
@@ -628,17 +655,17 @@ hwaddr mips_cpu_get_phys_page_debug(CPUState *cs, vaddr addr)
 
         tlb_exception_interpreter_prepare(env, addr, EXCP_TLBF);
 
-        if (likely(tlb_refill_info.state == USEFASTTLB)) {
-            CPU.do_tlbwr = 0;
-            if (tlb_exception_interpreter(env, tlb_refill_info.handler, TLB_HANDLER_SIZE) != 0) {
+        if (likely(tlb_refill_info[cpu_index].state == USEFASTTLB)) {
+            env->CPU.do_tlbwr = 0;
+            if (tlb_exception_interpreter(env, tlb_refill_info[cpu_index].handler, TLB_HANDLER_SIZE) != 0) {
                 phys_addr = -1;
                 fprintf(stderr, "cpu_get_phys_page_debug() fails for vaddr: 0x" TARGET_FMT_plx "\n", addr);
             } else {
                 target_ulong mask = env->CP0_PageMask | ~(TARGET_PAGE_MASK << 1);
-                target_ulong lo = (addr & mask & ~(mask >> 1)) ? CPU.CP0_EntryLo1 : CPU.CP0_EntryLo0;
+                target_ulong lo = (addr & mask & ~(mask >> 1)) ? env->CPU.CP0_EntryLo1 : env->CPU.CP0_EntryLo0;
                 phys_addr = ((lo >> CP0EnLo_PFN) << 12) | (addr & (mask >> 1));
             }
-            CPU.do_tlbwr = 1;
+            env->CPU.do_tlbwr = 1;
         }
 
         env->CP0_BadVAddr = saved_badvaddr;
@@ -1198,10 +1225,8 @@ void QEMU_NORETURN do_raise_exception_err(CPUMIPSState *env,
 {
     CPUState *cs = CPU(mips_env_get_cpu(env));
 
-    if (exception < EXCP_SC) {
-        qemu_log_mask(CPU_LOG_INT, "%s: %d %d\n",
-                      __func__, exception, error_code);
-    }
+    qemu_log_mask(CPU_LOG_INT, "%s: %d %d\n",
+                  __func__, exception, error_code);
     cs->exception_index = exception;
     env->error_code = error_code;
 
