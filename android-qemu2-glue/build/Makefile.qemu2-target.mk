@@ -118,6 +118,10 @@ LOCAL_SRC_FILES += \
         hax-stub.c \
     ) \
     $(call qemu2-if-target,x86 x86_64, \
+        $(call qemu2-if-os, linux darwin, whpx-stub.c), \
+        whpx-stub.c \
+    ) \
+    $(call qemu2-if-target,x86 x86_64, \
         $(call qemu2-if-os, linux windows, hvf-stub.c), \
         hvf-stub.c \
     ) \
