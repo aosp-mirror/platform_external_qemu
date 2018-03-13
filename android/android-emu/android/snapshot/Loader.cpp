@@ -177,6 +177,9 @@ void Loader::synchronize(bool isOnExit) {
         if (!mRamLoader->hasGaps()) {
             const auto ram = fopen(
                     PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
+
+            if (!ram) return;
+
             mRamLoader.emplace(
                     StdioStream(ram, StdioStream::kOwner),
                     true /* saving only */,
