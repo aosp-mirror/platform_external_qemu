@@ -4205,6 +4205,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse_noisily(olist, "accel=hax", false);
                 break;
+            case QEMU_OPTION_enable_whpx:
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse_noisily(olist, "accel=whpx", false);
+                break;
             case QEMU_OPTION_M:
             case QEMU_OPTION_machine:
                 olist = qemu_find_opts("machine");
