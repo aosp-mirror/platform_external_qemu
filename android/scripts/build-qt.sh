@@ -195,6 +195,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         # Configuring the build. This takes a lot of time due to QMake.
         dump "$(builder_text) Configuring Qt build"
 
+        LD_LIBRARY_PATH=
         EXTRA_CONFIGURE_FLAGS=
         var_append EXTRA_CONFIGURE_FLAGS \
                 -opensource \
@@ -217,6 +218,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         -qt-xcb \
                         -no-use-gold-linker \
                         -platform linux-g++-64
+                var_append LD_LIBRARY_PATH \
+                  $(dirname $(aosp_clang_libcplusplus))
                 ;;
             windows*)
                 case $SYSTEM in
@@ -270,6 +273,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             export CXXFLAGS &&
             export LDFLAGS &&
             export CPPFLAGS &&
+            export LD_LIBRARY_PATH &&
             export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
             export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
             run "$(builder_src_dir)"/$QT_SRC_NAME/configure \
@@ -294,12 +298,14 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         dump "$(builder_text) Building Qt binaries"
         (
             run cd "$QT_BUILD_DIR" &&
+            export LD_LIBRARY_PATH &&
             run make $QT_MAKE_FLAGS $QT_TARGET_BUILD_MODULES
         ) || panic "Could not build Qt binaries!"
 
         dump "$(builder_text) Installing Qt binaries"
         (
             run cd "$QT_BUILD_DIR" &&
+            export LD_LIBRARY_PATH &&
             run make $QT_MAKE_FLAGS $QT_TARGET_INSTALL_MODULES
         ) || panic "Could not install Qt binaries!"
 
