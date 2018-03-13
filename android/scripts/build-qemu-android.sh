@@ -268,6 +268,18 @@ build_qemu_android () {
                 ;;
         esac
 
+        WHPX_FLAG=
+        case $1 in
+            windows-*)
+                # Windows Hypervisor Platform accelerator will only be needed
+                # on Windows.
+                WHPX_FLAG="--enable-whpx"
+                ;;
+            *)
+                WHPX_FLAG="--disable-whpx"
+                ;;
+        esac
+
         LIBUSB_FLAGS=
         case $1 in
             windows-*)
@@ -389,6 +401,7 @@ EOF
             --enable-vnc \
             --disable-vnc-sasl \
             --disable-werror \
+            $WHPX_FLAG \
             --enable-sdl \
             --with-sdlabi=2.0 \
             --enable-trace-backends=nop \
