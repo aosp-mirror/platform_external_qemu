@@ -979,14 +979,17 @@ void EmulatorQtWindow::maskWindowFrame() {
         if (mRawSkinPixmap != nullptr) {
             // Rotate the skin to match the emulator window
             QTransform rotater;
-            int rotationAmount;
+            // Set the native rotation of the skin image
+            int rotationAmount = mSkinPixmapIsPortrait ? 0 : 90;
+            // Adjust for user-initiated rotation
             switch (mOrientation) {
-                case SKIN_ROTATION_0:    rotationAmount =   0;   break;
-                case SKIN_ROTATION_90:   rotationAmount =  90;   break;
-                case SKIN_ROTATION_180:  rotationAmount = 180;   break;
-                case SKIN_ROTATION_270:  rotationAmount = 270;   break;
-                default:                 rotationAmount =   0;   break;
+                case SKIN_ROTATION_0:    rotationAmount +=   0;   break;
+                case SKIN_ROTATION_90:   rotationAmount +=  90;   break;
+                case SKIN_ROTATION_180:  rotationAmount += 180;   break;
+                case SKIN_ROTATION_270:  rotationAmount += 270;   break;
+                default:                 rotationAmount +=   0;   break;
             }
+            if (rotationAmount >= 360) rotationAmount -= 360;
             rotater.rotate(rotationAmount);
             QPixmap rotatedPMap(mRawSkinPixmap->transformed(rotater));
 
@@ -1042,6 +1045,7 @@ void EmulatorQtWindow::getSkinPixmap() {
         // Already exists
         return;
     }
+    mSkinPixmapIsPortrait = true; // Default assumption
     // We need to read the skin image.
     // Where is the skin?
     char *skinName;
@@ -1052,6 +1056,7 @@ void EmulatorQtWindow::getSkinPixmap() {
     AConfig* skinConfig = aconfig_node("", "");
     aconfig_load_file(skinConfig, layoutPath.toStdString().c_str());
     // Find the first instance of parts/*/background/image
+    // ("*" will be either "portrait" or "landscape")
     AConfig* partsConfig = aconfig_find(skinConfig, "parts");
     if (partsConfig == nullptr) return; // Failed
     const char *skinFileName = nullptr;
@@ -1061,7 +1066,10 @@ void EmulatorQtWindow::getSkinPixmap() {
         const AConfig* backgroundNode = aconfig_find(partNode, "background");
         if (backgroundNode == NULL) continue;
         skinFileName = aconfig_str(backgroundNode, "image", nullptr);
-        if (skinFileName != nullptr && skinFileName[0] != '\0') break;
+        if (skinFileName != nullptr && skinFileName[0] != '\0') {
+            mSkinPixmapIsPortrait = !strcmp(partNode->name, "portrait");
+            break;
+        }
     }
     if (skinFileName == nullptr || skinFileName[0] == '\0') return; // Failed
 
