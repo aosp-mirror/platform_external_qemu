@@ -2234,6 +2234,19 @@ bool System::isUnderMemoryPressure(int* freeRamMb_out) {
     return currentFreeRam < kMemoryPressureLimitMb;
 }
 
+// static
+bool System::isUnderDiskPressure(StringView path, System::FileSize* freeDisk) {
+    System::FileSize availableSpace;
+    bool success = System::get()->pathFreeSpace(path,
+                                                &availableSpace);
+    if (success && availableSpace < kDiskPressureLimitBytes) {
+        if (freeDisk) *freeDisk = availableSpace;
+        return true;
+    }
+
+    return false;
+}
+
 std::string toString(OsType osType) {
     switch (osType) {
     case OsType::Windows:
