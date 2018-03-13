@@ -649,6 +649,13 @@ extern "C" int main(int argc, char** argv) {
 
     avd = android_avdInfo;
 
+    bool lowDisk = System::isUnderDiskPressure(avdInfo_getContentPath(avd));
+    if (lowDisk) {
+        derror("Not enough disk space to run AVD '%s'. Exiting...\n",
+               avdInfo_getName(avd));
+        return 1;
+    }
+
     // Lock the AVD as soon as we can to make sure other copy won't do anything
     // stupid before detecting that the AVD is already in use.
     const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
