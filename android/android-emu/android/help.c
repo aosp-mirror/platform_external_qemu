@@ -1576,6 +1576,7 @@ help_sim_access_rules_file(stralloc_t* out)
 #define  help_lowram       NULL
 #define  help_no_window    NULL
 #define  help_version      NULL
+#define  help_no_passive_gps NULL
 #define  help_memory       NULL
 #define  help_partition_size NULL
 

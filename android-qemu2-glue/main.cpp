@@ -15,7 +15,6 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
-
 #include "android/android.h"
 #include "android/avd/hw-config.h"
 #include "android/boot-properties.h"
@@ -795,6 +794,7 @@ extern "C" int main(int argc, char** argv) {
     args.add2If("-gps", opts->gps);
     args.add2If("-code-profile", opts->code_profile);
 
+
     /* Pass boot properties to the core. First, those from boot.prop,
      * then those from the command-line */
     const FileData* bootProperties = avdInfo_getBootProperties(avd);
@@ -1172,6 +1172,8 @@ extern "C" int main(int argc, char** argv) {
     if (gQAndroidBatteryAgent && gQAndroidBatteryAgent->setHasBattery) {
         gQAndroidBatteryAgent->setHasBattery(android_hw->hw_battery);
     }
+
+    gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.

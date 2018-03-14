@@ -101,7 +101,10 @@ LocationPage::LocationPage(QWidget *parent) :
             SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
     mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
 
-    mUpdateThread.start();
+    assert(sLocationAgent);
+    if (sLocationAgent->gpsGetPassiveUpdate()) {
+        mUpdateThread.start();
+    }
 
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
