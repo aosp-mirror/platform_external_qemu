@@ -92,6 +92,7 @@ void parse_gpu_info_list_linux(const std::string& contents,
 
 void getGpuInfoListNative(GpuInfoList* gpulist) {
     // Load it in a traditional way - by parsing output of external process.
+
     // TODO: Don't do GPU info detection on Linux for now---lspci can be
     // inaccurate as to what GPU the user is actually using.
     (void)load_gpu_info; // Make Werror happy
