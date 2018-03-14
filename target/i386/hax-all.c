@@ -87,6 +87,11 @@ int hax_ug_platform(void)
       return ug_support;
 }
 
+bool hax_gpa_protection_supported(void)
+{
+    return hax_global.supports_gpa_protection;
+}
+
 int hax_vcpu_active(CPUState* cpu)
 {
     return ug_support ||
@@ -224,6 +229,7 @@ static int hax_get_capability(struct hax_state *hax)
 
     hax->supports_64bit_ramblock = !!(cap->winfo & HAX_CAP_64BIT_RAMBLOCK);
     hax->supports_64bit_setram = !!(cap->winfo & HAX_CAP_64BIT_SETRAM);
+    hax->supports_gpa_protection = !!(cap->winfo & HAX_CAP_GPA_PROTECTION);
 
     if (cap->wstatus & HAX_CAP_MEMQUOTA) {
         if (cap->mem_quota < hax->mem_quota) {
@@ -755,6 +761,18 @@ vcpu_run:
             break;
         case HAX_EXIT_REAL:
             ret = HAX_EMUL_REAL;
+            break;
+        case HAX_EXIT_GPAPROT:
+            {
+                uint64_t gpa = ht->gpaprot.gpa & ~(uint64_t)0x1FFFFF;
+                uint64_t __gpa;
+                for (__gpa = gpa; __gpa < gpa + 0x200000; __gpa += 0x1000) {
+                  bool found = false;
+                  void* hva = hax_gpa2hva(__gpa, &found);
+                  if (found)
+                      qemu_ram_load(hva, 0x1000);
+                }
+            }
             break;
         default:
             fprintf(stderr, "Unknown exit %x from HAX\n", ht->_exit_status);

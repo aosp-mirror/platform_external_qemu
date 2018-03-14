@@ -77,6 +77,9 @@ void* hax_gpa2hva(uint64_t gpa, bool* found) {
     return 0;
 }
 
+#ifdef __APPLE__
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
 int hax_hva2gpa(void* hva, uint64_t length, int array_size,
                 uint64_t* gpa, uint64_t* size) {
     struct hax_slot *hslot;
@@ -263,6 +266,12 @@ static MemoryListener hax_memory_listener = {
 static MemoryListener hax_io_listener = {
     .priority = 10,
 };
+
+int hax_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags) {
+    int res = hax_gpa_prot(gpa, size, flags);
+    return res;
+}
+
 
 static void hax_ram_block_added(RAMBlockNotifier *n, void *host, size_t size)
 {

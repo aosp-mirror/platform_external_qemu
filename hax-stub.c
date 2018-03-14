@@ -18,6 +18,28 @@
 #include "cpu.h"
 #include "sysemu/hax.h"
 
+void* hax_gpa2hva(uint64_t gpa, bool* found)
+{
+    *found = false;
+    return NULL;
+}
+
+int hax_hva2gpa(void* hva, uint64_t length, int array_size,
+                uint64_t* gpa, uint64_t* size)
+{
+    return 0;
+}
+
+bool hax_gpa_protection_supported(void)
+{
+    return 0;
+}
+
+int hax_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags)
+{
+    return 0;
+}
+
 int hax_sync_vcpus(void)
 {
     return 0;

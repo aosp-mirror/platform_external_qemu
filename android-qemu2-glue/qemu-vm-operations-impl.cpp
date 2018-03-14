@@ -34,6 +34,7 @@ extern "C" {
 #include "qapi/qmp/qstring.h"
 #include "sysemu/hvf.h"
 #include "sysemu/kvm.h"
+#include "sysemu/hax.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 #include "exec/cpu-common.h"
@@ -402,7 +403,13 @@ static void set_snapshot_callbacks(void* opaque,
             android::CPU_ACCELERATOR_HVF) {
             set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
             set_memory_mapping_funcs(hvf_map_safe, hvf_unmap_safe,
-                                     hvf_protect_safe, hvf_remap_safe);
+                                     hvf_protect_safe, hvf_remap_safe, NULL);
+        }
+        if (android::GetCurrentCpuAccelerator() ==
+            android::CPU_ACCELERATOR_HAX) {
+            set_address_translation_funcs(hax_hva2gpa, hax_gpa2hva);
+            set_memory_mapping_funcs(NULL, NULL, hax_gpa_protect, NULL,
+                                     hax_gpa_protection_supported);
         }
 
         migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);
