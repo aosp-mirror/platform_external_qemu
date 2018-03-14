@@ -243,6 +243,7 @@ enum exit_status {
     /* the vcpu is now only paused when destroy, so simply return to hax */
     HAX_EXIT_PAUSED,
     HAX_EXIT_FAST_MMIO,
+    HAX_EXIT_GPAPROT
 };
 
 /*
@@ -277,6 +278,12 @@ struct hax_tunnel {
         struct {
             uint64_t gla;
         } mmio;
+        struct {
+            uint64_t gpa;
+            uint32_t flags;
+            uint32_t reserved1;
+            uint32_t reserved2;
+        } pagefault;
         struct {
         } state;
     };
@@ -345,6 +352,7 @@ struct hax_set_ram_info2 {
 #define HAX_CAP_UG                 0x4
 #define HAX_CAP_64BIT_RAMBLOCK     0x8
 #define HAX_CAP_64BIT_SETRAM       0x10
+#define HAX_CAP_GPA_PROTECTION     0x20
 
 struct hax_capabilityinfo {
     /* bit 0: 1 - working
@@ -375,5 +383,12 @@ struct hax_fastmmio {
     uint64_t _cr2;
     uint64_t _cr3;
     uint64_t _cr4;
+} __attribute__ ((__packed__));
+
+struct hax_gpa_prot_info {
+    uint64_t pa_start;
+    uint64_t size;
+    uint32_t flags;
+    uint32_t reserved;
 } __attribute__ ((__packed__));
 #endif
