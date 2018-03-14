@@ -375,7 +375,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                        SKIN_ROTATION_270 : SKIN_ROTATION_0;
 
     android::base::ThreadLooper::setLooper(mLooper, true);
-    CrashReporter::get()->hangDetector().addWatchedLooper(mLooper);
+
+    // TODO: Weird input lag with Qt will cause hang detector to trip and crash
+    // the emulator, even though it works ok (but laggy) otherwise.
+    // For now, disable Qt hang detection.
+    // bug: 73723222
+    // bug: 74520987
+    // CrashReporter::get()->hangDetector().addWatchedLooper(mLooper);
 
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
