@@ -14,6 +14,7 @@
 
 #include "android/emulation/serial_line.h"
 
+#include <stdbool.h>
 #include <sys/time.h>
 
 /* this is the internal character driver used to communicate with the
@@ -51,3 +52,12 @@ extern void  android_gps_send_location(double latitude, double longitude,
 // Null 'out' pointers are ignored.
 extern int android_gps_get_location(double* outLatitude, double* outLongitude,
                                     double* outMetersElevation, int* outNSatellites);
+
+/* android_gps_set_passive_update sets whether to ping guest for location
+ * updates every few seconds.
+ * Default to true.
+ * Please set it before initializing location page. Do not change it during the
+ * run. */
+extern void android_gps_set_passive_update(bool enable);
+
+extern bool android_gps_get_passive_update();

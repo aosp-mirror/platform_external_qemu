@@ -16,6 +16,8 @@
 #include <string.h>
 
 CSerialLine* android_gps_serial_line;
+// Set to true to ping guest for location updates every few seconds
+static bool s_enable_passive_location_update = true;
 
 #define  D(...)  VERBOSE_PRINT(gps,__VA_ARGS__)
 
@@ -142,4 +144,16 @@ android_gps_get_location(double* outLatitude, double* outLongitude,
     // TODO: This should use 'adb shell dumpsys location' and parse the result.
     //       It must ignore parameters the caller does not want (null pointers).
     return 0;
+}
+
+void
+android_gps_set_passive_update(bool enable)
+{
+    s_enable_passive_location_update = enable;
+}
+
+bool
+android_gps_get_passive_update()
+{
+    return s_enable_passive_location_update;
 }
