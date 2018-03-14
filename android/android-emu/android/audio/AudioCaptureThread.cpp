@@ -95,9 +95,9 @@ public:
         size_t szBytes = bits / CHAR_BIT;
 
         mFrameSize = mNbSamples * mChannels * szBytes;
-        double bytes_per_second = (double)mSampleRate * mChannels * szBytes;
-        double sec_per_frame = ((double)mFrameSize) / bytes_per_second;
-        mMicroSecondsPerFrame = (uint64_t)(sec_per_frame * 1000000);
+        double bytesPerSecond = (double)mSampleRate * mChannels * szBytes;
+        double secPerFrame = ((double)mFrameSize) / bytesPerSecond;
+        mMicroSecondsPerFrame = (uint64_t)(secPerFrame * 1000000);
 
         // 4 silent frames makes Chrome very happy
         mNbSilentFrames = 4;
@@ -105,8 +105,7 @@ public:
 
         // Prefill the free queue with empty packets
         for (int i = 0; i < kMaxPackets; ++i) {
-            mFreeQueue.send(
-                    std::move(AudioPacket(mFrameSize)));
+            mFreeQueue.send(AudioPacket(mFrameSize));
         }
     }
 
@@ -128,7 +127,10 @@ public:
         while (true) {
             // Consumer
             auto start = android::base::System::get()->getHighResTimeUs();
-            auto future = base::System::get()->getUnixTimeUs() + mNbSilentFrames * mMicroSecondsPerFrame;
+            // use getUnixTimeUs() to stay same with the following:
+            //   ConditionVariable::timedWait()
+            auto future = base::System::get()->getUnixTimeUs() +
+                    mNbSilentFrames * mMicroSecondsPerFrame;
             // Blocks until either we get a packet, timeout or the queue is closed.
             auto pkt = mDataQueue.timedReceive(future);
             if (!pkt) {
