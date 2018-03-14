@@ -33,10 +33,16 @@ int hax_vcpu_emulation_mode(CPUState *cpu);
 int hax_stop_emulation(CPUState *cpu);
 int hax_stop_translate(CPUState *cpu);
 int hax_populate_ram(uint64_t va, uint64_t size);
+int hax_gpa_protect(uint64_t va, uint64_t size, uint64_t flags);
+bool hax_gpa_protection_supported(void);
 
 void hax_cpu_synchronize_state(CPUState *cpu);
 void hax_cpu_synchronize_post_reset(CPUState *cpu);
 void hax_cpu_synchronize_post_init(CPUState *cpu);
+
+void* hax_gpa2hva(uint64_t gpa, bool* found);
+int hax_hva2gpa(void* hva, uint64_t length, int array_size,
+                uint64_t* gpa, uint64_t* size);
 
 #ifdef CONFIG_HAX
 

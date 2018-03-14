@@ -15,6 +15,7 @@
 #include "android/base/Optional.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/MessageChannel.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/ThreadPool.h"
@@ -173,6 +174,9 @@ private:
 
     // Whether or not we just want to reload the index.
     bool mIndexOnly = false;
+
+    // Lock to protect deletion of bufs.
+    android::base::Lock mLock;
 };
 
 struct RamLoader::Page {

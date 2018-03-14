@@ -451,8 +451,11 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         RamLoader::Page* page) {
     if (page) {
         fillPageData(page);
-        delete[] page->data;
-        page->data = nullptr;
+        {
+            android::base::AutoLock lock(mLock);
+            delete[] page->data;
+            page->data = nullptr;
+        }
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
@@ -486,7 +489,9 @@ void RamLoader::loadRamPage(void* ptr) {
     readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page) ? buf : nullptr);
     fillPageData(&page);
     if (page.data != buf) {
+        android::base::AutoLock lock(mLock);
         delete[] page.data;
+        page.data = nullptr;
     }
     page.data = nullptr;
 }
