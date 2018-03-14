@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76ce41c1_fb02d8fe",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-14T23:56:12Z",
+      "side": 1,
+      "message": "what if the directory for the snapshot exists and it is a link or a mount point to some other disk?",
+      "range": {
+        "startLine": 463,
+        "startChar": 3,
+        "endLine": 464,
+        "endChar": 56
+      },
+      "revId": "398a73b04606be03213e1c5ef09ed85da3299c2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
