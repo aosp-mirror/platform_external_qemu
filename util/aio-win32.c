@@ -18,6 +18,7 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "block/block.h"
+#include "qemu/main-loop.h"
 #include "qemu/queue.h"
 #include "qemu/sockets.h"
 #include "qapi/error.h"
@@ -55,6 +56,10 @@ void aio_set_fd_handler(AioContext *ctx,
 
     /* Are we deleting the fd handler? */
     if (!io_read && !io_write) {
+        assert(!node->io_notify);
+        /* Detach the event */
+        WSAEventSelect(node->pfd.fd, NULL, 0);
+
         if (node) {
             /* If aio_poll is in progress, just mark the node as deleted */
             if (qemu_lockcnt_count(&ctx->list_lock)) {
@@ -97,8 +102,8 @@ void aio_set_fd_handler(AioContext *ctx,
 
         event = event_notifier_get_handle(&ctx->notifier);
         WSAEventSelect(node->pfd.fd, event,
-                       FD_READ | FD_ACCEPT | FD_CLOSE |
-                       FD_CONNECT | FD_WRITE | FD_OOB);
+                       (io_read ? FD_READ : 0) | FD_ACCEPT | FD_CLOSE |
+                       FD_CONNECT | (io_write ? FD_WRITE : 0) | FD_OOB);
     }
 
     qemu_lockcnt_unlock(&ctx->list_lock);
@@ -175,10 +180,12 @@ void aio_set_event_notifier_poll(AioContext *ctx,
 
 bool aio_prepare(AioContext *ctx)
 {
-    static struct timeval tv0;
     AioHandler *node;
+    WSAPOLLFD fds[128];
     bool have_select_revents = false;
-    fd_set rfds, wfds;
+
+    int i = 0;
+    int polled_count = 0;
 
     /*
      * We have to walk very carefully in case aio_set_fd_handler is
@@ -186,30 +193,56 @@ bool aio_prepare(AioContext *ctx)
      */
     qemu_lockcnt_inc(&ctx->list_lock);
 
-    /* fill fd sets */
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    QLIST_FOREACH_RCU(node, &ctx->aio_handlers, node) {
-        if (node->io_read) {
-            FD_SET ((SOCKET)node->pfd.fd, &rfds);
+    QLIST_FOREACH(node, &ctx->aio_handlers, node) {
+        if (i >= sizeof(fds) / sizeof(*fds)) {
+            break;
         }
-        if (node->io_write) {
-            FD_SET ((SOCKET)node->pfd.fd, &wfds);
+
+        if (node->deleted || (!node->io_read && !node->io_write)) {
+            fds[i].fd = -1; // ignore
+        } else {
+            fds[i].fd = node->pfd.fd;
+            fds[i].events = (node->io_read ? POLLIN : 0) | (node->io_write ? POLLOUT : 0);
+            ++polled_count;
         }
+        ++i;
     }
 
-    if (select(0, &rfds, &wfds, NULL, &tv0) > 0) {
-        QLIST_FOREACH_RCU(node, &ctx->aio_handlers, node) {
-            node->pfd.revents = 0;
-            if (FD_ISSET(node->pfd.fd, &rfds)) {
-                node->pfd.revents |= G_IO_IN;
-                have_select_revents = true;
-            }
+    if (polled_count == 0) {
+        return false;
+    }
 
-            if (FD_ISSET(node->pfd.fd, &wfds)) {
-                node->pfd.revents |= G_IO_OUT;
-                have_select_revents = true;
+    // aio_prepare() is called very often on Windows, and every call takes
+    // at least 5 us, with most coming closer to 20 us.
+    // Let's make sure we don't prevent all other vCPUs from running during
+    // this time.
+    const bool had_iothread_lock = qemu_mutex_iothread_locked();
+    if (had_iothread_lock) {
+        qemu_mutex_unlock_iothread();
+    }
+
+    const int fds_count = i;
+    const int poll_res = WSAPoll(fds, fds_count, 0);
+
+    if (had_iothread_lock) {
+        qemu_mutex_lock_iothread();
+    }
+
+    if (poll_res > 0) {
+        i = 0;
+        QLIST_FOREACH(node, &ctx->aio_handlers, node) {
+            node->pfd.revents = 0;
+            if (i < fds_count && fds[i].fd >= 0) {
+                if (fds[i].revents & (POLLIN | POLLHUP | POLLERR)) {
+                    node->pfd.revents |= G_IO_IN;
+                    have_select_revents = true;
+                }
+                if (fds[i].revents & POLLOUT) {
+                    node->pfd.revents |= G_IO_OUT;
+                    have_select_revents = true;
+                }
             }
+            ++i;
         }
     }
 
@@ -285,9 +318,10 @@ static bool aio_dispatch_handlers(AioContext *ctx, HANDLE event)
             }
 
             /* if the next select() will return an event, we have progressed */
-            if (event == event_notifier_get_handle(&ctx->notifier)) {
+            if (event == event_notifier_get_handle(&ctx->notifier) ||
+                (event == INVALID_HANDLE_VALUE && node->e == &ctx->notifier)) {
                 WSANETWORKEVENTS ev;
-                WSAEnumNetworkEvents(node->pfd.fd, event, &ev);
+                WSAEnumNetworkEvents(node->pfd.fd, event_notifier_get_handle(&ctx->notifier), &ev);
                 if (ev.lNetworkEvents) {
                     progress = true;
                 }
