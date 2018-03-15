@@ -22,6 +22,30 @@
       "revId": "b694f99410cffc4b0d5c692a037b42df8e5d7cd2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b4bacfd_cf7be534",
+        "filename": "android/qemu1/android-qemu1-glue/qemu-location-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-03-15T19:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8840491_aab5638e",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 63
+      },
+      "revId": "b694f99410cffc4b0d5c692a037b42df8e5d7cd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
