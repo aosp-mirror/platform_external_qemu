@@ -72,15 +72,17 @@ bufprint_zoneinfo_timezone( char*  p, char*  end )
         return bufprint(p, end, "%s", tz);
 }
 
-/* on OS X, the timezone directory is always /usr/share/zoneinfo
- * this makes things easy.
+/* on OS X, the timezone directory is always "zoneinfo"
+ * 1, look up the real value of the symlink /etc/localtime
+ * 2, check if the path contains "/zoneinfo/"
+ * 3, timezone starts after "/zoneinfo/"
  */
 #if defined(__APPLE__)
 
 #include <unistd.h>
 #include <limits.h>
 #define  LOCALTIME_FILE  "/etc/localtime"
-#define  ZONEINFO_DIR    "/usr/share/zoneinfo/"
+#define  ZONEINFO_DIR    "/zoneinfo/"
 static const char*
 get_zoneinfo_timezone( void )
 {
@@ -98,15 +100,13 @@ get_zoneinfo_timezone( void )
 
             buff[len] = 0;
             D("%s: %s points to %s\n", __FUNCTION__, LOCALTIME_FILE, buff);
-            if ( memcmp(buff, ZONEINFO_DIR, sizeof(ZONEINFO_DIR)-1) ) {
-                dprint( "### WARNING: %s does not point to %s, can't determine zoneinfo timezone name",
-                        LOCALTIME_FILE, ZONEINFO_DIR );
-                return NULL;
-            }
-            tz = buff + sizeof(ZONEINFO_DIR)-1;
-            if ( !check_timezone_is_zoneinfo(tz) ) {
-                dprint( "### WARNING: %s does not point to zoneinfo-compatible timezone name\n", LOCALTIME_FILE );
-                return NULL;
+            char* zoneinfo_dir = NULL;
+            if ( zoneinfo_dir = strstr(buff, ZONEINFO_DIR) ) {
+                tz = zoneinfo_dir + sizeof(ZONEINFO_DIR) - 1;
+                if ( !check_timezone_is_zoneinfo(tz) ) {
+                    dprint( "### WARNING: %s does not point to zoneinfo-compatible timezone name\n", LOCALTIME_FILE );
+                    return NULL;
+                }
             }
         }
         snprintf(android_timezone0, sizeof(android_timezone0), "%s", tz );
