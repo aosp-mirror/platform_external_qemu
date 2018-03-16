@@ -196,13 +196,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
     // Make sure we create the extended window even if user didn't open it.
     auto self = QPointer<ToolWindow>(this);
-    QObject::connect(
-        &mExtendedWindowCreateTimer, &QTimer::timeout,
-        [self] {
-            if (self && !self->isExiting()) self->mExtendedWindow.get();
-        });
-    mExtendedWindowCreateTimer.setSingleShot(true);
-    mExtendedWindowCreateTimer.start(10 * 1000);
 
     if (android_hw->hw_arc) {
         // Chrome OS doesn't support rotation now.
@@ -219,9 +212,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 #endif
 }
 
-ToolWindow::~ToolWindow() {
-    stopExtendedWindowCreation();
-}
+ToolWindow::~ToolWindow() { }
 
 void ToolWindow::raise() {
     QFrame::raise();
@@ -244,11 +235,6 @@ void ToolWindow::switchClipboardSharing(bool enabled) {
 
 void ToolWindow::showVirtualSceneControls(bool show) {
     mVirtualSceneControlWindow.get()->setActive(show);
-}
-
-void ToolWindow::stopExtendedWindowCreation() {
-    mExtendedWindowCreateTimer.stop();
-    mExtendedWindowCreateTimer.disconnect();
 }
 
 void ToolWindow::onExtendedWindowCreated(ExtendedWindow* extendedWindow) {
@@ -309,8 +295,6 @@ void ToolWindow::closeEvent(QCloseEvent* ce) {
     // make sure only parent processes the event - otherwise some
     // siblings won't get it, e.g. main window
     ce->ignore();
-
-    stopExtendedWindowCreation();
 }
 
 void ToolWindow::mousePressEvent(QMouseEvent* event) {
