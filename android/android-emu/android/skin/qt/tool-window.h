@@ -116,8 +116,6 @@ private:
         handleUICommand(cmd, false);
     }
 
-    void stopExtendedWindowCreation();
-
     void onExtendedWindowCreated(ExtendedWindow* extendedWindow);
     void onVirtualSceneWindowCreated(
             VirtualSceneControlWindow* virtualSceneWindow);
@@ -145,7 +143,6 @@ private:
                                    void (ToolWindow::*)(
                                            VirtualSceneControlWindow*)>
             mVirtualSceneControlWindow;
-    QTimer mExtendedWindowCreateTimer;
     std::unique_ptr<Ui::ToolControls> mToolsUi;
     bool mStartedAdbStopProcess = false;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
