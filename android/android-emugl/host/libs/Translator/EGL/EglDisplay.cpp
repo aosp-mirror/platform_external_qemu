@@ -483,7 +483,7 @@ int EglDisplay::doChooseConfigs(const EglConfig& dummy,
               validConfigs.end(),
               CompareEglConfigs::DynamicCompare(dummy));
 
-    for (int i = 0; i < added; i++) {
+    for (int i = 0; configs && i < added; i++) {
         configs[i] = static_cast<EGLConfig>(validConfigs[i]);
     }
 
