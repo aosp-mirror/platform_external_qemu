@@ -30,6 +30,8 @@
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
 
+#define WHPX_CPUID_SIGNATURE 0x40000000
+
 struct whpx_state {
     uint64_t mem_quota;
     WHV_PARTITION_HANDLE partition;
@@ -949,6 +951,7 @@ static int whpx_vcpu_run(CPUState *cpu)
             WHV_REGISTER_NAME reg_names[5];
             UINT32 reg_count = 5;
             UINT64 rip, rax, rcx, rdx, rbx;
+            UINT32 signature[3] = {0};
 
             memset(reg_values, 0, sizeof(reg_values));
 
@@ -964,6 +967,13 @@ static int whpx_vcpu_run(CPUState *cpu)
 
                     rdx = vcpu->exit_ctx.CpuidAccess.DefaultResultRdx;
                     rbx = vcpu->exit_ctx.CpuidAccess.DefaultResultRbx;
+                    break;
+                case WHPX_CPUID_SIGNATURE:
+                    memcpy(signature, "WHPXWHPXWHPX", 12);
+                    rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
+                    rbx = signature[0];
+                    rcx = signature[1];
+                    rdx = signature[2];
                     break;
                 default:
                     rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
@@ -1379,7 +1389,7 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
-    UINT32 cpuidExitList[] = {1};
+    UINT32 cpuidExitList[] = {1, WHPX_CPUID_SIGNATURE};
     hr = whp_dispatch.WHvSetPartitionProperty(
         whpx->partition,
         WHvPartitionPropertyCodeCpuidExitList,
