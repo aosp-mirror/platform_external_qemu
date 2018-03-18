@@ -659,6 +659,7 @@ void Snapshotter::deleteSnapshot(const char* name) {
         // We're deleting the "loaded" snapshot, so first finish any pending
         // load, and then clear the snapshot file.  Do it under the VM lock to
         // finish background loading faster (i.e., no interference from VCPUs)
+        CrashReporter::get()->hangDetector().pause(true);
         android::RecursiveScopedVmLock lock;
         if (mLoader && mLoader->status() == OperationStatus::Ok) {
             mLoader->synchronize(false /* not on exit */);
