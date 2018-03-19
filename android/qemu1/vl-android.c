@@ -71,6 +71,7 @@
 #include "android/opengl/emugl_config.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/skin/charmap.h"
+#include "android/skin/winsys.h"
 #include "android/snapshot.h"
 #include "android/tcpdump.h"
 #include "android/update-check/update_check.h"
@@ -3638,6 +3639,9 @@ int main(int argc, char **argv, char **envp)
 
     android_check_for_updates();
 
+#ifdef CONFIG_ANDROID
+    skin_winsys_report_entering_main_loop();
+#endif
     main_loop();
 #ifdef CONFIG_ANDROID
     crashhandler_exitmode("after main_loop");

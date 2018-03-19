@@ -153,6 +153,8 @@ void skin_winsys_error_dialog(const char* message, const char* title);
 
 void skin_winsys_set_ui_agent(const UiEmuAgent* agent);
 
+void skin_winsys_report_entering_main_loop(void);
+
 #ifdef __cplusplus
 }
 #endif
