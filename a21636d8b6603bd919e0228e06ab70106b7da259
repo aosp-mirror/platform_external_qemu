@@ -46,6 +46,30 @@
       "revId": "a21636d8b6603bd919e0228e06ab70106b7da259",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f886dc3d_f44def3d",
+        "filename": "android/android-emu/android/qt/qt_setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-19T17:30:35Z",
+      "side": 1,
+      "message": "the difference is slight enough that I still need to verify that the opengl sw library is actually being used",
+      "parentUuid": "598c2bef_d2fb0299",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 44
+      },
+      "revId": "a21636d8b6603bd919e0228e06ab70106b7da259",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
