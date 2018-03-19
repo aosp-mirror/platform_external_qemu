@@ -40,5 +40,9 @@ bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
         qtPluginsSubDir.c_str());
     system->envSet("QT_QPA_PLATFORM_PLUGIN_PATH", qtPluginsSubDir);
 
+    VERBOSE_PRINT(init,
+        "Setting Qt to use software OpenGL: QT_OPENGL=software");
+    system->envSet("QT_OPENGL", "software");
+
     return true;
 }
