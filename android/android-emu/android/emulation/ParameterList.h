@@ -48,11 +48,15 @@ public:
     }
 
     // Convert list into a std::string. This joins all parameters with a
-    // single space.
+    // single space. Will quote parameters that include spaces.
     std::string toString() const;
 
     // A variant of toString() that returns instead a heap-allocated C string
     // that must be free-d by the caller.
+    // |quotes| add quotes to parameters when there is a space
+    char* toCStringCopy(bool quotes) const;
+
+    // Same as toCStringCopy(true). Will quote parameters that include spaces.
     char* toCStringCopy() const;
 
     // Adds a set of parameters to the list.
@@ -93,6 +97,11 @@ public:
 private:
     std::vector<std::string> mParams;
     mutable std::vector<char *> mArray;
+
+    // Implementation for toString() that will optionally single quote
+    // parameters that include spaces.
+    // |quotes| add quotes to parameters when there is a space
+    std::string toString(bool quotes) const;
 };
 
 }  // namespace android

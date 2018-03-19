@@ -45,15 +45,23 @@ inline static std::string quoteCommandLine(const std::string& line) {
 #endif
 }
 
-std::string ParameterList::toString() const {
+std::string ParameterList::toString(bool quotes) const {
   std::string result;
   for (size_t n = 0; n < mParams.size(); ++n) {
     if (n > 0) {
       result += ' ';
     }
-    result += quoteCommandLine(mParams[n]);
+    result += quotes ? quoteCommandLine(mParams[n]) : mParams[n];
   }
   return result;
+}
+
+std::string ParameterList::toString() const {
+    return toString(true);
+}
+
+char* ParameterList::toCStringCopy(bool quotes) const {
+    return android::base::strDup(toString(quotes));
 }
 
 char* ParameterList::toCStringCopy() const {
