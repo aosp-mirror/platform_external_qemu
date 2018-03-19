@@ -26,7 +26,11 @@ TEST(ParameterList, Construction) {
 
     EXPECT_EQ(std::string(), list.toString());
 
-    char* str = list.toCStringCopy();
+    char* str = list.toCStringCopy(false);
+    EXPECT_STREQ("", str);
+    ::free(str);
+
+    str = list.toCStringCopy();
     EXPECT_STREQ("", str);
     ::free(str);
 }
@@ -112,6 +116,17 @@ TEST(ParameterList, toCStringCopy) {
 #else
     const char* expect_str = "foo bar ' zoo '";
 #endif
+    EXPECT_STREQ(expect_str, str);
+    ::free(str);
+}
+
+TEST(ParameterList, toCStringCopyWithoutQuotes) {
+    ParameterList list;
+    list.add2("foo", "bar");
+    list.add(" zoo ");
+    EXPECT_EQ(3U, list.size());
+    char* str = list.toCStringCopy(false);
+    const char* expect_str = "foo bar  zoo ";
     EXPECT_STREQ(expect_str, str);
     ::free(str);
 }

@@ -183,5 +183,5 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
       params.addFormat("ramoops.mem_size=0x%" PRIx64, ramoops.size);
       params.addFormat("memmap=0x%" PRIx64 "$0x%" PRIx64,  ramoops.size, ramoops.start);
     }
-    return params.toCStringCopy();
+    return params.toCStringCopy(false);
 }
