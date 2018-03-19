@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "be9871ef_001e9e57",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-19T17:30:25Z",
+      "side": 1,
+      "message": "Do we need to bump the version number when all the added fields are optional?",
+      "range": {
+        "startLine": 273,
+        "startChar": 32,
+        "endLine": 273,
+        "endChar": 34
+      },
+      "revId": "5aa934652653b4c4648877adc9cabb872fcbe5e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05b680d8_28341503",
+        "filename": "android/android-emu/android/snapshot/proto/snapshot.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-19T17:30:25Z",
+      "side": 1,
+      "message": "Make this a uint64 to allow an enum here? (In case we come up with another save option.)",
+      "range": {
+        "startLine": 49,
+        "startChar": 13,
+        "endLine": 49,
+        "endChar": 17
+      },
+      "revId": "5aa934652653b4c4648877adc9cabb872fcbe5e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
