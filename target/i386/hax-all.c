@@ -89,7 +89,8 @@ int hax_ug_platform(void)
 
 bool hax_gpa_protection_supported(void)
 {
-    return hax_global.supports_gpa_protection;
+    return false;
+    //return hax_global.supports_gpa_protection;
 }
 
 int hax_vcpu_active(CPUState* cpu)
