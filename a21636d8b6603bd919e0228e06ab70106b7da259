@@ -22,6 +22,30 @@
       "revId": "a21636d8b6603bd919e0228e06ab70106b7da259",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "598c2bef_d2fb0299",
+        "filename": "android/android-emu/android/qt/qt_setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-19T17:28:52Z",
+      "side": 1,
+      "message": "Tested on normal 2D UI buttons and stuff, they work OK. Snapshot saving spinner is a bit slower though, but that sOK IMO",
+      "parentUuid": "a1e63fb5_b35c7916",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 44
+      },
+      "revId": "a21636d8b6603bd919e0228e06ab70106b7da259",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
