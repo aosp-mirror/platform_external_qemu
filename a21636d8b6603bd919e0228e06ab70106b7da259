@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1e63fb5_b35c7916",
+        "filename": "android/android-emu/android/qt/qt_setup.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-19T16:59:46Z",
+      "side": 1,
+      "message": "could you please add make sure this doesn\u0027t make the UI slow? I believe Qt uses opengl quite extensively inside for some image scaling, widget drawing etc. Forcing it into software could ruin the user experience",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 44
+      },
+      "revId": "a21636d8b6603bd919e0228e06ab70106b7da259",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
