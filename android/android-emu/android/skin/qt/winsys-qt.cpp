@@ -637,6 +637,10 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
     }
 }
 
+void skin_winsys_report_entering_main_loop(void) {
+    ToolWindow::onMainLoopStart();
+}
+
 #ifdef _WIN32
 extern "C" int qt_main(int, char**);
 

@@ -66,7 +66,7 @@ static const char kNewerVersionMessage[] =
 void android_checkForUpdates(const char* coreVersion) {
     std::unique_ptr<UpdateChecker> checker(new UpdateChecker(coreVersion));
 
-    if (checker->init() && checker->needsCheck() && checker->runAsyncCheck()) {
+    if (checker->runAsyncCheck()) {
         // checker will delete itself after the check in the worker thread
         checker.release();
     } else {
@@ -233,7 +233,9 @@ bool UpdateChecker::needsCheck() const {
 
 bool UpdateChecker::runAsyncCheck() {
     return async([this] {
-        asyncWorker();
+        if (init() && needsCheck()) {
+            asyncWorker();
+        }
         delete this;
     });
 }
