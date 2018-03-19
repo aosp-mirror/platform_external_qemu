@@ -12,6 +12,8 @@
 #include "android/main-kernel-parameters.h"
 
 #include "android/base/StringFormat.h"
+#include "android/base/StringView.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
@@ -172,9 +174,13 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         }
     }
 
-    if (avdKernelParameters && avdKernelParameters[0]) {
-        params.add(avdKernelParameters);
-    }
+    auto add = [&params](android::base::StringView kernelArg) {
+        if (!kernelArg.empty()) {
+            params.add(kernelArg);
+        }
+    };
+
+    android::base::split(avdKernelParameters, " ", add);
 
     // Configure the ramoops module, and mark the region where ramoops lives as
     // unusable. This will prevent anyone else from using this memory region.
