@@ -5602,6 +5602,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     os_setup_post();
 
+#ifdef CONFIG_ANDROID
+    skin_winsys_report_entering_main_loop();
+#endif
     main_loop();
     replay_disable_events();
     iothread_stop_all();
