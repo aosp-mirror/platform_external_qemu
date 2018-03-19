@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44e64850_25069e10",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-19T16:53:38Z",
+      "side": 1,
+      "message": "nit: if-out the whole sorting + loop if |configs| is null?",
+      "range": {
+        "startLine": 482,
+        "startChar": 3,
+        "endLine": 488,
+        "endChar": 5
+      },
+      "revId": "e3792ad2cbf59e114bbe07a95f65bbc54f998388",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
