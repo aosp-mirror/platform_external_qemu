@@ -67,6 +67,7 @@ public:
                UserActionsCounterPtr user_actions_counter);
     ~ToolWindow();
 
+    void allowExtWindowCreation();
     void hide();
     void show();
     void dockMainWindow();
@@ -76,6 +77,7 @@ public:
     void setToolEmuAgent(const UiEmuAgent* agPtr);
 
     static void setToolEmuAgentEarly(const UiEmuAgent* agentPtr);
+    static void onMainLoopStart();
     static const UiEmuAgent* getUiEmuAgent() { return sUiEmuAgent; }
 
     const ShortcutKeyStore<QtUICommand>* getShortcutKeyStore() {
@@ -145,7 +147,6 @@ private:
                                    void (ToolWindow::*)(
                                            VirtualSceneControlWindow*)>
             mVirtualSceneControlWindow;
-    QTimer mExtendedWindowCreateTimer;
     std::unique_ptr<Ui::ToolControls> mToolsUi;
     bool mStartedAdbStopProcess = false;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
@@ -158,6 +159,7 @@ private:
     bool mTopSwitched = false;
     bool mIsExiting = false;
     bool mAskedWhetherToSaveSnapshot = false;
+    bool mAllowExtWindow = false;
 
     static const UiEmuAgent* sUiEmuAgent;
 

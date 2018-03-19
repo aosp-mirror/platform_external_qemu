@@ -79,6 +79,7 @@ ToolWindow::WindowHolder<T>::~WindowHolder() {
 }
 
 const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
+static ToolWindow* sToolWindow = nullptr;
 
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
@@ -193,16 +194,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
-    // Make sure we create the extended window even if user didn't open it.
-    auto self = QPointer<ToolWindow>(this);
-    QObject::connect(
-        &mExtendedWindowCreateTimer, &QTimer::timeout,
-        [self] {
-            if (self && !self->isExiting()) self->mExtendedWindow.get();
-        });
-    mExtendedWindowCreateTimer.setSingleShot(true);
-    mExtendedWindowCreateTimer.start(10 * 1000);
-
     if (android_hw->hw_arc) {
         // Chrome OS doesn't support rotation now.
         mToolsUi->prev_layout_button->setHidden(true);
@@ -216,10 +207,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     auto closeBtn = mToolsUi->winButtonsLayout->takeAt(0);
     mToolsUi->winButtonsLayout->insertItem(1, closeBtn);
 #endif
+    sToolWindow = this;
 }
 
 ToolWindow::~ToolWindow() {
-    stopExtendedWindowCreation();
 }
 
 void ToolWindow::raise() {
@@ -235,6 +226,10 @@ void ToolWindow::raise() {
     }
 }
 
+void ToolWindow::allowExtWindowCreation() {
+    mAllowExtWindow = true;
+}
+
 void ToolWindow::switchClipboardSharing(bool enabled) {
     if (sUiEmuAgent && sUiEmuAgent->clipboard) {
         sUiEmuAgent->clipboard->setEnabled(enabled);
@@ -243,11 +238,6 @@ void ToolWindow::switchClipboardSharing(bool enabled) {
 
 void ToolWindow::showVirtualSceneControls(bool show) {
     mVirtualSceneControlWindow.get()->setActive(show);
-}
-
-void ToolWindow::stopExtendedWindowCreation() {
-    mExtendedWindowCreateTimer.stop();
-    mExtendedWindowCreateTimer.disconnect();
 }
 
 void ToolWindow::onExtendedWindowCreated(ExtendedWindow* extendedWindow) {
@@ -308,8 +298,6 @@ void ToolWindow::closeEvent(QCloseEvent* ce) {
     // make sure only parent processes the event - otherwise some
     // siblings won't get it, e.g. main window
     ce->ignore();
-
-    stopExtendedWindowCreation();
 }
 
 void ToolWindow::mousePressEvent(QMouseEvent* event) {
@@ -593,6 +581,13 @@ void ToolWindow::setToolEmuAgentEarly(const UiEmuAgent* agentPtr) {
     ExtendedWindow::setAgentEarly(agentPtr);
 }
 
+// static
+void ToolWindow::onMainLoopStart() {
+    if (sToolWindow) {
+        sToolWindow->allowExtWindowCreation();
+    }
+}
+
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     mVirtualSceneControlWindow.ifExists(
             [&] { mVirtualSceneControlWindow.get()->setAgent(agPtr); });
@@ -825,9 +820,11 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 }
 
 void ToolWindow::on_more_button_clicked() {
-    mExtendedWindow.get()->show();
-    mExtendedWindow.get()->raise();
-    mExtendedWindow.get()->activateWindow();
+    if (mAllowExtWindow) {
+        mExtendedWindow.get()->show();
+        mExtendedWindow.get()->raise();
+        mExtendedWindow.get()->activateWindow();
+    }
 }
 
 void ToolWindow::paintEvent(QPaintEvent*) {
