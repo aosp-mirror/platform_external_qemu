@@ -3549,6 +3549,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         }
     }
 
+    // Set audio device based on current QEMU_AUDIO_DRV. This is the first
+    // value, to be overriden if -no-audio is provided.  At this point we
+    // already have multiple threads started, so we should not setenv().
+    set_audio_drv(getenv("QEMU_AUDIO_DRV"));
+
     /* second pass of option parsing */
     optind = 1;
     for(;;) {
@@ -3830,7 +3835,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 return 0;
                 break;
             case QEMU_OPTION_audio_none:
-                setenv("QEMU_AUDIO_DRV", "none", 1);
+                set_audio_drv("none");
                 break;
             case QEMU_OPTION_soundhw:
                 select_soundhw (optarg);

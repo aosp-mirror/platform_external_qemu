@@ -316,11 +316,24 @@ static int audio_get_conf_int (const char *key, int defval, int *defaultp)
     }
 }
 
+static const char* s_audio_drv_name = NULL;
+
+void set_audio_drv(const char* name) {
+    s_audio_drv_name = name;
+}
+
 static const char *audio_get_conf_str (const char *key,
                                        const char *defval,
                                        int *defaultp)
 {
-    const char *val = getenv (key);
+    const char* val;
+
+    if (!strcmp(key, "QEMU_AUDIO_DRV")) {
+        val = s_audio_drv_name;
+    } else {
+        val = getenv(key);
+    }
+
     if (!val) {
         *defaultp = 1;
         return defval;

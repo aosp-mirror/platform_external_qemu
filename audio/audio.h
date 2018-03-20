@@ -171,4 +171,6 @@ void audio_sample_to_uint64(void *samples, int pos,
 void audio_sample_from_uint64(void *samples, int pos,
                             uint64_t left, uint64_t right);
 
+void set_audio_drv(const char* name);
+
 #endif /* QEMU_AUDIO_H */
