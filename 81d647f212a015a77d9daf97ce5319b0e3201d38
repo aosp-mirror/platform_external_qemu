@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51347ec8_27e73acd",
+        "filename": "audio/audio.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T23:12:24Z",
+      "side": 1,
+      "message": "please also check if |s_audio_drv_name| is not NULL, otherwise code should fall back to getenv()",
+      "range": {
+        "startLine": 331,
+        "startChar": 8,
+        "endLine": 331,
+        "endChar": 38
+      },
+      "revId": "81d647f212a015a77d9daf97ce5319b0e3201d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
