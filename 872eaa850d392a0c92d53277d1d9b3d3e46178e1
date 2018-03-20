@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b401feb_a16163d0",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1030,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-03-20T17:39:34Z",
+      "side": 1,
+      "message": "nit: just call mLivePbufs[pixelFormat].push_back(surf);",
+      "range": {
+        "startLine": 1029,
+        "startChar": 8,
+        "endLine": 1030,
+        "endChar": 32
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
