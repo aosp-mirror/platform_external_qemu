@@ -142,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "15b9a9a0_a3e9f5df",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T18:27:11Z",
+      "side": 1,
+      "message": "Right, past a certain point it\u0027s difficult to create more pbufs. IMO though it\u0027s worth it since the more we pause to create pbufs the more lag there is; there\u0027s not a completely linear relationship between run time of pbuf creation and the # of pbufs created. Creating many pbufs in a batch seems to be much quicker than letting their creation spread over time too much.",
+      "parentUuid": "fc2c8cee_88c4b411",
+      "range": {
+        "startLine": 1016,
+        "startChar": 8,
+        "endLine": 1022,
+        "endChar": 9
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b401feb_a16163d0",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
