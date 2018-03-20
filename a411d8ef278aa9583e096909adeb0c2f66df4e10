@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b15523c_efc8a5c7",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T13:57:58Z",
+      "side": 1,
+      "message": "nit: space, for (...",
+      "range": {
+        "startLine": 437,
+        "startChar": 7,
+        "endLine": 437,
+        "endChar": 8
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d31f2465_b5f29254",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T13:57:58Z",
+      "side": 1,
+      "message": "maybe rename to HAX_MAX_SLOTS?",
+      "range": {
+        "startLine": 36,
+        "startChar": 15,
+        "endLine": 36,
+        "endChar": 30
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20ae8960_da678460",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T13:57:58Z",
+      "side": 1,
+      "message": "nit: could be clearer inverted as if (!add \u0026\u0026 !(mem-\u003estart \u003c\u003d start \u0026\u0026 mem-\u003estart + mem-\u003esize \u003e\u003d start + size)), since we\u0027d know up front this is for deletion of a region only",
+      "range": {
+        "startLine": 141,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 16
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fbfcdc0_c5dd404b",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T13:57:58Z",
+      "side": 1,
+      "message": "nit: align mem-\u003estart with add above",
+      "range": {
+        "startLine": 142,
+        "startChar": 15,
+        "endLine": 142,
+        "endChar": 17
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe9be929_effd4e8b",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T13:57:58Z",
+      "side": 1,
+      "message": "what happens if mem-\u003estart \u003d 1000, mem-\u003esize \u003d 1, start \u003d 0, size \u003d 1001, and there is another slot with (mem-\u003estart \u003d 0, mem-\u003esize \u003d 1000)? wouldn\u0027t we need to reset the other slot as well?",
+      "range": {
+        "startLine": 161,
+        "startChar": 12,
+        "endLine": 164,
+        "endChar": 24
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bea2351_772ebf3f",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T13:57:58Z",
+      "side": 1,
+      "message": "registering",
+      "range": {
+        "startLine": 222,
+        "startChar": 31,
+        "endLine": 222,
+        "endChar": 41
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
