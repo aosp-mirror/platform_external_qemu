@@ -44,6 +44,17 @@ message Config {
     optional int64 ram_size_bytes = 4;
 }
 
+message SaveStats {
+    // Type of save
+    // 0: non-incremental
+    // 1: incremental
+    optional uint32 incremental = 1;
+    // Time taken to save.
+    optional uint64 duration = 2;
+    // How many changed bytes in RAM.
+    optional uint64 ram_changed_bytes = 3;
+}
+
 message Snapshot {
     // Update every time when introducing some breaking changes that make the
     // previous loading code break when trying to load the new snapshot.
@@ -101,4 +112,7 @@ message Snapshot {
 
     // Arbitrary description added by the user
     optional string description = 14;
+
+    // Record of save stats.
+    repeated SaveStats save_stats = 15;
 }

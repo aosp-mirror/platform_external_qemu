@@ -271,6 +271,7 @@ struct {
 };
 
 static constexpr int kVersion = 23;
+static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {
     return getSnapshotDir(name);
@@ -284,8 +285,9 @@ base::Optional<std::string> Snapshot::parent() {
     return parentName;
 }
 
+
 Snapshot::Snapshot(const char* name)
-    : mName(name), mDataDir(getSnapshotDir(name)) {}
+    : mName(name), mDataDir(getSnapshotDir(name)), mSaveStats(kMaxSaveStatsHistory) {}
 
 // static
 std::vector<Snapshot> Snapshot::getExistingSnapshots() {
@@ -310,6 +312,7 @@ bool Snapshot::save() {
     }
 
     mSnapshotPb.Clear();
+
     mSnapshotPb.set_version(kVersion);
     mSnapshotPb.set_creation_time(System::get()->getUnixTime());
 
@@ -338,6 +341,11 @@ bool Snapshot::save() {
 
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
+
+    for (size_t i = 0; i < mSaveStats.size(); i++) {
+        auto toSave = mSnapshotPb.add_save_stats();
+        *toSave = mSaveStats[i];
+    }
 
     auto parentSnapshot = Snapshotter::get().loadedSnapshotFile();
     // We want to maintain the default_boot snapshot as outside
@@ -540,6 +548,10 @@ bool Snapshot::load() {
         mSuccessfulLoads = mSnapshotPb.successful_loads();
     } else {
         mSuccessfulLoads = 0;
+    }
+
+    for (int i = 0; i < mSnapshotPb.save_stats_size(); i++) {
+        mSaveStats.push_back(mSnapshotPb.save_stats(i));
     }
 
     return true;
