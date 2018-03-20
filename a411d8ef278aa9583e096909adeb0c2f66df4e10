@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fee61145_c17b2cc2",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:26:28Z",
+      "side": 1,
+      "message": "very nit: please use |i| so it\u0027s easy to understand it\u0027s a loop counter",
+      "range": {
+        "startLine": 431,
+        "startChar": 8,
+        "endLine": 431,
+        "endChar": 9
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b15523c_efc8a5c7",
         "filename": "target/i386/hax-all.c",
         "patchSetId": 1
@@ -105,6 +128,30 @@
       "writtenOn": "2018-03-20T13:57:58Z",
       "side": 1,
       "message": "what happens if mem-\u003estart \u003d 1000, mem-\u003esize \u003d 1, start \u003d 0, size \u003d 1001, and there is another slot with (mem-\u003estart \u003d 0, mem-\u003esize \u003d 1000)? wouldn\u0027t we need to reset the other slot as well?",
+      "range": {
+        "startLine": 161,
+        "startChar": 12,
+        "endLine": 164,
+        "endChar": 24
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "018ed057_2345003a",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:26:28Z",
+      "side": 1,
+      "message": "I remember a couple bugs in the old code, where we were missing some edge cases. Is there a way to not rewrite it completely but adopt and change slightly instead? Otherwise I suspect to get pretty much the same bugs in the new version",
+      "parentUuid": "fe9be929_effd4e8b",
       "range": {
         "startLine": 161,
         "startChar": 12,
