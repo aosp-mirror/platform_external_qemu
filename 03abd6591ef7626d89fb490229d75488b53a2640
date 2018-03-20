@@ -22,6 +22,30 @@
       "revId": "03abd6591ef7626d89fb490229d75488b53a2640",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2ad8807_dff6f8a3",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:27:27Z",
+      "side": 1,
+      "message": "+1 - if you leave any commented code in, please also explain in a TODO comment why it\u0027s there and when it\u0027s supposed to be uncommented. Otherwise just remove the code instead of commenting it out",
+      "parentUuid": "cc1063a4_2e14f936",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 48
+      },
+      "revId": "03abd6591ef7626d89fb490229d75488b53a2640",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
