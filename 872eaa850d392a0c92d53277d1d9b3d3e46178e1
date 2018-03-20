@@ -2,6 +2,98 @@
   "comments": [
     {
       "key": {
+        "uuid": "b7c989fc_eafba038",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:55:23Z",
+      "side": 1,
+      "message": "please don\u0027t use __ in identifiers - it\u0027s reserved for the system",
+      "range": {
+        "startLine": 62,
+        "startChar": 34,
+        "endLine": 62,
+        "endChar": 36
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "453fbb01_ce5776a6",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1008,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:55:23Z",
+      "side": 1,
+      "message": "not needed: mFreePbufs[pixelFormat] will create an empty vector if it isn\u0027t there yet, so the next size check would set |needPrime| anyway",
+      "range": {
+        "startLine": 1005,
+        "startChar": 0,
+        "endLine": 1008,
+        "endChar": 9
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9c86e7db_8e1fa22a",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:55:23Z",
+      "side": 1,
+      "message": "nit: empty() ?",
+      "range": {
+        "startLine": 1012,
+        "startChar": 20,
+        "endLine": 1012,
+        "endChar": 32
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bc6bbd2_1d303b32",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:55:23Z",
+      "side": 1,
+      "message": "can we create only one buffer here per call instead of sticking here for unpredictable amount of time?\nAlso, why do we need to create at least the number of live pbufs?",
+      "range": {
+        "startLine": 1016,
+        "startChar": 8,
+        "endLine": 1022,
+        "endChar": 9
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b401feb_a16163d0",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -42,6 +134,75 @@
         "startChar": 8,
         "endLine": 1030,
         "endChar": 32
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2fe29164_3d81589b",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:55:23Z",
+      "side": 1,
+      "message": "do we need to call releaseDC() under a lock?",
+      "range": {
+        "startLine": 1042,
+        "startChar": 20,
+        "endLine": 1042,
+        "endChar": 29
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f1556896_83acb68f",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:55:23Z",
+      "side": 1,
+      "message": "unordered_set\u003c\u003e instead of a vector would allow faster removals",
+      "range": {
+        "startLine": 1169,
+        "startChar": 55,
+        "endLine": 1169,
+        "endChar": 61
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83782479_154221f8",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:55:23Z",
+      "side": 1,
+      "message": "static constexpr k...?",
+      "range": {
+        "startLine": 1170,
+        "startChar": 0,
+        "endLine": 1170,
+        "endChar": 30
       },
       "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
