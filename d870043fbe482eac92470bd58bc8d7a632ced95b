@@ -22,6 +22,30 @@
       "revId": "d870043fbe482eac92470bd58bc8d7a632ced95b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec7f2c09_719b3c00",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1296321
+      },
+      "writtenOn": "2018-03-20T23:58:23Z",
+      "side": 1,
+      "message": "Do you mean like: foo\u003dbar martin\u003d\"is a mean person\" debug\u003dtrue ? Ahh. I see the problem. Looking at the kernel source that is legitimate.",
+      "parentUuid": "ce7c5d4d_3b8b585e",
+      "range": {
+        "startLine": 183,
+        "startChar": 4,
+        "endLine": 183,
+        "endChar": 56
+      },
+      "revId": "d870043fbe482eac92470bd58bc8d7a632ced95b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
