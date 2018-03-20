@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "5727f305_a1f1b7b3",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "nit: please make this a switch()",
+      "range": {
+        "startLine": 402,
+        "startChar": 7,
+        "endLine": 409,
+        "endChar": 41
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49541cac_a973ecd1",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "nit: std::move() for the callbacks",
+      "range": {
+        "startLine": 41,
+        "startChar": 24,
+        "endLine": 41,
+        "endChar": 38
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6e3cffc_ca80a9a9",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "is there any way to share the constants between HAX and memory watch code? I\u0027m pretty sure HAX will eventually change this\nif not, please create a local constant to not duplicate 32 everywhere",
+      "range": {
+        "startLine": 60,
+        "startChar": 21,
+        "endLine": 60,
+        "endChar": 23
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "66202122_860cb0ac",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
         "patchSetId": 1
@@ -25,6 +94,98 @@
     },
     {
       "key": {
+        "uuid": "36b2d9ff_172cc30f",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "what about zeroing-out the memory in case |data| is null?\nIt can be skipped for |isQuickboot| case, but generic snapshots would need it zeroed anyway",
+      "range": {
+        "startLine": 96,
+        "startChar": 8,
+        "endLine": 97,
+        "endChar": 10
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d089c39a_28439c0b",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "is it ok to memcpy() before unprotecting the memory in the guest?",
+      "range": {
+        "startLine": 98,
+        "startChar": 10,
+        "endLine": 105,
+        "endChar": 13
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ba7d6d3_e2923af5",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "Windows can only sleep for 1 ms or longer:\n\n// static\nvoid Thread::sleepUs(unsigned n) {\n    // Hehe\n    ::Sleep(n / 1000);\n}\n\n\nPlease use sleepMs() here and set the timeout to 1 or 2",
+      "range": {
+        "startLine": 118,
+        "startChar": 32,
+        "endLine": 118,
+        "endChar": 35
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe4177aa_924c8a3b",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "please check the return value",
+      "range": {
+        "startLine": 153,
+        "startChar": 0,
+        "endLine": 154,
+        "endChar": 72
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4937897_11276110",
         "filename": "target/i386/hax-all.c",
         "patchSetId": 1
@@ -45,6 +206,53 @@
       "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca53d6d3_c992e5bc",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "+1. Please explaing what\u0027s going on here so the next time it\u0027s enough to read the comment instead of guessing the magic number purpose and the algorithm in general",
+      "parentUuid": "f4937897_11276110",
+      "range": {
+        "startLine": 769,
+        "startChar": 48,
+        "endLine": 769,
+        "endChar": 56
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b71c797_617902cd",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T17:14:32Z",
+      "side": 1,
+      "message": "why do you need this macro?",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 6
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
