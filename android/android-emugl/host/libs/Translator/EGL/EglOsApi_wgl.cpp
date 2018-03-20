@@ -15,6 +15,9 @@
 */
 #include "EglOsApi.h"
 
+#include "android/base/Profiler.h"
+#include "android/base/synchronization/Lock.h"
+
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
@@ -48,6 +51,21 @@
 #define D(...)  fprintf(stderr, __VA_ARGS__)
 #else
 #define D(...)  ((void)0)
+#endif
+
+#define PROFILE_SLOW_EGL 0
+
+#if PROFILE_SLOW_EGL
+
+// Log everything slower than 6 ms.
+#define PROFILE_SLOW(tag) \
+    android::base::ScopedProfiler __profile_slow(tag, [](const char* tag2, uint64_t elapsed) { \
+            if (elapsed >= 6000) { fprintf(stderr, "%s: slow, %f ms\n", tag2, elapsed / 1000.0f); }}); \
+
+#else
+
+#define PROFILE_SLOW(tag)
+
 #endif
 
 namespace {
@@ -472,12 +490,32 @@ public:
             m_hwnd(wnd),
             m_hdc(GetDC(wnd)) {}
 
-    explicit WinSurface(HPBUFFERARB pb, const WglExtensionsDispatch* dispatch) :
+    explicit WinSurface(HPBUFFERARB pb, const EglOS::PixelFormat* pixelFormat, const WglExtensionsDispatch* dispatch) :
             Surface(PBUFFER),
-            m_pb(pb) {
-        if (dispatch->wglGetPbufferDCARB) {
-            m_hdc = dispatch->wglGetPbufferDCARB(pb);
+            m_pb(pb),
+            m_pixelFormat(pixelFormat),
+            m_dispatch(dispatch) {
+        refreshDC();
+    }
+
+    bool releaseDC() {
+        if (m_dcReleased) return true;
+
+        bool res = false;
+        if (m_dispatch->wglReleasePbufferDCARB) {
+            res = m_dispatch->wglReleasePbufferDCARB(m_pb, m_hdc);
+            m_hdc = 0;
+            m_dcReleased = true;
         }
+        return res;
+    }
+
+    void refreshDC() {
+        if (!m_dcReleased) releaseDC();
+        if (m_dispatch->wglGetPbufferDCARB) {
+            m_hdc = m_dispatch->wglGetPbufferDCARB(m_pb);
+        }
+        m_dcReleased = false;
     }
 
     ~WinSurface() {
@@ -489,15 +527,19 @@ public:
     HWND getHwnd() const { return m_hwnd; }
     HDC  getDC() const { return m_hdc; }
     HPBUFFERARB getPbuffer() const { return m_pb; }
+    const EglOS::PixelFormat* getPixelFormat() const { return m_pixelFormat; }
 
     static WinSurface* from(EglOS::Surface* s) {
         return static_cast<WinSurface*>(s);
     }
 
 private:
+    bool        m_dcReleased = true;
     HWND        m_hwnd = nullptr;
     HPBUFFERARB m_pb = nullptr;
     HDC         m_hdc = nullptr;
+    const EglOS::PixelFormat* m_pixelFormat = nullptr;
+    const WglExtensionsDispatch* m_dispatch = nullptr;
 };
 
 class WinContext : public EglOS::Context {
@@ -956,59 +998,56 @@ public:
     virtual EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
-        const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
-        HDC dpy = mGlobals->getDummyDC(format);
+        (void)info;
 
-        int wglTexFormat = WGL_NO_TEXTURE_ARB;
-        int wglTexTarget =
-                (info->target == EGL_TEXTURE_2D) ? WGL_TEXTURE_2D_ARB
-                                                 : WGL_NO_TEXTURE_ARB;
-        switch (info->format) {
-        case EGL_TEXTURE_RGB:
-            wglTexFormat = WGL_TEXTURE_RGB_ARB;
-            break;
-        case EGL_TEXTURE_RGBA:
-            wglTexFormat = WGL_TEXTURE_RGBA_ARB;
-            break;
+        android::base::AutoLock lock(mPbufLock);
+
+        bool needPrime = false;
+        if (mFreePbufs.find(pixelFormat) == mFreePbufs.end()) {
+            needPrime = true;
         }
 
-        const int pbAttribs[] = {
-            WGL_TEXTURE_TARGET_ARB, wglTexTarget,
-            WGL_TEXTURE_FORMAT_ARB, wglTexFormat,
-            0
-        };
+        auto& freeElts = mFreePbufs[pixelFormat];
 
-        const WglExtensionsDispatch* dispatch = mDispatch;
-        if (!dispatch->wglCreatePbufferARB) {
-            return NULL;
+        if (freeElts.size() == 0) {
+            needPrime = true;
         }
-        HPBUFFERARB pb = dispatch->wglCreatePbufferARB(
-                dpy, format->configId(), info->width, info->height, pbAttribs);
-        if (!pb) {
-            GetLastError();
-            return NULL;
+
+        if (needPrime) {
+            PROFILE_SLOW("createPbufferSurface (slow path)");
+            int toCreate = std::max((int)mLivePbufs[pixelFormat].size(), mPbufPrimingCount);
+            for (int i = 0; i < toCreate; i++) {
+                freeElts.push_back(createPbufferSurfaceImpl(pixelFormat));
+            }
         }
-        return new WinSurface(pb, dispatch);
+
+        PROFILE_SLOW("createPbufferSurface (fast path)");
+        EglOS::Surface* surf = freeElts.back();
+        WinSurface::from(surf)->refreshDC();
+        freeElts.pop_back();
+
+        mLivePbufs[pixelFormat].push_back(surf);
+
+        return surf;
     }
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
-        if (!pb) {
-            return false;
-        }
-        const WglExtensionsDispatch* dispatch = mDispatch;
-        if (!dispatch->wglReleasePbufferDCARB ||
-            !dispatch->wglDestroyPbufferARB) {
-            return false;
-        }
-        WinSurface* winpb = WinSurface::from(pb);
-        if (!dispatch->wglReleasePbufferDCARB(
-                winpb->getPbuffer(), winpb->getDC()) ||
-            !dispatch->wglDestroyPbufferARB(winpb->getPbuffer())) {
-            GetLastError();
-            return false;
-        }
+        android::base::AutoLock lock(mPbufLock);
 
-        if (winpb) delete winpb;
+        if (!pb) return false;
+
+        WinSurface* winpb = WinSurface::from(pb);
+
+        if (!winpb->releaseDC()) return false;
+
+        const EglOS::PixelFormat* pixelFormat =
+            winpb->getPixelFormat();
+
+        auto& frees = mFreePbufs[pixelFormat];
+        frees.push_back(pb);
+
+        auto& forLive = mLivePbufs[pixelFormat];
+        forLive.erase(std::remove(forLive.begin(), forLive.end(), pb), forLive.end());
 
         return true;
     }
@@ -1098,6 +1137,24 @@ private:
         }
     }
 
+    EglOS::Surface* createPbufferSurfaceImpl(const EglOS::PixelFormat* pixelFormat) {
+        // we never care about width or height, since we just use
+        // opengl fbos anyway.
+        const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
+        HDC dpy = mGlobals->getDummyDC(format);
+
+        const WglExtensionsDispatch* dispatch = mDispatch;
+        if (!dispatch->wglCreatePbufferARB) {
+            return NULL;
+        }
+        HPBUFFERARB pb = dispatch->wglCreatePbufferARB(dpy, format->configId(), 1, 1, nullptr);
+        if (!pb) {
+            GetLastError();
+            return NULL;
+        }
+        return new WinSurface(pb, pixelFormat, dispatch);
+    }
+
     bool mCoreProfileSupported = false;
     int mCoreMajorVersion = 4;
     int mCoreMinorVersion = 5;
@@ -1106,6 +1163,11 @@ private:
 
     const WglExtensionsDispatch* mDispatch = nullptr;
     WinGlobals* mGlobals = nullptr;
+
+    std::unordered_map<const EglOS::PixelFormat*, std::vector<EglOS::Surface* > > mFreePbufs;
+    std::unordered_map<const EglOS::PixelFormat*, std::vector<EglOS::Surface* > > mLivePbufs;
+    int mPbufPrimingCount = 8;
+    android::base::Lock mPbufLock;
 };
 
 class WglLibrary : public GlLibrary {
