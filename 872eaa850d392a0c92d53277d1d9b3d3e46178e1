@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "054a4bcc_6ded3980",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T23:41:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b7c989fc_eafba038",
+      "range": {
+        "startLine": 62,
+        "startChar": 34,
+        "endLine": 62,
+        "endChar": 36
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "453fbb01_ce5776a6",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "3875026e_0462232c",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1008,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T23:41:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "453fbb01_ce5776a6",
+      "range": {
+        "startLine": 1005,
+        "startChar": 0,
+        "endLine": 1008,
+        "endChar": 9
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c86e7db_8e1fa22a",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2018-03-20T17:55:23Z",
       "side": 1,
       "message": "nit: empty() ?",
+      "range": {
+        "startLine": 1012,
+        "startChar": 20,
+        "endLine": 1012,
+        "endChar": 32
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca2db97b_e237c7ff",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T23:41:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c86e7db_8e1fa22a",
       "range": {
         "startLine": 1012,
         "startChar": 20,
@@ -214,6 +286,30 @@
     },
     {
       "key": {
+        "uuid": "8e1f7379_88ea8802",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T23:41:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "66f120d2_b7bb8cc0",
+      "range": {
+        "startLine": 1016,
+        "startChar": 8,
+        "endLine": 1022,
+        "endChar": 9
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b401feb_a16163d0",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -284,6 +380,30 @@
     },
     {
       "key": {
+        "uuid": "55b5a187_ef30a78f",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T23:41:12Z",
+      "side": 1,
+      "message": "Done (seems like we don\u0027t, if we ensure the global egl lock is held for all create/delete pbuffer operations)",
+      "parentUuid": "2fe29164_3d81589b",
+      "range": {
+        "startLine": 1042,
+        "startChar": 20,
+        "endLine": 1042,
+        "endChar": 29
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f1556896_83acb68f",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -307,6 +427,30 @@
     },
     {
       "key": {
+        "uuid": "35901493_19cef3af",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1169,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T23:41:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f1556896_83acb68f",
+      "range": {
+        "startLine": 1169,
+        "startChar": 55,
+        "endLine": 1169,
+        "endChar": 61
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83782479_154221f8",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
@@ -318,6 +462,30 @@
       "writtenOn": "2018-03-20T17:55:23Z",
       "side": 1,
       "message": "static constexpr k...?",
+      "range": {
+        "startLine": 1170,
+        "startChar": 0,
+        "endLine": 1170,
+        "endChar": 30
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f15eade0_33fc1d6e",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T23:41:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83782479_154221f8",
       "range": {
         "startLine": 1170,
         "startChar": 0,
