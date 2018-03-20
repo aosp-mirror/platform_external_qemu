@@ -118,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "fc2c8cee_88c4b411",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-20T18:22:48Z",
+      "side": 1,
+      "message": "well, but in that case we lock for quite a while - is it worth the efforts? knowing that we will eventually release some existing pbufs, so we may only need this one extra pbuf, not double the amount",
+      "parentUuid": "8d94d29e_408e8502",
+      "range": {
+        "startLine": 1016,
+        "startChar": 8,
+        "endLine": 1022,
+        "endChar": 9
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b401feb_a16163d0",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
