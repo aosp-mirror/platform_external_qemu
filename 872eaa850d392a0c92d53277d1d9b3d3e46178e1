@@ -166,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "7a14a068_85f01079",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T18:32:37Z",
+      "side": 1,
+      "message": "To give some more concrete numbers, here\u0027s a picture of the typical behavior I see running some CTS tests and general app switching.\n\nWe can get around 24 pbufs active with some CTS tests that are good at opening apps / manualy heavy app opening / switching. With the priming constant set at 8, we create 8 pbufs right there, 16 -\u003e 32 after doing a few app switches -\u003e never create a pbuf again after that, all recycled.",
+      "parentUuid": "15b9a9a0_a3e9f5df",
+      "range": {
+        "startLine": 1016,
+        "startChar": 8,
+        "endLine": 1022,
+        "endChar": 9
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b401feb_a16163d0",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
