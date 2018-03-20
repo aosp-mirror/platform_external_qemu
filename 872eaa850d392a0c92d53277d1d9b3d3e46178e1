@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "8d94d29e_408e8502",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T18:13:36Z",
+      "side": 1,
+      "message": "That\u0027s to repeatedly double the number of pbufs. When we do it this way, there\u0027s just a few times of this slowness and then the # of live pbufs the system uses basically never gets high enough to |needPrime| again",
+      "parentUuid": "1bc6bbd2_1d303b32",
+      "range": {
+        "startLine": 1016,
+        "startChar": 8,
+        "endLine": 1022,
+        "endChar": 9
+      },
+      "revId": "872eaa850d392a0c92d53277d1d9b3d3e46178e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b401feb_a16163d0",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
         "patchSetId": 1
