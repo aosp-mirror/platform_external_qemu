@@ -1181,6 +1181,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         if(prevCtx.get()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
+
         {
             emugl::Mutex::AutoLock mutex(s_eglLock);
             if (!dpy->nativeType()->makeCurrent(
@@ -1189,14 +1190,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                         newCtx->nativeType())) {
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
             }
-        }
-        //TODO: handle the following errors
-        // EGL_BAD_CURRENT_SURFACE , EGL_CONTEXT_LOST  , EGL_BAD_ACCESS
+            //TODO: handle the following errors
+            // EGL_BAD_CURRENT_SURFACE , EGL_CONTEXT_LOST  , EGL_BAD_ACCESS
 
-        thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
-        newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
-        g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
-        g_eglInfo->sweepDestroySurfaces();
+            thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
+            newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
+            g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
+            g_eglInfo->sweepDestroySurfaces();
+        }
 
         if (newDrawPtr->type() == EglSurface::PBUFFER &&
             newReadPtr->type() == EglSurface::PBUFFER) {
