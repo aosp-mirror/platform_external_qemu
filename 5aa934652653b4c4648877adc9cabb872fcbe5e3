@@ -25,6 +25,54 @@
     },
     {
       "key": {
+        "uuid": "dfc4ced6_366edcfd",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T15:05:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "be9871ef_001e9e57",
+      "range": {
+        "startLine": 273,
+        "startChar": 32,
+        "endLine": 273,
+        "endChar": 34
+      },
+      "revId": "5aa934652653b4c4648877adc9cabb872fcbe5e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf07b4ec_3414bf0a",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T15:05:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "be9871ef_001e9e57",
+      "range": {
+        "startLine": 273,
+        "startChar": 32,
+        "endLine": 273,
+        "endChar": 34
+      },
+      "revId": "5aa934652653b4c4648877adc9cabb872fcbe5e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "05b680d8_28341503",
         "filename": "android/android-emu/android/snapshot/proto/snapshot.proto",
         "patchSetId": 2
@@ -45,6 +93,30 @@
       "revId": "5aa934652653b4c4648877adc9cabb872fcbe5e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8b57b54_ffbed493",
+        "filename": "android/android-emu/android/snapshot/proto/snapshot.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-20T15:05:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05b680d8_28341503",
+      "range": {
+        "startLine": 49,
+        "startChar": 13,
+        "endLine": 49,
+        "endChar": 17
+      },
+      "revId": "5aa934652653b4c4648877adc9cabb872fcbe5e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
