@@ -70,6 +70,30 @@
       "revId": "d870043fbe482eac92470bd58bc8d7a632ced95b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1297d5c9_55359ea3",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T17:44:22Z",
+      "side": 1,
+      "message": "Yes, that sounds like a good idea to me. Please try it",
+      "parentUuid": "2cc9b1d7_dfd8fbbf",
+      "range": {
+        "startLine": 183,
+        "startChar": 4,
+        "endLine": 183,
+        "endChar": 56
+      },
+      "revId": "d870043fbe482eac92470bd58bc8d7a632ced95b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
