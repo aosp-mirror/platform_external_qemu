@@ -1991,7 +1991,7 @@ handleSendSMSText( const char*  cmd, AModem  modem )
             SmsPDU*        deliver;
             int            nn;
 
-            snprintf( temp, sizeof(temp), "%s%d", get_phone_number_prefix(), modem->base_port );
+            snprintf( temp, sizeof(temp), "%s", get_phone_number(modem->base_port) );
             sms_address_from_str( from, temp, strlen(temp) );
 
             deliver = sms_receiver_create_deliver( modem->sms_receiver, index, from );
