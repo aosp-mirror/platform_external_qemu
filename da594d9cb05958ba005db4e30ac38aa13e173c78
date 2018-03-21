@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5205528_bb4334ed",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1868,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T18:26:20Z",
+      "side": 1,
+      "message": "check for the running length here, otherwise there\u0027s a chance you overrun the buffer - e.g. have an input with lots of dashes",
+      "range": {
+        "startLine": 1868,
+        "startChar": 20,
+        "endLine": 1868,
+        "endChar": 49
+      },
+      "revId": "da594d9cb05958ba005db4e30ac38aa13e173c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "907220d0_81146141",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1873,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T18:26:20Z",
+      "side": 1,
+      "message": "instead of exit() call please set |exit_status| to 2 and return false",
+      "range": {
+        "startLine": 1873,
+        "startChar": 10,
+        "endLine": 1873,
+        "endChar": 14
+      },
+      "revId": "da594d9cb05958ba005db4e30ac38aa13e173c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46d12f96_0fb2c7f2",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T18:26:20Z",
+      "side": 1,
+      "message": "const reference? here and later",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 16
+      },
+      "revId": "da594d9cb05958ba005db4e30ac38aa13e173c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c41bd4ec_fc19b9ad",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T18:26:20Z",
+      "side": 1,
+      "message": "const ref",
+      "range": {
+        "startLine": 59,
+        "startChar": 12,
+        "endLine": 59,
+        "endChar": 16
+      },
+      "revId": "da594d9cb05958ba005db4e30ac38aa13e173c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7987873c_bb0efe0f",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T18:26:20Z",
+      "side": 1,
+      "message": "nit: these \"extern \"C\"\" aren\u0027t needed - they\u0027re already in the header",
+      "range": {
+        "startLine": 76,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 11
+      },
+      "revId": "da594d9cb05958ba005db4e30ac38aa13e173c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b316021_26a2e47e",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T18:26:20Z",
+      "side": 1,
+      "message": "please make sure you return const std::string\u0026, otherwise this c_str() returns a dangling pointer",
+      "range": {
+        "startLine": 77,
+        "startChar": 68,
+        "endLine": 77,
+        "endChar": 75
+      },
+      "revId": "da594d9cb05958ba005db4e30ac38aa13e173c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fa46301_fa4882e2",
+        "filename": "android/android-emu/android/telephony/phone_number.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T18:26:20Z",
+      "side": 1,
+      "message": "() -\u003e (void), as in C () means \"any number of any arguments\"",
+      "range": {
+        "startLine": 18,
+        "startChar": 35,
+        "endLine": 18,
+        "endChar": 37
+      },
+      "revId": "da594d9cb05958ba005db4e30ac38aa13e173c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8733f8c_0928a4a0",
+        "filename": "android/android-emu/android/telephony/sim_card.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-21T18:26:20Z",
+      "side": 1,
+      "message": "please at least assert the number is long enough",
+      "range": {
+        "startLine": 549,
+        "startChar": 17,
+        "endLine": 556,
+        "endChar": 52
+      },
+      "revId": "da594d9cb05958ba005db4e30ac38aa13e173c78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
