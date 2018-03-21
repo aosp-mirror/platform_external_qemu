@@ -328,7 +328,7 @@ static const char *audio_get_conf_str (const char *key,
 {
     const char* val;
 
-    if (!strcmp(key, "QEMU_AUDIO_DRV")) {
+    if (s_audio_drv_name && !strcmp(key, "QEMU_AUDIO_DRV")) {
         val = s_audio_drv_name;
     } else {
         val = getenv(key);
