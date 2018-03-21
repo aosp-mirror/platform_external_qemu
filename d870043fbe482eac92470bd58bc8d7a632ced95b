@@ -46,6 +46,30 @@
       "revId": "d870043fbe482eac92470bd58bc8d7a632ced95b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2cc9b1d7_dfd8fbbf",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1296321
+      },
+      "writtenOn": "2018-03-21T02:02:15Z",
+      "side": 1,
+      "message": "Hi Yurii. That being said. Would you accept changing ParameterList.cpp ? I was thinking of overloading toCStringCopy (alternatively adding toCStringCopyWithoutQuotes). I would revert my changes in this file. \n\nOr do you have a better idea?\n\nGiven that the ParameterList is used throughout the emulator I felt that a fix would be better in here, initially.",
+      "parentUuid": "ec7f2c09_719b3c00",
+      "range": {
+        "startLine": 183,
+        "startChar": 4,
+        "endLine": 183,
+        "endChar": 56
+      },
+      "revId": "d870043fbe482eac92470bd58bc8d7a632ced95b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
