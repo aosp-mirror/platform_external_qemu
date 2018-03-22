@@ -63,13 +63,14 @@ public:
         GapTrackingWorker,
         GapTrackingWriter,
         Compressing,
+        WriteCombining,
         /////////////////////
         Count
     };
 
     static constexpr char kTimeFormat[] =
             "\tTimes: disk %.03f, hash %.03f, iszero %.03f, gaps %.03f/%.03f, "
-            "lz4 %.03f\n";
+            "lz4 %.03f writecomb %.03f\n";
 
 #if SNAPSHOT_PROFILE <= 1
     template <class Func>

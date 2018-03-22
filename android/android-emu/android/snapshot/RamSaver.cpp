@@ -108,15 +108,28 @@ RamSaver::RamSaver(const std::string& fileName,
     }
 
     mWorkers.emplace(
-            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 6)),
+            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 4)),
             [this](QueuedPageInfo&& pi) { handlePageSave(std::move(pi)); });
     mWorkers->start();
+    mPendingWrites.reserve(kMaxPendingWrites);
+    mWriteCombineBuffer.resize(kDefaultPageSize * kMaxPendingWrites);
     mWriter.emplace([this](WriteInfo&& wi) {
-        if (!wi.page) {
-            return base::WorkerProcessingResult::Stop;
+        bool shouldStop = false;
+
+        if (wi.page) {
+            mPendingWrites.push_back(std::move(wi));
+        } else {
+            shouldStop = true;
         }
-        writePage(std::move(wi));
-        return base::WorkerProcessingResult::Continue;
+
+        if (shouldStop || mPendingWrites.size() == kMaxPendingWrites) {
+            mIncStats.measure(StatTime::WriteCombining, [this] {
+                flushWrites();
+            });
+        }
+
+        return shouldStop ? base::WorkerProcessingResult::Stop :
+                            base::WorkerProcessingResult::Continue;
     });
     mWriter->start();
 }
@@ -308,7 +321,7 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 calcHash(page, block, ptr);
             }
 
-            WriteInfo wi = {&page, ptr, false};
+            WriteInfo wi = {&page, loaderPage, ptr, false};
             if (!compressed()) {
                 page.sizeOnDisk = block.ramBlock.pageSize;
             } else {
@@ -331,23 +344,6 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 }
             }
 
-            if (loaderPage) {
-                if (page.sizeOnDisk <= loaderPage->sizeOnDisk) {
-                    page.filePos = loaderPage->filePos;
-                    mIncStats.count(StatAction::ReusedPos);
-                    if (page.sizeOnDisk < loaderPage->sizeOnDisk) {
-                        mIncStats.measure(StatTime::GapTrackingWorker, [&] {
-                            mGaps->add(
-                                    loaderPage->filePos + page.sizeOnDisk,
-                                    loaderPage->sizeOnDisk - page.sizeOnDisk);
-                        });
-                    }
-                } else if (!loaderPage->zeroed()) {
-                    mIncStats.measure(StatTime::GapTrackingWorker, [&] {
-                        mGaps->add(loaderPage->filePos, loaderPage->sizeOnDisk);
-                    });
-                }
-            }
             mWriter->enqueue(std::move(wi));
         }
     }
@@ -416,28 +412,97 @@ void RamSaver::writeIndex() {
             compressed ? "yes" : "no");
 }
 
-void RamSaver::writePage(WriteInfo&& wi) {
-    if (incremental() && wi.page->filePos == 0) {
-        if (auto gapPos = mIncStats.measure(StatTime::GapTrackingWriter, [&] {
-                return mGaps->allocate(wi.page->sizeOnDisk);
-            })) {
-            wi.page->filePos = *gapPos;
-            mIncStats.count(StatAction::ReusedPos);
+void RamSaver::flushWrites() {
+    int64_t nextStreamPos = mCurrentStreamPos;
+
+    if (incremental()) {
+        for (auto& i : mPendingWrites) {
+            if (i.loaderPage) {
+                if (i.page->sizeOnDisk <= i.loaderPage->sizeOnDisk) {
+                    i.page->filePos = i.loaderPage->filePos;
+                    mIncStats.count(StatAction::ReusedPos);
+                    if (i.page->sizeOnDisk < i.loaderPage->sizeOnDisk) {
+                        mIncStats.measure(StatTime::GapTrackingWorker, [&] {
+                                mGaps->add(
+                                        i.loaderPage->filePos + i.page->sizeOnDisk,
+                                        i.loaderPage->sizeOnDisk - i.page->sizeOnDisk);
+                                });
+                    }
+                } else if (!i.loaderPage->zeroed()) {
+                    mIncStats.measure(StatTime::GapTrackingWorker, [&] {
+                            mGaps->add(i.loaderPage->filePos, i.loaderPage->sizeOnDisk);
+                            });
+                }
+            }
+
+            if (i.page->filePos == 0) {
+                if (auto gapPos = mIncStats.measure(StatTime::GapTrackingWriter, [&] {
+                            return mGaps->allocate(i.page->sizeOnDisk);
+                            })) {
+                    i.page->filePos = *gapPos;
+                    mIncStats.count(StatAction::ReusedPos);
+                }
+            }
         }
     }
-    if (wi.page->filePos == 0) {
-        wi.page->filePos = mCurrentStreamPos;
-        mCurrentStreamPos += wi.page->sizeOnDisk;
-        mIncStats.count(StatAction::AppendedPos);
+
+    for (auto& i : mPendingWrites) {
+        if (i.page->filePos == 0) {
+            i.page->filePos = nextStreamPos;
+            nextStreamPos += i.page->sizeOnDisk;
+            mIncStats.count(StatAction::AppendedPos);
+        }
     }
 
-    mIncStats.measure(StatTime::Disk, [&] {
-        base::pwrite(mStreamFd, wi.ptr, size_t(wi.page->sizeOnDisk),
-                     wi.page->filePos);
-    });
-    if (wi.allocated) {
-        mCompressBuffers->release((CompressBuffer*)wi.ptr);
+    if (incremental()) {
+        std::sort(mPendingWrites.begin(), mPendingWrites.end(),
+                  WriteInfoFilePosCompare());
     }
+
+    char* writeCombinePtr = mWriteCombineBuffer.data();
+    int64_t currStart = -1;
+    int64_t currEnd = -1;
+    int64_t contigBytes = 0;
+    for (auto& i : mPendingWrites) {
+        int64_t pos = i.page->filePos;
+        int64_t sz = i.page->sizeOnDisk;
+
+        if (currEnd == -1) {
+            currStart = pos;
+            currEnd = pos + sz;
+            contigBytes = sz;
+        } else if (currEnd == i.page->filePos) {
+            currEnd += sz;
+            contigBytes += sz;
+        } else {
+            mIncStats.measure(StatTime::Disk,
+                    [&] { base::pwrite(mStreamFd,
+                            mWriteCombineBuffer.data(),
+                            contigBytes,
+                            currStart); });
+            writeCombinePtr = mWriteCombineBuffer.data();
+            currStart = pos;
+            currEnd = pos + sz;
+            contigBytes = sz;
+        }
+
+        memcpy(writeCombinePtr, i.ptr, sz);
+
+        if (i.allocated) {
+            mCompressBuffers->release((CompressBuffer*)i.ptr);
+        }
+
+        writeCombinePtr += sz;
+    }
+
+    mIncStats.measure(StatTime::Disk,
+            [&] { base::pwrite(mStreamFd,
+                    mWriteCombineBuffer.data(),
+                    contigBytes,
+                    currStart); });
+
+    mPendingWrites.clear();
+    mCurrentStreamPos = nextStreamPos;
 }
 
 }  // namespace snapshot
