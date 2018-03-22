@@ -1057,7 +1057,7 @@ void whpx_cpu_synchronize_pre_loadvm(CPUState *cpu)
  * Vcpu support.
  */
 
-static Error *whpx_migration_blocker;
+// static Error *whpx_migration_blocker;
 
 int whpx_init_vcpu(CPUState *cpu)
 {
@@ -1069,19 +1069,19 @@ int whpx_init_vcpu(CPUState *cpu)
     /* Add migration blockers for all unsupported features of the
      * Windows Hypervisor Platform
      */
-    if (whpx_migration_blocker == NULL) {
-        error_setg(&whpx_migration_blocker,
-               "State blocked due to non-migratable CPUID feature support,"
-               "dirty memory tracking support, and XSAVE/XRSTOR support");
+    // if (whpx_migration_blocker == NULL) {
+    //     error_setg(&whpx_migration_blocker,
+    //            "State blocked due to non-migratable CPUID feature support,"
+    //            "dirty memory tracking support, and XSAVE/XRSTOR support");
 
-        (void)migrate_add_blocker(whpx_migration_blocker, &local_error);
-        if (local_error) {
-            error_report_err(local_error);
-            error_free(whpx_migration_blocker);
-            migrate_del_blocker(whpx_migration_blocker);
-            return -EINVAL;
-        }
-    }
+    //     (void)migrate_add_blocker(whpx_migration_blocker, &local_error);
+    //     if (local_error) {
+    //         error_report_err(local_error);
+    //         error_free(whpx_migration_blocker);
+    //         migrate_del_blocker(whpx_migration_blocker);
+    //         return -EINVAL;
+    //     }
+    // }
 
     vcpu = g_malloc0(sizeof(struct whpx_vcpu));
 
