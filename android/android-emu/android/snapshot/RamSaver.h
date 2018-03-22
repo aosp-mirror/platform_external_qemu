@@ -129,8 +129,15 @@ private:
 
     struct WriteInfo {
         FileIndex::Block::Page* page;
+        const RamLoader::Page* loaderPage;
         const uint8_t* ptr;
         bool allocated;
+    };
+
+    struct WriteInfoFilePosCompare { 
+        bool operator()(const WriteInfo& a, const WriteInfo& b) const {
+            return a.page->filePos < b.page->filePos;
+        }
     };
 
     void calcHash(FileIndex::Block::Page& page,
@@ -140,7 +147,7 @@ private:
     void passToSaveHandler(QueuedPageInfo&& pi);
     bool handlePageSave(QueuedPageInfo&& pi);
     void writeIndex();
-    void writePage(WriteInfo&& wi);
+    void flushWrites();
 
     RamLoader* mLoader = nullptr;
     base::StdioStream mStream;
@@ -156,13 +163,16 @@ private:
     std::atomic<bool> mStopping{false};
     base::Optional<base::ThreadPool<QueuedPageInfo>> mWorkers;
     base::Optional<base::WorkerThread<WriteInfo>> mWriter;
+    static constexpr int kMaxPendingWrites = 4096;
+    std::vector<WriteInfo> mPendingWrites;
+    std::vector<char> mWriteCombineBuffer;
 
     GapTracker::Ptr mGaps;
 
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
 
-    static const int kCompressBufferCount = 128;
+    static const int kCompressBufferCount = 16384;
     using CompressBuffer =
             std::array<uint8_t, compress::maxCompressedSize(kDefaultPageSize)>;
     std::unique_ptr<CompressBuffer[]> mCompressBufferMemory;
