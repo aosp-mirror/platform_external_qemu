@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2836dbbf_a63e85e9",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-22T20:42:50Z",
+      "side": 1,
+      "message": "this also takes time, and it\u0027s not measured anywhere.",
+      "range": {
+        "startLine": 469,
+        "startChar": 7,
+        "endLine": 469,
+        "endChar": 63
+      },
+      "revId": "d14579f76e32dbcdb000b3f392d92322aa58bbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d1f380a_6ceff942",
+        "filename": "android/android-emu/android/snapshot/RamSaver.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-22T20:42:50Z",
+      "side": 1,
+      "message": "nit: mWriteCombinedBuffer ?",
+      "range": {
+        "startLine": 162,
+        "startChar": 22,
+        "endLine": 162,
+        "endChar": 36
+      },
+      "revId": "d14579f76e32dbcdb000b3f392d92322aa58bbfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
