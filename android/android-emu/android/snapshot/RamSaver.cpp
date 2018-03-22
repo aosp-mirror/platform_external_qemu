@@ -111,12 +111,24 @@ RamSaver::RamSaver(const std::string& fileName,
             std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 6)),
             [this](QueuedPageInfo&& pi) { handlePageSave(std::move(pi)); });
     mWorkers->start();
+    mPendingWrites.reserve(kMaxPendingWrites);
+    mIntermediates.resize(4096 * kMaxPendingWrites);
     mWriter.emplace([this](WriteInfo&& wi) {
-        if (!wi.page) {
-            return base::WorkerProcessingResult::Stop;
+        bool shouldStop = false;
+
+        if (wi.page) {
+            mPendingWrites.push_back(std::move(wi));
+        } else {
+            shouldStop = true;
         }
-        writePage(std::move(wi));
-        return base::WorkerProcessingResult::Continue;
+
+        if (shouldStop) {
+            flushWrites();
+        } else if(mPendingWrites.size() == kMaxPendingWrites) {
+                flushWrites();
+        }
+
+        return shouldStop ? base::WorkerProcessingResult::Stop : base::WorkerProcessingResult::Continue;
     });
     mWriter->start();
 }
@@ -438,6 +450,39 @@ void RamSaver::writePage(WriteInfo&& wi) {
     if (wi.allocated) {
         mCompressBuffers->release((CompressBuffer*)wi.ptr);
     }
+}
+
+void RamSaver::flushWrites() {
+    size_t flushBytes = 0;
+    for (auto& i : mPendingWrites) {
+        flushBytes += (size_t)i.page->sizeOnDisk;
+    }
+
+    char* intermedPtr = mIntermediates.data();
+    int64_t currStreamPos = mCurrentStreamPos;
+    int64_t nextStreamPos = mCurrentStreamPos;
+
+    for (auto& i : mPendingWrites) {
+        i.page->filePos = nextStreamPos;
+        nextStreamPos += i.page->sizeOnDisk;
+        mIncStats.count(StatAction::AppendedPos);
+        memcpy(intermedPtr, i.ptr, size_t(i.page->sizeOnDisk));
+        intermedPtr += i.page->sizeOnDisk;
+    }
+
+    mIncStats.measure(StatTime::Disk, [&] {
+        base::pwrite(mStreamFd, mIntermediates.data(), flushBytes, currStreamPos);
+    });
+
+    mCurrentStreamPos = nextStreamPos;
+
+    for (auto& i : mPendingWrites) {
+        if (i.allocated) {
+            mCompressBuffers->release((CompressBuffer*)i.ptr);
+        }
+    }
+
+    mPendingWrites.clear();
 }
 
 }  // namespace snapshot

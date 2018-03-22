@@ -141,6 +141,7 @@ private:
     bool handlePageSave(QueuedPageInfo&& pi);
     void writeIndex();
     void writePage(WriteInfo&& wi);
+    void flushWrites();
 
     RamLoader* mLoader = nullptr;
     base::StdioStream mStream;
@@ -156,13 +157,16 @@ private:
     std::atomic<bool> mStopping{false};
     base::Optional<base::ThreadPool<QueuedPageInfo>> mWorkers;
     base::Optional<base::WorkerThread<WriteInfo>> mWriter;
+    static constexpr int kMaxPendingWrites = 4096;
+    std::vector<WriteInfo> mPendingWrites;
+    std::vector<char> mIntermediates;
 
     GapTracker::Ptr mGaps;
 
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
 
-    static const int kCompressBufferCount = 128;
+    static const int kCompressBufferCount = 16384;
     using CompressBuffer =
             std::array<uint8_t, compress::maxCompressedSize(kDefaultPageSize)>;
     std::unique_ptr<CompressBuffer[]> mCompressBufferMemory;
