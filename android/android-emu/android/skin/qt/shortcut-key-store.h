@@ -16,6 +16,7 @@
 #include <QVector>
 #include <QMap>
 #include <QSet>
+#include <QtDebug>
 
 // Provides a generic way of mapping keyboard shortcuts to commands.
 // CommandType must be DefaultConstructable.
@@ -52,12 +53,15 @@ public:
         QString key_seq_str, command_str;
         while (!stream.atEnd()) {
             stream >> key_seq_str >> command_str;
+            if (key_seq_str.isEmpty() || command_str.isEmpty()) {
+                continue;
+            }
             auto key_seq = QKeySequence::fromString(key_seq_str);
             CommandType command;
             bool command_parse_result =
                 command_parser(command_str, &command);
             if (!command_parse_result || key_seq.isEmpty()) {
-                break;
+                qWarning() << "Warning: Unable to parse shortcut [" << command_str << "]";
             } else {
                 add(key_seq, command);
                 if (handled_externally) {
