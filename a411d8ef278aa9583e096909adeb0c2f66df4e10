@@ -48,6 +48,115 @@
     },
     {
       "key": {
+        "uuid": "2f3820df_eabb0e7a",
+        "filename": "target/i386/hax-i386.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: This file declares pointers in C style:\n void *hva",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6987aa8_d16b7e3c",
+        "filename": "target/i386/hax-i386.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: How about just \"id\"?",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 14
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b64294da_ab8961ea",
+        "filename": "target/i386/hax-i386.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "I also think HAX_MAX_MEMSLOTS would be a better name.",
+      "range": {
+        "startLine": 35,
+        "startChar": 8,
+        "endLine": 35,
+        "endChar": 23
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d2fd676_afca95f0",
+        "filename": "target/i386/hax-i386.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "How about \"memslots\" (or \"slots\")? The hax_ prefix is redundant.",
+      "range": {
+        "startLine": 54,
+        "startChar": 20,
+        "endLine": 54,
+        "endChar": 29
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bfe8ef0a_0a4112a6",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "Since it dumps all memslots, I\u0027d name it hax_dump_memslots (or hax_dump_all_memslots).",
+      "range": {
+        "startLine": 31,
+        "startChar": 12,
+        "endLine": 31,
+        "endChar": 28
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d31f2465_b5f29254",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -65,6 +174,297 @@
         "endLine": 36,
         "endChar": 30
       },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fc884df_90096192",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: Put the \u0027{\u0027 that marks the start of a function body on its own line.",
+      "range": {
+        "startLine": 49,
+        "startChar": 61,
+        "endLine": 49,
+        "endChar": 63
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4057d01d_8b0ac23b",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "1. I assume (slot-\u003esize \u003d\u003d 0) is equivalent to (slot-\u003eflags \u0026 HAX_RAM_INFO_INVALID). If so, we could simplify things by never using HAX_RAM_INFO_INVALID for slot-\u003eflags. That way, we can tell if a slot is valid just by looking at its size (when size \u003d\u003d 0, the slot is invalid, no matter what its flags says). Also, we can initialize a new slot with all zeroes. Ideally we should make the SET_RAM2 API drop the HAX_RAM_INFO_INVALID flag too, so we can delete/invalidate a slot by its id and by specifying size \u003d 0.\n2. nit: Break this long statement into 2 lines.",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "458065c3_02d8c2cb",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "1. nit: Space before \u0027*\u0027\n void *hax_gpa2hva\n bool *found\n2. nit: Line break before \u0027{\u0027",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6b3c5f7_84136762",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "1. Can be declared inside the for loop.\n2. nit: \"struct\" is redundant.",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83d173e2_fa1f0f51",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: Finish declaring variables before doing anything else (C coding style).",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "60a1cb26_dff0858f",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "Does this always evaluate to 0? If we want to skip invalid (MMIO) slots, we could do:\n\n if (hslot-\u003eflags \u0026 HAX_RAM_INFO_INVALID) continue;",
+      "range": {
+        "startLine": 69,
+        "startChar": 12,
+        "endLine": 69,
+        "endChar": 50
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b920df6_67c843ea",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: Space before \u0027*\u0027\n void *\n char *",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09ee81aa_11d526e3",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: NULL",
+      "range": {
+        "startLine": 77,
+        "startChar": 11,
+        "endLine": 77,
+        "endChar": 12
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46cc890a_71691d6c",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: Space before \u0027*\u0027\n void *hva\n uint64_t *gpa\n uint64_t *size\nLine break before \u0027{\u0027",
+      "range": {
+        "startLine": 80,
+        "startChar": 16,
+        "endLine": 81,
+        "endChar": 45
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4e7a695_2d0ad708",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "1. Can be declared inside the for loop.\n2. nit: \"struct\" is redundant.",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90761e24_3295e7d9",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "hslot-\u003eflags \u0026 HAX_RAM_INFO_INVALID\n(See my comment above)",
+      "range": {
+        "startLine": 87,
+        "startChar": 12,
+        "endLine": 87,
+        "endChar": 50
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba7f4d12_b8220722",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: Declare everything at the top (C coding style).",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 43
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "817bc741_f96befa6",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: Space before \u0027*\u0027, line break before \u0027{\u0027",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "108d996b_f0c7fa8c",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "The new region (area) may overlap with multiple existing slots, so probably we need a loop?",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d68cc16_380b253f",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "Should we also check the read-only flag?",
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -94,6 +494,23 @@
     },
     {
       "key": {
+        "uuid": "468f3260_f577629e",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "mem could be NULL:\n\n if (!add) {\n     if (!mem) return;  // Region to be deleted is already invalid\n     if (mem-\u003estart \u003c\u003d start \u0026\u0026 ...)\n         ...\n }",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7fbfcdc0_c5dd404b",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -111,6 +528,80 @@
         "endLine": 142,
         "endChar": 17
       },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "728e8b25_61998f85",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "nit: Align with the first parameter.",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e160235e_bf31fce6",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "I think I now understand the algorithm here. As I\u0027ve pointed out below, it doesn\u0027t handle the case where the new region (area) is very big and overlaps with multiple existing slots. In that case, we can delete/invalidate those existing slots one by one, before adding the new (big) slot. Of course, we\u0027ll have to handle the first and last existing slots with care (in case of a partial overlap).\nIf we make use of slot ids, we can simplify slot management on both QEMU and HAXM (kernel) sides, because we\u0027ll be able to delete/invalidate a slot by its id (invoking SET_RAM2 with size \u003d 0). But even without slot ids, the said algorithm can still be implemented. A big benefit of it is that SET_RAM2 will never be called with a region that overlaps with partial or more than one existing slot, so HAXM no longer needs to split or resize slots.",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d702953_48e80a59",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "I think you meant \u0027\u003e\u0027 instead. But actually, (mem-\u003esize \u003c size) is possible, too - imagine a new region (area) with a really big size, which overlaps with multiple existing slots (Frank has given a good example below).",
+      "range": {
+        "startLine": 156,
+        "startChar": 31,
+        "endLine": 156,
+        "endChar": 32
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5fe0e2a5_577512cf",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "Here the assumption is that the end of the new region (area) is inside the existing slot (mem). Again, that isn\u0027t necessarily the case.",
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -157,6 +648,63 @@
         "startChar": 12,
         "endLine": 164,
         "endChar": 24
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4167f4fc_56700b91",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "Technically it\u0027s possible to combine this for loop with the previous one and kill two birds with one stone.",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00f80204_217951ea",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "This can be moved into the if block above.",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4907515c_0e74e35b",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-03-22T04:24:44Z",
+      "side": 1,
+      "message": "Both here and line 148 above pass the original region to SET_RAM2, which may still overlap with partial or more than one existing slot that HAXM keeps track of, so HAXM needs to do similar manipulations of slots (splitting, resizing, etc.).\nIn a comment above I outlined another algorithm, which guarantees that we only pass to HAXM either a completely new region (no overlap with existing slots), or a region that perfectly coincides with a single existing slot (which is to be updated or deleted). I hope it can be implement in this patch, so we can avoid doing the slot manipulations twice. (I also wanted to see the use of slot ids, but that can wait.)",
+      "range": {
+        "startLine": 221,
+        "startChar": 20,
+        "endLine": 221,
+        "endChar": 31
       },
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
