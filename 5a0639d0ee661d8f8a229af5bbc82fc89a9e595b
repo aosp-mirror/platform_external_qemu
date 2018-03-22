@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2f97bd8_9f612a30",
+        "filename": "android/android-emu/android/emulation/ParameterList_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1062803
+      },
+      "writtenOn": "2018-03-22T23:37:42Z",
+      "side": 1,
+      "message": "No longer needed.",
+      "revId": "5a0639d0ee661d8f8a229af5bbc82fc89a9e595b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
