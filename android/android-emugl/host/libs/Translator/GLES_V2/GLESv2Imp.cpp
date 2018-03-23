@@ -3084,7 +3084,9 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
                 || (format == GL_LUMINANCE && internalformat == GL_LUMINANCE)), GL_INVALID_OPERATION);
 
         VALIDATE(!GLESv2Validate::pixelOp(format,type) && internalformat == ((GLint)format),GL_INVALID_OPERATION);
+	if(internalformat != 0x8058) {
         VALIDATE(!GLESv2Validate::pixelSizedFrmt(ctx, internalformat, format, type), GL_INVALID_OPERATION);
+	}
     }
 
     VALIDATE(border != 0,GL_INVALID_VALUE);
