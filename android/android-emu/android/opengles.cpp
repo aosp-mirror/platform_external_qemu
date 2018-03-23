@@ -26,6 +26,8 @@
 #include "config-host.h"
 
 #include "OpenglRender/render_api_functions.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -79,6 +81,12 @@ static bool sEgl2egl;
 static emugl::RenderLibPtr sRenderLib = nullptr;
 static emugl::RendererPtr sRenderer = nullptr;
 
+static void* display, * surface, * config, * context;
+static EGLDispatch* egl;
+static GLESv2Dispatch* gles2;
+
+void replace_func();
+
 int android_initOpenglesEmulation() {
     char* error = NULL;
 
@@ -121,7 +129,11 @@ int android_initOpenglesEmulation() {
         }
     }
 
-    return 0;
+   egl = (EGLDispatch *)sRenderLib->getEGL();
+   gles2 = (GLESv2Dispatch *)sRenderLib->getGL();
+   replace_func();
+
+   return 0;
 
 BAD_EXIT:
     derror("OpenGLES emulation library could not be initialized!");
@@ -178,6 +190,8 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     // on feature control and host GPU support. Set the obtained GLES version here.
     if (glesMajorVersion_out && glesMinorVersion_out)
         sRenderLib->getGlesVersion(glesMajorVersion_out, glesMinorVersion_out);
+
+
     return 0;
 }
 
@@ -371,4 +385,209 @@ void android_cleanupProcGLObjects(uint64_t puid) {
     if (sRenderer) {
         sRenderer->cleanupProcGLObjects(puid);
     }
+}
+
+extern "C" {
+
+#undef DIRECT_GL
+
+#ifdef DIRECT_GL
+
+// Make linker happy, actually direct gl doesn't use these.
+void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image) {}
+void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image){}
+void glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {}
+
+#define GL_CALL(return_type,func_name,signature,callargs) \
+extern return_type func_name signature; \
+static return_type my_ ## func_name signature { \
+   /*fprintf(stderr, "call %s\n", __func__);*/ \
+   return func_name callargs; \
+} \
+return_type (* epoxy_ ## func_name) signature = &my_ ## func_name ;
+
+#else
+
+#define GL_CALL(return_type,func_name,signature,callargs) \
+static return_type my_ ## func_name signature { \
+   return gles2-> func_name callargs; \
+} \
+return_type (* epoxy_ ## func_name) signature = &my_ ## func_name ;
+
+#endif
+
+LIST_GLES2_FUNCTIONS(GL_CALL, GL_CALL)
+
+typedef void(* void_func) ();
+
+#define REPLACE(a, b) void (* epoxy_ ## a ) () = (void_func) & my_ ## b;
+
+#define STUB(a) \
+void my_ ## a (void) {fprintf(stderr, "STUB %s\n", #a);abort();} \
+void (* epoxy_ ## a ) () = & my_ ## a;
+
+REPLACE(glBindBufferARB, glBindBuffer)
+REPLACE(glGenBuffersARB, glGenBuffers)
+REPLACE(glVertexAttribDivisorARB, glVertexAttribDivisor)
+REPLACE(glTexParameterIuiv, glTexParameteriv)
+REPLACE(glSamplerParameterIuiv, glSamplerParameteriv);
+
+STUB(glAlphaFunc)
+STUB(glBeginConditionalRender)
+STUB(glBindFragDataLocationIndexed)
+STUB(glBlendEquationSeparateiARB)
+STUB(glBlendFuncSeparateiARB)
+STUB(glClampColor)
+STUB(glClipPlane)
+STUB(glColorMaskIndexedEXT)
+STUB(glCompressedTexSubImage1D)
+STUB(glDepthRangeIndexed)
+STUB(glDisableClientState)
+STUB(glDisableIndexedEXT)
+STUB(glDrawArraysInstancedARB)
+STUB(glDrawArraysInstancedBaseInstance)
+STUB(glDrawElementsBaseVertex)
+STUB(glDrawElementsInstancedARB)
+STUB(glDrawElementsInstancedBaseVertex)
+STUB(glDrawPixels)
+STUB(glDrawRangeElementsBaseVertex)
+STUB(glEnableClientState)
+STUB(glEnableIndexedEXT)
+STUB(glEndConditionalRenderNV)
+STUB(glFramebufferTexture)
+STUB(glGetCompressedTexImage)
+STUB(glGetQueryObjectui64v)
+STUB(glGetnCompressedTexImageARB)
+STUB(glGetnTexImageARB)
+STUB(glLineStipple)
+STUB(glLogicOp)
+STUB(glPixelTransferf)
+STUB(glPixelZoom)
+STUB(glPointParameteri)
+STUB(glPointSize)
+STUB(glPolygonMode)
+STUB(glPolygonStipple)
+STUB(glPrimitiveRestartIndex)
+STUB(glPrimitiveRestartIndexNV)
+STUB(glProvokingVertexEXT)
+STUB(glQueryCounter)
+STUB(glReadnPixelsARB)
+STUB(glScissorIndexed)
+STUB(glShadeModel)
+STUB(glTexBuffer)
+STUB(glTexEnvi)
+STUB(glTexImage1D)
+STUB(glTexImage2DMultisample)
+STUB(glTexImage3DMultisample)
+STUB(glTexSubImage1D)
+STUB(glViewportIndexedf)
+STUB(glWindowPos2i)
+
+}
+
+struct gl_param {
+	int major_ver;
+	int minor_ver;
+};
+
+void replace_func(void) {
+   epoxy_glBindFramebufferEXT = epoxy_glBindFramebuffer;
+   epoxy_glFramebufferTexture2DEXT = epoxy_glFramebufferTexture2D;
+}
+
+static EGLint es31_att[] = {
+      EGL_CONTEXT_CLIENT_VERSION, 3,
+      EGL_CONTEXT_MINOR_VERSION_KHR, 1,
+      EGL_NONE
+};
+
+static int initDSCC() {
+  void* g_context;
+  sRenderLib->getDSCC(&display, &surface, &config, &g_context);
+  context = egl->eglCreateContext(display, config, EGL_NO_CONTEXT, es31_att);
+  if (context == NULL) {
+	  fprintf(stderr, "can't create context\n");
+	  abort();
+  }
+  return 1;
+}
+
+void* gl_create_context(void *p) {
+  static int called =  initDSCC();
+  if (!called) {
+    fprintf(stderr, "no init\n");
+  }
+  struct gl_param * params = static_cast<gl_param *>(p);
+  egl->eglMakeCurrent(display, surface, surface, context);
+  void * ret = egl->eglCreateContext(display, config, context, es31_att);
+  if (ret == NULL) {
+     fprintf(stderr, "create fail %08x %d %d\n", egl->eglGetError(),
+	     params->major_ver, params->minor_ver);
+  }
+  return ret;
+}
+
+void gl_destroy_context(void * p) {
+  egl->eglDestroyContext(display, p);
+}
+
+int gl_make_context_current(void * p) {
+  int ret = egl->eglMakeCurrent(display, surface, surface, p);
+  if (!ret) fprintf(stderr, "make ret %d %08x\n", ret, egl->eglGetError());
+  return ret;
+}
+
+static GLuint tex_id, fbo_id;
+static uint32_t gfx_h, gfx_w;
+static bool y0_top;
+
+void gl_scanout_texture(uint32_t backing_id,
+                                   bool backing_y_0_top,
+                                   uint32_t backing_width,
+                                   uint32_t backing_height,
+                                   uint32_t x, uint32_t y,
+                                   uint32_t w, uint32_t h) {
+  tex_id = backing_id;
+  gfx_h = h;
+  gfx_w = w;
+  y0_top = backing_y_0_top;
+  egl->eglMakeCurrent(display, surface, surface, context);
+  if (!fbo_id) {
+    epoxy_glGenFramebuffers(1, &fbo_id);
+  }
+  epoxy_glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo_id);
+  epoxy_glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0,
+                         GL_TEXTURE_2D, backing_id, 0);
+ int err = epoxy_glGetError();
+ if (err !=  GL_NO_ERROR) {
+      fprintf(stderr, "backing id %d %d %08x\n", backing_id, fbo_id, err);
+      abort();
+ }
+}
+
+void gl_scanout_flush(uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+  if (!fbo_id)  {
+	  fprintf(stderr, "no fbo_id");
+	  return;
+  }
+  egl->eglMakeCurrent(display, surface, surface, context);
+
+  epoxy_glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo_id);
+  epoxy_glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+  int y1 = y0_top ? 0 : gfx_h;
+  int y2 = y0_top ? gfx_h : 0;
+
+  int width, height;
+  if (!egl->eglQuerySurface(display, surface, EGL_WIDTH, &width)
+      ||!egl->eglQuerySurface(display, surface, EGL_HEIGHT, &height)) {
+     fprintf(stderr, "can' query surface \n");
+     abort();
+  }
+  epoxy_glViewport(0, 0, width, height);
+  epoxy_glBlitFramebuffer(0, y1, gfx_w, y2,
+                          0, 0, width, height,
+                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
+  egl->eglSwapBuffers(display, surface);
+  epoxy_glBindFramebuffer(GL_FRAMEBUFFER_EXT, fbo_id);
 }

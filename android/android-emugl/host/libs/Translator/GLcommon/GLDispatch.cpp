@@ -82,7 +82,9 @@ static const std::unordered_map<std::string, std::string> sAliasExtra = {
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
-            } \
+            } else { \
+	        fprintf(stderr, "%s not available\n", # func_name); \
+	    } \
         } \
     } while (0);
 
@@ -159,6 +161,8 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
         LIST_GLES31_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
     }
 
+    // glClientWaitSync always timeout for cros on windows/osx. Disable it now.
+    glFenceSync = nullptr;
     m_isLoaded = true;
     m_version = version;
 }
