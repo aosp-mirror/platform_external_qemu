@@ -331,6 +331,8 @@ public:
     // Return the host EGLDisplay used by this instance.
     EGLDisplay getDisplay() const { return m_eglDisplay; }
     EGLSurface getWindowSurface() const { return m_eglSurface; }
+    EGLContext getContext() const { return m_eglContext; }
+    EGLConfig getConfig() const { return m_eglConfig; }
 
     // Change the rotation of the displayed GPU sub-window.
     void setDisplayRotation(float zRot) {

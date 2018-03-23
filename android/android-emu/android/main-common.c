@@ -1951,9 +1951,9 @@ bool configAndStartRenderer(
     }
 
     if (hw->hw_arc) {
-        dprint("Forcing gpu off for Chrome OS");
-        str_reset(&opts->gpu, "off");
-        str_reset(&hw->hw_gpu_mode, "off");
+        dprint("Forcing gpu host for Chrome OS");
+        str_reset(&opts->gpu, "host");
+        str_reset(&hw->hw_gpu_mode, "host");
     }
 
     if (!androidEmuglConfigInit(&config,

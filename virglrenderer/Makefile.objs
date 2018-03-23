@@ -1,0 +1,36 @@
+#######################################################################
+# Common libraries for tools and emulators
+common-obj-y = src/gallium/auxiliary/cso_cache/cso_hash.o
+common-obj-y += src/gallium/auxiliary/cso_cache/cso_cache.o
+common-obj-y += src/gallium/auxiliary/os/os_misc.o
+common-obj-y += src/gallium/auxiliary/util/u_format.o
+common-obj-y += src/gallium/auxiliary/util/u_texture.o
+common-obj-y += src/gallium/auxiliary/util/u_bitmask.o
+common-obj-y += src/gallium/auxiliary/util/u_math.o
+common-obj-y += src/gallium/auxiliary/util/u_cpu_detect.o
+common-obj-y += src/gallium/auxiliary/util/u_hash_table.o
+common-obj-y += src/gallium/auxiliary/util/u_debug.o
+common-obj-y += src/gallium/auxiliary/util/u_format_table.o
+common-obj-y += src/gallium/auxiliary/util/u_surface.o
+common-obj-y += src/gallium/auxiliary/util/u_debug_describe.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_parse.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_util.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_build.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_ureg.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_strings.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_transform.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_text.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_sanity.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_iterate.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_scan.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_dump.o
+common-obj-y += src/gallium/auxiliary/tgsi/tgsi_info.o
+common-obj-y += src/vrend_decode.o
+common-obj-y += src/vrend_object.o
+common-obj-y += src/epoxy_stub.o
+common-obj-y += src/virglrenderer.o
+common-obj-y += src/vrend_shader.o
+common-obj-y += src/vrend_renderer.o
+common-obj-y += src/iov.o
+common-obj-y += src/vrend_blitter.o
+common-obj-y += src/vrend_formats.o

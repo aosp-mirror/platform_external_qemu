@@ -153,6 +153,9 @@ cat_co_rw(BlockDriverState *bs, int64_t sector_num, int nb_sectors, QEMUIOVector
         uint64_t cnt = left;
         if (start +  cnt > s->backings[i]->bs->total_sectors) {
                 cnt = s->backings[i]->bs->total_sectors - start;
+                qemu_iovec_reset(&tmp);
+                qemu_iovec_concat(&tmp, qiov, done << BDRV_SECTOR_BITS, cnt << BDRV_SECTOR_BITS);
+                c_iov = &tmp;
         }
         if (write) {
           ret = bdrv_co_writev(s->backings[i],  start, cnt, c_iov);

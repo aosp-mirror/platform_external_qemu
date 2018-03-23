@@ -46,3 +46,4 @@
 #define HOST_DSOSUF ".so"
 #define CONFIG_BLOCK_DELAYED_FLUSH  1
 #define CONFIG_VNC 1
+#define CONFIG_VIRGL 1
