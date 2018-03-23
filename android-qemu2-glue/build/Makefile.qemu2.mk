@@ -98,7 +98,7 @@ QEMU2_SDL2_LDLIBS += \
 endif
 
 # Ensure config-host.h can be found properly.
-QEMU2_INCLUDES := $(LOCAL_PATH)/android-qemu2-glue/config/$(BUILD_TARGET_TAG)
+QEMU2_INCLUDES := $(LOCAL_PATH)/android-qemu2-glue/config/$(BUILD_TARGET_TAG) $(LOCAL_PATH)/virglrenderer/src/gallium/auxiliary $(LOCAL_PATH)/virglrenderer/src/gallium/include $(LOCAL_PATH)/virglrenderer/src
 
 ifeq ($(BUILD_TARGET_OS),linux)
   QEMU2_INCLUDES += $(QEMU2_TOP_DIR)/linux-headers
@@ -340,11 +340,11 @@ $(call end-emulator-library)
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
-QEMU2_TARGET := x86
+QEMU2_TARGET := x86_64
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
 ifeq (,$(CONFIG_MIN_BUILD))
-    QEMU2_TARGET := x86_64
+    QEMU2_TARGET := x86
     include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
     QEMU2_TARGET := arm
