@@ -40,7 +40,8 @@ public:
     // Create a Texture backed render target with the given size.
     //
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
-    // |texture| - Destination texture.
+    // |textureId| - Destination texture id.
+    // |texture| - Destination texture wrapper object.
     // |width| - Requested texture width.
     // |height| - Requested texture height.
     //
@@ -48,6 +49,7 @@ public:
     // error.
     static std::unique_ptr<RenderTarget> createTextureTarget(
             const GLESv2Dispatch* gles2,
+            GLuint textureId,
             Texture texture,
             uint32_t width,
             uint32_t height);
@@ -77,10 +79,9 @@ private:
     RenderTarget(const GLESv2Dispatch* gles2,
                  GLuint framebuffer,
                  GLuint depthRenderbuffer,
+                 Texture texture,
                  uint32_t width,
                  uint32_t height);
-
-    void setTexture(const Texture& texture);
 
     const GLESv2Dispatch* mGles2 = nullptr;
 

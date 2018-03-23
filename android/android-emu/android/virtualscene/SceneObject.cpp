@@ -53,7 +53,6 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
-    std::unordered_map<std::string, Texture> textures;
 
     std::string err;
     const bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err,
@@ -68,19 +67,6 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
     }
 
     std::unique_ptr<SceneObject> result(new SceneObject());
-
-    auto getOrLoadTexture = [&textures, &renderer,
-                             &result](std::string filename) {
-        auto it = textures.find(filename);
-        if (it == textures.end()) {
-            Texture texture =
-                    renderer.loadTexture(result.get(), filename.c_str());
-            textures[filename] = texture;
-            return texture;
-        }
-
-        return it->second;
-    };
 
     const size_t vertexCount = attrib.vertices.size() / 3;
     const size_t texcoordCount = attrib.texcoords.size() / 2;
@@ -102,8 +88,9 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
                 if (strstr(materials[material_id].diffuse_texname.c_str(), "TV")) {
                     useCheckerboardMaterial = true;
                 } else {
-                    texture = getOrLoadTexture(
-                            materials[material_id].diffuse_texname);
+                    texture = renderer.loadTexture(
+                            result.get(),
+                            materials[material_id].diffuse_texname.c_str());
                 }
             }
         }

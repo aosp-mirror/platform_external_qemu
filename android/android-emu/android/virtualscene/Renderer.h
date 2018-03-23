@@ -162,7 +162,8 @@ public:
     // Load a PNG image from a file and create a Texture from it.
     //
     // |parent| - Parent SceneObject, which controls the lifetime of the
-    // texture. |filename| - Filename to load.
+    //            texture.
+    // |filename| - Filename to load.
     //
     // Returns a Texture instance or an invalid value if there was an error.
     virtual Texture loadTexture(const SceneObject* parent,

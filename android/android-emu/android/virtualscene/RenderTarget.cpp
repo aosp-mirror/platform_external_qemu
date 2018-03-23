@@ -22,11 +22,13 @@ namespace virtualscene {
 RenderTarget::RenderTarget(const GLESv2Dispatch* gles2,
                            GLuint framebuffer,
                            GLuint depthRenderbuffer,
+                           Texture texture,
                            uint32_t width,
                            uint32_t height)
     : mGles2(gles2),
       mFramebuffer(framebuffer),
       mDepthRenderbuffer(depthRenderbuffer),
+      mTexture(texture),
       mWidth(width),
       mHeight(height) {}
 
@@ -37,12 +39,9 @@ RenderTarget::~RenderTarget() {
     }
 }
 
-void RenderTarget::setTexture(const Texture& texture) {
-    mTexture = texture;
-}
-
 std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
         const GLESv2Dispatch* gles2,
+        GLuint textureId,
         Texture texture,
         uint32_t width,
         uint32_t height) {
@@ -59,8 +58,7 @@ std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
                                      GL_RENDERBUFFER, depthRenderbuffer);
 
     gles2->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                  GL_TEXTURE_2D,
-                                  static_cast<GLuint>(texture.id), 0);
+                                  GL_TEXTURE_2D, textureId, 0);
 
     if (gles2->glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
             GL_FRAMEBUFFER_COMPLETE) {
@@ -69,16 +67,15 @@ std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
         return nullptr;
     }
 
-    std::unique_ptr<RenderTarget> result(new RenderTarget(gles2,
-            framebuffer, depthRenderbuffer, width, height));
-    result->setTexture(texture);
+    std::unique_ptr<RenderTarget> result(new RenderTarget(
+            gles2, framebuffer, depthRenderbuffer, texture, width, height));
     return result;
 }
 
 std::unique_ptr<RenderTarget> RenderTarget::createDefault(
         const GLESv2Dispatch* gles2, uint32_t width, uint32_t height) {
-    return std::unique_ptr<RenderTarget>(new RenderTarget(gles2,
-            0, 0, width, height));
+    return std::unique_ptr<RenderTarget>(
+            new RenderTarget(gles2, 0, 0, Texture(), width, height));
 }
 
 void RenderTarget::bind() const {

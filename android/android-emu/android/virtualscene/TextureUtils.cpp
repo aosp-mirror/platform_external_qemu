@@ -18,7 +18,6 @@
 #include <string>
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedStdioFile.h"
-#include "android/base/system/System.h"
 #include "android/utils/debug.h"
 
 #include <png.h>
@@ -30,7 +29,6 @@
 
 using android::base::PathUtils;
 using android::base::ScopedStdioFile;
-using android::base::System;
 
 namespace android {
 namespace virtualscene {
@@ -42,9 +40,6 @@ bool TextureUtils::loadPNG(const char* filename,
     *outWidth = 0;
     *outHeight = 0;
 
-    const std::string path = PathUtils::join(
-            System::get()->getLauncherDirectory(), "resources", filename);
-
     uint8_t header[8];
     std::vector<uint8_t> data;
     std::vector<uint8_t*> rowPtrs;
@@ -54,9 +49,9 @@ bool TextureUtils::loadPNG(const char* filename,
 
     int bitdepth, colortype, imethod, cmethod, fmethod;
 
-    ScopedStdioFile fp(fopen(path.c_str(), "rb"));
+    ScopedStdioFile fp(fopen(filename, "rb"));
     if (!fp) {
-        E("%s: Failed to open file %s", __FUNCTION__, path.c_str());
+        E("%s: Failed to open file %s", __FUNCTION__, filename);
         return false;
     }
 
