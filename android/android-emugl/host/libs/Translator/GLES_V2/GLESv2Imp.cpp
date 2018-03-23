@@ -229,6 +229,10 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
 
 }  // extern "C"
 
+static bool isRealGles2Gles(void) {
+    return true;
+}
+
 static void s_attachShader(GLEScontext* ctx, GLuint program, GLuint shader,
                            ShaderParser* shaderParser) {
     if (ctx && program && shader && shaderParser) {
@@ -417,7 +421,7 @@ static void sSetDesktopGLEnable(const GLESv2Context* ctx, bool enable, GLenum ca
 // depending on the internal format and attachment combinations of the
 // framebuffer object.
 static void sUpdateFboEmulation(GLESv2Context* ctx) {
-    if (ctx->getMajorVersion() < 3 || isGles2Gles()) return;
+    if (ctx->getMajorVersion() < 3 || isRealGles2Gles()) return;
 
     std::vector<GLenum> colorAttachments(ctx->getCaps()->maxDrawBuffers);
     std::iota(colorAttachments.begin(), colorAttachments.end(), GL_COLOR_ATTACHMENT0);
@@ -550,7 +554,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
-    if (!ctx->isCoreProfile() && !isGles2Gles()) {
+    if (!ctx->isCoreProfile() && !isRealGles2Gles()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
         ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
     }
@@ -636,7 +640,7 @@ GL_APICALL void  GL_APIENTRY glClearColor(GLclampf red, GLclampf green, GLclampf
 GL_APICALL void  GL_APIENTRY glClearDepthf(GLclampf depth){
     GET_CTX();
     ctx->setClearDepth(depth);
-    if (isGles2Gles()) {
+    if (isRealGles2Gles()) {
         ctx->dispatcher().glClearDepthf(depth);
     } else {
         ctx->dispatcher().glClearDepth(depth);
@@ -1144,7 +1148,7 @@ GL_APICALL void  GL_APIENTRY glDepthMask(GLboolean flag){
 GL_APICALL void  GL_APIENTRY glDepthRangef(GLclampf zNear, GLclampf zFar){
     GET_CTX();
     ctx->setDepthRangef(zNear, zFar);
-    if (isGles2Gles()) {
+    if (isRealGles2Gles()) {
         ctx->dispatcher().glDepthRangef(zNear,zFar);
     } else {
         ctx->dispatcher().glDepthRange(zNear,zFar);
@@ -1207,7 +1211,7 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 
 // s_glDrawPre/Post() are for draw calls' fast paths.
 static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
-    if (isGles2Gles()) {
+    if (isRealGles2Gles()) {
         return;
     }
     if (ctx->getMajorVersion() < 3)
@@ -1230,7 +1234,7 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
 }
 
 static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
-    if (isGles2Gles()) {
+    if (isRealGles2Gles()) {
         return;
     }
     if (mode == GL_POINTS) {
@@ -2912,10 +2916,10 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
     GET_CTX_V2_RET(GL_NONE);
     GLenum internal = internalformat;
     // HACK: angle does not like GL_DEPTH_COMPONENT24_OES
-    if (isGles2Gles() && internalformat == GL_DEPTH_COMPONENT24_OES) {
+    if (isRealGles2Gles() && internalformat == GL_DEPTH_COMPONENT24_OES) {
         internal = GL_DEPTH_COMPONENT16;
     }
-    if (!isGles2Gles() && ctx->getMajorVersion() < 3) {
+    if (!isRealGles2Gles() && ctx->getMajorVersion() < 3) {
         switch (internalformat) {
             case GL_RGB565:
                 internal = GL_RGB;
@@ -3004,7 +3008,7 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
                      GL_INVALID_OPERATION);
         ShaderParser* sp = (ShaderParser*)objData;
         sp->setSrc(count, string, length);
-        if (isGles2Gles()) {
+        if (isRealGles2Gles()) {
             ctx->dispatcher().glShaderSource(globalShaderName, count, string,
                                          length);
         } else {
@@ -3098,7 +3102,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     s_glInitTexImage2D(target, level, internalformat, width, height, border, samples,
             &format, &type, &internalformat);
 
-    if (!isCompressedFormat && ctx->getMajorVersion() < 3 && !isGles2Gles()) {
+    if (!isCompressedFormat && ctx->getMajorVersion() < 3 && !isRealGles2Gles()) {
         if (type==GL_HALF_FLOAT_OES)
             type = GL_HALF_FLOAT_NV;
         if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
