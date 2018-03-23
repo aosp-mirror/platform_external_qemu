@@ -481,6 +481,40 @@ QEMU2_TARGET_SOURCES := \
     translate-common.c \
     xen-common-stub.c \
     xen-hvm-stub.c \
+    virglrenderer/src/gallium/auxiliary/cso_cache/cso_hash.c \
+    virglrenderer/src/gallium/auxiliary/cso_cache/cso_cache.c \
+    virglrenderer/src/gallium/auxiliary/os/os_misc.c \
+    virglrenderer/src/gallium/auxiliary/util/u_format.c \
+    virglrenderer/src/gallium/auxiliary/util/u_texture.c \
+    virglrenderer/src/gallium/auxiliary/util/u_bitmask.c \
+    virglrenderer/src/gallium/auxiliary/util/u_math.c \
+    virglrenderer/src/gallium/auxiliary/util/u_cpu_detect.c \
+    virglrenderer/src/gallium/auxiliary/util/u_hash_table.c \
+    virglrenderer/src/gallium/auxiliary/util/u_debug.c \
+    virglrenderer/src/gallium/auxiliary/util/u_format_table.c \
+    virglrenderer/src/gallium/auxiliary/util/u_surface.c \
+    virglrenderer/src/gallium/auxiliary/util/u_debug_describe.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_parse.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_util.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_build.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_ureg.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_strings.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_transform.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_text.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_sanity.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_iterate.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_scan.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_dump.c \
+    virglrenderer/src/gallium/auxiliary/tgsi/tgsi_info.c \
+    virglrenderer/src/epoxy_stub.c \
+    virglrenderer/src/vrend_decode.c \
+    virglrenderer/src/vrend_object.c \
+    virglrenderer/src/virglrenderer.c \
+    virglrenderer/src/vrend_shader.c \
+    virglrenderer/src/vrend_renderer.c \
+    virglrenderer/src/iov.c \
+    virglrenderer/src/vrend_blitter.c \
+    virglrenderer/src/vrend_formats.c
 
 QEMU2_TARGET_aarch64_SOURCES := \
     disas/arm-a64.cc \
