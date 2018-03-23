@@ -30,6 +30,7 @@ struct DCLExtra : public DisplayChangeListener {
     DCLExtra() { memset(this, 0, sizeof(*this)); }
 
     QFrameBuffer* fb;
+
 };
 
 }
@@ -115,6 +116,57 @@ static void android_display_refresh(DisplayChangeListener* dcl) {
     }
 }
 
+extern void* gl_create_context(void *);
+extern int gl_make_context_current(void *);
+extern void gl_destroy_context(void *);
+extern void gl_scanout_texture(uint32_t backing_id,
+                                bool backing_y_0_top,
+                                uint32_t backing_width,
+                                uint32_t backing_height,
+                                uint32_t x, uint32_t y,
+                                uint32_t w, uint32_t h);
+extern void gl_scanout_flush(uint32_t x, uint32_t y,
+                             uint32_t w, uint32_t h);
+
+
+static QEMUGLContext android_gl_create_context(DisplayChangeListener *dcl, QEMUGLParams *params) {
+	return gl_create_context(params);
+}
+
+static void android_gl_destroy_context(DisplayChangeListener *dcl, QEMUGLContext ctx) {
+  return gl_destroy_context(ctx);
+}
+
+static int android_gl_make_context_current(DisplayChangeListener *dcl,
+                                 QEMUGLContext ctx)
+{
+  return gl_make_context_current(ctx);
+}
+
+static void android_gl_scanout_disable(DisplayChangeListener *dcl)
+{
+  fprintf(stderr, "stub %s\n", __func__);
+}
+
+static void android_gl_scanout_texture(DisplayChangeListener *dcl,
+                             uint32_t backing_id,
+                             bool backing_y_0_top,
+                             uint32_t backing_width,
+                             uint32_t backing_height,
+                             uint32_t x, uint32_t y,
+                             uint32_t w, uint32_t h)
+{
+   return gl_scanout_texture(backing_id, backing_y_0_top, backing_width,
+			     backing_height, x, y, w, h);
+}
+
+
+static void android_gl_scanout_flush(DisplayChangeListener *dcl,
+                           uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+   return gl_scanout_flush(x, y, w, h);
+}
+
 static QemuConsole* find_graphic_console() {
     // find the first graphic console (Android emulator has only one usually)
     for (int i = 0;; i++) {
@@ -152,6 +204,7 @@ void android_display_init_no_window(QFrameBuffer* qf) {
     qframebuffer_set_producer(qf, nullptr, android_display_producer_check,
                               android_display_producer_invalidate, nullptr);
 }
+
 
 bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     QemuConsole* con = find_graphic_console();
@@ -197,7 +250,16 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     dclOps.dpy_refresh = &android_display_refresh;
     dclOps.dpy_gfx_update = &android_display_update;
     dclOps.dpy_gfx_switch = &android_display_switch;
+
+    dclOps.dpy_gl_ctx_create       = &android_gl_create_context,
+    dclOps.dpy_gl_ctx_destroy      = &android_gl_destroy_context,
+    dclOps.dpy_gl_ctx_make_current = &android_gl_make_context_current,
+    dclOps.dpy_gl_scanout_disable  = &android_gl_scanout_disable,
+    dclOps.dpy_gl_scanout_texture  = &android_gl_scanout_texture,
+    dclOps.dpy_gl_update           = &android_gl_scanout_flush,
+
     dcl->ops = &dclOps;
+    dcl->con = con;
     register_displaychangelistener(dcl);
 
     return true;

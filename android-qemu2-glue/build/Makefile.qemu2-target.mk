@@ -128,50 +128,6 @@ LOCAL_PREBUILTS_OBJ_FILES += \
 
 $(call end-emulator-library)
 
-ifeq (,$(CONFIG_MIN_BUILD))
-    # The upstream version of QEMU2, without any Android-specific hacks.
-    # This uses the regular SDL2 UI backend.
-
-    $(call start-emulator-program,qemu-upstream-$(QEMU2_TARGET_SYSTEM))
-
-    LOCAL_WHOLE_STATIC_LIBRARIES += \
-        libqemu2-system-$(QEMU2_TARGET_SYSTEM) \
-        libqemu2-common \
-
-    LOCAL_STATIC_LIBRARIES += \
-        $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
-
-    LOCAL_CFLAGS += \
-        $(QEMU2_SYSTEM_CFLAGS) \
-
-    LOCAL_C_INCLUDES += \
-        $(QEMU2_SYSTEM_INCLUDES) \
-        $(QEMU2_SDL2_INCLUDES) \
-
-    LOCAL_SRC_FILES += \
-        $(call qemu2-if-target,x86 x86_64, \
-            hw/i386/acpi-build.c \
-            hw/i386/pc_piix.c \
-            ) \
-        $(call qemu2-if-windows, \
-            stubs/win32-stubs.c \
-            ) \
-        ui/sdl2.c \
-        ui/sdl2-input.c \
-        ui/sdl2-2d.c \
-        vl.c \
-
-    LOCAL_LDFLAGS += $(QEMU2_SYSTEM_LDFLAGS)
-
-    LOCAL_LDLIBS += \
-        $(QEMU2_SYSTEM_LDLIBS) \
-        $(QEMU2_SDL2_LDLIBS) \
-
-    LOCAL_INSTALL_DIR := qemu/$(BUILD_TARGET_TAG)
-
-    $(call end-emulator-program)
-endif   # !CONFIG_MIN_BUILD
-
 # The emulator-specific version of QEMU2, with CONFIG_ANDROID defined at
 # compile-time.
 

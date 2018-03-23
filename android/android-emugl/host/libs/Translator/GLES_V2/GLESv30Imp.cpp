@@ -562,6 +562,10 @@ GL_APICALL void GL_APIENTRY glDrawBuffers(GLsizei n, const GLenum * bufs) {
     GET_CTX_V2();
     gles30usages->set_is_used(true);
     if (ctx->isDefaultFBOBound(GL_DRAW_FRAMEBUFFER)) {
+	if(n != 1 || (bufs[0] != GL_NONE && bufs[0] != GL_BACK)) {
+	  fprintf(stderr, "%d %08x\n", n, bufs[0]);
+	  abort();
+	}
         SET_ERROR_IF(n != 1 || (bufs[0] != GL_NONE && bufs[0] != GL_BACK),
                 GL_INVALID_OPERATION);
         GLenum emulatedBufs = bufs[0] == GL_NONE ? GL_NONE

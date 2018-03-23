@@ -1271,6 +1271,7 @@ echo "#define CONFIG_SLIRP    1" >> $config_h
 echo "#define CONFIG_SKINS    1" >> $config_h
 echo "#define CONFIG_TRACE    1" >> $config_h
 echo "#define CONFIG_QT       1" >> $config_h
+echo "#define CONFIG_VIRGL    1" >> $config_h
 echo "#undef CONFIG_SDL" >> $config_h
 
 echo "#define CONFIG_BLOCK_DELAYED_FLUSH  1" >> $config_h

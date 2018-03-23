@@ -455,6 +455,7 @@ public:
 
         bool useCoreProfile = mCoreProfileSupported &&
            (profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
+	useCoreProfile = true;
 
         ErrorHandler handler(mDisplay);
 

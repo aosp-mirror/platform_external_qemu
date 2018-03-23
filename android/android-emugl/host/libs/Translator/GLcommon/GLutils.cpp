@@ -30,11 +30,11 @@ static bool s_gles2Gles = false;
 static bool s_coreProfile = false;
 
 void setGles2Gles(bool isGles2Gles) {
-    s_gles2Gles = isGles2Gles;
+    s_gles2Gles = true;
 }
 
 bool isGles2Gles() {
-    return s_gles2Gles;
+    return true;
 }
 
 void setCoreProfile(bool isCore) {
