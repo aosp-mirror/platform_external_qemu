@@ -24,6 +24,7 @@
 namespace Ui {
 
 const char THEME_PATH_VAR[] = "PATH";
+const char THEME_TEXT_COLOR[] = "TEXT_COLOR";
 const char MAJOR_TAB_COLOR_VAR[] = "MAJOR_TAB_COLOR";
 const char TAB_BKG_COLOR_VAR[] = "TAB_BKG_COLOR";
 const char TAB_SELECTED_COLOR_VAR[] = "TAB_SELECTED_COLOR";
