@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "75e48327_f8511f9d",
+        "filename": "android/android-emu/android/emulation/ParameterList.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-23T00:47:56Z",
+      "side": 1,
+      "message": "nit: what about making \u0027true\u0027 a default parameter value? no need to have several functions then. Same thing\u0027s valid for the toString() public method",
+      "range": {
+        "startLine": 57,
+        "startChar": 24,
+        "endLine": 57,
+        "endChar": 35
+      },
+      "revId": "5a0639d0ee661d8f8a229af5bbc82fc89a9e595b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a2f97bd8_9f612a30",
         "filename": "android/android-emu/android/emulation/ParameterList_unittest.cpp",
         "patchSetId": 3
@@ -16,6 +39,29 @@
       "revId": "5a0639d0ee661d8f8a229af5bbc82fc89a9e595b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0995fcda_ee8ae057",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-23T00:47:56Z",
+      "side": 1,
+      "message": "nit: could you please add a short comment saying that as |params| contains a user-entered parameter we need to preseve the existing quoting there thus call with \"quote \u003d false\"",
+      "range": {
+        "startLine": 186,
+        "startChar": 1,
+        "endLine": 186,
+        "endChar": 39
+      },
+      "revId": "5a0639d0ee661d8f8a229af5bbc82fc89a9e595b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
