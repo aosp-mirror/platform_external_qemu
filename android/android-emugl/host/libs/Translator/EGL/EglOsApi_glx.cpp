@@ -455,17 +455,25 @@ public:
 
         bool useCoreProfile = mCoreProfileSupported &&
            (profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
+	useCoreProfile = true;
 
         ErrorHandler handler(mDisplay);
 
         GLXContext ctx;
         if (useCoreProfile) {
+		static const int esProfile[] = {
+		    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+		    GLX_CONTEXT_MINOR_VERSION_ARB, 2,
+		    GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_ES2_PROFILE_BIT_EXT,
+		    None
+		};
+
             ctx = mCreateContextAttribs(
                         mDisplay,
                         GlxPixelFormat::from(pixelFormat),
                         sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
                         True /* try direct (supposed to fall back to indirect) */,
-                        mCoreProfileCtxAttribs);
+                        esProfile);
         } else {
             ctx = glXCreateNewContext(
                     mDisplay,
