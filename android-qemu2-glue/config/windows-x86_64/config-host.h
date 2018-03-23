@@ -44,3 +44,4 @@
 #define CONFIG_IASL iasl
 #define HOST_DSOSUF ".dll"
 #define CONFIG_VNC 1
+#define CONFIG_VIRGL 1

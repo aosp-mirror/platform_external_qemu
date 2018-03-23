@@ -82,7 +82,9 @@ static const std::unordered_map<std::string, std::string> sAliasExtra = {
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
-            } \
+            } else { \
+	        fprintf(stderr, "%s not available\n", # func_name); \
+	    } \
         } \
     } while (0);
 
