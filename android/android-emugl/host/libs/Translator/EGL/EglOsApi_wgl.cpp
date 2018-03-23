@@ -977,12 +977,20 @@ public:
         bool useCoreProfile =
             mCoreProfileSupported &&
             (profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
+	useCoreProfile = true;
 
         HGLRC ctx;
         if (useCoreProfile) {
+	         static const int esProfile[] = {
+                 WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+                 WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+                 WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES2_PROFILE_BIT_EXT,
+                 0
+                 };
+
             ctx = mDispatch->wglCreateContextAttribsARB(
                       dpy, WinContext::from(sharedContext),
-                      mCoreProfileCtxAttribs);
+                      esProfile);
         } else {
             ctx = mDispatch->wglCreateContext(dpy);
             if (ctx && sharedContext) {

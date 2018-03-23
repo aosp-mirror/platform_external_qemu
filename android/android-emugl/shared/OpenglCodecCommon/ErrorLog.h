@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #define ERR(...)    fprintf(stderr, __VA_ARGS__)
+#define EMUGL_DEBUG 1
 #ifdef EMUGL_DEBUG
 #    define DBG(...)    fprintf(stderr, __VA_ARGS__)
 #else
