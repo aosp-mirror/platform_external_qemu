@@ -15,6 +15,8 @@
 
 #include "RendererImpl.h"
 
+#include "FrameBuffer.h"
+
 #include "android/base/files/Stream.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/dma_device.h"
@@ -22,6 +24,10 @@
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/sync_device.h"
+
+#include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/DispatchTables.h"
+
 
 namespace emugl {
 
@@ -71,6 +77,27 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
     set_emugl_dma_get_host_addr(ops.get_host_addr);
     set_emugl_dma_invalidate_host_mappings(ops.invalidate_host_mappings);
     set_emugl_dma_unlock(ops.unlock);
+}
+
+void* RenderLibImpl::getGL(void) {
+  return &s_gles2;
+}
+
+void* RenderLibImpl::getEGL(void) {
+  return &s_egl;
+}
+
+bool RenderLibImpl::getDSCC(void** display, void** surface, void** config, void** context) {
+  FrameBuffer* fb  = FrameBuffer::getFB();
+  if (fb == NULL) {
+	  fprintf(stderr, "null fp\n");
+	  abort();
+  }
+  *display = fb->getDisplay();
+  *surface = fb->getWindowSurface();
+  *config = fb->getConfig();
+  *context = fb->getContext();
+  return (*display && *surface  && *config && *context);
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,

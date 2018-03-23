@@ -40,6 +40,12 @@ public:
 
     virtual void setDmaOps(emugl_dma_ops) override;
 
+    virtual void* getGL(void) override;
+
+    virtual void* getEGL(void) override;
+
+    virtual bool getDSCC(void**, void**, void **, void**) override;
+
     virtual RendererPtr initRenderer(int width,
                                      int height,
                                      bool useSubWindow,
