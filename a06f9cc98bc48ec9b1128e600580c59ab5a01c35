@@ -1,0 +1,395 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "351e83e4_f83cf2e0",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "what about android::base::ScopedCustomPtr\u003c\u003e ?\n\nI see it defined in many places, mostly with the same deleter. You could create a custom struct to call that function specifically and create an alias so there\u0027s no need to supply avformat_free_context() every time",
+      "range": {
+        "startLine": 78,
+        "startChar": 6,
+        "endLine": 78,
+        "endChar": 21
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ec4902a_2758bfb1",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "this can\u0027t happen, StringView is never null",
+      "range": {
+        "startLine": 236,
+        "startChar": 9,
+        "endLine": 236,
+        "endChar": 27
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff5a742f_63d1afc2",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "there\u0027s a better function in android/base/misc/StringUtils.h - endsWith()",
+      "range": {
+        "startLine": 243,
+        "startChar": 9,
+        "endLine": 243,
+        "endChar": 22
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a6c4df9_7ec024a2",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "nit: please format",
+      "range": {
+        "startLine": 75,
+        "startChar": 16,
+        "endLine": 76,
+        "endChar": 19
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5092db4_81adfcaa",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "accept std::unique_ptr\u003c\u003e by value, this way it\u0027s explicit that it\u0027s taking ownership",
+      "range": {
+        "startLine": 104,
+        "startChar": 61,
+        "endLine": 104,
+        "endChar": 76
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eefd0dc7_a005c15f",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "nit: \u003d default",
+      "range": {
+        "startLine": 127,
+        "startChar": 21,
+        "endLine": 127,
+        "endChar": 23
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "645aa3ab_a3a5d34f",
+        "filename": "android/android-emu/android/recording/Frame.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "this can be the only constructor, just give both parameters default values of 0",
+      "range": {
+        "startLine": 68,
+        "startChar": 10,
+        "endLine": 68,
+        "endChar": 35
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "48815443_ec6608b6",
+        "filename": "android/android-emu/android/recording/GifConverter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "static constexpr?",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 31
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0433aa7b_da59b678",
+        "filename": "android/android-emu/android/recording/GifConverter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "nit: const",
+      "range": {
+        "startLine": 63,
+        "startChar": 24,
+        "endLine": 63,
+        "endChar": 25
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "329a04a2_7feafff5",
+        "filename": "android/android-emu/android/recording/GifConverter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "what about moving the call out of ctor and renaming it to \"run()\"?\nfunctions will look like this:\n\nGifConverterImpl converter(...);\nreturn converter.run()",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 17
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d8edf55_ae0b7eb8",
+        "filename": "android/android-emu/android/recording/GifConverter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "nit: move() makes no sense for primitive types",
+      "range": {
+        "startLine": 120,
+        "startChar": 12,
+        "endLine": 120,
+        "endChar": 21
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11187a47_6425fe4e",
+        "filename": "android/android-emu/android/recording/GifConverter.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "not needed in C++",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 20
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cec22251_573ef339",
+        "filename": "android/android-emu/android/recording/GifConverter.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "nit: StringView ?",
+      "range": {
+        "startLine": 36,
+        "startChar": 37,
+        "endLine": 36,
+        "endChar": 48
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2b630ef_5f094d7a",
+        "filename": "android/android-emu/android/recording/GifConverter.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "very nit: \u0027convert\u0027 is already a part of the class name\nGifConverter::toAnimatedGif(...) IMO looks better",
+      "range": {
+        "startLine": 36,
+        "startChar": 16,
+        "endLine": 36,
+        "endChar": 36
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0243e768_6a3902a2",
+        "filename": "android/android-emu/android/recording/screen-recorder-constants.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "kNumAudioChannels? just in case",
+      "range": {
+        "startLine": 33,
+        "startChar": 14,
+        "endLine": 33,
+        "endChar": 26
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c80558db_c0ce5fb6",
+        "filename": "android/android-emu/android/recording/video/GuestReadbackWorker.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "nit: please return unique_ptr\u003c\u003e instead of raw pointers in  all create() functions",
+      "range": {
+        "startLine": 43,
+        "startChar": 11,
+        "endLine": 43,
+        "endChar": 31
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3df6f212_ec51ddad",
+        "filename": "android/android-emu/android/utils/debug.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-24T17:16:56Z",
+      "side": 1,
+      "message": "please don\u0027t overuse the debug tags - those are bits in 64-bit int, and we don\u0027t have that many left",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 55
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
