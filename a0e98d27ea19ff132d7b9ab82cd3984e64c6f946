@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "aff3829c_cbe896c9",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b3a1372b_45162cbf",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 6
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "87dfba14_f8bfb40e",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "01a76b00_3fe37163",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "87dfba14_f8bfb40e",
+      "range": {
+        "startLine": 93,
+        "startChar": 4,
+        "endLine": 93,
+        "endChar": 21
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "10ff8c7e_e3e97afa",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -62,6 +110,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "614ed5e0_02627d7c",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "10ff8c7e_e3e97afa",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -112,6 +178,30 @@
     },
     {
       "key": {
+        "uuid": "a0f189c4_dea956bc",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3d5a32d8_6b90fb18",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 141,
+        "endChar": 25
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b939d0cc_f2593fa8",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -126,6 +216,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5704874_1d167bec",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b939d0cc_f2593fa8",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -146,6 +254,24 @@
     },
     {
       "key": {
+        "uuid": "97bf1742_d7763eb2",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86e24b44_4102ab8d",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4972a845_f03dbbe5",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -157,6 +283,30 @@
       "writtenOn": "2018-02-26T18:27:32Z",
       "side": 1,
       "message": "nit: please explain what is this path to. |mEncodedOutputPath| ?",
+      "range": {
+        "startLine": 234,
+        "startChar": 16,
+        "endLine": 234,
+        "endChar": 21
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f404626_4b1a2792",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4972a845_f03dbbe5",
       "range": {
         "startLine": 234,
         "startChar": 16,
@@ -186,6 +336,24 @@
     },
     {
       "key": {
+        "uuid": "d89ff909_92895637",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2892340a_b874338f",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aef637ee_b0fd6a02",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -203,6 +371,24 @@
     },
     {
       "key": {
+        "uuid": "44e94fea_dd9a4ef9",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aef637ee_b0fd6a02",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "69a63189_9fdf50bd",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -214,6 +400,30 @@
       "writtenOn": "2018-02-26T18:27:32Z",
       "side": 1,
       "message": "nit: PathUtils::extension(tmpfile) \u003d\u003d \".webm\"",
+      "range": {
+        "startLine": 280,
+        "startChar": 8,
+        "endLine": 280,
+        "endChar": 48
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de0fa13d_810994a3",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69a63189_9fdf50bd",
       "range": {
         "startLine": 280,
         "startChar": 8,
@@ -249,6 +459,30 @@
     },
     {
       "key": {
+        "uuid": "c0248816_9cac740d",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "387b4451_b2c7a929",
+      "range": {
+        "startLine": 308,
+        "startChar": 11,
+        "endLine": 308,
+        "endChar": 50
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dfa4a0dd_b4cb107e",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -263,6 +497,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a368cf95_09da3202",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dfa4a0dd_b4cb107e",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -313,6 +565,30 @@
     },
     {
       "key": {
+        "uuid": "5eadd108_da75642a",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done. Changed to use new generic Frame structure.",
+      "parentUuid": "d6f5acc4_c63049a0",
+      "range": {
+        "startLine": 384,
+        "startChar": 9,
+        "endLine": 385,
+        "endChar": 43
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a1226b7_3f384b4e",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -336,6 +612,30 @@
     },
     {
       "key": {
+        "uuid": "8d7fd587_bb76c065",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a1226b7_3f384b4e",
+      "range": {
+        "startLine": 392,
+        "startChar": 11,
+        "endLine": 392,
+        "endChar": 25
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "192c8d7e_0d25abfb",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -353,6 +653,24 @@
     },
     {
       "key": {
+        "uuid": "8a3205e6_a525e928",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done. I\u0027ve put some comments here regarding why.",
+      "parentUuid": "192c8d7e_0d25abfb",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3f093da3_3cf2474a",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -367,6 +685,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "761dc7b7_fc4eecc3",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done. This is not needed.",
+      "parentUuid": "3f093da3_3cf2474a",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -393,6 +729,30 @@
     },
     {
       "key": {
+        "uuid": "270e91c6_2d9f0681",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "185947b1_0055881e",
+      "range": {
+        "startLine": 514,
+        "startChar": 15,
+        "endLine": 514,
+        "endChar": 44
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e1dc4ee0_1cbab865",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -413,6 +773,30 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b3ec88d_63f32f5e",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e1dc4ee0_1cbab865",
+      "range": {
+        "startLine": 523,
+        "startChar": 19,
+        "endLine": 523,
+        "endChar": 33
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -439,6 +823,30 @@
     },
     {
       "key": {
+        "uuid": "512a49c9_cfc1e848",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "108c1122_d7e62ec4",
+      "range": {
+        "startLine": 530,
+        "startChar": 4,
+        "endLine": 530,
+        "endChar": 41
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a254aa5_1988ae84",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -453,6 +861,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba99a159_f8700f91",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a254aa5_1988ae84",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -479,6 +905,30 @@
     },
     {
       "key": {
+        "uuid": "c831f3b5_9fdacde1",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6052cc67_e2138311",
+      "range": {
+        "startLine": 621,
+        "startChar": 4,
+        "endLine": 621,
+        "endChar": 24
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "948fc1b1_7a09bbf9",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -493,6 +943,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "515d64bb_8e1e8c96",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "948fc1b1_7a09bbf9",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -543,6 +1011,30 @@
     },
     {
       "key": {
+        "uuid": "300b7ba2_76bcff2b",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "333feaed_139b702d",
+      "range": {
+        "startLine": 688,
+        "startChar": 19,
+        "endLine": 688,
+        "endChar": 35
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "405ba959_78249bd7",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -560,6 +1052,24 @@
     },
     {
       "key": {
+        "uuid": "aeab7830_474f2624",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "405ba959_78249bd7",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a80a6260_afc59bad",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -571,6 +1081,30 @@
       "writtenOn": "2018-02-26T18:27:32Z",
       "side": 1,
       "message": "what\u0027s this 32?",
+      "range": {
+        "startLine": 987,
+        "startChar": 39,
+        "endLine": 987,
+        "endChar": 41
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b20e852_76599c01",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 987,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "This was copied from some example code in ffmpeg codebase, and is hardcoded in a lot of places, even in it\u0027s own library. https://patches.libav.org/patch/62774/ seems to address this issue, but our library is older than this one. https://cs.corp.google.com/piper///depot/google3/third_party/ffmpeg/next/libavutil/x86/cpu.c?rcl\u003d190160421\u0026l\u003d245",
+      "parentUuid": "a80a6260_afc59bad",
       "range": {
         "startLine": 987,
         "startChar": 39,
@@ -600,6 +1134,24 @@
     },
     {
       "key": {
+        "uuid": "6af110fa_5119f17b",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1000,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fc3f4442_73ab060d",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ce9f8f53_6beaa942",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -614,6 +1166,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e7ecdec_a3f9e8ac",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1015,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "The number doesn\u0027t mean anything. It just means that if the encoder supports variable frame sizes, then we support encoding frames from 1 to 10000 samples per frame. We can make this smaller or larger if we want.",
+      "parentUuid": "ce9f8f53_6beaa942",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -634,6 +1204,24 @@
     },
     {
       "key": {
+        "uuid": "b7df4e90_a397b253",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1046,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Moved into addAudioTrack(). We\u0027ll just let the caller figure out what to do from here. I\u0027ve added a condition to only start the audio producer if adding the audio track was successful.",
+      "parentUuid": "5543620f_f8a85326",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8179683c_8b95fec8",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -648,6 +1236,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0c29447_b0ac9c5d",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done. Using smart pointers throughout the code now.",
+      "parentUuid": "8179683c_8b95fec8",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -674,6 +1280,30 @@
     },
     {
       "key": {
+        "uuid": "a43535cc_86834c16",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "663037d7_f21ee768",
+      "range": {
+        "startLine": 1174,
+        "startChar": 25,
+        "endLine": 1174,
+        "endChar": 45
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d912b670_e19d0be5",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -697,6 +1327,30 @@
     },
     {
       "key": {
+        "uuid": "b3f16973_5e7dd278",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1318,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d912b670_e19d0be5",
+      "range": {
+        "startLine": 1317,
+        "startChar": 4,
+        "endLine": 1318,
+        "endChar": 20
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "46333074_d4ecf0a3",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -711,6 +1365,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b237e385_3c6b1e5f",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1328,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46333074_d4ecf0a3",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -737,6 +1409,30 @@
     },
     {
       "key": {
+        "uuid": "9035db77_f63bce75",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1401,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f390c74_9352c54a",
+      "range": {
+        "startLine": 1393,
+        "startChar": 7,
+        "endLine": 1401,
+        "endChar": 38
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ad28608_a7a90161",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -760,6 +1456,30 @@
     },
     {
       "key": {
+        "uuid": "557bd938_8d2b068c",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done. Got rid of these.",
+      "parentUuid": "6ad28608_a7a90161",
+      "range": {
+        "startLine": 1531,
+        "startChar": 0,
+        "endLine": 1531,
+        "endChar": 69
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb34328e_703840b1",
         "filename": "android/android-emu/android/FfmpegRecorder.cpp",
         "patchSetId": 5
@@ -780,6 +1500,30 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0a0a387_219d3c9a",
+        "filename": "android/android-emu/android/FfmpegRecorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1573,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb34328e_703840b1",
+      "range": {
+        "startLine": 1573,
+        "startChar": 8,
+        "endLine": 1573,
+        "endChar": 9
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -830,6 +1574,30 @@
     },
     {
       "key": {
+        "uuid": "c26470dd_3992e8fa",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ed4f0825_c7e288dd",
+      "range": {
+        "startLine": 60,
+        "startChar": 17,
+        "endLine": 60,
+        "endChar": 34
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a7c9bab7_77690978",
         "filename": "android/android-emu/android/FfmpegRecorder.h",
         "patchSetId": 5
@@ -877,6 +1645,30 @@
     },
     {
       "key": {
+        "uuid": "fba0622b_10683a87",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a7c9bab7_77690978",
+      "range": {
+        "startLine": 71,
+        "startChar": 9,
+        "endLine": 71,
+        "endChar": 16
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aa1a2369_ae2a9eca",
         "filename": "android/android-emu/android/FfmpegRecorder.h",
         "patchSetId": 5
@@ -888,6 +1680,30 @@
       "writtenOn": "2018-02-26T18:27:32Z",
       "side": 1,
       "message": "why it is nonconst void* here, but const uint8_t* for the video frame?\nIt also looks similar enough to me to the level of defining of a \"struct Frame { const uint8_t* data, int size, uint64_t timestampUs }\"",
+      "range": {
+        "startLine": 106,
+        "startChar": 34,
+        "endLine": 106,
+        "endChar": 46
+      },
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c12ec45_02f33303",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa1a2369_ae2a9eca",
       "range": {
         "startLine": 106,
         "startChar": 34,
@@ -917,6 +1733,24 @@
     },
     {
       "key": {
+        "uuid": "5cdc3c5c_b60a90d9",
+        "filename": "android/android-emu/android/FfmpegRecorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d47ebcdb_49bfeddf",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6013019_33fe6c27",
         "filename": "android/android-emu/android/ffmpeg-recorder.h",
         "patchSetId": 5
@@ -931,6 +1765,24 @@
       "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7884acb6_3ac3a974",
+        "filename": "android/android-emu/android/ffmpeg-recorder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-24T03:06:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e6013019_33fe6c27",
+      "revId": "a0e98d27ea19ff132d7b9ab82cd3984e64c6f946",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
