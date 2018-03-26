@@ -57,19 +57,22 @@ public:
             "\t\tnew  %llu [reused %llu, empty %llu, appended %llu]\n";
 
     enum class Time : int {
-        Disk,
         Hashing,
         ZeroCheck,
         GapTrackingWorker,
         GapTrackingWriter,
         Compressing,
+        WaitingForDisk,
+        TotalHandlingPageSave,
+        DiskWriteCombine,
+        DiskIndexWrite,
         /////////////////////
         Count
     };
 
     static constexpr char kTimeFormat[] =
-            "\tTimes: disk %.03f, hash %.03f, iszero %.03f, gaps %.03f/%.03f, "
-            "lz4 %.03f\n";
+            "\tTimes: hash %.03f, iszero %.03f, gaps %.03f/%.03f, "
+            "lz4 %.03f waitdisk %.03f totalHandlingPageSage %.03f diskWriteCombine %.03f diskIndexWrite %.03f\n";
 
 #if SNAPSHOT_PROFILE <= 1
     template <class Func>
