@@ -22,6 +22,30 @@
       "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eae30bc8_399d83ad",
+        "filename": "android/android-emu/android/skin/qt/emulator-overlay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-26T21:56:50Z",
+      "side": 1,
+      "message": "Well, it works this way as well, but what we usually do is create a struct only in the .cpp, make all needed variables to be its public members, and then write a constructor to initialize those. E.g. look at android/android-emu/android/adb-server.cpp",
+      "parentUuid": "fda01beb_60feb92e",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 111
+      },
+      "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
