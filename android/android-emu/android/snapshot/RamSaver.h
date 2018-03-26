@@ -87,7 +87,8 @@ public:
 private:
     struct QueuedPageInfo {
         int blockIndex;
-        int32_t pageIndex;  // == pageOffset / block.pageSize
+        int32_t nonzeroChangedIndexStart;
+        int32_t nonzeroChangedIndexEnd;
     };
 
     // The file structure is as follows:
@@ -110,10 +111,13 @@ private:
                 bool hashFilled;
                 int64_t filePos;
                 Hash hash;
+                const RamLoader::Page* loaderPage;
+                uint8_t* writePtr;
 
                 bool zeroed() const { return sizeOnDisk == 0; }
             };
             std::vector<Page> pages;
+            std::vector<int32_t> nonzeroChangedPages;
         };
 
         using Flags = IndexFlags;
@@ -127,10 +131,16 @@ private:
         void clear();
     };
 
+    static const int kCompressBufferCount = 8;
+    static const int kCompressBufferBatchSize = 1024;
+    using CompressBuffer =
+            std::array<uint8_t, kCompressBufferBatchSize * compress::maxCompressedSize(kDefaultPageSize)>;
+
     struct WriteInfo {
-        FileIndex::Block::Page* page;
-        const uint8_t* ptr;
-        bool allocated;
+        int blockIndex;
+        int32_t nonzeroChangedIndexStart;
+        int32_t nonzeroChangedIndexEnd;
+        CompressBuffer* toRelease;
     };
 
     void calcHash(FileIndex::Block::Page& page,
@@ -162,12 +172,10 @@ private:
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
 
-    static const int kCompressBufferCount = 128;
-    using CompressBuffer =
-            std::array<uint8_t, compress::maxCompressedSize(kDefaultPageSize)>;
     std::unique_ptr<CompressBuffer[]> mCompressBufferMemory;
     base::Optional<FastReleasePool<CompressBuffer, kCompressBufferCount>>
             mCompressBuffers;
+    std::vector<char> mWriteCombineBuffer;
 
     base::System* mSystem = base::System::get();
 
