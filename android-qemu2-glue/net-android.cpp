@@ -16,6 +16,7 @@
 #include "android/network/globals.h"
 #include "android/telephony/modem_driver.h"
 #include "android/shaper.h"
+#include "android/tcpdump.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -59,11 +60,19 @@ void android_qemu_init_slirp_shapers(void)
     s_opaque = net_slirp_set_shapers(
             android_net_shaper_out,
             [](void* opaque, const void* data, int len) {
+                if (qemu_tcpdump_active) {
+                    qemu_tcpdump_packet(data, len);
+                }
+
                 netshaper_send_aux(static_cast<NetShaper>(opaque),
                                    (char*)data, len, s_opaque);
             },
             android_net_shaper_in,
             [](void* opaque, const void* data, int len) {
+                if (qemu_tcpdump_active) {
+                    qemu_tcpdump_packet(data, len);
+                }
+
                 netshaper_send_aux(static_cast<NetShaper>(opaque),
                                    (void*)data, len, s_opaque);
             });
