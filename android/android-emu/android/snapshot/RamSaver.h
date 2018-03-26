@@ -87,7 +87,8 @@ public:
 private:
     struct QueuedPageInfo {
         int blockIndex;
-        int32_t pageIndex;  // == pageOffset / block.pageSize
+        int32_t nonzeroChangedIndexStart;
+        int32_t nonzeroChangedIndexEnd;
     };
 
     // The file structure is as follows:
@@ -110,10 +111,12 @@ private:
                 bool hashFilled;
                 int64_t filePos;
                 Hash hash;
+                const RamLoader::Page* loaderPage;
 
                 bool zeroed() const { return sizeOnDisk == 0; }
             };
             std::vector<Page> pages;
+            std::vector<int32_t> nonzeroChangedPages;
         };
 
         using Flags = IndexFlags;
@@ -172,7 +175,7 @@ private:
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
 
-    static const int kCompressBufferCount = 16384;
+    static const int kCompressBufferCount = 4096;
     using CompressBuffer =
             std::array<uint8_t, compress::maxCompressedSize(kDefaultPageSize)>;
     std::unique_ptr<CompressBuffer[]> mCompressBufferMemory;
