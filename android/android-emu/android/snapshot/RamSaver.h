@@ -87,7 +87,8 @@ public:
 private:
     struct QueuedPageInfo {
         int blockIndex;
-        int32_t pageIndex;  // == pageOffset / block.pageSize
+        int32_t pageIndexStart;
+        int32_t pageIndexEnd;
     };
 
     // The file structure is as follows:
