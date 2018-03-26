@@ -122,6 +122,20 @@ private:
     QVariantAnimation mFlashAnimation;
     double mFlashValue;
 
+    // The colors for the "resize" rectangle
+    class FillBrush : public QBrush {
+    public:
+        FillBrush() : QBrush(QColor(0x01, 0xBE, 0xA4, 64)) { }
+    };
+
+    class OutlineColor : public QColor {
+    public:
+        OutlineColor() : QColor(0x01, 0xBE, 0xA4, 255) { }
+    };
+
+    static android::base::LazyInstance<FillBrush> FILL_BRUSH;
+    static android::base::LazyInstance<OutlineColor> OUTLINE_COLOR;
+
     // Ensure the overlay is never being used for more than one function
     enum class OverlayMode {
         Hidden,
