@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0c139269_dc0cde4a",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3055,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-03-26T19:44:44Z",
+      "side": 1,
+      "message": "Should we call it \"screenshot\"? My concern is we now have \"screenshot\" and \"snapshot\". It might be confusing if we just call it \"snap\".\nAlso we might want to tell todd so that he could help with the doc",
+      "range": {
+        "startLine": 3055,
+        "startChar": 10,
+        "endLine": 3055,
+        "endChar": 14
+      },
+      "revId": "c9ed6748021e04cc036a9590bc37e99e95818995",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
