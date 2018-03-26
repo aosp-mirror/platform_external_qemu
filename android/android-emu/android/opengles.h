@@ -77,6 +77,10 @@ void android_setOpenglesScreenMask(int width, int height, const unsigned char* r
 
 void android_redrawOpenglesWindow(void);
 
+typedef void (*ScreenshotFunc)(const char* dirname);
+void android_registerScreenshotFunc(ScreenshotFunc f);
+void android_screenShot(const char* dirname);
+
 /* Stop the renderer process */
 void android_stopOpenglesRenderer(bool wait);
 

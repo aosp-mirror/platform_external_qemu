@@ -3020,6 +3020,11 @@ static int do_screenrecord_stop(ControlClient client, char* args) {
     return 0;
 }
 
+static int do_screenrecord_screenshot(ControlClient client, char* args) {
+    client->global->record_agent->doSnap(args);
+    return 0;
+}
+
 static const CommandDefRec screenrecord_commands[] = {
         {"start", "start screen recording",
          "'screenrecord start [options] <filename>'\r\n"
@@ -3046,6 +3051,12 @@ static const CommandDefRec screenrecord_commands[] = {
          "'screenrecord stop' stops the recording if one has already "
          "started.\r\n",
          NULL, do_screenrecord_stop, NULL},
+
+        {"screenshot", "Take a screenshot",
+         "'screenrecord screenshot <dirname>'\r\n"
+         "\r\nTakes a single screenshot of emulator's display "
+         "and saves the resulting PNG in <dirname>.\r\n",
+         NULL, do_screenrecord_screenshot, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
@@ -3239,7 +3250,7 @@ extern const CommandDefRec main_commands[] = {
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
 
-        {"screenrecord", "Records the emulator's display to a .webm file", NULL,
+        {"screenrecord", "Records the emulator's display", NULL,
          NULL, NULL, screenrecord_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};

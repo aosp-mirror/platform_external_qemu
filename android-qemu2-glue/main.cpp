@@ -24,6 +24,7 @@
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/ParameterList.h"
 #include "android/error-messages.h"
@@ -1265,10 +1266,14 @@ extern "C" int main(int argc, char** argv) {
                                &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder
+        // and screenshot callback
         bool isGuestMode =
                 (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
         screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                              isGuestMode ? uiEmuAgent.display : nullptr);
+        android_registerScreenshotFunc([](const char* dirname) {
+            android::emulation::captureScreenshot(dirname, nullptr);
+        });
 
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =
