@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "14dfe730_73d8f6fd",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_glx.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-26T22:46:27Z",
+      "side": 1,
+      "message": "remove these two to rely on 3.0?",
+      "range": {
+        "startLine": 466,
+        "startChar": 6,
+        "endLine": 466,
+        "endChar": 39
+      },
+      "revId": "49f1b4471de144d214ac16281604902f82f891ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82394d9d_8e37635f",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 986,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-26T22:46:27Z",
+      "side": 1,
+      "message": "def test es profile on windows with older intel gpus, not sure about their support",
+      "range": {
+        "startLine": 985,
+        "startChar": 0,
+        "endLine": 986,
+        "endChar": 50
+      },
+      "revId": "49f1b4471de144d214ac16281604902f82f891ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0363feec_a4f2688d",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-26T22:46:27Z",
+      "side": 1,
+      "message": "lets try 2 unify gles2gles and Real gles2gles",
+      "range": {
+        "startLine": 232,
+        "startChar": 0,
+        "endLine": 234,
+        "endChar": 1
+      },
+      "revId": "49f1b4471de144d214ac16281604902f82f891ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a27788d6_a373fa85",
+        "filename": "block/cat.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-26T22:46:27Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 156,
+        "startChar": 0,
+        "endLine": 158,
+        "endChar": 29
+      },
+      "revId": "49f1b4471de144d214ac16281604902f82f891ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
