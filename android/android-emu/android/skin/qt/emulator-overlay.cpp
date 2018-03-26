@@ -17,6 +17,10 @@
 
 #include <QDesktopWidget>
 
+// The colors for the "resize" rectangle
+static const QBrush FILL_BRUSH(QColor(0x01, 0xBE, 0xA4, 64));
+static const QColor OUTLINE_COLOR(0x01, 0xBE, 0xA4, 255);
+
 EmulatorOverlay::MultitouchResources::MultitouchResources(
     const QString& centerImgPath,
     const QString& touchImgPath,
@@ -411,19 +415,14 @@ void EmulatorOverlay::drawResizeBox(QPainter* painter, int alpha) {
     boxX -= x();
     boxY -= y();
 
-    // Draw the box in solid black
+    // Fill the entire rectangle with a see-through color
+    painter->fillRect(boxX, boxY, boxW, boxH, FILL_BRUSH);
+
+    // Outline the rectangle with the same color, but opaque
     QPen pen = painter->pen();
     pen.setWidth(2);
-    pen.setColor(Qt::black);
+    pen.setColor(OUTLINE_COLOR);
     pen.setStyle(Qt::SolidLine);
-    painter->setPen(pen);
-    painter->drawRect(boxX, boxY, boxW, boxH);
-
-    // Draw the box in dashed white with the black showing through
-    pen.setColor(Qt::white);
-    QVector<qreal> dashPattern;
-    dashPattern << 4 << 4;
-    pen.setDashPattern(dashPattern);
     painter->setPen(pen);
     painter->drawRect(boxX, boxY, boxW, boxH);
 }
