@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fda01beb_60feb92e",
+        "filename": "android/android-emu/android/skin/qt/emulator-overlay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-26T19:08:20Z",
+      "side": 1,
+      "message": "Yurii, did I do this right (here and in the .h)? It seems like a lot of code complexity for what seem like pretty light objects.\n\nIf we want to avoid the cost at startup, I could use #define here and incur the expense below on each call to drawResizeBox().",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 111
+      },
+      "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
