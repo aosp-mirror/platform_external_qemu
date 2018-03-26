@@ -110,7 +110,11 @@ public:
     void enqueue(Item&& item) {
         int currentIndex =
                 mNextWorkerIndex.fetch_add(1, std::memory_order_relaxed);
-        mWorkers[currentIndex % mWorkers.size()]->enqueue(std::move(item));
+        enqueueAtWorker(std::move(item), currentIndex);
+    }
+
+    void enqueueAtWorker(Item&& item, int workerIndex) {
+        mWorkers[workerIndex % mWorkers.size()]->enqueue(std::move(item));
     }
 
     int numWorkers() const { return mWorkers.size(); }
