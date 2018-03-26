@@ -36,6 +36,8 @@ typedef struct QAndroidRecordScreenAgent {
     bool (*stopRecordingAsync)(void);
     // Get the state of the recorder.
     RecorderState (*getRecorderState)(void);
+    // Take a screenshot.
+    void (*doSnap)(const char* dirname);
 } QAndroidRecordScreenAgent;
 
 ANDROID_END_HEADER
