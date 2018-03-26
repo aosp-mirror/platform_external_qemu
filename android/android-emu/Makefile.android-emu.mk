@@ -888,6 +888,7 @@ LOCAL_SRC_FILES += \
     android/skin/LibuiAgent.cpp \
     android/gpu_frame.cpp \
     android/emulator-window.c \
+    android/emulation/control/ScreenCapturer.cpp \
     android/window-agent-impl.cpp \
     android/main-common-ui.c \
     android/resource.c \
