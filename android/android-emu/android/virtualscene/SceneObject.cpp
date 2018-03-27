@@ -36,6 +36,17 @@ using android::base::PathUtils;
 using android::base::ScopedStdioFile;
 using android::base::System;
 
+static constexpr android::virtualscene::VertexPositionUV kQuadVerts[] = {
+    { glm::vec3(-0.5f, -0.5f, 0.f), glm::vec2(0.f, 0.f) },
+    { glm::vec3( 0.5f, -0.5f, 0.f), glm::vec2(1.f, 0.f) },
+    { glm::vec3(-0.5f,  0.5f, 0.f), glm::vec2(0.f, 1.f) },
+    { glm::vec3( 0.5f,  0.5f, 0.f), glm::vec2(1.f, 1.f) },
+};
+
+static constexpr GLuint kQuadIndices[] = {
+    0, 1, 2, 2, 1, 3
+};
+
 namespace android {
 namespace virtualscene {
 
@@ -85,7 +96,8 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
         if (!mesh.material_ids.empty()) {
             const int material_id = mesh.material_ids[0];
             if (material_id >= 0 && material_id < materials.size()) {
-                if (strstr(materials[material_id].diffuse_texname.c_str(), "TV")) {
+                if (strstr(materials[material_id].diffuse_texname.c_str(),
+                           "TV")) {
                     useCheckerboardMaterial = true;
                 } else {
                     texture = renderer.loadTexture(
@@ -150,6 +162,28 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
 
         result.get()->mRenderables.emplace_back(std::move(renderable));
     }
+
+    return result;
+}
+
+std::unique_ptr<SceneObject> SceneObject::createQuad(
+        Renderer& renderer,
+        const char* textureFilename) {
+    std::unique_ptr<SceneObject> result(new SceneObject());
+
+    Texture texture = renderer.loadTexture(result.get(), textureFilename);
+    if (!texture.isValid()) {
+        W("%s: Could not load texture '%s'", __FUNCTION__, textureFilename);
+        return nullptr;
+    }
+
+    Renderable renderable;
+    renderable.material = renderer.createMaterialTextured();
+    renderable.mesh =
+            renderer.createMesh(result.get(), kQuadVerts, kQuadIndices);
+    renderable.texture = texture;
+
+    result.get()->mRenderables.emplace_back(std::move(renderable));
 
     return result;
 }

@@ -58,6 +58,14 @@ public:
     // Returns the timestamp at which the frame is rendered.
     static int64_t render();
 
+    // Load a poster into the scene from a file.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |filename| - Path to an image file, either PNG or JPEG.
+    //
+    // Returns true on success.
+    static bool loadPoster(const char* posterName, const char* filename);
+
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
     static Renderer* mRenderer;

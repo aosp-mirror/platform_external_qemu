@@ -528,9 +528,11 @@ ifdef FIRST_INCLUDE
 LOCAL_COPY_COMMON_PREBUILT_RESOURCES += \
       virtualscene/Toren1BD/Toren1BD.mtl \
       virtualscene/Toren1BD/Toren1BD.obj \
+      virtualscene/Toren1BD/Toren1BD.posters \
       virtualscene/Toren1BD/Toren1BD_Decor.png \
       virtualscene/Toren1BD/Toren1BD_Main.png \
-      virtualscene/Toren1BD/Toren1BD_TV.png
+      virtualscene/Toren1BD/poster.png \
+
 endif
 
 $(call gen-hw-config-defs)
