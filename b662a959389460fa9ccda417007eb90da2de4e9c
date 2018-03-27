@@ -22,6 +22,30 @@
       "revId": "b662a959389460fa9ccda417007eb90da2de4e9c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd0d42f9_4966767b",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 690,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-27T20:59:15Z",
+      "side": 1,
+      "message": "Yeah, something that provides more detail could work---my one reservation about that is it might make the user feel bad about their machine and have negative association with the emulator as a result :/",
+      "parentUuid": "f70d3989_34606180",
+      "range": {
+        "startLine": 690,
+        "startChar": 12,
+        "endLine": 690,
+        "endChar": 38
+      },
+      "revId": "b662a959389460fa9ccda417007eb90da2de4e9c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
