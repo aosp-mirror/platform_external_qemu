@@ -1398,9 +1398,10 @@ help_camera_back(stralloc_t* out)
     "  Use -camera-back <mode> to control emulation of a camera facing back.\n"
     "  Valid values for <mode> are:\n\n"
 
-    "     emulated  -> camera will be emulated using software ('fake') camera emulation\n"
-    "     webcam<N> -> camera will be emulated using a webcamera connected to the host\n"
-    "     none      -> camera emulation will be disabled\n\n"
+    "     emulated     -> camera will be emulated using software ('fake') camera emulation\n"
+    "     webcam<N>    -> camera will be emulated using a webcamera connected to the host\n"
+    "     virtualscene -> If the feature is enabled, camera will render a virtual scene\n"
+    "     none         -> camera emulation will be disabled\n\n"
     );
 }
 
@@ -1422,6 +1423,19 @@ help_webcam_list(stralloc_t* out)
 {
     PRINTF(
     "  Use -webcam-list to list web cameras available for emulation.\n\n"
+    );
+}
+
+static void
+help_virtualscene_poster(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -virtualscene-poster <name>=<filename> to load an image as a poster in the\n"
+    "  virtual scene camera environment. At a minimum, each scene supports these\n"
+    "  <name> values:\n\n"
+
+    "     wall  -> A poster on a vertical plane.\n"
+    "     table -> A poster on a horizontal plane.\n\n"
     );
 }
 
