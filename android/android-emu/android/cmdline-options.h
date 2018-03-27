@@ -195,7 +195,7 @@ OPT_PARAM(metrics_to_file, "<file>", "Enable usage metrics and write the message
 OPT_LIST(feature, "<name|-name>", "Force-enable or disable (-name) the features")
 
 OPT_PARAM(sim_access_rules_file, "<file>", "Use SIM access rules from specified file")
-OPT_PARAM(phone_number_prefix, "<string>", "Number to use as the emulator's phone number prefix")
+OPT_PARAM(phone_number, "<phone_number>", "Sets the phone number of the emulated device")
 
 #undef CFG_FLAG
 #undef CFG_PARAM
