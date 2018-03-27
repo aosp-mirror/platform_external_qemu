@@ -593,6 +593,21 @@ void Snapshot::addSaveStats(bool incremental,
     mSaveStats.push_back(stats);
 }
 
+bool Snapshot::areSavesSlow() const {
+
+    if (mSaveStats.empty()) return false;
+
+    static constexpr float kSlowSaveThresholdMs = 20000.0;
+    float maxSaveTimeMs = 0.0f;
+
+    for (size_t i = 0; i < mSaveStats.size(); ++i) {
+        float durationMs = mSaveStats[i].duration() / 1000.0f;
+        maxSaveTimeMs = std::max(durationMs, maxSaveTimeMs);
+    }
+
+   return maxSaveTimeMs >= kSlowSaveThresholdMs;
+}
+
 bool Snapshot::shouldInvalidate() const {
     // Either there wasn't any successful loads,
     // or there was more than one invalid load

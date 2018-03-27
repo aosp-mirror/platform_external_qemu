@@ -43,6 +43,7 @@ public:
     void addSaveStats(bool incremental,
                       const base::System::Duration duration,
                       uint64_t ramChangedBytes);
+    bool areSavesSlow() const;
 
     uint64_t diskSize() const { return mSize; }
 
