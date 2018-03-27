@@ -36,8 +36,7 @@ using namespace android::base;
 namespace android {
 namespace virtualscene {
 
-android::base::LazyInstance<android::base::Lock> VirtualSceneManager::mLock =
-        LAZY_INSTANCE_INIT;
+LazyInstance<Lock> VirtualSceneManager::mLock = LAZY_INSTANCE_INIT;
 Renderer* VirtualSceneManager::mRenderer = nullptr;
 Scene* VirtualSceneManager::mScene = nullptr;
 
@@ -79,6 +78,12 @@ public:
 
     void setPoster(const char* posterName, const char* filename) {
         mPosters[posterName] = filename;
+    }
+
+    void setupScene(Scene* scene) const {
+        for (const auto& it : mPosters) {
+            scene->loadPoster(it.first.c_str(), it.second.c_str());
+        }
     }
 
 private:
@@ -134,6 +139,8 @@ bool VirtualSceneManager::initialize(const GLESv2Dispatch* gles2,
         return false;
     }
 
+    sSettings->setupScene(scene.get());
+
     skin_winsys_show_virtual_scene_controls(true);
 
     // Store the raw pointers instead of the unique_ptr wrapper to prevent
@@ -153,7 +160,7 @@ void VirtualSceneManager::uninitialize() {
 
     skin_winsys_show_virtual_scene_controls(false);
 
-    mScene->releaseSceneObjects(*mRenderer);
+    mScene->releaseSceneObjects();
     delete mScene;
     mScene = nullptr;
 
@@ -172,6 +179,19 @@ int64_t VirtualSceneManager::render() {
     mRenderer->render(mScene->getRenderableObjects(),
             timestamp / 1000000000.0f);
     return timestamp;
+}
+
+bool VirtualSceneManager::loadPoster(const char* posterName,
+                                     const char* filename) {
+    AutoLock lock(mLock.get());
+    sSettings->setPoster(posterName, filename);
+
+    // If the scene is loaded, update it now.
+    if (mScene) {
+        return mScene->loadPoster(posterName, filename);
+    }
+
+    return true;
 }
 
 }  // namespace virtualscene
