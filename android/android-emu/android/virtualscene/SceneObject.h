@@ -50,6 +50,17 @@ public:
     static std::unique_ptr<SceneObject> loadFromObj(Renderer& renderer,
                                                     const char* filename);
 
+    // Creates a SceneObject from a unit quad.
+    //
+    // |renderer| - Renderer context, VirtualSceneObject will be bound to this
+    //              context.
+    // |textureFilename| - Filename of the texture to load.
+    //
+    // Returns a SceneObject instance if the object could be loaded or null if
+    // there was an error.
+    static std::unique_ptr<SceneObject> createQuad(Renderer& renderer,
+                                                   const char* textureFilename);
+
     // Sets the model transform.
     //
     // |transform| - Model transform for this object.
@@ -58,6 +69,7 @@ public:
     // Gets the model transform for this object.
     glm::mat4 getTransform() const;
 
+    // Get Renderables for the scene object.
     const std::vector<Renderable>& getRenderables() const;
 
 private:
