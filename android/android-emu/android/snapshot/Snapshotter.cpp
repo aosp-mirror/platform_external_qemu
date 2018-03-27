@@ -675,6 +675,11 @@ void Snapshotter::deleteSnapshot(const char* name) {
     Hierarchy::get()->currentInfo();
 }
 
+bool Snapshotter::areSavesSlow(const char* name) {
+    Snapshot s(name);
+    return s.areSavesSlow();
+}
+
 void Snapshotter::listSnapshots(void* opaque,
                                 int (*cbOut)(void*, const char*, int),
                                 int (*cbErr)(void*, const char*, int)) {

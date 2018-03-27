@@ -54,6 +54,10 @@ void androidSnapshot_delete(const char* name) {
     Snapshotter::get().deleteSnapshot(name);
 }
 
+bool androidSnapshot_areSavesSlow(const char* name) {
+    return Snapshotter::get().areSavesSlow(name);
+}
+
 int64_t androidSnapshot_lastLoadUptimeMs() {
     return Snapshotter::get().lastLoadUptimeMs();
 }

@@ -159,6 +159,8 @@ void Saver::complete(bool succeeded) {
 
     }
 
+    mSnapshot.areSavesSlow();
+
     if (!mSnapshot.save()) {
         return;
     }

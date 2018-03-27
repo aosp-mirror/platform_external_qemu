@@ -42,6 +42,8 @@ void androidSnapshot_cancelSave();
 
 void androidSnapshot_delete(const char* name);
 
+bool androidSnapshot_areSavesSlow(const char* name);
+
 // Returns the name of the snapshot file that was loaded to start
 // the current image.
 // Returns an empty string if the AVD was cold-booted.
