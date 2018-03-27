@@ -395,6 +395,8 @@ struct CPUState {
     uint32_t can_do_io;
     int32_t exception_index; /* used by m68k TCG */
 
+    bool vcpu_dirty;
+
     /* Used to keep track of an outstanding cpu throttle thread for migration
      * autoconverge
      */
