@@ -86,6 +86,7 @@ public:
     OperationStatus loadGeneric(const char* name);
 
     void deleteSnapshot(const char* name);
+    bool areSavesSlow(const char* name);
     void listSnapshots(void* opaque,
                        int (*cbOut)(void* opaque, const char* buf, int strlen),
                        int (*cbErr)(void* opaque, const char* buf, int strlen));
