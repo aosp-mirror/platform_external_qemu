@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f70d3989_34606180",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 690,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-27T20:53:50Z",
+      "side": 1,
+      "message": "How about \"Note: Saving state seems slow on your computer.\"?",
+      "range": {
+        "startLine": 690,
+        "startChar": 12,
+        "endLine": 690,
+        "endChar": 38
+      },
+      "revId": "b662a959389460fa9ccda417007eb90da2de4e9c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
