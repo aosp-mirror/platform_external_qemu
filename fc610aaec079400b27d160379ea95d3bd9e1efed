@@ -22,6 +22,30 @@
       "revId": "fc610aaec079400b27d160379ea95d3bd9e1efed",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f3e09dad_e335c1f5",
+        "filename": "android/android-emu/android/snapshot/Saver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-27T18:44:37Z",
+      "side": 1,
+      "message": "Sorry, that was test code. Removed",
+      "parentUuid": "6b6aa4d1_9db6a38f",
+      "range": {
+        "startLine": 162,
+        "startChar": 4,
+        "endLine": 162,
+        "endChar": 29
+      },
+      "revId": "fc610aaec079400b27d160379ea95d3bd9e1efed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
