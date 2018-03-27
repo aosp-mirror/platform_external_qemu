@@ -46,6 +46,30 @@
       "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "127cce5f_00480883",
+        "filename": "android/android-emu/android/skin/qt/emulator-overlay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-27T00:11:52Z",
+      "side": 1,
+      "message": "Yes, I like keeping this in the .cpp file.\n\nIMO, patchset 4 is better than patchset 3. (Primarily because it\u0027s cleaner.) What do you think?",
+      "parentUuid": "eae30bc8_399d83ad",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 111
+      },
+      "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
