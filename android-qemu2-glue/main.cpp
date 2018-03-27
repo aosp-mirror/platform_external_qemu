@@ -9,15 +9,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/android.h"
+#include "android/avd/hw-config.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
-#include "android/android.h"
-#include "android/avd/hw-config.h"
 #include "android/boot-properties.h"
+#include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
 #include "android/config/BluetoothConfig.h"
 #include "android/constants.h"
@@ -713,10 +714,13 @@ extern "C" int main(int argc, char** argv) {
 
     // If the virtual scene camera is selected in the avd, but not supported,
     // use the emulated camera instead.
-    bool isVirtualScene = !strcmp(hw->hw_camera_back, "virtualscene");
+    const bool isVirtualScene = !strcmp(hw->hw_camera_back, "virtualscene");
     if (isVirtualScene && !feature_is_enabled(kFeature_VirtualScene)) {
         str_reset(&hw->hw_camera_back, "emulated");
     }
+
+    // Parse virtual scene command line options, if enabled.
+    camera_virtualscene_parse_cmdline();
 
     if (opts->shared_net_id) {
         char* end;

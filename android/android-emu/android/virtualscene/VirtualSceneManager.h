@@ -34,6 +34,9 @@ class Scene;
 
 class VirtualSceneManager {
 public:
+    // Parse command line options for the virtual scene.
+    static void parseCmdline();
+
     // Initialize virtual scene rendering. Callers must have an active EGL
     // context.
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
