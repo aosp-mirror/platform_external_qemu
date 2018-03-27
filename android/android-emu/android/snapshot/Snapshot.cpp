@@ -287,7 +287,16 @@ base::Optional<std::string> Snapshot::parent() {
 
 
 Snapshot::Snapshot(const char* name)
-    : mName(name), mDataDir(getSnapshotDir(name)), mSaveStats(kMaxSaveStatsHistory) {}
+    : mName(name), mDataDir(getSnapshotDir(name)), mSaveStats(kMaxSaveStatsHistory) {
+
+    // All persisted snapshot protobuf fields across
+    // saves / loads go here.
+    if (preload()) {
+        for (int i = 0; i < mSnapshotPb.save_stats_size(); i++) {
+            mSaveStats.push_back(mSnapshotPb.save_stats(i));
+        }
+    }
+}
 
 // static
 std::vector<Snapshot> Snapshot::getExistingSnapshots() {
@@ -550,10 +559,6 @@ bool Snapshot::load() {
         mSuccessfulLoads = 0;
     }
 
-    for (int i = 0; i < mSnapshotPb.save_stats_size(); i++) {
-        mSaveStats.push_back(mSnapshotPb.save_stats(i));
-    }
-
     return true;
 }
 
@@ -573,6 +578,19 @@ void Snapshot::incrementSuccessfulLoads() {
         mSnapshotPb.set_version(kVersion);
     }
     writeSnapshotToDisk();
+}
+
+void Snapshot::addSaveStats(bool incremental,
+                            const base::System::Duration duration,
+                            uint64_t ramChangedBytes) {
+
+    emulator_snapshot::SaveStats stats;
+
+    stats.set_incremental(incremental ? 1 : 0);
+    stats.set_duration((uint64_t)duration);
+    stats.set_ram_changed_bytes((uint64_t)ramChangedBytes);
+
+    mSaveStats.push_back(stats);
 }
 
 bool Snapshot::shouldInvalidate() const {

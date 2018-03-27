@@ -146,6 +146,19 @@ void Saver::complete(bool succeeded) {
         return;
     }
 
+    base::System::Duration ramDuration = 0;
+    base::System::Duration texturesDuration = 0;
+
+    if (mRamSaver->getDuration(&ramDuration) &&
+        mTextureSaver->getDuration(&texturesDuration)) {
+
+        mSnapshot.addSaveStats(
+                mIncrementallySaved,
+                ramDuration + texturesDuration,
+                0 /* ram changed bytes; unused for now */);
+
+    }
+
     if (!mSnapshot.save()) {
         return;
     }
