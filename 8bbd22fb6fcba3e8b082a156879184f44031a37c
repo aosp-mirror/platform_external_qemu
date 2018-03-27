@@ -70,6 +70,30 @@
       "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e646ca6f_b823709e",
+        "filename": "android/android-emu/android/skin/qt/emulator-overlay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-03-27T00:33:13Z",
+      "side": 1,
+      "message": "Yeah, it\u0027s much cleaner, but it also creates/deletes a brush object for each draw call, which is a new/delete pair with some memcpy-ing. If you\u0027re ok with that I\u0027m fine for ps#4, otherwise #3 looks good too",
+      "parentUuid": "127cce5f_00480883",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 111
+      },
+      "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
