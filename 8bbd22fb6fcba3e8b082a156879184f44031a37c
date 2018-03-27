@@ -94,6 +94,30 @@
       "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db4a0f96_2bd931fa",
+        "filename": "android/android-emu/android/skin/qt/emulator-overlay.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-27T16:48:16Z",
+      "side": 1,
+      "message": "I\u0027ll go with ps4.",
+      "parentUuid": "e646ca6f_b823709e",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 111
+      },
+      "revId": "8bbd22fb6fcba3e8b082a156879184f44031a37c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
