@@ -22,6 +22,30 @@
       "revId": "6991e0f0d42ce0962da7bccd20e6580b962e4dd2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f733142_890441f8",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-target.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-28T15:46:03Z",
+      "side": 1,
+      "message": "You\u0027re right, thanks for pointing this out. I\u0027ll address it in the following patch set.",
+      "parentUuid": "208699df_60c39d65",
+      "range": {
+        "startLine": 121,
+        "startChar": 8,
+        "endLine": 121,
+        "endChar": 45
+      },
+      "revId": "6991e0f0d42ce0962da7bccd20e6580b962e4dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
