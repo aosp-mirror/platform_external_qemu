@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "1ef71a38_8ec6700e",
+        "filename": "cpus.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1518,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:00:24Z",
+      "side": 1,
+      "message": "Maybe return some error code here since this function does not return anything useful now?",
+      "range": {
+        "startLine": 1518,
+        "startChar": 7,
+        "endLine": 1518,
+        "endChar": 13
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd9f8853_9621c5ea",
+        "filename": "cpus.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1930,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:00:24Z",
+      "side": 1,
+      "message": "sizeof(thread_name)",
+      "range": {
+        "startLine": 1930,
+        "startChar": 26,
+        "endLine": 1930,
+        "endChar": 47
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e8020168_8cf93ac2",
         "filename": "target/i386/whpx-all.c",
         "patchSetId": 1
@@ -18,6 +64,98 @@
         "startChar": 0,
         "endLine": 612,
         "endChar": 56
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aebe53af_b3215bcd",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 781,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:00:24Z",
+      "side": 1,
+      "message": "Seems redundant.",
+      "range": {
+        "startLine": 781,
+        "startChar": 4,
+        "endLine": 781,
+        "endChar": 10
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9725b41_42d8eeae",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:00:24Z",
+      "side": 1,
+      "message": "If this function assumes that the qemu mutex is locked, could you please mark this function as \"..._run_locked\"?",
+      "range": {
+        "startLine": 867,
+        "startChar": 15,
+        "endLine": 867,
+        "endChar": 21
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af178f75_d5a77e49",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1071,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:00:24Z",
+      "side": 1,
+      "message": "Is this safe to use value in whpx_migration_blocker after error_free?",
+      "range": {
+        "startLine": 1071,
+        "startChar": 12,
+        "endLine": 1071,
+        "endChar": 31
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56d7cf42_7376b668",
+        "filename": "whpx-stub.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:00:24Z",
+      "side": 1,
+      "message": "Could you please use names instead of magic numbers?",
+      "range": {
+        "startLine": 18,
+        "startChar": 11,
+        "endLine": 18,
+        "endChar": 13
       },
       "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
