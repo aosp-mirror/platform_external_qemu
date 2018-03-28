@@ -16,6 +16,75 @@
       "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d1b77c3f_3badaa47",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:48:12Z",
+      "side": 1,
+      "message": "Why mix casting (and C style) with auto?",
+      "range": {
+        "startLine": 158,
+        "startChar": 26,
+        "endLine": 158,
+        "endChar": 34
+      },
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f9f23b55_341ecf03",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1152,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:48:12Z",
+      "side": 1,
+      "message": "Do we want to move \"default:\" out of switch to get compile time errors that not all enum values are handled?",
+      "range": {
+        "startLine": 1151,
+        "startChar": 8,
+        "endLine": 1152,
+        "endChar": 22
+      },
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "435da21a_197c4a47",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3240,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:48:12Z",
+      "side": 1,
+      "message": "ram_size \u003d MIN(ram_size, hax_mem_limit())\n\nI feel like it is more readable.",
+      "range": {
+        "startLine": 3240,
+        "startChar": 12,
+        "endLine": 3240,
+        "endChar": 20
+      },
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
