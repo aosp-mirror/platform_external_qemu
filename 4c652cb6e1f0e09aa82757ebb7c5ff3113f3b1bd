@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a0144e08_1973ce26",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 939,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-03-28T18:52:27Z",
+      "side": 1,
+      "message": "Can we create an integer constant instead of doing this? Does this have something to do with the platform endianness?",
+      "range": {
+        "startLine": 939,
+        "startChar": 39,
+        "endLine": 939,
+        "endChar": 51
+      },
+      "revId": "4c652cb6e1f0e09aa82757ebb7c5ff3113f3b1bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
