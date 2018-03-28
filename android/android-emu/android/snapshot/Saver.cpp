@@ -13,7 +13,6 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
-#include "android/base/system/System.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/TextureSaver.h"
 #include "android/utils/debug.h"
@@ -59,22 +58,20 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
             //    and HDD disk.
             // 3. If there's a bad case and we have enough CPU cores (3+), let's
             //    enable compression.
-            const auto cpuCount = System::get()->getCpuCoreCount();
-            if (cpuCount > 2) {
-                const auto memUsage = System::get()->getMemUsage();
-                if (memUsage.avail_phys_memory < 1536 * 1024 * 1024) {
+            auto numCores = System::get()->getCpuCoreCount();
+            mMemUsage = System::get()->getMemUsage();
+            mDiskKind =
+                    System::get()->pathDiskKind(mSnapshot.dataDir());
+            if (numCores > 2) {
+                auto freeMb = mMemUsage.avail_phys_memory / (1024 * 1024);
+                if (freeMb < 1536) {
                     flags |= RamSaver::Flags::Compress;
                     VERBOSE_PRINT(
                             snapshot,
                             "Enabling RAM compression: only %u MB of free RAM",
-                            unsigned(memUsage.avail_phys_memory /
-                                     (1024 * 1024)));
+                            unsigned(freeMb));
                 } else {
-                    // Disk kind calculation is potentially the slowest: do it
-                    // last.
-                    const auto diskKind =
-                            System::get()->pathDiskKind(mSnapshot.dataDir());
-                    if (diskKind.valueOr(System::DiskKind::Ssd) ==
+                    if (mDiskKind.valueOr(System::DiskKind::Ssd) ==
                         System::DiskKind::Hdd) {
                         flags |= RamSaver::Flags::Compress;
                         VERBOSE_PRINT(
