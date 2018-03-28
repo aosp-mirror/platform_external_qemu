@@ -43,6 +43,8 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/snapshot/interface.h"
+#include "android/snapshot/Quickboot.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 
@@ -669,25 +671,34 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
         return true;
     }
 
-    // If the setting is ALWAYS, we might want to ask anyway, such as
-    // when the system has low RAM.
+    // If the setting is ALWAYS, we might want to ask anyway, such as when
+    // previous saves were known to be slow, or the system has low RAM.
+    bool savesWereSlow =
+        androidSnapshot_areSavesSlow(
+            android::snapshot::Quickboot::kDefaultBootSnapshot.c_str());
     bool hasLowRam = System::isUnderMemoryPressure();
-    if (!hasLowRam && (saveOnExitChoice == SaveSnapshotOnExit::Always)) {
+
+    if (saveOnExitChoice == SaveSnapshotOnExit::Always &&
+        !savesWereSlow &&
+        !hasLowRam) {
         return true;
     }
 
     // The setting is ASK or we decided to ask anyway.
-
-    auto askMessageDefault =
-        tr("Do you want to save the current state for the next quick boot?");
+    auto askMessageSlow =
+        tr("Do you want to save the current state for the next quick boot?"
+           "Note: Recent saves seem to have been slow.");
     auto askMessageLowRam =
         tr("Do you want to save the current state for the next quick boot?\n\n"
            "Note: Saving the snapshot may take longer because free RAM is low.");
+    auto askMessageDefault =
+        tr("Do you want to save the current state for the next quick boot?");
 
     int64_t startTime = get_uptime_ms();
     QMessageBox msgBox(QMessageBox::Question,
                        tr("Save quick-boot state"),
-                       hasLowRam ? askMessageLowRam : askMessageDefault,
+                       savesWereSlow ? askMessageSlow :
+                           (hasLowRam ? askMessageLowRam : askMessageDefault),
                        (QMessageBox::Yes | QMessageBox::No),
                        this);
     // Add a Cancel button to enable the MessageBox's X.
