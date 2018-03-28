@@ -22,6 +22,12 @@
 
 #include <memory>
 
+namespace android_studio {
+
+class EmulatorMemoryUsage;
+
+} // namespace android_studio
+
 namespace android {
 namespace metrics {
 
@@ -42,6 +48,9 @@ public:
     void stop();
 
     ~MemoryUsageReporter();
+
+    static void fillProto(const base::System::MemUsage& memUsage,
+                          android_studio::EmulatorMemoryUsage* memUsageProto);
 
 protected:
     // Use |create| to correctly initialize the shared_ptr count.

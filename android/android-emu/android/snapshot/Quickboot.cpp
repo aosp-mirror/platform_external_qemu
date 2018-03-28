@@ -112,8 +112,7 @@ void Quickboot::reportSuccessfulLoad(StringView name,
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_SUCCEEDED);
         load->set_duration_ms(stats.durationMs);
         load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
-        auto snapshot = load->mutable_snapshot();
-        Snapshotter::fillSnapshotMetrics(snapshot, stats);
+        Snapshotter::fillSnapshotMetrics(event, stats);
     });
 }
 
@@ -128,8 +127,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
                 pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
         save->set_duration_ms(stats.durationMs);
         save->set_sesion_uptime_ms(sessionUptimeMs);
-        auto snapshot = save->mutable_snapshot();
-        Snapshotter::fillSnapshotMetrics(snapshot, stats);
+        Snapshotter::fillSnapshotMetrics(event, stats);
     });
 }
 

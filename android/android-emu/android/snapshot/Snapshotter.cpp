@@ -19,6 +19,8 @@
 #include "android/emulation/VmLock.h"
 #include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
+#include "android/metrics/MemoryUsageReporter.h"
+#include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/metrics/StudioConfig.h"
@@ -290,14 +292,29 @@ void Snapshotter::callCallbacks(Operation op, Stage stage) {
     }
 }
 
-void Snapshotter::fillSnapshotMetrics(pb::EmulatorSnapshot* snapshot,
+void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
                                       const SnapshotOperationStats& stats) {
+
+    pb::EmulatorSnapshot* snapshot = nullptr;
+
+    if (stats.forSave) {
+        snapshot = event->mutable_emulator_details()->add_snapshot_saves();
+    } else {
+        snapshot = event->mutable_emulator_details()->add_snapshot_loads();
+    }
+
     snapshot->set_name(MetricsReporter::get().anonymize(stats.name));
+
     if (stats.compressedRam) {
         snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
     }
+
     if (stats.compressedTextures) {
-        snapshot->set_flags(pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
+        snapshot->set_flags(snapshot->flags() | pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
+    }
+
+    if (stats.usingHDD) {
+        snapshot->set_flags(snapshot->flags() | pb::SNAPSHOT_FLAGS_HDD_BIT);
     }
 
     snapshot->set_lazy_loaded(stats.onDemandRamEnabled);
@@ -315,6 +332,7 @@ void Snapshotter::fillSnapshotMetrics(pb::EmulatorSnapshot* snapshot,
         snapshot->set_save_duration_ms(uint64_t(stats.durationMs));
         snapshot->set_ram_save_duration_ms(int64_t(stats.ramDurationMs));
         snapshot->set_textures_save_duration_ms(int64_t(stats.texturesDurationMs));
+
     } else {
         snapshot->set_load_state(
                 pb::EmulatorSnapshotLoadState::EMULATOR_SNAPSHOT_LOAD_SUCCEEDED_NORMAL);
@@ -322,6 +340,12 @@ void Snapshotter::fillSnapshotMetrics(pb::EmulatorSnapshot* snapshot,
         snapshot->set_ram_load_duration_ms(int64_t(stats.ramDurationMs));
         snapshot->set_textures_load_duration_ms(int64_t(stats.texturesDurationMs));
     }
+
+    // Also report some common host machine stats so we can correlate performance with
+    // host machine config.
+    auto memUsageProto = event->mutable_emulator_performance_stats()->add_memory_usage();
+    metrics::MemoryUsageReporter::fillProto(stats.memUsage, memUsageProto);
+    android_metrics_fill_common_info(true /* opengl alive */, event);
 }
 
 Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
@@ -346,6 +370,8 @@ Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
         save.incrementallySaved(),
         compressedRam,
         compressedTextures,
+        save.memUsage(),
+        save.isHDD(),
         (int64_t)diskSize,
         (int64_t)ramSize,
         (int64_t)texturesSize,
@@ -374,6 +400,8 @@ Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
         false /* not incrementally saved */,
         compressedRam,
         compressedTextures,
+        load.memUsage(),
+        load.isHDD(),
         (int64_t)diskSize,
         (int64_t)ramSize,
         (int64_t)texturesSize,
@@ -387,8 +415,7 @@ void Snapshotter::appendSuccessfulSave(const char* name,
                                        System::Duration durationMs) {
     auto stats = getSaveStats(name, durationMs);
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
-        auto snapshot = event->mutable_emulator_details()->add_snapshot_saves();
-        fillSnapshotMetrics(snapshot, stats);
+        fillSnapshotMetrics(event, stats);
     });
 }
 
@@ -397,8 +424,7 @@ void Snapshotter::appendSuccessfulLoad(const char* name,
     loader().reportSuccessful();
     auto stats = getLoadStats(name, durationMs);
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
-        auto snapshot = event->mutable_emulator_details()->add_snapshot_loads();
-        fillSnapshotMetrics(snapshot, stats);
+        fillSnapshotMetrics(event, stats);
     });
 }
 

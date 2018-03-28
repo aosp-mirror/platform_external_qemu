@@ -24,9 +24,9 @@
 #include <utility>
 #include <vector>
 
-// Fwd-declare the snapshot protobuf class
+// Fwd-declare the protobuf class
 namespace android_studio {
-class EmulatorSnapshot;
+class AndroidStudioEvent;
 } // namespace android_studio
 
 namespace android {
@@ -51,6 +51,8 @@ public:
         bool incrementallySaved;
         bool compressedRam;
         bool compressedTextures;
+        base::System::MemUsage memUsage;
+        bool usingHDD;
         int64_t diskSize;
         int64_t ramSize;
         int64_t texturesSize;
@@ -59,7 +61,7 @@ public:
     };
 
     static void fillSnapshotMetrics(
-        android_studio::EmulatorSnapshot* snapshot,
+        android_studio::AndroidStudioEvent* event,
         const SnapshotOperationStats& stats);
     SnapshotOperationStats getLoadStats(const char* name, base::System::Duration durationMs);
     SnapshotOperationStats getSaveStats(const char* name, base::System::Duration durationMs);
