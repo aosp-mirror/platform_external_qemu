@@ -1,0 +1,9 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+1: Jim Kaye <jameskaye@google.com>
+Code-Review+2: Joshua Duong <joshuaduong@google.com>
+Verified+1: Jim Kaye <jameskaye@google.com>
+Submitted-by: Jim Kaye <jameskaye@google.com>
+Submitted-at: Wed, 28 Mar 2018 14:41:56 +0000
+Reviewed-on: https://android-review.googlesource.com/649506
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
