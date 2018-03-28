@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8020168_8cf93ac2",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-28T15:53:16Z",
+      "side": 1,
+      "message": "If we\u0027d like to add on-demand RAM loads, could this work:\n\n1. Map all RAM with no permissions with WHvMapGpaRange\n2. whpx_emu_mmio_callback trips because of I guess, WHvRunVpExitReasonMemoryAccess?\n3. Add to whpx_emu_mmio_callback that also re-maps particular pages using WHvMapGpaRange from no permissions at all to Read/Write/Exec after the page is loaded",
+      "range": {
+        "startLine": 612,
+        "startChar": 0,
+        "endLine": 612,
+        "endChar": 56
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
