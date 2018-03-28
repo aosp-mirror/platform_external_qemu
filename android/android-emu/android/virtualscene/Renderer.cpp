@@ -17,6 +17,7 @@
 #include "android/virtualscene/Renderer.h"
 
 #include "android/base/ArraySize.h"
+#include "android/base/files/PathUtils.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/virtualscene/RenderTarget.h"
@@ -225,9 +226,16 @@ struct MeshData {
     size_t mIndexCount = 0;
 };
 
+struct TextureData {
+    size_t mRefCount = 0;
+    GLuint mTextureId = 0;
+    std::string mFilename;
+};
+
 struct SceneObjectData {
     std::vector<Material> materials;
     std::vector<Mesh> meshes;
+    std::vector<Texture> textures;
 };
 
 using RenderableParameterCallback =
@@ -273,12 +281,36 @@ private:
     void releaseMesh(Mesh mesh);
     void releaseTexture(Texture texture);
 
+    // Returns true if the material is a standard material.
+    bool isStandardMaterial(Material material);
+
     // Helper to determine if GLES supports a given texture size.
     bool isTextureSizeValid(uint32_t width, uint32_t height);
 
+    // Gets a cached texture, if it has already been loaded.
+    //
+    // Returns an invalid texture if the texture has not been cached, which can
+    // be checked with Texture::isValid().
+    //
+    // Is a valid texture is returned, it is bound to the parent object.
+    Texture tryGetCachedTexture(const SceneObject* parent,
+                                const char* filename);
+
     // Create an OpenGL texture with the given width and height with storage
     // allocated, but no data loaded.
-    Texture createEmptyTexture(uint32_t width, uint32_t height);
+    Texture createEmptyTexture(const SceneObject* parent, uint32_t width,
+                               uint32_t height);
+
+    // Create a texture handle from an OpenGL texture id, and register it with
+    // the textures list.
+    //
+    // |parent| - Parent scene object.
+    // |filename| - If this texture was loaded from a file, the filename it was
+    //              loaded from so that it can be cached, otherwise null.
+    // |textureId| - OpenGL texture id.
+    Texture createTextureInternal(const SceneObject* parent,
+                                  const char* filename,
+                                  GLuint textureId);
 
     // Compile a shader from source.
     // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
@@ -302,6 +334,8 @@ private:
     GLint getAttribLocation(GLuint program, const char* name);
     GLint getUniformLocation(GLuint program, const char* name);
 
+    GLuint getTextureId(Texture texture) const;
+
     // Executes the given renderable, used internally by Renderer::render.
     void processRenderable(const Renderable& renderable,
                            RenderableParameterCallback parameterCallback);
@@ -319,7 +353,8 @@ private:
     int mNextResourceId = 0;
     std::unordered_map<int, MaterialData> mMaterials;
     std::unordered_map<int, MeshData> mMeshes;
-    std::unordered_set<GLuint> mTextures;
+    std::unordered_map<int, TextureData> mTextures;
+    std::unordered_map<std::string, int> mTextureCache;
 
     std::unordered_map<const SceneObject*, SceneObjectData> mObjectData;
 
@@ -352,18 +387,15 @@ bool RendererImpl::initialize() {
         return false;
     }
 
-    mRenderTargets[0] = RenderTarget::createTextureTarget(
-            mGles2,
-            createEmptyTexture(mRenderWidth * kSuperSampleMultiple,
-                               mRenderHeight * kSuperSampleMultiple),
-            mRenderWidth * kSuperSampleMultiple,
-            mRenderHeight * kSuperSampleMultiple);
-    mRenderTargets[1] = RenderTarget::createTextureTarget(
-            mGles2,
-            createEmptyTexture(mRenderWidth * kSuperSampleMultiple,
-                               mRenderHeight * kSuperSampleMultiple),
-            mRenderWidth * kSuperSampleMultiple,
-            mRenderHeight * kSuperSampleMultiple);
+    for (size_t i = 0; i < 2; ++i) {
+        Texture renderTargetTexture =
+                createEmptyTexture(this, mRenderWidth * kSuperSampleMultiple,
+                                   mRenderHeight * kSuperSampleMultiple);
+        mRenderTargets[i] = RenderTarget::createTextureTarget(
+                mGles2, getTextureId(renderTargetTexture), renderTargetTexture,
+                mRenderWidth * kSuperSampleMultiple,
+                mRenderHeight * kSuperSampleMultiple);
+    }
     if (!mRenderTargets[0] || !mRenderTargets[1]) {
         E("%s: Failed creating texture render targets.", __FUNCTION__);
         return false;
@@ -413,6 +445,10 @@ RendererImpl::~RendererImpl() {
     for (const auto& meshIt : mMeshes) {
         W("%s: Leaked mesh with id %d", __FUNCTION__, meshIt.first);
     }
+
+    for (const auto& textureIt : mTextures) {
+        W("%s: Leaked texture with id %d", __FUNCTION__, textureIt.first);
+    }
 }
 
 float RendererImpl::getAspectRatio() {
@@ -432,11 +468,17 @@ void RendererImpl::releaseObjectResources(const SceneObject* sceneObject) {
 
     // Unregister object resources.
     for (auto& material : data.materials) {
-        releaseMaterial(material);
+        if (!isStandardMaterial(material)) {
+            releaseMaterial(material);
+        }
     }
 
     for (auto& mesh : data.meshes) {
         releaseMesh(mesh);
+    }
+
+    for (auto& texture : data.textures) {
+        releaseTexture(texture);
     }
 
     mObjectData.erase(objectDataIt);
@@ -600,10 +642,23 @@ Mesh RendererImpl::createMesh(const SceneObject* parent,
 
 Texture RendererImpl::loadTexture(const SceneObject* parent,
                                   const char* filename) {
+    std::string path;
+    if (!PathUtils::isAbsolute(filename)) {
+        path = PathUtils::join(System::get()->getLauncherDirectory(),
+                               "resources", filename);
+    } else {
+        path = filename;
+    }
+
+    Texture cachedTexture = tryGetCachedTexture(parent, path.c_str());
+    if (cachedTexture.isValid()) {
+        return cachedTexture;
+    }
+
     std::vector<uint8_t> buffer;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (!TextureUtils::loadPNG(filename, buffer, &width, &height)) {
+    if (!TextureUtils::loadPNG(path.c_str(), buffer, &width, &height)) {
         return Texture();
     }
 
@@ -634,14 +689,7 @@ Texture RendererImpl::loadTexture(const SceneObject* parent,
     }
 #endif
 
-    const auto insertResult = mTextures.insert(textureId);
-    if (!insertResult.second) {
-        W("%s: Texture id %d already exists.", __FUNCTION__, textureId);
-    }
-
-    Texture texture;
-    texture.id = static_cast<int>(textureId);
-    return texture;
+    return createTextureInternal(parent, path.c_str(), textureId);
 }
 
 void RendererImpl::render(const std::vector<RenderableObject>& renderables,
@@ -728,22 +776,38 @@ void RendererImpl::releaseMesh(Mesh mesh) {
 }
 
 void RendererImpl::releaseTexture(Texture texture) {
-    if (texture.id <= 0) {
-        E("%s: Invalid texture id %d", __FUNCTION__, texture.id);
-    }
-
-    const GLuint textureGL = static_cast<GLuint>(texture.id);
-    const auto textureIt = mTextures.find(textureGL);
+    auto textureIt = mTextures.find(texture.id);
 
     if (textureIt == mTextures.end()) {
         E("%s: Could not find texture id %d", __FUNCTION__, texture.id);
         return;
     }
 
-    // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
-    mGles2->glDeleteTextures(1, &textureGL);
+    TextureData& textureData = textureIt->second;
 
-    mTextures.erase(textureIt);
+    if (textureData.mRefCount == 0) {
+        E("%s: Texture refcount error.", __FUNCTION__);
+        return;
+    }
+
+    if (--textureData.mRefCount == 0) {
+        // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
+        mGles2->glDeleteTextures(1, &textureData.mTextureId);
+
+        if (!textureData.mFilename.empty()) {
+            mTextureCache.erase(textureData.mFilename);
+        }
+
+        mTextures.erase(textureIt);
+    }
+}
+
+bool RendererImpl::isStandardMaterial(Material material) {
+    if (material.id == mMaterialTextured.id) {
+        return true;
+    }
+
+    return false;
 }
 
 bool RendererImpl::isTextureSizeValid(uint32_t width, uint32_t height) {
@@ -753,7 +817,26 @@ bool RendererImpl::isTextureSizeValid(uint32_t width, uint32_t height) {
            height <= maxTextureSize;
 }
 
-Texture RendererImpl::createEmptyTexture(uint32_t width, uint32_t height) {
+Texture RendererImpl::tryGetCachedTexture(const SceneObject* parent,
+                                          const char* filename) {
+    const auto it = mTextureCache.find(filename);
+    if (it == mTextureCache.end()) {
+        return Texture();
+    }
+
+    const int id = it->second;
+    ++mTextures[id].mRefCount;
+
+    Texture texture;
+    texture.id = id;
+    mObjectData[parent].textures.push_back(texture);
+    return texture;
+}
+
+Texture RendererImpl::createEmptyTexture(
+        const SceneObject* parent,
+        uint32_t width,
+        uint32_t height) {
     if (!isTextureSizeValid(width, height)) {
         E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
           height, GL_MAX_TEXTURE_SIZE);
@@ -779,14 +862,28 @@ Texture RendererImpl::createEmptyTexture(uint32_t width, uint32_t height) {
     }
 #endif
 
-    const auto insertResult = mTextures.insert(textureId);
-    if (!insertResult.second) {
-        W("%s: Texture id %d already exists.", __FUNCTION__, textureId);
+    return createTextureInternal(parent, nullptr, textureId);
+}
+
+Texture RendererImpl::createTextureInternal(const SceneObject* parent,
+                                            const char* filename,
+                                            GLuint textureId) {
+    const int id = mNextResourceId++;
+
+    TextureData texture;
+    texture.mRefCount = 1;
+    texture.mTextureId = textureId;
+    if (filename) {
+        texture.mFilename = filename;
+        mTextureCache[filename] = id;
     }
 
-    Texture texture;
-    texture.id = static_cast<int>(textureId);
-    return texture;
+    mTextures[id] = texture;
+
+    Texture textureHandle;
+    textureHandle.id = id;
+    mObjectData[parent].textures.push_back(textureHandle);
+    return textureHandle;
 }
 
 GLuint RendererImpl::compileShader(GLenum type, const char* shaderSource) {
@@ -865,6 +962,10 @@ GLint RendererImpl::getUniformLocation(GLuint program, const char* name) {
     return location;
 }
 
+GLuint RendererImpl::getTextureId(Texture texture) const {
+    return mTextures.at(texture.id).mTextureId;
+}
+
 void RendererImpl::processRenderable(
         const Renderable& renderable,
         RenderableParameterCallback parameterCallback) {
@@ -893,8 +994,7 @@ void RendererImpl::processRenderable(
         mGles2->glActiveTexture(GL_TEXTURE0);
         mGles2->glUniform1i(material.texSamplerLocation, 0);
 
-        mGles2->glBindTexture(GL_TEXTURE_2D,
-                              static_cast<GLuint>(renderable.texture.id));
+        mGles2->glBindTexture(GL_TEXTURE_2D, getTextureId(renderable.texture));
     } else {
         mGles2->glBindTexture(GL_TEXTURE_2D, 0);
     }
