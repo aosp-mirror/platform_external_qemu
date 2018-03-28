@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b35661a_98add551",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-28T20:57:01Z",
+      "side": 1,
+      "message": "In the interest of making this faster:\n\nIs there some way to use sendFrames to directly write RGBA8888 frames to /dev/video0 (or even a virtual /dev/fb1), and skip a separate compression stage?\n\nAlso, try high values for kFPS (60), and tweaking the webrtc encoding for speed / low latency.",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 0
+      },
+      "revId": "42756399a7acb9b065c170adf6a51d6cd813fba7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
