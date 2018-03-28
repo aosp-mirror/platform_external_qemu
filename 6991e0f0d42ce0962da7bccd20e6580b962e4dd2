@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "77f3fa56_2004028a",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 1422,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-03-28T17:38:13Z",
+      "side": 1,
+      "message": "It looks like you didn\u0027t auto generate this file, since our build script appears to be broken ( ./android/scripts/build-qemu-android.sh --host\u003dwindows-x86_64). Please hold of on submitting until we can fix our build (looking into it now), and auto-generate this file as described in android/docs/DEVELOPMENT.txt",
+      "revId": "6991e0f0d42ce0962da7bccd20e6580b962e4dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "208699df_60c39d65",
         "filename": "android-qemu2-glue/build/Makefile.qemu2-target.mk",
         "patchSetId": 1
