@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "208699df_60c39d65",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-target.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-28T15:39:58Z",
+      "side": 1,
+      "message": "whpx-stub.c should be built for Mac too; $(call qemu2-if-os, linux darwin, whpx-stub.c)",
+      "range": {
+        "startLine": 121,
+        "startChar": 8,
+        "endLine": 121,
+        "endChar": 45
+      },
+      "revId": "6991e0f0d42ce0962da7bccd20e6580b962e4dd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
