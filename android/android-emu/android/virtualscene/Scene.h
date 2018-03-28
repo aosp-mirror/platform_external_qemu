@@ -26,6 +26,7 @@
 #include "android/virtualscene/SceneCamera.h"
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace android {
@@ -33,6 +34,15 @@ namespace virtualscene {
 
 // Forward declarations.
 class SceneObject;
+
+struct Poster {
+    glm::vec2 size = glm::vec2(1.0f, 1.0f);
+    glm::vec3 position = glm::vec3();
+    glm::quat rotation = glm::quat();
+    std::string defaultFilename;
+
+    std::unique_ptr<SceneObject> sceneObject;
+};
 
 class Scene {
     DISALLOW_COPY_AND_ASSIGN(Scene);
@@ -50,7 +60,7 @@ public:
 
     // Before teardown, release all SceneObjects so that Renderer resources are
     // cleaned up.
-    void releaseSceneObjects(Renderer& renderer);
+    void releaseSceneObjects();
 
     // Get the scene camera.
     const SceneCamera& getCamera() const;
@@ -63,15 +73,38 @@ public:
     // Get the list of RenderableObjects for the current frame.
     std::vector<RenderableObject> getRenderableObjects() const;
 
+    // Load a poster into the scene from a file.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |filename| - Path to an image file, either PNG or JPEG.
+    //
+    // Returns true on success.
+    bool loadPoster(const char* posterName, const char* filename);
+
 private:
     // Private constructor, use Scene::create to create an instance.
-    Scene();
+    Scene(Renderer& renderer);
 
     // Load the scene and create SceneObjects.
-    bool initialize(Renderer& renderer);
+    //
+    // Returns true on success.
+    bool initialize();
 
+    // Load a .posters file and populate the mPosters map.
+    //
+    // Returns true on success.
+    bool loadPostersFile(const char* filename);
+
+    // Gets RenderableObjects from a SceneObject.
+    static void getRenderableObjectsFromSceneObject(
+            const glm::mat4& viewProjection,
+            const std::unique_ptr<SceneObject>& sceneObject,
+            std::vector<RenderableObject>& outRenderableObjects);
+
+    Renderer& mRenderer;
     SceneCamera mCamera;
     std::vector<std::unique_ptr<SceneObject>> mSceneObjects;
+    std::unordered_map<std::string, Poster> mPosters;
 };
 
 }  // namespace virtualscene

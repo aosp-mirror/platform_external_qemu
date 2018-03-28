@@ -16,10 +16,15 @@
 
 #include "android/virtualscene/VirtualSceneManager.h"
 
+#include "android/base/files/PathUtils.h"
+#include "android/cmdline-option.h"
+#include "android/globals.h"
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/virtualscene/Renderer.h"
 #include "android/virtualscene/Scene.h"
+
+#include <unordered_map>
 
 using namespace android::base;
 
@@ -31,10 +36,87 @@ using namespace android::base;
 namespace android {
 namespace virtualscene {
 
-android::base::LazyInstance<android::base::Lock> VirtualSceneManager::mLock =
-        LAZY_INSTANCE_INIT;
+LazyInstance<Lock> VirtualSceneManager::mLock = LAZY_INSTANCE_INIT;
 Renderer* VirtualSceneManager::mRenderer = nullptr;
 Scene* VirtualSceneManager::mScene = nullptr;
+
+class Settings {
+public:
+    Settings() = default;
+
+    void parseCmdlineParameter(StringView param) {
+        auto it = std::find(param.begin(), param.end(), '=');
+        if (it == param.end()) {
+            E("%s: Invalid command line parameter '%s', should be "
+              "<name>=<filename>",
+              __FUNCTION__, std::string(param).c_str());
+            return;
+        }
+
+        std::string name(param.begin(), it);
+        StringView filename(++it, param.end());
+
+        std::string absFilename;
+        if (!PathUtils::isAbsolute(filename)) {
+            absFilename = PathUtils::join(System::get()->getCurrentDirectory(),
+                                          filename);
+        } else {
+            absFilename = filename;
+        }
+
+        if (!System::get()->pathExists(absFilename)) {
+            E("%s: Path '%s' does not exist.", __FUNCTION__,
+              absFilename.c_str());
+            return;
+        }
+
+        D("%s: Found poster %s at %s", __FUNCTION__, name.c_str(),
+          absFilename.c_str());
+
+        mPosters[name] = absFilename;
+    }
+
+    void setPoster(const char* posterName, const char* filename) {
+        mPosters[posterName] = filename;
+    }
+
+    void setupScene(Scene* scene) const {
+        for (const auto& it : mPosters) {
+            scene->loadPoster(it.first.c_str(), it.second.c_str());
+        }
+    }
+
+private:
+    std::unordered_map<std::string, std::string> mPosters;
+};
+
+static LazyInstance<Settings> sSettings = LAZY_INSTANCE_INIT;
+
+void VirtualSceneManager::parseCmdline() {
+    AutoLock lock(mLock.get());
+    if (sSettings.hasInstance()) {
+        E("VirtualSceneManager settings already loaded");
+        return;
+    }
+
+    if (!android_cmdLineOptions) {
+        return;
+    }
+
+    const bool isVirtualScene =
+            !strcmp(android_hw->hw_camera_back, "virtualscene");
+    if (!isVirtualScene && android_cmdLineOptions->virtualscene_poster) {
+        W("[VirtualScene] Poster parameter ignored, virtual scene is not "
+          "enabled.");
+        return;
+    }
+
+    const ParamList* feature = android_cmdLineOptions->virtualscene_poster;
+    while (feature) {
+        sSettings->parseCmdlineParameter(feature->param);
+        feature = feature->next;
+    }
+}
 
 bool VirtualSceneManager::initialize(const GLESv2Dispatch* gles2,
                                      int width,
@@ -57,6 +139,8 @@ bool VirtualSceneManager::initialize(const GLESv2Dispatch* gles2,
         return false;
     }
 
+    sSettings->setupScene(scene.get());
+
     skin_winsys_show_virtual_scene_controls(true);
 
     // Store the raw pointers instead of the unique_ptr wrapper to prevent
@@ -76,7 +160,7 @@ void VirtualSceneManager::uninitialize() {
 
     skin_winsys_show_virtual_scene_controls(false);
 
-    mScene->releaseSceneObjects(*mRenderer);
+    mScene->releaseSceneObjects();
     delete mScene;
     mScene = nullptr;
 
@@ -95,6 +179,19 @@ int64_t VirtualSceneManager::render() {
     mRenderer->render(mScene->getRenderableObjects(),
             timestamp / 1000000000.0f);
     return timestamp;
+}
+
+bool VirtualSceneManager::loadPoster(const char* posterName,
+                                     const char* filename) {
+    AutoLock lock(mLock.get());
+    sSettings->setPoster(posterName, filename);
+
+    // If the scene is loaded, update it now.
+    if (mScene) {
+        return mScene->loadPoster(posterName, filename);
+    }
+
+    return true;
 }
 
 }  // namespace virtualscene

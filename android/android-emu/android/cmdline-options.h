@@ -174,6 +174,8 @@ OPT_PARAM( camera_back, "<mode>", "set emulation mode for a camera facing back" 
 OPT_PARAM( camera_front, "<mode>", "set emulation mode for a camera facing front" )
 OPT_FLAG( webcam_list, "lists web cameras available for emulation" )
 
+OPT_LIST( virtualscene_poster, "<name>=<filename>", "Load a png or jpeg image as a poster in the virtual scene")
+
 OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 
 #ifndef __linux__
