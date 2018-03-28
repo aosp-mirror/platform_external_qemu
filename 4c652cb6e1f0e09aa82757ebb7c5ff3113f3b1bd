@@ -22,6 +22,30 @@
       "revId": "4c652cb6e1f0e09aa82757ebb7c5ff3113f3b1bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d032ae2_7857a821",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 939,
+      "author": {
+        "id": 1299294
+      },
+      "writtenOn": "2018-03-28T19:03:53Z",
+      "side": 1,
+      "message": "This approach is standard in the industry.\n\nKVM returns for example: KVMKVMKVM:\n\nhttps://android.googlesource.com/platform/external/qemu/+/emu-master-dev/target/i386/kvm.c#761\n\nOther hypervisors like VMware or Hyper-V return also similar strings.",
+      "parentUuid": "a0144e08_1973ce26",
+      "range": {
+        "startLine": 939,
+        "startChar": 39,
+        "endLine": 939,
+        "endChar": 51
+      },
+      "revId": "4c652cb6e1f0e09aa82757ebb7c5ff3113f3b1bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
