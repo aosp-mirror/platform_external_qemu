@@ -658,7 +658,9 @@ Texture RendererImpl::loadTexture(const SceneObject* parent,
     std::vector<uint8_t> buffer;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (!TextureUtils::loadPNG(path.c_str(), buffer, &width, &height)) {
+    TextureUtils::Format format;
+    if (!TextureUtils::loadPNG(path.c_str(), buffer, &width, &height,
+                               &format)) {
         return Texture();
     }
 
@@ -668,11 +670,15 @@ Texture RendererImpl::loadTexture(const SceneObject* parent,
         return Texture();
     }
 
+    const GLenum textureFormat =
+            format == TextureUtils::Format::RGBA32 ? GL_RGBA : GL_RGB;
+
     GLuint textureId;
     mGles2->glGenTextures(1, &textureId);
     mGles2->glBindTexture(GL_TEXTURE_2D, textureId);
-    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                         GL_UNSIGNED_BYTE, buffer.data());
+    mGles2->glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, textureFormat, width, height, 0,
+                         textureFormat, GL_UNSIGNED_BYTE, buffer.data());
     mGles2->glGenerateMipmap(GL_TEXTURE_2D);
     mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
@@ -697,8 +703,13 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables,
     mRenderTargets[0]->bind();
 
     mGles2->glEnable(GL_DEPTH_TEST);
+    // For basic transparency of posters, always rendered after the main scene.
+    mGles2->glEnable(GL_BLEND);
     mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Unpremultiplied, as supplied by libpng.
+    mGles2->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Render scene objects.
     for (auto& renderObject : renderables) {
@@ -712,6 +723,7 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables,
     }
 
     mGles2->glDisable(GL_DEPTH_TEST);
+    mGles2->glDisable(GL_BLEND);
 
     assert(!mEffectsChain.empty());
     for (size_t i = 0; i < mEffectsChain.size(); i++) {

@@ -131,10 +131,9 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
                     return nullptr;
                 }
 
-                // Flip Y coord, OpenGL and .obj are reversed.
                 vertex.uv = glm::vec2(
                         attrib.texcoords[2 * index.texcoord_index],
-                        1.0f - attrib.texcoords[2 * index.texcoord_index + 1]);
+                        attrib.texcoords[2 * index.texcoord_index + 1]);
             }
 
             auto existingEntry = existingVertexToIndex.find(vertex);
