@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "995c90b0_aabf6c8c",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done. See AVScopedPtr.h.",
+      "parentUuid": "351e83e4_f83cf2e0",
+      "range": {
+        "startLine": 78,
+        "startChar": 6,
+        "endLine": 78,
+        "endChar": 21
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ec4902a_2758bfb1",
         "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2018-03-24T17:16:56Z",
       "side": 1,
       "message": "this can\u0027t happen, StringView is never null",
+      "range": {
+        "startLine": 236,
+        "startChar": 9,
+        "endLine": 236,
+        "endChar": 27
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "45c0c8f7_4a886d47",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6ec4902a_2758bfb1",
       "range": {
         "startLine": 236,
         "startChar": 9,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "00db7d8c_3b1f943a",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a6c4df9_7ec024a2",
+      "range": {
+        "startLine": 75,
+        "startChar": 16,
+        "endLine": 76,
+        "endChar": 19
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5092db4_81adfcaa",
         "filename": "android/android-emu/android/recording/FfmpegRecorder.h",
         "patchSetId": 7
@@ -105,6 +177,30 @@
       "writtenOn": "2018-03-24T17:16:56Z",
       "side": 1,
       "message": "accept std::unique_ptr\u003c\u003e by value, this way it\u0027s explicit that it\u0027s taking ownership",
+      "range": {
+        "startLine": 104,
+        "startChar": 61,
+        "endLine": 104,
+        "endChar": 76
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c5e952f_0a10db34",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c5092db4_81adfcaa",
       "range": {
         "startLine": 104,
         "startChar": 61,
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "ed2c737d_24b00bae",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eefd0dc7_a005c15f",
+      "range": {
+        "startLine": 127,
+        "startChar": 21,
+        "endLine": 127,
+        "endChar": 23
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "645aa3ab_a3a5d34f",
         "filename": "android/android-emu/android/recording/Frame.h",
         "patchSetId": 7
@@ -151,6 +271,30 @@
       "writtenOn": "2018-03-24T17:16:56Z",
       "side": 1,
       "message": "this can be the only constructor, just give both parameters default values of 0",
+      "range": {
+        "startLine": 68,
+        "startChar": 10,
+        "endLine": 68,
+        "endChar": 35
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e98eaff_b9923fd0",
+        "filename": "android/android-emu/android/recording/Frame.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "645aa3ab_a3a5d34f",
       "range": {
         "startLine": 68,
         "startChar": 10,
@@ -186,6 +330,30 @@
     },
     {
       "key": {
+        "uuid": "8281dd2d_f85178f8",
+        "filename": "android/android-emu/android/recording/GifConverter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "48815443_ec6608b6",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 31
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0433aa7b_da59b678",
         "filename": "android/android-emu/android/recording/GifConverter.cpp",
         "patchSetId": 7
@@ -197,6 +365,30 @@
       "writtenOn": "2018-03-24T17:16:56Z",
       "side": 1,
       "message": "nit: const",
+      "range": {
+        "startLine": 63,
+        "startChar": 24,
+        "endLine": 63,
+        "endChar": 25
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab210b18_d3ec7230",
+        "filename": "android/android-emu/android/recording/GifConverter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0433aa7b_da59b678",
       "range": {
         "startLine": 63,
         "startChar": 24,
@@ -232,6 +424,30 @@
     },
     {
       "key": {
+        "uuid": "e289e2b3_8143f84a",
+        "filename": "android/android-emu/android/recording/GifConverter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "329a04a2_7feafff5",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 17
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8d8edf55_ae0b7eb8",
         "filename": "android/android-emu/android/recording/GifConverter.cpp",
         "patchSetId": 7
@@ -255,6 +471,30 @@
     },
     {
       "key": {
+        "uuid": "c254f0ac_f8fbc871",
+        "filename": "android/android-emu/android/recording/GifConverter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8d8edf55_ae0b7eb8",
+      "range": {
+        "startLine": 120,
+        "startChar": 12,
+        "endLine": 120,
+        "endChar": 21
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11187a47_6425fe4e",
         "filename": "android/android-emu/android/recording/GifConverter.h",
         "patchSetId": 7
@@ -266,6 +506,30 @@
       "writtenOn": "2018-03-24T17:16:56Z",
       "side": 1,
       "message": "not needed in C++",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 20
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bdc3f8aa_2abc97ab",
+        "filename": "android/android-emu/android/recording/GifConverter.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11187a47_6425fe4e",
       "range": {
         "startLine": 20,
         "startChar": 0,
@@ -324,6 +588,54 @@
     },
     {
       "key": {
+        "uuid": "fdad8b41_a362ef0d",
+        "filename": "android/android-emu/android/recording/GifConverter.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cec22251_573ef339",
+      "range": {
+        "startLine": 36,
+        "startChar": 37,
+        "endLine": 36,
+        "endChar": 48
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c5f772b_f05c35ff",
+        "filename": "android/android-emu/android/recording/GifConverter.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f2b630ef_5f094d7a",
+      "range": {
+        "startLine": 36,
+        "startChar": 16,
+        "endLine": 36,
+        "endChar": 36
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0243e768_6a3902a2",
         "filename": "android/android-emu/android/recording/screen-recorder-constants.h",
         "patchSetId": 7
@@ -335,6 +647,30 @@
       "writtenOn": "2018-03-24T17:16:56Z",
       "side": 1,
       "message": "kNumAudioChannels? just in case",
+      "range": {
+        "startLine": 33,
+        "startChar": 14,
+        "endLine": 33,
+        "endChar": 26
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "abab790e_a3c71d4e",
+        "filename": "android/android-emu/android/recording/screen-recorder-constants.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0243e768_6a3902a2",
       "range": {
         "startLine": 33,
         "startChar": 14,
@@ -370,6 +706,30 @@
     },
     {
       "key": {
+        "uuid": "9319ba18_941dba3b",
+        "filename": "android/android-emu/android/recording/video/GuestReadbackWorker.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c80558db_c0ce5fb6",
+      "range": {
+        "startLine": 43,
+        "startChar": 11,
+        "endLine": 43,
+        "endChar": 31
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3df6f212_ec51ddad",
         "filename": "android/android-emu/android/utils/debug.h",
         "patchSetId": 7
@@ -381,6 +741,30 @@
       "writtenOn": "2018-03-24T17:16:56Z",
       "side": 1,
       "message": "please don\u0027t overuse the debug tags - those are bits in 64-bit int, and we don\u0027t have that many left",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 55
+      },
+      "revId": "a06f9cc98bc48ec9b1128e600580c59ab5a01c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd46f7c6_8a1cdd3d",
+        "filename": "android/android-emu/android/utils/debug.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-03-28T18:54:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3df6f212_ec51ddad",
       "range": {
         "startLine": 68,
         "startChar": 0,
