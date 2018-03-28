@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2296b4ba_710ca4aa",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1299294
+      },
+      "writtenOn": "2018-03-28T16:45:29Z",
+      "side": 1,
+      "message": "Note: still needs patch for dynamic loading of the WHP functions",
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
