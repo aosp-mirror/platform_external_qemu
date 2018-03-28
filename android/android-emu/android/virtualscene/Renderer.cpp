@@ -659,8 +659,7 @@ Texture RendererImpl::loadTexture(const SceneObject* parent,
     uint32_t width = 0;
     uint32_t height = 0;
     TextureUtils::Format format;
-    if (!TextureUtils::loadPNG(path.c_str(), buffer, &width, &height,
-                               &format)) {
+    if (!TextureUtils::load(path.c_str(), buffer, &width, &height, &format)) {
         return Texture();
     }
 

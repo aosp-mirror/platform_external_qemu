@@ -21,6 +21,9 @@
 #include "android/utils/debug.h"
 
 #include <png.h>
+extern "C" {
+#include <jpeglib.h>
+}
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -32,6 +35,28 @@ using android::base::ScopedStdioFile;
 
 namespace android {
 namespace virtualscene {
+
+bool TextureUtils::load(const char* filename,
+                        std::vector<uint8_t>& buffer,
+                        uint32_t* outWidth,
+                        uint32_t* outHeight,
+                        Format* outFormat) {
+    *outWidth = 0;
+    *outHeight = 0;
+    *outFormat = Format::RGB24;
+
+    const base::StringView extension = PathUtils::extension(filename);
+
+    if (extension == ".png") {
+        return loadPNG(filename, buffer, outWidth, outHeight, outFormat);
+    } else if (extension == ".jpg" || extension == ".jpeg") {
+        return loadJPEG(filename, buffer, outWidth, outHeight);
+    } else {
+        E("%s: Unsupported file format %s", __FUNCTION__,
+          std::string(extension).c_str());
+        return false;
+    }
+}
 
 bool TextureUtils::loadPNG(const char* filename,
                            std::vector<uint8_t>& buffer,
@@ -145,6 +170,88 @@ bool TextureUtils::loadPNG(const char* filename,
     *outHeight = height;
     *outFormat =
             newColorType == PNG_COLOR_TYPE_RGB ? Format::RGB24 : Format::RGBA32;
+
+    return true;
+}
+
+struct ErrorManager {
+    struct jpeg_error_mgr pub;  // Public fields.
+    jmp_buf setjmp_buffer;
+};
+
+bool TextureUtils::loadJPEG(const char* filename,
+                            std::vector<uint8_t>& buffer,
+                            uint32_t* outWidth,
+                            uint32_t* outHeight) {
+    *outWidth = 0;
+    *outHeight = 0;
+
+    ScopedStdioFile fp(fopen(filename, "rb"));
+    if (!fp) {
+        E("%s: Failed to open file %s", __FUNCTION__, filename);
+        return false;
+    }
+
+    jpeg_decompress_struct cinfo;
+
+    // Set up normal error routines, then override error_exit to avoid exit()
+    // on failure.
+    ErrorManager jerr;
+    cinfo.err = jpeg_std_error(&jerr.pub);
+    jerr.pub.error_exit = [](j_common_ptr cinfoPtr) {
+        ErrorManager* err = reinterpret_cast<ErrorManager*>(cinfoPtr->err);
+        longjmp(err->setjmp_buffer, 1);
+    };
+
+    if (setjmp(jerr.setjmp_buffer)) {
+        E("%s: JPEG library error", __FUNCTION__);
+        // Prints the message.
+        (cinfo.err->output_message)(
+                reinterpret_cast<jpeg_common_struct*>(&cinfo));
+        jpeg_destroy_decompress(&cinfo);
+        return false;
+    }
+
+    jpeg_create_decompress(&cinfo);
+    jpeg_stdio_src(&cinfo, fp.get());
+
+    // We can safely ignore the return value since we're using a stdio source
+    // and passing require_image as true.
+    (void)jpeg_read_header(&cinfo, /* require_image */ TRUE);
+    cinfo.out_color_space = JCS_RGB;  // Force RGB format.
+    (void)jpeg_start_decompress(&cinfo);
+
+    const uint32_t width = cinfo.output_width;
+    const uint32_t height = cinfo.output_height;
+    D("%s: Loaded JPEG %s, %dx%d", __FUNCTION__, filename, width, height);
+
+    if (cinfo.output_components != 3) {
+        E("%s: Unsupported output_components %d, should be 3.", __FUNCTION__,
+          cinfo.output_components);
+        jpeg_destroy_decompress(&cinfo);
+        return false;
+    }
+
+    const size_t rowBytes = width * cinfo.output_components;
+    const size_t stride = (rowBytes + 3) / 4 * 4;  // Align to 4-byte boundary.
+    std::vector<uint8_t> data(stride * height);
+
+    while (cinfo.output_scanline < height) {
+        // libjpeg can read multiple scanlines at a time, but on high-quality
+        // decompression it is typically one at a time.  Only read one at a time
+        // for simplicity.
+        uint8_t* rowPtrs[1];
+        rowPtrs[0] =
+                data.data() + (height - cinfo.output_scanline - 1) * stride;
+        (void)jpeg_read_scanlines(&cinfo, rowPtrs, 1);
+    }
+
+    jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+
+    buffer = std::move(data);
+    *outWidth = width;
+    *outHeight = height;
 
     return true;
 }
