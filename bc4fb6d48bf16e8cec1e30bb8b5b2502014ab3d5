@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "901a232d_60fcf76b",
+        "filename": "android/scripts/build-qemu-android.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-28T19:56:36Z",
+      "side": 1,
+      "message": "nit: add a comment here so people will know the logic of making linux gcc but others g++",
+      "range": {
+        "startLine": 319,
+        "startChar": 0,
+        "endLine": 319,
+        "endChar": 19
+      },
+      "revId": "bc4fb6d48bf16e8cec1e30bb8b5b2502014ab3d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
