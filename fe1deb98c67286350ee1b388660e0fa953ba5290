@@ -22,6 +22,30 @@
       "revId": "fe1deb98c67286350ee1b388660e0fa953ba5290",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5f01785_95747e8d",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-03-28T18:27:19Z",
+      "side": 1,
+      "message": "Nice, I wasn\u0027t aware of that global.  Updated.",
+      "parentUuid": "4a0715ed_73ab5b57",
+      "range": {
+        "startLine": 717,
+        "startChar": 4,
+        "endLine": 717,
+        "endChar": 75
+      },
+      "revId": "fe1deb98c67286350ee1b388660e0fa953ba5290",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
