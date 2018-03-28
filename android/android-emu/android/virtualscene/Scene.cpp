@@ -99,6 +99,13 @@ void Scene::releaseSceneObjects() {
     }
 
     mSceneObjects.clear();
+
+    for (auto& poster : mPosters) {
+        if (poster.second.sceneObject) {
+            mRenderer.releaseObjectResources(poster.second.sceneObject.get());
+            poster.second.sceneObject.reset();
+        }
+    }
 }
 
 const SceneCamera& Scene::getCamera() const {
