@@ -220,6 +220,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         -platform linux-g++-64
                 var_append LD_LIBRARY_PATH \
                   $(dirname $(aosp_clang_libcplusplus))
+                var_append CXXFLAGS " -D__extern_always_inline=\"extern\ __always_inline\""
                 ;;
             windows*)
                 case $SYSTEM in
@@ -282,7 +283,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         ) || panic "Could not configure Qt build!"
 
         # Build everything now.
-        QT_MODULES="qtbase qtsvg qtimageformats"
+        QT_MODULES="qtbase qtsvg qtimageformats qtlocation"
         QT_TARGET_BUILD_MODULES=
         QT_TARGET_INSTALL_MODULES=
         for QT_MODULE in $QT_MODULES; do
