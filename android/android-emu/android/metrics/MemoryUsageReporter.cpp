@@ -63,12 +63,7 @@ MemoryUsageReporter::MemoryUsageReporter(
             System::MemUsage forMetrics = mCurrUsage;
             lock.unlock();
 
-            memUsageProto->set_resident_memory(forMetrics.resident);
-            memUsageProto->set_resident_memory_max(forMetrics.resident_max);
-            memUsageProto->set_virtual_memory(forMetrics.virt);
-            memUsageProto->set_virtual_memory_max(forMetrics.virt_max);
-            memUsageProto->set_total_phys_memory(forMetrics.total_phys_memory);
-            memUsageProto->set_total_page_file(forMetrics.total_page_file);
+            fillProto(forMetrics, memUsageProto);
 
             {
                 // TODO: Move performance stats setter to a separate location
@@ -96,6 +91,17 @@ void MemoryUsageReporter::start() {
 
 void MemoryUsageReporter::stop() {
     mRecurrentTask.stopAndWait();
+}
+
+// static
+void MemoryUsageReporter::fillProto(const System::MemUsage& memUsage,
+                                    android_studio::EmulatorMemoryUsage* memUsageProto) {
+    memUsageProto->set_resident_memory(memUsage.resident);
+    memUsageProto->set_resident_memory_max(memUsage.resident_max);
+    memUsageProto->set_virtual_memory(memUsage.virt);
+    memUsageProto->set_virtual_memory_max(memUsage.virt_max);
+    memUsageProto->set_total_phys_memory(memUsage.total_phys_memory);
+    memUsageProto->set_total_page_file(memUsage.total_page_file);
 }
 
 bool MemoryUsageReporter::checkMemoryUsage() {
