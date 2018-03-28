@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bb08a2f5_0f9b0ee9",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-03-28T20:13:18Z",
+      "side": 1,
+      "message": "It does, internally, but I can see how that is not clear.  I added a comment to clarify.",
+      "parentUuid": "389cd573_064c185e",
+      "range": {
+        "startLine": 86,
+        "startChar": 12,
+        "endLine": 86,
+        "endChar": 22
+      },
+      "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1651c90c_43a0bcc1",
         "filename": "android/android-emu/android/virtualscene/Scene.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "af769af9_cf65a8d2",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-03-28T20:13:18Z",
+      "side": 1,
+      "message": "Yeah, create isn\u0027t a good verb here, since it is just pushing POD-types on the vector, changed to \"get\".",
+      "parentUuid": "1651c90c_43a0bcc1",
+      "range": {
+        "startLine": 116,
+        "startChar": 8,
+        "endLine": 116,
+        "endChar": 31
+      },
+      "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb59f896_67589edc",
         "filename": "android/android-emu/android/virtualscene/Scene.cpp",
         "patchSetId": 2
@@ -62,6 +110,24 @@
       "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b4763f7_31160aa9",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-03-28T20:13:18Z",
+      "side": 1,
+      "message": "Good feedback, updated.",
+      "parentUuid": "fb59f896_67589edc",
+      "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -85,6 +151,30 @@
       "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f942000e_13f154c4",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-03-28T20:13:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6de6f84_1a772fd7",
+      "range": {
+        "startLine": 253,
+        "startChar": 5,
+        "endLine": 253,
+        "endChar": 0
+      },
+      "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
