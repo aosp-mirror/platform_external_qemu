@@ -49,6 +49,10 @@ private slots:
 
 private:
 
+    enum class SelectionStatus {
+        NoSelection, Valid, Invalid
+    };
+
     class WidgetSnapshotItem;
 
     static constexpr int COLUMN_ICON = 0;
@@ -64,9 +68,11 @@ private:
 
     void    adjustIcons(QTreeWidget* theDisplayList);
     void    deleteSnapshot(const WidgetSnapshotItem* theItem);
+    void    disableActions();
+    void    enableActions();
     void    editSnapshot(const WidgetSnapshotItem* theItem);
     void    highlightItemWithFilename(const QString& fileName);
-    void    showPreviewImage(const QString& snapshotName, bool isValid);
+    void    showPreviewImage(const QString& snapshotName, SelectionStatus itemStatus);
     void    updateAfterSelectionChanged();
     void    writeLogicalNameToProtobuf(const QString& fileName, const QString& logicalName);
     void    writeParentToProtobuf(const QString& fileName, const QString& parentName);
@@ -76,7 +82,12 @@ private:
 
     const WidgetSnapshotItem* getSelectedSnapshot();
 
+    bool mAllowEdit = false;
+    bool mAllowLoad = false;
+    bool mAllowTake = true;
+    bool mAllowDelete = false;
     bool mUseBigInfoWindow = false;
+
     std::unique_ptr<emulator_snapshot::Snapshot> loadProtobuf(const QString& fileName);
 
     void writeProtobuf(const QString& fileName,
