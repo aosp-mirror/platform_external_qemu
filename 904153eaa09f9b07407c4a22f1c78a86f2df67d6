@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f33de29_5667dcc1",
+        "filename": "stubs/migration.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-03-28T20:58:09Z",
+      "side": 1,
+      "message": "nit: ws\nnit: add copy write header for new files",
+      "range": {
+        "startLine": 3,
+        "startChar": 5,
+        "endLine": 3,
+        "endChar": 18
+      },
+      "revId": "904153eaa09f9b07407c4a22f1c78a86f2df67d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
