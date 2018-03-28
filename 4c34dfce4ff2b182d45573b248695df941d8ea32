@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "389cd573_064c185e",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-03-28T19:44:50Z",
+      "side": 1,
+      "message": "can we print an error message if loading the posters from the file doesn\u0027t work?",
+      "range": {
+        "startLine": 86,
+        "startChar": 12,
+        "endLine": 86,
+        "endChar": 22
+      },
+      "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1651c90c_43a0bcc1",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-03-28T19:44:50Z",
+      "side": 1,
+      "message": "does createRenderableObjects actually create new objects every call, or is it just a lazy-init getter?  If the latter, can we rename it to indicate that this isn\u0027t creating every time?",
+      "range": {
+        "startLine": 116,
+        "startChar": 8,
+        "endLine": 116,
+        "endChar": 31
+      },
+      "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb59f896_67589edc",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-03-28T19:44:50Z",
+      "side": 1,
+      "message": "consider converting to a quaternion immediately when we read this out of the file so that conversion is right after the comment describing what these values are.",
+      "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6de6f84_1a772fd7",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-03-28T19:44:50Z",
+      "side": 1,
+      "message": "consider printing a warning and returning false if name is empty.",
+      "range": {
+        "startLine": 253,
+        "startChar": 5,
+        "endLine": 253,
+        "endChar": 0
+      },
+      "revId": "4c34dfce4ff2b182d45573b248695df941d8ea32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
