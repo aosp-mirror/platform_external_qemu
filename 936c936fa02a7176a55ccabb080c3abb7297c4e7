@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "217d004b_e092aa52",
+        "filename": "android/android-emu/android/recording/codecs/CodecHelper.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-28T23:24:51Z",
+      "side": 1,
+      "message": "nit: \"Helper\" isn\u0027t informative as to what their function is, so maybe we can just call this class Codec? (And the other classes something close to just their proper names or with \"Codec\" at the end)",
+      "range": {
+        "startLine": 48,
+        "startChar": 11,
+        "endLine": 48,
+        "endChar": 17
+      },
+      "revId": "936c936fa02a7176a55ccabb080c3abb7297c4e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
