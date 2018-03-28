@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a0715ed_73ab5b57",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-28T15:16:44Z",
+      "side": 1,
+      "message": "nit: How about forgoing the plumbing through the \"enabled\" bool if you include android/globals.h and use the global android_hw, then android_hw-\u003ehw_camera_back? It\u0027s up to you which way you\u0027d like to do it though; I\u0027ve not a strong preference there.",
+      "range": {
+        "startLine": 717,
+        "startChar": 4,
+        "endLine": 717,
+        "endChar": 75
+      },
+      "revId": "fe1deb98c67286350ee1b388660e0fa953ba5290",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
