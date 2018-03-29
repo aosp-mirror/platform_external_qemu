@@ -148,6 +148,7 @@ void Quickboot::startLivenessMonitor() {
 
 void Quickboot::onLivenessTimer() {
     if (metrics::AdbLivenessChecker::isEmulatorBooted() ||
+        guest_boot_completed ||
         android::featurecontrol::isEnabled(
             android::featurecontrol::AllowSnapshotMigration)) {
         VERBOSE_PRINT(snapshot, "Guest came online %.3f sec after loading",
