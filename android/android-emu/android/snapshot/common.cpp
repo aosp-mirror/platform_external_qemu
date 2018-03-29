@@ -13,6 +13,7 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
+#include "android/opengles.h"
 
 #include <errno.h>
 
@@ -81,12 +82,13 @@ const char* failureReasonToString(FailureReason failure,
 }
 
 void resetSnapshotLiveness() {
-    // TODO: reset state such as whether the guest posted.
+    android_resetGuestPostedAFrame();
 }
 
 bool isSnapshotAlive() {
     return metrics::AdbLivenessChecker::isEmulatorBooted() ||
            guest_boot_completed ||
+           android_hasGuestPostedAFrame() ||
            android::featurecontrol::isEnabled(
                 android::featurecontrol::AllowSnapshotMigration);
 }
