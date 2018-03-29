@@ -521,17 +521,42 @@ ifeq ($(BUILD_TARGET_OS),windows)
 
 endif
 
-# This file can get included multiple times, with different variable declarations.
-# We only want to set the LOCAL_COPY_COMMON_PREBUILT_RESOURCES once. GNUmake will
-# complain that we are overriding targets if we don't.
+# This file can get included multiple times, with different variable
+# declarations. We only want to set LOCAL_COPY_COMMON_PREBUILT_RESOURCES and
+# LOCAL_COPY_COMMON_TESTDATA once. GNUmake will complain that we are overriding
+# targets if we don't.
 ifdef FIRST_INCLUDE
 LOCAL_COPY_COMMON_PREBUILT_RESOURCES += \
-      virtualscene/Toren1BD/Toren1BD.mtl \
-      virtualscene/Toren1BD/Toren1BD.obj \
-      virtualscene/Toren1BD/Toren1BD.posters \
-      virtualscene/Toren1BD/Toren1BD_Decor.png \
-      virtualscene/Toren1BD/Toren1BD_Main.png \
-      virtualscene/Toren1BD/poster.png \
+    virtualscene/Toren1BD/Toren1BD.mtl \
+    virtualscene/Toren1BD/Toren1BD.obj \
+    virtualscene/Toren1BD/Toren1BD.posters \
+    virtualscene/Toren1BD/Toren1BD_Decor.png \
+    virtualscene/Toren1BD/Toren1BD_Main.png \
+    virtualscene/Toren1BD/poster.png \
+
+LOCAL_COPY_COMMON_TESTDATA += \
+    textureutils/gray_alpha_golden.bmp \
+    textureutils/gray_alpha.png \
+    textureutils/gray_golden.bmp \
+    textureutils/gray.png \
+    textureutils/indexed_alpha_golden.bmp \
+    textureutils/indexed_alpha.png \
+    textureutils/indexed_golden.bmp \
+    textureutils/indexed.png \
+    textureutils/interlaced_golden.bmp \
+    textureutils/interlaced.png \
+    textureutils/jpeg_gray_golden.bmp \
+    textureutils/jpeg_gray.jpg \
+    textureutils/jpeg_gray_progressive_golden.bmp \
+    textureutils/jpeg_gray_progressive.jpg \
+    textureutils/jpeg_rgb24_golden.bmp \
+    textureutils/jpeg_rgb24.jpg \
+    textureutils/jpeg_rgb24_progressive_golden.bmp \
+    textureutils/jpeg_rgb24_progressive.jpg \
+    textureutils/rgb24_31px_golden.bmp \
+    textureutils/rgb24_31px.png \
+    textureutils/rgba32_golden.bmp \
+    textureutils/rgba32.png \
 
 endif
 
@@ -762,6 +787,7 @@ LOCAL_SRC_FILES := \
   android/utils/string_unittest.cpp \
   android/utils/sockets_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \
+  android/virtualscene/TextureUtils_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
