@@ -86,6 +86,9 @@ local-debug-info-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_DEBUG_INFO_DI
 # Location of resource files
 local-resource-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)resources/$(1)
 
+# Location of test data (for unittests)
+local-testdata-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)testdata/$(1)
+
 ldlibs_start_whole := -Wl,--whole-archive
 ldlibs_end_whole := -Wl,--no-whole-archive
 ldlibs_force_load := -Wl,-force_load,
