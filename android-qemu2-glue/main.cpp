@@ -1222,6 +1222,10 @@ extern "C" int main(int argc, char** argv) {
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }
+        if (opts->ui_only) {
+            // UI only. emulator_initUserInterface() is done, so we're done.
+            return 0;
+        }
 #if (SNAPSHOT_PROFILE > 1)
         printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
                get_uptime_ms());
