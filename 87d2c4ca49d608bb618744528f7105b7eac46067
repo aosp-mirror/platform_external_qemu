@@ -22,6 +22,30 @@
       "revId": "87d2c4ca49d608bb618744528f7105b7eac46067",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9be2ead1_021d2378",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-03-29T20:06:32Z",
+      "side": 1,
+      "message": "I\u0027d like to avoid changing this for this change, but I like the idea of AlignedBuf\u003cT\u003e.  I\u0027ll look into it.",
+      "parentUuid": "1d601cbb_8223ef9c",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 42
+      },
+      "revId": "87d2c4ca49d608bb618744528f7105b7eac46067",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
