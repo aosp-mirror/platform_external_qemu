@@ -343,6 +343,13 @@ ui_init(const AConfig* skinConfig,
     signal(SIGQUIT, SIG_DFL);
 #endif
 
+    if (opts->snapshot_control_only) {
+        *(emulator_window_get()->opts) = *opts;
+        int retVal = skin_winsys_snapshot_control_start();
+        // We are all done. Exit.
+        exit(retVal);
+    }
+
     skin_winsys_start(opts->no_window);
 
     if (opts->no_window) {

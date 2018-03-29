@@ -24,6 +24,7 @@
 #include "android/skin/winsys.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/emulator-qt-no-window.h"
+#include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/setenv.h"
@@ -536,6 +537,19 @@ extern void skin_winsys_init_args(int argc, char** argv) {
     GlobalState* g = globalState();
     g->argc = argc;
     g->argv = argv;
+}
+
+extern int skin_winsys_snapshot_control_start() {
+    GlobalState* g = globalState();
+    g->app = new QApplication(g->argc, g->argv);
+    androidQtDefaultInit();
+    // Pop up a stand-alone Snapshot pane
+    SnapshotPage* pSP = new SnapshotPage(nullptr, true);
+    if (pSP == nullptr) {
+        return 1;
+    }
+    pSP->show();
+    return g->app->exec();
 }
 
 extern void skin_winsys_start(bool no_window) {
