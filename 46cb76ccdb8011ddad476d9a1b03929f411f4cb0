@@ -22,6 +22,30 @@
       "revId": "46cb76ccdb8011ddad476d9a1b03929f411f4cb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b79cf763_1dcb9637",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-03-29T20:27:42Z",
+      "side": 1,
+      "message": "I don\u0027t think that TestTempDir works here.  It looks like that\u0027s for tests that need to write files, but we need to read the golden images from disk.\n\nAt build time, I\u0027m copying the files to objs\\testdata\\*, and here we need to load them relative to the current test executable.",
+      "parentUuid": "952a5b6e_5c769e50",
+      "range": {
+        "startLine": 99,
+        "startChar": 27,
+        "endLine": 99,
+        "endChar": 63
+      },
+      "revId": "46cb76ccdb8011ddad476d9a1b03929f411f4cb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
