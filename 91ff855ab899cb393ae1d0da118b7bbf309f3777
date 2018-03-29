@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7216e5ea_407ce3b4",
+        "filename": "cpus.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1518,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:02:36Z",
+      "side": 1,
+      "message": "This will just call exit(1) in case of errors. FWIW, this is consistent with what the other accelerators are doing (see \u0027qemu_kvm_cpu_thread_fn\u0027 for example).",
+      "parentUuid": "1ef71a38_8ec6700e",
+      "range": {
+        "startLine": 1518,
+        "startChar": 7,
+        "endLine": 1518,
+        "endChar": 13
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cd9f8853_9621c5ea",
         "filename": "cpus.c",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "59ab0583_c25d5ced",
+        "filename": "cpus.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1930,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:02:36Z",
+      "side": 1,
+      "message": "I think this is a minor nit, \"thread_name\" is defined 5 lines above, using the VCPU_THREAD_NAME_SIZE constant size.",
+      "parentUuid": "cd9f8853_9621c5ea",
+      "range": {
+        "startLine": 1930,
+        "startChar": 26,
+        "endLine": 1930,
+        "endChar": 47
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e8020168_8cf93ac2",
         "filename": "target/i386/whpx-all.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2018-03-28T15:53:16Z",
       "side": 1,
       "message": "If we\u0027d like to add on-demand RAM loads, could this work:\n\n1. Map all RAM with no permissions with WHvMapGpaRange\n2. whpx_emu_mmio_callback trips because of I guess, WHvRunVpExitReasonMemoryAccess?\n3. Add to whpx_emu_mmio_callback that also re-maps particular pages using WHvMapGpaRange from no permissions at all to Read/Write/Exec after the page is loaded",
+      "range": {
+        "startLine": 612,
+        "startChar": 0,
+        "endLine": 612,
+        "endChar": 56
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd420340_0c3df1b0",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:02:36Z",
+      "side": 1,
+      "message": "Maybe I got it wrong, but shouldn\u0027t this just use the high level MemoryListener.region_add function?",
+      "parentUuid": "e8020168_8cf93ac2",
       "range": {
         "startLine": 612,
         "startChar": 0,
@@ -140,6 +212,30 @@
     },
     {
       "key": {
+        "uuid": "66640414_56034825",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1071,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:02:36Z",
+      "side": 1,
+      "message": "Indeed, this should be moved before error_free. Thanks for pointing it out.",
+      "parentUuid": "af178f75_d5a77e49",
+      "range": {
+        "startLine": 1071,
+        "startChar": 12,
+        "endLine": 1071,
+        "endChar": 31
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "56d7cf42_7376b668",
         "filename": "whpx-stub.c",
         "patchSetId": 1
@@ -151,6 +247,30 @@
       "writtenOn": "2018-03-28T18:00:24Z",
       "side": 1,
       "message": "Could you please use names instead of magic numbers?",
+      "range": {
+        "startLine": 18,
+        "startChar": 11,
+        "endLine": 18,
+        "endChar": 13
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11eafd2d_fdab2e64",
+        "filename": "whpx-stub.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:02:36Z",
+      "side": 1,
+      "message": "Sure.",
+      "parentUuid": "56d7cf42_7376b668",
       "range": {
         "startLine": 18,
         "startChar": 11,
