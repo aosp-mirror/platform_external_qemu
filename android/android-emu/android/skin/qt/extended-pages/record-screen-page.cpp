@@ -13,8 +13,8 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
-#include "android/ffmpeg-muxer.h"
 #include "android/globals.h"
+#include "android/recording/GifConverter.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
@@ -62,9 +62,6 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
 }
 
 RecordScreenPage::~RecordScreenPage() {
-    if (mRecordScreenAgent) {
-        mRecordScreenAgent->stopRecording();
-    }
     // Remove the tmp video file if one exists
     if (!removeFileIfExists(QString(mTmpFilePath.c_str()))) {
         derror("Unable to clean up temp media file.");
@@ -433,10 +430,9 @@ ConvertingTask::ConvertingTask(const std::string& startFilename,
 
 void ConvertingTask::run() {
     emit started();
-    int rc = ffmpeg_convert_to_animated_gif(mStartFilename.c_str(),
-                                            mEndFilename.c_str(),
-                                            64 * 1024);
-    emit(finished(!rc));
+    bool rc = android::recording::GifConverter::toAnimatedGif(
+            mStartFilename, mEndFilename, 64 * 1024);
+    emit(finished(rc));
 }
 
 void RecordScreenPage::updateVideoView() {
