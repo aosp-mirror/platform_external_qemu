@@ -57,19 +57,22 @@ public:
             "\t\tnew  %llu [reused %llu, empty %llu, appended %llu]\n";
 
     enum class Time : int {
-        Disk,
         Hashing,
         ZeroCheck,
         GapTrackingWorker,
         GapTrackingWriter,
         Compressing,
+        WaitingForDisk,
+        TotalHandlingPageSave,
+        DiskWriteCombine,
+        DiskIndexWrite,
         /////////////////////
         Count
     };
 
     static constexpr char kTimeFormat[] =
-            "\tTimes: disk %.03f, hash %.03f, iszero %.03f, gaps %.03f/%.03f, "
-            "lz4 %.03f\n";
+            "\tTimes: hash %.03f, iszero %.03f, gaps %.03f/%.03f, "
+            "lz4 %.03f waitdisk %.03f totalHandlingPageSave %.03f diskWriteCombine %.03f diskIndexWrite %.03f\n";
 
 #if SNAPSHOT_PROFILE <= 1
     template <class Func>
@@ -78,6 +81,7 @@ public:
     }
 
     void count(Action action) {}
+    void countMultiple(Action action, int64_t howMany) {}
 
     void print(const char* prefixFormat, ...) {}
 
@@ -88,7 +92,11 @@ public:
     }
 
     void count(Action action) {
-        mActions[int(action)].fetch_add(1, std::memory_order_relaxed);
+        countMultiple(action, 1);
+    }
+
+    void countMultiple(Action action, int64_t howMany) {
+        mActions[int(action)].fetch_add(howMany, std::memory_order_relaxed);
     }
 
     void print(const char* prefixFormat, ...);
