@@ -113,8 +113,9 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         bool      mIsValid;
 };
 
-SnapshotPage::SnapshotPage(QWidget* parent) :
+SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QWidget(parent),
+    mIsStandAlone(standAlone),
     mUi(new Ui::SnapshotPage())
 {
     mUi->setupUi(this);
@@ -126,6 +127,18 @@ SnapshotPage::SnapshotPage(QWidget* parent) :
     mUi->enlargeInfoButton->setVisible(true);
     mUi->bigSelectionInfo->setVisible(false);
     mUi->reduceInfoButton->setVisible(false);
+
+    if (mIsStandAlone) {
+        QRect widgetGeometry = frameGeometry();
+        setFixedHeight(widgetGeometry.height() + 36); // Allow for the title bar
+        setFixedWidth(widgetGeometry.width());
+        setStyleSheet(Ui::stylesheetForTheme(getSelectedTheme()));
+        setWindowTitle(tr("Manage snapshots"));
+        mUi->loadSnapshot->setVisible(false);
+        mUi->takeSnapshotButton->setText(tr("CHOOSE SNAPSHOT"));
+
+        getOutputFileName();
+    }
 
     QObject::connect(this, SIGNAL(deleteCompleted()),
                      this, SLOT(slot_snapshotDeleteCompleted()));
@@ -359,6 +372,7 @@ void SnapshotPage::updateAfterSelectionChanged() {
         mAllowLoad = false;
         mAllowEdit = false;
         mAllowDelete = false;
+        mAllowTake = !mIsStandAlone;
     } else {
         QString logicalName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
         simpleName = theItem->fileName();
@@ -387,6 +401,7 @@ void SnapshotPage::updateAfterSelectionChanged() {
             mAllowDelete = true;
             // Cannot edit the default snapshot
             mAllowEdit = simpleName != Quickboot::kDefaultBootSnapshot.c_str();
+            mAllowTake = mAllowEdit || !mIsStandAlone;
         } else {
             // Invalid snapshot directory
             selectedItemStatus = SelectionStatus::Invalid;
@@ -399,9 +414,9 @@ void SnapshotPage::updateAfterSelectionChanged() {
             mAllowLoad = false;
             mAllowEdit = false;
             mAllowDelete = true;
+            mAllowTake = !mIsStandAlone;
         }
     }
-    mAllowTake = true;
 
     if (mUseBigInfoWindow) {
         // Use the big window for displaying the info
@@ -511,18 +526,48 @@ void SnapshotPage::showEvent(QShowEvent* ee) {
     populateSnapshotDisplay();
 }
 
+// In normal mode, this button is used to capture a snapshot.
+// In stand-alone mode, it is used to choose the selected
+// snapshot.
 void SnapshotPage::on_takeSnapshotButton_clicked() {
-    AndroidSnapshotStatus status;
+    if (mIsStandAlone) {
+        mMadeSelection = true;
+        close();
+    } else {
+        AndroidSnapshotStatus status;
 
-    QString snapshotName("snap_"
-                         + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss"));
+        QString snapshotName("snap_"
+                             + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss"));
 
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    disableActions();
-    android::base::ThreadLooper::runOnMainLooper([&status, snapshotName, this] {
-        status = androidSnapshot_save(snapshotName.toStdString().c_str());
-        emit(saveCompleted((int)status, snapshotName));
-    });
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        disableActions();
+        android::base::ThreadLooper::runOnMainLooper([&status, snapshotName, this] {
+            status = androidSnapshot_save(snapshotName.toStdString().c_str());
+            emit(saveCompleted((int)status, snapshotName));
+        });
+    }
+}
+
+// This function is invoked only in stand-alone mode. It runs
+// when the user clicks either takeSnapshot or X
+void SnapshotPage::closeEvent(QCloseEvent* closeEvent) {
+    if (mOutputFileName.isEmpty()) {
+        return;
+    }
+    // Write the file name of the selected snapshot to our
+    // output file
+    const WidgetSnapshotItem* selectedItem = nullptr;
+    if (mMadeSelection) {
+        // The user clicked 'takeSnapshot'
+        selectedItem = getSelectedSnapshot();
+    }
+    QString selectedFile = (selectedItem ? selectedItem->fileName() : "");
+    QFile outputFile(mOutputFileName);
+    if (outputFile.open(QFile::WriteOnly | QFile::Text)) {
+        QString selectionString = "selectedSnapshotFile=" + selectedFile + "\n";
+        outputFile.write(selectionString.toUtf8());
+        outputFile.close();
+    }
 }
 
 void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snapshotName) {
@@ -648,11 +693,13 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     if (!anItemIsSelected) {
         // There are items, but none is selected.
         // Select the first one.
+        mUi->defaultSnapshotDisplay->setSortingEnabled(true);
         QTreeWidgetItem* itemZero = mUi->defaultSnapshotDisplay->topLevelItem(0);
-        if (itemZero != nullptr) {
+        if (itemZero != nullptr && !mIsStandAlone) {
             mUi->defaultSnapshotDisplay->setCurrentItem(itemZero);
         } else {
             // Try the 'normal' list
+            mUi->snapshotDisplay->setSortingEnabled(true);
             itemZero = mUi->snapshotDisplay->topLevelItem(0);
             if (itemZero != nullptr) {
                 mUi->snapshotDisplay->setCurrentItem(itemZero);
@@ -908,4 +955,38 @@ QString SnapshotPage::formattedSize(qint64 theSize) {
     // '10.0', so make it '10' instead.)
     int nFractionalDigits = (sizeValue < 9.94) ? 1 : 0;
     return QString::number(sizeValue, 'f', nFractionalDigits) + sizeUnits;
+}
+
+void SnapshotPage::getOutputFileName() {
+    // In stand-alone mode, after the user selects a snapshot, we will write
+    // the name of that snapshot into our output file. Android Studio will
+    // read that file to learn what was selected.
+    mOutputFileName = "";
+
+    // Get the name of the file containing parameters from Android Studio
+    EmulatorWindow* const ew = emulator_window_get();
+    if (!ew || !ew->opts || !ew->opts->studio_params) {
+        // No file to read
+        return;
+    }
+
+    // Android Studio created a parameters file for us
+    QFile paramFile(ew->opts->studio_params);
+    if (!paramFile.open(QFile::ReadOnly | QFile::Text)) {
+        // Open failure
+        return;
+    }
+    // Scan the parameters file to get the name of our output file
+    while (!paramFile.atEnd()) {
+        QByteArray line = paramFile.readLine().trimmed();
+        int idx = line.indexOf("=");
+        if (idx > 0) {
+            QByteArray key = line.left(idx);
+            if (key == "snapshotTempFile") {
+                QByteArray value = line.right(line.length() - 1 - idx);
+                mOutputFileName = value;
+                break;
+            }
+        }
+    }
 }
