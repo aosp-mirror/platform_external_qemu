@@ -92,5 +92,8 @@ constexpr int32_t kDefaultPageSize = 4096;
 
 constexpr int32_t kCancelTimeoutMs = 15000;
 
+void resetSnapshotLiveness();
+bool isSnapshotAlive();
+
 }  // namespace snapshot
 }  // namespace android
