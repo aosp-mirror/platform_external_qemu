@@ -53,7 +53,7 @@ public:
     // display, and the notifier to receive updates
     static std::unique_ptr<VideoPlayer> create(std::string videoFile,
                                                VideoPlayerWidget* widget,
-                                               VideoPlayerNotifier* notifier);
+                                               std::unique_ptr<VideoPlayerNotifier> notifier);
 
     virtual void start() = 0;
     virtual void stop() = 0;
