@@ -22,6 +22,30 @@
       "revId": "d39bf025f25afed7de84af66deae4b769f78781e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7df5a1f0_0f0ef595",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-03-29T20:09:44Z",
+      "side": 1,
+      "message": "Good idea, this was lazily copied from the example code.  I like rowPtrs which is used by the libpng loader above, I\u0027ll use that instead.",
+      "parentUuid": "0b54a236_2fc211e1",
+      "range": {
+        "startLine": 243,
+        "startChar": 23,
+        "endLine": 243,
+        "endChar": 35
+      },
+      "revId": "d39bf025f25afed7de84af66deae4b769f78781e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
