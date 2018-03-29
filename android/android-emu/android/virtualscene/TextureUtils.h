@@ -32,10 +32,56 @@ namespace virtualscene {
 
 class TextureUtils {
 public:
+    enum class Format {
+        RGB24,   // Packed, 3-bytes-per-pixel, with stride aligned to a 4-byte
+                 // boundary.  Matches what glTexImage2D with GL_RGB and
+                 // GL_UNSIGNED_BYTE expects with GL_UNPACK_ALIGNMENT==4.
+        RGBA32,  // Matches GL_RGBA.
+    };
+
+    // Loads an image from disk, converting to either RGB or RGBA if necessary.
+    // The format loaded is determined by the file's extension.
+    //
+    // The image is oriented bottom-up to match glTexImage2D's data layout.
+    //
+    // |filename| - Filename to load.
+    // |buffer| - Output buffer, existing data is replaced.
+    // |outWidth| - Output width, in pixels.
+    // |outHeight| - Output height, in pixels.
+    // |outFormat| - Output format.
+    static bool load(const char* filename,
+                     std::vector<uint8_t>& buffer,
+                     uint32_t* outWidth,
+                     uint32_t* outHeight,
+                     Format* outFormat);
+
+    // Loads a PNG from disk, converting to either RGB or RGBA if necessary.
+    //
+    // The image is oriented bottom-up to match glTexImage2D's data layout.
+    //
+    // |filename| - Filename to load.
+    // |buffer| - Output buffer, existing data is replaced.
+    // |outWidth| - Output width, in pixels.
+    // |outHeight| - Output height, in pixels.
+    // |outFormat| - Output format.
     static bool loadPNG(const char* filename,
                         std::vector<uint8_t>& buffer,
                         uint32_t* outWidth,
-                        uint32_t* outHeight);
+                        uint32_t* outHeight,
+                        Format* outFormat);
+
+    // Loads a JPEG from disk.
+    //
+    // The image is oriented bottom-up to match glTexImage2D's data layout.
+    //
+    // |filename| - Filename to load.
+    // |buffer| - Output buffer, existing data is replaced.
+    // |outWidth| - Output width, in pixels.
+    // |outHeight| - Output height, in pixels.
+    static bool loadJPEG(const char* filename,
+                         std::vector<uint8_t>& buffer,
+                         uint32_t* outWidth,
+                         uint32_t* outHeight);
 };
 
 }  // namespace virtualscene
