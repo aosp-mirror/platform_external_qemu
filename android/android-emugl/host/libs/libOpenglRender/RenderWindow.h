@@ -131,6 +131,12 @@ public:
     // Force a repaint of the whole content into the sub-window.
     void repaint();
 
+    // Returns whether or not the guest posted a frame. For checking emulator
+    // liveness.
+    bool hasGuestPostedAFrame();
+    // Resets whether the guest has posted a frame.
+    void resetGuestPostedAFrame();
+
 private:
     bool processMessage(const RenderWindowMessage& msg);
     bool useThread() const { return mThread != nullptr; }
