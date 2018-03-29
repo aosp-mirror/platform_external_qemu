@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1d601cbb_8223ef9c",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-29T03:39:31Z",
+      "side": 1,
+      "message": "If this comes up a third time, perhaps it might be a good idea to create something like a AlignedBuf\u003cT\u003e class whose data() method returns aligned T* arrays (and jumps by sizeof(T) with pointer arithmetic), or something.\n\nDon\u0027t mind keeping it std::vector for now though.",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 42
+      },
+      "revId": "87d2c4ca49d608bb618744528f7105b7eac46067",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
