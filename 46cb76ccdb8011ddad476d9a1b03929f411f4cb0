@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "952a5b6e_5c769e50",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-29T03:43:47Z",
+      "side": 1,
+      "message": "I found that we could relax the requirement that the testdata dir be relative to the unit tests dir if we use the TestTempDir pattern (see System_unittest.cpp). Should have told you that earlier, sorry.",
+      "range": {
+        "startLine": 99,
+        "startChar": 27,
+        "endLine": 99,
+        "endChar": 63
+      },
+      "revId": "46cb76ccdb8011ddad476d9a1b03929f411f4cb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
