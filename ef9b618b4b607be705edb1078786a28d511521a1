@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2fbad66a_9a4966fd",
+        "filename": "android/android-emu/android/snapshot/IncrementalStats.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-29T23:54:20Z",
+      "side": 1,
+      "message": "You have comma separators at the beginning of this string; do you want them throughout?",
+      "range": {
+        "startLine": 75,
+        "startChar": 22,
+        "endLine": 75,
+        "endChar": 23
+      },
+      "revId": "ef9b618b4b607be705edb1078786a28d511521a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c150f2bc_383c1d76",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-29T23:54:20Z",
+      "side": 1,
+      "message": "circuit",
+      "range": {
+        "startLine": 171,
+        "startChar": 17,
+        "endLine": 171,
+        "endChar": 24
+      },
+      "revId": "ef9b618b4b607be705edb1078786a28d511521a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35a6f21d_dd3ddf4d",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-29T23:54:20Z",
+      "side": 1,
+      "message": "Maybe remove this ...",
+      "range": {
+        "startLine": 195,
+        "startChar": 16,
+        "endLine": 195,
+        "endChar": 51
+      },
+      "revId": "ef9b618b4b607be705edb1078786a28d511521a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "999bb32c_cf1b0cea",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-29T23:54:20Z",
+      "side": 1,
+      "message": "... and make this\npage.sizeOnDisk \u003d kDefaultPageSize * !isZero;",
+      "range": {
+        "startLine": 202,
+        "startChar": 16,
+        "endLine": 202,
+        "endChar": 42
+      },
+      "revId": "ef9b618b4b607be705edb1078786a28d511521a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58fe6f75_af069125",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-03-29T23:54:20Z",
+      "side": 1,
+      "message": "Eliminate 1 loop\u0027s overhead by\nif (mLoaderOnDemand) {\n    for() {\n        page.loaderPage \u003d ...\n        if (... \u003c Filled) { ... }\n    }\n} else {\n    for () {\n        page.loaderPage \u003d ...\n    }\n}",
+      "range": {
+        "startLine": 220,
+        "startChar": 16,
+        "endLine": 221,
+        "endChar": 60
+      },
+      "revId": "ef9b618b4b607be705edb1078786a28d511521a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
