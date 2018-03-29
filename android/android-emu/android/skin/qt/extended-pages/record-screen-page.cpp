@@ -20,6 +20,7 @@
 #include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
 #include "android/utils/debug.h"
 
 #include <QDesktopServices>
@@ -219,10 +220,16 @@ void RecordScreenPage::updateElapsedTime() {
 
 void RecordScreenPage::on_rec_playStopButton_clicked() {
     if (mState == RecordUiState::Stopped) {
-        mVideoPlayerNotifier.reset(new android::videoplayer::VideoPlayerNotifier());
-        mVideoPlayer = android::videoplayer::VideoPlayer::create(mTmpFilePath, mVideoWidget.get(), mVideoPlayerNotifier.get());
-        connect(mVideoPlayerNotifier.get(), SIGNAL(updateWidget()), this, SLOT(updateVideoView()));
-        connect(mVideoPlayerNotifier.get(), SIGNAL(videoFinished()), this, SLOT(videoPlayingFinished()));
+        auto videoPlayerNotifier =
+                std::unique_ptr<android::videoplayer::VideoPlayerNotifier>(
+                        new android::videoplayer::VideoPlayerNotifier());
+        connect(videoPlayerNotifier.get(), SIGNAL(updateWidget()), this,
+                SLOT(updateVideoView()));
+        connect(videoPlayerNotifier.get(), SIGNAL(videoFinished()), this,
+                SLOT(videoPlayingFinished()));
+        mVideoPlayer = android::videoplayer::VideoPlayer::create(
+                mTmpFilePath, mVideoWidget.get(),
+                std::move(videoPlayerNotifier));
 
         mVideoPlayer->scheduleRefresh(20);
         mVideoPlayer->start();
