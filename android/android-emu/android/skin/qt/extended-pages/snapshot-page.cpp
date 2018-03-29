@@ -822,18 +822,20 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 
 void SnapshotPage::disableActions() {
     // Disable all the action pushbuttons
-    mUi->deleteSnapshot->setEnabled(false);
-    mUi->editSnapshot->setEnabled(false);
-    mUi->loadSnapshot->setEnabled(false);
-    mUi->takeSnapshotButton->setEnabled(false);
+    SettingsTheme theme = getSelectedTheme();
+    setButtonEnabled(mUi->deleteSnapshot,     theme, false);
+    setButtonEnabled(mUi->editSnapshot,       theme, false);
+    setButtonEnabled(mUi->loadSnapshot,       theme, false);
+    setButtonEnabled(mUi->takeSnapshotButton, theme, false);
 }
 
 void SnapshotPage::enableActions() {
     // Enable the appropriate action pushbuttons
-    mUi->deleteSnapshot->setEnabled(mAllowDelete);
-    mUi->editSnapshot->setEnabled(mAllowEdit);
-    mUi->loadSnapshot->setEnabled(mAllowLoad);
-    mUi->takeSnapshotButton->setEnabled(mAllowTake);
+    SettingsTheme theme = getSelectedTheme();
+    setButtonEnabled(mUi->deleteSnapshot,     theme, mAllowDelete);
+    setButtonEnabled(mUi->editSnapshot,       theme, mAllowEdit);
+    setButtonEnabled(mUi->loadSnapshot,       theme, mAllowLoad);
+    setButtonEnabled(mUi->takeSnapshotButton, theme, mAllowTake);
 }
 
 void SnapshotPage::highlightItemWithFilename(const QString& fileName) {
