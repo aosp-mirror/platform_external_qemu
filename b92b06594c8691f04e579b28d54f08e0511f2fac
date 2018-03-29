@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "20bdffe7_58048112",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:24:29Z",
+      "side": 1,
+      "message": "Indeed, I\u0027ll cover this in the next patch.",
+      "parentUuid": "2296b4ba_710ca4aa",
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1b77c3f_3badaa47",
         "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
         "patchSetId": 1
@@ -39,6 +57,30 @@
       "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e395b670_ea9f0e5c",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:24:29Z",
+      "side": 1,
+      "message": "My bad, will change this.",
+      "parentUuid": "d1b77c3f_3badaa47",
+      "range": {
+        "startLine": 158,
+        "startChar": 26,
+        "endLine": 158,
+        "endChar": 34
+      },
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "04021634_66aa1122",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1152,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:24:29Z",
+      "side": 1,
+      "message": "Makes sense.",
+      "parentUuid": "f9f23b55_341ecf03",
+      "range": {
+        "startLine": 1151,
+        "startChar": 8,
+        "endLine": 1152,
+        "endChar": 22
+      },
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "435da21a_197c4a47",
         "filename": "vl.c",
         "patchSetId": 1
@@ -76,6 +142,30 @@
       "writtenOn": "2018-03-28T18:48:12Z",
       "side": 1,
       "message": "ram_size \u003d MIN(ram_size, hax_mem_limit())\n\nI feel like it is more readable.",
+      "range": {
+        "startLine": 3240,
+        "startChar": 12,
+        "endLine": 3240,
+        "endChar": 20
+      },
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f3e6c91_059b1884",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3240,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-29T12:24:29Z",
+      "side": 1,
+      "message": "Indeed. Well, all I did here was adding a check to see if hax is actually enabled, but I can cover this as well.",
+      "parentUuid": "435da21a_197c4a47",
       "range": {
         "startLine": 3240,
         "startChar": 12,
