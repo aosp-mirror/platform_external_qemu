@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "a68457cd_b13ecbbe",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-03-30T15:16:10Z",
+      "side": 1,
+      "message": "Right, I think there\u0027s a misunderstanding; sorry for not being clear.\n\nMemoryListener.region_add is for setting up the initial set of RAM mappings, while \"on-demand RAM load\" means that when loading a snapshot, we avoid eagerly loading all the RAM pages from disk on startup, and instead page them in on individual memory accesses, which would require page-level knowledge of all memory reads/writes.",
+      "parentUuid": "fd420340_0c3df1b0",
+      "range": {
+        "startLine": 612,
+        "startChar": 0,
+        "endLine": 612,
+        "endChar": 56
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "aebe53af_b3215bcd",
         "filename": "target/i386/whpx-all.c",
         "patchSetId": 1
