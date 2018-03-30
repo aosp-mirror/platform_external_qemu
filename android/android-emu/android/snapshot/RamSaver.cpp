@@ -168,7 +168,7 @@ void RamSaver::savePage(int64_t blockOffset,
         mIndex.blocks[size_t(mLastBlockIndex)].pages.resize(size_t(numPages));
         mIndex.totalPages += numPages;
 
-        // short-cirquit the fastest cases right here.
+        // Short-circuit the fastest cases right here.
 
         // Stats counting vars (for speed, avoid atomic ops)
         int totalZero = 0;
@@ -192,14 +192,13 @@ void RamSaver::savePage(int64_t blockOffset,
                                              block.ramBlock.pageSize);
 
                 auto& page = block.pages[size_t(i)];
-                page.sizeOnDisk = kDefaultPageSize;
                 page.same = false;
                 page.hashFilled = false;
                 page.filePos = 0;
                 page.loaderPage = nullptr;
 
                 // Don't branch for the isZero decision
-                page.sizeOnDisk *= !isZero;
+                page.sizeOnDisk = kDefaultPageSize * !isZero;
                 totalZero += isZero;
             }
 
@@ -208,18 +207,14 @@ void RamSaver::savePage(int64_t blockOffset,
             // Initialize the incremental save case
             if (mLoader) {
 
-                // Find all corresponding loader pages
-                for (int32_t i = 0; i < numPages; ++i) {
-                    auto& page = block.pages[size_t(i)];
-                    page.loaderPage =
-                        mLoader->findPage(mLastBlockIndex, block.ramBlock.id, i);
-                }
-
                 // Check for not-yet-loaded pages if we are doing
                 // on-demand RAM loading
                 if (mLoaderOnDemand) {
                     for (int32_t i = 0; i < numPages; ++i) {
                         auto& page = block.pages[size_t(i)];
+                        // Find all corresponding loader pages
+                        page.loaderPage =
+                            mLoader->findPage(mLastBlockIndex, block.ramBlock.id, i);
                         auto loaderPage = page.loaderPage;
                         if (loaderPage &&
                             loaderPage->state.load(std::memory_order_relaxed) <
@@ -237,6 +232,13 @@ void RamSaver::savePage(int64_t blockOffset,
                         }
                     }
 
+                } else {
+                    // Find all corresponding loader pages
+                    for (int32_t i = 0; i < numPages; ++i) {
+                        auto& page = block.pages[size_t(i)];
+                        page.loaderPage =
+                            mLoader->findPage(mLastBlockIndex, block.ramBlock.id, i);
+                    }
                 }
             }
         });
