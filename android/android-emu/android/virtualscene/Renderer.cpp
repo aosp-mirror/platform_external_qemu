@@ -701,14 +701,20 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables,
                           float time) {
     mRenderTargets[0]->bind();
 
+    mGles2->glEnable(GL_CULL_FACE);
     mGles2->glEnable(GL_DEPTH_TEST);
     // For basic transparency of posters, always rendered after the main scene.
     mGles2->glEnable(GL_BLEND);
     mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // Unpremultiplied, as supplied by libpng.
     mGles2->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    mGles2->glCullFace(GL_BACK);
+    // The SceneCamera adds a y-flip and actually renders the scene upside-down,
+    // because that's what is expected by the camera stack.  The y-flip changes
+    // the winding order, so the front-face is actually clockwise in window
+    // space.
+    mGles2->glFrontFace(GL_CW);
 
     // Render scene objects.
     for (auto& renderObject : renderables) {
@@ -723,6 +729,9 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables,
 
     mGles2->glDisable(GL_DEPTH_TEST);
     mGles2->glDisable(GL_BLEND);
+    // Disable culling for screen-space rendering, since that is done in the
+    // default CCW order.
+    mGles2->glDisable(GL_CULL_FACE);
 
     assert(!mEffectsChain.empty());
     for (size_t i = 0; i < mEffectsChain.size(); i++) {
