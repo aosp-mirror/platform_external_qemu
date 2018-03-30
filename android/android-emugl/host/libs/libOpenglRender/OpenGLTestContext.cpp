@@ -14,18 +14,32 @@
 
 #include <gtest/gtest.h>
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+
 #include "OpenGLTestContext.h"
+
 
 namespace gltest {
 
 static bool sDisplayNeedsInit = true;
 
+// Find and add translator lib and
+// Swiftshader to teh library search path.
+static void setLibrarySearchPaths() {
+}
+
 EGLDisplay getDisplay() {
+    if (sDisplayNeedsInit) {
+        setLibrarySearchPaths();
+    }
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
     EGLDisplay dpy = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
     EXPECT_TRUE(dpy != EGL_NO_DISPLAY);
 
     if (sDisplayNeedsInit) {
+
+        egl->eglUseOsEglApi(true);
         EGLint eglMaj, eglMin;
         EGLBoolean init_res = egl->eglInitialize(dpy, &eglMaj, &eglMin);
         EXPECT_TRUE(init_res != EGL_FALSE);
