@@ -288,6 +288,7 @@ endef
 define install-binary
 _SRC := $(1)
 _DST := $(2)
+_INSTALL_OPENGL := $(4)
 _BUILD_EXECUTABLES += $$(_DST)
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_SRC := $$(_SRC)
@@ -295,7 +296,14 @@ $$(_DST): PRIVATE_OBJCOPY := $$(BUILD_TARGET_OBJCOPY)
 $$(_DST): PRIVATE_OBJCOPY_FLAGS := $(3)
 $$(_DST): $$(_SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
-	@echo "Install: $$(PRIVATE_DST)"
+	@echo "Install: $$(PRIVATE_DST) [$$(_INSTALL_OPENGL)]"
+ifeq (darwin,$$(BUILD_TARGET_OS))
+ifeq (true,$$(_INSTALL_OPENGL))
+	@echo "install_name_tool for opengl on $$(PRIVATE_SRC) [$$(_INSTALL_OPENGL)]"
+	@install_name_tool -add_rpath "@executable_path/lib64" $$(PRIVATE_SRC)
+	@install_name_tool -add_rpath "@executable_path/lib64/gles_swiftshader" $$(PRIVATE_SRC)
+endif
+endif
 ifeq (true,$$(BUILD_STRIP_BINARIES))
 ifeq (darwin,$$(BUILD_TARGET_OS))
 	$(hide) strip -S -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
