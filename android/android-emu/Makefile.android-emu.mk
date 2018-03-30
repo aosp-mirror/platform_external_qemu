@@ -940,26 +940,41 @@ $(call end-emulator-library)
 
 # emulator-libui unit tests
 
+# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
+# string literals which are being glued together
+#LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
+
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_libui_unittests)
 
 LOCAL_C_INCLUDES += \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
+    $(FFMPEG_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/skin/keycode_unittest.cpp \
     android/skin/keycode-buffer_unittest.cpp \
     android/skin/rect_unittest.cpp \
+    android/recording/test/DummyAudioProducer.cpp \
+    android/recording/test/DummyVideoProducer.cpp \
+    android/recording/test/FfmpegRecorder_unittest.cpp \
+
+LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS)
 
 LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \
 
 LOCAL_CFLAGS += -O0
+# EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-libgtest \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
+    $(FFMPEG_STATIC_LIBRARIES) \
+    $(LIBX264_STATIC_LIBRARIES) \
+    $(LIBVPX_STATIC_LIBRARIES) \
+    emulator-zlib \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from
