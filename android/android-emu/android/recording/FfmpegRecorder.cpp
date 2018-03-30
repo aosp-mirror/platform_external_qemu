@@ -93,6 +93,7 @@ struct AudioOutputStream {
 
     uint64_t frameCount = 0;
     uint64_t writeFrameCount = 0;
+    uint64_t last_tsUs = 0;
 };
 
 class FfmpegRecorderImpl : public FfmpegRecorder {
@@ -324,6 +325,7 @@ bool FfmpegRecorderImpl::stop() {
     mAudioProducer->wait();
     mVideoProducer->wait();
 
+    printf("producers stopped\n");
     // flush video encoding with a NULL frame
     if (mHasVideoTrack) {
         while (true) {
@@ -350,7 +352,10 @@ bool FfmpegRecorderImpl::stop() {
                 auto size = frameSize - mAudioStream.audioLeftover.size();
                 auto tsUs = android::base::System::get()->getHighResTimeUs();
                 Frame f(size, 0);
-                f.tsUs = tsUs;
+                // compute the time delta between frames
+                auto avframe = mAudioStream.frame.get();
+                uint64_t deltaUs = (uint64_t)(((float)avframe->nb_samples / avframe->sample_rate) * 1000000);
+                f.tsUs = mAudioStream.last_tsUs + deltaUs;
                 f.format.audioFormat = mAudioProducer->getFormat().audioFormat;
                 encodeAudioFrame(&f);
             }
@@ -612,6 +617,7 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
                     (int64_t)(((double)elapsedUS * ost->stream->time_base.den) /
                               1000000.00);
             avframe->pts = pts;
+            ost->last_tsUs = frame->tsUs;
             writeAudioFrame(avframe);
             buf += bufUsed;
             remaining -= bufUsed;
@@ -629,6 +635,7 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
         int64_t pts = (int64_t)(
                 ((double)elapsedUS * ost->stream->time_base.den) / 1000000.00);
         avframe->pts = pts;
+        ost->last_tsUs = frame->tsUs;
         writeAudioFrame(avframe);
         buf += frameSize;
         remaining -= frameSize;
@@ -682,6 +689,7 @@ bool FfmpegRecorderImpl::writeFrame(AVStream* stream, AVPacket* pkt) {
     // DO NOT free or unref enc_pkt once interleaved.
     // av_interleaved_write_frame() will take ownership of the packet once
     // passed in.
+    printf("Writing pkt pts=[%lu]\n", pkt->pts);
     return av_interleaved_write_frame(mOutputContext.get(), pkt) == 0;
 }
 
