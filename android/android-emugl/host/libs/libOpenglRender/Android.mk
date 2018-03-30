@@ -78,6 +78,10 @@ $(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include)
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
 $(call emugl-export,LDLIBS,-lm)
 
+ifeq ($(BUILD_TARGET_OS),linux)
+LOCAL_LDFLAGS += -Wl,-rpath,$(ORIGIN)/lib$(BUILD_TARGET_SUFFIX),-rpath,$(ORIGIN)/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader
+endif
+
 # use Translator's egl/gles headers
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/GLES_V2/

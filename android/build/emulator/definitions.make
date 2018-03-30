@@ -317,6 +317,17 @@ $$(_DST): $$(_TST)
 	@echo "Running $$(PRIVATE_TST)"
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
+	ifeq (darwin,$$(BUILD_TARGET_OS))
+		@export DYLD_LIBRARY_PATH=$(BUILD_OBJS_DIR)/lib64
+		@export DYLD_LIBRARY_PATH=$(BUILD_OBJS_DIR)/lib64/gles_swiftshader
+	endif
+	ifeq (windows,$$(BUILD_TARGET_OS))
+		@export PATH=$(BUILD_OBJS_DIR)/lib64
+		@export PATH=$(BUILD_OBJS_DIR)/lib64/gles_swiftshader
+		@export PATH=$(BUILD_OBJS_DIR)/lib
+		@export PATH=$(BUILD_OBJS_DIR)/lib/gles_swiftshader
+	endif
+	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
 	$(hide) $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
 	@touch $$(PRIVATE_DST)
 endef
