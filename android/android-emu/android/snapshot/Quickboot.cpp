@@ -143,14 +143,12 @@ static int bootTimeoutMs() {
 }
 
 void Quickboot::startLivenessMonitor() {
+    resetSnapshotLiveness();
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
 }
 
 void Quickboot::onLivenessTimer() {
-    if (metrics::AdbLivenessChecker::isEmulatorBooted() ||
-        guest_boot_completed ||
-        android::featurecontrol::isEnabled(
-            android::featurecontrol::AllowSnapshotMigration)) {
+    if (isSnapshotAlive()) {
         VERBOSE_PRINT(snapshot, "Guest came online %.3f sec after loading",
                       (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
                               1000.0);
@@ -351,14 +349,11 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
 bool Quickboot::save(StringView name) {
     // TODO: detect if emulator was restarted since loading.
     const bool shouldTrySaving =
-            mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted() ||
-            guest_boot_completed ||
-            android::featurecontrol::isEnabled(
-                android::featurecontrol::AllowSnapshotMigration);
+            mLoaded || isSnapshotAlive();
 
     if (!shouldTrySaving) {
-        // Emulator hasn't booted yet, and this isn't a quickboot-loaded
-        // session. Don't save.
+        // Emulator hasn't booted yet or is otherwise not live,
+        // and this isn't a quickboot-loaded session. Don't save.
         dwarning("Not saving state: emulator hasn't finished booting.");
         reportFailedSave(
                 pb::EmulatorQuickbootSave::
