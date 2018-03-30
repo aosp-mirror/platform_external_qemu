@@ -22,6 +22,11 @@ static bool sDisplayNeedsInit = true;
 
 EGLDisplay getDisplay() {
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+
+    if (sDisplayNeedsInit) {
+        egl->eglUseOsEglApi(true);
+    }
+
     EGLDisplay dpy = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
     EXPECT_TRUE(dpy != EGL_NO_DISPLAY);
 

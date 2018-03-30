@@ -41,8 +41,10 @@ $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_STATIC_LIBRARIES),$(call local-libr
 $(LOCAL_BUILT_MODULE): $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call local-shared-library-path,$(lib)))
 
 ifeq (true,$(LOCAL_INSTALL))
+
 LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(LOCAL_MODULE))
-$(eval $(call install-binary,$(LOCAL_BUILT_MODULE),$(LOCAL_INSTALL_MODULE),--strip-all))
+
+$(eval $(call install-binary,$(LOCAL_BUILT_MODULE),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL)))
 
 ifneq (,$(findstring unittest,$(LOCAL_BUILT_MODULE)))
 $(eval $(call run-test,$(LOCAL_INSTALL_MODULE)))
