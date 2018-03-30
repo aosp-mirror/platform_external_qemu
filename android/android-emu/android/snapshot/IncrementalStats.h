@@ -72,7 +72,8 @@ public:
 
     static constexpr char kTimeFormat[] =
             "\tTimes: hash %.03f, iszero %.03f, gaps %.03f/%.03f, "
-            "lz4 %.03f waitdisk %.03f totalHandlingPageSave %.03f diskWriteCombine %.03f diskIndexWrite %.03f\n";
+            "lz4 %.03f, waitdisk %.03f, totalHandlingPageSave %.03f, "
+            "diskWriteCombine %.03f, diskIndexWrite %.03f\n";
 
 #if SNAPSHOT_PROFILE <= 1
     template <class Func>
