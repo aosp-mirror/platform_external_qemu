@@ -167,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "5d991cb2_302048d7",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-03-30T17:01:16Z",
+      "side": 1,
+      "message": "Oh, now I get it, it should be doable. I think we\u0027d avoid the MMIO code path completely when getting such exits, checking if the GPA range is mapped, if so doing a lazy memory load.\n\nWe should try this approach once we get the first batch of patches merged. Thanks for bringing it up.",
+      "parentUuid": "a68457cd_b13ecbbe",
+      "range": {
+        "startLine": 612,
+        "startChar": 0,
+        "endLine": 612,
+        "endChar": 56
+      },
+      "revId": "91ff855ab899cb393ae1d0da118b7bbf309f3777",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "aebe53af_b3215bcd",
         "filename": "target/i386/whpx-all.c",
         "patchSetId": 1
