@@ -19,6 +19,7 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/files/PathUtils.h"
 #include "android/cmdline-option.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
@@ -123,7 +124,9 @@ void VirtualSceneManager::parseCmdline() {
     }
 
     const bool isVirtualScene =
-            !strcmp(android_hw->hw_camera_back, "virtualscene");
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::VirtualScene) &&
+            androidHwConfig_hasVirtualSceneCamera(android_hw);
     if (!isVirtualScene && android_cmdLineOptions->virtualscene_poster) {
         W("[VirtualScene] Poster parameter ignored, virtual scene is not "
           "enabled.");
