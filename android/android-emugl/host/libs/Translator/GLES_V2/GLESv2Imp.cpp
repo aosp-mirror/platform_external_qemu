@@ -61,6 +61,8 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
 static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
+static void preSaveTexture();
+static void postSaveTexture();
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
                         android::base::SmallVector<unsigned char>* buffer);
 static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
@@ -95,6 +97,8 @@ static GLESiface s_glesIface = {
     .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)internal_glClientWaitSync,
     .waitSync = (FUNCPTR_WAIT_SYNC)internal_glWaitSync,
     .deleteSync = (FUNCPTR_DELETE_SYNC)internal_glDeleteSync,
+    .preSaveTexture = preSaveTexture,
+    .postSaveTexture = postSaveTexture,
     .saveTexture = saveTexture,
     .createTexture = createTexture,
     .restoreTexture = restoreTexture,
@@ -181,6 +185,14 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     ctx->releaseGlobalLock();
 
     return ret;
+}
+
+static void preSaveTexture() {
+    SaveableTexture::preSave();
+}
+
+static void postSaveTexture() {
+    SaveableTexture::postSave();
 }
 
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,

@@ -64,6 +64,11 @@ public:
 
     SaveableTexture(const TextureData& texture);
     // precondition: a context must be properly bound
+    // preSave and postSave should be called exactly once before and after
+    // all texture saves.
+    // The bound context cannot be changed from preSave to onSave to postSave
+    static void preSave();
+    static void postSave();
     void onSave(android::base::Stream* stream);
     // getGlobalObject() will touch and load data onto GPU if it is not yet
     // restored

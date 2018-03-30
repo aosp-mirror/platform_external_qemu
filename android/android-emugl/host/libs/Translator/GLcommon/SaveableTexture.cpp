@@ -397,6 +397,44 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     }
 }
 
+static GLuint s_auxFramebuffer = 0;
+static GLuint s_prevFramebuffer = 0;
+static GLint s_prevViewport[4] = {0, 0, 0, 0};
+
+void SaveableTexture::preSave() {
+    if (!isGles2Gles()) return;
+    assert(s_auxFramebuffer == 0);
+    assert(s_prevFramebuffer == 0);
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    dispatcher.glGetIntegerv(GL_VIEWPORT, s_prevViewport);
+    dispatcher.glGenFramebuffers(1, &s_auxFramebuffer);
+    assert(s_auxFramebuffer);
+    if (dispatcher.getGLESVersion() >= GLES_3_0) {
+        dispatcher.glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,
+                (GLint*)&s_prevFramebuffer);
+        dispatcher.glBindFramebuffer(GL_READ_FRAMEBUFFER, s_auxFramebuffer);
+    } else {
+        dispatcher.glGetIntegerv(GL_FRAMEBUFFER_BINDING,
+                (GLint*)&s_prevFramebuffer);
+        dispatcher.glBindFramebuffer(GL_FRAMEBUFFER, s_auxFramebuffer);
+    }
+}
+
+void SaveableTexture::postSave() {
+    if (!isGles2Gles()) return;
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    if (dispatcher.getGLESVersion() >= GLES_3_0) {
+        dispatcher.glBindFramebuffer(GL_READ_FRAMEBUFFER, s_prevFramebuffer);
+    } else {
+        dispatcher.glBindFramebuffer(GL_FRAMEBUFFER, s_prevFramebuffer);
+    }
+    dispatcher.glDeleteFramebuffers(1, &s_auxFramebuffer);
+    s_auxFramebuffer = 0;
+    s_prevFramebuffer = 0;
+    dispatcher.glViewport(s_prevViewport[0], s_prevViewport[1],
+            s_prevViewport[2], s_prevViewport[3]);
+}
+
 void SaveableTexture::onSave(
         android::base::Stream* stream) {
     stream->putBe32(m_target);
@@ -460,6 +498,19 @@ void SaveableTexture::onSave(
                                 GLenum target, bool isDepth,
                                 std::unique_ptr<LevelImageData[]>& imgData) {
             if (m_isDirty) {
+                const GLenum fbTarget = dispatcher.getGLESVersion() >= GLES_3_0
+                    ? GL_READ_FRAMEBUFFER : GL_FRAMEBUFFER;
+                GLenum attachment = GL_COLOR_ATTACHMENT0;
+                if (isGles2Gles()) {
+                    switch (m_format) {
+                        case GL_DEPTH_COMPONENT:
+                            attachment = GL_DEPTH_ATTACHMENT;
+                            break;
+                        case GL_DEPTH_STENCIL:
+                            attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+                            break;
+                    }
+                }
                 imgData.reset(new LevelImageData[numLevels]);
                 for (unsigned int level = 0; level < numLevels; level++) {
                     unsigned int& width = imgData.get()[level].m_width;
@@ -508,9 +559,57 @@ void SaveableTexture::onSave(
                             neededBufferFormat =
                                 getCoreProfileEmulatedFormat(m_format);
                         }
-                        dispatcher.glGetTexImage(target, level,
-                                neededBufferFormat, m_type,
-                                buffer.data());
+                        if (isGles2Gles()) {
+                            dispatcher.glViewport(0, 0, width, height);
+                            switch (target) {
+                                case GL_TEXTURE_2D:
+                                case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+                                case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+                                case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+                                case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+                                case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+                                case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+                                    dispatcher.glFramebufferTexture2D(
+                                            fbTarget, attachment, target,
+                                            m_globalName, level);
+                                    dispatcher.glReadPixels(0, 0, width, height,
+                                            neededBufferFormat, m_type,
+                                            buffer.data());
+                                    break;
+                                case GL_TEXTURE_3D: {
+                                    unsigned int layerImgSize = s_texImageSize(
+                                            m_format, m_type, 1, width, height);
+                                    for (unsigned int d = 0; d < depth; d++) {
+                                        dispatcher.glFramebufferTexture3DOES(
+                                                fbTarget, attachment, target,
+                                                m_globalName, level, d);
+                                        dispatcher.glReadPixels(0, 0, width,
+                                                height, neededBufferFormat,
+                                                m_type, buffer.data() +
+                                                layerImgSize * d);
+                                    }
+                                    break;
+                                }
+                                case GL_TEXTURE_2D_ARRAY: {
+                                    unsigned int layerImgSize = s_texImageSize(
+                                            m_format, m_type, 1, width, height);
+                                    for (unsigned int d = 0; d < depth; d++) {
+                                        dispatcher.glFramebufferTextureLayer(
+                                                fbTarget, attachment,
+                                                m_globalName, level, d);
+                                        dispatcher.glReadPixels(0, 0, width,
+                                                height, neededBufferFormat,
+                                                m_type, buffer.data() +
+                                                layerImgSize * d);
+                                    }
+                                    break;
+                                }
+                            }
+                        } else {
+                            dispatcher.glGetTexImage(target, level,
+                                    neededBufferFormat, m_type,
+                                    buffer.data());
+                        }
                     }
                 }
             }

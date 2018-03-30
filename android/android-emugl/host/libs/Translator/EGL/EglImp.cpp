@@ -1593,12 +1593,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
     if (!iface || !iface->saveTexture)
         return true;
     VALIDATE_DISPLAY(display);
+    iface->preSaveTexture();
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     dpy->onSaveAllImages(
             stm,
             *static_cast<const android::snapshot::ITextureSaverPtr*>(textureSaver),
             iface->saveTexture,
             iface->restoreTexture);
+    iface->postSaveTexture();
     return EGL_TRUE;
 }
 
