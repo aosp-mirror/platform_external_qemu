@@ -26,6 +26,8 @@ EGLDisplay getDisplay() {
     EXPECT_TRUE(dpy != EGL_NO_DISPLAY);
 
     if (sDisplayNeedsInit) {
+
+        egl->eglUseOsEglApi(true);
         EGLint eglMaj, eglMin;
         EGLBoolean init_res = egl->eglInitialize(dpy, &eglMaj, &eglMin);
         EXPECT_TRUE(init_res != EGL_FALSE);
