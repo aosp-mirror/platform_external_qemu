@@ -259,6 +259,11 @@ bool MemoryAccessWatch::fillPage(void* ptr,
     return true;
 }
 
+void MemoryAccessWatch::preJoin() {
+    // TODO: some optimization to rush load the remaining pages
+    // for Linux, if even necessary
+}
+
 void MemoryAccessWatch::join() {
     if (mImpl) {
         mImpl->join();

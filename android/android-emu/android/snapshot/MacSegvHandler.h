@@ -40,11 +40,12 @@ public:
     // access that should be passed through.
     bool isRegistered(void* ptr) const;
 
+    // Detaches segv handler from everything.
+    void clearRegistered();
+
 private:
     using MemoryRange = std::pair<char*, uint64_t>;
     using MemoryRanges = std::vector<MemoryRange>;
-
-    void clearRegistered();
 
     MemoryRanges mRanges = {};
 };

@@ -147,6 +147,9 @@ bool RamLoader::start(bool isQuickboot) {
 
 void RamLoader::join() {
     mJoining = true;
+    if (mAccessWatch) {
+        mAccessWatch->preJoin();
+    }
     mReaderThread.wait();
     if (mAccessWatch) {
         mAccessWatch->join();
