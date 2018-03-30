@@ -99,6 +99,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_ROTARY,        mExtendedUi->rotaryInputButton},
         {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
         {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
+        {PANE_IDX_VIRTUAL_SCENE, mExtendedUi->virtualSceneButton},
         {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
         {PANE_IDX_SNAPSHOT,      mExtendedUi->snapshotButton},
         {PANE_IDX_BUGREPORT,     mExtendedUi->bugreportButton},
@@ -124,6 +125,14 @@ ExtendedWindow::ExtendedWindow(
     }
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
+
+    if (androidHwConfig_hasVirtualSceneCamera(android_hw)) {
+        mSidebarButtons.addButton(mExtendedUi->virtualSceneButton);
+        mExtendedUi->virtualSceneButton->setVisible(true);
+    } else {
+        mExtendedUi->virtualSceneButton->setVisible(false);
+    }
+
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
 
     if (android::featurecontrol::isEnabled(android::featurecontrol::GenericSnapshotsUI)) {
@@ -195,6 +204,8 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
         }
         mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->record);
+        mExtendedUi->virtualScenePage->setVirtualSceneAgent(
+                agentPtr->virtualScene);
     }
     // The ADB port is known now. Show it on the UI Help page.
     mExtendedUi->helpPage->setAdbPort();
@@ -289,6 +300,7 @@ void ExtendedWindow::on_locationButton_clicked()     { adjustTabs(PANE_IDX_LOCAT
 void ExtendedWindow::on_microphoneButton_clicked()   { adjustTabs(PANE_IDX_MICROPHONE); }
 void ExtendedWindow::on_settingsButton_clicked()     { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEPHONE); }
+void ExtendedWindow::on_virtualSceneButton_clicked() { adjustTabs(PANE_IDX_VIRTUAL_SCENE); }
 void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 void ExtendedWindow::on_snapshotButton_clicked()     { adjustTabs(PANE_IDX_SNAPSHOT); }
 void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
