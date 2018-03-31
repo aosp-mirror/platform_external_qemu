@@ -316,6 +316,9 @@
    <property name="report_metrics" stdset="0">
     <bool>false</bool>
    </property>
+   <property name="themeIconName_disabled" stdset="0">
+    <string>edit_disabled</string>
+   </property>
   </widget>
   <widget class="RaisedMaterialButton" name="deleteSnapshot">
    <property name="geometry">
