@@ -100,7 +100,8 @@ public:
     // Ctor
     FfmpegRecorderImpl(uint16_t fbWidth,
                        uint16_t fbHeight,
-                       android::base::StringView filename);
+                       android::base::StringView filename,
+                       android::base::StringView containerFormat);
 
     virtual ~FfmpegRecorderImpl();
 
@@ -118,7 +119,8 @@ public:
 private:
     // Initalizes the output context for the muxer. This call is required for
     // adding video/audio contexts and starting the recording.
-    bool initOutputContext(android::base::StringView filename);
+    bool initOutputContext(android::base::StringView filename,
+                           android::base::StringView containerFormat);
 
     void attachAudioProducer(std::unique_ptr<Producer> producer);
     void attachVideoProducer(std::unique_ptr<Producer> producer);
@@ -184,11 +186,14 @@ private:
     std::unique_ptr<Producer> mVideoProducer;
 };
 
-FfmpegRecorderImpl::FfmpegRecorderImpl(uint16_t fbWidth,
-                                       uint16_t fbHeight,
-                                       android::base::StringView filename)
+FfmpegRecorderImpl::FfmpegRecorderImpl(
+        uint16_t fbWidth,
+        uint16_t fbHeight,
+        android::base::StringView filename,
+        android::base::StringView containerFormat)
     : mFbWidth(fbWidth), mFbHeight(fbHeight) {
-    mValid = initOutputContext(filename);
+    assert(mFbWidth > 0 && mFbHeight > 0);
+    mValid = initOutputContext(filename, containerFormat);
 }
 
 FfmpegRecorderImpl::~FfmpegRecorderImpl() {
@@ -199,21 +204,16 @@ bool FfmpegRecorderImpl::isValid() {
     return mValid;
 }
 
-bool FfmpegRecorderImpl::initOutputContext(android::base::StringView filename) {
+bool FfmpegRecorderImpl::initOutputContext(
+        android::base::StringView filename,
+        android::base::StringView containerFormat) {
     if (mStarted) {
         LOG(ERROR) << __func__ << ": Recording already started";
         return false;
     }
-    if (filename.empty()) {
-        LOG(ERROR) << __func__ << ": No output filename supplied";
-        return false;
-    }
-
-    std::string tmpfile = filename;
-    std::transform(tmpfile.begin(), tmpfile.end(), tmpfile.begin(), ::tolower);
-    if (PathUtils::extension(tmpfile) != ".webm") {
-        LOG(ERROR) << __func__ << ": [" << filename
-                   << "] must have a .webm extension";
+    if (filename.empty() || containerFormat.empty()) {
+        LOG(ERROR) << __func__
+                   << ": No output filename or container format supplied";
         return false;
     }
 
@@ -225,7 +225,7 @@ bool FfmpegRecorderImpl::initOutputContext(android::base::StringView filename) {
 
     // allocate the output media context
     AVFormatContext* outputCtx;
-    avformat_alloc_output_context2(&outputCtx, nullptr, nullptr,
+    avformat_alloc_output_context2(&outputCtx, nullptr, containerFormat.c_str(),
                                    mEncodedOutputPath.c_str());
     if (outputCtx == nullptr) {
         LOG(ERROR) << __func__ << ": avformat_alloc_output_context2 failed";
@@ -921,9 +921,10 @@ void FfmpegRecorderImpl::logPacket(const AVFormatContext* fmtCtx,
 std::unique_ptr<FfmpegRecorder> FfmpegRecorder::create(
         uint16_t fbWidth,
         uint16_t fbHeight,
-        android::base::StringView filename) {
-    return std::unique_ptr<FfmpegRecorder>(
-            new FfmpegRecorderImpl(fbWidth, fbHeight, filename));
+        android::base::StringView filename,
+        android::base::StringView containerFormat) {
+    return std::unique_ptr<FfmpegRecorder>(new FfmpegRecorderImpl(
+            fbWidth, fbHeight, filename, containerFormat));
 }
 
 }  // namespace recording

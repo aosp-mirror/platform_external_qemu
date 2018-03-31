@@ -151,7 +151,8 @@ bool ScreenRecorder::startRecordingWorker() {
         return false;
     }
 
-    ffmpegRecorder = FfmpegRecorder::create(mFbWidth, mFbHeight, mFilename);
+    ffmpegRecorder = FfmpegRecorder::create(mFbWidth, mFbHeight, mFilename,
+                                            kContainerFormat);
     if (!ffmpegRecorder->isValid()) {
         LOG(ERROR) << "Unable to create recorder";
         mRecorderState = RECORDER_STOPPED;
