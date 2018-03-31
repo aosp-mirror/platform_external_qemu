@@ -19,7 +19,8 @@
 // example use:
 //
 //    // Create a ffmpeg_recorder instance
-//    auto recorder = FfmpegRecorder::create(fbWidth, fbHeight, filename);
+//    auto recorder = FfmpegRecorder::create(fbWidth, fbHeight, filename,
+//    containerFormat);
 //
 //    // Add audio/video tracks
 //    recorder->addVideoTrack(std::move(videoProducer), myVideoCodec);
@@ -102,13 +103,17 @@ public:
     //   fb_width - the framebuffer width
     //   fb_height - the framebuffer height
     //   filename - the output filename
+    //   containerFormat - the output container format. This will be used to
+    //   determine which container to use for the output format, and not the
+    //   filename.
     //
     // returns:
     //   null if unable to create the recorder.
     static std::unique_ptr<FfmpegRecorder> create(
             uint16_t fbWidth,
             uint16_t fbHeight,
-            android::base::StringView filename);
+            android::base::StringView filename,
+            android::base::StringView containerFormat);
 
 protected:
     FfmpegRecorder() = default;

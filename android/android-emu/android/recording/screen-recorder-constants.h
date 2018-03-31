@@ -34,3 +34,5 @@ constexpr int kNumAudioChannels = 2;
 
 constexpr int kDefaultVideoBitrate = 4 * 1000 * 1000;  // bps
 constexpr int kDefaultTimeLimit = kMaxTimeLimit;
+
+constexpr char kContainerFormat[] = "webm";
