@@ -176,6 +176,7 @@ extern "C" int main(int argc, char **argv) {
     uiEmuAgent.sensors = gQAndroidSensorsAgent;
     uiEmuAgent.telephony = gQAndroidTelephonyAgent;
     uiEmuAgent.userEvents = gQAndroidUserEventAgent;
+    uiEmuAgent.virtualScene = gQAndroidVirtualSceneAgent;
     uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
     uiEmuAgent.car = gQCarDataAgent;
 

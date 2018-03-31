@@ -20,10 +20,12 @@
  * Defines the Virtual Scene, used by the Virtual Scene Camera
  */
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/emulation/control/virtual_scene_agent.h"
 #include "android/utils/compiler.h"
+
+class GLESv2Dispatch;
 
 namespace android {
 namespace virtualscene {
@@ -65,6 +67,14 @@ public:
     //
     // Returns true on success.
     static bool loadPoster(const char* posterName, const char* filename);
+
+    // Enumerate posters in the scene and their current values.  Synchronously
+    // calls the callback for each poster in the scene.
+    //
+    // |context| - Context object, passed into callback.
+    // |callback| - Callback to be invoked for each poster.
+    static void enumeratePosters(void* context,
+                                 EnumeratePostersCallback callback);
 
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
