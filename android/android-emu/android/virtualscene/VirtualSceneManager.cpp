@@ -16,6 +16,7 @@
 
 #include "android/virtualscene/VirtualSceneManager.h"
 
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/files/PathUtils.h"
 #include "android/cmdline-option.h"
 #include "android/globals.h"
@@ -25,6 +26,7 @@
 #include "android/virtualscene/Scene.h"
 
 #include <unordered_map>
+#include <deque>
 
 using namespace android::base;
 
@@ -40,6 +42,10 @@ LazyInstance<Lock> VirtualSceneManager::mLock = LAZY_INSTANCE_INIT;
 Renderer* VirtualSceneManager::mRenderer = nullptr;
 Scene* VirtualSceneManager::mScene = nullptr;
 
+// Stores settings for the virtual scene.
+//
+// Access to the instance of this class, sSettings should be guarded by
+// VirtualSceneManager::mLock.
 class Settings {
 public:
     Settings() = default;
@@ -78,16 +84,33 @@ public:
 
     void setPoster(const char* posterName, const char* filename) {
         mPosters[posterName] = filename;
+        mPendingUpdates.push_back(posterName);
     }
 
-    void setupScene(Scene* scene) const {
+    void setupScene(Scene* scene) {
         for (const auto& it : mPosters) {
             scene->loadPoster(it.first.c_str(), it.second.c_str());
         }
+
+        mPendingUpdates.clear();
+    }
+
+    void updateScene(Scene* scene) {
+        while (!mPendingUpdates.empty()) {
+            const std::string& posterName = mPendingUpdates.front();
+            scene->loadPoster(posterName.c_str(), mPosters[posterName].c_str());
+
+            mPendingUpdates.pop_front();
+        }
+    }
+
+    const std::unordered_map<std::string, std::string>& getPosters() const {
+        return mPosters;
     }
 
 private:
     std::unordered_map<std::string, std::string> mPosters;
+    std::deque<std::string> mPendingUpdates;
 };
 
 static LazyInstance<Settings> sSettings = LAZY_INSTANCE_INIT;
@@ -175,6 +198,8 @@ int64_t VirtualSceneManager::render() {
         return 0L;
     }
 
+    sSettings->updateScene(mScene);
+
     const int64_t timestamp = mScene->update();
     mRenderer->render(mScene->getRenderableObjects(),
             timestamp / 1000000000.0f);
@@ -186,12 +211,19 @@ bool VirtualSceneManager::loadPoster(const char* posterName,
     AutoLock lock(mLock.get());
     sSettings->setPoster(posterName, filename);
 
-    // If the scene is loaded, update it now.
-    if (mScene) {
-        return mScene->loadPoster(posterName, filename);
-    }
-
+    // If the scene is active, it will update the poster in the next render()
+    // invocation.
     return true;
+}
+
+void VirtualSceneManager::enumeratePosters(void* context,
+                                           EnumeratePostersCallback callback) {
+    AutoLock lock(mLock.get());
+
+    for (const auto& it : sSettings->getPosters()) {
+        callback(context, it.first.c_str(),
+                 it.second.empty() ? nullptr : it.second.c_str());
+    }
 }
 
 }  // namespace virtualscene

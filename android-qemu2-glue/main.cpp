@@ -1202,6 +1202,7 @@ extern "C" int main(int argc, char** argv) {
             gQAndroidSensorsAgent,
             gQAndroidTelephonyAgent,
             gQAndroidUserEventAgent,
+            gQAndroidVirtualSceneAgent,
             gQCarDataAgent,
             nullptr  // For now there's no uses of SettingsAgent, so we
                      // don't set it.
