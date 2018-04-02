@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e81ea854_45315298",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-04-02T19:40:25Z",
+      "side": 1,
+      "message": "At some point it would be nice to have these configured by the posters file so that we could have different ones in each scene.  Not necessary for now, but nice to have at some point if it\u0027s not too difficult.",
+      "range": {
+        "startLine": 30,
+        "startChar": 9,
+        "endLine": 30,
+        "endChar": 33
+      },
+      "revId": "5bc1eb85c7987ea33cecfbb0548d1208f99d2ebe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
