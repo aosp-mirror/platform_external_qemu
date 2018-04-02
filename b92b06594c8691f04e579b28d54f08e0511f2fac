@@ -131,6 +131,30 @@
     },
     {
       "key": {
+        "uuid": "e6c5ed0f_031f3c44",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1152,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-02T07:09:15Z",
+      "side": 1,
+      "message": "At a second thought, I think we may have valid situations in which this should return an empty string (if no accelerator is available).\n\nI\u0027d leave it as-is for now.",
+      "parentUuid": "04021634_66aa1122",
+      "range": {
+        "startLine": 1151,
+        "startChar": 8,
+        "endLine": 1152,
+        "endChar": 22
+      },
+      "revId": "b92b06594c8691f04e579b28d54f08e0511f2fac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "435da21a_197c4a47",
         "filename": "vl.c",
         "patchSetId": 1
