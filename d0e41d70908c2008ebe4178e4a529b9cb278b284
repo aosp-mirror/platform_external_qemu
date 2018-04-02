@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3f7618e7_c8daf7aa",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-02T20:45:06Z",
+      "side": 1,
+      "message": "Since this pattern happened a few times already, and is critical to determining the \"is virtualscene ok to use\" condition, we should probably unify this and the main.cpp one into one function. Not too sure where it should live, maybe VirtualSceneManager, or maybe hw-config. h (for the latter; ./android/android-emu/android/featurecontrol/features_c.h has the C interface to flags)",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 62
+      },
+      "revId": "d0e41d70908c2008ebe4178e4a529b9cb278b284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
