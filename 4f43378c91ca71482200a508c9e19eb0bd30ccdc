@@ -22,6 +22,30 @@
       "revId": "4f43378c91ca71482200a508c9e19eb0bd30ccdc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46db7f6c_cd38f36a",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-02T19:36:25Z",
+      "side": 1,
+      "message": "Yes, sSettings accesses are guarded by VirtualSceneManager::mLock.  I\u0027ll add a comment to clarify.",
+      "parentUuid": "07db2af3_4153df70",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 23
+      },
+      "revId": "4f43378c91ca71482200a508c9e19eb0bd30ccdc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
