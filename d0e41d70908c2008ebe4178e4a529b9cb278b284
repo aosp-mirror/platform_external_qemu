@@ -22,6 +22,30 @@
       "revId": "d0e41d70908c2008ebe4178e4a529b9cb278b284",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51778baf_56653869",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-02T23:43:09Z",
+      "side": 1,
+      "message": "Good point.  This condition is sort of redundant, actually, it can be simplified to \"androidHwConfig_hasVirtualSceneCamera(android_hw)\" since main.cpp resets the flag back to \"emulated\" if the feature isn\u0027t enabled.  I\u0027ll simplify.",
+      "parentUuid": "3f7618e7_c8daf7aa",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 62
+      },
+      "revId": "d0e41d70908c2008ebe4178e4a529b9cb278b284",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
