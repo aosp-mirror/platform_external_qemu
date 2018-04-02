@@ -26,6 +26,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/virtual_scene_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
 
@@ -60,6 +61,9 @@ extern const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent;
 
 // Defined in android-qemu1-glue/qemu-user-event-agent-impl.c
 extern const QAndroidUserEventAgent* const gQAndroidUserEventAgent;
+
+// Defined in android/qemu-virtual-scene-agent-impl.cpp
+extern const QAndroidVirtualSceneAgent* const gQAndroidVirtualSceneAgent;
 
 // Defined in android-qemu1-glue/qemu-net-agent-impl.c
 extern const QAndroidNetAgent* const gQAndroidNetAgent;
