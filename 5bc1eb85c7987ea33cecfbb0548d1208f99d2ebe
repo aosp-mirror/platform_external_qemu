@@ -22,6 +22,30 @@
       "revId": "5bc1eb85c7987ea33cecfbb0548d1208f99d2ebe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "26cae107_462b6154",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-02T19:42:49Z",
+      "side": 1,
+      "message": "Yeah, definitely! I would like to make this page dynamic, and automatically add ImageWells for each poster returned by enumeratePosters, but since we only have one scene at the moment that is sort of low on my priority list.",
+      "parentUuid": "e81ea854_45315298",
+      "range": {
+        "startLine": 30,
+        "startChar": 9,
+        "endLine": 30,
+        "endChar": 33
+      },
+      "revId": "5bc1eb85c7987ea33cecfbb0548d1208f99d2ebe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
