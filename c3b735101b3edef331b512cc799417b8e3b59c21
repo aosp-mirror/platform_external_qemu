@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "e31d8645_0ea6f624",
+        "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-03T17:42:58Z",
+      "side": 1,
+      "message": "please don\u0027t spell it twice - the type is pretty clear from the cast, and auto has been created for exactly these cases",
+      "parentUuid": "4a6391a5_0988fc56",
+      "range": {
+        "startLine": 97,
+        "startChar": 8,
+        "endLine": 97,
+        "endChar": 23
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1bb209e7_f13745cc",
         "filename": "android/android-emu/android/base/system/Win32Utils.h",
         "patchSetId": 2

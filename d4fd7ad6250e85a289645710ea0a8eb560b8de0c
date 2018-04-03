@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a4decef_a75c9abd",
+        "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-03T17:42:58Z",
+      "side": 1,
+      "message": "nit: not needed, |hLib| is not null here",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 107,
+        "endChar": 13
+      },
+      "revId": "d4fd7ad6250e85a289645710ea0a8eb560b8de0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
