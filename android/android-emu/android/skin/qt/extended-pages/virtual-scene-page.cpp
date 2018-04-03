@@ -18,6 +18,7 @@
 #include "android/skin/qt/qt-settings.h"
 
 #include <QDebug>
+#include <QFileInfo>
 #include <QSettings>
 
 const QAndroidVirtualSceneAgent* VirtualScenePage::sVirtualSceneAgent = nullptr;
@@ -67,6 +68,7 @@ void VirtualScenePage::reportInteraction() {
 }
 
 void VirtualScenePage::changePoster(QString name, QString path) {
+    // Persist to settings.
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
         const QString avdSettingsFile =
@@ -83,9 +85,19 @@ void VirtualScenePage::changePoster(QString name, QString path) {
                 Ui::Settings::PER_AVD_VIRTUAL_SCENE_POSTERS, savedPosters);
     }
 
+    // Update the ImageWells so that future file selections will use this file's
+    // directory as their starting directory.
+    if (!path.isNull()) {
+        QString dir = QFileInfo(path).path();
+        mUi->imageWall->setStartingDirectory(dir);
+        mUi->imageTable->setStartingDirectory(dir);
+    }
+
+    // Update the scene.
     if (sVirtualSceneAgent) {
-        sVirtualSceneAgent->loadPoster(name.toUtf8().constData(),
-                                       path.toUtf8().constData());
+        sVirtualSceneAgent->loadPoster(
+                name.toUtf8().constData(),
+                path.isNull() ? nullptr : path.toUtf8().constData());
     }
 }
 
