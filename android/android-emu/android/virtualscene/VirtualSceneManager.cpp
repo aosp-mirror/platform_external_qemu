@@ -83,11 +83,21 @@ public:
         mPosters[name] = absFilename;
     }
 
+    // Set the poster if it is not already defined.
+    void setInitialPoster(const char* posterName, const char* filename) {
+        if (mPosters.find(posterName) == mPosters.end()) {
+            setPoster(posterName, filename);
+        }
+    }
+
+    // Set the poster and queue a scene update for the next frame.
     void setPoster(const char* posterName, const char* filename) {
         mPosters[posterName] = filename;
         mPendingUpdates.push_back(posterName);
     }
 
+    // Called when the scene is created, load the current poster configuration
+    // in the scene.
     void setupScene(Scene* scene) {
         for (const auto& it : mPosters) {
             scene->loadPoster(it.first.c_str(), it.second.c_str());
@@ -96,6 +106,8 @@ public:
         mPendingUpdates.clear();
     }
 
+    // Called each frame, apply any pending updates to the scene.  This must be
+    // done on the OpenGL thread.
     void updateScene(Scene* scene) {
         while (!mPendingUpdates.empty()) {
             const std::string& posterName = mPendingUpdates.front();
@@ -204,6 +216,12 @@ int64_t VirtualSceneManager::render() {
     mRenderer->render(mScene->getRenderableObjects(),
             timestamp / 1000000000.0f);
     return timestamp;
+}
+
+void VirtualSceneManager::setInitialPoster(const char* posterName,
+                                           const char* filename) {
+    AutoLock lock(mLock.get());
+    sSettings->setInitialPoster(posterName, filename);
 }
 
 bool VirtualSceneManager::loadPoster(const char* posterName,

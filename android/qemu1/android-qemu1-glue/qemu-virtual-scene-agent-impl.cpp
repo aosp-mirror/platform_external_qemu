@@ -16,6 +16,7 @@
 using android::virtualscene::VirtualSceneManager;
 
 static const QAndroidVirtualSceneAgent sQAndroidVirtualSceneAgent = {
+    VirtualSceneManager::setInitialPoster,
     VirtualSceneManager::loadPoster,
     VirtualSceneManager::enumeratePosters
 };

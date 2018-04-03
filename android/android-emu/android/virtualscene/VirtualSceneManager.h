@@ -60,6 +60,15 @@ public:
     // Returns the timestamp at which the frame is rendered.
     static int64_t render();
 
+    // Set the initial poster of the scene, loaded from persisted settings.
+    // Command line flags take precedence, so if the -virtualscene-poster flag
+    // has been specified for the posterName this call will not replace it.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |filename| - Path to an image file, either PNG or JPEG, or nullptr
+    //              to set to default.
+    static void setInitialPoster(const char* posterName, const char* filename);
+
     // Load a poster into the scene from a file.  This may be called on any
     // thread.  Changes to the scene will happen the next time that render()
     // is called.
