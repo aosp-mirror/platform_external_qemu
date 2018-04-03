@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d12d4e79_46d5bace",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-03T22:48:45Z",
+      "side": 0,
+      "message": "I removed this TODO because it\u0027s no longer relevant.  dropEvent() accepts non-apk files and copies them to the sd card.",
+      "range": {
+        "startLine": 848,
+        "startChar": 4,
+        "endLine": 848,
+        "endChar": 67
+      },
+      "revId": "798c2f3f47d7bdb0c8fad7ac94d00bb8c544a38d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
