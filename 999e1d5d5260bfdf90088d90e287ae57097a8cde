@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "815c8d84_28b72d60",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-03T21:09:36Z",
+      "side": 1,
+      "message": "this covers both \u0027file doesn\u0027t exist\u0027 and \u0027qemu qcow2 image doesn\u0027t have saved data for this snapshot\u0027. We may want to introduce a different error code eventually as the latter is definitely a bug.\nAlso now we won\u0027t get cold boot metrics correctly - we used to be relaying on the \u0027cold boot: no snapshot\u0027 to count first AVD runs. What about only skipping mWindow.showMessage() here?",
+      "range": {
+        "startLine": 330,
+        "startChar": 48,
+        "endLine": 330,
+        "endChar": 65
+      },
+      "revId": "999e1d5d5260bfdf90088d90e287ae57097a8cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
