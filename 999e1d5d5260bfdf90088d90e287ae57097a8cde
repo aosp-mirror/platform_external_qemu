@@ -22,6 +22,30 @@
       "revId": "999e1d5d5260bfdf90088d90e287ae57097a8cde",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b31aed1e_f87826df",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-03T21:34:00Z",
+      "side": 1,
+      "message": "Ah shit, Yurii\u0027s completely right here. because of the complexity and fast approaching stable date, I vote not to submit this CL in any form for now, and wait for a refactoring",
+      "parentUuid": "815c8d84_28b72d60",
+      "range": {
+        "startLine": 330,
+        "startChar": 48,
+        "endLine": 330,
+        "endChar": 65
+      },
+      "revId": "999e1d5d5260bfdf90088d90e287ae57097a8cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
