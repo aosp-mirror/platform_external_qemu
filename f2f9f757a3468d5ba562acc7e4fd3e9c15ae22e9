@@ -45,6 +45,29 @@
       "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a164c4e_29fa83a8",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-03T21:29:10Z",
+      "side": 1,
+      "message": "nit: please use \" \u003d default\" syntax as it\u0027s more clear",
+      "range": {
+        "startLine": 65,
+        "startChar": 25,
+        "endLine": 65,
+        "endChar": 30
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
