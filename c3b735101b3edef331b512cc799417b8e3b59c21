@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d1726206_769c0d36",
+        "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "41331e44_8df5b61d",
+      "range": {
+        "startLine": 88,
+        "startChar": 52,
+        "endLine": 88,
+        "endChar": 65
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2de208ff_7a5a88a2",
         "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-02T18:23:04Z",
       "side": 1,
       "message": "please use LoadLibraryW() explicitly",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 36
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dacd8b5c_9c0a9c9a",
+        "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2de208ff_7a5a88a2",
       "range": {
         "startLine": 95,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3aa908ed_312d81d5",
+        "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a824e05_bdc5dbb6",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 15
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "841fc8ec_681178b7",
         "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2018-04-02T18:23:04Z",
       "side": 1,
       "message": "auto",
+      "range": {
+        "startLine": 97,
+        "startChar": 8,
+        "endLine": 97,
+        "endChar": 23
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a6391a5_0988fc56",
+        "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "I\u0027d rather stick to this notation in this case.",
+      "parentUuid": "841fc8ec_681178b7",
       "range": {
         "startLine": 97,
         "startChar": 8,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "fd981146_c562d18e",
+        "filename": "android/android-emu/android/base/system/Win32Utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1bb209e7_f13745cc",
+      "range": {
+        "startLine": 63,
+        "startChar": 12,
+        "endLine": 63,
+        "endChar": 66
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d781cc5f_2b0683bd",
         "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2018-04-02T18:23:04Z",
       "side": 1,
       "message": "please use the Unicode version (\"W\") explicitly",
+      "range": {
+        "startLine": 150,
+        "startChar": 21,
+        "endLine": 150,
+        "endChar": 32
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e058bd0c_5f65dcbe",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d781cc5f_2b0683bd",
       "range": {
         "startLine": 150,
         "startChar": 21,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "74b4ebcb_191379e5",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b91bf0c_38087d18",
+      "range": {
+        "startLine": 163,
+        "startChar": 8,
+        "endLine": 164,
+        "endChar": 14
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0ba07050_35ee39bd",
         "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
         "patchSetId": 2
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "44ec8708_275bf4cb",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0ba07050_35ee39bd",
+      "range": {
+        "startLine": 178,
+        "startChar": 15,
+        "endLine": 178,
+        "endChar": 45
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "987c77ac_2d2e5147",
         "filename": "android/android-emu/android/main-common.h",
         "patchSetId": 2
@@ -197,6 +389,30 @@
       "writtenOn": "2018-04-02T18:23:04Z",
       "side": 1,
       "message": "const char*",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 165,
+        "endChar": 5
+      },
+      "revId": "c3b735101b3edef331b512cc799417b8e3b59c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "872da39d_bee89416",
+        "filename": "android/android-emu/android/main-common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-03T14:43:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "987c77ac_2d2e5147",
       "range": {
         "startLine": 165,
         "startChar": 0,
