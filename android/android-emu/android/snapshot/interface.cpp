@@ -85,3 +85,7 @@ void androidSnapshot_list(void* opaque,
                           int (*cbErr)(void*, const char*, int)) {
     Snapshotter::get().listSnapshots(opaque, cbOut, cbErr);
 }
+
+void androidSnapshot_onColdBoot() {
+    Snapshotter::get().onColdBoot();
+}

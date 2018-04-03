@@ -74,6 +74,8 @@ public:
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(bool isOnExit, const char* name);
 
+    void onColdBoot();
+
     // Cancels the current save operation, and queries
     // whether saving was canceled.
     void cancelSave();

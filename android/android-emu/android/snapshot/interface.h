@@ -69,4 +69,7 @@ void androidSnapshot_list(void* opaque,
                           int (*cbOut)(void* opaque, const char* buf, int strlen),
                           int (*cbErr)(void* opaque, const char* buf, int strlen));
 
+// Use case: for dirty tracking even on cold boots.
+void androidSnapshot_onColdBoot();
+
 ANDROID_END_HEADER

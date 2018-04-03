@@ -639,6 +639,10 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
     return mSaver->status();
 }
 
+void Snapshotter::onColdBoot() {
+    fprintf(stderr, "%s: mLoader: %p\n", __func__, mLoader.get());
+}
+
 void Snapshotter::cancelSave() {
     if (!mSaver)
         return;
