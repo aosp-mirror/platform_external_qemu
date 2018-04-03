@@ -48,6 +48,29 @@
     },
     {
       "key": {
+        "uuid": "906f0924_a7c8ac44",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2018-04-03T21:43:41Z",
+      "side": 1,
+      "message": "Remove virtual if you are using override. There are multiple instances in this file.",
+      "range": {
+        "startLine": 246,
+        "startChar": 4,
+        "endLine": 246,
+        "endChar": 11
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4a164c4e_29fa83a8",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
         "patchSetId": 1
@@ -87,6 +110,29 @@
         "startChar": 63,
         "endLine": 86,
         "endChar": 72
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad07a4a6_c312f1d0",
+        "filename": "android/third_party/libkeymaster3/include/keymaster/android_keymaster_messages.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2018-04-03T21:43:41Z",
+      "side": 1,
+      "message": "Remove virtual.",
+      "range": {
+        "startLine": 387,
+        "startChar": 4,
+        "endLine": 387,
+        "endChar": 11
       },
       "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
