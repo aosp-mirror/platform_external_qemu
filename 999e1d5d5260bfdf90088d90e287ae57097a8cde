@@ -70,6 +70,30 @@
       "revId": "999e1d5d5260bfdf90088d90e287ae57097a8cde",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba33c9e4_75d8d781",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-03T22:14:19Z",
+      "side": 1,
+      "message": "I think it\u0027s a good change: if there\u0027s no snapshot user usually is expecting a cold boot, and if the snapshot is missing from qcow2 the message isn\u0027t really useful",
+      "parentUuid": "3a7c06fd_0c29cfbc",
+      "range": {
+        "startLine": 330,
+        "startChar": 48,
+        "endLine": 330,
+        "endChar": 65
+      },
+      "revId": "999e1d5d5260bfdf90088d90e287ae57097a8cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
