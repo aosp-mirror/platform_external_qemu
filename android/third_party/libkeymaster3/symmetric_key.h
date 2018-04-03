@@ -38,8 +38,8 @@ class SymmetricKeyFactory : public KeyFactory {
                                 KeymasterKeyBlob* output_key_blob, AuthorizationSet* hw_enforced,
                                 AuthorizationSet* sw_enforced) const override;
 
-    virtual const keymaster_key_format_t* SupportedImportFormats(size_t* format_count) const;
-    virtual const keymaster_key_format_t* SupportedExportFormats(size_t* format_count) const {
+    virtual const keymaster_key_format_t* SupportedImportFormats(size_t* format_count) const override;
+    virtual const keymaster_key_format_t* SupportedExportFormats(size_t* format_count) const override {
         return NoFormats(format_count);
     };
 

@@ -33,10 +33,8 @@ extern "C" {
 namespace keymaster {
 
 namespace {
-static const int kAesKeySize = 16;
 static const int kCallsBetweenRngReseeds = 32;
 static const int kRngReseedSize = 64;
-static const uint8_t kMasterKeyDerivationData[kAesKeySize] = "KeymasterMaster";
 }  // anonymous namespace
 
 TrustyKeymasterContext::TrustyKeymasterContext()
