@@ -24,6 +24,19 @@ typedef void (*EnumeratePostersCallback)(void* context,
                                          const char* filename);
 
 typedef struct QAndroidVirtualSceneAgent {
+    // Set the initial poster of the scene, loaded from persisted settings.
+    // Command line flags take precedence, so if the -virtualscene-poster flag
+    // has been specified for the posterName this call will not replace it.
+    //
+    // This only updates the setting, and does not replace the poster if the
+    // virtualscene is active.  To update the active scene, loadPoster should
+    // be used instead.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |filename| - Path to an image file, either PNG or JPEG, or nullptr
+    //              to set to default.
+    void (*setInitialPoster)(const char* posterName, const char* filename);
+
     // Load a poster into the scene from a file.
     //
     // |posterName| - Name of the poster position, such as "wall" or "table".

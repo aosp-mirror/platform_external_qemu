@@ -12,6 +12,7 @@
 
 #include "ui_virtual-scene-page.h"
 
+#include <QMap>
 #include <QWidget>
 #include <memory>
 
@@ -23,7 +24,7 @@ class VirtualScenePage : public QWidget {
 public:
     explicit VirtualScenePage(QWidget* parent = 0);
 
-    void setVirtualSceneAgent(const QAndroidVirtualSceneAgent* agent);
+    static void setVirtualSceneAgent(const QAndroidVirtualSceneAgent* agent);
 
     void showEvent(QShowEvent* event) override;
 
@@ -35,11 +36,14 @@ private slots:
     void reportInteraction();
 
 private:
-    void updatePosters();
+    void changePoster(QString name, QString path);
+    void loadUi();
+
+    static void loadSettings();
 
     std::unique_ptr<Ui::VirtualScenePage> mUi;
     bool mHasBeenShown = false;
     bool mHadFirstInteraction = false;
 
-    const QAndroidVirtualSceneAgent* mVirtualSceneAgent = nullptr;
+    static const QAndroidVirtualSceneAgent* sVirtualSceneAgent;
 };

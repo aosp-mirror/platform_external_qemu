@@ -194,6 +194,7 @@ void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
         LocationPage::setLocationAgent(agentPtr->location);
         SettingsPage::setHttpProxyAgent(agentPtr->proxy);
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
+        VirtualScenePage::setVirtualSceneAgent(agentPtr->virtualScene);
     }
 }
 
@@ -204,8 +205,6 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
         }
         mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->record);
-        mExtendedUi->virtualScenePage->setVirtualSceneAgent(
-                agentPtr->virtualScene);
     }
     // The ADB port is known now. Show it on the UI Help page.
     mExtendedUi->helpPage->setAdbPort();
