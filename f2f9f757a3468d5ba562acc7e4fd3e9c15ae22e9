@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ff3f10b_5f62fe9a",
+        "filename": "android/android-emu/android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-03T21:24:22Z",
+      "side": 1,
+      "message": "just mF() - it\u0027s simpler",
+      "range": {
+        "startLine": 34,
+        "startChar": 19,
+        "endLine": 34,
+        "endChar": 29
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8978e3b_c2e5251f",
+        "filename": "android/android-emu/android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-03T21:24:22Z",
+      "side": 1,
+      "message": "nit: you could even try adding std::move(f) here\noverall it should be exactly the same as the previous one, but if the default ctor is never used it won\u0027t be instantiated at all, so that\u0027s why no compilation error",
+      "range": {
+        "startLine": 35,
+        "startChar": 37,
+        "endLine": 35,
+        "endChar": 38
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
