@@ -62,6 +62,7 @@ using OptionalAdbCommandResult = android::base::Optional<AdbCommandResult>;
 // Class capable of finding all availabe adb executables.
 class AdbLocator {
 public:
+    virtual ~AdbLocator() = default;
     virtual std::vector<std::string> availableAdb() = 0;
 
     virtual base::Optional<int> getAdbProtocolVersion(StringView adbPath) = 0;
@@ -69,6 +70,7 @@ public:
 
 class AdbDaemon {
 public:
+    virtual ~AdbDaemon() = default;
     virtual Optional<int> getProtocolVersion() = 0;
 };
 
