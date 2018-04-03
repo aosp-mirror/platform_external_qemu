@@ -374,8 +374,7 @@ _camera_service_init(CameraServiceDesc* csd)
     memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
     csd->camera_count = 0;
 
-    if (feature_is_enabled(kFeature_VirtualScene) &&
-        !strcmp(android_hw->hw_camera_back, "virtualscene")) {
+    if (androidHwConfig_hasVirtualSceneCamera(android_hw)) {
         /* Set up virtual scene camera emulation. */
         _virtualscenecamera_setup(csd);
     }
