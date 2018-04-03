@@ -68,6 +68,29 @@
       "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d56a1550_54c26bb9",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2018-04-03T21:35:35Z",
+      "side": 1,
+      "message": "Is  this dependency for building host tools for Android (i.e. with prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.15-4.8/)?  If there are other dependencies, it\u0027d be good to know since we might (however unlikely it seems at this point) upgrade the host binutils and glibc.",
+      "range": {
+        "startLine": 86,
+        "startChar": 63,
+        "endLine": 86,
+        "endChar": 72
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
