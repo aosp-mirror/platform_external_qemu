@@ -327,7 +327,7 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
                 WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                          *failureReason);
-    } else {
+    } else if (*failureReason != FailureReason::NoSnapshotInImage) {
         mWindow.showMessage(
                 StringFormat("Cold boot: %s",
                              failureReasonToString(
