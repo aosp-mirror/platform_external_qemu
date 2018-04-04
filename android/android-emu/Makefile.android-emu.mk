@@ -488,6 +488,7 @@ LOCAL_SRC_FILES := \
     android/utils/socket_drainer.cpp \
     android/utils/sockets.c \
     android/utils/looper.cpp \
+    android/virtualscene/PosterSceneObject.cpp \
     android/virtualscene/Renderer.cpp \
     android/virtualscene/RenderTarget.cpp \
     android/virtualscene/Scene.cpp \

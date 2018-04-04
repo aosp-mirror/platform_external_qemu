@@ -22,6 +22,7 @@
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/utils/compiler.h"
+#include "android/virtualscene/PosterSceneObject.h"
 #include "android/virtualscene/Renderer.h"
 #include "android/virtualscene/SceneCamera.h"
 
@@ -41,7 +42,7 @@ struct Poster {
     glm::quat rotation = glm::quat();
     std::string defaultFilename;
 
-    std::unique_ptr<SceneObject> sceneObject;
+    std::unique_ptr<PosterSceneObject> sceneObject;
 };
 
 class Scene {
@@ -77,9 +78,19 @@ public:
     //
     // |posterName| - Name of the poster position, such as "wall" or "table".
     // |filename| - Path to an image file, either PNG or JPEG.
+    // |size| - The default poster size, between 0 and 1, which will
+    //          automatically be clamped.
     //
     // Returns true on success.
-    bool loadPoster(const char* posterName, const char* filename);
+    bool loadPoster(const char* posterName, const char* filename, float size);
+
+    // Update a given poster's size.  If the poster does not exist, this has
+    // no effect.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |size| - Poster size, between 0 and 1, which will be automatically
+    //          clamped.
+    void updatePosterSize(const char* posterName, float size);
 
 private:
     // Private constructor, use Scene::create to create an instance.
@@ -98,7 +109,7 @@ private:
     // Gets RenderableObjects from a SceneObject.
     static void getRenderableObjectsFromSceneObject(
             const glm::mat4& viewProjection,
-            const std::unique_ptr<SceneObject>& sceneObject,
+            const SceneObject* sceneObject,
             std::vector<RenderableObject>& outRenderableObjects);
 
     Renderer& mRenderer;

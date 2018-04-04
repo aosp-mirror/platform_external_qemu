@@ -85,6 +85,15 @@ public:
     // Get the aspect ratio of the frame, w/h.
     virtual float getAspectRatio() = 0;
 
+    // Get the dimensions of a texture.
+    //
+    // |texture| - Texture object.
+    // |outWidth| - Out parameter that returns texture width, in pixels.
+    // |outHeight| - Out parameter that returns texture height, in pixels.
+    virtual void getTextureInfo(Texture texture,
+                                uint32_t* outWidth,
+                                uint32_t* outHeight) = 0;
+
     // Release rendering state associated with a SceneObject, should be called
     // before destroying a SceneObject.
     //

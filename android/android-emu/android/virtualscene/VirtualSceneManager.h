@@ -31,8 +31,7 @@ namespace android {
 namespace virtualscene {
 
 // Forward declarations.
-class Renderer;
-class Scene;
+class VirtualSceneManagerImpl;
 
 class VirtualSceneManager {
 public:
@@ -87,10 +86,16 @@ public:
     static void enumeratePosters(void* context,
                                  EnumeratePostersCallback callback);
 
+    // Set the size of a poster.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |size| - Poster size, a value between 0 and 1. The value will be clamped
+    //          between the poster's minimum size and 1.
+    static void setPosterSize(const char* posterName, float size);
+
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
-    static Renderer* mRenderer;
-    static Scene* mScene;
+    static VirtualSceneManagerImpl* mImpl;
 };
 
 }  // namespace virtualscene

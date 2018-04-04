@@ -80,18 +80,20 @@ void EditableSliderWidget::setValue(double value, bool emit_signal) {
     updateValidatorStyle("");
 }
 
-void EditableSliderWidget::setMinimum(double minimum) {
+void EditableSliderWidget::setMinimum(double minimum, bool emit_signal) {
     mMinimum = minimum;
     mLineEditValidator.setBottom(mMinimum);
-    setValue(mValue); // Force the current value into the new bounds.
+    setValue(mValue,
+             emit_signal);  // Force the current value into the new bounds.
     mMinValueLabel.setText(QString::number(mMinimum));
     mSlider.setMinimum(static_cast<int>(mMinimum * 10.0));
 }
 
-void EditableSliderWidget::setMaximum(double maximum) {
+void EditableSliderWidget::setMaximum(double maximum, bool emit_signal) {
     mMaximum = maximum;
     mLineEditValidator.setTop(mMaximum);
-    setValue(mValue); // Force the current value into the new bounds.
+    setValue(mValue,
+             emit_signal);  // Force the current value into the new bounds.
     mMaxValueLabel.setText(QString::number(mMaximum));
     mSlider.setMaximum(static_cast<int>(mMaximum * 10.0));
 }

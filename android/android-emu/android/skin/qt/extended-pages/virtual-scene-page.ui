@@ -45,6 +45,9 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="EditableSliderWidget" name="sizeSliderTable" native="true"/>
+     </item>
     </layout>
    </item>
    <item row="0" column="0">
@@ -77,6 +80,9 @@
         </size>
        </property>
       </widget>
+     </item>
+     <item>
+      <widget class="EditableSliderWidget" name="sizeSliderWall" native="true"/>
      </item>
     </layout>
    </item>
@@ -113,6 +119,12 @@
    <class>ImageWell</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/image-well.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EditableSliderWidget</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/editable-slider-widget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
