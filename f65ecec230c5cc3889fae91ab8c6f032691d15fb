@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16f1d87a_26d4b984",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 671,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-04T03:17:14Z",
+      "side": 1,
+      "message": "I see, this here assumes avdParams was already set.",
+      "range": {
+        "startLine": 668,
+        "startChar": 0,
+        "endLine": 671,
+        "endChar": 5
+      },
+      "revId": "f65ecec230c5cc3889fae91ab8c6f032691d15fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
