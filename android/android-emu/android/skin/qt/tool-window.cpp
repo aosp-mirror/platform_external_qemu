@@ -645,7 +645,6 @@ void ToolWindow::on_back_button_released() {
 // 'false' to say we should NOT exit now.
 bool ToolWindow::askWhetherToSaveSnapshot() {
     mAskedWhetherToSaveSnapshot = true;
-    mExtendedWindow.get();
     // Check the UI setting
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
