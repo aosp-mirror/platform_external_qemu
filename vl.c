@@ -5645,5 +5645,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     monitor_cleanup();
     qemu_chr_cleanup();
 
+    if (qemu_mutex_iothread_locked()) {
+        qemu_mutex_unlock_iothread();
+    }
     return 0;
 }
