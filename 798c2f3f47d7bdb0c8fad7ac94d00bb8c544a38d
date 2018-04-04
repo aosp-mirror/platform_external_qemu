@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a184239_3f88ccc3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-04T00:16:23Z",
+      "side": 1,
+      "message": "should this be loadPoster? For the case where we don\u0027t have a poster set on the command line, and we have a previous avd setting for the poster, we should add it to the pending scene updates, right?",
+      "range": {
+        "startLine": 125,
+        "startChar": 12,
+        "endLine": 130,
+        "endChar": 76
+      },
+      "revId": "798c2f3f47d7bdb0c8fad7ac94d00bb8c544a38d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1049c24e_acfebe01",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-04T00:16:23Z",
+      "side": 1,
+      "message": "Could move to .cpp; looks like nothing here actually uses QMap",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 15
+      },
+      "revId": "798c2f3f47d7bdb0c8fad7ac94d00bb8c544a38d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
