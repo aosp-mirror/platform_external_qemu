@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6d0a264f_050fb410",
+        "filename": "android/android-emu/android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-04T16:51:30Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4ff3f10b_5f62fe9a",
+      "range": {
+        "startLine": 34,
+        "startChar": 19,
+        "endLine": 34,
+        "endChar": 29
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8978e3b_c2e5251f",
         "filename": "android/android-emu/android/base/memory/ScopedPtr.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-03T21:24:22Z",
       "side": 1,
       "message": "nit: you could even try adding std::move(f) here\noverall it should be exactly the same as the previous one, but if the default ctor is never used it won\u0027t be instantiated at all, so that\u0027s why no compilation error",
+      "range": {
+        "startLine": 35,
+        "startChar": 37,
+        "endLine": 35,
+        "endChar": 38
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0956e964_584d0c9d",
+        "filename": "android/android-emu/android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-04T16:51:30Z",
+      "side": 1,
+      "message": "Ack.\n\nI\u0027m a bit puzzled that GCC accepts f \u003d Func(), whereas clang 7 does not. (In the case where we never instantiate FuncDelete with a default constructor).",
+      "parentUuid": "f8978e3b_c2e5251f",
       "range": {
         "startLine": 35,
         "startChar": 37,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "47e74df3_74da882f",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-04T16:51:30Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "906f0924_a7c8ac44",
+      "range": {
+        "startLine": 246,
+        "startChar": 4,
+        "endLine": 246,
+        "endChar": 11
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a164c4e_29fa83a8",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2018-04-03T21:29:10Z",
       "side": 1,
       "message": "nit: please use \" \u003d default\" syntax as it\u0027s more clear",
+      "range": {
+        "startLine": 65,
+        "startChar": 25,
+        "endLine": 65,
+        "endChar": 30
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "13dcfc36_58c88919",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-04T16:51:30Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4a164c4e_29fa83a8",
       "range": {
         "startLine": 65,
         "startChar": 25,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "5288bd51_507b38a0",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-04T16:51:30Z",
+      "side": 1,
+      "message": "We basically need a sysroot with some additional packages. Here\u0027s the list of package dependencies for Xenial:\n\n\n# The X11 headers and binaries (for the emulator)\nadd_ubuntu_package \\\n    libx11-6 \\\n    libx11-dev \\\n    libxau6 \\\n    libxcb1 \\\n    libxcb1-dev \\\n    libxcb-dri3-0 \\\n    libxdmcp6 \\\n    libxext-dev \\\n    libxfixes-dev \\\n    libxi-dev \\\n    x11proto-core-dev \\\n    x11proto-fixes-dev \\\n    x11proto-xext-dev \\\n    x11proto-input-dev \\\n    x11proto-kb-dev\n\n# The OpenGL-related headers and libraries (for GLES emulation)\nadd_ubuntu_package \\\n    libdrm2 \\\n    libexpat1 \\\n    libgl1-mesa-dev \\\n    libgl1-mesa-glx \\\n    libglapi-mesa \\\n    libx11-xcb1 \\\n    libxcb-dri2-0 \\\n    libxcb-glx0 \\\n    libxcb-present0 \\\n    libxcb-sync1 \\\n    libxdamage1 \\\n    libxext6 \\\n    libxfixes3 \\\n    libxshmfence1 \\\n    libxxf86vm1 \\\n    mesa-common-dev \\\n\n\n# Audio libraries (required by the emulator)\nadd_ubuntu_package \\\n    libasound2 \\\n    libasound2-dev \\\n    libesd0-dev \\\n    libaudiofile-dev \\\n    libpulse0 \\\n    libjson-c2 \\\n    libdbus-1-3 \\\n    libpulse-dev \\\n    libsystemd0 \\\n    libwrap0 \\\n    libsndfile1 \\\n    libasyncns0 \\\n    libselinux1 \\\n    libflac8 \\\n    libogg0 \\\n    libvorbis0a \\\n    libvorbisenc2 \\\n\n\n# ZLib and others.\nadd_ubuntu_package \\\n    zlib1g \\\n    zlib1g-dev \\\n    libncurses5 \\\n    libncurses5-dev \\\n    libtinfo5 \\\n    liblzma5 \\\n    libgcrypt20 \\\n    libtinfo-dev \\\n    libpcre3 \\\n    libgpg-error0 \\",
+      "parentUuid": "d56a1550_54c26bb9",
+      "range": {
+        "startLine": 86,
+        "startChar": 63,
+        "endLine": 86,
+        "endChar": 72
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ad07a4a6_c312f1d0",
         "filename": "android/third_party/libkeymaster3/include/keymaster/android_keymaster_messages.h",
         "patchSetId": 1
@@ -137,6 +257,30 @@
       "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed891a08_84d9cf01",
+        "filename": "android/third_party/libkeymaster3/include/keymaster/android_keymaster_messages.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-04T16:51:30Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ad07a4a6_c312f1d0",
+      "range": {
+        "startLine": 387,
+        "startChar": 4,
+        "endLine": 387,
+        "endChar": 11
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
