@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "93babc7f_dc035a14",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-04T14:54:37Z",
+      "side": 1,
+      "message": "ah, good catch. The purpose of that function is currently solely for emulating GL_ALPHA/GL_LUMINANCE as GL_RED and GL_LUMINANCE_ALPHA as GL_RG (since those aren\u0027t supported on desktop core profile). In these two cases, the mapping wouldn\u0027t change the buffer size.\n\nYes, a comment in getCoreProfileEmulatedFormat is good. I can add it later if you\u0027re not up for putting it there in this CL.\n\nYahan: Would it be safe to move neededBufferFormat calculation before the allocation?",
+      "parentUuid": "99a572c5_6d74c38b",
+      "range": {
+        "startLine": 554,
+        "startChar": 43,
+        "endLine": 554,
+        "endChar": 51
+      },
+      "revId": "438b32f805d30eb57a3d121064f7fa37cd021beb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "14e15a0e_4245c12c",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 1
