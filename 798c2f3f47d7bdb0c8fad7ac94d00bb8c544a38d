@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ec92aa6c_0670c383",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-04T01:22:46Z",
+      "side": 1,
+      "message": "This is the place where setInitialPoster should be called.  I see the confusion, though, I\u0027ll update the comment to indicate that this is being called early during initialization and that this is the code that loads the initial settings.  I\u0027ll also rename this function to loadInitialSettings.",
+      "parentUuid": "7a184239_3f88ccc3",
+      "range": {
+        "startLine": 125,
+        "startChar": 12,
+        "endLine": 130,
+        "endChar": 76
+      },
+      "revId": "798c2f3f47d7bdb0c8fad7ac94d00bb8c544a38d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1049c24e_acfebe01",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-04T00:16:23Z",
       "side": 1,
       "message": "Could move to .cpp; looks like nothing here actually uses QMap",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 15
+      },
+      "revId": "798c2f3f47d7bdb0c8fad7ac94d00bb8c544a38d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b127cf07_f672785f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-04T01:22:46Z",
+      "side": 1,
+      "message": "Oops, yeah this shouldn\u0027t be here-- an earlier iteration had a QMap member variable to store state, but that has since been removed.",
+      "parentUuid": "1049c24e_acfebe01",
       "range": {
         "startLine": 15,
         "startChar": 0,
