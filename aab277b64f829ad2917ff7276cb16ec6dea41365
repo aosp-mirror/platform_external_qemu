@@ -16,6 +16,24 @@
       "revId": "aab277b64f829ad2917ff7276cb16ec6dea41365",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6ad9f90_34243d0f",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-04T21:32:05Z",
+      "side": 1,
+      "message": "solve compile Werror on mingw",
+      "parentUuid": "a2bf5501_f2c52f7c",
+      "revId": "aab277b64f829ad2917ff7276cb16ec6dea41365",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
