@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "6cb17e50_29b73dae",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-04T21:09:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ec92aa6c_0670c383",
+      "range": {
+        "startLine": 125,
+        "startChar": 12,
+        "endLine": 130,
+        "endChar": 76
+      },
+      "revId": "798c2f3f47d7bdb0c8fad7ac94d00bb8c544a38d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1049c24e_acfebe01",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.h",
         "patchSetId": 1
@@ -93,6 +117,30 @@
       "revId": "798c2f3f47d7bdb0c8fad7ac94d00bb8c544a38d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "022a1d1f_8c8eb797",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-04T21:09:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b127cf07_f672785f",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 15
+      },
+      "revId": "798c2f3f47d7bdb0c8fad7ac94d00bb8c544a38d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
