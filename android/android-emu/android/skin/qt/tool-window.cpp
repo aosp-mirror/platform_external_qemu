@@ -592,9 +592,40 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 }
 
 // static
-void ToolWindow::setToolEmuAgentEarly(const UiEmuAgent* agentPtr) {
+void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
     ExtendedWindow::setAgentEarly(agentPtr);
+
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (!avdPath) {
+        // Can't find the setting!
+        return;
+    }
+
+    QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+    QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+    SaveSnapshotOnExit saveOnExitChoice =
+        static_cast<SaveSnapshotOnExit>(
+            avdSpecificSettings.value(
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+
+    // Synchronize avdParams right here; avoid tight coupling with whether the settings page is initialized.
+    switch (saveOnExitChoice) {
+        case SaveSnapshotOnExit::Always:
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        case SaveSnapshotOnExit::Ask:
+            // If we can't ask, we'll treat ASK the same as ALWAYS.
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        case SaveSnapshotOnExit::Never:
+            android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        default:
+            break;
+    }
 }
 
 // static
@@ -645,7 +676,6 @@ void ToolWindow::on_back_button_released() {
 // 'false' to say we should NOT exit now.
 bool ToolWindow::askWhetherToSaveSnapshot() {
     mAskedWhetherToSaveSnapshot = true;
-    mExtendedWindow.get();
     // Check the UI setting
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
