@@ -2686,7 +2686,13 @@ static const struct {
     { "H", NULL, handleAnswer },  /* user is busy */
     { "!+VTS=", NULL, handleSetDialTone },
     { "+CIMI", OPERATOR_HOME_MCCMNC "000000000", NULL },   /* request internation subscriber identification number */
-    { "+CGSN", "000000000000000", NULL },   /* request model version */
+
+    /* request model version:
+     *          35824005        - Nexus 5 (https://en.wikipedia.org/wiki/Type_Allocation_Code)
+     *                  111111  - serial (random)
+     *                        0 - check digit (http://www.imei.info/calc)
+     */
+    { "+CGSN", "358240051111110", NULL },
     { "+CUSD=2",NULL, NULL }, /* Cancel USSD */
     { "+COPS=0", NULL, handleOperatorSelection }, /* set network selection to automatic */
     { "!+CMGD=", NULL, handleDeleteSMSonSIM }, /* delete SMS on SIM */
