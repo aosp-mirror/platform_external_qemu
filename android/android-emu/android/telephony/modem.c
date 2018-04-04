@@ -2686,7 +2686,7 @@ static const struct {
     { "H", NULL, handleAnswer },  /* user is busy */
     { "!+VTS=", NULL, handleSetDialTone },
     { "+CIMI", OPERATOR_HOME_MCCMNC "000000000", NULL },   /* request internation subscriber identification number */
-    { "+CGSN", "000000000000000", NULL },   /* request model version */
+    { "+CGSN", "874698124691845", NULL },   /* request model version */
     { "+CUSD=2",NULL, NULL }, /* Cancel USSD */
     { "+COPS=0", NULL, handleOperatorSelection }, /* set network selection to automatic */
     { "!+CMGD=", NULL, handleDeleteSMSonSIM }, /* delete SMS on SIM */
