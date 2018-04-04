@@ -53,7 +53,7 @@ BUILD_OPT_CFLAGS :=
 BUILD_OPT_LDFLAGS :=
 
 ifeq ($(BUILD_DEBUG),true)
-    BUILD_OPT_CFLAGS += -O0
+    BUILD_OPT_CFLAGS += -O0 -DANDROID_DEBUG
 else
     ifneq (windows,$(BUILD_TARGET_OS))
         BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
