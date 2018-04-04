@@ -35,6 +35,17 @@ public:
     //          is assumed to point to a valid file.
     void setPath(QString path);
 
+    // Set the starting directory for the file dialog.  Defaults to the current
+    // working directory, ".".  Does not have to match the path's base
+    // directory.
+    //
+    // |startingDirectory| - The starting directory to show when the file dialog
+    //                       loads.
+    void setStartingDirectory(QString startingDirectory);
+
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
+
 signals:
     // Emitted when the path stored by the widget changes.
     void pathChanged(QString path);
@@ -48,9 +59,20 @@ private slots:
 
 private:
     // Returns true if the path was changed.
-    bool setPathInternal(QString path);
+    bool setPathInternal(const QString& path);
+
+    // Returns the path of the file from a QDropEvent or QDragEnterEvent's
+    // mimeData if the mime data is supported.
+    //
+    // To be supported, the drop must be for a single file on the local system
+    // with a PNG or JPEG extension.
+    //
+    // |mimeData| - QMimeData object from QDrag*Event::mimeData() or
+    //              QDropEvent::mimeData().
+    QString getPathIfValidDrop(const QMimeData* mimeData) const;
 
     std::unique_ptr<Ui::ImageWell> mUi;
 
+    QString mStartingDirectory;
     QString mPath;
 };

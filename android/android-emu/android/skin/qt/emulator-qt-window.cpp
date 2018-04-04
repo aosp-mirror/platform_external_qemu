@@ -845,7 +845,6 @@ void EmulatorQtWindow::queueQuitEvent() {
 void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent* event) {
     // Accept all drag enter events with any URL, then filter more in drop
     // events
-    // TODO: check this with hasFormats() using MIME type for .apk?
     if (event->mimeData() && event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
     }
