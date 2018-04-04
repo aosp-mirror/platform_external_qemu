@@ -333,6 +333,10 @@ void ToolWindow::show() {
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
+    // Many UI commands require extended window. Construct it here.
+    if (!mIsExiting) {
+        mExtendedWindow.get();
+    }
     switch (cmd) {
         case QtUICommand::SHOW_PANE_LOCATION:
             if (down) {
