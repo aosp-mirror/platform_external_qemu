@@ -328,16 +328,16 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
         reportFailedLoad(pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                          *failureReason);
     } else {
-        mWindow.showMessage(
-                StringFormat("Cold boot: %s",
-                             failureReasonToString(
-                                 *failureReason,
-                                 SNAPSHOT_LOAD))
-                        .c_str(),
-                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+        if (*failureReason != FailureReason::NoSnapshotInImage) {
+            mWindow.showMessage(
+                    StringFormat("Cold boot: %s",
+                                 failureReasonToString(*failureReason,
+                                                       SNAPSHOT_LOAD))
+                            .c_str(),
+                    WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+        }
         reportFailedLoad(
-                failureReason < FailureReason::
-                                        UnrecoverableErrorLimit
+                failureReason < FailureReason::UnrecoverableErrorLimit
                         ? pb::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_FAILED
                         : pb::EmulatorQuickbootLoad::
