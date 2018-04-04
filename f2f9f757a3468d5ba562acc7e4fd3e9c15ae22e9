@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "5b92bf05_1d8fb8b6",
+        "filename": "android/android-emu/android/base/memory/ScopedPtr.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-04T17:01:44Z",
+      "side": 1,
+      "message": "One of those got a bug - not sure which one. lambdas don\u0027t have default constructor and having \"Func()\" forces clang 7 to try instantiating it, even if it\u0027s not used. GCC doesn\u0027t care as if we pass the real ctor parameter default one isn\u0027t ever needed.",
+      "parentUuid": "0956e964_584d0c9d",
+      "range": {
+        "startLine": 35,
+        "startChar": 37,
+        "endLine": 35,
+        "endChar": 38
+      },
+      "revId": "f2f9f757a3468d5ba562acc7e4fd3e9c15ae22e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "906f0924_a7c8ac44",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 1
