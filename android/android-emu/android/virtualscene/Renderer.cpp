@@ -230,6 +230,8 @@ struct TextureData {
     size_t mRefCount = 0;
     GLuint mTextureId = 0;
     std::string mFilename;
+    uint32_t mWidth = 0;
+    uint32_t mHeight = 0;
 };
 
 struct SceneObjectData {
@@ -256,6 +258,9 @@ public:
 
     // Renderer public API.
     float getAspectRatio() override;
+    void getTextureInfo(Texture texture,
+                        uint32_t* outWidth,
+                        uint32_t* outHeight) override;
 
     void releaseObjectResources(const SceneObject* sceneObject) override;
 
@@ -308,9 +313,13 @@ private:
     // |filename| - If this texture was loaded from a file, the filename it was
     //              loaded from so that it can be cached, otherwise null.
     // |textureId| - OpenGL texture id.
+    // |width| - Texture width, in pixels.
+    // |height| - Texture height, in pixels.
     Texture createTextureInternal(const SceneObject* parent,
                                   const char* filename,
-                                  GLuint textureId);
+                                  GLuint textureId,
+                                  uint32_t width,
+                                  uint32_t height);
 
     // Compile a shader from source.
     // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
@@ -453,6 +462,23 @@ RendererImpl::~RendererImpl() {
 
 float RendererImpl::getAspectRatio() {
     return static_cast<float>(mRenderWidth) / mRenderHeight;
+}
+
+void RendererImpl::getTextureInfo(Texture texture,
+                                  uint32_t* outWidth,
+                                  uint32_t* outHeight) {
+    *outWidth = 0;
+    *outHeight = 0;
+
+    auto textureIt = mTextures.find(texture.id);
+
+    if (textureIt == mTextures.end()) {
+        E("%s: Could not find texture id %d", __FUNCTION__, texture.id);
+        return;
+    }
+
+    *outWidth = textureIt->second.mWidth;
+    *outHeight = textureIt->second.mHeight;
 }
 
 void RendererImpl::releaseObjectResources(const SceneObject* sceneObject) {
@@ -694,7 +720,8 @@ Texture RendererImpl::loadTexture(const SceneObject* parent,
     }
 #endif
 
-    return createTextureInternal(parent, path.c_str(), textureId);
+    return createTextureInternal(parent, path.c_str(), textureId, width,
+                                 height);
 }
 
 void RendererImpl::render(const std::vector<RenderableObject>& renderables,
@@ -882,12 +909,14 @@ Texture RendererImpl::createEmptyTexture(
     }
 #endif
 
-    return createTextureInternal(parent, nullptr, textureId);
+    return createTextureInternal(parent, nullptr, textureId, width, height);
 }
 
 Texture RendererImpl::createTextureInternal(const SceneObject* parent,
                                             const char* filename,
-                                            GLuint textureId) {
+                                            GLuint textureId,
+                                            uint32_t width,
+                                            uint32_t height) {
     const int id = mNextResourceId++;
 
     TextureData texture;
@@ -897,6 +926,8 @@ Texture RendererImpl::createTextureInternal(const SceneObject* parent,
         texture.mFilename = filename;
         mTextureCache[filename] = id;
     }
+    texture.mWidth = width;
+    texture.mHeight = height;
 
     mTextures[id] = texture;
 
