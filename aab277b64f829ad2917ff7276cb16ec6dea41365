@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2bf5501_f2c52f7c",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2018-04-04T21:27:27Z",
+      "side": 1,
+      "message": "Isn\u0027t this a no-op?  This doesn\u0027t actually call the function.  Any idea why this is even here?",
+      "revId": "aab277b64f829ad2917ff7276cb16ec6dea41365",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
