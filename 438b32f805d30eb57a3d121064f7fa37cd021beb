@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "1c0fa910_c319b0bd",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-04-04T17:41:37Z",
+      "side": 1,
+      "message": "The format we use here should be independent of underlying GL library for migration purpose. In the case where the formats do not like each other, we should have a format converter. So I would prefer to keep the m_format as it is now.\n\nIt is a good idea to have more comments to reduce confusion. Will do.",
+      "parentUuid": "93babc7f_dc035a14",
+      "range": {
+        "startLine": 554,
+        "startChar": 43,
+        "endLine": 554,
+        "endChar": 51
+      },
+      "revId": "438b32f805d30eb57a3d121064f7fa37cd021beb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "14e15a0e_4245c12c",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "writtenOn": "2018-04-04T14:44:05Z",
       "side": 1,
       "message": "There\u0027s no guarantee that glReadPixels() supports the same format/type as the ones used to specify the texture image. For example RGB5_A1 can be uploaded using UNSIGNED_BYTE, UNSIGNED_SHORT_5_5_5_1, or UNSIGNED_INT2_10_10_10_REV, but glReadPixels() will only support UNSIGNED_BYTE (guaranteed) and one implementation-chosen (read: driver-chosen) format/type which can be queried using GL_IMPLEMENTATION_COLOR_READ_FORMAT/TYPE.\n\nFortunately the reverse is true; the implementation-chosen format/type can always be used to upload the data back to the texture image. Also, the spec highly recommends that it\u0027s a format/type that is efficient to load and store (which is not guaranteed for glGetTexImage). Hence it\u0027s highly suited for the purpose of storing and restoring texture images, as well as renderbuffer contents.",
+      "range": {
+        "startLine": 576,
+        "startChar": 56,
+        "endLine": 576,
+        "endChar": 70
+      },
+      "revId": "438b32f805d30eb57a3d121064f7fa37cd021beb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf4bfaee_2b0d21b0",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-04-04T17:41:37Z",
+      "side": 1,
+      "message": "Thanks Nicolas, I will change its behavior.",
+      "parentUuid": "14e15a0e_4245c12c",
       "range": {
         "startLine": 576,
         "startChar": 56,
