@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "66fffc2e_c1a099bf",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2689,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-05T17:47:09Z",
+      "side": 1,
+      "message": "Nexus 5",
+      "range": {
+        "startLine": 2689,
+        "startChar": 16,
+        "endLine": 2689,
+        "endChar": 31
+      },
+      "revId": "5497716ec07df38d029738992012d0638b391aa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
