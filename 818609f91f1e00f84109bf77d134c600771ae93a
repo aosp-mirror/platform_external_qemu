@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a333a56_28732a9b",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2689,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-05T17:33:14Z",
+      "side": 1,
+      "message": "is there any standard for this value, or we\u0027re free to put anything in?",
+      "range": {
+        "startLine": 2689,
+        "startChar": 16,
+        "endLine": 2689,
+        "endChar": 31
+      },
+      "revId": "818609f91f1e00f84109bf77d134c600771ae93a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
