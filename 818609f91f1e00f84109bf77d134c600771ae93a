@@ -22,6 +22,30 @@
       "revId": "818609f91f1e00f84109bf77d134c600771ae93a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af47a73_ec87d246",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2689,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-05T17:46:41Z",
+      "side": 1,
+      "message": "There is a structure there, but the test checks if IMEI is not all zeroes.\n\nhttps://en.wikipedia.org/wiki/Type_Allocation_Code\nAccording to http://www.imei.info/calc the checksum is correct.",
+      "parentUuid": "8a333a56_28732a9b",
+      "range": {
+        "startLine": 2689,
+        "startChar": 16,
+        "endLine": 2689,
+        "endChar": 31
+      },
+      "revId": "818609f91f1e00f84109bf77d134c600771ae93a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
