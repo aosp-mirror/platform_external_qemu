@@ -70,6 +70,24 @@
       "revId": "aab277b64f829ad2917ff7276cb16ec6dea41365",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fca23bfa_790c92fd",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-05T15:29:37Z",
+      "side": 1,
+      "message": "you could have used #ifndef NDEBUG, which is already defined for optimized builds",
+      "parentUuid": "2ccb8bfb_ad298365",
+      "revId": "aab277b64f829ad2917ff7276cb16ec6dea41365",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
