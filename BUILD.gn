@@ -1,0 +1,5 @@
+group("all") {
+  deps = [
+    "//android:all",
+  ]
+}

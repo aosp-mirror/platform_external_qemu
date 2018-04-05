@@ -1,0 +1,9 @@
+set_defaults("executable") {
+}
+set_defaults("static_library") {
+}
+set_defaults("shared_library") {
+}
+set_defaults("source_set") {
+}
+set_default_toolchain("//android:clang")
