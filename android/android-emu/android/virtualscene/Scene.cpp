@@ -86,7 +86,7 @@ bool Scene::initialize() {
             // Try to load posters, and ignore failures. If a poster fails to
             // load it will print an error message internally.
             (void)loadPoster(poster.first.c_str(),
-                             poster.second.defaultFilename.c_str());
+                             poster.second.defaultFilename.c_str(), 1.0f);
         }
     }
 
@@ -122,49 +122,62 @@ std::vector<RenderableObject> Scene::getRenderableObjects() const {
 
     const glm::mat4 viewProjection = getCamera().getViewProjection();
     for (auto& sceneObject : mSceneObjects) {
-        getRenderableObjectsFromSceneObject(viewProjection, sceneObject,
+        getRenderableObjectsFromSceneObject(viewProjection, sceneObject.get(),
                                             renderables);
     }
 
     for (auto& poster : mPosters) {
         if (poster.second.sceneObject) {
-            getRenderableObjectsFromSceneObject(
-                    viewProjection, poster.second.sceneObject, renderables);
+            getRenderableObjectsFromSceneObject(viewProjection,
+                                                poster.second.sceneObject.get(),
+                                                renderables);
         }
     }
 
     return std::move(renderables);
 }
 
-bool Scene::loadPoster(const char* posterName, const char* filename) {
+bool Scene::loadPoster(const char* posterName,
+                       const char* filename,
+                       float size) {
     auto it = mPosters.find(posterName);
     if (it == mPosters.end()) {
         W("%s: Could not find poster with name '%s'", __FUNCTION__, posterName);
         return false;
     }
 
-    std::unique_ptr<SceneObject> newSceneObject =
-            SceneObject::createQuad(mRenderer, filename);
+    Poster& poster = it->second;
+
+    std::unique_ptr<PosterSceneObject> newSceneObject =
+            PosterSceneObject::create(mRenderer, filename, poster.position,
+                                      poster.rotation, poster.size);
     if (!newSceneObject) {
         W("%s: Failed to create poster scene object.", __FUNCTION__);
         return false;
     }
-
-    Poster& poster = it->second;
 
     if (poster.sceneObject) {
         mRenderer.releaseObjectResources(poster.sceneObject.get());
         poster.sceneObject.reset();
     }
 
-    newSceneObject->setTransform(
-            glm::translate(glm::mat4(), poster.position) *
-            glm::mat4(poster.rotation) *
-            glm::scale(glm::mat4(),
-                       glm::vec3(poster.size.x, poster.size.y, 1.0f)));
+    newSceneObject->setScale(size);
 
     poster.sceneObject = std::move(newSceneObject);
     return true;
+}
+
+void Scene::updatePosterSize(const char* posterName, float size) {
+    auto it = mPosters.find(posterName);
+    if (it == mPosters.end()) {
+        W("%s: Could not find poster with name '%s'", __FUNCTION__, posterName);
+        return;
+    }
+
+    Poster& poster = it->second;
+    if (poster.sceneObject) {
+        poster.sceneObject->setScale(size);
+    }
 }
 
 bool Scene::loadPostersFile(const char* filename) {
@@ -274,7 +287,7 @@ bool Scene::loadPostersFile(const char* filename) {
 
 void Scene::getRenderableObjectsFromSceneObject(
         const glm::mat4& viewProjection,
-        const std::unique_ptr<SceneObject>& sceneObject,
+        const SceneObject* sceneObject,
         std::vector<RenderableObject>& outRenderableObjects) {
     const glm::mat4 mvp = viewProjection * sceneObject->getTransform();
 

@@ -40,8 +40,7 @@ namespace android {
 namespace virtualscene {
 
 LazyInstance<Lock> VirtualSceneManager::mLock = LAZY_INSTANCE_INIT;
-Renderer* VirtualSceneManager::mRenderer = nullptr;
-Scene* VirtualSceneManager::mScene = nullptr;
+VirtualSceneManagerImpl* VirtualSceneManager::mImpl = nullptr;
 
 // Stores settings for the virtual scene.
 //
@@ -49,6 +48,12 @@ Scene* VirtualSceneManager::mScene = nullptr;
 // VirtualSceneManager::mLock.
 class Settings {
 public:
+    // Defines the setting for a single poster.
+    struct PosterSetting {
+        std::string mFilename;
+        float mSize = 1.0f;
+    };
+
     Settings() = default;
 
     void parseCmdlineParameter(StringView param) {
@@ -80,7 +85,7 @@ public:
         D("%s: Found poster %s at %s", __FUNCTION__, name.c_str(),
           absFilename.c_str());
 
-        mPosters[name] = absFilename;
+        mPosters[name].mFilename = absFilename;
     }
 
     // Set the poster if it is not already defined.
@@ -92,41 +97,122 @@ public:
 
     // Set the poster and queue a scene update for the next frame.
     void setPoster(const char* posterName, const char* filename) {
-        mPosters[posterName] = filename;
-        mPendingUpdates.push_back(posterName);
+        mPosters[posterName].mFilename = filename;
     }
 
-    // Called when the scene is created, load the current poster configuration
-    // in the scene.
-    void setupScene(Scene* scene) {
-        for (const auto& it : mPosters) {
-            scene->loadPoster(it.first.c_str(), it.second.c_str());
-        }
-
-        mPendingUpdates.clear();
+    // Set the poster size.
+    void setPosterSize(const char* posterName, float size) {
+        mPosters[posterName].mSize = size;
     }
 
-    // Called each frame, apply any pending updates to the scene.  This must be
-    // done on the OpenGL thread.
-    void updateScene(Scene* scene) {
-        while (!mPendingUpdates.empty()) {
-            const std::string& posterName = mPendingUpdates.front();
-            scene->loadPoster(posterName.c_str(), mPosters[posterName].c_str());
-
-            mPendingUpdates.pop_front();
-        }
-    }
-
-    const std::unordered_map<std::string, std::string>& getPosters() const {
+    const std::unordered_map<std::string, PosterSetting>& getPosters() const {
         return mPosters;
     }
 
 private:
-    std::unordered_map<std::string, std::string> mPosters;
-    std::deque<std::string> mPendingUpdates;
+    std::unordered_map<std::string, PosterSetting> mPosters;
 };
 
 static LazyInstance<Settings> sSettings = LAZY_INSTANCE_INIT;
+
+// All functions in this class must be called under the
+// VirtualSceneManager::mLock lock.
+class VirtualSceneManagerImpl {
+private:
+    VirtualSceneManagerImpl(std::unique_ptr<Renderer>&& renderer,
+                            std::unique_ptr<Scene>&& scene);
+
+public:
+    ~VirtualSceneManagerImpl();
+
+    static std::unique_ptr<VirtualSceneManagerImpl>
+    create(const GLESv2Dispatch* gles2, int width, int height);
+
+    int64_t render();
+
+    // Queue an update to a poster filename that should be executed on the
+    // render thread.
+    void queuePosterUpdate(const char* posterName);
+
+    // Update the poster size.
+    void updatePosterSize(const char* posterName, float size);
+
+private:
+    std::unique_ptr<Renderer> mRenderer;
+    std::unique_ptr<Scene> mScene;
+
+    std::deque<std::string> mPosterFilenameUpdates;
+};
+
+VirtualSceneManagerImpl::VirtualSceneManagerImpl(
+        std::unique_ptr<Renderer>&& renderer,
+        std::unique_ptr<Scene>&& scene)
+    : mRenderer(std::move(renderer)), mScene(std::move(scene)) {}
+
+VirtualSceneManagerImpl::~VirtualSceneManagerImpl() {
+    skin_winsys_show_virtual_scene_controls(false);
+    mScene->releaseSceneObjects();
+}
+
+std::unique_ptr<VirtualSceneManagerImpl> VirtualSceneManagerImpl::create(
+        const GLESv2Dispatch* gles2,
+        int width,
+        int height) {
+    std::unique_ptr<Renderer> renderer = Renderer::create(gles2, width, height);
+    if (!renderer) {
+        E("VirtualSceneManager renderer failed to construct");
+        return nullptr;
+    }
+
+    std::unique_ptr<Scene> scene = Scene::create(*renderer.get());
+    if (!scene) {
+        E("VirtualSceneManager scene failed to load");
+        return nullptr;
+    }
+
+    // Load the poster configuration in the scene.
+    for (const auto& it : sSettings->getPosters()) {
+        scene->loadPoster(it.first.c_str(), it.second.mFilename.c_str(),
+                          it.second.mSize);
+    }
+
+    skin_winsys_show_virtual_scene_controls(true);
+
+    return std::unique_ptr<VirtualSceneManagerImpl>(
+            new VirtualSceneManagerImpl(std::move(renderer), std::move(scene)));
+}
+
+int64_t VirtualSceneManagerImpl::render() {
+    // Apply any pending updates to the scene.  This must be done on the OpenGL
+    // thread.
+    const auto& posters = sSettings->getPosters();
+    while (!mPosterFilenameUpdates.empty()) {
+        const std::string& posterName = mPosterFilenameUpdates.front();
+        const auto& setting = posters.at(posterName);
+        mScene->loadPoster(posterName.c_str(), setting.mFilename.c_str(),
+                           setting.mSize);
+
+        mPosterFilenameUpdates.pop_front();
+    }
+
+    const int64_t timestamp = mScene->update();
+    mRenderer->render(mScene->getRenderableObjects(),
+                      timestamp / 1000000000.0f);
+    return timestamp;
+}
+
+void VirtualSceneManagerImpl::queuePosterUpdate(const char* posterName) {
+    mPosterFilenameUpdates.push_back(posterName);
+}
+
+void VirtualSceneManagerImpl::updatePosterSize(const char* posterName,
+                                               float size) {
+    mScene->updatePosterSize(posterName, size);
+}
+
+/*******************************************************************************
+ *                     VirtualSceneManager API.
+ ******************************************************************************/
 
 void VirtualSceneManager::parseCmdline() {
     AutoLock lock(mLock.get());
@@ -157,71 +243,48 @@ bool VirtualSceneManager::initialize(const GLESv2Dispatch* gles2,
                                      int width,
                                      int height) {
     AutoLock lock(mLock.get());
-    if (mRenderer || mScene) {
+    if (mImpl) {
         E("VirtualSceneManager already initialized");
         return false;
     }
 
-    std::unique_ptr<Renderer> renderer = Renderer::create(gles2, width, height);
-    if (!renderer) {
-        E("VirtualSceneManager renderer failed to construct");
-        return false;
-    }
-
-    std::unique_ptr<Scene> scene = Scene::create(*renderer.get());
-    if (!scene) {
-        E("VirtualSceneManager scene failed to load");
-        return false;
-    }
-
-    sSettings->setupScene(scene.get());
-
-    skin_winsys_show_virtual_scene_controls(true);
-
-    // Store the raw pointers instead of the unique_ptr wrapper to prevent
-    // unintented side-effects on process shutdown.
-    mRenderer = renderer.release();
-    mScene = scene.release();
-
-    return true;
+    mImpl = VirtualSceneManagerImpl::create(gles2, width, height).release();
+    return mImpl != nullptr;
 }
 
 void VirtualSceneManager::uninitialize() {
     AutoLock lock(mLock.get());
-    if (!mRenderer || !mScene) {
+    if (!mImpl) {
         E("VirtualSceneManager not initialized");
         return;
     }
 
-    skin_winsys_show_virtual_scene_controls(false);
-
-    mScene->releaseSceneObjects();
-    delete mScene;
-    mScene = nullptr;
-
-    delete mRenderer;
-    mRenderer = nullptr;
+    // To make sure it's released the same way it was created, attach to a
+    // unique_ptr and let that release it.
+    std::unique_ptr<VirtualSceneManagerImpl> stateReleaser(mImpl);
+    mImpl = nullptr;
 }
 
 int64_t VirtualSceneManager::render() {
     AutoLock lock(mLock.get());
-    if (!mRenderer || !mScene) {
+    if (!mImpl) {
         E("VirtualSceneManager not initialized");
         return 0L;
     }
 
-    sSettings->updateScene(mScene);
-
-    const int64_t timestamp = mScene->update();
-    mRenderer->render(mScene->getRenderableObjects(),
-            timestamp / 1000000000.0f);
-    return timestamp;
+    return mImpl->render();
 }
 
 void VirtualSceneManager::setInitialPoster(const char* posterName,
                                            const char* filename) {
     AutoLock lock(mLock.get());
     sSettings->setInitialPoster(posterName, filename);
+
+    // If the scene is active, it will update the poster in the next render()
+    // invocation.
+    if (mImpl) {
+        mImpl->queuePosterUpdate(posterName);
+    }
 }
 
 bool VirtualSceneManager::loadPoster(const char* posterName,
@@ -231,6 +294,10 @@ bool VirtualSceneManager::loadPoster(const char* posterName,
 
     // If the scene is active, it will update the poster in the next render()
     // invocation.
+    if (mImpl) {
+        mImpl->queuePosterUpdate(posterName);
+    }
+
     return true;
 }
 
@@ -240,7 +307,19 @@ void VirtualSceneManager::enumeratePosters(void* context,
 
     for (const auto& it : sSettings->getPosters()) {
         callback(context, it.first.c_str(),
-                 it.second.empty() ? nullptr : it.second.c_str());
+                 it.second.mFilename.empty() ? nullptr
+                                             : it.second.mFilename.c_str(),
+                 it.second.mSize);
+    }
+}
+
+void VirtualSceneManager::setPosterSize(const char* posterName, float size) {
+    AutoLock lock(mLock.get());
+    sSettings->setPosterSize(posterName, size);
+
+    // Updating the poster size can be done on any thread, update it now.
+    if (mImpl) {
+        mImpl->updatePosterSize(posterName, size);
     }
 }
 
