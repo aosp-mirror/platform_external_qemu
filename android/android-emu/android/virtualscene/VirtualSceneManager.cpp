@@ -151,7 +151,7 @@ VirtualSceneManagerImpl::VirtualSceneManagerImpl(
 
 VirtualSceneManagerImpl::~VirtualSceneManagerImpl() {
     skin_winsys_show_virtual_scene_controls(false);
-    mScene->releaseSceneObjects();
+    mScene->releaseResources();
 }
 
 std::unique_ptr<VirtualSceneManagerImpl> VirtualSceneManagerImpl::create(
