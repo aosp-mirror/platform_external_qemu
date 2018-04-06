@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f3519177_555e0195",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5727f305_a1f1b7b3",
+      "range": {
+        "startLine": 402,
+        "startChar": 7,
+        "endLine": 409,
+        "endChar": 41
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49541cac_a973ecd1",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "464c9fe1_06e1dbfe",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "49541cac_a973ecd1",
+      "range": {
+        "startLine": 41,
+        "startChar": 24,
+        "endLine": 41,
+        "endChar": 38
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6e3cffc_ca80a9a9",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2018-03-20T17:14:32Z",
       "side": 1,
       "message": "is there any way to share the constants between HAX and memory watch code? I\u0027m pretty sure HAX will eventually change this\nif not, please create a local constant to not duplicate 32 everywhere",
+      "range": {
+        "startLine": 60,
+        "startChar": 21,
+        "endLine": 60,
+        "endChar": 23
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "959f1b81_99b4720f",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f6e3cffc_ca80a9a9",
       "range": {
         "startLine": 60,
         "startChar": 21,
@@ -117,6 +189,54 @@
     },
     {
       "key": {
+        "uuid": "5ab3a779_d9724e97",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36b2d9ff_172cc30f",
+      "range": {
+        "startLine": 96,
+        "startChar": 8,
+        "endLine": 97,
+        "endChar": 10
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90ee2b13_ef55fa36",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "66202122_860cb0ac",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 16
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d089c39a_28439c0b",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
         "patchSetId": 1
@@ -128,6 +248,30 @@
       "writtenOn": "2018-03-20T17:14:32Z",
       "side": 1,
       "message": "is it ok to memcpy() before unprotecting the memory in the guest?",
+      "range": {
+        "startLine": 98,
+        "startChar": 10,
+        "endLine": 105,
+        "endChar": 13
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3826c922_5ae4483b",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "if the hypervisor is keeping its own set of page tables, yeah I think so.",
+      "parentUuid": "d089c39a_28439c0b",
       "range": {
         "startLine": 98,
         "startChar": 10,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "097fc007_c98b5faf",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "Ack; I\u0027m doing another pass on the double free thing and will active this code again later",
+      "parentUuid": "2ba7d6d3_e2923af5",
+      "range": {
+        "startLine": 118,
+        "startChar": 32,
+        "endLine": 118,
+        "endChar": 35
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "fe4177aa_924c8a3b",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
         "patchSetId": 1
@@ -174,6 +342,30 @@
       "writtenOn": "2018-03-20T17:14:32Z",
       "side": 1,
       "message": "please check the return value",
+      "range": {
+        "startLine": 153,
+        "startChar": 0,
+        "endLine": 154,
+        "endChar": 72
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96591c6a_ae43d537",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fe4177aa_924c8a3b",
       "range": {
         "startLine": 153,
         "startChar": 0,
@@ -230,6 +422,30 @@
       "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e4b0191_1315b993",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T21:29:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca53d6d3_c992e5bc",
+      "range": {
+        "startLine": 769,
+        "startChar": 48,
+        "endLine": 769,
+        "endChar": 56
+      },
+      "revId": "c0664bbc25d421a7f670fd9d7646acf8dc3fd030",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
