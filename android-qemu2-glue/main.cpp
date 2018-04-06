@@ -84,6 +84,7 @@ extern "C" {
 #include <stdio.h>
 #include <unistd.h>
 #include <algorithm>
+#include <inttypes.h>
 
 #include "android/version.h"
 #define D(...)                   \
@@ -924,7 +925,8 @@ extern "C" int main(int argc, char** argv) {
             return ret;
     } else if (!hw->hw_arc) {
         // Resize userdata-qemu.img if the size is smaller than what
-        // config.ini says. This can happen as user wants a larger data
+        // config.ini says and also delete userdata-qemu.img.qcow2.
+        // This can happen as user wants a larger data
         // partition without wiping it. b.android.com/196926
         System::FileSize current_data_size;
         if (System::get()->pathFileSize(hw->disk_dataPartition_path,
@@ -938,8 +940,10 @@ extern "C" int main(int argc, char** argv) {
                         "M\n",
                         (int)(current_data_size / (1024 * 1024)),
                         (int)(partition_size / (1024 * 1024)));
-                resizeExt4Partition(android_hw->disk_dataPartition_path,
-                                    android_hw->disk_dataPartition_size);
+                if (!resizeExt4Partition(android_hw->disk_dataPartition_path,
+                                    android_hw->disk_dataPartition_size)) {
+                    path_delete_file(StringFormat("%s.qcow2", android_hw->disk_dataPartition_path).c_str());
+                }
             }
         }
     }
