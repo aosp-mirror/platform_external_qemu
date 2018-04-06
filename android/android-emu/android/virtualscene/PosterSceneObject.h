@@ -38,21 +38,27 @@ public:
     //
     // |renderer| - Renderer context, VirtualPosterSceneObject will be bound to
     //              this context.
-    // |textureFilename| - Filename of the texture to load.
     // |position| - Position of the poster, in world space.
     // |rotation| - Rotation quaternion.
     // |maxSize| - Maximum size of the poster, in meters.  This will be scaled
     //             down along the smaller axis of the texture, if it is not
     //             square.
+    // |placeholderFilename| - Filename of the placeholder texture to load.
     //
     // Returns a PosterSceneObject instance if the object could be loaded or
     // null if there was an error.
     static std::unique_ptr<PosterSceneObject> create(
             Renderer& renderer,
-            const char* textureFilename,
             const glm::vec3& position,
             const glm::quat& rotation,
-            const glm::vec2& maxSize);
+            const glm::vec2& maxSize,
+            const char* placeholderFilename);
+
+    // Update the texture in the PosterSceneObject.
+    //
+    // |filename| - Filename of the texture to load, may be null to reset to
+    //              default.
+    void setTexture(Renderer& renderer, const char* filename);
 
     // Set the scale of the poster, with a value between 0 and 1.  The value
     // will be clamped between the minimum poster size, 20cm and the maximum
@@ -61,6 +67,9 @@ public:
     // |value| - Scale of the poster.
     void setScale(float value);
 
+    // Update the PosterSceneObject for the current frame.
+    void update(Renderer& renderer);
+
 private:
     // Make private, setScale should be used instead.
     using SceneObject::setTransform;
@@ -68,8 +77,13 @@ private:
     void updateTransform();
 
     // Set in create().
-    glm::mat4 mBaseTransform = glm::mat4();
+    glm::mat4 mPositionRotation = glm::mat4();
+    glm::vec2 mMaxSize;
+    Texture mPlaceholderTexture;
+
+    // Updated each frame if the texture has changed.
     float mMinScale = 0.0f;
+    glm::mat4 mPosterSizeTransform = glm::mat4();
 
     // Dynamically adjustable with setScale().
     float mScale = 1.0f;

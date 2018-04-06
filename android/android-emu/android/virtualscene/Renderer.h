@@ -48,6 +48,8 @@ struct Texture {
     int id = -1;
 
     bool isValid() const { return id >= 0; }
+    bool operator==(const Texture& rhs) const { return id == rhs.id; }
+    bool operator!=(const Texture& rhs) const { return id != rhs.id; }
 };
 
 struct Renderable {
@@ -85,11 +87,22 @@ public:
     // Get the aspect ratio of the frame, w/h.
     virtual float getAspectRatio() = 0;
 
+    // Determine if a texture has finished loading, for use with async texture
+    // loads.
+    //
+    // |texture| - Texture object.
+    //
+    // Returns true if the texture has finished loading.  If the texture was not
+    // created with loadTextureAsync, always returns true.
+    virtual bool isTextureLoaded(Texture texture) = 0;
+
     // Get the dimensions of a texture.
     //
     // |texture| - Texture object.
     // |outWidth| - Out parameter that returns texture width, in pixels.
     // |outHeight| - Out parameter that returns texture height, in pixels.
+    //
+    // Returns a width and height for a texture.
     virtual void getTextureInfo(Texture texture,
                                 uint32_t* outWidth,
                                 uint32_t* outHeight) = 0;
@@ -99,6 +112,15 @@ public:
     //
     // |parent| - SceneObject pointer, used as an opaque identifier.
     virtual void releaseObjectResources(const SceneObject* sceneObject) = 0;
+
+    // Release a texture an unbind it from a SceneObject.  A texture may be used
+    // by multiple SceneObjects due to caching, so releasing requires the scene
+    // object to release it from.
+    //
+    // |parent| - SceneObject pointer, used as an opaque identifier.
+    // |texture| - Texture object.
+    virtual void releaseTexture(const SceneObject* sceneObject,
+                                Texture texture) = 0;
 
     // Create a standard material for rendering a test checkerboard texture.
     // This is a standard material and will be automatically cleaned up when the
@@ -168,15 +190,38 @@ public:
                             const GLuint* indices,
                             size_t indicesSize) = 0;
 
-    // Load a PNG image from a file and create a Texture from it.
+    // Load an image from a file and create a Texture from it.
     //
     // |parent| - Parent SceneObject, which controls the lifetime of the
     //            texture.
     // |filename| - Filename to load.
     //
-    // Returns a Texture instance or an invalid value if there was an error.
+    // Returns a Texture. If there was an error, the Texture will be invalid,
+    // which can be queried with Texture::isValid().
+    //
+    // NOTE: If the same texture is loaded with loadTextureAsync and has not
+    // finished loading, the returned texture may contain a placeholder texture
+    // until loading has completed.  To avoid this, do not mix-and-match
+    // loadTexture and loadTextureAsync.
     virtual Texture loadTexture(const SceneObject* parent,
                                 const char* filename) = 0;
+
+    // Load an image from a file and create a Texture from it.
+    //
+    // The Texture will be immediately created, but will initially contain a
+    // transparent placeholder texture.  The actual texture will automatically
+    // load in the background.
+    //
+    // To check if a texture has finished loading, use isTextureLoaded().
+    //
+    // |parent| - Parent SceneObject, which controls the lifetime of the
+    //            texture.
+    // |filename| - Filename to load.
+    //
+    // Returns a Texture. If there was an error, the Texture will be invalid,
+    // which can be queried with Texture::isValid().
+    virtual Texture loadTextureAsync(const SceneObject* parent,
+                                     const char* filename) = 0;
 
     // Render a frame.
     virtual void render(const std::vector<RenderableObject>& renderables,

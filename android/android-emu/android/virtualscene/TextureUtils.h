@@ -23,6 +23,7 @@
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/Compiler.h"
+#include "android/base/Optional.h"
 #include "android/utils/compiler.h"
 
 #include <vector>
@@ -39,49 +40,51 @@ public:
         RGBA32,  // Matches GL_RGBA.
     };
 
+    struct Result {
+        // Pixel data.
+        std::vector<uint8_t> mBuffer;
+        // Width, in pixels.
+        uint32_t mWidth = 0;
+        // Height, in pixels.
+        uint32_t mHeight = 0;
+        // Pixel format.
+        Format mFormat = Format::RGB24;
+    };
+
+    // Create an empty texture with a given size.
+    static Result createEmpty(uint32_t width, uint32_t height);
+
+    // Create a placeholder texture, which is 1x1 and transparent, to be used
+    // for asynchronous texture loading.
+    static Result createPlaceholder();
+
     // Loads an image from disk, converting to either RGB or RGBA if necessary.
     // The format loaded is determined by the file's extension.
     //
     // The image is oriented bottom-up to match glTexImage2D's data layout.
     //
     // |filename| - Filename to load.
-    // |buffer| - Output buffer, existing data is replaced.
-    // |outWidth| - Output width, in pixels.
-    // |outHeight| - Output height, in pixels.
-    // |outFormat| - Output format.
-    static bool load(const char* filename,
-                     std::vector<uint8_t>& buffer,
-                     uint32_t* outWidth,
-                     uint32_t* outHeight,
-                     Format* outFormat);
+    //
+    // If the load was successful, returns a Result.
+    static android::base::Optional<Result> load(const char* filename);
 
     // Loads a PNG from disk, converting to either RGB or RGBA if necessary.
     //
     // The image is oriented bottom-up to match glTexImage2D's data layout.
     //
     // |filename| - Filename to load.
-    // |buffer| - Output buffer, existing data is replaced.
-    // |outWidth| - Output width, in pixels.
-    // |outHeight| - Output height, in pixels.
-    // |outFormat| - Output format.
-    static bool loadPNG(const char* filename,
-                        std::vector<uint8_t>& buffer,
-                        uint32_t* outWidth,
-                        uint32_t* outHeight,
-                        Format* outFormat);
+    //
+    // If the load was successful, returns a Result.
+    static android::base::Optional<Result> loadPNG(const char* filename);
 
     // Loads a JPEG from disk.
     //
     // The image is oriented bottom-up to match glTexImage2D's data layout.
     //
     // |filename| - Filename to load.
-    // |buffer| - Output buffer, existing data is replaced.
-    // |outWidth| - Output width, in pixels.
-    // |outHeight| - Output height, in pixels.
-    static bool loadJPEG(const char* filename,
-                         std::vector<uint8_t>& buffer,
-                         uint32_t* outWidth,
-                         uint32_t* outHeight);
+    //
+    // If the load was successful, returns a Result.
+    static android::base::Optional<Result> loadJPEG(const char* filename);
 };
 
 }  // namespace virtualscene

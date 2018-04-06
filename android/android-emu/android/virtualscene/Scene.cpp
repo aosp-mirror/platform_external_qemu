@@ -82,11 +82,16 @@ bool Scene::initialize() {
     }
 
     for (auto& poster : mPosters) {
-        if (!poster.second.defaultFilename.empty()) {
-            // Try to load posters, and ignore failures. If a poster fails to
-            // load it will print an error message internally.
-            (void)loadPoster(poster.first.c_str(),
-                             poster.second.defaultFilename.c_str(), 1.0f);
+        poster.second.sceneObject = PosterSceneObject::create(
+                mRenderer, poster.second.position, poster.second.rotation,
+                poster.second.size,
+                poster.second.defaultFilename.empty()
+                        ? nullptr
+                        : poster.second.defaultFilename.c_str());
+        if (!poster.second.sceneObject) {
+            W("%s: Failed to create poster scene object %s.", __FUNCTION__,
+              poster.first.c_str());
+            return false;
         }
     }
 
@@ -114,6 +119,12 @@ const SceneCamera& Scene::getCamera() const {
 
 int64_t Scene::update() {
     mCamera.update();
+    for (auto& poster : mPosters) {
+        if (poster.second.sceneObject) {
+            poster.second.sceneObject->update(mRenderer);
+        }
+    }
+
     return mCamera.getTimestamp();
 }
 
@@ -147,23 +158,8 @@ bool Scene::loadPoster(const char* posterName,
     }
 
     Poster& poster = it->second;
-
-    std::unique_ptr<PosterSceneObject> newSceneObject =
-            PosterSceneObject::create(mRenderer, filename, poster.position,
-                                      poster.rotation, poster.size);
-    if (!newSceneObject) {
-        W("%s: Failed to create poster scene object.", __FUNCTION__);
-        return false;
-    }
-
-    if (poster.sceneObject) {
-        mRenderer.releaseObjectResources(poster.sceneObject.get());
-        poster.sceneObject.reset();
-    }
-
-    newSceneObject->setScale(size);
-
-    poster.sceneObject = std::move(newSceneObject);
+    poster.sceneObject->setScale(size);
+    poster.sceneObject->setTexture(mRenderer, filename);
     return true;
 }
 
@@ -175,9 +171,7 @@ void Scene::updatePosterSize(const char* posterName, float size) {
     }
 
     Poster& poster = it->second;
-    if (poster.sceneObject) {
-        poster.sceneObject->setScale(size);
-    }
+    poster.sceneObject->setScale(size);
 }
 
 bool Scene::loadPostersFile(const char* filename) {
@@ -289,10 +283,12 @@ void Scene::getRenderableObjectsFromSceneObject(
         const glm::mat4& viewProjection,
         const SceneObject* sceneObject,
         std::vector<RenderableObject>& outRenderableObjects) {
-    const glm::mat4 mvp = viewProjection * sceneObject->getTransform();
+    if (sceneObject->isVisible()) {
+        const glm::mat4 mvp = viewProjection * sceneObject->getTransform();
 
-    for (const Renderable& renderable : sceneObject->getRenderables()) {
-        outRenderableObjects.push_back({mvp, renderable});
+        for (const Renderable& renderable : sceneObject->getRenderables()) {
+            outRenderableObjects.push_back({mvp, renderable});
+        }
     }
 }
 

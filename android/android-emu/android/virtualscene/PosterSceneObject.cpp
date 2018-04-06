@@ -46,18 +46,68 @@ PosterSceneObject::~PosterSceneObject() = default;
 
 std::unique_ptr<PosterSceneObject> PosterSceneObject::create(
         Renderer& renderer,
-        const char* textureFilename,
         const glm::vec3& position,
         const glm::quat& rotation,
-        const glm::vec2& maxSize) {
+        const glm::vec2& maxSize,
+        const char* placeholderFilename) {
     // Create an empty PosterSceneObject so that the texture can be attached
     // to something.
     std::unique_ptr<PosterSceneObject> result(new PosterSceneObject());
 
-    Texture texture = renderer.loadTexture(result.get(), textureFilename);
-    if (!texture.isValid()) {
-        W("%s: Could not load texture '%s'", __FUNCTION__, textureFilename);
-        return nullptr;
+    Texture placeholderTexture;
+    if (placeholderFilename) {
+        placeholderTexture =
+                renderer.loadTextureAsync(result.get(), placeholderFilename);
+        if (!placeholderTexture.isValid()) {
+            W("%s: Could not load texture '%s'", __FUNCTION__,
+              placeholderFilename);
+            return nullptr;
+        }
+    }
+
+    result.get()->mPositionRotation =
+            glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
+    result.get()->mMaxSize = maxSize;
+    result.get()->mPlaceholderTexture = placeholderTexture;
+
+    // Initialize renderable.
+    Renderable renderable;
+    renderable.material = renderer.createMaterialTextured();
+    renderable.mesh =
+            renderer.createMesh(result.get(), kQuadVerts, kQuadIndices);
+    renderable.texture = placeholderTexture;
+    result.get()->mRenderables.emplace_back(std::move(renderable));
+
+    return result;
+}
+
+void PosterSceneObject::setTexture(Renderer& renderer, const char* filename) {
+    Texture oldTexture = mRenderables[0].texture;
+
+    if (filename) {
+        mRenderables[0].texture = renderer.loadTextureAsync(this, filename);
+    } else {
+        mRenderables[0].texture = mPlaceholderTexture;
+    }
+
+    // Release the old texture after loading the new one, to avoid unloading
+    // and reloading if the new texture is the same.
+    if (oldTexture != mPlaceholderTexture) {
+        renderer.releaseTexture(this, oldTexture);
+    }
+}
+
+void PosterSceneObject::setScale(float value) {
+    mScale = value;
+    updateTransform();
+}
+
+// Update the PosterSceneObject for the current frame.
+void PosterSceneObject::update(Renderer& renderer) {
+    Texture texture = mRenderables[0].texture;
+    mVisible = texture.isValid();
+    if (!mVisible) {
+        return;
     }
 
     // Determine poster size.
@@ -72,45 +122,28 @@ std::unique_ptr<PosterSceneObject> PosterSceneObject::create(
         aspectRatio /= aspectRatioMax;
     }
 
-    const glm::vec3 scale(maxSize * aspectRatio, 1.0f);
-    const glm::mat4 baseTransform = glm::translate(glm::mat4(), position) *
-                                    glm::mat4_cast(rotation) *
-                                    glm::scale(glm::mat4(), scale);
+    const glm::vec3 scale(mMaxSize * aspectRatio, 1.0f);
 
     // The minimum scale is the minimum size that the poster can be without
     // being smaller than kMinimumSizeMeters (on the smallest side).
     const float posterSize = std::min(scale.x, scale.y);
     float minScale = kMinimumSizeMeters / posterSize;
     if (minScale > 1.0f) {
-        // This indicates that a poster in the scene is smaller than the minimum
-        // size.  Set to 1 to effectively disable scaling and avoid exceeding
-        // the poster's bounds.
+        // This indicates that a poster in the scene is smaller than the
+        // minimum size.  Set to 1 to effectively disable scaling and avoid
+        // exceeding the poster's bounds.
         minScale = 1.0f;
     }
 
-    // Initialize result.
-    Renderable renderable;
-    renderable.material = renderer.createMaterialTextured();
-    renderable.mesh =
-            renderer.createMesh(result.get(), kQuadVerts, kQuadIndices);
-    renderable.texture = texture;
-
-    result.get()->mRenderables.emplace_back(std::move(renderable));
-    result.get()->mBaseTransform = baseTransform;
-    result.get()->mMinScale = minScale;
-    result.get()->updateTransform();
-
-    return result;
-}
-
-void PosterSceneObject::setScale(float value) {
-    mScale = value;
+    mPosterSizeTransform = glm::scale(glm::mat4(), scale);
+    mMinScale = minScale;
     updateTransform();
 }
 
 void PosterSceneObject::updateTransform() {
     const float scale = glm::clamp(mScale, mMinScale, 1.0f);
-    setTransform(mBaseTransform * glm::scale(glm::mat4(), glm::vec3(scale)));
+    setTransform(mPositionRotation * mPosterSizeTransform *
+                 glm::scale(glm::mat4(), glm::vec3(scale)));
 }
 
 }  // namespace virtualscene

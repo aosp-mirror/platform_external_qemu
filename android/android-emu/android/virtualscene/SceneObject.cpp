@@ -163,5 +163,9 @@ const std::vector<Renderable>& SceneObject::getRenderables() const {
     return mRenderables;
 }
 
+bool SceneObject::isVisible() const {
+    return mVisible;
+}
+
 }  // namespace virtualscene
 }  // namespace android

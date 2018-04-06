@@ -61,9 +61,13 @@ public:
     // Get Renderables for the scene object.
     const std::vector<Renderable>& getRenderables() const;
 
+    // Returns true if the SceneObject is visible.
+    bool isVisible() const;
+
 protected:
     glm::mat4 mTransform = glm::mat4();
     std::vector<Renderable> mRenderables;
+    bool mVisible = true;
 };
 
 }  // namespace virtualscene
