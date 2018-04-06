@@ -29,16 +29,13 @@ class PosterSceneObject : public SceneObject {
     DISALLOW_COPY_AND_ASSIGN(PosterSceneObject);
 
 protected:
-    PosterSceneObject();
+    PosterSceneObject(Renderer& renderer);
 
 public:
-    ~PosterSceneObject();
-
     // Creates a PosterSceneObject from a unit quad.
     //
     // |renderer| - Renderer context, VirtualPosterSceneObject will be bound to
     //              this context.
-    // |textureFilename| - Filename of the texture to load.
     // |position| - Position of the poster, in world space.
     // |rotation| - Rotation quaternion.
     // |maxSize| - Maximum size of the poster, in meters.  This will be scaled
@@ -47,12 +44,15 @@ public:
     //
     // Returns a PosterSceneObject instance if the object could be loaded or
     // null if there was an error.
-    static std::unique_ptr<PosterSceneObject> create(
-            Renderer& renderer,
-            const char* textureFilename,
-            const glm::vec3& position,
-            const glm::quat& rotation,
-            const glm::vec2& maxSize);
+    static std::unique_ptr<PosterSceneObject> create(Renderer& renderer,
+                                                     const glm::vec3& position,
+                                                     const glm::quat& rotation,
+                                                     const glm::vec2& maxSize);
+
+    // Update the texture in the PosterSceneObject.
+    //
+    // |texture| - Texture object.
+    void setTexture(Texture texture);
 
     // Set the scale of the poster, with a value between 0 and 1.  The value
     // will be clamped between the minimum poster size, 20cm and the maximum
@@ -61,6 +61,9 @@ public:
     // |value| - Scale of the poster.
     void setScale(float value);
 
+    // Update the PosterSceneObject for the current frame.
+    void update();
+
 private:
     // Make private, setScale should be used instead.
     using SceneObject::setTransform;
@@ -68,8 +71,12 @@ private:
     void updateTransform();
 
     // Set in create().
-    glm::mat4 mBaseTransform = glm::mat4();
+    glm::mat4 mPositionRotation = glm::mat4();
+    glm::vec2 mMaxSize;
+
+    // Updated each frame if the texture has changed.
     float mMinScale = 0.0f;
+    glm::mat4 mPosterSizeTransform = glm::mat4();
 
     // Dynamically adjustable with setScale().
     float mScale = 1.0f;
