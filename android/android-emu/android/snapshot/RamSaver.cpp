@@ -15,6 +15,7 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
 #include "android/base/memory/OnDemand.h"
+#include "android/base/memory/MemoryHints.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/RamLoader.h"
@@ -27,10 +28,18 @@
 #include <iterator>
 #include <utility>
 
+#ifdef __APPLE__
+
+#include <sys/types.h>
+#include <sys/mman.h>
+
+#endif
+
 namespace android {
 namespace snapshot {
 
 using android::base::MemStream;
+using android::base::MemoryHint;
 using android::base::System;
 
 using StatAction = IncrementalStats::Action;
@@ -178,12 +187,21 @@ void RamSaver::savePage(int64_t blockOffset,
         int stillZero = 0;
         int sameHash = 0;
 
+
         mIncStats.countMultiple(StatAction::TotalPages, numPages);
 
         mIncStats.measure(StatTime::ZeroCheck, [&] {
 
+
             // Initialize Pages and check for all-zero pages.
             uint8_t* zeroCheckPtr = block.ramBlock.hostPtr;
+
+            // Hint that we will access sequentially.
+            android::base::memoryHint(
+                zeroCheckPtr,
+                numPages * block.ramBlock.pageSize,
+                MemoryHint::Sequential);
+
             for (int32_t i = 0; i < numPages;
                  ++i,
                  zeroCheckPtr += (uintptr_t)block.ramBlock.pageSize) {
@@ -446,31 +464,41 @@ void RamSaver::writeIndex() {
     stream.putBe32(uint32_t(mIndex.totalPages));
     int64_t prevFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
-    for (const FileIndex::Block& b : mIndex.blocks) {
-        auto id = base::StringView(b.ramBlock.id);
-        stream.putByte(uint8_t(id.size()));
-        stream.write(id.data(), id.size());
-        stream.putBe32(uint32_t(b.pages.size()));
-        for (const FileIndex::Block::Page& page : b.pages) {
-            stream.putPackedNum(uint64_t(
-                    compressed ? page.sizeOnDisk
-                               : (page.sizeOnDisk / b.ramBlock.pageSize)));
-            if (!page.zeroed()) {
-                auto deltaPos = page.filePos - prevFilePos;
-                if (compressed) {
-                    deltaPos -= prevPageSizeOnDisk;
-                } else {
-                    assert(deltaPos % b.ramBlock.pageSize == 0);
-                    deltaPos /= b.ramBlock.pageSize;
+
+    mIncStats.measure(StatTime::DiskIndexWrite, [&] {
+        for (const FileIndex::Block& b : mIndex.blocks) {
+            auto id = base::StringView(b.ramBlock.id);
+            stream.putByte(uint8_t(id.size()));
+            stream.write(id.data(), id.size());
+            stream.putBe32(uint32_t(b.pages.size()));
+
+            // Make those normal again
+            android::base::memoryHint(
+                b.ramBlock.hostPtr,
+                b.pages.size() * b.ramBlock.pageSize,
+                MemoryHint::Normal);
+
+            for (const FileIndex::Block::Page& page : b.pages) {
+                stream.putPackedNum(uint64_t(
+                        compressed ? page.sizeOnDisk
+                                   : (page.sizeOnDisk / b.ramBlock.pageSize)));
+                if (!page.zeroed()) {
+                    auto deltaPos = page.filePos - prevFilePos;
+                    if (compressed) {
+                        deltaPos -= prevPageSizeOnDisk;
+                    } else {
+                        assert(deltaPos % b.ramBlock.pageSize == 0);
+                        deltaPos /= b.ramBlock.pageSize;
+                    }
+                    stream.putPackedSignedNum(deltaPos);
+                    assert(page.hashFilled);
+                    stream.write(page.hash.data(), page.hash.size());
+                    prevFilePos = page.filePos;
+                    prevPageSizeOnDisk = page.sizeOnDisk;
                 }
-                stream.putPackedSignedNum(deltaPos);
-                assert(page.hashFilled);
-                stream.write(page.hash.data(), page.hash.size());
-                prevFilePos = page.filePos;
-                prevPageSizeOnDisk = page.sizeOnDisk;
             }
         }
-    }
+    });
 
     mIncStats.measure(StatTime::GapTrackingWriter, [&] {
         incremental() ? mGaps->save(stream) : OneSizeGapTracker().save(stream);

@@ -11,6 +11,7 @@
 
 #include "android/snapshot/MemoryWatch.h"
 
+#include "android/base/memory/MemoryHinting.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
@@ -25,6 +26,9 @@
 
 #include <Hypervisor/hv.h>
 
+#include <vector>
+
+using android::base::MemoryHint;
 using android::base::System;
 
 namespace android {
@@ -56,6 +60,8 @@ public:
     }
 
     bool registerMemoryRange(void* start, size_t length) {
+        mRanges.push_back({start, length});
+
         if (mAccel == CPU_ACCELERATOR_HVF) {
             // The maxium slot number is 32 for HVF.
             uint64_t gpa[32];
@@ -65,13 +71,25 @@ public:
                 guest_mem_protect_call(gpa[i], size[i], 0);
             }
         }
+
         mprotect(start, length, PROT_NONE);
+        android::base::memoryHint(
+            start, length, MemoryHint::Random);
         mSegvHandler.registerMemoryRange(start, length);
         return true;
     }
 
     void join() {
+        for (auto range : mRanges) {
+            android::base::memoryHint(
+                range.first, range.second, MemoryHint::Sequential);
+        }
         mBackgroundLoadingThread.wait();
+        for (auto range : mRanges) {
+            android::base::memoryHint(
+                range.first, range.second, MemoryHint::Normal);
+        }
+        mRanges.clear();
     }
 
     void doneRegistering() {
@@ -140,6 +158,7 @@ public:
     MemoryAccessWatch::IdleCallback mIdleCallback;
     MacSegvHandler mSegvHandler;
     base::FunctorThread mBackgroundLoadingThread;
+    std::vector<std::pair<void*, size_t> > mRanges;
 };
 
 // static
