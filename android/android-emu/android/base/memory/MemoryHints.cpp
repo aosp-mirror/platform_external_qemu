@@ -94,5 +94,11 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
 #endif // _WIN32
 }
 
+bool zeroOutMemory(void* start, uint64_t length) {
+    memset(start, 0, length);
+    return memoryHint(start, length, MemoryHint::DontNeed) &&
+           memoryHint(start, length, MemoryHint::Normal);
+}
+
 } // namespace base
 } // namespace android
