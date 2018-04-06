@@ -597,18 +597,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                     }
                                 }
                             });
-                        if (mToolWindow) {
-                            mToolWindow->setEnabled(false);
-                        }
                     });
                 } else if (stage == Snapshotter::Stage::End) {
                     runOnUiThread([this, op]() {
                         AutoLock lock(mSnapshotStateLock);
                         mShouldShowSnapshotModalOverlay = false;
                         mContainer.hideModalOverlay();
-                        if (mToolWindow) {
-                            mToolWindow->setEnabled(true);
-                        }
                     });
                 }
             });
