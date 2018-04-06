@@ -334,7 +334,7 @@ void ToolWindow::show() {
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
     // Many UI commands require extended window. Construct it here.
-    if (!mIsExiting) {
+    if (mAllowExtWindow && !mIsExiting) {
         mExtendedWindow.get();
     }
     switch (cmd) {
