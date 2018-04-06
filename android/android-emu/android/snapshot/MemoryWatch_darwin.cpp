@@ -25,6 +25,8 @@
 
 #include <Hypervisor/hv.h>
 
+#include <vector>
+
 using android::base::System;
 
 namespace android {
@@ -56,6 +58,8 @@ public:
     }
 
     bool registerMemoryRange(void* start, size_t length) {
+        mRanges.push_back({start, length});
+
         if (mAccel == CPU_ACCELERATOR_HVF) {
             // The maxium slot number is 32 for HVF.
             uint64_t gpa[32];
@@ -65,13 +69,21 @@ public:
                 guest_mem_protect_call(gpa[i], size[i], 0);
             }
         }
+
         mprotect(start, length, PROT_NONE);
+        madvise(start, length, MADV_RANDOM);
         mSegvHandler.registerMemoryRange(start, length);
         return true;
     }
 
     void join() {
+        for (auto range : mRanges) {
+            madvise(range.first, range.second, MADV_SEQUENTIAL);
+        }
         mBackgroundLoadingThread.wait();
+        for (auto range : mRanges) {
+            madvise(range.first, range.second, MADV_NORMAL);
+        }
     }
 
     void doneRegistering() {
@@ -140,6 +152,7 @@ public:
     MemoryAccessWatch::IdleCallback mIdleCallback;
     MacSegvHandler mSegvHandler;
     base::FunctorThread mBackgroundLoadingThread;
+    std::vector<std::pair<void*, size_t> > mRanges;
 };
 
 // static

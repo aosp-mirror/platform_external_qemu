@@ -335,7 +335,7 @@ SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
                                  loader_t&& loader)
     : m_loader(std::move(loader)),
       m_globalNamespace(globalNameSpace),
-      m_isDirty(false) {
+      m_isDirty(true) {
     mNeedRestore = true;
 }
 
@@ -608,7 +608,7 @@ void SaveableTexture::onSave(
         // TODO: Don't keep those around in memory regardless of memory
         // pressure
 
-        m_isDirty = false || isLowMem;
+        m_isDirty = true;
     } else if (m_target != 0) {
         // SaveableTexture is uninitialized iff a texture hasn't been bound,
         // which will give m_target==0
