@@ -318,6 +318,7 @@ else  # BUILD_STRIP_BINARIES != true
 endif # BUILD_STRIP_BINARIES != true
 endef
 
+# Runs a test target
 define run-test
 _TST := $(1)
 _DST := $(call local-test-result-path, $(1))/$1.success
@@ -328,9 +329,10 @@ $$(_DST): $$(_TST)
 	@echo "Running $$(PRIVATE_TST)"
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
-	$(hide) $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
+	$(hide) LLVM_PROFILE_FILE=$(call local-test-result-path)/$$(PRIVATE_TST).profraw $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
 	@touch $$(PRIVATE_DST)
 endef
+
 
 # Installs a prebuilt library
 # If required, will generates symbols and debug info
