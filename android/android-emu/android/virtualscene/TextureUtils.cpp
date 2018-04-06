@@ -30,76 +30,88 @@ extern "C" {
 #define D(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
 #define D_ACTIVE VERBOSE_CHECK(virtualscene)
 
+using android::base::Optional;
 using android::base::PathUtils;
 using android::base::ScopedStdioFile;
 
 namespace android {
 namespace virtualscene {
 
-bool TextureUtils::load(const char* filename,
-                        std::vector<uint8_t>& buffer,
-                        uint32_t* outWidth,
-                        uint32_t* outHeight,
-                        Format* outFormat) {
-    *outWidth = 0;
-    *outHeight = 0;
-    *outFormat = Format::RGB24;
+static constexpr uint32_t kPlaceholderWidth = 1;
+static constexpr uint32_t kPlaceholderHeight = 1;
 
+template <typename T>
+static inline T alignRowBytes(T value) {
+    return (value + 3) / 4 * 4;
+}
+
+TextureUtils::Result TextureUtils::createEmpty(uint32_t width,
+                                               uint32_t height) {
+    Result result;
+    result.mWidth = width;
+    result.mHeight = height;
+    result.mFormat = Format::RGBA32;
+    return result;
+}
+
+TextureUtils::Result TextureUtils::createPlaceholder() {
+    Result result;
+    result.mBuffer.resize(alignRowBytes(kPlaceholderWidth * 4) *
+                          kPlaceholderHeight);
+    result.mWidth = kPlaceholderWidth;
+    result.mHeight = kPlaceholderHeight;
+    result.mFormat = Format::RGBA32;
+    return result;
+}
+
+Optional<TextureUtils::Result> TextureUtils::load(const char* filename) {
     const base::StringView extension = PathUtils::extension(filename);
 
     if (extension == ".png") {
-        return loadPNG(filename, buffer, outWidth, outHeight, outFormat);
+        return loadPNG(filename);
     } else if (extension == ".jpg" || extension == ".jpeg") {
-        return loadJPEG(filename, buffer, outWidth, outHeight);
+        return loadJPEG(filename);
     } else {
         E("%s: Unsupported file format %s", __FUNCTION__,
           std::string(extension).c_str());
-        return false;
+        return {};
     }
 }
 
-bool TextureUtils::loadPNG(const char* filename,
-                           std::vector<uint8_t>& buffer,
-                           uint32_t* outWidth,
-                           uint32_t* outHeight,
-                           Format* outFormat) {
-    *outWidth = 0;
-    *outHeight = 0;
-    *outFormat = Format::RGB24;
-
+Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
     ScopedStdioFile fp(fopen(filename, "rb"));
     if (!fp) {
         E("%s: Failed to open file %s", __FUNCTION__, filename);
-        return false;
+        return {};
     }
 
     uint8_t header[8];
     if (fread(header, sizeof(header), 1, fp.get()) != 1) {
         E("%s: Failed to read header", __FUNCTION__);
-        return false;
+        return {};
     }
 
     if (png_sig_cmp(header, 0, sizeof(header))) {
         E("%s: header is not a PNG header", __FUNCTION__);
-        return false;
+        return {};
     }
 
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
     if (!png) {
         E("%s: Failed to allocate png read struct", __FUNCTION__);
-        return false;
+        return {};
     }
 
     png_infop pngInfo = png_create_info_struct(png);
     if (!pngInfo) {
         E("%s: Failed to allocate png info struct", __FUNCTION__);
-        return false;
+        return {};
     }
 
     if (setjmp(png_jmpbuf(png))) {
         E("%s: PNG library error", __FUNCTION__);
         png_destroy_read_struct(&png, &pngInfo, 0);
-        return false;
+        return {};
     }
 
     png_init_io(png, fp.get());
@@ -149,11 +161,11 @@ bool TextureUtils::loadPNG(const char* filename,
         newColorType != PNG_COLOR_TYPE_RGB_ALPHA) {
         E("%s: Unsupported color type: %d", __FUNCTION__, newColorType);
         png_destroy_read_struct(&png, &pngInfo, 0);
-        return false;
+        return {};
     }
 
     const size_t rowBytes = png_get_rowbytes(png, pngInfo);
-    const size_t stride = (rowBytes + 3) / 4 * 4;  // Align to 4-byte boundary.
+    const size_t stride = alignRowBytes(rowBytes);
     std::vector<uint8_t> data(stride * height);
     std::vector<uint8_t*> rowPtrs(height);
 
@@ -164,14 +176,13 @@ bool TextureUtils::loadPNG(const char* filename,
     png_read_image(png, rowPtrs.data());
     png_destroy_read_struct(&png, &pngInfo, 0);
 
-    buffer = std::move(data);
-
-    *outWidth = width;
-    *outHeight = height;
-    *outFormat =
+    Result result;
+    result.mBuffer = std::move(data);
+    result.mWidth = width;
+    result.mHeight = height;
+    result.mFormat =
             newColorType == PNG_COLOR_TYPE_RGB ? Format::RGB24 : Format::RGBA32;
-
-    return true;
+    return result;
 }
 
 struct ErrorManager {
@@ -179,17 +190,11 @@ struct ErrorManager {
     jmp_buf setjmp_buffer;
 };
 
-bool TextureUtils::loadJPEG(const char* filename,
-                            std::vector<uint8_t>& buffer,
-                            uint32_t* outWidth,
-                            uint32_t* outHeight) {
-    *outWidth = 0;
-    *outHeight = 0;
-
+Optional<TextureUtils::Result> TextureUtils::loadJPEG(const char* filename) {
     ScopedStdioFile fp(fopen(filename, "rb"));
     if (!fp) {
         E("%s: Failed to open file %s", __FUNCTION__, filename);
-        return false;
+        return {};
     }
 
     jpeg_decompress_struct cinfo;
@@ -209,7 +214,7 @@ bool TextureUtils::loadJPEG(const char* filename,
         (cinfo.err->output_message)(
                 reinterpret_cast<jpeg_common_struct*>(&cinfo));
         jpeg_destroy_decompress(&cinfo);
-        return false;
+        return {};
     }
 
     jpeg_create_decompress(&cinfo);
@@ -229,11 +234,11 @@ bool TextureUtils::loadJPEG(const char* filename,
         E("%s: Unsupported output_components %d, should be 3.", __FUNCTION__,
           cinfo.output_components);
         jpeg_destroy_decompress(&cinfo);
-        return false;
+        return {};
     }
 
     const size_t rowBytes = width * cinfo.output_components;
-    const size_t stride = (rowBytes + 3) / 4 * 4;  // Align to 4-byte boundary.
+    const size_t stride = alignRowBytes(rowBytes);
     std::vector<uint8_t> data(stride * height);
 
     while (cinfo.output_scanline < height) {
@@ -249,11 +254,12 @@ bool TextureUtils::loadJPEG(const char* filename,
     jpeg_finish_decompress(&cinfo);
     jpeg_destroy_decompress(&cinfo);
 
-    buffer = std::move(data);
-    *outWidth = width;
-    *outHeight = height;
-
-    return true;
+    Result result;
+    result.mBuffer = std::move(data);
+    result.mWidth = width;
+    result.mHeight = height;
+    result.mFormat = Format::RGB24;
+    return result;
 }
 
 }  // namespace virtualscene

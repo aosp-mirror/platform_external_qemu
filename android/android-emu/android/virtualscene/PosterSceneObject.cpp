@@ -17,7 +17,6 @@
 #include "android/virtualscene/PosterSceneObject.h"
 
 #include "android/utils/debug.h"
-#include "android/virtualscene/Renderer.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -40,30 +39,53 @@ static constexpr float kMinimumSizeMeters = 0.2f;
 namespace android {
 namespace virtualscene {
 
-PosterSceneObject::PosterSceneObject() = default;
-
-PosterSceneObject::~PosterSceneObject() = default;
+PosterSceneObject::PosterSceneObject(Renderer& renderer)
+    : SceneObject(renderer) {}
 
 std::unique_ptr<PosterSceneObject> PosterSceneObject::create(
         Renderer& renderer,
-        const char* textureFilename,
         const glm::vec3& position,
         const glm::quat& rotation,
         const glm::vec2& maxSize) {
     // Create an empty PosterSceneObject so that the texture can be attached
     // to something.
-    std::unique_ptr<PosterSceneObject> result(new PosterSceneObject());
+    std::unique_ptr<PosterSceneObject> result(new PosterSceneObject(renderer));
 
-    Texture texture = renderer.loadTexture(result.get(), textureFilename);
-    if (!texture.isValid()) {
-        W("%s: Could not load texture '%s'", __FUNCTION__, textureFilename);
-        return nullptr;
+    result.get()->mPositionRotation =
+            glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
+    result.get()->mMaxSize = maxSize;
+
+    // Initialize renderable.
+    Renderable renderable;
+    renderable.material = renderer.createMaterialTextured();
+    renderable.mesh = renderer.createMesh(kQuadVerts, kQuadIndices);
+    result.get()->mRenderables.emplace_back(std::move(renderable));
+
+    return result;
+}
+
+void PosterSceneObject::setTexture(Texture texture) {
+    mRenderer.releaseTexture(mRenderables[0].texture);
+    mRenderables[0].texture = mRenderer.duplicateTexture(texture);
+}
+
+void PosterSceneObject::setScale(float value) {
+    mScale = value;
+    updateTransform();
+}
+
+// Update the PosterSceneObject for the current frame.
+void PosterSceneObject::update() {
+    Texture texture = mRenderables[0].texture;
+    mVisible = texture.isValid();
+    if (!mVisible) {
+        return;
     }
 
     // Determine poster size.
     uint32_t width = 0;
     uint32_t height = 0;
-    renderer.getTextureInfo(texture, &width, &height);
+    mRenderer.getTextureInfo(texture, &width, &height);
 
     glm::vec2 aspectRatio =
             glm::vec2(static_cast<float>(width), static_cast<float>(height));
@@ -72,45 +94,28 @@ std::unique_ptr<PosterSceneObject> PosterSceneObject::create(
         aspectRatio /= aspectRatioMax;
     }
 
-    const glm::vec3 scale(maxSize * aspectRatio, 1.0f);
-    const glm::mat4 baseTransform = glm::translate(glm::mat4(), position) *
-                                    glm::mat4_cast(rotation) *
-                                    glm::scale(glm::mat4(), scale);
+    const glm::vec3 scale(mMaxSize * aspectRatio, 1.0f);
 
     // The minimum scale is the minimum size that the poster can be without
     // being smaller than kMinimumSizeMeters (on the smallest side).
     const float posterSize = std::min(scale.x, scale.y);
     float minScale = kMinimumSizeMeters / posterSize;
     if (minScale > 1.0f) {
-        // This indicates that a poster in the scene is smaller than the minimum
-        // size.  Set to 1 to effectively disable scaling and avoid exceeding
-        // the poster's bounds.
+        // This indicates that a poster in the scene is smaller than the
+        // minimum size.  Set to 1 to effectively disable scaling and avoid
+        // exceeding the poster's bounds.
         minScale = 1.0f;
     }
 
-    // Initialize result.
-    Renderable renderable;
-    renderable.material = renderer.createMaterialTextured();
-    renderable.mesh =
-            renderer.createMesh(result.get(), kQuadVerts, kQuadIndices);
-    renderable.texture = texture;
-
-    result.get()->mRenderables.emplace_back(std::move(renderable));
-    result.get()->mBaseTransform = baseTransform;
-    result.get()->mMinScale = minScale;
-    result.get()->updateTransform();
-
-    return result;
-}
-
-void PosterSceneObject::setScale(float value) {
-    mScale = value;
+    mPosterSizeTransform = glm::scale(glm::mat4(), scale);
+    mMinScale = minScale;
     updateTransform();
 }
 
 void PosterSceneObject::updateTransform() {
     const float scale = glm::clamp(mScale, mMinScale, 1.0f);
-    setTransform(mBaseTransform * glm::scale(glm::mat4(), glm::vec3(scale)));
+    setTransform(mPositionRotation * mPosterSizeTransform *
+                 glm::scale(glm::mat4(), glm::vec3(scale)));
 }
 
 }  // namespace virtualscene
