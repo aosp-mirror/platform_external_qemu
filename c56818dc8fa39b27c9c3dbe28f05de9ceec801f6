@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30b8861c_34e63b4e",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/VkDispatch.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T22:56:12Z",
+      "side": 1,
+      "message": "where to put the vulkan sdk",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 44
+      },
+      "revId": "c56818dc8fa39b27c9c3dbe28f05de9ceec801f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
