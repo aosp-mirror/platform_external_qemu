@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "616b9e30_7c495994",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-06T03:05:39Z",
+      "side": 1,
+      "message": "Oh, I think I know what\u0027s happening, I\u0027ll initialize to 1 here.  I missed because I already had settings saved :-(",
+      "parentUuid": "87062a95_198af9a2",
+      "range": {
+        "startLine": 32,
+        "startChar": 1,
+        "endLine": 33,
+        "endChar": 66
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f5b80d50_0a52de34",
         "filename": "android/android-emu/android/virtualscene/PosterSceneObject.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-06T02:55:46Z",
       "side": 1,
       "message": "I only see setPosterLocation and ::create in the single place in the same function, with them taking different paths only if ::create fails. Should we fuse setPosterLocation with ::create, so there\u0027s fewer possible states for a PosterSceneObject, or do we anticipate that in the future we\u0027ll want to continuously shift the position/rotation after creation?",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 69
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d14e64e_56ee3d56",
+        "filename": "android/android-emu/android/virtualscene/PosterSceneObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-06T03:05:39Z",
+      "side": 1,
+      "message": "Good idea.  There isn\u0027t a scenario for moving them at the moment, and if it comes up we can always split the function back out later.",
+      "parentUuid": "f5b80d50_0a52de34",
       "range": {
         "startLine": 71,
         "startChar": 0,
@@ -68,6 +116,30 @@
       "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29a18bfe_dbea15c2",
+        "filename": "android/android-emu/android/virtualscene/Renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-06T03:05:39Z",
+      "side": 1,
+      "message": "I\u0027m addressing this in my next change, which will make it possible to load textures asynchronously.  My new design has TextureUtils returning a TextureUtils::Result struct and I pass that instead (along with a bunch of other changes, this function sort of disappears).",
+      "parentUuid": "47af67ed_2ebd5c42",
+      "range": {
+        "startLine": 313,
+        "startChar": 0,
+        "endLine": 322,
+        "endChar": 51
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -105,6 +177,30 @@
       "writtenOn": "2018-04-06T02:55:46Z",
       "side": 1,
       "message": "Could this be a public struct of Settings?",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 22
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a1c62a4_204abc33",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-06T03:05:39Z",
+      "side": 1,
+      "message": "To clarify, are you requesting to make this an inner struct (moving it into the Settings class)?  Sure, I can do that.",
+      "parentUuid": "2be4d6cf_6d6299de",
       "range": {
         "startLine": 46,
         "startChar": 0,
