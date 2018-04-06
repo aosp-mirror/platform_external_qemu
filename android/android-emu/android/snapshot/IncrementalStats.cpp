@@ -19,8 +19,6 @@ namespace snapshot {
 constexpr char IncrementalStats::kActionFormat[];
 constexpr char IncrementalStats::kTimeFormat[];
 
-#if SNAPSHOT_PROFILE > 1
-
 template <class TransformFunc, size_t N, int... Idx>
 static void formatFromArrayImpl(const char* format,
                                 std::array<std::atomic<int64_t>, N>& arr,
@@ -49,6 +47,5 @@ void IncrementalStats::print(const char* prefixFormat, ...) {
     formatFromArray(kTimeFormat, mTimes, [](int64_t x) { return x / 1000.0; });
 }
 
-#endif  // SNAPSHOT_PROFILE > 1
 }  // namespace snapshot
 }  // namespace android

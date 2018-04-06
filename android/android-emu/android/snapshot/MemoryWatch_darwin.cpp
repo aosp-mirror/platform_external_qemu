@@ -66,6 +66,7 @@ public:
             }
         }
         mprotect(start, length, PROT_NONE);
+        madvise(start, length, MADV_RANDOM);
         mSegvHandler.registerMemoryRange(start, length);
         return true;
     }

@@ -75,18 +75,6 @@ public:
             "lz4 %.03f, waitdisk %.03f, totalHandlingPageSave %.03f, "
             "diskWriteCombine %.03f, diskIndexWrite %.03f\n";
 
-#if SNAPSHOT_PROFILE <= 1
-    template <class Func>
-    auto measure(Time time, Func&& func) -> decltype(func()) {
-        return func();
-    }
-
-    void count(Action action) {}
-    void countMultiple(Action action, int64_t howMany) {}
-
-    void print(const char* prefixFormat, ...) {}
-
-#else   // SNAPSHOT_PROFILE > 1
     template <class Func>
     auto measure(Time time, Func&& func) -> decltype(func()) {
         return base::measure(mTimes[int(time)], std::forward<Func>(func));
@@ -105,7 +93,6 @@ public:
 private:
     std::array<std::atomic<int64_t>, int(Action::Count)> mActions{};
     std::array<std::atomic<int64_t>, int(Time::Count)> mTimes{};
-#endif  // SNAPSHOT_PROFILE > 1
 };
 
 }  // namespace snapshot
