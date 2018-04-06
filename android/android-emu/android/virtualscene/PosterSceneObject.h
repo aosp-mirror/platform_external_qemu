@@ -61,6 +61,9 @@ public:
     // |value| - Scale of the poster.
     void setScale(float value);
 
+    // Update the PosterSceneObject for the current frame.
+    void update(Renderer& renderer);
+
 private:
     // Make private, setScale should be used instead.
     using SceneObject::setTransform;
@@ -68,8 +71,15 @@ private:
     void updateTransform();
 
     // Set in create().
-    glm::mat4 mBaseTransform = glm::mat4();
+    bool mFinishedLoading = false;
+    Texture mTextureHandle;
+    glm::vec2 mMaxSize;
+
+    glm::mat4 mPositionRotation = glm::mat4();
     float mMinScale = 0.0f;
+
+    // Set once the texture has finished loading.
+    glm::mat4 mPosterSizeTransform = glm::mat4();
 
     // Dynamically adjustable with setScale().
     float mScale = 1.0f;

@@ -85,11 +85,24 @@ public:
     // Get the aspect ratio of the frame, w/h.
     virtual float getAspectRatio() = 0;
 
+    // Determine if a texture has finished loading, for use with async texture
+    // loads.
+    //
+    // |texture| - Texture object.
+    //
+    // Returns true if the texture has finished loading.  If the texture was not
+    // created with loadTextureAsync, always returns true.
+    virtual bool isTextureLoaded(Texture texture) = 0;
+
     // Get the dimensions of a texture.
     //
     // |texture| - Texture object.
     // |outWidth| - Out parameter that returns texture width, in pixels.
     // |outHeight| - Out parameter that returns texture height, in pixels.
+    //
+    // Returns a width and height for a loaded texture, or 0, 0 for one that has
+    // not finished loading.  Use isTextureLoaded() to determine if the texture
+    // has finished loading.
     virtual void getTextureInfo(Texture texture,
                                 uint32_t* outWidth,
                                 uint32_t* outHeight) = 0;
@@ -174,9 +187,26 @@ public:
     //            texture.
     // |filename| - Filename to load.
     //
-    // Returns a Texture instance or an invalid value if there was an error.
+    // Returns a Texture handle or an invalid value if there was an error.
     virtual Texture loadTexture(const SceneObject* parent,
                                 const char* filename) = 0;
+
+    // Load a PNG image from a file and create a Texture from it.
+    //
+    // The Texture handle will initially be in the unloaded state, and it will
+    // automatically load in the background.  If the texture is used before it
+    // is loaded, it is equivalent to rendering without a texture.
+    //
+    // To check if a texture has finished loading, use isTextureLoaded().
+    //
+    // |parent| - Parent SceneObject, which controls the lifetime of the
+    //            texture.
+    // |filename| - Filename to load.
+    //
+    // Returns an unloaded Texture handle or an invalid value if there was an
+    // error.
+    virtual Texture loadTextureAsync(const SceneObject* parent,
+                                     const char* filename) = 0;
 
     // Render a frame.
     virtual void render(const std::vector<RenderableObject>& renderables,

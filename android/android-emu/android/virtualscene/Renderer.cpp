@@ -18,6 +18,8 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/synchronization/MessageChannel.h"
+#include "android/base/threads/WorkerThread.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/virtualscene/RenderTarget.h"
@@ -25,6 +27,7 @@
 #include "android/virtualscene/TextureUtils.h"
 
 #include <cmath>
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -35,6 +38,15 @@ using namespace android::base;
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
 #define D_ACTIVE VERBOSE_CHECK(virtualscene)
+
+// The T(...) macro is used to dump extra verbose information.
+#define T_ACTIVE 1
+
+#if T_ACTIVE
+#define T(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
+#else
+#define T(...) ((void)0)
+#endif
 
 static constexpr int kSuperSampleMultiple = 2;
 
@@ -232,6 +244,7 @@ struct TextureData {
     std::string mFilename;
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
+    bool mLoaded = false;
 };
 
 struct SceneObjectData {
@@ -240,8 +253,24 @@ struct SceneObjectData {
     std::vector<Texture> textures;
 };
 
+enum class LoaderCommandType {
+    Shutdown,
+    LoadTexture
+};
+
+struct LoaderCommand {
+    LoaderCommandType mType;
+    int mHandle = -1;
+};
+
 using RenderableParameterCallback =
         std::function<void(const MaterialData& material)>;
+
+static uint64_t durationUsToMs(uint64_t startUs, uint64_t endUs) {
+    assert(startUs < endUs);
+    const uint64_t durationUs = (endUs - startUs);
+    return durationUs / 1000;
+}
 
 /*******************************************************************************
  *                     Renderer routines
@@ -258,6 +287,7 @@ public:
 
     // Renderer public API.
     float getAspectRatio() override;
+    bool isTextureLoaded(Texture texture) override;
     void getTextureInfo(Texture texture,
                         uint32_t* outWidth,
                         uint32_t* outHeight) override;
@@ -278,10 +308,17 @@ public:
     Texture loadTexture(const SceneObject* parent,
                         const char* filename) override;
 
+    Texture loadTextureAsync(const SceneObject* parent,
+                             const char* filename) override;
+
     void render(const std::vector<RenderableObject>& renderables,
                 float time) override;
 
 private:
+    void dispatchToRenderThread(std::function<void()>&& workItem);
+
+    WorkerProcessingResult onLoaderCommand(LoaderCommand&& command);
+
     void releaseMaterial(Material material);
     void releaseMesh(Mesh mesh);
     void releaseTexture(Texture texture);
@@ -306,20 +343,36 @@ private:
     Texture createEmptyTexture(const SceneObject* parent, uint32_t width,
                                uint32_t height);
 
-    // Create a texture handle from an OpenGL texture id, and register it with
-    // the textures list.
+    // Create a texture handle with no storage allocated.
     //
     // |parent| - Parent scene object.
     // |filename| - If this texture was loaded from a file, the filename it was
     //              loaded from so that it can be cached, otherwise null.
-    // |textureId| - OpenGL texture id.
+    Texture createTextureHandle(const SceneObject* parent,
+                                const char* filename);
+
+    // Load an OpenGL texture id into a texture handle.
+    //
+    // |texture| - Texture handle.
+    // |textureIdGL| - OpenGL texture id.
     // |width| - Texture width, in pixels.
     // |height| - Texture height, in pixels.
-    Texture createTextureInternal(const SceneObject* parent,
-                                  const char* filename,
-                                  GLuint textureId,
-                                  uint32_t width,
-                                  uint32_t height);
+    void setTextureStorage(Texture texture,
+                           GLuint textureIdGL,
+                           uint32_t width,
+                           uint32_t height);
+
+    // Helper to load texture data from file and schedule an import to OpenGL on
+    // the worker thread.
+    //
+    // |texture| - Texture handle.
+    void onLoaderLoadTexture(Texture texture);
+
+    // Import texture data from a TextureUtils result.
+    //
+    // |texture| - Texture handle.
+    // |data| - TextureUtils result data.
+    bool importTextureData(Texture texture, const TextureUtils::Result& data);
 
     // Compile a shader from source.
     // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
@@ -346,6 +399,7 @@ private:
     GLuint getTextureId(Texture texture) const;
 
     // Executes the given renderable, used internally by Renderer::render.
+    // Should be called under mLoaderLock.
     void processRenderable(const Renderable& renderable,
                            RenderableParameterCallback parameterCallback);
 
@@ -359,6 +413,11 @@ private:
     Mesh mEffectsMesh;
     std::vector<Material> mEffectsChain;
 
+    WorkerThread<LoaderCommand> mLoaderThread;
+    MessageChannel<std::function<void()>, 10> mRenderThreadDispatcherQueue;
+
+    Lock mLoaderLock;
+    // {{ Protected by mLoaderLock.
     int mNextResourceId = 0;
     std::unordered_map<int, MaterialData> mMaterials;
     std::unordered_map<int, MeshData> mMeshes;
@@ -366,6 +425,7 @@ private:
     std::unordered_map<std::string, int> mTextureCache;
 
     std::unordered_map<const SceneObject*, SceneObjectData> mObjectData;
+    // }} End protected by mLoaderLock.
 
     // Standard materials.
     Material mMaterialTextured;
@@ -386,7 +446,12 @@ Renderer::Renderer() = default;
 Renderer::~Renderer() = default;
 
 RendererImpl::RendererImpl(const GLESv2Dispatch* gles2, int width, int height)
-    : mGles2(gles2), mRenderWidth(width), mRenderHeight(height) {}
+    : mGles2(gles2),
+      mRenderWidth(width),
+      mRenderHeight(height),
+      mLoaderThread([this](LoaderCommand&& command) {
+          return onLoaderCommand(std::move(command));
+      }) {}
 
 bool RendererImpl::initialize() {
     mScreenRenderTarget =
@@ -431,10 +496,15 @@ bool RendererImpl::initialize() {
         return false;
     }
 
+    mLoaderThread.start();
+
     return true;
 }
 
 RendererImpl::~RendererImpl() {
+    mLoaderThread.enqueue({LoaderCommandType::Shutdown, -1});
+    mLoaderThread.join();
+
     // Release Renderer-internal objects.
     releaseObjectResources(this);
     if (mMaterialTextured.isValid()) {
@@ -464,12 +534,25 @@ float RendererImpl::getAspectRatio() {
     return static_cast<float>(mRenderWidth) / mRenderHeight;
 }
 
+bool RendererImpl::isTextureLoaded(Texture texture) {
+    AutoLock lock(mLoaderLock);
+    auto textureIt = mTextures.find(texture.id);
+
+    if (textureIt == mTextures.end()) {
+        E("%s: Could not find texture id %d", __FUNCTION__, texture.id);
+        return false;
+    }
+
+    return textureIt->second.mLoaded;
+}
+
 void RendererImpl::getTextureInfo(Texture texture,
                                   uint32_t* outWidth,
                                   uint32_t* outHeight) {
     *outWidth = 0;
     *outHeight = 0;
 
+    AutoLock lock(mLoaderLock);
     auto textureIt = mTextures.find(texture.id);
 
     if (textureIt == mTextures.end()) {
@@ -538,13 +621,16 @@ Material RendererImpl::createMaterialCheckerboard(const SceneObject* parent) {
     material.mvpLocation = getUniformLocation(program, "u_modelViewProj");
     material.timeLocation = getUniformLocation(program, "u_time");
 
-    const int id = mNextResourceId++;
-    mMaterials[id] = material;
+    {
+        AutoLock lock(mLoaderLock);
+        const int id = mNextResourceId++;
+        mMaterials[id] = material;
 
-    Material materialHandle;
-    materialHandle.id = id;
-    mObjectData[parent].materials.push_back(materialHandle);
-    return materialHandle;
+        Material materialHandle;
+        materialHandle.id = id;
+        mObjectData[parent].materials.push_back(materialHandle);
+        return materialHandle;
+    }
 }
 
 Material RendererImpl::createMaterialTextured() {
@@ -580,11 +666,14 @@ Material RendererImpl::createMaterialTextured() {
     material.texSamplerLocation = getUniformLocation(program, "tex_sampler");
     material.mvpLocation = getUniformLocation(program, "u_modelViewProj");
 
-    const int id = mNextResourceId++;
-    mMaterials[id] = material;
+    {
+        AutoLock lock(mLoaderLock);
+        const int id = mNextResourceId++;
+        mMaterials[id] = material;
 
-    mMaterialTextured.id = id;
-    return mMaterialTextured;
+        mMaterialTextured.id = id;
+        return mMaterialTextured;
+    }
 }
 
 Material RendererImpl::createMaterialScreenSpace(const SceneObject* parent,
@@ -615,13 +704,16 @@ Material RendererImpl::createMaterialScreenSpace(const SceneObject* parent,
     material.texSamplerLocation = getUniformLocation(program, "tex_sampler");
     material.resolutionLocation = getUniformLocation(program, "resolution");
 
-    const int id = mNextResourceId++;
-    mMaterials[id] = material;
+    {
+        AutoLock lock(mLoaderLock);
+        const int id = mNextResourceId++;
+        mMaterials[id] = material;
 
-    Material materialHandle;
-    materialHandle.id = id;
-    mObjectData[parent].materials.push_back(materialHandle);
-    return materialHandle;
+        Material materialHandle;
+        materialHandle.id = id;
+        mObjectData[parent].materials.push_back(materialHandle);
+        return materialHandle;
+    }
 }
 
 Mesh RendererImpl::createMesh(const SceneObject* parent,
@@ -657,17 +749,22 @@ Mesh RendererImpl::createMesh(const SceneObject* parent,
     mesh.mIndexBuffer = indexBuffer;
     mesh.mIndexCount = indicesSize;
 
-    const int id = mNextResourceId++;
-    mMeshes[id] = mesh;
+    {
+        AutoLock lock(mLoaderLock);
+        const int id = mNextResourceId++;
+        mMeshes[id] = mesh;
 
-    Mesh meshHandle;
-    meshHandle.id = id;
-    mObjectData[parent].meshes.push_back(meshHandle);
-    return meshHandle;
+        Mesh meshHandle;
+        meshHandle.id = id;
+        mObjectData[parent].meshes.push_back(meshHandle);
+        return meshHandle;
+    }
 }
 
 Texture RendererImpl::loadTexture(const SceneObject* parent,
                                   const char* filename) {
+    const uint64_t loadStartUs = System::get()->getHighResTimeUs();
+
     std::string path;
     if (!PathUtils::isAbsolute(filename)) {
         path = PathUtils::join(System::get()->getLauncherDirectory(),
@@ -681,47 +778,50 @@ Texture RendererImpl::loadTexture(const SceneObject* parent,
         return cachedTexture;
     }
 
-    std::vector<uint8_t> buffer;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    TextureUtils::Format format;
-    if (!TextureUtils::load(path.c_str(), buffer, &width, &height, &format)) {
+    Optional<TextureUtils::Result> result = TextureUtils::load(path.c_str());
+    if (!result) {
+        E("%s: Failed to load texture from file '%s'", __FUNCTION__,
+          path.c_str());
         return Texture();
     }
 
-    if (!isTextureSizeValid(width, height)) {
-        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
-          height, GL_MAX_TEXTURE_SIZE);
+    const uint64_t loadEndUs = System::get()->getHighResTimeUs();
+
+    Texture texture = createTextureHandle(parent, path.c_str());
+    if (!importTextureData(texture, result.value())) {
+        E("%s: Failed to import texture from file '%s'", __FUNCTION__,
+          path.c_str());
         return Texture();
     }
 
-    const GLenum textureFormat =
-            format == TextureUtils::Format::RGBA32 ? GL_RGBA : GL_RGB;
+    const uint64_t importEndUs = System::get()->getHighResTimeUs();
+    D("%s: Sync load texture %d in %" PRIu64 "ms, [read: %" PRIu64
+      "ms, import: %" PRIu64 "ms]",
+      __FUNCTION__, texture.id, durationUsToMs(loadStartUs, importEndUs),
+      durationUsToMs(loadStartUs, loadEndUs),
+      durationUsToMs(loadEndUs, importEndUs));
 
-    GLuint textureId;
-    mGles2->glGenTextures(1, &textureId);
-    mGles2->glBindTexture(GL_TEXTURE_2D, textureId);
-    mGles2->glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, textureFormat, width, height, 0,
-                         textureFormat, GL_UNSIGNED_BYTE, buffer.data());
-    mGles2->glGenerateMipmap(GL_TEXTURE_2D);
-    mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                            GL_LINEAR_MIPMAP_LINEAR);
-    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
+    return texture;
+}
 
-#ifdef DEBUG
-    // Only check for GL error on debug builds to avoid a potential synchronous
-    // flush.
-    const GLenum error = mGles2->glGetError();
-    if (error != GL_NO_ERROR) {
-        E("%s: GL error %d", __FUNCTION__, error);
-        return Texture();
+Texture RendererImpl::loadTextureAsync(const SceneObject* parent,
+                                       const char* filename) {
+    std::string path;
+    if (!PathUtils::isAbsolute(filename)) {
+        path = PathUtils::join(System::get()->getLauncherDirectory(),
+                               "resources", filename);
+    } else {
+        path = filename;
     }
-#endif
 
-    return createTextureInternal(parent, path.c_str(), textureId, width,
-                                 height);
+    Texture cachedTexture = tryGetCachedTexture(parent, path.c_str());
+    if (cachedTexture.isValid()) {
+        return cachedTexture;
+    }
+
+    Texture texture = createTextureHandle(parent, path.c_str());
+    mLoaderThread.enqueue({LoaderCommandType::LoadTexture, texture.id});
+    return texture;
 }
 
 void RendererImpl::render(const std::vector<RenderableObject>& renderables,
@@ -742,6 +842,17 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables,
     // the winding order, so the front-face is actually clockwise in window
     // space.
     mGles2->glFrontFace(GL_CW);
+
+    // Process render thread dispatcher queue.
+    std::function<void()> workItem;
+    while (mRenderThreadDispatcherQueue.tryReceive(&workItem)) {
+        workItem();
+    }
+
+    // Acquire the loader lock for the rest of rendering, it will involve
+    // accessing mTextures, mMeshes, and mMaterials to map the IDs to OpenGL
+    // resources.
+    AutoLock lock(mLoaderLock);
 
     // Render scene objects.
     for (auto& renderObject : renderables) {
@@ -789,7 +900,25 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables,
     mGles2->glUseProgram(0);
 }
 
+void RendererImpl::dispatchToRenderThread(std::function<void()>&& workItem) {
+    mRenderThreadDispatcherQueue.send(std::move(workItem));
+}
+
+WorkerProcessingResult RendererImpl::onLoaderCommand(LoaderCommand&& command) {
+    if (command.mType == LoaderCommandType::Shutdown) {
+        return WorkerProcessingResult::Stop;
+    } else if (command.mType == LoaderCommandType::LoadTexture) {
+        onLoaderLoadTexture({command.mHandle});
+    } else {
+        E("%s: Invalid command %d", __FUNCTION__,
+          static_cast<int>(command.mType));
+    }
+
+    return WorkerProcessingResult::Continue;
+}
+
 void RendererImpl::releaseMaterial(Material material) {
+    AutoLock lock(mLoaderLock);
     const auto materialIt = mMaterials.find(material.id);
 
     if (materialIt == mMaterials.end()) {
@@ -806,6 +935,7 @@ void RendererImpl::releaseMaterial(Material material) {
 }
 
 void RendererImpl::releaseMesh(Mesh mesh) {
+    AutoLock lock(mLoaderLock);
     const auto meshIt = mMeshes.find(mesh.id);
 
     if (meshIt == mMeshes.end()) {
@@ -823,6 +953,7 @@ void RendererImpl::releaseMesh(Mesh mesh) {
 }
 
 void RendererImpl::releaseTexture(Texture texture) {
+    AutoLock lock(mLoaderLock);
     auto textureIt = mTextures.find(texture.id);
 
     if (textureIt == mTextures.end()) {
@@ -833,9 +964,11 @@ void RendererImpl::releaseTexture(Texture texture) {
     TextureData& textureData = textureIt->second;
 
     if (textureData.mRefCount == 0) {
-        E("%s: Texture refcount error.", __FUNCTION__);
+        E("%s: Texture handle %d refcount error.", __FUNCTION__, texture.id);
         return;
     }
+
+    T("%s: Release texture handle %d", __FUNCTION__, texture.id);
 
     if (--textureData.mRefCount == 0) {
         // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
@@ -866,6 +999,7 @@ bool RendererImpl::isTextureSizeValid(uint32_t width, uint32_t height) {
 
 Texture RendererImpl::tryGetCachedTexture(const SceneObject* parent,
                                           const char* filename) {
+    AutoLock lock(mLoaderLock);
     const auto it = mTextureCache.find(filename);
     if (it == mTextureCache.end()) {
         return Texture();
@@ -909,25 +1043,23 @@ Texture RendererImpl::createEmptyTexture(
     }
 #endif
 
-    return createTextureInternal(parent, nullptr, textureId, width, height);
+    Texture texture = createTextureHandle(parent, nullptr);
+    setTextureStorage(texture, textureId, width, height);
+    return texture;
 }
 
-Texture RendererImpl::createTextureInternal(const SceneObject* parent,
-                                            const char* filename,
-                                            GLuint textureId,
-                                            uint32_t width,
-                                            uint32_t height) {
+Texture RendererImpl::createTextureHandle(const SceneObject* parent,
+                                          const char* filename) {
+    AutoLock lock(mLoaderLock);
     const int id = mNextResourceId++;
+    T("%s: Create texture handle %d for file '%s'", __FUNCTION__, id, filename);
 
     TextureData texture;
     texture.mRefCount = 1;
-    texture.mTextureId = textureId;
     if (filename) {
         texture.mFilename = filename;
         mTextureCache[filename] = id;
     }
-    texture.mWidth = width;
-    texture.mHeight = height;
 
     mTextures[id] = texture;
 
@@ -935,6 +1067,115 @@ Texture RendererImpl::createTextureInternal(const SceneObject* parent,
     textureHandle.id = id;
     mObjectData[parent].textures.push_back(textureHandle);
     return textureHandle;
+}
+
+void RendererImpl::setTextureStorage(Texture texture,
+                                     GLuint textureIdGL,
+                                     uint32_t width,
+                                     uint32_t height) {
+    AutoLock lock(mLoaderLock);
+    auto textureIt = mTextures.find(texture.id);
+    if (textureIt == mTextures.end()) {
+        D("%s: Could not find texture id %d, was the load canceled?",
+          __FUNCTION__, texture.id);
+
+        // Release the texture to avoid leaking it.
+        mGles2->glDeleteTextures(1, &textureIdGL);
+        return;
+    }
+
+    TextureData& textureData = textureIt->second;
+    textureData.mLoaded = true;
+    textureData.mTextureId = textureIdGL;
+    textureData.mWidth = width;
+    textureData.mHeight = height;
+}
+
+void RendererImpl::onLoaderLoadTexture(Texture texture) {
+    const uint64_t loadStartUs = System::get()->getHighResTimeUs();
+    std::string filename;
+    {
+        // Scope the lock so that TextureUtils::load happens outside of the
+        // lock.
+        AutoLock lock(mLoaderLock);
+        auto textureIt = mTextures.find(texture.id);
+
+        if (textureIt == mTextures.end()) {
+            D("%s: Could not find texture id %d, was the load canceled?",
+              __FUNCTION__, texture.id);
+            return;
+        }
+
+        if (textureIt->second.mLoaded) {
+            D("%s: Texture %d already loaded.", __FUNCTION__, texture.id);
+            return;
+        }
+
+        filename = textureIt->second.mFilename;
+    }
+
+    Optional<TextureUtils::Result> resultOpt =
+            TextureUtils::load(filename.c_str());
+    if (!resultOpt) {
+        E("%s: Failed to load texture %d from file '%s'", __FUNCTION__,
+          texture.id, filename.c_str());
+        return;
+    }
+
+    const uint64_t loadEndUs = System::get()->getHighResTimeUs();
+
+    TextureUtils::Result result = std::move(resultOpt.value());
+    dispatchToRenderThread([this, texture, result, loadStartUs, loadEndUs]() {
+        const uint64_t importStartUs = System::get()->getHighResTimeUs();
+        if (!importTextureData(texture, result)) {
+            return;
+        }
+        const uint64_t importEndUs = System::get()->getHighResTimeUs();
+
+        D("onLoaderLoadTexture: Async load texture %d in %" PRIu64
+          "ms, [read: %" PRIu64 "ms, import: %" PRIu64 "ms]",
+          texture.id, durationUsToMs(loadStartUs, importEndUs),
+          durationUsToMs(loadStartUs, loadEndUs),
+          durationUsToMs(importStartUs, importEndUs));
+    });
+}
+
+bool RendererImpl::importTextureData(Texture texture,
+                                     const TextureUtils::Result& data) {
+    if (!isTextureSizeValid(data.mWidth, data.mHeight)) {
+        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d",
+          data.mWidth, data.mHeight, GL_MAX_TEXTURE_SIZE);
+        return false;
+    }
+
+    const GLenum textureFormat =
+            data.mFormat == TextureUtils::Format::RGBA32 ? GL_RGBA : GL_RGB;
+
+    GLuint textureId;
+    mGles2->glGenTextures(1, &textureId);
+    mGles2->glBindTexture(GL_TEXTURE_2D, textureId);
+    mGles2->glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, textureFormat, data.mWidth,
+                         data.mHeight, 0, textureFormat, GL_UNSIGNED_BYTE,
+                         data.mBuffer.data());
+    mGles2->glGenerateMipmap(GL_TEXTURE_2D);
+    mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                            GL_LINEAR_MIPMAP_LINEAR);
+    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
+
+#ifdef DEBUG
+    // Only check for GL error on debug builds to avoid a potential synchronous
+    // flush.
+    const GLenum error = mGles2->glGetError();
+    if (error != GL_NO_ERROR) {
+        E("%s: GL error %d", __FUNCTION__, error);
+        return false;
+    }
+#endif
+
+    setTextureStorage(texture, textureId, data.mWidth, data.mHeight);
+    return true;
 }
 
 GLuint RendererImpl::compileShader(GLenum type, const char* shaderSource) {
@@ -1017,6 +1258,7 @@ GLuint RendererImpl::getTextureId(Texture texture) const {
     return mTextures.at(texture.id).mTextureId;
 }
 
+// Called under mLoaderLock.
 void RendererImpl::processRenderable(
         const Renderable& renderable,
         RenderableParameterCallback parameterCallback) {

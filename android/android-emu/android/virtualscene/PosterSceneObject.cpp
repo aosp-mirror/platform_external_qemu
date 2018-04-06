@@ -54,51 +54,16 @@ std::unique_ptr<PosterSceneObject> PosterSceneObject::create(
     // to something.
     std::unique_ptr<PosterSceneObject> result(new PosterSceneObject());
 
-    Texture texture = renderer.loadTexture(result.get(), textureFilename);
+    Texture texture = renderer.loadTextureAsync(result.get(), textureFilename);
     if (!texture.isValid()) {
         W("%s: Could not load texture '%s'", __FUNCTION__, textureFilename);
         return nullptr;
     }
 
-    // Determine poster size.
-    uint32_t width = 0;
-    uint32_t height = 0;
-    renderer.getTextureInfo(texture, &width, &height);
-
-    glm::vec2 aspectRatio =
-            glm::vec2(static_cast<float>(width), static_cast<float>(height));
-    const float aspectRatioMax = std::max(aspectRatio.x, aspectRatio.y);
-    if (aspectRatioMax > 0.0f) {
-        aspectRatio /= aspectRatioMax;
-    }
-
-    const glm::vec3 scale(maxSize * aspectRatio, 1.0f);
-    const glm::mat4 baseTransform = glm::translate(glm::mat4(), position) *
-                                    glm::mat4_cast(rotation) *
-                                    glm::scale(glm::mat4(), scale);
-
-    // The minimum scale is the minimum size that the poster can be without
-    // being smaller than kMinimumSizeMeters (on the smallest side).
-    const float posterSize = std::min(scale.x, scale.y);
-    float minScale = kMinimumSizeMeters / posterSize;
-    if (minScale > 1.0f) {
-        // This indicates that a poster in the scene is smaller than the minimum
-        // size.  Set to 1 to effectively disable scaling and avoid exceeding
-        // the poster's bounds.
-        minScale = 1.0f;
-    }
-
-    // Initialize result.
-    Renderable renderable;
-    renderable.material = renderer.createMaterialTextured();
-    renderable.mesh =
-            renderer.createMesh(result.get(), kQuadVerts, kQuadIndices);
-    renderable.texture = texture;
-
-    result.get()->mRenderables.emplace_back(std::move(renderable));
-    result.get()->mBaseTransform = baseTransform;
-    result.get()->mMinScale = minScale;
-    result.get()->updateTransform();
+    result.get()->mTextureHandle = texture;
+    result.get()->mPositionRotation =
+            glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
+    result.get()->mMaxSize = maxSize;
 
     return result;
 }
@@ -108,9 +73,54 @@ void PosterSceneObject::setScale(float value) {
     updateTransform();
 }
 
+// Update the PosterSceneObject for the current frame.
+void PosterSceneObject::update(Renderer& renderer) {
+    if (!mFinishedLoading && renderer.isTextureLoaded(mTextureHandle)) {
+        mFinishedLoading = true;
+
+        // Determine poster size.
+        uint32_t width = 0;
+        uint32_t height = 0;
+        renderer.getTextureInfo(mTextureHandle, &width, &height);
+
+        glm::vec2 aspectRatio = glm::vec2(static_cast<float>(width),
+                                          static_cast<float>(height));
+        const float aspectRatioMax = std::max(aspectRatio.x, aspectRatio.y);
+        if (aspectRatioMax > 0.0f) {
+            aspectRatio /= aspectRatioMax;
+        }
+
+        const glm::vec3 scale(mMaxSize * aspectRatio, 1.0f);
+
+        // The minimum scale is the minimum size that the poster can be without
+        // being smaller than kMinimumSizeMeters (on the smallest side).
+        const float posterSize = std::min(scale.x, scale.y);
+        float minScale = kMinimumSizeMeters / posterSize;
+        if (minScale > 1.0f) {
+            // This indicates that a poster in the scene is smaller than the
+            // minimum size.  Set to 1 to effectively disable scaling and avoid
+            // exceeding the poster's bounds.
+            minScale = 1.0f;
+        }
+
+        // Initialize renderable.
+        Renderable renderable;
+        renderable.material = renderer.createMaterialTextured();
+        renderable.mesh = renderer.createMesh(this, kQuadVerts, kQuadIndices);
+        renderable.texture = mTextureHandle;
+        mRenderables.emplace_back(std::move(renderable));
+
+        // Initialize transform.
+        mPosterSizeTransform = glm::scale(glm::mat4(), scale);
+        mMinScale = minScale;
+        updateTransform();
+    }
+}
+
 void PosterSceneObject::updateTransform() {
     const float scale = glm::clamp(mScale, mMinScale, 1.0f);
-    setTransform(mBaseTransform * glm::scale(glm::mat4(), glm::vec3(scale)));
+    setTransform(mPositionRotation * mPosterSizeTransform *
+                 glm::scale(glm::mat4(), glm::vec3(scale)));
 }
 
 }  // namespace virtualscene

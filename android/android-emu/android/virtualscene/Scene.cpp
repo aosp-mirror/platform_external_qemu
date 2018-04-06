@@ -114,6 +114,12 @@ const SceneCamera& Scene::getCamera() const {
 
 int64_t Scene::update() {
     mCamera.update();
+    for (auto& poster : mPosters) {
+        if (poster.second.sceneObject) {
+            poster.second.sceneObject->update(mRenderer);
+        }
+    }
+
     return mCamera.getTimestamp();
 }
 
