@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87062a95_198af9a2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-scene-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T02:55:46Z",
+      "side": 1,
+      "message": "When I tried the CL, for the wall poster at least, the slider started out at 0 while the scale of the poster was 1 in the actual virtual world, then snapped from the minimum scale as I dragged it up from 0, which could appear slightly jarring. Should we make the initial value 1.0 for the slider / load it from AVD specific settings?",
+      "range": {
+        "startLine": 32,
+        "startChar": 1,
+        "endLine": 33,
+        "endChar": 66
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5b80d50_0a52de34",
+        "filename": "android/android-emu/android/virtualscene/PosterSceneObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T02:55:46Z",
+      "side": 1,
+      "message": "I only see setPosterLocation and ::create in the single place in the same function, with them taking different paths only if ::create fails. Should we fuse setPosterLocation with ::create, so there\u0027s fewer possible states for a PosterSceneObject, or do we anticipate that in the future we\u0027ll want to continuously shift the position/rotation after creation?",
+      "range": {
+        "startLine": 71,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 69
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47af67ed_2ebd5c42",
+        "filename": "android/android-emu/android/virtualscene/Renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T02:55:46Z",
+      "side": 1,
+      "message": "It looks like createTextureInternal could take a TextureData as argument, so that there would be fewer arguments to the function (for simplicity).",
+      "range": {
+        "startLine": 313,
+        "startChar": 0,
+        "endLine": 322,
+        "endChar": 51
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f6165c0_8d0e59e5",
+        "filename": "android/android-emu/android/virtualscene/Scene.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T02:55:46Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 112,
+        "startChar": 12,
+        "endLine": 112,
+        "endChar": 43
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2be4d6cf_6d6299de",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T02:55:46Z",
+      "side": 1,
+      "message": "Could this be a public struct of Settings?",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 22
+      },
+      "revId": "3686a0c34e83c3308f9abd0a7b894c96450b299d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
