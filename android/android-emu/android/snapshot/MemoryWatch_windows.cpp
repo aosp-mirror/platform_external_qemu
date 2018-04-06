@@ -12,6 +12,7 @@
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/Snapshotter.h"
 
+#include "android/base/memory/MemoryHints.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
@@ -27,6 +28,7 @@
 #include <utility>
 #include <vector>
 
+using android::base::MemoryHint;
 using android::base::System;
 
 namespace android {
@@ -91,7 +93,11 @@ public:
         }
 
         if (!data) {
-            memset(start, 0, length);
+            // Is zero data, so try to use an existing zero page in the OS
+            // instead of memset which might cause more memory to be resident.
+            memset(start, 0x0, length);
+            android::base::memoryHint(start, length, MemoryHint::DontNeed);
+            android::base::memoryHint(start, length, MemoryHint::Normal);
         } else {
             memcpy(start, data, length);
         }
