@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cd434ba3_c795f0bb",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fee61145_c17b2cc2",
+      "range": {
+        "startLine": 431,
+        "startChar": 8,
+        "endLine": 431,
+        "endChar": 9
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b15523c_efc8a5c7",
         "filename": "target/i386/hax-all.c",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d15a9da7_39c514d2",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b15523c_efc8a5c7",
+      "range": {
+        "startLine": 437,
+        "startChar": 7,
+        "endLine": 437,
+        "endChar": 8
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2f3820df_eabb0e7a",
         "filename": "target/i386/hax-i386.h",
         "patchSetId": 1
@@ -62,6 +110,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4ebf92e_a1dd73e6",
+        "filename": "target/i386/hax-i386.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2f3820df_eabb0e7a",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "17ffb33a_6fc0e04c",
+        "filename": "target/i386/hax-i386.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e6987aa8_d16b7e3c",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 14
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b64294da_ab8961ea",
         "filename": "target/i386/hax-i386.h",
         "patchSetId": 1
@@ -108,6 +198,30 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d92f4c87_7c5e52e4",
+        "filename": "target/i386/hax-i386.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b64294da_ab8961ea",
+      "range": {
+        "startLine": 35,
+        "startChar": 8,
+        "endLine": 35,
+        "endChar": 23
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -134,6 +248,30 @@
     },
     {
       "key": {
+        "uuid": "9b32632e_6df39780",
+        "filename": "target/i386/hax-i386.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d2fd676_afca95f0",
+      "range": {
+        "startLine": 54,
+        "startChar": 20,
+        "endLine": 54,
+        "endChar": 29
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bfe8ef0a_0a4112a6",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -154,6 +292,30 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9fe35bd0_910ddf73",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bfe8ef0a_0a4112a6",
+      "range": {
+        "startLine": 31,
+        "startChar": 12,
+        "endLine": 31,
+        "endChar": 28
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "d11b9091_1f8e5599",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d31f2465_b5f29254",
+      "range": {
+        "startLine": 36,
+        "startChar": 15,
+        "endLine": 36,
+        "endChar": 30
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2fc884df_90096192",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -203,6 +389,30 @@
     },
     {
       "key": {
+        "uuid": "4f467313_d8a99576",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2fc884df_90096192",
+      "range": {
+        "startLine": 49,
+        "startChar": 61,
+        "endLine": 49,
+        "endChar": 63
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4057d01d_8b0ac23b",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -217,6 +427,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d823fb3e_69c5a865",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "I\u0027m not 100% sure that size \u003d\u003d 0 equivalent to HAX_RAM_INFO_INVALID, as we might be calling different versions of the HAXM driver with passing the flag, so to decrease risk I\u0027m going to maintain them both for now.",
+      "parentUuid": "4057d01d_8b0ac23b",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -237,6 +465,24 @@
     },
     {
       "key": {
+        "uuid": "f06e018e_862aed84",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "458065c3_02d8c2cb",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6b3c5f7_84136762",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -254,6 +500,24 @@
     },
     {
       "key": {
+        "uuid": "eb267fb7_c7ce3577",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6b3c5f7_84136762",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83d173e2_fa1f0f51",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -268,6 +532,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d83670d8_0edbbcaa",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83d173e2_fa1f0f51",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -294,6 +576,30 @@
     },
     {
       "key": {
+        "uuid": "704785a4_46452acb",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "60a1cb26_dff0858f",
+      "range": {
+        "startLine": 69,
+        "startChar": 12,
+        "endLine": 69,
+        "endChar": 50
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b920df6_67c843ea",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -308,6 +614,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "918be285_b220a81b",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b920df6_67c843ea",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -334,6 +658,30 @@
     },
     {
       "key": {
+        "uuid": "c1393549_5c9a1068",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "09ee81aa_11d526e3",
+      "range": {
+        "startLine": 77,
+        "startChar": 11,
+        "endLine": 77,
+        "endChar": 12
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "46cc890a_71691d6c",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -357,6 +705,30 @@
     },
     {
       "key": {
+        "uuid": "f9e400c8_c4b01d55",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46cc890a_71691d6c",
+      "range": {
+        "startLine": 80,
+        "startChar": 16,
+        "endLine": 81,
+        "endChar": 45
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4e7a695_2d0ad708",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -371,6 +743,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86cd939e_0c4d1923",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4e7a695_2d0ad708",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -397,6 +787,30 @@
     },
     {
       "key": {
+        "uuid": "dc67a969_3060a065",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90761e24_3295e7d9",
+      "range": {
+        "startLine": 87,
+        "startChar": 12,
+        "endLine": 87,
+        "endChar": 50
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba7f4d12_b8220722",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -420,6 +834,30 @@
     },
     {
       "key": {
+        "uuid": "0af6d89e_1587fbb7",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba7f4d12_b8220722",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 43
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "817bc741_f96befa6",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -434,6 +872,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3009b8a_327e2b44",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "817bc741_f96befa6",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -454,6 +910,24 @@
     },
     {
       "key": {
+        "uuid": "e3171aa9_37cf7668",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "108d996b_f0c7fa8c",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d68cc16_380b253f",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -468,6 +942,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e161fb81_280f5b42",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d68cc16_380b253f",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -511,6 +1003,48 @@
     },
     {
       "key": {
+        "uuid": "d1c19eaa_13c7f9ed",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "20ae8960_da678460",
+      "range": {
+        "startLine": 141,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 16
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50f77dab_f05fb9a9",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "468f3260_f577629e",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7fbfcdc0_c5dd404b",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -534,6 +1068,30 @@
     },
     {
       "key": {
+        "uuid": "9d901368_94d95633",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7fbfcdc0_c5dd404b",
+      "range": {
+        "startLine": 142,
+        "startChar": 15,
+        "endLine": 142,
+        "endChar": 17
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "728e8b25_61998f85",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -551,6 +1109,24 @@
     },
     {
       "key": {
+        "uuid": "657818f3_a66aa514",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "728e8b25_61998f85",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e160235e_bf31fce6",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -562,6 +1138,24 @@
       "writtenOn": "2018-03-22T04:24:44Z",
       "side": 1,
       "message": "I think I now understand the algorithm here. As I\u0027ve pointed out below, it doesn\u0027t handle the case where the new region (area) is very big and overlaps with multiple existing slots. In that case, we can delete/invalidate those existing slots one by one, before adding the new (big) slot. Of course, we\u0027ll have to handle the first and last existing slots with care (in case of a partial overlap).\nIf we make use of slot ids, we can simplify slot management on both QEMU and HAXM (kernel) sides, because we\u0027ll be able to delete/invalidate a slot by its id (invoking SET_RAM2 with size \u003d 0). But even without slot ids, the said algorithm can still be implemented. A big benefit of it is that SET_RAM2 will never be called with a region that overlaps with partial or more than one existing slot, so HAXM no longer needs to split or resize slots.",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fc290ae_b2b5c6c5",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Ok, I went over this again and made it handle multiple overlapped slots and the case where a single slot gets split, and hax_set_ram is never called with an overlapping range.\n\nSo if I understand correctly, SET_RAM2 is a new ioctl api for HAXM where we can invalidate slots by ids and slot id\u0027s will always be disjoint? What if the user on the QEMU side wants to merge or split regions?",
+      "parentUuid": "e160235e_bf31fce6",
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -591,6 +1185,30 @@
     },
     {
       "key": {
+        "uuid": "ca483230_84ab2f47",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7d702953_48e80a59",
+      "range": {
+        "startLine": 156,
+        "startChar": 31,
+        "endLine": 156,
+        "endChar": 32
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5fe0e2a5_577512cf",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -605,6 +1223,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59b94db8_9cde87b8",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fe0e2a5_577512cf",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -655,6 +1291,30 @@
     },
     {
       "key": {
+        "uuid": "4ed4806b_bf8a6f25",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Yu pointed out many more cases that weren\u0027t addressed so I ended up rewriting it.",
+      "parentUuid": "018ed057_2345003a",
+      "range": {
+        "startLine": 161,
+        "startChar": 12,
+        "endLine": 164,
+        "endChar": 24
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4167f4fc_56700b91",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -672,6 +1332,24 @@
     },
     {
       "key": {
+        "uuid": "c6ac0fcb_fae6c3ba",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4167f4fc_56700b91",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00f80204_217951ea",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -686,6 +1364,24 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9cccbe88_eff4e7b3",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "00f80204_217951ea",
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -712,6 +1408,30 @@
     },
     {
       "key": {
+        "uuid": "e2bab0c3_3df8e00e",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4907515c_0e74e35b",
+      "range": {
+        "startLine": 221,
+        "startChar": 20,
+        "endLine": 221,
+        "endChar": 31
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9bea2351_772ebf3f",
         "filename": "target/i386/hax-mem.c",
         "patchSetId": 1
@@ -732,6 +1452,30 @@
       "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b0022cc_f7dcadfe",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-06T15:48:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9bea2351_772ebf3f",
+      "range": {
+        "startLine": 222,
+        "startChar": 31,
+        "endLine": 222,
+        "endChar": 41
+      },
+      "revId": "a411d8ef278aa9583e096909adeb0c2f66df4e10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
