@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b795f16_ec2c0d6f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-07T06:13:52Z",
+      "side": 1,
+      "message": "Should we consider loading a very small placeholder texture (2x2 pixels or something) that is somewhat transparent so that it plays well with the rest of the scene (isn\u0027t solid black) and avoids issues with making texture id 0 special?",
+      "range": {
+        "startLine": 23,
+        "startChar": 54,
+        "endLine": 24,
+        "endChar": 41
+      },
+      "revId": "156c4f97f1b7435d40503df89cb6e05d70d6b93f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10e93910_fe8d1266",
+        "filename": "android/android-emu/android/virtualscene/PosterSceneObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-07T06:13:52Z",
+      "side": 1,
+      "message": "I\u0027m wondering what would be the differences if we end up loading a small placeholder texture first (including getting the OpenGL texture handle with glGenTextures) in the material creation, or something, and then re-defining it with glTexImage2D once the real data comes in.\n\nIt might make things less complex overall, with an initial cost of doing more work in update():\n\n1. Cost: update() can dynamically adjust to the current size of the texture if it has changed.\n2. But that means it\u0027s more decoupled from the explicit renderer state, which is good IMO.\n3. We can still initialize the material and mesh in ::create.",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 32
+      },
+      "revId": "156c4f97f1b7435d40503df89cb6e05d70d6b93f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a036180_bd958bab",
+        "filename": "android/android-emu/android/virtualscene/Renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-07T06:13:52Z",
+      "side": 1,
+      "message": "Maybe mResourceLock?",
+      "range": {
+        "startLine": 420,
+        "startChar": 23,
+        "endLine": 420,
+        "endChar": 34
+      },
+      "revId": "156c4f97f1b7435d40503df89cb6e05d70d6b93f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "762669af_8bee8338",
+        "filename": "android/android-emu/android/virtualscene/Renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1070,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-07T06:13:52Z",
+      "side": 1,
+      "message": "I guess the small texture data up front scheme would require some sort of dispatch to the renderer here.\n\nAnother way would be to create another context in the same share group as the renderer, and have the loader thread issue GL commands directly, but IMO that can wait until we need to be async loading more kinds / quantity of data.",
+      "range": {
+        "startLine": 1070,
+        "startChar": 0,
+        "endLine": 1070,
+        "endChar": 1
+      },
+      "revId": "156c4f97f1b7435d40503df89cb6e05d70d6b93f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cec27281_52c2fece",
+        "filename": "android/android-emu/android/virtualscene/Renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-07T06:13:52Z",
+      "side": 1,
+      "message": "I feel a slight weirdness that the Texture is being called a handle when it\u0027s a struct with a single member that has a method. I\u0027d be led to believe that Texture could be treated directly as an integer in this case. Could we drop the \"handle\" part and just use \"Texture\"? Or, rename the Texture type itself to TextureHandle.",
+      "range": {
+        "startLine": 190,
+        "startChar": 25,
+        "endLine": 190,
+        "endChar": 32
+      },
+      "revId": "156c4f97f1b7435d40503df89cb6e05d70d6b93f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
