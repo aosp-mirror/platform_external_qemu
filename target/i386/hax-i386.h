@@ -51,6 +51,7 @@ struct hax_state {
     uint64_t mem_quota;
     bool supports_64bit_ramblock;
     bool supports_64bit_setram;
+    bool supports_ram_protection;
     struct hax_slot memslots[HAX_MAX_SLOTS];
 };
 
@@ -85,6 +86,7 @@ int hax_vm_destroy(struct hax_vm *vm);
 int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap);
 int hax_notify_qemu_version(hax_fd vm_fd, struct hax_qemu_version *qversion);
 int hax_set_ram(uint64_t start_pa, uint64_t size, uint64_t host_va, int flags);
+int hax_protect_ram(uint64_t start_pa, uint64_t size, int flags);
 
 /* Common host function */
 int hax_host_create_vm(struct hax_state *hax, int *vm_id);
