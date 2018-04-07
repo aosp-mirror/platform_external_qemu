@@ -537,6 +537,11 @@ static MemoryListener hax_memory_listener = {
     .priority = 10,
 };
 
+int hax_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags) {
+    int res = hax_protect_ram(gpa, size, flags);
+    return res;
+}
+
 static void hax_ram_block_added(RAMBlockNotifier *n, void *host, size_t size)
 {
     /*
