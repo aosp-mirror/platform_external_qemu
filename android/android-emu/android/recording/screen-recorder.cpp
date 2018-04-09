@@ -25,6 +25,7 @@
 #include "android/recording/codecs/video/VP9Codec.h"
 #include "android/recording/screen-recorder-constants.h"
 #include "android/recording/video/VideoProducer.h"
+#include "android/recording/video/WebRTCProducer.h"
 #include "android/utils/debug.h"
 
 #include <atomic>
@@ -53,6 +54,7 @@ struct Globals {
     // may be accessing this concurrently.
     Lock lock;
     std::unique_ptr<ScreenRecorder> recorder;
+    std::unique_ptr<android::recording::Producer> webrtc_module;
     const QAndroidDisplayAgent* displayAgent = nullptr;
     uint32_t fbWidth = 0;
     uint32_t fbHeight = 0;
@@ -300,6 +302,7 @@ RecorderState screen_recorder_state_get(void) {
     }
 }
 
+
 void screen_recorder_init(uint32_t w,
                           uint32_t h,
                           const QAndroidDisplayAgent* dpy_agent) {
@@ -320,6 +323,7 @@ void screen_recorder_init(uint32_t w,
             dpy_agent->initFrameBufferNoWindow(&globals.dummyQf);
         }
     }
+
     D("%s(w=%d, h=%d, isGuestMode=%d)", __func__, w, h, dpy_agent != nullptr);
 }
 
@@ -343,4 +347,29 @@ bool screen_recorder_stop(bool async) {
     }
 
     return false;
+}
+
+bool start_webrtc_module(const char* handle, int fps) {
+    auto& globals = *sGlobals;
+
+    AutoLock lock(globals.lock);
+    if (globals.webrtc_module) {
+        globals.webrtc_module->stop();
+    }
+
+    globals.webrtc_module = android::recording::createWebRTCProducer(globals.fbWidth, globals.fbHeight, fps, handle);
+    globals.webrtc_module->start();
+    return true;
+}
+
+bool stop_webrtc_module() {
+    auto& globals = *sGlobals;
+
+    AutoLock lock(globals.lock);
+
+    if (globals.webrtc_module) {
+        globals.webrtc_module->stop();
+    }
+
+    return true;
 }
