@@ -278,4 +278,7 @@
         <file alias="warning">images/all/warning.png</file>
         <file alias="warning_2x">images/all/warning_2x.png</file>
     </qresource>
+    <qresource prefix="/qml">
+        <file alias="custom-location.qml">extended-pages/custom-location.qml</file>
+    </qresource>
 </RCC>

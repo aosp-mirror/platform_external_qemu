@@ -18,12 +18,14 @@
 #include "android/gps/KmlParser.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
+#include "android/qt/qt_path.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 
 #include <QFileDialog>
+#include <QQmlEngine>
 #include <QSettings>
 #include <algorithm>
 #include <string>
@@ -119,6 +121,14 @@ LocationPage::LocationPage(QWidget *parent) :
                 }
                 return false;
     });
+
+    // Add custom location tab
+    mMapQuickView.reset(new QQuickView());
+    printf("qmldir=%s\n", androidQtGetQmlDir().c_str());
+    mMapQuickView->engine()->addImportPath(androidQtGetQmlDir().c_str());
+    mMapWidget.reset(QWidget::createWindowContainer(mMapQuickView.get(), mUi->customLocationTab));
+    mMapQuickView->setSource(QUrl("qrc:/qml/custom-location.qml"));
+    mMapWidget->show();
 }
 
 LocationPage::~LocationPage() {
