@@ -25,6 +25,7 @@
 #include "android/recording/codecs/video/VP9Codec.h"
 #include "android/recording/screen-recorder-constants.h"
 #include "android/recording/video/VideoProducer.h"
+#include "android/recording/video/VideoFrameSharer.h"
 #include "android/utils/debug.h"
 
 #include <atomic>
@@ -42,6 +43,7 @@ using android::recording::CodecParams;
 using android::recording::FfmpegRecorder;
 using android::recording::VorbisCodec;
 using android::recording::VP9Codec;
+using android::recording::VideoFrameSharer;
 
 // The incoming audio sample format.
 constexpr AudioFormat kInSampleFormat = AudioFormat::AUD_FMT_S16;
@@ -54,6 +56,7 @@ struct Globals {
     // may be accessing this concurrently.
     Lock lock;
     std::unique_ptr<ScreenRecorder> recorder;
+    std::unique_ptr<VideoFrameSharer> webrtc_module;
     const QAndroidDisplayAgent* displayAgent = nullptr;
     uint32_t fbWidth = 0;
     uint32_t fbHeight = 0;
@@ -316,6 +319,7 @@ RecorderState screen_recorder_state_get(void) {
     }
 }
 
+
 void screen_recorder_init(uint32_t w,
                           uint32_t h,
                           const QAndroidDisplayAgent* dpy_agent) {
@@ -336,6 +340,7 @@ void screen_recorder_init(uint32_t w,
             dpy_agent->initFrameBufferNoWindow(&globals.dummyQf);
         }
     }
+
     D("%s(w=%d, h=%d, isGuestMode=%d)", __func__, w, h, dpy_agent != nullptr);
 }
 
@@ -360,3 +365,47 @@ bool screen_recorder_stop(bool async) {
 
     return false;
 }
+
+bool start_webrtc_module(const char* handle, int fps) {
+    auto& globals = *sGlobals;
+
+    AutoLock lock(globals.lock);
+    if (globals.webrtc_module) {
+        globals.webrtc_module->stop();
+    }
+
+    auto producer = android::recording::createVideoProducer(
+            globals.fbWidth, globals.fbHeight, fps, globals.displayAgent);
+    globals.webrtc_module.reset(new VideoFrameSharer(
+            globals.fbWidth, globals.fbHeight, fps, handle));
+
+    // We can fail due to shared memory allocation issues.
+    if (!globals.webrtc_module->attachProducer(std::move(producer)))
+        return false;
+
+    globals.webrtc_module->start();
+    return true;
+}
+
+bool stop_webrtc_module() {
+    auto& globals = *sGlobals;
+
+    AutoLock lock(globals.lock);
+
+    if (globals.webrtc_module) {
+        globals.webrtc_module->stop();
+    }
+
+    return true;
+}
+
+extern "C" {
+bool start_webrtc(const char* handle, int fps) {
+    return start_webrtc_module(handle, fps);
+}
+
+bool stop_webrtc() {
+    return stop_webrtc_module();
+}
+}
+
