@@ -16,6 +16,24 @@
       "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57c36e29_116e51e2",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-09T16:23:51Z",
+      "side": 1,
+      "message": "Thanks for the info!\n\nThe background loader thread is necessary for snapshot saves to count as \"done\"; it needs to be join()ed.\n\nI can look into increasing the amount that the background loader thread loads at a time.",
+      "parentUuid": "7e3813e1_b76c5668",
+      "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
