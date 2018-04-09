@@ -682,6 +682,7 @@ LOCAL_SRC_FILES := \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/OnDemand_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
+  android/base/memory/SharedMemory_unittest.cpp \
   android/base/misc/FileUtils_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
