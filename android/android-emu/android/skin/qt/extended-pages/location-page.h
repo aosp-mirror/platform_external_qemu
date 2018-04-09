@@ -15,6 +15,7 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/gps/GpsFix.h"
 #include "android/metrics/PeriodicReporter.h"
+#include <QQuickView>
 #include <QTimer>
 #include <QThread>
 #include <QWidget>
@@ -122,6 +123,10 @@ private:
     android::base::ConditionVariable mUpdateThreadCv;
     android::base::Lock mUpdateThreadLock;
     bool mShouldCloseUpdateThread = false;
+
+    // For custom location tab
+    std::unique_ptr<QQuickView> mMapQuickView;
+    std::unique_ptr<QWidget> mMapWidget;
 };
 
 class GeoDataLoaderThread : public QThread {
