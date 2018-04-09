@@ -784,6 +784,254 @@ builder_build_autotools_package_full_install () {
     touch "$PKG_TIMESTAMP"
 }
 
+# Build a given autotools based package and run customized install commands.
+# Uses autogen.sh to configure build
+#
+# $1: Package basename
+# $2: Make commands, e.g. install
+# $3+: Additional configure options.
+builder_build_autotools_package_full_install_autogen () {
+    local PKG_NAME=$(package_list_get_src_dir $1)
+    local INSTALL_COMMANDS="$2"
+    local PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
+    local PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
+    local PKG_TIMESTAMP=${PKG_BUILD_DIR}-timestamp
+
+    shift; shift;
+
+    if [ -f "$PKG_TIMESTAMP" -a -z "$OPT_FORCE" ]; then
+        # Return early if the package was already built.
+        return 0
+    fi
+
+    case $_SHU_BUILDER_CURRENT_HOST in
+        darwin*)
+            # Required for proper Autotools builds on Darwin
+            builder_disable_verbose_install
+            ;;
+    esac
+
+    local PKG_FULLNAME="$(basename $PKG_NAME)"
+    dump "$(builder_text) Building $PKG_FULLNAME"
+
+    local INSTALL_FLAGS
+    if [ -z "$_SHU_BUILDER_DISABLE_PARALLEL_INSTALL" ]; then
+        var_append INSTALL_FLAGS "-j$NUM_JOBS"
+    fi
+    if [ -z "$_SHU_BUILDER_DISABLE_VERBOSE_INSTALL" ]; then
+        var_append INSTALL_FLAGS "V=1";
+    fi
+    (
+        run mkdir -p "$PKG_BUILD_DIR" &&
+        run cd "$PKG_BUILD_DIR" &&
+        export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
+        export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+        export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
+        export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+        run "$PKG_SRC_DIR"/autogen.sh \
+            --prefix=$_SHU_BUILDER_PREFIX \
+            $_SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
+            $_SHU_BUILDER_CONFIGURE_FLAGS \
+            "$@" &&
+        run make -j$NUM_JOBS V=1 &&
+        run make $INSTALL_COMMANDS $INSTALL_FLAGS
+    ) ||
+    panic "Could not build and install $PKG_FULLNAME"
+
+    touch "$PKG_TIMESTAMP"
+}
+
+# Build a given autotools based package and run customized install commands.
+# Uses autogen.sh to configure build
+#
+# $1: Package basename
+# $2: Make commands, e.g. install
+# $3+: Additional configure options.
+builder_build_autotools_package_full_install_libxcb () {
+    local PKG_NAME=$(package_list_get_src_dir $1)
+    local INSTALL_COMMANDS="$2"
+    local PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
+    local PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
+    local PKG_TIMESTAMP=${PKG_BUILD_DIR}-timestamp
+
+    shift; shift;
+
+    if [ -f "$PKG_TIMESTAMP" -a -z "$OPT_FORCE" ]; then
+        # Return early if the package was already built.
+        return 0
+    fi
+
+    # Check if we have xorg-macros and xcb-proto in the prebuilts directory.
+    local XCB_PROTO_INSTALL_PATH="$PREBUILTS_DIR/common/xcb-proto/$_SHU_BUILDER_CURRENT_HOST"
+    echo "XCB_PROTO_INSTALL_PATH=$XCB_PROTO_INSTALL_PATH"
+    local XORG_MACROS_INSTALL_PATH="$PREBUILTS_DIR/common/xorg-macros/$_SHU_BUILDER_CURRENT_HOST"
+    local XPROTO_INSTALL_PATH="$PREBUILTS_DIR/common/xproto/$_SHU_BUILDER_CURRENT_HOST"
+    local LIBXAU_INSTALL_PATH="$PREBUILTS_DIR/common/libXau/$_SHU_BUILDER_CURRENT_HOST"
+    echo "XORG_MACROS_INSTALL_PATH=$XORG_MACROS_INSTALL_PATH"
+    local LIBPTHREAD_STUBS_INSTALL_PATH="$PREBUILTS_DIR/common/libpthread-stubs/$_SHU_BUILDER_CURRENT_HOST"
+    if [ ! -d $XCB_PROTO_INSTALL_PATH ]; then
+        panic "Missing $XCB_PROTO_INSTALL_PATH. Run build-xcb-proto.sh first."
+    fi
+    
+    if [ ! -d $LIBXAU_INSTALL_PATH ]; then
+        panic "Missing $LIBXAU_INSTALL_PATH. Run build-libXau.sh first."
+    fi
+    
+    if [ ! -d $XORG_MACROS_INSTALL_PATH ]; then
+        panic "Missing $XORG_MACROS_INSTALL_PATH. Run build-xorg-macros.sh first."
+    fi
+
+    if [ ! -d $LIBPTHREAD_STUBS_INSTALL_PATH ]; then
+        panic "Missing $LIBPTHREAD_STUBS_INSTALL_PATH. Run build-libpthread-stubs.sh first."
+    fi
+
+    if [ ! -d $XPROTO_INSTALL_PATH ]; then
+        panic "Missing $XPROTO_INSTALL_PATH. Run build-xproto.sh first."
+    fi
+
+
+    case $_SHU_BUILDER_CURRENT_HOST in
+        darwin*)
+            # Required for proper Autotools builds on Darwin
+            builder_disable_verbose_install
+            ;;
+    esac
+
+    local PKG_FULLNAME="$(basename $PKG_NAME)"
+    dump "$(builder_text) Building $PKG_FULLNAME"
+
+    local INSTALL_FLAGS
+    if [ -z "$_SHU_BUILDER_DISABLE_PARALLEL_INSTALL" ]; then
+        var_append INSTALL_FLAGS "-j$NUM_JOBS"
+    fi
+    if [ -z "$_SHU_BUILDER_DISABLE_VERBOSE_INSTALL" ]; then
+        var_append INSTALL_FLAGS "V=1";
+    fi
+    local RED='\033[0;31m'
+    local NC='\033[0m'
+    (
+        run mkdir -p "$PKG_BUILD_DIR" &&
+        run cd "$PKG_BUILD_DIR" &&
+        export ACLOCAL_PATH="$XORG_MACROS_INSTALL_PATH/share/aclocal" &&
+	echo  -e "${RED}ACLOCAL_PATH=$ACLOCAL_PATH${NC}" &&
+        export ACLOCAL="aclocal -I $ACLOCAL_PATH" &&
+	echo -e "${RED}ACLOCAL=$ACLOCAL${NC}" &&
+	echo -e "${RED}_SHU_BUILDER_PREFIX=$_SHU_BUILDER_PREFIX${NC}" &&
+        export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
+	echo -e "${RED}LDFLAGS=$LDFLAGS${NC}" &&
+        export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+	echo -e "${RED}CPPFLAGS=$CPPFLAGS${NC}" &&
+        export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
+        export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH:$XORG_MACROS_INSTALL_PATH/share/pkgconfig:$XCB_PROTO_INSTALL_PATH/lib/pkgconfig:$LIBPTHREAD_STUBS_INSTALL_PATH/lib/pkgconfig:$XPROTO_INSTALL_PATH/lib/pkgconfig:$LIBXAU_INSTALL_PATH/lib/pkgconfig" &&
+	echo -e "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" &&
+	echo -e "${RED}PKG_CONFIG_PATH=$PKG_CONFIG_PATH${NC}" &&
+        run "$PKG_SRC_DIR"/autogen.sh \
+            --prefix=$_SHU_BUILDER_PREFIX \
+            $_SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
+            $_SHU_BUILDER_CONFIGURE_FLAGS \
+            "$@" &&
+	echo -e "Passed autogen.sh" &&
+        run make -j$NUM_JOBS V=1 &&
+        run make $INSTALL_COMMANDS $INSTALL_FLAGS
+    ) ||
+    panic "Could not build and install $PKG_FULLNAME"
+
+    touch "$PKG_TIMESTAMP"
+}
+
+# Build a given autotools based package and run customized install commands.
+# Uses autogen.sh to configure build
+#
+# $1: Package basename
+# $2: Make commands, e.g. install
+# $3+: Additional configure options.
+builder_build_autotools_package_full_install_libXau () {
+    local PKG_NAME=$(package_list_get_src_dir $1)
+    local INSTALL_COMMANDS="$2"
+    local PKG_SRC_DIR=$(builder_src_dir)/$PKG_NAME
+    local PKG_BUILD_DIR=$(builder_build_dir)/$PKG_NAME
+    local PKG_TIMESTAMP=${PKG_BUILD_DIR}-timestamp
+
+    shift; shift;
+
+    if [ -f "$PKG_TIMESTAMP" -a -z "$OPT_FORCE" ]; then
+        # Return early if the package was already built.
+        return 0
+    fi
+
+    # Check if we have xorg-macros and xcb-proto in the prebuilts directory.
+    local XCB_PROTO_INSTALL_PATH="$PREBUILTS_DIR/common/xcb-proto/$_SHU_BUILDER_CURRENT_HOST"
+    echo "XCB_PROTO_INSTALL_PATH=$XCB_PROTO_INSTALL_PATH"
+    local XORG_MACROS_INSTALL_PATH="$PREBUILTS_DIR/common/xorg-macros/$_SHU_BUILDER_CURRENT_HOST"
+    local XPROTO_INSTALL_PATH="$PREBUILTS_DIR/common/xproto/$_SHU_BUILDER_CURRENT_HOST"
+    echo "XORG_MACROS_INSTALL_PATH=$XORG_MACROS_INSTALL_PATH"
+    local LIBPTHREAD_STUBS_INSTALL_PATH="$PREBUILTS_DIR/common/libpthread-stubs/$_SHU_BUILDER_CURRENT_HOST"
+    if [ ! -d $XCB_PROTO_INSTALL_PATH ]; then
+        panic "Missing $XCB_PROTO_INSTALL_PATH. Run build-xcb-proto.sh first."
+    fi
+    
+    if [ ! -d $XORG_MACROS_INSTALL_PATH ]; then
+        panic "Missing $XORG_MACROS_INSTALL_PATH. Run build-xorg-macros.sh first."
+    fi
+
+    if [ ! -d $LIBPTHREAD_STUBS_INSTALL_PATH ]; then
+        panic "Missing $LIBPTHREAD_STUBS_INSTALL_PATH. Run build-libpthread-stubs.sh first."
+    fi
+
+    if [ ! -d $XPROTO_INSTALL_PATH ]; then
+        panic "Missing $XPROTO_INSTALL_PATH. Run build-xproto.sh first."
+    fi
+
+
+    case $_SHU_BUILDER_CURRENT_HOST in
+        darwin*)
+            # Required for proper Autotools builds on Darwin
+            builder_disable_verbose_install
+            ;;
+    esac
+
+    local PKG_FULLNAME="$(basename $PKG_NAME)"
+    dump "$(builder_text) Building $PKG_FULLNAME"
+
+    local INSTALL_FLAGS
+    if [ -z "$_SHU_BUILDER_DISABLE_PARALLEL_INSTALL" ]; then
+        var_append INSTALL_FLAGS "-j$NUM_JOBS"
+    fi
+    if [ -z "$_SHU_BUILDER_DISABLE_VERBOSE_INSTALL" ]; then
+        var_append INSTALL_FLAGS "V=1";
+    fi
+    local RED='\033[0;31m'
+    local NC='\033[0m'
+    (
+        run mkdir -p "$PKG_BUILD_DIR" &&
+        run cd "$PKG_BUILD_DIR" &&
+        export ACLOCAL_PATH="$XORG_MACROS_INSTALL_PATH/share/aclocal" &&
+	echo  -e "${RED}ACLOCAL_PATH=$ACLOCAL_PATH${NC}" &&
+        export ACLOCAL="aclocal -I $ACLOCAL_PATH" &&
+	echo -e "${RED}ACLOCAL=$ACLOCAL${NC}" &&
+	echo -e "${RED}_SHU_BUILDER_PREFIX=$_SHU_BUILDER_PREFIX${NC}" &&
+        export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
+	echo -e "${RED}LDFLAGS=$LDFLAGS${NC}" &&
+        export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+	echo -e "${RED}CPPFLAGS=$CPPFLAGS${NC}" &&
+        export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
+        export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH:$XORG_MACROS_INSTALL_PATH/share/pkgconfig:$XCB_PROTO_INSTALL_PATH/lib/pkgconfig:$LIBPTHREAD_STUBS_INSTALL_PATH/lib/pkgconfig:$XPROTO_INSTALL_PATH/lib/pkgconfig" &&
+	echo -e "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" &&
+	echo -e "${RED}PKG_CONFIG_PATH=$PKG_CONFIG_PATH${NC}" &&
+        run "$PKG_SRC_DIR"/configure \
+            --prefix=$_SHU_BUILDER_PREFIX \
+            $_SHU_BUILDER_GNU_CONFIG_HOST_FLAG \
+            $_SHU_BUILDER_CONFIGURE_FLAGS \
+            "$@" &&
+	echo -e "Passed autogen.sh" &&
+        run make -j$NUM_JOBS V=1 &&
+        run make $INSTALL_COMMANDS $INSTALL_FLAGS
+    ) ||
+    panic "Could not build and install $PKG_FULLNAME"
+
+    touch "$PKG_TIMESTAMP"
+}
+
 # Build a given autotools based package and run customized install commands
 #
 # $1: Package basename
@@ -846,7 +1094,22 @@ builder_build_autotools_package_full_install_ffmpeg () {
 builder_build_autotools_package() {
     local FIRST="$1"
     shift;
-    builder_build_autotools_package_full_install "$FIRST" install "$@"
+    case $FIRST in
+    macros | xcb-proto)
+    	echo "using autogen.sh version"
+        builder_build_autotools_package_full_install_autogen "$FIRST" install "$@"
+	;;
+    libxcb)
+        builder_build_autotools_package_full_install_libxcb "$FIRST" install "$@"
+	;;
+    libXau)
+        builder_build_autotools_package_full_install_libXau "$FIRST" install "$@"
+	;;
+    *)
+    	echo "using configure version"
+    	builder_build_autotools_package_full_install "$FIRST" install "$@"
+	;;
+    esac
 }
 
 # Build with the default 'make install' command in the end

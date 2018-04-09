@@ -211,16 +211,23 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         if [ "$(get_verbosity)" -gt 2 ]; then
             var_append EXTRA_CONFIGURE_FLAGS "-v"
         fi
-
+        
+        local LIBXCB_INSTALL_PATH=""
         case $SYSTEM in
             linux-x86_64)
+                LIBXCB_INSTALL_PATH="$PREBUILTS_DIR/common/libxcb/$SYSTEM"
                 var_append EXTRA_CONFIGURE_FLAGS \
                         -qt-xcb \
                         -no-use-gold-linker \
+                        -verbose \
+                        -I "$LIBXCB_INSTALL_PATH/include" \
+                        -L "$LIBXCB_INSTALL_PATH/lib" \
                         -platform linux-g++-64
                 var_append LD_LIBRARY_PATH \
                   $(dirname $(aosp_clang_libcplusplus))
                 var_append CXXFLAGS " -D__extern_always_inline=\"extern\ __always_inline\""
+                var_append CPPFLAGS "-I$LIBXCB_INSTALL_PATH/include"
+                var_append LDFLAGS "-L$LIBXCB_INSTALL_PATH/lib"
                 ;;
             windows*)
                 case $SYSTEM in
@@ -356,6 +363,16 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 "$(builder_install_prefix)" \
                 "$INSTALL_DIR/$SYSTEM" \
                 $QT_SHARED_LIBS
+
+        # Copy everything in the qml directory. The qml engine needs the qmldir
+        # files contained within the qml folder.
+        copy_directory \
+                "$(builder_install_prefix)"/qml \
+                "$INSTALL_DIR/$SYSTEM"/qml.new
+
+        directory_atomic_update \
+                "$INSTALL_DIR/$SYSTEM"/qml \
+                "$INSTALL_DIR/$SYSTEM"/qml.new
 
         # Copy headers into common directory and add symlink
         copy_directory \
