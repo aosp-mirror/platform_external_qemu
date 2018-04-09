@@ -34,6 +34,24 @@
       "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31c9385b_267a95e5",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-09T19:06:07Z",
+      "side": 1,
+      "message": "Next patch applies the other patch you sent over, it doesn\u0027t fix background chunk loading yet.",
+      "parentUuid": "57c36e29_116e51e2",
+      "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
