@@ -967,6 +967,10 @@ for QT_ARCH in $PREBUILT_ARCHS; do
         fi
         install_prebuilt_dll "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
     done
+    QT_QML_FILES=$(cd "$QT_SRCDIR" && find . -name "qmldir" -o -name "*.qmltypes" -not -path "*.dSYM/*" 2>/dev/null)
+    for QML_FILE in $QT_QML_FILES; do
+        copy_file "$QT_SRCDIR/$QML_FILE" "$QT_DSTDIR/$QML_FILE"
+    done
 done
 
 # Copy e2fsprogs binaries.

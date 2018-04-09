@@ -32,3 +32,7 @@ std::string androidQtGetLibraryDir(int bitness = 0, const char* emulatorDir = nu
 // it will be inferred based on the location of the calling binary of this
 // function
 std::string androidQtGetPluginsDir(int bitness = 0, const char* emulatorDir = nullptr);
+
+// Return the path to the emulator's Qt qml directory.
+// This is needed by the qml engine to interpret qml sources.
+std::string androidQtGetQmlDir(int bitness = 0, const char* emulatorDir = nullptr);
