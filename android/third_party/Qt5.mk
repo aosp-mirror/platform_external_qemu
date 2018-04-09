@@ -8,7 +8,7 @@ QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
 QT_UIC_TOOL_LDPATH := $(QT_TOP64_DIR)/lib
 QT_UIC_TOOL := $(QT_TOP64_DIR)/bin/uic
 
-QT_LDLIBS := -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg
+QT_LDLIBS := -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg -lQt5Qml -lQt5Quick
 ifeq ($(BUILD_TARGET_OS),windows)
     # On Windows, linking to mingw32 is required. The library is provided
     # by the toolchain, and depends on a main() function provided by qtmain
@@ -20,7 +20,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
             -lmingw32 \
             $(QT_TOP_DIR)/lib/libqtmain.a
 else
-    QT_LDFLAGS := -L$(QT_TOP_DIR)/lib
+    QT_LDFLAGS := -L$(QT_TOP_DIR)/lib -L$(QT_TOP_DIR)/qml
 endif
 
 QT_INCLUDE_DIR := $(QT_PREBUILTS_DIR)/common/include
@@ -35,3 +35,5 @@ QT_INCLUDES := \
     $(QT_INCLUDE_DIR)/QtGui \
     $(QT_INCLUDE_DIR)/QtSvg \
     $(QT_INCLUDE_DIR)/QtWidgets \
+    $(QT_INCLUDE_DIR)/QtQuick \
+    $(QT_INCLUDE_DIR)/QtQml \

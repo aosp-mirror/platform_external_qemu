@@ -45,6 +45,15 @@ std::string androidQtGetLibraryDir(int bitness, const char* emulatorDir) {
     return qtLibDir;
 }
 
+std::string androidQtGetQmlDir(int bitness, const char* emulatorDir) {
+    std::vector<std::string> subDirVector;
+    subDirVector.push_back(androidQtGetBaseDir(bitness, emulatorDir));
+    subDirVector.push_back(std::string("qml"));
+    std::string qtQmlDir = PathUtils::recompose(subDirVector);
+
+    return qtQmlDir;
+}
+
 std::string androidQtGetPluginsDir(int bitness, const char* emulatorDir) {
     System* system = System::get();
     std::string qtPluginsDir =
