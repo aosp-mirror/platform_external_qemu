@@ -38,6 +38,10 @@ typedef struct QAndroidRecordScreenAgent {
     RecorderState (*getRecorderState)(void);
     // Take a screenshot.
     void (*doSnap)(const char* dirname);
+
+    bool (*startWebRtcModule)(const char* module, int fps);
+
+    bool (*stopWebRtcModule)();
 } QAndroidRecordScreenAgent;
 
 ANDROID_END_HEADER
