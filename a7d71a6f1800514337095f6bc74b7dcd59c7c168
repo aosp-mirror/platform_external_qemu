@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e3813e1_b76c5668",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-09T16:20:05Z",
+      "side": 1,
+      "message": "The worker thread can only load and unprotect one page at a time, but that may not play well with HAXM, which currently requires the entire 2MB chunk to be unprotected before the guest can access any page in it. Basically, if there\u0027s a chunk whose entire HVA range (2MB interval) is protected (by VirtualProtect()), and the worker thread is first to unprotect any page of this chunk, and then the guest accesses that same page, the host won\u0027t allow HAXM to pin the chunk because some pages of it are still protected. That\u0027s the same reason why we need the dirty HAXM_CHUNK_SIZE hack in hax-all.c.\n\nI tried to disable the worker thread by removing mBackgroundLoadingThread from this class, but then the AVD would go through exactly one cycle of Android soft reboot (restart of key system services) after quickboot. Is there a better way to disable the worker thread?",
+      "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
