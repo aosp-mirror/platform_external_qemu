@@ -3025,6 +3025,41 @@ static int do_screenrecord_screenshot(ControlClient client, char* args) {
     return 0;
 }
 
+static int do_screenrecord_webrtc(ControlClient client, char* args) {
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    const int kMaxArgs = 2;
+
+    // Count number of arguments
+    std::vector<std::string> splitArgs;
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    if (splitArgs.size() == 0) {
+        control_write(client, "KO: not enough arguments\r\n");
+        return -1;
+    }
+
+    if (splitArgs[0] == "start") {
+        if (splitArgs.size() != 2) {
+            control_write(client, "KO: Must provide an output filename\r\n");
+            return -1;
+        }
+        // Start on the given handle!
+        return client->global->record_agent->startWebRtcModule(splitArgs[1].c_str()) ? 0 : -1;
+
+    } else if (splitArgs[0] == "stop") {
+        return client->global->record_agent->stopWebRtcModule() ? 0 : -1;
+    } else {
+        control_write(client, "KO: expected 'start' or 'stop'\r\n");
+        return -1;
+    }
+
+    return 0;
+}
+
 static const CommandDefRec screenrecord_commands[] = {
         {"start", "start screen recording",
          "'screenrecord start [options] <filename>'\r\n"
@@ -3057,6 +3092,14 @@ static const CommandDefRec screenrecord_commands[] = {
          "\r\nTakes a single screenshot of emulator's display "
          "and saves the resulting PNG in <dirname>.\r\n",
          NULL, do_screenrecord_screenshot, NULL},
+
+        {"webrtc", "start/stop the webrtc module",
+         "'screenrecord webrtc [start|stop] <handle>'\r\n"
+         "\r\nStart or stop the webrtc memory sharing on the given "
+         "<handle>.\r\n",
+         NULL, do_screenrecord_webrtc, NULL},
+
+
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
