@@ -197,6 +197,7 @@ LOCAL_SRC_FILES := \
 ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
     android/base/files/preadwrite.cpp \
+    android/base/memory/SharedMemory_win32.cpp \
     android/base/threads/Thread_win32.cpp \
     android/base/system/Win32Utils.cpp \
     android/base/system/Win32UnicodeString.cpp \
@@ -205,6 +206,7 @@ LOCAL_SRC_FILES += \
 
 else
 LOCAL_SRC_FILES += \
+    android/base/memory/SharedMemory_posix.cpp \
     android/base/threads/Thread_pthread.cpp \
 
 endif
@@ -682,6 +684,7 @@ LOCAL_SRC_FILES := \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/OnDemand_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
+  android/base/memory/SharedMemory_unittest.cpp \
   android/base/misc/FileUtils_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
