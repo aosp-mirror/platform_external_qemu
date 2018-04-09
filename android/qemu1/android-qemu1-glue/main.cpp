@@ -285,6 +285,10 @@ extern "C" int main(int argc, char **argv) {
     if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
         return 1;
     }
+    if (opts->ui_only) {
+        // UI only. emulator_initUserInterface() is done, so we're done.
+        return 0;
+    }
 
     // This is a workaround for b.android.com/198256
     // Qemu1 QT GUI on OSX crashes on exit when QT releases NSWindow.

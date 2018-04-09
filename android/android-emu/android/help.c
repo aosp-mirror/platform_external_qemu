@@ -883,6 +883,20 @@ help_report_console(stralloc_t*  out)
 }
 
 static void
+help_ui_only(stralloc_t*  out)
+{
+    PRINTF(
+    "  the '-ui-only <UI feature>' option is used to run only that part\n"
+    "  of the emulator that displays the requested UI feature.\n"
+    "  No virtual device is launched.\n"
+    "  When the UI feature is closed, the emulator exits.\n\n"
+    "  Supported UI features are:\n"
+    "      snapshot-control\n"
+    "\n"
+    );
+}
+
+static void
 help_dpi_device(stralloc_t*  out)
 {
     PRINTF(

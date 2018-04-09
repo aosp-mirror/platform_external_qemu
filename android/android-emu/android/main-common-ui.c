@@ -343,6 +343,20 @@ ui_init(const AConfig* skinConfig,
     signal(SIGQUIT, SIG_DFL);
 #endif
 
+    if (opts->ui_only) {
+        bool ret_OK = false;
+
+        *(emulator_window_get()->opts) = *opts;
+        if (!strcmp("snapshot-control", opts->ui_only)) {
+            int winsys_ret;
+            winsys_ret = skin_winsys_snapshot_control_start();
+            ret_OK = (winsys_ret == 0);
+        } else {
+            fprintf(stderr, "Unknown \"-ui-only\" feature: \"%s\"\n", opts->ui_only);
+        }
+        return ret_OK;
+    }
+
     skin_winsys_start(opts->no_window);
 
     if (opts->no_window) {
