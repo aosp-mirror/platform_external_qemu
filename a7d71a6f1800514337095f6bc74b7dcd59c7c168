@@ -52,6 +52,24 @@
       "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4fd1a3d2_83ff8c77",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-10T15:24:07Z",
+      "side": 1,
+      "message": "I appreciate your willingness to change existing emulator code to work around a HAXM limitation. IMHO, this bulk load operation should be implemented as follows:\n1. Load all data into the chunk.\n2. Unprotect the entire chunk with one HAX_VM_IOCTL_PROTECT_RAM API call.\n\nI don\u0027t know how hard it would be to implement it this way, but it should work better than page-by-page loading, because if the worker thread unprotects one page at a time, there\u0027s still a chance that a vcpu thread accesses an unprotected page while some other pages in the chunk are yet to be unprotected.\n\nAdmittedly, the existing \"bulk load\" hack in hax-all.c (case HAX_EXIT_PAGEFAULT) does page-by-page loading - it calls qemu_ram_load() 512 times. So it may not be immune to the race condition I just described either. Would it work if we just replace the for loop with one qemu_ram_load() call for the entire 2MB interval? I haven\u0027t done the experiment, but under the hood I think qemu_ram_load() calls RamLoader::loadRam() which currently unprotects one page at a time.",
+      "parentUuid": "31c9385b_267a95e5",
+      "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
