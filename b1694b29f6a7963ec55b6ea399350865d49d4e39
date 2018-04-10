@@ -96,6 +96,53 @@
     },
     {
       "key": {
+        "uuid": "32835a72_3275a2ab",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-10T22:11:21Z",
+      "side": 1,
+      "message": "What about using the design from the other platform-specific primitives, like threads and locks? Those allow us to hide the implementation into .cpp files, so it won\u0027t get included everywhere. Also each template adds to compilation time, and makes errors harder to understand.\n\nPolicy-based design is good when we expect to use several policies at once, or if we care a lot about inlining - I don\u0027t think either of these is present here",
+      "parentUuid": "0489ff1e_023610ad",
+      "range": {
+        "startLine": 33,
+        "startChar": 15,
+        "endLine": 33,
+        "endChar": 27
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae2460e3_48044884",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-10T22:11:21Z",
+      "side": 1,
+      "message": "base::StringView ?",
+      "range": {
+        "startLine": 39,
+        "startChar": 17,
+        "endLine": 39,
+        "endChar": 29
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b6672b2_b70fd549",
         "filename": "android/android-emu/android/base/memory/SharedMemory.h",
         "patchSetId": 3
