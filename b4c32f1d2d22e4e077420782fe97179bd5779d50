@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6161be91_7503cfde",
+        "filename": "android/android-emu/android/recording/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:19:37Z",
+      "side": 1,
+      "message": "nit: extra blank lines",
+      "revId": "b4c32f1d2d22e4e077420782fe97179bd5779d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8424fd4_1b3c047b",
+        "filename": "android/android-emu/android/recording/video/WebRTCProducer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:19:37Z",
+      "side": 1,
+      "message": "remove extra fprintf?",
+      "revId": "b4c32f1d2d22e4e077420782fe97179bd5779d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0051f5a_65b481c6",
+        "filename": "android/android-emu/android/recording/video/WebRTCProducer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:19:37Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 119,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 17
+      },
+      "revId": "b4c32f1d2d22e4e077420782fe97179bd5779d50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
