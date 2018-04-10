@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "493b0b01_ba11d92d",
+        "filename": "android/android-emu/android/recording/video/WebRTCProducer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-04-10T16:34:40Z",
+      "side": 1,
+      "message": "You can also consider passing a callback to android::recording::VideoProducer instead of implementing your own producer class to do this. That way, you don\u0027t have to worry about setting up the recording state and also you will have guest mode working out of the box.",
+      "range": {
+        "startLine": 75,
+        "startChar": 1,
+        "endLine": 75,
+        "endChar": 27
+      },
+      "revId": "4f78104be6e2b3e7346c849875dd1c1cf0ae4e09",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
