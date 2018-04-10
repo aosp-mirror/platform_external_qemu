@@ -355,11 +355,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
         GLESDispatchMaxVersion guestExtVer = GLES_DISPATCH_MAX_VERSION_2;
         if (emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
+            // If the image is in ES 3 mode, add GL_OES_EGL_image_external_essl3 for better Skia support.
+            glStr += "GL_OES_EGL_image_external_essl3 ";
             guestExtVer = maxVersion;
         }
-
-        glStr += maxVersionToFeatureString(guestExtVer);
-        glStr += " ";
 
         // If we have a GLES3 implementation, add the corresponding
         // GLESv2 extensions as well.
@@ -371,6 +370,9 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
             glStr += kGLESNoHostError;
             glStr += " ";
         }
+
+        glStr += maxVersionToFeatureString(guestExtVer);
+        glStr += " ";
     }
 
     if (name == GL_VERSION) {
