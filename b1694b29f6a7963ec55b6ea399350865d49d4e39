@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "563c6be2_47e4028f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-10T05:41:41Z",
+      "side": 1,
+      "message": "I will test this on MacOS and see if we can get this to work. If we can it will most certainly make the UI designers happy.",
+      "parentUuid": "515ca490_f56375cf",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 55
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f68d43be_f1983927",
         "filename": "android/android-emu/android/base/memory/SharedMemory.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-10T04:13:51Z",
       "side": 1,
       "message": "is \"Policy\" a standard term or something? MemoryInterface maybe?",
+      "range": {
+        "startLine": 33,
+        "startChar": 15,
+        "endLine": 33,
+        "endChar": 27
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0489ff1e_023610ad",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-10T05:41:41Z",
+      "side": 1,
+      "message": "It is a naming practice for: https://en.wikipedia.org/wiki/Policy-based_design",
+      "parentUuid": "f68d43be_f1983927",
       "range": {
         "startLine": 33,
         "startChar": 15,
@@ -82,6 +130,30 @@
       "writtenOn": "2018-04-10T04:13:51Z",
       "side": 1,
       "message": "Could just be PosixSharedMemory or ShmInterface (since it\u0027s specific to shm)",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 23
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40e6c173_85d7b13f",
+        "filename": "android/android-emu/android/base/memory/posix/PosixSharedMemoryPolicy.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-10T05:41:41Z",
+      "side": 1,
+      "message": "Will change.",
+      "parentUuid": "6fc01865_7cf4a581",
       "range": {
         "startLine": 24,
         "startChar": 0,
