@@ -2873,11 +2873,8 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {NULL, 0, NULL, 0}};
 
     switch (client->global->record_agent->getRecorderState()) {
-        case RECORDER_READY:
+        case RECORDER_STOPPED:
             break;
-        case RECORDER_INVALID:
-            control_write(client, "KO: Recorder not initialized\r\n");
-            return -1;
         default:
             control_write(client, "KO: Recording has already started\r\n");
             return -1;
@@ -3004,8 +3001,7 @@ static int do_screenrecord_stop(ControlClient client, char* args) {
     switch (client->global->record_agent->getRecorderState()) {
         case RECORDER_RECORDING:
             break;
-        case RECORDER_READY:
-        case RECORDER_INVALID:
+        case RECORDER_STOPPED:
             control_write(client, "KO: No recording has been started.\r\n");
             return -1;
         default:
