@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "515ca490_f56375cf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:13:51Z",
+      "side": 1,
+      "message": "What about macos? do we just disable it then since the use case currently is for webrtc on cloud anyway?\n\nhttps://stackoverflow.com/questions/2033362/does-os-x-have-an-equivalent-to-dev-shm",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 55
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f68d43be_f1983927",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:13:51Z",
+      "side": 1,
+      "message": "is \"Policy\" a standard term or something? MemoryInterface maybe?",
+      "range": {
+        "startLine": 33,
+        "startChar": 15,
+        "endLine": 33,
+        "endChar": 27
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b6672b2_b70fd549",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:13:51Z",
+      "side": 1,
+      "message": "nit: trailing space",
+      "range": {
+        "startLine": 120,
+        "startChar": 59,
+        "endLine": 120,
+        "endChar": 60
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6fc01865_7cf4a581",
+        "filename": "android/android-emu/android/base/memory/posix/PosixSharedMemoryPolicy.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:13:51Z",
+      "side": 1,
+      "message": "Could just be PosixSharedMemory or ShmInterface (since it\u0027s specific to shm)",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 23
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e3114dd_1ea1a17b",
+        "filename": "android/android-emu/android/base/memory/win32/Win32SharedMemoryPolicy.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:13:51Z",
+      "side": 1,
+      "message": "same comments as elsewhere on the naming scheme",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 23
+      },
+      "revId": "b1694b29f6a7963ec55b6ea399350865d49d4e39",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
