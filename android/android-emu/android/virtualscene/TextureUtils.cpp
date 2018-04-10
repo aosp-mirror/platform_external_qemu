@@ -45,7 +45,9 @@ bool TextureUtils::load(const char* filename,
     *outHeight = 0;
     *outFormat = Format::RGB24;
 
-    const base::StringView extension = PathUtils::extension(filename);
+    std::string extension = PathUtils::extension(filename);
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+                   tolower);
 
     if (extension == ".png") {
         return loadPNG(filename, buffer, outWidth, outHeight, outFormat);
