@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "550bd953_597a282e",
+        "filename": "android/android-emu/android/virtualscene/Renderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:04:30Z",
+      "side": 1,
+      "message": "In this function,\"texture life time as a resource\" seems being maintained in two places; at the higher level, in the renderer with the cached texture objects, and at the level of individual scene objects that also hold references.\n\nTexture life time changes also happen in a special way for posters; when set set the texture of a poster from the UI or wherever, the poster object itself triggers the releasing of the previous texture (which is also the apparent reason for this function to depend on sceneObject).\n\nTo reduce specialness, and maybe simplify things, might we instead release the previous texture from the Scene itself by doing something like mRenderer.releaseTexture(texture) in Scene.cpp\u0027s loadPoster function?\n\nIn the long run (this can be another CL), let\u0027s consider the idea of not organizing textures, meshes, and materials per scene object, and instead have global vectors for each resource type, and a global refcount for each one. On scene object addition or removal, Renderer or Scene would explicit increment or decrement the refcount.",
+      "range": {
+        "startLine": 595,
+        "startChar": 17,
+        "endLine": 595,
+        "endChar": 33
+      },
+      "revId": "bf1a984c2f49386f329815bc4ac159066356c9b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7ed2cc0_56028f11",
+        "filename": "android/android-emu/android/virtualscene/Renderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T04:04:30Z",
+      "side": 1,
+      "message": "I\u0027ve also been thinking more about the vector of textures in SceneObjectData serving as a refcount, and comparing its use against the mTextureCache, and I was wondering, could we forgo the vector of textures per scene object? That seemed good at the time, but I now see that it could induce quite some complexity / coupling.\n\nThe benefit of just having one place to modify when releasing textures is that releaseTexture doesn\u0027t need to depend on the sceneObject; together with the comment above, we can continue to have the object resource release calls that occur during normal scene lifetime (not tearing down the whole thing) mostly triggered from Scene.cpp.",
+      "range": {
+        "startLine": 607,
+        "startChar": 0,
+        "endLine": 608,
+        "endChar": 33
+      },
+      "revId": "bf1a984c2f49386f329815bc4ac159066356c9b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
