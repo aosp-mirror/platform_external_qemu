@@ -45,6 +45,30 @@
       "revId": "bf1a984c2f49386f329815bc4ac159066356c9b0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38e2b529_e21b72b3",
+        "filename": "android/android-emu/android/virtualscene/Renderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 608,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-10T18:21:14Z",
+      "side": 1,
+      "message": "Yeah, I think that having items bound to SceneObjects is making things more complicated at this point.  However, we currently rely on this binding to properly clean up these resources, since we have the Renderer::releaseObjectResources call which is called right before destroying a SceneObject.\n\nWithout that call, we\u0027d have to have a callback in SceneObject that keeps track of the textures it is using and cleans them up, like SceneObject::destroy().\n\nAnother option is to change Texture/Model/Material to be RAII objects, and automatically call into the Renderer to clean up.  That would require them to contain a pointer to the Renderer, and update their refcount when they are copied/destructed.  However, if we start dealing with multiple threads then queue/dispatch the operations to make sure that releasing resources happens on the main thread.",
+      "parentUuid": "f7ed2cc0_56028f11",
+      "range": {
+        "startLine": 607,
+        "startChar": 0,
+        "endLine": 608,
+        "endChar": 33
+      },
+      "revId": "bf1a984c2f49386f329815bc4ac159066356c9b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
