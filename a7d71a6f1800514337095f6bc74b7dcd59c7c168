@@ -70,6 +70,24 @@
       "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4673c501_27a14a9e",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-10T23:42:58Z",
+      "side": 1,
+      "message": "Sounds good. I\u0027ll go ahead and submit those patches for now (unless anyone in the review has any more feedback), and then we can try to target next week to get bulk unprotect working.",
+      "parentUuid": "4fd1a3d2_83ff8c77",
+      "revId": "a7d71a6f1800514337095f6bc74b7dcd59c7c168",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
