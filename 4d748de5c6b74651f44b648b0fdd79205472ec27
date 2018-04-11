@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "accd3d09_314874eb",
+        "filename": "android/android-emu/android/main-common-ui.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T18:12:32Z",
+      "side": 1,
+      "message": "nit: derror()?",
+      "range": {
+        "startLine": 355,
+        "startChar": 12,
+        "endLine": 355,
+        "endChar": 27
+      },
+      "revId": "4d748de5c6b74651f44b648b0fdd79205472ec27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
