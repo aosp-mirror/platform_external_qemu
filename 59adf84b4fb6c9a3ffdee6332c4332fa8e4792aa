@@ -2,6 +2,558 @@
   "comments": [
     {
       "key": {
+        "uuid": "6c7d31c1_67890178",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "call this file SharedMemory_posix.cpp ?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 49
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "458a1668_e0601404",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "constexpr?",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 25
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f505e417_94c38f7a",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "move it out?",
+      "range": {
+        "startLine": 36,
+        "startChar": 12,
+        "endLine": 36,
+        "endChar": 23
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d47c320_54a69aff",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "reset other\u0027s |mCreate| as well?",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 27
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e87aa17_60b56964",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "standard states there\u0027s no need to check for self-move here. You may still put an assert if you want to make sure that\u0027s ok",
+      "range": {
+        "startLine": 51,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 24
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7f5e3cc3_b92ffaa4",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "nit: please don\u0027t copy header comments here - they will get obsolete REALLY soon",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 38
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b41403c0_2450c2ef",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "does this mean user can call open(CREATE | ..) as well?",
+      "range": {
+        "startLine": 70,
+        "startChar": 10,
+        "endLine": 70,
+        "endChar": 40
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9db1ce6a_5c44317b",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "handle EINTR?",
+      "range": {
+        "startLine": 118,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 13
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29133b10_04fd8162",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "nit: please add braces for easier reading",
+      "range": {
+        "startLine": 126,
+        "startChar": 30,
+        "endLine": 126,
+        "endChar": 45
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b7092bd_97cee549",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "looks like we don\u0027t need to call the fstat() at all if there\u0027s no O_CREAT flag",
+      "range": {
+        "startLine": 126,
+        "startChar": 3,
+        "endLine": 126,
+        "endChar": 48
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de60f847_d7f77182",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "handle EINTR?",
+      "range": {
+        "startLine": 128,
+        "startChar": 12,
+        "endLine": 128,
+        "endChar": 21
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79ebeed6_31978ad1",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "is this needed in the header? same for \u003ctuple\u003e",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 18
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6c2dd53f_66b3ac5a",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "please also mention the naming issue: \"The names of event, semaphore, mutex, and file-mapping objects share the same name space, so it is not possible to have two different object types with the same name\"\nThus I\u0027d suggest users to prefix the names with the object\u0027s explicit type, e.g. \"SHM_name\"",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 9
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f889e9d5_52e9a2d8",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "this isn\u0027t really true: https://blogs.msdn.microsoft.com/oldnewthing/20150130-00/?p\u003d44793",
+      "range": {
+        "startLine": 71,
+        "startChar": 71,
+        "endLine": 72,
+        "endChar": 18
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "976e6bfa_dac35995",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "it actually does, just in a little more complicated way: https://stackoverflow.com/a/47951175\n\nNote that the answer is slightly off, but comments do correct it",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 70
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed86af1f_1c873c64",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "nit: please use the new \"using alias \u003d type\" syntax",
+      "range": {
+        "startLine": 81,
+        "startChar": 4,
+        "endLine": 81,
+        "endChar": 11
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49c1ed4e_0001a447",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "Please don\u0027t use lpTstr as a type here - T may be either char* or wchar_t* based on compiler flags\nMapViewOfFile() returns void*, let\u0027s have it here as well",
+      "range": {
+        "startLine": 81,
+        "startChar": 12,
+        "endLine": 81,
+        "endChar": 18
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "055b3cbf_b1e0d13b",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "enum class?",
+      "range": {
+        "startLine": 87,
+        "startChar": 9,
+        "endLine": 87,
+        "endChar": 19
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b2814f61_6bf12836",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "const reference, please. Or, even better, base::StringView",
+      "range": {
+        "startLine": 92,
+        "startChar": 17,
+        "endLine": 92,
+        "endChar": 28
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "371a250e_852bd89f",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "what about moving this one closer to the ctros, to make it explicit that it\u0027s implemented and not deleted",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 99,
+        "endChar": 50
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f90a04db_d2b91335",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "the usual POSIX convention is to return \u003c0 on error, either -1 or -errno",
+      "range": {
+        "startLine": 102,
+        "startChar": 43,
+        "endLine": 102,
+        "endChar": 69
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd408ee9_208a7eaa",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "const reference",
+      "range": {
+        "startLine": 113,
+        "startChar": 3,
+        "endLine": 113,
+        "endChar": 15
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "648b9216_afa4321a",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "these functions should be const as well - they don\u0027t modify the object state",
+      "range": {
+        "startLine": 114,
+        "startChar": 21,
+        "endLine": 114,
+        "endChar": 22
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "81fa5ecc_c6577cc1",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "this comment is a leftover",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 59
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "902fd56f_58bb6fa4",
         "filename": "android/android-emu/android/base/memory/SharedMemory_unittest.cpp",
         "patchSetId": 7
@@ -22,6 +574,190 @@
       "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9cc0ae7c_0a6fdab2",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "constexpr",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 18
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "82c9059a_74a9763e",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "all these could be inlined in the header, so you won\u0027t need to duplicate the code. Also please add a private clear() method to cleanup the members, this way there\u0027s no code duplication for the moved-from object cleanup",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 1
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c31d3f3_46796f30",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "nit: what about using LARGE_INTEGER struct with its QuadPart, LowPart and HighPart?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 38
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59f9a270_d0461465",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "what \"fl\" stands for here?",
+      "range": {
+        "startLine": 73,
+        "startChar": 10,
+        "endLine": 73,
+        "endChar": 12
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d24fc6c_e7efeaf4",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "do you use it for CreateFileMapping() call?",
+      "range": {
+        "startLine": 78,
+        "startChar": 8,
+        "endLine": 78,
+        "endChar": 17
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "317c9637_7effaba0",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "please use CreateFileMappingW() explicitly, convert the name with Win32UnicodeString",
+      "range": {
+        "startLine": 81,
+        "startChar": 22,
+        "endLine": 81,
+        "endChar": 39
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3a9152f_d3dad73f",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "|flProtect| ?",
+      "range": {
+        "startLine": 84,
+        "startChar": 12,
+        "endLine": 84,
+        "endChar": 26
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5115c85_3b630eea",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:16:33Z",
+      "side": 1,
+      "message": "is this needed in win32 version at all?",
+      "range": {
+        "startLine": 108,
+        "startChar": 4,
+        "endLine": 108,
+        "endChar": 11
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
