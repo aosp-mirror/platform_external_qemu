@@ -41,11 +41,10 @@ typedef enum {
 } RecordingStatus;
 
 typedef enum {
-    RECORDER_READY,
     RECORDER_STARTING,
     RECORDER_RECORDING,
     RECORDER_STOPPING,
-    RECORDER_INVALID,
+    RECORDER_STOPPED,
 } RecorderState;
 
 typedef void (*RecordingCallback)(void* opaque, RecordingStatus status);

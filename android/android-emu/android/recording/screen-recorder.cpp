@@ -94,7 +94,7 @@ private:
     std::string mFilename;
     RecordingInfo mInfo = {0};
     const QAndroidDisplayAgent* mAgent = nullptr;
-    std::atomic<RecorderState> mRecorderState{RECORDER_READY};
+    std::atomic<RecorderState> mRecorderState{RECORDER_STARTING};
     QFrameBuffer mDummyQf;
 
     // Time-limit stop
@@ -133,12 +133,7 @@ void ScreenRecorder::sendRecordingStatus(RecordingStatus status) {
 
 // Start the recording
 bool ScreenRecorder::startRecording(bool async) {
-    auto current = RECORDER_READY;
-    if (!mRecorderState.compare_exchange_strong(current, RECORDER_STARTING)) {
-        D("Recording already started\n");
-        return false;
-    }
-
+    assert(mRecorderState == RECORDER_STARTING);
     if (async) {
         android::base::async([this]() { startRecordingWorker(); });
         return true;
@@ -151,7 +146,7 @@ bool ScreenRecorder::startRecordingWorker() {
 
     if (!parseRecordingInfo(mInfo)) {
         LOG(ERROR) << "Recording info is invalid";
-        mRecorderState = RECORDER_READY;
+        mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
         return false;
     }
@@ -159,7 +154,7 @@ bool ScreenRecorder::startRecordingWorker() {
     ffmpegRecorder = FfmpegRecorder::create(mFbWidth, mFbHeight, mFilename);
     if (!ffmpegRecorder->isValid()) {
         LOG(ERROR) << "Unable to create recorder";
-        mRecorderState = RECORDER_READY;
+        mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
         return false;
     }
@@ -181,7 +176,7 @@ bool ScreenRecorder::startRecordingWorker() {
     if (!ffmpegRecorder->addVideoTrack(std::move(videoProducer),
                                        &videoCodec)) {
         LOG(ERROR) << "Failed to add video track";
-        mRecorderState = RECORDER_READY;
+        mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
         return false;
     }
@@ -199,7 +194,7 @@ bool ScreenRecorder::startRecordingWorker() {
     if (!ffmpegRecorder->addAudioTrack(std::move(audioProducer),
                                        &audioCodec)) {
         LOG(ERROR) << "Failed to add audio track";
-        mRecorderState = RECORDER_READY;
+        mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
         return false;
     }
@@ -243,7 +238,7 @@ bool ScreenRecorder::stopRecordingWorker() {
     bool has_frames = ffmpegRecorder->stop();
     ffmpegRecorder.reset();
 
-    mRecorderState = RECORDER_READY;
+    mRecorderState = RECORDER_STOPPED;
     sendRecordingStatus(has_frames ? RECORD_STOPPED : RECORD_STOP_FAILED);
 
     return has_frames;
@@ -296,7 +291,7 @@ RecorderState screen_recorder_state_get(void) {
     if (globals.recorder) {
         return globals.recorder->getRecorderState();
     } else {
-        return RECORDER_INVALID;
+        return RECORDER_STOPPED;
     }
 }
 
