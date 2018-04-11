@@ -18,6 +18,7 @@
 #include "android/base/EnumFlags.h"
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
+#include "android/base/Version.h"
 
 #include <algorithm>
 #include <string>
@@ -125,6 +126,30 @@ public:
     // if we are unable to get host OS information or error
     // occurs.
     virtual std::string getOsName() = 0;
+
+    // Return current OS version name in a structured format
+    // TODO: Windows only, other platforms to follow
+    struct OsVersionInfo {
+        // TODO: Other platforms
+        // enum class Type {
+        //     Linux,
+        //     Mac,
+        //     Windows,
+        // };
+        enum class WindowsVersion {
+            Win9x,
+            WinXP,
+            WinVista,
+            Win7,
+            Win7SP1,
+            Win8,
+            Win81,
+            Win10,
+        };
+        WindowsVersion windowsVersion;
+        bool isServer;
+    };
+    virtual OsVersionInfo getOsVersionInfo() const = 0;
 
     // Check if we're running under Wine;
     // returns false for non-Windows builds
