@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76eb0892_430ceefa",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T00:41:02Z",
+      "side": 1,
+      "message": "why not simply a strcasecmp() call? We define it in android/utils/system.h for Win32 as well",
+      "range": {
+        "startLine": 52,
+        "startChar": 18,
+        "endLine": 52,
+        "endChar": 20
+      },
+      "revId": "9b3a1699db97b2d715e1b04195b297e03e126b7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
