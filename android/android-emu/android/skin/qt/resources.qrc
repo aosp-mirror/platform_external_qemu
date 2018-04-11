@@ -131,7 +131,6 @@
         <file alias="toggle_on">images/light/toggle_on_light.png</file>
         <file alias="toggle_on_disabled">images/light/toggle_on_disabled_light.png</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
-        <file alias="virtualscene">images/light/ic_wallpaper_678_48dp.svg</file>
         <file alias="android_auto">images/light/ic_car_678_56px.svg</file>
     </qresource>
     <qresource prefix="/dark">
@@ -242,7 +241,6 @@
         <file alias="toggle_on">images/dark/toggle_on_dark.png</file>
         <file alias="toggle_on_disabled">images/dark/toggle_on_disabled_dark.png</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
-        <file alias="virtualscene">images/dark/ic_wallpaper_677_48dp.svg</file>
         <file alias="android_auto">images/dark/ic_car_677_56px.svg</file>
     </qresource>
     <qresource prefix="/cursor">

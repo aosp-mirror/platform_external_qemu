@@ -10,18 +10,18 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_virtual-scene-page.h"
+#include "ui_camera-virtualscene-subpage.h"
 
 #include <QWidget>
 #include <memory>
 
 struct QAndroidVirtualSceneAgent;
 
-class VirtualScenePage : public QWidget {
+class CameraVirtualSceneSubpage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit VirtualScenePage(QWidget* parent = 0);
+    explicit CameraVirtualSceneSubpage(QWidget* parent = 0);
 
     static void setVirtualSceneAgent(const QAndroidVirtualSceneAgent* agent);
 
@@ -46,7 +46,7 @@ private:
     // startup.
     static void loadInitialSettings();
 
-    std::unique_ptr<Ui::VirtualScenePage> mUi;
+    std::unique_ptr<Ui::CameraVirtualSceneSubpage> mUi;
     bool mHasBeenShown = false;
     bool mHadFirstInteraction = false;
 

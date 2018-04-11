@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>VirtualScenePage</class>
- <widget class="QWidget" name="VirtualScenePage">
+ <class>CameraVirtualSceneSubpage</class>
+ <widget class="QWidget" name="CameraVirtualSceneSubpage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>580</height>
+    <width>618</width>
+    <height>529</height>
    </rect>
   </property>
   <property name="windowTitle">

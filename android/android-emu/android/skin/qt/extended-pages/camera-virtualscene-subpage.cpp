@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/skin/qt/extended-pages/virtual-scene-page.h"
+#include "android/skin/qt/extended-pages/camera-virtualscene-subpage.h"
 
 #include "android/emulation/control/virtual_scene_agent.h"
 #include "android/globals.h"
@@ -23,10 +23,11 @@
 
 static constexpr float kSliderValueScale = 100.0f;
 
-const QAndroidVirtualSceneAgent* VirtualScenePage::sVirtualSceneAgent = nullptr;
+const QAndroidVirtualSceneAgent* CameraVirtualSceneSubpage::sVirtualSceneAgent =
+        nullptr;
 
-VirtualScenePage::VirtualScenePage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::VirtualScenePage()) {
+CameraVirtualSceneSubpage::CameraVirtualSceneSubpage(QWidget* parent)
+    : QWidget(parent), mUi(new Ui::CameraVirtualSceneSubpage()) {
     mUi->setupUi(this);
 
     mUi->sizeSliderWall->setRange(0.0, kSliderValueScale, false);
@@ -41,36 +42,36 @@ VirtualScenePage::VirtualScenePage(QWidget* parent)
 }
 
 // static
-void VirtualScenePage::setVirtualSceneAgent(
+void CameraVirtualSceneSubpage::setVirtualSceneAgent(
         const QAndroidVirtualSceneAgent* agent) {
     sVirtualSceneAgent = agent;
     loadInitialSettings();
 }
 
-void VirtualScenePage::showEvent(QShowEvent* event) {
+void CameraVirtualSceneSubpage::showEvent(QShowEvent* event) {
     if (!mHasBeenShown) {
         mHasBeenShown = true;
         loadUi();
     }
 }
 
-void VirtualScenePage::on_imageWall_pathChanged(QString path) {
+void CameraVirtualSceneSubpage::on_imageWall_pathChanged(QString path) {
     changePoster("wall", path);
 }
 
-void VirtualScenePage::on_imageTable_pathChanged(QString path) {
+void CameraVirtualSceneSubpage::on_imageTable_pathChanged(QString path) {
     changePoster("table", path);
 }
 
-void VirtualScenePage::on_sizeSliderWall_valueChanged(double value) {
+void CameraVirtualSceneSubpage::on_sizeSliderWall_valueChanged(double value) {
     changePosterSize("wall", static_cast<float>(value));
 }
 
-void VirtualScenePage::on_sizeSliderTable_valueChanged(double value) {
+void CameraVirtualSceneSubpage::on_sizeSliderTable_valueChanged(double value) {
     changePosterSize("table", static_cast<float>(value));
 }
 
-void VirtualScenePage::reportInteraction() {
+void CameraVirtualSceneSubpage::reportInteraction() {
     if (!mHadFirstInteraction) {
         mHadFirstInteraction = true;
         android::metrics::MetricsReporter::get().report(
@@ -82,7 +83,7 @@ void VirtualScenePage::reportInteraction() {
     }
 }
 
-void VirtualScenePage::changePoster(QString name, QString path) {
+void CameraVirtualSceneSubpage::changePoster(QString name, QString path) {
     // Persist to settings.
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
@@ -116,7 +117,7 @@ void VirtualScenePage::changePoster(QString name, QString path) {
     }
 }
 
-void VirtualScenePage::changePosterSize(QString name, float value) {
+void CameraVirtualSceneSubpage::changePosterSize(QString name, float value) {
     const float scaledValue = value / kSliderValueScale;
 
     // Persist to settings.
@@ -144,13 +145,14 @@ void VirtualScenePage::changePosterSize(QString name, float value) {
     }
 }
 
-void VirtualScenePage::loadUi() {
+void CameraVirtualSceneSubpage::loadUi() {
     // Enumerate existing pointers.  If any are currently set, they were set
     // from the command line so they take precedence over the saved setting.
     sVirtualSceneAgent->enumeratePosters(
             this, [](void* context, const char* posterName,
                      const char* filename, float size) {
-                auto self = reinterpret_cast<VirtualScenePage*>(context);
+                auto self =
+                        reinterpret_cast<CameraVirtualSceneSubpage*>(context);
                 const QString name = posterName;
                 if (name == "wall") {
                     self->mUi->imageWall->setPath(filename);
@@ -165,7 +167,7 @@ void VirtualScenePage::loadUi() {
 }
 
 // static
-void VirtualScenePage::loadInitialSettings() {
+void CameraVirtualSceneSubpage::loadInitialSettings() {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
         const QString avdSettingsFile =
