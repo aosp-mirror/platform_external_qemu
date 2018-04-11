@@ -961,6 +961,10 @@ LOCAL_SRC_FILES := \
     android/recording/test/FfmpegRecorder_unittest.cpp \
 
 LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS)
+# ffmpeg mac dependency
+ifeq ($(BUILD_TARGET_OS),darwin)
+    LOCAL_LDLIBS += -lbz2
+endif
 
 LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \
