@@ -22,6 +22,30 @@
       "revId": "75319c4fe3f3e7c2e34b22f580e9cca03408b58c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67b2f72b_5b3f2404",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-11T20:58:09Z",
+      "side": 1,
+      "message": "Done (free function)",
+      "parentUuid": "b7ca32a6_e1a292f8",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 14
+      },
+      "revId": "75319c4fe3f3e7c2e34b22f580e9cca03408b58c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

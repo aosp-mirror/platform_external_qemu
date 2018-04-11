@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa95fd97_deed84a7",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-11T20:58:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b85599b3_49484beb",
+      "range": {
+        "startLine": 45,
+        "startChar": 32,
+        "endLine": 45,
+        "endChar": 50
+      },
+      "revId": "eb17d7b283286acd9357142fa8d3b243dc2a6c3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7e8df50_75035ede",
         "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-11T19:10:48Z",
       "side": 1,
       "message": "what about making this static? I doubt the support will ever go away if it was there from the beginning :)",
+      "range": {
+        "startLine": 75,
+        "startChar": 5,
+        "endLine": 77,
+        "endChar": 57
+      },
+      "revId": "eb17d7b283286acd9357142fa8d3b243dc2a6c3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ade9b6d5_123adecc",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-11T20:58:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b7e8df50_75035ede",
       "range": {
         "startLine": 75,
         "startChar": 5,
