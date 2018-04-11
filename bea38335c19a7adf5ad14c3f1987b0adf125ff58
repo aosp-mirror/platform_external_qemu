@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6ff0beb0_4b5d263d",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-11T20:58:38Z",
+      "side": 1,
+      "message": "Good catch! Done.",
+      "parentUuid": "405c1ebc_edf78e9f",
+      "range": {
+        "startLine": 80,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 9
+      },
+      "revId": "bea38335c19a7adf5ad14c3f1987b0adf125ff58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "29095b2f_7de855e8",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-11T18:22:04Z",
       "side": 1,
       "message": "?",
+      "range": {
+        "startLine": 611,
+        "startChar": 20,
+        "endLine": 611,
+        "endChar": 24
+      },
+      "revId": "bea38335c19a7adf5ad14c3f1987b0adf125ff58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "97b71b5e_c854992d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-11T20:58:38Z",
+      "side": 1,
+      "message": "Was doing another experiment there. Removed",
+      "parentUuid": "29095b2f_7de855e8",
       "range": {
         "startLine": 611,
         "startChar": 20,
