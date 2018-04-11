@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "902fd56f_58bb6fa4",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-11T12:06:19Z",
+      "side": 1,
+      "message": "nit:remove",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 4
+      },
+      "revId": "59adf84b4fb6c9a3ffdee6332c4332fa8e4792aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
