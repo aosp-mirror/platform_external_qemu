@@ -40,6 +40,7 @@
 #include <psapi.h>
 #include <winioctl.h>
 #include <ntddscsi.h>
+#include <versionhelpers.h>
 #endif
 
 #ifdef __APPLE__
@@ -676,6 +677,42 @@ public:
 #else
 #error getOsName(): unsupported OS;
 #endif
+    }
+
+    OsVersionInfo getOsVersionInfo() const override {
+        static Optional<OsVersionInfo> lastOsVersionInfo;
+        if (lastOsVersionInfo) {
+            return *lastOsVersionInfo;
+        }
+
+        OsVersionInfo res;
+
+#ifdef _WIN32
+        res.isServer = IsWindowsServer();
+
+#define WINDOWS_VERSION_INFER(versionFuncSuffix, inferredVersion) \
+        if (!IsWindows##versionFuncSuffix()) { \
+            res.windowsVersion = OsVersionInfo::WindowsVersion::inferredVersion; \
+            lastOsVersionInfo.emplace(res); \
+            return res; \
+        } \
+
+        WINDOWS_VERSION_INFER(XPOrGreater, Win9x);
+        WINDOWS_VERSION_INFER(VistaOrGreater, WinXP);
+        WINDOWS_VERSION_INFER(7OrGreater, WinVista);
+        WINDOWS_VERSION_INFER(7SP1OrGreater, Win7);
+        WINDOWS_VERSION_INFER(8OrGreater, Win7SP1);
+        WINDOWS_VERSION_INFER(8Point1OrGreater, Win8);
+        WINDOWS_VERSION_INFER(10OrGreater, Win81);
+
+        res.windowsVersion =
+            OsVersionInfo::WindowsVersion::Win10;
+        lastOsVersionInfo.emplace(res);
+        return res;
+#else
+        lastOsVersionInfo.emplace(res);
+#endif
+        return *lastOsVersionInfo;
     }
 
     bool isRunningUnderWine() const override {
