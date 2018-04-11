@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1c2a4ac8_180cf8e5",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-04-11T21:03:52Z",
+      "side": 1,
+      "message": "i think we need a c style function interface for the virtio-ballon.c to use.",
+      "revId": "7b1dbe2cb8d5d268fcf9808ee0acd44c407ddf54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
