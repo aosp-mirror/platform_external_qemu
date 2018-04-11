@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5539e779_c8b2a49e",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-11T06:55:04Z",
+      "side": 1,
+      "message": "Hmm, I don\u0027t think we should check start_gpa and size here. Let me explain what I mean by \"compatible\" with an example. Suppose we have a slot:\n* slot-\u003estart \u003d 0\n* slot-\u003esize \u003d 0x4000\n* slot-\u003ehva \u003d 0xcccc0000\n* slot-\u003eflags \u003d 0\n\nand a new region:\n* start_gpa \u003d 0x1000\n* size \u003d 0x2000\n* hva \u003d 0xcccc1000\n* flags \u003d 0\n\nEven though they have different start GPAs and sizes, if we look at the overlapping part, nothing is changed (same GPA\u003d\u003eHVA mapping, same flags), so we don\u0027t have to split the existing slot. This is exactly the subset/no-op case at line 269.\n\nNow if we change one property of the new region:\n* hva \u003d 0xdddd1000\n\nEven though slot-\u003eflags \u003d\u003d flags, the GPA\u003d\u003eHVA mapping is different for the overlap, so we need to split the existing slot.",
+      "revId": "d0a20a573a7f317615091098d2a735569dd5c271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1b55a11_cec63cec",
+        "filename": "target/i386/hax-mem.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-11T06:55:04Z",
+      "side": 1,
+      "message": "Should also check if hva \u003d\u003d slot-\u003ehva. Sorry I missed this yesterday.",
+      "revId": "d0a20a573a7f317615091098d2a735569dd5c271",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
