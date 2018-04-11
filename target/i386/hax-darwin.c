@@ -98,6 +98,23 @@ int hax_set_ram(uint64_t start_pa, uint64_t size, uint64_t host_va, int flags)
     return 0;
 }
 
+int hax_protect_ram(uint64_t start_pa, uint64_t size, int flags)
+{
+    int ret;
+
+    struct hax_protect_ram_info info = {
+        .pa_start = start_pa,
+        .size = size,
+        .flags = flags,
+        .reserved = 0,
+    };
+
+    ret = ioctl(hax_global.vm->fd, HAX_VM_IOCTL_PROTECT_RAM, &info);
+    if (ret < 0) {
+        return -errno;
+    }
+    return 0;
+}
 int hax_capability(struct hax_state *hax, struct hax_capabilityinfo *cap)
 {
     int ret;
