@@ -93,6 +93,7 @@ struct AudioOutputStream {
 
     uint64_t frameCount = 0;
     uint64_t writeFrameCount = 0;
+    uint64_t last_tsUs = 0;
 };
 
 class FfmpegRecorderImpl : public FfmpegRecorder {
@@ -100,7 +101,8 @@ public:
     // Ctor
     FfmpegRecorderImpl(uint16_t fbWidth,
                        uint16_t fbHeight,
-                       android::base::StringView filename);
+                       android::base::StringView filename,
+                       android::base::StringView containerFormat);
 
     virtual ~FfmpegRecorderImpl();
 
@@ -118,7 +120,8 @@ public:
 private:
     // Initalizes the output context for the muxer. This call is required for
     // adding video/audio contexts and starting the recording.
-    bool initOutputContext(android::base::StringView filename);
+    bool initOutputContext(android::base::StringView filename,
+                           android::base::StringView containerFormat);
 
     void attachAudioProducer(std::unique_ptr<Producer> producer);
     void attachVideoProducer(std::unique_ptr<Producer> producer);
@@ -184,11 +187,14 @@ private:
     std::unique_ptr<Producer> mVideoProducer;
 };
 
-FfmpegRecorderImpl::FfmpegRecorderImpl(uint16_t fbWidth,
-                                       uint16_t fbHeight,
-                                       android::base::StringView filename)
+FfmpegRecorderImpl::FfmpegRecorderImpl(
+        uint16_t fbWidth,
+        uint16_t fbHeight,
+        android::base::StringView filename,
+        android::base::StringView containerFormat)
     : mFbWidth(fbWidth), mFbHeight(fbHeight) {
-    mValid = initOutputContext(filename);
+    assert(mFbWidth > 0 && mFbHeight > 0);
+    mValid = initOutputContext(filename, containerFormat);
 }
 
 FfmpegRecorderImpl::~FfmpegRecorderImpl() {
@@ -199,21 +205,16 @@ bool FfmpegRecorderImpl::isValid() {
     return mValid;
 }
 
-bool FfmpegRecorderImpl::initOutputContext(android::base::StringView filename) {
+bool FfmpegRecorderImpl::initOutputContext(
+        android::base::StringView filename,
+        android::base::StringView containerFormat) {
     if (mStarted) {
         LOG(ERROR) << __func__ << ": Recording already started";
         return false;
     }
-    if (filename.empty()) {
-        LOG(ERROR) << __func__ << ": No output filename supplied";
-        return false;
-    }
-
-    std::string tmpfile = filename;
-    std::transform(tmpfile.begin(), tmpfile.end(), tmpfile.begin(), ::tolower);
-    if (PathUtils::extension(tmpfile) != ".webm") {
-        LOG(ERROR) << __func__ << ": [" << filename
-                   << "] must have a .webm extension";
+    if (filename.empty() || containerFormat.empty()) {
+        LOG(ERROR) << __func__
+                   << ": No output filename or container format supplied";
         return false;
     }
 
@@ -225,7 +226,7 @@ bool FfmpegRecorderImpl::initOutputContext(android::base::StringView filename) {
 
     // allocate the output media context
     AVFormatContext* outputCtx;
-    avformat_alloc_output_context2(&outputCtx, nullptr, nullptr,
+    avformat_alloc_output_context2(&outputCtx, nullptr, containerFormat.c_str(),
                                    mEncodedOutputPath.c_str());
     if (outputCtx == nullptr) {
         LOG(ERROR) << __func__ << ": avformat_alloc_output_context2 failed";
@@ -348,9 +349,11 @@ bool FfmpegRecorderImpl::stop() {
             if (mAudioStream.audioLeftover.size() <
                 frameSize) {  // this should always true
                 auto size = frameSize - mAudioStream.audioLeftover.size();
-                auto tsUs = android::base::System::get()->getHighResTimeUs();
                 Frame f(size, 0);
-                f.tsUs = tsUs;
+                // compute the time delta between frames
+                auto avframe = mAudioStream.frame.get();
+                uint64_t deltaUs = (uint64_t)(((float)avframe->nb_samples / avframe->sample_rate) * 1000000);
+                f.tsUs = mAudioStream.last_tsUs + deltaUs;
                 f.format.audioFormat = mAudioProducer->getFormat().audioFormat;
                 encodeAudioFrame(&f);
             }
@@ -612,6 +615,7 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
                     (int64_t)(((double)elapsedUS * ost->stream->time_base.den) /
                               1000000.00);
             avframe->pts = pts;
+            ost->last_tsUs = frame->tsUs;
             writeAudioFrame(avframe);
             buf += bufUsed;
             remaining -= bufUsed;
@@ -629,6 +633,7 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
         int64_t pts = (int64_t)(
                 ((double)elapsedUS * ost->stream->time_base.den) / 1000000.00);
         avframe->pts = pts;
+        ost->last_tsUs = frame->tsUs;
         writeAudioFrame(avframe);
         buf += frameSize;
         remaining -= frameSize;
@@ -921,9 +926,10 @@ void FfmpegRecorderImpl::logPacket(const AVFormatContext* fmtCtx,
 std::unique_ptr<FfmpegRecorder> FfmpegRecorder::create(
         uint16_t fbWidth,
         uint16_t fbHeight,
-        android::base::StringView filename) {
-    return std::unique_ptr<FfmpegRecorder>(
-            new FfmpegRecorderImpl(fbWidth, fbHeight, filename));
+        android::base::StringView filename,
+        android::base::StringView containerFormat) {
+    return std::unique_ptr<FfmpegRecorder>(new FfmpegRecorderImpl(
+            fbWidth, fbHeight, filename, containerFormat));
 }
 
 }  // namespace recording
