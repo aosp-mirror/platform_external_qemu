@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "debd264e_bbb06b91",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T18:53:54Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 78,
+        "startChar": 7,
+        "endLine": 78,
+        "endChar": 8
+      },
+      "revId": "7abae80d78ca5c71aae31f3b9fe5d243cc6cd697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba3b52b8_6ecd2e22",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T18:53:54Z",
+      "side": 1,
+      "message": "copy the stringview into class - this way you ensure it lives long enough. Passing parameters with StringView is OK as it will be able to capture both std::string and const char* without extra allocation, but storing it after the call needs a deep copy",
+      "range": {
+        "startLine": 152,
+        "startChar": 4,
+        "endLine": 152,
+        "endChar": 14
+      },
+      "revId": "7abae80d78ca5c71aae31f3b9fe5d243cc6cd697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
