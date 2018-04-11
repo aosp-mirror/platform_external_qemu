@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "405c1ebc_edf78e9f",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T18:22:04Z",
+      "side": 1,
+      "message": "join() can be called multiple times. What about clearing the |mRanges| vector in the end to make sure the next call is quick?",
+      "range": {
+        "startLine": 80,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 9
+      },
+      "revId": "bea38335c19a7adf5ad14c3f1987b0adf125ff58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29095b2f_7de855e8",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T18:22:04Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 611,
+        "startChar": 20,
+        "endLine": 611,
+        "endChar": 24
+      },
+      "revId": "bea38335c19a7adf5ad14c3f1987b0adf125ff58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
