@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4732c712_a38b905b",
+        "filename": "configure",
+        "patchSetId": 4
+      },
+      "lineNbr": 6195,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-11T16:28:06Z",
+      "side": 1,
+      "message": "does this mean whpx only works with software MMU emulation? I\u0027m curious why might it need it. HAXM needs it because it supports running on non-UG cpus and makes use of TCG",
+      "range": {
+        "startLine": 6195,
+        "startChar": 2,
+        "endLine": 6195,
+        "endChar": 42
+      },
+      "revId": "7bde9d4160d1589bfca902561d2b14c77aad6293",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
