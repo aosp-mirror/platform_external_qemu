@@ -12,6 +12,7 @@
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/Snapshotter.h"
 
+#include "android/base/memory/MemoryHints.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
@@ -27,6 +28,7 @@
 #include <utility>
 #include <vector>
 
+using android::base::MemoryHint;
 using android::base::System;
 
 namespace android {
@@ -91,7 +93,7 @@ public:
         }
 
         if (!data) {
-            memset(start, 0, length);
+            android::base::zeroOutMemory(start, length);
         } else {
             memcpy(start, data, length);
         }

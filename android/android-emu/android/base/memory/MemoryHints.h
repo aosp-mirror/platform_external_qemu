@@ -30,7 +30,14 @@ enum class MemoryHint {
 };
 
 // Returns true if successful, false otherwise.
+// |start| must be page-aligned.
 bool memoryHint(void* start, uint64_t length, MemoryHint hint);
+
+// Interface to zero out memory and tell the OS to decommit the page,
+// but leave it accessible later as well.
+// Returns true if successful, false otherwise.
+// |start| must be page-aligned.
+bool zeroOutMemory(void* start, uint64_t length);
 
 } // namespace base
 } // namespace android

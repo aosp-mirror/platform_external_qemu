@@ -54,6 +54,9 @@ TEST(MemoryHints, Basic) {
         EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::Normal));
         EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::Random));
         EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::Sequential));
+
+        // Check that zeroOutMemory works.
+        EXPECT_TRUE(zeroOutMemory(pagePtr, pageSize));
     }
 
     for (auto ptr : toDealloc) {
