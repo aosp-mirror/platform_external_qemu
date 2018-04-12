@@ -30,3 +30,20 @@ QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBo
 * {
     font-size: %%FONT_MEDIUM%%;
 }
+
+*[Style="MaterialBody"] {
+    font-family: Roboto;
+    font-size: %%FONT_SIZE_MATERIAL_BODY%%;
+}
+*[Style="MaterialHelper"] {
+    font-family: Roboto;
+    font-size: %%FONT_SIZE_MATERIAL_HELPER%%;
+}
+*[Style="MaterialTitle"] {
+    font-family: Roboto;
+    font-size: %%FONT_SIZE_MATERIAL_TITLE%%;
+}
+*[Style="MaterialSubheading"] {
+    font-family: Roboto;
+    font-size: %%FONT_SIZE_MATERIAL_SUBHEADING%%;
+}

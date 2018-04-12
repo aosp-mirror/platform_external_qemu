@@ -73,9 +73,9 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/FramelessDetector.cpp \
-    android/skin/qt/image-well.cpp \
     android/skin/qt/ModalOverlay.cpp \
     android/skin/qt/OverlayMessageCenter.cpp \
+    android/skin/qt/poster-image-well.cpp \
     android/skin/qt/qt-ui-commands.cpp \
     android/skin/qt/QtLooper.cpp \
     android/skin/qt/QtThreading.cpp \
@@ -129,9 +129,9 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/virtual-sensors-page.h \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h \
     android/skin/qt/extended-window.h \
-    android/skin/qt/image-well.h \
     android/skin/qt/raised-material-button.h \
     android/skin/qt/ModalOverlay.h \
+    android/skin/qt/poster-image-well.h \
     android/skin/qt/OverlayMessageCenter.h \
     android/skin/qt/QtLooperImpl.h \
     android/skin/qt/VirtualSceneInfoDialog.h \
@@ -171,7 +171,7 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/telephony-page.ui \
     android/skin/qt/extended-pages/virtual-sensors-page.ui \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui \
-    android/skin/qt/image-well.ui \
+    android/skin/qt/poster-image-well.ui \
     android/skin/qt/tools.ui \
     android/skin/qt/virtualscene-controls.ui \
     android/skin/qt/virtualscene-info-dialog.ui \

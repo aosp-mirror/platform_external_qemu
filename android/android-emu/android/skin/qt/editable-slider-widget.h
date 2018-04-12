@@ -29,12 +29,17 @@ class EditableSliderWidget : public QWidget
     Q_PROPERTY(double minimum READ getMinimum WRITE setMinimum);
     Q_PROPERTY(double maximum READ getMaximum WRITE setMaximum);
 
+    Q_PROPERTY(int lineEditMaximumWidth READ getLineEditMaximumWidth WRITE setLineEditMaximumWidth);
+
 public:
     explicit EditableSliderWidget(QWidget *parent = 0);
 
     double getValue() const { return mValue; }
     double getMinimum() const { return mMinimum; }
     double getMaximum() const { return mMaximum; }
+
+    int getLineEditMaximumWidth() const { return mLineEdit.maximumWidth(); }
+    void setLineEditMaximumWidth(int width) { return mLineEdit.setMaximumWidth(width); }
 
     // Sets the current value of the widget.
     // The provided value is clipped to the bounds currently imposed by the

@@ -21,19 +21,12 @@
 #include <QFileInfo>
 #include <QSettings>
 
-static constexpr float kSliderValueScale = 100.0f;
-
 const QAndroidVirtualSceneAgent* CameraVirtualSceneSubpage::sVirtualSceneAgent =
         nullptr;
 
 CameraVirtualSceneSubpage::CameraVirtualSceneSubpage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::CameraVirtualSceneSubpage()) {
     mUi->setupUi(this);
-
-    mUi->sizeSliderWall->setRange(0.0, kSliderValueScale, false);
-    mUi->sizeSliderWall->setValue(kSliderValueScale, false);
-    mUi->sizeSliderTable->setRange(0.0, kSliderValueScale, false);
-    mUi->sizeSliderTable->setValue(kSliderValueScale, false);
 
     connect(mUi->imageWall, SIGNAL(interaction()), this,
             SLOT(reportInteraction()));
@@ -59,16 +52,16 @@ void CameraVirtualSceneSubpage::on_imageWall_pathChanged(QString path) {
     changePoster("wall", path);
 }
 
+void CameraVirtualSceneSubpage::on_imageWall_sizeChanged(float value) {
+    changePosterSize("wall", value);
+}
+
 void CameraVirtualSceneSubpage::on_imageTable_pathChanged(QString path) {
     changePoster("table", path);
 }
 
-void CameraVirtualSceneSubpage::on_sizeSliderWall_valueChanged(double value) {
-    changePosterSize("wall", static_cast<float>(value));
-}
-
-void CameraVirtualSceneSubpage::on_sizeSliderTable_valueChanged(double value) {
-    changePosterSize("table", static_cast<float>(value));
+void CameraVirtualSceneSubpage::on_imageTable_sizeChanged(float value) {
+    changePosterSize("table", value);
 }
 
 void CameraVirtualSceneSubpage::reportInteraction() {
@@ -118,8 +111,6 @@ void CameraVirtualSceneSubpage::changePoster(QString name, QString path) {
 }
 
 void CameraVirtualSceneSubpage::changePosterSize(QString name, float value) {
-    const float scaledValue = value / kSliderValueScale;
-
     // Persist to settings.
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
@@ -131,7 +122,7 @@ void CameraVirtualSceneSubpage::changePosterSize(QString name, float value) {
                 avdSpecificSettings
                         .value(Ui::Settings::PER_AVD_VIRTUAL_SCENE_POSTER_SIZES)
                         .toMap();
-        savedPosterSizes[name] = scaledValue;
+        savedPosterSizes[name] = value;
 
         avdSpecificSettings.setValue(
                 Ui::Settings::PER_AVD_VIRTUAL_SCENE_POSTER_SIZES,
@@ -140,8 +131,7 @@ void CameraVirtualSceneSubpage::changePosterSize(QString name, float value) {
 
     // Update the scene.
     if (sVirtualSceneAgent) {
-        sVirtualSceneAgent->setPosterSize(name.toUtf8().constData(),
-                                          scaledValue);
+        sVirtualSceneAgent->setPosterSize(name.toUtf8().constData(), value);
     }
 }
 
@@ -156,12 +146,10 @@ void CameraVirtualSceneSubpage::loadUi() {
                 const QString name = posterName;
                 if (name == "wall") {
                     self->mUi->imageWall->setPath(filename);
-                    self->mUi->sizeSliderWall->setValue(
-                            size * kSliderValueScale, false);
+                    self->mUi->imageWall->setSize(size);
                 } else if (name == "table") {
                     self->mUi->imageTable->setPath(filename);
-                    self->mUi->sizeSliderTable->setValue(
-                            size * kSliderValueScale, false);
+                    self->mUi->imageTable->setSize(size);
                 }
             });
 }

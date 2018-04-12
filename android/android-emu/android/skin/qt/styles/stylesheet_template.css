@@ -281,3 +281,14 @@ QToolTip {
     background-color: #ffffff;
     color: #000000;
 }
+
+*[Style="MaterialHelper"] {
+    color: %%TITLE_COLOR%%;
+}
+
+#DropTarget {
+    background-color: %%DROP_TARGET_BKG_COLOR%%;
+    border-style: solid;
+    border-width: 2px;
+    border-color: %%TOOL_COLOR%%;
+}
