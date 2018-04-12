@@ -107,6 +107,8 @@ extern int daemon(int, int);
 #include "glib-compat.h"
 #include "qemu/typedefs.h"
 
+#include <sys/mman.h>
+
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
@@ -257,7 +259,11 @@ void qemu_anon_ram_free(void *ptr, size_t size);
 #else
 #define QEMU_MADV_NOHUGEPAGE QEMU_MADV_INVALID
 #endif
-
+#ifdef MADV_FREE
+#define QEMU_MADV_FREE MADV_FREE
+#else
+#define QEMU_MADV_FREE QEMU_MADV_INVALID
+#endif
 #elif defined(CONFIG_POSIX_MADVISE)
 
 #define QEMU_MADV_WILLNEED  POSIX_MADV_WILLNEED
@@ -269,7 +275,7 @@ void qemu_anon_ram_free(void *ptr, size_t size);
 #define QEMU_MADV_DONTDUMP QEMU_MADV_INVALID
 #define QEMU_MADV_HUGEPAGE  QEMU_MADV_INVALID
 #define QEMU_MADV_NOHUGEPAGE  QEMU_MADV_INVALID
-
+#define QEMU_MADV_FREE QEMU_MADV_INVALID
 #else /* no-op */
 
 #define QEMU_MADV_WILLNEED  QEMU_MADV_INVALID
@@ -281,7 +287,7 @@ void qemu_anon_ram_free(void *ptr, size_t size);
 #define QEMU_MADV_DONTDUMP QEMU_MADV_INVALID
 #define QEMU_MADV_HUGEPAGE  QEMU_MADV_INVALID
 #define QEMU_MADV_NOHUGEPAGE  QEMU_MADV_INVALID
-
+#define QEMU_MADV_FREE QEMU_MADV_INVALID
 #endif
 
 #if defined(CONFIG_LINUX)

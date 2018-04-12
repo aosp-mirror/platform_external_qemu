@@ -828,6 +828,29 @@ static void *virtqueue_alloc_element(size_t sz, unsigned out_num, unsigned in_nu
     return elem;
 }
 
+void pop_hinting_addr(VirtQueue *vq, uint64_t *addr, uint32_t *len)
+{
+   VRingMemoryRegionCaches *caches;
+   VRingDesc desc;
+   MemoryRegionCache *desc_cache;
+   VirtIODevice *vdev = vq->vdev;
+   unsigned int head, max;
+
+   max = vq->vring.num;
+   if (!virtqueue_get_head(vq, vq->last_avail_idx++, &head)) {
+   printf("\n%d:%sError: Unable to read head\n", __LINE__, __func__);
+   }
+
+   caches = vring_get_region_caches(vq);
+   if (caches->desc.len < max * sizeof(VRingDesc)) {
+       virtio_error(vdev, "Cannot map descriptor ring");
+   }
+   desc_cache = &caches->desc;
+   vring_desc_read(vdev, &desc, desc_cache, head);
+   *addr = desc.addr;
+   *len = desc.len;
+}
+
 void *virtqueue_pop(VirtQueue *vq, size_t sz)
 {
     unsigned int i, head, max;

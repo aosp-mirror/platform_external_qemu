@@ -24,6 +24,7 @@
 #define LEGACY_VIRTIO_IS_BIENDIAN 1
 #endif
 
+void pop_hinting_addr(VirtQueue *vq, uint64_t *addr, uint32_t *len);
 static inline bool virtio_access_is_big_endian(VirtIODevice *vdev)
 {
 #if defined(LEGACY_VIRTIO_IS_BIENDIAN)
