@@ -16,6 +16,24 @@
       "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9099bc21_c51f14c5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-12T21:28:01Z",
+      "side": 1,
+      "message": "Hi, you\u0027ll have to enable the \"Windows Hypervisor Platform\" optional Windows feature.",
+      "parentUuid": "3c6e5e44_f36b4d9f",
+      "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
