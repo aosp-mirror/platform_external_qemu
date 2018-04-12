@@ -22,6 +22,47 @@
       "revId": "7bde9d4160d1589bfca902561d2b14c77aad6293",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a0390b7_a95a43d3",
+        "filename": "configure",
+        "patchSetId": 4
+      },
+      "lineNbr": 6195,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-12T13:08:26Z",
+      "side": 1,
+      "message": "*-softmmu targets are used when doing full system emulation, as opposed to user-mode emulation (used when running individual binaries), which isn\u0027t available on Windows.",
+      "parentUuid": "4732c712_a38b905b",
+      "range": {
+        "startLine": 6195,
+        "startChar": 2,
+        "endLine": 6195,
+        "endChar": 42
+      },
+      "revId": "7bde9d4160d1589bfca902561d2b14c77aad6293",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19645174_3460b7e3",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1299243
+      },
+      "writtenOn": "2018-04-12T13:08:26Z",
+      "side": 1,
+      "message": "I think this is a leftover.",
+      "revId": "7bde9d4160d1589bfca902561d2b14c77aad6293",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
