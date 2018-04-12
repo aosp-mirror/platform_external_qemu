@@ -72,8 +72,9 @@ namespace {
 
 // a wrapper around a single output AVStream
 struct VideoOutputStream {
+    // These two pointers are owned by the output context
     AVStream* stream = nullptr;
-    AVScopedPtr<AVCodecContext> codecCtx;
+    AVCodecContext* codecCtx = nullptr;
     AVScopedPtr<AVFrame> frame;
     AVScopedPtr<AVFrame> tmpFrame;
     AVScopedPtr<SwsContext> swsCtx;
@@ -83,8 +84,9 @@ struct VideoOutputStream {
 };
 
 struct AudioOutputStream {
+    // These two pointers are owned by the output context
     AVStream* stream = nullptr;
-    AVScopedPtr<AVCodecContext> codecCtx;
+    AVCodecContext* codecCtx = nullptr;
     AVScopedPtr<AVFrame> frame;
     AVScopedPtr<AVFrame> tmpFrame;
     AVScopedPtr<SwrContext> swrCtx;
@@ -448,7 +450,7 @@ bool FfmpegRecorderImpl::addAudioTrack(
         return false;
     }
     AVCodecContext* c = ost->stream->codec;
-    ost->codecCtx = makeAVScopedPtr(c);
+    ost->codecCtx = c;
 
     D("%s: c->sample_fmt=%d, c->channels=%d, ost->st->time_base.den=%d\n",
       __func__, c->sample_fmt, c->channels, ost->stream->time_base.den);
@@ -549,7 +551,7 @@ bool FfmpegRecorderImpl::addVideoTrack(
         return false;
     }
     AVCodecContext* c = ost->stream->codec;
-    ost->codecCtx = makeAVScopedPtr(c);
+    ost->codecCtx = c;
 
     // allocate and init a re-usable frame
     auto frame = allocVideoFrame(c->pix_fmt, c->width, c->height);
@@ -879,14 +881,12 @@ bool FfmpegRecorderImpl::openAudioContext(AVCodec* codec,
 void FfmpegRecorderImpl::closeAudioContext() {
     mAudioStream.frame.reset();
     mAudioStream.tmpFrame.reset();
-    mAudioStream.codecCtx.reset();
     mAudioStream.swrCtx.reset();
 }
 
 void FfmpegRecorderImpl::closeVideoContext() {
     mVideoStream.frame.reset();
     mVideoStream.tmpFrame.reset();
-    mVideoStream.codecCtx.reset();
     mVideoStream.swsCtx.reset();
 }
 

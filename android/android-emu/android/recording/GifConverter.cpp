@@ -79,8 +79,8 @@ private:
     AVScopedPtr<AVFormatContext> mInputContext;
     AVScopedPtr<AVFormatContext> mOutputContext;
     AVScopedPtr<SwsContext> mSwsContext;
-    AVScopedPtr<AVCodecContext> mInVideoCodecCxt;
-    AVScopedPtr<AVCodecContext> mOutVideoCodecCxt;
+    AVCodecContext* mInVideoCodecCxt = nullptr;
+    AVCodecContext* mOutVideoCodecCxt = nullptr;
     AVStream* mOutputStream = nullptr;
     int mVideoStreamIndex = -1;
 };
@@ -135,7 +135,7 @@ bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
                 LOG(ERROR) << "Failed to open decoder for stream #" << i;
                 return false;
             }
-            mInVideoCodecCxt = makeAVScopedPtr(codec_ctx);
+            mInVideoCodecCxt = codec_ctx;
             mVideoStreamIndex = i;
             break;
         }
@@ -174,28 +174,27 @@ bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
         return false;
     }
 
-    AVCodecContext* dec_ctx = mInVideoCodecCxt.get();
     AVCodecContext* enc_ctx = mOutputStream->codec;
 
     if ((encoder->capabilities & CODEC_CAP_EXPERIMENTAL) != 0) {
         enc_ctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
     }
 
-    enc_ctx->height = dec_ctx->height;
-    enc_ctx->width = dec_ctx->width;
+    enc_ctx->height = mInVideoCodecCxt->height;
+    enc_ctx->width = mInVideoCodecCxt->width;
     enc_ctx->bit_rate = bitrate;
-    enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
+    enc_ctx->sample_aspect_ratio = mInVideoCodecCxt->sample_aspect_ratio;
     // take first format from list of supported formats, which should be
     // AV_PIX_FMT_RGB8
     enc_ctx->pix_fmt = encoder->pix_fmts[0];
-    enc_ctx->time_base = dec_ctx->time_base;
+    enc_ctx->time_base = mInVideoCodecCxt->time_base;
 
     int ret = avcodec_open2(enc_ctx, encoder, NULL);
     if (ret < 0) {
         LOG(ERROR) << "Cannot open video encoder for GIF";
         return false;
     }
-    mOutVideoCodecCxt = makeAVScopedPtr(enc_ctx);
+    mOutVideoCodecCxt = enc_ctx;
 
     if (mOutputContext->oformat->flags & AVFMT_GLOBALHEADER)
         enc_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
@@ -244,15 +243,12 @@ bool GifConverterImpl::run() {
         return false;
     }
 
-    AVCodecContext* dec_ctx = mInVideoCodecCxt.get();
-    AVCodecContext* enc_ctx = mOutVideoCodecCxt.get();
-
     SwsContext* sws_ctx = nullptr;
-    if (dec_ctx->pix_fmt != enc_ctx->pix_fmt) {
-        sws_ctx = sws_getContext(enc_ctx->width, enc_ctx->height,
-                                 dec_ctx->pix_fmt, enc_ctx->width,
-                                 enc_ctx->height,
-                                 /*AV_PIX_FMT_RGBA*/ enc_ctx->pix_fmt,
+    if (mInVideoCodecCxt->pix_fmt != mOutVideoCodecCxt->pix_fmt) {
+        sws_ctx = sws_getContext(mOutVideoCodecCxt->width, mOutVideoCodecCxt->height,
+                                 mInVideoCodecCxt->pix_fmt, mOutVideoCodecCxt->width,
+                                 mOutVideoCodecCxt->height,
+                                 /*AV_PIX_FMT_RGBA*/ mOutVideoCodecCxt->pix_fmt,
                                  SCALE_FLAGS, nullptr, nullptr, nullptr);
         if (sws_ctx == nullptr) {
             LOG(ERROR) << "Could not initialize the conversion context";
@@ -333,9 +329,9 @@ bool GifConverterImpl::run() {
             }
             auto pTmpFrame = makeAVScopedPtr(tmp_frame);
 
-            pTmpFrame->format = enc_ctx->pix_fmt;
-            pTmpFrame->width = enc_ctx->width;
-            pTmpFrame->height = enc_ctx->height;
+            pTmpFrame->format = mOutVideoCodecCxt->pix_fmt;
+            pTmpFrame->width = mOutVideoCodecCxt->width;
+            pTmpFrame->height = mOutVideoCodecCxt->height;
             // allocate the buffer for the frame data
             ret = av_frame_get_buffer(pTmpFrame.get(), 32);
             if (ret < 0) {
@@ -344,7 +340,7 @@ bool GifConverterImpl::run() {
             }
 
             sws_scale(mSwsContext.get(), pFrame->data, pFrame->linesize, 0,
-                      enc_ctx->height, pTmpFrame->data, pTmpFrame->linesize);
+                      mOutVideoCodecCxt->height, pTmpFrame->data, pTmpFrame->linesize);
             pTmpFrame->pts = pFrame->pts;
             ret = encodeWriteFrame(pTmpFrame.get(), nullptr);
             if (ret < 0) {
