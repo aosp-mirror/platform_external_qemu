@@ -16,6 +16,24 @@
       "revId": "7b1dbe2cb8d5d268fcf9808ee0acd44c407ddf54",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84d6be9f_44385dc6",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-12T00:33:01Z",
+      "side": 1,
+      "message": "We could use this in the glue code, hooking into the virtio balloon driver.",
+      "parentUuid": "1c2a4ac8_180cf8e5",
+      "revId": "7b1dbe2cb8d5d268fcf9808ee0acd44c407ddf54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }

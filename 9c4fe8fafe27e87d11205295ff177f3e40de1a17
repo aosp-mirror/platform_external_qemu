@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2ad7e86_b5b58888",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-12T00:33:01Z",
+      "side": 1,
+      "message": "This seems necessary to change the resident memory amount on Mac, even with MADV_FREE.",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 144,
+        "endChar": 5
+      },
+      "revId": "9c4fe8fafe27e87d11205295ff177f3e40de1a17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
