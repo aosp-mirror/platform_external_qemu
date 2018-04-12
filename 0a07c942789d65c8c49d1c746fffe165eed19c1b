@@ -34,6 +34,24 @@
       "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ffd3859e_8cc2be12",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-12T22:15:21Z",
+      "side": 1,
+      "message": "I have a \"Hyper-V platform\" marked with \"■\" and \"Hyper-V Hypervisor\" under it marked with \"✓\".\n\nI followed\nhttps://docs.microsoft.com/en-us/windows/security/threat-protection/device-guard/deploy-device-guard-enable-virtualization-based-security",
+      "parentUuid": "9099bc21_c51f14c5",
+      "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
