@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a832819e_af45ec94",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-12T16:27:05Z",
+      "side": 1,
+      "message": "what about adding a separate \"MemoryHint::ZeroOut\" flag? Looks like some OSes support discarding the page with on demand zeroing on first access; for others it would memset() explicitly, but with a potential to optimize",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 73
+      },
+      "revId": "e626a22a3a805d9d6a71b7f48e5d21ee9324b975",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de899ef0_21557977",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-12T16:27:05Z",
+      "side": 1,
+      "message": "check for end \u003d\u003d start ?",
+      "range": {
+        "startLine": 256,
+        "startChar": 38,
+        "endLine": 256,
+        "endChar": 74
+      },
+      "revId": "e626a22a3a805d9d6a71b7f48e5d21ee9324b975",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49fa28ab_22ef8746",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-12T16:27:05Z",
+      "side": 1,
+      "message": "nit: too many empty lines :)",
+      "range": {
+        "startLine": 515,
+        "startChar": 0,
+        "endLine": 515,
+        "endChar": 0
+      },
+      "revId": "e626a22a3a805d9d6a71b7f48e5d21ee9324b975",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
