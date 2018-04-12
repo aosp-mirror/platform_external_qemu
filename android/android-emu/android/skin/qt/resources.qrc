@@ -1,4 +1,4 @@
-<!--Copyright (C) 2015-2017 The Android Open Source Project
+<!--Copyright (C) 2015-2018 The Android Open Source Project
 
     This software is licensed under the terms of the GNU General Public
     License version 2, as published by the Free Software Foundation, and
@@ -130,6 +130,7 @@
         <file alias="toggle_off_disabled">images/light/toggle_off_disabled_light.png</file>
         <file alias="toggle_on">images/light/toggle_on_light.png</file>
         <file alias="toggle_on_disabled">images/light/toggle_on_disabled_light.png</file>
+        <file alias="trash">images/light/ic_delete_777_48px.svg</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
         <file alias="android_auto">images/light/ic_car_678_56px.svg</file>
     </qresource>
@@ -240,6 +241,7 @@
         <file alias="toggle_off_disabled">images/dark/toggle_off_disabled_dark.png</file>
         <file alias="toggle_on">images/dark/toggle_on_dark.png</file>
         <file alias="toggle_on_disabled">images/dark/toggle_on_disabled_dark.png</file>
+        <file alias="trash">images/dark/ic_delete_bcc_48px.svg</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
         <file alias="android_auto">images/dark/ic_car_677_56px.svg</file>
     </qresource>

@@ -10,21 +10,26 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_image-well.h"
+#include "ui_poster-image-well.h"
 
 #include <QWidget>
 #include <memory>
 
 // This widget provides an image viewer and file picker, and exposes the path
 // of the file it is referencing.
-class ImageWell : public QWidget {
+class PosterImageWell : public QWidget {
     Q_OBJECT
+
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged
+                       USER true);
+    Q_PROPERTY(float size READ getSize WRITE setSize NOTIFY sizeChanged
                        USER true);
 
 public:
-    explicit ImageWell(QWidget* parent = 0);
+    explicit PosterImageWell(QWidget* parent = 0);
 
+    // Get the current image path of the widget.  Returns a null QString if no
+    // image is set.
     QString getPath() const { return mPath; }
 
     // Set the current image path of the widget.
@@ -35,6 +40,14 @@ public:
     //          is assumed to point to a valid file.
     void setPath(QString path);
 
+    // Get the current poster size.
+    float getSize() const;
+
+    // Set the current poster size.
+    //
+    // |value| - Poster size, between 0 and 1.
+    void setSize(float value);
+
     // Set the starting directory for the file dialog.  Defaults to the current
     // working directory, ".".  Does not have to match the path's base
     // directory.
@@ -44,20 +57,32 @@ public:
     void setStartingDirectory(QString startingDirectory);
 
     void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragLeaveEvent(QDragLeaveEvent* event) override;
     void dropEvent(QDropEvent* event) override;
 
 signals:
     // Emitted when the path stored by the widget changes.
     void pathChanged(QString path);
 
+    // Emitted when the widget size changes.
+    void sizeChanged(float value);
+
     // Emitted when the user interacts with the control, even if the action
     // is canceled.
     void interaction();
 
 private slots:
+    // No image state.
     void on_filePicker_clicked();
 
+    // With image state.
+    void on_pickFileButton_clicked();
+    void on_removeButton_clicked();
+    void on_sizeSlider_valueChanged(double value);
+
 private:
+    void openFilePicker();
+
     // Returns true if the path was changed.
     bool setPathInternal(const QString& path);
 
@@ -71,8 +96,9 @@ private:
     //              QDropEvent::mimeData().
     QString getPathIfValidDrop(const QMimeData* mimeData) const;
 
-    std::unique_ptr<Ui::ImageWell> mUi;
+    std::unique_ptr<Ui::PosterImageWell> mUi;
 
     QString mStartingDirectory;
     QString mPath;
+    QWidget mOverlayWidget;
 };
