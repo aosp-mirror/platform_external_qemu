@@ -7,50 +7,55 @@
     <x>0</x>
     <y>0</y>
     <width>618</width>
-    <height>529</height>
+    <height>623</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="1">
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <property name="spacing">
-      <number>8</number>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>20</number>
+   </property>
+   <property name="topMargin">
+    <number>24</number>
+   </property>
+   <property name="rightMargin">
+    <number>24</number>
+   </property>
+   <property name="bottomMargin">
+    <number>24</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="title">
+     <property name="text">
+      <string>Scene images</string>
      </property>
-     <property name="sizeConstraint">
-      <enum>QLayout::SetMinimumSize</enum>
+     <property name="Style" stdset="0">
+      <string>MaterialTitle</string>
      </property>
-     <item>
-      <widget class="QLabel" name="labelTable">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Table</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ImageWell" name="imageTable" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>256</width>
-         <height>256</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="EditableSliderWidget" name="sizeSliderTable" native="true"/>
-     </item>
-    </layout>
+    </widget>
    </item>
-   <item row="0" column="0">
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>18</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
       <number>8</number>
@@ -66,27 +71,75 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+        </font>
+       </property>
        <property name="text">
         <string>Wall</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ImageWell" name="imageWall" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>256</width>
-         <height>256</height>
-        </size>
+       <property name="Style" stdset="0">
+        <string>MaterialSubheading</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="EditableSliderWidget" name="sizeSliderWall" native="true"/>
+      <widget class="PosterImageWell" name="imageWall" native="true"/>
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
+   <item>
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>18</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="spacing">
+      <number>8</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMinimumSize</enum>
+     </property>
+     <item>
+      <widget class="QLabel" name="labelTable">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <family>Roboto</family>
+        </font>
+       </property>
+       <property name="text">
+        <string>Table</string>
+       </property>
+       <property name="Style" stdset="0">
+        <string>MaterialSubheading</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="PosterImageWell" name="imageTable" native="true"/>
+     </item>
+    </layout>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -99,32 +152,13 @@
      </property>
     </spacer>
    </item>
-   <item row="0" column="2">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ImageWell</class>
+   <class>PosterImageWell</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/image-well.h</header>
-  </customwidget>
-  <customwidget>
-   <class>EditableSliderWidget</class>
-   <extends>QWidget</extends>
-   <header>android/skin/qt/editable-slider-widget.h</header>
-   <container>1</container>
+   <header>android/skin/qt/poster-image-well.h</header>
   </customwidget>
  </customwidgets>
  <resources>

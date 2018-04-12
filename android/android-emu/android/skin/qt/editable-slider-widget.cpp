@@ -23,6 +23,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     mEditBoxLayout.addWidget(&mLineEdit);
     mEditBoxLayout.addStretch();
     mMainLayout.setSpacing(0);
+    mMainLayout.setContentsMargins(0, 0, 0, 0);
     mMainLayout.addLayout(&mAnnotatedSliderLayout);
     mMainLayout.addSpacing(16);
     mMainLayout.addLayout(&mEditBoxLayout);
