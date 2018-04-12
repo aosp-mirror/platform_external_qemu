@@ -21,10 +21,7 @@ namespace android {
 namespace base {
 
 SharedMemory::SharedMemory(StringView name, size_t size)
-    : mName(name), mSize(size), mAddr(unmappedMemory()), mCreate(false) {
-    assert(mName.size() <= NAME_MAX);  // On mac SHM_NAME_MAX == 30, which is
-                                       // not defined in NAME_MAX
-}
+    : mName(name), mSize(size), mAddr(unmappedMemory()), mCreate(false) {}
 
 int SharedMemory::create(mode_t mode) {
     return openInternal(O_CREAT | O_RDWR, mode);
