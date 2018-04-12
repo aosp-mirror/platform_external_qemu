@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9b59f9b1_43745fde",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-12T16:34:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "72e464f8_6c0eef2b",
+      "range": {
+        "startLine": 35,
+        "startChar": 28,
+        "endLine": 35,
+        "endChar": 29
+      },
+      "revId": "10db61196899e6cad9d2edb895c30cccf0b1ec16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99bed16c_281ef5fd",
         "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-12T16:17:53Z",
       "side": 1,
       "message": "AFAIK linux should be able to decommit it without explicit mprotect() calls, could you give it a try? I remember seeing that code called on a simple MADV_DONTNEED",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 28
+      },
+      "revId": "10db61196899e6cad9d2edb895c30cccf0b1ec16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53b777da_b60cdb96",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-12T16:34:59Z",
+      "side": 1,
+      "message": "Right, thanks for the tip ! Seems to work still (decrease in memory usage during zero check). Done",
+      "parentUuid": "99bed16c_281ef5fd",
       "range": {
         "startLine": 68,
         "startChar": 0,
