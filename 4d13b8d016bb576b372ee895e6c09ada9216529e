@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1434bc6_c5c1ade9",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-04-12T15:21:15Z",
+      "side": 1,
+      "message": "Remove this?",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 18
+      },
+      "revId": "4d13b8d016bb576b372ee895e6c09ada9216529e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f79b3b9d_5f29b35d",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-04-12T15:21:15Z",
+      "side": 1,
+      "message": "clang-format?",
+      "range": {
+        "startLine": 35,
+        "startChar": 19,
+        "endLine": 37,
+        "endChar": 46
+      },
+      "revId": "4d13b8d016bb576b372ee895e6c09ada9216529e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
