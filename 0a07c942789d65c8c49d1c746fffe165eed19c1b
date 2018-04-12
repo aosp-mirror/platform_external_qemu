@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3c6e5e44_f36b4d9f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-12T21:22:33Z",
+      "side": 1,
+      "message": "Hi Lucian, I tried to run our emulator with your patches applied. I get\n\nCould not load library \u0027WinHvPlatform.dll\u0027.\n\nWindows shows this version:\n17127.rs4_release.180318-0047\n\nThe DG_readiness_Tool shows no complains in red.\n\nDo you know if we can verify your changes on our side at this moment?",
+      "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
