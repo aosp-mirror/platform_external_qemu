@@ -141,6 +141,7 @@ LOCAL_SRC_FILES := \
     android/base/synchronization/MessageChannel.cpp \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
+    android/base/memory/MemoryHints.cpp \
     android/base/system/System.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
@@ -682,6 +683,7 @@ LOCAL_SRC_FILES := \
   android/base/FunctionView_unittest.cpp \
   android/base/Log_unittest.cpp \
   android/base/memory/LazyInstance_unittest.cpp \
+  android/base/memory/MemoryHints_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/OnDemand_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
