@@ -36,13 +36,6 @@ struct AVDeleter : std::false_type {
     static void deleteFunc(void* v) { assert(0); }
 };
 
-template <>  // explicit specialization for T = AVCodecContext
-struct AVDeleter<AVCodecContext> : std::true_type {
-    static void deleteFunc(void* codec) {
-        avcodec_close(static_cast<AVCodecContext*>(codec));
-    }
-};
-
 template <>  // explicit specialization for T = AVFrame
 struct AVDeleter<AVFrame> : std::true_type {
     static void deleteFunc(void* f) {
@@ -77,6 +70,12 @@ template <>  // explicit specialization for T = AVFormatContext
 struct AVDeleter<AVFormatContext> : std::true_type {
     static void deleteFunc(void* oc) {
         auto ocp = static_cast<AVFormatContext*>(oc);
+        for (int i = 0; i < ocp->nb_streams; ++i) {
+            // Allocated from avcodec_open2
+            if (ocp->streams[i]->codec->codec) {
+                avcodec_close(ocp->streams[i]->codec);
+            }
+        }
         if (ocp->iformat) {
             // input context
             avformat_close_input(&ocp);
