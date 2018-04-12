@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72e464f8_6c0eef2b",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-12T16:17:53Z",
+      "side": 1,
+      "message": "unicode character",
+      "range": {
+        "startLine": 35,
+        "startChar": 28,
+        "endLine": 35,
+        "endChar": 29
+      },
+      "revId": "10db61196899e6cad9d2edb895c30cccf0b1ec16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99bed16c_281ef5fd",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-12T16:17:53Z",
+      "side": 1,
+      "message": "AFAIK linux should be able to decommit it without explicit mprotect() calls, could you give it a try? I remember seeing that code called on a simple MADV_DONTNEED",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 28
+      },
+      "revId": "10db61196899e6cad9d2edb895c30cccf0b1ec16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
