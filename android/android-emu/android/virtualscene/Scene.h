@@ -43,6 +43,8 @@ struct Poster {
     std::string defaultFilename;
 
     std::unique_ptr<PosterSceneObject> sceneObject;
+    Texture texture;
+    Texture defaultTexture;
 };
 
 class Scene {
@@ -59,9 +61,8 @@ public:
     // null if there was an error.
     static std::unique_ptr<Scene> create(Renderer& renderer);
 
-    // Before teardown, release all SceneObjects so that Renderer resources are
-    // cleaned up.
-    void releaseSceneObjects();
+    // Before teardown, release all Renderer resources and SceneObjects.
+    void releaseResources();
 
     // Get the scene camera.
     const SceneCamera& getCamera() const;

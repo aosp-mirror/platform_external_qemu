@@ -18,13 +18,16 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/synchronization/MessageChannel.h"
+#include "android/base/threads/WorkerThread.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 #include "android/virtualscene/RenderTarget.h"
-#include "android/virtualscene/SceneObject.h"
 #include "android/virtualscene/TextureUtils.h"
 
+#include <algorithm>
 #include <cmath>
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -35,6 +38,15 @@ using namespace android::base;
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
 #define D_ACTIVE VERBOSE_CHECK(virtualscene)
+
+// The T(...) macro is used to dump extra verbose information.
+#define T_ACTIVE 0
+
+#if T_ACTIVE
+#define T(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
+#else
+#define T(...) ((void)0)
+#endif
 
 static constexpr int kSuperSampleMultiple = 2;
 
@@ -226,28 +238,49 @@ struct MeshData {
     size_t mIndexCount = 0;
 };
 
+enum class TextureState { Placeholder, Loaded };
+
 struct TextureData {
     size_t mRefCount = 0;
+    TextureState mState = TextureState::Loaded;
     GLuint mTextureId = 0;
     std::string mFilename;
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
 };
 
-struct SceneObjectData {
+struct RendererHeldResources {
     std::vector<Material> materials;
     std::vector<Mesh> meshes;
     std::vector<Texture> textures;
 };
 
+enum class LoaderCommandType {
+    Shutdown,
+    LoadTexture
+};
+
+struct LoaderCommand {
+    LoaderCommandType mType;
+    int mHandle = -1;
+
+    LoaderCommand(LoaderCommandType type, int handle) : mType(type), mHandle(handle) {}
+};
+
 using RenderableParameterCallback =
         std::function<void(const MaterialData& material)>;
+
+static uint64_t durationUsToMs(uint64_t startUs, uint64_t endUs) {
+    assert(startUs < endUs);
+    const uint64_t durationUs = (endUs - startUs);
+    return durationUs / 1000;
+}
 
 /*******************************************************************************
  *                     Renderer routines
  ******************************************************************************/
 
-class RendererImpl : public Renderer, private SceneObject {
+class RendererImpl : public Renderer {
     DISALLOW_COPY_AND_ASSIGN(RendererImpl);
 
 public:
@@ -258,33 +291,39 @@ public:
 
     // Renderer public API.
     float getAspectRatio() override;
+    bool isTextureLoaded(Texture texture) override;
     void getTextureInfo(Texture texture,
                         uint32_t* outWidth,
                         uint32_t* outHeight) override;
 
-    void releaseObjectResources(const SceneObject* sceneObject) override;
+    void releaseTexture(Texture texture) override;
+    void releaseMaterial(Material material) override;
+    void releaseMesh(Mesh mesh) override;
 
-    Material createMaterialCheckerboard(const SceneObject* parent) override;
+    Material createMaterialCheckerboard() override;
     Material createMaterialTextured() override;
-    Material createMaterialScreenSpace(const SceneObject* parent,
-                                       const char* frag) override;
+    Material createMaterialScreenSpace(const char* frag) override;
 
-    Mesh createMesh(const SceneObject* parent,
-                    const VertexPositionUV* vertices,
+    Mesh createMesh(const VertexPositionUV* vertices,
                     size_t verticesSize,
                     const GLuint* indices,
                     size_t indicesSize) override;
 
-    Texture loadTexture(const SceneObject* parent,
-                        const char* filename) override;
+    Texture loadTexture(const char* filename) override;
+    Texture loadTextureAsync(const char* filename) override;
+    Texture duplicateTexture(Texture texture) override;
 
     void render(const std::vector<RenderableObject>& renderables,
                 float time) override;
 
 private:
-    void releaseMaterial(Material material);
-    void releaseMesh(Mesh mesh);
-    void releaseTexture(Texture texture);
+    void dispatchToRenderThread(std::function<void()>&& workItem);
+
+    WorkerProcessingResult onLoaderCommand(LoaderCommand&& command);
+
+    // Called by releaseMaterial, does not check to see if the material is a
+    // standard material before releasing it.
+    void releaseMaterialInternal(Material material);
 
     // Returns true if the material is a standard material.
     bool isStandardMaterial(Material material);
@@ -296,30 +335,33 @@ private:
     //
     // Returns an invalid texture if the texture has not been cached, which can
     // be checked with Texture::isValid().
-    //
-    // Is a valid texture is returned, it is bound to the parent object.
-    Texture tryGetCachedTexture(const SceneObject* parent,
-                                const char* filename);
+    Texture tryGetCachedTexture(const char* filename);
 
-    // Create an OpenGL texture with the given width and height with storage
-    // allocated, but no data loaded.
-    Texture createEmptyTexture(const SceneObject* parent, uint32_t width,
-                               uint32_t height);
+    // Create an OpenGL texture with the given width and height.
+    Texture createEmptyTexture(uint32_t width, uint32_t height);
 
-    // Create a texture handle from an OpenGL texture id, and register it with
-    // the textures list.
+    // Create a texture.
     //
-    // |parent| - Parent scene object.
+    // |state| - Texture state, if the texture is a placeholder or loaded data.
     // |filename| - If this texture was loaded from a file, the filename it was
     //              loaded from so that it can be cached, otherwise null.
-    // |textureId| - OpenGL texture id.
-    // |width| - Texture width, in pixels.
-    // |height| - Texture height, in pixels.
-    Texture createTextureInternal(const SceneObject* parent,
+    // |data| - TextureUtils result data.
+    Texture createTextureInternal(TextureState state,
                                   const char* filename,
-                                  GLuint textureId,
-                                  uint32_t width,
-                                  uint32_t height);
+                                  const TextureUtils::Result& data);
+
+    // Helper to load texture data from file and schedule an import to OpenGL on
+    // the worker thread.
+    //
+    // |texture| - Texture handle.
+    void onLoaderLoadTexture(Texture texture);
+
+    // Replace texture with new data, used for async texture loading.
+    //
+    // |texture| - Texture handle.
+    // |data| - TextureUtils result data.
+    bool replaceTextureInternal(Texture texture,
+                                const TextureUtils::Result& data);
 
     // Compile a shader from source.
     // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
@@ -346,6 +388,7 @@ private:
     GLuint getTextureId(Texture texture) const;
 
     // Executes the given renderable, used internally by Renderer::render.
+    // Should be called under mResourceLock.
     void processRenderable(const Renderable& renderable,
                            RenderableParameterCallback parameterCallback);
 
@@ -359,13 +402,19 @@ private:
     Mesh mEffectsMesh;
     std::vector<Material> mEffectsChain;
 
+    WorkerThread<LoaderCommand> mLoaderThread;
+    MessageChannel<std::function<void()>, 10> mRenderThreadDispatcherQueue;
+
+    Lock mResourceLock;
+    // {{ Protected by mResourceLock.
     int mNextResourceId = 0;
     std::unordered_map<int, MaterialData> mMaterials;
     std::unordered_map<int, MeshData> mMeshes;
     std::unordered_map<int, TextureData> mTextures;
     std::unordered_map<std::string, int> mTextureCache;
+    // }} End protected by mResourceLock.
 
-    std::unordered_map<const SceneObject*, SceneObjectData> mObjectData;
+    RendererHeldResources mRendererResources;
 
     // Standard materials.
     Material mMaterialTextured;
@@ -386,11 +435,16 @@ Renderer::Renderer() = default;
 Renderer::~Renderer() = default;
 
 RendererImpl::RendererImpl(const GLESv2Dispatch* gles2, int width, int height)
-    : mGles2(gles2), mRenderWidth(width), mRenderHeight(height) {}
+    : mGles2(gles2),
+      mRenderWidth(width),
+      mRenderHeight(height),
+      mLoaderThread([this](LoaderCommand&& command) {
+          return onLoaderCommand(std::move(command));
+      }) {}
 
 bool RendererImpl::initialize() {
-    mScreenRenderTarget =
-            RenderTarget::createDefault(mGles2, mRenderWidth, mRenderHeight);
+    mScreenRenderTarget = RenderTarget::createDefault(
+            *this, mGles2, mRenderWidth, mRenderHeight);
     if (!mScreenRenderTarget) {
         E("%s: Failed creating screen render target.", __FUNCTION__);
         return false;
@@ -398,11 +452,11 @@ bool RendererImpl::initialize() {
 
     for (size_t i = 0; i < 2; ++i) {
         Texture renderTargetTexture =
-                createEmptyTexture(this, mRenderWidth * kSuperSampleMultiple,
+                createEmptyTexture(mRenderWidth * kSuperSampleMultiple,
                                    mRenderHeight * kSuperSampleMultiple);
         mRenderTargets[i] = RenderTarget::createTextureTarget(
-                mGles2, getTextureId(renderTargetTexture), renderTargetTexture,
-                mRenderWidth * kSuperSampleMultiple,
+                *this, mGles2, getTextureId(renderTargetTexture),
+                renderTargetTexture, mRenderWidth * kSuperSampleMultiple,
                 mRenderHeight * kSuperSampleMultiple);
     }
     if (!mRenderTargets[0] || !mRenderTargets[1]) {
@@ -410,43 +464,59 @@ bool RendererImpl::initialize() {
         return false;
     }
 
-    Material fxaaEffect = createMaterialScreenSpace(this, kFxaaFragmentShader);
+    Material fxaaEffect = createMaterialScreenSpace(kFxaaFragmentShader);
     if (!fxaaEffect.isValid()) {
         E("%s: Failed creating fxaa effect.", __FUNCTION__);
         return false;
     }
+    mRendererResources.materials.push_back(fxaaEffect);
     mEffectsChain.push_back(std::move(fxaaEffect));
 
-    Material blitEffect = createMaterialScreenSpace(this, kBlitFragmentShader);
+    Material blitEffect = createMaterialScreenSpace(kBlitFragmentShader);
     if (!blitEffect.isValid()) {
         E("%s: Failed creating blit effect.", __FUNCTION__);
         return false;
     }
+    mRendererResources.materials.push_back(blitEffect);
     mEffectsChain.push_back(std::move(blitEffect));
 
-    mEffectsMesh =
-            Renderer::createMesh(this, kScreenQuadVerts, kScreenQuadIndices);
+    mEffectsMesh = Renderer::createMesh(kScreenQuadVerts, kScreenQuadIndices);
     if (!mEffectsMesh.isValid()) {
         E("%s: Failed creating effects mesh.", __FUNCTION__);
         return false;
     }
+    mRendererResources.meshes.push_back(mEffectsMesh);
+
+    mLoaderThread.start();
 
     return true;
 }
 
 RendererImpl::~RendererImpl() {
-    // Release Renderer-internal objects.
-    releaseObjectResources(this);
-    if (mMaterialTextured.isValid()) {
-        releaseMaterial(mMaterialTextured);
+    mLoaderThread.enqueue(LoaderCommand(LoaderCommandType::Shutdown, -1));
+    mLoaderThread.join();
+
+    // Release Renderer-internal resources.
+    for (auto& target : mRenderTargets) {
+        target.reset();
+    }
+    mScreenRenderTarget.reset();
+
+    for (auto& material : mRendererResources.materials) {
+        // Call releaseMaterialInternal so that we also release the standard
+        // materials.
+        releaseMaterialInternal(material);
     }
 
-    for (const auto& objectDataIt : mObjectData) {
-        W("%s: SceneObject 0x%08" PRIXPTR
-          " was not unregistered, resources will be leaked.",
-          __FUNCTION__, objectDataIt.first);
+    for (auto& mesh : mRendererResources.meshes) {
+        releaseMesh(mesh);
     }
 
+    for (auto& texture : mRendererResources.textures) {
+        releaseTexture(texture);
+    }
+
+    // Report leak warnings for resources that weren't released.
     for (const auto& materialIt : mMaterials) {
         W("%s: Leaked material with id %d", __FUNCTION__, materialIt.first);
     }
@@ -464,12 +534,25 @@ float RendererImpl::getAspectRatio() {
     return static_cast<float>(mRenderWidth) / mRenderHeight;
 }
 
+bool RendererImpl::isTextureLoaded(Texture texture) {
+    AutoLock lock(mResourceLock);
+    auto textureIt = mTextures.find(texture.id);
+
+    if (textureIt == mTextures.end()) {
+        E("%s: Could not find texture id %d", __FUNCTION__, texture.id);
+        return false;
+    }
+
+    return textureIt->second.mState == TextureState::Loaded;
+}
+
 void RendererImpl::getTextureInfo(Texture texture,
                                   uint32_t* outWidth,
                                   uint32_t* outHeight) {
     *outWidth = 0;
     *outHeight = 0;
 
+    AutoLock lock(mResourceLock);
     auto textureIt = mTextures.find(texture.id);
 
     if (textureIt == mTextures.end()) {
@@ -481,36 +564,74 @@ void RendererImpl::getTextureInfo(Texture texture,
     *outHeight = textureIt->second.mHeight;
 }
 
-void RendererImpl::releaseObjectResources(const SceneObject* sceneObject) {
-    auto objectDataIt = mObjectData.find(sceneObject);
-
-    if (objectDataIt == mObjectData.end()) {
-        D("%s: Scene object 0x08%" PRIXPTR " has no resources to release.",
-          __FUNCTION__, sceneObject);
+void RendererImpl::releaseTexture(Texture texture) {
+    if (!texture.isValid()) {
         return;
     }
 
-    SceneObjectData& data = objectDataIt->second;
+    AutoLock lock(mResourceLock);
+    auto textureIt = mTextures.find(texture.id);
 
-    // Unregister object resources.
-    for (auto& material : data.materials) {
-        if (!isStandardMaterial(material)) {
-            releaseMaterial(material);
+    if (textureIt == mTextures.end()) {
+        E("%s: Could not find texture id %d", __FUNCTION__, texture.id);
+        return;
+    }
+
+    TextureData& textureData = textureIt->second;
+
+    if (textureData.mRefCount == 0) {
+        E("%s: Texture handle %d refcount error.", __FUNCTION__, texture.id);
+        return;
+    }
+
+    T("%s: Release texture handle %d", __FUNCTION__, texture.id);
+
+    if (--textureData.mRefCount == 0) {
+        // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
+        mGles2->glDeleteTextures(1, &textureData.mTextureId);
+
+        if (!textureData.mFilename.empty()) {
+            mTextureCache.erase(textureData.mFilename);
         }
-    }
 
-    for (auto& mesh : data.meshes) {
-        releaseMesh(mesh);
+        mTextures.erase(textureIt);
     }
-
-    for (auto& texture : data.textures) {
-        releaseTexture(texture);
-    }
-
-    mObjectData.erase(objectDataIt);
 }
 
-Material RendererImpl::createMaterialCheckerboard(const SceneObject* parent) {
+void RendererImpl::releaseMaterial(Material material) {
+    if (!material.isValid()) {
+        return;
+    }
+
+    AutoLock lock(mResourceLock);
+    if (!isStandardMaterial(material)) {
+        releaseMaterialInternal(material);
+    }
+}
+
+void RendererImpl::releaseMesh(Mesh mesh) {
+    if (!mesh.isValid()) {
+        return;
+    }
+
+    AutoLock lock(mResourceLock);
+    const auto meshIt = mMeshes.find(mesh.id);
+
+    if (meshIt == mMeshes.end()) {
+        E("%s: Could not find mesh id %d", __FUNCTION__, mesh.id);
+        return;
+    }
+
+    const MeshData& meshData = meshIt->second;
+
+    // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
+    mGles2->glDeleteBuffers(1, &meshData.mVertexBuffer);
+    mGles2->glDeleteBuffers(1, &meshData.mIndexBuffer);
+
+    mMeshes.erase(meshIt);
+}
+
+Material RendererImpl::createMaterialCheckerboard() {
     // Compile and setup shaders.
     const GLuint vertexId =
             compileShader(GL_VERTEX_SHADER, kTexturedVertexShader);
@@ -538,13 +659,15 @@ Material RendererImpl::createMaterialCheckerboard(const SceneObject* parent) {
     material.mvpLocation = getUniformLocation(program, "u_modelViewProj");
     material.timeLocation = getUniformLocation(program, "u_time");
 
-    const int id = mNextResourceId++;
-    mMaterials[id] = material;
+    {
+        AutoLock lock(mResourceLock);
+        const int id = mNextResourceId++;
+        mMaterials[id] = material;
 
-    Material materialHandle;
-    materialHandle.id = id;
-    mObjectData[parent].materials.push_back(materialHandle);
-    return materialHandle;
+        Material materialHandle;
+        materialHandle.id = id;
+        return materialHandle;
+    }
 }
 
 Material RendererImpl::createMaterialTextured() {
@@ -580,15 +703,18 @@ Material RendererImpl::createMaterialTextured() {
     material.texSamplerLocation = getUniformLocation(program, "tex_sampler");
     material.mvpLocation = getUniformLocation(program, "u_modelViewProj");
 
-    const int id = mNextResourceId++;
-    mMaterials[id] = material;
+    {
+        AutoLock lock(mResourceLock);
+        const int id = mNextResourceId++;
+        mMaterials[id] = material;
 
-    mMaterialTextured.id = id;
-    return mMaterialTextured;
+        mMaterialTextured.id = id;
+        mRendererResources.materials.push_back(mMaterialTextured);
+        return mMaterialTextured;
+    }
 }
 
-Material RendererImpl::createMaterialScreenSpace(const SceneObject* parent,
-                                                 const char* frag) {
+Material RendererImpl::createMaterialScreenSpace(const char* frag) {
     // Compile and setup shaders.
     const GLuint vertexId =
             compileShader(GL_VERTEX_SHADER, kScreenSpaceVertexShader);
@@ -615,17 +741,18 @@ Material RendererImpl::createMaterialScreenSpace(const SceneObject* parent,
     material.texSamplerLocation = getUniformLocation(program, "tex_sampler");
     material.resolutionLocation = getUniformLocation(program, "resolution");
 
-    const int id = mNextResourceId++;
-    mMaterials[id] = material;
+    {
+        AutoLock lock(mResourceLock);
+        const int id = mNextResourceId++;
+        mMaterials[id] = material;
 
-    Material materialHandle;
-    materialHandle.id = id;
-    mObjectData[parent].materials.push_back(materialHandle);
-    return materialHandle;
+        Material materialHandle;
+        materialHandle.id = id;
+        return materialHandle;
+    }
 }
 
-Mesh RendererImpl::createMesh(const SceneObject* parent,
-                              const VertexPositionUV* vertices,
+Mesh RendererImpl::createMesh(const VertexPositionUV* vertices,
                               size_t verticesSize,
                               const GLuint* indices,
                               size_t indicesSize) {
@@ -657,17 +784,20 @@ Mesh RendererImpl::createMesh(const SceneObject* parent,
     mesh.mIndexBuffer = indexBuffer;
     mesh.mIndexCount = indicesSize;
 
-    const int id = mNextResourceId++;
-    mMeshes[id] = mesh;
+    {
+        AutoLock lock(mResourceLock);
+        const int id = mNextResourceId++;
+        mMeshes[id] = mesh;
 
-    Mesh meshHandle;
-    meshHandle.id = id;
-    mObjectData[parent].meshes.push_back(meshHandle);
-    return meshHandle;
+        Mesh meshHandle;
+        meshHandle.id = id;
+        return meshHandle;
+    }
 }
 
-Texture RendererImpl::loadTexture(const SceneObject* parent,
-                                  const char* filename) {
+Texture RendererImpl::loadTexture(const char* filename) {
+    const uint64_t loadStartUs = System::get()->getHighResTimeUs();
+
     std::string path;
     if (!PathUtils::isAbsolute(filename)) {
         path = PathUtils::join(System::get()->getLauncherDirectory(),
@@ -676,52 +806,76 @@ Texture RendererImpl::loadTexture(const SceneObject* parent,
         path = filename;
     }
 
-    Texture cachedTexture = tryGetCachedTexture(parent, path.c_str());
+    Texture cachedTexture = tryGetCachedTexture(path.c_str());
     if (cachedTexture.isValid()) {
         return cachedTexture;
     }
 
-    std::vector<uint8_t> buffer;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    TextureUtils::Format format;
-    if (!TextureUtils::load(path.c_str(), buffer, &width, &height, &format)) {
+    Optional<TextureUtils::Result> result = TextureUtils::load(path.c_str());
+    if (!result) {
+        E("%s: Failed to load texture from file '%s'", __FUNCTION__,
+          path.c_str());
         return Texture();
     }
 
-    if (!isTextureSizeValid(width, height)) {
-        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
-          height, GL_MAX_TEXTURE_SIZE);
+    const uint64_t loadEndUs = System::get()->getHighResTimeUs();
+
+    Texture texture = createTextureInternal(TextureState::Loaded, path.c_str(),
+                                            result.value());
+    // The texture may be invalid here, but the error is already logged so pass
+    // it through as-is.
+
+    const uint64_t importEndUs = System::get()->getHighResTimeUs();
+    D("%s: Sync load texture %d in %" PRIu64 "ms, [read: %" PRIu64
+      "ms, import: %" PRIu64 "ms]",
+      __FUNCTION__, texture.id, durationUsToMs(loadStartUs, importEndUs),
+      durationUsToMs(loadStartUs, loadEndUs),
+      durationUsToMs(loadEndUs, importEndUs));
+
+    return texture;
+}
+
+Texture RendererImpl::loadTextureAsync(const char* filename) {
+    std::string path;
+    if (!PathUtils::isAbsolute(filename)) {
+        path = PathUtils::join(System::get()->getLauncherDirectory(),
+                               "resources", filename);
+    } else {
+        path = filename;
+    }
+
+    Texture cachedTexture = tryGetCachedTexture(path.c_str());
+    if (cachedTexture.isValid()) {
+        return cachedTexture;
+    }
+
+    Texture texture =
+            createTextureInternal(TextureState::Placeholder, path.c_str(),
+                                  TextureUtils::createPlaceholder());
+    mLoaderThread.enqueue(LoaderCommand(LoaderCommandType::LoadTexture,
+                                        texture.id));
+    return texture;
+}
+
+Texture RendererImpl::duplicateTexture(Texture texture) {
+    if (!texture.isValid()) {
         return Texture();
     }
 
-    const GLenum textureFormat =
-            format == TextureUtils::Format::RGBA32 ? GL_RGBA : GL_RGB;
+    AutoLock lock(mResourceLock);
+    auto textureIt = mTextures.find(texture.id);
 
-    GLuint textureId;
-    mGles2->glGenTextures(1, &textureId);
-    mGles2->glBindTexture(GL_TEXTURE_2D, textureId);
-    mGles2->glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, textureFormat, width, height, 0,
-                         textureFormat, GL_UNSIGNED_BYTE, buffer.data());
-    mGles2->glGenerateMipmap(GL_TEXTURE_2D);
-    mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                            GL_LINEAR_MIPMAP_LINEAR);
-    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
-
-#ifdef DEBUG
-    // Only check for GL error on debug builds to avoid a potential synchronous
-    // flush.
-    const GLenum error = mGles2->glGetError();
-    if (error != GL_NO_ERROR) {
-        E("%s: GL error %d", __FUNCTION__, error);
+    if (textureIt == mTextures.end()) {
+        D("%s: Could not find texture id %d.", __FUNCTION__, texture.id);
         return Texture();
     }
-#endif
 
-    return createTextureInternal(parent, path.c_str(), textureId, width,
-                                 height);
+    TextureData& textureData = textureIt->second;
+    ++textureData.mRefCount;
+
+    // The texture reference stays the same, but now it has an additional
+    // reference on it.
+    return texture;
 }
 
 void RendererImpl::render(const std::vector<RenderableObject>& renderables,
@@ -743,53 +897,88 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables,
     // space.
     mGles2->glFrontFace(GL_CW);
 
-    // Render scene objects.
-    for (auto& renderObject : renderables) {
-        processRenderable(renderObject.renderable,
-                          [&](const MaterialData& material) {
-                              mGles2->glUniformMatrix4fv(
-                                      material.mvpLocation, 1, GL_FALSE,
-                                      &renderObject.modelViewProj[0][0]);
-                              mGles2->glUniform1f(material.timeLocation, time);
-                          });
-    }
+    {
+        // Acquire the loader lock for the rest of rendering, it will involve
+        // accessing mTextures, mMeshes, and mMaterials to map the IDs to OpenGL
+        // resources.
+        AutoLock lock(mResourceLock);
 
-    mGles2->glDisable(GL_DEPTH_TEST);
-    mGles2->glDisable(GL_BLEND);
-    // Disable culling for screen-space rendering, since that is done in the
-    // default CCW order.
-    mGles2->glDisable(GL_CULL_FACE);
-
-    assert(!mEffectsChain.empty());
-    for (size_t i = 0; i < mEffectsChain.size(); i++) {
-        int superSampleMultiple = kSuperSampleMultiple;
-        if (i == mEffectsChain.size() - 1) {
-            superSampleMultiple = 1;
-            mScreenRenderTarget->bind();
-        } else {
-            mRenderTargets[(i + 1) % 2]->bind();
+        // Render scene objects.
+        for (auto& renderObject : renderables) {
+            processRenderable(
+                    renderObject.renderable, [&](const MaterialData& material) {
+                        mGles2->glUniformMatrix4fv(
+                                material.mvpLocation, 1, GL_FALSE,
+                                &renderObject.modelViewProj[0][0]);
+                        mGles2->glUniform1f(material.timeLocation, time);
+                    });
         }
 
-        Renderable renderable;
-        renderable.texture = mRenderTargets[i % 2]->getTexture();
-        renderable.material = mEffectsChain[i];
-        renderable.mesh = mEffectsMesh;
+        mGles2->glDisable(GL_DEPTH_TEST);
+        mGles2->glDisable(GL_BLEND);
+        // Disable culling for screen-space rendering, since that is done in the
+        // default CCW order.
+        mGles2->glDisable(GL_CULL_FACE);
 
-        processRenderable(renderable, [&](const MaterialData& material) {
-            mGles2->glUniform2f(material.resolutionLocation,
-                                1.f / (superSampleMultiple * mRenderWidth),
-                                1.f / (superSampleMultiple * mRenderHeight));
-            mGles2->glUniform1f(material.timeLocation, time);
-        });
+        assert(!mEffectsChain.empty());
+        for (size_t i = 0; i < mEffectsChain.size(); i++) {
+            int superSampleMultiple = kSuperSampleMultiple;
+            if (i == mEffectsChain.size() - 1) {
+                superSampleMultiple = 1;
+                mScreenRenderTarget->bind();
+            } else {
+                mRenderTargets[(i + 1) % 2]->bind();
+            }
+
+            Renderable renderable;
+            renderable.texture = mRenderTargets[i % 2]->getTexture();
+            renderable.material = mEffectsChain[i];
+            renderable.mesh = mEffectsMesh;
+
+            processRenderable(renderable, [&](const MaterialData& material) {
+                mGles2->glUniform2f(
+                        material.resolutionLocation,
+                        1.f / (superSampleMultiple * mRenderWidth),
+                        1.f / (superSampleMultiple * mRenderHeight));
+                mGles2->glUniform1f(material.timeLocation, time);
+            });
+        }
+
+        mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+        mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        mGles2->glBindTexture(GL_TEXTURE_2D, 0);
+        mGles2->glUseProgram(0);
     }
 
-    mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
-    mGles2->glUseProgram(0);
+    // Process render thread dispatcher queue, do this after rendering to avoid
+    // changing any dependencies after Renderables have been updated for the
+    // frame.
+    std::function<void()> workItem;
+    while (mRenderThreadDispatcherQueue.tryReceive(&workItem)) {
+        workItem();
+    }
 }
 
-void RendererImpl::releaseMaterial(Material material) {
+void RendererImpl::dispatchToRenderThread(std::function<void()>&& workItem) {
+    mRenderThreadDispatcherQueue.send(std::move(workItem));
+}
+
+WorkerProcessingResult RendererImpl::onLoaderCommand(LoaderCommand&& command) {
+    if (command.mType == LoaderCommandType::Shutdown) {
+        return WorkerProcessingResult::Stop;
+    } else if (command.mType == LoaderCommandType::LoadTexture) {
+        Texture texture;
+        texture.id = command.mHandle;
+        onLoaderLoadTexture(std::move(texture));
+    } else {
+        E("%s: Invalid command %d", __FUNCTION__,
+          static_cast<int>(command.mType));
+    }
+
+    return WorkerProcessingResult::Continue;
+}
+
+void RendererImpl::releaseMaterialInternal(Material material) {
     const auto materialIt = mMaterials.find(material.id);
 
     if (materialIt == mMaterials.end()) {
@@ -803,50 +992,6 @@ void RendererImpl::releaseMaterial(Material material) {
     mGles2->glDeleteProgram(materialData.program);
 
     mMaterials.erase(materialIt);
-}
-
-void RendererImpl::releaseMesh(Mesh mesh) {
-    const auto meshIt = mMeshes.find(mesh.id);
-
-    if (meshIt == mMeshes.end()) {
-        E("%s: Could not find mesh id %d", __FUNCTION__, mesh.id);
-        return;
-    }
-
-    const MeshData& meshData = meshIt->second;
-
-    // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
-    mGles2->glDeleteBuffers(1, &meshData.mVertexBuffer);
-    mGles2->glDeleteBuffers(1, &meshData.mIndexBuffer);
-
-    mMeshes.erase(meshIt);
-}
-
-void RendererImpl::releaseTexture(Texture texture) {
-    auto textureIt = mTextures.find(texture.id);
-
-    if (textureIt == mTextures.end()) {
-        E("%s: Could not find texture id %d", __FUNCTION__, texture.id);
-        return;
-    }
-
-    TextureData& textureData = textureIt->second;
-
-    if (textureData.mRefCount == 0) {
-        E("%s: Texture refcount error.", __FUNCTION__);
-        return;
-    }
-
-    if (--textureData.mRefCount == 0) {
-        // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
-        mGles2->glDeleteTextures(1, &textureData.mTextureId);
-
-        if (!textureData.mFilename.empty()) {
-            mTextureCache.erase(textureData.mFilename);
-        }
-
-        mTextures.erase(textureIt);
-    }
 }
 
 bool RendererImpl::isStandardMaterial(Material material) {
@@ -864,8 +1009,8 @@ bool RendererImpl::isTextureSizeValid(uint32_t width, uint32_t height) {
            height <= maxTextureSize;
 }
 
-Texture RendererImpl::tryGetCachedTexture(const SceneObject* parent,
-                                          const char* filename) {
+Texture RendererImpl::tryGetCachedTexture(const char* filename) {
+    AutoLock lock(mResourceLock);
     const auto it = mTextureCache.find(filename);
     if (it == mTextureCache.end()) {
         return Texture();
@@ -876,25 +1021,33 @@ Texture RendererImpl::tryGetCachedTexture(const SceneObject* parent,
 
     Texture texture;
     texture.id = id;
-    mObjectData[parent].textures.push_back(texture);
     return texture;
 }
 
-Texture RendererImpl::createEmptyTexture(
-        const SceneObject* parent,
-        uint32_t width,
-        uint32_t height) {
+Texture RendererImpl::createEmptyTexture(uint32_t width, uint32_t height) {
     if (!isTextureSizeValid(width, height)) {
         E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
           height, GL_MAX_TEXTURE_SIZE);
         return Texture();
     }
 
-    GLuint textureId;
+    return createTextureInternal(TextureState::Loaded, nullptr,
+                                 TextureUtils::createEmpty(width, height));
+}
+
+Texture RendererImpl::createTextureInternal(TextureState state,
+                                            const char* filename,
+                                            const TextureUtils::Result& data) {
+    const GLenum textureFormat =
+            data.mFormat == TextureUtils::Format::RGBA32 ? GL_RGBA : GL_RGB;
+
+    GLuint textureId = 0;
     mGles2->glGenTextures(1, &textureId);
     mGles2->glBindTexture(GL_TEXTURE_2D, textureId);
-    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                         GL_UNSIGNED_BYTE, 0);
+    mGles2->glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, textureFormat, data.mWidth,
+                         data.mHeight, 0, textureFormat, GL_UNSIGNED_BYTE,
+                         data.mBuffer.empty() ? 0 : data.mBuffer.data());
     mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     mGles2->glBindTexture(GL_TEXTURE_2D, 0);
@@ -905,36 +1058,128 @@ Texture RendererImpl::createEmptyTexture(
     const GLenum error = mGles2->glGetError();
     if (error != GL_NO_ERROR) {
         E("%s: GL error %d", __FUNCTION__, error);
+        mGles2->glDeleteTextures(1, &textureId);
         return Texture();
     }
 #endif
 
-    return createTextureInternal(parent, nullptr, textureId, width, height);
-}
-
-Texture RendererImpl::createTextureInternal(const SceneObject* parent,
-                                            const char* filename,
-                                            GLuint textureId,
-                                            uint32_t width,
-                                            uint32_t height) {
+    AutoLock lock(mResourceLock);
     const int id = mNextResourceId++;
+    T("%s: Create texture handle %d for file '%s'", __FUNCTION__, id,
+      filename ? filename : "<none>");
 
-    TextureData texture;
-    texture.mRefCount = 1;
-    texture.mTextureId = textureId;
+    TextureData textureData;
+    textureData.mRefCount = 1;
+    textureData.mState = state;
+    textureData.mTextureId = textureId;
     if (filename) {
-        texture.mFilename = filename;
+        textureData.mFilename = filename;
         mTextureCache[filename] = id;
     }
-    texture.mWidth = width;
-    texture.mHeight = height;
+    textureData.mWidth = data.mWidth;
+    textureData.mHeight = data.mHeight;
 
-    mTextures[id] = texture;
+    mTextures[id] = textureData;
 
-    Texture textureHandle;
-    textureHandle.id = id;
-    mObjectData[parent].textures.push_back(textureHandle);
-    return textureHandle;
+    Texture texture;
+    texture.id = id;
+    return texture;
+}
+
+void RendererImpl::onLoaderLoadTexture(Texture texture) {
+    const uint64_t loadStartUs = System::get()->getHighResTimeUs();
+    std::string filename;
+    {
+        // Scope the lock so that TextureUtils::load happens outside of the
+        // lock.
+        AutoLock lock(mResourceLock);
+        auto textureIt = mTextures.find(texture.id);
+
+        if (textureIt == mTextures.end()) {
+            D("%s: Could not find texture id %d, was the load canceled?",
+              __FUNCTION__, texture.id);
+            return;
+        }
+
+        if (textureIt->second.mState == TextureState::Loaded) {
+            D("%s: Texture %d already loaded.", __FUNCTION__, texture.id);
+            return;
+        }
+
+        filename = textureIt->second.mFilename;
+    }
+
+    Optional<TextureUtils::Result> resultOpt =
+            TextureUtils::load(filename.c_str());
+    if (!resultOpt) {
+        E("%s: Failed to load texture %d from file '%s'", __FUNCTION__,
+          texture.id, filename.c_str());
+        return;
+    }
+
+    const uint64_t loadEndUs = System::get()->getHighResTimeUs();
+
+    dispatchToRenderThread([
+        this, texture, loadStartUs, loadEndUs,
+        result = std::move(resultOpt.value())
+    ]() {
+        const uint64_t importStartUs = System::get()->getHighResTimeUs();
+        if (!replaceTextureInternal(texture, result)) {
+            return;
+        }
+        const uint64_t importEndUs = System::get()->getHighResTimeUs();
+
+        D("onLoaderLoadTexture: Async load texture %d in %" PRIu64
+          "ms, [read: %" PRIu64 "ms, import: %" PRIu64 "ms]",
+          texture.id, durationUsToMs(loadStartUs, importEndUs),
+          durationUsToMs(loadStartUs, loadEndUs),
+          durationUsToMs(importStartUs, importEndUs));
+    });
+}
+
+bool RendererImpl::replaceTextureInternal(Texture texture,
+                                          const TextureUtils::Result& data) {
+    if (!isTextureSizeValid(data.mWidth, data.mHeight)) {
+        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d",
+          data.mWidth, data.mHeight, GL_MAX_TEXTURE_SIZE);
+        return false;
+    }
+
+    AutoLock lock(mResourceLock);
+    auto textureIt = mTextures.find(texture.id);
+
+    if (textureIt == mTextures.end()) {
+        D("%s: Could not find texture id %d, was the load canceled?",
+          __FUNCTION__, texture.id);
+        return false;
+    }
+
+    TextureData& textureData = textureIt->second;
+
+    const GLenum textureFormat =
+            data.mFormat == TextureUtils::Format::RGBA32 ? GL_RGBA : GL_RGB;
+
+    mGles2->glBindTexture(GL_TEXTURE_2D, textureData.mTextureId);
+    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, textureFormat, data.mWidth,
+                         data.mHeight, 0, textureFormat, GL_UNSIGNED_BYTE,
+                         data.mBuffer.data());
+    mGles2->glGenerateMipmap(GL_TEXTURE_2D);
+    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
+
+#ifdef DEBUG
+    // Only check for GL error on debug builds to avoid a potential synchronous
+    // flush.
+    const GLenum error = mGles2->glGetError();
+    if (error != GL_NO_ERROR) {
+        E("%s: GL error %d", __FUNCTION__, error);
+        return false;
+    }
+#endif
+
+    textureData.mState = TextureState::Loaded;
+    textureData.mWidth = data.mWidth;
+    textureData.mHeight = data.mHeight;
+    return true;
 }
 
 GLuint RendererImpl::compileShader(GLenum type, const char* shaderSource) {
@@ -1017,6 +1262,7 @@ GLuint RendererImpl::getTextureId(Texture texture) const {
     return mTextures.at(texture.id).mTextureId;
 }
 
+// Called under mResourceLock.
 void RendererImpl::processRenderable(
         const Renderable& renderable,
         RenderableParameterCallback parameterCallback) {

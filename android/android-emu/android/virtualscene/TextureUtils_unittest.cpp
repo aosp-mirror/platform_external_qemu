@@ -38,27 +38,23 @@ static void PrintTo(const ImageTestParam& param, std::ostream* os) {
         << ", golden=" << param.goldenFilename << ")";
 }
 
-struct TestImageData {
-    // Initialize metadata to garbage values to make sure it's overwritten.
-    uint32_t width = static_cast<uint32_t>(-1);
-    uint32_t height = static_cast<uint32_t>(-1);
-    TextureUtils::Format format = static_cast<TextureUtils::Format>(-1);
-    std::vector<uint8_t> buffer;
-};
-
-static void PrintTo(const TestImageData& param, std::ostream* os) {
-    *os << "TestImageData(" << param.width << "x" << param.height
+namespace android {
+namespace virtualscene {
+static void PrintTo(const TextureUtils::Result& param, std::ostream* os) {
+    *os << "TextureUtils::Result(" << param.mWidth << "x" << param.mHeight
         << ", format=";
-    if (param.format == TextureUtils::Format::RGB24) {
+    if (param.mFormat == TextureUtils::Format::RGB24) {
         *os << "RGB24";
-    } else if (param.format == TextureUtils::Format::RGBA32) {
+    } else if (param.mFormat == TextureUtils::Format::RGBA32) {
         *os << "RGBA32";
     } else {
-        *os << "<unknown format: " << static_cast<uint32_t>(param.format)
+        *os << "<unknown format: " << static_cast<uint32_t>(param.mFormat)
             << ">";
     }
-    *os << ", size=" << param.buffer.size() << " bytes)";
+    *os << ", size=" << param.mBuffer.size() << " bytes)";
 }
+}  // namespace virtualscene
+}  // namespace android
 
 namespace std {
 static void PrintTo(const vector<uint8_t>& vec, ostream* os) {
@@ -101,13 +97,14 @@ static std::string testdataPathToAbsolute(StringView filename) {
 }
 
 // Load an image using TextureUtils.
-static void loadImage(StringView filename, TestImageData* result) {
+static void loadImage(StringView filename, TextureUtils::Result* outResult) {
     const std::string path = testdataPathToAbsolute(filename);
-    EXPECT_TRUE(TextureUtils::load(path.c_str(), result->buffer, &result->width,
-                                   &result->height, &result->format));
+    Optional<TextureUtils::Result> result = TextureUtils::load(path.c_str());
+    ASSERT_TRUE(result);
+    *outResult = std::move(result.value());
 }
 
-static void loadGoldenBmp(StringView filename, TestImageData* result) {
+static void loadGoldenBmp(StringView filename, TextureUtils::Result* result) {
     const std::string path = testdataPathToAbsolute(filename);
 
     constexpr size_t kBmpHeaderSize = 54;
@@ -146,12 +143,12 @@ static void loadGoldenBmp(StringView filename, TestImageData* result) {
     ASSERT_TRUE(bitsPerPixel == 24 || bitsPerPixel == 32)
             << "Invalid bits per pixel: " << bitsPerPixel;
 
-    result->width = width;
-    result->height = height;
-    result->format = bitsPerPixel == 24 ? TextureUtils::Format::RGB24
-                                        : TextureUtils::Format::RGBA32;
+    result->mWidth = width;
+    result->mHeight = height;
+    result->mFormat = bitsPerPixel == 24 ? TextureUtils::Format::RGB24
+                                         : TextureUtils::Format::RGBA32;
 
-    std::vector<uint8_t>& data = result->buffer;
+    std::vector<uint8_t>& data = result->mBuffer;
 
     data.resize(imageSize);
     ASSERT_EQ(0, fseek(fp.get(), dataPos, SEEK_SET));
@@ -213,8 +210,8 @@ class TextureUtilLoad : public testing::TestWithParam<ImageTestParam> {};
 TEST_P(TextureUtilLoad, Compare) {
     const ImageTestParam param = GetParam();
 
-    TestImageData image;
-    TestImageData golden;
+    TextureUtils::Result image;
+    TextureUtils::Result golden;
     loadImage(param.filename, &image);
     loadGoldenBmp(param.goldenFilename, &golden);
 
@@ -222,57 +219,32 @@ TEST_P(TextureUtilLoad, Compare) {
                  << "image=" << testing::PrintToString(image) << "\n"
                  << " golden=" << testing::PrintToString(golden));
 
-    ASSERT_EQ(golden.width, image.width);
-    ASSERT_EQ(golden.height, image.height);
-    ASSERT_EQ(golden.format, image.format);
+    ASSERT_EQ(golden.mWidth, image.mWidth);
+    ASSERT_EQ(golden.mHeight, image.mHeight);
+    ASSERT_EQ(golden.mFormat, image.mFormat);
 
-    compareSumOfSquaredDifferences(image.buffer, golden.buffer,
+    compareSumOfSquaredDifferences(image.mBuffer, golden.mBuffer,
                                    kCompareThreshold);
 }
 
 TEST(TextureUtilsBasic, InvalidExtension) {
-    TestImageData result;
     const std::string path = testdataPathToAbsolute("invalid.extension");
-    ASSERT_FALSE(TextureUtils::load(path.c_str(), result.buffer, &result.width,
-                                    &result.height, &result.format));
-
-    ASSERT_TRUE(result.buffer.empty());
-    ASSERT_EQ(0, result.width);
-    ASSERT_EQ(0, result.height);
+    ASSERT_FALSE(TextureUtils::load(path.c_str()));
 }
 
 TEST(TextureUtilsBasic, NoExtension) {
-    TestImageData result;
     const std::string path = testdataPathToAbsolute("invalid");
-    ASSERT_FALSE(TextureUtils::load(path.c_str(), result.buffer, &result.width,
-                                    &result.height, &result.format));
-
-    ASSERT_TRUE(result.buffer.empty());
-    ASSERT_EQ(0, result.width);
-    ASSERT_EQ(0, result.height);
+    ASSERT_FALSE(TextureUtils::load(path.c_str()));
 }
 
 TEST(TextureUtilsBasic, InvalidJPEG) {
-    TestImageData result;
     const std::string path = testdataPathToAbsolute("gray_alpha_golden.bmp");
-    ASSERT_FALSE(TextureUtils::loadJPEG(path.c_str(), result.buffer,
-                                        &result.width, &result.height));
-
-    ASSERT_TRUE(result.buffer.empty());
-    ASSERT_EQ(0, result.width);
-    ASSERT_EQ(0, result.height);
+    ASSERT_FALSE(TextureUtils::loadJPEG(path.c_str()));
 }
 
 TEST(TextureUtilsBasic, InvalidPNG) {
-    TestImageData result;
     const std::string path = testdataPathToAbsolute("gray_alpha_golden.bmp");
-    ASSERT_FALSE(TextureUtils::loadPNG(path.c_str(), result.buffer,
-                                       &result.width, &result.height,
-                                       &result.format));
-
-    ASSERT_TRUE(result.buffer.empty());
-    ASSERT_EQ(0, result.width);
-    ASSERT_EQ(0, result.height);
+    ASSERT_FALSE(TextureUtils::loadPNG(path.c_str()));
 }
 
 INSTANTIATE_TEST_CASE_P(
