@@ -16,6 +16,7 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/memory/MemoryHints.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
 #include "android/utils/debug.h"
@@ -453,6 +454,9 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         fillPageData(page);
         delete[] page->data;
         page->data = nullptr;
+        // The guest probably doesn't want to access this page right now.
+        // Page it out if possible.
+        android::base::memoryHint(pagePtr(*page), mPageSize, base::MemoryHint::PageOut);
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
@@ -622,6 +626,8 @@ bool RamLoader::readAllPages() {
             sortedPages.emplace_back(&page);
         } else if (!mIsQuickboot) {
             zeroOutPage(page);
+            // Get rid of this page; it's zero.
+            android::base::memoryHint(pagePtr(*page), mPageSize, base::MemoryHint::DontNeed);
         }
     }
 
@@ -645,6 +651,8 @@ bool RamLoader::readAllPages() {
             mHasError = true;
             return false;
         }
+        // Let the guest decide which nonzero pages to include.
+        android::base::memoryHint(pagePtr(*page), mPageSize, base::MemoryHint::PageOut);
     }
 
     mDecompressor.clear();
