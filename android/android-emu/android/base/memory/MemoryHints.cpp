@@ -30,6 +30,7 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
 #ifdef _WIN32
     switch (hint) {
     case MemoryHint::DontNeed:
+    case MemoryHint::PageOut:
         // https://blogs.msdn.microsoft.com/oldnewthing/20170113-00/?p=95185
         // "Around the Windows NT 4 era, a new trick arrived on the scene: You
         // could VirtualUnlock memory that was already unlocked in order to
@@ -54,17 +55,27 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
         return true;
     }
 #else // macOS and Linux
+
     int asAdviseFlag = MADV_NORMAL;
     bool decommit = false;
+    bool skipAdvise = false;
+
     switch (hint) {
         case MemoryHint::DontNeed:
 #ifdef __APPLE__
             asAdviseFlag = MADV_FREE;
+            // On Mac, an explicit mprotect() needs to happen to kick the page out.
+            decommit = true;
 #else // Linux
             // MADV_FREE would be best, but it is not necessarily
             // supported on all Linux systems.
             asAdviseFlag = MADV_DONTNEED;
 #endif // __APPLE__
+            break;
+        case MemoryHint::PageOut:
+            // MADV_DONTNEED / MADV_FREE change the semantics of the memory,
+            // so all we do here is skip the madvise call and mprotect().
+            skipAdvise = true;
             decommit = true;
             break;
         case MemoryHint::Normal:
@@ -80,15 +91,16 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
             break;
     }
 
-    int res = madvise(start, length, asAdviseFlag);
+    int res = 0;
 
-    // On Mac, an explicit mprotect() needs to happen to kick the page out.
-#ifdef __APPLE__
+    if (!skipAdvise) {
+        res = madvise(start, length, asAdviseFlag);
+    }
+
     if (decommit) {
         mprotect(start, length, PROT_NONE);
-        mprotect(start, length, PROT_READ | PROT_WRITE | PROT_NONE);
+        mprotect(start, length, PROT_READ | PROT_WRITE | PROT_EXEC);
     }
-#endif // __APPLE__
 
     return res == 0;
 #endif // _WIN32
