@@ -112,7 +112,7 @@ QString ImageWell::getPathIfValidDrop(const QMimeData* mimeData) const {
         QList<QUrl> urls = mimeData->urls();
         if (urls.length() == 1 && urls[0].isLocalFile()) {
             QFileInfo info(urls[0].toLocalFile());
-            QString extension = info.suffix();
+            QString extension = info.suffix().toLower();
 
             // Support PNG and JPEG files.
             if (extension == "png" || extension == "jpg" ||
