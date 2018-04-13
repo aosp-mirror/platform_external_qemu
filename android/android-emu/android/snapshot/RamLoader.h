@@ -124,6 +124,7 @@ private:
     Page& page(void* ptr);
 
     void loadRamPage(void* ptr);
+    void loadRamPages(void* ptr, size_t pageCount);
     bool readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer = nullptr);
     void fillPageData(Page* pagePtr);
 
