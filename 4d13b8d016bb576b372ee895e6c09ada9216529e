@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0f6b005f_874a3311",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "This only exists in debug builds, and will maybe catch the case where we introduce a new VideoFormat that does not exist in the switch.",
+      "parentUuid": "a1434bc6_c5c1ade9",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 18
+      },
+      "revId": "4d13b8d016bb576b372ee895e6c09ada9216529e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f79b3b9d_5f29b35d",
         "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
         "patchSetId": 5

@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "0d11e5ca_16ebc15c",
+        "filename": "android/android-emu/android/recording/screen-recorder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "The display agent gets initialized during the screen recorder initialization. If a displayAgent is present we are in gpu guestmode. If it is a nullptr, we likely are not. \n\nThe VideoProducer handles all the details around the displayAgent.",
+      "parentUuid": "eca7f5fc_46e4530d",
+      "range": {
+        "startLine": 358,
+        "startChar": 60,
+        "endLine": 358,
+        "endChar": 72
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8abe37d9_4a21bf57",
         "filename": "android/android-emu/android/recording/video/VideoFrameSharer.cpp",
         "patchSetId": 6
@@ -59,6 +83,30 @@
       "writtenOn": "2018-04-12T16:50:55Z",
       "side": 1,
       "message": "how do we mark the frame to be completely converted to the shared memory consumer? is it ok for the code to only partially rewrite the frame in memory, and hope user won\u0027t notice?",
+      "range": {
+        "startLine": 102,
+        "startChar": 4,
+        "endLine": 120,
+        "endChar": 72
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "998a0623_b1f8394e",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "I\u0027m adding additional documentation detailing these types of things in the header. We don\u0027t support vsync, so it is possible that the encoder creates artifacts.",
+      "parentUuid": "8abe37d9_4a21bf57",
       "range": {
         "startLine": 102,
         "startChar": 4,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "7ace95e7_1a4a2f4b",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "Let me add some detailed documentation.",
+      "parentUuid": "2b8e26b5_438f19cc",
+      "range": {
+        "startLine": 24,
+        "startChar": 25,
+        "endLine": 24,
+        "endChar": 29
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ca28d3b_afbba7c5",
         "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
         "patchSetId": 6
@@ -105,6 +177,30 @@
       "writtenOn": "2018-04-12T16:50:55Z",
       "side": 1,
       "message": "no more than 255 frames per second? given that the struct is going to be padded to 12 bytes at least I don\u0027t think it\u0027s worth it - just use uint32_t",
+      "range": {
+        "startLine": 30,
+        "startChar": 16,
+        "endLine": 30,
+        "endChar": 19
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7f177025_c2509606",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "I don\u0027t think our encoders \u0026 emulators can handle it, let alone our eyes :-).\n\nWill update to uint32_t,",
+      "parentUuid": "9ca28d3b_afbba7c5",
       "range": {
         "startLine": 30,
         "startChar": 16,
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "2d4c4944_b45f5968",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "73762d20_4ad30d42",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 41
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a2ed446_bea0c4a9",
         "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
         "patchSetId": 6
@@ -160,6 +280,30 @@
       "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe1d1cbb_b4141432",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8a2ed446_bea0c4a9",
+      "range": {
+        "startLine": 53,
+        "startChar": 37,
+        "endLine": 53,
+        "endChar": 43
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     },
     {
       "key": {
@@ -186,6 +330,30 @@
     },
     {
       "key": {
+        "uuid": "de052b35_606ee7b7",
+        "filename": "android/android-emu/android/recording/video/VideoFrameSharer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c059ac20_40ddc2b9",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 26
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0907ad7a_3bde00e5",
         "filename": "android/android-emu/android/recording/webrtc-module.c",
         "patchSetId": 6
@@ -209,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "2cc02081_2b7d9836",
+        "filename": "android/android-emu/android/recording/webrtc-module.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0907ad7a_3bde00e5",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54e84f53_76d8b8bb",
         "filename": "android/android-emu/android/recording/webrtc-module.c",
         "patchSetId": 6
@@ -220,6 +412,30 @@
       "writtenOn": "2018-04-12T16:50:55Z",
       "side": 1,
       "message": "not used",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 80
+      },
+      "revId": "619ac8ca0fbd45d0735e1e09cb0f6998708ccd36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19357505_e1c56c12",
+        "filename": "android/android-emu/android/recording/webrtc-module.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-13T21:05:11Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "54e84f53_76d8b8bb",
       "range": {
         "startLine": 17,
         "startChar": 0,
