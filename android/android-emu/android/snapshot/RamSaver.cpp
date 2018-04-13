@@ -11,6 +11,7 @@
 
 #include "android/snapshot/RamSaver.h"
 
+#include "android/base/ContiguousRangeMapper.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
@@ -40,12 +41,17 @@
 namespace android {
 namespace snapshot {
 
+using android::base::ContiguousRangeMapper;
 using android::base::MemStream;
 using android::base::MemoryHint;
 using android::base::System;
 
 using StatAction = IncrementalStats::Action;
 using StatTime = IncrementalStats::Time;
+
+// Allow RAM to grow by 16 mb (due to various page touching)
+// before decommitting it.
+static const uint64_t kDecommitChunkSize = 4096 * 4096;
 
 void RamSaver::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
@@ -202,59 +208,43 @@ void RamSaver::savePage(int64_t blockOffset,
             // Initialize Pages and check for all-zero pages.
             uint8_t* zeroCheckPtr = block.ramBlock.hostPtr;
 
-            // RAM decommit: when checking for zero pages, we need to make sure
-            // that the memory does not become resident, or useful memory might
-            // get paged out and the save itself will have to compete with
-            // paging out, which can slow things down.
-            //
-            // Track continguous 16mb ranges to decommit.  This is so that zero
-            // check causes extra RAM to be resident only up to 16 mb, while
-            // avoiding issuing frequent system calls.
-            static const uint64_t decommitChunkSize = 4096 * block.ramBlock.pageSize;
-            uintptr_t currDecommitStart = 0;
-            uintptr_t currDecommitEnd = 0;
+            {
+                // RAM decommit: when checking for zero pages, we need to make sure
+                // that the memory does not become resident, or useful memory might
+                // get paged out and the save itself will have to compete with
+                // paging out, which can slow things down.
+                //
+                // Track continguous 16mb ranges to decommit.  This is so that zero
+                // check causes extra RAM to be resident only up to 16 mb, while
+                // avoiding issuing frequent system calls.
+                ContiguousRangeMapper zeroPageDecommitter([](uintptr_t start, uintptr_t size) {
+                    android::base::memoryHint((void*)start, size,
+                                              MemoryHint::DontNeed);
+                }, kDecommitChunkSize);
 
-            for (int32_t i = 0; i < numPages;
-                 ++i,
-                 zeroCheckPtr += (uintptr_t)block.ramBlock.pageSize) {
+                for (int32_t i = 0; i < numPages;
+                     ++i,
+                     zeroCheckPtr += (uintptr_t)block.ramBlock.pageSize) {
 
-                bool isZero = isBufferZeroed(zeroCheckPtr,
-                                             block.ramBlock.pageSize);
+                    bool isZero = isBufferZeroed(zeroCheckPtr,
+                                                 block.ramBlock.pageSize);
 
-                auto& page = block.pages[size_t(i)];
-                page.same = false;
-                page.hashFilled = false;
-                page.filePos = 0;
-                page.loaderPage = nullptr;
+                    auto& page = block.pages[size_t(i)];
+                    page.same = false;
+                    page.hashFilled = false;
+                    page.filePos = 0;
+                    page.loaderPage = nullptr;
 
-                // Don't branch for the isZero decision
-                page.sizeOnDisk = kDefaultPageSize * !isZero;
-                totalZero += isZero;
+                    // Don't branch for the isZero decision
+                    page.sizeOnDisk = kDefaultPageSize * !isZero;
+                    totalZero += isZero;
 
-                // Decommit the zero pages in chunks of 16mb.
-                if (page.sizeOnDisk == 0) {
-                    if (currDecommitStart == 0) {
-                        currDecommitStart = (uintptr_t)zeroCheckPtr;
-                        currDecommitEnd = currDecommitStart + block.ramBlock.pageSize;
-                    } else if ((currDecommitStart &&
-                                ((currDecommitEnd != (uintptr_t)zeroCheckPtr) ||
-                                 (currDecommitEnd - currDecommitStart >= decommitChunkSize)))) {
-                        android::base::memoryHint((void*)currDecommitStart,
-                                                  currDecommitEnd - currDecommitStart,
-                                                  MemoryHint::DontNeed);
-                        currDecommitStart = (uintptr_t)zeroCheckPtr;
-                        currDecommitEnd = (uintptr_t)zeroCheckPtr + block.ramBlock.pageSize;
-                    } else {
-                        currDecommitEnd += block.ramBlock.pageSize;
+                    // Decommit the zero pages in chunks of 16mb.
+                    if (page.sizeOnDisk == 0) {
+                        zeroPageDecommitter.add((uintptr_t)zeroCheckPtr, block.ramBlock.pageSize);
                     }
                 }
-            }
 
-            // Do the last decommit segment.
-            if (currDecommitEnd != currDecommitStart) {
-                android::base::memoryHint((void*)currDecommitStart,
-                                          currDecommitEnd - currDecommitStart,
-                                          MemoryHint::DontNeed);
             }
 
             changedTotal = totalZero;
@@ -302,15 +292,23 @@ void RamSaver::savePage(int64_t blockOffset,
         // snapshot, computing all changed nonzero pages
         mIncStats.measure(StatTime::Hashing, [&] {
 
+            // Decommit on page hashing.
+            ContiguousRangeMapper hashDecommitter([](uintptr_t start, uintptr_t size) {
+                android::base::memoryHint((void*)start, size,
+                                          base::MemoryHint::PageOut);
+            });
+
             uint8_t* hashPtr = block.ramBlock.hostPtr;
-            for (int32_t i = 0; i < numPages;
-                 ++i,
+            for (int32_t i = 0; i < numPages; ++i,
                  hashPtr += (uintptr_t)block.ramBlock.pageSize) {
                 auto& page = block.pages[size_t(i)];
                 if (page.sizeOnDisk && !page.hashFilled) {
                     calcHash(page, block, hashPtr);
+                    hashDecommitter.add((uintptr_t)hashPtr, block.ramBlock.pageSize);
                 }
             }
+
+            hashDecommitter.finish();
 
             // Comparison with previous snapshot
             if (mLoader) {
@@ -463,6 +461,8 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
 
                 assert(compressedSize > 0);
 
+                // Invariant: The page is compressed iff
+                // its sizeOnDisk is strictly less than the page size.
                 if (compressedSize >= block.ramBlock.pageSize) {
                     // Screw this, the page is better off uncompressed.
                     page.sizeOnDisk = block.ramBlock.pageSize;
@@ -473,8 +473,8 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                     compressBufferOffset += compressedSize;
                 }
             }
-
         });
+
     } else {
         for (int32_t nzcIndex = pi.nonzeroChangedIndexStart; nzcIndex < pi.nonzeroChangedIndexEnd; ++nzcIndex) {
             int32_t pageIndex = block.nonzeroChangedPages[size_t(nzcIndex)];
@@ -642,11 +642,19 @@ void RamSaver::writePage(WriteInfo&& wi) {
         int64_t currEnd = -1;
         int64_t contigBytes = 0;
 
+        // Decommit on page write.
+        ContiguousRangeMapper writeCombineDecommitter([](uintptr_t start, uintptr_t size) {
+            android::base::memoryHint((void*)start, size,
+                                      base::MemoryHint::PageOut);
+        });
+
         for (int32_t nzcIndex = wi.nonzeroChangedIndexStart;
              nzcIndex < wi.nonzeroChangedIndexEnd; ++nzcIndex) {
 
             int32_t pageIndex = block.nonzeroChangedPages[size_t(nzcIndex)];
             auto& page = block.pages[size_t(pageIndex)];
+            auto origPtr = block.ramBlock.hostPtr +
+                    int64_t(pageIndex) * block.ramBlock.pageSize;
 
             int64_t pos = page.filePos;
             int64_t sz = page.sizeOnDisk;
@@ -671,16 +679,20 @@ void RamSaver::writePage(WriteInfo&& wi) {
 
             memcpy(writeCombinePtr, page.writePtr, sz);
             writeCombinePtr += sz;
+
+            writeCombineDecommitter.add((uintptr_t)origPtr, block.ramBlock.pageSize);
         }
+
+        writeCombineDecommitter.finish();
 
         if (wi.toRelease) {
             mCompressBuffers->release(wi.toRelease);
         }
 
         base::pwrite(mStreamFd,
-                        mWriteCombineBuffer.data(),
-                        contigBytes,
-                        currStart);
+                     mWriteCombineBuffer.data(),
+                     contigBytes,
+                     currStart);
         mCurrentStreamPos = nextStreamPos;
 
     });
