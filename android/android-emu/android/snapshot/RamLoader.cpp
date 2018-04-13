@@ -54,6 +54,7 @@ RamLoader::RamLoader(base::StdioStream&& stream,
                              [this]() { return backgroundPageLoad(); });
         if (mAccessWatch->valid()) {
             mOnDemandEnabled = true;
+            mBackgroundPageFillBuf.resize(kBackgroundPageBatchSize * mPageSize);
         } else {
             derror("Failed to initialize memory access watcher, falling back "
                    "to synchronous RAM loading");
@@ -451,9 +452,7 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::backgroundPageLoad() {
 MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         RamLoader::Page* page) {
     if (page) {
-        fillPageData(page);
-        delete[] page->data;
-        page->data = nullptr;
+        fillPageData(page, false);
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
@@ -483,13 +482,8 @@ void RamLoader::loadRamPage(void* ptr) {
     }
 
     Page& page = this->page(ptr);
-    uint8_t buf[kDefaultPageSize];
-    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page) ? buf : nullptr);
+    readDataFromDisk(&page, nullptr);
     fillPageData(&page);
-    if (page.data != buf) {
-        delete[] page.data;
-    }
-    page.data = nullptr;
 }
 
 bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
@@ -575,29 +569,85 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     return true;
 }
 
-void RamLoader::fillPageData(Page* pagePtr) {
+void RamLoader::fillPageData(Page* pagePtr, bool fromCallback) {
     Page& page = *pagePtr;
-    auto state = uint8_t(State::Read);
-    if (!page.state.compare_exchange_strong(state, uint8_t(State::Filling),
-                                            std::memory_order_acquire)) {
-        while (state < uint8_t(State::Filled)) {
-            base::System::get()->yield();
-            state = page.state.load(std::memory_order_relaxed);
+
+    if (fromCallback) {
+        auto state = uint8_t(State::Read);
+        if (!page.state.compare_exchange_strong(state, uint8_t(State::Filling),
+                                                std::memory_order_acquire)) {
+            while (state < uint8_t(State::Filled)) {
+                base::System::get()->yield();
+                state = page.state.load(std::memory_order_relaxed);
+            }
+            return;
         }
-        return;
-    }
 
 #if SNAPSHOT_PROFILE > 2
-    printf("%s: loading page %p\n", __func__, this->pagePtr(page));
+        printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
-    if (mAccessWatch) {
-        bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
-                                          page.data, mIsQuickboot);
-        if (!res) {
-            mHasError = true;
+        if (mAccessWatch) {
+            bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
+                                              page.data, mIsQuickboot);
+            if (!res) {
+                mHasError = true;
+            }
+            if (page.data) {
+                delete [] page.data;
+                page.data = nullptr;
+            }
+            page.state.store(uint8_t(res ? State::Filled : State::Error),
+                             std::memory_order_release);
         }
-        page.state.store(uint8_t(res ? State::Filled : State::Error),
-                         std::memory_order_release);
+    } else {
+        mBackgroundLoadedPages.push_back(pagePtr);
+        if (mBackgroundLoadedPages.size() == kBackgroundPageBatchSize) {
+            char* fillBuf = mBackgroundPageFillBuf.data();
+            char* fillBufPtr = fillBuf;
+            std::vector<Page*> toLoad;
+            for (auto p : mBackgroundLoadedPages) {
+                auto state = uint8_t(State::Read);
+                if (p->state.compare_exchange_strong(state, uint8_t(State::Filling),
+                            std::memory_order_acquire)) {
+                    toLoad.push_back(p);
+                    if (page.data) {
+                        memcpy(fillBufPtr, page.data, mPageSize);
+                    } else {
+                        memset(fillBufPtr, 0, mPageSize);
+                    }
+                    fillBufPtr += mPageSize;
+                }
+            }
+
+            uintptr_t currStart = 0;
+            uintptr_t currEnd = 0;
+
+            for (auto p: toLoad) {
+                auto ptr = pagePtr(*p);
+                if (currStart == 0) {
+                    currStart = ptr;
+                    currEnd = currStart + mPageSize;
+                } else if (currStart &&
+                           (currEnd != ptr)) {
+                    if (mAccessWatch) {
+                        bool res = mAccessWatch->fillPage(ptr, currEnd - currStart, fillBuf + currStart, mIsQuickboot);
+                        if (!res) {
+                            mHasError = true;
+                        }
+                        if (page.data) {
+                            delete [] page.data;
+                            page.data = nullptr;
+                        }
+                        page.state.store(uint8_t(res ? State::Filled : State::Error),
+                                         std::memory_order_release);
+                        
+
+                    }
+                }
+            }
+            
+        }
+        mBackgroundLoadedPages.clear();
     }
 }
 

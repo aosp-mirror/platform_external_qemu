@@ -125,7 +125,7 @@ private:
 
     void loadRamPage(void* ptr);
     bool readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer = nullptr);
-    void fillPageData(Page* pagePtr);
+    void fillPageData(Page* pagePtr, bool fromCallback = true);
 
     void readerWorker();
     MemoryAccessWatch::IdleCallbackResult backgroundPageLoad();
@@ -173,6 +173,11 @@ private:
 
     // Whether or not we just want to reload the index.
     bool mIndexOnly = false;
+
+    // Batch background loader.
+    std::vector<Page*> mBackgroundLoadedPages;
+    std::vector<char> mBackgroundPageFillBuf;
+    static constexpr size_t kBackgroundPageBatchSize = 4096;
 };
 
 struct RamLoader::Page {
