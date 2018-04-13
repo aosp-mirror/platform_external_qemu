@@ -22,6 +22,30 @@
       "revId": "9b3a1699db97b2d715e1b04195b297e03e126b7d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "703b552f_eea7467b",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-13T01:34:05Z",
+      "side": 1,
+      "message": "I wasn\u0027t aware of strcasecmp, I\u0027ll update it.",
+      "parentUuid": "76eb0892_430ceefa",
+      "range": {
+        "startLine": 52,
+        "startChar": 18,
+        "endLine": 52,
+        "endChar": 20
+      },
+      "revId": "9b3a1699db97b2d715e1b04195b297e03e126b7d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
