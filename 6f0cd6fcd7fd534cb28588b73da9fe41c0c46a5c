@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "64b02831_07982b78",
+        "filename": "android/android-emu/android/recording/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-13T18:11:32Z",
+      "side": 1,
+      "message": "please use a FunctorThread as a member instead and wait() for it in the destructor - otherwise we\u0027ll get random crashes on exit",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 207,
+        "endChar": 35
+      },
+      "revId": "6f0cd6fcd7fd534cb28588b73da9fe41c0c46a5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd54fac0_a1f58058",
+        "filename": "android/android-emu/android/recording/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-13T18:11:32Z",
+      "side": 1,
+      "message": "this function returns false on timeout, so you can rely on it instead of own timekeeping",
+      "range": {
+        "startLine": 215,
+        "startChar": 15,
+        "endLine": 215,
+        "endChar": 55
+      },
+      "revId": "6f0cd6fcd7fd534cb28588b73da9fe41c0c46a5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
