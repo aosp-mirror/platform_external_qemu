@@ -101,8 +101,12 @@ void RamLoader::applyRamBlockStructure(const RamBlockStructure& blockStructure) 
 void RamLoader::loadRam(void* ptr, uint64_t size) {
     uint32_t num_pages = (size + mPageSize - 1) / mPageSize;
     char* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
-    for (uint32_t i = 0; i < num_pages; i++) {
-        loadRamPage(pagePtr + i * mPageSize);
+    if (num_pages > 1) {
+        loadRamPages(ptr, num_pages);
+    } else {
+        for (uint32_t i = 0; i < num_pages; i++) {
+            loadRamPage(pagePtr + i * mPageSize);
+        }
     }
 }
 
@@ -452,8 +456,6 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         RamLoader::Page* page) {
     if (page) {
         fillPageData(page);
-        delete[] page->data;
-        page->data = nullptr;
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
@@ -483,13 +485,54 @@ void RamLoader::loadRamPage(void* ptr) {
     }
 
     Page& page = this->page(ptr);
-    uint8_t buf[kDefaultPageSize];
-    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page) ? buf : nullptr);
+    readDataFromDisk(&page, nullptr);
     fillPageData(&page);
-    if (page.data != buf) {
-        delete[] page.data;
+}
+
+void RamLoader::loadRamPages(void* ptr, size_t pageCount) {
+    bool allIndexed = true;
+
+    uint8_t* start = (uint8_t*)ptr;
+
+    for (uint8_t* i = start; i < start + pageCount * mPageSize; i += mPageSize) {
+        // It's possible for us to try to RAM load
+        // things that are not registered in the index
+        // (like from qemu_iovec_init_external).
+        // Make sure that it is in the index.
+        const auto blockIt = std::find_if(
+                mIndex.blocks.begin(), mIndex.blocks.end(),
+                [i](const FileIndex::Block& b) {
+                    return i >= b.ramBlock.hostPtr &&
+                           i < b.ramBlock.hostPtr + b.ramBlock.totalSize;
+                });
+
+        if (blockIt == mIndex.blocks.end()) {
+            allIndexed = false;
+        }
     }
-    page.data = nullptr;
+
+    if (!allIndexed) {
+        // If some page was not indexed, load them individually and exit.
+        for (uint8_t* i = start; i < start + pageCount * mPageSize; i += mPageSize) {
+            loadRamPage(i);
+        }
+        return;
+    }
+
+    // Now we can execute bulk operations for reading the data.
+    if (mAccessWatch) {
+        mAccessWatch->initBulkFill(start, pageCount * mPageSize);
+    }
+
+    for (uint8_t* i = start; i < start + pageCount * mPageSize; i += mPageSize) {
+        Page& page = this->page(i);
+        readDataFromDisk(&page, nullptr);
+    }
+
+    for (uint8_t* i = start; i < start + pageCount * mPageSize; i += mPageSize) {
+        Page& page = this->page(i);
+        fillPageData(&page, true /* is bulk fill */);
+    }
 }
 
 bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
@@ -575,7 +618,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     return true;
 }
 
-void RamLoader::fillPageData(Page* pagePtr) {
+void RamLoader::fillPageData(Page* pagePtr, bool isBulk) {
     Page& page = *pagePtr;
     auto state = uint8_t(State::Read);
     if (!page.state.compare_exchange_strong(state, uint8_t(State::Filling),
@@ -591,10 +634,18 @@ void RamLoader::fillPageData(Page* pagePtr) {
     printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
     if (mAccessWatch) {
-        bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
+        bool res =
+            isBulk ?
+mAccessWatch->fillPageBulk(this->pagePtr(page), pageSize(page),
+                                          page.data, mIsQuickboot)
+            : mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
                                           page.data, mIsQuickboot);
         if (!res) {
             mHasError = true;
+        }
+        if (page.data) {
+            delete [] page.data;
+            page.data = nullptr;
         }
         page.state.store(uint8_t(res ? State::Filled : State::Error),
                          std::memory_order_release);
