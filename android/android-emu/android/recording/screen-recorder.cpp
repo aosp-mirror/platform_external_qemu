@@ -14,8 +14,8 @@
 
 #include "android/recording/screen-recorder.h"
 #include "android/base/Log.h"
-#include "android/base/async/Looper.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Async.h"
 #include "android/emulator-window.h"
@@ -34,8 +34,8 @@
 namespace {
 
 using android::base::AutoLock;
+using android::base::ConditionVariable;
 using android::base::Lock;
-using android::base::Looper;
 using android::recording::AudioFormat;
 using android::recording::CodecParams;
 using android::recording::FfmpegRecorder;
@@ -79,9 +79,6 @@ private:
     bool startRecordingWorker();
     bool stopRecordingWorker();
 
-    // Called by timer when time limit is reached.
-    static void onTimeLimitReached(void* opaque, Looper::Timer* timer);
-
     bool startFfmpegRecorder();
     void sendRecordingStatus(RecordingStatus status);
     bool parseRecordingInfo(RecordingInfo& info);
@@ -98,8 +95,9 @@ private:
     QFrameBuffer mDummyQf;
 
     // Time-limit stop
-    std::unique_ptr<Looper> mLooper;
-    std::unique_ptr<Looper::Timer> mTimer;
+    ConditionVariable mCond;
+    bool mFinished = false;
+    Lock mLock;
 };
 
 ScreenRecorder::ScreenRecorder(uint32_t fbWidth,
@@ -119,9 +117,9 @@ ScreenRecorder::ScreenRecorder(uint32_t fbWidth,
 }
 
 ScreenRecorder::~ScreenRecorder() {
-    if (mTimer) {
-        mTimer->stop();
-    }
+    AutoLock lock(mLock);
+    mFinished = true;
+    mCond.signalAndUnlock(&lock);
 }
 
 // Simple function to check callback for null before using
@@ -206,10 +204,22 @@ bool ScreenRecorder::startRecordingWorker() {
 
     // Start the timer that will stop the recording when the time-limit is
     // reached.
-    mLooper.reset(Looper::create());
-    mTimer.reset(mLooper->createTimer(onTimeLimitReached, this));
-    mTimer->startAbsolute(mLooper->nowMs() + (mInfo.timeLimit * 1000));
-    android::base::async([this]() { mLooper->run(); });
+    android::base::async([this]() {
+        auto timeoutTimeUs = android::base::System::get()->getUnixTimeUs() +
+                             mInfo.timeLimit * 1000000;
+        {
+            AutoLock lock(mLock);
+            while (!mFinished &&
+                   timeoutTimeUs >
+                           android::base::System::get()->getUnixTimeUs()) {
+                mCond.timedWait(&mLock, timeoutTimeUs);
+            }
+        }
+
+        if (!mFinished) {
+            stopRecording(false);
+        }
+    });
 
     mRecorderState = RECORDER_RECORDING;
     sendRecordingStatus(RECORD_STARTED);
@@ -235,6 +245,13 @@ bool ScreenRecorder::stopRecording(bool async) {
 
 bool ScreenRecorder::stopRecordingWorker() {
     sendRecordingStatus(RECORD_STOP_INITIATED);
+
+    {
+        // Stop the timer thread
+        AutoLock lock(mLock);
+        mFinished = true;
+        mCond.signalAndUnlock(&lock);
+    }
 
     bool has_frames = ffmpegRecorder->stop();
     ffmpegRecorder.reset();
@@ -273,14 +290,6 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
 
 RecorderState ScreenRecorder::getRecorderState() const {
     return mRecorderState;
-}
-
-// static
-void ScreenRecorder::onTimeLimitReached(void* opaque, Looper::Timer* timer) {
-    D("%s: Time limit reached. Stopping recording.", __func__);
-    auto s = reinterpret_cast<ScreenRecorder*>(opaque);
-
-    s->stopRecording(false);
 }
 }  // namespace
 
