@@ -17,7 +17,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
-#include "android/base/threads/Async.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/emulator-window.h"
 #include "android/recording/FfmpegRecorder.h"
 #include "android/recording/audio/AudioProducer.h"
@@ -35,6 +35,7 @@ namespace {
 
 using android::base::AutoLock;
 using android::base::ConditionVariable;
+using android::base::FunctorThread;
 using android::base::Lock;
 using android::recording::AudioFormat;
 using android::recording::CodecParams;
@@ -94,6 +95,10 @@ private:
     std::atomic<RecorderState> mRecorderState{RECORDER_STARTING};
     QFrameBuffer mDummyQf;
 
+    FunctorThread mStartThread;
+    FunctorThread mStopThread;
+    FunctorThread mTimeoutThread;
+
     // Time-limit stop
     ConditionVariable mCond;
     bool mFinished = false;
@@ -104,7 +109,25 @@ ScreenRecorder::ScreenRecorder(uint32_t fbWidth,
                                uint32_t fbHeight,
                                const RecordingInfo* info,
                                const QAndroidDisplayAgent* agent)
-    : mFbWidth(fbWidth), mFbHeight(fbHeight), mInfo(*info), mAgent(agent) {
+    : mFbWidth(fbWidth),
+      mFbHeight(fbHeight),
+      mInfo(*info),
+      mAgent(agent),
+      mStartThread([this]() { startRecordingWorker(); }),
+      mStopThread([this]() { stopRecordingWorker(); }),
+      mTimeoutThread([this]() {
+          auto timeoutTimeUs = android::base::System::get()->getUnixTimeUs() +
+                               mInfo.timeLimit * 1000000;
+          {
+              AutoLock lock(mLock);
+              while (!mFinished && mCond.timedWait(&mLock, timeoutTimeUs))
+                  ;
+          }
+
+          if (!mFinished) {
+              stopRecording(false);
+          }
+      }) {
     // Copy over the RecordingInfo struct. Need to copy the filename
     // string because info->fileName is pointing to data that we don't own.
     D("RecordingInfo "
@@ -120,6 +143,9 @@ ScreenRecorder::~ScreenRecorder() {
     AutoLock lock(mLock);
     mFinished = true;
     mCond.signalAndUnlock(&lock);
+    mStartThread.wait();
+    mStopThread.wait();
+    mTimeoutThread.wait();
 }
 
 // Simple function to check callback for null before using
@@ -133,7 +159,7 @@ void ScreenRecorder::sendRecordingStatus(RecordingStatus status) {
 bool ScreenRecorder::startRecording(bool async) {
     assert(mRecorderState == RECORDER_STARTING);
     if (async) {
-        android::base::async([this]() { startRecordingWorker(); });
+        mStartThread.start();
         return true;
     } else {
         return startRecordingWorker();
@@ -204,22 +230,7 @@ bool ScreenRecorder::startRecordingWorker() {
 
     // Start the timer that will stop the recording when the time-limit is
     // reached.
-    android::base::async([this]() {
-        auto timeoutTimeUs = android::base::System::get()->getUnixTimeUs() +
-                             mInfo.timeLimit * 1000000;
-        {
-            AutoLock lock(mLock);
-            while (!mFinished &&
-                   timeoutTimeUs >
-                           android::base::System::get()->getUnixTimeUs()) {
-                mCond.timedWait(&mLock, timeoutTimeUs);
-            }
-        }
-
-        if (!mFinished) {
-            stopRecording(false);
-        }
-    });
+    mTimeoutThread.start();
 
     mRecorderState = RECORDER_RECORDING;
     sendRecordingStatus(RECORD_STARTED);
@@ -236,7 +247,7 @@ bool ScreenRecorder::stopRecording(bool async) {
     }
 
     if (async) {
-        android::base::async([this]() { stopRecordingWorker(); });
+        mStopThread.start();
         return true;
     } else {
         return stopRecordingWorker();
