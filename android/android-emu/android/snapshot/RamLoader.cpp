@@ -146,7 +146,35 @@ bool RamLoader::start(bool isQuickboot) {
 }
 
 void RamLoader::join() {
+
+    if (mAccessWatch) {
+        // Unprotect all. Warning: this assumes the VM is stopped.
+        uint8_t* startPtr = nullptr;
+        uint64_t curSize = 0;
+
+        for (const Page& page : mIndex.pages) {
+            auto ptr = pagePtr(page);
+            auto size = pageSize(page);
+            if (ptr == startPtr + curSize) {
+                curSize += size;
+            } else {
+                if (startPtr) {
+                    mAccessWatch->initBulkFill(startPtr, curSize);
+                }
+                startPtr = ptr;
+                curSize = size;
+            }
+        }
+
+        if (startPtr) {
+            mAccessWatch->initBulkFill(startPtr, curSize);
+        }
+    }
+
+    // Set mJoining only after initBulkFill is all done, or we
+    // get race conditions in fillPageData.
     mJoining = true;
+
     mReaderThread.wait();
     if (mAccessWatch) {
         mAccessWatch->join();
@@ -591,8 +619,11 @@ void RamLoader::fillPageData(Page* pagePtr) {
     printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
     if (mAccessWatch) {
-        bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
-                                          page.data, mIsQuickboot);
+
+        bool res = mJoining ?
+            mAccessWatch->fillPageBulk(this->pagePtr(page), pageSize(page), page.data, mIsQuickboot) :
+            mAccessWatch->fillPage(this->pagePtr(page), pageSize(page), page.data, mIsQuickboot);
+
         if (!res) {
             mHasError = true;
         }
