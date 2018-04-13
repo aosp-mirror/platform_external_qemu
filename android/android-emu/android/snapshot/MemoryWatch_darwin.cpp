@@ -115,6 +115,36 @@ public:
         return true;
     }
 
+    // Unprotects all pages in the range. Note that the VM must be stopped.
+    void initBulkFill(void* startPtr, size_t length) {
+        android::base::AutoLock lock(mLock);
+
+        char* ptr = (char*)startPtr;
+        char* start = 0;
+        char* end = 0;
+        uint64_t gpa[32];
+        uint64_t size[32];
+
+        mprotect(ptr, length, PROT_READ | PROT_WRITE | PROT_EXEC);
+        if (mAccel == CPU_ACCELERATOR_HVF) {
+            int count = hva2gpa_call(startPtr, length, 32, gpa, size);
+            for (int i = 0; i < count; ++i) {
+                guest_mem_protect_call(gpa[i], size[i], HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+            }
+        }
+    }
+
+    bool fillPageBulk(void* startPtr, size_t length, const void* data,
+                  bool isQuickboot) {
+        android::base::AutoLock lock(mLock);
+        if (!data) {
+            android::base::zeroOutMemory(startPtr, length);
+        } else {
+            memcpy(startPtr, data, length);
+        }
+        return true;
+    }
+
     void bgLoaderWorker() {
         System::Duration timeoutUs = 0;
         for (;;) {
@@ -178,6 +208,16 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
     if (!mImpl) return false;
     return mImpl->fillPage(ptr, length, data, isQuickboot);
+}
+
+void MemoryAccessWatch::initBulkFill(void* ptr, size_t length) {
+    if (!mImpl) return;
+    mImpl->initBulkFill(ptr, length);
+}
+
+bool MemoryAccessWatch::fillPageBulk(void* ptr, size_t length, const void* data, bool isQuickboot) {
+    if (!mImpl) return false;
+    return mImpl->fillPageBulk(ptr, length, data, isQuickboot);
 }
 
 void MemoryAccessWatch::join() {
