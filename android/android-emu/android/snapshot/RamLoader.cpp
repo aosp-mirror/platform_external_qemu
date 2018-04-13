@@ -17,6 +17,8 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/memory/MemoryHints.h"
+#include "android/base/Profiler.h"
 #include "android/base/Stopwatch.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
@@ -28,6 +30,7 @@
 #include <memory>
 
 using android::base::ContiguousRangeMapper;
+using android::base::ScopedMemoryProfiler;
 using android::base::MemStream;
 using android::base::Stopwatch;
 
@@ -196,6 +199,7 @@ void RamLoader::interrupt() {
         mAccessWatch->join();
         mAccessWatch.clear();
     }
+    mDecommitter.finish();
     mStream.close();
 }
 
@@ -487,12 +491,16 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         fillPageData(page);
         delete[] page->data;
         page->data = nullptr;
+        // The guest probably doesn't want to access this page right now.
+        // Page it out if possible.
+        mDecommitter.add((uintptr_t)pagePtr(*page), mPageSize);
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
         return mJoining ? MemoryAccessWatch::IdleCallbackResult::RunAgain
                         : MemoryAccessWatch::IdleCallbackResult::Wait;
     } else {
+        mDecommitter.finish();
         // null page == all pages were loaded, stop.
         interruptReading();
         return MemoryAccessWatch::IdleCallbackResult::AllDone;
@@ -654,13 +662,34 @@ bool RamLoader::readAllPages() {
     auto startTime1 = base::System::get()->getHighResTimeUs();
 #endif
 
-    for (Page& page : mIndex.pages) {
-        if (page.sizeOnDisk) {
-            sortedPages.emplace_back(&page);
-        } else if (!mIsQuickboot) {
-            zeroOutPage(page);
+    {
+
+#if SNAPSHOT_PROFILE > 1
+        ScopedMemoryProfiler memProf("zeroOut");
+#endif
+
+        // Decommit nonzero pages as they are loaded;
+        // let the guest decide which ones to page in.
+        ContiguousRangeMapper zeroPageDecommitter(
+            [this](uintptr_t start, uintptr_t size) {
+                if (mIsQuickboot) {
+                    android::base::memoryHint((void*)start, size, base::MemoryHint::DontNeed);
+                } else {
+                    android::base::zeroOutMemory((void*)start, size);
+                }
+            }, 4096 * mPageSize); // flush them out every 16 mb
+
+        for (Page& page : mIndex.pages) {
+            if (page.sizeOnDisk) {
+                sortedPages.emplace_back(&page);
+            } else {
+                // Decommit regardless of quickboot.
+                auto ptr = pagePtr(page);
+                zeroPageDecommitter.add((uintptr_t)ptr, mPageSize);
+            }
         }
     }
+
 
 #if SNAPSHOT_PROFILE > 1
     printf("zeroing took %.03f ms\n",
@@ -677,14 +706,29 @@ bool RamLoader::readAllPages() {
            (base::System::get()->getHighResTimeUs() - startTime) / 1000.0);
 #endif
 
-    for (Page* page : sortedPages) {
-        if (!readDataFromDisk(page, pagePtr(*page))) {
-            mHasError = true;
-            return false;
+#if SNAPSHOT_PROFILE > 1
+    ScopedMemoryProfiler memProf("readingDataFromDisk to decompress finish");
+#endif
+    {
+        for (Page* page : sortedPages) {
+            auto ptr = pagePtr(*page);
+
+            if (!readDataFromDisk(page, ptr)) {
+                mHasError = true;
+                return false;
+            }
+
+            mDecommitter.add((uintptr_t)ptr, int32_t(pageSize(*page)));
         }
     }
 
     mDecompressor.clear();
+    mDecommitter.finish();
+
+    // Make everything normal again.
+    void* firstHostPtr = pagePtr(mIndex.pages[0]);
+    size_t numPages = mIndex.pages.size();
+    android::base::memoryHint(firstHostPtr, numPages * mPageSize, base::MemoryHint::Normal);
     return true;
 }
 
@@ -695,6 +739,7 @@ void RamLoader::startDecompressor() {
                 int32_t(pageSize(*page)));
         delete[] page->data;
         page->data = nullptr;
+        android::base::memoryHint(pagePtr(*page), int32_t(pageSize(*page)), base::MemoryHint::PageOut);
         if (!res) {
             derror("Decompressing page %p failed", pagePtr(*page));
             mHasError = true;
