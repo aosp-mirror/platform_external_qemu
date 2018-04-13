@@ -108,6 +108,52 @@ public:
         return true;
     }
 
+    void initBulkFill(void* startPtr, size_t length) {
+        android::base::AutoLock lock(mLock);
+
+        char* ptr = (char*)startPtr;
+        char* start = 0;
+        char* end = 0;
+
+        protectHostRange(start, length, PAGE_READWRITE);
+
+        uint64_t gpa, size;
+
+        for (char* i = ptr; i < ptr + length; i += 4096) {
+            int count = hva2gpa_call(i, 1, 1, &gpa, &size);
+
+            if (count && start == 0) {
+                start = i;
+                end = start + 4096;
+            } else if (!count) {
+                hva2gpa_call(start, 1, 1, &gpa, &size);
+
+                guest_mem_protect_call(gpa, end - start, PROT_READ | PROT_WRITE | PROT_EXEC);
+                start = 0;
+                end = 0;
+            } else {
+                end += 4096;
+            }
+        }
+
+        if (start && start != end) {
+            hva2gpa_call(start, 1, 1, &gpa, &size);
+
+            guest_mem_protect_call(gpa, end - start, PROT_READ | PROT_WRITE | PROT_EXEC);
+        }
+    }
+
+    bool fillPageBulk(void* startPtr, size_t length, const void* data,
+                  bool isQuickboot) {
+        android::base::AutoLock lock(mLock);
+        if (!data) {
+            android::base::zeroOutMemory(startPtr, length);
+        } else {
+            memcpy(startPtr, data, length);
+        }
+        return true;
+    }
+
     void bgLoaderWorker() {
         System::Duration timeoutMs = 0;
         for (;;) {
@@ -198,6 +244,16 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
     if (!mImpl) return false;
     return mImpl->fillPage(ptr, length, data, isQuickboot);
+}
+
+void MemoryAccessWatch::initBulkFill(void* ptr, size_t length) {
+    if (!mImpl) return;
+    mImpl->initBulkFill(ptr, length);
+}
+
+bool MemoryAccessWatch::fillPageBulk(void* ptr, size_t length, const void* data, bool isQuickboot) {
+    if (!mImpl) return false;
+    return mImpl->fillPageBulk(ptr, length, data, isQuickboot);
 }
 
 void MemoryAccessWatch::join() {

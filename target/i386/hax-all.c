@@ -765,14 +765,41 @@ vcpu_run:
         case HAX_EXIT_PAGEFAULT: {
             // HAXM fundamentally needs to unprotect guest RAM in 2MB chunks.
 #define HAXM_CHUNK_SIZE 0x200000
-            uint64_t gpa_chunk = ht->pagefault.gpa & ~(uint64_t)(HAXM_CHUNK_SIZE - 1);
-            uint64_t gpa;
-            for (gpa = gpa_chunk; gpa < gpa_chunk + HAXM_CHUNK_SIZE; gpa += 0x1000) {
-              bool found = false;
-              void* hva = hax_gpa2hva(gpa, &found);
-              if (found)
-                  qemu_ram_load(hva, 0x1000);
+            uint64_t gpa = ht->pagefault.gpa;
+            uint64_t gpa_chunk = gpa & ~(uint64_t)(HAXM_CHUNK_SIZE - 1);
+            uint64_t gpa_chunk_end = gpa_chunk + HAXM_CHUNK_SIZE;
+
+            uint64_t gpa_chunk_valid_start = 0;
+            uint64_t gpa_chunk_valid_end = 0;
+            uint64_t i;
+            void* hva = 0;
+
+            for (i = gpa_chunk; i < gpa_chunk_end; i += 0x1000) {
+                bool found = false;
+                hva = hax_gpa2hva(i, &found);
+                if (found) {
+                    gpa_chunk_valid_start = i;
+                    break;
+                }
             }
+
+            for (i = gpa_chunk_valid_start; i < gpa_chunk_end; i += 0x1000) {
+                bool found = false;
+                hva = hax_gpa2hva(i, &found);
+                gpa_chunk_valid_end = i + 0x1000;
+                if (!found) {
+                    gpa_chunk_valid_end = i;
+                    break;
+                }
+            }
+
+            if (!gpa_chunk_valid_start ||
+                (gpa_chunk_valid_end ==
+                 gpa_chunk_valid_start)) { break; }
+
+                bool found = false;
+                hva = hax_gpa2hva(gpa_chunk_valid_start, &found);
+                qemu_ram_load(hva, gpa_chunk_valid_end - gpa_chunk_valid_start);
             break;
         }
         default:
