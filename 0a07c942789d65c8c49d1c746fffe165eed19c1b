@@ -88,6 +88,24 @@
       "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "615b5c52_40627975",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1299294
+      },
+      "writtenOn": "2018-04-13T00:28:47Z",
+      "side": 1,
+      "message": "Can you please confirm that you have a recent Windows insiders build (RS4 branch) and that the Hypervisor Platform is enabled with:\n\nEnable-WindowsOptionalFeature -Online -FeatureName \"HypervisorPlatform\"",
+      "parentUuid": "d923390c_e627c95d",
+      "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
