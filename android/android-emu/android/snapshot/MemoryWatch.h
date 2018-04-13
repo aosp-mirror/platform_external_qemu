@@ -65,6 +65,10 @@ public:
     void doneRegistering();
     bool fillPage(void* ptr, size_t length, const void* data,
                   bool isQuickboot);
+    void initBulkFill(void* ptr, size_t length);
+    bool fillPageBulk(void* ptr, size_t length, const void* data,
+                      bool isQuickboot);
+    void endBulkFill();
 
     void join();
 
