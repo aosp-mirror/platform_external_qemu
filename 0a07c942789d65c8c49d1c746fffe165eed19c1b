@@ -70,6 +70,24 @@
       "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d923390c_e627c95d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-13T00:14:35Z",
+      "side": 1,
+      "message": "I am getting this on my Windows machine now:\n\n\"WHPX: No accelerator found, hr\u003d0\"",
+      "parentUuid": "89cd2cd3_cd951a53",
+      "revId": "0a07c942789d65c8c49d1c746fffe165eed19c1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
