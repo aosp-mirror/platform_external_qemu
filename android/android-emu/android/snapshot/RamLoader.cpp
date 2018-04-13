@@ -16,6 +16,7 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/memory/MemoryHints.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
 #include "android/utils/debug.h"
@@ -454,6 +455,9 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         fillPageData(page);
         delete[] page->data;
         page->data = nullptr;
+        // The guest probably doesn't want to access this page right now.
+        // Page it out if possible.
+        android::base::memoryHint(pagePtr(*page), mPageSize, base::MemoryHint::PageOut);
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
@@ -609,6 +613,12 @@ bool RamLoader::readAllPages() {
         startDecompressor();
     }
 
+    // Decommit nonzero pages as they are loaded;
+    // let the guest decide which ones to page in.
+    static const uint64_t decommitChunkSize = 4096 * mPageSize;
+    uintptr_t currDecommitStart = 0;
+    uintptr_t currDecommitEnd = 0;
+
     // Rearrange the nonzero pages in sequential disk order for faster reading.
     // Zero out all zero pages right here.
     std::vector<Page*> sortedPages;
@@ -621,10 +631,49 @@ bool RamLoader::readAllPages() {
     for (Page& page : mIndex.pages) {
         if (page.sizeOnDisk) {
             sortedPages.emplace_back(&page);
-        } else if (!mIsQuickboot) {
-            zeroOutPage(page);
+        } else {
+            // Get rid of this page; it's zero.
+            if (!mIsQuickboot) {
+                zeroOutPage(page);
+            }
+
+            // Decommit regardless of quickboot.
+            auto ptr = pagePtr(page);
+
+            if (currDecommitStart == 0) {
+                currDecommitStart = (uintptr_t)ptr;
+                currDecommitEnd = currDecommitStart + mPageSize;
+            } else if ((currDecommitStart &&
+                        ((currDecommitEnd != (uintptr_t)ptr) ||
+                         (currDecommitEnd - currDecommitStart >= decommitChunkSize)))) {
+                if (mIsQuickboot) {
+                    android::base::memoryHint((void*)currDecommitStart,
+                            currDecommitEnd - currDecommitStart,
+                            base::MemoryHint::DontNeed);
+                } else {
+                    android::base::zeroOutMemory((void*)currDecommitStart,
+                            currDecommitEnd - currDecommitStart);
+                }
+                currDecommitStart = (uintptr_t)ptr;
+                currDecommitEnd = (uintptr_t)ptr + mPageSize;
+            } else {
+                currDecommitEnd += mPageSize;
+            }
         }
     }
+
+    // Do the last decommit segment.
+    if (currDecommitEnd != currDecommitStart) {
+        if (mIsQuickboot) {
+            android::base::memoryHint((void*)currDecommitStart,
+                    currDecommitEnd - currDecommitStart,
+                    base::MemoryHint::DontNeed);
+        } else {
+            android::base::zeroOutMemory((void*)currDecommitStart,
+                    currDecommitEnd - currDecommitStart);
+        }
+    }
+
 
 #if SNAPSHOT_PROFILE > 1
     printf("zeroing took %.03f ms\n",
@@ -641,14 +690,46 @@ bool RamLoader::readAllPages() {
            (base::System::get()->getHighResTimeUs() - startTime) / 1000.0);
 #endif
 
+    currDecommitStart = 0;
+    currDecommitEnd = 0;
+
     for (Page* page : sortedPages) {
-        if (!readDataFromDisk(page, pagePtr(*page))) {
+        auto ptr = pagePtr(*page);
+
+        if (!readDataFromDisk(page, ptr)) {
             mHasError = true;
             return false;
         }
+
+        if (currDecommitStart == 0) {
+            currDecommitStart = (uintptr_t)ptr;
+            currDecommitEnd = currDecommitStart + mPageSize;
+        } else if ((currDecommitStart &&
+                    ((currDecommitEnd != (uintptr_t)ptr) ||
+                     (currDecommitEnd - currDecommitStart >= decommitChunkSize)))) {
+            android::base::memoryHint((void*)currDecommitStart,
+                                      currDecommitEnd - currDecommitStart,
+                                      base::MemoryHint::PageOut);
+            currDecommitStart = (uintptr_t)ptr;
+            currDecommitEnd = (uintptr_t)ptr + mPageSize;
+        } else {
+            currDecommitEnd += mPageSize;
+        }
+    }
+
+    // Do the last decommit segment.
+    if (currDecommitEnd != currDecommitStart) {
+        android::base::memoryHint((void*)currDecommitStart,
+                                  currDecommitEnd - currDecommitStart,
+                                  base::MemoryHint::PageOut);
     }
 
     mDecompressor.clear();
+
+    // Make everything normal again.
+    void* firstHostPtr = pagePtr(mIndex.pages[0]);
+    size_t numPages = mIndex.pages.size();
+    android::base::memoryHint(firstHostPtr, numPages * mPageSize, base::MemoryHint::Normal);
     return true;
 }
 
