@@ -66,12 +66,12 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="LocationPage" name="location_page"/>
    <widget class="CellularPage" name="cellular_page"/>
    <widget class="BatteryPage" name="batteryPage"/>
+   <widget class="CameraPage" name="cameraPage"/>
    <widget class="TelephonyPage" name="telephonyPage"/>
    <widget class="DPadPage" name="dpadPage"/>
    <widget class="RotaryInputPage" name="rotaryInputPage"/>
    <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
-   <widget class="VirtualScenePage" name="virtualScenePage"/>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
    <widget class="SnapshotPage" name="snapshotPage"/>
    <widget class="BugreportPage" name="bugreportPage"/>
@@ -487,6 +487,52 @@ padding: 10px 0px 10px 16px;</string>
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="cameraButton">
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+         </font>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/* overridden by stylesheet_template.css */
+border: none;
+text-align: left;
+padding: 10px 0px 10px 16px;</string>
+        </property>
+        <property name="text">
+         <string>  Camera</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/light/camera_iris</normaloff>:/light/camera_iris</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <property name="themeIconName" stdset="0">
+         <string>camera_iris</string>
+        </property>
+        <property name="ColorGroup" stdset="0">
+         <string>MajorTab</string>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="telephoneButton">
         <property name="font">
          <font>
@@ -713,52 +759,6 @@ padding: 10px 0px 10px 16px;</string>
         </property>
         <property name="ColorGroup" stdset="0">
          <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="virtualSceneButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Virtual scene</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/virtualscene</normaloff>:/light/virtualscene</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>virtualscene</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -1263,9 +1263,9 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>VirtualScenePage</class>
+   <class>CameraPage</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/virtual-scene-page.h</header>
+   <header>android/skin/qt/extended-pages/camera-page.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

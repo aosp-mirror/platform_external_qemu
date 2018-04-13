@@ -94,12 +94,12 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
         {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
+        {PANE_IDX_CAMERA,        mExtendedUi->cameraButton},
         {PANE_IDX_TELEPHONE,     mExtendedUi->telephoneButton},
         {PANE_IDX_DPAD,          mExtendedUi->dpadButton},
         {PANE_IDX_ROTARY,        mExtendedUi->rotaryInputButton},
         {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
         {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
-        {PANE_IDX_VIRTUAL_SCENE, mExtendedUi->virtualSceneButton},
         {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
         {PANE_IDX_SNAPSHOT,      mExtendedUi->snapshotButton},
         {PANE_IDX_BUGREPORT,     mExtendedUi->bugreportButton},
@@ -126,11 +126,13 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
 
+    // Currently, the camera page only contains options for the virtual scene
+    // camera.  Hide the button if the virtual scene camera is not enabled.
     if (androidHwConfig_hasVirtualSceneCamera(android_hw)) {
-        mSidebarButtons.addButton(mExtendedUi->virtualSceneButton);
-        mExtendedUi->virtualSceneButton->setVisible(true);
+        mSidebarButtons.addButton(mExtendedUi->cameraButton);
+        mExtendedUi->cameraButton->setVisible(true);
     } else {
-        mExtendedUi->virtualSceneButton->setVisible(false);
+        mExtendedUi->cameraButton->setVisible(false);
     }
 
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
@@ -194,7 +196,7 @@ void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
         LocationPage::setLocationAgent(agentPtr->location);
         SettingsPage::setHttpProxyAgent(agentPtr->proxy);
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
-        VirtualScenePage::setVirtualSceneAgent(agentPtr->virtualScene);
+        CameraPage::setVirtualSceneAgent(agentPtr->virtualScene);
     }
 }
 
@@ -289,6 +291,7 @@ void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
 
 // Tab buttons. Each raises its stacked pane to the top.
 void ExtendedWindow::on_batteryButton_clicked()      { adjustTabs(PANE_IDX_BATTERY); }
+void ExtendedWindow::on_cameraButton_clicked()       { adjustTabs(PANE_IDX_CAMERA); }
 void ExtendedWindow::on_bugreportButton_clicked()    { adjustTabs(PANE_IDX_BUGREPORT); }
 void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()         { adjustTabs(PANE_IDX_DPAD); }
@@ -299,7 +302,6 @@ void ExtendedWindow::on_locationButton_clicked()     { adjustTabs(PANE_IDX_LOCAT
 void ExtendedWindow::on_microphoneButton_clicked()   { adjustTabs(PANE_IDX_MICROPHONE); }
 void ExtendedWindow::on_settingsButton_clicked()     { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEPHONE); }
-void ExtendedWindow::on_virtualSceneButton_clicked() { adjustTabs(PANE_IDX_VIRTUAL_SCENE); }
 void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 void ExtendedWindow::on_snapshotButton_clicked()     { adjustTabs(PANE_IDX_SNAPSHOT); }
 void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
