@@ -97,7 +97,7 @@ public:
 
     // Set the poster and queue a scene update for the next frame.
     void setPoster(const char* posterName, const char* filename) {
-        mPosters[posterName].mFilename = filename;
+        mPosters[posterName].mFilename = filename ? filename : std::string();
     }
 
     // Set the poster size.
@@ -137,6 +137,10 @@ public:
     // Update the poster size.
     void updatePosterSize(const char* posterName, float size);
 
+    // Load a PosterSetting in the scene.
+    void loadPosterInternal(const char* posterName,
+                            const Settings::PosterSetting& setting);
+
 private:
     std::unique_ptr<Renderer> mRenderer;
     std::unique_ptr<Scene> mScene;
@@ -147,7 +151,12 @@ private:
 VirtualSceneManagerImpl::VirtualSceneManagerImpl(
         std::unique_ptr<Renderer>&& renderer,
         std::unique_ptr<Scene>&& scene)
-    : mRenderer(std::move(renderer)), mScene(std::move(scene)) {}
+    : mRenderer(std::move(renderer)), mScene(std::move(scene)) {
+    // Load the poster configuration in the scene.
+    for (const auto& it : sSettings->getPosters()) {
+        loadPosterInternal(it.first.c_str(), it.second);
+    }
+}
 
 VirtualSceneManagerImpl::~VirtualSceneManagerImpl() {
     skin_winsys_show_virtual_scene_controls(false);
@@ -170,12 +179,6 @@ std::unique_ptr<VirtualSceneManagerImpl> VirtualSceneManagerImpl::create(
         return nullptr;
     }
 
-    // Load the poster configuration in the scene.
-    for (const auto& it : sSettings->getPosters()) {
-        scene->loadPoster(it.first.c_str(), it.second.mFilename.c_str(),
-                          it.second.mSize);
-    }
-
     skin_winsys_show_virtual_scene_controls(true);
 
     return std::unique_ptr<VirtualSceneManagerImpl>(
@@ -188,10 +191,7 @@ int64_t VirtualSceneManagerImpl::render() {
     const auto& posters = sSettings->getPosters();
     while (!mPosterFilenameUpdates.empty()) {
         const std::string& posterName = mPosterFilenameUpdates.front();
-        const auto& setting = posters.at(posterName);
-        mScene->loadPoster(posterName.c_str(), setting.mFilename.c_str(),
-                           setting.mSize);
-
+        loadPosterInternal(posterName.c_str(), posters.at(posterName));
         mPosterFilenameUpdates.pop_front();
     }
 
@@ -208,6 +208,18 @@ void VirtualSceneManagerImpl::queuePosterUpdate(const char* posterName) {
 void VirtualSceneManagerImpl::updatePosterSize(const char* posterName,
                                                float size) {
     mScene->updatePosterSize(posterName, size);
+}
+
+void VirtualSceneManagerImpl::loadPosterInternal(
+        const char* posterName,
+        const Settings::PosterSetting& setting) {
+    if (setting.mFilename.empty()) {
+        // Always render empty posters at 100% size.
+        mScene->loadPoster(posterName, nullptr, 1.0f);
+    } else {
+        mScene->loadPoster(posterName, setting.mFilename.c_str(),
+                           setting.mSize);
+    }
 }
 
 /*******************************************************************************
