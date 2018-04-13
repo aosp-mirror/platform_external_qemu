@@ -189,7 +189,6 @@ void RamSaver::savePage(int64_t blockOffset,
         int stillZero = 0;
         int sameHash = 0;
 
-
         mIncStats.countMultiple(StatAction::TotalPages, numPages);
 
         mIncStats.measure(StatTime::ZeroCheck, [&] {
