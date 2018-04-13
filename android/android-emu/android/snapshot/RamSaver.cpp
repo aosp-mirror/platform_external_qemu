@@ -447,6 +447,10 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
 
         mIncStats.measure(StatTime::Compressing, [&] {
 
+            static const uint64_t decommitChunkSize = 4096 * block.ramBlock.pageSize;
+            uintptr_t currDecommitStart = 0;
+            uintptr_t currDecommitEnd = 0;
+
             for (int32_t nzcIndex = pi.nonzeroChangedIndexStart;
                  nzcIndex < pi.nonzeroChangedIndexEnd; ++nzcIndex) {
 
@@ -463,6 +467,7 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
 
                 assert(compressedSize > 0);
 
+                // Invariant: The page is compressed iff its sizeOnDisk is strictly less than the page size.
                 if (compressedSize >= block.ramBlock.pageSize) {
                     // Screw this, the page is better off uncompressed.
                     page.sizeOnDisk = block.ramBlock.pageSize;
@@ -471,9 +476,31 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                     page.sizeOnDisk = compressedSize;
                     page.writePtr = compressBufferData + compressBufferOffset;
                     compressBufferOffset += compressedSize;
+
+                    // Decommit the real page because we compressed it.
+                    if (currDecommitStart == 0) {
+                        currDecommitStart = (uintptr_t)ptr;
+                        currDecommitEnd = currDecommitStart + block.ramBlock.pageSize;
+                    } else if ((currDecommitStart &&
+                                ((currDecommitEnd != (uintptr_t)ptr) ||
+                                 (currDecommitEnd - currDecommitStart >= decommitChunkSize)))) {
+                        android::base::memoryHint((void*)currDecommitStart,
+                                                  currDecommitEnd - currDecommitStart,
+                                                  base::MemoryHint::PageOut);
+                        currDecommitStart = (uintptr_t)ptr;
+                        currDecommitEnd = (uintptr_t)ptr + block.ramBlock.pageSize;
+                    } else {
+                        currDecommitEnd += block.ramBlock.pageSize;
+                    }
                 }
             }
 
+            // Do the last decommit segment.
+            if (currDecommitEnd != currDecommitStart) {
+                android::base::memoryHint((void*)currDecommitStart,
+                                          currDecommitEnd - currDecommitStart,
+                                          base::MemoryHint::PageOut);
+            }
         });
     } else {
         for (int32_t nzcIndex = pi.nonzeroChangedIndexStart; nzcIndex < pi.nonzeroChangedIndexEnd; ++nzcIndex) {
@@ -642,6 +669,11 @@ void RamSaver::writePage(WriteInfo&& wi) {
         int64_t currEnd = -1;
         int64_t contigBytes = 0;
 
+        // Decommit on page write if the page was uncompressed.
+        static const uint64_t decommitChunkSize = 4096 * block.ramBlock.pageSize;
+        uintptr_t currDecommitStart = 0;
+        uintptr_t currDecommitEnd = 0;
+
         for (int32_t nzcIndex = wi.nonzeroChangedIndexStart;
              nzcIndex < wi.nonzeroChangedIndexEnd; ++nzcIndex) {
 
@@ -671,6 +703,31 @@ void RamSaver::writePage(WriteInfo&& wi) {
 
             memcpy(writeCombinePtr, page.writePtr, sz);
             writeCombinePtr += sz;
+
+            if (sz == block.ramBlock.pageSize) continue;
+
+            // Decommit the real page because we compressed it.
+            if (currDecommitStart == 0) {
+                currDecommitStart = (uintptr_t)page.writePtr;
+                currDecommitEnd = currDecommitStart + block.ramBlock.pageSize;
+            } else if ((currDecommitStart &&
+                        ((currDecommitEnd != (uintptr_t)page.writePtr) ||
+                         (currDecommitEnd - currDecommitStart >= decommitChunkSize)))) {
+                android::base::memoryHint((void*)currDecommitStart,
+                                          currDecommitEnd - currDecommitStart,
+                                          base::MemoryHint::PageOut);
+                currDecommitStart = (uintptr_t)page.writePtr;
+                currDecommitEnd = (uintptr_t)page.writePtr + block.ramBlock.pageSize;
+            } else {
+                currDecommitEnd += block.ramBlock.pageSize;
+            }
+        }
+
+        // Do the last decommit segment.
+        if (currDecommitEnd != currDecommitStart) {
+            android::base::memoryHint((void*)currDecommitStart,
+                                      currDecommitEnd - currDecommitStart,
+                                      base::MemoryHint::PageOut);
         }
 
         if (wi.toRelease) {
