@@ -86,12 +86,12 @@ public:
     static void enumeratePosters(void* context,
                                  EnumeratePostersCallback callback);
 
-    // Set the size of a poster.
+    // Set the scale of a poster.
     //
     // |posterName| - Name of the poster position, such as "wall" or "table".
-    // |size| - Poster size, a value between 0 and 1. The value will be clamped
-    //          between the poster's minimum size and 1.
-    static void setPosterSize(const char* posterName, float size);
+    // |scale| - Poster scale, a value between 0 and 1. The value will be
+    //          clamped between the poster's minimum size and 1.
+    static void setPosterScale(const char* posterName, float scale);
 
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;

@@ -23,13 +23,7 @@
 #include "android/virtualscene/MeshSceneObject.h"
 #include "android/virtualscene/Renderer.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/euler_angles.hpp>
-
 #include <cmath>
-#include <fstream>
-#include <vector>
 
 using namespace android::base;
 using android::camera::CameraMetrics;
@@ -42,8 +36,6 @@ using android::camera::CameraMetrics;
 static constexpr const char* kObjFiles[] = {
         "Toren1BD.obj",
 };
-
-static constexpr const char* kPosterFile = "Toren1BD.posters";
 
 // static_cast the value in a unique_ptr.
 // After this call, the unique_ptr that the value is cast from will be removed.
@@ -85,27 +77,6 @@ bool Scene::initialize() {
                 std::move(static_unique_cast<SceneObject>(sceneObject)));
     }
 
-    if (!loadPostersFile(kPosterFile)) {
-        return false;
-    }
-
-    for (auto& poster : mPosters) {
-        poster.second.sceneObject = PosterSceneObject::create(
-                mRenderer, poster.second.position, poster.second.rotation,
-                poster.second.size);
-        if (!poster.second.sceneObject) {
-            W("%s: Failed to create poster scene object %s.", __FUNCTION__,
-              poster.first.c_str());
-            return false;
-        }
-
-        if (!poster.second.defaultFilename.empty()) {
-            poster.second.defaultTexture = mRenderer.loadTextureAsync(
-                    poster.second.defaultFilename.c_str());
-            poster.second.sceneObject->setTexture(poster.second.defaultTexture);
-        }
-    }
-
     return true;
 }
 
@@ -129,9 +100,7 @@ const SceneCamera& Scene::getCamera() const {
 int64_t Scene::update() {
     mCamera.update();
     for (auto& poster : mPosters) {
-        if (poster.second.sceneObject) {
-            poster.second.sceneObject->update();
-        }
+        poster.second.sceneObject->update();
     }
 
     return mCamera.getTimestamp();
@@ -157,16 +126,37 @@ std::vector<RenderableObject> Scene::getRenderableObjects() const {
     return std::move(renderables);
 }
 
+bool Scene::createPosterLocation(const PosterInfo& info) {
+    PosterStorage storage;
+    storage.sceneObject =
+            PosterSceneObject::create(mRenderer, info.position, info.rotation,
+                                      kPosterMinimumSizeMeters, info.size);
+    if (!storage.sceneObject) {
+        W("%s: Failed to create poster scene object %s.", __FUNCTION__,
+          info.name.c_str());
+        return false;
+    }
+
+    if (!info.defaultFilename.empty()) {
+        storage.defaultTexture =
+                mRenderer.loadTextureAsync(info.defaultFilename.c_str());
+        storage.sceneObject->setTexture(storage.defaultTexture);
+    }
+
+    mPosters.insert(std::make_pair(info.name, std::move(storage)));
+    return true;
+}
+
 bool Scene::loadPoster(const char* posterName,
                        const char* filename,
-                       float size) {
+                       float scale) {
     auto it = mPosters.find(posterName);
     if (it == mPosters.end()) {
         W("%s: Could not find poster with name '%s'", __FUNCTION__, posterName);
         return false;
     }
 
-    Poster& poster = it->second;
+    PosterStorage& poster = it->second;
 
     mRenderer.releaseTexture(poster.texture);
     poster.texture = Texture();
@@ -175,127 +165,22 @@ bool Scene::loadPoster(const char* posterName,
         poster.texture = mRenderer.loadTextureAsync(filename);
     }
 
-    poster.sceneObject->setScale(size);
+    poster.sceneObject->setScale(scale);
     poster.sceneObject->setTexture(
             poster.texture.isValid() ? poster.texture : poster.defaultTexture);
 
     return true;
 }
 
-void Scene::updatePosterSize(const char* posterName, float size) {
+void Scene::updatePosterScale(const char* posterName, float scale) {
     auto it = mPosters.find(posterName);
     if (it == mPosters.end()) {
         W("%s: Could not find poster with name '%s'", __FUNCTION__, posterName);
         return;
     }
 
-    Poster& poster = it->second;
-    poster.sceneObject->setScale(size);
-}
-
-bool Scene::loadPostersFile(const char* filename) {
-    const std::string resourcesDir =
-            PathUtils::addTrailingDirSeparator(PathUtils::join(
-                    System::get()->getLauncherDirectory(), "resources"));
-    const std::string filePath = PathUtils::join(
-            System::get()->getLauncherDirectory(), "resources", filename);
-
-    std::ifstream in(filePath);
-    if (!in) {
-        W("%s: Could not find file '%s'", __FUNCTION__, filename);
-        return false;
-    }
-
-    Poster poster;
-    std::string name;
-
-    std::string str;
-
-    for (in >> str; !in.eof(); in >> str) {
-        if (str.empty()) {
-            continue;
-        }
-
-        if (str == "poster") {
-            // New poster entry, specified with a string name.
-            if (!name.empty()) {
-                // Store existing poster.
-                D("%s: Loaded poster %s at (%f, %f, %f)", __FUNCTION__,
-                  name.c_str(), poster.position.x, poster.position.y,
-                  poster.position.z);
-                mPosters[name] = std::move(poster);
-            }
-
-            poster = Poster();
-            in >> name;
-            if (!in) {
-                W("%s: Invalid name.", __FUNCTION__);
-                return false;
-            }
-
-        } else if (str == "position") {
-            // Poster center position.
-            // Specified with three floating point numbers, separated by
-            // whitespace.
-
-            in >> poster.position.x >> poster.position.y >> poster.position.z;
-            if (!in) {
-                W("%s: Invalid position.", __FUNCTION__);
-                return false;
-            }
-        } else if (str == "rotation") {
-            // Poster rotation.
-            // Specified with three floating point numbers, separated by
-            // whitespace.  This represents euler angle rotation in degrees, and
-            // it is applied in XYZ order.
-
-            glm::vec3 eulerRotation;
-            in >> eulerRotation.x >> eulerRotation.y >> eulerRotation.z;
-            if (!in) {
-                W("%s: Invalid rotation.", __FUNCTION__);
-                return false;
-            }
-
-            poster.rotation = glm::quat(
-                    glm::eulerAngleXYZ(glm::radians(eulerRotation.x),
-                                       glm::radians(eulerRotation.y),
-                                       glm::radians(eulerRotation.z)));
-        } else if (str == "size") {
-            // Poster center position.
-            // Specified with two floating point numbers, separated by
-            // whitespace.
-
-            in >> poster.size.x >> poster.size.y;
-            if (!in) {
-                W("%s: Invalid size.", __FUNCTION__);
-                return false;
-            }
-        } else if (str == "default") {
-            // Poster default filename.
-            // Specified with a string parameter.
-
-            in >> poster.defaultFilename;
-            if (!in) {
-                W("%s: Invalid default filename.", __FUNCTION__);
-                return false;
-            }
-        } else {
-            W("%s: Invalid input %s", __FUNCTION__, str.c_str());
-            return false;
-        }
-    }
-
-    if (name.empty()) {
-        E("%s: Posters file did not contain any entries.", __FUNCTION__);
-        return false;
-    }
-
-    // Store last poster.
-    D("%s: Loaded poster %s at (%f, %f, %f)", __FUNCTION__, name.c_str(),
-      poster.position.x, poster.position.y, poster.position.z);
-    mPosters[name] = std::move(poster);
-
-    return true;
+    PosterStorage& poster = it->second;
+    poster.sceneObject->setScale(scale);
 }
 
 void Scene::getRenderableObjectsFromSceneObject(

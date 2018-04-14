@@ -17,13 +17,17 @@ ANDROID_BEGIN_HEADER
 // Callback called to enumerate posters and their current values in the scene.
 //
 // |posterName| - Name of the poster position, such as "wall" or "table".
+// |minWidth| - The poster position's minimum width, in meters.
+// |maxWidth| - The poster position's maximum width, in meters.
 // |filename| - Path to an image file, either PNG or JPEG, or nullptr if none
 //              is set.
-// |size| - The poster size, a value between 0 and 1.
+// |scale| - The poster scale, a value between 0 and 1.
 typedef void (*EnumeratePostersCallback)(void* context,
                                          const char* posterName,
+                                         float minWidth,
+                                         float maxWidth,
                                          const char* filename,
-                                         float size);
+                                         float scale);
 
 typedef struct QAndroidVirtualSceneAgent {
     // Set the initial poster of the scene, loaded from persisted settings.
@@ -51,12 +55,12 @@ typedef struct QAndroidVirtualSceneAgent {
     // |callback| - Callback to be invoked for each poster.
     void (*enumeratePosters)(void* context, EnumeratePostersCallback callback);
 
-    // Set the size of a poster.
+    // Set the scale of a poster.
     //
     // |posterName| - Name of the poster position, such as "wall" or "table".
-    // |size| - Poster size, a value between 0 and 1. The value will be clamped
-    //          between the poster's minimum size and 1.
-    void (*setPosterSize)(const char* posterName, float size);
+    // |scale| - Poster scale, a value between 0 and 1. The value will be
+    //          clamped between the poster's minimum size and 1.
+    void (*setPosterScale)(const char* posterName, float scale);
 } QAndroidVirtualSceneAgent;
 
 ANDROID_END_HEADER
