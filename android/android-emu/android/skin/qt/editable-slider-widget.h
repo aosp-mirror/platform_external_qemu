@@ -28,11 +28,12 @@ class EditableSliderWidget : public QWidget
     Q_PROPERTY(double value READ getValue WRITE setValue NOTIFY valueChanged USER true);
     Q_PROPERTY(double minimum READ getMinimum WRITE setMinimum);
     Q_PROPERTY(double maximum READ getMaximum WRITE setMaximum);
+    Q_PROPERTY(double steps READ getSteps WRITE setSteps);
 
     Q_PROPERTY(int lineEditMaximumWidth READ getLineEditMaximumWidth WRITE setLineEditMaximumWidth);
 
 public:
-    explicit EditableSliderWidget(QWidget *parent = 0);
+    explicit EditableSliderWidget(QWidget* parent = 0);
 
     double getValue() const { return mValue; }
     double getMinimum() const { return mMinimum; }
@@ -40,6 +41,9 @@ public:
 
     int getLineEditMaximumWidth() const { return mLineEdit.maximumWidth(); }
     void setLineEditMaximumWidth(int width) { return mLineEdit.setMaximumWidth(width); }
+
+    double getSteps() const { return mSteps; }
+    void setSteps(double value);
 
     // Sets the current value of the widget.
     // The provided value is clipped to the bounds currently imposed by the
@@ -103,6 +107,8 @@ private:
     double mValue = 0.0f;
     double mMinimum = 0.0f;
     double mMaximum = 0.0f;
+    double mSteps = 10.0f;
+    int mPrecision = 1;
     QHBoxLayout mMainLayout;
     QVBoxLayout mAnnotatedSliderLayout;
     QVBoxLayout mEditBoxLayout;

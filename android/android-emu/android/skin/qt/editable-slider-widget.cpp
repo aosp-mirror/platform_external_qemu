@@ -2,15 +2,15 @@
 
 #include <QEvent>
 #include <QStyle>
+#include <QtMath>
 
-EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
-    QWidget(parent),
-    mMinValueLabel(this),
-    mMaxValueLabel(this),
-    mSlider(Qt::Horizontal, this),
-    mLineEdit(this),
-    mLineEditValidator(&mLineEdit) {
-
+EditableSliderWidget::EditableSliderWidget(QWidget* parent)
+    : QWidget(parent),
+      mMinValueLabel(this),
+      mMaxValueLabel(this),
+      mSlider(Qt::Horizontal, this),
+      mLineEdit(this),
+      mLineEditValidator(&mLineEdit) {
     // Arrange the child widgets in a layout.
     mSliderLabelsLayout.setSpacing(0);
     mSliderLabelsLayout.addWidget(&mMinValueLabel);
@@ -30,9 +30,9 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     setLayout(&mMainLayout);
 
     // Set initial values.
-    setMinimum(static_cast<int>(mSlider.minimum()/10.0));
-    setMaximum(static_cast<int>(mSlider.maximum()/10.0));
-    setValue(static_cast<int>(mSlider.value()/10.0));
+    setMinimum(static_cast<int>(mSlider.minimum() / mSteps));
+    setMaximum(static_cast<int>(mSlider.maximum() / mSteps));
+    setValue(static_cast<int>(mSlider.value() / mSteps));
 
     // Do some adjustments to child widgets.
     mSlider.setFocusPolicy(Qt::ClickFocus);
@@ -57,6 +57,15 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     connect(&mLineEdit, SIGNAL(editingFinished()), this, SLOT(lineEditValueChanged()));
 }
 
+void EditableSliderWidget::setSteps(double steps) {
+    const double previousSteps = mSteps;
+    mPrecision = qCeil(qLn(steps) / M_LN10);
+    mSteps = steps;
+    setMinimum(static_cast<int>(mSlider.minimum() / previousSteps), false);
+    setMaximum(static_cast<int>(mSlider.maximum() / previousSteps), false);
+    setValue(static_cast<int>(mSlider.value() / previousSteps), false);
+}
+
 void EditableSliderWidget::setValue(double value, bool emit_signal) {
     // Clip the value to the allowed range.
     mValue =
@@ -65,13 +74,13 @@ void EditableSliderWidget::setValue(double value, bool emit_signal) {
     // Update the values displayed by the slider and the edit box.
     {
         QSignalBlocker blocker(mSlider);
-        mSlider.setValue(static_cast<int>(mValue * 10.0));
+        mSlider.setValue(static_cast<int>(mValue * mSteps));
     }
 
     if (mLineEditFocused) {
         mValueChangeIgnored = true;
     } else {
-        mLineEdit.setText(QString("%1").arg(mValue, 0, 'f', 1, '0'));
+        mLineEdit.setText(QString("%1").arg(mValue, 0, 'f', mPrecision, '0'));
     }
     if (emit_signal) {
         emit valueChanged(mValue);
@@ -87,7 +96,7 @@ void EditableSliderWidget::setMinimum(double minimum, bool emit_signal) {
     setValue(mValue,
              emit_signal);  // Force the current value into the new bounds.
     mMinValueLabel.setText(QString::number(mMinimum));
-    mSlider.setMinimum(static_cast<int>(mMinimum * 10.0));
+    mSlider.setMinimum(static_cast<int>(mMinimum * mSteps));
 }
 
 void EditableSliderWidget::setMaximum(double maximum, bool emit_signal) {
@@ -96,11 +105,11 @@ void EditableSliderWidget::setMaximum(double maximum, bool emit_signal) {
     setValue(mValue,
              emit_signal);  // Force the current value into the new bounds.
     mMaxValueLabel.setText(QString::number(mMaximum));
-    mSlider.setMaximum(static_cast<int>(mMaximum * 10.0));
+    mSlider.setMaximum(static_cast<int>(mMaximum * mSteps));
 }
 
 void EditableSliderWidget::sliderValueChanged(int new_value) {
-    setValue(static_cast<double>(new_value) / 10.0);
+    setValue(static_cast<double>(new_value) / mSteps);
 }
 
 void EditableSliderWidget::lineEditValueChanged() {

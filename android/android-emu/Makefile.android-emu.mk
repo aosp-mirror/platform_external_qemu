@@ -492,6 +492,7 @@ LOCAL_SRC_FILES := \
     android/utils/sockets.c \
     android/utils/looper.cpp \
     android/virtualscene/MeshSceneObject.cpp \
+    android/virtualscene/PosterInfo.cpp \
     android/virtualscene/PosterSceneObject.cpp \
     android/virtualscene/Renderer.cpp \
     android/virtualscene/RenderTarget.cpp \

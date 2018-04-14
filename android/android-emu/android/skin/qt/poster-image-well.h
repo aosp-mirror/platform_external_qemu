@@ -22,7 +22,7 @@ class PosterImageWell : public QWidget {
 
     Q_PROPERTY(QString path READ getPath WRITE setPath NOTIFY pathChanged
                        USER true);
-    Q_PROPERTY(float size READ getSize WRITE setSize NOTIFY sizeChanged
+    Q_PROPERTY(float scale READ getScale WRITE setScale NOTIFY scaleChanged
                        USER true);
 
 public:
@@ -40,13 +40,19 @@ public:
     //          is assumed to point to a valid file.
     void setPath(QString path);
 
-    // Get the current poster size.
-    float getSize() const;
+    // Get the current poster scale.
+    float getScale() const;
 
-    // Set the current poster size.
+    // Set the current poster scale.
     //
-    // |value| - Poster size, between 0 and 1.
-    void setSize(float value);
+    // |value| - Poster scale, between 0 and 1.
+    void setScale(float value);
+
+    // Set minimum and maximum size of the poster.
+    //
+    // |minSize| - Minimum size, in meters.
+    // |maxSize| - Maximum size, in meters.
+    void setMinMaxSize(float minSize, float maxSize);
 
     // Set the starting directory for the file dialog.  Defaults to the current
     // working directory, ".".  Does not have to match the path's base
@@ -64,8 +70,8 @@ signals:
     // Emitted when the path stored by the widget changes.
     void pathChanged(QString path);
 
-    // Emitted when the widget size changes.
-    void sizeChanged(float value);
+    // Emitted when the widget scale changes.
+    void scaleChanged(float value);
 
     // Emitted when the user interacts with the control, even if the action
     // is canceled.
@@ -101,4 +107,5 @@ private:
     QString mStartingDirectory;
     QString mPath;
     QWidget mOverlayWidget;
+    float mSliderValueScale = 1.0f;
 };

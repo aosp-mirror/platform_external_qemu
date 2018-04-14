@@ -22,6 +22,7 @@
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/utils/compiler.h"
+#include "android/virtualscene/PosterInfo.h"
 #include "android/virtualscene/PosterSceneObject.h"
 #include "android/virtualscene/Renderer.h"
 #include "android/virtualscene/SceneCamera.h"
@@ -35,17 +36,6 @@ namespace virtualscene {
 
 // Forward declarations.
 class SceneObject;
-
-struct Poster {
-    glm::vec2 size = glm::vec2(1.0f, 1.0f);
-    glm::vec3 position = glm::vec3();
-    glm::quat rotation = glm::quat();
-    std::string defaultFilename;
-
-    std::unique_ptr<PosterSceneObject> sceneObject;
-    Texture texture;
-    Texture defaultTexture;
-};
 
 class Scene {
     DISALLOW_COPY_AND_ASSIGN(Scene);
@@ -75,23 +65,30 @@ public:
     // Get the list of RenderableObjects for the current frame.
     std::vector<RenderableObject> getRenderableObjects() const;
 
+    // Create a new poster location.
+    //
+    // |info| - Poster information.
+    //
+    // Returns true if the poster was successfully created.
+    bool createPosterLocation(const PosterInfo& info);
+
     // Load a poster into the scene from a file.
     //
     // |posterName| - Name of the poster position, such as "wall" or "table".
     // |filename| - Path to an image file, either PNG or JPEG.
-    // |size| - The default poster size, between 0 and 1, which will
-    //          automatically be clamped.
+    // |scale| - The default poster scale, between 0 and 1, which will
+    //           automatically be clamped.
     //
     // Returns true on success.
-    bool loadPoster(const char* posterName, const char* filename, float size);
+    bool loadPoster(const char* posterName, const char* filename, float scale);
 
-    // Update a given poster's size.  If the poster does not exist, this has
+    // Update a given poster's scale.  If the poster does not exist, this has
     // no effect.
     //
     // |posterName| - Name of the poster position, such as "wall" or "table".
-    // |size| - Poster size, between 0 and 1, which will be automatically
-    //          clamped.
-    void updatePosterSize(const char* posterName, float size);
+    // |scale| - Poster scale, between 0 and 1, which will be automatically
+    //           clamped.
+    void updatePosterScale(const char* posterName, float scale);
 
 private:
     // Private constructor, use Scene::create to create an instance.
@@ -102,21 +99,22 @@ private:
     // Returns true on success.
     bool initialize();
 
-    // Load a .posters file and populate the mPosters map.
-    //
-    // Returns true on success.
-    bool loadPostersFile(const char* filename);
-
     // Gets RenderableObjects from a SceneObject.
     static void getRenderableObjectsFromSceneObject(
             const glm::mat4& viewProjection,
             const SceneObject* sceneObject,
             std::vector<RenderableObject>& outRenderableObjects);
 
+    struct PosterStorage {
+        std::unique_ptr<PosterSceneObject> sceneObject;
+        Texture texture;
+        Texture defaultTexture;
+    };
+
     Renderer& mRenderer;
     SceneCamera mCamera;
     std::vector<std::unique_ptr<SceneObject>> mSceneObjects;
-    std::unordered_map<std::string, Poster> mPosters;
+    std::unordered_map<std::string, PosterStorage> mPosters;
 };
 
 }  // namespace virtualscene
