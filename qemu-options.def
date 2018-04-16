@@ -919,6 +919,10 @@ DEF("skip-adb-auth", 0, QEMU_OPTION_android_skip_adb_auth,
 DEF("timezone", HAS_ARG, QEMU_OPTION_timezone,
 "-timezone <timezone> use this timezone instead of host's default\n", QEMU_ARCH_ALL)
 
+DEF("adbkeyfile", HAS_ARG, QEMU_OPTION_adbkeyfile,
+"-adbkeyfile <path-to-adb-public-key-file> use this adb public key file"
+" instead of default .android/adbkey.pub\n", QEMU_ARCH_ALL)
+
 DEF("net-tap", HAS_ARG, QEMU_OPTION_net_tap,
 "-net-tap <tap interface> use the provided TAP interface for networking\n", QEMU_ARCH_ALL)
 
