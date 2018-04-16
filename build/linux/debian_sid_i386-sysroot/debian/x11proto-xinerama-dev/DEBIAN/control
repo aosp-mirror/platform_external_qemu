@@ -1,0 +1,21 @@
+Package: x11proto-xinerama-dev
+Source: x11proto-xinerama
+Version: 1.2.1-2
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 60
+Breaks: libxinerama-dev (<< 2:1.1)
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 Xinerama extension wire protocol
+ This package provides development headers describing the wire protocol
+ for the XINERAMA extension, used to use and manage a multiple-screen
+ display.
+ The terms 'Xinerama' and 'PanoramiX' are generally interchangeable;
+ this package used to be named x11proto-panoramix-dev.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org xineramaproto proto module.

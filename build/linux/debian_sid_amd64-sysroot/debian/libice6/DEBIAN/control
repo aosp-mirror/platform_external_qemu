@@ -1,0 +1,19 @@
+Package: libice6
+Source: libice
+Version: 2:1.0.9-2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 134
+Depends: libbsd0 (>= 0.2.0), libc6 (>= 2.14), x11-common
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: X11 Inter-Client Exchange library
+ This package provides the main interface to the X11 Inter-Client Exchange
+ library, which allows for communication of data between X clients.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This module can be found at
+ git://anongit.freedesktop.org/git/xorg/lib/libICE

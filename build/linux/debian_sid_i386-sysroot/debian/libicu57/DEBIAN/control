@@ -1,0 +1,15 @@
+Package: libicu57
+Source: icu
+Version: 57.1-8
+Architecture: i386
+Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Installed-Size: 30173
+Depends: libc6 (>= 2.7), libgcc1 (>= 1:7), libstdc++6 (>= 5.2)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.icu-project.org
+Description: International Components for Unicode
+ ICU is a C++ and C library that provides robust and full-featured
+ Unicode and locale support.  This package contains the runtime
+ libraries for ICU.

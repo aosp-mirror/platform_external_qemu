@@ -1,0 +1,2 @@
+libharfbuzz 0 libharfbuzz0b (>= 1.7.2)
+udeb: libharfbuzz 0 libharfbuzz0-udeb (>= 1.7.2)

@@ -1,0 +1,16 @@
+Package: libappindicator-dev
+Source: libappindicator
+Version: 0.4.92-5
+Architecture: i386
+Maintainer: Debian QA Group <packages@qa.debian.org>
+Installed-Size: 132
+Depends: libdbusmenu-glib-dev (>= 0.1.8), libdbus-glib-1-dev (>= 0.76), libappindicator1 (= 0.4.92-5)
+Section: libdevel
+Priority: optional
+Homepage: https://launchpad.net/libappindicator
+Description: allow applications to export a menu into the panel -- development
+ A library to allow applications to export a menu into the panel.
+ Based on KSNI it also works in KDE and will fallback to generic Systray
+ support if none of those are available.
+ .
+ This package contains files that are needed to build applications.

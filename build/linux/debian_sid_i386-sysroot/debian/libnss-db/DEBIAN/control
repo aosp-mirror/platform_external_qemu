@@ -1,0 +1,16 @@
+Package: libnss-db
+Source: libnss-db (2.2.3pre1-6)
+Version: 2.2.3pre1-6+b4
+Architecture: i386
+Maintainer: Debian QA Group <packages@qa.debian.org>
+Installed-Size: 102
+Depends: libc6 (>> 2.26), libc6 (<< 2.27), libdb5.3, libselinux1 (>= 1.32)
+Section: admin
+Priority: standard
+Homepage: http://www.gnu.org/software/libc/
+Description: NSS module for using Berkeley Databases as a naming service
+ nss_db is a set of C library extensions which allow Berkeley Databases
+ to be used as a primary source of aliases, ethers, groups, hosts,
+ networks, protocol, users, RPCs, services, and shadow passwords (instead
+ of or in addition to using flat files or NIS). Install nss_db if your
+ flat name service files are too large and lookups are slow.

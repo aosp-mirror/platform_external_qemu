@@ -1,0 +1,29 @@
+Package: libre2-dev
+Source: re2
+Version: 20170101+dfsg-1
+Architecture: amd64
+Maintainer: Stefano Rivera <stefanor@debian.org>
+Installed-Size: 1277
+Depends: libre2-3 (= 20170101+dfsg-1)
+Breaks: libre2-0 (<< 0+hg40+dfsg-1~)
+Replaces: libre2-0 (<< 0+hg40+dfsg-1~)
+Built-Using: unicode-data (= 9.0-1)
+Section: libdevel
+Priority: optional
+Homepage: https://github.com/google/re2
+Description: efficient, principled regular expression library, development kit
+ RE2 is a fast, safe, thread-friendly alternative to backtracking regular
+ expression engines like those used in PCRE, Perl, and Python. It is a C++
+ library.
+ .
+ RE2 uses automata theory to guarantee that regular expression searches run in
+ time linear in the size of the input. RE2 implements memory limits, so that
+ searches can be constrained to a fixed amount of memory. RE2 is engineered to
+ use a small fixed C++ stack footprint no matter what inputs or regular
+ expressions it must process; thus RE2 is useful in multithreaded environments
+ where thread stacks cannot grow arbitrarily large.
+ .
+ On large inputs, RE2 is often much faster than backtracking engines; its use
+ of automata theory lets it apply optimizations that the others cannot.
+ .
+ This package contains the static library and header files used in development.

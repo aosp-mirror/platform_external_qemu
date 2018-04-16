@@ -1,0 +1,11 @@
+prefix=/usr
+includedir=/usr/include
+libdir=/usr/lib/i386-linux-gnu
+idsdir=/usr/share/misc
+
+Name: libpci
+Description: libpci
+Version: 3.5.2
+Libs: -L${libdir} -lpci
+Libs.private:   -lz -lresolv -ludev
+Cflags: -I${includedir}

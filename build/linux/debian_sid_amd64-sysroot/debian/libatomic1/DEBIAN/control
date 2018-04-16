@@ -1,0 +1,14 @@
+Package: libatomic1
+Source: gcc-8
+Version: 8-20180218-1
+Architecture: amd64
+Maintainer: Debian GCC Maintainers <debian-gcc@lists.debian.org>
+Installed-Size: 41
+Depends: gcc-8-base (= 8-20180218-1), libc6 (>= 2.14)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://gcc.gnu.org/
+Description: support library providing __atomic built-in functions
+ library providing __atomic built-in functions. When an atomic call cannot
+ be turned into lock-free instructions, GCC will make calls into this library.

@@ -1,0 +1,17 @@
+Package: libbsd0
+Source: libbsd
+Version: 0.8.7-1
+Architecture: amd64
+Maintainer: Guillem Jover <guillem@debian.org>
+Installed-Size: 170
+Depends: libc6 (>= 2.25)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://libbsd.freedesktop.org/
+Description: utility functions from BSD systems - shared library
+ This library provides some C functions such as strlcpy() that are commonly
+ available on BSD systems but not on others like GNU systems.
+ .
+ For a detailed list of the provided functions, please see the libbsd-dev
+ package description.

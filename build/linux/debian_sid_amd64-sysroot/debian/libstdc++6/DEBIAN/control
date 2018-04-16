@@ -1,0 +1,21 @@
+Package: libstdc++6
+Source: gcc-8
+Version: 8-20180218-1
+Architecture: amd64
+Maintainer: Debian GCC Maintainers <debian-gcc@lists.debian.org>
+Installed-Size: 2028
+Depends: gcc-8-base (= 8-20180218-1), libc6 (>= 2.18), libgcc1 (>= 1:4.2)
+Conflicts: scim (<< 1.4.2-1)
+Breaks: blockattack (<= 1.4.1+ds1-2.1+b2), boo (<= 0.9.5~git20110729.r1.202a430-2), c++-annotations (<= 10.2.0-1), clustalx (<= 2.1+lgpl-3), dff (<= 1.3.0+dfsg.1-4.1+b3), digikam-private-libs (<= 4:4.4.0-1.1+b2), emscripten (<= 1.22.1-1), ergo (<= 3.4.0-1), fceux (<= 2.2.2+dfsg0-1), fiona (<= 1.5.1-2), flush (<= 0.9.12-3.1), freeorion (<= 0.4.4+git20150327-2), fslview (<= 4.0.1-4), fwbuilder (<= 5.1.0-4), gcc-4.3 (<< 4.3.6-1), gcc-4.4 (<< 4.4.6-4), gcc-4.5 (<< 4.5.3-2), gnote (<= 3.16.2-1), gnudatalanguage (<= 0.9.5-2+b2), innoextract (<= 1.4-1+b1), libantlr-dev (<= 2.7.7+dfsg-6), libapache2-mod-passenger (<= 5.0.7-1), libaqbanking34-plugins, libaqsis1 (<= 1.8.2-1), libassimp3 (<= 3.0~dfsg-4), libboost-date-time1.54.0, libboost-date-time1.55.0, libchemps2-1 (<= 1.5-1), libcpprest2.4 (<= 2.4.0-2), libdap17 (<= 3.14.0-2), libdapclient6 (<= 3.14.0-2), libdapserver7 (<= 3.14.0-2), libdavix0 (<= 0.4.0-1+b1), libdballe6 (<= 6.8-1), libdiet-admin2.8 (<= 2.8.0-1+b3), libdiet-client2.8 (<= 2.8.0-1+b3), libdiet-sed2.8 (<= 2.8.0-1+b3), libfreefem++ (<= 3.37.1-1), libgazebo5 (<= 5.0.1+dfsg-2.1), libgetfem4++ (<= 4.2.1~beta1~svn4635~dfsg-3+b1), libgmsh2 (<= 2.9.3+dfsg1-1), libinsighttoolkit4.7 (<= 4.7.2-2), libkolabxml1 (<= 1.1.0-3), libktoblzcheck1c2a, liblhapdf0, libmarisa0 (<= 0.2.4-8), libogre-1.8.0 (<= 1.8.0+dfsg1-7+b1), libogre-1.9.0 (<= 1.9.0+dfsg1-4), libopenwalnut1 (<= 1.4.0~rc1+hg3a3147463ee2-1+b1), libpqxx-4.0 (<= 4.0.1+dfsg-3), libpythia8, libreoffice-core (<= 1:4.4.5-2), librime1 (<= 1.2+dfsg-2), libwibble-dev (<= 1.1-1), libwreport2 (<= 2.14-1), libxapian30 (<= 1.4.1-1~bpo8+1), libxmltooling6 (<= 1.5.3-2.1), lightspark (<= 0.7.2+git20150512-2+b1), mira-assembler (<= 4.9.5-1), mongodb (<= 1:2.4.14-2), mongodb-server (<= 1:2.4.14-2), ncbi-blast+ (<= 2.2.30-4), openscad (<= 2014.03+dfsg-1+b1), passepartout (<= 0.7.1-1.1), pdf2djvu (<= 0.7.21-2), photoprint (<= 0.4.2~pre2-2.3+b2), plastimatch (<= 1.6.2+dfsg-1), plee-the-bear (<= 0.6.0-3.1), povray (<= 1:3.7.0.0-8), powertop (<= 2.6.1-1), printer-driver-brlaser (<= 3-3), psi4 (<= 4.0~beta5+dfsg-2+b1), python-fiona (<= 1.5.1-2), python-guiqwt (<= 2.3.1-1), python-healpy (<= 1.8.1-1+b1), python-htseq (<= 0.5.4p3-2), python-imposm (<= 2.5.0-3+b2), python-pysph (<= 0~20150606.gitfa26de9-5), python-rasterio (<= 0.24.0-1), python-scipy (<= 0.14.1-1), python-sfml (<= 2.2~git20150611.196c88+dfsg-1+b1), python3-fiona (<= 1.5.1-2), python3-scipy (<= 0.14.1-1), python3-sfml (<= 2.2~git20150611.196c88+dfsg-1+b1), python3-taglib (<= 0.3.6+dfsg-2+b2), realtimebattle (<= 1.0.8-14), ruby-passenger (<= 5.0.7-1), schroot (<= 1.6.10-1+b1), sqlitebrowser (<= 3.5.1-3), tecnoballz (<= 0.93.1-6), wesnoth-1.12-core (<= 1:1.12.4-1), widelands (<= 1:18-3+b1), xflr5 (<= 6.09.06-2)
+Replaces: libstdc++6-8-dbg (<< 4.9.0-3)
+Section: libs
+Priority: important
+Multi-Arch: same
+Homepage: http://gcc.gnu.org/
+Description: GNU Standard C++ Library v3
+ This package contains an additional runtime library for C++ programs
+ built with the GNU compiler.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.

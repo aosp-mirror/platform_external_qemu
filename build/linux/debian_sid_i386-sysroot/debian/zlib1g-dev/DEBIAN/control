@@ -1,0 +1,17 @@
+Package: zlib1g-dev
+Source: zlib
+Version: 1:1.2.8.dfsg-5
+Architecture: i386
+Maintainer: Mark Brown <broonie@debian.org>
+Installed-Size: 406
+Depends: zlib1g (= 1:1.2.8.dfsg-5), libc6-dev | libc-dev
+Conflicts: zlib1-dev
+Provides: libz-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://zlib.net/
+Description: compression library - development
+ zlib is a library implementing the deflate compression method found
+ in gzip and PKZIP.  This package includes the development support
+ files.

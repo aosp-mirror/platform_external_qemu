@@ -1,0 +1,19 @@
+Package: x11proto-fixes-dev
+Source: x11proto-fixes
+Version: 1:5.0-2
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 92
+Depends: x11proto-core-dev, x11proto-xext-dev (>= 7.0.99.1)
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 Fixes extension wire protocol
+ This package provides development headers describing the wire protocol
+ for the Fixes extension, which contains a few small extensions to the
+ X protocol, including a Region type.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org fixesproto proto module.

@@ -1,0 +1,21 @@
+Package: libstdc++-6-dev
+Source: gcc-6
+Version: 6.4.0-12
+Architecture: i386
+Maintainer: Debian GCC Maintainers <debian-gcc@lists.debian.org>
+Installed-Size: 13950
+Depends: gcc-6-base (= 6.4.0-12), libgcc-6-dev (= 6.4.0-12), libstdc++6 (>= 6.4.0-12), libc6-dev (>= 2.13-5)
+Suggests: libstdc++-6-doc
+Conflicts: libg++2.8-dev, libg++27-dev, libg++272-dev (<< 2.7.2.8-1), libstdc++2.10-dev (<< 1:2.95.3-2), libstdc++2.8-dev, libstdc++2.9-dev, libstdc++2.9-glibc2.1-dev, libstdc++3.0-dev
+Provides: libstdc++-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://gcc.gnu.org/
+Description: GNU Standard C++ Library v3 (development files)
+ This package contains the headers and static library files necessary for
+ building C++ programs which use libstdc++.
+ .
+ libstdc++-v3 is a complete rewrite from the previous libstdc++-v2, which
+ was included up to g++-2.95. The first version of libstdc++-v3 appeared
+ in g++-3.0.

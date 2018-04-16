@@ -1,0 +1,6 @@
+3e6273b9a4f61d5f69ebca03e6e69b5a  usr/lib/x86_64-linux-gnu/libdb-5.3.so
+cca750b0f82a256b193367ac0423fa56  usr/share/doc/libdb5.3/build_signature_amd64.txt
+2dffcd5039ef60eb9cec91b90ff0bdcc  usr/share/doc/libdb5.3/changelog.Debian.amd64.gz
+0e19b8bd2e920959b8328701c3247fba  usr/share/doc/libdb5.3/changelog.Debian.gz
+73e00aa8871093e6d4f0e03a47d384ea  usr/share/doc/libdb5.3/copyright
+6476eb780800b7b1b04948f3d4427083  usr/share/lintian/overrides/libdb5.3

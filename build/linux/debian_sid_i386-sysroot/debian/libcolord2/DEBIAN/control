@@ -1,0 +1,21 @@
+Package: libcolord2
+Source: colord
+Version: 1.3.3-2
+Architecture: i386
+Maintainer: Christopher James Halse Rogers <raof@ubuntu.com>
+Installed-Size: 552
+Depends: libc6 (>= 2.4), libglib2.0-0 (>= 2.37.3), liblcms2-2 (>= 2.6), libudev1 (>= 196)
+Suggests: colord
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.freedesktop.org/software/colord/
+Description: system service to manage device colour profiles -- runtime
+ colord is a system service that makes it easy to manage, install and generate
+ colour profiles to accurately colour manage input and output devices.
+ .
+ It provides a D-Bus API for system frameworks to query, a persistent data
+ store, and a mechanism for session applications to set system policy.
+ .
+ This package contains a gobject-based convenience library for programs to
+ interact with the colord system daemon.

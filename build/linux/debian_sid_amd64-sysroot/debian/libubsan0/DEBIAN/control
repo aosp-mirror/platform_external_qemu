@@ -1,0 +1,15 @@
+Package: libubsan0
+Source: gcc-7
+Version: 7.3.0-5
+Architecture: amd64
+Maintainer: Debian GCC Maintainers <debian-gcc@lists.debian.org>
+Installed-Size: 333
+Depends: gcc-7-base (= 7.3.0-5), libc6 (>= 2.2.5), libgcc1, libstdc++6
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://gcc.gnu.org/
+Description: UBSan -- undefined behaviour sanitizer (runtime)
+ UndefinedBehaviorSanitizer can be enabled via -fsanitize=undefined.
+ Various computations will be instrumented to detect undefined behavior
+ at runtime. Available for C and C++.

@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu/mit-krb5
+includedir=${prefix}/include/mit-krb5
+
+Name: mit-krb5-gssapi
+Description: Kerberos implementation of the GSSAPI
+Version: 1.16
+Requires.private: mit-krb5
+Cflags: -isystem ${includedir}
+Libs: -L${libdir} -lgssapi_krb5

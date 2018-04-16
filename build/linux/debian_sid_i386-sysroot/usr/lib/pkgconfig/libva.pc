@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/i386-linux-gnu
+includedir=${prefix}/include
+driverdir=${prefix}/lib/i386-linux-gnu/dri
+libva_version=2.0.0
+
+Name: libva
+Description: Userspace Video Acceleration (VA) core interface
+Version: 1.0.0
+Libs: -L${libdir} -lva
+Cflags: -I${includedir}

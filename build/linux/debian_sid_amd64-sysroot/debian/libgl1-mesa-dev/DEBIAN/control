@@ -1,0 +1,24 @@
+Package: libgl1-mesa-dev
+Source: mesa
+Version: 17.3.5-1
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 60
+Depends: mesa-common-dev (= 17.3.5-1), libglvnd-dev, libdrm-dev (>= 2.4.85), libx11-dev, libx11-xcb-dev, libxcb-dri3-dev, libxcb-present-dev, libxcb-sync-dev, libxshmfence-dev, libxcb-dri2-0-dev, libxcb-glx0-dev, libxdamage-dev, libxext-dev, libxfixes-dev, libxxf86vm-dev, x11proto-dri2-dev (>= 2.6), x11proto-gl-dev (>= 1.4.14)
+Conflicts: libgl-dev
+Replaces: libgl-dev
+Provides: libgl-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://mesa3d.org/
+Description: free implementation of the OpenGL API -- GLX development files
+ This version of Mesa provides GLX and DRI capabilities: it is capable of
+ both direct and indirect rendering.  For direct rendering, it can use DRI
+ modules from the libgl1-mesa-dri package to accelerate drawing.
+ .
+ This package includes headers and static libraries for compiling
+ programs with Mesa.
+ .
+ For a complete description of Mesa, please look at the libglx-mesa0
+ package.

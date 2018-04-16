@@ -1,0 +1,4 @@
+libcrypto 1.1 libssl1.1 (>= 1.1.0g)
+libssl 1.1 libssl1.1 (>= 1.1.0g)
+udeb: libcrypto 1.1 libcrypto1.1-udeb (>= 1.1.0g)
+udeb: libssl 1.1 libssl1.1-udeb (>= 1.1.0g)

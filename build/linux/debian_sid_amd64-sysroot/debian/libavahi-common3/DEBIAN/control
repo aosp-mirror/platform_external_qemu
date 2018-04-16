@@ -1,0 +1,20 @@
+Package: libavahi-common3
+Source: avahi
+Version: 0.7-3.1
+Architecture: amd64
+Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
+Installed-Size: 106
+Depends: libc6 (>= 2.14), libavahi-common-data
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://avahi.org/
+Description: Avahi common library
+ Avahi is a fully LGPL framework for Multicast DNS Service Discovery.
+ It allows programs to publish and discover services and hosts
+ running on a local network with no specific configuration. For
+ example you can plug into a network and instantly find printers to
+ print to, files to look at and people to talk to.
+ .
+ This package contains the Avahi common library, which is a set of common
+ functions used by many of Avahis components and client applications.

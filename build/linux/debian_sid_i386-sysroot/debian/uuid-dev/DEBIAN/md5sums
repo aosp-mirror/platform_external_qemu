@@ -1,0 +1,15 @@
+ed9e98b98b54deb2302063e329cdabaf  usr/include/uuid/uuid.h
+542ebd8ee6ffc095a14332e2f7712e8f  usr/lib/i386-linux-gnu/libuuid.a
+6cd9949ad2896e1c1e58fbafc0006ab0  usr/lib/i386-linux-gnu/pkgconfig/uuid.pc
+e952753f652bffb292e44ab45e29ba0b  usr/share/doc/uuid-dev/changelog.Debian.gz
+008b36824fcebc70316c18acb507d958  usr/share/doc/uuid-dev/changelog.gz
+bb44d726cc7e859bb8769ae21807f86b  usr/share/doc/uuid-dev/copyright
+d198361681403e380091261996ec83aa  usr/share/man/man3/uuid.3.gz
+2fbaa4844e127217f5e447c7a88bacb2  usr/share/man/man3/uuid_clear.3.gz
+8d0dae5ab7c5812fbea250d6fa404dd8  usr/share/man/man3/uuid_compare.3.gz
+ecc250ee3bfe528df4f4c99b69d7bb9e  usr/share/man/man3/uuid_copy.3.gz
+a1d6ad0349a4bbd81b25d8f52c97b184  usr/share/man/man3/uuid_generate.3.gz
+6af9b8a10baed34ea68206ce861b35bc  usr/share/man/man3/uuid_is_null.3.gz
+809f409db07a700d3a7f921b5864988e  usr/share/man/man3/uuid_parse.3.gz
+bf70f32b50567a89364b1f7e879681a3  usr/share/man/man3/uuid_time.3.gz
+c1d13efd3e06c7c6e14f4776ae6b0553  usr/share/man/man3/uuid_unparse.3.gz

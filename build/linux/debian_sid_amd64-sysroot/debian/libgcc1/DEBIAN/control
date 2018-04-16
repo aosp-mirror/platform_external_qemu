@@ -1,0 +1,16 @@
+Package: libgcc1
+Source: gcc-8 (8-20180218-1)
+Version: 1:8-20180218-1
+Architecture: amd64
+Maintainer: Debian GCC Maintainers <debian-gcc@lists.debian.org>
+Installed-Size: 112
+Depends: gcc-8-base (= 8-20180218-1), libc6 (>= 2.14)
+Breaks: gcc-4.3 (<< 4.3.6-1), gcc-4.4 (<< 4.4.6-4), gcc-4.5 (<< 4.5.3-2)
+Section: libs
+Priority: required
+Multi-Arch: same
+Homepage: http://gcc.gnu.org/
+Description: GCC support library
+ Shared version of the support library, a library of internal subroutines
+ that GCC uses to overcome shortcomings of particular machines, or
+ special needs for some languages.

@@ -1,0 +1,28 @@
+Package: libcairo2
+Source: cairo
+Version: 1.15.10-1
+Architecture: amd64
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 1374
+Depends: libc6 (>= 2.14), libfontconfig1 (>= 2.12), libfreetype6 (>= 2.7.1), libpixman-1-0 (>= 0.30.0), libpng16-16 (>= 1.6.2-1), libx11-6, libxcb-render0, libxcb-shm0, libxcb1 (>= 1.6), libxext6, libxrender1, zlib1g (>= 1:1.1.4)
+Breaks: libwebkit2gtk-3.0-25 (<< 2.4.5-2~), libwebkitgtk-1.0-0 (<< 2.4.5-2~), libwebkitgtk-3.0-0 (<< 2.4.5-2~), weston (<< 1.5.0-3~)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://cairographics.org/
+Description: Cairo 2D vector graphics library
+ Cairo is a multi-platform library providing anti-aliased
+ vector-based rendering for multiple target backends. Paths consist
+ of line segments and cubic splines and can be rendered at any width
+ with various join and cap styles. All colors may be specified with
+ optional translucence (opacity/alpha) and combined using the
+ extended Porter/Duff compositing algebra as found in the X Render
+ Extension.
+ .
+ Cairo exports a stateful rendering API similar in spirit to the path
+ construction, text, and painting operators of PostScript, (with the
+ significant addition of translucence in the imaging model). When
+ complete, the API is intended to support the complete imaging model of
+ PDF 1.4.
+ .
+ This package contains the shared libraries.

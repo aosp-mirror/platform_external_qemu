@@ -1,0 +1,20 @@
+Package: libpam0g-dev
+Source: pam
+Version: 1.1.8-3.7
+Architecture: i386
+Maintainer: Steve Langasek <vorlon@debian.org>
+Installed-Size: 378
+Depends: libpam0g (= 1.1.8-3.7), libc6-dev | libc-dev
+Provides: libpam-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.linux-pam.org/
+Description: Development files for PAM
+ Contains C header files and development libraries for libpam, the Pluggable
+ Authentication Modules, a library that enables the local system
+ administrator to choose how applications authenticate users.
+ .
+ PAM decouples applications from the authentication mechanism, making it
+ possible to upgrade the authentication system without recompiling or
+ rewriting the applications.

@@ -1,0 +1,21 @@
+Package: libgtk-3-0
+Source: gtk+3.0
+Version: 3.22.28-1
+Architecture: amd64
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 12733
+Depends: libgtk-3-common (>= 3.22.28-1), libatk-bridge2.0-0 (>= 2.5.3), libatk1.0-0 (>= 2.15.1), libc6 (>= 2.14), libcairo-gobject2 (>= 1.10.0), libcairo2 (>= 1.14.0), libcolord2 (>= 0.1.29), libcups2 (>= 1.6.0), libepoxy0 (>= 1.0), libfontconfig1 (>= 2.12), libfreetype6 (>= 2.2.1), libgdk-pixbuf2.0-0 (>= 2.30.1), libglib2.0-0 (>= 2.51.2), libjson-glib-1.0-0 (>= 0.12.0), libpango-1.0-0 (>= 1.40.5), libpangocairo-1.0-0 (>= 1.40.5), libpangoft2-1.0-0 (>= 1.40.5), librest-0.7-0 (>= 0.7), libsoup2.4-1 (>= 2.4.0), libwayland-client0 (>= 1.9.91), libwayland-cursor0 (>= 1.9.91), libwayland-egl1-mesa (>= 10.0.2) | libwayland-egl1, libx11-6 (>= 2:1.4.99.1), libxcomposite1 (>= 1:0.3-1), libxcursor1 (>> 1.1.2), libxdamage1 (>= 1:1.1), libxext6, libxfixes3, libxi6 (>= 2:1.2.99.4), libxinerama1, libxkbcommon0 (>= 0.5.0), libxml2 (>= 2.6.27), libxrandr2 (>= 2:1.5.0), hicolor-icon-theme, adwaita-icon-theme, shared-mime-info
+Recommends: libgtk-3-bin
+Suggests: librsvg2-common, gvfs
+Provides: gtk3-binver-3.0.0
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.gtk.org/
+Description: GTK+ graphical user interface library
+ GTK+ is a multi-platform toolkit for creating graphical user
+ interfaces. Offering a complete set of widgets, GTK+ is suitable
+ for projects ranging from small one-off tools to complete application
+ suites.
+ .
+ This package contains the shared libraries.

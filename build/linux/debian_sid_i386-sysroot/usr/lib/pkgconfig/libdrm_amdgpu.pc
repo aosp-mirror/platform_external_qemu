@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/i386-linux-gnu
+includedir=${prefix}/include
+
+Name: libdrm_amdgpu
+Description: Userspace interface to kernel DRM services for amdgpu
+Version: 2.4.90
+Libs: -L${libdir} -ldrm_amdgpu
+Cflags: -I${includedir} -I${includedir}/libdrm
+Requires.private: libdrm

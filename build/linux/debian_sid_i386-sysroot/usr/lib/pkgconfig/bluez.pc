@@ -1,0 +1,10 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/i386-linux-gnu
+includedir=${prefix}/include
+ 
+Name: BlueZ
+Description: Bluetooth protocol stack for Linux
+Version: 5.47
+Libs: -L${libdir} -lbluetooth
+Cflags: -I${includedir}

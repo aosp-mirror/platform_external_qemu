@@ -1,0 +1,141 @@
+#!/bin/sh
+#
+# CUPS configuration utility.
+#
+# Copyright 2007-2016 by Apple Inc.
+# Copyright 2001-2006 by Easy Software Products, all rights reserved.
+#
+# These coded instructions, statements, and computer programs are the
+# property of Apple Inc. and are protected by Federal copyright
+# law.  Distribution and use rights are outlined in the file "LICENSE.txt"
+# which should have been included with this file.  If this file is
+# file is missing or damaged, see the license at "http://www.cups.org/".
+#
+
+VERSION="2.2.6"
+APIVERSION="2.2"
+BUILD="cups-2.2.6"
+
+prefix=/usr
+exec_prefix=/usr
+bindir=/usr/bin
+includedir=${prefix}/include
+libdir=${prefix}/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+imagelibdir=${prefix}/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+datarootdir=/usr/share
+datadir=/usr/share
+sysconfdir=/etc
+cups_datadir=/usr/share/cups
+cups_serverbin=/usr/lib/cups
+cups_serverroot=/etc/cups
+INSTALLSTATIC=installstatic
+
+# flags for C++ compiler:
+CFLAGS=""
+LDFLAGS=""
+LIBGSSAPI=`[ ! -x /usr/bin/krb5-config ] || /usr/bin/krb5-config --libs`
+LIBS="$LIBGSSAPI -lgnutls -lz -lpthread -lm -lcrypt   -lz"
+
+# Check for local invocation...
+selfdir=`dirname $0`
+
+if test -f "$selfdir/cups/cups.h"; then
+    CFLAGS="-I$selfdir"
+    LDFLAGS="-L$selfdir/cups -L$selfdir/filter $LDFLAGS"
+    libdir="$selfdir/cups"
+    imagelibdir="$selfdir/filter"
+else
+    if test $includedir != /usr/include; then
+	CFLAGS="$CFLAGS -I$includedir"
+    fi
+
+    if test $libdir != /usr/lib -a $libdir != /usr/lib32 -a $libdir != /usr/lib64 -a $libdir != /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH); then
+	LDFLAGS="$LDFLAGS -L$libdir"
+    fi
+fi
+
+
+usage ()
+{
+    echo "Usage: cups-config --api-version"
+    echo "       cups-config --build"
+    echo "       cups-config --cflags"
+    echo "       cups-config --datadir"
+    echo "       cups-config --help"
+    echo "       cups-config --ldflags"
+    echo "       cups-config [--image] [--static] --libs"
+    echo "       cups-config --serverbin"
+    echo "       cups-config --serverroot"
+    echo "       cups-config --version"
+
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+# Parse command line options
+static=no
+image=no
+
+while test $# -gt 0; do
+    case $1 in
+	--api-version)
+	    echo $APIVERSION
+	    ;;
+	--build)
+	    echo $BUILD
+	    ;;
+	--cflags)
+	    echo $CFLAGS
+	    ;;
+	--datadir)
+	    echo $cups_datadir
+	    ;;
+	--help)
+	    usage 0
+	    ;;
+	--image)
+	    image=yes
+	    ;;
+	--ldflags)
+	    echo $LDFLAGS
+	    ;;
+	--libs)
+	    if test $static = no; then
+	        libs="-lcups";
+ 	        if test $image = yes; then
+ 	            libs="-lcupsimage $libs"
+		fi
+	    else
+	        libs="$libdir/libcups.a $LIBS";
+ 	        if test $image = yes; then
+ 	            libs="$libdir/libcupsimage.a $libs"
+		fi
+	    fi
+	    echo $libs
+	    ;;
+	--serverbin)
+	    echo $cups_serverbin
+	    ;;
+	--serverroot)
+	    echo $cups_serverroot
+	    ;;
+	--static)
+	    if test -z "$INSTALLSTATIC"; then
+	        echo "WARNING: Static libraries not installed!" >&2
+	    else
+	        static=yes
+	    fi
+	    ;;
+	--version)
+	    echo $VERSION
+	    ;;
+	*)
+	    usage 1
+	    ;;
+    esac
+
+    shift
+done

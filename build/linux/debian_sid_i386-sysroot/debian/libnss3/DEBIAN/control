@@ -1,0 +1,17 @@
+Package: libnss3
+Source: nss
+Version: 2:3.35-2
+Architecture: i386
+Maintainer: Maintainers of Mozilla-related packages <pkg-mozilla-maintainers@lists.alioth.debian.org>
+Installed-Size: 3829
+Depends: libc6 (>= 2.4), libnspr4 (>= 2:4.12), libsqlite3-0 (>= 3.5.9)
+Conflicts: libnss3-1d (<< 2:3.13.4-2)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.mozilla.org/projects/security/pki/nss/
+Description: Network Security Service libraries
+ This is a set of libraries designed to support cross-platform development
+ of security-enabled client and server applications. It can support SSLv2
+ and  v4, TLS, PKCS #5, #7, #11, #12, S/MIME, X.509 v3 certificates and
+ other security standards.

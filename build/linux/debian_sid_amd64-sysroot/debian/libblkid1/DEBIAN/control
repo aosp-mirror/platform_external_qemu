@@ -1,0 +1,15 @@
+Package: libblkid1
+Source: util-linux
+Version: 2.31.1-0.4
+Architecture: amd64
+Maintainer: LaMont Jones <lamont@debian.org>
+Installed-Size: 397
+Depends: libc6 (>= 2.25), libuuid1 (>= 2.16)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: block device ID library
+ The blkid library allows system programs such as fsck and mount to
+ quickly and easily find block devices by filesystem UUID or label.
+ This allows system administrators to avoid specifying filesystems by
+ hard-coded device names and use a logical naming system instead.

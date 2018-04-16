@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+
+IMMODULES_DIR=/usr/lib/x86_64-linux-gnu/gtk-2.0/2.10.0/immodules
+IMMODULES_DIR_OLD=/usr/lib/gtk-2.0/2.10.0/immodules
+
+if [ "$1" = triggered ]; then
+    # This is triggered everytime an application installs a
+    # GTK immodule loader
+    /usr/lib/x86_64-linux-gnu/libgtk2.0-0/gtk-query-immodules-2.0 --update-cache || true
+    exit 0
+fi
+
+
+
+# Also handle the initial installation
+if [ -d $IMMODULES_DIR ] || [ -d $IMMODULES_DIR_OLD ]; then
+     /usr/lib/x86_64-linux-gnu/libgtk2.0-0/gtk-query-immodules-2.0 --update-cache || true
+fi
+

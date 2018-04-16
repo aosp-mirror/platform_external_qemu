@@ -1,0 +1,19 @@
+Package: libxslt1-dev
+Source: libxslt
+Version: 1.1.29-5
+Architecture: i386
+Maintainer: Debian XML/SGML Group <debian-xml-sgml-pkgs@lists.alioth.debian.org>
+Installed-Size: 2335
+Depends: libxml2-dev (>= 2.6.26), libxslt1.1 (= 1.1.29-5)
+Provides: libxslt-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://xmlsoft.org/xslt/
+Description: XSLT 1.0 processing library - development kit
+ XSLT is an XML language for defining transformations of XML files from
+ XML to some other arbitrary format, such as XML, HTML, plain text, etc.
+ using standard XSLT stylesheets. libxslt is a C library which
+ implements XSLT version 1.0.
+ .
+ This package contains the development files for libxslt.

@@ -1,0 +1,17 @@
+Package: libexpat1
+Source: expat
+Version: 2.2.5-3
+Architecture: i386
+Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Installed-Size: 429
+Depends: libc6 (>= 2.25)
+Conflicts: wink (<= 1.5.1060-4)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://libexpat.github.io/
+Description: XML parsing C library - runtime library
+ This package contains the runtime, shared library of expat, the C
+ library for parsing XML. Expat is a stream-oriented parser in
+ which an application registers handlers for things the parser
+ might find in the XML document (like start tags).

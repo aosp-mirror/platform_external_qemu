@@ -1,0 +1,18 @@
+Package: libasound2
+Source: alsa-lib
+Version: 1.1.3-5
+Architecture: i386
+Maintainer: Debian ALSA Maintainers <pkg-alsa-devel@lists.alioth.debian.org>
+Installed-Size: 1390
+Depends: libasound2-data (>= 1.1.3-5), libc6 (>= 2.16)
+Suggests: libasound2-plugins (>= 1.0.24)
+Breaks: bluez-alsa (<= 4.94-2), libasound2-plugin-equal (<= 0.6-1), libasound2-plugins (<< 1.0.24)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.alsa-project.org/
+Description: shared library for ALSA applications
+ This package contains the ALSA library and its standard plugins, as well
+ as the required configuration files.
+ .
+ ALSA is the Advanced Linux Sound Architecture.

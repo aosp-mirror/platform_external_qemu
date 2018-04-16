@@ -1,0 +1,6 @@
+5f0a1486588e9bb8ba20b186b07b503a  usr/include/X11/extensions/render.h
+c83b68e2ede0cbde949b32ddbfdea228  usr/include/X11/extensions/renderproto.h
+dfc42c10b4c52f75394356d796c6950a  usr/share/doc/x11proto-render-dev/changelog.Debian.gz
+7942bd96a6c4629edcd927c995e19c09  usr/share/doc/x11proto-render-dev/copyright
+f1d4fb57ce1c583cbc0e4be9b194e34b  usr/share/doc/x11proto-render-dev/renderproto.txt.gz
+9d0c45d675be26694ac7e47bc080d90c  usr/share/pkgconfig/renderproto.pc

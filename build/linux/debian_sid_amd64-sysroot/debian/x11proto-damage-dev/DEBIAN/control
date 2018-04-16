@@ -1,0 +1,19 @@
+Package: x11proto-damage-dev
+Source: x11proto-damage
+Version: 1:1.2.1-2
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 68
+Depends: x11proto-fixes-dev, x11proto-core-dev
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 Damage extension wire protocol
+ This package provides development headers describing the wire protocol
+ for the Damage extension, used to notify clients of changes made to
+ particular areas.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org damageproto proto module.

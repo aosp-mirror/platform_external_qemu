@@ -1,0 +1,4 @@
+# Generated from 'DEPS'
+checkout_libaom = true
+checkout_nacl = true
+checkout_oculus_sdk = false

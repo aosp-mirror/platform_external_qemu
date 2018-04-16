@@ -1,0 +1,43 @@
+Package: libfreetype6
+Source: freetype
+Version: 2.8.1-2
+Architecture: amd64
+Maintainer: Steve Langasek <vorlon@debian.org>
+Installed-Size: 920
+Depends: libc6 (>= 2.14), libpng16-16 (>= 1.6.2-1), zlib1g (>= 1:1.1.4)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.freetype.org
+Description: FreeType 2 font engine, shared library files
+ The FreeType project is a team of volunteers who develop free,
+ portable and high-quality software solutions for digital typography.
+ They specifically target embedded systems and focus on bringing small,
+ efficient and ubiquitous products.
+ .
+ The FreeType 2 library is their new software font engine.  It has been
+ designed to provide the following important features:
+  * A universal and simple API to manage font files
+  * Support for several font formats through loadable modules
+  * High-quality anti-aliasing
+  * High portability & performance
+ .
+ Supported font formats include:
+  * TrueType files (.ttf) and collections (.ttc)
+  * Type 1 font files both in ASCII (.pfa) or binary (.pfb) format
+  * Type 1 Multiple Master fonts.  The FreeType 2 API also provides
+    routines to manage design instances easily
+  * Type 1 CID-keyed fonts
+  * OpenType/CFF (.otf) fonts
+  * CFF/Type 2 fonts
+  * Adobe CEF fonts (.cef), used to embed fonts in SVG documents with
+    the Adobe SVG viewer plugin.
+  * Windows FNT/FON bitmap fonts
+ .
+ This package contains the files needed to run programs that use the
+ FreeType 2 library.
+ .
+  Home Page: http://www.freetype.org/
+  Authors: David Turner   <david.turner@freetype.org>
+           Robert Wilhelm <robert.wilhelm@freetype.org>
+           Werner Lemberg <werner.lemberg@freetype.org>

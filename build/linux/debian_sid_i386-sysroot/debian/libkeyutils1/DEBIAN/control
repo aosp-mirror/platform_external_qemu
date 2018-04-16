@@ -1,0 +1,19 @@
+Package: libkeyutils1
+Source: keyutils
+Version: 1.5.9-9.2
+Architecture: i386
+Maintainer: Christian Kastner <ckk@debian.org>
+Installed-Size: 36
+Depends: libc6 (>= 2.7)
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://people.redhat.com/~dhowells/keyutils/
+Description: Linux Key Management Utilities (library)
+ Keyutils is a set of utilities for managing the key retention facility in the
+ kernel, which can be used by filesystems, block devices and more to gain and
+ retain the authorization and encryption keys required to perform secure
+ operations.
+ .
+ This package provides a wrapper library for the key management facility system
+ calls.

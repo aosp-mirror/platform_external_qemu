@@ -1,0 +1,3 @@
+libva-drm.so.2 libva-drm2 #MINVER#
+* Build-Depends-Package: libva-dev
+ vaGetDisplayDRM@Base 1.1.0

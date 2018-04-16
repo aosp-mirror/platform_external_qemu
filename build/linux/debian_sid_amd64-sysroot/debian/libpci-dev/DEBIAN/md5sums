@@ -1,0 +1,9 @@
+f1833c533d0596fd08c6837aa202df7d  usr/include/pci/config.h
+08c1f9a112e95d060acab2c33c4693ca  usr/include/pci/header.h
+36a8aa48bf5b9e1baf1f1df141767057  usr/include/pci/pci.h
+ccf2fc7d68c9218c02bc75514ec4f8c3  usr/include/pci/types.h
+419089685870feabd5396fd4a6438667  usr/lib/x86_64-linux-gnu/libpci.a
+8cbbdde67935f1c8aa04e57c15e11ee4  usr/lib/x86_64-linux-gnu/pkgconfig/libpci.pc
+1dead8086ef1004f9082bcf35fba3480  usr/share/doc/libpci-dev/changelog.Debian.gz
+a14e83167ecac8a1ace83e9cb10e9a2d  usr/share/doc/libpci-dev/changelog.gz
+5454957f5e60536a67a4d2913e81f2fa  usr/share/doc/libpci-dev/copyright

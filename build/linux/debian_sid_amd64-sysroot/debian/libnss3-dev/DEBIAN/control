@@ -1,0 +1,19 @@
+Package: libnss3-dev
+Source: nss
+Version: 2:3.35-2
+Architecture: amd64
+Maintainer: Maintainers of Mozilla-related packages <pkg-mozilla-maintainers@lists.alioth.debian.org>
+Installed-Size: 1357
+Depends: libnss3 (= 2:3.35-2), libnspr4-dev (>= 4.6.6-1)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.mozilla.org/projects/security/pki/nss/
+Description: Development files for the Network Security Service libraries
+ This is a set of libraries designed to support cross-platform development
+ of security-enabled client and server applications. It can support SSLv2
+ and  v4, TLS, PKCS #5, #7, #11, #12, S/MIME, X.509 v3 certificates and
+ other security standards.
+ .
+ Install this package if you wish to develop your own programs using the
+ Network Security Service Libraries.

@@ -1,0 +1,15 @@
+Package: libxft2
+Source: xft (2.3.2-1)
+Version: 2.3.2-1+b2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 122
+Depends: libc6 (>= 2.14), libfontconfig1 (>= 2.11), libfreetype6 (>= 2.3.5), libx11-6, libxrender1
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: FreeType-based font drawing library for X
+ Xft provides a client-side font API for X applications, making the FreeType
+ font rasterizer available to X clients.  Fontconfig is used for font
+ specification resolution.  Where available, the RENDER extension handles
+ glyph drawing; otherwise, the core X protocol is used.

@@ -1,0 +1,25 @@
+Package: libsnappy-dev
+Source: snappy
+Version: 1.1.7-1
+Architecture: amd64
+Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Installed-Size: 105
+Depends: libsnappy1v5 (= 1.1.7-1)
+Section: libdevel
+Priority: extra
+Multi-Arch: same
+Homepage: https://github.com/google/snappy/
+Description: fast compression/decompression library (development files)
+ Snappy is a compression/decompression library. It does not aim for
+ maximum compression, or compatibility with any other compression
+ library; instead, it aims for very high speeds and reasonable
+ compression.
+ .
+ For instance, compared to the fastest mode of zlib, Snappy
+ is an order of magnitude faster for most inputs, but the resulting
+ compressed files are anywhere from 20% to 100% bigger. On a single core
+ of a Core i7 processor in 64-bit mode, Snappy compresses at about 250
+ MB/sec or more and decompresses at about 500 MB/sec or more.
+ .
+ This package contains the development files required to build programs
+ against Snappy.
