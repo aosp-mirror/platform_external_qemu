@@ -1,0 +1,31 @@
+static_library("libGLcommon") {
+  sources = [
+    "etc.cpp",
+    "FramebufferData.cpp",
+    "GLBackgroundLoader.cpp",
+    "GLDispatch.cpp",
+    "GLutils.cpp",
+    "GLEScontext.cpp",
+    "GLESvalidate.cpp",
+    "GLESpointer.cpp",
+    "GLESbuffer.cpp",
+    "NamedObject.cpp",
+    "ObjectData.cpp",
+    "ObjectNameSpace.cpp",
+    "PaletteTexture.cpp",
+    "RangeManip.cpp",
+    "SaveableTexture.cpp",
+    "ScopedGLState.cpp",
+    "ShareGroup.cpp",
+    "TextureData.cpp",
+    "TextureUtils.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "../include",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+}

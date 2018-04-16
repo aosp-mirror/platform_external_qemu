@@ -1,0 +1,21 @@
+import("//third_party/protobuf/proto_library.gni")
+
+#group("proto_lite") {
+#  public_deps = [
+#    ":proto",
+#    "//third_party/protobuf:protobuf_lite",
+#  ]
+#}
+
+group("proto_full") {
+  public_deps = [
+    ":proto",
+    "//third_party/protobuf:protobuf_full",
+  ]
+}
+
+proto_library("proto") {
+  sources = [
+    "crash_info.proto",
+  ]
+}

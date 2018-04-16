@@ -1,0 +1,87 @@
+import("//external/qemu/android/config.gni")
+
+shared_library("lib$BUILD_TARGET_SUFFIX" + "OpenglRender") {
+  sources = [
+    "ChannelStream.cpp",
+    "ColorBuffer.cpp",
+    "FbConfig.cpp",
+    "FenceSync.cpp",
+    "FrameBuffer.cpp",
+    "GLESVersionDetector.cpp",
+    "PostWorker.cpp",
+    "ReadbackWorker.cpp",
+    "ReadBuffer.cpp",
+    "RenderChannelImpl.cpp",
+    "RenderContext.cpp",
+    "RenderControl.cpp",
+    "RendererImpl.cpp",
+    "RenderLibImpl.cpp",
+    "RenderThread.cpp",
+    "RenderThreadInfo.cpp",
+    "render_api.cpp",
+    "RenderWindow.cpp",
+    "SyncThread.cpp",
+    "TextureDraw.cpp",
+    "TextureResize.cpp",
+    "WindowSurface.cpp",
+    "YUVConverter.cpp",
+  ]
+
+  output_dir = "$root_out_dir/lib64"
+
+  ldflags = [
+  ]
+
+  if (is_linux) {
+    sources += [
+      "NativeSubWindow_x11.cpp",
+    ]
+    ldflags += [
+      "-lX11",
+      "-lrt",
+    ]
+  }
+
+  if (is_mac) {
+    sources += [
+      "NativeSubWindow_cocoa.m",
+    ]
+    ldflags += [
+      "-Wl,-framework,AppKit",
+    ]
+  }
+
+  if (is_win) {
+    sources += [
+      "NativeSubWindow_win32.cpp",
+    ]
+    ldflags += [
+      "-lgdi32",
+    ]
+  }
+
+  include_dirs = [
+    ".",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/host/include/OpenGLESDispatch",
+    "//external/qemu/android/android-emugl/host/libs/Translator/include",
+    "//external/qemu/android/android-emugl//host/libs/Translator/GLES_V2",
+    "//external/qemu/android/android-emugl//host/libs/libOpenGLESDispatch",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+
+  deps = [
+    "//build/config:exe_and_shlib_deps",
+    "//build/win:default_exe_manifest",
+    "//external/qemu/android/android-emu:android-emu-base",
+    "//external/qemu/android/android-emugl/host/libs/GLESv1_dec:libGLESv1_dec",
+    "//external/qemu/android/android-emugl/host/libs/GLESv2_dec:libGLESv2_dec",
+    "//external/qemu/android/android-emugl/host/libs/renderControl_dec:lib_renderControl_dec",
+    "//external/qemu/android/android-emugl/host/libs/libOpenGLESDispatch:libOpenGLESDispatch",
+    "//external/qemu/android/android-emugl/host/libs/libGLSnapshot:libGLSnapshot",
+    "//external/qemu/android/android-emugl/host/libs/Translator/GLcommon:libGLcommon",
+    "//external/qemu/android/android-emugl/shared/emugl/common:libemugl_common",
+    "//external/qemu/android/android-emugl/shared/OpenglCodecCommon:libOpenglCodecCommon",
+  ]
+}
