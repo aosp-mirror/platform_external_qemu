@@ -1,0 +1,39 @@
+import("//external/qemu/android/config.gni")
+
+config("emulator-libselinux_config") {
+  include_dirs = [
+    "include",
+  ]
+
+  cflags = [
+    "-DHOST",
+  ]
+
+  if (is_mac) {
+    cflags += [
+      "-DDARWIN",
+    ]
+  }
+}
+
+static_library("emulator-libselinux") {
+  # This code doesn't not build on Windows, so create empty
+  # libraries on this platform, this simplifies the build
+  # configuration.
+  if (is_win) {
+    sources = [
+    ]
+  } else {
+    sources = [
+      "src/callbacks.c",
+      "src/check_context.c",
+      "src/freecon.c",
+      "src/init.c",
+      "src/label.c",
+      "src/label_file.c",
+      "src/label_android_property.c",
+    ]
+  }
+
+  public_configs = [ ":emulator-libselinux_config" ]
+}

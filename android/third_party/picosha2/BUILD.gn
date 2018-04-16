@@ -1,0 +1,7 @@
+import("//external/qemu/android/config.gni")
+
+config("emulator-picosha2_config") {
+  include_dirs = [
+    ".",
+  ]
+}
