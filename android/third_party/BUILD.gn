@@ -1,0 +1,299 @@
+import("//external/qemu/android/config.gni")
+
+# libANGLETranslation
+config("libANGLETranslation") {
+  libs = [
+    "translator_static",
+    "translator_lib",
+    "preprocessor",
+    "angle_common",
+  ]
+
+  lib_dirs = [
+    "$ANGLE_TRANSLATION_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib",
+  ]
+
+  include_dirs = [
+    "$ANGLE_TRANSLATION_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+}
+
+# libbluez
+config("libbluez") {
+  include_dirs = [
+    "$LIBBLUEZ_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+
+  ldflags = [
+    rebase_path("$LIBBLUEZ_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libbluetooth.a", root_build_dir),
+  ]
+}
+
+# libbreakpad_client
+config("libbreakpad_client") {
+  libs = [
+    "breakpad_client",
+  ]
+
+  lib_dirs = [
+    "$BREAKPAD_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib",
+  ]
+
+  include_dirs = [
+    "$BREAKPAD_PREBUILTS_DIR/$BUILD_TARGET_TAG/include/breakpad",
+  ]
+}
+
+# libbreakpad
+config("libbreakpad") {
+  libs = [
+    "breakpad",
+  ]
+
+  lib_dirs = [
+    "$BREAKPAD_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib",
+  ]
+
+  include_dirs = [
+    "$BREAKPAD_PREBUILTS_DIR/$BUILD_TARGET_TAG/include/breakpad",
+  ]
+}
+
+# libcurl
+config("libcurl") {
+  defines = [
+    "CURL_STATICLIB",
+  ]
+
+  ldflags = [
+    rebase_path("$LIBCURL_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libcurl.a", root_build_dir),
+  ]
+
+  if (is_win) {
+     ldflags += [
+      "-lcrypt32",
+      "-lgdi32",
+    ]
+  } else {
+    ldflags += [
+      "-ldl",
+    ]
+  }
+
+  include_dirs = [
+    "$LIBCURL_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+}
+
+# libcrypto
+config("libcrypto") {  
+  ldflags = [
+    rebase_path("$LIBCURL_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libssl.a", root_build_dir),
+  ]
+}
+
+# libssl
+config("libssl") {
+  ldflags = [
+    rebase_path("$LIBCURL_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libcrypto.a", root_build_dir),
+  ]
+}
+
+# libffmpeg
+config("libffmpeg") {
+  libs = [
+    "avformat",
+    "avfilter",
+    "avcodec",
+    "swresample",
+    "swscale",
+    "avutil",
+  ]
+
+  lib_dirs = [
+    "$FFMPEG_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib",
+  ]
+
+  include_dirs = [
+    "$FFMPEG_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+}
+
+# liblz4
+config("liblz4") {
+  include_dirs = [
+    "$LZ4_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+
+  ldflags = [
+    rebase_path("$LZ4_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/liblz4.a", root_build_dir),
+  ]
+}
+
+# libpng
+config("libpng") {
+  include_dirs = [
+    "$LIBPNG_PREBUILTS_DIR/$BUILD_TARGET_OS-x86_64/include",
+  ]
+
+  ldflags = [
+    rebase_path("$LIBPNG_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libpng.a", root_build_dir),
+  ]
+}
+
+# libprotobuf
+config("libprotobuf") {
+  libs = [
+    "protobuf",
+  ]
+
+  lib_dirs = [
+    "$PROTOBUF_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib",
+  ]
+
+  include_dirs = [
+    "$PROTOBUF_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+}
+
+# Qt5
+config("qt5") {
+  QT_TOP_DIR = "$QT_PREBUILTS_DIR/$BUILD_TARGET_TAG"
+# QT_TOP64_DIR = "$QT_PREBUILTS_DIR/$BUILD_TARGET_OS-x86_64"
+  QT_INCLUDE_DIR = "$QT_PREBUILTS_DIR/common/include"
+  QT_TARGET_INCLUDE_DIR = "$QT_TOP_DIR/include.system"
+
+  ldflags = [
+    "-lQt5Widgets",
+    "-lQt5Gui",
+    "-lQt5Core",
+    "-lQt5Svg",
+  ]
+
+  if (is_win) {
+    ldflags += [
+      "-lmingw32",
+      "$QT_TOP_DIR/lib/libqtmain.a",
+    ]
+  }
+
+  lib_dirs = [
+    "$QT_TOP_DIR/$BUILD_TARGET_TAG/lib",
+  ]
+
+  if (is_win) {
+    lib_dirs += [
+      "$QT_TOP_DIR/bin",
+    ]
+  } else {
+    lib_dirs += [
+      "$QT_TOP_DIR/lib",
+    ]
+  }
+
+  include_dirs = [
+    "$QT_TARGET_INCLUDE_DIR",
+    "$QT_TARGET_INCLUDE_DIR/QtCore",
+    "$QT_INCLUDE_DIR",
+    "$QT_INCLUDE_DIR/QtCore",
+    "$QT_INCLUDE_DIR/QtGui",
+    "$QT_INCLUDE_DIR/QtSvg",
+    "$QT_INCLUDE_DIR/QtWidgets",
+  ]
+}
+
+# libsdl2
+config("libsdl2") {
+  include_dirs = [
+    "$LIBSDL2_PREBUILTS_DIR/$BUILD_TARGET_OS/include",
+  ]
+
+  ldflags = [
+    rebase_path("$LIBSDL2_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libSDL2.a", root_build_dir),
+  ]
+}
+
+# libusb
+config("libusb") {
+  include_dirs = [
+    "$LIBUSB_PREBUILTS_DIR/$BUILD_TARGET_TAG/include/libusb-1.0",
+  ]
+
+  ldflags = [
+    rebase_path("$LIBUSB_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libusb-1.0.a", root_build_dir),
+  ]
+
+}
+
+# libuuid
+config("libuuid") {
+  include_dirs = [
+    "$LIBUUID_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+
+  ldflags = [
+    rebase_path("$LIBUUID_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libuuid.a", root_build_dir),
+  ]
+}
+
+# libvpx
+config("libvpx") {
+  include_dirs = [
+    "$LIBVPX_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+
+  ldflags = [
+    rebase_path("$LIBVPX_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libvpx.a", root_build_dir),
+  ]
+}
+
+# libx264
+config("libx264") {
+  include_dirs = [
+    "$X264_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+
+  ldflags = [
+    rebase_path("$X264_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libx264.a", root_build_dir),
+  ] 
+}
+
+# libxml2
+config("libxml2") {
+  defines = [
+    "LIBXML_STATIC",
+  ]
+
+  include_dirs = [
+    "$LIBXML2_PREBUILTS_DIR/$BUILD_TARGET_TAG/include",
+  ]
+
+  ldflags = [
+    rebase_path("$LIBXML2_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libxml2.a", root_build_dir),
+  ]
+}
+
+config("emulator-tinyobjloader_config") {
+  include_dirs = [
+    "//external/tinyobjloader",
+  ]
+}
+
+static_library("emulator-tinyobjloader") {
+  sources = [
+    "//external/tinyobjloader/tiny_obj_loader.cc",
+  ]
+
+  public_configs = [ ":emulator-tinyobjloader_config" ]
+}
+
+# libz
+config("zlib") {
+  include_dirs = [
+    "$ZLIB_PREBUILTS_DIR/$BUILD_TARGET_OS-x86_64/include",
+  ]
+
+  ldflags = [
+    rebase_path("$ZLIB_PREBUILTS_DIR/$BUILD_TARGET_TAG/lib/libz.a", root_build_dir),
+  ]
+}
