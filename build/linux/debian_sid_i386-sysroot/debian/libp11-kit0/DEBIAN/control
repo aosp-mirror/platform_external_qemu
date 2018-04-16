@@ -1,0 +1,21 @@
+Package: libp11-kit0
+Source: p11-kit
+Version: 0.23.9-2
+Architecture: i386
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 1371
+Depends: libc6 (>= 2.16), libffi6 (>= 3.0.4)
+Breaks: opencryptoki (<= 3.6.1+dfsg-1)
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://p11-glue.freedesktop.org/p11-kit.html
+Description: library for loading and coordinating access to PKCS#11 modules - runtime
+ The p11-kit library provides a way to load and enumerate Public-Key
+ Cryptography Standard #11 modules, along with a standard configuration
+ setup for installing PKCS#11 modules so that they're discoverable. It
+ also solves problems with coordinating the use of PKCS#11 by different
+ components or libraries living in the same process.
+ .
+ This package contains the shared library required for applications loading
+ and accessing PKCS#11 modules.

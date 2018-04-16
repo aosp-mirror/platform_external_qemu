@@ -1,0 +1,5 @@
+libva-wayland.so.2 libva-wayland2 #MINVER#
+* Build-Depends-Package: libva-dev
+ vaGetDisplayWl@Base 1.3.0
+ vaGetImageBufferWl@Base 1.3.0
+ vaGetSurfaceBufferWl@Base 1.3.0

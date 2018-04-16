@@ -1,0 +1,4 @@
+libgdk_pixbuf-2.0 0 libgdk-pixbuf2.0-0 (>= 2.36.11)
+libgdk_pixbuf_xlib-2.0 0 libgdk-pixbuf2.0-0 (>= 2.36.11)
+udeb: libgdk_pixbuf-2.0 0 libgdk-pixbuf2.0-0-udeb (>= 2.36.11)
+udeb: libgdk_pixbuf_xlib-2.0 0 libgdk-pixbuf2.0-0-udeb (>= 2.36.11)

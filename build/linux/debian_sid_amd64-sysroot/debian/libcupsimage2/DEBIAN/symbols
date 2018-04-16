@@ -1,0 +1,16 @@
+libcupsimage.so.2 libcupsimage2 #MINVER#
+ _cupsRasterAddError@Base 1.6.2
+ _cupsRasterClearError@Base 1.6.2
+ _cupsRasterExecPS@Base 1.6.2
+ cupsRasterClose@Base 1.4.0
+ cupsRasterErrorString@Base 1.4.0
+ cupsRasterInitPWGHeader@Base 1.6.2
+ cupsRasterInterpretPPD@Base 1.4.0
+ cupsRasterOpen@Base 1.4.0
+ cupsRasterOpenIO@Base 1.6.2
+ cupsRasterReadHeader2@Base 1.4.0
+ cupsRasterReadHeader@Base 1.4.0
+ cupsRasterReadPixels@Base 1.4.0
+ cupsRasterWriteHeader2@Base 1.4.0
+ cupsRasterWriteHeader@Base 1.4.0
+ cupsRasterWritePixels@Base 1.4.0

@@ -1,0 +1,21 @@
+Package: libpng-dev
+Source: libpng1.6
+Version: 1.6.34-1
+Architecture: amd64
+Maintainer: Anibal Monsalve Salazar <anibal@debian.org>
+Installed-Size: 689
+Depends: libpng16-16 (= 1.6.34-1), zlib1g-dev
+Recommends: libpng-tools
+Conflicts: libpng12-0-dev, libpng12-dev, libpng2-dev, libpng3-dev
+Breaks: libpng16-dev (<< 1.6.20-3), libpng16-devtools (<< 1.6.21-1)
+Replaces: libpng16-dev (<< 1.6.20-3), libpng16-devtools (<< 1.6.21-1)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://libpng.org/pub/png/libpng.html
+Description: PNG library - development (version 1.6)
+ libpng is a library implementing an interface for reading and writing
+ PNG (Portable Network Graphics) format files.
+ .
+ This package contains the header and development files needed to build
+ programs and packages using libpng.

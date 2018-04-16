@@ -1,0 +1,29 @@
+Package: libgnutls-openssl27
+Source: gnutls28
+Version: 3.5.18-1
+Architecture: amd64
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 248
+Depends: libgnutls30 (= 3.5.18-1), libc6 (>= 2.14)
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://www.gnutls.org/
+Description: GNU TLS library - OpenSSL wrapper
+ GnuTLS is a portable library which implements the Transport Layer
+ Security (TLS 1.0, 1.1, 1.2) and Secure Sockets Layer (SSL) 3.0 and Datagram
+ Transport Layer Security (DTLS 1.0, 1.2) protocols.
+ .
+ GnuTLS features support for:
+  - TLS extensions: server name indication, max record size, opaque PRF
+    input, etc.
+  - authentication using the SRP protocol.
+  - authentication using both X.509 certificates and OpenPGP keys.
+  - TLS Pre-Shared-Keys (PSK) extension.
+  - Inner Application (TLS/IA) extension.
+  - X.509 and OpenPGP certificate handling.
+  - X.509 Proxy Certificates (RFC 3820).
+  - all the strong encryption algorithms (including SHA-256/384/512 and
+    Camellia (RFC 4132)).
+ .
+ This package contains the runtime library of the GnuTLS OpenSSL wrapper.

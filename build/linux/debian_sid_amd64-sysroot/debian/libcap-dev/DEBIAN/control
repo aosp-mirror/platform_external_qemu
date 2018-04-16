@@ -1,0 +1,19 @@
+Package: libcap-dev
+Source: libcap2
+Version: 1:2.25-1.2
+Architecture: amd64
+Maintainer: Christian Kastner <ckk@debian.org>
+Installed-Size: 94
+Depends: libcap2 (= 1:2.25-1.2)
+Suggests: manpages-dev
+Provides: libcap2-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://sites.google.com/site/fullycapable/
+Description: POSIX 1003.1e capabilities (development)
+ Libcap implements the user-space interfaces to the POSIX 1003.1e capabilities
+ available in Linux kernels. These capabilities are a partitioning of the all
+ powerful root privilege into a set of distinct privileges.
+ .
+ This package contains the development files.

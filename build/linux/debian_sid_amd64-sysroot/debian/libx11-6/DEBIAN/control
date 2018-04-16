@@ -1,0 +1,20 @@
+Package: libx11-6
+Source: libx11
+Version: 2:1.6.4-3
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 1547
+Depends: libc6 (>= 2.15), libxcb1 (>= 1.11.1), libx11-data
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: X11 client-side library
+ This package provides a client interface to the X Window System, otherwise
+ known as 'Xlib'.  It provides a complete API for the basic functions of the
+ window system.
+ .
+ More information about X.Org can be found at:
+ <URL:https://www.X.org>
+ .
+ This module can be found at
+ git://anongit.freedesktop.org/git/xorg/lib/libX11

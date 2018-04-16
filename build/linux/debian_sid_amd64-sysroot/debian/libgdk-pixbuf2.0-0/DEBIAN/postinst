@@ -1,0 +1,33 @@
+#!/bin/sh
+set -e
+
+LOADERS_DIR=/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
+LOADERS_DIR_OLD=/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders
+
+if [ "$1" = triggered ]; then
+    for trigger in $2; do
+        if ! [ -d $trigger ]; then
+            continue
+        fi
+        case $trigger in
+          $LOADERS_DIR|$LOADERS_DIR_OLD)
+            # This is triggered everytime an application installs a
+            # GdkPixbuf loader
+            /usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders \
+                $(find $LOADERS_DIR $LOADERS_DIR_OLD -name *.so 2> /dev/null | LC_ALL=C sort) \
+            > /usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders.cache || true
+            ;;
+        esac
+    done
+    exit 0
+fi
+
+
+
+
+# Also handle the initial installation
+if [ -d $LOADERS_DIR ] || [ -d $LOADERS_DIR_OLD ]; then
+    /usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders \
+        $(find $LOADERS_DIR $LOADERS_DIR_OLD -name *.so 2> /dev/null | LC_ALL=C sort) \
+    > /usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders.cache || true
+fi

@@ -1,0 +1,7 @@
+fcfb0d4532a76861bee8ff4d61e8d397  usr/include/X11/extensions/xfixesproto.h
+3d57f72f5af263ab68a6dc8c9d796784  usr/include/X11/extensions/xfixeswire.h
+2e9d00daa0d1b855e832087a9a7d1899  usr/share/doc/x11proto-fixes-dev/changelog.Debian.gz
+5485bcbc80f04ef1d215b25396f4c90b  usr/share/doc/x11proto-fixes-dev/changelog.gz
+d7b573d425d90a379ef6929e2eb3c8f2  usr/share/doc/x11proto-fixes-dev/copyright
+7be0a7af4efbb887daf0f32519f18fa9  usr/share/doc/x11proto-fixes-dev/fixesproto.txt.gz
+67fd552408e9b30ac3a3dfd267add507  usr/share/pkgconfig/fixesproto.pc

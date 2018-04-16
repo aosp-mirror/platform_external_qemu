@@ -1,0 +1,20 @@
+Package: libwrap0
+Source: tcp-wrappers
+Version: 7.6.q-27
+Architecture: amd64
+Maintainer: Marco d'Itri <md@linux.it>
+Installed-Size: 104
+Depends: libc6 (>= 2.14)
+Section: libs
+Priority: standard
+Multi-Arch: same
+Description: Wietse Venema's TCP wrappers library
+ Wietse Venema's network logger, also known as TCPD or LOG_TCP.
+ .
+ These programs log the client host name of incoming telnet,
+ ftp, rsh, rlogin, finger etc. requests.
+ .
+ Security options are:
+  - access control per host, domain and/or service;
+  - detection of host name spoofing or host address spoofing;
+  - booby traps to implement an early-warning system.

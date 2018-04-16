@@ -1,0 +1,13 @@
+Package: libudev1
+Source: systemd
+Version: 237-3
+Architecture: amd64
+Maintainer: Debian systemd Maintainers <pkg-systemd-maintainers@lists.alioth.debian.org>
+Installed-Size: 218
+Depends: libc6 (>= 2.25)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.freedesktop.org/wiki/Software/systemd
+Description: libudev shared library
+ This library provides access to udev device information.

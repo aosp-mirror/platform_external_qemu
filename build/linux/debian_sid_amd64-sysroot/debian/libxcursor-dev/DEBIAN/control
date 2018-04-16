@@ -1,0 +1,16 @@
+Package: libxcursor-dev
+Source: libxcursor
+Version: 1:1.1.15-1
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 139
+Depends: libxcursor1 (= 1:1.1.15-1), x11proto-core-dev, libx11-dev, libxrender-dev, libxfixes-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.x.org
+Description: X cursor management library (development files)
+ Header files and a static version of the X cursor management library are
+ provided by this package.
+ .
+ See the libxcursor1 package for further information.

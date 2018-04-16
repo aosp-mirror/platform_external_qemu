@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/i386-linux-gnu
+includedir=${prefix}/include
+
+Name: wayland-egl
+Description: Mesa wayland-egl library
+Version: 17.3.5
+Requires: wayland-client
+Libs: -L${libdir} -lwayland-egl
+Cflags: -I${includedir}

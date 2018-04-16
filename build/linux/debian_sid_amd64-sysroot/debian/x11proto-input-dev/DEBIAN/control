@@ -1,0 +1,19 @@
+Package: x11proto-input-dev
+Source: x11proto-input
+Version: 2.3.2-1
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 491
+Depends: x11proto-core-dev
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 Input extension wire protocol
+ This package provides development headers describing the wire protocol
+ for the Input extension, used to control all manner of options related
+ to input device handling.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org inputproto proto module.

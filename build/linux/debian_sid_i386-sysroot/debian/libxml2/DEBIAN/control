@@ -1,0 +1,20 @@
+Package: libxml2
+Version: 2.9.4+dfsg1-6.1
+Architecture: i386
+Maintainer: Debian XML/SGML Group <debian-xml-sgml-pkgs@lists.alioth.debian.org>
+Installed-Size: 2122
+Depends: libc6 (>= 2.15), libicu57 (>= 57.1-1~), liblzma5 (>= 5.1.1alpha+20120614), zlib1g (>= 1:1.2.3.3)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://xmlsoft.org
+Description: GNOME XML library
+ XML is a metalanguage to let you design your own markup language.
+ A regular markup language defines a way to describe information in
+ a certain class of documents (eg HTML). XML lets you define your
+ own customized markup languages for many classes of document. It
+ can do this because it's written in SGML, the international standard
+ metalanguage for markup languages.
+ .
+ This package provides a library providing an extensive API to handle
+ such XML data files.

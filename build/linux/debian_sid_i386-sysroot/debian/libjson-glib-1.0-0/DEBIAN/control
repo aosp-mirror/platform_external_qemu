@@ -1,0 +1,17 @@
+Package: libjson-glib-1.0-0
+Source: json-glib
+Version: 1.4.2-3
+Architecture: i386
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 202
+Depends: libc6 (>= 2.4), libglib2.0-0 (>= 2.41.1), libjson-glib-1.0-common (>= 1.4.2-3)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://wiki.gnome.org/Projects/JsonGlib
+Description: GLib JSON manipulation library
+ JSON-GLib is a library for parsing, generating and manipulating JavaScript
+ Object Notation (JSON) data streams using the GLib type system. It allows
+ manipulating JSON data types with a Document Object Model API. It also
+ allows serializing and deserializing simple or complex GObjects to and
+ from JSON data types.

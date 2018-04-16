@@ -1,0 +1,17 @@
+Package: libgpg-error-dev
+Source: libgpg-error
+Version: 1.27-6
+Architecture: i386
+Maintainer: Debian GnuPG Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
+Installed-Size: 360
+Depends: libgpg-error0 (= 1.27-6), libc6 (>= 2.4)
+Section: libdevel
+Priority: optional
+Homepage: https://www.gnupg.org/related_software/libgpg-error/
+Description: library for common error values and messages in GnuPG components (development)
+ Library that defines common error values for all GnuPG
+ components.  Among these are GPG, GPGSM, GPGME, GPG-Agent, libgcrypt,
+ pinentry, SmartCard Daemon and possibly more in the future.
+ .
+ This package contains the headers and other files needed to compile
+ against this library.

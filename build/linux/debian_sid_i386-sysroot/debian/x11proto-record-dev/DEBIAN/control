@@ -1,0 +1,18 @@
+Package: x11proto-record-dev
+Source: x11proto-record
+Version: 1.14.2-1
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 136
+Breaks: libxtst-dev (<< 2:1.0.99.2)
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 Record extension wire protocol
+ This package provides development headers describing the wire protocol
+ for the Record extension, used to record and play back event sequences.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org recordproto proto module.

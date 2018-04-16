@@ -1,0 +1,21 @@
+Package: libxxf86vm1
+Source: libxxf86vm (1:1.1.4-1)
+Version: 1:1.1.4-1+b2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 50
+Depends: libc6 (>= 2.4), libx11-6 (>= 2:1.6.0), libxext6
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: X11 XFree86 video mode extension library
+ libXxf86vm provides an interface to the XFree86-VidModeExtension
+ extension, which allows client applications to get and set video mode
+ timings in extensive detail.  It is used by the xvidtune program in
+ particular.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This module can be found at
+ git://anongit.freedesktop.org/git/xorg/lib/libXxf86vm

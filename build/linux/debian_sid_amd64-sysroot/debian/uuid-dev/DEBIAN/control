@@ -1,0 +1,16 @@
+Package: uuid-dev
+Source: util-linux
+Version: 2.31.1-0.4
+Architecture: amd64
+Maintainer: LaMont Jones <lamont@debian.org>
+Installed-Size: 161
+Depends: libc6-dev | libc-dev, libuuid1 (= 2.31.1-0.4)
+Replaces: e2fslibs-dev (<< 1.15)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Description: Universally Unique ID library - headers and static libraries
+ The libuuid library generates and parses 128-bit Universally Unique IDs
+ (UUIDs). See RFC 4122 for more information.
+ .
+ This package contains the development environment for the uuid library.

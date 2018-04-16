@@ -1,0 +1,16 @@
+Package: libidn2-0
+Source: libidn2
+Version: 2.0.4-1.1
+Architecture: i386
+Maintainer: Debian Libidn team <help-libidn@gnu.org>
+Installed-Size: 158
+Depends: libc6 (>= 2.4), libunistring2 (>= 0.9.7)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.gnu.org/software/libidn/#libidn2
+Description: Internationalized domain names (IDNA2008/TR46) library
+ Libidn2 implements the revised algorithm for internationalized domain
+ names called IDNA2008/TR46.
+ .
+ This package contains runtime libraries.

@@ -1,0 +1,17 @@
+Package: libssl1.0.2
+Source: openssl1.0
+Version: 1.0.2n-1
+Architecture: i386
+Maintainer: Debian OpenSSL Team <pkg-openssl-devel@lists.alioth.debian.org>
+Installed-Size: 3158
+Depends: libc6 (>= 2.7), debconf (>= 0.5) | debconf-2.0
+Section: libs
+Priority: important
+Multi-Arch: same
+Homepage: https://www.openssl.org
+Description: Secure Sockets Layer toolkit - shared libraries
+ This package is part of the OpenSSL project's implementation of the SSL
+ and TLS cryptographic protocols for secure communication over the
+ Internet.
+ .
+ It provides the libssl and libcrypto shared libraries.

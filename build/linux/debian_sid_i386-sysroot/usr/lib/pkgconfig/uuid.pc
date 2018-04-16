@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib/i386-linux-gnu
+includedir=/usr/include
+
+Name: uuid
+Description: Universally unique id library
+Version: 2.31.1
+Requires:
+Cflags: -I${includedir}/uuid
+Libs: -L${libdir} -luuid

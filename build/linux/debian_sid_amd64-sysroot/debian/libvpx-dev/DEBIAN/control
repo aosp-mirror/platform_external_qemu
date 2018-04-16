@@ -1,0 +1,18 @@
+Package: libvpx-dev
+Source: libvpx
+Version: 1.7.0-3
+Architecture: amd64
+Maintainer: Debian Multimedia Maintainers <pkg-multimedia-maintainers@lists.alioth.debian.org>
+Installed-Size: 3500
+Depends: libvpx5 (= 1.7.0-3)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.webmproject.org
+Description: VP8 and VP9 video codec (development files)
+ VP8 and VP9 are open video codecs, originally developed by On2 and released
+ as open source by Google Inc. They are the successor of the VP3 codec,
+ on which the Theora codec was based.
+ .
+ This package contains the development libraries, header files needed by
+ programs that want to compile with libvpx.

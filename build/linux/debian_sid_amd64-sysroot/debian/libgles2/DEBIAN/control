@@ -1,0 +1,18 @@
+Package: libgles2
+Source: libglvnd
+Version: 1.0.0-2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 105
+Depends: libc6 (>= 2.14), libglvnd0 (= 1.0.0-2)
+Breaks: libgles2-mesa (<< 17.2.0~rc4-1)
+Replaces: libgles2-mesa (<< 17.2.0~rc4-1)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://github.com/NVIDIA/libglvnd
+Description: Vendor neutral GL dispatch library -- GLES support
+ This is an implementation of the vendor-neutral dispatch layer for
+ arbitrating OpenGL API calls between multiple vendors on a per-screen basis.
+ .
+ This package contains support for GLES.

@@ -1,0 +1,14 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu
+bindir=${exec_prefix}/bin
+includedir=${prefix}/include
+
+Cflags: -I${includedir}/libappindicator3-0.1
+Requires: dbusmenu-glib-0.4 gtk+-3.0
+Libs: -L${libdir} -lappindicator3
+
+Name: appindicator3-0.1
+Description: Application indicators
+Version: 0.4.92
+

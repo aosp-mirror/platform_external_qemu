@@ -1,0 +1,14 @@
+Package: libdb5.3
+Source: db5.3 (5.3.28-13.1)
+Version: 5.3.28-13.1+b1
+Architecture: i386
+Maintainer: Debian Berkeley DB Group <pkg-db-devel@lists.alioth.debian.org>
+Installed-Size: 2017
+Depends: libc6 (>= 2.17)
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/overview/index.html
+Description: Berkeley v5.3 Database Libraries [runtime]
+ This is the runtime package for programs that use the v5.3 Berkeley
+ database library.

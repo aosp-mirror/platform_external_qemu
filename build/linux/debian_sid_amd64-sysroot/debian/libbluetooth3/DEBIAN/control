@@ -1,0 +1,16 @@
+Package: libbluetooth3
+Source: bluez (5.47-1)
+Version: 5.47-1+b1
+Architecture: amd64
+Maintainer: Debian Bluetooth Maintainers <pkg-bluetooth-maintainers@lists.alioth.debian.org>
+Installed-Size: 248
+Depends: libc6 (>= 2.15), libudev1 (>= 183)
+Conflicts: libsdp2 (<= 1.5-2)
+Replaces: libsdp2 (<= 1.5-2)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.bluez.org
+Description: Library to use the BlueZ Linux Bluetooth stack
+ BlueZ is the official Linux Bluetooth protocol stack. It is an Open Source
+ project distributed under GNU General Public License (GPL).

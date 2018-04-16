@@ -1,0 +1,20 @@
+Package: libatk1.0-dev
+Source: atk1.0
+Version: 2.26.1-3
+Architecture: amd64
+Maintainer: Debian Accessibility Team <pkg-a11y-devel@lists.alioth.debian.org>
+Installed-Size: 1004
+Depends: libatk1.0-0 (= 2.26.1-3), gir1.2-atk-1.0 (= 2.26.1-3), pkg-config, libglib2.0-dev (>= 2.31.2)
+Replaces: gir-repository-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://wiki.gnome.org/Accessibility
+Description: Development files for the ATK accessibility toolkit
+ ATK is a toolkit providing accessibility interfaces for applications or
+ other toolkits. By implementing these interfaces, those other toolkits or
+ applications can be used with tools such as screen readers, magnifiers, and
+ other alternative input devices.
+ .
+ These are the development files for ATK, needed for compilation of
+ programs or toolkits which use it.

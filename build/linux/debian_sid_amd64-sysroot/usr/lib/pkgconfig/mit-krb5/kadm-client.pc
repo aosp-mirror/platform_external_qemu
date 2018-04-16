@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu/mit-krb5
+includedir=${prefix}/include/mit-krb5
+
+Name: kadm-client
+Description: Kerberos administration client library
+Version: 1.16
+Requires.private: mit-krb5-gssapi gssrpc
+Cflags: -isystem ${includedir}
+Libs: -L${libdir} -lkadm5clnt_mit

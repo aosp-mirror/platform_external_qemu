@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/i386-linux-gnu
+includedir=${prefix}/include
+
+Name: gbm
+Description: Mesa gbm library
+Requires.private: 
+Version: 17.3.5
+Libs: -L${libdir} -lgbm
+Libs.private: -ldl
+Cflags: -I${includedir}

@@ -1,0 +1,18 @@
+Package: libglvnd0
+Source: libglvnd
+Version: 1.0.0-2
+Architecture: i386
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 335
+Depends: libc6 (>= 2.8)
+Breaks: libgldispatch0-nvidia
+Replaces: libgldispatch0-nvidia
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://github.com/NVIDIA/libglvnd
+Description: Vendor neutral GL dispatch library
+ This is an implementation of the vendor-neutral dispatch layer for
+ arbitrating OpenGL API calls between multiple vendors on a per-screen basis.
+ .
+ This package contains the GL dispatch library.

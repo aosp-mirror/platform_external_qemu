@@ -1,0 +1,19 @@
+Package: libpci3
+Source: pciutils
+Version: 1:3.5.2-1
+Architecture: amd64
+Maintainer: Anibal Monsalve Salazar <anibal@debian.org>
+Installed-Size: 102
+Depends: libc6 (>= 2.14), libudev1 (>= 196), zlib1g (>= 1:1.1.4)
+Conflicts: libpci2
+Replaces: libpci2
+Provides: libpci2
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://atrey.karlin.mff.cuni.cz/~mj/pciutils.shtml
+Description: Linux PCI Utilities (shared library)
+ This package contains the libpci shared library files.
+ .
+ The libpci library provides portable access to configuration
+ registers of devices connected to the PCI bus.

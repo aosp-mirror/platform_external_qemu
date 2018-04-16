@@ -1,0 +1,2 @@
+libcairo 2 libcairo2 (>= 1.14.0)
+udeb: libcairo 2 libcairo2-udeb (>= 1.14.0)

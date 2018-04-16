@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+#
+# Copyright 2014-2016 Sebastian Ramacher <sramacher@debian.org>
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sub license, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice (including the
+# next paragraph) shall be included in all copies or substantial portions
+# of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+# IN NO EVENT SHALL PRECISION INSIGHT AND/OR ITS SUPPLIERS BE LIABLE FOR
+# ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# PROMISE: DH NOOP WITHOUT tmp(usr/lib)
+
+=head1 NAME
+
+dh_libva - helps with packaging VA API drivers
+
+=head1 SYNOPSIS
+
+dh_libva [S<I<debhelper options>>] [B<-X>I<item>] [I<directory>...]
+
+=head1 DESCRIPTION
+
+B<dh_libva> is a debhelper program that generates dependencies for VA API driver
+packages. It scans packages looking for VA API drivers and adds the packages
+providing the necessary ABI for the driver to the B<${misc:Depends}>
+substitution variable.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--substvar=>I<substvar>
+
+Override the substitution variable.
+
+=back
+
+=cut
+
+use strict;
+use warnings;
+use Debian::Debhelper::Dh_Lib;
+use Set::Scalar;
+
+init(options => {
+    "substvar=s" => \$dh{SUBSTVAR}
+});
+
+unless ($dh{SUBSTVAR}) {
+  $dh{SUBSTVAR} = "misc:Depends";
+}
+
+my $triplet = dpkg_architecture_value("DEB_HOST_MULTIARCH");
+
+foreach my $package (@{$dh{DOPACKAGES}}) {
+  # Directory that contains the files included in the package.
+  my $pkgpath = tmpdir($package);
+  $pkgpath .= "/usr/lib/$triplet/dri";
+  next unless -d $pkgpath;
+
+  # ABI versions
+  my $abiver = Set::Scalar->new;
+
+  # Files to check
+  my @filelist = glob($pkgpath . "/*_drv_video.so");
+  foreach my $driver (@filelist) {
+    open(my $nm, "-|", "nm", ("-D", $driver)) or
+      error("cannot read symbols: $!\n");
+    while (<$nm>) {
+      chomp;
+
+      my @data = split(' ');
+      next unless scalar(@data) == 3;
+
+      my $symbol = $data[2];
+      if ($symbol =~ /^__vaDriverInit_(\d+)_(\d+)$/) {
+        $abiver->insert("libva-driver-abi-$1.$2");
+      }
+    }
+    close $nm or error($! ? "cannot close nm pipe: $!\n" :
+      "non-zero exit status from nm: $=\n");
+  }
+
+  # Add substvar
+  addsubstvar($package, $dh{SUBSTVAR},
+    join(' | ', reverse sort $abiver->elements));
+}
+
+exit 0;
+
+=head1 SEE ALSO
+
+L<debhelper(7)>, L<dh(1)>.
+
+This program is meant to be used together with debhelper.
+
+=head1 AUTHOR
+
+Sebastian Ramacher <sramacher@debian.org>
+
+=cut
+
+# vim:ts=2 sw=2 et

@@ -1,0 +1,15 @@
+Package: libaudit1
+Source: audit
+Version: 1:2.8.2-1
+Architecture: i386
+Maintainer: Laurent Bigonville <bigon@debian.org>
+Installed-Size: 157
+Depends: libaudit-common (>= 1:2.8.2-1), libc6 (>= 2.8), libcap-ng0
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://people.redhat.com/sgrubb/audit/
+Description: Dynamic library for security auditing
+ The audit-libs package contains the dynamic libraries needed for
+ applications to use the audit framework. It is used to monitor systems for
+ security related events.

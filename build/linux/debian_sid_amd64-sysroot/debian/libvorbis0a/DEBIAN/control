@@ -1,0 +1,17 @@
+Package: libvorbis0a
+Source: libvorbis
+Version: 1.3.5-4.1
+Architecture: amd64
+Maintainer: Debian Xiph.org Maintainers <pkg-xiph-maint@lists.alioth.debian.org>
+Installed-Size: 205
+Depends: libc6 (>= 2.15), libogg0 (>= 1.1.0)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.xiph.org/vorbis/
+Description: decoder library for Vorbis General Audio Compression Codec
+ Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
+ general-purpose compressed audio format for audio and music at fixed
+ and variable bitrates from 16 to 128 kbps/channel.
+ .
+ The Vorbis library is the primary Ogg Vorbis library.

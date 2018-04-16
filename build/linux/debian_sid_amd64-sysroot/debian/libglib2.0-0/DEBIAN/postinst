@@ -1,0 +1,46 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = triggered ]; then
+    for trigger in $2; do
+        if ! [ -d $trigger ]; then
+            continue
+        fi
+        case $trigger in
+          /usr/share/glib-2.0/schemas)
+            # This is triggered everytime an application installs a
+            # GSettings schema
+            /usr/lib/x86_64-linux-gnu/glib-2.0/glib-compile-schemas /usr/share/glib-2.0/schemas || true
+            ;;
+
+          /usr/lib/x86_64-linux-gnu/gio/modules|/usr/lib/gio/modules)
+            # This is triggered everytime an application installs a GIO
+            # module into /usr/lib/x86_64-linux-gnu/gio/modules or the
+            # backwards-compatible /usr/lib/gio/modules directory
+
+            # The /usr/lib/gio/modules directory is no longer shipped by
+            # libglib2.0 itself so we need to check to avoid a warning from
+            # gio-querymodules
+            dirs=/usr/lib/x86_64-linux-gnu/gio/modules
+            if [ -d /usr/lib/gio/modules ] && [ $(dpkg --print-architecture) = amd64 ]; then
+                dirs="$dirs /usr/lib/gio/modules"
+            fi
+            /usr/lib/x86_64-linux-gnu/glib-2.0/gio-querymodules $dirs || true
+            ;;
+        esac
+    done
+    exit 0
+fi
+
+
+
+# Also handle the initial installation
+if [ -d /usr/share/glib-2.0/schemas ]; then
+    /usr/lib/x86_64-linux-gnu/glib-2.0/glib-compile-schemas /usr/share/glib-2.0/schemas || true
+fi
+if [ -d /usr/lib/x86_64-linux-gnu/gio/modules ]; then
+    /usr/lib/x86_64-linux-gnu/glib-2.0/gio-querymodules /usr/lib/x86_64-linux-gnu/gio/modules || true
+fi
+if [ -d /usr/lib/gio/modules ] && [ $(dpkg --print-architecture) = amd64 ]; then
+    /usr/lib/x86_64-linux-gnu/glib-2.0/gio-querymodules /usr/lib/gio/modules || true
+fi

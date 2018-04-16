@@ -1,0 +1,5 @@
+interest /usr/lib/i386-linux-gnu/gio/modules
+interest /usr/lib/gio/modules
+interest /usr/share/glib-2.0/schemas
+# Triggers added by dh_makeshlibs/11.1.3
+activate-noawait ldconfig

@@ -1,0 +1,21 @@
+Package: libgtk2.0-0
+Source: gtk+2.0
+Version: 2.24.32-1
+Architecture: i386
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 6408
+Depends: libgtk2.0-common, libatk1.0-0 (>= 1.32.0), libc6 (>= 2.4), libcairo2 (>= 1.6.4-6.1), libcups2 (>= 1.6.0), libfontconfig1 (>= 2.12), libfreetype6 (>= 2.2.1), libgdk-pixbuf2.0-0 (>= 2.22.0), libglib2.0-0 (>= 2.41.1), libpango-1.0-0 (>= 1.28.3), libpangocairo-1.0-0 (>= 1.28.3), libpangoft2-1.0-0 (>= 1.28.3), libx11-6 (>= 2:1.4.99.1), libxcomposite1 (>= 1:0.3-1), libxcursor1 (>> 1.1.2), libxdamage1 (>= 1:1.1), libxext6, libxfixes3, libxi6, libxinerama1, libxrandr2 (>= 2:1.5.0), libxrender1, gnome-icon-theme | adwaita-icon-theme, hicolor-icon-theme, shared-mime-info
+Recommends: libgail-common, libgtk2.0-bin
+Suggests: librsvg2-common, gvfs
+Provides: gtk2.0-binver-2.10.0
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.gtk.org/
+Description: GTK+ graphical user interface library
+ GTK+ is a multi-platform toolkit for creating graphical user
+ interfaces. Offering a complete set of widgets, GTK+ is suitable
+ for projects ranging from small one-off tools to complete application
+ suites.
+ .
+ This package contains the shared libraries.

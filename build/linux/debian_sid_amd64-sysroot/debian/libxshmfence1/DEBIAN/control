@@ -1,0 +1,15 @@
+Package: libxshmfence1
+Source: libxshmfence (1.2-1)
+Version: 1.2-1+b2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 26
+Depends: libc6 (>= 2.4)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: X shared memory fences - shared library
+ This library provides an interface to shared-memory fences for
+ synchronization between the X server and direct-rendering clients.
+ .
+ This package contains the xshmfence shared library.

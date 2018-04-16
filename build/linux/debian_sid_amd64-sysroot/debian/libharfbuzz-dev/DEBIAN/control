@@ -1,0 +1,17 @@
+Package: libharfbuzz-dev
+Source: harfbuzz
+Version: 1.7.2-1
+Architecture: amd64
+Maintainer: أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>
+Installed-Size: 2057
+Depends: libharfbuzz0b (= 1.7.2-1), libharfbuzz-icu0 (= 1.7.2-1), libharfbuzz-gobject0 (= 1.7.2-1), gir1.2-harfbuzz-0.0 (= 1.7.2-1), libglib2.0-dev (>= 2.19.1), libgraphite2-dev, libicu-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.freedesktop.org/wiki/Software/HarfBuzz
+Description: Development files for OpenType text shaping engine
+ HarfBuzz is an implementation of the OpenType Layout engine (aka layout
+ engine) and the script-specific logic (aka shaping engine).
+ .
+ This package contains the header files and static libraries for the
+ HarfBuzz library.

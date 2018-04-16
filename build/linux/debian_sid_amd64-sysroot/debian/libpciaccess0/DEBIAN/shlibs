@@ -1,0 +1,2 @@
+libpciaccess 0 libpciaccess0 (>= 0.12.902)
+udeb: libpciaccess 0 libpciaccess0-udeb (>= 0.12.902)

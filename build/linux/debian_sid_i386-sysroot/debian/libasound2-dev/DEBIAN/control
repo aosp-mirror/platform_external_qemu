@@ -1,0 +1,18 @@
+Package: libasound2-dev
+Source: alsa-lib
+Version: 1.1.3-5
+Architecture: i386
+Maintainer: Debian ALSA Maintainers <pkg-alsa-devel@lists.alioth.debian.org>
+Installed-Size: 648
+Depends: libasound2 (= 1.1.3-5)
+Suggests: libasound2-doc
+Provides: libasound-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.alsa-project.org/
+Description: shared library for ALSA applications -- development files
+ This package contains files required for developing software
+ that makes use of libasound2, the ALSA library.
+ .
+ ALSA is the Advanced Linux Sound Architecture.

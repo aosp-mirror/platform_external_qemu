@@ -1,0 +1,18 @@
+Package: libgl1
+Source: libglvnd
+Version: 1.0.0-2
+Architecture: i386
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 498
+Depends: libc6 (>= 2.4), libglvnd0 (= 1.0.0-2), libglx0 (= 1.0.0-2)
+Breaks: glx-diversions (<< 0.8), libgl1-mesa-glx (<< 17.2.0~rc4-1), libglvnd0 (<< 0.2.999+git20170201-1)
+Replaces: libgl1-mesa-glx (<< 17.2.0~rc4-1), libglvnd0 (<< 0.2.999+git20170201-1)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://github.com/NVIDIA/libglvnd
+Description: Vendor neutral GL dispatch library -- legacy GL support
+ This is an implementation of the vendor-neutral dispatch layer for
+ arbitrating OpenGL API calls between multiple vendors on a per-screen basis.
+ .
+ This package contains support for old libGL for compatibility reasons.

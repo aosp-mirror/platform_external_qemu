@@ -1,0 +1,5 @@
+libpulse-mainloop-glib.so.0 libpulse-mainloop-glib0 #MINVER#
+ PULSE_0@PULSE_0 0.99.1
+ pa_glib_mainloop_free@PULSE_0 0.99.1
+ pa_glib_mainloop_get_api@PULSE_0 0.99.1
+ pa_glib_mainloop_new@PULSE_0 0.99.1
