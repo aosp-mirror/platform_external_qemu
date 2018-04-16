@@ -1,0 +1,31 @@
+import("//external/qemu/android/config.gni")
+import("//third_party/protobuf/proto_library.gni")
+
+shared_library("lib$BUILD_TARGET_SUFFIX" + "GLES_CM_translator") {
+  sources = [
+    "CoreProfileEngine.cpp",
+    "GLEScmImp.cpp",
+    "GLEScmUtils.cpp",
+    "GLEScmContext.cpp",
+    "GLEScmValidate.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "../include",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+
+  deps = [
+    "//build/config:exe_and_shlib_deps",
+    "//build/win:default_exe_manifest",
+    "//third_party/protobuf:protobuf_full",
+    "//external/qemu/android/android-emu:android-emu-base",
+    "//external/qemu/android/android-emu/android/metrics/proto",
+    "//external/qemu/android/android-emugl/host/libs/Translator/GLcommon:libGLcommon",
+    "//external/qemu/android/android-emugl/shared/emugl/common:libemugl_common",
+    "//external/qemu/android/android-emugl/shared/OpenglCodecCommon:libOpenglCodecCommon",
+  ]
+}

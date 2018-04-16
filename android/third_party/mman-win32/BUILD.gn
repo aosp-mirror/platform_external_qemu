@@ -1,0 +1,23 @@
+if (is_win) {
+
+  import("//external/qemu/android/config.gni")
+
+  config("emulator-libmman-win32") {
+    include_dirs = [
+      "includes",
+    ]
+  }
+
+  static_library("emulator-libmman-win32") {
+    sources = [
+      "mman.c",
+    ]
+
+    include_dirs = [
+      ".",
+    ]
+
+    public_configs = [ ":emulator-libmman-win32" ]
+  }
+
+}
