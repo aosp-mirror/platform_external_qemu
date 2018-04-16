@@ -79,7 +79,7 @@ int SharedMemory::openInternal(int oflag, int mode) {
 
         // Only increase size, as we don't want to yank away memory
         // from another process.
-        if (mSize > sb.st_size && HANDLE_EINTR(ftruncate(mFd, mSize)) == -1) {
+        if (mSize > (size_t)sb.st_size && HANDLE_EINTR(ftruncate(mFd, mSize)) == -1) {
             err = -errno;
             close();
             return err;

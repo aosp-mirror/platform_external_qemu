@@ -1,0 +1,62 @@
+import("//build/compiled_action.gni")
+
+_emugl_src = "renderControl"
+_emugl_dec = "$target_gen_dir/renderControl"
+
+# invoke the following command to generate decoder code
+# out/Default/emugen -D out/Default -i external/qemu/android/android-emugl/host/libs/renderControl_dec renderControl
+compiled_action("run_emugen_renderControl") {
+  tool = "//external/qemu/android/android-emugl/host/tools/emugen:emugen"
+  outputs = [
+    _emugl_dec + "_dec.cpp",
+    _emugl_dec + "_dec.h",
+    _emugl_dec + "_opcodes.h",
+    _emugl_dec + "_server_context.h",
+    _emugl_dec + "_server_context.cpp",
+  ]
+
+  # The tool takes this input, optional
+  #inputs = [
+  #]
+
+  # In this case, the tool takes as arguments the input file and the output
+  # build dir (both relative to the "cd" that the script will be run in)
+  # and will produce the output files listed above.
+  args = [
+    "-D", rebase_path(target_gen_dir, root_build_dir),
+    "-i", rebase_path(".", root_build_dir),
+    _emugl_src,
+  ]
+}
+
+config("lib_renderControl_dec_config") {
+  include_dirs = [
+    ".",
+   target_gen_dir,
+  ]
+}
+
+static_library("lib_renderControl_dec") {
+  sources = [   
+    _emugl_dec + "_dec.cpp",
+    _emugl_dec + "_dec.h",
+    _emugl_dec + "_opcodes.h",
+    _emugl_dec + "_server_context.h",
+    _emugl_dec + "_server_context.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/shared",
+    "//external/qemu/android/android-emugl/shared/OpenglCodecCommon",
+    target_gen_dir,
+  ]
+
+  deps = [
+    ":run_emugen_renderControl",
+  ]
+
+  public_configs = [ ":lib_renderControl_dec_config" ]
+}
