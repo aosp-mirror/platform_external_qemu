@@ -78,6 +78,7 @@ QemuParameters* qemu_parameters_create(const char* argv0,
 #endif
 
     params.add2If("-timezone", opts->timezone);
+    params.add2If("-adbkeyfile", opts->adbkeyfile);
     params.add2If( "-audio", opts->audio);
     params.add2If("-cpu-delay", opts->cpu_delay);
     params.add2If("-dns-server", opts->dns_server);

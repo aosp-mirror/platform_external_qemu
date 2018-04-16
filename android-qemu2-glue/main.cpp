@@ -268,15 +268,22 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     return 0;
 }
 
+static std::string getAdbPublicKeyFilePath(const char* adbkeyfile) {
+    if (adbkeyfile) {
+        return std::string(adbkeyfile);
+    } else {
+        return PathUtils::join(android::ConfigDirs::getUserDirectory(), "adbkey.pub");
+    }
+}
+
 static int createUserData(AvdInfo* avd,
                           std::string dataPath,
-                          AndroidHwConfig* hw) {
+                          AndroidHwConfig* hw, const char* adbkeyfile) {
     ScopedCPtr<char> initDir(avdInfo_getDataInitDirPath(avd));
     bool needCopyDataPartition = true;
     if (path_exists(initDir.get())) {
         path_copy_dir(dataPath.c_str(), initDir.get());
-        std::string adbKeyPath = PathUtils::join(
-                android::ConfigDirs::getUserDirectory(), "adbkey.pub");
+        std::string adbKeyPath = std::move(getAdbPublicKeyFilePath(adbkeyfile));
         if (path_is_regular(adbKeyPath.c_str()) &&
             path_can_read(adbKeyPath.c_str())) {
             std::string guestAdbKeyDir =
@@ -284,6 +291,8 @@ static int createUserData(AvdInfo* avd,
             std::string guestAdbKeyPath =
                     PathUtils::join(guestAdbKeyDir, "adb_keys");
             path_mkdir_if_needed(guestAdbKeyDir.c_str(), 0777);
+            D("Copying adb public key file %s to %s\n", adbKeyPath.c_str(),
+                    guestAdbKeyPath.c_str());
             path_copy_file(guestAdbKeyPath.c_str(), adbKeyPath.c_str());
             android_chmod(guestAdbKeyPath.c_str(), 0777);
         } else {
@@ -749,6 +758,7 @@ extern "C" int main(int argc, char** argv) {
 #endif
 
     args.add2If("-timezone", opts->timezone);
+    args.add2If("-adbkeyfile", opts->adbkeyfile);
     args.add2If("-cpu-delay", opts->cpu_delay);
     args.add2If("-dns-server", opts->dns_server);
     args.addIf("-skip-adb-auth", opts->skip_adb_auth);
@@ -919,7 +929,7 @@ extern "C" int main(int argc, char** argv) {
 
     // Create userdata file from init version if needed.
     if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
-        int ret = createUserData(avd, dataPath, hw);
+        int ret = createUserData(avd, dataPath, hw, opts->adbkeyfile);
         if (ret != 0)
             return ret;
     } else if (!hw->hw_arc) {

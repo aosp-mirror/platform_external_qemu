@@ -1725,6 +1725,11 @@ DEF("dns-server", HAS_ARG, QEMU_OPTION_dns_server, \
 DEF("timezone", HAS_ARG, QEMU_OPTION_timezone, \
     "-timezone <timezone> use this timezone instead of the host's default\n")
 
+DEF("adbkeyfile", HAS_ARG, QEMU_OPTION_adbkeyfile, \
+    "-adbkeyfile <path-to-adb-public-key-file> use this adb public key file"
+    " instead of default .android/adbkey.pub."
+    " (option effective in first boot or used with -wipe-data)\n")
+
 DEF("radio", HAS_ARG, QEMU_OPTION_radio, \
     "-radio <device> redirect radio modem interface to character device\n")
 
