@@ -1,0 +1,17 @@
+Package: libcairo-script-interpreter2
+Source: cairo
+Version: 1.15.10-1
+Architecture: i386
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 262
+Depends: libc6 (>= 2.11), libcairo2 (>= 1.14.0), libfontconfig1 (>= 2.12), libfreetype6 (>= 2.2.1), liblzo2-2, zlib1g (>= 1:1.1.4)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://cairographics.org/
+Description: Cairo 2D vector graphics library (script interpreter)
+ Cairo is a multi-platform library providing anti-aliased
+ vector-based rendering for multiple target backends.
+ .
+ This package contains the script interpreter for executing and manipulating
+ cairo execution traces.

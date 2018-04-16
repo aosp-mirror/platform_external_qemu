@@ -1,0 +1,20 @@
+Package: libthai0
+Source: libthai
+Version: 0.1.27-2
+Architecture: i386
+Maintainer: Theppitak Karoonboonyanan <thep@debian.org>
+Installed-Size: 93
+Depends: libthai-data (>= 0.1.10), libc6 (>= 2.4), libdatrie1 (>= 0.2.0)
+Enhances: libqtcore4, libqtgui4
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://linux.thai.net/projects/libthai
+Description: Thai language support library
+ LibThai is a set of Thai language support routines aimed to ease
+ developers' tasks to incorporate Thai language support in their applications.
+ It includes important Thai-specific functions e.g. word breaking, input and
+ output methods as well as basic character and string supports.
+ .
+ This package contains the shared libraries needed to run programs that use
+ the LibThai library.

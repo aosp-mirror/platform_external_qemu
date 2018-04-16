@@ -1,0 +1,15 @@
+Package: mesa-common-dev
+Source: mesa
+Version: 17.3.5-1
+Architecture: i386
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 3562
+Depends: libx11-dev, libdrm-dev (>= 2.4.85)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://mesa3d.org/
+Description: Developer documentation for Mesa
+ This package includes the specifications for the Mesa-specific OpenGL
+ extensions, the complete set of release notes and the development header
+ files common to all Mesa packages.

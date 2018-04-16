@@ -1,0 +1,13 @@
+Package: libgl1-mesa-glx
+Source: mesa
+Version: 17.3.5-1
+Architecture: i386
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 56
+Depends: libgl1, libglx-mesa0
+Section: oldlibs
+Priority: optional
+Multi-Arch: same
+Homepage: https://mesa3d.org/
+Description: transitional dummy package
+ This is a transitional dummy package, it can be safely removed.

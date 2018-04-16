@@ -1,0 +1,20 @@
+Package: libgtk-3-dev
+Source: gtk+3.0
+Version: 3.22.28-1
+Architecture: i386
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 14624
+Depends: libgtk-3-0 (= 3.22.28-1), gir1.2-gtk-3.0 (= 3.22.28-1), libgtk-3-common, dconf-gsettings-backend | gsettings-backend, libglib2.0-dev (>= 2.49.4), libgdk-pixbuf2.0-dev (>= 2.30.0), libpango1.0-dev (>= 1.40.5), libatk1.0-dev (>= 2.15.1), libatk-bridge2.0-dev, libcairo2-dev (>= 1.14.0), libepoxy-dev (>= 1.0), libfontconfig1-dev, libx11-dev, libxext-dev, libxinerama-dev, libxi-dev, libxrandr-dev, libxcursor-dev, libxfixes-dev, libxcomposite-dev, libxdamage-dev, pkg-config, libegl1-mesa-dev, libwayland-dev (>= 1.9.91), wayland-protocols (>= 1.9), libxkbcommon-dev
+Suggests: libgtk-3-doc
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.gtk.org/
+Description: development files for the GTK+ library
+ GTK+ is a multi-platform toolkit for creating graphical user
+ interfaces. Offering a complete set of widgets, GTK+ is suitable
+ for projects ranging from small one-off tools to complete application
+ suites.
+ .
+ This package contains the header and development files which are
+ needed for building GTK+ applications.

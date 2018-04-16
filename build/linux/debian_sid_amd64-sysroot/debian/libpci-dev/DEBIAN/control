@@ -1,0 +1,16 @@
+Package: libpci-dev
+Source: pciutils
+Version: 1:3.5.2-1
+Architecture: amd64
+Maintainer: Anibal Monsalve Salazar <anibal@debian.org>
+Installed-Size: 226
+Depends: zlib1g-dev, libpci3 (= 1:3.5.2-1), libudev-dev (>= 196)
+Conflicts: pciutils-dev
+Replaces: pciutils-dev
+Provides: pciutils-dev
+Section: libdevel
+Priority: optional
+Homepage: http://atrey.karlin.mff.cuni.cz/~mj/pciutils.shtml
+Description: Linux PCI Utilities (development files)
+ This package contains the <pci/pci.h>, <pci/config.h> and <pci/header.h>
+ header files, as well as the /usr/lib/libpci.a library.

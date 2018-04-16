@@ -1,0 +1,5 @@
+libharfbuzz-icu.so.0 libharfbuzz-icu0 #MINVER#
+* Build-Depends-Package: libharfbuzz-dev
+ hb_icu_get_unicode_funcs@Base 0.9.9
+ hb_icu_script_from_script@Base 0.9.9
+ hb_icu_script_to_script@Base 0.9.9

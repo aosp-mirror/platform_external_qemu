@@ -1,0 +1,32 @@
+Package: libsoup2.4-1
+Source: libsoup2.4
+Version: 2.60.3-1
+Architecture: amd64
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 1056
+Depends: libc6 (>= 2.14), libglib2.0-0 (>= 2.39.90), libgssapi-krb5-2 (>= 1.14+dfsg), libsqlite3-0 (>= 3.5.9), libxml2 (>= 2.7.4), glib-networking (>= 2.32.0)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://wiki.gnome.org/Projects/libsoup
+Description: HTTP library implementation in C -- Shared library
+ It was originally part of a SOAP (Simple Object Access Protocol)
+ implementation called Soup, but the SOAP and non-SOAP parts have now been
+ split into separate packages.
+ .
+ libsoup uses the Glib main loop and is designed to work well with GTK+
+ applications.  This enables GNOME applications to access HTTP servers
+ on the network in a completely asynchronous fashion, very similar to
+ the GTK+ programming model (a synchronous operation mode is also
+ supported for those who want it).
+ .
+ Features:
+  * Both asynchronous (GMainLoop and callback-based) and synchronous APIs
+  * Automatically caches connections
+  * SSL Support using GnuTLS
+  * Proxy support, including authentication and SSL tunneling
+  * Client support for Digest, NTLM, and Basic authentication
+  * Server support for Digest and Basic authentication
+  * Basic client-side SOAP and XML-RPC support
+ .
+ This package contains the shared library.

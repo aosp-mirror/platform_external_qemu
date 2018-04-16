@@ -1,0 +1,18 @@
+Package: libharfbuzz0b
+Source: harfbuzz
+Version: 1.7.2-1
+Architecture: amd64
+Maintainer: أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>
+Installed-Size: 1158
+Depends: libc6 (>= 2.14), libfreetype6 (>= 2.7.1), libglib2.0-0 (>= 2.31.8), libgraphite2-3 (>= 1.2.2)
+Conflicts: libharfbuzz0, libharfbuzz0a
+Replaces: libharfbuzz0, libharfbuzz0a
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.freedesktop.org/wiki/Software/HarfBuzz
+Description: OpenType text shaping engine (shared library)
+ HarfBuzz is an implementation of the OpenType Layout engine (aka layout
+ engine) and the script-specific logic (aka shaping engine).
+ .
+ This package contains the shared libraries.

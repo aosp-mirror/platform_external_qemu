@@ -1,0 +1,10 @@
+9a45e87e63eb4b47340c5ef23005e662  usr/include/libappindicator3-0.1/libappindicator/app-indicator-enum-types.h
+9e4be55b6763c2e44d87d7dad1c5fa58  usr/include/libappindicator3-0.1/libappindicator/app-indicator.h
+57c1af480f67e3bce953d72b0b603485  usr/lib/x86_64-linux-gnu/pkgconfig/appindicator3-0.1.pc
+fa172dcdf09a1aa166d71836f78dbd33  usr/share/doc/libappindicator3-dev/AUTHORS
+1807b73f8e1eca08bac34c0baf140505  usr/share/doc/libappindicator3-dev/README
+9961b40ac14e41c518929e9f37513dae  usr/share/doc/libappindicator3-dev/changelog.Debian.gz
+67f8d5a03ac1a1bc1d799371967f6604  usr/share/doc/libappindicator3-dev/changelog.gz
+a4d51d898f73f9572f8225eb84855e2b  usr/share/doc/libappindicator3-dev/copyright
+980d88c2891adcd10b06ba20e48aa3a7  usr/share/gir-1.0/AppIndicator3-0.1.gir
+cb5d15e53e7f7601df02fd630772f67f  usr/share/vala/vapi/appindicator3-0.1.vapi

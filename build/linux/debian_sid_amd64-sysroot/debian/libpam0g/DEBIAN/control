@@ -1,0 +1,20 @@
+Package: libpam0g
+Source: pam
+Version: 1.1.8-3.7
+Architecture: amd64
+Maintainer: Steve Langasek <vorlon@debian.org>
+Installed-Size: 230
+Depends: libaudit1 (>= 1:2.2.1), libc6 (>= 2.14), debconf (>= 0.5) | debconf-2.0
+Suggests: libpam-doc
+Replaces: libpam0g-util
+Section: libs
+Priority: required
+Multi-Arch: same
+Homepage: http://www.linux-pam.org/
+Description: Pluggable Authentication Modules library
+ Contains the shared library for Linux-PAM, a library that enables the
+ local system administrator to choose how applications authenticate users.
+ In other words, without rewriting or recompiling a PAM-aware application,
+ it is possible to switch between the authentication mechanism(s) it uses.
+ One may entirely upgrade the local authentication system without touching
+ the applications themselves.

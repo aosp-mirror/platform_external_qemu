@@ -1,0 +1,21 @@
+Package: libcap-ng0
+Source: libcap-ng (0.7.7-3.1)
+Version: 0.7.7-3.1+b1
+Architecture: i386
+Maintainer: Pierre Chifflier <pollux@debian.org>
+Installed-Size: 38
+Depends: libc6 (>= 2.8)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://people.redhat.com/sgrubb/libcap-ng
+Description: An alternate POSIX capabilities library
+ This library implements the user-space interfaces to the POSIX
+ 1003.1e capabilities available in Linux kernels.  These capabilities are
+ a partitioning of the all powerful root privilege into a set of distinct
+ privileges.
+ .
+ The libcap-ng library is intended to make programming with POSIX
+ capabilities much easier than the traditional libcap library.
+ .
+ This package contains header files and libraries for libcap-ng.

@@ -1,0 +1,14 @@
+a78bd687734e132b42f3ea9d8676a253  usr/bin/compile_et
+b1e3784cd241530eb4c773216ebb4944  usr/include/et/com_err.h
+a25a0ed9dd7245fa3136d914709f56d3  usr/lib/i386-linux-gnu/libcom_err.a
+41c10b6a25dd79426d04c878c964d26b  usr/lib/i386-linux-gnu/pkgconfig/com_err.pc
+eb5a24ad827bae80b198ef7bb63ff40a  usr/share/doc-base/comerr-manual
+9ec071e6bebea1858e3ef66eb2ba355c  usr/share/doc/libcom-err2/com_err.texi.gz
+db1d6b416afebc5ae83b9d2cbbd86e82  usr/share/doc/libcom-err2/examples/ext2_err.et.gz
+854b018a524fbe1c56451876d9c07594  usr/share/doc/libcom-err2/examples/ss_err.et
+c0971bb6952747718bb39a8cb580f2df  usr/share/doc/libcom-err2/html-info/com_err.html
+71fdfd25214d12014217706002cd3711  usr/share/et/et_c.awk
+a5c6d9dd3bf259cda5ef92c2f62910e9  usr/share/et/et_h.awk
+0c4fb7d1d9ef6353baa9345b954d3c88  usr/share/info/com_err.info.gz
+b021d15738982196935e4e20a6d1d9de  usr/share/man/man1/compile_et.1.gz
+1acbbb4341483553e3e23aeca012a0a4  usr/share/man/man3/com_err.3.gz

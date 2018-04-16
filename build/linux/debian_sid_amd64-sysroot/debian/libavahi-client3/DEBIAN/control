@@ -1,0 +1,20 @@
+Package: libavahi-client3
+Source: avahi
+Version: 0.7-3.1
+Architecture: amd64
+Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
+Installed-Size: 121
+Depends: libavahi-common3 (>= 0.6.22), libc6 (>= 2.4), libdbus-1-3 (>= 1.9.14)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://avahi.org/
+Description: Avahi client library
+ Avahi is a fully LGPL framework for Multicast DNS Service Discovery.
+ It allows programs to publish and discover services and hosts
+ running on a local network with no specific configuration. For
+ example you can plug into a network and instantly find printers to
+ print to, files to look at and people to talk to.
+ .
+ This package contains the library for Avahi's C API which  allows you
+ to integrate mDNS/DNS-SD functionality into your application.

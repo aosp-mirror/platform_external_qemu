@@ -1,0 +1,21 @@
+Package: libbrlapi0.6
+Source: brltty
+Version: 5.6-2
+Architecture: amd64
+Maintainer: Debian Accessibility Team <pkg-a11y-devel@lists.alioth.debian.org>
+Installed-Size: 131
+Depends: libc6 (>= 2.15)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://brltty.com
+Description: braille display access via BRLTTY - shared library
+ BRLTTY is a daemon which provides access to the console (text mode)
+ for a blind person using a braille display.  It drives the braille
+ display and provides complete screen review functionality.
+ .
+ BrlAPI is a library which gives an application access to a braille display and
+ lets it write braille.
+ .
+ This package contains the shared library necessary to run programs which
+ need to communicate with a braille display.

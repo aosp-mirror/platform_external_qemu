@@ -1,0 +1,18 @@
+Package: libpulse-dev
+Source: pulseaudio
+Version: 11.1-4
+Architecture: i386
+Maintainer: Pulseaudio maintenance team <pkg-pulseaudio-devel@lists.alioth.debian.org>
+Installed-Size: 500
+Depends: libpulse0 (= 11.1-4), libpulse-mainloop-glib0 (= 11.1-4), libglib2.0-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.pulseaudio.org
+Description: PulseAudio client development headers and libraries
+ PulseAudio, previously known as Polypaudio, is a sound server for POSIX and
+ WIN32 systems. It is a drop in replacement for the ESD sound server with
+ much better latency, mixing/re-sampling quality and overall architecture.
+ .
+ Headers and libraries for developing applications that access a PulseAudio
+ sound server via PulseAudio's native interface.

@@ -1,0 +1,14 @@
+Package: libpciaccess0
+Source: libpciaccess (0.13.4-1)
+Version: 0.13.4-1+b2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 92
+Depends: libc6 (>= 2.7), zlib1g (>= 1:1.1.4)
+Suggests: pciutils
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: Generic PCI access library for X
+ Provides functionality for X to access the PCI bus and devices
+ in a platform-independent way.

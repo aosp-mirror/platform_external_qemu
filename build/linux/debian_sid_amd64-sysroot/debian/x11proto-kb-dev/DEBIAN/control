@@ -1,0 +1,20 @@
+Package: x11proto-kb-dev
+Source: x11proto-kb
+Version: 1.0.7-1
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 1230
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 XKB extension wire protocol
+ This package provides development headers describing the wire protocol
+ for the XKEYBOARD extension, used to control all manner of options
+ related to keyboard handling and layout in particular.
+ It does not control the addition/enabling/disabling of keyboards;
+ this is done with the XINPUT extension.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org kbproto proto module.

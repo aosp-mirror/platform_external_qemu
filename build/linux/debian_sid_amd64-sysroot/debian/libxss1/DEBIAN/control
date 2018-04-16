@@ -1,0 +1,23 @@
+Package: libxss1
+Source: libxss (1:1.2.2-1)
+Version: 1:1.2.2-1+b2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 37
+Depends: libc6 (>= 2.2.5), libx11-6 (>= 2:1.4.99.1), libxext6, x11-common
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: X11 Screen Saver extension library
+ libXss provides an X Window System client interface to the MIT-SCREEN-SAVER
+ extension to the X protocol.
+ .
+ The Screen Saver extension allows clients behaving as screen savers to
+ register themselves with the X server, to better integrate themselves with
+ the running session.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This module can be found at
+ git://anongit.freedesktop.org/git/xorg/lib/libScrnSaver

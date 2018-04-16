@@ -1,0 +1,6 @@
+342d109e1be1a712c3e5b72c861f5b3a  usr/lib/i386-linux-gnu/libdb-5.3.so
+2567e08b7071a9be5cbb42ac80975154  usr/share/doc/libdb5.3/build_signature_i386.txt
+0e19b8bd2e920959b8328701c3247fba  usr/share/doc/libdb5.3/changelog.Debian.gz
+345120768dc3d38540a9542a66e6df09  usr/share/doc/libdb5.3/changelog.Debian.i386.gz
+73e00aa8871093e6d4f0e03a47d384ea  usr/share/doc/libdb5.3/copyright
+6476eb780800b7b1b04948f3d4427083  usr/share/lintian/overrides/libdb5.3

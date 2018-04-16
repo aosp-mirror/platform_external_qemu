@@ -1,0 +1,14 @@
+Package: libdatrie1
+Source: libdatrie
+Version: 0.2.10-7
+Architecture: i386
+Maintainer: Theppitak Karoonboonyanan <thep@debian.org>
+Installed-Size: 75
+Depends: libc6 (>= 2.4)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://linux.thai.net/projects/libthai
+Description: Double-array trie library
+ This package provides shared libraries needed to run programs that use the
+ datrie library. It is usually automatically installed.

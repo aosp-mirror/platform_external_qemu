@@ -1,0 +1,20 @@
+Package: libidn11
+Source: libidn
+Version: 1.33-2.1
+Architecture: i386
+Maintainer: Debian Libidn Team <help-libidn@gnu.org>
+Installed-Size: 302
+Depends: libc6 (>= 2.4)
+Conflicts: libidn9-dev
+Replaces: libidn11-dev
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: https://www.gnu.org/software/libidn/
+Description: GNU Libidn library, implementation of IETF IDN specifications
+ GNU Libidn is a fully documented implementation of the Stringprep,
+ Punycode and IDNA specifications.  Libidn's purpose is to encode and
+ decode internationalized domain names.  The Nameprep, XMPP, SASLprep,
+ and iSCSI profiles are supported.
+ .
+ This package contains the shared library.

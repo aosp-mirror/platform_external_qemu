@@ -1,0 +1,6 @@
+libva-glx.so.2 libva-glx2 #MINVER#
+* Build-Depends-Package: libva-dev
+ vaCopySurfaceGLX@Base 1.0.3
+ vaCreateSurfaceGLX@Base 1.0.3
+ vaDestroySurfaceGLX@Base 1.0.3
+ vaGetDisplayGLX@Base 1.0.3

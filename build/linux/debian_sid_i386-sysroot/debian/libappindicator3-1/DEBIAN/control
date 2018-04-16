@@ -1,0 +1,17 @@
+Package: libappindicator3-1
+Source: libappindicator
+Version: 0.4.92-5
+Architecture: i386
+Maintainer: Debian QA Group <packages@qa.debian.org>
+Installed-Size: 104
+Depends: libatk1.0-0 (>= 1.12.4), libc6 (>= 2.4), libcairo-gobject2 (>= 1.10.0), libcairo2 (>= 1.2.4), libdbusmenu-glib4 (>= 0.4.2), libdbusmenu-gtk3-4 (>= 0.4.2), libgdk-pixbuf2.0-0 (>= 2.22.0), libglib2.0-0 (>= 2.37.3), libgtk-3-0 (>= 3.0.0), libindicator3-7, libpango-1.0-0 (>= 1.14.0), libpangocairo-1.0-0 (>= 1.14.0)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://launchpad.net/libappindicator
+Description: allow applications to export a menu into the panel -- GTK3 version
+ A library to allow applications to export a menu into the panel.
+ Based on KSNI it also works in KDE and will fallback to generic Systray
+ support if none of those are available.
+ .
+ This package contains shared libraries to be used by GTK3 applications.

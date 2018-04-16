@@ -1,0 +1,21 @@
+Package: libfontconfig1
+Source: fontconfig
+Version: 2.12.6-0.1
+Architecture: amd64
+Maintainer: Keith Packard <keithp@debian.org>
+Installed-Size: 545
+Depends: libc6 (>= 2.14), libexpat1 (>= 2.0.1), libfreetype6 (>= 2.2.1), fontconfig-config (>= 2.12.6-0.1)
+Breaks: xpdf (<= 3.03-11)
+Provides: libfontconfig
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.freedesktop.org/wiki/Software/fontconfig/
+Description: generic font configuration library - runtime
+ Fontconfig is a font configuration and customization library, which
+ does not depend on the X Window System. It is designed to locate
+ fonts within the system and select them according to requirements
+ specified by applications.
+ .
+ This package contains the runtime library needed to launch applications
+ using fontconfig.

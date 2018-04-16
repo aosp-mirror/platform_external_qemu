@@ -1,0 +1,24 @@
+Package: libspeechd-dev
+Source: speech-dispatcher
+Version: 0.8.8-1
+Architecture: amd64
+Maintainer: Debian TTS Team <tts-project@lists.alioth.debian.org>
+Installed-Size: 101
+Depends: libspeechd2 (= 0.8.8-1)
+Suggests: speech-dispatcher
+Section: libdevel
+Priority: optional
+Homepage: http://devel.freebsoft.org/speechd
+Description: Speech Dispatcher: Development libraries and header files
+ Speech Dispatcher provides a device independent layer for speech synthesis.
+ It supports various software and hardware speech synthesizers as
+ backends and provides a generic layer for synthesizing speech and
+ playing back PCM data via those different backends to applications.
+ .
+ Various high level concepts like enqueueing vs. interrupting speech and
+ application specific user configurations are implemented in a device
+ independent way, therefore freeing the application programmer from
+ having to yet again reinvent the wheel.
+ .
+ This package contains static library, and C headers needed for programs
+ linked with the shared or static library.

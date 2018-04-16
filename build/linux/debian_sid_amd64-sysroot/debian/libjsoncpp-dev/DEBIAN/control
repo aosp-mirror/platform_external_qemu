@@ -1,0 +1,24 @@
+Package: libjsoncpp-dev
+Source: libjsoncpp
+Version: 1.7.4-3
+Architecture: amd64
+Maintainer: Peter Spiess-Knafl <dev@spiessknafl.at>
+Installed-Size: 458
+Depends: libjsoncpp1 (= 1.7.4-3)
+Section: libdevel
+Priority: extra
+Multi-Arch: same
+Homepage: https://github.com/open-source-parsers/jsoncpp
+Description: library for reading and writing JSON for C++ (devel files)
+ This package provides all required developer resources like header-files
+ and statically linked version of the library.
+ .
+ jsoncpp is an implementation of a JSON reader and writer in C++. JSON
+ (JavaScript Object Notation) is a lightweight data-interchange format
+ that it is easy to parse and redeable for human. It is useful for
+ building config files, network communications protocols, etc.
+ .
+ This library provides following features:
+ .
+ * High-level data structures for collecting data from JSON.
+ * Easy-to-use reader and writer.

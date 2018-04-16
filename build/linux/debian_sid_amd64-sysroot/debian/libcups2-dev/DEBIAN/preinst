@@ -1,0 +1,32 @@
+#! /bin/sh
+
+set -e
+
+case "$1" in
+    install)
+    ;;
+
+    upgrade)
+	if [ ! -L /usr/share/doc/libcups2-dev ]; then
+	    rm -rf /usr/share/doc/libcups2-dev
+	fi
+	# workaround for upgrades where this changed from a directory to a file;
+	# this fails with overlays (containers, schroots) sometimes (LP: #1272285)
+	# this can be dropped in jessie+1/trusty+1
+	if [ -d /usr/include/cups/i18n.h ]; then
+	    rm -rf /usr/include/cups/i18n.h
+	fi
+    ;;
+
+    abort-upgrade)
+    ;;
+
+    *)
+        echo "preinst called with unknown argument \`$1'" >&2
+        exit 0
+    ;;
+esac
+
+
+
+exit 0

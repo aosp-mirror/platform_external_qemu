@@ -1,0 +1,18 @@
+Package: libcom-err2
+Source: e2fsprogs
+Version: 1.43.9-1
+Architecture: i386
+Maintainer: Theodore Y. Ts'o <tytso@mit.edu>
+Installed-Size: 86
+Depends: libc6 (>= 2.17)
+Breaks: libcomerr2 (<< 1.43.9-1~)
+Replaces: libcomerr2 (<< 1.43.9-1~)
+Provides: libcomerr2 (= 1.43.9-1)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://e2fsprogs.sourceforge.net
+Description: common error description library
+ libcomerr is an attempt to present a common error-handling mechanism to
+ manipulate the most common form of error code in a fashion that does not
+ have the problems identified with mechanisms commonly in use.

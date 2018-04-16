@@ -1,0 +1,18 @@
+Package: libcairo2-dev
+Source: cairo
+Version: 1.15.10-1
+Architecture: amd64
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 2777
+Depends: libcairo2 (= 1.15.10-1), libcairo-gobject2 (= 1.15.10-1), libcairo-script-interpreter2 (= 1.15.10-1), libfontconfig1-dev (>= 2.2.95), libfreetype6-dev (>= 2.1.10), libx11-dev, libxrender-dev (>= 0.6), libxext-dev, libpng-dev, libsm-dev, libpixman-1-dev (>= 0.22.0), libxcb1-dev (>= 1.6), libxcb-render0-dev (>= 1.6), libxcb-shm0-dev, libglib2.0-dev
+Suggests: libcairo2-doc
+Provides: libcairo-dev
+Section: libdevel
+Priority: optional
+Homepage: https://cairographics.org/
+Description: Development files for the Cairo 2D graphics library
+ Cairo is a multi-platform library providing anti-aliased
+ vector-based rendering for multiple target backends.
+ .
+ This package contains the development libraries, header files needed by
+ programs that want to compile with Cairo.

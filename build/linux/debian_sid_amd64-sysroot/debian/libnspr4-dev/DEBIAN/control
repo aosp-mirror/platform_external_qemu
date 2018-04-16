@@ -1,0 +1,22 @@
+Package: libnspr4-dev
+Source: nspr
+Version: 2:4.18-1
+Architecture: amd64
+Maintainer: Maintainers of Mozilla-related packages <pkg-mozilla-maintainers@lists.alioth.debian.org>
+Installed-Size: 1192
+Depends: libnspr4 (>= 2:4.18), libnspr4 (<= 2:4.18-1.1~)
+Section: libdevel
+Priority: optional
+Homepage: http://www.mozilla.org/projects/nspr/
+Description: Development files for the NetScape Portable Runtime library
+ This library provides platform independent non-GUI operating system
+ facilities including:
+  * threads,
+  * thread synchronisation,
+  * normal file I/O and network I/O,
+  * interval timing and calendar time,
+  * basic memory management (malloc and free),
+  * shared library linking.
+ .
+ Install this package if you wish to develop your own programs using the
+ NetScape Portable Runtime library.

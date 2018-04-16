@@ -1,0 +1,16 @@
+Package: libepoxy0
+Source: libepoxy
+Version: 1.4.3-1
+Architecture: amd64
+Maintainer: Jérémy Lal <kapouer@melix.org>
+Installed-Size: 1222
+Depends: libc6 (>= 2.7)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://github.com/anholt/libepoxy
+Description: OpenGL function pointer management library
+ It hides the complexity of dlopen(), dlsym(), glXGetProcAddress(),
+ eglGetProcAddress(), etc. from the app developer, with very little
+ knowledge needed on their part.  They get to read GL specs and write
+ code using undecorated function names like glCompileShader().

@@ -1,0 +1,14 @@
+Package: libpixman-1-dev
+Source: pixman
+Version: 0.34.0-2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 1226
+Depends: libpixman-1-0 (= 0.34.0-2)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://pixman.org/
+Description: pixel-manipulation library for X and cairo (development files)
+ Development libraries, header files and documentation needed by
+ programs that want to compile with the Cairo/X pixman library.

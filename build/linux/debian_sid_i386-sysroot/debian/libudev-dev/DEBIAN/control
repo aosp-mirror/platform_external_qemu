@@ -1,0 +1,14 @@
+Package: libudev-dev
+Source: systemd
+Version: 237-3
+Architecture: i386
+Maintainer: Debian systemd Maintainers <pkg-systemd-maintainers@lists.alioth.debian.org>
+Installed-Size: 184
+Depends: libudev1 (= 237-3)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.freedesktop.org/wiki/Software/systemd
+Description: libudev development files
+ This package contains the files needed for developing applications that
+ use libudev.

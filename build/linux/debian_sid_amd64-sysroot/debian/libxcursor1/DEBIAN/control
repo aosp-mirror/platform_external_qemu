@@ -1,0 +1,19 @@
+Package: libxcursor1
+Source: libxcursor
+Version: 1:1.1.15-1
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 71
+Depends: libc6 (>= 2.4), libx11-6 (>= 2:1.4.99.1), libxfixes3, libxrender1
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.x.org
+Description: X cursor management library
+ Xcursor is a simple library designed to help locate and load cursors for the
+ X Window System.  Cursors can be loaded from files or memory and can exist in
+ several sizes; the library automatically picks the best size.  When using
+ images loaded from files, Xcursor prefers to use the Render extension's
+ CreateCursor request for rendering cursors.  Where the Render extension is
+ not supported, Xcursor maps the cursor image to a standard X cursor and uses
+ the core X protocol CreateCursor request.

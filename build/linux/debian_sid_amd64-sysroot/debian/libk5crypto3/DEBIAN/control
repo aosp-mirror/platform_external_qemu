@@ -1,0 +1,23 @@
+Package: libk5crypto3
+Source: krb5
+Version: 1.16-2
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 308
+Depends: libc6 (>= 2.14), libkeyutils1 (>= 1.4), libkrb5support0 (>= 1.16)
+Suggests: krb5-doc, krb5-user
+Breaks: libgssapi-krb5-2 (<= 1.10+dfsg~alpha1), libkrb5-3 (<= 1.8~aa)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: MIT Kerberos runtime libraries - Crypto Library
+ Kerberos is a system for authenticating users and services on a network.
+ Kerberos is a trusted third-party service.  That means that there is a
+ third party (the Kerberos server) that is trusted by all the entities on
+ the network (users and services, usually called "principals").
+ .
+ This is the MIT reference implementation of Kerberos V5.
+ .
+ This package contains the runtime cryptography libraries used by
+ applications and Kerberos clients.

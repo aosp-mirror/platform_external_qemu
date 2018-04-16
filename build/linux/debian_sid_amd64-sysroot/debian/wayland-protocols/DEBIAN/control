@@ -1,0 +1,14 @@
+Package: wayland-protocols
+Version: 1.11-1
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 334
+Section: libdevel
+Priority: extra
+Multi-Arch: foreign
+Homepage: http://wayland.freedesktop.org/
+Description: wayland compositor protocols
+ Wayland protocols that add functionality not available in the Wayland core
+ protocol. Such protocols either add completely new functionality, or extend
+ the functionality of some other protocol either in Wayland core, or some other
+ protocol in wayland-protocols.

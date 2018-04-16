@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+# Automatically added by dh_installdeb/11.1.4
+dpkg-maintscript-helper symlink_to_dir /usr/share/doc/libudev-dev libudev1 221-2\~ -- "$@"
+# End automatically added section

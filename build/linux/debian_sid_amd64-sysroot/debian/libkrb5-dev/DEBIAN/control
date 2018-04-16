@@ -1,0 +1,24 @@
+Package: libkrb5-dev
+Source: krb5
+Version: 1.16-2
+Architecture: amd64
+Maintainer: Sam Hartman <hartmans@debian.org>
+Installed-Size: 177
+Depends: krb5-multidev (= 1.16-2)
+Suggests: krb5-doc
+Conflicts: heimdal-dev
+Replaces: krb5-multidev (<< 1.8+dfsg~alpha1-3)
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://web.mit.edu/kerberos/
+Description: headers and development libraries for MIT Kerberos
+ Kerberos is a system for authenticating users and services on a network.
+ Kerberos is a trusted third-party service.  That means that there is a
+ third party (the Kerberos server) that is trusted by all the entities on
+ the network (users and services, usually called "principals").
+ .
+ This is the MIT reference implementation of Kerberos V5.
+ .
+ This package contains the symlinks, headers, and development libraries
+ needed to compile and link programs that use the Kerberos libraries.

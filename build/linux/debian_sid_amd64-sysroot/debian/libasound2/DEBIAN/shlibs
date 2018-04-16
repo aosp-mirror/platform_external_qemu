@@ -1,0 +1,2 @@
+libasound 2 libasound2 (>= 1.1.2)
+udeb: libasound 2 libasound2-udeb (>= 1.1.2)

@@ -1,0 +1,4 @@
+# Build arguments go here.
+# See "gn args <out_dir> --list" for available build arguments.
+clang_use_chrome_plugins = false
+treat_warnings_as_errors = false

@@ -1,0 +1,14 @@
+Package: libatk-bridge2.0-dev
+Source: at-spi2-atk
+Version: 2.26.1-1
+Architecture: i386
+Maintainer: Debian Accessibility Team <pkg-a11y-devel@lists.alioth.debian.org>
+Installed-Size: 30
+Depends: libatk-bridge2.0-0 (= 2.26.1-1), libglib2.0-dev (>= 2.4.1-2), libatspi2.0-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://wiki.gnome.org/Accessibility
+Description: Development files for the AT-SPI 2 toolkit bridge
+ These are the development files for libatk-bridge2.0, needed for
+ compilation of programs which use it.

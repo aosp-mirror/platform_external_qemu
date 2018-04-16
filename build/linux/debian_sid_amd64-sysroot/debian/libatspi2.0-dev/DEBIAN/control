@@ -1,0 +1,15 @@
+Package: libatspi2.0-dev
+Source: at-spi2-core
+Version: 2.26.2-2
+Architecture: amd64
+Maintainer: Debian Accessibility Team <pkg-a11y-devel@lists.alioth.debian.org>
+Installed-Size: 564
+Depends: gir1.2-atspi-2.0 (= 2.26.2-2), libatspi2.0-0 (= 2.26.2-2), libglib2.0-dev (>= 2.4.1-2), libdbus-1-dev, libxtst-dev
+Replaces: gir-repository-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://wiki.gnome.org/Accessibility
+Description: Development files for the assistive technology service provider
+ These are the development files for at-spi2, needed for compilation of
+ programs which use it.

@@ -1,0 +1,16 @@
+Package: libwayland-egl1-mesa
+Source: mesa
+Version: 17.3.5-1
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 71
+Depends: libc6 (>= 2.2.5), libegl1
+Conflicts: libwayland-egl1
+Replaces: libwayland-egl1
+Provides: libwayland-egl1
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://mesa3d.org/
+Description: implementation of the Wayland EGL platform -- runtime
+ This package contains the mesa implementation of the Wayland EGL platform

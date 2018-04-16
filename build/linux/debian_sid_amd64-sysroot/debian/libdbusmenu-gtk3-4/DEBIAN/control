@@ -1,0 +1,17 @@
+Package: libdbusmenu-gtk3-4
+Source: libdbusmenu
+Version: 16.04.1+17.04.20170109.1-5
+Architecture: amd64
+Maintainer: The Ayatana Packages <pkg-ayatana-devel@lists.alioth.debian.org>
+Installed-Size: 116
+Depends: libatk1.0-0 (>= 1.12.4), libc6 (>= 2.4), libcairo-gobject2 (>= 1.10.0), libcairo2 (>= 1.2.4), libdbusmenu-glib4 (>= 0.5.90), libgdk-pixbuf2.0-0 (>= 2.22.0), libglib2.0-0 (>= 2.37.3), libpango-1.0-0 (>= 1.14.0), libpangocairo-1.0-0 (>= 1.14.0)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://launchpad.net/dbusmenu
+Description: library for passing menus over DBus - GTK-3+ version
+ libdbusmenu passes a menu structure across DBus so that a program can
+ create a menu simply without worrying about how it is displayed on the
+ other side of the bus.
+ .
+ This package contains shared libraries to be used by GTK-3+ applications.

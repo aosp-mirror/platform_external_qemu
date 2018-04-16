@@ -1,0 +1,13 @@
+a4e7a1ff21ede284d4eadae08d8269b6  usr/include/libdbusmenu-glib-0.4/libdbusmenu-glib/client.h
+6c60749682ec64ba3f76b2dc9dab0707  usr/include/libdbusmenu-glib-0.4/libdbusmenu-glib/dbusmenu-glib.h
+c5fe3d99122640e0f6e7a5da10066465  usr/include/libdbusmenu-glib-0.4/libdbusmenu-glib/enum-types.h
+825161215e5656f14e29d08a53d62c94  usr/include/libdbusmenu-glib-0.4/libdbusmenu-glib/menuitem-proxy.h
+ee9803ac61bd2644c5217f6c47a93b88  usr/include/libdbusmenu-glib-0.4/libdbusmenu-glib/menuitem.h
+588f4878044eab709377bf40d6ca4895  usr/include/libdbusmenu-glib-0.4/libdbusmenu-glib/server.h
+5ca0724c07911e169c48eb19949cd860  usr/include/libdbusmenu-glib-0.4/libdbusmenu-glib/types.h
+a9c5aecb043a88174929ad980f359e7c  usr/lib/i386-linux-gnu/libdbusmenu-glib.a
+ed1b0a556647403dce5dc584c4783870  usr/lib/i386-linux-gnu/pkgconfig/dbusmenu-glib-0.4.pc
+58fb99c140439b0285e7e7fdbb219eca  usr/share/doc/libdbusmenu-glib-dev/changelog.Debian.gz
+56545889fbe48609b3e656d0858543fa  usr/share/doc/libdbusmenu-glib-dev/copyright
+b3d4cb6313920c61cdc06707a5cba7ec  usr/share/gir-1.0/Dbusmenu-0.4.gir
+7ae16c1d45e4ef132e4ef8e7dd13d6f3  usr/share/vala/vapi/Dbusmenu-0.4.vapi

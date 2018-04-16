@@ -1,0 +1,20 @@
+Package: x11proto-xext-dev
+Source: x11proto-xext
+Version: 7.3.0-1
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 898
+Depends: x11proto-input-dev, x11proto-core-dev
+Breaks: libxext-dev (<< 2:1.0.99), libxtst-dev (<< 2:1.0.99)
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 various extension wire protocol
+ This package provides development headers describing the wire protocol
+ for various extensions, the client-side libraries of which are provided
+ in the Xext library.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org xextproto proto module.

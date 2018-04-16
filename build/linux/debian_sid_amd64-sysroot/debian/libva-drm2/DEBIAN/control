@@ -1,0 +1,22 @@
+Package: libva-drm2
+Source: libva
+Version: 2.0.0-2
+Architecture: amd64
+Maintainer: Debian Multimedia Maintainers <pkg-multimedia-maintainers@lists.alioth.debian.org>
+Installed-Size: 38
+Depends: libc6 (>= 2.4), libdrm2 (>= 2.4.16), libva2 (>= 2.0.0), libva2 (<< 2.0.0.1)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://01.org/linuxmedia/vaapi
+Description: Video Acceleration (VA) API for Linux -- DRM runtime
+ Video Acceleration API (VA API) is a library ("libVA") and API specification
+ which enables and provides access to graphics hardware (GPU) acceleration for
+ video processing on Linux and UNIX based operating systems. Accelerated
+ processing includes video decoding, video encoding, subpicture blending and
+ rendering. The specification was originally designed by Intel for its GMA
+ (Graphics Media Accelerator) series of GPU hardware, the API is however not
+ limited to GPUs or Intel specific hardware, as other hardware and manufacturers
+ can also freely use this API for hardware accelerated video decoding.
+ .
+ This package provides the libva-drm library.

@@ -1,0 +1,42 @@
+#!/bin/sh
+set -e
+
+USER_NAME=speech-dispatcher
+HOME_DIR=/var/run/speech-dispatcher
+
+if ! id -u $USER_NAME >/dev/null 2>&1; then
+  adduser --quiet --system --ingroup audio \
+          --home $HOME_DIR \
+          --shell /bin/false --disabled-login  \
+	  --gecos 'Speech Dispatcher' $USER_NAME
+  chown -R $USER_NAME $HOME_DIR
+elif ! test -d $HOME_DIR; then
+  if test -d /var/run/speechd; then
+    mv /var/run/speechd $HOME_DIR
+  else
+    mkdir $HOME_DIR
+  fi
+  usermod --shell /bin/false $USER_NAME
+fi
+
+if [ -d /var/log/speech-dispatcher ]; then
+  chown -R $USER_NAME /var/log/speech-dispatcher
+fi
+
+# Automatically added by dh_installinit/10.10.9
+if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ]; then
+	if [ -x "/etc/init.d/speech-dispatcher" ]; then
+		update-rc.d speech-dispatcher defaults >/dev/null
+		if [ -n "$2" ]; then
+			_dh_action=restart
+		else
+			_dh_action=start
+		fi
+		invoke-rc.d speech-dispatcher $_dh_action || true
+	fi
+fi
+# End automatically added section
+# Automatically added by dh_installdeb/10.10.9
+dpkg-maintscript-helper rm_conffile /etc/speech-dispatcher/clients/gnome-speech.conf 0.8.6-2\~ speech-dispatcher -- "$@"
+# End automatically added section
+

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+
+
+if [ -d /usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0 ]; then
+    # Purge the cache
+    rm -f /usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
+    rmdir -p --ignore-fail-on-non-empty /usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0
+fi
