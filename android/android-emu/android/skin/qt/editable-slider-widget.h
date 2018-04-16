@@ -48,19 +48,25 @@ public:
 
     // Changes the lower bound of the allowed value range. The current value is
     // clipped to fit into the new range.
-    void setMinimum(double minimum);
+    // Calling this method will emit the valueChanged signal as long as the
+    // emit_signal parameter is true.
+    void setMinimum(double minimum, bool emit_signal = true);
 
     // Changes the upper bound of the allowed value range. The current value is
     // clipped to fit into the new range.
-    void setMaximum(double maximum);
+    // Calling this method will emit the valueChanged signal as long as the
+    // emit_signal parameter is true.
+    void setMaximum(double maximum, bool emit_signal = true);
 
     // Equivalent to calling setMinimum and setMaximum one after another, with
     // the corresponding argument. If the range is invalid (i.e. minimum >= maximum),
     // this method will have no effect.
-    void setRange(double minimum, double maximum) {
+    // Calling this method may emit the valueChanged signal if the emit_signal
+    // parameter is true.
+    void setRange(double minimum, double maximum, bool emit_signal = true) {
         if (minimum < maximum) {
-            setMinimum(minimum);
-            setMaximum(maximum);
+            setMinimum(minimum, emit_signal);
+            setMaximum(maximum, emit_signal);
         }
     }
 

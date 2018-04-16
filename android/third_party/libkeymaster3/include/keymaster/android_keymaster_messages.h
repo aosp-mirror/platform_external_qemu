@@ -384,7 +384,7 @@ struct FinishOperationRequest : public KeymasterMessage {
     uint8_t* Serialize(uint8_t* buf, const uint8_t* end) const override;
     bool Deserialize(const uint8_t** buf_ptr, const uint8_t* end) override;
 
-    virtual void dump(FILE* fp) {
+    void dump(FILE* fp) override {
         fprintf(fp, "FinishOperationRequest input size %d ", (int)(input.available_read()));
         fprintf(fp, "FinishOperationRequest signature size %d\n", (int)(signature.available_read()));
     }

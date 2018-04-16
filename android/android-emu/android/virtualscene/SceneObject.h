@@ -17,7 +17,9 @@
 #pragma once
 
 /*
- * Defines SceneObject, which represents an object in the 3D scene.
+ * Defines SceneObject, which represents an object in the 3D scene.  To render
+ * content, use a class that derives SceneObject and adds content, such as
+ * MeshSceneObject.
  */
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
@@ -34,21 +36,10 @@ class SceneObject {
     DISALLOW_COPY_AND_ASSIGN(SceneObject);
 
 protected:
-    SceneObject();
+    SceneObject(Renderer& renderer);
 
 public:
-    ~SceneObject();
-
-    // Loads an object mesh from an .obj file.
-    //
-    // |renderer| - Renderer context, VirtualSceneObject will be bound to this
-    //              context.
-    // |filename| - Filename to load.
-    //
-    // Returns a SceneObject instance if the object could be loaded or null if
-    // there was an error.
-    static std::unique_ptr<SceneObject> loadFromObj(Renderer& renderer,
-                                                    const char* filename);
+    virtual ~SceneObject();
 
     // Sets the model transform.
     //
@@ -58,11 +49,18 @@ public:
     // Gets the model transform for this object.
     glm::mat4 getTransform() const;
 
+    // Get Renderables for the scene object.
     const std::vector<Renderable>& getRenderables() const;
 
-private:
+    // Returns true if the SceneObject is visible.
+    bool isVisible() const;
+
+protected:
+    Renderer& mRenderer;
+
     glm::mat4 mTransform = glm::mat4();
     std::vector<Renderable> mRenderables;
+    bool mVisible = true;
 };
 
 }  // namespace virtualscene

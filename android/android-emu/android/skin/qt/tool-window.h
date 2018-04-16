@@ -76,7 +76,7 @@ public:
 
     void setToolEmuAgent(const UiEmuAgent* agPtr);
 
-    static void setToolEmuAgentEarly(const UiEmuAgent* agentPtr);
+    static void earlyInitialization(const UiEmuAgent* agentPtr);
     static void onMainLoopStart();
     static const UiEmuAgent* getUiEmuAgent() { return sUiEmuAgent; }
 

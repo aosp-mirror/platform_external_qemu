@@ -95,7 +95,13 @@ void getGpuInfoListNative(GpuInfoList* gpulist) {
 
     // TODO: Don't do GPU info detection on Linux for now---lspci can be
     // inaccurate as to what GPU the user is actually using.
+#ifdef ANDROID_DEBUG
+    // Workaround for b/77586363, clang -O0 introduces some unexpected behavior
+    // when it comes to the else. See the bug for details
+    load_gpu_info();
+#else
     (void)load_gpu_info; // Make Werror happy
+#endif
     // std::string gpu_info = load_gpu_info();
     // parse_gpu_info_list_linux(gpu_info, gpulist);
 

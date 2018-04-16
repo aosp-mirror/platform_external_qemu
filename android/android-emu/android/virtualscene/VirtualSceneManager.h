@@ -20,20 +20,24 @@
  * Defines the Virtual Scene, used by the Virtual Scene Camera
  */
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/emulation/control/virtual_scene_agent.h"
 #include "android/utils/compiler.h"
+
+class GLESv2Dispatch;
 
 namespace android {
 namespace virtualscene {
 
 // Forward declarations.
-class Renderer;
-class Scene;
+class VirtualSceneManagerImpl;
 
 class VirtualSceneManager {
 public:
+    // Parse command line options for the virtual scene.
+    static void parseCmdline();
+
     // Initialize virtual scene rendering. Callers must have an active EGL
     // context.
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
@@ -55,10 +59,43 @@ public:
     // Returns the timestamp at which the frame is rendered.
     static int64_t render();
 
+    // Set the initial poster of the scene, loaded from persisted settings.
+    // Command line flags take precedence, so if the -virtualscene-poster flag
+    // has been specified for the posterName this call will not replace it.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |filename| - Path to an image file, either PNG or JPEG, or nullptr
+    //              to set to default.
+    static void setInitialPoster(const char* posterName, const char* filename);
+
+    // Load a poster into the scene from a file.  This may be called on any
+    // thread.  Changes to the scene will happen the next time that render()
+    // is called.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |filename| - Path to an image file, either PNG or JPEG.
+    //
+    // Returns true on success.
+    static bool loadPoster(const char* posterName, const char* filename);
+
+    // Enumerate posters in the scene and their current values.  Synchronously
+    // calls the callback for each poster in the scene.
+    //
+    // |context| - Context object, passed into callback.
+    // |callback| - Callback to be invoked for each poster.
+    static void enumeratePosters(void* context,
+                                 EnumeratePostersCallback callback);
+
+    // Set the size of a poster.
+    //
+    // |posterName| - Name of the poster position, such as "wall" or "table".
+    // |size| - Poster size, a value between 0 and 1. The value will be clamped
+    //          between the poster's minimum size and 1.
+    static void setPosterSize(const char* posterName, float size);
+
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
-    static Renderer* mRenderer;
-    static Scene* mScene;
+    static VirtualSceneManagerImpl* mImpl;
 };
 
 }  // namespace virtualscene

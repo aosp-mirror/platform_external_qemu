@@ -24,6 +24,7 @@
 #include "android/skin/winsys.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/emulator-qt-no-window.h"
+#include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/setenv.h"
@@ -538,6 +539,19 @@ extern void skin_winsys_init_args(int argc, char** argv) {
     g->argv = argv;
 }
 
+extern int skin_winsys_snapshot_control_start() {
+    GlobalState* g = globalState();
+    g->app = new QApplication(g->argc, g->argv);
+    androidQtDefaultInit();
+    // Pop up a stand-alone Snapshot pane
+    SnapshotPage* pSP = new SnapshotPage(nullptr, true);
+    if (pSP == nullptr) {
+        return 1;
+    }
+    pSP->show();
+    return g->app->exec();
+}
+
 extern void skin_winsys_start(bool no_window) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
@@ -628,7 +642,7 @@ extern void skin_winsys_error_dialog(const char* message, const char* title) {
 }
 
 void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
-    ToolWindow::setToolEmuAgentEarly(agent);
+    ToolWindow::earlyInitialization(agent);
 
     if (const auto window = EmulatorQtWindow::getInstance()) {
         window->runOnUiThread([agent, window] {

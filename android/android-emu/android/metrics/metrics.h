@@ -48,6 +48,11 @@ typedef void* AdbInterfacePtr;
 
 bool android_metrics_start_adb_liveness_checker(AdbInterfacePtr adb);
 
+// |opaque| is assumed to be a pointer to the
+// android_studio::AndroidStudioEvent protobuf. Since this is a C file used in
+// many other C environments, we do not include the protobuf headers here.
+void android_metrics_fill_common_info(bool openglAlive, void* opaque);
+
 void android_metrics_report_common_info(bool openglAlive);
 
 ANDROID_END_HEADER

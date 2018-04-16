@@ -141,6 +141,7 @@ LOCAL_SRC_FILES := \
     android/base/synchronization/MessageChannel.cpp \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
+    android/base/memory/MemoryHints.cpp \
     android/base/system/System.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
@@ -197,6 +198,7 @@ LOCAL_SRC_FILES := \
 ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
     android/base/files/preadwrite.cpp \
+    android/base/memory/SharedMemory_win32.cpp \
     android/base/threads/Thread_win32.cpp \
     android/base/system/Win32Utils.cpp \
     android/base/system/Win32UnicodeString.cpp \
@@ -205,6 +207,7 @@ LOCAL_SRC_FILES += \
 
 else
 LOCAL_SRC_FILES += \
+    android/base/memory/SharedMemory_posix.cpp \
     android/base/threads/Thread_pthread.cpp \
 
 endif
@@ -273,7 +276,6 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
-    android/audio/AudioCaptureThread.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -489,6 +491,8 @@ LOCAL_SRC_FILES := \
     android/utils/socket_drainer.cpp \
     android/utils/sockets.c \
     android/utils/looper.cpp \
+    android/virtualscene/MeshSceneObject.cpp \
+    android/virtualscene/PosterSceneObject.cpp \
     android/virtualscene/Renderer.cpp \
     android/virtualscene/RenderTarget.cpp \
     android/virtualscene/Scene.cpp \
@@ -521,16 +525,43 @@ ifeq ($(BUILD_TARGET_OS),windows)
 
 endif
 
-# This file can get included multiple times, with different variable declarations.
-# We only want to set the LOCAL_COPY_COMMON_PREBUILT_RESOURCES once. GNUmake will
-# complain that we are overriding targets if we don't.
+# This file can get included multiple times, with different variable
+# declarations. We only want to set LOCAL_COPY_COMMON_PREBUILT_RESOURCES and
+# LOCAL_COPY_COMMON_TESTDATA once. GNUmake will complain that we are overriding
+# targets if we don't.
 ifdef FIRST_INCLUDE
 LOCAL_COPY_COMMON_PREBUILT_RESOURCES += \
-      virtualscene/Toren1BD/Toren1BD.mtl \
-      virtualscene/Toren1BD/Toren1BD.obj \
-      virtualscene/Toren1BD/Toren1BD_Decor.png \
-      virtualscene/Toren1BD/Toren1BD_Main.png \
-      virtualscene/Toren1BD/Toren1BD_TV.png
+    virtualscene/Toren1BD/Toren1BD.mtl \
+    virtualscene/Toren1BD/Toren1BD.obj \
+    virtualscene/Toren1BD/Toren1BD.posters \
+    virtualscene/Toren1BD/Toren1BD_Decor.png \
+    virtualscene/Toren1BD/Toren1BD_Main.png \
+    virtualscene/Toren1BD/poster.png \
+
+LOCAL_COPY_COMMON_TESTDATA += \
+    textureutils/gray_alpha_golden.bmp \
+    textureutils/gray_alpha.png \
+    textureutils/gray_golden.bmp \
+    textureutils/gray.png \
+    textureutils/indexed_alpha_golden.bmp \
+    textureutils/indexed_alpha.png \
+    textureutils/indexed_golden.bmp \
+    textureutils/indexed.png \
+    textureutils/interlaced_golden.bmp \
+    textureutils/interlaced.png \
+    textureutils/jpeg_gray_golden.bmp \
+    textureutils/jpeg_gray.jpg \
+    textureutils/jpeg_gray_progressive_golden.bmp \
+    textureutils/jpeg_gray_progressive.jpg \
+    textureutils/jpeg_rgb24_golden.bmp \
+    textureutils/jpeg_rgb24.jpg \
+    textureutils/jpeg_rgb24_progressive_golden.bmp \
+    textureutils/jpeg_rgb24_progressive.jpg \
+    textureutils/rgb24_31px_golden.bmp \
+    textureutils/rgb24_31px.png \
+    textureutils/rgba32_golden.bmp \
+    textureutils/rgba32.png \
+
 endif
 
 $(call gen-hw-config-defs)
@@ -652,9 +683,11 @@ LOCAL_SRC_FILES := \
   android/base/FunctionView_unittest.cpp \
   android/base/Log_unittest.cpp \
   android/base/memory/LazyInstance_unittest.cpp \
+  android/base/memory/MemoryHints_unittest.cpp \
   android/base/memory/MallocUsableSize_unittest.cpp \
   android/base/memory/OnDemand_unittest.cpp \
   android/base/memory/ScopedPtr_unittest.cpp \
+  android/base/memory/SharedMemory_unittest.cpp \
   android/base/misc/FileUtils_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
@@ -760,6 +793,7 @@ LOCAL_SRC_FILES := \
   android/utils/string_unittest.cpp \
   android/utils/sockets_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \
+  android/virtualscene/TextureUtils_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
@@ -888,12 +922,19 @@ LOCAL_SRC_FILES += \
     android/skin/LibuiAgent.cpp \
     android/gpu_frame.cpp \
     android/emulator-window.c \
+    android/emulation/control/ScreenCapturer.cpp \
     android/window-agent-impl.cpp \
     android/main-common-ui.c \
     android/resource.c \
-    android/ffmpeg-audio-capture.cpp \
-    android/ffmpeg-muxer.cpp \
-    android/screen-recorder.cpp
+    android/recording/audio/AudioProducer.cpp \
+    android/recording/codecs/audio/VorbisCodec.cpp \
+    android/recording/codecs/video/VP9Codec.cpp \
+    android/recording/FfmpegRecorder.cpp \
+    android/recording/Frame.cpp \
+    android/recording/GifConverter.cpp \
+    android/recording/screen-recorder.cpp \
+    android/recording/video/GuestReadbackWorker.cpp \
+    android/recording/video/VideoProducer.cpp
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
@@ -905,26 +946,45 @@ $(call end-emulator-library)
 
 # emulator-libui unit tests
 
+# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
+# string literals which are being glued together
+#LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
+
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_libui_unittests)
 
 LOCAL_C_INCLUDES += \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
+    $(FFMPEG_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/skin/keycode_unittest.cpp \
     android/skin/keycode-buffer_unittest.cpp \
     android/skin/rect_unittest.cpp \
+    android/recording/test/DummyAudioProducer.cpp \
+    android/recording/test/DummyVideoProducer.cpp \
+    android/recording/test/FfmpegRecorder_unittest.cpp \
+
+LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS)
+# ffmpeg mac dependency
+ifeq ($(BUILD_TARGET_OS),darwin)
+    LOCAL_LDLIBS += -lbz2
+endif
 
 LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \
 
 LOCAL_CFLAGS += -O0
+# EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-libgtest \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
+    $(FFMPEG_STATIC_LIBRARIES) \
+    $(LIBX264_STATIC_LIBRARIES) \
+    $(LIBVPX_STATIC_LIBRARIES) \
+    emulator-zlib \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from

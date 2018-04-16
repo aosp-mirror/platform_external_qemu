@@ -323,6 +323,7 @@ ScopedEglContext VirtualSceneCameraDevice::makeEglCurrent() {
  ******************************************************************************/
 
 using android::virtualscene::VirtualSceneCameraDevice;
+using android::virtualscene::VirtualSceneManager;
 
 static VirtualSceneCameraDevice* toVirtualSceneCameraDevice(CameraDevice* ccd) {
     if (!ccd || !ccd->opaque) {
@@ -330,6 +331,10 @@ static VirtualSceneCameraDevice* toVirtualSceneCameraDevice(CameraDevice* ccd) {
     }
 
     return reinterpret_cast<VirtualSceneCameraDevice*>(ccd->opaque);
+}
+
+void camera_virtualscene_parse_cmdline() {
+    VirtualSceneManager::parseCmdline();
 }
 
 uint32_t camera_virtualscene_preferred_format() {

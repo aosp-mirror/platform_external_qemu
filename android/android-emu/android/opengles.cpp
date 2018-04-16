@@ -331,6 +331,37 @@ android_redrawOpenglesWindow(void)
     }
 }
 
+bool
+android_hasGuestPostedAFrame(void)
+{
+    if (sRenderer) {
+        return sRenderer->hasGuestPostedAFrame();
+    }
+    return false;
+}
+
+void
+android_resetGuestPostedAFrame(void)
+{
+    if (sRenderer) {
+        sRenderer->resetGuestPostedAFrame();
+    }
+}
+
+static ScreenshotFunc sScreenshotFunc = nullptr;
+
+void android_registerScreenshotFunc(ScreenshotFunc f)
+{
+    sScreenshotFunc = f;
+}
+
+void android_screenShot(const char* dirname)
+{
+    if (sScreenshotFunc) {
+        sScreenshotFunc(dirname);
+    }
+}
+
 const emugl::RendererPtr& android_getOpenglesRenderer() {
     return sRenderer;
 }

@@ -87,6 +87,19 @@ public:
     void setOpenGLDisplayRotation(float zRot) { }
     void setOpenGLDisplayTranslation(float px, float py) { }
     void repaintOpenGLDisplay() { }
+
+    bool hasGuestPostedAFrame() {
+        return mGuestPostedAFrame;
+    }
+
+    void resetGuestPostedAFrame() {
+        mGuestPostedAFrame = false;
+    }
+
+    void setGuestPostedAFrame() {
+        mGuestPostedAFrame = true;
+    }
+
     void setScreenMask(int width, int height, const unsigned char* rgbaData) { }
     void cleanupProcGLObjects(uint64_t puid) { }
     void stop(bool wait) { }
@@ -113,6 +126,7 @@ public:
     }
 private:
     bool mHasValidScreenshot = false;
+    bool mGuestPostedAFrame = false;
     static const int kWidth = 1080;
     static const int kHeight = 1920;
 };
@@ -186,5 +200,19 @@ TEST_F(ScreenCapturerTest, getFrameBufferRgba888) {
                 *frameBufferData = buffer;
             },
             mScreenshotPath.c_str()));
+}
+
+TEST_F(ScreenCapturerTest, guestPostedAFrame) {
+    MockRenderer renderer(false);
+
+    EXPECT_FALSE(renderer.hasGuestPostedAFrame());
+
+    renderer.setGuestPostedAFrame();
+
+    EXPECT_TRUE(renderer.hasGuestPostedAFrame());
+
+    renderer.resetGuestPostedAFrame();
+
+    EXPECT_FALSE(renderer.hasGuestPostedAFrame());
 }
 

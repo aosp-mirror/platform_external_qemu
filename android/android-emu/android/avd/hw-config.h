@@ -99,4 +99,7 @@ const char* androidHwConfig_getKernelSerialPrefix( AndroidHwConfig* config );
 // non-defaulted settings into |target|
 void androidHwConfig_stripDefaults(CIniFile* source, CIniFile* target);
 
+// Checks if the hw config has the virtual scene camera enabled.
+int androidHwConfig_hasVirtualSceneCamera(AndroidHwConfig* config);
+
 ANDROID_END_HEADER
