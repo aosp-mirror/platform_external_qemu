@@ -1,0 +1,14 @@
+import("//third_party/protobuf/proto_library.gni")
+
+group("proto_lite") {
+  public_deps = [
+    ":proto",
+    "//third_party/protobuf:protobuf_lite",
+  ]
+}
+
+proto_library("proto") {
+  sources = [
+    "VehicleHalProto.proto",
+  ]
+}
