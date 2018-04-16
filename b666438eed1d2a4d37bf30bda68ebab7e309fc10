@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "23196530_d38c7ed1",
+        "filename": "android/qemu1/qemu-options.hx",
+        "patchSetId": 2
+      },
+      "lineNbr": 1730,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-04-16T17:38:51Z",
+      "side": 1,
+      "message": "add a sentence saying that it only works when combined with -wipe-data?",
+      "revId": "b666438eed1d2a4d37bf30bda68ebab7e309fc10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
