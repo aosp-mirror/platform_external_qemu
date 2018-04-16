@@ -4252,6 +4252,15 @@ STEXI
 Set timezone instead of using host's default
 ETEXI
 
+DEF("adbkeyfile", HAS_ARG, QEMU_OPTION_adbkeyfile,
+    "-adbkeyfile <path-to-adb-public-key-file> use this adb public key file"
+    " instead of default .android/adbkey.pub\n", QEMU_ARCH_ALL)
+STEXI
+@item -adbkeyfile
+@findex -adbkeyfile
+Use the user provided adb public key file
+ETEXI
+
 DEF("net-tap", HAS_ARG, QEMU_OPTION_net_tap,
     "-net-tap <tap interface> use the provided TAP interface for networking\n", QEMU_ARCH_ALL)
 STEXI

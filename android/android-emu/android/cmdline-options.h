@@ -138,6 +138,7 @@ OPT_PARAM( scale, "<scale>", "scale emulator window (deprecated)" )
 
 OPT_PARAM( http_proxy, "<proxy>", "make TCP connections through a HTTP/HTTPS proxy" )
 OPT_PARAM( timezone, "<timezone>", "use this timezone instead of the host's default" )
+OPT_PARAM( adbkeyfile, "<path-to-adb-key-file>", "use this adb public key file instead of the default" )
 OPT_PARAM( dns_server, "<servers>", "use this DNS server(s) in the emulated system" )
 OPT_PARAM( net_tap, "<interface>", "use this TAP interface for networking" )
 OPT_PARAM( net_tap_script_up, "<script>", "script to run when the TAP interface goes up" )
