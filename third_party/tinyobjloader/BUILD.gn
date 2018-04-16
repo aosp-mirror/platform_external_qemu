@@ -1,0 +1,15 @@
+import("//android/config.gni")
+
+config("emulator-tinyobjloader_config") {
+  include_dirs = [
+    ".",
+  ]
+}
+
+static_library("emulator-tinyobjloader") {
+  sources = [
+    "tiny_obj_loader.cc",
+  ]
+
+  public_configs = [ ":emulator-tinyobjloader_config" ]
+}
