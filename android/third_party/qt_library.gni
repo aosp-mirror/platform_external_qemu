@@ -1,0 +1,412 @@
+# Copyright 2018 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# qt_library.gni
+# refer to third_party/protobuf/proto_library.gni
+
+# Invoke Qt moc tool to generate .moc files
+# The generated files are provided as a source_set that can be used as dep
+# for other projects
+#
+
+# parameters:
+#
+#   in_dir (optional)
+#       Specifies the path relative to the current BUILD.gn file where
+#       moc cpp files are located and the directory structure of
+#       this library starts.
+#
+#       This option can be calculated automatically but it will raise an
+#       assertion error if any nested directories are found.
+#
+#   moc_out_dir (optional)
+#       Specifies the path suffix that output files are generated under.
+#       This path will be appended to |root_gen_dir|.
+#   cc_include (optional)
+#       String listing an extra include that should be passed.
+#       Example: cc_include = "foo/bar.h"
+
+# Example:
+#  qt_library("mylib") {
+#    moc_sources = [
+#      "foo.h",
+#    ]
+#
+#    ui_sources = [
+#      "foo.ui",
+#    ]
+#  }
+
+import("//build/config/sanitizers/sanitizers.gni")
+import("../config.gni")
+
+# copied from qt5.mk
+QT_TOP_DIR = "$QT_PREBUILTS_DIR/$BUILD_TARGET_TAG"
+QT_TOP64_DIR = "$QT_PREBUILTS_DIR/$BUILD_TARGET_OS-x86_64"
+QT_MOC_TOOL = "$QT_TOP64_DIR/bin/moc"
+QT_RCC_TOOL = "$QT_TOP64_DIR/bin/rcc"
+
+# Special-case: the 'uic' tool depends on Qt5Core: always ensure that the
+# version that is being used is from the prebuilts directory. Otherwise
+# the executable may fail to start due to dynamic linking problems.
+QT_UIC_TOOL_LDPATH = "$QT_TOP64_DIR/lib"
+QT_UIC_TOOL = "$QT_TOP64_DIR/bin/uic"
+
+template("qt_library") {
+  assert(defined(invoker.moc_ources) ||
+         defined(invoker.ui_sources) ||
+         defined(invoker.static_resources) ||
+         defined(invoker.dynamic_resources),
+         "Need sources, ui_sources or resources for qt_library")
+
+  moc_sources = invoker.moc_sources
+
+  # Don't apply OS-specific sources filtering to the assignments later on.
+  # Platform files should have gotten filtered out in the sources assignment
+  # when this template was invoked. If they weren't, it was on purpose and
+  # this template shouldn't re-apply the filter.
+  set_sources_assignment_filter([])
+
+  if (host_os == "win") {
+    host_executable_suffix = ".exe"
+  } else {
+    host_executable_suffix = ""
+  }
+
+  if (defined(invoker.in_dir)) {
+    in_dir = invoker.in_dir
+    has_nested_dirs = false
+    foreach(moc_source, moc_sources) {
+      if (get_path_info(moc_source, "dir") != in_dir) {
+        has_nested_dirs = true
+      }
+    }
+  } else {
+    in_dir = get_path_info(moc_sources[0], "dir")
+    has_nested_dirs = false
+
+    # Sanity check, |in_dir| should be defined to allow sub-directories.
+    foreach(moc_source, moc_sources) {
+      assert(get_path_info(moc_source, "dir") == in_dir,
+             "Please define |in_dir| to allow nested directories.")
+    }
+  }
+
+  # Avoid absolute path because of the assumption that |in_dir| is
+  # relative to the directory of current BUILD.gn file.
+  in_dir = rebase_path(in_dir, ".")
+
+  if (defined(invoker.moc_out_dir)) {
+    moc_out_dir = invoker.moc_out_dir
+  } else {
+    # Absolute path to the directory of current BUILD.gn file excluding "//".
+    moc_out_dir = rebase_path(".", "//")
+    if (in_dir != ".") {
+      moc_out_dir += "/$in_dir"
+    }
+  }
+
+  # We need both absolute path to use in GN statements and a relative one
+  # to pass to external script.
+  cc_out_dir = "$root_gen_dir/" + moc_out_dir
+  rel_cc_out_dir = rebase_path(cc_out_dir, root_build_dir)
+
+  # List input .h files.
+  header_files = rebase_path(invoker.moc_sources, in_dir)
+  mocgens = []
+
+  # List output .cpp files.
+  foreach(header, header_files) {
+    header_dir = get_path_info(header, "dir")
+    header_name = get_path_info(header, "name")
+    header_path = header_dir + "/moc_" + header_name
+
+    mocgens += [
+      "$cc_out_dir/$header_path.cpp",
+    ]
+  }
+
+  # List input .ui files.
+  ui_files = rebase_path(invoker.ui_sources, in_dir)
+  uicgens = []
+
+  # List output .h files from .ui files
+  foreach(uif, ui_files) {
+    dir = get_path_info(uif, "dir")
+    name = get_path_info(uif, "name")
+    path = dir + "/ui_" + name
+
+    uicgens += [
+      "$cc_out_dir/$path.h",
+    ]
+  }
+
+  #print("uicgens: $uicgens")
+
+  # List input static .qrs files.
+  static_resource_files = rebase_path(invoker.static_resources, in_dir)
+  static_resource_gens = []
+
+  # List output .cpp files from .qrc files
+  foreach(rsrc, static_resource_files) {
+    dir = get_path_info(rsrc, "dir")
+    name = get_path_info(rsrc, "name")
+    path = dir + "/rcc_" + name
+
+    static_resource_gens += [
+      "$cc_out_dir/$path.cpp",
+    ]
+  }
+
+  # List input dynamic .qrs files.
+  dynamic_resource_files = rebase_path(invoker.dynamic_resources, in_dir)
+  dynamic_resource_gens = []
+
+  # List output .cpp files from .qrc files
+  foreach(rsrc, dynamic_resource_files) {
+    dir = get_path_info(rsrc, "dir")
+    name = get_path_info(rsrc, "name")
+    path = dir + "/rcc_" + name
+
+    dynamic_resource_gens += [
+      "$cc_out_dir/$path.cpp",
+    ]
+  }
+
+  action_name = "${target_name}_gen"
+  source_set_name = target_name
+
+  # Generate moc cpp files from .h files.
+  action(action_name + "_moc") {
+    visibility = [ ":$source_set_name" ]
+    script = "//external/qemu/android/third_party/qt_moc_wrapper.py"
+    sources = moc_sources
+    outputs = get_path_info(mocgens, "abspath")
+    args = header_files
+
+    moc_path = get_path_info(QT_MOC_TOOL, "abspath") + host_executable_suffix
+
+   if (!is_win) {
+      ldpath = get_path_info(QT_UIC_TOOL_LDPATH, "abspath")
+      args += [
+        "--ldpath",
+        "./" + rebase_path(ldpath, root_build_dir),
+      ]
+    } 
+
+    args += [
+      # Wrapper should never pick a system moc.
+      # Path should be rebased because |root_build_dir| for current toolchain
+      # may be different from |root_out_dir| of moc built on host toolchain.
+      "--moc",
+      "./" + rebase_path(moc_path, root_build_dir),
+      "--moc-in-dir",
+      rebase_path(in_dir, root_build_dir),
+    ]
+
+    args += [
+      "--cc-out-dir",
+      rel_cc_out_dir,
+    ]
+
+    if (defined(invoker.cc_include)) {
+      args += [
+        "--include",
+        invoker.cc_include,
+      ]
+    }
+
+    if (defined(invoker.deps)) {
+      # The deps may have steps that have to run before running moc.
+      deps += invoker.deps
+    }
+  }
+
+  # Generate .h files from .ui files.
+  action(action_name + "_uic") {
+    visibility = [ ":$source_set_name" ]
+    script = "//external/qemu/android/third_party/qt_uic_wrapper.py"
+    sources = ui_files
+    outputs = get_path_info(uicgens, "abspath")
+    args = ui_files
+
+    uic_path = get_path_info(QT_UIC_TOOL, "abspath") + host_executable_suffix
+
+   if (!is_win) {
+      ldpath = get_path_info(QT_UIC_TOOL_LDPATH, "abspath")
+      args += [
+        "--ldpath",
+        "./" + rebase_path(ldpath, root_build_dir),
+      ]
+    } 
+
+    args += [
+      # Wrapper should never pick a system moc.
+      # Path should be rebased because |root_build_dir| for current toolchain
+      # may be different from |root_out_dir| of moc built on host toolchain.
+      "--uic",
+      "./" + rebase_path(uic_path, root_build_dir),
+      "--ui-in-dir",
+      rebase_path(in_dir, root_build_dir),
+    ]
+
+    args += [
+      "--header-out-dir",
+      rel_cc_out_dir,
+    ]
+
+    if (defined(invoker.cc_include)) {
+      args += [
+        "--include",
+        invoker.cc_include,
+      ]
+    }
+
+    if (defined(invoker.deps)) {
+      # The deps may have steps that have to run before running moc.
+      deps += invoker.deps
+    }
+  }
+
+  # Generate static .cpp files from .qrc files.
+  action(action_name + "_static_qrc") {
+    visibility = [ ":$source_set_name" ]
+    script = "//external/qemu/android/third_party/qt_rcc_wrapper.py"
+    sources = static_resource_files
+    outputs = get_path_info(static_resource_gens, "abspath")
+    args = static_resource_files
+
+    rcc_path = get_path_info(QT_RCC_TOOL, "abspath") + host_executable_suffix
+
+   if (!is_win) {
+      ldpath = get_path_info(QT_UIC_TOOL_LDPATH, "abspath")
+      args += [
+        "--ldpath",
+        "./" + rebase_path(ldpath, root_build_dir),
+      ]
+    } 
+
+    args += [
+      # Wrapper should never pick a system moc.
+      # Path should be rebased because |root_build_dir| for current toolchain
+      # may be different from |root_out_dir| of moc built on host toolchain.
+      "--rcc",
+      "./" + rebase_path(rcc_path, root_build_dir),
+      "--qrc-in-dir",
+      rebase_path(in_dir, root_build_dir),
+    ]
+
+    args += [
+      "--cc-out-dir",
+      rel_cc_out_dir,
+    ]
+
+    if (defined(invoker.cc_include)) {
+      args += [
+        "--include",
+        invoker.cc_include,
+      ]
+    }
+
+    if (defined(invoker.deps)) {
+      # The deps may have steps that have to run before running moc.
+      deps += invoker.deps
+    }
+  }
+
+  # Generate dynamic .cpp files from .qrc files.
+  # everything same as _static_name, except one extra arg "--dynamic"
+  action(action_name + "_dynamic_qrc") {
+    visibility = [ ":$source_set_name" ]
+    script = "//external/qemu/android/third_party/qt_rcc_wrapper.py"
+    sources = static_resource_files
+    outputs = get_path_info(dynamic_resource_gens, "abspath")
+    args = dynamic_resource_files
+
+    rcc_path = get_path_info(QT_RCC_TOOL, "abspath") + host_executable_suffix
+
+   if (!is_win) {
+      ldpath = get_path_info(QT_UIC_TOOL_LDPATH, "abspath")
+      args += [
+        "--ldpath",
+        "./" + rebase_path(ldpath, root_build_dir),
+      ]
+    } 
+
+    args += [
+      # Wrapper should never pick a system moc.
+      # Path should be rebased because |root_build_dir| for current toolchain
+      # may be different from |root_out_dir| of moc built on host toolchain.
+      "--rcc",
+      "./" + rebase_path(rcc_path, root_build_dir),
+      "--qrc-in-dir",
+      rebase_path(in_dir, root_build_dir),
+      "--dynamic",
+    ]
+
+    args += [
+      "--cc-out-dir",
+      rel_cc_out_dir,
+    ]
+
+    if (defined(invoker.cc_include)) {
+      args += [
+        "--include",
+        invoker.cc_include,
+      ]
+    }
+
+    if (defined(invoker.deps)) {
+      # The deps may have steps that have to run before running moc.
+      deps += invoker.deps
+    }
+  }
+
+  # Generated files may include other generated headers. These includes always
+  # use relative paths starting at |cc_out_dir|.
+  # However there is no necessity to add an additional directory, if all headers
+  # are located in the same directory which is in the search path by default.
+  if (has_nested_dirs) {
+    config_name = "${target_name}_config"
+    config(config_name) {
+      include_dirs = [ cc_out_dir ]
+    }
+  }
+
+  # Build generated moc cpp stubs as source set.
+  target("source_set", target_name) {
+    forward_variables_from(invoker,
+                           [               
+                             "defines",
+                             "testonly",
+                             "visibility",
+                           ])
+
+    sources = get_target_outputs(":$action_name" + "_moc")
+    sources += get_target_outputs(":$action_name" + "_uic")
+    sources += get_target_outputs(":$action_name" + "_static_qrc")
+    sources += get_target_outputs(":$action_name" + "_dynamic_qrc")
+
+    if (defined(invoker.include_dirs)) {
+      include_dirs = invoker.include_dirs
+    }
+
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+
+    deps = [
+      ":$action_name" + "_moc",
+      ":$action_name" + "_uic",
+      ":$action_name" + "_static_qrc",
+      ":$action_name" + "_dynamic_qrc",
+    ]
+
+    # This will link any libraries in the deps (the use of invoker.deps in the
+    # action won't link it).
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }    
+  }
+}
