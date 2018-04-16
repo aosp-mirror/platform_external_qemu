@@ -31,7 +31,7 @@ public:
 private:
     void* mLzStream;
     SmallFixedVector<char, 512> mBuffer;
-    int mBufferPos = 0;
+    size_t mBufferPos = 0;
 };
 
 }  // namespace base
