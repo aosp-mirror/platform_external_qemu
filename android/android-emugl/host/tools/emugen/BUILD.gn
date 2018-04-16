@@ -1,0 +1,36 @@
+# Determine if the emugen build needs to be builts from
+# sources.
+
+executable("emugen") {
+  sources = [
+    "ApiGen.cpp",
+    "EntryPoint.cpp",
+    "main.cpp",
+    "Parser.cpp",
+    "strUtils.cpp",
+    "TypeFactory.cpp",
+  ]
+
+  include_dirs = [
+    "//external/qemu/android/android-emu",
+  ]
+
+  deps = [
+    "//build/config:exe_and_shlib_deps",
+    "//build/win:default_exe_manifest",
+  ]
+}
+
+# The location of the emugen host tool that is used to generate wire
+# protocol encoders/ decoders. This variable is used by other emugl modules.
+executable("emugen_unittests") {
+  sources = [
+    "Parser.cpp",
+    "Parser_unittest.cpp",
+  ]
+
+  deps = [
+    "//build/config:exe_and_shlib_deps",
+    "//build/win:default_exe_manifest",
+  ]
+}

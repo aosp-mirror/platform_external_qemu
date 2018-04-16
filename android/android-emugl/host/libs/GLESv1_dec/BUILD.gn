@@ -1,0 +1,67 @@
+import("//build/compiled_action.gni")
+
+_emugl_src = "gles1"
+_emugl_dec = "$target_gen_dir/gles1"
+
+# invoke the following command to generate decoder code
+# out/Default/emugen -D out/Default -i external/qemu/android/android-emugl/host/libs/GLESv1_dec gles1
+compiled_action("run_emugen_gles1") {
+  tool = "//external/qemu/android/android-emugl/host/tools/emugen:emugen"
+  outputs = [
+    _emugl_dec + "_dec.cpp",
+    _emugl_dec + "_dec.h",
+    _emugl_dec + "_opcodes.h",
+    _emugl_dec + "_server_context.h",
+    _emugl_dec + "_server_context.cpp",
+  ]
+
+  # The tool takes this input, optional
+  #inputs = [
+  #]
+
+  # In this case, the tool takes as arguments the input file and the output
+  # build dir (both relative to the "cd" that the script will be run in)
+  # and will produce the output files listed above.
+  args = [
+    "-D", rebase_path(target_gen_dir, root_build_dir),
+    "-i", rebase_path(".", root_build_dir),
+    _emugl_src,
+  ]
+}
+
+config("libGLESv1_dec_config") {
+  include_dirs = [
+    ".",
+   target_gen_dir,
+  ]
+}
+
+static_library("libGLESv1_dec") {
+  # add this to use android as folder name
+  set_sources_assignment_filter([])
+  sources = [
+    "GLESv1Decoder.cpp",
+    _emugl_dec + "_dec.cpp",
+    _emugl_dec + "_dec.h",
+    _emugl_dec + "_opcodes.h",
+    _emugl_dec + "_server_context.h",
+    _emugl_dec + "_server_context.cpp",
+  ]
+
+  #print(sources)
+
+  include_dirs = [
+    ".",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/shared",
+    "//external/qemu/android/android-emugl/shared/OpenglCodecCommon",
+    target_gen_dir,
+  ]
+
+  deps = [
+    ":run_emugen_gles1",
+  ]
+
+  public_configs = [ ":libGLESv1_dec_config" ]
+}

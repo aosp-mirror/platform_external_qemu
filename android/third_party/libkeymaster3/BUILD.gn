@@ -1,0 +1,84 @@
+import("//external/qemu/android/config.gni")
+
+LIBCURL_TOP_DIR = "$LIBCURL_PREBUILTS_DIR/$BUILD_TARGET_TAG"
+
+config("libkeymaster3_config") {
+  include_dirs = [ "." ]
+}
+
+static_library("libkeymaster3") {
+  sources = [
+    "aes_key.cpp",
+    "aes_operation.cpp",
+    "android_keymaster.cpp",
+    "android_keymaster_messages.cpp",
+    "android_keymaster_utils.cpp",
+    "asymmetric_key.cpp",
+    "asymmetric_key_factory.cpp",
+    "attestation_record.cpp",
+    "auth_encrypted_key_blob.cpp",
+    "authorization_set.cpp",
+    "ecdsa_keymaster1_operation.cpp",
+    "ecdsa_operation.cpp",
+    "ecies_kem.cpp",
+    "ec_key.cpp",
+    "ec_key_factory.cpp",
+    "ec_keymaster0_key.cpp",
+    "ec_keymaster1_key.cpp",
+    "hkdf.cpp",
+    "hmac.cpp",
+    "hmac_key.cpp",
+    "hmac_operation.cpp",
+    "integrity_assured_key_blob.cpp",
+    "iso18033kdf.cpp",
+    "kdf.cpp",
+    "key.cpp",
+    "keymaster0_engine.cpp",
+    "keymaster1_engine.cpp",
+    "keymaster_enforcement.cpp",
+    "keymaster_ipc.cpp",
+    "keymaster_tags.cpp",
+    "logger.cpp",
+    "nist_curve_key_exchange.cpp",
+    "ocb.c",
+    "ocb_utils.cpp",
+    "openssl_err.cpp",
+    "openssl_utils.cpp",
+    "operation.cpp",
+    "operation_table.cpp",
+    "rsa_key.cpp",
+    "rsa_key_factory.cpp",
+    "rsa_keymaster0_key.cpp",
+    "rsa_keymaster1_key.cpp",
+    "rsa_keymaster1_operation.cpp",
+    "rsa_operation.cpp",
+    "serializable.cpp",
+    "soft_keymaster_context.cpp",
+    "soft_keymaster_device.cpp",
+    "symmetric_key.cpp",
+    "trusty_keymaster_context.cpp",
+    "trusty_keymaster_enforcement.cpp",
+    "trusty_rng.c",
+  ]
+
+  if (is_win) {
+    cflags = [
+      "-DUSE_MINGW=1",
+    ]
+  }
+
+  include_dirs = [
+    ".",
+    "src",
+    "include",
+    "$LIBCURL_TOP_DIR/include",
+    "../../../android/android-emu"
+  ]
+
+  public_configs = [
+    ":libkeymaster3_config",
+    "//external/qemu/android/third_party:libcrypto",
+    "//external/qemu/android/third_party:libssl",
+  ]
+}
+
