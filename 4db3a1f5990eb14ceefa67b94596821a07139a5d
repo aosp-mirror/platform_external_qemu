@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5cea73a9_8ce7ab72",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/camera-page.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-16T21:53:21Z",
+      "side": 1,
+      "message": "I believe our guidelines are for sentence caps, so I think we do not want this change.",
+      "range": {
+        "startLine": 33,
+        "startChar": 13,
+        "endLine": 33,
+        "endChar": 27
+      },
+      "revId": "4db3a1f5990eb14ceefa67b94596821a07139a5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1a7edb4_d51c58a9",
+        "filename": "android/android-emu/android/skin/qt/poster-image-well.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-16T21:53:21Z",
+      "side": 1,
+      "message": "\"Open image\"",
+      "range": {
+        "startLine": 118,
+        "startChar": 21,
+        "endLine": 118,
+        "endChar": 33
+      },
+      "revId": "4db3a1f5990eb14ceefa67b94596821a07139a5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "21e34ac6_304e5d76",
+        "filename": "android/android-emu/android/skin/qt/poster-image-well.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-16T21:53:21Z",
+      "side": 1,
+      "message": "can eliminate this \u0027else\u0027",
+      "range": {
+        "startLine": 145,
+        "startChar": 4,
+        "endLine": 145,
+        "endChar": 12
+      },
+      "revId": "4db3a1f5990eb14ceefa67b94596821a07139a5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5252495_3f6e15b7",
+        "filename": "android/android-emu/android/skin/qt/poster-image-well.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-16T21:53:21Z",
+      "side": 1,
+      "message": "tr()\nMaybe tr(\"Can\u0027t load image: \")",
+      "range": {
+        "startLine": 152,
+        "startChar": 22,
+        "endLine": 152,
+        "endChar": 51
+      },
+      "revId": "4db3a1f5990eb14ceefa67b94596821a07139a5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
