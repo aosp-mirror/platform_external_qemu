@@ -1,0 +1,82 @@
+import("//external/qemu/android/config.gni")
+#import("//third_party/protobuf/proto_library.gni")
+
+shared_library("lib$BUILD_TARGET_SUFFIX" + "EGL_translator") {
+  sources = [
+    "ThreadInfo.cpp",
+    "EglImp.cpp",
+    "EglConfig.cpp",
+    "EglContext.cpp",
+    "EglGlobalInfo.cpp",
+    "EglValidate.cpp",
+    "EglSurface.cpp",
+    "EglWindowSurface.cpp",
+    "EglPbufferSurface.cpp",
+    "EglThreadInfo.cpp",
+    "EglDisplay.cpp",
+    "ClientAPIExts.cpp",
+  ]
+
+  if (is_linux) {
+    sources += [
+      "EglOsApi_glx.cpp",
+      "EglOsApi_egl.cpp",
+      "CoreProfileConfigs_linux.cpp",
+    ]
+
+    ldflags = [
+      "-lGL",
+      "-lX11",
+      "-ldl",
+      "-lpthread",
+    ]
+  }
+
+  if (is_mac) {
+    sources += [
+      "EglOsApi_darwin.cpp",
+      "EglOsApi_egl.cpp",
+      "MacNative.m",
+      "MacPixelFormatsAttribs.m",
+    ]
+
+    ldflags = [
+      "-Wl",
+      "-framework,AppKit",
+    ]
+  }
+
+  if (is_win) {
+    sources += [
+      "EglOsApi_wgl.cpp",
+      "EglOsApi_egl.cpp",
+      "CoreProfileConfigs_windows.cpp",
+    ]
+
+    ldflags = [
+      "-lgdi32",
+    ]
+  }
+
+  include_dirs = [
+    ".",
+    "../include",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+
+  configs += [
+    "//external/qemu/android/third_party:libANGLETranslation",
+    "//external/qemu/android/third_party:libprotobuf",
+  ]
+
+  deps = [
+    "//build/config:exe_and_shlib_deps",
+    "//build/win:default_exe_manifest",
+    "//third_party/protobuf:protobuf_full",
+    "//external/qemu/android/android-emu:android-emu-base",
+    "//external/qemu/android/android-emugl/host/libs/Translator/GLcommon:libGLcommon",
+#    "//external/qemu/android/android-emugl/shared/emugl/common:libemugl_common",
+  ]
+}
