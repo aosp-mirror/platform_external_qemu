@@ -1,0 +1,16 @@
+import("//third_party/protobuf/proto_library.gni")
+
+group("proto_lite") {
+  public_deps = [
+    ":proto",
+    "//third_party/protobuf:protobuf_lite",
+  ]
+}
+
+proto_library("proto") {
+  sources = [
+    "clientanalytics.proto",
+    "device_restriction_enum.proto",    
+    "studio_stats.proto",
+  ]
+}
