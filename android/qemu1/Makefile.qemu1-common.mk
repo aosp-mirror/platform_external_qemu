@@ -188,6 +188,7 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/qemu-sensors-agent-impl.c \
     android-qemu1-glue/qemu-setup.cpp \
     android-qemu1-glue/qemu-telephony-agent-impl.c \
+    android-qemu1-glue/qemu-virtual-scene-agent-impl.cpp \
     android-qemu1-glue/telephony/modem_init.cpp \
     android-qemu1-glue/utils/stream.cpp \
     async.c \

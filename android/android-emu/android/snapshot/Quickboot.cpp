@@ -112,8 +112,7 @@ void Quickboot::reportSuccessfulLoad(StringView name,
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_SUCCEEDED);
         load->set_duration_ms(stats.durationMs);
         load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
-        auto snapshot = load->mutable_snapshot();
-        Snapshotter::fillSnapshotMetrics(snapshot, stats);
+        Snapshotter::fillSnapshotMetrics(event, stats);
     });
 }
 
@@ -128,8 +127,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
                 pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
         save->set_duration_ms(stats.durationMs);
         save->set_sesion_uptime_ms(sessionUptimeMs);
-        auto snapshot = save->mutable_snapshot();
-        Snapshotter::fillSnapshotMetrics(snapshot, stats);
+        Snapshotter::fillSnapshotMetrics(event, stats);
     });
 }
 
@@ -145,13 +143,12 @@ static int bootTimeoutMs() {
 }
 
 void Quickboot::startLivenessMonitor() {
+    resetSnapshotLiveness();
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
 }
 
 void Quickboot::onLivenessTimer() {
-    if (metrics::AdbLivenessChecker::isEmulatorBooted() ||
-        android::featurecontrol::isEnabled(
-            android::featurecontrol::AllowSnapshotMigration)) {
+    if (isSnapshotAlive()) {
         VERBOSE_PRINT(snapshot, "Guest came online %.3f sec after loading",
                       (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
                               1000.0);
@@ -331,16 +328,16 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
         reportFailedLoad(pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                          *failureReason);
     } else {
-        mWindow.showMessage(
-                StringFormat("Cold boot: %s",
-                             failureReasonToString(
-                                 *failureReason,
-                                 SNAPSHOT_LOAD))
-                        .c_str(),
-                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+        if (*failureReason != FailureReason::NoSnapshotInImage) {
+            mWindow.showMessage(
+                    StringFormat("Cold boot: %s",
+                                 failureReasonToString(*failureReason,
+                                                       SNAPSHOT_LOAD))
+                            .c_str(),
+                    WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+        }
         reportFailedLoad(
-                failureReason < FailureReason::
-                                        UnrecoverableErrorLimit
+                failureReason < FailureReason::UnrecoverableErrorLimit
                         ? pb::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_FAILED
                         : pb::EmulatorQuickbootLoad::
@@ -352,14 +349,11 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
 bool Quickboot::save(StringView name) {
     // TODO: detect if emulator was restarted since loading.
     const bool shouldTrySaving =
-            mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted() ||
-            guest_boot_completed ||
-            android::featurecontrol::isEnabled(
-                android::featurecontrol::AllowSnapshotMigration);
+            mLoaded || isSnapshotAlive();
 
     if (!shouldTrySaving) {
-        // Emulator hasn't booted yet, and this isn't a quickboot-loaded
-        // session. Don't save.
+        // Emulator hasn't booted yet or is otherwise not live,
+        // and this isn't a quickboot-loaded session. Don't save.
         dwarning("Not saving state: emulator hasn't finished booting.");
         reportFailedSave(
                 pb::EmulatorQuickbootSave::

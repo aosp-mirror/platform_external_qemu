@@ -46,6 +46,18 @@ TEST(ScopedPtr, FuncDelete_conversions) {
     funcFd3 = std::move(lambdaFd);
 }
 
+TEST(ScopedPtr, FuncDelete_GetsCalled) {
+    // Validates changes made to FuncDelete with regards
+    // to clang-7
+    bool called = false;
+    auto freeAsLambda = [&called](void* ptr) {
+        free(ptr);
+        called = true;
+    };
+    { auto ptr1 = makeCustomScopedPtr(malloc(1), freeAsLambda); }
+    ASSERT_TRUE(called);
+}
+
 TEST(ScopedPtr, makeCustomScopedPtr_fromLambda) {
     auto freeAsLambda = [](void* ptr) { free(ptr); };
 

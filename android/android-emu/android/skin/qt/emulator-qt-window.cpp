@@ -597,18 +597,22 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                     }
                                 }
                             });
+#ifndef __APPLE__ // bug: 77596251
                         if (mToolWindow) {
                             mToolWindow->setEnabled(false);
                         }
+#endif
                     });
                 } else if (stage == Snapshotter::Stage::End) {
                     runOnUiThread([this, op]() {
                         AutoLock lock(mSnapshotStateLock);
                         mShouldShowSnapshotModalOverlay = false;
                         mContainer.hideModalOverlay();
+#ifndef __APPLE__ // bug: 77596251
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
                         }
+#endif
                     });
                 }
             });
@@ -845,7 +849,6 @@ void EmulatorQtWindow::queueQuitEvent() {
 void EmulatorQtWindow::dragEnterEvent(QDragEnterEvent* event) {
     // Accept all drag enter events with any URL, then filter more in drop
     // events
-    // TODO: check this with hasFormats() using MIME type for .apk?
     if (event->mimeData() && event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
     }

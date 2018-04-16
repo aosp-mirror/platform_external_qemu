@@ -10,7 +10,9 @@
 ** GNU General Public License for more details.
 */
 #include "android/telephony/sim_card.h"
+
 #include "android/proxy/proxy_int.h"
+#include "android/telephony/phone_number.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -530,7 +532,29 @@ asimcard_io( ASimCard  sim, const char*  cmd )
 #endif
 
     if (!strcmp("+CRSM=178,28480,1,4,32", cmd)) {
-        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,ffffffffffffffffffffffffffffffffffff0781515525%d1%d%df%dffffffffffff", (sim->port / 1000) % 10, (sim->port / 10) % 10, (sim->port / 100) % 10, sim->port % 10);
+        const char* phone_number = get_phone_number_for_sim(sim->port);
+        assert(strlen(phone_number) == 15);
+        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,"
+                  "ffffffffffffffffffffffffffffffffffff"
+                  "09"  // length field (it denotes number of octets following this length field)A
+                        // Note: each number fits in a nibble, we need 8 octets
+                        // for (max) 15 digit number + 1 octet for type of
+                        // number and telephone numbering plan info.
+                  "9" // type of number(9 = 1001 =>
+                      // (first bit always one) 001 == international number and
+                      // plan identification (don't worry about it).
+                  "1" // == telephone numbering plan.
+                  // Phone number begins here.
+                  "%c%c%c%c" "%c%c%c%c" "%c%c%c%c" "%c%cf%c" "ffffffff",
+                  // Reverse BCD notation in action.
+                  phone_number[1],  phone_number[0],
+                  phone_number[3],  phone_number[2],
+                  phone_number[5],  phone_number[4],
+                  phone_number[7],  phone_number[6],
+                  phone_number[9],  phone_number[8],
+                  phone_number[11], phone_number[10],
+                  phone_number[13], phone_number[12],
+                                    phone_number[14]);
         return sim->out_buff;
         }
 

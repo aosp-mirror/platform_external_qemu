@@ -863,6 +863,7 @@ message EmulatorGpuInfo {
 message EmulatorFeatures {
   optional bool gps = 1;
   optional bool sensors = 2;
+  optional bool virtualscene_config = 3;
 }
 
 // A description of a single file from an AVD.
@@ -997,6 +998,8 @@ enum EmulatorSnapshotFlags {
   SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT = 1;
   // Textures are compressed in this snapshot.
   SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT = 2;
+  // Hard disk drive was used.
+  SNAPSHOT_FLAGS_HDD_BIT = 3;
 }
 
 // Generic snapshot save states. Distinguished

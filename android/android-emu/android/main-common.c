@@ -41,6 +41,7 @@
 #include "android/version.h"
 
 #include <assert.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -1857,15 +1858,31 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         }
     }
 
-    if (opts->phone_number_prefix) {
-        int prefix_length = strlen(opts->phone_number_prefix);
-        if (prefix_length < 7 || prefix_length > 11) {
-            derror(
-                    "Invalid phone_number_prefix '%s' length is %d. Valid\n"
-                    "values should be in [7,11].\n",
-                    opts->phone_number_prefix, prefix_length);
+    if (opts->phone_number) {
+      char phone_number[16];
+
+      // phone number should be all decimal digits and '-' (dash) which will be
+      // ignored.
+      int i;
+      int j;
+      for(i=0, j=0; opts->phone_number[i] != '\0'; i++) {
+        if (opts->phone_number[i] == '-') {
+          continue; // ignore the '-' character and continue.
+        } else if (!isdigit(opts->phone_number[i])) {
+          derror("Phone number should be all decimal digits\n");
+          *exit_status = 2;
+          return false;
+        } else {
+          if (j == 15) { // max possible MSISDN length
+            derror("length of phone_number should be at most 15");
+            *exit_status = 2;
             return false;
+          }
+          phone_number[j++] = opts->phone_number[i];
         }
+      }
+      phone_number[j] = '\0';
+      str_reset(&opts->phone_number, phone_number);
     }
 
     *exit_status = 0;

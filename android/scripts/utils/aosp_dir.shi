@@ -83,7 +83,7 @@ aosp_linux_glibc_version () {
 
 # Returns the version of Clang to use.
 aosp_clang_version () {
-  printf "clang-4053586" # Make sure that libc++ links against glibc2.15 or lower
+  printf "clang-4679922" # Make sure that libc++ links against glibc2.15 or lower
 }
 
 aosp_clang_libcplusplus () {

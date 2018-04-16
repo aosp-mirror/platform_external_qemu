@@ -45,6 +45,7 @@ LOCAL_SRC_FILES := \
     qemu-setup-dns-servers.cpp \
     qemu-telephony-agent-impl.c \
     qemu-user-event-agent-impl.c \
+    qemu-virtual-scene-agent-impl.cpp \
     qemu-vm-operations-impl.cpp \
     snapshot_compression.cpp \
     telephony/modem_init.c \

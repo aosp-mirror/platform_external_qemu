@@ -302,6 +302,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
             page.filePos = uint64_t(runningFilePos);
         }
     }
+
     *runningFilePosPtr = runningFilePos;
     *prevPageSizeOnDiskPtr = prevPageSizeOnDisk;
 }

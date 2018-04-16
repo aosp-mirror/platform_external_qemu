@@ -105,6 +105,10 @@ void skin_winsys_set_preferred_gles_backend(enum WinsysPreferredGlesBackend);
 // Returns current preferred gles api level specified through the emulator UI.
 enum WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel();
 
+// Start just the Snapshot control sub-page.
+// This is invoked using the command line parameter "-ui-only snapshot-control".
+int skin_winsys_snapshot_control_start();
+
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be
 // initialized.

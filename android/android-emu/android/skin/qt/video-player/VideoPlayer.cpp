@@ -159,7 +159,7 @@ class VideoPlayerImpl : public VideoPlayer {
 public:
     VideoPlayerImpl(std::string videoFile,
                     VideoPlayerWidget* widget,
-                    VideoPlayerNotifier* notifier);
+                    std::unique_ptr<VideoPlayerNotifier> notifier);
     virtual ~VideoPlayerImpl();
 
     virtual void start();
@@ -221,7 +221,7 @@ public:
 private:
     std::string mVideoFile;
     VideoPlayerWidget* mWidget = nullptr;
-    VideoPlayerNotifier* mNotifier = nullptr;
+    std::unique_ptr<VideoPlayerNotifier> mNotifier;
 
     // this is a real time stream, e.g., rtsp
     bool mRealTime = false;
@@ -581,9 +581,9 @@ void VideoDecoder::workerThreadFunc() {
 std::unique_ptr<VideoPlayer> VideoPlayer::create(
         std::string videoFile,
         VideoPlayerWidget* widget,
-        VideoPlayerNotifier* notifier) {
+        std::unique_ptr<VideoPlayerNotifier> notifier) {
     std::unique_ptr<VideoPlayerImpl> player;
-    player.reset(new VideoPlayerImpl(videoFile, widget, notifier));
+    player.reset(new VideoPlayerImpl(videoFile, widget, std::move(notifier)));
     return std::move(player);
 }
 
@@ -596,14 +596,14 @@ std::unique_ptr<VideoPlayer> VideoPlayer::create(
 
 VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
                                  VideoPlayerWidget* widget,
-                                 VideoPlayerNotifier* notifier)
+                                 std::unique_ptr<VideoPlayerNotifier> notifier)
     : mVideoFile(videoFile),
       mWidget(widget),
-      mNotifier(notifier),
+      mNotifier(std::move(notifier)),
       mRunning(true),
       mWorkerThread([this]() { workerThreadFunc(); }) {
-    notifier->setVideoPlayer(this);
-    notifier->initTimer();
+    mNotifier->setVideoPlayer(this);
+    mNotifier->initTimer();
 }
 
 VideoPlayerImpl::~VideoPlayerImpl() {

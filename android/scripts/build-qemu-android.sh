@@ -309,7 +309,18 @@ EOF
         case $BUILD_OS in
             darwin)
                 GLIB_LIBS="$GLIB_LIBS -Wl,-framework,Carbon -Wl,-framework,Foundation"
-                ;;
+        esac
+
+        case $1 in
+          darwin*)
+            GCC=g++
+            ;;
+          linux*)
+            GCC=gcc
+            ;;
+          windows*)
+            GCC=g++
+            ;;
         esac
 
         # Create a linking program that will capture its command-line to a file.
@@ -329,9 +340,11 @@ for opt; do
 done
 
 if [ "\$target" ]; then
+  dest=$BUILD_DIR/LINK-\$target
+  mkdir -p \$(dirname \$dest)
   printf "%s\n" "\$@" > $BUILD_DIR/LINK-\$target
 fi
-$(builder_gnu_config_host_prefix)g++ "\$@"
+$(builder_gnu_config_host_prefix)$GCC "\$@"
 EOF
         chmod a+x link-prog
 

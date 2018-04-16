@@ -517,3 +517,7 @@ void androidHwConfig_stripDefaults(CIniFile* source, CIniFile* target) {
 
 #include "android/avd/hw-config-defs.h"
 }
+
+int androidHwConfig_hasVirtualSceneCamera(AndroidHwConfig* config) {
+    return strcmp(config->hw_camera_back, "virtualscene") == 0;
+}

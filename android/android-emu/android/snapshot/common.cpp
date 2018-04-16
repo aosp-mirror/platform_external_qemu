@@ -10,6 +10,10 @@
 // GNU General Public License for more details.
 
 #include "android/snapshot/common.h"
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/globals.h"
+#include "android/metrics/AdbLivenessChecker.h"
+#include "android/opengles.h"
 
 #include <errno.h>
 
@@ -75,6 +79,18 @@ const char* failureReasonToString(FailureReason failure,
             return op == SNAPSHOT_LOAD ? "textures loading failed"
                                        : "textures saving failed";
     }
+}
+
+void resetSnapshotLiveness() {
+    android_resetGuestPostedAFrame();
+}
+
+bool isSnapshotAlive() {
+    return metrics::AdbLivenessChecker::isEmulatorBooted() ||
+           guest_boot_completed ||
+           android_hasGuestPostedAFrame() ||
+           android::featurecontrol::isEnabled(
+                android::featurecontrol::AllowSnapshotMigration);
 }
 
 } // namespace android
