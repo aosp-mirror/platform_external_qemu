@@ -1,0 +1,20 @@
+static_library("libemugl_common") {
+  sources = [
+    "crash_reporter.cpp",
+    "dma_device.cpp",
+    "feature_control.cpp",
+    "logging.cpp",
+    "misc.cpp",
+    "shared_library.cpp",
+    "stringparsing.cpp",
+    "sync_device.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "../include",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+}
