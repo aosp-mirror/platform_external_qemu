@@ -25,7 +25,7 @@
 #include "android/emulation/control/virtual_scene_agent.h"
 #include "android/utils/compiler.h"
 
-class GLESv2Dispatch;
+struct GLESv2Dispatch;
 
 namespace android {
 namespace virtualscene {

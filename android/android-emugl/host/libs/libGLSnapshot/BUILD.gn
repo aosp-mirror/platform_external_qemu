@@ -1,0 +1,25 @@
+config("libGLSnapshot_config") {
+  include_dirs = [
+    ".",
+  ]
+}
+
+static_library("libGLSnapshot") {
+  sources = [
+    "GLSnapshot.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/host/libs/libOpenGLESDispatch",
+    "//external/qemu/android/android-emugl/host/include/OpenGLESDispatch",
+    "//external/qemu/android/android-emugl/host/libs/GLESv2_dec",
+  ]
+
+  deps = [    
+  ]
+
+  public_configs = [ ":libGLSnapshot_config" ]
+}

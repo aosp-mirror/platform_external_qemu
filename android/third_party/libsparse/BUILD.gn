@@ -1,0 +1,62 @@
+import("//external/qemu/android/config.gni")
+
+config("emulator-libsparse_config") {
+  include_dirs = [
+    "include",
+  ]
+
+  cflags = [
+    "-Wno-error",
+  ]
+
+  if (is_win) {
+    cflags += [
+      "-DUSE_MINGW=1",
+    ]
+  }
+}
+
+static_library("emulator-libsparse") {
+  sources = [
+    "src/backed_block.c",
+    "src/output_file.c",
+    "src/sparse.c",
+    "src/sparse_crc32.c",
+    "src/sparse_err.c",
+    "src/sparse_read.c",
+  ]
+
+  configs += [
+    "//external/qemu/android/third_party:zlib",
+  ]
+
+  public_configs = [ ":emulator-libsparse_config" ]
+
+  if (is_win) {
+    deps = [
+      "//external/qemu/android/third_party/mman-win32:emulator-libmman-win32",
+    ]
+  }
+}
+
+executable("emulator$BUILD_TARGET_SUFFIX" + "_img2simg") {
+  sources = [
+    "src/img2simg.c", 
+  ]
+
+  deps = [
+    ":emulator-libsparse",
+  ]
+}
+
+
+executable("emulator$BUILD_TARGET_SUFFIX" + "_simg2img") {
+  sources = [
+    "src/simg2img.c", 
+  ]
+
+  deps = [
+    ":emulator-libsparse",
+  ]
+}
+
