@@ -1,0 +1,33 @@
+import("//external/qemu/android/config.gni")
+
+config("emulator-skin_config") {
+  cflags = [
+    "-DUSE_MMX=1",
+    "-mmmx",
+  ]
+}
+
+source_set("emulator-skin") {
+  sources = [
+    "android/skin/charmap.c",
+    "android/skin/rect.c",
+    "android/skin/generic-event.cpp",
+    "android/skin/generic-event-buffer.cpp",
+    "android/skin/image.c",
+    "android/skin/trackball.c",
+    "android/skin/keyboard.c",
+    "android/skin/keycode.c",
+    "android/skin/keycode-buffer.c",
+    "android/skin/file.c",
+    "android/skin/window.c",
+    "android/skin/resource.c",
+    "android/skin/ui.c",
+  ]
+
+  deps = [
+    "qt:emulator-skin-qt",
+  ]
+
+  public_configs = [ ":emulator-skin_config" ]
+}
+

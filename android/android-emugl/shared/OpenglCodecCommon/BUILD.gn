@@ -1,0 +1,26 @@
+config("libOpenglCodecCommon_config") {
+  include_dirs = [
+    ".",
+  ]
+}
+
+static_library("libOpenglCodecCommon") {
+  sources = [
+    "glUtils.cpp",
+    "ChecksumCalculator.cpp",
+    "ChecksumCalculatorThreadInfo.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/host/include/OpenglRender",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+
+  deps = [    
+  ]
+
+  public_configs = [ ":libOpenglCodecCommon_config" ]
+}
