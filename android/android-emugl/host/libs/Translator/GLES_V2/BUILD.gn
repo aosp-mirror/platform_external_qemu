@@ -1,0 +1,31 @@
+import("//external/qemu/android/config.gni")
+
+shared_library("lib$BUILD_TARGET_SUFFIX" + "GLES_V2_translator") {
+  sources = [
+    "GLESv2Imp.cpp",
+    "GLESv2Context.cpp",
+    "GLESv2Validate.cpp",
+    "SamplerData.cpp",
+    "ShaderParser.cpp",
+    "ShaderValidator.cpp",
+    "ProgramData.cpp",
+    "ANGLEShaderParser.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "../include",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+
+  deps = [
+    "//build/config:exe_and_shlib_deps",
+    "//build/win:default_exe_manifest",
+    "//external/qemu/android/android-emu:android-emu-base",
+#   "//external/qemu/android/android-emu:android-emu",
+    "//external/qemu/android/android-emugl/host/libs/Translator/GLcommon:libGLcommon",
+    "//external/qemu/android/android-emugl/shared/OpenglCodecCommon:libOpenglCodecCommon",
+  ]
+}
