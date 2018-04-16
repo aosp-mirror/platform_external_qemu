@@ -1,0 +1,207 @@
+import("//external/qemu/android/config.gni")
+import("//external/qemu/android/third_party/qt_library.gni")
+
+config("emulator-skin-qt_config") {
+  include_dirs = [
+    EMUGL_INCLUDES,
+    "$EMUGL_SRCDIR/shared",
+    "//external/qemu/android/android-emu",
+  ]
+}
+
+source_set("emulator-skin-qt") {
+  sources = [
+    "event-qt.cpp",
+    "init-qt.cpp",
+    "surface-qt.cpp",
+    "winsys-qt.cpp",
+    "accelerometer-3d-widget.cpp",
+    "angle-input-widget.cpp",
+    "editable-slider-widget.cpp",
+    "emulator-container.cpp",
+    "emulator-overlay.cpp",
+    "emulator-qt-window.cpp",
+    "emulator-qt-no-window.cpp",
+    "event-capturer.cpp",
+    "event-serializer.cpp",
+    "event-subscriber.cpp",
+    "error-dialog.cpp",
+    "gl-canvas.cpp",
+    "gl-common.cpp",
+    "gl-texture-draw.cpp",
+    "gl-widget.cpp",
+    "extended-pages/common.cpp",
+    "extended-pages/battery-page.cpp",
+    "extended-pages/bug-report-page.cpp",
+    "extended-pages/camera-page.cpp",
+    "extended-pages/camera-virtualscene-subpage.cpp",
+    "extended-pages/car-data-page.cpp",
+    "extended-pages/cellular-page.cpp",
+    "extended-pages/dpad-page.cpp",
+    "extended-pages/finger-page.cpp",
+    "extended-pages/google-play-page.cpp",
+    "extended-pages/help-page.cpp",
+    "extended-pages/location-page.cpp",
+    "extended-pages/microphone-page.cpp",
+    "extended-pages/record-screen-page.cpp",
+    "extended-pages/rotary-input-dial.cpp",
+    "extended-pages/rotary-input-page.cpp",
+    "extended-pages/settings-page-proxy.cpp",
+    "extended-pages/settings-page.cpp",
+    "extended-pages/snapshot-page.cpp",
+    "extended-pages/telephony-page.cpp",
+    "extended-pages/virtual-sensors-page.cpp",
+    "extended-pages/car-data-emulation/car-sensor-data.cpp",
+    "extended-window.cpp",
+    "FramelessDetector.cpp",
+    "ModalOverlay.cpp",
+    "OverlayMessageCenter.cpp",
+    "poster-image-well.cpp",
+    "qt-ui-commands.cpp",
+    "QtLooper.cpp",
+    "QtThreading.cpp",
+    "screen-mask.cpp",
+    "size-tweaker.cpp",
+    "stylesheet.cpp",
+    "tool-window.cpp",
+    "ui-event-recorder.cpp",
+    "user-actions-counter.cpp",
+    "virtualscene-control-window.cpp",
+    "VirtualSceneInfoDialog.cpp",
+    "wavefront-obj-parser.cpp",
+    "video-player/Clock.cpp",
+    "video-player/FrameQueue.cpp",
+    "video-player/PacketQueue.cpp",
+    "video-player/VideoPlayer.cpp",
+    "video-player/VideoPlayerNotifier.cpp",
+    "video-player/VideoPlayerWidget.cpp",
+    "video-player/VideoInfo.cpp",
+  ]
+
+  if (is_mac) {
+    sources += [
+      "mac-native-window.mm",
+    ]
+  }
+
+  if (is_win) {
+    sources += [
+      "windows-native-window.cpp",
+    ]
+  }
+
+  configs += [
+    "//external/qemu/android/third_party:qt5",
+  ]
+
+  # gl-widget.cpp depends on libOpenGLESDispatch, which depends on
+  # libemugl_common. Using libOpenGLESDispatch ensures that the code
+  # will find and use the same host EGL/GLESv2 libraries as the ones
+  # used by EmuGL. Doing anything else is prone to really bad failure
+  # cases.
+  deps = [
+    ":emulator-skin-qt-gen",    
+    "//external/qemu/android/android-emugl/host/libs/libOpenGLESDispatch:libOpenGLESDispatch",
+    "//external/qemu/android/android-emugl/shared/emugl/common:libemugl_common",
+  ]
+
+  public_configs = [ ":emulator-skin-qt_config" ]
+}
+
+qt_library("emulator-skin-qt-gen") {
+  # all input .h, .ui, .qrc files are relative to this in_dir
+  in_dir = "."
+
+  moc_sources = [
+    "accelerometer-3d-widget.h",
+    "angle-input-widget.h",
+    "editable-slider-widget.h",
+    "gl-widget.h",
+    "emulator-container.h",
+    "emulator-overlay.h",
+    "emulator-qt-window.h",
+    "emulator-qt-no-window.h",
+    "event-capturer.h",
+    "event-subscriber.h",
+    "extended-pages/battery-page.h",
+    "extended-pages/bug-report-page.h",
+    "extended-pages/camera-page.h",
+    "extended-pages/camera-virtualscene-subpage.h",
+    "extended-pages/car-data-page.h",
+    "extended-pages/cellular-page.h",
+    "extended-pages/dpad-page.h",
+    "extended-pages/finger-page.h",
+    "extended-pages/google-play-page.h",
+    "extended-pages/help-page.h",
+    "extended-pages/location-page.h",
+    "extended-pages/microphone-page.h",
+    "extended-pages/record-screen-page-tasks.h",
+    "extended-pages/record-screen-page.h",
+    "extended-pages/rotary-input-dial.h",
+    "extended-pages/rotary-input-page.h",
+    "extended-pages/settings-page.h",
+    "extended-pages/snapshot-page.h",
+    "extended-pages/telephony-page.h",
+    "extended-pages/virtual-sensors-page.h",
+    "extended-pages/car-data-emulation/car-sensor-data.h",
+    "extended-window.h",
+    "raised-material-button.h",
+    "ModalOverlay.h",
+    "poster-image-well.h",
+    "OverlayMessageCenter.h",
+    "QtLooperImpl.h",
+    "VirtualSceneInfoDialog.h",
+    "screen-mask.h",
+    "size-tweaker.h",
+    "tool-window.h",
+    "user-actions-counter.h",
+    "virtualscene-control-window.h",
+    "video-player/VideoPlayerNotifier.h",
+    "video-player/VideoPlayerWidget.h",
+    "video-player/VideoInfo.h",
+  ]
+
+  static_resources = [
+    "static_resources.qrc",
+  ]
+
+  dynamic_resources = [
+    "resources.qrc",
+  ]
+
+  ui_sources = [
+    "extended.ui",
+    "extended-pages/battery-page.ui",
+    "extended-pages/bug-report-page.ui",
+    "extended-pages/camera-page.ui",
+    "extended-pages/camera-virtualscene-subpage.ui",
+    "extended-pages/car-data-page.ui",
+    "extended-pages/cellular-page.ui",
+    "extended-pages/dpad-page.ui",
+    "extended-pages/finger-page.ui",
+    "extended-pages/google-play-page.ui",
+    "extended-pages/help-page.ui",
+    "extended-pages/location-page.ui",
+    "extended-pages/microphone-page.ui",
+    "extended-pages/record-screen-page.ui",
+    "extended-pages/rotary-input-page.ui",
+    "extended-pages/settings-page.ui",
+    "extended-pages/snapshot-page.ui",
+    "extended-pages/telephony-page.ui",
+    "extended-pages/virtual-sensors-page.ui",
+    "extended-pages/car-data-emulation/car-sensor-data.ui",
+    "poster-image-well.ui",
+    "tools.ui",
+    "virtualscene-controls.ui",
+    "virtualscene-info-dialog.ui",
+  ]
+
+  include_dirs = [
+    "//external/qemu/android/android-emu",
+  ]
+
+  configs = [
+    "//external/qemu/android/third_party:qt5",
+  ]
+}
+

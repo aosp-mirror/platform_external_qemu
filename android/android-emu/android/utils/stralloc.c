@@ -141,7 +141,7 @@ stralloc_cstr( stralloc_t*  s )
 void
 stralloc_lstrip( stralloc_t*  s )
 {
-    int  count;
+    unsigned int  count;
 
     for (count = 0; count < s->n; count++) {
         if (s->s[count] != ' ' && s->s[count] != '\t')
@@ -189,7 +189,7 @@ stralloc_formatv( stralloc_t*  s, const char*  fmt, va_list  args )
     stralloc_ready(s,10);
 
     while (1) {
-        int      n;
+        unsigned int n;
         va_list  args2;
 
         va_copy(args2, args);
