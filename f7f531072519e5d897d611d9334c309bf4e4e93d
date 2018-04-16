@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "557738fe_1d082635",
+        "filename": "android/android-emu/android/skin/qt/editable-slider-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-16T20:00:46Z",
+      "side": 1,
+      "message": "Why do we need to set with previousSteps instead of the current ones? Comment description could be good here.",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 71
+      },
+      "revId": "f7f531072519e5d897d611d9334c309bf4e4e93d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6529d31_bf4a8a6e",
+        "filename": "android/android-emu/android/virtualscene/PosterInfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-16T20:00:46Z",
+      "side": 1,
+      "message": "Can this be one class, or can we make parsePostersFile a global function in android::virtualscene namespace?",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 2
+      },
+      "revId": "f7f531072519e5d897d611d9334c309bf4e4e93d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "522f4d6b_ab9dded6",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-16T20:00:46Z",
+      "side": 1,
+      "message": "Can you add a description to the CL commit message about how posters are now generated from createPosterLocation (or at least that\u0027s what I took away), and the new call chain for it?",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 32
+      },
+      "revId": "f7f531072519e5d897d611d9334c309bf4e4e93d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
