@@ -1,0 +1,15 @@
+import("//external/qemu/android/config.gni")
+
+config("emulator-murmurhash_config") {
+  include_dirs = [
+    ".",
+  ]
+}
+
+static_library("emulator-murmurhash") {
+  sources = [
+    "MurmurHash3.cpp",
+  ]
+
+  public_configs = [ ":emulator-murmurhash_config" ]
+}

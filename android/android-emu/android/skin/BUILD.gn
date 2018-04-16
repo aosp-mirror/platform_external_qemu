@@ -1,0 +1,55 @@
+import("//external/qemu/android/config.gni")
+
+config("emulator-skin_config") {
+  cflags = [
+    "-DUSE_MMX=1",
+    "-mmmx",
+  ]
+}
+
+source_set("emulator-skin") {
+  sources = [
+    "charmap.c",
+    "rect.c",
+    "generic-event.cpp",
+    "generic-event-buffer.cpp",
+    "image.c",
+    "trackball.c",
+    "keyboard.c",
+    "keycode.c",
+    "keycode-buffer.c",
+    "file.c",
+    "window.c",
+    "resource.c",
+    "ui.c",
+  ]
+
+  cflags = EMULATOR_COMMON_CFLAGS
+
+  cflags += [
+    "-Werror=implicit-function-declaration",
+    "-Wno-sign-compare",
+  ]
+
+  if (is_clang) {
+    # ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
+    # string literals which are being glued together
+    cflags += [
+      "-Wno-reserved-user-defined-literal",
+      "-Wno-literal-suffix",
+    ]
+  }
+
+  include_dirs = [
+    # TODO: remove these hardcoded paths
+    "//external/qemu/objs/build",
+    "//external/qemu/objs/build/intermediates64/emulator_hw_config_defs",
+  ]
+
+  public_deps = [
+    "qt:emulator-skin-qt",
+  ]
+
+  public_configs = [ ":emulator-skin_config" ]
+}
+
