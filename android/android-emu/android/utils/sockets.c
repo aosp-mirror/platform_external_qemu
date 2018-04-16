@@ -562,7 +562,7 @@ sock_address_to_bsd( const SockAddress*  a, sockaddr_storage*  paddress, socklen
 #if HAVE_UNIX_SOCKETS
     case SOCKET_UNIX:
         {
-            int                  slen = strlen(a->u._unix.path);
+            size_t               slen = strlen(a->u._unix.path);
             struct sockaddr_un*  dst = paddress->un;
 
             if (slen >= UNIX_PATH_MAX)
@@ -863,7 +863,7 @@ sock_address_list_create2(const char* host_and_port, unsigned flags )
     // Parse host and port name.
     const char* port_name = strchr(host_and_port, ':');
     if (port_name != NULL) {
-        int to_copy = MIN(sizeof(host_name)-1, port_name - host_and_port);
+        int to_copy = MIN((int)sizeof(host_name)-1, port_name - host_and_port);
         if (to_copy != 0) {
             memcpy(host_name, host_and_port, to_copy);
             host_name[to_copy] = '\0';
