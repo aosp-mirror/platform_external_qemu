@@ -94,6 +94,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
         {PANE_IDX_CELLULAR,      mExtendedUi->cellularButton},
         {PANE_IDX_BATTERY,       mExtendedUi->batteryButton},
+        {PANE_IDX_CAMERA,        mExtendedUi->cameraButton},
         {PANE_IDX_TELEPHONE,     mExtendedUi->telephoneButton},
         {PANE_IDX_DPAD,          mExtendedUi->dpadButton},
         {PANE_IDX_ROTARY,        mExtendedUi->rotaryInputButton},
@@ -124,6 +125,16 @@ ExtendedWindow::ExtendedWindow(
     }
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
+
+    // Currently, the camera page only contains options for the virtual scene
+    // camera.  Hide the button if the virtual scene camera is not enabled.
+    if (androidHwConfig_hasVirtualSceneCamera(android_hw)) {
+        mSidebarButtons.addButton(mExtendedUi->cameraButton);
+        mExtendedUi->cameraButton->setVisible(true);
+    } else {
+        mExtendedUi->cameraButton->setVisible(false);
+    }
+
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
 
     if (android::featurecontrol::isEnabled(android::featurecontrol::GenericSnapshotsUI)) {
@@ -185,6 +196,7 @@ void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
         LocationPage::setLocationAgent(agentPtr->location);
         SettingsPage::setHttpProxyAgent(agentPtr->proxy);
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
+        CameraPage::setVirtualSceneAgent(agentPtr->virtualScene);
     }
 }
 
@@ -279,6 +291,7 @@ void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
 
 // Tab buttons. Each raises its stacked pane to the top.
 void ExtendedWindow::on_batteryButton_clicked()      { adjustTabs(PANE_IDX_BATTERY); }
+void ExtendedWindow::on_cameraButton_clicked()       { adjustTabs(PANE_IDX_CAMERA); }
 void ExtendedWindow::on_bugreportButton_clicked()    { adjustTabs(PANE_IDX_BUGREPORT); }
 void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()         { adjustTabs(PANE_IDX_DPAD); }

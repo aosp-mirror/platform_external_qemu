@@ -360,6 +360,19 @@ void RendererImpl::repaintOpenGLDisplay() {
     mRenderWindow->repaint();
 }
 
+bool RendererImpl::hasGuestPostedAFrame() {
+    if (mRenderWindow) {
+        return mRenderWindow->hasGuestPostedAFrame();
+    }
+    return false;
+}
+
+void RendererImpl::resetGuestPostedAFrame() {
+    if (mRenderWindow) {
+        mRenderWindow->resetGuestPostedAFrame();
+    }
+}
+
 void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgbaData) {
     assert(mRenderWindow);
     mRenderWindow->setScreenMask(width, height, rgbaData);

@@ -9,21 +9,23 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/android.h"
+#include "android/avd/hw-config.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
-#include "android/android.h"
-#include "android/avd/hw-config.h"
 #include "android/boot-properties.h"
+#include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
 #include "android/config/BluetoothConfig.h"
 #include "android/constants.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/ParameterList.h"
 #include "android/error-messages.h"
@@ -41,7 +43,7 @@
 #include "android/opengl/gpuinfo.h"
 #include "android/opengles.h"
 #include "android/process_setup.h"
-#include "android/screen-recorder.h"
+#include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -712,10 +714,13 @@ extern "C" int main(int argc, char** argv) {
 
     // If the virtual scene camera is selected in the avd, but not supported,
     // use the emulated camera instead.
-    bool isVirtualScene = !strcmp(hw->hw_camera_back, "virtualscene");
+    const bool isVirtualScene = !strcmp(hw->hw_camera_back, "virtualscene");
     if (isVirtualScene && !feature_is_enabled(kFeature_VirtualScene)) {
         str_reset(&hw->hw_camera_back, "emulated");
     }
+
+    // Parse virtual scene command line options, if enabled.
+    camera_virtualscene_parse_cmdline();
 
     if (opts->shared_net_id) {
         char* end;
@@ -919,7 +924,8 @@ extern "C" int main(int argc, char** argv) {
             return ret;
     } else if (!hw->hw_arc) {
         // Resize userdata-qemu.img if the size is smaller than what
-        // config.ini says. This can happen as user wants a larger data
+        // config.ini says and also delete userdata-qemu.img.qcow2.
+        // This can happen as user wants a larger data
         // partition without wiping it. b.android.com/196926
         System::FileSize current_data_size;
         if (System::get()->pathFileSize(hw->disk_dataPartition_path,
@@ -933,8 +939,10 @@ extern "C" int main(int argc, char** argv) {
                         "M\n",
                         (int)(current_data_size / (1024 * 1024)),
                         (int)(partition_size / (1024 * 1024)));
-                resizeExt4Partition(android_hw->disk_dataPartition_path,
-                                    android_hw->disk_dataPartition_size);
+                if (!resizeExt4Partition(android_hw->disk_dataPartition_path,
+                                    android_hw->disk_dataPartition_size)) {
+                    path_delete_file(StringFormat("%s.qcow2", android_hw->disk_dataPartition_path).c_str());
+                }
             }
         }
     }
@@ -1197,6 +1205,7 @@ extern "C" int main(int argc, char** argv) {
             gQAndroidSensorsAgent,
             gQAndroidTelephonyAgent,
             gQAndroidUserEventAgent,
+            gQAndroidVirtualSceneAgent,
             gQCarDataAgent,
             nullptr  // For now there's no uses of SettingsAgent, so we
                      // don't set it.
@@ -1215,6 +1224,10 @@ extern "C" int main(int argc, char** argv) {
         skin_winsys_init_args(argc, argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
+        }
+        if (opts->ui_only) {
+            // UI only. emulator_initUserInterface() is done, so we're done.
+            return 0;
         }
 #if (SNAPSHOT_PROFILE > 1)
         printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
@@ -1265,10 +1278,14 @@ extern "C" int main(int argc, char** argv) {
                                &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder
+        // and screenshot callback
         bool isGuestMode =
                 (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
         screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
                              isGuestMode ? uiEmuAgent.display : nullptr);
+        android_registerScreenshotFunc([](const char* dirname) {
+            android::emulation::captureScreenshot(dirname, nullptr);
+        });
 
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =

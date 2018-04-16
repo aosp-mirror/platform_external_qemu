@@ -42,7 +42,7 @@ BUILD_WARNING_CXXFLAGS := -Wdelete-non-virtual-dtor
 
 BUILD_TARGET_CFLAGS := \
     -g -fno-exceptions \
-    $(call if-target-clang,,-falign-functions -fno-unwind-tables) \
+    $(call if-target-clang,, -fno-unwind-tables) \
     $(BUILD_WARNING_CFLAGS)
 BUILD_TARGET_CXXFLAGS := \
     -fno-rtti \
@@ -53,7 +53,10 @@ BUILD_OPT_CFLAGS :=
 BUILD_OPT_LDFLAGS :=
 
 ifeq ($(BUILD_DEBUG),true)
-    BUILD_OPT_CFLAGS += -O0
+    BUILD_OPT_CFLAGS += -O0 -DANDROID_DEBUG
+    # Enable code coverage for debug builds.
+    BUILD_TARGET_CFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping)
+    BUILD_OPT_LDFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping)
 else
     ifneq (windows,$(BUILD_TARGET_OS))
         BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
@@ -189,8 +192,6 @@ endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
     BUILD_TARGET_CFLAGS += -D_DARWIN_C_SOURCE=1
-    # Clang complains about this flag being not useful anymore.
-    BUILD_TARGET_CFLAGS := $(filter-out -falign-functions,$(BUILD_TARGET_CFLAGS))
     # Clang annoys everyone with a warning about empty struct size being
     # different in C and C++.
     BUILD_TARGET_CFLAGS += -Wno-extern-c-compat

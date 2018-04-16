@@ -28,6 +28,9 @@
 
 ANDROID_BEGIN_HEADER
 
+// Parse command line options for the virtual scene.
+void camera_virtualscene_parse_cmdline();
+
 // Get the preferred pixel format for the virtual scene camera, which should be
 // used for maximum performance. If the preferred format is not supported by the
 // guest camera_virtualscene_read_frame will perform colorspace conversion.

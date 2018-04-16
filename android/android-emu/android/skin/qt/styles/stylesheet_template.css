@@ -110,6 +110,9 @@ QPushButton:pressed[helpButton=true] {
     border: none;
     background: %%TAB_DARKENED_COLOR%%;
 }
+QTreeWidget::item {
+    height: 28px;
+}
 QWidget[ColorGroup="MajorTab"] {
     border: none;
     background: %%TAB_BKG_COLOR%%;

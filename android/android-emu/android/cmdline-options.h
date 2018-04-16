@@ -97,6 +97,7 @@ CFG_PARAM( skin, "<name>", "select a given skin" )
 CFG_FLAG ( no_skin, "deprecated: create an AVD with no skin instead" )
 CFG_FLAG ( noskin, "same as -no-skin" )
 CFG_PARAM( memory, "<size>", "physical RAM size in MBs" )
+OPT_PARAM( ui_only, "<UI feature>", "run only the UI feature requested")
 
 OPT_PARAM( cores, "<number>", "Set number of CPU cores to emulator" )
 OPT_PARAM( accel, "<mode>", "Configure emulation acceleration" )
@@ -174,6 +175,8 @@ OPT_PARAM( camera_back, "<mode>", "set emulation mode for a camera facing back" 
 OPT_PARAM( camera_front, "<mode>", "set emulation mode for a camera facing front" )
 OPT_FLAG( webcam_list, "lists web cameras available for emulation" )
 
+OPT_LIST( virtualscene_poster, "<name>=<filename>", "Load a png or jpeg image as a poster in the virtual scene")
+
 OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 
 #ifndef __linux__
@@ -195,7 +198,7 @@ OPT_PARAM(metrics_to_file, "<file>", "Enable usage metrics and write the message
 OPT_LIST(feature, "<name|-name>", "Force-enable or disable (-name) the features")
 
 OPT_PARAM(sim_access_rules_file, "<file>", "Use SIM access rules from specified file")
-OPT_PARAM(phone_number_prefix, "<string>", "Number to use as the emulator's phone number prefix")
+OPT_PARAM(phone_number, "<phone_number>", "Sets the phone number of the emulated device")
 
 #undef CFG_FLAG
 #undef CFG_PARAM

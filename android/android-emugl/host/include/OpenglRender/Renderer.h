@@ -148,6 +148,13 @@ public:
     //    latest framebuffer content.
     virtual void repaintOpenGLDisplay() = 0;
 
+    // hasGuestPostedAFrame / resetGuestPostedAFrame -
+    //     for liveness checking; queries whether or not the guest
+    //     has successfully issued a framebuffer post to the emulator,
+    //     and a method to reset that state.
+    virtual bool hasGuestPostedAFrame() = 0;
+    virtual void resetGuestPostedAFrame() = 0;
+
     // setScreenMask -
     //    provide the image that should be overlayed on the
     //    device screen to mask that screen

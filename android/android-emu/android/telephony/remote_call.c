@@ -179,23 +179,23 @@ remote_call_alloc( RemoteCallType  type, int  to_port, int  from_port )
 
         switch (type) {
             case REMOTE_CALL_DIAL:
-                p = bufprint(p, end, "gsm call %s%d\n", get_phone_number_prefix(), from_num );
+                p = bufprint(p, end, "gsm call %s\n", get_phone_number(from_num) );
                 break;
 
             case REMOTE_CALL_BUSY:
-                p = bufprint(p, end, "gsm busy %s%d\n", get_phone_number_prefix(), from_num);
+                p = bufprint(p, end, "gsm busy %s\n", get_phone_number(from_num) );
                 break;
 
             case REMOTE_CALL_HOLD:
-                p = bufprint(p, end, "gsm hold %s%d\n", get_phone_number_prefix(), from_num);
+                p = bufprint(p, end, "gsm hold %s\n", get_phone_number(from_num) );
                 break;
 
             case REMOTE_CALL_ACCEPT:
-                p = bufprint(p, end, "gsm accept %s%d\n", get_phone_number_prefix(), from_num);
+                p = bufprint(p, end, "gsm accept %s\n", get_phone_number(from_num) );
                 break;
 
             case REMOTE_CALL_HANGUP:
-                p = bufprint(p, end, "gsm cancel %s%d\n", get_phone_number_prefix(), from_num );
+                p = bufprint(p, end, "gsm cancel %s\n", get_phone_number(from_num) );
                 break;
 
             default:

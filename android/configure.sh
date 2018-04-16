@@ -801,7 +801,10 @@ install_prebuilt_dll () {
 
 # Returns the compiler (GCC)/clang
 cc_type () {
-   local TYPE=$($1 --version | head -n 1 | awk '{ print $2 }')
+   local TYPE=GCC
+   if  $1 --version | grep -q clang; then
+     TYPE=clang
+   fi
    printf $TYPE
 }
 

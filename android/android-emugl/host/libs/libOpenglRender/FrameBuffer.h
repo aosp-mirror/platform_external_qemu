@@ -312,6 +312,7 @@ public:
     // contexts. It should be |false| only when called internally.
     bool post(HandleType p_colorbuffer, bool needLockAndBind = true);
     bool hasGuestPostedAFrame() { return m_guestPostedAFrame; }
+    void resetGuestPostedAFrame() { m_guestPostedAFrame = false; }
 
     // Runs the post callback with |pixels| (good for when the readback
     // happens in a separate place)

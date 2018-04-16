@@ -51,8 +51,10 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/gl-widget.cpp \
     android/skin/qt/extended-pages/common.cpp \
     android/skin/qt/extended-pages/battery-page.cpp \
-    android/skin/qt/extended-pages/car-data-page.cpp \
     android/skin/qt/extended-pages/bug-report-page.cpp \
+    android/skin/qt/extended-pages/camera-page.cpp \
+    android/skin/qt/extended-pages/camera-virtualscene-subpage.cpp \
+    android/skin/qt/extended-pages/car-data-page.cpp \
     android/skin/qt/extended-pages/cellular-page.cpp \
     android/skin/qt/extended-pages/dpad-page.cpp \
     android/skin/qt/extended-pages/finger-page.cpp \
@@ -63,14 +65,15 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/record-screen-page.cpp \
     android/skin/qt/extended-pages/rotary-input-dial.cpp \
     android/skin/qt/extended-pages/rotary-input-page.cpp \
-    android/skin/qt/extended-pages/settings-page.cpp \
     android/skin/qt/extended-pages/settings-page-proxy.cpp \
+    android/skin/qt/extended-pages/settings-page.cpp \
     android/skin/qt/extended-pages/snapshot-page.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/FramelessDetector.cpp \
+    android/skin/qt/image-well.cpp \
     android/skin/qt/ModalOverlay.cpp \
     android/skin/qt/OverlayMessageCenter.cpp \
     android/skin/qt/qt-ui-commands.cpp \
@@ -105,8 +108,10 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/event-capturer.h \
     android/skin/qt/event-subscriber.h \
     android/skin/qt/extended-pages/battery-page.h \
-    android/skin/qt/extended-pages/car-data-page.h \
     android/skin/qt/extended-pages/bug-report-page.h \
+    android/skin/qt/extended-pages/camera-page.h \
+    android/skin/qt/extended-pages/camera-virtualscene-subpage.h \
+    android/skin/qt/extended-pages/car-data-page.h \
     android/skin/qt/extended-pages/cellular-page.h \
     android/skin/qt/extended-pages/dpad-page.h \
     android/skin/qt/extended-pages/finger-page.h \
@@ -114,8 +119,8 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/help-page.h \
     android/skin/qt/extended-pages/location-page.h \
     android/skin/qt/extended-pages/microphone-page.h \
-    android/skin/qt/extended-pages/record-screen-page.h \
     android/skin/qt/extended-pages/record-screen-page-tasks.h \
+    android/skin/qt/extended-pages/record-screen-page.h \
     android/skin/qt/extended-pages/rotary-input-dial.h \
     android/skin/qt/extended-pages/rotary-input-page.h \
     android/skin/qt/extended-pages/settings-page.h \
@@ -124,6 +129,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/virtual-sensors-page.h \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h \
     android/skin/qt/extended-window.h \
+    android/skin/qt/image-well.h \
     android/skin/qt/raised-material-button.h \
     android/skin/qt/ModalOverlay.h \
     android/skin/qt/OverlayMessageCenter.h \
@@ -146,9 +152,11 @@ ANDROID_SKIN_QT_DYNAMIC_RESOURCES := \
 
 ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended.ui \
-    android/skin/qt/extended-pages/car-data-page.ui \
     android/skin/qt/extended-pages/battery-page.ui \
     android/skin/qt/extended-pages/bug-report-page.ui \
+    android/skin/qt/extended-pages/camera-page.ui \
+    android/skin/qt/extended-pages/camera-virtualscene-subpage.ui \
+    android/skin/qt/extended-pages/car-data-page.ui \
     android/skin/qt/extended-pages/cellular-page.ui \
     android/skin/qt/extended-pages/dpad-page.ui \
     android/skin/qt/extended-pages/finger-page.ui \
@@ -163,6 +171,7 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/telephony-page.ui \
     android/skin/qt/extended-pages/virtual-sensors-page.ui \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui \
+    android/skin/qt/image-well.ui \
     android/skin/qt/tools.ui \
     android/skin/qt/virtualscene-controls.ui \
     android/skin/qt/virtualscene-info-dialog.ui \

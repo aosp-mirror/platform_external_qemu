@@ -71,6 +71,7 @@ private slots:
 
     // Master tabs
     void on_batteryButton_clicked();
+    void on_cameraButton_clicked();
     void on_bugreportButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();

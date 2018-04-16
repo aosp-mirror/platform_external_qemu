@@ -13,6 +13,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
+#include "android/base/system/System.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/RamSaver.h"
 #include "android/snapshot/Snapshot.h"
@@ -45,12 +46,18 @@ public:
 
     bool canceled() const { return mStatus == OperationStatus::Canceled; }
 
+    const base::System::MemUsage& memUsage() const { return mMemUsage; }
+    bool isHDD() const { return mDiskKind.valueOr(base::System::DiskKind::Ssd) ==
+                                    base::System::DiskKind::Hdd; }
+
 private:
     OperationStatus mStatus;
     Snapshot mSnapshot;
     base::Optional<RamSaver> mRamSaver;
     std::shared_ptr<TextureSaver> mTextureSaver;
     bool mIncrementallySaved = false;
+    base::System::MemUsage mMemUsage;
+    base::Optional<base::System::DiskKind> mDiskKind = {};
 };
 
 }  // namespace snapshot

@@ -19,6 +19,7 @@
 
 using android::base::PathUtils;
 using android::base::StdioStream;
+using android::base::System;
 
 namespace android {
 namespace snapshot {
@@ -37,6 +38,10 @@ Loader::Loader(const Snapshot& snapshot, int error)
     if (!mSnapshot.preload()) {
         return;
     }
+
+    mMemUsage = System::get()->getMemUsage();
+    mDiskKind = System::get()->pathDiskKind(mSnapshot.dataDir());
+
     {
         const auto ram = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");

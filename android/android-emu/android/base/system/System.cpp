@@ -243,7 +243,7 @@ public:
 
     virtual ~HostSystem() {}
 
-    virtual const std::string& getProgramDirectory() const {
+    const std::string& getProgramDirectory() const override {
         if (mProgramDir.empty()) {
 #if defined(__linux__)
             char path[1024];
@@ -299,7 +299,7 @@ public:
         return mProgramDir;
     }
 
-    virtual std::string getCurrentDirectory() const {
+    std::string getCurrentDirectory() const override {
 #if defined(_WIN32)
         int currentLen = GetCurrentDirectoryW(0, nullptr);
         if (currentLen < 0) {
@@ -327,7 +327,7 @@ public:
 #endif  // !_WIN32
     }
 
-    virtual const std::string& getLauncherDirectory() const {
+    const std::string& getLauncherDirectory() const override {
         if (mLauncherDir.empty()) {
             std::string launcherDirEnv = envGet("ANDROID_EMULATOR_LAUNCHER_DIR");
             if (!launcherDirEnv.empty()) {
@@ -365,7 +365,7 @@ public:
         return mLauncherDir;
     }
 
-    virtual const std::string& getHomeDirectory() const {
+    const std::string& getHomeDirectory() const override {
         if (mHomeDir.empty()) {
 #if defined(_WIN32)
             // NOTE: SHGetFolderPathW always takes a buffer of MAX_PATH size,
@@ -407,7 +407,7 @@ public:
         return mHomeDir;
     }
 
-    virtual const std::string& getAppDataDirectory() const {
+    const std::string& getAppDataDirectory() const override {
 #if defined(_WIN32)
         if (mAppDataDir.empty()) {
             // NOTE: See comment in getHomeDirectory().
@@ -442,7 +442,7 @@ public:
     }
 
 
-    virtual int getHostBitness() const {
+    int getHostBitness() const override {
 #ifdef __x86_64__
         return 64;
 #elif defined(_WIN32)
@@ -495,7 +495,7 @@ public:
 #endif // !_WIN32
     }
 
-    virtual OsType getOsType() const override {
+    OsType getOsType() const override {
 #ifdef _WIN32
         return OsType::Windows;
 #elif defined(__APPLE__)
@@ -507,7 +507,7 @@ public:
 #endif
     }
 
-    virtual string getOsName() override {
+    string getOsName() override {
       static string lastSuccessfulValue;
       if (!lastSuccessfulValue.empty()) {
         return lastSuccessfulValue;
@@ -678,7 +678,7 @@ public:
 #endif
     }
 
-    virtual bool isRunningUnderWine() const override {
+    bool isRunningUnderWine() const override {
 #ifndef _WIN32
         return false;
 #else
@@ -895,9 +895,9 @@ public:
         return diskKindInternal(fd);
     }
 
-    virtual std::vector<std::string> scanDirEntries(
+    std::vector<std::string> scanDirEntries(
             StringView dirPath,
-            bool fullPath = false) const {
+            bool fullPath = false) const override {
         std::vector<std::string> result = scanDirInternal(dirPath);
         if (fullPath) {
             // Prepend |dirPath| to each entry.
@@ -909,7 +909,7 @@ public:
         return result;
     }
 
-    virtual std::string envGet(StringView varname) const {
+    std::string envGet(StringView varname) const override {
 #ifdef _WIN32
         Win32UnicodeString varname_unicode(varname);
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
@@ -927,7 +927,7 @@ public:
 #endif
     }
 
-    virtual void envSet(StringView varname, StringView varvalue) {
+    void envSet(StringView varname, StringView varvalue) override {
 #ifdef _WIN32
         std::string envStr =
             StringFormat("%s=%s", varname, varvalue);
@@ -942,7 +942,7 @@ public:
 #endif
     }
 
-    virtual bool envTest(StringView varname) const {
+    bool envTest(StringView varname) const override {
 #ifdef _WIN32
         Win32UnicodeString varname_unicode(varname);
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
@@ -953,7 +953,7 @@ public:
 #endif
     }
 
-    virtual std::vector<std::string> envGetAll() const override {
+    std::vector<std::string> envGetAll() const override {
         std::vector<std::string> res;
         for (auto env = environ; env && *env; ++env) {
             res.push_back(*env);
@@ -995,48 +995,48 @@ public:
         return false;
     }
 
-    virtual bool pathExists(StringView path) const {
+    bool pathExists(StringView path) const override {
         return pathExistsInternal(path);
     }
 
-    virtual bool pathIsFile(StringView path) const {
+    bool pathIsFile(StringView path) const override {
         return pathIsFileInternal(path);
     }
 
-    virtual bool pathIsDir(StringView path) const {
+    bool pathIsDir(StringView path) const override {
         return pathIsDirInternal(path);
     }
 
-    virtual bool pathIsLink(StringView path) const {
+    bool pathIsLink(StringView path) const override {
         return pathIsLinkInternal(path);
     }
 
-    virtual bool pathCanRead(StringView path) const override {
+    bool pathCanRead(StringView path) const override {
         return pathCanReadInternal(path);
     }
 
-    virtual bool pathCanWrite(StringView path) const override {
+    bool pathCanWrite(StringView path) const override {
         return pathCanWriteInternal(path);
     }
 
-    virtual bool pathCanExec(StringView path) const override {
+    bool pathCanExec(StringView path) const override {
         return pathCanExecInternal(path);
     }
 
-    virtual bool deleteFile(StringView path) const override {
+    bool deleteFile(StringView path) const override {
         return deleteFileInternal(path);
     }
 
-    virtual bool pathFileSize(StringView path,
+    bool pathFileSize(StringView path,
             FileSize* outFileSize) const override {
         return pathFileSizeInternal(path, outFileSize);
     }
 
-    virtual FileSize recursiveSize(StringView path) const override {
+    FileSize recursiveSize(StringView path) const override {
         return recursiveSizeInternal(path);
     }
 
-    virtual bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const override {
+    bool pathFreeSpace(StringView path, FileSize* spaceInBytes) const override {
         return pathFreeSpaceInternal(path, spaceInBytes);
     }
 
@@ -1044,7 +1044,7 @@ public:
         return fileSizeInternal(fd, outFileSize);
     }
 
-    virtual Optional<std::string> which(StringView command) const {
+    Optional<std::string> which(StringView command) const override {
 #ifdef WIN32
       std::string cmd = command ;
       if (!extractFullPath(&cmd)) {
@@ -1136,7 +1136,7 @@ public:
         Thread::yield();
     }
 
-    virtual Optional<std::string> runCommandWithResult(
+    Optional<std::string> runCommandWithResult(
             const std::vector<std::string>& commandLine,
             System::Duration timeoutMs = kInfinite,
             System::ProcessExitCode* outExitCode = nullptr) override {
@@ -1158,8 +1158,8 @@ public:
         tmpfd.close();
         temp_file_path.resize(strlen(temp_file_path.c_str()));
         auto tmpFileDeleter = base::makeCustomScopedPtr(
-                &temp_file_path,
-                [](const std::string* name) { remove(name->c_str()); });
+               /* std::string* */ &temp_file_path,
+               /* T? */ [](const std::string* name) { remove(name->c_str()); });
 
         if (!runCommand(commandLine,
                         RunOptions::WaitForCompletion |
@@ -1305,7 +1305,7 @@ public:
 #endif  // !_WIN32
     }
 
-    virtual std::string getTempDir() const {
+    std::string getTempDir() const override {
 #ifdef _WIN32
         Win32UnicodeString path(PATH_MAX);
         DWORD retval = GetTempPathW(path.size(), path.data());

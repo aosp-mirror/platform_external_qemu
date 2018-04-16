@@ -43,6 +43,8 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/snapshot/interface.h"
+#include "android/snapshot/Quickboot.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 
@@ -119,6 +121,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
             "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
             "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
+            "Ctrl+Shift+A SHOW_PANE_CAMERA\n"
             "Ctrl+Shift+U SHOW_PANE_BUGREPORT\n"
             "Ctrl+Shift+P SHOW_PANE_PHONE\n"
             "Ctrl+Shift+M SHOW_PANE_MICROPHONE\n"
@@ -331,6 +334,10 @@ void ToolWindow::show() {
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
+    // Many UI commands require extended window. Construct it here.
+    if (mAllowExtWindow && !mIsExiting) {
+        mExtendedWindow.get();
+    }
     switch (cmd) {
         case QtUICommand::SHOW_PANE_LOCATION:
             if (down) {
@@ -345,6 +352,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_BATTERY:
             if (down) {
                 showOrRaiseExtendedWindow(PANE_IDX_BATTERY);
+            }
+            break;
+        case QtUICommand::SHOW_PANE_CAMERA:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_CAMERA);
             }
             break;
         case QtUICommand::SHOW_PANE_BUGREPORT:
@@ -590,9 +602,40 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 }
 
 // static
-void ToolWindow::setToolEmuAgentEarly(const UiEmuAgent* agentPtr) {
+void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
     ExtendedWindow::setAgentEarly(agentPtr);
+
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (!avdPath) {
+        // Can't find the setting!
+        return;
+    }
+
+    QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+    QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+    SaveSnapshotOnExit saveOnExitChoice =
+        static_cast<SaveSnapshotOnExit>(
+            avdSpecificSettings.value(
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+
+    // Synchronize avdParams right here; avoid tight coupling with whether the settings page is initialized.
+    switch (saveOnExitChoice) {
+        case SaveSnapshotOnExit::Always:
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        case SaveSnapshotOnExit::Ask:
+            // If we can't ask, we'll treat ASK the same as ALWAYS.
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        case SaveSnapshotOnExit::Never:
+            android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        default:
+            break;
+    }
 }
 
 // static
@@ -643,7 +686,6 @@ void ToolWindow::on_back_button_released() {
 // 'false' to say we should NOT exit now.
 bool ToolWindow::askWhetherToSaveSnapshot() {
     mAskedWhetherToSaveSnapshot = true;
-    mExtendedWindow.get();
     // Check the UI setting
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
@@ -669,25 +711,34 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
         return true;
     }
 
-    // If the setting is ALWAYS, we might want to ask anyway, such as
-    // when the system has low RAM.
+    // If the setting is ALWAYS, we might want to ask anyway, such as when
+    // previous saves were known to be slow, or the system has low RAM.
+    bool savesWereSlow =
+        androidSnapshot_areSavesSlow(
+            android::snapshot::Quickboot::kDefaultBootSnapshot.c_str());
     bool hasLowRam = System::isUnderMemoryPressure();
-    if (!hasLowRam && (saveOnExitChoice == SaveSnapshotOnExit::Always)) {
+
+    if (saveOnExitChoice == SaveSnapshotOnExit::Always &&
+        !savesWereSlow &&
+        !hasLowRam) {
         return true;
     }
 
     // The setting is ASK or we decided to ask anyway.
-
-    auto askMessageDefault =
-        tr("Do you want to save the current state for the next quick boot?");
+    auto askMessageSlow =
+        tr("Do you want to save the current state for the next quick boot?"
+           "Note: Recent saves seem to have been slow.");
     auto askMessageLowRam =
         tr("Do you want to save the current state for the next quick boot?\n\n"
            "Note: Saving the snapshot may take longer because free RAM is low.");
+    auto askMessageDefault =
+        tr("Do you want to save the current state for the next quick boot?");
 
     int64_t startTime = get_uptime_ms();
     QMessageBox msgBox(QMessageBox::Question,
                        tr("Save quick-boot state"),
-                       hasLowRam ? askMessageLowRam : askMessageDefault,
+                       savesWereSlow ? askMessageSlow :
+                           (hasLowRam ? askMessageLowRam : askMessageDefault),
                        (QMessageBox::Yes | QMessageBox::No),
                        this);
     // Add a Cancel button to enable the MessageBox's X.

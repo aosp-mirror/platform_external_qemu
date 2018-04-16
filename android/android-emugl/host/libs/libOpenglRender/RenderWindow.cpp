@@ -60,6 +60,8 @@ enum Command {
     CMD_SET_ROTATION,
     CMD_SET_TRANSLATION,
     CMD_REPAINT,
+    CMD_HAS_GUEST_POSTED_A_FRAME,
+    CMD_RESET_GUEST_POSTED_A_FRAME,
     CMD_FINALIZE,
 };
 
@@ -219,6 +221,30 @@ struct RenderWindowMessage {
                     GL_LOG("CMD_REPAINT: no repost, no FrameBuffer");
                 }
                 break;
+
+            case CMD_HAS_GUEST_POSTED_A_FRAME:
+                GL_LOG("CMD_HAS_GUEST_POSTED_A_FRAME");
+                D("CMD_HAS_GUEST_POSTED_A_FRAME\n");
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    result = fb->hasGuestPostedAFrame();
+                } else {
+                    GL_LOG("CMD_HAS_GUEST_POSTED_A_FRAME: no FrameBuffer");
+                }
+                break;
+
+            case CMD_RESET_GUEST_POSTED_A_FRAME:
+                GL_LOG("CMD_RESET_GUEST_POSTED_A_FRAME");
+                D("CMD_RESET_GUEST_POSTED_A_FRAME\n");
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->resetGuestPostedAFrame();
+                    result = true;
+                } else {
+                    GL_LOG("CMD_RESET_GUEST_POSTED_A_FRAME: no FrameBuffer");
+                }
+                break;
+
 
             default:
                 ;
@@ -500,6 +526,23 @@ void RenderWindow::repaint() {
     D("Entering\n");
     RenderWindowMessage msg = {};
     msg.cmd = CMD_REPAINT;
+    (void) processMessage(msg);
+    D("Exiting\n");
+}
+
+bool RenderWindow::hasGuestPostedAFrame() {
+    D("Entering\n");
+    RenderWindowMessage msg = {};
+    msg.cmd = CMD_HAS_GUEST_POSTED_A_FRAME;
+    bool res = processMessage(msg);
+    D("Exiting\n");
+    return res;
+}
+
+void RenderWindow::resetGuestPostedAFrame() {
+    D("Entering\n");
+    RenderWindowMessage msg = {};
+    msg.cmd = CMD_RESET_GUEST_POSTED_A_FRAME;
     (void) processMessage(msg);
     D("Exiting\n");
 }

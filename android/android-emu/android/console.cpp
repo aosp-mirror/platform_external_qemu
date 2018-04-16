@@ -38,7 +38,7 @@
 #include "android/network/constants.h"
 #include "android/network/control.h"
 #include "android/network/globals.h"
-#include "android/screen-recorder-constants.h"
+#include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
@@ -2873,11 +2873,8 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {NULL, 0, NULL, 0}};
 
     switch (client->global->record_agent->getRecorderState()) {
-        case RECORDER_READY:
+        case RECORDER_STOPPED:
             break;
-        case RECORDER_INVALID:
-            control_write(client, "KO: Recorder not initialized\r\n");
-            return -1;
         default:
             control_write(client, "KO: Recording has already started\r\n");
             return -1;
@@ -3004,8 +3001,7 @@ static int do_screenrecord_stop(ControlClient client, char* args) {
     switch (client->global->record_agent->getRecorderState()) {
         case RECORDER_RECORDING:
             break;
-        case RECORDER_READY:
-        case RECORDER_INVALID:
+        case RECORDER_STOPPED:
             control_write(client, "KO: No recording has been started.\r\n");
             return -1;
         default:
@@ -3017,6 +3013,11 @@ static int do_screenrecord_stop(ControlClient client, char* args) {
     D(("Stopping the recording ...\n"));
     client->global->record_agent->stopRecording();
 
+    return 0;
+}
+
+static int do_screenrecord_screenshot(ControlClient client, char* args) {
+    client->global->record_agent->doSnap(args);
     return 0;
 }
 
@@ -3046,6 +3047,12 @@ static const CommandDefRec screenrecord_commands[] = {
          "'screenrecord stop' stops the recording if one has already "
          "started.\r\n",
          NULL, do_screenrecord_stop, NULL},
+
+        {"screenshot", "Take a screenshot",
+         "'screenrecord screenshot <dirname>'\r\n"
+         "\r\nTakes a single screenshot of emulator's display "
+         "and saves the resulting PNG in <dirname>.\r\n",
+         NULL, do_screenrecord_screenshot, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
@@ -3239,7 +3246,7 @@ extern const CommandDefRec main_commands[] = {
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
 
-        {"screenrecord", "Records the emulator's display to a .webm file", NULL,
+        {"screenrecord", "Records the emulator's display", NULL,
          NULL, NULL, screenrecord_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};

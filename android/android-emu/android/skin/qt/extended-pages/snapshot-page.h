@@ -25,7 +25,7 @@ class SnapshotPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit SnapshotPage(QWidget* parent = 0);
+    explicit SnapshotPage(QWidget* parent = 0, bool standAlone = false);
 
 public slots:
     void slot_snapshotLoadCompleted(int status, const QString& name);
@@ -49,6 +49,10 @@ private slots:
 
 private:
 
+    enum class SelectionStatus {
+        NoSelection, Valid, Invalid
+    };
+
     class WidgetSnapshotItem;
 
     static constexpr int COLUMN_ICON = 0;
@@ -63,10 +67,14 @@ private:
     QString getDescription(const QString& fileName);
 
     void    adjustIcons(QTreeWidget* theDisplayList);
+    void    closeEvent(QCloseEvent* closeEvent);
     void    deleteSnapshot(const WidgetSnapshotItem* theItem);
+    void    disableActions();
+    void    enableActions();
     void    editSnapshot(const WidgetSnapshotItem* theItem);
+    void    getOutputFileName();
     void    highlightItemWithFilename(const QString& fileName);
-    void    showPreviewImage(const QString& snapshotName, bool isValid);
+    void    showPreviewImage(const QString& snapshotName, SelectionStatus itemStatus);
     void    updateAfterSelectionChanged();
     void    writeLogicalNameToProtobuf(const QString& fileName, const QString& logicalName);
     void    writeParentToProtobuf(const QString& fileName, const QString& parentName);
@@ -76,7 +84,16 @@ private:
 
     const WidgetSnapshotItem* getSelectedSnapshot();
 
+    bool mIsStandAlone = false;
+    bool mAllowEdit = false;
+    bool mAllowLoad = false;
+    bool mAllowTake = true;
+    bool mAllowDelete = false;
+    bool mMadeSelection = false;
     bool mUseBigInfoWindow = false;
+
+    QString mOutputFileName = ""; // Used to provide our output in stand-alone mode
+
     std::unique_ptr<emulator_snapshot::Snapshot> loadProtobuf(const QString& fileName);
 
     void writeProtobuf(const QString& fileName,

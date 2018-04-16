@@ -86,6 +86,9 @@ local-debug-info-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_DEBUG_INFO_DI
 # Location of resource files
 local-resource-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)resources/$(1)
 
+# Location of test data (for unittests)
+local-testdata-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)testdata/$(1)
+
 ldlibs_start_whole := -Wl,--whole-archive
 ldlibs_end_whole := -Wl,--no-whole-archive
 ldlibs_force_load := -Wl,-force_load,
@@ -288,6 +291,7 @@ endef
 define install-binary
 _SRC := $(1)
 _DST := $(2)
+_INSTALL_OPENGL := $(4)
 _BUILD_EXECUTABLES += $$(_DST)
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_SRC := $$(_SRC)
@@ -296,6 +300,13 @@ $$(_DST): PRIVATE_OBJCOPY_FLAGS := $(3)
 $$(_DST): $$(_SRC)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Install: $$(PRIVATE_DST)"
+ifeq (darwin,$$(BUILD_TARGET_OS))
+ifeq (true,$$(_INSTALL_OPENGL))
+	@echo "install_name_tool for opengl on $$(PRIVATE_SRC) [$$(_INSTALL_OPENGL)]"
+	@install_name_tool -add_rpath "@executable_path/lib64" $$(PRIVATE_SRC)
+	@install_name_tool -add_rpath "@executable_path/lib64/gles_swiftshader" $$(PRIVATE_SRC)
+endif
+endif
 ifeq (true,$$(BUILD_STRIP_BINARIES))
 ifeq (darwin,$$(BUILD_TARGET_OS))
 	$(hide) strip -S -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
@@ -307,6 +318,7 @@ else  # BUILD_STRIP_BINARIES != true
 endif # BUILD_STRIP_BINARIES != true
 endef
 
+# Runs a test target
 define run-test
 _TST := $(1)
 _DST := $(call local-test-result-path, $(1))/$1.success
@@ -317,9 +329,10 @@ $$(_DST): $$(_TST)
 	@echo "Running $$(PRIVATE_TST)"
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
-	$(hide) $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
+	$(hide) LLVM_PROFILE_FILE=$(call local-test-result-path)/$$(PRIVATE_TST).profraw $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
 	@touch $$(PRIVATE_DST)
 endef
+
 
 # Installs a prebuilt library
 # If required, will generates symbols and debug info

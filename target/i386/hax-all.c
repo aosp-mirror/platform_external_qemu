@@ -87,6 +87,11 @@ int hax_ug_platform(void)
       return ug_support;
 }
 
+bool hax_gpa_protection_supported(void)
+{
+    return hax_global.supports_ram_protection;
+}
+
 int hax_vcpu_active(CPUState* cpu)
 {
     return ug_support ||
@@ -224,6 +229,7 @@ static int hax_get_capability(struct hax_state *hax)
 
     hax->supports_64bit_ramblock = !!(cap->winfo & HAX_CAP_64BIT_RAMBLOCK);
     hax->supports_64bit_setram = !!(cap->winfo & HAX_CAP_64BIT_SETRAM);
+    hax->supports_ram_protection = !!(cap->winfo & HAX_CAP_RAM_PROTECTION);
 
     if (cap->wstatus & HAX_CAP_MEMQUOTA) {
         if (cap->mem_quota < hax->mem_quota) {
@@ -428,11 +434,16 @@ static int hax_init(ram_addr_t ram_size)
     struct hax_state *hax = NULL;
     struct hax_qemu_version qversion;
     int ret;
+    int i;
 
     hax = &hax_global;
 
     memset(hax, 0, sizeof(struct hax_state));
     hax->mem_quota = ram_size;
+    for (i = 0; i < HAX_MAX_SLOTS; ++i) {
+        hax->memslots[i].id = i;
+        hax->memslots[i].flags = HAX_RAM_INFO_INVALID;
+    }
 
     hax->fd = hax_mod_open();
     if (hax_invalid_fd(hax->fd)) {
@@ -751,6 +762,19 @@ vcpu_run:
         case HAX_EXIT_REAL:
             ret = HAX_EMUL_REAL;
             break;
+        case HAX_EXIT_PAGEFAULT: {
+            // HAXM fundamentally needs to unprotect guest RAM in 2MB chunks.
+#define HAXM_CHUNK_SIZE 0x200000
+            uint64_t gpa_chunk = ht->pagefault.gpa & ~(uint64_t)(HAXM_CHUNK_SIZE - 1);
+            uint64_t gpa;
+            for (gpa = gpa_chunk; gpa < gpa_chunk + HAXM_CHUNK_SIZE; gpa += 0x1000) {
+              bool found = false;
+              void* hva = hax_gpa2hva(gpa, &found);
+              if (found)
+                  qemu_ram_load(hva, 0x1000);
+            }
+            break;
+        }
         default:
             fprintf(stderr, "Unknown exit %x from HAX\n", ht->_exit_status);
             qemu_system_reset_request();

@@ -1,4 +1,4 @@
-// Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
 
-#include "android/ffmpeg-audio-capture.h"
-#include "android/base/system/System.h"
+#include "android/recording/Producer.h"
 
-// This is the audio stream received from the capturer
-int FfmpegAudioCapturer::onSample(void *buf, int size)
-{
-    if (mRecorder != nullptr)
-        ffmpeg_encode_audio_frame(
-                mRecorder, (uint8_t*)buf, size,
-                android::base::System::get()->getHighResTimeUs());
+#include <memory>
 
-    return 0;
-}
+namespace android {
+namespace recording {
+
+// Creates a dummy audio producer for testing.
+std::unique_ptr<Producer> createDummyAudioProducer(
+        uint32_t sampleRate,
+        uint32_t nbSamples,
+        uint8_t nChannels,
+        uint8_t durationSecs,
+        AudioFormat fmt,
+        std::function<void()> onFinishedCb);
+
+}  // namespace recording
+}  // namespace android

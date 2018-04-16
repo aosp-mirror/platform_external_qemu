@@ -13,13 +13,14 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
-#include "android/ffmpeg-muxer.h"
 #include "android/globals.h"
+#include "android/recording/GifConverter.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
 #include "android/utils/debug.h"
 
 #include <QDesktopServices>
@@ -61,9 +62,6 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
 }
 
 RecordScreenPage::~RecordScreenPage() {
-    if (mRecordScreenAgent) {
-        mRecordScreenAgent->stopRecording();
-    }
     // Remove the tmp video file if one exists
     if (!removeFileIfExists(QString(mTmpFilePath.c_str()))) {
         derror("Unable to clean up temp media file.");
@@ -219,10 +217,16 @@ void RecordScreenPage::updateElapsedTime() {
 
 void RecordScreenPage::on_rec_playStopButton_clicked() {
     if (mState == RecordUiState::Stopped) {
-        mVideoPlayerNotifier.reset(new android::videoplayer::VideoPlayerNotifier());
-        mVideoPlayer = android::videoplayer::VideoPlayer::create(mTmpFilePath, mVideoWidget.get(), mVideoPlayerNotifier.get());
-        connect(mVideoPlayerNotifier.get(), SIGNAL(updateWidget()), this, SLOT(updateVideoView()));
-        connect(mVideoPlayerNotifier.get(), SIGNAL(videoFinished()), this, SLOT(videoPlayingFinished()));
+        auto videoPlayerNotifier =
+                std::unique_ptr<android::videoplayer::VideoPlayerNotifier>(
+                        new android::videoplayer::VideoPlayerNotifier());
+        connect(videoPlayerNotifier.get(), SIGNAL(updateWidget()), this,
+                SLOT(updateVideoView()));
+        connect(videoPlayerNotifier.get(), SIGNAL(videoFinished()), this,
+                SLOT(videoPlayingFinished()));
+        mVideoPlayer = android::videoplayer::VideoPlayer::create(
+                mTmpFilePath, mVideoWidget.get(),
+                std::move(videoPlayerNotifier));
 
         mVideoPlayer->scheduleRefresh(20);
         mVideoPlayer->start();
@@ -426,10 +430,9 @@ ConvertingTask::ConvertingTask(const std::string& startFilename,
 
 void ConvertingTask::run() {
     emit started();
-    int rc = ffmpeg_convert_to_animated_gif(mStartFilename.c_str(),
-                                            mEndFilename.c_str(),
-                                            64 * 1024);
-    emit(finished(!rc));
+    bool rc = android::recording::GifConverter::toAnimatedGif(
+            mStartFilename, mEndFilename, 64 * 1024);
+    emit(finished(rc));
 }
 
 void RecordScreenPage::updateVideoView() {

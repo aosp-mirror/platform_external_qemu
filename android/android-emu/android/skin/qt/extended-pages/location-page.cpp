@@ -50,7 +50,10 @@ LocationPage::LocationPage(QWidget *parent) :
         // update location every 10 seconds, until we exit
         mUpdateThreadLock.lock();
         while (!mShouldCloseUpdateThread) {
-            sendLocationToDevice();
+            if (sLocationAgent &&
+                sLocationAgent->gpsGetPassiveUpdate()) {
+                sendLocationToDevice();
+            }
             // wait 10 sec
             mUpdateThreadCv.timedWait(&mUpdateThreadLock,
                     android::base::System::get()->getUnixTimeUs()
@@ -101,10 +104,7 @@ LocationPage::LocationPage(QWidget *parent) :
             SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
     mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
 
-    assert(sLocationAgent);
-    if (sLocationAgent->gpsGetPassiveUpdate()) {
-        mUpdateThread.start();
-    }
+    mUpdateThread.start();
 
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(

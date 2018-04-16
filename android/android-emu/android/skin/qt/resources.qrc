@@ -81,6 +81,7 @@
         <file alias="dpad_up_pressed">images/light/dpad_up_pressed.svg</file>
         <file alias="drop_down">images/light/ic_arrow_drop_down_ccc_48dp.svg</file>
         <file alias="edit">images/light/ic_mode_edit_777_48dp.svg</file>
+        <file alias="edit_disabled">images/light/ic_mode_edit_BBB_48dp.svg</file>
         <file alias="file_download">images/light/ic_file_download_678_48dp.svg</file>
         <file alias="file_upload">images/light/ic_file_upload_678_48dp.svg</file>
         <file alias="fingerprint">images/light/ic_fingerprint_678_48dp.svg</file>
@@ -192,6 +193,7 @@
         <file alias="dpad_up_pressed">images/dark/dpad_up_pressed.svg</file>
         <file alias="drop_down">images/dark/ic_arrow_drop_down_667_48dp.svg</file>
         <file alias="edit">images/dark/ic_mode_edit_BCC_48dp.svg</file>
+        <file alias="edit_disabled">images/dark/ic_mode_edit_566_48dp.svg</file>
         <file alias="file_download">images/dark/ic_file_download_677_48dp.svg</file>
         <file alias="file_upload">images/dark/ic_file_upload_677_48dp.svg</file>
         <file alias="fingerprint">images/dark/ic_fingerprint_677_48dp.svg</file>

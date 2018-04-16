@@ -31,7 +31,8 @@ struct FreeDelete {
 
 template <class Func>
 struct FuncDelete {
-    explicit FuncDelete(Func f = Func()) : mF(f) {}
+    FuncDelete() : mF() { }
+    explicit FuncDelete(Func f) : mF(std::move(f)) {}
 
     FuncDelete(const FuncDelete& other) = default;
     FuncDelete(FuncDelete&& other) = default;

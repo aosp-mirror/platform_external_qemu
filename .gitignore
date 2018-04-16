@@ -117,3 +117,4 @@ TAGS
 docker-src.*
 *~
 *.DS_Store
+/default.profraw
