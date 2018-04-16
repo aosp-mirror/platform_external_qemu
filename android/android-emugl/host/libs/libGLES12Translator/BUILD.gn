@@ -1,0 +1,52 @@
+import("//external/qemu/android/config.gni")
+
+shared_library("lib$BUILD_TARGET_SUFFIX" + "GLES12Translator") {
+  sources = [
+    "gles/api_entries.cpp",
+    "gles/buffer_data.cpp",
+    "gles/debug.cpp",
+    "gles/egl_image.cpp",
+    "gles/framebuffer_data.cpp",
+    "gles/gles1_shader_generator.cpp",
+    "gles/gles_context.cpp",
+    "gles/gles_validate.cpp",
+    "gles/matrix.cpp",
+    "gles/paletted_texture_util.cpp",
+    "gles/pass_through.cpp",
+    "gles/program_data.cpp",
+    "gles/program_variant.cpp",
+    "gles/renderbuffer_data.cpp",
+    "gles/shader_data.cpp",
+    "gles/shader_variant.cpp",
+    "gles/share_group.cpp",
+    "gles/state.cpp",
+    "gles/texture_codecs.cpp",
+    "gles/texture_data.cpp",
+    "gles/uniform_value.cpp",
+    "gles/vector.cpp",
+    "gles/translator_interface.cpp",
+    "common/log.cpp",
+    "common/etc1.cpp",
+    "common/RefBase.cpp",
+  ]
+
+  output_dir = "$root_out_dir/lib64"
+
+  include_dirs = [
+    ".",
+    "../include",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+
+  deps = [
+    "//build/config:exe_and_shlib_deps",
+    "//build/win:default_exe_manifest",
+    "//external/qemu/android/android-emu:android-emu-base",
+    "//external/qemu/android/android-emugl/host/libs/GLESv1_dec:libGLESv1_dec",
+    "//external/qemu/android/android-emugl/host/libs/libOpenGLESDispatch:libOpenGLESDispatch",
+    "//external/qemu/android/android-emugl/shared/emugl/common:libemugl_common",
+    "//external/qemu/android/android-emugl/shared/OpenglCodecCommon:libOpenglCodecCommon",
+  ]
+}
