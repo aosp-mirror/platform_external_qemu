@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05433cf1_2dc69b83",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-16T11:12:02Z",
+      "side": 1,
+      "message": "Since we have ensured that every page in the HVA range (ptr .. ptr + length):\n\n1. Belongs to a registered RAM block (checked by RamLoader).\n2. Corresponds to a guest RAM page (guaranteed by caller of qemu_ram_load() in hax-all.c).\n\nI expect start \u003d\u003d ptr \u0026\u0026 end \u003d\u003d ptr + length. Do we still need this page-by-page check?",
+      "revId": "39e81b009135c5d16f684be3fae0dee3182c8ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a94c5bf_57f18f87",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-16T11:12:02Z",
+      "side": 1,
+      "message": "Hmm, since RamLoader calls initBulkFill() before fillPageBulk(), we are essentially asking HAXM to unprotect the chunk before the data is ready. We may have a problem if another vcpu thread accesses the same chunk while we fill its pages. I don\u0027t know if a similar race condition is possible with the host-side unprotect call.",
+      "revId": "39e81b009135c5d16f684be3fae0dee3182c8ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00b1b3d4_af92f57c",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-16T11:12:02Z",
+      "side": 1,
+      "message": "Since num_pages \u003d\u003d 1, we can get rid of this for loop.",
+      "revId": "39e81b009135c5d16f684be3fae0dee3182c8ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94345198_0720935a",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-16T11:12:02Z",
+      "side": 1,
+      "message": "Break out of the for loop?",
+      "revId": "39e81b009135c5d16f684be3fae0dee3182c8ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5abfecb5_c7dc854b",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-16T11:12:02Z",
+      "side": 1,
+      "message": "0 is a valid GPA, so it may not be safe to use it as an invalid value (line 796). How about UINT64_MAX ?",
+      "revId": "39e81b009135c5d16f684be3fae0dee3182c8ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0afc2d8c_4715fa3e",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 796,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-16T11:12:02Z",
+      "side": 1,
+      "message": "0 is a valid GPA (see my other comment above):\n gpa_chunk_valid_start \u003d\u003d UINT64_MAX",
+      "revId": "39e81b009135c5d16f684be3fae0dee3182c8ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef36f7cd_1e087e50",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 800,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-16T11:12:02Z",
+      "side": 1,
+      "message": "nit: Too much indentation for these 3 lines.",
+      "revId": "39e81b009135c5d16f684be3fae0dee3182c8ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f9a8f007_64064b64",
+        "filename": "target/i386/hax-all.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-16T11:12:02Z",
+      "side": 1,
+      "message": "The above algorithm to compute the valid HVA range for qemu_ram_load() is straightforward, but I have an idea to simplify it. Could you split this CL and create a separate one for hax-all.c? That way I could replace this algorithm and test it against the rest of this CL that enables the bulk loading API.\n\nHere\u0027s a sketch of the new algorithm (I actually discussed this idea briefly with Haitao):\n\n1. Find the hax_memslot (slot) containing the faulting GPA. There must be one (and only one).\n2. Convert the faulting GPA to HVA (fault_hva) using mapping info from |slot|.\n3. Compute the upper and lower bounds of the HVA range of the 2MB chunk containing |fault_hva|. Right now this is not trivial/possible, but I\u0027ll make a HAXM-side patch to redefine chunk boundaries based on absolute HVAs rather than RAM block boundaries, so this computation will be as easy as rounding |fault_hva| down and up to the nearest 2MB boundaries.\n4. Compute the intersection of a) the HVA range obtained from step 3, and b) the HVA range covered by |slot|.\n\nThe new algorithm only scans the memslot array once, and doesn\u0027t call hax_gpa2hva() at all.",
+      "revId": "39e81b009135c5d16f684be3fae0dee3182c8ebd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
