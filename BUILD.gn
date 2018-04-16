@@ -1,0 +1,596 @@
+import("android/config.gni")
+import("sources.gni")
+
+BUILD_OBJS_DIR = "//external/qemu/objs"
+
+QEMU2_AUTO_GENERATED_DIR = "$BUILD_OBJS_DIR/build/qemu2-qapi-auto-generated"
+
+QEMU2_DEPS_TOP_DIR = "$QEMU2_DEPS_PREBUILTS_DIR/$BUILD_TARGET_TAG"
+QEMU2_DEPS_LDFLAGS = "-L$QEMU2_DEPS_TOP_DIR/lib"
+
+QEMU2_GLIB_INCLUDES = [
+  "$QEMU2_DEPS_TOP_DIR/include/glib-2.0",
+  "$QEMU2_DEPS_TOP_DIR/lib/glib-2.0/include",
+]
+QEMU2_GLIB_LDLIBS = "-lglib-2.0"
+
+QEMU2_PIXMAN_INCLUDES = "$QEMU2_DEPS_TOP_DIR/include/pixman-1"
+QEMU2_PIXMAN_LDLIBS = "-lpixman-1"
+
+QEMU2_SDL2_INCLUDES = "$QEMU2_DEPS_TOP_DIR/include/SDL2"
+
+# Ensure config-host.h can be found properly.
+QEMU2_INCLUDES = [
+  "android-qemu2-glue/config/$BUILD_TARGET_TAG",
+]
+
+if (is_linux) {
+  QEMU2_INCLUDES += [
+    "$QEMU2_TOP_DIR/linux-headers",
+  ]
+}
+
+# Ensure QEMU2 headers are found.
+QEMU2_INCLUDES += [
+  ".",
+  "include",
+  QEMU2_AUTO_GENERATED_DIR,
+]
+
+QEMU2_INCLUDES += QEMU2_GLIB_INCLUDES
+
+QEMU2_INCLUDES += [
+  QEMU2_PIXMAN_INCLUDES,
+]
+
+config("qemu2_config") {
+
+  # copied from QEMU2_CFLAGS
+
+  cflags = EMULATOR_COMMON_CFLAGS
+
+  cflags += [
+    "-fno-strict-aliasing",
+    "-fno-common",
+    "-D_GNU_SOURCE",
+    "-D_FILE_OFFSET_BITS=64",
+    "-Wno-unused-function",
+    "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
+  ]
+
+  if (is_win) {
+    cflags += [
+      "-DWIN32_LEAN_AND_MEAN",
+      "-D__USE_MINGW_ANSI_STDIO=1",
+      "-mms-bitfields",
+     ]
+   }
+
+  if (is_mac) {
+    cflags += [
+      "-Wno-initializer-overrides",
+    ]
+  }
+
+  if (is_clang) {
+    cflags += [
+      "-Wno-address-of-packed-member",
+      "-Wno-tautological-pointer-compare",
+      "-Wno-tautological-compare",
+      "-Wno-tautological-pointer-compare",
+      "-Wno-format-security",
+    ]
+  } else {
+    cflags += [
+      "-Wno-unused-variable",
+      "-Wno-unused-but-set-variable",
+      "-Wno-maybe-uninitialized",
+    ]
+  }
+  # end of QEMU2_CFLAGS
+
+  include_dirs = QEMU2_INCLUDES
+}
+
+# A static library containing target-independent code
+# modifed android-qemu2-glue/build/from Makefile.qemu2.mk
+static_library("libqemu2-common")  {
+  set_sources_assignment_filter([])
+  sources = [
+    "$QEMU2_AUTO_GENERATED_DIR/qapi-event.c",
+    "$QEMU2_AUTO_GENERATED_DIR/qapi-types.c",
+    "$QEMU2_AUTO_GENERATED_DIR/qapi-visit.c",
+    "$QEMU2_AUTO_GENERATED_DIR/qmp-introspect.c",
+    "$QEMU2_AUTO_GENERATED_DIR/qmp-marshal.c",
+    "$QEMU2_AUTO_GENERATED_DIR/trace/generated-tcg-tracers.h",
+    "$QEMU2_AUTO_GENERATED_DIR/trace/generated-helpers-wrappers.h",
+    "$QEMU2_AUTO_GENERATED_DIR/trace/generated-helpers.h",
+    "$QEMU2_AUTO_GENERATED_DIR/trace-root.c",
+    "$QEMU2_AUTO_GENERATED_DIR/util/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/crypto/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/io/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/migration/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/block/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/backends/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/block/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/block/dataplane/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/char/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/intc/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/net/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/virtio/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/audio/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/misc/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/usb/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/scsi/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/nvram/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/display/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/input/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/timer/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/dma/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/sparc/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/sd/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/isa/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/mem/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/i386/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/i386/xen/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/9pfs/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/ppc/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/pci/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/s390x/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/vfio/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/acpi/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/arm/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/alpha/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/hw/xen/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/ui/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/audio/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/net/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/target/arm/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/target/i386/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/target/mips/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/target/sparc/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/target/s390x/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/target/ppc/trace.c",
+    "$QEMU2_AUTO_GENERATED_DIR/qom/trace.c",
+#   "$QEMU2_AUTO_GENERATED_DIR/trace/generated-helpers.c",
+  ]
+
+  # Stuff from libqemuutil, order follows util/Makefile.objs
+  sources += [
+    "crypto/pbkdf-stub.c",
+    "qapi/opts-visitor.c",
+    "qapi/qapi-clone-visitor.c",
+    "qapi/qapi-dealloc-visitor.c",
+    "qapi/qapi-util.c",
+    "qapi/qapi-visit-core.c",
+    "qapi/qobject-input-visitor.c",
+    "qapi/qobject-output-visitor.c",
+    "qapi/qmp-dispatch.c",
+    "qapi/qmp-event.c",
+    "qapi/qmp-registry.c",
+    "qapi/string-input-visitor.c",
+    "qapi/string-output-visitor.c",
+    "qobject/json-lexer.c",
+    "qobject/json-parser.c",
+    "qobject/json-streamer.c",
+    "qobject/qbool.c",
+    "qobject/qdict.c",
+    "qobject/qfloat.c",
+    "qobject/qint.c",
+    "qobject/qjson.c",
+    "qobject/qlist.c",
+    "qobject/qnull.c",
+    "qobject/qobject.c",
+    "qobject/qstring.c",
+    "trace/control.c",
+    "trace/qmp.c",
+    "util/abort.c",
+    "util/acl.c",
+    "util/aiocb.c",
+    "util/async.c",
+    "util/base64.c",
+    "util/bitmap.c",
+    "util/bitops.c",
+    "util/buffer.c",
+    "util/bufferiszero.c",
+    "util/crc32c.c",
+    "util/cutils.c",
+    "util/envlist.c",
+    "util/error.c",
+    "util/fifo8.c",
+    "util/getauxval.c",
+    "util/hexdump.c",
+    "util/hbitmap.c",
+    "util/id.c",
+    "util/iohandler.c",
+    "util/iov.c",
+    "util/keyval.c",
+    "util/lockcnt.c",
+    "util/log.c",
+    "util/module.c",
+    "util/main-loop.c",
+    "util/notify.c",
+    "util/osdep.c",
+    "util/qemu-timer.c",
+    "util/path.c",
+    "util/qdist.c",
+    "util/qemu-config.c",
+    "util/qemu-coroutine.c",
+    "util/qemu-coroutine-io.c",
+    "util/qemu-coroutine-lock.c",
+    "util/qemu-coroutine-sleep.c",
+    "util/qemu-error.c",
+    "util/qemu-option.c",
+    "util/qemu-progress.c",
+    "util/qemu-sockets.c",
+    "util/qemu-timer-common.c",
+    "util/qht.c",
+    "util/range.c",
+    "util/rcu.c",
+    "util/readline.c",
+    "util/timed-average.c",
+    "util/thread-pool.c",
+    "util/throttle.c",
+    "util/unicode.c",
+    "util/uri.c",
+    "util/uuid.c",
+  ]
+
+  if (is_win) {
+    sources += [
+      "util/aio-win32.c",
+      "util/coroutine-win32.c",
+      "util/event_notifier-win32.c",
+      "util/oslib-win32.c",
+      "util/qemu-thread-win32.c",
+    ]
+  }
+
+  if (is_linux) {
+    sources += [
+        "util/coroutine-ucontext.c",
+        "util/memfd.c",
+    ]
+  }
+
+  if (is_mac) {
+    sources += [
+      "util/coroutine-sigaltstack.c",
+    ]
+  }
+
+  if (is_mac || is_linux) {
+    sources += [
+      "util/aio-posix.c",
+      "util/event_notifier-posix.c",
+      "util/mmap-alloc.c",
+      "util/oslib-posix.c",
+      "util/qemu-openpty.c",
+      "util/qemu-thread-posix.c",
+      "util/compatfd.c",
+    ]
+  }
+
+  sources += QEMU2_COMMON_SOURCES
+
+  if (BUILD_TARGET_TAG == "darwin-x86_64") {
+    sources += QEMU2_COMMON_SOURCES_darwin_x86_64
+  } 
+  else if (BUILD_TARGET_TAG == "linux-x86_64") {
+    sources += QEMU2_COMMON_SOURCES_linux_x86_64
+  }
+  else if (BUILD_TARGET_TAG == "windows-x86") {
+    sources += QEMU2_COMMON_SOURCES_windows_x86
+  }
+  else if (BUILD_TARGET_TAG == "windows-x86_64") {
+    sources += QEMU2_COMMON_SOURCES_windows_x86_64
+  }
+
+  # $(call qemu2-if-build-target-arch,x86, util/host-utils.c)",
+
+  cflags = [
+    "-DPOISON_CONFIG_ANDROID",
+  ]
+
+  include_dirs = [
+    "slirp",
+    "tcg",
+  ]
+
+  configs += [
+    ":qemu2_config",
+    "//external/qemu/android/third_party:libusb",
+    "//external/qemu/android/third_party:zlib",
+  ]
+}
+
+
+# A static library containing the android-emu glue code
+static_library("libqemu2-glue") {
+  sources = [
+    "android-qemu2-glue/android_qemud.cpp",
+    "android-qemu2-glue/audio-capturer.cpp",
+    "android-qemu2-glue/audio-output.cpp",
+    "android-qemu2-glue/base/async/CpuLooper.cpp",
+    "android-qemu2-glue/base/async/Looper.cpp",
+    "android-qemu2-glue/base/files/QemuFileStream.cpp",
+    "android-qemu2-glue/display.cpp",
+    "android-qemu2-glue/emulation/android_pipe_device.cpp",
+    "android-qemu2-glue/emulation/charpipe.c",
+    "android-qemu2-glue/emulation/CharSerialLine.cpp",
+    "android-qemu2-glue/emulation/DmaMap.cpp",
+    "android-qemu2-glue/emulation/goldfish_sync.cpp",
+    "android-qemu2-glue/emulation/serial_line.cpp",
+    "android-qemu2-glue/emulation/VmLock.cpp",
+    "android-qemu2-glue/looper-qemu.cpp",
+    "android-qemu2-glue/net-android.cpp",
+    "android-qemu2-glue/proxy/slirp_proxy.cpp",
+    "android-qemu2-glue/qemu-battery-agent-impl.c",
+    "android-qemu2-glue/qemu-cellular-agent-impl.c",
+    "android-qemu2-glue/qemu-clipboard-agent-impl.cpp",
+    "android-qemu2-glue/qemu-display-agent-impl.cpp",
+    "android-qemu2-glue/qemu-finger-agent-impl.c",
+    "android-qemu2-glue/qemu-location-agent-impl.c",
+    "android-qemu2-glue/qemu-http-proxy-agent-impl.c",
+    "android-qemu2-glue/qemu-net-agent-impl.c",
+    "android-qemu2-glue/qemu-car-data-agent-impl.cpp",
+    "android-qemu2-glue/qemu-record-screen-agent-impl.c",
+    "android-qemu2-glue/qemu-sensors-agent-impl.c",
+    "android-qemu2-glue/qemu-setup.cpp",
+    "android-qemu2-glue/qemu-setup-dns-servers.cpp",
+    "android-qemu2-glue/qemu-telephony-agent-impl.c",
+    "android-qemu2-glue/qemu-user-event-agent-impl.c",
+    "android-qemu2-glue/qemu-virtual-scene-agent-impl.cpp",
+    "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+    "android-qemu2-glue/snapshot_compression.cpp",
+    "android-qemu2-glue/telephony/modem_init.c",
+    "android-qemu2-glue/utils/stream.cpp"
+  ]
+
+  include_dirs = [
+#    ANDROID_EMU_INCLUDES,
+    "//external/qemu/android/android-emu",
+    EMUGL_INCLUDES,
+    "slirp",
+
+    # TODO: remove these hardcoded paths
+    "//external/qemu/objs/build/intermediates64/emulator_hw_config_defs",
+  ]
+
+  configs += [
+    ":qemu2_config",
+    "//external/qemu/android/third_party:liblz4",
+    "//external/qemu/android/third_party:zlib",
+  ]
+}
+
+# android-qemu2-glue/build/Makefile.qemu2-target.mk
+# Rules to build the final target-specific QEMU2 binaries from sources.
+
+QEMU2_SYSTEM_LDFLAGS = QEMU2_DEPS_LDFLAGS
+
+# QEMU2_SYSTEM_CFLAGS
+# QEMU2_SYSTEM_INCLUDES
+config("qemu2_system_config") {
+  cflags = [
+    "-DNEED_CPU_H",
+  ]
+
+  include_dirs = [
+    "$QEMU2_DEPS_TOP_DIR/include",
+    "tcg",
+    "tcg/i386",
+  ]
+
+  # from QEMU2_SYSTEM_LDLIBS
+  ldflags = [
+    QEMU2_SYSTEM_LDFLAGS,
+    QEMU2_GLIB_LDLIBS,
+    QEMU2_PIXMAN_LDLIBS,
+    "-lfdt",
+  ]
+
+  if (is_linux) {
+    include_dirs += [
+      "linux-headers",
+    ]
+
+    ldflags += [
+      "-lpthread",
+      "-lrt",
+
+      "-lpulse",
+    ]
+  }  
+
+  if (is_mac) {
+    ldflags += [
+      "-liconv",
+      "-lintl",
+
+      "-weak_framework Hypervisor"
+    ]
+  }
+
+  if (is_win) {
+    ldflags += [
+      "-lole32",
+      "-lvfw32",
+
+      "-ldxguid",
+    ]
+  }
+
+  configs = [
+    ":qemu2_config",
+  ]
+}
+
+# A library that contains all QEMU2 target-specific sources, excluding
+# anything implemented by the glue code.
+
+# QEMU2_TARGET = x86
+# QEMU2_TARGET_CPU_x86 = i386
+# QEMU2_TARGET_TARGET = i386
+static_library("libqemu2-system-i386") {
+  sources = [
+    "stubs/gdbstub.c",
+    "stubs/arch-query-cpu-model-baseline.c",
+    "stubs/arch-query-cpu-model-comparison.c",
+    "stubs/target-get-monitor-def.c",
+    "hax-stub.c",
+    "hvf-stub.c",
+    "whpx-stub.c",
+  ]
+
+  sources += QEMU2_TARGET_SOURCES
+  sources += QEMU2_TARGET_i386_SOURCES
+
+  if (BUILD_TARGET_TAG == "darwin-x86_64") {
+    sources += QEMU2_TARGET_i386_SOURCES_darwin_x86_64
+  } 
+  else if (BUILD_TARGET_TAG == "linux-x86_64") {
+    sources += QEMU2_TARGET_i386_SOURCES_linux_x86_64
+  }
+  else if (BUILD_TARGET_TAG == "windows-x86") {
+    sources += QEMU2_TARGET_i386_SOURCES_windows_x86
+  }
+  else if (BUILD_TARGET_TAG == "windows-x86_64") {
+    sources += QEMU2_TARGET_i386_SOURCES_windows_x86_64
+  }
+
+  include_dirs = [
+    "android-qemu2-glue/config/target-x86",
+    "target/i386",
+  ]
+
+  configs += [
+    ":qemu2_system_config",
+  ]
+}
+
+executable("qemu-upstream-i386") {
+  sources = [
+    "hw/i386/acpi-build.c",
+    "hw/i386/pc_piix.c",
+    "ui/sdl2.c",
+    "ui/sdl2-input.c",
+    "ui/sdl2-2d.c",
+    "vl.c",
+  ]
+
+  include_dirs = [
+    "android-qemu2-glue/config/target-x86",
+    "target/i386",
+    QEMU2_SDL2_INCLUDES
+  ]
+
+  configs += [
+    ":qemu2_system_config",
+    "//external/qemu/android/third_party:zlib",
+  ]
+
+  if (is_linux) {
+    configs += [
+      "//external/qemu/android/third_party:libusb",
+      "//external/qemu/android/third_party:libbluez",
+    ]
+  }
+
+  ldflags = [
+    "-lSDL2",
+  ]
+
+  if (!is_mac) {
+    ldflags += [
+      "-lSDL2main"
+    ]
+  }
+
+  if (is_win) {
+    ldflags += [
+      "-limm32",
+      "-ldinput8",
+      "-ldxguid",
+      "-ldxerr8",
+      "-luser32",
+      "-lgdi32",
+      "-lwinmm",
+      "-lole32",
+      "-loleaut32",
+      "-lshell32",
+      "-lversion",
+      "-luuid",
+    ]
+  } 
+  else {
+    ldflags += [
+      "-ldl",
+    ]
+  }
+
+  deps = [
+    ":libqemu2-common",
+    ":libqemu2-system-i386",
+  ]
+}
+
+# The emulator-specific version of QEMU2, with CONFIG_ANDROID defined at
+# compile-time.
+executable("qemu-system-i386") {
+  sources = [
+    "android-qemu2-glue/main.cpp",
+    "hw/i386/acpi-build.c",
+    "hw/i386/pc_piix.c",
+    "vl.c",
+  ]
+
+  if (is_win) {
+    sources += [
+      "android-qemu2-glue/stubs/win32-stubs.c",
+    ]
+  }
+
+  cflags = [
+    "-DCONFIG_ANDROID",
+  ]
+
+  include_dirs = [
+    "android-qemu2-glue/config/target-x86",
+    "target/i386",
+
+    # ANDROID_EMU_INCLUDES,
+    "//external/qemu/android/android-emu",
+    EMUGL_INCLUDES,
+     # TODO: remove these hardcoded paths
+    "//external/qemu/objs/build/intermediates64/emulator_hw_config_defs",
+  ]
+
+  configs += [
+    ":qemu2_system_config",
+    "//external/qemu/android/third_party:libffmpeg",
+    "//external/qemu/android/third_party:liblz4",
+    "//external/qemu/android/third_party:libvpx",
+    "//external/qemu/android/third_party:qt5",
+    "//external/qemu/android/third_party:zlib",
+  ]
+
+  if (is_linux) {
+    configs += [
+      "//external/qemu/android/third_party:libusb",
+      "//external/qemu/android/third_party:libbluez",
+    ]
+  }
+
+  deps = [
+    "//build/config:exe_and_shlib_deps",
+    "//build/win:default_exe_manifest",
+
+    ":libqemu2-common",
+    ":libqemu2-glue",
+    ":libqemu2-system-i386",
+    "//external/qemu/android/android-emu:android-emu-base",
+    "//external/qemu/android/android-emu:android-emu",
+    "//external/qemu/android/android-emu:emulator-libui",
+  ]
+}
