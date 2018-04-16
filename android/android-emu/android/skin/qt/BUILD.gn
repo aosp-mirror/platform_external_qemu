@@ -1,0 +1,106 @@
+import("//external/qemu/android/config.gni")
+import("//external/qemu/android/third_party/qt_library.gni")
+
+config("emulator-skin-qt_config") {
+  include_dirs = [
+    EMUGL_INCLUDES,
+    "$EMUGL_SRCDIR/shared",
+    "//external/qemu/android/android-emu",
+  ]
+}
+
+source_set("emulator-skin-qt") {
+  sources = [
+    "android/skin/qt/event-qt.cpp",
+    "android/skin/qt/init-qt.cpp",
+    "android/skin/qt/surface-qt.cpp",
+    "android/skin/qt/winsys-qt.cpp",
+
+    "android/skin/qt/accelerometer-3d-widget.cpp",
+    "android/skin/qt/angle-input-widget.cpp",
+    "android/skin/qt/editable-slider-widget.cpp",
+    "android/skin/qt/emulator-container.cpp",
+    "android/skin/qt/emulator-overlay.cpp",
+    "android/skin/qt/emulator-qt-window.cpp",
+    "android/skin/qt/emulator-qt-no-window.cpp",
+    "android/skin/qt/event-capturer.cpp",
+    "android/skin/qt/event-serializer.cpp",
+    "android/skin/qt/event-subscriber.cpp",
+    "android/skin/qt/error-dialog.cpp",
+    "android/skin/qt/gl-canvas.cpp",
+    "android/skin/qt/gl-common.cpp",
+    "android/skin/qt/gl-texture-draw.cpp",
+    "android/skin/qt/gl-widget.cpp",
+    "android/skin/qt/extended-pages/common.cpp",
+    "android/skin/qt/extended-pages/battery-page.cpp",
+    "android/skin/qt/extended-pages/bug-report-page.cpp",
+    "android/skin/qt/extended-pages/camera-page.cpp",
+    "android/skin/qt/extended-pages/camera-virtualscene-subpage.cpp",
+    "android/skin/qt/extended-pages/car-data-page.cpp",
+    "android/skin/qt/extended-pages/cellular-page.cpp",
+    "android/skin/qt/extended-pages/dpad-page.cpp",
+    "android/skin/qt/extended-pages/finger-page.cpp",
+    "android/skin/qt/extended-pages/google-play-page.cpp",
+    "android/skin/qt/extended-pages/help-page.cpp",
+    "android/skin/qt/extended-pages/location-page.cpp",
+    "android/skin/qt/extended-pages/microphone-page.cpp",
+    "android/skin/qt/extended-pages/record-screen-page.cpp",
+    "android/skin/qt/extended-pages/rotary-input-dial.cpp",
+    "android/skin/qt/extended-pages/rotary-input-page.cpp",
+    "android/skin/qt/extended-pages/settings-page-proxy.cpp",
+    "android/skin/qt/extended-pages/settings-page.cpp",
+    "android/skin/qt/extended-pages/snapshot-page.cpp",
+    "android/skin/qt/extended-pages/telephony-page.cpp",
+    "android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+    "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+    "android/skin/qt/extended-window.cpp",
+    "android/skin/qt/FramelessDetector.cpp",
+    "android/skin/qt/ModalOverlay.cpp",
+    "android/skin/qt/OverlayMessageCenter.cpp",
+    "android/skin/qt/poster-image-well.cpp",
+    "android/skin/qt/qt-ui-commands.cpp",
+    "android/skin/qt/QtLooper.cpp",
+    "android/skin/qt/QtThreading.cpp",
+    "android/skin/qt/screen-mask.cpp",
+    "android/skin/qt/size-tweaker.cpp",
+    "android/skin/qt/stylesheet.cpp",
+    "android/skin/qt/tool-window.cpp",
+    "android/skin/qt/ui-event-recorder.cpp",
+    "android/skin/qt/user-actions-counter.cpp",
+    "android/skin/qt/virtualscene-control-window.cpp",
+    "android/skin/qt/VirtualSceneInfoDialog.cpp",
+    "android/skin/qt/wavefront-obj-parser.cpp",
+    "android/skin/qt/video-player/Clock.cpp",
+    "android/skin/qt/video-player/FrameQueue.cpp",
+    "android/skin/qt/video-player/PacketQueue.cpp",
+    "android/skin/qt/video-player/VideoPlayer.cpp",
+    "android/skin/qt/video-player/VideoPlayerNotifier.cpp",
+    "android/skin/qt/video-player/VideoPlayerWidget.cpp",
+    "android/skin/qt/video-player/VideoInfo.cpp",
+  ]
+
+  if (is_mac) {
+    sources += [
+      "android/skin/qt/mac-native-window.mm",
+    ]
+  }
+
+  if (is_win) {
+    sources += [
+      "android/skin/qt/windows-native-window.cpp",
+    ]
+  }
+
+  # gl-widget.cpp depends on libOpenGLESDispatch, which depends on
+  # libemugl_common. Using libOpenGLESDispatch ensures that the code
+  # will find and use the same host EGL/GLESv2 libraries as the ones
+  # used by EmuGL. Doing anything else is prone to really bad failure
+  # cases.
+  deps = [
+    "//external/qemu/android/android-emugl/host/libs/libOpenGLESDispatch:libOpenGLESDispatch",
+    "//external/qemu/android/android-emugl/shared/emugl/common:libemugl_common",
+  ]
+
+  public_configs = [ ":emulator-skin-qt_config" ]
+}
+
