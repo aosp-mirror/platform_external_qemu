@@ -1,0 +1,20 @@
+static_library("libOpenGLESDispatch") {
+  sources = [
+    "EGLDispatch.cpp",
+    "GLESv2Dispatch.cpp",
+    "GLESv1Dispatch.cpp",
+    "OpenGLDispatchLoader.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "//external/qemu/android/android-emu",
+    "//external/qemu/android/android-emugl/host/include",
+    "//external/qemu/android/android-emugl/host/libs/Translator/include",
+    "//external/qemu/android/android-emugl/shared",
+  ]
+
+  deps = [
+    "//external/qemu/android/android-emugl/host/libs/GLESv1_dec:libGLESv1_dec",
+  ]
+}
