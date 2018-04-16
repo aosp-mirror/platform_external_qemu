@@ -1,0 +1,2 @@
+libdrm 2 libdrm2 (>= 2.4.89)
+udeb: libdrm 2 libdrm2-udeb (>= 2.4.89)

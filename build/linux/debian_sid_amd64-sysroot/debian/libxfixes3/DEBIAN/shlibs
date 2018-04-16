@@ -1,0 +1,2 @@
+libXfixes 3 libxfixes3 (>= 1:5.0)
+udeb: libXfixes 3 libxfixes3-udeb (>= 1:5.0)

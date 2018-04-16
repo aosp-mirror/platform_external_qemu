@@ -1,0 +1,4 @@
+libgdk-x11-2.0 0 libgtk2.0-0 (>= 2.24.0)
+libgtk-x11-2.0 0 libgtk2.0-0 (>= 2.24.0)
+udeb: libgdk-x11-2.0 0 libgtk2.0-0-udeb (>= 2.24.0)
+udeb: libgtk-x11-2.0 0 libgtk2.0-0-udeb (>= 2.24.0)

@@ -1,0 +1,7 @@
+82c211968361aa5dcae87a83a1afaa28  usr/include/X11/extensions/Xrender.h
+8a51fb7dfc439214fff90ffec17c5356  usr/lib/x86_64-linux-gnu/libXrender.a
+bef9db74000621ea8908326ebc1aaa07  usr/lib/x86_64-linux-gnu/pkgconfig/xrender.pc
+be34e145b769991edcde223e06a93f35  usr/share/doc/libxrender-dev/changelog.Debian.gz
+edbf1d73541f226a13e01a8976b9063d  usr/share/doc/libxrender-dev/changelog.gz
+90df4691e5d950d83930ef2f933c4b54  usr/share/doc/libxrender-dev/copyright
+941385915a93ab35857cb5eb1211f20e  usr/share/doc/libxrender-dev/libXrender.txt.gz

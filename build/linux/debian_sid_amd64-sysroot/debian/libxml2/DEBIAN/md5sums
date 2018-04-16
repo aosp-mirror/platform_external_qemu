@@ -1,0 +1,8 @@
+f3b040ffd5f643d4fe9e520a8c604d1c  usr/lib/x86_64-linux-gnu/libxml2.so.2.9.4
+9261d67cf0df4641bb11fd4a8c864ee7  usr/share/doc/libxml2/AUTHORS
+2791aa6009e26ec6a7532295ee588e41  usr/share/doc/libxml2/README
+d2d496e80a9bcf6781f7425612193c2d  usr/share/doc/libxml2/README.Debian
+c8f457ac385add392fa5e1358b688270  usr/share/doc/libxml2/changelog.Debian.gz
+a0c235b1112ccb07a06c6a5baecdd923  usr/share/doc/libxml2/changelog.gz
+2796e21c9e379750ba4ec505f530a337  usr/share/doc/libxml2/copyright
+d2585ea42cb6ec3a0f95ac452f29128c  usr/share/lintian/overrides/libxml2

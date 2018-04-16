@@ -1,0 +1,20 @@
+Package: libcupsimage2
+Source: cups
+Version: 2.2.6-5
+Architecture: amd64
+Maintainer: Debian Printing Team <debian-printing@lists.debian.org>
+Installed-Size: 160
+Depends: libc6 (>= 2.14), libcups2 (= 2.2.6-5)
+Recommends: libcupsfilters1 (>= 1.0~b1)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.cups.org/
+Description: Common UNIX Printing System(tm) - Raster image library
+ The Common UNIX Printing System (or CUPS(tm)) is a printing system and
+ general replacement for lpd and the like.  It supports the Internet
+ Printing Protocol (IPP), and has its own filtering driver model for
+ handling various document types.
+ .
+ This package provides the image libraries for handling the CUPS
+ raster format.

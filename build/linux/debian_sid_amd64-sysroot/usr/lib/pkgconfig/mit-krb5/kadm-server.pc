@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu/mit-krb5
+includedir=${prefix}/include/mit-krb5
+
+Name: kadm-server
+Description: Kerberos administration server library
+Version: 1.16
+Requires.private: kdb mit-krb5-gssapi
+Cflags: -isystem ${includedir}
+Libs: -L${libdir} -lkadm5srv_mit

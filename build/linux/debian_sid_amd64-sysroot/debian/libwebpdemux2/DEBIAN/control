@@ -1,0 +1,16 @@
+Package: libwebpdemux2
+Source: libwebp
+Version: 0.6.0-4
+Architecture: amd64
+Maintainer: Jeff Breidenbach <jab@debian.org>
+Installed-Size: 104
+Depends: libc6 (>= 2.14), libwebp6 (>= 0.5.1)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://webp.googlecode.com
+Description: Lossy compression of digital photographic images.
+ Image Compression format, based on the VP8 codec.
+ WebP uses the modern VP8 compression format to deliver efficient
+ compression of images for the web. More than 30% extra gain over
+ optimized JPEG, for same quality, is not unusual.

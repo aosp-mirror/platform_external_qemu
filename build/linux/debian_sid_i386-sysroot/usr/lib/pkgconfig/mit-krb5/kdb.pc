@@ -1,0 +1,14 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/i386-linux-gnu/mit-krb5
+includedir=${prefix}/include/mit-krb5
+
+KDB5_DB_LIB=
+
+Name: kdb
+Description: Kerberos database access libraries
+Version: 1.16
+Requires.private: mit-krb5-gssapi mit-krb5 gssrpc
+Cflags: -isystem ${includedir}
+Libs: -L${libdir} -lkdb5
+Libs.private: ${KDB5_DB_LIB}

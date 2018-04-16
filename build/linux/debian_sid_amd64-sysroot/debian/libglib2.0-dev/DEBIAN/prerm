@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# libglib2.0-dev needs a prerm in buster, so that if the old prerm fails
+# due to https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=887629 we can
+# recover by running the new prerm. Keep this workaround until after
+# Debian 10 has been released.
+
+

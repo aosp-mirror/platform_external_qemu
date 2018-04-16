@@ -1,0 +1,15 @@
+Package: libsqlite3-0
+Source: sqlite3
+Version: 3.22.0-1
+Architecture: i386
+Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Installed-Size: 1264
+Depends: libc6 (>= 2.4)
+Section: libs
+Priority: standard
+Multi-Arch: same
+Homepage: http://www.sqlite.org/
+Description: SQLite 3 shared library
+ SQLite is a C library that implements an SQL database engine.
+ Programs that link with the SQLite library can have SQL database
+ access without running a separate RDBMS process.

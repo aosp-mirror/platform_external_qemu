@@ -1,0 +1,10 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu
+includedir=${prefix}/include
+
+Name: Wayland Cursor
+Description: Wayland cursor helper library
+Version: 1.14.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -lwayland-cursor

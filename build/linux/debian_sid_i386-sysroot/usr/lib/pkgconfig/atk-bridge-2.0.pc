@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib/i386-linux-gnu
+includedir=/usr/include
+
+Name: atk-bridge-2.0
+Description: ATK/D-Bus Bridge
+Version: 2.26.1
+Requires.private: gobject-2.0 atspi-2
+Libs: -L${libdir} -latk-bridge-2.0
+Cflags: -I${includedir}/at-spi2-atk/2.0

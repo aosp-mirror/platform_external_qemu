@@ -1,0 +1,21 @@
+Package: libexpat1-dev
+Source: expat
+Version: 2.2.5-3
+Architecture: amd64
+Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.org>
+Installed-Size: 1135
+Depends: libexpat1 (= 2.2.5-3), libc6-dev | libc-dev
+Conflicts: libexpat-dev
+Provides: libexpat-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: https://libexpat.github.io/
+Description: XML parsing C library - development kit
+ This package contains the header file and development libraries of
+ expat, the C library for parsing XML.  Expat is a stream oriented XML
+ parser.  This means that you register handlers with the parser prior
+ to starting the parse.  These handlers are called when the parser
+ discovers the associated structures in the document being parsed.  A
+ start tag is an example of the kind of structures for which you may
+ register handlers.

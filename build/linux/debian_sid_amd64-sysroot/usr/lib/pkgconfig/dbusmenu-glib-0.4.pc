@@ -1,0 +1,14 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu
+bindir=${exec_prefix}/bin
+includedir=${prefix}/include
+
+Cflags: -I${includedir}/libdbusmenu-glib-0.4
+Requires:
+Libs: -L${libdir} -ldbusmenu-glib
+
+Name: libdbusmenu-glib
+Description: libdbusmenu-glib.
+Version: 16.04.0
+

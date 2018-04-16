@@ -1,0 +1,27 @@
+Package: libpangox-1.0-0
+Source: pangox-compat (0.0.2-5)
+Version: 0.0.2-5+b2
+Architecture: amd64
+Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Installed-Size: 150
+Depends: libc6 (>= 2.4), libglib2.0-0 (>= 2.34.0), libpango-1.0-0 (>= 1.32.5-3~), libx11-6
+Breaks: libpango1.0-0 (<< 1.32.5-2)
+Replaces: libpango1.0-0 (<< 1.32.5-2)
+Section: oldlibs
+Priority: extra
+Multi-Arch: same
+Description: pango library X backend
+ Pango is a library for layout and rendering of text, with an emphasis
+ on internationalization. Pango can be used anywhere that text layout is
+ needed. however, most of the work on Pango-1.0 was done using the GTK+
+ widget toolkit as a test platform. Pango forms the core of text and
+ font handling for GTK+-2.0.
+ .
+ Pango is designed to be modular; the core Pango layout can be used with
+ four different font backends:
+  - Core X windowing system fonts
+  - Client-side fonts on X using the Xft library
+  - Direct rendering of scalable fonts using the FreeType library
+  - Native fonts on Microsoft backends
+ .
+ This package contains the Core X backend.

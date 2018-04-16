@@ -1,0 +1,19 @@
+Package: libidl-2-0
+Source: libidl
+Version: 0.8.14-4
+Architecture: amd64
+Maintainer: Debian QA Group <packages@qa.debian.org>
+Installed-Size: 250
+Depends: libc6 (>= 2.14), libglib2.0-0 (>= 2.16.0), cpp:any
+Breaks: libidl0 (<< 0.8.14-3)
+Replaces: libidl0 (<< 0.8.14-3)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://ftp.acc.umu.se/pub/gnome/sources/libIDL/
+Description: library for parsing CORBA IDL files
+ libIDL is a small library for creating parse trees of CORBA v2.2 compliant
+ Interface Definition Language (IDL) files, which is a specification for
+ defining interfaces which can be used between different CORBA
+ implementations.  libIDL is used in the ORBit2 IDL compiler, as well
+ as various language bindings (Perl, Python, etc.) for ORBit2.

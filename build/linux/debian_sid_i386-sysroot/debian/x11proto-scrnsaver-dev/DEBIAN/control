@@ -1,0 +1,20 @@
+Package: x11proto-scrnsaver-dev
+Source: x11proto-scrnsaver
+Version: 1.2.2-1
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 104
+Depends: x11proto-core-dev
+Breaks: libxss-dev (<< 1:1.2.0)
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 Screen Saver extension wire protocol
+ This package provides development headers describing the wire protocol
+ for the MIT-SCREEN-SAVER extension, used to notify the server of client
+ screen saver events.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org scrnsaverproto proto module.

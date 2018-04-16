@@ -1,0 +1,15 @@
+Package: librest-0.7-0
+Source: librest
+Version: 0.8.0-2
+Architecture: amd64
+Maintainer: Ying-Chun Liu (PaulLiu) <paulliu@debian.org>
+Installed-Size: 111
+Depends: libc6 (>= 2.4), libglib2.0-0 (>= 2.37.3), libsoup-gnome2.4-1 (>= 2.27.4), libsoup2.4-1 (>= 2.30), libxml2 (>= 2.7.4)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://wiki.gnome.org/Librest
+Description: REST service access library
+ This library was designed to make it easier to access web services that
+ claim to be "RESTful".  It includes convenience wrappers for libsoup and
+ libxml to ease remote use of the RESTful API.

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+DOCDIR=/usr/share/doc/libasound2-dev
+
+if [ -L $DOCDIR ]; then
+    rm $DOCDIR
+fi
+
+

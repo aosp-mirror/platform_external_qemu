@@ -1,0 +1,23 @@
+Package: libxi6
+Source: libxi
+Version: 2:1.7.9-1
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 136
+Depends: libc6 (>= 2.14), libx11-6 (>= 2:1.6.0), libxext6
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://www.x.org/
+Description: X11 Input extension library
+ libXi provides an X Window System client interface to the XINPUT
+ extension to the X protocol.
+ .
+ The Input extension allows setup and configuration of multiple input devices,
+ and hotplugging of input devices (to be added and removed on the fly).
+ .
+ More information about X.Org can be found at:
+ <URL:https://www.X.org>
+ .
+ This module can be found at
+ git://anongit.freedesktop.org/git/xorg/lib/libXi

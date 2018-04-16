@@ -1,0 +1,7 @@
+libvorbisenc.so.2 libvorbisenc2 #MINVER#
+ vorbis_encode_ctl@Base 1.1.2
+ vorbis_encode_init@Base 1.1.2
+ vorbis_encode_init_vbr@Base 1.1.2
+ vorbis_encode_setup_init@Base 1.1.2
+ vorbis_encode_setup_managed@Base 1.1.2
+ vorbis_encode_setup_vbr@Base 1.1.2

@@ -1,0 +1,15 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/i386-linux-gnu
+includedir=${prefix}/include
+
+epoxy_has_glx=1
+epoxy_has_egl=1
+epoxy_has_wgl=0
+
+Name: epoxy
+Description: epoxy GL dispatch Library
+Version: 1.4.3
+Cflags: -I${includedir}
+Libs: -L${libdir} -lepoxy
+Libs.private: -ldl

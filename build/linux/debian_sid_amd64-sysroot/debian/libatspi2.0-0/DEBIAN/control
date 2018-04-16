@@ -1,0 +1,15 @@
+Package: libatspi2.0-0
+Source: at-spi2-core
+Version: 2.26.2-2
+Architecture: amd64
+Maintainer: Debian Accessibility Team <pkg-a11y-devel@lists.alioth.debian.org>
+Installed-Size: 222
+Depends: libc6 (>= 2.7), libdbus-1-3 (>= 1.9.14), libglib2.0-0 (>= 2.37.3), libx11-6
+Recommends: at-spi2-core (= 2.26.2-2)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://wiki.gnome.org/Accessibility
+Description: Assistive Technology Service Provider Interface - shared library
+ This package contains the shared library for applications that wish to use
+ the at-spi interface.

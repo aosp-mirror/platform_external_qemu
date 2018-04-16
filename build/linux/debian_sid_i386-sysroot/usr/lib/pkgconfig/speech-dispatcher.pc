@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=/usr
+libdir=${prefix}/lib/i386-linux-gnu
+includedir=${prefix}/include/speech-dispatcher
+
+Name: speech-dispatcher
+Description: speech-dispatcher provides a device independent layer for speech synthesis
+Version: 0.8.8
+Requires: glib-2.0
+Libs: -L${libdir} -lspeechd
+Cflags: -I${includedir}

@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/x86_64-linux-gnu
+includedir=${prefix}/include
+display=drm
+
+Name: libva-${display}
+Description: Userspace Video Acceleration (VA) ${display} interface
+Requires: libva
+Version: 1.0.0
+Libs: -L${libdir} -lva-${display}
+Cflags: -I${includedir}

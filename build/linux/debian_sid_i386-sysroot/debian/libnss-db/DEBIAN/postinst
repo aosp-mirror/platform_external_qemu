@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "configure" ]; then
+	if [ -x /etc/init.d/nscd ]; then
+		invoke-rc.d nscd restart
+	fi
+fi
+
+
+
+
+
+exit 0

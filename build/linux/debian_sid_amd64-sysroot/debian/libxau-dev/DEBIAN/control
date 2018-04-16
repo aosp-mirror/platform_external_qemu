@@ -1,0 +1,23 @@
+Package: libxau-dev
+Source: libxau (1:1.0.8-1)
+Version: 1:1.0.8-1+b2
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 66
+Depends: libxau6 (= 1:1.0.8-1+b2), x11proto-core-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Description: X11 authorisation library (development headers)
+ This package provides the main interface to the X11 authorisation handling,
+ which controls authorisation for X connections, both client-side and
+ server-side.
+ .
+ This package contains the development headers for the library found in libxau6.
+ Non-developers likely have little use for this package.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This module can be found at
+ git://anongit.freedesktop.org/git/xorg/lib/libXau

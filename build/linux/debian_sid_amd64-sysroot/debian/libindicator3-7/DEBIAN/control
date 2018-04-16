@@ -1,0 +1,16 @@
+Package: libindicator3-7
+Source: libindicator (0.5.0-3)
+Version: 0.5.0-3+b1
+Architecture: amd64
+Maintainer: Debian QA Group <packages@qa.debian.org>
+Installed-Size: 102
+Depends: libatk1.0-0 (>= 1.12.4), libc6 (>= 2.4), libcairo-gobject2 (>= 1.10.0), libcairo2 (>= 1.2.4), libgdk-pixbuf2.0-0 (>= 2.22.0), libglib2.0-0 (>= 2.37.3), libgtk-3-0 (>= 3.0.0), libpango-1.0-0 (>= 1.14.0), libpangocairo-1.0-0 (>= 1.14.0)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: https://launchpad.net/libindicator
+Description: panel indicator applet - shared library
+ This library contains information to build indicators to go into
+ the indicator applet.
+ .
+ This package contains the library itself.

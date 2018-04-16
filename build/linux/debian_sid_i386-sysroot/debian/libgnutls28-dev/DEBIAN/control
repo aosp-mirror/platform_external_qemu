@@ -1,0 +1,33 @@
+Package: libgnutls28-dev
+Source: gnutls28
+Version: 3.5.18-1
+Architecture: i386
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 3234
+Depends: libgnutls30 (= 3.5.18-1), libgnutls-openssl27 (= 3.5.18-1), libgnutlsxx28 (= 3.5.18-1), libgnutls-dane0 (= 3.5.18-1), nettle-dev, libc6-dev | libc-dev, zlib1g-dev, libtasn1-6-dev, libp11-kit-dev, libidn2-0-dev
+Suggests: gnutls-doc, gnutls-bin
+Conflicts: gnutls-dev
+Replaces: gnutls-dev
+Provides: gnutls-dev, libgnutls-openssl-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.gnutls.org/
+Description: GNU TLS library - development files
+ GnuTLS is a portable library which implements the Transport Layer
+ Security (TLS 1.0, 1.1, 1.2) and Secure Sockets Layer (SSL) 3.0 and Datagram
+ Transport Layer Security (DTLS 1.0, 1.2) protocols.
+ .
+ GnuTLS features support for:
+  - TLS extensions: server name indication, max record size, opaque PRF
+    input, etc.
+  - authentication using the SRP protocol.
+  - authentication using both X.509 certificates and OpenPGP keys.
+  - TLS Pre-Shared-Keys (PSK) extension.
+  - Inner Application (TLS/IA) extension.
+  - X.509 and OpenPGP certificate handling.
+  - X.509 Proxy Certificates (RFC 3820).
+  - all the strong encryption algorithms (including SHA-256/384/512 and
+    Camellia (RFC 4132)).
+ .
+ This package contains the GnuTLS development files.

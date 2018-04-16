@@ -1,0 +1,24 @@
+Package: libflac-dev
+Source: flac
+Version: 1.3.2-1
+Architecture: amd64
+Maintainer: Debian Multimedia Maintainers <pkg-multimedia-maintainers@lists.alioth.debian.org>
+Installed-Size: 1014
+Depends: libflac8 (= 1.3.2-1), libogg-dev
+Section: libdevel
+Priority: optional
+Multi-Arch: same
+Homepage: http://xiph.org/flac/
+Description: Free Lossless Audio Codec - C development library
+ FLAC stands for Free Lossless Audio Codec. Grossly oversimplified, FLAC is
+ similar to MP3, but lossless.  The FLAC project consists of:
+ .
+  * The stream format
+  * libFLAC, which implements a reference encoder, stream decoder, and file
+    decoder
+  * flac, which is a command-line wrapper around libFLAC to encode and decode
+    .flac files
+  * Input plugins for various music players (Winamp, XMMS, and more in the
+    works)
+ .
+ This package contains the development library libFLAC.

@@ -1,0 +1,25 @@
+Package: libgcrypt20-dev
+Source: libgcrypt20
+Version: 1.8.1-4
+Architecture: amd64
+Maintainer: Debian GnuTLS Maintainers <pkg-gnutls-maint@lists.alioth.debian.org>
+Installed-Size: 2063
+Depends: libgcrypt20 (= 1.8.1-4), libc6-dev | libc-dev, libgpg-error-dev
+Suggests: libgcrypt20-doc
+Conflicts: libgcrypt-dev, libgcrypt11-dev (<< 1.5.4-3+really1.6.2-4)
+Provides: libgcrypt-dev
+Section: libdevel
+Priority: optional
+Homepage: http://directory.fsf.org/project/libgcrypt/
+Description: LGPL Crypto library - development files
+ libgcrypt contains cryptographic functions.  Many important free
+ ciphers, hash algorithms and public key signing algorithms have been
+ implemented:
+ .
+ Arcfour, Blowfish, CAST5, DES, AES, Twofish, Serpent, rfc2268 (rc2), SEED,
+ Poly1305, Camellia, ChaCha20, IDEA, Salsa, Blake-2, CRC, MD2, MD4, MD5,
+ RIPE-MD160, SHA-1, SHA-256, SHA-512, SHA3-224, SHA3-256, SHA3-384, SHA3-512,
+ SHAKE128, SHAKE256, Tiger, Whirlpool, DSA, DSA2, ElGamal, RSA, ECC
+ (Curve25519, sec256k1, GOST R 34.10-2001 and GOST R 34.10-2012, etc.)
+ .
+ This package contains header files and libraries for static linking.

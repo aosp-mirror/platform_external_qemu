@@ -1,0 +1,7 @@
+be1f1c7b5e87d597e6238a7c4dff3d75  usr/include/X11/extensions/damageproto.h
+06c6e463ebb206cc5602345732987d86  usr/include/X11/extensions/damagewire.h
+c39aef4903ae1e78b33820d2cd435ed7  usr/share/doc/x11proto-damage-dev/changelog.Debian.gz
+0be98efc1f52b2227702e057612e52cd  usr/share/doc/x11proto-damage-dev/changelog.gz
+c60058710f087867a800c417177111e9  usr/share/doc/x11proto-damage-dev/copyright
+e6cda9270379af4b40388e5d91578770  usr/share/doc/x11proto-damage-dev/damageproto.txt.gz
+4c638fadb1191fb45e5bbdcbeeb4d7e7  usr/share/pkgconfig/damageproto.pc

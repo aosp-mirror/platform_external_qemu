@@ -1,0 +1,15 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib/i386-linux-gnu/mit-krb5
+includedir=${prefix}/include/mit-krb5
+
+defccname=FILE:/tmp/krb5cc_%{uid}
+defktname=FILE:/etc/krb5.keytab
+defcktname=FILE:/etc/krb5/user/%{euid}/client.keytab
+
+Name: mit-krb5
+Description: An implementation of Kerberos network authentication
+Version: 1.16
+Cflags: -isystem ${includedir}
+Libs: -L${libdir} -lkrb5 -lk5crypto -lcom_err
+Libs.private: -lkrb5support

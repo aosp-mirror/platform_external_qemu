@@ -1,0 +1,15 @@
+Package: libpcre16-3
+Source: pcre3
+Version: 2:8.39-9
+Architecture: i386
+Maintainer: Matthew Vernon <matthew@debian.org>
+Installed-Size: 550
+Depends: libc6 (>= 2.4)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Description: Old Perl 5 Compatible Regular Expression Library - 16 bit runtime files
+ This is a library of functions to support regular expressions whose syntax
+ and semantics are as close as possible to those of the Perl 5 language.
+ .
+ This package contains the 16 bit runtime library.

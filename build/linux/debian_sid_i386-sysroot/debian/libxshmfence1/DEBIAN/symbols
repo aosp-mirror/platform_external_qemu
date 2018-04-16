@@ -1,0 +1,8 @@
+libxshmfence.so.1 libxshmfence1 #MINVER#
+ xshmfence_alloc_shm@Base 0
+ xshmfence_await@Base 0
+ xshmfence_map_shm@Base 0
+ xshmfence_query@Base 0
+ xshmfence_reset@Base 0
+ xshmfence_trigger@Base 0
+ xshmfence_unmap_shm@Base 0

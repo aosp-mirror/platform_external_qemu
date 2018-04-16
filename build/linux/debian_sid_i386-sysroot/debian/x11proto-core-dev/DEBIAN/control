@@ -1,0 +1,19 @@
+Package: x11proto-core-dev
+Source: x11proto-core
+Version: 7.0.31-1
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 1802
+Depends: xorg-sgml-doctools (>= 1:1.5)
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 core wire protocol and auxiliary headers
+ This package provides development headers describing the wire protocol
+ for the core X11 protocol, and also provides a number of utility headers,
+ used to abstract OS-specific functions.
+ .
+ More information about X.Org can be found at:
+ <URL:https://www.X.org>
+ .
+ This package is built from the X.org xproto proto module.

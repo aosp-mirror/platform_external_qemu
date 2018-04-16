@@ -1,0 +1,18 @@
+Package: x11proto-render-dev
+Source: x11proto-render
+Version: 2:0.11.1-2
+Architecture: all
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 88
+Depends: x11proto-core-dev
+Section: x11
+Priority: optional
+Multi-Arch: foreign
+Description: X11 Render extension wire protocol
+ This package provides development headers describing the wire protocol for
+ the Render extension, used to implement Porter-Duff operations within X.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This package is built from the X.org renderproto proto module.

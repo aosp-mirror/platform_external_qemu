@@ -1,0 +1,11 @@
+libcairo-script-interpreter.so.2 libcairo-script-interpreter2 #MINVER#
+ cairo_script_interpreter_create@Base 1.10.0
+ cairo_script_interpreter_destroy@Base 1.10.0
+ cairo_script_interpreter_feed_stream@Base 1.10.0
+ cairo_script_interpreter_feed_string@Base 1.10.0
+ cairo_script_interpreter_finish@Base 1.10.0
+ cairo_script_interpreter_get_line_number@Base 1.10.0
+ cairo_script_interpreter_install_hooks@Base 1.10.0
+ cairo_script_interpreter_reference@Base 1.10.0
+ cairo_script_interpreter_run@Base 1.10.0
+ cairo_script_interpreter_translate_stream@Base 1.10.0

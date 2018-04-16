@@ -1,0 +1,22 @@
+Package: libxkbcommon0
+Source: libxkbcommon
+Version: 0.8.0-1
+Architecture: amd64
+Maintainer: Debian X Strike Force <debian-x@lists.debian.org>
+Installed-Size: 300
+Depends: xkb-data, libc6 (>= 2.17)
+Section: libs
+Priority: optional
+Multi-Arch: same
+Homepage: http://www.xkbcommon.org/
+Description: library interface to the XKB compiler - shared library
+ This package provides a library to handle keyboard descriptions, including
+ loading them from disk, parsing them and handling their state. It's mainly
+ meant for client toolkits, window systems, and other system applications;
+ currently that includes Wayland, kmscon, GTK+, Clutter, and more.
+ .
+ More information about X.Org can be found at:
+ <URL:http://www.X.org>
+ .
+ This module can be found at
+ https://github.com/xkbcommon/libxkbcommon.git

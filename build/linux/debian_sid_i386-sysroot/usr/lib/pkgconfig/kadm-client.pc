@@ -1,0 +1,1 @@
+mit-krb5/kadm-client.pc
