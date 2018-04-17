@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "49455ca8_eedb00a9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/camera-page.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-17T18:03:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5cea73a9_8ce7ab72",
+      "range": {
+        "startLine": 33,
+        "startChar": 13,
+        "endLine": 33,
+        "endChar": 27
+      },
+      "revId": "4db3a1f5990eb14ceefa67b94596821a07139a5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b1a7edb4_d51c58a9",
         "filename": "android/android-emu/android/skin/qt/poster-image-well.cpp",
         "patchSetId": 1
