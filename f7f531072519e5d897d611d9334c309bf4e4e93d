@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "77b8dbac_8b249c45",
+        "filename": "android/android-emu/android/skin/qt/editable-slider-widget.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-17T00:53:29Z",
+      "side": 1,
+      "message": "Added a comment, the slider value is a multiple of the number of steps, so the sliders need to be rescaled so that they map to the same value as before.\n\nThis was more complicated than it needed to be, I updated this to use mMinimum/mMaximum/mValue directly.",
+      "parentUuid": "557738fe_1d082635",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 71
+      },
+      "revId": "f7f531072519e5d897d611d9334c309bf4e4e93d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6529d31_bf4a8a6e",
         "filename": "android/android-emu/android/virtualscene/PosterInfo.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-16T20:00:46Z",
       "side": 1,
       "message": "Can this be one class, or can we make parsePostersFile a global function in android::virtualscene namespace?",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 2
+      },
+      "revId": "f7f531072519e5d897d611d9334c309bf4e4e93d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40fd080b_5c15ddd5",
+        "filename": "android/android-emu/android/virtualscene/PosterInfo.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-17T00:53:29Z",
+      "side": 1,
+      "message": "Sorry, I\u0027m used to using a static class for helper methods like this :-)\n\nI\u0027d prefer if this was a global function, since it returns a vector of posters instead of a single poster.  I\u0027ll make that change.",
+      "parentUuid": "f6529d31_bf4a8a6e",
       "range": {
         "startLine": 30,
         "startChar": 0,
@@ -68,6 +116,30 @@
       "revId": "f7f531072519e5d897d611d9334c309bf4e4e93d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "88fbdc05_5c7531d1",
+        "filename": "android/android-emu/android/virtualscene/Scene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-17T00:53:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "522f4d6b_ab9dded6",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 32
+      },
+      "revId": "f7f531072519e5d897d611d9334c309bf4e4e93d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
