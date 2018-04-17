@@ -625,7 +625,11 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         Snapshot theSnapshot(fileName.toStdString().c_str());
 
         const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
-        bool snapshotIsValid = (protobuf != nullptr);
+        bool snapshotIsValid =
+            protobuf &&
+            theSnapshot.checkValid(
+                false /* don't write out the error code to protobuf; we just want
+                         to check validity here */);
 
         QString logicalName;
         QDateTime snapshotDate;
