@@ -51,6 +51,11 @@ public:
     // If Protobuf cannot be read, sets failure reason
     // and returns null.
     const emulator_snapshot::Snapshot* getGeneralInfo();
+    // Checks whether the snapshot can be loaded.
+    // |writeResult| controls whether we will invalidate
+    // the snapshot protobuf with an error code if the check
+    // does not work out.
+    const bool checkValid(bool writeResult);
 
     base::Optional<FailureReason> failureReason() const;
 
@@ -60,8 +65,8 @@ public:
 
 private:
     void loadProtobufOnce();
-    bool verifyHost(const emulator_snapshot::Host& host);
-    bool verifyConfig(const emulator_snapshot::Config& config);
+    bool verifyHost(const emulator_snapshot::Host& host, bool writeFailure);
+    bool verifyConfig(const emulator_snapshot::Config& config, bool writeFailure);
     bool writeSnapshotToDisk();
 
     std::string mName;
