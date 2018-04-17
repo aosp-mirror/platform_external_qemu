@@ -31,8 +31,8 @@ private slots:
     void on_imageWall_pathChanged(QString path);
     void on_imageTable_pathChanged(QString path);
 
-    void on_sizeSliderWall_valueChanged(double value);
-    void on_sizeSliderTable_valueChanged(double value);
+    void on_imageWall_sizeChanged(float value);
+    void on_imageTable_sizeChanged(float value);
 
     // Report metrics for the first interaction to this page.
     void reportInteraction();
