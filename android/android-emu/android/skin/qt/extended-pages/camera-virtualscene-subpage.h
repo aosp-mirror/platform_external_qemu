@@ -31,15 +31,15 @@ private slots:
     void on_imageWall_pathChanged(QString path);
     void on_imageTable_pathChanged(QString path);
 
-    void on_sizeSliderWall_valueChanged(double value);
-    void on_sizeSliderTable_valueChanged(double value);
+    void on_imageWall_scaleChanged(float value);
+    void on_imageTable_scaleChanged(float value);
 
     // Report metrics for the first interaction to this page.
     void reportInteraction();
 
 private:
     void changePoster(QString name, QString path);
-    void changePosterSize(QString name, float value);
+    void changePosterScale(QString name, float value);
     void loadUi();
 
     // Load initial settings to populate the virtual scene during emulator

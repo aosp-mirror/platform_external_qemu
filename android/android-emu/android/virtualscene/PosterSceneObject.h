@@ -38,6 +38,7 @@ public:
     //              this context.
     // |position| - Position of the poster, in world space.
     // |rotation| - Rotation quaternion.
+    // |minSize| - Minimum size of any dimension of the poster, in meters.
     // |maxSize| - Maximum size of the poster, in meters.  This will be scaled
     //             down along the smaller axis of the texture, if it is not
     //             square.
@@ -47,6 +48,7 @@ public:
     static std::unique_ptr<PosterSceneObject> create(Renderer& renderer,
                                                      const glm::vec3& position,
                                                      const glm::quat& rotation,
+                                                     float minSize,
                                                      const glm::vec2& maxSize);
 
     // Update the texture in the PosterSceneObject.
@@ -72,6 +74,7 @@ private:
 
     // Set in create().
     glm::mat4 mPositionRotation = glm::mat4();
+    float mMinSize = 0.0f;
     glm::vec2 mMaxSize;
 
     // Updated each frame if the texture has changed.
