@@ -20,7 +20,6 @@
 #include <QMimeData>
 #include <QPainter>
 
-static constexpr float kSliderValueScale = 100.0f;
 static constexpr int kPageNoImage = 0;
 static constexpr int kPageImage = 1;
 
@@ -33,8 +32,8 @@ PosterImageWell::PosterImageWell(QWidget* parent)
     mOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents);
 
     mUi->stackedWidget->setCurrentIndex(kPageNoImage);
-    mUi->sizeSlider->setRange(0.0, kSliderValueScale, false);
-    mUi->sizeSlider->setValue(kSliderValueScale, false);
+    mUi->sizeSlider->setRange(0.0, mSliderValueScale, false);
+    mUi->sizeSlider->setValue(mSliderValueScale, false);
 }
 
 void PosterImageWell::setPath(QString path) {
@@ -42,12 +41,20 @@ void PosterImageWell::setPath(QString path) {
     (void)setPathInternal(path);
 }
 
-float PosterImageWell::getSize() const {
-    return static_cast<float>(mUi->sizeSlider->getValue()) / kSliderValueScale;
+float PosterImageWell::getScale() const {
+    return static_cast<float>(mUi->sizeSlider->getValue()) / mSliderValueScale;
 }
 
-void PosterImageWell::setSize(float value) {
-    mUi->sizeSlider->setValue(value * kSliderValueScale, false);
+void PosterImageWell::setScale(float value) {
+    mUi->sizeSlider->setValue(value * mSliderValueScale, false);
+}
+
+void PosterImageWell::setMinMaxSize(float minSize, float maxSize) {
+    const float previousScale = getScale();
+
+    mSliderValueScale = maxSize;
+    mUi->sizeSlider->setRange(minSize, mSliderValueScale, false);
+    setScale(previousScale);
 }
 
 void PosterImageWell::setStartingDirectory(QString startingDirectory) {
@@ -107,9 +114,9 @@ void PosterImageWell::on_removeButton_clicked() {
 }
 
 void PosterImageWell::on_sizeSlider_valueChanged(double value) {
-    const float scaledValue = static_cast<float>(value) / kSliderValueScale;
+    const float scaledValue = static_cast<float>(value) / mSliderValueScale;
     emit interaction();
-    emit sizeChanged(scaledValue);
+    emit scaleChanged(scaledValue);
 }
 
 void PosterImageWell::openFilePicker() {

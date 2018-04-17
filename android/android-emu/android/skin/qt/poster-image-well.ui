@@ -66,7 +66,7 @@
    <item alignment="Qt::AlignVCenter">
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="noImage">
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -321,9 +321,9 @@
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="scaleLabel">
+        <widget class="QLabel" name="sizeLabel">
          <property name="text">
-          <string>Scale</string>
+          <string>Size (meters)</string>
          </property>
          <property name="Style" stdset="0">
           <string>MaterialHelper</string>
@@ -334,6 +334,9 @@
         <widget class="EditableSliderWidget" name="sizeSlider" native="true">
          <property name="lineEditMaximumWidth" stdset="0">
           <number>56</number>
+         </property>
+         <property name="steps" stdset="0">
+          <double>100.000000000000000</double>
          </property>
         </widget>
        </item>

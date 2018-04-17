@@ -52,16 +52,16 @@ void CameraVirtualSceneSubpage::on_imageWall_pathChanged(QString path) {
     changePoster("wall", path);
 }
 
-void CameraVirtualSceneSubpage::on_imageWall_sizeChanged(float value) {
-    changePosterSize("wall", value);
+void CameraVirtualSceneSubpage::on_imageWall_scaleChanged(float value) {
+    changePosterScale("wall", value);
 }
 
 void CameraVirtualSceneSubpage::on_imageTable_pathChanged(QString path) {
     changePoster("table", path);
 }
 
-void CameraVirtualSceneSubpage::on_imageTable_sizeChanged(float value) {
-    changePosterSize("table", value);
+void CameraVirtualSceneSubpage::on_imageTable_scaleChanged(float value) {
+    changePosterScale("table", value);
 }
 
 void CameraVirtualSceneSubpage::reportInteraction() {
@@ -110,7 +110,7 @@ void CameraVirtualSceneSubpage::changePoster(QString name, QString path) {
     }
 }
 
-void CameraVirtualSceneSubpage::changePosterSize(QString name, float value) {
+void CameraVirtualSceneSubpage::changePosterScale(QString name, float value) {
     // Persist to settings.
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
@@ -131,7 +131,7 @@ void CameraVirtualSceneSubpage::changePosterSize(QString name, float value) {
 
     // Update the scene.
     if (sVirtualSceneAgent) {
-        sVirtualSceneAgent->setPosterSize(name.toUtf8().constData(), value);
+        sVirtualSceneAgent->setPosterScale(name.toUtf8().constData(), value);
     }
 }
 
@@ -139,17 +139,19 @@ void CameraVirtualSceneSubpage::loadUi() {
     // Enumerate existing pointers.  If any are currently set, they were set
     // from the command line so they take precedence over the saved setting.
     sVirtualSceneAgent->enumeratePosters(
-            this, [](void* context, const char* posterName,
-                     const char* filename, float size) {
+            this, [](void* context, const char* posterName, float minWidth,
+                     float maxWidth, const char* filename, float scale) {
                 auto self =
                         reinterpret_cast<CameraVirtualSceneSubpage*>(context);
                 const QString name = posterName;
                 if (name == "wall") {
                     self->mUi->imageWall->setPath(filename);
-                    self->mUi->imageWall->setSize(size);
+                    self->mUi->imageWall->setScale(scale);
+                    self->mUi->imageWall->setMinMaxSize(minWidth, maxWidth);
                 } else if (name == "table") {
                     self->mUi->imageTable->setPath(filename);
-                    self->mUi->imageTable->setSize(size);
+                    self->mUi->imageTable->setScale(scale);
+                    self->mUi->imageTable->setMinMaxSize(minWidth, maxWidth);
                 }
             });
 }
@@ -187,8 +189,8 @@ void CameraVirtualSceneSubpage::loadInitialSettings() {
                 bool valid = false;
                 const float size = savedPosterSizes[name].toFloat(&valid);
                 if (valid) {
-                    sVirtualSceneAgent->setPosterSize(name.toUtf8().constData(),
-                                                      size);
+                    sVirtualSceneAgent->setPosterScale(
+                            name.toUtf8().constData(), size);
                 }
             }
         }

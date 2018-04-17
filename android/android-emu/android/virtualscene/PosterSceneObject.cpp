@@ -34,8 +34,6 @@ static constexpr android::virtualscene::VertexPositionUV kQuadVerts[] = {
 
 static constexpr GLuint kQuadIndices[] = {0, 1, 2, 2, 1, 3};
 
-static constexpr float kMinimumSizeMeters = 0.2f;
-
 namespace android {
 namespace virtualscene {
 
@@ -46,6 +44,7 @@ std::unique_ptr<PosterSceneObject> PosterSceneObject::create(
         Renderer& renderer,
         const glm::vec3& position,
         const glm::quat& rotation,
+        float minSize,
         const glm::vec2& maxSize) {
     // Create an empty PosterSceneObject so that the texture can be attached
     // to something.
@@ -53,6 +52,7 @@ std::unique_ptr<PosterSceneObject> PosterSceneObject::create(
 
     result.get()->mPositionRotation =
             glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
+    result.get()->mMinSize = minSize;
     result.get()->mMaxSize = maxSize;
 
     // Initialize renderable.
@@ -97,9 +97,9 @@ void PosterSceneObject::update() {
     const glm::vec3 scale(mMaxSize * aspectRatio, 1.0f);
 
     // The minimum scale is the minimum size that the poster can be without
-    // being smaller than kMinimumSizeMeters (on the smallest side).
+    // being smaller than mMinSize (on the smallest side).
     const float posterSize = std::min(scale.x, scale.y);
-    float minScale = kMinimumSizeMeters / posterSize;
+    float minScale = mMinSize / posterSize;
     if (minScale > 1.0f) {
         // This indicates that a poster in the scene is smaller than the
         // minimum size.  Set to 1 to effectively disable scaling and avoid

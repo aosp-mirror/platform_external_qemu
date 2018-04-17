@@ -23,6 +23,7 @@
 #include "android/globals.h"
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
+#include "android/virtualscene/PosterInfo.h"
 #include "android/virtualscene/Renderer.h"
 #include "android/virtualscene/Scene.h"
 
@@ -35,6 +36,8 @@ using namespace android::base;
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
 #define D_ACTIVE VERBOSE_CHECK(virtualscene)
+
+static constexpr const char* kPosterFile = "Toren1BD.posters";
 
 namespace android {
 namespace virtualscene {
@@ -51,10 +54,12 @@ public:
     // Defines the setting for a single poster.
     struct PosterSetting {
         std::string mFilename;
-        float mSize = 1.0f;
+        float mScale = 1.0f;
     };
 
-    Settings() = default;
+    Settings() {
+        mPosterLocations = parsePostersFile(kPosterFile);
+    }
 
     void parseCmdlineParameter(StringView param) {
         auto it = std::find(param.begin(), param.end(), '=');
@@ -85,32 +90,39 @@ public:
         D("%s: Found poster %s at %s", __FUNCTION__, name.c_str(),
           absFilename.c_str());
 
-        mPosters[name].mFilename = absFilename;
+        mPosterSettings[name].mFilename = absFilename;
     }
 
     // Set the poster if it is not already defined.
     void setInitialPoster(const char* posterName, const char* filename) {
-        if (mPosters.find(posterName) == mPosters.end()) {
+        if (mPosterSettings.find(posterName) == mPosterSettings.end()) {
             setPoster(posterName, filename);
         }
     }
 
-    // Set the poster and queue a scene update for the next frame.
+    // Set the poster filename.
     void setPoster(const char* posterName, const char* filename) {
-        mPosters[posterName].mFilename = filename ? filename : std::string();
+        mPosterSettings[posterName].mFilename =
+                filename ? filename : std::string();
     }
 
-    // Set the poster size.
-    void setPosterSize(const char* posterName, float size) {
-        mPosters[posterName].mSize = size;
+    // Set the poster scale.
+    void setPosterScale(const char* posterName, float scale) {
+        mPosterSettings[posterName].mScale = scale;
     }
 
-    const std::unordered_map<std::string, PosterSetting>& getPosters() const {
-        return mPosters;
+    const std::vector<PosterInfo> getPosterLocations() const {
+        return mPosterLocations;
+    }
+
+    const std::unordered_map<std::string, PosterSetting>& getPosterSettings()
+            const {
+        return mPosterSettings;
     }
 
 private:
-    std::unordered_map<std::string, PosterSetting> mPosters;
+    std::vector<PosterInfo> mPosterLocations;
+    std::unordered_map<std::string, PosterSetting> mPosterSettings;
 };
 
 static LazyInstance<Settings> sSettings = LAZY_INSTANCE_INIT;
@@ -134,8 +146,8 @@ public:
     // render thread.
     void queuePosterUpdate(const char* posterName);
 
-    // Update the poster size.
-    void updatePosterSize(const char* posterName, float size);
+    // Update the poster scale.
+    void updatePosterScale(const char* posterName, float scale);
 
     // Load a PosterSetting in the scene.
     void loadPosterInternal(const char* posterName,
@@ -153,7 +165,7 @@ VirtualSceneManagerImpl::VirtualSceneManagerImpl(
         std::unique_ptr<Scene>&& scene)
     : mRenderer(std::move(renderer)), mScene(std::move(scene)) {
     // Load the poster configuration in the scene.
-    for (const auto& it : sSettings->getPosters()) {
+    for (const auto& it : sSettings->getPosterSettings()) {
         loadPosterInternal(it.first.c_str(), it.second);
     }
 }
@@ -179,6 +191,13 @@ std::unique_ptr<VirtualSceneManagerImpl> VirtualSceneManagerImpl::create(
         return nullptr;
     }
 
+    for (const auto& it : sSettings->getPosterLocations()) {
+        if (!scene->createPosterLocation(it)) {
+            E("VirtualSceneManager failed to create poster location");
+            return nullptr;
+        }
+    }
+
     skin_winsys_show_virtual_scene_controls(true);
 
     return std::unique_ptr<VirtualSceneManagerImpl>(
@@ -188,7 +207,7 @@ std::unique_ptr<VirtualSceneManagerImpl> VirtualSceneManagerImpl::create(
 int64_t VirtualSceneManagerImpl::render() {
     // Apply any pending updates to the scene.  This must be done on the OpenGL
     // thread.
-    const auto& posters = sSettings->getPosters();
+    const auto& posters = sSettings->getPosterSettings();
     while (!mPosterFilenameUpdates.empty()) {
         const std::string& posterName = mPosterFilenameUpdates.front();
         loadPosterInternal(posterName.c_str(), posters.at(posterName));
@@ -205,20 +224,20 @@ void VirtualSceneManagerImpl::queuePosterUpdate(const char* posterName) {
     mPosterFilenameUpdates.push_back(posterName);
 }
 
-void VirtualSceneManagerImpl::updatePosterSize(const char* posterName,
-                                               float size) {
-    mScene->updatePosterSize(posterName, size);
+void VirtualSceneManagerImpl::updatePosterScale(const char* posterName,
+                                                float scale) {
+    mScene->updatePosterScale(posterName, scale);
 }
 
 void VirtualSceneManagerImpl::loadPosterInternal(
         const char* posterName,
         const Settings::PosterSetting& setting) {
     if (setting.mFilename.empty()) {
-        // Always render empty posters at 100% size.
+        // Always render empty posters at 100% scale.
         mScene->loadPoster(posterName, nullptr, 1.0f);
     } else {
         mScene->loadPoster(posterName, setting.mFilename.c_str(),
-                           setting.mSize);
+                           setting.mScale);
     }
 }
 
@@ -317,21 +336,32 @@ void VirtualSceneManager::enumeratePosters(void* context,
                                            EnumeratePostersCallback callback) {
     AutoLock lock(mLock.get());
 
-    for (const auto& it : sSettings->getPosters()) {
-        callback(context, it.first.c_str(),
-                 it.second.mFilename.empty() ? nullptr
-                                             : it.second.mFilename.c_str(),
-                 it.second.mSize);
+    const auto& settings = sSettings->getPosterSettings();
+    for (const auto& location : sSettings->getPosterLocations()) {
+        float scale = 1.0f;
+        const char* filename = nullptr;
+
+        auto settingIt = settings.find(location.name);
+        if (settingIt != settings.end()) {
+            filename = settingIt->second.mFilename.empty()
+                               ? nullptr
+                               : settingIt->second.mFilename.c_str();
+            scale = settingIt->second.mScale;
+        }
+
+        const float maxWidth = location.size.x;
+        callback(context, location.name.c_str(), kPosterMinimumSizeMeters,
+                 maxWidth, filename, scale);
     }
 }
 
-void VirtualSceneManager::setPosterSize(const char* posterName, float size) {
+void VirtualSceneManager::setPosterScale(const char* posterName, float scale) {
     AutoLock lock(mLock.get());
-    sSettings->setPosterSize(posterName, size);
+    sSettings->setPosterScale(posterName, scale);
 
-    // Updating the poster size can be done on any thread, update it now.
+    // Updating the poster scale can be done on any thread, update it now.
     if (mImpl) {
-        mImpl->updatePosterSize(posterName, size);
+        mImpl->updatePosterScale(posterName, scale);
     }
 }
 
