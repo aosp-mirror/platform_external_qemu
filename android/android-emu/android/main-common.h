@@ -14,6 +14,7 @@
 
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
+#include "android/cpu_accelerator.h"
 #include "android/cmdline-option.h"
 #include "android/opengl/emugl_config.h"
 #include "android/skin/winsys.h"
@@ -122,17 +123,23 @@ typedef enum {
     ACCEL_KVM = 3,
     ACCEL_HAX = 4,
     ACCEL_HVF = 5,
+    ACCEL_WHPX = 6,
 } CpuAccelMode;
 
+// TODO: the accelerator should not be assumed only based on the
+// platform. More than one may be available for each platform.
 #ifdef __linux__
     static const char kAccelerator[] = "KVM";
     static const char kEnableAccelerator[] = "-enable-kvm";
     static const char kDisableAccelerator[] = "-disable-kvm";
 #else
 #ifdef _WIN32
-    static const char kAccelerator[] = "Intel HAXM";
-    static const char kEnableAccelerator[] = "-enable-hax";
-    static const char kDisableAccelerator[] = "-disable-hax";
+    static const char kAccelerator[] = "Windows Hypervisor Platform (WHPX)";
+    static const char kEnableAccelerator[] = "-enable-whpx";
+    static const char kDisableAccelerator[] = "-disable-whpx";
+    static const char kAcceleratorHAX[] = "Intel HAXM";
+    static const char kEnableAcceleratorHAX[] = "-enable-hax";
+    static const char kDisableAcceleratorHAX[] = "-disable-hax";
 #else
     static const char kAccelerator[] = "Intel HAXM";
     static const char kEnableAccelerator[] = "-enable-hax";
@@ -153,5 +160,7 @@ typedef enum {
  */
 bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                            CpuAccelMode* accel_mode, char** accel_status);
+
+const char* getAcceleratorEnableParam(AndroidCpuAccelerator accel_type);
 
 ANDROID_END_HEADER

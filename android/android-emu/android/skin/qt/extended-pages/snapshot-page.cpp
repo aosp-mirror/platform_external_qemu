@@ -34,6 +34,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QPlainTextEdit>
+#include <QPropertyAnimation>
 #include <QSemaphore>
 #include <QVBoxLayout>
 
@@ -122,11 +123,17 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     mUi->defaultSnapshotDisplay->sortByColumn(COLUMN_NAME, Qt::AscendingOrder);
     mUi->snapshotDisplay->sortByColumn(COLUMN_NAME, Qt::AscendingOrder);
 
-    mUi->smallSelectionInfo->setVisible(true);
-    mUi->preview->setVisible(true);
     mUi->enlargeInfoButton->setVisible(true);
-    mUi->bigSelectionInfo->setVisible(false);
     mUi->reduceInfoButton->setVisible(false);
+
+    mInfoPanelSmallGeo = mUi->selectionInfo->geometry();
+    QRect previewGeo = mUi->preview->geometry();
+    // The large Info panel goes from the top of the Preview panel
+    // to the bottom of the small Info panel
+    mInfoPanelLargeGeo = QRect(mInfoPanelSmallGeo.x(),
+                               previewGeo.y(),
+                               mInfoPanelSmallGeo.width(),
+                               mInfoPanelSmallGeo.y() + mInfoPanelSmallGeo.height() - previewGeo.y());
 
     if (mIsStandAlone) {
         QRect widgetGeometry = frameGeometry();
@@ -282,12 +289,31 @@ const SnapshotPage::WidgetSnapshotItem* SnapshotPage::getSelectedSnapshot() {
 }
 
 void SnapshotPage::on_enlargeInfoButton_clicked() {
-    mUseBigInfoWindow = true;
+    // Make the info window grow
+    mUi->preview->lower(); // Let the preview window get covered
+    QPropertyAnimation *infoAnimation = new QPropertyAnimation(mUi->selectionInfo, "geometry");
+
+    infoAnimation->setDuration(500);  // mSec
+    infoAnimation->setStartValue(mInfoPanelSmallGeo);
+    infoAnimation->setEndValue  (mInfoPanelLargeGeo);
+    infoAnimation->setEasingCurve(QEasingCurve::OutCubic);
+    infoAnimation->start();
+
+    mInfoWindowIsBig = true;
     on_snapshotDisplay_itemSelectionChanged();
 }
 
 void SnapshotPage::on_reduceInfoButton_clicked() {
-    mUseBigInfoWindow = false;
+    // Make the info window shrink
+    QPropertyAnimation *infoAnimation = new QPropertyAnimation(mUi->selectionInfo, "geometry");
+
+    infoAnimation->setDuration(500);  // mSec
+    infoAnimation->setStartValue(mInfoPanelLargeGeo);
+    infoAnimation->setEndValue  (mInfoPanelSmallGeo);
+    infoAnimation->setEasingCurve(QEasingCurve::OutCubic);
+    infoAnimation->start();
+
+    mInfoWindowIsBig = false;
     on_snapshotDisplay_itemSelectionChanged();
 }
 
@@ -418,30 +444,13 @@ void SnapshotPage::updateAfterSelectionChanged() {
         }
     }
 
-    if (mUseBigInfoWindow) {
-        // Use the big window for displaying the info
-        mUi->bigSelectionInfo->setHtml(selectionInfoString);
-        mUi->bigSelectionInfo->setVisible(true);
-        mUi->reduceInfoButton->setVisible(true);
+    mUi->selectionInfo->setHtml(selectionInfoString);
+    mUi->reduceInfoButton->setVisible(mInfoWindowIsBig);
+    mUi->enlargeInfoButton->setVisible(!mInfoWindowIsBig);
 
-        mUi->smallSelectionInfo->setVisible(false);
-        mUi->preview->setVisible(false);
-        mUi->enlargeInfoButton->setVisible(false);
-    } else {
-        // Use the small window for displaying the info
-        mUi->smallSelectionInfo->setHtml(selectionInfoString);
-        mUi->smallSelectionInfo->setVisible(true);
-        mUi->preview->setVisible(true);
-        mUi->enlargeInfoButton->setVisible(true);
-
-        mUi->bigSelectionInfo->setVisible(false);
-        mUi->reduceInfoButton->setVisible(false);
-
-        if (mUi->preview->isVisible()) {
-            showPreviewImage(simpleName, selectedItemStatus);
-        }
+    if (!mInfoWindowIsBig && mUi->preview->isVisible()) {
+        showPreviewImage(simpleName, selectedItemStatus);
     }
-
     enableActions();
     QApplication::restoreOverrideCursor();
 }
@@ -625,7 +634,11 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         Snapshot theSnapshot(fileName.toStdString().c_str());
 
         const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
-        bool snapshotIsValid = (protobuf != nullptr);
+        bool snapshotIsValid =
+            protobuf &&
+            theSnapshot.checkValid(
+                false /* don't write out the error code to protobuf; we just want
+                         to check validity here */);
 
         QString logicalName;
         QDateTime snapshotDate;
