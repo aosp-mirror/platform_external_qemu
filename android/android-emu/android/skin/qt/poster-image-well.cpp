@@ -137,34 +137,35 @@ void PosterImageWell::openFilePicker() {
     }
 }
 
+void PosterImageWell::removeImage() {
+    mUi->stackedWidget->setCurrentIndex(kPageNoImage);
+
+    mUi->image->setText(tr("No image applied"));
+    mUi->fileName->clear();
+    mPath = QString();
+}
+
 bool PosterImageWell::setPathInternal(const QString& path) {
     if (mPath == path) {
         return false;  // No change.
     }
 
     if (path.isNull()) {
-        mUi->stackedWidget->setCurrentIndex(kPageNoImage);
-
-        mUi->image->clear();
-        mUi->fileName->clear();
-        mPath = path;
+        removeImage();
         return true;
     }
-
-    mUi->stackedWidget->setCurrentIndex(kPageImage);
 
     QPixmap image(path);
     if (image.isNull()) {
         // Failed to load, reset back to an empty path.
         qWarning() << tr("Can't load image: ") << path;
-        mUi->image->clear();
-        mUi->fileName->clear();
 
         const bool pathChanged = !mPath.isNull();
-        mPath = QString();
-
+        removeImage();
         return pathChanged;
     }
+
+    mUi->stackedWidget->setCurrentIndex(kPageImage);
 
     mPath = path;
     const int height = mUi->image->height();

@@ -89,6 +89,9 @@ private slots:
 private:
     void openFilePicker();
 
+    // Removes any image and resets back to default state.
+    void removeImage();
+
     // Returns true if the path was changed.
     bool setPathInternal(const QString& path);
 

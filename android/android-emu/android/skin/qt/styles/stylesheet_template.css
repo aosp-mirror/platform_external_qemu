@@ -282,10 +282,6 @@ QToolTip {
     color: #000000;
 }
 
-*[Style="MaterialHelper"] {
-    color: %%TITLE_COLOR%%;
-}
-
 #DropTarget {
     background-color: %%DROP_TARGET_BKG_COLOR%%;
     border-style: solid;
