@@ -58,6 +58,7 @@ _BUILD_SYMBOLS :=
 _BUILD_LIBRARIES :=
 _BUILD_DEBUG_INFOS :=
 _BUILD_TESTS :=
+_BUILD_LINT :=
 
 clean: clean-intermediates
 
@@ -71,6 +72,7 @@ executables: $(_BUILD_EXECUTABLES)
 symbols: $(_BUILD_SYMBOLS)
 debuginfo: $(_BUILD_DEBUG_INFOS)
 tests: $(_BUILD_TESTS)
+lint: $(_BUILD_LINT)
 
 clean-intermediates:
 	rm -rf $(BUILD_OBJS_DIR)/intermediates $(_BUILD_EXECUTABLES) \
