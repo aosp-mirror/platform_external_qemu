@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8c5a22d_b1a9c102",
+        "filename": "android/android-emu/android/base/ContiguousRangeMapper.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-18T20:32:38Z",
+      "side": 1,
+      "message": "nit: right-open range should use [) braces, as end isn\u0027t really included in this case. [start, start + size] implies that end is included",
+      "range": {
+        "startLine": 33,
+        "startChar": 38,
+        "endLine": 33,
+        "endChar": 40
+      },
+      "revId": "c9eca702c31358b75276b600080c7399ab15983b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
