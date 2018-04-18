@@ -58,5 +58,71 @@ private:
     android::base::ScopedProfiler __scoped_profiler(tag, [](const char* tag2, uint64_t elapsed) \
             { fprintf(stderr, "%s: %" PRIu64 " us\n", tag2, elapsed); }); \
 
+class MemoryProfiler {
+public:
+    MemoryProfiler() = default;
+
+    void start() {
+        auto memUsage = System::get()->getMemUsage();
+        mStartResident = memUsage.resident;
+    }
+
+    int64_t queryCurrentResident() {
+        auto memUsage = System::get()->getMemUsage();
+        return memUsage.resident;
+    }
+
+    int64_t queryStartResident() {
+        return mStartResident;
+    }
+
+private:
+    int64_t mStartResident = 0;
+    DISALLOW_COPY_ASSIGN_AND_MOVE(MemoryProfiler);
+};
+
+class ScopedMemoryProfiler {
+public:
+    using Callback = std::function<void(const char*, int64_t, int64_t)>;
+
+    ScopedMemoryProfiler(const std::string& tag) :
+        mProfiler(), mTag(tag) {
+        mProfiler.start();
+        check("(start)");
+    }
+
+    ScopedMemoryProfiler(const std::string& tag, Callback c) :
+        mProfiler(), mTag(tag), mCallback(c) {
+        mProfiler.start();
+        check("(end)");
+    }
+
+    void check(const std::string& tag2 = "") {
+        int64_t currRes = mProfiler.queryCurrentResident();
+        mCallback((mTag + tag2).c_str(),
+                  currRes, currRes - mProfiler.queryStartResident());
+    }
+
+    ~ScopedMemoryProfiler() {
+        check();
+    }
+
+private:
+    MemoryProfiler mProfiler;
+    std::string mTag;
+
+    Callback mCallback = { [](const char* tag, int64_t currentResident, int64_t change) {
+        fprintf(stderr, "%s: %f mb current. change: %f mb\n",
+                tag, (float)currentResident / 1048675.0f, (float)change / 1048576.0f);
+    }};
+
+    DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedMemoryProfiler);
+};
+
+#define PROFILE_CALL_MEMORY_STDERR(tag) \
+    android::base::ScopedMemoryProfiler __scoped_mem_profiler(tag, [](const char* tag2, int64_t currentResident, int64_t change) \
+            { fprintf(stderr, "%s: %f mb current, change %f mb since start\n", tag2, (float)currentResident / 1048675.0f, (float)change / 1048576.0f); } \
+
+
 }  // namespace base
 }  // namespace android
