@@ -46,6 +46,30 @@
       "revId": "e5b591aa5b40ea4a818ecb9a2b4c499c20093aba",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e1682f3_8aec4aa6",
+        "filename": "android/android-emu/android/skin/qt/poster-image-well.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-18T23:56:03Z",
+      "side": 1,
+      "message": "Yeah, I should probably remove that.\n\nAnd I should call it a \"period\" rather than a \"perdiod.\"  ;)",
+      "parentUuid": "3187be69_872b8d1e",
+      "range": {
+        "startLine": 143,
+        "startChar": 44,
+        "endLine": 143,
+        "endChar": 45
+      },
+      "revId": "e5b591aa5b40ea4a818ecb9a2b4c499c20093aba",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
