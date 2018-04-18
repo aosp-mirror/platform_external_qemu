@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "948ce0e3_322e046e",
+        "filename": "android/android-emu/android/base/Profiler.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-18T20:39:17Z",
+      "side": 1,
+      "message": "make an alias, e.g. MemoryUsageBytes, and use it everywhere?",
+      "range": {
+        "startLine": 70,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 11
+      },
+      "revId": "1f4ded119f5582824c5a77294f4df5c79d72e6ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17b51e36_735f059b",
+        "filename": "android/android-emu/android/base/Profiler.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-18T20:39:17Z",
+      "side": 1,
+      "message": "StringView?",
+      "range": {
+        "startLine": 86,
+        "startChar": 40,
+        "endLine": 86,
+        "endChar": 51
+      },
+      "revId": "1f4ded119f5582824c5a77294f4df5c79d72e6ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6352e2c1_94f94f2e",
+        "filename": "android/android-emu/android/base/Profiler.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-18T20:39:17Z",
+      "side": 1,
+      "message": "StringView?",
+      "range": {
+        "startLine": 88,
+        "startChar": 31,
+        "endLine": 88,
+        "endChar": 42
+      },
+      "revId": "1f4ded119f5582824c5a77294f4df5c79d72e6ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "233afa5e_3821a65f",
+        "filename": "android/android-emu/android/base/Profiler.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-18T20:39:17Z",
+      "side": 1,
+      "message": "these labels aren\u0027t very obvious to me: why the other ctor uses (start) but it\u0027s (end) here? I\u0027d expect to see (end) in the dtor instead",
+      "range": {
+        "startLine": 97,
+        "startChar": 15,
+        "endLine": 97,
+        "endChar": 20
+      },
+      "revId": "1f4ded119f5582824c5a77294f4df5c79d72e6ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2daff480_c72f82b9",
+        "filename": "android/android-emu/android/base/Profiler.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-18T20:39:17Z",
+      "side": 1,
+      "message": "what about using two tags instead of creating a temporary on each call, e.g.\ncallback \u003d (StringView tag, StringView stage, ...)",
+      "range": {
+        "startLine": 102,
+        "startChar": 18,
+        "endLine": 102,
+        "endChar": 39
+      },
+      "revId": "1f4ded119f5582824c5a77294f4df5c79d72e6ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4030a687_4e313a11",
+        "filename": "android/android-emu/android/base/Profiler.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-18T20:39:17Z",
+      "side": 1,
+      "message": "use double for better precision. printf will convert all floats to doubles no matter what passed in",
+      "range": {
+        "startLine": 116,
+        "startChar": 22,
+        "endLine": 116,
+        "endChar": 27
+      },
+      "revId": "1f4ded119f5582824c5a77294f4df5c79d72e6ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
