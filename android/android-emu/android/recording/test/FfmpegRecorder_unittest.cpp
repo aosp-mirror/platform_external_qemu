@@ -143,164 +143,497 @@ static std::string setupRecordingTest(VideoFormat videoFmt,
     return outputFile;
 }
 
-// The death test is failing on PSQ, so need to figure out why. For now, disable
-// it.
-//TEST(FfmpegRecorder, Creation) {
-//    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
-//                      "/appdir");
-//    TestTempDir* dir = system.getTempRoot();
-//
-//    // Bad output path
-//    auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight,
-//                                           "/no/such/directory/unittest.webm",
-//                                           kContainerFormat);
-//    EXPECT_FALSE(recorder->isValid());
-//
-//    // Empty filename
-//    recorder =
-//            FfmpegRecorder::create(kFbWidth, kFbHeight, "", kContainerFormat);
-//    EXPECT_FALSE(recorder->isValid());
-//
-//    // No container format supplied
-//    recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, "test.webm", "");
-//    EXPECT_FALSE(recorder->isValid());
-//
-//    // Unknown container format
-//    recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, "work.yet",
-//                                      "badContainerFormat");
-//    EXPECT_FALSE(recorder->isValid());
-//
-//    // All public API calls on invalid recorder should abort
-//    {
-//        auto audioProducer = android::recording::createDummyAudioProducer(
-//                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
-//                AudioFormat::AUD_FMT_S16, []() {});
-//        CodecParams audioParams;
-//        audioParams.sample_rate = kAudioSampleRate;
-//        audioParams.bitrate = kAudioBitrate;
-//        VorbisCodec audioCodec(
-//                std::move(audioParams),
-//                toAVSampleFormat(audioProducer->getFormat().audioFormat));
-//
-//        auto videoProducer = android::recording::createDummyVideoProducer(
-//                kFbWidth, kFbHeight, kFPS, 1, VideoFormat::RGBA8888, []() {});
-//        // Fill in the codec params for the audio and video
-//        CodecParams videoParams;
-//        videoParams.width = kFbWidth;
-//        videoParams.height = kFbHeight;
-//        videoParams.bitrate = kDefaultVideoBitrate;
-//        videoParams.fps = kFPS;
-//        videoParams.intra_spacing = kIntraSpacing;
-//        VP9Codec videoCodec(
-//                std::move(videoParams), kFbWidth, kFbHeight,
-//                toAVPixelFormat(videoProducer->getFormat().videoFormat));
-//
-//        ASSERT_DEATH({ recorder->start(); }, "");
-//        ASSERT_DEATH({ recorder->stop(); }, "");
-//        ASSERT_DEATH(
-//                {
-//                    recorder->addAudioTrack(std::move(audioProducer),
-//                                            &audioCodec);
-//                },
-//                "");
-//        ASSERT_DEATH(
-//                {
-//                    recorder->addVideoTrack(std::move(videoProducer),
-//                                            &videoCodec);
-//                },
-//                "");
-//    }
-//
-//    // avformat_alloc_output_context2() uses kContainerFormat to determine
-//    // container and not deduce from filename extension
-//    recorder = FfmpegRecorder::create(kFbWidth, kFbHeight,
-//                                      dir->makeSubPath("work.yes"),
-//                                      kContainerFormat);
-//    EXPECT_TRUE(recorder->isValid());
-//
-//    // Must have at least a video track or starting will abort
-//    ASSERT_DEATH({ recorder->start(); }, "");
-//
-//    {
-//        auto audioProducer = android::recording::createDummyAudioProducer(
-//                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
-//                AudioFormat::AUD_FMT_S16, []() {});
-//        CodecParams audioParams;
-//        audioParams.sample_rate = kAudioSampleRate;
-//        audioParams.bitrate = kAudioBitrate;
-//        VorbisCodec audioCodec(
-//                std::move(audioParams),
-//                toAVSampleFormat(audioProducer->getFormat().audioFormat));
-//
-//        // Add the audio track
-//        EXPECT_TRUE(
-//                recorder->addAudioTrack(std::move(audioProducer), &audioCodec));
-//    }
-//    ASSERT_DEATH({ recorder->start(); }, "");
-//
-//    {
-//        auto videoProducer = android::recording::createDummyVideoProducer(
-//                kFbWidth, kFbHeight, kFPS, 1, VideoFormat::RGBA8888, []() {});
-//        // Fill in the codec params for the audio and video
-//        CodecParams videoParams;
-//        videoParams.width = kFbWidth;
-//        videoParams.height = kFbHeight;
-//        videoParams.bitrate = kDefaultVideoBitrate;
-//        videoParams.fps = kFPS;
-//        videoParams.intra_spacing = kIntraSpacing;
-//        VP9Codec videoCodec(
-//                std::move(videoParams), kFbWidth, kFbHeight,
-//                toAVPixelFormat(videoProducer->getFormat().videoFormat));
-//
-//        // Add dummy video track
-//        EXPECT_TRUE(
-//                recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
-//    }
-//    // These calls shouldn't abort anymore now that we have a video track.
-//    recorder->start();
-//    recorder->stop();
-//
-//    // After stopping, the recorder is in an invalid state
-//    {
-//        auto audioProducer = android::recording::createDummyAudioProducer(
-//                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
-//                AudioFormat::AUD_FMT_S16, []() {});
-//        CodecParams audioParams;
-//        audioParams.sample_rate = kAudioSampleRate;
-//        audioParams.bitrate = kAudioBitrate;
-//        VorbisCodec audioCodec(
-//                std::move(audioParams),
-//                toAVSampleFormat(audioProducer->getFormat().audioFormat));
-//
-//        auto videoProducer = android::recording::createDummyVideoProducer(
-//                kFbWidth, kFbHeight, kFPS, 1, VideoFormat::RGBA8888, []() {});
-//        // Fill in the codec params for the audio and video
-//        CodecParams videoParams;
-//        videoParams.width = kFbWidth;
-//        videoParams.height = kFbHeight;
-//        videoParams.bitrate = kDefaultVideoBitrate;
-//        videoParams.fps = kFPS;
-//        videoParams.intra_spacing = kIntraSpacing;
-//        VP9Codec videoCodec(
-//                std::move(videoParams), kFbWidth, kFbHeight,
-//                toAVPixelFormat(videoProducer->getFormat().videoFormat));
-//
-//        ASSERT_DEATH({ recorder->start(); }, "");
-//        ASSERT_DEATH({ recorder->stop(); }, "");
-//        ASSERT_DEATH(
-//                {
-//                    recorder->addAudioTrack(std::move(audioProducer),
-//                                            &audioCodec);
-//                },
-//                "");
-//        ASSERT_DEATH(
-//                {
-//                    recorder->addVideoTrack(std::move(videoProducer),
-//                                            &videoCodec);
-//                },
-//                "");
-//    }
-//}
+TEST(FfmpegRecorder, RecorderCreation) {
+    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+                      "/appdir");
+    TestTempDir* dir = system.getTempRoot();
+
+    // Bad width
+    EXPECT_DEATH(
+            {
+                auto recorder = FfmpegRecorder::create(
+                        0, kFbHeight, dir->makeSubPath("work.yes"),
+                        kContainerFormat);
+            },
+            "");
+
+    // Bad height
+    EXPECT_DEATH(
+            {
+                auto recorder = FfmpegRecorder::create(
+                        kFbWidth, 0, dir->makeSubPath("work.yes"),
+                        kContainerFormat);
+            },
+            "");
+
+    // Bad output path
+    auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight,
+                                           "/no/such/directory/unittest.webm",
+                                           kContainerFormat);
+    EXPECT_FALSE(recorder->isValid());
+
+    // Bad container format
+    recorder = FfmpegRecorder::create(kFbWidth, kFbHeight,
+                                      dir->makeSubPath("work.yes"),
+                                      "NotAValidFormat");
+    EXPECT_FALSE(recorder->isValid());
+
+    // All valid parameters
+    recorder = FfmpegRecorder::create(kFbWidth, kFbHeight,
+                                      dir->makeSubPath("work.yes"),
+                                      kContainerFormat);
+    EXPECT_TRUE(recorder->isValid());
+}
+
+TEST(FfmpegRecorder, UsingInvalidRecorder) {
+    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+                      "/appdir");
+
+    // All public API calls should fail an assertion with an invalid recorder
+    // (except for isValid()).
+    {
+        // Invalid recorder
+        auto recorder = FfmpegRecorder::create(
+                kFbWidth, kFbHeight, "/no/such/directory/unittest.webm",
+                kContainerFormat);
+        EXPECT_FALSE(recorder->isValid());
+        EXPECT_DEATH({ recorder->start(); }, "");
+    }
+
+    {
+        // Invalid recorder
+        auto recorder = FfmpegRecorder::create(
+                kFbWidth, kFbHeight, "/no/such/directory/unittest.webm",
+                kContainerFormat);
+        EXPECT_FALSE(recorder->isValid());
+        EXPECT_DEATH({ recorder->stop(); }, "");
+    }
+
+    {
+        // Invalid recorder
+        auto recorder = FfmpegRecorder::create(
+                kFbWidth, kFbHeight, "/no/such/directory/unittest.webm",
+                kContainerFormat);
+        EXPECT_FALSE(recorder->isValid());
+        // Valid audio producer and audio codec
+        auto audioProducer = android::recording::createDummyAudioProducer(
+                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
+                AudioFormat::AUD_FMT_S16, []() {});
+        CodecParams audioParams;
+        audioParams.sample_rate = kAudioSampleRate;
+        audioParams.bitrate = kAudioBitrate;
+        VorbisCodec audioCodec(
+                std::move(audioParams),
+                toAVSampleFormat(audioProducer->getFormat().audioFormat));
+        EXPECT_DEATH(
+                {
+                    recorder->addAudioTrack(std::move(audioProducer),
+                                            &audioCodec);
+                },
+                "");
+    }
+
+    {
+        // Invalid recorder
+        auto recorder = FfmpegRecorder::create(
+                kFbWidth, kFbHeight, "/no/such/directory/unittest.webm",
+                kContainerFormat);
+        EXPECT_FALSE(recorder->isValid());
+        // Valid video producer and video codec
+        auto videoProducer = android::recording::createDummyVideoProducer(
+                kFbWidth, kFbHeight, kFPS, 1, VideoFormat::RGBA8888, []() {});
+        // Fill in the codec params for the audio and video
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(
+                std::move(videoParams), kFbWidth, kFbHeight,
+                toAVPixelFormat(videoProducer->getFormat().videoFormat));
+        EXPECT_DEATH(
+                {
+                    recorder->addVideoTrack(std::move(videoProducer),
+                                            &videoCodec);
+                },
+                "");
+    }
+}
+
+TEST(FfmpegRecorder, AddAudioTrack) {
+    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+                      "/appdir");
+    TestTempDir* dir = system.getTempRoot();
+    std::string outputFile = dir->makeSubPath("unittest.webm");
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        // Valid audio producer and null audio codec
+        auto audioProducer = android::recording::createDummyAudioProducer(
+                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
+                AudioFormat::AUD_FMT_S16, []() {});
+        EXPECT_DEATH(
+                { recorder->addAudioTrack(std::move(audioProducer), nullptr); },
+                "");
+    }
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        // null audio producer and valid audio codec
+        CodecParams audioParams;
+        audioParams.sample_rate = kAudioSampleRate;
+        audioParams.bitrate = kAudioBitrate;
+        VorbisCodec audioCodec(std::move(audioParams),
+                               toAVSampleFormat(AudioFormat::AUD_FMT_S16));
+        EXPECT_DEATH({ recorder->addAudioTrack(nullptr, &audioCodec); }, "");
+    }
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        // Valid audio producer and audio codec
+        auto audioProducer = android::recording::createDummyAudioProducer(
+                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
+                AudioFormat::AUD_FMT_S16, []() {});
+        CodecParams audioParams;
+        audioParams.sample_rate = kAudioSampleRate;
+        audioParams.bitrate = kAudioBitrate;
+        VorbisCodec audioCodec(
+                std::move(audioParams),
+                toAVSampleFormat(audioProducer->getFormat().audioFormat));
+        EXPECT_TRUE(
+                recorder->addAudioTrack(std::move(audioProducer), &audioCodec));
+    }
+}
+
+TEST(FfmpegRecorder, AddVideoTrack) {
+    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+                      "/appdir");
+    TestTempDir* dir = system.getTempRoot();
+    std::string outputFile = dir->makeSubPath("unittest.webm");
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+
+        // Valid video producer and null video codec
+        auto videoProducer = android::recording::createDummyVideoProducer(
+                kFbWidth, kFbHeight, kFPS, kDurationSecs, VideoFormat::RGBA8888,
+                []() {});
+        EXPECT_DEATH(
+                { recorder->addVideoTrack(std::move(videoProducer), nullptr); },
+                "");
+    }
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        // null video producer and valid video codec
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(std::move(videoParams), kFbWidth, kFbHeight,
+                            toAVPixelFormat(VideoFormat::RGBA8888));
+        EXPECT_DEATH({ recorder->addVideoTrack(nullptr, &videoCodec); }, "");
+    }
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        // Valid video producer and video codec
+        auto videoProducer = android::recording::createDummyVideoProducer(
+                kFbWidth, kFbHeight, kFPS, kDurationSecs, VideoFormat::RGBA8888,
+                []() {});
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(
+                std::move(videoParams), kFbWidth, kFbHeight,
+                toAVPixelFormat(videoProducer->getFormat().videoFormat));
+        EXPECT_TRUE(
+                recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
+    }
+}
+
+TEST(FfmpegRecorder, Start) {
+    // start() will only succeed if the recording hasn't been started yet and a
+    // video track has been added.
+    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+                      "/appdir");
+    TestTempDir* dir = system.getTempRoot();
+    std::string outputFile = dir->makeSubPath("unittest.webm");
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+
+        EXPECT_DEATH({ recorder->start(); }, "");
+    }
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+
+        // Valid audio producer and audio codec
+        auto audioProducer = android::recording::createDummyAudioProducer(
+                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
+                AudioFormat::AUD_FMT_S16, []() {});
+        CodecParams audioParams;
+        audioParams.sample_rate = kAudioSampleRate;
+        audioParams.bitrate = kAudioBitrate;
+        VorbisCodec audioCodec(
+                std::move(audioParams),
+                toAVSampleFormat(audioProducer->getFormat().audioFormat));
+        EXPECT_TRUE(
+                recorder->addAudioTrack(std::move(audioProducer), &audioCodec));
+        EXPECT_DEATH({ recorder->start(); }, "");
+    }
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        // Valid video producer and video codec
+        auto videoProducer = android::recording::createDummyVideoProducer(
+                kFbWidth, kFbHeight, kFPS, kDurationSecs, VideoFormat::RGBA8888,
+                []() {});
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(
+                std::move(videoParams), kFbWidth, kFbHeight,
+                toAVPixelFormat(videoProducer->getFormat().videoFormat));
+        EXPECT_TRUE(
+                recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
+        EXPECT_TRUE(recorder->start());
+    }
+
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        // Valid video producer and video codec
+        auto videoProducer = android::recording::createDummyVideoProducer(
+                kFbWidth, kFbHeight, kFPS, kDurationSecs, VideoFormat::RGBA8888,
+                []() {});
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(
+                std::move(videoParams), kFbWidth, kFbHeight,
+                toAVPixelFormat(videoProducer->getFormat().videoFormat));
+        EXPECT_TRUE(
+                recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
+
+        // Valid audio producer and audio codec
+        auto audioProducer = android::recording::createDummyAudioProducer(
+                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
+                AudioFormat::AUD_FMT_S16, []() {});
+        CodecParams audioParams;
+        audioParams.sample_rate = kAudioSampleRate;
+        audioParams.bitrate = kAudioBitrate;
+        VorbisCodec audioCodec(
+                std::move(audioParams),
+                toAVSampleFormat(audioProducer->getFormat().audioFormat));
+        EXPECT_TRUE(
+                recorder->addAudioTrack(std::move(audioProducer), &audioCodec));
+
+        EXPECT_TRUE(recorder->start());
+    }
+}
+
+// Class that doesn't send any video frames
+class NoVideoFrameProducer : public android::recording::Producer {
+public:
+    NoVideoFrameProducer() = default;
+    intptr_t main() final { return 0; }
+    virtual void stop() override {}
+};  // NoVideoFrameProducer
+
+TEST(FfmpegRecorder, Stop) {
+    // stop() will only succeed if the recording has been started.
+    // If no video frames were encoded, then stop() will return false.
+    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
+                      "/appdir");
+    TestTempDir* dir = system.getTempRoot();
+    std::string outputFile = dir->makeSubPath("unittest.webm");
+
+    // 1) Recording with only video track added, but no video frames encoded
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        EXPECT_FALSE(recorder->stop());
+        // Valid video producer and video codec (no audio track)
+        std::unique_ptr<Producer> videoProducer(new NoVideoFrameProducer());
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(
+                std::move(videoParams), kFbWidth, kFbHeight,
+                toAVPixelFormat(videoProducer->getFormat().videoFormat));
+        EXPECT_TRUE(
+                recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
+        EXPECT_FALSE(recorder->stop());
+        EXPECT_TRUE(recorder->start());
+        // NoVideoFrameProducer doesn't generate any video frames
+        EXPECT_FALSE(recorder->stop());
+        EXPECT_FALSE(recorder->isValid());
+    }
+
+    // 2) Recording with audio/video track added, but no video frames encoded
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        EXPECT_FALSE(recorder->stop());
+        // Valid video producer and video codec
+        std::unique_ptr<Producer> videoProducer(new NoVideoFrameProducer());
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(
+                std::move(videoParams), kFbWidth, kFbHeight,
+                toAVPixelFormat(videoProducer->getFormat().videoFormat));
+        EXPECT_TRUE(
+                recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
+        EXPECT_FALSE(recorder->stop());
+
+        // Valid audio producer and audio codec
+        auto audioProducer = android::recording::createDummyAudioProducer(
+                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
+                AudioFormat::AUD_FMT_S16, []() {});
+        CodecParams audioParams;
+        audioParams.sample_rate = kAudioSampleRate;
+        audioParams.bitrate = kAudioBitrate;
+        VorbisCodec audioCodec(
+                std::move(audioParams),
+                toAVSampleFormat(audioProducer->getFormat().audioFormat));
+        EXPECT_TRUE(
+                recorder->addAudioTrack(std::move(audioProducer), &audioCodec));
+        EXPECT_FALSE(recorder->stop());
+
+        EXPECT_TRUE(recorder->start());
+        // NoVideoFrameProducer doesn't generate any video frames
+        EXPECT_FALSE(recorder->stop());
+        EXPECT_FALSE(recorder->isValid());
+    }
+
+    // 3) Recording with only video track added
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        EXPECT_FALSE(recorder->stop());
+        // Valid video producer and video codec (no audio track)
+        auto videoProducer = android::recording::createDummyVideoProducer(
+                kFbWidth, kFbHeight, kFPS, kDurationSecs, VideoFormat::RGBA8888,
+                []() {});
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(
+                std::move(videoParams), kFbWidth, kFbHeight,
+                toAVPixelFormat(videoProducer->getFormat().videoFormat));
+        EXPECT_TRUE(
+                recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
+        EXPECT_FALSE(recorder->stop());
+        EXPECT_TRUE(recorder->start());
+        // 500 ms should be a long enough time to get at least one frame
+        Thread::sleepMs(500);
+        EXPECT_TRUE(recorder->stop());
+        EXPECT_FALSE(recorder->isValid());
+    }
+
+    // 4) Recording with audio/video track added
+    {
+        // Valid recorder
+        auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
+                                               kContainerFormat);
+        EXPECT_TRUE(recorder->isValid());
+        EXPECT_FALSE(recorder->stop());
+        // Valid video producer and video codec (no audio track)
+        auto videoProducer = android::recording::createDummyVideoProducer(
+                kFbWidth, kFbHeight, kFPS, kDurationSecs, VideoFormat::RGBA8888,
+                []() {});
+        CodecParams videoParams;
+        videoParams.width = kFbWidth;
+        videoParams.height = kFbHeight;
+        videoParams.bitrate = kDefaultVideoBitrate;
+        videoParams.fps = kFPS;
+        videoParams.intra_spacing = kIntraSpacing;
+        VP9Codec videoCodec(
+                std::move(videoParams), kFbWidth, kFbHeight,
+                toAVPixelFormat(videoProducer->getFormat().videoFormat));
+        EXPECT_TRUE(
+                recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
+        EXPECT_FALSE(recorder->stop());
+
+        // Valid audio producer and audio codec
+        auto audioProducer = android::recording::createDummyAudioProducer(
+                kAudioSampleRate, kSrcNumSamples, kNumAudioChannels, 1,
+                AudioFormat::AUD_FMT_S16, []() {});
+        CodecParams audioParams;
+        audioParams.sample_rate = kAudioSampleRate;
+        audioParams.bitrate = kAudioBitrate;
+        VorbisCodec audioCodec(
+                std::move(audioParams),
+                toAVSampleFormat(audioProducer->getFormat().audioFormat));
+        EXPECT_TRUE(
+                recorder->addAudioTrack(std::move(audioProducer), &audioCodec));
+        EXPECT_FALSE(recorder->stop());
+        EXPECT_TRUE(recorder->start());
+        // 500 ms should be a long enough time to get at least one frame
+        Thread::sleepMs(500);
+        EXPECT_TRUE(recorder->stop());
+        EXPECT_FALSE(recorder->isValid());
+    }
+}
 
 TEST(FfmpegRecorder, RecordRGBA8888AndAudFmtS16) {
     TestSystem system("/progdir", System::kProgramBitness, "/homedir",
