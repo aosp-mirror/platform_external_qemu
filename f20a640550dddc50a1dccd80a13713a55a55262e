@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9171b074_e6d43407",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1052399
+      },
+      "writtenOn": "2018-04-18T21:30:18Z",
+      "side": 1,
+      "message": "If you want all modernize checks that could be added in the future, you can use \"-*,modernize-*\".\nMany old Android code have too many warnings from modernize-* checks so those checks are not enabled globally.\nYou can find current Android platform global tidy checks in build/soong/cc/config/tidy.go, \"TidyExternalVendorChecks\" and \"TidyDefaultGlobalChecks\".",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 23
+      },
+      "revId": "f20a640550dddc50a1dccd80a13713a55a55262e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
