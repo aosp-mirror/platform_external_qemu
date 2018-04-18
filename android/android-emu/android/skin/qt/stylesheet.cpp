@@ -66,11 +66,6 @@ static const char kFontLargeName[] = "FONT_LARGE";
 static const char kFontLargerName[] = "FONT_LARGER";
 static const char kFontHugeName[] = "FONT_HUGE";
 
-static const char kFontSizeMaterialBody[] = "FONT_SIZE_MATERIAL_BODY";
-static const char kFontSizeMaterialHelper[] = "FONT_SIZE_MATERIAL_HELPER";
-static const char kFontSizeMaterialTitle[] = "FONT_SIZE_MATERIAL_TITLE";
-static const char kFontSizeMaterialSubheading[] = "FONT_SIZE_MATERIAL_SUBHEADING";
-
 struct FontSizeMapLoader {
     FontSizeMapLoader() {
 // Windows takes care of the font sizes, and if we try loading them from the
@@ -102,10 +97,6 @@ struct FontSizeMapLoader {
 
         fontMap[kFontLargerName] = "11pt";
         fontMap[kFontHugeName] = "15pt";
-        fontMap[kFontSizeMaterialHelper] = "12px";
-        fontMap[kFontSizeMaterialBody] = "14px";
-        fontMap[kFontSizeMaterialTitle] = "20px";
-        fontMap[kFontSizeMaterialSubheading] = "16px";
     }
 
     QHash<QString, QString> fontMap;
