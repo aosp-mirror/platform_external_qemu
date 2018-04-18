@@ -197,6 +197,9 @@ gen_wrapper_program ()
                 DST_PROG=clang++
                 DST_PREFIX=$CLANG_BINDIR/
                 ;;
+            clang-tidy)
+                DST_PREFIX=$CLANG_BINDIR/
+                ;;
         esac
     fi
 
@@ -257,7 +260,7 @@ gen_wrapper_toolchain () {
     local DST_DIR="$3"
     local CLANG_BINDIR="$4"
     local PROG
-    local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld"
+    local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
     local PROGRAMS="as ar ranlib strip strings nm objdump objcopy dlltool"
 
     log "Generating toolchain wrappers in: $DST_DIR"
@@ -410,7 +413,6 @@ prepare_build_for_linux() {
     if [ "$OPT_CXX11" ]; then
         var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
     fi
-
 
     # Make sure we can find libc++
     EXTRA_LDFLAGS="-m64"
