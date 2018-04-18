@@ -177,7 +177,13 @@ void OverlayMessageCenter::adjustSize() {
             findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
     if (children.empty()) {
         reattachToParent();
+#ifdef __APPLE__
+        // Mac doesn't let us set the height to 0.
+        // On Linux, setting width=0 here breaks moving the window.
+        setFixedWidth(0);
+#else
         setFixedHeight(0);
+#endif
         return;
     }
 
@@ -293,6 +299,8 @@ void OverlayMessageCenter::dismissMessage(OverlayChildWidget* messageWidget) {
             });
     messageWidget->connect(animation, &QVariantAnimation::finished,
                            [messageWidget] { messageWidget->deleteLater(); });
+    messageWidget->connect(animation, &QVariantAnimation::finished,
+                           [this] { setFixedWidth(0); });
 }
 
 // Get rid of the overlay message ASAP
@@ -300,6 +308,7 @@ void OverlayMessageCenter::dismissMessageImmediately(OverlayChildWidget* message
     if (isDismissing(messageWidget)) {
         return;
     }
+    setFixedWidth(0);
     messageWidget->setProperty(kDismissProperty, true);
     messageWidget->deleteLater();
 }

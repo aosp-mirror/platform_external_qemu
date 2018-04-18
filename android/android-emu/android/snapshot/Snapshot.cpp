@@ -183,11 +183,11 @@ static Optional<std::string> currentGpuDriverString() {
     return gpuDriverString(*currentIt);
 }
 
-bool Snapshot::verifyHost(const pb::Host& host) {
+bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
     VmConfiguration vmConfig;
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
     if (host.has_hypervisor() && host.hypervisor() != vmConfig.hypervisorType) {
-        saveFailure(FailureReason::ConfigMismatchHostHypervisor);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchHostHypervisor);
         return false;
     }
     // Do not worry about backend if in swiftshader_indirect
@@ -196,27 +196,27 @@ bool Snapshot::verifyHost(const pb::Host& host) {
     }
     if (auto gpuString = currentGpuDriverString()) {
         if (!host.has_gpu_driver() || host.gpu_driver() != *gpuString) {
-            saveFailure(FailureReason::ConfigMismatchHostGpu);
+            if (writeFailure) saveFailure(FailureReason::ConfigMismatchHostGpu);
             return false;
         }
     } else if (host.has_gpu_driver()) {
-        saveFailure(FailureReason::ConfigMismatchHostGpu);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchHostGpu);
         return false;
     }
     return true;
 }
 
-bool Snapshot::verifyConfig(const pb::Config& config) {
+bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
     VmConfiguration vmConfig;
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
     if (config.has_cpu_core_count() &&
         config.cpu_core_count() != vmConfig.numberOfCpuCores) {
-        saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
     if (config.has_ram_size_bytes() &&
         config.ram_size_bytes() != vmConfig.ramSizeBytes) {
-        saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
     if (config.has_selected_renderer() &&
@@ -224,7 +224,7 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
 #ifdef ALLOW_CHANGE_RENDERER
         fprintf(stderr, "WARNING: change of renderer detected.\n");
 #else // ALLOW_CHANGE_RENDERER
-        saveFailure(FailureReason::ConfigMismatchRenderer);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchRenderer);
         return false;
 #endif // ALLOW_CHANGE_RENDERER
     }
@@ -236,7 +236,7 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
                     [](int l, android::featurecontrol::Feature r) {
                         return int(l) == r;
                     })) {
-        saveFailure(FailureReason::ConfigMismatchFeatures);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchFeatures);
         return false;
     }
 
@@ -400,30 +400,6 @@ static bool isUnrecoverableReason(FailureReason reason) {
            reason < FailureReason::UnrecoverableErrorLimit;
 }
 
-static bool isValidationFailureReason(FailureReason reason) {
-    return reason != FailureReason::Empty &&
-           reason < FailureReason::ValidationErrorLimit;
-}
-
-// preload(): Obtain the protobuf metadata. Logic for deciding
-// whether or not to load based on it, plus initialization
-// of properties like skin rotation, is done afterward in load().
-// Checks whether or not the version of the protobuf is compatible.
-bool Snapshot::preload() {
-    loadProtobufOnce();
-
-    return (mSnapshotPb.has_version() && mSnapshotPb.version() == kVersion);
-}
-
-const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
-    loadProtobufOnce();
-    if (isValidationFailureReason(
-            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
-        return nullptr;
-    }
-    return &mSnapshotPb;
-}
-
 void Snapshot::loadProtobufOnce() {
     if (mSnapshotPb.has_version()) {
         return;
@@ -465,9 +441,29 @@ void Snapshot::loadProtobufOnce() {
     // Success
 }
 
-// load(): Loads all snapshot metadata and checks it against other files
-// for integrity.
-bool Snapshot::load() {
+// preload(): Obtain the protobuf metadata. Logic for deciding
+// whether or not to load based on it, plus initialization
+// of properties like skin rotation, is done afterward in load().
+// Checks whether or not the version of the protobuf is compatible.
+bool Snapshot::preload() {
+    loadProtobufOnce();
+
+    return (mSnapshotPb.has_version() && mSnapshotPb.version() == kVersion);
+}
+
+const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
+    loadProtobufOnce();
+
+    if (isUnrecoverableReason(
+            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+        fprintf(stderr, "%s: unrecoverable failure\n", __func__);
+        return nullptr;
+    }
+
+    return &mSnapshotPb;
+}
+
+const bool Snapshot::checkValid(bool writeFailure) {
     if (!preload()) {
         return false;
     }
@@ -477,16 +473,17 @@ bool Snapshot::load() {
         return true;
     }
 
-    if (mSnapshotPb.has_host() && !verifyHost(mSnapshotPb.host())) {
+    if (mSnapshotPb.has_host() && !verifyHost(mSnapshotPb.host(), writeFailure)) {
         return false;
     }
-    if (mSnapshotPb.has_config() && !verifyConfig(mSnapshotPb.config())) {
+    if (mSnapshotPb.has_config() && !verifyConfig(mSnapshotPb.config(), writeFailure)) {
         return false;
     }
     if (mSnapshotPb.images_size() > int(ARRAY_SIZE(kImages))) {
-        saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
+
     int matchedImages = 0;
     for (const auto& image : kImages) {
         ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
@@ -498,31 +495,31 @@ bool Snapshot::load() {
                 });
         if (it != mSnapshotPb.images().end()) {
             if (!verifyImageInfo(image.type, path.get(), *it)) {
-                saveFailure(FailureReason::SystemImageChanged);
+                if (writeFailure) saveFailure(FailureReason::SystemImageChanged);
                 return false;
             }
             ++matchedImages;
         } else {
             // Should match an empty image info
             if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
-                saveFailure(FailureReason::NoSnapshotInImage);
+                if (writeFailure) saveFailure(FailureReason::NoSnapshotInImage);
                 return false;
             }
         }
     }
     if (matchedImages != mSnapshotPb.images_size()) {
-        saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
 
     IniFile expectedConfig(PathUtils::join(mDataDir, "hardware.ini"));
     if (!expectedConfig.read(false)) {
-        saveFailure(FailureReason::CorruptedData);
+        if (writeFailure) saveFailure(FailureReason::CorruptedData);
         return false;
     }
     IniFile actualConfig(avdInfo_getCoreHwIniPath(android_avdInfo));
     if (!actualConfig.read(false)) {
-        saveFailure(FailureReason::InternalError);
+        if (writeFailure) saveFailure(FailureReason::InternalError);
         return false;
     }
     IniFile expectedStripped;
@@ -533,18 +530,13 @@ bool Snapshot::load() {
     androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
                                   reinterpret_cast<CIniFile*>(&actualStripped));
     if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
-        saveFailure(FailureReason::ConfigMismatchAvd);
+        if (writeFailure) saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
+
     if (mSnapshotPb.has_guest_data_partition_mounted()) {
         guest_data_partition_mounted =
                 mSnapshotPb.guest_data_partition_mounted();
-    }
-    if (mSnapshotPb.has_rotation() &&
-        Snapshotter::get().windowAgent().getRotation() !=
-                SkinRotation(mSnapshotPb.rotation())) {
-        Snapshotter::get().windowAgent().rotate(
-                SkinRotation(mSnapshotPb.rotation()));
     }
 
     if (mSnapshotPb.has_invalid_loads()) {
@@ -557,6 +549,32 @@ bool Snapshot::load() {
         mSuccessfulLoads = mSnapshotPb.successful_loads();
     } else {
         mSuccessfulLoads = 0;
+    }
+
+    return true;
+}
+
+// load(): Loads all snapshot metadata and checks it against other files
+// for integrity.
+bool Snapshot::load() {
+
+    if (!checkValid(true /* save the failure reason */)) {
+        return false;
+    }
+
+    if (mSnapshotPb.has_rotation() &&
+        Snapshotter::get().windowAgent().getRotation() !=
+                SkinRotation(mSnapshotPb.rotation())) {
+        Snapshotter::get().windowAgent().rotate(
+                SkinRotation(mSnapshotPb.rotation()));
+    }
+
+    // Successfully loaded protobuf;
+    // clear existing failure reason if it was not unrecoverable.
+    if (mSnapshotPb.has_failed_to_load_reason_code() &&
+        !isUnrecoverableReason(
+            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+        mSnapshotPb.clear_failed_to_load_reason_code();
     }
 
     return true;

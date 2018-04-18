@@ -719,7 +719,7 @@ help_accel(stralloc_t *out)
 
         "     off    Disables acceleration entirely. Mostly useful for debugging.\n\n"
 
-        "     on     Force acceleration. If KVM/HAXM is not installed or usable,\n"
+        "     on     Force acceleration. If KVM/HAXM/WHPX is not installed or usable,\n"
         "            the emulator will refuse to start and print an error message.\n\n"
 
         "  Note that this flag is ignored if you're not emulating an x86 or x86_64\n"

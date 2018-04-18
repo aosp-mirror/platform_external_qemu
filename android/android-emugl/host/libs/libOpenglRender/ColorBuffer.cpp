@@ -102,20 +102,20 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  HandleType hndl,
                                  Helper* helper,
                                  bool fastBlitSupported) {
-    GLenum texInternalFormat = 0;
+    GLenum texFormat = 0;
 
     GLenum pixelType = GL_UNSIGNED_BYTE;
     int bytesPerPixel = 3;
     switch (p_internalFormat) {
         case GL_RGB:
-            texInternalFormat = GL_RGB;
+            texFormat = GL_RGB;
             bytesPerPixel = 3;
             break;
 
         case GL_RGB565_OES: // and GL_RGB565
             // Still say "GL_RGB" for compatibility
             // with older drivers
-            texInternalFormat = GL_RGB;
+            texFormat = GL_RGB;
             pixelType = GL_UNSIGNED_SHORT_5_6_5;
             bytesPerPixel = 2;
             break;
@@ -123,24 +123,24 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         case GL_RGBA:
         case GL_RGB5_A1_OES:
         case GL_RGBA4_OES:
-            texInternalFormat = GL_RGBA;
+            texFormat = GL_RGBA;
             bytesPerPixel = 4;
             break;
 
         case GL_UNSIGNED_INT_10_10_10_2_OES:
-            texInternalFormat = GL_RGBA;
+            texFormat = GL_RGBA;
             pixelType = GL_UNSIGNED_SHORT;
             bytesPerPixel = 4;
             break;
 
         case GL_RGBA16F:
-            texInternalFormat = GL_RGBA;
+            texFormat = GL_RGBA;
             pixelType = GL_HALF_FLOAT;
             bytesPerPixel = 8;
             break;
 
         case GL_LUMINANCE:
-            texInternalFormat = GL_LUMINANCE;
+            texFormat = GL_LUMINANCE;
             pixelType = GL_UNSIGNED_SHORT;
             bytesPerPixel = 2;
             break;
@@ -172,8 +172,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
-                         0, texInternalFormat, pixelType,
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
+                         0, texFormat, pixelType,
                          initialImage.get());
     initialImage.reset();
 
@@ -187,8 +187,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     //
     s_gles2.glGenTextures(1, &cb->m_blitTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
-                         0, texInternalFormat, pixelType, NULL);
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
+                         0, texFormat, pixelType, NULL);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -197,8 +197,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     cb->m_width = p_width;
     cb->m_height = p_height;
-    cb->m_internalFormat = texInternalFormat;
-    cb->m_format = texInternalFormat;
+    cb->m_internalFormat = p_internalFormat;
+    cb->m_format = texFormat;
     cb->m_type = pixelType;
 
     cb->m_eglImage = s_egl.eglCreateImageKHR(

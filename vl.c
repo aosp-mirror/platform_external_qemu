@@ -3234,9 +3234,8 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
 #endif // defined(CONFIG_ANDROID) && defined(_WIN32) && !defined(_WIN64)
 
 #ifdef _WIN32
-    uint64_t hax_limit = hax_mem_limit();
-    if (ram_size > hax_limit) {
-        ram_size = hax_limit;
+    if (hax_enabled()) {
+        ram_size = MIN(ram_size, hax_mem_limit());
     }
 #endif
 
@@ -4204,6 +4203,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_enable_hax:
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse_noisily(olist, "accel=hax", false);
+                break;
+            case QEMU_OPTION_enable_whpx:
+                olist = qemu_find_opts("machine");
+                qemu_opts_parse_noisily(olist, "accel=whpx", false);
                 break;
             case QEMU_OPTION_M:
             case QEMU_OPTION_machine:

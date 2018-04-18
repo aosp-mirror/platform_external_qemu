@@ -90,7 +90,10 @@ private:
     bool mAllowTake = true;
     bool mAllowDelete = false;
     bool mMadeSelection = false;
-    bool mUseBigInfoWindow = false;
+    bool mInfoWindowIsBig = false;
+
+    QRect mInfoPanelSmallGeo; // Location and size of the info panel when it is small
+    QRect mInfoPanelLargeGeo; // Location and size of the info panel when it is big
 
     QString mOutputFileName = ""; // Used to provide our output in stand-alone mode
 

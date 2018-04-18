@@ -51,7 +51,7 @@
     </property>
    </column>
   </widget>
-  <widget class="QTextEdit" name="smallSelectionInfo">
+  <widget class="QTextEdit" name="selectionInfo">
    <property name="geometry">
     <rect>
      <x>315</x>
@@ -108,9 +108,9 @@
   <widget class="QGraphicsView" name="preview">
    <property name="geometry">
     <rect>
-     <x>305</x>
+     <x>315</x>
      <y>20</y>
-     <width>299</width>
+     <width>289</width>
      <height>435</height>
     </rect>
    </property>
@@ -205,37 +205,6 @@
    </property>
    <property name="themeIconName" stdset="0">
     <string>arrow_down</string>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="bigSelectionInfo">
-   <property name="geometry">
-    <rect>
-     <x>315</x>
-     <y>20</y>
-     <width>289</width>
-     <height>521</height>
-    </rect>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::NoFrame</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Plain</enum>
-   </property>
-   <property name="lineWidth">
-    <number>0</number>
-   </property>
-   <property name="horizontalScrollBarPolicy">
-    <enum>Qt::ScrollBarAlwaysOff</enum>
-   </property>
-   <property name="undoRedoEnabled">
-    <bool>false</bool>
-   </property>
-   <property name="lineWrapMode">
-    <enum>QTextEdit::WidgetWidth</enum>
-   </property>
-   <property name="readOnly">
-    <bool>true</bool>
    </property>
   </widget>
   <widget class="RaisedMaterialButton" name="loadSnapshot">
@@ -421,19 +390,6 @@
     <string>HorizDivider2</string>
    </property>
   </widget>
-  <zorder>bigSelectionInfo</zorder>
-  <zorder>snapshotDisplay</zorder>
-  <zorder>smallSelectionInfo</zorder>
-  <zorder>takeSnapshotButton</zorder>
-  <zorder>preview</zorder>
-  <zorder>noneAvailableLabel</zorder>
-  <zorder>enlargeInfoButton</zorder>
-  <zorder>reduceInfoButton</zorder>
-  <zorder>loadSnapshot</zorder>
-  <zorder>editSnapshot</zorder>
-  <zorder>deleteSnapshot</zorder>
-  <zorder>defaultSnapshotDisplay</zorder>
-  <zorder>line</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -451,8 +407,7 @@
   <tabstop>reduceInfoButton</tabstop>
   <tabstop>enlargeInfoButton</tabstop>
   <tabstop>preview</tabstop>
-  <tabstop>bigSelectionInfo</tabstop>
-  <tabstop>smallSelectionInfo</tabstop>
+  <tabstop>selectionInfo</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>
