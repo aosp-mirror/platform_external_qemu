@@ -53,10 +53,10 @@
       <bool>true</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: #808080;</string>
+        <string notr="true">background-color: rgba(128, 128, 128, 200)</string>
      </property>
      <property name="text">
-      <string/>
+      <string>No image applied</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -99,22 +99,6 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="noImageApplied">
-         <property name="font">
-          <font>
-           <family>Roboto</family>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>No image applied.</string>
-         </property>
-         <property name="Style" stdset="0">
-          <string>MaterialBody</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <property name="topMargin">
           <number>0</number>
@@ -153,7 +137,7 @@
             <string/>
            </property>
            <property name="ColorGroup" stdset="0">
-            <string>RaisedColoredButton</string>
+            <string>Button</string>
            </property>
            <property name="report_metrics" stdset="0">
             <bool>false</bool>
@@ -226,7 +210,7 @@
           <string>File name</string>
          </property>
          <property name="Style" stdset="0">
-          <string>MaterialHelper</string>
+          <string>Title</string>
          </property>
         </widget>
        </item>
@@ -326,7 +310,7 @@
           <string>Size (meters)</string>
          </property>
          <property name="Style" stdset="0">
-          <string>MaterialHelper</string>
+          <string>Title</string>
          </property>
         </widget>
        </item>
