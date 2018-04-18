@@ -14,7 +14,6 @@
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/camera/camera-list.h"
-#include "android/cpu_accelerator.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/featurecontrol/feature_control.h"
@@ -1259,6 +1258,20 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     return true;
 }
 
+const char* getAcceleratorEnableParam(AndroidCpuAccelerator accel_type) {
+    switch (accel_type) {
+        case ANDROID_CPU_ACCELERATOR_KVM:
+            return "-enable-kvm";
+        case ANDROID_CPU_ACCELERATOR_HAX:
+            return "-enable-hax";
+        case ANDROID_CPU_ACCELERATOR_HVF:
+            return "-enable-hvf";
+        case ANDROID_CPU_ACCELERATOR_WHPX:
+            return "-enable-whpx";
+        default:
+            return "";
+    }
+}
 
 bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                            CpuAccelMode* accel_mode, char** accel_status) {

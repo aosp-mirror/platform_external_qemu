@@ -23,3 +23,4 @@ endif
 ifdef CONFIG_DARWIN
 obj-$(CONFIG_HAX) += hax-all.o hax-mem.o hax-darwin.o
 endif
+obj-$(CONFIG_WHPX) += whpx-all.o
