@@ -695,7 +695,6 @@ static int whpx_handle_halt(CPUState *cpu)
     struct CPUX86State *env = (CPUArchState *)(cpu->env_ptr);
     int ret = 0;
 
-    qemu_mutex_lock_iothread();
     if (!((cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
           (env->eflags & IF_MASK)) &&
         !(cpu->interrupt_request & CPU_INTERRUPT_NMI)) {
@@ -703,7 +702,6 @@ static int whpx_handle_halt(CPUState *cpu)
         cpu->halted = true;
         ret = 1;
     }
-    qemu_mutex_unlock_iothread();
 
     return ret;
 }
@@ -724,8 +722,6 @@ static void whpx_vcpu_pre_run(CPUState *cpu)
 
     memset(&new_int, 0, sizeof(new_int));
     memset(reg_values, 0, sizeof(reg_values));
-
-    qemu_mutex_lock_iothread();
 
     /* Inject NMI */
     if (!vcpu->interruption_pending &&
@@ -798,8 +794,6 @@ static void whpx_vcpu_pre_run(CPUState *cpu)
         reg_count += 1;
     }
 
-    qemu_mutex_unlock_iothread();
-
     if (reg_count) {
         hr = whp_dispatch.WHvSetVirtualProcessorRegisters(
             whpx->partition, cpu->cpu_index,
@@ -824,9 +818,7 @@ static void whpx_vcpu_post_run(CPUState *cpu)
     uint64_t tpr = vcpu->exit_ctx.VpContext.Cr8;
     if (vcpu->tpr != tpr) {
         vcpu->tpr = tpr;
-        qemu_mutex_lock_iothread();
         cpu_set_apic_tpr(x86_cpu->apic_state, vcpu->tpr);
-        qemu_mutex_unlock_iothread();
     }
 
     vcpu->interruption_pending =
@@ -896,7 +888,6 @@ static int whpx_vcpu_run(CPUState *cpu)
         return 0;
     }
 
-    qemu_mutex_unlock_iothread();
     cpu_exec_start(cpu);
 
     do {
@@ -911,9 +902,13 @@ static int whpx_vcpu_run(CPUState *cpu)
             whpx_vcpu_kick(cpu);
         }
 
+        qemu_mutex_unlock_iothread();
+
         hr = whp_dispatch.WHvRunVirtualProcessor(
             whpx->partition, cpu->cpu_index,
             &vcpu->exit_ctx, sizeof(vcpu->exit_ctx));
+
+        qemu_mutex_lock_iothread();
 
         if (FAILED(hr)) {
             error_report("WHPX: Failed to exec a virtual processor,"
@@ -1017,16 +1012,13 @@ static int whpx_vcpu_run(CPUState *cpu)
             error_report("WHPX: Unexpected VP exit code %d",
                          vcpu->exit_ctx.ExitReason);
             whpx_get_registers(cpu);
-            qemu_mutex_lock_iothread();
             qemu_system_guest_panicked(cpu_get_crash_info(cpu));
-            qemu_mutex_unlock_iothread();
             break;
         }
 
     } while (!ret);
 
     cpu_exec_end(cpu);
-    qemu_mutex_lock_iothread();
     current_cpu = cpu;
 
     atomic_set(&cpu->exit_request, false);
