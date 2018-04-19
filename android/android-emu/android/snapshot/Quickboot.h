@@ -49,6 +49,8 @@ private:
     void startLivenessMonitor();
     void onLivenessTimer();
 
+    bool saveImpl(base::StringView name);
+
     Quickboot(const QAndroidVmOperations& vmOps,
               const QAndroidEmulatorWindowAgent& window);
 
