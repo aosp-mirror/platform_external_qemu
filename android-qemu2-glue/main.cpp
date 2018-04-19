@@ -45,6 +45,7 @@
 #include "android/process_setup.h"
 #include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
+#include "android/snapshot/interface.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
@@ -761,6 +762,25 @@ extern "C" int main(int argc, char** argv) {
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
         if (!opts->no_snapshot_load) {
             args.add2("-loadvm", opts->snapshot);
+        }
+    }
+
+    if (opts->quickboot_ram_map) {
+        fprintf(stderr, "%s: has ram map parameter\n", __func__);
+        const char* memPath = androidSnapshot_getRamMapPath(NULL);
+
+        args.add2("-mem-path", memPath);
+        AFREE((void*)memPath);
+
+        if (strcmp(opts->quickboot_ram_map, "shared") &&
+            strcmp(opts->quickboot_ram_map, "private")) {
+            fprintf(stderr, "ERROR: Invalid option %s for -quickboot-ram-map.\n",
+                    opts->quickboot_ram_map);
+            return 1;
+        }
+
+        if (!strcmp(opts->quickboot_ram_map, "shared")) {
+            args.add("-mem-file-shared");
         }
     }
 

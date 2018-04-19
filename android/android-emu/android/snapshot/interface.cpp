@@ -11,12 +11,18 @@
 
 #include "android/snapshot/interface.h"
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/StringView.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/snapshot/common.h"
 #include "android/snapshot/Loader.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshotter.h"
 
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 
+using android::base::StringView;
 using android::snapshot::FailureReason;
 using android::snapshot::OperationStatus;
 using android::snapshot::Snapshotter;
@@ -88,4 +94,22 @@ void androidSnapshot_list(void* opaque,
                           int (*cbOut)(void*, const char*, int),
                           int (*cbErr)(void*, const char*, int)) {
     Snapshotter::get().listSnapshots(opaque, cbOut, cbErr);
+}
+
+void androidSnapshot_setRamFile(const char* path, int shared) {
+    Snapshotter::get().setRamFile(path, shared);
+}
+
+const char* androidSnapshot_getRamMapPath(const char* _name) {
+    StringView name = _name ? _name : android::snapshot::kDefaultBootSnapshot;
+
+    std::string dir = android::snapshot::getSnapshotDir(name.c_str());
+    path_mkdir_if_needed(dir.c_str(), 0744);
+
+    auto mapPath = android::base::PathUtils::join(dir, "ram.img");
+    char* res = (char*)malloc(mapPath.size() + 1);
+    memset(res, 0, mapPath.size() + 1);
+    memcpy(res, mapPath.data(), mapPath.size());
+    fprintf(stderr, "%s: path is [%s]\n", __func__, res);
+    return res;
 }
