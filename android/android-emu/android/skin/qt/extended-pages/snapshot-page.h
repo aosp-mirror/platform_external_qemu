@@ -53,6 +53,7 @@ private slots:
     void on_snapshotDisplay_itemSelectionChanged();
     void on_tabWidget_currentChanged(int index);
     void on_takeSnapshotButton_clicked();
+    void on_set_useDynamicQuickBoot_toggled(bool checked);
 
 private:
 

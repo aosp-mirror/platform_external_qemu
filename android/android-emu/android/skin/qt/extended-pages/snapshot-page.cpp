@@ -198,7 +198,8 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
             break;
     }
     // Enable SAVE NOW if we won't overwrite the state on exit
-    mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
+    mUi->saveQuickBootNowButton->setEnabled( false);
+    mUi->loadQuickBootNowButton->setEnabled( false);
 
     QSettings settings;
     DeleteInvalidSnapshots deleteInvalids = static_cast<DeleteInvalidSnapshots>
@@ -214,6 +215,10 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     }
     mUi->deleteInvalidSnapshots->setCurrentIndex(static_cast<int>(deleteInvalidsUiIdx));
 
+    mUi->set_useDynamicQuickBoot->hide();
+    mUi->set_useDynamicQuickBootTitle->hide();
+    mUi->set_useDynamicQuickBootDescription->hide();
+
     if (mIsStandAlone) {
         QRect widgetGeometry = frameGeometry();
         setFixedHeight(widgetGeometry.height() + 36); // Allow for the title bar
@@ -226,6 +231,20 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
         mUi->tabWidget->removeTab(1); // Do not show the Settings tab
 
         getOutputFileName();
+    } else {
+
+        mUi->set_useDynamicQuickBoot->show();
+        mUi->set_useDynamicQuickBootTitle->show();
+        mUi->set_useDynamicQuickBootDescription->show();
+
+        const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+        if (avdPath) {
+            QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+            QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+            bool useDynamicQuickBoot = avdSpecificSettings.value(Ui::Settings::PER_AVD_USE_DYNAMIC_QUICKBOOT, false).toBool();
+            mUi->set_useDynamicQuickBoot->setChecked(useDynamicQuickBoot);
+            on_set_useDynamicQuickBoot_toggled(useDynamicQuickBoot);
+        }
     }
 
     QObject::connect(this, SIGNAL(deleteCompleted()),
@@ -796,6 +815,15 @@ void SnapshotPage::on_takeSnapshotButton_clicked() {
             status = androidSnapshot_save(snapshotName.toStdString().c_str());
             emit(saveCompleted((int)status, snapshotName));
         });
+    }
+}
+
+void SnapshotPage::on_set_useDynamicQuickBoot_toggled(bool value) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_USE_DYNAMIC_QUICKBOOT, value);
     }
 }
 

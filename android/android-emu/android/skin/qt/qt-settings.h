@@ -109,6 +109,10 @@ enum class SaveSnapshotOnExit { Always, Never, Ask };
 // Order of the items on the GUI for save snapshot on exit
 enum class SaveSnapshotOnExitUiOrder { Always, Never, Ask };
 
+// Whether to use dynamic quick boot for this AVD.
+constexpr char PER_AVD_USE_DYNAMIC_QUICKBOOT[] = "perAvd/useDynamicQuickboot";
+
+// Per-avd location settings.
 constexpr char PER_AVD_LONGITUDE[] = "perAvd/loc/longitude";
 constexpr char PER_AVD_LATITUDE[] = "perAvd/loc/latitude";
 constexpr char PER_AVD_ALTITUDE[] = "perAvd/loc/altitude";

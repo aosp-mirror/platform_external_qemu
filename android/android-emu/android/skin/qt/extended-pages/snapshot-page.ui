@@ -26,7 +26,7 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="snapshotsTab">
     <attribute name="title">
@@ -443,7 +443,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>68</y>
+       <y>250</y>
        <width>132</width>
        <height>36</height>
       </rect>
@@ -511,7 +511,7 @@
      <property name="geometry">
       <rect>
        <x>169</x>
-       <y>68</y>
+       <y>250</y>
        <width>132</width>
        <height>36</height>
       </rect>
@@ -540,7 +540,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>118</y>
+       <y>58</y>
        <width>281</width>
        <height>21</height>
       </rect>
@@ -562,7 +562,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>140</y>
+       <y>80</y>
        <width>281</width>
        <height>31</height>
       </rect>
@@ -599,6 +599,74 @@
        <string>Don't delete</string>
       </property>
      </item>
+    </widget>
+    <widget class="QCheckBox" name="set_useDynamicQuickBoot">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>130</y>
+       <width>281</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="set_useDynamicQuickBootDescription">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>150</y>
+       <width>281</width>
+       <height>91</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Dynamic Quick Boot snapshots are slower, but allow saving/loading of the Quick Boot snapshot during runtime, and the option to keep previous Quick Boot snapshot on exit. Setting will take effect next emulator boot.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="margin">
+      <number>10</number>
+     </property>
+     <property name="indent">
+      <number>4</number>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="set_useDynamicQuickBootTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>102</y>
+       <width>281</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Use dynamic Quick Boot snapshots</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
     </widget>
    </widget>
   </widget>

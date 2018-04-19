@@ -103,6 +103,8 @@ typedef enum {
     AVDINFO_NO_SNAPSHOT_LOAD = (1 << 5),
     /* use to prevent saving state on exit (set by the UI) */
     AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT = (1 << 6),
+    /* invalidate the current quickboot snapshot */
+    AVDINFO_SNAPSHOT_INVALIDATE = (1 << 7),
 } AvdFlags;
 
 typedef struct {

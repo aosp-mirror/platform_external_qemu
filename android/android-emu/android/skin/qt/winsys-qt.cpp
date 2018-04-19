@@ -350,6 +350,14 @@ extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
     return (WinsysPreferredGlesApiLevel)settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
 }
 
+extern bool skin_winsys_get_dynamic_quickboot(const char* avdPath)
+{
+    QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+    QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+    return avdSpecificSettings.value(Ui::Settings::PER_AVD_USE_DYNAMIC_QUICKBOOT, false).toBool();
+}
+
 extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);

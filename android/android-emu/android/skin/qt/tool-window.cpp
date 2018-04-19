@@ -692,6 +692,19 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
                 Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
                 static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
 
+    bool useDynamicQuickBoot =
+        androidSnapshot_getRamMapInfo() == SNAPSHOT_RAM_MAP_NONE;
+    bool willUseDynamicNextBoot =
+        avdSpecificSettings.value(Ui::Settings::PER_AVD_USE_DYNAMIC_QUICKBOOT, false).toBool();
+
+    bool mustInvalidate =
+        !useDynamicQuickBoot && willUseDynamicNextBoot;
+
+    if (mustInvalidate) {
+        fprintf(stderr, "%s: must invalidate, going from ram map to dynamic\n", __func__);
+        android_avdParams->flags |= AVDINFO_SNAPSHOT_INVALIDATE;
+    }
+
     if (android_cmdLineOptions->no_snapshot_save) {
         // The command line was used, so don't ask. That overrides the UI.
         return true;
@@ -702,37 +715,39 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
         return true;
     }
 
-    // If the setting is ALWAYS, we might want to ask anyway, such as when
-    // previous saves were known to be slow, or the system has low RAM.
-    bool savesWereSlow =
-        androidSnapshot_areSavesSlow(
-            android::snapshot::kDefaultBootSnapshot.c_str());
-    bool hasLowRam = System::isUnderMemoryPressure();
-
-    if (saveOnExitChoice == SaveSnapshotOnExit::Always &&
-        !savesWereSlow &&
-        !hasLowRam) {
+    if (saveOnExitChoice == SaveSnapshotOnExit::Always) {
         return true;
     }
 
-    // The setting is ASK or we decided to ask anyway.
-    auto askMessageSlow =
-        tr("Do you want to save the current state for the next quick boot?\n\n"
-           "Note: Recent saves seem to have been slow. Save can be skipped "
-           "by selecting 'No'.");
-    auto askMessageLowRam =
-        tr("Do you want to save the current state for the next quick boot?\n\n"
-           "Note: Saving the snapshot may take longer because free RAM is low.");
+    // The setting is ASK.
+
+    // Change messaging based on dynamic quick boot setting.
+
     auto askMessageDefault =
-        tr("Do you want to save the current state for the next quick boot?");
+        tr("Would you like to resume from this state next time, "
+           "or perform a cold boot?");
+    auto askMessageDynamicQuickBoot =
+        tr("Would you like to resume from this state next time, "
+           "or go back to the beginning of the previous Quick Boot?");
+
+    auto askMessage = useDynamicQuickBoot ? askMessageDynamicQuickBoot : askMessageDefault;
+    auto yesButtonMessage = tr("Save state");
+    auto noButtonMessageDefault = tr("Cold boot next time");
+    auto noButtonMessageDynamicQuickBoot = tr("Start from previous quick boot state");
+    auto noButtonMessage = useDynamicQuickBoot ? noButtonMessageDynamicQuickBoot : noButtonMessageDefault;
 
     int64_t startTime = get_uptime_ms();
     QMessageBox msgBox(QMessageBox::Question,
-                       tr("Save quick-boot state"),
-                       savesWereSlow ? askMessageSlow :
-                           (hasLowRam ? askMessageLowRam : askMessageDefault),
-                       (QMessageBox::Yes | QMessageBox::No),
+                       tr("Save state for next time?"),
+                       askMessage,
+                       0,
                        this);
+
+    QAbstractButton* saveStateButton =
+        msgBox.addButton(yesButtonMessage, QMessageBox::YesRole);
+    QAbstractButton* coldBootButton =
+        msgBox.addButton(noButtonMessage, QMessageBox::NoRole);
+
     // Add a Cancel button to enable the MessageBox's X.
     QPushButton *cancelButton = msgBox.addButton(QMessageBox::Cancel);
     // Hide the Cancel button so X is the only way to cancel.
@@ -758,7 +773,9 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
         return false;
     }
 
-    if (selection == QMessageBox::Yes) {
+    QAbstractButton* clickedButton = msgBox.clickedButton();
+
+    if (clickedButton == saveStateButton && !mustInvalidate) {
         MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
             auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
             counts->set_quickboot_ask_yes(1 + counts->quickboot_ask_yes());

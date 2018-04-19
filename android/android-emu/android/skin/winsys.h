@@ -96,6 +96,7 @@ enum WinsysPreferredGlesApiLevel {
     WINSYS_GLESAPILEVEL_PREFERENCE_NUM = 3,
 };
 
+
 // Overrides UI setting of gles backend value.
 enum WinsysPreferredGlesBackend skin_winsys_override_glesbackend_if_auto(enum WinsysPreferredGlesBackend);
 // Returns current preferred gles backend specified through the emulator UI.
@@ -104,6 +105,8 @@ enum WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend();
 void skin_winsys_set_preferred_gles_backend(enum WinsysPreferredGlesBackend);
 // Returns current preferred gles api level specified through the emulator UI.
 enum WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel();
+// Get the dynamic quickboot setting.
+bool skin_winsys_get_dynamic_quickboot(const char* avdPath);
 
 // Start just the Snapshot control sub-page.
 // This is invoked using the command line parameter "-ui-only snapshot-control".
