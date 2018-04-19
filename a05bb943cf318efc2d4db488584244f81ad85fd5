@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86dbc85a_5812b077",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-19T20:36:52Z",
+      "side": 1,
+      "message": "add comments describing why we are putting 3x the InstructionBytes here.",
+      "range": {
+        "startLine": 662,
+        "startChar": 58,
+        "endLine": 662,
+        "endChar": 62
+      },
+      "revId": "a05bb943cf318efc2d4db488584244f81ad85fd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d2c4d7e_8df43166",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 684,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-19T20:36:52Z",
+      "side": 1,
+      "message": "nit: can we put separators in between each of the possible independent cases so it\u0027s less confusing if we get multiple statuses?",
+      "range": {
+        "startLine": 666,
+        "startChar": 0,
+        "endLine": 684,
+        "endChar": 78
+      },
+      "revId": "a05bb943cf318efc2d4db488584244f81ad85fd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3cc5c64e_57616e20",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-19T20:36:52Z",
+      "side": 1,
+      "message": "nit: line this up with the \" on the line(s) above",
+      "range": {
+        "startLine": 687,
+        "startChar": 16,
+        "endLine": 688,
+        "endChar": 17
+      },
+      "revId": "a05bb943cf318efc2d4db488584244f81ad85fd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f3a0681_aa36d6c3",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 697,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-19T20:36:52Z",
+      "side": 1,
+      "message": "nit: line this up with the ctx_copy above",
+      "range": {
+        "startLine": 697,
+        "startChar": 0,
+        "endLine": 697,
+        "endChar": 47
+      },
+      "revId": "a05bb943cf318efc2d4db488584244f81ad85fd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84bd0ef6_09eddbd5",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-19T20:36:52Z",
+      "side": 1,
+      "message": "nit: 2 more spaces here",
+      "range": {
+        "startLine": 699,
+        "startChar": 0,
+        "endLine": 699,
+        "endChar": 10
+      },
+      "revId": "a05bb943cf318efc2d4db488584244f81ad85fd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40b637d7_0ba84d0d",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-19T20:36:52Z",
+      "side": 1,
+      "message": "nit: line this \" up with the \" on the line above",
+      "range": {
+        "startLine": 703,
+        "startChar": 16,
+        "endLine": 703,
+        "endChar": 18
+      },
+      "revId": "a05bb943cf318efc2d4db488584244f81ad85fd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
