@@ -67,9 +67,7 @@
 #include "migration/vmstate.h"
 
 #include "qemu/range.h"
-#ifndef _WIN32
 #include "qemu/mmap-alloc.h"
-#endif
 
 //#define DEBUG_SUBPAGE
 
@@ -1259,7 +1257,6 @@ void qemu_mutex_unlock_ramlist(void)
     qemu_mutex_unlock(&ram_list.mutex);
 }
 
-#ifdef __linux__
 /*
  * FIXME TOCTTOU: this iterates over memory backends' mem-path, which
  * may or may not name the same files / on the same filesystem now as
@@ -1286,6 +1283,7 @@ static int find_max_supported_pagesize(Object *obj, void *opaque)
     return 0;
 }
 
+#ifdef __linux__
 long qemu_getrampagesize(void)
 {
     long hpsize = LONG_MAX;
@@ -1340,7 +1338,6 @@ long qemu_getrampagesize(void)
 }
 #endif
 
-#ifdef __linux__
 static int64_t get_file_size(int fd)
 {
     int64_t size = lseek(fd, 0, SEEK_END);
@@ -1349,6 +1346,10 @@ static int64_t get_file_size(int fd)
     }
     return size;
 }
+
+#ifdef _WIN32
+#define MAP_FAILED 0
+#endif
 
 static void *file_ram_alloc(RAMBlock *block,
                             ram_addr_t memory,
@@ -1364,8 +1365,8 @@ static void *file_ram_alloc(RAMBlock *block,
     int64_t file_size;
 
     if (kvm_enabled() && !kvm_has_sync_mmu()) {
-        error_setg(errp,
-                   "host lacks kvm mmu notifiers, -mem-path unsupported");
+        fprintf(stderr, "host lacks kvm mmu notifiers, -mem-path unsupported\n");
+        error_setg(errp, "host lacks kvm mmu notifiers, -mem-path unsupported");
         return NULL;
     }
 
@@ -1460,13 +1461,14 @@ static void *file_ram_alloc(RAMBlock *block,
         perror("ftruncate");
     }
 
-    area = qemu_ram_mmap(fd, memory, block->mr->align,
-                         block->flags & RAM_SHARED);
+    area = qemu_ram_mmap(fd, memory, block->mr->align, true);
     if (area == MAP_FAILED) {
         error_setg_errno(errp, errno,
                          "unable to map backing store for guest RAM");
         goto error;
     }
+
+    fprintf(stderr, "%s: mmap successful\n", __func__);
 
     if (mem_prealloc) {
         os_mem_prealloc(fd, area, memory, smp_cpus, errp);
@@ -1474,6 +1476,8 @@ static void *file_ram_alloc(RAMBlock *block,
             goto error;
         }
     }
+
+    fprintf(stderr, "%s: success. fd %d\n", __func__, fd);
 
     block->fd = fd;
     return area;
@@ -1490,7 +1494,6 @@ error:
     }
     return NULL;
 }
-#endif
 
 /* Called with the ramlist lock held.  */
 static ram_addr_t find_ram_offset(ram_addr_t size)
@@ -1799,7 +1802,6 @@ static void ram_block_add(RAMBlock *new_block, Error **errp)
     }
 }
 
-#ifdef __linux__
 RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
                                    bool share, const char *mem_path,
                                    Error **errp)
@@ -1844,7 +1846,6 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
     }
     return new_block;
 }
-#endif
 
 static
 RAMBlock *qemu_ram_alloc_internal(ram_addr_t size, ram_addr_t max_size,
