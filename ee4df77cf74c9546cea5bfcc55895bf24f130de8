@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7419fbb4_1c46f6cd",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-19T14:00:47Z",
+      "side": 1,
+      "message": "Unused variable",
+      "revId": "ee4df77cf74c9546cea5bfcc55895bf24f130de8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14c6b6fb_75cc29c7",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-19T14:00:47Z",
+      "side": 1,
+      "message": "Unused variable",
+      "revId": "ee4df77cf74c9546cea5bfcc55895bf24f130de8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1953cc29_5806febe",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_windows.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-19T14:00:47Z",
+      "side": 1,
+      "message": "Now that this field is private, we can\u0027t access it from line 216, etc. Create an accessor for it, or make ::MemoryAccessWatch a friend class of ::Impl?",
+      "revId": "ee4df77cf74c9546cea5bfcc55895bf24f130de8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bce79cf7_4d2c33e7",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-19T14:00:47Z",
+      "side": 1,
+      "message": "Unused variable",
+      "revId": "ee4df77cf74c9546cea5bfcc55895bf24f130de8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0de46c0e_e73122c0",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2018-04-19T14:00:47Z",
+      "side": 1,
+      "message": "Unused variable",
+      "revId": "ee4df77cf74c9546cea5bfcc55895bf24f130de8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
