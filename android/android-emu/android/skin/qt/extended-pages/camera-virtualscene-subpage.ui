@@ -21,7 +21,7 @@
     <number>20</number>
    </property>
    <property name="topMargin">
-    <number>24</number>
+    <number>14</number>
    </property>
    <property name="rightMargin">
     <number>24</number>
@@ -29,32 +29,6 @@
    <property name="bottomMargin">
     <number>24</number>
    </property>
-   <item>
-    <widget class="QLabel" name="title">
-     <property name="text">
-      <string>Scene images</string>
-     </property>
-     <property name="Style" stdset="0">
-      <string>MaterialTitle</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>18</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
@@ -80,7 +54,7 @@
         <string>Wall</string>
        </property>
        <property name="Style" stdset="0">
-        <string>MaterialSubheading</string>
+        <string>Title</string>
        </property>
       </widget>
      </item>
@@ -130,7 +104,7 @@
         <string>Table</string>
        </property>
        <property name="Style" stdset="0">
-        <string>MaterialSubheading</string>
+        <string>Title</string>
        </property>
       </widget>
      </item>

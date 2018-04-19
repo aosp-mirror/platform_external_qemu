@@ -30,7 +30,7 @@
    </property>
    <widget class="CameraVirtualSceneSubpage" name="virtualScene">
     <attribute name="title">
-     <string>Virtual scene</string>
+     <string>Virtual scene images</string>
     </attribute>
    </widget>
   </widget>
