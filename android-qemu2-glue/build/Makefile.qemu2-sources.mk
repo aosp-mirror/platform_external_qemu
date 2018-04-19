@@ -104,6 +104,7 @@ QEMU2_LIB_qemuutil += \
     util/unicode.c \
     util/uri.c \
     util/uuid.c \
+    util/mmap-alloc.c \
 
 QEMU2_LIB_qemuutil_darwin-x86_64 := \
     util/aio-posix.c \
@@ -111,7 +112,6 @@ QEMU2_LIB_qemuutil_darwin-x86_64 := \
     util/coroutine-sigaltstack.c \
     util/event_notifier-posix.c \
     util/memfd.c \
-    util/mmap-alloc.c \
     util/oslib-posix.c \
     util/qemu-openpty.c \
     util/qemu-thread-posix.c \
@@ -122,7 +122,6 @@ QEMU2_LIB_qemuutil_linux-x86_64 := \
     util/coroutine-ucontext.c \
     util/event_notifier-posix.c \
     util/memfd.c \
-    util/mmap-alloc.c \
     util/oslib-posix.c \
     util/qemu-openpty.c \
     util/qemu-thread-posix.c \
