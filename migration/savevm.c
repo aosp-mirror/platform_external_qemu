@@ -2542,6 +2542,7 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
         if (s_snapshot_callbacks.loadvm.on_end) {
             s_snapshot_callbacks.loadvm.on_end(name, ret);
         }
+        fprintf(stderr, "Error %d while activating snapshot '%s' on '%s'", ret, name, bdrv_get_device_name(bs));
         messages->err(messages->opaque, NULL,
                      "Error %d while activating snapshot '%s' on '%s'",
                      ret, name, bdrv_get_device_name(bs));
@@ -2813,5 +2814,6 @@ void vmstate_unregister_ram(MemoryRegion *mr, DeviceState *dev)
 
 void vmstate_register_ram_global(MemoryRegion *mr)
 {
+    fprintf(stderr, "%s: register mem region %s\n", __func__, memory_region_name(mr));
     vmstate_register_ram(mr, NULL);
 }
