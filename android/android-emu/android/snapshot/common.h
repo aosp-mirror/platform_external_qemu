@@ -34,6 +34,7 @@ using RamBlock = ::SnapshotRamBlock;
 enum class IndexFlags {
     Empty = 0,
     CompressedPages = 0x01,
+    SeparateBackingStore = 0x02,
 };
 
 enum class OperationStatus {
@@ -91,6 +92,8 @@ bool isBufferZeroed(const void* ptr, int32_t size);
 constexpr int32_t kDefaultPageSize = 4096;
 
 constexpr int32_t kCancelTimeoutMs = 15000;
+
+constexpr base::StringView kDefaultBootSnapshot = "default_boot";
 
 void resetSnapshotLiveness();
 bool isSnapshotAlive();

@@ -67,9 +67,7 @@
 #include "migration/vmstate.h"
 
 #include "qemu/range.h"
-#ifndef _WIN32
 #include "qemu/mmap-alloc.h"
-#endif
 
 //#define DEBUG_SUBPAGE
 
@@ -98,6 +96,9 @@ static MemoryRegion io_mem_unassigned;
  * This used_length size can change across reboots.
  */
 #define RAM_RESIZEABLE (1 << 2)
+
+/* RAM is a mapped filed */
+#define RAM_MAPPED (1 << 3)
 
 #endif
 
@@ -1259,7 +1260,6 @@ void qemu_mutex_unlock_ramlist(void)
     qemu_mutex_unlock(&ram_list.mutex);
 }
 
-#ifdef __linux__
 /*
  * FIXME TOCTTOU: this iterates over memory backends' mem-path, which
  * may or may not name the same files / on the same filesystem now as
@@ -1286,6 +1286,7 @@ static int find_max_supported_pagesize(Object *obj, void *opaque)
     return 0;
 }
 
+#ifdef __linux__
 long qemu_getrampagesize(void)
 {
     long hpsize = LONG_MAX;
@@ -1340,7 +1341,6 @@ long qemu_getrampagesize(void)
 }
 #endif
 
-#ifdef __linux__
 static int64_t get_file_size(int fd)
 {
     int64_t size = lseek(fd, 0, SEEK_END);
@@ -1349,6 +1349,10 @@ static int64_t get_file_size(int fd)
     }
     return size;
 }
+
+#ifdef _WIN32
+#define MAP_FAILED 0
+#endif
 
 static void *file_ram_alloc(RAMBlock *block,
                             ram_addr_t memory,
@@ -1364,8 +1368,8 @@ static void *file_ram_alloc(RAMBlock *block,
     int64_t file_size;
 
     if (kvm_enabled() && !kvm_has_sync_mmu()) {
-        error_setg(errp,
-                   "host lacks kvm mmu notifiers, -mem-path unsupported");
+        fprintf(stderr, "host lacks kvm mmu notifiers, -mem-path unsupported\n");
+        error_setg(errp, "host lacks kvm mmu notifiers, -mem-path unsupported");
         return NULL;
     }
 
@@ -1468,12 +1472,16 @@ static void *file_ram_alloc(RAMBlock *block,
         goto error;
     }
 
+    fprintf(stderr, "%s: mmap successful\n", __func__);
+
     if (mem_prealloc) {
         os_mem_prealloc(fd, area, memory, smp_cpus, errp);
         if (errp && *errp) {
             goto error;
         }
     }
+
+    fprintf(stderr, "%s: success. fd %d\n", __func__, fd);
 
     block->fd = fd;
     return area;
@@ -1490,7 +1498,6 @@ error:
     }
     return NULL;
 }
-#endif
 
 /* Called with the ramlist lock held.  */
 static ram_addr_t find_ram_offset(ram_addr_t size)
@@ -1565,6 +1572,11 @@ const char *qemu_ram_get_idstr(RAMBlock *rb)
 bool qemu_ram_is_shared(RAMBlock *rb)
 {
     return rb->flags & RAM_SHARED;
+}
+
+bool qemu_ram_is_mapped(RAMBlock *rb)
+{
+    return rb->flags & RAM_MAPPED;
 }
 
 /* Called with iothread lock held.  */
@@ -1799,7 +1811,6 @@ static void ram_block_add(RAMBlock *new_block, Error **errp)
     }
 }
 
-#ifdef __linux__
 RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
                                    bool share, const char *mem_path,
                                    Error **errp)
@@ -1828,7 +1839,7 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
     new_block->mr = mr;
     new_block->used_length = size;
     new_block->max_length = size;
-    new_block->flags = share ? RAM_SHARED : 0;
+    new_block->flags = RAM_MAPPED | (share ? RAM_SHARED : 0);
     new_block->host = file_ram_alloc(new_block, size,
                                      mem_path, errp);
     if (!new_block->host) {
@@ -1844,7 +1855,6 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
     }
     return new_block;
 }
-#endif
 
 static
 RAMBlock *qemu_ram_alloc_internal(ram_addr_t size, ram_addr_t max_size,
