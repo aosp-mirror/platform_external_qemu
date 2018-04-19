@@ -297,9 +297,15 @@ static const QEMUFileHooks sSaveHooks = {
             qemu_put_be64(f, RAM_SAVE_FLAG_HOOK);
             if (flags == RAM_CONTROL_SETUP) {
                 // Register all blocks for saving.
-                qemu_ram_foreach_block(
+                qemu_ram_foreach_block_flags(
                         [](const char* block_name, void* host_addr,
-                           ram_addr_t offset, ram_addr_t length, void* opaque) {
+                           ram_addr_t offset, ram_addr_t length, int flags, void* opaque) {
+                            fprintf(stderr, "%s: register for saving: %s: host addr %p offset 0x%llx length 0x%llx flags 0x%x\n", __func__,
+                                    block_name,
+                                    host_addr,
+                                    (unsigned long long)offset,
+                                    (unsigned long long)length,
+                                    flags);
                             SnapshotRamBlock block = {
                                     block_name, (int64_t)offset,
                                     (uint8_t*)host_addr, (int64_t)length};

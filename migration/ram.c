@@ -1070,6 +1070,7 @@ static bool find_dirty_block(QEMUFile *f, PageSearchStatus *pss,
          * Give up.
          */
         *again = false;
+        fprintf(stderr, "%s: finished a block\n", __func__);
         return false;
     }
     if (pss->offset >= pss->block->used_length) {
@@ -1090,6 +1091,7 @@ static bool find_dirty_block(QEMUFile *f, PageSearchStatus *pss,
                 compression_switch = false;
             }
         }
+        fprintf(stderr, "%s: didnt find anything\n", __func__);
         /* Didn't find anything this time, but try again on the new block */
         *again = true;
         return false;
@@ -1500,6 +1502,7 @@ static void migration_bitmap_free(struct BitmapRcu *bmap)
 
 static void ram_migration_cleanup(void *opaque)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     /* caller have hold iothread lock or is in a bh, so there is
      * no writing race against this migration_bitmap
      */
@@ -2045,6 +2048,7 @@ static int ram_save_init_globals(void)
 
 static int ram_save_setup(QEMUFile *f, void *opaque)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     RAMBlock *block;
 
     /* migration has already setup the bitmap, reuse it. */
@@ -2083,6 +2087,8 @@ static int ram_save_iterate(QEMUFile *f, void *opaque)
     int i;
     int64_t t0;
     int done = 0;
+
+    fprintf(stderr, "%s: call\n", __func__);
 
     rcu_read_lock();
     if (ram_list.version != last_version) {
@@ -2144,6 +2150,8 @@ static int ram_save_iterate(QEMUFile *f, void *opaque)
 /* Called with iothread lock */
 static int ram_save_complete(QEMUFile *f, void *opaque)
 {
+    fprintf(stderr, "%s: call\n", __func__);
+
     rcu_read_lock();
 
     if (!migration_in_postcopy(migrate_get_current())) {
@@ -2180,6 +2188,7 @@ static void ram_save_pending(QEMUFile *f, void *opaque, uint64_t max_size,
                              uint64_t *non_postcopiable_pending,
                              uint64_t *postcopiable_pending)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     uint64_t remaining_size;
 
     remaining_size = ram_save_remaining() * TARGET_PAGE_SIZE;
@@ -2564,6 +2573,7 @@ static int ram_load_postcopy(QEMUFile *f)
 
 static int ram_load(QEMUFile *f, void *opaque, int version_id)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     int flags = 0, ret = 0;
     static uint64_t seq_iter;
     int len = 0;
@@ -2730,5 +2740,5 @@ static SaveVMHandlers savevm_ram_handlers = {
 void ram_mig_init(void)
 {
     qemu_mutex_init(&XBZRLE.lock);
-    register_savevm_live(NULL, "ram", 0, 4, &savevm_ram_handlers, NULL);
+    register_savevm_live(NULL, "ram-meow", 0, 4, &savevm_ram_handlers, NULL);
 }

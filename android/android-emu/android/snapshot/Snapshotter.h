@@ -74,6 +74,8 @@ public:
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(bool isOnExit, const char* name);
 
+    void setRamFile(const char* path, int shared);
+
     // Cancels the current save operation, and queries
     // whether saving was canceled.
     void cancelSave();
@@ -123,6 +125,8 @@ public:
     void addOperationCallback(Callback&& cb);
 
     bool isQuickboot() const { return mIsQuickboot; }
+    bool hasRamMap() const { return !mRamFile.empty(); }
+    bool isRamMapShared() const { return !mRamFile.empty() && mRamFileShared; }
 
 private:
     bool onStartSaving(const char* name);
@@ -161,6 +165,10 @@ private:
 
     bool mIsQuickboot = false;
     bool mIsOnExit = false;
+
+    std::string mRamFile = "";
+    bool mRamFileShared = false;
+
 };
 
 }  // namespace snapshot
