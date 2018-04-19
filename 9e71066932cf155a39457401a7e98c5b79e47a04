@@ -22,6 +22,30 @@
       "revId": "9e71066932cf155a39457401a7e98c5b79e47a04",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "790ae742_d25c9464",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-19T14:46:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e6f0b7df_41674b9d",
+      "range": {
+        "startLine": 154,
+        "startChar": 1,
+        "endLine": 174,
+        "endChar": 9
+      },
+      "revId": "9e71066932cf155a39457401a7e98c5b79e47a04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
