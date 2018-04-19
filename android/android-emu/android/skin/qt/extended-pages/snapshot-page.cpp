@@ -198,7 +198,8 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
             break;
     }
     // Enable SAVE NOW if we won't overwrite the state on exit
-    mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
+    mUi->saveQuickBootNowButton->setEnabled( false);
+    mUi->loadQuickBootNowButton->setEnabled( false);
 
     QSettings settings;
     DeleteInvalidSnapshots deleteInvalids = static_cast<DeleteInvalidSnapshots>

@@ -2542,6 +2542,7 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
         if (s_snapshot_callbacks.loadvm.on_end) {
             s_snapshot_callbacks.loadvm.on_end(name, ret);
         }
+        fprintf(stderr, "Error %d while activating snapshot '%s' on '%s'", ret, name, bdrv_get_device_name(bs));
         messages->err(messages->opaque, NULL,
                      "Error %d while activating snapshot '%s' on '%s'",
                      ret, name, bdrv_get_device_name(bs));
