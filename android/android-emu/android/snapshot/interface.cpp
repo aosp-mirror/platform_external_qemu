@@ -12,6 +12,7 @@
 #include "android/snapshot/interface.h"
 
 #include "android/emulation/CpuAccelerator.h"
+#include "android/snapshot/common.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/Snapshotter.h"
 
@@ -85,3 +86,15 @@ void androidSnapshot_list(void* opaque,
                           int (*cbErr)(void*, const char*, int)) {
     Snapshotter::get().listSnapshots(opaque, cbOut, cbErr);
 }
+
+void androidSnapshot_setRamFile(const char* path, int shared) {
+    Snapshotter::get().setRamFile(path, shared);
+}
+
+void androidSnapshot_getDirPath(const char* name) {
+    if (!name) {
+        name = Qui
+    }
+    std::string dir = getSnapshotDir(name);
+}
+

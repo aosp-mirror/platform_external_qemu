@@ -45,6 +45,7 @@
 #include "android/process_setup.h"
 #include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
+#include "android/snapshot/interface.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
@@ -784,6 +785,18 @@ extern "C" int main(int argc, char** argv) {
             args.add2("-savevm-on-exit", opts->snapshot);
         if (opts->no_snapshot_update_time)
             args.add("-snapshot-no-time-update");
+        if (opts->quickboot_ram_map) {
+            args.add2("-mem-path", androidSnapshot_quickbootDir());
+            if (strcmp(opts->quickboot_ram_map, "shared") &&
+                strcmp(opts->quickboot_ram_map, "private")) {
+                fprintf(stderr, "ERROR: Invalid option %s for -quickboot-ram-map.\n",
+                        opts->quickboot_ram_map);
+                return 1;
+            }
+            if (!strcmp(opts->quickboot_ram_map, "shared")) {
+                args.add("-mem-file-shared");
+            }
+        }
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 

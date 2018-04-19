@@ -481,7 +481,17 @@ bool androidSnapshot_quickbootLoad(const char* name) {
 }
 
 bool androidSnapshot_quickbootSave(const char* name) {
-    return android::snapshot::Quickboot::get().save(name);
+    bool invalidateOnFailure =
+        android::snapshot::Snapshotter::get().isRamMapShared();
+
+    bool saveResult = android::snapshot::Quickboot::get().save(name);
+
+    if (!saveResult && invalidateOnFailure) {
+        fprintf(stderr, "%s: invalidate\n", __func__);
+        androidSnapshot_quickbootInvalidate(name);
+    }
+
+    return saveResult;
 }
 
 void androidSnapshot_quickbootInvalidate(const char* name) {
