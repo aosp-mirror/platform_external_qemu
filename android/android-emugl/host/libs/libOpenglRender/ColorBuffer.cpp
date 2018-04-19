@@ -179,6 +179,27 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
+    GLint unpackAlignment;
+    GLint unpackRowLength;
+    GLint unpackSkipPixels;
+    GLint unpackSkipRows;
+    s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpackAlignment);
+    s_gles2.glGetIntegerv(GL_UNPACK_ROW_LENGTH, &unpackRowLength);
+    s_gles2.glGetIntegerv(GL_UNPACK_SKIP_PIXELS, &unpackSkipPixels);
+    s_gles2.glGetIntegerv(GL_UNPACK_SKIP_ROWS, &unpackSkipRows);
+
+    if (unpackAlignment != 1) {
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    }
+
+    fprintf(stderr, "ColorBuffer::%s: bufptr %p bufsize %d internalformat 0x%x w h %d %d texformat 0x%x type 0x%x unpack: align %d rowlength %d skipPixels %d skipRows %d\n", __func__,
+            initialImage.get(),
+            bufsize, p_internalFormat, p_width, p_height, texFormat, pixelType,
+            unpackAlignment,
+            unpackRowLength,
+            unpackSkipPixels,
+            unpackSkipRows);
+
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
                          0, texFormat, pixelType,
                          initialImage.get());
@@ -238,6 +259,22 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 #define GL_UNSIGNED_INT_8_8_8_8           0x8035
 #define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
         cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
+    }
+
+    if (unpackAlignment != 1) {
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, unpackAlignment);
+    }
+
+    if (unpackRowLength != 0) {
+        s_gles2.glPixelStorei(GL_UNPACK_ROW_LENGTH, unpackRowLength);
+    }
+
+    if (unpackSkipPixels != 0) {
+        s_gles2.glPixelStorei(GL_UNPACK_SKIP_PIXELS, unpackSkipPixels);
+    }
+
+    if (unpackSkipRows != 0) {
+        s_gles2.glPixelStorei(GL_UNPACK_SKIP_ROWS, unpackSkipRows);
     }
 
     s_gles2.glFinish();
