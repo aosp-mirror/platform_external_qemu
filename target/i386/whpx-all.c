@@ -645,6 +645,8 @@ static int whpx_handle_mmio(CPUState *cpu, WHV_MEMORY_ACCESS_CONTEXT *ctx)
 {
     HRESULT hr;
     struct whpx_vcpu *vcpu = get_whpx_vcpu(cpu);
+    struct whpx_vcpu vcpu_copy = *vcpu;
+    WHV_MEMORY_ACCESS_CONTEXT ctx_copy = *ctx;
     WHV_EMULATOR_STATUS emu_status;
 
     hr = whp_dispatch.WHvEmulatorTryMmioEmulation(
@@ -657,8 +659,62 @@ static int whpx_handle_mmio(CPUState *cpu, WHV_MEMORY_ACCESS_CONTEXT *ctx)
     }
 
     if (!emu_status.EmulationSuccessful) {
+        /* each byte takes 3 characters to print: "XX " */
+        char instruction[sizeof(ctx_copy.InstructionBytes) * 3 + 1];
+        int i;
+        int size;
+
         error_report("WHPX: Failed to emulate MMIO access with"
-                     " EmulatorReturnStatus: %u", emu_status.AsUINT32);
+                     " EmulatorReturnStatus: %u (%s%s%s%s%s%s%s%s%s%s)",
+            emu_status.AsUINT32,
+            (emu_status.EmulationSuccessful ? "EmulationSuccessful " : ""),
+            (emu_status.InternalEmulationFailure ?
+                "InternalEmulationFailure " : ""),
+            (emu_status.IoPortCallbackFailed ? "IoPortCallbackFailed " : ""),
+            (emu_status.MemoryCallbackFailed ? "MemoryCallbackFailed " : ""),
+            (emu_status.TranslateGvaPageCallbackFailed ?
+                "TranslateGvaPageCallbackFailed " : ""),
+            (emu_status.TranslateGvaPageCallbackGpaIsNotAligned ?
+                "TranslateGvaPageCallbackGpaIsNotAligned " : ""),
+            (emu_status.GetVirtualProcessorRegistersCallbackFailed ?
+                "GetVirtualProcessorRegistersCallbackFailed " : ""),
+            (emu_status.SetVirtualProcessorRegistersCallbackFailed ?
+                "SetVirtualProcessorRegistersCallbackFailed " : ""),
+            (emu_status.InterruptCausedIntercept ?
+                "InterruptCausedIntercept " : ""),
+            (emu_status.GuestCannotBeFaulted ? "GuestCannotBeFaulted " : ""));
+
+        error_report("whpx_vcpu { emulator=%p, window_registered=%s, "
+                     "interruptable=%s, tpr=%llx, apic_base=%llx, "
+                     "interruption_pending=%s }",
+            vcpu_copy.emulator,
+            (vcpu_copy.window_registered ? "true" : "false"),
+            (vcpu_copy.interruptable ? "true" : "false"),
+            vcpu_copy.tpr,
+            vcpu_copy.apic_base,
+            (vcpu_copy.interruption_pending ? "true" : "false"));
+
+        size = MIN(ctx_copy.InstructionByteCount,
+                   sizeof(ctx_copy.InstructionBytes));
+        for (i = 0; i < size; ++i) {
+            sprintf(&instruction[i * 3], "%02X ", ctx_copy.InstructionBytes[i]);
+        }
+
+        error_report("WHV_MEMORY_ACCESS_CONTEXT { "
+                     "Instruction={ size=%u, bytes='%s%s' }, "
+                     "AccessInfo={ AccessType=%u, GpaUnmapped=%u, "
+                     "GvaValid=%u, AsUINT32=%u }, Gpa=%llx, Gva=%llx }",
+            ctx_copy.InstructionByteCount,
+            instruction,
+            (ctx_copy.InstructionByteCount >
+                sizeof(ctx_copy.InstructionBytes) ? "..." : ""),
+            ctx_copy.AccessInfo.AccessType,
+            ctx_copy.AccessInfo.GpaUnmapped,
+            ctx_copy.AccessInfo.GvaValid,
+            ctx_copy.AccessInfo.AsUINT32,
+            ctx_copy.Gpa,
+            ctx_copy.Gva);
+
         return -1;
     }
 
