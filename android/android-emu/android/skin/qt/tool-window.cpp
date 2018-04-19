@@ -709,9 +709,7 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
             android::snapshot::kDefaultBootSnapshot.c_str());
     bool hasLowRam = System::isUnderMemoryPressure();
 
-    if (saveOnExitChoice == SaveSnapshotOnExit::Always &&
-        !savesWereSlow &&
-        !hasLowRam) {
+    if (saveOnExitChoice == SaveSnapshotOnExit::Always) {
         return true;
     }
 
