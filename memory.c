@@ -1381,7 +1381,6 @@ void memory_region_init_resizeable_ram(MemoryRegion *mr,
     mr->dirty_log_mask = tcg_enabled() ? (1 << DIRTY_MEMORY_CODE) : 0;
 }
 
-#ifdef __linux__
 void memory_region_init_ram_from_file(MemoryRegion *mr,
                                       struct Object *owner,
                                       const char *name,
@@ -1397,7 +1396,6 @@ void memory_region_init_ram_from_file(MemoryRegion *mr,
     mr->ram_block = qemu_ram_alloc_from_file(size, mr, share, path, errp);
     mr->dirty_log_mask = tcg_enabled() ? (1 << DIRTY_MEMORY_CODE) : 0;
 }
-#endif
 
 void memory_region_init_ram_ptr(MemoryRegion *mr,
                                 Object *owner,

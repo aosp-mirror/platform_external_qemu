@@ -312,6 +312,7 @@ LOCAL_SRC_FILES += \
         util/event_notifier-win32.c \
         util/oslib-win32.c \
         util/qemu-thread-win32.c \
+        util/mmap-alloc.c \
         ) \
     $(call qemu2-if-linux, \
         util/coroutine-ucontext.c \
