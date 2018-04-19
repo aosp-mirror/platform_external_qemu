@@ -111,8 +111,11 @@ extern struct MemoryRegion io_mem_notdirty;
 
 typedef int (RAMBlockIterFunc)(const char *block_name, void *host_addr,
     ram_addr_t offset, ram_addr_t length, void *opaque);
+typedef int (RAMBlockIterFuncFlags)(const char *block_name, void *host_addr,
+    ram_addr_t offset, ram_addr_t length, int flags, void *opaque);
 
 int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque);
+int qemu_ram_foreach_block_flags(RAMBlockIterFuncFlags func, void *opaque);
 int ram_block_discard_range(RAMBlock *rb, uint64_t start, size_t length);
 
 #endif

@@ -2813,5 +2813,6 @@ void vmstate_unregister_ram(MemoryRegion *mr, DeviceState *dev)
 
 void vmstate_register_ram_global(MemoryRegion *mr)
 {
+    fprintf(stderr, "%s: register mem region %s\n", __func__, memory_region_name(mr));
     vmstate_register_ram(mr, NULL);
 }
