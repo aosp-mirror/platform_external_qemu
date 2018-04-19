@@ -704,6 +704,19 @@ help_snapshot_list(stralloc_t*  out)
 }
 
 static void
+help_quickboot_ram_map(stralloc_t *out)
+{
+    PRINTF(
+        "  '-quickboot-ram-map <mode>' starts emulator with file-backed RAM\n"
+        "  as the quickboot snapshot RAM file.\n"
+        "  Valid values for <mode> are:\n\n"
+        "     shared      Writes are propagated to the underlying file.\n\n"
+        "     private     Writes are seen only by the current emulator session and file on disk\n"
+        "                 is unaffected.\n\n"
+    );
+}
+
+static void
 help_accel(stralloc_t *out)
 {
     PRINTF(
