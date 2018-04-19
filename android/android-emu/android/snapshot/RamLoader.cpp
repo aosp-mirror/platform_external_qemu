@@ -125,6 +125,18 @@ bool RamLoader::start(bool isQuickboot) {
         mHasError = true;
         return false;
     }
+
+    if (mIsQuickboot &&
+        nonzero(mIndex.flags & IndexFlags::SeparateBackingStore)) {
+       // we are using a file-backed RAM to load; return early.
+       mEndTime = base::System::get()->getHighResTimeUs();
+#if SNAPSHOT_PROFILE > 1
+       printf("File-backed RAM load complete in %.03f ms\n",
+              (mEndTime - mStartTime) / 1000.0);
+#endif
+       return true;
+    }
+
     if (!mAccessWatch) {
         bool res = readAllPages();
         mEndTime = base::System::get()->getHighResTimeUs();
@@ -467,6 +479,10 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
 }
 
 void RamLoader::loadRamPage(void* ptr) {
+    // No need to load ram if on separate storage.
+    if (mIsQuickboot &&
+        nonzero(mIndex.flags & IndexFlags::SeparateBackingStore)) return;
+
     // It's possible for us to try to RAM load
     // things that are not registered in the index
     // (like from qemu_iovec_init_external).

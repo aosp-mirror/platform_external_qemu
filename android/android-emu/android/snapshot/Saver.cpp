@@ -20,12 +20,14 @@
 
 using android::base::PathUtils;
 using android::base::StdioStream;
+using android::base::StringView;
 using android::base::System;
 
 namespace android {
 namespace snapshot {
 
-Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
+Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
+             base::StringView ramMapFile, int ramMapShared)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (path_mkdir_if_needed(mSnapshot.dataDir().c_str(), 0777) != 0) {
         return;
@@ -33,6 +35,15 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
     {
         const auto ramFile = PathUtils::join(mSnapshot.dataDir(), "ram.bin");
         auto flags = RamSaver::Flags::None;
+
+        // If we're using a file-backed RAM that is writing through,
+        // no need to save pages synchronously on exit.
+        if (isOnExit &&
+            !ramMapFile.empty() &&
+            ramMapShared) {
+            flags |= RamSaver::Flags::Async;
+        }
+
         const auto compressEnvVar =
                 System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
         if (compressEnvVar == "1" || compressEnvVar == "yes" ||
@@ -87,8 +98,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
 
         mIncrementallySaved = tryIncremental;
 
-        mRamSaver.emplace(ramFile, flags, tryIncremental ? loader : nullptr,
-                          isOnExit);
+        mRamSaver.emplace(ramFile, flags, tryIncremental ? loader : nullptr, isOnExit);
         if (mRamSaver->hasError()) {
             mRamSaver.clear();
             return;

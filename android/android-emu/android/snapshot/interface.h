@@ -69,4 +69,7 @@ void androidSnapshot_list(void* opaque,
                           int (*cbOut)(void* opaque, const char* buf, int strlen),
                           int (*cbErr)(void* opaque, const char* buf, int strlen));
 
+// Notify snapshot interface that we are using file-backed RAM.
+void androidSnapshot_setRamFile(const char* path, int shared);
+
 ANDROID_END_HEADER
