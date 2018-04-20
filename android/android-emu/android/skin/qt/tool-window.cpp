@@ -248,10 +248,6 @@ void ToolWindow::showVirtualSceneControls(bool show) {
 }
 
 void ToolWindow::onExtendedWindowCreated(ExtendedWindow* extendedWindow) {
-    if (sUiEmuAgent) {
-        extendedWindow->setAgent(sUiEmuAgent);
-    }
-
     if (auto userActionsCounter = mUserActionsCounter.lock()) {
         userActionsCounter->startCountingForExtendedWindow(extendedWindow);
     }
@@ -601,9 +597,8 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 // static
 void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
-    ExtendedWindow::setAgentEarly(agentPtr);
+    ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
-
 
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
@@ -644,9 +639,7 @@ void ToolWindow::onMainLoopStart() {
     }
 }
 
-void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
-    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->setAgent(agPtr); });
-
+void ToolWindow::setClipboardCallbacks(const UiEmuAgent* agPtr) {
     if (agPtr->clipboard) {
         connect(this, SIGNAL(guestClipboardChanged(QString)), this,
                 SLOT(onGuestClipboardChanged(QString)), Qt::QueuedConnection);
