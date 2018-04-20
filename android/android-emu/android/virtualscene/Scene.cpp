@@ -149,7 +149,8 @@ bool Scene::createPosterLocation(const PosterInfo& info) {
 
 bool Scene::loadPoster(const char* posterName,
                        const char* filename,
-                       float scale) {
+                       float scale,
+                       LoadBehavior loadBehavior) {
     auto it = mPosters.find(posterName);
     if (it == mPosters.end()) {
         W("%s: Could not find poster with name '%s'", __FUNCTION__, posterName);
@@ -162,7 +163,9 @@ bool Scene::loadPoster(const char* posterName,
     poster.texture = Texture();
 
     if (filename) {
-        poster.texture = mRenderer.loadTextureAsync(filename);
+        poster.texture = loadBehavior == LoadBehavior::Synchronous
+                                 ? mRenderer.loadTexture(filename)
+                                 : mRenderer.loadTextureAsync(filename);
     }
 
     poster.sceneObject->setScale(scale);

@@ -27,8 +27,8 @@
 #include "android/virtualscene/Renderer.h"
 #include "android/virtualscene/Scene.h"
 
-#include <unordered_map>
 #include <deque>
+#include <unordered_map>
 
 using namespace android::base;
 
@@ -57,9 +57,7 @@ public:
         float mScale = 1.0f;
     };
 
-    Settings() {
-        mPosterLocations = parsePostersFile(kPosterFile);
-    }
+    Settings() { mPosterLocations = parsePostersFile(kPosterFile); }
 
     void parseCmdlineParameter(StringView param) {
         auto it = std::find(param.begin(), param.end(), '=');
@@ -151,7 +149,8 @@ public:
 
     // Load a PosterSetting in the scene.
     void loadPosterInternal(const char* posterName,
-                            const Settings::PosterSetting& setting);
+                            const Settings::PosterSetting& setting,
+                            Scene::LoadBehavior loadBehavior);
 
 private:
     std::unique_ptr<Renderer> mRenderer;
@@ -166,7 +165,8 @@ VirtualSceneManagerImpl::VirtualSceneManagerImpl(
     : mRenderer(std::move(renderer)), mScene(std::move(scene)) {
     // Load the poster configuration in the scene.
     for (const auto& it : sSettings->getPosterSettings()) {
-        loadPosterInternal(it.first.c_str(), it.second);
+        loadPosterInternal(it.first.c_str(), it.second,
+                           Scene::LoadBehavior::Synchronous);
     }
 }
 
@@ -210,7 +210,8 @@ int64_t VirtualSceneManagerImpl::render() {
     const auto& posters = sSettings->getPosterSettings();
     while (!mPosterFilenameUpdates.empty()) {
         const std::string& posterName = mPosterFilenameUpdates.front();
-        loadPosterInternal(posterName.c_str(), posters.at(posterName));
+        loadPosterInternal(posterName.c_str(), posters.at(posterName),
+                           Scene::LoadBehavior::Default);
         mPosterFilenameUpdates.pop_front();
     }
 
@@ -231,13 +232,14 @@ void VirtualSceneManagerImpl::updatePosterScale(const char* posterName,
 
 void VirtualSceneManagerImpl::loadPosterInternal(
         const char* posterName,
-        const Settings::PosterSetting& setting) {
+        const Settings::PosterSetting& setting,
+        Scene::LoadBehavior loadBehavior) {
     if (setting.mFilename.empty()) {
         // Always render empty posters at 100% scale.
-        mScene->loadPoster(posterName, nullptr, 1.0f);
+        mScene->loadPoster(posterName, nullptr, 1.0f, loadBehavior);
     } else {
         mScene->loadPoster(posterName, setting.mFilename.c_str(),
-                           setting.mScale);
+                           setting.mScale, loadBehavior);
     }
 }
 
