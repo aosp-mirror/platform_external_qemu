@@ -21,6 +21,7 @@ LOCAL_SRC_FILES := \
     base/files/QemuFileStream.cpp \
     display.cpp \
     emulation/android_pipe_device.cpp \
+    emulation/balloon_driver_manager.cpp \
     emulation/charpipe.c \
     emulation/CharSerialLine.cpp \
     emulation/DmaMap.cpp \
