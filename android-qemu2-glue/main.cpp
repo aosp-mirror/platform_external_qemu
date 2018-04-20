@@ -1141,6 +1141,11 @@ extern "C" int main(int argc, char** argv) {
 #endif
     args.add("-show-cursor");
 
+    if (opts->balloon) {
+        args.add("-balloon");
+        args.add("virtio");
+    }
+
     if (opts->tcpdump) {
         args.add("-object");
         args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
