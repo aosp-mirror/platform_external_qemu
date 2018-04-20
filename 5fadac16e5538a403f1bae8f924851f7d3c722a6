@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25f503ab_c3a27147",
+        "filename": "android/android-emu/android/base/Profiler.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-20T16:12:38Z",
+      "side": 1,
+      "message": "mStartResident \u003d queryCurrentResident();",
+      "range": {
+        "startLine": 69,
+        "startChar": 7,
+        "endLine": 70,
+        "endChar": 61
+      },
+      "revId": "5fadac16e5538a403f1bae8f924851f7d3c722a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "67ff6f8b_bbe21279",
+        "filename": "android/android-emu/android/base/Profiler.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-20T16:12:38Z",
+      "side": 1,
+      "message": "Transposed some digits",
+      "range": {
+        "startLine": 124,
+        "startChar": 42,
+        "endLine": 124,
+        "endChar": 49
+      },
+      "revId": "5fadac16e5538a403f1bae8f924851f7d3c722a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
