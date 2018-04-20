@@ -197,12 +197,12 @@ void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
         SettingsPage::setHttpProxyAgent(agentPtr->proxy);
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
         CameraPage::setVirtualSceneAgent(agentPtr->virtualScene);
+        VirtualSensorsPage::setSensorsAgent(agentPtr->sensors);
     }
 }
 
 void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
     if (agentPtr) {
-        mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
         }
