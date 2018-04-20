@@ -1,0 +1,141 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "09703e68_3f8fab5e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-20T22:46:12Z",
+      "side": 1,
+      "message": "Can you add more documentation on how to use the feature + any guest kernel changes that are needed?",
+      "range": {
+        "startLine": 6,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 46
+      },
+      "revId": "3175c11c09791ead1b787f70032a7df4066d073d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b522db30_60bdfc4b",
+        "filename": "android-qemu2-glue/emulation/balloon_driver_manager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-20T22:46:12Z",
+      "side": 1,
+      "message": "nit: remove tabs (here and throughout)\n\nnit: align #include to beginning of line",
+      "revId": "3175c11c09791ead1b787f70032a7df4066d073d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc99aa81_81e12f9e",
+        "filename": "android-qemu2-glue/qemu-setup.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-20T22:46:12Z",
+      "side": 1,
+      "message": "android",
+      "range": {
+        "startLine": 37,
+        "startChar": 17,
+        "endLine": 37,
+        "endChar": 23
+      },
+      "revId": "3175c11c09791ead1b787f70032a7df4066d073d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d11c643b_2bda05de",
+        "filename": "android/android-emu/android/emulation/BalloonDriverManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-20T22:46:12Z",
+      "side": 1,
+      "message": "nit: remove trailing spaces",
+      "revId": "3175c11c09791ead1b787f70032a7df4066d073d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7ad05f85_707990ea",
+        "filename": "android/android-emu/android/emulation/BalloonDriverManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-20T22:46:12Z",
+      "side": 1,
+      "message": "nit: has tabs",
+      "revId": "3175c11c09791ead1b787f70032a7df4066d073d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e05a2877_af79c339",
+        "filename": "android/android-emu/android/emulation/BalloonDriverManager.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-20T22:46:12Z",
+      "side": 1,
+      "message": "please change all printf to debug print macros or VERBOSE prints",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 138,
+        "endChar": 10
+      },
+      "revId": "3175c11c09791ead1b787f70032a7df4066d073d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "124fb35b_06c0025d",
+        "filename": "android/android-emu/android/emulation/BalloonDriverManager.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-20T22:46:12Z",
+      "side": 1,
+      "message": "nit: space between bool and (",
+      "revId": "3175c11c09791ead1b787f70032a7df4066d073d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
