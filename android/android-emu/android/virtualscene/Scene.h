@@ -41,6 +41,8 @@ class Scene {
     DISALLOW_COPY_AND_ASSIGN(Scene);
 
 public:
+    enum class LoadBehavior { Default, Synchronous };
+
     ~Scene();
 
     // Create a Scene.
@@ -78,9 +80,14 @@ public:
     // |filename| - Path to an image file, either PNG or JPEG.
     // |scale| - The default poster scale, between 0 and 1, which will
     //           automatically be clamped.
+    // |loadBehavior| - Loading behavior, if this is LoadBehavior::Default the
+    //                  texture will be loaded asynchronously.
     //
     // Returns true on success.
-    bool loadPoster(const char* posterName, const char* filename, float scale);
+    bool loadPoster(const char* posterName,
+                    const char* filename,
+                    float scale,
+                    LoadBehavior loadBehavior);
 
     // Update a given poster's scale.  If the poster does not exist, this has
     // no effect.
