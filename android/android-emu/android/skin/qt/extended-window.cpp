@@ -198,14 +198,14 @@ void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
         CameraPage::setVirtualSceneAgent(agentPtr->virtualScene);
         VirtualSensorsPage::setSensorsAgent(agentPtr->sensors);
+        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+            CarDataPage::setCarDataAgent(agentPtr->car);
+        }
     }
 }
 
 void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
     if (agentPtr) {
-        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
-            mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
-        }
         mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->record);
     }
     // The ADB port is known now. Show it on the UI Help page.
