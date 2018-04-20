@@ -455,6 +455,7 @@ GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
 BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
 CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
 CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
+TIDY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang-tidy"
 AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
 LD=$CXX
 OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
@@ -1115,6 +1116,7 @@ echo "BUILD_TARGET_OBJCOPY  := $OBJCOPY" >> $config_mk
 echo "BUILD_TARGET_WINDRES  := $WINDRES" >> $config_mk
 echo "BUILD_TARGET_DUMPSYMS := $DUMPSYMS" >> $config_mk
 echo "BUILD_OBJS_DIR        := $OUT_DIR" >> $config_mk
+echo "BUILD_TIDY            := $TIDY" >> $config_mk
 
 echo "" >> $config_mk
 echo "BUILD_HOST_AR         := $BUILD_AR" >> $config_mk
