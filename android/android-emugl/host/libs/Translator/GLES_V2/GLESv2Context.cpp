@@ -225,6 +225,10 @@ void GLESv2Context::postLoadRestoreCtx() {
                             ->getGlobalName(NamedObjectType::VERTEXBUFFER,
                                             glesPointer->getBufferName());
                     if (!globalBufferName) {
+                        // don't skip enabling if the pointer was enabled
+                        if (glesPointer->isEnable()) {
+                            dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
+                        }
                         continue;
                     }
                     glesPointer->restoreBufferObj(getBufferObj);
