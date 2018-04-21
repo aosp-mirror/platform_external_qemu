@@ -115,6 +115,7 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
 
 LOCAL_SRC_FILES := \
+    android/base/ContiguousRangeMapper.cpp \
     android/base/Debug.cpp \
     android/base/files/CompressingStream.cpp \
     android/base/files/DecompressingStream.cpp \
@@ -663,6 +664,7 @@ LOCAL_SRC_FILES := \
   android/avd/util_unittest.cpp \
   android/avd/util_wrapper_unittest.cpp \
   android/base/ArraySize_unittest.cpp \
+  android/base/ContiguousRangeMapper_unittest.cpp \
   android/base/async/Looper_unittest.cpp \
   android/base/async/AsyncSocketServer_unittest.cpp \
   android/base/async/RecurrentTask_unittest.cpp \
