@@ -13,9 +13,6 @@
 #include "ui_record-screen-page.h"
 
 #include "android/screen-recorder.h"
-#include "android/skin/qt/video-player/VideoPlayer.h"
-#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
 
 #include <QTimer>
 #include <QWidget>
@@ -28,7 +25,7 @@ Q_DECLARE_METATYPE(RecordStopStatus);
 class RecordScreenPage : public QWidget {
     Q_OBJECT
 public:
-    enum class RecordState { Ready, Recording, Stopping, Stopped, Converting, Playing };
+    enum class RecordState { Ready, Recording, Stopping, Stopped, Converting };
 
     explicit RecordScreenPage(QWidget* parent = 0);
     ~RecordScreenPage();
@@ -49,8 +46,6 @@ private slots:
     void slot_recordingStopped(RecordStopStatus status);
     void convertingStarted();
     void convertingFinished(bool success);
-    void updateVideoView();
-    void videoPlayingFinished();
 
 public slots:
 
@@ -61,9 +56,6 @@ private:
     static const char kTmpMediaName[]; // tmp name for unsaved media file
     std::string mTmpFilePath;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
-    std::unique_ptr<android::videoplayer::VideoPlayerWidget> mVideoWidget;
-    std::unique_ptr<android::videoplayer::VideoPlayerNotifier> mVideoPlayerNotifier;
-    std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     const QAndroidRecordScreenAgent* mRecordScreenAgent;
     RecordState mState;
     QTimer mTimer;
