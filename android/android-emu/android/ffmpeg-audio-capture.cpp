@@ -14,15 +14,12 @@
 
 
 #include "android/ffmpeg-audio-capture.h"
-#include "android/base/system/System.h"
 
 // This is the audio stream received from the capturer
 int FfmpegAudioCapturer::onSample(void *buf, int size)
 {
     if (mRecorder != nullptr)
-        ffmpeg_encode_audio_frame(
-                mRecorder, (uint8_t*)buf, size,
-                android::base::System::get()->getHighResTimeUs());
+        ffmpeg_encode_audio_frame(mRecorder, (uint8_t *)buf, size);
 
     return 0;
 }

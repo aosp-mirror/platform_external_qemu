@@ -33,9 +33,10 @@
 
 #include "android/ffmpeg-muxer.h"
 
-#include "android/audio/AudioCaptureThread.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
+#include "android/emulation/AudioCaptureEngine.h"
+#include "android/ffmpeg-audio-capture.h"
 #include "android/utils/debug.h"
 #include "android/utils/string.h"
 
@@ -50,13 +51,11 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
-#include <memory>
-#include <string>
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
@@ -79,7 +78,7 @@ extern "C" {
 #define D_A(...) (void)0
 #endif
 
-using android::audio::AudioCaptureThread;
+using namespace android::emulation;
 
 // a wrapper around a single output AVStream
 struct VideoOutputStream {
@@ -138,6 +137,7 @@ struct AudioOutputStream {
 class ffmpeg_recorder {
 public:
     std::string path;
+    FfmpegAudioCapturer* audio_capturer = nullptr;
     AVFormatContext* oc = nullptr;
     VideoOutputStream video_st;
     AudioOutputStream audio_st;
@@ -150,7 +150,6 @@ public:
     uint64_t start_time = 0ll;
     int fb_width = 0;
     int fb_height = 0;
-    std::unique_ptr<AudioCaptureThread> audioCaptureThread;
 };
 
 // FFMpeg defines a set of macros for the same purpose, but those don't
@@ -604,9 +603,12 @@ bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     if (recorder == NULL)
         return false;
 
-    recorder->audioCaptureThread->stop();
-    recorder->audioCaptureThread->wait();
-    recorder->audioCaptureThread.reset();
+    if (recorder->audio_capturer != NULL) {
+        AudioCaptureEngine* engine = AudioCaptureEngine::get();
+        if (engine != NULL)
+            engine->stop(recorder->audio_capturer);
+        delete recorder->audio_capturer;
+    }
 
     // flush video encoding with a NULL frame
     while (recorder->have_video) {
@@ -635,9 +637,7 @@ bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
             int size = frame_size - recorder->audio_st.audio_leftover_len;
             uint8_t* zeros = new uint8_t[size];
             if (zeros != nullptr) {
-                ffmpeg_encode_audio_frame(
-                        recorder, zeros, size,
-                        android::base::System::get()->getHighResTimeUs());
+                ffmpeg_encode_audio_frame(recorder, zeros, size);
                 delete[] zeros;
             }
         }
@@ -714,6 +714,15 @@ static int start_recording(ffmpeg_recorder* recorder) {
         derror("Error occurred when opening output file: %s\n",
                avErr2Str(ret).c_str());
         return ret;
+    }
+
+    VERBOSE_PRINT(capture, "recorder->audio_capturer=%p\n",
+                  recorder->audio_capturer);
+    if (recorder->audio_capturer != NULL) {
+        AudioCaptureEngine* engine = AudioCaptureEngine::get();
+        VERBOSE_PRINT(capture, "engine=%p\n", engine);
+        if (engine != NULL)
+            engine->start(recorder->audio_capturer);
     }
 
     recorder->started = true;
@@ -806,13 +815,10 @@ int ffmpeg_add_audio_track(ffmpeg_recorder* recorder,
     int ret = open_audio(oc, codec, &recorder->audio_st, opt);
 
     // start audio capture, this informs QEMU to send audio to our muxer
-    recorder->audioCaptureThread.reset(AudioCaptureThread::create(
-            [recorder](const void* buffer, int size, uint64_t ptUs) -> int {
-                return ffmpeg_encode_audio_frame(recorder, (uint8_t*)buffer,
-                                                 size, ptUs);
-            },
-            sample_rate, ost->frame->nb_samples, 16, 2));
-    recorder->audioCaptureThread->start();
+    if (ret == 0 && recorder->audio_capturer == NULL) {
+        recorder->audio_capturer =
+                new FfmpegAudioCapturer(recorder, sample_rate, 16, 2);
+    }
 
     return ret;
 }
@@ -987,7 +993,6 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
 //    recorder - the recorder instance
 //    buffer - the byte array for the audio buffer in PCM format
 //    size - the audio buffer size
-//    ptUs - the presentation time (in microseconds) of the audio data
 // return:
 //   0    if successful
 //   < 0  if failed
@@ -995,8 +1000,7 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
 // this method is thread safe
 int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
                               uint8_t* buffer,
-                              int size,
-                              uint64_t ptUs) {
+                              int size) {
     if (recorder == NULL)
         return -1;
 
@@ -1028,7 +1032,9 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
             memcpy(ost->audio_leftover + ost->audio_leftover_len, buf,
                    frame_size - ost->audio_leftover_len);
             memcpy(frame->data[0], ost->audio_leftover, frame_size);
-            uint64_t elapsedUS = ptUs - recorder->start_time;
+            uint64_t elapsedUS =
+                    android::base::System::get()->getHighResTimeUs() -
+                    recorder->start_time;
             int64_t pts = (int64_t)(
                     ((double)elapsedUS * ost->st->time_base.den) / 1000000.00);
             frame->pts = pts;
@@ -1045,7 +1051,8 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
 
     while (remaining >= frame_size) {
         memcpy(frame->data[0], buf, frame_size);
-        uint64_t elapsedUS = ptUs - recorder->start_time;
+        uint64_t elapsedUS = android::base::System::get()->getHighResTimeUs() -
+                             recorder->start_time;
         int64_t pts = (int64_t)(((double)elapsedUS * ost->st->time_base.den) /
                                 1000000.00);
         frame->pts = pts;
