@@ -66,11 +66,6 @@ static const char kFontLargeName[] = "FONT_LARGE";
 static const char kFontLargerName[] = "FONT_LARGER";
 static const char kFontHugeName[] = "FONT_HUGE";
 
-static const char kFontSizeMaterialBody[] = "FONT_SIZE_MATERIAL_BODY";
-static const char kFontSizeMaterialHelper[] = "FONT_SIZE_MATERIAL_HELPER";
-static const char kFontSizeMaterialTitle[] = "FONT_SIZE_MATERIAL_TITLE";
-static const char kFontSizeMaterialSubheading[] = "FONT_SIZE_MATERIAL_SUBHEADING";
-
 struct FontSizeMapLoader {
     FontSizeMapLoader() {
 // Windows takes care of the font sizes, and if we try loading them from the
@@ -102,10 +97,6 @@ struct FontSizeMapLoader {
 
         fontMap[kFontLargerName] = "11pt";
         fontMap[kFontHugeName] = "15pt";
-        fontMap[kFontSizeMaterialHelper] = "12px";
-        fontMap[kFontSizeMaterialBody] = "14px";
-        fontMap[kFontSizeMaterialTitle] = "20px";
-        fontMap[kFontSizeMaterialSubheading] = "16px";
     }
 
     QHash<QString, QString> fontMap;
@@ -278,7 +269,6 @@ struct StylesheetValues {
         {"RAISED_COLORED_BKG_COLOR",        "#459388"},  // Colored raised button background color.
         {"RAISED_COLORED_PRESSED_COLOR",    "#5faca0"},  // Colored raised button pressed color.
         {"RAISED_COLORED_COLOR",            "#ffffff"},  // Colored raised button text color.
-        {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,10%)"},  // Drop target background color.
         {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
     };
 
@@ -312,7 +302,6 @@ struct StylesheetValues {
         {"RAISED_COLORED_BKG_COLOR",     "#459388"},
         {"RAISED_COLORED_PRESSED_COLOR", "#5faca0"},
         {"RAISED_COLORED_COLOR",         "#ffffff"},
-        {"DROP_TARGET_BKG_COLOR", "rgba(0,190,64,7%)"},
         {THEME_PATH_VAR,                    "dark"},
     };
 

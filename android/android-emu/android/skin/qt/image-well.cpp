@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/skin/qt/poster-image-well.h"
+#include "android/skin/qt/image-well.h"
 
 #include "android/metrics/proto/studio_stats.pb.h"
 
@@ -18,60 +18,29 @@
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QMimeData>
-#include <QPainter>
 
-static constexpr float kSliderValueScale = 100.0f;
-static constexpr int kPageNoImage = 0;
-static constexpr int kPageImage = 1;
-
-PosterImageWell::PosterImageWell(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::PosterImageWell()), mOverlayWidget(this) {
+ImageWell::ImageWell(QWidget* parent)
+    : QWidget(parent), mUi(new Ui::ImageWell()) {
     mUi->setupUi(this);
     setAcceptDrops(true);
-    mOverlayWidget.setObjectName("DropTarget");
-    mOverlayWidget.hide();
-    mOverlayWidget.setAttribute(Qt::WA_TransparentForMouseEvents);
-
-    mUi->stackedWidget->setCurrentIndex(kPageNoImage);
-    mUi->sizeSlider->setRange(0.0, kSliderValueScale, false);
-    mUi->sizeSlider->setValue(kSliderValueScale, false);
 }
 
-void PosterImageWell::setPath(QString path) {
+void ImageWell::setPath(QString path) {
     // Ignore the return value and don't emit pathChanged.
     (void)setPathInternal(path);
 }
 
-float PosterImageWell::getSize() const {
-    return static_cast<float>(mUi->sizeSlider->getValue()) / kSliderValueScale;
-}
-
-void PosterImageWell::setSize(float value) {
-    mUi->sizeSlider->setValue(value * kSliderValueScale, false);
-}
-
-void PosterImageWell::setStartingDirectory(QString startingDirectory) {
+void ImageWell::setStartingDirectory(QString startingDirectory) {
     mStartingDirectory = startingDirectory;
 }
 
-void PosterImageWell::dragEnterEvent(QDragEnterEvent* event) {
+void ImageWell::dragEnterEvent(QDragEnterEvent* event) {
     if (getPathIfValidDrop(event->mimeData()) != QString()) {
-        mOverlayWidget.setGeometry(rect());
-        mOverlayWidget.show();
-        mOverlayWidget.raise();
-
         event->acceptProposedAction();
-        update();
     }
 }
 
-void PosterImageWell::dragLeaveEvent(QDragLeaveEvent* event) {
-    mOverlayWidget.hide();
-}
-
-void PosterImageWell::dropEvent(QDropEvent* event) {
-    mOverlayWidget.hide();
-
+void ImageWell::dropEvent(QDropEvent* event) {
     // Modal dialogs don't prevent drag-and-drop! Manually check for a modal
     // dialog, and if so, reject the event.
     if (QApplication::activeModalWidget() != nullptr) {
@@ -90,32 +59,10 @@ void PosterImageWell::dropEvent(QDropEvent* event) {
     }
 }
 
-void PosterImageWell::on_filePicker_clicked() {
-    openFilePicker();
-}
-
-void PosterImageWell::on_pickFileButton_clicked() {
-    openFilePicker();
-}
-
-void PosterImageWell::on_removeButton_clicked() {
-    emit interaction();
-
-    if (setPathInternal(QString())) {
-        emit pathChanged(mPath);
-    }
-}
-
-void PosterImageWell::on_sizeSlider_valueChanged(double value) {
-    const float scaledValue = static_cast<float>(value) / kSliderValueScale;
-    emit interaction();
-    emit sizeChanged(scaledValue);
-}
-
-void PosterImageWell::openFilePicker() {
+void ImageWell::on_filePicker_clicked() {
     // Use dialog to get file name.
     QString fileName = QFileDialog::getOpenFileName(
-            this, tr("Open image"), mStartingDirectory,
+            this, tr("Open Image"), mStartingDirectory,
             tr("Images (*.png *.jpg *.jpeg)"));
 
     emit interaction();
@@ -130,29 +77,22 @@ void PosterImageWell::openFilePicker() {
     }
 }
 
-bool PosterImageWell::setPathInternal(const QString& path) {
+bool ImageWell::setPathInternal(const QString& path) {
     if (mPath == path) {
         return false;  // No change.
     }
 
     if (path.isNull()) {
-        mUi->stackedWidget->setCurrentIndex(kPageNoImage);
-
         mUi->image->clear();
-        mUi->fileName->clear();
         mPath = path;
         return true;
     }
 
-    mUi->stackedWidget->setCurrentIndex(kPageImage);
-
     QPixmap image(path);
     if (image.isNull()) {
         // Failed to load, reset back to an empty path.
-        qWarning() << tr("Can't load image: ") << path;
+        qWarning() << "Image could not be loaded: " << path;
         mUi->image->clear();
-        mUi->fileName->clear();
-
         const bool pathChanged = !mPath.isNull();
         mPath = QString();
 
@@ -163,11 +103,10 @@ bool PosterImageWell::setPathInternal(const QString& path) {
     const int height = mUi->image->height();
     const int width = mUi->image->width();
     mUi->image->setPixmap(image.scaled(width, height, Qt::KeepAspectRatio));
-    mUi->fileName->setText(QFileInfo(path).fileName());
     return true;
 }
 
-QString PosterImageWell::getPathIfValidDrop(const QMimeData* mimeData) const {
+QString ImageWell::getPathIfValidDrop(const QMimeData* mimeData) const {
     // Require exactly one URL to a local file.
     if (mimeData && mimeData->hasUrls()) {
         QList<QUrl> urls = mimeData->urls();
