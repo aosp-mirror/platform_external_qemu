@@ -39,5 +39,15 @@ enum Feature {
 
     VirtualScene = 20;
 
-    ProtoNumFeatures = 21;
+    IgnoreHostOpenGLErrors = 21;
+
+    GenericSnapshotsUI = 22;
+
+    AllowSnapshotMigration = 23;
+
+    WindowsOnDemandSnapshotLoad = 24;
+
+    WindowsHypervisorPlatform = 25;
+
+    ProtoNumFeatures = 26;
 }

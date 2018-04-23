@@ -967,7 +967,9 @@ message EmulatorFeatureFlagState {
     IGNORE_HOST_OPENGL_ERRORS = 21;
     GENERIC_SNAPSHOTS_UI = 22;
     ALLOW_SNAPSHOT_MIGRATION = 23;
-    // Next tag: 24
+    WINDOWS_ON_DEMAND_SNAPSHOT_LOAD = 24;
+    WINDOWS_HYPERVISOR_PLATFORM = 25;
+    // Next tag: 26
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

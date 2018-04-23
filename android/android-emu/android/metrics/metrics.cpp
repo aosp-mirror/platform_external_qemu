@@ -370,6 +370,10 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::GENERIC_SNAPSHOTS_UI;
         case android::featurecontrol::AllowSnapshotMigration:
             return android_studio::EmulatorFeatureFlagState::ALLOW_SNAPSHOT_MIGRATION;
+        case android::featurecontrol::WindowsOnDemandSnapshotLoad:
+            return android_studio::EmulatorFeatureFlagState::WINDOWS_ON_DEMAND_SNAPSHOT_LOAD;
+        case android::featurecontrol::WindowsHypervisorPlatform:
+            return android_studio::EmulatorFeatureFlagState::WINDOWS_HYPERVISOR_PLATFORM;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }
