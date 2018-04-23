@@ -122,6 +122,7 @@ $(foreach src,$(LOCAL_GENERATED_CXX_SOURCES), \
 
 $(foreach src,$(LOCAL_CXX_SOURCES), \
     $(eval $(call compile-cxx-source,$(src))) \
+    $(eval $(call tidy-cxx-source,$(src))) \
 )
 
 $(foreach src,$(LOCAL_OBJC_SOURCES), \

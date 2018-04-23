@@ -41,9 +41,6 @@
 #include "android/recording/Frame.h"
 #include "android/recording/Producer.h"
 #include "android/recording/codecs/Codec.h"
-#include "android/recording/screen-recorder-constants.h"
-#include "android/recording/screen-recorder.h"
-#include "android/utils/compiler.h"
 
 extern "C" {
 #include "libswresample/swresample.h"
@@ -64,13 +61,18 @@ public:
     // valid if, in the constructor, the output context was created successfully
     // and the recording has either not started or is in progress. If the
     // recorder is invalid, then either the output context failed to initialize
-    // or the recording has been stopped.
+    // or the recording has been stopped. Once the recorder has become invalid,
+    // it is no longer usable.
     virtual bool isValid() = 0;
 
-    // Starts the recording.
+    // Starts the recording. Must, at the minimum, have a video track added
+    // before starting.
     virtual bool start() = 0;
 
-    // Stops the recording.
+    // Stops the recording. Returns true iff recording has started and there was
+    // at least one video frame encoded, otherwise returns false. Note: if a
+    // recording has started and then stop() is called, the recorder will be set
+    // to an invalid state.
     virtual bool stop() = 0;
 
     // Add an audio track.
@@ -100,8 +102,8 @@ public:
 
     // Creates a FfmpegRecorder instance.
     // Params:
-    //   fb_width - the framebuffer width
-    //   fb_height - the framebuffer height
+    //   fb_width - the framebuffer width (must be > 0)
+    //   fb_height - the framebuffer height (must be > 0)
     //   filename - the output filename
     //   containerFormat - the output container format. This will be used to
     //   determine which container to use for the output format, and not the

@@ -25,13 +25,14 @@ class CarDataPage : public QWidget {
 public:
     explicit CarDataPage(QWidget* parent = nullptr);
     static void carDataCallback(const char* msg, int length, void* context);
-    void setCarDataAgent(const QCarDataAgent* agent);
+    static void setCarDataAgent(const QCarDataAgent* agent);
     void onReceiveData(const char* msg, int length);
     void sendCarEmulatorMessageLogged(const emulator::EmulatorMessage& msg,
                                       const std::string& log);
 
 private:
+    static const QCarDataAgent* sCarDataAgent;
+
     std::unique_ptr<Ui::CarDataPage> mUi;
-    const QCarDataAgent* mCarDataAgent = nullptr;
     void updateReceivedData(const QString msg);
 };

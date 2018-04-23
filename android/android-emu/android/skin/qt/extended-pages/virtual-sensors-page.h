@@ -30,6 +30,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 struct QAndroidSensorsAgent;
+
 class VirtualSensorsPage : public QWidget
 {
     Q_OBJECT
@@ -40,7 +41,7 @@ public:
 
     void showEvent(QShowEvent* event) override;
 
-    void setSensorsAgent(const QAndroidSensorsAgent* agent);
+    static void setSensorsAgent(const QAndroidSensorsAgent* agent);
 
 private slots:
     void on_temperatureSensorValueWidget_valueChanged(double value);
@@ -105,6 +106,8 @@ private slots:
     void startSensorUpdateTimer();
     void stopSensorUpdateTimer();
 private:
+    static const QAndroidSensorsAgent* sSensorsAgent;
+
     void reportVirtualSensorsInteraction();
 
     void resetDeviceRotation(const glm::quat&);
@@ -126,7 +129,6 @@ private:
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
     QDoubleValidator mMagFieldValidator;
-    const QAndroidSensorsAgent* mSensorsAgent = nullptr;
     QTimer mAccelerationTimer;
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation = SKIN_ROTATION_0;

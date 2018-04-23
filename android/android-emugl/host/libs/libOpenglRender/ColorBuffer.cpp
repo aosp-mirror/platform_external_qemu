@@ -282,7 +282,11 @@ void ColorBuffer::readPixels(int x,
 
     touch();
     if (bindFbo(&m_fbo, m_tex)) {
+        GLint prevAlignment = 0;
+        s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
+        s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
         s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
+        s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
         unbindFbo();
     }
 }

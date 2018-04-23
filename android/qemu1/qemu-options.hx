@@ -1361,6 +1361,23 @@ and Windows platforms (if VT is present), and it does not conflict
 with KVM.
 ETEXI
 
+#ifdef CONFIG_WHPX
+DEF("enable-whpx", 0, QEMU_OPTION_enable_whpx, \
+    "-enable-whpx    Enable WHPX virtualization support\n")
+DEF("disable-whpx", 0, QEMU_OPTION_disable_whpx, \
+    "-disable-whpx   Disable WHPX virtualization support\n")
+#endif
+
+STEXI
+@item -enable-whpx
+Enable WHPX (Windows Hypervisor Platform) support. Note: not implemented.
+ETEXI
+
+STEXI
+@item -disable-whpx
+Disable WHPX (Windows Hypervisor Platform) support. Note: not implemented.
+ETEXI
+
 #ifdef CONFIG_XEN
 DEF("xen-domid", HAS_ARG, QEMU_OPTION_xen_domid,
     "-xen-domid id   specify xen guest domain id\n")

@@ -306,9 +306,11 @@ void FfmpegRecorderImpl::abortRecording() {
         return;
     }
 
-    mAudioProducer->stop();
+    if (mAudioProducer) {
+        mAudioProducer->stop();
+        mAudioProducer->wait();
+    }
     mVideoProducer->stop();
-    mAudioProducer->wait();
     mVideoProducer->wait();
 
     mValid = false;
@@ -322,9 +324,11 @@ bool FfmpegRecorderImpl::stop() {
     }
     mStarted = false;
 
-    mAudioProducer->stop();
+    if (mAudioProducer) {
+        mAudioProducer->stop();
+        mAudioProducer->wait();
+    }
     mVideoProducer->stop();
-    mAudioProducer->wait();
     mVideoProducer->wait();
 
     // flush video encoding with a NULL frame
@@ -408,7 +412,7 @@ bool FfmpegRecorderImpl::stop() {
 bool FfmpegRecorderImpl::addAudioTrack(
         std::unique_ptr<Producer> producer,
         const Codec<SwrContext>* codec) {
-    assert(mValid);
+    assert(mValid && codec != nullptr && producer != nullptr);
     if (mStarted) {
         LOG(ERROR) << __func__ << ": Muxer already started";
         return false;
@@ -507,7 +511,7 @@ bool FfmpegRecorderImpl::addAudioTrack(
 bool FfmpegRecorderImpl::addVideoTrack(
         std::unique_ptr<Producer> producer,
         const Codec<SwsContext*>* codec) {
-    assert(mValid);
+    assert(mValid && codec != nullptr && producer != nullptr);
     if (mStarted) {
         LOG(ERROR) << __func__ << ": Muxer already started";
         return false;

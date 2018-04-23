@@ -41,9 +41,9 @@ public:
     explicit RecordScreenPage(QWidget* parent = 0);
     ~RecordScreenPage();
 
-    void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
     void updateTheme();
     void emitRecordingStatusChange(RecordingStatus status);
+    static void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
     static bool removeFileIfExists(const QString& file);
 
 signals:
@@ -67,12 +67,13 @@ public:
 
 private:
     static const char kTmpMediaName[]; // tmp name for unsaved media file
+    static const QAndroidRecordScreenAgent* sRecordScreenAgent;
+
     std::string mTmpFilePath;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
     std::unique_ptr<android::videoplayer::VideoPlayerWidget> mVideoWidget;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
-    const QAndroidRecordScreenAgent* mRecordScreenAgent = nullptr;
     RecordUiState mState;
     QTimer mTimer;
     int mSec;  // number of elapsed seconds

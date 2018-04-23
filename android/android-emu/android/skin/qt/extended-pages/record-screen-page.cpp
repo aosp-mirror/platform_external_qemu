@@ -33,6 +33,7 @@ using android::base::PathUtils;
 
 // static
 const char RecordScreenPage::kTmpMediaName[] = "tmp.webm";
+const QAndroidRecordScreenAgent* RecordScreenPage::sRecordScreenAgent = nullptr;
 
 RecordScreenPage::RecordScreenPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordScreenPage) {
@@ -86,9 +87,10 @@ void RecordScreenPage::emitRecordingStatusChange(RecordingStatus status) {
     emit(recordingStatusChange(status));
 }
 
+// static
 void RecordScreenPage::setRecordScreenAgent(
         const QAndroidRecordScreenAgent* agent) {
-    mRecordScreenAgent = agent;
+    sRecordScreenAgent = agent;
 }
 
 void RecordScreenPage::setRecordUiState(RecordUiState newState) {
@@ -243,7 +245,7 @@ void RecordScreenPage::on_rec_playStopButton_clicked() {
 void RecordScreenPage::on_rec_recordButton_clicked() {
     RecordUiState newState = RecordUiState::Ready;
 
-    if (!mRecordScreenAgent) {
+    if (!sRecordScreenAgent) {
         // agent not ready yet
         return;
     }
@@ -257,7 +259,7 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
             info.fileName = mTmpFilePath.c_str();
             info.cb = &onRecordingStatusChanged;
             info.opaque = this;
-            if (!mRecordScreenAgent->startRecordingAsync(&info)) {
+            if (!sRecordScreenAgent->startRecordingAsync(&info)) {
                 QString errStr =
                         tr("Failed to start the recording. If you are "
                            "recording from the command-line, you must stop "
@@ -267,7 +269,7 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
             break;
         }
         case RecordUiState::Recording: {
-            if (!mRecordScreenAgent->stopRecordingAsync()) {
+            if (!sRecordScreenAgent->stopRecordingAsync()) {
                 QString errStr =
                         tr("Failed to stop the recording. Recording was either "
                            "stopped from the command-line or the time limit "

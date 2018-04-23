@@ -115,6 +115,7 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
 
 LOCAL_SRC_FILES := \
+    android/base/ContiguousRangeMapper.cpp \
     android/base/Debug.cpp \
     android/base/files/CompressingStream.cpp \
     android/base/files/DecompressingStream.cpp \
@@ -663,6 +664,7 @@ LOCAL_SRC_FILES := \
   android/avd/util_unittest.cpp \
   android/avd/util_wrapper_unittest.cpp \
   android/base/ArraySize_unittest.cpp \
+  android/base/ContiguousRangeMapper_unittest.cpp \
   android/base/async/Looper_unittest.cpp \
   android/base/async/AsyncSocketServer_unittest.cpp \
   android/base/async/RecurrentTask_unittest.cpp \
@@ -947,9 +949,6 @@ $(call end-emulator-library)
 
 # emulator-libui unit tests
 
-# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
-# string literals which are being glued together
-#LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
 
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_libui_unittests)
 
@@ -959,13 +958,19 @@ LOCAL_C_INCLUDES += \
     $(EMULATOR_GTEST_INCLUDES) \
     $(FFMPEG_INCLUDES) \
 
+# Recompile FfmpegRecorder.cpp so we can keep assertions enabled for death tests
 LOCAL_SRC_FILES := \
     android/skin/keycode_unittest.cpp \
     android/skin/keycode-buffer_unittest.cpp \
     android/skin/rect_unittest.cpp \
     android/recording/test/DummyAudioProducer.cpp \
     android/recording/test/DummyVideoProducer.cpp \
+    android/recording/FfmpegRecorder.cpp \
     android/recording/test/FfmpegRecorder_unittest.cpp \
+
+# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
+# string literals which are being glued together
+LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
 
 LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS)
 # ffmpeg mac dependency
@@ -976,8 +981,7 @@ endif
 LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \
 
-LOCAL_CFLAGS += -O0
-# EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib
+LOCAL_CFLAGS += -O0 -UNDEBUG
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-libgtest \

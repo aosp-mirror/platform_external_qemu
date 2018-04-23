@@ -34,6 +34,14 @@ local-cxx-src-to-obj = $(strip \
     $(foreach pattern,$(LOCAL_CXX_EXTENSION_PATTERNS),\
         $(eval _local_cxx_src := $$(_local_cxx_src:$(pattern)=%.o)))\
     $(_local_cxx_src))
+#
+# Replace all extensions in files from $1 matching any of
+# $(LOCAL_CXX_EXTENSION_PATTERNS) with .yaml.
+local-cxx-src-to-tidy = $(strip \
+    $(eval _local_cxx_src := $1)\
+    $(foreach pattern,$(LOCAL_CXX_EXTENSION_PATTERNS),\
+        $(eval _local_cxx_src := $$(_local_cxx_src:$(pattern)=%.yaml)))\
+    $(_local_cxx_src))
 
 # Return the directory containing the intermediate files for a given
 # kind of executable
@@ -331,6 +339,34 @@ $$(_DST): $$(_TST)
 	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
 	$(hide) LLVM_PROFILE_FILE=$(call local-test-result-path)/$$(PRIVATE_TST).profraw $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
 	@touch $$(PRIVATE_DST)
+endef
+
+
+# Tidy the C++ source file. This will invoke clang-tidy with the proper includes & defines
+# to perform a set of linter checks.
+#
+define tidy-cxx-source
+SRC:=$(1)
+_DST:=$$(LOCAL_OBJS_DIR)/$$(call local-cxx-src-to-tidy,$$(SRC))
+_BUILD_LINT += $$(_DST)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_DEFINES    := $(filter -D%, $(LOCAL_CFLAGS))
+$$(_DST): PRIVATE_C_INCLUDES := $(patsubst %,-I%,$(LOCAL_C_INCLUDES))
+$$(_DST): PRIVATE_INCLUDES   := $$(PRIVATE_C_INCLUDES) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR) $$(PRIVATE_DEFINES)
+$$(_DST): PRIVATE_CHECKS     := $$(CLANG_TIDY_CHECKS)
+$$(_DST): PRIVATE_TIDY       := $$(BUILD_TIDY)
+$$(_DST): PRIVATE_SRC        := $$(LOCAL_PATH)/$$(SRC)
+$$(_DST): PRIVATE_SRC0       := $$(SRC)
+$$(_DST): PRIVATE_FIX        := $(if $(FIX), --fix, -export-fixes=$$(PRIVATE_DST))
+$$(_DST): PRIVATE_HDR        := $$(CLANG_TIDY_HEADER_INCLUDE)
+$$(_DST): $$(_TST)
+	@echo "Linting: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	$(hide) $$(PRIVATE_TIDY)  $$(PRIVATE_SRC) $$(PRIVATE_FIX) \
+    -analyze-temporary-dtors "-header-filter=$$(PRIVATE_HDR)" \
+    -format-style=google -checks='$$(PRIVATE_CHECKS)' \
+    -- $$(PRIVATE_INCLUDES)
+	touch $$(PRIVATE_DST)
 endef
 
 

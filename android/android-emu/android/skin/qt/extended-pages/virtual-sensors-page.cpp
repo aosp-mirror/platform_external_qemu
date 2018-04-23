@@ -33,6 +33,8 @@
 constexpr float kMetersPerInch = 0.0254f;
 constexpr uint64_t kMinInteractionTimeMilliseconds = 500;
 
+const QAndroidSensorsAgent* VirtualSensorsPage::sSensorsAgent = nullptr;
+
 VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::VirtualSensorsPage()) {
     mQAndroidPhysicalStateAgent.onTargetStateChanged = onTargetStateChanged;
@@ -104,12 +106,16 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
                 }
                 return false;
     });
+    if (sSensorsAgent != nullptr) {
+        sSensorsAgent->setPhysicalStateAgent(&mQAndroidPhysicalStateAgent);
+        mUi->accelWidget->setSensorsAgent(sSensorsAgent);
+    }
 }
 
 VirtualSensorsPage::~VirtualSensorsPage() {
     // Unregister for physical state change callbacks.
-    if (mSensorsAgent != nullptr) {
-        mSensorsAgent->setPhysicalStateAgent(nullptr);
+    if (sSensorsAgent != nullptr) {
+        sSensorsAgent->setPhysicalStateAgent(nullptr);
     }
 }
 
@@ -135,13 +141,14 @@ void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
 }
 
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
-    if (mSensorsAgent != nullptr) {
-        mSensorsAgent->setPhysicalStateAgent(nullptr);
+    if (sSensorsAgent != nullptr) {
+        sSensorsAgent->setPhysicalStateAgent(nullptr);
     }
-    mSensorsAgent = agent;
+    sSensorsAgent = agent;
 
-    mSensorsAgent->setPhysicalStateAgent(&mQAndroidPhysicalStateAgent);
-    mUi->accelWidget->setSensorsAgent(agent);
+    // Currently, all our parameter values match the initial values that the
+    // system image starts with. If we want to modify any of these initial
+    // values, we should do it here, as soon as the agent is available.
 }
 
 // Helper function
@@ -152,9 +159,9 @@ void VirtualSensorsPage::setPhysicalParameterTarget(
         double v2,
         double v3) {
     reportVirtualSensorsInteraction();
-    if (mSensorsAgent) {
+    if (sSensorsAgent) {
         mIsUIModifyingPhysicalState = true;
-        mSensorsAgent->setPhysicalParameterTarget(
+        sSensorsAgent->setPhysicalParameterTarget(
                 parameter_id,
                 static_cast<float>(v1),
                 static_cast<float>(v2),
@@ -168,8 +175,8 @@ void VirtualSensorsPage::setPhysicalParameterTarget(
 void VirtualSensorsPage::setCoarseOrientation(
         AndroidCoarseOrientation orientation) {
     reportVirtualSensorsInteraction();
-    if (mSensorsAgent) {
-        mSensorsAgent->setCoarseOrientation(static_cast<int>(orientation));
+    if (sSensorsAgent) {
+        sSensorsAgent->setCoarseOrientation(static_cast<int>(orientation));
     }
 }
 
@@ -265,13 +272,13 @@ void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
 
 void VirtualSensorsPage::updateTargetState() {
     glm::vec3 position;
-    mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_POSITION,
+    sSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_POSITION,
                                         &position.x, &position.y, &position.z,
                                         PARAMETER_VALUE_TYPE_TARGET);
     position *= (1.f / kMetersPerInch);
 
     glm::vec3 eulerDegrees;
-    mSensorsAgent->getPhysicalParameter(
+    sSensorsAgent->getPhysicalParameter(
             PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
             &eulerDegrees.z, PARAMETER_VALUE_TYPE_TARGET);
 
@@ -474,15 +481,15 @@ void VirtualSensorsPage::updateModelFromSliders(PhysicalInterpolation mode) {
  * Update the UI to reflect the underlying model state.
  */
 void VirtualSensorsPage::updateUIFromModelCurrentState() {
-    if (mSensorsAgent != nullptr) {
+    if (sSensorsAgent != nullptr) {
         glm::vec3 position;
-        mSensorsAgent->getPhysicalParameter(
+        sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_POSITION, &position.x, &position.y,
                 &position.z, PARAMETER_VALUE_TYPE_CURRENT);
         position = (1.f / kMetersPerInch) * position;
 
         glm::vec3 eulerDegrees;
-        mSensorsAgent->getPhysicalParameter(
+        sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
                 &eulerDegrees.z, PARAMETER_VALUE_TYPE_CURRENT);
 
@@ -501,13 +508,13 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
         float scratch0, scratch1;
 
         float temperature;
-        mSensorsAgent->getPhysicalParameter(
+        sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_TEMPERATURE, &temperature,
                 &scratch0, &scratch1, PARAMETER_VALUE_TYPE_TARGET);
         mUi->temperatureSensorValueWidget->setValue(temperature, false);
 
         glm::vec3 magneticField;
-        mSensorsAgent->getPhysicalParameter(
+        sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_MAGNETIC_FIELD,
                 &magneticField.x, &magneticField.y, &magneticField.z,
                 PARAMETER_VALUE_TYPE_TARGET);
@@ -516,28 +523,28 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
         mUi->magVerticalWidget->setValue(magneticField.z);
 
         float proximity;
-        mSensorsAgent->getPhysicalParameter(
+        sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_PROXIMITY, &proximity,
                 &scratch0, &scratch1,
                 PARAMETER_VALUE_TYPE_TARGET);
         mUi->proximitySensorValueWidget->setValue(proximity, false);
 
         float light;
-        mSensorsAgent->getPhysicalParameter(
+        sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_LIGHT, &light,
                 &scratch0, &scratch1,
                 PARAMETER_VALUE_TYPE_TARGET);
         mUi->lightSensorValueWidget->setValue(light, false);
 
         float pressure;
-        mSensorsAgent->getPhysicalParameter(
+        sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_PRESSURE, &pressure,
                 &scratch0, &scratch1,
                 PARAMETER_VALUE_TYPE_TARGET);
         mUi->pressureSensorValueWidget->setValue(pressure, false);
 
         float humidity;
-        mSensorsAgent->getPhysicalParameter(
+        sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_HUMIDITY, &humidity,
                 &scratch0, &scratch1,
                 PARAMETER_VALUE_TYPE_TARGET);
@@ -552,11 +559,11 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
 void VirtualSensorsPage::updateSensorValuesInUI() {
     updateUIFromModelCurrentState();
 
-    if (mSensorsAgent != nullptr) {
+    if (sSensorsAgent != nullptr) {
         glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
 
         glm::vec3 device_accelerometer;
-        mSensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION,
+        sSensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION,
                 &device_accelerometer.x,
                 &device_accelerometer.y,
                 &device_accelerometer.z);
@@ -590,13 +597,13 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
         }
 
         glm::vec3 device_magnetometer;
-        mSensorsAgent->getSensor(ANDROID_SENSOR_MAGNETIC_FIELD,
+        sSensorsAgent->getSensor(ANDROID_SENSOR_MAGNETIC_FIELD,
                 &device_magnetometer.x,
                 &device_magnetometer.y,
                 &device_magnetometer.z);
 
         glm::vec3 device_gyroscope;
-        mSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE,
+        sSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE,
                 &device_gyroscope.x,
                 &device_gyroscope.y,
                 &device_gyroscope.z);

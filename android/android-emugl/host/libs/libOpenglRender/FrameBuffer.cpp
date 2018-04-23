@@ -1661,14 +1661,17 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
     }
 
     //
-    // output FPS statistics
+    // output FPS and memory usage statistics
     //
     if (m_fpsStats) {
         long long currTime = System::get()->getHighResTimeUs() / 1000;
         m_statsNumFrames++;
         if (currTime - m_statsStartTime >= 1000) {
             float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
-            printf("FPS: %5.3f\n", (float)m_statsNumFrames / dt);
+            auto usage = System::get()->getMemUsage();
+            printf("FPS: %5.3f resident memory: %f mb\n",
+                   (float)m_statsNumFrames / dt,
+                   (float)usage.resident / 1048576.0f);
             m_statsStartTime = currTime;
             m_statsNumFrames = 0;
         }

@@ -853,10 +853,9 @@ public:
         fin.close();
 
 #elif defined(__APPLE__)
-        const auto host = mach_host_self();
         mach_task_basic_info info = {};
         mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
-        task_info(host, MACH_TASK_BASIC_INFO,
+        task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
                 reinterpret_cast<task_info_t>(&info), &infoCount);
 
         uint64_t total_phys = 0;
@@ -875,6 +874,7 @@ public:
 
         // Available memory detection: taken from the vm_stat utility sources.
         vm_size_t pageSize = 4096;
+        const auto host = mach_host_self();
         host_page_size(host, &pageSize);
         vm_statistics64_data_t vm_stat;
         unsigned int count = HOST_VM_INFO64_COUNT;

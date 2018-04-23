@@ -24,6 +24,8 @@
 using std::string;
 using emulator::EmulatorMessage;
 
+const QCarDataAgent* CarDataPage::sCarDataAgent = nullptr;
+
 CarDataPage::CarDataPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::CarDataPage) {
     mUi->setupUi(this);
@@ -31,12 +33,15 @@ CarDataPage::CarDataPage(QWidget* parent)
         sendCarEmulatorMessageLogged(msg, log);
     };
     mUi->tab_sensor->setSendEmulatorMsgCallback(sendFunc);
+    if (sCarDataAgent != nullptr) {
+        sCarDataAgent->setCarCallback(&CarDataPage::carDataCallback, this);
+    }
 }
 
 // static callback function wrapper
 void CarDataPage::carDataCallback(const char* msg, int len, void* context) {
     CarDataPage* carDataPage = (CarDataPage*)context;
-    if (carDataPage != NULL) {
+    if (carDataPage != nullptr) {
         carDataPage->onReceiveData(msg, len);
     }
 }
@@ -61,25 +66,21 @@ void CarDataPage::onReceiveData(const char* msg, int length) {
     D(printMsg.c_str());
 }
 
+// static
 void CarDataPage::setCarDataAgent(const QCarDataAgent* agent) {
-    if (agent == NULL) {
-        D("data agent null");
-        return;
-    } else {
-        agent->setCarCallback(&CarDataPage::carDataCallback, this);
-    }
-    mCarDataAgent = agent;
+    if (agent == nullptr) D("data agent null");
+    sCarDataAgent = agent;
 }
 
 void CarDataPage::sendCarEmulatorMessageLogged(const EmulatorMessage& msg,
                                                const string& log) {
-    if (mCarDataAgent == nullptr) {
+    if (sCarDataAgent == nullptr) {
         return;
     }
     D(log.c_str());
     string msgString;
     if (msg.SerializeToString(&msgString)) {
-        mCarDataAgent->sendCarData(msgString.c_str(), msgString.length());
+        sCarDataAgent->sendCarData(msgString.c_str(), msgString.length());
     } else {
         D("Failed to send emulator message.");
     }
