@@ -266,9 +266,6 @@ void ToolWindow::onExtendedWindowCreated(ExtendedWindow* extendedWindow) {
 
 void ToolWindow::onVirtualSceneWindowCreated(
         VirtualSceneControlWindow* virtualSceneWindow) {
-    if (sUiEmuAgent) {
-        virtualSceneWindow->setAgent(sUiEmuAgent);
-    }
 
     if (auto userActionsCounter = mUserActionsCounter.lock()) {
         userActionsCounter->startCountingForVirtualSceneWindow(
@@ -605,6 +602,8 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     sUiEmuAgent = agentPtr;
     ExtendedWindow::setAgentEarly(agentPtr);
+    VirtualSceneControlWindow::setAgent(agentPtr);
+
 
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
@@ -646,8 +645,6 @@ void ToolWindow::onMainLoopStart() {
 }
 
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
-    mVirtualSceneControlWindow.ifExists(
-            [&] { mVirtualSceneControlWindow.get()->setAgent(agPtr); });
     mExtendedWindow.ifExists([&] { mExtendedWindow.get()->setAgent(agPtr); });
 
     if (agPtr->clipboard) {
