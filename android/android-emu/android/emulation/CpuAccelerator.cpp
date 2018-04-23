@@ -923,14 +923,16 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
     }
 #if HAVE_WHPX
-    // WHPX will supersede HAX, if available.
-    std::string statusWHPX;
-    AndroidCpuAcceleration status_code_WHPX = ProbeWHPX(&statusWHPX);
-    if (status_code_WHPX == ANDROID_CPU_ACCELERATION_READY) {
-        g->accel = CPU_ACCELERATOR_WHPX;
-        g->supported_accelerators[CPU_ACCELERATOR_WHPX] = true;
-        status_code = status_code_WHPX;
-        status = std::move(statusWHPX);
+    if (featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform)) {
+        // WHPX will supersede HAX, if available.
+        std::string statusWHPX;
+        AndroidCpuAcceleration status_code_WHPX = ProbeWHPX(&statusWHPX);
+        if (status_code_WHPX == ANDROID_CPU_ACCELERATION_READY) {
+            g->accel = CPU_ACCELERATOR_WHPX;
+            g->supported_accelerators[CPU_ACCELERATOR_WHPX] = true;
+            status_code = status_code_WHPX;
+            status = std::move(statusWHPX);
+        }
     }
 #endif // HAVE_WHPX
 #if HAVE_HVF
