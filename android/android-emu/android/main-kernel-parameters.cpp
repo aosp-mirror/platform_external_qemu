@@ -106,9 +106,14 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                 android::featurecontrol::GLDMA, false);
 
     // OpenGL ES related setup
-    // 1. Set opengles.version and set Skia as UI renderer
+    // 1. Set opengles.version and set Skia as UI renderer if
+    // GLESDynamicVersion = on (i.e., is a reasonably good driver)
     params.addFormat("qemu.opengles.version=%d", bootPropOpenglesVersion);
-    params.addFormat("qemu.uirenderer=%s", "skiagl");
+
+    if (android::featurecontrol::isEnabled(
+            android::featurecontrol::GLESDynamicVersion)) {
+        params.addFormat("qemu.uirenderer=%s", "skiagl");
+    }
 
     // 2. Calculate additional memory for software renderers (e.g., SwiftShader)
     const uint64_t one_MB = 1024ULL * 1024ULL;
