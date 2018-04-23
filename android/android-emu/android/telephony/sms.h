@@ -55,11 +55,6 @@ typedef struct {
 extern int  sms_address_from_str( SmsAddress  address, const char*  src, int  srclen );
 extern int  sms_address_to_str( SmsAddress  address, char*  src, int  srclen );
 
-extern int  sms_address_from_bytes( SmsAddress  address, const unsigned char*  buf, int  buflen );
-extern int  sms_address_to_bytes  ( SmsAddress  address, unsigned char*  buf, int  bufsize );
-extern int  sms_address_from_hex  ( SmsAddress  address, const char*  hex, int  hexlen );
-extern int  sms_address_to_hex    ( SmsAddress  address, char*   hex, int  hexsize );
-
 /** SMS PROTOCOL DATA UNITS
  **/
 
