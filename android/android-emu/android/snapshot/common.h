@@ -73,6 +73,7 @@ enum class FailureReason {
     TexturesFailed,
     AdbOffline,
     OutOfDiskSpace,
+    Tombstone,
 
     InProgressLimit = 30000,
 };
@@ -91,6 +92,10 @@ bool isBufferZeroed(const void* ptr, int32_t size);
 constexpr int32_t kDefaultPageSize = 4096;
 
 constexpr int32_t kCancelTimeoutMs = 15000;
+
+constexpr base::StringView kDefaultBootSnapshot = "default_boot";
+constexpr base::StringView kRamFileName = "ram.bin";
+constexpr base::StringView kTexturesFileName = "textures.bin";
 
 void resetSnapshotLiveness();
 bool isSnapshotAlive();
