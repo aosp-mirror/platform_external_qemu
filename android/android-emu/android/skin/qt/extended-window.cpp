@@ -188,7 +188,7 @@ ExtendedWindow::~ExtendedWindow() {
 }
 
 // static
-void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
+void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
     if (agentPtr) {
         BatteryPage::setBatteryAgent(agentPtr->battery);
         CellularPage::setCellularAgent(agentPtr->cellular);
@@ -203,11 +203,6 @@ void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
             CarDataPage::setCarDataAgent(agentPtr->car);
         }
     }
-}
-
-void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
-    // The ADB port is known now. Show it on the UI Help page.
-    mExtendedUi->helpPage->setAdbPort();
 }
 
 void ExtendedWindow::show() {

@@ -74,7 +74,7 @@ public:
     void raiseMainWindow();
     void updateTheme(const QString& styleSheet);
 
-    void setToolEmuAgent(const UiEmuAgent* agPtr);
+    void setClipboardCallbacks(const UiEmuAgent* agPtr);
 
     static void earlyInitialization(const UiEmuAgent* agentPtr);
     static void onMainLoopStart();

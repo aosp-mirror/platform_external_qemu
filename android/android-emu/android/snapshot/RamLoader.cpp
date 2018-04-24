@@ -13,9 +13,11 @@
 
 #include "android/avd/info.h"
 #include "android/base/ArraySize.h"
+#include "android/base/ContiguousRangeMapper.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/Stopwatch.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
 #include "android/utils/debug.h"
@@ -25,7 +27,9 @@
 #include <cassert>
 #include <memory>
 
+using android::base::ContiguousRangeMapper;
 using android::base::MemStream;
+using android::base::Stopwatch;
 
 namespace android {
 namespace snapshot {
@@ -146,16 +150,45 @@ bool RamLoader::start(bool isQuickboot) {
 }
 
 void RamLoader::join() {
+#if SNAPSHOT_PROFILE > 1
+    printf("Finishing background RAM load\n");
+    Stopwatch sw;
+#endif
+
+    if (mAccessWatch) {
+        // Unprotect all. Warning: this assumes the VM is stopped.
+
+        ContiguousRangeMapper bulkFillPreparer([this](uintptr_t start, uintptr_t size) {
+            mAccessWatch->initBulkFill((void*)start, size);
+        });
+
+        for (const Page& page : mIndex.pages) {
+            auto ptr = pagePtr(page);
+            auto size = pageSize(page);
+
+            bulkFillPreparer.add((uintptr_t)ptr, size);
+        }
+    }
+
+    // Set mJoining only after initBulkFill is all done, or we
+    // get race conditions in fillPageData.
     mJoining = true;
+
     mReaderThread.wait();
     if (mAccessWatch) {
         mAccessWatch->join();
         mAccessWatch.clear();
     }
     mStream.close();
+
+#if SNAPSHOT_PROFILE > 1
+    printf("Finished remaining RAM load in %f ms\n", sw.elapsedUs() / 1000.0f);
+#endif
 }
 
 void RamLoader::interrupt() {
+    fprintf(stderr, "%s: call\n", __func__);
+
     mReadDataQueue.stop();
     mReadingQueue.stop();
     mReaderThread.wait();
@@ -591,8 +624,11 @@ void RamLoader::fillPageData(Page* pagePtr) {
     printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
     if (mAccessWatch) {
-        bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
-                                          page.data, mIsQuickboot);
+
+        bool res = mJoining ?
+            mAccessWatch->fillPageBulk(this->pagePtr(page), pageSize(page), page.data, mIsQuickboot) :
+            mAccessWatch->fillPage(this->pagePtr(page), pageSize(page), page.data, mIsQuickboot);
+
         if (!res) {
             mHasError = true;
         }

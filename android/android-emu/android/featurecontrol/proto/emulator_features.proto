@@ -3,6 +3,7 @@ syntax = "proto2";
 package emulator_features;
 
 // Must match emulator's featurecontrol defs.
+// Next tag: 26
 enum Feature {
     GLPipeChecksum = 0;
     GrallocSync = 1;
@@ -39,5 +40,13 @@ enum Feature {
 
     VirtualScene = 20;
 
-    ProtoNumFeatures = 21;
+    IgnoreHostOpenGLErrors = 21;
+
+    GenericSnapshotsUI = 22;
+
+    AllowSnapshotMigration = 23;
+
+    WindowsOnDemandSnapshotLoad = 24;
+
+    WindowsHypervisorPlatform = 25;
 }
