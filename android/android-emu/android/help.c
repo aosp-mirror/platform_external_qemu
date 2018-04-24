@@ -1607,6 +1607,7 @@ help_sim_access_rules_file(stralloc_t* out)
 #define  help_no_passive_gps NULL
 #define  help_memory       NULL
 #define  help_partition_size NULL
+#define  help_balloon NULL
 
 #define help_skip_adb_auth NULL
 #define help_quit_after_boot NULL
