@@ -73,6 +73,7 @@ enum class FailureReason {
     TexturesFailed,
     AdbOffline,
     OutOfDiskSpace,
+    Tombstone,
 
     InProgressLimit = 30000,
 };
