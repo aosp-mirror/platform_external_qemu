@@ -646,7 +646,7 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
 
     if (const auto window = EmulatorQtWindow::getInstance()) {
         window->runOnUiThread([agent, window] {
-            window->toolWindow()->setToolEmuAgent(agent);
+            window->toolWindow()->setClipboardCallbacks(agent);
         });
     }
 }
