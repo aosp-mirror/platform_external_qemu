@@ -79,4 +79,8 @@ extern bool screen_recorder_start(const RecordingInfo* info, bool async);
 extern bool screen_recorder_stop(bool async);
 // Get the recorder's current state.
 extern RecorderState screen_recorder_state_get(void);
+// Starts the webrtc module
+extern bool start_webrtc_module(const char* handle, int fps);
+// Stops the webrtc module
+extern bool stop_webrtc_module();
 ANDROID_END_HEADER
