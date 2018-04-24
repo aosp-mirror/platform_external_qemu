@@ -11,6 +11,7 @@
 
 #include "android/snapshot/Snapshotter.h"
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/StringFormat.h"
@@ -45,6 +46,7 @@ extern "C" {
 }
 
 using android::base::LazyInstance;
+using android::base::PathUtils;
 using android::base::Stopwatch;
 using android::base::StringFormat;
 using android::base::System;
@@ -686,6 +688,14 @@ OperationStatus Snapshotter::loadGeneric(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
+    invalidateSnapshot(name);
+
+    // then delete the folder and refresh hierarchy
+    path_delete_dir(getSnapshotDir(name).c_str());
+    Hierarchy::get()->currentInfo();
+}
+
+void Snapshotter::invalidateSnapshot(const char* name) {
     if (name == mLoadedSnapshotFile) {
         // We're deleting the "loaded" snapshot, so first finish any pending
         // load, and then clear the snapshot file.  Do it under the VM lock to
@@ -701,9 +711,9 @@ void Snapshotter::deleteSnapshot(const char* name) {
 
     mVmOperations.snapshotDelete(name, this, nullptr);
 
-    // then delete the folder and refresh hierarchy
-    path_delete_dir(getSnapshotDir(name).c_str());
-    Hierarchy::get()->currentInfo();
+    // then delete kRamFileName / kTexturesFileName
+    path_delete_file(PathUtils::join(getSnapshotDir(name), kRamFileName).c_str());
+    path_delete_file(PathUtils::join(getSnapshotDir(name), kTexturesFileName).c_str());
 }
 
 bool Snapshotter::areSavesSlow(const char* name) {

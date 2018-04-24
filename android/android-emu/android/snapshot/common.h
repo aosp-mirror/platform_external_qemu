@@ -95,6 +95,9 @@ constexpr int32_t kCancelTimeoutMs = 15000;
 
 constexpr base::StringView kDefaultBootSnapshot = "default_boot";
 
+constexpr base::StringView kRamFileName = "ram.bin";
+constexpr base::StringView kTexturesFileName = "textures.bin";
+
 void resetSnapshotLiveness();
 bool isSnapshotAlive();
 

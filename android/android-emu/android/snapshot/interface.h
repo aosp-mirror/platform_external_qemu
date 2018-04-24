@@ -41,6 +41,7 @@ AndroidSnapshotStatus androidSnapshot_save(const char* name);
 void androidSnapshot_cancelSave();
 
 void androidSnapshot_delete(const char* name);
+void androidSnapshot_invalidate(const char* name);
 
 bool androidSnapshot_areSavesSlow(const char* name);
 
