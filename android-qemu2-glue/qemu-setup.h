@@ -34,6 +34,7 @@ extern bool qemu_android_emulation_early_setup(void);
 extern bool qemu_android_emulation_setup_dns_servers(const char* dns_servers,
                                                      int* count);
 
+extern bool qemu_androd_emulation_start_balloon(int hwRamSize);
 
 extern void ranchu_device_tree_setup(void *fdt);
 
