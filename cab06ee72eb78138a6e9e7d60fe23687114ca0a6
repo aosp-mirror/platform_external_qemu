@@ -22,6 +22,30 @@
       "revId": "cab06ee72eb78138a6e9e7d60fe23687114ca0a6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b0f40b7_364af8ab",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_features.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-04-24T00:14:23Z",
+      "side": 1,
+      "message": "Got it; seems we are not using the enum anyway, so I removed it.",
+      "parentUuid": "bcb27bae_cfba53ab",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 20
+      },
+      "revId": "cab06ee72eb78138a6e9e7d60fe23687114ca0a6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
