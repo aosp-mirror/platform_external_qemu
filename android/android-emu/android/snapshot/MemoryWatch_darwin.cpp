@@ -11,12 +11,14 @@
 
 #include "android/snapshot/MemoryWatch.h"
 
+#include "android/base/ContiguousRangeMapper.h"
 #include "android/base/memory/MemoryHints.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/snapshot/common.h"
 #include "android/snapshot/MacSegvHandler.h"
 
 #include <signal.h>
@@ -85,6 +87,7 @@ public:
                 range.first, range.second, MemoryHint::Sequential);
         }
         mBackgroundLoadingThread.wait();
+        mBulkZero.finish();
         for (auto range : mRanges) {
             android::base::memoryHint(
                 range.first, range.second, MemoryHint::Normal);
@@ -115,6 +118,33 @@ public:
         return true;
     }
 
+    // Unprotects all pages in the range. Note that the VM must be stopped.
+    void initBulkFill(void* startPtr, size_t length) {
+        android::base::AutoLock lock(mLock);
+
+        uint64_t gpa[32];
+        uint64_t size[32];
+
+        mprotect(startPtr, length, PROT_READ | PROT_WRITE | PROT_EXEC);
+        if (mAccel == CPU_ACCELERATOR_HVF) {
+            int count = hva2gpa_call(startPtr, length, 32, gpa, size);
+            for (int i = 0; i < count; ++i) {
+                guest_mem_protect_call(gpa[i], size[i], HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+            }
+        }
+    }
+
+    bool fillPageBulk(void* startPtr, size_t length, const void* data,
+                  bool isQuickboot) {
+        android::base::AutoLock lock(mLock);
+        if (!data) {
+            mBulkZero.add((uintptr_t)startPtr, length);
+        } else {
+            memcpy(startPtr, data, length);
+        }
+        return true;
+    }
+
     void bgLoaderWorker() {
         System::Duration timeoutUs = 0;
         for (;;) {
@@ -141,6 +171,11 @@ public:
     MacSegvHandler mSegvHandler;
     base::FunctorThread mBackgroundLoadingThread;
     std::vector<std::pair<void*, size_t> > mRanges;
+
+    android::base::ContiguousRangeMapper mBulkZero = {
+        [](uintptr_t start, uintptr_t size) {
+            android::base::zeroOutMemory((void*)start, size);
+        }, 4096 * 4096};
 };
 
 // static
@@ -178,6 +213,16 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
     if (!mImpl) return false;
     return mImpl->fillPage(ptr, length, data, isQuickboot);
+}
+
+void MemoryAccessWatch::initBulkFill(void* ptr, size_t length) {
+    if (!mImpl) return;
+    mImpl->initBulkFill(ptr, length);
+}
+
+bool MemoryAccessWatch::fillPageBulk(void* ptr, size_t length, const void* data, bool isQuickboot) {
+    if (!mImpl) return false;
+    return mImpl->fillPageBulk(ptr, length, data, isQuickboot);
 }
 
 void MemoryAccessWatch::join() {

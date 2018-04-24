@@ -12,6 +12,7 @@
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/Snapshotter.h"
 
+#include "android/base/ContiguousRangeMapper.h"
 #include "android/base/memory/MemoryHints.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
@@ -64,11 +65,17 @@ public:
     }
 
     void join() {
-        for (const auto& range: mRanges) {
-            protectHostRange(range.first, range.second, PAGE_READWRITE);
+        for (auto range : mRanges) {
+            android::base::memoryHint(
+                range.first, range.second, MemoryHint::Sequential);
+        }
+        mBackgroundLoadingThread.wait();
+        mBulkZero.finish();
+        for (auto range : mRanges) {
+            android::base::memoryHint(
+                range.first, range.second, MemoryHint::Normal);
         }
         mRanges.clear();
-        mBackgroundLoadingThread.wait();
     }
 
     void doneRegistering() {
@@ -109,6 +116,34 @@ public:
         return true;
     }
 
+    // Unprotects all pages in the range. Note that the VM must be stopped.
+    void initBulkFill(void* startPtr, size_t length) {
+        android::base::AutoLock lock(mLock);
+
+        uint64_t gpa[32];
+        uint64_t size[32];
+
+        protectHostRange(startPtr, length, PAGE_READWRITE);
+
+        if (mAccel == CPU_ACCELERATOR_HAX) {
+            int count = hva2gpa_call(startPtr, length, 32, gpa, size);
+            for (int i = 0; i < count; ++i) {
+                guest_mem_protect_call(gpa[i], size[i], PROT_READ | PROT_WRITE | PROT_EXEC);
+            }
+        }
+    }
+
+    bool fillPageBulk(void* startPtr, size_t length, const void* data,
+                  bool isQuickboot) {
+        android::base::AutoLock lock(mLock);
+        if (!data) {
+            mBulkZero.add((uintptr_t)startPtr, length);
+        } else {
+            memcpy(startPtr, data, length);
+        }
+        return true;
+    }
+
     void bgLoaderWorker() {
         System::Duration timeoutMs = 0;
         for (;;) {
@@ -128,14 +163,16 @@ public:
         }
     }
 
-    android::base::Lock mLock;
-    CpuAccelerator mAccel;
-    MemoryAccessWatch::AccessCallback mAccessCallback;
-    MemoryAccessWatch::IdleCallback mIdleCallback;
-    base::FunctorThread mBackgroundLoadingThread;
-    void *mExceptionHandler = nullptr;
+    void* getExceptionHandler() {
+        return mExceptionHandler;
+    }
+
+    void setExceptionHandler(void* handler) {
+        mExceptionHandler = handler;
+    }
 
 private:
+
     bool protectHostRange(void* start, uint64_t size, DWORD protect) {
         DWORD oldProtect;
         if (::VirtualProtect(start, size, protect, &oldProtect) == 0) {
@@ -145,6 +182,18 @@ private:
         }
         return true;
     }
+
+    android::base::Lock mLock;
+    CpuAccelerator mAccel;
+    MemoryAccessWatch::AccessCallback mAccessCallback;
+    MemoryAccessWatch::IdleCallback mIdleCallback;
+    base::FunctorThread mBackgroundLoadingThread;
+    void *mExceptionHandler = nullptr;
+
+    android::base::ContiguousRangeMapper mBulkZero = {
+        [](uintptr_t start, uintptr_t size) {
+            android::base::zeroOutMemory((void*)start, size);
+        }, 4096 * 4096};
 
     std::vector<std::pair<void*, uint64_t> > mRanges;
 };
@@ -177,12 +226,12 @@ MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
     if (!handler) {
         mImpl.reset();
     } else {
-        mImpl->mExceptionHandler = handler;
+        mImpl->setExceptionHandler(handler);
     }
 }
 
 MemoryAccessWatch::~MemoryAccessWatch() {
-    ::RemoveVectoredExceptionHandler(mImpl->mExceptionHandler);
+    ::RemoveVectoredExceptionHandler(mImpl->getExceptionHandler());
 
     assert(sWatch == this);
     sWatch = nullptr;
@@ -206,6 +255,16 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
     if (!mImpl) return false;
     return mImpl->fillPage(ptr, length, data, isQuickboot);
+}
+
+void MemoryAccessWatch::initBulkFill(void* ptr, size_t length) {
+    if (!mImpl) return;
+    mImpl->initBulkFill(ptr, length);
+}
+
+bool MemoryAccessWatch::fillPageBulk(void* ptr, size_t length, const void* data, bool isQuickboot) {
+    if (!mImpl) return false;
+    return mImpl->fillPageBulk(ptr, length, data, isQuickboot);
 }
 
 void MemoryAccessWatch::join() {
