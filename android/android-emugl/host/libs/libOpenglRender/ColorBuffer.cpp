@@ -18,6 +18,7 @@
 #include "android/base/memory/ScopedPtr.h"
 
 #include "DispatchTables.h"
+#include "GLcommon/GLconversion.h"
 #include "GLcommon/GLutils.h"
 #include "RenderThreadInfo.h"
 #include "TextureDraw.h"
@@ -28,6 +29,7 @@
 
 #include "emugl/common/misc.h"
 
+#include <memory>
 #include <stdio.h>
 #include <string.h>
 
@@ -137,6 +139,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
             texFormat = GL_RGBA;
             pixelType = GL_HALF_FLOAT;
             bytesPerPixel = 8;
+            printf("setting cb GL_RGBA16F\n");
             break;
 
         case GL_LUMINANCE:
@@ -278,14 +281,23 @@ void ColorBuffer::readPixels(int x,
         return;
     }
 
-    p_format = sGetUnsizedColorBufferFormat(p_format);
+    GLenum format = sGetUnsizedColorBufferFormat(p_format);
 
     touch();
     if (bindFbo(&m_fbo, m_tex)) {
         GLint prevAlignment = 0;
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
+        if (p_format == GL_RGBA16F) {
+            std::unique_ptr<unsigned char[]> buff(
+                    new unsigned char [width * height * 4]);
+            s_gles2.glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                    buff.get());
+            convertBufferFromRgba8888<GL_RGBA16F, 8>(width, height, buff.get(),
+                    pixels);
+        } else {
+            s_gles2.glReadPixels(x, y, width, height, format, p_type, pixels);
+        }
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
         unbindFbo();
     }
