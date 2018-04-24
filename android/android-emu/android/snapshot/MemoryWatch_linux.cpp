@@ -259,6 +259,15 @@ bool MemoryAccessWatch::fillPage(void* ptr,
     return true;
 }
 
+void MemoryAccessWatch::initBulkFill(void* startPtr, size_t length) {
+    // TODO: no-op for now
+}
+
+bool MemoryAccessWatch::fillPageBulk(void* startPtr, size_t length, const void* data,
+              bool isQuickboot) {
+    return fillPage(startPtr, length, data, isQuickboot);
+}
+
 void MemoryAccessWatch::join() {
     if (mImpl) {
         mImpl->join();
