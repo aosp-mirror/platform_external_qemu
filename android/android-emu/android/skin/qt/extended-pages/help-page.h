@@ -26,15 +26,10 @@ class HelpPage : public QWidget
 public:
     explicit HelpPage(QWidget *parent = 0);
     void initialize(const ShortcutKeyStore<QtUICommand>* key_store);
-    void setAdbPort();
-
-signals:
-    void adbPortUpdateRequired();
 
 private slots:
     void on_help_docs_clicked();
     void on_help_sendFeedback_clicked();
-    void updateAdbPortNumber();
 
 private:
     void initializeLicenseText();

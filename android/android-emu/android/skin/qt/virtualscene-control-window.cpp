@@ -53,6 +53,8 @@ static const char* kTextStyleFormatString =
         "* { font-size: %1; background-color: transparent; }"
         "*[ColorGroup=\"Highlight\"] { color: #eee; }";
 
+const QAndroidSensorsAgent* VirtualSceneControlWindow::sSensorsAgent = nullptr;
+
 VirtualSceneControlWindow::VirtualSceneControlWindow(
         EmulatorQtWindow* emulatorWindow,
         ToolWindow* toolWindow)
@@ -154,8 +156,9 @@ void VirtualSceneControlWindow::updateTheme(const QString& styleSheet) {
     updateHighlightAndFocusStyle();
 }
 
+// static
 void VirtualSceneControlWindow::setAgent(const UiEmuAgent* agentPtr) {
-    mSensorsAgent = agentPtr->sensors;
+    sSensorsAgent = agentPtr->sensors;
 }
 
 void VirtualSceneControlWindow::setWidth(int width) {
@@ -169,9 +172,9 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
         mMouseCaptureElapsed.start();
 
         // Get the starting rotation.
-        if (mSensorsAgent) {
+        if (sSensorsAgent) {
             glm::vec3 eulerDegrees;
-            mSensorsAgent->getPhysicalParameter(
+            sSensorsAgent->getPhysicalParameter(
                     PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x,
                     &eulerDegrees.y, &eulerDegrees.z,
                     PARAMETER_VALUE_TYPE_TARGET);
@@ -196,7 +199,7 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
                 mEulerRotationRadians.x -= static_cast<float>(2 * M_PI);
             }
 
-            mSensorsAgent->setPhysicalParameterTarget(
+            sSensorsAgent->setPhysicalParameterTarget(
                     PHYSICAL_PARAMETER_AMBIENT_MOTION, 0.005f, 0.f, 0.f,
                     PHYSICAL_INTERPOLATION_SMOOTH);
         }
@@ -225,8 +228,8 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
             pressed = false;
         }
 
-        if (mSensorsAgent) {
-            mSensorsAgent->setPhysicalParameterTarget(
+        if (sSensorsAgent) {
+            sSensorsAgent->setPhysicalParameterTarget(
                     PHYSICAL_PARAMETER_AMBIENT_MOTION, 0.f,
                     0.f, 0.f,
                     PHYSICAL_INTERPOLATION_SMOOTH);
@@ -490,8 +493,8 @@ void VirtualSceneControlWindow::slot_mousePoller() {
 }
 
 void VirtualSceneControlWindow::slot_metricsAggregator() {
-    if (mSensorsAgent) {
-        int delayMs = static_cast<uint32_t>(mSensorsAgent->getDelayMs());
+    if (sSensorsAgent) {
+        int delayMs = static_cast<uint32_t>(sSensorsAgent->getDelayMs());
         if (delayMs < mVirtualSceneMetrics.minSensorDelayMs) {
             mVirtualSceneMetrics.minSensorDelayMs = delayMs;
         }
@@ -524,7 +527,7 @@ void VirtualSceneControlWindow::updateMouselook() {
             mEulerRotationRadians.x = glm::radians(kMaxVerticalRotationDegrees);
         }
 
-        if (mSensorsAgent) {
+        if (sSensorsAgent) {
             // Rotations applied in the Y X Z order, but we need to convert to X
             // Y Z order for the physical model.
             glm::vec3 rotationRadians;
@@ -535,7 +538,7 @@ void VirtualSceneControlWindow::updateMouselook() {
                     rotationRadians.x, rotationRadians.y, rotationRadians.z);
             const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
 
-            mSensorsAgent->setPhysicalParameterTarget(
+            sSensorsAgent->setPhysicalParameterTarget(
                     PHYSICAL_PARAMETER_ROTATION, rotationDegrees.x,
                     rotationDegrees.y, rotationDegrees.z,
                     PHYSICAL_INTERPOLATION_SMOOTH);
@@ -633,8 +636,8 @@ void VirtualSceneControlWindow::updateVelocity() {
     if (velocity != mVelocity) {
         mVelocity = velocity;
 
-        if (mSensorsAgent) {
-            mSensorsAgent->setPhysicalParameterTarget(
+        if (sSensorsAgent) {
+            sSensorsAgent->setPhysicalParameterTarget(
                     PHYSICAL_PARAMETER_VELOCITY, velocity.x, velocity.y,
                     velocity.z, PHYSICAL_INTERPOLATION_SMOOTH);
         }
@@ -647,16 +650,16 @@ void VirtualSceneControlWindow::aggregateMovementMetrics(bool reset) {
         mVirtualSceneMetrics.totalRotationRadians = 0.0;
     }
 
-    if (!mSensorsAgent) {
+    if (!sSensorsAgent) {
         return;
     }
 
     glm::vec3 eulerDegrees;
     glm::vec3 position;
-    mSensorsAgent->getPhysicalParameter(
+    sSensorsAgent->getPhysicalParameter(
             PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
             &eulerDegrees.z, PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
-    mSensorsAgent->getPhysicalParameter(
+    sSensorsAgent->getPhysicalParameter(
             PHYSICAL_PARAMETER_POSITION, &position.x, &position.y, &position.z,
             PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
 

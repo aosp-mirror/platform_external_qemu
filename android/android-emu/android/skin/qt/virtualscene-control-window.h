@@ -52,7 +52,6 @@ public:
     bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);
     void updateTheme(const QString& styleSheet);
 
-    void setAgent(const UiEmuAgent* agentPtr);
     void setWidth(int width);
     void setCaptureMouse(bool capture);
 
@@ -69,6 +68,7 @@ public:
 
     void reportMouseButtonDown();
 
+    static void setAgent(const UiEmuAgent* agentPtr);
     static void addShortcutKeysToKeyStore(
             ShortcutKeyStore<QtUICommand>& keystore);
 signals:
@@ -96,6 +96,8 @@ private:
 
     QPoint getMouseCaptureCenter();
 
+    static const QAndroidSensorsAgent* sSensorsAgent;
+
     EmulatorQtWindow* mEmulatorWindow = nullptr;
     ToolWindow* mToolWindow = nullptr;
     SizeTweaker mSizeTweaker;
@@ -110,7 +112,6 @@ private:
     bool mShouldShowInfoDialog = true;
     bool mIsHotkeyAvailable = true;
 
-    const QAndroidSensorsAgent* mSensorsAgent = nullptr;
     glm::vec3 mVelocity = glm::vec3();
     glm::vec3 mEulerRotationRadians = glm::vec3();
 

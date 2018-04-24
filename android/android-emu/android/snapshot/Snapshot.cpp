@@ -456,7 +456,6 @@ const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
 
     if (isUnrecoverableReason(
             FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
-        fprintf(stderr, "%s: unrecoverable failure\n", __func__);
         return nullptr;
     }
 

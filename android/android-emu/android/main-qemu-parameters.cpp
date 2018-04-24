@@ -15,6 +15,7 @@
 #include "android/base/StringFormat.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_data.h"
 #include "android/utils/property_file.h"
@@ -167,7 +168,19 @@ QemuParameters* qemu_parameters_create(const char* argv0,
         bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
 
         VERBOSE_PRINT(init, "checking cpu acceleration from main qemu params");
+
         // CPU acceleration only works for x86 and x86_64 system images.
+        const char* chosenAccel;
+#ifdef _WIN32
+        // For Windows, choose between WHPX and HAXM.
+        chosenAccel =
+            android::featurecontrol::isEnabled(
+                android::featurecontrol::WindowsHypervisorPlatform) ?
+                kEnableAccelerator : kEnableAcceleratorHAX;
+#else
+        chosenAccel = kEnableAccelerator;
+#endif
+
         if (accel_mode == ACCEL_OFF && accel_ok) {
             params.add(kDisableAccelerator);
         } else if (accel_mode == ACCEL_ON) {
@@ -176,9 +189,9 @@ QemuParameters* qemu_parameters_create(const char* argv0,
                 derror("Reason: %s", accel_status);
                 return NULL;
             }
-            params.add(kEnableAccelerator);
+            params.add(chosenAccel);
         } else {
-            params.add(accel_ok ? kEnableAccelerator : kDisableAccelerator);
+            params.add(accel_ok ? chosenAccel : kDisableAccelerator);
         }
 
         AFREE(accel_status);

@@ -214,6 +214,12 @@ void GLESv2Context::postLoadRestoreCtx() {
         }
         for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
             GLESpointer* glesPointer = glesPointerIte.second;
+
+            // don't skip enabling if the guest assumes it was enabled.
+            if (glesPointer->isEnable()) {
+                dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
+            }
+
             // attribute 0 are bound right before draw, no need to bind it here
             if (glesPointer->getAttribType() == GLESpointer::VALUE
                     && glesPointerIte.first == 0) {
@@ -269,9 +275,6 @@ void GLESv2Context::postLoadRestoreCtx() {
                     // client arrays are set up right before draw calls
                     // so we do nothing here
                     break;
-            }
-            if (glesPointer->isEnable()) {
-                dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
             }
         }
         for (size_t i = 0; i < vaoIte.second.bindingState.size(); i++) {
