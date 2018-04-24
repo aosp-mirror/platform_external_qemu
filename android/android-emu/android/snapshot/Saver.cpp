@@ -13,6 +13,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
+#include "android/snapshot/common.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/TextureSaver.h"
 #include "android/utils/debug.h"
@@ -31,7 +32,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
         return;
     }
     {
-        const auto ramFile = PathUtils::join(mSnapshot.dataDir(), "ram.bin");
+        const auto ramFile = PathUtils::join(mSnapshot.dataDir(), kRamFileName);
         auto flags = RamSaver::Flags::None;
         const auto compressEnvVar =
                 System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
@@ -97,7 +98,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
 
     {
         const auto textures = fopen(
-                PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
+                PathUtils::join(mSnapshot.dataDir(), kTexturesFileName).c_str(),
                 "wb");
         if (!textures) {
             mRamSaver.clear();
