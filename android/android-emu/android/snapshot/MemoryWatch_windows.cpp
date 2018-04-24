@@ -18,6 +18,7 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/featurecontrol/FeatureControl.h"
 
 #include <windows.h>
 
@@ -150,9 +151,16 @@ private:
 
 // static
 bool MemoryAccessWatch::isSupported() {
+
+    if (!android::featurecontrol::isEnabled(
+            android::featurecontrol::WindowsOnDemandSnapshotLoad)) {
+        return false;
+    }
+
     if (GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HAX
         && guest_mem_protect_call)
         return guest_mem_protection_supported_call();
+
     return false;
 }
 
