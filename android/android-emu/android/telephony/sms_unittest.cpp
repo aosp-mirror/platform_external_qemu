@@ -23,7 +23,7 @@ TEST(Sms, AddrFromStr) {
           const int            expectedRet;
           const int            expectedToa;
           const int            expectedLen;
-          const unsigned char  expectedData[16];
+          const unsigned char  expectedData[SMS_ADDRESS_MAX_SIZE];
       } kData[] = {
           { "(650) 123-4567",   0, 0x81, 10, { 0x56, 0x10, 0x32, 0x54, 0x76 } },
           { "+1.650 123/4567",  0, 0x91, 11, { 0x61, 0x05, 0x21, 0x43, 0x65, 0xf7 } },
@@ -31,11 +31,8 @@ TEST(Sms, AddrFromStr) {
           { "+()",             -1, 0,     0, { } }, // No digits
           { "",                -1, 0,     0, { } }, // No digits
           { "123 456.7890"
-            "(12)34567890"
-            "1234567890 12",    0, 0x81, 32, { 0x21, 0x43, 0x65, 0x87, 0x09,
-                                               0x21, 0x43, 0x65, 0x87, 0x09,
-                                               0x21, 0x43, 0x65, 0x87, 0x09,
-                                               0x21                          } },
+            "(12)34567890",     0, 0x81, 20, { 0x21, 0x43, 0x65, 0x87, 0x09,
+                                               0x21, 0x43, 0x65, 0x87, 0x09 } },
           { "123 456.7890"
             "(12)34567890"
             "1234567890 123",  -1, 0,     0, { } }, // Too long
