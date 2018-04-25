@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "421b7d77_2bacf75d",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-04-25T16:23:50Z",
+      "side": 0,
+      "message": "sockets.c is unused? Can we just delete the source as well?",
+      "revId": "8d81f0dca4a48f1a928938cc66816e0a2f450757",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
