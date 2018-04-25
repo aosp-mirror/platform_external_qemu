@@ -44,7 +44,17 @@ extern int   sms_timestamp_to_tm( SmsTimeStamp  stamp, struct tm*  tm );
 /** SMS ADDRESSES
  **/
 
-#define  SMS_ADDRESS_MAX_SIZE  16
+/*
+  ETSI TS 123 040 9.1.2.5 Address fields
+
+  The maximum length of the full address field (Address-Length,
+  Type-of-Address and Address-Value) is 12 octets.
+*/
+
+#define SMS_ADDRESS_MAX_SIZE                 10
+#define MAX_ALPHANUMERIC_SMS_ADDRESS_LENGTH  11
+#define BITS_PER_SMS_CHAR                    7
+#define BITS_PER_SEMIOCTET                   4
 
 typedef struct {
     unsigned char  len;
