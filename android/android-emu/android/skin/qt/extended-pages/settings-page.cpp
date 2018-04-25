@@ -19,8 +19,8 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
-#include "android/snapshot/Quickboot.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -30,7 +30,6 @@
 using Ui::Settings::SaveSnapshotOnExit;
 using Ui::Settings::SaveSnapshotOnExitUiOrder;
 using android::metrics::MetricsReporter;
-using android::snapshot::Quickboot;
 
 namespace pb = android_studio;
 
@@ -356,14 +355,14 @@ void SettingsPage::on_set_saveSnapNowButton_clicked() {
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
     android::base::ThreadLooper::runOnMainLooper( []() {
-        androidSnapshot_save(Quickboot::kDefaultBootSnapshot.c_str()); });
+        androidSnapshot_save(android::snapshot::kDefaultBootSnapshot.c_str()); });
 }
 
 void SettingsPage::on_set_loadSnapNowButton_clicked() {
     // Invoke the snapshot load function.
     // But don't run it on the UI thread.
     android::base::ThreadLooper::runOnMainLooper( []() {
-        androidSnapshot_load(Quickboot::kDefaultBootSnapshot.c_str()); });
+        androidSnapshot_load(android::snapshot::kDefaultBootSnapshot.c_str()); });
 }
 
 void SettingsPage::on_set_adbPathButton_clicked() {
