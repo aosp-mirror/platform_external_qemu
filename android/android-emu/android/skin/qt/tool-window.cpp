@@ -43,8 +43,8 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
-#include "android/snapshot/Quickboot.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 
@@ -705,7 +705,7 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     // previous saves were known to be slow, or the system has low RAM.
     bool savesWereSlow =
         androidSnapshot_areSavesSlow(
-            android::snapshot::Quickboot::kDefaultBootSnapshot.c_str());
+            android::snapshot::kDefaultBootSnapshot.c_str());
     bool hasLowRam = System::isUnderMemoryPressure();
 
     if (saveOnExitChoice == SaveSnapshotOnExit::Always &&
