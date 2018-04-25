@@ -138,6 +138,7 @@ LOCAL_SRC_FILES := \
     android/base/StringFormat.cpp \
     android/base/StringParse.cpp \
     android/base/StringView.cpp \
+    android/base/sockets/SocketDrainer.cpp \
     android/base/sockets/SocketUtils.cpp \
     android/base/sockets/SocketWaiter.cpp \
     android/base/synchronization/MessageChannel.cpp \
@@ -185,6 +186,7 @@ LOCAL_SRC_FILES := \
     android/utils/reflist.c \
     android/utils/refset.c \
     android/utils/sockets.c \
+    android/utils/socket_drainer.cpp \
     android/utils/stralloc.c \
     android/utils/stream.cpp \
     android/utils/string.cpp \
@@ -295,7 +297,6 @@ LOCAL_SRC_FILES := \
     android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
     android/base/network/Dns.cpp \
-    android/base/sockets/SocketDrainer.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
     android/camera/camera-common.cpp \
@@ -492,8 +493,6 @@ LOCAL_SRC_FILES := \
     android/user-config.cpp \
     android/utils/dns.cpp \
     android/utils/Random.cpp \
-    android/utils/socket_drainer.cpp \
-    android/utils/sockets.c \
     android/utils/looper.cpp \
     android/virtualscene/MeshSceneObject.cpp \
     android/virtualscene/PosterInfo.cpp \
