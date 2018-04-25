@@ -44,7 +44,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
 
     {
         const auto ram = fopen(
-                PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
+                PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str(), "rb");
         if (!ram) {
             mSnapshot.saveFailure(FailureReason::NoRamFile);
             return;
@@ -168,8 +168,8 @@ void Loader::synchronize(bool isOnExit) {
     // whatever it was doing, because the emulator will need valid ram after
     // the save. Then, we also need to invalidate the loader's gap tracker
     // because it's unknown whether the particular version of this loader's
-    // gaps corresponds properly to the gaps in the ram.bin file on disk (e.g.,
-    // we might have saved more than once after a load).
+    // gaps corresponds properly to the gaps in the |kRamFileName| file on disk
+    // (e.g., we might have saved more than once after a load).
 
     if (mRamLoader && !mRamLoader->hasError()) {
         if (isOnExit) {
@@ -181,7 +181,7 @@ void Loader::synchronize(bool isOnExit) {
 
         if (!mRamLoader->hasGaps()) {
             const auto ram = fopen(
-                    PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
+                    PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str(), "rb");
 
             if (!ram) return;
 
