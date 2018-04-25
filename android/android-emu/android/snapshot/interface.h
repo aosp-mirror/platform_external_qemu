@@ -42,6 +42,9 @@ void androidSnapshot_cancelSave();
 
 void androidSnapshot_delete(const char* name);
 
+// androidSnapshot_delete, but keeps the protobuf around as an epitaph.
+void androidSnapshot_invalidate(const char* name);
+
 bool androidSnapshot_areSavesSlow(const char* name);
 
 // Returns the name of the snapshot file that was loaded to start
