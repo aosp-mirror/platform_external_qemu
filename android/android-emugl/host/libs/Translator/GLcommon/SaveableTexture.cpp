@@ -19,6 +19,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/memory/MemoryHints.h"
 #include "android/base/system/System.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
@@ -521,6 +522,11 @@ void SaveableTexture::onSave(
                     stream->putBe32(imgData.get()[level].m_depth);
                 }
                 saveBuffer(stream, imgData.get()[level].m_data);
+                // Page out the data after save.
+                android::base::memoryHint(
+                        imgData.get()[level].m_data.data(),
+                        imgData.get()[level].m_data.size(),
+                        android::base::MemoryHint::PageOut);
             }
 
             // If under memory pressure, delete this intermediate buffer.
@@ -725,6 +731,13 @@ void SaveableTexture::restore() {
                                         levelData[level].m_height,
                                         m_border, resultFormat, m_type, pixels);
                             }
+                            if (pixels) {
+                                // Page out the data after restore.
+                                android::base::memoryHint(
+                                        levelData[level].m_data.data(),
+                                        levelData[level].m_data.size(),
+                                        android::base::MemoryHint::PageOut);
+                            }
                         }
                     }
                 };
@@ -753,6 +766,13 @@ void SaveableTexture::restore() {
                                         levelData[level].m_height,
                                         levelData[level].m_depth, m_border,
                                         resultFormat, m_type, pixels);
+                            }
+                            if (pixels) {
+                                // Page out the data after restore.
+                                android::base::memoryHint(
+                                        levelData[level].m_data.data(),
+                                        levelData[level].m_data.size(),
+                                        android::base::MemoryHint::PageOut);
                             }
                         }
                     }

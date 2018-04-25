@@ -24,6 +24,7 @@ namespace base {
 // cross-platform interface for madvise
 enum class MemoryHint {
     DontNeed,
+    PageOut,
     Normal,
     Random,
     Sequential,
