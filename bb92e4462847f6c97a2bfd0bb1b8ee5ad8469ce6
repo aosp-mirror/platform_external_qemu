@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "d9a6855c_29356bac",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-25T19:54:03Z",
+      "side": 1,
+      "message": "I double checked it with the standard, it supports more characters.",
+      "parentUuid": "7b4ccbd1_d57a924f",
+      "range": {
+        "startLine": 277,
+        "startChar": 0,
+        "endLine": 277,
+        "endChar": 75
+      },
+      "revId": "bb92e4462847f6c97a2bfd0bb1b8ee5ad8469ce6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a20ce7df_8efdb67e",
         "filename": "android/android-emu/android/telephony/sms.c",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2018-04-25T17:25:33Z",
       "side": 1,
       "message": "please make file\u0027s private functions static",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 17
+      },
+      "revId": "bb92e4462847f6c97a2bfd0bb1b8ee5ad8469ce6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50e554d4_49b4cb64",
+        "filename": "android/android-emu/android/telephony/sms.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-25T19:54:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a20ce7df_8efdb67e",
       "range": {
         "startLine": 41,
         "startChar": 4,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "7c6c71b8_47be3f8e",
+        "filename": "android/android-emu/android/telephony/sms.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-25T19:54:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e398744a_56dd47ab",
+      "range": {
+        "startLine": 287,
+        "startChar": 4,
+        "endLine": 287,
+        "endChar": 18
+      },
+      "revId": "bb92e4462847f6c97a2bfd0bb1b8ee5ad8469ce6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "97b07516_1e26e183",
         "filename": "android/android-emu/android/telephony/sms.c",
         "patchSetId": 2
@@ -105,6 +177,30 @@
       "writtenOn": "2018-04-25T17:25:33Z",
       "side": 1,
       "message": "in glib that\u0027s \u0027isalnum\u0027, what about either using that or just making it \u0027is_alnum_char\u0027? \u0027alphumeric\u0027 is a weird word IMO",
+      "range": {
+        "startLine": 299,
+        "startChar": 7,
+        "endLine": 299,
+        "endChar": 17
+      },
+      "revId": "bb92e4462847f6c97a2bfd0bb1b8ee5ad8469ce6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0588f45_d0cf25a7",
+        "filename": "android/android-emu/android/telephony/sms.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-25T19:54:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "97b07516_1e26e183",
       "range": {
         "startLine": 299,
         "startChar": 7,
@@ -151,6 +247,30 @@
       "writtenOn": "2018-04-25T17:25:33Z",
       "side": 1,
       "message": "space?",
+      "range": {
+        "startLine": 405,
+        "startChar": 8,
+        "endLine": 405,
+        "endChar": 22
+      },
+      "revId": "bb92e4462847f6c97a2bfd0bb1b8ee5ad8469ce6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30e83847_189a957d",
+        "filename": "android/android-emu/android/telephony/sms.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-25T19:54:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1dfe31f4_296715ad",
       "range": {
         "startLine": 405,
         "startChar": 8,
