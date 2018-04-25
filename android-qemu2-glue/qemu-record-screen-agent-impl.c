@@ -15,6 +15,7 @@
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulator-window.h"
 #include "android/opengles.h"
+#include "android/recording/screen-recorder.h"
 
 #include <stdbool.h>
 
@@ -24,7 +25,10 @@ static const QAndroidRecordScreenAgent sQAndroidRecordScreenAgent = {
         .startRecordingAsync = emulator_window_start_recording_async,
         .stopRecordingAsync = emulator_window_stop_recording_async,
         .getRecorderState = emulator_window_recorder_state_get,
-        .doSnap = android_screenShot};
+        .doSnap = android_screenShot,
+        .startWebRtcModule = start_webrtc_module,
+        .stopWebRtcModule = stop_webrtc_module
+};
 
 const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent =
         &sQAndroidRecordScreenAgent;

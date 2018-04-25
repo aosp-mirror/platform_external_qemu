@@ -360,9 +360,9 @@ bool Snapshot::save() {
     // We want to maintain the default_boot snapshot as outside
     // the hierarchy. For that reason, don't set parent if default
     // boot is involved either as the current snapshot or the parent snapshot.
-    if (mName != Quickboot::kDefaultBootSnapshot &&
+    if (mName != kDefaultBootSnapshot &&
         parentSnapshot != "" &&
-        parentSnapshot != Quickboot::kDefaultBootSnapshot) {
+        parentSnapshot != kDefaultBootSnapshot) {
         if (mName != parentSnapshot) {
             mSnapshotPb.set_parent(parentSnapshot);
         }

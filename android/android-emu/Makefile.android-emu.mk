@@ -897,7 +897,7 @@ EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STA
 
 $(call start-emulator-library, emulator-libui)
 
-EMULATOR_LIBUI_INCLUDES += $(ANDROID_SKIN_INCLUDES)
+EMULATOR_LIBUI_INCLUDES += $(ANDROID_SKIN_INCLUDES) $(EMULATOR_LIBYUV_INCLUDES)
 EMULATOR_LIBUI_LDLIBS += $(ANDROID_SKIN_LDLIBS)
 
 LOCAL_CFLAGS += \
@@ -937,7 +937,8 @@ LOCAL_SRC_FILES += \
     android/recording/GifConverter.cpp \
     android/recording/screen-recorder.cpp \
     android/recording/video/GuestReadbackWorker.cpp \
-    android/recording/video/VideoProducer.cpp
+    android/recording/video/VideoProducer.cpp \
+    android/recording/video/VideoFrameSharer.cpp \
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)

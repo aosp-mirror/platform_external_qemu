@@ -92,6 +92,12 @@ constexpr int32_t kDefaultPageSize = 4096;
 
 constexpr int32_t kCancelTimeoutMs = 15000;
 
+// Size in bytes of largest in-flight RAM region for decommitting.
+constexpr uint64_t kDecommitChunkSize = 4096 * 4096; // 16 MB
+constexpr base::StringView kDefaultBootSnapshot = "default_boot";
+constexpr base::StringView kRamFileName = "ram.bin";
+constexpr base::StringView kTexturesFileName = "textures.bin";
+
 void resetSnapshotLiveness();
 bool isSnapshotAlive();
 
