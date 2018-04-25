@@ -640,6 +640,13 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
                 false /* don't write out the error code to protobuf; we just want
                          to check validity here */);
 
+        // Nuke the invalid snapshots.
+        if (!snapshotIsValid) {
+            android::base::ThreadLooper::runOnMainLooper([fileName, this] {
+                androidSnapshot_delete(fileName.toStdString().c_str());
+            });
+        }
+
         QString logicalName;
         QDateTime snapshotDate;
         if (!snapshotIsValid) {
