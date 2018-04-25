@@ -44,6 +44,10 @@ private:
         // One or more digits (0-9) are required.
         // Some additional characters are allowed, but ignored.
         State validate(QString &input, int &pos) const;
+
+    private:
+        static State validateAsDigital(const QString &input);
+        static State validateAsAlphanumeric(const QString &input);
     };
 
     enum class CallActivity {
