@@ -236,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "e2f177d1_b79eb645",
+        "filename": "android/android-emu/android/telephony/sms.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-04-25T19:55:06Z",
+      "side": 1,
+      "message": "I added new test cases to the existing test and a new test for address to string conversion.",
+      "parentUuid": "75440e59_0f8d4334",
+      "range": {
+        "startLine": 308,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 29
+      },
+      "revId": "bb92e4462847f6c97a2bfd0bb1b8ee5ad8469ce6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1dfe31f4_296715ad",
         "filename": "android/android-emu/android/telephony/sms.c",
         "patchSetId": 2
