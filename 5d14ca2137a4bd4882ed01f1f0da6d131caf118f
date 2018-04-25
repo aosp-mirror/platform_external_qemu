@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4d0b1e2_75a7886d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/telephony-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-25T19:58:48Z",
+      "side": 1,
+      "message": "that\u0027s not the emulator coding style. please run clang-format with the style checked into external/qemu/android/.clang-format",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 237,
+        "endChar": 1
+      },
+      "revId": "5d14ca2137a4bd4882ed01f1f0da6d131caf118f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15681bfc_39f083ac",
+        "filename": "android/android-emu/android/telephony/sms.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-25T19:58:48Z",
+      "side": 1,
+      "message": "this formatting is definitely not right",
+      "range": {
+        "startLine": 430,
+        "startChar": 3,
+        "endLine": 430,
+        "endChar": 4
+      },
+      "revId": "5d14ca2137a4bd4882ed01f1f0da6d131caf118f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
