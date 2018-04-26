@@ -57,7 +57,7 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
 #else // macOS and Linux
 
     int asAdviseFlag = MADV_NORMAL;
-    bool decommit = false;
+    bool reprotect = false;
     bool skipAdvise = false;
 
     switch (hint) {
@@ -65,7 +65,7 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
 #ifdef __APPLE__
             asAdviseFlag = MADV_FREE;
             // On Mac, an explicit mprotect() needs to happen to kick the page out.
-            decommit = true;
+            reprotect = true;
 #else // Linux
             // MADV_FREE would be best, but it is not necessarily
             // supported on all Linux systems.
@@ -76,7 +76,9 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
             // MADV_DONTNEED / MADV_FREE change the semantics of the memory,
             // so all we do here is skip the madvise call and mprotect().
             skipAdvise = true;
-            decommit = true;
+#ifdef __APPLE__
+            reprotect = true;
+#endif
             break;
         case MemoryHint::Normal:
             asAdviseFlag = MADV_NORMAL;
@@ -97,7 +99,7 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
         res = madvise(start, length, asAdviseFlag);
     }
 
-    if (decommit) {
+    if (reprotect) {
         mprotect(start, length, PROT_NONE);
         mprotect(start, length, PROT_READ | PROT_WRITE | PROT_EXEC);
     }
