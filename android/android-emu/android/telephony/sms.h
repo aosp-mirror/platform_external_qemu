@@ -13,6 +13,7 @@
 #pragma once
 
 #include <time.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,13 +45,28 @@ extern int   sms_timestamp_to_tm( SmsTimeStamp  stamp, struct tm*  tm );
 /** SMS ADDRESSES
  **/
 
-#define  SMS_ADDRESS_MAX_SIZE  16
+/*
+  ETSI TS 123 040 9.1.2.5 Address fields
+
+  The maximum length of the full address field (Address-Length,
+  Type-of-Address and Address-Value) is 12 octets.
+*/
+
+#define SMS_ADDRESS_MAX_SIZE                 10
+#define BITS_PER_SMS_CHAR                    7
+#define BITS_PER_SEMIOCTET                   4
+#define MAX_ALPHANUMERIC_SMS_ADDRESS_LENGTH  (SMS_ADDRESS_MAX_SIZE * CHAR_BIT / BITS_PER_SMS_CHAR)
 
 typedef struct {
     unsigned char  len;
     unsigned char  toa;
     unsigned char  data[ SMS_ADDRESS_MAX_SIZE ];
 } SmsAddressRec, *SmsAddress;
+
+/* Checks if char is in the GSM default alphabet (we don't support the full
+ * alphabet, only the ASCII subset of it).
+ */
+int is_in_gsm_default_alphabet( int c );
 
 extern int  sms_address_from_str( SmsAddress  address, const char*  src, int  srclen );
 extern int  sms_address_to_str( SmsAddress  address, char*  src, int  srclen );

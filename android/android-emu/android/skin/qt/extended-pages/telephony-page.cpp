@@ -200,6 +200,41 @@ void TelephonyPage::on_tel_holdCallButton_clicked()
 
 QValidator::State TelephonyPage::PhoneNumberValidator::validate(QString &input, int &pos) const
 {
+    bool intermediate = false;
+
+    switch (validateAsDigital(input)) {
+    case QValidator::Acceptable:
+        return QValidator::Acceptable;
+
+    case QValidator::Intermediate:
+        intermediate = true;
+        break;
+
+    case QValidator::Invalid:
+        break;
+    }
+
+    switch (validateAsAlphanumeric(input)) {
+    case QValidator::Acceptable:
+        return QValidator::Acceptable;
+
+    case QValidator::Intermediate:
+        intermediate = true;
+        break;
+
+    case QValidator::Invalid:
+        break;
+    }
+
+    if (intermediate) {
+        return QValidator::Intermediate;
+    }
+
+    return QValidator::Invalid;
+}
+
+QValidator::State TelephonyPage::PhoneNumberValidator::validateAsDigital(const QString &input)
+{
     int numDigits = 0;
     const int MAX_DIGITS = 16;
     static const QString acceptable_non_digits = "-.()/ +";
@@ -209,7 +244,7 @@ QValidator::State TelephonyPage::PhoneNumberValidator::validate(QString &input, 
     }
 
     for (int i = 0; i < input.length(); i++) {
-        QCharRef c = input[i];
+        const QChar c = input[i];
         if (c.isDigit()) {
             numDigits++;
             if (numDigits > MAX_DIGITS) {
@@ -224,6 +259,27 @@ QValidator::State TelephonyPage::PhoneNumberValidator::validate(QString &input, 
     }
 
     return ((numDigits > 0) ? QValidator::Acceptable : QValidator::Intermediate);
+}
+
+QValidator::State TelephonyPage::PhoneNumberValidator::validateAsAlphanumeric(const QString &input)
+{
+    // Alphanumeric address is BITS_PER_SMS_CHAR bits per symbol
+
+    if (input.length() == 0) {
+        return QValidator::Intermediate;
+    }
+
+    if (input.length() > (SMS_ADDRESS_MAX_SIZE * CHAR_BIT / BITS_PER_SMS_CHAR)) {
+        return QValidator::Invalid;
+    }
+
+    for (int i = 0; i < input.length(); i++) {
+        if (!is_in_gsm_default_alphabet(input[i].unicode())) {
+            return QValidator::Invalid;
+        }
+    }
+
+    return QValidator::Acceptable;
 }
 
 void TelephonyPage::on_sms_sendButton_clicked()

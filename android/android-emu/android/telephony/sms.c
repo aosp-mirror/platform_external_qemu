@@ -19,6 +19,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 // Debug logs.
 #define  D(...)  ANDROID_TELEPHONY_LOG_ON(modem,__VA_ARGS__)
@@ -31,6 +32,23 @@
 
 /* size of the user data header in bytes */
 #define  USER_DATA_HEADER_SIZE   6
+
+/* ETSI TS 123 040 9.1.2.5 Address fields */
+#define TON_DOMESTIC      0
+#define TON_INTERNATIONAL 1
+#define TON_ALPHANUMERIC  5
+
+static int
+sms_build_toa( int ton )
+{
+    return 0x81 | (ton << 4);
+}
+
+static int
+sms_get_ton( int toa )
+{
+    return (toa >> 4) & 7;
+}
 
 /** MESSAGE TEXT
  **/
@@ -268,21 +286,106 @@ gsm_rope_add_timestamp( GsmRope  rope, const SmsTimeStampRec*  ts )
 /** SMS ADDRESSES
  **/
 
+/* 3G TS 23.038 6.2.1 Default alphabet (the ASCII part) */
 int
-sms_address_from_str( SmsAddress  address, const char*  src, int  srclen )
+is_in_gsm_default_alphabet( int c ) {
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+        return 1;
+    } else {
+        switch (c) {
+        case '@':
+        case '_':
+        case ' ':
+        case '!':
+        case '"':
+        case '#':
+        case '%':
+        case '&':
+        case '\'':
+        case '(':
+        case ')':
+        case '*':
+        case '+':
+        case ',':
+        case '-':
+        case '.':
+        case '/':
+        case ':':
+        case ';':
+        case '<':
+        case '=':
+        case '>':
+        case '?':
+            return 1;
+
+        default:
+            return 0;
+        }
+    }
+}
+
+/* 3G TS 23.038 6.1.2 Character packing */
+static int
+sms_alphanum_address_from_str( SmsAddress  address, const char*  src, int  srclen )
+{
+    if (srclen == 0) {
+        return -1;
+    } else if (srclen > MAX_ALPHANUMERIC_SMS_ADDRESS_LENGTH) {
+        return -1;
+    } else {
+        const char* end = src + srclen;
+        bytes_t data = address->data;
+        int shifterBits = 0;
+        int shifterSize = 0;
+
+        memset( data, 0, sizeof(address->data) );
+
+        /* src --(7bit)-->  shifterBits --(8bit)--> data */
+        for (; src != end; ++src) {
+            const char c = *src;
+            if (is_in_gsm_default_alphabet(c)) {
+                shifterBits |= (c << shifterSize);
+                shifterSize += BITS_PER_SMS_CHAR;
+
+                while (shifterSize >= CHAR_BIT) {
+                    *data = shifterBits & 0xff;
+                    ++data;
+
+                    shifterBits >>= CHAR_BIT;
+                    shifterSize -= CHAR_BIT;
+                }
+            } else {
+                return -1;
+            }
+        }
+
+        if (shifterSize > 0) {
+            *data = shifterBits;
+        }
+
+        address->len = (srclen * BITS_PER_SMS_CHAR + BITS_PER_SEMIOCTET - 1) /
+            BITS_PER_SEMIOCTET;
+        address->toa = sms_build_toa(TON_ALPHANUMERIC);
+
+        return 0;
+    }
+}
+
+static int
+sms_numeric_address_from_str( SmsAddress  address, const char*  src, int  srclen )
 {
     const char*  end   = src + srclen;
     int          shift = 0, len = 0;
     bytes_t      data = address->data;
 
     address->len = 0;
-    address->toa = 0x81; // Type of address: domestic
+    address->toa = sms_build_toa(TON_DOMESTIC);
 
     if (src >= end)
         return -1;
 
     if ( src[0] == '+' ) {
-        address->toa = 0x91; // Type of address: international
+        address->toa = sms_build_toa(TON_INTERNATIONAL);
         if (++src == end)
             goto Fail;
     }
@@ -318,7 +421,19 @@ Fail:
 }
 
 int
-sms_address_to_str( SmsAddress address, char*  str, int  strlen )
+sms_address_from_str( SmsAddress  address, const char*  src, int  srclen )
+{
+    int result;
+    result = sms_numeric_address_from_str(address, src, srclen);
+    if (result >= 0) {
+        return result;
+   }
+
+    return sms_alphanum_address_from_str(address, src, srclen);
+}
+
+static int
+sms_numeric_address_to_str( SmsAddress address, char*  str, int  strlen )
 {
     static const char  dialdigits[16] = "0123456789*#,N%";
     int                n, count = 0;
@@ -345,6 +460,62 @@ sms_address_to_str( SmsAddress address, char*  str, int  strlen )
             count += 1;
     }
     return count;
+}
+
+static int
+sms_alphanumeric_address_to_str( SmsAddress address, char*  str, int  strlen )
+{
+    int shifterBits = 0;
+    int shifterSize = 0;
+    int length = 0;
+    int addressLengthInBits = address->len * BITS_PER_SEMIOCTET;
+
+    cbytes_t i = address->data;
+    cbytes_t end = i + ((addressLengthInBits + CHAR_BIT - 1) / CHAR_BIT);
+
+    /* address->data --(8 bits)--> shifterBits --(7 bit)--> str */
+    for (; i != end; ++i) {
+        int thisBits = (addressLengthInBits < CHAR_BIT) ?
+            addressLengthInBits : CHAR_BIT;
+        shifterBits |= (*i << shifterSize);
+        shifterSize += thisBits;
+        addressLengthInBits -= thisBits;
+
+        while (shifterSize >= BITS_PER_SMS_CHAR) {
+            char c = shifterBits & 0x7f;
+            if (is_in_gsm_default_alphabet(c)) {
+                 ++length;
+                 if (length > strlen) {
+                     return -1;
+                 }
+
+                *str = c;
+                 ++str;
+
+                 shifterBits >>= BITS_PER_SMS_CHAR;
+                 shifterSize -= BITS_PER_SMS_CHAR;
+            } else {
+                return -1;
+            }
+        }
+    }
+
+    return length;
+}
+
+int
+sms_address_to_str( SmsAddress address, char*  str, int  strlen )
+{
+    switch (sms_get_ton(address->toa)) {
+    case TON_DOMESTIC:
+    case TON_INTERNATIONAL:
+        return sms_numeric_address_to_str(address, str, strlen);
+
+    case TON_ALPHANUMERIC:
+        return sms_alphanumeric_address_to_str(address, str, strlen);
+    }
+
+    return -1;
 }
 
 static void
