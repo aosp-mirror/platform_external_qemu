@@ -16,6 +16,20 @@
 
 namespace sms {
 
+TEST(Sms, IsInGsmDefaultAlphabet) {
+    EXPECT_TRUE(is_in_gsm_default_alphabet('a'));
+    EXPECT_TRUE(is_in_gsm_default_alphabet('z'));
+    EXPECT_TRUE(is_in_gsm_default_alphabet('A'));
+    EXPECT_TRUE(is_in_gsm_default_alphabet('Z'));
+    EXPECT_TRUE(is_in_gsm_default_alphabet('0'));
+    EXPECT_TRUE(is_in_gsm_default_alphabet('9'));
+    EXPECT_TRUE(is_in_gsm_default_alphabet(' '));
+    EXPECT_TRUE(is_in_gsm_default_alphabet('-'));
+
+    EXPECT_FALSE(is_in_gsm_default_alphabet('~'));
+    EXPECT_FALSE(is_in_gsm_default_alphabet('$'));
+}
+
 TEST(Sms, AddrFromStr) {
 
     static const struct {
@@ -23,19 +37,18 @@ TEST(Sms, AddrFromStr) {
           const int            expectedRet;
           const int            expectedToa;
           const int            expectedLen;
-          const unsigned char  expectedData[16];
+          const unsigned char  expectedData[SMS_ADDRESS_MAX_SIZE];
       } kData[] = {
           { "(650) 123-4567",   0, 0x81, 10, { 0x56, 0x10, 0x32, 0x54, 0x76 } },
           { "+1.650 123/4567",  0, 0x91, 11, { 0x61, 0x05, 0x21, 0x43, 0x65, 0xf7 } },
           { "5",                0, 0x81,  1, { 0xf5 } },
-          { "+()",             -1, 0,     0, { } }, // No digits
+          { "+()",              0, 0xD1,  6, { 0x2b, 0x54, 0x0a } },
           { "",                -1, 0,     0, { } }, // No digits
           { "123 456.7890"
-            "(12)34567890"
-            "1234567890 12",    0, 0x81, 32, { 0x21, 0x43, 0x65, 0x87, 0x09,
-                                               0x21, 0x43, 0x65, 0x87, 0x09,
-                                               0x21, 0x43, 0x65, 0x87, 0x09,
-                                               0x21                          } },
+            "(12)34567890",     0, 0x81, 20, { 0x21, 0x43, 0x65, 0x87, 0x09,
+                                               0x21, 0x43, 0x65, 0x87, 0x09 } },
+          { "emu dev",          0, 0xD1, 13, { 0xe5, 0x76, 0x1d, 0x44, 0x2e,
+                                               0xdb, 0x01 } },
           { "123 456.7890"
             "(12)34567890"
             "1234567890 123",  -1, 0,     0, { } }, // Too long
@@ -59,6 +72,30 @@ TEST(Sms, AddrFromStr) {
             EXPECT_FALSE(cmpResult);
         }
     }
+}
+
+TEST(Sms, AlphanumericAddressToStr) {
+    SmsAddressRec address = {13, 0xD1, { 0xe5, 0x76, 0x1d, 0x44, 0x2e, 0xdb, 0x01 }};
+
+    char buf[32];
+    EXPECT_EQ(sms_address_to_str(&address, buf, sizeof(buf)), 7);
+    EXPECT_EQ(strncmp(buf, "emu dev", 7), 0);
+}
+
+TEST(Sms, InternationalAddressToStr) {
+    SmsAddressRec address = {11, 0x91, { 0x61, 0x05, 0x21, 0x43, 0x65, 0xf7 }};
+
+    char buf[32];
+    EXPECT_EQ(sms_address_to_str(&address, buf, sizeof(buf)), 12);
+    EXPECT_EQ(strncmp(buf, "+16501234567", 12), 0);
+}
+
+TEST(Sms, DomesticAddressToStr) {
+    SmsAddressRec address = {10, 0x81, { 0x56, 0x10, 0x32, 0x54, 0x76 }};
+
+    char buf[32];
+    EXPECT_EQ(sms_address_to_str(&address, buf, sizeof(buf)), 10);
+    EXPECT_EQ(strncmp(buf, "6501234567", 10), 0);
 }
 
 TEST(Sms, Utf8FromStr) {

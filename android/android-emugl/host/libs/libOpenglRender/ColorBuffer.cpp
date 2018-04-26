@@ -87,6 +87,7 @@ static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
         case GL_RGB5_A1_OES:
         case GL_RGBA4_OES:
         case GL_UNSIGNED_INT_10_10_10_2_OES:
+        case GL_RGB10_A2:
         case GL_RGBA16F:
             return GL_RGBA;
         default:
@@ -130,6 +131,12 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         case GL_UNSIGNED_INT_10_10_10_2_OES:
             texFormat = GL_RGBA;
             pixelType = GL_UNSIGNED_SHORT;
+            bytesPerPixel = 4;
+            break;
+
+        case GL_RGB10_A2:
+            texFormat = GL_RGBA;
+            pixelType = GL_UNSIGNED_INT_2_10_10_10_REV;
             bytesPerPixel = 4;
             break;
 
@@ -339,13 +346,6 @@ void ColorBuffer::subUpdate(int x,
     p_format = sGetUnsizedColorBufferFormat(p_format);
 
     touch();
-
-    if (m_needFormatCheck) {
-        if (p_type != m_type || p_format != m_format) {
-            reformat((GLint)p_format, p_format, p_type);
-        }
-        m_needFormatCheck = false;
-    }
 
     if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
         m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
