@@ -2556,7 +2556,8 @@ bool GLEScontext::setupImageBlitForTexture(uint32_t width,
         read_iformat == GL_RGB10_A2) {
         // Is not a blittable format. Just create the texture for now to
         // make image blit state consistent.
-        gl.glTexImage2D(GL_TEXTURE_2D, 0, sizedInternalFormat, width, height, 0, internalFormat, GL_UNSIGNED_BYTE, 0);
+        gl.glTexImage2D(GL_TEXTURE_2D, 0, sizedInternalFormat, width, height, 0,
+                baseFormatOfInternalFormat(internalFormat), GL_UNSIGNED_BYTE, 0);
         return false;
     }
 

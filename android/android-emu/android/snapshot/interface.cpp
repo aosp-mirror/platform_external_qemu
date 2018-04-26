@@ -54,6 +54,10 @@ void androidSnapshot_delete(const char* name) {
     Snapshotter::get().deleteSnapshot(name);
 }
 
+void androidSnapshot_invalidate(const char* name) {
+    Snapshotter::get().invalidateSnapshot(name);
+}
+
 bool androidSnapshot_areSavesSlow(const char* name) {
     return Snapshotter::get().areSavesSlow(name);
 }
