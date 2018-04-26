@@ -11,11 +11,15 @@
 
 #include "android/skin/qt/extended-pages/settings-page.h"
 
-#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
+#include "android/skin/qt/FramelessDetector.h"
+#include "android/skin/qt/qt-settings.h"
+
+#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
+#include "android/base/async/ThreadLooper.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
@@ -23,10 +27,13 @@
 #include "android/snapshot/interface.h"
 
 #include <QApplication>
+#endif
+
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
 
+#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
 using Ui::Settings::SaveSnapshotOnExit;
 using Ui::Settings::SaveSnapshotOnExitUiOrder;
 using android::metrics::MetricsReporter;
@@ -34,11 +41,7 @@ using android::metrics::MetricsReporter;
 namespace pb = android_studio;
 
 static SaveSnapshotOnExit getSaveOnExitChoice();
-
-// Globally accessable
-bool userSettingIsDontSaveSnapshot() {
-    return getSaveOnExitChoice() == SaveSnapshotOnExit::Never;
-}
+#endif
 
 // Helper function to set the contents of a QLineEdit.
 static void setElidedText(QLineEdit* line_edit, const QString& text) {
@@ -132,43 +135,62 @@ SettingsPage::SettingsPage(QWidget* parent)
             break;
     }
 
-    // Save snapshot on exit
-    QString avdNameWithUnderscores(android_hw->avd_name);
+#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove this when Snapshot controls are fully enabled
+    // This is interim code.
+    if (android::featurecontrol::isEnabled(android::featurecontrol::GenericSnapshotsUI)) {
+        // The Emulator features file has Generic Snapshots UI enabled, so we
+        // show a separate Snapshots sub-window, and the snapshots controls on
+        // this page are not used.
+        //
+        // Hide the few Snapshot controls here.
+        mUi->set_saveOnExitTitle->hide();
+        mUi->set_saveSnapshotOnExit->hide();
+        mUi->set_loadSnapNowButton->hide();
+        mUi->set_saveSnapNowButton->hide();
+    } else {
+        // The Emulator features file does NOT have Generic Snapshots UI enabled.
+        // We do not show a separate Snapshots sub-window, so we need the few
+        // snapshots controls on this page.
 
-    mUi->set_saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
-                                   + avdNameWithUnderscores.replace('_', ' '));
+        // Save snapshot on exit
+        QString avdNameWithUnderscores(android_hw->avd_name);
 
-    SaveSnapshotOnExit saveOnExitChoice = getSaveOnExitChoice();
-    switch (saveOnExitChoice) {
-        case SaveSnapshotOnExit::Always:
-            mUi->set_saveSnapshotOnExit->setCurrentIndex(
-                    static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
-            break;
-        case SaveSnapshotOnExit::Ask:
-            mUi->set_saveSnapshotOnExit->setCurrentIndex(
-                    static_cast<int>(SaveSnapshotOnExitUiOrder::Ask));
-            // If we can't ask, we'll treat ASK the same as ALWAYS.
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
-            break;
-        case SaveSnapshotOnExit::Never:
-            mUi->set_saveSnapshotOnExit->setCurrentIndex(
-                    static_cast<int>(SaveSnapshotOnExitUiOrder::Never));
-            android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
-            break;
-        default:
-            fprintf(stderr,
-                    "%s: warning: unknown 'Save snapshot on exit' preference value 0x%x. "
-                    "Setting to Always.\n",
-                    __func__, (unsigned int)saveOnExitChoice);
-            mUi->set_saveSnapshotOnExit->setCurrentIndex(
-                    static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
-            break;
+        mUi->set_saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
+                                       + avdNameWithUnderscores.replace('_', ' '));
+
+        SaveSnapshotOnExit saveOnExitChoice = getSaveOnExitChoice();
+        switch (saveOnExitChoice) {
+            case SaveSnapshotOnExit::Always:
+                mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                        static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
+                android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+                break;
+            case SaveSnapshotOnExit::Ask:
+                mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                        static_cast<int>(SaveSnapshotOnExitUiOrder::Ask));
+                // If we can't ask, we'll treat ASK the same as ALWAYS.
+                android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+                break;
+            case SaveSnapshotOnExit::Never:
+                mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                        static_cast<int>(SaveSnapshotOnExitUiOrder::Never));
+                android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+                break;
+            default:
+                fprintf(stderr,
+                        "%s: warning: unknown 'Save snapshot on exit' preference value 0x%x. "
+                        "Setting to Always.\n",
+                        __func__, (unsigned int)saveOnExitChoice);
+                mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                        static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
+                android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+                break;
+        }
+        // Enable SAVE NOW if we won't overwrite the state on exit
+        mUi->set_saveSnapNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
     }
-    // Enable SAVE NOW if we won't overwrite the state on exit
-    mUi->set_saveSnapNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
 
+#endif
     // OpenGL ES renderer
     for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
         mUi->set_glesBackendPrefComboBox->setItemData(i, QVariant(i));
@@ -351,6 +373,7 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     setElidedText(mUi->set_saveLocBox, dirName);
 }
 
+#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove this when Snapshot controls are fully enabled
 void SettingsPage::on_set_saveSnapNowButton_clicked() {
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
@@ -364,6 +387,7 @@ void SettingsPage::on_set_loadSnapNowButton_clicked() {
     android::base::ThreadLooper::runOnMainLooper( []() {
         androidSnapshot_load(android::snapshot::kDefaultBootSnapshot.c_str()); });
 }
+#endif
 
 void SettingsPage::on_set_adbPathButton_clicked() {
     QSettings settings;
@@ -479,6 +503,7 @@ void SettingsPage::on_set_crashReportPrefComboBox_currentIndexChanged(int index)
     }
 }
 
+#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove this when Snapshot controls are fully enabled
 void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
     SaveSnapshotOnExit preferenceValue;
     switch(static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
@@ -537,6 +562,7 @@ static SaveSnapshotOnExit getSaveOnExitChoice() {
     }
     return userChoice;
 }
+#endif
 
 static void set_glesBackend_to(WinsysPreferredGlesBackend v) {
     QSettings settings;
