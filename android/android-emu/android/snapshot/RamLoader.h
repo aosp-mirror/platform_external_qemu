@@ -175,14 +175,6 @@ private:
 
     // Whether or not we just want to reload the index.
     bool mIndexOnly = false;
-
-    // Persistent contiguous range mapper for paging out
-    // loaded pages in order to avoid high resident RAM.
-    android::base::ContiguousRangeMapper mDecommitter = {
-        [](uintptr_t start, uintptr_t size) {
-            android::base::memoryHint((void*)start, size,
-                                      android::base::MemoryHint::PageOut);
-        }, kDecommitChunkSize};
 };
 
 struct RamLoader::Page {

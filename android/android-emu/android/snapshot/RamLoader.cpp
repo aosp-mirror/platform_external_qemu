@@ -199,7 +199,6 @@ void RamLoader::interrupt() {
         mAccessWatch->join();
         mAccessWatch.clear();
     }
-    mDecommitter.finish();
     mStream.close();
 }
 
@@ -491,16 +490,12 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         fillPageData(page);
         delete[] page->data;
         page->data = nullptr;
-        // The guest probably doesn't want to access this page right now.
-        // Page it out if possible.
-        mDecommitter.add((uintptr_t)pagePtr(*page), mPageSize);
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
         return mJoining ? MemoryAccessWatch::IdleCallbackResult::RunAgain
                         : MemoryAccessWatch::IdleCallbackResult::Wait;
     } else {
-        mDecommitter.finish();
         // null page == all pages were loaded, stop.
         interruptReading();
         return MemoryAccessWatch::IdleCallbackResult::AllDone;
@@ -633,13 +628,21 @@ void RamLoader::fillPageData(Page* pagePtr) {
 #endif
     if (mAccessWatch) {
 
+        void* guestRam = this->pagePtr(page);
+        uint32_t guestRamSize = pageSize(page);
+
         bool res = mJoining ?
-            mAccessWatch->fillPageBulk(this->pagePtr(page), pageSize(page), page.data, mIsQuickboot) :
-            mAccessWatch->fillPage(this->pagePtr(page), pageSize(page), page.data, mIsQuickboot);
+            mAccessWatch->fillPageBulk(guestRam, guestRamSize, page.data, mIsQuickboot) :
+            mAccessWatch->fillPage(guestRam, guestRamSize, page.data, mIsQuickboot);
 
         if (!res) {
             mHasError = true;
         }
+
+        if (!mJoining) {
+            android::base::memoryHint(guestRam, guestRamSize, base::MemoryHint::PageOut);
+        }
+
         page.state.store(uint8_t(res ? State::Filled : State::Error),
                          std::memory_order_release);
     }
@@ -717,13 +720,10 @@ bool RamLoader::readAllPages() {
                 mHasError = true;
                 return false;
             }
-
-            mDecommitter.add((uintptr_t)ptr, int32_t(pageSize(*page)));
         }
     }
 
     mDecompressor.clear();
-    mDecommitter.finish();
 
     // Make everything normal again.
     void* firstHostPtr = pagePtr(mIndex.pages[0]);
