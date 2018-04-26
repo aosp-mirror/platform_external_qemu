@@ -16,6 +16,24 @@
       "revId": "8d81f0dca4a48f1a928938cc66816e0a2f450757",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73b58824_0ab377b6",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-04-26T17:21:58Z",
+      "side": 0,
+      "message": "It\u0027s still needed, but somehow, we put it into two static libs, and cause issues with gn. Once I consolidate them into android-emu-base, all are happy",
+      "parentUuid": "421b7d77_2bacf75d",
+      "revId": "8d81f0dca4a48f1a928938cc66816e0a2f450757",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
