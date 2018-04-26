@@ -493,7 +493,9 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         page->data = nullptr;
         // The guest probably doesn't want to access this page right now.
         // Page it out if possible.
-        mDecommitter.add((uintptr_t)pagePtr(*page), mPageSize);
+        if (mJoining) {
+            mDecommitter.add((uintptr_t)pagePtr(*page), mPageSize);
+        }
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
@@ -633,9 +635,12 @@ void RamLoader::fillPageData(Page* pagePtr) {
 #endif
     if (mAccessWatch) {
 
+        void* guestRam = this->pagePtr(page);
+        uint32_t guestRamSize = pageSize(page);
+
         bool res = mJoining ?
-            mAccessWatch->fillPageBulk(this->pagePtr(page), pageSize(page), page.data, mIsQuickboot) :
-            mAccessWatch->fillPage(this->pagePtr(page), pageSize(page), page.data, mIsQuickboot);
+            mAccessWatch->fillPageBulk(guestRam, guestRamSize, page.data, mIsQuickboot) :
+            mAccessWatch->fillPage(guestRam, guestRamSize, page.data, mIsQuickboot);
 
         if (!res) {
             mHasError = true;

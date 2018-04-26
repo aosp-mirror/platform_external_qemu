@@ -187,6 +187,17 @@ void OverlayMessageCenter::adjustSize() {
         return;
     }
 
+    // We want the pop-up to be at most 700 dp wide. We also
+    // want it to leave 20 dp on its left and right, unless that
+    // would make it less than 300 dp wide.
+    int avdWidth = width();
+    int popUpWidth =   (avdWidth > 740) ? 700
+                     : (avdWidth > 340) ? avdWidth - 40
+                     : (avdWidth > 300) ? 300
+                     :                    avdWidth;
+
+    setFixedWidth(popUpWidth);
+
     const int topGap = 21;
     const int midGap = 7;
 

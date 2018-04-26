@@ -44,7 +44,11 @@ private slots:
     void on_enlargeInfoButton_clicked();
     void on_editSnapshot_clicked();
     void on_loadSnapshot_clicked();
+    void on_loadQuickBootNowButton_clicked();
     void on_reduceInfoButton_clicked();
+    void on_saveQuickBootNowButton_clicked();
+    void on_saveQuickBootOnExit_currentIndexChanged(int index);
+    void on_tabWidget_currentChanged(int index);
     void on_takeSnapshotButton_clicked();
 
 private:
