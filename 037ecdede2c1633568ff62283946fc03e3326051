@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1994b1be_859ae813",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-27T21:40:20Z",
+      "side": 0,
+      "message": "Per discussion offline, I\u0027m going to try pulling down this CR locally and comparing.  The assert that I hit is in writeIndex, and it only appears to be called here, and only once, and this fixes a potential issue /after/ writeIndex is called.",
+      "range": {
+        "startLine": 419,
+        "startChar": 8,
+        "endLine": 421,
+        "endChar": 23
+      },
+      "revId": "037ecdede2c1633568ff62283946fc03e3326051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
