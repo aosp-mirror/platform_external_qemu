@@ -29,12 +29,11 @@ public:
     void forceStop();
 
 protected:
-    virtual void* allocBuffer(size_t minSize) override final;
-    virtual int commitBuffer(size_t size) override final;
-    virtual const unsigned char* readRaw(void* buf, size_t* inout_len)
-            override final;
-    virtual void* getDmaForReading(uint64_t guest_paddr) override final;
-    virtual void unlockDma(uint64_t guest_paddr) override final;
+    void* allocBuffer(size_t minSize) final;
+    int commitBuffer(size_t size) final;
+    const unsigned char* readRaw(void* buf, size_t* inout_len) final;
+    void* getDmaForReading(uint64_t guest_paddr) final;
+    void unlockDma(uint64_t guest_paddr) final;
 
     void onSave(android::base::Stream* stream) override;
     unsigned char* onLoad(android::base::Stream* stream) override;

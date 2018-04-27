@@ -18,31 +18,29 @@
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
 
-#include <errno.h>
-#include <stdlib.h>
+#include <cerrno>
+#include <cstdlib>
 
 namespace android {
 namespace internal {
 
 class DefaultPartitionConfigBackend : public PartitionConfigBackend {
 public:
-    virtual bool pathExists(const char* path) override {
-        return path_exists(path);
-    }
+    bool pathExists(const char* path) override { return path_exists(path); }
 
-    virtual bool pathEmptyFile(const char* path) override {
+    bool pathEmptyFile(const char* path) override {
         return path_empty_file(path) == 0;
     }
 
-    virtual bool pathCopyFile(const char* dst, const char* src) override {
+    bool pathCopyFile(const char* dst, const char* src) override {
         return path_copy_file(dst, src) == 0;
     }
 
-    virtual bool pathLockFile(const char* path) override {
-        return filelock_create(path) != NULL;
+    bool pathLockFile(const char* path) override {
+        return filelock_create(path) != nullptr;
     }
 
-    virtual bool pathCreateTempFile(std::string* path) override {
+    bool pathCreateTempFile(std::string* path) override {
         TempFile* temp_file = tempfile_create();
         if (!temp_file) {
             return false;
@@ -51,15 +49,14 @@ public:
         return true;
     }
 
-    virtual AndroidPartitionType probePartitionFileType(
-            const char* path) override {
+    AndroidPartitionType probePartitionFileType(const char* path) override {
         return androidPartitionType_probeFile(path);
     }
 
-    virtual bool extractRamdiskFile(const char* ramdisk_path,
-                                    const char* file_path,
-                                    std::string* out) override {
-        char* out_data = NULL;
+    bool extractRamdiskFile(const char* ramdisk_path,
+                            const char* file_path,
+                            std::string* out) override {
+        char* out_data = nullptr;
         size_t out_size = 0U;
         if (!android_extractRamdiskFile(ramdisk_path, file_path, &out_data,
                                         &out_size)) {
@@ -70,10 +67,10 @@ public:
         return true;
     }
 
-    virtual bool parsePartitionFormat(const std::string& fstab,
-                                      const char* mountPath,
-                                      std::string* partitionFormat) override {
-        char* out_format = NULL;
+    bool parsePartitionFormat(const std::string& fstab,
+                              const char* mountPath,
+                              std::string* partitionFormat) override {
+        char* out_format = nullptr;
         if (!android_parseFstabPartitionFormat(fstab.c_str(), fstab.size(),
                                                mountPath, &out_format)) {
             return false;
@@ -83,9 +80,9 @@ public:
         return true;
     }
 
-    virtual bool makeEmptyPartition(AndroidPartitionType partitionType,
-                                    uint64_t partitionSize,
-                                    const char* partitionFile) override {
+    bool makeEmptyPartition(AndroidPartitionType partitionType,
+                            uint64_t partitionSize,
+                            const char* partitionFile) override {
         int ret = androidPartitionType_makeEmptyFile(
                 partitionType, partitionSize, partitionFile);
         if (ret < 0) {
@@ -95,8 +92,8 @@ public:
         return true;
     }
 
-    virtual void resizeExt4Partition(const char* partitionPath,
-                                     uint64_t partitionSize) override {
+    void resizeExt4Partition(const char* partitionPath,
+                             uint64_t partitionSize) override {
         (void)::resizeExt4Partition(partitionPath,
                                     static_cast<int64_t>(partitionSize));
     }

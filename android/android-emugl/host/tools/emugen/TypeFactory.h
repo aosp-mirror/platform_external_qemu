@@ -22,7 +22,7 @@
 class TypeFactory {
 public:
     static TypeFactory *instance() {
-        if (m_instance == NULL) {
+        if (m_instance == nullptr) {
             m_instance = new TypeFactory;
         }
         return m_instance;
@@ -32,6 +32,6 @@ public:
 private:
     static TypeFactory *m_instance;
     void initBaseTypes();
-    TypeFactory() {}
+    TypeFactory() = default;
 };
 #endif

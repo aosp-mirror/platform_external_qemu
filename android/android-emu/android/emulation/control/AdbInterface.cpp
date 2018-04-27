@@ -35,6 +35,7 @@
 
 #include <cstdio>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -61,7 +62,7 @@ static const int kMinAdbProtocol = 32;
 
 class AdbDaemonImpl : public AdbDaemon {
 public:
-    virtual Optional<int> getProtocolVersion() override {
+    Optional<int> getProtocolVersion() override {
         return AdbHostServer::getProtocolVersion();
     }
 };
@@ -80,7 +81,7 @@ public:
 
     const std::string& adbPath() final;
 
-    virtual void setSerialNumberPort(int port) final {
+    void setSerialNumberPort(int port) final {
         mSerialString = std::string("emulator-") + std::to_string(port);
     }
 
@@ -121,7 +122,7 @@ class AdbLocatorImpl : public AdbLocator {
 
 // Construct the platform path with adb executable, or Nothing if it doesn't
 // exist.
-static Optional<std::string> platformPath(base::StringView root) {
+static Optional<std::string> platformPath(const base::StringView& root) {
     if (root.empty()) {
         LOG(VERBOSE) << " no root specified: ";
         return Optional<std::string>();
@@ -168,8 +169,10 @@ Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
     int protocol = 0;
     // Retrieve the adb version.
     const int maxAdbRetrievalTimeMs = 500;
-    auto read = System::get()->runCommandWithResult(adbVersion, maxAdbRetrievalTimeMs, nullptr);
-    if (!read || sscanf(read->c_str(), "Android Debug Bridge version %*d.%*d.%d",
+    auto read = System::get()->runCommandWithResult(
+            adbVersion, maxAdbRetrievalTimeMs, nullptr);
+    if (!read ||
+        sscanf(read->c_str(), "Android Debug Bridge version %*d.%*d.%d",
                &protocol) != 1) {
         LOG(VERBOSE) << "Failed obtain protocol version from " << adbPath;
         return {};
@@ -177,7 +180,6 @@ Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
     LOG(VERBOSE) << "Path:" << adbPath << " protocol version: " << protocol;
     return Optional<int>(protocol);
 }
-
 
 std::unique_ptr<AdbInterface> AdbInterface::Builder::build() {
     if (!mLocator) {
@@ -188,7 +190,7 @@ std::unique_ptr<AdbInterface> AdbInterface::Builder::build() {
     }
 
     AdbInterface* adb = new AdbInterfaceImpl(mLooper, mLocator.release(),
-                                    mDaemon.release());
+                                             mDaemon.release());
     return std::unique_ptr<AdbInterface>(adb);
 }
 
@@ -196,14 +198,15 @@ std::unique_ptr<AdbInterface> AdbInterface::Builder::build() {
 void AdbInterfaceImpl::discoverAdbInstalls() {
     auto adbs = mLocator->availableAdb();
     for (const auto& install : adbs) {
-        mAvailableAdbInstalls.push_back(std::make_pair(
-                install, mLocator->getAdbProtocolVersion(install)));
+        mAvailableAdbInstalls.emplace_back(
+                install, mLocator->getAdbProtocolVersion(install));
     }
 }
 
 const std::string& AdbInterfaceImpl::adbPath() {
-    if (!mCustomAdbPath.empty())
+    if (!mCustomAdbPath.empty()) {
         return mCustomAdbPath;
+    }
 
     selectAdbPath();
     return mAutoAdbPath;
@@ -225,7 +228,7 @@ void AdbInterfaceImpl::selectAdbPath() {
         for (const auto& choice : mAvailableAdbInstalls) {
             std::tie(adbPath, adbVersion) = choice;
             if (daemon == adbVersion) {
-                assert(adbVersion); // Clearly true..
+                assert(adbVersion);  // Clearly true..
                 mAdbVersionCurrent = *adbVersion >= kMinAdbProtocol;
                 mAutoAdbPath = adbPath;
                 return;
@@ -276,13 +279,13 @@ AdbCommand::AdbCommand(Looper* looper,
       mTimeoutMs(timeoutMs) {
     mCommand.push_back(adb_path);
 
-    // TODO: when run headless, the serial string won't be properly
+    // TODO(lfy): when run headless, the serial string won't be properly
     // initialized, so make a best attempt by using -e. This should be updated
     // when the headless emulator is given an AdbInterface reference.
     if (serial_string.empty()) {
-        mCommand.push_back("-e");
+        mCommand.emplace_back("-e");
     } else {
-        mCommand.push_back("-s");
+        mCommand.emplace_back("-s");
         mCommand.push_back(serial_string);
     }
 
@@ -292,7 +295,7 @@ AdbCommand::AdbCommand(Looper* looper,
 void AdbCommand::start(int checkTimeoutMs) {
     if (!mTask && !mFinished) {
         auto shared = shared_from_this();
-        mTask.reset(new ParallelTask<OptionalAdbCommandResult>(
+        mTask.reset(new ParallelTask<OptionalAdbCommandResult>( // NOLINT
                 mLooper,
                 [shared](OptionalAdbCommandResult* result) {
                     shared->taskFunction(result);

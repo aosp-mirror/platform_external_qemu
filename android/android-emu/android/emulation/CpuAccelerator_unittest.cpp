@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace android {
 
@@ -27,7 +27,7 @@ public:
         saved_status_ = GetCurrentCpuAcceleratorStatus();
     }
 
-    ~CpuAcceleratorTest() {
+    ~CpuAcceleratorTest() override {
         // Restore previous state.
         SetCurrentCpuAcceleratorForTesting(saved_accel_,
                                            saved_status_code_,

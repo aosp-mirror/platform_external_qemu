@@ -16,9 +16,9 @@
 
 #include "gles/shader_variant.h"
 
-#include <stdio.h>
-#include <string.h>
 #include <algorithm>
+#include <cstdio>
+#include <cstring>
 #include "common/alog.h"
 #include "gles/gles_context.h"
 #include "gles/gles_validate.h"
@@ -90,11 +90,11 @@ std::string ShaderVariant::GetInfoLog() const {
                GL_INFO_LOG_LENGTH, &info_log_length);
 
   if (info_log_length > 0) {
-    char* buf = new char[info_log_length];
-    PASS_THROUGH(ctx, GetShaderInfoLog, global_name_,
-                 info_log_length, NULL, buf);
-    info_log_cache_.Mutate() = buf;
-    delete[] buf;
+      auto* buf = new char[info_log_length];
+      PASS_THROUGH(ctx, GetShaderInfoLog, global_name_, info_log_length, NULL,
+                   buf);
+      info_log_cache_.Mutate() = buf;
+      delete[] buf;
   } else {
     info_log_cache_.Mutate() = "";
   }
@@ -267,8 +267,9 @@ int ShaderVariant::ExtractVersion(std::string* src) {
         int ver;
         if (sscanf(c + 8, "%d", &ver) == 1) {  // NOLINT(runtime/printf)
           // Blank out the version token from the source.
-          for (int i = 0; i < 8; i++, c++)
-            *c = ' ';
+          for (int i = 0; i < 8; i++, c++) {
+              *c = ' ';
+          }
           while (*c < '0' || *c > '9') {
             *c = ' ';
             ++c;

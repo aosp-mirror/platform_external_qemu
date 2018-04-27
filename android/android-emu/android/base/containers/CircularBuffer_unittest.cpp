@@ -117,6 +117,5 @@ TEST(CircularBuffer, MoveOnlyType) {
    EXPECT_EQ(10098, *cb.back());
 }
 
-}
-}
-
+}  // namespace base
+}  // namespace android

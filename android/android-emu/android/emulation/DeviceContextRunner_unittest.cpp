@@ -61,7 +61,7 @@ public:
         queueDeviceOperation(op);
     }
 private:
-    void performDeviceOperation(const DeviceContextRunnerTestOp& op) {
+    void performDeviceOperation(const DeviceContextRunnerTestOp& op) override {
         getTestDevice()->requests.push_back(op.request_code);
     }
 };
@@ -139,7 +139,7 @@ TEST(DeviceContextRunner, multiRequests) {
     testRunner.init(&testLock, testLooper.get());
 
     for (size_t i = 0; i < kNumRequests; i++) {
-        testRunner.signal({ .request_code = (int)i });
+        testRunner.signal({.request_code = static_cast<int>(i)});
     }
 
     testLock.unlock();
@@ -166,7 +166,7 @@ TEST(DeviceContextRunner, multiRequestsNeedWait) {
     testRunner.init(&testLock, testLooper.get());
 
     for (size_t i = 0; i < kNumRequests; i++) {
-        testRunner.signal({ .request_code = (int)i });
+        testRunner.signal({.request_code = static_cast<int>(i)});
     }
 
     testLock.lock();

@@ -29,9 +29,9 @@
 #include <fstream>
 
 #include <fcntl.h>
-#include <inttypes.h>
-#include <stdint.h>
 #include <sys/stat.h>
+#include <cinttypes>
+#include <cstdint>
 
 #ifdef _WIN32
 #include <io.h>
@@ -82,7 +82,7 @@ const int CrashReporter::kCrashInfoProtobufStrInitialSize = 4096;
 
 CrashReporter::CrashReporter()
     : mDumpDir(System::get()->getTempDir()),
-      // TODO: add a function that can create a directory or error-out
+      // TODO(zyy): add a function that can create a directory or error-out
       // if it exists atomically. For now let's just allow UUIDs to do their
       // job to keep these unique
       mDataExchangeDir(
@@ -160,39 +160,44 @@ void CrashReporter::passDumpMessage(const char* message) {
 // Construct the full name of a file to put the data for the crash reporter
 // Don't allocate!
 template <size_t N>
-static void formatDataFileName(char (&buffer)[N], StringView baseName) {
+static void formatDataFileName(char (&buffer)[N], const StringView& baseName) {
     static_assert(N >= PATH_MAX, "Too small buffer for a path");
 
     // don't do any dynamic allocation here - it might be called during dump
     // writing, e.g. because of OOM exception
     memset(&buffer[0], 0, N);
-    snprintf(buffer, N - 1,
-             "%s%c%s",
+    snprintf(buffer, N - 1, "%s%c%s",
              CrashReporter::get()->getDataExchangeDir().c_str(),
              System::kDirSeparator,
              (baseName.empty() ? "additional_data.txt" : baseName.c_str()));
 }
 
-void CrashReporter::attachData(StringView name, StringView data, bool replace) {
+void CrashReporter::attachData(const StringView& name,
+                               const StringView& data,
+                               bool replace) {
     auto fd = openDataAttachFile(name, replace);
     HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
     HANDLE_EINTR(write(fd.get(), "\n", 1));
 }
 
-void CrashReporter::attachBinaryData(StringView name, StringView data, bool replace) {
+void CrashReporter::attachBinaryData(const StringView& name,
+                                     const StringView& data,
+                                     bool replace) {
     auto fd = openDataAttachFile(name, replace, true);
     HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
 }
 
-bool CrashReporter::attachFile(StringView sourceFullName,
-                               StringView destBaseName) {
+bool CrashReporter::attachFile(const StringView& sourceFullName,
+                               const StringView& destBaseName) {
     char fullName[PATH_MAX + 1];
     formatDataFileName(fullName, destBaseName);
 
     return path_copy_file_safe(fullName, sourceFullName.c_str()) >= 0;
 }
 
-ScopedFd CrashReporter::openDataAttachFile(StringView name, bool replace, bool binary) {
+ScopedFd CrashReporter::openDataAttachFile(const StringView& name,
+                                           bool replace,
+                                           bool binary) {
     const int bufferLength = PATH_MAX + 1;
     char fullName[bufferLength];
     formatDataFileName(fullName, name);

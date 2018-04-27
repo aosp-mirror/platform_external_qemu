@@ -13,14 +13,14 @@
 
 #include "android/base/memory/ScopedPtr.h"
 
+#include <sys/time.h>
+#include <cerrno>
+#include <cstdlib>
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
-#include "android/utils/system.h"
 #include "android/utils/path.h"
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/time.h>
+#include "android/utils/system.h"
 
 #define  D(...)   VERBOSE_PRINT(init,__VA_ARGS__)
 
@@ -62,7 +62,7 @@ auserConfig_new( AvdInfo*  info )
     char          inAndroidBuild = avdInfo_inAndroidBuild(info);
     char          needUUID = 1;
     char          temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
-    CIniFile*     ini = NULL;
+    CIniFile* ini = nullptr;
 
     std::unique_ptr<AUserConfig> uc(new AUserConfig());
     memset(uc.get(), 0, sizeof(*uc));
@@ -84,7 +84,7 @@ auserConfig_new( AvdInfo*  info )
         p = bufprint_temp_file(temp, end, USER_CONFIG_FILE);
         if (p >= end) {
             derror("Weird: Cannot create temporary user-config file?");
-            return NULL;
+            return nullptr;
         }
         dwarning("Weird: Content path too long, using temporary user-config.");
     }
@@ -95,23 +95,23 @@ auserConfig_new( AvdInfo*  info )
     {
         /* ensure that the parent directory exists */
         android::base::ScopedCPtr<char> parentPath(path_parent(uc->iniPath, 1));
-        if (parentPath == NULL) {
+        if (parentPath == nullptr) {
             derror("Weird: Can't find parent of user-config file: %s",
                    uc->iniPath);
-            return NULL;
+            return nullptr;
         }
 
         if (!path_exists(parentPath.get())) {
             if (!inAndroidBuild) {
                 derror("Weird: No content path for this AVD: %s",
                        parentPath.get());
-                return NULL;
+                return nullptr;
             }
             DD("creating missing directory: %s", parentPath.get());
             if (path_mkdir_if_needed(parentPath.get(), 0755) < 0) {
                 derror("Using empty user-config, can't create %s: %s",
                        parentPath.get(), strerror(errno));
-                return NULL;
+                return nullptr;
             }
         }
     }
@@ -119,13 +119,13 @@ auserConfig_new( AvdInfo*  info )
     if (path_exists(uc->iniPath)) {
         DD("reading user-config file");
         ini = iniFile_newFromFile(uc->iniPath);
-        if (ini == NULL) {
+        if (ini == nullptr) {
             dwarning("Can't read user-config file: %s\nUsing default values",
                      uc->iniPath);
         }
     }
 
-    if (ini != NULL) {
+    if (ini != nullptr) {
         uc->windowX = iniFile_getInteger(ini, KEY_WINDOW_X, DEFAULT_X);
         DD("    found %s = %d", KEY_WINDOW_X, uc->windowX);
 
@@ -133,7 +133,8 @@ auserConfig_new( AvdInfo*  info )
         DD("    found %s = %d", KEY_WINDOW_Y, uc->windowY);
 
         if (iniFile_hasKey(ini, KEY_UUID)) {
-            uc->uuid = (uint64_t) iniFile_getInt64(ini, KEY_UUID, 0LL);
+            uc->uuid =
+                    static_cast<uint64_t>(iniFile_getInt64(ini, KEY_UUID, 0LL));
             needUUID = 0;
             DD("    found %s = %lld", KEY_UUID, uc->uuid);
         }
@@ -152,8 +153,8 @@ auserConfig_new( AvdInfo*  info )
     if (needUUID) {
         struct timeval  tm;
 
-        gettimeofday( &tm, NULL );
-        uc->uuid    = (uint64_t)tm.tv_sec*1000 + tm.tv_usec/1000;
+        gettimeofday(&tm, nullptr);
+        uc->uuid = static_cast<uint64_t>(tm.tv_sec) * 1000 + tm.tv_usec / 1000;
         uc->changed = 1;
         DD("    Generated UUID = %lld", uc->uuid);
     }
@@ -199,7 +200,7 @@ auserConfig_save( AUserConfig*  uconfig )
     }
 
     ini = iniFile_newEmpty(uconfig->iniPath);
-    if (ini == NULL) {
+    if (ini == nullptr) {
         D("Weird: can't allocate user-config iniFile?");
         return;
     }

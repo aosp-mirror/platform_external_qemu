@@ -52,7 +52,7 @@ public:
     }
 
     ~MockAdbHostAgent() {
-        if (mThread.get()) {
+        if (mThread) {
             mThread->wait(nullptr);
         }
         AndroidPipe::Service::resetAll();
@@ -75,9 +75,9 @@ public:
     // Create a socket pair and a thread that will push |data| into it
     // before trying to read a single byte from one end of the pair.
     // The other end is passed to a new active guest.
-    void createFakeConnection(StringView data) {
+    void createFakeConnection(const StringView& data) {
         CHECK(mListening);
-        if (mThread.get()) {
+        if (mThread) {
             mThread->wait(nullptr);
         }
         mThread.reset(new ConnectorThread(data));
@@ -92,7 +92,8 @@ private:
     // before exiting.
     class ConnectorThread : public android::base::Thread {
     public:
-        ConnectorThread(StringView data) : Thread(), mData(data) {
+        explicit ConnectorThread(const StringView& data)
+            : Thread(), mData(data) {
             int inSocket, outSocket;
             if (android::base::socketCreatePair(&inSocket, &outSocket) < 0) {
                 PLOG(ERROR) << "Could not create socket pair";

@@ -25,8 +25,8 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/misc.h"
 
-#include <assert.h>
 #include <OpenglCodecCommon/ErrorLog.h>
+#include <cassert>
 
 extern GLESv1Dispatch s_gles1;
 
@@ -44,9 +44,9 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
                                      HandleType hndl,
                                      GLESApi version,
                                      android::base::Stream *stream) {
-    void* emulatedGLES1Context = NULL;
+    void* emulatedGLES1Context = nullptr;
 
-    bool shouldEmulateGLES1 = s_gles1.underlying_gles2_api != NULL;
+    bool shouldEmulateGLES1 = s_gles1.underlying_gles2_api != nullptr;
 
     GLESApi clientVersion = version;
     int majorVersion = clientVersion;
@@ -84,7 +84,7 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
     }
     if (context == EGL_NO_CONTEXT) {
         fprintf(stderr, "%s: failed to create context (EGL_NO_CONTEXT result)\n", __func__);
-        return NULL;
+        return nullptr;
     }
 
     if (shouldEmulateGLES1) {
@@ -94,11 +94,13 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
         } else {
             DBG("%s: this context is shared. need to maintain a sort of map I guess\n", __FUNCTION__);
         }
-        emulatedGLES1Context = s_gles1.create_gles1_context(NULL, s_gles1.underlying_gles2_api);
+        emulatedGLES1Context = s_gles1.create_gles1_context(
+                nullptr, s_gles1.underlying_gles2_api);
         DBG("%s: created a emulated gles1 context @ %p\n", __FUNCTION__, emulatedGLES1Context);
         return new RenderContext(display, context, hndl, clientVersion, emulatedGLES1Context);
     } else {
-        return new RenderContext(display, context, hndl, clientVersion, NULL);
+        return new RenderContext(display, context, hndl, clientVersion,
+                                 nullptr);
     }
 }
 
@@ -118,9 +120,9 @@ RenderContext::~RenderContext() {
     if (mContext != EGL_NO_CONTEXT) {
         s_egl.eglDestroyContext(mDisplay, mContext);
     }
-    if (mEmulatedGLES1Context != NULL) {
+    if (mEmulatedGLES1Context != nullptr) {
         s_gles1.destroy_gles1_context(mEmulatedGLES1Context);
-        mEmulatedGLES1Context = NULL;
+        mEmulatedGLES1Context = nullptr;
     }
 }
 
@@ -135,11 +137,11 @@ void RenderContext::onSave(android::base::Stream* stream) {
 
 RenderContext *RenderContext::onLoad(android::base::Stream* stream,
             EGLDisplay display) {
-    HandleType hndl = static_cast<HandleType>(stream->getBe32());
-    GLESApi version = static_cast<GLESApi>(stream->getBe32());
+    auto hndl = static_cast<HandleType>(stream->getBe32());
+    auto version = static_cast<GLESApi>(stream->getBe32());
 
-    return createImpl(display, (EGLConfig)0, EGL_NO_CONTEXT, hndl, version,
-                      stream);
+    return createImpl(display, (EGLConfig) nullptr, EGL_NO_CONTEXT, hndl,
+                      version, stream);
 }
 
 GLESApi RenderContext::clientVersion() const {

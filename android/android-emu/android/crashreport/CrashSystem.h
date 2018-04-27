@@ -34,12 +34,12 @@ public:
     CrashSystem()
         : mCaBundlePath(), mCrashServicePath(), mProcessId(), mCrashPipe() {}
 
-    virtual ~CrashSystem() {}
+    virtual ~CrashSystem() = default;
 
     enum class CrashType { PROD, STAGING, NONE };
 
     struct CrashPipe {
-        CrashPipe() : mServer(), mClient(), mValid(false) {}
+        CrashPipe() : mServer(), mClient() {}
         CrashPipe(const char* name)
             : mServer(name), mClient(name), mValid(true) {}
         CrashPipe(const std::string& name)
@@ -57,7 +57,7 @@ public:
         std::string mClient;
 
     private:
-        bool mValid;
+        bool mValid{false};
     };
 
     // Return predefined location of crash dump directory

@@ -13,14 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "errors.h"
-#include "EntryPoint.h"
-#include "strUtils.h"
+#include <cstdio>
+#include <cstdlib>
 #include "ApiGen.h"
+#include "EntryPoint.h"
 #include "TypeFactory.h"
+#include "errors.h"
 #include "getopt.h"
+#include "strUtils.h"
 
 const std::string SPEC_EXTENSION = std::string(".in");
 const std::string ATTRIB_EXTENSION = std::string(".attrib");

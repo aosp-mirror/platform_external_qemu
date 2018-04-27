@@ -11,7 +11,7 @@
 
 #include "android/base/StringFormat.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace android {
 namespace base {
@@ -54,7 +54,7 @@ void StringAppendFormatWithArgs(std::string* string,
         }
 
         if (ret > 0) {
-            size_t ret_sz = static_cast<size_t>(ret);
+            auto ret_sz = static_cast<size_t>(ret);
             if (extra == 0) {
                 // First pass, resize the string and try again.
                 extra = ret_sz + 1;

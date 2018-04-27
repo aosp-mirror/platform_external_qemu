@@ -14,8 +14,8 @@
 #include "android/base/files/StreamSerializing.h"
 #include "lz4.h"
 
-#include <errno.h>
 #include <cassert>
+#include <cerrno>
 
 namespace android {
 namespace base {
@@ -26,7 +26,7 @@ DecompressingStream::DecompressingStream(Stream& input)
 }
 
 DecompressingStream::~DecompressingStream() {
-    LZ4_freeStreamDecode((LZ4_streamDecode_t*)mLzStream);
+    LZ4_freeStreamDecode(static_cast<LZ4_streamDecode_t*>(mLzStream));
 }
 
 ssize_t DecompressingStream::read(void* buffer, size_t size) {
@@ -36,8 +36,8 @@ ssize_t DecompressingStream::read(void* buffer, size_t size) {
         return 0;
     }
     const int read = LZ4_decompress_fast_continue(
-            (LZ4_streamDecode_t*)mLzStream, mBuffer.data() + mBufferPos,
-            (char*)buffer, size);
+            static_cast<LZ4_streamDecode_t*>(mLzStream),
+            mBuffer.data() + mBufferPos, static_cast<char*>(buffer), size);
     if (!read) {
         return -EIO;
     }

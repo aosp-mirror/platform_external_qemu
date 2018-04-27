@@ -47,8 +47,9 @@ inline size_t min(size_t a, size_t b) {
 bool TrustyKeymasterEnforcement::ValidateTokenSignature(const hw_auth_token_t& token) const {
     keymaster_key_blob_t auth_token_key;
     keymaster_error_t error = context_->GetAuthTokenKey(&auth_token_key);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return false;
+    }
 
     // Signature covers entire token except HMAC field.
     const uint8_t* hash_data = reinterpret_cast<const uint8_t*>(&token);

@@ -26,9 +26,9 @@
 
 #include <atomic>
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
 
 // Set to 1 or 2 for debug traces
 #define DEBUG 0
@@ -75,7 +75,7 @@ public:
 
         bool canLoad() const override { return true; }
 
-        virtual void preLoad(android::base::Stream* stream) override {
+        void preLoad(android::base::Stream* stream) override {
 #ifdef SNAPSHOT_PROFILE
             mLoadMeter.restartUs();
 #endif
@@ -134,9 +134,9 @@ public:
 #endif
         }
 
-        virtual AndroidPipe* load(void* hwPipe,
-                                  const char* args,
-                                  android::base::Stream* stream) override {
+        AndroidPipe* load(void* hwPipe,
+                          const char* args,
+                          android::base::Stream* stream) override {
             return createPipe(hwPipe, this, args, stream);
         }
 
@@ -236,7 +236,7 @@ public:
         bool isWorking = true;
         if (loadStream) {
             DD("%s: loading GLES pipe state for hwpipe=%p", __func__, mHwPipe);
-            isWorking = (bool)loadStream->getBe32();
+            isWorking = static_cast<bool>(loadStream->getBe32());
             android::base::loadBuffer(loadStream, &mDataForReading);
             mDataForReadingLeft = loadStream->getBe32();
         }
@@ -256,7 +256,7 @@ public:
     //////////////////////////////////////////////////////////////////////////
     // Overriden AndroidPipe methods
 
-    virtual void onSave(android::base::Stream* stream) override {
+    void onSave(android::base::Stream* stream) override {
         DD("%s: saving GLES pipe state for hwpipe=%p", __FUNCTION__, mHwPipe);
         stream->putBe32(mIsWorking);
         android::base::saveBuffer(stream, mDataForReading);
@@ -265,7 +265,7 @@ public:
         mChannel->onSave(stream);
     }
 
-    virtual void onGuestClose(PipeCloseReason reason) override {
+    void onGuestClose(PipeCloseReason reason) override {
         D("%s", __func__);
         mIsWorking = false;
         mChannel->stop();
@@ -275,7 +275,7 @@ public:
         delete this;
     }
 
-    virtual unsigned onGuestPoll() const override {
+    unsigned onGuestPoll() const override {
         DD("%s", __func__);
 
         unsigned ret = 0;
@@ -296,8 +296,7 @@ public:
         return ret;
     }
 
-    virtual int onGuestRecv(AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+    int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override {
         DD("%s", __func__);
 
         // Consume the pipe's dataForReading, then put the next received data
@@ -360,8 +359,7 @@ public:
         return len;
     }
 
-    virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override {
         DD("%s", __func__);
 
         if (!mIsWorking) {
@@ -395,7 +393,7 @@ public:
         return count;
     }
 
-    virtual void onGuestWantWakeOn(int flags) override {
+    void onGuestWantWakeOn(int flags) override {
         DD("%s: flags=%d", __func__, flags);
 
         // Translate |flags| into ChannelState flags.

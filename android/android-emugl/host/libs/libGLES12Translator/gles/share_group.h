@@ -158,7 +158,7 @@ class ShareGroup : public android::RefBase {
   }
 
  protected:
-  virtual ~ShareGroup();
+     ~ShareGroup() override;
 
  private:
   typedef std::pair<ObjectType, ObjectLocalName> ObjectID;
@@ -187,10 +187,10 @@ class ShareGroup : public android::RefBase {
   ObjectDataMap objects_;
   GlesContext* context_;
 
-  ShareGroup(const ShareGroup&);
-  ShareGroup& operator=(const ShareGroup&);
+  ShareGroup(const ShareGroup&) = delete;
+  ShareGroup& operator=(const ShareGroup&) = delete;
 };
 
-typedef android::sp<ShareGroup> ShareGroupPtr;
+using ShareGroupPtr = android::sp<ShareGroup>;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_SHARE_GROUP_H_

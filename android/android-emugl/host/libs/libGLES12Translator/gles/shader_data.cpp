@@ -15,8 +15,8 @@
  */
 #include "gles/shader_data.h"
 
-#include <stdio.h>
 #include <GLES2/gl2.h>
+#include <cstdio>
 
 #include "common/alog.h"
 #include "gles/debug.h"
@@ -28,8 +28,7 @@ ShaderData::ShaderData(ObjectType type, ObjectLocalName name)
   LOG_ALWAYS_FATAL_IF(type != VERTEX_SHADER && type != FRAGMENT_SHADER);
 }
 
-ShaderData::~ShaderData() {
-}
+ShaderData::~ShaderData() = default;
 
 void ShaderData::SetSource(GLsizei count,
                            const GLchar* const* strings,

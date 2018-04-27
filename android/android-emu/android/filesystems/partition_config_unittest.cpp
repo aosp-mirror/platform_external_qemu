@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 
-#include <errno.h>
-#include <stdarg.h>
-#include <stdio.h>
+#include <cerrno>
+#include <cstdarg>
+#include <cstdio>
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 // A special file path used during unit-testing that corresponds to
 // a non-existing file. See TestPartitionConfigBackend::pathExists() below.
@@ -53,32 +53,31 @@ static bool strStartsWith(const char* path, const char* prefix) {
 // Base unittest version of PartitionConfigBackend interface.
 // All methods return success, and ext4 as the default partition type.
 class TestPartitionConfigBackend
-        : public android::internal::PartitionConfigBackend {
+    : public android::internal::PartitionConfigBackend {
 public:
-    TestPartitionConfigBackend()
-        : mPrevBackend(nullptr), mCommands(), mTempCounter(0) {
+    TestPartitionConfigBackend() : mCommands() {
         // Save previous backend then inject self into the process.
         mPrevBackend = PartitionConfigBackend::setForTesting(this);
     }
 
-    virtual ~TestPartitionConfigBackend() {
+    ~TestPartitionConfigBackend() override {
         // Restore previous backend.
         PartitionConfigBackend::setForTesting(mPrevBackend);
     }
 
-    virtual bool pathExists(const char* path) override {
+    bool pathExists(const char* path) override {
         if (strStartsWith(path, DOESNT_EXIST_PREFIX)) {
             return false;
         }
         return true;
     }
 
-    virtual bool pathEmptyFile(const char* path) override {
+    bool pathEmptyFile(const char* path) override {
         addCommand("EMPTY [%s]", path);
         return true;
     }
 
-    virtual bool pathCopyFile(const char* dst, const char* src) override {
+    bool pathCopyFile(const char* dst, const char* src) override {
         if (strStartsWith(src, CANNOT_COPY_PREFIX)) {
             return false;
         }
@@ -86,7 +85,7 @@ public:
         return true;
     }
 
-    virtual bool pathLockFile(const char* path) override {
+    bool pathLockFile(const char* path) override {
         if (strStartsWith(path, CANNOT_LOCK_PREFIX)) {
             errno = EINVAL;
             return false;
@@ -95,7 +94,7 @@ public:
         return true;
     }
 
-    virtual bool pathCreateTempFile(std::string* path) override {
+    bool pathCreateTempFile(std::string* path) override {
         char tmp[200];
         snprintf(tmp, sizeof(tmp), "/tmp/tempfile%d", ++mTempCounter);
         *path = tmp;
@@ -103,17 +102,16 @@ public:
         return true;
     }
 
-    virtual AndroidPartitionType probePartitionFileType(
-            const char* path) override {
+    AndroidPartitionType probePartitionFileType(const char* path) override {
         if (strStartsWith(path, YAFFS_PATH_PREFIX)) {
             return ANDROID_PARTITION_TYPE_YAFFS2;
         }
         return ANDROID_PARTITION_TYPE_EXT4;
     }
 
-    virtual bool extractRamdiskFile(const char* ramdisk_path,
-                                    const char* file_path,
-                                    std::string* out) override {
+    bool extractRamdiskFile(const char* ramdisk_path,
+                            const char* file_path,
+                            std::string* out) override {
         if (!strcmp(ramdisk_path, kBadRamdiskFile)) {
             return false;
         }
@@ -125,9 +123,9 @@ public:
         return true;
     }
 
-    virtual bool parsePartitionFormat(const std::string& fstab,
-                                      const char* mountPath,
-                                      std::string* partitionFormat) override {
+    bool parsePartitionFormat(const std::string& fstab,
+                              const char* mountPath,
+                              std::string* partitionFormat) override {
         if (fstab == kYaffsFstabContent) {
             *partitionFormat = "yaffs2";
         } else {
@@ -136,9 +134,9 @@ public:
         return true;
     }
 
-    virtual bool makeEmptyPartition(AndroidPartitionType partitionType,
-                                    uint64_t partitionSize,
-                                    const char* partitionPath) override {
+    bool makeEmptyPartition(AndroidPartitionType partitionType,
+                            uint64_t partitionSize,
+                            const char* partitionPath) override {
         addCommand("EMPTY_PARTITION format=%s size=%lld [%s]",
                    androidPartitionType_toString(partitionType),
                    static_cast<unsigned long long>(partitionSize),
@@ -148,8 +146,8 @@ public:
 
     // Resize an existing ext4 partition at |partitionPath| to a new
     // size in bytes given by |partitionSize|.
-    virtual void resizeExt4Partition(const char* partitionPath,
-                                     uint64_t partitionSize) override {
+    void resizeExt4Partition(const char* partitionPath,
+                             uint64_t partitionSize) override {
         addCommand("EXT4_RESIZE size=%lld [%s]",
                    static_cast<unsigned long long>(partitionSize),
                    partitionPath);
@@ -159,7 +157,7 @@ public:
 
 private:
     void addCommand(const char* fmt, ...) {
-        char* str = NULL;
+        char* str = nullptr;
         va_list args;
         va_start(args, fmt);
         vasprintf(&str, fmt, args);
@@ -169,9 +167,9 @@ private:
         free(str);
     }
 
-    PartitionConfigBackend* mPrevBackend;
+    PartitionConfigBackend* mPrevBackend{nullptr};
     std::string mCommands;
-    int mTempCounter;
+    int mTempCounter{0};
 };
 
 // A helper class used to collect the virtual NAND partition setup
@@ -215,7 +213,7 @@ public:
 };
 
 // Save a lot of typing.
-typedef PartitionCollector::Partition Partition;
+using Partition = PartitionCollector::Partition;
 
 // Helper function to check the results of a given partition configuration.
 // |config| is the input AndroidPartitionConfiguration instance.
@@ -229,7 +227,7 @@ static void checkConfig(const AndroidPartitionConfiguration* config,
     TestPartitionConfigBackend testBackend;
     PartitionCollector collector;
 
-    char* error_message = NULL;
+    char* error_message = nullptr;
     EXPECT_TRUE(android_partition_configuration_setup(
             config, PartitionCollector::setupPartition, &collector,
             &error_message));
@@ -261,7 +259,7 @@ static void checkErrorConfig(const AndroidPartitionConfiguration* config,
     TestPartitionConfigBackend testBackend;
     PartitionCollector collector;
 
-    char* error_message = NULL;
+    char* error_message = nullptr;
     EXPECT_FALSE(android_partition_configuration_setup(
             config, PartitionCollector::setupPartition, &collector,
             &error_message));
@@ -681,7 +679,6 @@ TEST(PartitionConfig, MissingDataPartition) {
     checkConfig(&config, kExpectedCommands, kExpectedPartitions,
                 kExpectedPartitionsSize);
 }
-
 
 TEST(PartitionConfig, MissingVendorPartition) {
     static const char kMissingVendorFile[] = DOESNT_EXIST_PREFIX "_vendor";

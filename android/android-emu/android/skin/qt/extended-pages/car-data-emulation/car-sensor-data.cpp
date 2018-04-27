@@ -58,8 +58,8 @@ static EmulatorMessage makeSetPropMsg() {
 }
 
 void CarSensorData::sendGearChangeMsg(const int gear, const string& gearName) {
-    // TODO: Grey out the buttons when callback is not set or vehicle hal is
-    // not connected.
+    // TODO(yaochen): Grey out the buttons when callback is not set or vehicle
+    // hal is not connected.
     if (mSendEmulatorMsg == nullptr) {
         return;
     }
@@ -142,8 +142,8 @@ void CarSensorData::sendIgnitionChangeMsg(const int ignition,
 }
 
 void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
-    // TODO: read static configs from vehical Hal to determine what unit to use,
-    // mph or kmph
+    // TODO(yaochen): read static configs from vehical Hal to determine what
+    // unit to use, mph or kmph
     mUi->car_speedLabel->setText(QString::number(speed) + " MPH");
     if (mSendEmulatorMsg != nullptr) {
         EmulatorMessage emulatorMsg = makeSetPropMsg();

@@ -23,8 +23,8 @@
 #include <vector>
 #include <utility>
 
-#include <assert.h>
-#include <stddef.h>
+#include <cassert>
+#include <cstddef>
 
 namespace android {
 namespace base {

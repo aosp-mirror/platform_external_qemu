@@ -218,5 +218,5 @@ TEST(SmallVector, useThroughInterface) {
     }
 }
 
-}  // namespace android
 }  // namespace base
+}  // namespace android

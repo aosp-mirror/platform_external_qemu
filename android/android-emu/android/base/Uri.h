@@ -32,13 +32,13 @@ public:
     // |Decode| is aggressive. It will decode every occurance of %XX in a single
     // pass -- even for unreserved characters.
     // Returns empty string on error.
-    static std::string Decode(StringView uri);
+    static std::string Decode(const StringView& uri);
 
     // Set of functions for arguments encoding
     struct FormatHelper {
         // Anything which can potentially have encodable character goes here and
         // is encoded into a const char*
-        static std::string encodeArg(StringView str);
+        static std::string encodeArg(const StringView& str);
 
         // Forward the rest as-is (non-StringView types)
         template <class T>

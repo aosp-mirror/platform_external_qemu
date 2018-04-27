@@ -14,9 +14,9 @@
 * limitations under the License.
 */
 #include "glUtils.h"
-#include "ErrorLog.h"
-#include <string.h>
 #include <GLES3/gl31.h>
+#include <cstring>
+#include "ErrorLog.h"
 
 size_t glSizeof(GLenum type)
 {

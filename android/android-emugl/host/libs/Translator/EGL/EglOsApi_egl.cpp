@@ -94,7 +94,7 @@ using namespace EglOS;
 class EglOsEglDispatcher {
 public:
 #define DECLARE_EGL_POINTER(return_type, function_name, signature) \
-    return_type(EGLAPIENTRY* function_name) signature = nullptr;
+    return_type(EGLAPIENTRY*(function_name)) signature = nullptr;
     LIST_EGL_FUNCTIONS(DECLARE_EGL_POINTER);
 
     EglOsEglDispatcher() {
@@ -133,13 +133,13 @@ public:
                 kGLES2LibName, error);
         }
     }
-    GlFunctionPointer findSymbol(const char* name) {
+    GlFunctionPointer findSymbol(const char* name) override {
         if (!mLib) {
-            return NULL;
+            return nullptr;
         }
         return reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
     }
-    ~EglOsGlLibrary() = default;
+    ~EglOsGlLibrary() override = default;
 
 private:
     emugl::SharedLibrary* mLib = nullptr;
@@ -149,7 +149,7 @@ class EglOsEglPixelFormat : public EglOS::PixelFormat {
 public:
     EglOsEglPixelFormat(EGLConfig configId, EGLint clientCtxVer)
         : mConfigId(configId), mClientCtxVer(clientCtxVer) {}
-    PixelFormat* clone() {
+    PixelFormat* clone() override {
         return new EglOsEglPixelFormat(mConfigId, mClientCtxVer);
     }
     EGLConfig mConfigId;
@@ -173,7 +173,7 @@ public:
     ~EglOsEglContext() {
         D("%s %p\n", __FUNCTION__, mNativeCtx);
         if (!mDispatcher->eglDestroyContext(mDisplay, mNativeCtx)) {
-            // TODO: print a better error message
+            // TODO(lfy): print a better error message
         }
     }
 
@@ -191,7 +191,7 @@ class EglOsEglSurface : public EglOS::Surface {
 public:
     EglOsEglSurface(SurfaceType type,
                     EGLSurface eglSurface,
-                    EGLNativeWindowType win = 0)
+                    EGLNativeWindowType win = 0)  // NOLINT
         : EglOS::Surface(type), mHndl(eglSurface), mWin(win) {}
     EGLSurface getHndl() { return mHndl; }
     EGLNativeWindowType getWin() { return mWin; }
@@ -204,27 +204,26 @@ private:
 class EglOsEglDisplay : public EglOS::Display {
 public:
     EglOsEglDisplay();
-    ~EglOsEglDisplay();
-    virtual EglOS::GlesVersion getMaxGlesVersion();
+    ~EglOsEglDisplay() override;
+    EglOS::GlesVersion getMaxGlesVersion() override;
     void queryConfigs(int renderableType,
                       AddConfigCallback* addConfigFunc,
-                      void* addConfigOpaque);
-    virtual emugl::SmartPtr<Context>
-    createContext(EGLint profileMask,
-                  const PixelFormat* pixelFormat,
-                  Context* sharedContext) override;
+                      void* addConfigOpaque) override;
+    emugl::SmartPtr<Context> createContext(EGLint profileMask,
+                                           const PixelFormat* pixelFormat,
+                                           Context* sharedContext) override;
     Surface* createPbufferSurface(const PixelFormat* pixelFormat,
-                                  const PbufferInfo* info);
+                                  const PbufferInfo* info) override;
     Surface* createWindowSurface(PixelFormat* pf, EGLNativeWindowType win);
-    bool releasePbuffer(Surface* pb);
-    bool makeCurrent(Surface* read, Surface* draw, Context* context);
-    void swapBuffers(Surface* srfc);
-    bool isValidNativeWin(Surface* win);
-    bool isValidNativeWin(EGLNativeWindowType win);
+    bool releasePbuffer(Surface* pb) override;
+    bool makeCurrent(Surface* read, Surface* draw, Context* context) override;
+    void swapBuffers(Surface* srfc) override;
+    bool isValidNativeWin(Surface* win) override;
+    bool isValidNativeWin(EGLNativeWindowType win) override;
     bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
                                      const PixelFormat* pixelFormat,
                                      unsigned int* width,
-                                     unsigned int* height);
+                                     unsigned int* height) override;
 
 private:
     EGLDisplay mDisplay;
@@ -240,7 +239,7 @@ EglOsEglDisplay::EglOsEglDisplay() {
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
     CHECK_EGL_ERR
 #ifdef __linux__
-    mGlxDisplay = XOpenDisplay(0);
+    mGlxDisplay = XOpenDisplay(nullptr);
 #endif // __linux__
 };
 
@@ -251,7 +250,8 @@ EglOsEglDisplay::~EglOsEglDisplay() {
 }
 
 EglOS::GlesVersion EglOsEglDisplay::getMaxGlesVersion() {
-    // TODO: Detect and return the highest version like in GLESVersionDetector.cpp
+    // TODO(lfy): Detect and return the highest version like in
+    // GLESVersionDetector.cpp
     return EglOS::GlesVersion::ES30;
 }
 
@@ -294,8 +294,9 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_ALPHA_SIZE,
                                        &configInfo.alpha_size);
 
-        mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_CONFIG_CAVEAT,
-                                       (EGLint*)&configInfo.caveat);
+        mDispatcher.eglGetConfigAttrib(
+                mDisplay, cfg, EGL_CONFIG_CAVEAT,
+                reinterpret_cast<EGLint*>(&configInfo.caveat));
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_DEPTH_SIZE,
                                        &configInfo.depth_size);
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_LEVEL,
@@ -308,8 +309,9 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_MAX_PBUFFER_PIXELS,
                                        &configInfo.max_pbuffer_size);
 
-        mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_NATIVE_RENDERABLE,
-                                       (EGLint*)&configInfo.native_renderable);
+        mDispatcher.eglGetConfigAttrib(
+                mDisplay, cfg, EGL_NATIVE_RENDERABLE,
+                reinterpret_cast<EGLint*>(&configInfo.native_renderable));
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_NATIVE_VISUAL_ID,
                                        &configInfo.native_visual_id);
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_NATIVE_VISUAL_TYPE,
@@ -322,8 +324,9 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
 
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_SURFACE_TYPE,
                                        &configInfo.surface_type);
-        mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_TRANSPARENT_TYPE,
-                                       (EGLint*)&configInfo.transparent_type);
+        mDispatcher.eglGetConfigAttrib(
+                mDisplay, cfg, EGL_TRANSPARENT_TYPE,
+                reinterpret_cast<EGLint*>(&configInfo.transparent_type));
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_TRANSPARENT_RED_VALUE,
                                        &configInfo.trans_red_val);
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg,
@@ -350,12 +353,12 @@ EglOsEglDisplay::createContext(EGLint profileMask,
     (void)profileMask;
 
     D("%s\n", __FUNCTION__);
-    const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
+    const auto* format = (const EglOsEglPixelFormat*)pixelFormat;
     D("with config %p\n", format->mConfigId);
     // Always GLES3
     EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
-    // TODO: support GLES3.1
-    EglOsEglContext* nativeSharedCtx = (EglOsEglContext*)sharedContext;
+    // TODO(yahan): support GLES3.1
+    auto* nativeSharedCtx = (EglOsEglContext*)sharedContext;
     EGLContext newNativeCtx = mDispatcher.eglCreateContext(
             mDisplay, format->mConfigId,
             nativeSharedCtx ? nativeSharedCtx->context() : nullptr,
@@ -371,7 +374,7 @@ EglOsEglDisplay::createContext(EGLint profileMask,
 Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
                                                const PbufferInfo* info) {
     D("%s\n", __FUNCTION__);
-    const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
+    const auto* format = (const EglOsEglPixelFormat*)pixelFormat;
     EGLint attrib[] = {EGL_WIDTH,
                        info->width,
                        EGL_HEIGHT,
@@ -410,9 +413,10 @@ Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
 
 bool EglOsEglDisplay::releasePbuffer(Surface* pb) {
     D("%s\n", __FUNCTION__);
-    if (!pb)
+    if (!pb) {
         return false;
-    EglOsEglSurface* surface = (EglOsEglSurface*)pb;
+    }
+    auto* surface = (EglOsEglSurface*)pb;
     bool ret = mDispatcher.eglDestroySurface(mDisplay, surface->getHndl());
     CHECK_EGL_ERR
     D("%s done\n", __FUNCTION__);
@@ -423,9 +427,9 @@ bool EglOsEglDisplay::makeCurrent(Surface* read,
                                   Surface* draw,
                                   Context* context) {
     D("%s\n", __FUNCTION__);
-    EglOsEglSurface* readSfc = (EglOsEglSurface*)read;
-    EglOsEglSurface* drawSfc = (EglOsEglSurface*)draw;
-    EglOsEglContext* ctx = (EglOsEglContext*)context;
+    auto* readSfc = (EglOsEglSurface*)read;
+    auto* drawSfc = (EglOsEglSurface*)draw;
+    auto* ctx = (EglOsEglContext*)context;
     if (ctx && !readSfc) {
         D("warning: makeCurrent a context without surface\n");
         return false;
@@ -446,14 +450,15 @@ bool EglOsEglDisplay::makeCurrent(Surface* read,
 
 void EglOsEglDisplay::swapBuffers(Surface* surface) {
     D("%s\n", __FUNCTION__);
-    EglOsEglSurface* sfc = (EglOsEglSurface*)surface;
+    auto* sfc = (EglOsEglSurface*)surface;
     mDispatcher.eglSwapBuffers(mDisplay, sfc->getHndl());
 }
 
 bool EglOsEglDisplay::isValidNativeWin(Surface* win) {
-    if (!win)
+    if (!win) {
         return false;
-    EglOsEglSurface* surface = (EglOsEglSurface*)win;
+    }
+    auto* surface = (EglOsEglSurface*)win;
     return surface->type() == EglOsEglSurface::WINDOW &&
            isValidNativeWin(surface->getWin());
 }
@@ -485,12 +490,12 @@ bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
     *height = r.bottom - r.top;
     return true;
 #elif defined(__linux__)
-    //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
+    // TODO(yahan): to check what does ATI & NVIDIA enforce on win pixelformat
     unsigned int depth, border;
     int x, y;
     Window root;
-    return XGetGeometry(
-            mGlxDisplay, win, &root, &x, &y, width, height, &border, &depth);
+    return XGetGeometry(mGlxDisplay, win, &root, &x, &y, width, height, &border,
+                        &depth);
 #else // __APPLE__
     bool ret = nsGetWinDims(win, width, height);
 
@@ -510,18 +515,18 @@ static emugl::LazyInstance<EglOsEglDisplay> sHostDisplay = LAZY_INSTANCE_INIT;
 class EglEngine : public EglOS::Engine {
 public:
     EglEngine() = default;
-    ~EglEngine() = default;
+    ~EglEngine() override = default;
 
-    EglOS::Display* getDefaultDisplay() {
+    EglOS::Display* getDefaultDisplay() override {
         D("%s\n", __FUNCTION__);
         return sHostDisplay.ptr();
     }
-    GlLibrary* getGlLibrary() {
+    GlLibrary* getGlLibrary() override {
         D("%s\n", __FUNCTION__);
         return &mGlLib;
     }
-    virtual EglOS::Surface* createWindowSurface(PixelFormat* pf,
-                                                EGLNativeWindowType wnd) {
+    EglOS::Surface* createWindowSurface(PixelFormat* pf,
+                                        EGLNativeWindowType wnd) override {
         D("%s\n", __FUNCTION__);
         return sHostDisplay->createWindowSurface(pf, wnd);
     }

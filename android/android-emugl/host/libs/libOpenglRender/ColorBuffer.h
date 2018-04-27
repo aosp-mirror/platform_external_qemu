@@ -92,13 +92,13 @@ public:
         RecursiveScopedHelperContext(ColorBuffer::Helper* helper) : mHelper(helper) {
             if (helper->isBound()) return;
             if (!helper->setupContext()) {
-                mHelper = NULL;
+                mHelper = nullptr;
                 return;
             }
             mNeedUnbind = true;
         }
 
-        bool isOk() const { return mHelper != NULL; }
+        bool isOk() const { return mHelper != nullptr; }
 
         ~RecursiveScopedHelperContext() { release(); }
 
@@ -107,7 +107,7 @@ public:
                 mHelper->teardownContext();
                 mNeedUnbind = false;
             }
-            mHelper = NULL;
+            mHelper = nullptr;
         }
 
     private:
@@ -263,5 +263,5 @@ private:
     GLenum m_asyncReadbackType = GL_UNSIGNED_BYTE;
 };
 
-typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
+using ColorBufferPtr = emugl::SmartPtr<ColorBuffer>;
 #endif

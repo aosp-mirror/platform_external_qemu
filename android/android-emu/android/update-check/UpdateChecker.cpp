@@ -33,10 +33,10 @@
 #include <new>
 #include <string>
 
-#include <assert.h>
-#include <errno.h>
-#include <string.h>
-#include <time.h>
+#include <cassert>
+#include <cerrno>
+#include <cstring>
+#include <ctime>
 
 using android::base::async;
 using android::base::Optional;
@@ -49,7 +49,7 @@ using android::base::Version;
 using android::update_check::UpdateChecker;
 
 static const char kDataFileName[] = "emu-update-last-check.ini";
-// TODO: kVersionUrl should not be fixed; XY in repository-XY.xml
+// TODO(bohu): kVersionUrl should not be fixed; XY in repository-XY.xml
 //       might change with studio updates irrelevant to the emulator
 static constexpr StringView kVersionUrl =
         "https://dl.google.com/android/repository/repository2-1.xml";
@@ -103,9 +103,10 @@ static StringView toOsArchString(int bitness) {
 
 class DataLoader final : public IDataLoader {
 public:
-    DataLoader(StringView coreVersion) : mCoreVersion(coreVersion) {}
+    explicit DataLoader(const StringView& coreVersion)
+        : mCoreVersion(coreVersion) {}
 
-    virtual std::string load() override {
+    std::string load() override {
         std::string xml;
         std::string url = kVersionUrl;
         if (!mCoreVersion.empty()) {
@@ -127,9 +128,7 @@ public:
         return xml;
     }
 
-    virtual std::string getUniqueDataKey() override {
-        return getVersionUriFields();
-    }
+    std::string getUniqueDataKey() override { return getVersionUriFields(); }
 
 private:
     std::string getVersionUriFields() const {
@@ -151,7 +150,7 @@ public:
         mDataFileName = PathUtils::join(configPath, kDataFileName);
     }
 
-    ~TimeStorage() {
+    ~TimeStorage() override {
         if (mFileLock) {
             filelock_release(mFileLock);
         }
@@ -168,7 +167,7 @@ public:
         return mFileLock != nullptr;
     }
 
-    time_t getTime(const std::string& key) {
+    time_t getTime(const std::string& key) override {
         IniFile file(mDataFileName);
         if (!file.read()) {
             // no file at all, return the lowest possible timestamp
@@ -178,7 +177,7 @@ public:
         return file.getInt64(IniFile::makeValidKey(key), 0);
     }
 
-    void setTime(const std::string& key, time_t time) {
+    void setTime(const std::string& key, time_t time) override {
         IniFile file(mDataFileName);
         file.read();  // who cares if it didn't exist - we'll create it anyway
         file.setInt64(IniFile::makeValidKey(key), time);
@@ -194,9 +193,8 @@ private:
 
 class NewerVersionReporter final : public INewerVersionReporter {
 public:
-    virtual void reportNewerVersion(
-            const android::base::Version& /*existing*/,
-            const android::base::Version& /*newer*/) override {
+    void reportNewerVersion(const android::base::Version& /*existing*/,
+                            const android::base::Version& /*newer*/) override {
         printf("%s\n", kNewerVersionMessage);
     }
 };

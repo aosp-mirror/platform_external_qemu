@@ -73,7 +73,7 @@ void unbindFbo() {
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-}
+}  // namespace
 
 ColorBuffer::Helper::~Helper() = default;
 
@@ -156,8 +156,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                     p_internalFormat);
             return NULL;
     }
-    const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
-            * p_height;
+    const unsigned long bufsize =
+            (static_cast<unsigned long>(bytesPerPixel)) * p_width * p_height;
     android::base::ScopedCPtr<char> initialImage(
                 static_cast<char*>(::malloc(bufsize)));
     if (!initialImage) {
@@ -210,11 +210,12 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     cb->m_eglImage = s_egl.eglCreateImageKHR(
             p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-            (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
+            static_cast<EGLClientBuffer>(SafePointerFromUInt(cb->m_tex)), NULL);
 
     cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
             p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-            (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
+            static_cast<EGLClientBuffer>(SafePointerFromUInt(cb->m_blitTex)),
+            NULL);
 
     cb->m_resizer = new TextureResize(p_width, p_height);
 
@@ -317,12 +318,12 @@ void ColorBuffer::reformat(GLint internalformat,
     s_egl.eglDestroyImageKHR(m_display, m_eglImage);
     m_eglImage = s_egl.eglCreateImageKHR(
             m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-            (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
+            static_cast<EGLClientBuffer>(SafePointerFromUInt(m_tex)), NULL);
 
     s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
     m_blitEGLImage = s_egl.eglCreateImageKHR(
             m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-            (EGLClientBuffer)SafePointerFromUInt(m_blitTex), NULL);
+            static_cast<EGLClientBuffer>(SafePointerFromUInt(m_blitTex)), NULL);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
     m_internalFormat = internalformat;
@@ -354,7 +355,8 @@ void ColorBuffer::subUpdate(int x,
         // This FBO will convert the YUV frame to RGB
         // and render it to |m_tex|.
         bindFbo(&m_yuv_conversion_fbo, m_tex);
-        m_yuv_converter->drawConvert(x, y, width, height, (char*)pixels);
+        m_yuv_converter->drawConvert(x, y, width, height,
+                                     static_cast<char*>(pixels));
         unbindFbo();
 
         // |m_tex| still needs to be bound afterwards
@@ -369,7 +371,8 @@ void ColorBuffer::subUpdate(int x,
 
     if (m_fastBlitSupported) {
         s_gles2.glFlush();
-        m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
+        m_sync = static_cast<GLsync>(
+                s_egl.eglSetImageFenceANDROID(m_display, m_eglImage));
     }
 }
 
@@ -385,7 +388,8 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
 
     if (m_fastBlitSupported) {
         s_egl.eglBlitFromCurrentReadBufferANDROID(m_display, m_eglImage);
-        m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
+        m_sync = static_cast<GLsync>(
+                s_egl.eglSetImageFenceANDROID(m_display, m_eglImage));
     } else {
         // Copy the content of the current read surface into m_blitEGLImage.
         // This is done by creating a temporary texture, bind it to the EGLImage
@@ -417,7 +421,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
                         m_height, GL_COLOR_BUFFER_BIT,
                         GL_NEAREST);
                 s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                        (GLuint)prev_draw_fbo);
+                                          static_cast<GLuint>(prev_draw_fbo));
 
                 s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
                 s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);

@@ -32,14 +32,14 @@ public:
                             uint32_t mFbWidth,
                             uint32_t mFbHeight,
                             AVPixelFormat fbFormat);
-    virtual ~VP9Codec();
+    ~VP9Codec() override;
 
     // Configures the encoder. Returns true if successful, false otherwise.
-    virtual bool configAndOpenEncoder(const AVFormatContext* oc,
-                                      AVStream* stream) const override;
+    bool configAndOpenEncoder(const AVFormatContext* oc,
+                              AVStream* stream) const override;
     // Configures and initializes the rescaling context.
-    virtual bool initSwxContext(const AVCodecContext* c,
-                                SwsContext** swsCxt) const override;
+    bool initSwxContext(const AVCodecContext* c,
+                        SwsContext** swsCxt) const override;
 
 protected:
     uint32_t mFbWidth = 0;

@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include <locale.h>
+#include <clocale>
 
 #define SKIP_TEST_ON_WINE()                        \
     do {                                           \

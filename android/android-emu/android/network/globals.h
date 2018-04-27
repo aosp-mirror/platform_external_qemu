@@ -20,7 +20,7 @@ ANDROID_BEGIN_HEADER
 
 // A collection of network-related global variables.
 
-// TODO: Change this to real function for proper mock support during
+// TODO(digit): Change this to real function for proper mock support during
 //       unit-testing of client-code that use these. For now, this is
 //       really QEMU-only, so that's low priority.
 

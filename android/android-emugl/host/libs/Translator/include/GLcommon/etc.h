@@ -29,9 +29,9 @@
 #define ETC1_RGB8_OES 0x8D64
 #endif
 
-typedef unsigned char etc1_byte;
-typedef int etc1_bool;
-typedef unsigned int etc1_uint32;
+using etc1_byte = unsigned char;
+using etc1_bool = int;
+using etc1_uint32 = unsigned int;
 
 enum ETC2ImageFormat {
 	EtcRGB8, EtcRGBA8, EtcR11, EtcSignedR11, EtcRG11, EtcSignedRG11, EtcRGB8A1

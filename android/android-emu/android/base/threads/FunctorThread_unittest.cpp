@@ -34,14 +34,17 @@ TEST(FunctorThreadTest, TestCtor) {
     // this test actually just makes sure all constructor syntaxes compile fine
     FunctorThread t1{intFunc};
     FunctorThread t2{intptrFunc};
-    FunctorThread t3{std::bind(paramFunc, 2)};
+    FunctorThread t3{[] { return paramFunc(2); }};
     FunctorThread t4{FunctorThread::Functor(intFunc)};
-    FunctorThread t5{[](){ return -1;}};
+    FunctorThread t5{[]() { return -1; }};
 }
 
 TEST(FunctorThreadTest, TestRun) {
     bool ran = false;
-    FunctorThread t([&ran]{ ran = true; return 0; });
+    FunctorThread t([&ran] {
+        ran = true;
+        return 0;
+    });
     EXPECT_FALSE(ran);
     EXPECT_TRUE(t.start());
     EXPECT_TRUE(t.wait());

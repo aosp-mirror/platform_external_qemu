@@ -45,14 +45,14 @@ public:
 
     // Generate an adb bugreport file saved at file path
     // |outputDirectoryPath|, this function might take minutes to finish
-    void generateBugReport(android::base::StringView outputDirectoryPath,
-                           ResultCallback resultCallback);
+    void generateBugReport(const android::base::StringView& outputDirectoryPath,
+                           const ResultCallback& resultCallback);
     // Returns true if the adb bugreport command is currently in the process of execution.
     bool isBugReportInFlight() const {
         return mAdbBugReportCommand != nullptr;
     };
 
-    void generateAdbLogcatInMemory(ResultOutputCallback resultCallback);
+    void generateAdbLogcatInMemory(const ResultOutputCallback& resultCallback);
 
     // Returns true if the adb logcat command is currently in the process of
     // execution.

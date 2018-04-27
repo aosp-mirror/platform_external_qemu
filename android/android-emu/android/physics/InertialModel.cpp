@@ -20,6 +20,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
 
+#include <cmath>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -96,7 +97,7 @@ void InertialModel::setTargetPosition(
         // in order to have a roughly consistent magnitude acceleration.
         const float timeScale = sqrt(glm::distance(x_target, x_init));
         // Use the max time for distances above 10cm.
-        const float maxTimeScale = sqrt(0.1f);
+        const float maxTimeScale = std::sqrt(0.1f);
 
         transitionTime = kMinStateChangeTimeSeconds +
                 (std::min(timeScale, maxTimeScale) / maxTimeScale) *
@@ -507,7 +508,7 @@ void InertialModel::setTargetRotation(
         const float timeScale = sqrt(glm::distance(x_init, x_target));
         // Use the max time for transitions of 180 degrees (i.e. distance 2 in
         // quaternion space).
-        const float maxTimeScale = sqrt(2.f);
+        const float maxTimeScale = std::sqrt(2.f);
 
         transitionTime = kMinStateChangeTimeSeconds +
                 (std::min(timeScale, maxTimeScale) / maxTimeScale) *

@@ -20,10 +20,10 @@
 #include <utils/RefBase.h>
 
 class EglImage;
-typedef android::sp<EglImage> EglImagePtr;
+using EglImagePtr = android::sp<EglImage>;
 
 class TextureData;
-typedef android::sp<TextureData> TextureDataPtr;
+using TextureDataPtr = android::sp<TextureData>;
 
 class EglImage : public android::RefBase {
  public:
@@ -39,8 +39,8 @@ class EglImage : public android::RefBase {
   EglImage(GLenum global_texture_target, GLuint global_texture_name,
            const TextureDataPtr& texture);
 
-  EglImage(const EglImage&);
-  EglImage& operator=(const EglImage&);
+  EglImage(const EglImage&) = delete;
+  EglImage& operator=(const EglImage&) = delete;
 };
 
 #endif  // GRAPHICS_TRANSLATION_GLES_EGL_IMAGE_H_

@@ -24,10 +24,10 @@
 #include <string>
 #include <vector>
 
-#include <stdio.h>
+#include <cstdio>
 
 typedef std::pair<uint32_t, uint32_t> GpuVendorDeviceId;
-typedef std::vector<GpuVendorDeviceId> GpuVendorDeviceIdList;
+using GpuVendorDeviceIdList = std::vector<GpuVendorDeviceId>;
 
 // Based on code from:
 // https://chromium.googlesource.com/chromium/src/gpu/+/e626016b34c63b7ff51bf9a6c20b37bcc18150c4/config/gpu_info_collector_mac.mm
@@ -37,22 +37,18 @@ typedef std::vector<GpuVendorDeviceId> GpuVendorDeviceIdList;
 // Return 0 if we couldn't find the property.
 // The property values we use should not be 0, so it's OK to use 0 as failure.
 uint32_t GetEntryProperty(io_registry_entry_t entry, CFStringRef property_name) {
-    CFDataRef ref(
-        static_cast<CFDataRef>(IORegistryEntrySearchCFProperty(
-            entry,
-            kIOServicePlane,
-            property_name,
-            kCFAllocatorDefault,
+    auto ref(static_cast<CFDataRef>(IORegistryEntrySearchCFProperty(
+            entry, kIOServicePlane, property_name, kCFAllocatorDefault,
             kIORegistryIterateRecursively | kIORegistryIterateParents)));
 
     if (!ref)
         return 0;
 
     uint32_t value = 0;
-    const uint32_t* value_pointer =
-        reinterpret_cast<const uint32_t*>(CFDataGetBytePtr(ref));
+    const auto* value_pointer =
+            reinterpret_cast<const uint32_t*>(CFDataGetBytePtr(ref));
 
-    if (value_pointer != NULL)
+    if (value_pointer != nullptr)
         value = *value_pointer;
 
     CFRelease(ref);

@@ -25,18 +25,21 @@ namespace emugl {
 namespace android {
 namespace emulation {
 
-bool captureScreenshot(android::base::StringView outputDirectoryPath,
-                       std::string* outputFilepath = NULL);
+bool captureScreenshot(const android::base::StringView& outputDirectoryPath,
+                       std::string* outputFilepath = nullptr);
 // The following one is for testing only
 // It loads texture from renderer if renderer is not null.
 // (-gpu host, swiftshader_indirect, angle_indirect)
 // Otherwise loads texture from getFrameBuffer function. (-gpu guest)
-bool captureScreenshot(emugl::Renderer* renderer,
-                       std::function<void(int* w, int* h, int* lineSize,
-                            int* bytesPerPixel, uint8_t** frameBufferData)>
-                            getFrameBuffer,
-                       android::base::StringView outputDirectoryPath,
-                       std::string* outputFilepath = NULL);
+bool captureScreenshot(
+        emugl::Renderer* renderer,
+        const std::function<void(int* w,
+                                 int* h,
+                                 int* lineSize,
+                                 int* bytesPerPixel,
+                                 uint8_t** frameBufferData)>& getFrameBuffer,
+        const android::base::StringView& outputDirectoryPath,
+        std::string* outputFilepath = nullptr);
 
 }  // namespace emulation
 }  // namespace android

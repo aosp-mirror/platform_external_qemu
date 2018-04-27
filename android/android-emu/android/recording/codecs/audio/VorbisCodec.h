@@ -30,14 +30,14 @@ class VorbisCodec : public Codec<SwrContext> {
 public:
     explicit VorbisCodec(CodecParams&& params,
                                AVSampleFormat inSampleFmt);
-    virtual ~VorbisCodec();
+    ~VorbisCodec() override;
 
     // Configures the encoder. Returns true if successful, false otherwise.
-    virtual bool configAndOpenEncoder(const AVFormatContext* oc,
-                                      AVStream* stream) const override;
+    bool configAndOpenEncoder(const AVFormatContext* oc,
+                              AVStream* stream) const override;
     // Configures and initializes the resampling context.
-    virtual bool initSwxContext(const AVCodecContext* c,
-                                SwrContext* swrCxt) const override;
+    bool initSwxContext(const AVCodecContext* c,
+                        SwrContext* swrCxt) const override;
 
 protected:
     AVSampleFormat mInSampleFmt = AV_SAMPLE_FMT_NONE;

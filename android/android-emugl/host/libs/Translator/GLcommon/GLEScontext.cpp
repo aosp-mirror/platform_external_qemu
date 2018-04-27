@@ -38,7 +38,7 @@
 #include <string.h>
 
 #include <numeric>
-
+#include <utility>
 //decleration
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
 static void convertFixedIndirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,GLsizei count,GLenum indices_type,const GLvoid* indices,unsigned int strideOut,int attribSize);
@@ -96,10 +96,10 @@ GLESConversionArrays::~GLESConversionArrays() {
     for(auto it = m_arrays.begin(); it != m_arrays.end(); ++it) {
         if((*it).second.allocated){
             if((*it).second.type == GL_FLOAT){
-                GLfloat* p = (GLfloat *)((*it).second.data);
+                GLfloat* p = static_cast<GLfloat*>((*it).second.data);
                 if(p) delete[] p;
             } else if((*it).second.type == GL_SHORT){
-                GLshort* p = (GLshort *)((*it).second.data);
+                GLshort* p = static_cast<GLshort*>((*it).second.data);
                 if(p) delete[] p;
             }
         }
@@ -286,8 +286,9 @@ void GLEScontext::addVertexArrayObject(GLuint array) {
 
 void GLEScontext::removeVertexArrayObject(GLuint array) {
     if (array == 0) return;
-    if (m_vaoStateMap.find(array) == m_vaoStateMap.end())
+    if (m_vaoStateMap.find(array) == m_vaoStateMap.end()) {
         return;
+    }
     if (array == m_currVaoState.vaoId()) {
         setVertexArrayObject(0);
     }
@@ -416,7 +417,7 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
         m_glesMajorVersion = stream->getBe32();
         m_glesMinorVersion = stream->getBe32();
         if (m_initialized) {
-            m_activeTexture = (GLuint)stream->getBe32();
+            m_activeTexture = static_cast<GLuint>(stream->getBe32());
 
             loadNameMap<VAOStateMap>(stream, m_vaoStateMap);
             uint32_t vaoId = stream->getBe32();
@@ -438,8 +439,8 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             loadContainer(stream, m_indexedAtomicCounterBuffers);
             loadContainer(stream, m_indexedShaderStorageBuffers);
 
-            // TODO: handle the case where the loaded size and the supported
-            // side does not match
+            // TODO(lfy): handle the case where the loaded size and the
+            // supported side does not match
 
             m_isViewport = stream->getByte();
             m_viewportX = static_cast<GLint>(stream->getBe32());
@@ -780,8 +781,8 @@ void GLEScontext::postLoadRestoreCtx() {
                                 j);
                         break;
                 }
-                // TODO: refactor the following line since it is duplicated in
-                // GLESv2Imp and GLEScmImp as well
+                // TODO(lfy): refactor the following line since it is
+                // duplicated in GLESv2Imp and GLEScmImp as well
                 ObjectLocalName texName = texState.texture != 0 ?
                         texState.texture : getDefaultTextureName(texTarget);
                 this->dispatcher().glBindTexture(
@@ -934,7 +935,7 @@ const GLESpointer* GLEScontext::getPointer(GLenum arrType) {
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize) {
 
     for(unsigned int i = 0; i < nBytes;i+=strideOut) {
-        const GLfixed* fixed_data = (const GLfixed *)dataIn;
+        const GLfixed* fixed_data = reinterpret_cast<const GLfixed*>(dataIn);
         //filling attrib
         for(int j=0;j<attribSize;j++) {
             reinterpret_cast<GLfloat*>(&static_cast<unsigned char*>(dataOut)[i])[j] = X2F(fixed_data[j]);
@@ -959,7 +960,7 @@ static void convertFixedIndirectLoop(const char* dataIn,unsigned int strideIn,vo
 static void convertByteDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize) {
 
     for(unsigned int i = 0; i < nBytes;i+=strideOut) {
-        const GLbyte* byte_data = (const GLbyte *)dataIn;
+        const GLbyte* byte_data = reinterpret_cast<const GLbyte*>(dataIn);
         //filling attrib
         for(int j=0;j<attribSize;j++) {
             reinterpret_cast<GLshort*>(&static_cast<unsigned char*>(dataOut)[i])[j] = B2S(byte_data[j]);
@@ -1030,7 +1031,8 @@ void GLEScontext::convertDirect(GLESConversionArrays& cArrs,GLint first,GLsizei 
     unsigned int bytes = type == GL_FIXED ? sizeof(GLfixed):sizeof(GLbyte);
     cArrs.allocArr(size,type);
     int stride = p->getStride()?p->getStride():bytes*attribSize;
-    const char* data = (const char*)p->getArrayData() + (first*stride);
+    const char* data =
+            static_cast<const char*>(p->getArrayData()) + (first * stride);
 
     if(type == GL_FIXED) {
         convertFixedDirectLoop(data,stride,cArrs.getCurrentData(),size*sizeof(GLfloat),attribSize*sizeof(GLfloat),attribSize);
@@ -1046,7 +1048,7 @@ void GLEScontext::convertDirectVBO(GLESConversionArrays& cArrs,GLint first,GLsiz
     GLuint* indices = NULL;
     int attribSize = p->getSize();
     int stride = p->getStride()?p->getStride():sizeof(GLfixed)*attribSize;
-    char* data = (char*)p->getBufferData();
+    char* data = static_cast<char*>(p->getBufferData());
 
     if(p->bufferNeedConversion()) {
         directToBytesRanges(first,count,p,ranges); //converting indices range to buffer bytes ranges by offset
@@ -1094,7 +1096,7 @@ void GLEScontext::convertIndirect(GLESConversionArrays& cArrs,GLsizei count,GLen
     cArrs.allocArr(size,type);
     int stride = p->getStride()?p->getStride():bytes*attribSize;
 
-    const char* data = (const char*)p->getArrayData();
+    const char* data = static_cast<const char*>(p->getArrayData());
     if(type == GL_FIXED) {
         convertFixedIndirectLoop(data,stride,cArrs.getCurrentData(),count,indices_type,indices,attribSize*sizeof(GLfloat),attribSize);
     } else if(type == GL_BYTE){
@@ -1217,30 +1219,42 @@ static void sClearIndexedBufferBinding(GLuint id, std::vector<BufferBinding>& bi
 }
 
 void GLEScontext::unbindBuffer(GLuint buffer) {
-    if (m_arrayBuffer == buffer)
+    if (m_arrayBuffer == buffer) {
         m_arrayBuffer = 0;
-    if (m_currVaoState.iboId() == buffer)
+    }
+    if (m_currVaoState.iboId() == buffer) {
         m_currVaoState.iboId() = 0;
-    if (m_copyReadBuffer == buffer)
+    }
+    if (m_copyReadBuffer == buffer) {
         m_copyReadBuffer = 0;
-    if (m_copyWriteBuffer == buffer)
+    }
+    if (m_copyWriteBuffer == buffer) {
         m_copyWriteBuffer = 0;
-    if (m_pixelPackBuffer == buffer)
+    }
+    if (m_pixelPackBuffer == buffer) {
         m_pixelPackBuffer = 0;
-    if (m_pixelUnpackBuffer == buffer)
+    }
+    if (m_pixelUnpackBuffer == buffer) {
         m_pixelUnpackBuffer = 0;
-    if (m_transformFeedbackBuffer == buffer)
+    }
+    if (m_transformFeedbackBuffer == buffer) {
         m_transformFeedbackBuffer = 0;
-    if (m_uniformBuffer == buffer)
+    }
+    if (m_uniformBuffer == buffer) {
         m_uniformBuffer = 0;
-    if (m_atomicCounterBuffer == buffer)
+    }
+    if (m_atomicCounterBuffer == buffer) {
         m_atomicCounterBuffer = 0;
-    if (m_dispatchIndirectBuffer == buffer)
+    }
+    if (m_dispatchIndirectBuffer == buffer) {
         m_dispatchIndirectBuffer = 0;
-    if (m_drawIndirectBuffer == buffer)
+    }
+    if (m_drawIndirectBuffer == buffer) {
         m_drawIndirectBuffer = 0;
-    if (m_shaderStorageBuffer == buffer)
+    }
+    if (m_shaderStorageBuffer == buffer) {
         m_shaderStorageBuffer = 0;
+    }
 
     // One might think that indexed buffer bindings for transform feedbacks
     // must be cleared as well, but transform feedbacks are
@@ -1583,10 +1597,11 @@ void GLEScontext::setClearStencil(GLint s) {
 const char * GLEScontext::getExtensionString() {
     const char * ret;
     s_lock.lock();
-    if (s_glExtensions)
+    if (s_glExtensions) {
         ret = s_glExtensions->c_str();
-    else
-        ret="";
+    } else {
+        ret = "";
+    }
     s_lock.unlock();
     return ret;
 }
@@ -1613,7 +1628,7 @@ void GLEScontext::releaseGlobalLock() {
 
 void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 {
-    const char* cstring = (const char*)extensionString;
+    const char* cstring = reinterpret_cast<const char*>(extensionString);
 
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
     s_glDispatch.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
@@ -1641,63 +1656,78 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetError();
 
     const GLubyte* glslVersion = s_glDispatch.glGetString(GL_SHADING_LANGUAGE_VERSION);
-    s_glSupport.glslVersion = Version((const  char*)(glslVersion));
+    s_glSupport.glslVersion =
+            Version(reinterpret_cast<const char*>(glslVersion));
     const GLubyte* glVersion = s_glDispatch.glGetString(GL_VERSION);
 
-    if (strstr(cstring,"GL_EXT_bgra ")!=NULL)
+    if (strstr(cstring, "GL_EXT_bgra ") != NULL) {
         s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888 = true;
+    }
 
     if (::isCoreProfile() ||
-        strstr(cstring,"GL_EXT_framebuffer_object ")!=NULL)
+        strstr(cstring, "GL_EXT_framebuffer_object ") != NULL) {
         s_glSupport.GL_EXT_FRAMEBUFFER_OBJECT = true;
+    }
 
-    if (strstr(cstring,"GL_ARB_vertex_blend ")!=NULL)
+    if (strstr(cstring, "GL_ARB_vertex_blend ") != NULL) {
         s_glSupport.GL_ARB_VERTEX_BLEND = true;
+    }
 
-    if (strstr(cstring,"GL_ARB_matrix_palette ")!=NULL)
+    if (strstr(cstring, "GL_ARB_matrix_palette ") != NULL) {
         s_glSupport.GL_ARB_MATRIX_PALETTE = true;
+    }
 
-    if (strstr(cstring,"GL_EXT_packed_depth_stencil ")!=NULL ||
-        strstr(cstring,"GL_OES_packed_depth_stencil ")!=NULL)
+    if (strstr(cstring, "GL_EXT_packed_depth_stencil ") != NULL ||
+        strstr(cstring, "GL_OES_packed_depth_stencil ") != NULL) {
         s_glSupport.GL_EXT_PACKED_DEPTH_STENCIL = true;
+    }
 
-    if (strstr(cstring,"GL_OES_read_format ")!=NULL)
+    if (strstr(cstring, "GL_OES_read_format ") != NULL) {
         s_glSupport.GL_OES_READ_FORMAT = true;
+    }
 
-    if (strstr(cstring,"GL_ARB_half_float_pixel ")!=NULL ||
-        strstr(cstring,"GL_OES_texture_half_float ")!=NULL)
+    if (strstr(cstring, "GL_ARB_half_float_pixel ") != NULL ||
+        strstr(cstring, "GL_OES_texture_half_float ") != NULL) {
         s_glSupport.GL_ARB_HALF_FLOAT_PIXEL = true;
+    }
 
-    if (strstr(cstring,"GL_NV_half_float ")!=NULL)
+    if (strstr(cstring, "GL_NV_half_float ") != NULL) {
         s_glSupport.GL_NV_HALF_FLOAT = true;
+    }
 
-    if (strstr(cstring,"GL_ARB_half_float_vertex ")!=NULL ||
-        strstr(cstring,"GL_OES_vertex_half_float ")!=NULL)
+    if (strstr(cstring, "GL_ARB_half_float_vertex ") != NULL ||
+        strstr(cstring, "GL_OES_vertex_half_float ") != NULL) {
         s_glSupport.GL_ARB_HALF_FLOAT_VERTEX = true;
+    }
 
-    if (strstr(cstring,"GL_SGIS_generate_mipmap ")!=NULL)
+    if (strstr(cstring, "GL_SGIS_generate_mipmap ") != NULL) {
         s_glSupport.GL_SGIS_GENERATE_MIPMAP = true;
+    }
 
-    if (strstr(cstring,"GL_ARB_ES2_compatibility ")!=NULL
-            || isGles2Gles())
+    if (strstr(cstring, "GL_ARB_ES2_compatibility ") != NULL || isGles2Gles()) {
         s_glSupport.GL_ARB_ES2_COMPATIBILITY = true;
+    }
 
-    if (strstr(cstring,"GL_OES_standard_derivatives ")!=NULL)
+    if (strstr(cstring, "GL_OES_standard_derivatives ") != NULL) {
         s_glSupport.GL_OES_STANDARD_DERIVATIVES = true;
+    }
 
     if (::isCoreProfile() ||
-        strstr(cstring,"GL_ARB_texture_non_power_of_two")!=NULL ||
-        strstr(cstring,"GL_OES_texture_npot")!=NULL)
+        strstr(cstring, "GL_ARB_texture_non_power_of_two") != NULL ||
+        strstr(cstring, "GL_OES_texture_npot") != NULL) {
         s_glSupport.GL_OES_TEXTURE_NPOT = true;
+    }
 
     if (::isCoreProfile() ||
-        strstr(cstring,"GL_ARB_color_buffer_float")!=NULL ||
-        strstr(cstring,"GL_EXT_color_buffer_float")!=NULL)
+        strstr(cstring, "GL_ARB_color_buffer_float") != NULL ||
+        strstr(cstring, "GL_EXT_color_buffer_float") != NULL) {
         s_glSupport.GL_EXT_color_buffer_float = true;
+    }
 
-    if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
+    if (!(Version(reinterpret_cast<const char*>(glVersion)) < Version("3.0")) ||
+        strstr(cstring, "GL_OES_rgb8_rgba8") != NULL) {
         s_glSupport.GL_OES_RGB8_RGBA8 = true;
-
+    }
 }
 
 void GLEScontext::buildStrings(const char* baseVendor,
@@ -1750,8 +1780,9 @@ void GLEScontext::buildStrings(const char* baseVendor,
 
 bool GLEScontext::isTextureUnitEnabled(GLenum unit) {
     for (int i=0;i<NUM_TEXTURE_TARGETS;++i) {
-        if (m_texState[unit-GL_TEXTURE0][i].enabled)
+        if (m_texState[unit - GL_TEXTURE0][i].enabled) {
             return true;
+        }
     }
     return false;
 }
@@ -1797,7 +1828,7 @@ bool GLEScontext::glGetFloatv(GLenum pname, GLfloat *params)
     if (numParams>0 && glGetIntegerv(pname,iParams)) {
         while(numParams >= 0)
         {
-            params[numParams] = (GLfloat)iParams[numParams];
+            params[numParams] = static_cast<GLfloat>(iParams[numParams]);
             numParams--;
         }
         result = true;
@@ -1931,12 +1962,14 @@ ObjectLocalName GLEScontext::getTextureLocalName(GLenum target,
 
 void GLEScontext::drawValidate(void)
 {
-    if(m_drawFramebuffer == 0)
+    if (m_drawFramebuffer == 0) {
         return;
+    }
 
     auto fbObj = getFBOData(m_drawFramebuffer);
-    if (!fbObj)
+    if (!fbObj) {
         return;
+    }
 
     fbObj->validate(this);
 }
@@ -2010,9 +2043,9 @@ void GLEScontext::initDefaultFBO(
     GLint prevRbo;
     dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prevRbo);
 
-    // OS X in legacy opengl mode does not actually support GL_RGB565 as a renderbuffer.
-    // Just replace it with GL_RGB8 for now.
-    // TODO: Re-enable GL_RGB565 for OS X when we move to core profile.
+    // OS X in legacy opengl mode does not actually support GL_RGB565 as a
+    // renderbuffer. Just replace it with GL_RGB8 for now.
+    // TODO(lfy): Re-enable GL_RGB565 for OS X when we move to core profile.
 #ifdef __APPLE__
     if (colorFormat == GL_RGB565)
         colorFormat = GL_RGB8;
@@ -2054,10 +2087,14 @@ void GLEScontext::initDefaultFBO(
     GLuint prevDrawFBOBinding = getFramebufferBinding(GL_FRAMEBUFFER);
     GLuint prevReadFBOBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
 
-    if (prevDrawFBOBinding)
-        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, getFBOGlobalName(prevDrawFBOBinding));
-    if (prevReadFBOBinding)
-        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBOGlobalName(prevReadFBOBinding));
+    if (prevDrawFBOBinding) {
+        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER,
+                                       getFBOGlobalName(prevDrawFBOBinding));
+    }
+    if (prevReadFBOBinding) {
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                                       getFBOGlobalName(prevReadFBOBinding));
+    }
 
     // We might be initializing a surfaceless context underneath
     // where the viewport is initialized to 0x0 width and height.
@@ -2125,7 +2162,7 @@ ObjectLocalName GLEScontext::genFBOName(ObjectLocalName p_localName,
 }
 
 void GLEScontext::setFBOData(ObjectLocalName p_localName, ObjectDataPtr data) {
-    m_fboNameSpace->setObjectData(p_localName, data);
+    m_fboNameSpace->setObjectData(p_localName, std::move(data));
 }
 
 void GLEScontext::deleteFBO(ObjectLocalName p_localName) {
@@ -2605,7 +2642,7 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
                                                      GLint internalFormat,
                                                      GLenum format,
                                                      GLenum type) {
-    // TODO: these might also matter
+    // TODO(lfy): these might also matter
     (void)format;
     (void)type;
 

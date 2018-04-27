@@ -43,7 +43,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 /* Implement the net pipes */
 
@@ -144,9 +144,9 @@ static void socketPipe_closeFromSocket(void* opaque) {
 
     /* Force the closure of the QEMUD channel - if a guest is blocked
      * waiting for a wake signal, it will receive an error. */
-    if (pipe->hwpipe != NULL) {
+    if (pipe->hwpipe != nullptr) {
         android_pipe_host_close(pipe->hwpipe);
-        pipe->hwpipe = NULL;
+        pipe->hwpipe = nullptr;
     }
 
     pipe->state = STATE_CLOSING_SOCKET;
@@ -204,7 +204,7 @@ static void socketPipe_io_func(void* opaque, int fd, unsigned events) {
 static void* socketPipe_initFromAddress(void* hwpipe,
                                         const SockAddress* address,
                                         Looper* looper) {
-    SocketPipe* pipe = new SocketPipe();
+    auto* pipe = new SocketPipe();
     *pipe = {};
     pipe->hwpipe = hwpipe;
     pipe->state = STATE_INIT;
@@ -216,7 +216,7 @@ static void* socketPipe_initFromAddress(void* hwpipe,
         if (fd < 0) {
             D("%s: Could create socket from address family!", __FUNCTION__);
             socketPipe_free(pipe);
-            return NULL;
+            return nullptr;
         }
 
         pipe->io = loopIo_new(looper, fd, socketPipe_io_func, pipe);
@@ -226,7 +226,7 @@ static void* socketPipe_initFromAddress(void* hwpipe,
         if (status == ASYNC_ERROR) {
             D("%s: Could not connect to socket: %s", __FUNCTION__, errno_str);
             socketPipe_free(pipe);
-            return NULL;
+            return nullptr;
         }
         if (status == ASYNC_COMPLETE) {
             pipe->state = STATE_CONNECTED;
@@ -246,14 +246,15 @@ static void socketPipe_closeFromGuest(void* opaque) {
 }
 
 static int netPipeReadySend(SocketPipe* pipe) {
-    if (pipe->state == STATE_CONNECTED)
+    if (pipe->state == STATE_CONNECTED) {
         return 0;
-    else if (pipe->state == STATE_CONNECTING)
+    } else if (pipe->state == STATE_CONNECTING) {
         return PIPE_ERROR_AGAIN;
-    else if (pipe->hwpipe == NULL)
+    } else if (pipe->hwpipe == nullptr) {
         return PIPE_ERROR_INVAL;
-    else
+    } else {
         return PIPE_ERROR_IO;
+    }
 }
 
 #ifdef _WIN32
@@ -317,11 +318,13 @@ static int socketPipe_sendBuffers(void* opaque,
     const AndroidPipeBuffer* buffEnd = buff + numBuffers;
 
     ret = netPipeReadySend(pipe);
-    if (ret != 0)
+    if (ret != 0) {
         return ret;
+    }
 
-    for (; buff < buffEnd; buff++)
+    for (; buff < buffEnd; buff++) {
         count += buff->size;
+    }
 
     buff = buffers;
     while (count > 0) {
@@ -395,8 +398,9 @@ static int socketPipe_sendBuffers(void* opaque,
 
         /* we reached the end of stream? */
         if (len == 0) {
-            if (ret == 0)
+            if (ret == 0) {
                 ret = PIPE_ERROR_IO;
+            }
             break;
         }
 
@@ -427,8 +431,9 @@ static int socketPipe_recvBuffers(void* opaque,
     AndroidPipeBuffer* buff = buffers;
     AndroidPipeBuffer* buffEnd = buff + numBuffers;
 
-    for (; buff < buffEnd; buff++)
+    for (; buff < buffEnd; buff++) {
         count += buff->size;
+    }
 
     buff = buffers;
     while (count > 0) {
@@ -463,8 +468,9 @@ static int socketPipe_recvBuffers(void* opaque,
 
         /* we reached the end of stream? */
         if (len == 0) {
-            if (ret == 0)
+            if (ret == 0) {
                 ret = PIPE_ERROR_IO;
+            }
             break;
         }
 
@@ -489,10 +495,12 @@ static unsigned socketPipe_poll(void* opaque) {
     unsigned mask = loopIo_poll(pipe->io);
     unsigned ret = 0;
 
-    if (mask & LOOP_IO_READ)
+    if (mask & LOOP_IO_READ) {
         ret |= PIPE_POLL_IN;
-    if (mask & LOOP_IO_WRITE)
+    }
+    if (mask & LOOP_IO_WRITE) {
         ret |= PIPE_POLL_OUT;
+    }
 
     return ret;
 }
@@ -512,15 +520,15 @@ void* socketPipe_initUnix(void* hwpipe, void* _looper, const char* args) {
      *   <path>
      */
 
-    if (args == NULL || args[0] == '\0') {
+    if (args == nullptr || args[0] == '\0') {
         D("%s: Missing address!", __FUNCTION__);
-        return NULL;
+        return nullptr;
     }
     D("%s: Address is '%s'", __FUNCTION__, args);
 
     if (!android_unix_pipe_check_path(args)) {
         D("%s: Rejecting connection to unknown path '%s'", __FUNCTION__, args);
-        return NULL;
+        return nullptr;
     }
 
     SockAddress address;
@@ -540,8 +548,8 @@ static const AndroidPipeFuncs s_unix_pipe_funcs = {
         socketPipe_recvBuffers,
         socketPipe_poll,
         socketPipe_wakeOn,
-        NULL, /* we can't save these */
-        NULL, /* we can't load these */
+        nullptr, /* we can't save these */
+        nullptr, /* we can't load these */
 };
 
 void android_unix_pipes_init(void) {

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
 
@@ -41,7 +42,7 @@ constexpr float kMinStateChangeTimeSeconds = 0.05f;
 // and scaled by 1 / sqrt(2) and 1 / sqrt(3) in y and z axis respectively.
 const float kAmbientFrequency = 0.5f;
 const glm::vec3 kAmbientFrequencyVec =
-        glm::vec3(1.f, 1.f / sqrt(2.f), 1.f / sqrt(3.f)) *
+        glm::vec3(1.f, 1.f / std::sqrt(2.f), 1.f / std::sqrt(3.f)) *
         kAmbientFrequency * 2.f * 3.14159265f;
 
 typedef enum {

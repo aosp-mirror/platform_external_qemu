@@ -18,7 +18,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <stddef.h>
+#include <cstddef>
 
 // Optional<T> - a template class to store an optional value of type T.
 //
@@ -184,7 +184,7 @@ public:
                   "Optional references are not allowed: use a pointer instead");
 
     // constructors
-    constexpr Optional() {}
+    constexpr Optional() = default;
     constexpr Optional(NulloptT) {}
 
     Optional(const Optional& other) : base_flag(other.constructed()) {

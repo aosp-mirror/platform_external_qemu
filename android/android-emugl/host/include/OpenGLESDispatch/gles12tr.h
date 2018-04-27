@@ -4,7 +4,7 @@
 #ifndef GLES12_TR_FUNCTIONS_H
 #define GLES12_TR_FUNCTIONS_H
 
-typedef void* voidptr;
+using voidptr = void*;
 #define LIST_GLES12_TR_FUNCTIONS(X) \
   X(voidptr, create_gles1_context, (void* share, const void* underlying_apis), (share, underlying_apis)) \
   X(voidptr, get_current_gles_context, (), ()) \

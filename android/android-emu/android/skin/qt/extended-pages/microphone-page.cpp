@@ -19,9 +19,7 @@
 #include <QSettings>
 
 MicrophonePage::MicrophonePage(QWidget* parent)
-    : QWidget(parent),
-      mUi(new Ui::MicrophonePage()),
-      mEmulatorWindow(nullptr) {
+    : QWidget(parent), mUi(new Ui::MicrophonePage()) {
     mUi->setupUi(this);
 
     // The Hook button is not functional yet.
@@ -88,7 +86,7 @@ void MicrophonePage::forwardGenericEventToEmulator(int type,
                                                    int code,
                                                    int value) {
     if (mEmulatorWindow) {
-        SkinEvent* skin_event = new SkinEvent();
+        auto* skin_event = new SkinEvent();
         skin_event->type = kEventGeneric;
         SkinEventGenericData& genericData = skin_event->u.generic_event;
         genericData.type = type;

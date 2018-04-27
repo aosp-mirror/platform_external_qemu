@@ -30,7 +30,7 @@ namespace android {
 namespace base {
 
 #ifdef __linux__
-static std::string readFile(StringView path) {
+static std::string readFile(const StringView& path) {
     std::ifstream is(path.c_str());
 
     if (!is) {

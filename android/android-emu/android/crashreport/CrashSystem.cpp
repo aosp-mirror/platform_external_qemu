@@ -84,9 +84,9 @@ class HostCrashSystem : public CrashSystem {
 public:
     HostCrashSystem() : mCrashURL(URL::CrashURL) { };
 
-    virtual ~HostCrashSystem() = default;
+    ~HostCrashSystem() override = default;
 
-    virtual const std::string& getCrashDirectory() override {
+    const std::string& getCrashDirectory() override {
         if (mCrashDir.empty()) {
             mCrashDir =
                     PathUtils::join(::android::ConfigDirs::getUserDirectory(),
@@ -96,11 +96,9 @@ public:
         return mCrashDir;
     }
 
-    virtual const std::string& getCrashURL() override {
-        return mCrashURL;
-    }
+    const std::string& getCrashURL() override { return mCrashURL; }
 
-    virtual bool validatePaths() override {
+    bool validatePaths() override {
         bool valid = CrashSystem::validatePaths();
         std::string crashDir = getCrashDirectory();
         if (!System::get()->pathExists(crashDir)) {

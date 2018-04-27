@@ -105,7 +105,7 @@ public:
             mGreenSize(greenSize),
             mBlueSize(blueSize) {}
 
-    EglOS::PixelFormat* clone() {
+    EglOS::PixelFormat* clone() override {
         return new MacPixelFormat(mHandle, mRedSize, mGreenSize, mBlueSize);
     }
 
@@ -119,8 +119,8 @@ public:
     }
 
 private:
-    MacPixelFormat();
-    MacPixelFormat(const MacPixelFormat& other);
+    MacPixelFormat() = delete;
+    MacPixelFormat(const MacPixelFormat& other) = delete;
 
     int mHandle = 0;
     int mRedSize = 0;
@@ -184,7 +184,7 @@ class MacDisplay : public EglOS::Display {
 public:
     explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {}
 
-    virtual EglOS::GlesVersion getMaxGlesVersion() {
+    EglOS::GlesVersion getMaxGlesVersion() override {
         switch (sSupportInfo->maxOpenGLProfile) {
         case MAC_OPENGL_PROFILE_LEGACY:
             return EglOS::GlesVersion::ES2;
@@ -196,9 +196,9 @@ public:
         }
     }
 
-    virtual void queryConfigs(int renderableType,
-                              EglOS::AddConfigCallback* addConfigFunc,
-                              void* addConfigOpaque) {
+    void queryConfigs(int renderableType,
+                      EglOS::AddConfigCallback* addConfigFunc,
+                      void* addConfigOpaque) override {
         for (int i = 0; i < sSupportInfo->numNativeFormats; i++) {
             pixelFormatToConfig(
                 i,
@@ -207,7 +207,7 @@ public:
         }
     }
 
-    virtual bool isValidNativeWin(EglOS::Surface* win) {
+    bool isValidNativeWin(EglOS::Surface* win) override {
         if (win->type() != MacSurface::WINDOW) {
             return false;
         } else {
@@ -215,16 +215,15 @@ public:
         }
     }
 
-    virtual bool isValidNativeWin(EGLNativeWindowType win) {
+    bool isValidNativeWin(EGLNativeWindowType win) override {
         unsigned int width, height;
         return nsGetWinDims(win, &width, &height);
     }
 
-    virtual bool checkWindowPixelFormatMatch(
-            EGLNativeWindowType win,
-            const EglOS::PixelFormat* pixelFormat,
-            unsigned int* width,
-            unsigned int* height) {
+    bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
+                                     const EglOS::PixelFormat* pixelFormat,
+                                     unsigned int* width,
+                                     unsigned int* height) override {
         bool ret = nsGetWinDims(win, width, height);
 
         const MacPixelFormat* format = MacPixelFormat::from(pixelFormat);
@@ -237,13 +236,12 @@ public:
         return ret && match;
     }
 
-    virtual emugl::SmartPtr<EglOS::Context> createContext(
+    emugl::SmartPtr<EglOS::Context> createContext(
             EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
-            EglOS::Context* sharedContext) {
-
+            EglOS::Context* sharedContext) override {
         void* macSharedContext =
-                sharedContext ? MacContext::from(sharedContext) : NULL;
+                sharedContext ? MacContext::from(sharedContext) : nullptr;
 
         bool isCoreProfile =
             profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR;
@@ -267,9 +265,9 @@ public:
                                    macSharedContext));
     }
 
-    virtual EglOS::Surface* createPbufferSurface(
+    EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
-            const EglOS::PbufferInfo* info) {
+            const EglOS::PbufferInfo* info) override {
         GLenum glTexFormat = GL_RGBA, glTexTarget = GL_TEXTURE_2D;
         switch (info->format) {
         case EGL_TEXTURE_RGB:
@@ -281,20 +279,16 @@ public:
         }
         EGLint maxMipmap = info->hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
 
-        MacSurface* result = new MacSurface(
-                nsCreatePBuffer(
-                        glTexTarget,
-                        glTexFormat,
-                        maxMipmap,
-                        info->width,
-                        info->height),
+        auto* result = new MacSurface(
+                nsCreatePBuffer(glTexTarget, glTexFormat, maxMipmap,
+                                info->width, info->height),
                 MacSurface::PBUFFER);
 
         result->setHasMipmap(info->hasMipmap);
         return result;
     }
 
-    virtual bool releasePbuffer(EglOS::Surface* pb) {
+    bool releasePbuffer(EglOS::Surface* pb) override {
         if (pb) {
             nsDestroyPBuffer(MacSurface::from(pb)->handle());
             delete pb;
@@ -302,15 +296,14 @@ public:
         return true;
     }
 
-    virtual bool makeCurrent(EglOS::Surface* read,
-                             EglOS::Surface* draw,
-                             EglOS::Context* ctx) {
+    bool makeCurrent(EglOS::Surface* read,
+                     EglOS::Surface* draw,
+                     EglOS::Context* ctx) override {
         // check for unbind
-        if (ctx == NULL && read == NULL && draw == NULL) {
-            nsWindowMakeCurrent(NULL, NULL);
+        if (ctx == nullptr && read == nullptr && draw == nullptr) {
+            nsWindowMakeCurrent(nullptr, nullptr);
             return true;
-        }
-        else if (ctx == NULL || read == NULL || draw == NULL) {
+        } else if (ctx == nullptr || read == nullptr || draw == nullptr) {
             // error !
             return false;
         }
@@ -338,9 +331,7 @@ public:
         return true;
     }
 
-    virtual void swapBuffers(EglOS::Surface* srfc) {
-        nsSwapBuffers();
-    }
+    void swapBuffers(EglOS::Surface* srfc) override { nsSwapBuffers(); }
 
     EGLNativeDisplayType dpy() const { return mDpy; }
 
@@ -363,13 +354,12 @@ public:
         }
     }
 
-    ~MacGlLibrary() {
-    }
+    ~MacGlLibrary() override = default;
 
     // override
-    virtual GlFunctionPointer findSymbol(const char* name) {
+    GlFunctionPointer findSymbol(const char* name) override {
         if (!mLib) {
-            return NULL;
+            return nullptr;
         }
         return reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
     }
@@ -380,16 +370,12 @@ private:
 
 class MacEngine : public EglOS::Engine {
 public:
-    virtual EglOS::Display* getDefaultDisplay() {
-        return new MacDisplay(0);
-    }
+    EglOS::Display* getDefaultDisplay() override { return new MacDisplay(0); }
 
-    virtual GlLibrary* getGlLibrary() {
-        return &mGlLib;
-    }
+    GlLibrary* getGlLibrary() override { return &mGlLib; }
 
-    virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* cfg,
-                                                EGLNativeWindowType wnd) {
+    EglOS::Surface* createWindowSurface(EglOS::PixelFormat* cfg,
+                                        EGLNativeWindowType wnd) override {
         return new MacSurface(wnd, MacSurface::WINDOW);
     }
 

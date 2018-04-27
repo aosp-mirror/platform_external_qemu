@@ -56,7 +56,7 @@ extern "C" {
 #include "sysemu/ranchu.h"
 #include "sysemu/rng-random-generic.h"
 
-// TODO: Remove op_http_proxy global variable.
+// TODO(digit): Remove op_http_proxy global variable.
 extern char* op_http_proxy;
 
 }  // extern "C"
@@ -112,7 +112,8 @@ bool qemu_android_emulation_early_setup() {
     qemu_looper_setForThread();
     qemu_thread_register_setup_callback(qemu_looper_setForThread);
 
-    qemu_abort_set_handler((QemuAbortHandler)&crashhandler_die_format_v);
+    qemu_abort_set_handler(
+            static_cast<QemuAbortHandler>(&crashhandler_die_format_v));
 
     // Make sure we override the ctrl-C handler as soon as possible.
     qemu_set_ctrlc_handler(&skin_winsys_quit_request);

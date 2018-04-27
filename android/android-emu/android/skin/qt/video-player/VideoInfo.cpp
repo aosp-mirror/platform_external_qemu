@@ -30,7 +30,7 @@
 // THE SOFTWARE.
 
 #include "android/skin/qt/video-player/VideoInfo.h"
-
+#include <utility>
 #include "android/base/memory/ScopedPtr.h"
 #include "android/skin/qt/video-player/PacketQueue.h"
 #include "android/utils/debug.h"
@@ -50,7 +50,7 @@ namespace videoplayer {
 // VideoInfo implementations
 
 VideoInfo::VideoInfo(VideoPlayerWidget* widget, std::string videoFile)
-    : mVideoFile(videoFile), mWidget(widget) {
+    : mVideoFile(std::move(videoFile)), mWidget(widget) {
     initialize();
 }
 
@@ -66,14 +66,15 @@ void VideoInfo::initialize() {
     avformat_network_init();
 
     AVFormatContext* fmtCtx = nullptr;
-    if (avformat_open_input(&fmtCtx, mVideoFile.c_str(), NULL, NULL) != 0) {
+    if (avformat_open_input(&fmtCtx, mVideoFile.c_str(), nullptr, nullptr) !=
+        0) {
         derror("Failed to open video file\n");
         return;  // failed to open video file
     }
     auto pFmtCtx = android::base::makeCustomScopedPtr(
             fmtCtx, [=](AVFormatContext* f) { avformat_close_input(&f); });
 
-    if (avformat_find_stream_info(fmtCtx, NULL) < 0) {
+    if (avformat_find_stream_info(fmtCtx, nullptr) < 0) {
         derror("Failed to find video stream info\n");
         return;  // failed to find stream info
     }
@@ -107,7 +108,7 @@ void VideoInfo::initialize() {
     }
 
     // Open codec
-    if (avcodec_open2(videoCodecCtx, videoCodec, NULL) < 0) {
+    if (avcodec_open2(videoCodecCtx, videoCodec, nullptr) < 0) {
         derror("Unable to open the video codec\n");
         return;
     }
@@ -121,9 +122,10 @@ void VideoInfo::initialize() {
 
     // create image convert context
     AVPixelFormat dst_fmt = AV_PIX_FMT_RGB24;
-    SwsContext* imgConvertCtx = sws_getContext(
-            videoCodecCtx->width, videoCodecCtx->height, videoCodecCtx->pix_fmt,
-            dst_w, dst_h, dst_fmt, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    SwsContext* imgConvertCtx =
+            sws_getContext(videoCodecCtx->width, videoCodecCtx->height,
+                           videoCodecCtx->pix_fmt, dst_w, dst_h, dst_fmt,
+                           SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
     if (imgConvertCtx == nullptr) {
         derror("Could not allocate image convert context\n");
         return;
@@ -134,7 +136,7 @@ void VideoInfo::initialize() {
     // Get the first valid packet from the video file
     int ret = 0;
     int got_frame = 0;
-    AVPacket packet = {0};
+    AVPacket packet = {nullptr};
     AVFrame* avframe = av_frame_alloc();
     if (avframe == nullptr) {
         derror("Unable to allocate AVFrame\n");
@@ -179,7 +181,8 @@ void VideoInfo::initialize() {
     int headerlen = 0;
     mPreviewFrame.buf = new unsigned char[numBytes + 64];
     // simply append a ppm header to become ppm image format
-    headerlen = sprintf((char*)mPreviewFrame.buf, "P6\n%d %d\n255\n", dst_w, dst_h);
+    headerlen = sprintf(reinterpret_cast<char*>(mPreviewFrame.buf),
+                        "P6\n%d %d\n255\n", dst_w, dst_h);
     mPreviewFrame.headerlen = headerlen;
     mPreviewFrame.len = numBytes + headerlen;
 
@@ -211,14 +214,15 @@ void VideoInfo::adjustWindowSize(AVCodecContext* c,
     }
 
     if (aspect_ratio <= 0.0) {
-        aspect_ratio = (float)c->width / (float)c->height;
+        aspect_ratio =
+                static_cast<float>(c->width) / static_cast<float>(c->height);
     }
 
     int h = widget->height();
-    int w = ((int)(h * aspect_ratio)) & -3;
+    int w = (static_cast<int>(h * aspect_ratio)) & -3;
     if (w > widget->width()) {
         w = widget->width();
-        h = ((int)(w / aspect_ratio)) & -3;
+        h = (static_cast<int>(w / aspect_ratio)) & -3;
     }
 
     int x = (widget->width() - w) / 2;

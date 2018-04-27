@@ -19,10 +19,11 @@
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
+#include <cinttypes>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
-#include <inttypes.h>
 
 using namespace android::base;
 using namespace android::crashreport;
@@ -78,7 +79,8 @@ static std::string getTestCrasher() {
 }
 
 static std::vector<std::string> getTestCrasherCmdLine(std::string pipe) {
-    const std::vector<std::string> cmdline = {getTestCrasher(), "-pipe", pipe};
+    const std::vector<std::string> cmdline = {getTestCrasher(), "-pipe",
+                                              std::move(pipe)};
     return cmdline;
 }
 

@@ -19,7 +19,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <cstdlib>
 
 void crashme(int arg, bool nocrash, int delay_ms) {

@@ -66,23 +66,28 @@ RsaOperation* RsaOperationFactory::CreateRsaOperation(const Key& key,
                                                       const AuthorizationSet& begin_params,
                                                       keymaster_error_t* error) {
     keymaster_padding_t padding;
-    if (!GetAndValidatePadding(begin_params, key, &padding, error))
+    if (!GetAndValidatePadding(begin_params, key, &padding, error)) {
         return nullptr;
+    }
 
     bool require_digest = (purpose() == KM_PURPOSE_SIGN || purpose() == KM_PURPOSE_VERIFY ||
                            padding == KM_PAD_RSA_OAEP);
 
     keymaster_digest_t digest = KM_DIGEST_NONE;
-    if (require_digest && !GetAndValidateDigest(begin_params, key, &digest, error))
+    if (require_digest &&
+        !GetAndValidateDigest(begin_params, key, &digest, error)) {
         return nullptr;
+    }
 
     UniquePtr<EVP_PKEY, EVP_PKEY_Delete> rsa(GetRsaKey(key, error));
-    if (!rsa.get())
+    if (!rsa.get()) {
         return nullptr;
+    }
 
     RsaOperation* op = InstantiateOperation(digest, padding, rsa.release());
-    if (!op)
+    if (!op) {
         *error = KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     return op;
 }
 
@@ -132,8 +137,9 @@ RsaCryptingOperationFactory::SupportedPaddingModes(size_t* padding_mode_count) c
 }
 
 RsaOperation::~RsaOperation() {
-    if (rsa_key_ != NULL)
+    if (rsa_key_ != NULL) {
         EVP_PKEY_free(rsa_key_);
+    }
 }
 
 keymaster_error_t RsaOperation::Begin(const AuthorizationSet& /* input_params */,
@@ -159,8 +165,9 @@ keymaster_error_t RsaOperation::Update(const AuthorizationSet& /* additional_par
 keymaster_error_t RsaOperation::StoreData(const Buffer& input, size_t* input_consumed) {
     assert(input_consumed);
 
-    if (!data_.reserve(EVP_PKEY_size(rsa_key_)))
+    if (!data_.reserve(EVP_PKEY_size(rsa_key_))) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     // If the write fails, it's because input length exceeds key size.
     LOG_E("get input %d", input.available_read());
     LOG_E("get data_ %d", data_.available_read());
@@ -180,18 +187,22 @@ keymaster_error_t RsaOperation::StoreData(const Buffer& input, size_t* input_con
 keymaster_error_t RsaOperation::SetRsaPaddingInEvpContext(EVP_PKEY_CTX* pkey_ctx, bool signing) {
     keymaster_error_t error;
     int openssl_padding = GetOpensslPadding(&error);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, openssl_padding) <= 0)
+    if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, openssl_padding) <= 0) {
         return TranslateLastOpenSslError();
+    }
 
     if (signing && openssl_padding == RSA_PKCS1_PSS_PADDING) {
         // Also need to set the length of the salt used in the padding generation.  We set it equal
         // to the length of the selected digest.
         assert(digest_algorithm_);
-        if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, EVP_MD_size(digest_algorithm_)) <= 0)
+        if (EVP_PKEY_CTX_set_rsa_pss_saltlen(
+                    pkey_ctx, EVP_MD_size(digest_algorithm_)) <= 0) {
             return TranslateLastOpenSslError();
+        }
     }
 
     return KM_ERROR_OK;
@@ -199,8 +210,9 @@ keymaster_error_t RsaOperation::SetRsaPaddingInEvpContext(EVP_PKEY_CTX* pkey_ctx
 
 keymaster_error_t RsaOperation::InitDigest() {
     if (digest_ == KM_DIGEST_NONE) {
-        if (require_digest())
+        if (require_digest()) {
             return KM_ERROR_INCOMPATIBLE_DIGEST;
+        }
         return KM_ERROR_OK;
     }
 
@@ -251,8 +263,11 @@ int RsaDigestingOperation::GetOpensslPadding(keymaster_error_t* error) {
             *error = KM_ERROR_INCOMPATIBLE_PADDING_MODE;
             return -1;
         }
-        if (EVP_MD_size(digest_algorithm_) * 2 + kPssOverhead > (size_t)EVP_PKEY_size(rsa_key_)) {
-            LOG_E("Input too long: %d-byte digest cannot be used with %d-byte RSA key in PSS "
+        if (EVP_MD_size(digest_algorithm_) * 2 + kPssOverhead >
+            static_cast<size_t>(EVP_PKEY_size(rsa_key_))) {
+            LOG_E("Input too long: %d-byte digest cannot be used with %d-byte "
+                  "RSA "
+                  "key in PSS "
                   "padding mode",
                   EVP_MD_size(digest_algorithm_), EVP_PKEY_size(rsa_key_));
             *error = KM_ERROR_INCOMPATIBLE_DIGEST;
@@ -267,29 +282,35 @@ int RsaDigestingOperation::GetOpensslPadding(keymaster_error_t* error) {
 keymaster_error_t RsaSignOperation::Begin(const AuthorizationSet& input_params,
                                           AuthorizationSet* output_params) {
     keymaster_error_t error = RsaDigestingOperation::Begin(input_params, output_params);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    if (digest_ == KM_DIGEST_NONE)
+    if (digest_ == KM_DIGEST_NONE) {
         return KM_ERROR_OK;
+    }
 
     EVP_PKEY_CTX* pkey_ctx;
-    if (EVP_DigestSignInit(&digest_ctx_, &pkey_ctx, digest_algorithm_, nullptr /* engine */,
-                           rsa_key_) != 1)
+    if (EVP_DigestSignInit(&digest_ctx_, &pkey_ctx, digest_algorithm_,
+                           nullptr /* engine */, rsa_key_) != 1) {
         return TranslateLastOpenSslError();
+    }
     return SetRsaPaddingInEvpContext(pkey_ctx, true /* signing */);
 }
 
 keymaster_error_t RsaSignOperation::Update(const AuthorizationSet& additional_params,
                                            const Buffer& input, AuthorizationSet* output_params,
                                            Buffer* output, size_t* input_consumed) {
-    if (digest_ == KM_DIGEST_NONE)
+    if (digest_ == KM_DIGEST_NONE) {
         // Just buffer the data.
-        return RsaOperation::Update(additional_params, input, output_params, output,
-                                    input_consumed);
+        return RsaOperation::Update(additional_params, input, output_params,
+                                    output, input_consumed);
+    }
 
-    if (EVP_DigestSignUpdate(&digest_ctx_, input.peek_read(), input.available_read()) != 1)
+    if (EVP_DigestSignUpdate(&digest_ctx_, input.peek_read(),
+                             input.available_read()) != 1) {
         return TranslateLastOpenSslError();
+    }
     *input_consumed = input.available_read();
     return KM_ERROR_OK;
 }
@@ -302,37 +323,43 @@ keymaster_error_t RsaSignOperation::Finish(const AuthorizationSet& additional_pa
     size_t key_len = EVP_PKEY_size(rsa_key_);
     LOG_E("calling sign finish: %d byte input and %d bit key", input.available_read(), key_len * 8);
     keymaster_error_t error = UpdateForFinish(additional_params, input);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    if (digest_ == KM_DIGEST_NONE)
+    if (digest_ == KM_DIGEST_NONE) {
         return SignUndigested(output);
-    else
+    } else {
         return SignDigested(output);
+    }
 }
 
 static keymaster_error_t zero_pad_left(UniquePtr<uint8_t[]>* dest, size_t padded_len, Buffer& src) {
     assert(padded_len > src.available_read());
 
     dest->reset(new uint8_t[padded_len]);
-    if (!dest->get())
+    if (!dest->get()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     size_t padding_len = padded_len - src.available_read();
     memset(dest->get(), 0, padding_len);
-    if (!src.read(dest->get() + padding_len, src.available_read()))
+    if (!src.read(dest->get() + padding_len, src.available_read())) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     return KM_ERROR_OK;
 }
 
 keymaster_error_t RsaSignOperation::SignUndigested(Buffer* output) {
     UniquePtr<RSA, RSA_Delete> rsa(EVP_PKEY_get1_RSA(const_cast<EVP_PKEY*>(rsa_key_)));
-    if (!rsa.get())
+    if (!rsa.get()) {
         return TranslateLastOpenSslError();
+    }
 
-    if (!output->Reinitialize(RSA_size(rsa.get())))
+    if (!output->Reinitialize(RSA_size(rsa.get()))) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     size_t key_len = EVP_PKEY_size(rsa_key_);
     int bytes_encrypted;
@@ -344,8 +371,9 @@ keymaster_error_t RsaSignOperation::SignUndigested(Buffer* output) {
             return KM_ERROR_INVALID_INPUT_LENGTH;
         } else if (data_.available_read() < key_len) {
             keymaster_error_t error = zero_pad_left(&zero_padded, key_len, data_);
-            if (error != KM_ERROR_OK)
+            if (error != KM_ERROR_OK) {
                 return error;
+            }
             to_encrypt = zero_padded.get();
         }
         LOG_E("sign %d byte message with %u-bit key", data_.available_read(), key_len * 8);
@@ -370,8 +398,9 @@ keymaster_error_t RsaSignOperation::SignUndigested(Buffer* output) {
         return KM_ERROR_UNSUPPORTED_PADDING_MODE;
     }
 
-    if (bytes_encrypted <= 0)
+    if (bytes_encrypted <= 0) {
         return TranslateLastOpenSslError();
+    }
     if (!output->advance_write(bytes_encrypted)) {
         LOG_E("return KM_ERROR_UNKNOWN_ERROR %d", KM_ERROR_UNKNOWN_ERROR);
         return KM_ERROR_UNKNOWN_ERROR;
@@ -381,16 +410,21 @@ keymaster_error_t RsaSignOperation::SignUndigested(Buffer* output) {
 
 keymaster_error_t RsaSignOperation::SignDigested(Buffer* output) {
     size_t siglen;
-    if (EVP_DigestSignFinal(&digest_ctx_, nullptr /* signature */, &siglen) != 1)
+    if (EVP_DigestSignFinal(&digest_ctx_, nullptr /* signature */, &siglen) !=
+        1) {
         return TranslateLastOpenSslError();
+    }
 
-    if (!output->Reinitialize(siglen))
+    if (!output->Reinitialize(siglen)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
-    if (EVP_DigestSignFinal(&digest_ctx_, output->peek_write(), &siglen) <= 0)
+    if (EVP_DigestSignFinal(&digest_ctx_, output->peek_write(), &siglen) <= 0) {
         return TranslateLastOpenSslError();
-    if (!output->advance_write(siglen))
+    }
+    if (!output->advance_write(siglen)) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     return KM_ERROR_OK;
 }
@@ -398,28 +432,35 @@ keymaster_error_t RsaSignOperation::SignDigested(Buffer* output) {
 keymaster_error_t RsaVerifyOperation::Begin(const AuthorizationSet& input_params,
                                             AuthorizationSet* output_params) {
     keymaster_error_t error = RsaDigestingOperation::Begin(input_params, output_params);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    if (digest_ == KM_DIGEST_NONE)
+    if (digest_ == KM_DIGEST_NONE) {
         return KM_ERROR_OK;
+    }
 
     EVP_PKEY_CTX* pkey_ctx;
-    if (EVP_DigestVerifyInit(&digest_ctx_, &pkey_ctx, digest_algorithm_, NULL, rsa_key_) != 1)
+    if (EVP_DigestVerifyInit(&digest_ctx_, &pkey_ctx, digest_algorithm_, NULL,
+                             rsa_key_) != 1) {
         return TranslateLastOpenSslError();
+    }
     return SetRsaPaddingInEvpContext(pkey_ctx, false /* signing */);
 }
 
 keymaster_error_t RsaVerifyOperation::Update(const AuthorizationSet& additional_params,
                                              const Buffer& input, AuthorizationSet* output_params,
                                              Buffer* output, size_t* input_consumed) {
-    if (digest_ == KM_DIGEST_NONE)
+    if (digest_ == KM_DIGEST_NONE) {
         // Just buffer the data.
-        return RsaOperation::Update(additional_params, input, output_params, output,
-                                    input_consumed);
+        return RsaOperation::Update(additional_params, input, output_params,
+                                    output, input_consumed);
+    }
 
-    if (EVP_DigestVerifyUpdate(&digest_ctx_, input.peek_read(), input.available_read()) != 1)
+    if (EVP_DigestVerifyUpdate(&digest_ctx_, input.peek_read(),
+                               input.available_read()) != 1) {
         return TranslateLastOpenSslError();
+    }
     *input_consumed = input.available_read();
     return KM_ERROR_OK;
 }
@@ -429,28 +470,33 @@ keymaster_error_t RsaVerifyOperation::Finish(const AuthorizationSet& additional_
                                              AuthorizationSet* /* output_params */,
                                              Buffer* /* output */) {
     keymaster_error_t error = UpdateForFinish(additional_params, input);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    if (digest_ == KM_DIGEST_NONE)
+    if (digest_ == KM_DIGEST_NONE) {
         return VerifyUndigested(signature);
-    else
+    } else {
         return VerifyDigested(signature);
+    }
 }
 
 keymaster_error_t RsaVerifyOperation::VerifyUndigested(const Buffer& signature) {
     UniquePtr<RSA, RSA_Delete> rsa(EVP_PKEY_get1_RSA(const_cast<EVP_PKEY*>(rsa_key_)));
-    if (!rsa.get())
+    if (!rsa.get()) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     size_t key_len = RSA_size(rsa.get());
     int openssl_padding;
     switch (padding_) {
     case KM_PAD_NONE:
-        if (data_.available_read() > key_len)
+        if (data_.available_read() > key_len) {
             return KM_ERROR_INVALID_INPUT_LENGTH;
-        if (key_len != signature.available_read())
+        }
+        if (key_len != signature.available_read()) {
             return KM_ERROR_VERIFICATION_FAILED;
+        }
         openssl_padding = RSA_NO_PADDING;
         break;
     case KM_PAD_RSA_PKCS1_1_5_SIGN:
@@ -466,12 +512,14 @@ keymaster_error_t RsaVerifyOperation::VerifyUndigested(const Buffer& signature) 
     }
 
     UniquePtr<uint8_t[]> decrypted_data(new (std::nothrow) uint8_t[key_len]);
-    if (!decrypted_data.get())
+    if (!decrypted_data.get()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     int bytes_decrypted = RSA_public_decrypt(signature.available_read(), signature.peek_read(),
                                              decrypted_data.get(), rsa.get(), openssl_padding);
-    if (bytes_decrypted < 0)
+    if (bytes_decrypted < 0) {
         return KM_ERROR_VERIFICATION_FAILED;
+    }
 
     const uint8_t* compare_pos = decrypted_data.get();
     size_t bytes_to_compare = bytes_decrypted;
@@ -481,32 +529,40 @@ keymaster_error_t RsaVerifyOperation::VerifyUndigested(const Buffer& signature) 
         // verification we should have zeros on the left of the decrypted data.  Do a constant-time
         // check.
         const uint8_t* zero_end = compare_pos + bytes_to_compare - data_.available_read();
-        while (compare_pos < zero_end)
+        while (compare_pos < zero_end) {
             zero_check_result |= *compare_pos++;
+        }
         bytes_to_compare = data_.available_read();
     }
-    if (memcmp_s(compare_pos, data_.peek_read(), bytes_to_compare) != 0 || zero_check_result != 0)
+    if (memcmp_s(compare_pos, data_.peek_read(), bytes_to_compare) != 0 ||
+        zero_check_result != 0) {
         return KM_ERROR_VERIFICATION_FAILED;
+    }
     return KM_ERROR_OK;
 }
 
 keymaster_error_t RsaVerifyOperation::VerifyDigested(const Buffer& signature) {
-    if (!EVP_DigestVerifyFinal(&digest_ctx_, signature.peek_read(), signature.available_read()))
+    if (!EVP_DigestVerifyFinal(&digest_ctx_, signature.peek_read(),
+                               signature.available_read())) {
         return KM_ERROR_VERIFICATION_FAILED;
+    }
     return KM_ERROR_OK;
 }
 
 keymaster_error_t RsaCryptOperation::SetOaepDigestIfRequired(EVP_PKEY_CTX* pkey_ctx) {
-    if (padding() != KM_PAD_RSA_OAEP)
+    if (padding() != KM_PAD_RSA_OAEP) {
         return KM_ERROR_OK;
+    }
 
     assert(digest_algorithm_ != nullptr);
-    if (!EVP_PKEY_CTX_set_rsa_oaep_md(pkey_ctx, digest_algorithm_))
+    if (!EVP_PKEY_CTX_set_rsa_oaep_md(pkey_ctx, digest_algorithm_)) {
         return TranslateLastOpenSslError();
+    }
 
     // MGF1 MD is always SHA1.
-    if (!EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha1()))
+    if (!EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha1())) {
         return TranslateLastOpenSslError();
+    }
 
     return KM_ERROR_OK;
 }
@@ -533,49 +589,60 @@ keymaster_error_t RsaEncryptOperation::Finish(const AuthorizationSet& additional
                                               const Buffer& input, const Buffer& /* signature */,
                                               AuthorizationSet* /* output_params */,
                                               Buffer* output) {
-    if (!output)
+    if (!output) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     keymaster_error_t error = UpdateForFinish(additional_params, input);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     UniquePtr<EVP_PKEY_CTX, EVP_PKEY_CTX_Delete> ctx(
-        EVP_PKEY_CTX_new(rsa_key_, nullptr /* engine */));
-    if (!ctx.get())
+            EVP_PKEY_CTX_new(rsa_key_, nullptr /* engine */));
+    if (!ctx.get()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
-    if (EVP_PKEY_encrypt_init(ctx.get()) <= 0)
+    if (EVP_PKEY_encrypt_init(ctx.get()) <= 0) {
         return TranslateLastOpenSslError();
+    }
 
     error = SetRsaPaddingInEvpContext(ctx.get(), false /* signing */);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
     error = SetOaepDigestIfRequired(ctx.get());
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     size_t outlen;
-    if (EVP_PKEY_encrypt(ctx.get(), nullptr /* out */, &outlen, data_.peek_read(),
-                         data_.available_read()) <= 0)
+    if (EVP_PKEY_encrypt(ctx.get(), nullptr /* out */, &outlen,
+                         data_.peek_read(), data_.available_read()) <= 0) {
         return TranslateLastOpenSslError();
+    }
 
-    if (!output->Reinitialize(outlen))
+    if (!output->Reinitialize(outlen)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     const uint8_t* to_encrypt = data_.peek_read();
     size_t to_encrypt_len = data_.available_read();
     UniquePtr<uint8_t[]> zero_padded;
     if (padding_ == KM_PAD_NONE && to_encrypt_len < outlen) {
         keymaster_error_t error = zero_pad_left(&zero_padded, outlen, data_);
-        if (error != KM_ERROR_OK)
+        if (error != KM_ERROR_OK) {
             return error;
+        }
         to_encrypt = zero_padded.get();
         to_encrypt_len = outlen;
     }
 
-    if (EVP_PKEY_encrypt(ctx.get(), output->peek_write(), &outlen, to_encrypt, to_encrypt_len) <= 0)
+    if (EVP_PKEY_encrypt(ctx.get(), output->peek_write(), &outlen, to_encrypt,
+                         to_encrypt_len) <= 0) {
         return TranslateLastOpenSslError();
+    }
     if (!output->advance_write(outlen)) {
         LOG_E("return KM_ERROR_UNKNOWN_ERROR %d", KM_ERROR_UNKNOWN_ERROR);
         return KM_ERROR_UNKNOWN_ERROR;
@@ -588,51 +655,63 @@ keymaster_error_t RsaDecryptOperation::Finish(const AuthorizationSet& additional
                                               const Buffer& input, const Buffer& /* signature */,
                                               AuthorizationSet* /* output_params */,
                                               Buffer* output) {
-    if (!output)
+    if (!output) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     keymaster_error_t error = UpdateForFinish(additional_params, input);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     UniquePtr<EVP_PKEY_CTX, EVP_PKEY_CTX_Delete> ctx(
-        EVP_PKEY_CTX_new(rsa_key_, nullptr /* engine */));
-    if (!ctx.get())
+            EVP_PKEY_CTX_new(rsa_key_, nullptr /* engine */));
+    if (!ctx.get()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
-    if (EVP_PKEY_decrypt_init(ctx.get()) <= 0)
+    if (EVP_PKEY_decrypt_init(ctx.get()) <= 0) {
         return TranslateLastOpenSslError();
+    }
 
     error = SetRsaPaddingInEvpContext(ctx.get(), false /* signing */);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
     error = SetOaepDigestIfRequired(ctx.get());
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     size_t outlen;
-    if (EVP_PKEY_decrypt(ctx.get(), nullptr /* out */, &outlen, data_.peek_read(),
-                         data_.available_read()) <= 0)
+    if (EVP_PKEY_decrypt(ctx.get(), nullptr /* out */, &outlen,
+                         data_.peek_read(), data_.available_read()) <= 0) {
         return TranslateLastOpenSslError();
+    }
 
-    if (!output->Reinitialize(outlen))
+    if (!output->Reinitialize(outlen)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     const uint8_t* to_decrypt = data_.peek_read();
     size_t to_decrypt_len = data_.available_read();
     UniquePtr<uint8_t[]> zero_padded;
     if (padding_ == KM_PAD_NONE && to_decrypt_len < outlen) {
         keymaster_error_t error = zero_pad_left(&zero_padded, outlen, data_);
-        if (error != KM_ERROR_OK)
+        if (error != KM_ERROR_OK) {
             return error;
+        }
         to_decrypt = zero_padded.get();
         to_decrypt_len = outlen;
     }
 
-    if (EVP_PKEY_decrypt(ctx.get(), output->peek_write(), &outlen, to_decrypt, to_decrypt_len) <= 0)
+    if (EVP_PKEY_decrypt(ctx.get(), output->peek_write(), &outlen, to_decrypt,
+                         to_decrypt_len) <= 0) {
         return TranslateLastOpenSslError();
-    if (!output->advance_write(outlen))
+    }
+    if (!output->advance_write(outlen)) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     return KM_ERROR_OK;
 }

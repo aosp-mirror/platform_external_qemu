@@ -17,8 +17,6 @@
 #include "android/utils/compiler.h"
 #include "android/utils/system.h"
 
-#include <stdbool.h>
-
 ANDROID_BEGIN_HEADER
 
 
@@ -31,7 +29,7 @@ ANDROID_BEGIN_HEADER
  * callback. Pending service data is stored in the client descriptor as a list
  * of QemudPipeMessage instances.
  */
-typedef struct QemudPipeMessage QemudPipeMessage;
+using QemudPipeMessage = struct QemudPipeMessage;
 struct QemudPipeMessage {
     /* Message to send. */
     uint8_t* message;
@@ -81,7 +79,7 @@ typedef struct QemudPipe {
     QemudClient* client;
 } QemudPipe;
 
-typedef struct QemudSerial QemudSerial;
+using QemudSerial = struct QemudSerial;
 
 struct QemudClient {
     /* Defines protocol, used by the client. */

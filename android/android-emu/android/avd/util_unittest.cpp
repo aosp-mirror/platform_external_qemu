@@ -25,7 +25,7 @@
 using android::base::TestSystem;
 using android::base::TestTempDir;
 
-static void writeToFile(std::string path, std::string text) {
+static void writeToFile(const std::string& path, const std::string& text) {
     std::ofstream iniFile(path, std::ios::trunc);
     iniFile << text;
     iniFile.close();
@@ -73,7 +73,7 @@ TEST(AvdUtil, emulator_getBackendSuffix) {
   EXPECT_STREQ("arm64", emulator_getBackendSuffix("arm64"));
   EXPECT_STREQ("mips64", emulator_getBackendSuffix("mips64"));
 
-  EXPECT_FALSE(emulator_getBackendSuffix(NULL));
+  EXPECT_FALSE(emulator_getBackendSuffix(nullptr));
   EXPECT_FALSE(emulator_getBackendSuffix("dummy"));
 }
 
@@ -92,7 +92,7 @@ TEST(AvdUtil, propertyFile_getInt) {
   EXPECT_EQ(0,fileData_initFromMemory(&fd, testFile, strlen(testFile)));
 
   const int kDefault = 1138;
-  SearchResult kSearchResultGarbage = (SearchResult)0xdeadbeef;
+  auto kSearchResultGarbage = static_cast<SearchResult>(0xdeadbeef);
   SearchResult searchResult = kSearchResultGarbage;
 
   EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "invalid", kDefault, &searchResult));
@@ -119,9 +119,9 @@ TEST(AvdUtil, propertyFile_getInt) {
   EXPECT_EQ(RESULT_FOUND,searchResult);
 
   // check that null "searchResult" parameter is supported
-  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "bar", kDefault, NULL));
-  EXPECT_EQ(kDefault,propertyFile_getInt(&fd, "invalid", kDefault, NULL));
-  EXPECT_EQ(19,propertyFile_getInt(&fd, "nineteen", kDefault, NULL));
+  EXPECT_EQ(kDefault, propertyFile_getInt(&fd, "bar", kDefault, nullptr));
+  EXPECT_EQ(kDefault, propertyFile_getInt(&fd, "invalid", kDefault, nullptr));
+  EXPECT_EQ(19, propertyFile_getInt(&fd, "nineteen", kDefault, nullptr));
 }
 
 TEST(AvdUtil, propertyFile_getApiLevel) {

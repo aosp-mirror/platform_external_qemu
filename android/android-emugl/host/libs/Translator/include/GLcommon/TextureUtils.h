@@ -24,20 +24,30 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-typedef std::function<void(GLenum target, GLint level,
-    GLint internalformat, GLsizei width, GLsizei height,
-    GLint border, GLenum format, GLenum type, const GLvoid * data)>
-        glTexImage2D_t;
+using glTexImage2D_t = std::function<void(GLenum,
+                                          GLint,
+                                          GLint,
+                                          GLsizei,
+                                          GLsizei,
+                                          GLint,
+                                          GLenum,
+                                          GLenum,
+                                          const GLvoid*)>;
 
 ETC2ImageFormat getEtcFormat(GLenum internalformat);
 bool isEtcFormat(GLenum internalformat);
 bool isPaletteFormat(GLenum internalformat);
 int getCompressedFormats(int* formats);
-void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
-                                          GLenum internalformat, GLsizei width,
-                                          GLsizei height, GLint border,
-                                          GLsizei imageSize, const GLvoid* data,
-                                          glTexImage2D_t glTexImage2DPtr);
+void doCompressedTexImage2D(GLEScontext* ctx,
+                            GLenum target,
+                            GLint level,
+                            GLenum internalformat,
+                            GLsizei width,
+                            GLsizei height,
+                            GLint border,
+                            GLsizei imageSize,
+                            const GLvoid* data,
+                            const glTexImage2D_t& glTexImage2DPtr);
 void deleteRenderbufferGlobal(GLuint rbo);
 GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat);
 

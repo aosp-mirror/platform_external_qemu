@@ -21,7 +21,7 @@
 #include "android/utils/stream.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
 
-#include <assert.h>
+#include <cassert>
 #include <memory>
 
 extern "C" {
@@ -59,18 +59,18 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         },
         // guest_close()
         [](GoldfishHostPipe* hostPipe, GoldfishPipeCloseReason reason) {
-            static_assert((int)GOLDFISH_PIPE_CLOSE_GRACEFUL ==
-                                  (int)PIPE_CLOSE_GRACEFUL,
+            static_assert(static_cast<int>(GOLDFISH_PIPE_CLOSE_GRACEFUL) ==
+                                  static_cast<int>(PIPE_CLOSE_GRACEFUL),
                           "Invalid PIPE_CLOSE_GRACEFUL value");
-            static_assert(
-                    (int)GOLDFISH_PIPE_CLOSE_REBOOT == (int)PIPE_CLOSE_REBOOT,
-                    "Invalid PIPE_CLOSE_REBOOT value");
-            static_assert((int)GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT ==
-                                  (int)PIPE_CLOSE_LOAD_SNAPSHOT,
+            static_assert(static_cast<int>(GOLDFISH_PIPE_CLOSE_REBOOT) ==
+                                  static_cast<int>(PIPE_CLOSE_REBOOT),
+                          "Invalid PIPE_CLOSE_REBOOT value");
+            static_assert(static_cast<int>(GOLDFISH_PIPE_CLOSE_LOAD_SNAPSHOT) ==
+                                  static_cast<int>(PIPE_CLOSE_LOAD_SNAPSHOT),
                           "Invalid PIPE_CLOSE_LOAD_SNAPSHOT value");
-            static_assert(
-                    (int)GOLDFISH_PIPE_CLOSE_ERROR == (int)PIPE_CLOSE_ERROR,
-                    "Invalid PIPE_CLOSE_ERROR value");
+            static_assert(static_cast<int>(GOLDFISH_PIPE_CLOSE_ERROR) ==
+                                  static_cast<int>(PIPE_CLOSE_ERROR),
+                          "Invalid PIPE_CLOSE_ERROR value");
 
             android_pipe_guest_close(hostPipe,
                                      static_cast<PipeCloseReason>(reason));
@@ -110,11 +110,14 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         },
         // guest_poll()
         [](GoldfishHostPipe* hostPipe) {
-            static_assert((int)GOLDFISH_PIPE_POLL_IN == (int)PIPE_POLL_IN,
+            static_assert(static_cast<int>(GOLDFISH_PIPE_POLL_IN) ==
+                                  static_cast<int>(PIPE_POLL_IN),
                           "invalid POLL_IN values");
-            static_assert((int)GOLDFISH_PIPE_POLL_OUT == (int)PIPE_POLL_OUT,
+            static_assert(static_cast<int>(GOLDFISH_PIPE_POLL_OUT) ==
+                                  static_cast<int>(PIPE_POLL_OUT),
                           "invalid POLL_OUT values");
-            static_assert((int)GOLDFISH_PIPE_POLL_HUP == (int)PIPE_POLL_HUP,
+            static_assert(static_cast<int>(GOLDFISH_PIPE_POLL_HUP) ==
+                                  static_cast<int>(PIPE_POLL_HUP),
                           "invalid POLL_HUP values");
 
             return static_cast<GoldfishPipePollFlags>(
@@ -187,15 +190,17 @@ static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
         },
         // signalWake()
         [](void* hwPipe, unsigned flags) {
-            static_assert(
-                    (int)GOLDFISH_PIPE_WAKE_CLOSED == (int)PIPE_WAKE_CLOSED,
-                    "Invalid PIPE_WAKE_CLOSED values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_READ == (int)PIPE_WAKE_READ,
+            static_assert(static_cast<int>(GOLDFISH_PIPE_WAKE_CLOSED) ==
+                                  static_cast<int>(PIPE_WAKE_CLOSED),
+                          "Invalid PIPE_WAKE_CLOSED values");
+            static_assert(static_cast<int>(GOLDFISH_PIPE_WAKE_READ) ==
+                                  static_cast<int>(PIPE_WAKE_READ),
                           "Invalid PIPE_WAKE_READ values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_WRITE == (int)PIPE_WAKE_WRITE,
+            static_assert(static_cast<int>(GOLDFISH_PIPE_WAKE_WRITE) ==
+                                  static_cast<int>(PIPE_WAKE_WRITE),
                           "Invalid PIPE_WAKE_WRITE values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_UNLOCK_DMA ==
-                                  (int)PIPE_WAKE_UNLOCK_DMA,
+            static_assert(static_cast<int>(GOLDFISH_PIPE_WAKE_UNLOCK_DMA) ==
+                                  static_cast<int>(PIPE_WAKE_UNLOCK_DMA),
                           "Invalid PIPE_WAKE_WRITE values");
 
             goldfish_pipe_signal_wake(
@@ -207,10 +212,7 @@ static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
             return goldfish_pipe_get_id(static_cast<GoldfishHwPipe*>(hwPipe));
         },
         // lookupPipeById()
-        [](int id) {
-            return (void*)goldfish_pipe_lookup_by_id(id);
-        }
-};
+        [](int id) { return (void*)goldfish_pipe_lookup_by_id(id); }};
 
 bool qemu_android_pipe_init(android::VmLock* vmLock) {
     goldfish_pipe_set_service_ops(&goldfish_pipe_service_ops);

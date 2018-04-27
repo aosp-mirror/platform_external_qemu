@@ -19,9 +19,9 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
 
 using android::base::System;
 using android::ConfigDirs;

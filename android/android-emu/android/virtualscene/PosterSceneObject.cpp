@@ -50,16 +50,16 @@ std::unique_ptr<PosterSceneObject> PosterSceneObject::create(
     // to something.
     std::unique_ptr<PosterSceneObject> result(new PosterSceneObject(renderer));
 
-    result.get()->mPositionRotation =
+    result->mPositionRotation =
             glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
-    result.get()->mMinSize = minSize;
-    result.get()->mMaxSize = maxSize;
+    result->mMinSize = minSize;
+    result->mMaxSize = maxSize;
 
     // Initialize renderable.
     Renderable renderable;
     renderable.material = renderer.createMaterialTextured();
     renderable.mesh = renderer.createMesh(kQuadVerts, kQuadIndices);
-    result.get()->mRenderables.emplace_back(std::move(renderable));
+    result->mRenderables.emplace_back(renderable);
 
     return result;
 }

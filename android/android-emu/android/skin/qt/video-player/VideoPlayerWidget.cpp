@@ -16,10 +16,9 @@
 namespace android {
 namespace videoplayer {
 
-VideoPlayerWidget::VideoPlayerWidget(QWidget* parent)
-    : QWidget(parent), mBuffer(nullptr), mBufferLen(0) {}
+VideoPlayerWidget::VideoPlayerWidget(QWidget* parent) : QWidget(parent) {}
 
-VideoPlayerWidget::~VideoPlayerWidget() {}
+VideoPlayerWidget::~VideoPlayerWidget() = default;
 
 void VideoPlayerWidget::paintEvent(QPaintEvent* e) {
     QPainter painter(this);

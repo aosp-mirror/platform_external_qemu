@@ -17,11 +17,11 @@
 
 #include <string>
 
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <climits>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -29,7 +29,7 @@ namespace base {
 namespace {
 
 // The current log output.
-testing::LogOutput* gLogOutput = NULL;
+testing::LogOutput* gLogOutput = nullptr;
 
 bool gDcheckLevel = false;
 LogSeverity gMinLogLevel = LOG_INFO;
@@ -39,8 +39,9 @@ const char* severityLevelToString(LogSeverity severity) {
     const char* kSeverityStrings[] = {
         "INFO", "WARNING", "ERROR", "FATAL",
     };
-    if (severity >= 0 && severity < LOG_NUM_SEVERITIES)
+    if (severity >= 0 && severity < LOG_NUM_SEVERITIES) {
         return kSeverityStrings[severity];
+    }
     if (severity == -1) {
         return "VERBOSE";
     }
@@ -118,16 +119,17 @@ void setMinLogLevel(LogSeverity level) {
 
 // LogString
 
-LogString::LogString(const char* fmt, ...) : mString(NULL) {
+LogString::LogString(const char* fmt, ...) : mString(nullptr) {
     size_t capacity = 100;
-    char* message = reinterpret_cast<char*>(::malloc(capacity));
+    auto* message = reinterpret_cast<char*>(::malloc(capacity));
     for (;;) {
         va_list args;
         va_start(args, fmt);
         int ret = vsnprintf(message, capacity, fmt, args);
         va_end(args);
-        if (ret >= 0 && size_t(ret) < capacity)
+        if (ret >= 0 && size_t(ret) < capacity) {
             break;
+        }
         capacity *= 2;
     }
     mString = message;
@@ -139,11 +141,11 @@ LogString::~LogString() {
 
 // LogStream
 
-LogStream::LogStream(const char* file, int lineno, LogSeverity severity) :
-        mParams(file, lineno, severity),
-        mString(NULL),
-        mSize(0),
-        mCapacity(0) {}
+LogStream::LogStream(const char* file, int lineno, LogSeverity severity)
+    : mParams(file, lineno, severity),
+      mString(nullptr),
+      mSize(0),
+      mCapacity(0) {}
 
 LogStream::~LogStream() {
     mSize = 0;
@@ -211,7 +213,7 @@ LogStream& LogStream::operator<<(unsigned long long v) {
     return *this;
 }
 
-LogStream& LogStream::operator<<(android::base::StringView v) {
+LogStream& LogStream::operator<<(const android::base::StringView& v) {
     if (!v.empty()) {
         append(v.c_str(), v.size());
     }
@@ -219,21 +221,23 @@ LogStream& LogStream::operator<<(android::base::StringView v) {
 }
 
 void LogStream::append(const char* str) {
-    if (str && str[0])
+    if (str && str[0]) {
         append(str, strlen(str));
+    }
 }
 
 void LogStream::append(const char* str, size_t len) {
-    if (!len || len > INT32_MAX)
+    if (!len || len > INT32_MAX) {
         return;
+    }
 
     size_t newSize = mSize + len;
     if (newSize > mCapacity) {
         size_t newCapacity = mCapacity;
-        while (newCapacity < newSize)
+        while (newCapacity < newSize) {
             newCapacity += (newCapacity >> 2) + 32;
-        mString = reinterpret_cast<char*>(
-                ::realloc(mString, newCapacity + 1));
+        }
+        mString = reinterpret_cast<char*>(::realloc(mString, newCapacity + 1));
         mCapacity = newCapacity;
     }
     ::memcpy(mString + mSize, str, len);
@@ -258,8 +262,8 @@ LogMessage::~LogMessage() {
 ErrnoLogMessage::ErrnoLogMessage(const char* file,
                                  int line,
                                  LogSeverity severity,
-                                 int errnoCode) :
-        mStream(NULL), mErrno(errnoCode) {
+                                 int errnoCode)
+    : mStream(nullptr), mErrno(errnoCode) {
     mStream = new LogStream(file, line, severity);
 }
 
@@ -286,5 +290,5 @@ LogOutput* LogOutput::setNewOutput(LogOutput* newOutput) {
 
 }  // namespace testing
 
-}  // naemspace base
+}  // namespace base
 }  // namespace android

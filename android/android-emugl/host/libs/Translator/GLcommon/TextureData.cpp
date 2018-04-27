@@ -23,7 +23,7 @@
 #include "GLcommon/GLutils.h"
 
 #include <cassert>
-
+#include <memory>
 using android::base::find;
 
 TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
@@ -96,7 +96,7 @@ const SaveableTexturePtr& TextureData::getSaveableTexture() const {
 }
 
 void TextureData::resetSaveableTexture() {
-    m_saveableTexture.reset(new SaveableTexture(*this));
+    m_saveableTexture = std::make_shared<SaveableTexture>(*this);
 }
 
 void TextureData::setTexParam(GLenum pname, GLint param) {

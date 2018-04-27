@@ -168,10 +168,7 @@ TEST(KernelUtils, ProbeKernelVersionString) {
 
     kernelVersionString[0] = 127;
     EXPECT_FALSE(android_imageProbeKernelVersionString(
-        0,
-        0,
-        kernelVersionString,
-        sizeof(kernelVersionString)));
+            nullptr, 0, kernelVersionString, sizeof(kernelVersionString)));
     EXPECT_EQ(127, kernelVersionString[0]);
 
     kernelVersionString[0] = 127;

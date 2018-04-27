@@ -6,7 +6,7 @@
 
 #include <GLES/gl.h>
 // Return types must be single words, see GLDispatch.cpp
-typedef const GLubyte* GLconstubyteptr;
+using GLconstubyteptr = const GLubyte*;
 #define LIST_GLES_COMMON_FUNCTIONS(X) \
   X(void, glActiveTexture, (GLenum texture), (texture)) \
   X(void, glBindBuffer, (GLenum target, GLuint buffer), (target, buffer)) \

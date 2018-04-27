@@ -181,18 +181,20 @@ TEST(MessageChannel, WaitForEmpty) {
     channel.waitForEmpty();
 
     // Fill the channel with data.
-    for (int i = 0; i < (int)channel.capacity(); ++i) {
+    for (int i = 0; i < static_cast<int>(channel.capacity()); ++i) {
         channel.send(i);
     }
 
-    TestThread thread([](void* param) -> void* {
-        auto channel = (Channel*)param;
-        int i;
-        while (channel->tryReceive(&i)) {
-            ;
-        }
-        return nullptr;
-    }, &channel);
+    TestThread thread(
+            [](void* param) -> void* {
+                auto channel = static_cast<Channel*>(param);
+                int i;
+                while (channel->tryReceive(&i)) {
+                    ;
+                }
+                return nullptr;
+            },
+            &channel);
 
     channel.waitForEmpty();
     // 2. Check that it unblocks as soon as the channel is emptied.

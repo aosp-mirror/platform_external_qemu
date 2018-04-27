@@ -35,7 +35,7 @@
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
 
-#include <assert.h>
+#include <cassert>
 
 using android::base::AutoLock;
 
@@ -255,7 +255,7 @@ intptr_t RenderThread::main() {
     FILE* dumpFP = nullptr;
     if (dump_dir) {
         size_t bsize = strlen(dump_dir) + 32;
-        char* fname = new char[bsize];
+        auto* fname = new char[bsize];
         snprintf(fname, bsize, "%s/stream_%p", dump_dir, this);
         dumpFP = fopen(fname, "wb");
         if (!dumpFP) {
@@ -265,12 +265,12 @@ intptr_t RenderThread::main() {
         delete[] fname;
     }
 
-    while (1) {
+    while (true) {
         // Let's make sure we read enough data for at least some processing.
         int packetSize;
         if (readBuf.validData() >= 8) {
             // We know that packet size is the second int32_t from the start.
-            packetSize = *(const int32_t*)(readBuf.buf() + 4);
+            packetSize = *reinterpret_cast<const int32_t*>(readBuf.buf() + 4);
         } else {
             // Read enough data to at least be able to get the packet size next
             // time.
@@ -278,10 +278,11 @@ intptr_t RenderThread::main() {
         }
 
         int stat = 0;
-        if (packetSize > (int)readBuf.validData()) {
+        if (packetSize > static_cast<int>(readBuf.validData())) {
             stat = readBuf.getData(&stream, packetSize);
             if (stat <= 0) {
-                if (doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
+                if (doSnapshotOperation(snapshotObjects,
+                                        SnapshotState::StartSaving)) {
                     continue;
                 } else {
                     D("Warning: render thread could not read data from stream");
@@ -291,12 +292,12 @@ intptr_t RenderThread::main() {
                 // We just loaded from a snapshot, need to initialize / bind
                 // the contexts.
                 needRestoreFromSnapshot = false;
-                HandleType ctx = tInfo.currContext ? tInfo.currContext->getHndl()
-                        : 0;
-                HandleType draw = tInfo.currDrawSurf ? tInfo.currDrawSurf->getHndl()
-                        : 0;
-                HandleType read = tInfo.currReadSurf ? tInfo.currReadSurf->getHndl()
-                        : 0;
+                HandleType ctx =
+                        tInfo.currContext ? tInfo.currContext->getHndl() : 0;
+                HandleType draw =
+                        tInfo.currDrawSurf ? tInfo.currDrawSurf->getHndl() : 0;
+                HandleType read =
+                        tInfo.currReadSurf ? tInfo.currReadSurf->getHndl() : 0;
                 FrameBuffer::getFB()->bindContext(ctx, draw, read);
             }
         }

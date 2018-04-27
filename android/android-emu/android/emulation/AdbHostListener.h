@@ -79,12 +79,12 @@ public:
     bool reset(int adbEmulatorPort);
 
     // AdbHostAgent method overrides.
-    virtual void startListening() override;
-    virtual void stopListening() override;
-    virtual void notifyServer() override;
+    void startListening() override;
+    void stopListening() override;
+    void notifyServer() override;
 
     // Return port this host server is currently bound to, or -1 if it is not.
-    int port() const { return mServer.get() ? mServer->port() : -1; }
+    int port() const { return mServer ? mServer->port() : -1; }
 
 private:
     // Called from the AsyncSocketServer when a new connection from the

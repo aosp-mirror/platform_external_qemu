@@ -36,7 +36,7 @@ public:
     virtual VideoFormat getPixelFormat() = 0;
 
     // Destructor
-    virtual ~GuestReadbackWorker() {}
+    virtual ~GuestReadbackWorker() = default;
 
     // Create a new AudioCaptureThread instance. |cb| is a function that
     // will be called from this thread with new audio frames.
@@ -46,7 +46,7 @@ public:
             uint32_t fbHeight);
 
 protected:
-    GuestReadbackWorker() {}
+    GuestReadbackWorker() = default;
 };
 
 }  // namespace recording

@@ -18,7 +18,7 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
 
-#include <assert.h>
+#include <cassert>
 
 namespace android {
 
@@ -144,7 +144,7 @@ std::string ConfigDirs::getSdkRootDirectoryByPath() {
     auto system = System::get();
 
     auto parts = PathUtils::decompose(system->getLauncherDirectory());
-    parts.push_back("..");
+    parts.emplace_back("..");
     PathUtils::simplifyComponents(&parts);
 
     std::string sdkRoot = PathUtils::recompose(parts);
@@ -166,20 +166,20 @@ std::string ConfigDirs::getSdkRootDirectory() {
 }
 
 // static
-bool ConfigDirs::isValidSdkRoot(android::base::StringView rootPath) {
+bool ConfigDirs::isValidSdkRoot(const android::base::StringView& rootPath) {
     if (rootPath.empty()) {
         return false;
     }
     System* system = System::get();
-    if ( !system->pathIsDir(rootPath) || !system->pathCanRead(rootPath) ) {
+    if (!system->pathIsDir(rootPath) || !system->pathCanRead(rootPath)) {
         return false;
     }
     std::string platformsPath = PathUtils::join(rootPath, "platforms");
-    if ( !system->pathIsDir(platformsPath) ) {
+    if (!system->pathIsDir(platformsPath)) {
         return false;
     }
     std::string platformToolsPath = PathUtils::join(rootPath, "platform-tools");
-    if ( !system->pathIsDir(platformToolsPath) ) {
+    if (!system->pathIsDir(platformToolsPath)) {
         return false;
     }
 
@@ -187,16 +187,16 @@ bool ConfigDirs::isValidSdkRoot(android::base::StringView rootPath) {
 }
 
 // static
-bool ConfigDirs::isValidAvdRoot(android::base::StringView avdPath) {
+bool ConfigDirs::isValidAvdRoot(const android::base::StringView& avdPath) {
     if (avdPath.empty()) {
         return false;
     }
     System* system = System::get();
-    if ( !system->pathIsDir(avdPath) || !system->pathCanRead(avdPath) ) {
+    if (!system->pathIsDir(avdPath) || !system->pathCanRead(avdPath)) {
         return false;
     }
     std::string avdAvdPath = PathUtils::join(avdPath, "avd");
-    if ( !system->pathIsDir(avdAvdPath) ) {
+    if (!system->pathIsDir(avdAvdPath)) {
         return false;
     }
 

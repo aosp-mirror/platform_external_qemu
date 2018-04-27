@@ -24,7 +24,7 @@
 
 // Type of handles, a.k.a. "object names" in the GL specification.
 // These are integers used to uniquely identify a resource of a given type.
-typedef uint32_t HandleType;
+using HandleType = uint32_t;
 
 // Tracks all the possible OpenGL ES API versions.
 enum GLESApi {
@@ -99,6 +99,6 @@ private:
     GLDecoderContextData mContextData;
 };
 
-typedef emugl::SmartPtr<RenderContext> RenderContextPtr;
+using RenderContextPtr = emugl::SmartPtr<RenderContext>;
 
 #endif  // _LIBRENDER_RENDER_CONTEXT_H

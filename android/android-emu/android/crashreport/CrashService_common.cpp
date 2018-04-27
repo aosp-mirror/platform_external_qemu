@@ -81,8 +81,9 @@ const char kCommentsKey[] = "comments";
 
 // Callback to get the response data from server.
 static size_t WriteCallback(void* ptr, size_t size, size_t nmemb, void* userp) {
-    if (!userp)
+    if (!userp) {
         return 0;
+    }
 
     auto& response = *static_cast<std::string*>(userp);
     size_t real_size = size * nmemb;
@@ -314,7 +315,7 @@ std::unique_ptr<CrashService> CrashService::makeCrashService(
             new HostCrashService(version, build, dataDir));
 }
 
-std::string CrashService::readFile(StringView path) {
+std::string CrashService::readFile(const StringView& path) {
     std::ifstream is(path.c_str());
 
     if (!is) {
@@ -503,7 +504,8 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
 
     int crashed_thread_id = process_state->requesting_thread();
     if (crashed_thread_id < 0 ||
-        crashed_thread_id >= (int)process_state->threads()->size()) {
+        crashed_thread_id >=
+                static_cast<int>(process_state->threads()->size())) {
         return;
     }
     google_breakpad::CallStack* crashed_stack =

@@ -36,9 +36,9 @@
 
 #include "config.h"
 
-#include <assert.h>
-#include <errno.h>
-#include <signal.h>
+#include <cassert>
+#include <cerrno>
+#include <csignal>
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -48,7 +48,7 @@ void enter_qemu_main_loop(int argc, char **argv) {
 #ifndef _WIN32
     sigset_t set;
     sigemptyset(&set);
-    pthread_sigmask(SIG_SETMASK, &set, NULL);
+    pthread_sigmask(SIG_SETMASK, &set, nullptr);
 #endif
 
     D("Starting QEMU main loop");
@@ -136,7 +136,7 @@ extern "C" int main(int argc, char **argv) {
     if (feature_is_enabled(kFeature_LogcatPipe) && opts->logcat) {
         boot_property_add_logcat_pipe(opts->logcat);
         // we have done with -logcat option.
-        opts->logcat = NULL;
+        opts->logcat = nullptr;
     }
 
 #ifdef _WIN32
@@ -181,14 +181,13 @@ extern "C" int main(int argc, char **argv) {
     uiEmuAgent.car = gQCarDataAgent;
 
     // for now there's no uses of SettingsAgent, so we don't set it
-    uiEmuAgent.settings = NULL;
+    uiEmuAgent.settings = nullptr;
 
     // Gpu configuration is set, now initialize the screen recorder
     bool isGuestMode = (!hw->hw_gpu_enabled ||
                         !strcmp(hw->hw_gpu_mode, "guest"));
-    screen_recorder_init(hw->hw_lcd_width,
-                         hw->hw_lcd_height,
-                         isGuestMode ? uiEmuAgent.display : NULL);
+    screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
+                         isGuestMode ? uiEmuAgent.display : nullptr);
 
     int apiLevel = avdInfo_getApiLevel(avd);
     mem_map mem = { 0 };
@@ -222,10 +221,10 @@ extern "C" int main(int argc, char **argv) {
      */
     const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
     {
-        CIniFile* hwIni = iniFile_newEmpty(NULL);
+        CIniFile* hwIni = iniFile_newEmpty(nullptr);
         androidHwConfig_write(hw, hwIni);
 
-        if (filelock_create(coreHwIniPath) == NULL) {
+        if (filelock_create(coreHwIniPath) == nullptr) {
             // The AVD is already in use
             derror("There's another emulator instance running with "
                    "the current AVD '%s'. Exiting...\n", avdInfo_getName(avd));
@@ -246,14 +245,14 @@ extern "C" int main(int argc, char **argv) {
         /* In verbose mode, dump the file's content */
         if (VERBOSE_CHECK(init)) {
             FILE* file = fopen(coreHwIniPath, "rt");
-            if (file == NULL) {
+            if (file == nullptr) {
                 derror("Could not open hardware configuration file: %s\n",
                        coreHwIniPath);
             } else {
                 LineInput* input = lineInput_newFromStdFile(file);
                 const char* line;
                 printf("Content of hardware configuration file:\n");
-                while ((line = lineInput_getLine(input)) !=  NULL) {
+                while ((line = lineInput_getLine(input)) != nullptr) {
                     printf("  %s\n", line);
                 }
                 printf(".\n");
@@ -278,7 +277,7 @@ extern "C" int main(int argc, char **argv) {
 #ifdef __linux__
     sigset_t set;
     sigfillset(&set);
-    pthread_sigmask(SIG_SETMASK, &set, NULL);
+    pthread_sigmask(SIG_SETMASK, &set, nullptr);
 #endif
     skin_winsys_init_args(argc, argv);
 

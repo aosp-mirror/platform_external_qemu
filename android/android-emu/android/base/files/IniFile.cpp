@@ -22,8 +22,8 @@
 #include <string>
 #include <utility>
 
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -39,7 +39,7 @@ IniFile::IniFile(const char* data, int size) {
     readFromMemory(StringView(data, size));
 }
 
-void IniFile::setBackingFile(StringView filePath) {
+void IniFile::setBackingFile(const StringView& filePath) {
     // We have no idea what the new backing file contains.
     mDirty = true;
     mBackingFilePath = filePath;
@@ -193,8 +193,7 @@ bool IniFile::read(bool keepComments) {
     return true;
 }
 
-bool IniFile::readFromMemory(StringView data)
-{
+bool IniFile::readFromMemory(const StringView& data) {
     mDirty = false;
     mData.clear();
     mOrderList.clear();
@@ -203,7 +202,7 @@ bool IniFile::readFromMemory(StringView data)
     // Create a streambuf that's able to do a single pass over an array only.
     class OnePassIBuf : public std::streambuf {
     public:
-        OnePassIBuf(StringView data) {
+        explicit OnePassIBuf(const StringView& data) {
             setg(const_cast<char*>(data.c_str()),
                  const_cast<char*>(data.c_str()),
                  const_cast<char*>(data.c_str()) + data.size());
@@ -275,7 +274,7 @@ int IniFile::size() const {
     return static_cast<int>(mData.size());
 }
 
-bool IniFile::hasKey(StringView key) const {
+bool IniFile::hasKey(const StringView& key) const {
     return mData.find(key) != std::end(mData);
 }
 
@@ -294,11 +293,12 @@ std::string IniFile::makeValidKey(StringView str) {
     return res.str();
 }
 
-string IniFile::makeValidValue(StringView str) {
+string IniFile::makeValidValue(const StringView& str) {
     std::ostringstream res;
     for (const char* ch = str.c_str(); *ch != '\0'; ch++) {
-        if (*ch == '%')
+        if (*ch == '%') {
             res << *ch;
+        }
         res << *ch;
     }
     return res.str();
@@ -316,7 +316,7 @@ string IniFile::makeValidValue(StringView str) {
 // "%FOO" => "%FOO" (Not terminated)
 // "%%HI%%" => "%HI%" (Escaped)
 // Note that: %%%USER%%% is parsed as %(USER)% and not %(USER%)%
-static string envSubst(const StringView fix) {
+static string envSubst(const StringView& fix) {
     size_t len = fix.size();
 
     string res;
@@ -335,8 +335,7 @@ static string envSubst(const StringView fix) {
         if (curr == &var) {
             string env = System::get()->envGet(var);
             if (env.empty()) {
-                LOG(WARNING)
-                        << "Environment variable " << var << " is not set";
+                LOG(WARNING) << "Environment variable " << var << " is not set";
             }
             res.append(env);
             var.clear();
@@ -367,9 +366,11 @@ static string envSubst(const StringView fix) {
     return res;
 }
 
-string IniFile::getString(const string& key, StringView defaultValue) const {
+string IniFile::getString(const string& key,
+                          const StringView& defaultValue) const {
     auto citer = mData.find(key);
-    return envSubst((citer == std::end(mData)) ? defaultValue : StringView(citer->second));
+    return envSubst((citer == std::end(mData)) ? defaultValue
+                                               : StringView(citer->second));
 }
 
 int IniFile::getInt(const string& key, int defaultValue) const {
@@ -421,13 +422,13 @@ double IniFile::getDouble(const string& key, double defaultValue) const {
     return result;
 }
 
-static bool isBoolTrue(StringView value) {
+static bool isBoolTrue(const StringView& value) {
     const char* cstr = value.c_str();
     return strcasecmp("yes", cstr) == 0 || strcasecmp("true", cstr) == 0 ||
            strcasecmp("1", cstr) == 0;
 }
 
-static bool isBoolFalse(StringView value) {
+static bool isBoolFalse(const StringView& value) {
     const char* cstr = value.c_str();
     return strcasecmp("no", cstr) == 0 || strcasecmp("false", cstr) == 0 ||
            strcasecmp("0", cstr) == 0;
@@ -449,15 +450,15 @@ bool IniFile::getBool(const string& key, bool defaultValue) const {
     }
 }
 
-bool IniFile::getBool(const string& key, StringView defaultValue) const {
+bool IniFile::getBool(const string& key, const StringView& defaultValue) const {
     return getBool(key, isBoolTrue(defaultValue));
 }
 
 // If not nullptr, |*outMalformed| is set to true if |valueStr| is malformed.
-static IniFile::DiskSize parseDiskSize(StringView valueStr,
+static IniFile::DiskSize parseDiskSize(const StringView& valueStr,
                                        IniFile::DiskSize defaultValue,
                                        bool* outMalformed) {
-    if(outMalformed) {
+    if (outMalformed) {
         *outMalformed = false;
     }
 
@@ -487,7 +488,7 @@ static IniFile::DiskSize parseDiskSize(StringView valueStr,
     }
 
     if (malformed) {
-        if(outMalformed) {
+        if (outMalformed) {
             *outMalformed = true;
         }
         return defaultValue;
@@ -510,7 +511,7 @@ IniFile::DiskSize IniFile::getDiskSize(const string& key,
 }
 
 IniFile::DiskSize IniFile::getDiskSize(const string& key,
-                                       StringView defaultValue) const {
+                                       const StringView& defaultValue) const {
     return getDiskSize(key, parseDiskSize(defaultValue, 0, nullptr));
 }
 
@@ -526,7 +527,7 @@ void IniFile::updateData(const string& key, string&& value) {
     }
 }
 
-void IniFile::setString(const string& key, StringView value) {
+void IniFile::setString(const string& key, const StringView& value) {
     updateData(key, value);
 }
 
