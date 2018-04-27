@@ -22,6 +22,30 @@
       "revId": "037ecdede2c1633568ff62283946fc03e3326051",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3655726_53cdaebd",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-04-27T22:43:39Z",
+      "side": 0,
+      "message": "Resolving.  Per offline discussion, what was happening is that moving the mCanceled resulted in executing writeIndex immediately on cancel instead of after all pages were queued.  The new iteration resolves both asserts.",
+      "parentUuid": "1994b1be_859ae813",
+      "range": {
+        "startLine": 419,
+        "startChar": 8,
+        "endLine": 421,
+        "endChar": 23
+      },
+      "revId": "037ecdede2c1633568ff62283946fc03e3326051",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
