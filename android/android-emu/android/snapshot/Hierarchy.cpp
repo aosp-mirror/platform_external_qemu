@@ -48,7 +48,7 @@ namespace snapshot {
 
 class HierarchyImpl {
 public:
-    HierarchyImpl() { }
+    HierarchyImpl() = default;
 
     void loadPersistentData() {
         mPrevParentMap.clear();
@@ -71,9 +71,8 @@ public:
 
     void savePersistentData() {
         mSnapshotDepsPb.Clear();
-        for (const auto it : mNextParentMap) {
-            D("Next parent map: %s --- parent of --> %s",
-              it.second.c_str(),
+        for (const auto& it : mNextParentMap) {
+            D("Next parent map: %s --- parent of --> %s", it.second.c_str(),
               it.first.c_str());
             auto dep = mSnapshotDepsPb.add_dependencies();
             dep->set_name(it.first);

@@ -84,8 +84,8 @@ void ParameterList::addFormatWithArgs(const char* format, va_list args) {
 }
 
 void ParameterList::add2(const char* param1, const char* param2) {
-    mParams.push_back(param1);
-    mParams.push_back(param2);
+    mParams.emplace_back(param1);
+    mParams.emplace_back(param2);
 }
 
 void ParameterList::addIf(const char* param, bool flag) {

@@ -24,9 +24,9 @@ namespace android {
 namespace qemu2 {
 
 CharSerialLine::CharSerialLine(Chardev* dev) {
-  mBackend = { 0 };
-  mBackend.chr = dev;
-  dev->be = &mBackend;
+    mBackend = {nullptr};
+    mBackend.chr = dev;
+    dev->be = &mBackend;
 }
 
 
@@ -38,7 +38,8 @@ CharSerialLine::~CharSerialLine() {
 }
 
 void CharSerialLine::addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc) {
-    qemu_chr_fe_set_handlers(&mBackend, canReadFunc, readFunc, NULL, opaque, NULL, false);
+    qemu_chr_fe_set_handlers(&mBackend, canReadFunc, readFunc, nullptr, opaque,
+                             nullptr, false);
 }
 
 int CharSerialLine::write(const uint8_t* data, int len) {

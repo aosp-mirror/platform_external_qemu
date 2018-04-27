@@ -21,7 +21,7 @@ GLuint createShader(const GLESv2Dispatch* gles2,
     if (!shader) {
         return 0;
     }
-    const GLchar* text = static_cast<const GLchar*>(shader_code);
+    const auto* text = static_cast<const GLchar*>(shader_code);
     const GLint text_len = strlen(shader_code);
     gles2->glShaderSource(shader, 1, &text, &text_len);
     gles2->glCompileShader(shader);

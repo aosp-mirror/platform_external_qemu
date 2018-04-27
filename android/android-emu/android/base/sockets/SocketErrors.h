@@ -13,7 +13,7 @@
 
 // Older Mingw32 headers didn't define all error macros appropriately.
 // Include this header to work-around this.
-#include <errno.h>
+#include <cerrno>
 
 #ifdef _WIN32
 #  include "android/base/sockets/Winsock.h"

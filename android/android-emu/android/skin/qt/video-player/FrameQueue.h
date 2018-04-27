@@ -137,7 +137,7 @@ private:
     int mWindex = 0;
     int mSize = 0;
     int mMaxSize = 0;
-    bool mKeepLast = 0;
+    bool mKeepLast = false;
     int mRindexShown = 0;
 
     VideoPlayerWaitInfo mWaitInfo;

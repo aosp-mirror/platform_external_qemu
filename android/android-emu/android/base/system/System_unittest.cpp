@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 namespace android {
 namespace base {
@@ -171,8 +171,8 @@ TEST(System, scandDirEntries) {
     const size_t kCount = ARRAYLEN(kInput);
 
     TestTempDir myDir("scanDirEntries");
-    for (size_t n = 0; n < kCount; ++n) {
-        make_subfile(myDir.path(), kInput[n]);
+    for (auto n : kInput) {
+        make_subfile(myDir.path(), n);
     }
 
     std::vector<std::string> entries =
@@ -382,8 +382,8 @@ TEST(System, scanDirEntriesWithFullPaths) {
     const size_t kCount = ARRAYLEN(kInput);
 
     TestTempDir myDir("scanDirEntriesFull");
-    for (size_t n = 0; n < kCount; ++n) {
-        make_subfile(myDir.path(), kInput[n]);
+    for (auto n : kInput) {
+        make_subfile(myDir.path(), n);
     }
 
     std::vector<std::string> entries =
@@ -427,11 +427,11 @@ TEST(System, findBundledExecutable) {
     ASSERT_TRUE(testDir->makeSubDir("foo"));
 
     std::vector<std::string> pathList;
-    pathList.push_back(std::string("foo"));
-    pathList.push_back(std::string(System::kBinSubDir));
+    pathList.emplace_back("foo");
+    pathList.emplace_back(System::kBinSubDir);
     ASSERT_TRUE(testDir->makeSubDir(PathUtils::recompose(pathList).c_str()));
 
-    pathList.push_back(std::string(kProgramFile));
+    pathList.emplace_back(kProgramFile);
     std::string programPath = PathUtils::recompose(pathList);
     make_subfile(testDir->path(), programPath.c_str());
 
@@ -452,7 +452,7 @@ TEST(System, getProcessTimes) {
 }
 
 TEST(System, getUnixTime) {
-    const time_t curTime = time(NULL);
+    const time_t curTime = time(nullptr);
     const time_t time1 = System::get()->getUnixTime();
     const time_t time2 = System::get()->getUnixTime();
     ASSERT_GE(time1, curTime);

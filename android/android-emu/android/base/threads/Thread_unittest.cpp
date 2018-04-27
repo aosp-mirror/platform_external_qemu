@@ -31,7 +31,7 @@ using ::android::base::Thread;
 // A simple thread instance that does nothing at all and exits immediately.
 class EmptyThread : public Thread {
 public:
-    intptr_t main() { return 42; }
+    intptr_t main() override { return 42; }
 };
 
 // A thread that checks if onExit is called
@@ -42,11 +42,11 @@ public:
 
     OnExitThread() { onExitCalled = dtorCalled = false; }
 
-    ~OnExitThread() { dtorCalled = true; }
+    ~OnExitThread() override { dtorCalled = true; }
 
-    virtual intptr_t main() { return 42; }
+    intptr_t main() override { return 42; }
 
-    virtual void onExit() {
+    void onExit() override {
         onExitCalled = true;
         delete this;
     }
@@ -59,8 +59,8 @@ class CountingThread : public Thread {
 public:
     class State {
     public:
-        State() : mLock(), mCount(0) {}
-        ~State() {}
+        State() : mLock() {}
+        ~State() = default;
 
         void increment() {
             mLock.lock();
@@ -78,12 +78,12 @@ public:
 
     private:
         mutable Lock mLock;
-        int mCount;
+        int mCount{0};
     };
 
-    CountingThread(State* state) : Thread(), mState(state) {}
+    explicit CountingThread(State* state) : Thread(), mState(state) {}
 
-    intptr_t main() {
+    intptr_t main() override {
         mState->increment();
         return 0;
     }
@@ -94,7 +94,7 @@ private:
 
 // A thread that blocks till it's instructed to continue.
 class BlockingThread : public Thread {
- public:
+public:
     BlockingThread() : Thread(), mLock(), mSharedContinueFlag(new bool) {
         *mSharedContinueFlag = false;
     }
@@ -105,7 +105,7 @@ class BlockingThread : public Thread {
         mLock.unlock();
     }
 
-    intptr_t main() {
+    intptr_t main() override {
         bool continueFlag;
         do {
             mLock.lock();
@@ -116,7 +116,7 @@ class BlockingThread : public Thread {
         return 42;
     }
 
- private:
+private:
     mutable Lock mLock;
     std::unique_ptr<bool> mSharedContinueFlag;
 };
@@ -158,24 +158,24 @@ TEST(ThreadTest, MultipleThreads) {
 
     // Wait for them all.
     for (size_t n = 0; n < kMaxThreads; ++n) {
-        EXPECT_TRUE(threads[n]->wait(NULL)) << "thread " << n;
+        EXPECT_TRUE(threads[n]->wait(nullptr)) << "thread " << n;
     }
 
     // Check state.
     EXPECT_EQ((int)kMaxThreads, state.count());
 
     // Delete them all.
-    for (size_t n = 0; n < kMaxThreads; ++n) {
-        delete threads[n];
+    for (auto& thread : threads) {
+        delete thread;
     }
 }
 
 TEST(ThreadTest, OnExit) {
-    OnExitThread* thread = new OnExitThread();
+    auto* thread = new OnExitThread();
     EXPECT_FALSE(OnExitThread::onExitCalled);
     EXPECT_FALSE(OnExitThread::dtorCalled);
     EXPECT_TRUE(thread->start());
-    EXPECT_TRUE(thread->wait(NULL));
+    EXPECT_TRUE(thread->wait(nullptr));
     EXPECT_TRUE(OnExitThread::onExitCalled);
     EXPECT_TRUE(OnExitThread::dtorCalled);
 }
@@ -195,7 +195,7 @@ TEST(ThreadTest, tryWait) {
     static const unsigned kMaxNumChecks = kMaxWaitTimeMs / kSleepTimeMs;
     unsigned numIters = 0;
     result = 0;
-    while(numIters < kMaxNumChecks && !thread.tryWait(&result)) {
+    while (numIters < kMaxNumChecks && !thread.tryWait(&result)) {
         System::get()->sleepMs(kSleepTimeMs);
     }
     EXPECT_LT(numIters, kMaxNumChecks);
@@ -204,7 +204,7 @@ TEST(ThreadTest, tryWait) {
 
 class TidSetterThread : public Thread {
 public:
-    intptr_t main() {
+    intptr_t main() override {
         mTid = getCurrentThreadId();
         return 0;
     }

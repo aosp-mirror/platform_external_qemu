@@ -15,7 +15,7 @@
 #include <GLcommon/etc.h>
 
 #include <gtest/gtest.h>
-#include <stdio.h>
+#include <cstdio>
 
 namespace {
 class Etc2Test : public ::testing::Test {
@@ -48,7 +48,7 @@ protected:
         }
     }
 };
-}
+}  // namespace
 
 // ETC2 rgb decoder tests.
 // The three test cases here cover T, H and planar codec, which are

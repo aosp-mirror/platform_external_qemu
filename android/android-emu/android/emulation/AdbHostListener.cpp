@@ -27,8 +27,9 @@ namespace emulation {
 
 static bool systemSupportsIPv4() {
     int socket = base::socketCreateTcp4();
-    if (socket < 0 && errno == EAFNOSUPPORT)
+    if (socket < 0 && errno == EAFNOSUPPORT) {
         return false;
+    }
     base::socketClose(socket);
     return true;
 }

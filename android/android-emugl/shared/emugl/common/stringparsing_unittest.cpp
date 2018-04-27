@@ -96,10 +96,10 @@ TEST(StringParsing, Simple) {
     // multi_find returns std::string::npos
     // if there aren't any matches
     std::vector<std::string> nomatches;
-    nomatches.push_back("{");
-    nomatches.push_back("}");
-    nomatches.push_back("8");
-    nomatches.push_back("asdf");
+    nomatches.emplace_back("{");
+    nomatches.emplace_back("}");
+    nomatches.emplace_back("8");
+    nomatches.emplace_back("asdf");
     EXPECT_EQ(std::string::npos, multi_find(e, nomatches));
 
     // Split with trailing delimiter

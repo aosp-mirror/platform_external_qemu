@@ -17,13 +17,13 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "emugl/common/shared_library.h"
 
-static emugl::SharedLibrary *s_gles2_lib = NULL;
+static emugl::SharedLibrary* s_gles2_lib = nullptr;
 
 #define DEFAULT_GLES_V2_LIB EMUGL_LIBNAME("GLES_V2_translator")
 
@@ -75,14 +75,14 @@ bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table)
 //
 void *gles2_dispatch_get_proc_func(const char *name, void *userData)
 {
-    void* func = NULL;
+    void* func = nullptr;
     if (s_gles2_lib) {
-        func = (void *)s_gles2_lib->findSymbol(name);
+        func = reinterpret_cast<void*>(s_gles2_lib->findSymbol(name));
     }
     // To make it consistent with the guest, redirect any unsupported functions
     // to gles2_unimplemented.
     if (!func) {
-        func = (void *)gles2_unimplemented;
+        func = reinterpret_cast<void*>(gles2_unimplemented);
     }
     return func;
 }

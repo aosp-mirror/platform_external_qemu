@@ -16,8 +16,8 @@
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 
-#include <string.h>
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
 
 #include <string>
 
@@ -35,9 +35,7 @@
 #  define  D(...)  ((void)0)
 #endif
 
-
-
-static const char* get_zoneinfo_timezone( void );  /* forward */
+static const char* get_zoneinfo_timezone(); /* forward */
 
 static char         android_timezone0[256];
 static const char*  android_timezone;
@@ -45,20 +43,23 @@ static const char*  android_timezone;
 static int
 check_timezone_is_zoneinfo(const char*  tz)
 {
-    const char*  slash1 = NULL, *slash2 = NULL;
+    const char *slash1 = nullptr, *slash2 = nullptr;
 
-    if (tz == NULL)
+    if (tz == nullptr) {
         return 0;
+    }
 
     /* the name must be of the form Area/Location or Area/Location/SubLocation */
     slash1 = strchr( tz, '/' );
-    if (slash1 == NULL || slash1[1] == 0)
+    if (slash1 == nullptr || slash1[1] == 0) {
         return 0;
+    }
 
     slash2 = strchr( slash1+1, '/');
-    if (slash2 != NULL) {
-        if (slash2[1] == 0 || strchr(slash2+1, '/') != NULL)
+    if (slash2 != nullptr) {
+        if (slash2[1] == 0 || strchr(slash2 + 1, '/') != nullptr) {
             return 0;
+        }
     }
 
     return 1;
@@ -69,10 +70,11 @@ bufprint_zoneinfo_timezone( char*  p, char*  end )
 {
     const char*  tz = get_zoneinfo_timezone();
 
-    if (tz == NULL || !check_timezone_is_zoneinfo(tz))
+    if (tz == nullptr || !check_timezone_is_zoneinfo(tz)) {
         return bufprint(p, end, "Unknown/Unknown");
-    else
+    } else {
         return bufprint(p, end, "%s", tz);
+    }
 }
 
 /* on OS X, the timezone directory is always "zoneinfo"
@@ -83,32 +85,30 @@ bufprint_zoneinfo_timezone( char*  p, char*  end )
 #if defined(__APPLE__)
 
 #include <unistd.h>
-#include <limits.h>
+#include <climits>
 #define  LOCALTIME_FILE  "/etc/localtime"
 #define  ZONEINFO_DIR    "/zoneinfo/"
-static const char*
-get_zoneinfo_timezone( void )
-{
+static const char* get_zoneinfo_timezone() {
     if (!android_timezone) {
         const char*  tz = getenv("TZ");
         char         buff[PATH_MAX+1];
 
-        if (tz == NULL) {
+        if (tz == nullptr) {
             int   len = readlink(LOCALTIME_FILE, buff, sizeof(buff));
             if (len < 0) {
                 dprint( "### WARNING: Could not read %s, something is very wrong on your system",
                         LOCALTIME_FILE);
-                return NULL;
+                return nullptr;
             }
 
             buff[len] = 0;
             D("%s: %s points to %s\n", __FUNCTION__, LOCALTIME_FILE, buff);
-            char* zoneinfo_dir = NULL;
+            char* zoneinfo_dir = nullptr;
             if ( zoneinfo_dir = strstr(buff, ZONEINFO_DIR) ) {
                 tz = zoneinfo_dir + sizeof(ZONEINFO_DIR) - 1;
                 if ( !check_timezone_is_zoneinfo(tz) ) {
                     dprint( "### WARNING: %s does not point to zoneinfo-compatible timezone name\n", LOCALTIME_FILE );
-                    return NULL;
+                    return nullptr;
                 }
             }
         }
@@ -132,13 +132,13 @@ get_zoneinfo_timezone( void )
  */
 #if defined(__linux__) || defined (__FreeBSD__)
 
-#include <unistd.h>
-#include <limits.h>
-#include <sys/stat.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include <errno.h>
-#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cerrno>
+#include <climits>
+#include <cstring>
 
 #define  ZONEINFO_DIR  "/usr/share/zoneinfo/"
 #define  LOCALTIME_FILE1  "/etc/localtime"
@@ -194,13 +194,14 @@ compare_timezone_to_localtime( ScanDataRec*  scan,
             ret = HANDLE_EINTR(read(fd2, &temp[1], 1));
             if (ret < 0) break;
 
-            if (temp[0] != temp[1])
+            if (temp[0] != temp[1]) {
                 break;
+            }
         }
 
         result = (nn == st.st_size);
 
-    } while (0);
+    } while (false);
 
     D( result ? " MATCH\n" : "no match\n" );
 
@@ -216,21 +217,23 @@ scan_timezone_dir( ScanDataRec*  scan,
                    int           depth )
 {
     DIR*         d = opendir( scan->path );
-    const char*  result = NULL;
+    const char* result = nullptr;
 
     D( "%s: entering '%s\n", __FUNCTION__, scan->path );
-    if (d != NULL) {
+    if (d != nullptr) {
         struct  dirent*  ent;
-        while ((ent = readdir(d)) != NULL) {
+        while ((ent = readdir(d)) != nullptr) {
             struct stat   ent_st;
             char*         p = top;
 
-            if  (ent->d_name[0] == '.')  /* avoid hidden and special files */
+            if (ent->d_name[0] == '.') { /* avoid hidden and special files */
                 continue;
+            }
 
             p = bufprint( p, scan->path_end, "/%s", ent->d_name );
-            if (p >= scan->path_end)
+            if (p >= scan->path_end) {
                 continue;
+            }
 
             //D( "%s: scanning '%s'\n", __FUNCTION__, scan->path );
 
@@ -238,15 +241,17 @@ scan_timezone_dir( ScanDataRec*  scan,
             // Ubuntu distributions creates directories full of links, e.g.
             // /usr/share/info/posix/Australia/Sydney -> ../../Australia/Sydney
             // and we want to ignore them.
-            if ( lstat( scan->path, &ent_st ) < 0 )
+            if (lstat(scan->path, &ent_st) < 0) {
                 continue;
+            }
 
             if ( S_ISDIR(ent_st.st_mode) && depth < 2 )
             {
                 //D( "%s: directory '%s'\n", __FUNCTION__, scan->path );
                 result = scan_timezone_dir( scan, p, depth + 1 );
-                if (result != NULL)
+                if (result != nullptr) {
                     break;
+                }
             }
             else if ( S_ISREG(ent_st.st_mode) && (depth >= 1 && depth <= 2) )
             {
@@ -272,9 +277,7 @@ scan_timezone_dir( ScanDataRec*  scan,
     return  result;
 }
 
-static const char*
-get_zoneinfo_timezone( void )
-{
+static const char* get_zoneinfo_timezone() {
     if (!android_timezone)
     {
         const char*  tz = getenv( "TZ" );
@@ -282,13 +285,13 @@ get_zoneinfo_timezone( void )
         // if we ever allocate into tz, this object will take care of it.
         android::base::ScopedCPtr<const char> tzDeleter;
 
-        if ( tz != NULL && !check_timezone_is_zoneinfo(tz) ) {
+        if (tz != nullptr && !check_timezone_is_zoneinfo(tz)) {
             D( "%s: ignoring non zoneinfo formatted TZ environment variable: '%s'\n",
                __FUNCTION__, tz );
-            tz = NULL;
+            tz = nullptr;
         }
 
-        if (tz == NULL) {
+        if (tz == nullptr) {
             int          len;
             char         temp[ PATH_MAX ];
             std::string  tzdir;
@@ -299,8 +302,9 @@ get_zoneinfo_timezone( void )
                 const char*  env = getenv("TZDIR");
                 const char*  zoneinfo_dir = ZONEINFO_DIR;
 
-                if (env == NULL)
+                if (env == nullptr) {
                     env = zoneinfo_dir;
+                }
 
                 if ( access( env, R_OK ) != 0 ) {
                     if ( env == zoneinfo_dir ) {
@@ -311,7 +315,7 @@ get_zoneinfo_timezone( void )
                            __FUNCTION__, zoneinfo_dir );
                         env = zoneinfo_dir;
                     }
-                    return NULL;
+                    return nullptr;
                 }
                 tzdir = env;
             }
@@ -377,8 +381,9 @@ get_zoneinfo_timezone( void )
             }
 
         Exit:
-            if (tz == NULL)
-                return NULL;
+            if (tz == nullptr) {
+                return nullptr;
+            }
         }
 
         snprintf(android_timezone0, sizeof(android_timezone0), "%s", tz);
@@ -902,11 +907,13 @@ int
 timezone_set(const char *tzname)
 {
     int   len;
-    if (!check_timezone_is_zoneinfo(tzname))
+    if (!check_timezone_is_zoneinfo(tzname)) {
         return -1;
+    }
     len = strlen(tzname);
-    if (len > (int)sizeof(android_timezone0)-1)
+    if (len > static_cast<int>(sizeof(android_timezone0)) - 1) {
         return -1;
+    }
     strcpy(android_timezone0, tzname);
     android_timezone = android_timezone0;
     return 0;
@@ -917,6 +924,6 @@ android_tzoffset_in_seconds(time_t* utc_time)
 {
     struct tm local = *localtime(utc_time);
     time_t local_time = mktime(&local);
-    return (long)difftime(*utc_time, local_time);
+    return static_cast<long>(difftime(*utc_time, local_time));
 }
 

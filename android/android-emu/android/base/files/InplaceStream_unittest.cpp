@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {
@@ -56,7 +56,8 @@ TEST(InplaceStream, read) {
     {
         int32_t val = 1;
         std::vector<int32_t> testbuf = { val };
-        InplaceStream stream((char*)&testbuf[0], testbuf.size() * sizeof(int32_t));
+        InplaceStream stream(reinterpret_cast<char*>(&testbuf[0]),
+                             testbuf.size() * sizeof(int32_t));
         val = 0;
         EXPECT_EQ(sizeof(val), stream.read(&val, sizeof(val)));
         EXPECT_EQ(1, val);
@@ -64,7 +65,8 @@ TEST(InplaceStream, read) {
     }
     {
         std::vector<int32_t> testbuf = { 1, 2, 3, 4, 5 };
-        InplaceStream stream((char*)&testbuf[0], testbuf.size() * sizeof(int32_t));
+        InplaceStream stream(reinterpret_cast<char*>(&testbuf[0]),
+                             testbuf.size() * sizeof(int32_t));
         for (int i = 0; i < 10; i++) {
             int32_t val = 0;
             if (i < 5) {
@@ -134,7 +136,8 @@ TEST(InplaceStream, saveLoad) {
 
 TEST(InplaceStream, getPosAndAdvance) {
     std::vector<int32_t> testbuf = { 1, 2, 3, 4, 5 };
-    InplaceStream stream((char*)&testbuf[0], testbuf.size() * sizeof(int32_t));
+    InplaceStream stream(reinterpret_cast<char*>(&testbuf[0]),
+                         testbuf.size() * sizeof(int32_t));
     EXPECT_EQ((char*)&testbuf[0], stream.currentRead());
     stream.advanceRead(1);
     EXPECT_EQ(((char*)&testbuf[0]) + 1, stream.currentRead());

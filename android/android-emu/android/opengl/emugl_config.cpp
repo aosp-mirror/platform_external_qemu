@@ -20,11 +20,11 @@
 
 #include <string>
 
-#include <assert.h>
-#include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cinttypes>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #define DEBUG 0
 
@@ -39,7 +39,7 @@ using android::base::StringFormat;
 using android::base::System;
 using android::opengl::EmuglBackendList;
 
-static EmuglBackendList* sBackendList = NULL;
+static EmuglBackendList* sBackendList = nullptr;
 
 static void resetBackendList(int bitness) {
     delete sBackendList;
@@ -49,8 +49,8 @@ static void resetBackendList(int bitness) {
 
 static bool stringVectorContains(const std::vector<std::string>& list,
                                  const char* value) {
-    for (size_t n = 0; n < list.size(); ++n) {
-        if (!strcmp(list[n].c_str(), value)) {
+    for (const auto& n : list) {
+        if (!strcmp(n.c_str(), value)) {
             return true;
         }
     }
@@ -338,9 +338,9 @@ bool emuglConfig_init(EmuglConfig* config,
         if (!stringVectorContains(backends, gpu_mode)) {
             std::string error = StringFormat(
                 "Invalid GPU mode '%s', use one of: on off host guest", gpu_mode);
-            for (size_t n = 0; n < backends.size(); ++n) {
+            for (const auto& backend : backends) {
                 error += " ";
-                error += backends[n];
+                error += backend;
             }
             config->enabled = false;
             gpu_mode = "error";

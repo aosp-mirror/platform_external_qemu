@@ -26,8 +26,8 @@ namespace qemu2 {
 //
 class DmaMap : public android::DmaMap {
 private:
-    virtual void* doMap(uint64_t addr, uint64_t sz);
-    virtual void doUnmap(void* mapped, uint64_t sz);
+    void* doMap(uint64_t addr, uint64_t sz) override;
+    void doUnmap(void* mapped, uint64_t sz) override;
 };
 
 }  // namespace qemu2

@@ -29,11 +29,11 @@ namespace ClientAPIExts
 // typename has the form __egl_{funcname}_t
 //
 #define FUNC_TYPE(fname) __egl_ ## fname ## _t
-#define API_ENTRY(fname,params,args) \
-    typedef void (GL_APIENTRY *FUNC_TYPE(fname)) params;
+#define API_ENTRY(fname, params, args) \
+    typedef void(GL_APIENTRY * FUNC_TYPE(fname)) params;
 
-#define API_ENTRY_RET(rtype,fname,params,args) \
-    typedef rtype (GL_APIENTRY *FUNC_TYPE(fname)) params;
+#define API_ENTRY_RET(rtype, fname, params, args) \
+    typedef rtype(GL_APIENTRY* FUNC_TYPE(fname)) params;
 
 #include "ClientAPIExts.in"
 #undef API_ENTRY
@@ -45,8 +45,7 @@ namespace ClientAPIExts
 // ClientAPIExts::initClientFuncs function after each client API has been
 // loaded.
 /////
-#define API_ENTRY(fname,params,args) \
-    FUNC_TYPE(fname) fname;
+#define API_ENTRY(fname, params, args) FUNC_TYPE(fname) fname;
 
 #define API_ENTRY_RET(rtype,fname,params,args) \
     API_ENTRY(fname,params,args)
@@ -90,32 +89,30 @@ void initClientFuncs(const GLESiface *iface, int idx)
 // the current context version and calls to the correct client API
 // function.
 //
-#define API_ENTRY(fname,params,args) \
-    static void _egl_ ## fname params \
-    { \
-        ThreadInfo* thread  = getThreadInfo(); \
-        if (!thread->eglContext.get()) { \
-            return; \
-        } \
+#define API_ENTRY(fname, params, args)                    \
+    static void _egl_##fname params {                     \
+        ThreadInfo* thread = getThreadInfo();             \
+        if (!thread->eglContext.get()) {                  \
+            return;                                       \
+        }                                                 \
         int idx = (int)thread->eglContext->version() - 1; \
-        if (!s_client_extensions[idx].fname) { \
-            return; \
-        } \
-        (*s_client_extensions[idx].fname) args; \
+        if (!s_client_extensions[idx].fname) {            \
+            return;                                       \
+        }                                                 \
+        (*s_client_extensions[idx].fname) args;           \
     }
 
-#define API_ENTRY_RET(rtype,fname,params,args) \
-    static rtype _egl_ ## fname params \
-    { \
-        ThreadInfo* thread  = getThreadInfo(); \
-        if (!thread->eglContext.get()) { \
-            return (rtype)0; \
-        } \
+#define API_ENTRY_RET(rtype, fname, params, args)         \
+    static rtype _egl_##fname params {                    \
+        ThreadInfo* thread = getThreadInfo();             \
+        if (!thread->eglContext.get()) {                  \
+            return (rtype)0;                              \
+        }                                                 \
         int idx = (int)thread->eglContext->version() - 1; \
-        if (!s_client_extensions[idx].fname) { \
-            return (rtype)0; \
-        } \
-        return (*s_client_extensions[idx].fname) args; \
+        if (!s_client_extensions[idx].fname) {            \
+            return (rtype)0;                              \
+        }                                                 \
+        return (*s_client_extensions[idx].fname)args;     \
     }
 
 #include "ClientAPIExts.in"
@@ -137,8 +134,8 @@ static struct _client_ext_funcs {
 } s_client_ext_funcs[] = {
 #include "ClientAPIExts.in"
 };
-static const int numExtFuncs = sizeof(s_client_ext_funcs) / 
-                               sizeof(s_client_ext_funcs[0]);
+static const int numExtFuncs =
+        sizeof(s_client_ext_funcs) / sizeof(s_client_ext_funcs[0]);
 
 #undef API_ENTRY
 #undef API_ENTRY_RET
@@ -148,12 +145,12 @@ static const int numExtFuncs = sizeof(s_client_ext_funcs) /
 //
 __translatorMustCastToProperFunctionPointerType getProcAddress(const char *fname)
 {
-    for (int i=0; i<numExtFuncs; i++) {
-        if (!strcmp(fname, s_client_ext_funcs[i].fname)) {
-            return s_client_ext_funcs[i].proc;
+    for (auto& s_client_ext_func : s_client_ext_funcs) {
+        if (!strcmp(fname, s_client_ext_func.fname)) {
+            return s_client_ext_func.proc;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
-} // of namespace ClientAPIExts
+}  // namespace ClientAPIExts

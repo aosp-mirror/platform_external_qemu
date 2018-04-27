@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {
@@ -51,7 +51,7 @@ int netStringToInterfaceIndex(const char* src);
 // resolver during unit-testing.
 class NetworkInterfaceNameResolver {
 public:
-    virtual ~NetworkInterfaceNameResolver() {}
+    virtual ~NetworkInterfaceNameResolver() = default;
     virtual int queryInterfaceName(const char* src) = 0;
 };
 

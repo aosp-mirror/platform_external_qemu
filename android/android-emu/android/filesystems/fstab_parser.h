@@ -13,7 +13,7 @@
 
 #include "android/utils/compiler.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 ANDROID_BEGIN_HEADER
 

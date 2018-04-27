@@ -16,8 +16,6 @@
 
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
-
 ANDROID_BEGIN_HEADER
 
 // Change the global emulated network speed. |speed| is a string that can be

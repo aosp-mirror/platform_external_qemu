@@ -13,7 +13,7 @@
 
 #include "android/base/Compiler.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {
@@ -69,7 +69,7 @@ public:
     static SocketWaiter* create();
 
     // Destroy the instance.
-    virtual ~SocketWaiter() {}
+    virtual ~SocketWaiter() = default;
 
     // Reset the waiter, i.e. equivalent to calling update(fd, 0) on
     // all previously registered socket descriptors.
@@ -108,7 +108,7 @@ public:
     virtual int nextPendingFd(unsigned* fdEvents) = 0;
 
 protected:
-    SocketWaiter() {}
+    SocketWaiter() = default;
 
     DISALLOW_COPY_AND_ASSIGN(SocketWaiter);
 };

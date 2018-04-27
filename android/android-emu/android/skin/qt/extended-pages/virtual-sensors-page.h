@@ -36,8 +36,8 @@ class VirtualSensorsPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit VirtualSensorsPage(QWidget* parent = 0);
-    ~VirtualSensorsPage();
+    explicit VirtualSensorsPage(QWidget* parent = nullptr);
+    ~VirtualSensorsPage() override;
 
     void showEvent(QShowEvent* event) override;
 

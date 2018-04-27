@@ -70,10 +70,12 @@ static void ConvertCharacteristics(keymaster_key_characteristics_t* characterist
                                    AuthorizationSet* hw_enforced, AuthorizationSet* sw_enforced) {
     unique_ptr<keymaster_key_characteristics_t, Characteristics_Delete> characteristics_deleter(
         characteristics);
-    if (hw_enforced)
+    if (hw_enforced) {
         hw_enforced->Reinitialize(characteristics->hw_enforced);
-    if (sw_enforced)
+    }
+    if (sw_enforced) {
         sw_enforced->Reinitialize(characteristics->sw_enforced);
+    }
 }
 
 keymaster_error_t Keymaster1Engine::GenerateKey(const AuthorizationSet& key_description,
@@ -86,8 +88,9 @@ keymaster_error_t Keymaster1Engine::GenerateKey(const AuthorizationSet& key_desc
     keymaster_key_blob_t blob;
     keymaster_error_t error = keymaster1_device_->generate_key(keymaster1_device_, &key_description,
                                                                &blob, &characteristics);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
     unique_ptr<uint8_t, Malloc_Delete> blob_deleter(const_cast<uint8_t*>(blob.key_material));
     key_blob->key_material = dup_buffer(blob.key_material, blob.key_material_size);
     key_blob->key_material_size = blob.key_material_size;
@@ -111,8 +114,9 @@ keymaster_error_t Keymaster1Engine::ImportKey(const AuthorizationSet& key_descri
     keymaster_error_t error = keymaster1_device_->import_key(keymaster1_device_, &key_description,
                                                              input_key_material_format, &input_key,
                                                              &blob, &characteristics);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
     unique_ptr<uint8_t, Malloc_Delete> blob_deleter(const_cast<uint8_t*>(blob.key_material));
     output_key_blob->key_material = dup_buffer(blob.key_material, blob.key_material_size);
     output_key_blob->key_material_size = blob.key_material_size;
@@ -122,14 +126,16 @@ keymaster_error_t Keymaster1Engine::ImportKey(const AuthorizationSet& key_descri
 }
 
 keymaster_error_t Keymaster1Engine::DeleteKey(const KeymasterKeyBlob& blob) const {
-    if (!keymaster1_device_->delete_key)
+    if (!keymaster1_device_->delete_key) {
         return KM_ERROR_OK;
+    }
     return keymaster1_device_->delete_key(keymaster1_device_, &blob);
 }
 
 keymaster_error_t Keymaster1Engine::DeleteAllKeys() const {
-    if (!keymaster1_device_->delete_all_keys)
+    if (!keymaster1_device_->delete_all_keys) {
         return KM_ERROR_OK;
+    }
     return keymaster1_device_->delete_all_keys(keymaster1_device_);
 }
 
@@ -153,8 +159,9 @@ RSA* Keymaster1Engine::BuildRsaKey(const KeymasterKeyBlob& blob,
     // Copy public key into new RSA key
     unique_ptr<EVP_PKEY, EVP_PKEY_Delete> pkey(
         GetKeymaster1PublicKey(key_data->key_material, key_data->begin_params, error));
-    if (*error != KM_ERROR_OK)
+    if (*error != KM_ERROR_OK) {
         return nullptr;
+    }
 
     unique_ptr<RSA, RSA_Delete> public_rsa(EVP_PKEY_get1_RSA(pkey.get()));
     if (!public_rsa) {
@@ -193,8 +200,9 @@ EC_KEY* Keymaster1Engine::BuildEcKey(const KeymasterKeyBlob& blob,
     // Copy public key into new EC key
     unique_ptr<EVP_PKEY, EVP_PKEY_Delete> pkey(
         GetKeymaster1PublicKey(blob, additional_params, error));
-    if (*error != KM_ERROR_OK)
+    if (*error != KM_ERROR_OK) {
         return nullptr;
+    }
 
     unique_ptr<EC_KEY, EC_KEY_Delete> public_ec_key(EVP_PKEY_get1_EC_KEY(pkey.get()));
     if (!public_ec_key) {
@@ -230,15 +238,18 @@ Keymaster1Engine::KeyData* Keymaster1Engine::GetData(EVP_PKEY* key) const {
 }
 
 Keymaster1Engine::KeyData* Keymaster1Engine::GetData(const RSA* rsa) const {
-    if (!rsa)
+    if (!rsa) {
         return nullptr;
+    }
     return reinterpret_cast<KeyData*>(RSA_get_ex_data(rsa, rsa_index_));
 }
 
 Keymaster1Engine::KeyData* Keymaster1Engine::GetData(const EC_KEY* ec_key) const {
-    if (!ec_key)
+    if (!ec_key) {
         return nullptr;
-    return reinterpret_cast<KeyData*>(EC_KEY_get_ex_data(ec_key, ec_key_index_));
+    }
+    return reinterpret_cast<KeyData*>(
+            EC_KEY_get_ex_data(ec_key, ec_key_index_));
 }
 
 /* static */
@@ -246,13 +257,15 @@ int Keymaster1Engine::duplicate_key_data(CRYPTO_EX_DATA* /* to */, const CRYPTO_
                                          void** from_d, int /* index */, long /* argl */,
                                          void* /* argp */) {
     KeyData* data = reinterpret_cast<KeyData*>(*from_d);
-    if (!data)
+    if (!data) {
         return 1;
+    }
 
     // Default copy ctor is good.
     *from_d = new KeyData(*data);
-    if (*from_d)
+    if (*from_d) {
         return 1;
+    }
     return 0;
 }
 
@@ -265,28 +278,33 @@ void Keymaster1Engine::free_key_data(void* /* parent */, void* ptr, CRYPTO_EX_DA
 keymaster_error_t Keymaster1Engine::Keymaster1Finish(const KeyData* key_data,
                                                      const keymaster_blob_t& input,
                                                      keymaster_blob_t* output) {
-    if (key_data->op_handle == 0)
+    if (key_data->op_handle == 0) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     size_t input_consumed;
-    // Note: devices are required to consume all input in a single update call for undigested
-    // signing operations and encryption operations.  No need to loop here.
-    keymaster_error_t error =
-        device()->update(device(), key_data->op_handle, &key_data->finish_params, &input,
-                         &input_consumed, nullptr /* out_params */, nullptr /* output */);
-    if (error != KM_ERROR_OK)
+    // Note: devices are required to consume all input in a single update call
+    // for undigested signing operations and encryption operations.  No need to
+    // loop here.
+    keymaster_error_t error = device()->update(
+            device(), key_data->op_handle, &key_data->finish_params, &input,
+            &input_consumed, nullptr /* out_params */, nullptr /* output */);
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    return device()->finish(device(), key_data->op_handle, &key_data->finish_params,
-                            nullptr /* signature */, nullptr /* out_params */, output);
+    return device()->finish(device(), key_data->op_handle,
+                            &key_data->finish_params, nullptr /* signature */,
+                            nullptr /* out_params */, output);
 }
 
 /* static */
 int Keymaster1Engine::rsa_sign_raw(RSA* rsa, size_t* out_len, uint8_t* out, size_t max_out,
                                    const uint8_t* in, size_t in_len, int padding) {
     KeyData* key_data = instance_->GetData(rsa);
-    if (!key_data)
+    if (!key_data) {
         return 0;
+    }
 
     if (padding != key_data->expected_openssl_padding) {
         LOG_E("Expected sign_raw with padding %d but got padding %d",
@@ -297,8 +315,9 @@ int Keymaster1Engine::rsa_sign_raw(RSA* rsa, size_t* out_len, uint8_t* out, size
     keymaster_blob_t input = {in, in_len};
     keymaster_blob_t output;
     key_data->error = instance_->Keymaster1Finish(key_data, input, &output);
-    if (key_data->error != KM_ERROR_OK)
+    if (key_data->error != KM_ERROR_OK) {
         return 0;
+    }
     unique_ptr<uint8_t, Malloc_Delete> output_deleter(const_cast<uint8_t*>(output.data));
 
     *out_len = std::min(output.data_length, max_out);
@@ -310,8 +329,9 @@ int Keymaster1Engine::rsa_sign_raw(RSA* rsa, size_t* out_len, uint8_t* out, size
 int Keymaster1Engine::rsa_decrypt(RSA* rsa, size_t* out_len, uint8_t* out, size_t max_out,
                                   const uint8_t* in, size_t in_len, int padding) {
     KeyData* key_data = instance_->GetData(rsa);
-    if (!key_data)
+    if (!key_data) {
         return 0;
+    }
 
     if (padding != key_data->expected_openssl_padding) {
         LOG_E("Expected sign_raw with padding %d but got padding %d",
@@ -322,8 +342,9 @@ int Keymaster1Engine::rsa_decrypt(RSA* rsa, size_t* out_len, uint8_t* out, size_
     keymaster_blob_t input = {in, in_len};
     keymaster_blob_t output;
     key_data->error = instance_->Keymaster1Finish(key_data, input, &output);
-    if (key_data->error != KM_ERROR_OK)
+    if (key_data->error != KM_ERROR_OK) {
         return 0;
+    }
     unique_ptr<uint8_t, Malloc_Delete> output_deleter(const_cast<uint8_t*>(output.data));
 
     *out_len = std::min(output.data_length, max_out);
@@ -335,19 +356,22 @@ int Keymaster1Engine::rsa_decrypt(RSA* rsa, size_t* out_len, uint8_t* out, size_
 int Keymaster1Engine::ecdsa_sign(const uint8_t* digest, size_t digest_len, uint8_t* sig,
                                  unsigned int* sig_len, EC_KEY* ec_key) {
     KeyData* key_data = instance_->GetData(ec_key);
-    if (!key_data)
+    if (!key_data) {
         return 0;
+    }
 
     // Truncate digest if it's too long
     size_t max_input_len = (ec_group_size_bits(ec_key) + 7) / 8;
-    if (digest_len > max_input_len)
+    if (digest_len > max_input_len) {
         digest_len = max_input_len;
+    }
 
     keymaster_blob_t input = {digest, digest_len};
     keymaster_blob_t output;
     key_data->error = instance_->Keymaster1Finish(key_data, input, &output);
-    if (key_data->error != KM_ERROR_OK)
+    if (key_data->error != KM_ERROR_OK) {
         return 0;
+    }
     unique_ptr<uint8_t, Malloc_Delete> output_deleter(const_cast<uint8_t*>(output.data));
 
     *sig_len = std::min(output.data_length, ECDSA_size(ec_key));
@@ -362,16 +386,19 @@ EVP_PKEY* Keymaster1Engine::GetKeymaster1PublicKey(const KeymasterKeyBlob& blob,
     keymaster_blob_t app_data = {nullptr, 0};
     keymaster_blob_t* client_id_ptr = nullptr;
     keymaster_blob_t* app_data_ptr = nullptr;
-    if (additional_params.GetTagValue(TAG_APPLICATION_ID, &client_id))
+    if (additional_params.GetTagValue(TAG_APPLICATION_ID, &client_id)) {
         client_id_ptr = &client_id;
-    if (additional_params.GetTagValue(TAG_APPLICATION_DATA, &app_data))
+    }
+    if (additional_params.GetTagValue(TAG_APPLICATION_DATA, &app_data)) {
         app_data_ptr = &app_data;
+    }
 
     keymaster_blob_t export_data = {nullptr, 0};
     *error = keymaster1_device_->export_key(keymaster1_device_, KM_KEY_FORMAT_X509, &blob,
                                             client_id_ptr, app_data_ptr, &export_data);
-    if (*error != KM_ERROR_OK)
+    if (*error != KM_ERROR_OK) {
         return nullptr;
+    }
 
     unique_ptr<uint8_t, Malloc_Delete> pub_key(const_cast<uint8_t*>(export_data.data));
 

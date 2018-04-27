@@ -44,10 +44,7 @@ public:
     // |width| and |height| are dimensions in pixels, and |pixels| is
     // the memory buffer of 32-bit RGBA image data. This buffer is freed
     // when the function returns.
-    typedef void (Callback)(void* opaque,
-                            int width,
-                            int height,
-                            const void* pixels);
+    using Callback = void(void*, int, int, const void*);
 
     // Create a new GpuFrameBridge instance. |looper| is a handle to the main
     // loop's Looper instance, and |callback| is a function that will be
@@ -57,7 +54,7 @@ public:
                                   void* callbackOpaque);
 
     // Destructor
-    virtual ~GpuFrameBridge() {}
+    virtual ~GpuFrameBridge() = default;
 
     // Post a new frame from the EmuGL thread (synchronous).
     virtual void postFrame(int width, int height, const void* pixels) = 0;
@@ -86,7 +83,7 @@ public:
     virtual void invalidateRecordingBuffers() = 0;
 
 protected:
-    GpuFrameBridge() {}
+    GpuFrameBridge() = default;
     GpuFrameBridge(const GpuFrameBridge& other);
 };
 

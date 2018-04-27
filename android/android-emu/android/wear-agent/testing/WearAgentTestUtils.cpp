@@ -15,9 +15,9 @@
 #include "android/base/sockets/SocketErrors.h"
 #include "android/base/sockets/SocketUtils.h"
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 
 #define DEBUG_TEST 0
 

@@ -16,8 +16,8 @@
 #ifndef GRAPHICS_TRANSLATION_GLES_PALETTED_TEXTURE_UTIL_H_
 #define GRAPHICS_TRANSLATION_GLES_PALETTED_TEXTURE_UTIL_H_
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
 #include <GLES/gl.h>
 

@@ -82,10 +82,10 @@ public:
             : AndroidPipe::Service("qemud:adb"), mHostAgent(hostAgent) {}
 
         // Create a new AdbGuestPipe instance.
-        virtual AndroidPipe* create(void* mHwPipe, const char* args) override;
+        AndroidPipe* create(void* mHwPipe, const char* args) override;
 
         // Overridden AdbGuestAgent method.
-        virtual void onHostConnection(ScopedSocket&& socket) override;
+        void onHostConnection(ScopedSocket&& socket) override;
 
         // Called when a new adb pipe connection is opened by
         // the guest. Note that this does *not* transfer ownership of |pipe|.
@@ -118,15 +118,14 @@ public:
         AdbGuestPipe* mCurrentActivePipe = nullptr;
     };
 
-    virtual ~AdbGuestPipe();
+    ~AdbGuestPipe() override;
 
     // Overridden AndroidPipe methods. Called from the device context.
-    virtual void onGuestClose(PipeCloseReason reason) override;
-    virtual unsigned onGuestPoll() const override;
-    virtual int onGuestRecv(AndroidPipeBuffer* buffers, int count) override;
-    virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int count) override;
-    virtual void onGuestWantWakeOn(int flags) override;
+    void onGuestClose(PipeCloseReason reason) override;
+    unsigned onGuestPoll() const override;
+    int onGuestRecv(AndroidPipeBuffer* buffers, int count) override;
+    int onGuestSend(const AndroidPipeBuffer* buffers, int count) override;
+    void onGuestWantWakeOn(int flags) override;
 
     // Called when a host connection occurs. Transfers ownership of
     // |socket| to the pipe. On success, return true, on error return
@@ -182,11 +181,11 @@ private:
 
     // Set the reply to send to the guest as |reply|, and change the state
     // to |newState|.
-    void setReply(StringView reply, State newState);
+    void setReply(const StringView& reply, State newState);
 
     // Set the expected |command| to wait from the guest, and change the
     // state to |newState|.
-    void setExpectedGuestCommand(StringView command, State newState);
+    void setExpectedGuestCommand(const StringView& command, State newState);
 
     // Try to wait for a new host connection. Change the state according to
     // whether one already occured or not.

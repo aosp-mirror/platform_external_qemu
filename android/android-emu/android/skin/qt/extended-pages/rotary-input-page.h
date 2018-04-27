@@ -23,7 +23,7 @@ class RotaryInputPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit RotaryInputPage(QWidget *parent = 0);
+    explicit RotaryInputPage(QWidget* parent = nullptr);
     void setEmulatorWindow(EmulatorQtWindow* eW);
     void updateTheme();
 private:
@@ -31,6 +31,6 @@ private:
 private:
     int dialDeltaToRotaryInputDelta(int newDialValue, int oldDialValue);
     std::unique_ptr<Ui::RotaryInputPage> mUi;
-    EmulatorQtWindow* mEmulatorWindow;
+    EmulatorQtWindow* mEmulatorWindow{nullptr};
     int mValue;
 };

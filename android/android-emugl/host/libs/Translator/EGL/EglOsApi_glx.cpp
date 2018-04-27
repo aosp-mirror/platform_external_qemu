@@ -26,9 +26,9 @@
 
 #include "OpenglCodecCommon/ErrorLog.h"
 
-#include <string.h>
-#include <X11/Xlib.h>
 #include <GL/glx.h>
+#include <X11/Xlib.h>
+#include <cstring>
 
 #include <EGL/eglext.h>
 
@@ -52,11 +52,11 @@
 
 namespace {
 
-typedef Display X11Display;
+using X11Display = Display;
 
 class ErrorHandler{
 public:
-    ErrorHandler(EGLNativeDisplayType dpy);
+    explicit ErrorHandler(EGLNativeDisplayType dpy);
     ~ErrorHandler();
     int getLastError() const { return s_lastErrorCode; }
 
@@ -92,15 +92,21 @@ int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
     return 0;
 }
 
-#define IS_SUCCESS(a) \
-        do { if (a != Success) return 0; } while (0)
+#define IS_SUCCESS(a)       \
+    do {                    \
+        if ((a) != Success) \
+            return 0;       \
+    } while (0)
 
-#define EXIT_IF_FALSE(a) \
-        do { if (a != Success) return; } while (0)
+#define EXIT_IF_FALSE(a)    \
+    do {                    \
+        if ((a) != Success) \
+            return;         \
+    } while (0)
 
 class GlxLibrary : public GlLibrary {
 public:
-    typedef GlFunctionPointer (ResolverFunc)(const char* name);
+    using ResolverFunc = GlFunctionPointer(const char*);
 
     // Important: Use libGL.so.1 explicitly, because it will always link to
     // the vendor-specific version of the library. libGL.so might in some
@@ -123,17 +129,16 @@ public:
         if (!mResolver) {
             ERR("%s: Could not find resolver %s in %s\n",
                 __func__, kResolverName, kLibName);
-            mLib = NULL;
+            mLib = nullptr;
         }
     }
 
-    ~GlxLibrary() {
-    }
+    ~GlxLibrary() override = default;
 
     // override
-    virtual GlFunctionPointer findSymbol(const char* name) {
+    GlFunctionPointer findSymbol(const char* name) override {
         if (!mLib) {
-            return NULL;
+            return nullptr;
         }
         GlFunctionPointer ret = (*mResolver)(name);
         if (!ret) {
@@ -154,7 +159,7 @@ class GlxPixelFormat : public EglOS::PixelFormat {
 public:
     explicit GlxPixelFormat(GLXFBConfig fbconfig) : mFbConfig(fbconfig) {}
 
-    virtual EglOS::PixelFormat* clone() {
+    EglOS::PixelFormat* clone() override {
         return new GlxPixelFormat(mFbConfig);
     }
 
@@ -190,7 +195,7 @@ public:
     }
 
 private:
-    GLXFBConfig mFbConfig = 0;
+    GLXFBConfig mFbConfig = nullptr;
     GLXDrawable mDrawable = 0;
 };
 
@@ -338,7 +343,7 @@ class GlxDisplay : public EglOS::Display {
 public:
     explicit GlxDisplay(X11Display* disp) : mDisplay(disp) {}
 
-    virtual ~GlxDisplay() {
+    ~GlxDisplay() override {
         PROFILE_SLOW("displayCleanup");
 
         for (auto it : mLivePbufs)  {
@@ -358,7 +363,7 @@ public:
         XCloseDisplay(mDisplay);
     }
 
-    virtual EglOS::GlesVersion getMaxGlesVersion() {
+    EglOS::GlesVersion getMaxGlesVersion() override {
         if (!mCoreProfileSupported) {
             return EglOS::GlesVersion::ES2;
         }
@@ -367,9 +372,9 @@ public:
                    mCoreMajorVersion, mCoreMinorVersion);
     }
 
-    virtual void queryConfigs(int renderableType,
-                              EglOS::AddConfigCallback* addConfigFunc,
-                              void* addConfigOpaque) {
+    void queryConfigs(int renderableType,
+                      EglOS::AddConfigCallback* addConfigFunc,
+                      void* addConfigOpaque) override {
         int n;
         GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
         if (frmtList) {
@@ -403,7 +408,7 @@ public:
         }
     }
 
-    virtual bool isValidNativeWin(EglOS::Surface* win) {
+    bool isValidNativeWin(EglOS::Surface* win) override {
         if (!win) {
             return false;
         } else {
@@ -411,7 +416,7 @@ public:
         }
     }
 
-    virtual bool isValidNativeWin(EGLNativeWindowType win) {
+    bool isValidNativeWin(EGLNativeWindowType win) override {
         Window root;
         int t;
         unsigned int u;
@@ -422,35 +427,33 @@ public:
         return handler.getLastError() == 0;
     }
 
-    virtual bool checkWindowPixelFormatMatch(
-            EGLNativeWindowType win,
-            const EglOS::PixelFormat* pixelFormat,
-            unsigned int* width,
-            unsigned int* height) {
-        //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
+    bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
+                                     const EglOS::PixelFormat* pixelFormat,
+                                     unsigned int* width,
+                                     unsigned int* height) override {
+        // TODO(digit): to check what does ATI & NVIDIA enforce on win
+        // pixelformat
         unsigned int depth, configDepth, border;
         int r, g, b, x, y;
         GLXFBConfig fbconfig = GlxPixelFormat::from(pixelFormat);
 
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_RED_SIZE, &r));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
+        IS_SUCCESS(glXGetFBConfigAttrib(mDisplay, fbconfig, GLX_RED_SIZE, &r));
+        IS_SUCCESS(
+                glXGetFBConfigAttrib(mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
+        IS_SUCCESS(glXGetFBConfigAttrib(mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
         configDepth = r + g + b;
         Window root;
-        if (!XGetGeometry(
-                mDisplay, win, &root, &x, &y, width, height, &border, &depth)) {
+        if (!XGetGeometry(mDisplay, win, &root, &x, &y, width, height, &border,
+                          &depth)) {
             return false;
         }
         return depth >= configDepth;
     }
 
-    virtual emugl::SmartPtr<EglOS::Context> createContext(
+    emugl::SmartPtr<EglOS::Context> createContext(
             EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
-            EglOS::Context* sharedContext) {
+            EglOS::Context* sharedContext) override {
         PROFILE_SLOW("createContext");
 
         bool useCoreProfile = mCoreProfileSupported &&
@@ -461,22 +464,21 @@ public:
         GLXContext ctx;
         if (useCoreProfile) {
             ctx = mCreateContextAttribs(
-                        mDisplay,
-                        GlxPixelFormat::from(pixelFormat),
-                        sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
-                        True /* try direct (supposed to fall back to indirect) */,
-                        mCoreProfileCtxAttribs);
+                    mDisplay, GlxPixelFormat::from(pixelFormat),
+                    sharedContext ? GlxContext::contextFor(sharedContext)
+                                  : nullptr,
+                    True /* try direct (supposed to fall back to indirect) */,
+                    mCoreProfileCtxAttribs);
         } else {
             ctx = glXCreateNewContext(
-                    mDisplay,
-                    GlxPixelFormat::from(pixelFormat),
-                    GLX_RGBA_TYPE,
-                    sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
+                    mDisplay, GlxPixelFormat::from(pixelFormat), GLX_RGBA_TYPE,
+                    sharedContext ? GlxContext::contextFor(sharedContext)
+                                  : nullptr,
                     true);
         }
 
         if (handler.getLastError()) {
-            return NULL;
+            return nullptr;
         }
 
         return std::make_shared<GlxContext>(mDisplay, ctx);
@@ -506,10 +508,9 @@ public:
 #endif
     }
 
-    virtual EglOS::Surface* createPbufferSurface(
+    EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
-            const EglOS::PbufferInfo* info) {
-
+            const EglOS::PbufferInfo* info) override {
         android::base::AutoLock lock(mPbufLock);
 
         GLXFBConfig config = GlxPixelFormat::from(pixelFormat);
@@ -531,7 +532,7 @@ public:
             PROFILE_SLOW("createPbufferSurface (slow path)");
             // Double the # pbufs of this config, or create |mPbufPrimingCount|
             // of them, whichever is higher.
-            int toCreate = std::max((int)mLivePbufs[config].size(),
+            int toCreate = std::max(static_cast<int>(mLivePbufs[config].size()),
                                     mPbufPrimingCount);
             for (int i = 0; i < toCreate; i++) {
                 freeElts.push_back(createPbufferSurfaceImpl(config));
@@ -548,8 +549,7 @@ public:
         return surf;
     }
 
-    virtual bool releasePbuffer(EglOS::Surface* pb) {
-
+    bool releasePbuffer(EglOS::Surface* pb) override {
         android::base::AutoLock lock(mPbufLock);
 
         PROFILE_SLOW("releasePbuffer");
@@ -569,15 +569,15 @@ public:
         }
     }
 
-    virtual bool makeCurrent(EglOS::Surface* read,
-                             EglOS::Surface* draw,
-                             EglOS::Context* context) {
+    bool makeCurrent(EglOS::Surface* read,
+                     EglOS::Surface* draw,
+                     EglOS::Context* context) override {
         PROFILE_SLOW("makeCurrent");
         ErrorHandler handler(mDisplay);
         bool retval = false;
         if (!context && !read && !draw) {
             // unbind
-            retval = glXMakeContextCurrent(mDisplay, 0, 0, NULL);
+            retval = glXMakeContextCurrent(mDisplay, 0, 0, nullptr);
         }
         else if (context && read && draw) {
             retval = glXMakeContextCurrent(
@@ -590,7 +590,7 @@ public:
         return (err == 0) && retval;
     }
 
-    virtual void swapBuffers(EglOS::Surface* srfc) {
+    void swapBuffers(EglOS::Surface* srfc) override {
         if (srfc) {
             glXSwapBuffers(mDisplay, GlxSurface::drawableFor(srfc));
         }
@@ -607,8 +607,8 @@ private:
         ErrorHandler handler(mDisplay);
 
         GlxLibrary* lib = sGlxLibrary.ptr();
-        mCreateContextAttribs =
-            (CreateContextAttribs)lib->findSymbol("glXCreateContextAttribsARB");
+        mCreateContextAttribs = reinterpret_cast<CreateContextAttribs>(
+                lib->findSymbol("glXCreateContextAttribsARB"));
 
         if (!mCreateContextAttribs || mFBConfigs.size() == 0) return;
 
@@ -672,17 +672,15 @@ private:
 
 class GlxEngine : public EglOS::Engine {
 public:
-    virtual EglOS::Display* getDefaultDisplay() {
-        return new GlxDisplay(XOpenDisplay(0));
+    EglOS::Display* getDefaultDisplay() override {
+        return new GlxDisplay(XOpenDisplay(nullptr));
     }
 
-    virtual GlLibrary* getGlLibrary() {
-        return sGlxLibrary.ptr();
-    }
+    GlLibrary* getGlLibrary() override { return sGlxLibrary.ptr(); }
 
-    virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* pf,
-                                                EGLNativeWindowType wnd) {
-        return new GlxSurface(wnd, 0, GlxSurface::WINDOW);
+    EglOS::Surface* createWindowSurface(EglOS::PixelFormat* pf,
+                                        EGLNativeWindowType wnd) override {
+        return new GlxSurface(wnd, nullptr, GlxSurface::WINDOW);
     }
 };
 

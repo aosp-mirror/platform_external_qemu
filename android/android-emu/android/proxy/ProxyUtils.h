@@ -47,7 +47,7 @@ struct ParseResult {
 // rest of the structure is valid and can be used.
 //
 // NOTE: This doesn't support a <username> or <password> that contain a @ or :
-ParseResult parseConfigurationString(android::base::StringView str);
+ParseResult parseConfigurationString(const android::base::StringView& str);
 
 }  // namespace proxy
 }  // namespace android

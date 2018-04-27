@@ -189,9 +189,11 @@ control_global_add_redir( ControlGlobal  global,
         int  old_max = global->max_redirs;
         int  new_max = old_max + (old_max >> 1) + 4;
 
-        auto new_redirs = (Redir)realloc( global->redirs, new_max*sizeof(global->redirs[0]) );
-        if (new_redirs == NULL)
+        auto new_redirs = static_cast<Redir>(
+                realloc(global->redirs, new_max * sizeof(global->redirs[0])));
+        if (new_redirs == NULL) {
             return -1;
+        }
 
         global->redirs     = new_redirs;
         global->max_redirs = new_max;
@@ -241,8 +243,9 @@ control_client_detach( ControlClient  client )
 {
     int  result;
 
-    if (client->sock < 0)
+    if (client->sock < 0) {
         return -1;
+    }
 
     loopIo_free(client->loopIo);
     client->loopIo = NULL;
@@ -262,13 +265,15 @@ control_client_destroy( ControlClient  client )
     D(( "destroying control client %p\n", client ));
 
     sock = control_client_detach( client );
-    if (sock >= 0)
+    if (sock >= 0) {
         socket_close(sock);
+    }
 
     for ( ;; ) {
         ControlClient  node = *pnode;
-        if ( node == NULL )
+        if (node == NULL) {
             break;
+        }
         if ( node == client ) {
             *pnode     = node->next;
             node->next = NULL;
@@ -299,8 +304,9 @@ static bool send_chunk(int sock, const char* buff, int len) {
 
 static void control_control_write(ControlClient client, const char* buff, int len)
 {
-    if (len < 0)
+    if (len < 0) {
         len = strlen(buff);
+    }
 
     // Terminal requires an explicit \r\n symbol pair for newlines, and most of
     // the clients use \n alone. Make sure we insert missing \r characters
@@ -308,7 +314,8 @@ static void control_control_write(ControlClient client, const char* buff, int le
     int offset = 0;
     for (;;) {
         const char* pos = buff + offset;
-        auto newline = (const char*)memchr(pos, '\n', len - offset);
+        auto newline =
+                static_cast<const char*>(memchr(pos, '\n', len - offset));
         if (!newline) {
             // Done, send the rest as a single chunk.
             send_chunk(client->sock, buff + offset, len - offset);
@@ -353,14 +360,14 @@ static int  control_write( ControlClient  client, const char*  format, ... )
 }
 
 static int control_write_out_cb(void* opaque, const char* str, int strsize) {
-    auto client = (ControlClient)opaque;
+    auto client = static_cast<ControlClient>(opaque);
     control_control_write(client, str, strsize);
     return strsize;
 }
 
 static int control_write_err_cb(void* opaque, const char* str, int strsize) {
     int ret = 0;
-    auto client = (ControlClient)opaque;
+    auto client = static_cast<ControlClient>(opaque);
     ret += control_write(client, "KO: ");
     control_control_write(client, str, strsize);
     return ret + strsize;
@@ -416,11 +423,13 @@ find_command( char*  input, CommandDef  commands, char*  *pend, char*  *pargs )
     char*  args = strchr(input, ' ');
 
     if (args != NULL) {
-        while (*args == ' ')
+        while (*args == ' ') {
             args++;
+        }
 
-        if (args[0] == 0)
+        if (args[0] == 0) {
             args = NULL;
+        }
     }
 
     for (nn = 0; commands[nn].names != NULL; nn++)
@@ -432,10 +441,11 @@ find_command( char*  input, CommandDef  commands, char*  *pend, char*  *pargs )
             int  len, c;
 
             sep = strchr( name, '|' );
-            if (sep)
+            if (sep) {
                 len = sep - name;
-            else
+            } else {
                 len = strlen(name);
+            }
 
             c = input[len];
             if ( !memcmp( name, input, len ) && (c == ' ' || c == 0) ) {
@@ -444,8 +454,9 @@ find_command( char*  input, CommandDef  commands, char*  *pend, char*  *pargs )
                 return &commands[nn];
             }
 
-            if (sep)
+            if (sep) {
                 name = sep + 1;
+            }
 
         } while (sep != NULL && *name);
     }
@@ -625,22 +636,24 @@ control_client_read_byte( ControlClient  client, unsigned char  ch )
     {
         client->buff[ client->buff_len ] = 0;
         control_client_do_command( client );
-        if (client->finished)
+        if (client->finished) {
             return;
+        }
 
         client->buff_len = 0;
     }
     else
     {
-        if (client->buff_len >= sizeof(client->buff)-1)
+        if (client->buff_len >= sizeof(client->buff) - 1) {
             client->buff_len = 0;
+        }
 
         client->buff[ client->buff_len++ ] = ch;
     }
 }
 
 static void control_client_read(void* opaque, int fd, unsigned events) {
-    auto client = (ControlClient)opaque;
+    auto client = static_cast<ControlClient>(opaque);
     unsigned char buf[4096];
     int size;
 
@@ -651,8 +664,9 @@ static void control_client_read(void* opaque, int fd, unsigned events) {
     size = socket_recv( client->sock, buf, sizeof(buf) );
     if (size < 0) {
         D(( "size < 0, exiting with %d: %s\n", errno, errno_str ));
-        if (errno != EWOULDBLOCK && errno != EAGAIN)
-            control_client_destroy( client );
+        if (errno != EWOULDBLOCK && errno != EAGAIN) {
+            control_client_destroy(client);
+        }
         return;
     }
 
@@ -696,7 +710,7 @@ static void control_client_read(void* opaque, int fd, unsigned events) {
 static void control_global_accept(void* opaque,
                                   int listen_fd,
                                   unsigned events) {
-    auto global = (ControlGlobal)opaque;
+    auto global = static_cast<ControlGlobal>(opaque);
     ControlClient client;
     Socket fd;
 
@@ -848,11 +862,13 @@ do_network_status( ControlClient  client, char*  args )
 {
     control_write( client, "Current network status:\r\n" );
 
-    control_write( client, "  download speed:   %8d bits/s (%.1f KB/s)\r\n",
-                   (long)android_net_download_speed, android_net_download_speed/8192. );
+    control_write(client, "  download speed:   %8d bits/s (%.1f KB/s)\r\n",
+                  static_cast<long>(android_net_download_speed),
+                  android_net_download_speed / 8192.);
 
-    control_write( client, "  upload speed:     %8d bits/s (%.1f KB/s)\r\n",
-                   (long)android_net_upload_speed, android_net_upload_speed/8192. );
+    control_write(client, "  upload speed:     %8d bits/s (%.1f KB/s)\r\n",
+                  static_cast<long>(android_net_upload_speed),
+                  android_net_upload_speed / 8192.);
 
     control_write( client, "  minimum latency:  %ld ms\r\n", android_net_min_latency );
     control_write( client, "  maximum latency:  %ld ms\r\n", android_net_max_latency );
@@ -999,9 +1015,9 @@ do_redir_list( ControlClient  client, char*  args )
 {
     ControlGlobal  global = client->global;
 
-    if (global->num_redirs == 0)
+    if (global->num_redirs == 0) {
         control_write( client, "no active redirections\r\n" );
-    else {
+    } else {
         int  nn;
         for (nn = 0; nn < global->num_redirs; nn++) {
             Redir  redir = &global->redirs[nn];
@@ -1029,15 +1045,16 @@ redir_parse_proto_port( char*  args, int  *pport, int  *pproto )
     else if ( !memcmp( args, "udp:", 4 ) ) {
         proto = 1;
         len   = 4;
-    }
-    else
+    } else {
         return 0;
+    }
 
     args   += len;
     *pproto = proto;
     *pport  = strtol( args, &end, 10 );
-    if (end == args)
+    if (end == args) {
         return 0;
+    }
 
     len += end - args;
     return len;
@@ -1049,8 +1066,9 @@ redir_parse_guest_port( char*  arg, int  *pport )
     char*  end;
 
     *pport = strtoul( arg, &end, 10 );
-    if (end == arg)
+    if (end == arg) {
         return 0;
+    }
 
     return end - arg;
 }
@@ -1063,8 +1081,9 @@ redir_find( ControlGlobal  global, int  port, int  isudp )
     for (nn = 0; nn < global->num_redirs; nn++) {
         Redir  redir = &global->redirs[nn];
 
-        if (redir->host_port == port && redir->host_udp == isudp)
+        if (redir->host_port == port && redir->host_udp == isudp) {
             return redir;
+        }
     }
     return NULL;
 }
@@ -1077,8 +1096,9 @@ do_redir_add( ControlClient  client, char*  args )
     uint32_t  guest_ip;
     Redir     redir;
 
-    if ( !args )
+    if (!args) {
         goto BadFormat;
+    }
 
     if (!client->global->net_agent->isSlirpInited())
     {
@@ -1087,13 +1107,15 @@ do_redir_add( ControlClient  client, char*  args )
     }
 
     len = redir_parse_proto_port( args, &host_port, &host_proto );
-    if (len == 0 || args[len] != ':')
+    if (len == 0 || args[len] != ':') {
         goto BadFormat;
+    }
 
     args += len + 1;
     len = redir_parse_guest_port( args, &guest_port );
-    if (len == 0 || args[len] != 0)
+    if (len == 0 || args[len] != 0) {
         goto BadFormat;
+    }
 
     redir = redir_find( client->global, host_port, host_proto );
     if ( redir != NULL ) {
@@ -1134,11 +1156,13 @@ do_redir_del( ControlClient  client, char*  args )
     int    len, proto, port;
     Redir  redir;
 
-    if ( !args )
+    if (!args) {
         goto BadFormat;
+    }
     len = redir_parse_proto_port( args, &port, &proto );
-    if ( len == 0 || args[len] != 0 )
+    if (len == 0 || args[len] != 0) {
         goto BadFormat;
+    }
 
     redir = redir_find( client->global, port, proto );
     if (redir == NULL) {
@@ -1236,8 +1260,9 @@ do_cdma_ssource( ControlClient  client, char*  args )
         const char*         name    = _cdma_subscription_sources[nn].name;
         ACdmaSubscriptionSource ssource = _cdma_subscription_sources[nn].source;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         if (!strcasecmp( args, name )) {
             amodem_set_cdma_subscription_source( android_modem_get(), ssource );
@@ -1293,8 +1318,9 @@ gsm_state_to_string( ARegistrationState  state )
 {
     int  nn;
     for (nn = 0; _gsm_states[nn].name != NULL; nn++) {
-        if (state == _gsm_states[nn].state)
+        if (state == _gsm_states[nn].state) {
             return _gsm_states[nn].name;
+        }
     }
     return "<unknown>";
 }
@@ -1331,8 +1357,9 @@ help_gsm_data( ControlClient  client )
         const char*         name    = _gsm_states[nn].name;
         const char*         display = _gsm_states[nn].display;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         control_write( client, "  %-15s %s\r\n", name, display );
     }
@@ -1354,8 +1381,9 @@ do_gsm_data( ControlClient  client, char*  args )
         const char*         name    = _gsm_states[nn].name;
         ARegistrationState  state   = _gsm_states[nn].state;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         if ( !strcmp( args, name ) ) {
             if (!android_modem_get()) {
@@ -1383,8 +1411,9 @@ help_gsm_voice( ControlClient  client )
         const char*         name    = _gsm_states[nn].name;
         const char*         display = _gsm_states[nn].display;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         control_write( client, "  %-15s %s\r\n", name, display );
     }
@@ -1406,8 +1435,9 @@ do_gsm_voice( ControlClient  client, char*  args )
         const char*         name    = _gsm_states[nn].name;
         ARegistrationState  state   = _gsm_states[nn].state;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         if ( !strcmp( args, name ) ) {
             if (!android_modem_get()) {
@@ -1434,8 +1464,9 @@ gsm_check_number( char*  args )
             return -1;
         }
     }
-    if (nn == 0)
+    if (nn == 0) {
         return -1;
+    }
 
     return 0;
 }
@@ -1508,13 +1539,15 @@ do_gsm_list( ControlClient  client, char*  args )
         ACall        call = amodem_get_call( android_modem_get(), nn );
         const char*  dir;
 
-        if (call == NULL)
+        if (call == NULL) {
             continue;
+        }
 
-        if (call->dir == A_CALL_OUTBOUND)
+        if (call->dir == A_CALL_OUTBOUND) {
             dir = "outbound to ";
-         else
+        } else {
             dir = "inbound from";
+        }
 
         control_write( client, "%s %-10s : %s\r\n", dir,
                        call->number, call_state_to_string(call->state) );
@@ -1596,8 +1629,9 @@ do_gsm_signal( ControlClient  client, char*  args )
 
     static  int  last_ber = 99;
 
-    if (!p)
+    if (!p) {
         p = "";
+    }
 
     /* tokenize */
     while (*p) {
@@ -1610,12 +1644,14 @@ do_gsm_signal( ControlClient  client, char*  args )
         }
 
         params[++top_param] = val;
-        if (top_param + 1 == NUM_SIGNAL_PARAMS)
+        if (top_param + 1 == NUM_SIGNAL_PARAMS) {
             break;
+        }
 
         p = end;
-        while (*p && (p[0] == ' ' || p[0] == '\t'))
+        while (*p && (p[0] == ' ' || p[0] == '\t')) {
             p += 1;
+        }
     }
 
     /* sanity check */
@@ -1650,8 +1686,9 @@ do_gsm_signal_profile( ControlClient  client, char*  args )
 {
     char* end;
     const char* p = args;
-    if (!p)
+    if (!p) {
         p = "";
+    }
     int  val = strtol( p, &end, 10 );
 
     if (end == p) {
@@ -1794,7 +1831,8 @@ do_sms_send( ControlClient  client, char*  args )
     /* un-escape message text into proper utf-8 (conversion happens in-site) */
     p      += 1;
     textlen = strlen(p);
-    textlen = sms_utf8_from_message_str( p, textlen, (unsigned char*)p, textlen );
+    textlen = sms_utf8_from_message_str(
+            p, textlen, reinterpret_cast<unsigned char*>(p), textlen);
     if (textlen < 0) {
         control_write( client, "message must be utf8 and can use the following escapes:\r\n"
                        "    \\n      for a newline\r\n"
@@ -1812,14 +1850,16 @@ do_sms_send( ControlClient  client, char*  args )
     }
 
     /* create a list of SMS PDUs, then send them */
-    pdus = smspdu_create_deliver_utf8( (cbytes_t)p, textlen, &sender, NULL );
+    pdus = smspdu_create_deliver_utf8(reinterpret_cast<cbytes_t>(p), textlen,
+                                      &sender, NULL);
     if (pdus == NULL) {
         control_write( client, "KO: internal error when creating SMS-DELIVER PDUs\n" );
         return -1;
     }
 
-    for (nn = 0; pdus[nn] != NULL; nn++)
-        amodem_receive_sms( android_modem_get(), pdus[nn] );
+    for (nn = 0; pdus[nn] != NULL; nn++) {
+        amodem_receive_sms(android_modem_get(), pdus[nn]);
+    }
 
     smspdu_free_list( pdus );
     return 0;
@@ -1876,7 +1916,7 @@ static const CommandDefRec  sms_commands[] =
 /********************************************************************************************/
 
 void do_control_write(void* opaque, const char* args) {
-    control_write((ControlClient)opaque, args);
+    control_write(static_cast<ControlClient>(opaque), args);
 }
 
 static int
@@ -2061,15 +2101,18 @@ do_event_send( ControlClient  client, char*  args )
         int    type, code, value, ret;
 
         p += strspn( p, " \t" );  /* skip spaces */
-        if (*p == 0)
+        if (*p == 0) {
             break;
+        }
 
         q  = p + strcspn( p, " \t" );
 
-        if (q == p)
+        if (q == p) {
             break;
+        }
 
-        snprintf(temp, sizeof temp, "%.*s", (int)(intptr_t)(q-p), p);
+        snprintf(temp, sizeof temp, "%.*s",
+                 static_cast<int>(static_cast<intptr_t>(q - p)), p);
         ret = android_event_from_str( temp, &type, &code, &value );
         if (ret < 0) {
             if (ret == -1) {
@@ -2110,8 +2153,9 @@ do_event_types( ControlClient  client, char*  args )
         p = android_event_bufprint_type_str( p, end, nn );
 
         control_write( client, "    %-8s", tmp );
-        if (count2 > 0)
-            control_write( client, "  (%d code aliases)", count2 );
+        if (count2 > 0) {
+            control_write(client, "  (%d code aliases)", count2);
+        }
 
         control_write( client, "\r\n" );
     }
@@ -2183,11 +2227,11 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
-    unsigned char*  p   = (unsigned char*) args;
+    unsigned char* p = reinterpret_cast<unsigned char*>(args);
     int             textlen = strlen(args);
 
     /* un-secape message text into proper utf-8 (conversion happens in-site) */
-    textlen = sms_utf8_from_message_str( args, textlen, (unsigned char*)p, textlen );
+    textlen = sms_utf8_from_message_str(args, textlen, p, textlen);
     if (textlen < 0) {
         control_write( client, "message must be utf8 and can use the following escapes:\r\n"
                        "    \\n      for a newline\r\n"
@@ -2199,8 +2243,10 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
-    if (!client->global->libui_agent->convertUtf8ToKeyCodeEvents(p, textlen,
-        (LibuiKeyCodeSendFunc)client->global->user_event_agent->sendKeyCodes)) {
+    if (!client->global->libui_agent->convertUtf8ToKeyCodeEvents(
+                p, textlen,
+                reinterpret_cast<LibuiKeyCodeSendFunc>(
+                        client->global->user_event_agent->sendKeyCodes))) {
         control_write( client, "KO: device is unable to recieve text input now\r\n" );
         return -1;
     }
@@ -2438,8 +2484,9 @@ do_geo_fix( ControlClient  client, char*  args )
 
     struct  timeval tVal;
 
-    if (!p)
+    if (!p) {
         p = "";
+    }
 
     /* tokenize */
     while (*p) {
@@ -2452,12 +2499,14 @@ do_geo_fix( ControlClient  client, char*  args )
         }
 
         params[++top_param] = val;
-        if (top_param + 1 == NUM_GEO_PARAMS)
+        if (top_param + 1 == NUM_GEO_PARAMS) {
             break;
+        }
 
         p = end;
-        while (*p && (p[0] == ' ' || p[0] == '\t'))
+        while (*p && (p[0] == ' ' || p[0] == '\t')) {
             p += 1;
+        }
     }
 
     /* sanity check */
@@ -2483,7 +2532,7 @@ do_geo_fix( ControlClient  client, char*  args )
     /* check number of satellites, must be integer between 1 and 12 */
     if (top_param >= GEO_SAT) {
         int sat_index = (top_param >= GEO_SAT2) ? GEO_SAT2 : GEO_SAT;
-        n_satellites = (int) params[sat_index];
+        n_satellites = static_cast<int>(params[sat_index]);
         if (n_satellites != params[sat_index]
             || n_satellites < 1 || n_satellites > 12) {
             control_write( client, "KO: invalid number of satellites. Must be an integer between 1 and 12\r\n");
@@ -2556,8 +2605,9 @@ do_sensors_get( ControlClient client, char* args )
 
     int status = SENSOR_STATUS_UNKNOWN;
     char sensor[strlen(args) + 1];
-    if (1 != sscanf( args, "%s", &sensor[0] ))
+    if (1 != sscanf(args, "%s", &sensor[0])) {
         goto SENSOR_STATUS_ERROR;
+    }
 
     {
         int sensor_id = android_sensors_get_id_from_name( sensor );
@@ -2568,8 +2618,9 @@ do_sensors_get( ControlClient client, char* args )
         {
             float a, b, c;
             status = android_sensors_get( sensor_id, &a, &b, &c );
-            if (status != SENSOR_STATUS_OK)
+            if (status != SENSOR_STATUS_OK) {
                 goto SENSOR_STATUS_ERROR;
+            }
 
             snprintf( buffer, sizeof(buffer), "%s = %g:%g:%g\r\n", sensor, a, b, c );
             do_control_write( client, buffer );
@@ -2619,19 +2670,22 @@ do_sensors_set( ControlClient client, char* args )
 
     /* Parsing the args to get sensor name string */
     while (*p && isspace(*p)) p++;
-    if (*p == 0)
+    if (*p == 0) {
         goto INPUT_ERROR;
+    }
     sensor = p;
 
     /* Parsing the args to get value string */
     while (*p && (! isspace(*p))) p++;
-    if (*p == 0 || *(p + 1) == 0/* make sure value isn't NULL */)
+    if (*p == 0 || *(p + 1) == 0 /* make sure value isn't NULL */) {
         goto INPUT_ERROR;
+    }
     *p = 0;
     value = p + 1;
 
-    if (! (strlen(sensor) && strlen(value)))
+    if (!(strlen(sensor) && strlen(value))) {
         goto INPUT_ERROR;
+    }
 
     {
         int sensor_id = android_sensors_get_id_from_name( sensor );
@@ -2641,8 +2695,9 @@ do_sensors_set( ControlClient client, char* args )
         } else {
             float fvalues[3];
             status = android_sensors_get( sensor_id, &fvalues[0], &fvalues[1], &fvalues[2] );
-            if (status != SENSOR_STATUS_OK)
+            if (status != SENSOR_STATUS_OK) {
                 goto SENSOR_STATUS_ERROR;
+            }
 
             {
                 /* Parsing the value part to get the sensor values(a, b, c) */
@@ -2658,16 +2713,18 @@ do_sensors_set( ControlClient client, char* args )
                     }
 
                     if (pnext > value) {
-                        if (1 != sscanf( value,"%g", &fvalues[i] ))
+                        if (1 != sscanf(value, "%g", &fvalues[i])) {
                             goto INPUT_ERROR;
+                        }
                     }
                 }
             }
 
             status = android_sensors_override_set(
                     sensor_id, fvalues[0], fvalues[1], fvalues[2] );
-            if (status != SENSOR_STATUS_OK)
+            if (status != SENSOR_STATUS_OK) {
                 goto SENSOR_STATUS_ERROR;
+            }
 
             free( args_dup );
             return 0;
@@ -2894,12 +2951,14 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     std::vector<std::string> splitArgs;
     splitArgs.push_back("screenrecord");
     android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
-        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1) {
             splitArgs.push_back(s);
+        }
     });
 
     // Need char** for getopt()
     std::vector<char*> sarray;
+    sarray.reserve(splitArgs.size());
     for (auto& arg : splitArgs) {
         sarray.push_back(&arg[0]);
     }
@@ -3033,8 +3092,9 @@ static int do_screenrecord_webrtc(ControlClient client, char* args) {
     // Count number of arguments
     std::vector<std::string> splitArgs;
     android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
-        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1) {
             splitArgs.push_back(s);
+        }
     });
 
     if (splitArgs.size() == 0) {
@@ -3209,7 +3269,7 @@ static int do_debug(ControlClient client, char* args) {
 }
 
 static int do_rotate_90_clockwise(ControlClient client, char* args) {
-    return (int)client->global->emu_agent->rotate90Clockwise();
+    return static_cast<int>(client->global->emu_agent->rotate90Clockwise());
 }
 
 /* NOTE: The names of all commands are listed when the 'help' command
@@ -3346,7 +3406,7 @@ static int do_auth(ControlClient client, char* args) {
      */
     size_t token = strlen(auth_token) + 1;
     size_t args_len = strlen(args) + 1;
-    char* auth = (char*) calloc(token, 1);
+    char* auth = static_cast<char*>(calloc(token, 1));
     memcpy(auth, args, token <= args_len ? token : args_len);
 
     if (0 != const_time_strcmp(auth_token, auth, token)) {
@@ -3457,12 +3517,12 @@ void* test_control_client_create(Socket socket)
 
 void test_control_client_close(void* opaque)
 {
-    delete (ControlClientRec*)opaque;
+    delete static_cast<ControlClientRec*>(opaque);
 }
 
 void send_test_string(void* opaque, const char* the_string)
 {
-    ControlClient c = (ControlClient)opaque;
+    ControlClient c = static_cast<ControlClient>(opaque);
     strcpy(c->buff, the_string);
     control_client_do_command(c);
 }

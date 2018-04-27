@@ -26,6 +26,6 @@ enum class SdkComponentType { PlatformTools, Tools };
 // various components.
 
 android::base::Version getCurrentSdkVersion(
-        android::base::StringView sdkRootDirectory,
+        const android::base::StringView& sdkRootDirectory,
         SdkComponentType type);
 }  // namespace android

@@ -13,8 +13,6 @@
 
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
-
 ANDROID_BEGIN_HEADER
 
 // Setup environment variables to run the Qt-based UI programs.

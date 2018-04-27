@@ -19,7 +19,9 @@
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
 
-#include <stdio.h>
+#include <cstdio>
+
+#include <utility>
 
 // Set TRACE_THREADINFO to 1 to debug creation/destruction of ThreadInfo
 // instances.
@@ -68,19 +70,18 @@ void ThreadInfo::updateInfo(ContextPtr eglCtx,
                             GLEScontext* glesCtx,
                             ShareGroupPtr share,
                             ObjectNameManager* manager) {
-
-    eglContext  = eglCtx;
-    eglDisplay  = dpy;
+    eglContext = std::move(eglCtx);
+    eglDisplay = dpy;
     glesContext = glesCtx;
-    shareGroup  = share;
-    objManager  = manager;
+    shareGroup = std::move(share);
+    objManager = manager;
 }
 
 static ::emugl::LazyInstance<ThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
 
 ThreadInfo *getThreadInfo()
 {
-    ThreadInfo *ti = static_cast<ThreadInfo*>(s_tls->get());
+    auto* ti = static_cast<ThreadInfo*>(s_tls->get());
     if (!ti) {
         ti = new ThreadInfo();
         s_tls->set(ti);

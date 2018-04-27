@@ -14,15 +14,15 @@
 
 #include "android/opengl/GpuFrameBridge.h"
 
-#include "android/base/async/Looper.h"
 #include "android/base/Log.h"
+#include "android/base/async/Looper.h"
 #include "android/base/memory/ScopedPtr.h"
 
 #include <gtest/gtest.h>
 
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 
 namespace android {
 namespace opengl {
@@ -40,9 +40,7 @@ struct Frame {
         ::memcpy(this->pixels, pixels, w * h * 4);
     }
 
-    ~Frame() {
-        ::free(this->pixels);
-    }
+    ~Frame() { ::free(this->pixels); }
 
     int width;
     int height;
@@ -51,7 +49,7 @@ struct Frame {
 
 class FrameList {
 public:
-    FrameList() : mCount(0) {}
+    FrameList() = default;
 
     ~FrameList() {
         for (int n = mCount; n > 0; --n) {
@@ -63,12 +61,12 @@ public:
 
     Frame* popFront() {
         if (mCount == 0) {
-            return NULL;
+            return nullptr;
         }
         Frame* result = mFrames[0];
         mCount--;
         ::memmove(&mFrames[0], &mFrames[1], mCount * sizeof(Frame*));
-        mFrames[mCount] = NULL;
+        mFrames[mCount] = nullptr;
         return result;
     }
 
@@ -76,23 +74,21 @@ public:
         if (index >= 0 && index < mCount) {
             return mFrames[index];
         } else {
-            return NULL;
+            return nullptr;
         }
     }
 
     static void add(void* context, int w, int h, const void* pixels) {
-        FrameList* list = reinterpret_cast<FrameList*>(context);
+        auto* list = reinterpret_cast<FrameList*>(context);
         CHECK(list->mCount < kMaxFrames);
-        Frame* frame = new Frame(w, h, pixels);
+        auto* frame = new Frame(w, h, pixels);
         list->mFrames[list->mCount++] = frame;
     }
 
 private:
-    enum {
-        kMaxFrames = 128
-    };
+    enum { kMaxFrames = 128 };
 
-    int mCount;
+    int mCount{0};
     Frame* mFrames[kMaxFrames];
 };
 
@@ -108,7 +104,10 @@ TEST(GpuFrameBridge, postFrameWithinSingleThread) {
     EXPECT_TRUE(bridge);
 
     static const unsigned char kFrame0[4] = {
-        0xff, 0x80, 0x40, 0xff,
+            0xff,
+            0x80,
+            0x40,
+            0xff,
     };
 
     bridge->postFrame(1, 1, kFrame0);
@@ -121,7 +120,8 @@ TEST(GpuFrameBridge, postFrameWithinSingleThread) {
     EXPECT_EQ(1, frame->width);
     EXPECT_EQ(1, frame->height);
     for (size_t n = 0; n < sizeof(kFrame0); ++n) {
-        EXPECT_EQ(kFrame0[n], reinterpret_cast<unsigned char*>(frame->pixels)[n])
+        EXPECT_EQ(kFrame0[n],
+                  reinterpret_cast<unsigned char*>(frame->pixels)[n])
                 << "# " << n;
     }
 }

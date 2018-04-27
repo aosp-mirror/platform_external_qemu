@@ -62,7 +62,7 @@ void VirtualSceneInfoDialog::show() {
     showAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-void VirtualSceneInfoDialog::hide(CompletionFunc onHidden) {
+void VirtualSceneInfoDialog::hide(const CompletionFunc& onHidden) {
     auto hideAnimation = new QPropertyAnimation(this, "windowOpacity");
     hideAnimation->setStartValue(windowOpacity());
     hideAnimation->setEndValue(0.0);

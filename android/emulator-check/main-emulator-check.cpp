@@ -20,8 +20,8 @@
 #include <sstream>
 #include <tuple>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 using android::base::StringView;
 using CommandReturn = std::pair<int, std::string>;

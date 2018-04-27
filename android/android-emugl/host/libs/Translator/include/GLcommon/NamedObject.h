@@ -15,8 +15,8 @@
 */
 #pragma once
 
-#include <assert.h>
 #include <GLES/gl.h>
+#include <cassert>
 #include <memory>
 
 enum class NamedObjectType : short {
@@ -75,8 +75,7 @@ struct GenNameInfo {
         m_existingGlobal(existingGlobal) {}
 };
 
-
-typedef unsigned long long ObjectLocalName;
+using ObjectLocalName = unsigned long long;
 
 class GlobalNameSpace;
 
@@ -112,4 +111,4 @@ private:
     GlobalNameSpace *m_globalNameSpace;
 };
 
-typedef std::shared_ptr<NamedObject> NamedObjectPtr;
+using NamedObjectPtr = std::shared_ptr<NamedObject>;

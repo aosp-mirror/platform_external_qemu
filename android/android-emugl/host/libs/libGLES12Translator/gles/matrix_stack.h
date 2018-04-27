@@ -57,8 +57,8 @@ class MatrixStack {
  private:
   std::stack<emugl::Matrix> stack_;
 
-  MatrixStack(const MatrixStack&);
-  MatrixStack& operator=(const MatrixStack&);
+  MatrixStack(const MatrixStack&) = delete;
+  MatrixStack& operator=(const MatrixStack&) = delete;
 };
 
 #endif  // GRAPHICS_TRANSLATION_GLES_MATRIX_STACK_H_

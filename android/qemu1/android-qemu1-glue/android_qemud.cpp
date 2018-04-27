@@ -26,14 +26,14 @@ extern "C" {
 
 static void qemud_save(QEMUFile* f, void* opaque) {
     Stream* stream = stream_from_qemufile(f);
-    QemudMultiplexer* m = static_cast<QemudMultiplexer*>(opaque);
+    auto* m = static_cast<QemudMultiplexer*>(opaque);
     qemud_multiplexer_save(m, stream);
     stream_free(stream);
 }
 
 static int qemud_load(QEMUFile* f, void* opaque, int version) {
     Stream* stream = stream_from_qemufile(f);
-    QemudMultiplexer* m = static_cast<QemudMultiplexer*>(opaque);
+    auto* m = static_cast<QemudMultiplexer*>(opaque);
     int ret = qemud_multiplexer_load(m, stream, version);
     stream_free(stream);
     return ret;

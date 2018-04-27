@@ -397,12 +397,8 @@ void Accelerometer3DWidget::repaintGL() {
     mGLES2->glEnableVertexAttribArray(mVertexPositionAttribute);
     mGLES2->glEnableVertexAttribArray(mVertexNormalAttribute);
     mGLES2->glEnableVertexAttribArray(mVertexUVAttribute);
-    mGLES2->glVertexAttribPointer(mVertexPositionAttribute,
-                                  3,
-                                  GL_FLOAT,
-                                  GL_FALSE,
-                                  sizeof(float) * 8,
-                                  0);
+    mGLES2->glVertexAttribPointer(mVertexPositionAttribute, 3, GL_FLOAT,
+                                  GL_FALSE, sizeof(float) * 8, nullptr);
     mGLES2->glVertexAttribPointer(mVertexNormalAttribute,
                                   3,
                                   GL_FLOAT,
@@ -419,7 +415,8 @@ void Accelerometer3DWidget::repaintGL() {
 
     // Draw the model.
     mGLES2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    mGLES2->glDrawElements(GL_TRIANGLES, mElementsCount, GL_UNSIGNED_INT, 0);
+    mGLES2->glDrawElements(GL_TRIANGLES, mElementsCount, GL_UNSIGNED_INT,
+                           nullptr);
 }
 
 static float clamp(float a, float b, float x) {

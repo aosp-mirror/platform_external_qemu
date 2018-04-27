@@ -31,12 +31,15 @@ static ssize_t max_compressed_size(ssize_t size) {
 
 static ssize_t compress(uint8_t *dest, ssize_t dest_size,
                         const uint8_t *data, ssize_t size, int level) {
-    return LZ4_compress_fast((const char*)data, (char*)dest, size, dest_size, 1);
+    return LZ4_compress_fast(reinterpret_cast<const char*>(data),
+                             reinterpret_cast<char*>(dest), size, dest_size, 1);
 }
 
 static ssize_t uncompress(uint8_t *dest, ssize_t dest_size,
                           const uint8_t *data, ssize_t size) {
-    int res = LZ4_decompress_safe((const char*)data, (char*)dest, size, dest_size);
+    int res =
+            LZ4_decompress_safe(reinterpret_cast<const char*>(data),
+                                reinterpret_cast<char*>(dest), size, dest_size);
     assert(res == dest_size);
     return res;
 }

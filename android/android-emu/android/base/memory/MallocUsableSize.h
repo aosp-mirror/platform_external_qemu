@@ -20,7 +20,7 @@
 // like __GLIBC__. Choose carefully because some headers like <stddef.h>
 // are actually provided by the compiler, not the C library and do not
 // define the macros we need.
-#include <stdint.h>
+#include <cstdint>
 
 #if defined(__GLIBC__)
 #  include <malloc.h>

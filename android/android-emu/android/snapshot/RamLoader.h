@@ -82,7 +82,7 @@ public:
 
     bool hasError() const { return mHasError; }
     void invalidateGaps() { mGaps.reset(nullptr); }
-    bool hasGaps() const { return mGaps ? 1 : 0; }
+    bool hasGaps() const { return mGaps ? true : false; }
     bool onDemandEnabled() const { return mOnDemandEnabled; }
     bool onDemandLoadingComplete() const {
         return mLoadingCompleted.load(std::memory_order_relaxed);

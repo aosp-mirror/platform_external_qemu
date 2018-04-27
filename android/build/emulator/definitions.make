@@ -357,18 +357,16 @@ $$(_DST): PRIVATE_CHECKS     := $$(CLANG_TIDY_CHECKS)
 $$(_DST): PRIVATE_TIDY       := $$(BUILD_TIDY)
 $$(_DST): PRIVATE_SRC        := $$(LOCAL_PATH)/$$(SRC)
 $$(_DST): PRIVATE_SRC0       := $$(SRC)
-$$(_DST): PRIVATE_FIX        := $(if $(FIX), --fix, -export-fixes=$$(PRIVATE_DST))
 $$(_DST): PRIVATE_HDR        := $$(CLANG_TIDY_HEADER_INCLUDE)
 $$(_DST): $$(_TST)
 	@echo "Linting: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	@mkdir -p $$(dir $$(PRIVATE_DST))
-	$(hide) $$(PRIVATE_TIDY)  $$(PRIVATE_SRC) $$(PRIVATE_FIX) \
+	$(hide) $$(PRIVATE_TIDY)  $$(PRIVATE_SRC) -export-fixes=$$(PRIVATE_DST) \
     -analyze-temporary-dtors "-header-filter=$$(PRIVATE_HDR)" \
     -format-style=google -checks='$$(PRIVATE_CHECKS)' \
-    -- $$(PRIVATE_INCLUDES)
-	touch $$(PRIVATE_DST)
+    -- $$(PRIVATE_INCLUDES) -fPIC
+	@touch $$(PRIVATE_DST)
 endef
-
 
 # Installs a prebuilt library
 # If required, will generates symbols and debug info

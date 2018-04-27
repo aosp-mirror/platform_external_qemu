@@ -30,10 +30,10 @@
 
 #include <dirent.h>
 #include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cstdlib>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -52,7 +52,7 @@ class TestTempDir {
 public:
     // Create new instance. This also tries to create a new temporary
     // directory. |debugPrefix| is an optional name prefix and can be NULL.
-    TestTempDir(StringView debugName) {
+    TestTempDir(const StringView& debugName) {
         std::string temp_dir = getTempPath();
         if (!debugName.empty()) {
             temp_dir += debugName;
@@ -60,7 +60,7 @@ public:
         }
         temp_dir += "XXXXXX";
         if (mkdtemp(&temp_dir[0])) {
-          // Fix any Win32/Linux naming issues
+            // Fix any Win32/Linux naming issues
             auto parts = PathUtils::decompose(temp_dir);
             mPath = PathUtils::recompose(parts);
         }
@@ -68,7 +68,7 @@ public:
 
     // Return the path to the temporary directory, or NULL if it could not
     // be created for some reason.
-    const char* path() const { return mPath.size() ? mPath.c_str() : NULL; }
+    const char* path() const { return mPath.size() ? mPath.c_str() : nullptr; }
 
     // Return the path as a string. It will be empty if the directory could
     // not be created for some reason.
@@ -88,7 +88,7 @@ public:
     }
 
     // Create an empty directory under the temporary directory.
-    bool makeSubDir(StringView subdir) {
+    bool makeSubDir(const StringView& subdir) {
         std::string path = makeSubPath(subdir);
 #ifdef _WIN32
         if (mkdir(path.c_str()) < 0) {
@@ -105,9 +105,9 @@ public:
     }
 
     // Create an empty file under the temporary directory.
-    bool makeSubFile(StringView file) {
+    bool makeSubFile(const StringView& file) {
         std::string path = makeSubPath(file);
-        int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0744);
+        int fd = ::open(path.c_str(), O_WRONLY | O_CREAT, 0744);
         if (fd < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;
@@ -117,7 +117,7 @@ public:
     }
 
 private:
-    DISALLOW_COPY_AND_ASSIGN(TestTempDir);
+    DISALLOW_COPY_AND_ASSIGN(TestTempDir);  // NOLINT
 
     void DeleteRecursive(const std::string& path) {
         // First remove any files in the dir
@@ -127,7 +127,7 @@ private:
         }
 
         dirent* entry;
-        while ((entry = readdir(dir)) != NULL) {
+        while ((entry = readdir(dir)) != nullptr) {
             if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
                 continue;
             }
@@ -173,7 +173,7 @@ private:
             int ret;
             *sep = '\0';  // temporarily zero-terminate the dirname.
             ret = android_stat(path, &st);
-            *sep = '/';   // restore full path.
+            *sep = '/';  // restore full path.
             if (ret < 0) {
                 return NULL;
             }
@@ -212,17 +212,17 @@ private:
         }
         // Otherwise use P_tmpdir, which defaults to /tmp
         if (result.empty()) {
-#  ifndef P_tmpdir
-#  define P_tmpdir "/tmp"
-#  endif
+#ifndef P_tmpdir
+#define P_tmpdir "/tmp"
+#endif
             result = P_tmpdir;
         }
         // Check that it exists and is a directory.
         struct stat st;
         int ret = android_stat(result.c_str(), &st);
         if (ret < 0 || !S_ISDIR(st.st_mode)) {
-            LOG(FATAL) << "Can't find temporary path: ["
-                    << result.c_str() << "]";
+            LOG(FATAL) << "Can't find temporary path: [" << result.c_str()
+                       << "]";
         }
         // Ensure there is a trailing directory separator.
         if (result.size() && result[result.size() - 1] != '/') {

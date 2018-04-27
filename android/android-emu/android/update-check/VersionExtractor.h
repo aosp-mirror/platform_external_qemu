@@ -20,9 +20,9 @@ class VersionExtractor : public IVersionExtractor {
 public:
     static const char* const kXmlNamespace;
 
-    virtual Versions extractVersions(StringView data) const override;
+    Versions extractVersions(StringView data) const override;
 
-    virtual Version getCurrentVersion() const override;
+    Version getCurrentVersion() const override;
 };
 
 }  // namespace update_check

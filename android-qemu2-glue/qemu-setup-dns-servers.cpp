@@ -27,7 +27,7 @@ extern "C" {
 
 #include <vector>
 
-#include <errno.h>
+#include <cerrno>
 
 #define MAX_DNS_SERVERS 4
 
@@ -68,7 +68,7 @@ static bool resolveHostNameToList(
     for (const auto& ip : list) {
         sockaddr_storage addr = {};
         if (sockaddr_storage_from_ipaddress(&addr, ip)) {
-            out->emplace_back(std::move(addr));
+            out->emplace_back(addr);
             count++;
         }
     }
@@ -87,7 +87,7 @@ bool qemu_android_emulation_setup_dns_servers(const char* dns_servers,
 
     if (!dns_servers || !dns_servers[0]) {
         // Empty list, use the default behaviour.
-        return 0;
+        return false;
     }
 
     std::vector<sockaddr_storage> server_addresses;
@@ -118,9 +118,9 @@ bool qemu_android_emulation_setup_dns_servers(const char* dns_servers,
         p = next_p;
     }
 
-    int count = static_cast<int>(server_addresses.size());
+    auto count = static_cast<int>(server_addresses.size());
     if (!count) {
-        return 0;
+        return false;
     }
 
     if (count > MAX_DNS_SERVERS) {

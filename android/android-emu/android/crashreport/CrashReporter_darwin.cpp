@@ -23,8 +23,8 @@
 
 #include <memory>
 
-#include <inttypes.h>
-#include <stdint.h>
+#include <cinttypes>
+#include <cstdint>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -40,19 +40,19 @@ class HostCrashReporter : public CrashReporter {
 public:
     HostCrashReporter() : CrashReporter(), mHandler() {}
 
-    virtual ~HostCrashReporter() {}
+    ~HostCrashReporter() override = default;
 
     bool attachCrashHandler(const CrashSystem::CrashPipe& crashpipe) override {
         if (mHandler) {
             return false;
         }
 
-        mHandler.reset(new google_breakpad::ExceptionHandler(
+        mHandler = std::make_unique<google_breakpad::ExceptionHandler>(
                 getDumpDir(), &HostCrashReporter::exceptionFilterCallback,
                 nullptr,  // no minidump callback
                 nullptr,  // no callback context
                 true,     // install signal handlers
-                crashpipe.mClient.c_str()));
+                crashpipe.mClient.c_str());
 
         return mHandler != nullptr;
     }

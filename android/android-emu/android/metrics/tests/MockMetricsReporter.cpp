@@ -11,6 +11,8 @@
 
 #include "android/metrics/tests/MockMetricsReporter.h"
 
+#include <utility>
+
 #include "android/metrics/NullMetricsWriter.h"
 
 namespace android {
@@ -23,13 +25,14 @@ MockMetricsReporter::MockMetricsReporter()
                       {},
                       {}) {}
 
-MockMetricsReporter::MockMetricsReporter(bool enabled,
-                                         MetricsWriter::Ptr writer,
-                                         base::StringView emulatorVersion,
-                                         base::StringView emulatorFullVersion,
-                                         base::StringView qemuVersion)
+MockMetricsReporter::MockMetricsReporter(
+        bool enabled,
+        MetricsWriter::Ptr writer,
+        const base::StringView& emulatorVersion,
+        const base::StringView& emulatorFullVersion,
+        const base::StringView& qemuVersion)
     : MetricsReporter(enabled,
-                      writer,
+                      std::move(writer),
                       emulatorVersion,
                       emulatorFullVersion,
                       qemuVersion) {}

@@ -292,7 +292,8 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
     }
 
     const auto buildProps = avdInfo_getBuildProperties(android_avdInfo);
-    android::base::IniFile ini((const char*)buildProps->data, buildProps->size);
+    android::base::IniFile ini(reinterpret_cast<const char*>(buildProps->data),
+                               buildProps->size);
     if (const int64_t buildTimestamp = ini.getInt64("ro.build.date.utc", 0)) {
         eventAvdInfo->set_build_timestamp(buildTimestamp);
         VERBOSE_PRINT(metrics, "AVD build timestamp %ld", buildTimestamp);
@@ -402,8 +403,7 @@ static void fillFeatureFlagState(android_studio::AndroidStudioEvent* event) {
 }
 
 void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
-    android_studio::AndroidStudioEvent* event =
-        static_cast<android_studio::AndroidStudioEvent*>(opaque);
+    auto* event = static_cast<android_studio::AndroidStudioEvent*>(opaque);
 
     event->mutable_product_details()->set_channel(
             toClearcutLogUpdateChannel(android::studio::updateChannel()));
@@ -418,11 +418,11 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     event->mutable_emulator_details()->set_guest_api_level(
             avdInfo_getApiLevel(android_avdInfo));
 
-    // TODO: Check that CpuAccelerator enum +1 is the same
+    // TODO(lfy): Check that CpuAccelerator enum +1 is the same
     // as the proto enum.
     event->mutable_emulator_details()->set_hypervisor(
-            (android_studio::EmulatorDetails::EmulatorHypervisor)
-            (android::GetCurrentCpuAccelerator() + 1));
+            static_cast<android_studio::EmulatorDetails::EmulatorHypervisor>(
+                    android::GetCurrentCpuAccelerator() + 1));
 
     fillFeatureFlagState(event);
 

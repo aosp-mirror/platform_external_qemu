@@ -19,7 +19,7 @@
 #include <QFileDialog>
 #include <QMimeData>
 #include <QPainter>
-
+#include <utility>
 static constexpr int kPageNoImage = 0;
 static constexpr int kPageImage = 1;
 
@@ -36,7 +36,7 @@ PosterImageWell::PosterImageWell(QWidget* parent)
     mUi->sizeSlider->setValue(mSliderValueScale, false);
 }
 
-void PosterImageWell::setPath(QString path) {
+void PosterImageWell::setPath(const QString& path) {
     // Ignore the return value and don't emit pathChanged.
     (void)setPathInternal(path);
 }
@@ -58,7 +58,7 @@ void PosterImageWell::setMinMaxSize(float minSize, float maxSize) {
 }
 
 void PosterImageWell::setStartingDirectory(QString startingDirectory) {
-    mStartingDirectory = startingDirectory;
+    mStartingDirectory = std::move(startingDirectory);
 }
 
 void PosterImageWell::dragEnterEvent(QDragEnterEvent* event) {

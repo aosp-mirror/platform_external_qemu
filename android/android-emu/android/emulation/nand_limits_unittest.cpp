@@ -13,9 +13,9 @@
 
 #include <gtest/gtest.h>
 
-#include <stddef.h>
+#include <cstddef>
 
-#define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 TEST(NandLimits,Parse) {
     static const struct Data {

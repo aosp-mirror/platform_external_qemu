@@ -50,7 +50,7 @@ void Percentiles::addSample(double val) {
         mBuckets.back().value = val;
     }
 
-    for (int i = 1; i < (int)mBuckets.size() - 1; ++i) {
+    for (int i = 1; i < static_cast<int>(mBuckets.size()) - 1; ++i) {
         mBuckets[i].optimalCount += mBuckets[i].target;
         if (mBuckets[i].value > val) {
             ++mBuckets[i].count;
@@ -68,7 +68,7 @@ int Percentiles::targetCount() const {
 }
 
 base::Optional<double> Percentiles::target(int index) const {
-    if (index < 0 || index >= (int)mTargets.size()) {
+    if (index < 0 || index >= static_cast<int>(mTargets.size())) {
         return {};
     }
     return mTargets[index];
@@ -81,7 +81,7 @@ base::Optional<double> Percentiles::calcValueForTarget(double target) {
 }
 
 base::Optional<double> Percentiles::calcValueForTargetNo(int targetNo) {
-    if (targetNo < 0 || targetNo >= (int)mTargets.size()) {
+    if (targetNo < 0 || targetNo >= static_cast<int>(mTargets.size())) {
         return {};
     }
     if (mCount <= mRawDataSize) {
@@ -134,12 +134,12 @@ void Percentiles::createBucketsFromRawData() {
     int currentBucketIndex = 1;
     for (const double t : mTargets) {
         double target = (last + t) / 2;
-        auto index = (int)(target * mRawDataSize);
+        auto index = static_cast<int>(target * mRawDataSize);
         mBuckets[currentBucketIndex] =
                 Bucket{target, mRawData[index], index, mRawDataSize};
         ++currentBucketIndex;
         target = t;
-        index = (int)(target * mRawDataSize);
+        index = static_cast<int>(target * mRawDataSize);
         mBuckets[currentBucketIndex] =
                 Bucket{target, mRawData[index], index, mRawDataSize};
         currentBucketIndex++;
@@ -147,7 +147,7 @@ void Percentiles::createBucketsFromRawData() {
     }
     assert(currentBucketIndex == (int)mTargets.size() * 2 + 1);
     double target = (1.0 + last) / 2;
-    auto index = (int)(target * mRawDataSize);
+    auto index = static_cast<int>(target * mRawDataSize);
     mBuckets[currentBucketIndex] =
             Bucket{target, mRawData[index], index, mRawDataSize};
     ++currentBucketIndex;
@@ -162,7 +162,7 @@ void Percentiles::createBucketsFromRawData() {
 
 void Percentiles::interpolateIfNecessary() {
     assert(mBuckets.size() > 2);
-    for (int i = 1; i < (int)mBuckets.size() - 1; i++) {
+    for (int i = 1; i < static_cast<int>(mBuckets.size()) - 1; i++) {
         Bucket& b = mBuckets[i];
         const Bucket& prev = mBuckets[i - 1];
         const Bucket& next = mBuckets[i + 1];
@@ -199,7 +199,7 @@ void Percentiles::updateBucket(Percentiles::Bucket* b,
         }
         b->value = newValue;
     }
-    b->count += (int64_t)d;
+    b->count += static_cast<int64_t>(d);
 }
 
 }  // namespace metrics

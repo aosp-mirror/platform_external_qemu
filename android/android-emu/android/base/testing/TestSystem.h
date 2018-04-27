@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <utility>
 #include "android/base/Log.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
@@ -48,10 +49,10 @@ namespace base {
 //
 class TestSystem : public System {
 public:
-    TestSystem(StringView launcherDir,
+    TestSystem(const StringView& launcherDir,
                int hostBitness,
-               StringView homeDir = "/home",
-               StringView appDataDir = "")
+               const StringView& homeDir = "/home",
+               const StringView& appDataDir = "")
         : mProgramDir(launcherDir),
           mProgramSubdir(""),
           mLauncherDir(launcherDir),
@@ -61,29 +62,27 @@ public:
           mHostBitness(hostBitness),
           mIsRemoteSession(false),
           mRemoteSessionType(),
-          mTempDir(NULL),
+          mTempDir(nullptr),
           mTempRootPrefix(),
           mEnvPairs(),
           mPrevSystem(System::setForTesting(this)),
           mTimes(),
-          mShellFunc(NULL),
-          mShellOpaque(NULL),
-          mUnixTime(),
-          mPid() {
-          }
+          mShellFunc(nullptr),
+          mShellOpaque(nullptr),
+          mUnixTime() {}
 
-    virtual ~TestSystem() {
+    ~TestSystem() override {
         System::setForTesting(mPrevSystem);
         delete mTempDir;
     }
 
-    virtual const std::string& getProgramDirectory() const override {
+    const std::string& getProgramDirectory() const override {
         return mProgramDir;
     }
 
     // Set directory of currently executing binary.  This must be a subdirectory
     // of mLauncherDir and specified relative to mLauncherDir
-    void setProgramSubDir(StringView programSubDir) {
+    void setProgramSubDir(const StringView& programSubDir) {
         mProgramSubdir = programSubDir;
         if (programSubDir.empty()) {
             mProgramDir = getLauncherDirectory();
@@ -93,7 +92,7 @@ public:
         }
     }
 
-    virtual const std::string& getLauncherDirectory() const override {
+    const std::string& getLauncherDirectory() const override {
         if (mLauncherDir.size()) {
             return mLauncherDir;
         } else {
@@ -101,43 +100,45 @@ public:
         }
     }
 
-    void setLauncherDirectory(StringView launcherDir) {
+    void setLauncherDirectory(const StringView& launcherDir) {
         mLauncherDir = launcherDir;
         // Update directories that are suffixes of |mLauncherDir|.
         setProgramSubDir(mProgramSubdir);
     }
 
-    virtual const std::string& getHomeDirectory() const override { return mHomeDir; }
+    const std::string& getHomeDirectory() const override { return mHomeDir; }
 
-    void setHomeDirectory(StringView homeDir) { mHomeDir = homeDir; }
+    void setHomeDirectory(const StringView& homeDir) { mHomeDir = homeDir; }
 
-    virtual const std::string& getAppDataDirectory() const override {
+    const std::string& getAppDataDirectory() const override {
         return mAppDataDir;
     }
 
-    void setAppDataDirectory(StringView appDataDir) {
+    void setAppDataDirectory(const StringView& appDataDir) {
         mAppDataDir = appDataDir;
     }
 
-    virtual std::string getCurrentDirectory() const override { return mCurrentDir; }
+    std::string getCurrentDirectory() const override { return mCurrentDir; }
 
     // Set current directory during unit-testing.
-    void setCurrentDirectoryForTesting(StringView path) { mCurrentDir = path; }
+    void setCurrentDirectoryForTesting(const StringView& path) {
+        mCurrentDir = path;
+    }
 
-    virtual int getHostBitness() const override { return mHostBitness; }
+    int getHostBitness() const override { return mHostBitness; }
 
-    virtual OsType getOsType() const override { return mOsType; }
+    OsType getOsType() const override { return mOsType; }
 
-    virtual std::string getOsName() override { return mOsName; }
+    std::string getOsName() override { return mOsName; }
 
-    virtual bool isRunningUnderWine() const override { return mUnderWine; }
+    bool isRunningUnderWine() const override { return mUnderWine; }
 
     void setRunningUnderWine(bool underWine) { mUnderWine = underWine; }
 
-    virtual Pid getCurrentProcessId() const override { return mPid; }
+    Pid getCurrentProcessId() const override { return mPid; }
 
-    virtual WaitExitResult
-    waitForProcessExit(int pid, Duration timeoutMs) const override {
+    WaitExitResult waitForProcessExit(int pid,
+                                      Duration timeoutMs) const override {
         return WaitExitResult::Exited;
     }
 
@@ -145,7 +146,7 @@ public:
 
     void setCpuCoreCount(int count) { mCoreCount = count; }
 
-    virtual MemUsage getMemUsage() const override {
+    MemUsage getMemUsage() const override {
         MemUsage res;
         res.resident = 4294967295ULL;
         res.resident_max = 4294967295ULL * 2;
@@ -160,7 +161,7 @@ public:
 
     void setOsType(OsType type) { mOsType = type; }
 
-    virtual std::string envGet(StringView varname) const override {
+    std::string envGet(StringView varname) const override {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const std::string& name = mEnvPairs[n];
             if (name == varname) {
@@ -170,7 +171,7 @@ public:
         return std::string();
     }
 
-    virtual std::vector<std::string> envGetAll() const override {
+    std::vector<std::string> envGetAll() const override {
         std::vector<std::string> res;
         for (size_t i = 0; i < mEnvPairs.size(); i += 2) {
             const std::string& name = mEnvPairs[i];
@@ -180,7 +181,7 @@ public:
         return res;
     }
 
-    virtual void envSet(StringView varname, StringView varvalue) override {
+    void envSet(StringView varname, StringView varvalue) override {
         // First, find if the name is in the array.
         int index = -1;
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
@@ -207,7 +208,7 @@ public:
         }
     }
 
-    virtual bool envTest(StringView varname) const override {
+    bool envTest(StringView varname) const override {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
             const std::string& name = mEnvPairs[n];
             if (name == varname) {
@@ -217,70 +218,65 @@ public:
         return false;
     }
 
-    virtual bool pathExists(StringView path) const override {
+    bool pathExists(StringView path) const override {
         return pathExistsInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsFile(StringView path) const override {
+    bool pathIsFile(StringView path) const override {
         return pathIsFileInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsDir(StringView path) const override {
+    bool pathIsDir(StringView path) const override {
         return pathIsDirInternal(toTempRoot(path));
     }
 
-    virtual bool pathIsLink(StringView path) const override {
+    bool pathIsLink(StringView path) const override {
         return pathIsLinkInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanRead(StringView path) const override {
+    bool pathCanRead(StringView path) const override {
         return pathCanReadInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanWrite(StringView path) const override {
+    bool pathCanWrite(StringView path) const override {
         return pathCanWriteInternal(toTempRoot(path));
     }
 
-    virtual bool pathCanExec(StringView path) const override {
+    bool pathCanExec(StringView path) const override {
         return pathCanExecInternal(toTempRoot(path));
     }
 
-    virtual bool deleteFile(StringView path) const override {
+    bool deleteFile(StringView path) const override {
         return deleteFileInternal(toTempRoot(path));
     }
 
-    virtual bool pathFileSize(StringView path,
-                              FileSize* outFileSize) const override {
+    bool pathFileSize(StringView path, FileSize* outFileSize) const override {
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
     }
 
-    virtual FileSize recursiveSize(StringView path) const override {
+    FileSize recursiveSize(StringView path) const override {
         return recursiveSizeInternal(toTempRoot(path));
     }
 
-    virtual bool pathFreeSpace(StringView path, FileSize* sizeInBytes) const override {
+    bool pathFreeSpace(StringView path, FileSize* sizeInBytes) const override {
         return pathFreeSpaceInternal(toTempRoot(path), sizeInBytes);
     }
 
-    virtual bool fileSize(int fd, FileSize* outFileSize) const override {
+    bool fileSize(int fd, FileSize* outFileSize) const override {
         return fileSizeInternal(fd, outFileSize);
     }
 
-    virtual Optional<std::string> which(StringView executable) const override {
-      return mWhich;
+    Optional<std::string> which(StringView executable) const override {
+        return mWhich;
     }
 
-    void setWhich(Optional<std::string> which) {
-      mWhich = which;
-    }
+    void setWhich(Optional<std::string> which) { mWhich = std::move(which); }
 
-    virtual Optional<Duration> pathCreationTime(
-            StringView path) const override {
+    Optional<Duration> pathCreationTime(StringView path) const override {
         return pathCreationTimeInternal(toTempRoot(path));
     }
 
-    virtual Optional<Duration> pathModificationTime(
-            StringView path) const override {
+    Optional<Duration> pathModificationTime(StringView path) const override {
         return pathModificationTimeInternal(toTempRoot(path));
     }
 
@@ -291,7 +287,7 @@ public:
         return diskKindInternal(fd);
     }
 
-    virtual std::vector<std::string> scanDirEntries(
+    std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const override {
         getTempRoot();  // make sure we have a temp root;
@@ -300,8 +296,8 @@ public:
         std::vector<std::string> result = scanDirInternal(newPath);
         if (fullPath) {
             std::string prefix = PathUtils::addTrailingDirSeparator(dirPath);
-            for (size_t n = 0; n < result.size(); ++n) {
-                result[n] = prefix + result[n];
+            for (auto& n : result) {
+                n = prefix + n;
             }
         }
         return result;
@@ -316,7 +312,7 @@ public:
         return mTempDir;
     }
 
-    virtual bool isRemoteSession(std::string* sessionType) const override {
+    bool isRemoteSession(std::string* sessionType) const override {
         if (!mIsRemoteSession) {
             return false;
         }
@@ -327,26 +323,26 @@ public:
     // Force the remote session type. If |sessionType| is NULL or empty,
     // this sets the session as local. Otherwise, |*sessionType| must be
     // a session type.
-    void setRemoteSessionType(StringView sessionType) {
+    void setRemoteSessionType(const StringView& sessionType) {
         mIsRemoteSession = !sessionType.empty();
         if (mIsRemoteSession) {
             mRemoteSessionType = sessionType;
         }
     }
 
-    virtual Times getProcessTimes() const override { return mTimes; }
+    Times getProcessTimes() const override { return mTimes; }
 
     void setProcessTimes(const Times& times) { mTimes = times; }
 
     // Type of a helper function that can be used during unit-testing to
     // receive the parameters of a runCommand() call. Register it
     // with setShellCommand().
-    typedef bool(ShellCommand)(void* opaque,
-                               const std::vector<std::string>& commandLine,
-                               System::Duration timeoutMs,
-                               System::ProcessExitCode* outExitCode,
-                               System::Pid* outChildPid,
-                               const std::string& outputFile);
+    using ShellCommand = bool(void*,
+                              const std::vector<std::string>&,
+                              System::Duration,
+                              System::ProcessExitCode*,
+                              System::Pid*,
+                              const std::string&);
 
     // Register a silent shell function. |shell| is the function callback,
     // and |shellOpaque| a user-provided pointer passed as its first parameter.
@@ -380,21 +376,16 @@ public:
             const std::vector<std::string>& commandLine,
             System::Duration timeoutMs = kInfinite,
             System::ProcessExitCode* outExitCode = nullptr) override {
-
         return {};
     }
 
-    virtual std::string getTempDir() const override { return "/tmp"; }
+    std::string getTempDir() const override { return "/tmp"; }
 
-    virtual time_t getUnixTime() const override {
-        return getUnixTimeUs() / 1000000;
-    }
+    time_t getUnixTime() const override { return getUnixTimeUs() / 1000000; }
 
-    virtual Duration getUnixTimeUs() const override {
-        return getHighResTimeUs();
-    }
+    Duration getUnixTimeUs() const override { return getHighResTimeUs(); }
 
-    virtual WallDuration getHighResTimeUs() const override {
+    WallDuration getHighResTimeUs() const override {
         if (mUnixTimeLive) {
             auto now = hostSystem()->getHighResTimeUs();
             mUnixTime += now - mUnixTimeLastQueried;
@@ -416,20 +407,18 @@ public:
         }
     }
 
-    virtual void sleepMs(unsigned n) const override {
+    void sleepMs(unsigned n) const override {
         // Don't sleep in tests, use the static functions from Thread class
         // if you need a delay (you don't!).
         Thread::yield();  // Add a small delay to mimic the intended behavior.
     }
 
-    virtual void sleepUs(unsigned n) const override {
-        sleepMs(n / 1000);
-    }
+    void sleepUs(unsigned n) const override { sleepMs(n / 1000); }
 
-    virtual void yield() const override { Thread::yield(); }
+    void yield() const override { Thread::yield(); }
 
 private:
-    std::string toTempRoot(StringView pathView) const {
+    std::string toTempRoot(const StringView& pathView) const {
         std::string path = pathView;
         if (!PathUtils::isAbsolute(path)) {
             auto currdir = getCurrentDirectory();

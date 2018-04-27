@@ -71,8 +71,8 @@ bool ApkInstaller::parseOutputForFailure(std::istream& stream,
             gotSuccess = true;
         } else if (!line.compare(0, 7, "Failure") ||
                    !line.compare(0, 6, "Failed")) {
-            auto openBrace = line.find("[");
-            auto closeBrace = line.find("]", openBrace + 1);
+            auto openBrace = line.find('[');
+            auto closeBrace = line.find(']', openBrace + 1);
             if (openBrace != string::npos && closeBrace != string::npos) {
                 *outErrorString =
                         line.substr(openBrace + 1, closeBrace - openBrace - 1);
@@ -106,8 +106,8 @@ bool ApkInstaller::parseOutputForFailure(std::istream& stream,
 }
 
 AdbCommandPtr ApkInstaller::install(
-        android::base::StringView apkFilePath,
-        ApkInstaller::ResultCallback resultCallback) {
+        const android::base::StringView& apkFilePath,
+        const ApkInstaller::ResultCallback& resultCallback) {
     if (!base::System::get()->pathCanRead(apkFilePath)) {
         resultCallback(Result::kApkPermissionsError, "");
         return nullptr;

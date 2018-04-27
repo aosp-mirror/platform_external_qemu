@@ -34,14 +34,14 @@ TEST(ConditionVariable, initAndSignal) {
 }
 
 struct TestThreadParams {
-    TestThreadParams() : mutex(), cv(), counter(0) { }
+    TestThreadParams() : mutex(), cv() {}
     Lock mutex;
     ConditionVariable cv;
-    int counter;
+    int counter{0};
 };
 
 static void* testThreadFunctionBasicWait(void* param) {
-    TestThreadParams* p = static_cast<TestThreadParams*>(param);
+    auto* p = static_cast<TestThreadParams*>(param);
 
     p->mutex.lock();
 
@@ -50,11 +50,11 @@ static void* testThreadFunctionBasicWait(void* param) {
     }
 
     p->mutex.unlock();
-    return NULL;
+    return nullptr;
 }
 
 static void* testThreadFunctionAutoLockWait(void* param) {
-    TestThreadParams* p = static_cast<TestThreadParams*>(param);
+    auto* p = static_cast<TestThreadParams*>(param);
 
     AutoLock lock(p->mutex);
 
@@ -62,9 +62,8 @@ static void* testThreadFunctionAutoLockWait(void* param) {
         p->cv.wait(&lock);
     }
 
-    return NULL;
+    return nullptr;
 }
-
 
 TEST(ConditionVariable, basicWaitSignal) {
     TestThreadParams p;
@@ -138,4 +137,3 @@ TEST(ConditionVariable, waitBroadcast) {
 
 }  // namespace base
 }  // namespace android
-

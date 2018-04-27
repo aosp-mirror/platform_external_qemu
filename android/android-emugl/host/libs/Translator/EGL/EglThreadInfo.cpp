@@ -32,14 +32,12 @@ private:
 
 }  // namespace
 
-EglThreadInfo::EglThreadInfo() :
-        m_err(EGL_SUCCESS), m_api(EGL_OPENGL_ES_API) {}
+EglThreadInfo::EglThreadInfo() = default;
 
 static emugl::LazyInstance<EglThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
 
-EglThreadInfo* EglThreadInfo::get(void)
-{
-    EglThreadInfo *ti = static_cast<EglThreadInfo*>(s_tls->get());
+EglThreadInfo* EglThreadInfo::get() {
+    auto* ti = static_cast<EglThreadInfo*>(s_tls->get());
     if (!ti) {
         ti = new EglThreadInfo();
         s_tls->set(ti);

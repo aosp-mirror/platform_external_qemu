@@ -11,8 +11,8 @@
 
 #include "android/base/files/Stream.h"
 
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -28,58 +28,55 @@ uint8_t Stream::getByte() {
 }
 
 void Stream::putBe16(uint16_t value) {
-    uint8_t b[2] = { (uint8_t)(value >> 8), (uint8_t)value };
+    uint8_t b[2] = {static_cast<uint8_t>(value >> 8),
+                    static_cast<uint8_t>(value)};
     write(b, 2U);
 }
 
 uint16_t Stream::getBe16() {
     uint8_t b[2] = { 0, 0 };
     read(b, 2U);
-    return ((uint16_t)b[0] << 8) | (uint16_t)b[1];
+    return (static_cast<uint16_t>(b[0]) << 8) | static_cast<uint16_t>(b[1]);
 }
 
 void Stream::putBe32(uint32_t value) {
-    uint8_t b[4] = {
-            (uint8_t)(value >> 24),
-            (uint8_t)(value >> 16),
-            (uint8_t)(value >> 8),
-            (uint8_t)value };
+    uint8_t b[4] = {static_cast<uint8_t>(value >> 24),
+                    static_cast<uint8_t>(value >> 16),
+                    static_cast<uint8_t>(value >> 8),
+                    static_cast<uint8_t>(value)};
     write(b, 4U);
 }
 
 uint32_t Stream::getBe32() {
     uint8_t b[4] = { 0, 0, 0, 0 };
     read(b, 4U);
-    return ((uint32_t)b[0] << 24) |
-           ((uint32_t)b[1] << 16) |
-           ((uint32_t)b[2] << 8) |
-           (uint32_t)b[3];
+    return (static_cast<uint32_t>(b[0]) << 24) |
+           (static_cast<uint32_t>(b[1]) << 16) |
+           (static_cast<uint32_t>(b[2]) << 8) | static_cast<uint32_t>(b[3]);
 }
 
 void Stream::putBe64(uint64_t value) {
-    uint8_t b[8] = {
-            (uint8_t)(value >> 56),
-            (uint8_t)(value >> 48),
-            (uint8_t)(value >> 40),
-            (uint8_t)(value >> 32),
-            (uint8_t)(value >> 24),
-            (uint8_t)(value >> 16),
-            (uint8_t)(value >> 8),
-            (uint8_t)value };
+    uint8_t b[8] = {static_cast<uint8_t>(value >> 56),
+                    static_cast<uint8_t>(value >> 48),
+                    static_cast<uint8_t>(value >> 40),
+                    static_cast<uint8_t>(value >> 32),
+                    static_cast<uint8_t>(value >> 24),
+                    static_cast<uint8_t>(value >> 16),
+                    static_cast<uint8_t>(value >> 8),
+                    static_cast<uint8_t>(value)};
     write(b, 8U);
 }
 
 uint64_t Stream::getBe64() {
     uint8_t b[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     read(b, 8U);
-    return ((uint64_t)b[0] << 56) |
-           ((uint64_t)b[1] << 48) |
-           ((uint64_t)b[2] << 40) |
-           ((uint64_t)b[3] << 32) |
-           ((uint64_t)b[4] << 24) |
-           ((uint64_t)b[5] << 16) |
-           ((uint64_t)b[6] << 8) |
-           (uint64_t)b[7];
+    return (static_cast<uint64_t>(b[0]) << 56) |
+           (static_cast<uint64_t>(b[1]) << 48) |
+           (static_cast<uint64_t>(b[2]) << 40) |
+           (static_cast<uint64_t>(b[3]) << 32) |
+           (static_cast<uint64_t>(b[4]) << 24) |
+           (static_cast<uint64_t>(b[5]) << 16) |
+           (static_cast<uint64_t>(b[6]) << 8) | static_cast<uint64_t>(b[7]);
 }
 
 void Stream::putFloat(float v) {
@@ -100,7 +97,7 @@ float Stream::getFloat() {
     return u.f;
 }
 
-void Stream::putString(StringView str) {
+void Stream::putString(const StringView& str) {
     this->putBe32(str.size());
     this->write(str.data(), str.size());
 }

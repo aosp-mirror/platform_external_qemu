@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace {
 
@@ -38,7 +38,7 @@ public:
         return result;
     }
 
-    ~RamdiskExtractorTest() {
+    ~RamdiskExtractorTest() override {
         if (!mTempFilePath.empty()) {
             HANDLE_EINTR(unlink(mTempFilePath.c_str()));
         }
@@ -55,7 +55,7 @@ private:
 TEST_F(RamdiskExtractorTest, FindFoo) {
     static const char kExpected[] = "Hello World!\n";
     static const size_t kExpectedSize = sizeof(kExpected) - 1U;
-    char* out = NULL;
+    char* out = nullptr;
     size_t outSize = 0;
 
     EXPECT_TRUE(fillData(kTestRamdiskImage, kTestRamdiskImageSize));
@@ -69,7 +69,7 @@ TEST_F(RamdiskExtractorTest, FindFoo) {
 TEST_F(RamdiskExtractorTest, FindBar2) {
     static const char kExpected[] = "La vie est un long fleuve tranquille\n";
     static const size_t kExpectedSize = sizeof(kExpected) - 1U;
-    char* out = NULL;
+    char* out = nullptr;
     size_t outSize = 0;
 
     EXPECT_TRUE(fillData(kTestRamdiskImage, kTestRamdiskImageSize));
@@ -83,7 +83,7 @@ TEST_F(RamdiskExtractorTest, FindBar2) {
 TEST_F(RamdiskExtractorTest, FindZoo) {
     static const char kExpected[] = "Meow!!\n";
     static const size_t kExpectedSize = sizeof(kExpected) - 1U;
-    char* out = NULL;
+    char* out = nullptr;
     size_t outSize = 0;
 
     EXPECT_TRUE(fillData(kTestRamdiskImage, kTestRamdiskImageSize));
@@ -95,7 +95,7 @@ TEST_F(RamdiskExtractorTest, FindZoo) {
 }
 
 TEST_F(RamdiskExtractorTest, MissingFile) {
-    char* out = NULL;
+    char* out = nullptr;
     size_t outSize = 0;
     EXPECT_TRUE(fillData(kTestRamdiskImage, kTestRamdiskImageSize));
     EXPECT_FALSE(android_extractRamdiskFile(path(), "zoolander", &out, &outSize));

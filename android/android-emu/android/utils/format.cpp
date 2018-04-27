@@ -12,8 +12,8 @@
 #include "android/utils/format.h"
 
 #include <algorithm>
-#include <ctype.h>
-#include <stdint.h>
+#include <cctype>
+#include <cstdint>
 
 // append a character if there is room for it (and a terminating null)
 // always increment the result
@@ -27,7 +27,7 @@ size_t format_hex(char* dst, size_t dstLen, const void* srcVoid, size_t srcLen) 
     static const int kSpaceInterval = 4;
 
     const static char digitMap[] = "0123456789abcdef";
-    const uint8_t* src = (const uint8_t*)srcVoid;
+    const auto* src = static_cast<const uint8_t*>(srcVoid);
     for (size_t srcPos = 0; srcPos < srcLen; ++srcPos) {
         if (srcPos > 0 && (srcPos % kSpaceInterval) == 0) {
             // time to append a space
@@ -53,14 +53,14 @@ size_t format_printable(char* dst, size_t dstLen, const void* srcVoid, size_t sr
     // insert a space between every kSpaceInterval src bytes
     static const int kSpaceInterval = 8;
 
-    const uint8_t* src = (const uint8_t*)srcVoid;
+    const auto* src = static_cast<const uint8_t*>(srcVoid);
     for (size_t srcPos = 0; srcPos < srcLen; ++srcPos) {
         if (srcPos > 0 && (srcPos % kSpaceInterval) == 0) {
             // time to append a space
             DST_APPEND_SAFE(' ');
         }
         uint8_t b = src[srcPos];
-        char out = isprint(b) ? (char)b : '.';
+        char out = isprint(b) ? static_cast<char>(b) : '.';
         DST_APPEND_SAFE(out);
     }
 

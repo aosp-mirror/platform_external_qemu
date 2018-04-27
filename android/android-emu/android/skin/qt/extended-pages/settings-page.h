@@ -64,9 +64,9 @@ private slots:
 
     // HTTP Proxy
     void on_set_hostName_editingFinished();
-    void on_set_hostName_textChanged(QString /* unused */);
+    void on_set_hostName_textChanged(const QString& /* unused */);
     void on_set_loginName_editingFinished();
-    void on_set_loginName_textChanged(QString /* unused */);
+    void on_set_loginName_textChanged(const QString& /* unused */);
     void on_set_manualConfig_toggled(bool checked);
     void on_set_noProxy_toggled(bool checked);
     void on_set_portNumber_editingFinished();

@@ -20,10 +20,10 @@
 
 #include <string>
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
 
 #ifdef _WIN32
 #include "android/base/system/Win32Utils.h"
@@ -66,7 +66,7 @@ void explainSystemErrors(const char* msg) {
 #endif
 }
 
-static int runExt4Program(StringView program,
+static int runExt4Program(const StringView& program,
                           std::initializer_list<std::string> params) {
     std::string executable = System::get()->findBundledExecutable(program);
     if (executable.empty()) {
@@ -91,7 +91,7 @@ static int runExt4Program(StringView program,
     if (exitCode != 0) {
         fprintf(stderr,
                 "ERROR: resizing partition %s failed with exit code %d\n",
-                program.c_str(), (int)exitCode);
+                program.c_str(), static_cast<int>(exitCode));
         return exitCode;
     }
     return 0;
@@ -99,7 +99,7 @@ static int runExt4Program(StringView program,
 
 int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
     // sanity checks
-    if (partitionPath == NULL || !checkExt4PartitionSize(newByteSize)) {
+    if (partitionPath == nullptr || !checkExt4PartitionSize(newByteSize)) {
         return -1;
     }
 

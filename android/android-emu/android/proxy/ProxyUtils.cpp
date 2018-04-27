@@ -17,9 +17,9 @@
 
 #include <algorithm>
 
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 
 namespace android {
 namespace proxy {
@@ -27,7 +27,7 @@ namespace proxy {
 using android::base::IpAddress;
 using android::base::Dns;
 
-ParseResult parseConfigurationString(android::base::StringView str) {
+ParseResult parseConfigurationString(const android::base::StringView& str) {
     ParseResult result{};
 
     const char* pos = str.begin();

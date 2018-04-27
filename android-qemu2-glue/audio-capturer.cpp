@@ -54,7 +54,7 @@ static void my_destroy(void* opaque)
 
 static void my_capture(void* opaque, void* buf, int size)
 {
-    AudioState* state = (AudioState*)opaque;
+    auto* state = static_cast<AudioState*>(opaque);
     state->bytes += size;
 
     if (state->capturer != nullptr) {
@@ -118,8 +118,9 @@ int QemuAudioCaptureEngine::start(android::emulation::AudioCapturer* capturer)
 int QemuAudioCaptureEngine::stop(android::emulation::AudioCapturer* capturer)
 {
     auto stateIt = sGlobals->mCapturerMap.find(capturer);
-    if (stateIt == sGlobals->mCapturerMap.end())
+    if (stateIt == sGlobals->mCapturerMap.end()) {
         return -1;
+    }
 
     AudioState *state = &stateIt->second;
     int rc = -1;

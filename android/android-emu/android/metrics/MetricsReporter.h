@@ -66,9 +66,9 @@ public:
         std::function<bool (android_studio::AndroidStudioEvent*)>;
 
     static void start(const std::string& sessionId,
-                      base::StringView emulatorVersion,
-                      base::StringView emulatorFullVersion,
-                      base::StringView qemuVersion);
+                      const base::StringView& emulatorVersion,
+                      const base::StringView& emulatorFullVersion,
+                      const base::StringView& qemuVersion);
     static void stop(MetricsStopReason reason);
     static MetricsReporter& get();
 
@@ -77,7 +77,7 @@ public:
     // Wait for all pending reports to be finished.
     virtual void finishPendingReports() = 0;
 
-    void report(Callback callback);
+    void report(const Callback& callback);
     // Checks if the metrics reporting is enabled for the current reporter
     // instance.
     bool isReportingEnabled() const;
@@ -86,13 +86,14 @@ public:
     const std::string& sessionId() const;
     // Returns an anonymized copy of |s| string, using the Android Studio's
     // salt value + some hashing algorithm.
-    std::string anonymize(base::StringView s);
+    std::string anonymize(const base::StringView& s);
 
 protected:
-    MetricsReporter(bool enabled, MetricsWriter::Ptr writer,
-                    base::StringView emulatorVersion,
-                    base::StringView emulatorFullVersion,
-                    base::StringView qemuVersion);
+    MetricsReporter(bool enabled,
+                    MetricsWriter::Ptr writer,
+                    const base::StringView& emulatorVersion,
+                    const base::StringView& emulatorFullVersion,
+                    const base::StringView& qemuVersion);
     void sendToWriter(android_studio::AndroidStudioEvent* event);
 
 private:

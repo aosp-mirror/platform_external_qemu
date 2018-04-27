@@ -102,25 +102,24 @@ public:
     //          if |name| is empty the file gets some default generic name
     // |data| - a string of data to upload with the crash report
     // |replace| - replace all the data with the same name instead of appending
-    void attachData(android::base::StringView name,
-                    android::base::StringView data,
+    void attachData(const android::base::StringView& name,
+                    const android::base::StringView& data,
                     bool replace = false);
 
     // Same as attachData, but for binary data, so there is no text processing.
-    void attachBinaryData(android::base::StringView name,
-                          android::base::StringView data,
+    void attachBinaryData(const android::base::StringView& name,
+                          const android::base::StringView& data,
                           bool replace = true);
 
     // Pass some file to the crash reporter to upload it with the dump
-    bool attachFile(android::base::StringView sourceFullName,
-                    android::base::StringView destBaseName);
+    bool attachFile(const android::base::StringView& sourceFullName,
+                    const android::base::StringView& destBaseName);
 
     // Opens a descriptor to an attachment file, so one can write there
     // directly.
-    base::ScopedFd openDataAttachFile(
-            base::StringView name,
-            bool replace = false,
-            bool binary = false);
+    base::ScopedFd openDataAttachFile(const base::StringView& name,
+                                      bool replace = false,
+                                      bool binary = false);
 
     // The following two functions write a dump of current process state.
     // Both pass the |message| to the dump writer, so it is sent together with
@@ -159,5 +158,5 @@ private:
     HangDetector mHangDetector;
 };
 
-}  // crashreport
-}  // android
+}  // namespace crashreport
+}  // namespace android

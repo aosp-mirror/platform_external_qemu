@@ -19,9 +19,9 @@
 
 // #include <cutils/atomic.h>
 
-#include <stdint.h>
 #include <sys/types.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -58,44 +58,48 @@ inline bool operator _op_ (const wp<U>& o) const {              \
 template<typename T>
 class sp {
 public:
-	inline sp() : m_ptr(0) { }
+    inline sp() : m_ptr(nullptr) {}
 
-	sp(T* other);
-	sp(const sp<T>& other);
-	template<typename U> sp(U* other);
-	template<typename U> sp(const sp<U>& other);
+    sp(T* other);
+    sp(const sp<T>& other);
+    template <typename U>
+    sp(U* other);
+    template <typename U>
+    sp(const sp<U>& other);
 
-	~sp();
+    ~sp();
 
-	// Assignment
+    // Assignment
 
-	sp& operator = (T* other);
-	sp& operator = (const sp<T>& other);
+    sp& operator=(T* other);
+    sp& operator=(const sp<T>& other);
 
-	template<typename U> sp& operator = (const sp<U>& other);
-	template<typename U> sp& operator = (U* other);
+    template <typename U>
+    sp& operator=(const sp<U>& other);
+    template <typename U>
+    sp& operator=(U* other);
 
-	//! Special optimization for use by ProcessState (and nobody else).
-	void force_set(T* other);
+    //! Special optimization for use by ProcessState (and nobody else).
+    void force_set(T* other);
 
-	// Reset
+    // Reset
 
-	void clear();
+    void clear();
 
-	// Accessors
+    // Accessors
 
-	inline  T&      operator* () const  { return *m_ptr; }
-	inline  T*      operator-> () const { return m_ptr;  }
-	inline  T*      get() const         { return m_ptr; }
+    inline T& operator*() const { return *m_ptr; }
+    inline T* operator->() const { return m_ptr; }
+    inline T* get() const { return m_ptr; }
 
-	// Operators
+    // Operators
 
-	COMPARE(==)
-	COMPARE(!=)
-	COMPARE(>)
-	COMPARE(<)
-	COMPARE(<=)
-	COMPARE(>=)
+    COMPARE(==)
+    COMPARE(!=)
+    COMPARE(>)
+    COMPARE(<)
+    COMPARE(<=)
+    COMPARE(>=)
 
 private:
 	template<typename Y> friend class sp;

@@ -44,12 +44,14 @@ using ProtobufSaveCallback =
     std::function<ProtobufSaveResult(google::protobuf::io::FileOutputStream& stream,
                                      android::base::System::FileSize*)>;
 
-ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
-                                        android::base::System::FileSize* bytesUsed,
-                                        ProtobufLoadCallback loadCb);
-ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
-                                        android::base::System::FileSize* bytesUsed,
-                                        ProtobufSaveCallback saveCb);
+ProtobufLoadResult loadProtobufFileImpl(
+        const android::base::StringView& fileName,
+        android::base::System::FileSize* bytesUsed,
+        const ProtobufLoadCallback& loadCb);
+ProtobufSaveResult saveProtobufFileImpl(
+        const android::base::StringView& fileName,
+        android::base::System::FileSize* bytesUsed,
+        const ProtobufSaveCallback& saveCb);
 
 template <class T>
 ProtobufLoadResult loadProtobuf(android::base::StringView fileName,
@@ -80,7 +82,10 @@ ProtobufSaveResult saveProtobuf(android::base::StringView fileName,
             [&toSave](google::protobuf::io::FileOutputStream& stream,
                       android::base::System::FileSize* bytesUsed) {
                if (toSave.SerializeToZeroCopyStream(&stream)) {
-                   if (bytesUsed) *bytesUsed = (android::base::System::FileSize)stream.ByteCount();
+                   if (bytesUsed)
+                       *bytesUsed =
+                               static_cast<android::base::System::FileSize>(
+                                       stream.ByteCount());
                    return ProtobufSaveResult::Success;
                } else {
                    return ProtobufSaveResult::Failure;
@@ -88,5 +93,5 @@ ProtobufSaveResult saveProtobuf(android::base::StringView fileName,
             });
 }
 
-} // namespace android
-} // namespace protobuf
+}  // namespace protobuf
+}  // namespace android

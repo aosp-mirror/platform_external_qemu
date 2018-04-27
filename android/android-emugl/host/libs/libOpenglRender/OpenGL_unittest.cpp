@@ -41,7 +41,7 @@ using namespace gltest;
 
 class GLTest : public ::testing::Test {
 protected:
-    virtual void SetUp() {
+    void SetUp() override {
         const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
         const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
         EXPECT_TRUE(egl != nullptr);
@@ -54,7 +54,7 @@ protected:
         egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
     }
 
-    virtual void TearDown() {
+    void TearDown() override {
         const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
         egl->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         destroyContext(m_display, m_context);
@@ -71,16 +71,16 @@ protected:
 class SnapshotTest : public GLTest {
 public:
     void doSnapshot() {
-        // TODO: use Translator snapshot instead of libGLSnapshot
+        // TODO(lfy): use Translator snapshot instead of libGLSnapshot
         // const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
         // mSnap.save();
-        // mEGL->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-        // destroyContext(m_display, m_context);
+        // mEGL->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+        // EGL_NO_CONTEXT); destroyContext(m_display, m_context);
         // destroySurface(m_display, m_surface);
         // m_surface = pbufferSurface(m_display, m_config, mWidth, mHeight);
-        // m_context = createContext(m_display, m_config, mMajorVersion, mMinorVersion);
-        // mEGL->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
-        // mSnap.restore();
+        // m_context = createContext(m_display, m_config, mMajorVersion,
+        // mMinorVersion); mEGL->eglMakeCurrent(m_display, m_surface, m_surface,
+        // m_context); mSnap.restore();
     }
 };
 

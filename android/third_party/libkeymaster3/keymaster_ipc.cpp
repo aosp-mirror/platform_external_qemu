@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// TODO: add guard in header
+// TODO(bohu): add guard in header
 extern "C" {
 #include <stdlib.h>
 }
@@ -66,8 +66,9 @@ static long do_dispatch(void (AndroidKeymaster::*operation)(const Request&, Resp
     const uint8_t* payload = msg->payload;
     Request req;
     req.message_version = message_version;
-    if (!req.Deserialize(&payload, msg->payload + payload_size))
+    if (!req.Deserialize(&payload, msg->payload + payload_size)) {
         return ERR_NOT_VALID;
+    }
     // req.dump(stdout);
     // fflush(stdout);
 

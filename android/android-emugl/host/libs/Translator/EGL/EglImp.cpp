@@ -41,9 +41,9 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <cstdio>
 
 #define MAJOR          1
 #define MINOR          4
@@ -60,7 +60,7 @@ static bool unbindAndDestroyAuxiliaryContext(
 
 #define tls_thread  EglThreadInfo::get()
 
-EglGlobalInfo* g_eglInfo = NULL;
+EglGlobalInfo* g_eglInfo = nullptr;
 emugl::Mutex  s_eglLock;
 emugl::Mutex  s_surfaceDestroyLock;
 
@@ -105,26 +105,36 @@ EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
-        {"eglCreateImageKHR" ,
-                (__eglMustCastToProperFunctionPointerType)eglCreateImageKHR },
+        {"eglCreateImageKHR",
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglCreateImageKHR)},
         {"eglDestroyImageKHR",
-                (__eglMustCastToProperFunctionPointerType)eglDestroyImageKHR },
-        {"eglCreateSyncKHR" ,
-                (__eglMustCastToProperFunctionPointerType)eglCreateSyncKHR },
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglDestroyImageKHR)},
+        {"eglCreateSyncKHR",
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglCreateSyncKHR)},
         {"eglClientWaitSyncKHR",
-                (__eglMustCastToProperFunctionPointerType)eglClientWaitSyncKHR },
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglClientWaitSyncKHR)},
         {"eglDestroySyncKHR",
-                (__eglMustCastToProperFunctionPointerType)eglDestroySyncKHR },
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglDestroySyncKHR)},
         {"eglGetMaxGLESVersion",
-                (__eglMustCastToProperFunctionPointerType)eglGetMaxGLESVersion },
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglGetMaxGLESVersion)},
         {"eglWaitSyncKHR",
-                (__eglMustCastToProperFunctionPointerType)eglWaitSyncKHR },
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglWaitSyncKHR)},
         {"eglBlitFromCurrentReadBufferANDROID",
-                (__eglMustCastToProperFunctionPointerType)eglBlitFromCurrentReadBufferANDROID },
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglBlitFromCurrentReadBufferANDROID)},
         {"eglSetImageFenceANDROID",
-                (__eglMustCastToProperFunctionPointerType)eglSetImageFenceANDROID },
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglSetImageFenceANDROID)},
         {"eglWaitImageFenceANDROID",
-                (__eglMustCastToProperFunctionPointerType)eglWaitImageFenceANDROID },
+         reinterpret_cast<__eglMustCastToProperFunctionPointerType>(
+                 eglWaitImageFenceANDROID)},
 };
 
 static const int s_eglExtensionsSize =
@@ -178,11 +188,11 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
             RETURN_ERROR(ret,EGL_BAD_CONFIG);                \
         }
 
-#define VALIDATE_SURFACE_RETURN(EGLSurface,ret,varName)      \
-        SurfacePtr varName = dpy->getSurface(EGLSurface);    \
-        if(!varName.get()) {                                 \
-            RETURN_ERROR(ret,EGL_BAD_SURFACE);               \
-        }
+#define VALIDATE_SURFACE_RETURN(EGLSurface, ret, varName) \
+    SurfacePtr varName = dpy->getSurface(EGLSurface);     \
+    if (!(varName).get()) {                               \
+        RETURN_ERROR(ret, EGL_BAD_SURFACE);               \
+    }
 
 #define VALIDATE_CONTEXT_RETURN(EGLContext,ret)              \
         ContextPtr ctx = dpy->getContext(EGLContext);        \
@@ -306,8 +316,8 @@ EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
 }
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
-    EglDisplay* dpy = NULL;
-    EglOS::Display* internalDisplay = NULL;
+    EglDisplay* dpy = nullptr;
+    EglOS::Display* internalDisplay = nullptr;
 
     initGlobalInfo();
 
@@ -334,14 +344,14 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
     emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(
             libName, error, errorSize);
     if (!libGLES) {
-        return NULL;
+        return nullptr;
     }
-    __translator_getGLESIfaceFunc func =  (__translator_getGLESIfaceFunc)
-            libGLES->findSymbol(TRANSLATOR_GETIFACE_NAME);
+    auto func = reinterpret_cast<__translator_getGLESIfaceFunc>(
+            libGLES->findSymbol(TRANSLATOR_GETIFACE_NAME));
     if (!func) {
         snprintf(error, errorSize, "Missing symbol %s",
                  TRANSLATOR_GETIFACE_NAME);
-        return NULL;
+        return nullptr;
     }
     return func;
 }
@@ -361,7 +371,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
     if(major) *major = MAJOR;
     if(minor) *minor = MINOR;
 
-    __translator_getGLESIfaceFunc func  = NULL;
+    __translator_getGLESIfaceFunc func = nullptr;
     int renderableType = EGL_OPENGL_ES_BIT;
 
     g_eglInfo->setEglIface(&s_eglIface);
@@ -431,7 +441,7 @@ EGLAPI const char * EGLAPIENTRY eglQueryString(EGLDisplay display, EGLint name) 
                                     "EGL_KHR_gl_texture_2D_image "
                                     "EGL_ANDROID_recordable ";
     if(!EglValidate::stringName(name)) {
-        RETURN_ERROR(NULL,EGL_BAD_PARAMETER);
+        RETURN_ERROR(nullptr, EGL_BAD_PARAMETER);
     }
     switch(name) {
     case EGL_VENDOR:
@@ -441,7 +451,7 @@ EGLAPI const char * EGLAPIENTRY eglQueryString(EGLDisplay display, EGLint name) 
     case EGL_EXTENSIONS:
         return extensions;
     }
-    return NULL;
+    return nullptr;
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglGetConfigs(EGLDisplay display, EGLConfig *configs,
@@ -451,7 +461,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglGetConfigs(EGLDisplay display, EGLConfig *confi
         RETURN_ERROR(EGL_FALSE,EGL_BAD_PARAMETER);
     }
 
-    if(configs == NULL) {
+    if (configs == nullptr) {
         *num_config = dpy->nConfigs();
     } else {
         *num_config = dpy->getConfigs(configs,config_size);
@@ -764,13 +774,16 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
             }
         }
     }
-    EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,conformant,depth_size,
-                    frame_buffer_level,0,0,0,native_renderable,renderable_type,0,native_visual_type,
-                    sample_buffers_num, samples_per_pixel,stencil_size,luminance_size,wanted_buffer_size,
-                    surface_type,transparent_type,trans_red_val,trans_green_val,trans_blue_val,recordable_android, framebuffer_target_android,
-                    NULL);
-    for (size_t i = 0; i < wanted_attribs.size(); i++) {
-        dummy.addWantedAttrib(wanted_attribs[i]);
+    EglConfig dummy(red_size, green_size, blue_size, alpha_size, caveat,
+                    conformant, depth_size, frame_buffer_level, 0, 0, 0,
+                    native_renderable, renderable_type, 0, native_visual_type,
+                    sample_buffers_num, samples_per_pixel, stencil_size,
+                    luminance_size, wanted_buffer_size, surface_type,
+                    transparent_type, trans_red_val, trans_green_val,
+                    trans_blue_val, recordable_android,
+                    framebuffer_target_android, nullptr);
+    for (int wanted_attrib : wanted_attribs) {
+        dummy.addWantedAttrib(wanted_attrib);
     }
     *num_config = dpy->chooseConfigs(dummy,configs,config_size);
     CHOOSE_CONFIG_DLOG("eglChooseConfig: Success(EGL_TRUE). Num configs returned:%d", *num_config);
@@ -846,8 +859,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
     }
 
     EGLint width, height, largest, texTarget, texFormat;
-    EglPbufferSurface* tmpPbSurfacePtr =
-            static_cast<EglPbufferSurface*>(pbSurface.get());
+    auto* tmpPbSurfacePtr = static_cast<EglPbufferSurface*>(pbSurface.get());
 
     tmpPbSurfacePtr->getDim(&width, &height, &largest);
     tmpPbSurfacePtr->getTexInfo(&texTarget, &texFormat);
@@ -856,8 +868,9 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
                                     height,
                                     texFormat == EGL_NO_TEXTURE,
                                     texTarget == EGL_NO_TEXTURE)) {
-        //TODO: RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have bad_value
-        RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);
+        // TODO(digit): RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have
+        // bad_value
+        RETURN_ERROR(EGL_NO_SURFACE, EGL_BAD_ATTRIBUTE);
     }
 
     EglOS::PbufferInfo pbinfo;
@@ -874,8 +887,9 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
     EglOS::Surface* pb = dpy->nativeType()->createPbufferSurface(
             cfg->nativeFormat(), &pbinfo);
     if(!pb) {
-        //TODO: RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have bad value
-        RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_ATTRIBUTE);
+        // TODO(digit): RETURN_ERROR(EGL_NO_SURFACE,EGL_BAD_VALUE); dont have
+        // bad value
+        RETURN_ERROR(EGL_NO_SURFACE, EGL_BAD_ATTRIBUTE);
     }
 
     tmpPbSurfacePtr->setNativePbuffer(pb);
@@ -987,7 +1001,7 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
         }
     }
 
-    // TODO: Investigate these ignored flags and see which are needed
+    // TODO(lfy): Investigate these ignored flags and see which are needed
     (void)context_flags;
     (void)reset_notification_strategy;
 
@@ -1018,7 +1032,7 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
     }
 
     const GLESiface* iface = g_eglInfo->getIface(glesVersion);
-    GLEScontext* glesCtx = NULL;
+    GLEScontext* glesCtx = nullptr;
     if(iface) {
         glesCtx = iface->createGLESContext(major_version, minor_version,
                 dpy->getGlobalNameSpace(), stream);
@@ -1059,7 +1073,8 @@ EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig con
 
 EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list,
                                              android::base::Stream *stream) {
-    return eglCreateOrLoadContext(display, (EGLConfig)0, (EGLContext)0, attrib_list, stream);
+    return eglCreateOrLoadContext(display, (EGLConfig) nullptr,
+                                  (EGLContext) nullptr, attrib_list, stream);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyContext(EGLDisplay display, EGLContext context) {
@@ -1110,7 +1125,7 @@ static void sGetPbufferSurfaceGLProperties(
     // Blanket provide 24/8 depth/stencil format for now.
     *depthStencilFormat = GL_DEPTH24_STENCIL8;
 
-    // TODO: Support more if necessary, or even restrict
+    // TODO(lfy): Support more if necessary, or even restrict
     // EGL configs from host display to only these ones.
 }
 
@@ -1131,10 +1146,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
     if(releaseContext) { //releasing current context
        if(prevCtx.get()) {
            g_eglInfo->getIface(prevCtx->version())->flush();
-           if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
+           if (!dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr)) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
            }
-           thread->updateInfo(ContextPtr(),dpy,NULL,ShareGroupPtr(),dpy->getManager(prevCtx->version()));
+           thread->updateInfo(ContextPtr(), dpy, nullptr, ShareGroupPtr(),
+                              dpy->getManager(prevCtx->version()));
        }
     } else { //assining new context
         VALIDATE_CONTEXT(context);
@@ -1143,7 +1159,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
         EglSurface* newDrawPtr = newDrawSrfc.get();
         EglSurface* newReadPtr = newReadSrfc.get();
-        ContextPtr  newCtx     = ctx;
+        const ContextPtr& newCtx = ctx;
 
         if (newCtx.get() && prevCtx.get()) {
             if (newCtx.get() == prevCtx.get()) {
@@ -1190,7 +1206,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                         newCtx->nativeType())) {
                 RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
             }
-            //TODO: handle the following errors
+            // TODO(lfy): handle the following errors
             // EGL_BAD_CURRENT_SURFACE , EGL_CONTEXT_LOST  , EGL_BAD_ACCESS
 
             thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
@@ -1201,11 +1217,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
         if (newDrawPtr->type() == EglSurface::PBUFFER &&
             newReadPtr->type() == EglSurface::PBUFFER) {
-
-            EglPbufferSurface* tmpPbSurfacePtr =
-                static_cast<EglPbufferSurface*>(newDrawPtr);
-            EglPbufferSurface* tmpReadPbSurfacePtr =
-                static_cast<EglPbufferSurface*>(newReadPtr);
+            auto* tmpPbSurfacePtr = static_cast<EglPbufferSurface*>(newDrawPtr);
+            auto* tmpReadPbSurfacePtr =
+                    static_cast<EglPbufferSurface*>(newReadPtr);
 
             EGLint width, height, readWidth, readHeight;
             GLint colorFormat, depthStencilFormat, multisamples;
@@ -1284,12 +1298,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
 EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
     emugl::Mutex::AutoLock mutex(s_eglLock);
     ThreadInfo* thread = getThreadInfo();
-    EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
+    auto* dpy = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx    = thread->eglContext;
     if(dpy && ctx.get()){
         // This double check is required because a context might still be current after it is destroyed - in which case
         // its handle should be invalid, that is EGL_NO_CONTEXT should be returned even though the context is current
-        EGLContext c = (EGLContext)SafePointerFromUInt(ctx->getHndl());
+        auto c = static_cast<EGLContext>(SafePointerFromUInt(ctx->getHndl()));
         if(dpy->getContext(c).get())
         {
             return c;
@@ -1305,7 +1319,7 @@ EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
     }
 
     ThreadInfo* thread = getThreadInfo();
-    EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
+    auto* dpy = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx    = thread->eglContext;
 
     if(dpy && ctx.get()) {
@@ -1316,7 +1330,8 @@ EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
             // current after it is destroyed - in which case its handle should
             // be invalid, that is EGL_NO_SURFACE should be returned even
             // though the surface is current.
-            EGLSurface s = (EGLSurface)SafePointerFromUInt(surface->getHndl());
+            auto s = static_cast<EGLSurface>(
+                    SafePointerFromUInt(surface->getHndl()));
             surface = dpy->getSurface(s);
             if(surface.get())
             {
@@ -1348,18 +1363,18 @@ EGLAPI EGLenum EGLAPIENTRY eglQueryAPI(void) {
 
 EGLAPI EGLBoolean EGLAPIENTRY eglReleaseThread(void) {
     ThreadInfo* thread  = getThreadInfo();
-    EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
+    auto* dpy = static_cast<EglDisplay*>(thread->eglDisplay);
     return eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
 }
 
 EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
        eglGetProcAddress(const char *procname){
-    __eglMustCastToProperFunctionPointerType retVal = NULL;
+    __eglMustCastToProperFunctionPointerType retVal = nullptr;
 
     if(!strncmp(procname,"egl",3)) { //EGL proc
-        for(int i=0;i < s_eglExtensionsSize;i++){
-            if(strcmp(procname,s_eglExtensions[i].name) == 0){
-                retVal = s_eglExtensions[i].address;
+        for (auto s_eglExtension : s_eglExtensions) {
+            if (strcmp(procname, s_eglExtension.name) == 0) {
+                retVal = s_eglExtension.address;
                 break;
             }
         }
@@ -1376,7 +1391,7 @@ EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
 ImagePtr getEGLImage(unsigned int imageId)
 {
     ThreadInfo* thread  = getThreadInfo();
-    EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
+    auto* dpy = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx     = thread->eglContext;
     if (ctx.get()) {
         const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
@@ -1398,18 +1413,18 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 
     ThreadInfo* thread  = getThreadInfo();
     ShareGroupPtr sg = thread->shareGroup;
-    if (sg.get() != NULL) {
+    if (sg.get() != nullptr) {
         NamedObjectPtr globalTexObject = sg->getNamedObject(NamedObjectType::TEXTURE,
                                                             SafeUIntFromPointer(buffer));
         if (!globalTexObject) return EGL_NO_IMAGE_KHR;
 
         ImagePtr img( new EglImage() );
-        if (img.get() != NULL) {
+        if (img.get() != nullptr) {
             auto objData = sg->getObjectData(
                     NamedObjectType::TEXTURE, SafeUIntFromPointer(buffer));
             if (!objData) return EGL_NO_IMAGE_KHR;
 
-            TextureData *texData = (TextureData *)objData;
+            auto* texData = (TextureData*)objData;
             if(!texData->width || !texData->height) return EGL_NO_IMAGE_KHR;
             img->width = texData->width;
             img->height = texData->height;
@@ -1455,8 +1470,8 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, 
         return EGL_CONDITION_SATISFIED_KHR;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    GLenum gl_wait_result =
-        iface->clientWaitSync((GLsync)sync, GL_SYNC_FLUSH_COMMANDS_BIT, timeout);
+    GLenum gl_wait_result = iface->clientWaitSync(
+            static_cast<GLsync>(sync), GL_SYNC_FLUSH_COMMANDS_BIT, timeout);
     EGLint egl_wait_result;
 
     switch (gl_wait_result) {
@@ -1481,14 +1496,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
         return EGL_TRUE;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    iface->deleteSync((GLsync)sync);
+    iface->deleteSync(static_cast<GLsync>(sync));
     return EGL_TRUE;
 }
 
 EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display) {
     // 0: es2 1: es3.0 2: es3.1 3: es3.2
     VALIDATE_DISPLAY_RETURN(display, 0 /* gles2 */);
-    return (EGLint)dpy->getMaxGlesVersion();
+    return static_cast<EGLint>(dpy->getMaxGlesVersion());
 }
 
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
@@ -1496,13 +1511,13 @@ EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint
         return EGL_TRUE;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    iface->waitSync((GLsync)sync, 0, -1);
+    iface->waitSync(static_cast<GLsync>(sync), 0, -1);
     return EGL_TRUE;
 }
 
 EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay dpy, EGLImageKHR image) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    iface->blitFromCurrentReadBufferANDROID((GLeglImageOES)image);
+    iface->blitFromCurrentReadBufferANDROID(static_cast<GLeglImageOES>(image));
 }
 
 // Creates a fence checkpoint for operations that have happened to |image|.
@@ -1519,7 +1534,7 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
 
     if (img->sync) {
-        iface->deleteSync((GLsync)img->sync);
+        iface->deleteSync(img->sync);
         img->sync = nullptr;
     }
 
@@ -1530,7 +1545,7 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
 
 EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay dpy, void* fence) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    iface->waitSync((GLsync)fence, 0, -1);
+    iface->waitSync(static_cast<GLsync>(fence), 0, -1);
 }
 
 /*********************************************************************************/
@@ -1548,18 +1563,20 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext c
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream) {
     VALIDATE_DISPLAY(display);
     VALIDATE_CONTEXT(contex);
-    ctx->onSave((android::base::Stream*)stream);
+    ctx->onSave(static_cast<android::base::Stream*>(stream));
     return EGL_TRUE;
 }
 
 EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream) {
-    return eglCreateOrLoadContext(display, (EGLConfig)0, EGL_NO_CONTEXT, attrib_list, (android::base::Stream*)stream);
+    return eglCreateOrLoadContext(display, (EGLConfig) nullptr, EGL_NO_CONTEXT,
+                                  attrib_list,
+                                  static_cast<android::base::Stream*>(stream));
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream) {
     VALIDATE_DISPLAY(display);
     VALIDATE_CONTEXT(context);
-    ctx->postSave((android::base::Stream*)stream);
+    ctx->postSave(static_cast<android::base::Stream*>(stream));
     return EGL_TRUE;
 }
 
@@ -1567,14 +1584,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display,
         EGLConfig config, EGLStream stream) {
     VALIDATE_DISPLAY(display);
     VALIDATE_CONFIG(config);
-    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    auto* stm = static_cast<android::base::Stream*>(stream);
     stm->putBe32(cfg->id());
     return EGL_TRUE;
 }
 
 EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream) {
     VALIDATE_DISPLAY(display);
-    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    auto* stm = static_cast<android::base::Stream*>(stream);
     EGLint cfgId = stm->getBe32();
     EglConfig* cfg = dpy->getConfig(cfgId);
     if (!cfg) {
@@ -1590,10 +1607,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
                                                const void* textureSaver) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     assert(iface->saveTexture);
-    if (!iface || !iface->saveTexture)
+    if (!iface || !iface->saveTexture) {
         return true;
+    }
     VALIDATE_DISPLAY(display);
-    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    auto* stm = static_cast<android::base::Stream*>(stream);
     dpy->onSaveAllImages(
             stm,
             *static_cast<const android::snapshot::ITextureSaverPtr*>(textureSaver),
@@ -1607,10 +1625,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
                                                const void* textureLoader) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     assert(iface->createTexture);
-    if (!iface || !iface->createTexture)
+    if (!iface || !iface->createTexture) {
         return true;
+    }
     VALIDATE_DISPLAY(display);
-    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    auto* stm = static_cast<android::base::Stream*>(stream);
     dpy->onLoadAllImages(
             stm,
             *static_cast<const android::snapshot::ITextureLoaderPtr*>(textureLoader),
@@ -1620,7 +1639,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
 
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream) {
     VALIDATE_DISPLAY(display);
-    android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
+    auto* stm = static_cast<android::base::Stream*>(stream);
     dpy->postLoadAllImages(stm);
     return true;
 }
@@ -1641,7 +1660,7 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
         glesVersion = GLES_3_0;
         break;
     case 2:
-    case 3: // TODO: GLES 3.2 support?
+    case 3:  // TODO(yahan): GLES 3.2 support?
         glesVersion = GLES_3_1;
         break;
     }
@@ -1662,11 +1681,11 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages) {
     if (g_eglInfo->getIface(GLES_1_1) &&
             g_eglInfo->getIface(GLES_1_1)->fillGLESUsages) {
         g_eglInfo->getIface(GLES_1_1)->fillGLESUsages(
-            (android_studio::EmulatorGLESUsages*)usages);
+                static_cast<android_studio::EmulatorGLESUsages*>(usages));
     }
     if (g_eglInfo->getIface(GLES_2_0) &&
             g_eglInfo->getIface(GLES_2_0)->fillGLESUsages) {
         g_eglInfo->getIface(GLES_2_0)->fillGLESUsages(
-            (android_studio::EmulatorGLESUsages*)usages);
+                static_cast<android_studio::EmulatorGLESUsages*>(usages));
     }
 }

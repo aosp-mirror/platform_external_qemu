@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace android {
 namespace base {
@@ -53,7 +53,7 @@ public:
     // Call |Read| to read the data.
     // When created without a backing file, all |read|/|write*| operations will
     // fail unless |setBackingFile| is called to point to a valid file path.
-    explicit IniFile(StringView backingFilePath = {})
+    explicit IniFile(const StringView& backingFilePath = {})
         : mBackingFilePath(backingFilePath) {}
 
     // This constructor reads the data from memory at |data| of |size| bytes.
@@ -61,7 +61,7 @@ public:
 
     // Set a new backing file. This does not read data from the file. Call
     // |read| to refresh data from the new backing file.
-    void setBackingFile(StringView filePath);
+    void setBackingFile(const StringView& filePath);
     const std::string& getBackingFile() const { return mBackingFilePath; }
 
     // Reads data into IniFile from the the backing file, overwriting any
@@ -69,7 +69,7 @@ public:
     bool read(bool keepComments = true);
     // Same thing, but parses an already read file data.
     // Note: write operations fail unless there's a backing file set
-    bool readFromMemory(StringView data);
+    bool readFromMemory(const StringView& data);
 
     // Write the current IniFile to the backing file.
     bool write();
@@ -89,11 +89,11 @@ public:
     // Gets the number of (key,value) pairs in the file.
     int size() const;
     // Check if a certain key exists in the file.
-    bool hasKey(StringView key) const;
+    bool hasKey(const StringView& key) const;
 
     // Make sure the string can be used as a valid key/value
     static std::string makeValidKey(StringView str);
-    static std::string makeValidValue(StringView str);
+    static std::string makeValidValue(const StringView& str);
 
     // ///////////////////// Value Getters
     // //////////////////////////////////////
@@ -109,7 +109,7 @@ public:
     // - The disadvantage is that behaviour is undefined if we fail to parse the
     //   default value.
     std::string getString(const std::string& key,
-                          StringView defaultValue) const;
+                          const StringView& defaultValue) const;
     int getInt(const std::string& key, int defaultValue) const;
     int64_t getInt64(const std::string& key, int64_t defaultValue) const;
     double getDouble(const std::string& key, double defaultValue) const;
@@ -117,7 +117,8 @@ public:
     //     True: "1", "yes", "YES".
     //     False: "0", "no", "NO".
     bool getBool(const std::string& key, bool defaultValue) const;
-    bool getBool(const std::string& key, StringView defaultValueStr) const;
+    bool getBool(const std::string& key,
+                 const StringView& defaultValueStr) const;
     bool getBool(const std::string& key, const char* defaultValue) const {
         return getBool(key, StringView(defaultValue));
     }
@@ -126,11 +127,12 @@ public:
     // suffixes correspond to KiB, MiB and GiB multipliers.
     // Note: We consider 1K = 1024, not 1000.
     DiskSize getDiskSize(const std::string& key, DiskSize defaultValue) const;
-    DiskSize getDiskSize(const std::string& key, StringView defaultValue) const;
+    DiskSize getDiskSize(const std::string& key,
+                         const StringView& defaultValue) const;
 
     // ///////////////////// Value Setters
     // //////////////////////////////////////
-    void setString(const std::string& key, StringView value);
+    void setString(const std::string& key, const StringView& value);
     void setInt(const std::string& key, int value);
     void setInt64(const std::string& key, int64_t value);
     void setDouble(const std::string& key, double value);

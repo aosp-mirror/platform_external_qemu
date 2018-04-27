@@ -37,22 +37,27 @@ keymaster_error_t EcdsaKeymaster0KeyFactory::GenerateKey(const AuthorizationSet&
                                                          KeymasterKeyBlob* key_blob,
                                                          AuthorizationSet* hw_enforced,
                                                          AuthorizationSet* sw_enforced) const {
-    if (!key_blob || !hw_enforced || !sw_enforced)
+    if (!key_blob || !hw_enforced || !sw_enforced) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    if (!engine_ || !engine_->supports_ec())
-        return super::GenerateKey(key_description, key_blob, hw_enforced, sw_enforced);
+    if (!engine_ || !engine_->supports_ec()) {
+        return super::GenerateKey(key_description, key_blob, hw_enforced,
+                                  sw_enforced);
+    }
 
     keymaster_ec_curve_t ec_curve;
     uint32_t key_size;
-    keymaster_error_t error = GetCurveAndSize(key_description, &ec_curve, &key_size);
+    keymaster_error_t error =
+            GetCurveAndSize(key_description, &ec_curve, &key_size);
     if (error != KM_ERROR_OK) {
         return error;
     }
 
     KeymasterKeyBlob key_material;
-    if (!engine_->GenerateEcKey(key_size, &key_material))
+    if (!engine_->GenerateEcKey(key_size, &key_material)) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     // These tags are hardware-enforced.  Putting them in the hw_enforced set here will ensure that
     // context_->CreateKeyBlob doesn't put them in sw_enforced.
@@ -69,32 +74,41 @@ keymaster_error_t EcdsaKeymaster0KeyFactory::ImportKey(
     const AuthorizationSet& key_description, keymaster_key_format_t input_key_material_format,
     const KeymasterKeyBlob& input_key_material, KeymasterKeyBlob* output_key_blob,
     AuthorizationSet* hw_enforced, AuthorizationSet* sw_enforced) const {
-    if (!output_key_blob || !hw_enforced || !sw_enforced)
+    if (!output_key_blob || !hw_enforced || !sw_enforced) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    if (!engine_ || !engine_->supports_ec())
-        return super::ImportKey(key_description, input_key_material_format, input_key_material,
-                                output_key_blob, hw_enforced, sw_enforced);
+    if (!engine_ || !engine_->supports_ec()) {
+        return super::ImportKey(key_description, input_key_material_format,
+                                input_key_material, output_key_blob,
+                                hw_enforced, sw_enforced);
+    }
 
     AuthorizationSet authorizations;
     uint32_t key_size;
     keymaster_error_t error = UpdateImportKeyDescription(
-        key_description, input_key_material_format, input_key_material, &authorizations, &key_size);
-    if (error != KM_ERROR_OK)
+            key_description, input_key_material_format, input_key_material,
+            &authorizations, &key_size);
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     KeymasterKeyBlob imported_hw_key;
-    if (!engine_->ImportKey(input_key_material_format, input_key_material, &imported_hw_key))
+    if (!engine_->ImportKey(input_key_material_format, input_key_material,
+                            &imported_hw_key)) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
-    // These tags are hardware-enforced.  Putting them in the hw_enforced set here will ensure that
-    // context_->CreateKeyBlob doesn't put them in sw_enforced.
+    // These tags are hardware-enforced.  Putting them in the hw_enforced set
+    // here will ensure that context_->CreateKeyBlob doesn't put them in
+    // sw_enforced.
     hw_enforced->push_back(TAG_ALGORITHM, KM_ALGORITHM_EC);
     hw_enforced->push_back(TAG_KEY_SIZE, key_size);
     hw_enforced->push_back(TAG_ORIGIN, KM_ORIGIN_UNKNOWN);
 
-    return context_->CreateKeyBlob(authorizations, KM_ORIGIN_UNKNOWN, imported_hw_key,
-                                   output_key_blob, hw_enforced, sw_enforced);
+    return context_->CreateKeyBlob(authorizations, KM_ORIGIN_UNKNOWN,
+                                   imported_hw_key, output_key_blob,
+                                   hw_enforced, sw_enforced);
 }
 
 keymaster_error_t EcdsaKeymaster0KeyFactory::LoadKey(const KeymasterKeyBlob& key_material,
@@ -102,21 +116,27 @@ keymaster_error_t EcdsaKeymaster0KeyFactory::LoadKey(const KeymasterKeyBlob& key
                                                      const AuthorizationSet& hw_enforced,
                                                      const AuthorizationSet& sw_enforced,
                                                      UniquePtr<Key>* key) const {
-    if (!key)
+    if (!key) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    if (sw_enforced.GetTagCount(TAG_ALGORITHM) == 1)
-        return super::LoadKey(key_material, additional_params, hw_enforced, sw_enforced, key);
+    if (sw_enforced.GetTagCount(TAG_ALGORITHM) == 1) {
+        return super::LoadKey(key_material, additional_params, hw_enforced,
+                              sw_enforced, key);
+    }
 
-    unique_ptr<EC_KEY, EC_KEY_Delete> ec_key(engine_->BlobToEcKey(key_material));
-    if (!ec_key)
+    unique_ptr<EC_KEY, EC_KEY_Delete> ec_key(
+            engine_->BlobToEcKey(key_material));
+    if (!ec_key) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     keymaster_error_t error;
-    key->reset(new (std::nothrow)
-                   EcKeymaster0Key(ec_key.release(), hw_enforced, sw_enforced, &error));
-    if (error != KM_ERROR_OK)
+    key->reset(new (std::nothrow) EcKeymaster0Key(ec_key.release(), hw_enforced,
+                                                  sw_enforced, &error));
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     return KM_ERROR_OK;
 }
