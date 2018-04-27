@@ -70,17 +70,19 @@ bool VideoFrameSharer::attachProducer(std::unique_ptr<Producer> producer) {
 }
 
 void VideoFrameSharer::start() {
-    if (mVideoProducer)
+    if (mVideoProducer) {
         mVideoProducer->start();
+    }
 }
 
 void VideoFrameSharer::stop() {
-    if (mVideoProducer)
+    if (mVideoProducer) {
         mVideoProducer->stop();
+    }
 }
 
 bool VideoFrameSharer::marshallFrame(const Frame* frame) {
-    uint8_t* bPixels = (uint8_t*)mMemory.get() + sizeof(mVideo);
+    uint8_t* bPixels = static_cast<uint8_t*>(mMemory.get()) + sizeof(mVideo);
     const int cPixelBytes = getPixelBytes(mVideo);
     // We need to convert this to I420, otherwise the WebRTC engine
     // will get confused. So we do that here.
@@ -96,7 +98,7 @@ bool VideoFrameSharer::marshallFrame(const Frame* frame) {
         LOG(FATAL) << "Staging framebuffer too small,"
                    << required_framebuffer_size << " bytes required,"
                    << cPixelBytes << " provided";
-        return 0;
+        return false;
     }
 
     uint8_t* y_staging = bPixels;

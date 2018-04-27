@@ -11,7 +11,7 @@
 
 #include "android/emulation/qemud/android_qemud_sink.h"
 
-#include <string.h>
+#include <cstring>
 
 void qemud_sink_save(Stream* f, const QemudSink* s) {
     stream_put_be32(f, s->used);
@@ -33,11 +33,13 @@ void qemud_sink_reset(QemudSink* ss, int size, uint8_t* buffer) {
 int qemud_sink_fill(QemudSink* ss, const uint8_t** pmsg, int* plen) {
     int avail = ss->size - ss->used;
 
-    if (avail <= 0)
+    if (avail <= 0) {
         return 1;
+    }
 
-    if (avail > *plen)
+    if (avail > *plen) {
         avail = *plen;
+    }
 
     memcpy(ss->buff + ss->used, *pmsg, avail);
     *pmsg += avail;

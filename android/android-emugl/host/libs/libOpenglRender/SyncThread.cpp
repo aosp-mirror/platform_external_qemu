@@ -170,8 +170,8 @@ void SyncThread::doSyncContextInit() {
 void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     DPRINT("enter");
 
-    FenceSync* fenceSync =
-        FenceSync::getFromHandle((uint64_t)(uintptr_t)cmd->fenceSync);
+    FenceSync* fenceSync = FenceSync::getFromHandle(
+            static_cast<uint64_t>((uintptr_t)cmd->fenceSync));
 
     if (!fenceSync) {
         emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
@@ -262,7 +262,7 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
 SyncThread* SyncThread::getSyncThread() {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
-    if (!tInfo->syncThread.get()) {
+    if (!tInfo->syncThread) {
         DPRINT("starting a sync thread for render thread info=%p", tInfo);
         tInfo->createSyncThread();
     }

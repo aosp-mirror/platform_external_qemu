@@ -24,7 +24,7 @@
 #  include <pthread.h>
 #endif
 
-#include <assert.h>
+#include <cassert>
 
 namespace android {
 namespace base {
@@ -110,9 +110,7 @@ public:
 private:
     SRWLOCK mLock = SRWLOCK_INIT;
 #else  // !_WIN32
-    ReadWriteLock() {
-        ::pthread_rwlock_init(&mLock, NULL);
-    }
+    ReadWriteLock() { ::pthread_rwlock_init(&mLock, nullptr); }
     void lockRead() {
         ::pthread_rwlock_rdlock(&mLock);
     }

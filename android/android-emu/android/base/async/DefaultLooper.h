@@ -120,9 +120,9 @@ public:
 
         void fire();
 
-        void save(Stream* stream) const;
+        void save(Stream* stream) const override;
 
-        void load(Stream* stream);
+        void load(Stream* stream) override;
 
     private:
         Duration mDeadline;
@@ -153,7 +153,7 @@ public:
         Task(Looper* looper, Looper::Task::Callback&& callback,
              bool selfDeleting = false);
 
-        ~Task();
+        ~Task() override;
 
         void schedule() override;
         void cancel() override;
@@ -174,10 +174,10 @@ public:
     //
     int runWithDeadlineMs(Duration deadlineMs) override;
 
-    typedef std::list<Timer*> TimerList;
+    using TimerList = std::list<Timer*>;
     typedef std::unordered_map<Timer*, TimerList::iterator> TimerSet;
 
-    typedef std::list<FdWatch*> FdWatchList;
+    using FdWatchList = std::list<FdWatch*>;
     typedef std::unordered_map<FdWatch*, FdWatchList::iterator> FdWatchSet;
 
 protected:

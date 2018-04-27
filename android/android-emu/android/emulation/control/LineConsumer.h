@@ -53,5 +53,5 @@ private:
     DISALLOW_COPY_AND_ASSIGN(LineConsumer);
 };
 
-}  // emulation
-}  // android
+}  // namespace emulation
+}  // namespace android

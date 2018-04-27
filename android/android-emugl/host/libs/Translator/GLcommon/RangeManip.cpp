@@ -41,8 +41,9 @@ bool Range::rangeUnion(const Range& r,Range& rOut) const {
 }
 
 void RangeList::addRange(const Range& r) {
-    if(r.getSize())
+    if (r.getSize()) {
         list.push_back(r);
+    }
 }
 
 void RangeList::addRanges(const RangeList& rl) {
@@ -79,26 +80,31 @@ void RangeList::delRange(const Range& r,RangeList& deleted) {
     Range intersection;
     Range temp;
     // compare new rect to each and any of the rects on the list
-    for (int i=0;i<(int)list.size();i++) { // i must be signed for i-- below
-     // if there is intersection
-     if (r.rangeIntersection(list[i],intersection)) {
-             Range old=list[i];
-         // remove old as it is about to be split
-         erase(i);
-         i--;
-         if (intersection!=old) { // otherwise split:
-             //intersection on right side
-             if(old.getStart() != intersection.getStart()) {
-                 list.insert(list.begin(),Range(old.getStart(),intersection.getStart() - old.getStart()));
-             }
+    for (int i = 0; i < static_cast<int>(list.size());
+         i++) {  // i must be signed for i-- below
+        // if there is intersection
+        if (r.rangeIntersection(list[i], intersection)) {
+            Range old = list[i];
+            // remove old as it is about to be split
+            erase(i);
+            i--;
+            if (intersection != old) {  // otherwise split:
+                // intersection on right side
+                if (old.getStart() != intersection.getStart()) {
+                    list.insert(list.begin(),
+                                Range(old.getStart(), intersection.getStart() -
+                                                              old.getStart()));
+                }
 
-             //intersection on left side
-             if(old.getEnd() != intersection.getEnd()) {
-                 list.insert(list.begin(),Range(intersection.getEnd(),old.getEnd() - intersection.getEnd()));
-             }
-         }
-         deleted.addRange(intersection);
-     }
+                // intersection on left side
+                if (old.getEnd() != intersection.getEnd()) {
+                    list.insert(list.begin(),
+                                Range(intersection.getEnd(),
+                                      old.getEnd() - intersection.getEnd()));
+                }
+            }
+            deleted.addRange(intersection);
+        }
  }
 }
 
@@ -109,18 +115,18 @@ void RangeList::merge() {
     bool changed;
 
     do { // re-run if changed in last run
-        changed=0;
+        changed = false;
         // run for each combinations of two rects in the list
-        for (int i=0;i<(((int)list.size())-1) && !changed ;i++)
-        {
-            for (int j=i+1;j<(int)list.size() && !changed ;j++)
-            {
-               if (list[i].rangeUnion(list[j],temp)) {
+        for (int i = 0; i < ((static_cast<int>(list.size())) - 1) && !changed;
+             i++) {
+            for (int j = i + 1; j < static_cast<int>(list.size()) && !changed;
+                 j++) {
+                if (list[i].rangeUnion(list[j], temp)) {
                     // are them exactly one on left of the other
                     list[i] = temp;
                     erase(j);
-                    changed=1;
-               }
+                    changed = true;
+                }
             }
         }
     } while (changed);

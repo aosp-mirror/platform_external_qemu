@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <memory>
 
-#include <inttypes.h>
-#include <string.h>
+#include <cinttypes>
+#include <cstring>
 
 using android::base::StringFormat;
 
@@ -63,7 +63,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     params.addFormat("androidboot.hardware=%s",
                      isQemu2 ? "ranchu" : "goldfish");
 
-    // TODO: enable this with option
+    // TODO(bohu): enable this with option
     // params.addFormat("androidboot.logcat=*:D");
 
     if (isX86ish) {
@@ -101,9 +101,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     }
 
     // If qemu1, make sure GLDMA is disabled.
-    if (!isQemu2)
+    if (!isQemu2) {
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLDMA, false);
+    }
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if

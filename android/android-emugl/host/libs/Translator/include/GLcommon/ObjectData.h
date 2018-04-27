@@ -34,7 +34,7 @@ enum ObjectDataType {
 };
 
 class ObjectData;
-typedef emugl::SmartPtr<ObjectData> ObjectDataPtr;
+using ObjectDataPtr = emugl::SmartPtr<ObjectData>;
 
 extern NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType);
 
@@ -46,13 +46,14 @@ public:
     ObjectDataType getDataType() { return m_dataType; };
     virtual ~ObjectData() = default;
     virtual void onSave(android::base::Stream* stream, unsigned int globalName) const = 0;
-    typedef std::function<ObjectDataPtr(NamedObjectType p_type,
-            ObjectLocalName p_localName, android::base::Stream* stream)>
-                loadObject_t;
-    typedef std::function<const ObjectDataPtr(NamedObjectType,
-            ObjectLocalName)> const getObjDataPtr_t;
-    typedef std::function<int(NamedObjectType, ObjectLocalName)> const
-            getGlobalName_t;
+    using loadObject_t = std::function<ObjectDataPtr(NamedObjectType,
+                                                     ObjectLocalName,
+                                                     android::base::Stream*)>;
+    using getObjDataPtr_t =
+            const std::function<const ObjectDataPtr(NamedObjectType,
+                                                    ObjectLocalName)>;
+    using getGlobalName_t =
+            const std::function<int(NamedObjectType, ObjectLocalName)>;
     // postLoad: setup references after loading all ObjectData from snapshot
     // in one share group
     virtual void postLoad(const getObjDataPtr_t& getObjDataPtr);

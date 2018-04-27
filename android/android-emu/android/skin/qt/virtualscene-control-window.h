@@ -46,7 +46,7 @@ class VirtualSceneControlWindow : public QFrame {
 public:
     explicit VirtualSceneControlWindow(EmulatorQtWindow* emulatorWindow,
                                        ToolWindow* toolWindow);
-    virtual ~VirtualSceneControlWindow();
+    ~VirtualSceneControlWindow() override;
 
     void dockMainWindow();
     bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);

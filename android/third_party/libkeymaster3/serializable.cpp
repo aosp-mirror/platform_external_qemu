@@ -25,8 +25,9 @@
 namespace keymaster {
 
 uint8_t* append_to_buf(uint8_t* buf, const uint8_t* end, const void* data, size_t data_len) {
-    if (__pval(buf) + data_len < __pval(buf))  // Pointer wrap check
+    if (__pval(buf) + data_len < __pval(buf)) {  // Pointer wrap check
         return buf;
+    }
 
     if (buf + data_len <= end) {
         memcpy(buf, data, data_len);
@@ -36,11 +37,13 @@ uint8_t* append_to_buf(uint8_t* buf, const uint8_t* end, const void* data, size_
 }
 
 bool copy_from_buf(const uint8_t** buf_ptr, const uint8_t* end, void* dest, size_t size) {
-    if (__pval(*buf_ptr) + size < __pval(*buf_ptr))  // Pointer wrap check
+    if (__pval(*buf_ptr) + size < __pval(*buf_ptr)) {  // Pointer wrap check
         return false;
+    }
 
-    if (end < *buf_ptr + size)
+    if (end < *buf_ptr + size) {
         return false;
+    }
     memcpy(dest, *buf_ptr, size);
     *buf_ptr += size;
     return true;
@@ -48,22 +51,26 @@ bool copy_from_buf(const uint8_t** buf_ptr, const uint8_t* end, void* dest, size
 
 bool copy_size_and_data_from_buf(const uint8_t** buf_ptr, const uint8_t* end, size_t* size,
                                  UniquePtr<uint8_t[]>* dest) {
-    if (!copy_uint32_from_buf(buf_ptr, end, size))
+    if (!copy_uint32_from_buf(buf_ptr, end, size)) {
         return false;
+    }
 
-    if (__pval(*buf_ptr) + *size < __pval(*buf_ptr))  // Pointer wrap check
+    if (__pval(*buf_ptr) + *size < __pval(*buf_ptr)) {  // Pointer wrap check
         return false;
+    }
 
-    if (*buf_ptr + *size > end)
+    if (*buf_ptr + *size > end) {
         return false;
+    }
 
     if (*size == 0) {
         dest->reset();
         return true;
     }
     dest->reset(new (std::nothrow) uint8_t[*size]);
-    if (!dest->get())
+    if (!dest->get()) {
         return false;
+    }
     return copy_from_buf(buf_ptr, end, dest->get(), *size);
 }
 
@@ -71,8 +78,9 @@ bool Buffer::reserve(size_t size) {
     if (available_write() < size) {
         size_t new_size = buffer_size_ + size - available_write();
         uint8_t* new_buffer = new (std::nothrow) uint8_t[new_size];
-        if (!new_buffer)
+        if (!new_buffer) {
             return false;
+        }
         memcpy(new_buffer, buffer_.get() + read_position_, available_read());
         memset_s(buffer_.get(), 0, buffer_size_);
         buffer_.reset(new_buffer);
@@ -86,8 +94,9 @@ bool Buffer::reserve(size_t size) {
 bool Buffer::Reinitialize(size_t size) {
     Clear();
     buffer_.reset(new (std::nothrow) uint8_t[size]);
-    if (!buffer_.get())
+    if (!buffer_.get()) {
         return false;
+    }
     buffer_size_ = size;
     read_position_ = 0;
     write_position_ = 0;
@@ -96,11 +105,13 @@ bool Buffer::Reinitialize(size_t size) {
 
 bool Buffer::Reinitialize(const void* data, size_t data_len) {
     Clear();
-    if (__pval(data) + data_len < __pval(data))  // Pointer wrap check
+    if (__pval(data) + data_len < __pval(data)) {  // Pointer wrap check
         return false;
+    }
     buffer_.reset(new (std::nothrow) uint8_t[data_len]);
-    if (!buffer_.get())
+    if (!buffer_.get()) {
         return false;
+    }
     buffer_size_ = data_len;
     memcpy(buffer_.get(), data, data_len);
     read_position_ = 0;
@@ -120,16 +131,18 @@ size_t Buffer::available_read() const {
 }
 
 bool Buffer::write(const uint8_t* src, size_t write_length) {
-    if (available_write() < write_length)
+    if (available_write() < write_length) {
         return false;
+    }
     memcpy(buffer_.get() + write_position_, src, write_length);
     write_position_ += write_length;
     return true;
 }
 
 bool Buffer::read(uint8_t* dest, size_t read_length) {
-    if (available_read() < read_length)
+    if (available_read() < read_length) {
         return false;
+    }
     memcpy(dest, buffer_.get() + read_position_, read_length);
     read_position_ += read_length;
     return true;

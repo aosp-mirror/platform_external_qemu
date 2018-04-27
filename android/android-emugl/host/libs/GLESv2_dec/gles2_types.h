@@ -17,5 +17,5 @@
 #define _GL_2_TYPES_H_
 #include "gl_base_types.h"
 
-typedef void *GLvoidptr;
+using GLvoidptr = void*;
 #endif

@@ -69,8 +69,9 @@ public:
     MainLoopThread(StartFunction f, int argc, char** argv)
         : start_function(f), argc(argc), argv(argv) {}
     void run() Q_DECL_OVERRIDE {
-        if (start_function)
+        if (start_function) {
             start_function(argc, argv);
+        }
     }
 
 private:
@@ -85,7 +86,7 @@ class CustomInitProgressDialog : public QProgressDialog {
 public:
     using InitFunc = std::function<void(QProgressDialog*)>;
 
-    CustomInitProgressDialog(QWidget* parent, InitFunc initFunc)
+    CustomInitProgressDialog(QWidget* parent, const InitFunc& initFunc)
         : QProgressDialog(parent) {
         initFunc(this);
     }
@@ -263,7 +264,7 @@ private slots:
     void slot_clearInstance();
     void slot_fill(SkinSurface* s,
                    QRect rect,
-                   QColor color,
+                   const QColor& color,
                    QSemaphore* semaphore = NULL);
     void slot_getDevicePixelRatio(double* out_dpr,
                                   QSemaphore* semaphore = NULL);
@@ -292,12 +293,12 @@ private slots:
     void slot_setWindowOverlayForResize(int whichCorner, QSemaphore* semaphore = NULL);
     void slot_setWindowCursorResize(int whichCorner, QSemaphore* semaphore = NULL);
     void slot_setWindowCursorNormal(QSemaphore* semaphore = NULL);
-    void slot_setWindowTitle(QString title,
+    void slot_setWindowTitle(const QString& title,
                              QSemaphore* semaphore = NULL);
     void slot_showWindow(SkinSurface* surface,
                          QRect rect,
                          QSemaphore* semaphore = NULL);
-    void slot_runOnUiThread(RunOnUiThreadFunc f,
+    void slot_runOnUiThread(const RunOnUiThreadFunc& f,
                             QSemaphore* semaphore = NULL);
     void slot_updateRotation(SkinRotation rotation);
 
@@ -316,11 +317,12 @@ private slots:
 
     void slot_showMessage(QString text, Ui::OverlayMessageIcon icon,
                           int timeoutMs);
-    void slot_showMessageWithDismissCallback(QString text,
-                                             Ui::OverlayMessageIcon icon,
-                                             QString dismissText,
-                                             Ui::OverlayChildWidget::DismissFunc func,
-                                             int timeoutMs);
+    void slot_showMessageWithDismissCallback(
+            QString text,
+            Ui::OverlayMessageIcon icon,
+            const QString& dismissText,
+            Ui::OverlayChildWidget::DismissFunc func,
+            int timeoutMs);
 
 public slots:
     // Here are conventional slots that perform interesting high-level functions
@@ -363,16 +365,16 @@ private:
 
     void runAdbInstall(const QString& path);
     void installDone(android::emulation::ApkInstaller::Result result,
-                     android::base::StringView errorString);
+                     const android::base::StringView& errorString);
 
     static const int kPushProgressBarMax;
     void runAdbPush(const QList<QUrl>& urls);
     void adbPushProgress(double progress, bool done);
-    void adbPushDone(android::base::StringView filePath,
+    void adbPushDone(const android::base::StringView& filePath,
                      android::emulation::FilePusher::Result result);
 
     void runAdbShellPowerDownAndQuit();
-    void setVisibleExtent(QBitmap bitMap);
+    void setVisibleExtent(const QBitmap& bitMap);
     void getSkinPixmap(); // For masking the skin when frameless
 
     android::base::Looper* mLooper;

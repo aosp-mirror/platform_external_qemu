@@ -19,11 +19,14 @@ namespace metrics {
 
 AsyncMetricsReporter::AsyncMetricsReporter(
         MetricsWriter::Ptr writer,
-        base::StringView emulatorVersion,
-        base::StringView emulatorFullVersion,
-        base::StringView qemuVersion)
-    : MetricsReporter(true, std::move(writer),
-                      emulatorVersion, emulatorFullVersion, qemuVersion),
+        const base::StringView& emulatorVersion,
+        const base::StringView& emulatorFullVersion,
+        const base::StringView& qemuVersion)
+    : MetricsReporter(true,
+                      std::move(writer),
+                      emulatorVersion,
+                      emulatorFullVersion,
+                      qemuVersion),
       mWorkerThread([this]() { worker(); }) {
     D("created");
     mWorkerThread.start();

@@ -53,21 +53,21 @@ public:
 private:
     bool drawImpl(GLuint texture, float rotationDegrees, float dx, float dy, bool wantOverlay);
 
-    GLuint mVertexShader;
-    GLuint mFragmentShader;
-    GLuint mProgram;
-    GLint mPositionSlot;
-    GLint mInCoordSlot;
-    GLint mTextureSlot;
-    GLint mTranslationSlot;
+    GLuint mVertexShader{0};
+    GLuint mFragmentShader{0};
+    GLuint mProgram{0};
+    GLint mPositionSlot{-1};
+    GLint mInCoordSlot{-1};
+    GLint mTextureSlot{-1};
+    GLint mTranslationSlot{-1};
     GLuint mVertexBuffer;
     GLuint mIndexBuffer;
 
-    GLuint mMaskTexture;
+    GLuint mMaskTexture{0};
     int    mMaskWidth;
     int    mMaskHeight;
-    bool   mHaveNewMask;
-    bool   mMaskIsValid;
+    bool mHaveNewMask{false};
+    bool mMaskIsValid{false};
     const unsigned char* mMaskPixels;
 };
 

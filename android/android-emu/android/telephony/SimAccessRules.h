@@ -40,7 +40,7 @@ private:
                      ArDo{PermArDo{"0000000000000000"}}}}}};
 
     std::unordered_map<std::string, AllRefArDo> mCustomRules;
-    bool mHasCustomRules;
+    bool mHasCustomRules{false};
 };
 
 }  // namespace android

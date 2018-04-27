@@ -49,7 +49,7 @@ class VideoPlayerNotifier : public QObject {
 public:
     VideoPlayerNotifier() = default;
 
-    virtual ~VideoPlayerNotifier() = default;
+    ~VideoPlayerNotifier() override = default;
 
     // initialize the Qt timer, must be called from Qt UI thread
     void initTimer();

@@ -16,13 +16,13 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/crashreport/CrashReporter.h"
 
-#include <algorithm>
-#include <fstream>
-#include <inttypes.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <string>
 #include <sys/time.h>
+#include <algorithm>
+#include <cinttypes>
+#include <cstdarg>
+#include <cstdio>
+#include <fstream>
+#include <string>
 #include <vector>
 
 using android::base::AutoLock;
@@ -46,7 +46,7 @@ typedef std::pair<uint64_t, std::string> TimestampedLogEntry;
 class OpenGLLogger {
 public:
     OpenGLLogger();
-    OpenGLLogger(const char* filename);
+    explicit OpenGLLogger(const char* filename);
     void stop();
 
     // Coarse log: Call this infrequently.
@@ -60,9 +60,10 @@ public:
     void startFineLog();
     void stopFineLog();
     static OpenGLLogger* get();
+
 private:
     Lock mLock;
-    bool mFineLogActive;
+    bool mFineLogActive{false};
     std::string mFileName;
     std::ofstream mFileHandle;
     std::string mFineLogFileName;
@@ -77,20 +78,15 @@ OpenGLLogger* OpenGLLogger::get() {
     return sOpenGLLogger.ptr();
 }
 
-OpenGLLogger::OpenGLLogger() :
-    mFineLogActive(false) {
-    const std::string& data_dir =
-        CrashReporter::get()->getDataExchangeDir();
-    mFileName = PathUtils::join(data_dir,
-                                "opengl_log.txt");
+OpenGLLogger::OpenGLLogger() {
+    const std::string& data_dir = CrashReporter::get()->getDataExchangeDir();
+    mFileName = PathUtils::join(data_dir, "opengl_log.txt");
     mFileHandle.open(mFileName, std::ios::app);
-    mFineLogFileName = PathUtils::join(data_dir,
-                                       "opengl_cxt_log.txt");
+    mFineLogFileName = PathUtils::join(data_dir, "opengl_cxt_log.txt");
     mFineLogFileHandle.open(mFineLogFileName, std::ios::app);
 }
 
-OpenGLLogger::OpenGLLogger(const char* filename) :
-    mFileName(filename) {
+OpenGLLogger::OpenGLLogger(const char* filename) : mFileName(filename) {
     mFileHandle.open(mFileName, std::ios::app);
 }
 
@@ -116,22 +112,22 @@ void OpenGLLogger::writeFineTimestamped(const char* str) {
     if (mFineLogActive) {
         char buf[kBufferLen] = {};
         struct timeval tv;
-        gettimeofday(&tv, NULL);
+        gettimeofday(&tv, nullptr);
 
         uint64_t curr_micros = (tv.tv_usec) % 1000;
         uint64_t curr_millis = (tv.tv_usec / 1000) % 1000;
         uint64_t curr_secs = tv.tv_sec;
         snprintf(buf, sizeof(buf) - 1,
-                "time_us="
-                "%" PRIu64 " s "
-                "%" PRIu64 " ms "
-                "%" PRIu64 " us | %s",
-                curr_secs,
-                curr_millis,
-                curr_micros,
-                str);
+                 "time_us="
+                 "%" PRIu64
+                 " s "
+                 "%" PRIu64
+                 " ms "
+                 "%" PRIu64 " us | %s",
+                 curr_secs, curr_millis, curr_micros, str);
         writeFine(curr_micros + 1000ULL * curr_millis +
-                  1000ULL * 1000ULL * curr_secs, buf);
+                          1000ULL * 1000ULL * curr_secs,
+                  buf);
     }
 }
 
@@ -145,19 +141,18 @@ void OpenGLLogger::stopFineLog() {
         // Only print message when fine-grained
         // logging is turned on.
         if (!mFineLog.empty()) {
-            fprintf(stderr,
-                    "Writing fine-grained GL log to %s...",
+            fprintf(stderr, "Writing fine-grained GL log to %s...",
                     mFineLogFileName.c_str());
         }
 
         // Sort log entries according to their timestamps.
         // This is because the log entries might arrive
         // out of order.
-        std::sort(mFineLog.begin(), mFineLog.end(),
-                  [](const TimestampedLogEntry& x,
-                     const TimestampedLogEntry& y) {
-                      return x.first < y.first;
-                  });
+        std::sort(
+                mFineLog.begin(), mFineLog.end(),
+                [](const TimestampedLogEntry& x, const TimestampedLogEntry& y) {
+                    return x.first < y.first;
+                });
 
         for (const auto& entry : mFineLog) {
             // The fine log does not print newlines

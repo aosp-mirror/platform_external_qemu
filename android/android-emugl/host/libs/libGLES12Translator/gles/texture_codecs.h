@@ -17,8 +17,8 @@
 #ifndef GRAPHICS_TRANSLATION_GLES_TEXTURE_CODECS_H_
 #define GRAPHICS_TRANSLATION_GLES_TEXTURE_CODECS_H_
 
-#include <stddef.h>
 #include <GLES/gl.h>
+#include <cstddef>
 
 class ConverterBase;
 
@@ -42,8 +42,8 @@ class TextureConverter {
   GLenum dst_format_;
   GLenum dst_type_;
 
-  TextureConverter(const TextureConverter&);
-  TextureConverter& operator=(const TextureConverter&);
+  TextureConverter(const TextureConverter&) = delete;
+  TextureConverter& operator=(const TextureConverter&) = delete;
 };
 
 #endif  // GRAPHICS_TRANSLATION_GLES_TEXTURE_CODECS_H_

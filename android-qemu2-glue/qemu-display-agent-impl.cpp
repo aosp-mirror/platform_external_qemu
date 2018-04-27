@@ -20,7 +20,7 @@ extern "C" {
 #include "ui/console.h"
 }
 
-#include <string.h>
+#include <cstring>
 
 #include <algorithm>
 #include <vector>
@@ -62,7 +62,7 @@ static void getFrameBuffer(int* w, int* h, int* lineSize, int* bytesPerPixel,
         *bytesPerPixel = surface_bytes_per_pixel(ds);
     }
     if (frameBufferData) {
-        *frameBufferData = (uint8_t*)surface_data(ds);
+        *frameBufferData = static_cast<uint8_t*>(surface_data(ds));
     }
 }
 

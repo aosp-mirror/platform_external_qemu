@@ -12,8 +12,8 @@
 #include "android/base/Version.h"
 #include "android/base/StringFormat.h"
 
+#include <cassert>
 #include <sstream>
-#include <assert.h>
 
 namespace android {
 namespace base {
@@ -24,7 +24,7 @@ static bool isEof(std::istream& in) {
     return in.peek() == std::char_traits<char>::eof();
 }
 
-Version::Version(StringView ver) : mData() {
+Version::Version(const StringView& ver) : mData() {
     std::istringstream in(ver.c_str());
     in >> std::noskipws;
 
@@ -83,5 +83,5 @@ Version::ComponentType& Version::component(Version::Component c) {
     return none;
 }
 
-}  // namespace android
 }  // namespace base
+}  // namespace android

@@ -23,9 +23,9 @@
 #include <string>
 #include <vector>
 
-#include <limits.h>
-#include <stdint.h>
-#include <time.h>
+#include <climits>
+#include <cstdint>
+#include <ctime>
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -77,8 +77,8 @@ enum class RunOptions {
 // Interface class to the underlying operating system.
 class System {
 public:
-    typedef int64_t  Duration;
-    typedef uint64_t WallDuration;
+    using Duration = int64_t;
+    using WallDuration = uint64_t;
     using FileSize = uint64_t;
 
     // Information about user, system and wall clock times for some process,
@@ -171,7 +171,8 @@ public:
     static bool isUnderMemoryPressure(int* freeRamMb = nullptr);
 
     static constexpr System::FileSize kDiskPressureLimitBytes = 2147483648ULL;
-    static bool isUnderDiskPressure(StringView path, System::FileSize* freeDisk = nullptr);
+    static bool isUnderDiskPressure(const StringView& path,
+                                    System::FileSize* freeDisk = nullptr);
 
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__
@@ -279,7 +280,7 @@ public:
     // Fails if path is not a file or not readable, and in case of other errors.
     virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
     virtual bool fileSize(int fd, FileSize* outFileSize) const = 0;
-    Optional<FileSize> pathFileSize(StringView path) {
+    Optional<FileSize> pathFileSize(const StringView& path) {
         FileSize res;
         return pathFileSize(path, &res) ? makeOptional(res) : kNullopt;
     }
@@ -330,7 +331,7 @@ public:
     // kBinSubDir of getLauncherDirectory(). The name should not include the
     // executable extension (.exe) on Windows.
     // Return an empty string if the file doesn't exist.
-    static std::string findBundledExecutable(StringView programName);
+    static std::string findBundledExecutable(const StringView& programName);
 
     // Return the path of the current program's directory.
     virtual const std::string& getProgramDirectory() const = 0;
@@ -441,23 +442,26 @@ protected:
     // Internal implementation of scanDirEntries() that can be used by
     // mock implementation using a fake file system rooted into a temporary
     // directory or something like that. Always returns short paths.
-    static std::vector<std::string> scanDirInternal(StringView dirPath);
+    static std::vector<std::string> scanDirInternal(const StringView& dirPath);
 
-    static bool pathExistsInternal(StringView path);
-    static bool pathIsFileInternal(StringView path);
-    static bool pathIsDirInternal(StringView path);
-    static bool pathIsLinkInternal(StringView path);
-    static bool pathCanReadInternal(StringView path);
-    static bool pathCanWriteInternal(StringView path);
-    static bool pathCanExecInternal(StringView path);
-    static bool deleteFileInternal(StringView path);
-    static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
+    static bool pathExistsInternal(const StringView& path);
+    static bool pathIsFileInternal(const StringView& path);
+    static bool pathIsDirInternal(const StringView& path);
+    static bool pathIsLinkInternal(const StringView& path);
+    static bool pathCanReadInternal(const StringView& path);
+    static bool pathCanWriteInternal(const StringView& path);
+    static bool pathCanExecInternal(const StringView& path);
+    static bool deleteFileInternal(const StringView& path);
+    static bool pathFileSizeInternal(const StringView& path,
+                                     FileSize* outFileSize);
     static bool fileSizeInternal(int fd, FileSize* outFileSize);
-    static bool pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes);
-    static FileSize recursiveSizeInternal(StringView path);
-    static Optional<Duration> pathCreationTimeInternal(StringView path);
-    static Optional<Duration> pathModificationTimeInternal(StringView path);
-    static Optional<DiskKind> diskKindInternal(StringView path);
+    static bool pathFreeSpaceInternal(const StringView& path,
+                                      FileSize* spaceInBytes);
+    static FileSize recursiveSizeInternal(const StringView& path);
+    static Optional<Duration> pathCreationTimeInternal(const StringView& path);
+    static Optional<Duration> pathModificationTimeInternal(
+            const StringView& path);
+    static Optional<DiskKind> diskKindInternal(const StringView& path);
     static Optional<DiskKind> diskKindInternal(int fd);
 
 private:

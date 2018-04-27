@@ -28,4 +28,4 @@ struct GpsFix {
     }
 };
 
-typedef std::vector<GpsFix> GpsFixArray;
+using GpsFixArray = std::vector<GpsFix>;

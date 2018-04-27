@@ -124,24 +124,22 @@ TEST(CmdLineOptions, parseDebug) {
         bool expectedResult;
         uint64_t initialFlags;
         uint64_t parsedFlags;
-    } kData[] = {
-        { NULL, false, false, 0, 0 },
-        { NULL, true, false, 0, 0 },
-        { "", false, 0, 0 },
-        { "all", false, true, 0, -1ull },
-        { "-all", false, true, 1, 0 },
-        { "all", true, true, 0, -1ull },
-        { "-all", true, false, 1, 1 },
-        { "no-all", false, true, 1, 0 },
-        { "noall", false, false, 1, 1 },
-        { "init", false, true, 0, 1 },
-        { "init", true, true, 0, 1 },
-        { "-init", true, false, 1, 1 },
-        { "all,no-init", false, true, 0, -1ull & ~1 },
-        { "all,no-init", true, false, 0, 0 },
-        { "init,blah,-foo,no-bar", false, true, 0, 1 },
-        { "init,blah,-foo,no-bar", true, false, 0, 0 }
-    };
+    } kData[] = {{nullptr, false, false, 0, 0},
+                 {nullptr, true, false, 0, 0},
+                 {"", false, false, 0},
+                 {"all", false, true, 0, -1ull},
+                 {"-all", false, true, 1, 0},
+                 {"all", true, true, 0, -1ull},
+                 {"-all", true, false, 1, 1},
+                 {"no-all", false, true, 1, 0},
+                 {"noall", false, false, 1, 1},
+                 {"init", false, true, 0, 1},
+                 {"init", true, true, 0, 1},
+                 {"-init", true, false, 1, 1},
+                 {"all,no-init", false, true, 0, -1ull & ~1},
+                 {"all,no-init", true, false, 0, 0},
+                 {"init,blah,-foo,no-bar", false, true, 0, 1},
+                 {"init,blah,-foo,no-bar", true, false, 0, 0}};
 
     // Make sure the android_verbose debug flags are restored even if any test
     // case fails.

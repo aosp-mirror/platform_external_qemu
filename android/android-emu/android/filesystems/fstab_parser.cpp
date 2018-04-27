@@ -11,9 +11,9 @@
 
 #include "android/filesystems/fstab_parser.h"
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
 
 namespace {
 
@@ -34,14 +34,14 @@ const char* skipNonWhitespace(const char* p, const char* end) {
 const char* skipExpectedToken(const char* p, const char* end) {
     p = skipWhitespace(p, end);
     if (p == end) {
-        return NULL;
+        return nullptr;
     }
     return skipNonWhitespace(p, end);
 }
 
 size_t getTokenLen(const char* p, const char* end) {
     const char* q = skipNonWhitespace(p, end);
-    return (size_t)(q - p);
+    return static_cast<size_t>(q - p);
 }
 
 }  // namespace

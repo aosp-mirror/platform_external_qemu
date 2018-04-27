@@ -17,9 +17,10 @@
 #define GRAPHICS_TRANSLATION_GLES_PROGRAM_VARIANT_H_
 
 #include <GLES/gl.h>
+#include <utils/RefBase.h>
 #include <map>
 #include <string>
-#include <utils/RefBase.h>
+#include <utility>
 #include <vector>
 
 #include "android/base/synchronization/Lock.h"
@@ -34,121 +35,133 @@ class GlesContext;
 // one variant per linked program. A new variant may appear when the backing
 // texture target requires a different variant of the fragment shader.
 // Functions (including destructor) may pass calls to the underlying GL
-// implementation, and so must be called with an active context.
-// A linked ProgramVariant instance cannot be re-linked.
+// impl swi linked ProgramVariant instance cannot be re-linked.
 class ProgramVariant : public android::RefBase {
- public:
-  ProgramVariant();
+public:
+    ProgramVariant();
 
-  bool IsLinked() const { return is_linked_; }
-  bool IsLinkAttempted() const { return is_link_attempted_; }
+    bool IsLinked() const { return is_linked_; }
+    bool IsLinkAttempted() const { return is_link_attempted_; }
 
-  std::string GetInfoLog() const;
-  void ResetInfoLogCache();
+    std::string GetInfoLog() const;
+    void ResetInfoLogCache();
 
-  GLuint GetOrCreateGlobalName();
+    GLuint GetOrCreateGlobalName();
 
-  void AttachShader(ShaderVariantPtr shader);
-  void DetachShader(ShaderVariantPtr shader);
-  ShaderVariantPtr GetVertexShader() const { return vertex_shader_; }
-  ShaderVariantPtr GetFragmentShader() const { return fragment_shader_; }
+    void AttachShader(const ShaderVariantPtr& shader);
+    void DetachShader(const ShaderVariantPtr& shader);
+    ShaderVariantPtr GetVertexShader() const { return vertex_shader_; }
+    ShaderVariantPtr GetFragmentShader() const { return fragment_shader_; }
 
-  void Link();
+    void Link();
 
-  // Clones this program into a new variant. Current program must be linked.
-  // The resulting program will have the same shaders, but will not be linked.
-  ProgramVariant* Clone() const;
+    // Clones this program into a new variant. Current program must be linked.
+    // The resulting program will have the same shaders, but will not be linked.
+    ProgramVariant* Clone() const;
 
-  bool UsesExternalTextureAs2D() const;
+    bool UsesExternalTextureAs2D() const;
 
-  // Describes one active attribute of this program.
-  struct ActiveAttribute {
-    ActiveAttribute() : type_(-1), size_(-1) {}
-    ActiveAttribute(const std::string& name, GLenum type, GLint size)
-        : name_(name), type_(type), size_(size) {}
+    // Describes one active attribute of this program.
+    struct ActiveAttribute {
+        ActiveAttribute() {}
+        ActiveAttribute(std::string name, GLenum type, GLint size)
+            : name_(std::move(name)), type_(type), size_(size) {}
 
-    const std::string& GetName() const { return name_; }
-    GLenum GetType() const { return type_; }
-    GLint GetSize() const { return size_; }
+        const std::string& GetName() const { return name_; }
+        GLenum GetType() const { return type_; }
+        GLint GetSize() const { return size_; }
 
-   private:
-    std::string name_;
-    GLenum type_;
-    GLint size_;
-  };
+    private:
+        std::string name_;
+        GLenum type_{static_cast<GLenum>(-1)};
+        GLint size_{-1};
+    };
 
-  int GetActiveAttribCount() const { return active_attributes_.size(); }
-  int GetActiveAttribMaxNameLengh() const;
-  void GetActiveAttrib(GLuint index, GLsizei buf_size, GLsizei* length,
-                       GLint* size, GLenum* type, GLchar* name) const;
-  std::string GetActiveAttribNameAndLocation(GLuint index, GLint* location);
-  void BindAttribLocation(const std::string& name, GLint location);
-  GLint GetAttribLocation(const std::string& name);
+    int GetActiveAttribCount() const { return active_attributes_.size(); }
+    int GetActiveAttribMaxNameLengh() const;
+    void GetActiveAttrib(GLuint index,
+                         GLsizei buf_size,
+                         GLsizei* length,
+                         GLint* size,
+                         GLenum* type,
+                         GLchar* name) const;
+    std::string GetActiveAttribNameAndLocation(GLuint index, GLint* location);
+    void BindAttribLocation(const std::string& name, GLint location);
+    GLint GetAttribLocation(const std::string& name);
 
-  // Describes one active uniform of this program.
-  struct ActiveUniform {
-    ActiveUniform() : type_(0), is_array_(false), array_size_(0) {}
-    ActiveUniform(const std::string& original_name,
-                  const std::string& base_name,
-                  GLenum type, bool is_array, GLint array_size)
-        : original_name_(original_name), base_name_(base_name),
-          type_(type), is_array_(is_array), array_size_(array_size) {}
+    // Describes one active uniform of this program.
+    struct ActiveUniform {
+        ActiveUniform() {}
+        ActiveUniform(std::string original_name,
+                      std::string base_name,
+                      GLenum type,
+                      bool is_array,
+                      GLint array_size)
+            : original_name_(std::move(original_name)),
+              base_name_(std::move(base_name)),
+              type_(type),
+              is_array_(is_array),
+              array_size_(array_size) {}
 
-    const std::string& GetOriginalName() const { return original_name_; }
-    const std::string& GetBaseName() const { return base_name_; }
-    GLenum GetType() const { return type_; }
-    bool IsArray() const { return is_array_; }
-    GLint GetArraySize() const { return array_size_; }
+        const std::string& GetOriginalName() const { return original_name_; }
+        const std::string& GetBaseName() const { return base_name_; }
+        GLenum GetType() const { return type_; }
+        bool IsArray() const { return is_array_; }
+        GLint GetArraySize() const { return array_size_; }
 
-   private:
-    std::string original_name_;
-    std::string base_name_;
-    GLenum type_;
-    bool is_array_;
-    GLint array_size_;
-  };
+    private:
+        std::string original_name_;
+        std::string base_name_;
+        GLenum type_{0};
+        bool is_array_{false};
+        GLint array_size_{0};
+    };
 
-  int GetActiveUniformCount() const { return active_uniforms_.size(); }
-  int GetActiveUniformMaxNameLengh() const;
-  void GetActiveUniform(GLuint index, GLsizei buf_size, GLsizei* length,
-                        GLint* size, GLenum* type, GLchar* name) const;
-  const ActiveUniform& GetActiveUniform(GLuint index) const;
-  // Parses the given name, matches against the list of known active uniforms,
-  // verifies array index and returns uniform base name.
-  // In case of error returns empty string.
-  std::string ParseUniformName(
-      const std::string& name, int* array_index) const;
-  GLint GetUniformLocation(const std::string& name);
+    int GetActiveUniformCount() const { return active_uniforms_.size(); }
+    int GetActiveUniformMaxNameLengh() const;
+    void GetActiveUniform(GLuint index,
+                          GLsizei buf_size,
+                          GLsizei* length,
+                          GLint* size,
+                          GLenum* type,
+                          GLchar* name) const;
+    const ActiveUniform& GetActiveUniform(GLuint index) const;
+    // Parses the given name, matches against the list of known active uniforms,
+    // verifies array index and returns uniform base name.
+    // In case of error returns empty string.
+    std::string ParseUniformName(const std::string& name,
+                                 int* array_index) const;
+    GLint GetUniformLocation(const std::string& name);
 
- protected:
-  virtual ~ProgramVariant();
+protected:
+    ~ProgramVariant() override;
 
- private:
-  typedef std::map<std::string, GLint> NameLocationMap;
+private:
+    typedef std::map<std::string, GLint> NameLocationMap;
 
-  void EnsureLiveProgramObject(GlesContext* ctx);
-  void UpdateActiveAttributes();
-  void UpdateActiveUniforms();
+    void EnsureLiveProgramObject(GlesContext* ctx);
+    void UpdateActiveAttributes();
+    void UpdateActiveUniforms();
 
-  GLuint global_name_;
-  ShaderVariantPtr vertex_shader_;
-  ShaderVariantPtr fragment_shader_;
-  std::vector<ActiveAttribute> active_attributes_;
-  std::vector<ActiveUniform> active_uniforms_;
-  // Maps base name to index inside active_uniforms_.
-  NameLocationMap uniform_base_names_;
-  NameLocationMap attribute_locations_;
-  NameLocationMap requested_attribute_locations_;
-  NameLocationMap uniform_locations_;
-  bool is_linked_;
-  bool is_link_attempted_;
-  mutable Dirtiable<std::string> info_log_cache_;
-  mutable android::base::Lock lock_;
+    GLuint global_name_{0};
+    ShaderVariantPtr vertex_shader_;
+    ShaderVariantPtr fragment_shader_;
+    std::vector<ActiveAttribute> active_attributes_;
+    std::vector<ActiveUniform> active_uniforms_;
+    // Maps base name to index inside active_uniforms_.
+    NameLocationMap uniform_base_names_;
+    NameLocationMap attribute_locations_;
+    NameLocationMap requested_attribute_locations_;
+    NameLocationMap uniform_locations_;
+    bool is_linked_{false};
+    bool is_link_attempted_{false};
+    mutable Dirtiable<std::string> info_log_cache_;
+    mutable android::base::Lock lock_;
 
-  ProgramVariant(const ProgramVariant&);
-  ProgramVariant& operator=(const ProgramVariant&);
+    ProgramVariant(const ProgramVariant&) = delete;
+    ProgramVariant& operator=(const ProgramVariant&) = delete;
 };
 
-typedef android::sp<ProgramVariant> ProgramVariantPtr;
+using ProgramVariantPtr = android::sp<ProgramVariant>;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_PROGRAM_VARIANT_H_

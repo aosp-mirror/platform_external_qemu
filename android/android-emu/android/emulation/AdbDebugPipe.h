@@ -43,26 +43,25 @@ public:
         Service(Stream* output)
             : AndroidPipe::Service("qemud:adb-debug"), mOutput(output) {}
 
-        virtual AndroidPipe* create(void* hwPipe, const char* args) override;
+        AndroidPipe* create(void* hwPipe, const char* args) override;
 
-        virtual bool canLoad() const override;
+        bool canLoad() const override;
 
-        virtual AndroidPipe* load(void* hwPipe,
-                                  const char* args,
-                                  android::base::Stream* stream) override;
+        AndroidPipe* load(void* hwPipe,
+                          const char* args,
+                          android::base::Stream* stream) override;
 
     private:
         std::unique_ptr<Stream> mOutput;
     };
 
-    virtual void onGuestClose(PipeCloseReason reason) override;
-    virtual unsigned onGuestPoll() const override;
-    virtual int onGuestRecv(AndroidPipeBuffer* buffers, int count) override;
-    virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int count) override;
+    void onGuestClose(PipeCloseReason reason) override;
+    unsigned onGuestPoll() const override;
+    int onGuestRecv(AndroidPipeBuffer* buffers, int count) override;
+    int onGuestSend(const AndroidPipeBuffer* buffers, int count) override;
 
-    virtual void onGuestWantWakeOn(int flags) override;
-    virtual void onSave(android::base::Stream* stream) override;
+    void onGuestWantWakeOn(int flags) override;
+    void onSave(android::base::Stream* stream) override;
 
 private:
     AdbDebugPipe(void* hwPipe, Service* service, Stream* output)

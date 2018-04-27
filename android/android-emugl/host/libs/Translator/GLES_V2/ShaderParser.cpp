@@ -18,9 +18,9 @@
 
 #include "GLcommon/GLutils.h"
 
+#include <cstdlib>
+#include <cstring>
 #include <memory>
-#include <stdlib.h>
-#include <string.h>
 #include <string>
 #include <vector>
 
@@ -44,7 +44,7 @@ ShaderParser::ShaderParser(android::base::Stream* stream) : ObjectData(stream) {
     m_originalSrc = stream->getString();
     m_src = stream->getString();
     m_parsedSrc = stream->getString();
-    m_parsedLines = (GLchar*)m_parsedSrc.c_str();
+    m_parsedLines = const_cast<GLchar*>(m_parsedSrc.c_str());
     m_compiledSrc = stream->getString();
     m_infoLog = stream->getString();
     size_t programSize = stream->getBe32();
@@ -88,12 +88,14 @@ void ShaderParser::restore(ObjectLocalName localName,
             localName);
     if (isGles2Gles()) {
         const char* src = getOriginalSrc().c_str();
-        GLEScontext::dispatcher().glShaderSource(globalName, 1, &src, NULL);
+        GLEScontext::dispatcher().glShaderSource(globalName, 1, &src, nullptr);
     } else {
-        GLEScontext::dispatcher().glShaderSource(globalName, 1, parsedLines(), NULL);
+        GLEScontext::dispatcher().glShaderSource(globalName, 1, parsedLines(),
+                                                 nullptr);
     }
-    if (m_compileStatus)
+    if (m_compileStatus) {
         GLEScontext::dispatcher().glCompileShader(globalName);
+    }
 }
 
 static const char kAlwaysInvalidShader[] =
@@ -140,8 +142,8 @@ void ShaderParser::setSrc(GLsizei count, const GLchar* const* strings, const GLi
 }
 
 const GLchar** ShaderParser::parsedLines() {
-      m_parsedLines = (GLchar*)m_parsedSrc.c_str();
-      return const_cast<const GLchar**> (&m_parsedLines);
+    m_parsedLines = const_cast<GLchar*>(m_parsedSrc.c_str());
+    return const_cast<const GLchar**>(&m_parsedLines);
 }
 
 void ShaderParser::clear() {

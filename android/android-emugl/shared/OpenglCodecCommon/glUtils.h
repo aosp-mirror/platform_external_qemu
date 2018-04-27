@@ -20,7 +20,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#include <stddef.h>
+#include <cstddef>
 
 #ifdef __cplusplus
 extern "C" {

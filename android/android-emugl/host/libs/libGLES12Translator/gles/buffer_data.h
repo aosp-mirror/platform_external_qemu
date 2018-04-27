@@ -20,7 +20,7 @@
 
 #include "gles/object_data.h"
 
-#include <string.h>
+#include <cstring>
 
 class BufferData : public ObjectData {
  public:
@@ -36,17 +36,17 @@ class BufferData : public ObjectData {
   const unsigned char* GetData() const { return data_; }
 
  protected:
-  ~BufferData();
+     ~BufferData() override;
 
  private:
   GLuint size_;
   GLenum usage_;
   unsigned char* data_;
 
-  BufferData(const BufferData&);
-  BufferData& operator=(const BufferData&);
+  BufferData(const BufferData&) = delete;
+  BufferData& operator=(const BufferData&) = delete;
 };
 
-typedef android::sp<BufferData> BufferDataPtr;
+using BufferDataPtr = android::sp<BufferData>;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_BUFFER_DATA_H_

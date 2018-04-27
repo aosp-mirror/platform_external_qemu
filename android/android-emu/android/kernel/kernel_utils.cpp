@@ -29,11 +29,11 @@
 
 #include <vector>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <strings.h>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #define DEBUG_KERNEL 0
 
@@ -57,12 +57,12 @@ static const StringView kLinuxVersionStringPrefixes[] = {
 bool android_parseLinuxVersionString(const char* versionString,
                                      KernelVersion* kernelVersion) {
     bool validPrefix = false;
-    for (size_t i = 0; i < ARRAY_SIZE(kLinuxVersionStringPrefixes); ++i) {
-        if (!strncmp(versionString, kLinuxVersionStringPrefixes[i].data(),
-                     kLinuxVersionStringPrefixes[i].size())) {
+    for (const auto& kLinuxVersionStringPrefixe : kLinuxVersionStringPrefixes) {
+        if (!strncmp(versionString, kLinuxVersionStringPrefixe.data(),
+                     kLinuxVersionStringPrefixe.size())) {
             validPrefix = true;
             // skip past the prefix to the version number
-            versionString += kLinuxVersionStringPrefixes[i].size();
+            versionString += kLinuxVersionStringPrefixe.size();
             break;
         }
     }
@@ -90,7 +90,7 @@ bool android_parseLinuxVersionString(const char* versionString,
         temp |= number;
         versionString = end;
     }
-    *kernelVersion = (KernelVersion)temp;
+    *kernelVersion = static_cast<KernelVersion>(temp);
 
     KERNEL_LOG << android::base::LogString("Kernel version hex 0x%06x", temp);
     return true;
@@ -109,7 +109,7 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
                                            size_t dstLen) {
     std::vector<uint8_t> uncompressed;
 
-    const uint8_t* uncompressedKernel = NULL;
+    const uint8_t* uncompressedKernel = nullptr;
     size_t uncompressedKernelLen = 0;
 
     const char kElfHeader[] = {0x7f, 'E', 'L', 'F'};
@@ -119,7 +119,7 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
         return false;
     }
 
-    const char* versionStringStart = NULL;
+    const char* versionStringStart = nullptr;
 
     if (0 == memcmp(kElfHeader, kernelFileData, sizeof(kElfHeader))) {
         // this is an uncompressed ELF file (probably mips)
@@ -129,12 +129,13 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
         // x86[-64] kernels have their version embedded in a comment section
         // of the compressed image with a different prefix. Try looking for it
         // before uncompressing the whole thing.
-        auto data = (const char*)kernelFileData;
+        auto data = reinterpret_cast<const char*>(kernelFileData);
         const auto end = data + kernelFileSize;
         for (;;) {
-            const auto versionInCompressedKernel = (const char*)memmem(
-                    data, end - data, kCompressedLinuxVersionPrefix.data(),
-                    kCompressedLinuxVersionPrefix.size());
+            const auto versionInCompressedKernel = static_cast<const char*>(
+                    memmem(data, end - data,
+                           kCompressedLinuxVersionPrefix.data(),
+                           kCompressedLinuxVersionPrefix.size()));
             if (!versionInCompressedKernel) {
                 break;
             }
@@ -156,9 +157,9 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
         if (!versionStringStart) {
             // handle compressed kernels here
             const uint8_t kGZipMagic[4] = {0x1f, 0x8b, 0x08, 0x00};
-            const uint8_t* compressedKernel =
-                    (const uint8_t*)memmem(kernelFileData, kernelFileSize,
-                                           kGZipMagic, sizeof(kGZipMagic));
+            const auto* compressedKernel = static_cast<const uint8_t*>(
+                    memmem(kernelFileData, kernelFileSize, kGZipMagic,
+                           sizeof(kGZipMagic)));
             if (!compressedKernel) {
                 KERNEL_ERROR << "Could not find gzip header in kernel file!";
                 return false;
@@ -167,9 +168,9 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
             // Special case: certain images, like the ARM64 one, contain a GZip
             // header _after_ the actual Linux version string. So first try to
             // see if there is something before the header.
-            versionStringStart = (const char*)memmem(
+            versionStringStart = static_cast<const char*>(memmem(
                     kernelFileData, (compressedKernel - kernelFileData),
-                    kLinuxVersionPrefix.data(), kLinuxVersionPrefix.size());
+                    kLinuxVersionPrefix.data(), kLinuxVersionPrefix.size()));
 
             if (!versionStringStart) {
                 size_t compressedKernelLen =
@@ -196,9 +197,9 @@ bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
 
     if (!versionStringStart) {
         if (uncompressedKernel) {
-            versionStringStart = (const char*)memmem(
+            versionStringStart = static_cast<const char*>(memmem(
                     uncompressedKernel, uncompressedKernelLen,
-                    kLinuxVersionPrefix.data(), kLinuxVersionPrefix.size());
+                    kLinuxVersionPrefix.data(), kLinuxVersionPrefix.size()));
         }
         if (!versionStringStart) {
             KERNEL_ERROR << "Could not find 'Linux version ' in kernel!";
@@ -223,13 +224,15 @@ bool android_pathProbeKernelVersionString(const char* kernelPath,
     const auto kernelFileMap = android::base::makeCustomScopedPtr(
             mmap(nullptr, size, PROT_READ, MAP_PRIVATE, kernelFile.get(), 0),
             [size](void* ptr) {
-                if (ptr != MAP_FAILED)
+                if (ptr != MAP_FAILED) {
                     munmap(ptr, size);
+                }
             });
     if (!kernelFileMap || kernelFileMap.get() == MAP_FAILED) {
         return false;
     }
 
     return android_imageProbeKernelVersionString(
-            (const uint8_t*)kernelFileMap.get(), size, dst, dstLen);
+            static_cast<const uint8_t*>(kernelFileMap.get()), size, dst,
+            dstLen);
 }

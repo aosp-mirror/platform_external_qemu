@@ -15,7 +15,7 @@
 #include "android/utils/panic.h"
 #include "android/utils/path.h"
 
-#include <errno.h>
+#include <cerrno>
 
 namespace {
 
@@ -34,9 +34,9 @@ const size_t kPartitionTypeMapSize =
 }  // namespace
 
 const char* androidPartitionType_toString(AndroidPartitionType part_type) {
-    for (size_t n = 0; n < kPartitionTypeMapSize; ++n) {
-        if (kPartitionTypeMap[n].value == part_type) {
-            return kPartitionTypeMap[n].name;
+    for (auto n : kPartitionTypeMap) {
+        if (n.value == part_type) {
+            return n.name;
         }
     }
     APANIC("Invalid partition type value %d", part_type);
@@ -44,9 +44,9 @@ const char* androidPartitionType_toString(AndroidPartitionType part_type) {
 }
 
 AndroidPartitionType androidPartitionType_fromString(const char* part_type) {
-    for (size_t n = 0; n < kPartitionTypeMapSize; ++n) {
-        if (!strcmp(kPartitionTypeMap[n].name, part_type)) {
-            return kPartitionTypeMap[n].value;
+    for (auto n : kPartitionTypeMap) {
+        if (!strcmp(n.name, part_type)) {
+            return n.value;
         }
     }
     return ANDROID_PARTITION_TYPE_UNKNOWN;
@@ -78,7 +78,7 @@ int androidPartitionType_makeEmptyFile(AndroidPartitionType part_type,
             return 0;
 
         case ANDROID_PARTITION_TYPE_EXT4:
-            return android_createEmptyExt4Image(part_file, part_size, NULL);
+            return android_createEmptyExt4Image(part_file, part_size, nullptr);
 
         default:
             return -EINVAL;

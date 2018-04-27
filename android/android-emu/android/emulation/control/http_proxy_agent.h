@@ -11,7 +11,7 @@
  */
 
 #pragma once
-#include <stdbool.h>
+
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER

@@ -18,7 +18,7 @@
 
 #include "android/camera/camera-capture.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 /* Maximum number of supported emulated cameras. */
 #define MAX_CAMERA 8
@@ -37,7 +37,7 @@ void android_camera_list_webcams(void) {
         printf(" Camera '%s' is connected to device '%s' on channel %d "
                "using pixel format '%.4s'\n",
                ci[i].display_name, ci[i].device_name, ci[i].inp_channel,
-               (const char*)&ci[i].pixel_format);
+               reinterpret_cast<const char*>(&ci[i].pixel_format));
 
         camera_info_done(&ci[i]);
     }

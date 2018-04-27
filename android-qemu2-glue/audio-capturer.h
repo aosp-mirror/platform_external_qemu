@@ -44,10 +44,10 @@ namespace qemu {
 class QemuAudioCaptureEngine : public android::emulation::AudioCaptureEngine {
 public:
     QemuAudioCaptureEngine() = default;
-    virtual ~QemuAudioCaptureEngine() = default;
+    ~QemuAudioCaptureEngine() override = default;
 
-    virtual int start(android::emulation::AudioCapturer* capturer) override;
-    virtual int stop(android::emulation::AudioCapturer* capturer) override;
+    int start(android::emulation::AudioCapturer* capturer) override;
+    int stop(android::emulation::AudioCapturer* capturer) override;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(QemuAudioCaptureEngine);

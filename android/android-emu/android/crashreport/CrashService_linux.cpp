@@ -62,8 +62,7 @@ void HostCrashService::OnClientExit(
         void* context,
         const ::google_breakpad::ClientInfo* client_info) {
     D("Client exiting\n");
-    CrashService::ServerState* serverstate =
-            static_cast<CrashService::ServerState*>(context);
+    auto* serverstate = static_cast<CrashService::ServerState*>(context);
     if (serverstate->connected > 0) {
         serverstate->connected -= 1;
     }
@@ -80,9 +79,9 @@ bool HostCrashService::startCrashServer(const std::string& pipe) {
 
     initCrashServer();
 
-    mCrashServer.reset(new ::google_breakpad::CrashGenerationServer(
+    mCrashServer = std::make_unique<::google_breakpad::CrashGenerationServer>(
             listen_fd, OnClientDumpRequest, &mDumpRequestContext, OnClientExit,
-            &mServerState, true, &CrashSystem::get()->getCrashDirectory()));
+            &mServerState, true, &CrashSystem::get()->getCrashDirectory());
 
     return mCrashServer->Start();
 }
@@ -98,7 +97,7 @@ bool HostCrashService::stopCrashServer() {
 
 bool HostCrashService::isClientAlive() {
     if (!mClientPID) {
-        return 0;
+        return false;
     }
     // waitpid for child clients
     waitpid(mClientPID, nullptr, WNOHANG);

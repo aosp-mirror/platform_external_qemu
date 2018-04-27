@@ -384,9 +384,7 @@ TEST(Optional, Destruction) {
     // create a reference counting class to check if we delete everything
     // we've created
     struct Track {
-        Track(int& val) : mVal(val) {
-            ++mVal.get();
-        }
+        explicit Track(int& val) : mVal(val) { ++mVal.get(); }
         Track(std::initializer_list<int*> vals) : mVal(**vals.begin()) {
             ++mVal.get();
         }

@@ -48,7 +48,7 @@ TEST(GooglePlayServices, parseOutputForVersionNullArgs) {
     ofs.close();
 
     f.open(outputFile.c_str());
-    EXPECT_FALSE(GooglePlayServices::parseOutputForVersion(f, NULL));
+    EXPECT_FALSE(GooglePlayServices::parseOutputForVersion(f, nullptr));
 }
 
 TEST(GooglePlayServices, parseOutputForVersionNoVersionName) {

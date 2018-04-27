@@ -99,7 +99,7 @@ private:
     // Thread function executing all sync commands.
     // It listens for |SyncThreadCmd| objects off the message channel
     // |mInput|, and runs them serially.
-    virtual intptr_t main() override final;
+    intptr_t main() final;
     static const size_t kSyncThreadChannelCapacity = 256;
     android::base::MessageChannel<SyncThreadCmd, kSyncThreadChannelCapacity> mInput;
 

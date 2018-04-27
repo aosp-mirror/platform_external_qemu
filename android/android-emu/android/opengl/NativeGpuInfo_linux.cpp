@@ -40,14 +40,14 @@ static std::string load_gpu_info() {
 }
 
 static std::string parse_last_hexbrackets(const std::string& str) {
-    size_t closebrace_p = str.rfind("]");
-    size_t openbrace_p = str.rfind("[", closebrace_p - 1);
+    size_t closebrace_p = str.rfind(']');
+    size_t openbrace_p = str.rfind('[', closebrace_p - 1);
     return str.substr(openbrace_p + 1, closebrace_p - openbrace_p - 1);
 }
 
 void parse_gpu_info_list_linux(const std::string& contents,
                                GpuInfoList* gpulist) {
-    size_t line_loc = contents.find("\n");
+    size_t line_loc = contents.find('\n');
     if (line_loc == std::string::npos) {
         line_loc = contents.size();
     }
@@ -83,7 +83,7 @@ void parse_gpu_info_list_linux(const std::string& contents,
             break;
         }
         p = line_loc + 1;
-        line_loc = contents.find("\n", p);
+        line_loc = contents.find('\n', p);
         if (line_loc == std::string::npos) {
             line_loc = contents.size();
         }
@@ -93,8 +93,8 @@ void parse_gpu_info_list_linux(const std::string& contents,
 void getGpuInfoListNative(GpuInfoList* gpulist) {
     // Load it in a traditional way - by parsing output of external process.
 
-    // TODO: Don't do GPU info detection on Linux for now---lspci can be
-    // inaccurate as to what GPU the user is actually using.
+    // TODO(yahan): Don't do GPU info detection on Linux for now---lspci can
+    // be inaccurate as to what GPU the user is actually using.
 #ifdef ANDROID_DEBUG
     // Workaround for b/77586363, clang -O0 introduces some unexpected behavior
     // when it comes to the else. See the bug for details

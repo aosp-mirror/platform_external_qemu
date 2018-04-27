@@ -17,15 +17,19 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/threads/Async.h"
 
-typedef ::Looper CLooper;
-typedef android::base::Looper BaseLooper;
+using CLooper = ::Looper;
+using BaseLooper = android::base::Looper;
 
 static BaseLooper::ClockType toBaseLooperClockType(LooperClockType clock) {
-    static_assert((int) LOOPER_CLOCK_HOST == (int) BaseLooper::ClockType::kHost &&
-                  (int) LOOPER_CLOCK_VIRTUAL == (int) BaseLooper::ClockType::kVirtual &&
-                  (int) LOOPER_CLOCK_REALTIME == (int) BaseLooper::ClockType::kRealtime,
-                  "Values in the Looper::ClockType enumeration are out of sync with "
-                          "LooperClockType");
+    static_assert(
+            static_cast<int>(LOOPER_CLOCK_HOST) ==
+                            static_cast<int>(BaseLooper::ClockType::kHost) &&
+                    static_cast<int>(LOOPER_CLOCK_VIRTUAL) ==
+                            static_cast<int>(BaseLooper::ClockType::kVirtual) &&
+                    static_cast<int>(LOOPER_CLOCK_REALTIME) ==
+                            static_cast<int>(BaseLooper::ClockType::kRealtime),
+            "Values in the Looper::ClockType enumeration are out of sync with "
+            "LooperClockType");
 
     return static_cast<BaseLooper::ClockType>(clock);
 }
@@ -70,7 +74,7 @@ void looper_free(Looper* looper) {
  **********************************************************************
  **********************************************************************/
 
-typedef ::android::base::Looper::Timer BaseTimer;
+using BaseTimer = ::android::base::Looper::Timer;
 
 static BaseTimer* asBaseTimer(LoopTimer* timer) {
     return reinterpret_cast<BaseTimer*>(timer);
@@ -120,7 +124,7 @@ LoopTimer* loopTimer_newWithClock(CLooper* looper,
  **********************************************************************
  **********************************************************************/
 
-typedef android::base::Looper::FdWatch BaseFdWatch;
+using BaseFdWatch = android::base::Looper::FdWatch;
 
 static BaseFdWatch* asBaseFdWatch(LoopIo* io) {
     return reinterpret_cast<BaseFdWatch*>(io);

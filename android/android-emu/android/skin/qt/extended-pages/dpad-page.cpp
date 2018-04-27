@@ -25,11 +25,7 @@
 #include <QScreen>
 #include <QSettings>
 
-DPadPage::DPadPage(QWidget *parent) :
-    QWidget(parent),
-    mUi(new Ui::DPadPage()),
-    mEmulatorWindow(NULL)
-{
+DPadPage::DPadPage(QWidget* parent) : QWidget(parent), mUi(new Ui::DPadPage()) {
     mUi->setupUi(this);
 
     if (android_hw->hw_dPad) {
@@ -82,7 +78,7 @@ void DPadPage::toggleButtonPressed(
     const SkinKeyCode key_code,
     const bool pressed) {
     if (mEmulatorWindow) {
-        SkinEvent* skin_event = new SkinEvent();
+        auto* skin_event = new SkinEvent();
         skin_event->type = pressed ? kEventKeyDown : kEventKeyUp;
         skin_event->u.key.keycode = key_code;
         skin_event->u.key.mod = 0;

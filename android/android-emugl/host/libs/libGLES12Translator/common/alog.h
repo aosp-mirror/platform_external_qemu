@@ -36,7 +36,7 @@
 #define _COMMON_ALOG_H
 
 #include <common/log.h>
-#include <stdarg.h>
+#include <cstdarg>
 
 extern "C" {
 
@@ -123,9 +123,9 @@ enum CrashLogMessageKind {
   ReportableForAllUsers
 };
 
-typedef void (*AddCrashExtraInformationFunction)
-    (CrashLogMessageKind crash_log_message_kind,
-     const char* field_name, const char* message);
+using AddCrashExtraInformationFunction = void (*)(CrashLogMessageKind,
+                                                  const char*,
+                                                  const char*);
 void RegisterCrashCallback(AddCrashExtraInformationFunction function);
 
 int PrintLogBuf(int bufID, int prio, const char* tag, const char* fmt, ...)

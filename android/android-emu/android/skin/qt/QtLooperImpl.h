@@ -25,8 +25,8 @@ namespace android {
 namespace qt {
 namespace internal {
 
-typedef ::android::base::Looper BaseLooper;
-typedef ::android::base::Looper::Timer BaseTimer;
+using BaseLooper = ::android::base::Looper;
+using BaseTimer = ::android::base::Looper::Timer;
 
 class TimerImpl : public QTimer {
     DISALLOW_COPY_AND_ASSIGN(TimerImpl);
@@ -46,7 +46,7 @@ public:
                 Qt::BlockingQueuedConnection);
     }
 
-    ~TimerImpl() { stop(); }
+    ~TimerImpl() override { stop(); }
 
     void start(int timeoutMs = 0) { emit signalStart(timeoutMs); }
     void stop() {
@@ -89,7 +89,7 @@ public:
                 Qt::QueuedConnection);
     }
 
-    ~TaskImpl() { disconnect(); }
+    ~TaskImpl() override { disconnect(); }
 
     void schedule() override {
         mCanceled = false;

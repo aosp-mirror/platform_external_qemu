@@ -41,17 +41,17 @@ class HostCrashReporter : public CrashReporter {
 public:
     HostCrashReporter() : CrashReporter(), mHandler() {}
 
-    virtual ~HostCrashReporter() {}
+    ~HostCrashReporter() override = default;
 
     bool attachCrashHandler(const CrashSystem::CrashPipe& crashpipe) override {
         if (mHandler) {
             return false;
         }
 
-        mHandler.reset(new google_breakpad::ExceptionHandler(
+        mHandler = std::make_unique<google_breakpad::ExceptionHandler>(
                 google_breakpad::MinidumpDescriptor(getDumpDir()),
-                &HostCrashReporter::exceptionFilterCallback,
-                nullptr, nullptr, true, std::stoi(crashpipe.mClient)));
+                &HostCrashReporter::exceptionFilterCallback, nullptr, nullptr,
+                true, std::stoi(crashpipe.mClient));
 
         return mHandler != nullptr;
     }
@@ -92,7 +92,7 @@ bool HostCrashReporter::onCrashPlatformSpecific() {
     return true;
 }
 
-}  // namespace anonymous
+}  // namespace
 
 CrashReporter* CrashReporter::get() {
     return sCrashReporter.ptr();

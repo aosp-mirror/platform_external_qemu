@@ -51,7 +51,7 @@ extern "C" {
 }
 
 #include <cmath>
-
+#include <utility>
 using android::emulation::AudioOutputEngine;
 
 namespace android {
@@ -583,7 +583,8 @@ std::unique_ptr<VideoPlayer> VideoPlayer::create(
         VideoPlayerWidget* widget,
         std::unique_ptr<VideoPlayerNotifier> notifier) {
     std::unique_ptr<VideoPlayerImpl> player;
-    player.reset(new VideoPlayerImpl(videoFile, widget, std::move(notifier)));
+    player.reset(new VideoPlayerImpl(std::move(videoFile), widget,
+                                     std::move(notifier)));
     return std::move(player);
 }
 
@@ -597,7 +598,7 @@ std::unique_ptr<VideoPlayer> VideoPlayer::create(
 VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
                                  VideoPlayerWidget* widget,
                                  std::unique_ptr<VideoPlayerNotifier> notifier)
-    : mVideoFile(videoFile),
+    : mVideoFile(std::move(videoFile)),
       mWidget(widget),
       mNotifier(std::move(notifier)),
       mRunning(true),
@@ -630,14 +631,15 @@ void VideoPlayerImpl::adjustWindowSize(AVCodecContext* c,
     }
 
     if (aspect_ratio <= 0.0) {
-        aspect_ratio = (float)c->width / (float)c->height;
+        aspect_ratio =
+                static_cast<float>(c->width) / static_cast<float>(c->height);
     }
 
     int h = mWidget->height();
-    int w = ((int)(h * aspect_ratio)) & -3;
+    int w = (static_cast<int>(h * aspect_ratio)) & -3;
     if (w > mWidget->width()) {
         w = mWidget->width();
-        h = ((int)(w / aspect_ratio)) & -3;
+        h = (static_cast<int>(w / aspect_ratio)) & -3;
     }
 
     int x = (mWidget->width() - w) / 2;
@@ -744,8 +746,9 @@ int VideoPlayerImpl::queuePicture(AVFrame* src_frame,
         vp->buf = new unsigned char[numBytes + 64];
         if (vp->buf != nullptr) {
             // simply append a ppm header to become ppm image format
-            headerlen = sprintf((char*)vp->buf, "P6\n%d %d\n255\n",
-                                mWindowWidth, mWindowHeight);
+            headerlen =
+                    sprintf(reinterpret_cast<char*>(vp->buf),
+                            "P6\n%d %d\n255\n", mWindowWidth, mWindowHeight);
         } else {
             headerlen = 0;
         }
@@ -942,7 +945,7 @@ retry:
 #define REFRESH_DURATION 0.01
 
 void VideoPlayerImpl::videoRefresh() {
-    if (!mRunning && mVideoFrameQueue.get() != nullptr &&
+    if (!mRunning && mVideoFrameQueue != nullptr &&
         mVideoFrameQueue->size() == 0) {
         if (mNotifier != nullptr) {
             mNotifier->stopTimer();
@@ -950,7 +953,7 @@ void VideoPlayerImpl::videoRefresh() {
         return;
     }
 
-    if (mVideoFrameQueue.get() == nullptr) {
+    if (mVideoFrameQueue == nullptr) {
         scheduleRefresh(20);
         return;
     }
@@ -1171,10 +1174,10 @@ int VideoPlayerImpl::play() {
 
         // if the queues are full, no need to read more
         int curent_queues_total_size = 0;
-        if (mAudioQueue.get() != nullptr) {
+        if (mAudioQueue != nullptr) {
             curent_queues_total_size += mAudioQueue->getSize();
         }
-        if (mVideoQueue.get() != nullptr) {
+        if (mVideoQueue != nullptr) {
             curent_queues_total_size += mVideoQueue->getSize();
         }
 
@@ -1205,12 +1208,12 @@ int VideoPlayerImpl::play() {
         }
     }
 
-    if (mAudioDecoder.get() != nullptr) {
+    if (mAudioDecoder != nullptr) {
         mAudioDecoder->wait();
         mAudioDecoder.reset();
     }
 
-    if (mVideoDecoder.get() != nullptr) {
+    if (mVideoDecoder != nullptr) {
         mVideoDecoder->wait();
         mVideoDecoder.reset();
     }
@@ -1231,7 +1234,7 @@ void VideoPlayerImpl::workerThreadFunc() {
 
 // get an audio frame from the decoded queue, and convert it to buffer
 int VideoPlayerImpl::getConvertedAudioFrame() {
-    if (mAudioFrameQueue.get() == nullptr) {
+    if (mAudioFrameQueue == nullptr) {
         return -1;
     }
 
@@ -1244,7 +1247,7 @@ int VideoPlayerImpl::getConvertedAudioFrame() {
 
     int data_size = av_samples_get_buffer_size(
             NULL, av_frame_get_channels(af->frame), af->frame->nb_samples,
-            (enum AVSampleFormat)af->frame->format, 1);
+            static_cast<enum AVSampleFormat>(af->frame->format), 1);
     int wanted_nb_samples = af->frame->nb_samples;
 
     int resampled_data_size;
@@ -1252,7 +1255,7 @@ int VideoPlayerImpl::getConvertedAudioFrame() {
     if (this->mSwrCtx) {
         const uint8_t** in = (const uint8_t**)af->frame->extended_data;
         uint8_t** out = &this->mAudioBuf1;
-        int out_count = (int64_t)wanted_nb_samples + 256;
+        int out_count = static_cast<int64_t>(wanted_nb_samples) + 256;
         int out_size = av_samples_get_buffer_size(NULL, 2, out_count,
                                                   AV_SAMPLE_FMT_S16, 0);
         if (out_size < 0) {
@@ -1268,8 +1271,9 @@ int VideoPlayerImpl::getConvertedAudioFrame() {
             return -1;
         }
         if (len2 == out_count) {
-            if (swr_init(this->mSwrCtx) < 0)
+            if (swr_init(this->mSwrCtx) < 0) {
                 swr_free(&this->mSwrCtx);
+            }
         }
         this->mAudioBuf = this->mAudioBuf1;
         resampled_data_size = len2 * 2 * 2;
@@ -1280,8 +1284,9 @@ int VideoPlayerImpl::getConvertedAudioFrame() {
 
     // update the audio clock with the pts
     if (!std::isnan(af->pts)) {
-        this->mAudioClockValue = af->pts + (double)af->frame->nb_samples /
-                                                   af->frame->sample_rate;
+        this->mAudioClockValue =
+                af->pts + static_cast<double>(af->frame->nb_samples) /
+                                  af->frame->sample_rate;
     } else {
         this->mAudioClockValue = NAN;
     }
@@ -1293,7 +1298,7 @@ int VideoPlayerImpl::getConvertedAudioFrame() {
 
 // we can't block here, otherwise cause the whole emulator to freeze
 void VideoPlayerImpl::audioCallback(void* opaque, int len) {
-    VideoPlayerImpl* pThis = (VideoPlayerImpl*)opaque;
+    VideoPlayerImpl* pThis = static_cast<VideoPlayerImpl*>(opaque);
     pThis->mAudioCallbackTime = av_gettime_relative();
     while (len > 0) {
         if (pThis->mAudioBufIndex >= pThis->mAudioBufSize) {
@@ -1324,7 +1329,13 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
 
     if (!std::isnan(pThis->mAudioClockValue)) {
         int bytes_per_sec = av_samples_get_buffer_size(NULL, 2, 48000, AV_SAMPLE_FMT_S16, 1);
-        pThis->mAudioClock.setAt(pThis->mAudioClockValue - (double)(2 * 1024 + pThis->mAudioWriteBufSize) / bytes_per_sec, pThis->mAudioClockSerial, pThis->mAudioCallbackTime / 1000000.0);
+        pThis->mAudioClock.setAt(
+                pThis->mAudioClockValue -
+                        static_cast<double>(2 * 1024 +
+                                            pThis->mAudioWriteBufSize) /
+                                bytes_per_sec,
+                pThis->mAudioClockSerial,
+                pThis->mAudioCallbackTime / 1000000.0);
         pThis->mExternalClock.syncToSlave(&pThis->mAudioClock);
     }
 }
@@ -1344,50 +1355,50 @@ void VideoPlayerImpl::stop() {
 void VideoPlayerImpl::internalStop() {
     mRunning = false;
 
-    if (mAudioDecoder.get() != nullptr) {
+    if (mAudioDecoder != nullptr) {
         mAudioDecoder->abort();
     }
 
-    if (mVideoDecoder.get() != nullptr) {
+    if (mVideoDecoder != nullptr) {
         mVideoDecoder->abort();
     }
 
-    if (mAudioQueue.get() != nullptr) {
+    if (mAudioQueue != nullptr) {
         mAudioQueue->signalWait();
         // mAudioQueue.reset();
     }
 
-    if (mVideoQueue.get() != nullptr) {
+    if (mVideoQueue != nullptr) {
         mVideoQueue->signalWait();
         // mVideoQueue.reset();
     }
 
-    if (mAudioFrameQueue.get() != nullptr) {
+    if (mAudioFrameQueue != nullptr) {
         mAudioFrameQueue->signalWait();
         // mAudioFrameQueue.reset();
     }
 
-    if (mVideoFrameQueue.get() != nullptr) {
+    if (mVideoFrameQueue != nullptr) {
         mVideoFrameQueue->signalWait();
         // mVideoFrameQueue.reset();
     }
 }
 
 void VideoPlayerImpl::cleanup() {
-    if (mAudioDecoder.get() != nullptr) {
+    if (mAudioDecoder != nullptr) {
         mAudioDecoder->abort();
     }
 
-    if (mVideoDecoder.get() != nullptr) {
+    if (mVideoDecoder != nullptr) {
         mVideoDecoder->abort();
     }
 
-    if (mAudioFrameQueue.get() != nullptr) {
+    if (mAudioFrameQueue != nullptr) {
         mAudioFrameQueue->signalWait();
         // mAudioFrameQueue.reset();
     }
 
-    if (mVideoFrameQueue.get() != nullptr) {
+    if (mVideoFrameQueue != nullptr) {
         mVideoFrameQueue->signalWait();
         // mVideoFrameQueue.reset();
     }

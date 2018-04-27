@@ -70,6 +70,6 @@ private:
     DISALLOW_COPY_AND_ASSIGN(MemoryUsageReporter);
 };
 
-}  // namespace base
+}  // namespace metrics
 }  // namespace android
 

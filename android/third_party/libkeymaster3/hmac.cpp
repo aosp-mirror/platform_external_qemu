@@ -36,8 +36,9 @@ bool HmacSha256::Init(const Buffer& key) {
 }
 
 bool HmacSha256::Init(const uint8_t* key, size_t key_len) {
-    if (!key)
+    if (!key) {
         return false;
+    }
 
     key_len_ = key_len;
     key_.reset(dup_buffer(key, key_len));
@@ -57,14 +58,16 @@ bool HmacSha256::Sign(const uint8_t* data, size_t data_len, uint8_t* out_digest,
 
     uint8_t tmp[SHA256_DIGEST_LENGTH];
     uint8_t* digest = tmp;
-    if (digest_len >= SHA256_DIGEST_LENGTH)
+    if (digest_len >= SHA256_DIGEST_LENGTH) {
         digest = out_digest;
+    }
 
     if (nullptr == ::HMAC(EVP_sha256(), key_.get(), key_len_, data, data_len, digest, nullptr)) {
         return false;
     }
-    if (digest_len < SHA256_DIGEST_LENGTH)
+    if (digest_len < SHA256_DIGEST_LENGTH) {
         memcpy(out_digest, tmp, digest_len);
+    }
 
     return true;
 }
@@ -76,12 +79,14 @@ bool HmacSha256::Verify(const Buffer& data, const Buffer& digest) const {
 
 bool HmacSha256::Verify(const uint8_t* data, size_t data_len, const uint8_t* digest,
                         size_t digest_len) const {
-    if (digest_len != SHA256_DIGEST_LENGTH)
+    if (digest_len != SHA256_DIGEST_LENGTH) {
         return false;
+    }
 
     uint8_t computed_digest[SHA256_DIGEST_LENGTH];
-    if (!Sign(data, data_len, computed_digest, sizeof(computed_digest)))
+    if (!Sign(data, data_len, computed_digest, sizeof(computed_digest))) {
         return false;
+    }
 
     return 0 == CRYPTO_memcmp(digest, computed_digest, SHA256_DIGEST_LENGTH);
 }

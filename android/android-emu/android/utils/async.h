@@ -14,11 +14,11 @@
 
 #include "android/utils/compiler.h"
 
-#include <stdint.h>
+#include <stdint.h>  // NOLINT
 
 ANDROID_BEGIN_HEADER
 
-typedef intptr_t (*async_function_t)(void);
+typedef intptr_t (*async_function_t)(void);  // NOLINT
 
 // Run the passed |func| in a separate thread, not waiting for it to finish
 // If |maskSignals| is true, mask all Posix signals in the new thread

@@ -38,7 +38,7 @@
 
 #include <algorithm>
 #include <fstream>
-
+#include <memory>
 using android::base::IniFile;
 using android::base::PathUtils;
 using android::base::StringAppendFormat;
@@ -133,7 +133,7 @@ BugreportPage::BugreportPage(QWidget* parent)
     mReportingFields.cpuModel = android::GetCpuInfo().second;
 
     SettingsTheme theme = getSelectedTheme();
-    QMovie* movie = new QMovie(this);
+    auto* movie = new QMovie(this);
     movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
                        "/circular_spinner");
     if (movie->isValid()) {
@@ -169,7 +169,7 @@ void BugreportPage::initialize(EmulatorQtWindow* eW) {
 
 void BugreportPage::updateTheme() {
     SettingsTheme theme = getSelectedTheme();
-    QMovie* movie = new QMovie(this);
+    auto* movie = new QMovie(this);
     movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
                        "/circular_spinner");
     if (movie->isValid()) {
@@ -262,7 +262,7 @@ void BugreportPage::saveBugReportFolder(bool willOpenIssueTracker) {
 }
 
 void BugreportPage::saveBugreportFolderFinished(bool success,
-                                                QString folderPath,
+                                                const QString& folderPath,
                                                 bool willOpenIssueTracker) {
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->bug_sendToGoogle, theme, true);
@@ -288,7 +288,8 @@ void BugreportPage::saveBugreportFolderStarted() {
     setButtonEnabled(mUi->bug_saveButton, theme, false);
 }
 
-void BugreportPage::issueTrackerTaskFinished(bool success, QString error) {
+void BugreportPage::issueTrackerTaskFinished(bool success,
+                                             const QString& error) {
     if (!success) {
         QString errMsg =
                 tr("There was an error while opening the Google issue "
@@ -332,8 +333,9 @@ void BugreportPage::launchIssueTrackerThread() {
 
 void BugreportPage::loadAdbBugreport() {
     // Avoid generating adb bugreport multiple times while in execution.
-    if (mBugReportServices->isBugReportInFlight())
+    if (mBugReportServices->isBugReportInFlight()) {
         return;
+    }
     mSavingStates.adbBugreportSucceed = false;
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->bug_sendToGoogle, theme, false);
@@ -407,7 +409,7 @@ void BugreportPage::loadAvdDetails() {
         StringAppendFormat(&mReportingFields.avdDetails,
                            "Target: %s (API level %d)\n", tag,
                            avdInfo_getApiLevel(android_avdInfo));
-        free((char*)tag);
+        free(const_cast<char*>(tag));
 
         char* skinName = nullptr;
         char* skinDir = nullptr;
@@ -428,7 +430,7 @@ void BugreportPage::loadAvdDetails() {
         }
         StringAppendFormat(&mReportingFields.avdDetails, "SD Card: %s\n",
                            sdcard);
-        free((char*)sdcard);
+        free(const_cast<char*>(sdcard));
 
         if (configIni->hasKey(SNAPSHOT_PRESENT)) {
             StringAppendFormat(
@@ -551,7 +553,7 @@ void BugReportFolderSavingTask::run() {
 
 IssueTrackerTask::IssueTrackerTask(
         BugreportPage::ReportingFields reportingFields)
-    : mReportingFields(reportingFields) {}
+    : mReportingFields(std::move(reportingFields)) {}
 
 void IssueTrackerTask::run() {
     std::string bugTemplate = StringFormat(

@@ -31,7 +31,7 @@ TEST(MemoryHints, Basic) {
     // to get around flaky lucky alignments and so forth.
     std::vector<char*> toDealloc;
     for (int i = 0; i < numIter; i++) {
-        char* unalignedPtr = new char[pageSize];
+        auto* unalignedPtr = new char[pageSize];
 
         // Don't delete those ptrs right away either, because
         // chances are they will just reuse the same addresses
@@ -43,12 +43,11 @@ TEST(MemoryHints, Basic) {
         memoryHint(unalignedPtr, pageSize, MemoryHint::Random);
         memoryHint(unalignedPtr, pageSize, MemoryHint::Sequential);
 
-        char* forAlignedPtr = new char[pageSize * 2];
+        auto* forAlignedPtr = new char[pageSize * 2];
         toDealloc.push_back(forAlignedPtr);
-        char* pagePtr =
-            (char*)((uintptr_t)(forAlignedPtr +
-                        (uintptr_t)(pageSize)) &
-                    (~(pageSize - 1)));
+        auto* pagePtr = (char*)((uintptr_t)(forAlignedPtr +
+                                            static_cast<uintptr_t>(pageSize)) &
+                                (~(pageSize - 1)));
 
         EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::DontNeed));
         EXPECT_TRUE(memoryHint(pagePtr, pageSize, MemoryHint::Normal));
@@ -68,10 +67,10 @@ TEST(MemoryHints, Basic) {
 // crash. All bets are off as to the return result, as some hint
 // settings are not supported on some platforms and are no-ops.
 TEST(MemoryHints, Negative) {
-    memoryHint(0, 4096, MemoryHint::DontNeed);
-    memoryHint(0, 4096, MemoryHint::Normal);
-    memoryHint(0, 4096, MemoryHint::Random);
-    memoryHint(0, 4096, MemoryHint::Sequential);
+    memoryHint(nullptr, 4096, MemoryHint::DontNeed);
+    memoryHint(nullptr, 4096, MemoryHint::Normal);
+    memoryHint(nullptr, 4096, MemoryHint::Random);
+    memoryHint(nullptr, 4096, MemoryHint::Sequential);
 }
 
 }  // namespace base

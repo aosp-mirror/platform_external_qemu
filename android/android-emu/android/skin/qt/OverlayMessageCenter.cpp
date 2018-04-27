@@ -24,19 +24,19 @@
 #include <QLabel>
 #include <QPointer>
 #include <QStyle>
-#include <QtMath>
 #include <QTextLayout>
 #include <QTimer>
 #include <QVariantAnimation>
-
+#include <QtMath>
+#include <utility>
 using android::base::Optional;
 
 namespace Ui {
 
 OverlayChildWidget::OverlayChildWidget(OverlayMessageCenter* parent,
                                        QString text,
-                                       QPixmap icon)
-    : QFrame(parent), mText(text) {
+                                       const QPixmap& icon)
+    : QFrame(parent), mText(std::move(text)) {
     setObjectName("OverlayChildWidget");
     setStyleSheet(QString("* { font-size: %1; } #OverlayChildWidget { "
                           "border-radius: %2px; border-style: outward; "
@@ -334,7 +334,8 @@ OverlayChildWidget* OverlayMessageCenter::addMessage(QString message,
         dismissMessage(static_cast<OverlayChildWidget*>(children[i]));
     }
 
-    auto widget = new OverlayChildWidget(this, message, this->icon(icon));
+    auto widget =
+            new OverlayChildWidget(this, std::move(message), this->icon(icon));
 
     QPointer<OverlayChildWidget> widgetPtr = widget;
     widget->dismissButton()->connect(widget->dismissButton(),

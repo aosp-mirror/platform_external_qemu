@@ -26,8 +26,8 @@ extern "C" {
 
 using namespace vixl;
 
-static Decoder *vixl_decoder = NULL;
-static Disassembler *vixl_disasm = NULL;
+static Decoder* vixl_decoder = nullptr;
+static Disassembler* vixl_disasm = nullptr;
 
 /* We don't use libvixl's PrintDisassembler because its output
  * is a little unhelpful (trailing newlines, for example).
@@ -36,8 +36,8 @@ static Disassembler *vixl_disasm = NULL;
  */
 class QEMUDisassembler : public Disassembler {
 public:
-    QEMUDisassembler() : printf_(NULL), stream_(NULL) { }
-    ~QEMUDisassembler() { }
+    QEMUDisassembler() : printf_(nullptr), stream_(nullptr) {}
+    ~QEMUDisassembler() override = default;
 
     void SetStream(FILE *stream) {
         stream_ = stream;
@@ -48,7 +48,7 @@ public:
     }
 
 protected:
-    virtual void ProcessOutput(const Instruction *instr) {
+    void ProcessOutput(const Instruction* instr) override {
         printf_(stream_, "%08" PRIx32 "      %s",
                 instr->InstructionBits(), GetOutput());
     }
@@ -58,9 +58,8 @@ private:
     FILE *stream_;
 };
 
-static int vixl_is_initialized(void)
-{
-    return vixl_decoder != NULL;
+static int vixl_is_initialized() {
+    return vixl_decoder != nullptr;
 }
 
 static void vixl_init() {

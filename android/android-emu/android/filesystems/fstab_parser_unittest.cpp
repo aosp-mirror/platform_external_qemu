@@ -26,7 +26,7 @@ TEST(FstabParser, ParsePartitionFormat) {
         ;
     static const size_t kFstabSize = sizeof(kFstab);
 
-    char* out = NULL;
+    char* out = nullptr;
     EXPECT_TRUE(android_parseFstabPartitionFormat(kFstab, kFstabSize,
                                                   "/system", &out));
     EXPECT_STREQ("ext4", out);

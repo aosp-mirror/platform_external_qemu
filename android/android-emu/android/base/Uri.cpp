@@ -17,7 +17,7 @@
 
 #include "android/base/StringFormat.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace android {
 namespace base {
@@ -64,7 +64,7 @@ std::string Uri::Encode(StringView uri) {
 }
 
 // static
-std::string Uri::Decode(StringView uri) {
+std::string Uri::Decode(const StringView& uri) {
     std::string decodedUri;
     decodedUri.reserve(uri.size());
     for (StringView::const_iterator cit = uri.begin(); cit != uri.end();
@@ -85,7 +85,7 @@ std::string Uri::Decode(StringView uri) {
             hex[1] = *cit;
 
             hex[2] = '\0';
-            decodedChar = static_cast<char>(strtoul(hex, NULL, 16));
+            decodedChar = static_cast<char>(strtoul(hex, nullptr, 16));
             if (decodedChar == 0) {
                 return "";
             }
@@ -97,7 +97,7 @@ std::string Uri::Decode(StringView uri) {
     return decodedUri;
 }
 
-std::string Uri::FormatHelper::encodeArg(StringView str) {
+std::string Uri::FormatHelper::encodeArg(const StringView& str) {
     return Uri::Encode(str);
 }
 

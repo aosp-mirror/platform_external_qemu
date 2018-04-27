@@ -120,8 +120,8 @@ ObjectLocalName NamespaceImpl::GenLocalName() {
 }
 
 ObjectGlobalName NamespaceImpl::GetGlobalName(ObjectLocalName local_name) {
-  NameMap::iterator it = names_.find(local_name);
-  return it != names_.end() ? it->second : 0;
+    auto it = names_.find(local_name);
+    return it != names_.end() ? it->second : 0;
 }
 
 void NamespaceImpl::SetGlobalName(ObjectLocalName local_name,
@@ -130,16 +130,16 @@ void NamespaceImpl::SetGlobalName(ObjectLocalName local_name,
 }
 
 void NamespaceImpl::DeleteName(GlesContext* c, ObjectLocalName local_name) {
-  NameMap::iterator it = names_.find(local_name);
-  if (it != names_.end()) {
-    DeleteGlobalName(c, type_, it->second);
-    names_.erase(it);
+    auto it = names_.find(local_name);
+    if (it != names_.end()) {
+        DeleteGlobalName(c, type_, it->second);
+        names_.erase(it);
   }
 }
 
 void NamespaceImpl::DeleteAllNames(GlesContext* c) {
-  for (NameMap::iterator it = names_.begin(); it != names_.end(); ++it) {
-    DeleteGlobalName(c, type_, it->second);
+    for (auto& name : names_) {
+        DeleteGlobalName(c, type_, name.second);
   }
   names_.clear();
 }
@@ -147,16 +147,16 @@ void NamespaceImpl::DeleteAllNames(GlesContext* c) {
 ShareGroup::ShareGroup(GlesContext* context)
   : context_(context) {
   for (int i = 0; i < NUM_OBJECT_TYPES; ++i) {
-    namespace_[i] = new NamespaceImpl((ObjectType)i);
+      namespace_[i] = new NamespaceImpl(static_cast<ObjectType>(i));
   }
 }
 
 ShareGroup::~ShareGroup() {
     AutoLock mutex(lock_);
   objects_.clear();
-  for (int i = 0; i < NUM_OBJECT_TYPES; ++i) {
-    namespace_[i]->DeleteAllNames(context_);
-    delete namespace_[i];
+  for (auto& i : namespace_) {
+      i->DeleteAllNames(context_);
+      delete i;
   }
 }
 
@@ -193,7 +193,7 @@ ObjectDataPtr ShareGroup::GetObject(ObjectType type, ObjectLocalName name,
   AutoLock mutex(lock_);
 
   const ObjectID id = GetObjectID(type, name);
-  ObjectDataMap::iterator iter = objects_.find(id);
+  auto iter = objects_.find(id);
   if (iter != objects_.end()) {
     return iter->second;
   }

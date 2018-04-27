@@ -35,7 +35,7 @@
 #include <memory>
 #include <sstream>
 
-#include <stdint.h>
+#include <cstdint>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -71,8 +71,7 @@ void HostCrashService::OnClientExit(
         void* context,
         const google_breakpad::ClientInfo& client_info) {
     D("Client exiting\n");
-    CrashService::ServerState* serverstate =
-            static_cast<CrashService::ServerState*>(context);
+    auto* serverstate = static_cast<CrashService::ServerState*>(context);
     if (serverstate->connected > 0) {
         serverstate->connected -= 1;
     }
@@ -87,10 +86,10 @@ bool HostCrashService::startCrashServer(const std::string& pipe) {
     }
     initCrashServer();
 
-    mCrashServer.reset(new ::google_breakpad::CrashGenerationServer(
+    mCrashServer = std::make_unique<::google_breakpad::CrashGenerationServer>(
             pipe.c_str(), nullptr, nullptr, &OnClientDumpRequest,
             &mDumpRequestContext, &OnClientExit, &mServerState, true,
-            CrashSystem::get()->getCrashDirectory()));
+            CrashSystem::get()->getCrashDirectory());
     if (!mCrashServer) {
         return false;
     }

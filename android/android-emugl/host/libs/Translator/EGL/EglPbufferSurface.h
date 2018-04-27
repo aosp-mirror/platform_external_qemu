@@ -30,8 +30,8 @@ public:
                                          m_largest(EGL_FALSE){};
 
     void  setNativePbuffer(EglOS::Surface* srfc) { m_native = srfc; }
-    bool  setAttrib(EGLint attrib,EGLint val);
-    bool  getAttrib(EGLint attrib,EGLint* val);
+    bool setAttrib(EGLint attrib, EGLint val) override;
+    bool getAttrib(EGLint attrib, EGLint* val) override;
     void  getDim(EGLint* width,EGLint* height,EGLint* largest){
                                                               *width = m_width;
                                                               *height = m_height;

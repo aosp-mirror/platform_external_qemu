@@ -25,25 +25,27 @@ class RenderLibImpl final : public RenderLib {
 public:
     RenderLibImpl() = default;
 
-    virtual void setRenderer(SelectedRenderer renderer) override;
-    virtual void setAvdInfo(bool phone, int api) override;
-    virtual void getGlesVersion(int* maj, int* min) override;
-    virtual void setLogger(emugl_logger_struct logger) override;
-    virtual void setCrashReporter(emugl_crash_reporter_t reporter) override;
-    virtual void setFeatureController(emugl_feature_is_enabled_t featureController) override;
-    virtual void setSyncDevice(emugl_sync_create_timeline_t,
-                               emugl_sync_create_fence_t,
-                               emugl_sync_timeline_inc_t,
-                               emugl_sync_destroy_timeline_t,
-                               emugl_sync_register_trigger_wait_t,
-                               emugl_sync_device_exists_t) override;
+    void setRenderer(SelectedRenderer renderer) override;
+    void setAvdInfo(bool phone, int api) override;
+    void getGlesVersion(int* maj, int* min) override;
+    void setLogger(emugl_logger_struct logger) override;
+    void setCrashReporter(emugl_crash_reporter_t reporter) override;
+    void setFeatureController(
+            emugl_feature_is_enabled_t featureController) override;
+    void setSyncDevice(emugl_sync_create_timeline_t,
+                       emugl_sync_create_fence_t,
+                       emugl_sync_timeline_inc_t,
+                       emugl_sync_destroy_timeline_t,
+                       emugl_sync_register_trigger_wait_t,
+                       emugl_sync_device_exists_t) override;
 
-    virtual void setDmaOps(emugl_dma_ops) override;
+    void setDmaOps(emugl_dma_ops) override;
 
-    virtual RendererPtr initRenderer(int width,
-                                     int height,
-                                     bool useSubWindow,
-                                     bool egl2egl) override;
+    RendererPtr initRenderer(int width,
+                             int height,
+                             bool useSubWindow,
+                             bool egl2egl) override;
+
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderLibImpl);
 

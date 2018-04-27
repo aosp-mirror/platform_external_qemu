@@ -16,8 +16,8 @@
 #include <libxml/parser.h>
 
 #include <algorithm>
-#include <string.h>
-#include <time.h>
+#include <cstring>
+#include <ctime>
 
 using std::string;
 
@@ -45,11 +45,12 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
     xmlChar *tmpStr;
 
     // Check for and get the latitude attribute
-    attr = xmlHasProp(ptNode, (const xmlChar *) "lat");
-    if (!attr || !(tmpStr = xmlGetProp(ptNode, (const xmlChar *) "lat"))) {
+    attr = xmlHasProp(ptNode, reinterpret_cast<const xmlChar*>("lat"));
+    if (!attr || !(tmpStr = xmlGetProp(
+                           ptNode, reinterpret_cast<const xmlChar*>("lat")))) {
         *error = formatError("Point missing a latitude on line %d.",
                              ptNode->line);
-        return false; // Return error since a point *must* have a latitude
+        return false;  // Return error since a point *must* have a latitude
     } else {
         int read =
             android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &latitude);
@@ -60,11 +61,12 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
     }
 
     // Check for and get the longitude attribute
-    attr = xmlHasProp(ptNode, (const xmlChar *) "lon");
-    if (!attr || !(tmpStr = xmlGetProp(ptNode, (const xmlChar *) "lon"))) {
+    attr = xmlHasProp(ptNode, reinterpret_cast<const xmlChar*>("lon"));
+    if (!attr || !(tmpStr = xmlGetProp(
+                           ptNode, reinterpret_cast<const xmlChar*>("lon")))) {
         *error = formatError("Point missing a longitude on line %d.",
                              ptNode->line);
-        return false; // Return error since a point *must* have a longitude
+        return false;  // Return error since a point *must* have a longitude
     } else {
         int read =
             android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &longitude);
@@ -84,53 +86,54 @@ static bool parseLocation(xmlNode *ptNode, xmlDoc *doc, GpsFix *result, string *
     for (xmlNode *field = ptNode->children; field; field = field->next) {
         tmpStr = nullptr;
 
-        if ( !strcmp((const char *) field->name, "time") ) {
+        if (!strcmp(reinterpret_cast<const char*>(field->name), "time")) {
             if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
                 // Convert to a number
                 struct tm time = {};
                 time.tm_isdst = -1;
-                int results = sscanf((const char *)tmpStr,
-                                     "%u-%u-%uT%u:%u:%u",
-                                     &time.tm_year, &time.tm_mon, &time.tm_mday,
-                                     &time.tm_hour, &time.tm_min, &time.tm_sec);
+                int results = sscanf(reinterpret_cast<const char*>(tmpStr),
+                                     "%u-%u-%uT%u:%u:%u", &time.tm_year,
+                                     &time.tm_mon, &time.tm_mday, &time.tm_hour,
+                                     &time.tm_min, &time.tm_sec);
                 if (results != 6) {
                     *error = formatError(
-                                 "Improperly formatted time on line %d.<br/>"
-                                 "Times must be in ISO format.", ptNode->line);
+                            "Improperly formatted time on line %d.<br/>"
+                            "Times must be in ISO format.",
+                            ptNode->line);
                     return false;
                 }
 
                 // Correct according to the struct tm specification
-                time.tm_year -= 1900; // Years since 1900
-                time.tm_mon -= 1; // Months since January, 0-11
+                time.tm_year -= 1900;  // Years since 1900
+                time.tm_mon -= 1;      // Months since January, 0-11
 
                 result->time = mktime(&time);
-                xmlFree(tmpStr); // Caller-freed
+                xmlFree(tmpStr);  // Caller-freed
                 childCount++;
             }
-        }
-        else if ( !strcmp((const char *) field->name, "ele") ) {
+        } else if (!strcmp(reinterpret_cast<const char*>(field->name), "ele")) {
             if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
-                int read =
-                    android::base::SscanfWithCLocale(reinterpret_cast<const char*>(tmpStr), "%f", &result->elevation);
-                xmlFree(tmpStr); // Caller-freed
+                int read = android::base::SscanfWithCLocale(
+                        reinterpret_cast<const char*>(tmpStr), "%f",
+                        &result->elevation);
+                xmlFree(tmpStr);  // Caller-freed
                 if (read != 1) {
                     return false;
                 }
                 childCount++;
             }
-        }
-        else if ( !strcmp((const char *) field->name, "name") ) {
+        } else if (!strcmp(reinterpret_cast<const char*>(field->name),
+                           "name")) {
             if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
                 result->name = reinterpret_cast<const char*>(tmpStr);
-                xmlFree(tmpStr); // Caller-freed
+                xmlFree(tmpStr);  // Caller-freed
                 childCount++;
             }
-        }
-        else if ( !strcmp((const char *) field->name, "desc") ) {
+        } else if (!strcmp(reinterpret_cast<const char*>(field->name),
+                           "desc")) {
             if ((tmpStr = xmlNodeListGetString(doc, field->children, 1))) {
                 result->description = reinterpret_cast<const char*>(tmpStr);
-                xmlFree(tmpStr); // Caller-freed
+                xmlFree(tmpStr);  // Caller-freed
                 childCount++;
             }
         }
@@ -153,7 +156,7 @@ static bool parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
     for (xmlNode *child = root->children; child; child = child->next) {
 
         // Individual <wpt> elements are parsed on their own
-        if ( !strcmp((const char *) child->name, "wpt") ) {
+        if (!strcmp(reinterpret_cast<const char*>(child->name), "wpt")) {
             isOk = parseLocation(child, doc, &location, error);
             if (!isOk) {
                 cleanupXmlDoc(doc);
@@ -163,11 +166,11 @@ static bool parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
         }
 
         // <rte> elements require an additional depth of parsing
-        else if ( !strcmp((const char *) child->name, "rte") ) {
-            for (xmlNode *rtept = child->children; rtept; rtept = rtept->next) {
-
+        else if (!strcmp(reinterpret_cast<const char*>(child->name), "rte")) {
+            for (xmlNode* rtept = child->children; rtept; rtept = rtept->next) {
                 // <rtept> elements are parsed just like <wpt> elements
-                if ( !strcmp((const char *) rtept->name, "rtept") ) {
+                if (!strcmp(reinterpret_cast<const char*>(rtept->name),
+                            "rtept")) {
                     isOk = parseLocation(rtept, doc, &location, error);
                     if (!isOk) {
                         cleanupXmlDoc(doc);
@@ -179,17 +182,18 @@ static bool parse(xmlDoc *doc, GpsFixArray *fixes, string *error)
         }
 
         // <trk> elements require two additional depths of parsing
-        else if ( !strcmp((const char *) child->name, "trk") ) {
-            for (xmlNode *trkseg = child->children; trkseg; trkseg = trkseg->next) {
-
+        else if (!strcmp(reinterpret_cast<const char*>(child->name), "trk")) {
+            for (xmlNode* trkseg = child->children; trkseg;
+                 trkseg = trkseg->next) {
                 // Skip non <trkseg> elements
-                if ( !strcmp((const char *) trkseg->name, "trkseg") ) {
-
+                if (!strcmp(reinterpret_cast<const char*>(trkseg->name),
+                            "trkseg")) {
                     // <trkseg> elements an additional depth of parsing
-                    for (xmlNode *trkpt = trkseg->children; trkpt; trkpt = trkpt->next) {
-
+                    for (xmlNode* trkpt = trkseg->children; trkpt;
+                         trkpt = trkpt->next) {
                         // <trkpt> elements are parsed just like <wpt> elements
-                        if ( !strcmp((const char *) trkpt->name, "trkpt") ) {
+                        if (!strcmp(reinterpret_cast<const char*>(trkpt->name),
+                                    "trkpt")) {
                             isOk = parseLocation(trkpt, doc, &location, error);
                             if (!isOk) {
                                 cleanupXmlDoc(doc);

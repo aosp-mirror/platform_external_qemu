@@ -28,7 +28,7 @@ namespace ScreenMask {
 
 // These allow us to re-send an ADB command
 static AdbInterface* sAdbInterface = nullptr;
-static const char* sRoundedContentPadding = 0;
+static const char* sRoundedContentPadding = nullptr;
 static int sRetryCount = 0;
 
 static QImage sScreenMaskImage;
@@ -41,7 +41,7 @@ static void loadMaskImage(AConfig* config, char* skinDir, char* skinName) {
     // Get the mask itself. The layout has the file name as
     // parts/portrait/foreground/mask.
 
-    const char* maskFilename = aconfig_str(config, "mask", 0);
+    const char* maskFilename = aconfig_str(config, "mask", nullptr);
     if (!maskFilename || maskFilename[0] == '\0') {
         return;
     }
@@ -100,7 +100,7 @@ static void setPadding(AConfig* config) {
     // and send that number to the device. The layout has this
     // number as parts/portrait/foreground/padding
 
-    sRoundedContentPadding = aconfig_str(config, "padding", 0);
+    sRoundedContentPadding = aconfig_str(config, "padding", nullptr);
     if (sRoundedContentPadding && sRoundedContentPadding[0] != '\0') {
         sendAdbPaddingCommand();
     }
@@ -122,19 +122,19 @@ void loadMask(AdbInterface* adbInterface) {
     // Look for parts/portrait/foreground
 
     AConfig* nextConfig = aconfig_find(rootConfig, "parts");
-    if (nextConfig == NULL) {
+    if (nextConfig == nullptr) {
         return;
     }
     nextConfig = aconfig_find(nextConfig, "portrait");
-    if (nextConfig == NULL) {
+    if (nextConfig == nullptr) {
         return;
     }
     AConfig* foregroundConfig = aconfig_find(nextConfig, "foreground");
 
-    if (foregroundConfig != NULL) {
+    if (foregroundConfig != nullptr) {
         setPadding(foregroundConfig);
         loadMaskImage(foregroundConfig, skinDir, skinName);
     }
 }
 
-}
+}  // namespace ScreenMask

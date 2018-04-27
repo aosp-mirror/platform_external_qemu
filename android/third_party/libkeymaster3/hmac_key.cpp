@@ -44,8 +44,9 @@ keymaster_error_t HmacKeyFactory::LoadKey(const KeymasterKeyBlob& key_material,
                                           const AuthorizationSet& hw_enforced,
                                           const AuthorizationSet& sw_enforced,
                                           UniquePtr<Key>* key) const {
-    if (!key)
+    if (!key) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     uint32_t min_mac_length;
     if (!hw_enforced.GetTagValue(TAG_MIN_MAC_LENGTH, &min_mac_length) &&
@@ -56,16 +57,19 @@ keymaster_error_t HmacKeyFactory::LoadKey(const KeymasterKeyBlob& key_material,
 
     keymaster_error_t error;
     key->reset(new (std::nothrow) HmacKey(key_material, hw_enforced, sw_enforced, &error));
-    if (!key->get())
+    if (!key->get()) {
         error = KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     return error;
 }
 
 keymaster_error_t HmacKeyFactory::validate_algorithm_specific_new_key_params(
     const AuthorizationSet& key_description) const {
     uint32_t min_mac_length_bits;
-    if (!key_description.GetTagValue(TAG_MIN_MAC_LENGTH, &min_mac_length_bits))
+    if (!key_description.GetTagValue(TAG_MIN_MAC_LENGTH,
+                                     &min_mac_length_bits)) {
         return KM_ERROR_MISSING_MIN_MAC_LENGTH;
+    }
 
     keymaster_digest_t digest;
     if (!key_description.GetTagValue(TAG_DIGEST, &digest)) {
@@ -102,11 +106,13 @@ keymaster_error_t HmacKeyFactory::validate_algorithm_specific_new_key_params(
         return KM_ERROR_UNSUPPORTED_DIGEST;
     }
 
-    if (min_mac_length_bits % 8 != 0 || min_mac_length_bits > hash_size_bits)
+    if (min_mac_length_bits % 8 != 0 || min_mac_length_bits > hash_size_bits) {
         return KM_ERROR_UNSUPPORTED_MIN_MAC_LENGTH;
+    }
 
-    if (min_mac_length_bits < kMinHmacLengthBits)
+    if (min_mac_length_bits < kMinHmacLengthBits) {
         return KM_ERROR_UNSUPPORTED_MIN_MAC_LENGTH;
+    }
 
     return KM_ERROR_OK;
 }

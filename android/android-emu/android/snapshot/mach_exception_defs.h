@@ -48,7 +48,7 @@ ANDROID_BEGIN_HEADER
 
 #define MY_THREAD_STATE_COUNT x86_THREAD_STATE64_COUNT
 #define MY_THREAD_STATE_FLAVOR x86_THREAD_STATE64
-typedef x86_thread_state64_t my_thread_state_t;
+using my_thread_state_t = x86_thread_state64_t;
 
 #define MY_IP __rip
 

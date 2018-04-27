@@ -14,8 +14,8 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Thread.h"
 
-#include <assert.h>
 #include <openssl/crypto.h>
+#include <cassert>
 
 using android::base::Lock;
 using android::base::Thread;

@@ -26,8 +26,8 @@
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/TranslatorIfaces.h"
 
-#include <assert.h>
-
+#include <cassert>
+#include <memory>
 using android::snapshot::ITextureSaver;
 using android::snapshot::ITextureLoader;
 using android::snapshot::ITextureSaverPtr;
@@ -45,13 +45,12 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
     size_t objSize = stream->getBe32();
     for (size_t obj = 0; obj < objSize; obj++) {
         ObjectLocalName localName = stream->getBe64();
-        ObjectDataPtr data = loadObject((NamedObjectType)m_type,
-                localName, stream);
+        ObjectDataPtr data = loadObject(m_type, localName, stream);
         if (m_type == NamedObjectType::TEXTURE) {
             // Texture data are managed differently
             // They are loaded by GlobalNameSpace before loading
             // share groups
-            TextureData* texData = (TextureData*)data.get();
+            auto* texData = (TextureData*)data.get();
             SaveableTexturePtr saveableTexture =
                     globalNameSpace->getSaveableTextureFromLoad(
                         texData->globalName);
@@ -62,8 +61,7 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
     }
 }
 
-NameSpace::~NameSpace() {
-}
+NameSpace::~NameSpace() = default;
 
 void NameSpace::postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr) {
     for (const auto& objData : m_objectDataMap) {
@@ -74,7 +72,7 @@ void NameSpace::postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr) {
 void NameSpace::touchTextures() {
     assert(m_type == NamedObjectType::TEXTURE);
     for (const auto& obj : m_objectDataMap) {
-        TextureData* texData = (TextureData*)obj.second.get();
+        auto* texData = (TextureData*)obj.second.get();
         if (!texData->needRestore()) {
             continue;
         }
@@ -122,8 +120,8 @@ void NameSpace::preSave(GlobalNameSpace *globalNameSpace) {
     }
     // In case we loaded textures from a previous snapshot and have not yet
     // restore them to GPU, we do the restoration here.
-    // TODO: skip restoration and write saveableTexture directly to the new
-    // snapshot
+    // TODO(yahan): skip restoration and write saveableTexture directly to the
+    // new snapshot
     touchTextures();
     for (const auto& obj : m_objectDataMap) {
         globalNameSpace->preSaveAddTex((TextureData*)obj.second.get());
@@ -151,10 +149,11 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
                         m_localToGlobalMap.end() );
     }
 
-    auto it = m_localToGlobalMap.emplace(localName,
-                                         NamedObjectPtr(
-                                            new NamedObject(genNameInfo,
-                                                    m_globalNameSpace))).first;
+    auto it =
+            m_localToGlobalMap
+                    .emplace(localName, std::make_shared<NamedObject>(
+                                                genNameInfo, m_globalNameSpace))
+                    .first;
     unsigned int globalName = it->second->getGlobalName();
     m_globalToLocalMap[globalName] = localName;
 
@@ -165,7 +164,7 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
 unsigned int
 NameSpace::getGlobalName(ObjectLocalName p_localName)
 {
-    NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
+    auto n(m_localToGlobalMap.find(p_localName));
     if (n != m_localToGlobalMap.end()) {
         // object found - return its global name map
         return (*n).second->getGlobalName();
@@ -198,7 +197,7 @@ NamedObjectPtr NameSpace::getNamedObject(ObjectLocalName p_localName) {
 void
 NameSpace::deleteName(ObjectLocalName p_localName)
 {
-    NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
+    auto n(m_localToGlobalMap.find(p_localName));
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         m_localToGlobalMap.erase(n);
@@ -215,7 +214,7 @@ NameSpace::isObject(ObjectLocalName p_localName)
 void
 NameSpace::setGlobalObject(ObjectLocalName p_localName,
                                NamedObjectPtr p_namedObject) {
-    NamesMap::iterator n(m_localToGlobalMap.find(p_localName));
+    auto n(m_localToGlobalMap.find(p_localName));
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         (*n).second = p_namedObject;
@@ -225,11 +224,9 @@ NameSpace::setGlobalObject(ObjectLocalName p_localName,
     m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
 }
 
-void
-NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
-                               NamedObjectPtr p_namedObject)
-{
-    NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
+void NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
+                                    const NamedObjectPtr& p_namedObject) {
+    auto n(m_localToGlobalMap.find(p_localName));
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         (*n).second = p_namedObject;

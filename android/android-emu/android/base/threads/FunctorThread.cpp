@@ -14,7 +14,7 @@
 
 #include "FunctorThread.h"
 
-#include <assert.h>
+#include <cassert>
 
 namespace android {
 namespace base {

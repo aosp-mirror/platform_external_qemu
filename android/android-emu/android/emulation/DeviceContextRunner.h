@@ -94,7 +94,7 @@ public:
                     static_cast<DeviceContextRunner*>(that)->onTimerEvent();
                 },
                 this));
-        if (!mTimer.get()) {
+        if (!mTimer) {
             LOG(FATAL) << "Failed to create a loop timer in DeviceContextRunner";
         }
     }

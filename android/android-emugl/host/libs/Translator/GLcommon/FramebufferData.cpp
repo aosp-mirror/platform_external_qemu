@@ -22,12 +22,12 @@
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-
+#include <memory>
 RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     ObjectData(stream) {
     attachedFB = stream->getBe32();
     attachedPoint = stream->getBe32();
-    // TODO: load eglImageGlobalTexObject
+    // TODO(yahan): load eglImageGlobalTexObject
     width = stream->getBe32();
     height = stream->getBe32();
     internalformat = stream->getBe32();
@@ -38,7 +38,7 @@ void RenderbufferData::onSave(android::base::Stream* stream, unsigned int global
     ObjectData::onSave(stream, globalName);
     stream->putBe32(attachedFB);
     stream->putBe32(attachedPoint);
-    // TODO: snapshot eglImageGlobalTexObject
+    // TODO(yahan): snapshot eglImageGlobalTexObject
     if (eglImageGlobalTexObject) {
         fprintf(stderr, "RenderbufferData::onSave: warning:"
                 " EglImage snapshot unimplemented. \n");
@@ -81,7 +81,7 @@ FramebufferData::FramebufferData(android::base::Stream* stream) :
     for (auto& attachPoint : m_attachPoints) {
         attachPoint.target = stream->getBe32();
         attachPoint.name = stream->getBe32();
-        attachPoint.objType = (NamedObjectType)stream->getBe32();
+        attachPoint.objType = static_cast<NamedObjectType>(stream->getBe32());
         // attachPoint.obj will be set up in postLoad
         attachPoint.owned = stream->getByte();
     }
@@ -107,10 +107,11 @@ void FramebufferData::onSave(android::base::Stream* stream, unsigned int globalN
         stream->putBe32(attachPoint.name);
         // do not save attachPoint.obj
         if (attachPoint.obj) {
-            stream->putBe32((uint32_t)ObjectDataType2NamedObjectType(
-                    attachPoint.obj->getDataType()));
+            stream->putBe32(
+                    static_cast<uint32_t>(ObjectDataType2NamedObjectType(
+                            attachPoint.obj->getDataType())));
         } else {
-            stream->putBe32((uint32_t)NamedObjectType::NULLTYPE);
+            stream->putBe32(static_cast<uint32_t>(NamedObjectType::NULLTYPE));
         }
         stream->putByte(attachPoint.owned);
     }
@@ -129,7 +130,7 @@ void FramebufferData::postLoad(const getObjDataPtr_t& getObjDataPtr) {
             if (!attachPoint.obj) {
                 fprintf(stderr, "FramebufferData::postLoad: warning: "
                         "bound render buffer restore failed.\n");
-                attachPoint.obj.reset(new RenderbufferData);
+                attachPoint.obj = std::make_shared<RenderbufferData>();
             }
         } else {
             attachPoint.obj = {};
@@ -158,7 +159,7 @@ void FramebufferData::restore(ObjectLocalName localName,
         if (attachPoint.obj) { // binding a render buffer
             assert(attachPoint.obj->getDataType()
                     == RENDERBUFFER_DATA);
-            RenderbufferData *rbData = (RenderbufferData*)attachPoint.obj.get();
+            auto* rbData = (RenderbufferData*)attachPoint.obj.get();
             if (rbData->eglImageGlobalTexObject) {
                 fprintf(stderr, "FramebufferData::restore: warning: "
                         "binding egl image unsupported\n");
@@ -212,11 +213,11 @@ void FramebufferData::makeTextureDirty(const getObjDataPtr_t& getObjDataPtr) {
 }
 
 void FramebufferData::setAttachment(GLenum attachment,
-               GLenum target,
-               GLuint name,
-               ObjectDataPtr obj,
-               bool takeOwnership) {
-int idx = attachmentPointIndex(attachment);
+                                    GLenum target,
+                                    GLuint name,
+                                    const ObjectDataPtr& obj,
+                                    bool takeOwnership) {
+    int idx = attachmentPointIndex(attachment);
     if (!name) {
         detachObject(idx);
         return;
@@ -225,16 +226,15 @@ int idx = attachmentPointIndex(attachment);
         m_attachPoints[idx].name != name ||
         m_attachPoints[idx].obj.get() != obj.get() ||
         m_attachPoints[idx].owned != takeOwnership) {
-
-        detachObject(idx); 
+        detachObject(idx);
 
         m_attachPoints[idx].target = target;
         m_attachPoints[idx].name = name;
         m_attachPoints[idx].obj = obj;
         m_attachPoints[idx].owned = takeOwnership;
 
-        if (target == GL_RENDERBUFFER_OES && obj.get() != NULL) {
-            RenderbufferData *rbData = (RenderbufferData *)obj.get();
+        if (target == GL_RENDERBUFFER_OES && obj.get() != nullptr) {
+            auto* rbData = (RenderbufferData*)obj.get();
             rbData->attachedFB = m_fbName;
             rbData->attachedPoint = attachment;
         }
@@ -262,12 +262,12 @@ GLint FramebufferData::getAttachmentSamples(GLEScontext* ctx, GLenum attachment)
     GLuint name = m_attachPoints[idx].name;
 
     if (target == GL_RENDERBUFFER) {
-        RenderbufferData* rbData = (RenderbufferData*)
-            ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, name);
+        auto* rbData = (RenderbufferData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::RENDERBUFFER, name);
         return rbData ? rbData->samples : 0;
     } else {
-        TextureData* texData = (TextureData*)
-            ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, name);
+        auto* texData = (TextureData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::TEXTURE, name);
         return texData ? texData->samples : 0;
     }
 }
@@ -282,15 +282,15 @@ void FramebufferData::getAttachmentDimensions(GLEScontext* ctx, GLenum attachmen
     GLuint name = m_attachPoints[idx].name;
 
     if (target == GL_RENDERBUFFER) {
-        RenderbufferData* rbData = (RenderbufferData*)
-            ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, name);
+        auto* rbData = (RenderbufferData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::RENDERBUFFER, name);
         if (rbData) {
             *width = rbData->width;
             *height = rbData->height;
         }
     } else {
-        TextureData* texData = (TextureData*)
-            ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, name);
+        auto* texData = (TextureData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::TEXTURE, name);
         if (texData) {
             *width = texData->width;
             *height = texData->height;
@@ -308,12 +308,12 @@ GLint FramebufferData::getAttachmentInternalFormat(GLEScontext* ctx, GLenum atta
     GLuint name = m_attachPoints[idx].name;
 
     if (target == GL_RENDERBUFFER) {
-        RenderbufferData* rbData = (RenderbufferData*)
-            ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, name);
+        auto* rbData = (RenderbufferData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::RENDERBUFFER, name);
         return rbData ? rbData->internalformat : 0;
     } else {
-        TextureData* texData = (TextureData*)
-            ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, name);
+        auto* texData = (TextureData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::TEXTURE, name);
         return texData? texData->internalFormat : 0;
     }
 }
@@ -358,8 +358,9 @@ static GLenum s_index2Attachment(int idx) {
 }
 
 void FramebufferData::detachObject(int idx) {
-    if (m_attachPoints[idx].target == GL_RENDERBUFFER_OES && m_attachPoints[idx].obj.get() != NULL) {
-        RenderbufferData *rbData = (RenderbufferData *)m_attachPoints[idx].obj.get();
+    if (m_attachPoints[idx].target == GL_RENDERBUFFER_OES &&
+        m_attachPoints[idx].obj.get() != nullptr) {
+        auto* rbData = (RenderbufferData*)m_attachPoints[idx].obj.get();
         rbData->attachedFB = 0;
         rbData->attachedPoint = 0;
     }
@@ -384,8 +385,7 @@ void FramebufferData::validate(GLEScontext* ctx)
 {
     // Do not validate if on another GLES2 backend
     if (isGles2Gles()) return;
-    if(!getAttachment(GL_COLOR_ATTACHMENT0_OES, NULL, NULL))
-    {
+    if (!getAttachment(GL_COLOR_ATTACHMENT0_OES, nullptr, nullptr)) {
         // GLES does not require the framebuffer to have a color attachment.
         // OpenGL does. Therefore, if no color is attached, create a dummy
         // color texture and attach it.
@@ -448,7 +448,8 @@ void FramebufferData::validate(GLEScontext* ctx)
         ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
         ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
         ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-        ctx->dispatcher().glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        ctx->dispatcher().glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height,
+                                       0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
         setAttachment(GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, ObjectDataPtr(), true);

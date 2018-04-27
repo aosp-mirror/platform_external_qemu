@@ -84,8 +84,9 @@ public:
     bool isStarted() const { return mStarted; }
     // Waits for all enqueue()'d items to finish.
     void waitQueuedItems() {
-        if (!mStarted || mFinished)
+        if (!mStarted || mFinished) {
             return;
+        }
 
         SyncPoint sync;
         enqueueImpl(&sync);

@@ -29,4 +29,4 @@ void destroyContext(EGLDisplay dpy, EGLContext cxt);
 void destroySurface(EGLDisplay dpy, EGLSurface surface);
 void destroyDisplay(EGLDisplay dpy);
 
-}
+}  // namespace gltest

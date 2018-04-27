@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 namespace android_skin {
 
@@ -55,8 +55,8 @@ TEST(keycode_buffer,skin_keycode_buffer_flush) {
     SkinKeycodeBuffer buffer;
 
     skin_keycode_buffer_init(&buffer, &myFlushFunc);
-    for (size_t nn = 0U; nn < kDataLen; ++nn) {
-        skin_keycode_buffer_add(&buffer, kData[nn].code, kData[nn].down);
+    for (auto nn : kData) {
+        skin_keycode_buffer_add(&buffer, nn.code, nn.down);
     }
     skin_keycode_buffer_flush(&buffer);
 

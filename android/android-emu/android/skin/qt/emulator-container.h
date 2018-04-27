@@ -33,7 +33,7 @@ class EmulatorContainer : public QScrollArea {
 
 public:
     explicit EmulatorContainer(EmulatorQtWindow* window);
-    virtual ~EmulatorContainer();
+    ~EmulatorContainer() override;
 
     void changeEvent(QEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
@@ -64,9 +64,9 @@ signals:
 
 private slots:
     void slot_resizeDone();
-    void slot_showModalOverlay(QString text);
+    void slot_showModalOverlay(const QString& text);
     void slot_hideModalOverlay();
-    void slot_setModalOverlayFunc(QString text,
+    void slot_setModalOverlayFunc(const QString& text,
                                   Ui::ModalOverlay::OverlayButtonFunc func);
     void slot_showVirtualSceneInfoDialog();
     void slot_hideVirtualSceneInfoDialog();

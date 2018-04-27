@@ -32,7 +32,7 @@ private slots:
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
     void on_cell_signalStatusBox_currentIndexChanged(int index);
 
-    // TODO: Implement Network delay setting
+    // TODO(zyy): Implement Network delay setting
     // http://developer.android.com/tools/devices/emulator.html#netdelay
 
 private:

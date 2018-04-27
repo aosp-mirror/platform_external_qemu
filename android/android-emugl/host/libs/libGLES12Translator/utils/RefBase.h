@@ -17,10 +17,10 @@
 #ifndef ANDROID_REF_BASE_H
 #define ANDROID_REF_BASE_H
 
-#include <stdint.h>
 #include <sys/types.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 
 #include <utils/StrongPointer.h>
 #include <utils/TypeHelpers.h>
@@ -57,7 +57,8 @@ protected:
     // subclasses; we have to make it protected to guarantee that it
     // cannot be called from this base class (and to make strict compilers
     // happy).
-    ~ReferenceRenamer() { }
+    ~ReferenceRenamer() = default;
+
 public:
     virtual void operator()(size_t i) const = 0;
 };
@@ -120,7 +121,7 @@ public:
         getWeakRefs()->trackMe(enable, retain);
     }
 
-    typedef RefBase basetype;
+    using basetype = RefBase;
 
 protected:
                             RefBase();
@@ -149,8 +150,8 @@ private:
     friend class weakref_type;
     class weakref_impl;
 
-                            RefBase(const RefBase& o);
-            RefBase&        operator=(const RefBase& o);
+    RefBase(const RefBase& o) = delete;
+    RefBase& operator=(const RefBase& o) = delete;
 
 private:
     friend class ReferenceMover;
@@ -214,7 +215,7 @@ template <typename T>
 class wp
 {
 public:
-    typedef typename RefBase::weakref_type weakref_type;
+    using weakref_type = typename RefBase::weakref_type;
 
     inline wp() : m_ptr(0) { }
 
@@ -484,13 +485,13 @@ public:
         class Renamer : public ReferenceRenamer {
             sp<TYPE>* d;
             sp<TYPE> const* s;
-            virtual void operator()(size_t i) const {
+            void operator()(size_t i) const override {
                 // The id are known to be the sp<>'s this pointer
                 TYPE::renameRefId(d[i].get(), &s[i], &d[i]);
             }
         public:
             Renamer(sp<TYPE>* d, sp<TYPE> const* s) : d(d), s(s) { }
-            virtual ~Renamer() { }
+            virtual ~Renamer() = default;
         };
 
         memmove(d, s, n*sizeof(sp<TYPE>));
@@ -504,13 +505,13 @@ public:
         class Renamer : public ReferenceRenamer {
             wp<TYPE>* d;
             wp<TYPE> const* s;
-            virtual void operator()(size_t i) const {
+            void operator()(size_t i) const override {
                 // The id are known to be the wp<>'s this pointer
                 TYPE::renameRefId(d[i].get_refs(), &s[i], &d[i]);
             }
         public:
             Renamer(wp<TYPE>* d, wp<TYPE> const* s) : d(d), s(s) { }
-            virtual ~Renamer() { }
+            virtual ~Renamer() = default;
         };
 
         memmove(d, s, n*sizeof(wp<TYPE>));

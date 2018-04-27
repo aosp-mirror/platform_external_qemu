@@ -19,8 +19,8 @@
 #include <string>
 #include <utility>
 
-#include <string.h>
 #include <unistd.h>
+#include <cstring>
 
 using std::string;
 
@@ -28,7 +28,8 @@ using std::string;
 // on the type of object (Point, LineString, Polygon) the Placemark contains
 static xmlNode* findCoordinates(xmlNode* current) {
     for (; current != nullptr; current = current->next) {
-        if (!strcmp((const char *) current->name, "coordinates")) {
+        if (!strcmp(reinterpret_cast<const char*>(current->name),
+                    "coordinates")) {
             return current;
         }
         xmlNode * children = findCoordinates(current->xmlChildrenNode);
@@ -54,7 +55,8 @@ static bool parseCoordinates(xmlNode* current, GpsFixArray* fixes) {
         return false;
     }
 
-    const char* coordinates = (const char*)(coordinates_node->xmlChildrenNode->content);
+    const auto* coordinates = reinterpret_cast<const char*>(
+            coordinates_node->xmlChildrenNode->content);
     int coordinates_len = strlen(coordinates);
     int offset = 0, n = 0;
     GpsFix new_fix;
@@ -80,19 +82,16 @@ static bool parseCoordinates(xmlNode* current, GpsFixArray* fixes) {
 static bool parseGxTrack(xmlNode* children, GpsFixArray* fixes) {
     bool result = true;
     for (xmlNode* current = children; result && current != nullptr; current = current->next) {
-        if (
-            current->ns &&
-            current->ns->prefix &&
-            !strcmp((const char*)current->ns->prefix, "gx") &&
-            !strcmp((const char *)current->name, "coord")) {
-            std::string coordinates{(const char*)current->xmlChildrenNode->content};
+        if (current->ns && current->ns->prefix &&
+            !strcmp(reinterpret_cast<const char*>(current->ns->prefix), "gx") &&
+            !strcmp(reinterpret_cast<const char*>(current->name), "coord")) {
+            std::string coordinates{reinterpret_cast<const char*>(
+                    current->xmlChildrenNode->content)};
             GpsFix new_fix;
             result = (3 == android::base::SscanfWithCLocale(
-                                  coordinates.c_str(),
-                                  "%f %f %f",
-                                  &new_fix.longitude,
-                                  &new_fix.latitude,
-                                  &new_fix.elevation));
+                                   coordinates.c_str(), "%f %f %f",
+                                   &new_fix.longitude, &new_fix.latitude,
+                                   &new_fix.elevation));
             fixes->push_back(new_fix);
         }
     }
@@ -109,24 +108,31 @@ static bool parsePlacemark(xmlNode* current, GpsFixArray* fixes) {
         const bool hasContent =
                 current->xmlChildrenNode && current->xmlChildrenNode->content;
 
-        if (hasContent && !strcmp((const char*)current->name, "description")) {
-            description = (const char*)current->xmlChildrenNode->content;
-        } else if (hasContent && !strcmp((const char*)current->name, "name")) {
-            name = (const char *) current->xmlChildrenNode->content;
-        } else if (
-                !strcmp((const char *) current->name, "Point") ||
-                !strcmp((const char *) current->name, "LineString") ||
-                !strcmp((const char *) current->name, "Polygon")) {
-            ind = (ind != string::npos ? ind :fixes->size());
+        if (hasContent && !strcmp(reinterpret_cast<const char*>(current->name),
+                                  "description")) {
+            description = reinterpret_cast<const char*>(
+                    current->xmlChildrenNode->content);
+        } else if (hasContent &&
+                   !strcmp(reinterpret_cast<const char*>(current->name),
+                           "name")) {
+            name = reinterpret_cast<const char*>(
+                    current->xmlChildrenNode->content);
+        } else if (!strcmp(reinterpret_cast<const char*>(current->name),
+                           "Point") ||
+                   !strcmp(reinterpret_cast<const char*>(current->name),
+                           "LineString") ||
+                   !strcmp(reinterpret_cast<const char*>(current->name),
+                           "Polygon")) {
+            ind = (ind != string::npos ? ind : fixes->size());
             if (!parseCoordinates(current->xmlChildrenNode, fixes)) {
                 return false;
             }
-        } else if (
-            current->ns &&
-            current->ns->prefix &&
-            !strcmp((const char*)current->ns->prefix, "gx") &&
-            !strcmp((const char*)current->name, "Track")) {
-            ind = (ind != string::npos ? ind :fixes->size());
+        } else if (current->ns && current->ns->prefix &&
+                   !strcmp(reinterpret_cast<const char*>(current->ns->prefix),
+                           "gx") &&
+                   !strcmp(reinterpret_cast<const char*>(current->name),
+                           "Track")) {
+            ind = (ind != string::npos ? ind : fixes->size());
             if (!parseGxTrack(current->xmlChildrenNode, fixes)) {
                 return false;
             }
@@ -151,15 +157,15 @@ static bool traverseSubtree(xmlNode* current,
                                         string* error) {
     for (; current; current = current->next) {
         if (current->name != nullptr &&
-                !strcmp((const char *) current->name, "Placemark")) {
-
+            !strcmp(reinterpret_cast<const char*>(current->name),
+                    "Placemark")) {
             if (!parsePlacemark(current->xmlChildrenNode, fixes)) {
                 *error = "Location found with missing or malformed coordinates";
                 return false;
             }
         } else if (current->name != nullptr &&
-                strcmp((const char *) current->name, "text")) {
-
+                   strcmp(reinterpret_cast<const char*>(current->name),
+                          "text")) {
             // if it's not a Placemark we must go deeper
             if (!traverseSubtree(current->xmlChildrenNode, fixes, error)) {
                 return false;

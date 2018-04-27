@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/snapshot/Saver.h"
-
+#include <utility>
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/snapshot/common.h"
@@ -61,8 +61,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
             //    enable compression.
             auto numCores = System::get()->getCpuCoreCount();
             mMemUsage = System::get()->getMemUsage();
-            mDiskKind =
-                    System::get()->pathDiskKind(mSnapshot.dataDir());
+            mDiskKind = System::get()->pathDiskKind(mSnapshot.dataDir());
             if (numCores > 2) {
                 auto freeMb = mMemUsage.avail_phys_memory / (1024 * 1024);
                 if (freeMb < 1536) {
@@ -84,7 +83,7 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
         }
 
         const bool tryIncremental =
-            loader && !loader->hasError() && loader->hasGaps();
+                loader && !loader->hasError() && loader->hasGaps();
 
         mIncrementallySaved = tryIncremental;
 
@@ -126,7 +125,7 @@ ITextureSaverPtr Saver::textureSaver() const {
 }
 
 void Saver::prepare() {
-    // TODO: run asynchronous saving preparation here (e.g. screenshot,
+    // TODO(lfy): run asynchronous saving preparation here (e.g. screenshot,
     // hardware info collection etc).
 }
 
@@ -149,12 +148,9 @@ void Saver::complete(bool succeeded) {
 
     if (mRamSaver->getDuration(&ramDuration) &&
         mTextureSaver->getDuration(&texturesDuration)) {
-
-        mSnapshot.addSaveStats(
-                mIncrementallySaved,
-                ramDuration + texturesDuration,
-                0 /* ram changed bytes; unused for now */);
-
+        mSnapshot.addSaveStats(mIncrementallySaved,
+                               ramDuration + texturesDuration,
+                               0 /* ram changed bytes; unused for now */);
     }
 
     if (!mSnapshot.save()) {
@@ -171,7 +167,7 @@ void Saver::cancel() {
         mRamSaver->cancel();
     }
 
-    // TODO next: texture save cancel
+    // TODO(lfy): next: texture save cancel
     path_delete_dir(mSnapshot.dataDir().c_str());
 
     mSnapshot.saveFailure(FailureReason::Canceled);

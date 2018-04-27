@@ -13,10 +13,10 @@
 
 #include "android/utils/misc.h"
 
-#include <assert.h>
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
 #include <vector>
-#include <stdint.h>
-#include <stdio.h>
 
 namespace android {
 
@@ -146,7 +146,8 @@ ApduArDo::ApduArDo(Allow rule) {
 
 ApduArDo::ApduArDo(const std::vector<std::string>& rules) {
     std::vector<const std::string*> data;
-    for(const auto& rule : rules) {
+    data.reserve(rules.size());
+    for (const auto& rule : rules) {
         data.push_back(&rule);
     }
     populateData(kTag, data.begin(), data.end());
@@ -195,6 +196,7 @@ AllRefArDo::AllRefArDo(std::initializer_list<RefArDo> refArDos) {
 
 AllRefArDo::AllRefArDo(const std::vector<RefArDo>& refArDos) {
     std::vector<const RefArDo*> data;
+    data.reserve(refArDos.size());
     for (const auto& object : refArDos) {
         data.push_back(&object);
     }

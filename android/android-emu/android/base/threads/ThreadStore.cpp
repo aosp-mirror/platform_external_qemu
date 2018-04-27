@@ -18,10 +18,10 @@
 #include "android/base/memory/LazyInstance.h"
 #endif
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 // Set to 1 to print debug messages.
 #define DEBUG_THREAD_STORE  0

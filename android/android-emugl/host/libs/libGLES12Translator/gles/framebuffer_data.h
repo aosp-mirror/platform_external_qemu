@@ -34,7 +34,7 @@ class FramebufferData : public ObjectData {
   void ClearAttachment(GLuint name, bool clear_texture);
 
  protected:
-  virtual ~FramebufferData();
+     ~FramebufferData() override;
 
  private:
   enum AttachPoint {
@@ -57,10 +57,10 @@ class FramebufferData : public ObjectData {
 
   Attachment attachment_[MAX_ATTACH_POINTS];
 
-  FramebufferData(const FramebufferData&);
-  FramebufferData& operator=(const FramebufferData&);
+  FramebufferData(const FramebufferData&) = delete;
+  FramebufferData& operator=(const FramebufferData&) = delete;
 };
 
-typedef android::sp<FramebufferData> FramebufferDataPtr;
+using FramebufferDataPtr = android::sp<FramebufferData>;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_FRAMEBUFFER_DATA_H_

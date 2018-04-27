@@ -11,8 +11,8 @@
 
 #include "android/base/files/StdioStream.h"
 
-#include <assert.h>
-#include <errno.h>
+#include <cassert>
+#include <cerrno>
 
 namespace android {
 namespace base {

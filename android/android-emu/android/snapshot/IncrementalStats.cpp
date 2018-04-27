@@ -11,7 +11,7 @@
 
 #include "android/snapshot/IncrementalStats.h"
 
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace android {
 namespace snapshot {

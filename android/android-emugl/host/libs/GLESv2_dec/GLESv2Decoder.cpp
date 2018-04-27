@@ -28,21 +28,21 @@
 #include <string>
 #include <vector>
 
-#include <string.h>
+#include <cstring>
 
 static inline void* SafePointerFromUInt(GLuint value) {
-  return (void*)(uintptr_t)value;
+    return (void*)static_cast<uintptr_t>(value);
 }
 
 int gles2_decoder_extended_context::initDispatch(
         GLESv2Decoder::get_proc_func_t getProc, void *userData) {
     gles2_server_context_t::initDispatchByName(getProc, userData);
     glVertexAttribPointerWithDataSize =
-            (glVertexAttribPointerWithDataSize_server_proc_t)
-            getProc("glVertexAttribPointerWithDataSize", userData);
+            reinterpret_cast<glVertexAttribPointerWithDataSize_server_proc_t>(
+                    getProc("glVertexAttribPointerWithDataSize", userData));
     glVertexAttribIPointerWithDataSize =
-            (glVertexAttribIPointerWithDataSize_server_proc_t)
-            getProc("glVertexAttribIPointerWithDataSize", userData);
+            reinterpret_cast<glVertexAttribIPointerWithDataSize_server_proc_t>(
+                    getProc("glVertexAttribIPointerWithDataSize", userData));
     return 0;
 }
 
@@ -65,29 +65,27 @@ static android::base::LazyInstance<ContextTemplateLoader> sContextTemplate = {};
 
 GLESv2Decoder::GLESv2Decoder()
 {
-    m_contextData = NULL;
-    m_GL2library = NULL;
-    m_snapshot = NULL;
+    m_contextData = nullptr;
+    m_GL2library = nullptr;
+    m_snapshot = nullptr;
 }
 
-GLESv2Decoder::~GLESv2Decoder()
-{
-}
+GLESv2Decoder::~GLESv2Decoder() = default;
 
 void *GLESv2Decoder::s_getProc(const char *name, void *userData)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) userData;
+    auto* ctx = static_cast<GLESv2Decoder*>(userData);
 
-    if (ctx == NULL || ctx->m_GL2library == NULL) {
-        return NULL;
+    if (ctx == nullptr || ctx->m_GL2library == nullptr) {
+        return nullptr;
     }
 
-    void *func = NULL;
+    void* func = nullptr;
 #ifdef USE_EGL_GETPROCADDRESS
     func = (void *) eglGetProcAddress(name);
 #endif
-    if (func == NULL) {
-        func = (void *) ctx->m_GL2library->findSymbol(name);
+    if (func == nullptr) {
+        func = reinterpret_cast<void*>(ctx->m_GL2library->findSymbol(name));
     }
     return func;
 }
@@ -258,19 +256,23 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 
 int GLESv2Decoder::s_glFinishRoundTrip(void *self)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glFinish();
     return 0;
 }
 
 void GLESv2Decoder::s_glGetCompressedTextureFormats(void *self, int count, GLint *formats)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
 
     int nFormats;
     ctx->glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &nFormats);
     if (nFormats > count) {
-        fprintf(stderr, "%s: GetCompressedTextureFormats: The requested number of formats does not match the number that is reported by OpenGL\n", __FUNCTION__);
+        fprintf(stderr,
+                "%s: GetCompressedTextureFormats: The requested number of "
+                "formats "
+                "does not match the number that is reported by OpenGL\n",
+                __FUNCTION__);
     } else {
         ctx->glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, formats);
     }
@@ -279,17 +281,19 @@ void GLESv2Decoder::s_glGetCompressedTextureFormats(void *self, int count, GLint
 void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint size, GLenum type,
                                              GLboolean normalized, GLsizei stride,  void * data, GLuint datalen)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
-    if (ctx->m_contextData != NULL) {
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    if (ctx->m_contextData != nullptr) {
         ctx->m_contextData->storePointerData(indx, data, datalen);
-        // note - the stride of the data is always zero when it comes out of the codec.
-        // See gl2.attrib for the packing function call.
-        if ((void*)ctx->glVertexAttribPointerWithDataSize != gles2_unimplemented) {
-            ctx->glVertexAttribPointerWithDataSize(indx, size, type, normalized,
-                    0, ctx->m_contextData->pointerData(indx), datalen);
+        // note - the stride of the data is always zero when it comes out of the
+        // codec. See gl2.attrib for the packing function call.
+        if (reinterpret_cast<void*>(ctx->glVertexAttribPointerWithDataSize) !=
+            gles2_unimplemented) {
+            ctx->glVertexAttribPointerWithDataSize(
+                    indx, size, type, normalized, 0,
+                    ctx->m_contextData->pointerData(indx), datalen);
         } else {
             ctx->glVertexAttribPointer(indx, size, type, normalized, 0,
-                    ctx->m_contextData->pointerData(indx));
+                                       ctx->m_contextData->pointerData(indx));
         }
     }
 }
@@ -297,27 +301,28 @@ void GLESv2Decoder::s_glVertexAttribPointerData(void *self, GLuint indx, GLint s
 void GLESv2Decoder::s_glVertexAttribPointerOffset(void *self, GLuint indx, GLint size, GLenum type,
                                                GLboolean normalized, GLsizei stride,  GLuint data)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
-    ctx->glVertexAttribPointer(indx, size, type, normalized, stride, SafePointerFromUInt(data));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glVertexAttribPointer(indx, size, type, normalized, stride,
+                               SafePointerFromUInt(data));
 }
 
 
 void GLESv2Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDrawElements(mode, count, type, data);
 }
 
 
 void GLESv2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDrawElements(mode, count, type, SafePointerFromUInt(offset));
 }
 
 void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     if ((access & GL_MAP_READ_BIT) ||
         ((access & GL_MAP_WRITE_BIT) &&
          (!(access & GL_MAP_INVALIDATE_RANGE_BIT) &&
@@ -333,44 +338,64 @@ void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr o
 
 void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     *out_res = GL_TRUE;
 
     if (access & GL_MAP_WRITE_BIT) {
-        if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
+        if (!guest_buffer) {
+            fprintf(stderr,
+                    "%s: error: wanted to write to a mapped buffer with "
+                    "NULL!\n",
+                    __FUNCTION__);
+        }
         void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
-        if (!gpu_ptr) fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
+        if (!gpu_ptr) {
+            fprintf(stderr, "%s: could not get host gpu pointer!\n",
+                    __FUNCTION__);
+        }
         memcpy(gpu_ptr, guest_buffer, length);
         *out_res = ctx->glUnmapBuffer(target);
     }
 }
 
 void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    if (!guest_buffer) {
+        fprintf(stderr,
+                "%s: error: wanted to write to a mapped buffer with NULL!\n",
+                __FUNCTION__);
+    }
     void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
     memcpy(gpu_ptr, guest_buffer, length);
-    if (!gpu_ptr) fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
-    // |offset| was the absolute offset into the mapping, so just flush offset 0.
+    if (!gpu_ptr) {
+        fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
+    }
+    // |offset| was the absolute offset into the mapping, so just flush offset
+    // 0.
     ctx->glFlushMappedBufferRange(target, 0, length);
     ctx->glUnmapBuffer(target);
 }
 
 void GLESv2Decoder::s_glCompressedTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-	ctx->glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glCompressedTexImage2D(target, level, internalformat, width, height,
+                                border, imageSize, SafePointerFromUInt(offset));
 }
 void GLESv2Decoder::s_glCompressedTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-	ctx->glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glCompressedTexSubImage2D(target, level, xoffset, yoffset, width,
+                                   height, format, imageSize,
+                                   SafePointerFromUInt(offset));
 }
 void GLESv2Decoder::s_glTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-	ctx->glTexImage2D(target, level, internalformat, width, height, border, format, type, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glTexImage2D(target, level, internalformat, width, height, border,
+                      format, type, SafePointerFromUInt(offset));
 }
 void GLESv2Decoder::s_glTexSubImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-	ctx->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format,
+                         type, SafePointerFromUInt(offset));
 }
 
 static const char* const kNameDelimiter = ";";
@@ -394,14 +419,15 @@ static std::vector<std::string> sUnpackVarNames(GLsizei count, const char* packe
 }
 
 void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsizei uniformCount, const GLchar* packedNames, GLsizei packedLen, GLuint* uniformIndices) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
 
-    std::vector<std::string> unpacked = sUnpackVarNames(uniformCount, packedNames);
+    std::vector<std::string> unpacked =
+            sUnpackVarNames(uniformCount, packedNames);
 
-    GLchar** unpackedArray = new GLchar*[unpacked.size()];
+    auto** unpackedArray = new GLchar*[unpacked.size()];
     GLsizei i = 0;
     for (auto& elt : unpacked) {
-        unpackedArray[i] = (GLchar*)&elt[0];
+        unpackedArray[i] = static_cast<GLchar*>(&elt[0]);
         i++;
     }
 
@@ -412,34 +438,36 @@ void GLESv2Decoder::s_glGetUniformIndicesAEMU(void* self, GLuint program, GLsize
 
 void GLESv2Decoder::s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, void * data, GLuint datalen)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
-    if (ctx->m_contextData != NULL) {
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    if (ctx->m_contextData != nullptr) {
         ctx->m_contextData->storePointerData(indx, data, datalen);
-        // note - the stride of the data is always zero when it comes out of the codec.
-        // See gl2.attrib for the packing function call.
-        if ((void*)ctx->glVertexAttribIPointerWithDataSize != gles2_unimplemented) {
-            ctx->glVertexAttribIPointerWithDataSize(indx, size, type, 0,
-                ctx->m_contextData->pointerData(indx), datalen);
+        // note - the stride of the data is always zero when it comes out of the
+        // codec. See gl2.attrib for the packing function call.
+        if (reinterpret_cast<void*>(ctx->glVertexAttribIPointerWithDataSize) !=
+            gles2_unimplemented) {
+            ctx->glVertexAttribIPointerWithDataSize(
+                    indx, size, type, 0, ctx->m_contextData->pointerData(indx),
+                    datalen);
         } else {
             ctx->glVertexAttribIPointer(indx, size, type, 0,
-                ctx->m_contextData->pointerData(indx));
+                                        ctx->m_contextData->pointerData(indx));
         }
     }
 }
 
 void GLESv2Decoder::s_glVertexAttribIPointerOffsetAEMU(void *self, GLuint indx, GLint size, GLenum type, GLsizei stride, GLuint data)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
-    ctx->glVertexAttribIPointer(indx, size, type, stride, SafePointerFromUInt(data));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glVertexAttribIPointer(indx, size, type, stride,
+                                SafePointerFromUInt(data));
 }
 
 void GLESv2Decoder::s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program, GLsizei count, const char* packedVaryings, GLuint packedVaryingsLen, GLenum bufferMode) {
-
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
 
     std::vector<std::string> unpacked = sUnpackVarNames(count, packedVaryings);
 
-    char** unpackedArray = new char*[unpacked.size()];
+    auto** unpackedArray = new char*[unpacked.size()];
     GLsizei i = 0;
     for (auto& elt : unpacked) {
         unpackedArray[i] = &elt[0];
@@ -452,97 +480,108 @@ void GLESv2Decoder::s_glTransformFeedbackVaryingsAEMU(void* self, GLuint program
 }
 
 void GLESv2Decoder::s_glTexImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
-	ctx->glTexImage3D(target, level, internalFormat, width, height, depth, border, format, type, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glTexImage3D(target, level, internalFormat, width, height, depth,
+                      border, format, type, SafePointerFromUInt(offset));
 }
 void GLESv2Decoder::s_glTexSubImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
-	ctx->glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width,
+                         height, depth, format, type,
+                         SafePointerFromUInt(offset));
 }
 void GLESv2Decoder::s_glCompressedTexImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
-	ctx->glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glCompressedTexImage3D(target, level, internalformat, width, height,
+                                depth, border, imageSize,
+                                SafePointerFromUInt(offset));
 }
 void GLESv2Decoder::s_glCompressedTexSubImage3DOffsetAEMU(void* self, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *) self;
-	ctx->glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset,
+                                   width, height, depth, format, imageSize,
+                                   SafePointerFromUInt(offset));
 }
 
 void GLESv2Decoder::s_glDrawElementsInstancedOffsetAEMU(void* self, GLenum mode, GLsizei count, GLenum type, GLuint offset, GLsizei primcount) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    ctx->glDrawElementsInstanced(mode, count, type, SafePointerFromUInt(offset), primcount);
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glDrawElementsInstanced(mode, count, type, SafePointerFromUInt(offset),
+                                 primcount);
 }
 
 void GLESv2Decoder::s_glDrawElementsInstancedDataAEMU(void* self, GLenum mode, GLsizei count, GLenum type, const void* indices, GLsizei primcount, GLsizei datalen) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDrawElementsInstanced(mode, count, type, indices, primcount);
 }
 
 void GLESv2Decoder::s_glReadPixelsOffsetAEMU(void* self, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    ctx->glReadPixels(x, y, width, height, format, type, SafePointerFromUInt(offset));
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glReadPixels(x, y, width, height, format, type,
+                      SafePointerFromUInt(offset));
 }
 
 GLuint GLESv2Decoder::s_glCreateShaderProgramvAEMU(void* self, GLenum type, GLsizei count, const char* packedStrings, GLuint packedLen) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     return ctx->glCreateShaderProgramv(type, 1, &packedStrings);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDrawArraysIndirectDataAEMU(void* self, GLenum mode, const void* indirect, GLuint datalen) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDrawArraysIndirect(mode, indirect);
 }
 
 void GLESv2Decoder::s_glDrawArraysIndirectOffsetAEMU(void* self, GLenum mode, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDrawArraysIndirect(mode, SafePointerFromUInt(offset));
 }
 
 void GLESv2Decoder::s_glDrawElementsIndirectDataAEMU(void* self, GLenum mode, GLenum type, const void* indirect, GLuint datalen) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDrawElementsIndirect(mode, type, indirect);
 }
 
 void GLESv2Decoder::s_glDrawElementsIndirectOffsetAEMU(void* self, GLenum mode, GLenum type, GLuint offset) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDrawElementsIndirect(mode, type, SafePointerFromUInt(offset));
 }
 
 uint64_t GLESv2Decoder::s_glFenceSyncAEMU(void* self, GLenum condition, GLbitfield flags) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    return (uint64_t)(uintptr_t)ctx->glFenceSync(condition, flags);
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    return static_cast<uint64_t>((uintptr_t)ctx->glFenceSync(condition, flags));
 }
 
 GLenum GLESv2Decoder::s_glClientWaitSyncAEMU(void* self, uint64_t wait_on, GLbitfield flags, GLuint64 timeout) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    return ctx->glClientWaitSync((GLsync)(uintptr_t)wait_on, flags, timeout);
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    return ctx->glClientWaitSync((GLsync) static_cast<uintptr_t>(wait_on),
+                                 flags, timeout);
 }
 
 void GLESv2Decoder::s_glWaitSyncAEMU(void* self, uint64_t wait_on, GLbitfield flags, GLuint64 timeout) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    ctx->glWaitSync((GLsync)(uintptr_t)wait_on, flags, timeout);
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glWaitSync((GLsync) static_cast<uintptr_t>(wait_on), flags, timeout);
 }
 
 void GLESv2Decoder::s_glDeleteSyncAEMU(void* self, uint64_t to_delete) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    ctx->glDeleteSync((GLsync)(uintptr_t)to_delete);
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glDeleteSync((GLsync) static_cast<uintptr_t>(to_delete));
 }
 
 GLboolean GLESv2Decoder::s_glIsSyncAEMU(void* self, uint64_t sync) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    return ctx->glIsSync((GLsync)(uintptr_t)sync);
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    return ctx->glIsSync((GLsync) static_cast<uintptr_t>(sync));
 }
 
 void GLESv2Decoder::s_glGetSyncivAEMU(void* self, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    ctx->glGetSynciv((GLsync)(uintptr_t)sync, pname, bufSize, length, values);
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
+    ctx->glGetSynciv((GLsync) static_cast<uintptr_t>(sync), pname, bufSize,
+                     length, values);
 }
 
 GLuint GLESv2Decoder::s_glCreateShader(void* self, GLenum shaderType) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     GLuint shader = ctx->glCreateShader(shaderType);
-    
+
     if (ctx->m_snapshot) {
         GLuint emuName = ctx->m_snapshot->createShader(shader, shaderType);
         return emuName;
@@ -552,12 +591,12 @@ GLuint GLESv2Decoder::s_glCreateShader(void* self, GLenum shaderType) {
 }
 
 GLuint GLESv2Decoder::s_glCreateProgram(void* self) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     return ctx->glCreateProgram();
 }
 
 void GLESv2Decoder::s_glGenBuffers(void* self, GLsizei n, GLuint* buffers) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenBuffers(n, buffers);
 
     if (ctx->m_snapshot) {
@@ -566,145 +605,145 @@ void GLESv2Decoder::s_glGenBuffers(void* self, GLsizei n, GLuint* buffers) {
 }
 
 void GLESv2Decoder::s_glGenFramebuffers(void* self, GLsizei n, GLuint* framebuffers) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenFramebuffers(n, framebuffers);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glGenRenderbuffers(void* self, GLsizei n, GLuint* renderbuffers) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenRenderbuffers(n, renderbuffers);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glGenTextures(void* self, GLsizei n, GLuint* textures) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenTextures(n, textures);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glGenVertexArraysOES(void* self, GLsizei n, GLuint* arrays) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenVertexArraysOES(n, arrays);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glGenVertexArrays(void* self, GLsizei n, GLuint* arrays) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenVertexArrays(n, arrays);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glGenTransformFeedbacks(void* self, GLsizei n, GLuint* transformFeedbacks) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenTransformFeedbacks(n, transformFeedbacks);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glGenSamplers(void* self, GLsizei n, GLuint* samplers) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenSamplers(n, samplers);
-    // TODO: Snapshot names
-
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glGenQueries(void* self, GLsizei n, GLuint* queries) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenQueries(n, queries);
-    // TODO: Snapshot names
-
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glGenProgramPipelines(void* self, GLsizei n, GLuint* pipelines) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glGenProgramPipelines(n, pipelines);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteShader(void* self, GLuint shader) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteShader(shader);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteProgram(void* self, GLuint program) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteProgram(program);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteBuffers(void* self, GLsizei n, const GLuint *buffers) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteBuffers(n, buffers);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteFramebuffers(void* self, GLsizei n, const GLuint *framebuffers) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteFramebuffers(n, framebuffers);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteRenderbuffers(void* self, GLsizei n, const GLuint *renderbuffers) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteRenderbuffers(n, renderbuffers);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteTextures(void* self, GLsizei n, const GLuint *textures) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteTextures(n, textures);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 
 void GLESv2Decoder::s_glDeleteVertexArraysOES(void* self, GLsizei n, const GLuint *arrays) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteVertexArraysOES(n, arrays);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteVertexArrays(void* self, GLsizei n, const GLuint *arrays) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteVertexArrays(n, arrays);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 
 void GLESv2Decoder::s_glDeleteTransformFeedbacks(void* self, GLsizei n, const GLuint *transformFeedbacks) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteTransformFeedbacks(n, transformFeedbacks);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteSamplers(void* self, GLsizei n, const GLuint *samplers) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteSamplers(n, samplers);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteQueries(void* self, GLsizei n, const GLuint *queries) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteQueries(n, queries);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
 void GLESv2Decoder::s_glDeleteProgramPipelines(void* self, GLsizei n, const GLuint *pipelines) {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    auto* ctx = static_cast<GLESv2Decoder*>(self);
     ctx->glDeleteProgramPipelines(n, pipelines);
-    // TODO: Snapshot names
+    // TODO(lfy): Snapshot names
 }
 
-#define SNAPSHOT_PROGRAM_NAME(x) \
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self; \
-    if (ctx->m_snapshot) { x = ctx->m_snapshot->getProgramName(x); } \
+#define SNAPSHOT_PROGRAM_NAME(x)                  \
+    GLESv2Decoder* ctx = (GLESv2Decoder*)self;    \
+    if (ctx->m_snapshot) {                        \
+        (x) = ctx->m_snapshot->getProgramName(x); \
+    }
 
-#define SNAPSHOT_PROGRAM_NAME2(x,y) \
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self; \
-    if (ctx->m_snapshot) { \
-        x = ctx->m_snapshot->getProgramName(x); \
-        y = ctx->m_snapshot->getProgramName(y); \
-    } \
+#define SNAPSHOT_PROGRAM_NAME2(x, y)              \
+    GLESv2Decoder* ctx = (GLESv2Decoder*)self;    \
+    if (ctx->m_snapshot) {                        \
+        (x) = ctx->m_snapshot->getProgramName(x); \
+        (y) = ctx->m_snapshot->getProgramName(y); \
+    }
 
 #define SNAPSHOT_SHADER_CALL(funcname,argtypes,args) \
 void GLESv2Decoder::s_##funcname argtypes { \
@@ -729,7 +768,7 @@ void GLESv2Decoder::s_glShaderString(void *self, GLuint shader, const GLchar* st
 {
     SNAPSHOT_PROGRAM_NAME(shader);
 
-    ctx->glShaderSource(shader, 1, &string, NULL);
+    ctx->glShaderSource(shader, 1, &string, nullptr);
 
     if (ctx->m_snapshot) {
         ctx->m_snapshot->shaderString(shader, string);

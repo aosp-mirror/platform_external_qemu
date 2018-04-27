@@ -19,7 +19,7 @@
 
 #include "android/base/StringView.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace recording {
@@ -34,8 +34,8 @@ public:
     //             to reduce the file size.
     // returns:
     //   true if successfully converted to animated gif, false otherwise.
-    static bool toAnimatedGif(android::base::StringView inFilename,
-                              android::base::StringView outFilename,
+    static bool toAnimatedGif(const android::base::StringView& inFilename,
+                              const android::base::StringView& outFilename,
                               uint32_t bitRate);
 };
 

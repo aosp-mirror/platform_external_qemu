@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 
-#include <string.h>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -29,13 +29,9 @@ TEST(HttpUtils, httpIsRequestLine) {
         { false, "POSTAL HTTP/1.1\r\n" },
         { false, "OPTIONS http/1.0\r\n" },
     };
-    const size_t kDataSize = sizeof(kData)/sizeof(kData[0]);
-
-    for (size_t n = 0; n < kDataSize; ++n) {
-        EXPECT_EQ(kData[n].expected,
-                  httpIsRequestLine(
-                        kData[n].line,
-                        strlen(kData[n].line))) << kData[n].line;
+    for (auto n : kData) {
+        EXPECT_EQ(n.expected, httpIsRequestLine(n.line, strlen(n.line)))
+                << n.line;
     }
 }
 

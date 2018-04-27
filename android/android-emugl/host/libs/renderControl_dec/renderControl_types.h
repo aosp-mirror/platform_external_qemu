@@ -14,8 +14,8 @@
 * limitations under the License.
 */
 
-#include <stdint.h>
 #include <EGL/egl.h>
+#include <cstdint>
 #include "glUtils.h"
 
 // values for 'param' argument of rcGetFBParam

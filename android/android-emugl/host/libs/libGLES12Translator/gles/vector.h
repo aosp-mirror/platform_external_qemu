@@ -5,9 +5,9 @@
 #ifndef GLES_VECTOR_H_
 #define GLES_VECTOR_H_
 
-#include <math.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 
 namespace emugl {
@@ -40,9 +40,7 @@ class Vector {
     return GetDotProduct(*this);
   }
 
-  float GetLength() const {
-    return sqrt(GetLengthSquared());
-  }
+  float GetLength() const { return std::sqrt(GetLengthSquared()); }
 
   void Scale(float v) {
     entries_[0] *= v;
@@ -56,9 +54,10 @@ class Vector {
   }
 
   float* GetFloatArray(float (&data)[4]) const {
-    for (size_t i = 0; i < kEntries; i++)
-      data[i] = entries_[i];
-    return data;
+      for (size_t i = 0; i < kEntries; i++) {
+          data[i] = entries_[i];
+      }
+      return data;
   }
 
   void AssignMatrixMultiply(const Matrix& a, const Vector& b);

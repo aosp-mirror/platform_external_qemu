@@ -16,7 +16,7 @@
 #include <string>
 #include <type_traits>
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {
@@ -31,7 +31,7 @@ public:
 
     // Parse a string into Uuid instance. If the string isn't parsable the
     // object is zero-initialized instead
-    explicit Uuid(StringView asString);
+    explicit Uuid(const StringView& asString);
 
     // These two functions generate a new random Uuid. generateFast() may
     // be slightly faster because of the higher possibility of

@@ -116,10 +116,10 @@ struct BufferBinding {
     void onSave(android::base::Stream* stream) const;
 };
 
-typedef std::vector<BufferBinding> VertexAttribBindingVector;
+using VertexAttribBindingVector = std::vector<BufferBinding>;
 
 struct VAOState {
-    VAOState() : VAOState(0, NULL, 0) { }
+    VAOState() : VAOState(0, nullptr, 0) {}
     VAOState(GLuint ibo, ArraysMap* arr, int numVertexAttribBindings) :
         element_array_buffer_binding(ibo),
         arraysMap(arr),
@@ -137,7 +137,7 @@ struct VAOState {
 typedef std::unordered_map<GLuint, VAOState> VAOStateMap;
 
 struct VAOStateRef {
-    VAOStateRef() { }
+    VAOStateRef() = default;
     VAOStateRef(VAOStateMap::iterator iter) : it(iter) { }
     GLuint vaoId() const { return it->first; }
     GLuint& iboId() { return it->second.element_array_buffer_binding; }
@@ -253,7 +253,7 @@ public:
     virtual ~GLEScontext();
     virtual int getMaxTexUnits() = 0;
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
-    virtual void drawValidate(void);
+    virtual void drawValidate();
 
     // Default FBO emulation. Do not call this from GLEScontext context;
     // it needs dynamic dispatch (from GLEScmContext or GLESv2Context DLLs)
@@ -374,7 +374,7 @@ public:
             android::base::Stream* stream);
     bool isFBO(ObjectLocalName p_localName);
     ObjectLocalName genFBOName(ObjectLocalName p_localName = 0,
-            bool genLocal = 0);
+                               bool genLocal = false);
     void setFBOData(ObjectLocalName p_localName, ObjectDataPtr data);
     void setDefaultFBODrawBuffer(GLenum buffer);
     void setDefaultFBOReadBuffer(GLenum buffer);
@@ -406,7 +406,7 @@ public:
 
     bool isVAO(ObjectLocalName p_localName);
     ObjectLocalName genVAOName(ObjectLocalName p_localName = 0,
-            bool genLocal = 0);
+                               bool genLocal = false);
     void deleteVAO(ObjectLocalName p_localName);
     unsigned int getVAOGlobalName(ObjectLocalName p_localName);
     ObjectLocalName getVAOLocalName(unsigned int p_globalName);
@@ -582,12 +582,12 @@ protected:
     GLuint m_textureEmulationVBO = 0;
     GLuint m_textureEmulationSamplerLoc = 0;
 
-    std::function<GLESbuffer*(GLuint)> getBufferObj
-            = [this] (GLuint bufferName) -> GLESbuffer* {
-                return (GLESbuffer*)m_shareGroup->getObjectData(
-                    NamedObjectType::VERTEXBUFFER,
-                    (ObjectLocalName)bufferName);
-            };
+    std::function<GLESbuffer*(GLuint)> getBufferObj =
+            [this](GLuint bufferName) -> GLESbuffer* {
+        return (GLESbuffer*)m_shareGroup->getObjectData(
+                NamedObjectType::VERTEXBUFFER,
+                static_cast<ObjectLocalName>(bufferName));
+    };
 
     GLuint m_useProgram = 0;
 

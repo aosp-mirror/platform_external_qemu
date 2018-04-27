@@ -207,17 +207,21 @@ static keymaster_error_t insert_integer(ASN1_INTEGER* value, ASN1_INTEGER** dest
     assert(value);
 
     if (dest_integer_set) {
-        if (!*dest_integer_set)
+        if (!*dest_integer_set) {
             *dest_integer_set = sk_ASN1_INTEGER_new_null();
-        if (!*dest_integer_set)
+        }
+        if (!*dest_integer_set) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
-        if (!sk_ASN1_INTEGER_push(*dest_integer_set, value))
+        }
+        if (!sk_ASN1_INTEGER_push(*dest_integer_set, value)) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
         return KM_ERROR_OK;
 
     } else if (dest_integer) {
-        if (*dest_integer)
+        if (*dest_integer) {
             ASN1_INTEGER_free(*dest_integer);
+        }
         *dest_integer = value;
         return KM_ERROR_OK;
     }
@@ -231,8 +235,9 @@ static keymaster_error_t insert_integer(ASN1_INTEGER* value, ASN1_INTEGER** dest
 static keymaster_error_t build_auth_list(const AuthorizationSet& auth_list, KM_AUTH_LIST* record) {
     assert(record);
 
-    if (auth_list.empty())
+    if (auth_list.empty()) {
         return KM_ERROR_OK;
+    }
 
     for (auto entry : auth_list) {
 
@@ -390,10 +395,12 @@ static keymaster_error_t build_auth_list(const AuthorizationSet& auth_list, KM_A
                    (!keymaster_tag_repeatable(entry.tag) && integer_ptr));
 
             UniquePtr<ASN1_INTEGER, ASN1_INTEGER_Delete> value(ASN1_INTEGER_new());
-            if (!value.get())
+            if (!value.get()) {
                 return KM_ERROR_MEMORY_ALLOCATION_FAILED;
-            if (!ASN1_INTEGER_set(value.get(), get_uint32_value(entry)))
+            }
+            if (!ASN1_INTEGER_set(value.get(), get_uint32_value(entry))) {
                 return TranslateLastOpenSslError();
+            }
 
             insert_integer(value.release(), integer_ptr, integer_set);
             break;
@@ -406,8 +413,9 @@ static keymaster_error_t build_auth_list(const AuthorizationSet& auth_list, KM_A
                    (!keymaster_tag_repeatable(entry.tag) && integer_ptr));
 
             UniquePtr<BIGNUM, BIGNUM_Delete> bn_value(BN_new());
-            if (!bn_value.get())
+            if (!bn_value.get()) {
                 return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+            }
 
             if (type == KM_DATE) {
                 if (!BN_set_u64(bn_value.get(), entry.date_time)) {
@@ -421,8 +429,9 @@ static keymaster_error_t build_auth_list(const AuthorizationSet& auth_list, KM_A
 
             UniquePtr<ASN1_INTEGER, ASN1_INTEGER_Delete> value(
                 BN_to_ASN1_INTEGER(bn_value.get(), nullptr));
-            if (!value.get())
+            if (!value.get()) {
                 return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+            }
 
             insert_integer(value.release(), integer_ptr, integer_set);
             break;
@@ -430,21 +439,27 @@ static keymaster_error_t build_auth_list(const AuthorizationSet& auth_list, KM_A
 
         case KM_BOOL:
             assert(bool_ptr);
-            if (!*bool_ptr)
+            if (!*bool_ptr) {
                 *bool_ptr = ASN1_NULL_new();
-            if (!*bool_ptr)
+            }
+            if (!*bool_ptr) {
                 return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+            }
             break;
 
         /* Byte arrays*/
         case KM_BYTES:
             assert(string_ptr);
-            if (!*string_ptr)
+            if (!*string_ptr) {
                 *string_ptr = ASN1_OCTET_STRING_new();
-            if (!*string_ptr)
+            }
+            if (!*string_ptr) {
                 return KM_ERROR_MEMORY_ALLOCATION_FAILED;
-            if (!ASN1_OCTET_STRING_set(*string_ptr, entry.blob.data, entry.blob.data_length))
+            }
+            if (!ASN1_OCTET_STRING_set(*string_ptr, entry.blob.data,
+                                       entry.blob.data_length)) {
                 return TranslateLastOpenSslError();
+            }
             break;
 
         default:
@@ -460,15 +475,18 @@ static keymaster_error_t build_auth_list(const AuthorizationSet& auth_list, KM_A
         // This must be a keymaster1 key. It's an EC key with no curve.  Insert the curve.
 
         keymaster_error_t error = EcKeySizeToCurve(key_size, &ec_curve);
-        if (error != KM_ERROR_OK)
+        if (error != KM_ERROR_OK) {
             return error;
+        }
 
         UniquePtr<ASN1_INTEGER, ASN1_INTEGER_Delete> value(ASN1_INTEGER_new());
-        if (!value.get())
+        if (!value.get()) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
 
-        if (!ASN1_INTEGER_set(value.get(), ec_curve))
+        if (!ASN1_INTEGER_set(value.get(), ec_curve)) {
             return TranslateLastOpenSslError();
+        }
 
         insert_integer(value.release(), &record->ec_curve, nullptr);
     }
@@ -487,8 +505,9 @@ keymaster_error_t build_attestation_record(const AuthorizationSet& attestation_p
     assert(asn1_key_desc && asn1_key_desc_len);
 
     UniquePtr<KM_KEY_DESCRIPTION, KM_KEY_DESCRIPTION_Delete> key_desc(KM_KEY_DESCRIPTION_new());
-    if (!key_desc.get())
+    if (!key_desc.get()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     keymaster_security_level_t keymaster_security_level;
     uint32_t keymaster_version = UINT32_MAX;
@@ -513,26 +532,37 @@ keymaster_error_t build_attestation_record(const AuthorizationSet& attestation_p
             break;
         }
 
-        if (keymaster_version == UINT32_MAX)
+        if (keymaster_version == UINT32_MAX) {
             return KM_ERROR_UNKNOWN_ERROR;
+        }
     }
 
-    if (!ASN1_INTEGER_set(key_desc->attestation_version, kCurrentAttestationVersion) ||
-        !ASN1_ENUMERATED_set(key_desc->attestation_security_level, context.GetSecurityLevel()) ||
+    if (!ASN1_INTEGER_set(key_desc->attestation_version,
+                          kCurrentAttestationVersion) ||
+        !ASN1_ENUMERATED_set(key_desc->attestation_security_level,
+                             context.GetSecurityLevel()) ||
         !ASN1_INTEGER_set(key_desc->keymaster_version, keymaster_version) ||
-        !ASN1_ENUMERATED_set(key_desc->keymaster_security_level, keymaster_security_level))
+        !ASN1_ENUMERATED_set(key_desc->keymaster_security_level,
+                             keymaster_security_level)) {
         return TranslateLastOpenSslError();
+    }
 
     keymaster_blob_t attestation_challenge = {nullptr, 0};
-    if (!attestation_params.GetTagValue(TAG_ATTESTATION_CHALLENGE, &attestation_challenge))
+    if (!attestation_params.GetTagValue(TAG_ATTESTATION_CHALLENGE,
+                                        &attestation_challenge)) {
         return KM_ERROR_ATTESTATION_CHALLENGE_MISSING;
-    if (!ASN1_OCTET_STRING_set(key_desc->attestation_challenge, attestation_challenge.data,
-                               attestation_challenge.data_length))
+    }
+    if (!ASN1_OCTET_STRING_set(key_desc->attestation_challenge,
+                               attestation_challenge.data,
+                               attestation_challenge.data_length)) {
         return TranslateLastOpenSslError();
+    }
 
     keymaster_blob_t attestation_app_id;
-    if (!attestation_params.GetTagValue(TAG_ATTESTATION_APPLICATION_ID, &attestation_app_id))
+    if (!attestation_params.GetTagValue(TAG_ATTESTATION_APPLICATION_ID,
+                                        &attestation_app_id)) {
         return KM_ERROR_ATTESTATION_APPLICATION_ID_MISSING;
+    }
     sw_enforced.push_back(TAG_ATTESTATION_APPLICATION_ID, attestation_app_id);
 
     keymaster_error_t error = context.VerifyAndCopyDeviceIds(attestation_params,
@@ -550,12 +580,14 @@ keymaster_error_t build_attestation_record(const AuthorizationSet& attestation_p
     }
 
     error = build_auth_list(sw_enforced, key_desc->software_enforced);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     error = build_auth_list(tee_enforced, key_desc->tee_enforced);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
     key_desc->tee_enforced->root_of_trust = new KM_ROOT_OF_TRUST();
     memset(key_desc->tee_enforced->root_of_trust, 0, sizeof(KM_ROOT_OF_TRUST));
     key_desc->tee_enforced->root_of_trust->verified_boot_key = ASN1_OCTET_STRING_new();
@@ -585,27 +617,32 @@ keymaster_error_t build_attestation_record(const AuthorizationSet& attestation_p
         error = context.GenerateUniqueId(
             creation_datetime, application_id,
             attestation_params.GetTagValue(TAG_RESET_SINCE_ID_ROTATION), &unique_id);
-        if (error != KM_ERROR_OK)
+        if (error != KM_ERROR_OK) {
             return error;
+        }
 
         key_desc->unique_id = ASN1_OCTET_STRING_new();
         if (!key_desc->unique_id ||
             !ASN1_OCTET_STRING_set(key_desc->unique_id, unique_id.peek_read(),
-                                   unique_id.available_read()))
+                                   unique_id.available_read())) {
             return TranslateLastOpenSslError();
+        }
     }
 
     int len = i2d_KM_KEY_DESCRIPTION(key_desc.get(), nullptr);
-    if (len < 0)
+    if (len < 0) {
         return TranslateLastOpenSslError();
+    }
     *asn1_key_desc_len = len;
     asn1_key_desc->reset(new uint8_t[*asn1_key_desc_len]);
-    if (!asn1_key_desc->get())
+    if (!asn1_key_desc->get()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     uint8_t* p = asn1_key_desc->get();
     len = i2d_KM_KEY_DESCRIPTION(key_desc.get(), &p);
-    if (len < 0)
+    if (len < 0) {
         return TranslateLastOpenSslError();
+    }
 
     return KM_ERROR_OK;
 }
@@ -615,9 +652,10 @@ static bool get_repeated_enums(const stack_st_ASN1_INTEGER* stack, keymaster_tag
                                AuthorizationSet* auth_list) {
     assert(keymaster_tag_get_type(tag) == KM_ENUM_REP);
     for (size_t i = 0; i < sk_ASN1_INTEGER_num(stack); ++i) {
-        if (!auth_list->push_back(
-                keymaster_param_enum(tag, ASN1_INTEGER_get(sk_ASN1_INTEGER_value(stack, i)))))
+        if (!auth_list->push_back(keymaster_param_enum(
+                    tag, ASN1_INTEGER_get(sk_ASN1_INTEGER_value(stack, i))))) {
             return false;
+        }
     }
     return true;
 }
@@ -626,19 +664,23 @@ static bool get_repeated_enums(const stack_st_ASN1_INTEGER* stack, keymaster_tag
 template <keymaster_tag_type_t Type, keymaster_tag_t Tag, typename KeymasterEnum>
 static bool get_enum(const ASN1_INTEGER* asn1_int, TypedEnumTag<Type, Tag, KeymasterEnum> tag,
                      AuthorizationSet* auth_list) {
-    if (!asn1_int)
+    if (!asn1_int) {
         return true;
-    return auth_list->push_back(tag, static_cast<KeymasterEnum>(ASN1_INTEGER_get(asn1_int)));
+    }
+    return auth_list->push_back(
+            tag, static_cast<KeymasterEnum>(ASN1_INTEGER_get(asn1_int)));
 }
 
 // Add the specified ulong tag/value pair to auth_list.
 static bool get_ulong(const ASN1_INTEGER* asn1_int, keymaster_tag_t tag,
                       AuthorizationSet* auth_list) {
-    if (!asn1_int)
+    if (!asn1_int) {
         return true;
+    }
     UniquePtr<BIGNUM, BIGNUM_Delete> bn(ASN1_INTEGER_to_BN(asn1_int, nullptr));
-    if (!bn.get())
+    if (!bn.get()) {
         return false;
+    }
     uint64_t ulong = BN_get_word(bn.get());
     return auth_list->push_back(keymaster_param_long(tag, ulong));
 }
@@ -646,152 +688,200 @@ static bool get_ulong(const ASN1_INTEGER* asn1_int, keymaster_tag_t tag,
 // Extract the values from the specified ASN.1 record and place them in auth_list.
 static keymaster_error_t extract_auth_list(const KM_AUTH_LIST* record,
                                            AuthorizationSet* auth_list) {
-    if (!record)
+    if (!record) {
         return KM_ERROR_OK;
+    }
 
     // Purpose
-    if (!get_repeated_enums(record->purpose, TAG_PURPOSE, auth_list))
+    if (!get_repeated_enums(record->purpose, TAG_PURPOSE, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Algorithm
-    if (!get_enum(record->algorithm, TAG_ALGORITHM, auth_list))
+    if (!get_enum(record->algorithm, TAG_ALGORITHM, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Key size
-    if (record->key_size && !auth_list->push_back(TAG_KEY_SIZE, ASN1_INTEGER_get(record->key_size)))
+    if (record->key_size &&
+        !auth_list->push_back(TAG_KEY_SIZE,
+                              ASN1_INTEGER_get(record->key_size))) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Digest
-    if (!get_repeated_enums(record->digest, TAG_DIGEST, auth_list))
+    if (!get_repeated_enums(record->digest, TAG_DIGEST, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Padding
-    if (!get_repeated_enums(record->padding, TAG_PADDING, auth_list))
+    if (!get_repeated_enums(record->padding, TAG_PADDING, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // EC curve
-    if (!get_enum(record->ec_curve, TAG_EC_CURVE, auth_list))
+    if (!get_enum(record->ec_curve, TAG_EC_CURVE, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // RSA public exponent
-    if (!get_ulong(record->rsa_public_exponent, TAG_RSA_PUBLIC_EXPONENT, auth_list))
+    if (!get_ulong(record->rsa_public_exponent, TAG_RSA_PUBLIC_EXPONENT,
+                   auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Active date time
-    if (!get_ulong(record->active_date_time, TAG_ACTIVE_DATETIME, auth_list))
+    if (!get_ulong(record->active_date_time, TAG_ACTIVE_DATETIME, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Origination expire date time
-    if (!get_ulong(record->origination_expire_date_time, TAG_ORIGINATION_EXPIRE_DATETIME,
-                   auth_list))
+    if (!get_ulong(record->origination_expire_date_time,
+                   TAG_ORIGINATION_EXPIRE_DATETIME, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Usage Expire date time
-    if (!get_ulong(record->usage_expire_date_time, TAG_USAGE_EXPIRE_DATETIME, auth_list))
+    if (!get_ulong(record->usage_expire_date_time, TAG_USAGE_EXPIRE_DATETIME,
+                   auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // No auth required
-    if (record->no_auth_required && !auth_list->push_back(TAG_NO_AUTH_REQUIRED))
+    if (record->no_auth_required &&
+        !auth_list->push_back(TAG_NO_AUTH_REQUIRED)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // User auth type
-    if (!get_enum(record->user_auth_type, TAG_USER_AUTH_TYPE, auth_list))
+    if (!get_enum(record->user_auth_type, TAG_USER_AUTH_TYPE, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Auth timeout
     if (record->auth_timeout &&
-        !auth_list->push_back(TAG_AUTH_TIMEOUT, ASN1_INTEGER_get(record->auth_timeout)))
+        !auth_list->push_back(TAG_AUTH_TIMEOUT,
+                              ASN1_INTEGER_get(record->auth_timeout))) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // All applications
-    if (record->all_applications && !auth_list->push_back(TAG_ALL_APPLICATIONS))
+    if (record->all_applications &&
+        !auth_list->push_back(TAG_ALL_APPLICATIONS)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Application ID
     if (record->application_id &&
         !auth_list->push_back(TAG_APPLICATION_ID, record->application_id->data,
-                              record->application_id->length))
+                              record->application_id->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Creation date time
-    if (!get_ulong(record->creation_date_time, TAG_CREATION_DATETIME, auth_list))
+    if (!get_ulong(record->creation_date_time, TAG_CREATION_DATETIME,
+                   auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Origin
-    if (!get_enum(record->origin, TAG_ORIGIN, auth_list))
+    if (!get_enum(record->origin, TAG_ORIGIN, auth_list)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Rollback resistant
-    if (record->rollback_resistant && !auth_list->push_back(TAG_ROLLBACK_RESISTANT))
+    if (record->rollback_resistant &&
+        !auth_list->push_back(TAG_ROLLBACK_RESISTANT)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Root of trust
     if (record->root_of_trust) {
         KM_ROOT_OF_TRUST* rot = record->root_of_trust;
-        if (!rot->verified_boot_key)
+        if (!rot->verified_boot_key) {
             return KM_ERROR_INVALID_KEY_BLOB;
+        }
 
         // Other root of trust fields are not mapped to auth set entries.
     }
 
     // OS Version
     if (record->os_version &&
-        !auth_list->push_back(TAG_OS_VERSION, ASN1_INTEGER_get(record->os_version)))
+        !auth_list->push_back(TAG_OS_VERSION,
+                              ASN1_INTEGER_get(record->os_version))) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // OS Patch level
     if (record->os_patchlevel &&
-        !auth_list->push_back(TAG_OS_PATCHLEVEL, ASN1_INTEGER_get(record->os_patchlevel)))
+        !auth_list->push_back(TAG_OS_PATCHLEVEL,
+                              ASN1_INTEGER_get(record->os_patchlevel))) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Brand name
     if (record->attestation_id_brand &&
-        !auth_list->push_back(TAG_ATTESTATION_ID_BRAND, record->attestation_id_brand->data,
-                              record->attestation_id_brand->length))
+        !auth_list->push_back(TAG_ATTESTATION_ID_BRAND,
+                              record->attestation_id_brand->data,
+                              record->attestation_id_brand->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Device name
     if (record->attestation_id_device &&
-        !auth_list->push_back(TAG_ATTESTATION_ID_DEVICE, record->attestation_id_device->data,
-                              record->attestation_id_device->length))
+        !auth_list->push_back(TAG_ATTESTATION_ID_DEVICE,
+                              record->attestation_id_device->data,
+                              record->attestation_id_device->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Product name
     if (record->attestation_id_product &&
-        !auth_list->push_back(TAG_ATTESTATION_ID_PRODUCT, record->attestation_id_product->data,
-                              record->attestation_id_product->length))
+        !auth_list->push_back(TAG_ATTESTATION_ID_PRODUCT,
+                              record->attestation_id_product->data,
+                              record->attestation_id_product->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Serial number
     if (record->attestation_id_serial &&
-        !auth_list->push_back(TAG_ATTESTATION_ID_SERIAL, record->attestation_id_serial->data,
-                              record->attestation_id_serial->length))
+        !auth_list->push_back(TAG_ATTESTATION_ID_SERIAL,
+                              record->attestation_id_serial->data,
+                              record->attestation_id_serial->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // IMEI
     if (record->attestation_id_imei &&
-        !auth_list->push_back(TAG_ATTESTATION_ID_IMEI, record->attestation_id_imei->data,
-                              record->attestation_id_imei->length))
+        !auth_list->push_back(TAG_ATTESTATION_ID_IMEI,
+                              record->attestation_id_imei->data,
+                              record->attestation_id_imei->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // MEID
     if (record->attestation_id_meid &&
-        !auth_list->push_back(TAG_ATTESTATION_ID_MEID, record->attestation_id_meid->data,
-                              record->attestation_id_meid->length))
+        !auth_list->push_back(TAG_ATTESTATION_ID_MEID,
+                              record->attestation_id_meid->data,
+                              record->attestation_id_meid->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Manufacturer name
     if (record->attestation_id_manufacturer &&
         !auth_list->push_back(TAG_ATTESTATION_ID_MANUFACTURER,
                               record->attestation_id_manufacturer->data,
-                              record->attestation_id_manufacturer->length))
+                              record->attestation_id_manufacturer->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     // Model name
     if (record->attestation_id_model &&
-        !auth_list->push_back(TAG_ATTESTATION_ID_MODEL, record->attestation_id_model->data,
-                              record->attestation_id_model->length))
+        !auth_list->push_back(TAG_ATTESTATION_ID_MODEL,
+                              record->attestation_id_model->data,
+                              record->attestation_id_model->length)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     return KM_ERROR_OK;
 }
@@ -810,8 +900,9 @@ keymaster_error_t parse_attestation_record(const uint8_t* asn1_key_desc, size_t 
     const uint8_t* p = asn1_key_desc;
     UniquePtr<KM_KEY_DESCRIPTION, KM_KEY_DESCRIPTION_Delete> record(
         d2i_KM_KEY_DESCRIPTION(nullptr, &p, asn1_key_desc_len));
-    if (!record.get())
+    if (!record.get()) {
         return TranslateLastOpenSslError();
+    }
 
     *attestation_version = ASN1_INTEGER_get(record->attestation_version);
     *attestation_security_level = static_cast<keymaster_security_level_t>(
@@ -828,8 +919,9 @@ keymaster_error_t parse_attestation_record(const uint8_t* asn1_key_desc, size_t 
     unique_id->data_length = record->unique_id->length;
 
     keymaster_error_t error = extract_auth_list(record->software_enforced, software_enforced);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     return extract_auth_list(record->tee_enforced, tee_enforced);
 }
