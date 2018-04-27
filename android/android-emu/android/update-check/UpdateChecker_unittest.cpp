@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <string>
 
 namespace android {
@@ -27,8 +28,7 @@ using android::studio::UpdateChannel;
 
 class MockVersionExtractor : public IVersionExtractor {
 public:
-    virtual Versions extractVersions(
-            android::base::StringView data) const override {
+    Versions extractVersions(android::base::StringView data) const override {
         ++mExtractVersionCallCount;
         EXPECT_EQ(mExtractVersionDataParam, data);
         return mExtractVersionResult ? Versions{{UpdateChannel::Canary,
@@ -36,7 +36,7 @@ public:
                                      : Versions{};
     }
 
-    virtual Version getCurrentVersion() const {
+    Version getCurrentVersion() const override {
         ++mGetCurrentVersionCallCount;
         return mGetCurrentVersionResult;
     }
@@ -50,12 +50,12 @@ public:
 
 class MockDataLoader : public IDataLoader {
 public:
-    virtual std::string load() override {
+    std::string load() override {
         ++mLoadCallCount;
         return mLoadResult;
     }
 
-    virtual std::string getUniqueDataKey() override {
+    std::string getUniqueDataKey() override {
         ++mGetUniqueDataKeyCallCount;
         return mUniqueDataKey;
     }
@@ -69,18 +69,18 @@ public:
 
 class MockTimeStorage : public ITimeStorage {
 public:
-    virtual bool lock() override {
+    bool lock() override {
         ++mLockCallCount;
         return mLockResult;
     }
 
-    virtual time_t getTime(const std::string& key) override {
+    time_t getTime(const std::string& key) override {
         EXPECT_STREQ(mKeyParam.c_str(), key.c_str());
         ++mGetTimeCallCount;
         return mGetTimeResult;
     }
 
-    virtual void setTime(const std::string& key, time_t time) override {
+    void setTime(const std::string& key, time_t time) override {
         EXPECT_STREQ(mKeyParam.c_str(), key.c_str());
         ++mSetTimeCallCount;
         EXPECT_EQ(mSetTimeParam, time);
@@ -97,8 +97,8 @@ public:
 
 class MockNewerVersionReporter : public INewerVersionReporter {
 public:
-    virtual void reportNewerVersion(const Version& existing,
-                                    const Version& newer) {
+    void reportNewerVersion(const Version& existing,
+                            const Version& newer) override {
         EXPECT_EQ(mReportNewerVersionExistingParam, existing);
         EXPECT_EQ(mReportNewerVersionNewerParam, newer);
         ++mReportNewerVersionCallCount;
@@ -129,8 +129,8 @@ public:
         mReporter = new MockNewerVersionReporter();
         mTimeStorage = new MockTimeStorage();
         mVersionExtractor = new MockVersionExtractor();
-        mUC.reset(new TestUpdateChecker(mVersionExtractor, mDataLoader,
-                                        mTimeStorage, mReporter));
+        mUC = std::make_unique<TestUpdateChecker>(
+                mVersionExtractor, mDataLoader, mTimeStorage, mReporter);
     }
 
     std::unique_ptr<TestUpdateChecker> mUC;
@@ -172,7 +172,7 @@ TEST(UpdateChecker, needsCheck) {
     EXPECT_EQ(2, test.mTimeStorage->mGetTimeCallCount);
 }
 
-// TODO: Re-enable these tests once they can work with lazy, once-only
+// TODO(yahan): Re-enable these tests once they can work with lazy, once-only
 // loading of the update channel.
 
 TEST(UpdateChecker, DISABLED_getVersion) {

@@ -34,16 +34,16 @@ TEST(ScopedPtr, FuncDelete_conversions) {
     // assignment operator
     funcFd2 = funcFd1;
     // move operator
-    funcFd2 = std::move(funcFd1);
+    funcFd2 = funcFd1;
 
     // conversion ctor
     FuncDelete<decltype(+lambda)> funcFd3(lambdaFd);
     // conversion move ctor
-    FuncDelete<decltype(+lambda)> funcFd4(std::move(lambdaFd));
+    FuncDelete<decltype(+lambda)> funcFd4(lambdaFd);
     // conversion assignment
     funcFd3 = lambdaFd;
     // conversion move
-    funcFd3 = std::move(lambdaFd);
+    funcFd3 = lambdaFd;
 }
 
 TEST(ScopedPtr, FuncDelete_GetsCalled) {

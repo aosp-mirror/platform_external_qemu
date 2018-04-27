@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 static const int kBasePort = 42;
 
@@ -139,27 +139,27 @@ TEST_F(ModemTest, TransmitLogicalChannel) {
     };
     static const size_t kNumTests = android::base::arraySize(kData);
 
-    for (size_t i = 0; i < kNumTests; ++i) {
+    for (const auto& i : kData) {
         int channel = -1;
-        if (kData[i].ChannelName) {
-            channel = openLogicalChannel(kData[i].ChannelName);
+        if (i.ChannelName) {
+            channel = openLogicalChannel(i.ChannelName);
             ASSERT_GE(channel, 1);
         }
         char command[1024];
-        if (strstr(kData[i].CommandFormat, "%d") != nullptr) {
+        if (strstr(i.CommandFormat, "%d") != nullptr) {
             // Insert channel number if there's a format argument in there
-            snprintf(command, sizeof(command), kData[i].CommandFormat, channel);
+            snprintf(command, sizeof(command), i.CommandFormat, channel);
         } else {
-            snprintf(command, sizeof(command), "%s", kData[i].CommandFormat);
+            snprintf(command, sizeof(command), "%s", i.CommandFormat);
         }
         command[sizeof(command) - 1] = '\0';
 
         const char* reply = amodem_send(mModem, command);
         ASSERT_NE(nullptr, reply);
-        if (kData[i].FullMatch) {
-            ASSERT_STREQ(kData[i].ExpectedReply, reply);
+        if (i.FullMatch) {
+            ASSERT_STREQ(i.ExpectedReply, reply);
         } else {
-            ASSERT_EQ(reply, strstr(reply, kData[i].ExpectedReply));
+            ASSERT_EQ(reply, strstr(reply, i.ExpectedReply));
         }
         closeLogicalChannel(channel);
     }

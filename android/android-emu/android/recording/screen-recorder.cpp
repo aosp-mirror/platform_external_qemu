@@ -29,7 +29,7 @@
 #include "android/utils/debug.h"
 
 #include <atomic>
-
+#include <memory>
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
 namespace {
@@ -93,7 +93,7 @@ private:
     uint32_t mFbHeight = 0;
 
     std::string mFilename;
-    RecordingInfo mInfo = {0};
+    RecordingInfo mInfo = {nullptr};
     const QAndroidDisplayAgent* mAgent = nullptr;
     std::atomic<RecorderState> mRecorderState{RECORDER_STARTING};
     QFrameBuffer mDummyQf;
@@ -123,8 +123,9 @@ ScreenRecorder::ScreenRecorder(uint32_t fbWidth,
                                mInfo.timeLimit * 1000000;
           {
               AutoLock lock(mLock);
-              while (!mFinished && mCond.timedWait(&mLock, timeoutTimeUs))
+              while (!mFinished && mCond.timedWait(&mLock, timeoutTimeUs)) {
                   ;
+              }
           }
 
           if (!mFinished) {
@@ -349,8 +350,8 @@ bool screen_recorder_start(const RecordingInfo* info, bool async) {
 
     AutoLock lock(globals.lock);
 
-    globals.recorder.reset(new ScreenRecorder(globals.fbWidth, globals.fbHeight,
-                                              info, globals.displayAgent));
+    globals.recorder = std::make_unique<ScreenRecorder>(
+            globals.fbWidth, globals.fbHeight, info, globals.displayAgent);
     return globals.recorder->startRecording(async);
 }
 
@@ -376,12 +377,13 @@ bool start_webrtc_module(const char* handle, int fps) {
 
     auto producer = android::recording::createVideoProducer(
             globals.fbWidth, globals.fbHeight, fps, globals.displayAgent);
-    globals.webrtc_module.reset(new VideoFrameSharer(
-            globals.fbWidth, globals.fbHeight, fps, handle));
+    globals.webrtc_module = std::make_unique<VideoFrameSharer>(
+            globals.fbWidth, globals.fbHeight, fps, handle);
 
     // We can fail due to shared memory allocation issues.
-    if (!globals.webrtc_module->attachProducer(std::move(producer)))
+    if (!globals.webrtc_module->attachProducer(std::move(producer))) {
         return false;
+    }
 
     globals.webrtc_module->start();
     return true;

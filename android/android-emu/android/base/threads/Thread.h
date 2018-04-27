@@ -24,7 +24,7 @@
 #include <pthread.h>
 #endif
 
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace android {
 namespace base {

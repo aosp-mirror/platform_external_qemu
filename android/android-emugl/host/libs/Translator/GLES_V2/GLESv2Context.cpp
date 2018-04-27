@@ -23,8 +23,8 @@
 
 #include "emugl/common/crash_reporter.h"
 
-#include <string.h>
-
+#include <cstring>
+#include <memory>
 static const char kGLES20StringPart[] = "OpenGL ES 2.0";
 static const char kGLES30StringPart[] = "OpenGL ES 3.0";
 static const char kGLES31StringPart[] = "OpenGL ES 3.1";
@@ -70,26 +70,34 @@ void GLESv2Context::init() {
         setVertexArrayObject(0);
         setAttribute0value(0.0, 0.0, 0.0, 1.0);
 
-        buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
-                     (const char*)dispatcher().glGetString(GL_RENDERER),
-                     (const char*)dispatcher().glGetString(GL_VERSION),
-                     sPickVersionStringPart(m_glesMajorVersion, m_glesMinorVersion));
+        buildStrings(
+                reinterpret_cast<const char*>(
+                        dispatcher().glGetString(GL_VENDOR)),
+                reinterpret_cast<const char*>(
+                        dispatcher().glGetString(GL_RENDERER)),
+                reinterpret_cast<const char*>(
+                        dispatcher().glGetString(GL_VERSION)),
+                sPickVersionStringPart(m_glesMajorVersion, m_glesMinorVersion));
         if (m_glesMajorVersion > 2 && !isGles2Gles()) {
-            // OpenGL ES assumes that colors computed by / given to shaders will be converted to / from SRGB automatically
-            // by the underlying implementation.
-            // Desktop OpenGL makes no such assumption, and requires glEnable(GL_FRAMEBUFFER_SRGB) for the automatic conversion
-            // to work.
-            // This should work in most cases: just glEnable(GL_FRAMEBUFFER_SRGB) for every context.
-            // But, that's not the whole story:
-            // TODO: For dEQP tests standalone, we can just glEnable GL_FRAMEBUFFER_SRGB from the beginning and
-            // pass all the framebuffer blit tests. However with CTS dEQP, EGL gets failures in color clear
-            // and some dEQP-GLES3 framebuffer blit tests fail.
-            // So we need to start out each context with GL_FRAMEBUFFER_SRGB disabled, and then enable it depending on
-            // whether or not the current draw or read framebuffer has a SRGB texture color attachment.
+            // OpenGL ES assumes that colors computed by / given to shaders will
+            // be converted to / from SRGB automatically by the underlying
+            // implementation. Desktop OpenGL makes no such assumption, and
+            // requires glEnable(GL_FRAMEBUFFER_SRGB) for the automatic
+            // conversion to work. This should work in most cases: just
+            // glEnable(GL_FRAMEBUFFER_SRGB) for every context. But, that's not
+            // the whole story:
+            // TODO(yahan): For dEQP tests standalone, we can just glEnable
+            // GL_FRAMEBUFFER_SRGB from the beginning and pass all the
+            // framebuffer blit tests. However with CTS dEQP, EGL gets failures
+            // in color clear and some dEQP-GLES3 framebuffer blit tests fail.
+            // So we need to start out each context with GL_FRAMEBUFFER_SRGB
+            // disabled, and then enable it depending on whether or not the
+            // current draw or read framebuffer has a SRGB texture color
+            // attachment.
             dispatcher().glDisable(GL_FRAMEBUFFER_SRGB);
-            // Desktop OpenGL allows one to make cube maps seamless _or not_, but
-            // OpenGL ES assumes seamless cubemaps are activated 100% of the time.
-            // Many dEQP cube map tests fail without this enable.
+            // Desktop OpenGL allows one to make cube maps seamless _or not_,
+            // but OpenGL ES assumes seamless cubemaps are activated 100% of the
+            // time. Many dEQP cube map tests fail without this enable.
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
 
@@ -146,7 +154,7 @@ GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
         m_attribute0valueChanged = stream->getByte();
         m_att0ArrayLength = stream->getBe32();
         if (m_att0ArrayLength != 0) {
-            m_att0Array.reset(new GLfloat[4 * m_att0ArrayLength]);
+            m_att0Array = std::make_unique<GLfloat[]>(4 * m_att0ArrayLength);
             stream->read(m_att0Array.get(), sizeof(GLfloat) * 4 * m_att0ArrayLength);
         }
         m_att0NeedsDisable = stream->getByte();
@@ -237,17 +245,20 @@ void GLESv2Context::postLoadRestoreCtx() {
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
                     if (glesPointer->isIntPointer()) {
-                        dispatcher.glVertexAttribIPointer(glesPointerIte.first,
-                                glesPointer->getSize(),
+                        dispatcher.glVertexAttribIPointer(
+                                glesPointerIte.first, glesPointer->getSize(),
                                 glesPointer->getType(),
                                 glesPointer->getStride(),
-                                (GLvoid*)(size_t)glesPointer->getBufferOffset());
+                                (GLvoid*)static_cast<size_t>(
+                                        glesPointer->getBufferOffset()));
                     } else {
-                        dispatcher.glVertexAttribPointer(glesPointerIte.first,
-                                glesPointer->getSize(),
-                                glesPointer->getType(), glesPointer->isNormalize(),
+                        dispatcher.glVertexAttribPointer(
+                                glesPointerIte.first, glesPointer->getSize(),
+                                glesPointer->getType(),
+                                glesPointer->isNormalize(),
                                 glesPointer->getStride(),
-                                (GLvoid*)(size_t)glesPointer->getBufferOffset());
+                                (GLvoid*)static_cast<size_t>(
+                                        glesPointer->getBufferOffset()));
                     }
                     break;
                 }
@@ -410,7 +421,7 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
 
     if (count > m_att0ArrayLength) {
         const unsigned newLen = std::max(count, 2 * m_att0ArrayLength);
-        m_att0Array.reset(new GLfloat[4 * newLen]);
+        m_att0Array = std::make_unique<GLfloat[]>(4 * newLen);
         m_att0ArrayLength = newLen;
         m_attribute0valueChanged = true;
     }
@@ -429,8 +440,7 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
     m_att0NeedsDisable = true;
 }
 
-void GLESv2Context::validateAtt0PostDraw(void)
-{
+void GLESv2Context::validateAtt0PostDraw() {
     if (m_att0NeedsDisable) {
         s_glDispatch.glDisableVertexAttribArray(0);
         m_att0NeedsDisable = false;
@@ -504,7 +514,8 @@ void GLESv2Context::drawWithEmulations(
 
         size_t dataSize = bpv * count;
 
-        s_glDispatch.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint*)&prevIBO);
+        s_glDispatch.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+                                   reinterpret_cast<GLint*>(&prevIBO));
         s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_emulatedClientIBO);
         s_glDispatch.glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
     }
@@ -580,17 +591,21 @@ void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                                          GLenum arrayType, GLenum dataType,
                                          GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt){
     // is not really a client side arr.
-    if (arr == NULL) return;
+    if (arr == nullptr)
+        return;
 
     GLuint prevArrayBuffer;
-    s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);
+    s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+                               reinterpret_cast<GLint*>(&prevArrayBuffer));
     s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, m_emulatedClientVBOs[arrayType]);
     s_glDispatch.glBufferData(GL_ARRAY_BUFFER, datasize, arr, GL_STREAM_DRAW);
 
     if (isInt) {
-        s_glDispatch.glVertexAttribIPointer(arrayType, size, dataType, stride, 0);
+        s_glDispatch.glVertexAttribIPointer(arrayType, size, dataType, stride,
+                                            nullptr);
     } else {
-        s_glDispatch.glVertexAttribPointer(arrayType, size, dataType, normalized, stride, 0);
+        s_glDispatch.glVertexAttribPointer(arrayType, size, dataType,
+                                           normalized, stride, nullptr);
     }
 
     s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, prevArrayBuffer);
@@ -668,20 +683,28 @@ void GLESv2Context::initExtensionString() {
     *s_glExtensions = "GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint "
                       "GL_OES_texture_float GL_OES_texture_float_linear "
                       "GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture ";
-    if (s_glSupport.GL_ARB_HALF_FLOAT_PIXEL || s_glSupport.GL_NV_HALF_FLOAT)
-        *s_glExtensions+="GL_OES_texture_half_float GL_OES_texture_half_float_linear ";
-    if (s_glSupport.GL_EXT_PACKED_DEPTH_STENCIL)
-        *s_glExtensions+="GL_OES_packed_depth_stencil ";
-    if (s_glSupport.GL_ARB_HALF_FLOAT_VERTEX)
-        *s_glExtensions+="GL_OES_vertex_half_float ";
-    if (s_glSupport.GL_OES_STANDARD_DERIVATIVES)
-        *s_glExtensions+="GL_OES_standard_derivatives ";
-    if (s_glSupport.GL_OES_TEXTURE_NPOT)
-        *s_glExtensions+="GL_OES_texture_npot ";
-    if (s_glSupport.GL_OES_RGB8_RGBA8)
-        *s_glExtensions+="GL_OES_rgb8_rgba8 ";
-    if (s_glSupport.GL_EXT_color_buffer_float)
-        *s_glExtensions+="GL_EXT_color_buffer_float ";
+    if (s_glSupport.GL_ARB_HALF_FLOAT_PIXEL || s_glSupport.GL_NV_HALF_FLOAT) {
+        *s_glExtensions +=
+                "GL_OES_texture_half_float GL_OES_texture_half_float_linear ";
+    }
+    if (s_glSupport.GL_EXT_PACKED_DEPTH_STENCIL) {
+        *s_glExtensions += "GL_OES_packed_depth_stencil ";
+    }
+    if (s_glSupport.GL_ARB_HALF_FLOAT_VERTEX) {
+        *s_glExtensions += "GL_OES_vertex_half_float ";
+    }
+    if (s_glSupport.GL_OES_STANDARD_DERIVATIVES) {
+        *s_glExtensions += "GL_OES_standard_derivatives ";
+    }
+    if (s_glSupport.GL_OES_TEXTURE_NPOT) {
+        *s_glExtensions += "GL_OES_texture_npot ";
+    }
+    if (s_glSupport.GL_OES_RGB8_RGBA8) {
+        *s_glExtensions += "GL_OES_rgb8_rgba8 ";
+    }
+    if (s_glSupport.GL_EXT_color_buffer_float) {
+        *s_glExtensions += "GL_EXT_color_buffer_float ";
+    }
 }
 
 int GLESv2Context::getMaxTexUnits() {

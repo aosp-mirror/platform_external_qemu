@@ -107,7 +107,7 @@ void RamLoader::applyRamBlockStructure(const RamBlockStructure& blockStructure) 
 
 void RamLoader::loadRam(void* ptr, uint64_t size) {
     uint32_t num_pages = (size + mPageSize - 1) / mPageSize;
-    char* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
+    auto* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
     for (uint32_t i = 0; i < num_pages; i++) {
         loadRamPage(pagePtr + i * mPageSize);
     }

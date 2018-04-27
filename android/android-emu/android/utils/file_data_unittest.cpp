@@ -15,7 +15,7 @@
 
 class ScopedFileData {
 public:
-    ScopedFileData() : mStatus(0) { fileData_initEmpty(&mFileData); }
+    ScopedFileData() { fileData_initEmpty(&mFileData); }
 
     ScopedFileData(const void* buff, size_t length) {
         mStatus = fileData_initFromMemory(&mFileData, buff, length);
@@ -36,15 +36,16 @@ public:
     const FileData* ptr() const { return &mFileData; }
     FileData& operator*() { return mFileData; }
     FileData* operator->() { return &mFileData; }
+
 private:
     FileData mFileData;
-    int mStatus;
+    int mStatus{0};
 };
 
 TEST(FileData, IsValid) {
-    EXPECT_FALSE(fileData_isValid(NULL));
+    EXPECT_FALSE(fileData_isValid(nullptr));
 
-    FileData fakeData = { (uint8_t*)0x012345678, 12345, 23983 };
+    FileData fakeData = {(uint8_t*)0x012345678, 12345, 23983};
     EXPECT_FALSE(fileData_isValid(&fakeData));
 }
 

@@ -22,6 +22,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 
+#include <memory>
 #include <unordered_map>
 
 using android::base::AutoLock;
@@ -38,8 +39,7 @@ static uint64_t sUniqueId = 0;
 // |sCommandReplyLock| protects
 // |sUniqueId| and |wait_map|, including
 // the |CommandWaitInfo| structures within.
-static android::base::LazyInstance<Lock> sCommandReplyLock =
-    LAZY_INSTANCE_INIT;
+static android::base::LazyInstance<Lock> sCommandReplyLock = LAZY_INSTANCE_INIT;
 
 uint64_t next_unique_id() {
     AutoLock lock(sCommandReplyLock.get());
@@ -49,7 +49,7 @@ uint64_t next_unique_id() {
 }
 
 struct CommandWaitInfo {
-    Lock lock; // protects other parts of this struct
+    Lock lock;  // protects other parts of this struct
     bool done = false;
     ConditionVariable cvDone;
     uint64_t return_value;
@@ -57,14 +57,12 @@ struct CommandWaitInfo {
 
 // |wait_map| keeps track of all the commands in flight
 // that require a reply from the guest.
-static std::unordered_map<uint64_t, std::unique_ptr<CommandWaitInfo> >
-    wait_map;
+static std::unordered_map<uint64_t, std::unique_ptr<CommandWaitInfo> > wait_map;
 
 static CommandWaitInfo* allocWait(uint64_t id) {
     AutoLock lock(sCommandReplyLock.get());
-    std::unique_ptr<CommandWaitInfo>& res =
-        wait_map[id];
-    res.reset(new CommandWaitInfo);
+    std::unique_ptr<CommandWaitInfo>& res = wait_map[id];
+    res = std::make_unique<CommandWaitInfo>();
     return res.get();
 }
 
@@ -73,7 +71,7 @@ static void freeWait(uint64_t id) {
     wait_map.erase(id);
 }
 
-static GoldfishSyncDeviceInterface* sGoldfishSyncHwFuncs = NULL;
+static GoldfishSyncDeviceInterface* sGoldfishSyncHwFuncs = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Goldfish sync device: command send/receive protocol
@@ -88,13 +86,11 @@ static GoldfishSyncDeviceInterface* sGoldfishSyncHwFuncs = NULL;
 // not caring about a reply from the guest. During normal operation,
 // we will only use |sendCommand| to send over a |goldfish_sync_timeline_inc|
 // call, to signal fence FD's on the guest.
-static void sendCommand(uint32_t cmd,
-                        uint64_t handle,
-                        uint32_t time_arg) {
-    GoldfishSyncCommandQueue::hostSignal
-        (cmd, handle, time_arg, 0
-         // last arg 0 OK because we will not reference it
-        );
+static void sendCommand(uint32_t cmd, uint64_t handle, uint32_t time_arg) {
+    GoldfishSyncCommandQueue::hostSignal(
+            cmd, handle, time_arg, 0
+            // last arg 0 OK because we will not reference it
+    );
 }
 
 // Receiving commands can be interesting because we do not know when
@@ -132,10 +128,8 @@ static uint64_t sendCommandAndGetResult(uint64_t cmd,
                                         uint64_t handle,
                                         uint64_t time_arg,
                                         uint64_t hostcmd_handle) {
-
     // queue a signal to the device
-    GoldfishSyncCommandQueue::hostSignal
-        (cmd, handle, time_arg, hostcmd_handle);
+    GoldfishSyncCommandQueue::hostSignal(cmd, handle, time_arg, hostcmd_handle);
 
     CommandWaitInfo* waitInfo = allocWait(hostcmd_handle);
 
@@ -158,13 +152,13 @@ static uint64_t sendCommandAndGetResult(uint64_t cmd,
 // Goldfish sync host-side interface implementation/////////////////////////////
 
 uint64_t goldfish_sync_create_timeline() {
-    return sendCommandAndGetResult(CMD_CREATE_SYNC_TIMELINE,
-                                   0, 0, next_unique_id());
+    return sendCommandAndGetResult(CMD_CREATE_SYNC_TIMELINE, 0, 0,
+                                   next_unique_id());
 }
 
 int goldfish_sync_create_fence(uint64_t timeline, uint32_t pt) {
-    return (int)sendCommandAndGetResult(CMD_CREATE_SYNC_FENCE,
-                                        timeline, pt, next_unique_id());
+    return static_cast<int>(sendCommandAndGetResult(
+            CMD_CREATE_SYNC_FENCE, timeline, pt, next_unique_id()));
 }
 
 void goldfish_sync_timeline_inc(uint64_t timeline, uint32_t howmuch) {
@@ -185,12 +179,11 @@ bool goldfish_sync_device_exists() {
     // The idea here is that the virtual device should set
     // sGoldfishSyncHwFuncs. If it didn't do that, we take
     // that to mean there is no virtual device.
-    return sGoldfishSyncHwFuncs != NULL;
+    return sGoldfishSyncHwFuncs != nullptr;
 }
 
 void goldfish_sync_set_hw_funcs(GoldfishSyncDeviceInterface* hw_funcs) {
     sGoldfishSyncHwFuncs = hw_funcs;
-    GoldfishSyncCommandQueue::setQueueCommand
-        (sGoldfishSyncHwFuncs->doHostCommand);
+    GoldfishSyncCommandQueue::setQueueCommand(
+            sGoldfishSyncHwFuncs->doHostCommand);
 }
-

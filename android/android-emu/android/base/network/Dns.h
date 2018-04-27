@@ -35,7 +35,7 @@ public:
 
     // Resolve name |server_name| into a list of IpAddress instances.
     // Return an empty list on failure.
-    static AddressList resolveName(StringView server_name);
+    static AddressList resolveName(const StringView& server_name);
 
     // Return the list of DNS server addresses used by the system.
     // This works by either parsing /etc/resolver.conf on Posix or

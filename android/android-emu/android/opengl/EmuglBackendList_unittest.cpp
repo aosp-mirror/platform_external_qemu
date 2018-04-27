@@ -20,7 +20,7 @@
 namespace android {
 namespace opengl {
 
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 using android::base::StringFormat;
 using android::base::System;
@@ -97,9 +97,9 @@ TEST(EmuglBackendList, getBackendLibPath) {
     };
     const size_t kDataLen = ARRAYLEN(kData);
 
-    for (size_t n = 0; n < kDataLen; ++n) {
+    for (auto n : kData) {
         std::string file = "gles_bar/";
-        file += kData[n].libName;
+        file += n.libName;
         makeLibSubFile(myDir, file.c_str());
     }
 
@@ -109,12 +109,11 @@ TEST(EmuglBackendList, getBackendLibPath) {
     EXPECT_EQ(1U, names.size());
     EXPECT_STREQ("bar", names[0].c_str());
 
-    for (size_t n = 0; n < kDataLen; ++n) {
+    for (auto n : kData) {
         std::string expected = StringFormat("/foo/%s/gles_bar/%s",
-                                            System::kLibSubDir,
-                                            kData[n].libName);
+                                            System::kLibSubDir, n.libName);
         std::string libdir;
-        EXPECT_TRUE(list.getBackendLibPath("bar", kData[n].library, &libdir));
+        EXPECT_TRUE(list.getBackendLibPath("bar", n.library, &libdir));
         EXPECT_TRUE(list.contains("bar"));
         EXPECT_FALSE(list.contains("foo"));
         EXPECT_STREQ(expected.c_str(), libdir.c_str());

@@ -30,10 +30,10 @@ static const QAndroidHttpProxyAgent* sHttpProxyAgent = nullptr;
 
 static void getStudioProxyString();
 static void sendProxySettingsToAgent(QString password);
-static QString proxyStringFromParts(QString hostName,
-                                    int     port,
-                                    QString userName,
-                                    QString password);
+static QString proxyStringFromParts(const QString& hostName,
+                                    int port,
+                                    const QString& userName,
+                                    const QString& password);
 
 void SettingsPage::initProxy() {
 
@@ -43,9 +43,10 @@ void SettingsPage::initProxy() {
     bool useStudio = settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
     bool proxyAuth = settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false).toBool();
     enum Ui::Settings::HTTP_PROXY_TYPE proxyType =
-            (enum Ui::Settings::HTTP_PROXY_TYPE)settings.value(
-                    Ui::Settings::HTTP_PROXY_TYPE,
-                    Ui::Settings::HTTP_PROXY_TYPE_NONE).toInt();
+            static_cast<enum Ui::Settings::HTTP_PROXY_TYPE>(
+                    settings.value(Ui::Settings::HTTP_PROXY_TYPE,
+                                   Ui::Settings::HTTP_PROXY_TYPE_NONE)
+                            .toInt());
     QString proxyHost = settings.value(Ui::Settings::HTTP_PROXY_HOST, "").toString();
     int proxyPort = settings.value(Ui::Settings::HTTP_PROXY_PORT, 80).toInt();
     QString proxyUsername = settings.value(Ui::Settings::HTTP_PROXY_USERNAME, "").toString();
@@ -94,7 +95,7 @@ void SettingsPage::on_set_proxyApply_clicked() {
     mUi->set_proxyResults->setText(sHttpProxyResults);
 }
 
-void SettingsPage::on_set_hostName_textChanged(QString /* unused */) {
+void SettingsPage::on_set_hostName_textChanged(const QString& /* unused */) {
     enableProxyApply();
 }
 void SettingsPage::on_set_hostName_editingFinished() {
@@ -102,7 +103,7 @@ void SettingsPage::on_set_hostName_editingFinished() {
     settings.setValue(Ui::Settings::HTTP_PROXY_HOST, mUi->set_hostName->text());
 }
 
-void SettingsPage::on_set_loginName_textChanged(QString /* unused */) {
+void SettingsPage::on_set_loginName_textChanged(const QString& /* unused */) {
     enableProxyApply();
 }
 void SettingsPage::on_set_loginName_editingFinished() {
@@ -208,9 +209,10 @@ static void sendProxySettingsToAgent(QString password) {
     bool useStudio = settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
     bool proxyAuth = settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false).toBool();
     enum Ui::Settings::HTTP_PROXY_TYPE proxyType =
-            (enum Ui::Settings::HTTP_PROXY_TYPE)settings.value(
-                    Ui::Settings::HTTP_PROXY_TYPE,
-                    Ui::Settings::HTTP_PROXY_TYPE_NONE).toInt();
+            static_cast<enum Ui::Settings::HTTP_PROXY_TYPE>(
+                    settings.value(Ui::Settings::HTTP_PROXY_TYPE,
+                                   Ui::Settings::HTTP_PROXY_TYPE_NONE)
+                            .toInt());
     QString proxyHost = settings.value(Ui::Settings::HTTP_PROXY_HOST, "").toString();
     int proxyPort = settings.value(Ui::Settings::HTTP_PROXY_PORT, 80).toInt();
     QString proxyUsername = settings.value(Ui::Settings::HTTP_PROXY_USERNAME, "").toString();
@@ -305,11 +307,10 @@ static void getStudioProxyString() {
 }
 
 // Construct a string like "myname:password@host.com:80"
-static QString proxyStringFromParts(QString hostName,
-                                    int     port,
-                                    QString userName,
-                                    QString password) {
-
+static QString proxyStringFromParts(const QString& hostName,
+                                    int port,
+                                    const QString& userName,
+                                    const QString& password) {
     if (hostName.isEmpty()) {
         // Without a host name, we have nothing
         return "";

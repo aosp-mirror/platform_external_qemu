@@ -27,19 +27,19 @@
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 
-#include "android/utils/debug.h"
+#include <cmath>
 #include "android/base/StringView.h"
+#include "android/utils/debug.h"
+#include "emugl/common/dma_device.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
-#include "emugl/common/sync_device.h"
-#include "emugl/common/dma_device.h"
 #include "emugl/common/misc.h"
+#include "emugl/common/sync_device.h"
 #include "emugl/common/thread.h"
-#include "math.h"
 
 #include <atomic>
-#include <inttypes.h>
-#include <string.h>
+#include <cinttypes>
+#include <cstring>
 
 using android::base::AutoLock;
 using android::base::Lock;
@@ -191,8 +191,8 @@ static EGLint rcGetEGLVersion(EGLint* major, EGLint* minor)
     if (!fb) {
         return EGL_FALSE;
     }
-    *major = (EGLint)fb->getCaps().eglMajor;
-    *minor = (EGLint)fb->getCaps().eglMinor;
+    *major = fb->getCaps().eglMajor;
+    *minor = fb->getCaps().eglMinor;
 
     return EGL_TRUE;
 }
@@ -221,13 +221,13 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
         return -len;
     }
 
-    strcpy((char *)buffer, eglStr.c_str());
+    strcpy(static_cast<char*>(buffer), eglStr.c_str());
     return len;
 }
 
 static bool shouldEnableAsyncSwap() {
     bool isPhone;
-    emugl::getAvdInfo(&isPhone, NULL);
+    emugl::getAvdInfo(&isPhone, nullptr);
     return emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
            emugl_sync_device_exists() &&
            isPhone &&
@@ -258,8 +258,7 @@ android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion versi
 // is Translator, SwiftShader, ANGLE, et al) may not advertise a GL_VERSION
 // string reflecting their maximum capabilities.
 std::string replaceESVersionString(const std::string& prev,
-                                   android::base::StringView newver) {
-
+                                   const android::base::StringView& newver) {
     // There is no need to fiddle with the string
     // if we are in a ES 1.x context.
     // Such contexts are considered as a special case that must
@@ -269,10 +268,9 @@ std::string replaceESVersionString(const std::string& prev,
     }
 
     size_t esStart = prev.find("ES ");
-    size_t esEnd = prev.find(" ", esStart + 3);
+    size_t esEnd = prev.find(' ', esStart + 3);
 
-    if (esStart == std::string::npos ||
-        esEnd == std::string::npos) {
+    if (esStart == std::string::npos || esEnd == std::string::npos) {
         // Account for out-of-spec version strings.
         fprintf(stderr, "%s: Error: invalid OpenGL ES version string %s\n",
                 __func__, prev.c_str());
@@ -291,8 +289,9 @@ std::string replaceESVersionString(const std::string& prev,
 void removeExtension(std::string& currExts, const std::string& toRemove) {
     size_t pos = currExts.find(toRemove);
 
-    if (pos != std::string::npos)
+    if (pos != std::string::npos) {
         currExts.erase(pos, toRemove.length());
+    }
 }
 
 static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
@@ -307,10 +306,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     if (tInfo && tInfo->currContext.get()) {
         const char *str = nullptr;
         if (tInfo->currContext->clientVersion() > GLESApi_CM) {
-            str = (const char *)s_gles2.glGetString(name);
+            str = reinterpret_cast<const char*>(s_gles2.glGetString(name));
         }
         else {
-            str = (const char *)s_gles1.glGetString(name);
+            str = reinterpret_cast<const char*>(s_gles1.glGetString(name));
         }
         if (str) {
             glStr += str;
@@ -406,7 +405,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         return -nextBufferSize;
     }
 
-    snprintf((char *)buffer, nextBufferSize, "%s", glStr.c_str());
+    snprintf(static_cast<char*>(buffer), nextBufferSize, "%s", glStr.c_str());
     return nextBufferSize;
 }
 
@@ -423,7 +422,7 @@ static EGLint rcGetNumConfigs(uint32_t* p_numAttribs)
 
 static EGLint rcGetConfigs(uint32_t bufSize, GLuint* buffer)
 {
-    GLuint bufferSize = (GLuint)bufSize;
+    auto bufferSize = static_cast<GLuint>(bufSize);
     return FrameBuffer::getFB()->getConfigs()->packConfigs(bufferSize, buffer);
 }
 
@@ -437,8 +436,9 @@ static EGLint rcChooseConfig(EGLint *attribs,
         return 0;
     }
 
-    return fb->getConfigs()->chooseConfig(
-            attribs, (EGLint*)configs, (EGLint)configs_size);
+    return fb->getConfigs()->chooseConfig(attribs,
+                                          reinterpret_cast<EGLint*>(configs),
+                                          static_cast<EGLint>(configs_size));
 }
 
 static EGLint rcGetFBParam(EGLint param)
@@ -487,7 +487,8 @@ static uint32_t rcCreateContext(uint32_t config,
         return 0;
     }
 
-    HandleType ret = fb->createRenderContext(config, share, (GLESApi)glVersion);
+    HandleType ret = fb->createRenderContext(config, share,
+                                             static_cast<GLESApi>(glVersion));
     return ret;
 }
 
@@ -546,7 +547,7 @@ static uint32_t rcCreateColorBufferDMA(uint32_t width,
     }
 
     return fb->createColorBuffer(width, height, internalFormat,
-                                 (FrameworkFormat)frameworkFormat);
+                                 static_cast<FrameworkFormat>(frameworkFormat));
 }
 
 static int rcOpenColorBuffer2(uint32_t colorbuffer)
@@ -780,14 +781,14 @@ static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
 static void rcTriggerWait(uint64_t eglsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline) {
-    FenceSync* fenceSync = (FenceSync*)(uintptr_t)eglsync_ptr;
-    EGLSYNC_DPRINT("eglsync=0x%llx "
-                   "fenceSync=%p "
-                   "thread_ptr=0x%llx "
-                   "timeline=0x%llx",
-                   eglsync_ptr, fenceSync, thread_ptr, timeline);
-    SyncThread* syncThread =
-        SyncThread::getFromHandle(thread_ptr);
+    auto* fenceSync = (FenceSync*)static_cast<uintptr_t>(eglsync_ptr);
+    EGLSYNC_DPRINT(
+            "eglsync=0x%llx "
+            "fenceSync=%p "
+            "thread_ptr=0x%llx "
+            "timeline=0x%llx",
+            eglsync_ptr, fenceSync, thread_ptr, timeline);
+    SyncThread* syncThread = SyncThread::getFromHandle(thread_ptr);
     syncThread->triggerWait(fenceSync, timeline);
 }
 
@@ -817,17 +818,18 @@ static void rcCreateSyncKHR(EGLenum type,
     // guaranteed, and we need to make sure
     // rcTriggerWait is registered.
     emugl_sync_register_trigger_wait(rcTriggerWait);
-    FenceSync* fenceSync = new FenceSync(hasNativeFence,
-                                         destroy_when_signaled);
+    auto* fenceSync = new FenceSync(hasNativeFence, destroy_when_signaled);
 
     // This MUST be present, or we get a deadlock effect.
     s_gles2.glFlush();
 
-    if (syncthread_out) *syncthread_out =
-        reinterpret_cast<uint64_t>(SyncThread::getSyncThread());
+    if (syncthread_out) {
+        *syncthread_out =
+                reinterpret_cast<uint64_t>(SyncThread::getSyncThread());
+    }
 
     if (eglsync_out) {
-        uint64_t res = (uint64_t)(uintptr_t)fenceSync;
+        auto res = static_cast<uint64_t>((uintptr_t)fenceSync);
         *eglsync_out = res;
         EGLSYNC_DPRINT("send out eglsync 0x%llx", res);
     }

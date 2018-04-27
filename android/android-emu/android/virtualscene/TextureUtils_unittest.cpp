@@ -62,8 +62,7 @@ static void PrintTo(const vector<uint8_t>& vec, ostream* os) {
 
     *os << '{';
     size_t count = 0;
-    for (vector<uint8_t>::const_iterator it = vec.begin(); it != vec.end();
-         ++it, ++count) {
+    for (auto it = vec.begin(); it != vec.end(); ++it, ++count) {
         if (count > 0) {
             *os << ", ";
         }
@@ -97,14 +96,16 @@ static std::string testdataPathToAbsolute(StringView filename) {
 }
 
 // Load an image using TextureUtils.
-static void loadImage(StringView filename, TextureUtils::Result* outResult) {
+static void loadImage(const StringView& filename,
+                      TextureUtils::Result* outResult) {
     const std::string path = testdataPathToAbsolute(filename);
     Optional<TextureUtils::Result> result = TextureUtils::load(path.c_str());
     ASSERT_TRUE(result);
     *outResult = std::move(result.value());
 }
 
-static void loadGoldenBmp(StringView filename, TextureUtils::Result* result) {
+static void loadGoldenBmp(const StringView& filename,
+                          TextureUtils::Result* result) {
     const std::string path = testdataPathToAbsolute(filename);
 
     constexpr size_t kBmpHeaderSize = 54;

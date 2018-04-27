@@ -17,10 +17,10 @@
 #ifndef ANDROID_TYPE_HELPERS_H
 #define ANDROID_TYPE_HELPERS_H
 
-#include <new>
-#include <stdint.h>
-#include <string.h>
 #include <sys/types.h>
+#include <cstdint>
+#include <cstring>
+#include <new>
 
 // ---------------------------------------------------------------------------
 
@@ -225,12 +225,12 @@ void move_backward_type(TYPE* d, const TYPE* s, size_t n = 1) {
 
 template <typename KEY, typename VALUE>
 struct key_value_pair_t {
-    typedef KEY key_t;
-    typedef VALUE value_t;
+    using key_t = KEY;
+    using value_t = VALUE;
 
     KEY     key;
     VALUE   value;
-    key_value_pair_t() { }
+    key_value_pair_t() = default;
     key_value_pair_t(const key_value_pair_t& o) : key(o.key), value(o.value) { }
     key_value_pair_t(const KEY& k, const VALUE& v) : key(k), value(v)  { }
     key_value_pair_t(const KEY& k) : key(k) { }
@@ -263,7 +263,7 @@ struct trait_trivial_move< key_value_pair_t<K, V> >
 /*
  * Hash codes.
  */
-typedef uint32_t hash_t;
+using hash_t = uint32_t;
 
 template <typename TKey>
 hash_t hash_type(const TKey& key);

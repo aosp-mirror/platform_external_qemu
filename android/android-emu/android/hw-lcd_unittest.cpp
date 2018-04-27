@@ -42,4 +42,4 @@ TEST(Hw_lcd, GetScreenSize) {
     EXPECT_EQ(LCD_SIZE_XLARGE, hwLcd_getScreenSize(2048, 1536, LCD_DENSITY_XHDPI));
 }
 
-}  // namespace density
+}  // namespace lcd_density

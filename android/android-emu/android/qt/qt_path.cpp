@@ -29,8 +29,8 @@ static std::string androidQtGetBaseDir(int bitness, const char* emulatorDir) {
     const char* const libBitness = bitness == 64 ? "lib64" : "lib";
     std::vector<std::string> subDirVector;
     subDirVector.push_back(emulatorDir ? emulatorDir : system->getLauncherDirectory());
-    subDirVector.push_back(std::string(libBitness));
-    subDirVector.push_back(std::string("qt"));
+    subDirVector.emplace_back(libBitness);
+    subDirVector.emplace_back("qt");
     std::string qtDir = PathUtils::recompose(subDirVector);
 
     return qtDir;
@@ -39,7 +39,7 @@ static std::string androidQtGetBaseDir(int bitness, const char* emulatorDir) {
 std::string androidQtGetLibraryDir(int bitness, const char* emulatorDir) {
     std::vector<std::string> subDirVector;
     subDirVector.push_back(androidQtGetBaseDir(bitness, emulatorDir));
-    subDirVector.push_back(std::string("lib"));
+    subDirVector.emplace_back("lib");
     std::string qtLibDir = PathUtils::recompose(subDirVector);
 
     return qtLibDir;
@@ -55,7 +55,7 @@ std::string androidQtGetPluginsDir(int bitness, const char* emulatorDir) {
 
     std::vector<std::string> subDirVector;
     subDirVector.push_back(androidQtGetBaseDir(bitness, emulatorDir));
-    subDirVector.push_back(std::string("plugins"));
+    subDirVector.emplace_back("plugins");
     qtPluginsDir = PathUtils::recompose(subDirVector);
 
     return qtPluginsDir;

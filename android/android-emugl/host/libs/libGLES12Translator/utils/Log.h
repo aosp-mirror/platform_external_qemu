@@ -30,7 +30,7 @@
 
 #include <common/alog.h>
 #include <sys/types.h>
-#include <stdint.h>
+#include <cstdint>
 
 #ifdef __cplusplus
 

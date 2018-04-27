@@ -243,7 +243,7 @@ TEST(Optional, MakeOptional) {
 }
 
 TEST(Optional, Move) {
-    auto o = makeOptional(std::unique_ptr<int>(new int(10)));
+    auto o = makeOptional(std::make_unique<int>(10));
     {
         decltype(o) o2 = std::move(o);
         EXPECT_TRUE(o);

@@ -30,8 +30,8 @@ void FramebufferData::Attachment::Set(GLenum target,
 }
 
 void FramebufferData::Attachment::Detach() {
-  if (obj_ != NULL && target_ == GL_RENDERBUFFER) {
-    obj_->DetachFramebuffer();
+    if (obj_ != nullptr && target_ == GL_RENDERBUFFER) {
+        obj_->DetachFramebuffer();
   }
   Set(0, 0, RenderbufferDataPtr());
 }
@@ -41,8 +41,8 @@ FramebufferData::FramebufferData(ObjectLocalName name)
 }
 
 FramebufferData::~FramebufferData() {
-  for (int i = 0; i < MAX_ATTACH_POINTS; ++i) {
-    attachment_[i].Detach();
+    for (auto& i : attachment_) {
+        i.Detach();
   }
 }
 
@@ -56,8 +56,8 @@ void FramebufferData::SetAttachment(GLenum attachment, GLenum target,
     attachment_[idx].Detach();
     attachment_[idx].Set(target, name, obj);
 
-    if (target == GL_RENDERBUFFER && obj != NULL) {
-      obj->AttachFramebuffer(GetLocalName(), attachment);
+    if (target == GL_RENDERBUFFER && obj != nullptr) {
+        obj->AttachFramebuffer(GetLocalName(), attachment);
     }
   }
 }
@@ -90,12 +90,12 @@ void FramebufferData::ClearAttachment(GLenum attachment) {
 }
 
 void FramebufferData::ClearAttachment(GLuint name, bool clear_texture) {
-  for (int idx = 0; idx < MAX_ATTACH_POINTS; ++idx) {
-    if (attachment_[idx].name_ == name) {
-      const bool is_renderbuffer = (attachment_[idx].obj_ != NULL);
-      if (clear_texture != is_renderbuffer) {
-        attachment_[idx].Detach();
-      }
-    }
+    for (auto& idx : attachment_) {
+        if (idx.name_ == name) {
+            const bool is_renderbuffer = (idx.obj_ != nullptr);
+            if (clear_texture != is_renderbuffer) {
+                idx.Detach();
+            }
+        }
   }
 }

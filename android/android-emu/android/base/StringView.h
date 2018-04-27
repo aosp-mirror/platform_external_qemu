@@ -14,8 +14,8 @@
 #include "android/base/TypeTraits.h"
 
 #include <algorithm>
+#include <cstring>
 #include <string>
-#include <string.h>
 
 namespace android {
 namespace base {
@@ -65,10 +65,10 @@ namespace base {
 //
 class StringView {
 public:
-    constexpr StringView() : mString(""), mSize(0U) {}
+    constexpr StringView() = default;
 
-    constexpr StringView(const StringView& other) :
-        mString(other.data()), mSize(other.size()) {}
+    constexpr StringView(const StringView& other)
+        : mString(other.data()), mSize(other.size()) {}
 
     // IMPORTANT: all StringView constructors are intentionally not explict
     // it is needed to allow seamless creation of StringView from all types
@@ -81,15 +81,15 @@ public:
     // static constexpr StringView message = "blah";
     //
     template <size_t size>
-    constexpr StringView(const char (&buf)[size]) :
-        mString(buf), mSize(size - 1) {}
+    constexpr StringView(const char (&buf)[size])
+        : mString(buf), mSize(size - 1) {}
 
     // Ctor for non-const arrays, AKA buffers. These usually contain some
     // string formatted at runtime, so call strlen() instead of using the
     // buffer size.
     template <size_t size>
-    constexpr StringView(char (&buf)[size]) :
-        mString(buf), mSize(strlen(buf)) {}
+    constexpr StringView(char (&buf)[size])
+        : mString(buf), mSize(strlen(buf)) {}
 
     // Constructor from a const char pointer. It has to be templated to make
     // sure the array-based one is chosen for an array - otherwise non-templated
@@ -103,11 +103,11 @@ public:
     //   data there. One may not construct a StringView passing past-the-end
     //   iterator as |end|! StringView will try to dereference it.
     template <class Char, class = enable_if<std::is_same<Char, char>>>
-    constexpr StringView(const Char* const & string) :
-            mString(string ? string : ""), mSize(string ? strlen(string) : 0) {}
+    constexpr StringView(const Char* const& string)
+        : mString(string ? string : ""), mSize(string ? strlen(string) : 0) {}
 
-    StringView(const std::string& str) :
-        mString(str.c_str()), mSize(str.size()) {}
+    StringView(const std::string& str)
+        : mString(str.c_str()), mSize(str.size()) {}
 
     constexpr StringView(const char* str, size_t len)
         : mString(str ? str : ""), mSize(len) {}
@@ -115,16 +115,15 @@ public:
     constexpr StringView(const char* begin, const char* end)
         : mString(begin ? begin : ""), mSize(begin ? end - begin : 0) {}
 
-    constexpr StringView(std::nullptr_t) :
-            mString(""), mSize(0) {}
+    constexpr StringView(std::nullptr_t) : mString(""), mSize(0) {}
 
     constexpr const char* c_str() const { return mString; }
     constexpr const char* str() const { return mString; }
     constexpr const char* data() const { return mString; }
     constexpr size_t size() const { return mSize; }
 
-    typedef const char* iterator;
-    typedef const char* const_iterator;
+    using iterator = const char*;
+    using const_iterator = const char*;
 
     constexpr const_iterator begin() const { return mString; }
     constexpr const_iterator end() const { return mString + mSize; }
@@ -137,9 +136,7 @@ public:
         mString = "";
     }
 
-    constexpr char operator[](size_t index) const {
-        return mString[index];
-    }
+    constexpr char operator[](size_t index) const { return mString[index]; }
 
     void set(const char* data, size_t len) {
         mString = data ? data : "";
@@ -168,26 +165,31 @@ public:
     // Returns absolute offset (does not include |off|).
     size_t find(StringView other, size_t off = 0) {
         // Trivial case
-        if (!other.mSize) return 0;
+        if (!other.mSize) {
+            return 0;
+        }
 
         size_t safeOff = std::min(off, mSize);
 
         const char* searchStart = mString + safeOff;
         const char* searchEnd = searchStart + mSize - safeOff;
 
-        const char* res =
-            std::search(searchStart, searchEnd,
-                        other.mString, other.mString + other.mSize);
-        if (res == searchEnd) return std::string::npos;
-        return (size_t)((uintptr_t)res - (uintptr_t)mString);
+        const char* res = std::search(searchStart, searchEnd, other.mString,
+                                      other.mString + other.mSize);
+        if (res == searchEnd) {
+            return std::string::npos;
+        }
+        return static_cast<size_t>((uintptr_t)res - (uintptr_t)mString);
     }
 
     // getSubstr(); returns this string starting at the first place |other|
     // occurs, otherwise a blank string.
-    StringView getSubstr(StringView other, size_t off = 0) {
+    StringView getSubstr(const StringView& other, size_t off = 0) {
         size_t loc = find(other, off);
-        if (loc == std::string::npos) return StringView("");
-        return { mString + loc, end() };
+        if (loc == std::string::npos) {
+            return StringView("");
+        }
+        return {mString + loc, end()};
     }
 
     // Returns substring starting at |begin| and running for |len|,
@@ -198,7 +200,7 @@ public:
         }
         size_t safeOff = std::min(begin, mSize);
         size_t safeLen = std::min(len, mSize - safeOff);
-        return { mString + safeOff, safeLen };
+        return {mString + safeOff, safeLen};
     }
 
     // Returns substring starting at |begin| ending at |end|,
@@ -214,8 +216,8 @@ public:
     operator std::string() const { return std::string(mString, mSize); }
 
 private:
-    const char* mString;
-    size_t mSize;
+    const char* mString{""};
+    size_t mSize{0U};
 };
 
 // Comparison operators. Defined as functions to allow automatic type
@@ -235,7 +237,7 @@ inline bool operator>=(const StringView& x, const StringView& y) {
     return !(x < y);
 }
 
-inline bool operator >(const StringView& x, const StringView& y) {
+inline bool operator>(const StringView& x, const StringView& y) {
     return x.compare(y) > 0;
 }
 

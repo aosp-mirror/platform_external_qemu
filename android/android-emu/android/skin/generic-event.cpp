@@ -14,7 +14,7 @@
 #include "android/skin/generic-event-buffer.h"
 #include "android/utils/debug.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <memory>
 
@@ -32,7 +32,7 @@ struct SkinGenericEvent {
 
 SkinGenericEvent* skin_generic_event_create(
         SkinGenericEventFlushFunc generic_event_flush) {
-    auto gb = std::unique_ptr<SkinGenericEvent>(new SkinGenericEvent());
+    auto gb = std::make_unique<SkinGenericEvent>();
 
     skin_generic_event_buffer_init(gb->event_buf, generic_event_flush);
     return gb.release();

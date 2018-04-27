@@ -24,6 +24,7 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -44,26 +45,27 @@ public:
     using ProgressPair = std::pair<double, bool>;
 
     void SetUp() override {
-        mTestSystem.reset(new android::base::TestSystem(
-                PATH_SEP "progdir", System::kProgramBitness, PATH_SEP "homedir", PATH_SEP "appdir"));
+        mTestSystem = std::make_unique<android::base::TestSystem>(
+                PATH_SEP "progdir", System::kProgramBitness, PATH_SEP "homedir",
+                PATH_SEP "appdir");
         mLooper = new android::base::TestLooper();
         mAdb = AdbInterface::Builder().setLooper(mLooper).setAdbLocator(new StaticAdbLocator({ {"adb", 40 }})).build();
         mAdb->setSerialNumberPort(0);
-        mFilePusher.reset(
-            new FilePusher(mAdb.get(),
-                           [this](StringView filePath, FilePusher::Result result) {
-                               mResults.push_back({filePath, result});
-                               mAtomicNumCommands--;
-                            },
-                            [this](double progress, bool done) {
-                                mProgresses.push_back({progress, done});
-                            }));
+        mFilePusher = std::make_unique<FilePusher>(
+                mAdb.get(),
+                [this](StringView filePath, FilePusher::Result result) {
+                    mResults.emplace_back(filePath, result);
+                    mAtomicNumCommands--;
+                },
+                [this](double progress, bool done) {
+                    mProgresses.emplace_back(progress, done);
+                });
         // By default, the 'adb push' command will always block.
         mTestSystem->setShellCommand(&FilePusherTest::fakeShellCommand, this);
         mAtomicNumCommands = 0;
     }
 
-    void TearDown() {
+    void TearDown() override {
         mFilePusher.reset();
         mAdb.reset();
         delete mLooper;
@@ -108,7 +110,7 @@ public:
             if (f.second) {
                 EXPECT_TRUE(mTestSystem->getTempRoot()->makeSubFile(f.first.c_str()));
             }
-            push_pairs.push_back(std::make_pair(f.first, PATH_SEP "tmp"));
+            push_pairs.emplace_back(f.first, PATH_SEP "tmp");
         }
         mFilePusher->pushFiles(push_pairs);
     }

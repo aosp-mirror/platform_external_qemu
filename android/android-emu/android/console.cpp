@@ -58,16 +58,16 @@
 #include <atomic>
 #include <vector>
 
-#include <assert.h>
-#include <ctype.h>
 #include <fcntl.h>
 #include <getopt.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cctype>
+#include <cstdarg>
+
 #include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #define  DEBUG  1
 
@@ -85,9 +85,9 @@
 
 #define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
-typedef struct ControlGlobalRec_*  ControlGlobal;
+using ControlGlobal = struct ControlGlobalRec_*;
 
-typedef struct ControlClientRec_*  ControlClient;
+using ControlClient = struct ControlClientRec_*;
 
 typedef struct {
     int           host_port;
@@ -96,9 +96,8 @@ typedef struct {
     int           guest_port;
 } RedirRec, *Redir;
 
-
-typedef int Socket;
-typedef const struct CommandDefRec_* CommandDef;
+using Socket = int;
+using CommandDef = const struct CommandDefRec_*;
 
 typedef struct ControlClientRec_
 {
@@ -154,7 +153,7 @@ typedef struct CmdFeatureFlag_
 
 const CmdFeatureFlag command_flags[] = {
         {"screenrecord", android::featurecontrol::ScreenRecording},
-        {NULL, android::featurecontrol::Feature_n_items}};
+        {nullptr, android::featurecontrol::Feature_n_items}};
 }  // namespace
 
 static bool
@@ -189,9 +188,11 @@ control_global_add_redir( ControlGlobal  global,
         int  old_max = global->max_redirs;
         int  new_max = old_max + (old_max >> 1) + 4;
 
-        auto new_redirs = (Redir)realloc( global->redirs, new_max*sizeof(global->redirs[0]) );
-        if (new_redirs == NULL)
+        auto new_redirs = static_cast<Redir>(
+                realloc(global->redirs, new_max * sizeof(global->redirs[0])));
+        if (new_redirs == nullptr) {
             return -1;
+        }
 
         global->redirs     = new_redirs;
         global->max_redirs = new_max;
@@ -241,11 +242,12 @@ control_client_detach( ControlClient  client )
 {
     int  result;
 
-    if (client->sock < 0)
+    if (client->sock < 0) {
         return -1;
+    }
 
     loopIo_free(client->loopIo);
-    client->loopIo = NULL;
+    client->loopIo = nullptr;
     result = client->sock;
     client->sock = -1;
 
@@ -262,16 +264,18 @@ control_client_destroy( ControlClient  client )
     D(( "destroying control client %p\n", client ));
 
     sock = control_client_detach( client );
-    if (sock >= 0)
+    if (sock >= 0) {
         socket_close(sock);
+    }
 
     for ( ;; ) {
         ControlClient  node = *pnode;
-        if ( node == NULL )
+        if (node == nullptr) {
             break;
+        }
         if ( node == client ) {
             *pnode     = node->next;
-            node->next = NULL;
+            node->next = nullptr;
             break;
         }
         pnode = &node->next;
@@ -299,8 +303,9 @@ static bool send_chunk(int sock, const char* buff, int len) {
 
 static void control_control_write(ControlClient client, const char* buff, int len)
 {
-    if (len < 0)
+    if (len < 0) {
         len = strlen(buff);
+    }
 
     // Terminal requires an explicit \r\n symbol pair for newlines, and most of
     // the clients use \n alone. Make sure we insert missing \r characters
@@ -308,15 +313,16 @@ static void control_control_write(ControlClient client, const char* buff, int le
     int offset = 0;
     for (;;) {
         const char* pos = buff + offset;
-        auto newline = (const char*)memchr(pos, '\n', len - offset);
+        auto newline =
+                static_cast<const char*>(memchr(pos, '\n', len - offset));
         if (!newline) {
             // Done, send the rest as a single chunk.
             send_chunk(client->sock, buff + offset, len - offset);
             break;
         }
 
-        if (newline == buff || // The very first character is '\n'.
-                newline[-1] != '\r') { // Previous character is not '\r'.
+        if (newline == buff ||      // The very first character is '\n'.
+            newline[-1] != '\r') {  // Previous character is not '\r'.
             if (!send_chunk(client->sock, pos, newline - pos) ||
                 !send_chunk(client->sock, "\r\n", 2)) {
                 break;
@@ -353,14 +359,14 @@ static int  control_write( ControlClient  client, const char*  format, ... )
 }
 
 static int control_write_out_cb(void* opaque, const char* str, int strsize) {
-    auto client = (ControlClient)opaque;
+    auto client = static_cast<ControlClient>(opaque);
     control_control_write(client, str, strsize);
     return strsize;
 }
 
 static int control_write_err_cb(void* opaque, const char* str, int strsize) {
     int ret = 0;
-    auto client = (ControlClient)opaque;
+    auto client = static_cast<ControlClient>(opaque);
     ret += control_write(client, "KO: ");
     control_control_write(client, str, strsize);
     return ret + strsize;
@@ -369,7 +375,7 @@ static int control_write_err_cb(void* opaque, const char* str, int strsize) {
 // forward declaration
 static void control_client_read(void* opaque, int fd, unsigned events);
 
-typedef const struct CommandDefRec_* CommandDef;
+using CommandDef = const struct CommandDefRec_*;
 
 typedef struct CommandDefRec_ {
     const char* names;
@@ -415,16 +421,17 @@ find_command( char*  input, CommandDef  commands, char*  *pend, char*  *pargs )
     int    nn;
     char*  args = strchr(input, ' ');
 
-    if (args != NULL) {
-        while (*args == ' ')
+    if (args != nullptr) {
+        while (*args == ' ') {
             args++;
+        }
 
-        if (args[0] == 0)
-            args = NULL;
+        if (args[0] == 0) {
+            args = nullptr;
+        }
     }
 
-    for (nn = 0; commands[nn].names != NULL; nn++)
-    {
+    for (nn = 0; commands[nn].names != nullptr; nn++) {
         const char*  name = commands[nn].names;
         const char*  sep;
 
@@ -432,10 +439,11 @@ find_command( char*  input, CommandDef  commands, char*  *pend, char*  *pargs )
             int  len, c;
 
             sep = strchr( name, '|' );
-            if (sep)
+            if (sep) {
                 len = sep - name;
-            else
+            } else {
                 len = strlen(name);
+            }
 
             c = input[len];
             if ( !memcmp( name, input, len ) && (c == ' ' || c == 0) ) {
@@ -444,13 +452,14 @@ find_command( char*  input, CommandDef  commands, char*  *pend, char*  *pargs )
                 return &commands[nn];
             }
 
-            if (sep)
+            if (sep) {
                 name = sep + 1;
+            }
 
-        } while (sep != NULL && *name);
+        } while (sep != nullptr && *name);
     }
     /* NOTE: don't touch *pend and *pargs if no command is found */
-    return NULL;
+    return nullptr;
 }
 
 static void
@@ -469,7 +478,7 @@ dump_help( ControlClient  client,
     if (cmd->subcommands) {
         cmd = cmd->subcommands;
         control_write( client, "\r\navailable sub-commands:\r\n" );
-        for ( ; cmd->names != NULL; cmd++ ) {
+        for (; cmd->names != nullptr; cmd++) {
             control_write( client, "   %s %-15s  %s\r\n", prefix, cmd->names, cmd->abstract );
         }
         control_write( client, "\r\n" );
@@ -485,26 +494,26 @@ static void control_send_help_prompt(ControlClient client) {
 
 static void control_client_do_command(ControlClient client) {
     char*       line     = client->buff;
-    char*       args     = NULL;
+    char* args = nullptr;
     CommandDef  commands = client->commands;
     char*       cmdend   = client->buff;
-    CommandDef  cmd = NULL;
+    CommandDef cmd = nullptr;
 
     // do security checks before executing find_command
     size_t line_len = strlen(line);
     if (android_http_is_request_line(line, line_len)) {
         control_write(client, "KO: Forbidden HTTP request. Aborting\r\n");
-        do_quit(client, NULL);
+        do_quit(client, nullptr);
         return;
     } else if (!android_utf8_is_valid(line, line_len)) {
         control_write(client, "KO: Forbidden binary request. Aborting\r\n");
-        do_quit(client, NULL);
+        do_quit(client, nullptr);
         return;
     }
 
     cmd = find_command(line, commands, &cmdend, &args);
 
-    if (cmd == NULL || !isCommandEnabled(cmd->names)) {
+    if (cmd == nullptr || !isCommandEnabled(cmd->names)) {
         control_write(client, "KO: unknown command, try 'help'\r\n");
         return;
     }
@@ -520,7 +529,7 @@ static void control_client_do_command(ControlClient client) {
         }
 
         /* no handler means we should have sub-commands */
-        if (cmd->subcommands == NULL) {
+        if (cmd->subcommands == nullptr) {
             control_write( client, "KO: internal error: buggy command table for '%.*s'\r\n",
                            cmdend - client->buff, client->buff );
             break;
@@ -536,7 +545,7 @@ static void control_client_do_command(ControlClient client) {
         line     = args;
         commands = cmd->subcommands;
         subcmd   = find_command( line, commands, &cmdend, &args );
-        if (subcmd == NULL) {
+        if (subcmd == nullptr) {
             dump_help( client, cmd, "" );
             control_write( client, "KO:  bad sub-command\r\n" );
             break;
@@ -555,9 +564,9 @@ do_help( ControlClient  client, char*  args )
     CommandDef  cmd = client->commands;
 
     /* without arguments, simply list all commands */
-    if (args == NULL) {
+    if (args == nullptr) {
         control_write( client, "Android console commands:\r\n" );
-        for ( ; cmd->names != NULL; cmd++ ) {
+        for (; cmd->names != nullptr; cmd++) {
             if (isCommandEnabled(cmd->names)) {
                 control_write( client, "    %s\r\n", cmd->names );
             }
@@ -573,9 +582,9 @@ do_help( ControlClient  client, char*  args )
 
         line    = args;
         subcmd  = find_command( line, cmd, &end, &args );
-        if (subcmd == NULL || !isCommandEnabled(subcmd->names)) {
+        if (subcmd == nullptr || !isCommandEnabled(subcmd->names)) {
             /* Not found. Recurse to print the short list of commands. */
-            do_help(client, NULL);
+            do_help(client, nullptr);
             control_write( client, "\r\nKO: unknown command\r\n" );
             return -1;
         }
@@ -596,7 +605,7 @@ do_help_verbose( ControlClient  client, char*  args )
 
     /* Dump all commands */
     control_write( client, "Android console command help:\r\n\r\n" );
-    for (cmd = client->commands; cmd->names != NULL; cmd++) {
+    for (cmd = client->commands; cmd->names != nullptr; cmd++) {
         if (isCommandEnabled(cmd->names)) {
             control_write( client, "    %-15s  %s\r\n", cmd->names, cmd->abstract );
         }
@@ -625,34 +634,37 @@ control_client_read_byte( ControlClient  client, unsigned char  ch )
     {
         client->buff[ client->buff_len ] = 0;
         control_client_do_command( client );
-        if (client->finished)
+        if (client->finished) {
             return;
+        }
 
         client->buff_len = 0;
     }
     else
     {
-        if (client->buff_len >= sizeof(client->buff)-1)
+        if (client->buff_len >= sizeof(client->buff) - 1) {
             client->buff_len = 0;
+        }
 
-        client->buff[ client->buff_len++ ] = ch;
+        client->buff[client->buff_len++] = ch;
     }
 }
 
 static void control_client_read(void* opaque, int fd, unsigned events) {
-    auto client = (ControlClient)opaque;
+    auto client = static_cast<ControlClient>(opaque);
     unsigned char buf[4096];
     int size;
 
     assert(fd == client->sock);
     assert((events & LOOP_IO_READ) != 0);
 
-    D(( "in control_client read: " ));
-    size = socket_recv( client->sock, buf, sizeof(buf) );
+    D(("in control_client read: "));
+    size = socket_recv(client->sock, buf, sizeof(buf));
     if (size < 0) {
-        D(( "size < 0, exiting with %d: %s\n", errno, errno_str ));
-        if (errno != EWOULDBLOCK && errno != EAGAIN)
-            control_client_destroy( client );
+        D(("size < 0, exiting with %d: %s\n", errno, errno_str));
+        if (errno != EWOULDBLOCK && errno != EAGAIN) {
+            control_client_destroy(client);
+        }
         return;
     }
 
@@ -696,17 +708,17 @@ static void control_client_read(void* opaque, int fd, unsigned events) {
 static void control_global_accept(void* opaque,
                                   int listen_fd,
                                   unsigned events) {
-    auto global = (ControlGlobal)opaque;
+    auto global = static_cast<ControlGlobal>(opaque);
     ControlClient client;
     Socket fd;
 
-    D(( "control_global_accept: just in (fd=%d)\n", listen_fd ));
+    D(("control_global_accept: just in (fd=%d)\n", listen_fd));
     // connect()s are mapped to LOOP_IO_READ
     assert(events & LOOP_IO_READ);
 
-    fd = HANDLE_EINTR(socket_accept(listen_fd, NULL));
+    fd = HANDLE_EINTR(socket_accept(listen_fd, nullptr));
     if (fd < 0) {
-        D(( "problem in accept: %d: %s\n", errno, errno_str ));
+        D(("problem in accept: %d: %s\n", errno, errno_str));
         return;
     }
 
@@ -811,7 +823,7 @@ int android_console_start(int control_port,
         loopIo_wantRead(global->listen4_loopio);
         loopIo_dontWantWrite(global->listen4_loopio);
     } else {
-        global->listen4_loopio = NULL;
+        global->listen4_loopio = nullptr;
     }
 
     if (fd6 >= 0) {
@@ -820,7 +832,7 @@ int android_console_start(int control_port,
         loopIo_wantRead(global->listen6_loopio);
         loopIo_dontWantWrite(global->listen6_loopio);
     } else {
-        global->listen6_loopio = NULL;
+        global->listen6_loopio = nullptr;
     }
 
     return 0;
@@ -848,11 +860,13 @@ do_network_status( ControlClient  client, char*  args )
 {
     control_write( client, "Current network status:\r\n" );
 
-    control_write( client, "  download speed:   %8d bits/s (%.1f KB/s)\r\n",
-                   (long)android_net_download_speed, android_net_download_speed/8192. );
+    control_write(client, "  download speed:   %8d bits/s (%.1f KB/s)\r\n",
+                  static_cast<long>(android_net_download_speed),
+                  android_net_download_speed / 8192.);
 
-    control_write( client, "  upload speed:     %8d bits/s (%.1f KB/s)\r\n",
-                   (long)android_net_upload_speed, android_net_upload_speed/8192. );
+    control_write(client, "  upload speed:     %8d bits/s (%.1f KB/s)\r\n",
+                  static_cast<long>(android_net_upload_speed),
+                  android_net_upload_speed / 8192.);
 
     control_write( client, "  minimum latency:  %ld ms\r\n", android_net_min_latency );
     control_write( client, "  maximum latency:  %ld ms\r\n", android_net_max_latency );
@@ -950,41 +964,42 @@ do_network_capture_stop( ControlClient  client, char*  args )
     return 0;
 }
 
-static const CommandDefRec  network_capture_commands[] =
-{
-    { "start", "start network capture",
-      "'network capture start <file>' starts a new capture of network packets\r\n"
-      "into a specific <file>. This will stop any capture already in progress.\r\n"
-      "the capture file can later be analyzed by tools like WireShark. It uses\r\n"
-      "the libpcap file format.\r\n\r\n"
-      "you can stop the capture anytime with 'network capture stop'\r\n", NULL,
-      do_network_capture_start, NULL },
+static const CommandDefRec network_capture_commands[] = {
+        {"start", "start network capture",
+         "'network capture start <file>' starts a new capture of network "
+         "packets\r\n"
+         "into a specific <file>. This will stop any capture already in "
+         "progress.\r\n"
+         "the capture file can later be analyzed by tools like WireShark. It "
+         "uses\r\n"
+         "the libpcap file format.\r\n\r\n"
+         "you can stop the capture anytime with 'network capture stop'\r\n",
+         nullptr, do_network_capture_start, nullptr},
 
-    { "stop", "stop network capture",
-      "'network capture stop' stops a currently running packet capture, if any.\r\n"
-      "you can start one with 'network capture start <file>'\r\n", NULL,
-      do_network_capture_stop, NULL },
+        {"stop", "stop network capture",
+         "'network capture stop' stops a currently running packet capture, if "
+         "any.\r\n"
+         "you can start one with 'network capture start <file>'\r\n",
+         nullptr, do_network_capture_stop, nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-static const CommandDefRec  network_commands[] =
-{
-    { "status", "dump network status", NULL, NULL,
-       do_network_status, NULL },
+static const CommandDefRec network_commands[] = {
+        {"status", "dump network status", nullptr, nullptr, do_network_status,
+         nullptr},
 
-    { "speed", "change network speed", NULL, describe_network_speed,
-      do_network_speed, NULL },
+        {"speed", "change network speed", nullptr, describe_network_speed,
+         do_network_speed, nullptr},
 
-    { "delay", "change network latency", NULL, describe_network_delay,
-       do_network_delay, NULL },
+        {"delay", "change network latency", nullptr, describe_network_delay,
+         do_network_delay, nullptr},
 
-    { "capture", "dump network packets to file",
-      "allows to start/stop capture of network packets to a file for later analysis\r\n", NULL,
-      NULL, network_capture_commands },
+        {"capture", "dump network packets to file",
+         "allows to start/stop capture of network packets to a file for later "
+         "analysis\r\n",
+         nullptr, nullptr, network_capture_commands},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -999,16 +1014,15 @@ do_redir_list( ControlClient  client, char*  args )
 {
     ControlGlobal  global = client->global;
 
-    if (global->num_redirs == 0)
-        control_write( client, "no active redirections\r\n" );
-    else {
-        int  nn;
+    if (global->num_redirs == 0) {
+        control_write(client, "no active redirections\r\n");
+    } else {
+        int nn;
         for (nn = 0; nn < global->num_redirs; nn++) {
-            Redir  redir = &global->redirs[nn];
-            control_write( client, "%s:%-5d => %-5d\r\n",
-                          redir->host_udp ? "udp" : "tcp",
-                          redir->host_port,
-                          redir->guest_port );
+            Redir redir = &global->redirs[nn];
+            control_write(client, "%s:%-5d => %-5d\r\n",
+                          redir->host_udp ? "udp" : "tcp", redir->host_port,
+                          redir->guest_port);
         }
     }
     return 0;
@@ -1029,15 +1043,16 @@ redir_parse_proto_port( char*  args, int  *pport, int  *pproto )
     else if ( !memcmp( args, "udp:", 4 ) ) {
         proto = 1;
         len   = 4;
-    }
-    else
+    } else {
         return 0;
+    }
 
     args   += len;
     *pproto = proto;
     *pport  = strtol( args, &end, 10 );
-    if (end == args)
+    if (end == args) {
         return 0;
+    }
 
     len += end - args;
     return len;
@@ -1049,8 +1064,9 @@ redir_parse_guest_port( char*  arg, int  *pport )
     char*  end;
 
     *pport = strtoul( arg, &end, 10 );
-    if (end == arg)
+    if (end == arg) {
         return 0;
+    }
 
     return end - arg;
 }
@@ -1063,10 +1079,11 @@ redir_find( ControlGlobal  global, int  port, int  isudp )
     for (nn = 0; nn < global->num_redirs; nn++) {
         Redir  redir = &global->redirs[nn];
 
-        if (redir->host_port == port && redir->host_udp == isudp)
+        if (redir->host_port == port && redir->host_udp == isudp) {
             return redir;
+        }
     }
-    return NULL;
+    return nullptr;
 }
 
 
@@ -1077,8 +1094,9 @@ do_redir_add( ControlClient  client, char*  args )
     uint32_t  guest_ip;
     Redir     redir;
 
-    if ( !args )
+    if (!args) {
         goto BadFormat;
+    }
 
     if (!client->global->net_agent->isSlirpInited())
     {
@@ -1087,16 +1105,18 @@ do_redir_add( ControlClient  client, char*  args )
     }
 
     len = redir_parse_proto_port( args, &host_port, &host_proto );
-    if (len == 0 || args[len] != ':')
+    if (len == 0 || args[len] != ':') {
         goto BadFormat;
+    }
 
     args += len + 1;
     len = redir_parse_guest_port( args, &guest_port );
-    if (len == 0 || args[len] != 0)
+    if (len == 0 || args[len] != 0) {
         goto BadFormat;
+    }
 
     redir = redir_find( client->global, host_port, host_proto );
-    if ( redir != NULL ) {
+    if (redir != nullptr) {
         control_write( client, "KO: host port already active, use 'redir del' to remove first\r\n" );
         return -1;
     }
@@ -1134,14 +1154,16 @@ do_redir_del( ControlClient  client, char*  args )
     int    len, proto, port;
     Redir  redir;
 
-    if ( !args )
+    if (!args) {
         goto BadFormat;
+    }
     len = redir_parse_proto_port( args, &port, &proto );
-    if ( len == 0 || args[len] != 0 )
+    if (len == 0 || args[len] != 0) {
         goto BadFormat;
+    }
 
     redir = redir_find( client->global, port, proto );
-    if (redir == NULL) {
+    if (redir == nullptr) {
         control_write( client, "KO: can't remove unknown redirection (%s:%d)\r\n",
                         proto ? "udp" : "tcp", port );
         return -1;
@@ -1157,32 +1179,35 @@ BadFormat:
     return -1;
 }
 
-static const CommandDefRec  redir_commands[] =
-{
-    { "list", "list current redirections",
-    "list current port redirections. use 'redir add' and 'redir del' to add and remove them\r\n", NULL,
-    do_redir_list, NULL },
+static const CommandDefRec redir_commands[] = {
+        {"list", "list current redirections",
+         "list current port redirections. use 'redir add' and 'redir del' to "
+         "add and remove them\r\n",
+         nullptr, do_redir_list, nullptr},
 
-    { "add",  "add new redirection",
-    "add a new port redirection, arguments must be:\r\n\r\n"
-            "  redir add <protocol>:<host-port>:<guest-port>\r\n\r\n"
-            "where:   <protocol>     is either 'tcp' or 'udp'\r\n"
-            "         <host-port>    a number indicating which port on the host to open\r\n"
-            "         <guest-port>   a number indicating which port to route to on the device\r\n"
-            "\r\nas an example, 'redir  tcp:5000:6000' will allow any packets sent to\r\n"
-            "the host's TCP port 5000 to be routed to TCP port 6000 of the emulated device\r\n", NULL,
-    do_redir_add, NULL },
+        {"add", "add new redirection",
+         "add a new port redirection, arguments must be:\r\n\r\n"
+         "  redir add <protocol>:<host-port>:<guest-port>\r\n\r\n"
+         "where:   <protocol>     is either 'tcp' or 'udp'\r\n"
+         "         <host-port>    a number indicating which port on the host "
+         "to open\r\n"
+         "         <guest-port>   a number indicating which port to route to "
+         "on the device\r\n"
+         "\r\nas an example, 'redir  tcp:5000:6000' will allow any packets "
+         "sent to\r\n"
+         "the host's TCP port 5000 to be routed to TCP port 6000 of the "
+         "emulated device\r\n",
+         nullptr, do_redir_add, nullptr},
 
-    { "del",  "remove existing redirection",
-    "remove a port redirecion that was created with 'redir add', arguments must be:\r\n\r\n"
-            "  redir  del <protocol>:<host-port>\r\n\r\n"
-            "see the 'help redir add' for the meaning of <protocol> and <host-port>\r\n", NULL,
-    do_redir_del, NULL },
+        {"del", "remove existing redirection",
+         "remove a port redirecion that was created with 'redir add', "
+         "arguments must be:\r\n\r\n"
+         "  redir  del <protocol>:<host-port>\r\n\r\n"
+         "see the 'help redir add' for the meaning of <protocol> and "
+         "<host-port>\r\n",
+         nullptr, do_redir_del, nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
-
-
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -1236,8 +1261,9 @@ do_cdma_ssource( ControlClient  client, char*  args )
         const char*         name    = _cdma_subscription_sources[nn].name;
         ACdmaSubscriptionSource ssource = _cdma_subscription_sources[nn].source;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         if (!strcasecmp( args, name )) {
             amodem_set_cdma_subscription_source( android_modem_get(), ssource );
@@ -1278,23 +1304,23 @@ static const struct {
     const char*         display;
     ARegistrationState  state;
 } _gsm_states[] = {
-    { "unregistered",  "no network available", A_REGISTRATION_UNREGISTERED },
-    { "home",          "on local network, non-roaming", A_REGISTRATION_HOME },
-    { "roaming",       "on roaming network", A_REGISTRATION_ROAMING },
-    { "searching",     "searching networks", A_REGISTRATION_SEARCHING },
-    { "denied",        "emergency calls only", A_REGISTRATION_DENIED },
-    { "off",           "same as 'unregistered'", A_REGISTRATION_UNREGISTERED },
-    { "on",            "same as 'home'", A_REGISTRATION_HOME },
-    { NULL, NULL, A_REGISTRATION_UNREGISTERED }
-};
+        {"unregistered", "no network available", A_REGISTRATION_UNREGISTERED},
+        {"home", "on local network, non-roaming", A_REGISTRATION_HOME},
+        {"roaming", "on roaming network", A_REGISTRATION_ROAMING},
+        {"searching", "searching networks", A_REGISTRATION_SEARCHING},
+        {"denied", "emergency calls only", A_REGISTRATION_DENIED},
+        {"off", "same as 'unregistered'", A_REGISTRATION_UNREGISTERED},
+        {"on", "same as 'home'", A_REGISTRATION_HOME},
+        {nullptr, nullptr, A_REGISTRATION_UNREGISTERED}};
 
 static const char*
 gsm_state_to_string( ARegistrationState  state )
 {
     int  nn;
-    for (nn = 0; _gsm_states[nn].name != NULL; nn++) {
-        if (state == _gsm_states[nn].state)
+    for (nn = 0; _gsm_states[nn].name != nullptr; nn++) {
+        if (state == _gsm_states[nn].state) {
             return _gsm_states[nn].name;
+        }
     }
     return "<unknown>";
 }
@@ -1331,8 +1357,9 @@ help_gsm_data( ControlClient  client )
         const char*         name    = _gsm_states[nn].name;
         const char*         display = _gsm_states[nn].display;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         control_write( client, "  %-15s %s\r\n", name, display );
     }
@@ -1354,8 +1381,9 @@ do_gsm_data( ControlClient  client, char*  args )
         const char*         name    = _gsm_states[nn].name;
         ARegistrationState  state   = _gsm_states[nn].state;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         if ( !strcmp( args, name ) ) {
             if (!android_modem_get()) {
@@ -1383,8 +1411,9 @@ help_gsm_voice( ControlClient  client )
         const char*         name    = _gsm_states[nn].name;
         const char*         display = _gsm_states[nn].display;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         control_write( client, "  %-15s %s\r\n", name, display );
     }
@@ -1406,8 +1435,9 @@ do_gsm_voice( ControlClient  client, char*  args )
         const char*         name    = _gsm_states[nn].name;
         ARegistrationState  state   = _gsm_states[nn].state;
 
-        if (!name)
+        if (!name) {
             break;
+        }
 
         if ( !strcmp( args, name ) ) {
             if (!android_modem_get()) {
@@ -1434,8 +1464,9 @@ gsm_check_number( char*  args )
             return -1;
         }
     }
-    if (nn == 0)
+    if (nn == 0) {
         return -1;
+    }
 
     return 0;
 }
@@ -1508,13 +1539,15 @@ do_gsm_list( ControlClient  client, char*  args )
         ACall        call = amodem_get_call( android_modem_get(), nn );
         const char*  dir;
 
-        if (call == NULL)
+        if (call == nullptr) {
             continue;
+        }
 
-        if (call->dir == A_CALL_OUTBOUND)
+        if (call->dir == A_CALL_OUTBOUND) {
             dir = "outbound to ";
-         else
+        } else {
             dir = "inbound from";
+        }
 
         control_write( client, "%s %-10s : %s\r\n", dir,
                        call->number, call_state_to_string(call->state) );
@@ -1532,7 +1565,7 @@ do_gsm_busy( ControlClient  client, char*  args )
         return -1;
     }
     call = amodem_find_call_by_number( android_modem_get(), args );
-    if (call == NULL || call->dir != A_CALL_OUTBOUND) {
+    if (call == nullptr || call->dir != A_CALL_OUTBOUND) {
         control_write( client, "KO: no current outbound call to number '%s' (call %p)\r\n", args, call );
         return -1;
     }
@@ -1553,7 +1586,7 @@ do_gsm_hold( ControlClient  client, char*  args )
         return -1;
     }
     call = amodem_find_call_by_number( android_modem_get(), args );
-    if (call == NULL) {
+    if (call == nullptr) {
         control_write( client, "KO: no current call to/from number '%s'\r\n", args );
         return -1;
     }
@@ -1575,7 +1608,7 @@ do_gsm_accept( ControlClient  client, char*  args )
         return -1;
     }
     call = amodem_find_call_by_number( android_modem_get(), args );
-    if (call == NULL) {
+    if (call == nullptr) {
         control_write( client, "KO: no current call to/from number '%s'\r\n", args );
         return -1;
     }
@@ -1596,8 +1629,9 @@ do_gsm_signal( ControlClient  client, char*  args )
 
     static  int  last_ber = 99;
 
-    if (!p)
+    if (!p) {
         p = "";
+    }
 
     /* tokenize */
     while (*p) {
@@ -1610,12 +1644,14 @@ do_gsm_signal( ControlClient  client, char*  args )
         }
 
         params[++top_param] = val;
-        if (top_param + 1 == NUM_SIGNAL_PARAMS)
+        if (top_param + 1 == NUM_SIGNAL_PARAMS) {
             break;
+        }
 
         p = end;
-        while (*p && (p[0] == ' ' || p[0] == '\t'))
+        while (*p && (p[0] == ' ' || p[0] == '\t')) {
             p += 1;
+        }
     }
 
     /* sanity check */
@@ -1650,8 +1686,9 @@ do_gsm_signal_profile( ControlClient  client, char*  args )
 {
     char* end;
     const char* p = args;
-    if (!p)
+    if (!p) {
         p = "";
+    }
     int  val = strtol( p, &end, 10 );
 
     if (end == p) {
@@ -1692,70 +1729,70 @@ static const CommandDefRec  gsm_in_commands[] =
 };
 #endif
 
+static const CommandDefRec cdma_commands[] = {
+        {"ssource", "Set the current CDMA subscription source", nullptr,
+         describe_subscription_source, do_cdma_ssource, nullptr},
+        {"prl_version", "Dump the current PRL version", nullptr, nullptr,
+         do_cdma_prl_version, nullptr},
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
-static const CommandDefRec  cdma_commands[] =
-{
-    { "ssource", "Set the current CDMA subscription source",
-      NULL, describe_subscription_source,
-      do_cdma_ssource, NULL },
-    { "prl_version", "Dump the current PRL version",
-      NULL, NULL,
-      do_cdma_prl_version, NULL },
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+static const CommandDefRec gsm_commands[] = {
+        {"list", "list current phone calls",
+         "'gsm list' lists all inbound and outbound calls and their state\r\n",
+         nullptr, do_gsm_list, nullptr},
 
-static const CommandDefRec  gsm_commands[] =
-{
-    { "list", "list current phone calls",
-    "'gsm list' lists all inbound and outbound calls and their state\r\n", NULL,
-    do_gsm_list, NULL },
+        {"call", "create inbound phone call",
+         "'gsm call <phonenumber>' allows you to simulate a new inbound "
+         "call\r\n",
+         nullptr, do_gsm_call, nullptr},
 
-    { "call", "create inbound phone call",
-    "'gsm call <phonenumber>' allows you to simulate a new inbound call\r\n", NULL,
-    do_gsm_call, NULL },
+        {"busy", "close waiting outbound call as busy",
+         "'gsm busy <remoteNumber>' closes an outbound call, reporting\r\n"
+         "the remote phone as busy. only possible if the call is "
+         "'waiting'.\r\n",
+         nullptr, do_gsm_busy, nullptr},
 
-    { "busy", "close waiting outbound call as busy",
-    "'gsm busy <remoteNumber>' closes an outbound call, reporting\r\n"
-    "the remote phone as busy. only possible if the call is 'waiting'.\r\n", NULL,
-    do_gsm_busy, NULL },
+        {"hold", "change the state of an outbound call to 'held'",
+         "'gsm hold <remoteNumber>' change the state of a call to 'held'. this "
+         "is only possible\r\n"
+         "if the call in the 'waiting' or 'active' state\r\n",
+         nullptr, do_gsm_hold, nullptr},
 
-    { "hold", "change the state of an outbound call to 'held'",
-    "'gsm hold <remoteNumber>' change the state of a call to 'held'. this is only possible\r\n"
-    "if the call in the 'waiting' or 'active' state\r\n", NULL,
-    do_gsm_hold, NULL },
+        {"accept", "change the state of an outbound call to 'active'",
+         "'gsm accept <remoteNumber>' change the state of a call to 'active'. "
+         "this is only possible\r\n"
+         "if the call is in the 'waiting' or 'held' state\r\n",
+         nullptr, do_gsm_accept, nullptr},
 
-    { "accept", "change the state of an outbound call to 'active'",
-    "'gsm accept <remoteNumber>' change the state of a call to 'active'. this is only possible\r\n"
-    "if the call is in the 'waiting' or 'held' state\r\n", NULL,
-    do_gsm_accept, NULL },
+        {"cancel", "disconnect an inbound or outbound phone call",
+         "'gsm cancel <phonenumber>' allows you to simulate the end of an "
+         "inbound or outbound call\r\n",
+         nullptr, do_gsm_cancel, nullptr},
 
-    { "cancel", "disconnect an inbound or outbound phone call",
-    "'gsm cancel <phonenumber>' allows you to simulate the end of an inbound or outbound call\r\n", NULL,
-    do_gsm_cancel, NULL },
+        {"data", "modify data connection state", nullptr, help_gsm_data,
+         do_gsm_data, nullptr},
 
-    { "data", "modify data connection state", NULL, help_gsm_data,
-    do_gsm_data, NULL },
+        {"voice", "modify voice connection state", nullptr, help_gsm_voice,
+         do_gsm_voice, nullptr},
 
-    { "voice", "modify voice connection state", NULL, help_gsm_voice,
-    do_gsm_voice, NULL },
+        {"status", "display GSM status",
+         "'gsm status' displays the current state of the GSM emulation\r\n",
+         nullptr, do_gsm_status, nullptr},
 
-    { "status", "display GSM status",
-    "'gsm status' displays the current state of the GSM emulation\r\n", NULL,
-    do_gsm_status, NULL },
+        {"signal", "set sets the rssi and ber",
+         "'gsm signal <rssi> [<ber>]' changes the reported strength and error "
+         "rate on next (15s) update.\r\n"
+         "rssi range is 0..31 and 99 for unknown\r\n"
+         "ber range is 0..7 percent and 99 for unknown\r\n",
+         nullptr, do_gsm_signal, nullptr},
 
-    { "signal", "set sets the rssi and ber",
-    "'gsm signal <rssi> [<ber>]' changes the reported strength and error rate on next (15s) update.\r\n"
-    "rssi range is 0..31 and 99 for unknown\r\n"
-    "ber range is 0..7 percent and 99 for unknown\r\n",
-    NULL, do_gsm_signal, NULL },
+        {"signal-profile", "set the signal strength profile",
+         "'gsm signal-profile <strength>' changes the reported strength on "
+         "next (15s) update.\r\n"
+         "strength range is 0..4\r\n",
+         nullptr, do_gsm_signal_profile, nullptr},
 
-    { "signal-profile", "set the signal strength profile",
-    "'gsm signal-profile <strength>' changes the reported strength on next (15s) update.\r\n"
-    "strength range is 0..4\r\n",
-    NULL, do_gsm_signal_profile, NULL },
-
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -1794,7 +1831,8 @@ do_sms_send( ControlClient  client, char*  args )
     /* un-escape message text into proper utf-8 (conversion happens in-site) */
     p      += 1;
     textlen = strlen(p);
-    textlen = sms_utf8_from_message_str( p, textlen, (unsigned char*)p, textlen );
+    textlen = sms_utf8_from_message_str(
+            p, textlen, reinterpret_cast<unsigned char*>(p), textlen);
     if (textlen < 0) {
         control_write( client, "message must be utf8 and can use the following escapes:\r\n"
                        "    \\n      for a newline\r\n"
@@ -1812,14 +1850,16 @@ do_sms_send( ControlClient  client, char*  args )
     }
 
     /* create a list of SMS PDUs, then send them */
-    pdus = smspdu_create_deliver_utf8( (cbytes_t)p, textlen, &sender, NULL );
-    if (pdus == NULL) {
+    pdus = smspdu_create_deliver_utf8(reinterpret_cast<cbytes_t>(p), textlen,
+                                      &sender, nullptr);
+    if (pdus == nullptr) {
         control_write( client, "KO: internal error when creating SMS-DELIVER PDUs\n" );
         return -1;
     }
 
-    for (nn = 0; pdus[nn] != NULL; nn++)
-        amodem_receive_sms( android_modem_get(), pdus[nn] );
+    for (nn = 0; pdus[nn] != nullptr; nn++) {
+        amodem_receive_sms(android_modem_get(), pdus[nn]);
+    }
 
     smspdu_free_list( pdus );
     return 0;
@@ -1842,7 +1882,7 @@ do_sms_sendpdu( ControlClient  client, char*  args )
     }
 
     pdu = smspdu_create_from_hex( args, strlen(args) );
-    if (pdu == NULL) {
+    if (pdu == nullptr) {
         control_write( client, "KO: badly formatted <hexstring>\r\n" );
         return -1;
     }
@@ -1852,20 +1892,21 @@ do_sms_sendpdu( ControlClient  client, char*  args )
     return 0;
 }
 
-static const CommandDefRec  sms_commands[] =
-{
-    { "send", "send inbound SMS text message",
-    "'sms send <phonenumber> <message>' allows you to simulate a new inbound sms message\r\n", NULL,
-    do_sms_send, NULL },
+static const CommandDefRec sms_commands[] = {
+        {"send", "send inbound SMS text message",
+         "'sms send <phonenumber> <message>' allows you to simulate a new "
+         "inbound sms message\r\n",
+         nullptr, do_sms_send, nullptr},
 
-    { "pdu", "send inbound SMS PDU",
-    "'sms pdu <hexstring>' allows you to simulate a new inbound sms PDU\r\n"
-    "(used internally when one emulator sends SMS messages to another instance).\r\n"
-    "you probably don't want to play with this at all\r\n", NULL,
-    do_sms_sendpdu, NULL },
+        {"pdu", "send inbound SMS PDU",
+         "'sms pdu <hexstring>' allows you to simulate a new inbound sms "
+         "PDU\r\n"
+         "(used internally when one emulator sends SMS messages to another "
+         "instance).\r\n"
+         "you probably don't want to play with this at all\r\n",
+         nullptr, do_sms_sendpdu, nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -1876,7 +1917,7 @@ static const CommandDefRec  sms_commands[] =
 /********************************************************************************************/
 
 void do_control_write(void* opaque, const char* args) {
-    control_write((ControlClient)opaque, args);
+    control_write(static_cast<ControlClient>(opaque), args);
 }
 
 static int
@@ -2005,35 +2046,36 @@ do_battery_capacity( ControlClient  client, char*  args )
     return -1;
 }
 
+static const CommandDefRec power_commands[] = {
+        {"display", "display battery and charger state",
+         "display battery and charger state\r\n", nullptr, do_power_display,
+         nullptr},
 
-static const CommandDefRec  power_commands[] =
-{
-    { "display", "display battery and charger state",
-    "display battery and charger state\r\n", NULL,
-    do_power_display, NULL },
+        {"ac", "set AC charging state",
+         "'ac on|off' allows you to set the AC charging state to on or off\r\n",
+         nullptr, do_ac_state, nullptr},
 
-    { "ac", "set AC charging state",
-    "'ac on|off' allows you to set the AC charging state to on or off\r\n", NULL,
-    do_ac_state, NULL },
+        {"status", "set battery status",
+         "'status unknown|charging|discharging|not-charging|full' allows you "
+         "to set battery status\r\n",
+         nullptr, do_battery_status, nullptr},
 
-    { "status", "set battery status",
-    "'status unknown|charging|discharging|not-charging|full' allows you to set battery status\r\n", NULL,
-    do_battery_status, NULL },
+        {"present", "set battery present state",
+         "'present true|false' allows you to set battery present state to true "
+         "or false\r\n",
+         nullptr, do_battery_present, nullptr},
 
-    { "present", "set battery present state",
-    "'present true|false' allows you to set battery present state to true or false\r\n", NULL,
-    do_battery_present, NULL },
+        {"health", "set battery health state",
+         "'health unknown|good|overheat|dead|overvoltage|failure' allows you "
+         "to set battery health state\r\n",
+         nullptr, do_battery_health, nullptr},
 
-    { "health", "set battery health state",
-    "'health unknown|good|overheat|dead|overvoltage|failure' allows you to set battery health state\r\n", NULL,
-    do_battery_health, NULL },
+        {"capacity", "set battery capacity state",
+         "'capacity <percentage>' allows you to set battery capacity to a "
+         "value 0 - 100\r\n",
+         nullptr, do_battery_capacity, nullptr},
 
-    { "capacity", "set battery capacity state",
-    "'capacity <percentage>' allows you to set battery capacity to a value 0 - 100\r\n", NULL,
-    do_battery_capacity, NULL },
-
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2061,15 +2103,18 @@ do_event_send( ControlClient  client, char*  args )
         int    type, code, value, ret;
 
         p += strspn( p, " \t" );  /* skip spaces */
-        if (*p == 0)
+        if (*p == 0) {
             break;
+        }
 
         q  = p + strcspn( p, " \t" );
 
-        if (q == p)
+        if (q == p) {
             break;
+        }
 
-        snprintf(temp, sizeof temp, "%.*s", (int)(intptr_t)(q-p), p);
+        snprintf(temp, sizeof temp, "%.*s",
+                 static_cast<int>(static_cast<intptr_t>(q - p)), p);
         ret = android_event_from_str( temp, &type, &code, &value );
         if (ret < 0) {
             if (ret == -1) {
@@ -2110,8 +2155,9 @@ do_event_types( ControlClient  client, char*  args )
         p = android_event_bufprint_type_str( p, end, nn );
 
         control_write( client, "    %-8s", tmp );
-        if (count2 > 0)
-            control_write( client, "  (%d code aliases)", count2 );
+        if (count2 > 0) {
+            control_write(client, "  (%d code aliases)", count2);
+        }
 
         control_write( client, "\r\n" );
     }
@@ -2183,11 +2229,11 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
-    unsigned char*  p   = (unsigned char*) args;
+    auto* p = reinterpret_cast<unsigned char*>(args);
     int             textlen = strlen(args);
 
     /* un-secape message text into proper utf-8 (conversion happens in-site) */
-    textlen = sms_utf8_from_message_str( args, textlen, (unsigned char*)p, textlen );
+    textlen = sms_utf8_from_message_str(args, textlen, p, textlen);
     if (textlen < 0) {
         control_write( client, "message must be utf8 and can use the following escapes:\r\n"
                        "    \\n      for a newline\r\n"
@@ -2199,54 +2245,64 @@ do_event_text( ControlClient  client, char*  args )
         return -1;
     }
 
-    if (!client->global->libui_agent->convertUtf8ToKeyCodeEvents(p, textlen,
-        (LibuiKeyCodeSendFunc)client->global->user_event_agent->sendKeyCodes)) {
-        control_write( client, "KO: device is unable to recieve text input now\r\n" );
+    if (!client->global->libui_agent->convertUtf8ToKeyCodeEvents(
+                p, textlen,
+                reinterpret_cast<LibuiKeyCodeSendFunc>(
+                        client->global->user_event_agent->sendKeyCodes))) {
+        control_write(client,
+                      "KO: device is unable to recieve text input now\r\n");
         return -1;
     }
 
     return 0;
 }
 
-static const CommandDefRec  event_commands[] =
-{
-    { "send", "send a series of events to the kernel",
-    "'event send <type>:<code>:<value> ...' allows you to send one or more hardware events\r\n"
-    "to the Android kernel. You can use text names or integers for <type> and <code>\r\n", NULL,
-    do_event_send, NULL },
+static const CommandDefRec event_commands[] = {
+        {"send", "send a series of events to the kernel",
+         "'event send <type>:<code>:<value> ...' allows you to send one or "
+         "more hardware events\r\n"
+         "to the Android kernel. You can use text names or integers for <type> "
+         "and <code>\r\n",
+         nullptr, do_event_send, nullptr},
 
-    { "types", "list all <type> aliases",
-    "'event types' list all <type> string aliases supported by the 'event' subcommands\r\n",
-    NULL, do_event_types, NULL },
+        {"types", "list all <type> aliases",
+         "'event types' list all <type> string aliases supported by the "
+         "'event' subcommands\r\n",
+         nullptr, do_event_types, nullptr},
 
-    { "codes", "list all <code> aliases for a given <type>",
-    "'event codes <type>' lists all <code> string aliases for a given event <type>\r\n",
-    NULL, do_event_codes, NULL },
+        {"codes", "list all <code> aliases for a given <type>",
+         "'event codes <type>' lists all <code> string aliases for a given "
+         "event <type>\r\n",
+         nullptr, do_event_codes, nullptr},
 
-    { "text", "simulate keystrokes from a given text",
-    "'event text <message>' allows you to simulate keypresses to generate a given text\r\n"
-    "message. <message> must be an utf-8 string. Unicode points will be reverse-mapped\r\n"
-    "according to the current device keyboard. Unsupported characters will be discarded\r\n"
-    "silently\r\n", NULL, do_event_text, NULL },
+        {"text", "simulate keystrokes from a given text",
+         "'event text <message>' allows you to simulate keypresses to generate "
+         "a given text\r\n"
+         "message. <message> must be an utf-8 string. Unicode points will be "
+         "reverse-mapped\r\n"
+         "according to the current device keyboard. Unsupported characters "
+         "will be discarded\r\n"
+         "silently\r\n",
+         nullptr, do_event_text, nullptr},
 
-    { "mouse", "simulate a mouse event",
-      "'event mouse <x> <y> <device> <buttonstate>' allows you to genenarate a mouse event\r\n"
-      "at x, y with the given buttonstate using the given device. All values are integers.\r\n"
-      "Where device:\r\n"
-      "  0  = touch screen\r\n"
-      "  1  = trackball\r\n"
-      "And buttonstate is a mask where:\r\n"
-      "  0  = No buttons\r\n"
-      "  1  = Left button\r\n"
-      "  2  = Right button\r\n"
-      "  4  = Middle button\r\n"
-      "  8  = Wheel up\r\n"
-      "  16 = Wheel down\r\n",
-      NULL, do_event_mouse, NULL},
+        {"mouse", "simulate a mouse event",
+         "'event mouse <x> <y> <device> <buttonstate>' allows you to "
+         "genenarate a mouse event\r\n"
+         "at x, y with the given buttonstate using the given device. All "
+         "values are integers.\r\n"
+         "Where device:\r\n"
+         "  0  = touch screen\r\n"
+         "  1  = trackball\r\n"
+         "And buttonstate is a mask where:\r\n"
+         "  0  = No buttons\r\n"
+         "  1  = Left button\r\n"
+         "  2  = Right button\r\n"
+         "  4  = Middle button\r\n"
+         "  8  = Wheel up\r\n"
+         "  16 = Wheel down\r\n",
+         nullptr, do_event_mouse, nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
-
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2263,7 +2319,7 @@ static int do_snapshot_list(ControlClient client, char* args) {
 }
 
 static int do_snapshot_save(ControlClient client, char* args) {
-    if (args == NULL) {
+    if (args == nullptr) {
         control_write(
                 client,
                 "KO: Argument missing, try 'avd snapshot save <name>'\r\n");
@@ -2276,7 +2332,7 @@ static int do_snapshot_save(ControlClient client, char* args) {
 }
 
 static int do_snapshot_load(ControlClient client, char* args) {
-    if (args == NULL) {
+    if (args == nullptr) {
         control_write(
                 client,
                 "KO: Argument missing, try 'avd snapshot load <name>'\r\n");
@@ -2289,7 +2345,7 @@ static int do_snapshot_load(ControlClient client, char* args) {
 }
 
 static int do_snapshot_del(ControlClient client, char* args) {
-    if (args == NULL) {
+    if (args == nullptr) {
         control_write(
                 client,
                 "KO: Argument missing, try 'avd snapshot list <name>'\r\n");
@@ -2301,28 +2357,28 @@ static int do_snapshot_del(ControlClient client, char* args) {
     return success ? 0 : -1;
 }
 
-static const CommandDefRec  snapshot_commands[] =
-{
-    { "list", "list available state snapshots",
-    "'avd snapshot list' will show a list of all state snapshots that can be loaded\r\n",
-    NULL, do_snapshot_list, NULL },
+static const CommandDefRec snapshot_commands[] = {
+        {"list", "list available state snapshots",
+         "'avd snapshot list' will show a list of all state snapshots that can "
+         "be loaded\r\n",
+         nullptr, do_snapshot_list, nullptr},
 
-    { "save", "save state snapshot",
-    "'avd snapshot save <name>' will save the current (run-time) state to a snapshot with the given name\r\n",
-    NULL, do_snapshot_save, NULL },
+        {"save", "save state snapshot",
+         "'avd snapshot save <name>' will save the current (run-time) state to "
+         "a snapshot with the given name\r\n",
+         nullptr, do_snapshot_save, nullptr},
 
-    { "load", "load state snapshot",
-    "'avd snapshot load <name>' will load the state snapshot of the given name\r\n",
-    NULL, do_snapshot_load, NULL },
+        {"load", "load state snapshot",
+         "'avd snapshot load <name>' will load the state snapshot of the given "
+         "name\r\n",
+         nullptr, do_snapshot_load, nullptr},
 
-    { "del", "delete state snapshot",
-    "'avd snapshot del <name>' will delete the state snapshot with the given name\r\n",
-    NULL, do_snapshot_del, NULL },
+        {"del", "delete state snapshot",
+         "'avd snapshot del <name>' will delete the state snapshot with the "
+         "given name\r\n",
+         nullptr, do_snapshot_del, nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
-
-
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2367,30 +2423,32 @@ do_avd_name( ControlClient  client, char*  args )
     return 0;
 }
 
-static const CommandDefRec  vm_commands[] =
-{
-    { "stop", "stop the virtual device",
-    "'avd stop' stops the virtual device immediately, use 'avd start' to continue execution\r\n",
-    NULL, do_avd_stop, NULL },
+static const CommandDefRec vm_commands[] = {
+        {"stop", "stop the virtual device",
+         "'avd stop' stops the virtual device immediately, use 'avd start' to "
+         "continue execution\r\n",
+         nullptr, do_avd_stop, nullptr},
 
-    { "start", "start/restart the virtual device",
-    "'avd start' will start or continue the virtual device, use 'avd stop' to stop it\r\n",
-    NULL, do_avd_start, NULL },
+        {"start", "start/restart the virtual device",
+         "'avd start' will start or continue the virtual device, use 'avd "
+         "stop' to stop it\r\n",
+         nullptr, do_avd_start, nullptr},
 
-    { "status", "query virtual device status",
-    "'avd status' will indicate whether the virtual device is running or not\r\n",
-    NULL, do_avd_status, NULL },
+        {"status", "query virtual device status",
+         "'avd status' will indicate whether the virtual device is running or "
+         "not\r\n",
+         nullptr, do_avd_status, nullptr},
 
-    { "name", "query virtual device name",
-    "'avd name' will return the name of this virtual device\r\n",
-    NULL, do_avd_name, NULL },
+        {"name", "query virtual device name",
+         "'avd name' will return the name of this virtual device\r\n", nullptr,
+         do_avd_name, nullptr},
 
-    { "snapshot", "state snapshot commands",
-    "allows you to save and restore the virtual device state in snapshots\r\n",
-    NULL, NULL, snapshot_commands },
+        {"snapshot", "state snapshot commands",
+         "allows you to save and restore the virtual device state in "
+         "snapshots\r\n",
+         nullptr, nullptr, snapshot_commands},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2415,7 +2473,7 @@ do_geo_nmea( ControlClient  client, char*  args )
     return 0;
 }
 
-static location_qt_settings_writer location_agent_qt_settings_func = 0;
+static location_qt_settings_writer location_agent_qt_settings_func = nullptr;
 
 void location_registerQtSettingsWriter(location_qt_settings_writer f) {
     location_agent_qt_settings_func = f;
@@ -2434,8 +2492,9 @@ do_geo_fix( ControlClient  client, char*  args )
 
     struct  timeval tVal;
 
-    if (!p)
+    if (!p) {
         p = "";
+    }
 
     /* tokenize */
     while (*p) {
@@ -2448,12 +2507,14 @@ do_geo_fix( ControlClient  client, char*  args )
         }
 
         params[++top_param] = val;
-        if (top_param + 1 == NUM_GEO_PARAMS)
+        if (top_param + 1 == NUM_GEO_PARAMS) {
             break;
+        }
 
         p = end;
-        while (*p && (p[0] == ' ' || p[0] == '\t'))
+        while (*p && (p[0] == ' ' || p[0] == '\t')) {
             p += 1;
+        }
     }
 
     /* sanity check */
@@ -2479,7 +2540,7 @@ do_geo_fix( ControlClient  client, char*  args )
     /* check number of satellites, must be integer between 1 and 12 */
     if (top_param >= GEO_SAT) {
         int sat_index = (top_param >= GEO_SAT2) ? GEO_SAT2 : GEO_SAT;
-        n_satellites = (int) params[sat_index];
+        n_satellites = static_cast<int>(params[sat_index]);
         if (n_satellites != params[sat_index]
             || n_satellites < 1 || n_satellites > 12) {
             control_write( client, "KO: invalid number of satellites. Must be an integer between 1 and 12\r\n");
@@ -2493,7 +2554,7 @@ do_geo_fix( ControlClient  client, char*  args )
     }
 
     memset(&tVal, 0, sizeof(tVal));
-    gettimeofday(&tVal, NULL);
+    gettimeofday(&tVal, nullptr);
 
     // Also update the settings.
     if (location_agent_qt_settings_func) {
@@ -2505,28 +2566,27 @@ do_geo_fix( ControlClient  client, char*  args )
     return 0;
 }
 
-static const CommandDefRec  geo_commands[] =
-{
-    { "nmea", "send a GPS NMEA sentence",
-    "'geo nema <sentence>' sends an NMEA 0183 sentence to the emulated device, as\r\n"
-    "if it came from an emulated GPS modem. <sentence> must begin with '$GP'. Only\r\n"
-    "'$GPGGA' and '$GPRMC' sentences are supported at the moment.\r\n",
-    NULL, do_geo_nmea, NULL },
+static const CommandDefRec geo_commands[] = {
+        {"nmea", "send a GPS NMEA sentence",
+         "'geo nema <sentence>' sends an NMEA 0183 sentence to the emulated "
+         "device, as\r\n"
+         "if it came from an emulated GPS modem. <sentence> must begin with "
+         "'$GP'. Only\r\n"
+         "'$GPGGA' and '$GPRMC' sentences are supported at the moment.\r\n",
+         nullptr, do_geo_nmea, nullptr},
 
-    { "fix", "send a simple GPS fix",
-    "'geo fix <longitude> <latitude> [<altitude> [<satellites>]]'\r\n"
-    " allows you to send a simple GPS fix to the emulated system.\r\n"
-    " The parameters are:\r\n\r\n"
-    "  <longitude>   longitude, in decimal degrees\r\n"
-    "  <latitude>    latitude, in decimal degrees\r\n"
-    "  <altitude>    optional altitude in meters\r\n"
-    "  <satellites>  number of satellites being tracked (1-12)\r\n"
-    "\r\n",
-    NULL, do_geo_fix, NULL },
+        {"fix", "send a simple GPS fix",
+         "'geo fix <longitude> <latitude> [<altitude> [<satellites>]]'\r\n"
+         " allows you to send a simple GPS fix to the emulated system.\r\n"
+         " The parameters are:\r\n\r\n"
+         "  <longitude>   longitude, in decimal degrees\r\n"
+         "  <latitude>    latitude, in decimal degrees\r\n"
+         "  <altitude>    optional altitude in meters\r\n"
+         "  <satellites>  number of satellites being tracked (1-12)\r\n"
+         "\r\n",
+         nullptr, do_geo_fix, nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
-
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2552,8 +2612,9 @@ do_sensors_get( ControlClient client, char* args )
 
     int status = SENSOR_STATUS_UNKNOWN;
     char sensor[strlen(args) + 1];
-    if (1 != sscanf( args, "%s", &sensor[0] ))
+    if (1 != sscanf(args, "%s", &sensor[0])) {
         goto SENSOR_STATUS_ERROR;
+    }
 
     {
         int sensor_id = android_sensors_get_id_from_name( sensor );
@@ -2564,8 +2625,9 @@ do_sensors_get( ControlClient client, char* args )
         {
             float a, b, c;
             status = android_sensors_get( sensor_id, &a, &b, &c );
-            if (status != SENSOR_STATUS_OK)
+            if (status != SENSOR_STATUS_OK) {
                 goto SENSOR_STATUS_ERROR;
+            }
 
             snprintf( buffer, sizeof(buffer), "%s = %g:%g:%g\r\n", sensor, a, b, c );
             do_control_write( client, buffer );
@@ -2607,7 +2669,7 @@ do_sensors_set( ControlClient client, char* args )
     char* sensor;
     char* value;
     char* args_dup = strdup( args );
-    if (args_dup == NULL) {
+    if (args_dup == nullptr) {
         control_write( client, "KO: Memory allocation failed.\n" );
         return -1;
     }
@@ -2615,19 +2677,22 @@ do_sensors_set( ControlClient client, char* args )
 
     /* Parsing the args to get sensor name string */
     while (*p && isspace(*p)) p++;
-    if (*p == 0)
+    if (*p == 0) {
         goto INPUT_ERROR;
+    }
     sensor = p;
 
     /* Parsing the args to get value string */
     while (*p && (! isspace(*p))) p++;
-    if (*p == 0 || *(p + 1) == 0/* make sure value isn't NULL */)
+    if (*p == 0 || *(p + 1) == 0 /* make sure value isn't NULL */) {
         goto INPUT_ERROR;
+    }
     *p = 0;
     value = p + 1;
 
-    if (! (strlen(sensor) && strlen(value)))
+    if (!(strlen(sensor) && strlen(value))) {
         goto INPUT_ERROR;
+    }
 
     {
         int sensor_id = android_sensors_get_id_from_name( sensor );
@@ -2637,8 +2702,9 @@ do_sensors_set( ControlClient client, char* args )
         } else {
             float fvalues[3];
             status = android_sensors_get( sensor_id, &fvalues[0], &fvalues[1], &fvalues[2] );
-            if (status != SENSOR_STATUS_OK)
+            if (status != SENSOR_STATUS_OK) {
                 goto SENSOR_STATUS_ERROR;
+            }
 
             {
                 /* Parsing the value part to get the sensor values(a, b, c) */
@@ -2654,16 +2720,18 @@ do_sensors_set( ControlClient client, char* args )
                     }
 
                     if (pnext > value) {
-                        if (1 != sscanf( value,"%g", &fvalues[i] ))
+                        if (1 != sscanf(value, "%g", &fvalues[i])) {
                             goto INPUT_ERROR;
+                        }
                     }
                 }
             }
 
             status = android_sensors_override_set(
                     sensor_id, fvalues[0], fvalues[1], fvalues[2] );
-            if (status != SENSOR_STATUS_OK)
+            if (status != SENSOR_STATUS_OK) {
                 goto SENSOR_STATUS_ERROR;
+            }
 
             free( args_dup );
             return 0;
@@ -2713,22 +2781,21 @@ do_sensors_status( ControlClient client, char* args )
 }
 
 /* Sensor commands for get/set sensor values and get available sensor names. */
-static const CommandDefRec sensor_commands[] =
-{
-    { "status", "list all sensors and their status.",
-      "'status': list all sensors and their status.\r\n",
-      NULL, do_sensors_status, NULL },
+static const CommandDefRec sensor_commands[] = {
+        {"status", "list all sensors and their status.",
+         "'status': list all sensors and their status.\r\n", nullptr,
+         do_sensors_status, nullptr},
 
-    { "get", "get sensor values",
-      "'get <sensorname>' returns the values of a given sensor.\r\n",
-      NULL, do_sensors_get, NULL },
+        {"get", "get sensor values",
+         "'get <sensorname>' returns the values of a given sensor.\r\n",
+         nullptr, do_sensors_get, nullptr},
 
-    { "set", "set sensor values",
-      "'set <sensorname> <value-a>[:<value-b>[:<value-c>]]' set the values of a given sensor.\r\n",
-      NULL, do_sensors_set, NULL },
+        {"set", "set sensor values",
+         "'set <sensorname> <value-a>[:<value-b>[:<value-c>]]' set the values "
+         "of a given sensor.\r\n",
+         nullptr, do_sensors_set, nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2758,20 +2825,21 @@ do_physics_stop( ControlClient client, char* args ) {
 }
 
 /* Physics commands for record/playback physics state. */
-static const CommandDefRec physics_commands[] =
-{
-    { "record", "start recording physical state changes.",
-      "'record <filename>': start recording physical state changes to the given file.\r\n",
-      NULL, do_physics_record, NULL },
-    { "play", "start playing physical state changes.",
-      "'play <filename>': start playing physical state changes from the given file.\r\n",
-      NULL, do_physics_play, NULL },
-    { "stop", "stop recording or playing back physical state changes.",
-      "'stop': stop the current recording or playback of physical state changes.\r\n",
-      NULL, do_physics_stop, NULL },
+static const CommandDefRec physics_commands[] = {
+        {"record", "start recording physical state changes.",
+         "'record <filename>': start recording physical state changes to the "
+         "given file.\r\n",
+         nullptr, do_physics_record, nullptr},
+        {"play", "start playing physical state changes.",
+         "'play <filename>': start playing physical state changes from the "
+         "given file.\r\n",
+         nullptr, do_physics_play, nullptr},
+        {"stop", "stop recording or playing back physical state changes.",
+         "'stop': stop the current recording or playback of physical state "
+         "changes.\r\n",
+         nullptr, do_physics_stop, nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2805,16 +2873,14 @@ do_fingerprint_remove(ControlClient client, char* args )
     return 0;
 }
 
-static const CommandDefRec fingerprint_commands[] =
-{
-    { "touch", "touch finger print sensor with <fingerid>",
-      "'touch <fingerid>' touch finger print sensor with <fingerid>.\r\n",
-      NULL, do_fingerprint_touch, NULL },
-    { "remove", "remove finger from the fingerprint sensor",
-      "'remove' remove finger from the fingerprint sensor.\r\n",
-      NULL, do_fingerprint_remove, NULL },
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+static const CommandDefRec fingerprint_commands[] = {
+        {"touch", "touch finger print sensor with <fingerid>",
+         "'touch <fingerid>' touch finger print sensor with <fingerid>.\r\n",
+         nullptr, do_fingerprint_touch, nullptr},
+        {"remove", "remove finger from the fingerprint sensor",
+         "'remove' remove finger from the fingerprint sensor.\r\n", nullptr,
+         do_fingerprint_remove, nullptr},
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -2867,10 +2933,10 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     // parameters, if any, and the filename)
     static constexpr int kMaxArgs = 3 * 2 + 1;
     static const struct option longOptions[] = {
-            {"size", required_argument, NULL, 's'},
-            {"bit-rate", required_argument, NULL, 'b'},
-            {"time-limit", required_argument, NULL, 't'},
-            {NULL, 0, NULL, 0}};
+            {"size", required_argument, nullptr, 's'},
+            {"bit-rate", required_argument, nullptr, 'b'},
+            {"time-limit", required_argument, nullptr, 't'},
+            {nullptr, 0, nullptr, 0}};
 
     switch (client->global->record_agent->getRecorderState()) {
         case RECORDER_STOPPED:
@@ -2888,14 +2954,16 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     // Count number of arguments
     // Need to get it into a format for getopt_long().
     std::vector<std::string> splitArgs;
-    splitArgs.push_back("screenrecord");
+    splitArgs.emplace_back("screenrecord");
     android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
-        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1) {
             splitArgs.push_back(s);
+        }
     });
 
     // Need char** for getopt()
     std::vector<char*> sarray;
+    sarray.reserve(splitArgs.size());
     for (auto& arg : splitArgs) {
         sarray.push_back(&arg[0]);
     }
@@ -3029,8 +3097,9 @@ static int do_screenrecord_webrtc(ControlClient client, char* args) {
     // Count number of arguments
     std::vector<std::string> splitArgs;
     android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
-        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1) {
             splitArgs.push_back(s);
+        }
     });
 
     if (splitArgs.size() == 0) {
@@ -3083,18 +3152,18 @@ static const CommandDefRec screenrecord_commands[] = {
          "\r\nThe recording will stop with 'screenrecord stop' or when the "
          "time limit\r\n"
          "is reached\r\n",
-         NULL, do_screenrecord_start, NULL},
+         nullptr, do_screenrecord_start, nullptr},
 
         {"stop", "stop screen recording",
          "'screenrecord stop' stops the recording if one has already "
          "started.\r\n",
-         NULL, do_screenrecord_stop, NULL},
+         nullptr, do_screenrecord_stop, nullptr},
 
         {"screenshot", "Take a screenshot",
          "'screenrecord screenshot <dirname>'\r\n"
          "\r\nTakes a single screenshot of emulator's display "
          "and saves the resulting PNG in <dirname>.\r\n",
-         NULL, do_screenrecord_screenshot, NULL},
+         nullptr, do_screenrecord_screenshot, nullptr},
 
         {"webrtc", "start/stop the webrtc module",
          "'screenrecord webrtc [start|stop] [<handle>] [fps]'\r\n"
@@ -3102,10 +3171,9 @@ static const CommandDefRec screenrecord_commands[] = {
          "\r\nSharing can happen on only one handle and must "
          "be provided on start."
          "\r\nAn option framerate can be provided, the default is fps=60",
-         NULL, do_screenrecord_webrtc, NULL},
+         nullptr, do_screenrecord_webrtc, nullptr},
 
-
-        {NULL, NULL, NULL, NULL, NULL, NULL}};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -3122,14 +3190,12 @@ do_qemu_monitor( ControlClient client, char* args )
     return -1;
 }
 
-static const CommandDefRec  qemu_commands[] =
-{
-    { "monitor", "enter QEMU monitor",
-    "Enter the QEMU virtual machine monitor\r\n",
-    NULL, do_qemu_monitor, NULL },
+static const CommandDefRec qemu_commands[] = {
+        {"monitor", "enter QEMU monitor",
+         "Enter the QEMU virtual machine monitor\r\n", nullptr, do_qemu_monitor,
+         nullptr},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 #define HELP_COMMAND \
     { "help|h|?", "print a list of commands", NULL, NULL, do_help, NULL }
@@ -3161,7 +3227,7 @@ static const CommandDefRec  qemu_commands[] =
 /********************************************************************************************/
 
 static void __attribute__((noreturn)) crash() {
-    volatile int * ptr = NULL;
+    volatile int* ptr = nullptr;
     *ptr+=1;
     abort();    // just to make the compiler happy
 }
@@ -3205,7 +3271,7 @@ static int do_debug(ControlClient client, char* args) {
 }
 
 static int do_rotate_90_clockwise(ControlClient client, char* args) {
-    return (int)client->global->emu_agent->rotate90Clockwise();
+    return static_cast<int>(client->global->emu_agent->rotate90Clockwise());
 }
 
 /* NOTE: The names of all commands are listed when the 'help' command
@@ -3223,39 +3289,41 @@ extern const CommandDefRec main_commands[] = {
         PING_COMMAND,
 
         {"event", "simulate hardware events",
-         "allows you to send fake hardware events to the kernel\r\n", NULL,
-         NULL, event_commands},
+         "allows you to send fake hardware events to the kernel\r\n", nullptr,
+         nullptr, event_commands},
 
         {"geo", "Geo-location commands",
          "allows you to change Geo-related settings, or to send GPS NMEA "
          "sentences\r\n",
-         NULL, NULL, geo_commands},
+         nullptr, nullptr, geo_commands},
 
         {"gsm", "GSM related commands",
          "allows you to change GSM-related settings, or to make a new inbound "
          "phone call\r\n",
-         NULL, NULL, gsm_commands},
+         nullptr, nullptr, gsm_commands},
 
         {"cdma", "CDMA related commands",
-         "allows you to change CDMA-related settings\r\n", NULL, NULL,
+         "allows you to change CDMA-related settings\r\n", nullptr, nullptr,
          cdma_commands},
 
-        {"crash", "crash the emulator instance", NULL, NULL, do_crash, NULL},
+        {"crash", "crash the emulator instance", nullptr, nullptr, do_crash,
+         nullptr},
 
         {"crash-on-exit", "simulate crash on exit for the emulator instance",
-         NULL, NULL, do_crash_on_exit},
+         nullptr, nullptr, do_crash_on_exit},
 
-        {"kill", "kill the emulator instance", NULL, NULL, do_kill, NULL},
+        {"kill", "kill the emulator instance", nullptr, nullptr, do_kill,
+         nullptr},
 
         {"network", "manage network settings",
          "allows you to manage the settings related to the network data "
          "connection "
          "of the\r\n"
          "emulated device.\r\n",
-         NULL, NULL, network_commands},
+         nullptr, nullptr, network_commands},
 
         {"power", "power related commands",
-         "allows to change battery and AC power status\r\n", NULL, NULL,
+         "allows to change battery and AC power status\r\n", nullptr, nullptr,
          power_commands},
 
         QUIT_COMMAND,
@@ -3268,39 +3336,40 @@ extern const CommandDefRec main_commands[] = {
          "the "
          "host's TCP port 5000\r\n"
          "to TCP port 6000 of the emulated device\r\n",
-         NULL, NULL, redir_commands},
+         nullptr, nullptr, redir_commands},
 
         {"sms", "SMS related commands",
-         "allows you to simulate an inbound SMS\r\n", NULL, NULL, sms_commands},
+         "allows you to simulate an inbound SMS\r\n", nullptr, nullptr,
+         sms_commands},
 
         AVD_COMMAND(vm_commands),
 
         {"qemu", "QEMU-specific commands",
-         "allows to connect to the QEMU virtual machine monitor\r\n", NULL,
-         NULL, qemu_commands},
+         "allows to connect to the QEMU virtual machine monitor\r\n", nullptr,
+         nullptr, qemu_commands},
 
         {"sensor", "manage emulator sensors",
-         "allows you to request the emulator sensors\r\n", NULL, NULL,
+         "allows you to request the emulator sensors\r\n", nullptr, nullptr,
          sensor_commands},
 
         {"physics", "manage physical model",
-         "allows you to record and playback physical model state changes\r\n", NULL, NULL,
-         physics_commands},
+         "allows you to record and playback physical model state changes\r\n",
+         nullptr, nullptr, physics_commands},
 
         {"finger", "manage emulator finger print",
-         "allows you to touch the emulator finger print sensor\r\n", NULL, NULL,
-         fingerprint_commands},
+         "allows you to touch the emulator finger print sensor\r\n", nullptr,
+         nullptr, fingerprint_commands},
 
-        {"debug", "control the emulator debug output tags", NULL, NULL,
+        {"debug", "control the emulator debug output tags", nullptr, nullptr,
          do_debug},
 
-        {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
-         do_rotate_90_clockwise, NULL},
+        {"rotate", "rotate the screen clockwise by 90 degrees", nullptr,
+         nullptr, do_rotate_90_clockwise, nullptr},
 
-        {"screenrecord", "Records the emulator's display", NULL,
-         NULL, NULL, screenrecord_commands},
+        {"screenrecord", "Records the emulator's display", nullptr, nullptr,
+         nullptr, screenrecord_commands},
 
-        {NULL, NULL, NULL, NULL, NULL, NULL}};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 }  // namespace
 
@@ -3342,7 +3411,7 @@ static int do_auth(ControlClient client, char* args) {
      */
     size_t token = strlen(auth_token) + 1;
     size_t args_len = strlen(args) + 1;
-    char* auth = (char*) calloc(token, 1);
+    auto* auth = static_cast<char*>(calloc(token, 1));
     memcpy(auth, args, token <= args_len ? token : args_len);
 
     if (0 != const_time_strcmp(auth_token, auth, token)) {
@@ -3362,38 +3431,32 @@ static int do_auth(ControlClient client, char* args) {
 }
 
 static const CommandDefRec vm_commands_preauth[] = {
-        {"name",
-         "query virtual device name",
-         "'avd name' will return the name of this virtual device\r\n",
-         NULL,
-         do_avd_name,
-         NULL},
+        {"name", "query virtual device name",
+         "'avd name' will return the name of this virtual device\r\n", nullptr,
+         do_avd_name, nullptr},
 
-        {NULL, NULL, NULL, NULL, NULL, NULL}};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 /* "preauth" commands are the set of commands that are legal before
  * authentication.  "avd name is special cased here because it is needed by
  * older versions of Android Studio */
 namespace {
 extern const CommandDefRec main_commands_preauth[] = {
-    HELP_COMMAND,
+        HELP_COMMAND,
 
-    HELP_VERBOSE_COMMAND,
+        HELP_VERBOSE_COMMAND,
 
-    PING_COMMAND,
+        PING_COMMAND,
 
-    AVD_COMMAND(vm_commands_preauth),
+        AVD_COMMAND(vm_commands_preauth),
 
-    {"auth",
-     "user authentication for the emulator console",
-     "use 'auth <auth_token>' to get extended console functionality\r\n",
-     NULL,
-     do_auth,
-     NULL},
+        {"auth", "user authentication for the emulator console",
+         "use 'auth <auth_token>' to get extended console functionality\r\n",
+         nullptr, do_auth, nullptr},
 
-    QUIT_COMMAND,
+        QUIT_COMMAND,
 
-    {NULL, NULL, NULL, NULL, NULL, NULL}};
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}};
 
 }  // namespace
 
@@ -3453,12 +3516,12 @@ void* test_control_client_create(Socket socket)
 
 void test_control_client_close(void* opaque)
 {
-    delete (ControlClientRec*)opaque;
+    delete static_cast<ControlClientRec*>(opaque);
 }
 
 void send_test_string(void* opaque, const char* the_string)
 {
-    ControlClient c = (ControlClient)opaque;
+    auto c = static_cast<ControlClient>(opaque);
     strcpy(c->buff, the_string);
     control_client_do_command(c);
 }

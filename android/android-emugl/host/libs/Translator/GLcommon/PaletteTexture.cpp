@@ -14,9 +14,7 @@
 * limitations under the License.
 */
 #include "GLcommon/PaletteTexture.h"
-#include <stdio.h>
-
-
+#include <cstdio>
 
 struct Color
 {
@@ -86,9 +84,10 @@ Color paletteColor(const unsigned char* pallete,unsigned int index,GLenum format
     case GL_PALETTE8_R5_G6_B5_OES:
     case GL_PALETTE4_R5_G6_B5_OES:
             s = *((short *)(pallete+index));
-            return Color((s >> 11)*255/31,((s >> 5) & 0x3f)*255/63 ,(s & 0x1f)*255/31,0);
+            return Color((s >> 11) * 255 / 31, ((s >> 5) & 0x3f) * 255 / 63,
+                         (s & 0x1f) * 255 / 31, 0);  // NOLINT
 
-        //RGBA
+            // RGBA
     case GL_PALETTE4_RGBA8_OES:
     case GL_PALETTE8_RGBA8_OES:
             return Color(pallete[index],pallete[index+1],pallete[index+2],pallete[index+3]);
@@ -113,10 +112,10 @@ unsigned char* uncompressTexture(GLenum internalformat,GLenum& formatOut,GLsizei
     getPaletteInfo(internalformat,indexSizeBits,colorSizeBytes,formatOut);
     if(!data)
     {
-        return NULL;
+        return nullptr;
     }
 
-    const unsigned char* palette = static_cast<const unsigned char *>(data);
+    const auto* palette = static_cast<const unsigned char*>(data);
 
     //the pallete positioned in the begininng of the data
     // so we jump over it to get to the colos indices in the palette
@@ -134,8 +133,9 @@ unsigned char* uncompressTexture(GLenum internalformat,GLenum& formatOut,GLsizei
 
     int colorSizeOut = (formatOut == GL_RGB? 3:4);
     int nPixels = width*height;
-    unsigned char* pixelsOut = new unsigned char[nPixels*colorSizeOut];
-    if(!pixelsOut) return NULL;
+    auto* pixelsOut = new unsigned char[nPixels * colorSizeOut];
+    if (!pixelsOut)
+        return nullptr;
 
     int leftBytes = ((palette + imageSize) /* the end of data pointer*/
                       - imageIndices);

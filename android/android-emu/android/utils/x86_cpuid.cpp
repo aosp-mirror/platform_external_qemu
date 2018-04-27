@@ -13,19 +13,20 @@
 */
 
 #include "android/utils/x86_cpuid.h"
-#include <string.h>
+#include <cstring>
 
 uint32_t android_get_x86_cpuid_function_max()
 {
     uint32_t function_max;
-    android_get_x86_cpuid(0, 0, &function_max, 0, 0, 0);
+    android_get_x86_cpuid(0, 0, &function_max, nullptr, nullptr, nullptr);
     return function_max;
 }
 
 uint32_t android_get_x86_cpuid_extended_function_max()
 {
     uint32_t function_max;
-    android_get_x86_cpuid(0x80000000, 0, &function_max, 0, 0, 0);
+    android_get_x86_cpuid(0x80000000, 0, &function_max, nullptr, nullptr,
+                          nullptr);
     return function_max;
 }
 
@@ -82,10 +83,11 @@ bool android_get_x86_cpuid_vendor_id_is_vmhost(const char* vendor_id) {
     };
 
     const int VMHostCPUIDCount = sizeof(VMHostCPUID)/sizeof(VMHostCPUID[0]);
-    for (int i = 0; i < VMHostCPUIDCount; i++) {
+    for (auto i : VMHostCPUID) {
         /* I don't think HAXM supports nesting */
-        if (memcmp(vendor_id, VMHostCPUID[i], strlen(VMHostCPUID[i])) == 0)
+        if (memcmp(vendor_id, i, strlen(i)) == 0) {
             return true;
+        }
     }
     return false;
 }
@@ -97,8 +99,9 @@ void android_get_x86_cpuid_vendor_id(char* buf, size_t buf_len)
     {
         return;
     }
-    android_get_x86_cpuid(0, 0,
-            0, (uint32_t*)buf, (uint32_t*)(buf+8), (uint32_t*)(buf+4));
+    android_get_x86_cpuid(0, 0, nullptr, reinterpret_cast<uint32_t*>(buf),
+                          reinterpret_cast<uint32_t*>(buf + 8),
+                          reinterpret_cast<uint32_t*>(buf + 4));
 }
 
 void android_get_x86_cpuid_vmhost_vendor_id(char* buf, size_t buf_len)
@@ -108,8 +111,10 @@ void android_get_x86_cpuid_vmhost_vendor_id(char* buf, size_t buf_len)
     {
         return;
     }
-    android_get_x86_cpuid(0x40000000, 0,
-            0, (uint32_t*)buf, (uint32_t*)(buf+4), (uint32_t*)(buf+8));
+    android_get_x86_cpuid(0x40000000, 0, nullptr,
+                          reinterpret_cast<uint32_t*>(buf),
+                          reinterpret_cast<uint32_t*>(buf + 4),
+                          reinterpret_cast<uint32_t*>(buf + 8));
 }
 
 CpuVendorIdType android_get_x86_cpuid_vendor_id_type(const char* vendor_id)
@@ -164,7 +169,8 @@ CpuVendorVmType android_get_x86_cpuid_vendor_vmhost_type(const char* vendor_id) 
 bool android_get_x86_cpuid_vmx_support()
 {
     uint32_t cpuid_function1_ecx;
-    android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
+    android_get_x86_cpuid(1, 0, nullptr, nullptr, &cpuid_function1_ecx,
+                          nullptr);
 
     const uint32_t CPUID_1_ECX_VMX = (1<<5); // Intel VMX support
     if ((cpuid_function1_ecx & CPUID_1_ECX_VMX) != 0) {
@@ -182,7 +188,7 @@ bool android_get_x86_cpuid_vmx_support()
 bool android_get_x86_cpuid_svm_support()
 {
     uint32_t cpuid_ecx;
-    android_get_x86_cpuid(0x80000001, 0, NULL, NULL, &cpuid_ecx, NULL);
+    android_get_x86_cpuid(0x80000001, 0, nullptr, nullptr, &cpuid_ecx, nullptr);
 
     const uint32_t CPUID_ECX_SVM = (1<<2); // AMD SVM support
     if ((cpuid_ecx & CPUID_ECX_SVM) != 0) {
@@ -200,7 +206,8 @@ bool android_get_x86_cpuid_svm_support()
 bool android_get_x86_cpuid_is_vcpu()
 {
     uint32_t cpuid_function1_ecx;
-    android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
+    android_get_x86_cpuid(1, 0, nullptr, nullptr, &cpuid_function1_ecx,
+                          nullptr);
 
     // Hypervisors are supposed to indicate their presence with a bit in the
     // output of running CPUID when eax=1: if the output ECX has bit 31 set
@@ -211,13 +218,15 @@ bool android_get_x86_cpuid_is_vcpu()
 
 bool android_get_x86_cpuid_nx_support()
 {
-    if (android_get_x86_cpuid_extended_function_max() < 0x80000001)
+    if (android_get_x86_cpuid_extended_function_max() < 0x80000001) {
         return false;
+    }
 
     uint32_t cpuid_80000001_edx;
-    android_get_x86_cpuid(0x80000001, 0, NULL, NULL, NULL, &cpuid_80000001_edx);
+    android_get_x86_cpuid(0x80000001, 0, nullptr, nullptr, nullptr,
+                          &cpuid_80000001_edx);
 
-    const uint32_t CPUID_80000001_EDX_NX = (1<<20); // NX support
+    const uint32_t CPUID_80000001_EDX_NX = (1 << 20);  // NX support
     return (cpuid_80000001_edx & CPUID_80000001_EDX_NX) != 0;
 }
 

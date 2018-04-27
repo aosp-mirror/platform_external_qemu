@@ -28,5 +28,5 @@ bool writeOneDelimited(const google::protobuf::MessageLite& message,
 bool readOneDelimited(google::protobuf::MessageLite* message,
                       google::protobuf::io::ZeroCopyInputStream* in);
 
-}  // namespace android
 }  // namespace protobuf
+}  // namespace android

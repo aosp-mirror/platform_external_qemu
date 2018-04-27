@@ -31,8 +31,10 @@ void PostWorker::post(ColorBuffer* cb) {
     // divide by device pixel ratio because windowing coordinates ignore
     // DPR,
     // but the framebuffer includes DPR
-    float fx = 2.f * (m_viewportWidth / dpr - windowWidth) / (float)m_viewportWidth;
-    float fy = 2.f * (m_viewportHeight / dpr - windowHeight) / (float)m_viewportHeight;
+    float fx = 2.f * (m_viewportWidth / dpr - windowWidth) /
+               static_cast<float>(m_viewportWidth);
+    float fy = 2.f * (m_viewportHeight / dpr - windowHeight) /
+               static_cast<float>(m_viewportHeight);
 
     // finally, compute translation values
     float dx = px * fx;

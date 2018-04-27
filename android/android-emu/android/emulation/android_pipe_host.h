@@ -15,8 +15,7 @@
 #include "android/utils/compiler.h"
 #include "android/utils/stream.h"
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <stdint.h>  // NOLINT
 
 ANDROID_BEGIN_HEADER
 
@@ -100,7 +99,9 @@ typedef struct AndroidPipeFuncs {
     // be loaded. In this case, the emulator will automatically force-close
     // it. Parameters are similar to init(), with the addition of |file|
     // which is the input stream.
-    void* (*load)(void* hwpipe, void* serviceOpaque, const char* args,
+    void* (*load)(void* hwpipe,
+                  void* serviceOpaque,
+                  const char* args,
                   Stream* file);
 
 } AndroidPipeFuncs;
@@ -108,9 +109,9 @@ typedef struct AndroidPipeFuncs {
 /* Register a new pipe service type. |serviceOpaque| is passed directly
  * to 'init() when a new pipe is connected to.
  */
-extern void  android_pipe_add_type(const char* serviceName,
-                                   void* serviceOpaque,
-                                   const AndroidPipeFuncs* pipeFuncs);
+extern void android_pipe_add_type(const char* serviceName,
+                                  void* serviceOpaque,
+                                  const AndroidPipeFuncs* pipeFuncs);
 
 // The following functions are only used during unit-testing.
 

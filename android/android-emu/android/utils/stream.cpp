@@ -13,10 +13,10 @@
 
 #include "android/base/files/Stream.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
-typedef android::base::Stream BaseStream;
+using BaseStream = android::base::Stream;
 
 static BaseStream* asBaseStream(Stream* stream) {
     return reinterpret_cast<BaseStream*>(stream);
@@ -77,9 +77,9 @@ void stream_put_string(Stream* stream, const char* str) {
 char* stream_get_string(Stream* stream) {
     std::string ret = asBaseStream(stream)->getString();
     if (ret.empty()) {
-        return NULL;
+        return nullptr;
     }
-    char* result = static_cast<char*>(::malloc(ret.size() + 1U));
+    auto* result = static_cast<char*>(::malloc(ret.size() + 1U));
     ::memcpy(result, ret.c_str(), ret.size() + 1U);
     return result;
 }

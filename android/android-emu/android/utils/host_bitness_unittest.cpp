@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 
-#include <stdio.h>
+#include <cstdio>
 
 TEST(HostBitness, android_getHostBitness) {
     int host_bitness = android_getHostBitness();

@@ -85,7 +85,8 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
         if (now > *mLastCheckTimeUs + mTimeoutMs * 1000) {
             const auto message = base::StringFormat(
                     "detected a hanging thread '%s'. No response for %d ms",
-                    mLooper->name(), (int)((now - *mLastCheckTimeUs) / 1000));
+                    mLooper->name(),
+                    static_cast<int>((now - *mLastCheckTimeUs) / 1000));
             l.unlock();
 
             derror("%s", message.c_str());

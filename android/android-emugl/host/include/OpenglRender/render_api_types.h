@@ -20,24 +20,24 @@
 #include "android/featurecontrol/FeatureControl.h"
 
 // Crash reporter
-typedef void (*emugl_crash_reporter_t)(const char* format, ...);
+using emugl_crash_reporter_t = void (*)(const char*, ...);
 
 // Feature control
-typedef bool (*emugl_feature_is_enabled_t)(android::featurecontrol::Feature feature);
+using emugl_feature_is_enabled_t = bool (*)(android::featurecontrol::Feature);
 
 // Goldfish sync device
-typedef uint64_t (*emugl_sync_create_timeline_t)();
-typedef int (*emugl_sync_create_fence_t)(uint64_t timeline, uint32_t pt);
-typedef void (*emugl_sync_timeline_inc_t)(uint64_t timeline, uint32_t howmuch);
-typedef void (*emugl_sync_destroy_timeline_t)(uint64_t timeline);
+using emugl_sync_create_timeline_t = uint64_t (*)();
+using emugl_sync_create_fence_t = int (*)(uint64_t, uint32_t);
+using emugl_sync_timeline_inc_t = void (*)(uint64_t, uint32_t);
+using emugl_sync_destroy_timeline_t = void (*)(uint64_t);
 
-typedef void (*emugl_sync_trigger_wait_t)(uint64_t glsync, uint64_t thread, uint64_t timeline);
-typedef void (*emugl_sync_register_trigger_wait_t)(emugl_sync_trigger_wait_t trigger_fn);
+using emugl_sync_trigger_wait_t = void (*)(uint64_t, uint64_t, uint64_t);
+using emugl_sync_register_trigger_wait_t = void (*)(emugl_sync_trigger_wait_t);
 
-typedef bool (*emugl_sync_device_exists_t)();
+using emugl_sync_device_exists_t = bool (*)();
 
 // OpenGL timestamped logger
-typedef void (*emugl_logger_t)(const char* fmt, ...);
+using emugl_logger_t = void (*)(const char*, ...);
 typedef struct {
     emugl_logger_t coarse;
     emugl_logger_t fine;
@@ -46,11 +46,11 @@ typedef struct {
 // Function type that describes functions for
 // reading from the Goldfish DMA region
 // at a specified offset.
-typedef void (*emugl_dma_add_buffer_t)(void*, uint64_t, uint64_t);
-typedef void (*emugl_dma_remove_buffer_t)(uint64_t);
-typedef void* (*emugl_dma_get_host_addr_t)(uint64_t);
-typedef void (*emugl_dma_invalidate_host_mappings_t)(void);
-typedef void (*emugl_dma_unlock_t)(uint64_t);
+using emugl_dma_add_buffer_t = void (*)(void*, uint64_t, uint64_t);
+using emugl_dma_remove_buffer_t = void (*)(uint64_t);
+using emugl_dma_get_host_addr_t = void* (*)(uint64_t);
+using emugl_dma_invalidate_host_mappings_t = void (*)();
+using emugl_dma_unlock_t = void (*)(uint64_t);
 
 typedef struct {
     emugl_dma_add_buffer_t add_buffer;

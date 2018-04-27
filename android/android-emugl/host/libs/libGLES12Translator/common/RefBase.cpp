@@ -18,13 +18,13 @@
 // #define LOG_NDEBUG 0
 
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <typeinfo>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <typeinfo>
 
 #include <utils/RefBase.h>
 
@@ -402,7 +402,7 @@ RefBase* RefBase::weakref_type::refBase() const
 
 void RefBase::weakref_type::incWeak(const void* id)
 {
-    weakref_impl* const impl = static_cast<weakref_impl*>(this);
+    auto* const impl = static_cast<weakref_impl*>(this);
     impl->addWeakRef(id);
     const int32_t c __unused = impl->mWeak++;
     ALOG_ASSERT(c >= 0, "incWeak called on %p after last weak ref", this);
@@ -411,7 +411,7 @@ void RefBase::weakref_type::incWeak(const void* id)
 
 void RefBase::weakref_type::decWeak(const void* id)
 {
-    weakref_impl* const impl = static_cast<weakref_impl*>(this);
+    auto* const impl = static_cast<weakref_impl*>(this);
     impl->removeWeakRef(id);
     const int32_t c = impl->mWeak--;
     ALOG_ASSERT(c >= 1, "decWeak called on %p too many times", this);
@@ -445,7 +445,7 @@ bool RefBase::weakref_type::attemptIncStrong(const void* id)
 {
     incWeak(id);
 
-    weakref_impl* const impl = static_cast<weakref_impl*>(this);
+    auto* const impl = static_cast<weakref_impl*>(this);
     int32_t curCount = impl->mStrong;
 
     ALOG_ASSERT(curCount >= 0,
@@ -547,7 +547,7 @@ bool RefBase::weakref_type::attemptIncStrong(const void* id)
 
 bool RefBase::weakref_type::attemptIncWeak(const void* id)
 {
-    weakref_impl* const impl = static_cast<weakref_impl*>(this);
+    auto* const impl = static_cast<weakref_impl*>(this);
 
     int32_t curCount = impl->mWeak;
     ALOG_ASSERT(curCount >= 0, "attemptIncWeak called on %p after underflow",
@@ -615,7 +615,7 @@ RefBase::~RefBase()
         }
     }
     // for debugging purposes, clear this.
-    const_cast<weakref_impl*&>(mRefs) = NULL;
+    const_cast<weakref_impl*&>(mRefs) = nullptr;
 }
 
 void RefBase::extendObjectLifetime(int32_t mode)
@@ -654,7 +654,7 @@ void RefBase::renameRefs(size_t /*n*/, const ReferenceRenamer& /*renamer*/) { }
 
 void RefBase::renameRefId(weakref_type* ref,
         const void* old_id, const void* new_id) {
-    weakref_impl* const impl = static_cast<weakref_impl*>(ref);
+    auto* const impl = static_cast<weakref_impl*>(ref);
     impl->renameStrongRefId(old_id, new_id);
     impl->renameWeakRefId(old_id, new_id);
 }

@@ -6,9 +6,8 @@
 #include <string>
 #include <vector>
 
-#include <inttypes.h>
-
 #include <GLES2/gl2.h>
+#include <cinttypes>
 
 namespace GLSnapshot {
 

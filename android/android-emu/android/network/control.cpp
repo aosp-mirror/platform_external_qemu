@@ -34,8 +34,8 @@ bool android_network_set_latency(const char* latency) {
     if (!android_network_latency_parse(latency, &min_delay_ms, &max_delay_ms)) {
         return false;
     }
-    android_net_min_latency = (int)min_delay_ms;
-    android_net_max_latency = (int)max_delay_ms;
+    android_net_min_latency = static_cast<int>(min_delay_ms);
+    android_net_max_latency = static_cast<int>(max_delay_ms);
 
     return true;
 }

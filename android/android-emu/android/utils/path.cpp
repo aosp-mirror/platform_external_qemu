@@ -22,12 +22,12 @@
 #include "android/base/files/ScopedFileHandle.h"
 #include "android/base/system/Win32UnicodeString.h"
 
-#include <memory>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
 #include <fcntl.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <memory>
 
 #ifdef _WIN32
 #include <process.h>
@@ -40,10 +40,10 @@
 #include <limits.h>
 #include <winbase.h>
 #else
-#include <unistd.h>
 #include <sys/stat.h>
-#include <time.h>
-#include <signal.h>
+#include <unistd.h>
+#include <csignal>
+#include <ctime>
 #endif
 
 #ifdef __APPLE__
@@ -86,22 +86,26 @@ path_parent( const char*  path, int  levels )
         const char*  base;
 
         /* trim any trailing path separator */
-        while (end > path && ispathsep(end[-1]))
+        while (end > path && ispathsep(end[-1])) {
             end--;
-
-        base = end;
-        while (base > path && !ispathsep(base[-1]))
-            base--;
-
-        if (base <= path) {
-            if (end == base+1 && base[0] == '.' && levels == 1)
-                return strdup("..");
-          /* we can't go that far */
-            return NULL;
         }
 
-        if (end == base+1 && base[0] == '.')
+        base = end;
+        while (base > path && !ispathsep(base[-1])) {
+            base--;
+        }
+
+        if (base <= path) {
+            if (end == base + 1 && base[0] == '.' && levels == 1) {
+                return strdup("..");
+            }
+            /* we can't go that far */
+            return nullptr;
+        }
+
+        if (end == base + 1 && base[0] == '.') {
             goto Next;
+        }
 
         if (end == base+2 && base[0] == '.' && base[1] == '.') {
             levels += 1;
@@ -114,7 +118,7 @@ path_parent( const char*  path, int  levels )
         end = base - 1;
     }
     result = reinterpret_cast<char*>(malloc( end-path+1 ));
-    if (result != NULL) {
+    if (result != nullptr) {
         memcpy( result, path, end-path );
         result[end-path] = 0;
     }
@@ -140,8 +144,9 @@ path_mkdir_recursive( char*  path, unsigned  len, int  mode )
     unsigned  len2;
 
     /* get rid of trailing separators */
-    while (len > 0 && ispathsep(path[len-1]))
+    while (len > 0 && ispathsep(path[len - 1])) {
         len -= 1;
+    }
 
     if (len == 0) {
         errno = ENOENT;
@@ -151,8 +156,9 @@ path_mkdir_recursive( char*  path, unsigned  len, int  mode )
     /* check that the parent exists, 'len2' is the length of
      * the parent part of the path */
     len2 = len-1;
-    while (len2 > 0 && !ispathsep(path[len2-1]))
+    while (len2 > 0 && !ispathsep(path[len2 - 1])) {
         len2 -= 1;
+    }
 
     if (len2 > 0) {
         old_c      = path[len2];
@@ -164,8 +170,9 @@ path_mkdir_recursive( char*  path, unsigned  len, int  mode )
         }
         path[len2] = old_c;
 
-        if (ret < 0)
+        if (ret < 0) {
             return ret;
+        }
     }
 
     /* at this point, we now the parent exists */
@@ -189,7 +196,7 @@ path_mkdir_if_needed( const char*  path, int  mode )
 
         if (ret < 0 && errno == ENOENT) {
             char      temp[MAX_PATH];
-            unsigned  len = (unsigned)strlen(path);
+            auto len = static_cast<unsigned>(strlen(path));
 
             if (len > sizeof(temp)-1) {
                 errno = EINVAL;
@@ -240,7 +247,7 @@ path_get_size( const char*  path, uint64_t  *psize )
     struct stat  st;
     int ret = HANDLE_EINTR(stat(path, &st));
     if (ret == 0) {
-        *psize = (uint64_t) st.st_size;
+        *psize = static_cast<uint64_t>(st.st_size);
     }
     return ret;
 #endif
@@ -489,42 +496,49 @@ path_load_file(const char *fn, size_t  *pSize)
     int    sz;
     int    fd;
 
-    if (pSize)
+    if (pSize) {
         *pSize = 0;
+    }
 
-    data   = NULL;
+    data = nullptr;
 
     fd = android_open(fn, O_BINARY | O_RDONLY);
-    if(fd < 0) return NULL;
+    if (fd < 0)
+        return nullptr;
 
     do {
         sz = lseek(fd, 0, SEEK_END);
         if(sz < 0) break;
 
-        if (pSize)
-            *pSize = (size_t) sz;
+        if (pSize) {
+            *pSize = static_cast<size_t>(sz);
+        }
 
-        if (lseek(fd, 0, SEEK_SET) != 0)
+        if (lseek(fd, 0, SEEK_SET) != 0) {
+            break;
+        }
+
+        data = static_cast<char*>(malloc(sz + 1));
+        if (data == nullptr)
             break;
 
-        data = (char*) malloc(sz + 1);
-        if(data == NULL) break;
-
-        if (read(fd, data, sz) != sz)
+        if (read(fd, data, sz) != sz) {
             break;
+        }
 
         close(fd);
         data[sz] = 0;
 
         return data;
-    } while (0);
+    } while (false);
 
     close(fd);
 
-    if(data != NULL)
+    if (data != nullptr) {
         free(data);
+    }
 
-    return NULL;
+    return nullptr;
 }
 
 #ifdef _WIN32
@@ -544,18 +558,18 @@ path_search_exec( const char* filename )
 #ifdef _WIN32
     if (strchr(filename, '/') != NULL || strchr(filename, '\\') != NULL) {
 #else
-    if (strchr(filename, '/') != NULL) {
+    if (strchr(filename, '/') != nullptr) {
 #endif
         if (path_exists(filename)) {
             return strdup(filename);
         } else {
-            return NULL;
+            return nullptr;
         }
     }
 
     /* If system path is empty, don't search */
-    if (sysPath == NULL || sysPath[0] == '\0') {
-        return NULL;
+    if (sysPath == nullptr || sysPath[0] == '\0') {
+        return nullptr;
     }
 
     /* Count the number of non-empty items in the system path
@@ -567,15 +581,16 @@ path_search_exec( const char* filename )
     while (*p) {
         const char* p2 = strchr(p, DIR_SEP);
         int   len;
-        if (p2 == NULL) {
+        if (p2 == nullptr) {
             len = strlen(p);
         } else {
             len = p2 - p;
         }
 
         do {
-            if (len <= 0)
+            if (len <= 0) {
                 break;
+            }
 
             snprintf(temp, sizeof(temp), "%.*s/%s", len, p, filename);
 
@@ -583,25 +598,28 @@ path_search_exec( const char* filename )
                 return strdup(temp);
             }
 
-        } while (0);
+        } while (false);
 
         p += len;
-        if (*p == DIR_SEP)
+        if (*p == DIR_SEP) {
             p++;
+        }
     }
 
     /* Nothing, really */
-    return NULL;
+    return nullptr;
 }
 
 char *
 path_escape_path(const char* src)
 {
-    if (!src) return NULL;
+    if (!src)
+        return nullptr;
 
     // Allocate for the maximum output size, including terminator
-    char *retStr = reinterpret_cast<char*>(malloc(2 * strlen(src) + 1));
-    if (retStr == 0) return 0;
+    auto* retStr = reinterpret_cast<char*>(malloc(2 * strlen(src) + 1));
+    if (retStr == nullptr)
+        return nullptr;
 
     char *dst = retStr;
     while (*src != '\0') {
@@ -677,8 +695,9 @@ APosixStatus path_copy_dir(const char* dst, const char* src) {
 APosixStatus path_delete_dir(const char* path) {
     auto dirScanner = android::base::makeCustomScopedPtr(dirScanner_new(path),
                                                          dirScanner_free);
-    if (!dirScanner)
+    if (!dirScanner) {
         return -EINVAL;
+    }
 
     int fullRes = 0;
     const char* name = dirScanner_nextFull(dirScanner.get());

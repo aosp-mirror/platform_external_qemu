@@ -21,12 +21,13 @@ static int utf8_next(const unsigned char** pp, const unsigned char* end) {
     if (p < end) {
         int c = *p++;
         if (c >= 128) {
-            if ((c & 0xe0) == 0xc0)
+            if ((c & 0xe0) == 0xc0) {
                 c &= 0x1f;
-            else if ((c & 0xf0) == 0xe0)
+            } else if ((c & 0xf0) == 0xe0) {
                 c &= 0x0f;
-            else
+            } else {
                 c &= 0x07;
+            }
 
             while (p < end && (p[0] & 0xc0) == 0x80) {
                 c = (c << 6) | (p[0] & 0x3f);
@@ -49,18 +50,21 @@ static const QAndroidLibuiAgent kLibuiAgent = {
             }
 
             SkinKeycodeBuffer keycodes;
-            skin_keycode_buffer_init(&keycodes, (SkinKeyCodeFlushFunc)sendFunc);
+            skin_keycode_buffer_init(
+                    &keycodes,
+                    reinterpret_cast<SkinKeyCodeFlushFunc>(sendFunc));
 
             const auto end = text + len;
             while (text < end) {
                 const int c = utf8_next(&text, end);
-                if (c <= 0)
+                if (c <= 0) {
                     break;
+                }
 
-                skin_charmap_reverse_map_unicode(charmap, (unsigned)c, 1,
-                                                 &keycodes);
-                skin_charmap_reverse_map_unicode(charmap, (unsigned)c, 0,
-                                                 &keycodes);
+                skin_charmap_reverse_map_unicode(
+                        charmap, static_cast<unsigned>(c), 1, &keycodes);
+                skin_charmap_reverse_map_unicode(
+                        charmap, static_cast<unsigned>(c), 0, &keycodes);
                 skin_keycode_buffer_flush(&keycodes);
             }
             return true;

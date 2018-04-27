@@ -33,7 +33,7 @@ struct PingPongState {
 
 void* pingPongFunction(void* param) {
     for (;;) {
-        PingPongState* s = static_cast<PingPongState*>(param);
+        auto* s = static_cast<PingPongState*>(param);
         std::string str;
         s->in.receive(&str);
         if (s->in.isStopped()) {
@@ -44,7 +44,7 @@ void* pingPongFunction(void* param) {
             return (void*)-1;
         }
         if (str == "quit") {
-            return 0;
+            return nullptr;
         }
     }
 }
@@ -83,8 +83,7 @@ TEST(MessageChannel, SingleThreadWithStdString) {
 
 TEST(MessageChannel, TwoThreadsPingPong) {
     PingPongState state;
-    auto thread = std::unique_ptr<TestThread>(
-            new TestThread(pingPongFunction, &state));
+    auto thread = std::make_unique<TestThread>(pingPongFunction, &state);
 
     std::string str;
     const size_t kCount = 100;
@@ -109,8 +108,7 @@ TEST(MessageChannel, TwoThreadsPingPong) {
 TEST(MessageChannel, Stop) {
     {
         PingPongState state;
-        auto thread = std::unique_ptr<TestThread>(
-                new TestThread(pingPongFunction, &state));
+        auto thread = std::make_unique<TestThread>(pingPongFunction, &state);
 
         // the thread has to be blocked on in.receive(), let's stop it
         state.in.stop();
@@ -122,8 +120,7 @@ TEST(MessageChannel, Stop) {
 
     {
         PingPongState state;
-        auto thread = std::unique_ptr<TestThread>(
-                new TestThread(pingPongFunction, &state));
+        auto thread = std::make_unique<TestThread>(pingPongFunction, &state);
 
         // fill in the receiving message channel
         while (state.out.size() < state.out.capacity()) {
@@ -181,18 +178,20 @@ TEST(MessageChannel, WaitForEmpty) {
     channel.waitForEmpty();
 
     // Fill the channel with data.
-    for (int i = 0; i < (int)channel.capacity(); ++i) {
+    for (int i = 0; i < static_cast<int>(channel.capacity()); ++i) {
         channel.send(i);
     }
 
-    TestThread thread([](void* param) -> void* {
-        auto channel = (Channel*)param;
-        int i;
-        while (channel->tryReceive(&i)) {
-            ;
-        }
-        return nullptr;
-    }, &channel);
+    TestThread thread(
+            [](void* param) -> void* {
+                auto channel = static_cast<Channel*>(param);
+                int i;
+                while (channel->tryReceive(&i)) {
+                    ;
+                }
+                return nullptr;
+            },
+            &channel);
 
     channel.waitForEmpty();
     // 2. Check that it unblocks as soon as the channel is emptied.

@@ -88,8 +88,7 @@ std::unique_ptr<MeshSceneObject> MeshSceneObject::load(Renderer& renderer,
             }
         }
 
-        for (size_t i = 0; i < mesh.indices.size(); i++) {
-            tinyobj::index_t index = mesh.indices[i];
+        for (auto index : mesh.indices) {
             VertexPositionUV vertex;
 
             if (index.vertex_index < 0 || index.vertex_index >= vertexCount) {
@@ -140,7 +139,7 @@ std::unique_ptr<MeshSceneObject> MeshSceneObject::load(Renderer& renderer,
         renderable.mesh = renderer.createMesh(vertices, indices);
         renderable.texture = texture;
 
-        result.get()->mRenderables.emplace_back(std::move(renderable));
+        result->mRenderables.emplace_back(renderable);
     }
 
     return result;

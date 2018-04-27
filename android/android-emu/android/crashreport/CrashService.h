@@ -30,7 +30,7 @@ namespace crashreport {
 // presented to the user upon
 // analyzing a crash report.
 enum class Suggestion {
-    // TODO: Add more suggestion types
+    // TODO(joshuaduong): Add more suggestion types
     // (Update OS, Get more RAM, etc)
     // as we find them
     UpdateGfxDrivers
@@ -124,7 +124,7 @@ public:
     bool collectSysInfo();
 
     // Utility function for reading a txt file into string
-    static std::string readFile(android::base::StringView path);
+    static std::string readFile(const android::base::StringView& path);
 
     // Return string containing collectSysInfo result
     std::string getSysInfo();
@@ -204,7 +204,7 @@ protected:
     static const char* const kMemInfoName;
 
 private:
-    CrashService();
+    CrashService() = delete;
 
     // Read the data files passed by the watched/dumped application
     void collectDataFiles();

@@ -51,8 +51,8 @@ public:
         AndroidPipe::Service::add(service);
     }
 
-    ~MockAdbHostAgent() {
-        if (mThread.get()) {
+    ~MockAdbHostAgent() override {
+        if (mThread) {
             mThread->wait(nullptr);
         }
         AndroidPipe::Service::resetAll();
@@ -61,9 +61,9 @@ public:
     // AdbHostAgent overrides.
     void setAgent(AdbGuestAgent* guestAgent) { mGuestAgent = guestAgent; }
 
-    virtual void startListening() override { mListening = true; }
-    virtual void stopListening() override { mListening = false; }
-    virtual void notifyServer() override { mServerNotificationCount++; }
+    void startListening() override { mListening = true; }
+    void stopListening() override { mListening = false; }
+    void notifyServer() override { mServerNotificationCount++; }
 
     // Accessors.
     virtual bool isListening() const { return mListening; }
@@ -75,12 +75,12 @@ public:
     // Create a socket pair and a thread that will push |data| into it
     // before trying to read a single byte from one end of the pair.
     // The other end is passed to a new active guest.
-    void createFakeConnection(StringView data) {
+    void createFakeConnection(const StringView& data) {
         CHECK(mListening);
-        if (mThread.get()) {
+        if (mThread) {
             mThread->wait(nullptr);
         }
-        mThread.reset(new ConnectorThread(data));
+        mThread = std::make_unique<ConnectorThread>(data);
         mListening = false;
         mGuestAgent->onHostConnection(mThread->releaseOutSocket());
         mThread->start();
@@ -92,7 +92,7 @@ private:
     // before exiting.
     class ConnectorThread : public android::base::Thread {
     public:
-        ConnectorThread(StringView data) : Thread(), mData(data) {
+        ConnectorThread(const StringView& data) : Thread(), mData(data) {
             int inSocket, outSocket;
             if (android::base::socketCreatePair(&inSocket, &outSocket) < 0) {
                 PLOG(ERROR) << "Could not create socket pair";
@@ -110,7 +110,7 @@ private:
 
         int releaseOutSocket() { return mOutSocket.release(); }
 
-        virtual intptr_t main() override {
+        intptr_t main() override {
             if (mData.size() > 0) {
                 if (!android::base::socketSendAll(
                             mInSocket.get(), mData.c_str(), mData.size())) {
@@ -191,7 +191,7 @@ TEST(AdbGuestPipe, DISABLED_createOneGuest) {
     EXPECT_EQ(5, guest->write("start", 5));
 
     char buffer[kMessage.size() + 1] = {};
-    const ssize_t expectedSize = static_cast<ssize_t>(kMessage.size());
+    const auto expectedSize = static_cast<ssize_t>(kMessage.size());
     EXPECT_EQ(expectedSize, blockingRead(guest, buffer, kMessage.size()));
     EXPECT_STREQ(kMessage.c_str(), buffer);
 
@@ -350,10 +350,10 @@ TEST(AdbGuestPipe, DISABLED_createMultipleGuestConnections) {
 
     // Create kCount guests that all connect at the same time.
     std::unique_ptr<TestGuest> guests[kCount];
-    for (int n = 0; n < kCount; ++n) {
-        guests[n].reset(TestGuest::create());
-        EXPECT_TRUE(guests[n].get());
-        EXPECT_EQ(0, guests[n]->connect("qemud:adb"));
+    for (auto& guest : guests) {
+        guest.reset(TestGuest::create());
+        EXPECT_TRUE(guest.get());
+        EXPECT_EQ(0, guest->connect("qemud:adb"));
         EXPECT_FALSE(adbHost.isListening());
     }
 

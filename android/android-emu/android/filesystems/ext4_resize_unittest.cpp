@@ -41,7 +41,7 @@ public:
         // We explicitly set the launcher dir, as we expect the resize
         // executable to be in a directory below us.
         mSys->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", mSys->getProgramDirectory());
-        mTempDir.reset(new TestTempDir("ext4resizetest"));
+        mTempDir = std::make_unique<TestTempDir>("ext4resizetest");
         ASSERT_TRUE(mTempDir->path());
         mFilePath = mTempDir->makeSubPath(kSubPath);
         ASSERT_EQ(0,

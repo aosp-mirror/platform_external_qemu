@@ -35,24 +35,30 @@ keymaster_error_t SymmetricKeyFactory::GenerateKey(const AuthorizationSet& key_d
                                                    KeymasterKeyBlob* key_blob,
                                                    AuthorizationSet* hw_enforced,
                                                    AuthorizationSet* sw_enforced) const {
-    if (!key_blob || !hw_enforced || !sw_enforced)
+    if (!key_blob || !hw_enforced || !sw_enforced) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     uint32_t key_size_bits;
     if (!key_description.GetTagValue(TAG_KEY_SIZE, &key_size_bits) ||
-        !key_size_supported(key_size_bits))
+        !key_size_supported(key_size_bits)) {
         return KM_ERROR_UNSUPPORTED_KEY_SIZE;
+    }
 
-    keymaster_error_t error = validate_algorithm_specific_new_key_params(key_description);
-    if (error != KM_ERROR_OK)
+    keymaster_error_t error =
+            validate_algorithm_specific_new_key_params(key_description);
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     size_t key_data_size = key_size_bits / 8;
     KeymasterKeyBlob key_material(key_data_size);
-    if (!key_material.key_material)
+    if (!key_material.key_material) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
-    error = context_->GenerateRandom(key_material.writable_data(), key_data_size);
+    error = context_->GenerateRandom(key_material.writable_data(),
+                                     key_data_size);
     if (error != KM_ERROR_OK) {
         LOG_E("Error generating %d bit symmetric key", key_size_bits);
         return error;
@@ -74,8 +80,9 @@ keymaster_error_t SymmetricKeyFactory::ImportKey(const AuthorizationSet& key_des
                                                  KeymasterKeyBlob* output_key_blob,
                                                  AuthorizationSet* hw_enforced,
                                                  AuthorizationSet* sw_enforced) const {
-    if (!output_key_blob || !hw_enforced || !sw_enforced)
+    if (!output_key_blob || !hw_enforced || !sw_enforced) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     AuthorizationSet authorizations(key_description);
 
@@ -89,14 +96,17 @@ keymaster_error_t SymmetricKeyFactory::ImportKey(const AuthorizationSet& key_des
     keymaster_algorithm_t myalgorithm;
     authorizations.GetTagValue(TAG_ALGORITHM, &myalgorithm);
     keymaster_error_t error = validate_algorithm_specific_new_key_params(key_description);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    if (!key_size_supported(key_size_bits))
+    if (!key_size_supported(key_size_bits)) {
         return KM_ERROR_UNSUPPORTED_KEY_SIZE;
+    }
 
-    if (input_key_material_format != KM_KEY_FORMAT_RAW)
+    if (input_key_material_format != KM_KEY_FORMAT_RAW) {
         return KM_ERROR_UNSUPPORTED_KEY_FORMAT;
+    }
 
     if (key_size_bits != input_key_material.key_material_size * 8) {
         LOG_E("Expected %d-bit key data but got %d bits", key_size_bits,
@@ -130,10 +140,12 @@ SymmetricKey::SymmetricKey(const KeymasterKeyBlob& key_material,
                            const AuthorizationSet& hw_enforced, const AuthorizationSet& sw_enforced,
                            keymaster_error_t* error)
     : Key(hw_enforced, sw_enforced, error) {
-    if (*error != KM_ERROR_OK)
+    if (*error != KM_ERROR_OK) {
         return;
+    }
 
-    uint8_t* tmp = dup_buffer(key_material.key_material, key_material.key_material_size);
+    uint8_t* tmp = dup_buffer(key_material.key_material,
+                              key_material.key_material_size);
     if (tmp) {
         key_data_.reset(tmp);
         key_data_size_ = key_material.key_material_size;
@@ -151,8 +163,9 @@ keymaster_error_t SymmetricKey::key_material(UniquePtr<uint8_t[]>* key_material,
                                              size_t* size) const {
     *size = key_data_size_;
     key_material->reset(new (std::nothrow) uint8_t[*size]);
-    if (!key_material->get())
+    if (!key_material->get()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     memcpy(key_material->get(), key_data_.get(), *size);
     return KM_ERROR_OK;
 }

@@ -15,7 +15,7 @@
 */
 #include "NativeSubWindow.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 static Bool WaitForMapNotify(Display *d, XEvent *e, char *arg) {
     if (e->type == MapNotify && e->xmap.window == (Window)arg) {
@@ -31,7 +31,7 @@ static Bool WaitForConfigureNotify(Display *d, XEvent *e, char *arg) {
     return 0;
 }
 
-static Display *s_display = NULL;
+static Display* s_display = nullptr;
 
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int x,
@@ -43,7 +43,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
    // The call to this function is protected by a lock
    // in FrameBuffer so it is safe to check and initialize s_display here
    if (!s_display) {
-       s_display = XOpenDisplay(NULL);
+       s_display = XOpenDisplay(nullptr);
    }
 
     XSetWindowAttributes wa;

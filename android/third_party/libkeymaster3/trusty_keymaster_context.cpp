@@ -73,8 +73,9 @@ TrustyKeymasterContext::GetSupportedAlgorithms(size_t* algorithms_count) const {
 OperationFactory* TrustyKeymasterContext::GetOperationFactory(keymaster_algorithm_t algorithm,
                                                               keymaster_purpose_t purpose) const {
     KeyFactory* key_factory = GetKeyFactory(algorithm);
-    if (!key_factory)
+    if (!key_factory) {
         return nullptr;
+    }
     return key_factory->GetOperationFactory(purpose);
 }
 
@@ -145,10 +146,11 @@ static keymaster_error_t SetAuthorizations(const AuthorizationSet& key_descripti
             break;
 
         case KM_TAG_USER_AUTH_TYPE:
-            if (entry.enumerated == HW_AUTH_PASSWORD)
+            if (entry.enumerated == HW_AUTH_PASSWORD) {
                 hw_enforced->push_back(entry);
-            else
+            } else {
                 sw_enforced->push_back(entry);
+            }
             break;
 
         case KM_TAG_ACTIVE_DATETIME:
@@ -176,20 +178,24 @@ static keymaster_error_t SetAuthorizations(const AuthorizationSet& key_descripti
     sw_enforced->push_back(TAG_OS_VERSION, os_version);
     sw_enforced->push_back(TAG_OS_PATCHLEVEL, os_patchlevel);
 
-    if (sw_enforced->is_valid() != AuthorizationSet::OK)
+    if (sw_enforced->is_valid() != AuthorizationSet::OK) {
         return TranslateAuthorizationSetError(sw_enforced->is_valid());
-    if (hw_enforced->is_valid() != AuthorizationSet::OK)
+    }
+    if (hw_enforced->is_valid() != AuthorizationSet::OK) {
         return TranslateAuthorizationSetError(hw_enforced->is_valid());
+    }
     return KM_ERROR_OK;
 }
 
 static keymaster_error_t BuildHiddenAuthorizations(const AuthorizationSet& input_set,
                                                    AuthorizationSet* hidden) {
     keymaster_blob_t entry;
-    if (input_set.GetTagValue(TAG_APPLICATION_ID, &entry))
+    if (input_set.GetTagValue(TAG_APPLICATION_ID, &entry)) {
         hidden->push_back(TAG_APPLICATION_ID, entry.data, entry.data_length);
-    if (input_set.GetTagValue(TAG_APPLICATION_DATA, &entry))
+    }
+    if (input_set.GetTagValue(TAG_APPLICATION_DATA, &entry)) {
         hidden->push_back(TAG_APPLICATION_DATA, entry.data, entry.data_length);
+    }
 
     keymaster_key_param_t root_of_trust;
     root_of_trust.tag = KM_TAG_ROOT_OF_TRUST;
@@ -209,33 +215,38 @@ keymaster_error_t TrustyKeymasterContext::CreateKeyBlob(const AuthorizationSet& 
     uint32_t os_version=80000;
     uint32_t os_patchlevel=201709;
     keymaster_error_t error = SetAuthorizations(key_description, origin, os_version, os_patchlevel, hw_enforced, sw_enforced);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     AuthorizationSet hidden;
     LOG_I("calling %s at %d", __func__, __LINE__);
     error = BuildHiddenAuthorizations(key_description, &hidden);
     LOG_I("calling %s at %d", __func__, __LINE__);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     KeymasterKeyBlob master_key;
     LOG_I("calling %s at %d", __func__, __LINE__);
     error = DeriveMasterKey(&master_key);
     LOG_I("calling %s at %d", __func__, __LINE__);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     Buffer nonce(OCB_NONCE_LENGTH);
     Buffer tag(OCB_TAG_LENGTH);
-    if (!nonce.peek_write() || !tag.peek_write())
+    if (!nonce.peek_write() || !tag.peek_write()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     LOG_I("calling %s at %d", __func__, __LINE__);
     error = GenerateRandom(nonce.peek_write(), OCB_NONCE_LENGTH);
     LOG_I("calling %s at %d", __func__, __LINE__);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
     nonce.advance_write(OCB_NONCE_LENGTH);
 
     KeymasterKeyBlob encrypted_key;
@@ -256,35 +267,42 @@ keymaster_error_t TrustyKeymasterContext::ParseKeyBlob(const KeymasterKeyBlob& b
     KeymasterKeyBlob encrypted_key_material;
     keymaster_error_t error = DeserializeAuthEncryptedBlob(blob, &encrypted_key_material,
                                                            hw_enforced, sw_enforced, &nonce, &tag);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    if (nonce.available_read() != OCB_NONCE_LENGTH || tag.available_read() != OCB_TAG_LENGTH)
+    if (nonce.available_read() != OCB_NONCE_LENGTH ||
+        tag.available_read() != OCB_TAG_LENGTH) {
         return KM_ERROR_INVALID_KEY_BLOB;
+    }
 
     KeymasterKeyBlob master_key;
     error = DeriveMasterKey(&master_key);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     AuthorizationSet hidden;
     error = BuildHiddenAuthorizations(additional_params, &hidden);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     return OcbDecryptKey(*hw_enforced, *sw_enforced, hidden, master_key, encrypted_key_material,
                          nonce, tag, key_material);
 }
 
 keymaster_error_t TrustyKeymasterContext::AddRngEntropy(const uint8_t* buf, size_t length) const {
-    if (trusty_rng_add_entropy(buf, length) != 0)
+    if (trusty_rng_add_entropy(buf, length) != 0) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
     return KM_ERROR_OK;
 }
 
 bool TrustyKeymasterContext::SeedRngIfNeeded() const {
-    if (ShouldReseedRng())
+    if (ShouldReseedRng()) {
         const_cast<TrustyKeymasterContext*>(this)->ReseedRng();
+    }
     return rng_initialized_;
 }
 
@@ -316,8 +334,9 @@ bool TrustyKeymasterContext::ReseedRng() {
 }
 
 keymaster_error_t TrustyKeymasterContext::GenerateRandom(uint8_t* buf, size_t length) const {
-    if (!SeedRngIfNeeded() || trusty_rng_secure_rand(buf, length) != 0)
+    if (!SeedRngIfNeeded() || trusty_rng_secure_rand(buf, length) != 0) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
     return KM_ERROR_OK;
 }
 
@@ -334,16 +353,18 @@ keymaster_error_t TrustyKeymasterContext::DeriveMasterKey(KeymasterKeyBlob* mast
 }
 
 bool TrustyKeymasterContext::InitializeAuthTokenKey() {
-    if (GenerateRandom(auth_token_key_, kAuthTokenKeySize) != KM_ERROR_OK)
+    if (GenerateRandom(auth_token_key_, kAuthTokenKeySize) != KM_ERROR_OK) {
         return false;
+    }
     auth_token_key_initialized_ = true;
     return auth_token_key_initialized_;
 }
 
 keymaster_error_t TrustyKeymasterContext::GetAuthTokenKey(keymaster_key_blob_t* key) const {
     if (!auth_token_key_initialized_ &&
-        !const_cast<TrustyKeymasterContext*>(this)->InitializeAuthTokenKey())
+        !const_cast<TrustyKeymasterContext*>(this)->InitializeAuthTokenKey()) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     key->key_material = auth_token_key_;
     key->key_material_size = kAuthTokenKeySize;

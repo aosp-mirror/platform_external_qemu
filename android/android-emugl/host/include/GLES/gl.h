@@ -14,26 +14,25 @@ extern "C" {
  * 2.0. For details, see http://oss.sgi.com/projects/FreeB/ .
  */
 
-typedef void             GLvoid;
-typedef char             GLchar;
-typedef unsigned int     GLenum;
-typedef unsigned char    GLboolean;
-typedef unsigned int     GLbitfield;
-typedef khronos_int8_t   GLbyte;
-typedef short            GLshort;
-typedef int              GLint;
-typedef int              GLsizei;
-typedef khronos_uint8_t  GLubyte;
-typedef unsigned short   GLushort;
-typedef unsigned int     GLuint;
-typedef khronos_float_t  GLfloat;
-typedef khronos_float_t  GLclampf;
-typedef khronos_int32_t  GLfixed;
-typedef khronos_int32_t  GLclampx;
+using GLvoid = void;
+using GLchar = char;
+using GLenum = unsigned int;
+using GLboolean = unsigned char;
+using GLbitfield = unsigned int;
+using GLbyte = khronos_int8_t;
+using GLshort = short;
+using GLint = int;
+using GLsizei = int;
+using GLubyte = khronos_uint8_t;
+using GLushort = unsigned short;
+using GLuint = unsigned int;
+using GLfloat = khronos_float_t;
+using GLclampf = khronos_float_t;
+using GLfixed = khronos_int32_t;
+using GLclampx = khronos_int32_t;
 
-typedef khronos_intptr_t GLintptr;
-typedef khronos_ssize_t  GLsizeiptr;
-
+using GLintptr = khronos_intptr_t;
+using GLsizeiptr = khronos_ssize_t;
 
 /*************************************************************/
 

@@ -29,8 +29,8 @@ public:
         PlayServices,
     };
 
-    explicit GooglePlayPage(QWidget* parent = 0);
-    ~GooglePlayPage();
+    explicit GooglePlayPage(QWidget* parent = nullptr);
+    ~GooglePlayPage() override;
 
     void initialize(android::emulation::AdbInterface* adb);
 
@@ -42,11 +42,11 @@ private:
     static QString getPlayPageDescription(PlayPages page);
     void bootCompletionPropertyDone(
             android::emulation::GooglePlayServices::Result result,
-            android::base::StringView outString);
+            const android::base::StringView& outString);
     void getPlayServicesVersion();
     void playVersionDone(android::emulation::GooglePlayServices::Result result,
                          PlayApps app,
-                         android::base::StringView outString);
+                         const android::base::StringView& outString);
 
 private slots:
     void on_goog_updateServicesButton_clicked();

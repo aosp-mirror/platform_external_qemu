@@ -38,7 +38,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <stdint.h>
+#include <cstdint>
 
 struct ColorBufferRef {
     ColorBufferPtr cb;
@@ -55,18 +55,18 @@ struct ColorBufferRef {
 };
 
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
-typedef std::unordered_set<HandleType> WindowSurfaceSet;
+using WindowSurfaceSet = std::unordered_set<HandleType>;
 typedef std::unordered_map<uint64_t, WindowSurfaceSet> ProcOwnedWindowSurfaces;
 
 typedef std::unordered_map<HandleType, RenderContextPtr> RenderContextMap;
-typedef std::unordered_set<HandleType> RenderContextSet;
+using RenderContextSet = std::unordered_set<HandleType>;
 typedef std::unordered_map<uint64_t, RenderContextSet> ProcOwnedRenderContexts;
 
 typedef std::unordered_map<HandleType, ColorBufferRef> ColorBufferMap;
-typedef std::unordered_multiset<HandleType> ColorBufferSet;
+using ColorBufferSet = std::unordered_multiset<HandleType>;
 typedef std::unordered_map<uint64_t, ColorBufferSet> ProcOwnedColorBuffers;
 
-typedef std::unordered_set<HandleType> EGLImageSet;
+using EGLImageSet = std::unordered_set<HandleType>;
 typedef std::unordered_map<uint64_t, EGLImageSet> ProcOwnedEGLImages;
 
 // A structure used to list the capabilities of the underlying EGL
@@ -176,8 +176,9 @@ public:
     // |p_share| is either EGL_NO_CONTEXT or the handle of a shared context.
     // |version| specifies the GLES version as a GLESApi enum.
     // Return a new handle value, which will be 0 in case of error.
-    HandleType createRenderContext(int p_config, HandleType p_share, 
-        GLESApi version = GLESApi_CM);
+    HandleType createRenderContext(int p_config,
+                                   HandleType p_share,
+                                   GLESApi version = GLESApi_CM);
 
     // Create a new WindowSurface instance from this display instance.
     // |p_config| is the index of one of the configs returned by getConfigs().
@@ -463,7 +464,7 @@ private:
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;
-    FBNativeWindowType m_nativeWindow = 0;
+    FBNativeWindowType m_nativeWindow = 0;  // NOLINT
     FrameBufferCaps m_caps = {};
     EGLDisplay m_eglDisplay = EGL_NO_DISPLAY;
     RenderContextMap m_contexts;

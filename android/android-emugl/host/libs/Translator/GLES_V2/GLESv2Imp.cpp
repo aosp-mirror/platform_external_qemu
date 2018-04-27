@@ -45,10 +45,11 @@
 
 #include "ANGLEShaderParser.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <numeric>
 #include <unordered_map>
+#include <utility>
 
 extern "C" {
 
@@ -58,7 +59,7 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void setMaxGlesVersion(GLESVersion version);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
-static GLEScontext* createGLESContext(void);
+static GLEScontext* createGLESContext();
 static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
@@ -76,31 +77,32 @@ static void internal_glDeleteSync(GLsync to_delete);
 
 /************************************** GLES EXTENSIONS *********************************************************/
 typedef std::unordered_map<std::string, __translatorMustCastToProperFunctionPointerType> ProcTableMap;
-ProcTableMap *s_glesExtensions = NULL;
+ProcTableMap* s_glesExtensions = nullptr;
 /****************************************************************************************************************/
 
-static EGLiface*  s_eglIface = NULL;
+static EGLiface* s_eglIface = nullptr;
 static GLESiface s_glesIface = {
-    .initGLESx = initGLESx,
-    .createGLESContext = createGLESxContext,
-    .initContext = initContext,
-    .setMaxGlesVersion = setMaxGlesVersion,
-    .deleteGLESContext = deleteGLESContext,
-    .flush = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
-    .finish = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
-    .getError = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
-    .setShareGroup = setShareGroup,
-    .getProcAddress = getProcAddress,
-    .fenceSync = (FUNCPTR_FENCE_SYNC)internal_glFenceSync,
-    .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)internal_glClientWaitSync,
-    .waitSync = (FUNCPTR_WAIT_SYNC)internal_glWaitSync,
-    .deleteSync = (FUNCPTR_DELETE_SYNC)internal_glDeleteSync,
-    .saveTexture = saveTexture,
-    .createTexture = createTexture,
-    .restoreTexture = restoreTexture,
-    .deleteRbo = deleteRenderbufferGlobal,
-    .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
-    .fillGLESUsages = fillGLESUsages,
+        .initGLESx = initGLESx,
+        .createGLESContext = createGLESxContext,
+        .initContext = initContext,
+        .setMaxGlesVersion = setMaxGlesVersion,
+        .deleteGLESContext = deleteGLESContext,
+        .flush = static_cast<FUNCPTR_NO_ARGS_RET_VOID>(glFlush),
+        .finish = static_cast<FUNCPTR_NO_ARGS_RET_VOID>(glFinish),
+        .getError = reinterpret_cast<FUNCPTR_NO_ARGS_RET_INT>(glGetError),
+        .setShareGroup = setShareGroup,
+        .getProcAddress = getProcAddress,
+        .fenceSync = static_cast<FUNCPTR_FENCE_SYNC>(internal_glFenceSync),
+        .clientWaitSync = static_cast<FUNCPTR_CLIENT_WAIT_SYNC>(
+                internal_glClientWaitSync),
+        .waitSync = static_cast<FUNCPTR_WAIT_SYNC>(internal_glWaitSync),
+        .deleteSync = static_cast<FUNCPTR_DELETE_SYNC>(internal_glDeleteSync),
+        .saveTexture = saveTexture,
+        .createTexture = createTexture,
+        .restoreTexture = restoreTexture,
+        .deleteRbo = deleteRenderbufferGlobal,
+        .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
+        .fillGLESUsages = fillGLESUsages,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -118,7 +120,7 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     GLESv2Context::initGlobal(s_eglIface);
 
     if (!ctx->shareGroup()) {
-        ctx->setShareGroup(grp);
+        ctx->setShareGroup(std::move(grp));
     }
     if (!ctx->isInitialized()) {
         ctx->init();
@@ -151,7 +153,7 @@ static void deleteGLESContext(GLEScontext* ctx) {
 
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
     if(ctx) {
-        ctx->setShareGroup(grp);
+        ctx->setShareGroup(std::move(grp));
     }
 }
 
@@ -160,24 +162,26 @@ GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GL
 
 
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
-    GET_CTX_RET(NULL)
+    GET_CTX_RET(nullptr)
     ctx->getGlobalLock();
     static bool proc_table_initialized = false;
     if (!proc_table_initialized) {
         proc_table_initialized = true;
-        if (!s_glesExtensions)
+        if (!s_glesExtensions) {
             s_glesExtensions = new ProcTableMap();
-        else
+        } else {
             s_glesExtensions->clear();
+        }
         (*s_glesExtensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glEGLImageTargetTexture2DOES;
         (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES;
         (*s_glesExtensions)["glVertexAttribPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribPointerWithDataSize;
         (*s_glesExtensions)["glVertexAttribIPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribIPointerWithDataSize;
     }
-    __translatorMustCastToProperFunctionPointerType ret=NULL;
-    ProcTableMap::iterator val = s_glesExtensions->find(procName);
-    if (val!=s_glesExtensions->end())
+    __translatorMustCastToProperFunctionPointerType ret = nullptr;
+    auto val = s_glesExtensions->find(procName);
+    if (val != s_glesExtensions->end()) {
         ret = val->second;
+    }
     ctx->releaseGlobalLock();
 
     return ret;
@@ -241,7 +245,7 @@ static void s_detachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
         auto shaderData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         if (!shaderData) return;
-        ShaderParser* shaderParser = (ShaderParser*)shaderData;
+        auto* shaderParser = (ShaderParser*)shaderData;
         shaderParser->detachProgram(program);
         if (shaderParser->getDeleteStatus()
                 && !shaderParser->hasAttachedPrograms()) {
@@ -251,8 +255,8 @@ static void s_detachShader(GLEScontext* ctx, GLuint program, GLuint shader) {
 }
 
 static TextureData* getTextureData(ObjectLocalName tex) {
-    GET_CTX_RET(NULL);
-    TextureData *texData = NULL;
+    GET_CTX_RET(nullptr);
+    TextureData* texData = nullptr;
     auto objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
     if(!objData){
@@ -266,7 +270,7 @@ static TextureData* getTextureData(ObjectLocalName tex) {
 }
 
 static TextureData* getTextureTargetData(GLenum target){
-    GET_CTX_RET(NULL);
+    GET_CTX_RET(nullptr);
     unsigned int tex = ctx->getBindedTexture(target);
     return getTextureData(ctx->getTextureLocalName(target,tex));
 }
@@ -297,7 +301,7 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
                      !(programData->getDataType()==PROGRAM_DATA) ,GL_INVALID_OPERATION);
 
         GLenum shaderType = ((ShaderParser*)shaderData)->getType();
-        ProgramData* pData = (ProgramData*)programData;
+        auto* pData = (ProgramData*)programData;
         SET_ERROR_IF((pData->getAttachedShader(shaderType)!=0), GL_INVALID_OPERATION);
         pData->attachShader(shader, (ShaderParser*)shaderData, shaderType);
         s_attachShader(ctx, program, shader, (ShaderParser*)shaderData);
@@ -317,7 +321,7 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
 
-        ProgramData* pData = (ProgramData*)objData;
+        auto* pData = (ProgramData*)objData;
 
         ctx->dispatcher().glBindAttribLocation(
             globalProgramName, index, pData->getTranslatedName(name).c_str());
@@ -338,9 +342,8 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
     }
     ctx->bindBuffer(target,buffer);
     if (buffer) {
-        GLESbuffer* vbo =
-                (GLESbuffer*)ctx->shareGroup()
-                        ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
+        auto* vbo = (GLESbuffer*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::VERTEXBUFFER, buffer);
         vbo->setBinded();
         const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
         ctx->dispatcher().glBindBuffer(target, globalBufferName);
@@ -376,7 +379,7 @@ static bool sHasAttachmentWithFormat(const GLESv2Context* ctx,
 
     for (auto attachment : attachments) {
         GLenum target;
-        GLuint name = fbData->getAttachment(attachment, &target, NULL);
+        GLuint name = fbData->getAttachment(attachment, &target, nullptr);
         if (target == GL_RENDERBUFFER) {
             auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::RENDERBUFFER, name);
@@ -405,10 +408,11 @@ static bool sHasAttachmentWithFormat(const GLESv2Context* ctx,
 
 
 static void sSetDesktopGLEnable(const GLESv2Context* ctx, bool enable, GLenum cap) {
-    if (enable)
+    if (enable) {
         ctx->dispatcher().glEnable(cap);
-    else
+    } else {
         ctx->dispatcher().glDisable(cap);
+    }
 }
 
 // Framebuffer format workarounds:
@@ -436,19 +440,22 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
         if (fbObj == nullptr) { continue; }
 
         // Enable GL_FRAMEBUFFER_SRGB when any framebuffer has SRGB color attachment.
-        if (sHasAttachmentWithFormat(ctx, fbObj,
-                    colorAttachments, {GL_SRGB8_ALPHA8}))
+        if (sHasAttachmentWithFormat(ctx, fbObj, colorAttachments,
+                                     {GL_SRGB8_ALPHA8})) {
             enableSRGB = true;
+        }
 
         // Enable GL_DEPTH_CLAMP when any fbo's
         // GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
         // GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
-        if (sHasAttachmentWithFormat(ctx, fbObj,
-                    depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}))
+        if (sHasAttachmentWithFormat(
+                    ctx, fbObj, depthAttachments,
+                    {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8})) {
             enableDepth32fClamp = true;
+        }
     }
 
-    // TODO: GLES3: snapshot those enable value as well?
+    // TODO(lfy): GLES3: snapshot those enable value as well?
     sSetDesktopGLEnable(ctx, enableSRGB, GL_FRAMEBUFFER_SRGB);
     sSetDesktopGLEnable(ctx, enableDepth32fClamp, GL_DEPTH_CLAMP);
 }
@@ -623,8 +630,9 @@ GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
     GLbitfield has_disallowed_bits = (mask & ~allowed_bits);
     SET_ERROR_IF(has_disallowed_bits, GL_INVALID_VALUE);
 
-    if (ctx->getMajorVersion() < 3)
+    if (ctx->getMajorVersion() < 3) {
         ctx->drawValidate();
+    }
 
     ctx->dispatcher().glClear(mask);
 }
@@ -662,7 +670,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(objData->getDataType()!= SHADER_DATA,GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData;
+        auto* sp = (ShaderParser*)objData;
         SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
         GLint compileStatus;
         if (sp->validShader()) {
@@ -672,7 +680,8 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             GLchar* infoLog;
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_INFO_LOG_LENGTH,&infoLogLength);
             infoLog = new GLchar[infoLogLength+1];
-            ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
+            ctx->dispatcher().glGetShaderInfoLog(
+                    globalShaderName, infoLogLength, nullptr, infoLog);
             if (infoLogLength == 0) {
                 infoLog[0] = 0;
             }
@@ -841,22 +850,23 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
 
-    GLenum format = baseFormatOfInternalFormat((GLint)internalformat);
-    GLenum type = accurateTypeOfInternalFormat((GLint)internalformat);
-    s_glInitTexImage2D(
-        target, level, internalformat, width, height, border, 0,
-        &format, &type, (GLint*)&internalformat);
+    GLenum format =
+            baseFormatOfInternalFormat(static_cast<GLint>(internalformat));
+    GLenum type =
+            accurateTypeOfInternalFormat(static_cast<GLint>(internalformat));
+    s_glInitTexImage2D(target, level, internalformat, width, height, border, 0,
+                       &format, &type,
+                       reinterpret_cast<GLint*>(&internalformat));
 
     TextureData* texData = getTextureTargetData(target);
     if (texData && isCoreProfile() &&
         isCoreProfileEmulatedFormat(texData->format)) {
         GLEScontext::prepareCoreProfileEmulatedTexture(
-            getTextureTargetData(target),
-            false, target, format, type,
-            (GLint*)&internalformat, &format);
-        ctx->copyTexImageWithEmulation(
-            texData, false, target, level, internalformat,
-            0, 0, x, y, width, height, border);
+                getTextureTargetData(target), false, target, format, type,
+                reinterpret_cast<GLint*>(&internalformat), &format);
+        ctx->copyTexImageWithEmulation(texData, false, target, level,
+                                       internalformat, 0, 0, x, y, width,
+                                       height, border);
     } else {
         ctx->dispatcher().glCopyTexImage2D(
             target, level, internalformat,
@@ -884,9 +894,8 @@ GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLi
 GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
     GET_CTX_RET(0);
     if(ctx->shareGroup().get()) {
-        ProgramData* programInfo =
-            new ProgramData(ctx->getMajorVersion(),
-                            ctx->getMinorVersion());
+        auto* programInfo =
+                new ProgramData(ctx->getMajorVersion(), ctx->getMinorVersion());
         const GLuint localProgramName =
                 ctx->shareGroup()->genName(ShaderProgramType::PROGRAM, 0, true);
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
@@ -961,7 +970,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
         }
         const GLuint localShaderName = ctx->shareGroup()->genName(
                                                 shaderProgramType, 0, true);
-        ShaderParser* sp = new ShaderParser(type, isCoreProfile());
+        auto* sp = new ShaderParser(type, isCoreProfile());
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
                                          localShaderName, ObjectDataPtr(sp));
         return localShaderName;
@@ -1008,7 +1017,8 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
     GLuint fbName = ctx->getFramebufferBinding(target);
     if (!fbName) return;
     auto fbObj = ctx->getFBOData(fbName);
-    if (fbObj == NULL) return;
+    if (fbObj == nullptr)
+        return;
     const GLenum kAttachments[] = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
@@ -1031,18 +1041,21 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
         GL_DEPTH_STENCIL_ATTACHMENT };
     const size_t sizen = sizeof(kAttachments)/sizeof(GLenum);
     GLenum textarget;
-    for (size_t i = 0; i < sizen; ++i ) {
-        GLuint name = fbObj->getAttachment(kAttachments[i], &textarget, NULL);
+    for (unsigned int kAttachment : kAttachments) {
+        GLuint name = fbObj->getAttachment(kAttachment, &textarget, nullptr);
         if (name != texture) continue;
         if (NamedObjectType::TEXTURE == bufferType &&
             GLESv2Validate::textureTargetEx(ctx, textarget)) {
-            glFramebufferTexture2D(GL_FRAMEBUFFER, kAttachments[i], textarget, 0, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, kAttachment, textarget, 0,
+                                   0);
         } else if (NamedObjectType::RENDERBUFFER == bufferType &&
                    GLESv2Validate::renderbufferTarget(textarget)) {
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, kAttachments[i], textarget, 0);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, kAttachment, textarget,
+                                      0);
         }
         // detach
-        fbObj->setAttachment(kAttachments[i], (GLenum)0, 0, nullptr, false);
+        fbObj->setAttachment(kAttachment, static_cast<GLenum>(0), 0, nullptr,
+                             false);
     }
 }
 
@@ -1067,18 +1080,26 @@ GL_APICALL void  GL_APIENTRY glDeleteTextures(GLsizei n, const GLuint* textures)
     if(ctx->shareGroup().get()) {
         for(int i=0; i < n; i++){
             if (textures[i]!=0) {
-                if (ctx->getBindedTexture(GL_TEXTURE_2D) == textures[i])
-                    ctx->setBindedTexture(GL_TEXTURE_2D,0);
-                if (ctx->getBindedTexture(GL_TEXTURE_CUBE_MAP) == textures[i])
-                    ctx->setBindedTexture(GL_TEXTURE_CUBE_MAP,0);
-                if (ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY) == textures[i])
-                    ctx->setBindedTexture(GL_TEXTURE_2D_ARRAY,0);
-                if (ctx->getBindedTexture(GL_TEXTURE_3D) == textures[i])
-                    ctx->setBindedTexture(GL_TEXTURE_3D,0);
-                if (ctx->getBindedTexture(GL_TEXTURE_2D_MULTISAMPLE) == textures[i])
-                    ctx->setBindedTexture(GL_TEXTURE_2D_MULTISAMPLE,0);
-                s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i], GL_DRAW_FRAMEBUFFER);
-                s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i], GL_READ_FRAMEBUFFER);
+                if (ctx->getBindedTexture(GL_TEXTURE_2D) == textures[i]) {
+                    ctx->setBindedTexture(GL_TEXTURE_2D, 0);
+                }
+                if (ctx->getBindedTexture(GL_TEXTURE_CUBE_MAP) == textures[i]) {
+                    ctx->setBindedTexture(GL_TEXTURE_CUBE_MAP, 0);
+                }
+                if (ctx->getBindedTexture(GL_TEXTURE_2D_ARRAY) == textures[i]) {
+                    ctx->setBindedTexture(GL_TEXTURE_2D_ARRAY, 0);
+                }
+                if (ctx->getBindedTexture(GL_TEXTURE_3D) == textures[i]) {
+                    ctx->setBindedTexture(GL_TEXTURE_3D, 0);
+                }
+                if (ctx->getBindedTexture(GL_TEXTURE_2D_MULTISAMPLE) ==
+                    textures[i]) {
+                    ctx->setBindedTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+                }
+                s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i],
+                                        GL_DRAW_FRAMEBUFFER);
+                s_detachFromFramebuffer(NamedObjectType::TEXTURE, textures[i],
+                                        GL_READ_FRAMEBUFFER);
                 ctx->shareGroup()->deleteName(NamedObjectType::TEXTURE,
                                               textures[i]);
             }
@@ -1097,7 +1118,7 @@ GL_APICALL void  GL_APIENTRY glDeleteProgram(GLuint program){
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(!(programData->getDataType()==PROGRAM_DATA),
                 GL_INVALID_OPERATION);
-        ProgramData* pData = (ProgramData*)programData;
+        auto* pData = (ProgramData*)programData;
         if (pData && pData->isInUse()) {
             pData->setDeleteStatus(true);
             return;
@@ -1120,7 +1141,7 @@ GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(!objData ,GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData;
+        auto* sp = (ShaderParser*)objData;
         SET_ERROR_IF(sp->getDeleteStatus(), GL_INVALID_VALUE);
         if (sp->hasAttachedPrograms()) {
             sp->setDeleteStatus(true);
@@ -1166,7 +1187,7 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
         SET_ERROR_IF(!objData,GL_INVALID_OPERATION);
         SET_ERROR_IF(!(objData->getDataType()==PROGRAM_DATA) ,GL_INVALID_OPERATION);
 
-        ProgramData* programData = (ProgramData*)objData;
+        auto* programData = (ProgramData*)objData;
         SET_ERROR_IF(!programData->isAttached(shader),GL_INVALID_OPERATION);
         programData->detachShader(shader);
 
@@ -1210,8 +1231,9 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
     if (isGles2Gles()) {
         return;
     }
-    if (ctx->getMajorVersion() < 3)
+    if (ctx->getMajorVersion() < 3) {
         ctx->drawValidate();
+    }
 
     //Enable texture generation for GL_POINTS and gl_PointSize shader variable
     //GLES2 assumes this is enabled by default, we need to set this state for GL
@@ -1347,12 +1369,12 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->getFBOData(fbName);
-    if (fbObj != NULL) {
+    if (fbObj != nullptr) {
         fbObj->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
     }
 
-    if (renderbuffer && obj.get() != NULL) {
-        RenderbufferData *rbData = (RenderbufferData *)obj.get();
+    if (renderbuffer && obj.get() != nullptr) {
+        auto* rbData = (RenderbufferData*)obj.get();
         if (rbData->eglImageGlobalTexObject) {
             //
             // This renderbuffer object is an eglImage target
@@ -1487,10 +1509,10 @@ static void s_getActiveAttribOrUniform(bool isUniform, GLEScontext* ctx,
     GLsizei hostLen = 0;
     GLint hostSize = 0;
     GLenum hostType = 0;
-    gl.glGetProgramiv(
-        globalProgramName,
-        isUniform ? GL_ACTIVE_UNIFORM_MAX_LENGTH : GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
-        (GLint*)&hostBufSize);
+    gl.glGetProgramiv(globalProgramName,
+                      isUniform ? GL_ACTIVE_UNIFORM_MAX_LENGTH
+                                : GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
+                      static_cast<GLint*>(&hostBufSize));
 
     std::string hostVarName(hostBufSize + 1, 0);
     char watch_val = 0xfe;
@@ -1520,7 +1542,8 @@ static void s_getActiveAttribOrUniform(bool isUniform, GLEScontext* ctx,
 
     // Don't overstate how many non-nullterminator characters
     // we are returning.
-    int strlenForGuest = std::min((int)(bufsize - 1), (int)guestVarName.size());
+    int strlenForGuest =
+            std::min((bufsize - 1), static_cast<int>(guestVarName.size()));
 
     if (length) *length = strlenForGuest;
     if (size) *size = hostSize;
@@ -1545,7 +1568,7 @@ GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLs
         SET_ERROR_IF(index >= numActiveAttributes, GL_INVALID_VALUE);
         SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
 
-        ProgramData* pData = (ProgramData*)objData;
+        auto* pData = (ProgramData*)objData;
         s_getActiveAttribOrUniform(false, ctx, pData,
                                    globalProgramName, index, bufsize, length,
                                    size, type, name);
@@ -1568,7 +1591,7 @@ GL_APICALL void  GL_APIENTRY glGetActiveUniform(GLuint program, GLuint index, GL
         SET_ERROR_IF(index >= numActiveUniforms, GL_INVALID_VALUE);
         SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
 
-        ProgramData* pData = (ProgramData*)objData;
+        auto* pData = (ProgramData*)objData;
         s_getActiveAttribOrUniform(true, ctx, pData,
                                    globalProgramName, index, bufsize, length,
                                    size, type, name);
@@ -1604,7 +1627,7 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
                  NamedObjectType::SHADER_OR_PROGRAM, program);
          RET_AND_SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                               GL_INVALID_OPERATION, -1);
-         ProgramData* pData = (ProgramData*)objData;
+         auto* pData = (ProgramData*)objData;
          RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,
                               GL_INVALID_OPERATION, -1);
          int ret = ctx->dispatcher().glGetAttribLocation(
@@ -1758,59 +1781,65 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
         break;
 
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = (T)getCompressedFormats(NULL);
+        *params = (T)getCompressedFormats(nullptr);
         break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
-            int nparams = getCompressedFormats(NULL);
-            if (nparams > 0) {
-                int* iparams = new int[nparams];
-                getCompressedFormats(iparams);
-                for (int i = 0; i < nparams; i++) {
-                    params[i] = (T)iparams[i];
-                }
-                delete [] iparams;
+        int nparams = getCompressedFormats(nullptr);
+        if (nparams > 0) {
+            auto* iparams = new int[nparams];
+            getCompressedFormats(iparams);
+            for (int i = 0; i < nparams; i++) {
+                params[i] = (T)iparams[i];
+            }
+            delete[] iparams;
             }
         }
         break;
     case GL_SHADER_COMPILER:
-        if(es2)
+        if (es2) {
             getter(pname, params);
-        else
+        } else {
             *params = 1;
+        }
         break;
 
     case GL_SHADER_BINARY_FORMATS:
-        if(es2)
-            getter(pname,params);
+        if (es2) {
+            getter(pname, params);
+        }
         break;
 
     case GL_NUM_SHADER_BINARY_FORMATS:
-        if(es2)
-            getter(pname,params);
-        else
+        if (es2) {
+            getter(pname, params);
+        } else {
             *params = 0;
+        }
         break;
 
     case GL_MAX_VERTEX_UNIFORM_VECTORS:
-        if(es2)
-            getter(pname,params);
-        else
+        if (es2) {
+            getter(pname, params);
+        } else {
             *params = 128;
+        }
         break;
 
     case GL_MAX_VARYING_VECTORS:
-        if(es2)
-            getter(pname,params);
-        else
+        if (es2) {
+            getter(pname, params);
+        } else {
             *params = 8;
+        }
         break;
 
     case GL_MAX_FRAGMENT_UNIFORM_VECTORS:
-        if(es2)
-            getter(pname,params);
-        else
+        if (es2) {
+            getter(pname, params);
+        } else {
             *params = 16;
+        }
         break;
 
     case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
@@ -1882,8 +1911,7 @@ static void s_glStateQueryTi_v(GLenum pname, GLuint index, T* params, GLStateQue
 
 GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
     GET_CTX_V2();
-#define TO_GLBOOL(params, x) \
-    *params = x ? GL_TRUE : GL_FALSE; \
+#define TO_GLBOOL(params, x) *(params) = (x) ? GL_TRUE : GL_FALSE;
 
     GLint i;
     switch (pname) {
@@ -2028,14 +2056,16 @@ GL_APICALL void  GL_APIENTRY glGetIntegerv(GLenum pname, GLint* params){
 
     if (!ctx) {
         ctx = createGLESContext();
-        if (ctx)
+        if (ctx) {
             destroyCtx = 1;
+        }
     }
     if (ctx->glGetIntegerv(pname,params))
     {
-        if (destroyCtx)
+        if (destroyCtx) {
             deleteGLESContext(ctx);
-            return;
+        }
+        return;
     }
 
     // For non-int64 glGetIntegerv, the following params have precision issues,
@@ -2070,7 +2100,8 @@ GL_APICALL void  GL_APIENTRY glGetIntegerv(GLenum pname, GLint* params){
 
     if (converted_float_params) {
         for (int i = 0; i < converted_float_params; i++) {
-            params[i] = (GLint)((GLint64)(floatVals[i] * 2147483647.0));
+            params[i] = static_cast<GLint>(
+                    static_cast<GLint64>(floatVals[i] * 2147483647.0));
         }
         return;
     }
@@ -2078,8 +2109,9 @@ GL_APICALL void  GL_APIENTRY glGetIntegerv(GLenum pname, GLint* params){
     bool es2 = ctx->getCaps()->GL_ARB_ES2_COMPATIBILITY;
     s_glStateQueryTv<GLint>(es2, pname, params, s_glGetIntegerv_wrapper);
 
-    if (destroyCtx)
+    if (destroyCtx) {
         deleteGLESContext(ctx);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint* params){
@@ -2091,9 +2123,9 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
     GLuint fbName = ctx->getFramebufferBinding(target);
     if (fbName) {
         auto fbObj = ctx->getFBOData(fbName);
-        if (fbObj != NULL) {
+        if (fbObj != nullptr) {
             GLenum target;
-            GLuint name = fbObj->getAttachment(attachment, &target, NULL);
+            GLuint name = fbObj->getAttachment(attachment, &target, nullptr);
             if (!name) {
                 SET_ERROR_IF(pname != GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE &&
                         pname != GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, GL_INVALID_ENUM);
@@ -2126,12 +2158,15 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
              attachment <= GL_COLOR_ATTACHMENT15), GL_INVALID_OPERATION);
         SET_ERROR_IF(pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, GL_INVALID_ENUM);
 
-        if (attachment == GL_BACK)
+        if (attachment == GL_BACK) {
             attachment = GL_COLOR_ATTACHMENT0;
-        if (attachment == GL_DEPTH)
+        }
+        if (attachment == GL_DEPTH) {
             attachment = GL_DEPTH_ATTACHMENT;
-        if (attachment == GL_STENCIL)
+        }
+        if (attachment == GL_STENCIL) {
             attachment = GL_STENCIL_ATTACHMENT;
+        }
     }
 
     ctx->dispatcher().glGetFramebufferAttachmentParameteriv(target,attachment,pname,params);
@@ -2154,7 +2189,7 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
     if (rb) {
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::RENDERBUFFER, rb);
-        RenderbufferData *rbData = (RenderbufferData *)objData;
+        auto* rbData = (RenderbufferData*)objData;
         if (rbData && rbData->eglImageGlobalTexObject) {
             GLenum texPname;
             switch(pname) {
@@ -2223,7 +2258,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
-            ProgramData* programData = (ProgramData*)objData;
+            auto* programData = (ProgramData*)objData;
             params[0] = programData->getDeleteStatus() ? GL_TRUE : GL_FALSE;
             }
             break;
@@ -2234,7 +2269,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
-            ProgramData* programData = (ProgramData*)objData;
+            auto* programData = (ProgramData*)objData;
             params[0] = programData->getLinkStatus();
             }
             break;
@@ -2246,12 +2281,13 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
-            ProgramData* programData = (ProgramData*)objData;
-            if (programData->getLinkStatus() == GL_TRUE)
+            auto* programData = (ProgramData*)objData;
+            if (programData->getLinkStatus() == GL_TRUE) {
                 ctx->dispatcher().glGetProgramiv(globalProgramName, pname,
                                                  params);
-            else
+            } else {
                 params[0] = GL_FALSE;
+            }
             }
             break;
         case GL_INFO_LOG_LENGTH:
@@ -2261,7 +2297,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
-            ProgramData* programData = (ProgramData*)objData;
+            auto* programData = (ProgramData*)objData;
             GLint logLength = strlen(programData->getInfoLog());
             params[0] = (logLength > 0) ? logLength + 1 : 0;
             }
@@ -2282,7 +2318,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramInfoLog(GLuint program, GLsizei bufsize
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(!objData ,GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* programData = (ProgramData*)objData;
+        auto* programData = (ProgramData*)objData;
 
         if (bufsize==0) {
             if (length) {
@@ -2317,7 +2353,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* p
         SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                      GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData;
+        auto* sp = (ShaderParser*)objData;
         switch(pname) {
         case GL_DELETE_STATUS:
             {
@@ -2353,7 +2389,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderInfoLog(GLuint shader, GLsizei bufsize, 
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
         SET_ERROR_IF(!objData ,GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType()!=SHADER_DATA,GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData;
+        auto* sp = (ShaderParser*)objData;
 
         if (bufsize==0) {
             if (length) {
@@ -2397,7 +2433,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderPrecisionFormat(GLenum shadertype, GLenu
     case GL_LOW_FLOAT:
     case GL_MEDIUM_FLOAT:
     case GL_HIGH_FLOAT:
-        if(ctx->dispatcher().glGetShaderPrecisionFormat != NULL) {
+        if (ctx->dispatcher().glGetShaderPrecisionFormat != nullptr) {
             ctx->dispatcher().glGetShaderPrecisionFormat(shadertype,precisiontype,range,precision);
         } else {
             range[0] = range[1] = 127;
@@ -2420,7 +2456,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderSource(GLuint shader, GLsizei bufsize, G
                      GL_INVALID_OPERATION);
         const std::string& src =
                 ((ShaderParser*)objData)->getOriginalSrc();
-        int srcLength = static_cast<int>(src.size());
+        auto srcLength = static_cast<int>(src.size());
 
         int returnLength = bufsize < srcLength ? bufsize - 1 : srcLength;
         if (returnLength) {
@@ -2428,25 +2464,26 @@ GL_APICALL void  GL_APIENTRY glGetShaderSource(GLuint shader, GLsizei bufsize, G
             source[returnLength] = '\0';
        }
 
-       if (length)
-          *length = returnLength;
+       if (length) {
+           *length = returnLength;
+       }
     }
 }
 
 
 GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
-    GET_CTX_V2_RET(NULL)
+    GET_CTX_V2_RET(nullptr)
     static const GLubyte SHADING[] = "OpenGL ES GLSL ES 1.0.17";
     static const GLubyte SHADING30[] = "OpenGL ES GLSL ES 3.00";
     static const GLubyte SHADING31[] = "OpenGL ES GLSL ES 3.10";
     static const GLubyte SHADING32[] = "OpenGL ES GLSL ES 3.20";
     switch(name) {
         case GL_VENDOR:
-            return (const GLubyte*)ctx->getVendorString();
+            return reinterpret_cast<const GLubyte*>(ctx->getVendorString());
         case GL_RENDERER:
-            return (const GLubyte*)ctx->getRendererString();
+            return reinterpret_cast<const GLubyte*>(ctx->getRendererString());
         case GL_VERSION:
-            return (const GLubyte*)ctx->getVersionString();
+            return reinterpret_cast<const GLubyte*>(ctx->getVersionString());
         case GL_SHADING_LANGUAGE_VERSION:
             switch (ctx->getMajorVersion()) {
             case 3:
@@ -2464,9 +2501,9 @@ GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
                 return SHADING;
              }
         case GL_EXTENSIONS:
-            return (const GLubyte*)ctx->getExtensionString();
+            return reinterpret_cast<const GLubyte*>(ctx->getExtensionString());
         default:
-            RET_AND_SET_ERROR_IF(true,GL_INVALID_ENUM,NULL);
+            RET_AND_SET_ERROR_IF(true, GL_INVALID_ENUM, nullptr);
     }
 }
 
@@ -2483,7 +2520,7 @@ GL_APICALL void  GL_APIENTRY glGetTexParameterfv(GLenum target, GLenum pname, GL
 
     TextureData* texData = getTextureTargetData(target);
     if (sShouldEmulateSwizzles(texData, target, pname)) {
-        *params = (GLfloat)(texData->getSwizzle(pname));
+        *params = static_cast<GLfloat>(texData->getSwizzle(pname));
     } else {
         ctx->dispatcher().glGetTexParameterfv(target,pname,params);
     }
@@ -2513,7 +2550,7 @@ GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfl
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* pData = (ProgramData *)objData;
+        auto* pData = (ProgramData*)objData;
         SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformfv(globalProgramName,
             pData->getHostUniformLocation(location), params);
@@ -2530,7 +2567,7 @@ GL_APICALL void  GL_APIENTRY glGetUniformiv(GLuint program, GLint location, GLin
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* pData = (ProgramData *)objData;
+        auto* pData = (ProgramData*)objData;
         SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformiv(globalProgramName,
             pData->getHostUniformLocation(location), params);
@@ -2546,7 +2583,7 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
-        ProgramData* pData = (ProgramData *)objData;
+        auto* pData = (ProgramData*)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
         return pData->getGuestUniformLocation(name);
     }
@@ -2556,7 +2593,7 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
 static bool s_invalidVertexAttribIndex(GLuint index) {
     GLint param=0;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &param);
-    return (param < 0 || index >= (GLuint)param);
+    return (param < 0 || index >= static_cast<GLuint>(param));
 }
 
 GL_APICALL void  GL_APIENTRY glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params){
@@ -2587,11 +2624,12 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribfv(GLuint index, GLenum pname, GLf
             if(index == 0)
             {
                 const float* att0 = ctx->getAtt0();
-                for(int i=0; i<4; i++)
+                for (int i = 0; i < 4; i++) {
                     params[i] = att0[i];
+                }
+            } else {
+                ctx->dispatcher().glGetVertexAttribfv(index, pname, params);
             }
-            else
-                ctx->dispatcher().glGetVertexAttribfv(index,pname,params);
             break;
         default:
             ctx->setGLerror(GL_INVALID_ENUM);
@@ -2629,11 +2667,12 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribiv(GLuint index, GLenum pname, GLi
             if(index == 0)
             {
                 const float* att0 = ctx->getAtt0();
-                for(int i=0; i<4; i++)
-                    params[i] = (GLint)att0[i];
+                for (int i = 0; i < 4; i++) {
+                    params[i] = static_cast<GLint>(att0[i]);
+                }
+            } else {
+                ctx->dispatcher().glGetVertexAttribiv(index, pname, params);
             }
-            else
-                ctx->dispatcher().glGetVertexAttribiv(index,pname,params);
             break;
         default:
             ctx->setGLerror(GL_INVALID_ENUM);
@@ -2687,10 +2726,12 @@ GL_APICALL GLboolean    GL_APIENTRY glIsBuffer(GLuint buffer){
 GL_APICALL GLboolean    GL_APIENTRY glIsFramebuffer(GLuint framebuffer){
     GET_CTX_RET(GL_FALSE)
     if(framebuffer){
-        if (!ctx->isFBO(framebuffer))
+        if (!ctx->isFBO(framebuffer)) {
             return GL_FALSE;
+        }
         auto fbObj = ctx->getFBOData(framebuffer);
-        if (!fbObj) return GL_FALSE;
+        if (!fbObj)
+            return GL_FALSE;
         return fbObj->hasBeenBoundAtLeastOnce() ? GL_TRUE : GL_FALSE;
     }
     return GL_FALSE;
@@ -2710,8 +2751,9 @@ GL_APICALL GLboolean    GL_APIENTRY glIsRenderbuffer(GLuint renderbuffer){
 
 GL_APICALL GLboolean    GL_APIENTRY glIsTexture(GLuint texture){
     GET_CTX_RET(GL_FALSE)
-    if (texture==0)
+    if (texture == 0) {
         return GL_FALSE;
+    }
     TextureData* tex = getTextureData(texture);
     return tex ? tex->wasBound : GL_FALSE;
 }
@@ -2767,7 +2809,7 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
         SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA, GL_INVALID_OPERATION);
 
-        ProgramData* programData = (ProgramData*)objData;
+        auto* programData = (ProgramData*)objData;
         GLint fragmentShader   = programData->getAttachedFragmentShader();
         GLint vertexShader =  programData->getAttachedVertexShader();
 
@@ -2780,8 +2822,8 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                         NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
                 auto vertObjData = ctx->shareGroup()->getObjectData(
                         NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
-                ShaderParser* fragSp = (ShaderParser*)fragObjData;
-                ShaderParser* vertSp = (ShaderParser*)vertObjData;
+                auto* fragSp = (ShaderParser*)fragObjData;
+                auto* vertSp = (ShaderParser*)vertObjData;
 
                 if(fragSp->getCompileStatus() && vertSp->getCompileStatus()) {
                     if (programData->validateLink(fragSp, vertSp)) {
@@ -2802,7 +2844,8 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
         GLchar* infoLog;
         ctx->dispatcher().glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
         infoLog = new GLchar[infoLogLength+1];
-        ctx->dispatcher().glGetProgramInfoLog(globalProgramName,infoLogLength,NULL,infoLog);
+        ctx->dispatcher().glGetProgramInfoLog(globalProgramName, infoLogLength,
+                                              nullptr, infoLog);
         programData->setInfoLog(infoLog);
     }
 }
@@ -2900,8 +2943,7 @@ GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
 
     GET_CTX();
 
-    if(ctx->dispatcher().glReleaseShaderCompiler != NULL)
-    {
+    if (ctx->dispatcher().glReleaseShaderCompiler != nullptr) {
         ctx->dispatcher().glReleaseShaderCompiler();
     }
 #endif // !__APPLE__
@@ -2934,7 +2976,7 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
     GLuint rb = ctx->getRenderbufferBinding();
     if (!rb) { *err = GL_INVALID_OPERATION; return GL_NONE; }
     auto objData = ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
-    RenderbufferData *rbData = (RenderbufferData *)objData;
+    auto* rbData = (RenderbufferData*)objData;
     if (!rbData) { *err = GL_INVALID_OPERATION; return GL_NONE; }
 
     rbData->internalformat = internalformat;
@@ -2978,7 +3020,8 @@ GL_APICALL void  GL_APIENTRY glScissor(GLint x, GLint y, GLsizei width, GLsizei 
 GL_APICALL void  GL_APIENTRY glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length){
     GET_CTX();
 
-    SET_ERROR_IF( (ctx->dispatcher().glShaderBinary == NULL), GL_INVALID_OPERATION);
+    SET_ERROR_IF((ctx->dispatcher().glShaderBinary == nullptr),
+                 GL_INVALID_OPERATION);
 
     if(ctx->shareGroup().get()){
         for(int i=0; i < n ; i++){
@@ -3002,14 +3045,14 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
         SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                      GL_INVALID_OPERATION);
-        ShaderParser* sp = (ShaderParser*)objData;
+        auto* sp = (ShaderParser*)objData;
         sp->setSrc(count, string, length);
         if (isGles2Gles()) {
             ctx->dispatcher().glShaderSource(globalShaderName, count, string,
                                          length);
         } else {
-            ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
-                                         NULL);
+            ctx->dispatcher().glShaderSource(globalShaderName, 1,
+                                             sp->parsedLines(), nullptr);
         }
     }
 }
@@ -3099,12 +3142,15 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
             &format, &type, &internalformat);
 
     if (!isCompressedFormat && ctx->getMajorVersion() < 3 && !isGles2Gles()) {
-        if (type==GL_HALF_FLOAT_OES)
+        if (type == GL_HALF_FLOAT_OES) {
             type = GL_HALF_FLOAT_NV;
-        if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
+        }
+        if (pixels == nullptr && type == GL_UNSIGNED_SHORT_5_5_5_1) {
             type = GL_UNSIGNED_BYTE;
-        if (type == GL_FLOAT)
+        }
+        if (type == GL_FLOAT) {
             internalformat = (format == GL_RGBA) ? GL_RGBA32F : GL_RGB32F;
+        }
     }
 
     *type_out = type;
@@ -3162,7 +3208,8 @@ GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloa
     }
 
     if (sShouldEmulateSwizzles(texData, target, pname)) {
-        sEmulateUserTextureSwizzle(texData, target, pname, (GLint)param);
+        sEmulateUserTextureSwizzle(texData, target, pname,
+                                   static_cast<GLint>(param));
     } else {
         ctx->dispatcher().glTexParameterf(target,pname,param);
     }
@@ -3180,7 +3227,8 @@ GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const
     }
 
     if (sShouldEmulateSwizzles(texData, target, pname)) {
-        sEmulateUserTextureSwizzle(texData, target, pname, (GLint)params[0]);
+        sEmulateUserTextureSwizzle(texData, target, pname,
+                                   static_cast<GLint>(params[0]));
     } else {
         ctx->dispatcher().glTexParameterfv(target,pname,params);
     }
@@ -3241,8 +3289,9 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
                    GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelOp(format,type),GL_INVALID_OPERATION);
     SET_ERROR_IF(!pixels && !ctx->isBindedBuffer(GL_PIXEL_UNPACK_BUFFER),GL_INVALID_OPERATION);
-    if (type==GL_HALF_FLOAT_OES)
+    if (type == GL_HALF_FLOAT_OES) {
         type = GL_HALF_FLOAT_NV;
+    }
 
     if (isCoreProfile() &&
         isCoreProfileEmulatedFormat(format)) {
@@ -3416,7 +3465,7 @@ static void s_unUseCurrentProgram() {
     auto objData = ctx->shareGroup()->getObjectData(
             NamedObjectType::SHADER_OR_PROGRAM, localCurrentProgram);
     SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-    ProgramData* programData = (ProgramData*)objData;
+    auto* programData = (ProgramData*)objData;
     programData->setInUse(false);
     if (programData->getDeleteStatus()) {
         s_detachShader(ctx, localCurrentProgram,
@@ -3442,7 +3491,7 @@ GL_APICALL void  GL_APIENTRY glUseProgram(GLuint program){
 
         s_unUseCurrentProgram();
 
-        ProgramData* programData = (ProgramData*)objData.get();
+        auto* programData = (ProgramData*)objData.get();
         if (programData) programData->setInUse(true);
 
         ctx->setUseProgram(program, objData);
@@ -3459,14 +3508,15 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* programData = (ProgramData*)objData;
+        auto* programData = (ProgramData*)objData;
         ctx->dispatcher().glValidateProgram(globalProgramName);
 
         GLsizei infoLogLength=0;
         GLchar* infoLog;
         ctx->dispatcher().glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
         infoLog = new GLchar[infoLogLength+1];
-        ctx->dispatcher().glGetProgramInfoLog(globalProgramName,infoLogLength,NULL,infoLog);
+        ctx->dispatcher().glGetProgramInfoLog(globalProgramName, infoLogLength,
+                                              nullptr, infoLog);
         programData->setInfoLog(infoLog);
     }
 }
@@ -3476,8 +3526,9 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib1f(GLuint index, GLfloat x){
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib1f(index,x);
     ctx->setAttribValue(index, 1, &x);
-    if(index == 0)
+    if (index == 0) {
         ctx->setAttribute0value(x, 0.0, 0.0, 1.0);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib1fv(GLuint index, const GLfloat* values){
@@ -3485,8 +3536,9 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib1fv(GLuint index, const GLfloat* valu
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib1fv(index,values);
     ctx->setAttribValue(index, 1, values);
-    if(index == 0)
+    if (index == 0) {
         ctx->setAttribute0value(values[0], 0.0, 0.0, 1.0);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y){
@@ -3495,8 +3547,9 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y
     ctx->dispatcher().glVertexAttrib2f(index,x,y);
     GLfloat values[] = {x, y};
     ctx->setAttribValue(index, 2, values);
-    if(index == 0)
+    if (index == 0) {
         ctx->setAttribute0value(x, y, 0.0, 1.0);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib2fv(GLuint index, const GLfloat* values){
@@ -3504,8 +3557,9 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib2fv(GLuint index, const GLfloat* valu
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib2fv(index,values);
     ctx->setAttribValue(index, 2, values);
-    if(index == 0)
+    if (index == 0) {
         ctx->setAttribute0value(values[0], values[1], 0.0, 1.0);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z){
@@ -3514,8 +3568,9 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y
     ctx->dispatcher().glVertexAttrib3f(index,x,y,z);
     GLfloat values[3] = {x, y, z};
     ctx->setAttribValue(index, 3, values);
-    if(index == 0)
+    if (index == 0) {
         ctx->setAttribute0value(x, y, z, 1.0);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib3fv(GLuint index, const GLfloat* values){
@@ -3523,8 +3578,9 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib3fv(GLuint index, const GLfloat* valu
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib3fv(index,values);
     ctx->setAttribValue(index, 3, values);
-    if(index == 0)
+    if (index == 0) {
         ctx->setAttribute0value(values[0], values[1], values[2], 1.0);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
@@ -3533,8 +3589,9 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y
     ctx->dispatcher().glVertexAttrib4f(index,x,y,z,w);
     GLfloat values[4] = {x, y, z, z};
     ctx->setAttribValue(index, 4, values);
-    if(index == 0)
+    if (index == 0) {
         ctx->setAttribute0value(x, y, z, w);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib4fv(GLuint index, const GLfloat* values){
@@ -3542,8 +3599,9 @@ GL_APICALL void  GL_APIENTRY glVertexAttrib4fv(GLuint index, const GLfloat* valu
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib4fv(index,values);
     ctx->setAttribValue(index, 4, values);
-    if(index == 0)
+    if (index == 0) {
         ctx->setAttribute0value(values[0], values[1], values[2], values[3]);
+    }
 }
 
 static void s_glPrepareVertexAttribPointer(GLESv2Context* ctx, GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize, bool isInt) {
@@ -3611,7 +3669,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
                                                    img->globalTexObj);
             ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexObj->getGlobalName());
             TextureData *texData = getTextureTargetData(target);
-            SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
+            SET_ERROR_IF(texData == nullptr, GL_INVALID_OPERATION);
             texData->width = img->width;
             texData->height = img->height;
             texData->border = img->border;
@@ -3650,7 +3708,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     SET_ERROR_IF(rb == 0,GL_INVALID_OPERATION);
     auto objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, rb);
-    RenderbufferData *rbData = (RenderbufferData *)objData;
+    auto* rbData = (RenderbufferData*)objData;
     SET_ERROR_IF(!rbData,GL_INVALID_OPERATION);
 
     //
@@ -3698,7 +3756,7 @@ GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
 GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
     if (ctx->setVertexArrayObject(array)) {
-        // TODO: This could be useful for a glIsVertexArray
+        // TODO(lfy): This could be useful for a glIsVertexArray
         // that doesn't use the host GPU, but currently, it doesn't
         // really work. VAOs need to be bound first if glIsVertexArray
         // is to return true, and for now let's just ask the GPU
@@ -3720,7 +3778,7 @@ GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * ar
 GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     GET_CTX_V2_RET(0);
     if (!array) return GL_FALSE;
-    // TODO: Figure out how to answer this completely in software.
+    // TODO(lfy): Figure out how to answer this completely in software.
     // Currently, state gets weird so we need to ask the GPU directly.
     return ctx->dispatcher().glIsVertexArray(ctx->getVAOGlobalName(array));
 }

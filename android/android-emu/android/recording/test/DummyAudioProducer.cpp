@@ -33,10 +33,11 @@ public:
                   std::function<void()> onFinishedCb)
         : mSampleRate(sampleRate), mNbSamples(nbSamples), mChannels(nChannels), mDurationSecs(durationSecs), mOnFinishedCb(std::move(onFinishedCb)) {
         mFormat.audioFormat = fmt;
-        mMicroSecondsPerFrame = (uint64_t)(((float)mNbSamples / mSampleRate) * 1000000);
+        mMicroSecondsPerFrame = static_cast<uint64_t>(
+                (static_cast<float>(mNbSamples) / mSampleRate) * 1000000);
     }
 
-    virtual ~DummyAudioProducer() {}
+    ~DummyAudioProducer() override = default;
 
     intptr_t main() final {
         assert(mCallback);
@@ -61,8 +62,8 @@ public:
                 auto ptr = reinterpret_cast<int16_t*>(&(frame.dataVec[0]));
                 auto ptrSize = frame.dataVec.size() / 2;
                 for (int j = 0; j < ptrSize / mChannels; ++j) {
-                    int v[2] = {(int)(sin(t) * 0x7fff),
-                                (int)(sin(t_stereo) * 0x7fff)};
+                    int v[2] = {static_cast<int>(sin(t) * 0x7fff),
+                                static_cast<int>(sin(t_stereo) * 0x7fff)};
                     for (int i = 0; i < mChannels; i++) {
                         ptr[j * mChannels + i] = v[i];
                     }
@@ -75,8 +76,8 @@ public:
                 auto ptr = reinterpret_cast<int8_t*>(&(frame.dataVec[0]));
                 auto ptrSize = frame.dataVec.size();
                 for (int j = 0; j < ptrSize / mChannels; ++j) {
-                    int v[2] = {(int)(sin(t) * 0xFF),
-                                (int)(sin(t_stereo) * 0xFF)};
+                    int v[2] = {static_cast<int>(sin(t) * 0xFF),
+                                static_cast<int>(sin(t_stereo) * 0xFF)};
                     for (int i = 0; i < mChannels; i++) {
                         ptr[j * mChannels + i] = v[i];
                     }
@@ -94,7 +95,7 @@ public:
         return 0;
     }
 
-    virtual void stop() override {
+    void stop() override {
         // Don't need to to anything here because main() stops after
         // mDurationSecs.
     }

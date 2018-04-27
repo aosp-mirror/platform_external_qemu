@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 TEST(AndroidNetworkConstants, ParseSpeed) {
     static const struct {

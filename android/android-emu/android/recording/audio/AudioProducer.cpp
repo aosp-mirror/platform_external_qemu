@@ -61,7 +61,7 @@ public:
         return engine->stop(this) == 0;
     }
 
-    virtual ~AudioCapturerImpl() {
+    ~AudioCapturerImpl() override {
         // Doesn't hurt to stop the audio capture engine even if we stopped it
         // already
         auto engine = AudioCaptureEngine::get();
@@ -71,9 +71,7 @@ public:
     }
 
     // Called from the qemu io thread with the audio data
-    virtual int onSample(void* buf, int size) override {
-        return mCallback(buf, size);
-    }
+    int onSample(void* buf, int size) override { return mCallback(buf, size); }
 
 private:
     Callback mCallback;
@@ -93,13 +91,15 @@ public:
         size_t szBytes = getAudioFormatSize(mFormat.audioFormat);
 
         mFrameSize = mNbSamples * mChannels * szBytes;
-        double bytesPerSecond = (double)mSampleRate * mChannels * szBytes;
-        double secPerFrame = ((double)mFrameSize) / bytesPerSecond;
-        mMicroSecondsPerFrame = (uint64_t)(secPerFrame * 1000000);
+        double bytesPerSecond =
+                static_cast<double>(mSampleRate) * mChannels * szBytes;
+        double secPerFrame = (static_cast<double>(mFrameSize)) / bytesPerSecond;
+        mMicroSecondsPerFrame = static_cast<uint64_t>(secPerFrame * 1000000);
 
         // 4 silent frames makes Chrome very happy
         mNbSilentFrames = 4;
-        mSilentFrames.reset(new Frame(mNbSilentFrames * mFrameSize, 0));
+        mSilentFrames =
+                std::make_unique<Frame>(mNbSilentFrames * mFrameSize, 0);
 
         // Prefill the free queue with empty packets
         for (int i = 0; i < kMaxFrames; ++i) {
@@ -109,18 +109,18 @@ public:
         }
     }
 
-    virtual ~AudioProducer() { stop(); }
+    ~AudioProducer() override { stop(); }
 
     intptr_t main() final {
         assert(mCallback);
 
         // Start the audio capturer to start receiving audio frames.
-        mAudioCapturer.reset(new AudioCapturerImpl(
+        mAudioCapturer = std::make_unique<AudioCapturerImpl>(
                 [this](const void* buf, int size) -> int {
                     return onSample(buf, size);
                 },
                 mSampleRate, getAudioFormatSize(mFormat.audioFormat) * CHAR_BIT,
-                mChannels));
+                mChannels);
         if (!mAudioCapturer->start()) {
             LOG(ERROR) << "Unable to start audio capturer";
             return -1;
@@ -167,7 +167,7 @@ public:
         return 0;
     }
 
-    virtual void stop() override {
+    void stop() override {
         if (!mAudioCapturer) {
             return;
         }

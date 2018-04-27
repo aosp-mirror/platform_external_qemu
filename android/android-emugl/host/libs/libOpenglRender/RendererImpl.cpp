@@ -15,15 +15,16 @@
 
 #include "RenderChannelImpl.h"
 
-#include "emugl/common/logging.h"
 #include "ErrorLog.h"
 #include "FenceSync.h"
 #include "FrameBuffer.h"
+#include "emugl/common/logging.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 
-#include <assert.h>
+#include <cassert>
 
 namespace emugl {
 
@@ -68,17 +69,11 @@ public:
         mCleanupThread.wait();
     }
 
-    void cleanup(uint64_t processId) {
-        mCleanupProcessIds.send(processId);
-    }
+    void cleanup(uint64_t processId) { mCleanupProcessIds.send(processId); }
 
-    void stop() {
-        mCleanupProcessIds.stop();
-    }
+    void stop() { mCleanupProcessIds.stop(); }
 
-    void waitForCleanup() {
-        mCleanupProcessIds.waitForEmpty();
-    }
+    void waitForCleanup() { mCleanupProcessIds.waitForEmpty(); }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ProcessCleanupThread);
@@ -88,7 +83,7 @@ private:
 };
 
 RendererImpl::RendererImpl() {
-    mCleanupThread.reset(new ProcessCleanupThread());
+    mCleanupThread = std::make_unique<ProcessCleanupThread>();
 }
 
 RendererImpl::~RendererImpl() {
@@ -96,7 +91,10 @@ RendererImpl::~RendererImpl() {
     mRenderWindow.reset();
 }
 
-bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl2egl) {
+bool RendererImpl::initialize(int width,
+                              int height,
+                              bool useSubWindow,
+                              bool egl2egl) {
     if (mRenderWindow) {
         return false;
     }
@@ -118,7 +116,7 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl
 
     // This render thread won't do anything but will only preload resources
     // for the real threads to start faster.
-    mLoaderRenderThread.reset(new RenderThread(nullptr));
+    mLoaderRenderThread = std::make_unique<RenderThread>(nullptr);
     mLoaderRenderThread->start();
 
     return true;
@@ -179,7 +177,7 @@ void RendererImpl::waitForProcessCleanup() {
     mCleanupThread->waitForCleanup();
     // Recreate it to make sure we've started from scratch and that we've
     // finished all in-progress cleanups as well.
-    mCleanupThread.reset(new ProcessCleanupThread());
+    mCleanupThread = std::make_unique<ProcessCleanupThread>();
 }
 
 RenderChannelPtr RendererImpl::createRenderChannel(
@@ -239,8 +237,9 @@ void RendererImpl::resumeAll() {
     repaintOpenGLDisplay();
 }
 
-void RendererImpl::save(android::base::Stream* stream,
-                        const android::snapshot::ITextureSaverPtr& textureSaver) {
+void RendererImpl::save(
+        android::base::Stream* stream,
+        const android::snapshot::ITextureSaverPtr& textureSaver) {
     stream->putByte(mStopped);
     if (mStopped) {
         return;
@@ -252,18 +251,20 @@ void RendererImpl::save(android::base::Stream* stream,
     FenceSync::onSave(stream);
 }
 
-bool RendererImpl::load(android::base::Stream* stream,
-                        const android::snapshot::ITextureLoaderPtr& textureLoader) {
+bool RendererImpl::load(
+        android::base::Stream* stream,
+        const android::snapshot::ITextureLoaderPtr& textureLoader) {
 #ifdef SNAPSHOT_PROFILE
-    android::base::System::Duration startTime
-            = android::base::System::get()->getUnixTimeUs();
+    android::base::System::Duration startTime =
+            android::base::System::get()->getUnixTimeUs();
 #endif
     cleanupRenderThreads();
     waitForProcessCleanup();
 #ifdef SNAPSHOT_PROFILE
     printf("RenderThread cleanup time: %lld ms\n",
-            (long long)(android::base::System::get()->getUnixTimeUs()
-            - startTime) / 1000);
+           (long long)(android::base::System::get()->getUnixTimeUs() -
+                       startTime) /
+                   1000);
 #endif
 
     mStopped = stream->getByte();
@@ -283,13 +284,19 @@ bool RendererImpl::load(android::base::Stream* stream,
 
 void RendererImpl::fillGLESUsages(android_studio::EmulatorGLESUsages* usages) {
     auto fb = FrameBuffer::getFB();
-    if (fb) fb->fillGLESUsages(usages);
+    if (fb) {
+        fb->fillGLESUsages(usages);
+    }
 }
 
-void RendererImpl::getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels) {
+void RendererImpl::getScreenshot(unsigned int nChannels,
+                                 unsigned int* width,
+                                 unsigned int* height,
+                                 std::vector<unsigned char>& pixels) {
     auto fb = FrameBuffer::getFB();
-    if (fb) fb->getScreenshot(nChannels, width, height, pixels);
+    if (fb) {
+        fb->getScreenshot(nChannels, width, height, pixels);
+    }
 }
 
 RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
@@ -319,8 +326,7 @@ bool RendererImpl::asyncReadbackSupported() {
     return mRenderWindow->asyncReadbackSupported();
 }
 
-RendererImpl::ReadPixelsCallback
-RendererImpl::getReadPixelsCallback() {
+RendererImpl::ReadPixelsCallback RendererImpl::getReadPixelsCallback() {
     assert(mRenderWindow);
     return mRenderWindow->getReadPixelsCallback();
 }
@@ -373,7 +379,9 @@ void RendererImpl::resetGuestPostedAFrame() {
     }
 }
 
-void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgbaData) {
+void RendererImpl::setScreenMask(int width,
+                                 int height,
+                                 const unsigned char* rgbaData) {
     assert(mRenderWindow);
     mRenderWindow->setScreenMask(width, height, rgbaData);
 }

@@ -16,8 +16,8 @@
 #include "android/qt/qt_path.h"
 #include "android/utils/debug.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
     // Add <progdir>/<lib>/qt/lib if it exists to the library search path.

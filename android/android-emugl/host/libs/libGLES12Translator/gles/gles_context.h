@@ -46,9 +46,9 @@ class GlesContext {
    public:
     virtual void EnsureBufferReady() = 0;
    protected:
-    virtual ~SurfaceControlCallback() {}
+       ~SurfaceControlCallback() override = default;
   };
-  typedef android::sp<SurfaceControlCallback> SurfaceControlCallbackPtr;
+  using SurfaceControlCallbackPtr = android::sp<SurfaceControlCallback>;
 
   GlesContext(int32_t id, GlesVersion ver, GlesContext* share,
               void* underlying_context, const UnderlyingApis* underlying_apis);
@@ -68,7 +68,9 @@ class GlesContext {
   bool AreChecksEnabled() const;
 
   void OnMakeCurrent();
-  void OnAttachSurface(SurfaceControlCallbackPtr sfc, int width, int height);
+  void OnAttachSurface(const SurfaceControlCallbackPtr& sfc,
+                       int width,
+                       int height);
   void EnsureSurfaceReadyToDraw() const;
   void Flush();
 
@@ -100,8 +102,8 @@ class GlesContext {
             GLenum type, const GLvoid* indices);
 
   // EGL image functions
-  bool BindImageToTexture(GLenum target, EglImagePtr image);
-  bool BindImageToRenderbuffer(EglImagePtr image);
+  bool BindImageToTexture(GLenum target, const EglImagePtr& image);
+  bool BindImageToRenderbuffer(const EglImagePtr& image);
 
   bool IsCompressedFormatEmulationNeeded(GLenum format) const;
 
@@ -191,7 +193,7 @@ class GlesContext {
 
   typedef MruCache<ShaderConfig, GLuint> ShaderCache;
   typedef MruCache<ShaderConfig, ProgramContext> ProgramCache;
-  typedef std::vector<GLenum> TextureFormats;
+  using TextureFormats = std::vector<GLenum>;
 
   template <typename T>
   bool GetValue(GLenum value, T* data) const;

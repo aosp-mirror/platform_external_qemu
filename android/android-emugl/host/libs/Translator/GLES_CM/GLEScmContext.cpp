@@ -15,12 +15,12 @@
 */
 
 #include "GLEScmContext.h"
-#include "GLEScmUtils.h"
-#include <GLcommon/GLutils.h>
-#include <GLcommon/GLconversion_macros.h>
-#include <string.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLcommon/GLconversion_macros.h>
+#include <GLcommon/GLutils.h>
+#include <cstring>
+#include "GLEScmUtils.h"
 
 #include "android/base/files/StreamSerializing.h"
 #include "emugl/common/crash_reporter.h"
@@ -66,10 +66,12 @@ void GLEScmContext::init() {
 void GLEScmContext::initGlobal(EGLiface* eglIface) {
     s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
     GLEScontext::initGlobal(eglIface);
-    buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
-                 (const char*)dispatcher().glGetString(GL_RENDERER),
-                 (const char*)dispatcher().glGetString(GL_VERSION),
-                 "OpenGL ES-CM 1.1");
+    buildStrings(
+            reinterpret_cast<const char*>(dispatcher().glGetString(GL_VENDOR)),
+            reinterpret_cast<const char*>(
+                    dispatcher().glGetString(GL_RENDERER)),
+            reinterpret_cast<const char*>(dispatcher().glGetString(GL_VERSION)),
+            "OpenGL ES-CM 1.1");
 }
 
 void GLEScmContext::initDefaultFBO(
@@ -88,23 +90,23 @@ void GLEScmContext::initDefaultFBO(
 GLEScmContext::GLEScmContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream)
     : GLEScontext(globalNameSpace, stream, nullptr) {
-    // TODO: snapshot support
+    // TODO(yahan): snapshot support
     if (stream) {
         assert(maj == m_glesMajorVersion);
         assert(min == m_glesMinorVersion);
         android::base::loadBuffer(stream, &mProjMatrices);
         android::base::loadBuffer(stream, &mModelviewMatrices);
-        android::base::loadBuffer(stream, &mTextureMatrices,
-                [](android::base::Stream* stream) {
+        android::base::loadBuffer(
+                stream, &mTextureMatrices, [](android::base::Stream* stream) {
                     MatrixStack matrices;
                     android::base::loadBuffer(stream, &matrices);
                     return std::move(matrices);
                 });
-        android::base::loadBuffer(stream, &mTexUnitEnvs,
-                [](android::base::Stream* stream) {
+        android::base::loadBuffer(
+                stream, &mTexUnitEnvs, [](android::base::Stream* stream) {
                     TexEnv texEnv;
-                    android::base::loadCollection(stream, &texEnv,
-                            [] (android::base::Stream* stream) {
+                    android::base::loadCollection(
+                            stream, &texEnv, [](android::base::Stream* stream) {
                                 GLenum idx = stream->getBe32();
                                 GLValTyped val;
                                 stream->read(&val, sizeof(GLValTyped));
@@ -112,11 +114,11 @@ GLEScmContext::GLEScmContext(int maj, int min,
                             });
                     return std::move(texEnv);
                 });
-        android::base::loadBuffer(stream, &mTexGens,
-                [](android::base::Stream* stream) {
+        android::base::loadBuffer(
+                stream, &mTexGens, [](android::base::Stream* stream) {
                     TexEnv texEnv;
-                    android::base::loadCollection(stream, &texEnv,
-                            [] (android::base::Stream* stream) {
+                    android::base::loadCollection(
+                            stream, &texEnv, [](android::base::Stream* stream) {
                                 GLenum idx = stream->getBe32();
                                 GLValTyped val;
                                 stream->read(&val, sizeof(GLValTyped));
@@ -205,13 +207,13 @@ void GLEScmContext::setBindedTexture(GLenum target, unsigned int texture, unsign
 GLEScmContext::~GLEScmContext(){
     if(m_texCoords){
         delete[] m_texCoords;
-        m_texCoords = NULL;
+        m_texCoords = nullptr;
     }
-    m_currVaoState[GL_TEXTURE_COORD_ARRAY] = NULL;
+    m_currVaoState[GL_TEXTURE_COORD_ARRAY] = nullptr;
 
     if (m_coreProfileEngine) {
         delete m_coreProfileEngine;
-        m_coreProfileEngine = NULL;
+        m_coreProfileEngine = nullptr;
     }
 }
 
@@ -403,7 +405,7 @@ void GLEScmContext::postLoadRestoreCtx() {
                 dispatcher.glLightf(GL_LIGHT0 + i, GL_QUADRATIC_ATTENUATION, mLights[i].attenuationQuadratic);
             }
 
-            dispatcher.glFogf(GL_FOG_MODE, (GLfloat)mFog.mode);
+            dispatcher.glFogf(GL_FOG_MODE, static_cast<GLfloat>(mFog.mode));
             dispatcher.glFogf(GL_FOG_DENSITY, mFog.density);
             dispatcher.glFogf(GL_FOG_START, mFog.start);
             dispatcher.glFogf(GL_FOG_END, mFog.end);
@@ -415,7 +417,8 @@ void GLEScmContext::postLoadRestoreCtx() {
 
 //setting client side arr
 void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
-    if( arr == NULL) return;
+    if (arr == nullptr)
+        return;
     switch(arrayType) {
         case GL_VERTEX_ARRAY:
             s_glDispatch.glVertexPointer(size,dataType,stride,arr);
@@ -484,13 +487,13 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 }
 
 void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw) {
-    const char  *pointsArr =  NULL;
+    const char* pointsArr = nullptr;
     int stride = 0;
     GLESpointer* p = m_currVaoState[GL_POINT_SIZE_ARRAY_OES];
 
     //choosing the right points sizes array source
     if(m_pointsIndex >= 0) { //point size array was converted
-        pointsArr = (const char*)(cArrs[m_pointsIndex].data);
+        pointsArr = static_cast<const char*>(cArrs[m_pointsIndex].data);
         stride = cArrs[m_pointsIndex].stride;
     } else {
         pointsArr = static_cast<const char*>(p->getData());
@@ -563,7 +566,7 @@ void  GLEScmContext::drawPointsData(GLESConversionArrays& cArrs,GLint first,GLsi
 }
 
 void  GLEScmContext::drawPointsArrs(GLESConversionArrays& arrs,GLint first,GLsizei count) {
-    drawPointsData(arrs,first,count,0,NULL,false);
+    drawPointsData(arrs, first, count, 0, nullptr, false);
 }
 
 void GLEScmContext::drawPointsElems(GLESConversionArrays& arrs,GLsizei count,GLenum type,const GLvoid* indices_in) {
@@ -693,7 +696,7 @@ const GLESpointer* GLEScmContext::getPointer(GLenum arrType) {
     {
         return GLEScontext::getPointer(type);
     }
-    return NULL;
+    return nullptr;
 }
 
 void GLEScmContext::initExtensionString() {
@@ -702,24 +705,30 @@ void GLEScmContext::initExtensionString() {
                       "GL_OES_point_sprite GL_OES_single_precision GL_OES_stencil_wrap GL_OES_texture_env_crossbar "
                       "GL_OES_texture_mirored_repeat GL_OES_EGL_image GL_OES_element_index_uint GL_OES_draw_texture "
                       "GL_OES_texture_cube_map GL_OES_draw_texture ";
-    if (s_glSupport.GL_OES_READ_FORMAT)
-        *s_glExtensions+="GL_OES_read_format ";
+    if (s_glSupport.GL_OES_READ_FORMAT) {
+        *s_glExtensions += "GL_OES_read_format ";
+    }
     if (s_glSupport.GL_EXT_FRAMEBUFFER_OBJECT) {
         *s_glExtensions+="GL_OES_framebuffer_object GL_OES_depth24 GL_OES_depth32 GL_OES_fbo_render_mipmap "
                          "GL_OES_rgb8_rgba8 GL_OES_stencil1 GL_OES_stencil4 GL_OES_stencil8 ";
     }
-    if (s_glSupport.GL_EXT_PACKED_DEPTH_STENCIL)
-        *s_glExtensions+="GL_OES_packed_depth_stencil ";
-    if (s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888)
-        *s_glExtensions+="GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 ";
+    if (s_glSupport.GL_EXT_PACKED_DEPTH_STENCIL) {
+        *s_glExtensions += "GL_OES_packed_depth_stencil ";
+    }
+    if (s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888) {
+        *s_glExtensions +=
+                "GL_EXT_texture_format_BGRA8888 "
+                "GL_APPLE_texture_format_BGRA8888 ";
+    }
     if (s_glSupport.GL_ARB_MATRIX_PALETTE && s_glSupport.GL_ARB_VERTEX_BLEND) {
         *s_glExtensions+="GL_OES_matrix_palette ";
         GLint max_palette_matrices=0;
         GLint max_vertex_units=0;
         dispatcher().glGetIntegerv(GL_MAX_PALETTE_MATRICES_OES,&max_palette_matrices);
         dispatcher().glGetIntegerv(GL_MAX_VERTEX_UNITS_OES,&max_vertex_units);
-        if (max_palette_matrices>=32 && max_vertex_units>=4)
-            *s_glExtensions+="GL_OES_extended_matrix_palette ";
+        if (max_palette_matrices >= 32 && max_vertex_units >= 4) {
+            *s_glExtensions += "GL_OES_extended_matrix_palette ";
+        }
     }
     *s_glExtensions+="GL_OES_compressed_ETC1_RGB8_texture ";
 }
@@ -760,7 +769,7 @@ bool GLEScmContext::glGetFloatv(GLenum pname, GLfloat *params)
 
     if(glGetIntegerv(pname, &iParam))
     {
-        *params = (GLfloat)iParam;
+        *params = static_cast<GLfloat>(iParam);
         return true;
     }
 
@@ -769,12 +778,13 @@ bool GLEScmContext::glGetFloatv(GLenum pname, GLfloat *params)
 
 bool GLEScmContext::glGetIntegerv(GLenum pname, GLint *params)
 {
-    if(GLEScontext::glGetIntegerv(pname, params))
+    if (GLEScontext::glGetIntegerv(pname, params)) {
         return true;
+    }
 
-    const GLESpointer* ptr = NULL;
+    const GLESpointer* ptr = nullptr;
 
-    switch(pname){
+    switch (pname) {
         case GL_VERTEX_ARRAY_BUFFER_BINDING:
         case GL_VERTEX_ARRAY_SIZE:
         case GL_VERTEX_ARRAY_STRIDE:
@@ -985,7 +995,7 @@ void GLEScmContext::frustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloa
 void GLEScmContext::texEnvf(GLenum target, GLenum pname, GLfloat param) {
     // Assume |target| is GL_TEXTURE_ENV
     if (pname == GL_TEXTURE_ENV_MODE) {
-        texEnvi(target, pname, (GLint)param);
+        texEnvi(target, pname, static_cast<GLint>(param));
     } else {
         mTexUnitEnvs[m_activeTexture][pname].val.floatVal[0] = param;
         mTexUnitEnvs[m_activeTexture][pname].type = GL_FLOAT;
@@ -1515,7 +1525,7 @@ void GLEScmContext::normal3f(GLfloat nx, GLfloat ny, GLfloat nz) {
 void GLEScmContext::fogf(GLenum pname, GLfloat param) {
     switch (pname) {
         case GL_FOG_MODE: {
-            GLenum mode = (GLenum)param;
+            auto mode = static_cast<GLenum>(param);
             switch (mode) {
                 case GL_EXP:
                 case GL_EXP2:
@@ -1523,8 +1533,10 @@ void GLEScmContext::fogf(GLenum pname, GLfloat param) {
                     mFog.mode = mode;
                     break;
                 default:
-                    fprintf(stderr, "GL_INVALID_ENUM: Unknown GL_FOG_MODE 0x%x "
-                                    "for glFog(f/x).\n", mode);
+                    fprintf(stderr,
+                            "GL_INVALID_ENUM: Unknown GL_FOG_MODE 0x%x "
+                            "for glFog(f/x).\n",
+                            mode);
                     setGLerror(GL_INVALID_ENUM);
                     break;
             }
@@ -1564,7 +1576,7 @@ void GLEScmContext::fogf(GLenum pname, GLfloat param) {
 void GLEScmContext::fogfv(GLenum pname, const GLfloat* params) {
     switch (pname) {
         case GL_FOG_MODE: {
-            GLenum mode = (GLenum)params[0];
+            auto mode = static_cast<GLenum>(params[0]);
             switch (mode) {
                 case GL_EXP:
                 case GL_EXP2:
@@ -1572,8 +1584,10 @@ void GLEScmContext::fogfv(GLenum pname, const GLfloat* params) {
                     mFog.mode = mode;
                     break;
                 default:
-                    fprintf(stderr, "GL_INVALID_ENUM: Unknown GL_FOG_MODE 0x%x "
-                                    "for glFog(f/x)v.\n", mode);
+                    fprintf(stderr,
+                            "GL_INVALID_ENUM: Unknown GL_FOG_MODE 0x%x "
+                            "for glFog(f/x)v.\n",
+                            mode);
                     setGLerror(GL_INVALID_ENUM);
                     break;
             }
@@ -1671,13 +1685,14 @@ void GLEScmContext::drawTexOES(float x, float y, float z, float width, float hei
 
         //disable clip planes
         gl.glGetIntegerv(GL_MAX_CLIP_PLANES,&numClipPlanes);
-        for (int i=0;i<numClipPlanes;++i)
-            gl.glDisable(GL_CLIP_PLANE0+i);
+        for (int i = 0; i < numClipPlanes; ++i) {
+            gl.glDisable(GL_CLIP_PLANE0 + i);
+        }
 
         int nTexPtrs = 0;
         for (int i=0;i<getMaxTexUnits();++i) {
             if (isTextureUnitEnabled(GL_TEXTURE0+i)) {
-                TextureData * texData = NULL;
+                TextureData* texData = nullptr;
                 unsigned int texname = getBindedTexture(GL_TEXTURE0+i,GL_TEXTURE_2D);
                 ObjectLocalName tex = getTextureLocalName(GL_TEXTURE_2D,texname);
                 gl.glClientActiveTexture(GL_TEXTURE0+i);
@@ -1686,17 +1701,29 @@ void GLEScmContext::drawTexOES(float x, float y, float z, float width, float hei
                 if (objData) {
                     texData = (TextureData*)objData;
                     //calculate texels
-                    texels[i][0] = (float)(texData->crop_rect[0])/(float)(texData->width);
-                    texels[i][1] = (float)(texData->crop_rect[1])/(float)(texData->height);
+                    texels[i][0] = static_cast<float>(texData->crop_rect[0]) /
+                                   static_cast<float>(texData->width);
+                    texels[i][1] = static_cast<float>(texData->crop_rect[1]) /
+                                   static_cast<float>(texData->height);
 
-                    texels[i][2] = (float)(texData->crop_rect[0])/(float)(texData->width);
-                    texels[i][3] = (float)(texData->crop_rect[3]+texData->crop_rect[1])/(float)(texData->height);
+                    texels[i][2] = static_cast<float>(texData->crop_rect[0]) /
+                                   static_cast<float>(texData->width);
+                    texels[i][3] = static_cast<float>(texData->crop_rect[3] +
+                                                      texData->crop_rect[1]) /
+                                   static_cast<float>(texData->height);
 
-                    texels[i][4] = (float)(texData->crop_rect[2]+texData->crop_rect[0])/(float)(texData->width);
-                    texels[i][5] = (float)(texData->crop_rect[3]+texData->crop_rect[1])/(float)(texData->height);
+                    texels[i][4] = static_cast<float>(texData->crop_rect[2] +
+                                                      texData->crop_rect[0]) /
+                                   static_cast<float>(texData->width);
+                    texels[i][5] = static_cast<float>(texData->crop_rect[3] +
+                                                      texData->crop_rect[1]) /
+                                   static_cast<float>(texData->height);
 
-                    texels[i][6] = (float)(texData->crop_rect[2]+texData->crop_rect[0])/(float)(texData->width);
-                    texels[i][7] = (float)(texData->crop_rect[1])/(float)(texData->height);
+                    texels[i][6] = static_cast<float>(texData->crop_rect[2] +
+                                                      texData->crop_rect[0]) /
+                                   static_cast<float>(texData->width);
+                    texels[i][7] = static_cast<float>(texData->crop_rect[1]) /
+                                   static_cast<float>(texData->height);
 
                     gl.glTexCoordPointer(2,GL_FLOAT,0,texels[i]);
                     nTexPtrs++;
@@ -1801,9 +1828,9 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
     GLuint prev_vbo;
     GLuint prev_ibo;
     dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
-            (GLint*)&prev_vbo);
+                               reinterpret_cast<GLint*>(&prev_vbo));
     dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
-            (GLint*)&prev_ibo);
+                               reinterpret_cast<GLint*>(&prev_ibo));
     dispatcher().glBindBuffer(GL_ARRAY_BUFFER, 0);
     dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -1832,7 +1859,7 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
     } else {
         GLESConversionArrays tmpArrs;
 
-        setupArraysPointers(tmpArrs,first,count,0,NULL,true);
+        setupArraysPointers(tmpArrs, first, count, 0, nullptr, true);
 
         if (mode == GL_POINTS && isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
             drawPointsArrs(tmpArrs,first,count);
@@ -1857,9 +1884,9 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
     GLuint prev_vbo;
     GLuint prev_ibo;
     dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
-            (GLint*)&prev_vbo);
+                               reinterpret_cast<GLint*>(&prev_vbo));
     dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
-            (GLint*)&prev_ibo);
+                               reinterpret_cast<GLint*>(&prev_ibo));
     dispatcher().glBindBuffer(GL_ARRAY_BUFFER, 0);
     dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 

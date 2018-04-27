@@ -16,7 +16,7 @@
 
 namespace android_skin {
 
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 namespace {
 
@@ -75,20 +75,19 @@ TEST(keycode,skin_keycode_rotate) {
     };
     const size_t kDataLen = ARRAYLEN(kData);
 
-    for (size_t nn = 0; nn < kDataLen; ++nn) {
-        SkinKeyCode code = kData[nn].code;
-        int rotation = kData[nn].rotation;
-        EXPECT_EQ(kData[nn].expected, skin_keycode_rotate(code, rotation))
+    for (auto nn : kData) {
+        SkinKeyCode code = nn.code;
+        int rotation = nn.rotation;
+        EXPECT_EQ(nn.expected, skin_keycode_rotate(code, rotation))
                 << "code=" << code << " rotation=" << rotation;
     }
 }
 
 TEST(keycode, skin_key_pair_to_string) {
-    for (size_t nn = 0; nn < kKeyPairDataLen; ++nn) {
-        uint32_t code = kKeyPairData[nn].code;
-        uint32_t mod = kKeyPairData[nn].mod;
-        EXPECT_STREQ(kKeyPairData[nn].string,
-                     skin_key_pair_to_string(code, mod))
+    for (auto nn : kKeyPairData) {
+        uint32_t code = nn.code;
+        uint32_t mod = nn.mod;
+        EXPECT_STREQ(nn.string, skin_key_pair_to_string(code, mod))
                 << "code=" << code << " mod=" << mod;
     }
 }

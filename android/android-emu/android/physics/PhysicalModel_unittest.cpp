@@ -25,7 +25,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <gtest/gtest.h>
 
-#include <assert.h>
+#include <cassert>
 
 using android::base::TestSystem;
 using android::base::System;
@@ -34,10 +34,10 @@ static Stream* asStream(android::base::Stream* stream) {
     return reinterpret_cast<Stream*>(stream);
 }
 
-#define EXPECT_VEC3_NEAR(e,a,d)\
-EXPECT_NEAR(e.x,a.x,d);\
-EXPECT_NEAR(e.y,a.y,d);\
-EXPECT_NEAR(e.z,a.z,d);
+#define EXPECT_VEC3_NEAR(e, a, d) \
+    EXPECT_NEAR((e).x, (a).x, d); \
+    EXPECT_NEAR((e).y, (a).y, d); \
+    EXPECT_NEAR((e).z, (a).z, d);
 
 TEST(PhysicalModel, CreateAndDestroy) {
     TestSystem mTestSystem("/", System::kProgramBitness);

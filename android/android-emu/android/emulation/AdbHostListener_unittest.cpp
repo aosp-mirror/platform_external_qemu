@@ -29,8 +29,8 @@
 #undef ERROR
 #endif
 
+#include <cerrno>
 #include <memory>
-#include <errno.h>
 
 namespace android {
 namespace emulation {
@@ -68,7 +68,7 @@ public:
         return mState;
     }
 
-    virtual intptr_t main() override {
+    intptr_t main() override {
         // Connect
         std::string prefix = StringFormat("[thread %d] ", mId);
         ScopedSocket fd(android::base::socketTcp4LoopbackClient(mPort));
@@ -77,7 +77,7 @@ public:
             return -1;
         }
         setState(kConnected);
-        uint32_t id = static_cast<uint32_t>(mId);
+        auto id = static_cast<uint32_t>(mId);
         ssize_t len = android::base::socketSend(fd.get(), &id, sizeof(id));
         if (len == 0) {
             LOG(INFO) << prefix << "End of stream";
@@ -108,7 +108,7 @@ struct TestAdbGuestAgent : public AdbGuestAgent {
     TestAdbGuestAgent(int id)
         : mId(id), mPrefix(StringFormat("[guest %d] ", id)) {}
 
-    virtual void onHostConnection(ScopedSocket&& socket) override {
+    void onHostConnection(ScopedSocket&& socket) override {
         mSocket = std::move(socket);
 
         uint32_t id = 0;
@@ -249,4 +249,4 @@ TEST(AdbHostListener, notifyServer) {
 }
 
 }  // namespace emulation
-}  // namespace base
+}  // namespace android

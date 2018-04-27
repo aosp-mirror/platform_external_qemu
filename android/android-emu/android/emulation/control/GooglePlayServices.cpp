@@ -86,8 +86,8 @@ bool GooglePlayServices::parseOutputForVersion(std::istream& stream,
 }
 
 void GooglePlayServices::getSystemProperty(
-        android::base::StringView sysProp,
-        ResultOutputCallback resultCallback) {
+        const android::base::StringView& sysProp,
+        const ResultOutputCallback& resultCallback) {
     if (!mAdb) {
         return;
     }
@@ -112,7 +112,8 @@ void GooglePlayServices::getSystemProperty(
             kAdbCommandTimeoutMs, true);
 }
 
-void GooglePlayServices::showPlayServicesPage(ResultCallback resultCallback) {
+void GooglePlayServices::showPlayServicesPage(
+        const ResultCallback& resultCallback) {
     if (!mAdb) {
         return;
     }
@@ -134,7 +135,7 @@ void GooglePlayServices::showPlayServicesPage(ResultCallback resultCallback) {
 }
 
 void GooglePlayServices::getPlayServicesVersion(
-        ResultOutputCallback resultCallback) {
+        const ResultOutputCallback& resultCallback) {
     if (!mAdb) {
         return;
     }

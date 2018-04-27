@@ -15,9 +15,9 @@
 #include "GLES2/gl2.h"
 
 #include <QResizeEvent>
-#include <QtGlobal>
 #include <QWindow>
-
+#include <QtGlobal>
+#include <memory>
 #include "emugl/common/OpenGLDispatchLoader.h"
 
 struct EGLState {
@@ -31,16 +31,13 @@ struct EGLState {
 // to allow generating mipmaps (GLES 2.0 doesn't support
 // mipmaps for NPOT textures)
 static int nearestPOT(int value) {
-    return pow(2, ceil(log(value)/log(2)));
+    return pow(2, ceil(log(value) / log(2)));
 }
 
-GLWidget::GLWidget(QWidget* parent) :
-        QWidget(parent),
-        mEGL(LazyLoadedEGLDispatch::get()),
-        mGLES2(LazyLoadedGLESv2Dispatch::get()),
-        mEGLState(nullptr),
-        mValid(false),
-        mEnableAA(false) {
+GLWidget::GLWidget(QWidget* parent)
+    : QWidget(parent),
+      mEGL(LazyLoadedEGLDispatch::get()),
+      mGLES2(LazyLoadedGLESv2Dispatch::get()) {
     setAutoFillBackground(false);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_PaintOnScreen, true);
@@ -128,20 +125,18 @@ bool GLWidget::ensureInit() {
 
     // Finally, create a window surface associated with this widget.
     mEGLState->surface = mEGL->eglCreateWindowSurface(
-            mEGLState->display, egl_config, (EGLNativeWindowType)(winId()),
-            nullptr);
+            mEGLState->display, egl_config,
+            reinterpret_cast<EGLNativeWindowType>(winId()), nullptr);
     if (mEGLState->surface == EGL_NO_SURFACE) {
         qWarning("Failed to create an EGL surface %d", mEGL->eglGetError());
         return false;
     }
 
-
     makeContextCurrent();
-    mCanvas.reset(new GLCanvas(
-        nearestPOT(realPixelsWidth()),
-        nearestPOT(realPixelsHeight()),
-        mGLES2));
-    mTextureDraw.reset(new TextureDraw(mGLES2));
+    mCanvas =
+            std::make_unique<GLCanvas>(nearestPOT(realPixelsWidth()),
+                                       nearestPOT(realPixelsHeight()), mGLES2);
+    mTextureDraw = std::make_unique<TextureDraw>(mGLES2);
     mValid = initGL();
 
     return mValid;
@@ -149,9 +144,9 @@ bool GLWidget::ensureInit() {
 
 bool GLWidget::makeContextCurrent() {
     if (mEGLState) {
-        return
-            mEGL->eglMakeCurrent(mEGLState->display, mEGLState->surface,
-                                 mEGLState->surface, mEGLState->context) == EGL_TRUE;
+        return mEGL->eglMakeCurrent(mEGLState->display, mEGLState->surface,
+                                    mEGLState->surface,
+                                    mEGLState->context) == EGL_TRUE;
 
     } else {
         return false;
@@ -177,8 +172,7 @@ void GLWidget::renderFrame() {
     if (mEnableAA) {
         mGLES2->glBindTexture(GL_TEXTURE_2D, mCanvas->texture());
         mGLES2->glGenerateMipmap(GL_TEXTURE_2D);
-        mTextureDraw->draw(mCanvas->texture(),
-                           realPixelsWidth(),
+        mTextureDraw->draw(mCanvas->texture(), realPixelsWidth(),
                            realPixelsHeight());
     }
 
@@ -201,8 +195,8 @@ void GLWidget::showEvent(QShowEvent*) {
     // isn't visible yet, so we need an additional check.
     if (isVisible() && !visibleRegion().isNull() && mFirstShow) {
         mFirstShow = false;
-        connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)),
-                this, SLOT(handleScreenChange(QScreen*)));
+        connect(window()->windowHandle(), SIGNAL(screenChanged(QScreen*)), this,
+                SLOT(handleScreenChange(QScreen*)));
         update();
     }
 }
@@ -217,10 +211,9 @@ void GLWidget::resizeEvent(QResizeEvent* e) {
         // framebuffer will not be created.
         makeContextCurrent();
         // Re-create the framebuffer with new size.
-        mCanvas.reset(new GLCanvas(
-            nearestPOT(e->size().width() * devicePixelRatioF()),
-            nearestPOT(e->size().height() * devicePixelRatioF()),
-            mGLES2));
+        mCanvas = std::make_unique<GLCanvas>(
+                nearestPOT(e->size().width() * devicePixelRatioF()),
+                nearestPOT(e->size().height() * devicePixelRatioF()), mGLES2);
         resizeGL(e->size().width() * devicePixelRatioF(),
                  e->size().height() * devicePixelRatioF());
         update();
@@ -240,7 +233,7 @@ void GLWidget::destroyContext() {
         mTextureDraw.reset(nullptr);
 
         // Make sure the context isn't active before destroying it.
-        mEGL->eglMakeCurrent(mEGLState->display, 0, 0, 0);
+        mEGL->eglMakeCurrent(mEGLState->display, nullptr, nullptr, nullptr);
 
         // Reset EGL state and set mEGLState to null, which will force
         // re-initialization when attempting to render the next frame.

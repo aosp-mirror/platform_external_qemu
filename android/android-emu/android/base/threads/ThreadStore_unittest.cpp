@@ -34,8 +34,9 @@ public:
 
     StaticCounter() {
         AutoLock lock(mLock);
-        if (mCreationCount < kMaxInstances)
+        if (mCreationCount < kMaxInstances) {
             mInstances[mCreationCount] = this;
+        }
         mCreationCount++;
     }
 
@@ -61,8 +62,9 @@ public:
     }
 
     static void freeAll() {
-        for (size_t n = 0; n < kMaxInstances; ++n)
-            delete mInstances[n];
+        for (auto& mInstance : mInstances) {
+            delete mInstance;
+        }
     }
 
 private:
@@ -72,7 +74,7 @@ private:
     static StaticCounter* mInstances[kMaxInstances];
 };
 
-typedef ThreadStore<StaticCounter> StaticCounterStore;
+using StaticCounterStore = ThreadStore<StaticCounter>;
 
 Lock StaticCounter::mLock;
 size_t StaticCounter::mCreationCount = 0;
@@ -83,7 +85,7 @@ class MyThread : public Thread {
 public:
     MyThread(StaticCounterStore* store) : mStore(store) {}
 
-    virtual intptr_t main() {
+    intptr_t main() override {
         mStore->set(new StaticCounter());
         return 0;
     }
@@ -96,7 +98,7 @@ private:
 // Just check that we can create a new ThreadStoreBase with an empty
 // destructor, and use it in the current thread.
 TEST(ThreadStoreBase, MainThreadWithoutDestructor) {
-    ThreadStoreBase store(NULL);
+    ThreadStoreBase store(nullptr);
     static int x = 42;
     store.set(&x);
     EXPECT_EQ(&x, store.get());
@@ -105,14 +107,14 @@ TEST(ThreadStoreBase, MainThreadWithoutDestructor) {
 // The following test checks that exiting a thread correctly deletes
 // any thread-local value stored in it.
 static void simplyDestroy(void* value) {
-    delete (StaticCounter*) value;
+    delete static_cast<StaticCounter*>(value);
 }
 
 static void* simpleThreadFunc(void* param) {
-    ThreadStoreBase* store = static_cast<ThreadStoreBase*>(param);
+    auto* store = static_cast<ThreadStoreBase*>(param);
     store->set(new StaticCounter());
     ThreadStoreBase::OnThreadExit();
-    return NULL;
+    return nullptr;
 }
 
 TEST(ThreadStoreBase, ThreadsWithDestructor) {
@@ -121,32 +123,32 @@ TEST(ThreadStoreBase, ThreadsWithDestructor) {
     TestThread* threads[kNumThreads];
     StaticCounter::reset();
 
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n] = new TestThread(&simpleThreadFunc, &store);
+    for (auto& thread : threads) {
+        thread = new TestThread(&simpleThreadFunc, &store);
     }
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n]->join();
+    for (auto& thread : threads) {
+        thread->join();
     }
 
     EXPECT_EQ(kNumThreads, StaticCounter::getCreationCount());
     EXPECT_EQ(kNumThreads, StaticCounter::getDestructionCount());
 
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        delete threads[n];
+    for (auto& thread : threads) {
+        delete thread;
     }
 }
 
 TEST(ThreadStoreBase, ThreadsWithoutDestructor) {
-    ThreadStoreBase store(NULL);
+    ThreadStoreBase store(nullptr);
     const size_t kNumThreads = 1000;
     TestThread* threads[kNumThreads];
     StaticCounter::reset();
 
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n] = new TestThread(&simpleThreadFunc, &store);
+    for (auto& thread : threads) {
+        thread = new TestThread(&simpleThreadFunc, &store);
     }
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n]->join();
+    for (auto& thread : threads) {
+        thread->join();
     }
 
     EXPECT_EQ(kNumThreads, StaticCounter::getCreationCount());
@@ -154,8 +156,8 @@ TEST(ThreadStoreBase, ThreadsWithoutDestructor) {
 
     StaticCounter::freeAll();
 
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        delete threads[n];
+    for (auto& thread : threads) {
+        delete thread;
     }
 }
 
@@ -163,14 +165,14 @@ TEST(ThreadStore, MainThread) {
     StaticCounter::reset();
 
     ThreadStore<StaticCounter> store;
-    EXPECT_EQ(NULL, store.get());
+    EXPECT_EQ(nullptr, store.get());
 
-    StaticCounter* counter = new StaticCounter();
+    auto* counter = new StaticCounter();
     store.set(counter);
     EXPECT_EQ(counter, store.get());
     EXPECT_EQ(0U, StaticCounter::getDestructionCount());
 
-    store.set(NULL);
+    store.set(nullptr);
     EXPECT_EQ(1U, StaticCounter::getDestructionCount());
 }
 
@@ -180,20 +182,20 @@ TEST(ThreadStore, Threads) {
     MyThread* threads[kNumThreads];
     StaticCounter::reset();
 
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n] = new MyThread(&store);
-        threads[n]->start();
+    for (auto& thread : threads) {
+        thread = new MyThread(&store);
+        thread->start();
     }
 
     for (size_t n = 0; n < kNumThreads; ++n) {
-        EXPECT_TRUE(threads[n]->wait(NULL)) << "Thread " << n;
+        EXPECT_TRUE(threads[n]->wait(nullptr)) << "Thread " << n;
     }
 
     EXPECT_EQ(kNumThreads, StaticCounter::getCreationCount());
     EXPECT_EQ(kNumThreads, StaticCounter::getDestructionCount());
 
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        delete threads[n];
+    for (auto& thread : threads) {
+        delete thread;
     }
 }
 

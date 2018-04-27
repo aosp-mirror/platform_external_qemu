@@ -17,7 +17,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace android {
 namespace base {

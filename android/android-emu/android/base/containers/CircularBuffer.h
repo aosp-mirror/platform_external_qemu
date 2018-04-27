@@ -137,5 +137,5 @@ private:
     int mBackIdx;
 };
 
-}
-}
+}  // namespace base
+}  // namespace android

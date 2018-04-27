@@ -25,8 +25,7 @@ RenderbufferData::RenderbufferData(ObjectLocalName name)
     height_(0) {
 }
 
-RenderbufferData::~RenderbufferData() {
-}
+RenderbufferData::~RenderbufferData() = default;
 
 void RenderbufferData::AttachFramebuffer(GLuint name, GLenum target) {
   attach_fbo_ = name;
@@ -39,19 +38,19 @@ void RenderbufferData::DetachFramebuffer() {
 }
 
 GLuint RenderbufferData::GetWidth() const {
-  return image_ != NULL ? image_->width : width_;
+    return image_ != nullptr ? image_->width : width_;
 }
 
 GLuint RenderbufferData::GetHeight() const {
-  return image_ != NULL ? image_->height : height_;
+    return image_ != nullptr ? image_->height : height_;
 }
 
 GLenum RenderbufferData::GetFormat() const {
-  return image_ != NULL ? image_->format : format_;
+    return image_ != nullptr ? image_->format : format_;
 }
 
 GLint RenderbufferData::GetEglImageTexture() const {
-  return image_ != NULL ? image_->global_texture_name : 0;
+    return image_ != nullptr ? image_->global_texture_name : 0;
 }
 
 void RenderbufferData::SetEglImage(const EglImagePtr& image) {
@@ -64,9 +63,9 @@ void RenderbufferData::SetEglImage(const EglImagePtr& image) {
 
 void RenderbufferData::SetDataStore(GLenum target, GLenum format, GLint width,
                                     GLint height) {
-  image_ = NULL;
-  target_ = target;
-  format_ = format;
-  width_ = width;
-  height_ = height;
+    image_ = nullptr;
+    target_ = target;
+    format_ = format;
+    width_ = width;
+    height_ = height;
 }

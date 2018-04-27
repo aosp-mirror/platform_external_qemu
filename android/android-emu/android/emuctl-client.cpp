@@ -28,9 +28,9 @@
 #include "android/jpeg-compress.h"
 #include "android/gpu_frame.h"
 
+#include <cerrno>
 #include <cmath>
 #include <limits>
-#include <errno.h>
 #ifdef _WIN32
 #include <winsock2.h>
 #else
@@ -111,8 +111,8 @@ inline static float float_ntohl(float a) {
 // contribution to the acceleration vector. Also, some apps might lock the
 // screen in a particular orientation so that it's not affected by the
 // accelerometer at all, which isn't taken into account by this function.
-// TODO: implement a method for retrieving the actual screen orientation from
-// the emulated device.
+// TODO(grigoryi): implement a method for retrieving the actual screen
+// orientation from the emulated device.
 static SkinRotation guessScreenOrientation() {
     // Values for gravity in different orientations
     float gravity[][3] = {
@@ -177,7 +177,7 @@ static void onFramebufferPosted(void*, int w, int h, const void* pixels) {
 
     if (sGlobals->socket) {
         // JPEG-compress the contents of the window.
-        const uint8_t* fb = static_cast<const uint8_t*>(pixels);
+        const auto* fb = static_cast<const uint8_t*>(pixels);
         jpeg_compressor_compress_fb(
             sGlobals->jpeg_compressor,
             0, 0, w, h,
@@ -190,8 +190,7 @@ static void onFramebufferPosted(void*, int w, int h, const void* pixels) {
             jpeg_compressor_get_buffer(sGlobals->jpeg_compressor);
 
         // Fill out header fields.
-        FramebufferPacketHeader* hdr =
-            static_cast<FramebufferPacketHeader*>(compr_buf);
+        auto* hdr = static_cast<FramebufferPacketHeader*>(compr_buf);
         hdr->buf_size =
             jpeg_compressor_get_jpeg_size(sGlobals->jpeg_compressor);
         hdr->screen_orientation =
@@ -231,7 +230,7 @@ static void handlePacket(InboundPacket* p) {
             scaleForTouchpad(float_ntohl(p->x), android_hw->hw_lcd_width);
         int y =
             scaleForTouchpad(float_ntohl(p->y), android_hw->hw_lcd_height);
-        int pressure = static_cast<int>(100.0f * float_ntohl(p->z));
+        auto pressure = static_cast<int>(100.0f * float_ntohl(p->z));
         switch (type) {
         case PACKET_TYPE_MT_ACTION_DOWN:
         case PACKET_TYPE_MT_ACTION_MOVE:
@@ -282,8 +281,7 @@ static void onDataAvailable(void* opaque, int sock, unsigned int) {
             sGlobals->pkt_bytes_remaining -= size;
             sGlobals->pkt_bytes_read += size;
             if (sGlobals->pkt_bytes_remaining == 0) {
-                InboundPacket* p =
-                    reinterpret_cast<InboundPacket*>(&sGlobals->pkt_buf);
+                auto* p = reinterpret_cast<InboundPacket*>(&sGlobals->pkt_buf);
                 handlePacket(p);
                 sGlobals->pkt_bytes_remaining = sizeof(InboundPacket);
                 sGlobals->pkt_bytes_read = 0;
@@ -333,7 +331,7 @@ void android_emuctl_client_disconnect(void) {
             reinterpret_cast<Looper*>(sGlobals->looper),
             nullptr,
             nullptr);
-    sGlobals->socket.reset(0);
+    sGlobals->socket.reset(nullptr);
 }
 
 void android_emuctl_client_setsensors(const QAndroidSensorsAgent* agent) {

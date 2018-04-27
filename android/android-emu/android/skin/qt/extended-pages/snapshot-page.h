@@ -25,7 +25,7 @@ class SnapshotPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit SnapshotPage(QWidget* parent = 0, bool standAlone = false);
+    explicit SnapshotPage(QWidget* parent = nullptr, bool standAlone = false);
 
 public slots:
     void slot_snapshotLoadCompleted(int status, const QString& name);
@@ -71,7 +71,7 @@ private:
     QString getDescription(const QString& fileName);
 
     void    adjustIcons(QTreeWidget* theDisplayList);
-    void    closeEvent(QCloseEvent* closeEvent);
+    void closeEvent(QCloseEvent* closeEvent) override;
     void    deleteSnapshot(const WidgetSnapshotItem* theItem);
     void    disableActions();
     void    enableActions();

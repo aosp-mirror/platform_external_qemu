@@ -26,12 +26,13 @@ namespace {
 
 class Foo {
 public:
-    Foo() : mValue(42) {}
+    Foo() = default;
     int get() const { return mValue; }
     void set(int value) { mValue = value; }
     ~Foo() { mValue = 13; }
+
 private:
-    int mValue;
+    int mValue{42};
 };
 
 class StaticCounter {
@@ -94,14 +95,14 @@ namespace {
 
 // The following is the shared structure between all threads.
 struct MultiState {
-    MultiState(LazyInstance<StaticCounter>* staticCounter) :
-            mLock(), mStaticCounter(staticCounter), mCount(0) {}
+    MultiState(LazyInstance<StaticCounter>* staticCounter)
+        : mLock(), mStaticCounter(staticCounter), mCount(0) {}
 
     enum {
         kMaxThreads = 1000,
     };
 
-    Lock  mLock;
+    Lock mLock;
     LazyInstance<StaticCounter>* mStaticCounter;
     size_t mCount;
     void* mValues[kMaxThreads];
@@ -110,12 +111,12 @@ struct MultiState {
 
 // The thread function for the test below.
 static void* threadFunc(void* param) {
-    MultiState* state = static_cast<MultiState*>(param);
+    auto* state = static_cast<MultiState*>(param);
     AutoLock lock(state->mLock);
     if (state->mCount < MultiState::kMaxThreads) {
         state->mValues[state->mCount++] = state->mStaticCounter->ptr();
     }
-    return NULL;
+    return nullptr;
 }
 
 }  // namespace
@@ -128,13 +129,13 @@ TEST(LazyInstance, MultipleThreads) {
     const size_t kNumThreads = MultiState::kMaxThreads;
 
     // Create all threads.
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        state.mThreads[n] = new TestThread(threadFunc, &state);
+    for (auto& mThread : state.mThreads) {
+        mThread = new TestThread(threadFunc, &state);
     }
 
     // Wait for their completion.
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        state.mThreads[n]->join();
+    for (auto& mThread : state.mThreads) {
+        mThread->join();
     }
 
     // Now check that the constructor was only called once.
@@ -146,8 +147,8 @@ TEST(LazyInstance, MultipleThreads) {
         EXPECT_EQ(expectedValue, state.mValues[n]) << "For thread " << n;
     }
 
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        delete state.mThreads[n];
+    for (auto& mThread : state.mThreads) {
+        delete mThread;
     }
 }
 

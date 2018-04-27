@@ -40,9 +40,9 @@ namespace {
 class IniFileTest : public ::testing::Test {
 public:
     void SetUp() override {
-        mTempDir.reset(new TestTempDir("inifiletest"));
+        mTempDir = std::make_unique<TestTempDir>("inifiletest");
         mIniFilePath = mTempDir->makeSubPath("test.ini").c_str();
-        mIni.reset(new IniFile(mIniFilePath));
+        mIni = std::make_unique<IniFile>(mIniFilePath);
     }
 
     void TearDown() override {
@@ -159,7 +159,7 @@ TEST_F(IniFileTest, readWrite) {
 
     ASSERT_TRUE(mIni->write());
 
-    mIni.reset(new IniFile(mIniFilePath));
+    mIni = std::make_unique<IniFile>(mIniFilePath);
     ASSERT_EQ(0, mIni->size());
     ASSERT_TRUE(mIni->read());
     EXPECT_EQ(static_cast<int>(intData.size() + int64Data.size() +
@@ -203,7 +203,7 @@ TEST_F(IniFileTest, duplicateAndMissingKeys) {
     mIni->setDiskSize("ds", 1ULL);
 
     ASSERT_TRUE(mIni->write());
-    mIni.reset(new IniFile(mIniFilePath));
+    mIni = std::make_unique<IniFile>(mIniFilePath);
     ASSERT_EQ(0, mIni->size());
     ASSERT_TRUE(mIni->read());
     EXPECT_NE(0, mIni->size());
@@ -274,24 +274,24 @@ TEST_F(IniFileTest, environmentSubstitution) {
 
 
     // Check that we can substitute all the environment variables.
-    for(auto env : System::get()->envGetAll()) {
-      string name = env.substr(0, env.find_first_of('='));
+    for (const auto& env : System::get()->envGetAll()) {
+        string name = env.substr(0, env.find_first_of('='));
 
-      // Empty environment names??!
-      if (name.size() == 0) continue;
+        // Empty environment names??!
+        if (name.size() == 0)
+            continue;
 
-      string escaped = string("%").append(name).append("%");
-      string value = System::get()->envGet(name);
-      EXPECT_EQ(value, mIni->getString(NON, escaped));
+        string escaped = string("%").append(name).append("%");
+        string value = System::get()->envGet(name);
+        EXPECT_EQ(value, mIni->getString(NON, escaped));
 
+        escaped = string("%%HELLO%% %").append(name).append("%");
+        string expect = string("%HELLO% ").append(value);
+        EXPECT_EQ(expect, mIni->getString(NON, escaped));
 
-      escaped = string("%%HELLO%% %").append(name).append("%");
-      string expect = string("%HELLO% ").append(value);
-      EXPECT_EQ(expect, mIni->getString(NON, escaped));
-
-      escaped = string("%%%").append(name).append("%%%");
-      expect = string("%").append(value).append("%");
-      EXPECT_EQ(expect, mIni->getString(NON, escaped));
+        escaped = string("%%%").append(name).append("%%%");
+        expect = string("%").append(value).append("%");
+        EXPECT_EQ(expect, mIni->getString(NON, escaped));
     }
 
     // It should work with numbers too..
@@ -433,7 +433,7 @@ TEST_F(IniFileTest, discardEmpty) {
     mIni->setString("empty", "");
 
     ASSERT_TRUE(mIni->write());
-    mIni.reset(new IniFile(mIniFilePath));
+    mIni = std::make_unique<IniFile>(mIniFilePath);
     ASSERT_EQ(0, mIni->size());
     ASSERT_TRUE(mIni->read());
     EXPECT_EQ(2, mIni->size());
@@ -441,7 +441,7 @@ TEST_F(IniFileTest, discardEmpty) {
     EXPECT_EQ("", mIni->getString("empty", "defaultString"));
 
     EXPECT_TRUE(mIni->writeDiscardingEmpty());
-    mIni.reset(new IniFile(mIniFilePath));
+    mIni = std::make_unique<IniFile>(mIniFilePath);
     ASSERT_EQ(0, mIni->size());
     ASSERT_TRUE(mIni->read());
     EXPECT_EQ(1, mIni->size());
@@ -452,7 +452,7 @@ TEST_F(IniFileTest, discardEmpty) {
 TEST_F(IniFileTest, writeIfChanged) {
     // Initially, we must treat the object as dirty.
     // Hence, we'll clear the lines we'd written previously.
-    mIni.reset(new IniFile(mIniFilePath));
+    mIni = std::make_unique<IniFile>(mIniFilePath);
     verifyFileUpdated(true);
 
     mIni->write();
@@ -473,7 +473,7 @@ TEST_F(IniFileTest, writeIfChanged) {
 }
 
 TEST_F(IniFileTest, noBackingFile) {
-    mIni.reset(new IniFile());
+    mIni = std::make_unique<IniFile>();
     ASSERT_FALSE(mIni->read());
 
     mIni->setBackingFile(mIniFilePath);
@@ -528,7 +528,7 @@ TEST_F(IniFileTest, diskFileOrder) {
     // Extra keys are appended to the file.
     mIni->setString("extraKey", "extraValue");
     ASSERT_TRUE(mIni->write());
-    rewritten_lines.push_back("extraKey = extraValue");
+    rewritten_lines.emplace_back("extraKey = extraValue");
     verifyFileContents(rewritten_lines);
 
     // Test order of iteration in this complicated case.

@@ -13,10 +13,10 @@
 
 #include <gtest/gtest.h>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #define TEST_SKIP(string, skipped) \
-    EXPECT_EQ(string + skipped, str_skip_white_space_if_any(string))
+    EXPECT_EQ((string) + (skipped), str_skip_white_space_if_any(string))
 TEST(String, str_skip_white_space_if_any) {
     TEST_SKIP("no change", 0);
     TEST_SKIP("", 0);
@@ -62,7 +62,7 @@ TEST(String, str_reset) {
 
 TEST(String, str_reset_withNULL) {
     char* str = strdup("Foo Bar");
-    str_reset(&str, NULL);
+    str_reset(&str, nullptr);
     EXPECT_FALSE(str);
 }
 

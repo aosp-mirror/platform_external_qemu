@@ -15,12 +15,12 @@
 bool uncompress_gzipStream(uint8_t* dst, size_t* dstLen, const uint8_t* src,
                    size_t srcLen) {
     z_stream stream;
-    stream.next_in = (Bytef*)src;
+    stream.next_in = const_cast<Bytef*>(src);
     stream.avail_in = srcLen;
     stream.next_out = dst;
     stream.avail_out = *dstLen;
-    stream.zalloc = (alloc_func)0;
-    stream.zfree = (free_func)0;
+    stream.zalloc = (alloc_func) nullptr;
+    stream.zfree = (free_func) nullptr;
 
     // magic number from gz_read
     const int GZIP_WINDOW_BITS = 15 + 16;

@@ -17,7 +17,7 @@
 #include "android/globals.h"
 #include "android/hw-sensors.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include <memory>
 #include <random>
@@ -31,7 +31,7 @@ static bool beginWith(const std::vector<uint8_t>& input, const char* keyword) {
         return false;
     }
     int size = strlen(keyword);
-    const char *mesg = (const char*)(&input[0]);
+    const auto* mesg = reinterpret_cast<const char*>(&input[0]);
     return (input.size() >= size && strncmp(mesg, keyword, size) == 0);
 }
 
@@ -68,7 +68,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
     } else if (beginWith(input, "get_random=")) {
         // need to parse the value after =
         int bytes=0;
-        const char *mesg = (const char*)(&input[0]);
+        const auto* mesg = reinterpret_cast<const char*>(&input[0]);
         sscanf(mesg, "get_random=%d", &bytes);
         if (bytes > 0) {
             getRandomBytes(bytes, outputp);

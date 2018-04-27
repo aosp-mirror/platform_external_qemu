@@ -33,8 +33,7 @@ private:
 class ConvertingTask : public QObject {
     Q_OBJECT
 public:
-    ConvertingTask(const std::string& startFilename,
-                   const std::string& endFilename);
+    ConvertingTask(std::string startFilename, std::string endFilename);
 
 public slots:
     void run();

@@ -48,9 +48,10 @@ public:
     static const char* const kExeNameSuffix;
 
     // Returns the executable name for a base name |baseName|
-    static std::string toExecutableName(StringView baseName, HostType hostType);
+    static std::string toExecutableName(const StringView& baseName,
+                                        HostType hostType);
 
-    static std::string toExecutableName(StringView baseName) {
+    static std::string toExecutableName(const StringView& baseName) {
         return toExecutableName(baseName, HOST_TYPE);
     }
 
@@ -76,20 +77,20 @@ public:
     }
 
     // Remove trailing separators from a |path| string, for a given |hostType|.
-    static StringView removeTrailingDirSeparator(StringView path,
+    static StringView removeTrailingDirSeparator(const StringView& path,
                                                  HostType hostType);
 
     // Remove trailing separators from a |path| string for the current host.
-    static StringView removeTrailingDirSeparator(StringView path) {
+    static StringView removeTrailingDirSeparator(const StringView& path) {
         return removeTrailingDirSeparator(path, HOST_TYPE);
     }
 
     // Add a trailing separator if needed.
-    static std::string addTrailingDirSeparator(StringView path,
+    static std::string addTrailingDirSeparator(const StringView& path,
                                                HostType hostType);
 
     // Add a trailing separator if needed.
-    static std::string addTrailingDirSeparator(StringView path) {
+    static std::string addTrailingDirSeparator(const StringView& path) {
         return addTrailingDirSeparator(path, HOST_TYPE);
     }
 
@@ -101,19 +102,19 @@ public:
     //    <drive>:
     //    <drive>:<sep>
     //    <sep><sep>volumeName<sep>
-    static size_t rootPrefixSize(StringView path, HostType hostType);
+    static size_t rootPrefixSize(const StringView& path, HostType hostType);
 
     // Return the root prefix for the current platform. See above for
     // documentation.
-    static size_t rootPrefixSize(StringView path) {
+    static size_t rootPrefixSize(const StringView& path) {
         return rootPrefixSize(path, HOST_TYPE);
     }
 
     // Return true iff |path| is an absolute path for a given |hostType|.
-    static bool isAbsolute(StringView path, HostType hostType);
+    static bool isAbsolute(const StringView& path, HostType hostType);
 
     // Return true iff |path| is an absolute path for the current host.
-    static bool isAbsolute(StringView path) {
+    static bool isAbsolute(const StringView& path) {
         return isAbsolute(path, HOST_TYPE);
     }
 
@@ -123,7 +124,8 @@ public:
     //  "file" -> ""
     //  "file." -> "."
     //  "/full/path.png" -> ".png"
-    static StringView extension(StringView path, HostType hostType = HOST_TYPE);
+    static StringView extension(const StringView& path,
+                                HostType hostType = HOST_TYPE);
 
     // Split |path| into a directory name and a file name. |dirName| and
     // |baseName| are optional pointers to strings that will receive the
@@ -140,13 +142,13 @@ public:
     //     <drive>:foo  -> '<drive>:' + 'foo'
     //     <drive>:\foo -> '<drive>:\' + 'foo'
     //
-    static bool split(StringView path,
+    static bool split(const StringView& path,
                       HostType hostType,
                       StringView* dirName,
                       StringView* baseName);
 
     // A variant of split() for the current process' host type.
-    static bool split(StringView path,
+    static bool split(const StringView& path,
                       StringView* dirName,
                       StringView* baseName) {
         return split(path, HOST_TYPE, dirName, baseName);
@@ -157,12 +159,12 @@ public:
     // the result will be the concatenation of |path1| and |path2|, if
     // |path1| doesn't end with a directory separator, a |hostType| specific
     // one will be inserted between the two paths in the result.
-    static std::string join(StringView path1,
-                            StringView path2,
+    static std::string join(const StringView& path1,
+                            const StringView& path2,
                             HostType hostType);
 
     // A variant of join() for the current process' host type.
-    static std::string join(StringView path1, StringView path2) {
+    static std::string join(const StringView& path1, const StringView& path2) {
         return join(path1, path2, HOST_TYPE);
     }
 
@@ -183,7 +185,7 @@ public:
     // each one being a path component (prefix or subdirectory or file
     // name). Directory separators do not appear in components, except
     // for the root prefix, if any.
-    static std::vector<StringView> decompose(StringView path,
+    static std::vector<StringView> decompose(const StringView& path,
                                              HostType hostType);
     static std::vector<std::string> decompose(std::string&& path,
                                               HostType hostType);
@@ -198,7 +200,7 @@ public:
 
     // Decompose |path| into individual components for the host platform.
     // See comments above for more details.
-    static std::vector<StringView> decompose(StringView path) {
+    static std::vector<StringView> decompose(const StringView& path) {
         return decompose(path, HOST_TYPE);
     }
     static std::vector<std::string> decompose(std::string&& path) {

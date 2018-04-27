@@ -25,14 +25,14 @@ namespace qemu {
 class QemuFileStream : public android::base::Stream {
 public:
     explicit QemuFileStream(QEMUFile* file);
-    virtual ~QemuFileStream();
-    virtual ssize_t read(void* buffer, size_t len);
-    virtual ssize_t write(const void* buffer, size_t len);
+    ~QemuFileStream() override;
+    ssize_t read(void* buffer, size_t len) override;
+    ssize_t write(const void* buffer, size_t len) override;
 
     QEMUFile* file() const { return mFile; }
 
 private:
-    QemuFileStream();
+    QemuFileStream() = delete;
     DISALLOW_COPY_AND_ASSIGN(QemuFileStream);
 
     QEMUFile* mFile;

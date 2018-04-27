@@ -98,7 +98,8 @@ public:
     //
     // replaces an object to map to an existing global object
     //
-    void replaceGlobalObject(ObjectLocalName p_localName, NamedObjectPtr p_namedObject);
+    void replaceGlobalObject(ObjectLocalName p_localName,
+                             const NamedObjectPtr& p_namedObject);
 
     const ObjectDataPtr& getObjectDataPtr(ObjectLocalName p_localName);
     void setObjectData(ObjectLocalName p_localName, ObjectDataPtr data);

@@ -58,7 +58,7 @@ class ThreadStoreBase {
 public:
     // Type of a function used to destroy a thread-specific value that
     // was previously assigned by calling set().
-    typedef void (Destructor)(void* value);
+    using Destructor = void(void*);
 
     // Initialize instance so that is hold keys that must be destroyed
     // on thread exit by calling |destroy|.
@@ -103,7 +103,7 @@ public:
 
 private:
     // Ensure you can't create an empty ThreadStore instance.
-    ThreadStoreBase();
+    ThreadStoreBase() = delete;
 
     DISALLOW_COPY_AND_ASSIGN(ThreadStoreBase);
 
@@ -133,7 +133,7 @@ public:
     // |t| is the new object instance.
     // NOTE: Any previous object instance is deleted.
     void set(T* t) {
-        T* old = static_cast<T*>(swap(t));
+        auto* old = static_cast<T*>(swap(t));
         delete old;
     }
 

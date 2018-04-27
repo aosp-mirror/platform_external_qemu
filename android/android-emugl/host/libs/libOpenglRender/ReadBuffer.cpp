@@ -19,15 +19,15 @@
 
 #include <algorithm>
 
-#include <assert.h>
-#include <string.h>
-#include <limits.h>
+#include <cassert>
+#include <climits>
+#include <cstring>
 
 namespace emugl {
 
 ReadBuffer::ReadBuffer(size_t bufsize) {
     m_size = bufsize;
-    m_buf = (unsigned char*)malloc(m_size);
+    m_buf = static_cast<unsigned char*>(malloc(m_size));
     m_validData = 0;
     m_readPtr = m_buf;
 }
@@ -62,7 +62,7 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
                 new_size = INT_MAX;
             }
 
-            const auto new_buf = (unsigned char*)malloc(new_size);
+            const auto new_buf = static_cast<unsigned char*>(malloc(new_size));
             if (!new_buf) {
                 ERR("Failed to alloc %zu bytes for ReadBuffer\n", new_size);
                 return -1;
@@ -115,7 +115,7 @@ void ReadBuffer::onLoad(android::base::Stream* stream) {
     if (size > m_size) {
         m_size = size;
         free(m_buf);
-        m_buf = (unsigned char*)malloc(m_size);
+        m_buf = static_cast<unsigned char*>(malloc(m_size));
     }
     m_readPtr = m_buf;
     m_validData = stream->getBe32();

@@ -62,19 +62,22 @@ public:
     };
     ProgramData(int glesMaj, int glesMin);
     ProgramData(android::base::Stream* stream);
-    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
-    virtual void postLoad(const getObjDataPtr_t& getObjDataPtr) override;
+    void onSave(android::base::Stream* stream,
+                unsigned int globalName) const override;
+    void postLoad(const getObjDataPtr_t& getObjDataPtr) override;
     // restore() in ProgramData must be executed after shaders
-    virtual void restore(ObjectLocalName localName,
-           const getGlobalName_t& getGlobalName) override;
+    void restore(ObjectLocalName localName,
+                 const getGlobalName_t& getGlobalName) override;
 
     GLuint getAttachedVertexShader() const;
     GLuint getAttachedFragmentShader() const;
     GLuint getAttachedComputeShader() const;
     GLuint getAttachedShader(GLenum type) const;
 
-    android::base::StringView getTranslatedName(android::base::StringView userVarName) const;
-    android::base::StringView getDetranslatedName(android::base::StringView driverName) const;
+    android::base::StringView getTranslatedName(
+            const android::base::StringView& userVarName) const;
+    android::base::StringView getDetranslatedName(
+            const android::base::StringView& driverName) const;
 
     bool attachShader(GLuint shader, ShaderParser* shaderData, GLenum type);
     bool isAttached(GLuint shader) const;
@@ -102,15 +105,15 @@ public:
     // glBindAttribLocation.
     // It will take effect after glLinkProgram.
     std::unordered_map<std::string, GLuint> boundAttribLocs;
-    virtual GenNameInfo getGenNameInfo() const override;
+    GenNameInfo getGenNameInfo() const override;
     void addProgramName(GLuint name) { ProgramName = name; }
     GLuint getProgramName() const { return ProgramName; }
 
     // Virtualize uniform locations
     // It handles location -1 as well
-    void initGuestUniformLocForKey(android::base::StringView key);
-    void initGuestUniformLocForKey(android::base::StringView key,
-                                   android::base::StringView key2);
+    void initGuestUniformLocForKey(const android::base::StringView& key);
+    void initGuestUniformLocForKey(const android::base::StringView& key,
+                                   const android::base::StringView& key2);
     int getGuestUniformLocation(const char* uniName);
     int getHostUniformLocation(int guestLocation);
 

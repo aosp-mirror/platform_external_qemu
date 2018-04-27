@@ -28,7 +28,7 @@
 #include <QMovie>
 #include <QSettings>
 #include <QThread>
-
+#include <memory>
 using android::base::PathUtils;
 
 // static
@@ -45,7 +45,8 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
     mUi->rec_formatSwitch->setMinimumWidth(width);
 
     // Create widget for video player
-    mVideoWidget.reset(new android::videoplayer::VideoPlayerWidget(this));
+    mVideoWidget =
+            std::make_unique<android::videoplayer::VideoPlayerWidget>(this);
     mUi->rec_playerOverlayLayout->addWidget(mVideoWidget.get());
     // Need to call show() on the parent widget to notify mVideoWidget to resize
     // to match the size of rec_playerOverlayWidget.
@@ -77,7 +78,7 @@ bool RecordScreenPage::removeFileIfExists(const QString& file) {
 }
 
 static void onRecordingStatusChanged(void* opaque, RecordingStatus status) {
-    RecordScreenPage* rsInst = (RecordScreenPage*)opaque;
+    auto* rsInst = static_cast<RecordScreenPage*>(opaque);
     if (rsInst) {
         rsInst->emitRecordingStatusChange(status);
     }
@@ -110,7 +111,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             break;
         case RecordUiState::Starting: {
             SettingsTheme theme = getSelectedTheme();
-            QMovie* movie = new QMovie(this);
+            auto* movie = new QMovie(this);
             movie->setFileName(":/" +
                                Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
                                "/circular_spinner");
@@ -145,7 +146,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
         case RecordUiState::Stopping: {
             mTimer.stop();
             SettingsTheme theme = getSelectedTheme();
-            QMovie* movie = new QMovie(this);
+            auto* movie = new QMovie(this);
             movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
                                "/circular_spinner");
             if (movie->isValid()) {
@@ -192,7 +193,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             break;
         case RecordUiState::Converting: {
             SettingsTheme theme = getSelectedTheme();
-            QMovie* movie = new QMovie(this);
+            auto* movie = new QMovie(this);
             movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
                                "/circular_spinner");
             if (movie->isValid()) {
@@ -220,8 +221,7 @@ void RecordScreenPage::updateElapsedTime() {
 void RecordScreenPage::on_rec_playStopButton_clicked() {
     if (mState == RecordUiState::Stopped) {
         auto videoPlayerNotifier =
-                std::unique_ptr<android::videoplayer::VideoPlayerNotifier>(
-                        new android::videoplayer::VideoPlayerNotifier());
+                std::make_unique<android::videoplayer::VideoPlayerNotifier>();
         connect(videoPlayerNotifier.get(), SIGNAL(updateWidget()), this,
                 SLOT(updateVideoView()));
         connect(videoPlayerNotifier.get(), SIGNAL(videoFinished()), this,
@@ -299,8 +299,9 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
             savePath + QString("/untitled.%1").arg(ext),
             tr("Multimedia (*.%1)").arg(ext));
 
-    if (recordingName.isEmpty())
+    if (recordingName.isEmpty()) {
         return;  // Operation was canceled
+    }
 
     QFileInfo fileInfo(recordingName);
     QString dirName = fileInfo.absolutePath();
@@ -351,7 +352,7 @@ void RecordScreenPage::updateTheme() {
     }
 
     SettingsTheme theme = getSelectedTheme();
-    QMovie* movie = new QMovie(this);
+    auto* movie = new QMovie(this);
     movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
                        "/circular_spinner");
     if (movie->isValid()) {
@@ -382,8 +383,8 @@ void RecordScreenPage::slot_recordingStatusChange(RecordingStatus status) {
             mVideoPlayer.reset();
             // Setup the preview frame. Needs to be initialized before
             // setRecordUiState() or the preview frame will not be shown.
-            mVideoInfo.reset(new android::videoplayer::VideoInfo(
-                    mVideoWidget.get(), mTmpFilePath));
+            mVideoInfo = std::make_unique<android::videoplayer::VideoInfo>(
+                    mVideoWidget.get(), mTmpFilePath);
             connect(mVideoInfo.get(), SIGNAL(updateWidget()), this,
                     SLOT(updateVideoView()));
             setRecordUiState(RecordUiState::Stopped);
@@ -425,10 +426,10 @@ void StopRecordingTask::run() {
     emit(finished(true));
 }
 
-ConvertingTask::ConvertingTask(const std::string& startFilename,
-                               const std::string& endFilename)
-    : mStartFilename(startFilename),
-      mEndFilename(endFilename) {}
+ConvertingTask::ConvertingTask(std::string startFilename,
+                               std::string endFilename)
+    : mStartFilename(std::move(startFilename)),
+      mEndFilename(std::move(endFilename)) {}
 
 void ConvertingTask::run() {
     emit started();

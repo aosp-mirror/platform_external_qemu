@@ -11,14 +11,14 @@
 
 #include "android/base/misc/HttpUtils.h"
 
-#include <string.h>
+#include <cstring>
 
 namespace android {
 namespace base {
 
 namespace {
 
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 bool isHttpSpace(int ch) {
     // See Section 2.2 of RFC 2616, in particular this section:
@@ -48,8 +48,7 @@ bool httpIsRequestLine(const char* line, size_t lineLen) {
 
     bool methodMatch = false;
 
-    for (size_t n = 0; n < kHttpMethodsSize; ++n) {
-        const char* method = kHttpMethods[n];
+    for (auto method : kHttpMethods) {
         size_t methodLen = strlen(method);
 
         if (lineLen < methodLen || memcmp(method, line, methodLen)) {
@@ -81,7 +80,7 @@ bool httpIsRequestLine(const char* line, size_t lineLen) {
 
     static const char kVersion[] = "HTTP/";
     const size_t kVersionLen = sizeof(kVersion) - 1U;
-    if (version == line || (size_t)(end - version) <= kVersionLen ||
+    if (version == line || static_cast<size_t>(end - version) <= kVersionLen ||
         memcmp(version, kVersion, kVersionLen) != 0) {
         // No HTTP version field.
         return false;

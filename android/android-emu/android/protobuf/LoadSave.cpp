@@ -32,24 +32,27 @@ using android::base::makeCustomScopedPtr;
 namespace android {
 namespace protobuf {
 
-ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
-                                        System::FileSize* bytesUsed,
-                                        ProtobufLoadCallback loadCb) {
-    const auto file =
-            ScopedFd(::open(fileName.c_str(),
-                            O_RDONLY | O_BINARY | O_CLOEXEC, 0644));
+ProtobufLoadResult loadProtobufFileImpl(
+        const android::base::StringView& fileName,
+        System::FileSize* bytesUsed,
+        const ProtobufLoadCallback& loadCb) {
+    const auto file = ScopedFd(
+            ::open(fileName.c_str(), O_RDONLY | O_BINARY | O_CLOEXEC, 0644));
 
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
         return ProtobufLoadResult::FileNotFound;
     }
 
-    if (bytesUsed) *bytesUsed = size;
+    if (bytesUsed)
+        *bytesUsed = size;
 
-    const auto fileMap =
-        makeCustomScopedPtr(
+    const auto fileMap = makeCustomScopedPtr(
             mmap(nullptr, size, PROT_READ, MAP_PRIVATE, file.get(), 0),
-            [size](void* ptr) { if (ptr != MAP_FAILED) munmap(ptr, size); });
+            [size](void* ptr) {
+                if (ptr != MAP_FAILED)
+                    munmap(ptr, size);
+            });
 
     if (!fileMap || fileMap.get() == MAP_FAILED) {
         return ProtobufLoadResult::FileMapFailed;
@@ -58,10 +61,12 @@ ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
     return loadCb(fileMap.get(), size);
 }
 
-ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
-                                        System::FileSize* bytesUsed,
-                                        ProtobufSaveCallback saveCb) {
-    if (bytesUsed) *bytesUsed = 0;
+ProtobufSaveResult saveProtobufFileImpl(
+        const android::base::StringView& fileName,
+        System::FileSize* bytesUsed,
+        const ProtobufSaveCallback& saveCb) {
+    if (bytesUsed)
+        *bytesUsed = 0;
 
     google::protobuf::io::FileOutputStream stream(
             ::open(fileName.c_str(),
@@ -72,6 +77,5 @@ ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
     return saveCb(stream, bytesUsed);
 }
 
-} // namespace android
-} // namespace protobuf
-
+}  // namespace protobuf
+}  // namespace android

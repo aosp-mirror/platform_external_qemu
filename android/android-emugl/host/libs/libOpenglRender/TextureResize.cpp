@@ -24,8 +24,8 @@
 
 #include "GLES2/gl2ext.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -208,7 +208,8 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
         mTextureDataType(GL_UNSIGNED_BYTE) {
 
     // Fix color banding by trying to use a texture type with a high precision.
-    const char* exts = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
+    const auto* exts =
+            reinterpret_cast<const char*>(s_gles2.glGetString(GL_EXTENSIONS));
 
     bool hasColorBufferFloat =
         emugl::getRenderer() == SELECTED_RENDERER_HOST ||
@@ -368,7 +369,8 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight);
     s_gles2.glUseProgram(mFBWidth.program);
     s_gles2.glEnableVertexAttribArray(mFBWidth.aPosition);
-    s_gles2.glVertexAttribPointer(mFBWidth.aPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    s_gles2.glVertexAttribPointer(mFBWidth.aPosition, 2, GL_FLOAT, GL_FALSE, 0,
+                                  nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
 
     // Store the current texture filters and set to nearest for scaling.
@@ -390,7 +392,8 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight / mFactor);
     s_gles2.glUseProgram(mFBHeight.program);
     s_gles2.glEnableVertexAttribArray(mFBHeight.aPosition);
-    s_gles2.glVertexAttribPointer(mFBHeight.aPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    s_gles2.glVertexAttribPointer(mFBHeight.aPosition, 2, GL_FLOAT, GL_FALSE, 0,
+                                  nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
     s_gles2.glUniform1i(mFBHeight.uTexture, 0);
     s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));

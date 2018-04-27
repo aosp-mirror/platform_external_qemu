@@ -27,7 +27,7 @@ using android::base::System;
 using android::emulation::captureScreenshot;
 
 extern "C" EmulatorWindow* emulator_window_get(void) {
-    return NULL;
+    return nullptr;
 }
 
 class ScreenCapturerTest : public ::testing::Test {
@@ -54,66 +54,60 @@ public:
     MockRenderer(bool hasValidScreenshot)
         : mHasValidScreenshot(hasValidScreenshot) { }
     emugl::RenderChannelPtr createRenderChannel(
-            android::base::Stream* loadStream = nullptr) {
+            android::base::Stream* loadStream = nullptr) override {
         return nullptr;
     }
-    HardwareStrings getHardwareStrings() {
-        return {};
-    }
-    void setPostCallback(OnPostCallback onPost, void* context) {
+    HardwareStrings getHardwareStrings() override { return {}; }
+    void setPostCallback(OnPostCallback onPost, void* context) override {
         return;
     }
-    bool asyncReadbackSupported() {
-        return false;
-    }
-    ReadPixelsCallback getReadPixelsCallback() {
-        return nullptr;
-    }
+    bool asyncReadbackSupported() override { return false; }
+    ReadPixelsCallback getReadPixelsCallback() override { return nullptr; }
     bool showOpenGLSubwindow(FBNativeWindowType window,
-                                     int wx,
-                                     int wy,
-                                     int ww,
-                                     int wh,
-                                     int fbw,
-                                     int fbh,
-                                     float dpr,
-                                     float zRot,
-                                     bool deleteExisting) {
+                             int wx,
+                             int wy,
+                             int ww,
+                             int wh,
+                             int fbw,
+                             int fbh,
+                             float dpr,
+                             float zRot,
+                             bool deleteExisting) override {
         return false;
     }
-    bool destroyOpenGLSubwindow() {
-        return false;
-    }
-    void setOpenGLDisplayRotation(float zRot) { }
-    void setOpenGLDisplayTranslation(float px, float py) { }
-    void repaintOpenGLDisplay() { }
+    bool destroyOpenGLSubwindow() override { return false; }
+    void setOpenGLDisplayRotation(float zRot) override {}
+    void setOpenGLDisplayTranslation(float px, float py) override {}
+    void repaintOpenGLDisplay() override {}
 
-    bool hasGuestPostedAFrame() {
-        return mGuestPostedAFrame;
-    }
+    bool hasGuestPostedAFrame() override { return mGuestPostedAFrame; }
 
-    void resetGuestPostedAFrame() {
-        mGuestPostedAFrame = false;
-    }
+    void resetGuestPostedAFrame() override { mGuestPostedAFrame = false; }
 
     void setGuestPostedAFrame() {
         mGuestPostedAFrame = true;
     }
 
-    void setScreenMask(int width, int height, const unsigned char* rgbaData) { }
-    void cleanupProcGLObjects(uint64_t puid) { }
-    void stop(bool wait) { }
-    void pauseAllPreSave() { }
-    void resumeAll() { }
-    void save(android::base::Stream* stream,
-            const android::snapshot::ITextureSaverPtr& textureSaver) { }
+    void setScreenMask(int width,
+                       int height,
+                       const unsigned char* rgbaData) override {}
+    void cleanupProcGLObjects(uint64_t puid) override {}
+    void stop(bool wait) override {}
+    void pauseAllPreSave() override {}
+    void resumeAll() override {}
+    void save(
+            android::base::Stream* stream,
+            const android::snapshot::ITextureSaverPtr& textureSaver) override {}
     bool load(android::base::Stream* stream,
-            const android::snapshot::ITextureLoaderPtr& textureLoader) {
+              const android::snapshot::ITextureLoaderPtr& textureLoader)
+            override {
         return false;
     }
-    void fillGLESUsages(android_studio::EmulatorGLESUsages*) { }
-    void getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels) {
+    void fillGLESUsages(android_studio::EmulatorGLESUsages*) override {}
+    void getScreenshot(unsigned int nChannels,
+                       unsigned int* width,
+                       unsigned int* height,
+                       std::vector<unsigned char>& pixels) override {
         if (mHasValidScreenshot) {
             *width = kWidth;
             *height = kHeight;

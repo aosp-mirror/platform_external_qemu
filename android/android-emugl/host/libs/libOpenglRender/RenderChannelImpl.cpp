@@ -17,10 +17,11 @@
 #include "android/base/synchronization/Lock.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
@@ -51,8 +52,8 @@ RenderChannelImpl::RenderChannelImpl(android::base::Stream* loadStream)
     if (loadStream) {
         mFromGuest.onLoadLocked(loadStream);
         mToGuest.onLoadLocked(loadStream);
-        mState = (State)loadStream->getBe32();
-        mWantedEvents = (State)loadStream->getBe32();
+        mState = static_cast<State>(loadStream->getBe32());
+        mWantedEvents = static_cast<State>(loadStream->getBe32());
 #ifndef NDEBUG
         // Make sure we're in a consistent state after loading.
         const auto state = mState;
@@ -62,7 +63,7 @@ RenderChannelImpl::RenderChannelImpl(android::base::Stream* loadStream)
     } else {
         updateStateLocked();
     }
-    mRenderThread.reset(new RenderThread(this, loadStream));
+    mRenderThread = std::make_unique<RenderThread>(this, loadStream);
     mRenderThread->start();
 }
 

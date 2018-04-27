@@ -11,8 +11,8 @@
 
 #pragma once
 
+#include <cstdarg>
 #include "android/utils/compiler.h"
-#include <stdarg.h>
 
 //
 // This file defines C and C++ replacements for scanf to parse a string in a

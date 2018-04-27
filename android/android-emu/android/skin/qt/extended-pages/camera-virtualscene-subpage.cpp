@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QSettings>
-
+#include <utility>
 const QAndroidVirtualSceneAgent* CameraVirtualSceneSubpage::sVirtualSceneAgent =
         nullptr;
 
@@ -49,7 +49,7 @@ void CameraVirtualSceneSubpage::showEvent(QShowEvent* event) {
 }
 
 void CameraVirtualSceneSubpage::on_imageWall_pathChanged(QString path) {
-    changePoster("wall", path);
+    changePoster("wall", std::move(path));
 }
 
 void CameraVirtualSceneSubpage::on_imageWall_scaleChanged(float value) {
@@ -57,7 +57,7 @@ void CameraVirtualSceneSubpage::on_imageWall_scaleChanged(float value) {
 }
 
 void CameraVirtualSceneSubpage::on_imageTable_pathChanged(QString path) {
-    changePoster("table", path);
+    changePoster("table", std::move(path));
 }
 
 void CameraVirtualSceneSubpage::on_imageTable_scaleChanged(float value) {
@@ -76,7 +76,8 @@ void CameraVirtualSceneSubpage::reportInteraction() {
     }
 }
 
-void CameraVirtualSceneSubpage::changePoster(QString name, QString path) {
+void CameraVirtualSceneSubpage::changePoster(const QString& name,
+                                             const QString& path) {
     // Persist to settings.
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
@@ -110,7 +111,8 @@ void CameraVirtualSceneSubpage::changePoster(QString name, QString path) {
     }
 }
 
-void CameraVirtualSceneSubpage::changePosterScale(QString name, float value) {
+void CameraVirtualSceneSubpage::changePosterScale(const QString& name,
+                                                  float value) {
     // Persist to settings.
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {

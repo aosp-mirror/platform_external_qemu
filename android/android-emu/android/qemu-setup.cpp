@@ -44,30 +44,27 @@
 #include "android/utils/timezone.h"
 #include "android/version.h"
 
-
-#include <stdbool.h>
-
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 extern "C" {
     /* Contains arguments for -android-ports option. */
-    char* android_op_ports = NULL;
-    /* Contains the parsed numbers from android_op_ports */
-    int android_op_ports_numbers[2] = {-1, -1};
-    /* Contains arguments for -android-port option. */
-    char* android_op_port = NULL;
-    /* Contains the parsed number from android_op_port */
-    int android_op_port_number = -1;
-    /* Contains arguments for -android-report-console option. */
-    char* android_op_report_console = NULL;
-    /* Contains arguments for -http-proxy option. */
-    char* op_http_proxy = NULL;
-    /* Base port for the emulated system. */
-    int    android_base_port;
-    /* ADB port */
-    int    android_adb_port = 5037; // Default
-    /* The device "serial number" is "emulator-<this number>" */
-    int    android_serial_number_port;
+char* android_op_ports = nullptr;
+/* Contains the parsed numbers from android_op_ports */
+int android_op_ports_numbers[2] = {-1, -1};
+/* Contains arguments for -android-port option. */
+char* android_op_port = nullptr;
+/* Contains the parsed number from android_op_port */
+int android_op_port_number = -1;
+/* Contains arguments for -android-report-console option. */
+char* android_op_report_console = nullptr;
+/* Contains arguments for -http-proxy option. */
+char* op_http_proxy = nullptr;
+/* Base port for the emulated system. */
+int android_base_port;
+/* ADB port */
+int android_adb_port = 5037;  // Default
+/* The device "serial number" is "emulator-<this number>" */
+int android_serial_number_port;
 }
 
 // The following code is used to support the -report-console option,
@@ -96,7 +93,7 @@ enum {
 static int get_report_console_options(char* end, int* maxtries) {
     int flags = 0;
 
-    if (end == NULL || *end == 0) {
+    if (end == nullptr || *end == 0) {
         return 0;
     }
 
@@ -107,14 +104,15 @@ static int get_report_console_options(char* end, int* maxtries) {
     end += 1;
     while (*end) {
         char*  p = strchr(end, ',');
-        if (p == NULL)
+        if (p == nullptr) {
             p = end + strlen(end);
+        }
 
         if ((p - end) == strlen("server") && !memcmp(end, "server", p - end)) {
             flags |= REPORT_CONSOLE_SERVER;
         } else if (memcmp( end, "max=", 4) == 0) {
             end  += 4;
-            *maxtries = strtol( end, NULL, 10 );
+            *maxtries = strtol(end, nullptr, 10);
             flags |= REPORT_CONSOLE_MAX;
         } else if ((p - end) == strlen("ipv6") &&
                 !memcmp(end, "ipv6", p - end)) {
@@ -126,8 +124,9 @@ static int get_report_console_options(char* end, int* maxtries) {
         }
 
         end = p;
-        if (*end)
+        if (*end) {
             end += 1;
+        }
     }
     return flags;
 }
@@ -153,9 +152,10 @@ static int report_console(const char* proto_port, int console_port) {
         }
 
         if (flags & REPORT_CONSOLE_SERVER) {
-            // TODO: Listen on both IPv6 and IPv4 interfaces at the same time?
+            // TODO(digit): Listen on both IPv6 and IPv4 interfaces at the same
+            // time?
             if (flags & REPORT_CONSOLE_IPV6) {
-                s = socket_loopback6_server( port, SOCKET_STREAM );
+                s = socket_loopback6_server(port, SOCKET_STREAM);
             } else {
                 s = socket_loopback4_server( port, SOCKET_STREAM );
             }
@@ -172,8 +172,9 @@ static int report_console(const char* proto_port, int console_port) {
                 } else {
                     s = socket_loopback4_client( port, SOCKET_STREAM );
                 }
-                if (s >= 0)
+                if (s >= 0) {
                     break;
+                }
 
                 sleep_ms(1000);
             }
@@ -190,7 +191,7 @@ static int report_console(const char* proto_port, int console_port) {
 #else
         char*  path = strdup(proto_port+5);
         char*  end  = strchr(path, ',');
-        if (end != NULL) {
+        if (end != nullptr) {
             flags = get_report_console_options( end, &maxtries );
             if (flags < 0) {
                 free(path);
@@ -208,8 +209,9 @@ static int report_console(const char* proto_port, int console_port) {
         } else {
             for ( ; maxtries > 0; maxtries-- ) {
                 s = socket_unix_client( path, SOCKET_STREAM );
-                if (s >= 0)
+                if (s >= 0) {
                     break;
+                }
 
                 sleep_ms(1000);
             }
@@ -231,7 +233,7 @@ static int report_console(const char* proto_port, int console_port) {
         int  tries = 3;
         D( "waiting for console-reporting client" );
         do {
-            s2 = socket_accept(s, NULL);
+            s2 = socket_accept(s, nullptr);
         } while (s2 < 0 && --tries > 0);
 
         if (s2 < 0) {

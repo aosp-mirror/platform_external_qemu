@@ -87,7 +87,7 @@ public:
 private:
 
     static base::LazyInstance<GoldfishSyncCommandQueue> sCommandQueue;
-    virtual void performDeviceOperation(const GoldfishSyncWakeInfo& cmd) override;
+    void performDeviceOperation(const GoldfishSyncWakeInfo& cmd) override;
 
     queue_device_command_t tellSyncDevice = nullptr;
 };

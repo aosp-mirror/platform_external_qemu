@@ -29,8 +29,8 @@ void saveBufferRaw(Stream* stream, char* buffer, uint32_t len) {
 
 bool loadBufferRaw(Stream* stream, char* buffer) {
     auto len = stream->getBe32();
-    int ret = (int)stream->read(buffer, len);
-    return ret == (int)len;
+    auto ret = static_cast<int>(stream->read(buffer, len));
+    return ret == static_cast<int>(len);
 }
 
 }  // namespace base

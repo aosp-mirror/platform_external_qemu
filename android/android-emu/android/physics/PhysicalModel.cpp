@@ -17,8 +17,8 @@
 #include "android/physics/PhysicalModel.h"
 
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
 
 #include "android/base/files/PathUtils.h"
@@ -34,6 +34,7 @@
 #include "android/utils/stream.h"
 
 #include <cstdio>
+#include <memory>
 #include <mutex>
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
@@ -84,55 +85,58 @@ public:
      */
     void setCurrentTime(int64_t time_ns);
 
-    /*
-     * Sets the target value for the given physical parameter that the physical
-     * model should move towards and records the result.
-     * Can be called from any thread.
-     */
+/*
+ * Sets the target value for the given physical parameter that the physical
+ * model should move towards and records the result.
+ * Can be called from any thread.
+ */
 #define SET_TARGET_FUNCTION_NAME(x) setTarget##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) void SET_TARGET_FUNCTION_NAME(z)(\
-        w value, PhysicalInterpolation mode);
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w) \
+    void SET_TARGET_FUNCTION_NAME(z)(w value, PhysicalInterpolation mode);
+    PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef SET_TARGET_FUNCTION_NAME
 
-    /*
-     * Gets current target state of the modeled object.
-     * Can be called from any thread.
-     */
+/*
+ * Gets current target state of the modeled object.
+ * Can be called from any thread.
+ */
 #define GET_TARGET_FUNCTION_NAME(x) getParameter##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) w GET_TARGET_FUNCTION_NAME(z)(\
-        ParameterValueType parameterValueType) const;
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w) \
+    w GET_TARGET_FUNCTION_NAME(z)(ParameterValueType parameterValueType) const;
+    PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_TARGET_FUNCTION_NAME
 
-    /*
-     * Sets the current override states for each simulated sensor.
-     * Can be called from any thread.
-     */
+/*
+ * Sets the current override states for each simulated sensor.
+ * Can be called from any thread.
+ */
 #define OVERRIDE_FUNCTION_NAME(x) override##x
-#define SENSOR_(x,y,z,v,w) void OVERRIDE_FUNCTION_NAME(z)(v override_value);
+#define SENSOR_(x, y, z, v, w) void OVERRIDE_FUNCTION_NAME(z)(v override_value);
     SENSORS_LIST
 #undef SENSOR_
 #undef OVERRIDE_FUNCTION_NAME
 
-    /*
-     * Getters for all sensor values.
-     * Can be called from any thread.
-     */
+/*
+ * Getters for all sensor values.
+ * Can be called from any thread.
+ */
 #define GET_FUNCTION_NAME(x) get##x
-#define SENSOR_(x,y,z,v,w) v GET_FUNCTION_NAME(z)(\
-        long* measurement_id) const;
+#define SENSOR_(x, y, z, v, w) \
+    v GET_FUNCTION_NAME(z)(long* measurement_id) const;
     SENSORS_LIST
 #undef SENSOR_
 #undef GET_FUNCTION_NAME
 
     /* Get the physical rotation and translation simulatenousely. */
-    void getTransform(
-            float* out_translation_x, float* out_translation_y, float* out_translation_z,
-            float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-            int64_t* out_timestamp);
+    void getTransform(float* out_translation_x,
+                      float* out_translation_y,
+                      float* out_translation_z,
+                      float* out_rotation_x,
+                      float* out_rotation_y,
+                      float* out_rotation_z,
+                      int64_t* out_timestamp);
 
     /*
      * Set or unset callbacks used to signal changing state.
@@ -169,26 +173,26 @@ PHYSICAL_PARAMETERS_LIST
     int stopRecordAndPlayback();
 
 private:
-
     void setCurrentTimeInternal(int64_t time_ns);
 
-    /*
-     * Sets the target value for the given physical parameter that the physical
-     * model should move towards.
-     * Can be called from any thread.
-     */
+/*
+ * Sets the target value for the given physical parameter that the physical
+ * model should move towards.
+ * Can be called from any thread.
+ */
 #define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) void SET_TARGET_INTERNAL_FUNCTION_NAME(z)(\
-        w value, PhysicalInterpolation mode);
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w)                \
+    void SET_TARGET_INTERNAL_FUNCTION_NAME(z)(w value, \
+                                              PhysicalInterpolation mode);
+    PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef SET_TARGET_INTERNAL_FUNCTION_NAME
 
-    /*
-     * Getters for non-overridden physical sensor values.
-     */
+/*
+ * Getters for non-overridden physical sensor values.
+ */
 #define GET_PHYSICAL_NAME(x) getPhysical##x
-#define SENSOR_(x,y,z,v,w) v GET_PHYSICAL_NAME(z)() const;
+#define SENSOR_(x, y, z, v, w) v GET_PHYSICAL_NAME(z)() const;
     SENSORS_LIST
 #undef SENSOR_
 #undef GET_PHYSICAL_NAME
@@ -196,7 +200,7 @@ PHYSICAL_PARAMETERS_LIST
     /*
      * Helper for setting overrides.
      */
-    template<class T>
+    template <class T>
     void setOverride(AndroidSensor sensor,
                      T* overrideMemberPointer,
                      T overrideValue) {
@@ -210,7 +214,7 @@ PHYSICAL_PARAMETERS_LIST
     /*
      * Helper for getting current sensor values.
      */
-    template<class T>
+    template <class T>
     T getSensorValue(AndroidSensor sensor,
                      const T* overrideMemberPointer,
                      std::function<T()> physicalGetter,
@@ -248,7 +252,7 @@ PHYSICAL_PARAMETERS_LIST
     bool mUseOverride[MAX_SENSORS] = {false};
     mutable long mMeasurementId[MAX_SENSORS] = {0};
 #define OVERRIDE_NAME(x) m##x##Override
-#define SENSOR_(x,y,z,v,w) v OVERRIDE_NAME(z){0.f};
+#define SENSOR_(x, y, z, v, w) v OVERRIDE_NAME(z){0.f};
     SENSORS_LIST
 #undef SENSOR_
 #undef OVERRIDE_NAME
@@ -291,8 +295,7 @@ PhysicalModelImpl::PhysicalModelImpl(bool shouldTick) {
 
     if (shouldTick) {
         mLoopTimer = loopTimer_newWithClock(
-                looper_getForThread(),
-                PhysicalModelImpl::tick,
+                looper_getForThread(), PhysicalModelImpl::tick,
                 reinterpret_cast<void*>(&mPhysicalModelInterface),
                 LOOPER_CLOCK_VIRTUAL);
     }
@@ -307,9 +310,9 @@ PhysicalModel* PhysicalModelImpl::getPhysicalModel() {
 }
 
 PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
-    return physicalModel != nullptr ?
-            reinterpret_cast<PhysicalModelImpl*>(physicalModel->opaque) :
-            nullptr;
+    return physicalModel != nullptr
+                   ? reinterpret_cast<PhysicalModelImpl*>(physicalModel->opaque)
+                   : nullptr;
 }
 
 emulator_physics::TargetCommand_InterpolationMethod toProto(
@@ -339,15 +342,16 @@ PhysicalInterpolation fromProto(
     }
 }
 
-PhysicalParameter fromProto(emulator_physics::TargetCommand_PhysicalParameter param) {
+PhysicalParameter fromProto(
+        emulator_physics::TargetCommand_PhysicalParameter param) {
     switch (param) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
 #define PROTO_ENUM(x) emulator_physics::TargetCommand_PhysicalParameter_##x
 
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-        case PROTO_ENUM(x):\
-            return PHYSICAL_PARAMETER_ENUM(x);
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w) \
+    case PROTO_ENUM(x):                 \
+        return PHYSICAL_PARAMETER_ENUM(x);
+        PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef PHYSICAL_PARAMETER_ENUM
         default:
@@ -359,7 +363,8 @@ PHYSICAL_PARAMETERS_LIST
 float getProtoValue_float(const emulator_physics::TargetCommand& target) {
     if (target.value_size() != 1) {
         W("%s: Error in parsed physics command.  Float parameters should have "
-          "exactly one value.  Found %d.", __FUNCTION__, target.value_size());
+          "exactly one value.  Found %d.",
+          __FUNCTION__, target.value_size());
         return 0.f;
     }
     return target.value(0);
@@ -368,9 +373,9 @@ float getProtoValue_float(const emulator_physics::TargetCommand& target) {
 vec3 getProtoValue_vec3(const emulator_physics::TargetCommand& target) {
     if (target.value_size() != 3) {
         W("%s: Error in parsed physics command.  Vec3 parameters should have "
-          "exactly three values.  Found %d.", __FUNCTION__,
-          target.value_size());
-        return vec3 {0.f, 0.f, 0.f};
+          "exactly three values.  Found %d.",
+          __FUNCTION__, target.value_size());
+        return vec3{0.f, 0.f, 0.f};
     }
     return vec3{target.value(0), target.value(1), target.value(2)};
 }
@@ -388,32 +393,30 @@ void setProtoValue(emulator_physics::TargetCommand* target, vec3 value) {
 bool parseNextCommand(StdioStream* inStream,
                       emulator_physics::TargetCommand& outCommand) {
     std::string nextCommand = inStream->getString();
-    return !nextCommand.empty() &&
-            outCommand.ParseFromString(nextCommand) &&
-            outCommand.has_physical_parameter() &&
-            outCommand.has_time() &&
-            outCommand.has_interpolation_method();
+    return !nextCommand.empty() && outCommand.ParseFromString(nextCommand) &&
+           outCommand.has_physical_parameter() && outCommand.has_time() &&
+           outCommand.has_interpolation_method();
 }
 
 void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     while (mPlaybackState == PLAYBACK_STATE_PLAYING &&
            time_ns >= mPlaybackAndRecordingStartTimeNs +
-                   mNextPlaybackCommand.time()) {
+                              mNextPlaybackCommand.time()) {
         setCurrentTimeInternal(mPlaybackAndRecordingStartTimeNs +
-                mNextPlaybackCommand.time());
+                               mNextPlaybackCommand.time());
         switch (fromProto(mNextPlaybackCommand.physical_parameter())) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
 #define UNION_VALUE_NAME(x) x
 #define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
 #define GET_PROTO_VALUE_FUNCTION_NAME(x) getProtoValue_##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-            case PHYSICAL_PARAMETER_ENUM(x):\
-                SET_TARGET_INTERNAL_FUNCTION_NAME(z)(\
-                        GET_PROTO_VALUE_FUNCTION_NAME(w)(mNextPlaybackCommand),\
-                        fromProto(mNextPlaybackCommand.interpolation_method()));\
-                break;
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w)                           \
+    case PHYSICAL_PARAMETER_ENUM(x):                              \
+        SET_TARGET_INTERNAL_FUNCTION_NAME(z)                      \
+        (GET_PROTO_VALUE_FUNCTION_NAME(w)(mNextPlaybackCommand),  \
+         fromProto(mNextPlaybackCommand.interpolation_method())); \
+        break;
+            PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PROTO_VALUE_FUNCTION_NAME
 #undef SET_TARGET_INTERNAL_FUNCTION_NAME
@@ -433,18 +436,18 @@ PHYSICAL_PARAMETERS_LIST
 
 void PhysicalModelImpl::setCurrentTimeInternal(int64_t time_ns) {
     mModelTimeNs = time_ns;
-    bool isInertialModelStable = mInertialModel.setCurrentTime(time_ns) ==
-            INERTIAL_STATE_STABLE;
-    bool isAmbientModelStable = mAmbientEnvironment.setCurrentTime(time_ns) ==
-            AMBIENT_STATE_STABLE;
+    bool isInertialModelStable =
+            mInertialModel.setCurrentTime(time_ns) == INERTIAL_STATE_STABLE;
+    bool isAmbientModelStable =
+            mAmbientEnvironment.setCurrentTime(time_ns) == AMBIENT_STATE_STABLE;
     if (isInertialModelStable && isAmbientModelStable &&
-            mIsPhysicalStateChanging) {
+        mIsPhysicalStateChanging) {
         physicalStateStabilized();
     }
 }
 
 void PhysicalModelImpl::setTargetInternalPosition(vec3 position,
-        PhysicalInterpolation mode) {
+                                                  PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mInertialModel.setTargetPosition(toGlm(position), mode);
@@ -452,14 +455,15 @@ void PhysicalModelImpl::setTargetInternalPosition(vec3 position,
 }
 
 void PhysicalModelImpl::setTargetInternalVelocity(vec3 velocity,
-        PhysicalInterpolation mode) {
+                                                  PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mInertialModel.setTargetVelocity(toGlm(velocity), mode);
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalAmbientMotion(float bounds,
+void PhysicalModelImpl::setTargetInternalAmbientMotion(
+        float bounds,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -468,59 +472,61 @@ void PhysicalModelImpl::setTargetInternalAmbientMotion(float bounds,
 }
 
 void PhysicalModelImpl::setTargetInternalRotation(vec3 rotation,
-        PhysicalInterpolation mode) {
+                                                  PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mInertialModel.setTargetRotation(glm::toQuat(glm::eulerAngleXYZ(
-            glm::radians(rotation.x),
-            glm::radians(rotation.y),
-            glm::radians(rotation.z))), mode);
+    mInertialModel.setTargetRotation(
+            glm::toQuat(glm::eulerAngleXYZ(glm::radians(rotation.x),
+                                           glm::radians(rotation.y),
+                                           glm::radians(rotation.z))),
+            mode);
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalMagneticField(
-        vec3 field, PhysicalInterpolation mode) {
+        vec3 field,
+        PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mAmbientEnvironment.setMagneticField(
-        field.x, field.y, field.z, mode);
+    mAmbientEnvironment.setMagneticField(field.x, field.y, field.z, mode);
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalTemperature(
-        float celsius, PhysicalInterpolation mode) {
+        float celsius,
+        PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mAmbientEnvironment.setTemperature(celsius, mode);
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalProximity(
-        float centimeters, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalProximity(float centimeters,
+                                                   PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mAmbientEnvironment.setProximity(centimeters, mode);
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalLight(
-        float lux, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalLight(float lux,
+                                               PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mAmbientEnvironment.setLight(lux, mode);
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalPressure(
-        float hPa, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalPressure(float hPa,
+                                                  PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mAmbientEnvironment.setPressure(hPa, mode);
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetInternalHumidity(
-        float percentage, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalHumidity(float percentage,
+                                                  PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mAmbientEnvironment.setHumidity(percentage, mode);
@@ -598,23 +604,21 @@ float PhysicalModelImpl::getParameterHumidity(
 #define PHYSICAL_NAME(x) getPhysical##x
 
 // Implement sensor overrides.
-#define SENSOR_(x,y,z,v,w) \
-void PhysicalModelImpl::OVERRIDE_FUNCTION_NAME(z)(v override_value) {\
-    setOverride(SENSOR_NAME(x), &OVERRIDE_NAME(z), override_value);\
-}
+#define SENSOR_(x, y, z, v, w)                                            \
+    void PhysicalModelImpl::OVERRIDE_FUNCTION_NAME(z)(v override_value) { \
+        setOverride(SENSOR_NAME(x), &OVERRIDE_NAME(z), override_value);   \
+    }
 SENSORS_LIST
 #undef SENSOR_
 
 // Implement getters that respect overrides.
-#define SENSOR_(x,y,z,v,w) \
-v PhysicalModelImpl::GET_FUNCTION_NAME(z)(\
-        long* measurement_id) const {\
-    return getSensorValue<v>(SENSOR_NAME(x),\
-                             &OVERRIDE_NAME(z),\
-                             std::bind(&PhysicalModelImpl::PHYSICAL_NAME(z),\
-                                       this),\
-                             measurement_id);\
-}
+#define SENSOR_(x, y, z, v, w)                                              \
+    v PhysicalModelImpl::GET_FUNCTION_NAME(z)(long* measurement_id) const { \
+        return getSensorValue<v>(                                           \
+                SENSOR_NAME(x), &OVERRIDE_NAME(z),                          \
+                std::bind(&PhysicalModelImpl::PHYSICAL_NAME(z), this),      \
+                measurement_id);                                            \
+    }
 SENSORS_LIST
 #undef SENSOR_
 
@@ -625,23 +629,24 @@ SENSORS_LIST
 #undef GET_FUNCTION_NAME
 
 vec3 PhysicalModelImpl::getPhysicalAccelerometer() const {
-    //Implementation Note:
+    // Implementation Note:
     // Gravity and magnetic vectors as observed by the device.
     // Note how we're applying the *inverse* of the transformation
     // represented by device_rotation_quat to the "absolute" coordinates
     // of the vectors.
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        (mInertialModel.getAcceleration() - mAmbientEnvironment.getGravity()));
+                   (mInertialModel.getAcceleration() -
+                    mAmbientEnvironment.getGravity()));
 }
 
 vec3 PhysicalModelImpl::getPhysicalGyroscope() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        mInertialModel.getRotationalVelocity());
+                   mInertialModel.getRotationalVelocity());
 }
 
 vec3 PhysicalModelImpl::getPhysicalMagnetometer() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        mAmbientEnvironment.getMagneticField());
+                   mAmbientEnvironment.getMagneticField());
 }
 
 /* (x, y, z) == (azimuth, pitch, roll) */
@@ -671,18 +676,21 @@ float PhysicalModelImpl::getPhysicalHumidity() const {
 
 vec3 PhysicalModelImpl::getPhysicalMagnetometerUncalibrated() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        mAmbientEnvironment.getMagneticField());
+                   mAmbientEnvironment.getMagneticField());
 }
 
 vec3 PhysicalModelImpl::getPhysicalGyroscopeUncalibrated() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
-        mInertialModel.getRotationalVelocity());
+                   mInertialModel.getRotationalVelocity());
 }
 
-void PhysicalModelImpl::getTransform(
-        float* out_translation_x, float* out_translation_y, float* out_translation_z,
-        float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-        int64_t* out_timestamp) {
+void PhysicalModelImpl::getTransform(float* out_translation_x,
+                                     float* out_translation_y,
+                                     float* out_translation_z,
+                                     float* out_rotation_x,
+                                     float* out_rotation_y,
+                                     float* out_rotation_z,
+                                     int64_t* out_timestamp) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     // Note: when getting the transform, we always update the current time
@@ -763,19 +771,18 @@ void PhysicalModelImpl::save(Stream* f) {
     // first save targets
     stream_put_be32(f, MAX_PHYSICAL_PARAMETERS);
 
-    for (int parameter = 0;
-         parameter < MAX_PHYSICAL_PARAMETERS;
-         parameter++) {
+    for (int parameter = 0; parameter < MAX_PHYSICAL_PARAMETERS; parameter++) {
         switch (parameter) {
 #define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
 #define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) case PHYSICAL_PARAMETER_NAME(x): {\
-                w targetValue = GET_PARAMETER_FUNCTION_NAME(z)(\
-                        PARAMETER_VALUE_TYPE_TARGET);\
-                writeValueToStream(f, targetValue);\
-                break;\
-            }
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                      \
+    case PHYSICAL_PARAMETER_NAME(x): {                                       \
+        w targetValue =                                                      \
+                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_TARGET); \
+        writeValueToStream(f, targetValue);                                  \
+        break;                                                               \
+    }
+            PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PARAMETER_FUNCTION_NAME
 #undef PHYSICAL_PARAMETER_NAME
@@ -788,20 +795,18 @@ PHYSICAL_PARAMETERS_LIST
     // then save overrides
     stream_put_be32(f, MAX_SENSORS);
 
-    for (int sensor = 0;
-         sensor < MAX_SENSORS;
-         sensor++) {
+    for (int sensor = 0; sensor < MAX_SENSORS; sensor++) {
         stream_put_be32(f, mUseOverride[sensor]);
         if (mUseOverride[sensor]) {
-            switch(sensor) {
+            switch (sensor) {
 #define SENSOR_NAME(x) ANDROID_SENSOR_##x
 #define OVERRIDE_NAME(x) m##x##Override
-#define SENSOR_(x,y,z,v,w)\
-                case SENSOR_NAME(x): {\
-                    writeValueToStream(f, OVERRIDE_NAME(z));\
-                    break;\
-                }
-SENSORS_LIST
+#define SENSOR_(x, y, z, v, w)                   \
+    case SENSOR_NAME(x): {                       \
+        writeValueToStream(f, OVERRIDE_NAME(z)); \
+        break;                                   \
+    }
+                SENSORS_LIST
 #undef SENSOR_
 #undef OVERRIDE_NAME
 #undef SENSOR_NAME
@@ -817,7 +822,8 @@ int PhysicalModelImpl::load(Stream* f) {
     // first load targets
     const int32_t num_physical_parameters = stream_get_be32(f);
     if (num_physical_parameters > MAX_PHYSICAL_PARAMETERS) {
-        D("%s: cannot load: snapshot requires %d physical parameters, %d available\n",
+        D("%s: cannot load: snapshot requires %d physical parameters, %d "
+          "available\n",
           __FUNCTION__, num_physical_parameters, MAX_PHYSICAL_PARAMETERS);
         return -EIO;
     }
@@ -826,20 +832,18 @@ int PhysicalModelImpl::load(Stream* f) {
 
     // Note: any new target params will remain at their defaults.
 
-    for (int parameter = 0;
-         parameter < num_physical_parameters;
-         parameter++) {
+    for (int parameter = 0; parameter < num_physical_parameters; parameter++) {
         switch (parameter) {
 #define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
 #define SET_TARGET_FUNCTION_NAME(x) setTargetInternal##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) case PHYSICAL_PARAMETER_NAME(x): {\
-                w value;\
-                readValueFromStream(f, &value);\
-                SET_TARGET_FUNCTION_NAME(z)(\
-                        value, PHYSICAL_INTERPOLATION_STEP);\
-                break;\
-            }
-PHYSICAL_PARAMETERS_LIST
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                  \
+    case PHYSICAL_PARAMETER_NAME(x): {                                   \
+        w value;                                                         \
+        readValueFromStream(f, &value);                                  \
+        SET_TARGET_FUNCTION_NAME(z)(value, PHYSICAL_INTERPOLATION_STEP); \
+        break;                                                           \
+    }
+            PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef SET_TARGET_FUNCTION_NAME
 #undef PHYSICAL_PARAMETER_NAME
@@ -854,26 +858,25 @@ PHYSICAL_PARAMETERS_LIST
     /* check number of physical sensors */
     int32_t num_sensors = stream_get_be32(f);
     if (num_sensors > MAX_SENSORS) {
-        D("%s: cannot load: snapshot requires %d physical sensors, %d available\n",
+        D("%s: cannot load: snapshot requires %d physical sensors, %d "
+          "available\n",
           __FUNCTION__, num_sensors, MAX_SENSORS);
         return -EIO;
     }
 
-    for (int sensor = 0;
-         sensor < num_sensors;
-         sensor++) {
+    for (int sensor = 0; sensor < num_sensors; sensor++) {
         if (stream_get_be32(f)) {
-            switch(sensor) {
+            switch (sensor) {
 #define SENSOR_NAME(x) ANDROID_SENSOR_##x
 #define OVERRIDE_FUNCTION_NAME(x) override##x
-#define SENSOR_(x,y,z,v,w)\
-                case SENSOR_NAME(x): {\
-                    v value;\
-                    readValueFromStream(f, &value);\
-                    OVERRIDE_FUNCTION_NAME(z)(value);\
-                    break;\
-                }
-SENSORS_LIST
+#define SENSOR_(x, y, z, v, w)            \
+    case SENSOR_NAME(x): {                \
+        v value;                          \
+        readValueFromStream(f, &value);   \
+        OVERRIDE_FUNCTION_NAME(z)(value); \
+        break;                            \
+    }
+                SENSORS_LIST
 #undef SENSOR_
 #undef OVERRIDE_FUNCTION_NAME
 #undef SENSOR_NAME
@@ -892,18 +895,20 @@ int PhysicalModelImpl::record(const char* filename) {
 
     if (!filename) {
         E("%s: Must specify filename for writing.  Physical Motion will not be "
-          "recorded.", __FUNCTION__, filename);
+          "recorded.",
+          __FUNCTION__, filename);
         return -1;
     }
 
-    const std::string path = PathUtils::join(
-            System::get()->getHomeDirectory(), filename);
+    const std::string path =
+            PathUtils::join(System::get()->getHomeDirectory(), filename);
 
-    mRecordingAndPlaybackStream.reset(new StdioStream(fopen(path.c_str(), "wb"),
-            StdioStream::kOwner));
-    if (!mRecordingAndPlaybackStream.get()) {
+    mRecordingAndPlaybackStream = std::make_unique<StdioStream>(
+            fopen(path.c_str(), "wb"), StdioStream::kOwner);
+    if (!mRecordingAndPlaybackStream) {
         E("%s: Error unable to open physics file %s for writing.  "
-          "Physical Motion will not be recorded.", __FUNCTION__, filename);
+          "Physical Motion will not be recorded.",
+          __FUNCTION__, filename);
         return -1;
     }
 
@@ -918,18 +923,20 @@ int PhysicalModelImpl::playback(const char* filename) {
 
     if (!filename) {
         E("%s: Must specify filename for reading.  Physical Motion will not be "
-          "played back.", __FUNCTION__, filename);
+          "played back.",
+          __FUNCTION__, filename);
         return -1;
     }
 
-    const std::string path = PathUtils::join(
-            System::get()->getHomeDirectory(), filename);
+    const std::string path =
+            PathUtils::join(System::get()->getHomeDirectory(), filename);
 
     std::unique_ptr<StdioStream> playbackStream(
             new StdioStream(fopen(path.c_str(), "rb"), StdioStream::kOwner));
-    if (!playbackStream.get()) {
+    if (!playbackStream) {
         E("%s: Error unable to open physics file %s for reading.  "
-          "Physical Motion will not be played back.", __FUNCTION__, filename);
+          "Physical Motion will not be played back.",
+          __FUNCTION__, filename);
         return -1;
     }
 
@@ -943,7 +950,8 @@ int PhysicalModelImpl::playback(const char* filename) {
 
     if (!parseNextCommand(playbackStream.get(), mNextPlaybackCommand)) {
         E("%s: Invalid physics file %s.  Physical Motion will "
-          "not be played back.", __FUNCTION__, filename);
+          "not be played back.",
+          __FUNCTION__, filename);
         return -1;
     }
     mRecordingAndPlaybackStream.swap(playbackStream);
@@ -964,24 +972,26 @@ int PhysicalModelImpl::stopRecordAndPlayback() {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
 #define PROTO_ENUM(x) emulator_physics::TargetCommand_PhysicalParameter_##x
 #define UNION_VALUE_NAME(x) x
-#define PHYSICAL_PARAMETER_(x,y,z,w) void PhysicalModelImpl::SET_TARGET_FUNCTION_NAME(z)(\
-        w value, PhysicalInterpolation mode) {\
-    if (mPlaybackState != PLAYBACK_STATE_PLAYING) {\
-        if (mPlaybackState == PLAYBACK_STATE_RECORDING) {\
-            emulator_physics::TargetCommand command;\
-            command.set_physical_parameter(PROTO_ENUM(x));\
-            command.set_time(mModelTimeNs - mPlaybackAndRecordingStartTimeNs);\
-            command.set_interpolation_method(toProto(mode));\
-            setProtoValue(&command, value);\
-            assert(mRecordingAndPlaybackStream.get());\
-            std::string encodedProto;\
-            if (command.SerializeToString(&encodedProto)) {\
-                mRecordingAndPlaybackStream->putString(encodedProto);\
-            }\
-        }\
-        SET_TARGET_INTERNAL_FUNCTION_NAME(z)(value, mode);\
-    }\
-}
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                   \
+    void PhysicalModelImpl::SET_TARGET_FUNCTION_NAME(z)(                  \
+            w value, PhysicalInterpolation mode) {                        \
+        if (mPlaybackState != PLAYBACK_STATE_PLAYING) {                   \
+            if (mPlaybackState == PLAYBACK_STATE_RECORDING) {             \
+                emulator_physics::TargetCommand command;                  \
+                command.set_physical_parameter(PROTO_ENUM(x));            \
+                command.set_time(mModelTimeNs -                           \
+                                 mPlaybackAndRecordingStartTimeNs);       \
+                command.set_interpolation_method(toProto(mode));          \
+                setProtoValue(&command, value);                           \
+                assert(mRecordingAndPlaybackStream.get());                \
+                std::string encodedProto;                                 \
+                if (command.SerializeToString(&encodedProto)) {           \
+                    mRecordingAndPlaybackStream->putString(encodedProto); \
+                }                                                         \
+            }                                                             \
+            SET_TARGET_INTERNAL_FUNCTION_NAME(z)(value, mode);            \
+        }                                                                 \
+    }
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef UNION_VALUE_NAME
@@ -995,7 +1005,7 @@ void PhysicalModelImpl::physicalStateChanging() {
     // stable to changing (i.e. don't call if we get to physicalStateChanging
     // calls in a row without a physicalStateStabilized call in between).
     if (!mIsPhysicalStateChanging && mAgent != nullptr &&
-            mAgent->onPhysicalStateChanging != nullptr) {
+        mAgent->onPhysicalStateChanging != nullptr) {
         mAgent->onPhysicalStateChanging(mAgent->context);
     }
     if (mLoopTimer != nullptr) {
@@ -1011,16 +1021,16 @@ void PhysicalModelImpl::physicalStateStabilized() {
     }
     // Increment all of the measurement ids because the physical state has
     // stabilized.
-    for (int i = 0; i < MAX_SENSORS; i++) {
-        mMeasurementId[i]++;
+    for (long& i : mMeasurementId) {
+        i++;
     }
     mIsPhysicalStateChanging = false;
 }
 
 void PhysicalModelImpl::targetStateChanged() {
     /* when target state changes we reset all sensor overrides */
-    for (int i = 0; i < MAX_SENSORS; i++) {
-        mUseOverride[i] = false;
+    for (bool& i : mUseOverride) {
+        i = false;
     }
     if (mAgent != nullptr && mAgent->onTargetStateChanged != nullptr) {
         mAgent->onTargetStateChanged(mAgent->context);
@@ -1031,8 +1041,8 @@ void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(
             reinterpret_cast<PhysicalModel*>(opaque));
     if (impl != nullptr) {
-        const DurationNs now_ns =
-                looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+        const DurationNs now_ns = looper_nowNsWithClock(looper_getForThread(),
+                                                        LOOPER_CLOCK_VIRTUAL);
         impl->setCurrentTime(now_ns);
 
         // if the model is still changing, schedule another timer.
@@ -1049,7 +1059,7 @@ void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
 using android::physics::PhysicalModelImpl;
 
 PhysicalModel* physicalModel_new(bool shouldTick) {
-    PhysicalModelImpl* impl = new PhysicalModelImpl(shouldTick);
+    auto* impl = new PhysicalModelImpl(shouldTick);
     return impl != nullptr ? impl->getPhysicalModel() : nullptr;
 }
 
@@ -1060,8 +1070,7 @@ void physicalModel_free(PhysicalModel* model) {
     }
 }
 
-void physicalModel_setCurrentTime(
-        PhysicalModel* model, int64_t time_ns) {
+void physicalModel_setCurrentTime(PhysicalModel* model, int64_t time_ns) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->setCurrentTime(time_ns);
@@ -1070,32 +1079,33 @@ void physicalModel_setCurrentTime(
 
 #define SET_PHYSICAL_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
 #define SET_TARGET_FUNCTION_NAME(x) setTarget##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) void SET_PHYSICAL_TARGET_FUNCTION_NAME(z)(\
-        PhysicalModel* model, w value, PhysicalInterpolation mode) {\
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
-    if (impl != nullptr) {\
-        impl->SET_TARGET_FUNCTION_NAME(z)(value, mode);\
-    }\
-}
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                       \
+    void SET_PHYSICAL_TARGET_FUNCTION_NAME(z)(PhysicalModel * model, w value, \
+                                              PhysicalInterpolation mode) {   \
+        PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);          \
+        if (impl != nullptr) {                                                \
+            impl->SET_TARGET_FUNCTION_NAME(z)(value, mode);                   \
+        }                                                                     \
+    }
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef SET_TARGET_FUNCTION_NAME
 #undef SET_PHYSICAL_TARGET_FUNCTION_NAME
 
-
 #define GET_PHYSICAL_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
 #define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) w GET_PHYSICAL_PARAMETER_FUNCTION_NAME(z)(\
-        PhysicalModel* model, ParameterValueType parameterValueType) {\
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
-    w result;\
-    if (impl != nullptr) {\
-        result = impl->GET_PARAMETER_FUNCTION_NAME(z)(parameterValueType);\
-    } else {\
-        result = {0.f};\
-    }\
-    return result;\
-}
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                        \
+    w GET_PHYSICAL_PARAMETER_FUNCTION_NAME(z)(                                 \
+            PhysicalModel * model, ParameterValueType parameterValueType) {    \
+        PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);           \
+        w result;                                                              \
+        if (impl != nullptr) {                                                 \
+            result = impl->GET_PARAMETER_FUNCTION_NAME(z)(parameterValueType); \
+        } else {                                                               \
+            result = {0.f};                                                    \
+        }                                                                      \
+        return result;                                                         \
+    }
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PARAMETER_FUNCTION_NAME
@@ -1103,14 +1113,14 @@ PHYSICAL_PARAMETERS_LIST
 
 #define OVERRIDE_FUNCTION_NAME(x) override##x
 #define PHYSICAL_OVERRIDE_FUNCTION_NAME(x) physicalModel_override##x
-#define SENSOR_(x,y,z,v,w) void PHYSICAL_OVERRIDE_FUNCTION_NAME(z)(\
-        PhysicalModel* model,\
-        v override_value) {\
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
-    if (impl != nullptr) {\
-        impl->OVERRIDE_FUNCTION_NAME(z)(override_value);\
-    }\
-}
+#define SENSOR_(x, y, z, v, w)                                       \
+    void PHYSICAL_OVERRIDE_FUNCTION_NAME(z)(PhysicalModel * model,   \
+                                            v override_value) {      \
+        PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model); \
+        if (impl != nullptr) {                                       \
+            impl->OVERRIDE_FUNCTION_NAME(z)(override_value);         \
+        }                                                            \
+    }
 SENSORS_LIST
 #undef SENSOR_
 #undef PHYSICAL_OVERRIDE_FUNCTION_NAME
@@ -1118,32 +1128,37 @@ SENSORS_LIST
 
 #define GET_FUNCTION_NAME(x) get##x
 #define PHYSICAL_GET_FUNCTION_NAME(x) physicalModel_get##x
-#define SENSOR_(x,y,z,v,w) v PHYSICAL_GET_FUNCTION_NAME(z)(\
-        PhysicalModel* model, long* measurement_id) {\
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
-    *measurement_id = 0L;\
-    return impl != nullptr ?\
-            impl->GET_FUNCTION_NAME(z)(measurement_id) :\
-            v{0.f};\
-}
+#define SENSOR_(x, y, z, v, w)                                              \
+    v PHYSICAL_GET_FUNCTION_NAME(z)(PhysicalModel * model,                  \
+                                    long* measurement_id) {                 \
+        PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);        \
+        *measurement_id = 0L;                                               \
+        return impl != nullptr ? impl->GET_FUNCTION_NAME(z)(measurement_id) \
+                               : v{0.f};                                    \
+    }
 SENSORS_LIST
 #undef SENSOR_
 #undef PHYSICAL_GET_FUNCTION_NAME
 #undef GET_FUNCTION_NAME
 
 void physicalModel_getTransform(PhysicalModel* model,
-    float* out_translation_x, float* out_translation_y, float* out_translation_z,
-    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-    int64_t* out_timestamp) {
+                                float* out_translation_x,
+                                float* out_translation_y,
+                                float* out_translation_z,
+                                float* out_rotation_x,
+                                float* out_rotation_y,
+                                float* out_rotation_z,
+                                int64_t* out_timestamp) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
-        impl->getTransform(out_translation_x, out_translation_y, out_translation_z,
-                out_rotation_x, out_rotation_y, out_rotation_z,
-                out_timestamp);
+        impl->getTransform(out_translation_x, out_translation_y,
+                           out_translation_z, out_rotation_x, out_rotation_y,
+                           out_rotation_z, out_timestamp);
     }
 }
 
-void physicalModel_setPhysicalStateAgent(PhysicalModel* model,
+void physicalModel_setPhysicalStateAgent(
+        PhysicalModel* model,
         const QAndroidPhysicalStateAgent* agent) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {

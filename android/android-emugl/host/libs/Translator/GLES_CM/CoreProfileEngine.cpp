@@ -76,9 +76,11 @@ const CoreProfileEngine::DrawTexOESCoreState& CoreProfileEngine::getDrawTexOESCo
         gl.glEnableVertexAttribArray(0); // pos
         gl.glEnableVertexAttribArray(1); // texcoord
 
-        gl.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (GLvoid*)0);
-        gl.glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                                 (GLvoid*)(uintptr_t)(3 * sizeof(float)));
+        gl.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                                 (GLvoid*)nullptr);
+        gl.glVertexAttribPointer(
+                1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                (GLvoid*)static_cast<uintptr_t>(3 * sizeof(float)));
 
         gl.glBindVertexArray(0);
 
@@ -458,7 +460,8 @@ void CoreProfileEngine::setupArrayForDraw(
             stride ? stride :
                      (size * sizeOfType(dataType));
 
-        char* bufData = convert ? (char*)currentArr.data : (char*)p->getData();
+        char* bufData = convert ? static_cast<char*>(currentArr.data)
+                                : (char*)p->getData();
         uint32_t offset = first * effectiveStride;
         uint32_t bufSize = offset + vboCount * effectiveStride;
 
@@ -468,12 +471,11 @@ void CoreProfileEngine::setupArrayForDraw(
         GLboolean shouldNormalize = false;
 
         if (arrayType == GL_COLOR_ARRAY &&
-            (dataType == GL_BYTE ||
-             dataType == GL_UNSIGNED_BYTE ||
-             dataType == GL_INT ||
-             dataType == GL_UNSIGNED_INT ||
-             dataType == GL_FIXED))
+            (dataType == GL_BYTE || dataType == GL_UNSIGNED_BYTE ||
+             dataType == GL_INT || dataType == GL_UNSIGNED_INT ||
+             dataType == GL_FIXED)) {
             shouldNormalize = true;
+        }
 
         gl.glVertexAttribPointer(attribNum, size, dataType,
                                  shouldNormalize ? GL_TRUE : GL_FALSE /* normalized */,
@@ -694,8 +696,10 @@ void CoreProfileEngine::drawTexOES(float x, float y, float z, float width, float
     // track previous vbo/ibo
     GLuint prev_vbo;
     GLuint prev_ibo;
-    gl.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prev_vbo);
-    gl.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint*)&prev_ibo);
+    gl.glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+                     reinterpret_cast<GLint*>(&prev_vbo));
+    gl.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+                     reinterpret_cast<GLint*>(&prev_ibo));
 
     // compile shaders, generate vbo/ibo if not done already
     CoreProfileEngine::DrawTexOESCoreState drawTexState =
@@ -716,10 +720,12 @@ void CoreProfileEngine::drawTexOES(float x, float y, float z, float width, float
 
     // Compute screen coordinates for our texture.
     // Recenter, rescale. (e.g., [0, 0, 1080, 1920] -> [-1, -1, 1, 1])
-    float xNdc = 2.0f * (float)(x - viewport[0] - viewport[2] / 2) / (float)viewport[2];
-    float yNdc = 2.0f * (float)(y - viewport[1] - viewport[3] / 2) / (float)viewport[3];
-    float wNdc = 2.0f * (float)width / (float)viewport[2];
-    float hNdc = 2.0f * (float)height / (float)viewport[3];
+    float xNdc = 2.0f * (x - viewport[0] - viewport[2] / 2) /
+                 static_cast<float>(viewport[2]);
+    float yNdc = 2.0f * (y - viewport[1] - viewport[3] / 2) /
+                 static_cast<float>(viewport[3]);
+    float wNdc = 2.0f * width / static_cast<float>(viewport[2]);
+    float hNdc = 2.0f * height / static_cast<float>(viewport[3]);
     z = z >= 1.0f ? 1.0f : z;
     z = z <= 0.0f ? 0.0f : z;
     float zNdc = z * 2.0f - 1.0f;
@@ -732,16 +738,16 @@ void CoreProfileEngine::drawTexOES(float x, float y, float z, float width, float
             auto objData = mCtx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
 
             if (objData) {
-                TextureData* texData = (TextureData*)objData;
+                auto* texData = (TextureData*)objData;
 
-                float texCropX = (float)(texData->crop_rect[0]);
-                float texCropY = (float)(texData->crop_rect[1]);
+                auto texCropX = static_cast<float>(texData->crop_rect[0]);
+                auto texCropY = static_cast<float>(texData->crop_rect[1]);
 
-                float texCropW = (float)(texData->crop_rect[2]);
-                float texCropH = (float)(texData->crop_rect[3]);
+                auto texCropW = static_cast<float>(texData->crop_rect[2]);
+                auto texCropH = static_cast<float>(texData->crop_rect[3]);
 
-                float texW = (float)(texData->width);
-                float texH = (float)(texData->height);
+                auto texW = static_cast<float>(texData->width);
+                auto texH = static_cast<float>(texData->height);
 
                 // Now we know the vertex attributes (pos, texcoord).
                 // Our vertex attributes are formatted with interleaved
@@ -767,7 +773,7 @@ void CoreProfileEngine::drawTexOES(float x, float y, float z, float width, float
 
             gl.glActiveTexture(GL_TEXTURE0 + i);
             gl.glUniform1i(samplerLoc, i);
-            gl.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            gl.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         }
     }
 
@@ -848,7 +854,7 @@ void CoreProfileEngine::preDrawTextureUnitEmulation() {
     auto objData = mCtx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
 
     if (objData) {
-        TextureData* texData = (TextureData*)objData;
+        auto* texData = (TextureData*)objData;
         gl.glUniform1i(m_geometryDrawState.textureFormatLoc, texData->internalFormat);
     } else {
         gl.glUniform1i(m_geometryDrawState.textureFormatLoc, GL_RGBA);
@@ -995,7 +1001,7 @@ void CoreProfileEngine::drawElements(GLenum mode, GLsizei count, GLenum type, co
     setupLighting();
     setupFog();
 
-    gl.glDrawElements(mode, count, type, (GLvoid*)0);
+    gl.glDrawElements(mode, count, type, (GLvoid*)nullptr);
 
     postDrawVertexSetup();
     postDrawTextureUnitEmulation();

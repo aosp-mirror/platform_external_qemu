@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2011 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "RenderThreadInfo.h"
 
@@ -21,10 +21,11 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
+#include "FrameBuffer.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
-#include "FrameBuffer.h"
 
+#include <memory>
 #include <unordered_map>
 
 using android::base::Stream;
@@ -33,7 +34,7 @@ namespace {
 
 class ThreadInfoStore : public ::emugl::ThreadStore {
 public:
-    ThreadInfoStore() : ::emugl::ThreadStore(NULL) {}
+    ThreadInfoStore() : ::emugl::ThreadStore(nullptr) {}
 };
 
 }  // namespace
@@ -45,7 +46,7 @@ RenderThreadInfo::RenderThreadInfo() {
 }
 
 RenderThreadInfo::~RenderThreadInfo() {
-    s_tls->set(NULL);
+    s_tls->set(nullptr);
 }
 
 RenderThreadInfo* RenderThreadInfo::get() {
@@ -74,11 +75,11 @@ RenderThreadInfo* RenderThreadInfo::get() {
 // So we maintain a StalePtrRegistry<SyncThread>, sSyncThreadRegistry,
 // with getPtr removing entries from stale database.
 static android::base::LazyInstance<StalePtrRegistry<SyncThread> >
-    sSyncThreadRegistry = LAZY_INSTANCE_INIT;
+        sSyncThreadRegistry = LAZY_INSTANCE_INIT;
 
 // createSyncThread() tracks new sync threads in the registry.
 void RenderThreadInfo::createSyncThread() {
-    syncThread.reset(new SyncThread(currContext->getEGLContext()));
+    syncThread = std::make_unique<SyncThread>(currContext->getEGLContext());
     sSyncThreadRegistry->addPtr(syncThread.get());
 }
 
@@ -114,8 +115,8 @@ void RenderThreadInfo::onSave(Stream* stream) {
 
     stream->putBe64(m_puid);
 
-    if (syncThread.get()) {
-        syncThreadAlias = (uint64_t)(uintptr_t)syncThread.get();
+    if (syncThread) {
+        syncThreadAlias = static_cast<uint64_t>((uintptr_t)syncThread.get());
     }
     stream->putBe64(syncThreadAlias);
 
@@ -134,19 +135,16 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     currReadSurf = fb->getWindowSurface_locked(readSurf);
     fb->unlock();
 
-    loadCollection(stream, &m_contextSet, [](Stream* stream) {
-        return stream->getBe32();
-    });
-    loadCollection(stream, &m_windowSet, [](Stream* stream) {
-        return stream->getBe32();
-    });
+    loadCollection(stream, &m_contextSet,
+                   [](Stream* stream) { return stream->getBe32(); });
+    loadCollection(stream, &m_windowSet,
+                   [](Stream* stream) { return stream->getBe32(); });
 
     m_puid = stream->getBe64();
 
     syncThreadAlias = stream->getBe64();
 
     if (syncThreadAlias) {
-
         // We need to create a new sync thread super early if we are restoring
         // renderthreadinfo, since there could be a pending rcTriggerWait.
         // Additionally, that rcTriggerWait most likely uses the old pointer
@@ -158,7 +156,7 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
             eglCtx = currContext->getEGLContext();
         }
 
-        syncThread.reset(new SyncThread(eglCtx));
+        syncThread = std::make_unique<SyncThread>(eglCtx);
         sSyncThreadRegistry->remapStalePtr(syncThreadAlias, syncThread.get());
 
         // Note that the values in sSyncThreadRegistry will only be used for a

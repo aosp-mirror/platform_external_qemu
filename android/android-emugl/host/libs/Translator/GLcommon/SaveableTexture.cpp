@@ -16,35 +16,28 @@
 
 #include "GLcommon/SaveableTexture.h"
 
+#include "GLcommon/GLEScontext.h"
+#include "GLcommon/GLutils.h"
+#include "GLcommon/TextureUtils.h"
 #include "android/base/ArraySize.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/system/System.h"
-#include "GLcommon/GLEScontext.h"
-#include "GLcommon/GLutils.h"
-#include "GLcommon/TextureUtils.h"
 
 #include <algorithm>
-
+#include <memory>
 static const GLenum kTexParam[] = {
-    GL_TEXTURE_MIN_FILTER,
-    GL_TEXTURE_MAG_FILTER,
-    GL_TEXTURE_WRAP_S,
-    GL_TEXTURE_WRAP_T,
+        GL_TEXTURE_MIN_FILTER,
+        GL_TEXTURE_MAG_FILTER,
+        GL_TEXTURE_WRAP_S,
+        GL_TEXTURE_WRAP_T,
 };
 
 static const GLenum kTexParamGles3[] = {
-    GL_TEXTURE_BASE_LEVEL,
-    GL_TEXTURE_COMPARE_FUNC,
-    GL_TEXTURE_COMPARE_MODE,
-    GL_TEXTURE_MIN_LOD,
-    GL_TEXTURE_MAX_LOD,
-    GL_TEXTURE_MAX_LEVEL,
-    GL_TEXTURE_SWIZZLE_R,
-    GL_TEXTURE_SWIZZLE_G,
-    GL_TEXTURE_SWIZZLE_B,
-    GL_TEXTURE_SWIZZLE_A,
-    GL_TEXTURE_WRAP_R,
+        GL_TEXTURE_BASE_LEVEL, GL_TEXTURE_COMPARE_FUNC, GL_TEXTURE_COMPARE_MODE,
+        GL_TEXTURE_MIN_LOD,    GL_TEXTURE_MAX_LOD,      GL_TEXTURE_MAX_LEVEL,
+        GL_TEXTURE_SWIZZLE_R,  GL_TEXTURE_SWIZZLE_G,    GL_TEXTURE_SWIZZLE_B,
+        GL_TEXTURE_SWIZZLE_A,  GL_TEXTURE_WRAP_R,
 };
 
 static uint32_t s_texAlign(uint32_t v, uint32_t align) {
@@ -328,8 +321,7 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_border(texture.border),
       m_texStorageLevels(texture.texStorageLevels),
       m_maxMipmapLevel(texture.maxMipmapLevel),
-      m_globalName(texture.globalName),
-      m_isDirty(true) {}
+      m_globalName(texture.globalName) {}
 
 SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
                                  loader_t&& loader)
@@ -350,15 +342,15 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     m_border = stream->getBe32();
     m_texStorageLevels = stream->getBe32();
     m_maxMipmapLevel = stream->getBe32();
-    // TODO: handle other texture targets
+    // TODO(yahan): handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
-        unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
-                m_maxMipmapLevel + 1;
+        unsigned int numLevels =
+                m_texStorageLevels ? m_texStorageLevels : m_maxMipmapLevel + 1;
         auto loadTex = [stream, numLevels](
                                std::unique_ptr<LevelImageData[]>& levelData,
                                bool isDepth) {
-            levelData.reset(new LevelImageData[numLevels]);
+            levelData = std::make_unique<LevelImageData[]>(numLevels);
             for (unsigned int level = 0; level < numLevels; level++) {
                 levelData[level].m_width = stream->getBe32();
                 levelData[level].m_height = stream->getBe32();
@@ -373,8 +365,8 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
                 loadTex(m_levelData[0], false);
                 break;
             case GL_TEXTURE_CUBE_MAP:
-                for (int i = 0; i < 6; i++) {
-                    loadTex(m_levelData[i], false);
+                for (auto& i : m_levelData) {
+                    loadTex(i, false);
                 }
                 break;
             case GL_TEXTURE_3D:
@@ -385,9 +377,10 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
                 break;
         }
         // Load tex param
-        loadCollection(stream, &m_texParam,
+        loadCollection(
+                stream, &m_texParam,
                 [](android::base::Stream* stream)
-                    -> std::unordered_map<GLenum, GLint>::value_type {
+                        -> std::unordered_map<GLenum, GLint>::value_type {
                     GLenum pname = stream->getBe32();
                     GLint value = stream->getBe32();
                     return std::make_pair(pname, value);
@@ -397,8 +390,7 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     }
 }
 
-void SaveableTexture::onSave(
-        android::base::Stream* stream) {
+void SaveableTexture::onSave(android::base::Stream* stream) {
     stream->putBe32(m_target);
     stream->putBe32(m_width);
     stream->putBe32(m_height);
@@ -409,7 +401,7 @@ void SaveableTexture::onSave(
     stream->putBe32(m_border);
     stream->putBe32(m_texStorageLevels);
     stream->putBe32(m_maxMipmapLevel);
-    // TODO: handle other texture targets
+    // TODO(yahan): handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         static constexpr GLenum pixelStoreIndexes[] = {
@@ -451,48 +443,57 @@ void SaveableTexture::onSave(
         }
         dispatcher.glBindTexture(m_target, m_globalName);
         // Get the number of mipmap levels.
-        unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
-                m_maxMipmapLevel + 1;
+        unsigned int numLevels =
+                m_texStorageLevels ? m_texStorageLevels : m_maxMipmapLevel + 1;
 
         bool isLowMem = android::base::System::isUnderMemoryPressure();
 
         auto saveTex = [this, stream, numLevels, &dispatcher, isLowMem](
-                                GLenum target, bool isDepth,
-                                std::unique_ptr<LevelImageData[]>& imgData) {
+                               GLenum target, bool isDepth,
+                               std::unique_ptr<LevelImageData[]>& imgData) {
             if (m_isDirty) {
-                imgData.reset(new LevelImageData[numLevels]);
+                imgData = std::make_unique<LevelImageData[]>(numLevels);
                 for (unsigned int level = 0; level < numLevels; level++) {
                     unsigned int& width = imgData.get()[level].m_width;
                     unsigned int& height = imgData.get()[level].m_height;
                     unsigned int& depth = imgData.get()[level].m_depth;
-                    width = level == 0 ? m_width :
-                        std::max<unsigned int>(
-                            imgData.get()[level - 1].m_width / 2, 1);
-                    height = level == 0 ? m_height :
-                        std::max<unsigned int>(
-                            imgData.get()[level - 1].m_height / 2, 1);
-                    depth = level == 0 ? m_depth :
-                        std::max<unsigned int>(
-                            imgData.get()[level - 1].m_depth / 2, 1);
-                    android::base::SmallFixedVector<unsigned char, 16>& buffer
-                        = imgData.get()[level].m_data;
+                    width = level == 0
+                                    ? m_width
+                                    : std::max<unsigned int>(
+                                              imgData.get()[level - 1].m_width /
+                                                      2,
+                                              1);
+                    height = level == 0 ? m_height
+                                        : std::max<unsigned int>(
+                                                  imgData.get()[level - 1]
+                                                                  .m_height /
+                                                          2,
+                                                  1);
+                    depth = level == 0
+                                    ? m_depth
+                                    : std::max<unsigned int>(
+                                              imgData.get()[level - 1].m_depth /
+                                                      2,
+                                              1);
+                    android::base::SmallFixedVector<unsigned char, 16>& buffer =
+                            imgData.get()[level].m_data;
                     if (!isGles2Gles()) {
                         GLint glWidth;
                         GLint glHeight;
-                        dispatcher.glGetTexLevelParameteriv(target, level,
-                                GL_TEXTURE_WIDTH, &glWidth);
-                        dispatcher.glGetTexLevelParameteriv(target, level,
-                                GL_TEXTURE_HEIGHT, &glHeight);
+                        dispatcher.glGetTexLevelParameteriv(
+                                target, level, GL_TEXTURE_WIDTH, &glWidth);
+                        dispatcher.glGetTexLevelParameteriv(
+                                target, level, GL_TEXTURE_HEIGHT, &glHeight);
                         width = static_cast<unsigned int>(glWidth);
                         height = static_cast<unsigned int>(glHeight);
                     }
                     if (isDepth) {
                         if (!isGles2Gles()) {
                             GLint glDepth;
-                            dispatcher.glGetTexLevelParameteriv(target, level,
-                                    GL_TEXTURE_DEPTH, &glDepth);
-                            depth = static_cast<unsigned int>(std::max(glDepth,
-                                    1));
+                            dispatcher.glGetTexLevelParameteriv(
+                                    target, level, GL_TEXTURE_DEPTH, &glDepth);
+                            depth = static_cast<unsigned int>(
+                                    std::max(glDepth, 1));
                         }
                     } else {
                         depth = 1;
@@ -506,11 +507,11 @@ void SaveableTexture::onSave(
                         GLenum neededBufferFormat = m_format;
                         if (isCoreProfile()) {
                             neededBufferFormat =
-                                getCoreProfileEmulatedFormat(m_format);
+                                    getCoreProfileEmulatedFormat(m_format);
                         }
                         dispatcher.glGetTexImage(target, level,
-                                neededBufferFormat, m_type,
-                                buffer.data());
+                                                 neededBufferFormat, m_type,
+                                                 buffer.data());
                     }
                 }
             }
@@ -556,13 +557,13 @@ void SaveableTexture::onSave(
         }
         std::unordered_map<GLenum, GLint> texParam;
         auto saveParam = [this, &texParam, stream, &dispatcher,
-                emulatedBaseSwizzle](
-                const GLenum* plist, size_t plistSize) {
+                          emulatedBaseSwizzle](const GLenum* plist,
+                                               size_t plistSize) {
             GLint param;
             for (size_t i = 0; i < plistSize; i++) {
                 dispatcher.glGetTexParameteriv(m_target, plist[i], &param);
                 if (isSwizzleParam(plist[i]) && param != GL_ZERO &&
-                        param != GL_ONE) {
+                    param != GL_ONE) {
                     if (param == emulatedBaseSwizzle.toRed) {
                         param = GL_RED;
                     } else if (param == emulatedBaseSwizzle.toGreen) {
@@ -579,11 +580,12 @@ void SaveableTexture::onSave(
         saveParam(kTexParam, sizeof(kTexParam) / sizeof(kTexParam[0]));
         if (dispatcher.getGLESVersion() >= GLES_3_0) {
             saveParam(kTexParamGles3,
-                    sizeof(kTexParamGles3) / sizeof(kTexParamGles3[0]));
+                      sizeof(kTexParamGles3) / sizeof(kTexParamGles3[0]));
         }
-        saveCollection(stream, texParam,
+        saveCollection(
+                stream, texParam,
                 [](android::base::Stream* s,
-                    const std::unordered_map<GLenum, GLint>::value_type& pair) {
+                   const std::unordered_map<GLenum, GLint>::value_type& pair) {
                     s->putBe32(pair.first);
                     s->putBe32(pair.second);
                 });
@@ -605,7 +607,7 @@ void SaveableTexture::onSave(
         // textures requires that the intermediate buffer is still around.
         // Therefore, mark as dirty if we were under memory pressure.
         //
-        // TODO: Don't keep those around in memory regardless of memory
+        // TODO(lfy): Don't keep those around in memory regardless of memory
         // pressure
 
         m_isDirty = false || isLowMem;
@@ -620,8 +622,8 @@ void SaveableTexture::onSave(
 void SaveableTexture::restore() {
     assert(m_loader);
     m_loader(this);
-    m_globalTexObj.reset(new NamedObject(
-            GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
+    m_globalTexObj = std::make_shared<NamedObject>(
+            GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace);
     m_globalName = m_globalTexObj->getGlobalName();
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
@@ -672,13 +674,13 @@ void SaveableTexture::restore() {
         // Restore texture data
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Get the number of mipmap levels.
-        unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
-                m_maxMipmapLevel + 1;
+        unsigned int numLevels =
+                m_texStorageLevels ? m_texStorageLevels : m_maxMipmapLevel + 1;
         GLint resultInternalFormat = m_internalFormat;
         GLenum resultFormat = m_format;
         if (isCoreProfile() && isCoreProfileEmulatedFormat(m_format)) {
-            resultInternalFormat = getCoreProfileEmulatedInternalFormat(
-                    m_format, m_type);
+            resultInternalFormat =
+                    getCoreProfileEmulatedInternalFormat(m_format, m_type);
             resultFormat = getCoreProfileEmulatedFormat(m_format);
         }
         if (m_texStorageLevels) {
@@ -686,26 +688,25 @@ void SaveableTexture::restore() {
                 case GL_TEXTURE_2D:
                 case GL_TEXTURE_CUBE_MAP:
                     dispatcher.glTexStorage2D(m_target, m_texStorageLevels,
-                            m_internalFormat,
-                            m_levelData[0].get()[0].m_width,
-                            m_levelData[0].get()[0].m_height);
+                                              m_internalFormat,
+                                              m_levelData[0].get()[0].m_width,
+                                              m_levelData[0].get()[0].m_height);
                     break;
                 case GL_TEXTURE_3D:
                 case GL_TEXTURE_2D_ARRAY:
                     dispatcher.glTexStorage3D(m_target, m_texStorageLevels,
-                            m_internalFormat,
-                            m_levelData[0].get()[0].m_width,
-                            m_levelData[0].get()[0].m_height,
-                            m_levelData[0].get()[0].m_depth);
+                                              m_internalFormat,
+                                              m_levelData[0].get()[0].m_width,
+                                              m_levelData[0].get()[0].m_height,
+                                              m_levelData[0].get()[0].m_depth);
                     break;
             }
         }
 
         auto restoreTex2D =
-                [this, numLevels, resultInternalFormat,
-                resultFormat, &dispatcher](
-                        GLenum target,
-                        std::unique_ptr<LevelImageData[]>& levelData) {
+                [this, numLevels, resultInternalFormat, resultFormat,
+                 &dispatcher](GLenum target,
+                              std::unique_ptr<LevelImageData[]>& levelData) {
                     for (unsigned int level = 0; level < numLevels; level++) {
                         const void* pixels =
                                 levelData[level].m_data.empty()
@@ -716,23 +717,22 @@ void SaveableTexture::restore() {
                                 dispatcher.glTexSubImage2D(
                                         target, level, 0, 0,
                                         levelData[level].m_width,
-                                        levelData[level].m_height,
-                                        resultFormat, m_type, pixels);
+                                        levelData[level].m_height, resultFormat,
+                                        m_type, pixels);
                             } else {
                                 dispatcher.glTexImage2D(
                                         target, level, resultInternalFormat,
                                         levelData[level].m_width,
-                                        levelData[level].m_height,
-                                        m_border, resultFormat, m_type, pixels);
+                                        levelData[level].m_height, m_border,
+                                        resultFormat, m_type, pixels);
                             }
                         }
                     }
                 };
         auto restoreTex3D =
-                [this, numLevels, resultInternalFormat,
-                resultFormat, &dispatcher](
-                        GLenum target,
-                        std::unique_ptr<LevelImageData[]>& levelData) {
+                [this, numLevels, resultInternalFormat, resultFormat,
+                 &dispatcher](GLenum target,
+                              std::unique_ptr<LevelImageData[]>& levelData) {
                     for (unsigned int level = 0; level < numLevels; level++) {
                         const void* pixels =
                                 levelData[level].m_data.empty()
@@ -744,8 +744,8 @@ void SaveableTexture::restore() {
                                         target, level, 0, 0, 0,
                                         levelData[level].m_width,
                                         levelData[level].m_height,
-                                        levelData[level].m_depth,
-                                        resultFormat, m_type, pixels);
+                                        levelData[level].m_depth, resultFormat,
+                                        m_type, pixels);
                             } else {
                                 dispatcher.glTexImage3D(
                                         target, level, m_internalFormat,
@@ -784,9 +784,9 @@ void SaveableTexture::restore() {
         for (const auto& param : m_texParam) {
             if (isSwizzleParam(param.first)) {
                 GLenum hostEquivalentSwizzle =
-                    swizzleComponentOf(emulatedBaseSwizzle, param.second);
+                        swizzleComponentOf(emulatedBaseSwizzle, param.second);
                 dispatcher.glTexParameteri(m_target, param.first,
-                        hostEquivalentSwizzle);
+                                           hostEquivalentSwizzle);
             } else {
                 dispatcher.glTexParameteri(m_target, param.first, param.second);
             }

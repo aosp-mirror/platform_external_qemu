@@ -33,7 +33,7 @@ class EmulatorContainer : public QScrollArea {
 
 public:
     explicit EmulatorContainer(EmulatorQtWindow* window);
-    virtual ~EmulatorContainer();
+    ~EmulatorContainer() override;
 
     void changeEvent(QEvent* event) override;
     void closeEvent(QCloseEvent* event) override;

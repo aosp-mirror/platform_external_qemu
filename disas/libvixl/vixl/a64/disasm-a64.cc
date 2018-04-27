@@ -154,7 +154,7 @@ void Disassembler::VisitAddSubShifted(const Instruction* instr) {
 void Disassembler::VisitAddSubExtended(const Instruction* instr) {
   bool rd_is_zr = RdIsZROrSP(instr);
   const char *mnemonic = "";
-  Extend mode = static_cast<Extend>(instr->ExtendMode());
+  auto mode = static_cast<Extend>(instr->ExtendMode());
   const char *form = ((mode == UXTX) || (mode == SXTX)) ?
                      "'Rds, 'Rns, 'Xm'Ext" : "'Rds, 'Rns, 'Wm'Ext";
   const char *form_cmp = ((mode == UXTX) || (mode == SXTX)) ?
@@ -385,7 +385,7 @@ void Disassembler::VisitConditionalSelect(const Instruction* instr) {
   const char *form_test = "'Rd, 'CInv";
   const char *form_update = "'Rd, 'Rn, 'CInv";
 
-  Condition cond = static_cast<Condition>(instr->Condition());
+  auto cond = static_cast<Condition>(instr->Condition());
   bool invertible_cond = (cond != al) && (cond != nv);
 
   switch (instr->Mask(ConditionalSelectMask)) {
@@ -557,7 +557,7 @@ void Disassembler::VisitUnconditionalBranchToRegister(
     case RET: {
       mnemonic = "ret";
       if (instr->Rn() == kLinkRegCode) {
-        form = NULL;
+          form = nullptr;
       }
       break;
     }
@@ -764,11 +764,12 @@ void Disassembler::VisitMoveWideImmediate(const Instruction* instr) {
       break;
     case MOVZ_w:
     case MOVZ_x:
-      if ((instr->ImmMoveWide()) || (instr->ShiftMoveWide() == 0))
-        mnemonic = "mov";
-      else
-        mnemonic = "movz";
-      break;
+        if ((instr->ImmMoveWide()) || (instr->ShiftMoveWide() == 0)) {
+            mnemonic = "mov";
+        } else {
+            mnemonic = "movz";
+        }
+        break;
     case MOVK_w:
     case MOVK_x: mnemonic = "movk"; form = "'Rd, 'IMoveLSL"; break;
     default: VIXL_UNREACHABLE();
@@ -1288,7 +1289,7 @@ void Disassembler::VisitSystem(const Instruction* instr) {
     switch (instr->Mask(SystemExclusiveMonitorMask)) {
       case CLREX: {
         mnemonic = "clrex";
-        form = (instr->CRm() == 0xf) ? NULL : "'IX";
+        form = (instr->CRm() == 0xf) ? nullptr : "'IX";
         break;
       }
     }
@@ -1317,7 +1318,7 @@ void Disassembler::VisitSystem(const Instruction* instr) {
     switch (instr->ImmHint()) {
       case NOP: {
         mnemonic = "nop";
-        form = NULL;
+        form = nullptr;
         break;
       }
     }
@@ -1335,7 +1336,7 @@ void Disassembler::VisitSystem(const Instruction* instr) {
       }
       case ISB: {
         mnemonic = "isb";
-        form = NULL;
+        form = nullptr;
         break;
       }
     }
@@ -1583,52 +1584,64 @@ void Disassembler::VisitNEON3Same(const Instruction* instr) {
     }
     nfd.SetFormatMaps(nfd.LogicalFormatMap());
   } else {
-    static const char *mnemonics[] = {
-        "shadd", "uhadd", "shadd", "uhadd",
-        "sqadd", "uqadd", "sqadd", "uqadd",
-        "srhadd", "urhadd", "srhadd", "urhadd",
-        NULL, NULL, NULL, NULL,  // Handled by logical cases above.
-        "shsub", "uhsub", "shsub", "uhsub",
-        "sqsub", "uqsub", "sqsub", "uqsub",
-        "cmgt", "cmhi", "cmgt", "cmhi",
-        "cmge", "cmhs", "cmge", "cmhs",
-        "sshl", "ushl", "sshl", "ushl",
-        "sqshl", "uqshl", "sqshl", "uqshl",
-        "srshl", "urshl", "srshl", "urshl",
-        "sqrshl", "uqrshl", "sqrshl", "uqrshl",
-        "smax", "umax", "smax", "umax",
-        "smin", "umin", "smin", "umin",
-        "sabd", "uabd", "sabd", "uabd",
-        "saba", "uaba", "saba", "uaba",
-        "add", "sub", "add", "sub",
-        "cmtst", "cmeq", "cmtst", "cmeq",
-        "mla", "mls", "mla", "mls",
-        "mul", "pmul", "mul", "pmul",
-        "smaxp", "umaxp", "smaxp", "umaxp",
-        "sminp", "uminp", "sminp", "uminp",
-        "sqdmulh", "sqrdmulh", "sqdmulh", "sqrdmulh",
-        "addp", "unallocated", "addp", "unallocated",
-        "fmaxnm", "fmaxnmp", "fminnm", "fminnmp",
-        "fmla", "unallocated", "fmls", "unallocated",
-        "fadd", "faddp", "fsub", "fabd",
-        "fmulx", "fmul", "unallocated", "unallocated",
-        "fcmeq", "fcmge", "unallocated", "fcmgt",
-        "unallocated", "facge", "unallocated", "facgt",
-        "fmax", "fmaxp", "fmin", "fminp",
-        "frecps", "fdiv", "frsqrts", "unallocated"};
+      static const char* mnemonics[] = {
+              "shadd",       "uhadd",       "shadd",
+              "uhadd",       "sqadd",       "uqadd",
+              "sqadd",       "uqadd",       "srhadd",
+              "urhadd",      "srhadd",      "urhadd",
+              nullptr,       nullptr,       nullptr,
+              nullptr,  // Handled by logical cases above.
+              "shsub",       "uhsub",       "shsub",
+              "uhsub",       "sqsub",       "uqsub",
+              "sqsub",       "uqsub",       "cmgt",
+              "cmhi",        "cmgt",        "cmhi",
+              "cmge",        "cmhs",        "cmge",
+              "cmhs",        "sshl",        "ushl",
+              "sshl",        "ushl",        "sqshl",
+              "uqshl",       "sqshl",       "uqshl",
+              "srshl",       "urshl",       "srshl",
+              "urshl",       "sqrshl",      "uqrshl",
+              "sqrshl",      "uqrshl",      "smax",
+              "umax",        "smax",        "umax",
+              "smin",        "umin",        "smin",
+              "umin",        "sabd",        "uabd",
+              "sabd",        "uabd",        "saba",
+              "uaba",        "saba",        "uaba",
+              "add",         "sub",         "add",
+              "sub",         "cmtst",       "cmeq",
+              "cmtst",       "cmeq",        "mla",
+              "mls",         "mla",         "mls",
+              "mul",         "pmul",        "mul",
+              "pmul",        "smaxp",       "umaxp",
+              "smaxp",       "umaxp",       "sminp",
+              "uminp",       "sminp",       "uminp",
+              "sqdmulh",     "sqrdmulh",    "sqdmulh",
+              "sqrdmulh",    "addp",        "unallocated",
+              "addp",        "unallocated", "fmaxnm",
+              "fmaxnmp",     "fminnm",      "fminnmp",
+              "fmla",        "unallocated", "fmls",
+              "unallocated", "fadd",        "faddp",
+              "fsub",        "fabd",        "fmulx",
+              "fmul",        "unallocated", "unallocated",
+              "fcmeq",       "fcmge",       "unallocated",
+              "fcmgt",       "unallocated", "facge",
+              "unallocated", "facgt",       "fmax",
+              "fmaxp",       "fmin",        "fminp",
+              "frecps",      "fdiv",        "frsqrts",
+              "unallocated"};
 
-    // Operation is determined by the opcode bits (15-11), the top bit of
-    // size (23) and the U bit (29).
-    unsigned index = (instr->Bits(15, 11) << 2) | (instr->Bit(23) << 1) |
-                     instr->Bit(29);
-    VIXL_ASSERT(index < (sizeof(mnemonics) / sizeof(mnemonics[0])));
-    mnemonic = mnemonics[index];
-    // Assert that index is not one of the previously handled logical
-    // instructions.
-    VIXL_ASSERT(mnemonic != NULL);
+      // Operation is determined by the opcode bits (15-11), the top bit of
+      // size (23) and the U bit (29).
+      unsigned index = (instr->Bits(15, 11) << 2) | (instr->Bit(23) << 1) |
+                       instr->Bit(29);
+      VIXL_ASSERT(index < (sizeof(mnemonics) / sizeof(mnemonics[0])));
+      mnemonic = mnemonics[index];
+      // Assert that index is not one of the previously handled logical
+      // instructions.
+      VIXL_ASSERT(mnemonic != NULL);
 
-    if (instr->Mask(NEON3SameFPFMask) == NEON3SameFPFixed) {
-      nfd.SetFormatMaps(nfd.FPFormatMap());
+      if (instr->Mask(NEON3SameFPFMask) == NEON3SameFPFixed) {
+          nfd.SetFormatMaps(nfd.FPFormatMap());
     }
   }
   Format(instr, mnemonic, nfd.Substitute(form));
@@ -1964,10 +1977,11 @@ void Disassembler::VisitNEONLoadStoreSingleStruct(const Instruction* instr) {
       VIXL_STATIC_ASSERT((NEON_ST2_s | (1 << NEONLSSize_offset)) == NEON_ST2_d);
       VIXL_STATIC_ASSERT((NEON_LD2_s | (1 << NEONLSSize_offset)) == NEON_LD2_d);
       mnemonic = (instr->LdStXLoad() == 1) ? "ld2" : "st2";
-      if ((instr->NEONLSSize() & 1) == 0)
-        form = "{'Vt.s, 'Vt2.s}['IVLSLane2], ['Xns]";
-      else
-        form = "{'Vt.d, 'Vt2.d}['IVLSLane3], ['Xns]";
+      if ((instr->NEONLSSize() & 1) == 0) {
+          form = "{'Vt.s, 'Vt2.s}['IVLSLane2], ['Xns]";
+      } else {
+          form = "{'Vt.d, 'Vt2.d}['IVLSLane3], ['Xns]";
+      }
       break;
     case NEON_LD2R:
       mnemonic = "ld2r";
@@ -1986,10 +2000,11 @@ void Disassembler::VisitNEONLoadStoreSingleStruct(const Instruction* instr) {
     case NEON_LD3_s:
     case NEON_ST3_s:
       mnemonic = (instr->LdStXLoad() == 1) ? "ld3" : "st3";
-      if ((instr->NEONLSSize() & 1) == 0)
-        form = "{'Vt.s, 'Vt2.s, 'Vt3.s}['IVLSLane2], ['Xns]";
-      else
-        form = "{'Vt.d, 'Vt2.d, 'Vt3.d}['IVLSLane3], ['Xns]";
+      if ((instr->NEONLSSize() & 1) == 0) {
+          form = "{'Vt.s, 'Vt2.s, 'Vt3.s}['IVLSLane2], ['Xns]";
+      } else {
+          form = "{'Vt.d, 'Vt2.d, 'Vt3.d}['IVLSLane3], ['Xns]";
+      }
       break;
     case NEON_LD3R:
       mnemonic = "ld3r";
@@ -2010,10 +2025,11 @@ void Disassembler::VisitNEONLoadStoreSingleStruct(const Instruction* instr) {
       VIXL_STATIC_ASSERT((NEON_LD4_s | (1 << NEONLSSize_offset)) == NEON_LD4_d);
       VIXL_STATIC_ASSERT((NEON_ST4_s | (1 << NEONLSSize_offset)) == NEON_ST4_d);
       mnemonic = (instr->LdStXLoad() == 1) ? "ld4" : "st4";
-      if ((instr->NEONLSSize() & 1) == 0)
-        form = "{'Vt.s, 'Vt2.s, 'Vt3.s, 'Vt4.s}['IVLSLane2], ['Xns]";
-      else
-        form = "{'Vt.d, 'Vt2.d, 'Vt3.d, 'Vt4.d}['IVLSLane3], ['Xns]";
+      if ((instr->NEONLSSize() & 1) == 0) {
+          form = "{'Vt.s, 'Vt2.s, 'Vt3.s, 'Vt4.s}['IVLSLane2], ['Xns]";
+      } else {
+          form = "{'Vt.d, 'Vt2.d, 'Vt3.d, 'Vt4.d}['IVLSLane3], ['Xns]";
+      }
       break;
     case NEON_LD4R:
       mnemonic = "ld4r";
@@ -2069,10 +2085,11 @@ void Disassembler::VisitNEONLoadStoreSingleStructPostIndex(
     case NEON_LD2_s_post:
     case NEON_ST2_s_post:
       mnemonic = (instr->LdStXLoad() == 1) ? "ld2" : "st2";
-      if ((instr->NEONLSSize() & 1) == 0)
-        form = "{'Vt.s, 'Vt2.s}['IVLSLane2], ['Xns], 'Xmb8";
-      else
-        form = "{'Vt.d, 'Vt2.d}['IVLSLane3], ['Xns], 'Xmb16";
+      if ((instr->NEONLSSize() & 1) == 0) {
+          form = "{'Vt.s, 'Vt2.s}['IVLSLane2], ['Xns], 'Xmb8";
+      } else {
+          form = "{'Vt.d, 'Vt2.d}['IVLSLane3], ['Xns], 'Xmb16";
+      }
       break;
     case NEON_LD2R_post:
       mnemonic = "ld2r";
@@ -2091,10 +2108,11 @@ void Disassembler::VisitNEONLoadStoreSingleStructPostIndex(
     case NEON_LD3_s_post:
     case NEON_ST3_s_post:
       mnemonic = (instr->LdStXLoad() == 1) ? "ld3" : "st3";
-      if ((instr->NEONLSSize() & 1) == 0)
-        form = "{'Vt.s, 'Vt2.s, 'Vt3.s}['IVLSLane2], ['Xns], 'Xmb12";
-      else
-        form = "{'Vt.d, 'Vt2.d, 'Vt3.d}['IVLSLane3], ['Xns], 'Xmr3";
+      if ((instr->NEONLSSize() & 1) == 0) {
+          form = "{'Vt.s, 'Vt2.s, 'Vt3.s}['IVLSLane2], ['Xns], 'Xmb12";
+      } else {
+          form = "{'Vt.d, 'Vt2.d, 'Vt3.d}['IVLSLane3], ['Xns], 'Xmr3";
+      }
       break;
     case NEON_LD3R_post:
       mnemonic = "ld3r";
@@ -2113,10 +2131,11 @@ void Disassembler::VisitNEONLoadStoreSingleStructPostIndex(
     case NEON_LD4_s_post:
     case NEON_ST4_s_post:
       mnemonic = (instr->LdStXLoad() == 1) ? "ld4" : "st4";
-      if ((instr->NEONLSSize() & 1) == 0)
-        form = "{'Vt.s, 'Vt2.s, 'Vt3.s, 'Vt4.s}['IVLSLane2], ['Xns], 'Xmb16";
-      else
-        form = "{'Vt.d, 'Vt2.d, 'Vt3.d, 'Vt4.d}['IVLSLane3], ['Xns], 'Xmb32";
+      if ((instr->NEONLSSize() & 1) == 0) {
+          form = "{'Vt.s, 'Vt2.s, 'Vt3.s, 'Vt4.s}['IVLSLane2], ['Xns], 'Xmb16";
+      } else {
+          form = "{'Vt.d, 'Vt2.d, 'Vt3.d, 'Vt4.d}['IVLSLane3], ['Xns], 'Xmb32";
+      }
       break;
     case NEON_LD4R_post:
       mnemonic = "ld4r";
@@ -2755,10 +2774,10 @@ void Disassembler::Format(const Instruction* instr, const char* mnemonic,
   VIXL_ASSERT(mnemonic != NULL);
   ResetOutput();
   Substitute(instr, mnemonic);
-  if (format != NULL) {
-    VIXL_ASSERT(buffer_pos_ < buffer_size_);
-    buffer_[buffer_pos_++] = ' ';
-    Substitute(instr, format);
+  if (format != nullptr) {
+      VIXL_ASSERT(buffer_pos_ < buffer_size_);
+      buffer_[buffer_pos_++] = ' ';
+      Substitute(instr, format);
   }
   VIXL_ASSERT(buffer_pos_ < buffer_size_);
   buffer_[buffer_pos_] = 0;
@@ -2840,7 +2859,7 @@ int Disassembler::SubstituteRegisterField(const Instruction* instr,
         case 'z': {
           field_len = 3;
           char* eimm;
-          int imm = static_cast<int>(strtol(&format[3], &eimm, 10));
+          auto imm = static_cast<int>(strtol(&format[3], &eimm, 10));
           field_len += eimm - &format[3];
           if (reg_num == 31) {
             switch (format[2]) {
@@ -2949,10 +2968,12 @@ int Disassembler::SubstituteImmediateField(const Instruction* instr,
         VIXL_ASSERT((format[5] == 'I') || (format[5] == 'N'));
         uint64_t imm = static_cast<uint64_t>(instr->ImmMoveWide()) <<
             (16 * instr->ShiftMoveWide());
-        if (format[5] == 'N')
-          imm = ~imm;
-        if (!instr->SixtyFourBits())
-          imm &= UINT64_C(0xffffffff);
+        if (format[5] == 'N') {
+            imm = ~imm;
+        }
+        if (!instr->SixtyFourBits()) {
+            imm &= UINT64_C(0xffffffff);
+        }
         AppendToOutput("#0x%" PRIx64, imm);
       }
       return 8;
@@ -3202,7 +3223,7 @@ int Disassembler::SubstituteLiteralField(const Instruction* instr,
   VIXL_ASSERT(strncmp(format, "LValue", 6) == 0);
   USE(format);
 
-  const void * address = instr->LiteralAddress<const void *>();
+  const auto* address = instr->LiteralAddress<const void*>();
   switch (instr->Mask(LoadLiteralMask)) {
     case LDR_w_lit:
     case LDR_x_lit:
@@ -3298,8 +3319,8 @@ int Disassembler::SubstitutePCRelAddressField(const Instruction* instr,
   }
   // Strip code_address_offset before printing, so we can use the
   // semantically-correct AppendCodeRelativeAddressToOutput.
-  const void* target =
-      reinterpret_cast<const void*>(base + offset - code_address_offset());
+  const auto* target =
+          reinterpret_cast<const void*>(base + offset - code_address_offset());
 
   AppendPCRelativeOffsetToOutput(instr, offset);
   AppendToOutput(" ");
@@ -3325,7 +3346,7 @@ int Disassembler::SubstituteBranchTargetField(const Instruction* instr,
     default: VIXL_UNIMPLEMENTED();
   }
   offset <<= kInstructionSizeLog2;
-  const void* target_address = reinterpret_cast<const void*>(instr + offset);
+  const auto* target_address = reinterpret_cast<const void*>(instr + offset);
   VIXL_STATIC_ASSERT(sizeof(*instr) == 1);
 
   AppendPCRelativeOffsetToOutput(instr, offset);
@@ -3371,7 +3392,7 @@ int Disassembler::SubstituteLSRegOffsetField(const Instruction* instr,
   USE(format);
 
   unsigned shift = instr->ImmShiftLS();
-  Extend ext = static_cast<Extend>(instr->ExtendMode());
+  auto ext = static_cast<Extend>(instr->ExtendMode());
   char reg_type = ((ext == UXTW) || (ext == SXTW)) ? 'w' : 'x';
 
   unsigned rm = instr->Rm();

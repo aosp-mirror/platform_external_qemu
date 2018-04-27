@@ -41,7 +41,7 @@ public:
     ~RendererImpl();
 
     bool initialize(int width, int height, bool useSubWindow, bool egl2egl);
-    void stop(bool wait);
+    void stop(bool wait) override;
 
 public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;

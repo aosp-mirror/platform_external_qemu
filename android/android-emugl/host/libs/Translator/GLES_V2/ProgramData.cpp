@@ -1,39 +1,48 @@
 /*
-* Copyright (C) 2011 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "ProgramData.h"
 #include "OpenglCodecCommon/glUtils.h"
 
-#include "android/base/containers/Lookup.h"
-#include "android/base/files/StreamSerializing.h"
 #include "ANGLEShaderParser.h"
 #include "GLcommon/GLutils.h"
+#include "android/base/containers/Lookup.h"
+#include "android/base/files/StreamSerializing.h"
 
-#include <GLcommon/ShareGroup.h>
 #include <GLES3/gl31.h>
+#include <GLcommon/ShareGroup.h>
 
-#include <string.h>
+#include <cstring>
+#include <memory>
 #include <unordered_set>
 
 using android::base::StringView;
 
-GLUniformDesc::GLUniformDesc(const char* name, GLint location, GLsizei count, GLboolean transpose,
-            GLenum type, GLsizei size, unsigned char* val)
-        : mCount(count), mTranspose(transpose), mType(type)
-        , mVal(val, val + size), mGuestName(name) { }
+GLUniformDesc::GLUniformDesc(const char* name,
+                             GLint location,
+                             GLsizei count,
+                             GLboolean transpose,
+                             GLenum type,
+                             GLsizei size,
+                             unsigned char* val)
+    : mCount(count),
+      mTranspose(transpose),
+      mType(type),
+      mVal(val, val + size),
+      mGuestName(name) {}
 
 GLUniformDesc::GLUniformDesc(android::base::Stream* stream) {
     mCount = stream->getBe32();
@@ -53,51 +62,50 @@ void GLUniformDesc::onSave(android::base::Stream* stream) const {
 
 static int s_glShaderType2ShaderType(GLenum type) {
     switch (type) {
-    case GL_VERTEX_SHADER:
-        return ProgramData::VERTEX;
-        break;
-    case GL_FRAGMENT_SHADER:
-        return ProgramData::FRAGMENT;
-        break;
-    case GL_COMPUTE_SHADER:
-        return ProgramData::COMPUTE;
-        break;
-    default:
-        assert(0);
-        break;
+        case GL_VERTEX_SHADER:
+            return ProgramData::VERTEX;
+            break;
+        case GL_FRAGMENT_SHADER:
+            return ProgramData::FRAGMENT;
+            break;
+        case GL_COMPUTE_SHADER:
+            return ProgramData::COMPUTE;
+            break;
+        default:
+            assert(0);
+            break;
     }
     return ProgramData::NUM_SHADER_TYPE;
 }
 
-ProgramData::ProgramData(int glesMaj, int glesMin) :
-    ObjectData(PROGRAM_DATA),
-    LinkStatus(GL_FALSE),
-    IsInUse(false),
-    DeleteStatus(false),
-    mGlesMajorVersion(glesMaj),
-    mGlesMinorVersion(glesMin) {}
+ProgramData::ProgramData(int glesMaj, int glesMin)
+    : ObjectData(PROGRAM_DATA),
+      LinkStatus(GL_FALSE),
+      IsInUse(false),
+      DeleteStatus(false),
+      mGlesMajorVersion(glesMaj),
+      mGlesMinorVersion(glesMin) {}
 
-ProgramData::ProgramData(android::base::Stream* stream) :
-    ObjectData(stream) {
+ProgramData::ProgramData(android::base::Stream* stream) : ObjectData(stream) {
     auto loadAttribLocs = [](android::base::Stream* stream) {
-                std::string attrib = stream->getString();
-                GLuint loc = stream->getBe32();
-                return std::make_pair(std::move(attrib), loc);
-            };
+        std::string attrib = stream->getString();
+        GLuint loc = stream->getBe32();
+        return std::make_pair(std::move(attrib), loc);
+    };
     loadCollection(stream, &boundAttribLocs, loadAttribLocs);
     loadCollection(stream, &linkedAttribLocs, loadAttribLocs);
 
     loadCollection(stream, &uniforms, [](android::base::Stream* stream) {
-       GLuint loc = stream->getBe32();
-       GLUniformDesc desc(stream);
-       return std::make_pair(loc, std::move(desc));
+        GLuint loc = stream->getBe32();
+        GLUniformDesc desc(stream);
+        return std::make_pair(loc, std::move(desc));
     });
     loadCollection(stream, &mUniformBlockBinding,
-            [](android::base::Stream* stream) {
-                GLuint block = stream->getBe32();
-                GLuint binding = stream->getBe32();
-                return std::make_pair(block, binding);
-    });
+                   [](android::base::Stream* stream) {
+                       GLuint block = stream->getBe32();
+                       GLuint binding = stream->getBe32();
+                       return std::make_pair(block, binding);
+                   });
     int transformFeedbackCount = stream->getBe32();
     mTransformFeedbacks.resize(transformFeedbackCount);
     for (auto& feedback : mTransformFeedbacks) {
@@ -114,7 +122,7 @@ ProgramData::ProgramData(android::base::Stream* stream) :
     std::string infoLogRead = stream->getString();
     size_t infoSize = infoLogRead.length();
     if (infoSize) {
-        GLchar* info = new GLchar[infoSize + 1];
+        auto* info = new GLchar[infoSize + 1];
         memcpy(info, infoLogRead.c_str(), infoSize + 1);
         infoLog.reset(info);
     }
@@ -124,76 +132,83 @@ ProgramData::ProgramData(android::base::Stream* stream) :
     mGlesMajorVersion = stream->getByte();
     mGlesMinorVersion = stream->getByte();
     loadCollection(stream, &mUniNameToGuestLoc,
-            [](android::base::Stream* stream) {
-        std::string name = stream->getString();
-        int loc = stream->getBe32();
-        return std::make_pair(name, loc);
-    });
+                   [](android::base::Stream* stream) {
+                       std::string name = stream->getString();
+                       int loc = stream->getBe32();
+                       return std::make_pair(name, loc);
+                   });
 }
 
-void ProgramData::getUniformValue(const GLchar *name, GLenum type,
-        std::unordered_map<GLuint, GLUniformDesc> &uniformsOnSave) const {
-    alignas(double) unsigned char val[256];     //Large enought to hold MAT4x4
+void ProgramData::getUniformValue(
+        const GLchar* name,
+        GLenum type,
+        std::unordered_map<GLuint, GLUniformDesc>& uniformsOnSave) const {
+    alignas(double) unsigned char val[256];  // Large enought to hold MAT4x4
     GLDispatch& dispatcher = GLEScontext::dispatcher();
 
     GLint location = dispatcher.glGetUniformLocation(ProgramName, name);
     if (location < 0) {
         return;
     }
-    switch(type) {
-    case GL_FLOAT:
-    case GL_FLOAT_VEC2:
-    case GL_FLOAT_VEC3:
-    case GL_FLOAT_VEC4:
-    case GL_FLOAT_MAT2:
-    case GL_FLOAT_MAT3:
-    case GL_FLOAT_MAT4:
-    case GL_FLOAT_MAT2x3:
-    case GL_FLOAT_MAT2x4:
-    case GL_FLOAT_MAT3x2:
-    case GL_FLOAT_MAT3x4:
-    case GL_FLOAT_MAT4x2:
-    case GL_FLOAT_MAT4x3:
-        dispatcher.glGetUniformfv(ProgramName, location, (GLfloat *)val);
-        break;
-    case GL_INT:
-    case GL_INT_VEC2:
-    case GL_INT_VEC3:
-    case GL_INT_VEC4:
-    case GL_BOOL:
-    case GL_BOOL_VEC2:
-    case GL_BOOL_VEC3:
-    case GL_BOOL_VEC4:
-    case GL_SAMPLER_2D:
-    case GL_SAMPLER_3D:
-    case GL_SAMPLER_CUBE:
-    case GL_SAMPLER_2D_SHADOW:
-    case GL_SAMPLER_2D_ARRAY:
-    case GL_SAMPLER_2D_ARRAY_SHADOW:
-    case GL_SAMPLER_CUBE_SHADOW:
-    case GL_INT_SAMPLER_2D:
-    case GL_INT_SAMPLER_3D:
-    case GL_INT_SAMPLER_CUBE:
-    case GL_INT_SAMPLER_2D_ARRAY:
-    case GL_UNSIGNED_INT_SAMPLER_2D:
-    case GL_UNSIGNED_INT_SAMPLER_3D:
-    case GL_UNSIGNED_INT_SAMPLER_CUBE:
-    case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
-        dispatcher.glGetUniformiv(ProgramName, location, (GLint *)val);
-        break;
-    case GL_UNSIGNED_INT:
-    case GL_UNSIGNED_INT_VEC2:
-    case GL_UNSIGNED_INT_VEC3:
-    case GL_UNSIGNED_INT_VEC4:
-        dispatcher.glGetUniformuiv(ProgramName, location, (GLuint *)val);
-        break;
-    default:
-        fprintf(stderr, "ProgramData::gtUniformValue: warning: "
-                "unsupported uniform type 0x%x\n", type);
-        return;
+    switch (type) {
+        case GL_FLOAT:
+        case GL_FLOAT_VEC2:
+        case GL_FLOAT_VEC3:
+        case GL_FLOAT_VEC4:
+        case GL_FLOAT_MAT2:
+        case GL_FLOAT_MAT3:
+        case GL_FLOAT_MAT4:
+        case GL_FLOAT_MAT2x3:
+        case GL_FLOAT_MAT2x4:
+        case GL_FLOAT_MAT3x2:
+        case GL_FLOAT_MAT3x4:
+        case GL_FLOAT_MAT4x2:
+        case GL_FLOAT_MAT4x3:
+            dispatcher.glGetUniformfv(ProgramName, location,
+                                      reinterpret_cast<GLfloat*>(val));
+            break;
+        case GL_INT:
+        case GL_INT_VEC2:
+        case GL_INT_VEC3:
+        case GL_INT_VEC4:
+        case GL_BOOL:
+        case GL_BOOL_VEC2:
+        case GL_BOOL_VEC3:
+        case GL_BOOL_VEC4:
+        case GL_SAMPLER_2D:
+        case GL_SAMPLER_3D:
+        case GL_SAMPLER_CUBE:
+        case GL_SAMPLER_2D_SHADOW:
+        case GL_SAMPLER_2D_ARRAY:
+        case GL_SAMPLER_2D_ARRAY_SHADOW:
+        case GL_SAMPLER_CUBE_SHADOW:
+        case GL_INT_SAMPLER_2D:
+        case GL_INT_SAMPLER_3D:
+        case GL_INT_SAMPLER_CUBE:
+        case GL_INT_SAMPLER_2D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D:
+        case GL_UNSIGNED_INT_SAMPLER_3D:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE:
+        case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+            dispatcher.glGetUniformiv(ProgramName, location,
+                                      reinterpret_cast<GLint*>(val));
+            break;
+        case GL_UNSIGNED_INT:
+        case GL_UNSIGNED_INT_VEC2:
+        case GL_UNSIGNED_INT_VEC3:
+        case GL_UNSIGNED_INT_VEC4:
+            dispatcher.glGetUniformuiv(ProgramName, location,
+                                       reinterpret_cast<GLuint*>(val));
+            break;
+        default:
+            fprintf(stderr,
+                    "ProgramData::gtUniformValue: warning: "
+                    "unsupported uniform type 0x%x\n",
+                    type);
+            return;
     }
     GLUniformDesc uniformDesc(name, location, 1, 0, /*transpose*/
-        type, glSizeof(type), val);
+                              type, glSizeof(type), val);
 
     if (!isGles2Gles()) {
         uniformDesc.mGuestName = getDetranslatedName(uniformDesc.mGuestName);
@@ -205,7 +220,9 @@ void ProgramData::getUniformValue(const GLchar *name, GLenum type,
 static std::string getBaseName(const std::string& name) {
     std::string baseName;
     int length = name.length();
-    if (length < 3) return name;
+    if (length < 3) {
+        return name;
+    }
     if (name.compare(length - 3, 1, "[") == 0) {
         baseName = name.substr(0, length - 3);
     } else {
@@ -215,12 +232,14 @@ static std::string getBaseName(const std::string& name) {
 }
 
 // Query uniform variables from driver
-std::unordered_map<GLuint, GLUniformDesc> ProgramData::collectUniformInfo() const {
+std::unordered_map<GLuint, GLUniformDesc> ProgramData::collectUniformInfo()
+        const {
     GLint uniform_count;
     GLint nameLength;
     std::unordered_map<GLuint, GLUniformDesc> uniformsOnSave;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
-    dispatcher.glGetProgramiv(ProgramName, GL_ACTIVE_UNIFORM_MAX_LENGTH, &nameLength);
+    dispatcher.glGetProgramiv(ProgramName, GL_ACTIVE_UNIFORM_MAX_LENGTH,
+                              &nameLength);
     if (nameLength == 0) {
         // No active uniform variables exist.
         return uniformsOnSave;
@@ -232,7 +251,7 @@ std::unordered_map<GLuint, GLUniformDesc> ProgramData::collectUniformInfo() cons
         GLenum type;
         GLsizei length;
         dispatcher.glGetActiveUniform(ProgramName, i, nameLength, &length,
-                &size, &type, name.data());
+                                      &size, &type, name.data());
         if (size > 1) {
             // Uniform array, drivers may return 'arrayName' or 'arrayName[0]'
             // as the name of the array.
@@ -245,24 +264,24 @@ std::unordered_map<GLuint, GLUniformDesc> ProgramData::collectUniformInfo() cons
                 std::string toSaveName = oss.str();
                 getUniformValue(toSaveName.c_str(), type, uniformsOnSave);
             }
-        }
-        else {
+        } else {
             getUniformValue(name.data(), type, uniformsOnSave);
         }
     }
     return uniformsOnSave;
 }
 
-static std::unordered_map<GLuint, GLuint> collectUniformBlockInfo(GLuint pname) {
+static std::unordered_map<GLuint, GLuint> collectUniformBlockInfo(
+        GLuint pname) {
     GLint uniformBlockCount = 0;
     std::unordered_map<GLuint, GLuint> uniformBlocks;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glGetProgramiv(pname, GL_ACTIVE_UNIFORM_BLOCKS,
-            &uniformBlockCount);
+                              &uniformBlockCount);
     for (int i = 0; i < uniformBlockCount; i++) {
         GLint binding = 0;
         dispatcher.glGetActiveUniformBlockiv(pname, i, GL_UNIFORM_BLOCK_BINDING,
-                &binding);
+                                             &binding);
         uniformBlocks.emplace(i, binding);
     }
     return uniformBlocks;
@@ -273,55 +292,59 @@ static std::vector<std::string> collectTransformFeedbackInfo(GLuint pname) {
     GLint transformFeedbakMaxLength = 0;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glGetProgramiv(pname, GL_TRANSFORM_FEEDBACK_VARYINGS,
-            &transformFeedbackCount);
+                              &transformFeedbackCount);
     dispatcher.glGetProgramiv(pname, GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH,
-            &transformFeedbakMaxLength);
+                              &transformFeedbakMaxLength);
 
     std::vector<std::string> transformFeedbacks(transformFeedbackCount);
-    std::unique_ptr<char[]> nameBuffer(new char [transformFeedbakMaxLength]);
+    std::unique_ptr<char[]> nameBuffer(new char[transformFeedbakMaxLength]);
 
     for (int i = 0; i < transformFeedbackCount; i++) {
         GLsizei size;
         GLenum type;
 
-        dispatcher.glGetTransformFeedbackVarying(pname, i,
-                transformFeedbakMaxLength, nullptr, &size, &type,
+        dispatcher.glGetTransformFeedbackVarying(
+                pname, i, transformFeedbakMaxLength, nullptr, &size, &type,
                 nameBuffer.get());
         transformFeedbacks[i] = nameBuffer.get();
     }
     return transformFeedbacks;
 }
 
-void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName) const {
+void ProgramData::onSave(android::base::Stream* stream,
+                         unsigned int globalName) const {
     // The first byte is used to distinguish between program and shader object.
     // It will be loaded outside of this class
     stream->putByte(LOAD_PROGRAM);
     ObjectData::onSave(stream, globalName);
     auto saveAttribLocs = [](android::base::Stream* stream,
-            const std::pair<std::string, GLuint>& attribLoc) {
-                stream->putString(attribLoc.first);
-                stream->putBe32(attribLoc.second);
-            };
+                             const std::pair<std::string, GLuint>& attribLoc) {
+        stream->putString(attribLoc.first);
+        stream->putBe32(attribLoc.second);
+    };
     saveCollection(stream, boundAttribLocs, saveAttribLocs);
     saveCollection(stream, linkedAttribLocs, saveAttribLocs);
 
-    auto saveUniform = [](android::base::Stream* stream,
-                const std::pair<const GLuint, GLUniformDesc>& uniform) {
-            stream->putBe32(uniform.first);
-            uniform.second.onSave(stream);
-        };
-    auto saveUniformBlock = [](android::base::Stream* stream,
-                const std::pair<const GLuint, GLuint>& uniformBlock) {
-            stream->putBe32(uniformBlock.first);
-            stream->putBe32(uniformBlock.second);
-        };
-    auto saveTransformFeedbacks = [](android::base::Stream* stream,
-                const std::vector<std::string>& transformFeedbacks) {
-            stream->putBe32((int)transformFeedbacks.size());
-            for (const auto& feedback : transformFeedbacks) {
-                stream->putString(feedback);
-            }
-        };
+    auto saveUniform =
+            [](android::base::Stream* stream,
+               const std::pair<const GLuint, GLUniformDesc>& uniform) {
+                stream->putBe32(uniform.first);
+                uniform.second.onSave(stream);
+            };
+    auto saveUniformBlock =
+            [](android::base::Stream* stream,
+               const std::pair<const GLuint, GLuint>& uniformBlock) {
+                stream->putBe32(uniformBlock.first);
+                stream->putBe32(uniformBlock.second);
+            };
+    auto saveTransformFeedbacks =
+            [](android::base::Stream* stream,
+               const std::vector<std::string>& transformFeedbacks) {
+                stream->putBe32(static_cast<int>(transformFeedbacks.size()));
+                for (const auto& feedback : transformFeedbacks) {
+                    stream->putString(feedback);
+                }
+            };
     if (needRestore()) {
         saveCollection(stream, uniforms, saveUniform);
         saveCollection(stream, mUniformBlockBinding, saveUniformBlock);
@@ -335,8 +358,8 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
         if (mGlesMajorVersion >= 3) {
             uniformBlocks = collectUniformBlockInfo(ProgramName);
             transformFeedbacks = collectTransformFeedbackInfo(ProgramName);
-            GLEScontext::dispatcher().glGetProgramiv(ProgramName,
-                    GL_TRANSFORM_FEEDBACK_BUFFER_MODE,
+            GLEScontext::dispatcher().glGetProgramiv(
+                    ProgramName, GL_TRANSFORM_FEEDBACK_BUFFER_MODE,
                     (GLint*)&mTransformFeedbackBufferMode);
         }
 
@@ -360,27 +383,29 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
 
     stream->putByte(mGlesMajorVersion);
     stream->putByte(mGlesMinorVersion);
-    saveCollection(stream, mUniNameToGuestLoc, [](android::base::Stream* stream,
-                const std::pair<std::string, int>& uniNameLoc) {
-        stream->putString(uniNameLoc.first);
-        stream->putBe32(uniNameLoc.second);
-    });
+    saveCollection(stream, mUniNameToGuestLoc,
+                   [](android::base::Stream* stream,
+                      const std::pair<std::string, int>& uniNameLoc) {
+                       stream->putString(uniNameLoc.first);
+                       stream->putBe32(uniNameLoc.second);
+                   });
 }
 
 void ProgramData::postLoad(const getObjDataPtr_t& getObjDataPtr) {
     for (auto& s : attachedShaders) {
         if (s.localName) {
             s.shader = (ShaderParser*)getObjDataPtr(
-                    NamedObjectType::SHADER_OR_PROGRAM, s.localName).get();
+                               NamedObjectType::SHADER_OR_PROGRAM, s.localName)
+                               .get();
         }
     }
 }
 
 void ProgramData::restore(ObjectLocalName localName,
-           const getGlobalName_t& getGlobalName) {
+                          const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
-    int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
-            localName);
+    int globalName =
+            getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, localName);
     assert(globalName);
     ProgramName = globalName;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
@@ -399,44 +424,40 @@ void ProgramData::restore(ObjectLocalName localName,
             }
             GLenum type = 0;
             switch (i) {
-            case VERTEX:
-                type = GL_VERTEX_SHADER;
-                break;
-            case FRAGMENT:
-                type = GL_FRAGMENT_SHADER;
-                break;
-            case COMPUTE:
-                type = GL_COMPUTE_SHADER;
-                break;
-            default:
-                assert(0);
+                case VERTEX:
+                    type = GL_VERTEX_SHADER;
+                    break;
+                case FRAGMENT:
+                    type = GL_FRAGMENT_SHADER;
+                    break;
+                case COMPUTE:
+                    type = GL_COMPUTE_SHADER;
+                    break;
+                default:
+                    assert(0);
             }
             tmpShaders[i] = dispatcher.glCreateShader(type);
-            const GLchar* src = (const GLchar *)s.linkedSource.c_str();
+            const auto* src =
+                    static_cast<const GLchar*>(s.linkedSource.c_str());
             std::string parsedSrc;
             if (!isGles2Gles()) {
                 std::string infoLog;
-                ANGLEShaderParser::translate(
-                            isCoreProfile(),
-                            src,
-                            type,
-                            &infoLog,
-                            &parsedSrc,
-                            &s.linkInfo);
+                ANGLEShaderParser::translate(isCoreProfile(), src, type,
+                                             &infoLog, &parsedSrc, &s.linkInfo);
                 src = parsedSrc.c_str();
             }
-            dispatcher.glShaderSource(tmpShaders[i], 1, &src, NULL);
+            dispatcher.glShaderSource(tmpShaders[i], 1, &src, nullptr);
             dispatcher.glCompileShader(tmpShaders[i]);
             dispatcher.glAttachShader(globalName, tmpShaders[i]);
         }
         for (const auto& attribLocs : linkedAttribLocs) {
             // Prefix "gl_" is reserved, we should skip those.
             // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glBindAttribLocation.xhtml
-            if  (strncmp(attribLocs.first.c_str(), "gl_", 3) == 0) {
+            if (strncmp(attribLocs.first.c_str(), "gl_", 3) == 0) {
                 continue;
             }
             dispatcher.glBindAttribLocation(globalName, attribLocs.second,
-                    attribLocs.first.c_str());
+                                            attribLocs.first.c_str());
         }
         if (mGlesMajorVersion >= 3) {
             std::unique_ptr<const char*> varyings(
@@ -444,8 +465,8 @@ void ProgramData::restore(ObjectLocalName localName,
             for (size_t i = 0; i < mTransformFeedbacks.size(); i++) {
                 varyings.get()[i] = mTransformFeedbacks[i].c_str();
             }
-            dispatcher.glTransformFeedbackVaryings(globalName,
-                    mTransformFeedbacks.size(), varyings.get(),
+            dispatcher.glTransformFeedbackVaryings(
+                    globalName, mTransformFeedbacks.size(), varyings.get(),
                     mTransformFeedbackBufferMode);
             mTransformFeedbacks.clear();
         }
@@ -454,20 +475,21 @@ void ProgramData::restore(ObjectLocalName localName,
 #ifdef DEBUG
         for (const auto& attribLocs : linkedAttribLocs) {
             assert(dispatcher.glGetAttribLocation(globalName,
-                attribLocs.first.c_str()) == attribLocs.second);
+                                                  attribLocs.first.c_str()) ==
+                   attribLocs.second);
         }
-#endif // DEBUG
+#endif  // DEBUG
         for (const auto& uniform : mUniNameToGuestLoc) {
-            GLint hostLoc = dispatcher.glGetUniformLocation(globalName,
-                    getTranslatedName(uniform.first).c_str());
+            GLint hostLoc = dispatcher.glGetUniformLocation(
+                    globalName, getTranslatedName(uniform.first).c_str());
             if (hostLoc != -1) {
                 mGuestLocToHostLoc.emplace(uniform.second, hostLoc);
             }
         }
         for (const auto& uniformEntry : uniforms) {
             const auto& uniform = uniformEntry.second;
-            GLint location = dispatcher.glGetUniformLocation(globalName,
-                    getTranslatedName(uniform.mGuestName).c_str());
+            GLint location = dispatcher.glGetUniformLocation(
+                    globalName, getTranslatedName(uniform.mGuestName).c_str());
             if (location == -1) {
                 // Location changed after loading from a snapshot.
                 // likely loading from different GPU backend (and they
@@ -478,19 +500,23 @@ void ProgramData::restore(ObjectLocalName localName,
             switch (uniform.mType) {
                 case GL_FLOAT:
                     dispatcher.glUniform1fv(location, uniform.mCount,
-                            (const GLfloat*)uniform.mVal.data());
+                                            reinterpret_cast<const GLfloat*>(
+                                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_VEC2:
                     dispatcher.glUniform2fv(location, uniform.mCount,
-                            (const GLfloat*)uniform.mVal.data());
+                                            reinterpret_cast<const GLfloat*>(
+                                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_VEC3:
                     dispatcher.glUniform3fv(location, uniform.mCount,
-                            (const GLfloat*)uniform.mVal.data());
+                                            reinterpret_cast<const GLfloat*>(
+                                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_VEC4:
                     dispatcher.glUniform4fv(location, uniform.mCount,
-                            (const GLfloat*)uniform.mVal.data());
+                                            reinterpret_cast<const GLfloat*>(
+                                                    uniform.mVal.data()));
                     break;
                 case GL_BOOL:
                 case GL_INT:
@@ -510,92 +536,111 @@ void ProgramData::restore(ObjectLocalName localName,
                 case GL_UNSIGNED_INT_SAMPLER_CUBE:
                 case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
                     dispatcher.glUniform1iv(location, uniform.mCount,
-                            (const GLint*)uniform.mVal.data());
+                                            reinterpret_cast<const GLint*>(
+                                                    uniform.mVal.data()));
                     break;
                 case GL_BOOL_VEC2:
                 case GL_INT_VEC2:
                     dispatcher.glUniform2iv(location, uniform.mCount,
-                            (const GLint*)uniform.mVal.data());
+                                            reinterpret_cast<const GLint*>(
+                                                    uniform.mVal.data()));
                     break;
                 case GL_BOOL_VEC3:
                 case GL_INT_VEC3:
                     dispatcher.glUniform3iv(location, uniform.mCount,
-                            (const GLint*)uniform.mVal.data());
+                                            reinterpret_cast<const GLint*>(
+                                                    uniform.mVal.data()));
                     break;
                 case GL_BOOL_VEC4:
                 case GL_INT_VEC4:
                     dispatcher.glUniform4iv(location, uniform.mCount,
-                            (const GLint*)uniform.mVal.data());
+                                            reinterpret_cast<const GLint*>(
+                                                    uniform.mVal.data()));
                     break;
                 case GL_UNSIGNED_INT:
                     dispatcher.glUniform1uiv(location, uniform.mCount,
-                            (const GLuint*)uniform.mVal.data());
+                                             reinterpret_cast<const GLuint*>(
+                                                     uniform.mVal.data()));
                     break;
                 case GL_UNSIGNED_INT_VEC2:
                     dispatcher.glUniform2uiv(location, uniform.mCount,
-                            (const GLuint*)uniform.mVal.data());
+                                             reinterpret_cast<const GLuint*>(
+                                                     uniform.mVal.data()));
                     break;
                 case GL_UNSIGNED_INT_VEC3:
                     dispatcher.glUniform3uiv(location, uniform.mCount,
-                            (const GLuint*)uniform.mVal.data());
+                                             reinterpret_cast<const GLuint*>(
+                                                     uniform.mVal.data()));
                     break;
                 case GL_UNSIGNED_INT_VEC4:
                     dispatcher.glUniform4uiv(location, uniform.mCount,
-                            (const GLuint*)uniform.mVal.data());
+                                             reinterpret_cast<const GLuint*>(
+                                                     uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT2:
-                    dispatcher.glUniformMatrix2fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix2fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT3:
-                    dispatcher.glUniformMatrix3fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix3fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT4:
-                    dispatcher.glUniformMatrix4fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix4fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT2x3:
-                    dispatcher.glUniformMatrix2x3fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix2x3fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT2x4:
-                    dispatcher.glUniformMatrix2x4fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix2x4fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT3x2:
-                    dispatcher.glUniformMatrix3x2fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix3x2fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT3x4:
-                    dispatcher.glUniformMatrix3x4fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix3x4fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT4x2:
-                    dispatcher.glUniformMatrix4x2fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix4x2fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 case GL_FLOAT_MAT4x3:
-                    dispatcher.glUniformMatrix4x3fv(location,
-                            uniform.mCount, uniform.mTranspose,
-                            (const GLfloat*)uniform.mVal.data());
+                    dispatcher.glUniformMatrix4x3fv(
+                            location, uniform.mCount, uniform.mTranspose,
+                            reinterpret_cast<const GLfloat*>(
+                                    uniform.mVal.data()));
                     break;
                 default:
-                    fprintf(stderr, "ProgramData::restore: warning: "
-                            "unsupported uniform type 0x%x\n", uniform.mType);
+                    fprintf(stderr,
+                            "ProgramData::restore: warning: "
+                            "unsupported uniform type 0x%x\n",
+                            uniform.mType);
             }
         }
         for (const auto& uniformBlock : mUniformBlockBinding) {
             dispatcher.glUniformBlockBinding(globalName, uniformBlock.first,
-                    uniformBlock.second);
+                                             uniformBlock.second);
         }
         for (auto s : tmpShaders) {
             if (s != 0) {
@@ -618,7 +663,7 @@ void ProgramData::restore(ObjectLocalName localName,
     }
     for (const auto& attribLocs : boundAttribLocs) {
         dispatcher.glBindAttribLocation(globalName, attribLocs.second,
-                attribLocs.first.c_str());
+                                        attribLocs.first.c_str());
     }
 }
 
@@ -628,8 +673,8 @@ GenNameInfo ProgramData::getGenNameInfo() const {
 
 void ProgramData::setErrInfoLog() {
     size_t bytes = validationInfoLog.length() + 1;
-    infoLog.reset(new GLchar[bytes]);
-    memcpy((char*)infoLog.get(), &validationInfoLog[0], bytes);
+    infoLog = std::make_unique<GLchar[]>(bytes);
+    memcpy(const_cast<char*>(infoLog.get()), &validationInfoLog[0], bytes);
 }
 
 void ProgramData::setInfoLog(const GLchar* log) {
@@ -656,38 +701,38 @@ GLuint ProgramData::getAttachedShader(GLenum type) const {
     return attachedShaders[s_glShaderType2ShaderType(type)].localName;
 }
 
-StringView
-ProgramData::getTranslatedName(StringView userVarName) const {
+StringView ProgramData::getTranslatedName(const StringView& userVarName) const {
     if (isGles2Gles()) {
         return userVarName;
     }
-    // TODO: translate uniform array names
-    for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+    // TODO(lfy): translate uniform array names
+    for (const auto& attachedShader : attachedShaders) {
         if (const auto name = android::base::find(
-                attachedShaders[i].linkInfo.nameMap, userVarName)) {
+                    attachedShader.linkInfo.nameMap, userVarName)) {
             return *name;
         }
     }
     return userVarName;
 }
 
-StringView
-ProgramData::getDetranslatedName(StringView driverName) const {
+StringView ProgramData::getDetranslatedName(
+        const StringView& driverName) const {
     if (isGles2Gles()) {
         return driverName;
     }
-    // TODO: detranslate uniform array names
-    for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+    // TODO(lfy): detranslate uniform array names
+    for (const auto& attachedShader : attachedShaders) {
         if (const auto name = android::base::find(
-                attachedShaders[i].linkInfo.nameMapReverse, driverName)) {
+                    attachedShader.linkInfo.nameMapReverse, driverName)) {
             return *name;
         }
     }
     return driverName;
 }
 
-bool ProgramData::attachShader(GLuint shader, ShaderParser* shaderData,
-        GLenum type) {
+bool ProgramData::attachShader(GLuint shader,
+                               ShaderParser* shaderData,
+                               GLenum type) {
     AttachedShader& s = attachedShaders[s_glShaderType2ShaderType(type)];
     if (s.localName == 0) {
         s.localName = shader;
@@ -699,7 +744,9 @@ bool ProgramData::attachShader(GLuint shader, ShaderParser* shaderData,
 
 bool ProgramData::isAttached(GLuint shader) const {
     for (const auto& s : attachedShaders) {
-        if (s.localName == shader) return true;
+        if (s.localName == shader) {
+            return true;
+        }
     }
     return false;
 }
@@ -737,20 +784,21 @@ static bool sCheckLimits(ProgramData* pData,
 static bool sCheckVariables(ProgramData* pData,
                             const ANGLEShaderParser::ShaderLinkInfo& a,
                             const ANGLEShaderParser::ShaderLinkInfo& b);
-static void sInitializeUniformLocs(ProgramData* pData,
-                                   const std::vector<sh::ShaderVariable>& uniforms);
+static void sInitializeUniformLocs(
+        ProgramData* pData,
+        const std::vector<sh::ShaderVariable>& uniforms);
 
 bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
     const ANGLEShaderParser::ShaderLinkInfo& fragLinkInfo =
-        frag->getShaderLinkInfo();
+            frag->getShaderLinkInfo();
     const ANGLEShaderParser::ShaderLinkInfo& vertLinkInfo =
-        vert->getShaderLinkInfo();
+            vert->getShaderLinkInfo();
 
     bool res = true;
 
     res = res && sCheckUndecl(this, fragLinkInfo, vertLinkInfo);
-    res = res && sCheckLimits(this, ANGLEShaderParser::kResources,
-                              fragLinkInfo, vertLinkInfo);
+    res = res && sCheckLimits(this, ANGLEShaderParser::kResources, fragLinkInfo,
+                              vertLinkInfo);
     res = res && sCheckVariables(this, fragLinkInfo, vertLinkInfo);
 
     return res;
@@ -770,7 +818,7 @@ void ProgramData::setLinkStatus(GLint status) {
                 s.linkedSource = s.shader->getOriginalSrc();
                 s.linkInfo = s.shader->getShaderLinkInfo();
                 is310 = is310 || (s.linkInfo.esslVersion == 310);
-                for (const auto& var: s.linkInfo.uniforms) {
+                for (const auto& var : s.linkInfo.uniforms) {
                     allUniforms.push_back(var);
                 }
             }
@@ -781,7 +829,7 @@ void ProgramData::setLinkStatus(GLint status) {
         } else {
             sInitializeUniformLocs(this, allUniforms);
         }
-        for (const auto &attribLoc : boundAttribLocs) {
+        for (const auto& attribLoc : boundAttribLocs) {
             // overwrite
             linkedAttribLocs[attribLoc.first] = attribLoc.second;
         }
@@ -798,15 +846,13 @@ GLint ProgramData::getLinkStatus() const {
 }
 
 static const char kDifferentPrecisionErr[] =
-    "specified with different precision in different shaders.";
+        "specified with different precision in different shaders.";
 static const char kDifferentTypeErr[] =
-    "specified with different type in different shaders.";
+        "specified with different type in different shaders.";
 static const char kDifferentLayoutQualifierErr[] =
-    "specified with different layout qualifiers in different shaders.";
-static const char kExceededMaxVertexAttribs[] =
-    "exceeded max vertex attribs.";
-static const char kUsedUndeclaredErr[] =
-    "used, but not declared.";
+        "specified with different layout qualifiers in different shaders.";
+static const char kExceededMaxVertexAttribs[] = "exceeded max vertex attribs.";
+static const char kUsedUndeclaredErr[] = "used, but not declared.";
 static const char kUniformQualifier[] = "uniform";
 static const char kVaryingQualifier[] = "varying";
 static const char kUnknownQualifier[] = "[unknown qualifier]";
@@ -817,10 +863,10 @@ enum ValidationQualifier {
 
 static const char* sQualifierString(ValidationQualifier q) {
     switch (q) {
-    case ValidationQualifier::UNIFORM:
-        return kUniformQualifier;
-    case ValidationQualifier::VARYING:
-        return kVaryingQualifier;
+        case ValidationQualifier::UNIFORM:
+            return kUniformQualifier;
+        case ValidationQualifier::VARYING:
+            return kVaryingQualifier;
     }
     return kUnknownQualifier;
 }
@@ -840,8 +886,7 @@ static bool sVarCheck(ProgramData* pData,
         res = false;
     }
 
-    if (a.isStruct() != b.isStruct() ||
-        a.type != b.type) {
+    if (a.isStruct() != b.isStruct() || a.type != b.type) {
         std::ostringstream err;
         err << sQualifierString(qualifier) << " " << a.name << " ";
         err << kDifferentTypeErr;
@@ -852,7 +897,9 @@ static bool sVarCheck(ProgramData* pData,
     if (a.isStruct()) {
         for (const auto& afield : a.fields) {
             for (const auto& bfield : b.fields) {
-                if (afield.name != bfield.name) continue;
+                if (afield.name != bfield.name) {
+                    continue;
+                }
                 res = res && sVarCheck(pData, qualifier, afield, bfield);
             }
         }
@@ -866,8 +913,7 @@ static bool sInterfaceBlockCheck(ProgramData* pData,
                                  const sh::InterfaceBlock& b) {
     bool res = true;
 
-    if (a.layout != b.layout ||
-        a.isRowMajorLayout != b.isRowMajorLayout) {
+    if (a.layout != b.layout || a.isRowMajorLayout != b.isRowMajorLayout) {
         std::ostringstream err;
         err << "interface block " << a.name << " ";
         err << kDifferentLayoutQualifierErr;
@@ -885,9 +931,11 @@ static bool sInterfaceBlockCheck(ProgramData* pData,
 
     for (const auto& afield : a.fields) {
         for (const auto& bfield : b.fields) {
-            if (afield.name != bfield.name) continue;
-            res = res && sVarCheck(pData, ValidationQualifier::VARYING,
-                                   afield, bfield);
+            if (afield.name != bfield.name) {
+                continue;
+            }
+            res = res && sVarCheck(pData, ValidationQualifier::VARYING, afield,
+                                   bfield);
             if (afield.isRowMajorLayout != bfield.isRowMajorLayout) {
                 std::ostringstream err;
                 err << "interface block field ";
@@ -907,7 +955,9 @@ static bool sCheckUndecl(
         const ANGLEShaderParser::ShaderLinkInfo& vertLinkInfo) {
     bool res = true;
     for (const auto& felt : fragLinkInfo.varyings) {
-        if (felt.isBuiltIn()) continue;
+        if (felt.isBuiltIn()) {
+            continue;
+        }
 
         bool declaredInVertShader = false;
         for (const auto& velt : vertLinkInfo.varyings) {
@@ -935,12 +985,13 @@ static bool sCheckLimits(
         const ANGLEShaderParser::ShaderLinkInfo& vertShaderLinkInfo) {
     bool res = true;
 
-    size_t maxAttribs = (size_t)resources.MaxVertexAttribs;
+    auto maxAttribs = static_cast<size_t>(resources.MaxVertexAttribs);
 
     std::unordered_set<GLuint> explicitlyBound;
     int numImplicitlyBound = 0;
     for (const auto& elt : vertShaderLinkInfo.attributes) {
-        if (const auto loc = android::base::find(pData->boundAttribLocs, elt.name)) {
+        if (const auto loc =
+                    android::base::find(pData->boundAttribLocs, elt.name)) {
             explicitlyBound.insert(*loc);
         } else {
             numImplicitlyBound++;
@@ -948,7 +999,8 @@ static bool sCheckLimits(
     }
     int numExplicitlyBound = explicitlyBound.size();
 
-    if ((int)maxAttribs - numExplicitlyBound - numImplicitlyBound < 0) {
+    if (static_cast<int>(maxAttribs) - numExplicitlyBound - numImplicitlyBound <
+        0) {
         std::ostringstream err;
         err << kExceededMaxVertexAttribs;
         err << " Wanted (from vertex shader): ";
@@ -968,21 +1020,29 @@ static bool sCheckVariables(ProgramData* pData,
 
     for (const auto& aelt : a.uniforms) {
         for (const auto& belt : b.uniforms) {
-            if (aelt.name != belt.name) continue;
-            res = res && sVarCheck(pData, ValidationQualifier::UNIFORM, aelt, belt);
+            if (aelt.name != belt.name) {
+                continue;
+            }
+            res = res &&
+                  sVarCheck(pData, ValidationQualifier::UNIFORM, aelt, belt);
         }
     }
 
     for (const auto& aelt : a.varyings) {
         for (const auto& belt : b.varyings) {
-            if (aelt.name != belt.name) continue;
-            res = res && sVarCheck(pData, ValidationQualifier::VARYING, aelt, belt);
+            if (aelt.name != belt.name) {
+                continue;
+            }
+            res = res &&
+                  sVarCheck(pData, ValidationQualifier::VARYING, aelt, belt);
         }
     }
 
     for (const auto& aelt : a.interfaceBlocks) {
         for (const auto& belt : b.interfaceBlocks) {
-            if (aelt.name != belt.name) continue;
+            if (aelt.name != belt.name) {
+                continue;
+            }
             res = res && sInterfaceBlockCheck(pData, aelt, belt);
         }
     }
@@ -990,7 +1050,9 @@ static bool sCheckVariables(ProgramData* pData,
     return res;
 }
 
-static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBase, const sh::ShaderVariable& var) {
+static void sRecursiveLocInitalize(ProgramData* pData,
+                                   const std::string& keyBase,
+                                   const sh::ShaderVariable& var) {
     bool isArr = var.arraySize > 0;
     int baseSize = isArr ? var.arraySize : 1;
 
@@ -998,16 +1060,22 @@ static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBas
         if (isArr) {
             for (int k = 0; k < var.arraySize; k++) {
                 for (const auto& field : var.fields) {
-                    std::vector<char> keyBuf(keyBase.length() + field.name.length() + 20, 0);
-                    snprintf(keyBuf.data(), keyBuf.size(), "%s[%d].%s", keyBase.c_str(), k, field.name.c_str());
-                    sRecursiveLocInitalize(pData, std::string(keyBuf.data()), field);
+                    std::vector<char> keyBuf(
+                            keyBase.length() + field.name.length() + 20, 0);
+                    snprintf(keyBuf.data(), keyBuf.size(), "%s[%d].%s",
+                             keyBase.c_str(), k, field.name.c_str());
+                    sRecursiveLocInitalize(pData, std::string(keyBuf.data()),
+                                           field);
                 }
             }
         } else {
             for (const auto& field : var.fields) {
-                std::vector<char> keyBuf(keyBase.length() + field.name.length() + 20, 0);
-                snprintf(keyBuf.data(), keyBuf.size(), "%s.%s", keyBase.c_str(), field.name.c_str());
-                sRecursiveLocInitalize(pData, std::string(keyBuf.data()), field);
+                std::vector<char> keyBuf(
+                        keyBase.length() + field.name.length() + 20, 0);
+                snprintf(keyBuf.data(), keyBuf.size(), "%s.%s", keyBase.c_str(),
+                         field.name.c_str());
+                sRecursiveLocInitalize(pData, std::string(keyBuf.data()),
+                                       field);
             }
         }
     } else {
@@ -1016,27 +1084,32 @@ static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBas
                 std::vector<char> keyBuf(keyBase.length() + 20, 0);
                 std::vector<char> keyBuf2(keyBase.length() + 20, 0);
                 snprintf(keyBuf.data(), keyBuf.size(), "%s", keyBase.c_str());
-                snprintf(keyBuf2.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
+                snprintf(keyBuf2.data(), keyBuf.size(), "%s[%d]",
+                         keyBase.c_str(), k);
                 pData->initGuestUniformLocForKey(keyBuf.data(), keyBuf2.data());
             } else {
                 std::vector<char> keyBuf(keyBase.length() + 20, 0);
-                snprintf(keyBuf.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
+                snprintf(keyBuf.data(), keyBuf.size(), "%s[%d]",
+                         keyBase.c_str(), k);
                 pData->initGuestUniformLocForKey(keyBuf.data());
             }
         }
     }
 }
 
-static void sInitializeUniformLocs(ProgramData* pData,
-                                   const std::vector<sh::ShaderVariable>& uniforms) {
+static void sInitializeUniformLocs(
+        ProgramData* pData,
+        const std::vector<sh::ShaderVariable>& uniforms) {
     // initialize in order of indices
     std::vector<std::string> orderedUniforms;
     GLint uniform_count;
     GLint nameLength;
 
     GLDispatch& gl = GLEScontext::dispatcher();
-    gl.glGetProgramiv(pData->getProgramName(), GL_ACTIVE_UNIFORM_MAX_LENGTH, &nameLength);
-    gl.glGetProgramiv(pData->getProgramName(), GL_ACTIVE_UNIFORMS, &uniform_count);
+    gl.glGetProgramiv(pData->getProgramName(), GL_ACTIVE_UNIFORM_MAX_LENGTH,
+                      &nameLength);
+    gl.glGetProgramiv(pData->getProgramName(), GL_ACTIVE_UNIFORMS,
+                      &uniform_count);
 
     std::vector<char> name(nameLength, 0);
 
@@ -1045,7 +1118,7 @@ static void sInitializeUniformLocs(ProgramData* pData,
         GLenum type;
         GLsizei length;
         gl.glGetActiveUniform(pData->getProgramName(), i, nameLength, &length,
-                &size, &type, name.data());
+                              &size, &type, name.data());
         orderedUniforms.push_back(pData->getDetranslatedName(name.data()));
     }
 
@@ -1059,7 +1132,8 @@ static void sInitializeUniformLocs(ProgramData* pData,
 
     for (const auto& str : orderedUniforms) {
         if (linkInfoUniformsByName.find(str) != linkInfoUniformsByName.end()) {
-            sRecursiveLocInitalize(pData, str, uniforms[linkInfoUniformsByName[str]]);
+            sRecursiveLocInitalize(pData, str,
+                                   uniforms[linkInfoUniformsByName[str]]);
         }
     }
 
@@ -1068,14 +1142,15 @@ static void sInitializeUniformLocs(ProgramData* pData,
     }
 }
 
-void ProgramData::initGuestUniformLocForKey(StringView key) {
+void ProgramData::initGuestUniformLocForKey(const StringView& key) {
     if (mUniNameToGuestLoc.find(key.c_str()) == mUniNameToGuestLoc.end()) {
         mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
         mCurrUniformBaseLoc++;
     }
 }
 
-void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
+void ProgramData::initGuestUniformLocForKey(const StringView& key,
+                                            const StringView& key2) {
     bool newUniform = false;
     if (mUniNameToGuestLoc.find(key.c_str()) == mUniNameToGuestLoc.end()) {
         mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
@@ -1103,7 +1178,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
                 guestLoc = activeLoc->second;
             } else {
                 guestLoc =
-                    dispatcher.glGetUniformLocation(ProgramName, uniName);
+                        dispatcher.glGetUniformLocation(ProgramName, uniName);
                 if (guestLoc == -1) {
                     return -1;
                 } else {
@@ -1124,8 +1199,8 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
             }
 
             std::string translatedName = getTranslatedName(uniName);
-            int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
-                    translatedName.c_str());
+            int hostLoc = dispatcher.glGetUniformLocation(
+                    ProgramName, translatedName.c_str());
             if (hostLoc == -1) {
                 return -1;
             }
@@ -1135,13 +1210,15 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
         }
     } else {
         return dispatcher.glGetUniformLocation(
-                   ProgramName, getTranslatedName(uniName).c_str());
+                ProgramName, getTranslatedName(uniName).c_str());
     }
 }
 
 int ProgramData::getHostUniformLocation(int guestLocation) {
     if (mUseUniformLocationVirtualization) {
-        if (guestLocation == -1) return -1;
+        if (guestLocation == -1) {
+            return -1;
+        }
 
         const auto& location = mGuestLocToHostLoc.find(guestLocation);
         if (location != mGuestLocToHostLoc.end()) {

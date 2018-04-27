@@ -62,7 +62,7 @@ namespace android {
 namespace snapshot {
 
 static void fillImageInfo(pb::Image::Type type,
-                          StringView path,
+                          const StringView& path,
                           pb::Image* image) {
     image->set_type(type);
     *image->mutable_path() = path;
@@ -80,7 +80,7 @@ static void fillImageInfo(pb::Image::Type type,
 }
 
 static bool verifyImageInfo(pb::Image::Type type,
-                            StringView path,
+                            const StringView& path,
                             const pb::Image& in) {
     if (in.type() != type) {
         return false;
@@ -604,8 +604,8 @@ void Snapshot::addSaveStats(bool incremental,
     emulator_snapshot::SaveStats stats;
 
     stats.set_incremental(incremental ? 1 : 0);
-    stats.set_duration((uint64_t)duration);
-    stats.set_ram_changed_bytes((uint64_t)ramChangedBytes);
+    stats.set_duration(static_cast<uint64_t>(duration));
+    stats.set_ram_changed_bytes(ramChangedBytes);
 
     mSaveStats.push_back(stats);
 }

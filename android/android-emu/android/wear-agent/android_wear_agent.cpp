@@ -16,9 +16,9 @@
 
 namespace {
 
-typedef ::Looper CLooper;
+using CLooper = ::Looper;
 
-android::wear::WearAgent* sAgent = NULL;
+android::wear::WearAgent* sAgent = nullptr;
 
 }  // namespace
 
@@ -34,6 +34,6 @@ void android_wear_agent_start(CLooper* looper) {
 void android_wear_agent_stop(void) {
     DCHECK(sAgent);
     android::wear::WearAgent* agent = sAgent;
-    sAgent = NULL;
+    sAgent = nullptr;
     delete agent;
 }

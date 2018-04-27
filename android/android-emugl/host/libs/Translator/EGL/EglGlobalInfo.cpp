@@ -22,7 +22,7 @@
 #include "GLcommon/GLutils.h"
 #include "emugl/common/lazy_instance.h"
 
-#include <string.h>
+#include <cstring>
 
 namespace {
 
@@ -60,8 +60,8 @@ EglGlobalInfo::EglGlobalInfo() {
 }
 
 EglGlobalInfo::~EglGlobalInfo() {
-    for (size_t n = 0; n < m_displays.size(); ++n) {
-        delete m_displays[n];
+    for (auto& m_display : m_displays) {
+        delete m_display;
     }
 }
 
@@ -69,16 +69,16 @@ EglDisplay* EglGlobalInfo::addDisplay(EGLNativeDisplayType dpy,
                                       EglOS::Display* idpy) {
     //search if it already exists.
     emugl::Mutex::AutoLock mutex(m_lock);
-    for (size_t n = 0; n < m_displays.size(); ++n) {
-        if (m_displays[n]->getNativeDisplay() == dpy) {
-            return m_displays[n];
+    for (auto& m_display : m_displays) {
+        if (m_display->getNativeDisplay() == dpy) {
+            return m_display;
         }
     }
 
     if (!idpy) {
-        return NULL;
+        return nullptr;
     }
-    EglDisplay* result = new EglDisplay(dpy, idpy);
+    auto* result = new EglDisplay(dpy, idpy);
     m_displays.push_back(result);
     return result;
 }
@@ -97,28 +97,29 @@ bool  EglGlobalInfo::removeDisplay(EGLDisplay dpy) {
 
 EglDisplay* EglGlobalInfo::getDisplay(EGLNativeDisplayType dpy) const {
     emugl::Mutex::AutoLock mutex(m_lock);
-    for (size_t n = 0; n < m_displays.size(); ++n) {
-        if (m_displays[n]->getNativeDisplay() == dpy) {
-            return m_displays[n];
+    for (auto m_display : m_displays) {
+        if (m_display->getNativeDisplay() == dpy) {
+            return m_display;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 EglDisplay* EglGlobalInfo::getDisplay(EGLDisplay dpy) const {
     emugl::Mutex::AutoLock mutex(m_lock);
-    for (size_t n = 0; n < m_displays.size(); ++n) {
-        if (m_displays[n] == static_cast<EglDisplay*>(dpy)) {
-            return m_displays[n];
+    for (auto m_display : m_displays) {
+        if (m_display == static_cast<EglDisplay*>(dpy)) {
+            return m_display;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void EglGlobalInfo::initClientExtFuncTable(GLESVersion ver) {
     emugl::Mutex::AutoLock mutex(m_lock);
     if (!m_gles_extFuncs_inited[ver]) {
-        ClientAPIExts::initClientFuncs(m_gles_ifaces[ver], (int)ver - 1);
+        ClientAPIExts::initClientFuncs(m_gles_ifaces[ver],
+                                       static_cast<int>(ver) - 1);
         m_gles_extFuncs_inited[ver] = true;
     }
 }
@@ -127,8 +128,7 @@ void EglGlobalInfo::markSurfaceForDestroy(EglDisplay* display,
                                           EGLSurface toDestroy) {
     emugl::Mutex::AutoLock mutex(m_lock);
     assert(display);
-    m_surfaceDestroyList.push_back(
-        std::make_pair(display, toDestroy));
+    m_surfaceDestroyList.emplace_back(display, toDestroy);
 }
 
 void EglGlobalInfo::sweepDestroySurfaces() {

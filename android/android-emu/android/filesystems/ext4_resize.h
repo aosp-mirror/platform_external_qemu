@@ -14,8 +14,8 @@
 
 #pragma once
 
+#include <cstdint>
 #include "android/utils/compiler.h"
-#include <stdint.h>
 
 ANDROID_BEGIN_HEADER
 

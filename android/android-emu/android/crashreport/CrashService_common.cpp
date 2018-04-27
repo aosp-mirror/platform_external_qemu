@@ -32,32 +32,33 @@
 #error "Unsupported platform"
 #endif
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/curl-support.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
-#include "google_breakpad/processor/fast_source_line_resolver.h"
 #include "google_breakpad/processor/call_stack.h"
 #include "google_breakpad/processor/code_module.h"
 #include "google_breakpad/processor/code_modules.h"
+#include "google_breakpad/processor/fast_source_line_resolver.h"
 #include "google_breakpad/processor/minidump.h"
 #include "google_breakpad/processor/minidump_processor.h"
 #include "google_breakpad/processor/stack_frame_cpu.h"
-#include "processor/stackwalk_common.h"
 #include "processor/pathname_stripper.h"
+#include "processor/stackwalk_common.h"
 
 #include <curl/curl.h>
 
+#include <strings.h>
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -81,8 +82,9 @@ const char kCommentsKey[] = "comments";
 
 // Callback to get the response data from server.
 static size_t WriteCallback(void* ptr, size_t size, size_t nmemb, void* userp) {
-    if (!userp)
+    if (!userp) {
         return 0;
+    }
 
     auto& response = *static_cast<std::string*>(userp);
     size_t real_size = size * nmemb;
@@ -196,7 +198,8 @@ void CrashService::addUserComments(const std::string& comments) {
 
 bool CrashService::uploadCrash() {
     curl_init(::android::crashreport::CrashSystem::get()
-                      ->getCaBundlePath().c_str());
+                      ->getCaBundlePath()
+                      .c_str());
     char* error = nullptr;
     CURL* const curl = curl_easy_default_init(&error);
     if (!curl) {
@@ -275,7 +278,7 @@ UserSuggestions CrashService::getSuggestions() {
 }
 
 bool CrashService::processCrash() {
-    mMinidump.reset(new google_breakpad::Minidump(mDumpFile));
+    mMinidump = std::make_unique<google_breakpad::Minidump>(mDumpFile);
     google_breakpad::MinidumpProcessor minidump_processor(nullptr,
                                                           &mLineResolver);
 
@@ -314,7 +317,7 @@ std::unique_ptr<CrashService> CrashService::makeCrashService(
             new HostCrashService(version, build, dataDir));
 }
 
-std::string CrashService::readFile(StringView path) {
+std::string CrashService::readFile(const StringView& path) {
     std::ifstream is(path.c_str());
 
     if (!is) {
@@ -394,16 +397,13 @@ bool CrashService::setClient(int clientpid) {
     return true;
 }
 
-void CrashService::collectProcessList()
-{
+void CrashService::collectProcessList() {
     if (mDataDirectory.empty()) {
         return;
     }
 
-    const auto command = StringFormat(
-                             "ps aux >%s/%s",
-                             mDataDirectory,
-                             CrashReporter::kProcessListFileName);
+    const auto command = StringFormat("ps aux >%s/%s", mDataDirectory,
+                                      CrashReporter::kProcessListFileName);
     system(command.c_str());
 }
 
@@ -442,47 +442,47 @@ void CrashService::collectDataFiles() {
 // trace to lowe case before doing the comparisons
 
 static const char* const gfx_drivers_lcase[] = {
-    // NVIDIA
-    "nvcpl", // Control Panel
-    "nvshell", // Desktop Explorer
-    "nvinit", // initializer
-    "nv4_disp", // Windows 2000 (!) display driver
-    "nvcod", // CoInstaller
-    "nvcuda", // Cuda
-    "nvopencl", // OpenCL
-    "nvcuvid", // Video decode
-    "nvogl", // OpenGL (modern)
-    "ig4icd", // OpenGL (icd?)
-    "geforcegldriver", // OpenGL (old)
-    "nvd3d", // Direct3D
-    "nvwgf2", // D3D10
-    "nvdx", // D3D shim drivers
-    "nvml", // management library
-    "nvfbc", // front buffer capture library
-    "nvapi", // NVAPI Library
-    "libnvidia", // NVIDIA Linux
+        // NVIDIA
+        "nvcpl",            // Control Panel
+        "nvshell",          // Desktop Explorer
+        "nvinit",           // initializer
+        "nv4_disp",         // Windows 2000 (!) display driver
+        "nvcod",            // CoInstaller
+        "nvcuda",           // Cuda
+        "nvopencl",         // OpenCL
+        "nvcuvid",          // Video decode
+        "nvogl",            // OpenGL (modern)
+        "ig4icd",           // OpenGL (icd?)
+        "geforcegldriver",  // OpenGL (old)
+        "nvd3d",            // Direct3D
+        "nvwgf2",           // D3D10
+        "nvdx",             // D3D shim drivers
+        "nvml",             // management library
+        "nvfbc",            // front buffer capture library
+        "nvapi",            // NVAPI Library
+        "libnvidia",        // NVIDIA Linux
 
-    // ATI
-    "atioglxx", // OpenGL
-    "atig6txx", // OpenGL
-    "r600", // Radeon r600 series
-    "aticfx", // DX11
-    "atiumd", // D3D
-    "atidxx", // "TMM Com Clone Control Module" (???)
-    "atimpenc", // video encoder
-    "atigl", // another ATI OpenGL driver
+        // ATI
+        "atioglxx",  // OpenGL
+        "atig6txx",  // OpenGL
+        "r600",      // Radeon r600 series
+        "aticfx",    // DX11
+        "atiumd",    // D3D
+        "atidxx",    // "TMM Com Clone Control Module" (???)
+        "atimpenc",  // video encoder
+        "atigl",     // another ATI OpenGL driver
 
-    // Intel
-    "i915", // Intel i915 gpu
-    "igd", // 'igd' series of Intel GPU's
-    "igl", // ?
-    "igfx", // ?
-    "ig75icd", // Intel icd
-    "intelocl", // Intel OpenCL
+        // Intel
+        "i915",      // Intel i915 gpu
+        "igd",       // 'igd' series of Intel GPU's
+        "igl",       // ?
+        "igfx",      // ?
+        "ig75icd",   // Intel icd
+        "intelocl",  // Intel OpenCL
 
-    // Others
-    "libgl.", // Low-level Linux OpenGL
-    "opengl32.dll", // Low-level Windows OpenGL
+        // Others
+        "libgl.",        // Low-level Linux OpenGL
+        "opengl32.dll",  // Low-level Windows OpenGL
 };
 
 static bool containsGfxPattern(const std::string& str) {
@@ -503,7 +503,8 @@ UserSuggestions::UserSuggestions(google_breakpad::ProcessState* process_state) {
 
     int crashed_thread_id = process_state->requesting_thread();
     if (crashed_thread_id < 0 ||
-        crashed_thread_id >= (int)process_state->threads()->size()) {
+        crashed_thread_id >=
+                static_cast<int>(process_state->threads()->size())) {
         return;
     }
     google_breakpad::CallStack* crashed_stack =

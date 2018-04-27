@@ -19,9 +19,9 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/android_pipe_device.h"
 
+#include <cinttypes>
+#include <cstdio>
 #include <type_traits>
-#include <inttypes.h>
-#include <stdio.h>
 
 #define DEBUG 0
 
@@ -102,7 +102,7 @@ void* DmaMap::getHostAddr(uint64_t guest_paddr) {
     } else {
         E("guest paddr 0x%llx not alloced!",
           (unsigned long long)guest_paddr);
-        return 0;
+        return nullptr;
     }
 }
 

@@ -15,8 +15,8 @@
 
 #include <string>
 
-#include <inttypes.h>
 #include <sys/types.h>
+#include <cinttypes>
 
 namespace android {
 namespace base {
@@ -74,7 +74,7 @@ public:
     float getFloat();
 
     // Write a string |str| into the stream. Ignore errors.
-    void putString(StringView str);
+    void putString(const StringView& str);
 
     // Write a 0-terminated C string |str| into the stream. Ignore error.
     void putString(const char* str);

@@ -25,11 +25,13 @@ namespace keymaster {
 const size_t kMaxDupBufferSize = 16 * 1024 * 1024;
 
 uint8_t* dup_buffer(const void* buf, size_t size) {
-    if (size >= kMaxDupBufferSize)
+    if (size >= kMaxDupBufferSize) {
         return nullptr;
+    }
     uint8_t* retval = new (std::nothrow) uint8_t[size];
-    if (retval)
+    if (retval) {
         memcpy(retval, buf, size);
+    }
     return retval;
 }
 
@@ -37,8 +39,9 @@ int memcmp_s(const void* p1, const void* p2, size_t length) {
     const uint8_t* s1 = static_cast<const uint8_t*>(p1);
     const uint8_t* s2 = static_cast<const uint8_t*>(p2);
     uint8_t result = 0;
-    while (length-- > 0)
+    while (length-- > 0) {
         result |= *s1++ ^ *s2++;
+    }
     return result == 0 ? 0 : 1;
 }
 

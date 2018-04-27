@@ -14,7 +14,7 @@
 #include "android/base/files/StreamSerializing.h"
 #include "lz4.h"
 
-#include <errno.h>
+#include <cerrno>
 
 namespace android {
 namespace base {
@@ -24,7 +24,7 @@ CompressingStream::CompressingStream(Stream& output)
 
 CompressingStream::~CompressingStream() {
     saveBuffer(&mOutput, mBuffer);
-    LZ4_freeStream((LZ4_stream_t*)mLzStream);
+    LZ4_freeStream(static_cast<LZ4_stream_t*>(mLzStream));
 }
 
 ssize_t CompressingStream::read(void*, size_t) {
@@ -39,9 +39,9 @@ ssize_t CompressingStream::write(const void* buffer, size_t size) {
     auto oldSize = mBuffer.size();
     mBuffer.resize_noinit(mBuffer.size() + outSize);
     const auto outBuffer = mBuffer.data() + oldSize;
-    const int written = LZ4_compress_fast_continue((LZ4_stream_t*)mLzStream,
-                                                   (const char*)buffer,
-                                                   outBuffer, size, outSize, 1);
+    const int written = LZ4_compress_fast_continue(
+            static_cast<LZ4_stream_t*>(mLzStream),
+            static_cast<const char*>(buffer), outBuffer, size, outSize, 1);
     if (!written) {
         return -EIO;
     }

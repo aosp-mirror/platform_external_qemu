@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {

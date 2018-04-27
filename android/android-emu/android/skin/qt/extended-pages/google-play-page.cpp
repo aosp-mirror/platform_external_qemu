@@ -10,7 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/extended-pages/google-play-page.h"
-
+#include <memory>
 #include "android/skin/qt/error-dialog.h"
 
 using android::base::StringView;
@@ -43,15 +43,16 @@ GooglePlayPage::GooglePlayPage(QWidget* parent)
     mTimer.setInterval(5000);  // 5 sec
 }
 
-GooglePlayPage::~GooglePlayPage() {}
+GooglePlayPage::~GooglePlayPage() = default;
 
 void GooglePlayPage::initialize(android::emulation::AdbInterface* adb) {
-    mGooglePlayServices.reset(new android::emulation::GooglePlayServices(adb));
+    mGooglePlayServices =
+            std::make_unique<android::emulation::GooglePlayServices>(adb);
     mTimer.start();
 }
 
 void GooglePlayPage::getBootCompletionProperty() {
-    // TODO: Really wish we had some kind of guest property to do
+    // TODO(joshuaduong): Really wish we had some kind of guest property to do
     // asynchronous waiting.
     const StringView boot_property = "sys.boot_completed";
     // Ran in a timer. We have to wait for the package manager
@@ -70,10 +71,11 @@ void GooglePlayPage::queryPlayVersions() {
 
 void GooglePlayPage::bootCompletionPropertyDone(
         GooglePlayServices::Result result,
-        StringView outString) {
+        const StringView& outString) {
     if (result == GooglePlayServices::Result::Success && !outString.empty() &&
         outString[0] == '1') {
-        // TODO: remove this once we have android properties to wait on.
+        // TODO(joshuaduong): remove this once we have android properties to
+        // wait on.
         mTimer.disconnect();
         QObject::connect(&mTimer, &QTimer::timeout, this,
                          &GooglePlayPage::queryPlayVersions);
@@ -143,7 +145,7 @@ void GooglePlayPage::getPlayServicesVersion() {
 
 void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
                                      PlayApps app,
-                                     StringView outString) {
+                                     const StringView& outString) {
     QString msg;
     QPlainTextEdit* textEdit = nullptr;
 

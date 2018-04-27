@@ -72,9 +72,9 @@ private:
 // Base class used to wrap engine-specific pixel format descriptors.
 class PixelFormat {
 public:
-    PixelFormat() {}
+    PixelFormat() = default;
 
-    virtual ~PixelFormat() {}
+    virtual ~PixelFormat() = default;
 
     virtual PixelFormat* clone() = 0;
 };
@@ -112,7 +112,7 @@ struct ConfigInfo {
 // |opaque| is an opaque value passed to queryConfig().
 // All other parameters are config attributes.
 // Note that ownership of |frmt| is transfered to the callback.
-typedef void (AddConfigCallback)(void* opaque, const ConfigInfo* configInfo);
+using AddConfigCallback = void(void*, const ConfigInfo*);
 
 // Pbuffer description.
 // |width| and |height| are its dimensions.
@@ -155,7 +155,7 @@ inline GlesVersion calcMaxESVersionFromCoreVersion(int coreMajor, int coreMinor)
 class Display {
 public:
     Display() = default;
-    virtual ~Display() {}
+    virtual ~Display() = default;
 
     virtual GlesVersion getMaxGlesVersion() = 0;
 
@@ -196,7 +196,7 @@ public:
 class Engine {
 public:
     Engine() = default;
-    virtual ~Engine() {}
+    virtual ~Engine() = default;
 
     // Return a Display instance to the default display / window.
     virtual Display* getDefaultDisplay() = 0;

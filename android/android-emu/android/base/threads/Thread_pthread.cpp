@@ -17,16 +17,16 @@
 #include "android/base/Log.h"
 #include "android/base/threads/ThreadStore.h"
 
-#include <assert.h>
-#include <signal.h>
-#include <stdio.h>
 #include <unistd.h>
+#include <cassert>
+#include <csignal>
+#include <cstdio>
 
 namespace android {
 namespace base {
 
 Thread::Thread(ThreadFlags flags, int stackSize)
-    : mThread((pthread_t)NULL),
+    : mThread(reinterpret_cast<pthread_t>(0)),  // NOLINT
       mStackSize(stackSize),
       mFlags(flags) {}
 
@@ -77,7 +77,7 @@ bool Thread::wait(intptr_t* exitStatus) {
     // NOTE: Do not hold the lock when waiting for the thread to ensure
     // it can update mFinished and mExitStatus properly in thread_main
     // without blocking.
-    if (!mJoined && pthread_join(mThread, NULL)) {
+    if (!mJoined && pthread_join(mThread, nullptr)) {
         return false;
     }
     mJoined = true;
@@ -98,7 +98,7 @@ bool Thread::tryWait(intptr_t* exitStatus) {
         return false;
     }
 
-    if (!mJoined && pthread_join(mThread, NULL)) {
+    if (!mJoined && pthread_join(mThread, nullptr)) {
         return false;
     }
     mJoined = true;
@@ -114,7 +114,7 @@ void* Thread::thread_main(void* arg) {
     intptr_t ret;
 
     {
-        Thread* self = reinterpret_cast<Thread*>(arg);
+        auto* self = reinterpret_cast<Thread*>(arg);
         if ((self->mFlags & ThreadFlags::MaskSignals) != ThreadFlags::NoFlags) {
             Thread::maskAllSignals();
         }
@@ -141,7 +141,7 @@ void* Thread::thread_main(void* arg) {
     ::android::base::ThreadStoreBase::OnThreadExit();
 
     // This return value is ignored.
-    return NULL;
+    return nullptr;
 }
 
 // static

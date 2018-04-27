@@ -35,7 +35,7 @@ namespace {
 class FeatureControlTest : public ::testing::Test {
 public:
     void SetUp() override {
-        mTempDir.reset(new base::TestTempDir("featurecontroltest"));
+        mTempDir = std::make_unique<base::TestTempDir>("featurecontroltest");
         mDefaultIniHostFilePath =
                 mTempDir->makeSubPath("defaultSettingsHost.ini").c_str();
         mDefaultIniGuestFilePath =
@@ -86,16 +86,16 @@ public:
 #undef FEATURE_CONTROL_ITEM
     }
 protected:
-    void writeDefaultIniHost(android::base::StringView data) {
+    void writeDefaultIniHost(const android::base::StringView& data) {
         writeIni(mDefaultIniHostFilePath, data);
     }
-    void writeDefaultIniGuest(android::base::StringView data) {
+    void writeDefaultIniGuest(const android::base::StringView& data) {
         writeIni(mDefaultIniGuestFilePath, data);
     }
-    void writeUserIniHost(android::base::StringView data) {
+    void writeUserIniHost(const android::base::StringView& data) {
         writeIni(mUserIniHostFilePath, data);
     }
-    void writeUserIniGuest(android::base::StringView data) {
+    void writeUserIniGuest(const android::base::StringView& data) {
         writeIni(mUserIniGuestFilePath, data);
     }
     void loadAllIni() {
@@ -116,8 +116,8 @@ protected:
     std::string mAllDefaultIniGuestOnly;
 
 private:
-    void writeIni(android::base::StringView filename,
-                  android::base::StringView data) {
+    void writeIni(const android::base::StringView& filename,
+                  const android::base::StringView& data) {
         std::ofstream outFile(filename,
                               std::ios_base::out | std::ios_base::trunc);
         ASSERT_TRUE(outFile.good());
@@ -135,7 +135,7 @@ TEST_F(FeatureControlTest, overrideSetting) {
     loadAllIni();
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         setEnabledOverride(feature, true);
         EXPECT_TRUE(isEnabled(feature));
         setEnabledOverride(feature, false);
@@ -151,7 +151,7 @@ TEST_F(FeatureControlTest, resetToDefault) {
     loadAllIni();
     using namespace featurecontrol;
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         bool defaultVal = isEnabled(feature);
         setEnabledOverride(feature, true);
         resetEnabledToDefault(feature);
@@ -170,7 +170,7 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
     writeDefaultIniGuest(mAllOnIniGuestOnly);
     loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_TRUE(isEnabled(feature));
     }
 
@@ -178,7 +178,7 @@ TEST_F(FeatureControlTest, readDefaultSettings) {
     writeDefaultIniGuest(mAllOffIniGuestOnly);
     loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
     }
 }
@@ -189,7 +189,7 @@ TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
     FeatureControlImpl::get().init(mDefaultIniHostFilePath,
                                    mDefaultIniGuestFilePath, "", "");
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_TRUE(isEnabled(feature));
     }
 
@@ -198,7 +198,7 @@ TEST_F(FeatureControlTest, readDefaultSettingsWithNoUserSettings) {
     FeatureControlImpl::get().init(mDefaultIniHostFilePath,
                                    mDefaultIniGuestFilePath, "", "");
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
     }
 }
@@ -224,7 +224,7 @@ TEST_F(FeatureControlTest, readDefaultSettingsHostGuestDifferent) {
     FeatureControlImpl::get().init(mDefaultIniHostFilePath,
                                    mDefaultIniGuestFilePath, "", "");
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
     }
 }
@@ -237,7 +237,7 @@ TEST_F(FeatureControlTest, readUserSettings) {
     writeUserIniGuest(mAllOnIniGuestOnly);
     loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_TRUE(isEnabled(feature));
     }
 
@@ -245,7 +245,7 @@ TEST_F(FeatureControlTest, readUserSettings) {
     writeUserIniGuest(mAllOffIniGuestOnly);
     loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
     }
 }
@@ -267,19 +267,19 @@ TEST_F(FeatureControlTest, setNonOverriden) {
     writeDefaultIniGuest(mAllOnIniGuestOnly);
     loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_TRUE(isEnabled(feature));
         EXPECT_FALSE(isOverridden(feature));
     }
 
-    Feature overriden = (Feature)0;
+    auto overriden = static_cast<Feature>(0);
     setEnabledOverride(overriden, false);
     EXPECT_FALSE(isEnabled(overriden));
 
     setIfNotOverriden(overriden, true);
     EXPECT_FALSE(isEnabled(overriden));
 
-    Feature nonOverriden = (Feature)1;
+    auto nonOverriden = static_cast<Feature>(1);
     EXPECT_TRUE(isEnabled(nonOverriden));
     EXPECT_FALSE(isOverridden(nonOverriden));
     setIfNotOverriden(nonOverriden, false);
@@ -291,7 +291,7 @@ TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOn) {
     writeDefaultIniGuest(mAllOnIniGuestOnly);
     loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
         EXPECT_FALSE(isOverridden(feature));
         setIfNotOverridenOrGuestDisabled(feature, true);
@@ -304,7 +304,7 @@ TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOff) {
     writeDefaultIniGuest(mAllOffIniGuestOnly);
     loadAllIni();
     for (int i = 0; i < Feature_n_items; i++) {
-        Feature feature = static_cast<Feature>(i);
+        auto feature = static_cast<Feature>(i);
         EXPECT_FALSE(isEnabled(feature));
         EXPECT_FALSE(isOverridden(feature));
         setIfNotOverridenOrGuestDisabled(feature, true);
@@ -319,17 +319,15 @@ TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOff) {
 TEST_F(FeatureControlTest, parseCommandLine) {
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
-    ParamList feature1 = {
-            (char*)FeatureControlImpl::toString(Feature::Wifi).c_str()};
-    ParamList feature2 = {
-            (char*)FeatureControlImpl::toString(Feature::EncryptUserData)
-                    .c_str()};
-    ParamList feature3 = {
-            (char*)FeatureControlImpl::toString(Feature::GLPipeChecksum)
-                    .c_str()};
+    ParamList feature1 = {const_cast<char*>(
+            FeatureControlImpl::toString(Feature::Wifi).c_str())};
+    ParamList feature2 = {const_cast<char*>(
+            FeatureControlImpl::toString(Feature::EncryptUserData).c_str())};
+    ParamList feature3 = {const_cast<char*>(
+            FeatureControlImpl::toString(Feature::GLPipeChecksum).c_str())};
     std::string feature4str =
-            "-" + (std::string)FeatureControlImpl::toString(Feature::HYPERV);
-    ParamList feature4 = {(char*)feature4str.c_str()};
+            "-" + std::string(FeatureControlImpl::toString(Feature::HYPERV));
+    ParamList feature4 = {const_cast<char*>(feature4str.c_str())};
     feature1.next = &feature2;
     feature2.next = &feature3;
     feature3.next = &feature4;

@@ -71,8 +71,9 @@ keymaster_error_t NistCurveKeyExchange::ExtractPublicKey() {
     const EC_GROUP* group = EC_KEY_get0_group(private_key_.get());
     size_t field_len_bits;
     keymaster_error_t error = ec_get_group_size(group, &field_len_bits);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     shared_secret_len_ = (field_len_bits + 7) / 8;
     public_key_len_ = 1 + 2 * shared_secret_len_;

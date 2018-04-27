@@ -14,7 +14,7 @@
 #include "android/base/ArraySize.h"
 #include <gtest/gtest.h>
 
-#include <string.h>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -34,7 +34,7 @@ public:
             mSize(bufferLen),
             mPos(0) {}
 
-    virtual ssize_t read(void* buffer, size_t len) {
+    ssize_t read(void* buffer, size_t len) override {
         size_t avail = mSize - mPos;
         if (len > avail) {
             len = avail;
@@ -44,7 +44,7 @@ public:
         return static_cast<ssize_t>(len);
     }
 
-    virtual ssize_t write(const void* buffer, size_t len) {
+    ssize_t write(const void* buffer, size_t len) override {
         size_t avail = mSize - mPos;
         if (len > avail) {
             len = avail;
@@ -91,8 +91,8 @@ TEST(Stream,putBe16) {
     uint8_t buffer[sizeof(kExpected)] = { 0, };
     MemoryStream stream(buffer, sizeof(buffer));
 
-    for (size_t n = 0; n < sizeof(kData) / sizeof(*kData); ++n) {
-        stream.putBe16(kData[n]);
+    for (unsigned short n : kData) {
+        stream.putBe16(n);
     }
     for (size_t n = 0; n < sizeof(kExpected); ++n) {
         EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;
@@ -123,8 +123,8 @@ TEST(Stream,putBe32) {
     uint8_t buffer[sizeof(kExpected)] = { 0, };
     MemoryStream stream(buffer, sizeof(buffer));
 
-    for (size_t n = 0; n < sizeof(kData) / sizeof(*kData); ++n) {
-        stream.putBe32(kData[n]);
+    for (unsigned int n : kData) {
+        stream.putBe32(n);
     }
     for (size_t n = 0; n < sizeof(kExpected); ++n) {
         EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;
@@ -155,8 +155,8 @@ TEST(Stream,putBe64) {
     uint8_t buffer[sizeof(kExpected)] = { 0, };
     MemoryStream stream(buffer, sizeof(buffer));
 
-    for (size_t n = 0; n < sizeof(kData) / sizeof(*kData); ++n) {
-        stream.putBe64(kData[n]);
+    for (unsigned long long n : kData) {
+        stream.putBe64(n);
     }
     for (size_t n = 0; n < sizeof(kExpected); ++n) {
         EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;
@@ -274,8 +274,8 @@ TEST(Stream, putPackedNum) {
     uint8_t buffer[sizeof(kExpected)] = {};
     MemoryStream stream(buffer, sizeof(buffer));
 
-    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        stream.putPackedNum(kData[n]);
+    for (unsigned long long n : kData) {
+        stream.putPackedNum(n);
     }
     for (size_t n = 0; n < sizeof(kExpected); ++n) {
         EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;

@@ -31,7 +31,7 @@
 #include <EGL/egl.h>
 
 class EglContext;
-typedef emugl::SmartPtr<EglContext> ContextPtr;
+using ContextPtr = emugl::SmartPtr<EglContext>;
 
 class EglDisplay;
 
@@ -45,7 +45,7 @@ public:
                EGLint profile_mask,
                ObjectNameManager* mngr,
                android::base::Stream* stream);
-    bool usingSurface(SurfacePtr surface);
+    bool usingSurface(const SurfacePtr& surface);
     EglOS::Context* nativeType() const { return m_native.get(); }
     bool getAttrib(EGLint attrib, EGLint* value);
     const SurfacePtr& read() const { return m_read; };

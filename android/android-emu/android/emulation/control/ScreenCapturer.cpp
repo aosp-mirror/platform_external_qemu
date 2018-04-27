@@ -25,7 +25,7 @@
 namespace android {
 namespace emulation {
 
-bool captureScreenshot(android::base::StringView outputDirectoryPath,
+bool captureScreenshot(const android::base::StringView& outputDirectoryPath,
                        std::string* pOutputFilepath) {
     const auto& renderer = android_getOpenglesRenderer();
     if (const auto renderer_ptr = renderer.get()) {
@@ -33,18 +33,22 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
                                  pOutputFilepath);
     } else {
         // renderer is nullptr in -gpu guest
-        return captureScreenshot(nullptr,
+        return captureScreenshot(
+                nullptr,
                 emulator_window_get()->uiEmuAgent->display->getFrameBuffer,
                 outputDirectoryPath, pOutputFilepath);
     }
 }
 
-bool captureScreenshot(emugl::Renderer* renderer,
-                       std::function<void(int* w, int* h, int* lineSize,
-                            int* bytesPerPixel, uint8_t** frameBufferData)>
-                            getFrameBuffer,
-                       android::base::StringView outputDirectoryPath,
-                       std::string* pOutputFilepath) {
+bool captureScreenshot(
+        emugl::Renderer* renderer,
+        const std::function<void(int* w,
+                                 int* h,
+                                 int* lineSize,
+                                 int* bytesPerPixel,
+                                 uint8_t** frameBufferData)>& getFrameBuffer,
+        const android::base::StringView& outputDirectoryPath,
+        std::string* pOutputFilepath) {
     if (!renderer && !getFrameBuffer) {
         LOG(WARNING) << "Cannot take screenshots.\n";
         return false;
@@ -60,8 +64,9 @@ bool captureScreenshot(emugl::Renderer* renderer,
     } else {
         int bpp = 4;
         int lineSize = 0;
-        getFrameBuffer((int*)&width, (int*)&height, &lineSize, &bpp,
-                &pixels);
+        getFrameBuffer(reinterpret_cast<int*>(&width),
+                       reinterpret_cast<int*>(&height), &lineSize, &bpp,
+                       &pixels);
         if (bpp < 1 || bpp > 4) {
             // unknown pixel buffer format
             return false;
@@ -71,8 +76,7 @@ bool captureScreenshot(emugl::Renderer* renderer,
         // convert it to rgb888
         nChannels = bpp == 2 ? 3 : bpp;
         // Need to handle padding if lineSize != width * nChannels
-        if ((lineSize != 0 && lineSize != width * nChannels) ||
-                bpp == 2) {
+        if ((lineSize != 0 && lineSize != width * nChannels) || bpp == 2) {
             pixelBuffer.resize(width * height * nChannels);
             unsigned char* src = pixels;
             unsigned char* dst = pixelBuffer.data();
@@ -83,9 +87,10 @@ bool captureScreenshot(emugl::Renderer* renderer,
                 } else {
                     // rgb565, need convertion
                     for (int w = 0; w < width; w++) {
-                        unsigned char r = src[w*2+1] >> 3;
-                        unsigned char g = (src[w*2+1] & 7) << 3 | src[w*2] >> 5;
-                        unsigned char b = src[w*2] & 63;
+                        unsigned char r = src[w * 2 + 1] >> 3;
+                        unsigned char g =
+                                (src[w * 2 + 1] & 7) << 3 | src[w * 2] >> 5;
+                        unsigned char b = src[w * 2] & 63;
                         r = r << 3 | r >> 2;
                         g = g << 2 | g >> 4;
                         b = b << 3 | b >> 2;
@@ -104,8 +109,10 @@ bool captureScreenshot(emugl::Renderer* renderer,
     }
     // the file name is ~25 characters
     char fileName[100];
-    int fileNameSize = snprintf(fileName, sizeof(fileName), "Screenshot_%lld.png",
-            (long long int)android::base::System::get()->getUnixTime());
+    int fileNameSize =
+            snprintf(fileName, sizeof(fileName), "Screenshot_%lld.png",
+                     static_cast<long long int>(
+                             android::base::System::get()->getUnixTime()));
     assert(fileNameSize < sizeof(fileName));
     (void)fileNameSize;
 

@@ -35,7 +35,7 @@ extern "C" {
 #include "libavutil/time.h"
 }
 
-#include <math.h>
+#include <cmath>
 
 namespace android {
 namespace videoplayer {

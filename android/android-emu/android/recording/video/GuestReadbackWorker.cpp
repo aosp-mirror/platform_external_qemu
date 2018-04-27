@@ -47,9 +47,9 @@ public:
         auto sz = fbWidth * fbHeight * bpp;
 
         // Preallocate the space for the three frames
-        for (int i = 0; i < 3; ++i) {
-            mFrames[i] = Frame(sz);
-            mFrames[i].format.videoFormat = mFormat;
+        for (auto& mFrame : mFrames) {
+            mFrame = Frame(sz);
+            mFrame.format.videoFormat = mFormat;
         }
 
         mAgent->registerUpdateListener(&onPost, this);
@@ -66,7 +66,7 @@ public:
     }
 
     // Called by the consumer.
-    virtual const Frame* getFrame() override {
+    const Frame* getFrame() override {
         AutoLock lock(mLock);
         if (!mFirstFrameLoaded) {
             return nullptr;
@@ -81,9 +81,9 @@ public:
         return &mFrames[mCopyIdx];
     }
 
-    virtual VideoFormat getPixelFormat() override { return mFormat; }
+    VideoFormat getPixelFormat() override { return mFormat; }
 
-    virtual ~GuestReadbackWorkerImpl() {
+    ~GuestReadbackWorkerImpl() override {
         if (mAgent) {
             mAgent->unregisterUpdateListener(&onPost);
         }

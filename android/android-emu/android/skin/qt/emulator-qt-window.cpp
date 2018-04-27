@@ -90,6 +90,7 @@
 
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
 using android::base::AutoLock;
@@ -129,8 +130,8 @@ SkinSurfaceBitmap::SkinSurfaceBitmap(const char* path) : reader(path) {
 }
 
 SkinSurfaceBitmap::SkinSurfaceBitmap(const unsigned char* data, int size) {
-    auto array =
-            new QByteArray(QByteArray::fromRawData((const char*)data, size));
+    auto array = new QByteArray(
+            QByteArray::fromRawData(reinterpret_cast<const char*>(data), size));
     auto buffer = new QBuffer(array);
     buffer->open(QIODevice::ReadOnly);
     reader.setDevice(buffer);
@@ -285,19 +286,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
       mStartupDialog(this),
-      mToolWindow(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
-      mZoomFactor(1.0),
-      mInZoomMode(false),
-      mNextIsZoom(false),
-      mForwardShortcutsToDevice(false),
       mPrevMousePosition(0, 0),
-      mSkinGapTop(0),
-      mSkinGapRight(0),
-      mSkinGapBottom(0),
-      mSkinGapLeft(0),
-      mMainLoopThread(nullptr),
       mAvdWarningBox(QMessageBox::Information,
                      tr("Recommended AVD"),
                      tr("Running an x86 based Android Virtual Device (AVD) is "
@@ -353,17 +344,14 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                          QObject::connect(dialog, SIGNAL(canceled()), this,
                                           SLOT(slot_installCanceled()));
                      }),
-      mPushDialog(this,
-                  [this](QProgressDialog* dialog) {
-                      dialog->setWindowTitle(tr("File Copy"));
-                      dialog->setLabelText(tr("Copying files..."));
-                      dialog->setRange(0, kPushProgressBarMax);
-                      dialog->close();
-                      QObject::connect(dialog, SIGNAL(canceled()), this,
-                                       SLOT(slot_adbPushCanceled()));
-                  }),
-      mStartedAdbStopProcess(false),
-      mHaveBeenFrameless(false) {
+      mPushDialog(this, [this](QProgressDialog* dialog) {
+          dialog->setWindowTitle(tr("File Copy"));
+          dialog->setLabelText(tr("Copying files..."));
+          dialog->setRange(0, kPushProgressBarMax);
+          dialog->close();
+          QObject::connect(dialog, SIGNAL(canceled()), this,
+                           SLOT(slot_adbPushCanceled()));
+      }) {
     qRegisterMetaType<QPainter::CompositionMode>();
     qRegisterMetaType<SkinRotation>();
     qRegisterMetaType<SkinGenericFunction>();
@@ -376,11 +364,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     android::base::ThreadLooper::setLooper(mLooper, true);
 
-    // TODO: Weird input lag with Qt will cause hang detector to trip and crash
-    // the emulator, even though it works ok (but laggy) otherwise.
-    // For now, disable Qt hang detection.
-    // bug: 73723222
-    // bug: 74520987
+    // TODO(lfy): Weird input lag with Qt will cause hang detector to trip and
+    // crash the emulator, even though it works ok (but laggy) otherwise. For
+    // now, disable Qt hang detection. bug: 73723222 bug: 74520987
     // CrashReporter::get()->hangDetector().addWatchedLooper(mLooper);
 
     // Start a timer. If the main window doesn't
@@ -393,7 +379,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mStartupTimer.setInterval(500);  // Half a second
     mStartupTimer.start();
 
-    mBackingSurface = NULL;
+    mBackingSurface = nullptr;
 
     QSettings settings;
     mFrameAlways =
@@ -636,7 +622,7 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     deleteErrorDialog();
     if (mToolWindow) {
         delete mToolWindow;
-        mToolWindow = NULL;
+        mToolWindow = nullptr;
     }
 
     mStartupDialog.ifExists([&] {
@@ -758,12 +744,12 @@ void EmulatorQtWindow::slot_startupTick() {
     mStartupDialog->setLabel(label);
 
     // The default progress bar on Windows isn't centered for some reason
-    QProgressBar* bar = new QProgressBar();
+    auto* bar = new QProgressBar();
     bar->setAlignment(Qt::AlignHCenter);
     mStartupDialog->setBar(bar);
 
     mStartupDialog->setRange(0, 0);      // Don't show % complete
-    mStartupDialog->setCancelButton(0);  // No "cancel" button
+    mStartupDialog->setCancelButton(nullptr);  // No "cancel" button
     mStartupDialog->setMinimumSize(mStartupDialog->sizeHint());
     mStartupDialog->show();
 }
@@ -890,8 +876,8 @@ void EmulatorQtWindow::dropEvent(QDropEvent* event) {
         return;
     } else {
         // If any of the files is an APK, intent was ambiguous
-        for (int i = 0; i < urls.length(); i++) {
-            if (urls[i].path().endsWith(".apk")) {
+        for (auto& url : urls) {
+            if (url.path().endsWith(".apk")) {
                 showErrorDialog(
                         tr("Drag-and-drop can either install a single APK"
                            " file or copy one or more non-APK files to the"
@@ -1044,7 +1030,7 @@ void EmulatorQtWindow::maskWindowFrame() {
     mToolWindow->dockMainWindow();
 
     D("%s: kEventWindowChanged", __FUNCTION__);
-    SkinEvent* event = new SkinEvent();
+    auto* event = new SkinEvent();
     event->type = kEventWindowChanged;
     queueSkinEvent(event);
 }
@@ -1069,11 +1055,11 @@ void EmulatorQtWindow::getSkinPixmap() {
     AConfig* partsConfig = aconfig_find(skinConfig, "parts");
     if (partsConfig == nullptr) return; // Failed
     const char *skinFileName = nullptr;
-    for (AConfig* partNode = partsConfig->first_child;
-                  partNode != NULL;
-                  partNode = partNode->next) {
+    for (AConfig* partNode = partsConfig->first_child; partNode != nullptr;
+         partNode = partNode->next) {
         const AConfig* backgroundNode = aconfig_find(partNode, "background");
-        if (backgroundNode == NULL) continue;
+        if (backgroundNode == nullptr)
+            continue;
         skinFileName = aconfig_str(backgroundNode, "image", nullptr);
         if (skinFileName != nullptr && skinFileName[0] != '\0') {
             mSkinPixmapIsPortrait = !strcmp(partNode->name, "portrait");
@@ -1153,7 +1139,7 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways)
     }
 
     D("%s: kEventScreenChanged", __FUNCTION__);
-    SkinEvent* event = new SkinEvent();
+    auto* event = new SkinEvent();
     event->type = kEventScreenChanged;
     queueSkinEvent(event);
 }
@@ -1203,7 +1189,7 @@ void EmulatorQtWindow::slot_clearInstance() {
 #ifndef __APPLE__
     if (mToolWindow) {
         delete mToolWindow;
-        mToolWindow = NULL;
+        mToolWindow = nullptr;
     }
 #endif
 
@@ -1228,21 +1214,23 @@ void EmulatorQtWindow::slot_blit(SkinSurfaceBitmap* src,
 
 void EmulatorQtWindow::slot_fill(SkinSurface* s,
                                  QRect rect,
-                                 QColor color,
+                                 const QColor& color,
                                  QSemaphore* semaphore) {
     if (mBackingSurface && s == mBackingSurface) {
         mBackingBitmapChanged = true;
     }
     s->bitmap->fill(rect, color);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_getDevicePixelRatio(double* out_dpr,
                                                 QSemaphore* semaphore) {
     *out_dpr = devicePixelRatioF();
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
@@ -1265,8 +1253,9 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
     out_rect->setHeight(rect.height() * .95);
 #endif
 
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 WId EmulatorQtWindow::getWindowId() {
@@ -1286,8 +1275,9 @@ void EmulatorQtWindow::slot_getWindowSize(int* ww,
 
     *ww = geom.width();
     *hh = geom.height();
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_getWindowPos(int* xx,
@@ -1300,14 +1290,16 @@ void EmulatorQtWindow::slot_getWindowPos(int* xx,
 
     *xx = geom.x();
     *yy = geom.y();
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_windowHasFrame(bool* outValue, QSemaphore* semaphore) {
     *outValue = hasFrame();
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_getFramePos(int* xx,
@@ -1318,8 +1310,9 @@ void EmulatorQtWindow::slot_getFramePos(int* xx,
 
     *xx = mContainer.x();
     *yy = mContainer.y();
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
@@ -1337,8 +1330,9 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
         *out_value = screenGeo.contains(mContainer.geometry());
     }
 
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_isWindowOffScreen(bool* out_value,
@@ -1350,8 +1344,9 @@ void EmulatorQtWindow::slot_isWindowOffScreen(bool* out_value,
 
     *out_value = (screenNum < 0);
 
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::pollEvent(SkinEvent* event,
@@ -1426,84 +1421,96 @@ void EmulatorQtWindow::slot_updateRotation(SkinRotation rotation) {
 void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
                                           QSemaphore* semaphore) {
     if (mBackingSurface == s) {
-        mBackingSurface = NULL;
+        mBackingSurface = nullptr;
         mBackingBitmapChanged = true;
     }
     delete s->bitmap;
     delete s;
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
     crashhandler_exitmode(__FUNCTION__);
     mContainer.close();
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_requestUpdate(QRect rect,
                                           QSemaphore* semaphore) {
-    if (!mBackingSurface)
+    if (!mBackingSurface) {
         return;
+    }
 
     QRect r(rect.x() * mBackingSurface->w / mBackingSurface->bitmap->size().width(),
             rect.y() * mBackingSurface->h / mBackingSurface->bitmap->size().height(),
             rect.width() * mBackingSurface->w / mBackingSurface->bitmap->size().width(),
             rect.height() * mBackingSurface->h / mBackingSurface->bitmap->size().height());
     update(r);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_setDeviceGeometry(QRect rect,
                                               QSemaphore* semaphore) {
     mDeviceGeometry = rect;
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_setWindowPos(int x, int y, QSemaphore* semaphore) {
     mContainer.move(x, y);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_setWindowSize(int w, int h, QSemaphore* semaphore) {
     mContainer.resize(w, h);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_paintWindowOverlayForResize(int mouseX, int mouseY, QSemaphore* semaphore) {
     mOverlay.paintForResize(mouseX, mouseY);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_clearWindowOverlay(QSemaphore* semaphore) {
     mOverlay.hide();
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_setWindowOverlayForResize(int whichCorner, QSemaphore* semaphore) {
     mOverlay.showForResize(whichCorner);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_setWindowCursorResize(int whichCorner, QSemaphore* semaphore) {
     mContainer.setCursor((whichCorner == 0 || whichCorner == 2) ?
                               Qt::SizeFDiagCursor : Qt::SizeBDiagCursor);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_setWindowCursorNormal(QSemaphore* semaphore) {
     mContainer.setCursor(Qt::ArrowCursor);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_setWindowIcon(const unsigned char* data,
@@ -1513,11 +1520,12 @@ void EmulatorQtWindow::slot_setWindowIcon(const unsigned char* data,
     image.loadFromData(data, size);
     QIcon icon(image);
     QApplication::setWindowIcon(icon);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
-void EmulatorQtWindow::slot_setWindowTitle(QString title,
+void EmulatorQtWindow::slot_setWindowTitle(const QString& title,
                                            QSemaphore* semaphore) {
     mContainer.setWindowTitle(title);
 
@@ -1525,8 +1533,9 @@ void EmulatorQtWindow::slot_setWindowTitle(QString title,
     // has been set. This port ensures AdbInterface can identify the correct
     // device if there is more than one.
     (*mAdbInterface)->setSerialNumberPort(android_serial_number_port);
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
@@ -1548,13 +1557,16 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     {
         // We're trying to go smaller than the container will allow.
         // Increase our size to the container's minimum.
-        double horizIncreaseFactor = (double)(mContainer.minimumWidth()) / rect.width();
-        double vertIncreaseFactor = (double)(mContainer.minimumHeight()) / rect.height();
+        double horizIncreaseFactor =
+                static_cast<double>(mContainer.minimumWidth()) / rect.width();
+        double vertIncreaseFactor =
+                static_cast<double>(mContainer.minimumHeight()) / rect.height();
         if (horizIncreaseFactor > vertIncreaseFactor) {
             rect.setWidth(mContainer.minimumWidth());
-            rect.setHeight((int)(horizIncreaseFactor * rect.height()));
+            rect.setHeight(
+                    static_cast<int>(horizIncreaseFactor * rect.height()));
         } else {
-            rect.setWidth((int)(vertIncreaseFactor * rect.width()));
+            rect.setWidth(static_cast<int>(vertIncreaseFactor * rect.width()));
             rect.setHeight(mContainer.minimumHeight());
         }
     }
@@ -1595,8 +1607,9 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
         mFirstShowWindowCall = false;
     }
 
-    if (semaphore != NULL)
+    if (semaphore != nullptr) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::onScreenChanged(QScreen* newScreen) {
@@ -1691,7 +1704,7 @@ void EmulatorQtWindow::runAdbInstall(const QString& path) {
 }
 
 void EmulatorQtWindow::installDone(ApkInstaller::Result result,
-                                   StringView errorString) {
+                                   const StringView& errorString) {
     mInstallDialog->hide();
 
     QString msg;
@@ -1738,8 +1751,7 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
     for (const auto& url : urls) {
         string remoteFile = PathUtils::join(remoteDownloadsDir,
                                             url.fileName().toStdString());
-        file_paths.push_back(
-                std::make_pair(url.toLocalFile().toStdString(), remoteFile));
+        file_paths.emplace_back(url.toLocalFile().toStdString(), remoteFile);
     }
 
     mFilePusher->pushFiles(file_paths);
@@ -1752,15 +1764,17 @@ void EmulatorQtWindow::slot_adbPushCanceled() {
 void EmulatorQtWindow::slot_showMessage(QString text,
                                         Ui::OverlayMessageIcon icon,
                                         int timeoutMs) {
-    mContainer.messageCenter().addMessage(text, icon, timeoutMs);
+    mContainer.messageCenter().addMessage(std::move(text), icon, timeoutMs);
 }
 
-void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
-                                                           Ui::OverlayMessageIcon icon,
-                                                           QString dismissText,
-                                                           RunOnUiThreadFunc func,
-                                                           int timeoutMs) {
-    auto msg = mContainer.messageCenter().addMessage(text, icon, timeoutMs);
+void EmulatorQtWindow::slot_showMessageWithDismissCallback(
+        QString text,
+        Ui::OverlayMessageIcon icon,
+        const QString& dismissText,
+        RunOnUiThreadFunc func,
+        int timeoutMs) {
+    auto msg = mContainer.messageCenter().addMessage(std::move(text), icon,
+                                                     timeoutMs);
     msg->setDismissCallback(dismissText, std::move(func));
 }
 
@@ -1774,7 +1788,7 @@ void EmulatorQtWindow::adbPushProgress(double progress, bool done) {
     mPushDialog->show();
 }
 
-void EmulatorQtWindow::adbPushDone(StringView filePath,
+void EmulatorQtWindow::adbPushDone(const StringView& filePath,
                                    FilePusher::Result result) {
     QString msg;
     switch (result) {
@@ -1903,7 +1917,7 @@ static int convertKeyCode(int sym) {
 }
 
 SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
-    SkinEvent* skin_event = new SkinEvent();
+    auto* skin_event = new SkinEvent();
     skin_event->type = type;
     return skin_event;
 }
@@ -1937,8 +1951,10 @@ void EmulatorQtWindow::doResize(const QSize& size,
         }
     }
 
-    double widthScale = (double)newSize.width() / (double)originalWidth;
-    double heightScale = (double)newSize.height() / (double)originalHeight;
+    double widthScale = static_cast<double>(newSize.width()) /
+                        static_cast<double>(originalWidth);
+    double heightScale = static_cast<double>(newSize.height()) /
+                         static_cast<double>(originalHeight);
 
     simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
 
@@ -1982,12 +1998,15 @@ void EmulatorQtWindow::forwardKeyEventToEmulator(SkinEventType type,
     keyData.keycode = convertKeyCode(event->key());
 
     Qt::KeyboardModifiers modifiers = event->modifiers();
-    if (modifiers & Qt::ShiftModifier)
+    if (modifiers & Qt::ShiftModifier) {
         keyData.mod |= kKeyModLShift;
-    if (modifiers & Qt::ControlModifier)
+    }
+    if (modifiers & Qt::ControlModifier) {
         keyData.mod |= kKeyModLCtrl;
-    if (modifiers & Qt::AltModifier)
+    }
+    if (modifiers & Qt::AltModifier) {
         keyData.mod |= kKeyModLAlt;
+    }
 
     queueSkinEvent(skin_event);
 }
@@ -2025,8 +2044,8 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
                 // Send an additional TextInput event to the emulator.
                 SkinEvent* skin_event = createSkinEvent(kEventTextInput);
                 skin_event->u.text.down = false;
-                strncpy((char*)skin_event->u.text.text,
-                        (const char*)event->text().toUtf8().constData(),
+                strncpy(reinterpret_cast<char*>(skin_event->u.text.text),
+                        event->text().toUtf8().constData(),
                         sizeof(skin_event->u.text.text) - 1);
                 // Ensure the event's text is 0-terminated
                 skin_event->u.text.text[sizeof(skin_event->u.text.text) - 1] =
@@ -2133,11 +2152,12 @@ void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
     mForwardShortcutsToDevice = (index != 0);
 }
 
-void EmulatorQtWindow::slot_runOnUiThread(RunOnUiThreadFunc f,
+void EmulatorQtWindow::slot_runOnUiThread(const RunOnUiThreadFunc& f,
                                           QSemaphore* semaphore) {
     f();
-    if (semaphore)
+    if (semaphore) {
         semaphore->release();
+    }
 }
 
 bool EmulatorQtWindow::hasFrame() const {
@@ -2147,7 +2167,7 @@ bool EmulatorQtWindow::hasFrame() const {
     // Probably frameless. But framed if there's no skin.
     char *skinName, *skinDir;
     avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
-    return (skinDir == NULL);
+    return (skinDir == nullptr);
 }
 
 bool EmulatorQtWindow::isInZoomMode() const {
@@ -2213,8 +2233,8 @@ void EmulatorQtWindow::saveZoomPoints(const QPoint& focus,
     // The underlying frame will change sizes, so get what "percentage" of the
     // frame was clicked, where (0,0) is the top-left corner and (1,1) is the
     // bottom right corner.
-    mFocus = QPointF((float)focus.x() / this->width(),
-                     (float)focus.y() / this->height());
+    mFocus = QPointF(static_cast<float>(focus.x()) / this->width(),
+                     static_cast<float>(focus.y()) / this->height());
 
     // Save to re-align the container with the underlying frame.
     mViewportFocus = viewportFocus;
@@ -2235,8 +2255,9 @@ void EmulatorQtWindow::zoomIn() {
 
 void EmulatorQtWindow::zoomIn(const QPoint& focus,
                               const QPoint& viewportFocus) {
-    if (!mBackingSurface)
+    if (!mBackingSurface) {
         return;
+    }
 
     saveZoomPoints(focus, viewportFocus);
 
@@ -2245,7 +2266,8 @@ void EmulatorQtWindow::zoomIn(const QPoint& focus,
     // should be at a 1:1 pixel mapping with the monitor. We allow going
     // to twice this size.
     double scale =
-            ((double)size().width() / (double)mBackingSurface->bitmap->size().width());
+            (static_cast<double>(size().width()) /
+             static_cast<double>(mBackingSurface->bitmap->size().width()));
     double maxZoom = mZoomFactor * 2.0 / scale;
 
     if (scale < 2) {
@@ -2271,8 +2293,9 @@ void EmulatorQtWindow::zoomReset() {
 }
 
 void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
-    if (!mBackingSurface)
+    if (!mBackingSurface) {
         return;
+    }
 
     saveZoomPoints(focus,
                    QPoint(mContainer.width() / 2, mContainer.height() / 2));
@@ -2282,17 +2305,20 @@ void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
     // should be at a 1:1 pixel mapping with the monitor. We allow going to
     // twice this size.
     double scale =
-            ((double)size().width() / (double)mBackingSurface->bitmap->size().width());
+            (static_cast<double>(size().width()) /
+             static_cast<double>(mBackingSurface->bitmap->size().width()));
 
     // Calculate the "ideal" zoom factor, which would perfectly frame this
     // rectangle, and the "maximum" zoom factor, which makes scale = 1, and
     // pick the smaller one. Adding 20 accounts for the scroll bars
     // potentially cutting off parts of the selection
     double maxZoom = mZoomFactor * 2.0 / scale;
-    double idealWidthZoom = mZoomFactor * (double)mContainer.width() /
-                            (double)(rectSize.width() + 20);
-    double idealHeightZoom = mZoomFactor * (double)mContainer.height() /
-                             (double)(rectSize.height() + 20);
+    double idealWidthZoom = mZoomFactor *
+                            static_cast<double>(mContainer.width()) /
+                            static_cast<double>(rectSize.width() + 20);
+    double idealHeightZoom = mZoomFactor *
+                             static_cast<double>(mContainer.height()) /
+                             static_cast<double>(rectSize.height() + 20);
 
     simulateSetZoom(std::min({idealWidthZoom, idealHeightZoom, maxZoom}));
 }
@@ -2408,7 +2434,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     queueSkinEvent(event);
 }
 
-void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
+void EmulatorQtWindow::setVisibleExtent(const QBitmap& bitMap) {
     QImage bitImage = bitMap.toImage();
     int topVisible = -1;
     for (int row = 0; row < bitImage.height() && topVisible < 0; row++) {

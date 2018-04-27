@@ -112,7 +112,6 @@ CLANG_COMPILER_FLAGS= \
 CLANG_TIDY_CHECKS=-*, \
                   modernize-*. \
                   google*, \
-                  misc-macro-parentheses, \
                   performance*, \
                   google-readability*, \
                   google-runtime-references \
@@ -121,6 +120,120 @@ CLANG_TIDY_CHECKS=-*, \
 # You can use the regex in a smart way to exclude headers that
 # you do not want to be analyzed.
 CLANG_TIDY_HEADER_INCLUDE=android.*(!Compiler.h)
+
+# We have a lot of C headers that get included in both C/C++, We don't want
+# clang tidy to fix up these files..
+CLANG_TIDY_SKIP=android/android-emu/android/android.h \
+                android/android-emu/android/async-socket.h \
+                android/android-emu/android/avd/hw-config.h \
+                android/android-emu/android/avd/info.h \
+                android/android-emu/android/avd/scanner.h \
+                android/android-emu/android/camera/camera-common.h \
+                android/android-emu/android/camera/camera-metrics.h \
+                android/android-emu/android/camera/camera-virtualscene.h \
+                android/android-emu/android/car.h \
+                android/android-emu/android/cmdline-option.h \
+                android/android-emu/android/console_auth.h \
+                android/android-emu/android/crashreport/crash-handler.h \
+                android/android-emu/android/curl-support.h \
+                android/android-emu/android/emulation/android_pipe_common.h \
+                android/android-emu/android/emulation/android_pipe_device.h \
+                android/android-emu/android/emulation/android_qemud.h \
+                android/android-emu/android/emulation/control/battery_agent.h \
+                android/android-emu/android/emulation/control/callbacks.h \
+                android/android-emu/android/emulation/control/clipboard_agent.h \
+                android/android-emu/android/emulation/control/display_agent.h \
+                android/android-emu/android/emulation/control/libui_agent.h \
+                android/android-emu/android/emulation/control/location_agent.h \
+                android/android-emu/android/emulation/control/net_agent.h \
+                android/android-emu/android/emulation/control/user_event_agent.h \
+                android/android-emu/android/emulation/control/virtual_scene_agent.h \
+                android/android-emu/android/emulation/control/vm_operations.h \
+                android/android-emu/android/emulation/control/window_agent.h \
+                android/android-emu/android/emulation/nand_limits.h \
+                android/android-emu/android/emulation/serial_line.h \
+                android/android-emu/android/featurecontrol/feature_control.h \
+                android/android-emu/android/filesystems/partition_config.h \
+                android/android-emu/android/filesystems/partition_types.h \
+                android/android-emu/android/framebuffer.h \
+                android/android-emu/android/gpu_frame.h \
+                android/android-emu/android/hw-kmsg.h \
+                android/android-emu/android/hw-sensors.h \
+                android/android-emu/android/jpeg-compress.h \
+                android/android-emu/android/kernel/kernel_utils.h \
+                android/android-emu/android/loadpng.h \
+                android/android-emu/android/main-common.h \
+                android/android-emu/android/multitouch-port.h \
+                android/android-emu/android/network/constants.h \
+                android/android-emu/android/opengles.h \
+                android/android-emu/android/proxy/proxy_common.h \
+                android/android-emu/android/proxy/proxy_int.h \
+                android/android-emu/android/proxy/proxy_setup.h \
+                android/android-emu/android/recording/screen-recorder.h \
+                android/android-emu/android/sdk-controller-socket.h \
+                android/android-emu/android/shaper.h \
+                android/android-emu/android/skin/event.h \
+                android/android-emu/android/skin/generic-event-buffer.h \
+                android/android-emu/android/skin/generic-event.h \
+                android/android-emu/android/skin/image.h \
+                android/android-emu/android/skin/keyboard.h \
+                android/android-emu/android/skin/keycode-buffer.h \
+                android/android-emu/android/skin/keycode.h \
+                android/android-emu/android/skin/qt/emulator-qt-window.h \
+                android/android-emu/android/skin/qt/extended-pages/microphone-page.h \
+                android/android-emu/android/skin/qt/extended-pages/rotary-input-dial.h \
+                android/android-emu/android/skin/qt/extended-pages/settings-page.h \
+                android/android-emu/android/skin/qt/gl-widget.h \
+                android/android-emu/android/skin/qt/video-player/VideoPlayerWidget.h \
+                android/android-emu/android/skin/rect.h \
+                android/android-emu/android/skin/resource.h \
+                android/android-emu/android/skin/surface.h \
+                android/android-emu/android/skin/trackball.h \
+                android/android-emu/android/skin/ui.h \
+                android/android-emu/android/skin/window.h \
+                android/android-emu/android/skin/winsys.h \
+                android/android-emu/android/tcpdump.h \
+                android/android-emu/android/telephony/gsm.h \
+                android/android-emu/android/telephony/modem.h \
+                android/android-emu/android/telephony/sim_card.h \
+                android/android-emu/android/telephony/sms.h \
+                android/android-emu/android/telephony/sysdeps.h \
+                android/android-emu/android/user-config.h \
+                android/android-emu/android/utils/aconfig-file.h \
+                android/android-emu/android/utils/assert.h \
+                android/android-emu/android/utils/bufprint.h \
+                android/android-emu/android/utils/debug.h \
+                android/android-emu/android/utils/dirscanner.h \
+                android/android-emu/android/utils/dll.h \
+                android/android-emu/android/utils/dns.h \
+                android/android-emu/android/utils/file_data.h \
+                android/android-emu/android/utils/file_io.h \
+                android/android-emu/android/utils/filelock.h \
+                android/android-emu/android/utils/ini.h \
+                android/android-emu/android/utils/iolooper.h \
+                android/android-emu/android/utils/ipaddr.h \
+                android/android-emu/android/utils/lineinput.h \
+                android/android-emu/android/utils/looper.h \
+                android/android-emu/android/utils/misc.h \
+                android/android-emu/android/utils/panic.h \
+                android/android-emu/android/utils/path.h \
+                android/android-emu/android/utils/property_file.h \
+                android/android-emu/android/utils/setenv.h \
+                android/android-emu/android/utils/sockets.h \
+                android/android-emu/android/utils/stralloc.h \
+                android/android-emu/android/utils/stream.h \
+                android/android-emu/android/utils/string.h \
+                android/android-emu/android/utils/system.h \
+                android/android-emu/android/utils/tempfile.h \
+                android/android-emu/android/utils/timezone.h \
+                android/android-emu/android/utils/utf8_utils.h \
+                android/android-emu/android/utils/x86_cpuid.h \
+                android/android-emugl/host/include/KHR/khrplatform.h \
+                android/android-emugl/host/include/OpenglRender/render_api_platform_types.h \
+                android/android-emugl/host/include/EGL/.* \
+                android/android-emugl/host/include/glm/.* \
+                android/android-emugl/host/include/vulkan/.* \
+                $(BUILD_OBJS_DIR).*
 
 BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS))
 BUILD_HOST_CFLAGS   += $(call if-host-clang,$(CLANG_COMPILER_FLAGS))

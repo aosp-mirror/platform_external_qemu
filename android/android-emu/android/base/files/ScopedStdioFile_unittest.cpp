@@ -34,7 +34,7 @@ TEST(ScopedStdioFile, Constructor) {
 }
 
 TEST(ScopedStdioFile, Release) {
-    FILE* handle = NULL;
+    FILE* handle = nullptr;
     ScopedStdioFile f(fopen(kNullFile, "rb"));
     EXPECT_TRUE(f.get());
     handle = f.release();

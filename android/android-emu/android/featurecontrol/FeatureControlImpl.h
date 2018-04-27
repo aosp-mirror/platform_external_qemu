@@ -79,7 +79,7 @@ public:
     void setIfNotOverriden(Feature feature, bool isEnabled);
     void setIfNotOverridenOrGuestDisabled(Feature feature, bool isEnabled);
 
-    static Feature fromString(base::StringView str);
+    static Feature fromString(const base::StringView& str);
     static base::StringView toString(Feature feature);
 
     std::vector<Feature> getEnabledNonOverride() const;
@@ -87,10 +87,10 @@ public:
     std::vector<Feature> getDisabledOverride() const;
     std::vector<Feature> getEnabled() const;
 
-    void init(android::base::StringView defaultIniHostPath,
-              android::base::StringView defaultIniGuestPath,
-              android::base::StringView userIniHostPath,
-              android::base::StringView userIniGuestPath);
+    void init(const android::base::StringView& defaultIniHostPath,
+              const android::base::StringView& defaultIniGuestPath,
+              const android::base::StringView& userIniHostPath,
+              const android::base::StringView& userIniGuestPath);
 
     static void create();
     static FeatureControlImpl& get();
@@ -110,7 +110,7 @@ private:
     // Parse the list of overrides and apply those to the control.
     // |overrides| - list of overrides in following format:
     //      "[-]feature1[,[-]feature2,[...]]"
-    void parseAndApplyOverrides(base::StringView overrides);
+    void parseAndApplyOverrides(const base::StringView& overrides);
 
     void initHostFeatureAndParseDefault(
         android::base::IniFile& defaultIniHost,

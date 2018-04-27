@@ -18,14 +18,14 @@
 #include "common/alog.h"
 
 TextureData::TextureData(ObjectLocalName name)
-  : ObjectData(TEXTURE, name),
-    target_(0),
-    image_(0),
-    auto_mip_map_(false) {
-  crop_rect_[0] = 0;
-  crop_rect_[1] = 0;
-  crop_rect_[2] = 0;
-  crop_rect_[3] = 0;
+    : ObjectData(TEXTURE, name),
+      target_(0),
+      image_(nullptr),
+      auto_mip_map_(false) {
+    crop_rect_[0] = 0;
+    crop_rect_[1] = 0;
+    crop_rect_[2] = 0;
+    crop_rect_[3] = 0;
 }
 
 TextureData::~TextureData() {
@@ -49,20 +49,20 @@ void TextureData::Bind(GLenum target, GLint max_levels) {
   }
 }
 
-void TextureData::AttachEglImage(EglImagePtr image) {
-  image_ = image;
-  level_map_[0].width = image->width;
-  level_map_[0].height = image->height;
-  level_map_[0].format = image->format;
+void TextureData::AttachEglImage(const EglImagePtr& image) {
+    image_ = image;
+    level_map_[0].width = image->width;
+    level_map_[0].height = image->height;
+    level_map_[0].format = image->format;
 }
 
 void TextureData::DetachEglImage() {
-  image_ = NULL;
-  target_ = GL_TEXTURE_2D;
+    image_ = nullptr;
+    target_ = GL_TEXTURE_2D;
 }
 
 bool TextureData::IsEglImageAttached() const {
-  return image_ != NULL;
+    return image_ != nullptr;
 }
 
 const EglImagePtr& TextureData::GetAttachedEglImage() const {

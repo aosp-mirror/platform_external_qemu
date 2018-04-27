@@ -15,7 +15,7 @@
 */
 #include "GLcommon/GLESpointer.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 GLenum GLESpointer::getType() const {
     return m_type;
@@ -175,8 +175,9 @@ GLESpointer::GLESpointer(android::base::Stream* stream) {
 }
 
 void GLESpointer::restoreBufferObj(
-        std::function<GLESbuffer*(GLuint)> getBufferObj) {
-    if (m_attribType != BUFFER) return;
+        const std::function<GLESbuffer*(GLuint)>& getBufferObj) {
+    if (m_attribType != BUFFER)
+        return;
     m_buffer = getBufferObj(m_bufferName);
 }
 
@@ -186,7 +187,7 @@ void GLESpointer::onLoad(android::base::Stream* stream) {
     m_stride = stream->getBe32();
     m_enabled = stream->getByte();
     m_normalize = stream->getByte();
-    m_attribType = (GLESpointer::AttribType)stream->getByte();
+    m_attribType = static_cast<GLESpointer::AttribType>(stream->getByte());
     m_bufferName = stream->getBe32();
     if (m_attribType == ARRAY) {
         m_dataSize = stream->getBe32();

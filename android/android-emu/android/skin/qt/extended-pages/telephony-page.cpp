@@ -38,21 +38,18 @@ public:
 
 extern "C" {
 static void telephony_callback(void* userData, int numActiveCalls) {
-    TelephonyPage* tpInst = (TelephonyPage*)userData;
+    auto* tpInst = (TelephonyPage*)userData;
     if (tpInst) {
         tpInst->eventLauncher(numActiveCalls);
     }
 }
 }
 
-TelephonyPage::TelephonyPage(QWidget *parent) :
-    QWidget(parent),
-    mUi(new Ui::TelephonyPage()),
-    mCallActivity(TelephonyPage::CallActivity::Inactive)
-{
+TelephonyPage::TelephonyPage(QWidget* parent)
+    : QWidget(parent), mUi(new Ui::TelephonyPage()) {
     mUi->setupUi(this);
     mUi->tel_numberBox->setValidator(new PhoneNumberValidator());
-    mCustomEventType = (QEvent::Type)QEvent::registerEventType();
+    mCustomEventType = static_cast<QEvent::Type>(QEvent::registerEventType());
 
     android::RecursiveScopedVmLock vmlock;
     if (sTelephonyAgent  &&  sTelephonyAgent->setNotifyCallback) {
@@ -65,7 +62,7 @@ TelephonyPage::TelephonyPage(QWidget *parent) :
 TelephonyPage::~TelephonyPage() {
     if (sTelephonyAgent  &&  sTelephonyAgent->setNotifyCallback) {
         // Tell the agent that we do not want any more call-backs
-        sTelephonyAgent->setNotifyCallback(0, 0);
+        sTelephonyAgent->setNotifyCallback(nullptr, nullptr);
     }
 }
 
@@ -91,7 +88,7 @@ void TelephonyPage::on_tel_startEndButton_clicked()
                 tResp = sTelephonyAgent->telephonyCmd(Tel_Op_Init_Call,
                                                       cleanNumber.toStdString().c_str());
                 if (tResp != Tel_Resp_OK) {
-                    const char* errMsg = NULL;
+                    const char* errMsg = nullptr;
                     if (tResp == Tel_Resp_Radio_Off) {
                         errMsg = "The call failed: radio is off.";
                     } else {
@@ -325,9 +322,9 @@ void TelephonyPage::on_sms_sendButton_clicked()
     }
 
     // Create a list of SMS PDUs, then send them
-    SmsPDU *pdus = smspdu_create_deliver_utf8(utf8Message, nUtf8Chars,
-                                              &sender, NULL);
-    if (pdus == NULL) {
+    SmsPDU* pdus = smspdu_create_deliver_utf8(utf8Message, nUtf8Chars, &sender,
+                                              nullptr);
+    if (pdus == nullptr) {
         showErrorDialog(tr("The message contains invalid characters."),
                                      tr("SMS"));
         return;
@@ -337,7 +334,7 @@ void TelephonyPage::on_sms_sendButton_clicked()
         android::RecursiveScopedVmLock vmlock;
         if (sTelephonyAgent && sTelephonyAgent->getModem) {
             AModem modem = sTelephonyAgent->getModem();
-            if (modem == NULL) {
+            if (modem == nullptr) {
                 showErrorDialog(tr("Cannot send message, modem emulation not running."), tr("SMS"));
                 return;
             }
@@ -348,7 +345,7 @@ void TelephonyPage::on_sms_sendButton_clicked()
                 return;
             }
 
-            for (int idx = 0; pdus[idx] != NULL; idx++) {
+            for (int idx = 0; pdus[idx] != nullptr; idx++) {
                 amodem_receive_sms(modem, pdus[idx]);
             }
         }
@@ -370,7 +367,7 @@ void TelephonyPage::eventLauncher(int numActiveCalls) {
 
 void TelephonyPage::customEvent(QEvent* cEvent) {
     assert(cEvent->type() == mCustomEventType);
-    TelephonyEvent* tEvent = (TelephonyEvent*)cEvent;
+    auto* tEvent = (TelephonyEvent*)cEvent;
     if (tEvent->numActiveCalls == 0) {
         if (mCallActivity != CallActivity::Inactive) {
             // The device has no calls but we're active.
