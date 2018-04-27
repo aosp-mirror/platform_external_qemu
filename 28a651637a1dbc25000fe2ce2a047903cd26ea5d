@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6ad8efd1_4ff22b78",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1064,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-27T22:09:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1bab8831_5c557fa2",
+      "range": {
+        "startLine": 1047,
+        "startChar": 4,
+        "endLine": 1064,
+        "endChar": 10
+      },
+      "revId": "28a651637a1dbc25000fe2ce2a047903cd26ea5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1e4be2b2_49bd3b6c",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "28a651637a1dbc25000fe2ce2a047903cd26ea5d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fed84527_f41ab8a9",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-04-27T22:09:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1e4be2b2_49bd3b6c",
+      "range": {
+        "startLine": 483,
+        "startChar": 17,
+        "endLine": 483,
+        "endChar": 34
+      },
+      "revId": "28a651637a1dbc25000fe2ce2a047903cd26ea5d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
