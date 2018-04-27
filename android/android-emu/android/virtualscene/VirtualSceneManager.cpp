@@ -59,7 +59,7 @@ public:
 
     Settings() { mPosterLocations = parsePostersFile(kPosterFile); }
 
-    void parseCmdlineParameter(StringView param) {
+    void parseCmdlineParameter(const StringView& param) {
         auto it = std::find(param.begin(), param.end(), '=');
         if (it == param.end()) {
             E("%s: Invalid command line parameter '%s', should be "
@@ -185,7 +185,7 @@ std::unique_ptr<VirtualSceneManagerImpl> VirtualSceneManagerImpl::create(
         return nullptr;
     }
 
-    std::unique_ptr<Scene> scene = Scene::create(*renderer.get());
+    std::unique_ptr<Scene> scene = Scene::create(*renderer);
     if (!scene) {
         E("VirtualSceneManager scene failed to load");
         return nullptr;
@@ -222,7 +222,7 @@ int64_t VirtualSceneManagerImpl::render() {
 }
 
 void VirtualSceneManagerImpl::queuePosterUpdate(const char* posterName) {
-    mPosterFilenameUpdates.push_back(posterName);
+    mPosterFilenameUpdates.emplace_back(posterName);
 }
 
 void VirtualSceneManagerImpl::updatePosterScale(const char* posterName,

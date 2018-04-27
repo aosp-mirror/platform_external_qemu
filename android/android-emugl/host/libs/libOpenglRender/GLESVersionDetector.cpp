@@ -95,23 +95,20 @@ static bool sTryContextCreation(EGLDisplay dpy, GLESDispatchMaxVersion ver) {
 }
 
 GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
+    // TODO(lfy): 3.1 is the highest
+    GLESDispatchMaxVersion maxVersion = GLES_DISPATCH_MAX_VERSION_3_1;
 
-    // TODO: 3.1 is the highest
-    GLESDispatchMaxVersion maxVersion =
-       GLES_DISPATCH_MAX_VERSION_3_1;
-
-    // TODO: CTS conformance for OpenGL ES 3.1
+    // TODO(lfy): CTS conformance for OpenGL ES 3.1
     bool playStoreImage =
-        emugl_feature_is_enabled(
-                android::featurecontrol::PlayStoreImage);
+            emugl_feature_is_enabled(android::featurecontrol::PlayStoreImage);
 
-    if (emugl::getRenderer() == SELECTED_RENDERER_HOST
-        || emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT
-        || emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT
-        || emugl::getRenderer() == SELECTED_RENDERER_ANGLE9_INDIRECT) {
+    if (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
+        emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+        emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT ||
+        emugl::getRenderer() == SELECTED_RENDERER_ANGLE9_INDIRECT) {
         if (s_egl.eglGetMaxGLESVersion) {
-            maxVersion =
-                (GLESDispatchMaxVersion)s_egl.eglGetMaxGLESVersion(dpy);
+            maxVersion = static_cast<GLESDispatchMaxVersion>(
+                    s_egl.eglGetMaxGLESVersion(dpy));
         }
     } else {
         if (playStoreImage ||
@@ -161,7 +158,7 @@ bool shouldEnableCoreProfile() {
 void sAddExtensionIfSupported(GLESDispatchMaxVersion currVersion,
                               const std::string& from,
                               GLESDispatchMaxVersion extVersion,
-                              StringView ext,
+                              const StringView& ext,
                               std::string& to) {
     // If we chose a GLES version less than or equal to
     // the |extVersion| the extension |ext| is tagged with,
@@ -173,8 +170,7 @@ void sAddExtensionIfSupported(GLESDispatchMaxVersion currVersion,
     }
 }
 
-static bool sWhitelistedExtensionsGLES2(StringView hostExt) {
-
+static bool sWhitelistedExtensionsGLES2(const StringView& hostExt) {
 #define WHITELIST(ext) \
     if (hostExt == #ext) return true; \
 

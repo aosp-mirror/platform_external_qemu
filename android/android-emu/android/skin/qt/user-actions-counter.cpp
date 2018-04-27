@@ -13,7 +13,7 @@
 
 #include <QVariant>
 
-#include <assert.h>
+#include <cassert>
 
 namespace android {
 namespace qt {

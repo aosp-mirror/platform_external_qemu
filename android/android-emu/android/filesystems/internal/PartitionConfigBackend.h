@@ -30,10 +30,10 @@ namespace internal {
 class PartitionConfigBackend {
 public:
     // Constructor.
-    PartitionConfigBackend() {}
+    PartitionConfigBackend() = default;
 
     // Destructor.
-    virtual ~PartitionConfigBackend() {}
+    virtual ~PartitionConfigBackend() = default;
 
     // Retrieve current process-wide instance.
     static PartitionConfigBackend* get();

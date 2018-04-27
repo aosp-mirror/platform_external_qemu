@@ -91,8 +91,9 @@ Frame* FrameQueue::peekWritable() {
     }
     pwi->lock.unlock();
 
-    if (!mPlayer->isRunning() || mPacketQueue->isAbort())
+    if (!mPlayer->isRunning() || mPacketQueue->isAbort()) {
         return nullptr;
+    }
 
     return &mQueue[mWindex];
 }

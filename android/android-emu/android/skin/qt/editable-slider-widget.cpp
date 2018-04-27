@@ -144,7 +144,7 @@ bool EditableSliderWidget::eventFilter(QObject*, QEvent* e) {
     return false;
 }
 
-void EditableSliderWidget::updateValidatorStyle(QString colorGroup) {
+void EditableSliderWidget::updateValidatorStyle(const QString& colorGroup) {
     if (mLineEdit.property("ColorGroup") != colorGroup) {
         mLineEdit.setProperty("ColorGroup", colorGroup);
         mLineEdit.style()->unpolish(&mLineEdit);

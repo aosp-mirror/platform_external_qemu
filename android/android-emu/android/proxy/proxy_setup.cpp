@@ -17,8 +17,8 @@
 #include "android/proxy/proxy_http.h"
 #include "android/utils/debug.h"
 
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 
 int android_http_proxy_setup(const char* http_proxy, bool verbose) {
     if (!http_proxy) {

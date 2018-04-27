@@ -16,7 +16,7 @@
 
 #include "android/base/network/IpAddress.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 int inet_strtoip(const char* str, uint32_t* ip)
 {

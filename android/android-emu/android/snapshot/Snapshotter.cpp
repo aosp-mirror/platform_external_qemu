@@ -88,8 +88,8 @@ namespace snapshot {
 
 static const System::Duration kSnapshotCrashThresholdMs = 120000; // 2 minutes
 
-// TODO: implement an optimized SSE4 version and dynamically select it if host
-// supports SSE4.
+// TODO(zyy): implement an optimized SSE4 version and dynamically select it
+// if host supports SSE4.
 bool isBufferZeroed(const void* ptr, int32_t size) {
     assert((uintptr_t(ptr) & (1024 - 1)) == 0);  // page-aligned
     assert(size >= 1024);  // at least one small page in |size|
@@ -154,7 +154,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                      },
                      // isCanceled
                      [](void* opaque, const char* name) {
-                         // TODO: Implement load cancel if necessary
+                         // TODO(lfy): Implement load cancel if necessary
                          return false;
                      }},
                     // del
@@ -172,7 +172,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                      [](void*, const char*, int) {},
                      // isCanceled
                      [](void* opaque, const char* name) {
-                         // TODO: Implement delete cancel if necessary
+                         // TODO(lfy): Implement delete cancel if necessary
                          return false;
                      }},
             },
@@ -235,7 +235,8 @@ static void appendFailedSave(pb::EmulatorSnapshotSaveState state,
     MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
         auto snap = event->mutable_emulator_details()->add_snapshot_saves();
         snap->set_save_state(state);
-        snap->set_save_failure_reason((pb::EmulatorSnapshotFailureReason)failureReason);
+        snap->set_save_failure_reason(
+                static_cast<pb::EmulatorSnapshotFailureReason>(failureReason));
     });
 }
 
@@ -244,7 +245,8 @@ static void appendFailedLoad(pb::EmulatorSnapshotLoadState state,
     MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
         auto snap = event->mutable_emulator_details()->add_snapshot_loads();
         snap->set_load_state(state);
-        snap->set_load_failure_reason((pb::EmulatorSnapshotFailureReason)failureReason);
+        snap->set_load_failure_reason(
+                static_cast<pb::EmulatorSnapshotFailureReason>(failureReason));
     });
 }
 
@@ -365,20 +367,20 @@ Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
     save.textureSaver()->getDuration(&texturesDurationMs); texturesDurationMs /= 1000;
 
     return {
-        true /* for save */,
-        std::string(name),
-        durationMs,
-        false /* on-demand ram loading N/A for save */,
-        save.incrementallySaved(),
-        compressedRam,
-        compressedTextures,
-        save.memUsage(),
-        save.isHDD(),
-        (int64_t)diskSize,
-        (int64_t)ramSize,
-        (int64_t)texturesSize,
-        ramDurationMs,
-        texturesDurationMs,
+            true /* for save */,
+            std::string(name),
+            durationMs,
+            false /* on-demand ram loading N/A for save */,
+            save.incrementallySaved(),
+            compressedRam,
+            compressedTextures,
+            save.memUsage(),
+            save.isHDD(),
+            static_cast<int64_t>(diskSize),
+            static_cast<int64_t>(ramSize),
+            static_cast<int64_t>(texturesSize),
+            ramDurationMs,
+            texturesDurationMs,
     };
 }
 
@@ -395,20 +397,20 @@ Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
     load.ramLoader().getDuration(&ramDurationMs);
     ramDurationMs /= 1000;
     return {
-        false /* not for save */,
-        name,
-        durationMs,
-        onDemandRamEnabled,
-        false /* not incrementally saved */,
-        compressedRam,
-        compressedTextures,
-        load.memUsage(),
-        load.isHDD(),
-        (int64_t)diskSize,
-        (int64_t)ramSize,
-        (int64_t)texturesSize,
-        ramDurationMs,
-        0 /* TODO: texture lazy/bg load duration */,
+            false /* not for save */,
+            name,
+            durationMs,
+            onDemandRamEnabled,
+            false /* not incrementally saved */,
+            compressedRam,
+            compressedTextures,
+            load.memUsage(),
+            load.isHDD(),
+            static_cast<int64_t>(diskSize),
+            static_cast<int64_t>(ramSize),
+            static_cast<int64_t>(texturesSize),
+            ramDurationMs,
+            0 /* TODO: texture lazy/bg load duration */,
     };
 }
 
@@ -642,15 +644,17 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
 }
 
 void Snapshotter::cancelSave() {
-    if (!mSaver)
+    if (!mSaver) {
         return;
+    }
 
     mSaver->cancel();
 }
 
 bool Snapshotter::isSavingCanceled(const char* name) const {
-    if (!mSaver)
+    if (!mSaver) {
         return false;
+    }
 
     if (name && (mSaver->snapshot().name() != base::StringView(name))) {
         return false;
@@ -803,9 +807,8 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     callCallbacks(Operation::Load, Stage::End);
     if (mLoader->status() == OperationStatus::Error) {
         auto failureReason = mLoader->snapshot().failureReason();
-        int failureReasonForQemu =
-            (int)(failureReason ?
-                  *failureReason : FailureReason::InternalError);
+        int failureReasonForQemu = static_cast<int>(
+                failureReason ? *failureReason : FailureReason::InternalError);
         mVmOperations.setFailureReason(
             name, failureReasonForQemu);
         return false;
@@ -830,8 +833,8 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
 
     auto failureReason = mLoader->snapshot().failureReason();
     mVmOperations.setFailureReason(
-        name, (int)(failureReason ?
-                    *failureReason : errnoToFailure(-err)));
+            name, static_cast<int>(failureReason ? *failureReason
+                                                 : errnoToFailure(-err)));
 }
 
 bool Snapshotter::onStartDelete(const char*) {

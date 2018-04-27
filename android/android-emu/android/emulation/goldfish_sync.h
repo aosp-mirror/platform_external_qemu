@@ -14,8 +14,7 @@
 
 #include "android/utils/compiler.h"
 
-#include <inttypes.h>
-#include <stdbool.h>
+#include <cinttypes>
 
 ANDROID_BEGIN_HEADER
 
@@ -65,7 +64,7 @@ ANDROID_BEGIN_HEADER
 #define GUEST_TRIGGERED(cmd) (cmd == CMD_SYNC_READY || \
                               cmd == CMD_TRIGGER_HOST_WAIT)
 
-typedef void (*trigger_wait_fn_t)(uint64_t, uint64_t, uint64_t);
+using trigger_wait_fn_t = void (*)(uint64_t, uint64_t, uint64_t);
 
 // The commands below operate on Android sync "timelines" and
 // "fences". The basic concept is as follows.
@@ -147,9 +146,7 @@ void goldfish_sync_register_trigger_wait(trigger_wait_fn_t trigger_fn);
 bool goldfish_sync_device_exists();
 
 // Function types for sending commands to the virtual device.
-typedef void (*queue_device_command_t)
-    (uint32_t cmd, uint64_t handle, uint32_t time_arg,
-     uint64_t hostcmd_handle);
+using queue_device_command_t = void (*)(uint32_t, uint64_t, uint32_t, uint64_t);
 
 typedef struct GoldfishSyncDeviceInterface {
     // Callback for all communications with virtual device

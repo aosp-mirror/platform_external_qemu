@@ -53,7 +53,7 @@ public:
                              android::base::Stream*,
                              Buffer* buffer);
     // loader_t is supposed to setup a stream and trigger loadFromStream.
-    typedef std::function<void(SaveableTexture*)> loader_t;
+    using loader_t = std::function<void(SaveableTexture*)>;
     using creator_t = SaveableTexture* (*)(GlobalNameSpace*, loader_t&&);
     using restorer_t = void (*)(SaveableTexture*);
 
@@ -108,4 +108,4 @@ private:
     bool m_isDirty = true;
 };
 
-typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
+using SaveableTexturePtr = std::shared_ptr<SaveableTexture>;

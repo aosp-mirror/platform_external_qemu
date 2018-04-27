@@ -27,9 +27,10 @@ class ShaderParser : public ObjectData {
 public:
     ShaderParser(GLenum type, bool coreProfile);
     ShaderParser(android::base::Stream* stream);
-    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
-    virtual void restore(ObjectLocalName localName,
-                         const getGlobalName_t& getGlobalName) override;
+    void onSave(android::base::Stream* stream,
+                unsigned int globalName) const override;
+    void restore(ObjectLocalName localName,
+                 const getGlobalName_t& getGlobalName) override;
     void setSrc(GLsizei count, const GLchar* const* strings,
             const GLint* length);
     const std::string& getOriginalSrc() const;
@@ -61,7 +62,7 @@ public:
 
     const ANGLEShaderParser::ShaderLinkInfo& getShaderLinkInfo() const { return m_shaderLinkInfo; }
 
-    virtual GenNameInfo getGenNameInfo() const override;
+    GenNameInfo getGenNameInfo() const override;
     const char* getCompiledSrc() const { return m_compiledSrc.c_str(); }
 
 private:

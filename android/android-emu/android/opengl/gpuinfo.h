@@ -12,11 +12,11 @@
 
 #include "android/base/Compiler.h"
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <string>
-#include <string.h>
+#include <utility>
 #include <vector>
 
 // gpuinfo is designed to collect information about the GPUs
@@ -37,7 +37,7 @@ bool async_query_host_gpu_SyncBlacklisted();
 
 // Below is the implementation.
 
-struct GpuInfoView{
+struct GpuInfoView {
     const char* make;
     const char* model;
     const char* device_id;
@@ -57,22 +57,21 @@ using WhitelistEntry = GpuInfoView;
 // about the system's GPU.s
 class GpuInfo {
 public:
-    GpuInfo() : current_gpu(false) { }
-    GpuInfo(const std::string& _make,
-            const std::string& _model,
-            const std::string& _device_id,
-            const std::string& _revision_id,
-            const std::string& _version,
-            const std::string& _renderer) :
-        current_gpu(false),
-        make(_make),
-        model(_model),
-        device_id(_device_id),
-        revision_id(_revision_id),
-        version(_version),
-        renderer(_renderer) { }
+    GpuInfo() = default;
+    GpuInfo(std::string _make,
+            std::string _model,
+            std::string _device_id,
+            std::string _revision_id,
+            std::string _version,
+            std::string _renderer)
+        : make(std::move(_make)),
+          model(std::move(_model)),
+          device_id(std::move(_device_id)),
+          revision_id(std::move(_revision_id)),
+          version(std::move(_version)),
+          renderer(std::move(_renderer)) {}
 
-    bool current_gpu;
+    bool current_gpu{false};
 
     void addDll(std::string dll_str);
 
@@ -120,8 +119,10 @@ bool gpuinfo_query_blacklist(GpuInfoList* gpulist,
                              int size);
 
 // Platform-specific information parsing functions.
-void parse_gpu_info_list_linux(const std::string& contents, GpuInfoList* gpulist);
-void parse_gpu_info_list_windows(const std::string& contents, GpuInfoList* gpulist);
+void parse_gpu_info_list_linux(const std::string& contents,
+                               GpuInfoList* gpulist);
+void parse_gpu_info_list_windows(const std::string& contents,
+                                 GpuInfoList* gpulist);
 
 // If we actually switched to software, call this.
 void setGpuBlacklistStatus(bool switchedToSoftware);

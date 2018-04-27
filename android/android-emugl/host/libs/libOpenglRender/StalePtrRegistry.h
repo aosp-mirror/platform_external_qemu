@@ -57,8 +57,9 @@ public:
 
         Entry* it = nullptr;
 
-        if ((it = android::base::find(mPtrs, handle)))
+        if ((it = android::base::find(mPtrs, handle))) {
             res = it->ptr;
+        }
 
         if (removeFromStaleOnGet &&
             it && it->staleness == Staleness::PrevSnapshot) {
@@ -113,7 +114,7 @@ private:
     }
 
     static T* asPtr(uint64_t handle) {
-        return (T*)(uintptr_t)handle;
+        return (T*)static_cast<uintptr_t>(handle);
     }
 
     enum class Staleness {

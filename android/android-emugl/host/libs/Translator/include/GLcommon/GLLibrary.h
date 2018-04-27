@@ -21,13 +21,13 @@
 class GlLibrary {
 public:
     // Generic pointer-to-function type.
-    typedef void (*GlFunctionPointer)(void);
+    using GlFunctionPointer = void (*)();
 
     // Empty constructor.
-    GlLibrary() {}
+    GlLibrary() = default;
 
     // Empty destructor.
-    virtual ~GlLibrary() {}
+    virtual ~GlLibrary() = default;
 
     // Find the function named |name| in the library and return its address.
     virtual GlFunctionPointer findSymbol(const char* name) = 0;

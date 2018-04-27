@@ -37,7 +37,7 @@ ANDROID_BEGIN_HEADER
  * connections and disconnections of clients.
  */
 typedef struct QemudMultiplexer {
-    // TODO: Hide QemudMultiplexer struct
+    // TODO(lfy): Hide QemudMultiplexer struct
     // from the header/client.
     QemudSerial serial[1];
     QemudClient* clients;

@@ -45,7 +45,7 @@ using std::endl;
 using std::ofstream;
 
 TEST(StudioConfigTest, androidStudioVersioning) {
-    const char* str = NULL;
+    const char* str = nullptr;
 
     str = ANDROID_STUDIO_DIR;
     Version v1studio(extractAndroidStudioVersion(str));

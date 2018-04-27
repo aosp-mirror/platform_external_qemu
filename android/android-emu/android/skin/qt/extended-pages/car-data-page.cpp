@@ -40,7 +40,7 @@ CarDataPage::CarDataPage(QWidget* parent)
 
 // static callback function wrapper
 void CarDataPage::carDataCallback(const char* msg, int len, void* context) {
-    CarDataPage* carDataPage = (CarDataPage*)context;
+    auto* carDataPage = static_cast<CarDataPage*>(context);
     if (carDataPage != nullptr) {
         carDataPage->onReceiveData(msg, len);
     }
@@ -50,7 +50,7 @@ void CarDataPage::carDataCallback(const char* msg, int len, void* context) {
  * Callback to handle the data sent from vehicle hal.
  */
 void CarDataPage::onReceiveData(const char* msg, int length) {
-    // TODO: add more sophisticated processing.
+    // TODO(yaochen): add more sophisticated processing.
     string protoStr(msg, length);
     EmulatorMessage emulatorMsg;
     string printMsg;

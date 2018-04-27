@@ -67,7 +67,7 @@
  * NOTE: These functions MUST be implemented by /system/lib/liblog.so
  */
 
-#include <stdarg.h>
+#include <cstdarg>
 
 #ifdef __cplusplus
 extern "C" {

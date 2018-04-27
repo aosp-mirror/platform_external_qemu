@@ -81,8 +81,8 @@ EglConfig::EglConfig(EGLint     red_size,
         m_nativeFormat(frmt),
         m_color_buffer_type(EGL_RGB_BUFFER) {}
 
-
-#define FB_TARGET_ANDROID_BUF_SIZE(size) (size == 16  || size == 32) ? EGL_TRUE : EGL_FALSE
+#define FB_TARGET_ANDROID_BUF_SIZE(size) \
+    ((size) == 16 || (size) == 32) ? EGL_TRUE : EGL_FALSE
 
 EglConfig::EglConfig(EGLint     red_size,
                      EGLint     green_size,
@@ -410,46 +410,35 @@ bool EglConfig::operator>=(const EglConfig& conf) const {
 
 // static
 bool EglConfig::operator==(const EglConfig& other) const {
-#define EGLCONFIG_EQ(field) \
-    (field == other.field)
+#define EGLCONFIG_EQ(field) ((field) == other.field)
 
-    return
-    EGLCONFIG_EQ(m_buffer_size) &&
-    EGLCONFIG_EQ(m_red_size) &&
-    EGLCONFIG_EQ(m_green_size) &&
-    EGLCONFIG_EQ(m_blue_size) &&
-    EGLCONFIG_EQ(m_alpha_size) &&
-    EGLCONFIG_EQ(m_bind_to_tex_rgb) &&
-    EGLCONFIG_EQ(m_bind_to_tex_rgba) &&
-    EGLCONFIG_EQ(m_caveat) &&
-    // Not using config id, we are only concerned with properties.
-    // EGLCONFIG_EQ(m_config_id) &&
-    // EGLCONFIG_EQ(m_native_config_id) &&
-    EGLCONFIG_EQ(m_frame_buffer_level) &&
-    EGLCONFIG_EQ(m_depth_size) &&
-    EGLCONFIG_EQ(m_max_pbuffer_width) &&
-    EGLCONFIG_EQ(m_max_pbuffer_height) &&
-    EGLCONFIG_EQ(m_max_pbuffer_size) &&
-    EGLCONFIG_EQ(m_max_swap_interval) &&
-    EGLCONFIG_EQ(m_min_swap_interval) &&
-    EGLCONFIG_EQ(m_native_renderable) &&
-    EGLCONFIG_EQ(m_renderable_type) &&
-    // EGLCONFIG_EQ(m_native_visual_id) &&
-    // EGLCONFIG_EQ(m_native_visual_type) &&
-    EGLCONFIG_EQ(m_sample_buffers_num) &&
-    EGLCONFIG_EQ(m_samples_per_pixel) &&
-    EGLCONFIG_EQ(m_stencil_size) &&
-    EGLCONFIG_EQ(m_luminance_size) &&
-    // EGLCONFIG_EQ(m_wanted_buffer_size) &&
-    EGLCONFIG_EQ(m_surface_type) &&
-    EGLCONFIG_EQ(m_transparent_type) &&
-    EGLCONFIG_EQ(m_trans_red_val) &&
-    EGLCONFIG_EQ(m_trans_green_val) &&
-    EGLCONFIG_EQ(m_trans_blue_val) &&
-    EGLCONFIG_EQ(m_recordable_android) &&
-    EGLCONFIG_EQ(m_framebuffer_target_android) &&
-    EGLCONFIG_EQ(m_conformant) &&
-    EGLCONFIG_EQ(m_color_buffer_type);
+    return EGLCONFIG_EQ(m_buffer_size) && EGLCONFIG_EQ(m_red_size) &&
+           EGLCONFIG_EQ(m_green_size) && EGLCONFIG_EQ(m_blue_size) &&
+           EGLCONFIG_EQ(m_alpha_size) && EGLCONFIG_EQ(m_bind_to_tex_rgb) &&
+           EGLCONFIG_EQ(m_bind_to_tex_rgba) && EGLCONFIG_EQ(m_caveat) &&
+           // Not using config id, we are only concerned with properties.
+           // EGLCONFIG_EQ(m_config_id) &&
+           // EGLCONFIG_EQ(m_native_config_id) &&
+           EGLCONFIG_EQ(m_frame_buffer_level) && EGLCONFIG_EQ(m_depth_size) &&
+           EGLCONFIG_EQ(m_max_pbuffer_width) &&
+           EGLCONFIG_EQ(m_max_pbuffer_height) &&
+           EGLCONFIG_EQ(m_max_pbuffer_size) &&
+           EGLCONFIG_EQ(m_max_swap_interval) &&
+           EGLCONFIG_EQ(m_min_swap_interval) &&
+           EGLCONFIG_EQ(m_native_renderable) &&
+           EGLCONFIG_EQ(m_renderable_type) &&
+           // EGLCONFIG_EQ(m_native_visual_id) &&
+           // EGLCONFIG_EQ(m_native_visual_type) &&
+           EGLCONFIG_EQ(m_sample_buffers_num) &&
+           EGLCONFIG_EQ(m_samples_per_pixel) && EGLCONFIG_EQ(m_stencil_size) &&
+           EGLCONFIG_EQ(m_luminance_size) &&
+           // EGLCONFIG_EQ(m_wanted_buffer_size) &&
+           EGLCONFIG_EQ(m_surface_type) && EGLCONFIG_EQ(m_transparent_type) &&
+           EGLCONFIG_EQ(m_trans_red_val) && EGLCONFIG_EQ(m_trans_green_val) &&
+           EGLCONFIG_EQ(m_trans_blue_val) &&
+           EGLCONFIG_EQ(m_recordable_android) &&
+           EGLCONFIG_EQ(m_framebuffer_target_android) &&
+           EGLCONFIG_EQ(m_conformant) && EGLCONFIG_EQ(m_color_buffer_type);
 
 #undef EGLCONFIG_EQ
 }
@@ -458,8 +447,7 @@ uint32_t EglConfig::u32hash() const {
     uint32_t res = 0xabcd9001;
 
 #define EGLCONFIG_HASH(field) \
-    res = res * 16777213 + \
-          std::hash<unsigned int>()((unsigned int)field); \
+    res = res * 16777213 + std::hash<unsigned int>()((unsigned int)(field));
 
     EGLCONFIG_HASH(m_buffer_size)
     EGLCONFIG_HASH(m_red_size)
@@ -503,21 +491,24 @@ uint32_t EglConfig::u32hash() const {
 }
 
 //checking if config stands for all the selection crateria of dummy as defined by EGL spec
-#define CHECK_PROP(dummy,prop_name,op) \
-    if((dummy.prop_name != EGL_DONT_CARE) && (dummy.prop_name op prop_name)) { \
-        CHOOSE_CONFIG_DLOG(#prop_name " does not match: %d vs %d", dummy.prop_name, prop_name); \
-        return false; \
-    } else { \
-        CHOOSE_CONFIG_DLOG(#prop_name " compatible."); \
-    } \
+#define CHECK_PROP(dummy, prop_name, op)                           \
+    if (((dummy).prop_name != EGL_DONT_CARE) &&                    \
+        ((dummy).prop_name op prop_name)) {                        \
+        CHOOSE_CONFIG_DLOG(#prop_name " does not match: %d vs %d", \
+                           (dummy).prop_name, prop_name);          \
+        return false;                                              \
+    } else {                                                       \
+        CHOOSE_CONFIG_DLOG(#prop_name " compatible.");             \
+    }
 
-#define CHECK_PROP_CAST(dummy,prop_name,op) \
-    if((((EGLint)dummy.prop_name) != EGL_DONT_CARE) && (dummy.prop_name op prop_name)) { \
+#define CHECK_PROP_CAST(dummy, prop_name, op)              \
+    if ((((EGLint)(dummy).prop_name) != EGL_DONT_CARE) &&  \
+        ((dummy).prop_name op prop_name)) {                \
         CHOOSE_CONFIG_DLOG(#prop_name " does not match."); \
-        return false; \
-    } else { \
-        CHOOSE_CONFIG_DLOG(#prop_name " compatible."); \
-    } \
+        return false;                                      \
+    } else {                                               \
+        CHOOSE_CONFIG_DLOG(#prop_name " compatible.");     \
+    }
 
 bool EglConfig::chosen(const EglConfig& dummy) const {
 
@@ -611,8 +602,8 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
        return false;
    }
 
-   if(dummy.m_conformant != (EGLenum)EGL_DONT_CARE &&
-      ((dummy.m_conformant & m_conformant) != dummy.m_conformant)) {
+   if (dummy.m_conformant != static_cast<EGLenum> EGL_DONT_CARE &&
+       ((dummy.m_conformant & m_conformant) != dummy.m_conformant)) {
        CHOOSE_CONFIG_DLOG("m_conformant does not match.");
        return false;
    }
@@ -624,9 +615,9 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
        return false;
    }
 
-   if ((EGLint)(dummy.m_framebuffer_target_android) != EGL_DONT_CARE &&
-       dummy.m_framebuffer_target_android !=
-       m_framebuffer_target_android) {
+   if (static_cast<EGLint>(dummy.m_framebuffer_target_android) !=
+               EGL_DONT_CARE &&
+       dummy.m_framebuffer_target_android != m_framebuffer_target_android) {
        CHOOSE_CONFIG_DLOG("m_framebuffer_target_android does not match.");
        return false;
    }

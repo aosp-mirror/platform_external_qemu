@@ -28,7 +28,7 @@
 
 using android::opengl::GpuFrameBridge;
 
-static GpuFrameBridge* sBridge = NULL;
+static GpuFrameBridge* sBridge = nullptr;
 // We need some way to disable the post() if only the recording is using that
 // path and it is not in use because glReadPixels will slow down everything.
 static bool sIsGuestMode = false;
@@ -36,9 +36,8 @@ static bool sIsGuestMode = false;
 // Called from an EmuGL thread to transfer a new frame of the GPU display
 // to the main loop.
 
-typedef void (*on_new_gpu_frame_t)(void* opaque, int width, int height,
-                                   int ydir, int format, int type,
-                                   unsigned char* pixels);
+using on_new_gpu_frame_t =
+        void (*)(void*, int, int, int, int, int, unsigned char*);
 // Guest mode:
 static void onNewGpuFrame_guest(void* opaque, int width, int height,
                                 int ydir, int format, int type,
@@ -47,7 +46,7 @@ static void onNewGpuFrame_guest(void* opaque, int width, int height,
     DCHECK(format == GL_RGBA);
     DCHECK(type == GL_UNSIGNED_BYTE);
 
-    GpuFrameBridge* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
+    auto* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
     bridge->postFrame(width, height, pixels);
 }
 
@@ -59,7 +58,7 @@ static void onNewGpuFrame_record(void* opaque, int width, int height,
     DCHECK(format == GL_RGBA);
     DCHECK(type == GL_UNSIGNED_BYTE);
 
-    GpuFrameBridge* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
+    auto* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
     bridge->postRecordFrame(width, height, pixels);
 }
 
@@ -71,7 +70,7 @@ static void onNewGpuFrame_recordAsync(void* opaque, int width, int height,
     DCHECK(format == GL_RGBA);
     DCHECK(type == GL_UNSIGNED_BYTE);
 
-    GpuFrameBridge* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
+    auto* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
     bridge->postRecordFrameAsync(width, height, pixels);
 }
 

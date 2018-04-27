@@ -42,15 +42,15 @@ EglImagePtr EglImage::Create(GLenum global_target, GLuint name) {
 
   ShareGroupPtr sg = c->GetShareGroup();
   TextureDataPtr tex = sg->GetTextureData(name);
-  if (tex == NULL) {
+  if (tex == nullptr) {
       DLOG("texture data of %u not present!", name);
   }
   if (tex->GetWidth() == 0 || tex->GetHeight() == 0) {
       DLOG("texture is 0 width/height: %ux%u", tex->GetWidth(), tex->GetHeight());
   }
-  if (tex == NULL || tex->GetWidth() == 0 || tex->GetHeight() == 0) {
-    LOG_ALWAYS_FATAL("No such texture: %d", name);
-    return EglImagePtr();
+  if (tex == nullptr || tex->GetWidth() == 0 || tex->GetHeight() == 0) {
+      LOG_ALWAYS_FATAL("No such texture: %d", name);
+      return EglImagePtr();
   }
 
   const GLuint global_name = sg->GetTextureGlobalName(name);

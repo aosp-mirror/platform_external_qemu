@@ -87,5 +87,5 @@ std::vector<Feature> getEnabledOverride();
 std::vector<Feature> getDisabledOverride();
 std::vector<Feature> getEnabled();
 
-} // namespace android
-} // namespace featurecontrol
+}  // namespace featurecontrol
+}  // namespace android

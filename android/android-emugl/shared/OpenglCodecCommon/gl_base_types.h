@@ -26,30 +26,30 @@
 #define gles2_APIENTRY KHRONOS_APIENTRY
 #endif
 
-typedef void             GLvoid;
-typedef unsigned int     GLenum;
-typedef unsigned char    GLboolean;
-typedef unsigned int     GLbitfield;
-typedef char             GLchar;
-typedef khronos_int8_t   GLbyte;
-typedef short            GLshort;
-typedef int              GLint;
-typedef int              GLsizei;
-typedef khronos_uint8_t  GLubyte;
-typedef unsigned short   GLushort;
-typedef unsigned int     GLuint;
-typedef khronos_float_t  GLfloat;
-typedef khronos_float_t  GLclampf;
-typedef khronos_int32_t  GLfixed;
-typedef khronos_int32_t  GLclampx;
-typedef khronos_intptr_t GLintptr;
-typedef khronos_ssize_t  GLsizeiptr;
-typedef char *GLstr;
+using GLvoid = void;
+using GLenum = unsigned int;
+using GLboolean = unsigned char;
+using GLbitfield = unsigned int;
+using GLchar = char;
+using GLbyte = khronos_int8_t;
+using GLshort = short;
+using GLint = int;
+using GLsizei = int;
+using GLubyte = khronos_uint8_t;
+using GLushort = unsigned short;
+using GLuint = unsigned int;
+using GLfloat = khronos_float_t;
+using GLclampf = khronos_float_t;
+using GLfixed = khronos_int32_t;
+using GLclampx = khronos_int32_t;
+using GLintptr = khronos_intptr_t;
+using GLsizeiptr = khronos_ssize_t;
+using GLstr = char*;
 /* JR XXX Treating this as an in handle - is this correct? */
-typedef void * GLeglImageOES;
-typedef struct __GLsync *GLsync;
-typedef khronos_int64_t GLint64;
-typedef khronos_uint64_t GLuint64;
+using GLeglImageOES = void*;
+using GLsync = struct __GLsync*;
+using GLint64 = khronos_int64_t;
+using GLuint64 = khronos_uint64_t;
 
 /* ErrorCode */
 #ifndef GL_INVALID_ENUM

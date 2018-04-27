@@ -62,7 +62,7 @@ extern void skin_surface_unrefp(SkinSurface* *psurface)
     if (surf) {
         D("skin_surface_unref %d", surf->id);
         skin_surface_free(surf);
-        *psurface = NULL;
+        *psurface = nullptr;
     }
 }
 
@@ -103,7 +103,8 @@ extern SkinSurface *skin_surface_create(int w, int h, int original_w, int origin
 
 extern SkinSurface* skin_surface_create_from_data(const void* data, int size) {
     return createSkinSurface([data, size](SkinSurface* s) {
-        s->bitmap = new SkinSurfaceBitmap((const unsigned char*)data, size);
+        s->bitmap = new SkinSurfaceBitmap(
+                static_cast<const unsigned char*>(data), size);
         s->w = s->bitmap->size().width();
         s->h = s->bitmap->size().height();
         s->isRound = 0;
@@ -137,7 +138,7 @@ extern SkinSurface* skin_surface_create_derived(SkinSurface* source,
 extern SkinSurface* skin_surface_resize(SkinSurface *surface, int w, int h,
                                         int original_w, int original_h)
 {
-    if ( surface == NULL ) {
+    if (surface == nullptr) {
         return skin_surface_create(w, h, original_w, original_h);
     } else if (surface->bitmap->size() == QSize(original_w, original_h)) {
         surface->w = w;
@@ -156,7 +157,9 @@ extern void skin_surface_create_window(SkinSurface* surface,
                                        int h) {
     D("skin_surface_create_window  %d, %d, %d, %d", x, y, w, h);
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) return;
+    if (window == nullptr) {
+        return;
+    }
     QRect rect(x, y, w, h);
     window->showWindow(surface, rect, nullptr);
     D("ID of backing bitmap surface is %d", surface->id);
@@ -208,8 +211,10 @@ extern void skin_surface_upload(SkinSurface *surface, const SkinRect *rect, cons
         pitch == rect->size.w * 4) {
         memcpy(surface->bitmap->get().bits(), pixels, surface->h * surface->w * 4);
     } else {
-        const uint32_t *src = (const uint32_t*)pixels;
-        uint32_t *dst = ((uint32_t*)surface->bitmap->get().bits()) + surface->w * rect->pos.y;
+        const auto* src = static_cast<const uint32_t*>(pixels);
+        uint32_t* dst =
+                (reinterpret_cast<uint32_t*>(surface->bitmap->get().bits())) +
+                surface->w * rect->pos.y;
         for (int y = rect->pos.y; y < rect->pos.y + rect->size.h; y++) {
             for (int x = rect->pos.x; x < rect->pos.x + rect->size.w; x++) {
                 *(dst + x) = *(src + x - rect->pos.x);
@@ -252,18 +257,24 @@ extern void skin_surface_get_scaled_rect(SkinSurface *surface, const SkinRect *f
 
     double fudge = original_w == fromw ? 0.0f : 1.0f;
 
-    double surfaceFactorW = ((double)w) / ((double)original_w);
-    double surfaceFactorH = ((double)h) / ((double)original_h);
+    double surfaceFactorW =
+            (static_cast<double>(w)) / (static_cast<double>(original_w));
+    double surfaceFactorH =
+            (static_cast<double>(h)) / (static_cast<double>(original_h));
 
     double wantedFactor = surfaceFactorW > surfaceFactorH ? surfaceFactorW : surfaceFactorH;
 
     if (fromw <= fromh) {
-        to->size.w = (int)(from->size.w * wantedFactor + fudge + 0.5f);
-        double originalAspect = ((double)fromh) / ((double)fromw);
+        to->size.w =
+                static_cast<int>(from->size.w * wantedFactor + fudge + 0.5f);
+        double originalAspect =
+                (static_cast<double>(fromh)) / (static_cast<double>(fromw));
         to->size.h = to->size.w * originalAspect + 0.5f;
     } else {
-        to->size.h = (int)(from->size.h * wantedFactor + fudge + 0.5f);
-        double originalAspect = ((double)fromw) / ((double)fromh);
+        to->size.h =
+                static_cast<int>(from->size.h * wantedFactor + fudge + 0.5f);
+        double originalAspect =
+                (static_cast<double>(fromw)) / (static_cast<double>(fromh));
         to->size.w = to->size.h * originalAspect + 0.5f;
     }
 

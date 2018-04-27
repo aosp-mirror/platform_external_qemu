@@ -39,9 +39,7 @@ public:
 
     explicit AngleInputWidget(QWidget* parent = nullptr);
 
-    // For setting the value programmatically.
-    // The value will be clipped to the current value range.
-    // This will NOT trigger a valueChanged signal.
+    // For setting the value progra  // Tbe clit valua valueChanged signal.
     void setValue(double value);
 
     // Returns the decimal measure of the angle, in degrees.
@@ -122,8 +120,8 @@ private:
     QDoubleValidator mSecValidator;
     QHBoxLayout mLayout;
     QDoubleValidator* mValueValidator;
-    double mMinValue;
-    double mMaxValue;
-    double mDecimalValue;
-    InputMode mCurrentInputMode;
+    double mMinValue{0.0};
+    double mMaxValue{0.0};
+    double mDecimalValue{0.0};
+    InputMode mCurrentInputMode{InputMode::Decimal};
 };

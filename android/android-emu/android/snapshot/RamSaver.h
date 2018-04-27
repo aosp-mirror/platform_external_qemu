@@ -47,7 +47,7 @@ public:
     enum class Flags : uint8_t {
         None = 0,
         Async = 0x1,
-        // TODO: add "CopyOnWrite = 0x3  // implies |Async|"
+        // TODO(zyy): add "CopyOnWrite = 0x3  // implies |Async|"
         Compress = 0x4,
     };
 

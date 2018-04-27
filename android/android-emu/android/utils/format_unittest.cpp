@@ -14,8 +14,8 @@
 #include "gtest/gtest.h"
 
 #include <algorithm>
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
+#include <cstring>
 
 namespace android {
 namespace utils {

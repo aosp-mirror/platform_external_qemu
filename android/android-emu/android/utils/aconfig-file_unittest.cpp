@@ -13,13 +13,13 @@
 
 #include <gtest/gtest.h>
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace {
 
 class ScopedAConfig {
 public:
-    ScopedAConfig() : mNode(NULL) {}
+    ScopedAConfig() = default;
 
     explicit ScopedAConfig(AConfig* node) : mNode(node) {}
 
@@ -29,12 +29,12 @@ public:
         }
     }
 
-    bool isValid() const { return mNode != NULL; }
+    bool isValid() const { return mNode != nullptr; }
 
     AConfig* get() const { return mNode; }
 
 private:
-    AConfig* mNode;
+    AConfig* mNode{nullptr};
 };
 
 }  // namespace

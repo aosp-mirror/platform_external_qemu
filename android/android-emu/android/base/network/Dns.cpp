@@ -34,8 +34,8 @@
 
 #include <fstream>
 
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 
 // Set to 1 to increase verbosity of debug messages.
 #define DEBUG 0
@@ -59,8 +59,7 @@ static std::string toUtf8(const wchar_t* str) {
 // Implementation of Dns::Resolver interface based on ::getaddrinfo().
 class SystemResolver : public Dns::Resolver {
 public:
-    virtual int resolveName(StringView dns_server_name,
-                            AddressList* out) override {
+    int resolveName(StringView dns_server_name, AddressList* out) override {
         std::string hostname = dns_server_name;
         struct addrinfo* res;
         struct addrinfo* pHints = nullptr;
@@ -128,7 +127,7 @@ public:
         return 0;
     }
 
-    virtual int getSystemServerList(AddressList* out) override {
+    int getSystemServerList(AddressList* out) override {
 #ifdef _WIN32
         // The set of DNS server addresses already in the output list,
         // used to remove duplicates.
@@ -299,7 +298,7 @@ Dns::Resolver* sResolver = nullptr;
 }  // namespace
 
 // static
-AddressList Dns::resolveName(StringView serverName) {
+AddressList Dns::resolveName(const StringView& serverName) {
     AddressList result;
     int err = Dns::Resolver::get()->resolveName(serverName, &result);
     if (err != 0) {

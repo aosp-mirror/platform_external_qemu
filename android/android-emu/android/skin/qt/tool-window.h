@@ -65,7 +65,7 @@ public:
                QWidget* parent,
                UIEventRecorderPtr event_recorder,
                UserActionsCounterPtr user_actions_counter);
-    ~ToolWindow();
+    ~ToolWindow() override;
 
     void allowExtWindowCreation();
     void hide();
@@ -132,10 +132,10 @@ private:
 
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
 
-    virtual void closeEvent(QCloseEvent* ce) override;
-    virtual void mousePressEvent(QMouseEvent* event) override;
-    virtual void paintEvent(QPaintEvent*) override;
-    virtual void hideEvent(QHideEvent* event) override;
+    void closeEvent(QCloseEvent* ce) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void paintEvent(QPaintEvent*) override;
+    void hideEvent(QHideEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
     android::base::MemberOnDemandT<WindowHolder<ExtendedWindow>,
@@ -190,6 +190,6 @@ private slots:
     void on_zoom_button_clicked();
     void on_tablet_mode_button_clicked();
 
-    void onGuestClipboardChanged(QString text);
+    void onGuestClipboardChanged(const QString& text);
     void onHostClipboardChanged();
 };

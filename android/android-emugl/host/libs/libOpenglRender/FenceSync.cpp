@@ -41,9 +41,7 @@ FenceSync::FenceSync(bool hasNativeFence,
     assert(RenderThreadInfo::get()->currContext.get());
 
     mDisplay = FrameBuffer::getFB()->getDisplay();
-    mSync = s_egl.eglCreateSyncKHR(mDisplay,
-                                   EGL_SYNC_FENCE_KHR,
-                                   NULL);
+    mSync = s_egl.eglCreateSyncKHR(mDisplay, EGL_SYNC_FENCE_KHR, nullptr);
 }
 
 FenceSync::~FenceSync() {

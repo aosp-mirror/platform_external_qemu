@@ -2,9 +2,9 @@
 
 #include "android/base/sockets/SocketWaiter.h"
 
-#include <stddef.h>
-#include <sys/types.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <cstddef>
 
 using namespace android::base;
 
@@ -85,8 +85,10 @@ int iolooper_has_operations(IoLooper* iol) {
 
 int64_t iolooper_now(void) {
     struct timeval time_now;
-    return gettimeofday(&time_now, NULL) ? -1 : (int64_t)time_now.tv_sec * 1000LL +
-                                                time_now.tv_usec / 1000;
+    return gettimeofday(&time_now, nullptr)
+                   ? -1
+                   : static_cast<int64_t>(time_now.tv_sec) * 1000LL +
+                             time_now.tv_usec / 1000;
 }
 
 int iolooper_wait_absolute(IoLooper* iol, int64_t deadline) {
@@ -94,8 +96,9 @@ int iolooper_wait_absolute(IoLooper* iol, int64_t deadline) {
 
     /* If the deadline has passed, set the timeout to 0, this allows us
      * to poll the file descriptor nonetheless */
-    if (timeout < 0)
+    if (timeout < 0) {
         timeout = 0;
+    }
 
     return iolooper_wait(iol, timeout);
 }

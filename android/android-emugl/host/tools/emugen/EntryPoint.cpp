@@ -22,16 +22,14 @@
 #include <sstream>
 #include <string>
 
-#include <stdio.h>
+#include <cstdio>
 
 EntryPoint::EntryPoint()
 {
     reset();
 }
 
-EntryPoint::~EntryPoint()
-{
-}
+EntryPoint::~EntryPoint() = default;
 
 void EntryPoint::reset()
 {
@@ -149,10 +147,10 @@ void EntryPoint::print(FILE *fp, bool newline,
 
 Var * EntryPoint::var(const std::string & name)
 {
-    Var *v = NULL;
-    for (size_t i = 0; i < m_vars.size(); i++) {
-        if (m_vars[i].name() == name) {
-            v = &m_vars[i];
+    Var* v = nullptr;
+    for (auto& m_var : m_vars) {
+        if (m_var.name() == name) {
+            v = &m_var;
             break;
         }
     }
@@ -161,10 +159,10 @@ Var * EntryPoint::var(const std::string & name)
 
 const Var * EntryPoint::var(const std::string & name) const
 {
-    const Var *v = NULL;
-    for (size_t i = 0; i < m_vars.size(); i++) {
-        if (m_vars[i].name() == name) {
-            v = &m_vars[i];
+    const Var* v = nullptr;
+    for (const auto& m_var : m_vars) {
+        if (m_var.name() == name) {
+            v = &m_var;
             break;
         }
     }
@@ -176,8 +174,8 @@ bool EntryPoint::hasPointers()
     bool pointers = false;
     if (m_retval.isPointer()) pointers = true;
     if (!pointers) {
-        for (size_t i = 0; i < m_vars.size(); i++) {
-            if (m_vars[i].isPointer()) {
+        for (auto& m_var : m_vars) {
+            if (m_var.isPointer()) {
                 pointers = true;
                 break;
             }
@@ -188,13 +186,14 @@ bool EntryPoint::hasPointers()
 
 int EntryPoint::validateVarAttr(const std::string& varname, size_t lc) const {
     if (varname.size() == 0) {
-        fprintf(stderr, "ERROR: %u: Missing variable name in attribute\n", (unsigned int)lc);
+        fprintf(stderr, "ERROR: %u: Missing variable name in attribute\n",
+                static_cast<unsigned int>(lc));
         return -1;
     }
     const Var * v = var(varname);
-    if (v == NULL) {
+    if (v == nullptr) {
         fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
-                (unsigned int)lc, varname.c_str(), name().c_str());
+                static_cast<unsigned int>(lc), varname.c_str(), name().c_str());
         return -2;
     }
     return 0;
@@ -239,7 +238,8 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
 
         std::string pointerDirStr = getNextToken(line, pos, &last, WHITESPACE);
         if (pointerDirStr.size() == 0) {
-            fprintf(stderr, "ERROR: %u: missing pointer directions\n", (unsigned int)lc);
+            fprintf(stderr, "ERROR: %u: missing pointer directions\n",
+                    static_cast<unsigned int>(lc));
             return -3;
         }
 
@@ -251,7 +251,7 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
             v->setPointerDir(Var::POINTER_IN);
         } else {
             fprintf(stderr, "ERROR: %u: unknown pointer direction %s\n",
-                    (unsigned int)lc, pointerDirStr.c_str());
+                    static_cast<unsigned int>(lc), pointerDirStr.c_str());
         }
     } else if (token == "var_flag") {
         pos = last;
@@ -266,7 +266,8 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
             std::string flag = getNextToken(line, pos, &last, WHITESPACE);
             if (flag.size() == 0) {
                 if (count == 0) {
-                    fprintf(stderr, "ERROR: %u: missing flag\n", (unsigned int) lc);
+                    fprintf(stderr, "ERROR: %u: missing flag\n",
+                            static_cast<unsigned int>(lc));
                     return -3;
                 }
                 break;
@@ -277,20 +278,26 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
                 if (v->isPointer()) {
                     v->setNullAllowed(true);
                 } else {
-                    fprintf(stderr, "WARNING: %u: setting nullAllowed for non-pointer variable %s\n",
-                            (unsigned int) lc, v->name().c_str());
+                    fprintf(stderr,
+                            "WARNING: %u: setting nullAllowed for non-pointer "
+                            "variable %s\n",
+                            static_cast<unsigned int>(lc), v->name().c_str());
                 }
             } else if (flag == "isLarge") {
                 if (v->isPointer()) {
                     v->setIsLarge(true);
                 } else {
-                    fprintf(stderr, "WARNING: %u: setting isLarge flag for a non-pointer variable %s\n",
-                            (unsigned int) lc, v->name().c_str());
+                    fprintf(stderr,
+                            "WARNING: %u: setting isLarge flag for a "
+                            "non-pointer "
+                            "variable %s\n",
+                            static_cast<unsigned int>(lc), v->name().c_str());
                 }
             } else if (flag == "DMA") {
                 v->setDMA(true);
             } else {
-                fprintf(stderr, "WARNING: %u: unknow flag %s\n", (unsigned int)lc, flag.c_str());
+                fprintf(stderr, "WARNING: %u: unknow flag %s\n",
+                        static_cast<unsigned int>(lc), flag.c_str());
             }
         }
     } else if (token == "custom_pack") {
@@ -320,8 +327,9 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
 
         v = var(varname);
         if (v->pointerDir() == Var::POINTER_IN) {
-            fprintf(stderr, "ERROR: %u: variable %s is not an output or inout\n",
-                    (unsigned int)lc, varname.c_str());
+            fprintf(stderr,
+                    "ERROR: %u: variable %s is not an output or inout\n",
+                    static_cast<unsigned int>(lc), varname.c_str());
             return -2;
         }
 
@@ -335,8 +343,9 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
 
         v = var(varname);
         if (v->pointerDir() == Var::POINTER_IN) {
-            fprintf(stderr, "ERROR: %u: variable %s is not an output or inout\n",
-                    (unsigned int)lc, varname.c_str());
+            fprintf(stderr,
+                    "ERROR: %u: variable %s is not an output or inout\n",
+                    static_cast<unsigned int>(lc), varname.c_str());
             return -2;
         }
 
@@ -350,8 +359,9 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
 
         v = var(varname);
         if (v->pointerDir() == Var::POINTER_IN) {
-            fprintf(stderr, "ERROR: %u: variable %s is not an output or inout\n",
-                    (unsigned int)lc, varname.c_str());
+            fprintf(stderr,
+                    "ERROR: %u: variable %s is not an output or inout\n",
+                    static_cast<unsigned int>(lc), varname.c_str());
             return -2;
         }
 
@@ -371,7 +381,8 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
         pos = last;
         std::string flag = getNextToken(line, pos, &last, WHITESPACE);
         if (flag.size() == 0) {
-            fprintf(stderr, "ERROR: %u: missing flag\n", (unsigned int) lc);
+            fprintf(stderr, "ERROR: %u: missing flag\n",
+                    static_cast<unsigned int>(lc));
             return -4;
         }
 
@@ -384,10 +395,12 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
         } else if (flag == "flushOnEncode") {
             setFlushOnEncode(true);
         } else {
-            fprintf(stderr, "WARNING: %u: unknown flag %s\n", (unsigned int)lc, flag.c_str());
+            fprintf(stderr, "WARNING: %u: unknown flag %s\n",
+                    static_cast<unsigned int>(lc), flag.c_str());
         }
     } else {
-        fprintf(stderr, "WARNING: %u: unknown attribute %s\n", (unsigned int)lc, token.c_str());
+        fprintf(stderr, "WARNING: %u: unknown attribute %s\n",
+                static_cast<unsigned int>(lc), token.c_str());
     }
 
     return 0;

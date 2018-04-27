@@ -31,7 +31,7 @@ ANDROID_BEGIN_HEADER
 // /* Now do important stuff */
 // android_lock_release(l);
 // android_lock_free(l);
-typedef struct CLock CLock;
+using CLock = struct CLock;
 
 extern CLock* android_lock_new();
 extern void android_lock_acquire(CLock* l);

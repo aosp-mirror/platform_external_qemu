@@ -20,7 +20,9 @@ namespace {
 
 class TestSerialLine : public SerialLine {
 public:
-    virtual void addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc) {
+    void addHandlers(void* opaque,
+                     CanReadFunc canReadFunc,
+                     ReadFunc readFunc) override {
         ++addHandlersCallCount;
 
         EXPECT_EQ(expectedOpaque, opaque);
@@ -28,7 +30,7 @@ public:
         EXPECT_EQ(expectedReadFunc, readFunc);
     }
 
-    virtual int write(const uint8_t* data, int len) {
+    int write(const uint8_t* data, int len) override {
         ++writeCallCount;
 
         EXPECT_EQ(expectedData, data);

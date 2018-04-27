@@ -18,23 +18,24 @@
 
 #include <glm/gtx/euler_angles.hpp>
 
-#include <assert.h>
+#include <cassert>
 
 using android::base::TestSystem;
 using android::base::System;
 using android::physics::InertialModel;
 
-#define EXPECT_QUAT_NEAR(expected, actual, epsilon) {\
-    glm::quat zero = glm::conjugate(expected) * actual;\
-    EXPECT_NEAR(0.f, zero.x, epsilon);\
-    EXPECT_NEAR(0.f, zero.y, epsilon);\
-    EXPECT_NEAR(0.f, zero.z, epsilon);\
-    if (zero.w > 0.f) {\
-        EXPECT_NEAR(1.f, zero.w, epsilon);\
-    } else {\
-        EXPECT_NEAR(-1.f, zero.w, epsilon);\
-    }\
-}
+#define EXPECT_QUAT_NEAR(expected, actual, epsilon)           \
+    {                                                         \
+        glm::quat zero = glm::conjugate(expected) * (actual); \
+        EXPECT_NEAR(0.f, zero.x, epsilon);                    \
+        EXPECT_NEAR(0.f, zero.y, epsilon);                    \
+        EXPECT_NEAR(0.f, zero.z, epsilon);                    \
+        if (zero.w > 0.f) {                                   \
+            EXPECT_NEAR(1.f, zero.w, epsilon);                \
+        } else {                                              \
+            EXPECT_NEAR(-1.f, zero.w, epsilon);               \
+        }                                                     \
+    }
 
 TEST(InertialModel, DefaultPosition) {
     TestSystem mTestSystem("/", System::kProgramBitness);

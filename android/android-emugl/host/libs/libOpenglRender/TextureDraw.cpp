@@ -16,9 +16,9 @@
 
 #include "DispatchTables.h"
 
-#include <assert.h>
-#include <string.h>
-#include <stdio.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 #define ERR(...)  fprintf(stderr, __VA_ARGS__)
 
 namespace {
@@ -33,7 +33,7 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
     if (!shader) {
         return 0;
     }
-    const GLchar* text = static_cast<const GLchar*>(shaderText);
+    const auto* text = static_cast<const GLchar*>(shaderText);
     const GLint textLen = ::strlen(shaderText);
     s_gles2.glShaderSource(shader, 1, &text, &textLen);
 
@@ -118,17 +118,8 @@ const GLint kIndicesPerDraw = 6;
 
 }  // namespace
 
-TextureDraw::TextureDraw() :
-        mVertexShader(0),
-        mFragmentShader(0),
-        mProgram(0),
-        mPositionSlot(-1),
-        mInCoordSlot(-1),
-        mTextureSlot(-1),
-        mTranslationSlot(-1),
-        mMaskTexture(0),
-        mHaveNewMask(false),
-        mMaskIsValid(false) {
+TextureDraw::TextureDraw()
+    : mVertexShader(0), mFragmentShader(0), mProgram(0), mMaskTexture(0) {
     // Create shaders and program.
     mVertexShader = createShader(GL_VERTEX_SHADER, kVertexShaderSource);
     mFragmentShader = createShader(GL_FRAGMENT_SHADER, kFragmentShaderSource);
@@ -142,8 +133,8 @@ TextureDraw::TextureDraw() :
     s_gles2.glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
     if (success == GL_FALSE) {
         GLchar messages[256];
-        s_gles2.glGetProgramInfoLog(
-                mProgram, sizeof(messages), 0, &messages[0]);
+        s_gles2.glGetProgramInfoLog(mProgram, sizeof(messages), nullptr,
+                                    &messages[0]);
         ERR("%s: Could not create/link program: %s\n", __FUNCTION__, messages);
         s_gles2.glDeleteProgram(mProgram);
         mProgram = 0;
@@ -222,12 +213,8 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
 #endif
 
     s_gles2.glEnableVertexAttribArray(mPositionSlot);
-    s_gles2.glVertexAttribPointer(mPositionSlot,
-                                  3,
-                                  GL_FLOAT,
-                                  GL_FALSE,
-                                  sizeof(Vertex),
-                                  0);
+    s_gles2.glVertexAttribPointer(mPositionSlot, 3, GL_FLOAT, GL_FALSE,
+                                  sizeof(Vertex), nullptr);
 
 #ifndef NDEBUG
     err = s_gles2.glGetError();
@@ -281,7 +268,7 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
 #endif
 
     // We may only get 0, 90, 180, 270 in |rotation| so far.
-    const int intRotation = ((int)rotation)/90;
+    const int intRotation = (static_cast<int>(rotation)) / 90;
     assert(intRotation >= 0 && intRotation <= 3);
     const intptr_t indexShift = intRotation * kIndicesPerDraw;
 

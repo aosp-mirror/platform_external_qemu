@@ -21,10 +21,10 @@
 #include "android/base/memory/ScopedPtr.h"
 #endif
 
-#include <assert.h>
-#include <locale.h>
-#include <string.h>
-#include <stdlib.h>
+#include <cassert>
+#include <clocale>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef __APPLE__
 #include <xlocale.h>
@@ -77,7 +77,7 @@ StringView fixStringForFloats(StringView string,
 #else  // !_WIN32
 
 struct GlobalCLocaleT {
-    locale_t value = newlocale(LC_ALL_MASK, "C", (locale_t)0);
+    locale_t value = newlocale(LC_ALL_MASK, "C", (locale_t) nullptr);
 };
 static LazyInstance<GlobalCLocaleT> sGlobalCLocale;
 

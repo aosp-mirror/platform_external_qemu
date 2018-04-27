@@ -11,12 +11,12 @@
 
 #include "android/emulation/testing/TestAndroidPipeDevice.h"
 
-#include "android/emulation/AndroidPipe.h"
 #include "android/base/Log.h"
+#include "android/emulation/AndroidPipe.h"
 
-#include <errno.h>
-#include <stdint.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdint>
+#include <cstring>
 
 namespace android {
 
@@ -24,7 +24,7 @@ namespace {
 
 class TestGuest : public TestAndroidPipeDevice::Guest {
 public:
-    TestGuest() : mClosed(true), mWakes(0u), mPipe(nullptr) {
+    TestGuest() {
         mPipe = android_pipe_guest_open(this);
         if (!mPipe) {
             LOG(ERROR) << "Could not create new "
@@ -32,9 +32,9 @@ public:
         }
     }
 
-    virtual ~TestGuest() { close(); }
+    ~TestGuest() override { close(); }
 
-    virtual int connect(const char* name) override {
+    int connect(const char* name) override {
         std::string handshake("pipe:");
         handshake += name;
         int len = static_cast<int>(handshake.size()) + 1;
@@ -49,46 +49,41 @@ public:
         return 0;
     }
 
-    virtual ssize_t read(void* buffer, size_t len) override {
+    ssize_t read(void* buffer, size_t len) override {
         if (mClosed) {
             return 0;
         }
-        AndroidPipeBuffer buf = { static_cast<uint8_t*>(buffer), len };
+        AndroidPipeBuffer buf = {static_cast<uint8_t*>(buffer), len};
         return android_pipe_guest_recv(mPipe, &buf, 1);
     }
 
-    virtual ssize_t write(const void* buffer, size_t len) override {
+    ssize_t write(const void* buffer, size_t len) override {
         if (mClosed) {
             return 0;
         }
-        AndroidPipeBuffer buf = {
-                (uint8_t*)buffer, len };
+        AndroidPipeBuffer buf = {(uint8_t*)buffer, len};
         return android_pipe_guest_send(mPipe, &buf, 1);
     }
 
-    virtual void close() override {
+    void close() override {
         if (!mClosed) {
             mClosed = true;
             android_pipe_guest_close(mPipe, PIPE_CLOSE_GRACEFUL);
         }
     }
 
-    virtual unsigned poll() const override {
+    unsigned poll() const override {
         if (mClosed) {
             return PIPE_POLL_HUP;
         }
         return android_pipe_guest_poll(mPipe);
     }
 
-    virtual void* getPipe() const override { return mPipe; }
+    void* getPipe() const override { return mPipe; }
 
-    void resetPipe(void* internal_pipe) {
-        mPipe = internal_pipe;
-    }
+    void resetPipe(void* internal_pipe) { mPipe = internal_pipe; }
 
-    void closeFromHost() {
-        mClosed = true;
-    }
+    void closeFromHost() { mClosed = true; }
 
     void signalWake(int wakes) {
         // NOTE: Update the flags, but for now don't do anything
@@ -97,15 +92,15 @@ public:
     }
 
 private:
-    bool mClosed;
-    unsigned mWakes;
-    void* mPipe;
+    bool mClosed{true};
+    unsigned mWakes{0u};
+    void* mPipe{nullptr};
 };
 
 }  // namespace
 
 TestAndroidPipeDevice::TestAndroidPipeDevice()
-        : mOldHwFuncs(android_pipe_set_hw_funcs(&sHwFuncs)) {
+    : mOldHwFuncs(android_pipe_set_hw_funcs(&sHwFuncs)) {
     AndroidPipe::Service::resetAll();
     AndroidPipe::initThreading(&mVmLock);
     mVmLock.lock();
@@ -119,9 +114,9 @@ TestAndroidPipeDevice::~TestAndroidPipeDevice() {
 
 // static
 const AndroidPipeHwFuncs TestAndroidPipeDevice::sHwFuncs = {
-    &TestAndroidPipeDevice::resetPipe,
-    &TestAndroidPipeDevice::closeFromHost,
-    &TestAndroidPipeDevice::signalWake,
+        &TestAndroidPipeDevice::resetPipe,
+        &TestAndroidPipeDevice::closeFromHost,
+        &TestAndroidPipeDevice::signalWake,
 };
 
 // static

@@ -21,9 +21,8 @@
 #  include <sys/select.h>
 #endif
 
-
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -36,9 +35,9 @@ public:
         reset();
     }
 
-    virtual ~SelectSocketWaiter() {}
+    ~SelectSocketWaiter() override = default;
 
-    virtual void reset() {
+    void reset() override {
         FD_ZERO(mReads);
         FD_ZERO(mWrites);
         FD_ZERO(mReadsResult);
@@ -48,7 +47,7 @@ public:
         mPendingFd = 0;
     }
 
-    virtual unsigned wantedEventsFor(int fd) const {
+    unsigned wantedEventsFor(int fd) const override {
         if (!isValidFd(fd)) {
             return 0U;
         }
@@ -63,7 +62,7 @@ public:
         return events;
     }
 
-    virtual unsigned pendingEventsFor(int fd) const {
+    unsigned pendingEventsFor(int fd) const override {
         if (!isValidFd(fd)) {
             return 0U;
         }
@@ -78,11 +77,9 @@ public:
         return events;
     }
 
-    virtual bool hasFds() const {
-        return getFdCount() > 0;
-    }
+    bool hasFds() const override { return getFdCount() > 0; }
 
-    virtual void update(int fd, unsigned events) {
+    void update(int fd, unsigned events) override {
         DCHECK(isValidFd(fd)) << "fd " << fd << " max " << FD_SETSIZE;
 
         // Compute current flags for fd.
@@ -116,7 +113,7 @@ public:
         }
     }
 
-    virtual int wait(int64_t timeout_ms) {
+    int wait(int64_t timeout_ms) override {
         int count = getFdCount();
 
         mPendingFd = 0;
@@ -138,7 +135,7 @@ public:
         // Compute timeout pointer.
         struct timeval tm0, *tm;
         if (timeout_ms < 0 || timeout_ms == INT64_MAX) {
-            tm = NULL;
+            tm = nullptr;
         } else {
             tm0.tv_sec = timeout_ms / 1000;
             tm0.tv_usec = (timeout_ms - 1000 * tm0.tv_sec) * 1000;
@@ -165,7 +162,7 @@ public:
         return ret;
     }
 
-    virtual int nextPendingFd(unsigned *fdEvents) {
+    int nextPendingFd(unsigned* fdEvents) override {
         int count = getFdCount();
         int fd = mPendingFd;
 

@@ -39,8 +39,9 @@ static Version parseVersionFromSourceProperties(
     return version;
 }
 
-static std::string getComponentPath(android::base::StringView sdkRootDirectory,
-                                    SdkComponentType type) {
+static std::string getComponentPath(
+        const android::base::StringView& sdkRootDirectory,
+        SdkComponentType type) {
     switch (type) {
         case SdkComponentType::PlatformTools:
             return PathUtils::join(sdkRootDirectory, "platform-tools");
@@ -52,7 +53,7 @@ static std::string getComponentPath(android::base::StringView sdkRootDirectory,
 }
 
 android::base::Version getCurrentSdkVersion(
-        android::base::StringView sdkRootDirectory,
+        const android::base::StringView& sdkRootDirectory,
         SdkComponentType type) {
     Version version = Version::invalid();
     if (!sdkRootDirectory.empty()) {

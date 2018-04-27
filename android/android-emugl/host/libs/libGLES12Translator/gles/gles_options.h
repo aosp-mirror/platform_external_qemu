@@ -16,9 +16,9 @@ namespace emugl {
         static bool GLErrorChecksEnabled() { return gl_error_checks; }
 
     private:
-        GlesOptions();
-        ~GlesOptions();
-        COMMON_DISALLOW_COPY_AND_ASSIGN(GlesOptions);
+        GlesOptions() = delete;
+        ~GlesOptions() = delete;
+        COMMON_DISALLOW_COPY_AND_ASSIGN(GlesOptions) = delete;
 
 #ifdef GL_FIXED_ATTRIBS
         static const bool gl_fixed_attribs = true;

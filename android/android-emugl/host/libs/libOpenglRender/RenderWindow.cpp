@@ -20,11 +20,11 @@
 #include "emugl/common/thread.h"
 #include "FrameBuffer.h"
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 #ifndef _WIN32
-#include <signal.h>
 #include <pthread.h>
+#include <csignal>
 #endif
 
 #define DEBUG 0
@@ -278,7 +278,7 @@ struct RenderWindowMessage {
 class RenderWindowChannel {
 public:
     RenderWindowChannel() : mIn(), mOut() {}
-    ~RenderWindowChannel() {}
+    ~RenderWindowChannel() = default;
 
     // Send a message from the main thread.
     // Note that the content of |msg| is copied into the channel.
@@ -325,14 +325,15 @@ namespace {
 //
 class RenderWindowThread : public emugl::Thread {
 public:
-    RenderWindowThread(RenderWindowChannel* channel) : mChannel(channel) {}
+    explicit RenderWindowThread(RenderWindowChannel* channel)
+        : mChannel(channel) {}
 
-    virtual intptr_t main() {
+    intptr_t main() override {
         D("Entering render window thread thread\n");
 #ifndef _WIN32
         sigset_t set;
         sigfillset(&set);
-        pthread_sigmask(SIG_SETMASK, &set, NULL);
+        pthread_sigmask(SIG_SETMASK, &set, nullptr);
 #endif
         bool running = true;
         while (running) {
@@ -402,7 +403,7 @@ RenderWindow::~RenderWindow() {
     (void) processMessage(msg);
 
     if (useThread()) {
-        mThread->wait(NULL);
+        mThread->wait(nullptr);
         delete mThread;
         delete mChannel;
     } else {

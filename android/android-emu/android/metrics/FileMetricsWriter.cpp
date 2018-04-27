@@ -23,11 +23,11 @@
 #include "android/metrics/proto/clientanalytics.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 
-#include <assert.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <cassert>
+#include <memory>
 using android::base::AutoLock;
 using android::base::Looper;
 using android::base::makeCustomScopedPtr;
@@ -63,15 +63,15 @@ static std::string formatFilename(StringView sessionId,
                                   int counter,
                                   StringView extension) {
     return StringFormat("emulator-metrics-%s-%d-%d%s", sessionId,
-                        (int)System::get()->getCurrentProcessId(), counter,
-                        extension);
+                        static_cast<int>(System::get()->getCurrentProcessId()),
+                        counter, extension);
 }
 
 // A cross-platform function to rename an |from| file to |to| name only if |to|
 // doesn't exist.
 // On POSIX one needs to make sure the |to| doesn't exist, otherwise it will be
 // owerwritten. On Windows rename() never overwrites target.
-static bool renameIfNotExists(StringView from, StringView to) {
+static bool renameIfNotExists(const StringView& from, const StringView& to) {
 #ifdef _WIN32
     return rename(from.c_str(), to.c_str()) == 0;
 #else
@@ -88,7 +88,7 @@ static bool renameIfNotExists(StringView from, StringView to) {
 #endif
 }
 
-FileMetricsWriter::FileMetricsWriter(StringView spoolDir,
+FileMetricsWriter::FileMetricsWriter(const StringView& spoolDir,
                                      const std::string& sessionId,
                                      int recordCountLimit,
                                      Looper* looper,
@@ -99,7 +99,7 @@ FileMetricsWriter::FileMetricsWriter(StringView spoolDir,
       mRecordCountLimit(recordCountLimit),
       mLooper(looper),
       mActiveFileLock(
-          makeCustomScopedPtr<FileLock*>(nullptr, filelock_release)) {
+              makeCustomScopedPtr<FileLock*>(nullptr, filelock_release)) {
     D("created a FileMetricsWriter");
     assert(strlen(spoolDir.data()) == spoolDir.size());
     path_mkdir_if_needed(spoolDir.data(), 0744);
@@ -110,7 +110,7 @@ FileMetricsWriter::FileMetricsWriter(StringView spoolDir,
     openNewFileNoLock();
 }
 
-FileMetricsWriter::Ptr FileMetricsWriter::create(StringView spoolDir,
+FileMetricsWriter::Ptr FileMetricsWriter::create(const StringView& spoolDir,
                                                  const std::string& sessionId,
                                                  int recordCountLimit,
                                                  Looper* looper,
@@ -120,7 +120,7 @@ FileMetricsWriter::Ptr FileMetricsWriter::create(StringView spoolDir,
 }
 
 MetricsWriter::AbandonedSessions
-FileMetricsWriter::finalizeAbandonedSessionFiles(StringView spoolDir) {
+FileMetricsWriter::finalizeAbandonedSessionFiles(const StringView& spoolDir) {
     AbandonedSessions abandonedSessions;
     const std::vector<std::string> files =
             System::get()->scanDirEntries(spoolDir);
@@ -139,7 +139,8 @@ FileMetricsWriter::finalizeAbandonedSessionFiles(StringView spoolDir) {
 
         if (!System::get()->pathIsFile(PathUtils::join(spoolDir, file))) {
             D("Saw a ghost file right before it disappeared from the file "
-              "system; most probably a rename: '%s'", file.c_str());
+              "system; most probably a rename: '%s'",
+              file.c_str());
             continue;
         }
 
@@ -153,16 +154,16 @@ FileMetricsWriter::finalizeAbandonedSessionFiles(StringView spoolDir) {
         (void)scanned;
 
         // now rename it
-        if (!runFileOperationWithRetries(&filenameCounter, [spoolDir,
-                                                            &sessionId,
-                                                            &filenameCounter,
-                                                            &file]() -> bool {
-                const std::string finalName = PathUtils::join(
-                        spoolDir, formatFilename(sessionId, filenameCounter,
-                                                 kFinalExtension));
-                return renameIfNotExists(PathUtils::join(spoolDir, file),
-                                         finalName);
-            })) {
+        if (!runFileOperationWithRetries(
+                    &filenameCounter,
+                    [spoolDir, &sessionId, &filenameCounter, &file]() -> bool {
+                        const std::string finalName = PathUtils::join(
+                                spoolDir,
+                                formatFilename(sessionId, filenameCounter,
+                                               kFinalExtension));
+                        return renameIfNotExists(
+                                PathUtils::join(spoolDir, file), finalName);
+                    })) {
             W("failed to rename an abandoned log file '%s'", file.c_str());
         }
 

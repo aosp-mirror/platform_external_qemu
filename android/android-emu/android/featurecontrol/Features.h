@@ -24,4 +24,4 @@ enum Feature {
     Feature_n_items
 };
 }
-}
+}  // namespace android

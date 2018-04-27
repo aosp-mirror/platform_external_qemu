@@ -16,7 +16,7 @@
 #ifndef _ERROR_LOG_H_
 #define _ERROR_LOG_H_
 
-#include <stdio.h>
+#include <cstdio>
 #define ERR(...)    fprintf(stderr, __VA_ARGS__)
 #ifdef EMUGL_DEBUG
 #    define DBG(...)    fprintf(stderr, __VA_ARGS__)

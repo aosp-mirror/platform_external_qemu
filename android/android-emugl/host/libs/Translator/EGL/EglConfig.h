@@ -207,7 +207,7 @@ namespace std {
 template <>
 struct hash<EglConfig> {
     std::size_t operator()(const EglConfig& config) const {
-        return (size_t)config.u32hash();
+        return static_cast<size_t>(config.u32hash());
     }
 };
 } // namespace std

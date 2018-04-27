@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 // Set TRACE_CHECKSUMHELPER to 1 to debug creation/destruction of GLprotocol
 // instances.

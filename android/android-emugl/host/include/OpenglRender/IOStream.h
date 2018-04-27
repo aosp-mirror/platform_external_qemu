@@ -18,10 +18,10 @@
 #include "ErrorLog.h"
 #include "android/base/files/Stream.h"
 
-#include <assert.h>
-#include <inttypes.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cassert>
+#include <cinttypes>
+#include <cstdio>
+#include <cstdlib>
 
 class IOStream {
 protected:
@@ -44,16 +44,16 @@ public:
         if (m_buf && len > m_free) {
             if (flush() < 0) {
                 ERR("Failed to flush in alloc\n");
-                return NULL; // we failed to flush so something is wrong
+                return nullptr;  // we failed to flush so something is wrong
             }
         }
 
         if (!m_buf || len > m_bufsize) {
             int allocLen = m_bufsize < len ? len : m_bufsize;
-            m_buf = (unsigned char *)allocBuffer(allocLen);
+            m_buf = static_cast<unsigned char*>(allocBuffer(allocLen));
             if (!m_buf) {
                 ERR("Alloc (%u bytes) failed\n", allocLen);
-                return NULL;
+                return nullptr;
             }
             m_bufsize = m_free = allocLen;
         }
@@ -68,7 +68,7 @@ public:
         if (!m_buf || m_free == m_bufsize) return 0;
 
         int stat = commitBuffer(m_bufsize - m_free);
-        m_buf = NULL;
+        m_buf = nullptr;
         m_free = 0;
         return stat;
     }

@@ -25,27 +25,33 @@ namespace keymaster {
 bool OperationFactory::supported(keymaster_padding_t padding) const {
     size_t padding_count;
     const keymaster_padding_t* supported_paddings = SupportedPaddingModes(&padding_count);
-    for (size_t i = 0; i < padding_count; ++i)
-        if (padding == supported_paddings[i])
+    for (size_t i = 0; i < padding_count; ++i) {
+        if (padding == supported_paddings[i]) {
             return true;
+        }
+    }
     return false;
 }
 
 bool OperationFactory::supported(keymaster_block_mode_t block_mode) const {
     size_t block_mode_count;
     const keymaster_block_mode_t* supported_block_modes = SupportedBlockModes(&block_mode_count);
-    for (size_t i = 0; i < block_mode_count; ++i)
-        if (block_mode == supported_block_modes[i])
+    for (size_t i = 0; i < block_mode_count; ++i) {
+        if (block_mode == supported_block_modes[i]) {
             return true;
+        }
+    }
     return false;
 }
 
 bool OperationFactory::supported(keymaster_digest_t digest) const {
     size_t digest_count;
     const keymaster_digest_t* supported_digests = SupportedDigests(&digest_count);
-    for (size_t i = 0; i < digest_count; ++i)
-        if (digest == supported_digests[i])
+    for (size_t i = 0; i < digest_count; ++i) {
+        if (digest == supported_digests[i]) {
             return true;
+        }
+    }
     return false;
 }
 
@@ -67,8 +73,9 @@ inline bool is_public_key_algorithm(keymaster_algorithm_t algorithm) {
 bool OperationFactory::is_public_key_operation() const {
     KeyType key_type = registry_key();
 
-    if (!is_public_key_algorithm(key_type.algorithm))
+    if (!is_public_key_algorithm(key_type.algorithm)) {
         return false;
+    }
 
     switch (key_type.purpose) {
     case KM_PURPOSE_VERIFY:
@@ -142,8 +149,9 @@ keymaster_error_t Operation::UpdateForFinish(const AuthorizationSet& input_param
         AuthorizationSet output_params;
         keymaster_error_t error =
             Update(input_params, input, &output_params, &output, &input_consumed);
-        if (error != KM_ERROR_OK)
+        if (error != KM_ERROR_OK) {
             return error;
+        }
         assert(input_consumed == input.available_read());
         assert(output_params.empty());
         assert(output.available_read() == 0);

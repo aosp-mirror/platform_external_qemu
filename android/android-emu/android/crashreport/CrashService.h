@@ -124,7 +124,7 @@ public:
     bool collectSysInfo();
 
     // Utility function for reading a txt file into string
-    static std::string readFile(android::base::StringView path);
+    static std::string readFile(const android::base::StringView& path);
 
     // Return string containing collectSysInfo result
     std::string getSysInfo();

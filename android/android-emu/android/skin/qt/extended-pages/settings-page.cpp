@@ -15,7 +15,8 @@
 #include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/qt-settings.h"
 
-#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
+#ifndef SNAPSHOT_CONTROLS  // TODO(jameskaye): Remove when Snapshot
+                           // controls are fully enabled
 #include "android/base/async/ThreadLooper.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsReporter.h"
@@ -33,7 +34,8 @@
 #include <QMessageBox>
 #include <QSettings>
 
-#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
+#ifndef SNAPSHOT_CONTROLS  // TODO(jameskaye): Remove when Snapshot
+                           // controls are fully enabled
 using Ui::Settings::SaveSnapshotOnExit;
 using Ui::Settings::SaveSnapshotOnExitUiOrder;
 using android::metrics::MetricsReporter;
@@ -129,13 +131,14 @@ SettingsPage::SettingsPage(QWidget* parent)
             fprintf(stderr,
                     "%s: warning: unknown crash report preference value 0x%x. "
                     "Setting to Ask.\n",
-                    __func__, (unsigned int)report_pref);
+                    __func__, static_cast<unsigned int>(report_pref));
             mUi->set_crashReportPrefComboBox->setCurrentIndex(
                     Ui::Settings::CRASHREPORT_COMBOBOX_ASK);
             break;
     }
 
-#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove this when Snapshot controls are fully enabled
+#ifndef SNAPSHOT_CONTROLS  // TODO(jameskaye): Remove this when Snapshot
+                           // controls are fully enabled
     // This is interim code.
     if (android::featurecontrol::isEnabled(android::featurecontrol::GenericSnapshotsUI)) {
         // The Emulator features file has Generic Snapshots UI enabled, so we
@@ -178,9 +181,10 @@ SettingsPage::SettingsPage(QWidget* parent)
                 break;
             default:
                 fprintf(stderr,
-                        "%s: warning: unknown 'Save snapshot on exit' preference value 0x%x. "
+                        "%s: warning: unknown 'Save snapshot on exit' "
+                        "preference value 0x%x. "
                         "Setting to Always.\n",
-                        __func__, (unsigned int)saveOnExitChoice);
+                        __func__, static_cast<unsigned int>(saveOnExitChoice));
                 mUi->set_saveSnapshotOnExit->setCurrentIndex(
                         static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
                 android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
@@ -203,8 +207,9 @@ SettingsPage::SettingsPage(QWidget* parent)
     if (mDisableANGLE) {
         for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count();) {
             WinsysPreferredGlesBackend backendPreference =
-                (WinsysPreferredGlesBackend)
-                (mUi->set_glesBackendPrefComboBox->itemData(i).toInt());
+                    static_cast<WinsysPreferredGlesBackend>(
+                            mUi->set_glesBackendPrefComboBox->itemData(i)
+                                    .toInt());
             switch (backendPreference) {
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
@@ -223,10 +228,10 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
         WinsysPreferredGlesBackend backendPreference =
-            (WinsysPreferredGlesBackend)
-            (mUi->set_glesBackendPrefComboBox->itemData(i).toInt());
+                static_cast<WinsysPreferredGlesBackend>(
+                        mUi->set_glesBackendPrefComboBox->itemData(i).toInt());
 
-        if ((int)settings_glesbackend_pref == backendPreference) {
+        if (static_cast<int>(settings_glesbackend_pref) == backendPreference) {
             switch (settings_glesbackend_pref) {
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
@@ -238,9 +243,12 @@ SettingsPage::SettingsPage(QWidget* parent)
                     break;
                 default:
                     fprintf(stderr,
-                            "%s: warning: unknown GLES backend preference value 0x%x. "
+                            "%s: warning: unknown GLES backend preference "
+                            "value 0x%x. "
                             "Setting to auto.\n",
-                            __func__, (unsigned int)settings_glesbackend_pref);
+                            __func__,
+                            static_cast<unsigned int>(
+                                    settings_glesbackend_pref));
                     mUi->set_glesBackendPrefComboBox->setCurrentIndex(
                             WINSYS_GLESBACKEND_PREFERENCE_AUTO);
                     break;
@@ -269,7 +277,7 @@ SettingsPage::SettingsPage(QWidget* parent)
         fprintf(stderr,
                 "%s: warning: unknown GLES API level preference value 0x%x. "
                 "Setting to Auto.\n",
-                __func__, (unsigned int)glesapilevel_pref);
+                __func__, static_cast<unsigned int>(glesapilevel_pref));
         mUi->set_glesApiLevelPrefComboBox->setCurrentIndex(
                 WINSYS_GLESAPILEVEL_PREFERENCE_AUTO);
         break;
@@ -336,14 +344,14 @@ bool SettingsPage::eventFilter(QObject* object, QEvent* event)
 void SettingsPage::on_set_themeBox_currentIndexChanged(int index)
 {
     // Select either the light or dark theme
-    SettingsTheme theme = (SettingsTheme)index;
+    SettingsTheme theme = static_cast<SettingsTheme>(index);
 
     if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
         // Out of range--ignore
         return;
     }
     QSettings settings;
-    settings.setValue(Ui::Settings::UI_THEME, (int)theme);
+    settings.setValue(Ui::Settings::UI_THEME, static_cast<int>(theme));
 
     emit(themeChanged(theme));
 }
@@ -373,7 +381,8 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     setElidedText(mUi->set_saveLocBox, dirName);
 }
 
-#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove this when Snapshot controls are fully enabled
+#ifndef SNAPSHOT_CONTROLS  // TODO(jameskaye): Remove this when Snapshot
+                           // controls are fully enabled
 void SettingsPage::on_set_saveSnapNowButton_clicked() {
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
@@ -503,7 +512,8 @@ void SettingsPage::on_set_crashReportPrefComboBox_currentIndexChanged(int index)
     }
 }
 
-#ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove this when Snapshot controls are fully enabled
+#ifndef SNAPSHOT_CONTROLS  // TODO(jameskaye): Remove this when Snapshot
+                           // controls are fully enabled
 void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
     SaveSnapshotOnExit preferenceValue;
     switch(static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
@@ -576,8 +586,8 @@ static void set_glesApiLevel_to(WinsysPreferredGlesApiLevel v) {
 
 void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index) {
     WinsysPreferredGlesBackend backendPreference =
-        (WinsysPreferredGlesBackend)
-        (mUi->set_glesBackendPrefComboBox->itemData(index).toInt());
+            static_cast<WinsysPreferredGlesBackend>(
+                    mUi->set_glesBackendPrefComboBox->itemData(index).toInt());
     switch (backendPreference) {
     case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
     case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
@@ -585,7 +595,7 @@ void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index)
     case WINSYS_GLESBACKEND_PREFERENCE_AUTO:
     case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
     case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
-        set_glesBackend_to((WinsysPreferredGlesBackend)backendPreference);
+        set_glesBackend_to(backendPreference);
         break;
     default:
         break;
@@ -597,7 +607,7 @@ void SettingsPage::on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index
     case WINSYS_GLESAPILEVEL_PREFERENCE_AUTO:
     case WINSYS_GLESAPILEVEL_PREFERENCE_MAX:
     case WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT:
-        set_glesApiLevel_to((WinsysPreferredGlesApiLevel)index);
+        set_glesApiLevel_to(static_cast<WinsysPreferredGlesApiLevel>(index));
         break;
     default:
         break;

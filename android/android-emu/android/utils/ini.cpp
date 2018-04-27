@@ -15,17 +15,17 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/base/Log.h"
 
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include <iterator>
 #include <string>
 
-typedef ::CIniFile CIniFile;
-typedef android::base::IniFile BaseIniFile;
+using CIniFile = ::CIniFile;
+using BaseIniFile = android::base::IniFile;
 using android::base::strDup;
 
 static BaseIniFile* asBaseIniFile(CIniFile* i) {
@@ -84,12 +84,12 @@ int iniFile_getEntry(CIniFile* f, int index, char** key, char** value) {
 char* iniFile_getString(CIniFile* f,
                         const char* key,
                         const char* defaultValue) {
-    if (defaultValue != NULL ) {
+    if (defaultValue != nullptr) {
         return strDup(asBaseIniFile(f)->getString(key, defaultValue));
     }
     // |defaultValue| of NULL is not handled well by getString.
     if (!asBaseIniFile(f)->hasKey(key)) {
-        return NULL;
+        return nullptr;
     }
     return strDup(asBaseIniFile(f)->getString(key, ""));
 }
@@ -118,7 +118,7 @@ int64_t iniFile_getInt64(CIniFile* f, const char* key, int64_t defaultValue) {
 
 void iniFile_setValue(CIniFile* f, const char* key, const char* value) {
     // Silently protect us from blowing up.
-    asBaseIniFile(f)->setString(key, (value == NULL) ? "" : value);
+    asBaseIniFile(f)->setString(key, (value == nullptr) ? "" : value);
 }
 
 void iniFile_setInteger(CIniFile* f, const char* key, int value) {

@@ -88,8 +88,9 @@ static keymaster_error_t authorized_purpose(const keymaster_purpose_t purpose,
     case KM_PURPOSE_ENCRYPT:
     case KM_PURPOSE_SIGN:
     case KM_PURPOSE_DECRYPT:
-        if (auth_set.Contains(TAG_PURPOSE, purpose))
+        if (auth_set.Contains(TAG_PURPOSE, purpose)) {
             return KM_ERROR_OK;
+        }
         return KM_ERROR_INCOMPATIBLE_PURPOSE;
 
     default:
@@ -135,10 +136,11 @@ keymaster_error_t KeymasterEnforcement::AuthorizeOperation(const keymaster_purpo
         };
     };
 
-    if (is_begin_operation)
+    if (is_begin_operation) {
         return AuthorizeBegin(purpose, keyid, auth_set, operation_params);
-    else
+    } else {
         return AuthorizeUpdateOrFinish(auth_set, operation_params, op_handle);
+    }
 }
 
 // For update and finish the only thing to check is user authentication, and then only if it's not
@@ -177,14 +179,17 @@ KeymasterEnforcement::AuthorizeUpdateOrFinish(const AuthorizationSet& auth_set,
         if (param.tag == KM_TAG_USER_SECURE_ID) {
             authentication_required = true;
             int auth_timeout_index = -1;
-            if (AuthTokenMatches(auth_set, operation_params, param.long_integer, auth_type_index,
-                                 auth_timeout_index, op_handle, false /* is_begin_operation */))
+            if (AuthTokenMatches(auth_set, operation_params, param.long_integer,
+                                 auth_type_index, auth_timeout_index, op_handle,
+                                 false /* is_begin_operation */)) {
                 return KM_ERROR_OK;
+            }
         }
     }
 
-    if (authentication_required)
+    if (authentication_required) {
         return KM_ERROR_KEY_USER_NOT_AUTHENTICATED;
+    }
 
     return KM_ERROR_OK;
 }
@@ -214,8 +219,9 @@ keymaster_error_t KeymasterEnforcement::AuthorizeBegin(const keymaster_purpose_t
     }
 
     keymaster_error_t error = authorized_purpose(purpose, auth_set);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     // If successful, and if key has a min time between ops, this will be set to the time limit
     uint32_t min_ops_timeout = UINT32_MAX;
@@ -229,36 +235,44 @@ keymaster_error_t KeymasterEnforcement::AuthorizeBegin(const keymaster_purpose_t
 
         // KM_TAG_PADDING_OLD and KM_TAG_DIGEST_OLD aren't actually members of the enum, so we can't
         // switch on them.  There's nothing to validate for them, though, so just ignore them.
-        if (param.tag == KM_TAG_PADDING_OLD || param.tag == KM_TAG_DIGEST_OLD)
+        if (param.tag == KM_TAG_PADDING_OLD || param.tag == KM_TAG_DIGEST_OLD) {
             continue;
+        }
 
         switch (param.tag) {
 
         case KM_TAG_ACTIVE_DATETIME:
-            if (!activation_date_valid(param.date_time))
+            if (!activation_date_valid(param.date_time)) {
                 return KM_ERROR_KEY_NOT_YET_VALID;
+            }
             break;
 
         case KM_TAG_ORIGINATION_EXPIRE_DATETIME:
-            if (is_origination_purpose(purpose) && expiration_date_passed(param.date_time))
+            if (is_origination_purpose(purpose) &&
+                expiration_date_passed(param.date_time)) {
                 return KM_ERROR_KEY_EXPIRED;
+            }
             break;
 
         case KM_TAG_USAGE_EXPIRE_DATETIME:
-            if (is_usage_purpose(purpose) && expiration_date_passed(param.date_time))
+            if (is_usage_purpose(purpose) &&
+                expiration_date_passed(param.date_time)) {
                 return KM_ERROR_KEY_EXPIRED;
+            }
             break;
 
         case KM_TAG_MIN_SECONDS_BETWEEN_OPS:
             min_ops_timeout = param.integer;
-            if (!MinTimeBetweenOpsPassed(min_ops_timeout, keyid))
+            if (!MinTimeBetweenOpsPassed(min_ops_timeout, keyid)) {
                 return KM_ERROR_KEY_RATE_LIMIT_EXCEEDED;
+            }
             break;
 
         case KM_TAG_MAX_USES_PER_BOOT:
             update_access_count = true;
-            if (!MaxUsesPerBootNotExceeded(keyid, param.integer))
+            if (!MaxUsesPerBootNotExceeded(keyid, param.integer)) {
                 return KM_ERROR_KEY_MAX_OPS_EXCEEDED;
+            }
             break;
 
         case KM_TAG_USER_SECURE_ID:
@@ -269,10 +283,12 @@ keymaster_error_t KeymasterEnforcement::AuthorizeBegin(const keymaster_purpose_t
 
             if (auth_timeout_index != -1) {
                 authentication_required = true;
-                if (AuthTokenMatches(auth_set, operation_params, param.long_integer,
-                                     auth_type_index, auth_timeout_index, 0 /* op_handle */,
-                                     true /* is_begin_operation */))
+                if (AuthTokenMatches(auth_set, operation_params,
+                                     param.long_integer, auth_type_index,
+                                     auth_timeout_index, 0 /* op_handle */,
+                                     true /* is_begin_operation */)) {
                     auth_token_matched = true;
+                }
             }
             break;
 
@@ -359,8 +375,9 @@ keymaster_error_t KeymasterEnforcement::AuthorizeBegin(const keymaster_purpose_t
     }
 
     if (!caller_nonce_authorized_by_key && is_origination_purpose(purpose) &&
-        operation_params.find(KM_TAG_NONCE) != -1)
+        operation_params.find(KM_TAG_NONCE) != -1) {
         return KM_ERROR_CALLER_NONCE_PROHIBITED;
+    }
 
     if (min_ops_timeout != UINT32_MAX) {
         if (!access_time_map_) {
@@ -418,22 +435,27 @@ bool KeymasterEnforcement::CreateKeyId(const keymaster_key_blob_t& key_blob, km_
 }
 
 bool KeymasterEnforcement::MinTimeBetweenOpsPassed(uint32_t min_time_between, const km_id_t keyid) {
-    if (!access_time_map_)
+    if (!access_time_map_) {
         return false;
+    }
 
     uint32_t last_access_time;
-    if (!access_time_map_->LastKeyAccessTime(keyid, &last_access_time))
+    if (!access_time_map_->LastKeyAccessTime(keyid, &last_access_time)) {
         return true;
-    return min_time_between <= static_cast<int64_t>(get_current_time()) - last_access_time;
+    }
+    return min_time_between <=
+           static_cast<int64_t>(get_current_time()) - last_access_time;
 }
 
 bool KeymasterEnforcement::MaxUsesPerBootNotExceeded(const km_id_t keyid, uint32_t max_uses) {
-    if (!access_count_map_)
+    if (!access_count_map_) {
         return false;
+    }
 
     uint32_t key_access_count;
-    if (!access_count_map_->KeyAccessCount(keyid, &key_access_count))
+    if (!access_count_map_->KeyAccessCount(keyid, &key_access_count)) {
         return true;
+    }
     return key_access_count < max_uses;
 }
 
@@ -488,8 +510,9 @@ bool KeymasterEnforcement::AuthTokenMatches(const AuthorizationSet& auth_set,
     }
 
     assert(auth_set[auth_type_index].tag == KM_TAG_USER_AUTH_TYPE);
-    if (auth_set[auth_type_index].tag != KM_TAG_USER_AUTH_TYPE)
+    if (auth_set[auth_type_index].tag != KM_TAG_USER_AUTH_TYPE) {
         return false;
+    }
 
     uint32_t key_auth_type_mask = auth_set[auth_type_index].integer;
     uint32_t token_auth_type = ntoh(auth_token.authenticator_type);
@@ -501,8 +524,9 @@ bool KeymasterEnforcement::AuthTokenMatches(const AuthorizationSet& auth_set,
 
     if (auth_timeout_index != -1 && is_begin_operation) {
         assert(auth_set[auth_timeout_index].tag == KM_TAG_AUTH_TIMEOUT);
-        if (auth_set[auth_timeout_index].tag != KM_TAG_AUTH_TIMEOUT)
+        if (auth_set[auth_timeout_index].tag != KM_TAG_AUTH_TIMEOUT) {
             return false;
+        }
 
         if (auth_token_timed_out(auth_token, auth_set[auth_timeout_index].integer)) {
             LOG_E("Auth token has timed out", 0);
@@ -515,11 +539,12 @@ bool KeymasterEnforcement::AuthTokenMatches(const AuthorizationSet& auth_set,
 }
 
 bool AccessTimeMap::LastKeyAccessTime(km_id_t keyid, uint32_t* last_access_time) const {
-    for (auto& entry : last_access_list_)
+    for (auto& entry : last_access_list_) {
         if (entry.keyid == keyid) {
             *last_access_time = entry.access_time;
             return true;
         }
+    }
     return false;
 }
 
@@ -533,14 +558,16 @@ bool AccessTimeMap::UpdateKeyAccessTime(km_id_t keyid, uint32_t current_time, ui
 
         // Expire entry if possible.
         assert(current_time >= iter->access_time);
-        if (current_time - iter->access_time >= iter->timeout)
+        if (current_time - iter->access_time >= iter->timeout) {
             iter = last_access_list_.erase(iter);
-        else
+        } else {
             ++iter;
+        }
     }
 
-    if (last_access_list_.size() >= max_size_)
+    if (last_access_list_.size() >= max_size_) {
         return false;
+    }
 
     AccessTime new_entry;
     new_entry.keyid = keyid;
@@ -551,29 +578,34 @@ bool AccessTimeMap::UpdateKeyAccessTime(km_id_t keyid, uint32_t current_time, ui
 }
 
 bool AccessCountMap::KeyAccessCount(km_id_t keyid, uint32_t* count) const {
-    for (auto& entry : access_count_list_)
+    for (auto& entry : access_count_list_) {
         if (entry.keyid == keyid) {
             *count = entry.access_count;
             return true;
         }
+    }
     return false;
 }
 
 bool AccessCountMap::IncrementKeyAccessCount(km_id_t keyid) {
-    for (auto& entry : access_count_list_)
+    for (auto& entry : access_count_list_) {
         if (entry.keyid == keyid) {
-            // Note that the 'if' below will always be true because KM_TAG_MAX_USES_PER_BOOT is a
-            // uint32_t, and as soon as entry.access_count reaches the specified maximum value
-            // operation requests will be rejected and access_count won't be incremented any more.
-            // And, besides, UINT64_MAX is huge.  But we ensure that it doesn't wrap anyway, out of
-            // an abundance of caution.
-            if (entry.access_count < UINT64_MAX)
+            // Note that the 'if' below will always be true because
+            // KM_TAG_MAX_USES_PER_BOOT is a uint32_t, and as soon as
+            // entry.access_count reaches the specified maximum value operation
+            // requests will be rejected and access_count won't be incremented
+            // any more. And, besides, UINT64_MAX is huge.  But we ensure that
+            // it doesn't wrap anyway, out of an abundance of caution.
+            if (entry.access_count < UINT64_MAX) {
                 ++entry.access_count;
+            }
             return true;
         }
+    }
 
-    if (access_count_list_.size() >= max_size_)
+    if (access_count_list_.size() >= max_size_) {
         return false;
+    }
 
     AccessCount new_entry;
     new_entry.keyid = keyid;

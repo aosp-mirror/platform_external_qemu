@@ -335,7 +335,7 @@ bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
             return true;
         } else if (event->type() == QEvent::KeyPress ||
                    event->type() == QEvent::KeyRelease) {
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+            auto* keyEvent = static_cast<QKeyEvent*>(event);
             if (handleKeyEvent(keyEvent)) {
                 updateVelocity();
                 return true;

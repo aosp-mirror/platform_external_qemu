@@ -22,7 +22,7 @@ std::string tokenGetPathDefault();
 
 // For unit test mocking only.  This lets unit tests run with a temp file
 // instead of the user's real auth token
-typedef std::string (*fn_get_auth_token_path)();
+using fn_get_auth_token_path = std::string (*)();
 extern fn_get_auth_token_path g_get_auth_token_path;
 
 }  // namespace console_auth

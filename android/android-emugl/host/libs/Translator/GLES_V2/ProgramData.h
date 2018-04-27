@@ -35,7 +35,7 @@ struct GLUniformDesc {
 
     GLsizei mCount = 0;
     GLboolean mTranspose = GL_FALSE;
-    GLenum mType = (GLenum)0;
+    GLenum mType = static_cast<GLenum>(0);
     std::vector<unsigned char> mVal;
 
     std::string mGuestName = {};
@@ -73,8 +73,10 @@ public:
     GLuint getAttachedComputeShader() const;
     GLuint getAttachedShader(GLenum type) const;
 
-    android::base::StringView getTranslatedName(android::base::StringView userVarName) const;
-    android::base::StringView getDetranslatedName(android::base::StringView driverName) const;
+    android::base::StringView getTranslatedName(
+            const android::base::StringView& userVarName) const;
+    android::base::StringView getDetranslatedName(
+            const android::base::StringView& driverName) const;
 
     bool attachShader(GLuint shader, ShaderParser* shaderData, GLenum type);
     bool isAttached(GLuint shader) const;
@@ -108,9 +110,9 @@ public:
 
     // Virtualize uniform locations
     // It handles location -1 as well
-    void initGuestUniformLocForKey(android::base::StringView key);
-    void initGuestUniformLocForKey(android::base::StringView key,
-                                   android::base::StringView key2);
+    void initGuestUniformLocForKey(const android::base::StringView& key);
+    void initGuestUniformLocForKey(const android::base::StringView& key,
+                                   const android::base::StringView& key2);
     int getGuestUniformLocation(const char* uniName);
     int getHostUniformLocation(int guestLocation);
 

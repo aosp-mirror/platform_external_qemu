@@ -13,7 +13,7 @@
 
 #include "google/protobuf/io/coded_stream.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace protobuf {
@@ -74,5 +74,5 @@ bool readOneDelimited(google::protobuf::MessageLite* message,
     return true;
 }
 
-}  // namespace android
 }  // namespace protobuf
+}  // namespace android

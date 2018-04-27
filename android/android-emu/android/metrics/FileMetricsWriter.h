@@ -72,7 +72,7 @@ public:
     //  |looper| - an instance of a |Looper| object to create timed events.
     //  |timeLimitMs| - create new file after this many milliseconds, if there
     //      was at least one event logged. Disabled if <=0 or |logger| is NULL.
-    static Ptr create(base::StringView spoolDir,
+    static Ptr create(const base::StringView& spoolDir,
                       const std::string& sessionId,
                       int recordCountLimit,
                       base::Looper* looper,
@@ -83,7 +83,7 @@ public:
     // sessions that had such files. Useful for a cleanup or crash reporting
     // process.
     static AbandonedSessions finalizeAbandonedSessionFiles(
-            base::StringView spoolDir);
+            const base::StringView& spoolDir);
 
     ~FileMetricsWriter() override;
 
@@ -94,7 +94,7 @@ public:
 
 private:
     // A private constructor to enforce the use of shared_ptr<>.
-    FileMetricsWriter(base::StringView spoolDir,
+    FileMetricsWriter(const base::StringView& spoolDir,
                       const std::string& sessionId,
                       int recordCountLimit,
                       base::Looper* looper,

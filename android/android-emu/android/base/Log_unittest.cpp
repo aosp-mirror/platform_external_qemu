@@ -11,9 +11,9 @@
 
 #include "android/base/Log.h"
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 
 #include <gtest/gtest.h>
 
@@ -26,14 +26,14 @@ const LogSeverity LOG_INVISIBLE = static_cast<LogSeverity>(-10000);
 
 class LogTest : public ::testing::Test, android::base::testing::LogOutput {
 public:
-    LogTest() : mFatal(false) {
+    LogTest() {
         mSavedOutput = ::android::base::testing::LogOutput::setNewOutput(this);
         mExpected[0] = '\0';
         mBuffer[0] = '\x7f';
         mBuffer[1] = '\0';
     }
 
-    ~LogTest() {
+    ~LogTest() override {
         ::android::base::testing::LogOutput::setNewOutput(mSavedOutput);
     }
 
@@ -47,10 +47,11 @@ public:
     // LogOutput override
     void logMessage(const LogParams& params,
                     const char* message,
-                    size_t messageLen) {
+                    size_t messageLen) override {
         mParams = params;
-        if (messageLen > sizeof(mBuffer) - 1)
+        if (messageLen > sizeof(mBuffer) - 1) {
             messageLen = sizeof(mBuffer) - 1;
+        }
         ::memcpy(mBuffer, message, messageLen);
         mBuffer[messageLen] = '\0';
         mFatal = (params.severity >= LOG_FATAL);
@@ -62,11 +63,10 @@ protected:
     LogParams mExpectedParams;
     char mExpected[1024];
     char mBuffer[1024];
-    bool mFatal;
+    bool mFatal{false};
 };
 
-class CheckTest : public LogTest {
-};
+class CheckTest : public LogTest {};
 
 #if ENABLE_DCHECK != 0
 class DCheckEnabledTest : public LogTest {
@@ -76,9 +76,8 @@ public:
         mSavedLevel = setDcheckLevel(true);
     }
 
-    ~DCheckEnabledTest() {
-        setDcheckLevel(mSavedLevel);
-    }
+    ~DCheckEnabledTest() override { setDcheckLevel(mSavedLevel); }
+
 private:
     bool mSavedLevel;
 };
@@ -87,13 +86,10 @@ private:
 #if ENABLE_DCHECK != 2
 class DCheckDisabledTest : public LogTest {
 public:
-    DCheckDisabledTest() : LogTest() {
-        mSavedLevel = setDcheckLevel(false);
-    }
+    DCheckDisabledTest() : LogTest() { mSavedLevel = setDcheckLevel(false); }
 
-    ~DCheckDisabledTest() {
-        setDcheckLevel(mSavedLevel);
-    }
+    ~DCheckDisabledTest() override { setDcheckLevel(mSavedLevel); }
+
 private:
     bool mSavedLevel;
 };
@@ -101,11 +97,9 @@ private:
 
 class PLogTest : public LogTest {
 public:
-    PLogTest() : LogTest(), mForcedErrno(-1000) {}
+    PLogTest() : LogTest() {}
 
-    void setForcedErrno(int errnoCode) {
-        mForcedErrno = errnoCode;
-    }
+    void setForcedErrno(int errnoCode) { mForcedErrno = errnoCode; }
 
     void setExpectedErrno(LogSeverity severity,
                           int line,
@@ -114,35 +108,33 @@ public:
         mExpectedParams.file = __FILE__;
         mExpectedParams.lineno = line;
         mExpectedParams.severity = severity;
-        snprintf(mExpected,
-                 sizeof(mExpected),
-                 "%sError message: %s",
-                 suffix,
+        snprintf(mExpected, sizeof(mExpected), "%sError message: %s", suffix,
                  strerror(errnoCode));
     }
 
     void logMessage(const LogParams& params,
                     const char* message,
-                    size_t messageLen) {
+                    size_t messageLen) override {
         LogTest::logMessage(params, message, messageLen);
 
-        if (mForcedErrno != -1000)
+        if (mForcedErrno != -1000) {
             errno = mForcedErrno;
+        }
     }
 
 protected:
-    int mForcedErrno;
+    int mForcedErrno{-1000};
 };
 
 #define STRINGIFY(x) STRINGIFY_(x)
 #define STRINGIFY_(x) #x
 
 #define EXPECTED_STRING_PREFIX(prefix, line) \
-  prefix ":" __FILE__ ":" STRINGIFY(line) ": "
+    prefix ":" __FILE__ ":" STRINGIFY(line) ": "
 
-#define CHECK_EXPECTATIONS() \
-    EXPECT_STREQ(mExpectedParams.file, mParams.file); \
-    EXPECT_EQ(mExpectedParams.lineno, mParams.lineno); \
+#define CHECK_EXPECTATIONS()                               \
+    EXPECT_STREQ(mExpectedParams.file, mParams.file);      \
+    EXPECT_EQ(mExpectedParams.lineno, mParams.lineno);     \
     EXPECT_EQ(mExpectedParams.severity, mParams.severity); \
     EXPECT_STREQ(mExpected, mBuffer)
 
@@ -182,7 +174,8 @@ TEST_F(LogTest, LogInfoWithString) {
 
 TEST_F(LogTest, LogInfoWithTwoStrings) {
     setExpected(LOG_INFO, __LINE__ + 1, "Hello Globe!");
-    LOG(INFO) << "Hello " << "Globe!";
+    LOG(INFO) << "Hello "
+              << "Globe!";
     CHECK_EXPECTATIONS();
 }
 
@@ -231,7 +224,6 @@ TEST_F(LogTest, LogOnlyEvaluatesArgumentsIfNeeded) {
     LOG(INVISIBLE) << setFlag(&flag, "Flag was set!");
     EXPECT_FALSE(flag);
 }
-
 
 // TODO(digit): Convert this to a real death test when this is supported
 // by our version of GTest.

@@ -31,9 +31,9 @@ struct EGLDispatch;
 class GLWidget : public QWidget {
     Q_OBJECT
 public:
-    explicit GLWidget(QWidget* parent = 0);
+    explicit GLWidget(QWidget* parent = nullptr);
 
-    virtual ~GLWidget();
+    ~GLWidget() override;
 
     QPaintEngine* paintEngine() const override { return nullptr; }
     bool readyForRendering() const { return mValid; }
@@ -83,9 +83,9 @@ private:
     bool ensureInit();
     void destroyContext();
 
-    EGLState* mEGLState;
-    bool mValid;
-    bool mEnableAA;
+    EGLState* mEGLState{nullptr};
+    bool mValid{false};
+    bool mEnableAA{false};
     bool mFirstShow = true;
 
     std::unique_ptr<GLCanvas> mCanvas;

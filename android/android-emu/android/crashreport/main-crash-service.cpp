@@ -38,10 +38,10 @@
 #include <QCoreApplication>
 #include <QProgressDialog>
 #include <QSettings>
-#include <QTimer>
 #include <QThread>
-#include <stdio.h>
-#include <stdlib.h>
+#include <QTimer>
+#include <cstdio>
+#include <cstdlib>
 #include <memory>
 
 #define E(...) derror(__VA_ARGS__)

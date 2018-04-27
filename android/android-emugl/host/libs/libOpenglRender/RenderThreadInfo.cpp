@@ -114,8 +114,8 @@ void RenderThreadInfo::onSave(Stream* stream) {
 
     stream->putBe64(m_puid);
 
-    if (syncThread.get()) {
-        syncThreadAlias = (uint64_t)(uintptr_t)syncThread.get();
+    if (syncThread) {
+        syncThreadAlias = static_cast<uint64_t>((uintptr_t)syncThread.get());
     }
     stream->putBe64(syncThreadAlias);
 

@@ -45,16 +45,16 @@ namespace qemu {
 class QemuAudioOutputEngine : public android::emulation::AudioOutputEngine {
 public:
     QemuAudioOutputEngine() = default;
-    virtual ~QemuAudioOutputEngine() = default;
+    ~QemuAudioOutputEngine() override = default;
 
-    virtual int open(const char *name,
-                     android::emulation::AudioFormat format,
-                     int freq,
-                     int nchannels,
-                     android::emulation::audio_callback_fn callback,
-                     void *callback_opaque) override;
-    virtual int write(void *pcm_buf, int size) override;
-    virtual void close() override;
+    int open(const char* name,
+             android::emulation::AudioFormat format,
+             int freq,
+             int nchannels,
+             android::emulation::audio_callback_fn callback,
+             void* callback_opaque) override;
+    int write(void* pcm_buf, int size) override;
+    void close() override;
 
 private:
     // convert audio format

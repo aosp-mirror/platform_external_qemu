@@ -15,8 +15,6 @@
 #include "android/recording/screen-recorder.h"
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
-
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidRecordScreenAgent {
@@ -30,12 +28,12 @@ typedef struct QAndroidRecordScreenAgent {
     bool (*startRecordingAsync)(const RecordingInfo* recordingInfo);
 
     // Stop recording.
-    bool (*stopRecording)(void);
+    bool (*stopRecording)();
     // Async version of stopRecording(). Use |recordingInfo->cb| to get the
     // recording state.
-    bool (*stopRecordingAsync)(void);
+    bool (*stopRecordingAsync)();
     // Get the state of the recorder.
-    RecorderState (*getRecorderState)(void);
+    RecorderState (*getRecorderState)();
     // Take a screenshot.
     void (*doSnap)(const char* dirname);
 

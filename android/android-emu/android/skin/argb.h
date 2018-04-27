@@ -16,8 +16,8 @@
 #if USE_MMX
 #include <mmintrin.h>
 
-typedef __m64   mmx_t;
-typedef  mmx_t  argb_t;
+using mmx_t = __m64;
+using argb_t = mmx_t;
 
 static inline mmx_t
 mmx_load8888( unsigned  value, mmx_t  zero )
@@ -28,7 +28,7 @@ mmx_load8888( unsigned  value, mmx_t  zero )
 static inline unsigned
 mmx_save8888( mmx_t   argb, mmx_t  zero )
 {
-    return (unsigned) _mm_cvtsi64_si32( _mm_packs_pu16( argb, zero ) );
+    return static_cast<unsigned>(_mm_cvtsi64_si32(_mm_packs_pu16(argb, zero)));
 }
 
 static inline mmx_t

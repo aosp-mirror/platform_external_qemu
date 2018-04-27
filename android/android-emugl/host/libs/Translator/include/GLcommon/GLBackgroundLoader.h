@@ -22,19 +22,19 @@
 #include <EGL/egl.h>
 
 #include <memory>
-
+#include <utility>
 class GLBackgroundLoader : public emugl::Thread {
 public:
-    GLBackgroundLoader(const android::snapshot::ITextureLoaderWPtr& textureLoaderWeak,
+    GLBackgroundLoader(android::snapshot::ITextureLoaderWPtr textureLoaderWeak,
                        const EGLiface& eglIface,
                        const GLESiface& glesIface,
-                       SaveableTextureMap& textureMap) :
-        m_textureLoaderWPtr(textureLoaderWeak),
-        m_eglIface(eglIface),
-        m_glesIface(glesIface),
-        m_textureMap(textureMap) { }
+                       SaveableTextureMap& textureMap)
+        : m_textureLoaderWPtr(std::move(textureLoaderWeak)),
+          m_eglIface(eglIface),
+          m_glesIface(glesIface),
+          m_textureMap(textureMap) {}
 
-    intptr_t main();
+    intptr_t main() override;
 
     const android::snapshot::ITextureLoaderWPtr m_textureLoaderWPtr;
     const EGLiface& m_eglIface;

@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include <assert.h>
+#include <cassert>
 
 using android::base::TestSystem;
 using android::base::System;

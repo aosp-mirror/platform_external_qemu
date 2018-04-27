@@ -33,9 +33,9 @@ namespace {
 
 extern "C" void qemu_system_shutdown_request(void);
 
-typedef ::android::base::Looper BaseLooper;
-typedef ::android::base::Looper::Timer BaseTimer;
-typedef ::android::base::Looper::FdWatch BaseFdWatch;
+using BaseLooper = ::android::base::Looper;
+using BaseTimer = ::android::base::Looper::Timer;
+using BaseFdWatch = ::android::base::Looper::FdWatch;
 
 // An implementation of android::base::Looper on top of the QEMU main
 // event loop. There are few important things here:
@@ -59,7 +59,7 @@ public:
         mQemuBh = qemu_bh_new(handleBottomHalf, this);
     }
 
-    virtual ~QemuLooper() {
+    ~QemuLooper() override {
         qemu_bh_delete(mQemuBh);
         DCHECK(mPendingFdWatches.empty());
     }
@@ -67,11 +67,19 @@ public:
     base::StringView name() const override { return "QEMU1 main loop"; }
 
     static QEMUClockType toQemuClockType(ClockType clock) {
-        static_assert((int) QEMU_CLOCK_HOST == (int) BaseLooper::ClockType::kHost &&
-                      (int) QEMU_CLOCK_VIRTUAL == (int) BaseLooper::ClockType::kVirtual &&
-                      (int) QEMU_CLOCK_REALTIME == (int) BaseLooper::ClockType::kRealtime,
-                      "Values in the Looper::ClockType enumeration are out of sync with "
-                              "QEMUClockType");
+        static_assert(
+                static_cast<int>(QEMU_CLOCK_HOST) ==
+                                static_cast<int>(
+                                        BaseLooper::ClockType::kHost) &&
+                        static_cast<int>(QEMU_CLOCK_VIRTUAL) ==
+                                static_cast<int>(
+                                        BaseLooper::ClockType::kVirtual) &&
+                        static_cast<int>(QEMU_CLOCK_REALTIME) ==
+                                static_cast<int>(
+                                        BaseLooper::ClockType::kRealtime),
+                "Values in the Looper::ClockType enumeration are out of sync "
+                "with "
+                "QEMUClockType");
 
         return static_cast<QEMUClockType>(clock);
     }
@@ -92,24 +100,22 @@ public:
                 BaseFdWatch::Callback callback,
                 void* opaque) : BaseFdWatch(looper, fd, callback, opaque) {}
 
-        virtual ~FdWatch() {
+        ~FdWatch() override {
             clearPending();
-            qemu_set_fd_handler(mFd, NULL, NULL, NULL);
+            qemu_set_fd_handler(mFd, nullptr, nullptr, nullptr);
         }
 
-        virtual void addEvents(unsigned events) {
+        void addEvents(unsigned events) override {
             events &= kEventMask;
             updateEvents(mWantedEvents | events);
         }
 
-        virtual void removeEvents(unsigned events) {
+        void removeEvents(unsigned events) override {
             events &= kEventMask;
             updateEvents(mWantedEvents & ~events);
         }
 
-        virtual unsigned poll() const {
-            return mPendingEvents;
-        }
+        unsigned poll() const override { return mPendingEvents; }
 
         bool isPending() const {
             return mPendingEvents != 0U;
@@ -124,8 +130,8 @@ public:
 
     private:
         void updateEvents(unsigned events) {
-            IOHandler* cbRead = (events & kEventRead) ? handleRead : NULL;
-            IOHandler* cbWrite = (events & kEventWrite) ? handleWrite : NULL;
+            IOHandler* cbRead = (events & kEventRead) ? handleRead : nullptr;
+            IOHandler* cbWrite = (events & kEventWrite) ? handleWrite : nullptr;
             qemu_set_fd_handler(mFd, cbRead, cbWrite, this);
             mWantedEvents = events;
         }
@@ -146,13 +152,13 @@ public:
 
         // Called by QEMU on a read i/o event. |opaque| is a FdWatch handle.
         static void handleRead(void* opaque) {
-            FdWatch* watch = static_cast<FdWatch*>(opaque);
+            auto* watch = static_cast<FdWatch*>(opaque);
             watch->setPending(kEventRead);
         }
 
         // Called by QEMU on a write i/o event. |opaque| is a FdWatch handle.
         static void handleWrite(void* opaque) {
-            FdWatch* watch = static_cast<FdWatch*>(opaque);
+            auto* watch = static_cast<FdWatch*>(opaque);
             watch->setPending(kEventWrite);
         }
 
@@ -160,9 +166,9 @@ public:
         unsigned mPendingEvents = 0;
     };
 
-    virtual BaseFdWatch* createFdWatch(int fd,
-                                       BaseFdWatch::Callback callback,
-                                       void* opaque) {
+    BaseFdWatch* createFdWatch(int fd,
+                               BaseFdWatch::Callback callback,
+                               void* opaque) override {
         ::android::base::socketSetNonBlocking(fd);
         return new FdWatch(this, fd, callback, opaque);
     }
@@ -174,20 +180,18 @@ public:
     public:
         Timer(QemuLooper* looper,
               BaseTimer::Callback callback,
-              void* opaque, ClockType clock) :
-                    BaseTimer(looper, callback, opaque, clock),
-                    mTimer(NULL) {
+              void* opaque,
+              ClockType clock)
+            : BaseTimer(looper, callback, opaque, clock), mTimer(nullptr) {
             mTimer = ::timer_new(QemuLooper::toQemuClockType(mClockType),
                                  SCALE_MS,
                                  qemuTimerCallbackAdapter,
                                  this);
         }
 
-        ~Timer() {
-            ::timer_free(mTimer);
-        }
+        ~Timer() override { ::timer_free(mTimer); }
 
-        virtual void startRelative(Duration timeout_ms) {
+        void startRelative(Duration timeout_ms) override {
             if (timeout_ms == kDurationInfinite) {
                 timer_del(mTimer);
             } else {
@@ -197,7 +201,7 @@ public:
             }
         }
 
-        virtual void startAbsolute(Duration deadline_ms) {
+        void startAbsolute(Duration deadline_ms) override {
             if (deadline_ms == kDurationInfinite) {
                 timer_del(mTimer);
             } else {
@@ -205,21 +209,17 @@ public:
             }
         }
 
-        virtual void stop() {
-            ::timer_del(mTimer);
-        }
+        void stop() override { ::timer_del(mTimer); }
 
-        virtual bool isActive() const {
-            return timer_pending(mTimer);
-        }
+        bool isActive() const override { return timer_pending(mTimer); }
 
-        void save(android::base::Stream* stream) const {
+        void save(android::base::Stream* stream) const override {
             timer_put(
                 reinterpret_cast<android::qemu::QemuFileStream*>(stream)->file(),
                 mTimer);
         }
 
-        void load(android::base::Stream* stream) {
+        void load(android::base::Stream* stream) override {
             timer_get(
                 reinterpret_cast<android::qemu::QemuFileStream*>(stream)->file(),
                 mTimer);
@@ -227,15 +227,16 @@ public:
 
     private:
         static void qemuTimerCallbackAdapter(void* opaque) {
-            Timer* timer = static_cast<Timer*>(opaque);
+            auto* timer = static_cast<Timer*>(opaque);
             timer->mCallback(timer->mOpaque, timer);
         }
 
         QEMUTimer* mTimer;
     };
 
-    virtual BaseTimer* createTimer(BaseTimer::Callback callback,
-                                   void* opaque, ClockType clock) {
+    BaseTimer* createTimer(BaseTimer::Callback callback,
+                           void* opaque,
+                           ClockType clock) override {
         return new QemuLooper::Timer(this, callback, opaque, clock);
     }
 
@@ -249,7 +250,7 @@ public:
             : BaseLooper::Task(looper, std::move(callback))
             , mBottomHalf(qemu_bh_new(&Task::handleBottomHalf, this)) {}
 
-        ~Task() {
+        ~Task() override {
             cancel();
             qemu_bh_delete(mBottomHalf);
         }
@@ -298,26 +299,24 @@ public:
     //  L O O P E R
     //
 
-    virtual Duration nowMs(ClockType clockType) {
+    Duration nowMs(ClockType clockType) override {
         return qemu_clock_get_ms(toQemuClockType(clockType));
     }
 
-    virtual DurationNs nowNs(ClockType clockType) {
+    DurationNs nowNs(ClockType clockType) override {
         return qemu_clock_get_ns(toQemuClockType(clockType));
     }
 
-    virtual int runWithDeadlineMs(Duration deadline_ms) {
+    int runWithDeadlineMs(Duration deadline_ms) override {
         CHECK(false) << "User cannot call looper_run on a QEMU event loop";
         errno = ENOSYS;
         return -1;
     }
 
-    virtual void forceQuit() {
-        qemu_system_shutdown_request();
-    }
+    void forceQuit() override { qemu_system_shutdown_request(); }
 
 private:
-    typedef std::list<FdWatch*> FdWatchList;
+    using FdWatchList = std::list<FdWatch*>;
     typedef std::unordered_map<FdWatch*, FdWatchList::iterator> FdWatchSet;
 
     static inline QemuLooper* asQemuLooper(BaseLooper* looper) {
@@ -350,7 +349,7 @@ private:
     // Called by QEMU as soon as the main loop has finished processed
     // I/O events. Used to look at pending watches and fire them.
     static void handleBottomHalf(void* opaque) {
-        QemuLooper* looper = reinterpret_cast<QemuLooper*>(opaque);
+        auto* looper = reinterpret_cast<QemuLooper*>(opaque);
         while (!looper->mPendingFdWatches.empty()) {
             FdWatch* watch = looper->mPendingFdWatches.front();
             looper->delPendingFdWatch(watch);

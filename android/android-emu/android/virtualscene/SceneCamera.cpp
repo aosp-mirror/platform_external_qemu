@@ -18,6 +18,7 @@
 #include "android/hw-sensors.h"
 #include "android/utils/debug.h"
 
+#include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -63,9 +64,10 @@ static glm::mat4 poseToOpenGl(glm::quat rotation, glm::vec3 translation) {
 SceneCamera::SceneCamera() {
     setAspectRatio(kDefaultAspectRatio);
 
-    const glm::mat4 openGlFromSensors = poseToOpenGl(
-            glm::quat(sqrt(2.0f) / 2.0f, 0.0f, 0.0f, sqrt(2.0f) / 2.0f),
-            glm::vec3(-0.03f, -0.06f, 0.002f));
+    const glm::mat4 openGlFromSensors =
+            poseToOpenGl(glm::quat(std::sqrt(2.0f) / 2.0f, 0.0f, 0.0f,
+                                   std::sqrt(2.0f) / 2.0f),
+                         glm::vec3(-0.03f, -0.06f, 0.002f));
 
     const glm::mat4 cameraFromOpenGl = glm::mat4(1.0f,  0.0f, 0.0f, 0.0f,
                                                  0.0f, -1.0f, 0.0f, 0.0f,

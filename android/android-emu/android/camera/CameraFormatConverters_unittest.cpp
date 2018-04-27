@@ -111,8 +111,7 @@ void PrintTo(const vector<uint8_t>& vec, ostream* os) {
 
     *os << '{';
     size_t count = 0;
-    for (vector<uint8_t>::const_iterator it = vec.begin(); it != vec.end();
-         ++it, ++count) {
+    for (auto it = vec.begin(); it != vec.end(); ++it, ++count) {
         if (count > 0) {
             *os << ", ";
         }
@@ -132,7 +131,7 @@ void PrintTo(const vector<uint8_t>& vec, ostream* os) {
 
     os->flags(origFlags);
 }
-}
+}  // namespace std
 
 static size_t bufferSize(uint32_t format, int width, int height) {
     size_t size = 0;
@@ -155,7 +154,7 @@ static std::vector<uint8_t> generateFramebuffer(uint32_t format,
                                                 uint8_t g,
                                                 uint8_t b) {
     uint32_t argbColor;
-    uint8_t* rgbPtr = reinterpret_cast<uint8_t*>(&argbColor);
+    auto* rgbPtr = reinterpret_cast<uint8_t*>(&argbColor);
     rgbPtr[0] = a;
     rgbPtr[1] = r;
     rgbPtr[2] = g;
@@ -167,7 +166,7 @@ static std::vector<uint8_t> generateFramebuffer(uint32_t format,
     std::vector<uint8_t> dest(destSize);
 
     // Fill src with the argbColor
-    uint32_t* src32 = reinterpret_cast<uint32_t*>(src.data());
+    auto* src32 = reinterpret_cast<uint32_t*>(src.data());
     for (size_t i = 0; i < srcSize / 4; ++i) {
         src32[i] = argbColor;
     }

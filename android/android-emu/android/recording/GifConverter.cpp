@@ -54,18 +54,18 @@ namespace {
 
 class GifConverterImpl {
 public:
-    explicit GifConverterImpl(android::base::StringView inFilename,
-                              android::base::StringView outFilename,
+    explicit GifConverterImpl(const android::base::StringView& inFilename,
+                              const android::base::StringView& outFilename,
                               uint32_t bitrate);
     bool run();
 
 private:
-    bool initialize(android::base::StringView inFilename,
-                    android::base::StringView outFilename,
+    bool initialize(const android::base::StringView& inFilename,
+                    const android::base::StringView& outFilename,
                     uint32_t bitrate);
 
-    bool initInputContext(android::base::StringView inFilename);
-    bool initOutputContext(android::base::StringView outFilename,
+    bool initInputContext(const android::base::StringView& inFilename);
+    bool initOutputContext(const android::base::StringView& outFilename,
                            uint32_t bitrate);
     bool initConversionContext();
 
@@ -85,14 +85,14 @@ private:
     int mVideoStreamIndex = -1;
 };
 
-GifConverterImpl::GifConverterImpl(android::base::StringView inFilename,
-                                   android::base::StringView outFilename,
+GifConverterImpl::GifConverterImpl(const android::base::StringView& inFilename,
+                                   const android::base::StringView& outFilename,
                                    uint32_t bitrate) {
     mIsValid = initialize(inFilename, outFilename, bitrate);
 }
 
-bool GifConverterImpl::initialize(android::base::StringView inFilename,
-                                  android::base::StringView outFilename,
+bool GifConverterImpl::initialize(const android::base::StringView& inFilename,
+                                  const android::base::StringView& outFilename,
                                   uint32_t bitrate) {
     // Initialize libavcodec, and register all codecs and formats. does not hurt
     // to register multiple times
@@ -101,7 +101,8 @@ bool GifConverterImpl::initialize(android::base::StringView inFilename,
            initOutputContext(outFilename, bitrate);
 }
 
-bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
+bool GifConverterImpl::initInputContext(
+        const android::base::StringView& inFilename) {
     int ret;
 
     // open the input video file
@@ -114,7 +115,7 @@ bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
     mInputContext = makeAVScopedPtr(ifmt_ctx);
 
     // Open the codec for the input file.
-    if ((ret = avformat_find_stream_info(mInputContext.get(), NULL)) < 0) {
+    if ((ret = avformat_find_stream_info(mInputContext.get(), nullptr)) < 0) {
         LOG(ERROR) << "Cannot find stream information";
         return false;
     }
@@ -129,8 +130,9 @@ bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
         if (codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
             codec_ctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
             // Open decoder
-            ret = avcodec_open2(
-                    codec_ctx, avcodec_find_decoder(codec_ctx->codec_id), NULL);
+            ret = avcodec_open2(codec_ctx,
+                                avcodec_find_decoder(codec_ctx->codec_id),
+                                nullptr);
             if (ret < 0) {
                 LOG(ERROR) << "Failed to open decoder for stream #" << i;
                 return false;
@@ -148,8 +150,9 @@ bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
     return true;
 }
 
-bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
-                                         uint32_t bitrate) {
+bool GifConverterImpl::initOutputContext(
+        const android::base::StringView& outFilename,
+        uint32_t bitrate) {
     // open the output gif file
     AVFormatContext* ofmt_ctx = nullptr;
     avformat_alloc_output_context2(&ofmt_ctx, nullptr, nullptr,
@@ -162,7 +165,7 @@ bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
     mOutputContext = makeAVScopedPtr(ofmt_ctx);
 
     AVStream* out_stream = avformat_new_stream(mOutputContext.get(), nullptr);
-    if (out_stream == NULL) {
+    if (out_stream == nullptr) {
         LOG(ERROR) << "Failed allocating output stream";
         return false;
     }
@@ -189,15 +192,16 @@ bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
     enc_ctx->pix_fmt = encoder->pix_fmts[0];
     enc_ctx->time_base = mInVideoCodecCxt->time_base;
 
-    int ret = avcodec_open2(enc_ctx, encoder, NULL);
+    int ret = avcodec_open2(enc_ctx, encoder, nullptr);
     if (ret < 0) {
         LOG(ERROR) << "Cannot open video encoder for GIF";
         return false;
     }
     mOutVideoCodecCxt = enc_ctx;
 
-    if (mOutputContext->oformat->flags & AVFMT_GLOBALHEADER)
+    if (mOutputContext->oformat->flags & AVFMT_GLOBALHEADER) {
         enc_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+    }
 
     av_dump_format(mOutputContext.get(), 0, outFilename.c_str(), 1);
 
@@ -260,7 +264,7 @@ bool GifConverterImpl::run() {
     // read all packets, decode, convert, then encode to gif format
     int64_t last_pts = -1;
     int got_frame;
-    AVPacket packet = {0};
+    AVPacket packet = {nullptr};
     while (getNextVideoPacket(&packet)) {
         auto pPacket = makeAVScopedPtr(&packet);
         // for GIF, it seems we can't use a shared frame, so we have to alloc
@@ -370,19 +374,22 @@ int GifConverterImpl::encodeWriteFrame(AVFrame* filt_frame, int* got_frame) {
     int got_frame_local;
     AVPacket enc_pkt;
 
-    if (!got_frame)
+    if (!got_frame) {
         got_frame = &got_frame_local;
+    }
 
-    enc_pkt.data = NULL;
+    enc_pkt.data = nullptr;
     enc_pkt.size = 0;
     av_init_packet(&enc_pkt);
     ret = avcodec_encode_video2(
             mOutputContext->streams[mVideoStreamIndex]->codec, &enc_pkt,
             filt_frame, got_frame);
-    if (ret < 0)
+    if (ret < 0) {
         return ret;
-    if (!(*got_frame))
+    }
+    if (!(*got_frame)) {
         return 0;
+    }
 
     // prepare packet for muxing
     enc_pkt.stream_index = mVideoStreamIndex;
@@ -406,24 +413,27 @@ int GifConverterImpl::flushEncoder() {
 
     if (!(mOutputContext->streams[mVideoStreamIndex]
                   ->codec->codec->capabilities &
-          AV_CODEC_CAP_DELAY))
+          AV_CODEC_CAP_DELAY)) {
         return 0;
+    }
 
-    while (1) {
-        av_log(NULL, AV_LOG_INFO, "Flushing stream #%u encoder\n",
+    while (true) {
+        av_log(nullptr, AV_LOG_INFO, "Flushing stream #%u encoder\n",
                mVideoStreamIndex);
         ret = encodeWriteFrame(nullptr, &got_frame);
-        if (ret < 0)
+        if (ret < 0) {
             break;
-        if (!got_frame)
+        }
+        if (!got_frame) {
             return 0;
+        }
     }
     return ret;
 }
 }  // namespace
 
-bool GifConverter::toAnimatedGif(android::base::StringView inFilename,
-                                 android::base::StringView outFilename,
+bool GifConverter::toAnimatedGif(const android::base::StringView& inFilename,
+                                 const android::base::StringView& outFilename,
                                  uint32_t bitrate) {
     GifConverterImpl converter(inFilename, outFilename, bitrate);
     return converter.run();

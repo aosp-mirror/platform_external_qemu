@@ -329,9 +329,9 @@ void Decoder::DecodeLoadStore(const Instruction* instr) {
                 break;
               }
               case 2: {
-                // TODO: VisitLoadStoreRegisterOffsetUnpriv.
-                VisitUnimplemented(instr);
-                break;
+                  // TODO(??): VisitLoadStoreRegisterOffsetUnpriv.
+                  VisitUnimplemented(instr);
+                  break;
               }
               case 3: {
                 if (instr->Mask(0xC4C00000) == 0xC0800000) {

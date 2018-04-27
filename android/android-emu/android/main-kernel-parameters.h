@@ -15,7 +15,7 @@
 #include "android/utils/compiler.h"
 #include "android/opengl/emugl_config.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 ANDROID_BEGIN_HEADER
 

@@ -278,8 +278,7 @@ bool UniformValue::CopyElementFrom(int dst_idx, const UniformValue& src,
 template<typename T>
 void UniformValue::StoreBoolElementTo(T* dst, int idx) const {
   LOG_ALWAYS_FATAL_IF(data_type_ != DATA_BOOL);
-  const GLint* src = reinterpret_cast<const GLint*>(
-      value_ + GetArrayPos(idx));
+  const auto* src = reinterpret_cast<const GLint*>(value_ + GetArrayPos(idx));
   for (int i = 0; i < components_; ++i) {
     dst[i] = (src[i] != 0);
   }
@@ -288,7 +287,7 @@ void UniformValue::StoreBoolElementTo(T* dst, int idx) const {
 template<typename T>
 void UniformValue::SetBoolElementFrom(int idx, const T* src) {
   LOG_ALWAYS_FATAL_IF(data_type_ != DATA_BOOL);
-  GLint* dst = reinterpret_cast<GLint*>(value_ + GetArrayPos(idx));
+  auto* dst = reinterpret_cast<GLint*>(value_ + GetArrayPos(idx));
   for (int i = 0; i < components_; ++i) {
     dst[i] = (src[i] != 0);
   }
@@ -334,8 +333,8 @@ void UniformValue::SetOnProgram(GlesContext* ctx,
   if (!array_size_) {
     return;
   }
-  const GLint* int_value = reinterpret_cast<const GLint*>(value_);
-  const GLfloat* float_value = reinterpret_cast<const GLfloat*>(value_);
+  const auto* int_value = reinterpret_cast<const GLint*>(value_);
+  const auto* float_value = reinterpret_cast<const GLfloat*>(value_);
   switch (type_) {
     case GL_FLOAT:
       PASS_THROUGH(ctx, Uniform1fv, location, array_size_, float_value);

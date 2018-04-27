@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 #include "GLESv2Validate.h"
-#include <string.h>
+#include <cstring>
 
 #define LIST_VALID_TEXFORMATS(f) \
     f(GL_DEPTH_COMPONENT) \
@@ -442,7 +442,7 @@ bool GLESv2Validate::precisionType(GLenum type){
 }
 
 bool GLESv2Validate::arrayIndex(GLEScontext * ctx,GLuint index) {
-    return index < (GLuint)ctx->getCaps()->maxVertexAttribs;
+    return index < static_cast<GLuint>(ctx->getCaps()->maxVertexAttribs);
 }
 
 #define GL_RED                              0x1903
@@ -459,9 +459,10 @@ bool GLESv2Validate::arrayIndex(GLEScontext * ctx,GLuint index) {
 bool GLESv2Validate::pixelType(GLEScontext * ctx,GLenum type) {
     int glesMajorVersion = ctx->getMajorVersion();
     if (glesMajorVersion < 3) {
-        if(type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT
-                || type == GL_UNSIGNED_INT_10F_11F_11F_REV)
+        if (type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT ||
+            type == GL_UNSIGNED_INT_10F_11F_11F_REV) {
             return true;
+        }
 
         return GLESvalidate::pixelType(ctx, type);
     }
@@ -640,8 +641,9 @@ bool GLESv2Validate::pixelSizedFrmt(GLEScontext* ctx, GLenum internalformat,
         }
     }
 
-#define VALIDATE_FORMAT_COMBINATION(x, y, z) \
-    if (internalformat == x && format == y && type == z) return true; \
+#define VALIDATE_FORMAT_COMBINATION(x, y, z)                   \
+    if (internalformat == (x) && format == (y) && type == (z)) \
+        return true;
 
     LIST_VALID_TEXFORMAT_COMBINATIONS(VALIDATE_FORMAT_COMBINATION)
 
@@ -668,11 +670,11 @@ bool GLESv2Validate::isCompressedFormat(GLenum format) {
 
 void GLESv2Validate::getCompatibleFormatTypeForInternalFormat(GLenum internalformat, GLenum* format_out, GLenum* type_out) {
 #define RETURN_COMPATIBLE_FORMAT(x, y, z) \
-    if (internalformat == x) { \
-        *format_out = y; \
-        *type_out = z; \
-        return; \
-    } \
+    if (internalformat == (x)) {          \
+        *format_out = y;                  \
+        *type_out = z;                    \
+        return;                           \
+    }
 
     LIST_VALID_TEXFORMAT_COMBINATIONS(RETURN_COMPATIBLE_FORMAT)
 }

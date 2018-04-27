@@ -23,7 +23,7 @@
 // types.
 #include "android/utils/system.h"
 
-#include <string.h>
+#include <cstring>
 
 using android::base::System;
 

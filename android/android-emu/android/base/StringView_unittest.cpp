@@ -71,7 +71,7 @@ TEST(StringView, InitConstexpr) {
 TEST(StringView, InitWithStringView) {
     static const char kString[] = "Hello2";
     StringView view1(kString);
-    StringView view2(view1);
+    const StringView& view2(view1);
     EXPECT_FALSE(view2.empty());
     EXPECT_STREQ(kString, view2.str());
     EXPECT_EQ(strlen(kString), view2.size());

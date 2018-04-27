@@ -15,16 +15,16 @@
 #include "android/base/sockets/SocketDrainer.h"
 #include "android/base/sockets/SocketUtils.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 using namespace android::base;
 
 namespace {
 
-typedef ::Looper CLooper;
-typedef ::android::base::Looper BaseLooper;
+using CLooper = ::Looper;
+using BaseLooper = ::android::base::Looper;
 
-android::base::SocketDrainer *s_socket_drainer = NULL;
+android::base::SocketDrainer* s_socket_drainer = nullptr;
 
 }  // namespace
 
@@ -53,6 +53,6 @@ void socket_drainer_drain_and_close(int socketFd) {
 void socket_drainer_stop() {
     if (s_socket_drainer) {
         delete s_socket_drainer;
-        s_socket_drainer = 0;
+        s_socket_drainer = nullptr;
     }
 }

@@ -33,8 +33,8 @@
 
 #include <vector>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -339,7 +339,7 @@ union SockAddressStorage {
             if (!addr.initFromBsd(r->ai_addr, r->ai_addrlen)) {
                 continue;
             }
-            result.emplace_back(std::move(addr));
+            result.emplace_back(addr);
         }
         ::freeaddrinfo(res);
 
@@ -396,11 +396,8 @@ int socketSetOption(int socket, int  domain, int option, int  _flag) {
     int flag = _flag;
 #endif
     errno = 0;
-    int ret = ::setsockopt(socket,
-                           domain,
-                           option,
-                           (const char*)&flag,
-                           sizeof(flag));
+    int ret = ::setsockopt(socket, domain, option,
+                           reinterpret_cast<const char*>(&flag), sizeof(flag));
     ON_SOCKET_ERROR_RETURN_M1(ret);
     return 0;
 }
@@ -632,7 +629,8 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
         (errno == EWOULDBLOCK ||
          errno == EAGAIN ||
          errno == EINPROGRESS)) {
-        int selectRes = HANDLE_EINTR(::select(fd + 1, 0, &my_set, 0, &tv));
+        int selectRes =
+                HANDLE_EINTR(::select(fd + 1, nullptr, &my_set, nullptr, &tv));
         if (selectRes > 0) {
             socketSetBlocking(fd);
             return s.release();
@@ -665,9 +663,10 @@ int socketTcp6LoopbackClient(int port) {
 int socketAcceptAny(int serverSocket) {
     errno = 0;
 #ifdef __linux__
-    int s = HANDLE_EINTR(::accept4(serverSocket, NULL, NULL, SOCK_CLOEXEC));
+    int s = HANDLE_EINTR(
+            ::accept4(serverSocket, nullptr, nullptr, SOCK_CLOEXEC));
 #else  // !__linux__
-    int s = HANDLE_EINTR(::accept(serverSocket, NULL, NULL));
+    int s = HANDLE_EINTR(::accept(serverSocket, nullptr, nullptr));
     fdSetCloexec(s);
 #endif  // !__linux__
     ON_SOCKET_ERROR_RETURN_M1(s);
@@ -749,7 +748,7 @@ int socketCreateTcp6() {
 
 int socketGetPort(int socket) {
     SockAddressStorage addr;
-    socklen_t addrLen = static_cast<socklen_t>(sizeof(addr));
+    auto addrLen = static_cast<socklen_t>(sizeof(addr));
     if (getsockname(socket, &addr.generic, &addrLen) < 0) {
         DPLOG(ERROR) << "Could not get socket name!\n";
         return -1;
@@ -759,7 +758,7 @@ int socketGetPort(int socket) {
 
 int socketGetPeerPort(int socket) {
     SockAddressStorage addr;
-    socklen_t addrLen = static_cast<socklen_t>(sizeof(addr));
+    auto addrLen = static_cast<socklen_t>(sizeof(addr));
     if (getpeername(socket, &addr.generic, &addrLen) < 0) {
         DPLOG(ERROR) << "Could not get socket peer name!";
         return -1;

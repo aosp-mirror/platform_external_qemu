@@ -520,7 +520,7 @@ GL_APICALL void GL_APIENTRY glViewport (GLint x, GLint y, GLsizei width, GLsizei
 
 #ifndef GL_ES_VERSION_3_0
 #define GL_ES_VERSION_3_0 1
-typedef unsigned short GLhalf;
+using GLhalf = unsigned short;
 #define GL_READ_BUFFER                    0x0C02
 #define GL_UNPACK_ROW_LENGTH              0x0CF2
 #define GL_UNPACK_SKIP_ROWS               0x0CF3

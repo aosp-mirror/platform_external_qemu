@@ -29,17 +29,19 @@ class MatrixStack {
   }
 
   bool Push() {
-    if (stack_.size() >= kMaxDepth)
-      return false;
-    stack_.push(stack_.top());
-    return true;
+      if (stack_.size() >= kMaxDepth) {
+          return false;
+      }
+      stack_.push(stack_.top());
+      return true;
   }
 
   bool Pop() {
-    if (stack_.size() <= 1)
-      return false;
-    stack_.pop();
-    return true;
+      if (stack_.size() <= 1) {
+          return false;
+      }
+      stack_.pop();
+      return true;
   }
 
   const emugl::Matrix& GetTop() const {
@@ -57,8 +59,8 @@ class MatrixStack {
  private:
   std::stack<emugl::Matrix> stack_;
 
-  MatrixStack(const MatrixStack&);
-  MatrixStack& operator=(const MatrixStack&);
+  MatrixStack(const MatrixStack&) = delete;
+  MatrixStack& operator=(const MatrixStack&) = delete;
 };
 
 #endif  // GRAPHICS_TRANSLATION_GLES_MATRIX_STACK_H_

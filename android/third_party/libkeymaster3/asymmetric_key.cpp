@@ -114,23 +114,28 @@ static keymaster_error_t add_key_usage_extension(const AuthorizationSet& tee_enf
 keymaster_error_t AsymmetricKey::formatted_key_material(keymaster_key_format_t format,
                                                         UniquePtr<uint8_t[]>* material,
                                                         size_t* size) const {
-    if (format != KM_KEY_FORMAT_X509)
+    if (format != KM_KEY_FORMAT_X509) {
         return KM_ERROR_UNSUPPORTED_KEY_FORMAT;
+    }
 
-    if (material == NULL || size == NULL)
+    if (material == NULL || size == NULL) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     EVP_PKEY_Ptr pkey(EVP_PKEY_new());
-    if (!InternalToEvp(pkey.get()))
+    if (!InternalToEvp(pkey.get())) {
         return TranslateLastOpenSslError();
+    }
 
     int key_data_length = i2d_PUBKEY(pkey.get(), NULL);
-    if (key_data_length <= 0)
+    if (key_data_length <= 0) {
         return TranslateLastOpenSslError();
+    }
 
     material->reset(new (std::nothrow) uint8_t[key_data_length]);
-    if (material->get() == NULL)
+    if (material->get() == NULL) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     uint8_t* tmp = material->get();
     if (i2d_PUBKEY(pkey.get(), &tmp) != key_data_length) {
@@ -149,25 +154,30 @@ static keymaster_error_t build_attestation_extension(const AuthorizationSet& att
                                                      X509_EXTENSION_Ptr* extension) {
     ASN1_OBJECT_Ptr oid(
         OBJ_txt2obj(kAttestionRecordOid, 1 /* accept numerical dotted string form only */));
-    if (!oid.get())
+    if (!oid.get()) {
         return TranslateLastOpenSslError();
+    }
 
     UniquePtr<uint8_t[]> attest_bytes;
     size_t attest_bytes_len;
     keymaster_error_t error = build_attestation_record(attest_params, sw_enforced, tee_enforced,
                                                        context, &attest_bytes, &attest_bytes_len);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     ASN1_OCTET_STRING_Ptr attest_str(ASN1_OCTET_STRING_new());
     if (!attest_str.get() ||
-        !ASN1_OCTET_STRING_set(attest_str.get(), attest_bytes.get(), attest_bytes_len))
+        !ASN1_OCTET_STRING_set(attest_str.get(), attest_bytes.get(),
+                               attest_bytes_len)) {
         return TranslateLastOpenSslError();
+    }
 
     extension->reset(
         X509_EXTENSION_create_by_OBJ(nullptr, oid.get(), 0 /* not critical */, attest_str.get()));
-    if (!extension->get())
+    if (!extension->get()) {
         return TranslateLastOpenSslError();
+    }
 
     return KM_ERROR_OK;
 }
@@ -188,8 +198,9 @@ static bool add_attestation_extension(const AuthorizationSet& attest_params,
     X509_EXTENSION_Ptr attest_extension;
     *error = build_attestation_extension(attest_params, tee_enforced, sw_enforced, context,
                                          &attest_extension);
-    if (*error != KM_ERROR_OK)
+    if (*error != KM_ERROR_OK) {
         return false;
+    }
 
     if (!X509_add_ext(certificate, attest_extension.get() /* Don't release; copied */,
                       -1 /* insert at end */)) {
@@ -202,12 +213,14 @@ static bool add_attestation_extension(const AuthorizationSet& attest_params,
 
 static keymaster_error_t get_certificate_blob(X509* certificate, keymaster_blob_t* blob) {
     int len = i2d_X509(certificate, nullptr);
-    if (len < 0)
+    if (len < 0) {
         return TranslateLastOpenSslError();
+    }
 
     uint8_t* data = new uint8_t[len];
-    if (!data)
+    if (!data) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     uint8_t* p = data;
     i2d_X509(certificate, &p);
@@ -221,8 +234,9 @@ static keymaster_error_t get_certificate_blob(X509* certificate, keymaster_blob_
 static bool allocate_cert_chain(size_t entry_count, keymaster_cert_chain_t* chain,
                                 keymaster_error_t* error) {
     if (chain->entries) {
-        for (size_t i = 0; i < chain->entry_count; ++i)
+        for (size_t i = 0; i < chain->entry_count; ++i) {
             delete[] chain->entries[i].data;
+        }
         delete[] chain->entries;
     }
 
@@ -243,11 +257,13 @@ static bool copy_attestation_chain(const KeymasterContext& context,
 
     UniquePtr<keymaster_cert_chain_t, CertificateChainDelete> attest_key_chain(
         context.AttestationChain(sign_algorithm, error));
-    if (!attest_key_chain.get())
+    if (!attest_key_chain.get()) {
         return false;
+    }
 
-    if (!allocate_cert_chain(attest_key_chain->entry_count + 1, chain, error))
+    if (!allocate_cert_chain(attest_key_chain->entry_count + 1, chain, error)) {
         return false;
+    }
 
     chain->entries[0].data = nullptr;  // Leave empty for the leaf certificate.
     chain->entries[1].data_length = 0;
@@ -268,42 +284,58 @@ keymaster_error_t AsymmetricKey::GenerateAttestation(const KeymasterContext& con
 
     keymaster_algorithm_t sign_algorithm;
     if ((!sw_enforced.GetTagValue(TAG_ALGORITHM, &sign_algorithm) &&
-         !tee_enforced.GetTagValue(TAG_ALGORITHM, &sign_algorithm)))
+         !tee_enforced.GetTagValue(TAG_ALGORITHM, &sign_algorithm))) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
-    if ((sign_algorithm != KM_ALGORITHM_RSA && sign_algorithm != KM_ALGORITHM_EC))
+    if ((sign_algorithm != KM_ALGORITHM_RSA &&
+         sign_algorithm != KM_ALGORITHM_EC)) {
         return KM_ERROR_INCOMPATIBLE_ALGORITHM;
+    }
 
     EVP_PKEY_Ptr pkey(EVP_PKEY_new());
-    if (!InternalToEvp(pkey.get()))
+    if (!InternalToEvp(pkey.get())) {
         return TranslateLastOpenSslError();
+    }
 
     X509_Ptr certificate(X509_new());
-    if (!certificate.get())
+    if (!certificate.get()) {
         return TranslateLastOpenSslError();
+    }
 
-    if (!X509_set_version(certificate.get(), 2 /* version 3, but zero-based */))
+    if (!X509_set_version(certificate.get(),
+                          2 /* version 3, but zero-based */)) {
         return TranslateLastOpenSslError();
+    }
 
     ASN1_INTEGER_Ptr serialNumber(ASN1_INTEGER_new());
     if (!serialNumber.get() || !ASN1_INTEGER_set(serialNumber.get(), 1) ||
-        !X509_set_serialNumber(certificate.get(), serialNumber.get() /* Don't release; copied */))
+        !X509_set_serialNumber(
+                certificate.get(),
+                serialNumber.get() /* Don't release; copied */)) {
         return TranslateLastOpenSslError();
+    }
 
     X509_NAME_Ptr subjectName(X509_NAME_new());
     if (!subjectName.get() ||
-        !X509_NAME_add_entry_by_txt(subjectName.get(), "CN", MBSTRING_ASC,
-                                    reinterpret_cast<const uint8_t*>("Android Keystore Key"),
-                                    -1 /* len */, -1 /* loc */, 0 /* set */) ||
-        !X509_set_subject_name(certificate.get(), subjectName.get() /* Don't release; copied */))
+        !X509_NAME_add_entry_by_txt(
+                subjectName.get(), "CN", MBSTRING_ASC,
+                reinterpret_cast<const uint8_t*>("Android Keystore Key"),
+                -1 /* len */, -1 /* loc */, 0 /* set */) ||
+        !X509_set_subject_name(certificate.get(),
+                               subjectName.get() /* Don't release; copied */)) {
         return TranslateLastOpenSslError();
+    }
 
     ASN1_TIME_Ptr notBefore(ASN1_TIME_new());
     uint64_t activeDateTime = 0;
     authorizations().GetTagValue(TAG_ACTIVE_DATETIME, &activeDateTime);
-    if (!notBefore.get() || !ASN1_TIME_set(notBefore.get(), activeDateTime / 1000) ||
-        !X509_set_notBefore(certificate.get(), notBefore.get() /* Don't release; copied */))
+    if (!notBefore.get() ||
+        !ASN1_TIME_set(notBefore.get(), activeDateTime / 1000) ||
+        !X509_set_notBefore(certificate.get(),
+                            notBefore.get() /* Don't release; copied */)) {
         return TranslateLastOpenSslError();
+    }
 
     ASN1_TIME_Ptr notAfter(ASN1_TIME_new());
     uint64_t usageExpireDateTime = UINT64_MAX;
@@ -313,8 +345,10 @@ keymaster_error_t AsymmetricKey::GenerateAttestation(const KeymasterContext& con
     // 32 bits.
     time_t notAfterTime = min(static_cast<uint64_t>(UINT32_MAX), usageExpireDateTime / 1000);
     if (!notAfter.get() || !ASN1_TIME_set(notAfter.get(), notAfterTime) ||
-        !X509_set_notAfter(certificate.get(), notAfter.get() /* Don't release; copied */))
+        !X509_set_notAfter(certificate.get(),
+                           notAfter.get() /* Don't release; copied */)) {
         return TranslateLastOpenSslError();
+    }
 
     keymaster_error_t error = add_key_usage_extension(tee_enforced, sw_enforced, certificate.get());
     if (error != KM_ERROR_OK) {
@@ -325,12 +359,14 @@ keymaster_error_t AsymmetricKey::GenerateAttestation(const KeymasterContext& con
 
     if (!sign_key.get() ||  //
         !add_public_key(pkey.get(), certificate.get(), &error) ||
-        !add_attestation_extension(attest_params, tee_enforced, sw_enforced, context,
-                                   certificate.get(), &error))
+        !add_attestation_extension(attest_params, tee_enforced, sw_enforced,
+                                   context, certificate.get(), &error)) {
         return error;
+    }
 
-    if (!copy_attestation_chain(context, sign_algorithm, cert_chain, &error))
+    if (!copy_attestation_chain(context, sign_algorithm, cert_chain, &error)) {
         return error;
+    }
 
     // Copy subject key identifier from cert_chain->entries[1] as authority key_id.
     if (cert_chain->entry_count < 2) {
@@ -368,8 +404,9 @@ keymaster_error_t AsymmetricKey::GenerateAttestation(const KeymasterContext& con
         return TranslateLastOpenSslError();
     }
 
-    if (!X509_sign(certificate.get(), sign_key.get(), EVP_sha256()))
+    if (!X509_sign(certificate.get(), sign_key.get(), EVP_sha256())) {
         return TranslateLastOpenSslError();
+    }
 
     return get_certificate_blob(certificate.get(), &cert_chain->entries[0]);
 }
