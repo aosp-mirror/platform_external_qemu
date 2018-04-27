@@ -364,6 +364,7 @@ void TextureResize::resize(GLuint texture) {
 
     // First scale the horizontal dimension by rendering the input texture to a scaled framebuffer.
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);
+    s_gles2.glClear(GL_COLOR_BUFFER_BIT);
     s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight);
     s_gles2.glUseProgram(mFBWidth.program);
     s_gles2.glEnableVertexAttribArray(mFBWidth.aPosition);
@@ -385,6 +386,7 @@ void TextureResize::resize(GLuint texture) {
 
     // Secondly, scale the vertical dimension using the second framebuffer.
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);
+    s_gles2.glClear(GL_COLOR_BUFFER_BIT);
     s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight / mFactor);
     s_gles2.glUseProgram(mFBHeight.program);
     s_gles2.glEnableVertexAttribArray(mFBHeight.aPosition);
