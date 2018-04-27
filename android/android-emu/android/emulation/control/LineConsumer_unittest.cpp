@@ -15,13 +15,13 @@
 #include "android/emulation/control/LineConsumer.h"
 
 #include <gtest/gtest.h>
-#include <string.h>
+#include <cstring>
 
 using android::emulation::LineConsumer;
 
 TEST(CannedCallbacks, LineConsumerNullTest) {
     LineConsumer lineConsumer;
-    EXPECT_TRUE(lineConsumer.opaque() != NULL);
+    EXPECT_TRUE(lineConsumer.opaque() != nullptr);
     EXPECT_TRUE(lineConsumer.lines().empty());
 }
 

@@ -15,8 +15,8 @@
 */
 #pragma once
 
-#include <assert.h>
 #include <GLES/gl.h>
+#include <cassert>
 #include <memory>
 
 enum class NamedObjectType : short {
@@ -56,9 +56,9 @@ enum class ShaderProgramType : short {
 //          unsigned int shaderID = globalNameSpace.genName(genShader);
 
 struct GenNameInfo {
-    NamedObjectType m_type = (NamedObjectType)0;
+    NamedObjectType m_type = static_cast<NamedObjectType>(0);
     // only used for NamedObjectType::SHADER_OR_PROGRAM
-    ShaderProgramType m_shaderProgramType = (ShaderProgramType)0;
+    ShaderProgramType m_shaderProgramType = static_cast<ShaderProgramType>(0);
     // only used for NamedObjectType::SHADER_OR_PROGRAM, so far.
     GLuint m_existingGlobal = 0;
 
@@ -75,8 +75,7 @@ struct GenNameInfo {
         m_existingGlobal(existingGlobal) {}
 };
 
-
-typedef unsigned long long ObjectLocalName;
+using ObjectLocalName = unsigned long long;
 
 class GlobalNameSpace;
 
@@ -112,4 +111,4 @@ private:
     GlobalNameSpace *m_globalNameSpace;
 };
 
-typedef std::shared_ptr<NamedObject> NamedObjectPtr;
+using NamedObjectPtr = std::shared_ptr<NamedObject>;

@@ -22,8 +22,8 @@
 
 #include <gtest/gtest.h>
 
-#include <errno.h>
-#include <stdio.h>
+#include <cerrno>
+#include <cstdio>
 
 namespace android {
 namespace base {

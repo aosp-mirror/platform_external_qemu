@@ -28,21 +28,24 @@ bool  GLESvalidate::textureEnum(GLenum e,unsigned int maxTex) {
 
 bool GLESvalidate::pixelType(GLEScontext * ctx, GLenum type) {
     if ((ctx && ctx->getCaps()->GL_EXT_PACKED_DEPTH_STENCIL) &&
-       (type == GL_UNSIGNED_INT_24_8_OES) )
+        (type == GL_UNSIGNED_INT_24_8_OES)) {
         return true;
+    }
 
     if (ctx &&
-       (ctx->getCaps()->GL_ARB_HALF_FLOAT_PIXEL || ctx->getCaps()->GL_NV_HALF_FLOAT) &&
-       (type == GL_HALF_FLOAT_OES || type == GL_HALF_FLOAT))
+        (ctx->getCaps()->GL_ARB_HALF_FLOAT_PIXEL ||
+         ctx->getCaps()->GL_NV_HALF_FLOAT) &&
+        (type == GL_HALF_FLOAT_OES || type == GL_HALF_FLOAT)) {
         return true;
+    }
 
-    switch(type) {
-    case GL_UNSIGNED_BYTE:
-    case GL_UNSIGNED_SHORT_5_6_5:
-    case GL_UNSIGNED_SHORT_4_4_4_4:
-    case GL_UNSIGNED_SHORT_5_5_5_1:
-    case GL_FLOAT:
-        return true;
+    switch (type) {
+        case GL_UNSIGNED_BYTE:
+        case GL_UNSIGNED_SHORT_5_6_5:
+        case GL_UNSIGNED_SHORT_4_4_4_4:
+        case GL_UNSIGNED_SHORT_5_5_5_1:
+        case GL_FLOAT:
+            return true;
     }
     return false;
 }
@@ -59,17 +62,21 @@ bool GLESvalidate::pixelOp(GLenum format,GLenum type) {
 }
 
 bool GLESvalidate::pixelFrmt(GLEScontext* ctx ,GLenum format) {
-    if (ctx && ctx->getCaps()->GL_EXT_TEXTURE_FORMAT_BGRA8888 && format == GL_BGRA_EXT)
-      return true;
-    if (ctx && ctx->getCaps()->GL_EXT_PACKED_DEPTH_STENCIL && format == GL_DEPTH_STENCIL_OES)
-      return true;
-    switch(format) {
-    case GL_ALPHA:
-    case GL_RGB:
-    case GL_RGBA:
-    case GL_LUMINANCE:
-    case GL_LUMINANCE_ALPHA:
+    if (ctx && ctx->getCaps()->GL_EXT_TEXTURE_FORMAT_BGRA8888 &&
+        format == GL_BGRA_EXT) {
         return true;
+    }
+    if (ctx && ctx->getCaps()->GL_EXT_PACKED_DEPTH_STENCIL &&
+        format == GL_DEPTH_STENCIL_OES) {
+        return true;
+    }
+    switch (format) {
+        case GL_ALPHA:
+        case GL_RGB:
+        case GL_RGBA:
+        case GL_LUMINANCE:
+        case GL_LUMINANCE_ALPHA:
+            return true;
     }
     return false;
 }
@@ -186,9 +193,9 @@ bool GLESvalidate::renderbufferParams(GLenum pname){
 }
 
 bool GLESvalidate::texImgDim(GLsizei width,GLsizei height,int maxTexSize) {
-
- if( width < 0 || height < 0 || width > maxTexSize || height > maxTexSize)
-    return false;
- return isPowerOf2(width) && isPowerOf2(height);
+    if (width < 0 || height < 0 || width > maxTexSize || height > maxTexSize) {
+        return false;
+    }
+    return isPowerOf2(width) && isPowerOf2(height);
 }
 

@@ -36,7 +36,7 @@ struct TestData {
                 std::bind(&TestData::onConnection, this, std::placeholders::_1);
         mServer = AsyncSocketServer::createTcpLoopbackServer(mPort, callback,
                                                              mode, mLooper);
-        if (!mServer.get()) {
+        if (!mServer) {
             return false;
         }
         mPort = mServer->port();

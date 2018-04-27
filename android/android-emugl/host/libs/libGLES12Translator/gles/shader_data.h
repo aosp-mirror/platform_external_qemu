@@ -38,15 +38,15 @@ class ShaderData : public ObjectData {
   void Compile();
 
  protected:
-  virtual ~ShaderData();
+     ~ShaderData() override;
 
  private:
   ShaderVariantPtr shader_variant_;
 
-  ShaderData(const ShaderData&);
-  ShaderData& operator=(const ShaderData&);
+  ShaderData(const ShaderData&) = delete;
+  ShaderData& operator=(const ShaderData&) = delete;
 };
 
-typedef android::sp<ShaderData> ShaderDataPtr;
+using ShaderDataPtr = android::sp<ShaderData>;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_SHADER_DATA_H_

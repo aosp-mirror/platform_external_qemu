@@ -45,20 +45,23 @@ keymaster_error_t AsymmetricKeyFactory::LoadKey(const KeymasterKeyBlob& key_mate
                                                 UniquePtr<Key>* key) const {
     UniquePtr<AsymmetricKey> asymmetric_key;
     keymaster_error_t error = CreateEmptyKey(hw_enforced, sw_enforced, &asymmetric_key);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     const uint8_t* tmp = key_material.key_material;
     EVP_PKEY* pkey =
         d2i_PrivateKey(evp_key_type(), NULL /* pkey */, &tmp, key_material.key_material_size);
-    if (!pkey)
+    if (!pkey) {
         return TranslateLastOpenSslError();
+    }
     UniquePtr<EVP_PKEY, EVP_PKEY_Delete> pkey_deleter(pkey);
 
-    if (!asymmetric_key->EvpToInternal(pkey))
+    if (!asymmetric_key->EvpToInternal(pkey)) {
         error = TranslateLastOpenSslError();
-    else
+    } else {
         key->reset(asymmetric_key.release());
+    }
 
     return error;
 }

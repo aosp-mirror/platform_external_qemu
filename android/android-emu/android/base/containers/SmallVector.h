@@ -19,8 +19,8 @@
 #include <type_traits>
 #include <utility>
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
 
 //
 // SmallVector<T>, SmallFixedVector<T, SmallSize>
@@ -387,8 +387,8 @@ private:
     union Data {
         alignas(size_type) T array[kSmallSize];
 
-        Data() {}
-        ~Data() {}
+        Data() {}   // NOLINT
+        ~Data() {}  // NOLINT
     } mData;
 };
 

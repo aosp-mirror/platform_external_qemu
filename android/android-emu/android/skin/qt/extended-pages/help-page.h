@@ -24,7 +24,7 @@ class HelpPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit HelpPage(QWidget *parent = 0);
+    explicit HelpPage(QWidget* parent = nullptr);
     void initialize(const ShortcutKeyStore<QtUICommand>* key_store);
 
 private slots:

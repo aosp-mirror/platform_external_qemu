@@ -20,7 +20,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include <errno.h>
+#include <cerrno>
 
 namespace android {
 namespace base {
@@ -46,7 +46,7 @@ public:
     TestDnsResolver() { mPrevResolver = Dns::Resolver::setForTesting(this); }
 
     // Destructor restores the previous global resolver instance.
-    ~TestDnsResolver() { Dns::Resolver::setForTesting(mPrevResolver); }
+    ~TestDnsResolver() override { Dns::Resolver::setForTesting(mPrevResolver); }
 
     // Clear the internal table.
     void reset() { mMap.clear(); }
@@ -54,27 +54,27 @@ public:
     // Add new entry to the internal table. |server_name| is a server name,
     // and |address| is a string corresponding to either a dotted IPv4 address
     // or column-separated IPv6 one.
-    void addEntry(StringView server_name, StringView address) {
+    void addEntry(const StringView& server_name, const StringView& address) {
         AddressList list = {IpAddress(address)};
         addEntryList(server_name, list);
     }
 
     // Add new entry to the internal table. |server_nam| is a server name,
     // and |ipv4| is the host-order 32-bit IPv4 address for it.
-    void addEntryIpv4(StringView server_name, uint32_t ipv4) {
+    void addEntryIpv4(const StringView& server_name, uint32_t ipv4) {
         AddressList list = {IpAddress(ipv4)};
         addEntryList(server_name, list);
     }
 
     // Add a new entry to the internal table. |server_name| is a server name,
     // and |ipv6| is a 26-byte IPv6 address for it.
-    void addEntryIpv6(StringView server_name, const uint8_t ipv6[16]) {
+    void addEntryIpv6(const StringView& server_name, const uint8_t ipv6[16]) {
         addEntryList(server_name, AddressList({IpAddress(ipv6)}));
     }
 
     // Add a |list| of IP addresses to the internal table, associated with
     // |server_name|.
-    void addEntryList(StringView server_name, const AddressList& list) {
+    void addEntryList(const StringView& server_name, const AddressList& list) {
         std::string key(server_name);
         auto it = mMap.find(key);
         if (it == mMap.end()) {
@@ -88,7 +88,7 @@ public:
 
     // Return the list of IpAddress instances associated with |server_name|
     // through previous addEntryXXX() calls.
-    virtual int resolveName(StringView server_name, AddressList* out) override {
+    int resolveName(StringView server_name, AddressList* out) override {
         std::string key(server_name);
         // First try to parse it as a numerical IP address.
         IpAddress ip(key);
@@ -105,7 +105,7 @@ public:
     }
 
     // Return the list of DNS servers used by the system currently.
-    virtual int getSystemServerList(AddressList* out) override {
+    int getSystemServerList(AddressList* out) override {
         out->emplace_back(IpAddress(0x7f000001));
         return 0;
     }

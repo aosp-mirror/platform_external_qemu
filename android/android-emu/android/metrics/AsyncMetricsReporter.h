@@ -33,9 +33,9 @@ class AsyncMetricsReporter final : public MetricsReporter
 {
 public:
     AsyncMetricsReporter(MetricsWriter::Ptr writer,
-                         base::StringView emulatorVersion,
-                         base::StringView emulatorFullVersion,
-                         base::StringView qemuVersion);
+                         const base::StringView& emulatorVersion,
+                         const base::StringView& emulatorFullVersion,
+                         const base::StringView& qemuVersion);
     ~AsyncMetricsReporter() override;
 
     void reportConditional(ConditionalCallback callback) override;

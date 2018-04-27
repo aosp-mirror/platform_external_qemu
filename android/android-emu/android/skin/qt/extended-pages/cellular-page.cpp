@@ -93,28 +93,30 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
     if (sCellularAgent->setStandard) {
         int cStandard = settings.value(Ui::Settings::CELLULAR_NETWORK_TYPE,
                                        Cellular_Std_full).toInt();
-        sCellularAgent->setStandard((CellularStandard)cStandard);
+        sCellularAgent->setStandard(static_cast<CellularStandard>(cStandard));
     }
 
     // Signal strength
     if (sCellularAgent->setSignalStrengthProfile) {
         int cStrength = settings.value(Ui::Settings::CELLULAR_SIGNAL_STRENGTH,
                                        Cellular_Signal_Moderate).toInt();
-        sCellularAgent->setSignalStrengthProfile((CellularSignal)cStrength);
+        sCellularAgent->setSignalStrengthProfile(
+                static_cast<CellularSignal>(cStrength));
     }
 
     // Voice status
     if (sCellularAgent->setVoiceStatus) {
         int voiceStatus = settings.value(Ui::Settings::CELLULAR_VOICE_STATUS,
                                          Cellular_Stat_Home).toInt();
-        sCellularAgent->setVoiceStatus((CellularStatus)voiceStatus);
+        sCellularAgent->setVoiceStatus(
+                static_cast<CellularStatus>(voiceStatus));
     }
 
     // Data status
     if (sCellularAgent->setDataStatus) {
         int dataStatus = settings.value(Ui::Settings::CELLULAR_DATA_STATUS,
                                         Cellular_Stat_Home).toInt();
-        sCellularAgent->setDataStatus((CellularStatus)dataStatus);
+        sCellularAgent->setDataStatus(static_cast<CellularStatus>(dataStatus));
     }
 }
 
@@ -125,7 +127,7 @@ void CellularPage::on_cell_standardBox_currentIndexChanged(int index)
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setStandard) {
-        CellularStandard cStandard = (CellularStandard)index;
+        auto cStandard = static_cast<CellularStandard>(index);
         sCellularAgent->setStandard(cStandard);
     }
 }
@@ -137,7 +139,7 @@ void CellularPage::on_cell_voiceStatusBox_currentIndexChanged(int index)
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setVoiceStatus) {
-        CellularStatus vStatus = (CellularStatus)index;
+        auto vStatus = static_cast<CellularStatus>(index);
         sCellularAgent->setVoiceStatus(vStatus);
     }
 }
@@ -149,7 +151,7 @@ void CellularPage::on_cell_dataStatusBox_currentIndexChanged(int index)
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setDataStatus) {
-        CellularStatus dStatus = (CellularStatus)index;
+        auto dStatus = static_cast<CellularStatus>(index);
         sCellularAgent->setDataStatus(dStatus);
     }
 }
@@ -161,7 +163,7 @@ void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index)
 
     android::RecursiveScopedVmLock vmlock;
     if (sCellularAgent && sCellularAgent->setSignalStrengthProfile) {
-        CellularSignal signal = (CellularSignal)index;
+        auto signal = static_cast<CellularSignal>(index);
         sCellularAgent->setSignalStrengthProfile(signal);
     }
 }

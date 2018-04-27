@@ -79,23 +79,25 @@ bool Instruction::IsLoad() const {
   if (Mask(LoadStorePairAnyFMask) == LoadStorePairAnyFixed) {
     return Mask(LoadStorePairLBit) != 0;
   } else {
-    LoadStoreOp op = static_cast<LoadStoreOp>(Mask(LoadStoreMask));
-    switch (op) {
-      case LDRB_w:
-      case LDRH_w:
-      case LDR_w:
-      case LDR_x:
-      case LDRSB_w:
-      case LDRSB_x:
-      case LDRSH_w:
-      case LDRSH_x:
-      case LDRSW_x:
-      case LDR_b:
-      case LDR_h:
-      case LDR_s:
-      case LDR_d:
-      case LDR_q: return true;
-      default: return false;
+      auto op = static_cast<LoadStoreOp>(Mask(LoadStoreMask));
+      switch (op) {
+          case LDRB_w:
+          case LDRH_w:
+          case LDR_w:
+          case LDR_x:
+          case LDRSB_w:
+          case LDRSB_x:
+          case LDRSH_w:
+          case LDRSH_x:
+          case LDRSW_x:
+          case LDR_b:
+          case LDR_h:
+          case LDR_s:
+          case LDR_d:
+          case LDR_q:
+              return true;
+          default:
+              return false;
     }
   }
 }
@@ -109,18 +111,20 @@ bool Instruction::IsStore() const {
   if (Mask(LoadStorePairAnyFMask) == LoadStorePairAnyFixed) {
     return Mask(LoadStorePairLBit) == 0;
   } else {
-    LoadStoreOp op = static_cast<LoadStoreOp>(Mask(LoadStoreMask));
-    switch (op) {
-      case STRB_w:
-      case STRH_w:
-      case STR_w:
-      case STR_x:
-      case STR_b:
-      case STR_h:
-      case STR_s:
-      case STR_d:
-      case STR_q: return true;
-      default: return false;
+      auto op = static_cast<LoadStoreOp>(Mask(LoadStoreMask));
+      switch (op) {
+          case STRB_w:
+          case STRH_w:
+          case STR_w:
+          case STR_x:
+          case STR_b:
+          case STR_h:
+          case STR_s:
+          case STR_d:
+          case STR_q:
+              return true;
+          default:
+              return false;
     }
   }
 }
@@ -355,7 +359,7 @@ void Instruction::SetBranchImmTarget(const Instruction* target) {
   VIXL_ASSERT(((target - this) & 3) == 0);
   Instr branch_imm = 0;
   uint32_t imm_mask = 0;
-  int offset = static_cast<int>((target - this) >> kInstructionSizeLog2);
+  auto offset = static_cast<int>((target - this) >> kInstructionSizeLog2);
   switch (BranchType()) {
     case CondBranchType: {
       branch_imm = Assembler::ImmCondBranch(offset);

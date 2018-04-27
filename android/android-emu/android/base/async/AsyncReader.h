@@ -14,7 +14,7 @@
 #include "android/base/async/AsyncStatus.h"
 #include "android/base/async/Looper.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {
@@ -45,21 +45,17 @@ namespace base {
 //
 class AsyncReader {
 public:
-    AsyncReader() :
-            mBuffer(NULL),
-            mBufferSize(0U),
-            mPos(0),
-            mFdWatch(NULL) {}
+    AsyncReader() = default;
 
     void reset(void* buffer, size_t buffSize, Looper::FdWatch* watch);
 
     AsyncStatus run();
 
 private:
-    uint8_t* mBuffer;
-    size_t mBufferSize;
-    size_t mPos;
-    Looper::FdWatch* mFdWatch;
+    uint8_t* mBuffer{nullptr};
+    size_t mBufferSize{0U};
+    size_t mPos{0};
+    Looper::FdWatch* mFdWatch{nullptr};
 };
 
 }  // namespace base

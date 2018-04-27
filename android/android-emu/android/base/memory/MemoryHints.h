@@ -16,7 +16,7 @@
 
 #include "android/base/Compiler.h"
 
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace android {
 namespace base {

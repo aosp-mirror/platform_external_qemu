@@ -71,8 +71,8 @@ TEST(StalePtrRegistry, GetNonExisting) {
 
 TEST(StalePtrRegistry, AddMakeStaleGetStale) {
     StalePtrRegistry<void> reg;
-    void* ptr = (void*)0xabcdef;
-    uint64_t handle = (uint64_t)(uintptr_t)ptr;
+    auto* ptr = (void*)0xabcdef;
+    auto handle = static_cast<uint64_t>((uintptr_t)ptr);
 
     EXPECT_EQ(reg.numCurrEntries(), 0);
 
@@ -91,8 +91,8 @@ TEST(StalePtrRegistry, AddMakeStaleGetStale) {
 
 TEST(StalePtrRegistry, AddMakeStaleGetStaleWithDelete) {
     StalePtrRegistry<void> reg;
-    void* ptr = (void*)0xabcdef;
-    uint64_t handle = (uint64_t)(uintptr_t)ptr;
+    auto* ptr = (void*)0xabcdef;
+    auto handle = static_cast<uint64_t>((uintptr_t)ptr);
 
     EXPECT_EQ(reg.numCurrEntries(), 0);
 
@@ -112,9 +112,9 @@ TEST(StalePtrRegistry, AddMakeStaleGetStaleWithDelete) {
 
 TEST(StalePtrRegistry, AddMakeStaleWithRemap) {
     StalePtrRegistry<void> reg;
-    void* ptr = (void*)0xabcdef;
-    void* remapped = (void*)0xbcdefa;
-    uint64_t handle = (uint64_t)(uintptr_t)ptr;
+    auto* ptr = (void*)0xabcdef;
+    auto* remapped = (void*)0xbcdefa;
+    auto handle = static_cast<uint64_t>((uintptr_t)ptr);
 
     EXPECT_EQ(reg.numCurrEntries(), 0);
 
@@ -135,9 +135,9 @@ TEST(StalePtrRegistry, AddMakeStaleWithRemap) {
 
 TEST(StalePtrRegistry, AddMakeStaleWithRemapNameCollision) {
     StalePtrRegistry<void> reg;
-    void* ptr = (void*)0xabcdef;
-    void* remapped = (void*)0xbcdefa;
-    uint64_t handle = (uint64_t)(uintptr_t)ptr;
+    auto* ptr = (void*)0xabcdef;
+    auto* remapped = (void*)0xbcdefa;
+    auto handle = static_cast<uint64_t>((uintptr_t)ptr);
 
     EXPECT_EQ(reg.numCurrEntries(), 0);
 
@@ -162,10 +162,10 @@ TEST(StalePtrRegistry, AddMakeStaleWithRemapNameCollision) {
 
 TEST(StalePtrRegistry, AddMakeStaleTwice) {
     StalePtrRegistry<void> reg;
-    void* ptr1 = (void*)0xabcdef;
-    uint64_t handle1 = (uint64_t)(uintptr_t)ptr1;
-    void* ptr2 = (void*)0xbcdefa;
-    uint64_t handle2 = (uint64_t)(uintptr_t)ptr2;
+    auto* ptr1 = (void*)0xabcdef;
+    auto handle1 = static_cast<uint64_t>((uintptr_t)ptr1);
+    auto* ptr2 = (void*)0xbcdefa;
+    auto handle2 = static_cast<uint64_t>((uintptr_t)ptr2);
 
     reg.addPtr(ptr1);
     reg.makeCurrentPtrsStale();
@@ -182,10 +182,10 @@ TEST(StalePtrRegistry, AddMakeStaleTwice) {
 
 TEST(StalePtrRegistry, AddMakeStaleTwiceWithCollision) {
     StalePtrRegistry<void> reg;
-    void* ptr1 = (void*)0xabcdef;
-    uint64_t handle1 = (uint64_t)(uintptr_t)ptr1;
-    void* ptr2 = (void*)0xabcdef;
-    uint64_t handle2 = (uint64_t)(uintptr_t)ptr2;
+    auto* ptr1 = (void*)0xabcdef;
+    auto handle1 = static_cast<uint64_t>((uintptr_t)ptr1);
+    auto* ptr2 = (void*)0xabcdef;
+    auto handle2 = static_cast<uint64_t>((uintptr_t)ptr2);
 
     reg.addPtr(ptr1);
     reg.makeCurrentPtrsStale();

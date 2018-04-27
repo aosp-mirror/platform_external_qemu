@@ -31,9 +31,9 @@ public:
                      unsigned width,
                      unsigned int height);
 
-    ~EglWindowSurface();
+    ~EglWindowSurface() override;
 
-    bool  getAttrib(EGLint attrib,EGLint* val);
+    bool getAttrib(EGLint attrib, EGLint* val) override;
 
     static bool alreadyAssociatedWithConfig(EGLNativeWindowType win);
 

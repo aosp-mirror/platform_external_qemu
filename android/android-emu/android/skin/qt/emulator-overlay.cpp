@@ -87,7 +87,7 @@ EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
                      this, SLOT(slot_animationValueChanged(QVariant)));
 }
 
-EmulatorOverlay::~EmulatorOverlay() {}
+EmulatorOverlay::~EmulatorOverlay() = default;
 
 void EmulatorOverlay::focusOutEvent(QFocusEvent* event) {
     if (mMode == OverlayMode::Multitouch) {
@@ -300,11 +300,13 @@ void EmulatorOverlay::hideForFlash() {
 }
 
 void EmulatorOverlay::showForMultitouch(bool centerTouches) {
-    if (mMode != OverlayMode::Hidden)
+    if (mMode != OverlayMode::Hidden) {
         return;
+    }
 
-    if (!geometry().contains(QCursor::pos()))
+    if (!geometry().contains(QCursor::pos())) {
         return;
+    }
 
     // Show and render the frame once before the mode is changed.
     // This ensures that the first frame of the overlay that is rendered *does
@@ -433,8 +435,9 @@ void EmulatorOverlay::paintForResize(int mouseX, int mouseY){
 }
 
 void EmulatorOverlay::showForZoom() {
-    if (mMode != OverlayMode::Hidden)
+    if (mMode != OverlayMode::Hidden) {
         return;
+    }
 
     mMode = OverlayMode::Zoom;
     setCursor(QCursor(mZoomCursor.get()));
@@ -442,8 +445,9 @@ void EmulatorOverlay::showForZoom() {
 }
 
 void EmulatorOverlay::showForZoomUserHidden() {
-    if (mMode != OverlayMode::UserHiddenZoom)
+    if (mMode != OverlayMode::UserHiddenZoom) {
         return;
+    }
 
     mMode = OverlayMode::Hidden;
     showForZoom();
@@ -498,7 +502,7 @@ void EmulatorOverlay::hideAndFocusContainer() {
 }
 
 void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
-    SkinEventType eventType = (SkinEventType)0;
+    auto eventType = static_cast<SkinEventType>(0);
 
     if (event->type() == QMouseEvent::MouseButtonPress) {
         if (event->button() == Qt::RightButton) {

@@ -14,13 +14,13 @@
 
 #include "emugl/common/shared_library.h"
 
-#include <stddef.h>
-#include <string.h>
-#include <stdio.h>
+#include <cstddef>
+#include <cstdio>
+#include <cstring>
 
 #ifndef _WIN32
 #include <dlfcn.h>
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 namespace emugl {
@@ -126,7 +126,7 @@ SharedLibrary* SharedLibrary::do_open(const char* libraryName,
                                    char* error,
                                    size_t errorSize) {
     const char* libPath = libraryName;
-    char* path = NULL;
+    char* path = nullptr;
 
     const char* libBaseName = strrchr(libraryName, '/');
     if (!libBaseName) {
@@ -153,7 +153,7 @@ SharedLibrary* SharedLibrary::do_open(const char* libraryName,
     // On OSX we try to open |libraryName| first.  If that doesn't exist,
     // we try |libraryName|.dylib
     void* lib = dlopen(libraryName, RTLD_NOW);
-    if (lib == NULL) {
+    if (lib == nullptr) {
         lib = dlopen(libPath, RTLD_NOW);
     }
 #else
@@ -169,7 +169,7 @@ SharedLibrary* SharedLibrary::do_open(const char* libraryName,
     }
 
     snprintf(error, errorSize, "%s", dlerror());
-    return NULL;
+    return nullptr;
 }
 
 SharedLibrary::SharedLibrary(HandleType lib) : mLib(lib) {}
@@ -183,7 +183,7 @@ SharedLibrary::~SharedLibrary() {
 SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
         const char* symbolName) const {
     if (!mLib || !symbolName) {
-        return NULL;
+        return nullptr;
     }
     return reinterpret_cast<FunctionPtr>(dlsym(mLib, symbolName));
 }

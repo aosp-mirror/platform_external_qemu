@@ -38,12 +38,11 @@ public:
 
     // Entry point to create an AdbLivenessChecker.
     // Objects of this type are managed via shared_ptr.
-    static Ptr create(
-            android::emulation::AdbInterface* adb,
-            android::base::Looper* looper,
-            MetricsReporter* reporter,
-            android::base::StringView emulatorName,
-            android::base::Looper::Duration checkIntervalMs);
+    static Ptr create(android::emulation::AdbInterface* adb,
+                      android::base::Looper* looper,
+                      MetricsReporter* reporter,
+                      const android::base::StringView& emulatorName,
+                      android::base::Looper::Duration checkIntervalMs);
 
     // Query online / bootcomplete status of emulator.
     static bool isEmulatorOnline();
@@ -59,7 +58,7 @@ protected:
     AdbLivenessChecker(android::emulation::AdbInterface* adb,
                        android::base::Looper* looper,
                        MetricsReporter* reporter,
-                       android::base::StringView emulatorName,
+                       const android::base::StringView& emulatorName,
                        android::base::Looper::Duration checkIntervalMs);
 
 protected:
@@ -101,5 +100,5 @@ private:
     DISALLOW_COPY_AND_ASSIGN(AdbLivenessChecker);
 };
 
-}  // namespace base
+}  // namespace metrics
 }  // namespace android

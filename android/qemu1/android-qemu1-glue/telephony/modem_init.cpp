@@ -23,17 +23,20 @@ extern "C" {
 static void modem_state_save(QEMUFile* file, void* opaque)
 {
     Stream* const s = stream_from_qemufile(file);
-    amodem_state_save((AModem)opaque, (SysFile*)s);
+    amodem_state_save(static_cast<AModem>(opaque),
+                      reinterpret_cast<SysFile*>(s));
     stream_free(s);
 }
 
 static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
 {
-    if (version_id != MODEM_DEV_STATE_SAVE_VERSION)
+    if (version_id != MODEM_DEV_STATE_SAVE_VERSION) {
         return -1;
+    }
 
     Stream* const s = stream_from_qemufile(file);
-    const int res = amodem_state_load((AModem)opaque, (SysFile*)s);
+    const int res = amodem_state_load(static_cast<AModem>(opaque),
+                                      reinterpret_cast<SysFile*>(s));
     stream_free(s);
 
     return res;

@@ -18,13 +18,13 @@
 #include "android/opengl/gpuinfo.h"
 #include "android/opengl/NativeGpuInfo.h"
 
-#include <assert.h>
-#include <inttypes.h>
+#include <cassert>
+#include <cinttypes>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <sstream>
 #include <utility>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 using android::base::arraySize;
 using android::base::FunctorThread;
@@ -60,7 +60,7 @@ void GpuInfo::addDll(std::string dll_str) {
 }
 
 void GpuInfoList::addGpu() {
-    infos.push_back(GpuInfo());
+    infos.emplace_back();
 }
 GpuInfo& GpuInfoList::currGpu() {
     if (infos.empty()) { addGpu(); }
@@ -115,21 +115,28 @@ static bool gpuinfo_query_list(GpuInfoList* gpulist,
             const char* bl_renderer = bl_entry.renderer;
             const char* bl_os = bl_entry.os;
 
-            if (bl_make && (gpuinfo.make != bl_make))
+            if (bl_make && (gpuinfo.make != bl_make)) {
                 continue;
-            if (bl_model && (gpuinfo.model != bl_model))
+            }
+            if (bl_model && (gpuinfo.model != bl_model)) {
                 continue;
-            if (bl_device_id && (gpuinfo.device_id != bl_device_id))
+            }
+            if (bl_device_id && (gpuinfo.device_id != bl_device_id)) {
                 continue;
-            if (bl_revision_id && (gpuinfo.revision_id != bl_revision_id))
+            }
+            if (bl_revision_id && (gpuinfo.revision_id != bl_revision_id)) {
                 continue;
-            if (bl_version && (gpuinfo.revision_id != bl_version))
+            }
+            if (bl_version && (gpuinfo.revision_id != bl_version)) {
                 continue;
-            if (bl_renderer && (gpuinfo.renderer.find(bl_renderer) ==
-                                std::string::npos))
+            }
+            if (bl_renderer &&
+                (gpuinfo.renderer.find(bl_renderer) == std::string::npos)) {
                 continue;
-            if (bl_os && (gpuinfo.os != bl_os))
+            }
+            if (bl_os && (gpuinfo.os != bl_os)) {
                 continue;
+            }
             return true;
         }
     }

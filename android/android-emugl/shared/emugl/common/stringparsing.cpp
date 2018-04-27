@@ -170,8 +170,8 @@ size_t multi_find(const std::string& src,
                   const std::vector<std::string>& to_find) {
 
     size_t res = std::string::npos;
-    for (size_t i = 0; i < to_find.size(); i++) {
-        size_t p = src.find(to_find[i]);
+    for (const auto& i : to_find) {
+        size_t p = src.find(i);
         if (p != std::string::npos) {
             res = p;
         }

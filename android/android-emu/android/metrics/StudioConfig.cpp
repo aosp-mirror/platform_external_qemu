@@ -15,14 +15,14 @@
 #include "android/metrics/StudioConfig.h"
 
 #include "android/base/ArraySize.h"
-#include "android/base/files/PathUtils.h"
 #include "android/base/Optional.h"
+#include "android/base/StringView.h"
+#include "android/base/Version.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
-#include "android/base/StringView.h"
 #include "android/base/system/System.h"
-#include "android/base/Version.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/metrics/MetricsPaths.h"
 #include "android/utils/debug.h"
@@ -33,11 +33,11 @@
 #include <libxml/tree.h>
 
 #include <algorithm>
-#include <iterator>
 #include <fstream>
+#include <iterator>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 using android::base::LazyInstance;
 using android::base::Optional;
@@ -100,11 +100,11 @@ static std::string findLatestAndroidStudioDir() {
         return studio;
     }
 
-    const std::string appDataPath =
+    const std::string& appDataPath =
 #ifdef __APPLE__
-        sys->getAppDataDirectory();
+            sys->getAppDataDirectory();
 #else
-        sys->getHomeDirectory();
+            sys->getHomeDirectory();
 #endif  // __APPLE__
     if (appDataPath.empty()) {
         return {};
@@ -113,7 +113,7 @@ static std::string findLatestAndroidStudioDir() {
 }
 
 Version extractAndroidStudioVersion(const char* const dirName) {
-    if (dirName == NULL) {
+    if (dirName == nullptr) {
         return Version::invalid();
     }
 
@@ -150,9 +150,10 @@ Version extractAndroidStudioVersion(const char* const dirName) {
         return Version::invalid();
     }
 
-    return Version(rawVersion.component<Version::kMajor>(),
-                   rawVersion.component<Version::kMinor>(),
-                   rawVersion.component<Version::kMicro>(), build);
+    return {rawVersion.component<Version::kMajor>(),
+            rawVersion.component<Version::kMinor>(),
+            rawVersion.component<Version::kMicro>(),
+            static_cast<base::Version::ComponentType>(build)};
 }
 
 std::string latestAndroidStudioDir(const std::string& scanPath) {
@@ -172,7 +173,7 @@ std::string latestAndroidStudioDir(const std::string& scanPath) {
 
     for (;;) {
         const char* full_path = dirScanner_nextFull(scanner.get());
-        if (full_path == NULL) {
+        if (full_path == nullptr) {
             // End of enumeration.
             break;
         }
@@ -182,7 +183,7 @@ std::string latestAndroidStudioDir(const std::string& scanPath) {
         }
 
         char* name = path_basename(full_path);
-        if (name == NULL) {
+        if (name == nullptr) {
             continue;
         }
         Version v = extractAndroidStudioVersion(name);
@@ -198,16 +199,17 @@ std::string latestAndroidStudioDir(const std::string& scanPath) {
 
 std::string pathToStudioXML(const std::string& studioPath,
                             const std::string& filename) {
-    if (studioPath.empty() || filename.empty())
+    if (studioPath.empty() || filename.empty()) {
         return std::string();
+    }
 
     // build /path/to/.AndroidStudio/subpath/to/file.xml
     std::vector<std::string> vpath;
     vpath.push_back(studioPath);
 #ifndef __APPLE__
-    vpath.push_back(std::string(kAndroidStudioDirInfix));
+    vpath.emplace_back(kAndroidStudioDirInfix);
 #endif  // !__APPLE__
-    vpath.push_back(std::string(kAndroidStudioDirSuffix));
+    vpath.emplace_back(kAndroidStudioDirSuffix);
     vpath.push_back(filename);
     return PathUtils::recompose(vpath);
 }
@@ -229,8 +231,7 @@ struct UpdateChannelInfo {
     bool initialized = false;
 };
 
-static LazyInstance<UpdateChannelInfo> sUpdateChannelInfo =
-    LAZY_INSTANCE_INIT;
+static LazyInstance<UpdateChannelInfo> sUpdateChannelInfo = LAZY_INSTANCE_INIT;
 
 UpdateChannel updateChannel() {
     // Only interact with other files if
@@ -283,8 +284,8 @@ UpdateChannel updateChannel() {
 static std::string eval_studio_config_xml(xmlDocPtr doc,
                                           xmlNodePtr root,
                                           const StudioXml* const match) {
-    xmlNodePtr current = NULL;
-    xmlChar* xmlval = NULL;
+    xmlNodePtr current = nullptr;
+    xmlChar* xmlval = nullptr;
     std::string retVal;
 
     for (current = root; current; current = current->next) {
@@ -296,7 +297,7 @@ static std::string eval_studio_config_xml(xmlDocPtr doc,
                 xmlFree(propvalue);
                 if (!nomatch) {
                     xmlval = xmlGetProp(current, BAD_CAST match->keyname);
-                    if (xmlval != NULL) {
+                    if (xmlval != nullptr) {
                         // xmlChar* is defined as unsigned char
                         // we are simply reading the result and don't
                         // operate on it, soe simply reinterpret as
@@ -334,9 +335,10 @@ static Optional<string> parseStudioXML(const StudioXml* const match) {
         return {};
     }
 
-    xmlDocPtr doc = xmlReadFile(xml_path.c_str(), NULL, 0);
-    if (doc == NULL)
+    xmlDocPtr doc = xmlReadFile(xml_path.c_str(), nullptr, 0);
+    if (doc == nullptr) {
         return {};
+    };
 
     // At this point, we assume that we have found the correct xml file.
     // If we fail to match within this file, we'll return an empty string
@@ -364,7 +366,7 @@ static Optional<string> parseStudioXML(const StudioXml* const match) {
 //
 template <class ValueType, class ValueExtractor>
 static Optional<ValueType> getStudioConfigJsonValue(
-        StringView name,
+        const StringView& name,
         ValueExtractor extractValue) {
     const std::string configPath = android::metrics::getSettingsFilePath();
     std::ifstream in(configPath.c_str());
@@ -378,8 +380,7 @@ static Optional<ValueType> getStudioConfigJsonValue(
         // All names start from a double quote character, so start with finding
         // one.
         for (auto it = std::find(line.begin(), line.end(), '\"');
-             it != line.end();
-             it = std::find(it + 1, line.end(), '\"')) {
+             it != line.end(); it = std::find(it + 1, line.end(), '\"')) {
             auto itName = it + 1;
             if (itName == line.end()) {
                 continue;
@@ -487,9 +488,7 @@ namespace {
 struct StaticValues {
     std::string installationId;
 
-    StaticValues() {
-        installationId = extractInstallationId();
-    }
+    StaticValues() { installationId = extractInstallationId(); }
 };
 
 static LazyInstance<StaticValues> sStaticValues = {};

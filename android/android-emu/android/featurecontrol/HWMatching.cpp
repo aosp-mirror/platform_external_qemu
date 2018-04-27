@@ -108,8 +108,9 @@ public:
                 kCachedPatternsFilename)) { }
 
     ~PatternsFileAccessor() {
-        if (mFileLock)
+        if (mFileLock) {
             filelock_release(mFileLock);
+        }
     }
 
     bool read(emulator_features::EmulatorFeaturePatterns* patterns) {
@@ -239,12 +240,11 @@ bool matchFeaturePattern(
 
 template <unsigned int defaultVal>
 static Version versionFromProto(const emulator_features::EmulatorVersion& ver) {
-    return Version(
-            ver.has_major() ? ver.major() : defaultVal,
+    return {ver.has_major() ? ver.major() : defaultVal,
             (ver.has_major() && ver.has_minor()) ? ver.minor() : defaultVal,
             (ver.has_major() && ver.has_minor() && ver.has_patch())
                     ? ver.patch()
-                    : defaultVal);
+                    : defaultVal};
 }
 
 static bool featureActionAppliesToEmulatorVersion(
@@ -288,8 +288,7 @@ std::vector<FeatureAction> matchFeaturePatterns(
 
         if (!thisHostMatches) continue;
 
-        for (const auto action : pattern.featureaction()) {
-
+        for (const auto& action : pattern.featureaction()) {
             if (!action.has_feature() || !action.has_enable()) {
                 D("Not enough info about this feature. Skip");
                 continue;
@@ -404,8 +403,9 @@ static LazyInstance<emulator_features::EmulatorFeaturePatterns> sCachedFeaturePa
 void applyCachedServerFeaturePatterns() {
     PatternsFileAccessor access;
 
-    if (!access.read(sCachedFeaturePatterns.ptr()))
+    if (!access.read(sCachedFeaturePatterns.ptr())) {
         return;
+    }
 
     std::vector<FeatureAction> todo =
         matchFeaturePatterns(HostHwInfo::query(), sCachedFeaturePatterns.ptr());
@@ -443,6 +443,5 @@ static void queryFeaturePatternFn() {
     outputCachedFeaturePatterns(patterns);
 }
 
-
-} // namespace hwinfo
+}  // namespace featurecontrol
 } // namespace android

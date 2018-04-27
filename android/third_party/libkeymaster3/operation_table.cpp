@@ -35,13 +35,16 @@ keymaster_error_t OperationTable::Add(Operation* operation,
                                       keymaster_operation_handle_t* op_handle) {
     if (!table_.get()) {
         table_.reset(new (std::nothrow) Entry[table_size_]);
-        if (!table_.get())
+        if (!table_.get()) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
     }
 
     UniquePtr<Operation> op(operation);
-    if (RAND_bytes(reinterpret_cast<uint8_t*>(op_handle), sizeof(*op_handle)) != 1)
+    if (RAND_bytes(reinterpret_cast<uint8_t*>(op_handle), sizeof(*op_handle)) !=
+        1) {
         return TranslateLastOpenSslError();
+    }
     if (*op_handle == 0) {
         // Statistically this is vanishingly unlikely, which means if it ever happens in practice,
         // it indicates a broken RNG.
@@ -59,22 +62,26 @@ keymaster_error_t OperationTable::Add(Operation* operation,
 }
 
 Operation* OperationTable::Find(keymaster_operation_handle_t op_handle) {
-    if (op_handle == 0)
+    if (op_handle == 0) {
         return NULL;
+    }
 
-    if (!table_.get())
+    if (!table_.get()) {
         return NULL;
+    }
 
     for (size_t i = 0; i < table_size_; ++i) {
-        if (table_[i].handle == op_handle)
+        if (table_[i].handle == op_handle) {
             return table_[i].operation;
+        }
     }
     return NULL;
 }
 
 bool OperationTable::Delete(keymaster_operation_handle_t op_handle) {
-    if (!table_.get())
+    if (!table_.get()) {
         return false;
+    }
 
     for (size_t i = 0; i < table_size_; ++i) {
         if (table_[i].handle == op_handle) {

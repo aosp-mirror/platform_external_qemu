@@ -16,7 +16,7 @@
 #include <memory>
 #include <string>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace android {
 

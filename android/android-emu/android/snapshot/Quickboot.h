@@ -40,9 +40,9 @@ public:
 
 private:
     void decideFailureReport(const base::Optional<FailureReason>& failureReason);
-    void reportSuccessfulLoad(base::StringView name,
+    void reportSuccessfulLoad(const base::StringView& name,
                               base::System::WallDuration startTimeMs);
-    void reportSuccessfulSave(base::StringView name,
+    void reportSuccessfulSave(const base::StringView& name,
                               base::System::WallDuration durationMs,
                               base::System::WallDuration sessionUptimeMs);
 

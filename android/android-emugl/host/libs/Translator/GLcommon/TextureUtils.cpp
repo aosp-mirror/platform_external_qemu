@@ -13,12 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include <GLcommon/TextureUtils.h>
-#include <GLcommon/GLESmacros.h>
 #include <GLcommon/GLDispatch.h>
+#include <GLcommon/GLESmacros.h>
 #include <GLcommon/GLESvalidate.h>
-#include <stdio.h>
+#include <GLcommon/TextureUtils.h>
 #include <cmath>
+#include <cstdio>
 #include <memory>
 
 int getCompressedFormats(int* formats) {
@@ -176,12 +176,16 @@ GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat) {
     }
 }
 
-void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
-                            GLenum internalformat, GLsizei width,
-                            GLsizei height, GLint border,
-                            GLsizei imageSize, const GLvoid* data,
-                            glTexImage2D_t glTexImage2DPtr) {
-
+void doCompressedTexImage2D(GLEScontext* ctx,
+                            GLenum target,
+                            GLint level,
+                            GLenum internalformat,
+                            GLsizei width,
+                            GLsizei height,
+                            GLint border,
+                            GLsizei imageSize,
+                            const GLvoid* data,
+                            const glTexImage2D_t& glTexImage2DPtr) {
     /* XXX: This is just a hack to fix the resolve of glTexImage2D problem
        It will be removed when we'll no longer link against ligGL */
     /*typedef void (GLAPIENTRY *glTexImage2DPtr_t ) (
@@ -195,7 +199,8 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
     if (isEtcFormat(internalformat)) {
         GLint format = GL_RGB;
         GLint type = GL_UNSIGNED_BYTE;
-        GLint convertedInternalFormat = decompressedInternalFormat(ctx, internalformat);
+        GLint convertedInternalFormat =
+                decompressedInternalFormat(ctx, internalformat);
         ETC2ImageFormat etcFormat = EtcRGB8;
         switch (internalformat) {
             case GL_COMPRESSED_RGB8_ETC2:
@@ -243,7 +248,7 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
 
         int pixelSize = etc_get_decoded_pixel_size(etcFormat);
         GLsizei compressedSize =
-            etc_get_encoded_data_size(etcFormat, width, height);
+                etc_get_encoded_data_size(etcFormat, width, height);
         SET_ERROR_IF((compressedSize != imageSize), GL_INVALID_VALUE);
 
         bool emulateCompressedData = false;
@@ -252,49 +257,45 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
             data = new char[compressedSize];
         }
 
-        const int32_t align = ctx->getUnpackAlignment()-1;
+        const int32_t align = ctx->getUnpackAlignment() - 1;
         const int32_t bpr = ((width * pixelSize) + align) & ~align;
         const size_t size = bpr * height;
 
         std::unique_ptr<etc1_byte[]> pOut(new etc1_byte[size]);
 
-        int res =
-            etc2_decode_image(
-                    (const etc1_byte*)data, etcFormat, pOut.get(),
-                    width, height, bpr);
-        SET_ERROR_IF(res!=0, GL_INVALID_VALUE);
+        int res = etc2_decode_image(static_cast<const etc1_byte*>(data),
+                                    etcFormat, pOut.get(), width, height, bpr);
+        SET_ERROR_IF(res != 0, GL_INVALID_VALUE);
 
-        glTexImage2DPtr(target, level, convertedInternalFormat,
-                        width, height, border, format, type, pOut.get());
+        glTexImage2DPtr(target, level, convertedInternalFormat, width, height,
+                        border, format, type, pOut.get());
 
         if (emulateCompressedData) {
-            delete [] (char*)data;
+            delete[](char*) data;
         }
     } else if (isPaletteFormat(internalformat)) {
-        SET_ERROR_IF(
-            level > log2(ctx->getMaxTexSize()) ||
-            border !=0 || level > 0 ||
-            !GLESvalidate::texImgDim(
-                width, height, ctx->getMaxTexSize() + 2),
-            GL_INVALID_VALUE);
-        SET_ERROR_IF(!data,GL_INVALID_OPERATION);
+        SET_ERROR_IF(level > log2(ctx->getMaxTexSize()) || border != 0 ||
+                             level > 0 ||
+                             !GLESvalidate::texImgDim(width, height,
+                                                      ctx->getMaxTexSize() + 2),
+                     GL_INVALID_VALUE);
+        SET_ERROR_IF(!data, GL_INVALID_OPERATION);
 
         int nMipmaps = -level + 1;
-        GLsizei tmpWidth  = width;
+        GLsizei tmpWidth = width;
         GLsizei tmpHeight = height;
 
-        for(int i = 0; i < nMipmaps; i++)
-        {
+        for (int i = 0; i < nMipmaps; i++) {
             GLenum uncompressedFrmt;
             unsigned char* uncompressed =
-                uncompressTexture(internalformat, uncompressedFrmt,
-                                  width, height, imageSize, data, i);
-            glTexImage2DPtr(target, i, uncompressedFrmt,
-                            tmpWidth, tmpHeight, border,
-                            uncompressedFrmt, GL_UNSIGNED_BYTE, uncompressed);
+                    uncompressTexture(internalformat, uncompressedFrmt, width,
+                                      height, imageSize, data, i);
+            glTexImage2DPtr(target, i, uncompressedFrmt, tmpWidth, tmpHeight,
+                            border, uncompressedFrmt, GL_UNSIGNED_BYTE,
+                            uncompressed);
             tmpWidth /= 2;
             tmpHeight /= 2;
-            delete [] uncompressed;
+            delete[] uncompressed;
         }
     } else {
         SET_ERROR_IF(1, GL_INVALID_ENUM);

@@ -19,7 +19,7 @@ ANDROID_BEGIN_HEADER
 // NOTE: Do not include "qemu-common.h" here because this fails
 //       to compile when included from a C++ file due to other
 //       issues in include/qemu/int28.h. Instead, use the
-typedef struct Chardev Chardev;
+using Chardev = struct Chardev;
 
 // Call this during setup to inject QEMU2-specific SerialLine
 // implementation into the process.

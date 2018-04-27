@@ -13,7 +13,7 @@
 
 #include "ShaderValidator.h"
 
-// TODO: Improve parsing/analysis
+// TODO(lfy): Improve parsing/analysis
 // https://code.google.com/p/android/issues/detail?id=206951
 
 static std::vector<std::string> parse_raw_declarations(std::string text) {
@@ -73,36 +73,36 @@ static void validate_keywords_in_decls(const std::vector<std::string>& decls,
                                        bool* err) {
     std::vector<std::string> variance_keywords;
 
-    variance_keywords.push_back(std::string("invariant"));
+    variance_keywords.emplace_back("invariant");
 
     std::vector<std::string> storage_keywords;
 
-    storage_keywords.push_back(std::string(" const "));
-    storage_keywords.push_back(std::string(" uniform "));
-    storage_keywords.push_back(std::string(" attribute "));
-    storage_keywords.push_back(std::string(" varying "));
-    storage_keywords.push_back(std::string(" sampler "));
+    storage_keywords.emplace_back(" const ");
+    storage_keywords.emplace_back(" uniform ");
+    storage_keywords.emplace_back(" attribute ");
+    storage_keywords.emplace_back(" varying ");
+    storage_keywords.emplace_back(" sampler ");
 
     std::vector<std::string> precision_keywords;
 
-    precision_keywords.push_back(std::string(" lowp "));
-    precision_keywords.push_back(std::string(" mediump "));
-    precision_keywords.push_back(std::string(" highp "));
-    precision_keywords.push_back(std::string(" superp "));
+    precision_keywords.emplace_back(" lowp ");
+    precision_keywords.emplace_back(" mediump ");
+    precision_keywords.emplace_back(" highp ");
+    precision_keywords.emplace_back(" superp ");
 
     std::vector<std::string> parameter_keywords;
 
-    parameter_keywords.push_back(std::string(" in ")); // c.f., "int"
-    parameter_keywords.push_back(std::string(" out "));
-    parameter_keywords.push_back(std::string(" inout "));
+    parameter_keywords.emplace_back(" in ");  // c.f., "int"
+    parameter_keywords.emplace_back(" out ");
+    parameter_keywords.emplace_back(" inout ");
 
-    for (size_t i = 0; i < decls.size(); i++) {
+    for (const auto& decl : decls) {
         std::string variance, storage, precision, parameter;
         size_t storage_pos, precision_pos, parameter_pos;
 
-        storage_pos = multi_find(decls[i], storage_keywords);
-        precision_pos = multi_find(decls[i], precision_keywords);
-        parameter_pos = multi_find(decls[i], parameter_keywords);
+        storage_pos = multi_find(decl, storage_keywords);
+        precision_pos = multi_find(decl, precision_keywords);
+        parameter_pos = multi_find(decl, parameter_keywords);
 
         if (storage_pos != std::string::npos &&
                 precision_pos != std::string::npos) {
@@ -129,9 +129,9 @@ static void validate_glsles_variable_decls(
         bool* err) {
     std::string openpar("(");
     std::vector<std::string> non_function_decls;
-    for (size_t i = 0; i < raw_decls.size(); i++) {
-        if (raw_decls[i].find(openpar) == std::string::npos) {
-            non_function_decls.push_back(raw_decls[i]);
+    for (const auto& raw_decl : raw_decls) {
+        if (raw_decl.find(openpar) == std::string::npos) {
+            non_function_decls.push_back(raw_decl);
         }
     }
     validate_keywords_in_decls(non_function_decls, err);
@@ -146,10 +146,10 @@ static void validate_glsles_function_parameters(
     std::string closepar(")");
     std::string comma(",");
     std::vector<std::string> func_param_decls;
-    for (size_t i = 0; i < raw_decls.size(); i++) {
-        if (raw_decls[i].find(openpar) != std::string::npos) {
+    for (const auto& raw_decl : raw_decls) {
+        if (raw_decl.find(openpar) != std::string::npos) {
             std::vector<std::string> func_params =
-                isolate_in_out(raw_decls[i], openpar, closepar, &parse_err);
+                    isolate_in_out(raw_decl, openpar, closepar, &parse_err);
             if (func_params.size() > 0) {
                 // Just use the first set of parens
                 std::vector<std::string> these_params =

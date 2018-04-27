@@ -18,13 +18,13 @@
 #include <winioctl.h>
 #else
 #include <fcntl.h>
-#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cstring>
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "android/base/Compiler.h"
 #include "android/base/files/ScopedFd.h"
@@ -97,7 +97,8 @@ using base::Version;
 // UG: aes + pclmulqsq
 bool hasModernX86VirtualizationFeatures() {
     uint32_t cpuid_function1_ecx;
-    android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
+    android_get_x86_cpuid(1, 0, nullptr, nullptr, &cpuid_function1_ecx,
+                          nullptr);
 
     uint32_t popcnt_support = 1 << 23;
     uint32_t aes_support = 1 << 25;
@@ -218,8 +219,8 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
 // status of KVM on success or failure.
 AndroidCpuAcceleration ProbeKVM(std::string* status) {
     const char* kvm_device = getenv(KVM_DEVICE_NAME_ENV);
-    if (NULL == kvm_device) {
-      kvm_device = "/dev/kvm";
+    if (nullptr == kvm_device) {
+        kvm_device = "/dev/kvm";
     }
     // Check that kvm device exists.
     if (::access(kvm_device, F_OK)) {
@@ -683,7 +684,7 @@ static Version currentMacOSVersion(std::string* status) {
         StringAppendFormat(status,
                 "Internal error: failed to parse OS version '%s'",
                 osProductVersion);
-        return Version(0,0,0);
+        return {0, 0, 0};
     }
 
     auto ver = Version(StringView(osProductVersion.c_str() + pos + 1,

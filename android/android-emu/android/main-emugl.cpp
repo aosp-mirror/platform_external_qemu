@@ -17,8 +17,8 @@
 #include "android/utils/debug.h"
 #include "android/utils/string.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 using android::base::ScopedCPtr;
 

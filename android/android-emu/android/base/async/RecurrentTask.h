@@ -22,7 +22,7 @@
 
 #include <functional>
 #include <memory>
-
+#include <utility>
 namespace android {
 namespace base {
 
@@ -60,7 +60,7 @@ public:
                   TaskFunction function,
                   Looper::Duration taskIntervalMs)
         : mLooper(looper),
-          mFunction(function),
+          mFunction(std::move(function)),
           mTaskIntervalMs(int(taskIntervalMs)),
           mTimer(mLooper->createTimer(&RecurrentTask::taskCallback, this)) {}
 

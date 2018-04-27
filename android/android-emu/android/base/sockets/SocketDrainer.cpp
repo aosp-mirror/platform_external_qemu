@@ -37,7 +37,7 @@ class SocketDrainerImpl {
     DISALLOW_COPY_AND_ASSIGN(SocketDrainerImpl);
 
 public:
-    SocketDrainerImpl(Looper* looper) : mLooper(looper) {}
+    explicit SocketDrainerImpl(Looper* looper) : mLooper(looper) {}
     ~SocketDrainerImpl();
 
 public:
@@ -84,8 +84,10 @@ private:
 
 // callback from looper when the socket_fd has some data ready to read
 static void _on_read_socket_fd(void* opaque, int fd, unsigned events) {
-    DrainerObject * drainerObject = (DrainerObject*)opaque;
-    if (!drainerObject) return;
+    auto* drainerObject = static_cast<DrainerObject*>(opaque);
+    if (!drainerObject) {
+        return;
+    }
     if ((events & Looper::FdWatch::kEventRead) != 0) {
         drainerObject->drainSocket();
     }
@@ -96,12 +98,12 @@ static void _on_read_socket_fd(void* opaque, int fd, unsigned events) {
 
 DrainerObject::DrainerObject(int socket_fd,
                              Looper* looper,
-                             SocketDrainerImpl* parent) :
-            mSocket(socket_fd),
-            mLooper(looper),
-            mParent(parent),
-            mIo(NULL),
-            mSocketIsDrained(false) {
+                             SocketDrainerImpl* parent)
+    : mSocket(socket_fd),
+      mLooper(looper),
+      mParent(parent),
+      mIo(nullptr),
+      mSocketIsDrained(false) {
     socketShutdownWrites(mSocket);
     if (drainSocket() && mLooper && mParent) {
         mIo = looper->createFdWatch(mSocket, _on_read_socket_fd, this);
@@ -109,7 +111,7 @@ DrainerObject::DrainerObject(int socket_fd,
         mIo->dontWantWrite();
     } else {
         // there is nothing to read, the drainer object is done
-        mLooper = 0;
+        mLooper = nullptr;
     }
 }
 
@@ -123,7 +125,7 @@ DrainerObject::~DrainerObject() {
     delete mIo;
     socketClose(mSocket);
     mSocket = -1;
-    mParent = 0;
+    mParent = nullptr;
 }
 
 bool DrainerObject::drainSocket() {
@@ -148,7 +150,7 @@ SocketDrainerImpl::~SocketDrainerImpl() {
 }
 
 void SocketDrainerImpl::addSocketToDrain(int socket_fd) {
-    DrainerObject* drainer = new DrainerObject(socket_fd, mLooper, this);
+    auto* drainer = new DrainerObject(socket_fd, mLooper, this);
     if (drainer->socketIsDrained()) {
         delete drainer;
     } else {
@@ -169,7 +171,7 @@ SocketDrainer::SocketDrainer(Looper* looper) :
 
 SocketDrainer::~SocketDrainer() {
     delete mSocketDrainerImpl;
-    mSocketDrainerImpl = 0;
+    mSocketDrainerImpl = nullptr;
 }
 
 void SocketDrainer::drainAndClose(int socketFd) {
@@ -181,7 +183,7 @@ void SocketDrainer::drainAndClose(int socketFd) {
 
 // static
 void SocketDrainer::drainAndCloseBlocking(int socketFd) {
-    DrainerObject drainer(socketFd, 0, 0);
+    DrainerObject drainer(socketFd, nullptr, nullptr);
 }
 
 } // namespace base

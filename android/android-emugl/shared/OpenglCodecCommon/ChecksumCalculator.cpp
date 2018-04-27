@@ -21,8 +21,8 @@
 #include <string>
 #include <vector>
 
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 // Checklist when implementing new protocol:
 // 1. update CHECKSUMHELPER_MAX_VERSION
@@ -79,7 +79,7 @@ void ChecksumCalculator::addBuffer(const void* buf, size_t packetLen) {
 
 bool ChecksumCalculator::writeChecksum(void* outputChecksum, size_t outputChecksumLen) {
     if (outputChecksumLen < checksumByteSize()) return false;
-    char *checksumPtr = (char *)outputChecksum;
+    auto* checksumPtr = static_cast<char*>(outputChecksum);
     switch (m_version) {
         case 1: { // protocol v1 is to reverse the packetLen and write it at the end
             uint32_t val = computeV1Checksum();

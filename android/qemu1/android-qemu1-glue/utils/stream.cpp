@@ -15,11 +15,11 @@
 #include "android-qemu1-glue/base/files/QemuFileStream.h"
 
 using android::qemu::QemuFileStream;
-typedef ::Stream CStream;
+using CStream = ::Stream;
 
 CStream* stream_from_qemufile(QEMUFile* file) {
     if (!file) {
-        return NULL;
+        return nullptr;
     }
     return reinterpret_cast<CStream*>(new QemuFileStream(file));
 }

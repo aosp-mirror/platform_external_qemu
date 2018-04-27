@@ -15,14 +15,14 @@
 */
 #include <GLcommon/GLESbuffer.h>
 #include <GLcommon/GLEScontext.h>
-#include <string.h>
+#include <cstring>
 
 bool  GLESbuffer::setBuffer(GLuint size,GLuint usage,const GLvoid* data) {
     m_size = size;
     m_usage = usage;
     if(m_data) {
         delete [] m_data;
-        m_data = NULL;
+        m_data = nullptr;
     }
     m_data = new unsigned char[size];
     if(m_data) {
@@ -61,7 +61,7 @@ GLESbuffer::GLESbuffer(android::base::Stream* stream) : ObjectData(stream) {
     if (m_size) {
         m_data = new unsigned char[m_size];
         stream->read(m_data, m_size);
-        // TODO: m_conversionManager loading
+        // TODO(yahan): m_conversionManager loading
         m_conversionManager.addRange(Range(0,m_size));
     }
     m_wasBound = stream->getByte();
@@ -104,7 +104,7 @@ void GLESbuffer::onSave(android::base::Stream* stream,
         stream->write(m_data, m_size);
     }
 
-    // TODO: m_conversionManager
+    // TODO(yahan): m_conversionManager
     //
     // Treat it as a low priority issue for now because in GLES2 this is only
     // used for fix point vertex buffers. We are very unlikely to hit it

@@ -21,11 +21,11 @@
 #include "android/test/checkboot.h"
 #include "android/utils/filelock.h"
 
+#include <QCoreApplication>
 #include <QObject>
 #include <QThread>
 #include <QtCore>
-#include <QCoreApplication>
-
+#include <utility>
 #define DEBUG 0
 
 #if DEBUG
@@ -39,7 +39,7 @@
 static android::base::LazyInstance<EmulatorQtNoWindow::Ptr> sNoWindowInstance =
         LAZY_INSTANCE_INIT;
 
-Task::Task(std::function<void()> f) : fptr(f) {}
+Task::Task(std::function<void()> f) : fptr(std::move(f)) {}
 
 void Task::run() {
     fptr();
@@ -78,7 +78,7 @@ EmulatorQtNoWindow* EmulatorQtNoWindow::getInstance() {
 
 void EmulatorQtNoWindow::startThread(std::function<void()> f) {
     auto thread = new QThread();
-    auto task = new Task(f);
+    auto task = new Task(std::move(f));
 
     // pass task object to thread and start task when thread starts
     task->moveToThread(thread);

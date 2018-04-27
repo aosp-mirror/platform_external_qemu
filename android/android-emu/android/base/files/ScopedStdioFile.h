@@ -11,8 +11,8 @@
 
 #pragma once
 
+#include <cstdio>
 #include <memory>
-#include <stdio.h>
 
 namespace android {
 namespace base {

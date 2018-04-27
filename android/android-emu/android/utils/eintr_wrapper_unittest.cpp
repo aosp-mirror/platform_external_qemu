@@ -14,8 +14,8 @@
 
 #include "android/utils/eintr_wrapper.h"
 
-#include <stdarg.h>
-#include <setjmp.h>
+#include <csetjmp>
+#include <cstdarg>
 
 #include "android/utils/panic.h"
 
@@ -26,9 +26,10 @@ static int loop_count = 0;
 
 // This function returns the first time it is called, or -1/EINVAL
 // otherwise.
-static int return_einval_after_first_call(void) {
-    if (++loop_count == 1)
+static int return_einval_after_first_call() {
+    if (++loop_count == 1) {
         return 0;
+    }
 
     errno = EINVAL;
     return -1;
@@ -48,7 +49,7 @@ TEST(eintr_wrapper,NoLoopOnRegularError) {
     EXPECT_EQ(2, loop_count);
 }
 
-static int always_return_eintr(void) {
+static int always_return_eintr() {
     loop_count++;
 #ifdef _WIN32
     // Win32 cannot generate EINTR.
@@ -69,7 +70,7 @@ TEST(eintr_wrapper,IgnoreEintr) {
 
 // This function loops 10 times around |loop_count|, while returning
 // -1/errno.
-static int loop_eintr_10(void) {
+static int loop_eintr_10() {
     if (++loop_count < 10) {
         errno = EINTR;
         return -1;
@@ -98,7 +99,7 @@ static void my_panic_handler(const char* fmt, va_list args) {
     longjmp(panic_jumper, 1);
 }
 
-static int loop_eintr_200(void) {
+static int loop_eintr_200() {
     if (++loop_count < 200) {
         errno = EINTR;
         return -1;

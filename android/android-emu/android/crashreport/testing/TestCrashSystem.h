@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <utility>
 #include "android/crashreport/CrashSystem.h"
 
 namespace android {
@@ -21,18 +22,18 @@ namespace crashreport {
 
 class TestCrashSystem : public CrashSystem {
 public:
-    TestCrashSystem(const std::string& crashDir, const std::string& crashURL)
+    TestCrashSystem(std::string crashDir, std::string crashURL)
         : mPrevCrashSystem(CrashSystem::setForTesting(this)),
-          mCrashDir(crashDir),
-          mCrashURL(crashURL) {}
+          mCrashDir(std::move(crashDir)),
+          mCrashURL(std::move(crashURL)) {}
 
-    virtual ~TestCrashSystem() { CrashSystem::setForTesting(mPrevCrashSystem); }
-
-    virtual const std::string& getCrashDirectory(void) override {
-        return mCrashDir;
+    ~TestCrashSystem() override {
+        CrashSystem::setForTesting(mPrevCrashSystem);
     }
 
-    virtual const std::string& getCrashURL(void) override { return mCrashURL; }
+    const std::string& getCrashDirectory() override { return mCrashDir; }
+
+    const std::string& getCrashURL() override { return mCrashURL; }
 
 private:
     CrashSystem* mPrevCrashSystem;

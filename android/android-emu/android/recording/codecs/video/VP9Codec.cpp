@@ -29,7 +29,7 @@ VP9Codec::VP9Codec(CodecParams&& p,
       mFbHeight(fbHeight),
       mFbFormat(fbFormat) {}
 
-VP9Codec::~VP9Codec() {}
+VP9Codec::~VP9Codec() = default;
 
 // Configures the encoder. Returns true if successful, false otherwise.
 bool VP9Codec::configAndOpenEncoder(const AVFormatContext* oc,
@@ -79,7 +79,7 @@ bool VP9Codec::initSwxContext(const AVCodecContext* c,
                                     SwsContext** swsCxt) const {
     *swsCxt =
             sws_getContext(mFbWidth, mFbHeight, mFbFormat, c->width, c->height,
-                           c->pix_fmt, SCALE_FLAGS, NULL, NULL, NULL);
+                           c->pix_fmt, SCALE_FLAGS, nullptr, nullptr, nullptr);
     if (*swsCxt == nullptr) {
         LOG(ERROR) << "Could not initialize the conversion context";
         return false;

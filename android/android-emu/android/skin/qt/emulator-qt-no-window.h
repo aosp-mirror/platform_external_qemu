@@ -59,7 +59,7 @@ signals:
     void requestClose();
 
 private:
-    explicit EmulatorQtNoWindow(QObject* parent = 0);
+    explicit EmulatorQtNoWindow(QObject* parent = nullptr);
 
 private slots:
     void slot_clearInstance();

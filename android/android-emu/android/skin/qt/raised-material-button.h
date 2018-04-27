@@ -20,9 +20,8 @@
 class RaisedMaterialButton : public QPushButton {
 Q_OBJECT
 public:
-    explicit RaisedMaterialButton(QWidget* parent = 0) :
-        QPushButton(parent),
-        mShadowEffect(new QGraphicsDropShadowEffect()) {
+    explicit RaisedMaterialButton(QWidget* parent = nullptr)
+        : QPushButton(parent), mShadowEffect(new QGraphicsDropShadowEffect()) {
         mShadowEffect->setBlurRadius(4.5);
         mShadowEffect->setOffset(1.0, 1.0);
         setTheme(getSelectedTheme());

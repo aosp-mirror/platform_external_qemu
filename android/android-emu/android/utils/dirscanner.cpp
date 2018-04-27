@@ -40,7 +40,7 @@ const char* dirScanner_next(DirScanner* s) {
     if (s->pos < s->entries.size()) {
         return s->entries[s->pos++].c_str();
     }
-    return NULL;
+    return nullptr;
 }
 
 const char* dirScanner_nextFull(DirScanner* s) {
@@ -49,7 +49,7 @@ const char* dirScanner_nextFull(DirScanner* s) {
         s->result += s->entries[s->pos++];
         return s->result.c_str();
     }
-    return NULL;
+    return nullptr;
 }
 
 size_t dirScanner_numEntries(DirScanner* s) {
@@ -57,7 +57,7 @@ size_t dirScanner_numEntries(DirScanner* s) {
 }
 
 DirScanner* dirScanner_new(const char* rootPath) {
-    DirScanner* s = new DirScanner(rootPath);
+    auto* s = new DirScanner(rootPath);
     return s;
 }
 

@@ -18,7 +18,7 @@
 
 ANDROID_BEGIN_HEADER
 
-typedef struct QemuParameters QemuParameters;
+using QemuParameters = struct QemuParameters;
 
 // Generate the list of parameters to pass to the underlying QEMU engine.
 // |argv0| is the initial program name/path.

@@ -77,7 +77,7 @@ bool RecordScreenPage::removeFileIfExists(const QString& file) {
 }
 
 static void onRecordingStatusChanged(void* opaque, RecordingStatus status) {
-    RecordScreenPage* rsInst = (RecordScreenPage*)opaque;
+    RecordScreenPage* rsInst = static_cast<RecordScreenPage*>(opaque);
     if (rsInst) {
         rsInst->emitRecordingStatusChange(status);
     }
@@ -299,8 +299,9 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
             savePath + QString("/untitled.%1").arg(ext),
             tr("Multimedia (*.%1)").arg(ext));
 
-    if (recordingName.isEmpty())
+    if (recordingName.isEmpty()) {
         return;  // Operation was canceled
+    }
 
     QFileInfo fileInfo(recordingName);
     QString dirName = fileInfo.absolutePath();

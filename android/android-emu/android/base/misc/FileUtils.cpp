@@ -12,11 +12,11 @@
 #include "android/base/misc/FileUtils.h"
 #include "android/utils/eintr_wrapper.h"
 
-#include <assert.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cassert>
 
 #ifdef _WIN32
 #include <io.h>
@@ -31,15 +31,15 @@ namespace android {
 
 bool readFileIntoString(int fd, std::string* file_contents) {
     off_t size = lseek(fd, 0, SEEK_END);
-    if (size == (off_t)-1) {
+    if (size == static_cast<off_t>(-1)) {
         return false;
     }
     off_t err = lseek(fd, 0, SEEK_SET);
-    if (err == (off_t)-1) {
+    if (err == static_cast<off_t>(-1)) {
         return false;
     }
 
-    std::string buf((size_t)size, '\0');
+    std::string buf(static_cast<size_t>(size), '\0');
     ssize_t result = HANDLE_EINTR(read(fd, &buf[0], size));
     if (result != size) {
         return false;
@@ -51,13 +51,13 @@ bool readFileIntoString(int fd, std::string* file_contents) {
 bool writeStringToFile(int fd, const std::string& file_contents) {
     ssize_t result = HANDLE_EINTR(
             write(fd, file_contents.c_str(), file_contents.size()));
-    if (result != (ssize_t)file_contents.size()) {
+    if (result != static_cast<ssize_t>(file_contents.size())) {
         return false;
     }
     return true;
 }
 
-base::Optional<std::string> readFileIntoString(base::StringView name) {
+base::Optional<std::string> readFileIntoString(const base::StringView& name) {
     std::ifstream is(name.isNullTerminated()
                              ? name.c_str()
                              : std::string(name.data(), name.size()).c_str());

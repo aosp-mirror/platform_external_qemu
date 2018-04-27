@@ -31,8 +31,9 @@ namespace keymaster {
 keymaster_error_t EcdsaKeymaster1WrappedOperation::Begin(EVP_PKEY* ecdsa_key,
                                                          const AuthorizationSet& input_params) {
     Keymaster1Engine::KeyData* key_data = engine_->GetData(ecdsa_key);
-    if (!key_data)
+    if (!key_data) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     // Copy the input params and substitute KM_DIGEST_NONE for whatever was specified.  Also change
     // KM_PAD_ECDSA_PSS and KM_PAD_OAEP to KM_PAD_NONE, if necessary. These are the params we'll
@@ -49,8 +50,9 @@ keymaster_error_t EcdsaKeymaster1WrappedOperation::Begin(EVP_PKEY* ecdsa_key,
     // that layer.
     AuthorizationSet begin_params(input_params);
     int pos = begin_params.find(TAG_DIGEST);
-    if (pos == -1)
+    if (pos == -1) {
         return KM_ERROR_UNSUPPORTED_DIGEST;
+    }
     begin_params[pos].enumerated = KM_DIGEST_NONE;
 
     return engine_->device()->begin(engine_->device(), purpose_, &key_data->key_material,
@@ -77,8 +79,9 @@ keymaster_error_t EcdsaKeymaster1WrappedOperation::Abort() {
 
 keymaster_error_t EcdsaKeymaster1WrappedOperation::GetError(EVP_PKEY* ecdsa_key) {
     Keymaster1Engine::KeyData* key_data = engine_->GetData(ecdsa_key);
-    if (!key_data)
+    if (!key_data) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
     return key_data->error;
 }
 
@@ -100,13 +103,15 @@ Operation* EcdsaKeymaster1OperationFactory::CreateOperation(const Key& key,
                                                             const AuthorizationSet& begin_params,
                                                             keymaster_error_t* error) {
     keymaster_digest_t digest;
-    if (!GetAndValidateDigest(begin_params, key, &digest, error))
+    if (!GetAndValidateDigest(begin_params, key, &digest, error)) {
         return nullptr;
+    }
 
     const EcdsaKeymaster1Key& ecdsa_km1_key(static_cast<const EcdsaKeymaster1Key&>(key));
     unique_ptr<EVP_PKEY, EVP_PKEY_Delete> ecdsa(GetEvpKey(ecdsa_km1_key, error));
-    if (!ecdsa)
+    if (!ecdsa) {
         return nullptr;
+    }
 
     switch (purpose_) {
     case KM_PURPOSE_SIGN:

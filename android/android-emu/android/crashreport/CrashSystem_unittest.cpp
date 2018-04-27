@@ -22,8 +22,8 @@
 using namespace android::base;
 using namespace android::crashreport;
 
-// TODO fix validatePaths_nonWritableHomeDir
-// TODO windows tests
+// TODO(zyy): fix validatePaths_nonWritableHomeDir
+// TODO(zyy): windows tests
 
 class CrashSystemTest: public ::testing::Test {
 public:

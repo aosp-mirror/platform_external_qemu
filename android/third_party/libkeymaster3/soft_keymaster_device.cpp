@@ -133,27 +133,31 @@ static keymaster_error_t map_digests(keymaster1_device_t* dev, SoftKeymasterDevi
 
     keymaster_algorithm_t sig_algorithms[] = {KM_ALGORITHM_RSA, KM_ALGORITHM_EC, KM_ALGORITHM_HMAC};
     keymaster_purpose_t sig_purposes[] = {KM_PURPOSE_SIGN, KM_PURPOSE_VERIFY};
-    for (auto algorithm : sig_algorithms)
+    for (auto algorithm : sig_algorithms) {
         for (auto purpose : sig_purposes) {
             bool alg_purpose_supports_all;
-            keymaster_error_t error =
-                add_digests(dev, algorithm, purpose, map, &alg_purpose_supports_all);
-            if (error != KM_ERROR_OK)
+            keymaster_error_t error = add_digests(dev, algorithm, purpose, map,
+                                                  &alg_purpose_supports_all);
+            if (error != KM_ERROR_OK) {
                 return error;
+            }
             *supports_all &= alg_purpose_supports_all;
         }
+    }
 
     keymaster_algorithm_t crypt_algorithms[] = {KM_ALGORITHM_RSA};
     keymaster_purpose_t crypt_purposes[] = {KM_PURPOSE_ENCRYPT, KM_PURPOSE_DECRYPT};
-    for (auto algorithm : crypt_algorithms)
+    for (auto algorithm : crypt_algorithms) {
         for (auto purpose : crypt_purposes) {
             bool alg_purpose_supports_all;
-            keymaster_error_t error =
-                add_digests(dev, algorithm, purpose, map, &alg_purpose_supports_all);
-            if (error != KM_ERROR_OK)
+            keymaster_error_t error = add_digests(dev, algorithm, purpose, map,
+                                                  &alg_purpose_supports_all);
+            if (error != KM_ERROR_OK) {
                 return error;
+            }
             *supports_all &= alg_purpose_supports_all;
         }
+    }
 
     return KM_ERROR_OK;
 }
@@ -183,13 +187,15 @@ keymaster_error_t SoftKeymasterDevice::SetHardwareDevice(keymaster0_device_t* ke
     assert(keymaster0_device);
     LOG_D("Reinitializing SoftKeymasterDevice to use HW keymaster0", 0);
 
-    if (!context_)
+    if (!context_) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
     supports_all_digests_ = false;
     keymaster_error_t error = context_->SetHardwareDevice(keymaster0_device);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     initialize_device_struct(keymaster0_device->flags);
 
@@ -212,17 +218,20 @@ keymaster_error_t SoftKeymasterDevice::SetHardwareDevice(keymaster1_device_t* ke
     assert(keymaster1_device);
     LOG_D("Reinitializing SoftKeymasterDevice to use HW keymaster1", 0);
 
-    if (!context_)
+    if (!context_) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
     keymaster_error_t error =
         map_digests(keymaster1_device, &km1_device_digests_, &supports_all_digests_);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     error = context_->SetHardwareDevice(keymaster1_device);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     initialize_device_struct(keymaster1_device->flags);
 
@@ -250,14 +259,18 @@ bool SoftKeymasterDevice::Keymaster1DeviceIsGood() {
         KM_DIGEST_SHA_2_256, KM_DIGEST_SHA_2_384, KM_DIGEST_SHA_2_512};
 
     for (auto& entry : km1_device_digests_) {
-        if (entry.first.first == KM_ALGORITHM_RSA)
+        if (entry.first.first == KM_ALGORITHM_RSA) {
             if (!std::is_permutation(entry.second.begin(), entry.second.end(),
-                                     expected_rsa_digests.begin()))
+                                     expected_rsa_digests.begin())) {
                 return false;
-        if (entry.first.first == KM_ALGORITHM_EC)
+            }
+        }
+        if (entry.first.first == KM_ALGORITHM_EC) {
             if (!std::is_permutation(entry.second.begin(), entry.second.end(),
-                                     expected_ec_digests.begin()))
+                                     expected_ec_digests.begin())) {
                 return false;
+            }
+        }
     }
     return true;
 }
@@ -360,10 +373,12 @@ template <typename RequestType>
 void AddClientAndAppData(const keymaster_blob_t* client_id, const keymaster_blob_t* app_data,
                          RequestType* request) {
     request->additional_params.Clear();
-    if (client_id)
+    if (client_id) {
         request->additional_params.push_back(TAG_APPLICATION_ID, *client_id);
-    if (app_data)
+    }
+    if (app_data) {
         request->additional_params.push_back(TAG_APPLICATION_DATA, *app_data);
+    }
 }
 
 template <typename T> SoftKeymasterDevice* convert_device(const T* dev) {
@@ -377,15 +392,16 @@ template <typename T> SoftKeymasterDevice* convert_device(const T* dev) {
 template <keymaster_tag_t Tag, keymaster_tag_type_t Type, typename KeymasterEnum>
 bool FindTagValue(const keymaster_key_param_set_t& params,
                   TypedEnumTag<Type, Tag, KeymasterEnum> tag, KeymasterEnum* value) {
-    for (size_t i = 0; i < params.length; ++i)
+    for (size_t i = 0; i < params.length; ++i) {
         if (params.params[i].tag == tag) {
             *value = static_cast<KeymasterEnum>(params.params[i].enumerated);
             return true;
         }
+    }
     return false;
 }
 
-}  // unnamed namespaced
+}  // namespace
 
 /* static */
 int SoftKeymasterDevice::close_device(hw_device_t* dev) {
@@ -411,15 +427,20 @@ int SoftKeymasterDevice::close_device(hw_device_t* dev) {
 keymaster_error_t SoftKeymasterDevice::get_supported_algorithms(const keymaster1_device_t* dev,
                                                                 keymaster_algorithm_t** algorithms,
                                                                 size_t* algorithms_length) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!algorithms || !algorithms_length)
+    if (!algorithms || !algorithms_length) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev)
-        return km1_dev->get_supported_algorithms(km1_dev, algorithms, algorithms_length);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev) {
+        return km1_dev->get_supported_algorithms(km1_dev, algorithms,
+                                                 algorithms_length);
+    }
 
     SupportedAlgorithmsRequest request;
     SupportedAlgorithmsResponse response;
@@ -433,8 +454,9 @@ keymaster_error_t SoftKeymasterDevice::get_supported_algorithms(const keymaster1
     *algorithms_length = response.results_length;
     *algorithms =
         reinterpret_cast<keymaster_algorithm_t*>(malloc(*algorithms_length * sizeof(**algorithms)));
-    if (!*algorithms)
+    if (!*algorithms) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     std::copy(response.results, response.results + response.results_length, *algorithms);
     return KM_ERROR_OK;
 }
@@ -445,15 +467,20 @@ keymaster_error_t SoftKeymasterDevice::get_supported_block_modes(const keymaster
                                                                  keymaster_purpose_t purpose,
                                                                  keymaster_block_mode_t** modes,
                                                                  size_t* modes_length) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!modes || !modes_length)
+    if (!modes || !modes_length) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev)
-        return km1_dev->get_supported_block_modes(km1_dev, algorithm, purpose, modes, modes_length);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev) {
+        return km1_dev->get_supported_block_modes(km1_dev, algorithm, purpose,
+                                                  modes, modes_length);
+    }
 
     SupportedBlockModesRequest request;
     request.algorithm = algorithm;
@@ -469,8 +496,9 @@ keymaster_error_t SoftKeymasterDevice::get_supported_block_modes(const keymaster
 
     *modes_length = response.results_length;
     *modes = reinterpret_cast<keymaster_block_mode_t*>(malloc(*modes_length * sizeof(**modes)));
-    if (!*modes)
+    if (!*modes) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     std::copy(response.results, response.results + response.results_length, *modes);
     return KM_ERROR_OK;
 }
@@ -481,16 +509,20 @@ keymaster_error_t SoftKeymasterDevice::get_supported_padding_modes(const keymast
                                                                    keymaster_purpose_t purpose,
                                                                    keymaster_padding_t** modes,
                                                                    size_t* modes_length) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!modes || !modes_length)
+    if (!modes || !modes_length) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev)
-        return km1_dev->get_supported_padding_modes(km1_dev, algorithm, purpose, modes,
-                                                    modes_length);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev) {
+        return km1_dev->get_supported_padding_modes(km1_dev, algorithm, purpose,
+                                                    modes, modes_length);
+    }
 
     SupportedPaddingModesRequest request;
     request.algorithm = algorithm;
@@ -505,8 +537,9 @@ keymaster_error_t SoftKeymasterDevice::get_supported_padding_modes(const keymast
 
     *modes_length = response.results_length;
     *modes = reinterpret_cast<keymaster_padding_t*>(malloc(*modes_length * sizeof(**modes)));
-    if (!*modes)
+    if (!*modes) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     std::copy(response.results, response.results + response.results_length, *modes);
     return KM_ERROR_OK;
 }
@@ -517,15 +550,20 @@ keymaster_error_t SoftKeymasterDevice::get_supported_digests(const keymaster1_de
                                                              keymaster_purpose_t purpose,
                                                              keymaster_digest_t** digests,
                                                              size_t* digests_length) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!digests || !digests_length)
+    if (!digests || !digests_length) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev)
-        return km1_dev->get_supported_digests(km1_dev, algorithm, purpose, digests, digests_length);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev) {
+        return km1_dev->get_supported_digests(km1_dev, algorithm, purpose,
+                                              digests, digests_length);
+    }
 
     SupportedDigestsRequest request;
     request.algorithm = algorithm;
@@ -540,8 +578,9 @@ keymaster_error_t SoftKeymasterDevice::get_supported_digests(const keymaster1_de
 
     *digests_length = response.results_length;
     *digests = reinterpret_cast<keymaster_digest_t*>(malloc(*digests_length * sizeof(**digests)));
-    if (!*digests)
+    if (!*digests) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     std::copy(response.results, response.results + response.results_length, *digests);
     return KM_ERROR_OK;
 }
@@ -550,15 +589,20 @@ keymaster_error_t SoftKeymasterDevice::get_supported_digests(const keymaster1_de
 keymaster_error_t SoftKeymasterDevice::get_supported_import_formats(
     const keymaster1_device_t* dev, keymaster_algorithm_t algorithm,
     keymaster_key_format_t** formats, size_t* formats_length) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!formats || !formats_length)
+    if (!formats || !formats_length) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev)
-        return km1_dev->get_supported_import_formats(km1_dev, algorithm, formats, formats_length);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev) {
+        return km1_dev->get_supported_import_formats(km1_dev, algorithm,
+                                                     formats, formats_length);
+    }
 
     SupportedImportFormatsRequest request;
     request.algorithm = algorithm;
@@ -573,8 +617,9 @@ keymaster_error_t SoftKeymasterDevice::get_supported_import_formats(
     *formats_length = response.results_length;
     *formats =
         reinterpret_cast<keymaster_key_format_t*>(malloc(*formats_length * sizeof(**formats)));
-    if (!*formats)
+    if (!*formats) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     std::copy(response.results, response.results + response.results_length, *formats);
     return KM_ERROR_OK;
 }
@@ -583,15 +628,20 @@ keymaster_error_t SoftKeymasterDevice::get_supported_import_formats(
 keymaster_error_t SoftKeymasterDevice::get_supported_export_formats(
     const keymaster1_device_t* dev, keymaster_algorithm_t algorithm,
     keymaster_key_format_t** formats, size_t* formats_length) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!formats || !formats_length)
+    if (!formats || !formats_length) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev)
-        return km1_dev->get_supported_export_formats(km1_dev, algorithm, formats, formats_length);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev) {
+        return km1_dev->get_supported_export_formats(km1_dev, algorithm,
+                                                     formats, formats_length);
+    }
 
     SupportedExportFormatsRequest request;
     request.algorithm = algorithm;
@@ -606,8 +656,9 @@ keymaster_error_t SoftKeymasterDevice::get_supported_export_formats(
     *formats_length = response.results_length;
     *formats =
         reinterpret_cast<keymaster_key_format_t*>(malloc(*formats_length * sizeof(**formats)));
-    if (!*formats)
+    if (!*formats) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     std::copy(response.results, response.results + *formats_length, *formats);
     return KM_ERROR_OK;
 }
@@ -626,38 +677,45 @@ keymaster_error_t SoftKeymasterDevice::configure(const keymaster2_device_t* dev,
 
     keymaster_error_t error =
         convert_device(dev)->context_->SetSystemVersion(os_version, os_patchlevel);
-    if (error == KM_ERROR_OK)
+    if (error == KM_ERROR_OK) {
         convert_device(dev)->configured_ = true;
+    }
     return error;
 }
 
 /* static */
 keymaster_error_t SoftKeymasterDevice::add_rng_entropy(const keymaster1_device_t* dev,
                                                        const uint8_t* data, size_t data_length) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev)
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev) {
         return km1_dev->add_rng_entropy(km1_dev, data, data_length);
+    }
 
     AddEntropyRequest request;
     request.random_data.Reinitialize(data, data_length);
     AddEntropyResponse response;
     convert_device(dev)->impl_->AddRngEntropy(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         LOG_E("add_rng_entropy failed with %d", response.error);
+    }
     return response.error;
 }
 
 /* static */
 keymaster_error_t SoftKeymasterDevice::add_rng_entropy(const keymaster2_device_t* dev,
                                                        const uint8_t* data, size_t data_length) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
     return add_rng_entropy(&sk_dev->km1_device_, data, data_length);
@@ -674,18 +732,24 @@ bool SoftKeymasterDevice::FindUnsupportedDigest(keymaster_algorithm_t algorithm,
     assert(wrapped_km1_device_);
 
     auto supported_digests = km1_device_digests_.find(std::make_pair(algorithm, purpose));
-    if (supported_digests == km1_device_digests_.end())
-        // Invalid algorith/purpose pair (e.g. EC encrypt).  Let the error be handled by HW module.
+    if (supported_digests == km1_device_digests_.end()) {
+        // Invalid algorith/purpose pair (e.g. EC encrypt).  Let the error be
+        // handled by HW module.
         return false;
+    }
 
-    for (auto& entry : params)
-        if (entry.tag == TAG_DIGEST)
+    for (auto& entry : params) {
+        if (entry.tag == TAG_DIGEST) {
             if (!contains(supported_digests->second, entry.enumerated)) {
-                LOG_I("Digest %d requested but not supported by module %s", entry.enumerated,
+                LOG_I("Digest %d requested but not supported by module %s",
+                      entry.enumerated,
                       wrapped_km1_device_->common.module->name);
-                *unsupported = static_cast<keymaster_digest_t>(entry.enumerated);
+                *unsupported =
+                        static_cast<keymaster_digest_t>(entry.enumerated);
                 return true;
             }
+        }
+    }
     return false;
 }
 
@@ -693,8 +757,9 @@ bool SoftKeymasterDevice::RequiresSoftwareDigesting(keymaster_algorithm_t algori
                                                     keymaster_purpose_t purpose,
                                                     const AuthorizationSet& params) const {
     assert(wrapped_km1_device_);
-    if (!wrapped_km1_device_)
+    if (!wrapped_km1_device_) {
         return true;
+    }
 
     switch (algorithm) {
     case KM_ALGORITHM_AES:
@@ -718,8 +783,9 @@ bool SoftKeymasterDevice::RequiresSoftwareDigesting(keymaster_algorithm_t algori
 bool SoftKeymasterDevice::KeyRequiresSoftwareDigesting(
     const AuthorizationSet& key_description) const {
     assert(wrapped_km1_device_);
-    if (!wrapped_km1_device_)
+    if (!wrapped_km1_device_) {
         return true;
+    }
 
     keymaster_algorithm_t algorithm;
     if (!key_description.GetTagValue(TAG_ALGORITHM, &algorithm)) {
@@ -727,12 +793,16 @@ bool SoftKeymasterDevice::KeyRequiresSoftwareDigesting(
         return false;
     }
 
-    for (auto& entry : key_description)
+    for (auto& entry : key_description) {
         if (entry.tag == TAG_PURPOSE) {
-            keymaster_purpose_t purpose = static_cast<keymaster_purpose_t>(entry.enumerated);
-            if (RequiresSoftwareDigesting(algorithm, purpose, key_description))
+            keymaster_purpose_t purpose =
+                    static_cast<keymaster_purpose_t>(entry.enumerated);
+            if (RequiresSoftwareDigesting(algorithm, purpose,
+                                          key_description)) {
                 return true;
+            }
         }
+    }
 
     return false;
 }
@@ -741,11 +811,13 @@ bool SoftKeymasterDevice::KeyRequiresSoftwareDigesting(
 keymaster_error_t SoftKeymasterDevice::generate_key(
     const keymaster1_device_t* dev, const keymaster_key_param_set_t* params,
     keymaster_key_blob_t* key_blob, keymaster_key_characteristics_t** characteristics) {
-    if (!dev || !params)
+    if (!dev || !params) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!key_blob)
+    if (!key_blob) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
 
@@ -753,31 +825,41 @@ keymaster_error_t SoftKeymasterDevice::generate_key(
     request.key_description.Reinitialize(*params);
 
     keymaster1_device_t* km1_dev = sk_dev->wrapped_km1_device_;
-    if (km1_dev && !sk_dev->KeyRequiresSoftwareDigesting(request.key_description))
-        return km1_dev->generate_key(km1_dev, params, key_blob, characteristics);
+    if (km1_dev &&
+        !sk_dev->KeyRequiresSoftwareDigesting(request.key_description)) {
+        return km1_dev->generate_key(km1_dev, params, key_blob,
+                                     characteristics);
+    }
 
     GenerateKeyResponse response;
     sk_dev->impl_->GenerateKey(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     key_blob->key_material_size = response.key_blob.key_material_size;
-    uint8_t* tmp = reinterpret_cast<uint8_t*>(malloc(key_blob->key_material_size));
-    if (!tmp)
+    uint8_t* tmp =
+            reinterpret_cast<uint8_t*>(malloc(key_blob->key_material_size));
+    if (!tmp) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
-    memcpy(tmp, response.key_blob.key_material, response.key_blob.key_material_size);
+    }
+    memcpy(tmp, response.key_blob.key_material,
+           response.key_blob.key_material_size);
     key_blob->key_material = tmp;
 
     if (characteristics) {
-        // This is a keymaster1 method, and keymaster1 doesn't include version info, so remove it.
+        // This is a keymaster1 method, and keymaster1 doesn't include version
+        // info, so remove it.
         response.enforced.erase(response.enforced.find(TAG_OS_VERSION));
         response.enforced.erase(response.enforced.find(TAG_OS_PATCHLEVEL));
         response.unenforced.erase(response.unenforced.find(TAG_OS_VERSION));
         response.unenforced.erase(response.unenforced.find(TAG_OS_PATCHLEVEL));
 
-        *characteristics = BuildCharacteristics(response.enforced, response.unenforced);
-        if (!*characteristics)
+        *characteristics =
+                BuildCharacteristics(response.enforced, response.unenforced);
+        if (!*characteristics) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
     }
 
     return KM_ERROR_OK;
@@ -788,14 +870,17 @@ SoftKeymasterDevice::generate_key(const keymaster2_device_t* dev,  //
                                   const keymaster_key_param_set_t* params,
                                   keymaster_key_blob_t* key_blob,
                                   keymaster_key_characteristics_t* characteristics) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
-    if (!key_blob)
+    if (!key_blob) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
 
@@ -803,32 +888,39 @@ SoftKeymasterDevice::generate_key(const keymaster2_device_t* dev,  //
     request.key_description.Reinitialize(*params);
 
     keymaster1_device_t* km1_dev = sk_dev->wrapped_km1_device_;
-    if (km1_dev && !sk_dev->KeyRequiresSoftwareDigesting(request.key_description)) {
+    if (km1_dev &&
+        !sk_dev->KeyRequiresSoftwareDigesting(request.key_description)) {
         keymaster_ec_curve_t curve;
         if (request.key_description.Contains(TAG_ALGORITHM, KM_ALGORITHM_EC) &&
             request.key_description.GetTagValue(TAG_EC_CURVE, &curve)) {
-            // Keymaster1 doesn't know about EC curves. We need to translate to key size.
+            // Keymaster1 doesn't know about EC curves. We need to translate to
+            // key size.
             uint32_t key_size_from_curve;
-            keymaster_error_t error = EcCurveToKeySize(curve, &key_size_from_curve);
+            keymaster_error_t error =
+                    EcCurveToKeySize(curve, &key_size_from_curve);
             if (error != KM_ERROR_OK) {
                 return error;
             }
 
             uint32_t key_size_from_desc;
-            if (request.key_description.GetTagValue(TAG_KEY_SIZE, &key_size_from_desc)) {
+            if (request.key_description.GetTagValue(TAG_KEY_SIZE,
+                                                    &key_size_from_desc)) {
                 if (key_size_from_desc != key_size_from_curve) {
                     return KM_ERROR_INVALID_ARGUMENT;
                 }
             } else {
-                request.key_description.push_back(TAG_KEY_SIZE, key_size_from_curve);
+                request.key_description.push_back(TAG_KEY_SIZE,
+                                                  key_size_from_curve);
             }
         }
 
         keymaster_key_characteristics_t* chars_ptr;
-        keymaster_error_t error = km1_dev->generate_key(km1_dev, &request.key_description, key_blob,
-                                                        characteristics ? &chars_ptr : nullptr);
-        if (error != KM_ERROR_OK)
+        keymaster_error_t error = km1_dev->generate_key(
+                km1_dev, &request.key_description, key_blob,
+                characteristics ? &chars_ptr : nullptr);
+        if (error != KM_ERROR_OK) {
             return error;
+        }
 
         if (characteristics) {
             *characteristics = *chars_ptr;
@@ -840,13 +932,15 @@ SoftKeymasterDevice::generate_key(const keymaster2_device_t* dev,  //
 
     GenerateKeyResponse response;
     sk_dev->impl_->GenerateKey(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     key_blob->key_material_size = response.key_blob.key_material_size;
     uint8_t* tmp = reinterpret_cast<uint8_t*>(malloc(key_blob->key_material_size));
-    if (!tmp)
+    if (!tmp) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     memcpy(tmp, response.key_blob.key_material, response.key_blob.key_material_size);
     key_blob->key_material = tmp;
 
@@ -863,21 +957,24 @@ keymaster_error_t SoftKeymasterDevice::get_key_characteristics(
     const keymaster1_device_t* dev, const keymaster_key_blob_t* key_blob,
     const keymaster_blob_t* client_id, const keymaster_blob_t* app_data,
     keymaster_key_characteristics_t** characteristics) {
-    if (!dev || !key_blob || !key_blob->key_material)
+    if (!dev || !key_blob || !key_blob->key_material) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!characteristics)
+    if (!characteristics) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
     if (km1_dev) {
-        keymaster_error_t error = km1_dev->get_key_characteristics(km1_dev, key_blob, client_id,
-                                                                   app_data, characteristics);
+        keymaster_error_t error = km1_dev->get_key_characteristics(
+                km1_dev, key_blob, client_id, app_data, characteristics);
         if (error != KM_ERROR_INVALID_KEY_BLOB) {
             return error;
         }
-        // If we got "invalid blob", continue to try with the software device. This might be a
-        // software key blob.
+        // If we got "invalid blob", continue to try with the software device.
+        // This might be a software key blob.
     }
 
     GetKeyCharacteristicsRequest request;
@@ -886,8 +983,9 @@ keymaster_error_t SoftKeymasterDevice::get_key_characteristics(
 
     GetKeyCharacteristicsResponse response;
     convert_device(dev)->impl_->GetKeyCharacteristics(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     // This is a keymaster1 method, and keymaster1 doesn't include version info, so remove it.
     response.enforced.erase(response.enforced.find(TAG_OS_VERSION));
@@ -896,8 +994,9 @@ keymaster_error_t SoftKeymasterDevice::get_key_characteristics(
     response.unenforced.erase(response.unenforced.find(TAG_OS_PATCHLEVEL));
 
     *characteristics = BuildCharacteristics(response.enforced, response.unenforced);
-    if (!*characteristics)
+    if (!*characteristics) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     return KM_ERROR_OK;
 }
@@ -907,14 +1006,17 @@ keymaster_error_t SoftKeymasterDevice::get_key_characteristics(
     const keymaster2_device_t* dev, const keymaster_key_blob_t* key_blob,
     const keymaster_blob_t* client_id, const keymaster_blob_t* app_data,
     keymaster_key_characteristics_t* characteristics) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
-    if (!characteristics)
+    if (!characteristics) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
 
@@ -924,8 +1026,9 @@ keymaster_error_t SoftKeymasterDevice::get_key_characteristics(
 
     GetKeyCharacteristicsResponse response;
     sk_dev->impl_->GetKeyCharacteristics(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     response.enforced.CopyToParamSet(&characteristics->hw_enforced);
     response.unenforced.CopyToParamSet(&characteristics->sw_enforced);
@@ -938,11 +1041,13 @@ keymaster_error_t SoftKeymasterDevice::import_key(
     const keymaster1_device_t* dev, const keymaster_key_param_set_t* params,
     keymaster_key_format_t key_format, const keymaster_blob_t* key_data,
     keymaster_key_blob_t* key_blob, keymaster_key_characteristics_t** characteristics) {
-    if (!params || !key_data)
+    if (!params || !key_data) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!key_blob)
+    if (!key_blob) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
 
@@ -950,32 +1055,40 @@ keymaster_error_t SoftKeymasterDevice::import_key(
     request.key_description.Reinitialize(*params);
 
     keymaster1_device_t* km1_dev = sk_dev->wrapped_km1_device_;
-    if (km1_dev && !sk_dev->KeyRequiresSoftwareDigesting(request.key_description))
-        return km1_dev->import_key(km1_dev, params, key_format, key_data, key_blob,
-                                   characteristics);
+    if (km1_dev &&
+        !sk_dev->KeyRequiresSoftwareDigesting(request.key_description)) {
+        return km1_dev->import_key(km1_dev, params, key_format, key_data,
+                                   key_blob, characteristics);
+    }
 
-    if (characteristics)
+    if (characteristics) {
         *characteristics = nullptr;
+    }
 
     request.key_format = key_format;
     request.SetKeyMaterial(key_data->data, key_data->data_length);
 
     ImportKeyResponse response;
     convert_device(dev)->impl_->ImportKey(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     key_blob->key_material_size = response.key_blob.key_material_size;
-    key_blob->key_material = reinterpret_cast<uint8_t*>(malloc(key_blob->key_material_size));
-    if (!key_blob->key_material)
+    key_blob->key_material =
+            reinterpret_cast<uint8_t*>(malloc(key_blob->key_material_size));
+    if (!key_blob->key_material) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
-    memcpy(const_cast<uint8_t*>(key_blob->key_material), response.key_blob.key_material,
-           response.key_blob.key_material_size);
+    }
+    memcpy(const_cast<uint8_t*>(key_blob->key_material),
+           response.key_blob.key_material, response.key_blob.key_material_size);
 
     if (characteristics) {
-        *characteristics = BuildCharacteristics(response.enforced, response.unenforced);
-        if (!*characteristics)
+        *characteristics =
+                BuildCharacteristics(response.enforced, response.unenforced);
+        if (!*characteristics) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
     }
     return KM_ERROR_OK;
 }
@@ -985,19 +1098,21 @@ keymaster_error_t SoftKeymasterDevice::import_key(
     const keymaster2_device_t* dev, const keymaster_key_param_set_t* params,
     keymaster_key_format_t key_format, const keymaster_blob_t* key_data,
     keymaster_key_blob_t* key_blob, keymaster_key_characteristics_t* characteristics) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
 
     keymaster_error_t error;
     if (characteristics) {
         keymaster_key_characteristics_t* characteristics_ptr;
-        error = import_key(&sk_dev->km1_device_, params, key_format, key_data, key_blob,
-                           &characteristics_ptr);
+        error = import_key(&sk_dev->km1_device_, params, key_format, key_data,
+                           key_blob, &characteristics_ptr);
         if (error == KM_ERROR_OK) {
             *characteristics = *characteristics_ptr;
             free(characteristics_ptr);
@@ -1016,16 +1131,20 @@ keymaster_error_t SoftKeymasterDevice::export_key(const keymaster1_device_t* dev
                                                   const keymaster_blob_t* client_id,
                                                   const keymaster_blob_t* app_data,
                                                   keymaster_blob_t* export_data) {
-    if (!key_to_export || !key_to_export->key_material)
+    if (!key_to_export || !key_to_export->key_material) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!export_data)
+    if (!export_data) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev)
-        return km1_dev->export_key(km1_dev, export_format, key_to_export, client_id, app_data,
-                                   export_data);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev) {
+        return km1_dev->export_key(km1_dev, export_format, key_to_export,
+                                   client_id, app_data, export_data);
+    }
 
     export_data->data = nullptr;
     export_data->data_length = 0;
@@ -1037,13 +1156,15 @@ keymaster_error_t SoftKeymasterDevice::export_key(const keymaster1_device_t* dev
 
     ExportKeyResponse response;
     convert_device(dev)->impl_->ExportKey(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     export_data->data_length = response.key_data_length;
     uint8_t* tmp = reinterpret_cast<uint8_t*>(malloc(export_data->data_length));
-    if (!tmp)
+    if (!tmp) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     memcpy(tmp, response.key_data, export_data->data_length);
     export_data->data = tmp;
     return KM_ERROR_OK;
@@ -1056,15 +1177,17 @@ keymaster_error_t SoftKeymasterDevice::export_key(const keymaster2_device_t* dev
                                                   const keymaster_blob_t* client_id,
                                                   const keymaster_blob_t* app_data,
                                                   keymaster_blob_t* export_data) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
-    return export_key(&sk_dev->km1_device_, export_format, key_to_export, client_id, app_data,
-                      export_data);
+    return export_key(&sk_dev->km1_device_, export_format, key_to_export,
+                      client_id, app_data, export_data);
 }
 
 /* static */
@@ -1072,11 +1195,13 @@ keymaster_error_t SoftKeymasterDevice::attest_key(const keymaster2_device_t* dev
                                                   const keymaster_key_blob_t* key_to_attest,
                                                   const keymaster_key_param_set_t* attest_params,
                                                   keymaster_cert_chain_t* cert_chain) {
-    if (!dev || !key_to_attest || !attest_params || !cert_chain)
+    if (!dev || !key_to_attest || !attest_params || !cert_chain) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     cert_chain->entry_count = 0;
     cert_chain->entries = nullptr;
@@ -1086,27 +1211,34 @@ keymaster_error_t SoftKeymasterDevice::attest_key(const keymaster2_device_t* dev
     request.attest_params.Reinitialize(*attest_params);
 
     keymaster_blob_t attestation_challenge = {};
-    request.attest_params.GetTagValue(TAG_ATTESTATION_CHALLENGE, &attestation_challenge);
-    if (attestation_challenge.data_length > kMaximumAttestationChallengeLength) {
+    request.attest_params.GetTagValue(TAG_ATTESTATION_CHALLENGE,
+                                      &attestation_challenge);
+    if (attestation_challenge.data_length >
+        kMaximumAttestationChallengeLength) {
         LOG_E("%d-byte attestation challenge; only %d bytes allowed",
-              attestation_challenge.data_length, kMaximumAttestationChallengeLength);
+              attestation_challenge.data_length,
+              kMaximumAttestationChallengeLength);
         return KM_ERROR_INVALID_INPUT_LENGTH;
     }
 
     AttestKeyResponse response;
     convert_device(dev)->impl_->AttestKey(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     // Allocate and clear storage for cert_chain.
     keymaster_cert_chain_t& rsp_chain = response.certificate_chain;
     cert_chain->entries = reinterpret_cast<keymaster_blob_t*>(
         malloc(rsp_chain.entry_count * sizeof(*cert_chain->entries)));
-    if (!cert_chain->entries)
+    if (!cert_chain->entries) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     cert_chain->entry_count = rsp_chain.entry_count;
-    for (keymaster_blob_t& entry : array_range(cert_chain->entries, cert_chain->entry_count))
+    for (keymaster_blob_t& entry :
+         array_range(cert_chain->entries, cert_chain->entry_count)) {
         entry = {};
+    };
 
     // Copy cert_chain contents
     size_t i = 0;
@@ -1129,14 +1261,17 @@ keymaster_error_t SoftKeymasterDevice::upgrade_key(const keymaster2_device_t* de
                                                    const keymaster_key_blob_t* key_to_upgrade,
                                                    const keymaster_key_param_set_t* upgrade_params,
                                                    keymaster_key_blob_t* upgraded_key) {
-    if (!dev || !key_to_upgrade || !upgrade_params)
+    if (!dev || !key_to_upgrade || !upgrade_params) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!upgraded_key)
+    if (!upgraded_key) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     UpgradeKeyRequest request;
     request.SetKeyMaterial(*key_to_upgrade);
@@ -1144,14 +1279,18 @@ keymaster_error_t SoftKeymasterDevice::upgrade_key(const keymaster2_device_t* de
 
     UpgradeKeyResponse response;
     convert_device(dev)->impl_->UpgradeKey(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     upgraded_key->key_material_size = response.upgraded_key.key_material_size;
-    uint8_t* tmp = reinterpret_cast<uint8_t*>(malloc(upgraded_key->key_material_size));
-    if (!tmp)
+    uint8_t* tmp =
+            reinterpret_cast<uint8_t*>(malloc(upgraded_key->key_material_size));
+    if (!tmp) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
-    memcpy(tmp, response.upgraded_key.key_material, response.upgraded_key.key_material_size);
+    }
+    memcpy(tmp, response.upgraded_key.key_material,
+           response.upgraded_key.key_material_size);
     upgraded_key->key_material = tmp;
 
     return KM_ERROR_OK;
@@ -1160,8 +1299,9 @@ keymaster_error_t SoftKeymasterDevice::upgrade_key(const keymaster2_device_t* de
 /* static */
 keymaster_error_t SoftKeymasterDevice::delete_key(const keymaster1_device_t* dev,
                                                   const keymaster_key_blob_t* key) {
-    if (!dev || !key || !key->key_material)
+    if (!dev || !key || !key->key_material) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
     KeymasterKeyBlob blob(*key);
     return convert_device(dev)->context_->DeleteKey(blob);
@@ -1170,11 +1310,13 @@ keymaster_error_t SoftKeymasterDevice::delete_key(const keymaster1_device_t* dev
 /* static */
 keymaster_error_t SoftKeymasterDevice::delete_key(const keymaster2_device_t* dev,
                                                   const keymaster_key_blob_t* key) {
-    if (!dev || !key || !key->key_material)
+    if (!dev || !key || !key->key_material) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     KeymasterKeyBlob blob(*key);
     return convert_device(dev)->context_->DeleteKey(blob);
@@ -1182,19 +1324,22 @@ keymaster_error_t SoftKeymasterDevice::delete_key(const keymaster2_device_t* dev
 
 /* static */
 keymaster_error_t SoftKeymasterDevice::delete_all_keys(const keymaster1_device_t* dev) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
     return convert_device(dev)->context_->DeleteAllKeys();
 }
 
 /* static */
 keymaster_error_t SoftKeymasterDevice::delete_all_keys(const keymaster2_device_t* dev) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     return convert_device(dev)->context_->DeleteAllKeys();
 }
@@ -1206,11 +1351,13 @@ keymaster_error_t SoftKeymasterDevice::begin(const keymaster1_device_t* dev,
                                              const keymaster_key_param_set_t* in_params,
                                              keymaster_key_param_set_t* out_params,
                                              keymaster_operation_handle_t* operation_handle) {
-    if (!dev || !key || !key->key_material)
+    if (!dev || !key || !key->key_material) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!operation_handle)
+    if (!operation_handle) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
     SoftKeymasterDevice* skdev = convert_device(dev);
     const keymaster1_device_t* km1_dev = skdev->wrapped_km1_device_;
@@ -1221,8 +1368,9 @@ keymaster_error_t SoftKeymasterDevice::begin(const keymaster1_device_t* dev,
         KeymasterKeyBlob key_material;
         AuthorizationSet hw_enforced;
         AuthorizationSet sw_enforced;
-        skdev->context_->ParseKeyBlob(KeymasterKeyBlob(*key), in_params_set, &key_material,
-                                      &hw_enforced, &sw_enforced);
+        skdev->context_->ParseKeyBlob(KeymasterKeyBlob(*key), in_params_set,
+                                      &key_material, &hw_enforced,
+                                      &sw_enforced);
 
         keymaster_algorithm_t algorithm = KM_ALGORITHM_AES;
         if (!hw_enforced.GetTagValue(TAG_ALGORITHM, &algorithm) &&
@@ -1231,8 +1379,9 @@ keymaster_error_t SoftKeymasterDevice::begin(const keymaster1_device_t* dev,
         }
 
         if (algorithm == KM_ALGORITHM_HMAC) {
-            // Because HMAC keys can have only one digest, in_params_set doesn't contain it.  We
-            // need to get the digest from the key and add it to in_params_set.
+            // Because HMAC keys can have only one digest, in_params_set doesn't
+            // contain it.  We need to get the digest from the key and add it to
+            // in_params_set.
             keymaster_digest_t digest;
             if (!hw_enforced.GetTagValue(TAG_DIGEST, &digest) &&
                 !sw_enforced.GetTagValue(TAG_DIGEST, &digest)) {
@@ -1241,12 +1390,16 @@ keymaster_error_t SoftKeymasterDevice::begin(const keymaster1_device_t* dev,
             in_params_set.push_back(TAG_DIGEST, digest);
         }
 
-        if (!skdev->RequiresSoftwareDigesting(algorithm, purpose, in_params_set)) {
-            LOG_D("Operation supported by %s, passing through to keymaster1 module",
+        if (!skdev->RequiresSoftwareDigesting(algorithm, purpose,
+                                              in_params_set)) {
+            LOG_D("Operation supported by %s, passing through to keymaster1 "
+                  "module",
                   km1_dev->common.module->name);
-            return km1_dev->begin(km1_dev, purpose, key, in_params, out_params, operation_handle);
+            return km1_dev->begin(km1_dev, purpose, key, in_params, out_params,
+                                  operation_handle);
         }
-        LOG_I("Doing software digesting for keymaster1 module %s", km1_dev->common.module->name);
+        LOG_I("Doing software digesting for keymaster1 module %s",
+              km1_dev->common.module->name);
     }
 
     if (out_params) {
@@ -1261,14 +1414,16 @@ keymaster_error_t SoftKeymasterDevice::begin(const keymaster1_device_t* dev,
 
     BeginOperationResponse response;
     skdev->impl_->BeginOperation(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     if (response.output_params.size() > 0) {
-        if (out_params)
+        if (out_params) {
             response.output_params.CopyToParamSet(out_params);
-        else
+        } else {
             return KM_ERROR_OUTPUT_PARAMETER_NULL;
+        }
     }
 
     *operation_handle = response.op_handle;
@@ -1282,14 +1437,17 @@ keymaster_error_t SoftKeymasterDevice::begin(const keymaster2_device_t* dev,
                                              const keymaster_key_param_set_t* in_params,
                                              keymaster_key_param_set_t* out_params,
                                              keymaster_operation_handle_t* operation_handle) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
-    return begin(&sk_dev->km1_device_, purpose, key, in_params, out_params, operation_handle);
+    return begin(&sk_dev->km1_device_, purpose, key, in_params, out_params,
+                 operation_handle);
 }
 
 /* static */
@@ -1299,19 +1457,24 @@ keymaster_error_t SoftKeymasterDevice::update(const keymaster1_device_t* dev,
                                               const keymaster_blob_t* input, size_t* input_consumed,
                                               keymaster_key_param_set_t* out_params,
                                               keymaster_blob_t* output) {
-    if (!input)
+    if (!input) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!input_consumed)
+    if (!input_consumed) {
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev && !convert_device(dev)->impl_->has_operation(operation_handle)) {
-        // This operation is being handled by km1_dev (or doesn't exist).  Pass it through to
-        // km1_dev.  Otherwise, we'll use the software AndroidKeymaster, which may delegate to
-        // km1_dev after doing necessary digesting.
-        return km1_dev->update(km1_dev, operation_handle, in_params, input, input_consumed,
-                               out_params, output);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev &&
+        !convert_device(dev)->impl_->has_operation(operation_handle)) {
+        // This operation is being handled by km1_dev (or doesn't exist).  Pass
+        // it through to km1_dev.  Otherwise, we'll use the software
+        // AndroidKeymaster, which may delegate to km1_dev after doing necessary
+        // digesting.
+        return km1_dev->update(km1_dev, operation_handle, in_params, input,
+                               input_consumed, out_params, output);
     }
 
     if (out_params) {
@@ -1325,29 +1488,34 @@ keymaster_error_t SoftKeymasterDevice::update(const keymaster1_device_t* dev,
 
     UpdateOperationRequest request;
     request.op_handle = operation_handle;
-    if (input)
+    if (input) {
         request.input.Reinitialize(input->data, input->data_length);
-    if (in_params)
+    }
+    if (in_params) {
         request.additional_params.Reinitialize(*in_params);
+    }
 
     UpdateOperationResponse response;
     convert_device(dev)->impl_->UpdateOperation(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     if (response.output_params.size() > 0) {
-        if (out_params)
+        if (out_params) {
             response.output_params.CopyToParamSet(out_params);
-        else
+        } else {
             return KM_ERROR_OUTPUT_PARAMETER_NULL;
+        }
     }
 
     *input_consumed = response.input_consumed;
     if (output) {
         output->data_length = response.output.available_read();
         uint8_t* tmp = reinterpret_cast<uint8_t*>(malloc(output->data_length));
-        if (!tmp)
+        if (!tmp) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
         memcpy(tmp, response.output.peek_read(), output->data_length);
         output->data = tmp;
     } else if (response.output.available_read() > 0) {
@@ -1363,15 +1531,17 @@ keymaster_error_t SoftKeymasterDevice::update(const keymaster2_device_t* dev,
                                               const keymaster_blob_t* input, size_t* input_consumed,
                                               keymaster_key_param_set_t* out_params,
                                               keymaster_blob_t* output) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
-    return update(&sk_dev->km1_device_, operation_handle, in_params, input, input_consumed,
-                  out_params, output);
+    return update(&sk_dev->km1_device_, operation_handle, in_params, input,
+                  input_consumed, out_params, output);
 }
 
 /* static */
@@ -1381,15 +1551,20 @@ keymaster_error_t SoftKeymasterDevice::finish(const keymaster1_device_t* dev,
                                               const keymaster_blob_t* signature,
                                               keymaster_key_param_set_t* out_params,
                                               keymaster_blob_t* output) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev && !convert_device(dev)->impl_->has_operation(operation_handle)) {
-        // This operation is being handled by km1_dev (or doesn't exist).  Pass it through to
-        // km1_dev.  Otherwise, we'll use the software AndroidKeymaster, which may delegate to
-        // km1_dev after doing necessary digesting.
-        return km1_dev->finish(km1_dev, operation_handle, params, signature, out_params, output);
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev &&
+        !convert_device(dev)->impl_->has_operation(operation_handle)) {
+        // This operation is being handled by km1_dev (or doesn't exist).  Pass
+        // it through to km1_dev.  Otherwise, we'll use the software
+        // AndroidKeymaster, which may delegate to km1_dev after doing necessary
+        // digesting.
+        return km1_dev->finish(km1_dev, operation_handle, params, signature,
+                               out_params, output);
     }
 
     if (out_params) {
@@ -1404,26 +1579,30 @@ keymaster_error_t SoftKeymasterDevice::finish(const keymaster1_device_t* dev,
 
     FinishOperationRequest request;
     request.op_handle = operation_handle;
-    if (signature && signature->data_length > 0)
+    if (signature && signature->data_length > 0) {
         request.signature.Reinitialize(signature->data, signature->data_length);
+    }
     request.additional_params.Reinitialize(*params);
 
     FinishOperationResponse response;
     convert_device(dev)->impl_->FinishOperation(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     if (response.output_params.size() > 0) {
-        if (out_params)
+        if (out_params) {
             response.output_params.CopyToParamSet(out_params);
-        else
+        } else {
             return KM_ERROR_OUTPUT_PARAMETER_NULL;
+        }
     }
     if (output) {
         output->data_length = response.output.available_read();
         uint8_t* tmp = reinterpret_cast<uint8_t*>(malloc(output->data_length));
-        if (!tmp)
+        if (!tmp) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
         memcpy(tmp, response.output.peek_read(), output->data_length);
         output->data = tmp;
     } else if (response.output.available_read() > 0) {
@@ -1445,46 +1624,58 @@ keymaster_error_t SoftKeymasterDevice::finish(const keymaster2_device_t* dev,
                                               const keymaster_blob_t* signature,
                                               keymaster_key_param_set_t* out_params,
                                               keymaster_blob_t* output) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
-    if (out_params)
+    if (out_params) {
         *out_params = {};
+    };
 
-    if (output)
+    if (output) {
         *output = {};
+    };
 
-    const keymaster1_device_t* km1_dev = convert_device(dev)->wrapped_km1_device_;
-    if (km1_dev && !convert_device(dev)->impl_->has_operation(operation_handle)) {
-        // This operation is being handled by km1_dev (or doesn't exist).  Pass it through to
-        // km1_dev.  Otherwise, we'll use the software AndroidKeymaster, which may delegate to
-        // km1_dev after doing necessary digesting.
+    const keymaster1_device_t* km1_dev =
+            convert_device(dev)->wrapped_km1_device_;
+    if (km1_dev &&
+        !convert_device(dev)->impl_->has_operation(operation_handle)) {
+        // This operation is being handled by km1_dev (or doesn't exist).  Pass
+        // it through to km1_dev.  Otherwise, we'll use the software
+        // AndroidKeymaster, which may delegate to km1_dev after doing necessary
+        // digesting.
 
         std::vector<uint8_t> accumulated_output;
         AuthorizationSet accumulated_out_params;
         AuthorizationSet mutable_params(*params);
         if (input && input->data && input->data_length) {
-            // Keymaster1 doesn't support input to finish().  Call update() to process input.
+            // Keymaster1 doesn't support input to finish().  Call update() to
+            // process input.
 
-            accumulated_output.reserve(input->data_length);  // Guess at output size
+            accumulated_output.reserve(
+                    input->data_length);  // Guess at output size
             keymaster_blob_t mutable_input = *input;
 
             while (mutable_input.data_length > 0) {
                 keymaster_key_param_set_t update_out_params = {};
                 keymaster_blob_t update_output = {};
                 size_t input_consumed = 0;
-                keymaster_error_t error =
-                    km1_dev->update(km1_dev, operation_handle, &mutable_params, &mutable_input,
-                                    &input_consumed, &update_out_params, &update_output);
+                keymaster_error_t error = km1_dev->update(
+                        km1_dev, operation_handle, &mutable_params,
+                        &mutable_input, &input_consumed, &update_out_params,
+                        &update_output);
                 if (error != KM_ERROR_OK) {
                     return error;
                 }
 
-                accumulated_output.reserve(accumulated_output.size() + update_output.data_length);
-                std::copy(update_output.data, update_output.data + update_output.data_length,
+                accumulated_output.reserve(accumulated_output.size() +
+                                           update_output.data_length);
+                std::copy(update_output.data,
+                          update_output.data + update_output.data_length,
                           std::back_inserter(accumulated_output));
                 free(const_cast<uint8_t*>(update_output.data));
 
@@ -1501,7 +1692,8 @@ keymaster_error_t SoftKeymasterDevice::finish(const keymaster2_device_t* dev,
                 }
 
                 if (input_consumed == 0) {
-                    // Apparently we need more input than we have to complete an operation.
+                    // Apparently we need more input than we have to complete an
+                    // operation.
                     km1_dev->abort(km1_dev, operation_handle);
                     return KM_ERROR_INVALID_INPUT_LENGTH;
                 }
@@ -1510,8 +1702,9 @@ keymaster_error_t SoftKeymasterDevice::finish(const keymaster2_device_t* dev,
 
         keymaster_key_param_set_t finish_out_params = {};
         keymaster_blob_t finish_output = {};
-        keymaster_error_t error = km1_dev->finish(km1_dev, operation_handle, &mutable_params,
-                                                  signature, &finish_out_params, &finish_output);
+        keymaster_error_t error =
+                km1_dev->finish(km1_dev, operation_handle, &mutable_params,
+                                signature, &finish_out_params, &finish_output);
         if (error != KM_ERROR_OK) {
             return error;
         }
@@ -1523,14 +1716,18 @@ keymaster_error_t SoftKeymasterDevice::finish(const keymaster2_device_t* dev,
             accumulated_out_params.CopyToParamSet(&finish_out_params);
         }
         std::unique_ptr<keymaster_key_param_set_t, KeyParamSetContents_Delete>
-            finish_out_params_deleter(&finish_out_params);
+                finish_out_params_deleter(&finish_out_params);
 
         if (!accumulated_output.empty()) {
-            size_t finish_out_length = accumulated_output.size() + finish_output.data_length;
-            uint8_t* finish_out_buf = reinterpret_cast<uint8_t*>(malloc(finish_out_length));
+            size_t finish_out_length =
+                    accumulated_output.size() + finish_output.data_length;
+            uint8_t* finish_out_buf =
+                    reinterpret_cast<uint8_t*>(malloc(finish_out_length));
 
-            std::copy(accumulated_output.begin(), accumulated_output.end(), finish_out_buf);
-            std::copy(finish_output.data, finish_output.data + finish_output.data_length,
+            std::copy(accumulated_output.begin(), accumulated_output.end(),
+                      finish_out_buf);
+            std::copy(finish_output.data,
+                      finish_output.data + finish_output.data_length,
                       finish_out_buf + accumulated_output.size());
 
             free(const_cast<uint8_t*>(finish_output.data));
@@ -1538,9 +1735,10 @@ keymaster_error_t SoftKeymasterDevice::finish(const keymaster2_device_t* dev,
             finish_output.data = finish_out_buf;
         }
         std::unique_ptr<uint8_t, Malloc_Delete> finish_output_deleter(
-            const_cast<uint8_t*>(finish_output.data));
+                const_cast<uint8_t*>(finish_output.data));
 
-        if ((!out_params && finish_out_params.length) || (!output && finish_output.data_length)) {
+        if ((!out_params && finish_out_params.length) ||
+            (!output && finish_output.data_length)) {
             return KM_ERROR_OUTPUT_PARAMETER_NULL;
         }
 
@@ -1560,28 +1758,33 @@ keymaster_error_t SoftKeymasterDevice::finish(const keymaster2_device_t* dev,
 
     FinishOperationRequest request;
     request.op_handle = operation_handle;
-    if (signature && signature->data_length > 0)
+    if (signature && signature->data_length > 0) {
         request.signature.Reinitialize(signature->data, signature->data_length);
-    if (input && input->data_length > 0)
+    }
+    if (input && input->data_length > 0) {
         request.input.Reinitialize(input->data, input->data_length);
+    }
     request.additional_params.Reinitialize(*params);
 
     FinishOperationResponse response;
     convert_device(dev)->impl_->FinishOperation(request, &response);
-    if (response.error != KM_ERROR_OK)
+    if (response.error != KM_ERROR_OK) {
         return response.error;
+    }
 
     if (response.output_params.size() > 0) {
-        if (out_params)
+        if (out_params) {
             response.output_params.CopyToParamSet(out_params);
-        else
+        } else {
             return KM_ERROR_OUTPUT_PARAMETER_NULL;
+        }
     }
     if (output) {
         output->data_length = response.output.available_read();
         uint8_t* tmp = reinterpret_cast<uint8_t*>(malloc(output->data_length));
-        if (!tmp)
+        if (!tmp) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
         memcpy(tmp, response.output.peek_read(), output->data_length);
         output->data = tmp;
     } else if (response.output.available_read() > 0) {
@@ -1612,11 +1815,13 @@ keymaster_error_t SoftKeymasterDevice::abort(const keymaster1_device_t* dev,
 /* static */
 keymaster_error_t SoftKeymasterDevice::abort(const keymaster2_device_t* dev,
                                              keymaster_operation_handle_t operation_handle) {
-    if (!dev)
+    if (!dev) {
         return KM_ERROR_UNEXPECTED_NULL_POINTER;
+    }
 
-    if (!convert_device(dev)->configured())
+    if (!convert_device(dev)->configured()) {
         return KM_ERROR_KEYMASTER_NOT_CONFIGURED;
+    }
 
     SoftKeymasterDevice* sk_dev = convert_device(dev);
     return abort(&sk_dev->km1_device_, operation_handle);

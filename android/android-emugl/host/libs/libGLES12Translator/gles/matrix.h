@@ -5,8 +5,8 @@
 #ifndef GLES_MATRIX_H_
 #define GLES_MATRIX_H_
 
-#include <math.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
 
 #ifdef _WIN32 // M_PI not defined in MS Windows
 #define M_PI 3.14159265358979323846

@@ -18,8 +18,8 @@
 
 #include <gtest/gtest.h>
 
-#include <stdio.h>
 #include <sys/unistd.h>
+#include <cstdio>
 
 #define DEBUG_TEST 0
 
@@ -77,8 +77,8 @@ static bool testWrapper(bool usbPhone) {
     const char kWearDevice[] = "emulator-6558";
 
     std::vector<std::string> deviceList;
-    deviceList.push_back(kWearDevice);
-    deviceList.push_back(phoneDevice);
+    deviceList.emplace_back(kWearDevice);
+    deviceList.emplace_back(phoneDevice);
     int childpid = fork();
     if (childpid == 0) {
         // Child process runs the pairing agent.

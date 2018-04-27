@@ -97,7 +97,8 @@ Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
         return {};
     }
 
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr,
+                                             nullptr, nullptr);
     if (!png) {
         E("%s: Failed to allocate png read struct", __FUNCTION__);
         return {};
@@ -111,7 +112,7 @@ Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
 
     if (setjmp(png_jmpbuf(png))) {
         E("%s: PNG library error", __FUNCTION__);
-        png_destroy_read_struct(&png, &pngInfo, 0);
+        png_destroy_read_struct(&png, &pngInfo, nullptr);
         return {};
     }
 
@@ -161,7 +162,7 @@ Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
     if (newColorType != PNG_COLOR_TYPE_RGB &&
         newColorType != PNG_COLOR_TYPE_RGB_ALPHA) {
         E("%s: Unsupported color type: %d", __FUNCTION__, newColorType);
-        png_destroy_read_struct(&png, &pngInfo, 0);
+        png_destroy_read_struct(&png, &pngInfo, nullptr);
         return {};
     }
 
@@ -175,7 +176,7 @@ Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
     }
 
     png_read_image(png, rowPtrs.data());
-    png_destroy_read_struct(&png, &pngInfo, 0);
+    png_destroy_read_struct(&png, &pngInfo, nullptr);
 
     Result result;
     result.mBuffer = std::move(data);
@@ -205,7 +206,7 @@ Optional<TextureUtils::Result> TextureUtils::loadJPEG(const char* filename) {
     ErrorManager jerr;
     cinfo.err = jpeg_std_error(&jerr.pub);
     jerr.pub.error_exit = [](j_common_ptr cinfoPtr) {
-        ErrorManager* err = reinterpret_cast<ErrorManager*>(cinfoPtr->err);
+        auto* err = reinterpret_cast<ErrorManager*>(cinfoPtr->err);
         longjmp(err->setjmp_buffer, 1);
     };
 

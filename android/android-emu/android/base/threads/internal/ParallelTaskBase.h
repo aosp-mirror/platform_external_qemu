@@ -52,7 +52,7 @@ private:
         ManagedThread(ParallelTaskBase* manager, ThreadFlags flags)
             : Thread(flags), mManager(manager) {}
 
-        intptr_t main() {
+        intptr_t main() override {
             mManager->taskImpl();
             // This return value is ignored.
             return 0;

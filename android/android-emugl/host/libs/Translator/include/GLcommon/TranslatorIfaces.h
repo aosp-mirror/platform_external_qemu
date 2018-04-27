@@ -24,7 +24,7 @@
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES3/gl3.h>
-#include <string.h>
+#include <cstring>
 
 #include <unordered_map>
 
@@ -33,7 +33,7 @@ extern "C" {
 /* This is a generic function pointer type, whose name indicates it must
  * be cast to the proper type *and calling convention* before use.
  */
-typedef void (*__translatorMustCastToProperFunctionPointerType)(void);
+using __translatorMustCastToProperFunctionPointerType = void (*)();
 
 typedef struct {
   const char*                                     name;
@@ -41,11 +41,12 @@ typedef struct {
 } ExtensionDescriptor;
 
 class SaveableTexture;
-typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
+using SaveableTexturePtr = std::shared_ptr<SaveableTexture>;
 
 struct EglImage
 {
-    ~EglImage(){};
+    ~EglImage() = default;
+    ;
     unsigned int imageId;
     NamedObjectPtr globalTexObj;
     unsigned int width;
@@ -60,7 +61,7 @@ struct EglImage
     GLsync sync;
 };
 
-typedef emugl::SmartPtr<EglImage> ImagePtr;
+using ImagePtr = emugl::SmartPtr<EglImage>;
 typedef std::unordered_map<unsigned int, ImagePtr> ImagesHndlMap;
 typedef std::unordered_map<unsigned int, SaveableTexturePtr> SaveableTextureMap;
 
@@ -129,7 +130,6 @@ struct EGLiface {
     bool (*unbindAndDestroyAuxiliaryContext)(EGLContext context, EGLSurface surface);
 };
 
-typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);
-
+using __translator_getGLESIfaceFunc = GLESiface* (*)(const EGLiface*);
 }
 #endif

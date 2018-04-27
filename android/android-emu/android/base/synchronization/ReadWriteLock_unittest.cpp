@@ -69,28 +69,28 @@ TEST(ReadWriteLock, readLockMultiReadSingleThread) {
 // Package up data being modified + lock class
 
 struct RWThreadParams {
-    RWThreadParams() : mutex(), counter(0), read_counter(0) {}
+    RWThreadParams() : mutex() {}
     ReadWriteLock mutex;
-    int counter;
-    int read_counter;
+    int counter{0};
+    int read_counter{0};
 };
 
 static void* writeThreadFunction(void* param) {
-    RWThreadParams* p = static_cast<RWThreadParams*>(param);
+    auto* p = static_cast<RWThreadParams*>(param);
 
     p->mutex.lockWrite();
     p->counter++;
     p->mutex.unlockWrite();
-    return NULL;
+    return nullptr;
 }
 
 static void* readThreadFunction(void* param) {
-    RWThreadParams* p = static_cast<RWThreadParams*>(param);
+    auto* p = static_cast<RWThreadParams*>(param);
 
     p->mutex.lockRead();
     p->read_counter++;
     p->mutex.unlockRead();
-    return NULL;
+    return nullptr;
 }
 
 // basic synchronized write / read tests
@@ -215,15 +215,16 @@ TEST(ReadWriteLock, SyncReadWriteRandom) {
             item.second = i < num_writers;
             indices_writers.push_back(item);
         }
-        std::random_shuffle(indices_writers.begin(), indices_writers.end());
+        std::shuffle(indices_writers.begin(), indices_writers.end(),
+                     std::mt19937(std::random_device()()));
 
         for (size_t i = 0; i < kNumThreadsPerTrial; i++) {
             if (indices_writers[i].second) {
                 threads[indices_writers[i].first] =
-                    new TestThread(writeThreadFunction, &p);
+                        new TestThread(writeThreadFunction, &p);
             } else {
                 threads[indices_writers[i].first] =
-                    new TestThread(readThreadFunction, &p);
+                        new TestThread(readThreadFunction, &p);
             }
         }
 

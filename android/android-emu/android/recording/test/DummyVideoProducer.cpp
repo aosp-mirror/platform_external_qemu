@@ -36,7 +36,7 @@ public:
         mFormat.videoFormat = fmt;
     }
 
-    virtual ~DummyVideoProducer() {}
+    ~DummyVideoProducer() override = default;
 
     intptr_t main() final {
         assert(mCallback);
@@ -115,7 +115,7 @@ public:
         return 0;
     }
 
-    virtual void stop() override {
+    void stop() override {
         // Don't need to to anything here because main() stops after
         // mDurationSecs.
     }

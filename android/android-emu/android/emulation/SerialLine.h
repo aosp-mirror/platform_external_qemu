@@ -24,8 +24,8 @@ class SerialLine : public CSerialLine {
 public:
     virtual ~SerialLine() = default;
 
-    typedef SLCanReadHandler* CanReadFunc;
-    typedef SLReadHandler* ReadFunc;
+    using CanReadFunc = SLCanReadHandler*;
+    using ReadFunc = SLReadHandler*;
 
     virtual void addHandlers(void* opaque,
                              CanReadFunc canReadFunc,

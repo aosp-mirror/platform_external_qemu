@@ -56,12 +56,12 @@ static void android_display_producer_check(void* opaque) {
      * lead to calls to android_display_update()
      */
     (void)opaque;
-    graphic_hw_update(NULL);
+    graphic_hw_update(nullptr);
 }
 
 static void android_display_producer_invalidate(void* opaque) {
     (void)opaque;
-    graphic_hw_invalidate(NULL);
+    graphic_hw_invalidate(nullptr);
 }
 
 static void android_display_producer_detach(void* opaque) {
@@ -90,7 +90,8 @@ static pixman_image_t* get_pixman_image_from_qframebuffer(QFrameBuffer* qf) {
     pixman_format_code_t format =
             qemu_default_pixman_format(qf->bits_per_pixel, true);
     return pixman_image_create_bits(format, qf->width, qf->height,
-                                    (uint32_t*)qf->pixels, qf->pitch);
+                                    static_cast<uint32_t*>(qf->pixels),
+                                    qf->pitch);
 }
 
 static void android_display_switch(DisplayChangeListener* dcl,
@@ -99,11 +100,9 @@ static void android_display_switch(DisplayChangeListener* dcl,
         if (android_hw->hw_arc) {
             static pixman_image_t * qfb_image =
                     get_pixman_image_from_qframebuffer(qfbuff);
-            pixman_image_composite(PIXMAN_OP_OVER,
-                                   new_surface->image, NULL,
-                                   qfb_image,
-                                   0, 0, 0, 0, 0, 0,
-                                   qfbuff->width, qfbuff->height);
+            pixman_image_composite(PIXMAN_OP_OVER, new_surface->image, nullptr,
+                                   qfb_image, 0, 0, 0, 0, 0, 0, qfbuff->width,
+                                   qfbuff->height);
         }
         qframebuffer_rotate(qfbuff, 0);
     }
@@ -127,7 +126,7 @@ static QemuConsole* find_graphic_console() {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static int last_graphic_console_index() {
@@ -168,9 +167,10 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
         console_select(index);
         con = qemu_console_lookup_by_index(index);
         QemuUIInfo info = {
-            0, 0,
-            (uint32_t)qf->width,
-            (uint32_t)qf->height,
+                0,
+                0,
+                static_cast<uint32_t>(qf->width),
+                static_cast<uint32_t>(qf->height),
         };
         dpy_set_ui_info(con, &info);
     }
@@ -186,7 +186,8 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
             qemu_default_pixman_format(qf->bits_per_pixel, true);
 
     auto surface = qemu_create_displaysurface_from(
-            qf->width, qf->height, format, qf->pitch, (uint8_t*)qf->pixels);
+            qf->width, qf->height, format, qf->pitch,
+            static_cast<uint8_t*>(qf->pixels));
 
     dpy_gfx_replace_surface(con, surface);
 

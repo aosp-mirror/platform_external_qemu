@@ -23,16 +23,16 @@
 
 #include <algorithm>
 
-#include <assert.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdlib>
 
 /* Initializes QEMUD serial interface.
  */
 static void _android_qemud_serial_init(CSerialLine* sl) {
     // guard against double initialization
-    static CSerialLine* qemud_serial_line = NULL;
+    static CSerialLine* qemud_serial_line = nullptr;
 
-    if (qemud_serial_line != NULL) {
+    if (qemud_serial_line != nullptr) {
         return;
     }
 
@@ -55,28 +55,29 @@ static void _save_pipe_message(Stream* f, QemudPipeMessage* msg) {
 
 /* Loads pending pipe messages from the snapshot file.
  * Return:
- *  List of pending pipe messages loaded from snapshot, or NULL if snapshot didn't
- *  contain saved messages.
+ *  List of pending pipe messages loaded from snapshot, or NULL if snapshot
+ * didn't contain saved messages.
  */
-static QemudPipeMessage* _load_pipe_message(Stream* f, QemudPipeMessage** last) {
-    QemudPipeMessage* ret = NULL;
+static QemudPipeMessage* _load_pipe_message(Stream* f,
+                                            QemudPipeMessage** last) {
+    QemudPipeMessage* ret = nullptr;
     QemudPipeMessage** next = &ret;
-    *last = NULL;
+    *last = nullptr;
 
     uint32_t size = stream_get_be32(f);
     while (size != 0) {
-        QemudPipeMessage* wrk =
-                static_cast<QemudPipeMessage*>(android_alloc0(sizeof(*wrk)));
+        QemudPipeMessage* wrk = static_cast<QemudPipeMessage*>(
+                android_alloc0(sizeof(*wrk)));  // NOLINT
         *last = *next = wrk;
         wrk->size = size;
         wrk->offset = stream_get_be32(f);
         wrk->message = static_cast<uint8_t*>(malloc(wrk->size));
-        if (wrk->message == NULL) {
+        if (wrk->message == nullptr) {
             APANIC("Unable to allocate buffer for pipe's pending message.");
         }
         stream_read(f, wrk->message, wrk->size);
         next = &wrk->next;
-        *next = NULL;
+        *next = nullptr;
         size = stream_get_be32(f);
     }
 
@@ -88,34 +89,34 @@ static QemudPipeMessage* _load_pipe_message(Stream* f, QemudPipeMessage** last) 
  * Here we will create a new client as well as pipe descriptor representing new
  * connection.
  */
-static void*
-_qemudPipe_init(void* hwpipe, void* _looper, const char* args) {
+static void* _qemudPipe_init(void* hwpipe, void* _looper, const char* args) {
     QemudMultiplexer* m = qemud_multiplexer;
     QemudService* sv = m->services;
     QemudClient* client;
-    QemudPipe* pipe = NULL;
+    QemudPipe* pipe = nullptr;
     char service_name[512];
     const char* client_args;
     size_t srv_name_len;
 
-    /* 'args' passed in this callback represents name of the service the guest is
-     * connecting to. It can't be NULL. */
-    if (args == NULL) {
+    /* 'args' passed in this callback represents name of the service the guest
+     * is connecting to. It can't be NULL. */
+    if (args == nullptr) {
         D("%s: Missing address!", __FUNCTION__);
-        return NULL;
+        return nullptr;
     }
 
     /* 'args' contain service name, and optional parameters for the client that
-     * is about to be created in this call. The parameters are separated from the
-     * service name wit ':'. Separate service name from the client param. */
+     * is about to be created in this call. The parameters are separated from
+     * the service name wit ':'. Separate service name from the client param. */
     client_args = strchr(args, ':');
-    if (client_args != NULL) {
-        srv_name_len = std::min(client_args - args,\
-                                (intptr_t) sizeof(service_name) - 1);
+    if (client_args != nullptr) {
+        srv_name_len =
+                std::min(client_args - args,
+                         static_cast<intptr_t>(sizeof(service_name)) - 1);
         client_args++;  // Past the ':'
         if (*client_args == '\0') {
             /* No actual parameters. */
-            client_args = NULL;
+            client_args = nullptr;
         }
     } else {
         srv_name_len = std::min(strlen(args), sizeof(service_name) - 1);
@@ -124,18 +125,19 @@ _qemudPipe_init(void* hwpipe, void* _looper, const char* args) {
     service_name[srv_name_len] = '\0';
 
     /* Lookup registered service by its name. */
-    while (sv != NULL && strcmp(sv->name, service_name)) {
+    while (sv != nullptr && strcmp(sv->name, service_name)) {
         sv = sv->next;
     }
-    if (sv == NULL) {
-        D("%s: Service '%s' has not been registered!", __FUNCTION__, service_name);
-        return NULL;
+    if (sv == nullptr) {
+        D("%s: Service '%s' has not been registered!", __FUNCTION__,
+          service_name);
+        return nullptr;
     }
 
     /* Create a client for this connection. -1 as a channel ID signals that this
      * is a pipe client. */
     client = qemud_service_connect_client(sv, -1, client_args);
-    if (client != NULL) {
+    if (client != nullptr) {
         pipe = static_cast<QemudPipe*>(android_alloc0(sizeof(*pipe)));
         pipe->hwpipe = hwpipe;
         pipe->looper = _looper;
@@ -148,13 +150,12 @@ _qemudPipe_init(void* hwpipe, void* _looper, const char* args) {
 }
 
 /* Called when the guest wants to close the channel.
-*/
-static void
-_qemudPipe_closeFromGuest(void* opaque) {
-    QemudPipe* pipe = static_cast<QemudPipe*>(opaque);
+ */
+static void _qemudPipe_closeFromGuest(void* opaque) {
+    auto* pipe = static_cast<QemudPipe*>(opaque);
     QemudClient* client = pipe->client;
     D("%s", __FUNCTION__);
-    if (client != NULL) {
+    if (client != nullptr) {
         qemud_client_disconnect(client, 1);
     } else {
         D("%s: Unexpected NULL client", __FUNCTION__);
@@ -163,28 +164,28 @@ _qemudPipe_closeFromGuest(void* opaque) {
 
 /* Called when the guest has sent some data to the client.
  */
-static int
-_qemudPipe_sendBuffers(void* opaque,
-                       const AndroidPipeBuffer* buffers,
-                       int numBuffers) {
-    QemudPipe* pipe = static_cast<QemudPipe*>(opaque);
+static int _qemudPipe_sendBuffers(void* opaque,
+                                  const AndroidPipeBuffer* buffers,
+                                  int numBuffers) {
+    auto* pipe = static_cast<QemudPipe*>(opaque);
     QemudClient* client = pipe->client;
     size_t transferred = 0;
 
-    if (client == NULL) {
+    if (client == nullptr) {
         D("%s: Unexpected NULL client", __FUNCTION__);
         return -1;
     }
 
     if (numBuffers == 1) {
         /* Simple case: all data are in one buffer. */
-        D("%s: %s", __FUNCTION__, quote_bytes((char*) buffers->data, buffers->size));
+        D("%s: %s", __FUNCTION__,
+          quote_bytes((char*)buffers->data, buffers->size));
         qemud_client_recv(client, buffers->data, buffers->size);
         transferred = buffers->size;
     } else {
-        /* If there are multiple buffers involved, collect all data in one buffer
-         * before calling the high level client. */
-        uint8_t* msg, * wrk;
+        /* If there are multiple buffers involved, collect all data in one
+         * buffer before calling the high level client. */
+        uint8_t *msg, *wrk;
         int n;
         for (n = 0; n < numBuffers; n++) {
             transferred += buffers[n].size;
@@ -195,7 +196,7 @@ _qemudPipe_sendBuffers(void* opaque,
             memcpy(wrk, buffers[n].data, buffers[n].size);
             wrk += buffers[n].size;
         }
-        D("%s: %s", __FUNCTION__, quote_bytes((char*) msg, transferred));
+        D("%s: %s", __FUNCTION__, quote_bytes((char*)msg, transferred));
         qemud_client_recv(client, msg, transferred);
         free(msg);
     }
@@ -205,9 +206,10 @@ _qemudPipe_sendBuffers(void* opaque,
 
 /* Called when the guest is reading data from the client.
  */
-static int
-_qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers) {
-    QemudPipe* pipe = static_cast<QemudPipe*>(opaque);
+static int _qemudPipe_recvBuffers(void* opaque,
+                                  AndroidPipeBuffer* buffers,
+                                  int numBuffers) {
+    auto* pipe = static_cast<QemudPipe*>(opaque);
     QemudClient* client = pipe->client;
     QemudPipeMessage** msg_list;
     AndroidPipeBuffer* buff = buffers;
@@ -215,13 +217,13 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
     size_t sent_bytes = 0;
     size_t off_in_buff = 0;
 
-    if (client == NULL) {
+    if (client == nullptr) {
         D("%s: Unexpected NULL client", __FUNCTION__);
         return -1;
     }
 
     msg_list = &client->ProtocolSelector.Pipe.messages;
-    if (*msg_list == NULL) {
+    if (*msg_list == nullptr) {
         /* No data to send. Let it block until we wake it up with
          * PIPE_WAKE_READ when service sends data to the client. */
         return PIPE_ERROR_AGAIN;
@@ -229,11 +231,11 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
 
     /* Fill in goldfish buffers while they are still available, and there are
      * messages in the client's message list. */
-    while (buff != endbuff && *msg_list != NULL) {
+    while (buff != endbuff && *msg_list != nullptr) {
         QemudPipeMessage* msg = *msg_list;
         /* Message data fiting the current pipe's buffer. */
-        size_t to_copy = std::min(msg->size - msg->offset,
-                                  buff->size - off_in_buff);
+        size_t to_copy =
+                std::min(msg->size - msg->offset, buff->size - off_in_buff);
         memcpy(buff->data + off_in_buff, msg->message + msg->offset, to_copy);
         /* Update offsets. */
         off_in_buff += to_copy;
@@ -252,7 +254,7 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
     }
 
     if (!*msg_list) {
-        client->ProtocolSelector.Pipe.last_msg = NULL;
+        client->ProtocolSelector.Pipe.last_msg = nullptr;
     }
 
     D("%s: -> %u (of %u)", __FUNCTION__, sent_bytes, buffers->size);
@@ -260,15 +262,14 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
     return sent_bytes;
 }
 
-static unsigned
-_qemudPipe_poll(void* opaque) {
-    QemudPipe* pipe = static_cast<QemudPipe*>(opaque);
+static unsigned _qemudPipe_poll(void* opaque) {
+    auto* pipe = static_cast<QemudPipe*>(opaque);
     QemudClient* client = pipe->client;
     unsigned ret = 0;
 
-    if (client != NULL) {
+    if (client != nullptr) {
         ret |= PIPE_POLL_OUT;
-        if (client->ProtocolSelector.Pipe.messages != NULL) {
+        if (client->ProtocolSelector.Pipe.messages != nullptr) {
             ret |= PIPE_POLL_IN;
         }
     } else {
@@ -278,13 +279,12 @@ _qemudPipe_poll(void* opaque) {
     return ret;
 }
 
-static void
-_qemudPipe_wakeOn(void* opaque, int flags) {
-    QemudPipe* qemud_pipe = (QemudPipe*) opaque;
+static void _qemudPipe_wakeOn(void* opaque, int flags) {
+    auto* qemud_pipe = static_cast<QemudPipe*>(opaque);
     QemudClient* c = qemud_pipe->client;
     D("%s: -> %X", __FUNCTION__, flags);
     if (flags & PIPE_WAKE_READ) {
-        if (c->ProtocolSelector.Pipe.messages != NULL) {
+        if (c->ProtocolSelector.Pipe.messages != nullptr) {
             android_pipe_host_signal_wake(
                     c->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
                     PIPE_WAKE_READ);
@@ -293,7 +293,7 @@ _qemudPipe_wakeOn(void* opaque, int flags) {
 }
 
 static void _qemudPipe_save(void* opaque, Stream* f) {
-    QemudPipe* qemud_pipe = (QemudPipe*) opaque;
+    auto* qemud_pipe = static_cast<QemudPipe*>(opaque);
     QemudClient* c = qemud_pipe->client;
     QemudPipeMessage* msg = c->ProtocolSelector.Pipe.messages;
 
@@ -302,7 +302,7 @@ static void _qemudPipe_save(void* opaque, Stream* f) {
     stream_put_string(f, c->param);
 
     /* Save pending messages. */
-    while (msg != NULL) {
+    while (msg != nullptr) {
         _save_pipe_message(f, msg);
         msg = msg->next;
     }
@@ -310,8 +310,9 @@ static void _qemudPipe_save(void* opaque, Stream* f) {
     stream_put_be32(f, 0);
 
     /* save client-specific state */
-    if (c->clie_save)
+    if (c->clie_save) {
         c->clie_save(f, c, c->clie_opaque);
+    }
 
     /* save framing configuration */
     stream_put_be32(f, c->framing);
@@ -330,18 +331,19 @@ static void* _qemudPipe_load(void* hwpipe,
                              void* pipeOpaque,
                              const char* args,
                              Stream* f) {
-    QemudPipe* qemud_pipe = NULL;
+    QemudPipe* qemud_pipe = nullptr;
     char* param;
     char* service_name = qemud_service_load_name(f);
-    if (service_name == NULL)
-        return NULL;
+    if (service_name == nullptr) {
+        return nullptr;
+    }
     /* get service instance for the loading client*/
-    QemudService* sv = qemud_service_find(qemud_multiplexer->services,
-                                          service_name);
-    if (sv == NULL) {
-        D("%s: load failed: unknown service \"%s\"\n",
-          __FUNCTION__, service_name);
-        return NULL;
+    QemudService* sv =
+            qemud_service_find(qemud_multiplexer->services, service_name);
+    if (sv == nullptr) {
+        D("%s: load failed: unknown service \"%s\"\n", __FUNCTION__,
+          service_name);
+        return nullptr;
     }
 
     /* Load saved parameters. */
@@ -349,8 +351,9 @@ static void* _qemudPipe_load(void* hwpipe,
 
     /* re-connect client */
     QemudClient* c = qemud_service_connect_client(sv, -1, param);
-    if (c == NULL)
-        return NULL;
+    if (c == nullptr) {
+        return nullptr;
+    }
 
     /* Load pending messages. */
     c->ProtocolSelector.Pipe.messages =
@@ -359,31 +362,33 @@ static void* _qemudPipe_load(void* hwpipe,
     /* load client-specific state */
     if (c->clie_load && c->clie_load(f, c, c->clie_opaque)) {
         /* load failure */
-        return NULL;
+        return nullptr;
     }
 
     /* load framing configuration */
     c->framing = stream_get_be32(f);
     if (c->framing) {
-
         /* header buffer */
         c->need_header = stream_get_be32(f);
         int header_size = stream_get_be32(f);
         if (header_size > FRAME_HEADER_SIZE) {
-            D("%s: load failed: payload buffer requires %d bytes, %d available\n",
+            D("%s: load failed: payload buffer requires %d bytes, %d "
+              "available\n",
               __FUNCTION__, header_size, FRAME_HEADER_SIZE);
-            return NULL;
+            return nullptr;
         }
         int ret;
         if ((ret = stream_read(f, c->header0, header_size)) != header_size) {
-            D("%s: frame header buffer load failed: expected %d bytes, got %d\n",
+            D("%s: frame header buffer load failed: expected %d bytes, got "
+              "%d\n",
               __FUNCTION__, header_size, ret);
-            return NULL;
+            return nullptr;
         }
 
         /* payload sink */
-        if ((ret = qemud_sink_load(f, c->payload)))
-            return NULL;
+        if ((ret = qemud_sink_load(f, c->payload))) {
+            return nullptr;
+        }
 
         /* replace payload buffer by saved data */
         if (c->payload->buff) {
@@ -391,14 +396,15 @@ static void* _qemudPipe_load(void* hwpipe,
         }
 
         /* +1 for terminating zero */
-        c->payload->buff = static_cast<uint8_t*>(
-                _android_array_alloc(sizeof(*c->payload->buff), c->payload->size + 1));
+        c->payload->buff = static_cast<uint8_t*>(_android_array_alloc(
+                sizeof(*c->payload->buff), c->payload->size + 1));
         if ((ret = stream_read(f, c->payload->buff, c->payload->size)) !=
             c->payload->size) {
-            D("%s: frame payload buffer load failed: expected %d bytes, got %d\n",
+            D("%s: frame payload buffer load failed: expected %d bytes, got "
+              "%d\n",
               __FUNCTION__, c->payload->size, ret);
             AFREE(c->payload->buff);
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -416,23 +422,20 @@ static void* _qemudPipe_load(void* hwpipe,
 /* QEMUD pipe functions.
  */
 static const AndroidPipeFuncs _qemudPipe_funcs = {
-        _qemudPipe_init,
-        _qemudPipe_closeFromGuest,
-        _qemudPipe_sendBuffers,
-        _qemudPipe_recvBuffers,
-        _qemudPipe_poll,
-        _qemudPipe_wakeOn,
-        _qemudPipe_save,
-        _qemudPipe_load,
+        _qemudPipe_init,        _qemudPipe_closeFromGuest,
+        _qemudPipe_sendBuffers, _qemudPipe_recvBuffers,
+        _qemudPipe_poll,        _qemudPipe_wakeOn,
+        _qemudPipe_save,        _qemudPipe_load,
 };
 
 /* Initializes QEMUD pipe interface.
  */
-static void _android_qemud_pipe_init(void) {
+static void _android_qemud_pipe_init() {
     static bool _qemud_pipe_initialized = false;
 
     if (!_qemud_pipe_initialized) {
-        android_pipe_add_type("qemud", looper_getForThread(), &_qemudPipe_funcs);
+        android_pipe_add_type("qemud", looper_getForThread(),
+                              &_qemudPipe_funcs);
         _qemud_pipe_initialized = true;
     }
 }
@@ -458,14 +461,9 @@ QemudService* qemud_service_register(const char* service_name,
                                      QemudServiceLoad serv_load) {
     assert(isInited);
 
-    QemudService* const sv =
-            qemud_service_new(service_name,
-                              max_clients,
-                              serv_opaque,
-                              serv_connect,
-                              serv_save,
-                              serv_load,
-                              &qemud_multiplexer->services);
+    QemudService* const sv = qemud_service_new(
+            service_name, max_clients, serv_opaque, serv_connect, serv_save,
+            serv_load, &qemud_multiplexer->services);
     D("Registered QEMUD service %s", service_name);
     return sv;
 }

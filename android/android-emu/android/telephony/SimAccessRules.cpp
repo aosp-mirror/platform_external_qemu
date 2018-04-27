@@ -98,7 +98,7 @@ std::unordered_map<std::string, AllRefArDo> parseSimAccessRules(
     return simAccessRules;
 }
 
-SimAccessRules::SimAccessRules() : mHasCustomRules(false) {
+SimAccessRules::SimAccessRules() {
     if (android_cmdLineOptions &&
         android_cmdLineOptions->sim_access_rules_file != nullptr) {
         std::ifstream file(android_cmdLineOptions->sim_access_rules_file);

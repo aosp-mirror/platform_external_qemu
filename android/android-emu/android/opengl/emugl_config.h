@@ -14,8 +14,6 @@
 #include "android/skin/winsys.h"
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
-
 ANDROID_BEGIN_HEADER
 
 // List of values describing how EGL/GLES emulation should work in a given

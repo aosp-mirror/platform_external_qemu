@@ -15,15 +15,15 @@
 
 #include <QTime>
 
-#include <errno.h>
+#include <cerrno>
 
 namespace android {
 namespace qt {
 namespace internal {
 
-typedef ::android::base::Looper BaseLooper;
-typedef ::android::base::Looper::Timer BaseTimer;
-typedef ::android::base::Looper::FdWatch BaseFdWatch;
+using BaseLooper = ::android::base::Looper;
+using BaseTimer = ::android::base::Looper::Timer;
+using BaseFdWatch = ::android::base::Looper::FdWatch;
 
 // A partial implementation of android::base::Looper on top of the Qt main
 // event loop. There are few important things here:
@@ -56,7 +56,7 @@ public:
     // almost millisecond accuracy (5% error margin), but is more efficient.
     class Timer : public BaseTimer {
     public:
-        virtual void startRelative(Duration timeout_ms) {
+        void startRelative(Duration timeout_ms) override {
             if (timeout_ms == kDurationInfinite) {
                 mTimer.stop();
             } else {
@@ -64,20 +64,20 @@ public:
             }
         }
 
-        virtual void startAbsolute(Duration deadline_ms) {
+        void startAbsolute(Duration deadline_ms) override {
             Q_ASSERT_X(false, "QtLooper::Timer::startAbsolute",
                        "startAbsolute is not supported.");
         }
 
-        virtual void stop() { mTimer.stop(); }
+        void stop() override { mTimer.stop(); }
 
-        virtual bool isActive() const { return mTimer.isActive(); }
+        bool isActive() const override { return mTimer.isActive(); }
 
-        virtual void save(android::base::Stream* stream) const {
+        void save(android::base::Stream* stream) const override {
             qDebug("QtLooper::Timer does not support serialization. Skipped.");
         }
 
-        virtual void load(android::base::Stream* stream) {
+        void load(android::base::Stream* stream) override {
             qDebug("QtLooper::Timer does not support deserialization. "
                    "Skipped.");
         }
@@ -101,16 +101,16 @@ public:
         DISALLOW_COPY_AND_ASSIGN(Timer);
     };
 
-    virtual BaseTimer* createTimer(BaseTimer::Callback callback,
-                                   void* opaque,
-                                   ClockType clock) override {
+    BaseTimer* createTimer(BaseTimer::Callback callback,
+                           void* opaque,
+                           ClockType clock) override {
         clock = validateClockType(clock);
         return new QtLooper::Timer(this, callback, opaque, clock);
     }
 
-    virtual BaseFdWatch* createFdWatch(int fd,
-                                       BaseFdWatch::Callback callback,
-                                       void* opaque) override {
+    BaseFdWatch* createFdWatch(int fd,
+                               BaseFdWatch::Callback callback,
+                               void* opaque) override {
         Q_ASSERT_X(false, "QtLooper::createFdWatch",
                    "FdWatch is not yet implemented for QtLooper.");
         return nullptr;
@@ -128,7 +128,7 @@ public:
     //
     //  L O O P E R
     //
-    virtual Duration nowMs(ClockType clock) override {
+    Duration nowMs(ClockType clock) override {
         clock = validateClockType(clock);
         auto time = QTime::currentTime();
         return time.msec() +
@@ -136,18 +136,18 @@ public:
                          60UL * (time.minute() + 60UL * time.hour()));
     }
 
-    virtual DurationNs nowNs(ClockType clockType) override {
+    DurationNs nowNs(ClockType clockType) override {
         qWarning("QtLooper::nowNs is not supported. Defaulting to nowMs.");
         return nowMs(clockType);
     }
 
-    virtual int runWithDeadlineMs(Duration deadline_ms) override {
+    int runWithDeadlineMs(Duration deadline_ms) override {
         qWarning("User cannot call |run*| on a QtLooper event loop");
         errno = ENOSYS;
         return -1;
     }
 
-    virtual void forceQuit() override {
+    void forceQuit() override {
         qWarning("User cannot call |forceQuit| on a QtLooper event loop");
     }
 

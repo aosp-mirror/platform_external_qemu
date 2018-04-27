@@ -27,10 +27,10 @@
 #include "android/utils/system.h"
 
 #include <algorithm>
+#include <cstdio>
+#include <cstring>
 #include <memory>
 #include <set>
-#include <stdio.h>
-#include <string.h>
 #include <unordered_set>
 
 using android::base::ScopedCPtr;
@@ -144,11 +144,13 @@ void FeatureControlImpl::loadUserOverrideFeature(
     }
 }
 
-void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
-                              android::base::StringView defaultIniGuestPath,
-                              android::base::StringView userIniHostPath,
-                              android::base::StringView userIniGuestPath) {
-    memset(mGuestTriedEnabledFeatures, 0, sizeof(FeatureOption) * Feature_n_items);
+void FeatureControlImpl::init(
+        const android::base::StringView& defaultIniHostPath,
+        const android::base::StringView& defaultIniGuestPath,
+        const android::base::StringView& userIniHostPath,
+        const android::base::StringView& userIniGuestPath) {
+    memset(mGuestTriedEnabledFeatures, 0,
+           sizeof(FeatureOption) * Feature_n_items);
     base::IniFile defaultIniHost(defaultIniHostPath);
     if (defaultIniHost.read()) {
         // Initialize host only features
@@ -252,11 +254,11 @@ FeatureControlImpl::FeatureControlImpl() {
             base::PathUtils::join(base::System::get()->getLauncherDirectory(),
                                   "lib", "advancedFeatures.ini");
     } else {
-        // TODO: If we ever use beta/dev channels, disambiguate them
+        // TODO(yahan): If we ever use beta/dev channels, disambiguate them
         // with separate files here.
-        defaultIniHostName =
-            base::PathUtils::join(base::System::get()->getLauncherDirectory(),
-                                  "lib", "advancedFeaturesCanary.ini");
+        defaultIniHostName = base::PathUtils::join(
+                base::System::get()->getLauncherDirectory(), "lib",
+                "advancedFeaturesCanary.ini");
     }
 
     ScopedCPtr<char> defaultIniGuestName;
@@ -280,10 +282,11 @@ FeatureControlImpl::FeatureControlImpl() {
             static constexpr char format[] =
                     "Feature: '%s' (%d), value: %d, default: %d, is overridden: %d\n";
             char buffer[sizeof(format) + 100 + 3 + 1 + 1 + 1] = {};
-            int count = snprintf(buffer, sizeof(buffer), format,
-                                 toString(feature.name).c_str(),
-                                 (int)feature.name, feature.currentVal,
-                                 feature.defaultVal, feature.isOverridden);
+            int count =
+                    snprintf(buffer, sizeof(buffer), format,
+                             toString(feature.name).c_str(),
+                             static_cast<int>(feature.name), feature.currentVal,
+                             feature.defaultVal, feature.isOverridden);
             HANDLE_EINTR(write(file.get(),
                                buffer, std::min<int>(count, sizeof(buffer))));
         }
@@ -341,8 +344,7 @@ void FeatureControlImpl::setIfNotOverridenOrGuestDisabled(Feature feature, bool 
     currFeature.currentVal = isEnabled;
 }
 
-Feature FeatureControlImpl::fromString(base::StringView str) {
-
+Feature FeatureControlImpl::fromString(const base::StringView& str) {
 #define FEATURE_CONTROL_ITEM(item) if (str == #item) return item;
 #include "FeatureControlDefHost.h"
 #include "FeatureControlDefGuest.h"
@@ -377,7 +379,7 @@ void FeatureControlImpl::setGuestTriedEnable(Feature feature) {
     opt.isOverridden = false;
 }
 
-void FeatureControlImpl::parseAndApplyOverrides(base::StringView csv) {
+void FeatureControlImpl::parseAndApplyOverrides(const base::StringView& csv) {
     for (auto it = csv.begin(); it < csv.end();) {
         bool enable = true;
         if (*it == '-') {

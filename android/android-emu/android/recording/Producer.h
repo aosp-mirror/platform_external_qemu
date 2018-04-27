@@ -26,7 +26,8 @@ namespace recording {
 
 class Producer : public android::base::Thread {
 public:
-    virtual ~Producer(){};
+    ~Producer() override = default;
+    ;
 
     // Callback to pass the contents of a new audio/video frame.
     using Callback = std::function<bool(const Frame* frame)>;

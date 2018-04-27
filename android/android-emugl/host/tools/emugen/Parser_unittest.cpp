@@ -17,7 +17,7 @@
 
 #include <gtest/gtest.h>
 
-#define ARRAYLEN(x)  (sizeof(x) / sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 TEST(ParserTest, normalizeTypeDeclaration) {
     static const struct {
@@ -29,14 +29,14 @@ TEST(ParserTest, normalizeTypeDeclaration) {
         { "char* const**", "char *const* *" },
     };
     const size_t kDataSize = ARRAYLEN(kData);
-    for (size_t n = 0; n < kDataSize; ++n) {
+    for (auto n : kData) {
         std::string result;
         std::string text = "When parsing '";
-        text += kData[n].input;
+        text += n.input;
         text += "'";
 
-        result = normalizeTypeDeclaration(kData[n].input);
-        EXPECT_STREQ(kData[n].expected, result.c_str()) << text;
+        result = normalizeTypeDeclaration(n.input);
+        EXPECT_STREQ(n.expected, result.c_str()) << text;
     }
 }
 
@@ -47,33 +47,31 @@ TEST(ParserTest, parseTypeDeclaration) {
         const char* expectedType;
         const char* expectedError;
     } kData[] = {
-        { "const", false, NULL, "Missing type name" },
-        { "const const", false, NULL, "Missing type name" },
-        { "foo", true, "foo", NULL },
-        { "void", true, "void", NULL },
-        { "const foo", true, "const foo", NULL },
-        { "foo *", true, "foo*", NULL },
-        { "char foo", true, "char foo", NULL },
-        { "\tunsigned \t  int\n", true, "unsigned int", NULL },
-        { "const * char", false, NULL, "Unexpected '*' before type name" },
-        { "const char * ", true, "const char*", NULL },
-        { "const void*const * *", true, "const void* const**", NULL },
+            {"const", false, nullptr, "Missing type name"},
+            {"const const", false, nullptr, "Missing type name"},
+            {"foo", true, "foo", nullptr},
+            {"void", true, "void", nullptr},
+            {"const foo", true, "const foo", nullptr},
+            {"foo *", true, "foo*", nullptr},
+            {"char foo", true, "char foo", nullptr},
+            {"\tunsigned \t  int\n", true, "unsigned int", nullptr},
+            {"const * char", false, nullptr, "Unexpected '*' before type name"},
+            {"const char * ", true, "const char*", nullptr},
+            {"const void*const * *", true, "const void* const**", nullptr},
     };
     const size_t kDataSize = ARRAYLEN(kData);
-    for (size_t n = 0; n < kDataSize; ++n) {
+    for (const auto& n : kData) {
         std::string varname, vartype, error;
         std::string text = "When parsing '";
-        text += kData[n].input;
+        text += n.input;
         text += "'";
 
-        EXPECT_EQ(kData[n].expected,
-                  parseTypeDeclaration(kData[n].input,
-                                       &vartype,
-                                       &error)) << text;
-        if (kData[n].expected) {
-            EXPECT_STREQ(kData[n].expectedType, vartype.c_str()) << text;
+        EXPECT_EQ(n.expected, parseTypeDeclaration(n.input, &vartype, &error))
+                << text;
+        if (n.expected) {
+            EXPECT_STREQ(n.expectedType, vartype.c_str()) << text;
         } else {
-            EXPECT_STREQ(kData[n].expectedError, error.c_str()) << text;
+            EXPECT_STREQ(n.expectedError, error.c_str()) << text;
         }
     }
 }
@@ -86,35 +84,37 @@ TEST(ParserTest, parseParameterDeclaration) {
         const char* expectedVariable;
         const char* expectedError;
     } kData[] = {
-        { "foo", false, NULL, NULL, "Missing variable name" },
-        { "const", false, NULL, NULL, "Missing type name" },
-        { "const foo", false, NULL, NULL, "Missing variable name" },
-        { "const const", false, NULL, NULL, "Missing type name" },
-        { "char foo", true, "char", "foo", NULL },
-        { "unsigned   int\t bar\n", true, "unsigned int", "bar", NULL },
-        { "const * char foo", false, NULL, NULL, "Unexpected '*' before type name" },
-        { "const char * foo", true, "const char*", "foo", NULL },
-        { "const void*const *data", true, "const void* const*", "data", NULL },
-        { "char foo const", false, NULL, NULL, "Extra 'const' after variable name" },
-        { "int bar*", false, NULL, NULL, "Extra '*' after variable name" },
+            {"foo", false, nullptr, nullptr, "Missing variable name"},
+            {"const", false, nullptr, nullptr, "Missing type name"},
+            {"const foo", false, nullptr, nullptr, "Missing variable name"},
+            {"const const", false, nullptr, nullptr, "Missing type name"},
+            {"char foo", true, "char", "foo", nullptr},
+            {"unsigned   int\t bar\n", true, "unsigned int", "bar", nullptr},
+            {"const * char foo", false, nullptr, nullptr,
+             "Unexpected '*' before type name"},
+            {"const char * foo", true, "const char*", "foo", nullptr},
+            {"const void*const *data", true, "const void* const*", "data",
+             nullptr},
+            {"char foo const", false, nullptr, nullptr,
+             "Extra 'const' after variable name"},
+            {"int bar*", false, nullptr, nullptr,
+             "Extra '*' after variable name"},
     };
     const size_t kDataSize = ARRAYLEN(kData);
-    for (size_t n = 0; n < kDataSize; ++n) {
+    for (const auto& n : kData) {
         std::string varname, vartype, error;
         std::string text = "When parsing '";
-        text += kData[n].input;
+        text += n.input;
         text += "'";
 
-        EXPECT_EQ(kData[n].expected,
-                  parseParameterDeclaration(kData[n].input,
-                                            &vartype,
-                                            &varname,
-                                            &error)) << text;
-        if (kData[n].expected) {
-            EXPECT_STREQ(kData[n].expectedType, vartype.c_str()) << text;
-            EXPECT_STREQ(kData[n].expectedVariable, varname.c_str()) << text;
+        EXPECT_EQ(n.expected, parseParameterDeclaration(n.input, &vartype,
+                                                        &varname, &error))
+                << text;
+        if (n.expected) {
+            EXPECT_STREQ(n.expectedType, vartype.c_str()) << text;
+            EXPECT_STREQ(n.expectedVariable, varname.c_str()) << text;
         } else {
-            EXPECT_STREQ(kData[n].expectedError, error.c_str()) << text;
+            EXPECT_STREQ(n.expectedError, error.c_str()) << text;
         }
     }
 }

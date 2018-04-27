@@ -342,7 +342,7 @@ uint32_t camera_virtualscene_preferred_format() {
 }
 
 CameraDevice* camera_virtualscene_open(const char* name, int inp_channel) {
-    VirtualSceneCameraDevice* cd = new VirtualSceneCameraDevice();
+    auto* cd = new VirtualSceneCameraDevice();
     return cd ? cd->getCameraDevice() : nullptr;
 }
 

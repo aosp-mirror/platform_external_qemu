@@ -37,11 +37,11 @@ namespace videoplayer {
 
 //// PacketQueue implementations
 
-AVPacket PacketQueue::sFlushPkt = {0};
+AVPacket PacketQueue::sFlushPkt = {nullptr};
 
 void PacketQueue::init() {
     av_init_packet(&sFlushPkt);
-    sFlushPkt.data = (uint8_t*)&sFlushPkt;
+    sFlushPkt.data = reinterpret_cast<uint8_t*>(&sFlushPkt);
 }
 
 PacketQueue::PacketQueue(VideoPlayer* player) : mPlayer(player) {}
@@ -74,8 +74,8 @@ int PacketQueue::internalPut(AVPacket* pkt) {
         return -1;
     }
 
-    CustomAVPacketList* pkt1 =
-            (CustomAVPacketList*)av_malloc(sizeof(CustomAVPacketList));
+    auto* pkt1 = static_cast<CustomAVPacketList*>(
+            av_malloc(sizeof(CustomAVPacketList)));
     if (pkt1 == nullptr) {
         return -1;
     }
@@ -163,7 +163,7 @@ int PacketQueue::get(AVPacket* pkt, bool blocking, int* serial) {
         if (pkt1 != nullptr) {
             mFirstPkt = pkt1->next;
             if (mFirstPkt == nullptr) {
-                mLastPkt = NULL;
+                mLastPkt = nullptr;
             }
             mNumPkts--;
             mSize -= pkt1->pkt.size + sizeof(*pkt1);

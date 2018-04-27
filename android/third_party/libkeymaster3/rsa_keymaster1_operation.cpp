@@ -31,8 +31,9 @@ namespace keymaster {
 keymaster_error_t RsaKeymaster1WrappedOperation::Begin(EVP_PKEY* rsa_key,
                                                        const AuthorizationSet& input_params) {
     Keymaster1Engine::KeyData* key_data = engine_->GetData(rsa_key);
-    if (!key_data)
+    if (!key_data) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
 
     // Copy the input params and substitute KM_DIGEST_NONE for whatever was specified.  Also change
     // KM_PAD_RSA_PSS and KM_PAD_OAEP to KM_PAD_NONE, if necessary. These are the params we'll pass
@@ -48,13 +49,15 @@ keymaster_error_t RsaKeymaster1WrappedOperation::Begin(EVP_PKEY* rsa_key,
     // that layer.
     AuthorizationSet begin_params(input_params);
     int pos = begin_params.find(TAG_DIGEST);
-    if (pos == -1)
+    if (pos == -1) {
         return KM_ERROR_UNSUPPORTED_DIGEST;
+    }
     begin_params[pos].enumerated = KM_DIGEST_NONE;
 
     pos = begin_params.find(TAG_PADDING);
-    if (pos == -1)
+    if (pos == -1) {
         return KM_ERROR_UNSUPPORTED_PADDING_MODE;
+    }
     switch (begin_params[pos].enumerated) {
 
     case KM_PAD_RSA_PSS:
@@ -93,8 +96,9 @@ keymaster_error_t RsaKeymaster1WrappedOperation::Abort() {
 
 keymaster_error_t RsaKeymaster1WrappedOperation::GetError(EVP_PKEY* rsa_key) {
     Keymaster1Engine::KeyData* key_data = engine_->GetData(rsa_key);  // key_data is owned by rsa
-    if (!key_data)
+    if (!key_data) {
         return KM_ERROR_UNKNOWN_ERROR;
+    }
     return key_data->error;
 }
 
@@ -116,17 +120,20 @@ Operation* RsaKeymaster1OperationFactory::CreateOperation(const Key& key,
                                                           const AuthorizationSet& begin_params,
                                                           keymaster_error_t* error) {
     keymaster_digest_t digest;
-    if (!GetAndValidateDigest(begin_params, key, &digest, error))
+    if (!GetAndValidateDigest(begin_params, key, &digest, error)) {
         return nullptr;
+    }
 
     keymaster_padding_t padding;
-    if (!GetAndValidatePadding(begin_params, key, &padding, error))
+    if (!GetAndValidatePadding(begin_params, key, &padding, error)) {
         return nullptr;
+    }
 
     const RsaKeymaster1Key& rsa_km1_key(static_cast<const RsaKeymaster1Key&>(key));
     unique_ptr<EVP_PKEY, EVP_PKEY_Delete> rsa(GetEvpKey(rsa_km1_key, error));
-    if (!rsa)
+    if (!rsa) {
         return nullptr;
+    }
 
     switch (purpose_) {
     case KM_PURPOSE_SIGN:

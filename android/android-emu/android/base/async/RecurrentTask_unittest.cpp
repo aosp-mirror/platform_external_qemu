@@ -133,7 +133,7 @@ TEST(RecurrentTaskTest, stopFromCallback) {
     EXPECT_EQ(1, count);
 }
 
-// TODO: this test is unstable as TestLooper isn't thread-safe.
+// TODO(zyy): this test is unstable as TestLooper isn't thread-safe.
 TEST(RecurrentTaskTest, DISABLED_stopAndWait) {
     TestLooper looper;
     int count = 0;
@@ -146,12 +146,14 @@ TEST(RecurrentTaskTest, DISABLED_stopAndWait) {
     task.start();
     EXPECT_TRUE(task.inFlight());
 
-    TestThread runner([](void* param) -> void* {
-        auto looper = (TestLooper*)param;
-        EXPECT_EQ(EWOULDBLOCK,
-                  looper->runWithDeadlineMs(Looper::kDurationInfinite));
-        return nullptr;
-    }, &looper);
+    TestThread runner(
+            [](void* param) -> void* {
+                auto looper = static_cast<TestLooper*>(param);
+                EXPECT_EQ(EWOULDBLOCK,
+                          looper->runWithDeadlineMs(Looper::kDurationInfinite));
+                return nullptr;
+            },
+            &looper);
 
     task.waitUntilRunning();
 

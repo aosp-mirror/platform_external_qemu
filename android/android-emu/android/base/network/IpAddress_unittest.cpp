@@ -43,7 +43,7 @@ TEST(IpAddress, ConstructorIpv4) {
 TEST(IpAddress, CopyOperations) {
     IpAddress addr0(0x12345678);
 
-    IpAddress addr1(addr0);  // copy-constructor.
+    const IpAddress& addr1(addr0);  // copy-constructor.
     EXPECT_TRUE(addr1.isIpv4());
     EXPECT_EQ(addr0.ipv4(), addr1.ipv4());
     EXPECT_EQ(addr0.ipv4(), addr0.ipv4());

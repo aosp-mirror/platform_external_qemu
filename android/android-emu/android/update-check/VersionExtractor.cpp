@@ -28,8 +28,8 @@
 #include <memory>
 #include <unordered_map>
 
-#include <errno.h>
-#include <stdlib.h>
+#include <cerrno>
+#include <cstdlib>
 
 namespace android {
 namespace update_check {
@@ -52,7 +52,7 @@ struct DeleteXmlObject {
 
     void operator()(xmlDocPtr doc) const { xmlFreeDoc(doc); }
 };
-}
+}  // namespace
 
 template <class T>
 using xmlAutoPtr = std::unique_ptr<T, DeleteXmlObject>;
