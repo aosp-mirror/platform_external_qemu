@@ -46,6 +46,30 @@
       "revId": "c6e1378362755ef5f682c125b698d60e113a4586",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3553b211_a75b34cc",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-27T16:41:40Z",
+      "side": 1,
+      "message": "oh, I misunderstood the requirements then\nThought it needs to be no smaller than 300px, now it all makes sense",
+      "parentUuid": "79f3baee_69012935",
+      "range": {
+        "startLine": 196,
+        "startChar": 33,
+        "endLine": 196,
+        "endChar": 34
+      },
+      "revId": "c6e1378362755ef5f682c125b698d60e113a4586",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
