@@ -70,7 +70,7 @@ void GooglePlayPage::queryPlayVersions() {
 
 void GooglePlayPage::bootCompletionPropertyDone(
         GooglePlayServices::Result result,
-        StringView outString) {
+        const StringView& outString) {
     if (result == GooglePlayServices::Result::Success && !outString.empty() &&
         outString[0] == '1') {
         // TODO: remove this once we have android properties to wait on.
@@ -143,7 +143,7 @@ void GooglePlayPage::getPlayServicesVersion() {
 
 void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
                                      PlayApps app,
-                                     StringView outString) {
+                                     const StringView& outString) {
     QString msg;
     QPlainTextEdit* textEdit = nullptr;
 

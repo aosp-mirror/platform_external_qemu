@@ -33,7 +33,7 @@ class EditableSliderWidget : public QWidget
     Q_PROPERTY(int lineEditMaximumWidth READ getLineEditMaximumWidth WRITE setLineEditMaximumWidth);
 
 public:
-    explicit EditableSliderWidget(QWidget* parent = 0);
+    explicit EditableSliderWidget(QWidget* parent = nullptr);
 
     double getValue() const { return mValue; }
     double getMinimum() const { return mMinimum; }
@@ -102,7 +102,7 @@ private slots:
     void lineEditValueChanged();
 
 private:
-    void updateValidatorStyle(QString colorGroup);
+    void updateValidatorStyle(const QString& colorGroup);
 
     double mValue = 0.0f;
     double mMinimum = 0.0f;

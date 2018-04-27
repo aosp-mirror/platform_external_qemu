@@ -21,11 +21,10 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
-#include <assert.h>
 #include <GLES/glext.h>
-#include <stdio.h>
-#include <string.h>
-
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 
 WindowSurface::WindowSurface(EGLDisplay display,
                              EGLConfig config,
@@ -46,25 +45,26 @@ WindowSurface *WindowSurface::create(EGLDisplay display,
                                      int p_height,
                                      HandleType hndl) {
     // allocate space for the WindowSurface object
-    WindowSurface *win = new WindowSurface(display, config, hndl);
+    auto* win = new WindowSurface(display, config, hndl);
     if (!win) {
-        return NULL;
+        return nullptr;
     }
 
     // Create a pbuffer to be used as the egl surface
     // for that window.
     if (!win->resize(p_width, p_height)) {
         delete win;
-        return NULL;
+        return nullptr;
     }
 
     return win;
 }
 
-
-void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
+void WindowSurface::setColorBuffer(const ColorBufferPtr& p_colorBuffer) {
     mAttachedColorBuffer = p_colorBuffer;
-    if (!p_colorBuffer) return;
+    if (!p_colorBuffer) {
+        return;
+    }
 
     // resize the window if the attached color buffer is of different
     // size.
@@ -76,7 +76,7 @@ void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
     }
 }
 
-void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
+void WindowSurface::bind(const RenderContextPtr& p_ctx, BindType p_bindType) {
     if (p_bindType == BIND_READ) {
         mReadContext = p_ctx;
     } else if (p_bindType == BIND_DRAW) {
@@ -162,14 +162,16 @@ bool WindowSurface::resize(unsigned int p_width, unsigned int p_height)
     //
     if (mSurface) {
         s_egl.eglDestroySurface(mDisplay, mSurface);
-        mSurface = NULL;
+        mSurface = nullptr;
     }
 
     //
     // Create pbuffer surface.
     //
     const EGLint pbufAttribs[5] = {
-        EGL_WIDTH, (EGLint) p_width, EGL_HEIGHT, (EGLint) p_height, EGL_NONE,
+            EGL_WIDTH,  static_cast<EGLint>(p_width),
+            EGL_HEIGHT, static_cast<EGLint>(p_height),
+            EGL_NONE,
     };
 
     mSurface = s_egl.eglCreatePbufferSurface(mDisplay,
@@ -229,7 +231,7 @@ WindowSurface * WindowSurface::onLoad(android::base::Stream* stream,
 
     GLuint width = stream->getBe32();
     GLuint height = stream->getBe32();
-    EGLConfig config = 0;
+    EGLConfig config = nullptr;
     if (s_egl.eglLoadConfig) {
         config = s_egl.eglLoadConfig(display, stream);
     }

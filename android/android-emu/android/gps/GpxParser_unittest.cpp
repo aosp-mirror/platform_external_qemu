@@ -350,4 +350,4 @@ TEST(GpxParser, ParseValidDocument) {
     EXPECT_EQ("Trkpt 2-2", locations[7].name);
 }
 
-}
+}  // namespace android_gps

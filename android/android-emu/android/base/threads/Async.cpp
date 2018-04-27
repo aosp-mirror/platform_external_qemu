@@ -31,17 +31,14 @@ public:
                                 ThreadFlags flags = ThreadFlags::MaskSignals)
         : FunctorThread(func, flags | ThreadFlags::Detach) {}
 
-    virtual void onExit() override {
-        delete this;
-    }
+    void onExit() override { delete this; }
 };
 
-}
+}  // namespace
 
 bool async(const ThreadFunctor& func, ThreadFlags flags) {
-    auto thread =
-            std::unique_ptr<SelfDeletingThread>(
-                new SelfDeletingThread(func, flags));
+    auto thread = std::unique_ptr<SelfDeletingThread>(
+            new SelfDeletingThread(func, flags));  // NOLINT
     if (thread->start()) {
         thread.release();
         return true;

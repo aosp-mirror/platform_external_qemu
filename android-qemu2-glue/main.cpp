@@ -79,11 +79,11 @@ extern "C" {
 #define TARGET_X86
 #endif
 
-#include <assert.h>
-#include <limits.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cstdio>
 
 #include "android/version.h"
 #define D(...)                   \
@@ -157,7 +157,7 @@ const TargetInfo kTarget = {
         "virtio-net-device",
         {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY,
          IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
-        {NULL},
+        {nullptr},
 #elif defined(TARGET_ARM)
         "arm",
         "arm",
@@ -167,7 +167,7 @@ const TargetInfo kTarget = {
         "virtio-net-device",
         {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY,
          IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
-        {NULL},
+        {nullptr},
 #elif defined(TARGET_MIPS64)
         "mips64",
         "mips64el",
@@ -177,7 +177,7 @@ const TargetInfo kTarget = {
         "virtio-net-device",
         {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY,
          IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
-        {NULL},
+        {nullptr},
 #elif defined(TARGET_MIPS)
         "mips",
         "mipsel",
@@ -187,7 +187,7 @@ const TargetInfo kTarget = {
         "virtio-net-device",
         {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY,
          IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
-        {NULL},
+        {nullptr},
 #elif defined(TARGET_X86_64)
         "x86_64",
         "x86_64",
@@ -197,7 +197,7 @@ const TargetInfo kTarget = {
         "virtio-net-pci",
         {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA,
          IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_VENDOR, IMAGE_TYPE_SD_CARD},
-        {"-vga", "none", NULL},
+        {"-vga", "none", nullptr},
 #elif defined(TARGET_I386)  // Both i386 and x86_64 targets define this macro
         "x86",
         "i386",
@@ -207,7 +207,7 @@ const TargetInfo kTarget = {
         "virtio-net-pci",
         {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA,
          IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_VENDOR, IMAGE_TYPE_SD_CARD},
-        {"-vga", "none", NULL},
+        {"-vga", "none", nullptr},
 #else
 #error No target platform is defined
 #endif
@@ -232,7 +232,7 @@ static std::string getNthParentDir(const char* path, size_t n) {
  */
 static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     const auto hwIni = android::base::makeCustomScopedPtr(
-            iniFile_newEmpty(NULL), iniFile_free);
+            iniFile_newEmpty(nullptr), iniFile_free);
     androidHwConfig_write(hw, hwIni.get());
 
     /* While saving HW config, ignore valueless entries. This will
@@ -249,7 +249,7 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     /* In verbose mode, dump the file's content */
     if (VERBOSE_CHECK(init)) {
         auto file = makeCustomScopedPtr(fopen(coreHwIniPath, "rt"), fclose);
-        if (file.get() == NULL) {
+        if (file == nullptr) {
             derror("Could not open hardware configuration file: "
                    "%s\n",
                    coreHwIniPath);
@@ -257,7 +257,7 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
             LineInput* input = lineInput_newFromStdFile(file.get());
             const char* line;
             printf("Content of hardware configuration file:\n");
-            while ((line = lineInput_getLine(input)) != NULL) {
+            while ((line = lineInput_getLine(input)) != nullptr) {
                 printf("  %s\n", line);
             }
             printf(".\n");
@@ -269,7 +269,7 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
 }
 
 static int createUserData(AvdInfo* avd,
-                          std::string dataPath,
+                          const std::string& dataPath,
                           AndroidHwConfig* hw) {
     ScopedCPtr<char> initDir(avdInfo_getDataInitDirPath(avd));
     bool needCopyDataPartition = true;
@@ -292,7 +292,7 @@ static int createUserData(AvdInfo* avd,
         android_createExt4ImageFromDir(
                 hw->disk_dataPartition_path, dataPath.c_str(),
                 android_hw->disk_dataPartition_size, "data");
-        // TODO: remove dataPath folder
+        // TODO(jansene): remove dataPath folder
 
         // Creating data partition can fail because of insufficient disk space
         // or non-ascii path on Windows. Fall back to default userdata.img if
@@ -449,7 +449,7 @@ private:
                                            kTarget.storageDeviceType);
                 break;
             case IMAGE_TYPE_SD_CARD:
-                if (m_hw->hw_sdCard_path != NULL &&
+                if (m_hw->hw_sdCard_path != nullptr &&
                     strcmp(m_hw->hw_sdCard_path, "")) {
                     filePath = m_hw->hw_sdCard_path;
                     driveParam +=
@@ -464,7 +464,7 @@ private:
                 break;
             case IMAGE_TYPE_ENCRYPTION_KEY:
                 if (fc::isEnabled(fc::EncryptUserData) &&
-                    m_hw->disk_encryptionKeyPartition_path != NULL &&
+                    m_hw->disk_encryptionKeyPartition_path != nullptr &&
                     strcmp(m_hw->disk_encryptionKeyPartition_path, "")) {
                     filePath = m_hw->disk_encryptionKeyPartition_path;
                     driveParam +=
@@ -525,13 +525,13 @@ private:
 
 extern "C" int run_qemu_main(int argc,
                              const char** argv,
-                             void (*on_main_loop_done)(void));
+                             void (*on_main_loop_done)());
 
 static void enter_qemu_main_loop(int argc, char** argv) {
 #ifndef _WIN32
     sigset_t set;
     sigemptyset(&set);
-    pthread_sigmask(SIG_SETMASK, &set, NULL);
+    pthread_sigmask(SIG_SETMASK, &set, nullptr);
 #endif
 // stick a version here for qemu-system binary
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
@@ -675,7 +675,7 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
-    if (filelock_create(coreHwIniPath) == NULL) {
+    if (filelock_create(coreHwIniPath) == nullptr) {
         // The AVD is already in use
         derror("There's another emulator instance running with "
                "the current AVD '%s'. Exiting...\n",
@@ -725,7 +725,8 @@ extern "C" int main(int argc, char** argv) {
     if (opts->shared_net_id) {
         char* end;
         long shared_net_id = strtol(opts->shared_net_id, &end, 0);
-        if (end == NULL || *end || shared_net_id < 1 || shared_net_id > 255) {
+        if (end == nullptr || *end || shared_net_id < 1 ||
+            shared_net_id > 255) {
             fprintf(stderr,
                     "option -shared-net-id must be an integer between 1 and "
                     "255\n");
@@ -736,7 +737,7 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Add bluetooth parameters if applicable.
-    char* bluetooth_opts = NULL;
+    char* bluetooth_opts = nullptr;
 #ifdef __linux__
     bluetooth_opts = opts->bluetooth;
 
@@ -753,8 +754,9 @@ extern "C" int main(int argc, char** argv) {
     args.add2If("-dns-server", opts->dns_server);
     args.addIf("-skip-adb-auth", opts->skip_adb_auth);
 
-    if (opts->audio && !strcmp(opts->audio, "none"))
+    if (opts->audio && !strcmp(opts->audio, "none")) {
         args.add("-no-audio");
+    }
 
     // Generic snapshots command line option
 
@@ -790,7 +792,7 @@ extern "C" int main(int argc, char** argv) {
     if (fc::isEnabled(fc::LogcatPipe) && opts->logcat) {
         boot_property_add_logcat_pipe(opts->logcat);
         // we have done with -logcat option.
-        opts->logcat = NULL;
+        opts->logcat = nullptr;
     }
 
     // Always setup a single serial port, that can be connected
@@ -820,7 +822,7 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 
-    for (ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
+    for (ParamList* pl = opts->prop; pl != nullptr; pl = pl->next) {
         args.add2("-boot-property", pl->param);
     }
 
@@ -846,7 +848,7 @@ extern "C" int main(int argc, char** argv) {
     if (!opts->charmap) {
         /* Try to find a valid charmap name */
         char* charmap = avdInfo_getCharmapFile(avd, hw->hw_keyboard_charmap);
-        if (charmap != NULL) {
+        if (charmap != nullptr) {
             D("autoconfig: -charmap %s", charmap);
             opts->charmap = charmap;
         }
@@ -869,7 +871,7 @@ extern "C" int main(int argc, char** argv) {
         str_reset(&hw->hw_keyboard_charmap, charmap_name);
     }
 
-// TODO: imement network
+// TODO(digit): implement network
 #if 0
     /* Set up the interfaces for inter-emulator networking */
     if (opts->shared_net_id) {
@@ -920,8 +922,9 @@ extern "C" int main(int argc, char** argv) {
     // Create userdata file from init version if needed.
     if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
         int ret = createUserData(avd, dataPath, hw);
-        if (ret != 0)
+        if (ret != 0) {
             return ret;
+        }
     } else if (!hw->hw_arc) {
         // Resize userdata-qemu.img if the size is smaller than what
         // config.ini says and also delete userdata-qemu.img.qcow2.
@@ -930,7 +933,7 @@ extern "C" int main(int argc, char** argv) {
         System::FileSize current_data_size;
         if (System::get()->pathFileSize(hw->disk_dataPartition_path,
                                         &current_data_size)) {
-            System::FileSize partition_size = static_cast<System::FileSize>(
+            auto partition_size = static_cast<System::FileSize>(
                     android_hw->disk_dataPartition_size);
             if (android_hw->disk_dataPartition_size > 0 &&
                 current_data_size < partition_size) {
@@ -949,7 +952,7 @@ extern "C" int main(int argc, char** argv) {
 
     // create encryptionkey.img file if needed
     if (fc::isEnabled(fc::EncryptUserData)) {
-        if (hw->disk_encryptionKeyPartition_path == NULL) {
+        if (hw->disk_encryptionKeyPartition_path == nullptr) {
             if (!createInitalEncryptionKeyPartition(hw)) {
                 derror("Encryption is requested but failed to create "
                        "encrypt "
@@ -1008,7 +1011,7 @@ extern "C" int main(int argc, char** argv) {
     }
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
-    char* accel_status = NULL;
+    char* accel_status = nullptr;
     CpuAccelMode accel_mode = ACCEL_AUTO;
     const bool accel_ok =
             handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
@@ -1170,7 +1173,7 @@ extern "C" int main(int argc, char** argv) {
 #endif
 
     /* append extra qemu parameters if any */
-    for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
+    for (int idx = 0; kTarget.qemuExtraArgs[idx] != nullptr; idx++) {
         args.add(kTarget.qemuExtraArgs[idx]);
     }
 
@@ -1338,8 +1341,9 @@ extern "C" int main(int argc, char** argv) {
 
     // Generate a hardware-qemu.ini for this AVD.
     int ret = genHwIniFile(hw, coreHwIniPath);
-    if (ret != 0)
+    if (ret != 0) {
         return ret;
+    }
 
     args.add2("-android-hw", coreHwIniPath);
     crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);

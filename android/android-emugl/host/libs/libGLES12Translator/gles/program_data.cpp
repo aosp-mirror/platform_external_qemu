@@ -16,8 +16,8 @@
 
 #include "gles/program_data.h"
 
-#include <stdio.h>
 #include <GLES/glext.h>
+#include <cstdio>
 
 #include "common/alog.h"
 #include "gles/debug.h"
@@ -84,13 +84,12 @@ void ProgramData::AttachShader(const ShaderDataPtr& shader) {
 void ProgramData::DetachShader(const ShaderDataPtr& shader) {
   AutoLock lock(lock_);
   bool found = false;
-  for (ShaderList::iterator it = shaders_.begin();
-      it != shaders_.end(); ++it) {
-    if (shader == *it) {
-      shaders_.erase(it);
-      found = true;
-      break;
-    }
+  for (auto it = shaders_.begin(); it != shaders_.end(); ++it) {
+      if (shader == *it) {
+          shaders_.erase(it);
+          found = true;
+          break;
+      }
   }
   if (!found) {
     GLES_ERROR(GL_INVALID_OPERATION, "The shader has not been attached");
@@ -103,10 +102,10 @@ void ProgramData::DetachShader(const ShaderDataPtr& shader) {
 void ProgramData::GetAttachedShaders(GLsizei max_count, GLsizei* count,
                                      GLuint* shaders) const {
   int i = 0;
-  for (ShaderList::const_iterator it = shaders_.begin();
-        it != shaders_.end() && i < max_count; ++it) {
-    shaders[i] = (*it)->GetLocalName();
-    ++i;
+  for (auto it = shaders_.begin(); it != shaders_.end() && i < max_count;
+       ++it) {
+      shaders[i] = (*it)->GetLocalName();
+      ++i;
   }
   if (count) {
     *count = i;
@@ -144,8 +143,8 @@ void ProgramData::GetProgramiv(GLenum pname, GLint* params) const {
       break;
     case GL_ACTIVE_ATTRIBUTES: {
       ProgramVariantPtr program = GetProgramWithLinkAttemptLocked();
-      if (program != NULL) {
-        *params = program->GetActiveAttribCount();
+      if (program != nullptr) {
+          *params = program->GetActiveAttribCount();
       } else {
         *params = 0;
       }
@@ -153,8 +152,8 @@ void ProgramData::GetProgramiv(GLenum pname, GLint* params) const {
     }
     case GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: {
       ProgramVariantPtr program = GetProgramWithLinkAttemptLocked();
-      if (program != NULL) {
-        *params = program->GetActiveAttribMaxNameLengh() + 1;
+      if (program != nullptr) {
+          *params = program->GetActiveAttribMaxNameLengh() + 1;
       } else {
         *params = 0;
       }
@@ -162,8 +161,8 @@ void ProgramData::GetProgramiv(GLenum pname, GLint* params) const {
     }
     case GL_ACTIVE_UNIFORMS: {
       ProgramVariantPtr program = GetProgramWithLinkAttemptLocked();
-      if (program != NULL) {
-        *params = program->GetActiveUniformCount();
+      if (program != nullptr) {
+          *params = program->GetActiveUniformCount();
       } else {
         *params = 0;
       }
@@ -171,8 +170,8 @@ void ProgramData::GetProgramiv(GLenum pname, GLint* params) const {
     }
     case GL_ACTIVE_UNIFORM_MAX_LENGTH: {
       ProgramVariantPtr program = GetProgramWithLinkAttemptLocked();
-      if (program != NULL) {
-        *params = program->GetActiveUniformMaxNameLengh() + 1;
+      if (program != nullptr) {
+          *params = program->GetActiveUniformMaxNameLengh() + 1;
       } else {
         *params = 0;
       }
@@ -217,27 +216,27 @@ void ProgramData::Link() {
         current_program_->GetInfoLog().c_str());
 
   if (use_count_ == 0) {
-    SetLinkedProgramLocked(ProgramVariantPtr(NULL));
+      SetLinkedProgramLocked(ProgramVariantPtr(nullptr));
   }
 }
 
-void ProgramData::SetLinkedProgramLocked(ProgramVariantPtr program) {
-  // Reset all mappings.
-  linked_programs_.clear();
-  ClearUniformCacheLocked();
+void ProgramData::SetLinkedProgramLocked(const ProgramVariantPtr& program) {
+    // Reset all mappings.
+    linked_programs_.clear();
+    ClearUniformCacheLocked();
 
-  if (program == NULL) {
-    return;  // No linked program exists.
-  }
+    if (program == nullptr) {
+        return;  // No linked program exists.
+    }
 
-  for (int i = 0; i < program->GetActiveUniformCount(); ++i) {
-    const ProgramVariant::ActiveUniform& uniform =
-        program->GetActiveUniform(i);
-    uniform_cache_[uniform.GetBaseName()] = new CachedUniform(
-        uniform.GetType(), uniform.IsArray(), uniform.GetArraySize());
-  }
+    for (int i = 0; i < program->GetActiveUniformCount(); ++i) {
+        const ProgramVariant::ActiveUniform& uniform =
+                program->GetActiveUniform(i);
+        uniform_cache_[uniform.GetBaseName()] = new CachedUniform(
+                uniform.GetType(), uniform.IsArray(), uniform.GetArraySize());
+    }
 
-  linked_programs_.push_back(LinkedProgram(program));
+    linked_programs_.emplace_back(program);
 }
 
 bool ProgramData::Use(bool enable) {
@@ -248,7 +247,7 @@ bool ProgramData::Use(bool enable) {
     if (has_link_failure_ && !linked_programs_.empty() && use_count_ == 0) {
       // glUseProgram() spec says an active in-use program that failed
       // to re-link should keep working until it goes out of use.
-      SetLinkedProgramLocked(ProgramVariantPtr(NULL));
+      SetLinkedProgramLocked(ProgramVariantPtr(nullptr));
     }
     return true;
   }
@@ -394,18 +393,17 @@ void ProgramData::GetActiveUniform(GLuint index, GLsizei buf_size,
                                    GLsizei* length, GLint* size, GLenum* type,
                                    GLchar* name) const {
   ProgramVariantPtr program = GetProgramWithLinkAttemptLocked();
-  if (program != NULL) {
-    program->GetActiveUniform(index, buf_size, length, size, type, name);
-    return;
+  if (program != nullptr) {
+      program->GetActiveUniform(index, buf_size, length, size, type, name);
+      return;
   }
 
   GLES_ERROR(GL_INVALID_OPERATION, "The program has not been linked");
 }
 
 void ProgramData::ClearUniformCacheLocked() {
-  for (UniformCacheMap::iterator it = uniform_cache_.begin();
-        it != uniform_cache_.end(); ++it) {
-    delete it->second;
+    for (auto& it : uniform_cache_) {
+        delete it.second;
   }
   uniform_cache_.clear();
   uniform_locations_.clear();
@@ -490,8 +488,7 @@ void ProgramData::SetUniformInternal(GLint location,
 
   const UniformLocation& location_info =
       uniform_locations_.find(location)->second;
-  UniformCacheMap::iterator it =
-      uniform_cache_.find(location_info.GetBaseName());
+  auto it = uniform_cache_.find(location_info.GetBaseName());
   LOG_ALWAYS_FATAL_IF(it == uniform_cache_.end());
   CachedUniform* uniform = it->second;
 
@@ -558,8 +555,7 @@ void ProgramData::GetUniformfv(GLint location, GLfloat* params) const {
 
   const UniformLocation& location_info =
       uniform_locations_.find(location)->second;
-  UniformCacheMap::const_iterator it =
-      uniform_cache_.find(location_info.GetBaseName());
+  auto it = uniform_cache_.find(location_info.GetBaseName());
   LOG_ALWAYS_FATAL_IF(it == uniform_cache_.end());
   if (!it->second->StoreAsFloatTo(params)) {
     GLES_ERROR(GL_INVALID_OPERATION, "Unable to convert uniform data");
@@ -576,8 +572,7 @@ void ProgramData::GetUniformiv(GLint location, GLint* params) const {
 
   const UniformLocation& location_info =
       uniform_locations_.find(location)->second;
-  UniformCacheMap::const_iterator it =
-      uniform_cache_.find(location_info.GetBaseName());
+  auto it = uniform_cache_.find(location_info.GetBaseName());
   LOG_ALWAYS_FATAL_IF(it == uniform_cache_.end());
   if (!it->second->StoreAsIntTo(params)) {
     GLES_ERROR(GL_INVALID_OPERATION, "Unable to convert uniform data");
@@ -592,9 +587,9 @@ void ProgramData::GetActiveAttrib(GLuint index, GLsizei buf_size,
                                   GLsizei* length, GLint* size,
                                   GLenum* type, GLchar* name) const {
   ProgramVariantPtr program = GetProgramWithLinkAttemptLocked();
-  if (program != NULL) {
-    program->GetActiveAttrib(index, buf_size, length, size, type, name);
-    return;
+  if (program != nullptr) {
+      program->GetActiveAttrib(index, buf_size, length, size, type, name);
+      return;
   }
 
   GLES_ERROR(GL_INVALID_OPERATION, "The program has not been linked");
@@ -643,10 +638,10 @@ void ProgramData::CachedUniform::SetOnProgram(GlesContext* ctx,
 // LinkedProgram
 ///////////////////////////////////////////////////////////////////////////////
 
-ProgramData::LinkedProgram::LinkedProgram(ProgramVariantPtr program)
+ProgramData::LinkedProgram::LinkedProgram(const ProgramVariantPtr& program)
     : program_(program), uniform_revision_(0) {
-  LOG_ALWAYS_FATAL_IF(program_ == NULL);
-  LOG_ALWAYS_FATAL_IF(!program_->IsLinked());
+    LOG_ALWAYS_FATAL_IF(program_ == nullptr);
+    LOG_ALWAYS_FATAL_IF(!program_->IsLinked());
 }
 
 ProgramData::LinkedProgram* ProgramData::LinkedProgram::Clone(
@@ -654,7 +649,7 @@ ProgramData::LinkedProgram* ProgramData::LinkedProgram::Clone(
   if (!program_->UsesExternalTextureAs2D()) {
     // It is not possible to use other global targets if the user's program
     // does not use external textures.
-    return NULL;
+    return nullptr;
   }
 
   // Create the new program with proper shaders.
@@ -693,7 +688,7 @@ ProgramData::LinkedProgram* ProgramData::LinkedProgram::Clone(
   if (!new_program->IsLinked()) {
     ALOGW("Unable to link program for texture target 0x%x",
           global_texture_target);
-    return NULL;
+    return nullptr;
   }
 
   return new LinkedProgram(new_program);

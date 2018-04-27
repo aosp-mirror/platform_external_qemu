@@ -23,7 +23,7 @@
 #include <vector>
 
 class SaveableTexture;
-typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
+using SaveableTexturePtr = std::shared_ptr<SaveableTexture>;
 
 class RenderbufferData : public ObjectData
 {
@@ -38,7 +38,7 @@ public:
     void makeTextureDirty();
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
-    NamedObjectPtr eglImageGlobalTexObject = 0;
+    NamedObjectPtr eglImageGlobalTexObject = nullptr;
     SaveableTexturePtr saveableTexture = {};
     GLenum internalformat = GL_RGBA8;
     GLenum hostInternalFormat = GL_RGBA8;
@@ -54,7 +54,7 @@ class FramebufferData : public ObjectData
 public:
     explicit FramebufferData(GLuint name, GLuint globalName);
     FramebufferData(android::base::Stream* stream);
-    ~FramebufferData();
+    ~FramebufferData() override;
     void onSave(android::base::Stream* stream,
                 unsigned int globalName) const override;
     void postLoad(const getObjDataPtr_t& getObjDataPtr) override;
@@ -65,7 +65,7 @@ public:
                        GLenum attachment,
                        GLenum target,
                        GLuint name,
-                       ObjectDataPtr obj,
+                       const ObjectDataPtr& obj,
                        bool takeOwnership = false);
 
     GLuint getAttachment(GLenum attachment,

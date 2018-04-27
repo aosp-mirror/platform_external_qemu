@@ -108,7 +108,8 @@ public:
                  android::base::Looper::Duration checkTimeoutMs = 1 * 1000,
                  ThreadFlags flags = ThreadFlags::MaskSignals)
         : ParallelTaskBase(looper, checkTimeoutMs, flags),
-        mTaskFunction(taskFunction), mTaskDoneFunction(taskDoneFunction) {}
+          mTaskFunction(std::move(taskFunction)),
+          mTaskDoneFunction(std::move(taskDoneFunction)) {}
 
     // Start the thread instance. Returns true on success, false otherwise.
     // (e.g. if the thread was already started or terminated).
@@ -120,9 +121,9 @@ public:
     bool inFlight() const { return ParallelTaskBase::inFlight(); }
 
 protected:
-    void taskImpl() override final { mTaskFunction(&mResultBuffer); }
+    void taskImpl() final { mTaskFunction(&mResultBuffer); }
 
-    void taskDoneImpl() override final { mTaskDoneFunction(mResultBuffer); }
+    void taskDoneImpl() final { mTaskDoneFunction(mResultBuffer); }
 
 private:
     ResultType mResultBuffer;
@@ -145,7 +146,7 @@ public:
                              TaskFunction taskFunction,
                              TaskDoneFunction taskDoneFunction,
                              android::base::Looper::Duration checkTimeoutMs)
-        : mTaskDoneFunction(taskDoneFunction),
+        : mTaskDoneFunction(std::move(taskDoneFunction)),
           mParallelTask(looper,
                         taskFunction,
                         std::bind(&SelfDeletingParallelTask::taskDoneFunction,

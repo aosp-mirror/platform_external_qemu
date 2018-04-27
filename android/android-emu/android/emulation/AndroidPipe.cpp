@@ -31,7 +31,7 @@
 #include <vector>
 #include <unordered_set>
 
-#include <assert.h>
+#include <cassert>
 
 #define DEBUG 0
 
@@ -114,20 +114,19 @@ public:
         DD("%s: Creating new ConnectorPipe hwpipe=%p", __FUNCTION__, mHwPipe);
     }
 
-    virtual void onGuestClose(PipeCloseReason reason) override {
+    void onGuestClose(PipeCloseReason reason) override {
         // nothing to do here
         DD("%s: closing ConnectorPipe hwpipe=%p prematurily (reason=%d)!",
            __func__, mHwPipe, (int)reason);
     }
 
-    virtual unsigned onGuestPoll() const override {
+    unsigned onGuestPoll() const override {
         // A connector always want to receive data.
         DD("%s: polling hwpipe=%p", __FUNCTION__, mHwPipe);
         return PIPE_POLL_OUT;
     }
 
-    virtual int onGuestRecv(AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+    int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override {
         // This pipe never wants to write to the guest, so getting there
         // is an error since PIPE_WAKE_IN is never signaled.
         DD("%s: trying to receive data from hwpipe=%p", __FUNCTION__, mHwPipe);
@@ -143,8 +142,7 @@ public:
     // instance! In case of error (e.g. invalid service name, or error during
     // initialization), PIPE_ERROR_INVAL will be returned, otherwise, the
     // number of bytes accepted from the guest is returned.
-    virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override {
         int result = 0;
         size_t avail = kBufferSize - mPos;
         bool foundZero = false;
@@ -156,7 +154,7 @@ public:
             size_t n = 0;
             while (n < count) {
                 uint8_t byte = data[n++];
-                mBuffer[mPos++] = (char) byte;
+                mBuffer[mPos++] = static_cast<char>(byte);
                 if (!byte) {
                     foundZero = true;
                     break;
@@ -229,7 +227,7 @@ public:
         if (pipeArgs) {
             *pipeArgs++ = '\0';
             if (!pipeArgs) {
-                pipeArgs = NULL;
+                pipeArgs = nullptr;
             }
         }
 
@@ -260,13 +258,13 @@ public:
         return result;
     }
 
-    virtual void onGuestWantWakeOn(int wakeFlags) override {
+    void onGuestWantWakeOn(int wakeFlags) override {
         // nothing to do here
         DD("%s: signaling wakeFlags=%d for hwpipe=%p", __FUNCTION__, wakeFlags,
            mHwPipe);
     }
 
-    virtual void onSave(BaseStream* stream) override {
+    void onSave(BaseStream* stream) override {
         DD("%s: saving connector state for hwpipe=%p", __FUNCTION__, mHwPipe);
         stream->putBe32(mPos);
         stream->write(mBuffer, mPos);
@@ -280,8 +278,8 @@ public:
               static_cast<int>(len), kBufferSize);
             return false;
         }
-        mPos = (int)len;
-        int ret = (int)stream->read(mBuffer, mPos);
+        mPos = static_cast<int>(len);
+        auto ret = static_cast<int>(stream->read(mBuffer, mPos));
         DD("%s: read %d bytes (%d expected)", __FUNCTION__, ret, mPos);
         return (ret == mPos);
     }
@@ -297,16 +295,16 @@ class ConnectorService : public Service {
 public:
     ConnectorService() : Service("<connector>") {}
 
-    virtual AndroidPipe* create(void* hwPipe, const char* args) override {
+    AndroidPipe* create(void* hwPipe, const char* args) override {
         return new ConnectorPipe(hwPipe, this);
     }
 
-    virtual bool canLoad() const override { return true; }
+    bool canLoad() const override { return true; }
 
-    virtual AndroidPipe* load(void* hwPipe,
-                              const char* args,
-                              BaseStream* stream) override {
-        ConnectorPipe* pipe = new ConnectorPipe(hwPipe, this);
+    AndroidPipe* load(void* hwPipe,
+                      const char* args,
+                      BaseStream* stream) override {
+        auto* pipe = new ConnectorPipe(hwPipe, this);
         if (!pipe->onLoad(stream)) {
             delete pipe;
             return nullptr;
@@ -353,7 +351,7 @@ public:
     }
 
 private:
-    virtual void performDeviceOperation(const PipeWakeCommand& wake_cmd) {
+    void performDeviceOperation(const PipeWakeCommand& wake_cmd) override {
         void* hwPipe = wake_cmd.hwPipe;
         int flags = wake_cmd.wakeFlags;
 
@@ -434,9 +432,10 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
     if (pendingFlags && pipe && !*pForceClose) {
         if (!hwPipe) {
             CrashReporter::get()->GenerateDumpAndDie(
-                    StringFormat(
-                            "AndroidPipe::%s [%s]: hwPipe is NULL (flags = 0x%x)",
-                            __func__, pipe->name(), (unsigned)pendingFlags)
+                    StringFormat("AndroidPipe::%s [%s]: hwPipe is NULL (flags "
+                                 "= 0x%x)",
+                                 __func__, pipe->name(),
+                                 static_cast<unsigned>(pendingFlags))
                             .c_str());
             abort();
         }
@@ -479,7 +478,7 @@ void AndroidPipe::signalWake(int wakeFlags) {
         CrashReporter::get()->GenerateDumpAndDie(
                 StringFormat(
                         "AndroidPipe::%s [%s]: hwPipe is NULL (flags = 0x%x)",
-                        __func__, name(), (unsigned)wakeFlags)
+                        __func__, name(), static_cast<unsigned>(wakeFlags))
                         .c_str());
         abort();
     }

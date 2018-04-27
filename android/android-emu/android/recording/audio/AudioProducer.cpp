@@ -93,9 +93,10 @@ public:
         size_t szBytes = getAudioFormatSize(mFormat.audioFormat);
 
         mFrameSize = mNbSamples * mChannels * szBytes;
-        double bytesPerSecond = (double)mSampleRate * mChannels * szBytes;
-        double secPerFrame = ((double)mFrameSize) / bytesPerSecond;
-        mMicroSecondsPerFrame = (uint64_t)(secPerFrame * 1000000);
+        double bytesPerSecond =
+                static_cast<double>(mSampleRate) * mChannels * szBytes;
+        double secPerFrame = (static_cast<double>(mFrameSize)) / bytesPerSecond;
+        mMicroSecondsPerFrame = static_cast<uint64_t>(secPerFrame * 1000000);
 
         // 4 silent frames makes Chrome very happy
         mNbSilentFrames = 4;

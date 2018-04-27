@@ -16,9 +16,9 @@
 
 #include "gles/gles1_shader_generator.h"
 
-#include <stdio.h>
-#include <string.h>
 #include <GLES/glext.h>
+#include <cstdio>
+#include <cstring>
 
 #include "common/alog.h"
 #include "gles/debug.h"
@@ -49,12 +49,12 @@ namespace {
 class StringBuilder {
  public:
   StringBuilder(char* buf, size_t size) : buf_(buf), size_(size) {
-    LOG_ALWAYS_FATAL_IF(buf == NULL || size_ == 0);
-    // Always ensure the buffer is nul terminated.
-    *buf_ = 0;
-    // Reduce available size by 1 because we'll always add a nul terminator
-    // to the end of the buffer.
-    --size_;
+      LOG_ALWAYS_FATAL_IF(buf == nullptr || size_ == 0);
+      // Always ensure the buffer is nul terminated.
+      *buf_ = 0;
+      // Reduce available size by 1 because we'll always add a nul terminator
+      // to the end of the buffer.
+      --size_;
   }
 
   void Write(const char* text) {

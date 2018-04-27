@@ -18,8 +18,8 @@
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 
+#include <cstddef>
 #include <utility>
-#include <stddef.h>
 
 namespace android {
 namespace base {

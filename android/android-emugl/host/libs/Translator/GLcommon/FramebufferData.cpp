@@ -81,7 +81,7 @@ FramebufferData::FramebufferData(android::base::Stream* stream) :
     for (auto& attachPoint : m_attachPoints) {
         attachPoint.target = stream->getBe32();
         attachPoint.name = stream->getBe32();
-        attachPoint.objType = (NamedObjectType)stream->getBe32();
+        attachPoint.objType = static_cast<NamedObjectType>(stream->getBe32());
         // attachPoint.obj will be set up in postLoad
         attachPoint.owned = stream->getByte();
     }
@@ -107,10 +107,10 @@ void FramebufferData::onSave(android::base::Stream* stream, unsigned int globalN
         stream->putBe32(attachPoint.name);
         // do not save attachPoint.obj
         if (attachPoint.obj) {
-            stream->putBe32((uint32_t)ObjectDataType2NamedObjectType(
-                    attachPoint.obj->getDataType()));
+            stream->putBe32(static_cast<uint32_t>(ObjectDataType2NamedObjectType(
+                    attachPoint.obj->getDataType())));
         } else {
-            stream->putBe32((uint32_t)NamedObjectType::NULLTYPE);
+            stream->putBe32(static_cast<uint32_t>(NamedObjectType::NULLTYPE));
         }
         stream->putByte(attachPoint.owned);
     }
@@ -218,7 +218,7 @@ void FramebufferData::setAttachment(
                GLenum attachment,
                GLenum target,
                GLuint name,
-               ObjectDataPtr obj,
+               const ObjectDataPtr& obj,
                bool takeOwnership) {
 
     int idx = attachmentPointIndex(attachment);
@@ -485,7 +485,7 @@ void FramebufferData::refreshSeparateDepthStencilAttachmentState() {
         m_attachPoints[attachmentPointIndex(attachmentToRestore)].target;
 
     GLuint prevFboBinding;
-    gl.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, (GLint*)&prevFboBinding);
+    gl.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, reinterpret_cast<GLint*>(&prevFboBinding));
     gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbGlobalName);
 
     switch (objectTypeToRestore) {

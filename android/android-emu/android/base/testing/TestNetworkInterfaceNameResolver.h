@@ -32,11 +32,11 @@ public:
     TestNetworkInterfaceNameResolver()
         : mOldResolver(netSetNetworkInterfaceNameResolverForTesting(this)) {}
 
-    ~TestNetworkInterfaceNameResolver() {
+    ~TestNetworkInterfaceNameResolver() override {
         netSetNetworkInterfaceNameResolverForTesting(mOldResolver);
     }
 
-    virtual int queryInterfaceName(const char* str) {
+    int queryInterfaceName(const char* str) override {
         for (const auto& item : mEntries) {
             if (item.first == str) {
                 return item.second;

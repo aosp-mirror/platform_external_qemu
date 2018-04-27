@@ -25,7 +25,7 @@
 #include <QtCore>
 
 #include <algorithm>
-
+#include <utility>
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
 #endif
@@ -300,7 +300,7 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
             // The subwindow won't redraw until the guest screen changes, which
             // may not happen for a minute (when the clock changes), so force a
             // redraw after re-showing the window.
-            SkinEvent* event = new SkinEvent();
+            auto* event = new SkinEvent();
             event->type = kEventForceRedraw;
             mEmulatorWindow->queueSkinEvent(event);
         }
@@ -385,7 +385,7 @@ void EmulatorContainer::slot_resizeDone() {
     }
 }
 
-void EmulatorContainer::slot_showModalOverlay(QString text) {
+void EmulatorContainer::slot_showModalOverlay(const QString& text) {
     slot_hideModalOverlay();
     slot_hideVirtualSceneInfoDialog();
     mModalOverlay = new Ui::ModalOverlay(text, this);
@@ -410,7 +410,7 @@ void EmulatorContainer::slot_hideModalOverlay() {
 }
 
 void EmulatorContainer::slot_setModalOverlayFunc(
-        QString text,
+        const QString& text,
         Ui::ModalOverlay::OverlayButtonFunc f) {
     if (mModalOverlay) {
         mModalOverlay->showButtonFunc(text, std::move(f));

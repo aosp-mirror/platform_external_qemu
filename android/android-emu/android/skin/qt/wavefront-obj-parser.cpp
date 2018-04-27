@@ -29,7 +29,7 @@ private:
         return std::hash<int>()(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
     }
 };
-}
+}  // namespace std
 
 bool parseWavefrontOBJ(QTextStream& stream,
                        std::vector<float>& vtx_buf,

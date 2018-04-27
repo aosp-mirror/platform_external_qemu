@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <errno.h>
+#include <errno.h>  // NOLINT
 
 #include "android/utils/compiler.h"
 
@@ -23,11 +23,11 @@ ANDROID_BEGIN_HEADER
 // Mostly used for unit testing.
 // If the macro is undefined, auto-detect the value based on NDEBUG.
 #if !defined(EINTR_WRAPPER_DEBUG)
-#  ifdef NDEBUG
-#    define EINTR_WRAPPER_DEBUG 0
-#  else
-#    define EINTR_WRAPPER_DEBUG 1
-#  endif
+#ifdef NDEBUG
+#define EINTR_WRAPPER_DEBUG 0
+#else
+#define EINTR_WRAPPER_DEBUG 1
+#endif
 #endif
 
 // HANDLE_EINTR() is a macro used to handle EINTR return values when
@@ -53,35 +53,35 @@ ANDROID_BEGIN_HEADER
 //   much random! It's better to leave the descriptor open than risk
 //   closing another one by mistake :(
 //
-#define MAX_EINTR_LOOP_COUNT  100
+#define MAX_EINTR_LOOP_COUNT 100
 
 #ifdef _WIN32
-#  define HANDLE_EINTR(x)  (x)
+#define HANDLE_EINTR(x) (x)
 #elif EINTR_WRAPPER_DEBUG == 0
-#  define HANDLE_EINTR(x) \
-    __extension__ ({ \
-        __typeof__(x) eintr_wrapper_result; \
-        do { \
-            eintr_wrapper_result = (x); \
+#define HANDLE_EINTR(x)                                       \
+    __extension__({                                           \
+        __typeof__(x) eintr_wrapper_result;                   \
+        do {                                                  \
+            eintr_wrapper_result = (x);                       \
         } while (eintr_wrapper_result < 0 && errno == EINTR); \
-        eintr_wrapper_result; \
+        eintr_wrapper_result;                                 \
     })
 #else  // !_WIN32 && EINTR_WRAPPER_DEBUG
 
-#  define HANDLE_EINTR(x) \
-    __extension__ ({ \
-        __typeof__(x) eintr_wrapper_result; \
-        int eintr_wrapper_loop_count = 0; \
-        for (;;) { \
-            eintr_wrapper_result = (x); \
-            if (eintr_wrapper_result != -1 || errno != EINTR) \
-                break; \
+#define HANDLE_EINTR(x)                                               \
+    __extension__({                                                   \
+        __typeof__(x) eintr_wrapper_result;                           \
+        int eintr_wrapper_loop_count = 0;                             \
+        for (;;) {                                                    \
+            eintr_wrapper_result = (x);                               \
+            if (eintr_wrapper_result != -1 || errno != EINTR)         \
+                break;                                                \
             if (++eintr_wrapper_loop_count >= MAX_EINTR_LOOP_COUNT) { \
-                android_eintr_wrapper_fatal( \
-                        __FILE__,__LINE__,__PRETTY_FUNCTION__,#x); \
-            } \
-        }; \
-        eintr_wrapper_result; \
+                android_eintr_wrapper_fatal(__FILE__, __LINE__,       \
+                                            __PRETTY_FUNCTION__, #x); \
+            }                                                         \
+        };                                                            \
+        eintr_wrapper_result;                                         \
     })
 #endif  // !_WIN32 && EINTR_WRAPPER_DEBUG
 
@@ -90,14 +90,14 @@ ANDROID_BEGIN_HEADER
 // This is mostly used with the close() system call, as described
 // in the HANDLE_EINTR() documentation.
 #ifdef _WIN32
-#  define IGNORE_EINTR(x)  (x)
+#define IGNORE_EINTR(x) (x)
 #else
-#  define IGNORE_EINTR(x) \
-    __extension__ ({ \
-        __typeof__(x) eintr_wrapper_result = (x); \
+#define IGNORE_EINTR(x)                                   \
+    __extension__({                                       \
+        __typeof__(x) eintr_wrapper_result = (x);         \
         if (eintr_wrapper_result == -1 && errno == EINTR) \
-            eintr_wrapper_result = 0; \
-        eintr_wrapper_result; \
+            eintr_wrapper_result = 0;                     \
+        eintr_wrapper_result;                             \
     })
 #endif
 
@@ -108,11 +108,10 @@ ANDROID_BEGIN_HEADER
 // |lineno| is the line number in the source file.
 // |function| is the name of the function, or NULL if not available.
 // |call| is a string describing the system call that failed.
-void __attribute__((noreturn)) android_eintr_wrapper_fatal(
-        const char* file,
-        long lineno,
-        const char* function,
-        const char* call);
+void __attribute__((noreturn)) android_eintr_wrapper_fatal(const char* file,
+                                                           long lineno,
+                                                           const char* function,
+                                                           const char* call);
 #endif  // !_WIN32
 
 ANDROID_END_HEADER

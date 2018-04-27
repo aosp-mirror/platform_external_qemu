@@ -51,7 +51,7 @@ public:
     //
     // IMPORTANT: This automatically resizes the Pbuffer's to the ColorBuffer's
     // dimensions. Potentially losing pixel values in the process.
-    void setColorBuffer(ColorBufferPtr p_colorBuffer);
+    void setColorBuffer(const ColorBufferPtr& p_colorBuffer);
 
     // Retrieves a pointer to the attached color buffer.
     ColorBuffer* getAttachedColorBuffer() const {
@@ -83,7 +83,7 @@ public:
     // |p_bindType| is the type of bind. For BIND_READ, this assigns |p_ctx|
     // to mReadContext, for BIND_DRAW, it assigns it to mDrawContext, and for
     // for BIND_READDRAW, it assigns it to both.
-    void bind(RenderContextPtr p_ctx, BindType p_bindType);
+    void bind(const RenderContextPtr& p_ctx, BindType p_bindType);
 
     GLuint getWidth() const;
     GLuint getHeight() const;
@@ -111,6 +111,6 @@ private:
     HandleType mHndl;
 };
 
-typedef emugl::SmartPtr<WindowSurface> WindowSurfacePtr;
+using WindowSurfacePtr = emugl::SmartPtr<WindowSurface>;
 
 #endif  // _LIBRENDER_WINDOW_SURFACE_H

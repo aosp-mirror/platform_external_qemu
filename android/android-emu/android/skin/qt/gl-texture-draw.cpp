@@ -60,7 +60,8 @@ TextureDraw::TextureDraw(const GLESv2Dispatch* gl_dispatch) :
     mGLES2->glGetProgramiv(mProgram, GL_LINK_STATUS, &success);
     if (success == GL_FALSE) {
         GLchar infolog[256];
-        mGLES2->glGetProgramInfoLog(mProgram, sizeof(infolog), 0, infolog);
+        mGLES2->glGetProgramInfoLog(mProgram, sizeof(infolog), nullptr,
+                                    infolog);
         fprintf(stderr, "Could not create/link program: %s\n", infolog);
         return;
     }
@@ -118,11 +119,10 @@ void TextureDraw::draw(GLuint input_texture, int width, int height) {
     mGLES2->glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
     mGLES2->glEnableVertexAttribArray(mPositionAttribLocation);
     mGLES2->glVertexAttribPointer(mPositionAttribLocation,
-                                  2, // components per attrib
-                                  GL_FLOAT,
-                                  GL_FALSE,
-                                  0, // stride
-                                  0); // offset
+                                  2,  // components per attrib
+                                  GL_FLOAT, GL_FALSE,
+                                  0,         // stride
+                                  nullptr);  // offset
     mGLES2->glActiveTexture(GL_TEXTURE0);
     mGLES2->glBindTexture(GL_TEXTURE_2D, input_texture);
     mGLES2->glUniform1i(mInputUniformLocation, 0);

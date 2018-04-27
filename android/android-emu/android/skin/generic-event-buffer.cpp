@@ -14,7 +14,7 @@
 
 #include "android/utils/debug.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 void skin_generic_event_buffer_init(SkinGenericEventBuffer* buffer,
                                     SkinGenericEventFlushFunc flush_func) {
@@ -27,7 +27,7 @@ void skin_generic_event_buffer_add(SkinGenericEventBuffer* buffer,
                                    unsigned code,
                                    unsigned value) {
     if (buffer->event_count < MAX_GENERIC_EVENTS) {
-        int count = (int)buffer->event_count++;
+        int count = buffer->event_count++;
         buffer->events[count].type = type;
         buffer->events[count].code = code;
         buffer->events[count].value = value;

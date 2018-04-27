@@ -4,8 +4,8 @@
 
 #include "vector.h"
 
-#include <assert.h>
 #include <algorithm>
+#include <cassert>
 #include "common/alog.h"
 #include "matrix.h"
 
@@ -13,8 +13,9 @@ namespace emugl {
 
 float Vector::GetDotProduct(const Vector& v) const {
   float dp = 0;
-  for (size_t i = 0; i < kEntries; ++i)
-    dp += entries_[i] * v.entries_[i];
+  for (size_t i = 0; i < kEntries; ++i) {
+      dp += entries_[i] * v.entries_[i];
+  }
   return dp;
 }
 
@@ -37,8 +38,9 @@ void Vector::AssignMatrixMultiply(const Matrix& a, const Vector& b) {
 
 void Vector::AssignLinearMapping(const float* params, size_t count) {
   LOG_ALWAYS_FATAL_IF(count > kEntries);
-  for (size_t i = 0; i < count; i++)
-    entries_[i] = params[i];
+  for (size_t i = 0; i < count; i++) {
+      entries_[i] = params[i];
+  }
 }
 
 void Vector::AssignLinearMapping(const int32_t* params, size_t count) {
@@ -68,8 +70,9 @@ void Vector::AssignLinearMapping(const uint8_t* params, size_t count) {
 
 void Vector::GetLinearMapping(float* params, size_t count) const {
   LOG_ALWAYS_FATAL_IF(count > kEntries);
-  for (size_t i = 0; i < count; i++)
-    params[i] = entries_[i];
+  for (size_t i = 0; i < count; i++) {
+      params[i] = entries_[i];
+  }
 }
 
 void Vector::GetLinearMapping(int32_t* params, size_t count) const {
@@ -78,8 +81,9 @@ void Vector::GetLinearMapping(int32_t* params, size_t count) const {
 }
 
 void Vector::Clamp(float minv, float maxv) {
-  for (size_t i = 0; i < kEntries; i++)
-    entries_[i] = std::min(std::max(entries_[i], minv), maxv);
+    for (float& entrie : entries_) {
+        entrie = std::min(std::max(entrie, minv), maxv);
+    }
 }
 
 template <typename T>
@@ -90,7 +94,7 @@ void Vector::AssignLinearMappingHelper(const T* params, size_t count) {
   // will be in the range [0.0, +1.0].
 
   // An alias is convenient.
-  typedef std::numeric_limits<T> Limits;
+  using Limits = std::numeric_limits<signed char>;
 
   // We only expect integers here.
   LOG_ALWAYS_FATAL_IF(!Limits::is_integer);
@@ -99,15 +103,15 @@ void Vector::AssignLinearMappingHelper(const T* params, size_t count) {
   // accurately represented in a single precision floating point number.
 
   // Get the range of the integer
-  const double mini = static_cast<double>(Limits::min());
-  const double maxi = static_cast<double>(Limits::max());
+  const auto mini = static_cast<double>(Limits::min());
+  const auto maxi = static_cast<double>(Limits::max());
   // Get the range of the floating point output.
   const double minf = Limits::is_signed ? -1.f : 0.f;
   const double maxf = +1.f;
 
   for (size_t i = 0; i < count; i++) {
-    double v = static_cast<double>(params[i]);
-    entries_[i] = (v - mini) * (maxf - minf) / (maxi - mini) + minf;
+      auto v = static_cast<double>(params[i]);
+      entries_[i] = (v - mini) * (maxf - minf) / (maxi - mini) + minf;
   }
 }
 
@@ -122,7 +126,7 @@ void Vector::GetLinearMappingHelper(T* params, size_t count) const {
   // the maximum value.
 
   // An alias is convenient.
-  typedef std::numeric_limits<T> Limits;
+  using Limits = std::numeric_limits<T>;
 
   // We only expect integers here.
   LOG_ALWAYS_FATAL_IF(!Limits::is_integer);
@@ -131,8 +135,8 @@ void Vector::GetLinearMappingHelper(T* params, size_t count) const {
   // accurately represented in a single precision floating point number.
 
   // Get the range of the integer
-  const double mini = static_cast<double>(Limits::min());
-  const double maxi = static_cast<double>(Limits::max());
+  const auto mini = static_cast<double>(Limits::min());
+  const auto maxi = static_cast<double>(Limits::max());
   // Get the range of the floating point output.
   const double minf = Limits::is_signed ? -1. : 0.;
   const double maxf = +1.;

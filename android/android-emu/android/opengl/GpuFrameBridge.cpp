@@ -23,8 +23,8 @@
 
 #include <atomic>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef _WIN32
 #undef ERROR
@@ -48,8 +48,8 @@ struct Frame {
     void* pixels;
     bool isValid;
 
-    Frame(int w, int h, const void* pixels) :
-            width(w), height(h), pixels(NULL), isValid(true) {
+    Frame(int w, int h, const void* pixels)
+        : width(w), height(h), pixels(nullptr), isValid(true) {
         this->pixels = ::calloc(w * 4, h);
         ::memcpy(this->pixels, pixels, w * 4 * h);
     }
@@ -63,19 +63,19 @@ struct Frame {
 class Bridge : public GpuFrameBridge {
 public:
     // Constructor.
-    Bridge(Looper* looper, Callback* callback, void* callbackOpaque) :
-            GpuFrameBridge(),
-            mLooper(looper),
-            mInSocket(-1),
-            mOutSocket(-1),
-            mFdWatch(NULL),
-            mFrames(),
-            mCallback(callback),
-            mCallbackOpaque(callbackOpaque),
-            mRecFrame(NULL),
-            mRecTmpFrame(NULL),
-            mRecFrameUpdated(false),
-            mReadPixelsFunc(android_getReadPixelsFunc()) {
+    Bridge(Looper* looper, Callback* callback, void* callbackOpaque)
+        : GpuFrameBridge(),
+          mLooper(looper),
+          mInSocket(-1),
+          mOutSocket(-1),
+          mFdWatch(nullptr),
+          mFrames(),
+          mCallback(callback),
+          mCallbackOpaque(callbackOpaque),
+          mRecFrame(nullptr),
+          mRecTmpFrame(nullptr),
+          mRecFrameUpdated(false),
+          mReadPixelsFunc(android_getReadPixelsFunc()) {
         if (!mLooper) {
             return;
         }
@@ -99,7 +99,7 @@ public:
     }
 
     // Destructor
-    virtual ~Bridge() {
+    ~Bridge() override {
         // Non-recording mode
         if (mLooper) {
             delete mFdWatch;
@@ -116,11 +116,11 @@ public:
 
     // Implementation of the GpuFrameBridge::postFrame() method, must be
     // called from the EmuGL thread.
-    virtual void postFrame(int width, int height, const void* pixels) {
+    void postFrame(int width, int height, const void* pixels) override {
         if (mInSocket < 0) {
             return;
         }
-        Frame* frame = new Frame(width, height, pixels);
+        auto* frame = new Frame(width, height, pixels);
         ::memcpy(frame->pixels, pixels, width * 4 * height);
         mFrames.send(frame);
         char c = 1;
@@ -129,13 +129,15 @@ public:
 
     // Implementation of the GpuFrameBridge::postRecordFrame() method, must be
     // called from the EmuGL thread.
-    virtual void postRecordFrame(int width, int height, const void* pixels) {
+    void postRecordFrame(int width, int height, const void* pixels) override {
         postRecordFrameAsync(width, height, pixels);
         AutoLock lock(mRecLock);
         memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
     }
 
-    virtual void postRecordFrameAsync(int width, int height, const void* pixels) {
+    void postRecordFrameAsync(int width,
+                              int height,
+                              const void* pixels) override {
         {
             AutoLock lock(mRecLock);
             if (!mRecFrame) {
@@ -148,7 +150,7 @@ public:
         mRecFrameUpdated.store(true, std::memory_order_release);
     }
 
-    virtual void* getRecordFrame() {
+    void* getRecordFrame() override {
         if (mRecFrameUpdated.exchange(false)) {
             AutoLock lock(mRecLock);
             memcpy(mRecFrame->pixels, mRecTmpFrame->pixels,
@@ -158,7 +160,7 @@ public:
         return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
     }
 
-    virtual void* getRecordFrameAsync() {
+    void* getRecordFrameAsync() override {
         if (mRecFrameUpdated.exchange(false)) {
             AutoLock lock(mRecLock);
             mReadPixelsFunc(mRecFrame->pixels,
@@ -168,7 +170,7 @@ public:
         return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
     }
 
-    virtual void invalidateRecordingBuffers() {
+    void invalidateRecordingBuffers() override {
         {
             AutoLock lock(mRecLock);
             if (mRecFrame) {
@@ -185,7 +187,7 @@ private:
 
     // Called from the looper thread when a new Frame instance is available.
     static void onSocketEvent(void* opaque, int fd, unsigned events) {
-        Bridge* bridge = reinterpret_cast<Bridge*>(opaque);
+        auto* bridge = reinterpret_cast<Bridge*>(opaque);
         if (events & Looper::FdWatch::kEventRead) {
             char c = 0;
             android::base::socketRecv(bridge->mOutSocket, &c, 1);
@@ -199,7 +201,7 @@ private:
             if (!c) {
                 return;
             }
-            Frame* frame = NULL;
+            Frame* frame = nullptr;
             bridge->mFrames.receive(&frame);
             if (frame) {
                 bridge->mCallback(bridge->mCallbackOpaque,
@@ -226,7 +228,7 @@ private:
     Frame* mRecTmpFrame;
     std::atomic_bool mRecFrameUpdated;
 
-    ReadPixelsFunc mReadPixelsFunc = 0;
+    ReadPixelsFunc mReadPixelsFunc = nullptr;
 };
 
 }  // namespace

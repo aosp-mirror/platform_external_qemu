@@ -14,8 +14,8 @@
 #include "android/base/files/Stream.h"
 #include "android/base/StringView.h"
 
+#include <cerrno>
 #include <vector>
-#include <errno.h>
 
 namespace android {
 namespace base {
@@ -26,12 +26,12 @@ namespace base {
 // read() operations on the stream are forbidden.
 class TestMemoryOutputStream : public Stream {
 public:
-    virtual ssize_t read(void* buffer, size_t len) override {
+    ssize_t read(void* buffer, size_t len) override {
         errno = EINVAL;
         return -1;
     }
 
-    virtual ssize_t write(const void* buffer, size_t len) override {
+    ssize_t write(const void* buffer, size_t len) override {
         mData.insert(mData.end(), static_cast<const char*>(buffer),
                      static_cast<const char*>(buffer) + len);
         return static_cast<ssize_t>(len);

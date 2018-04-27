@@ -27,46 +27,46 @@
 
 #include "OpenglRender/render_api_functions.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
 
-#define D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
-#define DD(...) VERBOSE_PRINT(gles,__VA_ARGS__)
+#define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
+#define DD(...) VERBOSE_PRINT(gles, __VA_ARGS__)
 
 /* Name of the GLES rendering library we're going to use */
 #if UINTPTR_MAX == UINT32_MAX
-#define RENDERER_LIB_NAME  "libOpenglRender"
+#define RENDERER_LIB_NAME "libOpenglRender"
 #elif UINTPTR_MAX == UINT64_MAX
-#define RENDERER_LIB_NAME  "lib64OpenglRender"
+#define RENDERER_LIB_NAME "lib64OpenglRender"
 #else
 #error Unknown UINTPTR_MAX
 #endif
 
 /* Declared in "android/globals.h" */
-int  android_gles_fast_pipes = 1;
+int android_gles_fast_pipes = 1;
 
 // Define the Render API function pointers.
-#define FUNCTION_(ret, name, sig, params) \
-        static ret (*name) sig = NULL;
+#define FUNCTION_(ret, name, sig, params) static ret(*name) sig = NULL;
 LIST_RENDER_API_FUNCTIONS(FUNCTION_)
 #undef FUNCTION_
 
 // Define a function that initializes the function pointers by looking up
 // the symbols from the shared library.
 static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
-    void*  symbol;
-    char*  error;
+    void* symbol;
+    char* error;
 
-#define FUNCTION_(ret, name, sig, params) \
-    symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error); \
-    if (symbol != NULL) { \
-        using type = ret(sig); \
-        name = (type*)symbol; \
-    } else { \
-        derror("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
-        free(error); \
-        return -1; \
+#define FUNCTION_(ret, name, sig, params)                                 \
+    symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error);      \
+    if (symbol != NULL) {                                                 \
+        using type = ret(sig);                                            \
+        (name) = (type*)symbol;                                           \
+    } else {                                                              \
+        derror("GLES emulation: Could not find required symbol (%s): %s", \
+               #name, error);                                             \
+        free(error);                                                      \
+        return -1;                                                        \
     }
     LIST_RENDER_API_FUNCTIONS(FUNCTION_)
 #undef FUNCTION_
@@ -80,16 +80,17 @@ static emugl::RenderLibPtr sRenderLib = nullptr;
 static emugl::RendererPtr sRenderer = nullptr;
 
 int android_initOpenglesEmulation() {
-    char* error = NULL;
+    char* error = nullptr;
 
-    if (sRenderLib != NULL)
+    if (sRenderLib != nullptr) {
         return 0;
+    }
 
     D("Initializing hardware OpenGLES emulation support");
 
     ADynamicLibrary* const rendererSo =
             adynamicLibrary_open(RENDERER_LIB_NAME, &error);
-    if (rendererSo == NULL) {
+    if (rendererSo == nullptr) {
         derror("Could not load OpenGLES emulation library [%s]: %s",
                RENDERER_LIB_NAME, error);
         return -1;
@@ -97,7 +98,8 @@ int android_initOpenglesEmulation() {
 
     /* Resolve the functions */
     if (initOpenglesEmulationFuncs(rendererSo) < 0) {
-        derror("OpenGLES emulation library mismatch. Be sure to use the correct version!");
+        derror("OpenGLES emulation library mismatch. Be sure to use the "
+               "correct version!");
         goto BAD_EXIT;
     }
 
@@ -129,11 +131,12 @@ BAD_EXIT:
     return -1;
 }
 
-int
-android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
-                              int* glesMajorVersion_out,
-                              int* glesMinorVersion_out)
-{
+int android_startOpenglesRenderer(int width,
+                                  int height,
+                                  bool guestPhoneApi,
+                                  int guestApiLevel,
+                                  int* glesMajorVersion_out,
+                                  int* glesMinorVersion_out) {
     if (!sRenderLib) {
         D("Can't start OpenGLES renderer without support libraries");
         return -1;
@@ -149,12 +152,10 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
     sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
-    sRenderLib->setSyncDevice(goldfish_sync_create_timeline,
-            goldfish_sync_create_fence,
-            goldfish_sync_timeline_inc,
-            goldfish_sync_destroy_timeline,
-            goldfish_sync_register_trigger_wait,
-            goldfish_sync_device_exists);
+    sRenderLib->setSyncDevice(
+            goldfish_sync_create_timeline, goldfish_sync_create_fence,
+            goldfish_sync_timeline_inc, goldfish_sync_destroy_timeline,
+            goldfish_sync_register_trigger_wait, goldfish_sync_device_exists);
 
     emugl_logger_struct logfuncs;
     logfuncs.coarse = android_opengl_logger_write;
@@ -164,25 +165,28 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.add_buffer = android_goldfish_dma_ops.add_buffer;
     dma_ops.remove_buffer = android_goldfish_dma_ops.remove_buffer;
     dma_ops.get_host_addr = android_goldfish_dma_ops.get_host_addr;
-    dma_ops.invalidate_host_mappings = android_goldfish_dma_ops.invalidate_host_mappings;
+    dma_ops.invalidate_host_mappings =
+            android_goldfish_dma_ops.invalidate_host_mappings;
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
 
-    sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+    sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow,
+                                         sEgl2egl);
     if (!sRenderer) {
         D("Can't start OpenGLES renderer?");
         return -1;
     }
 
-    // after initRenderer is a success, the maximum GLES API is calculated depending
-    // on feature control and host GPU support. Set the obtained GLES version here.
-    if (glesMajorVersion_out && glesMinorVersion_out)
+    // after initRenderer is a success, the maximum GLES API is calculated
+    // depending on feature control and host GPU support. Set the obtained GLES
+    // version here.
+    if (glesMajorVersion_out && glesMinorVersion_out) {
         sRenderLib->getGlesVersion(glesMajorVersion_out, glesMinorVersion_out);
+    }
     return 0;
 }
 
-bool
-android_asyncReadbackSupported() {
+bool android_asyncReadbackSupported() {
     if (sRenderer) {
         return sRenderer->asyncReadbackSupported();
     } else {
@@ -192,9 +196,7 @@ android_asyncReadbackSupported() {
     }
 }
 
-void
-android_setPostCallback(OnPostFunc onPost, void* onPostContext)
-{
+void android_setPostCallback(OnPostFunc onPost, void* onPostContext) {
     if (sRenderer) {
         sRenderer->setPostCallback(onPost, onPostContext);
     }
@@ -229,7 +231,7 @@ static char* strdupBaseString(const char* src) {
     len = end - begin;
 
     char* result;
-    result = (char*)malloc(len + 1);
+    result = static_cast<char*>(malloc(len + 1));
     memcpy(result, begin, len);
     result[len] = '\0';
     return result;
@@ -254,7 +256,8 @@ void android_getOpenglesHardwareStrings(char** vendor,
     /* Special case for the default ES to GL translators: extract the strings
      * of the underlying OpenGL implementation. */
     if (strncmp(strings.vendor.c_str(), "Google", 6) == 0 &&
-            strncmp(strings.renderer.c_str(), "Android Emulator OpenGL ES Translator", 37) == 0) {
+        strncmp(strings.renderer.c_str(),
+                "Android Emulator OpenGL ES Translator", 37) == 0) {
         *vendor = strdupBaseString(strings.vendor.c_str());
         *renderer = strdupBaseString(strings.renderer.c_str());
         *version = strdupBaseString(strings.version.c_str());
@@ -270,9 +273,7 @@ void android_getOpenglesVersion(int* maj, int* min) {
     fprintf(stderr, "%s: maj min %d %d\n", __func__, *maj, *min);
 }
 
-void
-android_stopOpenglesRenderer(bool wait)
-{
+void android_stopOpenglesRenderer(bool wait) {
     if (sRenderer) {
         sRenderer->stop(wait);
         if (wait) {
@@ -282,40 +283,40 @@ android_stopOpenglesRenderer(bool wait)
     }
 }
 
-int
-android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
-                           int fbw, int fbh, float dpr, float rotation,
-                           bool deleteExisting)
-{
+int android_showOpenglesWindow(void* window,
+                               int wx,
+                               int wy,
+                               int ww,
+                               int wh,
+                               int fbw,
+                               int fbh,
+                               float dpr,
+                               float rotation,
+                               bool deleteExisting) {
     if (!sRenderer) {
         return -1;
     }
-    FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
+    FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;  // NOLINT
     bool success = sRenderer->showOpenGLSubwindow(
-            win, wx, wy, ww, wh, fbw, fbh, dpr, rotation,
-                       deleteExisting);
+            win, wx, wy, ww, wh, fbw, fbh, dpr, rotation, deleteExisting);
     return success ? 0 : -1;
 }
 
-void
-android_setOpenglesTranslation(float px, float py)
-{
+void android_setOpenglesTranslation(float px, float py) {
     if (sRenderer) {
         sRenderer->setOpenGLDisplayTranslation(px, py);
     }
 }
 
-void
-android_setOpenglesScreenMask(int width, int height, const unsigned char* rgbaData)
-{
+void android_setOpenglesScreenMask(int width,
+                                   int height,
+                                   const unsigned char* rgbaData) {
     if (sRenderer) {
         sRenderer->setScreenMask(width, height, rgbaData);
     }
 }
 
-int
-android_hideOpenglesWindow(void)
-{
+int android_hideOpenglesWindow(void) {
     if (!sRenderer) {
         return -1;
     }
@@ -323,26 +324,20 @@ android_hideOpenglesWindow(void)
     return success ? 0 : -1;
 }
 
-void
-android_redrawOpenglesWindow(void)
-{
+void android_redrawOpenglesWindow(void) {
     if (sRenderer) {
         sRenderer->repaintOpenGLDisplay();
     }
 }
 
-bool
-android_hasGuestPostedAFrame(void)
-{
+bool android_hasGuestPostedAFrame(void) {
     if (sRenderer) {
         return sRenderer->hasGuestPostedAFrame();
     }
     return false;
 }
 
-void
-android_resetGuestPostedAFrame(void)
-{
+void android_resetGuestPostedAFrame(void) {
     if (sRenderer) {
         sRenderer->resetGuestPostedAFrame();
     }
@@ -350,13 +345,11 @@ android_resetGuestPostedAFrame(void)
 
 static ScreenshotFunc sScreenshotFunc = nullptr;
 
-void android_registerScreenshotFunc(ScreenshotFunc f)
-{
+void android_registerScreenshotFunc(ScreenshotFunc f) {
     sScreenshotFunc = f;
 }
 
-void android_screenShot(const char* dirname)
-{
+void android_screenShot(const char* dirname) {
     if (sScreenshotFunc) {
         sScreenshotFunc(dirname);
     }

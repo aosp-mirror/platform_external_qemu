@@ -28,12 +28,12 @@ TEST(Gsm, Utf8CheckGsm7) {
     // The Euro symbol is a three-byte UTF-8 symbol and a
     // two-byte GSM-7 symbol.
 
-    cbytes_t start = (cbytes_t)&utf8In[0];
+    auto start = reinterpret_cast<cbytes_t>(&utf8In[0]);
 
     int isGsm7 = utf8_check_gsm7(start, strlen(utf8In));
     EXPECT_TRUE(isGsm7);
 
-    cbytes_t end     = (cbytes_t)(start + strlen(utf8In));
+    cbytes_t end = (start + strlen(utf8In));
     int      gsm7len = 154;
 
     // The "Euro" generates 2 output GSM-7 bytes from 3 input
@@ -59,12 +59,12 @@ TEST(Gsm, Utf8CheckUcs2) {
     // The cent symbol is not in GSM-7. Its presence forces
     // the SMS message to use UCS-2.
 
-    cbytes_t start   = (cbytes_t)&utf8In[0];
+    auto start = reinterpret_cast<cbytes_t>(&utf8In[0]);
 
     int isGsm7 = utf8_check_gsm7(start, strlen(utf8In));
     EXPECT_FALSE(isGsm7);
 
-    cbytes_t end     = (cbytes_t)(start + strlen(utf8In));
+    cbytes_t end = (start + strlen(utf8In));
     int      ucs2len = 124;
 
     // The "cent" generates 2 output UCS-2 bytes from 2 input

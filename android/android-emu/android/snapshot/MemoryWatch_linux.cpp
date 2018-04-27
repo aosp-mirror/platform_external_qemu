@@ -248,7 +248,7 @@ bool MemoryAccessWatch::fillPage(void* ptr,
         }
     }
 
-    // TODO: figure out why this kills emulator on some Linux machines.
+    // TODO(zyy): figure out why this kills emulator on some Linux machines.
     //
     // uffdio_range rangeStruct{(uintptr_t)ptr, length};
     // if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_UNREGISTER, &rangeStruct)) {
@@ -260,7 +260,7 @@ bool MemoryAccessWatch::fillPage(void* ptr,
 }
 
 void MemoryAccessWatch::initBulkFill(void* startPtr, size_t length) {
-    // TODO: no-op for now
+    // TODO(bohu): no-op for now
 }
 
 bool MemoryAccessWatch::fillPageBulk(void* startPtr, size_t length, const void* data,

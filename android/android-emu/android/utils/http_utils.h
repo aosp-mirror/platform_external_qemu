@@ -13,8 +13,7 @@
 
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
-#include <stddef.h>
+#include <cstddef>
 
 ANDROID_BEGIN_HEADER
 

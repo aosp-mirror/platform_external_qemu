@@ -44,7 +44,7 @@ public:
         static Guest* create();
 
         // Destructor, closes the connection, if any.
-        virtual ~Guest() {}
+        virtual ~Guest() = default;
 
         // Try to connect to a named service. |name| can be
         // either <service> or <service>:<args>. Returns 0 on
@@ -74,7 +74,7 @@ public:
 
     protected:
         // Private constructor.
-        Guest() {}
+        Guest() = default;
     };
 
 private:

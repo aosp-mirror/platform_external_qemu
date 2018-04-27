@@ -123,8 +123,9 @@ ScreenRecorder::ScreenRecorder(uint32_t fbWidth,
                                mInfo.timeLimit * 1000000;
           {
               AutoLock lock(mLock);
-              while (!mFinished && mCond.timedWait(&mLock, timeoutTimeUs))
+              while (!mFinished && mCond.timedWait(&mLock, timeoutTimeUs)) {
                   ;
+              }
           }
 
           if (!mFinished) {
@@ -380,8 +381,9 @@ bool start_webrtc_module(const char* handle, int fps) {
             globals.fbWidth, globals.fbHeight, fps, handle));
 
     // We can fail due to shared memory allocation issues.
-    if (!globals.webrtc_module->attachProducer(std::move(producer)))
+    if (!globals.webrtc_module->attachProducer(std::move(producer))) {
         return false;
+    }
 
     globals.webrtc_module->start();
     return true;

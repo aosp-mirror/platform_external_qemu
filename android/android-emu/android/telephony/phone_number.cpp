@@ -10,8 +10,8 @@
 ** GNU General Public License for more details.
 */
 
-#include <string.h>
 #include <algorithm>
+#include <cstring>
 #include <string>
 
 #include "android/telephony/phone_number.h"

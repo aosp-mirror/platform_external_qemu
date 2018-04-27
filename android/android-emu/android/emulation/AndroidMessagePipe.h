@@ -15,6 +15,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 // This is a utility class that can help implement simple
@@ -70,7 +71,7 @@ public:
     class Service : public AndroidPipe::Service {
     public:
         Service(const char* serviceName, DecodeAndExecuteFunction cb)
-            : AndroidPipe::Service(serviceName), m_cb(cb) {}
+            : AndroidPipe::Service(serviceName), m_cb(std::move(cb)) {}
 
         bool canLoad() const override { return true; }
 
@@ -80,7 +81,7 @@ public:
             return new AndroidMessagePipe(hwPipe, this, m_cb, stream);
         }
 
-        virtual AndroidPipe* create(void* mHwPipe, const char* args) override {
+        AndroidPipe* create(void* mHwPipe, const char* args) override {
             return new AndroidMessagePipe(mHwPipe, this, m_cb, nullptr);
         }
 

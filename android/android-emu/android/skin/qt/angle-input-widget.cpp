@@ -23,22 +23,17 @@ static void setUpLabel(QLabel* label, const QString& title) {
     label->setProperty("ColorGroup", "Title");
 }
 
-AngleInputWidget::AngleInputWidget(QWidget* parent) :
-    QWidget(parent),
-    mDecimalModeFrame(this),
-    mSexagesimalModeFrame(this),
-    mDecimalValueEditor(&mDecimalModeFrame),
-    mDegreesValueEditor(&mSexagesimalModeFrame),
-    mMinutesValueEditor(&mSexagesimalModeFrame),
-    mSecondsValueEditor(&mSexagesimalModeFrame),
-    mDegreesLabel(&mSexagesimalModeFrame),
-    mMinutesLabel(&mSexagesimalModeFrame),
-    mSecondsLabel(&mSexagesimalModeFrame),
-    mMinValue(0.0),
-    mMaxValue(0.0),
-    mDecimalValue(0.0),
-    mCurrentInputMode(InputMode::Decimal) {
-
+AngleInputWidget::AngleInputWidget(QWidget* parent)
+    : QWidget(parent),
+      mDecimalModeFrame(this),
+      mSexagesimalModeFrame(this),
+      mDecimalValueEditor(&mDecimalModeFrame),
+      mDegreesValueEditor(&mSexagesimalModeFrame),
+      mMinutesValueEditor(&mSexagesimalModeFrame),
+      mSecondsValueEditor(&mSexagesimalModeFrame),
+      mDegreesLabel(&mSexagesimalModeFrame),
+      mMinutesLabel(&mSexagesimalModeFrame),
+      mSecondsLabel(&mSexagesimalModeFrame) {
     // Set up validators for the editors.
     setMinValue(-180.0);
     setMaxValue(180.0);
@@ -56,7 +51,8 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
     setUpLineEdit(&mDegreesValueEditor, &mIntegerDegreeValidator);
     setUpLineEdit(&mMinutesValueEditor, &mMinValidator);
     setUpLineEdit(&mSecondsValueEditor, &mSecValidator);
-    setUpLabel(&mDegreesLabel, QString("\u00B0")); // U+00B0 is the "degree" sign in Unicode.
+    setUpLabel(&mDegreesLabel,
+               QString("\u00B0"));  // U+00B0 is the "degree" sign in Unicode.
     setUpLabel(&mMinutesLabel, QString("'"));
     setUpLabel(&mSecondsLabel, QString("''"));
 
@@ -77,15 +73,16 @@ AngleInputWidget::AngleInputWidget(QWidget* parent) :
     // Default input mode is "decimal".
     setInputMode(InputMode::Decimal);
 
-    // Ensure the internal value is updated when changes are made in the editor subwidgets.
-    connect(&mDecimalValueEditor, SIGNAL(editingFinished()),
-            this, SLOT(updateValueFromDecimalInput()));
-    connect(&mDegreesValueEditor, SIGNAL(editingFinished()),
-            this, SLOT(updateValueFromSexagesimalInput()));
-    connect(&mMinutesValueEditor, SIGNAL(editingFinished()),
-            this, SLOT(updateValueFromSexagesimalInput()));
-    connect(&mSecondsValueEditor, SIGNAL(editingFinished()),
-            this, SLOT(updateValueFromSexagesimalInput()));
+    // Ensure the internal value is updated when changes are made in the editor
+    // subwidgets.
+    connect(&mDecimalValueEditor, SIGNAL(editingFinished()), this,
+            SLOT(updateValueFromDecimalInput()));
+    connect(&mDegreesValueEditor, SIGNAL(editingFinished()), this,
+            SLOT(updateValueFromSexagesimalInput()));
+    connect(&mMinutesValueEditor, SIGNAL(editingFinished()), this,
+            SLOT(updateValueFromSexagesimalInput()));
+    connect(&mSecondsValueEditor, SIGNAL(editingFinished()), this,
+            SLOT(updateValueFromSexagesimalInput()));
 
     // The line edit controls must not be squished by the spacing
     // introduced by additional box layouts. The spacing is removed

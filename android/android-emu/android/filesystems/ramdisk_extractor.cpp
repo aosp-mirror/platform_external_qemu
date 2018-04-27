@@ -14,11 +14,11 @@
 #include "android/base/Compiler.h"
 #include "android/base/Log.h"
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <zlib.h>
+#include <cinttypes>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #define DEBUG 0
 
@@ -58,7 +58,7 @@ public:
     explicit GZipInputStream(const char* filePath) {
         mFile = gzopen(filePath, "rb");
         if (mFile == Z_NULL) {
-            mFile = NULL;
+            mFile = nullptr;
             mError = errno;
         } else {
             mError = 0;
@@ -76,7 +76,7 @@ public:
     void close() {
         if (mFile) {
             gzclose(mFile);
-            mFile = NULL;
+            mFile = nullptr;
         }
     }
 
@@ -102,12 +102,13 @@ public:
         // Warning, gzread() takes an unsigned int parameter for
         // the length, but will return an error if its value
         // exceeds INT_MAX anyway.
-        char* buff = reinterpret_cast<char*>(buffer);
+        auto* buff = reinterpret_cast<char*>(buffer);
 
         while (len > 0) {
             size_t avail = len;
-            if (avail > INT_MAX)
+            if (avail > INT_MAX) {
                 avail = INT_MAX;
+            }
 
             int ret = gzread(mFile, buff, static_cast<unsigned int>(avail));
             if (ret < 0) {
@@ -168,7 +169,7 @@ bool parse_hex8(const char* input, uint32_t* value) {
     uint32_t result = 0;
     for (int n = 0; n < 8; ++n) {
         int c = input[n];
-        unsigned d = static_cast<unsigned>(c - '0');
+        auto d = static_cast<unsigned>(c - '0');
         if (d >= 10) {
             d = static_cast<unsigned>(c - 'a');
             if (d >= 6) {
@@ -191,7 +192,7 @@ bool android_extractRamdiskFile(const char* ramdiskPath,
                                 const char* fileName,
                                 char** out,
                                 size_t* outSize) {
-    *out = NULL;
+    *out = nullptr;
     *outSize = 0;
 
     GZipInputStream input(ramdiskPath);

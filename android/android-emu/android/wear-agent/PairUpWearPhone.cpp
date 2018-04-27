@@ -23,10 +23,10 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/utils/debug.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #define  DPRINT(...)  do {  if (VERBOSE_CHECK(adb)) dprintn(__VA_ARGS__); } while (0)
 
@@ -35,8 +35,8 @@ namespace wear {
 
 using namespace ::android::base;
 
-typedef ScopedPtr<Looper::FdWatch> FdWatch;
-typedef ScopedPtr<Looper::Timer> Timer;
+using FdWatch = ScopedPtr<Looper::FdWatch>;
+using Timer = ScopedPtr<Looper::Timer>;
 
 class PairUpWearPhoneImpl {
 public:
@@ -56,7 +56,7 @@ public:
     void cleanUp();
 
 private:
-    typedef std::vector<std::string> StrQueue;
+    using StrQueue = std::vector<std::string>;
     enum CommunicationState {
 
          PAIRUP_ERROR = 0,
@@ -172,7 +172,7 @@ static const char kWearableAppName[] = "com.google.android.wearable";
 
 // callback that talks to adb server on the host computer
 static void _on_adb_server_socket_fd(void* opaque, int fd, unsigned events) {
-    PairUpWearPhoneImpl * pairup = static_cast<PairUpWearPhoneImpl*>(opaque);
+    auto* pairup = static_cast<PairUpWearPhoneImpl*>(opaque);
     if (!pairup) return;
 
     if (events & Looper::FdWatch::kEventRead) {
@@ -187,7 +187,7 @@ static void _on_adb_server_socket_fd(void* opaque, int fd, unsigned events) {
 
 // callback that talks to emulator console
 static void _on_emulator_console_socket_fd(void* opaque, int fd, unsigned events) {
-    PairUpWearPhoneImpl * pairup = static_cast<PairUpWearPhoneImpl*>(opaque);
+    auto* pairup = static_cast<PairUpWearPhoneImpl*>(opaque);
     if (!pairup) return;
 
     if (events & Looper::FdWatch::kEventRead) {
@@ -397,7 +397,8 @@ bool PairUpWearPhoneImpl::startWriteCommandToAdb(int queryType,
             return false;
     }
 
-    snprintf(mWriteBuffer, WRITE_BUFFER_SIZE, "%04x%s", (unsigned)(::strlen(buf2)), buf2);
+    snprintf(mWriteBuffer, WRITE_BUFFER_SIZE, "%04x%s",
+             static_cast<unsigned>(::strlen(buf2)), buf2);
     DPRINT("sending query '%s' to adb\n", mWriteBuffer);
     mAsyncWriter.reset(mWriteBuffer, ::strlen(mWriteBuffer), mAdbWatch.get());
     switchToWrite(&mAdbWatch);
@@ -491,7 +492,7 @@ PairUpWearPhoneImpl::PairUpWearPhoneImpl(
 
 PairUpWearPhoneImpl::~PairUpWearPhoneImpl() {
     cleanUp();
-    mLooper = 0;
+    mLooper = nullptr;
 }
 
 void PairUpWearPhoneImpl::startProbeNextDevice() {
@@ -523,11 +524,11 @@ void PairUpWearPhoneImpl::cleanUp() {
     mReply.clear();
     if (mReadBuffer) {
         free(mReadBuffer);
-        mReadBuffer = NULL;
+        mReadBuffer = nullptr;
     }
     if (mWriteBuffer) {
         free(mWriteBuffer);
-        mWriteBuffer = NULL;
+        mWriteBuffer = nullptr;
     }
     if (PAIRUP_SUCCESS == mState) {
         DPRINT("\nSUCCESS\n");
@@ -552,8 +553,9 @@ void PairUpWearPhoneImpl::updateDevices(
     }
     DPRINT("start pairing up wear to phone\n");
     std::vector<std::string> deviceQueue;
-    for (size_t i = 0; i < devices.size(); ++i) {
-        deviceQueue.push_back(devices[i]);
+    deviceQueue.reserve(devices.size());
+    for (const auto& device : devices) {
+        deviceQueue.push_back(device);
     }
     mUnprobedDevices.swap(deviceQueue);
     startProbeNextDevice();
@@ -611,7 +613,7 @@ void PairUpWearPhoneImpl::closeConnection(FdWatch* watch) {
         (*watch)->dontWantRead();
         (*watch)->dontWantWrite();
         socketClose((*watch)->fd());
-        watch->reset(NULL);
+        watch->reset(nullptr);
     }
 }
 
@@ -621,7 +623,7 @@ bool PairUpWearPhoneImpl::openConnection(int port,
     int so = socketTcp4LoopbackClient(port);
     if (so < 0) {
         DPRINT("failed to open up connection to port %d\n", port);
-        watch->reset(NULL);
+        watch->reset(nullptr);
         return false;
     }
     socketSetNonBlocking(so);

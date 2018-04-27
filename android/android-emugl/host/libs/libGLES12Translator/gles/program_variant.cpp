@@ -17,7 +17,7 @@
 #include "gles/program_variant.h"
 
 #include <algorithm>
-#include <stdio.h>
+#include <cstdio>
 
 #include "common/alog.h"
 #include "gles/gles_context.h"
@@ -38,9 +38,7 @@ static const int kMaxAttribUniformNameLength = 1024;
 // ProgramVariant Main Code
 ///////////////////////////////////////////////////////////////////////////////
 
-ProgramVariant::ProgramVariant()
-    : global_name_(0), is_linked_(false), is_link_attempted_(false) {
-}
+ProgramVariant::ProgramVariant() : global_name_(0) {}
 
 ProgramVariant::~ProgramVariant() {
   if (global_name_) {
@@ -61,27 +59,28 @@ GLuint ProgramVariant::GetOrCreateGlobalName() {
   return global_name_;
 }
 
-void ProgramVariant::AttachShader(ShaderVariantPtr shader) {
-  LOG_ALWAYS_FATAL_IF(is_linked_);
-  if (shader->GetObjectType() == VERTEX_SHADER) {
-    vertex_shader_ = shader;
-  } else {
-    fragment_shader_ = shader;
-  }
+void ProgramVariant::AttachShader(const ShaderVariantPtr& shader) {
+    LOG_ALWAYS_FATAL_IF(is_linked_);
+    if (shader->GetObjectType() == VERTEX_SHADER) {
+        vertex_shader_ = shader;
+    } else {
+        fragment_shader_ = shader;
+    }
 }
 
-void ProgramVariant::DetachShader(ShaderVariantPtr shader) {
-  LOG_ALWAYS_FATAL_IF(is_linked_);
-  if (shader->GetObjectType() == VERTEX_SHADER) {
-    vertex_shader_ = ShaderVariantPtr(NULL);
-  } else {
-    fragment_shader_ = ShaderVariantPtr(NULL);
-  }
+void ProgramVariant::DetachShader(const ShaderVariantPtr& shader) {
+    LOG_ALWAYS_FATAL_IF(is_linked_);
+    if (shader->GetObjectType() == VERTEX_SHADER) {
+        vertex_shader_ = ShaderVariantPtr(nullptr);
+    } else {
+        fragment_shader_ = ShaderVariantPtr(nullptr);
+    }
 }
 
 bool ProgramVariant::UsesExternalTextureAs2D() const {
-  return (fragment_shader_ != NULL ?
-      fragment_shader_->HasReplacedExternalTextureWith2D() : false);
+    return (fragment_shader_ != nullptr
+                    ? fragment_shader_->HasReplacedExternalTextureWith2D()
+                    : false);
 }
 
 std::string ProgramVariant::GetInfoLog() const {
@@ -98,7 +97,7 @@ std::string ProgramVariant::GetInfoLog() const {
     return "";
   }
 
-  char* buf = new char[info_log_length];
+  auto* buf = new char[info_log_length];
   PASS_THROUGH(ctx, GetProgramInfoLog, global_name_,
                info_log_length, NULL, buf);
   info_log_cache_.Mutate() = buf;
@@ -113,7 +112,7 @@ void ProgramVariant::ResetInfoLogCache() {
 
 ProgramVariant* ProgramVariant::Clone() const {
   LOG_ALWAYS_FATAL_IF(!is_linked_);
-  ProgramVariant* result = new ProgramVariant();
+  auto* result = new ProgramVariant();
   result->AttachShader(vertex_shader_);
   result->AttachShader(fragment_shader_);
   result->active_attributes_ = active_attributes_;
@@ -132,10 +131,10 @@ void ProgramVariant::Link() {
 
   is_link_attempted_ = true;
 
-  if (vertex_shader_ == NULL || fragment_shader_ == NULL) {
-    info_log_cache_.Mutate() = "Both shaders must be attached";
-    info_log_cache_.Clean();
-    return;
+  if (vertex_shader_ == nullptr || fragment_shader_ == nullptr) {
+      info_log_cache_.Mutate() = "Both shaders must be attached";
+      info_log_cache_.Clean();
+      return;
   }
 
   if (!vertex_shader_->IsCompileRequested() ||
@@ -200,25 +199,25 @@ void ProgramVariant::UpdateActiveAttributes() {
     }
 
     unknown_attributes.erase(name);
-    active_attributes_.push_back(ActiveAttribute(name, type, size));
+    active_attributes_.emplace_back(name, type, size);
   }
 
   if (is_linked_) {
     // Remove any unmatched attribute names from the location cache
     // once the program has finally linked.
-    for (NameLocationMap::iterator it = unknown_attributes.begin();
-          it != unknown_attributes.end(); ++it) {
-      ALOGW("Unknown attribute name bound to a shader program: '%s'",
-            it->first.c_str());
-      attribute_locations_.erase(it->first);
+    for (auto it = unknown_attributes.begin(); it != unknown_attributes.end();
+         ++it) {
+        ALOGW("Unknown attribute name bound to a shader program: '%s'",
+              it->first.c_str());
+        attribute_locations_.erase(it->first);
     }
   }
 }
 
 int ProgramVariant::GetActiveAttribMaxNameLengh() const {
   size_t max_len = 0;
-  for (size_t i = 0; i < active_attributes_.size(); ++i) {
-    max_len = std::max(max_len, active_attributes_[i].GetName().size());
+  for (const auto& active_attribute : active_attributes_) {
+      max_len = std::max(max_len, active_attribute.GetName().size());
   }
   return max_len;
 }
@@ -336,15 +335,14 @@ void ProgramVariant::UpdateActiveUniforms() {
     }
 
     uniform_base_names_[base_name] = active_uniforms_.size();
-    active_uniforms_.push_back(
-        ActiveUniform(name, base_name, type, is_array, size));
+    active_uniforms_.emplace_back(name, base_name, type, is_array, size);
   }
 }
 
 int ProgramVariant::GetActiveUniformMaxNameLengh() const {
   size_t max_len = 0;
-  for (size_t i = 0; i < active_uniforms_.size(); ++i) {
-    max_len = std::max(max_len, active_uniforms_[i].GetOriginalName().size());
+  for (const auto& active_uniform : active_uniforms_) {
+      max_len = std::max(max_len, active_uniform.GetOriginalName().size());
   }
   return max_len;
 }
@@ -392,8 +390,8 @@ std::string ProgramVariant::ParseUniformName(
     }
     base_name = name.substr(0, pos);
     std::string idx_str = name.substr(pos + 1, len - pos - 2);
-    char* endptr = NULL;
-    int idx = static_cast<int>(strtol(idx_str.c_str(), &endptr, 10));
+    char* endptr = nullptr;
+    auto idx = static_cast<int>(strtol(idx_str.c_str(), &endptr, 10));
     if (idx < 0 || *endptr != '\0') {
       ALOGW("Invalid array index in uniform name: '%s'", name.c_str());
       return "";  // Out-of-range or unparseable index.
@@ -403,7 +401,7 @@ std::string ProgramVariant::ParseUniformName(
     *array_index = 0;
   }
 
-  NameLocationMap::const_iterator it = uniform_base_names_.find(base_name);
+  auto it = uniform_base_names_.find(base_name);
   if (it == uniform_base_names_.end()) {
     ALOGI("Unable to find active uniform for '%s' in global program %d, "
           "base name '%s', array index %d",

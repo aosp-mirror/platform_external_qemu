@@ -36,7 +36,7 @@ public:
     using DismissFunc = std::function<void()>;
     OverlayChildWidget(OverlayMessageCenter* parent,
                        QString text,
-                       QPixmap icon);
+                       const QPixmap& icon);
 
     QLabel* icon() const { return mIcon; }
     QLabel* label() const { return mLabel; }

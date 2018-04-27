@@ -11,16 +11,17 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/memory/SharedMemory.h"
 
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cassert>
+#include <cerrno>
 
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(StringView name, size_t size)
+SharedMemory::SharedMemory(const StringView& name, size_t size)
     : mName(name), mSize(size), mAddr(unmappedMemory()), mCreate(false) {}
 
 int SharedMemory::create(mode_t mode) {
@@ -48,8 +49,9 @@ void SharedMemory::close() {
     }
 
     assert(!isOpen());
-    if (mCreate)
+    if (mCreate) {
         shm_unlink(mName.c_str());
+    }
 }
 
 bool SharedMemory::isOpen() const {

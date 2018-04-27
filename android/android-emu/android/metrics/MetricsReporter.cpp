@@ -31,7 +31,7 @@
 
 #include "picosha2.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <type_traits>
 
 using android::base::System;
@@ -77,9 +77,9 @@ static base::LazyInstance<ReporterHolder> sInstance = {};
 }  // namespace
 
 void MetricsReporter::start(const std::string& sessionId,
-                            base::StringView emulatorVersion,
-                            base::StringView emulatorFullVersion,
-                            base::StringView qemuVersion) {
+                            const base::StringView& emulatorVersion,
+                            const base::StringView& emulatorFullVersion,
+                            const base::StringView& qemuVersion) {
     MetricsWriter::Ptr writer;
     if (android_cmdLineOptions->metrics_to_console) {
         writer = TextMetricsWriter::create(base::StdioStream(stdout));
@@ -128,7 +128,7 @@ MetricsReporter& MetricsReporter::get() {
     return sInstance->reporter();
 }
 
-void MetricsReporter::report(Callback callback) {
+void MetricsReporter::report(const Callback& callback) {
     if (!callback) {
         return;
     }
@@ -138,10 +138,11 @@ void MetricsReporter::report(Callback callback) {
     });
 }
 
-MetricsReporter::MetricsReporter(bool enabled, MetricsWriter::Ptr writer,
-                                 base::StringView emulatorVersion,
-                                 base::StringView emulatorFullVersion,
-                                 base::StringView qemuVersion)
+MetricsReporter::MetricsReporter(bool enabled,
+                                 MetricsWriter::Ptr writer,
+                                 const base::StringView& emulatorVersion,
+                                 const base::StringView& emulatorFullVersion,
+                                 const base::StringView& qemuVersion)
     : mWriter(std::move(writer)),
       mEnabled(enabled),
       mStartTimeMs(System::get()->getUnixTimeUs() / 1000),
@@ -164,7 +165,7 @@ const std::string& MetricsReporter::sessionId() const {
     return mWriter->sessionId();
 }
 
-std::string MetricsReporter::anonymize(base::StringView s) {
+std::string MetricsReporter::anonymize(const base::StringView& s) {
     picosha2::hash256_one_by_one hasher;
     hasher.process(s.begin(), s.end());
     const auto salt = this->salt();

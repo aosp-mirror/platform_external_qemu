@@ -27,7 +27,7 @@ CharSerialLine::~CharSerialLine() {
 }
 
 void CharSerialLine::addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc) {
-    qemu_chr_add_handlers(mCs, canReadFunc, readFunc, NULL, opaque);
+    qemu_chr_add_handlers(mCs, canReadFunc, readFunc, nullptr, opaque);
 }
 
 int CharSerialLine::write(const uint8_t* data, int len) {

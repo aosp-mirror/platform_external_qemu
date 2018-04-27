@@ -25,7 +25,7 @@ void qemud_multiplexer_serial_recv(void* opaque,
                                    int channel,
                                    uint8_t* msg,
                                    int msglen) {
-    QemudMultiplexer* m = (QemudMultiplexer*) opaque;
+    auto* m = static_cast<QemudMultiplexer*>(opaque);
     // Note: A lock is not needed here.
     QemudClient* c = m->clients;
 
@@ -33,8 +33,9 @@ void qemud_multiplexer_serial_recv(void* opaque,
      * note that channel 0 is handled by a special
      * QemudClient that is setup in qemud_multiplexer_init()
      */
-    for (; c != NULL; c = c->next) {
-        if (!qemud_is_pipe_client(c) && c->ProtocolSelector.Serial.channel == channel) {
+    for (; c != nullptr; c = c->next) {
+        if (!qemud_is_pipe_client(c) &&
+            c->ProtocolSelector.Serial.channel == channel) {
             qemud_client_recv(c, msg, msglen);
             return;
         }
@@ -56,7 +57,7 @@ int qemud_multiplexer_connect(QemudMultiplexer* m,
 
     /* find the corresponding registered service by name */
     QemudService* sv = qemud_service_find(m->services, service_name);
-    if (sv == NULL) {
+    if (sv == nullptr) {
         D("%s: no registered '%s' service", __FUNCTION__, service_name);
         return -1;
     }
@@ -69,7 +70,7 @@ int qemud_multiplexer_connect(QemudMultiplexer* m,
     }
 
     /* connect a new client to the service on the given channel */
-    if (qemud_service_connect_client(sv, channel_id, NULL) == NULL) {
+    if (qemud_service_connect_client(sv, channel_id, nullptr) == nullptr) {
         return -1;
     }
 
@@ -134,29 +135,28 @@ void qemud_multiplexer_control_recv(void* opaque,
                                     uint8_t* msg,
                                     int msglen,
                                     QemudClient* client) {
-    QemudMultiplexer* mult = (QemudMultiplexer*) opaque;
+    auto* mult = static_cast<QemudMultiplexer*>(opaque);
     android::base::AutoLock(mult->lock);
     uint8_t* msgend = msg + msglen;
-    char tmp[64], * p = tmp, * end = p + sizeof(tmp);
+    char tmp[64], *p = tmp, *end = p + sizeof(tmp);
 
     /* handle connection attempts.
      * the client message must be "connect:<service-name>:<id>"
      * where <id> is a 2-char hexadecimal string, which must be > 0
      */
     if (msglen > 8 && !memcmp(msg, "connect:", 8)) {
-        char* service_name = (char*) msg + 8;
+        char* service_name = reinterpret_cast<char*>(msg) + 8;
         int channel, ret;
         char* q = strchr(service_name, ':');
-        if (q == NULL || q + 3 != (char*) msgend) {
-            D("%s: malformed connect message: '%.*s' (offset=%d)",
-              __FUNCTION__, msglen, (const char*) msg, q ? q - (char*) msg : -1);
+        if (q == nullptr || q + 3 != reinterpret_cast<char*>(msgend)) {
+            D("%s: malformed connect message: '%.*s' (offset=%d)", __FUNCTION__,
+              msglen, (const char*)msg, q ? q - (char*)msg : -1);
             return;
         }
-        *q++ = 0;  /* zero-terminate service name */
-        channel = hex2int((uint8_t*) q, 2);
+        *q++ = 0; /* zero-terminate service name */
+        channel = hex2int(reinterpret_cast<uint8_t*>(q), 2);
         if (channel <= 0) {
-            D("%s: malformed channel id '%.*s",
-              __FUNCTION__, 2, q);
+            D("%s: malformed channel id '%.*s", __FUNCTION__, 2, q);
             return;
         }
 
@@ -168,15 +168,16 @@ void qemud_multiplexer_control_recv(void* opaque,
         if (ret < 0) {
             if (ret == -1) {
                 /* could not connect */
-                p = bufprint(tmp, end, "ko:connect:%02x:unknown service", channel);
+                p = bufprint(tmp, end, "ko:connect:%02x:unknown service",
+                             channel);
             } else {
                 p = bufprint(tmp, end, "ko:connect:%02x:service busy", channel);
             }
-        }
-        else {
+        } else {
             p = bufprint(tmp, end, "ok:connect:%02x", channel);
         }
-        qemud_serial_send(mult->serial, 0, 0, (uint8_t*) tmp, p - tmp);
+        qemud_serial_send(mult->serial, 0, 0, reinterpret_cast<uint8_t*>(tmp),
+                          p - tmp);
         return;
     }
 
@@ -255,7 +256,8 @@ void qemud_multiplexer_control_recv(void* opaque,
 
     /* anything else is a problem */
     p = bufprint(tmp, end, "ko:unknown command");
-    qemud_serial_send(mult->serial, 0, 0, (uint8_t*) tmp, p - tmp);
+    qemud_serial_send(mult->serial, 0, 0, reinterpret_cast<uint8_t*>(tmp),
+                      p - tmp);
 }
 
 /* initialize the global QemudMultiplexer.
@@ -267,13 +269,8 @@ void qemud_multiplexer_init(QemudMultiplexer* mult, CSerialLine* serial_line) {
                       mult);
 
     /* setup listener for channel 0 */
-    qemud_client_alloc(0,
-                       NULL,
-                       mult,
-                       qemud_multiplexer_control_recv,
-                       NULL, NULL, NULL,
-                       mult->serial,
-                       &mult->clients);
+    qemud_client_alloc(0, nullptr, mult, qemud_multiplexer_control_recv,
+                       nullptr, nullptr, nullptr, mult->serial, &mult->clients);
 }
 
 /** SNAPSHOT SUPPORT
@@ -283,11 +280,14 @@ void qemud_multiplexer_init(QemudMultiplexer* mult, CSerialLine* serial_line) {
  */
 static void qemud_client_save_count(Stream* f, QemudClient* c) {
     unsigned int client_count = 0;
-    for (; c; c = c->next)   // walk over linked list
+    for (; c; c = c->next) {  // walk over linked list
         /* skip control channel, which is not saved, and pipe channels that
          * are saved along with the pipe. */
-        if (!qemud_is_pipe_client(c) && c->ProtocolSelector.Serial.channel > 0)
+        if (!qemud_is_pipe_client(c) &&
+            c->ProtocolSelector.Serial.channel > 0) {
             client_count++;
+        }
+    }
 
     stream_put_be32(f, client_count);
 }
@@ -296,8 +296,9 @@ static void qemud_client_save_count(Stream* f, QemudClient* c) {
  */
 static void qemud_service_save_count(Stream* f, QemudService* s) {
     unsigned int service_count = 0;
-    for (; s; s = s->next)  // walk over linked list
+    for (; s; s = s->next) {  // walk over linked list
         service_count++;
+    }
 
     stream_put_be32(f, service_count);
 }
@@ -369,8 +370,9 @@ void qemud_multiplexer_save(QemudMultiplexer* m, Stream* stream) {
     /* save service states */
     qemud_service_save_count(stream, m->services);
     QemudService* s;
-    for (s = m->services; s; s = s->next)
+    for (s = m->services; s; s = s->next) {
         qemud_service_save(stream, s);
+    }
 
     /* save client channels */
     qemud_client_save_count(stream, m->clients);

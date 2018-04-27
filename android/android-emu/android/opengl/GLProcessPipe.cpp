@@ -11,10 +11,10 @@
 
 #include "android/emulation/AndroidPipe.h"
 
-#include "android/opengles.h"
-#include <assert.h>
 #include <atomic>
+#include <cassert>
 #include <memory>
+#include "android/opengles.h"
 
 namespace android {
 namespace opengl {
@@ -83,7 +83,8 @@ public:
 
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override {
         assert(buffers[0].size >= 8);
-        memcpy(buffers[0].data, (const char*)&m_uniqueId, sizeof(m_uniqueId));
+        memcpy(buffers[0].data, reinterpret_cast<const char*>(&m_uniqueId),
+               sizeof(m_uniqueId));
         return sizeof(m_uniqueId);
     }
 
@@ -92,7 +93,7 @@ public:
         // The guest is supposed to send us a confirm code first. The code is
         // 100 (4 byte integer).
         assert(buffers[0].size >= 4);
-        int32_t confirmInt = *((int32_t*)buffers[0].data);
+        int32_t confirmInt = *(reinterpret_cast<int32_t*>(buffers[0].data));
         assert(confirmInt == 100);
         (void)confirmInt;
         return buffers[0].size;
@@ -113,11 +114,11 @@ private:
 
 std::atomic<uint64_t> GLProcessPipe::s_headId {0};
 
-}
+}  // namespace
 
 void registerGLProcessPipeService() {
     android::AndroidPipe::Service::add(new GLProcessPipe::Service());
 }
 
-}
-}
+}  // namespace opengl
+}  // namespace android

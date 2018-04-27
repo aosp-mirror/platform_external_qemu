@@ -23,8 +23,8 @@
 #include <atomic>
 #include <string>
 
-#include <assert.h>
-#include <stdio.h>
+#include <cassert>
+#include <cstdio>
 
 namespace {
 
@@ -36,7 +36,7 @@ public:
 #if TRACE_CHECKSUMHELPER
 std::atomic<size_t> sNumInstances(0);
 #endif  // TRACE_CHECKSUMHELPER
-}
+}  // namespace
 
 static ::emugl::LazyInstance<ChecksumCalculatorThreadStore> s_tls =
         LAZY_INSTANCE_INIT;

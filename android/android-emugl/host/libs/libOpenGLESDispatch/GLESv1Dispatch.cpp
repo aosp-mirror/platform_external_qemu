@@ -19,9 +19,9 @@
 
 #include "android/utils/debug.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "emugl/common/shared_library.h"
 
@@ -36,8 +36,8 @@
 #define DPRINT(...)
 #endif
 
-static emugl::SharedLibrary *s_gles1_lib = NULL;
-static emugl::SharedLibrary *s_underlying_gles2_lib = NULL;
+static emugl::SharedLibrary* s_gles1_lib = nullptr;
+static emugl::SharedLibrary* s_underlying_gles2_lib = nullptr;
 
 // An unimplemented function which prints out an error message.
 // To make it consistent with the guest, all GLES1 functions not supported by
@@ -115,8 +115,7 @@ LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
         } while(0);
 
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
-
-    dispatch_table->underlying_gles2_api = NULL;
+    dispatch_table->underlying_gles2_api = nullptr;
 
     const char* libName = getenv("ANDROID_GLESv1_LIB");
     if (!libName) {
@@ -169,8 +168,8 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
                    "12tr-specific functions...");
 
             DPRINT("Now creating the underlying api");
-            UnderlyingApis* gles2api =
-                (UnderlyingApis*)dispatch_table->create_underlying_api();
+            auto* gles2api = static_cast<UnderlyingApis*>(
+                    dispatch_table->create_underlying_api());
             dispatch_table->underlying_gles2_api = gles2api;
 
             DPRINT("api ptr:%p", dispatch_table->underlying_gles2_api);
@@ -211,14 +210,14 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
 //
 void *gles1_dispatch_get_proc_func(const char *name, void *userData)
 {
-    void* func = NULL;
+    void* func = nullptr;
     if (s_gles1_lib) {
-        func = (void *)s_gles1_lib->findSymbol(name);
+        func = reinterpret_cast<void*>(s_gles1_lib->findSymbol(name));
     }
     // To make it consistent with the guest, redirect any unsupported functions
     // to gles1_unimplemented.
     if (!func) {
-        func = (void *)gles1_unimplemented;
+        func = reinterpret_cast<void*>(gles1_unimplemented);
     }
     return func;
 }

@@ -22,10 +22,11 @@
 #include <QDesktopServices>
 #include <QTextStream>
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
+#include <cmath>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 #include <array>
 #include <cassert>
@@ -350,7 +351,7 @@ void VirtualSensorsPage::onPhysicalStateStabilized() {
 
 void VirtualSensorsPage::onTargetStateChanged(void* context) {
     if (context != nullptr) {
-        VirtualSensorsPage* virtual_sensors_page =
+        auto* virtual_sensors_page =
                 reinterpret_cast<VirtualSensorsPage*>(context);
         virtual_sensors_page->onTargetStateChanged();
     }
@@ -358,7 +359,7 @@ void VirtualSensorsPage::onTargetStateChanged(void* context) {
 
 void VirtualSensorsPage::onPhysicalStateChanging(void* context) {
     if (context != nullptr) {
-        VirtualSensorsPage* virtual_sensors_page =
+        auto* virtual_sensors_page =
                 reinterpret_cast<VirtualSensorsPage*>(context);
         virtual_sensors_page->onPhysicalStateChanging();
     }
@@ -366,7 +367,7 @@ void VirtualSensorsPage::onPhysicalStateChanging(void* context) {
 
 void VirtualSensorsPage::onPhysicalStateStabilized(void* context) {
     if (context != nullptr) {
-        VirtualSensorsPage* virtual_sensors_page =
+        auto* virtual_sensors_page =
                 reinterpret_cast<VirtualSensorsPage*>(context);
         virtual_sensors_page->onPhysicalStateStabilized();
     }
@@ -390,30 +391,33 @@ void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
     table_html_stream.setNumberFlags(table_html_stream.numberFlags() |
                                      QTextStream::ForcePoint);
     table_html_stream.setRealNumberNotation(QTextStream::FixedNotation);
-    table_html_stream
-        << "<table border=\"0\""
-        << "       cellpadding=\"3\" style=\"font-size:" <<
-           Ui::stylesheetFontSize(Ui::FontSize::Medium) << "\">"
-        << "<tr>"
-        << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)") << ":</td>"
-        << "<td align=left>" << acceleration.x << "</td>"
-        << "<td align=left>" << acceleration.y << "</td>"
-        << "<td align=left>" << acceleration.z << "</td></tr>"
-        << "<tr>"
-        << "<td>" << tr("Gyroscope (rad/s)") << ":</td>"
-        << "<td align=left>" << gyroscope.x << "</td>"
-        << "<td align=left>" << gyroscope.y << "</td>"
-        << "<td align=left>" << gyroscope.z << "</td></tr>"
-        << "<tr>"
-        << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
-        << "<td align=left>" << device_magnetic_vector.x << "</td>"
-        << "<td align=left>" << device_magnetic_vector.y << "</td>"
-        << "<td align=left>" << device_magnetic_vector.z << "</td></tr>"
-        << "<tr><td>" << tr("Rotation")
-        << ":</td><td colspan = \"3\" align=left>"
-        << rotation_labels[mCoarseOrientation - SKIN_ROTATION_0]
-        << "</td></tr>"
-        << "</table>";
+    table_html_stream << "<table border=\"0\""
+                      << R"(       cellpadding="3" style="font-size:)"
+                      << Ui::stylesheetFontSize(Ui::FontSize::Medium) << "\">"
+                      << "<tr>"
+                      << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)")
+                      << ":</td>"
+                      << "<td align=left>" << acceleration.x << "</td>"
+                      << "<td align=left>" << acceleration.y << "</td>"
+                      << "<td align=left>" << acceleration.z << "</td></tr>"
+                      << "<tr>"
+                      << "<td>" << tr("Gyroscope (rad/s)") << ":</td>"
+                      << "<td align=left>" << gyroscope.x << "</td>"
+                      << "<td align=left>" << gyroscope.y << "</td>"
+                      << "<td align=left>" << gyroscope.z << "</td></tr>"
+                      << "<tr>"
+                      << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
+                      << "<td align=left>" << device_magnetic_vector.x
+                      << "</td>"
+                      << "<td align=left>" << device_magnetic_vector.y
+                      << "</td>"
+                      << "<td align=left>" << device_magnetic_vector.z
+                      << "</td></tr>"
+                      << "<tr><td>" << tr("Rotation")
+                      << ":</td><td colspan = \"3\" align=left>"
+                      << rotation_labels[mCoarseOrientation - SKIN_ROTATION_0]
+                      << "</td></tr>"
+                      << "</table>";
     mUi->resultingAccelerometerValues->setText(table_html);
 }
 
@@ -582,8 +586,8 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
             QString rotation_label;
             SkinRotation coarse_orientation = mCoarseOrientation;
             for (const auto& v : directions) {
-                if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) <
-                        0.1f) {
+                if (std::fabs(glm::dot(normalized_accelerometer, v.first) -
+                              1.f) < 0.1f) {
                     coarse_orientation = v.second;
                     break;
                 }

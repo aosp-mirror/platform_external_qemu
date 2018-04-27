@@ -21,8 +21,7 @@ void ReadbackWorker::initGL() {
     for (auto buffer : mBuffers) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
         s_gles2.glBufferData(GL_PIXEL_PACK_BUFFER, mBufferSize,
-                             0 /* init, with no data */,
-                             GL_STREAM_READ);
+                             nullptr /* init, with no data */, GL_STREAM_READ);
     }
     s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }

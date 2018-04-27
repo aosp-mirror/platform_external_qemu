@@ -39,26 +39,26 @@ public:
     // state of the channel, according to the event mask provided by
     // setWantedEvents(). Call this function right after creating the
     // instance.
-    virtual void setEventCallback(EventCallback&& callback) override final;
+    void setEventCallback(EventCallback&& callback) final;
 
     // Set the mask of events the guest wants to be notified of from the
     // host thread.
-    virtual void setWantedEvents(State state) override final;
+    void setWantedEvents(State state) final;
 
     // Return the current channel state relative to the guest.
-    virtual State state() const override final;
+    State state() const final;
 
     // Try to send a buffer from the guest to the host render thread.
-    virtual IoResult tryWrite(Buffer&& buffer) override final;
+    IoResult tryWrite(Buffer&& buffer) final;
 
     // Try to read a buffer from the host render thread into the guest.
-    virtual IoResult tryRead(Buffer* buffer) override final;
+    IoResult tryRead(Buffer* buffer) final;
 
     // Close the channel from the guest.
-    virtual void stop() override final;
+    void stop() final;
 
     // Callback function when snapshotting the virtual machine.
-    virtual void onSave(android::base::Stream* stream) override;
+    void onSave(android::base::Stream* stream) override;
 
     /////////////////////////////////////////////////////////////////
     // These functions are called from the host render thread or renderer.

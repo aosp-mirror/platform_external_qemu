@@ -41,7 +41,7 @@ TEST(SharedMemory, ShareVisibileWithinSameProc) {
     ASSERT_TRUE(mReader.isOpen());
 
     memcpy(*mWriter, message.c_str(), message.size());
-    std::string read((const char*) *mReader);
+    std::string read(static_cast<const char*>(*mReader));
     ASSERT_TRUE(message == read);
 
     mWriter.close();

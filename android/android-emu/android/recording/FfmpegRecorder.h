@@ -47,8 +47,7 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace recording {
@@ -98,7 +97,7 @@ public:
     virtual bool addVideoTrack(std::unique_ptr<Producer> producer,
                                const Codec<SwsContext*>* codec) = 0;
 
-    virtual ~FfmpegRecorder() {}
+    virtual ~FfmpegRecorder() = default;
 
     // Creates a FfmpegRecorder instance.
     // Params:
@@ -114,8 +113,8 @@ public:
     static std::unique_ptr<FfmpegRecorder> create(
             uint16_t fbWidth,
             uint16_t fbHeight,
-            android::base::StringView filename,
-            android::base::StringView containerFormat);
+            const android::base::StringView& filename,
+            const android::base::StringView& containerFormat);
 
 protected:
     FfmpegRecorder() = default;

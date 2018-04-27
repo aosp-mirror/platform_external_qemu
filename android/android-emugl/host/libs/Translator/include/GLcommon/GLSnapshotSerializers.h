@@ -18,7 +18,7 @@
 
 template <class Container>
 void loadContainer(android::base::Stream* stream, Container& c) {
-    size_t size = (size_t)stream->getBe32();
+    auto size = static_cast<size_t>(stream->getBe32());
     c.resize(size);
     for (auto& ite : c) {
         ite.onLoad(stream);
@@ -28,7 +28,7 @@ void loadContainer(android::base::Stream* stream, Container& c) {
 template <class NameMap>
 void loadNameMap(android::base::Stream* stream, NameMap& namemap) {
     assert(namemap.size() == 0);
-    size_t size = static_cast<size_t>(stream->getBe32());
+    auto size = static_cast<size_t>(stream->getBe32());
     for (size_t i = 0; i < size; i++) {
         typename NameMap::key_type name = stream->getBe32();
         namemap.emplace(name, stream);

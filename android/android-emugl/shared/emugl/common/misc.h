@@ -36,4 +36,4 @@ namespace emugl {
                       const char* wantedExtension);
 
     using Profiler = android::base::Profiler;
-}
+    }  // namespace emugl

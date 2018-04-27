@@ -23,9 +23,9 @@
 
 #include <memory>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 struct QemuParameters {
     android::ParameterList params;
@@ -62,9 +62,10 @@ QemuParameters* qemu_parameters_create(const char* argv0,
     if (opts->shared_net_id) {
         char* end;
         long shared_net_id = strtol(opts->shared_net_id, &end, 0);
-        if (end == NULL || *end || shared_net_id < 1 || shared_net_id > 255) {
+        if (end == nullptr || *end || shared_net_id < 1 ||
+            shared_net_id > 255) {
             derror("option -shared-net-id must be an integer between 1 and 255\n");
-            return NULL;
+            return nullptr;
         }
         snprintf(boot_prop_ip, sizeof(boot_prop_ip),
                  "net.shared_net_ip=10.1.2.%ld", shared_net_id);
@@ -132,9 +133,9 @@ QemuParameters* qemu_parameters_create(const char* argv0,
         }
     }
 
-    if (opts->prop != NULL) {
+    if (opts->prop != nullptr) {
         ParamList*  pl = opts->prop;
-        for ( ; pl != NULL; pl = pl->next ) {
+        for (; pl != nullptr; pl = pl->next) {
             params.add2("-boot-property", pl->param);
         }
     }
@@ -163,7 +164,7 @@ QemuParameters* qemu_parameters_create(const char* argv0,
     if (targetArch &&
         (!strcmp(targetArch, "x86") ||
          !strcmp(targetArch, "x86_64"))) {
-        char* accel_status = NULL;
+        char* accel_status = nullptr;
         CpuAccelMode accel_mode = ACCEL_AUTO;
         bool accel_ok = handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
 
@@ -187,7 +188,7 @@ QemuParameters* qemu_parameters_create(const char* argv0,
             if (!accel_ok) {
                 derror("CPU acceleration not supported on this machine!");
                 derror("Reason: %s", accel_status);
-                return NULL;
+                return nullptr;
             }
             params.add(chosenAccel);
         } else {

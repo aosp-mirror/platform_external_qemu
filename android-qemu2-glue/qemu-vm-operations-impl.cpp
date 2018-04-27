@@ -42,9 +42,9 @@ extern "C" {
 
 #include <string>
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdarg>
+#include <cstdlib>
+#include <cstring>
 
 using android::base::StringAppendFormatWithArgs;
 using android::base::StringFormatWithArgs;
@@ -96,7 +96,7 @@ private:
     // GCC doesn't support converting lambdas with '...' to function pointers,
     // so these have to be real functions.
     static void outCb(void* opaque, const char* fmt, ...) {
-        auto self = (MessageCallback*)opaque;
+        auto self = static_cast<MessageCallback*>(opaque);
         if (self->userOut) {
             va_list ap;
             va_start(ap, fmt);
@@ -107,7 +107,7 @@ private:
     }
 
     static void errCb(void* opaque, Error* err, const char* fmt, ...) {
-        auto self = (MessageCallback*)opaque;
+        auto self = static_cast<MessageCallback*>(opaque);
         if (self->userErr) {
             std::string msg;
             if (fmt) {
@@ -301,10 +301,12 @@ static const QEMUFileHooks sSaveHooks = {
                         [](const char* block_name, void* host_addr,
                            ram_addr_t offset, ram_addr_t length, void* opaque) {
                             SnapshotRamBlock block = {
-                                    block_name, (int64_t)offset,
-                                    (uint8_t*)host_addr, (int64_t)length};
-                            block.pageSize = (int32_t)qemu_ram_pagesize(
-                                    qemu_ram_block_by_name(block_name));
+                                    block_name, static_cast<int64_t>(offset),
+                                    static_cast<uint8_t*>(host_addr),
+                                    static_cast<int64_t>(length)};
+                            block.pageSize = static_cast<int32_t>(
+                                    qemu_ram_pagesize(qemu_ram_block_by_name(
+                                            block_name)));
                             sSnapshotCallbacks.ramOps.registerBlock(
                                     sSnapshotCallbacksOpaque, SNAPSHOT_SAVE,
                                     &block);
@@ -331,9 +333,10 @@ static const QEMUFileHooks sSaveHooks = {
            ram_addr_t offset,
            size_t size,
            uint64_t* bytes_sent) {
-            sSnapshotCallbacks.ramOps.savePage(sSnapshotCallbacksOpaque,
-                                               (int64_t)block_offset,
-                                               (int64_t)offset, (int32_t)size);
+            sSnapshotCallbacks.ramOps.savePage(
+                    sSnapshotCallbacksOpaque,
+                    static_cast<int64_t>(block_offset),
+                    static_cast<int64_t>(offset), static_cast<int32_t>(size));
             // Must set |bytes_sent| to non-zero, otherwise QEMU will save the
             // page in own way.
             *bytes_sent = size;
@@ -362,7 +365,8 @@ static const QEMUFileHooks sLoadHooks = {
                                     return 0;
                                 }
                                 block->startOffset = offset;
-                                block->hostPtr = (uint8_t*)host_addr;
+                                block->hostPtr =
+                                        static_cast<uint8_t*>(host_addr);
                                 block->totalSize = length;
                                 return 1;
                             },
@@ -370,7 +374,8 @@ static const QEMUFileHooks sLoadHooks = {
 
                     RAMBlock* const qemuBlock =
                             qemu_ram_block_by_name(block.id);
-                    block.pageSize = (int32_t)qemu_ram_pagesize(qemuBlock);
+                    block.pageSize =
+                            static_cast<int32_t>(qemu_ram_pagesize(qemuBlock));
                     sSnapshotCallbacks.ramOps.registerBlock(
                             sSnapshotCallbacksOpaque, SNAPSHOT_LOAD, &block);
                     break;
@@ -403,11 +408,11 @@ static void set_snapshot_callbacks(void* opaque,
         case android::CPU_ACCELERATOR_HVF:
             set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
             set_memory_mapping_funcs(hvf_map_safe, hvf_unmap_safe,
-                                     hvf_protect_safe, hvf_remap_safe, NULL);
+                                     hvf_protect_safe, hvf_remap_safe, nullptr);
             break;
         case android::CPU_ACCELERATOR_HAX:
             set_address_translation_funcs(hax_hva2gpa, hax_gpa2hva);
-            set_memory_mapping_funcs(NULL, NULL, hax_gpa_protect, NULL,
+            set_memory_mapping_funcs(nullptr, nullptr, hax_gpa_protect, nullptr,
                                      hax_gpa_protection_supported);
             break;
         default:
@@ -454,8 +459,9 @@ static void get_vm_config(VmConfiguration* out) {
 }
 
 static void set_failure_reason(const char* name, int failure_reason) {
-    (void)name; // TODO
-    sFailureReason = (android::snapshot::FailureReason)failure_reason;
+    (void)name;  // TODO(lfy):
+    sFailureReason =
+            static_cast<android::snapshot::FailureReason>(failure_reason);
 }
 
 static void set_exiting() {

@@ -44,13 +44,11 @@ private:
 
 class ThreadLooperStore : public ThreadStore<State> {
 public:
-    bool hasLooper() const {
-        return ThreadStoreBase::get() != NULL;
-    }
+    bool hasLooper() const { return ThreadStoreBase::get() != nullptr; }
 
     void setLooper(Looper* looper, bool own) {
         CHECK(!get());
-        State* state = new State(looper, own);
+        auto* state = new State(looper, own);
         set(state);
     }
 
@@ -88,11 +86,14 @@ void ThreadLooper::setLooper(Looper* looper, bool own) {
 
 class MainLoopClosureRunner {
 public:
-    MainLoopClosureRunner() :
-        mTimer(((Looper*)android_getMainLooper())->createTimer(
-            [](void* obj, Looper::Timer*) {
-                ((MainLoopClosureRunner*)obj)->runClosures(); },
-            (void*)this)) { }
+    MainLoopClosureRunner()
+        : mTimer((reinterpret_cast<Looper*>(android_getMainLooper()))
+                         ->createTimer(
+                                 [](void* obj, Looper::Timer*) {
+                                     (static_cast<MainLoopClosureRunner*>(obj))
+                                             ->runClosures();
+                                 },
+                                 (void*)this)) {}
 
     void appendAndWake(ThreadLooper::Closure&& func) {
         mPendingClosures.send(std::move(func));

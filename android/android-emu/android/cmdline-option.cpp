@@ -1,24 +1,21 @@
 #include "android/cmdline-option.h"
+#include <cerrno>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include "android/constants.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
-#include <errno.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
 
-const AndroidOptions* android_cmdLineOptions = NULL;
+const AndroidOptions* android_cmdLineOptions = nullptr;
 
 #define  _VERBOSE_TAG(x,y)   { #x, VERBOSE_##x, y },
-static const struct { const char*  name; int  flag; const char*  text; }
-debug_tags[] = {
-    VERBOSE_TAG_LIST
-    { 0, 0, 0 }
-};
+static const struct { const char*  name; int  flag; const char*  text;
+} debug_tags[] = {VERBOSE_TAG_LIST{nullptr, 0, nullptr}};
 
-void  parse_env_debug_tags( void );
+void parse_env_debug_tags();
 
 enum {
     OPTION_IS_FLAG = 0,
@@ -36,16 +33,14 @@ typedef struct {
 #define  OPTION(_name,_type,_config)  \
     { #_name, offsetof(AndroidOptions,_name), _type, _config },
 
-
-static const OptionInfo  option_keys[] = {
+static const OptionInfo option_keys[] = {
 #define  OPT_FLAG(_name,_descr)             OPTION(_name,OPTION_IS_FLAG,0)
 #define  OPT_PARAM(_name,_template,_descr)  OPTION(_name,OPTION_IS_PARAM,0)
 #define  OPT_LIST(_name,_template,_descr)   OPTION(_name,OPTION_IS_LIST,0)
 #define  CFG_FLAG(_name,_descr)             OPTION(_name,OPTION_IS_FLAG,1)
 #define  CFG_PARAM(_name,_template,_descr)  OPTION(_name,OPTION_IS_PARAM,1)
 #include "android/cmdline-options.h"
-    { NULL, 0, 0, 0 }
-};
+        {nullptr, 0, 0, 0}};
 
 int
 android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
@@ -80,7 +75,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
         arg = aread[0]+1;
 
         /* an option cannot contain an underscore */
-        if (strchr(arg, '_') != NULL) {
+        if (strchr(arg, '_') != nullptr) {
             break;
         }
 
@@ -133,42 +128,41 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
 
             for ( ; oo->name; oo++ ) {
                 if ( !strcmp( oo->name, arg2 ) ) {
-                    void*  field = (char*)opt + oo->var_offset;
+                    void* field = reinterpret_cast<char*>(opt) + oo->var_offset;
 
                     if (oo->var_type != OPTION_IS_FLAG) {
                         /* parameter/list option */
                         if (nargs == 0) {
-                            derror( "-%s must be followed by parameter (see -help-%s)",
-                                    arg, arg );
+                            derror("-%s must be followed by parameter (see "
+                                   "-help-%s)",
+                                   arg, arg);
                             exit(1);
                         }
                         nargs--;
 
-                        if (oo->var_type == OPTION_IS_PARAM)
-                        {
-                            ((char**)field)[0] = strdup(*aread++);
-                        }
-                        else if (oo->var_type == OPTION_IS_LIST)
-                        {
-                            ParamList**  head = (ParamList**)field;
-                            ParamList*   pl;
+                        if (oo->var_type == OPTION_IS_PARAM) {
+                            (static_cast<char**>(field))[0] = strdup(*aread++);
+                        } else if (oo->var_type == OPTION_IS_LIST) {
+                            auto** head = static_cast<ParamList**>(field);
+                            ParamList* pl;
                             ANEW0(pl);
                             /* note: store list items in reverse order here
-                             *       the list is reversed later in this function.
+                             *       the list is reversed later in this
+                             * function.
                              */
                             pl->param = strdup(*aread++);
-                            pl->next  = *head;
-                            *head     = pl;
+                            pl->next = *head;
+                            *head = pl;
                         }
                     } else {
                         /* flag option */
-                        ((int*)field)[0] = 1;
+                        (static_cast<int*>(field))[0] = 1;
                     }
                     break;
                 }
             }
 
-            if (oo->name == NULL) {  /* unknown option ? */
+            if (oo->name == nullptr) { /* unknown option ? */
                 nargs++;
                 aread--;
                 break;
@@ -186,7 +180,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
         nargs  --;
     }
 
-    awrite[0] = NULL;
+    awrite[0] = nullptr;
 
     /* reverse any parameter list before exit.
      */
@@ -195,15 +189,16 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
 
         for ( ; oo->name; oo++ ) {
             if ( oo->var_type == OPTION_IS_LIST ) {
-                ParamList**  head = (ParamList**)((char*)opt + oo->var_offset);
-                ParamList*   prev = NULL;
-                ParamList*   cur  = *head;
+                auto** head = reinterpret_cast<ParamList**>(
+                        reinterpret_cast<char*>(opt) + oo->var_offset);
+                ParamList* prev = nullptr;
+                ParamList* cur = *head;
 
-                while (cur != NULL) {
-                    ParamList*  next = cur->next;
+                while (cur != nullptr) {
+                    ParamList* next = cur->next;
                     cur->next = prev;
-                    prev      = cur;
-                    cur       = next;
+                    prev = cur;
+                    cur = next;
                 }
                 *head = prev;
             }
@@ -236,19 +231,21 @@ static bool is_tag_equal(const char* tagStart, const char* tagEnd,
 }
 
 bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix) {
-    if (opt == NULL)
+    if (opt == nullptr) {
         return false;
+    }
 
     bool result = false;
     const char* x = opt;
     while (*x) {
         const char* y = parse_as_suffix ? (x + strlen(x)) : strchr(x, ',');
-        if (y == NULL)
+        if (y == nullptr) {
             y = x + strlen(x);
+        }
 
-        if (y > x+1) {
+        if (y > x + 1) {
             int remove = 0;
-            const char* x0 = x; // in case we need to print it out
+            const char* x0 = x;  // in case we need to print it out
 
             if (!parse_as_suffix && x[0] == '-') {
                 remove = 1;
@@ -260,18 +257,18 @@ bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix) {
 
             if (is_tag_equal(x, y, "all")) {
                 result = true;
-                remove
-                        ? base_disable_verbose_logs()
-                        : base_enable_verbose_logs();
+                remove ? base_disable_verbose_logs()
+                       : base_enable_verbose_logs();
             } else {
-                char  temp[32];
-                buffer_translate_char_with_len(temp, sizeof temp,
-                                               x, y - x, '-', '_');
+                char temp[32];
+                buffer_translate_char_with_len(temp, sizeof temp, x, y - x, '-',
+                                               '_');
 
                 int nn;
                 uint64_t mask = 0;
-                for (nn = 0; debug_tags[nn].name != NULL; nn++) {
-                    if (is_tag_equal(temp, temp + (y - x), debug_tags[nn].name)) {
+                for (nn = 0; debug_tags[nn].name != nullptr; nn++) {
+                    if (is_tag_equal(temp, temp + (y - x),
+                                     debug_tags[nn].name)) {
                         mask |= (1ULL << debug_tags[nn].flag);
                         break;
                     }
@@ -279,13 +276,14 @@ bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix) {
 
                 if (mask == 0) {
                     dprint("ignoring unknown debug item '%.*s'",
-                           (int)(y - x0), x0);
+                           static_cast<int>(y - x0), x0);
                 } else {
                     result = true;
-                    if (remove)
+                    if (remove) {
                         android_verbose &= ~mask;
-                    else
+                    } else {
                         android_verbose |= mask;
+                    }
                 }
             }
         }
@@ -296,9 +294,7 @@ bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix) {
     return result;
 }
 
-void
-parse_env_debug_tags( void )
-{
+void parse_env_debug_tags() {
     const char*  env = getenv( ENV_DEBUG );
     android_parse_debug_tags_option(env, /*parse_as_suffix*/false);
 }
@@ -327,14 +323,14 @@ bool android_validate_ports(int console_port, int adb_port) {
 bool android_parse_port_option(const char* port_string,
                                int* console_port,
                                int* adb_port) {
-    if (port_string == NULL) {
+    if (port_string == nullptr) {
         return false;
     }
 
     char* end;
     errno = 0;
     int port = strtol(port_string, &end, 0);
-    if (end == NULL || *end || errno || port < 1 || port > UINT16_MAX) {
+    if (end == nullptr || *end || errno || port < 1 || port > UINT16_MAX) {
         derror("option -port must be followed by an integer. "
                "'%s' is not a valid input.", port_string);
         return false;
@@ -351,22 +347,22 @@ bool android_parse_port_option(const char* port_string,
 bool android_parse_ports_option(const char* ports_string,
                                 int* console_port,
                                 int* adb_port) {
-    if (ports_string == NULL) {
+    if (ports_string == nullptr) {
         return false;
     }
 
     char* comma_location;
     char* end;
     int first_port = strtol(ports_string, &comma_location, 0);
-    if (comma_location == NULL || *comma_location != ',' ||
-        first_port < 1 || first_port > UINT16_MAX) {
+    if (comma_location == nullptr || *comma_location != ',' || first_port < 1 ||
+        first_port > UINT16_MAX) {
         derror("Failed to parse option: |%s| (Could not parse first port). "
                "See -help-ports.", ports_string);
         return false;
     }
 
     int second_port = strtol(comma_location+1, &end, 0);
-    if (end == NULL || *end || second_port < 1 || second_port > UINT16_MAX) {
+    if (end == nullptr || *end || second_port < 1 || second_port > UINT16_MAX) {
         derror("Failed to parse option: |%s|. (Could not parse second port). "
                "See -help-ports.", ports_string);
         return false;

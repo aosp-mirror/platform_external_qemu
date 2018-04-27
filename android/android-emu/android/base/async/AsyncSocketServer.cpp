@@ -19,6 +19,7 @@
 #include "android/base/sockets/SocketUtils.h"
 
 #include <memory>
+#include <utility>
 
 namespace android {
 namespace base {
@@ -34,7 +35,9 @@ public:
                      ConnectCallback connectCallback,
                      int socket4,
                      int socket6)
-        : mLooper(looper), mPort(port), mConnectCallback(connectCallback) {
+        : mLooper(looper),
+          mPort(port),
+          mConnectCallback(std::move(connectCallback)) {
         if (socket4 >= 0) {
             mBoundSocket4.reset(looper->createFdWatch(socket4, onAccept, this));
             CHECK(mBoundSocket4.get());
@@ -45,11 +48,11 @@ public:
         }
     }
 
-    virtual ~BaseSocketServer() = default;
+    ~BaseSocketServer() override = default;
 
-    virtual int port() const override { return mPort; }
+    int port() const override { return mPort; }
 
-    virtual void startListening() override {
+    void startListening() override {
         if (mBoundSocket4) {
             mBoundSocket4->wantRead();
         }
@@ -63,7 +66,7 @@ public:
         return mListening;
     };
 
-    virtual void stopListening() override {
+    void stopListening() override {
         if (mBoundSocket4) {
             mBoundSocket4->dontWantRead();
         }
@@ -73,7 +76,7 @@ public:
         mListening = false;
     };
 
-    virtual LoopbackMode getListenMode() const override {
+    LoopbackMode getListenMode() const override {
         return mBoundSocket4 ? (mBoundSocket6 ? kIPv4AndIPv6 : kIPv4)
                              : (mBoundSocket6 ? kIPv6 : kNone);
     }
@@ -171,7 +174,7 @@ std::unique_ptr<AsyncSocketServer> AsyncSocketServer::createTcpLoopbackServer(
     AsyncSocketServer* result = nullptr;
 
     if (success && (sock4.valid() || sock6.valid())) {
-        result = new BaseSocketServer(looper, port, connectCallback,
+        result = new BaseSocketServer(looper, port, std::move(connectCallback),
                                       sock4.release(), sock6.release());
     }
     return std::unique_ptr<AsyncSocketServer>(result);

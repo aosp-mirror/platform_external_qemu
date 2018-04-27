@@ -69,13 +69,15 @@ Operation* HmacOperationFactory::CreateOperation(const Key& key,
     UniquePtr<HmacOperation> op(new (std::nothrow) HmacOperation(
         purpose(), symmetric_key->key_data(), symmetric_key->key_data_size(), digest,
         mac_length_bits / 8, min_mac_length_bits / 8));
-    if (!op.get())
+    if (!op.get()) {
         *error = KM_ERROR_MEMORY_ALLOCATION_FAILED;
-    else
+    } else {
         *error = op->error();
+    }
 
-    if (*error != KM_ERROR_OK)
+    if (*error != KM_ERROR_OK) {
         return nullptr;
+    }
 
     return op.release();
 }
@@ -150,8 +152,9 @@ keymaster_error_t HmacOperation::Begin(const AuthorizationSet& /* input_params *
 keymaster_error_t HmacOperation::Update(const AuthorizationSet& /* additional_params */,
                                         const Buffer& input, AuthorizationSet* /* output_params */,
                                         Buffer* /* output */, size_t* input_consumed) {
-    if (!HMAC_Update(&ctx_, input.peek_read(), input.available_read()))
+    if (!HMAC_Update(&ctx_, input.peek_read(), input.available_read())) {
         return TranslateLastOpenSslError();
+    }
     *input_consumed = input.available_read();
     return KM_ERROR_OK;
 }
@@ -164,29 +167,37 @@ keymaster_error_t HmacOperation::Finish(const AuthorizationSet& additional_param
                                         const Buffer& input, const Buffer& signature,
                                         AuthorizationSet* /* output_params */, Buffer* output) {
     keymaster_error_t error = UpdateForFinish(additional_params, input);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
     uint8_t digest[EVP_MAX_MD_SIZE];
     unsigned int digest_len;
-    if (!HMAC_Final(&ctx_, digest, &digest_len))
+    if (!HMAC_Final(&ctx_, digest, &digest_len)) {
         return TranslateLastOpenSslError();
+    }
 
     switch (purpose()) {
     case KM_PURPOSE_SIGN:
-        if (mac_length_ > digest_len)
+        if (mac_length_ > digest_len) {
             return KM_ERROR_UNSUPPORTED_MAC_LENGTH;
-        if (!output->reserve(mac_length_) || !output->write(digest, mac_length_))
+        }
+        if (!output->reserve(mac_length_) ||
+            !output->write(digest, mac_length_)) {
             return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+        }
         return KM_ERROR_OK;
     case KM_PURPOSE_VERIFY: {
         size_t siglen = signature.available_read();
-        if (siglen > digest_len || siglen < kMinHmacLengthBits / 8)
+        if (siglen > digest_len || siglen < kMinHmacLengthBits / 8) {
             return KM_ERROR_UNSUPPORTED_MAC_LENGTH;
-        if (siglen < min_mac_length_)
+        }
+        if (siglen < min_mac_length_) {
             return KM_ERROR_INVALID_MAC_LENGTH;
-        if (CRYPTO_memcmp(signature.peek_read(), digest, siglen) != 0)
+        }
+        if (CRYPTO_memcmp(signature.peek_read(), digest, siglen) != 0) {
             return KM_ERROR_VERIFICATION_FAILED;
+        }
         return KM_ERROR_OK;
     }
     default:

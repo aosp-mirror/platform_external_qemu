@@ -26,7 +26,7 @@ VorbisCodec::VorbisCodec(CodecParams&& p,
     : Codec(AV_CODEC_ID_VORBIS, std::move(p)),
       mInSampleFmt(inSampleFmt) {}
 
-VorbisCodec::~VorbisCodec() {}
+VorbisCodec::~VorbisCodec() = default;
 
 // Configures the encoder. Returns true if successful, false otherwise.
 bool VorbisCodec::configAndOpenEncoder(const AVFormatContext* oc,

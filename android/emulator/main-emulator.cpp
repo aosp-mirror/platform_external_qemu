@@ -19,11 +19,11 @@
  * migration is completed.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include <fstream>
 #include <streambuf>
@@ -150,8 +150,9 @@ static std::string emulator_dirname(const std::string& launcherDir) {
     return cppstr;
 }
 
-static void delete_files(const StringView file_dir, const StringView files_to_delete[],
-        unsigned int num_files) {
+static void delete_files(const StringView& file_dir,
+                         const StringView files_to_delete[],
+                         unsigned int num_files) {
     for (unsigned int i = 0; i < num_files; ++i) {
         std::string file = PathUtils::join(file_dir, files_to_delete[i]);
         APosixStatus ret = path_delete_file(file.c_str());
@@ -166,12 +167,15 @@ static void delete_files(const StringView file_dir, const StringView files_to_de
 static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
     // sdcard.img should not be deleted, because it is created by sdk manager
     // and we dont know how to re-create it from emulator yet
-    // TODO: fixit
+    // TODO(bohu): fixit
     static constexpr StringView files_to_delete[] = {
-        "system.img.qcow2", "vendor.img.qcow2", "userdata-qemu.img",
-        "userdata-qemu.img.qcow2", "userdata.img", "userdata.img.qcow2", "cache.img",
-        "cache.img.qcow2", "version_num.cache", "sdcard.img.qcow2", "encryptionkey.img",
-        "encryptionkey.img.qcow2", "hardware-qemu.ini", "emulator-user.ini"};
+            "system.img.qcow2",  "vendor.img.qcow2",
+            "userdata-qemu.img", "userdata-qemu.img.qcow2",
+            "userdata.img",      "userdata.img.qcow2",
+            "cache.img",         "cache.img.qcow2",
+            "version_num.cache", "sdcard.img.qcow2",
+            "encryptionkey.img", "encryptionkey.img.qcow2",
+            "hardware-qemu.ini", "emulator-user.ini"};
     delete_files(avd_folder, files_to_delete, ARRAY_SIZE(files_to_delete));
 }
 
@@ -227,9 +231,9 @@ static bool checkOsVersion() {
 /* Main routine */
 int main(int argc, char** argv)
 {
-    const char* avdName = NULL;
-    const char* avdArch = NULL;
-    const char* engine = NULL;
+    const char* avdName = nullptr;
+    const char* avdArch = nullptr;
+    const char* engine = nullptr;
     bool doAccelCheck = false;
     bool doListAvds = false;
     bool force32bit = false;
@@ -244,7 +248,7 @@ int main(int argc, char** argv)
      */
     const char* debug = getenv("ANDROID_EMULATOR_DEBUG");
 
-    if (debug != NULL && *debug && *debug != '0') {
+    if (debug != nullptr && *debug && *debug != '0') {
         android_verbose = 1;
     }
 
@@ -382,7 +386,7 @@ int main(int argc, char** argv)
     }
 
     if (doListAvds) {
-        AvdScanner* scanner = avdScanner_new(NULL);
+        AvdScanner* scanner = avdScanner_new(nullptr);
         for (;;) {
             const char* name = avdScanner_next(scanner);
             if (!name) {
@@ -442,7 +446,7 @@ int main(int argc, char** argv)
 
     // When running in a platform build environment, point to the output
     // directory where image partition files are located.
-    const char* androidOut = NULL;
+    const char* androidOut = nullptr;
 
     // print a version string and build id for easier debugging
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
@@ -453,7 +457,7 @@ int main(int argc, char** argv)
     /* If there is an AVD name, we're going to extract its target architecture
      * by looking at its config.ini
      */
-    if (avdName != NULL) {
+    if (avdName != nullptr) {
         D("Found AVD name '%s'", avdName);
         ScopedCPtr<const char> rootIni(path_getRootIniPath(avdName));
         if (!rootIni) {
@@ -485,7 +489,7 @@ int main(int argc, char** argv)
         /* Otherwise, using the ANDROID_PRODUCT_OUT directory */
         androidOut = getenv("ANDROID_PRODUCT_OUT");
 
-        if (androidOut != NULL) {
+        if (androidOut != nullptr) {
             D("Found ANDROID_PRODUCT_OUT: %s", androidOut);
             avdArch = path_getBuildTargetArch(androidOut);
             D("Found build target architecture: %s",
@@ -513,7 +517,7 @@ int main(int argc, char** argv)
         }
     }
 
-    if (avdArch == NULL) {
+    if (avdArch == nullptr) {
         avdArch = "x86";
         D("Can't determine target AVD architecture: defaulting to %s", avdArch);
     }
@@ -562,12 +566,13 @@ int main(int argc, char** argv)
             if (cpuHasRanchu) {
                 if (cpuHasGoldfish) {
                     // Need to auto-detect the default engine.
-                    // TODO: Deal with -kernel <file>, -systemdir <dir> and platform
-                    // builds appropriately. For now this only works reliably for
-                    // regular SDK AVD configurations.
+                    // TODO(zyy): Deal with -kernel <file>, -systemdir <dir>
+                    // and platform builds appropriately. For now this only
+                    // works reliably for regular SDK AVD configurations.
                     if (checkAvdSystemDirForKernelRanchu(avdName, avdArch,
                                                          androidOut)) {
-                        D("Auto-config: -engine qemu2 (based on configuration)");
+                        D("Auto-config: -engine qemu2 (based on "
+                          "configuration)");
                         ranchu = RANCHU_ON;
                     } else {
                         D("Auto-config: -engine classic (based on configuration)");
@@ -631,9 +636,9 @@ int main(int argc, char** argv)
     const StringView candidates[] = {progDirSystem, emuDirName, argv0DirName};
     char* emulatorPath = nullptr;
     StringView progDir;
-    for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
-        D("try dir %s", candidates[i].c_str());
-        progDir = candidates[i];
+    for (const auto& candidate : candidates) {
+        D("try dir %s", candidate.c_str());
+        progDir = candidate;
         if (ranchu == RANCHU_ON) {
             emulatorPath = getQemuExecutablePath(progDir.c_str(),
                                                  avdArch,
@@ -701,7 +706,7 @@ int main(int argc, char** argv)
             /* To make it easier to copy-paste the output to a command-line,
              * quote anything that contains spaces.
              */
-            if (strchr(argv[i], ' ') != NULL) {
+            if (strchr(argv[i], ' ') != nullptr) {
                 printf(" '%s'", argv[i]);
             } else {
                 printf(" %s", argv[i]);
@@ -778,7 +783,7 @@ static char* probeTargetEmulatorPath(const char* progDir,
         return path_get_absolute(path);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // Find the absolute path to the classic emulator binary that supports CPU architecture
@@ -830,7 +835,7 @@ static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 // Return the path of the QEMU executable. |progDir| is the directory
@@ -956,7 +961,7 @@ static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
     }
 
     bool result = false;
-    char* kernel_file = NULL;
+    char* kernel_file = nullptr;
     if (androidOut) {
         asprintf(&kernel_file, "%s/kernel-ranchu-64", androidOut);
     } else {
@@ -976,7 +981,7 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
                                              const char* androidOut) {
     bool result = false;
-    char* kernel_file = NULL;
+    char* kernel_file = nullptr;
 
     // For now, just check that a kernel-ranchu file exists. All official
     // system images should have that if they support ranchu.

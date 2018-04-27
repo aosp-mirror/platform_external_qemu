@@ -34,7 +34,7 @@ public:
 
     const AndroidPipeFuncs* getFuncs() const;
 
-    virtual void onGuestClose(PipeCloseReason reason) override {
+    void onGuestClose(PipeCloseReason reason) override {
         auto funcs = getFuncs();
         if (funcs->close) {
             funcs->close(mInstance);
@@ -44,23 +44,23 @@ public:
         delete this;
     }
 
-    virtual unsigned onGuestPoll() const { return getFuncs()->poll(mInstance); }
+    unsigned onGuestPoll() const override {
+        return getFuncs()->poll(mInstance);
+    }
 
-    virtual int onGuestRecv(AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+    int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override {
         return getFuncs()->recvBuffers(mInstance, buffers, numBuffers);
     }
 
-    virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override {
         return getFuncs()->sendBuffers(mInstance, buffers, numBuffers);
     }
 
-    virtual void onGuestWantWakeOn(int flags) override {
+    void onGuestWantWakeOn(int flags) override {
         getFuncs()->wakeOn(mInstance, flags);
     }
 
-    virtual void onSave(BaseStream* stream) {
+    void onSave(BaseStream* stream) override {
         if (getFuncs()->save) {
             getFuncs()->save(mInstance, asCStream(stream));
         }
@@ -78,7 +78,7 @@ public:
                       const AndroidPipeFuncs* funcs)
         : Service(name), mOpaque(opaque), mFuncs(funcs) {}
 
-    virtual AndroidPipe* create(void* hwPipe, const char* args) override {
+    AndroidPipe* create(void* hwPipe, const char* args) override {
         void* hostPipe = mFuncs->init(hwPipe, mOpaque, args);
         if (!hostPipe) {
             return nullptr;
@@ -86,11 +86,11 @@ public:
         return new LegacyPipe(hostPipe, hwPipe, this);
     }
 
-    virtual bool canLoad() const override { return (mFuncs->load != nullptr); }
+    bool canLoad() const override { return (mFuncs->load != nullptr); }
 
-    virtual AndroidPipe* load(void* hwPipe,
-                              const char* args,
-                              BaseStream* stream) override {
+    AndroidPipe* load(void* hwPipe,
+                      const char* args,
+                      BaseStream* stream) override {
         void* instance = mFuncs->load(hwPipe, mOpaque, args, asCStream(stream));
         if (!instance) {
             return nullptr;

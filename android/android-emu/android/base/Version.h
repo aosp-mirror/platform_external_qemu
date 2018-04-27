@@ -32,7 +32,7 @@ public:
     // This is the value for an invalid/missing version component.
     static constexpr ComponentType kNone = static_cast<ComponentType>(-1);
 
-    explicit Version(StringView ver);
+    explicit Version(const StringView& ver);
 
     constexpr Version();
 
@@ -98,8 +98,8 @@ constexpr bool Version::operator!=(const Version& other) const {
 }
 
 constexpr Version Version::invalid() {
-    return Version(kNone, kNone, kNone);
+    return {kNone, kNone, kNone};
 }
 
-}  // namespace android
 }  // namespace base
+}  // namespace android

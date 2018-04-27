@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-#include <ctype.h>
+#include <cctype>
 #endif
 
 namespace android {

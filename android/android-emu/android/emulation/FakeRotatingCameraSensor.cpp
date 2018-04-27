@@ -14,7 +14,7 @@
 #include "android/utils/debug.h"
 #include "android/hw-sensors.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include <memory>
 #include <vector>
@@ -25,7 +25,7 @@ void fakeCameraSensorDecodeAndExecute(const std::vector<uint8_t>& input,
                                std::vector<uint8_t>* outputp) {
     std::vector<uint8_t> & output = *outputp;
     output.resize(9*sizeof(float));
-    float *p = reinterpret_cast<float*>(&(output[0]));
+    auto* p = reinterpret_cast<float*>(&(output[0]));
     android_sensors_get(ANDROID_SENSOR_ACCELERATION, p, p+1, p+2);
     android_sensors_get(ANDROID_SENSOR_MAGNETIC_FIELD, p+3, p+4, p+5);
     android_sensors_get(ANDROID_SENSOR_ORIENTATION, p+6, p+7, p+8);

@@ -15,8 +15,8 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/interface.h"
 
+#include <cstdint>
 #include <memory>
-#include <stdint.h>
 
 namespace android {
 namespace snapshot {

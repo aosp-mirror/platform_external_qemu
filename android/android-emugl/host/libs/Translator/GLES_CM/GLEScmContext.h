@@ -37,27 +37,41 @@ class CoreProfileEngine;
 class GLEScmContext: public GLEScontext
 {
 public:
-    virtual void init();
+    void init() override;
     static void initGlobal(EGLiface* eglIface);
     GLEScmContext(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream);
-    void setActiveTexture(GLenum tex);
+    void setActiveTexture(GLenum tex) override;
     void  setClientActiveTexture(GLenum tex);
     GLenum  getActiveTexture() { return GL_TEXTURE0 + m_activeTexture;};
     GLenum  getClientActiveTexture() { return GL_TEXTURE0 + m_clientActiveTexture;};
     void setBindedTexture(GLenum target, unsigned int texture, unsigned int globalTexName);
-    void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
+    void setupArraysPointers(GLESConversionArrays& fArrs,
+                             GLint first,
+                             GLsizei count,
+                             GLenum type,
+                             const GLvoid* indices,
+                             bool direct) override;
     void drawPointsArrs(GLESConversionArrays& arrs,GLint first,GLsizei count);
     void drawPointsElems(GLESConversionArrays& arrs,GLsizei count,GLenum type,const GLvoid* indices);
-    virtual const GLESpointer* getPointer(GLenum arrType);
-    int  getMaxTexUnits();
+    const GLESpointer* getPointer(GLenum arrType) override;
+    int getMaxTexUnits() override;
 
-    virtual void initDefaultFBO(
-            GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
-            GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
-            GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
-            GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
-    ~GLEScmContext();
+    void initDefaultFBO(GLint width,
+                        GLint height,
+                        GLint colorFormat,
+                        GLint depthstencilFormat,
+                        GLint multisamples,
+                        GLuint* eglSurfaceRBColorId,
+                        GLuint* eglSurfaceRBDepthId,
+                        GLuint readWidth,
+                        GLint readHeight,
+                        GLint readColorFormat,
+                        GLint readDepthStencilFormat,
+                        GLint readMultisamples,
+                        GLuint* eglReadSurfaceRBColorId,
+                        GLuint* eglReadSurfaceRBDepthId) override;
+    ~GLEScmContext() override;
     static void setMaxGlesVersion(GLESVersion version);
 
     // Emulated GLES1
@@ -66,10 +80,10 @@ public:
     GLint getErrorCoreProfile();
 
     // API
-    virtual bool glGetIntegerv(GLenum pname, GLint *params);
-    virtual bool glGetBooleanv(GLenum pname, GLboolean *params);
-    virtual bool glGetFloatv(GLenum pname, GLfloat *params);
-    virtual bool glGetFixedv(GLenum pname, GLfixed *params);
+    bool glGetIntegerv(GLenum pname, GLint* params) override;
+    bool glGetBooleanv(GLenum pname, GLboolean* params) override;
+    bool glGetFloatv(GLenum pname, GLfloat* params) override;
+    bool glGetFixedv(GLenum pname, GLfixed* params) override;
 
     void enable(GLenum cap);
     void disable(GLenum cap);
@@ -186,21 +200,29 @@ public:
     const Light& getLightInfo(uint32_t lightIndex);
     const Fog& getFogInfo();
 
-    virtual void onSave(android::base::Stream* stream) const override;
+    void onSave(android::base::Stream* stream) const override;
 
 protected:
-    virtual void postLoadRestoreCtx() override;
+    void postLoadRestoreCtx() override;
 
     static const GLint kMaxTextureUnits = 4;
     static const GLint kMaxMatrixStackSize = 16;
 
-    bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
+    bool needConvert(GLESConversionArrays& fArrs,
+                     GLint first,
+                     GLsizei count,
+                     GLenum type,
+                     const GLvoid* indices,
+                     bool direct,
+                     GLESpointer* p,
+                     GLenum array_id) override;
+
 private:
     void setupArrayPointerHelper(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLenum array_id,GLESpointer* p);
     void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1, bool isInt = false);
     void drawPoints(PointSizeIndices* points);
     void drawPointsData(GLESConversionArrays& arrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw);
-    void initExtensionString();
+    void initExtensionString() override;
     void restoreVertexAttrib(GLenum attrib);
     CoreProfileEngine& core() { return *m_coreProfileEngine; }
 

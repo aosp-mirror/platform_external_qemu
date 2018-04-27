@@ -54,10 +54,10 @@ extern "C" {
 
 #include <string>
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
@@ -103,27 +103,25 @@ public:
     // Ctor
     FfmpegRecorderImpl(uint16_t fbWidth,
                        uint16_t fbHeight,
-                       android::base::StringView filename,
-                       android::base::StringView containerFormat);
+                       const android::base::StringView& filename,
+                       const android::base::StringView& containerFormat);
 
-    virtual ~FfmpegRecorderImpl();
+    ~FfmpegRecorderImpl() override;
 
-    virtual bool isValid() override;
-    virtual bool start() override;
-    virtual bool stop() override;
+    bool isValid() override;
+    bool start() override;
+    bool stop() override;
 
-    virtual bool addAudioTrack(
-            std::unique_ptr<Producer> producer,
-            const Codec<SwrContext>* codec) override;
-    virtual bool addVideoTrack(
-            std::unique_ptr<Producer> producer,
-            const Codec<SwsContext*>* codec) override;
+    bool addAudioTrack(std::unique_ptr<Producer> producer,
+                       const Codec<SwrContext>* codec) override;
+    bool addVideoTrack(std::unique_ptr<Producer> producer,
+                       const Codec<SwsContext*>* codec) override;
 
 private:
     // Initalizes the output context for the muxer. This call is required for
     // adding video/audio contexts and starting the recording.
-    bool initOutputContext(android::base::StringView filename,
-                           android::base::StringView containerFormat);
+    bool initOutputContext(const android::base::StringView& filename,
+                           const android::base::StringView& containerFormat);
 
     void attachAudioProducer(std::unique_ptr<Producer> producer);
     void attachVideoProducer(std::unique_ptr<Producer> producer);
@@ -192,8 +190,8 @@ private:
 FfmpegRecorderImpl::FfmpegRecorderImpl(
         uint16_t fbWidth,
         uint16_t fbHeight,
-        android::base::StringView filename,
-        android::base::StringView containerFormat)
+        const android::base::StringView& filename,
+        const android::base::StringView& containerFormat)
     : mFbWidth(fbWidth), mFbHeight(fbHeight) {
     assert(mFbWidth > 0 && mFbHeight > 0);
     mValid = initOutputContext(filename, containerFormat);
@@ -208,8 +206,8 @@ bool FfmpegRecorderImpl::isValid() {
 }
 
 bool FfmpegRecorderImpl::initOutputContext(
-        android::base::StringView filename,
-        android::base::StringView containerFormat) {
+        const android::base::StringView& filename,
+        const android::base::StringView& containerFormat) {
     if (mStarted) {
         LOG(ERROR) << __func__ << ": Recording already started";
         return false;
@@ -334,7 +332,7 @@ bool FfmpegRecorderImpl::stop() {
     // flush video encoding with a NULL frame
     if (mHasVideoTrack) {
         while (true) {
-            AVPacket pkt = {0};
+            AVPacket pkt = {nullptr};
             int gotPacket = 0;
             av_init_packet(&pkt);
             int ret = avcodec_encode_video2(mVideoStream.stream->codec, &pkt,
@@ -358,7 +356,10 @@ bool FfmpegRecorderImpl::stop() {
                 Frame f(size, 0);
                 // compute the time delta between frames
                 auto avframe = mAudioStream.frame.get();
-                uint64_t deltaUs = (uint64_t)(((float)avframe->nb_samples / avframe->sample_rate) * 1000000);
+                auto deltaUs = static_cast<uint64_t>(
+                        (static_cast<float>(avframe->nb_samples) /
+                         avframe->sample_rate) *
+                        1000000);
                 f.tsUs = mAudioStream.last_tsUs + deltaUs;
                 f.format.audioFormat = mAudioProducer->getFormat().audioFormat;
                 encodeAudioFrame(&f);
@@ -367,11 +368,11 @@ bool FfmpegRecorderImpl::stop() {
 
         // flush audio encoding with a NULL frame
         while (true) {
-            AVPacket pkt = {0};
+            AVPacket pkt = {nullptr};
             int gotPacket;
             av_init_packet(&pkt);
             int ret = avcodec_encode_audio2(mAudioStream.stream->codec, &pkt,
-                                            NULL, &gotPacket);
+                                            nullptr, &gotPacket);
             if (ret < 0 || !gotPacket) {
                 break;
             }
@@ -617,9 +618,9 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
                                       buf + bufUsed);
             memcpy(avframe->data[0], ost->audioLeftover.data(), frameSize);
             uint64_t elapsedUS = frame->tsUs - mStartTimeUs;
-            int64_t pts =
-                    (int64_t)(((double)elapsedUS * ost->stream->time_base.den) /
-                              1000000.00);
+            auto pts = static_cast<int64_t>((static_cast<double>(elapsedUS) *
+                                             ost->stream->time_base.den) /
+                                            1000000.00);
             avframe->pts = pts;
             ost->last_tsUs = frame->tsUs;
             writeAudioFrame(avframe);
@@ -636,8 +637,9 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
     while (remaining >= frameSize) {
         memcpy(avframe->data[0], buf, frameSize);
         uint64_t elapsedUS = frame->tsUs - mStartTimeUs;
-        int64_t pts = (int64_t)(
-                ((double)elapsedUS * ost->stream->time_base.den) / 1000000.00);
+        auto pts = static_cast<int64_t>(
+                (static_cast<double>(elapsedUS) * ost->stream->time_base.den) /
+                1000000.00);
         avframe->pts = pts;
         ost->last_tsUs = frame->tsUs;
         writeAudioFrame(avframe);
@@ -673,8 +675,9 @@ bool FfmpegRecorderImpl::encodeVideoFrame(const Frame* frame) {
               1000);
 
     uint64_t elapsedUS = frame->tsUs - mStartTimeUs;
-    ost->frame->pts = (int64_t)(
-            ((double)elapsedUS * ost->stream->time_base.den) / 1000000.00);
+    ost->frame->pts = static_cast<int64_t>(
+            (static_cast<double>(elapsedUS) * ost->stream->time_base.den) /
+            1000000.00);
 
     bool ret = writeVideoFrame(ost->frame.get());
     mHasVideoFrames = true;
@@ -738,7 +741,7 @@ bool FfmpegRecorderImpl::writeAudioFrame(AVFrame* frame) {
 
     D("Encoding audio frame %d\n", mAudioStream.frameCount++);
     av_init_packet(&pkt);
-    pkt.data = NULL;  // data and size must be 0
+    pkt.data = nullptr;  // data and size must be 0
     pkt.size = 0;
     ret = avcodec_encode_audio2(c, &pkt, frame, &gotPacket);
     if (ret < 0) {
@@ -775,7 +778,7 @@ bool FfmpegRecorderImpl::writeVideoFrame(AVFrame* frame) {
 
         pkt.flags |= AV_PKT_FLAG_KEY;
         pkt.stream_index = mVideoStream.stream->index;
-        pkt.data = (uint8_t*)frame;
+        pkt.data = reinterpret_cast<uint8_t*>(frame);
         pkt.size = sizeof(AVPicture);
 
         pkt.pts = pkt.dts = frame->pts;
@@ -930,8 +933,8 @@ void FfmpegRecorderImpl::logPacket(const AVFormatContext* fmtCtx,
 std::unique_ptr<FfmpegRecorder> FfmpegRecorder::create(
         uint16_t fbWidth,
         uint16_t fbHeight,
-        android::base::StringView filename,
-        android::base::StringView containerFormat) {
+        const android::base::StringView& filename,
+        const android::base::StringView& containerFormat) {
     return std::unique_ptr<FfmpegRecorder>(new FfmpegRecorderImpl(
             fbWidth, fbHeight, filename, containerFormat));
 }

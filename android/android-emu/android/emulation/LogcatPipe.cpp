@@ -51,7 +51,8 @@ int LogcatPipe::onGuestSend(const AndroidPipeBuffer* buffers,
     int result = 0;
     std::ostream *pstream = mOutputFile.good() ? &mOutputFile : &(std::cout);
     while (numBuffers > 0) {
-        pstream->write((char*)buffers->data, static_cast<int>(buffers->size));
+        pstream->write(reinterpret_cast<char*>(buffers->data),
+                       static_cast<int>(buffers->size));
         result += static_cast<int>(buffers->size);
         buffers++;
         numBuffers--;

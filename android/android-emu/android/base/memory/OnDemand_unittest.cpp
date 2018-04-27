@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 
+#include <utility>
+
 using android::base::makeAtomicOnDemand;
 using android::base::makeOnDemand;
 using android::base::MemberOnDemandT;
@@ -53,7 +55,7 @@ struct Test0 {
 
 struct Test1 : Test0 {
     int n;
-    Test1(int n) : n(n) {}
+    explicit Test1(int n) : n(n) {}
 };
 
 }  // namespace
@@ -125,7 +127,7 @@ TEST_F(OnDemandTest, makeMore) {
         bool b;
 
         Test4(int n, char c, std::string s, bool b = true)
-            : n(n), c(c), s(s), b(b) {}
+            : n(n), c(c), s(std::move(s)), b(b) {}
     };
 
     {
@@ -226,9 +228,9 @@ TEST_F(OnDemandTest, multiConstruct) {
     ThreadPool pool(kNumThreads, [](ThreadPool::Item&& f) { f(); });
     auto t = makeAtomicOnDemand<Test1>(100);
     Test1* values[kNumThreads] = {};
-    for (int i = 0; i < kNumThreads; ++i) {
-        pool.enqueue([&t, i, &values]() {
-            values[i] = t.ptr();
+    for (auto& value : values) {
+        pool.enqueue([&t, &value, &values]() {
+            value = t.ptr();
             EXPECT_EQ(100, t.ptr()->n);
         });
     }
@@ -240,8 +242,8 @@ TEST_F(OnDemandTest, multiConstruct) {
     EXPECT_EQ((State{1, 0}), sState);
 
     // Make sure all threads got the same pointer value.
-    for (int i = 0; i < kNumThreads; ++i) {
-        EXPECT_EQ(values[i], t.ptr());
+    for (auto& value : values) {
+        EXPECT_EQ(value, t.ptr());
     }
 }
 

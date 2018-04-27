@@ -80,7 +80,8 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
             setText(COLUMN_NAME, logicalName);
         }
 
-        // TODO: jameskaye@ Enable this code if we decide to provide a hierarchical
+        // TODO(jameskaye): Enable this code if we decide to provide a
+        // hierarchical
         //                  display. Remove this code if we decide not to.
         // // ctor for a subordinate item
         // // (used only for hierarchical display)
@@ -92,8 +93,8 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         //     mFileName(fileName),
         //     mDateTime(dateTime)
         // {
-        //     mParentName = parentItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
-        //     setText(COLUMN_NAME, logicalName);
+        //     mParentName = parentItem->data(COLUMN_NAME,
+        //     Qt::DisplayRole).toString(); setText(COLUMN_NAME, logicalName);
         // }
 
         // Customize the sort order: Sort by date
@@ -178,9 +179,10 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
             break;
         default:
             fprintf(stderr,
-                    "%s: warning: unknown 'Save snapshot on exit' preference value 0x%x. "
+                    "%s: warning: unknown 'Save snapshot on exit' preference "
+                    "value 0x%x. "
                     "Setting to Always.\n",
-                    __func__, (unsigned int)saveOnExitChoice);
+                    __func__, static_cast<unsigned int>(saveOnExitChoice));
             mUi->saveQuickBootOnExit->setCurrentIndex(
                     static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
@@ -390,7 +392,7 @@ void SnapshotPage::on_loadSnapshot_clicked() {
     disableActions();
     android::base::ThreadLooper::runOnMainLooper([&status, fileName, this] {
         status = androidSnapshot_load(fileName.toStdString().c_str());
-        emit(loadCompleted((int)status, fileName));
+        emit(loadCompleted(static_cast<int>(status), fileName));
     });
 }
 
@@ -409,7 +411,8 @@ void SnapshotPage::on_loadQuickBootNowButton_clicked() {
 }
 
 void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snapshotFileName) {
-    AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
+    AndroidSnapshotStatus status =
+            static_cast<AndroidSnapshotStatus>(statusInt);
 
     if (status != SNAPSHOT_STATUS_OK) {
         enableActions();
@@ -751,7 +754,7 @@ void SnapshotPage::on_takeSnapshotButton_clicked() {
         disableActions();
         android::base::ThreadLooper::runOnMainLooper([&status, snapshotName, this] {
             status = androidSnapshot_save(snapshotName.toStdString().c_str());
-            emit(saveCompleted((int)status, snapshotName));
+            emit(saveCompleted(static_cast<int>(status), snapshotName));
         });
     }
 }
@@ -779,7 +782,8 @@ void SnapshotPage::closeEvent(QCloseEvent* closeEvent) {
 }
 
 void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snapshotName) {
-    AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
+    AndroidSnapshotStatus status =
+            static_cast<AndroidSnapshotStatus>(statusInt);
 
     if (status != SNAPSHOT_STATUS_OK) {
         enableActions();
@@ -939,14 +943,15 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     mUi->snapshotDisplay->setSortingEnabled(true);
 }
 
-// TODO: jameskaye@ Enable this code if we decide to provide a hierarchical display.
+// TODO(jameskaye): Enable this code if we decide to provide a
+// hierarchical display.
 //                  Remove this code if we decide not to.
 // // Populate the list of snapshot with the hierarchy of parentage
 // // (used only for the hierarchical display)
 // void SnapshotPage::populateSnapshotDisplay_hierarchical() {
 //
-//     mUi->snapshotDisplay->setSortingEnabled(false); // Don't sort during modification
-//     mUi->snapshotDisplay->clear();
+//     mUi->snapshotDisplay->setSortingEnabled(false); // Don't sort during
+//     modification mUi->snapshotDisplay->clear();
 //
 //     // Temporary structure for organizing the display of the snapshots
 //     class treeItem {
@@ -975,8 +980,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //
 //         Snapshot theSnapshot(fileName.toStdString().c_str());
 //
-//         const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
-//         if (protobuf == nullptr) continue;
+//         const emulator_snapshot::Snapshot* protobuf =
+//         theSnapshot.getGeneralInfo(); if (protobuf == nullptr) continue;
 //         QString logicalName;
 //         if (protobuf->has_logical_name()) {
 //             logicalName = protobuf->logical_name().c_str();
@@ -991,15 +996,15 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //
 //         QDateTime snapshotDate;
 //         if (protobuf->has_creation_time()) {
-//             snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL * protobuf->creation_time());
+//             snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL *
+//             protobuf->creation_time());
 //         }
 //         itemArray[idx].fileName = fileName;
 //         itemArray[idx].logicalName = logicalName;
 //         itemArray[idx].dateTime = snapshotDate;
 //         itemArray[idx].parent = parentName;
-//         itemArray[idx].parentIdx = -1; // Haven't found the parent's item (yet)
-//         itemArray[idx].item = nullptr; // No QTreeWidgetItem yet
-//         idx++;
+//         itemArray[idx].parentIdx = -1; // Haven't found the parent's item
+//         (yet) itemArray[idx].item = nullptr; // No QTreeWidgetItem yet idx++;
 //     }
 //     nItems = idx;
 //
@@ -1047,7 +1052,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //             } else if (itemArray[itemArray[idx].parentIdx].item != nullptr) {
 //                 // The parent was found and its item was created.
 //                 // Create a child item.
-//                 thisItem = new WidgetSnapshotItem(itemArray[itemArray[idx].parentIdx].item,
+//                 thisItem = new
+//                 WidgetSnapshotItem(itemArray[itemArray[idx].parentIdx].item,
 //                                                   itemArray[idx].fileName,
 //                                                   itemArray[idx].logicalName,
 //                                                   itemArray[idx].dateTime);
@@ -1078,8 +1084,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //     } while (didSomething);
 //
 //     mUi->snapshotDisplay->header()->setStretchLastSection(false);
-//     mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME, QHeaderView::Stretch);
-//     mUi->snapshotDisplay->setSortingEnabled(true);
+//     mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME,
+//     QHeaderView::Stretch); mUi->snapshotDisplay->setSortingEnabled(true);
 // }
 
 void SnapshotPage::disableActions() {

@@ -22,8 +22,9 @@ Logger* Logger::instance_ = 0;
 
 /* static */
 int Logger::Log(LogLevel level, const char* fmt, va_list args) {
-    if (!instance_)
+    if (!instance_) {
         return 0;
+    }
     return instance_->log_msg(level, fmt, args);
 }
 

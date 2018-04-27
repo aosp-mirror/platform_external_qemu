@@ -33,12 +33,11 @@
 #include <unordered_set>
 #include <vector>
 
-typedef std::vector<std::unique_ptr<EglConfig>> ConfigsList;
+using ConfigsList = std::vector<std::unique_ptr<EglConfig> >;
 typedef std::unordered_map<unsigned int, ContextPtr>  ContextsHndlMap;
 typedef std::unordered_map<unsigned int, SurfacePtr>  SurfacesHndlMap;
 
-
-typedef std::unordered_set<EglConfig> ConfigSet;
+using ConfigSet = std::unordered_set<EglConfig>;
 
 class EglDisplay {
 public:
@@ -82,13 +81,13 @@ public:
 
     EglConfig* getDefaultConfig() const;
 
-    EGLSurface addSurface(SurfacePtr s );
+    EGLSurface addSurface(const SurfacePtr& s);
     SurfacePtr getSurface(EGLSurface surface) const;
     bool removeSurface(EGLSurface s);
-    EGLContext addContext(ContextPtr ctx );
+    EGLContext addContext(const ContextPtr& ctx);
     ContextPtr getContext(EGLContext ctx) const;
     bool removeContext(EGLContext ctx);
-    bool removeContext(ContextPtr ctx);
+    bool removeContext(const ContextPtr& ctx);
     ObjectNameManager* getManager(GLESVersion ver) const { return m_manager[ver];}
 
     ~EglDisplay();
@@ -98,7 +97,7 @@ public:
 
     ImagePtr getImage(EGLImageKHR img,
         SaveableTexture::restorer_t restorer) const;
-    EGLImageKHR addImageKHR(ImagePtr);
+    EGLImageKHR addImageKHR(const ImagePtr&);
     bool destroyImageKHR(EGLImageKHR img);
     EglOS::Context* getGlobalSharedContext() const;
     GlobalNameSpace* getGlobalNameSpace() { return &m_globalNameSpace; }
@@ -117,7 +116,7 @@ private:
 
     int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) const;
     EglConfig* addSimplePixelFormat(int red_size, int green_size, int blue_size, int alpha_size, int sample_per_pixel);
-    void addReservedConfigs(void);
+    void addReservedConfigs();
     void initConfigurations(int renderableType);
 
     EGLNativeDisplayType    m_dpy = {};

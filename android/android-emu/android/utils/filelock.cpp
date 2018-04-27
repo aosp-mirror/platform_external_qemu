@@ -17,32 +17,32 @@
 #include "android/utils/lock.h"
 #include "android/utils/path.h"
 
-#include <assert.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cerrno>
+
 #include <sys/stat.h>
-#include <time.h>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #ifdef _WIN32
-#  include "android/base/memory/ScopedPtr.h"
-#  include "android/base/system/Win32UnicodeString.h"
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
-#  include <windows.h>
+#include "android/base/memory/ScopedPtr.h"
+#include "android/base/system/Win32UnicodeString.h"
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
 #else
-#  include <sys/types.h>
-#  include <unistd.h>
-#  include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <csignal>
 #endif
 
 using android::base::System;
 
 // Set to 1 to enable debug traces here.
 #if 0
-#define  D(...)  printf(__VA_ARGS__), printf("\n"), fflush(stdout)
+#define D(...) printf(__VA_ARGS__), printf("\n"), fflush(stdout)
 #else
 #define D(...) ((void)0)
 #endif
@@ -76,7 +76,6 @@ using android::base::System;
  **
  **/
 
-
 /* Thread safety:
  *     _all_filelocks_tl: Hold this when accessing |_all_filelocks|.
  *                        This is locked at exit, so hold this for very, *very*
@@ -93,27 +92,25 @@ static CLock* _all_filelocks_tl;
  */
 static bool _is_exiting = false;
 
-struct FileLock
-{
-  const char*  file;
-  const char*  lock;
-  char*        temp;
+struct FileLock {
+    const char* file;
+    const char* lock;
+    char* temp;
 #ifdef _WIN32
-  HANDLE       lock_handle;
+    HANDLE lock_handle;
 #endif
-  int          locked;
-  FileLock*    next;
+    int locked;
+    FileLock* next;
 };
 
 /* used to cleanup all locks at emulator exit */
-static FileLock*   _all_filelocks;
+static FileLock* _all_filelocks;
 
-#define  LOCK_NAME   ".lock"
-#define  TEMP_NAME   ".tmp-XXXXXX"
-#define  WIN_PIDFILE_NAME  "pid"
+#define LOCK_NAME ".lock"
+#define TEMP_NAME ".tmp-XXXXXX"
+#define WIN_PIDFILE_NAME "pid"
 
-void
-filelock_init() {
+void filelock_init() {
     _all_filelocks_tl = android_lock_new();
 }
 
@@ -137,7 +134,8 @@ static bool retry_with_limit(Func func, int tries = 4, int timeoutMs = 100) {
         --tries;
         int retval = func(&tries);
 
-        if (retval) return true;
+        if (retval)
+            return true;
         if (tries == 0) {
             return false;
         }
@@ -170,86 +168,96 @@ static int filelock_lock(FileLock* lock, int liveProcessTimeout /* TODO */) {
 
     HANDLE lockHandle = INVALID_HANDLE_VALUE;
     const bool createFileResult = retry_with_limit(
-        [&lockHandle, &unicodeDir, &unicodeName, liveProcessTimeout](int* triesRemaining) {
-            if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
-                ::GetLastError() != ERROR_ALREADY_EXISTS) {
-                fprintf(stderr, "%s: error not already exists\n", __func__);
-                return false;
-            }
+            [&lockHandle, &unicodeDir, &unicodeName,
+             liveProcessTimeout](int* triesRemaining) {
+                if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
+                    ::GetLastError() != ERROR_ALREADY_EXISTS) {
+                    fprintf(stderr, "%s: error not already exists\n", __func__);
+                    return false;
+                }
 
-            // Open/create a lock file with a flags combination like:
-            //  - open for writing only
-            //  - allow only one process to open file for writing (our process)
-            // Together, this guarantees that the file can only be opened when
-            // our process is alive and keeps a handle to it.
-            // As soon as our process ends or we close/delete it - other lock
-            // can be acquired.
-            // Note: FILE_FLAG_DELETE_ON_CLOSE doesn't work well here, as
-            //  everyone else would need to open the file in FILE_SHARE_DELETE
-            //  mode, and both Android Studio and cmd.exe don't use it. Fix
-            //  at least the Android Studio part before trying to add this flag
-            //  instead of the manual deletion code.
-            lockHandle = ::CreateFileW(
-                    unicodeName.c_str(),
-                    GENERIC_WRITE,    // open only for writing
-                    FILE_SHARE_READ,  // allow others to read the file, but not
-                                      // to write to it or not to delete it
-                    nullptr,          // no special security attributes
-                    CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
-                    nullptr);  // no template file
-            DWORD lastErr = GetLastError();
-            if (lockHandle == INVALID_HANDLE_VALUE &&
-                (lastErr == ERROR_ACCESS_DENIED ||
-                 lastErr == ERROR_SHARING_VIOLATION)) {
-
-                HANDLE getpidHandle =
-                    ::CreateFileW(
+                // Open/create a lock file with a flags combination like:
+                //  - open for writing only
+                //  - allow only one process to open file for writing (our
+                //  process)
+                // Together, this guarantees that the file can only be opened
+                // when our process is alive and keeps a handle to it. As soon
+                // as our process ends or we close/delete it - other lock can be
+                // acquired. Note: FILE_FLAG_DELETE_ON_CLOSE doesn't work well
+                // here, as
+                //  everyone else would need to open the file in
+                //  FILE_SHARE_DELETE mode, and both Android Studio and cmd.exe
+                //  don't use it. Fix at least the Android Studio part before
+                //  trying to add this flag instead of the manual deletion code.
+                lockHandle = ::CreateFileW(
                         unicodeName.c_str(),
-                        GENERIC_READ, // open only for reading
-                        FILE_SHARE_READ | FILE_SHARE_WRITE, // allow others to r+w the file (we only read, but
-                                                            // the write flag needs to be there to fit with
-                                                            // the original process, or this call fails)
-                        nullptr,               // default security
-                        OPEN_EXISTING,         // existing file only
-                        FILE_ATTRIBUTE_NORMAL, // normal file
-                        nullptr);              // no template file
+                        GENERIC_WRITE,    // open only for writing
+                        FILE_SHARE_READ,  // allow others to read the file, but
+                                          // not to write to it or not to delete
+                                          // it
+                        nullptr,          // no special security attributes
+                        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
+                        nullptr);  // no template file
+                DWORD lastErr = GetLastError();
+                if (lockHandle == INVALID_HANDLE_VALUE &&
+                    (lastErr == ERROR_ACCESS_DENIED ||
+                     lastErr == ERROR_SHARING_VIOLATION)) {
+                    HANDLE getpidHandle = ::CreateFileW(
+                            unicodeName.c_str(),
+                            GENERIC_READ,  // open only for reading
+                            FILE_SHARE_READ |
+                                    FILE_SHARE_WRITE,  // allow others to r+w
+                                                       // the file (we only
+                                                       // read, but the write
+                                                       // flag needs to be there
+                                                       // to fit with the
+                                                       // original process, or
+                                                       // this call fails)
+                            nullptr,                   // default security
+                            OPEN_EXISTING,             // existing file only
+                            FILE_ATTRIBUTE_NORMAL,     // normal file
+                            nullptr);                  // no template file
 
-                // Read the pid of the locking process.
-                char buf[12] = {};
-                DWORD bytesRead;
-                if (!::ReadFile(getpidHandle, buf, 12, &bytesRead, nullptr)) {
-                    return false;
-                }
-
-                DWORD lockingPid;
-                if (sscanf(buf, "%lu", &lockingPid) == 1) {
-                    // Try waiting for the specified timeout for
-                    // the locking process to exit. If that doesn't work, bail.
-                    switch (System::get()->waitForProcessExit(lockingPid, liveProcessTimeout)) {
-                    // Need to stop if there is a timeout.
-                    case System::WaitExitResult::Timeout:
-                        *triesRemaining = 0;
-                    // Need to try again if we waited out the process.
-                    case System::WaitExitResult::Exited:
-                        *triesRemaining = 1;
-                    // Need to keep trying if there was an error.
-                    case System::WaitExitResult::Error:
-                    default:
-                        break;
+                    // Read the pid of the locking process.
+                    char buf[12] = {};
+                    DWORD bytesRead;
+                    if (!::ReadFile(getpidHandle, buf, 12, &bytesRead,
+                                    nullptr)) {
+                        return false;
                     }
-                } else {
-                    return false;
-                }
 
-                // Sometimes a previous file gets readonly attribute even when
-                // its parent process has exited; that prevents us from opening
-                // it for writing.
-                SetFileAttributesW(unicodeName.c_str(), FILE_ATTRIBUTE_NORMAL);
-            }
-            return lockHandle != INVALID_HANDLE_VALUE;
-        },
-        5,      // tries
-        200);   // sleep timeout between tries
+                    DWORD lockingPid;
+                    if (sscanf(buf, "%lu", &lockingPid) == 1) {
+                        // Try waiting for the specified timeout for
+                        // the locking process to exit. If that doesn't work,
+                        // bail.
+                        switch (System::get()->waitForProcessExit(
+                                lockingPid, liveProcessTimeout)) {
+                            // Need to stop if there is a timeout.
+                            case System::WaitExitResult::Timeout:
+                                *triesRemaining = 0;
+                            // Need to try again if we waited out the process.
+                            case System::WaitExitResult::Exited:
+                                *triesRemaining = 1;
+                            // Need to keep trying if there was an error.
+                            case System::WaitExitResult::Error:
+                            default:
+                                break;
+                        }
+                    } else {
+                        return false;
+                    }
+
+                    // Sometimes a previous file gets readonly attribute even
+                    // when its parent process has exited; that prevents us from
+                    // opening it for writing.
+                    SetFileAttributesW(unicodeName.c_str(),
+                                       FILE_ATTRIBUTE_NORMAL);
+                }
+                return lockHandle != INVALID_HANDLE_VALUE;
+            },
+            5,     // tries
+            200);  // sleep timeout between tries
 
     if (!createFileResult) {
         assert(lockHandle == INVALID_HANDLE_VALUE);
@@ -285,13 +293,13 @@ static int filelock_lock(FileLock* lock, int liveProcessTimeout /* TODO */) {
 #else
 /* returns 0 on success, -1 on failure */
 static int filelock_lock(FileLock* lock, int live_process_timeout) {
-    int    ret;
-    int    temp_fd = -1;
-    int    lock_fd = -1;
-    int    rc, tries;
-    FILE*  f = NULL;
-    char   pid[8];
-    struct stat  st_temp;
+    int ret;
+    int temp_fd = -1;
+    int lock_fd = -1;
+    int rc, tries;
+    FILE* f = nullptr;
+    char pid[8];
+    struct stat st_temp;
     int sleep_duration_ms = 0;
 
     temp_fd = mkstemp(lock->temp);
@@ -317,8 +325,7 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
     }
 
     /* now attempt to link the temp file to the lock file */
-    for (tries = 4; tries > 0; tries--)
-    {
+    for (tries = 4; tries > 0; tries--) {
         const int kSleepDurationMsMax = 2000;  // 2 seconds.
         const int kSleepDurationMsIncrement = 50;
 
@@ -343,7 +350,7 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
         }
 
         if (st_temp.st_rdev == st_lock.st_rdev &&
-            st_temp.st_ino  == st_lock.st_ino  ) {
+            st_temp.st_ino == st_lock.st_ino) {
             /* The link() operation suceeded */
             lock->locked = 1;
             rc = HANDLE_EINTR(unlink(lock->temp));
@@ -351,28 +358,26 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
         }
 
         if (S_ISDIR(st_lock.st_mode)) {
-            char *win_pid;
+            char* win_pid;
             int win_pid_len;
             // The .lock file is a directory. This can only happen
             // when the AVD was previously used by a Win32 emulator
             // instance running under Wine on the same machine.
-            fprintf(stderr,
-                    "Stale Win32 lock file detected: %s\n",
-                    lock->lock);
+            fprintf(stderr, "Stale Win32 lock file detected: %s\n", lock->lock);
 
             /* Try deleting the pid file dropped in windows.
              * Ignore error -- try blowing away the directory anyway.
              */
             win_pid_len = strlen(lock->lock) + 1 + sizeof(WIN_PIDFILE_NAME);
-            win_pid = (char *) malloc(win_pid_len);
+            win_pid = static_cast<char*>(malloc(win_pid_len));
             snprintf(win_pid, win_pid_len, "%s/" WIN_PIDFILE_NAME, lock->lock);
             HANDLE_EINTR(unlink(win_pid));
             free(win_pid);
 
             rc = HANDLE_EINTR(rmdir(lock->lock));
             if (rc != 0) {
-                D("Removing stale Win32 lockfile '%s' failed (%s)",
-                  lock->lock, strerror(errno));
+                D("Removing stale Win32 lockfile '%s' failed (%s)", lock->lock,
+                  strerror(errno));
             }
 
             goto Fail;
@@ -394,7 +399,7 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
         st.st_mtime = now - 120;
 
         int lockpid = 0;
-        int lockfd = HANDLE_EINTR(open(lock->lock,O_RDONLY));
+        int lockfd = HANDLE_EINTR(open(lock->lock, O_RDONLY));
         if (lockfd >= 0) {
             char buf[16];
             int len = HANDLE_EINTR(read(lockfd, buf, sizeof(buf) - 1U));
@@ -420,21 +425,22 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
                     // the locking process to exit. If that doesn't work, bail.
                     // If we waited until the process exited, the process
                     // is not fresh anymore.
-                    switch (System::get()->waitForProcessExit(lockpid, live_process_timeout)) {
-                    // Try agian just once if we waited out the process.
-                    case System::WaitExitResult::Exited:
-                        freshness = FRESHNESS_STALE;
-                        tries = 1;
-                        break;
-                    // Don't try again if timeout occurred.
-                    case System::WaitExitResult::Timeout:
-                        freshness = FRESHNESS_FRESH;
-                        tries = 0;
-                        break;
-                    // Keep trying no error.
-                    case System::WaitExitResult::Error:
-                    default:
-                        break;
+                    switch (System::get()->waitForProcessExit(
+                            lockpid, live_process_timeout)) {
+                        // Try agian just once if we waited out the process.
+                        case System::WaitExitResult::Exited:
+                            freshness = FRESHNESS_STALE;
+                            tries = 1;
+                            break;
+                        // Don't try again if timeout occurred.
+                        case System::WaitExitResult::Timeout:
+                            freshness = FRESHNESS_FRESH;
+                            tries = 0;
+                            break;
+                        // Keep trying no error.
+                        case System::WaitExitResult::Error:
+                        default:
+                            break;
                     }
                 }
             } else if (rc < 0 && errno == ESRCH) {
@@ -443,9 +449,8 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
         }
         if (freshness == FRESHNESS_UNKNOWN) {
             /* no pid, stale if the file is older than 1 minute */
-            freshness = (now >= st.st_mtime + 60) ?
-                    FRESHNESS_STALE :
-                    FRESHNESS_FRESH;
+            freshness = (now >= st.st_mtime + 60) ? FRESHNESS_STALE
+                                                  : FRESHNESS_FRESH;
         }
 
         if (freshness == FRESHNESS_STALE) {
@@ -475,9 +480,7 @@ Fail:
 }
 #endif
 
-void
-filelock_release( FileLock*  lock )
-{
+void filelock_release(FileLock* lock) {
     if (lock->locked) {
 #ifdef _WIN32
         ::CloseHandle(lock->lock_handle);
@@ -485,74 +488,69 @@ filelock_release( FileLock*  lock )
         delete_file(android::base::Win32UnicodeString(lock->temp));
         delete_dir(android::base::Win32UnicodeString(lock->lock));
 #else
-        unlink( (char*)lock->lock );
+        unlink(const_cast<char*>(lock->lock));
 #endif
-        free((char*)lock->file);
+        free(const_cast<char*>(lock->file));
         lock->file = lock->lock = lock->temp = nullptr;
         lock->locked = 0;
     }
 }
 
-static void
-filelock_atexit( void )
-{
-  android_lock_acquire(_all_filelocks_tl);
-  if (!_is_exiting) {
-    for (FileLock* lock = _all_filelocks; lock != NULL; ) {
-        filelock_release(lock);
-        FileLock* const prev = lock;
-        lock = lock->next;
-        free(prev);
+static void filelock_atexit() {
+    android_lock_acquire(_all_filelocks_tl);
+    if (!_is_exiting) {
+        for (FileLock* lock = _all_filelocks; lock != nullptr;) {
+            filelock_release(lock);
+            FileLock* const prev = lock;
+            lock = lock->next;
+            free(prev);
+        }
     }
-  }
-  _is_exiting = true;
-  android_lock_release(_all_filelocks_tl);
-  // We leak |_all_filelocks_tl| here. We can never guarantee that another
-  // thread isn't trying to use filelock concurrently, so we can not safely
-  // clean up the mutex. See b.android.com/209635
+    _is_exiting = true;
+    android_lock_release(_all_filelocks_tl);
+    // We leak |_all_filelocks_tl| here. We can never guarantee that another
+    // thread isn't trying to use filelock concurrently, so we can not safely
+    // clean up the mutex. See b.android.com/209635
 }
 
-FileLock*
-filelock_create( const char*  file) {
+FileLock* filelock_create(const char* file) {
     return filelock_create_timeout(file, 0);
 }
 
 /* create a file lock */
-FileLock*
-filelock_create_timeout( const char*  file, int timeout)
-{
-    int    file_len = strlen(file);
-    int    lock_len = file_len + sizeof(LOCK_NAME);
+FileLock* filelock_create_timeout(const char* file, int timeout) {
+    int file_len = strlen(file);
+    int lock_len = file_len + sizeof(LOCK_NAME);
 #ifdef _WIN32
-    int    temp_len = lock_len + 1 + sizeof(WIN_PIDFILE_NAME);
+    int temp_len = lock_len + 1 + sizeof(WIN_PIDFILE_NAME);
 #else
-    int    temp_len = file_len + sizeof(TEMP_NAME);
+    int temp_len = file_len + sizeof(TEMP_NAME);
 #endif
     const int paths_len = file_len + lock_len + temp_len + 3;
 
-    FileLock* const lock = (FileLock*)malloc(sizeof(*lock));
-    char* const paths = (char*)malloc(paths_len);
+    FileLock* const lock =
+            static_cast<FileLock*>(malloc(sizeof(*lock)));  // NOLINT
+    auto* const paths = static_cast<char*>(malloc(paths_len));
 
     lock->file = paths;
-    memcpy( (char*)lock->file, file, file_len+1 );
+    memcpy(const_cast<char*>(lock->file), file, file_len + 1);
 
     lock->lock = lock->file + file_len + 1;
-    memcpy( (char*)lock->lock, file, file_len+1 );
-    strcat( (char*)lock->lock, LOCK_NAME );
+    memcpy(const_cast<char*>(lock->lock), file, file_len + 1);
+    strcat(const_cast<char*>(lock->lock), LOCK_NAME);
 
-    lock->temp    = (char*)lock->lock + lock_len + 1;
+    lock->temp = const_cast<char*>(lock->lock) + lock_len + 1;
 #ifdef _WIN32
-    snprintf( (char*)lock->temp, temp_len, "%s\\" WIN_PIDFILE_NAME,
-              lock->lock );
+    snprintf((char*)lock->temp, temp_len, "%s\\" WIN_PIDFILE_NAME, lock->lock);
 #else
-    snprintf((char*)lock->temp, temp_len, "%s%s", lock->file, TEMP_NAME);
+    snprintf(lock->temp, temp_len, "%s%s", lock->file, TEMP_NAME);
 #endif
     lock->locked = 0;
 
     if (filelock_lock(lock, timeout) < 0) {
         free(paths);
         free(lock);
-        return NULL;
+        return nullptr;
     }
 
     android_lock_acquire(_all_filelocks_tl);
@@ -560,15 +558,16 @@ filelock_create_timeout( const char*  file, int timeout)
         android_lock_release(_all_filelocks_tl);
         filelock_release(lock);
         free(lock);
-        return NULL;
+        return nullptr;
     }
 
-    lock->next     = _all_filelocks;
+    lock->next = _all_filelocks;
     _all_filelocks = lock;
     android_lock_release(_all_filelocks_tl);
 
-    if (lock->next == NULL)
-        atexit( filelock_atexit );
+    if (lock->next == nullptr) {
+        atexit(filelock_atexit);
+    }
 
     return lock;
 }

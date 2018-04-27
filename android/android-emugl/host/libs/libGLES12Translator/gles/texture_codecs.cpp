@@ -95,13 +95,16 @@ template <uint32_t N> struct StaticLeadingZeroCount {
 //     . . .
 //     Broadcast(0xf0, 4) -> 0xff
 uint8_t Broadcast(uint8_t component, int bits) {
-  if (bits < 8)
-    component |= component >> (bits * 1);
-  if (bits < 4)
-    component |= component >> (bits * 2);
-  if (bits < 2)
-    component |= component >> (bits * 4);
-  return component;
+    if (bits < 8) {
+        component |= component >> (bits * 1);
+    }
+    if (bits < 4) {
+        component |= component >> (bits * 2);
+    }
+    if (bits < 2) {
+        component |= component >> (bits * 4);
+    }
+    return component;
 }
 
 // Bitwise shift helper function
@@ -129,8 +132,8 @@ template <uint32_t kMask, uint8_t kDefault> struct PackedComponent {
   static const int kPackShift = -kUnpackShift;
 
   static uint8_t Unpack(uint32_t pv) {
-    uint8_t masked = static_cast<uint8_t>(ShiftRight(pv & kMask, kUnpackShift));
-    return Broadcast(masked, kMaskWidth);
+      auto masked = static_cast<uint8_t>(ShiftRight(pv & kMask, kUnpackShift));
+      return Broadcast(masked, kMaskWidth);
   }
 
   static uint32_t Pack(uint8_t v) {
@@ -177,10 +180,10 @@ uint32_t SwapEndian(uint32_t v) {
 
 #ifdef __BYTE_ORDER
     # if __BYTE_ORDER == __LITTLE_ENDIAN
-    typedef Memory2ByteFormatLE Memory2ByteFormatNative;
+using Memory2ByteFormatNative = Memory2ByteFormatLE;
 
-    uint32_t SwapBE(uint32_t v) {
-        return SwapEndian(v);
+uint32_t SwapBE(uint32_t v) {
+    return SwapEndian(v);
     }
 
     # elif __BYTE_ORDER == __BIG_ENDIAN
@@ -199,20 +202,22 @@ uint32_t SwapEndian(uint32_t v) {
 template <typename StorageInt, uint32_t kRedMask, uint32_t kGreenMask,
          uint32_t kBlueMask, uint32_t kAlphaMask>
 struct PackedFormat {
-  typedef StorageInt StorageType;
-  typedef PackedComponent<kRedMask, 0> Red;
-  typedef PackedComponent<kGreenMask, 0> Green;
-  typedef PackedComponent<kBlueMask, 0> Blue;
-  typedef PackedComponent<kAlphaMask, 255> Alpha;
+    using StorageType = unsigned short;
+    typedef PackedComponent<kRedMask, 0> Red;
+    typedef PackedComponent<kGreenMask, 0> Green;
+    typedef PackedComponent<kBlueMask, 0> Blue;
+    typedef PackedComponent<kAlphaMask, 255> Alpha;
 };
 
 bool IsAligned(const void* ptr, int align) {
-  if (align == 1)
-    return true;
-  if (align == 3)
-    return false;
+    if (align == 1) {
+        return true;
+    }
+    if (align == 3) {
+        return false;
+    }
 
-  return ((reinterpret_cast<intptr_t>(ptr) & (align - 1)) == 0);
+    return ((reinterpret_cast<intptr_t>(ptr) & (align - 1)) == 0);
 };
 
 // Defines the intermediate format used when encoding and decoding all other
@@ -300,12 +305,15 @@ struct BytestreamCodec {
 
   static uint32_t ReadAligned(const uint8_t* p) {
     uint32_t v = 0;
-    if (kHasRed)
-      v |= IntermediateFormat::Red::Pack(*p++);
-    if (kHasGreen)
-      v |= IntermediateFormat::Green::Pack(*p++);
-    if (kHasBlue)
-      v |= IntermediateFormat::Blue::Pack(*p++);
+    if (kHasRed) {
+        v |= IntermediateFormat::Red::Pack(*p++);
+    }
+    if (kHasGreen) {
+        v |= IntermediateFormat::Green::Pack(*p++);
+    }
+    if (kHasBlue) {
+        v |= IntermediateFormat::Blue::Pack(*p++);
+    }
     if (kHasLuminance) {
       // Note: See es_full_spec_1.1.12.pdf section 3.6, "Conversion to
       // RGB".
@@ -314,27 +322,33 @@ struct BytestreamCodec {
       v |= IntermediateFormat::Blue::Pack(luminance);
       v |= IntermediateFormat::Green::Pack(luminance);
     }
-    if (kHasAlpha)
-      v |= IntermediateFormat::Alpha::Pack(*p++);
-    else
-      v |= IntermediateFormat::Alpha::Pack(255);
+    if (kHasAlpha) {
+        v |= IntermediateFormat::Alpha::Pack(*p++);
+    } else {
+        v |= IntermediateFormat::Alpha::Pack(255);
+    }
     return v;
   }
 
 
   static void WriteAligned(uint8_t* p, uint32_t v) {
-    if (kHasRed)
-      *p++ = IntermediateFormat::Red::Unpack(v);
-    if (kHasGreen)
-      *p++ = IntermediateFormat::Green::Unpack(v);
-    if (kHasBlue)
-      *p++ = IntermediateFormat::Blue::Unpack(v);
-    if (kHasLuminance)
-      // Note: es_full_spec_1.1.12.pdf section 3.7.1 table 3.8. gles uses red
-      // as luminance.
-      *p++ = IntermediateFormat::Red::Unpack(v);
-    if (kHasAlpha)
-      *p++ = IntermediateFormat::Alpha::Unpack(v);
+      if (kHasRed) {
+          *p++ = IntermediateFormat::Red::Unpack(v);
+      }
+      if (kHasGreen) {
+          *p++ = IntermediateFormat::Green::Unpack(v);
+      }
+      if (kHasBlue) {
+          *p++ = IntermediateFormat::Blue::Unpack(v);
+      }
+      if (kHasLuminance) {
+          // Note: es_full_spec_1.1.12.pdf section 3.7.1 table 3.8. gles uses
+          // red as luminance.
+          *p++ = IntermediateFormat::Red::Unpack(v);
+      }
+      if (kHasAlpha) {
+          *p++ = IntermediateFormat::Alpha::Unpack(v);
+      }
   }
 };
 
@@ -423,8 +437,7 @@ class ConverterBase {
       dst_bpp_(dst_bpp) {
   }
 
-  virtual ~ConverterBase() {
-  }
+  virtual ~ConverterBase() = default;
 
   virtual void* Convert(size_t width, size_t height, size_t alignment,
       const void* __restrict__ src, void* __restrict__ dst) const {
@@ -471,91 +484,105 @@ class OptimizedConverter : public ConverterBase {
   OptimizedConverter() : ConverterBase(SrcF::kSize, DstF::kSize) {}
 
  protected:
-  virtual void ConvertAligned(size_t width, size_t height,
-      size_t src_stride, const uint8_t* __restrict__ src,
-      size_t dst_stride, uint8_t* __restrict__ dst) const {
-    for (size_t y = 0; y < height; y++) {
-      const uint8_t* src_next = src + src_stride;
-      uint8_t* dst_next = dst + dst_stride;
-      for (size_t x = 0; x < width; x++) {
-        uint32_t v = SrcF::ReadAligned(src);
-        DstF::WriteAligned(dst, v);
-        src += SrcF::kSize;
-        dst += DstF::kSize;
-      }
-      src = src_next;
-      dst = dst_next;
-    }
+     void ConvertAligned(size_t width,
+                         size_t height,
+                         size_t src_stride,
+                         const uint8_t* __restrict__ src,
+                         size_t dst_stride,
+                         uint8_t* __restrict__ dst) const override {
+         for (size_t y = 0; y < height; y++) {
+             const uint8_t* src_next = src + src_stride;
+             uint8_t* dst_next = dst + dst_stride;
+             for (size_t x = 0; x < width; x++) {
+                 uint32_t v = SrcF::ReadAligned(src);
+                 DstF::WriteAligned(dst, v);
+                 src += SrcF::kSize;
+                 dst += DstF::kSize;
+             }
+             src = src_next;
+             dst = dst_next;
+         }
   }
 
-  virtual void ConvertUnaligned(size_t width, size_t height,
-      size_t src_stride, const uint8_t* __restrict__ src,
-      size_t dst_stride, uint8_t* __restrict__ dst) const {
-    for (size_t y = 0; y < height; y++) {
-      const uint8_t* src_next = src + src_stride;
-      uint8_t* dst_next = dst + dst_stride;
-      for (size_t x = 0; x < width; x++) {
-        uint32_t v = SrcF::ReadUnaligned(src);
-        DstF::WriteAligned(dst, v);
-        src += SrcF::kSize;
-        dst += DstF::kSize;
+  void ConvertUnaligned(size_t width,
+                        size_t height,
+                        size_t src_stride,
+                        const uint8_t* __restrict__ src,
+                        size_t dst_stride,
+                        uint8_t* __restrict__ dst) const override {
+      for (size_t y = 0; y < height; y++) {
+          const uint8_t* src_next = src + src_stride;
+          uint8_t* dst_next = dst + dst_stride;
+          for (size_t x = 0; x < width; x++) {
+              uint32_t v = SrcF::ReadUnaligned(src);
+              DstF::WriteAligned(dst, v);
+              src += SrcF::kSize;
+              dst += DstF::kSize;
+          }
+          src = src_next;
+          dst = dst_next;
       }
-      src = src_next;
-      dst = dst_next;
-    }
   }
 };
 
 class GeneralConverter : public ConverterBase {
  public:
-  typedef uint32_t (*ReadFunc)(const uint8_t *);
-  typedef void (*WriteFunc)(uint8_t*, uint32_t);
+     using ReadFunc = uint32_t (*)(const uint8_t*);
+     using WriteFunc = void (*)(uint8_t*, uint32_t);
 
-  GeneralConverter(
-      size_t src_bpp, ReadFunc read_aligned_cb, ReadFunc read_unaligned_cb,
-      size_t dst_bpp, WriteFunc write_aligned_cb)
-    : ConverterBase(src_bpp, dst_bpp),
-      read_aligned_cb_(read_aligned_cb),
-      read_unaligned_cb_(read_unaligned_cb),
-      write_aligned_cb_(write_aligned_cb) {
-    ALOG_ASSERT(read_aligned_cb_);
-    ALOG_ASSERT(read_unaligned_cb_);
-    ALOG_ASSERT(write_aligned_cb_);
+     GeneralConverter(size_t src_bpp,
+                      ReadFunc read_aligned_cb,
+                      ReadFunc read_unaligned_cb,
+                      size_t dst_bpp,
+                      WriteFunc write_aligned_cb)
+         : ConverterBase(src_bpp, dst_bpp),
+           read_aligned_cb_(read_aligned_cb),
+           read_unaligned_cb_(read_unaligned_cb),
+           write_aligned_cb_(write_aligned_cb) {
+         ALOG_ASSERT(read_aligned_cb_);
+         ALOG_ASSERT(read_unaligned_cb_);
+         ALOG_ASSERT(write_aligned_cb_);
   }
 
  protected:
-  virtual void ConvertAligned(size_t width, size_t height,
-      size_t src_stride, const uint8_t* __restrict__ src,
-      size_t dst_stride, uint8_t* __restrict__ dst) const {
-    for (size_t y = 0; y < height; y++) {
-      const uint8_t* src_next = src + src_stride;
-      uint8_t* dst_next = dst + dst_stride;
-      for (size_t x = 0; x < width; x++) {
-        uint32_t v = read_aligned_cb_(src);
-        write_aligned_cb_(dst, v);
-        src += src_bpp_;
-        dst += dst_bpp_;
-      }
-      src = src_next;
-      dst = dst_next;
-    }
+     void ConvertAligned(size_t width,
+                         size_t height,
+                         size_t src_stride,
+                         const uint8_t* __restrict__ src,
+                         size_t dst_stride,
+                         uint8_t* __restrict__ dst) const override {
+         for (size_t y = 0; y < height; y++) {
+             const uint8_t* src_next = src + src_stride;
+             uint8_t* dst_next = dst + dst_stride;
+             for (size_t x = 0; x < width; x++) {
+                 uint32_t v = read_aligned_cb_(src);
+                 write_aligned_cb_(dst, v);
+                 src += src_bpp_;
+                 dst += dst_bpp_;
+             }
+             src = src_next;
+             dst = dst_next;
+         }
   }
 
-  virtual void ConvertUnaligned(size_t width, size_t height,
-      size_t src_stride, const uint8_t* __restrict__ src,
-      size_t dst_stride, uint8_t* __restrict__ dst) const {
-    for (size_t y = 0; y < height; y++) {
-      const uint8_t* src_next = src + src_stride;
-      uint8_t* dst_next = dst + dst_stride;
-      for (size_t x = 0; x < width; x++) {
-        uint32_t v = read_unaligned_cb_(src);
-        write_aligned_cb_(dst, v);
-        src += src_bpp_;
-        dst += dst_bpp_;
+  void ConvertUnaligned(size_t width,
+                        size_t height,
+                        size_t src_stride,
+                        const uint8_t* __restrict__ src,
+                        size_t dst_stride,
+                        uint8_t* __restrict__ dst) const override {
+      for (size_t y = 0; y < height; y++) {
+          const uint8_t* src_next = src + src_stride;
+          uint8_t* dst_next = dst + dst_stride;
+          for (size_t x = 0; x < width; x++) {
+              uint32_t v = read_unaligned_cb_(src);
+              write_aligned_cb_(dst, v);
+              src += src_bpp_;
+              dst += dst_bpp_;
+          }
+          src = src_next;
+          dst = dst_next;
       }
-      src = src_next;
-      dst = dst_next;
-    }
   }
 
  private:
@@ -594,14 +621,16 @@ const Codec codecs[] = {
   CODEC_ENTRY(CodecAlpha),
 };
 
-TextureConverter::TextureConverter(GLenum src_format, GLenum src_type,
-                                   GLenum dst_format, GLenum dst_type)
-  : converter_(NULL),
-    src_format_(src_format),
-    src_type_(src_type),
-    dst_format_(dst_format),
-    dst_type_(dst_type) {
-  InitializeConverter();
+TextureConverter::TextureConverter(GLenum src_format,
+                                   GLenum src_type,
+                                   GLenum dst_format,
+                                   GLenum dst_type)
+    : converter_(nullptr),
+      src_format_(src_format),
+      src_type_(src_type),
+      dst_format_(dst_format),
+      dst_type_(dst_type) {
+    InitializeConverter();
 }
 
 TextureConverter::~TextureConverter() {
@@ -609,7 +638,7 @@ TextureConverter::~TextureConverter() {
 }
 
 bool TextureConverter::IsValid() const {
-  return converter_ != NULL;
+    return converter_ != nullptr;
 }
 
 void TextureConverter::InitializeConverter() {
@@ -629,15 +658,18 @@ void TextureConverter::InitializeConverter() {
   CONVERTER_ENTRY(CodecRgba5551, CodecRgb);
 #undef CONVERTER_ENTRY
 
-  const Codec* src = NULL;
-  const Codec* dst = NULL;
-  for (size_t i = 0; i < sizeof(codecs) / sizeof(codecs[0]); i++) {
-    if (!src && codecs[i].format == src_format_ && codecs[i].type == src_type_)
-      src = &codecs[i];
-    if (!dst && codecs[i].format == dst_format_ && codecs[i].type == dst_type_)
-      dst = &codecs[i];
-    if (src && dst)
-      break;
+  const Codec* src = nullptr;
+  const Codec* dst = nullptr;
+  for (const auto& codec : codecs) {
+      if (!src && codec.format == src_format_ && codec.type == src_type_) {
+          src = &codec;
+      }
+      if (!dst && codec.format == dst_format_ && codec.type == dst_type_) {
+          dst = &codec;
+      }
+      if (src && dst) {
+          break;
+      }
   }
   if (src && dst) {
     ALOGV("(%s, %s) to (%s, %s) conversion is not optimized.",

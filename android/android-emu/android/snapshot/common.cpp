@@ -15,7 +15,7 @@
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/opengles.h"
 
-#include <errno.h>
+#include <cerrno>
 
 namespace android {
 namespace snapshot {
@@ -93,5 +93,5 @@ bool isSnapshotAlive() {
                 android::featurecontrol::AllowSnapshotMigration);
 }
 
-} // namespace android
-} // namespace snapshot
+}  // namespace snapshot
+}  // namespace android

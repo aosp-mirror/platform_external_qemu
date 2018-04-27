@@ -21,7 +21,7 @@ class BatteryPage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit BatteryPage(QWidget *parent = 0);
+    explicit BatteryPage(QWidget* parent = nullptr);
 
     static void setBatteryAgent(const QAndroidBatteryAgent* agent);
 

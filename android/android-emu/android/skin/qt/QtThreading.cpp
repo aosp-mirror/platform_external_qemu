@@ -14,7 +14,7 @@
 #include <QApplication>
 #include <QThread>
 
-#include <assert.h>
+#include <cassert>
 
 namespace android {
 namespace qt {

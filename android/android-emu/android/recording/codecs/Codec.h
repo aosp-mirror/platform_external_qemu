@@ -47,7 +47,7 @@ struct CodecParams {
 template <class T>
 class Codec {
 public:
-    virtual ~Codec() {}
+    virtual ~Codec() = default;
 
     // Configures the encoder and opens the codec context. Returns true if
     // successful, false otherwise.

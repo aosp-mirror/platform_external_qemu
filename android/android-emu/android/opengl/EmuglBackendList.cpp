@@ -43,8 +43,8 @@ EmuglBackendList::EmuglBackendList(const char* execDir,
 }
 
 bool EmuglBackendList::contains(const char* name) const {
-    for (size_t n = 0; n < mNames.size(); ++n) {
-        if (mNames[n] == name) {
+    for (const auto& mName : mNames) {
+        if (mName == name) {
             return true;
         }
     }
@@ -55,7 +55,8 @@ std::string EmuglBackendList::getLibDirPath(const char* name) {
     // remove the "_indirect" suffix
     static constexpr android::base::StringView suffix("_indirect");
     std::string nameNoSuffix(name);
-    int nameNoSuffixLen = (int)nameNoSuffix.size() - (int)suffix.size();
+    int nameNoSuffixLen = static_cast<int>(nameNoSuffix.size()) -
+                          static_cast<int>(suffix.size());
     if (nameNoSuffixLen > 0 &&
         suffix == nameNoSuffix.c_str() + nameNoSuffixLen) {
         nameNoSuffix.erase(nameNoSuffixLen);
@@ -94,8 +95,7 @@ std::string EmuglBackendList::getGLES12TranslatorLibName() {
 bool EmuglBackendList::getBackendLibPath(const char* name,
                                          Library library,
                                          std::string* libPath) {
-
-    const char* libraryName = NULL;
+    const char* libraryName = nullptr;
     if (library == LIBRARY_EGL) {
         libraryName = "EGL";
     } else if (library == LIBRARY_GLESv1) {

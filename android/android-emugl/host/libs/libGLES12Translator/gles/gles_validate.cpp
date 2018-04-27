@@ -536,11 +536,13 @@ bool IsValidTexGenMode(GLenum mode) {
 
 bool IsValidTextureDimensions(GLsizei width, GLsizei height,
                               GLint max_texture_size) {
-  if (width < 0 || width > max_texture_size)
-    return false;
-  if (height < 0 || height > max_texture_size)
-    return false;
-  return IsPowerOf2(width) && IsPowerOf2(height);
+    if (width < 0 || width > max_texture_size) {
+        return false;
+    }
+    if (height < 0 || height > max_texture_size) {
+        return false;
+    }
+    return IsPowerOf2(width) && IsPowerOf2(height);
 }
 
 bool IsValidTextureEnum(GLenum unit, GLuint max_num_textures) {

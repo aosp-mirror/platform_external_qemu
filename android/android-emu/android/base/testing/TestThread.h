@@ -21,7 +21,7 @@
 #  include <pthread.h>
 #endif
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {
@@ -32,7 +32,7 @@ namespace base {
 class TestThread {
 public:
     // Main thread function type.
-    typedef void* (ThreadFunction)(void* param);
+    using ThreadFunction = void*(void*);
 
     // Constructor actually launches a new platform thread.
     TestThread(ThreadFunction* func, void* funcParam,
@@ -65,7 +65,7 @@ public:
         DWORD ret = 0;
         ::GetExitCodeThread(mThread, &ret);
 #else
-        void* ret = NULL;
+        void* ret = nullptr;
         pthread_join(mThread, &ret);
 #endif
         return (intptr_t)ret;

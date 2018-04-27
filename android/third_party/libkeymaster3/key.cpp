@@ -30,8 +30,9 @@ Key::Key(const AuthorizationSet& hw_enforced, const AuthorizationSet& sw_enforce
     authorizations_.push_back(hw_enforced);
     authorizations_.push_back(sw_enforced);
     *error = KM_ERROR_OK;
-    if (authorizations_.is_valid() != AuthorizationSet::OK)
+    if (authorizations_.is_valid() != AuthorizationSet::OK) {
         *error = KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 }
 
 }  // namespace keymaster

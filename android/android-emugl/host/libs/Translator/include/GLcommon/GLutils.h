@@ -46,7 +46,7 @@ bool isPowerOf2(int num);
 // implemented as unsigned integers. These convenience template functions
 // help casting between them safely without generating compiler warnings.
 inline void* SafePointerFromUInt(unsigned int handle) {
-    return (void*)(uintptr_t)(handle);
+    return (void*)static_cast<uintptr_t>(handle);
 }
 
 inline unsigned int SafeUIntFromPointerFileLine(const void* ptr,
@@ -55,7 +55,7 @@ inline unsigned int SafeUIntFromPointerFileLine(const void* ptr,
     // Ignore the assert below to avoid crashing when running older
     // system images, which might have buggy encoder libraries. Print
     // an error message though.
-    if ((uintptr_t)(ptr) != (unsigned int)(uintptr_t)(ptr)) {
+    if ((uintptr_t)(ptr) != static_cast<unsigned int>((uintptr_t)(ptr))) {
         fprintf(stderr, "(%s:%d) EmuGL:WARNING: bad generic pointer %p\n",
                 file, line, ptr);
     }
@@ -64,7 +64,7 @@ inline unsigned int SafeUIntFromPointerFileLine(const void* ptr,
     // in an unsigned integer!
     assert((uintptr_t)(ptr) == (unsigned int)(uintptr_t)(ptr));
 #endif
-    return (unsigned int)(uintptr_t)(ptr);
+    return static_cast<unsigned int>((uintptr_t)(ptr));
 }
 
 #define SafeUIntFromPointer(ptr) \

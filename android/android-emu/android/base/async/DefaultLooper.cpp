@@ -179,8 +179,9 @@ bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
     Duration timeOut = INT64_MAX;
     if (nextDeadline < kDurationInfinite) {
         timeOut = nextDeadline - nowMs();
-        if (timeOut < 0)
+        if (timeOut < 0) {
             timeOut = 0;
+        }
     }
 
     if (!mScheduledTasks.empty()) {
@@ -412,7 +413,7 @@ void DefaultLooper::Timer::save(Stream* stream) const {
 }
 
 void DefaultLooper::Timer::load(Stream* stream) {
-    const Duration deadline = static_cast<Duration>(stream->getBe64());
+    const auto deadline = static_cast<Duration>(stream->getBe64());
     startAbsolute(deadline);
 }
 

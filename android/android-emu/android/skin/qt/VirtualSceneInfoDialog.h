@@ -32,7 +32,7 @@ public:
     explicit VirtualSceneInfoDialog(EmulatorContainer* parent = nullptr);
 
     void show();
-    void hide(CompletionFunc onHidden);
+    void hide(const CompletionFunc& onHidden);
     using QWidget::hide;
 
     void resize(const QSize& parentSize);

@@ -22,12 +22,14 @@
 
 #include <GLcommon/GLEScontext.h>
 
+#include <utility>
+
 unsigned int EglContext::s_nextContextHndl = 0;
 
 extern EglGlobalInfo* g_eglInfo; // defined in EglImp.cpp
 
-bool EglContext::usingSurface(SurfacePtr surface) {
-  return surface.get() == m_read.get() || surface.get() == m_draw.get();
+bool EglContext::usingSurface(const SurfacePtr& surface) {
+    return surface.get() == m_read.get() || surface.get() == m_draw.get();
 }
 
 EglContext::EglContext(EglDisplay *dpy,
@@ -61,7 +63,7 @@ EglContext::EglContext(EglDisplay *dpy,
     glesCtx->setCoreProfile(usingCoreProfile);
 
     if (stream) {
-        EGLint configId = EGLint(stream->getBe32());
+        auto configId = EGLint(stream->getBe32());
         m_config = dpy->getConfig(configId);
         if (!m_config) {
             m_config = dpy->getDefaultConfig();
@@ -102,8 +104,8 @@ EglContext::~EglContext()
     ThreadInfo* thread = getThreadInfo();
     // get the current context
     ContextPtr currentCtx = thread->eglContext;
-    if (currentCtx && !m_dpy->getContext((EGLContext)SafePointerFromUInt(
-                        currentCtx->getHndl()))) {
+    if (currentCtx && !m_dpy->getContext(static_cast<EGLContext>(
+                              SafePointerFromUInt(currentCtx->getHndl())))) {
         currentCtx.reset();
     }
     SurfacePtr currentRead = currentCtx ? currentCtx->read() : nullptr;
@@ -156,8 +158,8 @@ EglContext::~EglContext()
 
 void EglContext::setSurfaces(SurfacePtr read,SurfacePtr draw)
 {
-    m_read = read;
-    m_draw = draw;
+    m_read = std::move(read);
+    m_draw = std::move(draw);
 }
 
 bool EglContext::getAttrib(EGLint attrib,EGLint* value) {
@@ -183,7 +185,7 @@ void EglContext::onSave(android::base::Stream* stream) {
     // The current implementation is pretty hacky. It stores the config id.
     // It almost only works when snapshot saving and loading happens on the
     // same system with the same GPU driver and hardware.
-    // TODO: make it more general
+    // TODO(yahan): make it more general
     stream->putBe32(getConfig()->id());
     // Save shared group ID
     stream->putBe64(m_shareGroup->getId());

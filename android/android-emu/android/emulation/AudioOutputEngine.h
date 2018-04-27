@@ -24,7 +24,7 @@ enum class AudioFormat { U8, S8, U16, S16, U32, S32 };
 
 // audio callback, should fill audio buffer up to the length specified by the
 // avail parameter
-typedef void (*audio_callback_fn)(void* opaque, int avail);
+using audio_callback_fn = void (*)(void*, int);
 
 // A generic engine for audio output
 

@@ -186,7 +186,7 @@ private:
     };
 
     // Main thread function.
-    virtual intptr_t main() override final {
+    intptr_t main() final {
         for (;;) {
             Request r;
             if (!mInput.receive(&r)) {
