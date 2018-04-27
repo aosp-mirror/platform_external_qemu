@@ -418,7 +418,8 @@ void RamSaver::calcHash(FileIndex::Block::Page& page,
 }
 
 void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
-    if (pi.blockIndex != kStopMarkerIndex) {
+    if (pi.blockIndex != kStopMarkerIndex &&
+        !mCanceled.load(std::memory_order_acquire)) {
         mWorkers->enqueue(std::move(pi));
     } else {
         if (mStopping.load(std::memory_order_acquire))
@@ -431,8 +432,6 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
         mIndex.startPosInFile = mCurrentStreamPos;
         writeIndex();
 
-        mIndex.clear();
-
         mEndTime = System::get()->getHighResTimeUs();
 
 #if SNAPSHOT_PROFILE > 1
@@ -442,8 +441,6 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
 }
 
 bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
-    if (mCanceled.load(std::memory_order_acquire))
-        return false;
 
     assert(pi.blockIndex != kStopMarkerIndex);
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
@@ -543,7 +540,8 @@ void RamSaver::writeIndex() {
                         deltaPos /= b.ramBlock.pageSize;
                     }
                     stream.putPackedSignedNum(deltaPos);
-                    assert(page.hashFilled);
+                    assert(page.hashFilled ||
+                           mCanceled.load(std::memory_order_acquire));
                     stream.write(page.hash.data(), page.hash.size());
                     prevFilePos = page.filePos;
                     prevPageSizeOnDisk = page.sizeOnDisk;
