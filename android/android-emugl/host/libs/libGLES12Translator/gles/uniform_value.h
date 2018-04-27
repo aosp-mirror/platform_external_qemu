@@ -74,8 +74,8 @@ class UniformValue {
   };
 
   // Copy and assignment are not supported.
-  UniformValue(const UniformValue& src);
-  UniformValue& operator=(const UniformValue& src);
+  UniformValue(const UniformValue& src) = delete;
+  UniformValue& operator=(const UniformValue& src) = delete;
 
   template<typename T> void InitData(const T* initial_value);
   void ResetData();

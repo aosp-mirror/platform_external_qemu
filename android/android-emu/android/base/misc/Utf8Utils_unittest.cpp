@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 namespace android {
 namespace base {
@@ -97,7 +97,7 @@ TEST(Utf8Utils, utf8Encode) {
         uint8_t buffer[32] = { 0, };
 
         // First, check length without an output buffer.
-        int len = utf8Encode(kData[n].codepoint, NULL, 0);
+        int len = utf8Encode(kData[n].codepoint, nullptr, 0);
         EXPECT_EQ(kData[n].expected_len, len) << "#" << n;
 
         // Second, check length with an output buffer.
@@ -110,7 +110,8 @@ TEST(Utf8Utils, utf8Encode) {
 
         // Third, check length with a buffer that is too short.
         if (kData[n].expected_len > 0) {
-            len = utf8Encode(kData[n].codepoint, buffer, (size_t)(len - 1));
+            len = utf8Encode(kData[n].codepoint, buffer,
+                             static_cast<size_t>(len - 1));
             EXPECT_EQ(-1, len) << "#" << n;
         }
     }

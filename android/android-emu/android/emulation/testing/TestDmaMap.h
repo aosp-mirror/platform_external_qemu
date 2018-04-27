@@ -25,7 +25,7 @@ class TestDmaMap : public DmaMap {
 public:
     TestDmaMap() : mOldDmaMap(DmaMap::set(this)), mInstalled(true) {}
 
-    ~TestDmaMap() { release(); }
+    ~TestDmaMap() override { release(); }
 
     void release() {
         if (mInstalled) {
@@ -39,8 +39,8 @@ public:
         return mDmaBuffers;
     }
 
-    virtual void* doMap(uint64_t addr, uint64_t buffer) { return nullptr; }
-    virtual void doUnmap(void* mapped, uint64_t buffer) { }
+    void* doMap(uint64_t addr, uint64_t buffer) override { return nullptr; }
+    void doUnmap(void* mapped, uint64_t buffer) override {}
 
     DmaMap* mOldDmaMap = nullptr;
     bool mInstalled = false;

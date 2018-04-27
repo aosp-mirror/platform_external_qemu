@@ -109,12 +109,8 @@ TEST(HWMatching, basicCpuMatch) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo::Info testinfo = {
-        "KVMKVMKVM",
-        0, 1, 64, 0xf,
-        "Linux",
-        nullptr
-    };
+    HostHwInfo::Info testinfo = {"KVMKVMKVM", false,   true,   64,
+                                 0xf,         "Linux", nullptr};
 
     EXPECT_FALSE(matchFeaturePattern(testinfo, &patterns.pattern(0)));
     EXPECT_FALSE(matchFeaturePattern(testinfo, &patterns.pattern(1)));
@@ -166,10 +162,7 @@ TEST(HWMatching, basicGpuMatch) {
     };
 
     HostHwInfo::Info testinfo = {
-        "KVMKVMKVM",
-        0, 1, 64, 0xf,
-        "Linux",
-        &infolist,
+            "KVMKVMKVM", false, true, 64, 0xf, "Linux", &infolist,
     };
 
     EXPECT_FALSE(matchFeaturePattern(testinfo, &patterns.pattern(0)));
@@ -202,12 +195,8 @@ TEST(HWMatching, basicFeatureActions) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo::Info testinfo = {
-        "KVMKVMKVM",
-        0, 1, 64, 0xf,
-        "Linux",
-        nullptr
-    };
+    HostHwInfo::Info testinfo = {"KVMKVMKVM", false,   true,   64,
+                                 0xf,         "Linux", nullptr};
 
     EXPECT_FALSE(matchFeaturePattern(testinfo, &patterns.pattern(0)));
     EXPECT_FALSE(matchFeaturePattern(testinfo, &patterns.pattern(1)));
@@ -237,12 +226,8 @@ TEST(HWMatching, basicDisjunction) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo::Info testinfo = {
-        "KVMKVMKVM",
-        0, 1, 64, 0xf,
-        "Linux",
-        nullptr
-    };
+    HostHwInfo::Info testinfo = {"KVMKVMKVM", false,   true,   64,
+                                 0xf,         "Linux", nullptr};
 
     EXPECT_TRUE(matchFeaturePattern(testinfo, &patterns.pattern(7)));
 }
@@ -254,12 +239,8 @@ TEST(HWMatching, trivialMatch) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo::Info testinfo = {
-        "KVMKVMKVM",
-        0, 1, 64, 0xf,
-        "Linux",
-        nullptr
-    };
+    HostHwInfo::Info testinfo = {"KVMKVMKVM", false,   true,   64,
+                                 0xf,         "Linux", nullptr};
 
     EXPECT_TRUE(matchFeaturePattern(testinfo, &patterns.pattern(8)));
 }
@@ -271,15 +252,11 @@ TEST(HWMatching, trivialMismatch) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo::Info testinfo = {
-        "KVMKVMKVM",
-        0, 1, 64, 0xf,
-        "Linux",
-        nullptr
-    };
+    HostHwInfo::Info testinfo = {"KVMKVMKVM", false,   true,   64,
+                                 0xf,         "Linux", nullptr};
 
     EXPECT_FALSE(matchFeaturePattern(testinfo, &patterns.pattern(9)));
 }
 
-} // featurecontrol
-} // android
+}  // namespace featurecontrol
+}  // namespace android

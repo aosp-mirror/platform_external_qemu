@@ -77,7 +77,7 @@ struct ShaderConfig {
   bool any_texture_gen_reflection_map : 1;
 
  private:
-  ShaderConfig& operator=(const ShaderConfig&);
+     ShaderConfig& operator=(const ShaderConfig&) = delete;
 };
 
 void GenerateVertexShader(const ShaderConfig& cfg, char* buffer, size_t len);

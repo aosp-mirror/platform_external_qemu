@@ -16,15 +16,15 @@
 #ifndef __EntryPoint__H__
 #define __EntryPoint__H__
 
+#include <cstdio>
 #include <string>
 #include <vector>
-#include <stdio.h>
 
 #include "Var.h"
 
 //---------------------------------------------------
 
-typedef std::vector<Var> VarsArray;
+using VarsArray = std::vector<Var>;
 
 class EntryPoint {
 public:

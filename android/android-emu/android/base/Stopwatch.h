@@ -13,7 +13,7 @@
 
 #include "android/base/system/System.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace android {
 namespace base {

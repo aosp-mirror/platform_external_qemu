@@ -19,7 +19,7 @@
 #include <QTextStream>
 #include <QtGlobal>
 
-#include <math.h>
+#include <cmath>
 
 namespace Ui {
 

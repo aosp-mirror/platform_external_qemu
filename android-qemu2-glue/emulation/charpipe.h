@@ -16,8 +16,8 @@
 ANDROID_BEGIN_HEADER
 
 /* Forward-declare it as qemu-common.h doesn't like to be included here */
-typedef struct Chardev Chardev;
-typedef struct CharBackend CharBackend;
+using Chardev = struct Chardev;
+using CharBackend = struct CharBackend;
 
 /* open two connected character drivers that can be used to communicate by internal
  * QEMU components. For Android, this is used to connect an emulated serial port

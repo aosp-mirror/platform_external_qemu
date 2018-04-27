@@ -18,7 +18,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 
-#include <limits.h>
+#include <climits>
 
 #ifdef __APPLE__
 #include <sys/socket.h>
@@ -27,8 +27,8 @@
 #ifndef _WIN32
 #include <net/if.h>
 #endif
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef _WIN32
 #include "android/base/memory/LazyInstance.h"
@@ -83,30 +83,35 @@ bool netStringToIpv4(const char* src, uint8_t* dst) {
     while ((ch = *src++) != '\0') {
         const char* pch;
 
-        if ((pch = strchr(digits, ch)) != NULL) {
+        if ((pch = strchr(digits, ch)) != nullptr) {
             u_int val = *tp * 10 + (pch - digits);
 
-            if (val > 255)
-                return (0);
+            if (val > 255) {
+                return (false);
+            }
             if (!saw_digit) {
-                if (++octets > 4)
-                    return (0);
+                if (++octets > 4) {
+                    return (false);
+                }
                 saw_digit = 1;
             }
             *tp = val;
         } else if (ch == '.' && saw_digit) {
-            if (octets == 4)
-                return (0);
+            if (octets == 4) {
+                return (false);
+            }
             *++tp = 0;
             saw_digit = 0;
-        } else
-            return (0);
+        } else {
+            return (false);
+        }
     }
-    if (octets < 4)
-        return (0);
+    if (octets < 4) {
+        return (false);
+    }
 
     memcpy(dst, tmp, INADDRSZ);
-    return (1);
+    return (true);
 }
 
 bool netStringToIpv6(const char* src, uint8_t* dst) {
@@ -119,26 +124,31 @@ bool netStringToIpv6(const char* src, uint8_t* dst) {
 
     memset((tp = tmp), '\0', IN6ADDRSZ);
     endp = tp + IN6ADDRSZ;
-    colonp = NULL;
+    colonp = nullptr;
     /* Leading :: requires some special handling. */
-    if (*src == ':')
-        if (*++src != ':')
-            return (0);
+    if (*src == ':') {
+        if (*++src != ':') {
+            return (false);
+        }
+    }
     curtok = src;
     saw_xdigit = count_xdigit = 0;
     val = 0;
     while ((ch = *src++) != '\0') {
         const char* pch;
 
-        if ((pch = strchr((xdigits = xdigits_l), ch)) == NULL)
+        if ((pch = strchr((xdigits = xdigits_l), ch)) == nullptr) {
             pch = strchr((xdigits = xdigits_u), ch);
-        if (pch != NULL) {
-            if (count_xdigit >= 4)
-                return (0);
+        }
+        if (pch != nullptr) {
+            if (count_xdigit >= 4) {
+                return (false);
+            }
             val <<= 4;
             val |= (pch - xdigits);
-            if (val > 0xffff)
-                return (0);
+            if (val > 0xffff) {
+                return (false);
+            }
             saw_xdigit = 1;
             count_xdigit++;
             continue;
@@ -146,17 +156,19 @@ bool netStringToIpv6(const char* src, uint8_t* dst) {
         if (ch == ':') {
             curtok = src;
             if (!saw_xdigit) {
-                if (colonp)
-                    return (0);
+                if (colonp) {
+                    return (false);
+                }
                 colonp = tp;
                 continue;
             } else if (*src == '\0') {
-                return (0);
+                return (false);
             }
-            if (tp + INT16SZ > endp)
-                return (0);
-            *tp++ = (u_char)(val >> 8) & 0xff;
-            *tp++ = (u_char)val & 0xff;
+            if (tp + INT16SZ > endp) {
+                return (false);
+            }
+            *tp++ = static_cast<u_char>(val >> 8) & 0xff;
+            *tp++ = static_cast<u_char>(val) & 0xff;
             saw_xdigit = 0;
             count_xdigit = 0;
             val = 0;
@@ -169,15 +181,16 @@ bool netStringToIpv6(const char* src, uint8_t* dst) {
             count_xdigit = 0;
             break; /* '\0' was seen by inet_pton4(). */
         }
-        return (0);
+        return (false);
     }
     if (saw_xdigit) {
-        if (tp + INT16SZ > endp)
-            return (0);
-        *tp++ = (u_char)(val >> 8) & 0xff;
-        *tp++ = (u_char)val & 0xff;
+        if (tp + INT16SZ > endp) {
+            return (false);
+        }
+        *tp++ = static_cast<u_char>(val >> 8) & 0xff;
+        *tp++ = static_cast<u_char>(val) & 0xff;
     }
-    if (colonp != NULL) {
+    if (colonp != nullptr) {
         /*
          * Since some memmove()'s erroneously fail to handle
          * overlapping regions, we'll do the shift by hand.
@@ -185,18 +198,20 @@ bool netStringToIpv6(const char* src, uint8_t* dst) {
         const int n = tp - colonp;
         int i;
 
-        if (tp == endp)
-            return (0);
+        if (tp == endp) {
+            return (false);
+        }
         for (i = 1; i <= n; i++) {
             endp[-i] = colonp[n - i];
             colonp[n - i] = 0;
         }
         tp = endp;
     }
-    if (tp != endp)
-        return (0);
+    if (tp != endp) {
+        return (false);
+    }
     memcpy(dst, tmp, IN6ADDRSZ);
-    return (1);
+    return (true);
 }
 
 using android::base::System;
@@ -279,7 +294,7 @@ private:
 
 class SystemNetworkInterfaceNameResolver : public NetworkInterfaceNameResolver {
 public:
-    virtual int queryInterfaceName(const char* src) override {
+    int queryInterfaceName(const char* src) override {
         int ret = if_nametoindex(src);
         return (ret == 0) ? -1 : ret;
     }
@@ -318,4 +333,4 @@ NetworkInterfaceNameResolver* netSetNetworkInterfaceNameResolverForTesting(
 }
 
 }  // namespace base
-}  // namepsace android
+}  // namespace android

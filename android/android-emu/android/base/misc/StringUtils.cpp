@@ -16,8 +16,8 @@
 
 #include <algorithm>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef _WIN32
 const void* memmem(const void* haystack, size_t haystackLen,
@@ -40,17 +40,17 @@ const void* memmem(const void* haystack, size_t haystackLen,
 namespace android {
 namespace base {
 
-char* strDup(StringView view) {
+char* strDup(const StringView& view) {
     // Same as strdup(str.c_str()) but avoids a strlen() call.
-    char* ret = static_cast<char*>(malloc(view.size() + 1u));
+    auto* ret = static_cast<char*>(malloc(view.size() + 1u));
     ::memcpy(ret, view.c_str(), view.size());
     ret[view.size()] = '\0';
     return ret;
 }
 
-bool strContains(StringView haystack, const char* needle) {
-    return ::memmem(haystack.c_str(), haystack.size(),
-                    needle, ::strlen(needle)) != nullptr;
+bool strContains(const StringView& haystack, const char* needle) {
+    return ::memmem(haystack.c_str(), haystack.size(), needle,
+                    ::strlen(needle)) != nullptr;
 }
 
 std::string trim(const std::string& in) {
@@ -66,15 +66,15 @@ std::string trim(const std::string& in) {
     return std::string(in.c_str() + start, end - start);
 }
 
-bool startsWith(StringView string, StringView prefix) {
+bool startsWith(const StringView& string, const StringView& prefix) {
     return string.size() >= prefix.size() &&
-            memcmp(string.data(), prefix.data(), prefix.size()) == 0;
+           memcmp(string.data(), prefix.data(), prefix.size()) == 0;
 }
 
-bool endsWith(StringView string, StringView suffix) {
+bool endsWith(const StringView& string, const StringView& suffix) {
     return string.size() >= suffix.size() &&
-            memcmp(string.data() + string.size() - suffix.size(),
-                   suffix.data(), suffix.size()) == 0;
+           memcmp(string.data() + string.size() - suffix.size(), suffix.data(),
+                  suffix.size()) == 0;
 }
 
 }  // namespace base

@@ -15,8 +15,8 @@
 #include "android/emulation/android_qemud.h"
 #include "android/utils/debug.h"
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
 
 #define  D(...)    VERBOSE_PRINT(qemud,__VA_ARGS__)
 
@@ -55,7 +55,7 @@
  * to the emulated tty implementation. The other end of the
  * charpipe must be passed to qemud_multiplexer_init().
  */
-static CSerialLine* android_qemud_serial_line = NULL;
+static CSerialLine* android_qemud_serial_line = nullptr;
 
 CSerialLine* android_qemud_get_serial_line(void) {
     if (!android_qemud_serial_line) {
@@ -105,7 +105,7 @@ struct qemud_char_client {
  */
 static void _qemud_char_client_recv(void* opaque, uint8_t* msg, int msglen,
                                     QemudClient* client) {
-    qemud_char_client* const data = static_cast<qemud_char_client*>(opaque);
+    auto* const data = static_cast<qemud_char_client*>(opaque);
     CSerialLine* sl = data->sl;
     android_serialline_write(sl, msg, msglen);
 }
@@ -115,7 +115,7 @@ static void _qemud_char_client_recv(void* opaque, uint8_t* msg, int msglen,
  * be able to recover from these though, so don't panic.
  */
 static void _qemud_char_client_close(void* opaque) {
-    qemud_char_client* const data = static_cast<qemud_char_client*>(opaque);
+    auto* const data = static_cast<qemud_char_client*>(opaque);
     QemudClient* client = data->client;
 
     /* At this point modem driver still uses char pipe to communicate with
@@ -145,7 +145,7 @@ static int _qemud_char_service_can_read(void* opaque) {
  * because we don't need a QemudCharClient object this way.
  */
 static void _qemud_char_service_read(void* opaque, const uint8_t* from, int len) {
-    QemudService* sv = static_cast<QemudService*>(opaque);
+    auto* sv = static_cast<QemudService*>(opaque);
     qemud_service_broadcast(sv, from, len);
 }
 
@@ -157,15 +157,13 @@ static QemudClient* _qemud_char_service_connect(void* opaque,
                                                 QemudService* sv,
                                                 int channel,
                                                 const char* client_param) {
-    CSerialLine* sl = static_cast<CSerialLine*>(opaque);
+    auto* sl = static_cast<CSerialLine*>(opaque);
 
-    qemud_char_client* const data = new qemud_char_client();
+    auto* const data = new qemud_char_client();
     data->sl = sl;
-    data->client = qemud_client_new(sv, channel, client_param,
-                                    data,
+    data->client = qemud_client_new(sv, channel, client_param, data,
                                     _qemud_char_client_recv,
-                                    _qemud_char_client_close,
-                                    NULL, NULL);
+                                    _qemud_char_client_close, nullptr, nullptr);
 
     /* now we can open the gates :-) */
     android_serialline_addhandlers(sl, sv,
@@ -176,7 +174,8 @@ static QemudClient* _qemud_char_service_connect(void* opaque,
 }
 
 static int android_qemud_channel_connect(const char* name, CSerialLine* sl) {
-    qemud_service_register(name, 1, sl, _qemud_char_service_connect, NULL, NULL);
+    qemud_service_register(name, 1, sl, _qemud_char_service_connect, nullptr,
+                           nullptr);
     return 0;
 }
 

@@ -55,4 +55,4 @@ bool translate(bool hostUsesCoreProfile,
                const char* src, GLenum shaderType,
                std::string* outInfolog, std::string* outObjCode,
                ShaderLinkInfo* outShaderLinkInfo);
-}
+}  // namespace ANGLEShaderParser

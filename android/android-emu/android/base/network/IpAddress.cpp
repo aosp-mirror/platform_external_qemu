@@ -142,8 +142,8 @@ size_t IpAddress::hash() const {
             break;
         case Kind::Ipv6:
             // TODO(digit): Find better hash function?
-            for (size_t n = 0; n < sizeof(mIpv6.mAddr); ++n) {
-                hash = (hash * 33) ^ mIpv6.mAddr[n];
+            for (unsigned char n : mIpv6.mAddr) {
+                hash = (hash * 33) ^ n;
             }
             hash = hash ^ mIpv6.mScopeId;
             break;

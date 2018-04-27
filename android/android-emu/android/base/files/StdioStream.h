@@ -14,7 +14,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/files/Stream.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace android {
 namespace base {
@@ -29,9 +29,9 @@ public:
     StdioStream(StdioStream&& other);
     StdioStream& operator=(StdioStream&& other);
 
-    virtual ~StdioStream();
-    virtual ssize_t read(void* buffer, size_t size) override;
-    virtual ssize_t write(const void* buffer, size_t size) override;
+    ~StdioStream() override;
+    ssize_t read(void* buffer, size_t size) override;
+    ssize_t write(const void* buffer, size_t size) override;
 
     FILE* get() const { return mFile; }
     void close();

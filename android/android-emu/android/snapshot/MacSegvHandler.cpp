@@ -24,18 +24,18 @@
 #include "android/snapshot/MacSegvHandler.h"
 #include "android/snapshot/mach_exception_defs.h"
 
-#include <assert.h>
-#include <inttypes.h>
 #include <pthread.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <cassert>
+#include <cinttypes>
+#include <csignal>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 
 #define DEBUG 0
 
@@ -59,9 +59,9 @@ static void default_bad_access_callback(void* faultvaddr) {
 
 // Use raise_state_identity request/reply, with a all_requests_union for
 // forwarding requests.
-typedef __Request__mach_exception_raise_state_identity_t exception_request_t;
-typedef __Reply__exception_raise_state_identity_t exception_reply_t;
-typedef AnyRequest forwarded_exception_t;
+using exception_request_t = __Request__mach_exception_raise_state_identity_t;
+using exception_reply_t = __Reply__exception_raise_state_identity_t;
+using forwarded_exception_t = AnyRequest;
 
 /* Build a reply message based on a request. */
 
@@ -252,8 +252,9 @@ public:
                 D("our mach msg is missing its address :(");
             }
 
-            void* faultvaddr = (void*)(uintptr_t)current_request.code[1];
-            void* faultpage = (void*)(((uintptr_t)current_request.code[1]) & ~0xFFF);
+            auto* faultvaddr = (void*)(uintptr_t)current_request.code[1];
+            auto* faultpage =
+                    (void*)(((uintptr_t)current_request.code[1]) & ~0xFFF);
             D("bad access at vaddr %p (page %p)", faultvaddr, faultpage);
             (void)faultvaddr;
 

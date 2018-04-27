@@ -27,9 +27,9 @@
 
 #include <unordered_set>
 
-typedef uint32_t HandleType;
-typedef std::unordered_set<HandleType> ThreadContextSet;
-typedef std::unordered_set<HandleType> WindowSurfaceSet;
+using HandleType = uint32_t;
+using ThreadContextSet = std::unordered_set<HandleType>;
+using WindowSurfaceSet = std::unordered_set<HandleType>;
 
 // A class used to model the state of each RenderThread related
 struct RenderThreadInfo {

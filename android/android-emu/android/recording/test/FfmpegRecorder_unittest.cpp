@@ -45,7 +45,7 @@ static constexpr uint32_t kFbHeight = 1920;
 // Keep the recordings short or the unit-tests will take too long
 static constexpr uint8_t kDurationSecs = 3;
 
-static void checkMediaFile(StringView file,
+static void checkMediaFile(const StringView& file,
                            uint8_t expDuration,
                            uint32_t expWidth,
                            uint32_t expHeight,
@@ -81,7 +81,7 @@ static std::string setupRecordingTest(VideoFormat videoFmt,
                                       AudioFormat audioFmt,
                                       uint32_t outputWidth,
                                       uint32_t outputHeight,
-                                      StringView outputFile) {
+                                      const StringView& outputFile) {
     auto recorder = FfmpegRecorder::create(kFbWidth, kFbHeight, outputFile,
                                            kContainerFormat);
     EXPECT_TRUE(recorder->isValid());
@@ -105,8 +105,7 @@ static std::string setupRecordingTest(VideoFormat videoFmt,
     VP9Codec videoCodec(
             std::move(videoParams), kFbWidth, kFbHeight,
             toAVPixelFormat(videoProducer->getFormat().videoFormat));
-    EXPECT_TRUE(recorder->addVideoTrack(std::move(videoProducer),
-                                       &videoCodec));
+    EXPECT_TRUE(recorder->addVideoTrack(std::move(videoProducer), &videoCodec));
 
     // Add the audio track
     auto audioProducer = android::recording::createDummyAudioProducer(
@@ -118,8 +117,7 @@ static std::string setupRecordingTest(VideoFormat videoFmt,
     VorbisCodec audioCodec(
             std::move(audioParams),
             toAVSampleFormat(audioProducer->getFormat().audioFormat));
-    EXPECT_TRUE(recorder->addAudioTrack(std::move(audioProducer),
-                                       &audioCodec));
+    EXPECT_TRUE(recorder->addAudioTrack(std::move(audioProducer), &audioCodec));
 
     // Start the recording
     EXPECT_TRUE(recorder->start());
@@ -480,7 +478,7 @@ class NoVideoFrameProducer : public android::recording::Producer {
 public:
     NoVideoFrameProducer() = default;
     intptr_t main() final { return 0; }
-    virtual void stop() override {}
+    void stop() override {}
 };  // NoVideoFrameProducer
 
 TEST(FfmpegRecorder, Stop) {

@@ -40,7 +40,7 @@ public:
     explicit RenderThread(RenderChannelImpl* channel,
                           android::base::Stream* loadStream = nullptr);
 
-    virtual ~RenderThread();
+    ~RenderThread() override;
 
     // Returns true iff the thread has finished.
     bool isFinished() const { return mFinished; }
@@ -50,7 +50,7 @@ public:
     void save(android::base::Stream* stream);
 
 private:
-    virtual intptr_t main();
+    intptr_t main() override;
     void setFinished();
 
     // Snapshot support.

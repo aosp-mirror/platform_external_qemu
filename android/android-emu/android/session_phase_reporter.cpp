@@ -23,7 +23,7 @@ void android_report_session_phase(
         AndroidSessionPhase phase) {
     sCurrentSessionPhase = phase;
     android::CommonReportedInfo::setSessionPhase(phase);
-    // TODO: Also report session phase to metrics. But should we?
+    // TODO(lfy): Also report session phase to metrics. But should we?
 }
 
 AndroidSessionPhase android_get_session_phase() {

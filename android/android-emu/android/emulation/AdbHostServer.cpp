@@ -18,8 +18,8 @@
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 
+#include <cstdlib>
 #include <string>
-#include <stdlib.h>
 
 namespace android {
 namespace emulation {
@@ -44,8 +44,8 @@ static bool sendMessage(int fd, const std::string& message) {
     //
     // 1. A 4-byte hexadecimal string giving the length of the payload
     // 2. Followed by the payload itself.
-    auto wireformat =
-            StringFormat("%04x%s", (uint32_t)message.size(), message.c_str());
+    auto wireformat = StringFormat(
+            "%04x%s", static_cast<uint32_t>(message.size()), message.c_str());
     LOG(VERBOSE) << "Send [" << wireformat << "] to adb daemon.";
     return android::base::socketSendAll(fd, wireformat.c_str(),
                                         wireformat.size());
@@ -139,7 +139,7 @@ int AdbHostServer::getClientPort() {
     const android::base::StringView kVarName = "ANDROID_ADB_SERVER_PORT";
     std::string env = android::base::System::get()->envGet(kVarName);
     if (!env.empty()) {
-        long port = strtol(env.c_str(), NULL, 0);
+        long port = strtol(env.c_str(), nullptr, 0);
         if (port <= 0 || port >= 65536) {
             LOG(ERROR) << "Env. var " << kVarName << " must be a number "
                        << "in 1..65535 range. Got " << port;

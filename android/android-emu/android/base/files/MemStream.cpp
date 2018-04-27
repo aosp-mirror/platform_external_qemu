@@ -33,12 +33,13 @@ ssize_t MemStream::read(void* buffer, size_t size) {
 }
 
 ssize_t MemStream::write(const void* buffer, size_t size) {
-    mData.insert(mData.end(), (const char*)buffer, (const char*)buffer + size);
+    mData.insert(mData.end(), static_cast<const char*>(buffer),
+                 static_cast<const char*>(buffer) + size);
     return size;
 }
 
 int MemStream::writtenSize() const {
-    return (int)mData.size();
+    return static_cast<int>(mData.size());
 }
 
 int MemStream::readPos() const {

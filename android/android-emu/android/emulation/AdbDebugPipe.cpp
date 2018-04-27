@@ -11,7 +11,7 @@
 
 #include "android/emulation/AdbDebugPipe.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace android {
 namespace emulation {

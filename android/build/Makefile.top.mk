@@ -111,16 +111,129 @@ CLANG_COMPILER_FLAGS= \
 # Add your tidy checks here.
 CLANG_TIDY_CHECKS=-*, \
                   modernize-*. \
+                  -modernize-make-unique, \
                   google*, \
-                  misc-macro-parentheses, \
                   performance*, \
                   google-readability*, \
+                  -google-readability-todo, \
+                  -google-explicit-constructor, \
                   google-runtime-references \
 
 # Let's not "FIX" every header we can get our hands on.
 # You can use the regex in a smart way to exclude headers that
 # you do not want to be analyzed.
-CLANG_TIDY_HEADER_INCLUDE=android.*(!Compiler.h)
+CLANG_TIDY_HEADER_INCLUDE=android.*
+
+# We have a lot of C headers that get included in both C/C++, We don't want
+# clang tidy to fix up these files..
+CLANG_TIDY_SKIP=.*android/android.h \
+                .*android/async-socket.h \
+                .*android/avd/hw-config.h \
+                .*android/avd/info.h \
+                .*android/avd/scanner.h \
+                .*android/camera/camera-common.h \
+                .*android/camera/camera-metrics.h \
+                .*android/camera/camera-virtualscene.h \
+                .*android/car.h \
+                .*android/cmdline-option.h \
+                .*android/console_auth.h \
+                .*android/crashreport/crash-handler.h \
+                .*android/curl-support.h \
+                .*android/emulation/android_pipe_common.h \
+                .*android/emulation/android_pipe_device.h \
+                .*android/emulation/android_qemud.h \
+                .*android/emulation/control/battery_agent.h \
+                .*android/emulation/control/callbacks.h \
+                .*android/emulation/control/clipboard_agent.h \
+                .*android/emulation/control/display_agent.h \
+                .*android/emulation/control/libui_agent.h \
+                .*android/emulation/control/location_agent.h \
+                .*android/emulation/control/net_agent.h \
+                .*android/emulation/control/user_event_agent.h \
+                .*android/emulation/control/virtual_scene_agent.h \
+                .*android/emulation/control/vm_operations.h \
+                .*android/emulation/control/window_agent.h \
+                .*android/emulation/nand_limits.h \
+                .*android/emulation/serial_line.h \
+                .*android/featurecontrol/feature_control.h \
+                .*android/filesystems/partition_config.h \
+                .*android/filesystems/partition_types.h \
+                .*android/framebuffer.h \
+                .*android/gpu_frame.h \
+                .*android/hw-kmsg.h \
+                .*android/hw-sensors.h \
+                .*android/jpeg-compress.h \
+                .*android/kernel/kernel_utils.h \
+                .*android/loadpng.h \
+                .*android/main-common.h \
+                .*android/multitouch-port.h \
+                .*android/network/constants.h \
+                .*android/opengles.h \
+                .*android/proxy/proxy_common.h \
+                .*android/proxy/proxy_int.h \
+                .*android/proxy/proxy_setup.h \
+                .*android/recording/screen-recorder.h \
+                .*android/sdk-controller-socket.h \
+                .*android/shaper.h \
+                .*android/skin/event.h \
+                .*android/skin/generic-event-buffer.h \
+                .*android/skin/generic-event.h \
+                .*android/skin/image.h \
+                .*android/skin/keyboard.h \
+                .*android/skin/keycode-buffer.h \
+                .*android/skin/keycode.h \
+                .*android/skin/qt/extended-pages/microphone-page.h \
+                .*android/skin/qt/extended-pages/rotary-input-dial.h \
+                .*android/skin/qt/extended-pages/settings-page.h \
+                .*android/skin/qt/gl-widget.h \
+                .*android/skin/qt/video-player/VideoPlayerWidget.h \
+                .*android/skin/rect.h \
+                .*android/skin/resource.h \
+                .*android/skin/surface.h \
+                .*android/skin/trackball.h \
+                .*android/skin/ui.h \
+                .*android/skin/window.h \
+                .*android/skin/winsys.h \
+                .*android/tcpdump.h \
+                .*android/telephony/gsm.h \
+                .*android/telephony/modem.h \
+                .*android/telephony/sim_card.h \
+                .*android/telephony/sms.h \
+                .*android/telephony/sysdeps.h \
+                .*android/user-config.h \
+                .*android/utils/aconfig-file.h \
+                .*android/utils/assert.h \
+                .*android/utils/bufprint.h \
+                .*android/utils/debug.h \
+                .*android/utils/dirscanner.h \
+                .*android/utils/dll.h \
+                .*android/utils/dns.h \
+                .*android/utils/file_data.h \
+                .*android/utils/file_io.h \
+                .*android/utils/filelock.h \
+                .*android/utils/ini.h \
+                .*android/utils/iolooper.h \
+                .*android/utils/ipaddr.h \
+                .*android/utils/lineinput.h \
+                .*android/utils/looper.h \
+                .*android/utils/misc.h \
+                .*android/utils/panic.h \
+                .*android/utils/path.h \
+                .*android/utils/property_file.h \
+                .*android/utils/setenv.h \
+                .*android/utils/sockets.h \
+                .*android/utils/stralloc.h \
+                .*android/utils/stream.h \
+                .*android/utils/string.h \
+                .*android/utils/system.h \
+                .*android/utils/tempfile.h \
+                .*android/utils/timezone.h \
+                .*android/utils/utf8_utils.h \
+                .*android/utils/x86_cpuid.h \
+                .*android/android-emugl/host/include/KHR/khrplatform.h \
+                .*android/android-emugl/host/include/OpenglRender/render_api_platform_types.h \
+                .*android/android-emugl/host/include/.* \
+                .*$(BUILD_OBJS_DIR).*
 
 BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS))
 BUILD_HOST_CFLAGS   += $(call if-host-clang,$(CLANG_COMPILER_FLAGS))

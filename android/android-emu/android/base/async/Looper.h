@@ -18,9 +18,9 @@
 #include <memory>
 #include <utility>
 
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <cinttypes>
+#include <cstddef>
+#include <cstdint>
 
 namespace android {
 namespace base {
@@ -37,8 +37,8 @@ namespace base {
 //
 class Looper {
 public:
-    typedef int64_t Duration;
-    typedef uint64_t DurationNs;
+    using Duration = int64_t;
+    using DurationNs = uint64_t;
 
     enum {
         kDurationInfinite = INT64_MAX,
@@ -98,7 +98,7 @@ public:
     class Timer {
     public:
         // Type of callback function called when the timer expires.
-        typedef void (*Callback)(void* opaque, Timer* timer);
+        using Callback = void (*)(void*, Timer*);
 
         virtual ~Timer();
 
@@ -152,7 +152,7 @@ public:
         // |opaque| is the opaque pointer passed at creation.
         // |fd| is the file descriptor.
         // |events| is an event bitmask.
-        typedef void (*Callback)(void* opaque, int fd, unsigned events);
+        using Callback = void (*)(void*, int, unsigned int);
 
         virtual ~FdWatch();
 

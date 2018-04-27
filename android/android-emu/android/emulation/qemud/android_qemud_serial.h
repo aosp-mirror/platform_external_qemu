@@ -52,7 +52,7 @@ typedef enum {
 /* out of convenience, the incoming message is zero-terminated
  * and can be modified by the receiver (e.g. for tokenization).
  */
-typedef void (* QemudSerialReceive)(void* opaque, int channel, uint8_t* msg, int msglen);
+using QemudSerialReceive = void (*)(void*, int, uint8_t*, int);
 
 typedef struct QemudSerial {
     CSerialLine* sl;  /* serial line endpoint */

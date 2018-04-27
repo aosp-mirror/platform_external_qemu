@@ -26,7 +26,7 @@ class PosterImageWell : public QWidget {
                        USER true);
 
 public:
-    explicit PosterImageWell(QWidget* parent = 0);
+    explicit PosterImageWell(QWidget* parent = nullptr);
 
     // Get the current image path of the widget.  Returns a null QString if no
     // image is set.
@@ -38,7 +38,7 @@ public:
     //
     // |path| - File path, or an empty string to clear the value. The filename
     //          is assumed to point to a valid file.
-    void setPath(QString path);
+    void setPath(const QString& path);
 
     // Get the current poster scale.
     float getScale() const;

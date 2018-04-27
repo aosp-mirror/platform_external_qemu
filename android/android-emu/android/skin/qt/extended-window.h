@@ -52,7 +52,7 @@ class ExtendedWindow : public QFrame
 public:
     ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW);
 
-    ~ExtendedWindow();
+    ~ExtendedWindow() override;
 
     static void setAgent(const UiEmuAgent* agentPtr);
 

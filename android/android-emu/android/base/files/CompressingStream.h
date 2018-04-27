@@ -23,7 +23,7 @@ class CompressingStream : public Stream {
 
 public:
     CompressingStream(Stream& output);
-    ~CompressingStream();
+    ~CompressingStream() override;
 
     ssize_t read(void* buffer, size_t size) override;
     ssize_t write(const void* buffer, size_t size) override;

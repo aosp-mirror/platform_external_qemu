@@ -16,7 +16,7 @@
 #include <memory>
 #include <string>
 
-#define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 using Guest = android::TestAndroidPipeDevice::Guest;
 
@@ -39,13 +39,11 @@ TEST(AndroidPipe, PingPongPipeWritesAndReadsOfTheSameSize) {
     static const size_t kSizes[] = {
         0, 100, 128, 256, 512, 1000, 2048, 8192, 655356,
     };
-    for (size_t n = 0; n < ARRAY_SIZE(kSizes); n++) {
-        size_t size = kSizes[n];
-
+    for (unsigned long size : kSizes) {
         // Allocate and fill buffer with simple pattern.
         std::string buffer(size, 'x');
         for (size_t i = 0u; i < size; ++i) {
-            buffer[i] = (char)(i + size);
+            buffer[i] = static_cast<char>(i + size);
         }
 
         // Send buffer to service.
@@ -80,7 +78,7 @@ TEST(AndroidPipe, PingPongPipeLargeWriteWithSmallReads) {
     const size_t size = 100000;
     std::string buffer(size, 'x');
     for (size_t i = 0; i < size; ++i) {
-        buffer[i] = (char)i;
+        buffer[i] = static_cast<char>(i);
     }
 
     EXPECT_EQ(static_cast<ssize_t>(size), guest->write(buffer.c_str(), size));
@@ -89,7 +87,8 @@ TEST(AndroidPipe, PingPongPipeLargeWriteWithSmallReads) {
         char tmp[1];
         EXPECT_EQ((unsigned)(PIPE_POLL_IN|PIPE_POLL_OUT), guest->poll());
         EXPECT_EQ(1, guest->read(tmp, 1));
-        EXPECT_EQ((char)i, tmp[0]) << "# " << i << " expected " << (char)i;
+        EXPECT_EQ((char)i, tmp[0])
+                << "# " << i << " expected " << static_cast<char>(i);
     }
     EXPECT_EQ((unsigned)PIPE_POLL_OUT, guest->poll());
 }
@@ -103,7 +102,7 @@ TEST(AndroidPipe, PingPongSmallWritesAndLargeRead) {
     const size_t size = 100000;
     std::string buffer(size, 'x');
     for (size_t i = 0; i < size; ++i) {
-        buffer[i] = (char)i;
+        buffer[i] = static_cast<char>(i);
     }
 
     for (size_t i = 0; i < size; i++) {

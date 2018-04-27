@@ -19,8 +19,8 @@
 #include "emugl/common/debug.h"
 #include "emugl/common/dma_device.h"
 
-#include <assert.h>
 #include <memory.h>
+#include <cassert>
 
 namespace emugl {
 
@@ -83,7 +83,7 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
     }
     *inout_len = count;
     D("read %d bytes", (int)count);
-    return (const unsigned char*)buf;
+    return static_cast<const unsigned char*>(buf);
 }
 
 void* ChannelStream::getDmaForReading(uint64_t guest_paddr) {

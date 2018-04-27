@@ -21,7 +21,7 @@ class CameraPage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit CameraPage(QWidget* parent = 0);
+    explicit CameraPage(QWidget* parent = nullptr);
 
     static void setVirtualSceneAgent(const QAndroidVirtualSceneAgent* agent);
 

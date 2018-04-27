@@ -29,11 +29,11 @@
 #include <windows.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <unordered_map>
 
-typedef GlLibrary::GlFunctionPointer GL_FUNC_PTR;
+using GL_FUNC_PTR = GlLibrary::GlFunctionPointer;
 
 static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
     return glLib->findSymbol(funcName);
@@ -119,7 +119,7 @@ emugl::Mutex GLDispatch::s_lock;
 LIST_GLES_FUNCTIONS(GL_DISPATCH_DEFINE_POINTER, GL_DISPATCH_DEFINE_POINTER)
 
 // Constructor.
-GLDispatch::GLDispatch() : m_isLoaded(false) {}
+GLDispatch::GLDispatch() = default;
 
 bool GLDispatch::isInitialized() const {
     return m_isLoaded;
@@ -131,8 +131,9 @@ GLESVersion GLDispatch::getGLESVersion() const {
 
 void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
-    if(m_isLoaded)
+    if (m_isLoaded) {
         return;
+    }
 
     /* Loading OpenGL functions which are needed for implementing BOTH GLES 1.1 & GLES 2.0*/
     LIST_GLES_COMMON_FUNCTIONS(LOAD_GL_FUNC)

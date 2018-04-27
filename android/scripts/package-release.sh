@@ -248,9 +248,6 @@ package_archive_files () {
     run tar ${SEPTARFLAGS} -c${TARFLAGS}f "$PKG_FILE" \
             -C "$PKG_DIR" \
             -T "$TMP_FILE_LIST" \
-            --owner=android \
-            --group=android \
-            --mtime="2015-01-01 00:00:00" \
         || RET=$?
     rm -f "$TMP_FILE_LIST"
     return $RET

@@ -15,7 +15,7 @@
 
 #include <functional>
 
-#include <inttypes.h>
+#include <cinttypes>
 
 // Convenience class ContiguousRangeMapper which makes it easier to collect
 // contiguous ranges and run some function over the coalesced range.

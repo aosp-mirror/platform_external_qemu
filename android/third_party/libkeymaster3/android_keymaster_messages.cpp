@@ -49,31 +49,36 @@ static bool deserialize_key_blob(keymaster_key_blob_t* key_blob, const uint8_t**
     key_blob->key_material = 0;
     UniquePtr<uint8_t[]> deserialized_key_material;
     if (!copy_size_and_data_from_buf(buf_ptr, end, &key_blob->key_material_size,
-                                     &deserialized_key_material))
+                                     &deserialized_key_material)) {
         return false;
+    }
     key_blob->key_material = deserialized_key_material.release();
     return true;
 }
 
 size_t KeymasterResponse::SerializedSize() const {
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return sizeof(int32_t);
-    else
+    } else {
         return sizeof(int32_t) + NonErrorSerializedSize();
+    }
 }
 
 uint8_t* KeymasterResponse::Serialize(uint8_t* buf, const uint8_t* end) const {
     buf = append_uint32_to_buf(buf, end, static_cast<uint32_t>(error));
-    if (error == KM_ERROR_OK)
+    if (error == KM_ERROR_OK) {
         buf = NonErrorSerialize(buf, end);
+    }
     return buf;
 }
 
 bool KeymasterResponse::Deserialize(const uint8_t** buf_ptr, const uint8_t* end) {
-    if (!copy_uint32_from_buf(buf_ptr, end, &error))
+    if (!copy_uint32_from_buf(buf_ptr, end, &error)) {
         return false;
-    if (error != KM_ERROR_OK)
+    }
+    if (error != KM_ERROR_OK) {
         return true;
+    }
     return NonErrorDeserialize(buf_ptr, end);
 }
 
@@ -154,45 +159,52 @@ bool BeginOperationRequest::Deserialize(const uint8_t** buf_ptr, const uint8_t* 
 }
 
 size_t BeginOperationResponse::NonErrorSerializedSize() const {
-    if (message_version == 0)
+    if (message_version == 0) {
         return sizeof(op_handle);
-    else
+    } else {
         return sizeof(op_handle) + output_params.SerializedSize();
+    }
 }
 
 uint8_t* BeginOperationResponse::NonErrorSerialize(uint8_t* buf, const uint8_t* end) const {
     buf = append_uint64_to_buf(buf, end, op_handle);
-    if (message_version > 0)
+    if (message_version > 0) {
         buf = output_params.Serialize(buf, end);
+    }
     return buf;
 }
 
 bool BeginOperationResponse::NonErrorDeserialize(const uint8_t** buf_ptr, const uint8_t* end) {
     bool retval = copy_uint64_from_buf(buf_ptr, end, &op_handle);
-    if (retval && message_version > 0)
+    if (retval && message_version > 0) {
         retval = output_params.Deserialize(buf_ptr, end);
+    }
     return retval;
 }
 
 size_t UpdateOperationRequest::SerializedSize() const {
-    if (message_version == 0)
+    if (message_version == 0) {
         return sizeof(op_handle) + input.SerializedSize();
-    else
-        return sizeof(op_handle) + input.SerializedSize() + additional_params.SerializedSize();
+    } else {
+        return sizeof(op_handle) + input.SerializedSize() +
+               additional_params.SerializedSize();
+    }
 }
 
 uint8_t* UpdateOperationRequest::Serialize(uint8_t* buf, const uint8_t* end) const {
     buf = append_uint64_to_buf(buf, end, op_handle);
     buf = input.Serialize(buf, end);
-    if (message_version > 0)
+    if (message_version > 0) {
         buf = additional_params.Serialize(buf, end);
+    }
     return buf;
 }
 
 bool UpdateOperationRequest::Deserialize(const uint8_t** buf_ptr, const uint8_t* end) {
     bool retval = copy_uint64_from_buf(buf_ptr, end, &op_handle) && input.Deserialize(buf_ptr, end);
-    if (retval && message_version > 0)
+    if (retval && message_version > 0) {
         retval = additional_params.Deserialize(buf_ptr, end);
+    }
     return retval;
 }
 
@@ -219,19 +231,23 @@ size_t UpdateOperationResponse::NonErrorSerializedSize() const {
 
 uint8_t* UpdateOperationResponse::NonErrorSerialize(uint8_t* buf, const uint8_t* end) const {
     buf = output.Serialize(buf, end);
-    if (message_version > 0)
+    if (message_version > 0) {
         buf = append_uint32_to_buf(buf, end, input_consumed);
-    if (message_version > 1)
+    }
+    if (message_version > 1) {
         buf = output_params.Serialize(buf, end);
+    }
     return buf;
 }
 
 bool UpdateOperationResponse::NonErrorDeserialize(const uint8_t** buf_ptr, const uint8_t* end) {
     bool retval = output.Deserialize(buf_ptr, end);
-    if (retval && message_version > 0)
+    if (retval && message_version > 0) {
         retval = copy_uint32_from_buf(buf_ptr, end, &input_consumed);
-    if (retval && message_version > 1)
+    }
+    if (retval && message_version > 1) {
         retval = output_params.Deserialize(buf_ptr, end);
+    }
     return retval;
 }
 
@@ -259,10 +275,12 @@ size_t FinishOperationRequest::SerializedSize() const {
 uint8_t* FinishOperationRequest::Serialize(uint8_t* buf, const uint8_t* end) const {
     buf = append_uint64_to_buf(buf, end, op_handle);
     buf = signature.Serialize(buf, end);
-    if (message_version > 0)
+    if (message_version > 0) {
         buf = additional_params.Serialize(buf, end);
-    if (message_version > 2)
+    }
+    if (message_version > 2) {
         buf = input.Serialize(buf, end);
+    }
     return buf;
 }
 
@@ -284,23 +302,26 @@ bool FinishOperationRequest::Deserialize(const uint8_t** buf_ptr, const uint8_t*
 }
 
 size_t FinishOperationResponse::NonErrorSerializedSize() const {
-    if (message_version < 2)
+    if (message_version < 2) {
         return output.SerializedSize();
-    else
+    } else {
         return output.SerializedSize() + output_params.SerializedSize();
+    }
 }
 
 uint8_t* FinishOperationResponse::NonErrorSerialize(uint8_t* buf, const uint8_t* end) const {
     buf = output.Serialize(buf, end);
-    if (message_version > 1)
+    if (message_version > 1) {
         buf = output_params.Serialize(buf, end);
+    }
     return buf;
 }
 
 bool FinishOperationResponse::NonErrorDeserialize(const uint8_t** buf_ptr, const uint8_t* end) {
     bool retval = output.Deserialize(buf_ptr, end);
-    if (retval && message_version > 1)
+    if (retval && message_version > 1) {
         retval = output_params.Deserialize(buf_ptr, end);
+    }
     return retval;
 }
 
@@ -339,8 +360,10 @@ bool ImportKeyRequest::Deserialize(const uint8_t** buf_ptr, const uint8_t* end) 
     UniquePtr<uint8_t[]> deserialized_key_material;
     if (!key_description.Deserialize(buf_ptr, end) ||
         !copy_uint32_from_buf(buf_ptr, end, &key_format) ||
-        !copy_size_and_data_from_buf(buf_ptr, end, &key_data_length, &deserialized_key_material))
+        !copy_size_and_data_from_buf(buf_ptr, end, &key_data_length,
+                                     &deserialized_key_material)) {
         return false;
+    }
     key_data = deserialized_key_material.release();
     return true;
 }
@@ -403,8 +426,10 @@ bool ExportKeyResponse::NonErrorDeserialize(const uint8_t** buf_ptr, const uint8
     delete[] key_data;
     key_data = NULL;
     UniquePtr<uint8_t[]> deserialized_key_material;
-    if (!copy_size_and_data_from_buf(buf_ptr, end, &key_data_length, &deserialized_key_material))
+    if (!copy_size_and_data_from_buf(buf_ptr, end, &key_data_length,
+                                     &deserialized_key_material)) {
         return false;
+    }
     key_data = deserialized_key_material.release();
     return true;
 }
@@ -441,8 +466,9 @@ uint8_t* GetVersionResponse::NonErrorSerialize(uint8_t* buf, const uint8_t* end)
 }
 
 bool GetVersionResponse::NonErrorDeserialize(const uint8_t** buf_ptr, const uint8_t* end) {
-    if (*buf_ptr + NonErrorSerializedSize() > end)
+    if (*buf_ptr + NonErrorSerializedSize() > end) {
         return false;
+    }
     const uint8_t* tmp = *buf_ptr;
     major_ver = *tmp++;
     minor_ver = *tmp++;
@@ -473,19 +499,22 @@ bool AttestKeyRequest::Deserialize(const uint8_t** buf_ptr, const uint8_t* end) 
 }
 
 AttestKeyResponse::~AttestKeyResponse() {
-    for (size_t i = 0; i < certificate_chain.entry_count; ++i)
+    for (size_t i = 0; i < certificate_chain.entry_count; ++i) {
         delete[] certificate_chain.entries[i].data;
+    }
     delete[] certificate_chain.entries;
 }
 
 const size_t kMaxChainEntryCount = 10;
 bool AttestKeyResponse::AllocateChain(size_t entry_count) {
-    if (entry_count > kMaxChainEntryCount)
+    if (entry_count > kMaxChainEntryCount) {
         return false;
+    }
 
     if (certificate_chain.entries) {
-        for (size_t i = 0; i < certificate_chain.entry_count; ++i)
+        for (size_t i = 0; i < certificate_chain.entry_count; ++i) {
             delete[] certificate_chain.entries[i].data;
+        }
         delete[] certificate_chain.entries;
     }
 
@@ -520,14 +549,17 @@ uint8_t* AttestKeyResponse::NonErrorSerialize(uint8_t* buf, const uint8_t* end) 
 
 bool AttestKeyResponse::NonErrorDeserialize(const uint8_t** buf_ptr, const uint8_t* end) {
     size_t entry_count;
-    if (!copy_uint32_from_buf(buf_ptr, end, &entry_count) || !AllocateChain(entry_count))
+    if (!copy_uint32_from_buf(buf_ptr, end, &entry_count) ||
+        !AllocateChain(entry_count)) {
         return false;
+    }
 
     for (size_t i = 0; i < certificate_chain.entry_count; ++i) {
         UniquePtr<uint8_t[]> data;
         size_t data_length;
-        if (!copy_size_and_data_from_buf(buf_ptr, end, &data_length, &data))
+        if (!copy_size_and_data_from_buf(buf_ptr, end, &data_length, &data)) {
             return false;
+        }
         certificate_chain.entries[i].data = data.release();
         certificate_chain.entries[i].data_length = data_length;
     }

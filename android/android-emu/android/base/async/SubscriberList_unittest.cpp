@@ -31,7 +31,7 @@ public:
     // This struct is purely instructional.
     struct SubscriberInfo {
         TestClient* client;
-        SubscriberInfo(TestClient* c) : client(c) {}
+        explicit SubscriberInfo(TestClient* c) : client(c) {}
     };
 
     using SubscriberList = android::base::SubscriberList<SubscriberInfo>;

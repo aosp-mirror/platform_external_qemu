@@ -13,8 +13,8 @@
 
 #include "android/base/Compiler.h"
 
-#include <errno.h>
 #include <unistd.h>
+#include <cerrno>
 
 namespace android {
 namespace base {
@@ -25,15 +25,13 @@ namespace base {
 class ScopedFd {
 public:
     // Default constructor will hold an invalid descriptor.
-    ScopedFd() : fd_(-1) {}
+    ScopedFd() = default;
 
     // Constructor takes ownership of |fd|.
     explicit ScopedFd(int fd) : fd_(fd) {}
 
     // Make it movable.
-    ScopedFd(ScopedFd&& other) : fd_(other.fd_) {
-        other.fd_ = -1;
-    }
+    ScopedFd(ScopedFd&& other) : fd_(other.fd_) { other.fd_ = -1; }
 
     ScopedFd& operator=(ScopedFd&& other) {
         swap(&other);
@@ -74,9 +72,9 @@ public:
     }
 
 private:
-    DISALLOW_COPY_AND_ASSIGN(ScopedFd);
+    DISALLOW_COPY_AND_ASSIGN(ScopedFd);  // NOLINT
 
-    int fd_;
+    int fd_{-1};
 };
 
 }  // namespace base

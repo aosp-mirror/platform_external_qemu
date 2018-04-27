@@ -22,16 +22,15 @@ static const QAndroidBatteryAgent* sBatteryAgent = nullptr;
 BatteryPage::BatteryPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::BatteryPage()) {
     mUi->setupUi(this);
-    populateListBox(
-            mUi->bat_chargerBox,
-            {
-                    {BATTERY_CHARGER_NONE, "None"},
-                    {BATTERY_CHARGER_AC, "AC charger"},
-                    // TODO: The UI only allows NONE and AC.
-                    // Need to also allow and implement USB and WIRELESS.
-                    // {BATTERY_CHARGER_USB, "USB charger"},
-                    // {BATTERY_CHARGER_WIRELESS, "Wireless charger"},
-            });
+    populateListBox(mUi->bat_chargerBox,
+                    {
+                            {BATTERY_CHARGER_NONE, "None"},
+                            {BATTERY_CHARGER_AC, "AC charger"},
+                            // TODO(zyy): The UI only allows NONE and AC.
+                            // Need to also allow and implement USB and
+                            // WIRELESS. {BATTERY_CHARGER_USB, "USB charger"},
+                            // {BATTERY_CHARGER_WIRELESS, "Wireless charger"},
+                    });
     populateListBox(mUi->bat_healthBox,
                     {
                             {BATTERY_HEALTH_GOOD, "Good"},
@@ -73,16 +72,18 @@ BatteryPage::BatteryPage(QWidget* parent)
         }
 
         chargeIdx = mUi->bat_chargerBox->findData(bCharger);
-        if (chargeIdx < 0)
+        if (chargeIdx < 0) {
             chargeIdx = 0;  // In case the saved value wasn't found
+        }
 
         if (sBatteryAgent && sBatteryAgent->health) {
             bHealth = sBatteryAgent->health();
         }
 
         healthIdx = mUi->bat_healthBox->findData(bHealth);
-        if (healthIdx < 0)
+        if (healthIdx < 0) {
             healthIdx = 0;  // In case the saved value wasn't found
+        }
 
         if (sBatteryAgent && sBatteryAgent->status) {
             bStatus = sBatteryAgent->status();
@@ -90,8 +91,9 @@ BatteryPage::BatteryPage(QWidget* parent)
     }
 
     statusIdx = mUi->bat_statusBox->findData(bStatus);
-    if (statusIdx < 0)
+    if (statusIdx < 0) {
         statusIdx = 0;  // In case the saved value wasn't found
+    }
 
     mUi->bat_levelSlider->setValue(chargeLevel);
     mUi->bat_chargerBox->setCurrentIndex(chargeIdx);

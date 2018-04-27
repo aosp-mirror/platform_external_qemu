@@ -13,8 +13,7 @@
 #include <memory>
 #include <vector>
 
-#include <inttypes.h>
-#include <stdbool.h>
+#include <cinttypes>
 
 // MacSegvHandler is a class that sets up Mac-specific signal handling
 // using Mach exceptions and handles them, including forwarding real crashes

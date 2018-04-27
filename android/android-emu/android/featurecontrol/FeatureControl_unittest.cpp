@@ -86,16 +86,16 @@ public:
 #undef FEATURE_CONTROL_ITEM
     }
 protected:
-    void writeDefaultIniHost(android::base::StringView data) {
+    void writeDefaultIniHost(const android::base::StringView& data) {
         writeIni(mDefaultIniHostFilePath, data);
     }
-    void writeDefaultIniGuest(android::base::StringView data) {
+    void writeDefaultIniGuest(const android::base::StringView& data) {
         writeIni(mDefaultIniGuestFilePath, data);
     }
-    void writeUserIniHost(android::base::StringView data) {
+    void writeUserIniHost(const android::base::StringView& data) {
         writeIni(mUserIniHostFilePath, data);
     }
-    void writeUserIniGuest(android::base::StringView data) {
+    void writeUserIniGuest(const android::base::StringView& data) {
         writeIni(mUserIniGuestFilePath, data);
     }
     void loadAllIni() {
@@ -116,8 +116,8 @@ protected:
     std::string mAllDefaultIniGuestOnly;
 
 private:
-    void writeIni(android::base::StringView filename,
-                  android::base::StringView data) {
+    void writeIni(const android::base::StringView& filename,
+                  const android::base::StringView& data) {
         std::ofstream outFile(filename,
                               std::ios_base::out | std::ios_base::trunc);
         ASSERT_TRUE(outFile.good());
@@ -272,14 +272,14 @@ TEST_F(FeatureControlTest, setNonOverriden) {
         EXPECT_FALSE(isOverridden(feature));
     }
 
-    Feature overriden = (Feature)0;
+    Feature overriden = static_cast<Feature>(0);
     setEnabledOverride(overriden, false);
     EXPECT_FALSE(isEnabled(overriden));
 
     setIfNotOverriden(overriden, true);
     EXPECT_FALSE(isEnabled(overriden));
 
-    Feature nonOverriden = (Feature)1;
+    Feature nonOverriden = static_cast<Feature>(1);
     EXPECT_TRUE(isEnabled(nonOverriden));
     EXPECT_FALSE(isOverridden(nonOverriden));
     setIfNotOverriden(nonOverriden, false);
@@ -319,17 +319,15 @@ TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOff) {
 TEST_F(FeatureControlTest, parseCommandLine) {
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
-    ParamList feature1 = {
-            (char*)FeatureControlImpl::toString(Feature::Wifi).c_str()};
-    ParamList feature2 = {
-            (char*)FeatureControlImpl::toString(Feature::EncryptUserData)
-                    .c_str()};
-    ParamList feature3 = {
-            (char*)FeatureControlImpl::toString(Feature::GLPipeChecksum)
-                    .c_str()};
+    ParamList feature1 = {const_cast<char*>(
+            FeatureControlImpl::toString(Feature::Wifi).c_str())};
+    ParamList feature2 = {const_cast<char*>(
+            FeatureControlImpl::toString(Feature::EncryptUserData).c_str())};
+    ParamList feature3 = {const_cast<char*>(
+            FeatureControlImpl::toString(Feature::GLPipeChecksum).c_str())};
     std::string feature4str =
-            "-" + (std::string)FeatureControlImpl::toString(Feature::HYPERV);
-    ParamList feature4 = {(char*)feature4str.c_str()};
+            "-" + std::string(FeatureControlImpl::toString(Feature::HYPERV));
+    ParamList feature4 = {const_cast<char*>(feature4str.c_str())};
     feature1.next = &feature2;
     feature2.next = &feature3;
     feature3.next = &feature4;

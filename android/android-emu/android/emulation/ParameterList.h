@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace android {
 

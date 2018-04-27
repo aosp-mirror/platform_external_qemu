@@ -38,7 +38,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <stdint.h>
+#include <cstdint>
 
 struct ColorBufferRef {
     ColorBufferPtr cb;
@@ -54,20 +54,22 @@ struct ColorBufferRef {
     android::base::System::Duration closedTs;
 };
 
-typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
-typedef std::unordered_set<HandleType> WindowSurfaceSet;
-typedef std::unordered_map<uint64_t, WindowSurfaceSet> ProcOwnedWindowSurfaces;
+using WindowSurfaceMap =
+        std::unordered_map<HandleType,
+                           std::pair<WindowSurfacePtr, HandleType> >;
+using WindowSurfaceSet = std::unordered_set<HandleType>;
+using ProcOwnedWindowSurfaces = std::unordered_map<uint64_t, WindowSurfaceSet>;
 
-typedef std::unordered_map<HandleType, RenderContextPtr> RenderContextMap;
-typedef std::unordered_set<HandleType> RenderContextSet;
-typedef std::unordered_map<uint64_t, RenderContextSet> ProcOwnedRenderContexts;
+using RenderContextMap = std::unordered_map<HandleType, RenderContextPtr>;
+using RenderContextSet = std::unordered_set<HandleType>;
+using ProcOwnedRenderContexts = std::unordered_map<uint64_t, RenderContextSet>;
 
-typedef std::unordered_map<HandleType, ColorBufferRef> ColorBufferMap;
-typedef std::unordered_multiset<HandleType> ColorBufferSet;
-typedef std::unordered_map<uint64_t, ColorBufferSet> ProcOwnedColorBuffers;
+using ColorBufferMap = std::unordered_map<HandleType, ColorBufferRef>;
+using ColorBufferSet = std::unordered_multiset<HandleType>;
+using ProcOwnedColorBuffers = std::unordered_map<uint64_t, ColorBufferSet>;
 
-typedef std::unordered_set<HandleType> EGLImageSet;
-typedef std::unordered_map<uint64_t, EGLImageSet> ProcOwnedEGLImages;
+using EGLImageSet = std::unordered_set<HandleType>;
+using ProcOwnedEGLImages = std::unordered_map<uint64_t, EGLImageSet>;
 
 // A structure used to list the capabilities of the underlying EGL
 // implementation that the FrameBuffer instance depends on.
@@ -176,8 +178,9 @@ public:
     // |p_share| is either EGL_NO_CONTEXT or the handle of a shared context.
     // |version| specifies the GLES version as a GLESApi enum.
     // Return a new handle value, which will be 0 in case of error.
-    HandleType createRenderContext(int p_config, HandleType p_share, 
-        GLESApi version = GLESApi_CM);
+    HandleType createRenderContext(int p_config,
+                                   HandleType p_share,
+                                   GLESApi version = GLESApi_CM);
 
     // Create a new WindowSurface instance from this display instance.
     // |p_config| is the index of one of the configs returned by getConfigs().
@@ -463,7 +466,7 @@ private:
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;
-    FBNativeWindowType m_nativeWindow = 0;
+    FBNativeWindowType m_nativeWindow = 0;  // NOLINT
     FrameBufferCaps m_caps = {};
     EGLDisplay m_eglDisplay = EGL_NO_DISPLAY;
     RenderContextMap m_contexts;

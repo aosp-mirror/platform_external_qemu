@@ -21,10 +21,16 @@
 #include "GLDecoderContextData.h"
 #include "emugl/common/shared_library.h"
 
-typedef void (gles1_APIENTRY *glColorPointerWithDataSize_server_proc_t) (GLint, GLenum, GLsizei, const GLvoid*, GLsizei);
-typedef void (gles1_APIENTRY *glNormalPointerWithDataSize_server_proc_t) (GLenum, GLsizei, const GLvoid*, GLsizei);
-typedef void (gles1_APIENTRY *glTexCoordPointerWithDataSize_server_proc_t) (GLint, GLenum, GLsizei, const GLvoid*, GLsizei);
-typedef void (gles1_APIENTRY *glVertexPointerWithDataSize_server_proc_t) (GLint, GLenum, GLsizei, const GLvoid*, GLsizei);
+using glColorPointerWithDataSize_server_proc_t =
+        void (*)(GLint, GLenum, GLsizei, const GLvoid*, GLsizei);
+using glNormalPointerWithDataSize_server_proc_t = void (*)(GLenum,
+                                                           GLsizei,
+                                                           const GLvoid*,
+                                                           GLsizei);
+using glTexCoordPointerWithDataSize_server_proc_t =
+        void (*)(GLint, GLenum, GLsizei, const GLvoid*, GLsizei);
+using glVertexPointerWithDataSize_server_proc_t =
+        void (*)(GLint, GLenum, GLsizei, const GLvoid*, GLsizei);
 
 struct gles1_decoder_extended_context : gles1_decoder_context_t {
     glColorPointerWithDataSize_server_proc_t glColorPointerWithDataSize;
@@ -37,10 +43,10 @@ struct gles1_decoder_extended_context : gles1_decoder_context_t {
 
 class GLESv1Decoder : public gles1_decoder_extended_context {
 public:
-    typedef void *(*get_proc_func_t)(const char *name, void *userData);
+    using get_proc_func_t = void* (*)(const char*, void*);
 
     GLESv1Decoder();
-    ~GLESv1Decoder();
+    ~GLESv1Decoder() override;
     int initGL(get_proc_func_t getProcFunc, void *getProcFuncData);
     void setContextData(GLDecoderContextData *contextData) { m_contextData = contextData; }
 

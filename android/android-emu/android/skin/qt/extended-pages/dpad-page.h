@@ -25,7 +25,7 @@ class DPadPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit DPadPage(QWidget *parent = 0);
+    explicit DPadPage(QWidget* parent = nullptr);
     void setEmulatorWindow(EmulatorQtWindow* eW);
 
 private:
@@ -37,5 +37,5 @@ private:
     bool eventFilter(QObject*, QEvent*) override;
 
     std::unique_ptr<Ui::DPadPage> mUi;
-    EmulatorQtWindow* mEmulatorWindow;
+    EmulatorQtWindow* mEmulatorWindow{nullptr};
 };

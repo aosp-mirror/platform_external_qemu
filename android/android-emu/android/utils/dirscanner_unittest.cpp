@@ -22,7 +22,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAYLEN(x) (sizeof(x) / sizeof((x)[0]))
 
 using android::base::TestTempDir;
 using android::base::PathUtils;
@@ -55,8 +55,8 @@ TEST(DirScanner, scanNormal) {
     const size_t kCount = ARRAYLEN(kInput);
 
     TestTempDir myDir("DirScannerTest");
-    for (size_t n = 0; n < kCount; ++n) {
-        make_subfile(myDir.path(), kInput[n]);
+    for (auto n : kInput) {
+        make_subfile(myDir.path(), n);
     }
 
     DirScanner* scanner = dirScanner_new(myDir.path());
@@ -69,7 +69,7 @@ TEST(DirScanner, scanNormal) {
         if (!entry) {
             break;
         }
-        entries.push_back(std::string(entry));
+        entries.emplace_back(entry);
     }
     dirScanner_free(scanner);
 
@@ -94,8 +94,8 @@ TEST(DirScanner, scanFull) {
     const size_t kCount = ARRAYLEN(kInput);
 
     TestTempDir myDir("DirScannerTest");
-    for (size_t n = 0; n < kCount; ++n) {
-        make_subfile(myDir.path(), kInput[n]);
+    for (auto n : kInput) {
+        make_subfile(myDir.path(), n);
     }
 
     DirScanner* scanner = dirScanner_new(myDir.path());
@@ -108,7 +108,7 @@ TEST(DirScanner, scanFull) {
         if (!entry) {
             break;
         }
-        entries.push_back(std::string(entry));
+        entries.emplace_back(entry);
     }
     dirScanner_free(scanner);
 

@@ -13,7 +13,7 @@
 
 #include "android/emulation/qemud/android_qemud_common.h"
 
-#include <errno.h>
+#include <cerrno>
 
 #define  HEADER_SIZE    6
 
@@ -140,15 +140,16 @@ void qemud_serial_send_legacy_probe( QemudSerial*  s )
  */
 
 static int _qemud_serial_can_read(void* opaque) {
-    QemudSerial* s = static_cast<QemudSerial*>(opaque);
+    auto* s = static_cast<QemudSerial*>(opaque);
 
     if (s->overflow > 0) {
         return s->overflow;
     }
 
     /* if in_size is 0, we're reading the header */
-    if (s->need_header)
+    if (s->need_header) {
         return qemud_sink_needed(s->header);
+    }
 
     /* otherwise, we're reading the payload */
     return qemud_sink_needed(s->payload);
@@ -159,7 +160,7 @@ static int _qemud_serial_can_read(void* opaque) {
  * by 'qemud_serial_can_read'.
  */
 static void _qemud_serial_read(void* opaque, const uint8_t* from, int len) {
-    QemudSerial* s = static_cast<QemudSerial*>(opaque);
+    auto* s = static_cast<QemudSerial*>(opaque);
 
     TRACE("%s: received %3d bytes: '%s'", __FUNCTION__, len, quote_bytes((const void*) from, len));
 
@@ -169,8 +170,9 @@ static void _qemud_serial_read(void* opaque, const uint8_t* from, int len) {
         /* skip overflow bytes */
         if (s->overflow > 0) {
             avail = s->overflow;
-            if (avail > len)
+            if (avail > len) {
                 avail = len;
+            }
 
             from += avail;
             len -= avail;
@@ -179,8 +181,9 @@ static void _qemud_serial_read(void* opaque, const uint8_t* from, int len) {
 
         /* read header if needed */
         if (s->need_header) {
-            if (!qemud_sink_fill(s->header, (const uint8_t**) &from, &len))
+            if (!qemud_sink_fill(s->header, &from, &len)) {
                 break;
+            }
 
 #if SUPPORT_LEGACY_QEMUD
             if (s->version == QEMUD_VERSION_UNKNOWN) {
@@ -231,8 +234,9 @@ static void _qemud_serial_read(void* opaque, const uint8_t* from, int len) {
         }
 
         /* read payload bytes */
-        if (!qemud_sink_fill(s->payload, &from, &len))
+        if (!qemud_sink_fill(s->payload, &from, &len)) {
             break;
+        }
 
         /* zero-terminate payload, then send it to receiver */
         s->payload->buff[s->payload->size] = 0;
@@ -280,8 +284,9 @@ void qemud_serial_send(QemudSerial* s,
     uint8_t frame[FRAME_HEADER_SIZE];
     int avail, len = msglen;
 
-    if (msglen <= 0 || channel < 0)
+    if (msglen <= 0 || channel < 0) {
         return;
+    }
 
     D("%s: channel=%2d len=%3d '%s'",
       __FUNCTION__, channel, msglen,
@@ -294,8 +299,9 @@ void qemud_serial_send(QemudSerial* s,
     /* packetize the payload for the serial MTU */
     while (len > 0) {
         avail = len;
-        if (avail > MAX_SERIAL_PAYLOAD)
+        if (avail > MAX_SERIAL_PAYLOAD) {
             avail = MAX_SERIAL_PAYLOAD;
+        }
 
         /* write this packet's header */
 #if SUPPORT_LEGACY_QEMUD

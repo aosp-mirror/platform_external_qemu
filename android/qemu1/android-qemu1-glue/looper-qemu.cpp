@@ -15,7 +15,7 @@
 #include "android/base/async/Looper.h"
 #include "android/utils/looper.h"
 
-typedef ::Looper CLooper;
+using CLooper = ::Looper;
 
 void qemu_looper_setForThread(void) {
     looper_setForThreadToOwn(

@@ -40,8 +40,8 @@ public:
         Move
     };
 
-     Accelerometer3DWidget(QWidget *parent = 0);
-    ~Accelerometer3DWidget();
+    Accelerometer3DWidget(QWidget* parent = nullptr);
+    ~Accelerometer3DWidget() override;
 
     void setSensorsAgent(const QAndroidSensorsAgent* agent);
 

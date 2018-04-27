@@ -50,7 +50,7 @@
 
 #include <cassert>
 #include <string>
-
+#include <utility>
 namespace {
 
 void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
@@ -93,8 +93,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mVirtualSceneControlWindow(this,
                                  &ToolWindow::onVirtualSceneWindowCreated),
       mToolsUi(new Ui::ToolControls),
-      mUIEventRecorder(event_recorder),
-      mUserActionsCounter(user_actions_counter),
+      mUIEventRecorder(std::move(event_recorder)),
+      mUserActionsCounter(std::move(user_actions_counter)),
       mSizeTweaker(this) {
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
@@ -217,8 +217,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     sToolWindow = this;
 }
 
-ToolWindow::~ToolWindow() {
-}
+ToolWindow::~ToolWindow() = default;
 
 void ToolWindow::raise() {
     QFrame::raise();
@@ -491,7 +490,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             break;
         case QtUICommand::TOGGLE_TRACKBALL:
             if (down) {
-                SkinEvent* skin_event = new SkinEvent();
+                auto* skin_event = new SkinEvent();
                 skin_event->type = kEventToggleTrackball;
                 mEmulatorWindow->queueSkinEvent(skin_event);
             }
@@ -508,7 +507,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
 void ToolWindow::forwardGenericEventToEmulator(int type,
                                                int code,
                                                int value) {
-    SkinEvent* skin_event = new SkinEvent();
+    auto* skin_event = new SkinEvent();
     skin_event->type = kEventGeneric;
     SkinEventGenericData& genericData = skin_event->u.generic_event;
     genericData.type = type;
@@ -518,7 +517,7 @@ void ToolWindow::forwardGenericEventToEmulator(int type,
 }
 
 void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
-    SkinEvent* skin_event = new SkinEvent();
+    auto* skin_event = new SkinEvent();
     skin_event->type = down ? kEventKeyDown : kEventKeyUp;
     skin_event->u.key.keycode = keycode;
     skin_event->u.key.mod = 0;
@@ -646,8 +645,8 @@ void ToolWindow::setClipboardCallbacks(const UiEmuAgent* agPtr) {
         agPtr->clipboard->setGuestClipboardCallback(
                 [](void* context, const uint8_t* data, size_t size) {
                     auto self = static_cast<ToolWindow*>(context);
-                    emit self->guestClipboardChanged(
-                            QString::fromUtf8((const char*)data, size));
+                    emit self->guestClipboardChanged(QString::fromUtf8(
+                            reinterpret_cast<const char*>(data), size));
                 },
                 this);
         connect(QApplication::clipboard(), SIGNAL(dataChanged()), this,
@@ -871,7 +870,7 @@ void ToolWindow::on_zoom_button_clicked() {
     handleUICommand(QtUICommand::ENTER_ZOOM, true);
 }
 
-void ToolWindow::onGuestClipboardChanged(QString text) {
+void ToolWindow::onGuestClipboardChanged(const QString& text) {
     QSignalBlocker blockSignals(QApplication::clipboard());
     QApplication::clipboard()->setText(text);
 }
@@ -879,7 +878,7 @@ void ToolWindow::onGuestClipboardChanged(QString text) {
 void ToolWindow::onHostClipboardChanged() {
     QByteArray bytes = QApplication::clipboard()->text().toUtf8();
     sUiEmuAgent->clipboard->setGuestClipboardContents(
-                (const uint8_t*)bytes.data(), bytes.size());
+            reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size());
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {

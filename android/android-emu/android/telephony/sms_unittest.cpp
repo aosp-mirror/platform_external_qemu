@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 #include "android/telephony/sms.h"
 
-#define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 namespace sms {
 
@@ -56,19 +56,18 @@ TEST(Sms, AddrFromStr) {
 
     SmsAddressRec smsAddrRec;
 
-    for (size_t idx = 0; idx < ARRAY_SIZE(kData); ++idx) {
-        const char* input = kData[idx].input;
+    for (const auto& idx : kData) {
+        const char* input = idx.input;
 
         memset(smsAddrRec.data, 0, sizeof(smsAddrRec.data));
 
         int rVal = sms_address_from_str(&smsAddrRec, input, strlen(input));
 
-        EXPECT_EQ(rVal, kData[idx].expectedRet);
+        EXPECT_EQ(rVal, idx.expectedRet);
         if (rVal == 0) {
-            EXPECT_EQ(smsAddrRec.len, kData[idx].expectedLen);
-            const char cmpResult = memcmp( smsAddrRec.data,
-                                           kData[idx].expectedData,
-                                           (kData[idx].expectedLen + 1) / 2 );
+            EXPECT_EQ(smsAddrRec.len, idx.expectedLen);
+            const char cmpResult = memcmp(smsAddrRec.data, idx.expectedData,
+                                          (idx.expectedLen + 1) / 2);
             EXPECT_FALSE(cmpResult);
         }
     }
@@ -105,36 +104,34 @@ TEST(Sms, Utf8FromStr) {
           const int            outputBuffSize;
           const int            expectedRet;
           const unsigned char  expectedUtf8[32];
-      } kData[] = {
-          { "A text message",                    32, 14, "A text message"},
-          { "A text message",                    11, 14, "A text mess"},
-          { "A two line\ntext message",          32, 23, "A two line\ntext message"},
-          { "A two line\\ntext message",         32, 23, "A two line\ntext message"},
-          { "My \\x41 \\u0042 Cs",               32,  9, "My A B Cs" },
-          { "5 \\xe2\\x82\\u00aC each \\u12345", 32, 18,
-            "5 \303\242\302\202\302\254 each \301\210\2645"},
-      };
+    } kData[] = {
+            {"A text message", 32, 14, "A text message"},
+            {"A text message", 11, 14, "A text mess"},
+            {"A two line\ntext message", 32, 23, "A two line\ntext message"},
+            {"A two line\\ntext message", 32, 23, "A two line\ntext message"},
+            {"My \\x41 \\u0042 Cs", 32, 9, "My A B Cs"},
+            {R"(5 \xe2\x82\u00aC each \u12345)", 32, 18,
+             "5 \303\242\302\202\302\254 each \301\210\2645"},
+    };
 
     unsigned char actualOutput[256];
 
-    for (size_t idx = 0; idx < ARRAY_SIZE(kData); ++idx) {
-
+    for (const auto& idx : kData) {
         memset(actualOutput, 0, sizeof(actualOutput));
 
-        const char *input = (char *)kData[idx].input;
+        const auto* input = reinterpret_cast<const char*>(idx.input);
 
-        int nCharsOut = sms_utf8_from_message_str( input,
-                                                   strlen(input),
-                                                   actualOutput,
-                                                   kData[idx].outputBuffSize );
+        int nCharsOut = sms_utf8_from_message_str(
+                input, strlen(input), actualOutput, idx.outputBuffSize);
 
-        EXPECT_EQ(nCharsOut, kData[idx].expectedRet);
+        EXPECT_EQ(nCharsOut, idx.expectedRet);
         if (nCharsOut > 0) {
-            char *expectedOutput = (char *)kData[idx].expectedUtf8;
+            const auto* expectedOutput =
+                    reinterpret_cast<const char*>(idx.expectedUtf8);
 
-            const char cmpResult = strncmp( (const char *)actualOutput,
-                                            expectedOutput,
-                                            nCharsOut );
+            const char cmpResult =
+                    strncmp(reinterpret_cast<const char*>(actualOutput),
+                            expectedOutput, nCharsOut);
             EXPECT_FALSE(cmpResult);
         }
     }

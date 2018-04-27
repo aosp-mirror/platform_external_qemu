@@ -17,8 +17,8 @@
 
 #include "emugl/common/shared_library.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 EGLDispatch s_egl;
 

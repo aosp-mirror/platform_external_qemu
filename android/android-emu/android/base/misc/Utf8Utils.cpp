@@ -35,7 +35,7 @@ bool utf8IsValid(const char* text, size_t textLen) {
         } else {
             return false;
         }
-        if ((size_t)(end - text) < n) {
+        if (static_cast<size_t>(end - text) < n) {
             return false;
         }
         for (text++; n > 0; text++, n--) {
@@ -72,7 +72,7 @@ int utf8Decode(const uint8_t* text, size_t textLen, uint32_t* codepoint) {
         // Invalid input.
         return -1;
     }
-    if ((size_t)n + 1U > textLen) {
+    if (static_cast<size_t>(n) + 1U > textLen) {
         // Input is too short.
         return -1;
     }
@@ -83,7 +83,7 @@ int utf8Decode(const uint8_t* text, size_t textLen, uint32_t* codepoint) {
     } else {
         value = text[0] & (0x7f >> n);
         for (int i = 0; i < n; i++) {
-            value = (value << 6U) | (uint32_t)(text[i + 1] & 0x3f);
+            value = (value << 6U) | static_cast<uint32_t>(text[i + 1] & 0x3f);
         }
     }
     *codepoint = value;
@@ -112,20 +112,20 @@ int utf8Encode(uint32_t codepoint, uint8_t* buffer, size_t bufferLen) {
     if (!buffer) {
         return len;
     }
-    if (bufferLen < (size_t)len) {
+    if (bufferLen < static_cast<size_t>(len)) {
         // buffer too small.
         return -1;
     }
 
     for (int n = len - 1; n > 0; --n) {
-        buffer[n] = (uint8_t)(codepoint & 0x3f) | 0x80;
+        buffer[n] = static_cast<uint8_t>(codepoint & 0x3f) | 0x80;
         codepoint >>= 6;
     }
 
     if (len == 1) {
-        buffer[0] = (uint8_t)codepoint;
+        buffer[0] = static_cast<uint8_t>(codepoint);
     } else {
-        buffer[0] = (uint8_t)(0xff00 >> len) | codepoint;
+        buffer[0] = static_cast<uint8_t>(0xff00 >> len) | codepoint;
     }
 
     return len;

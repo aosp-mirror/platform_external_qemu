@@ -52,10 +52,12 @@ HostHwInfo::HostHwInfo() {
         android::GetCpuInfo().first;
 
     StringView cpu_manufacturer_str = "Unknown";
-    if (cpuFlags | ANDROID_CPU_INFO_AMD)
+    if (cpuFlags | ANDROID_CPU_INFO_AMD) {
         cpu_manufacturer_str = "AMD";
-    if (cpuFlags | ANDROID_CPU_INFO_INTEL)
+    }
+    if (cpuFlags | ANDROID_CPU_INFO_INTEL) {
         cpu_manufacturer_str = "Intel";
+    }
 
     uint32_t model_family_stepping;
     android_get_x86_cpuid(1, 0, &model_family_stepping,
@@ -82,8 +84,7 @@ HostHwInfo::HostHwInfo() {
       info.cpu_model_name,
       info.os_platform.c_str());
 
-    for (size_t i = 0; i < info.gpuinfolist->infos.size(); i++) {
-        const GpuInfo& gpuinfo = info.gpuinfolist->infos[i];
+    for (const auto& gpuinfo : info.gpuinfolist->infos) {
         D("gpu %zu:\n"
           "    make %s\n"
           "    model %s\n"

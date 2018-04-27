@@ -27,8 +27,8 @@ class LocationPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit LocationPage(QWidget *parent = 0);
-    ~LocationPage();
+    explicit LocationPage(QWidget* parent = nullptr);
+    ~LocationPage() override;
 
     static void setLocationAgent(const QAndroidLocationAgent* agent);
 
@@ -61,7 +61,9 @@ private slots:
     // Calls finishGeoDataLoading.
     // Do not change QString to QString& - these arguments are passed
     // between threads.
-    void geoDataThreadFinished(QString file_name, bool ok, QString error);
+    void geoDataThreadFinished(const QString& file_name,
+                               bool ok,
+                               const QString& error);
 
     // Takes the loaded geodata and populates UI table chunk-by-chunk, allowing
     // UI to process other events while loading.
@@ -69,7 +71,9 @@ private slots:
 
     // Same as above, but only works for the initial invokation of the geo data
     // loader thread (the one that occurs when the widget is first constructed)
-    void startupGeoDataThreadFinished(QString file_name, bool ok, QString error);
+    void startupGeoDataThreadFinished(const QString& file_name,
+                                      bool ok,
+                                      const QString& error);
 
     void updateDisplayedLocation(double lat, double lon, double alt);
 

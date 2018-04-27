@@ -48,9 +48,8 @@ public:
     using AbandonedSessions = std::unordered_set<std::string>;
 
     virtual ~MetricsWriter();
-    virtual void write(
-            const android_studio::AndroidStudioEvent& asEvent,
-            wireless_android_play_playlog::LogEvent* logEvent) = 0;
+    virtual void write(const android_studio::AndroidStudioEvent& asEvent,
+                       wireless_android_play_playlog::LogEvent* logEvent) = 0;
 
     const std::string& sessionId() const { return mSessionId; }
 

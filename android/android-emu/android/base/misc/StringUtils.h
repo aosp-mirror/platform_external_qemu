@@ -20,7 +20,7 @@
 #include <iterator>
 #include <sstream>
 
-#include <stddef.h>
+#include <cstddef>
 
 #ifdef _WIN32
 // Returns a pointer to the first occurrence of |needle| in |haystack|, or a
@@ -36,10 +36,10 @@ namespace base {
 
 // Copy the content of |view| into a new heap-allocated zero-terminated
 // C string. Caller must free() the result.
-char* strDup(StringView str);
+char* strDup(const StringView& str);
 
 // Returns true iff |haystack| contains |needle|.
-bool strContains(StringView haystack, const char* needle);
+bool strContains(const StringView& haystack, const char* needle);
 
 // Joins all elements from the |range| into a single string, using |delim|
 // as a delimiter
@@ -71,8 +71,8 @@ std::string join(const Range& range) {
 // Returns a version of |in| with whitespace trimmed from the front/end
 std::string trim(const std::string& in);
 
-bool startsWith(StringView string, StringView prefix);
-bool endsWith(StringView string, StringView suffix);
+bool startsWith(const StringView& string, const StringView& prefix);
+bool endsWith(const StringView& string, const StringView& suffix);
 
 // Iterates over a string's parts using |splitBy| as a delimiter.
 // |splitBy| must be a nonempty string well, or it's a no-op.
@@ -81,7 +81,7 @@ bool endsWith(StringView string, StringView suffix);
 // |func| will be called on a StringView("") in between. See
 // StringUtils_unittest.cpp for the full story.
 template <class Func>
-void split(StringView str, StringView splitBy, Func func) {
+void split(StringView str, const StringView& splitBy, Func func) {
     if (splitBy.empty()) return;
 
     size_t splitSize = splitBy.size();

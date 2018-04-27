@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 namespace android {
 namespace base {

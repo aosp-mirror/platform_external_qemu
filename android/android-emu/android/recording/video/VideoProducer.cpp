@@ -71,7 +71,7 @@ public:
         }
     }
 
-    virtual ~VideoProducer() {}
+    ~VideoProducer() override = default;
 
     intptr_t main() final {
         assert(mCallback);
@@ -102,7 +102,7 @@ public:
         return 0;
     }
 
-    virtual void stop() override {
+    void stop() override {
         if (!mIsGuestMode) {
             gpu_frame_set_record_mode(false);
         }
@@ -130,7 +130,8 @@ private:
             frame->tsUs = android::base::System::get()->getHighResTimeUs();
             bool gotFrame = false;
             if (!mIsGuestMode) {
-                auto px = (unsigned char*)gpu_frame_get_record_frame();
+                auto px = static_cast<unsigned char*>(
+                        gpu_frame_get_record_frame());
                 if (px) {
                     frame->dataVec.assign(px, px + frame->dataVec.size());
                     gotFrame = true;

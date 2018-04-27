@@ -39,7 +39,7 @@ typedef enum {
 typedef struct QAndroidTelephonyAgent {
     TelephonyResponse (*telephonyCmd)(TelephonyOperation op, const char *phoneNumber);
     void (*initModem)(int basePort);
-    AModem (*getModem)(void);
+    AModem (*getModem)();
     void (*setNotifyCallback)(ModemCallback callbackFunc, void* userData);
 } QAndroidTelephonyAgent;
 

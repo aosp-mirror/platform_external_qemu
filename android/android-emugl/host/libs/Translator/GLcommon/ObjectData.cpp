@@ -37,7 +37,7 @@ NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType) {
 }
 
 ObjectData::ObjectData(android::base::Stream* stream) {
-    m_dataType = (ObjectDataType)stream->getBe32();
+    m_dataType = static_cast<ObjectDataType>(stream->getBe32());
     m_needRestore = true;
 }
 

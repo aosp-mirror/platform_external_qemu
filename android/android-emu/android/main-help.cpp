@@ -11,12 +11,12 @@
 
 #include "android/main-help.h"
 
-// TODO: Re-implement android/help.c in C++ to get rid of stralloc.h
+// TODO(digit): Re-implement android/help.c in C++ to get rid of stralloc.h
 #include "android/help.h"
 #include "android/utils/stralloc.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 int emulator_parseHelpOption(const char* opt) {
     if (!strcmp(opt, "-help")) {

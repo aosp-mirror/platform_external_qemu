@@ -58,7 +58,7 @@ static bool parseTypeTokens(const std::string& input,
         std::string str = input.substr(pos, end - pos);
         if (str.size() == 0) {
             // Sanity check: should not happen.
-            if (error != NULL) {
+            if (error != nullptr) {
                 *error = "Unexpected empty token !?";
             }
             return false;
@@ -68,7 +68,7 @@ static bool parseTypeTokens(const std::string& input,
         pos = end;
     }
 
-    if (error != NULL) {
+    if (error != nullptr) {
         // Sanity check: require non-empty input
         if (out->empty()) {
             *error = "Empty parameter declaration!";
@@ -76,8 +76,7 @@ static bool parseTypeTokens(const std::string& input,
         }
 
         // Sanity check: There must be base type name before any '*'
-        for (size_t n = 0; n < out->size(); ++n) {
-            std::string& token = (*out)[n];
+        for (auto& token : *out) {
             if (token == "*") {
                 *error = "Unexpected '*' before type name";
                 return false;
@@ -109,7 +108,7 @@ static std::string buildTypeString(const std::vector<std::string>& tokens,
 
 std::string normalizeTypeDeclaration(const std::string& input) {
     std::vector<std::string> tokens;
-    if (!parseTypeTokens(input, &tokens, NULL)) {
+    if (!parseTypeTokens(input, &tokens, nullptr)) {
         return "";
     }
     return buildTypeString(tokens, tokens.size());
@@ -129,8 +128,8 @@ bool parseTypeDeclaration(const std::string& input,
 
     // Sanity check, there must be a least one non-special tokens.
     size_t nonSpecialCount = 0;
-    for (size_t n = 0; n < tokens.size(); ++n) {
-        if (tokens[n] != "*" && tokens[n] != "const") {
+    for (const auto& token : tokens) {
+        if (token != "*" && token != "const") {
             nonSpecialCount++;
         }
     }
@@ -156,8 +155,8 @@ bool parseParameterDeclaration(const std::string& param,
 
     // Sanity check, there must be a least two non-special tokens.
     size_t nonSpecialCount = 0;
-    for (size_t n = 0; n < tokens.size(); ++n) {
-        if (tokens[n] != "*" && tokens[n] != "const") {
+    for (const auto& token : tokens) {
+        if (token != "*" && token != "const") {
             nonSpecialCount++;
         }
     }

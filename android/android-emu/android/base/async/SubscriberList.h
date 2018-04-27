@@ -12,11 +12,11 @@
 
 #include "android/base/Compiler.h"
 
+#include <cassert>
 #include <functional>
 #include <list>
 #include <memory>
-
-#include <assert.h>
+#include <utility>
 
 namespace android {
 namespace base {
@@ -46,11 +46,12 @@ class SubscriptionTokenImpl {
 public:
     using Callback = std::function<void()>;
 
-    explicit SubscriptionTokenImpl(const Callback& cb) : mCb(cb) {}
+    explicit SubscriptionTokenImpl(Callback cb) : mCb(std::move(cb)) {}
 
     ~SubscriptionTokenImpl() {
-        if (mCb)
+        if (mCb) {
             mCb();
+        }
     }
 
     // If this method is called, the stored callable object

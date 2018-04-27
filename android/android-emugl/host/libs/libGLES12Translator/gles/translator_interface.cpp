@@ -29,7 +29,7 @@
 #include "GLES12Translator/underlying_apis.h"
 #include "GLES12Translator/angle_gles2.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 // Interface to emulator's libOpenglRender.
 // translator_interface provides all the essential functions for properly
@@ -50,21 +50,21 @@ public:
     GlesContext* context;
 };
 
-typedef android::base::ThreadStore<GLES12ThreadInfo> EmulatedGLES1ThreadInfo;
+using EmulatedGLES1ThreadInfo = android::base::ThreadStore<GLES12ThreadInfo>;
 
 static ::emugl::LazyInstance<EmulatedGLES1ThreadInfo> sGLES12ThreadInfo = LAZY_INSTANCE_INIT;
 
 GLES12ThreadInfo::GLES12ThreadInfo() {
     sGLES12ThreadInfo->set(this);
-    context = NULL;
+    context = nullptr;
 }
 
 GLES12ThreadInfo::~GLES12ThreadInfo() {
-    sGLES12ThreadInfo->set(NULL);
+    sGLES12ThreadInfo->set(nullptr);
 }
 
 GLES12ThreadInfo* GLES12ThreadInfo::get() {
-    GLES12ThreadInfo* current = static_cast<GLES12ThreadInfo*>(sGLES12ThreadInfo->get());
+    auto* current = static_cast<GLES12ThreadInfo*>(sGLES12ThreadInfo->get());
     if (!current) { current = new GLES12ThreadInfo; }
     return current;
 }
@@ -74,7 +74,7 @@ GLES12ThreadInfo* GLES12ThreadInfo::get() {
 
 GlesContext* CreateGles1Context(GlesContext* share,
                                 const UnderlyingApis* underlying_apis) {
-    return new GlesContext(0, kGles11, share, NULL, underlying_apis);
+    return new GlesContext(0, kGles11, share, nullptr, underlying_apis);
 }
 
 GlesContext* GetCurrentGlesContext() {
@@ -95,7 +95,7 @@ TRANSLATOR_APIENTRY(void*, create_underlying_api) {
 #if GLES12TR_DLOG
     VERBOSE_ENABLE(gles1emu);
 #endif
-    UnderlyingApis* container = new UnderlyingApis;
+    auto* container = new UnderlyingApis;
     container->angle = new ANGLE_GLES2;
     return (void*)container;
 }
@@ -115,12 +115,12 @@ TRANSLATOR_APIENTRY(void, set_current_gles_context, void* cxt_in) {
 TRANSLATOR_APIENTRY(void, make_current_setup, GLuint width, GLuint height) {
     GlesContext* cxt = GetCurrentGlesContext();
     DLOG("width=%u height=%u cxt@%p", width, height, cxt);
-    cxt->OnAttachSurface(NULL, width, height);
+    cxt->OnAttachSurface(nullptr, width, height);
     cxt->OnMakeCurrent();
 }
 
 TRANSLATOR_APIENTRY(void, destroy_gles1_context, void* cxt) {
-    GlesContext* toDelete = (GlesContext*)cxt;
+    auto* toDelete = (GlesContext*)cxt;
     delete toDelete;
 }
 
@@ -135,7 +135,7 @@ void* MapTexSubImage2DCHROMIUMCall (const GlesContext* c,
                                     GLenum format, GLenum type, GLenum access)
 {
     fprintf(stderr, "%s called (unsupported!)", __FUNCTION__);
-    return NULL;
+    return nullptr;
 }
 
 void  UnmapTexSubImage2DCHROMIUMCall (const GlesContext* c, const void* mem)
@@ -148,13 +148,13 @@ void* MapBufferSubDataCHROMIUMCall (GLuint target, GLintptr offset,
                                     GLsizeiptr size, GLenum access)
 {
     fprintf(stderr, "%s called (unsupported!)", __FUNCTION__);
-    return NULL;
+    return nullptr;
 }
 
 EglImagePtr GetEglImageFromNativeBuffer(GLeglImageOES buffer)
 {
     fprintf(stderr, "%s called (unsupported!)", __FUNCTION__);
-    return NULL;
+    return nullptr;
     GLenum target = 0;
     GLuint texture = 0;
     return EglImage::Create(target, texture);

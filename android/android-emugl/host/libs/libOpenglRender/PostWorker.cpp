@@ -30,8 +30,10 @@ void PostWorker::post(ColorBuffer* cb) {
     // Multiply by 2 because the texture goes from -1 to 1, not 0 to 1.
     // Multiply the windowing coordinates by DPR because they ignore
     // DPR, but the viewport includes DPR.
-    float fx = 2.f * (m_viewportWidth  - windowWidth  * dpr) / (float)m_viewportWidth;
-    float fy = 2.f * (m_viewportHeight - windowHeight * dpr) / (float)m_viewportHeight;
+    float fx = 2.f * (m_viewportWidth - windowWidth * dpr) /
+               static_cast<float>(m_viewportWidth);
+    float fy = 2.f * (m_viewportHeight - windowHeight * dpr) /
+               static_cast<float>(m_viewportHeight);
 
     // finally, compute translation values
     float dx = px * fx;

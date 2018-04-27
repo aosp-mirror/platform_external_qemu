@@ -14,13 +14,13 @@
 * limitations under the License.
 */
 #include "ApiGen.h"
-#include "android/base/EnumFlags.h"
-#include "EntryPoint.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include "strUtils.h"
-#include <errno.h>
 #include <sys/types.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include "EntryPoint.h"
+#include "android/base/EnumFlags.h"
+#include "strUtils.h"
 
 /* Define this to 1 to enable support for the 'isLarge' variable flag
  * that instructs the encoder to send large data buffers by a direct
@@ -48,7 +48,7 @@
 
 EntryPoint * ApiGen::findEntryByName(const std::string & name)
 {
-    EntryPoint * entry = NULL;
+    EntryPoint* entry = nullptr;
 
     size_t n = this->size();
     for (size_t i = 0; i < n; i++) {
@@ -69,7 +69,7 @@ void ApiGen::printHeader(FILE *fp) const
 int ApiGen::genProcTypes(const std::string &filename, SideType side)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -130,7 +130,7 @@ int ApiGen::genProcTypes(const std::string &filename, SideType side)
 int ApiGen::genFuncTable(const std::string &filename, SideType side)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -161,7 +161,7 @@ int ApiGen::genFuncTable(const std::string &filename, SideType side)
 int ApiGen::genContext(const std::string & filename, SideType side)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -176,8 +176,8 @@ int ApiGen::genContext(const std::string & filename, SideType side)
     fprintf(fp, "\n#include \"%s_types.h\"\n", m_basename.c_str());
 
     StringVec & contextHeaders = side == CLIENT_SIDE ? m_clientContextHeaders : m_serverContextHeaders;
-    for (size_t i = 0; i < contextHeaders.size(); i++) {
-        fprintf(fp, "#include %s\n", contextHeaders[i].c_str());
+    for (auto& contextHeader : contextHeaders) {
+        fprintf(fp, "#include %s\n", contextHeader.c_str());
     }
     fprintf(fp, "\n");
 
@@ -230,7 +230,7 @@ int ApiGen::genEntryPoints(const std::string & filename, SideType side)
 
 
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return errno;
     }
@@ -270,9 +270,10 @@ int ApiGen::genEntryPoints(const std::string & filename, SideType side)
         bool shouldCallWithContext = (side == CLIENT_SIDE);
         //param check
         if (shouldCallWithContext) {
-            for (size_t j=0; j<e->vars().size(); j++) {
-                if (e->vars()[j].paramCheckExpression() != "")
-                    fprintf(fp, "\t%s\n", e->vars()[j].paramCheckExpression().c_str());
+            for (auto& j : e->vars()) {
+                if (j.paramCheckExpression() != "") {
+                    fprintf(fp, "\t%s\n", j.paramCheckExpression().c_str());
+                }
             }
         }
         fprintf(fp, "\t%sctx->%s(%s",
@@ -299,7 +300,7 @@ int ApiGen::genEntryPoints(const std::string & filename, SideType side)
 int ApiGen::genOpcodes(const std::string &filename)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return errno;
     }
@@ -308,9 +309,11 @@ int ApiGen::genOpcodes(const std::string &filename)
     fprintf(fp, "#ifndef __GUARD_%s_opcodes_h_\n", m_basename.c_str());
     fprintf(fp, "#define __GUARD_%s_opcodes_h_\n\n", m_basename.c_str());
     for (size_t i = 0; i < size(); i++) {
-        fprintf(fp, "#define OP_%s \t\t\t\t\t%u\n", at(i).name().c_str(), (unsigned int)i + m_baseOpcode);
+        fprintf(fp, "#define OP_%s \t\t\t\t\t%u\n", at(i).name().c_str(),
+                static_cast<unsigned int>(i) + m_baseOpcode);
     }
-    fprintf(fp, "#define OP_last \t\t\t\t\t%u\n", (unsigned int)size() + m_baseOpcode);
+    fprintf(fp, "#define OP_last \t\t\t\t\t%u\n",
+            static_cast<unsigned int>(size()) + m_baseOpcode);
     fprintf(fp,"\n\n#endif\n");
     fclose(fp);
     return 0;
@@ -319,7 +322,7 @@ int ApiGen::genOpcodes(const std::string &filename)
 int ApiGen::genAttributesTemplate(const std::string &filename )
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -338,7 +341,7 @@ int ApiGen::genAttributesTemplate(const std::string &filename )
 int ApiGen::genEncoderHeader(const std::string &filename)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -353,8 +356,8 @@ int ApiGen::genEncoderHeader(const std::string &filename)
     fprintf(fp, "#include \"ChecksumCalculator.h\"\n");
     fprintf(fp, "#include \"%s_%s_context.h\"\n\n\n", m_basename.c_str(), sideString(CLIENT_SIDE));
 
-    for (size_t i = 0; i < m_encoderHeaders.size(); i++) {
-        fprintf(fp, "#include %s\n", m_encoderHeaders[i].c_str());
+    for (auto& m_encoderHeader : m_encoderHeaders) {
+        fprintf(fp, "#include %s\n", m_encoderHeader.c_str());
     }
     fprintf(fp, "\n");
 
@@ -392,7 +395,8 @@ static int getVarEncodingSizeExpression(
         EncodingSizeFlags flags)
 {
     if (!var.isPointer()) {
-        snprintf(buff, bufflen, "%u", (unsigned int) var.type()->bytes());
+        snprintf(buff, bufflen, "%u",
+                 static_cast<unsigned int>(var.type()->bytes()));
         return 0;
     }
 
@@ -406,7 +410,7 @@ static int getVarEncodingSizeExpression(
     } else {
         const char* lenExpr = var.lenExpression().c_str();
         const char* varname = var.name().c_str();
-        if (e != NULL && lenExpr[0] == '\0') {
+        if (e != nullptr && lenExpr[0] == '\0') {
             fprintf(stderr, "%s: data len is undefined for '%s'\n",
                     e->name().c_str(), varname);
         }
@@ -423,7 +427,7 @@ static int writeVarEncodingSize(Var& var, bool excludeOutVars, FILE* fp)
 {
     int ret = 0;
     if (!var.isPointer()) {
-        fprintf(fp, "%u", (unsigned int) var.type()->bytes());
+        fprintf(fp, "%u", static_cast<unsigned int>(var.type()->bytes()));
     } else {
         ret = 1;
         if (var.isDMA()) {
@@ -472,10 +476,9 @@ static void writeVarEncodingExpression(Var& var, FILE* fp)
     } else {
         // encode a non pointer variable
         if (!var.isVoid()) {
-            fprintf(fp, "\t\tmemcpy(ptr, &%s, %u); ptr += %u;\n",
-                    varname,
-                    (unsigned) var.type()->bytes(),
-                    (unsigned) var.type()->bytes());
+            fprintf(fp, "\t\tmemcpy(ptr, &%s, %u); ptr += %u;\n", varname,
+                    static_cast<unsigned>(var.type()->bytes()),
+                    static_cast<unsigned>(var.type()->bytes()));
         }
     }
 }
@@ -532,7 +535,7 @@ static void addGuestTimePrinting(const EntryPoint* e, bool hasTimeBeforeReadback
 int ApiGen::genEncoderImpl(const std::string &filename)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -591,8 +594,9 @@ int ApiGen::genEncoderImpl(const std::string &filename)
         for (j = 0; j < maxvars; j++) {
             Var& var = evars[j];
 
-            if (!var.isPointer())
+            if (!var.isPointer()) {
                 continue;
+            }
 
             const char* varname = var.name().c_str();
             fprintf(fp, "\tconst unsigned int __size_%s = ", varname);
@@ -644,8 +648,9 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
             // Skip over non-large fields
             for (j = nvars; j < maxvars; j++) {
-                if (evars[j].isLarge())
+                if (evars[j].isLarge()) {
                     break;
+                }
             }
 
             // Write a fragment if needed.
@@ -816,9 +821,12 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 #endif
 
             fprintf(fp, "\n\t%s retval;\n", e->retval().type()->name().c_str());
-            fprintf(fp, "\tstream->readback(&retval, %u);\n",(unsigned) e->retval().type()->bytes());
-            fprintf(fp, "\tif (useChecksum) checksumCalculator->addBuffer(&retval, %u);\n",
-                    (unsigned) e->retval().type()->bytes());
+            fprintf(fp, "\tstream->readback(&retval, %u);\n",
+                    static_cast<unsigned>(e->retval().type()->bytes()));
+            fprintf(fp,
+                    "\tif (useChecksum) checksumCalculator->addBuffer(&retval, "
+                    "%u);\n",
+                    static_cast<unsigned>(e->retval().type()->bytes()));
             writeEncodingChecksumValidatorOnReturn(e->name().c_str(), fp);
             addGuestTimePrinting(e, hasTimeBeforeReadback, fp);
             fprintf(fp, "\treturn retval;\n");
@@ -840,10 +848,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
         if (e->unsupported()) {
-            fprintf(fp, 
-                    "\tthis->%s = (%s_%s_proc_t) &enc_unsupported;\n",
-                    e->name().c_str(),
-                    e->name().c_str(),
+            fprintf(fp, "\tthis->%s = (%s_%s_proc_t) &enc_unsupported;\n",
+                    e->name().c_str(), e->name().c_str(),
                     sideString(CLIENT_SIDE));
         } else {
             fprintf(fp,
@@ -862,7 +868,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 int ApiGen::genDecoderHeader(const std::string &filename)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -881,8 +887,8 @@ int ApiGen::genDecoderHeader(const std::string &filename)
     fprintf(fp, "#include \"time.h\"\n");
 #endif
 
-    for (size_t i = 0; i < m_decoderHeaders.size(); i++) {
-        fprintf(fp, "#include %s\n", m_decoderHeaders[i].c_str());
+    for (auto& m_decoderHeader : m_decoderHeaders) {
+        fprintf(fp, "#include %s\n", m_decoderHeader.c_str());
     }
     fprintf(fp, "\n");
 
@@ -899,7 +905,7 @@ int ApiGen::genDecoderHeader(const std::string &filename)
 int ApiGen::genContextImpl(const std::string &filename, SideType side)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -937,7 +943,7 @@ int ApiGen::genContextImpl(const std::string &filename, SideType side)
 int ApiGen::genDecoderImpl(const std::string &filename)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
@@ -1032,12 +1038,12 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
         // construct a printout string;
         std::string printString;
-        for (size_t i = 0; i < e->vars().size(); i++) {
-            Var *v = &e->vars()[i];
+        for (auto& i : e->vars()) {
+            Var* v = &i;
             if (!v->isVoid())  printString += (v->isPointer() ? "%p(%u)" : v->type()->printFormat()) + " ";
         }
 
-        // TODO - add for return value;
+        // TODO(bohu): - add for return value;
         fprintf(fp, "\t\tcase OP_%s: {\n", e->name().c_str());
 
 #if INSTRUMENT_TIMING_HOST
@@ -1046,7 +1052,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
 #endif
         bool totalTmpBuffExist = false;
         std::string totalTmpBuffOffset = "0";
-        std::string *tmpBufOffset = new std::string[e->vars().size()];
+        auto* tmpBufOffset = new std::string[e->vars().size()];
 
         // construct retval type string
         std::string retvalType;
@@ -1373,8 +1379,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
                 if (pass == PASS_FunctionCall) {
                     // unlock all dma buffers that have been passed
-                    for (size_t j = 0; j < evars.size(); j++) {
-                        Var *v = & evars[j];
+                    for (auto& evar : evars) {
+                        Var* v = &evar;
                         if (v->isVoid()) {
                             continue;
                         }
@@ -1390,14 +1396,13 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
             if (pass == PASS_TmpBuffAlloc) {
                 if (!e->retval().isVoid() && !e->retval().isPointer()) {
-                    if (!totalTmpBuffExist)
-                        fprintf(fp,
-                                "\t\t\tsize_t totalTmpSize = sizeof(%s);\n",
+                    if (!totalTmpBuffExist) {
+                        fprintf(fp, "\t\t\tsize_t totalTmpSize = sizeof(%s);\n",
                                 retvalType.c_str());
-                    else
-                        fprintf(fp,
-                                "\t\t\ttotalTmpSize += sizeof(%s);\n",
+                    } else {
+                        fprintf(fp, "\t\t\ttotalTmpSize += sizeof(%s);\n",
                                 retvalType.c_str());
+                    }
 
                     totalTmpBuffExist = true;
                 }
@@ -1457,13 +1462,13 @@ R"(        // Do this on every iteration, as some commands may change the checks
 int ApiGen::readSpec(const std::string & filename)
 {
     FILE *specfp = fopen(filename.c_str(), "rt");
-    if (specfp == NULL) {
+    if (specfp == nullptr) {
         return -1;
     }
 
     char line[1000];
     unsigned int lc = 0;
-    while (fgets(line, sizeof(line), specfp) != NULL) {
+    while (fgets(line, sizeof(line), specfp) != nullptr) {
         lc++;
         EntryPoint ref;
         if (ref.parse(lc, std::string(line))) {
@@ -1480,17 +1485,17 @@ int ApiGen::readAttributes(const std::string & attribFilename)
     enum { ST_NAME, ST_ATT } state;
 
     FILE *fp = fopen(attribFilename.c_str(), "rt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(attribFilename.c_str());
         return -1;
     }
     char buf[1000];
 
     state = ST_NAME;
-    EntryPoint *currentEntry = NULL;
+    EntryPoint* currentEntry = nullptr;
     size_t lc = 0;
     bool globalAttributes = false;
-    while (fgets(buf, sizeof(buf), fp) != NULL) {
+    while (fgets(buf, sizeof(buf), fp) != nullptr) {
         lc++;
         std::string line(buf);
         if (line.size() == 0) continue; // could that happen?
@@ -1510,8 +1515,11 @@ int ApiGen::readAttributes(const std::string & attribFilename)
             } else {
                 globalAttributes = false;
                 currentEntry = findEntryByName(line);
-                if (currentEntry == NULL) {
-                    fprintf(stderr, "WARNING: %u: attribute of non existant entry point %s\n", (unsigned int)lc, line.c_str());
+                if (currentEntry == nullptr) {
+                    fprintf(stderr,
+                            "WARNING: %u: attribute of non existant entry "
+                            "point %s\n",
+                            static_cast<unsigned int>(lc), line.c_str());
                 }
             }
             state = ST_ATT;
@@ -1519,7 +1527,7 @@ int ApiGen::readAttributes(const std::string & attribFilename)
         case ST_ATT:
             if (globalAttributes) {
                 setGlobalAttribute(line, lc);
-            } else  if (currentEntry != NULL) {
+            } else if (currentEntry != nullptr) {
                 currentEntry->setAttribute(line, lc);
             }
             break;
@@ -1539,7 +1547,8 @@ int ApiGen::setGlobalAttribute(const std::string & line, size_t lc)
     if (token == "base_opcode") {
         std::string str = getNextToken(line, pos, &last, WHITESPACE);
         if (str.size() == 0) {
-            fprintf(stderr, "line %u: missing value for base_opcode\n", (unsigned) lc);
+            fprintf(stderr, "line %u: missing value for base_opcode\n",
+                    static_cast<unsigned>(lc));
         } else {
             setBaseOpcode(atoi(str.c_str()));
         }
@@ -1577,7 +1586,8 @@ int ApiGen::setGlobalAttribute(const std::string & line, size_t lc)
         }
     }
     else {
-        fprintf(stderr, "WARNING: %u : unknown global attribute %s\n", (unsigned int)lc, line.c_str());
+        fprintf(stderr, "WARNING: %u : unknown global attribute %s\n",
+                static_cast<unsigned int>(lc), line.c_str());
     }
 
     return 0;

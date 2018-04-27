@@ -18,9 +18,9 @@
 
 #include "DispatchTables.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 
 #define FATAL(fmt,...) do { \
     fprintf(stderr, "%s: FATAL: " fmt "\n", __func__, ##__VA_ARGS__); \
@@ -169,10 +169,8 @@ static void createYUVGLTex(GLenum texture_unit,
     s_gles2.glBindTexture(GL_TEXTURE_2D, *texName_out);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE,
-                         width, height, 0,
-                         GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                         NULL);
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0,
+                         GL_LUMINANCE, GL_UNSIGNED_BYTE, nullptr);
     s_gles2.glActiveTexture(GL_TEXTURE0);
 }
 
@@ -218,8 +216,7 @@ void main(void) {
   outCoord = inCoord;
 }
     )";
-    const GLchar* const kVShaders =
-        static_cast<const GLchar*>(kVShader);
+    const auto* const kVShaders = static_cast<const GLchar*>(kVShader);
 
     // Based on:
     // http://stackoverflow.com/questions/11093061/yv12-to-rgb-using-glsl-in-ios-result-image-attached
@@ -256,8 +253,7 @@ void main(void) {
 }
     )";
 
-    const GLchar* const kFShaders =
-        static_cast<const GLchar*>(kFShader);
+    const auto* const kFShaders = static_cast<const GLchar*>(kFShader);
 
     GLuint vshader = s_gles2.glCreateShader(GL_VERTEX_SHADER);
     GLuint fshader = s_gles2.glCreateShader(GL_FRAGMENT_SHADER);
@@ -343,7 +339,7 @@ static void doYUVConversionDraw(GLuint program,
                                 float cWidthCutoff) {
 
     const GLsizei kVertexAttribStride = 5 * sizeof(GL_FLOAT);
-    const GLvoid* kVertexAttribPosOffset = (GLvoid*)0;
+    const GLvoid* kVertexAttribPosOffset = (GLvoid*)nullptr;
     const GLvoid* kVertexAttribCoordOffset = (GLvoid*)(3 * sizeof(GL_FLOAT));
 
     s_gles2.glUseProgram(program);
@@ -367,7 +363,7 @@ static void doYUVConversionDraw(GLuint program,
                                   kVertexAttribCoordOffset);
 
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibuf);
-    s_gles2.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+    s_gles2.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
 
     s_gles2.glDisableVertexAttribArray(posLoc);
     s_gles2.glDisableVertexAttribArray(inCoordLoc);
@@ -473,8 +469,8 @@ void YUVConverter::updateCutoffs(float width, float ywidth,
                                  float halfwidth, float cwidth) {
     switch (mFormat) {
     case FRAMEWORK_FORMAT_YV12:
-        mYWidthCutoff = ((float)width) / ((float)ywidth);
-        mCWidthCutoff = ((float)halfwidth) / ((float)cwidth);
+        mYWidthCutoff = (width) / (ywidth);
+        mCWidthCutoff = (halfwidth) / (cwidth);
         break;
     case FRAMEWORK_FORMAT_YUV_420_888:
         mYWidthCutoff = 1.0f;

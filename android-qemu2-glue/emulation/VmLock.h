@@ -25,9 +25,9 @@ namespace qemu2 {
 //
 class VmLock : public android::VmLock {
 public:
-    virtual void lock() override;
-    virtual void unlock() override;
-    virtual bool isLockedBySelf() const override;
+    void lock() override;
+    void unlock() override;
+    bool isLockedBySelf() const override;
 };
 
 }  // namespace qemu2

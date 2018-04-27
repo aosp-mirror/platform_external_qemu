@@ -23,7 +23,7 @@
 #include <pthread.h>
 #endif
 
-#include <assert.h>
+#include <cassert>
 
 namespace android {
 namespace base {
@@ -130,9 +130,7 @@ private:
 
     // Note: on Posix systems, make it a naive wrapper around pthread_cond_t.
 
-    ConditionVariable() {
-        pthread_cond_init(&mCond, NULL);
-    }
+    ConditionVariable() { pthread_cond_init(&mCond, nullptr); }
 
     ~ConditionVariable() {
         pthread_cond_destroy(&mCond);

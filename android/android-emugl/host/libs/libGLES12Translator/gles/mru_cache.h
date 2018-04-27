@@ -26,22 +26,23 @@ class MruCache {
  public:
   // Typedef for the function that can be used to clean up objects if/when
   // they get removed from the cache.
-  typedef void (*DestroyFn)(Value* v);
+     using DestroyFn = void (*)(Value*);
 
-  typedef std::list<std::pair<Key, Value> > Cache;
+     typedef std::list<std::pair<Key, Value> > Cache;
 
-  explicit MruCache(size_t limit) : cache_(), destroy_(NULL), limit_(limit) {}
+     explicit MruCache(size_t limit)
+         : cache_(), destroy_(NULL), limit_(limit) {}
 
-  MruCache(size_t limit, DestroyFn destroy)
-      : cache_(), destroy_(destroy), limit_(limit) {}
+     MruCache(size_t limit, DestroyFn destroy)
+         : cache_(), destroy_(destroy), limit_(limit) {}
 
-  ~MruCache() {
-    if (destroy_) {
-      while (cache_.size() != 0) {
-        destroy_(&cache_.back().second);
-        cache_.pop_back();
-      }
-    }
+     ~MruCache() {
+         if (destroy_) {
+             while (cache_.size() != 0) {
+                 destroy_(&cache_.back().second);
+                 cache_.pop_back();
+             }
+         }
   }
 
   Value* GetMostRecentlyUsed() {
@@ -54,13 +55,13 @@ class MruCache {
   // Gets a pointer to the object referenced by the Key (or NULL if no such
   // object).  Will internally move the object to the "front" of the cache.
   Value* Get(const Key& key) {
-    for (typename Cache::iterator i = cache_.begin(); i != cache_.end(); ++i) {
-      if (i->first == key) {
-        cache_.splice(cache_.begin(), cache_, i);
-        return &i->second;
-      }
+      for (auto i = cache_.begin(); i != cache_.end(); ++i) {
+          if (i->first == key) {
+              cache_.splice(cache_.begin(), cache_, i);
+              return &i->second;
+          }
     }
-    return NULL;
+    return nullptr;
   }
 
   // Push an object into the cache referenced by the Key.
@@ -80,8 +81,8 @@ class MruCache {
   DestroyFn destroy_;
   size_t limit_;
 
-  MruCache(const MruCache&);
-  MruCache& operator=(const MruCache&);
+  MruCache(const MruCache&) = delete;
+  MruCache& operator=(const MruCache&) = delete;
 };
 
 #endif  // GRAPHICS_TRANSLATION_GLES_MRU_CACHE_H_

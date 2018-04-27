@@ -13,8 +13,6 @@
 
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
-
 ANDROID_BEGIN_HEADER
 
 // Setup callbacks for thread locking required by OpenSSL.

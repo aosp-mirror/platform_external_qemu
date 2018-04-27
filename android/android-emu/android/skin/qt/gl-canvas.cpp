@@ -35,15 +35,13 @@ GLCanvas::GLCanvas(int w, int h, const GLESv2Dispatch* gl_dispatch) :
     mGLES2->glGenTextures(1, &mTargetTexture);
     CHECK_GL_ERROR("Failed to create target texture for FBO");
     mGLES2->glBindTexture(GL_TEXTURE_2D, mTargetTexture);
-    mGLES2->glTexImage2D(GL_TEXTURE_2D,
-                         0, // mipmap level 0
-                         GL_RGB,
-                         width(),
-                         height(),
-                         0, // border, must be 0
-                         GL_RGB,
-                         GL_UNSIGNED_BYTE,
-                         0); // don't upload any data, just allocate space
+    mGLES2->glTexImage2D(
+            GL_TEXTURE_2D,
+            0,  // mipmap level 0
+            GL_RGB, width(), height(),
+            0,  // border, must be 0
+            GL_RGB, GL_UNSIGNED_BYTE,
+            nullptr);  // don't upload any data, just allocate space
     CHECK_GL_ERROR("Failed to populate target texture");
     mGLES2->glTexParameteri(GL_TEXTURE_2D,
                             GL_TEXTURE_WRAP_S,

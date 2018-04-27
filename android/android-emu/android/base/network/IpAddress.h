@@ -17,7 +17,7 @@
 #include <functional>
 #include <string>
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {
@@ -173,8 +173,8 @@ namespace std {
 
 template <>
 struct hash<android::base::IpAddress> {
-    typedef android::base::IpAddress argument_type;
-    typedef size_t result_type;
+    using argument_type = android::base::IpAddress;
+    using result_type = size_t;
     inline result_type operator()(const argument_type& a) const {
         return a.hash();
     }

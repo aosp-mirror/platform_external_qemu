@@ -21,7 +21,7 @@ using android::base::TestTempDir;
 namespace android {
 namespace path {
 
-#define ARRAY_SIZE(x)  (sizeof(x)/sizeof(x[0]))
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 #ifdef _WIN32
 #define IF_WIN32(x, y)  x
@@ -46,9 +46,9 @@ TEST(Path, isAbsolute) {
         { "//server", !isWin32 },
         { "//server/path", true },
     };
-    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        const char* path = kData[n].path;
-        EXPECT_EQ(kData[n].expected, path_is_absolute(path))
+    for (auto n : kData) {
+        const char* path = n.path;
+        EXPECT_EQ(n.expected, path_is_absolute(path))
                 << "Testing '" << (path ? path : "<NULL>") << "'";
     }
 }
@@ -76,10 +76,10 @@ TEST(Path, GetAbsolute) {
     android::base::TestSystem testSystem("/bin", 32);
     testSystem.setCurrentDirectoryForTesting("/home");
 
-    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
-        const char* path = kData[n].path;
+    for (auto n : kData) {
+        const char* path = n.path;
         char* result = path_get_absolute(path);
-        EXPECT_STREQ(kData[n].expected, result)
+        EXPECT_STREQ(n.expected, result)
                 << "Testing '" << (path ? path : "<NULL>") << "'";
         free(result);
     }
@@ -89,29 +89,31 @@ TEST(Path, EscapePath) {
     const char linuxInputPath[]    = "/Linux/style_with/various,special==character%s";
     const char linuxOutputPath[]   = "/Linux/style_with/various%Cspecial%E%Echaracter%Ps";
 
-    const char windowsInputPath[]  = "C:\\Windows\\style:=with,,other%\\types of characters";
-    const char windowsOutputPath[] = "C:\\Windows\\style:%Ewith%C%Cother%P\\types of characters";
+    const char windowsInputPath[] =
+            R"(C:\Windows\style:=with,,other%\types of characters)";
+    const char windowsOutputPath[] =
+            R"(C:\Windows\style:%Ewith%C%Cother%P\types of characters)";
 
     char *result;
 
     // Escape Linux style paths
     result = path_escape_path(linuxInputPath);
-    EXPECT_NE(result, (char*)NULL);
+    EXPECT_NE(result, (char*)nullptr);
     EXPECT_STREQ(linuxOutputPath, result);
 
     path_unescape_path(result);
-    EXPECT_NE(result, (char*)NULL);
+    EXPECT_NE(result, (char*)nullptr);
     EXPECT_STREQ(linuxInputPath, result);
 
     free(result);
 
     // Escape Windows style paths
     result = path_escape_path(windowsInputPath);
-    EXPECT_NE(result, (char*)NULL);
+    EXPECT_NE(result, (char*)nullptr);
     EXPECT_STREQ(windowsOutputPath, result);
 
     path_unescape_path(result);
-    EXPECT_NE(result, (char*)NULL);
+    EXPECT_NE(result, (char*)nullptr);
     EXPECT_STREQ(windowsInputPath, result);
 
     free(result);

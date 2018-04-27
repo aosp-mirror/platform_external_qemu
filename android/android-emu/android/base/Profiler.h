@@ -20,7 +20,7 @@
 
 #include <functional>
 #include <string>
-
+#include <utility>
 namespace android {
 namespace base {
 
@@ -41,8 +41,8 @@ private:
 class ScopedProfiler {
 public:
     using Callback = std::function<void(const char*, uint64_t)>;
-    ScopedProfiler(const std::string& tag, Callback c) :
-        mProfiler(), mTag(tag), mCallback(c) {
+    ScopedProfiler(std::string tag, Callback c)
+        : mProfiler(), mTag(std::move(tag)), mCallback(std::move(c)) {
         mProfiler.start();
     }
     ~ScopedProfiler() {
@@ -71,7 +71,7 @@ public:
 
     MemoryUsageBytes queryCurrentResident() {
         auto memUsage = System::get()->getMemUsage();
-        return (MemoryUsageBytes)memUsage.resident;
+        return static_cast<MemoryUsageBytes>(memUsage.resident);
     }
 
     MemoryUsageBytes queryStartResident() {
@@ -89,19 +89,19 @@ public:
                                         MemoryProfiler::MemoryUsageBytes,
                                         MemoryProfiler::MemoryUsageBytes)>;
 
-    ScopedMemoryProfiler(StringView tag) :
-        mProfiler(), mTag(tag.c_str()) {
+    ScopedMemoryProfiler(const StringView& tag)
+        : mProfiler(), mTag(tag.c_str()) {
         mProfiler.start();
         check("(start)");
     }
 
-    ScopedMemoryProfiler(StringView tag, Callback c) :
-        mProfiler(), mTag(tag.c_str()), mCallback(c) {
+    ScopedMemoryProfiler(const StringView& tag, Callback c)
+        : mProfiler(), mTag(tag.c_str()), mCallback(std::move(c)) {
         mProfiler.start();
         check("(start)");
     }
 
-    void check(StringView stage = "") {
+    void check(const StringView& stage = "") {
         int64_t currRes = mProfiler.queryCurrentResident();
         mCallback(mTag.c_str(), stage,
                   currRes, currRes - mProfiler.queryStartResident());
@@ -115,14 +115,14 @@ private:
     MemoryProfiler mProfiler;
     std::string mTag;
 
-    Callback mCallback = { [](StringView tag, StringView stage,
-                              MemoryProfiler::MemoryUsageBytes currentResident,
-                              MemoryProfiler::MemoryUsageBytes change) {
+    Callback mCallback = {[](const StringView& tag,
+                             const StringView& stage,
+                             MemoryProfiler::MemoryUsageBytes currentResident,
+                             MemoryProfiler::MemoryUsageBytes change) {
         double megabyte = 1024.0 * 1024.0;
-        fprintf(stderr, "%s %s: %f mb current. change: %f mb\n",
-                tag.c_str(), stage.c_str(),
-                (double)currentResident / megabyte,
-                (double)change / megabyte);
+        fprintf(stderr, "%s %s: %f mb current. change: %f mb\n", tag.c_str(),
+                stage.c_str(), static_cast<double>(currentResident) / megabyte,
+                static_cast<double>(change) / megabyte);
     }};
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedMemoryProfiler);

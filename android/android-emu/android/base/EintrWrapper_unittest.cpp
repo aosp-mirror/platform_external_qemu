@@ -14,8 +14,8 @@
 
 #include "android/base/EintrWrapper.h"
 
-#include <stdarg.h>
-#include <setjmp.h>
+#include <csetjmp>
+#include <cstdarg>
 
 #include <gtest/gtest.h>
 
@@ -30,40 +30,36 @@ using namespace ::android::base::testing;
 
 class EintrWrapperTest : public ::testing::Test, LogOutput {
 public:
-    EintrWrapperTest() :
-            mFatal(false),
-            mLogged(true),
-            mPrevious(LogOutput::setNewOutput(this)) {}
+    EintrWrapperTest() : mPrevious(LogOutput::setNewOutput(this)) {}
 
-    ~EintrWrapperTest() {
-        LogOutput::setNewOutput(mPrevious);
-    }
+    ~EintrWrapperTest() override { LogOutput::setNewOutput(mPrevious); }
 
-    virtual void logMessage(const android::base::LogParams& params,
-                            const char* message,
-                            size_t messageLen) {
+    void logMessage(const android::base::LogParams& params,
+                    const char* message,
+                    size_t messageLen) override {
         mFatal = (params.severity == LOG_FATAL);
         mLogged = true;
-        if (mFatal)
+        if (mFatal) {
             longjmp(mJumper, 1);
+        }
     }
 
 protected:
-    bool mFatal;
-    bool mLogged;
+    bool mFatal{false};
+    bool mLogged{true};
     LogOutput* mPrevious;
     jmp_buf mJumper;
 };
-
 
 // Loop counter used by several functions below.
 static int gLoopCount = 0;
 
 // This function returns the first time it is called, or -1/EINVAL
 // otherwise.
-static int returnEinvalAfterFirstCall(void) {
-    if (++gLoopCount == 1)
+static int returnEinvalAfterFirstCall() {
+    if (++gLoopCount == 1) {
         return 0;
+    }
 
     errno = EINVAL;
     return -1;
@@ -83,7 +79,7 @@ TEST_F(EintrWrapperTest, NoLoopOnRegularError) {
     EXPECT_EQ(2, gLoopCount);
 }
 
-static int alwaysReturnEintr(void) {
+static int alwaysReturnEintr() {
     gLoopCount++;
 #ifdef _WIN32
     // Win32 cannot generate EINTR.
@@ -104,7 +100,7 @@ TEST_F(EintrWrapperTest, IgnoreEintr) {
 
 // This function loops 10 times around |gLoopCount|, while returning
 // -1/errno.
-static int loopEintr10(void) {
+static int loopEintr10() {
     if (++gLoopCount < 10) {
         errno = EINTR;
         return -1;
@@ -118,7 +114,7 @@ TEST_F(EintrWrapperTest, LoopOnEintr) {
     EXPECT_EQ(10, gLoopCount);
 }
 
-static int loopEintr200(void) {
+static int loopEintr200() {
     if (++gLoopCount < 200) {
         errno = EINTR;
         return -1;

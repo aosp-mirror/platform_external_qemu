@@ -27,7 +27,8 @@ namespace Ui {
 
 static constexpr int kDefaultBorderRadius = 10;
 
-ModalOverlay::ModalOverlay(QString message, QWidget* parent) : QWidget(parent) {
+ModalOverlay::ModalOverlay(const QString& message, QWidget* parent)
+    : QWidget(parent) {
 #ifdef __APPLE__
     Qt::WindowFlags flag = Qt::Dialog;
 #else
@@ -93,7 +94,7 @@ void ModalOverlay::show() {
     showAnimation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-void ModalOverlay::hide(CompletionFunc onHidden) {
+void ModalOverlay::hide(const CompletionFunc& onHidden) {
     auto hideAnimation = new QPropertyAnimation(this, "windowOpacity");
     hideAnimation->setStartValue(windowOpacity());
     hideAnimation->setEndValue(0.0);
@@ -116,7 +117,7 @@ void ModalOverlay::resize(const QSize& size, const QSize& parentSize) {
     updateStylesheet(newBorderRadius);
 }
 
-void ModalOverlay::showButtonFunc(QString text,
+void ModalOverlay::showButtonFunc(const QString& text,
                                   ModalOverlay::OverlayButtonFunc&& f) {
     mButtonFunc = f;
 

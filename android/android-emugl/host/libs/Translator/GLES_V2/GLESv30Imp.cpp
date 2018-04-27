@@ -3,7 +3,7 @@
 // Try to make changes through gen_translator in gen-entries.py,
 // and/or parcel out custom functionality in separate code.
 extern "C" GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLint index) {
-    GET_CTX_V2_RET(0);
+    GET_CTX_V2_RET(nullptr);
     GLconstubyteptr glGetStringiRET = ctx->dispatcher().glGetStringi(name, index);
     return glGetStringiRET;
 }
@@ -26,8 +26,9 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArray(GLuint array) {
 }
 
 GL_APICALL void * GL_APIENTRY glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
-    GET_CTX_V2_RET(0);
-    RET_AND_SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target),GL_INVALID_ENUM,0);
+    GET_CTX_V2_RET(nullptr);
+    RET_AND_SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target),
+                         GL_INVALID_ENUM, nullptr);
     gles30usages->set_is_used(true);
     void * glMapBufferRangeRET = ctx->dispatcher().glMapBufferRange(target, offset, length, access);
     return glMapBufferRangeRET;
@@ -259,7 +260,7 @@ GL_APICALL void GL_APIENTRY glGetUniformuiv(GLuint program, GLint location, GLui
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ProgramData* pData = (ProgramData *)objData;
+        auto* pData = (ProgramData*)objData;
         SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
         int hostLoc = s_getHostLocOrSetError(location);
         SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
@@ -403,10 +404,10 @@ GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuin
 // to it colliding with an EGL fence name.
 class GuestSyncs {
 public:
-    GuestSyncs() { }
+    GuestSyncs() = default;
 
     GLsync create(GLsync newHostSync) {
-        GLsync res = (GLsync)(uintptr_t)mNameCounter;
+        auto res = (GLsync) static_cast<uintptr_t>(mNameCounter);
         mSyncs[res] = newHostSync;
         mNameCounter++;
         if (!mNameCounter) mNameCounter = 0x1000;
@@ -415,7 +416,7 @@ public:
 
     GLsync lookupWithError(GLsync guestSync, GLint* err) {
         *err = GL_NO_ERROR;
-        GLsync host = (GLsync)0x0;
+        auto host = (GLsync) nullptr;
 
         const auto& it = mSyncs.find(guestSync);
         if (it == mSyncs.end()) {
@@ -429,7 +430,7 @@ public:
 
     GLsync removeWithError(GLsync guestSyncToDelete, GLint* err) {
         *err = GL_NO_ERROR;
-        GLsync host = (GLsync)0x0;
+        auto host = (GLsync) nullptr;
 
         if (!guestSyncToDelete) {
             return host;
@@ -462,7 +463,7 @@ private:
 static android::base::LazyInstance<GuestSyncs> sSyncs = LAZY_INSTANCE_INIT;
 
 static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags) {
-    GET_CTX_V2_RET(0);
+    GET_CTX_V2_RET(nullptr);
     if (!ctx->dispatcher().glFenceSync) {
         ctx->dispatcher().glFinish();
         return (GLsync)0x42;
@@ -497,7 +498,7 @@ static void internal_glDeleteSync(GLsync to_delete) {
 }
 
 GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
-    GET_CTX_V2_RET(0);
+    GET_CTX_V2_RET(nullptr);
     gles30usages->set_is_used(true);
     gles30usages->set_fence_sync(true);
 
@@ -722,7 +723,9 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
     GLint err = GL_NO_ERROR;
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
-    sPrepareTexImage2D(target, 0, (GLint)internalformat, width, height, 0, format, type, 0, NULL, &type, (GLint*)&internalformat, &err);
+    sPrepareTexImage2D(target, 0, static_cast<GLint>(internalformat), width,
+                       height, 0, format, type, 0, nullptr, &type,
+                       reinterpret_cast<GLint*>(&internalformat), &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;
@@ -840,7 +843,7 @@ GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GL
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SAMPLER, sampler);
         SET_ERROR_IF(!globalSampler, GL_INVALID_OPERATION);
-        SamplerData* samplerData = (SamplerData*)ctx->shareGroup()->getObjectData(
+        auto* samplerData = (SamplerData*)ctx->shareGroup()->getObjectData(
                 NamedObjectType::SAMPLER, sampler);
         samplerData->setParamf(pname, param);
         ctx->dispatcher().glSamplerParameterf(globalSampler, pname, param);
@@ -853,7 +856,7 @@ GL_APICALL void GL_APIENTRY glSamplerParameteri(GLuint sampler, GLenum pname, GL
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
         NamedObjectType::SAMPLER, sampler);
         SET_ERROR_IF(!globalSampler, GL_INVALID_OPERATION);
-        SamplerData* samplerData = (SamplerData*)ctx->shareGroup()->getObjectData(
+        auto* samplerData = (SamplerData*)ctx->shareGroup()->getObjectData(
                 NamedObjectType::SAMPLER, sampler);
         samplerData->setParami(pname, param);
         ctx->dispatcher().glSamplerParameteri(globalSampler, pname, param);

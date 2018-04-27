@@ -3,7 +3,7 @@
 #include <GLES2/gl2.h>
 #include <GLES3/gl31.h>
 
-#include <stdio.h>
+#include <cstdio>
 
 #define DEBUG 0
 
@@ -27,35 +27,35 @@ void GLSnapshotState::getGlobalStateEnum(GLenum name, int size) {
     D("save 0x%x", name);
     std::vector<GLenum>& store = mGlobals[name].enums;
     store.resize(size);
-    mGL->glGetIntegerv(name, (GLint*)&store[0]);
+    mGL->glGetIntegerv(name, reinterpret_cast<GLint*>(&store[0]));
 }
 
 void GLSnapshotState::getGlobalStateByte(GLenum name, int size) {
     D("save 0x%x", name);
     std::vector<unsigned char>& store = mGlobals[name].bytes;
     store.resize(size);
-    mGL->glGetBooleanv(name, (GLboolean*)&store[0]);
+    mGL->glGetBooleanv(name, static_cast<GLboolean*>(&store[0]));
 }
 
 void GLSnapshotState::getGlobalStateInt(GLenum name, int size) {
     D("save 0x%x", name);
     std::vector<uint32_t>& store = mGlobals[name].ints;
     store.resize(size);
-    mGL->glGetIntegerv(name, (GLint*)&store[0]);
+    mGL->glGetIntegerv(name, reinterpret_cast<GLint*>(&store[0]));
 }
 
 void GLSnapshotState::getGlobalStateFloat(GLenum name, int size) {
     D("save 0x%x", name);
     std::vector<float>& store = mGlobals[name].floats;
     store.resize(size);
-    mGL->glGetFloatv(name, (GLfloat*)&store[0]);
+    mGL->glGetFloatv(name, static_cast<GLfloat*>(&store[0]));
 }
 
 void GLSnapshotState::getGlobalStateInt64(GLenum name, int size) {
     D("save 0x%x", name);
     std::vector<uint64_t>& store = mGlobals[name].int64s;
     store.resize(size);
-    mGL->glGetInteger64v(name, (GLint64*)&store[0]);
+    mGL->glGetInteger64v(name, reinterpret_cast<GLint64*>(&store[0]));
 }
 
 void GLSnapshotState::getGlobalStateEnable(GLenum name) {

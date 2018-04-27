@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include <stddef.h>
+#include <cstddef>
 
 #ifdef _WIN32
 #undef ERROR
@@ -61,7 +61,7 @@ public:
     StringView view() const { return mString; }
 
     // Main function simply receives everything and stores it in a string.
-    virtual intptr_t main() override {
+    intptr_t main() override {
         // Wait for a single connection.
         int fd = android::base::socketAcceptAny(mSocket.get());
         if (fd < 0) {

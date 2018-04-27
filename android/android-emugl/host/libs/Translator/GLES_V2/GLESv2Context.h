@@ -32,11 +32,11 @@ class ProgramData;
 
 class GLESv2Context : public GLEScontext{
 public:
-    virtual void init();
+    void init() override;
     static void initGlobal(EGLiface* eglIface);
     GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream, GlLibrary* glLib);
-    virtual ~GLESv2Context();
+    ~GLESv2Context() override;
 
     enum class DrawCallCmd {
         Elements,
@@ -57,7 +57,12 @@ public:
         GLuint start,
         GLuint end);
 
-    void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
+    void setupArraysPointers(GLESConversionArrays& fArrs,
+                             GLint first,
+                             GLsizei count,
+                             GLenum type,
+                             const GLvoid* indices,
+                             bool direct) override;
     void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
     void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
     void setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt = false);
@@ -73,35 +78,52 @@ public:
     void setAttribute0value(float x, float y, float z, float w);
     bool needAtt0PreDrawValidation();
     void validateAtt0PreDraw(unsigned int count);
-    void validateAtt0PostDraw(void);
-    const float* getAtt0(void) const {return m_attribute0value;}
+    void validateAtt0PostDraw();
+    const float* getAtt0() const { return m_attribute0value; }
     void setUseProgram(GLuint program, const ObjectDataPtr& programData);
     GLuint getCurrentProgram() const;
     ProgramData* getUseProgram();
 
-    virtual void onSave(android::base::Stream* stream) const override;
-    virtual ObjectDataPtr loadObject(NamedObjectType type,
-            ObjectLocalName localName, android::base::Stream* stream) const
-            override;
+    void onSave(android::base::Stream* stream) const override;
+    ObjectDataPtr loadObject(NamedObjectType type,
+                             ObjectLocalName localName,
+                             android::base::Stream* stream) const override;
 
-    virtual void initDefaultFBO(
-            GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
-            GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
-            GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
-            GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
+    void initDefaultFBO(GLint width,
+                        GLint height,
+                        GLint colorFormat,
+                        GLint depthstencilFormat,
+                        GLint multisamples,
+                        GLuint* eglSurfaceRBColorId,
+                        GLuint* eglSurfaceRBDepthId,
+                        GLuint readWidth,
+                        GLint readHeight,
+                        GLint readColorFormat,
+                        GLint readDepthStencilFormat,
+                        GLint readMultisamples,
+                        GLuint* eglReadSurfaceRBColorId,
+                        GLuint* eglReadSurfaceRBDepthId) override;
 
     void initEmulatedBuffers();
     void initEmulatedVAO();
 
     static void setMaxGlesVersion(GLESVersion version);
 protected:
-    virtual void postLoadRestoreCtx();
-    bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
+    void postLoadRestoreCtx() override;
+    bool needConvert(GLESConversionArrays& fArrs,
+                     GLint first,
+                     GLsizei count,
+                     GLenum type,
+                     const GLvoid* indices,
+                     bool direct,
+                     GLESpointer* p,
+                     GLenum array_id) override;
+
 private:
     void setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                               GLenum arrayType, GLenum dataType,
                               GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt);
-    void initExtensionString();
+    void initExtensionString() override;
 
     float m_attribute0value[4] = {};
     bool m_attribute0valueChanged = true;

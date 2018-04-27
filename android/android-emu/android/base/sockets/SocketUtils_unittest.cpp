@@ -14,9 +14,9 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include <gtest/gtest.h>
 
-#include <errno.h>
-#include <signal.h>
-#include <string.h>
+#include <cerrno>
+#include <csignal>
+#include <cstring>
 
 namespace android {
 namespace base {

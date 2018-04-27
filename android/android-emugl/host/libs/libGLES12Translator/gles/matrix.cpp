@@ -4,7 +4,8 @@
 
 #include "matrix.h"
 
-#include <string.h>
+#include <cmath>
+#include <cstring>
 
 #include "common/alog.h"
 #include "vector.h"
@@ -180,25 +181,25 @@ Matrix Matrix::GeneratePerspective(float left, float right,
   LOG_ALWAYS_FATAL_IF(z_near == z_far);
 
   // See http://www.songho.ca/opengl/gl_projectionmatrix.html.
-  return Matrix((2.0f * z_near) / (right - left),
-                0.0f,
-                (right + left) / (right - left),
-                0.0f,
+  return {(2.0f * z_near) / (right - left),
+          0.0f,
+          (right + left) / (right - left),
+          0.0f,
 
-                0.0f,
-                (2.0f * z_near) / (top - bottom),
-                (top + bottom) / (top - bottom),
-                0.0f,
+          0.0f,
+          (2.0f * z_near) / (top - bottom),
+          (top + bottom) / (top - bottom),
+          0.0f,
 
-                0.0f,
-                0.0f,
-                -(z_far + z_near) / (z_far - z_near),
-                (-2.0f * z_far * z_near) / (z_far - z_near),
+          0.0f,
+          0.0f,
+          -(z_far + z_near) / (z_far - z_near),
+          (-2.0f * z_far * z_near) / (z_far - z_near),
 
-                0.0f,
-                0.0f,
-                -1.0f,
-                0.0f);
+          0.0f,
+          0.0f,
+          -1.0f,
+          0.0f};
 }
 
 Matrix Matrix::GenerateOrthographic(float left, float right,
@@ -209,22 +210,22 @@ Matrix Matrix::GenerateOrthographic(float left, float right,
   LOG_ALWAYS_FATAL_IF(z_near == z_far);
 
   // See http://www.songho.ca/opengl/gl_projectionmatrix.html.
-  return Matrix(2.0f / (right - left),
-                0.0f,
-                0.0f,
-                -(right + left) / (right - left),
-                0.0f,
-                2.0f / (top - bottom),
-                0.0f,
-                -(top + bottom) / (top - bottom),
-                0.0f,
-                0.0f,
-                -2.0f / (z_far - z_near),
-                -(z_far + z_near) / (z_far - z_near),
-                0.0f,
-                0.0f,
-                0.0f,
-                1.0f);
+  return {2.0f / (right - left),
+          0.0f,
+          0.0f,
+          -(right + left) / (right - left),
+          0.0f,
+          2.0f / (top - bottom),
+          0.0f,
+          -(top + bottom) / (top - bottom),
+          0.0f,
+          0.0f,
+          -2.0f / (z_far - z_near),
+          -(z_far + z_near) / (z_far - z_near),
+          0.0f,
+          0.0f,
+          0.0f,
+          1.0f};
 }
 
 Matrix Matrix::GenerateScale(const Vector& v) {
@@ -250,29 +251,29 @@ Matrix Matrix::GenerateRotationByDegrees(float degrees,
   // See http://mathworld.wolfram.com/RodriguesRotationFormula.html or
   // http://www.manpagez.com/man/3/glRotatef/ for formulas.
   const float theta = degrees * kRadiansPerDegree;
-  const float sin_t = sin(theta);
-  const float cos_t = cos(theta);
+  const float sin_t = std::sin(theta);
+  const float cos_t = std::cos(theta);
   const float x_cos_t = 1.0f - cos_t;
   const float wx = w.Get(0);
   const float wy = w.Get(1);
   const float wz = w.Get(2);
 
-  return Matrix(cos_t + wx * wx * x_cos_t,
-                wx * wy * x_cos_t - wz * sin_t,
-                wy * sin_t + wx * wz * x_cos_t,
-                0.0f,
-                wz * sin_t + wx * wy * x_cos_t,
-                cos_t + wy * wy * x_cos_t,
-                -wx * sin_t + wy * wz * x_cos_t,
-                0.0f,
-                -wy * sin_t + wx * wz * x_cos_t,
-                wx * sin_t + wy * wz * x_cos_t,
-                cos_t + wz * wz * x_cos_t,
-                0.0f,
-                0.0f,
-                0.0f,
-                0.0f,
-                1.0f);
+  return {cos_t + wx * wx * x_cos_t,
+          wx * wy * x_cos_t - wz * sin_t,
+          wy * sin_t + wx * wz * x_cos_t,
+          0.0f,
+          wz * sin_t + wx * wy * x_cos_t,
+          cos_t + wy * wy * x_cos_t,
+          -wx * sin_t + wy * wz * x_cos_t,
+          0.0f,
+          -wy * sin_t + wx * wz * x_cos_t,
+          wx * sin_t + wy * wz * x_cos_t,
+          cos_t + wz * wz * x_cos_t,
+          0.0f,
+          0.0f,
+          0.0f,
+          0.0f,
+          1.0f};
 }
 
 }  // namespace emugl

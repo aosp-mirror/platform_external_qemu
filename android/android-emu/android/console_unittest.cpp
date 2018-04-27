@@ -52,7 +52,7 @@ TEST(Console, postauth_help_size_max) {
 
     // Create a fake client that will send the output through this socket
     void* opaque = test_control_client_create(sock[1]);
-    ASSERT_TRUE(opaque != NULL);
+    ASSERT_TRUE(opaque != nullptr);
 
     send_test_string(opaque, "help");
 

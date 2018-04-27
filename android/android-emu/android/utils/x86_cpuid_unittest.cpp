@@ -11,7 +11,7 @@
 
 #include "android/utils/x86_cpuid.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <gtest/gtest.h>
 
@@ -34,7 +34,7 @@ TEST(x86_cpuid, Default) {
     uint32_t ecx = 0, edx = 0;
 
     // Call CPUID with EAX=1 and ECX=0 to get CPU feature bits.
-    android_get_x86_cpuid(1, 0, NULL, NULL, &ecx, &edx);
+    android_get_x86_cpuid(1, 0, nullptr, nullptr, &ecx, &edx);
 
     if (!ecx && !edx) {
         // Both output variables are unchanged, which probably means that
@@ -48,7 +48,7 @@ TEST(x86_cpuid, Default) {
 
         // Call CPUID with EAX=0x80000001 and ECX=0 to get extended CPU feature
         // bits.
-        android_get_x86_cpuid(0x80000001, 0, NULL, NULL, NULL, &edx2);
+        android_get_x86_cpuid(0x80000001, 0, nullptr, nullptr, nullptr, &edx2);
 
         // Long mode is a distinguishing feature of x86_64.
         bool isX86_64 = edx2 & CPUID_EDX_LM;

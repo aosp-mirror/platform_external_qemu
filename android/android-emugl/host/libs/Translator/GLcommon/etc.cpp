@@ -15,12 +15,12 @@
 #include <GLcommon/etc.h>
 
 #include <algorithm>
-#include <assert.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdio.h>
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
 
-typedef uint16_t etc1_uint16;
+using etc1_uint16 = uint16_t;
 
 /* From http://www.khronos.org/registry/gles/extensions/OES/OES_compressed_ETC1_RGB8_texture.txt
 
@@ -481,11 +481,13 @@ void eac_decode_single_channel_block(const etc1_byte* pIn,
             }
             if (isSigned) {
                 decoded = clampSigned1023(decoded);
-                reinterpret_cast<float*>(q)[0] = (float)decoded / 1023.0;
+                reinterpret_cast<float*>(q)[0] =
+                        static_cast<float>(decoded) / 1023.0;
             } else {
                 decoded += 4;
                 decoded = clamp2047(decoded);
-                reinterpret_cast<float*>(q)[0] = (float)decoded / 2047.0;
+                reinterpret_cast<float*>(q)[0] =
+                        static_cast<float>(decoded) / 2047.0;
             }
         }
     }
@@ -546,9 +548,9 @@ void etc_average_colors_subblock(const etc1_byte* pIn, etc1_uint32 inMask,
             }
         }
     }
-    pColors[0] = (etc1_byte)((r + 4) >> 3);
-    pColors[1] = (etc1_byte)((g + 4) >> 3);
-    pColors[2] = (etc1_byte)((b + 4) >> 3);
+    pColors[0] = static_cast<etc1_byte>((r + 4) >> 3);
+    pColors[1] = static_cast<etc1_byte>((g + 4) >> 3);
+    pColors[2] = static_cast<etc1_byte>((b + 4) >> 3);
 }
 
 static
@@ -570,17 +572,17 @@ static etc1_uint32 chooseModifier(const etc1_byte* pBaseColors,
     for (int i = 0; i < 4; i++) {
         int modifier = pModifierTable[i];
         int decodedG = clamp(g + modifier);
-        etc1_uint32 score = (etc1_uint32) (6 * square(decodedG - pixelG));
+        auto score = static_cast<etc1_uint32>(6 * square(decodedG - pixelG));
         if (score >= bestScore) {
             continue;
         }
         int decodedR = clamp(r + modifier);
-        score += (etc1_uint32) (3 * square(decodedR - pixelR));
+        score += static_cast<etc1_uint32>(3 * square(decodedR - pixelR));
         if (score >= bestScore) {
             continue;
         }
         int decodedB = clamp(b + modifier);
-        score += (etc1_uint32) square(decodedB - pixelB);
+        score += static_cast<etc1_uint32>(square(decodedB - pixelB));
         if (score < bestScore) {
             bestScore = score;
             bestIndex = i;
@@ -731,10 +733,10 @@ void etc_encode_block_helper(const etc1_byte* pIn, etc1_uint32 inMask,
 }
 
 static void writeBigEndian(etc1_byte* pOut, etc1_uint32 d) {
-    pOut[0] = (etc1_byte)(d >> 24);
-    pOut[1] = (etc1_byte)(d >> 16);
-    pOut[2] = (etc1_byte)(d >> 8);
-    pOut[3] = (etc1_byte) d;
+    pOut[0] = static_cast<etc1_byte>(d >> 24);
+    pOut[1] = static_cast<etc1_byte>(d >> 16);
+    pOut[2] = static_cast<etc1_byte>(d >> 8);
+    pOut[3] = static_cast<etc1_byte>(d);
 }
 
 // Input is a 4 x 4 square of 3-byte pixels in form R, G, B
@@ -980,8 +982,8 @@ static const etc1_uint32 ETC1_PKM_HEIGHT_OFFSET = 14;
 static const etc1_uint32 ETC1_RGB_NO_MIPMAPS = 0;
 
 static void writeBEUint16(etc1_byte* pOut, etc1_uint32 data) {
-    pOut[0] = (etc1_byte) (data >> 8);
-    pOut[1] = (etc1_byte) data;
+    pOut[0] = static_cast<etc1_byte>(data >> 8);
+    pOut[1] = static_cast<etc1_byte>(data);
 }
 
 static etc1_uint32 readBEUint16(const etc1_byte* pIn) {
