@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "baaca368_b2dfd14a",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-04-27T00:32:08Z",
+      "side": 1,
+      "message": "\"\u003e\" -\u003e \"\u003c\"\n?\nand it looks like it needs to just be \u0027else\u0027 here - otherwise it may jump-shrink when we stop subtracting \"40\"",
+      "range": {
+        "startLine": 196,
+        "startChar": 33,
+        "endLine": 196,
+        "endChar": 34
+      },
+      "revId": "c6e1378362755ef5f682c125b698d60e113a4586",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
