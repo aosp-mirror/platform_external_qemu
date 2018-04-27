@@ -31,16 +31,16 @@ public:
     using CompletionFunc = std::function<void(ModalOverlay* self)>;
     using OverlayButtonFunc = std::function<void()>;
 
-    explicit ModalOverlay(QString message, QWidget* parent = nullptr);
+    explicit ModalOverlay(const QString& message, QWidget* parent = nullptr);
 
     void show();
-    void hide(CompletionFunc onHidden);
+    void hide(const CompletionFunc& onHidden);
     using QWidget::hide;
 
     void resize(const QSize& size, const QSize& parentSize);
 
     // Displays a secondary, clickable link to perform some action.
-    void showButtonFunc(QString text, OverlayButtonFunc&& func);
+    void showButtonFunc(const QString& text, OverlayButtonFunc&& func);
 
 public slots:
     void slot_handleButtonFunc();

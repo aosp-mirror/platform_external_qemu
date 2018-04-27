@@ -16,34 +16,35 @@
 #ifndef GRAPHICS_TRANSLATION_GLES_LAZY_CACHE_H_
 #define GRAPHICS_TRANSLATION_GLES_LAZY_CACHE_H_
 
-#include <string.h>
+#include <cstring>
 
 // A simple lazy cache class that tracks whether the cache has been initialized
 // yet or not. If the cached value is requested and it has not yet been
 // initialized, then F(T&) is used to do so.
 template <typename T, void (*F)(T&)>
 class LazyCache {
- public:
-  LazyCache() : valid_(false) {}
+public:
+    LazyCache() {}
 
-  T& Mutate() {
-    valid_ = true;
-    return data_;
-  }
-
-  const T& Get() const {
-    if (!valid_) {
-      // Zero out the data because Chrome validates this in some configurations.
-      memset(&data_, 0, sizeof(T));
-      F(data_);
-      valid_ = true;
+    T& Mutate() {
+        valid_ = true;
+        return data_;
     }
-    return data_;
-  }
 
- private:
-  mutable bool valid_;
-  mutable T data_;
+    const T& Get() const {
+        if (!valid_) {
+            // Zero out the data because Chrome validates this in some
+            // configurations.
+            memset(&data_, 0, sizeof(T));
+            F(data_);
+            valid_ = true;
+        }
+        return data_;
+    }
+
+private:
+    mutable bool valid_{false};
+    mutable T data_;
 };
 
 #endif  // GRAPHICS_TRANSLATION_GLES_LAZY_CACHE_H_

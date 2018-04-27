@@ -11,9 +11,9 @@
 */
 #pragma once
 
+#include <cstring>
 #include <initializer_list>
 #include <string>
-#include <string.h>
 #include <vector>
 
 // This file contains a set of Tag Length Values (TLV) that are stored on a UICC
@@ -29,12 +29,9 @@ namespace android {
 // string of data.
 class TagLengthValue {
 public:
-    const char* c_str() const {
-        return mData.c_str();
-    }
-    size_t size() const {
-        return mData.size();
-    }
+    const char* c_str() const { return mData.c_str(); }
+    size_t size() const { return mData.size(); }
+
 protected:
     // Disallow construction and destruction of base class.
     TagLengthValue() = default;
@@ -43,10 +40,10 @@ protected:
     void populateData(const char* tag,
                       std::initializer_list<const TagLengthValue*> data);
 
-    template<class T>
+    template <class T>
     void populateData(const char* tag, std::initializer_list<const T*> data);
 
-    template<class T>
+    template <class T>
     void populateData(const char* tag, T begin, T end);
 
 private:
@@ -66,6 +63,7 @@ class AidRefDo : public TagLengthValue {
 // package matching this name
 class PkgRefDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     explicit PkgRefDo(const std::string& packageName);
 };
@@ -74,6 +72,7 @@ public:
 // to sign an app.
 class DeviceAppIdRefDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     // Create a DeviceAppID-REF-DO from data represented as a hexadecimal string
     explicit DeviceAppIdRefDo(const std::string& stringData);
@@ -84,12 +83,11 @@ public:
 // application.
 class RefDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     explicit RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo);
-    RefDo(const AidRefDo& aidRefDo,
-          const DeviceAppIdRefDo& deviceAppIdRefDo);
-    RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo,
-          const PkgRefDo& pkgRefDo);
+    RefDo(const AidRefDo& aidRefDo, const DeviceAppIdRefDo& deviceAppIdRefDo);
+    RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo, const PkgRefDo& pkgRefDo);
 };
 
 // APDU-AR-DO, used to set access rules regarding APDU commands, can be used to
@@ -97,6 +95,7 @@ public:
 // for different APDU command types.
 class ApduArDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     enum class Allow {
         Never = 0,
@@ -114,6 +113,7 @@ public:
 // NFC-AR-DO, indicates if NFC events are allowed for the device application
 class NfcArDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     enum class Allow {
         Never = 0,
@@ -126,6 +126,7 @@ public:
 // https://source.android.com/devices/tech/config/uicc.html
 class PermArDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     explicit PermArDo(const std::string& stringData);
 };
@@ -133,6 +134,7 @@ public:
 // AR-DO, contains a permission, APDU and/or NFC access rules
 class ArDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     explicit ArDo(const ApduArDo& apduArDo);
     explicit ArDo(const NfcArDo& nfcArDo);
@@ -144,6 +146,7 @@ public:
 // corresponding rule.
 class RefArDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     RefArDo(const RefDo& refDo, const ArDo& arDo);
 };
@@ -151,6 +154,7 @@ public:
 // ALL-REF-AR-DO, a list of all RefArDo's
 class AllRefArDo : public TagLengthValue {
     static const char kTag[];
+
 public:
     explicit AllRefArDo(std::initializer_list<RefArDo> refArDos);
     explicit AllRefArDo(const std::vector<RefArDo>& refArDos);

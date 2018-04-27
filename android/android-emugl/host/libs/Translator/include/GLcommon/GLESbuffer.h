@@ -16,11 +16,11 @@
 #ifndef GLES_BUFFER_H
 #define GLES_BUFFER_H
 
-#include <android/base/files/Stream.h>
-#include <stdio.h>
 #include <GLES/gl.h>
 #include <GLcommon/ObjectData.h>
 #include <GLcommon/RangeManip.h>
+#include <android/base/files/Stream.h>
+#include <cstdio>
 
 class GLESbuffer: public ObjectData {
 public:
@@ -39,15 +39,15 @@ public:
    bool  fullyConverted(){return m_conversionManager.size() == 0;};
    void  setBinded(){m_wasBound = true;};
    bool  wasBinded(){return m_wasBound;};
-   ~GLESbuffer();
+   ~GLESbuffer() override;
 
-private:
-    GLuint         m_size = 0;
-    GLuint         m_usage = GL_STATIC_DRAW;
-    unsigned char* m_data = nullptr;
-    RangeList      m_conversionManager;
-    bool           m_wasBound = false;
+   private:
+   GLuint m_size = 0;
+   GLuint m_usage = GL_STATIC_DRAW;
+   unsigned char* m_data = nullptr;
+   RangeList m_conversionManager;
+   bool m_wasBound = false;
 };
 
-typedef emugl::SmartPtr<GLESbuffer> GLESbufferPtr;
+using GLESbufferPtr = emugl::SmartPtr<GLESbuffer>;
 #endif

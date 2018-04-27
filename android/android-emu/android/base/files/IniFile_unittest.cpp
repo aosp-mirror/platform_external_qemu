@@ -274,24 +274,24 @@ TEST_F(IniFileTest, environmentSubstitution) {
 
 
     // Check that we can substitute all the environment variables.
-    for(auto env : System::get()->envGetAll()) {
-      string name = env.substr(0, env.find_first_of('='));
+    for (const auto& env : System::get()->envGetAll()) {
+        string name = env.substr(0, env.find_first_of('='));
 
-      // Empty environment names??!
-      if (name.size() == 0) continue;
+        // Empty environment names??!
+        if (name.size() == 0)
+            continue;
 
-      string escaped = string("%").append(name).append("%");
-      string value = System::get()->envGet(name);
-      EXPECT_EQ(value, mIni->getString(NON, escaped));
+        string escaped = string("%").append(name).append("%");
+        string value = System::get()->envGet(name);
+        EXPECT_EQ(value, mIni->getString(NON, escaped));
 
+        escaped = string("%%HELLO%% %").append(name).append("%");
+        string expect = string("%HELLO% ").append(value);
+        EXPECT_EQ(expect, mIni->getString(NON, escaped));
 
-      escaped = string("%%HELLO%% %").append(name).append("%");
-      string expect = string("%HELLO% ").append(value);
-      EXPECT_EQ(expect, mIni->getString(NON, escaped));
-
-      escaped = string("%%%").append(name).append("%%%");
-      expect = string("%").append(value).append("%");
-      EXPECT_EQ(expect, mIni->getString(NON, escaped));
+        escaped = string("%%%").append(name).append("%%%");
+        expect = string("%").append(value).append("%");
+        EXPECT_EQ(expect, mIni->getString(NON, escaped));
     }
 
     // It should work with numbers too..

@@ -50,10 +50,10 @@ Loader::Loader(const Snapshot& snapshot, int error)
             return;
         }
 
-        // TODO: RamLoader constructor can just have the first argument if we
-        // can figure out a way to get it to compile for windows. It currently
-        // doesn't like {} being put as an argument for the ram block structure
-        // directly.
+        // TODO(lfy): RamLoader constructor can just have the first argument
+        // if we can figure out a way to get it to compile for windows. It
+        // currently doesn't like {} being put as an argument for the ram block
+        // structure directly.
 
         RamLoader::RamBlockStructure emptyRamBlockStructure = {};
         mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner),
@@ -77,7 +77,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
 }
 
 void Loader::prepare() {
-    // TODO: run asynchronous index loading here.
+    // TODO(zyy): run asynchronous index loading here.
 }
 
 void Loader::start() {

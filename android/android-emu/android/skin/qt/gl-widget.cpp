@@ -128,7 +128,8 @@ bool GLWidget::ensureInit() {
 
     // Finally, create a window surface associated with this widget.
     mEGLState->surface = mEGL->eglCreateWindowSurface(
-            mEGLState->display, egl_config, (EGLNativeWindowType)(winId()),
+            mEGLState->display, egl_config,
+            (EGLNativeWindowType)(winId()),  // NOLINT
             nullptr);
     if (mEGLState->surface == EGL_NO_SURFACE) {
         qWarning("Failed to create an EGL surface %d", mEGL->eglGetError());

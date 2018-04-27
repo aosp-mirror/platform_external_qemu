@@ -66,12 +66,11 @@ MemoryUsageReporter::MemoryUsageReporter(
             fillProto(forMetrics, memUsageProto);
 
             {
-                // TODO: Move performance stats setter to a separate location
-                // once we are tracking more performance stats
+                // TODO(lfy): Move performance stats setter to a separate
+                // location once we are tracking more performance stats
                 android_studio::EmulatorPerformanceStats forCommonInfo =
-                    event->emulator_performance_stats();
-                CommonReportedInfo::setPerformanceStats(
-                    &forCommonInfo);
+                        event->emulator_performance_stats();
+                CommonReportedInfo::setPerformanceStats(&forCommonInfo);
             }
             return true;
         });

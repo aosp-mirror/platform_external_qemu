@@ -20,7 +20,7 @@
 #include <list>
 #include <memory>
 #include <unordered_set>
-
+#include <utility>
 // Use this class to "spy" on events received by other objects.
 // This class is not thread-safe. All subscribers should be on
 // the UI thread.
@@ -46,12 +46,14 @@ private:
         SubscriberInfo(EventTypeSet e,
                        std::unordered_set<QObject*> o,
                        Callback c)
-            : event_types(e), objects(o), callback(c) {}
+            : event_types(std::move(e)),
+              objects(std::move(o)),
+              callback(std::move(c)) {}
     };
 
 public:
     EventCapturer() = default;
-    virtual ~EventCapturer() = default;
+    ~EventCapturer() override = default;
 
     // Ensures that |callback| is invoked for every event that meets
     // the following requirements:

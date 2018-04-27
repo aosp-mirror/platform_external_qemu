@@ -13,7 +13,9 @@
 #include "android/base/files/StreamSerializing.h"
 #include "android/utils/debug.h"
 
-#include <assert.h>
+#include <cassert>
+
+#include <utility>
 
 // #define DEBUG 1
 
@@ -35,7 +37,7 @@ AndroidMessagePipe::AndroidMessagePipe(void* hwPipe,
                                        Service* service,
                                        DecodeAndExecuteFunction cb,
                                        base::Stream* stream)
-    : AndroidPipe(hwPipe, service), m_cb(cb) {
+    : AndroidPipe(hwPipe, service), m_cb(std::move(cb)) {
     D("register new message pipe %s\n", service->name().c_str());
     if (stream) {
         D("load AndroidMessagePipe state from snapshot\n");
@@ -105,7 +107,7 @@ size_t AndroidMessagePipe::copyData(uint8_t** bufdatap,
     uint8_t*& bufdata = *bufdatap;
     size_t& bufsize = *bufsizep;
     assert(m_expected > 0);
-    size_t toCopy = std::min(bufsize, (size_t)m_expected);
+    size_t toCopy = std::min(bufsize, static_cast<size_t>(m_expected));
     if (fromBufdata) {
         memcpy(m_curPos, bufdata, toCopy);
     } else {
@@ -224,7 +226,7 @@ uint32_t AndroidMessagePipe::getOffset() const {
         default:
             break;
     }
-    return (uint32_t)myoffset;
+    return static_cast<uint32_t>(myoffset);
 }
 
 void AndroidMessagePipe::setOffset(uint32_t myoffset) {
@@ -253,7 +255,7 @@ void AndroidMessagePipe::onSave(base::Stream* stream) {
     saveBuffer(stream, mSendPayloadBuffer);
     stream->putBe32(mRecvLengthBuffer);
     saveBuffer(stream, mRecvPayloadBuffer);
-    stream->putByte((uint8_t)mGuestWaitingState);
+    stream->putByte(static_cast<uint8_t>(mGuestWaitingState));
     stream->putBe32(m_expected);
     stream->putBe32(getOffset());
 }
@@ -269,7 +271,7 @@ void AndroidMessagePipe::loadFromStream(base::Stream* stream) {
     mRecvPayloadBuffer.resize(mRecvLengthBuffer);
     loadBuffer(stream, &mRecvPayloadBuffer);
 
-    mGuestWaitingState = (GuestWaitingState)(stream->getByte());
+    mGuestWaitingState = static_cast<GuestWaitingState>(stream->getByte());
     m_expected = stream->getBe32();
     setOffset(stream->getBe32());
 }
@@ -278,7 +280,7 @@ void registerAndroidMessagePipeService(
         const char* serviceName,
         android::AndroidMessagePipe::DecodeAndExecuteFunction cb) {
     android::AndroidPipe::Service::add(
-            new AndroidMessagePipe::Service(serviceName, cb));
+            new AndroidMessagePipe::Service(serviceName, std::move(cb)));
 }
 
 }  // namespace android

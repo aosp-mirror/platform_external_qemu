@@ -16,9 +16,9 @@
 
 #pragma once
 
-typedef double      GLclampd;   /* double precision float in [0,1] */
-typedef double      GLdouble;   /* double precision float */
-typedef void*       GLeglImageOES;
+using GLclampd = double; /* double precision float in [0,1] */
+using GLdouble = double; /* double precision float */
+using GLeglImageOES = void*;
 
 #define GL_S                    0x2000
 #define GL_T                    0x2001

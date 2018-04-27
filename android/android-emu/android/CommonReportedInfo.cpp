@@ -74,7 +74,7 @@ void appendMemoryUsage() {
 
 void setUptime(base::System::Duration uptime) {
     AutoLock lock(get()->lock);
-    get()->details.set_wall_time((uint64_t)uptime);
+    get()->details.set_wall_time(static_cast<uint64_t>(uptime));
 }
 
 void setSessionPhase(AndroidSessionPhase phase) {
@@ -83,7 +83,8 @@ void setSessionPhase(AndroidSessionPhase phase) {
     // the proto's android_studio::EmulatorDetails::EmulatorSessionPhase,
     // at least for now.
     get()->details.set_session_phase(
-        (android_studio::EmulatorDetails::EmulatorSessionPhase)phase);
+            static_cast<android_studio::EmulatorDetails::EmulatorSessionPhase>(
+                    phase));
 }
 
 void writeHostInfo(std::string* res) {

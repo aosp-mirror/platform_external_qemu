@@ -16,11 +16,10 @@
 #include "gles/buffer_data.h"
 
 BufferData::BufferData(ObjectLocalName name)
-  : ObjectData(BUFFER, name),
-    size_(0),
-    usage_(GL_STATIC_DRAW),
-    data_(NULL) {
-}
+    : ObjectData(BUFFER, name),
+      size_(0),
+      usage_(GL_STATIC_DRAW),
+      data_(nullptr) {}
 
 BufferData::~BufferData() {
   delete[] data_;

@@ -32,7 +32,7 @@ class EmulatorOverlay : public QFrame {
 public:
     explicit EmulatorOverlay(EmulatorQtWindow* window,
                              EmulatorContainer* container);
-    virtual ~EmulatorOverlay();
+    ~EmulatorOverlay() override;
 
     void focusOutEvent(QFocusEvent* event) override;
     void hideEvent(QHideEvent* event) override;

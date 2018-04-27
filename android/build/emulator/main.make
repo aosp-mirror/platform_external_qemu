@@ -42,7 +42,7 @@ include $(_BUILD_CONFIG_MAKE)
 include $(_BUILD_CORE_DIR)/emulator/definitions.make
 
 .PHONY: all libraries executables clean clean-config clean-objs-dir \
-        clean-executables clean-libraries
+        clean-executables clean-libraries lint_fix
 
 CLEAR_VARS                := $(_BUILD_CORE_DIR)/emulator/clear_vars.make
 BUILD_HOST_EXECUTABLE     := $(_BUILD_CORE_DIR)/emulator/host_executable.make
@@ -74,6 +74,13 @@ debuginfo: $(_BUILD_DEBUG_INFOS)
 tests: $(_BUILD_TESTS)
 lint: $(_BUILD_LINT)
 
+# This applies all the tidy fixes, note that this is a best effort operation, you will likely still need
+# to fixup some issues, or run lint multiple times until no more changes are applied.
+lint-fix:
+	$(hide) python $(_BUILD_CORE_DIR)/apply-tidy-fixes.py  \
+            -p $(BUILD_OBJS_DIR) --accept ".*android.*" \
+            --reject "$(subst $(space),|,$(strip $(CLANG_TIDY_SKIP)))" \
+            -v
 clean-intermediates:
 	rm -rf $(BUILD_OBJS_DIR)/intermediates $(_BUILD_EXECUTABLES) \
 	    $(_BUILD_LIBRARIES) $(_BUILD_SYMBOLS) $(_BUILD_SYMBOLS_DIR)

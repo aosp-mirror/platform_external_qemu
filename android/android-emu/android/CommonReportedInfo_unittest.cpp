@@ -172,4 +172,4 @@ TEST(CommonReportedInfo, basic) {
     }
 }
 
-} // android
+}  // namespace android

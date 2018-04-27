@@ -11,14 +11,14 @@
 
 #include "android/snapshot/MemoryWatch.h"
 
-hva2gpa_t hva2gpa_call = 0;
-gpa2hva_t gpa2hva_call = 0;
+hva2gpa_t hva2gpa_call = nullptr;
+gpa2hva_t gpa2hva_call = nullptr;
 
-guest_mem_map_t guest_mem_map_call = 0;
-guest_mem_unmap_t guest_mem_unmap_call = 0;
-guest_mem_protect_t guest_mem_protect_call = 0;
-guest_mem_remap_t guest_mem_remap_call = 0;
-guest_mem_protection_supported_t guest_mem_protection_supported_call = 0;
+guest_mem_map_t guest_mem_map_call = nullptr;
+guest_mem_unmap_t guest_mem_unmap_call = nullptr;
+guest_mem_protect_t guest_mem_protect_call = nullptr;
+guest_mem_remap_t guest_mem_remap_call = nullptr;
+guest_mem_protection_supported_t guest_mem_protection_supported_call = nullptr;
 
 void set_address_translation_funcs(
         hva2gpa_t hva2gpa,

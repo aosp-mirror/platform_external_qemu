@@ -69,9 +69,10 @@ Keymaster0Engine::Keymaster0Engine(const keymaster0_device_t* keymaster0_device)
 }
 
 Keymaster0Engine::~Keymaster0Engine() {
-    if (keymaster0_device_)
-        keymaster0_device_->common.close(
-            reinterpret_cast<hw_device_t*>(const_cast<keymaster0_device_t*>(keymaster0_device_)));
+    if (keymaster0_device_) {
+        keymaster0_device_->common.close(reinterpret_cast<hw_device_t*>(
+                const_cast<keymaster0_device_t*>(keymaster0_device_)));
+    }
     ENGINE_free(engine_);
     instance_ = nullptr;
 }
@@ -114,8 +115,9 @@ bool Keymaster0Engine::ImportKey(keymaster_key_format_t key_format,
                                  const KeymasterKeyBlob& to_import,
                                  KeymasterKeyBlob* imported_key) const {
     assert(imported_key);
-    if (key_format != KM_KEY_FORMAT_PKCS8)
+    if (key_format != KM_KEY_FORMAT_PKCS8) {
         return false;
+    }
 
     uint8_t* key_blob = 0;
     if (keymaster0_device_->import_keypair(keymaster0_device_, to_import.key_material,
@@ -130,26 +132,31 @@ bool Keymaster0Engine::ImportKey(keymaster_key_format_t key_format,
 }
 
 bool Keymaster0Engine::DeleteKey(const KeymasterKeyBlob& blob) const {
-    if (!keymaster0_device_->delete_keypair)
+    if (!keymaster0_device_->delete_keypair) {
         return true;
-    return (keymaster0_device_->delete_keypair(keymaster0_device_, blob.key_material,
+    }
+    return (keymaster0_device_->delete_keypair(keymaster0_device_,
+                                               blob.key_material,
                                                blob.key_material_size) == 0);
 }
 
 bool Keymaster0Engine::DeleteAllKeys() const {
-    if (!keymaster0_device_->delete_all)
+    if (!keymaster0_device_->delete_all) {
         return true;
+    }
     return (keymaster0_device_->delete_all(keymaster0_device_) == 0);
 }
 
 static keymaster_key_blob_t* duplicate_blob(const uint8_t* key_data, size_t key_data_size) {
     unique_ptr<uint8_t[]> key_material_copy(dup_buffer(key_data, key_data_size));
-    if (!key_material_copy)
+    if (!key_material_copy) {
         return nullptr;
+    }
 
     unique_ptr<keymaster_key_blob_t> blob_copy(new (std::nothrow) keymaster_key_blob_t);
-    if (!blob_copy.get())
+    if (!blob_copy) {
         return nullptr;
+    }
     blob_copy->key_material_size = key_data_size;
     blob_copy->key_material = key_material_copy.release();
     return blob_copy.release();
@@ -162,24 +169,30 @@ inline keymaster_key_blob_t* duplicate_blob(const keymaster_key_blob_t& blob) {
 RSA* Keymaster0Engine::BlobToRsaKey(const KeymasterKeyBlob& blob) const {
     // Create new RSA key (with engine methods) and insert blob
     unique_ptr<RSA, RSA_Delete> rsa(RSA_new_method(engine_));
-    if (!rsa)
+    if (!rsa) {
         return nullptr;
+    }
 
     keymaster_key_blob_t* blob_copy = duplicate_blob(blob);
-    if (!blob_copy->key_material || !RSA_set_ex_data(rsa.get(), rsa_index_, blob_copy))
+    if (!blob_copy->key_material ||
+        !RSA_set_ex_data(rsa.get(), rsa_index_, blob_copy)) {
         return nullptr;
+    }
 
     // Copy public key into new RSA key
     unique_ptr<EVP_PKEY, EVP_PKEY_Delete> pkey(GetKeymaster0PublicKey(blob));
-    if (!pkey)
+    if (!pkey) {
         return nullptr;
+    }
     unique_ptr<RSA, RSA_Delete> public_rsa(EVP_PKEY_get1_RSA(pkey.get()));
-    if (!public_rsa)
+    if (!public_rsa) {
         return nullptr;
+    }
     rsa->n = BN_dup(public_rsa->n);
     rsa->e = BN_dup(public_rsa->e);
-    if (!rsa->n || !rsa->e)
+    if (!rsa->n || !rsa->e) {
         return nullptr;
+    }
 
     return rsa.release();
 }
@@ -187,25 +200,33 @@ RSA* Keymaster0Engine::BlobToRsaKey(const KeymasterKeyBlob& blob) const {
 EC_KEY* Keymaster0Engine::BlobToEcKey(const KeymasterKeyBlob& blob) const {
     // Create new EC key (with engine methods) and insert blob
     unique_ptr<EC_KEY, EC_KEY_Delete> ec_key(EC_KEY_new_method(engine_));
-    if (!ec_key)
+    if (!ec_key) {
         return nullptr;
+    }
 
     keymaster_key_blob_t* blob_copy = duplicate_blob(blob);
-    if (!blob_copy->key_material || !EC_KEY_set_ex_data(ec_key.get(), ec_key_index_, blob_copy))
+    if (!blob_copy->key_material ||
+        !EC_KEY_set_ex_data(ec_key.get(), ec_key_index_, blob_copy)) {
         return nullptr;
+    }
 
     // Copy public key into new EC key
     unique_ptr<EVP_PKEY, EVP_PKEY_Delete> pkey(GetKeymaster0PublicKey(blob));
-    if (!pkey)
+    if (!pkey) {
         return nullptr;
+    }
 
     unique_ptr<EC_KEY, EC_KEY_Delete> public_ec_key(EVP_PKEY_get1_EC_KEY(pkey.get()));
-    if (!public_ec_key)
+    if (!public_ec_key) {
         return nullptr;
+    }
 
-    if (!EC_KEY_set_group(ec_key.get(), EC_KEY_get0_group(public_ec_key.get())) ||
-        !EC_KEY_set_public_key(ec_key.get(), EC_KEY_get0_public_key(public_ec_key.get())))
+    if (!EC_KEY_set_group(ec_key.get(),
+                          EC_KEY_get0_group(public_ec_key.get())) ||
+        !EC_KEY_set_public_key(ec_key.get(),
+                               EC_KEY_get0_public_key(public_ec_key.get()))) {
         return nullptr;
+    }
 
     return ec_key.release();
 }
@@ -223,11 +244,13 @@ int Keymaster0Engine::keyblob_dup(CRYPTO_EX_DATA* /* to */, const CRYPTO_EX_DATA
                                   void** from_d, int /* index */, long /* argl */,
                                   void* /* argp */) {
     keymaster_key_blob_t* blob = reinterpret_cast<keymaster_key_blob_t*>(*from_d);
-    if (!blob)
+    if (!blob) {
         return 1;
+    }
     *from_d = duplicate_blob(*blob);
-    if (*from_d)
+    if (*from_d) {
         return 1;
+    }
     return 0;
 }
 
@@ -350,8 +373,9 @@ int Keymaster0Engine::EcdsaSign(const uint8_t* digest, size_t digest_len, uint8_
 
     // Truncate digest if it's too long
     size_t max_input_len = (ec_group_size_bits(ec_key) + 7) / 8;
-    if (digest_len > max_input_len)
+    if (digest_len > max_input_len) {
         digest_len = max_input_len;
+    }
 
     keymaster_ec_sign_params_t sign_params = {DIGEST_NONE};
     unique_ptr<uint8_t[], Malloc_Delete> signature;

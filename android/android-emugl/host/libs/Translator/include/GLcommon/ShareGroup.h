@@ -87,7 +87,9 @@ public:
     // replaceGlobalName - replaces an object to map to an existing global
     //        named object. (used when creating EGLImage siblings)
     //
-    void replaceGlobalObject(NamedObjectType p_type, ObjectLocalName p_localName, NamedObjectPtr p_globalObject);
+    void replaceGlobalObject(NamedObjectType p_type,
+                             ObjectLocalName p_localName,
+                             const NamedObjectPtr& p_globalObject);
 
     //
     // isObject - returns true if the named object exist.
@@ -151,7 +153,7 @@ private:
     bool m_needLoadRestore = false;
 };
 
-typedef emugl::SmartPtr<ShareGroup> ShareGroupPtr;
+using ShareGroupPtr = emugl::SmartPtr<ShareGroup>;
 // TODO: refactor ShareGroupsMap so that it is indexed by share group id
 typedef std::unordered_map<void*, ShareGroupPtr> ShareGroupsMap;
 

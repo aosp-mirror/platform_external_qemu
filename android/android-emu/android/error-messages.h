@@ -13,8 +13,6 @@
 
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
-
 ANDROID_BEGIN_HEADER
 
 // Set an error code and message for an error that occurred during

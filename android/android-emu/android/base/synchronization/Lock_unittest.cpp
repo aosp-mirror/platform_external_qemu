@@ -42,21 +42,21 @@ TEST(Lock, AutoLock) {
 // Wrapper class for threads. Does not use emugl::Thread intentionally.
 // Common data type used by the following tests below.
 struct ThreadParams {
-    ThreadParams() : mutex(), counter(0) {}
+    ThreadParams() : mutex() {}
 
     Lock mutex;
-    int counter;
+    int counter{0};
 };
 
 // This thread function uses Lock::lock/unlock to synchronize a counter
 // increment operation.
 static void* threadFunction(void* param) {
-    ThreadParams* p = static_cast<ThreadParams*>(param);
+    auto* p = static_cast<ThreadParams*>(param);
 
     p->mutex.lock();
     p->counter++;
     p->mutex.unlock();
-    return NULL;
+    return nullptr;
 }
 
 TEST(Lock, Synchronization) {
@@ -65,14 +65,14 @@ TEST(Lock, Synchronization) {
     ThreadParams p;
 
     // Create and launch all threads.
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n] = new TestThread(threadFunction, &p);
+    for (auto& thread : threads) {
+        thread = new TestThread(threadFunction, &p);
     }
 
     // Wait until their completion.
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n]->join();
-        delete threads[n];
+    for (auto& thread : threads) {
+        thread->join();
+        delete thread;
     }
 
     EXPECT_EQ(static_cast<int>(kNumThreads), p.counter);
@@ -80,11 +80,11 @@ TEST(Lock, Synchronization) {
 
 // This thread function uses a AutoLock to protect the counter.
 static void* threadAutoLockFunction(void* param) {
-    ThreadParams* p = static_cast<ThreadParams*>(param);
+    auto* p = static_cast<ThreadParams*>(param);
 
     AutoLock lock(p->mutex);
     p->counter++;
-    return NULL;
+    return nullptr;
 }
 
 TEST(Lock, AutoLockSynchronization) {
@@ -93,14 +93,14 @@ TEST(Lock, AutoLockSynchronization) {
     ThreadParams p;
 
     // Create and launch all threads.
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n] = new TestThread(threadAutoLockFunction, &p);
+    for (auto& thread : threads) {
+        thread = new TestThread(threadAutoLockFunction, &p);
     }
 
     // Wait until their completion.
-    for (size_t n = 0; n < kNumThreads; ++n) {
-        threads[n]->join();
-        delete threads[n];
+    for (auto& thread : threads) {
+        thread->join();
+        delete thread;
     }
 
     EXPECT_EQ(static_cast<int>(kNumThreads), p.counter);

@@ -17,11 +17,11 @@
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
 
-#include <assert.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 
@@ -51,32 +51,33 @@ static void _hwCarClient_recv(void* opaque,
                               int msglen,
                               QemudClient* car) {
     T("%s: msg length %d", __func__, msglen);
-    HwCar* hwCar = (HwCar*)opaque;
+    auto* hwCar = static_cast<HwCar*>(opaque);
 
     if (hwCar->callback.func != nullptr) {
-        hwCar->callback.func((char*)msg, msglen, hwCar->callback.context);
+        hwCar->callback.func(reinterpret_cast<char*>(msg), msglen,
+                             hwCar->callback.context);
     }
 }
 
 static void _hwCarClient_close(void* opaque) {
-    // TODO: handle close
+    // TODO(grigoryj): handle close
 }
 
 static void _hwCarClient_save(Stream* f, QemudClient* client, void* opaque) {
-    // TODO
+    // TODO(grigoryj):
 }
 
 static int _hwCarClient_load(Stream* f, QemudClient* client, void* opaque) {
-    // TODO
+    // TODO(grigoryj):
     return 0;
 }
 
 static void _hwCar_save(Stream* f, QemudService* sv, void* opaque) {
-    // TODO
+    // TODO(grigoryj):
 }
 
 static int _hwCar_load(Stream* f, QemudService* s, void* opaque) {
-    // TODO
+    // TODO(grigoryj):
     return 0;
 }
 
@@ -85,7 +86,7 @@ static QemudClient* _hwCar_connect(void* opaque,
                                    int channel,
                                    const char* client_param) {
     D("Car client connected");
-    HwCar* car = (HwCar*)opaque;
+    auto* car = static_cast<HwCar*>(opaque);
     // Allow only one client -- Vehical Hal
     if (car->client != nullptr) {
         qemud_client_close(car->client);
@@ -135,5 +136,6 @@ void android_send_car_data(const char* msg, int msgLen) {
         return;
     }
     T("%s: Sent message length of %d", __func__, );
-    qemud_client_send(_car->client, (const uint8_t*)msg, msgLen);
+    qemud_client_send(_car->client, reinterpret_cast<const uint8_t*>(msg),
+                      msgLen);
 }

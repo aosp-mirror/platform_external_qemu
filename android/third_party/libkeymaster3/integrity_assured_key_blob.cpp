@@ -35,8 +35,9 @@ static const size_t HMAC_SIZE = 8;
 static const char HMAC_KEY[] = "IntegrityAssuredBlob0";
 
 inline size_t min(size_t a, size_t b) {
-    if (a < b)
+    if (a < b) {
         return a;
+    }
     return b;
 }
 
@@ -53,23 +54,27 @@ static keymaster_error_t ComputeHmac(const uint8_t* serialized_data, size_t seri
                                      const AuthorizationSet& hidden, uint8_t hmac[HMAC_SIZE]) {
     size_t hidden_bytes_size = hidden.SerializedSize();
     UniquePtr<uint8_t[]> hidden_bytes(new (std::nothrow) uint8_t[hidden_bytes_size]);
-    if (!hidden_bytes.get())
+    if (!hidden_bytes.get()) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
     hidden.Serialize(hidden_bytes.get(), hidden_bytes.get() + hidden_bytes_size);
 
     HMAC_CTX ctx;
     HMAC_CTX_init(&ctx);
     const EVP_MD* md = EVP_sha256();
-    if (!HMAC_Init_ex(&ctx, HMAC_KEY, sizeof(HMAC_KEY), md, NULL /* engine */))
+    if (!HMAC_Init_ex(&ctx, HMAC_KEY, sizeof(HMAC_KEY), md,
+                      NULL /* engine */)) {
         return TranslateLastOpenSslError();
+    }
     HmacCleanup cleanup(&ctx);
 
     uint8_t tmp[EVP_MAX_MD_SIZE];
     unsigned tmp_len;
     if (!HMAC_Update(&ctx, serialized_data, serialized_data_size) ||
         !HMAC_Update(&ctx, hidden_bytes.get(), hidden_bytes_size) ||  //
-        !HMAC_Final(&ctx, tmp, &tmp_len))
+        !HMAC_Final(&ctx, tmp, &tmp_len)) {
         return TranslateLastOpenSslError();
+    }
 
     assert(tmp_len >= HMAC_SIZE);
     memcpy(hmac, tmp, min(HMAC_SIZE, tmp_len));
@@ -88,8 +93,9 @@ keymaster_error_t SerializeIntegrityAssuredBlob(const KeymasterKeyBlob& key_mate
                   sw_enforced.SerializedSize() +   //
                   HMAC_SIZE;
 
-    if (!key_blob->Reset(size))
+    if (!key_blob->Reset(size)) {
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
+    }
 
     uint8_t* p = key_blob->writable_data();
     *p++ = BLOB_VERSION;
@@ -108,17 +114,21 @@ keymaster_error_t DeserializeIntegrityAssuredBlob(const KeymasterKeyBlob& key_bl
     const uint8_t* p = key_blob.begin();
     const uint8_t* end = key_blob.end();
 
-    if (p > end || p + HMAC_SIZE > end)
+    if (p > end || p + HMAC_SIZE > end) {
         return KM_ERROR_INVALID_KEY_BLOB;
+    }
 
     uint8_t computed_hmac[HMAC_SIZE];
     keymaster_error_t error = ComputeHmac(key_blob.begin(), key_blob.key_material_size - HMAC_SIZE,
                                           hidden, computed_hmac);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
         return error;
+    }
 
-    if (CRYPTO_memcmp(key_blob.end() - HMAC_SIZE, computed_hmac, HMAC_SIZE) != 0)
+    if (CRYPTO_memcmp(key_blob.end() - HMAC_SIZE, computed_hmac, HMAC_SIZE) !=
+        0) {
         return KM_ERROR_INVALID_KEY_BLOB;
+    }
 
     return DeserializeIntegrityAssuredBlob_NoHmacCheck(key_blob, key_material, hw_enforced,
                                                        sw_enforced);
@@ -131,19 +141,22 @@ keymaster_error_t DeserializeIntegrityAssuredBlob_NoHmacCheck(const KeymasterKey
     const uint8_t* p = key_blob.begin();
     const uint8_t* end = key_blob.end() - HMAC_SIZE;
 
-    if (p > end)
+    if (p > end) {
         return KM_ERROR_INVALID_KEY_BLOB;
+    }
 
-    if (*p != BLOB_VERSION)
+    if (*p != BLOB_VERSION) {
         return KM_ERROR_INVALID_KEY_BLOB;
+    }
     ++p;
 
     if (!key_material->Deserialize(&p, end) ||  //
         !hw_enforced->Deserialize(&p, end) ||   //
-        !sw_enforced->Deserialize(&p, end))
+        !sw_enforced->Deserialize(&p, end)) {
         return KM_ERROR_INVALID_KEY_BLOB;
+    }
 
     return KM_ERROR_OK;
 }
 
-}  // namespace keymaster;
+}  // namespace keymaster

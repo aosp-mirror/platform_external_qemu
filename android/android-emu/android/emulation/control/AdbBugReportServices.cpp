@@ -45,8 +45,9 @@ AdbBugReportServices::~AdbBugReportServices() {
     }
 }
 
-void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
-                                             ResultCallback resultCallback) {
+void AdbBugReportServices::generateBugReport(
+        const StringView& outputDirectoryPath,
+        const ResultCallback& resultCallback) {
     if (isBugReportInFlight()) {
         resultCallback(Result::OperationInProgress, nullptr);
         return;
@@ -108,7 +109,7 @@ void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
 }
 
 void AdbBugReportServices::generateAdbLogcatInMemory(
-        ResultOutputCallback resultCallback) {
+        const ResultOutputCallback& resultCallback) {
     if (mAdbLogcatCommand) {
         resultCallback(Result::OperationInProgress, nullptr);
         return;

@@ -152,10 +152,10 @@ TEST(KmlParser, ParseValidComplexFile) {
         EXPECT_EQ("Fruity", locations[2].name);
         EXPECT_EQ("If the <tessellate> tag has a value of n", locations[2].description);
 
-        for (unsigned i = 0; i < locations.size(); ++i) {
-            EXPECT_FLOAT_EQ(-122.084075, locations[i].longitude);
-            EXPECT_FLOAT_EQ(37.4220033612141, locations[i].latitude);
-            EXPECT_FLOAT_EQ(50, locations[i].elevation);
+        for (auto& location : locations) {
+            EXPECT_FLOAT_EQ(-122.084075, location.longitude);
+            EXPECT_FLOAT_EQ(37.4220033612141, location.latitude);
+            EXPECT_FLOAT_EQ(50, location.elevation);
         }
     }   // destructor removes temp directory and all files under it.
 }
@@ -275,12 +275,12 @@ TEST(KmlParser, ParseLocationNormal) {
 
     ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
 
-    for (unsigned i = 0; i < locations.size(); ++i) {
-        EXPECT_EQ("Simple placemark", locations[i].name);
-        EXPECT_EQ("Attached to the ground.", locations[i].description);
-        EXPECT_FLOAT_EQ(-122.0822035425683, locations[i].longitude);
-        EXPECT_FLOAT_EQ(37.42228990140251, locations[i].latitude);
-        EXPECT_FLOAT_EQ(0, locations[i].elevation);
+    for (auto& location : locations) {
+        EXPECT_EQ("Simple placemark", location.name);
+        EXPECT_EQ("Attached to the ground.", location.description);
+        EXPECT_FLOAT_EQ(-122.0822035425683, location.longitude);
+        EXPECT_FLOAT_EQ(37.42228990140251, location.latitude);
+        EXPECT_FLOAT_EQ(0, location.elevation);
     }
 }
 
@@ -308,12 +308,12 @@ TEST(KmlParser, ParseLocationNormalMissingOptionalFields) {
     EXPECT_EQ("", error);
     ASSERT_EQ(1U, locations.size());
 
-    for (unsigned i = 0; i < locations.size(); ++i) {
-        EXPECT_EQ("", locations[i].name);
-        EXPECT_EQ("", locations[i].description);
-        EXPECT_FLOAT_EQ(-122.0822035425683, locations[i].longitude);
-        EXPECT_FLOAT_EQ(37.42228990140251, locations[i].latitude);
-        EXPECT_FLOAT_EQ(0, locations[i].elevation);
+    for (auto& location : locations) {
+        EXPECT_EQ("", location.name);
+        EXPECT_EQ("", location.description);
+        EXPECT_FLOAT_EQ(-122.0822035425683, location.longitude);
+        EXPECT_FLOAT_EQ(37.42228990140251, location.latitude);
+        EXPECT_FLOAT_EQ(0, location.elevation);
     }
 }
 
@@ -371,10 +371,10 @@ TEST(KmlParser, ParseLocationNameOnlyFirst) {
     EXPECT_EQ("", locations[1].name);
     EXPECT_EQ("", locations[1].description);
 
-    for (unsigned i = 0; i < locations.size(); ++i) {
-        EXPECT_FLOAT_EQ(-122.0822035425683, locations[i].longitude);
-        EXPECT_FLOAT_EQ(37.42228990140251, locations[i].latitude);
-        EXPECT_FLOAT_EQ(0, locations[i].elevation);
+    for (auto& location : locations) {
+        EXPECT_FLOAT_EQ(-122.0822035425683, location.longitude);
+        EXPECT_FLOAT_EQ(37.42228990140251, location.latitude);
+        EXPECT_FLOAT_EQ(0, location.elevation);
     }
 }
 
@@ -572,12 +572,12 @@ TEST(KmlParser, ParseLocationNormalCommaLocale) {
 
     ASSERT_TRUE(KmlParser::parseFile(path.c_str(), &locations, &error));
 
-    for (unsigned i = 0; i < locations.size(); ++i) {
-        EXPECT_EQ("Simple placemark", locations[i].name);
-        EXPECT_EQ("Attached to the ground.", locations[i].description);
-        EXPECT_FLOAT_EQ(-122.0822035425683, locations[i].longitude);
-        EXPECT_FLOAT_EQ(37.42228990140251, locations[i].latitude);
-        EXPECT_FLOAT_EQ(0, locations[i].elevation);
+    for (auto& location : locations) {
+        EXPECT_EQ("Simple placemark", location.name);
+        EXPECT_EQ("Attached to the ground.", location.description);
+        EXPECT_FLOAT_EQ(-122.0822035425683, location.longitude);
+        EXPECT_FLOAT_EQ(37.42228990140251, location.latitude);
+        EXPECT_FLOAT_EQ(0, location.elevation);
     }
 }
-}
+}  // namespace android_gps

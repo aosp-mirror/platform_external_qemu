@@ -41,7 +41,7 @@ class RenderbufferData : public ObjectData {
   GLuint GetAttachedFramebuffer() const { return attach_fbo_; }
 
  protected:
-  virtual ~RenderbufferData();
+     ~RenderbufferData() override;
 
  private:
   GLuint attach_fbo_;
@@ -53,10 +53,10 @@ class RenderbufferData : public ObjectData {
   GLuint height_;
   EglImagePtr image_;
 
-  RenderbufferData(const RenderbufferData&);
-  RenderbufferData& operator=(const RenderbufferData&);
+  RenderbufferData(const RenderbufferData&) = delete;
+  RenderbufferData& operator=(const RenderbufferData&) = delete;
 };
 
-typedef android::sp<RenderbufferData> RenderbufferDataPtr;
+using RenderbufferDataPtr = android::sp<RenderbufferData>;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_RENDERBUFFER_DATA_H_

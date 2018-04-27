@@ -15,10 +15,7 @@
 #include <QSvgRenderer>
 
 RotaryInputDial::RotaryInputDial(QWidget* parent)
-: QDial(parent),
-  mSvgRenderer(this),
-  mImageAngleOffset(0)
-{
+    : QDial(parent), mSvgRenderer(this) {
     setRange(0, 359);
     setWrapping(true);
 }

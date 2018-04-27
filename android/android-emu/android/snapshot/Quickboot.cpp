@@ -54,9 +54,12 @@ static void reportFailedLoad(
     MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_load()->set_state(
                 state);
-        event->mutable_emulator_details()->mutable_quickboot_load()->
-            mutable_snapshot()->set_load_failure_reason(
-                (pb::EmulatorSnapshotFailureReason)failureReason);
+        event->mutable_emulator_details()
+                ->mutable_quickboot_load()
+                ->mutable_snapshot()
+                ->set_load_failure_reason(
+                        static_cast<pb::EmulatorSnapshotFailureReason>(
+                                failureReason));
     });
 }
 
@@ -65,9 +68,12 @@ static void reportFailedSave(
     MetricsReporter::get().report([state](pb::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_save()->set_state(
                 state);
-        event->mutable_emulator_details()->mutable_quickboot_save()->
-            mutable_snapshot()->set_save_failure_reason(
-                (pb::EmulatorSnapshotFailureReason)FailureReason::Empty);
+        event->mutable_emulator_details()
+                ->mutable_quickboot_save()
+                ->mutable_snapshot()
+                ->set_save_failure_reason(
+                        static_cast<pb::EmulatorSnapshotFailureReason>(
+                                FailureReason::Empty));
     });
 }
 
@@ -97,9 +103,9 @@ void Quickboot::finalize() {
     sInstance = nullptr;
 }
 
-Quickboot::~Quickboot() { }
+Quickboot::~Quickboot() = default;
 
-void Quickboot::reportSuccessfulLoad(StringView name,
+void Quickboot::reportSuccessfulLoad(const StringView& name,
                                      System::WallDuration startTimeMs) {
     auto& loader = Snapshotter::get().loader();
     loader.reportSuccessful();
@@ -116,12 +122,13 @@ void Quickboot::reportSuccessfulLoad(StringView name,
     });
 }
 
-void Quickboot::reportSuccessfulSave(StringView name,
+void Quickboot::reportSuccessfulSave(const StringView& name,
                                      System::WallDuration durationMs,
                                      System::WallDuration sessionUptimeMs) {
     auto stats = Snapshotter::get().getSaveStats(name.c_str(), durationMs);
 
-    MetricsReporter::get().report([stats, sessionUptimeMs](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([stats, sessionUptimeMs](
+                                          pb::AndroidStudioEvent* event) {
         auto save = event->mutable_emulator_details()->mutable_quickboot_save();
         save->set_state(
                 pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
@@ -347,17 +354,15 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
 }
 
 bool Quickboot::save(StringView name) {
-    // TODO: detect if emulator was restarted since loading.
-    const bool shouldTrySaving =
-            mLoaded || isSnapshotAlive();
+    // TODO(zyy): detect if emulator was restarted since loading.
+    const bool shouldTrySaving = mLoaded || isSnapshotAlive();
 
     if (!shouldTrySaving) {
         // Emulator hasn't booted yet or is otherwise not live,
         // and this isn't a quickboot-loaded session. Don't save.
         dwarning("Not saving state: emulator hasn't finished booting.");
-        reportFailedSave(
-                pb::EmulatorQuickbootSave::
-                        EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED);
+        reportFailedSave(pb::EmulatorQuickbootSave::
+                                 EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED);
         return false;
     }
 
@@ -403,7 +408,8 @@ bool Quickboot::save(StringView name) {
             nowMs - (mLoadTimeMs ? mLoadTimeMs : mStartTimeMs);
     const bool ranLongEnoughForSaving = sessionUptimeMs > kMinUptimeForSavingMs;
 
-    // TODO: when cleaning the current 'default_boot' snapshot, save the reason
+    // TODO(bohu): when cleaning the current 'default_boot' snapshot, save
+    // the reason
     //  of its invalidation in it - this way emulator will be able to give a
     //  better idea on the next clean boot other than "no snapshot".
 

@@ -17,24 +17,26 @@
 #include "android/base/async/Looper.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/sockets/SocketUtils.h"
-#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/utils/debug.h"
 #include "android/wear-agent/PairUpWearPhone.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
-#define DPRINT(...)  ((void)0)
+#define DPRINT(...) ((void)0)
 
-//#define  DPRINT(...)  do {  if (VERBOSE_CHECK(adb)) dprintn(__VA_ARGS__); } while (0)
+//#define  DPRINT(...)  do {  if (VERBOSE_CHECK(adb)) dprintn(__VA_ARGS__); }
+// while (0)
 
 namespace android {
 namespace wear {
@@ -69,34 +71,26 @@ private:
 
     static const int DEFAULT_READ_BUFFER_SIZE = 1024;
     static const int WRITE_BUFFER_SIZE = 1024;
-    int          mAdbHostPort;
+    int mAdbHostPort;
 
-    enum class SocketOpenState {
-        Pending,
-        Succeded,
-        Failed
-    };
+    enum class SocketOpenState { Pending, Succeded, Failed };
     SocketOpenState mSocketOpenState = SocketOpenState::Pending;
-    int          mSocket;
+    int mSocket;
     android::base::Lock mSocketLock;
 
     Looper* mLooper;
     ScopedPtr<Looper::FdWatch> mFdWatch;
     ScopedPtr<Looper::Timer> mTimer;
-    int          mRetryAfterSeconds;
-    ::android::base::AsyncReader  mAsyncReader;
-    ::android::base::AsyncWriter  mAsyncWriter;
-    int          mSizeOfReadBuffer;
-    char         *mReadBuffer;
-    char         mWriteBuffer[WRITE_BUFFER_SIZE];
-    int          mExpectReplayType;
+    int mRetryAfterSeconds;
+    ::android::base::AsyncReader mAsyncReader;
+    ::android::base::AsyncWriter mAsyncWriter;
+    int mSizeOfReadBuffer;
+    char* mReadBuffer;
+    char mWriteBuffer[WRITE_BUFFER_SIZE];
+    int mExpectReplayType;
     ScopedPtr<PairUpWearPhone> mPairUpWearPhone;
 
-    enum class ConnectAction {
-        None,
-        Connect,
-        Quit
-    };
+    enum class ConnectAction { None, Connect, Quit };
 
     ConnectAction mConnectAction = ConnectAction::None;
     android::base::FunctorThread mConnectThread;
@@ -108,13 +102,9 @@ private:
     // function on the main thread where it's safe
     ScopedPtr<Looper::Timer> mConnectCompleteTimer;
 
-    enum ExpectMessage {
-        OKAY = 0,
-        LENGTH,
-        MESSAGE
-    };
+    enum ExpectMessage { OKAY = 0, LENGTH, MESSAGE };
 
-    bool expectOkay () const { return OKAY == mExpectReplayType; }
+    bool expectOkay() const { return OKAY == mExpectReplayType; }
     bool expectLength() const { return LENGTH == mExpectReplayType; }
     bool expectMsg() const { return MESSAGE == mExpectReplayType; }
     static bool isValidHexNumber(const char* str, const int sz);
@@ -137,8 +127,7 @@ static void on_adb_server_socket_fd(void* opaque, int fd, unsigned events) {
     }
 }
 
-bool WearAgentImpl::connected() const
-{
+bool WearAgentImpl::connected() const {
     return mFdWatch.get() != nullptr;
 }
 
@@ -159,17 +148,19 @@ void WearAgentImpl::onRead() {
                 mAsyncReader.reset(mReadBuffer, 4, mFdWatch.get());
                 mExpectReplayType = LENGTH;
 
-            } else if (expectLength() && isValidHexNumber(mReadBuffer, 4)
-                    && 1 == sscanf(mReadBuffer, "%x", &msgsize)) {
+            } else if (expectLength() && isValidHexNumber(mReadBuffer, 4) &&
+                       1 == sscanf(mReadBuffer, "%x", &msgsize)) {
                 if (msgsize < 0) {
                     isError = true;
-                } else if (0 == msgsize) { //this is not error: just no devices
+                } else if (0 == msgsize) {  // this is not error: just no
+                                            // devices
                     mExpectReplayType = LENGTH;
                     mReadBuffer[msgsize] = '\0';
                     mAsyncReader.reset(mReadBuffer, 4, mFdWatch.get());
                 } else {
                     if (msgsize >= mSizeOfReadBuffer) {
-                        char* ptr = (char*)calloc(2 * msgsize, sizeof(char));
+                        auto* ptr = static_cast<char*>(
+                                calloc(2 * msgsize, sizeof(char)));
                         if (ptr) {
                             mSizeOfReadBuffer = 2 * msgsize;
                             free(mReadBuffer);
@@ -188,8 +179,7 @@ void WearAgentImpl::onRead() {
                 std::vector<std::string> devices;
                 parseAdbDevices(mReadBuffer, &devices);
                 if (devices.size() >= 2) {
-                    mPairUpWearPhone.reset(new PairUpWearPhone(mLooper,
-                                                               devices,
+                    mPairUpWearPhone.reset(new PairUpWearPhone(mLooper, devices,
                                                                mAdbHostPort));
                 }
                 // prepare for next adb devices message
@@ -254,8 +244,7 @@ void WearAgentImpl::connectToAdbHostAsync() {
     }
 }
 
-void WearAgentImpl::connectToAdbHostWorker()
-{
+void WearAgentImpl::connectToAdbHostWorker() {
     Thread::maskAllSignals();
 
     for (;;) {
@@ -265,17 +254,17 @@ void WearAgentImpl::connectToAdbHostWorker()
         }
 
         switch (mConnectAction) {
-        default:
-            break;  // make the compiler happy
+            default:
+                break;  // make the compiler happy
 
-        case ConnectAction::Quit:
-            return;
+            case ConnectAction::Quit:
+                return;
 
-        case ConnectAction::Connect:
-            mConnectAction = ConnectAction::None;
-            lock.unlock();
-            connectToAdbHost();
-            break;
+            case ConnectAction::Connect:
+                mConnectAction = ConnectAction::None;
+                lock.unlock();
+                connectToAdbHost();
+                break;
         }
     }
 }
@@ -314,23 +303,22 @@ void WearAgentImpl::connectToAdbHost() {
 }
 
 void WearAgentImpl::connectLater() {
-    DPRINT("Warning: cannot connect to adb server, will try again in %d seconds. \n",
-            mRetryAfterSeconds);
+    DPRINT("Warning: cannot connect to adb server, will try again in %d "
+           "seconds. \n",
+           mRetryAfterSeconds);
     const Looper::Duration dl = 1000 * mRetryAfterSeconds;
     mTimer->startRelative(dl);
 }
 
-void WearAgentImpl::completeConnectLater()
-{
+void WearAgentImpl::completeConnectLater() {
     static const unsigned completeConnectTimeoutMs = 16;
 
     DPRINT("Info: scheduling a connection completion handler in %d ms. \n",
-            completeConnectTimeoutMs);
+           completeConnectTimeoutMs);
     mConnectCompleteTimer->startRelative(completeConnectTimeoutMs);
 }
 
-void WearAgentImpl::completeConnect()
-{
+void WearAgentImpl::completeConnect() {
     if (connected()) {
         return;
     }
@@ -341,31 +329,26 @@ void WearAgentImpl::completeConnect()
     lock.unlock();
 
     switch (state) {
-    case SocketOpenState::Pending:
-        // just reschedule to check later
-        completeConnectLater();
-        return;
+        case SocketOpenState::Pending:
+            // just reschedule to check later
+            completeConnectLater();
+            return;
 
-    case SocketOpenState::Failed:
-        connectLater();
-        return;
+        case SocketOpenState::Failed:
+            connectLater();
+            return;
 
-    case SocketOpenState::Succeded:
-        {
+        case SocketOpenState::Succeded: {
             assert(mSocket >= 0);
 
             ScopedPtr<Looper::FdWatch> fdWatch(mLooper->createFdWatch(
-                                                   mSocket,
-                                                   on_adb_server_socket_fd,
-                                                   this));
-            mAsyncWriter.reset(mWriteBuffer,
-                               ::strlen(mWriteBuffer),
+                    mSocket, on_adb_server_socket_fd, this));
+            mAsyncWriter.reset(mWriteBuffer, ::strlen(mWriteBuffer),
                                fdWatch.get());
 
             // connected() checks if mFdWatch is not null, so set it last
             mFdWatch.reset(fdWatch.release());
-        }
-        break;
+        } break;
     }
 }
 
@@ -385,25 +368,28 @@ void WearAgentImpl::cleanupConnection() {
 
 void WearAgentImpl::parseAdbDevices(char* buf,
                                     std::vector<std::string>* devices) {
-    if (!buf) return;
+    if (!buf) {
+        return;
+    }
 
     static const char kDelimiters[] = " \t\r\n";
 
     char* pch = strtok(buf, kDelimiters);
-    char* prev = NULL;
+    char* prev = nullptr;
     while (pch) {
         if (!strcmp("device", pch) && prev) {
             devices->push_back(std::string(prev));
         }
         prev = pch;
-        pch = strtok(NULL, kDelimiters);
+        pch = strtok(nullptr, kDelimiters);
     }
 }
 
 bool WearAgentImpl::isValidHexNumber(const char* str, const int sz) {
-    if (!str || sz <= 0)
+    if (!str || sz <= 0) {
         return false;
-    for (int i=0; i < sz; ++i) {
+    }
+    for (int i = 0; i < sz; ++i) {
         int ch = tolower(str[i]);
         if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {
             continue;
@@ -428,23 +414,25 @@ static void on_reconnect_timeout(void* opaque, Looper::Timer* timer) {
     }
 }
 
-WearAgentImpl::WearAgentImpl(Looper* looper, int adbHostPort) :
-        mAdbHostPort(adbHostPort),
-        mSocket(-1),
-        mLooper(looper),
-        mFdWatch(),
-        mTimer(),
-        mRetryAfterSeconds(2),
-        mAsyncReader(),
-        mAsyncWriter(),
-        mSizeOfReadBuffer(DEFAULT_READ_BUFFER_SIZE),
-        mReadBuffer(0),
-        mWriteBuffer(),
-        mExpectReplayType(OKAY),
-        mPairUpWearPhone(),
-        mConnectThread([this]() { connectToAdbHostWorker(); return 0; })
-{
-    mReadBuffer = (char*)calloc(mSizeOfReadBuffer,sizeof(char));
+WearAgentImpl::WearAgentImpl(Looper* looper, int adbHostPort)
+    : mAdbHostPort(adbHostPort),
+      mSocket(-1),
+      mLooper(looper),
+      mFdWatch(),
+      mTimer(),
+      mRetryAfterSeconds(2),
+      mAsyncReader(),
+      mAsyncWriter(),
+      mSizeOfReadBuffer(DEFAULT_READ_BUFFER_SIZE),
+      mReadBuffer(nullptr),
+      mWriteBuffer(),
+      mExpectReplayType(OKAY),
+      mPairUpWearPhone(),
+      mConnectThread([this]() {
+          connectToAdbHostWorker();
+          return 0;
+      }) {
+    mReadBuffer = static_cast<char*>(calloc(mSizeOfReadBuffer, sizeof(char)));
     mTimer.reset(looper->createTimer(on_reconnect_timeout, this));
 
     static const char kTrackDevicesRequest[] = "host:track-devices";
@@ -471,7 +459,8 @@ WearAgentImpl::~WearAgentImpl() {
 }
 
 //------------------------- WearAgent Class
-WearAgent::WearAgent(Looper* looper, int adbHostPort) : mWearAgentImpl(0) {
+WearAgent::WearAgent(Looper* looper, int adbHostPort)
+    : mWearAgentImpl(nullptr) {
     if (looper && adbHostPort >= 5037) {
         mWearAgentImpl = new WearAgentImpl(looper, adbHostPort);
     }
@@ -480,9 +469,9 @@ WearAgent::WearAgent(Looper* looper, int adbHostPort) : mWearAgentImpl(0) {
 WearAgent::~WearAgent() {
     if (mWearAgentImpl) {
         delete mWearAgentImpl;
-        mWearAgentImpl = 0;
+        mWearAgentImpl = nullptr;
     }
 }
 
-} // namespace wear
-} // namespace android
+}  // namespace wear
+}  // namespace android

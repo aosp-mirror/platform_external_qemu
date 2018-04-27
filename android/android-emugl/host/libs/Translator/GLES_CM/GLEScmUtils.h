@@ -16,7 +16,7 @@
 #ifndef GLES_UTILS_H
 #define GLES_UTILS_H
 #include <GLES/gl.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 size_t glParamSize(GLenum param);
 #endif

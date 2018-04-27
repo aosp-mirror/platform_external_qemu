@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "android/cpu_accelerator.h"
+#include <cstdlib>
 #include <string>
-#include <stdlib.h>
+#include "android/cpu_accelerator.h"
 
 namespace android {
 

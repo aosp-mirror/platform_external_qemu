@@ -19,8 +19,8 @@
 #include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
 
+#include <cinttypes>
 #include <unordered_map>
-#include <inttypes.h>
 
 using android::base::Optional;
 using android::base::kNullopt;

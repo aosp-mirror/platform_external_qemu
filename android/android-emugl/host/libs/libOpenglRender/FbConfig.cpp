@@ -20,8 +20,8 @@
 #include "FrameBuffer.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 namespace {
 
@@ -137,11 +137,11 @@ FbConfigList::FbConfigList(EGLDisplay display) : mDisplay(display) {
     }
 
     EGLint numHostConfigs = 0;
-    if (!s_egl.eglGetConfigs(display, NULL, 0, &numHostConfigs)) {
+    if (!s_egl.eglGetConfigs(display, nullptr, 0, &numHostConfigs)) {
         E("%s: Could not get number of host EGL configs\n", __FUNCTION__);
         return;
     }
-    EGLConfig* hostConfigs = new EGLConfig[numHostConfigs];
+    auto* hostConfigs = new EGLConfig[numHostConfigs];
     s_egl.eglGetConfigs(display, hostConfigs, numHostConfigs, &numHostConfigs);
 
     mConfigs = new FbConfig*[numHostConfigs];
@@ -168,12 +168,12 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
                                EGLint* configs,
                                EGLint configsSize) const {
     EGLint numHostConfigs = 0;
-    if (!s_egl.eglGetConfigs(mDisplay, NULL, 0, &numHostConfigs)) {
+    if (!s_egl.eglGetConfigs(mDisplay, nullptr, 0, &numHostConfigs)) {
         E("%s: Could not get number of host EGL configs\n", __FUNCTION__);
         return 0;
     }
 
-    EGLConfig* matchedConfigs = new EGLConfig[numHostConfigs];
+    auto* matchedConfigs = new EGLConfig[numHostConfigs];
 
     // If EGL_SURFACE_TYPE appears in |attribs|, the value passed to
     // eglChooseConfig should be forced to EGL_PBUFFER_BIT because that's
@@ -208,13 +208,14 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
     memcpy(&newAttribs[0], attribs, numAttribs * sizeof(EGLint));
 
     int apiLevel;
-    emugl::getAvdInfo(NULL, &apiLevel);
+    emugl::getAvdInfo(nullptr, &apiLevel);
 
     if (!hasSurfaceType) {
         newAttribs.push_back(EGL_SURFACE_TYPE);
         newAttribs.push_back(0);
     } else if (wantSwapPreserved && apiLevel <= 19) {
-        newAttribs[surfaceTypeIdx + 1] &= ~(EGLint)EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
+        newAttribs[surfaceTypeIdx + 1] &=
+                ~static_cast<EGLint>(EGL_SWAP_BEHAVIOR_PRESERVED_BIT);
     }
     if (emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER ||
         emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
@@ -255,7 +256,7 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
             if (guestConfigId == hostConfigId) {
                 // There is a match. Write it to |configs| if it is not NULL.
                 if (configs && result < configsSize) {
-                    configs[result] = (uint32_t)k;
+                    configs[result] = static_cast<uint32_t>(k);
                 }
                 result ++;
                 break;
@@ -280,8 +281,8 @@ void FbConfigList::getPackInfo(EGLint* numConfigs,
 }
 
 EGLint FbConfigList::packConfigs(GLuint bufferByteSize, GLuint* buffer) const {
-    GLuint numAttribs = static_cast<GLuint>(kConfigAttributesLen);
-    GLuint kGLuintSize = static_cast<GLuint>(sizeof(GLuint));
+    auto numAttribs = static_cast<GLuint>(kConfigAttributesLen);
+    auto kGLuintSize = static_cast<GLuint>(sizeof(GLuint));
     GLuint neededByteSize = (mCount + 1) * numAttribs * kGLuintSize;
     if (!buffer || bufferByteSize < neededByteSize) {
         return -neededByteSize;

@@ -19,7 +19,7 @@
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
 
-#include <stddef.h>
+#include <cstddef>
 
 // A class used to model a guest EGL config.
 // This really wraps a host EGLConfig handle, and provides a few cached
@@ -58,8 +58,8 @@ public:
     GLint getConfigId() const { return (GLint)getAttribValue(4); }
 
 private:
-    FbConfig();
-    FbConfig(FbConfig& other);
+    FbConfig() = delete;
+    FbConfig(FbConfig& other) = delete;
 
     explicit FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay);
 
@@ -121,7 +121,7 @@ public:
         if (guestId >= 0 && guestId < mCount) {
             return mConfigs[guestId];
         } else {
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -157,7 +157,7 @@ private:
 
     int mCount = 0;
     FbConfig** mConfigs = nullptr;
-    EGLDisplay mDisplay = 0;
+    EGLDisplay mDisplay = nullptr;
 };
 
 #endif  // _LIBRENDER_FB_CONFIG_H

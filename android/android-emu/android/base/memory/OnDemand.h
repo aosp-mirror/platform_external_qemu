@@ -103,7 +103,8 @@ namespace internal {
 //          func(std::get<N>(args)...); // expands std::get<>() for each N
 //      }
 //
-//  TODO: C++14 gives us std::index_sequence<> in STL, so we'll be able to get
+// TODO(zyy): C++14 gives us std::index_sequence<> in STL, so we'll be able to
+// get
 //        rid of out custom Seq<> class.
 //        C++17 got std::apply() call to replace all of this altogether.
 //

@@ -13,7 +13,7 @@
 
 #include "android/base/files/DecompressingStream.h"
 
-#include <assert.h>
+#include <cassert>
 
 using android::base::DecompressingStream;
 

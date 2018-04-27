@@ -29,11 +29,13 @@ public:
     // takes ownership of |cs|, deletes it in destructor
     CharSerialLine(Chardev* dev);
 
-    ~CharSerialLine();
+    ~CharSerialLine() override;
 
-    virtual void addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc);
+    void addHandlers(void* opaque,
+                     CanReadFunc canReadFunc,
+                     ReadFunc readFunc) override;
 
-    virtual int write(const uint8_t* data, int len);
+    int write(const uint8_t* data, int len) override;
 
     Chardev* state() const { return mBackend.chr; }
 
@@ -41,7 +43,7 @@ private:
     DISALLOW_COPY_AND_ASSIGN(CharSerialLine);
 
 private:
-    CharBackend mBackend = { 0 };
+    CharBackend mBackend = {nullptr};
 };
 
 }  // namespace qemu2

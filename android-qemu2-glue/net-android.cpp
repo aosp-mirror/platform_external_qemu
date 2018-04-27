@@ -74,6 +74,6 @@ void android_qemu_init_slirp_shapers(void)
                 }
 
                 netshaper_send_aux(static_cast<NetShaper>(opaque),
-                                   (void*)data, len, s_opaque);
+                                   const_cast<void*>(data), len, s_opaque);
             });
 }

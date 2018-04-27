@@ -23,7 +23,7 @@ extern "C" {
 #include "exec/cpu-common.h"
 }  // extern "C"
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace qemu2 {
 
@@ -31,10 +31,11 @@ void* DmaMap::doMap(uint64_t addr, uint64_t sz) {
     uint64_t sz_reg = sz;
     void* res = cpu_physical_memory_map(addr, &sz_reg, 1);
     if (sz_reg != sz) {
-        fprintf(stderr, "ERROR: DmaMap::doMap(0x0%llx) wanted %llu bytes, got %llu\n",
-                (unsigned long long)addr,
-                (unsigned long long)sz,
-                (unsigned long long)sz_reg);
+        fprintf(stderr,
+                "ERROR: DmaMap::doMap(0x0%llx) wanted %llu bytes, got %llu\n",
+                static_cast<unsigned long long>(addr),
+                static_cast<unsigned long long>(sz),
+                static_cast<unsigned long long>(sz_reg));
         if (res) {
             cpu_physical_memory_unmap(res, sz_reg, 1, sz_reg);
         }

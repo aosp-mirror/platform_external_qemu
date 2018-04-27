@@ -21,7 +21,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <algorithm>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 
 #include "common/alog.h"
@@ -65,7 +65,9 @@ void DeleteProgram(ProgramContext* program) {
 
 }  // namespace
 
-GlesContext::GlesContext(int32_t id, GlesVersion version, GlesContext* share,
+GlesContext::GlesContext(int32_t id,
+                         GlesVersion version,
+                         GlesContext* share,
                          void* underlying_context,
                          const UnderlyingApis* underlying_apis)
     : uniform_context_(this),
@@ -82,7 +84,7 @@ GlesContext::GlesContext(int32_t id, GlesVersion version, GlesContext* share,
       error_(GL_NO_ERROR),
       gles_impl_(underlying_context),
       apis_(underlying_apis),
-      share_group_(NULL),
+      share_group_(nullptr),
       global_override_framebuffer_(0),
       global_framebuffer_(0),
       global_depth_renderbuffer_(0),
@@ -95,15 +97,15 @@ GlesContext::GlesContext(int32_t id, GlesVersion version, GlesContext* share,
       vertex_shader_cache_(kCacheLimit, &DeleteShader),
       fragment_shader_cache_(kCacheLimit, &DeleteShader),
       program_cache_(kCacheLimit, &DeleteProgram),
-      fullscreen_quad_(NULL),
+      fullscreen_quad_(nullptr),
       checks_enabled_(emugl::GlesOptions::GLErrorChecksEnabled()),
-      global_extensions_(NULL),
+      global_extensions_(nullptr),
       supports_packed_depth_stencil_(false) {
-  if (share) {
-    share_group_ = share->GetShareGroup();
-  } else {
-    share_group_ = ShareGroupPtr(new ShareGroup(this));
-  }
+    if (share) {
+        share_group_ = share->GetShareGroup();
+    } else {
+        share_group_ = ShareGroupPtr(new ShareGroup(this));
+    }
 }
 
 GlesContext::~GlesContext() {
@@ -154,24 +156,25 @@ void GlesContext::Restore() {
   initialized_ = true;
 }
 
-void GlesContext::OnAttachSurface(SurfaceControlCallbackPtr sfc,
-                                  GLint width, GLint height) {
-  surface_callback_ = sfc;
-  if (!initialized_viewport_) {
-    initialized_viewport_ = true;
+void GlesContext::OnAttachSurface(const SurfaceControlCallbackPtr& sfc,
+                                  GLint width,
+                                  GLint height) {
+    surface_callback_ = sfc;
+    if (!initialized_viewport_) {
+        initialized_viewport_ = true;
 
-    // The first time that a context is attached to a surface, the context needs
-    // to be initialized with the dimensions of the draw surface. These
-    // dimensions are used to initialized the viewport and scissor rectangles
-    // correctly for the surface.
-    // It is the client's responsibility to maintain those values afterwards.
-    viewport_.Mutate()[0] = 0;
-    viewport_.Mutate()[1] = 0;
-    viewport_.Mutate()[2] = width;
-    viewport_.Mutate()[3] = height;
-    PASS_THROUGH(this, Viewport, 0, 0, width, height);
-    PASS_THROUGH(this, Scissor, 0, 0, width, height);
-  }
+        // The first time that a context is attached to a surface, the context
+        // needs to be initialized with the dimensions of the draw surface.
+        // These dimensions are used to initialized the viewport and scissor
+        // rectangles correctly for the surface. It is the client's
+        // responsibility to maintain those values afterwards.
+        viewport_.Mutate()[0] = 0;
+        viewport_.Mutate()[1] = 0;
+        viewport_.Mutate()[2] = width;
+        viewport_.Mutate()[3] = height;
+        PASS_THROUGH(this, Viewport, 0, 0, width, height);
+        PASS_THROUGH(this, Scissor, 0, 0, width, height);
+    }
 }
 
 void GlesContext::UpdateFramebufferOverride(GLint width, GLint height,
@@ -296,8 +299,8 @@ void GlesContext::DeleteFramebufferOverride() {
 }
 
 ShareGroupPtr GlesContext::GetShareGroup() const {
-  LOG_ALWAYS_FATAL_IF(share_group_ == NULL);
-  return share_group_;
+    LOG_ALWAYS_FATAL_IF(share_group_ == nullptr);
+    return share_group_;
 }
 
 void GlesContext::SetGLerror(GLenum error, const char* function,
@@ -369,8 +372,8 @@ void GlesContext::Flush() {
 }
 
 void GlesContext::EnsureSurfaceReadyToDraw() const {
-  if (surface_callback_ != NULL) {
-    surface_callback_->EnsureBufferReady();
+    if (surface_callback_ != nullptr) {
+        surface_callback_->EnsureBufferReady();
   }
 }
 
@@ -379,14 +382,14 @@ void GlesContext::SetCurrentUserProgram(const ProgramDataPtr& program) {
     return;
   }
 
-  if (program != NULL) {
-    if (!program->Use(true)) {
-      return;
-    }
+  if (program != nullptr) {
+      if (!program->Use(true)) {
+          return;
+      }
   }
 
-  if (current_user_program_ != NULL) {
-    current_user_program_->Use(false);
+  if (current_user_program_ != nullptr) {
+      current_user_program_->Use(false);
   }
 
   current_user_program_ = program;
@@ -412,13 +415,13 @@ bool GlesContext::CanDraw() const {
     }
     return true;
   } else {
-    return current_user_program_ != NULL;
+      return current_user_program_ != nullptr;
   }
 }
 
 void GlesContext::DrawFullscreenQuad(GLuint texture, bool flip_v) {
-  if (fullscreen_quad_ == NULL) {
-    fullscreen_quad_ = new FullscreenQuad(this);
+    if (fullscreen_quad_ == nullptr) {
+        fullscreen_quad_ = new FullscreenQuad(this);
   }
 
   EnsureSurfaceReadyToDraw();
@@ -458,67 +461,67 @@ void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
   ClearProgramObject();
 }
 
-bool GlesContext::BindImageToTexture(GLenum target, EglImagePtr image) {
-  TextureDataPtr texture = GetBoundTextureData(target);
-  if (texture == NULL) {
-    return false;
-  }
-
-  // Delete old texture object but only if it is not a target of a EGLImage
-  const GLuint name =
-      share_group_->GetTextureGlobalName(texture->GetLocalName());
-  if (name) {
-    if (!texture->IsEglImageAttached()) {
-      PASS_THROUGH(this, DeleteTextures, 1, &name);
+bool GlesContext::BindImageToTexture(GLenum target, const EglImagePtr& image) {
+    TextureDataPtr texture = GetBoundTextureData(target);
+    if (texture == nullptr) {
+        return false;
     }
-  }
 
-  // Map the texture to the EGL image texture.
-  texture->AttachEglImage(image);
-  share_group_->SetTextureGlobalName(texture->GetLocalName(),
-                                     image->global_texture_name);
+    // Delete old texture object but only if it is not a target of a EGLImage
+    const GLuint name =
+            share_group_->GetTextureGlobalName(texture->GetLocalName());
+    if (name) {
+        if (!texture->IsEglImageAttached()) {
+            PASS_THROUGH(this, DeleteTextures, 1, &name);
+        }
+    }
 
-  // This function is always called to create a TEXTURE_EXTERNAL_OES,
-  // Since we are binding the texture, ensure that we know what actual
-  // global target this texture uses in the underlying implementation.
-  texture_context_.SetTargetTexture(GL_TEXTURE_EXTERNAL_OES,
-                                    texture->GetLocalName(),
-                                    image->global_texture_target);
+    // Map the texture to the EGL image texture.
+    texture->AttachEglImage(image);
+    share_group_->SetTextureGlobalName(texture->GetLocalName(),
+                                       image->global_texture_name);
 
-  // Bind the EGL image texture (which is now the same as the texture).
-  PASS_THROUGH(this, BindTexture, image->global_texture_target,
-               image->global_texture_name);
-  return true;
+    // This function is always called to create a TEXTURE_EXTERNAL_OES,
+    // Since we are binding the texture, ensure that we know what actual
+    // global target this texture uses in the underlying implementation.
+    texture_context_.SetTargetTexture(GL_TEXTURE_EXTERNAL_OES,
+                                      texture->GetLocalName(),
+                                      image->global_texture_target);
+
+    // Bind the EGL image texture (which is now the same as the texture).
+    PASS_THROUGH(this, BindTexture, image->global_texture_target,
+                 image->global_texture_name);
+    return true;
 }
 
-bool GlesContext::BindImageToRenderbuffer(EglImagePtr image) {
-  RenderbufferDataPtr rb = GetBoundRenderbufferData();
-  if (rb == NULL) {
-    return false;
-  }
-
-  rb->SetEglImage(image);
-
-  // If the renderbuffer is attached to a framebuffer, change the
-  // framebuffer attachment to point to the EGLImage texture object.
-  if (rb->IsAttached()) {
-    const bool save_and_restore =
-        (framebuffer_binding_ != rb->GetAttachedFramebuffer());
-    if (save_and_restore) {
-      const GLuint global_name =
-          share_group_->GetFramebufferGlobalName(rb->GetAttachedFramebuffer());
-      PASS_THROUGH(this, BindFramebuffer, GL_FRAMEBUFFER, global_name);
+bool GlesContext::BindImageToRenderbuffer(const EglImagePtr& image) {
+    RenderbufferDataPtr rb = GetBoundRenderbufferData();
+    if (rb == nullptr) {
+        return false;
     }
-    PASS_THROUGH(this, FramebufferTexture2D, GL_FRAMEBUFFER,
-                 rb->GetAttachment(), image->global_texture_target,
-                 image->global_texture_name, 0);
-    if (save_and_restore) {
-      const GLuint global_name =
-          share_group_->GetFramebufferGlobalName(framebuffer_binding_);
-      PASS_THROUGH(this, BindFramebuffer, GL_FRAMEBUFFER, global_name);
+
+    rb->SetEglImage(image);
+
+    // If the renderbuffer is attached to a framebuffer, change the
+    // framebuffer attachment to point to the EGLImage texture object.
+    if (rb->IsAttached()) {
+        const bool save_and_restore =
+                (framebuffer_binding_ != rb->GetAttachedFramebuffer());
+        if (save_and_restore) {
+            const GLuint global_name = share_group_->GetFramebufferGlobalName(
+                    rb->GetAttachedFramebuffer());
+            PASS_THROUGH(this, BindFramebuffer, GL_FRAMEBUFFER, global_name);
+        }
+        PASS_THROUGH(this, FramebufferTexture2D, GL_FRAMEBUFFER,
+                     rb->GetAttachment(), image->global_texture_target,
+                     image->global_texture_name, 0);
+        if (save_and_restore) {
+            const GLuint global_name = share_group_->GetFramebufferGlobalName(
+                    framebuffer_binding_);
+            PASS_THROUGH(this, BindFramebuffer, GL_FRAMEBUFFER, global_name);
+        }
     }
-  }
-  return true;
+    return true;
 }
 
 
@@ -590,8 +593,8 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
     } else {
         texture_data = share_group_->GetTextureData(texture);
     }
-    if (texture_data == NULL) {
-      continue;
+    if (texture_data == nullptr) {
+        continue;
     }
 
     const GLint* crop_rect = texture_data->GetCropRect();
@@ -630,7 +633,7 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
             GL_FLOAT, 0, vertices);
     // DrawTex() needs texture environments etc, so we use GLES1 emulation to
     // avoid unnecessary complexity.
-    Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, 0);
+    Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, nullptr);
   }
 
   // Restore enabled_set_
@@ -736,8 +739,8 @@ ShaderConfig GlesContext::ConfigureShader(GLenum mode) {
 
     const GLuint texture = texture_context_.GetTexture(id, target);
     TextureDataPtr obj = share_group_->GetTextureData(texture);
-    if (obj == NULL && texture == 0) {
-      obj = texture_context_.GetDefaultTextureData(target);
+    if (obj == nullptr && texture == 0) {
+        obj = texture_context_.GetDefaultTextureData(target);
     }
 
     ShaderConfig::TextureConfig& t = cfg.texture[i];
@@ -818,7 +821,7 @@ GLuint GlesContext::CompileShader(GLenum shader_kind, const char* source) {
     if (compiled == GL_FALSE) {
       GLint len = 0, written = 0;
       PASS_THROUGH(this, GetShaderiv, object, GL_INFO_LOG_LENGTH, &len);
-      char* log = new char[len];
+      auto* log = new char[len];
       PASS_THROUGH(this, GetShaderInfoLog, object, len, &written, log);
       LOG_ALWAYS_FATAL("Unable to compile %s:\n%s\n%s",
                        GetEnumString(shader_kind), source, log);
@@ -845,7 +848,7 @@ GLuint GlesContext::CompileProgram(GLuint vertex_shader,
     if (link_status == GL_FALSE) {
       GLint len = 0, written = 0;
       PASS_THROUGH(this, GetProgramiv, program, GL_INFO_LOG_LENGTH, &len);
-      char* log = new char[len];
+      auto* log = new char[len];
       PASS_THROUGH(this, GetProgramInfoLog, program, len, &written, log);
       LOG_ALWAYS_FATAL("Unable to link:\nfragment:%d vertex:%d\n%s",
                        fragment_shader, vertex_shader, log);
@@ -883,16 +886,16 @@ ProgramContext& GlesContext::BindProgramContext(GLenum mode) {
     program = program_cache_.Push(cfg, ProgramContext(this, id));
   }
 
-  LOG_ALWAYS_FATAL_IF(program == NULL, "Program not created?");
+  LOG_ALWAYS_FATAL_IF(program == nullptr, "Program not created?");
   program->Bind();
   return *program;
 }
 
 void GlesContext::PrepareProgramObject(GLenum mode,
                                        bool* program_uses_external_as_2d) {
-  if (current_user_program_ != NULL) {
-    current_user_program_->PrepareForRendering(program_uses_external_as_2d);
-    return;
+    if (current_user_program_ != nullptr) {
+        current_user_program_->PrepareForRendering(program_uses_external_as_2d);
+        return;
   }
 
   ProgramContext& program = BindProgramContext(mode);
@@ -942,9 +945,9 @@ void GlesContext::PrepareProgramObject(GLenum mode,
 }
 
 void GlesContext::ClearProgramObject() {
-  if (current_user_program_ != NULL) {
-    current_user_program_->CleanupAfterRendering();
-    return;
+    if (current_user_program_ != nullptr) {
+        current_user_program_->CleanupAfterRendering();
+        return;
   }
 
   if (pointer_context_.IsArrayEnabled(kPositionVertexAttribute)) {
@@ -1022,14 +1025,13 @@ void GlesContext::EnsureCompressedTextureFormatStateKnown() const {
       sizeof(kEmulatedCompressedTextureFormats) /
       sizeof(kEmulatedCompressedTextureFormats[0]);
   emulated_compressed_texture_formats_.reserve(count_emulated_formats);
-  for (size_t i = 0; i < count_emulated_formats; ++i) {
-    GLenum format = kEmulatedCompressedTextureFormats[i];
-    std::vector<GLint>::const_iterator iter =
-        std::find(underlying_compressed_textures_supported.begin(),
-                  underlying_compressed_textures_supported.end(), format);
-    if (iter == underlying_compressed_textures_supported.end()) {
-      emulated_compressed_texture_formats_.push_back(format);
-    }
+  for (unsigned int format : kEmulatedCompressedTextureFormats) {
+      std::vector<GLint>::const_iterator iter =
+              std::find(underlying_compressed_textures_supported.begin(),
+                        underlying_compressed_textures_supported.end(), format);
+      if (iter == underlying_compressed_textures_supported.end()) {
+          emulated_compressed_texture_formats_.push_back(format);
+      }
   }
 
   // Build the list of texture formats we support by combining the list from the
@@ -1054,7 +1056,7 @@ void GlesContext::EnsureUnderlyingExtensionsKnown() const {
   global_extensions_ = reinterpret_cast<const char *>(
       PASS_THROUGH(this, GetString, GL_EXTENSIONS));
   supports_packed_depth_stencil_ =
-      strstr(global_extensions_, "OES_packed_depth_stencil") != NULL;
+          strstr(global_extensions_, "OES_packed_depth_stencil") != nullptr;
 }
 
 
@@ -1245,9 +1247,9 @@ case GL_STENCIL_TEST:
       return true;
 
     case GL_CURRENT_PROGRAM:
-      if (current_user_program_ != NULL) {
-        Convert(data, static_cast<GLint>(
-            current_user_program_->GetLocalName()));
+        if (current_user_program_ != nullptr) {
+            Convert(data,
+                    static_cast<GLint>(current_user_program_->GetLocalName()));
       } else {
         *data = 0;
       }
@@ -1396,7 +1398,7 @@ case GL_STENCIL_TEST:
       return true;
   }
 
-  const PointerData* ptr = NULL;
+  const PointerData* ptr = nullptr;
   switch (value) {
     case GL_VERTEX_ARRAY_BUFFER_BINDING:
     case GL_VERTEX_ARRAY_SIZE:
@@ -1505,65 +1507,65 @@ bool GlesContext::GetFixedv(GLenum pname, GLfixed* data) const {
 }
 
 const GLubyte* GlesContext::GetString(GLenum pname) const {
-  const char* str = NULL;
-  switch (pname) {
-    case GL_VENDOR:
-      str = "Chromium";
-      break;
-    case GL_RENDERER:
-      str = "Chromium";
-      break;
-    case GL_VERSION:
-      if (version_ == kGles11) {
-        str = "OpenGL ES 1.1 Chromium";
-      } else {
-        str = "OpenGL ES 2.0 Chromium";
-      }
-      break;
-    case GL_EXTENSIONS:
-      if (version_ == kGles11) {
-        str = "GL_OES_EGL_image "
-              "GL_OES_blend_equation_separate "
-              "GL_OES_blend_func_separate "
-              "GL_OES_blend_subtract "
-              "GL_OES_byte_coordinates "
-              "GL_OES_compressed_ETC1_RGB8_texture "
-              "GL_OES_depth24 "
-              "GL_OES_depth32 "
-              "GL_OES_draw_texture "
-              "GL_OES_element_index_uint "
-              "GL_OES_framebuffer_object "
-              "GL_OES_matrix_palette "
-              "GL_EXT_packed_depth_stencil "
-              "GL_OES_point_size_array "
-              "GL_OES_point_sprite "
-              "GL_OES_rgb8_rgba8 "
-              "GL_OES_single_precision "
-              "GL_OES_stencil1 "
-              "GL_OES_stencil4 "
-              "GL_OES_stencil8 "
-              "GL_OES_stencil_wrap "
-              "GL_OES_texture_cube_map "
-              "GL_OES_texture_env_crossbar "
-              "GL_OES_texture_npot ";
-      } else {
-        str = "GL_OES_EGL_image "
-              "GL_OES_EGL_image_external "
-              "GL_OES_compressed_ETC1_RGB8_texture "
-              "GL_OES_depth24 "
-              "GL_OES_depth32 "
-              "GL_OES_depth_texture "
-              "GL_OES_element_index_uint "
-              "GL_OES_packed_depth_stencil "
-              "GL_OES_texture_npot ";
-      }
-      break;
-    case GL_SHADING_LANGUAGE_VERSION:
-      str = "OpenGL ES GLSL ES 1.0 Chromium";
-      break;
-    default:
-      LOG_ALWAYS_FATAL("Unsupported string parameter: %s (0x%x)",
-                       GetEnumString(pname), pname);
+    const char* str = nullptr;
+    switch (pname) {
+        case GL_VENDOR:
+            str = "Chromium";
+            break;
+        case GL_RENDERER:
+            str = "Chromium";
+            break;
+        case GL_VERSION:
+            if (version_ == kGles11) {
+                str = "OpenGL ES 1.1 Chromium";
+            } else {
+                str = "OpenGL ES 2.0 Chromium";
+            }
+            break;
+        case GL_EXTENSIONS:
+            if (version_ == kGles11) {
+                str = "GL_OES_EGL_image "
+                      "GL_OES_blend_equation_separate "
+                      "GL_OES_blend_func_separate "
+                      "GL_OES_blend_subtract "
+                      "GL_OES_byte_coordinates "
+                      "GL_OES_compressed_ETC1_RGB8_texture "
+                      "GL_OES_depth24 "
+                      "GL_OES_depth32 "
+                      "GL_OES_draw_texture "
+                      "GL_OES_element_index_uint "
+                      "GL_OES_framebuffer_object "
+                      "GL_OES_matrix_palette "
+                      "GL_EXT_packed_depth_stencil "
+                      "GL_OES_point_size_array "
+                      "GL_OES_point_sprite "
+                      "GL_OES_rgb8_rgba8 "
+                      "GL_OES_single_precision "
+                      "GL_OES_stencil1 "
+                      "GL_OES_stencil4 "
+                      "GL_OES_stencil8 "
+                      "GL_OES_stencil_wrap "
+                      "GL_OES_texture_cube_map "
+                      "GL_OES_texture_env_crossbar "
+                      "GL_OES_texture_npot ";
+            } else {
+                str = "GL_OES_EGL_image "
+                      "GL_OES_EGL_image_external "
+                      "GL_OES_compressed_ETC1_RGB8_texture "
+                      "GL_OES_depth24 "
+                      "GL_OES_depth32 "
+                      "GL_OES_depth_texture "
+                      "GL_OES_element_index_uint "
+                      "GL_OES_packed_depth_stencil "
+                      "GL_OES_texture_npot ";
+            }
+            break;
+        case GL_SHADING_LANGUAGE_VERSION:
+            str = "OpenGL ES GLSL ES 1.0 Chromium";
+            break;
+        default:
+            LOG_ALWAYS_FATAL("Unsupported string parameter: %s (0x%x)",
+                             GetEnumString(pname), pname);
   }
   return reinterpret_cast<const GLubyte*>(str);
 }

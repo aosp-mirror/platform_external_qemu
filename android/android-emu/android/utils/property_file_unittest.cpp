@@ -11,7 +11,7 @@
 
 #include "android/utils/property_file.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <gtest/gtest.h>
 

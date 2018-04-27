@@ -19,24 +19,28 @@
 
 // A simple container class that also tracks when the contained object is
 // (potentially) mutated.
-template<typename T>
+template <typename T>
 class Dirtiable {
- public:
-  Dirtiable() : value_(), dirty_(true) {}
-  explicit Dirtiable(const T& init_value) : value_(init_value), dirty_(true) {}
+public:
+    Dirtiable() : value_() {}
+    explicit Dirtiable(const T& init_value)
+        : value_(init_value), dirty_(true) {}
 
-  bool IsDirty() const { return dirty_; }
-  void Clean() { dirty_ = false; }
+    bool IsDirty() const { return dirty_; }
+    void Clean() { dirty_ = false; }
 
-  const T& Get() const { return value_; }
-  T& Mutate() { dirty_ = true; return value_; }
+    const T& Get() const { return value_; }
+    T& Mutate() {
+        dirty_ = true;
+        return value_;
+    }
 
- private:
-  T value_;
-  bool dirty_;
+private:
+    T value_;
+    bool dirty_{true};
 
-  Dirtiable(const Dirtiable&);
-  Dirtiable& operator=(const Dirtiable&);
+    Dirtiable(const Dirtiable&) = delete;
+    Dirtiable& operator=(const Dirtiable&) = delete;
 };
 
 #endif  // GRAPHICS_TRANSLATION_GLES_DIRTIABLE_H_

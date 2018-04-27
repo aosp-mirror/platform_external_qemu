@@ -16,8 +16,8 @@
 
 #include "android/base/EnumFlags.h"
 
+#include <cstdint>
 #include <functional>
-#include <stdint.h>
 
 namespace android {
 namespace base {

@@ -21,15 +21,15 @@ class CameraVirtualSceneSubpage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit CameraVirtualSceneSubpage(QWidget* parent = 0);
+    explicit CameraVirtualSceneSubpage(QWidget* parent = nullptr);
 
     static void setVirtualSceneAgent(const QAndroidVirtualSceneAgent* agent);
 
     void showEvent(QShowEvent* event) override;
 
 private slots:
-    void on_imageWall_pathChanged(QString path);
-    void on_imageTable_pathChanged(QString path);
+    void on_imageWall_pathChanged(const QString& path);
+    void on_imageTable_pathChanged(const QString& path);
 
     void on_imageWall_scaleChanged(float value);
     void on_imageTable_scaleChanged(float value);
@@ -38,8 +38,8 @@ private slots:
     void reportInteraction();
 
 private:
-    void changePoster(QString name, QString path);
-    void changePosterScale(QString name, float value);
+    void changePoster(const QString& name, const QString& path);
+    void changePosterScale(const QString& name, float value);
     void loadUi();
 
     // Load initial settings to populate the virtual scene during emulator

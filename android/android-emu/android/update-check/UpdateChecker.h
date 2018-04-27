@@ -21,7 +21,7 @@
 #include <string>
 #include <utility>
 
-#include <time.h>
+#include <ctime>
 
 namespace android {
 namespace update_check {

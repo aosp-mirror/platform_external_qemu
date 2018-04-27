@@ -138,9 +138,9 @@ TEST(PercentilesTest, normalMultiplePointsTest) {
     p.addSamples(entries);
 
     std::sort(entries.begin(), entries.end());
-    const double actual40th = entries[(int)(0.4 * entries.size())];
-    const double actual50th = entries[(int)(0.5 * entries.size())];
-    const double actual60th = entries[(int)(0.6 * entries.size())];
+    const double actual40th = entries[static_cast<int>(0.4 * entries.size())];
+    const double actual50th = entries[static_cast<int>(0.5 * entries.size())];
+    const double actual60th = entries[static_cast<int>(0.6 * entries.size())];
 
     EXPECT_NEAR(actual40th, p.calcValueForTarget(0.4).valueOr(actual40th - 100),
                 0.03);
@@ -163,8 +163,8 @@ TEST(PercentilesTest, tailQuantile) {
   p.addSamples(entries);
 
   std::sort(entries.begin(), entries.end());
-  const double actual1st = entries[(int)(0.01 * entries.size())];
-  const double actual99th = entries[(int)(0.99 * entries.size())];
+  const double actual1st = entries[static_cast<int>(0.01 * entries.size())];
+  const double actual99th = entries[static_cast<int>(0.99 * entries.size())];
 
   EXPECT_NEAR(actual1st, p.calcValueForTarget(0.01).valueOr(actual1st - 100),
               0.404);

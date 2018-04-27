@@ -38,8 +38,8 @@ public:
         Playing
     };
 
-    explicit RecordScreenPage(QWidget* parent = 0);
-    ~RecordScreenPage();
+    explicit RecordScreenPage(QWidget* parent = nullptr);
+    ~RecordScreenPage() override;
 
     void updateTheme();
     void emitRecordingStatusChange(RecordingStatus status);

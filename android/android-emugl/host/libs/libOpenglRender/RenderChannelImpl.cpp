@@ -51,8 +51,8 @@ RenderChannelImpl::RenderChannelImpl(android::base::Stream* loadStream)
     if (loadStream) {
         mFromGuest.onLoadLocked(loadStream);
         mToGuest.onLoadLocked(loadStream);
-        mState = (State)loadStream->getBe32();
-        mWantedEvents = (State)loadStream->getBe32();
+        mState = static_cast<State>(loadStream->getBe32());
+        mWantedEvents = static_cast<State>(loadStream->getBe32());
 #ifndef NDEBUG
         // Make sure we're in a consistent state after loading.
         const auto state = mState;

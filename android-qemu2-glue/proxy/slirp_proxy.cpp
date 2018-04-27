@@ -126,6 +126,6 @@ bool qemu_android_setup_http_proxy(const char* http_proxy) {
 }
 
 void qemu_android_remove_http_proxy() {
-    op_http_proxy = NULL;
+    op_http_proxy = nullptr;
     http_proxy_on = false;
 }

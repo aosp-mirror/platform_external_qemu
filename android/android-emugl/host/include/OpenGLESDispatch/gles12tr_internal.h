@@ -4,8 +4,8 @@
 #ifndef GLES12TR_INTERNAL_FUNCTIONS_H
 #define GLES12TR_INTERNAL_FUNCTIONS_H
 
-typedef GLvoid* GLvoidptr;
-typedef const GLubyte* constGLubyte;
+using GLvoidptr = GLvoid*;
+using constGLubyte = const GLubyte*;
 #define LIST_GLES12TR_INTERNAL_FUNCTIONS(X) \
   X(void, glActiveTexture, (GLenum texture), (texture)) \
   X(void, glAlphaFunc, (GLenum func, GLclampf ref), (func, ref)) \

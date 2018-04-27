@@ -43,12 +43,12 @@ public:
     ~GooglePlayServices();
 
     // Opens the Play Services app details page in the play store.
-    void showPlayServicesPage(ResultCallback resultCallback);
+    void showPlayServicesPage(const ResultCallback& resultCallback);
     // Get a string of the latest version number of play services.
-    void getPlayServicesVersion(ResultOutputCallback resultCallback);
+    void getPlayServicesVersion(const ResultOutputCallback& resultCallback);
     // Get a system property.
-    void getSystemProperty(android::base::StringView sysProp,
-                           ResultOutputCallback resultCallback);
+    void getSystemProperty(const android::base::StringView& sysProp,
+                           const ResultOutputCallback& resultCallback);
 
     // Parses the contents of |output| stream as if it was the output from
     // running "adb shell dumpsys <pkgname>" to get the

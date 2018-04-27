@@ -38,7 +38,7 @@ using namespace ::android::wear::testing;
 static volatile bool stopped = false;
 
 static void on_time_up (void* opaque, Looper::Timer* timer) {
-    Looper* looper = static_cast<Looper*>(opaque);
+    auto* looper = static_cast<Looper*>(opaque);
     looper->forceQuit();
     stopped = true;
 }
@@ -88,7 +88,7 @@ static void runWearAgent(int adbHostPort, int milSecondsToRun) {
         android::wear::WearAgent agent(mainLooper, adbHostPort);
         SocketDrainer drainer(mainLooper);
 
-        Looper::Timer* timer = NULL;
+        Looper::Timer* timer = nullptr;
         if (milSecondsToRun > 0) {
             timer = mainLooper->createTimer(on_time_up, mainLooper);
             const Looper::Duration dl = milSecondsToRun;
@@ -159,7 +159,8 @@ static bool testWearAgent(bool usbPhone) {
              kWearDevice,
              phoneDevice);
     char buf[1024] = {'\0'};
-    snprintf(buf, sizeof(buf), "%04x%s", (int)(strlen(kDevices)), kDevices);
+    snprintf(buf, sizeof(buf), "%04x%s", static_cast<int>(strlen(kDevices)),
+             kDevices);
     return testSendToSocket(agentSocketTracking.get(), buf) &&
            testRunMockAdbServer(adbServerSocket.get(),
                                 consoleSocket.get(),

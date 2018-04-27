@@ -66,7 +66,7 @@ class ShaderVariant : public android::RefBase {
   void Compile();
 
  protected:
-  virtual ~ShaderVariant();
+     ~ShaderVariant() override;
 
  private:
   enum CompileStatus {
@@ -93,10 +93,10 @@ class ShaderVariant : public android::RefBase {
   static bool Substitute(std::string* src, const char* match,
                          const char* repl);
 
-  ShaderVariant(const ShaderVariant&);
-  ShaderVariant& operator=(const ShaderVariant&);
+  ShaderVariant(const ShaderVariant&) = delete;
+  ShaderVariant& operator=(const ShaderVariant&) = delete;
 };
 
-typedef android::sp<ShaderVariant> ShaderVariantPtr;
+using ShaderVariantPtr = android::sp<ShaderVariant>;
 
 #endif  // GRAPHICS_TRANSLATION_GLES_SHADER_VARIANT_H_

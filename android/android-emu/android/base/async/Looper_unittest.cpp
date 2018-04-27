@@ -18,7 +18,7 @@
 
 #include <memory>
 
-#include <errno.h>
+#include <cerrno>
 
 namespace android {
 namespace base {

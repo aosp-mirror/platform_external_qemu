@@ -25,7 +25,7 @@
 #include <GLES2/gl2.h>
 
 class EglSurface;
-typedef emugl::SmartPtr<EglSurface> SurfacePtr;
+using SurfacePtr = emugl::SmartPtr<EglSurface>;
 
 class EglDisplay;
 

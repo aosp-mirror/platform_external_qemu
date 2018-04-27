@@ -53,26 +53,26 @@ extern "C" {
 #ifndef GL_ES_VERSION_2_0
 #define GL_ES_VERSION_2_0 1
 #include <KHR/khrplatform.h>
-typedef khronos_int8_t GLbyte;
-typedef khronos_float_t GLclampf;
-typedef khronos_int32_t GLfixed;
-typedef short GLshort;
-typedef unsigned short GLushort;
-typedef void GLvoid;
-typedef struct __GLsync *GLsync;
-typedef khronos_int64_t GLint64;
-typedef khronos_uint64_t GLuint64;
-typedef unsigned int GLenum;
-typedef unsigned int GLuint;
-typedef char GLchar;
-typedef khronos_float_t GLfloat;
-typedef khronos_ssize_t GLsizeiptr;
-typedef khronos_intptr_t GLintptr;
-typedef unsigned int GLbitfield;
-typedef int GLint;
-typedef unsigned char GLboolean;
-typedef int GLsizei;
-typedef khronos_uint8_t GLubyte;
+using GLbyte = khronos_int8_t;
+using GLclampf = khronos_float_t;
+using GLfixed = khronos_int32_t;
+using GLshort = short;
+using GLushort = unsigned short;
+using GLvoid = void;
+using GLsync = struct __GLsync*;
+using GLint64 = khronos_int64_t;
+using GLuint64 = khronos_uint64_t;
+using GLenum = unsigned int;
+using GLuint = unsigned int;
+using GLchar = char;
+using GLfloat = khronos_float_t;
+using GLsizeiptr = khronos_ssize_t;
+using GLintptr = khronos_intptr_t;
+using GLbitfield = unsigned int;
+using GLint = int;
+using GLboolean = unsigned char;
+using GLsizei = int;
+using GLubyte = khronos_uint8_t;
 #define GL_DEPTH_BUFFER_BIT               0x00000100
 #define GL_STENCIL_BUFFER_BIT             0x00000400
 #define GL_COLOR_BUFFER_BIT               0x00004000
@@ -520,7 +520,7 @@ GL_APICALL void GL_APIENTRY glViewport (GLint x, GLint y, GLsizei width, GLsizei
 
 #ifndef GL_ES_VERSION_3_0
 #define GL_ES_VERSION_3_0 1
-typedef unsigned short GLhalf;
+using GLhalf = unsigned short;
 #define GL_READ_BUFFER                    0x0C02
 #define GL_UNPACK_ROW_LENGTH              0x0CF2
 #define GL_UNPACK_SKIP_ROWS               0x0CF3

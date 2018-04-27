@@ -48,7 +48,7 @@ class VideoInfo : public QObject {
 
 public:
     VideoInfo(VideoPlayerWidget* widget, std::string videoFile);
-    virtual ~VideoInfo();
+    ~VideoInfo() override;
 
     int getDurationSecs();
     void show();

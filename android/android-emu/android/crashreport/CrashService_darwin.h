@@ -26,7 +26,7 @@ public:
     // Inherit CrashServer constructor
     using CrashService::CrashService;
 
-    virtual ~HostCrashService();
+    ~HostCrashService() override;
 
     static void OnClientDumpRequest(
             void* context,
@@ -36,9 +36,9 @@ public:
     static void OnClientExit(void* context,
                              const google_breakpad::ClientInfo& client_info);
 
-    virtual bool startCrashServer(const std::string& pipe) override;
+    bool startCrashServer(const std::string& pipe) override;
 
-    virtual bool stopCrashServer() override final;
+    bool stopCrashServer() final;
 
     bool isClientAlive() override;
 

@@ -17,7 +17,7 @@
 namespace android {
 namespace base {
 
-SharedMemory::SharedMemory(StringView name, size_t size)
+SharedMemory::SharedMemory(const StringView& name, size_t size)
     : mName(std::string("SHM_") + std::string(name)),
       mSize(size),
       mAddr(unmappedMemory()),

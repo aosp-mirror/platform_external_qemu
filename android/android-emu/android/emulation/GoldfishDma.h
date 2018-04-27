@@ -14,7 +14,7 @@
 
 #include "android/base/files/Stream.h"
 
-#include <inttypes.h>
+#include <cinttypes>
 
 static const uint32_t kDmaBufSizeMB = 32;
 // GOLDFISH DMA
@@ -48,14 +48,14 @@ void* (*get_host_addr)(uint64_t guest_paddr);
 // the guest DMA buffers so to regain access to them.
 // This function tells our map of DMA buffers to remap the buffers
 // next time they are used.
-void (*invalidate_host_mappings)(void);
+void (*invalidate_host_mappings)();
 // unlock():
 // Unlocks the buffer at |guest_paddr| to signal the guest
 // that we are done writing it.
 void (*unlock)(uint64_t guest_paddr);
 // reset_host_mappings();
 // Not only invalidates the mappings, but also removes them from the record.
-void (*reset_host_mappings)(void);
+void (*reset_host_mappings)();
 // For snapshots.
 void (*save_mappings)(android::base::Stream* stream);
 void (*load_mappings)(android::base::Stream* stream);

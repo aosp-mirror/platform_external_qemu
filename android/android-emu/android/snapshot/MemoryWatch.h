@@ -14,15 +14,14 @@
 #include <functional>
 #include <memory>
 
-typedef void* (*gpa2hva_t)(uint64_t gpa, bool* found);
-typedef int (*hva2gpa_t)(void* hva, uint64_t length, int max,
-                         uint64_t* gpa, uint64_t* size);
+using gpa2hva_t = void* (*)(uint64_t, bool*);
+using hva2gpa_t = int (*)(void*, uint64_t, int, uint64_t*, uint64_t*);
 
-typedef int (*guest_mem_map_t)(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
-typedef int (*guest_mem_unmap_t)(uint64_t gpa, uint64_t size);
-typedef int (*guest_mem_protect_t)(uint64_t gpa, uint64_t size, uint64_t flags);
-typedef int (*guest_mem_remap_t)(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
-typedef bool (*guest_mem_protection_supported_t)(void);
+using guest_mem_map_t = int (*)(void*, uint64_t, uint64_t, uint64_t);
+using guest_mem_unmap_t = int (*)(uint64_t, uint64_t);
+using guest_mem_protect_t = int (*)(uint64_t, uint64_t, uint64_t);
+using guest_mem_remap_t = int (*)(void*, uint64_t, uint64_t, uint64_t);
+using guest_mem_protection_supported_t = bool (*)();
 
 extern hva2gpa_t hva2gpa_call;
 extern gpa2hva_t gpa2hva_call;

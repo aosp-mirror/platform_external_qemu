@@ -22,20 +22,20 @@
 #include <map>
 #include <string>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
-
-TypeFactory * TypeFactory::m_instance = NULL;
+TypeFactory* TypeFactory::m_instance = nullptr;
 
 typedef std::map<std::string, VarType> TypeMap;
 static  TypeMap g_varMap;
 static bool g_initialized = false;
 static int g_typeId = 0;
 
-
-#define ADD_TYPE(name, size, printformat,ispointer)                                           \
-    g_varMap.insert(std::pair<std::string, VarType>(name, VarType(g_typeId++, name, (size + 7) >> 3, printformat , ispointer)));
+#define ADD_TYPE(name, size, printformat, ispointer)                        \
+    g_varMap.insert(std::pair<std::string, VarType>(                        \
+            name, VarType(g_typeId++, name, ((size) + 7) >> 3, printformat, \
+                          ispointer)));
 
 void TypeFactory::initBaseTypes()
 {
@@ -55,13 +55,13 @@ int TypeFactory::initFromFile(const std::string &filename)
     }
 
     FILE *fp = fopen(filename.c_str(), "rt");
-    if (fp == NULL) {
+    if (fp == nullptr) {
         perror(filename.c_str());
         return -1;
     }
     char line[1000];
     int lc = 0;
-    while(fgets(line, sizeof(line), fp) != NULL) {
+    while (fgets(line, sizeof(line), fp) != nullptr) {
         lc++;
         std::string str = trim(line);
         if (str.size() == 0 || str.at(0) == '#') {
@@ -148,7 +148,7 @@ const VarType * TypeFactory::getVarTypeByName(const std::string & type)
     if (!g_initialized) {
         initBaseTypes();
     }
-    TypeMap::iterator i = g_varMap.find(type);
+    auto i = g_varMap.find(type);
     if (i == g_varMap.end()) {
         i = g_varMap.find("UNKNOWN");
     }

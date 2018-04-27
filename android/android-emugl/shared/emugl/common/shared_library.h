@@ -15,7 +15,7 @@
 #ifndef EMUGL_COMMON_SHARED_LIBRARY_H
 #define EMUGL_COMMON_SHARED_LIBRARY_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -76,7 +76,7 @@ public:
 
     // Generic function pointer type, for values returned by the
     // findSymbol() method.
-    typedef void (*FunctionPtr)(void);
+    using FunctionPtr = void (*)();
 
     // Probe a given SharedLibrary instance to find a symbol named
     // |symbolName| in it. Return its address as a FunctionPtr, or
@@ -93,7 +93,7 @@ private:
 #ifdef _WIN32
     typedef HMODULE HandleType;
 #else
-    typedef void* HandleType;
+    using HandleType = void*;
 #endif
 
     // Constructor intentionally hidden.

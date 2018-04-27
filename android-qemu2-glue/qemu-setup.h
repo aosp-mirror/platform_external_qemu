@@ -16,8 +16,6 @@
 
 #include "android/utils/compiler.h"
 
-#include <stdbool.h>
-
 ANDROID_BEGIN_HEADER
 
 /* Call this function at the start of the QEMU main() function to perform

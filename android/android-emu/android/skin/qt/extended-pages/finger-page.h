@@ -21,7 +21,7 @@ class FingerPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit FingerPage(QWidget *parent = 0);
+    explicit FingerPage(QWidget* parent = nullptr);
     static void setFingerAgent(const QAndroidFingerAgent* agent);
 
 private slots:

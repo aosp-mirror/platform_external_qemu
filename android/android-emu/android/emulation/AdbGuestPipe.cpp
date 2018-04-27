@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <string>
 
-#include <assert.h>
+#include <cassert>
 
 #define DEBUG 0
 
@@ -558,7 +558,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
     // which will force the guest to close the connection.
     int result = 0;
     while (numBuffers > 0) {
-        const char* data = reinterpret_cast<const char*>(buffers[0].data);
+        const auto* data = reinterpret_cast<const char*>(buffers[0].data);
         size_t dataSize = buffers[0].size;
         while (dataSize > 0) {
             size_t avail = std::min(mBufferSize - mBufferPos, dataSize);
@@ -596,7 +596,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
     return result;
 }
 
-void AdbGuestPipe::setReply(StringView reply, State newState) {
+void AdbGuestPipe::setReply(const StringView& reply, State newState) {
     CHECK(newState == State::SendingAcceptReplyOk);
     CHECK(reply.size() <= sizeof(mBuffer));
     memcpy(mBuffer, reply.c_str(), reply.size());
@@ -605,7 +605,8 @@ void AdbGuestPipe::setReply(StringView reply, State newState) {
     mState = newState;
 }
 
-void AdbGuestPipe::setExpectedGuestCommand(StringView command, State newState) {
+void AdbGuestPipe::setExpectedGuestCommand(const StringView& command,
+                                           State newState) {
     CHECK(newState == State::WaitingForGuestAcceptCommand ||
           newState == State::WaitingForGuestStartCommand);
     CHECK(command.size() <= sizeof(mBuffer));

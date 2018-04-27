@@ -159,4 +159,4 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
     }
 }
 
-}  // namespace
+}  // namespace android

@@ -64,10 +64,12 @@ static ShShaderOutput sOutputSpecForVersion(bool coreProfileHost, int esslVersio
 struct ShaderSpecKeyCompare {
     bool operator() (const ShaderSpecKey& a,
                      const ShaderSpecKey& b) const {
-        if (a.shaderType != b.shaderType)
+        if (a.shaderType != b.shaderType) {
             return a.shaderType < b.shaderType;
-        if (a.esslVersion != b.esslVersion)
+        }
+        if (a.esslVersion != b.esslVersion) {
             return a.esslVersion < b.esslVersion;
+        }
         return false;
     }
 };
@@ -228,7 +230,7 @@ bool translate(bool hostUsesCoreProfile,
 
         outShaderLinkInfo->esslVersion = esslVersion;
         size_t versionStart = origSrc.find("#version");
-        size_t versionEnd = origSrc.find("\n", versionStart);
+        size_t versionEnd = origSrc.find('\n', versionStart);
         std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
         std::string src2 =
             versionPart + "precision highp atomic_uint;\n" +
@@ -275,4 +277,4 @@ bool translate(bool hostUsesCoreProfile,
     return res;
 }
 
-}
+}  // namespace ANGLEShaderParser

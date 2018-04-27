@@ -13,9 +13,9 @@
 
 #include <algorithm>
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 

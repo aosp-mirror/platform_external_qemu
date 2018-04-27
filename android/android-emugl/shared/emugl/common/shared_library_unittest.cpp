@@ -18,8 +18,8 @@
 
 #include <string>
 
-#include <limits.h>
-#include <string.h>
+#include <climits>
+#include <cstring>
 
 // Hack to get the current executable's full path.
 namespace testing {
@@ -83,7 +83,7 @@ public:
         mLibraryPath = GetTestLibraryName();
     }
 
-    ~SharedLibraryTest() {}
+    ~SharedLibraryTest() override = default;
 
     const char* library_path() const { return mLibraryPath.c_str(); }
 
@@ -94,15 +94,12 @@ private:
 class ScopedSharedLibrary {
 public:
     explicit ScopedSharedLibrary(const SharedLibrary* lib) : mLib(lib) {}
-    ~ScopedSharedLibrary() {
-    }
+    ~ScopedSharedLibrary() = default;
     const SharedLibrary* get() const { return mLib; }
 
     const SharedLibrary* operator->() { return mLib; }
 
-    void release() {
-        mLib = NULL;
-    }
+    void release() { mLib = nullptr; }
 
 private:
     const SharedLibrary* mLib;
@@ -163,10 +160,10 @@ TEST_F(SharedLibraryTest, FindSymbol) {
     EXPECT_TRUE(lib.get());
 
     if (lib.get()) {
-        typedef int (*FooFunction)(void);
+        using FooFunction = int (*)();
 
-        FooFunction foo_func = reinterpret_cast<FooFunction>(
-                lib->findSymbol("foo_function"));
+        auto foo_func =
+                reinterpret_cast<FooFunction>(lib->findSymbol("foo_function"));
         EXPECT_TRUE(foo_func);
         EXPECT_EQ(42, (*foo_func)());
     }

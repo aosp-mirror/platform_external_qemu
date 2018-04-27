@@ -17,7 +17,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace android {
 namespace base {
@@ -48,7 +48,7 @@ void StringAppendFormatWithArgs(std::string* string,
 
 // Anything which can be used to construct a string view goes here and unpacks
 // into a const char*
-constexpr const char* unpackFormatArg(StringView str) {
+constexpr const char* unpackFormatArg(const StringView& str) {
     return str.str();
 }
 // Forward all PODs as-is

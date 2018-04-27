@@ -324,7 +324,7 @@ bool LocationPage::validateCell(QTableWidget* table,
 
 
 static QTableWidgetItem* itemForTable(QString&& text) {
-    QTableWidgetItem* item = new QTableWidgetItem(std::move(text));
+    auto* item = new QTableWidgetItem(text);
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     return item;
 }
@@ -340,7 +340,7 @@ void LocationPage::populateTableByChunks() {
         mUi->loc_pathTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     }
 
-    if (mGpsNextPopulateIndex < (int)fixes.size()) {
+    if (mGpsNextPopulateIndex < static_cast<int>(fixes.size())) {
         // Special case, the first row will have delay 0
         time_t previousTime = fixes[std::max(mGpsNextPopulateIndex - 1, 0)].time;
         // Calculate the last chunk index.
@@ -368,7 +368,7 @@ void LocationPage::populateTableByChunks() {
         mGpsNextPopulateIndex = i;
     }
 
-    if (mGpsNextPopulateIndex < (int)fixes.size()) {
+    if (mGpsNextPopulateIndex < static_cast<int>(fixes.size())) {
         // More data to load: allow Qt to handle pending events and then process
         // the next chunk via a queued signal conneciton.
         emit populateNextGeoDataChunk();
@@ -538,13 +538,17 @@ void LocationPage::finishGeoDataLoading(
     populateTableByChunks();
 }
 
-void LocationPage::startupGeoDataThreadFinished(QString file_name, bool ok, QString error_message) {
+void LocationPage::startupGeoDataThreadFinished(const QString& file_name,
+                                                bool ok,
+                                                const QString& error_message) {
     // on startup, we silently ignore the previously remebered geo data file being
     // missing or malformed.
     finishGeoDataLoading(file_name, ok, error_message, true);
 }
 
-void LocationPage::geoDataThreadFinished(QString file_name, bool ok, QString error_message) {
+void LocationPage::geoDataThreadFinished(const QString& file_name,
+                                         bool ok,
+                                         const QString& error_message) {
     finishGeoDataLoading(file_name, ok, error_message, false);
 }
 
@@ -727,7 +731,7 @@ void GeoDataLoaderThread::run() {
 GeoDataLoaderThread* GeoDataLoaderThread::newInstance(const QObject* handler,
                                                       const char* started_slot,
                                                       const char* finished_slot) {
-    GeoDataLoaderThread* new_instance = new GeoDataLoaderThread();
+    auto* new_instance = new GeoDataLoaderThread();
     connect(new_instance, SIGNAL(started()), handler, started_slot);
     connect(new_instance, SIGNAL(loadingFinished(QString, bool, QString)), handler, finished_slot);
 

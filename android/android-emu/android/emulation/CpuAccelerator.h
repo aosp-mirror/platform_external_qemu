@@ -14,9 +14,9 @@
 #include "android/base/Version.h"
 #include "android/cpu_accelerator.h"
 
+#include <cstdlib>
 #include <string>
 #include <utility>
-#include <stdlib.h>
 
 namespace android {
 

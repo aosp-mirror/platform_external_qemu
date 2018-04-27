@@ -48,8 +48,7 @@ std::vector<std::string> EmuglBackendScanner::scanDir(const char* execDir,
     static const char kBackendPrefix[] = "gles_";
     const size_t kBackendPrefixSize = sizeof(kBackendPrefix) - 1U;
 
-    for (size_t n = 0; n < entries.size(); ++n) {
-        const std::string& entry = entries[n];
+    for (const auto& entry : entries) {
         if (entry.size() <= kBackendPrefixSize ||
             memcmp(entry.c_str(), kBackendPrefix, kBackendPrefixSize)) {
             continue;
@@ -60,12 +59,12 @@ std::vector<std::string> EmuglBackendScanner::scanDir(const char* execDir,
         if (!System::get()->pathIsDir(full_dir)) {
             continue;
         }
-        names.push_back(std::string(entry.c_str() + kBackendPrefixSize));
+        names.emplace_back(entry.c_str() + kBackendPrefixSize);
         if (!strcmp(entry.c_str() + kBackendPrefixSize, "angle")) {
-            names.push_back("angle_indirect");
+            names.emplace_back("angle_indirect");
         }
         if (!strcmp(entry.c_str() + kBackendPrefixSize, "swiftshader")) {
-            names.push_back("swiftshader_indirect");
+            names.emplace_back("swiftshader_indirect");
         }
     }
 

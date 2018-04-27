@@ -16,8 +16,8 @@
 #include <iterator>
 #include <numeric>
 
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 namespace android {
 namespace base {
@@ -27,7 +27,7 @@ const char* const PathUtils::kExeNameSuffixes[kHostTypeCount] = { "", ".exe" };
 const char* const PathUtils::kExeNameSuffix =
         PathUtils::kExeNameSuffixes[PathUtils::HOST_TYPE];
 
-std::string PathUtils::toExecutableName(StringView baseName,
+std::string PathUtils::toExecutableName(const StringView& baseName,
                                         HostType hostType) {
     return static_cast<std::string>(baseName).append(
             kExeNameSuffixes[hostType]);
@@ -45,38 +45,43 @@ bool PathUtils::isPathSeparator(int ch, HostType hostType) {
 }
 
 // static
-size_t PathUtils::rootPrefixSize(StringView path, HostType hostType) {
-    if (path.empty())
+size_t PathUtils::rootPrefixSize(const StringView& path, HostType hostType) {
+    if (path.empty()) {
         return 0;
+    }
 
-    if (hostType != HOST_WIN32)
+    if (hostType != HOST_WIN32) {
         return (path[0] == '/') ? 1U : 0U;
+    }
 
     size_t result = 0;
     if (path[1] == ':') {
         int ch = path[0];
-        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z'))
+        if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
             result = 2U;
-    } else if (!strncmp(path.begin(), "\\\\.\\", 4) ||
-            !strncmp(path.begin(), "\\\\?\\", 4)) {
+        }
+    } else if (!strncmp(path.begin(), R"(\\.\)", 4) ||
+               !strncmp(path.begin(), R"(\\?\)", 4)) {
         // UNC prefixes.
         return 4U;
     } else if (isDirSeparator(path[0], hostType)) {
         result = 1;
         if (isDirSeparator(path[1], hostType)) {
             result = 2;
-            while (path[result] && !isDirSeparator(path[result], HOST_WIN32))
+            while (path[result] && !isDirSeparator(path[result], HOST_WIN32)) {
                 result++;
+            }
         }
     }
-    if (result && path[result] && isDirSeparator(path[result], HOST_WIN32))
+    if (result && path[result] && isDirSeparator(path[result], HOST_WIN32)) {
         result++;
+    }
 
     return result;
 }
 
 // static
-bool PathUtils::isAbsolute(StringView path, HostType hostType) {
+bool PathUtils::isAbsolute(const StringView& path, HostType hostType) {
     size_t prefixSize = rootPrefixSize(path, hostType);
     if (!prefixSize) {
         return false;
@@ -88,11 +93,11 @@ bool PathUtils::isAbsolute(StringView path, HostType hostType) {
 }
 
 // static
-StringView PathUtils::extension(const StringView path, HostType hostType) {
+StringView PathUtils::extension(const StringView& path, HostType hostType) {
     using riter = std::reverse_iterator<StringView::const_iterator>;
 
-    for (auto it = riter(path.end()), itEnd = riter(path.begin());
-         it != itEnd; ++it) {
+    for (auto it = riter(path.end()), itEnd = riter(path.begin()); it != itEnd;
+         ++it) {
         if (*it == '.') {
             // reverse iterator stores a base+1, so decrement it when returning
             return StringView(std::prev(it.base()), path.end());
@@ -109,7 +114,7 @@ StringView PathUtils::extension(const StringView path, HostType hostType) {
 }
 
 // static
-StringView PathUtils::removeTrailingDirSeparator(StringView path,
+StringView PathUtils::removeTrailingDirSeparator(const StringView& path,
                                                  HostType hostType) {
     size_t pathLen = path.size();
     // NOTE: Don't remove initial path separator for absolute paths.
@@ -120,7 +125,7 @@ StringView PathUtils::removeTrailingDirSeparator(StringView path,
 }
 
 // static
-std::string PathUtils::addTrailingDirSeparator(StringView path,
+std::string PathUtils::addTrailingDirSeparator(const StringView& path,
                                                HostType hostType) {
     std::string result = path;
     if (result.size() > 0 && !isDirSeparator(result[result.size() - 1U])) {
@@ -130,7 +135,7 @@ std::string PathUtils::addTrailingDirSeparator(StringView path,
 }
 
 // static
-bool PathUtils::split(StringView path,
+bool PathUtils::split(const StringView& path,
                       HostType hostType,
                       StringView* dirName,
                       StringView* baseName) {
@@ -177,8 +182,8 @@ bool PathUtils::split(StringView path,
 }
 
 // static
-std::string PathUtils::join(StringView path1,
-                            StringView path2,
+std::string PathUtils::join(const StringView& path1,
+                            const StringView& path2,
                             HostType hostType) {
     if (path1.empty()) {
         return path2;
@@ -204,8 +209,9 @@ template <class String>
 std::vector<String> PathUtils::decompose(const String& path,
                                                 HostType hostType) {
     std::vector<String> result;
-    if (path.empty())
+    if (path.empty()) {
         return result;
+    }
 
     size_t prefixLen = rootPrefixSize(path, hostType);
     auto it = path.begin();
@@ -215,8 +221,9 @@ std::vector<String> PathUtils::decompose(const String& path,
     }
     for (;;) {
         auto p = it;
-        while (*p && !isDirSeparator(*p, hostType))
+        while (*p && !isDirSeparator(*p, hostType)) {
             p++;
+        }
         if (p > it) {
             result.emplace_back(it, p);
         }
@@ -233,7 +240,7 @@ std::vector<std::string> PathUtils::decompose(std::string&& path,
     return decompose<std::string>(path, hostType);
 }
 
-std::vector<StringView> PathUtils::decompose(StringView path,
+std::vector<StringView> PathUtils::decompose(const StringView& path,
                                              HostType hostType) {
     return decompose<StringView>(path, hostType);
 }
@@ -260,8 +267,9 @@ std::string PathUtils::recompose(const std::vector<String>& components,
     bool addSeparator = false;
     for (size_t n = 0; n < components.size(); ++n) {
         const auto& component = components[n];
-        if (addSeparator)
+        if (addSeparator) {
             result += dirSeparator;
+        }
         addSeparator = true;
         if (n == 0) {
             size_t prefixLen = rootPrefixSize(component, hostType);

@@ -27,10 +27,10 @@ class BugreportPage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit BugreportPage(QWidget* parent = 0);
-    ~BugreportPage();
+    explicit BugreportPage(QWidget* parent = nullptr);
+    ~BugreportPage() override;
     void initialize(EmulatorQtWindow* eW);
-    void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent* event) override;
     void updateTheme();
     struct ReportingFields {
         std::string androidVer;
@@ -58,10 +58,10 @@ private slots:
     void on_bug_saveButton_clicked();
     void on_bug_sendToGoogle_clicked();
     void saveBugreportFolderFinished(bool success,
-                                     QString folderPath,
+                                     const QString& folderPath,
                                      bool willOpenIssueTracker);
     void saveBugreportFolderStarted();
-    void issueTrackerTaskFinished(bool success, QString error);
+    void issueTrackerTaskFinished(bool success, const QString& error);
 
 private:
     void loadAdbBugreport();

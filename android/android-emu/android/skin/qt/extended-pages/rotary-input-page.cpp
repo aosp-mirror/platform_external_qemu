@@ -17,11 +17,8 @@
 #include "android/skin/qt/stylesheet.h"
 #include "android/utils/debug.h"
 
-RotaryInputPage::RotaryInputPage(QWidget *parent) :
-    QWidget(parent),
-    mUi(new Ui::RotaryInputPage()),
-    mEmulatorWindow(NULL)
-{
+RotaryInputPage::RotaryInputPage(QWidget* parent)
+    : QWidget(parent), mUi(new Ui::RotaryInputPage()) {
     mUi->setupUi(this);
     // Start with highlighted dot on the left.
     mValue = 90;
@@ -51,7 +48,7 @@ void RotaryInputPage::onValueChanged(const int value) {
     int delta = dialDeltaToRotaryInputDelta(value, mValue);
     VERBOSE_PRINT(keys, "Rotary input value change: %d", delta);
     if (mEmulatorWindow) {
-        SkinEvent* skin_event = new SkinEvent();
+        auto* skin_event = new SkinEvent();
         skin_event->type = kEventRotaryInput;
         skin_event->u.rotary_input.delta = delta;
         mEmulatorWindow->queueSkinEvent(skin_event);

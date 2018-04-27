@@ -32,7 +32,7 @@ Q_OBJECT
 public:
     // Creates a new subscriber based on the given EventCapturer.
     explicit EventSubscriber(EventCapturer* ecap);
-    virtual ~EventSubscriber(){}
+    ~EventSubscriber() override = default;
 
 public slots:
     // Starts monitoring events from the hierarchy of a given object.

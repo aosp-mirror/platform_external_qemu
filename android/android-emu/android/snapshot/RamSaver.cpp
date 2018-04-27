@@ -234,7 +234,7 @@ void RamSaver::savePage(int64_t blockOffset,
 
                 for (int32_t i = 0; i < numPages;
                      ++i,
-                     zeroCheckPtr += (uintptr_t)block.ramBlock.pageSize) {
+                     zeroCheckPtr += static_cast<uintptr_t>(block.ramBlock.pageSize)) {
 
                     bool isZero = isBufferZeroed(zeroCheckPtr,
                                                  block.ramBlock.pageSize);
@@ -309,7 +309,7 @@ void RamSaver::savePage(int64_t blockOffset,
 
             uint8_t* hashPtr = block.ramBlock.hostPtr;
             for (int32_t i = 0; i < numPages; ++i,
-                 hashPtr += (uintptr_t)block.ramBlock.pageSize) {
+                 hashPtr += static_cast<uintptr_t>(block.ramBlock.pageSize)) {
                 auto& page = block.pages[size_t(i)];
                 if (page.sizeOnDisk && !page.hashFilled) {
                     calcHash(page, block, hashPtr);
@@ -409,8 +409,8 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
         !mCanceled.load(std::memory_order_acquire)) {
         mWorkers->enqueue(std::move(pi));
     } else {
-        if (mStopping.load(std::memory_order_acquire))
-            return;
+        if (mStopping.load(std::memory_order_acquire)) {
+            return; }
         mStopping.store(true, std::memory_order_release);
 
         mWorkers.clear();
@@ -564,7 +564,7 @@ void RamSaver::writeIndex() {
     auto bytesWasted = incremental() ? mGaps->wastedSpace() : 0;
     mIncStats.print(
             "RAM: index %d, total %lld bytes, wasted %d (compressed: %s)\n",
-            int(end - start), (long long)mDiskSize, int(bytesWasted),
+            int(end - start), static_cast<long long>(mDiskSize), int(bytesWasted),
             compressed ? "yes" : "no");
 }
 

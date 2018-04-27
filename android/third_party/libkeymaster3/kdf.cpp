@@ -37,19 +37,22 @@ bool Kdf::Init(keymaster_digest_t digest_type, const uint8_t* secret, size_t sec
         return false;
     }
 
-    if (!secret || secret_len == 0)
+    if (!secret || secret_len == 0) {
         return false;
+    }
 
     secret_key_len_ = secret_len;
     secret_key_.reset(dup_buffer(secret, secret_len));
-    if (!secret_key_.get())
+    if (!secret_key_.get()) {
         return false;
+    }
 
     salt_len_ = salt_len;
     if (salt && salt_len > 0) {
         salt_.reset(dup_buffer(salt, salt_len));
-        if (!salt_.get())
+        if (!salt_.get()) {
             return false;
+        }
     } else {
         salt_.reset();
     }
@@ -59,8 +62,9 @@ bool Kdf::Init(keymaster_digest_t digest_type, const uint8_t* secret, size_t sec
 }
 
 bool Kdf::Uint32ToBigEndianByteArray(uint32_t number, uint8_t* output) {
-    if (!output)
+    if (!output) {
         return false;
+    }
 
     output[0] = (number >> 24) & 0xff;
     output[1] = (number >> 16) & 0xff;

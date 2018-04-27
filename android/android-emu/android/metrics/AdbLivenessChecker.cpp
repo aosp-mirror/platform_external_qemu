@@ -40,7 +40,7 @@ AdbLivenessChecker::Ptr AdbLivenessChecker::create(
         android::emulation::AdbInterface* adb,
         android::base::Looper* looper,
         MetricsReporter* reporter,
-        android::base::StringView emulatorName,
+        const android::base::StringView& emulatorName,
         android::base::Looper::Duration checkIntervalMs) {
     auto inst = Ptr(new AdbLivenessChecker(adb, looper, reporter, emulatorName,
                                            checkIntervalMs));
@@ -77,7 +77,7 @@ AdbLivenessChecker::AdbLivenessChecker(
         android::emulation::AdbInterface* adb,
         android::base::Looper* looper,
         MetricsReporter* reporter,
-        android::base::StringView emulatorName,
+        const android::base::StringView& emulatorName,
         android::base::Looper::Duration checkIntervalMs)
     : mAdb(adb),
       mLooper(looper),
@@ -190,8 +190,9 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     System::ProcessExitCode exitCode;
     const std::string& adbPath = mAdb->adbPath();
     std::string serial = mAdb->serialString();
-    if (serial.empty())
+    if (serial.empty()) {
         serial = mEmulatorName;
+    }
 
     const std::vector<std::string> adbServerAliveCmd = {adbPath, "devices"};
     if (!System::get()->runCommand(

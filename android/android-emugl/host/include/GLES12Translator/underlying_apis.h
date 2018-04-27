@@ -25,7 +25,7 @@ struct UnderlyingApis {
     //    const ANGLE_GLES2_ext *angle_ext
     // assuming that is how UndelryingApis implement them
 };
-typedef UnderlyingApis GraphicsApis;
+using GraphicsApis = UnderlyingApis;
 
 // Swiftshader could offer different UnderlyingApis
 

@@ -14,7 +14,7 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/Log.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #ifdef _WIN32
 #include <windows.h>

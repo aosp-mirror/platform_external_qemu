@@ -15,11 +15,11 @@
 #include "android/filesystems/internal/PartitionConfigBackend.h"
 #include "android/utils/debug.h"
 
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 using android::internal::PartitionConfigBackend;
 using android::base::System;
@@ -137,10 +137,10 @@ static bool addNandImage(PartitionConfigState* state,
                          bool readonly) {
     // Sanitize parameters, an empty string must be the same as NULL.
     if (part_file && !*part_file) {
-        part_file = NULL;
+        part_file = nullptr;
     }
     if (part_init_file && !*part_init_file) {
-        part_init_file = NULL;
+        part_init_file = nullptr;
     }
 
     // Sanity checks.
@@ -165,13 +165,13 @@ static bool addNandImage(PartitionConfigState* state,
     // As a special case, a |part_file| of '<temp>' means a temporary
     // partition is needed.
     if (part_file && !strcmp(part_file, "<temp>")) {
-        part_file = NULL;
+        part_file = nullptr;
     }
 
     // Verify partition type, or probe it if needed.
     {
         // First determine which image file to probe.
-        const char* image_file = NULL;
+        const char* image_file = nullptr;
         if (part_file && state->backend->pathExists(part_file)) {
             image_file = part_file;
         } else if (part_init_file) {
@@ -443,7 +443,7 @@ bool android_partition_configuration_setup(
 
         if (!addNandImage(state, "cache", cache_partition_type,
                           cache_partition_mode, config->cache_partition.size,
-                          config->cache_partition.path, NULL, false)) {
+                          config->cache_partition.path, nullptr, false)) {
             return false;
         }
     }

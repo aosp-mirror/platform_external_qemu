@@ -14,30 +14,24 @@
 #include "android/base/async/AsyncStatus.h"
 #include "android/base/async/Looper.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace android {
 namespace base {
 
 class AsyncWriter {
 public:
-    AsyncWriter() :
-            mBuffer(NULL),
-            mBufferSize(0U),
-            mPos(0U),
-            mFdWatch(NULL) {}
+    AsyncWriter() = default;
 
-    void reset(const void* buffer,
-               size_t bufferSize,
-               Looper::FdWatch* watch);
+    void reset(const void* buffer, size_t bufferSize, Looper::FdWatch* watch);
 
     AsyncStatus run();
 
 private:
-    const uint8_t* mBuffer;
-    size_t mBufferSize;
-    size_t mPos;
-    Looper::FdWatch* mFdWatch;
+    const uint8_t* mBuffer{nullptr};
+    size_t mBufferSize{0U};
+    size_t mPos{0U};
+    Looper::FdWatch* mFdWatch{nullptr};
 };
 
 }  // namespace base

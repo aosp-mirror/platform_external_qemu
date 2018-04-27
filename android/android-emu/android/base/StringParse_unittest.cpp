@@ -56,6 +56,7 @@ TEST(StringParse, SscanfWithCLocaleThreads) {
     auto scopedCommaLocale = setScopedCommaLocale();
 
     std::vector<std::unique_ptr<FunctorThread>> threads;
+    threads.reserve(20);
     for (int i = 0; i < 20; ++i) {
         threads.emplace_back(new FunctorThread(&testScanf));
     }

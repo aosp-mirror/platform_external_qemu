@@ -35,7 +35,7 @@ extern "C" {
 #include "libavutil/time.h"
 }
 
-#include <math.h>
+#include <cmath>
 
 namespace android {
 namespace videoplayer {
@@ -81,8 +81,8 @@ void Clock::setSpeed(double speed) {
 void Clock::syncToSlave(Clock* slave) {
     double clock = this->getTime();
     double slave_clock = slave->getTime();
-    if (!isnan(slave_clock) &&
-        (isnan(clock) || fabs(clock - slave_clock) > AV_NOSYNC_THRESHOLD)) {
+    if (!std::isnan(slave_clock) &&
+        (std::isnan(clock) || fabs(clock - slave_clock) > AV_NOSYNC_THRESHOLD)) {
         this->set(slave_clock, slave->mSerial);
     }
 }

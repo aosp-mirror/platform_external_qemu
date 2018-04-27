@@ -14,7 +14,7 @@
 #include "android/utils/debug.h"
 #include "keymaster_ipc.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include <memory>
 #include <vector>

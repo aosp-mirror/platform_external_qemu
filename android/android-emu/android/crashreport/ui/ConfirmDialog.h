@@ -28,7 +28,7 @@ public:
                   android::crashreport::CrashService* crashservice,
                   Ui::Settings::CRASHREPORT_PREFERENCE_VALUE reportPreference,
                   const char* reportingDir);
-    ~ConfirmDialog();
+    ~ConfirmDialog() override;
 
 public slots:
     void sendReport();

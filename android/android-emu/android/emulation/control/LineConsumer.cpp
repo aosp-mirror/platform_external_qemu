@@ -22,9 +22,9 @@ using std::string;
 // static
 int LineConsumer::Callback(void* opaque, const char* buff, int len) {
     auto me = static_cast<LineConsumer*>(opaque);
-    me->mLines.push_back(string(buff, len));
+    me->mLines.emplace_back(buff, len);
     return len;
 }
 
-}  // emulation
-}  // android
+}  // namespace emulation
+}  // namespace android

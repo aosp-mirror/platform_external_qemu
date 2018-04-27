@@ -20,7 +20,7 @@ class TestVmLock : public VmLock {
 public:
     TestVmLock() : mOldVmLock(VmLock::set(this)), mInstalled(true) {}
 
-    ~TestVmLock() { release(); }
+    ~TestVmLock() override { release(); }
 
     void release() {
         if (mInstalled) {
@@ -30,11 +30,9 @@ public:
         }
     }
 
-    virtual void lock() override { mLockCount++; }
-    virtual void unlock() override { mUnlockCount++; }
-    virtual bool isLockedBySelf() const override {
-        return mLockCount > mUnlockCount;
-    }
+    void lock() override { mLockCount++; }
+    void unlock() override { mUnlockCount++; }
+    bool isLockedBySelf() const override { return mLockCount > mUnlockCount; }
 
     int mLockCount = 0;
     int mUnlockCount = 0;
