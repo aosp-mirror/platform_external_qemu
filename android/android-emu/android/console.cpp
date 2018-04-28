@@ -2319,6 +2319,10 @@ static const CommandDefRec  snapshot_commands[] =
     "'avd snapshot del <name>' will delete the state snapshot with the given name\r\n",
     NULL, do_snapshot_del, NULL },
 
+    { "delete", "delete state snapshot",
+    "'avd snapshot delete <name>' will delete the state snapshot with the given name\r\n",
+    NULL, do_snapshot_del, NULL },
+
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
