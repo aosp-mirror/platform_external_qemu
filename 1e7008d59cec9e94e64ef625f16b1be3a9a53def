@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1dbca36d_7a9bdcbb",
+        "filename": "android/android-emugl/host/include/GLES/gl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-04-30T23:34:47Z",
+      "side": 1,
+      "message": "this file is supposed to be compatible with c (although we probably did not include it in a c file). is it a concern to have those using? same with other headers in this folder, and gles2 / gles3 folders.",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 5
+      },
+      "revId": "1e7008d59cec9e94e64ef625f16b1be3a9a53def",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3045f33f_53124ed0",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 3

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d5d3ab2e_677c3993",
+        "filename": "android/android-emugl/host/include/GLES2/gl2ext.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-04-30T23:34:47Z",
+      "side": 0,
+      "message": "I have a bad feeling about removing those GL_APIENTRYP stuff, or in general any modification in this file",
+      "range": {
+        "startLine": 73,
+        "startChar": 14,
+        "endLine": 73,
+        "endChar": 26
+      },
+      "revId": "1473fc9f8bea8e39a442bb51ba3307d1bedb9cb6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
