@@ -769,12 +769,13 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
         bool snapshotIsValid =
             protobuf &&
-            theSnapshot.checkValid(
+            (mIsStandAlone || // Don't checkValid in standalone mode
+             theSnapshot.checkValid(
                 false /* don't write out the error code to protobuf; we just want
-                         to check validity here */);
+                         to check validity here */));
 
         // Nuke the invalid snapshots.
-        if (!snapshotIsValid) {
+        if (!snapshotIsValid && !mIsStandAlone) {
             android::base::ThreadLooper::runOnMainLooper([fileName, this] {
                 androidSnapshot_delete(fileName.toStdString().c_str());
             });
