@@ -480,9 +480,7 @@ private:
     bool mStartedAdbStopProcess;
 
     bool         mFrameAlways;       // true = no floating emulator
-    bool         mPreviouslyFramed = false;
     bool         mHaveBeenFrameless;
-    unsigned int mHardRefreshCountDown = 0;
     SkinRotation mOrientation;       // Rotation of the main window
 
     QScreen* mCurrentScreen = nullptr;

@@ -399,7 +399,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mFrameAlways =
         FramelessDetector::isFramelessOk() ?
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true;
-    mPreviouslyFramed = mFrameAlways;
 
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
@@ -1041,31 +1040,10 @@ void EmulatorQtWindow::maskWindowFrame() {
             mContainer.setMask(bitmap);
         }
     }
+
+    mContainer.framelessChanged();
     mContainer.show();
     mToolWindow->dockMainWindow();
-
-    if (haveFrame != mPreviouslyFramed) {
-        // We are switching between framed and frameless. We need to
-        // signal a kEventScreenChanged to force redrawing the device
-        // screen.
-        // Unfortunately, signaling this once isn't sufficient; we
-        // need to do it until things settle down. Three time looks
-        // like enough. Five times is for safety, but even this is
-        // not a 100% fix.
-        // TODO: http://b/78789992 Occasional black screen when switching framed/frameless
-        mHardRefreshCountDown = 5;
-        mPreviouslyFramed = haveFrame;
-    }
-    SkinEvent* event = new SkinEvent();
-    if (mHardRefreshCountDown == 0) {
-        D("%s: kEventWindowChanged", __FUNCTION__);
-        event->type = kEventWindowChanged;
-    } else {
-        D("%s: kEventScreenChanged", __FUNCTION__);
-        event->type = kEventScreenChanged;
-        mHardRefreshCountDown--;
-    }
-    queueSkinEvent(event);
 }
 
 void EmulatorQtWindow::getSkinPixmap() {

@@ -51,6 +51,7 @@ public:
     QSize viewportSize() const;
 
     void prepareForRotation() { mRotating = true; }
+    void framelessChanged() { mFramelessRecentlyChanged = true; }
 
     Ui::OverlayMessageCenter& messageCenter();
 
@@ -88,4 +89,5 @@ private:
     QList<QEvent::Type> mEventBuffer;
     QTimer mResizeTimer;
     bool mRotating = false;
+    bool mFramelessRecentlyChanged = false;
 };

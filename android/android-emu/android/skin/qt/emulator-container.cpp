@@ -315,6 +315,13 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
         }
         mMessages.ifExists([&] { mMessages->showNormal(); });
     }
+
+    if (mFramelessRecentlyChanged) {
+        mFramelessRecentlyChanged = false;
+        SkinEvent* event = new SkinEvent();
+        event->type = kEventScreenChanged;
+        mEmulatorWindow->queueSkinEvent(event);
+    }
 }
 
 void EmulatorContainer::showMinimized() {
