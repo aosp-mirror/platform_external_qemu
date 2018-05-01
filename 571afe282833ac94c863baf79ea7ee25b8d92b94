@@ -22,6 +22,30 @@
       "revId": "571afe282833ac94c863baf79ea7ee25b8d92b94",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87dd0243_a7070258",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 845,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-05-01T21:21:43Z",
+      "side": 1,
+      "message": "Clangformat only ran for the changed lines.",
+      "parentUuid": "fd5264b9_ffea5113",
+      "range": {
+        "startLine": 845,
+        "startChar": 0,
+        "endLine": 845,
+        "endChar": 160
+      },
+      "revId": "571afe282833ac94c863baf79ea7ee25b8d92b94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
