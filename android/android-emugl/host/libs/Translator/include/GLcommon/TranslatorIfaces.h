@@ -55,7 +55,6 @@ struct EglImage
     unsigned int format;
     unsigned int type;
     unsigned int texStorageLevels;
-    unsigned int maxMipmapLevel;
     SaveableTexturePtr saveableTexture;
     bool needRestore;
     GLsync sync;

@@ -74,6 +74,7 @@ public:
     void makeDirty();
     bool isDirty() const;
     void setTarget(GLenum target);
+    void setMipmapLevelAtLeast(unsigned int level);
 public:
     // precondition: (1) a context must be properly bound
     //               (2) m_fileReader is set up
