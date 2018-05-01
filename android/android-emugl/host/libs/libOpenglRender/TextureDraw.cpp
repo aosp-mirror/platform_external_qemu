@@ -199,6 +199,7 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
     }
 
     // TODO(digit): Save previous program state.
+    assert(s_gles2.glGetError() == GL_NO_ERROR);
 
     s_gles2.glUseProgram(mProgram);
 
@@ -207,6 +208,7 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not use program error=0x%x\n",
             __FUNCTION__, err);
+        assert(0);
     }
 #endif
 
@@ -293,14 +295,16 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
         // available to be blended
         s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
 
-        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mMaskWidth, mMaskHeight, 0,
                              GL_RGBA, GL_UNSIGNED_BYTE, mMaskPixels);
 
-        s_gles2.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        s_gles2.glEnable(GL_BLEND);
+        //s_gles2.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //s_gles2.glEnable(GL_BLEND);
 
         mHaveNewMask = false;
         mMaskIsValid = true;
@@ -310,8 +314,6 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
         s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
         s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
                                (const GLvoid*)indexShift);
-        // Reset to the "normal" texture
-        s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
     }
 
 #ifndef NDEBUG
@@ -330,6 +332,7 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
     s_gles2.glDisableVertexAttribArray(mInCoordSlot);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 
     return true;
 }
@@ -343,6 +346,12 @@ TextureDraw::~TextureDraw() {
     }
     if (mVertexShader) {
         s_gles2.glDeleteShader(mVertexShader);
+    }
+    if (mProgram) {
+        s_gles2.glDeleteProgram(mProgram);
+    }
+    if (mMaskTexture) {
+        s_gles2.glDeleteTextures(1, &mMaskTexture);
     }
 }
 

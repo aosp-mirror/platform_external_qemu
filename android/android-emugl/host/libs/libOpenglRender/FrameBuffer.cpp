@@ -1642,6 +1642,7 @@ void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
+    AutoLock mutex(m_lock);
     bool res = postImpl(p_colorbuffer, needLockAndBind);
     if (res) setGuestPostedAFrame();
     return res;
@@ -1751,6 +1752,7 @@ FrameBuffer::getReadPixelsCallback() {
 
 bool FrameBuffer::repost(bool needLockAndBind) {
     GL_LOG("Reposting framebuffer.");
+    AutoLock mutex(m_lock);
     if (m_lastPostedColorBuffer &&
         sInitialized.load(std::memory_order_relaxed)) {
         GL_LOG("Has last posted colorbuffer and is initialized; post.");
@@ -1909,6 +1911,9 @@ bool FrameBuffer::onLoad(Stream* stream,
     // cleanups
     {
         ScopedBind scopedBind(m_colorBufferHelper);
+        GLenum err = s_gles2.glGetError();
+        printf("err %d\n", err);
+        assert(err == GL_NO_ERROR);
         if (m_procOwnedWindowSurfaces.empty() &&
             m_procOwnedColorBuffers.empty() && m_procOwnedEGLImages.empty() &&
             m_procOwnedRenderContext.empty() &&
@@ -1942,9 +1947,34 @@ bool FrameBuffer::onLoad(Stream* stream,
         assert(m_contexts.empty());
         assert(m_windows.empty());
         assert(m_colorbuffers.empty());
+        assert(!s_gles2.glGetError());
+        /*s_gles2.glDisable(GL_BLEND);
+        assert(!s_gles2.glGetError());
+        s_gles2.glDisable(GL_DEPTH_TEST);
+        assert(!s_gles2.glGetError());
+        s_gles2.glDisable(GL_CULL_FACE);
+        assert(!s_gles2.glGetError());
+        s_gles2.glDisable(GL_SCISSOR_TEST);
+        assert(!s_gles2.glGetError());
+        s_gles2.glDisable(GL_STENCIL_TEST);
+        assert(!s_gles2.glGetError());*/
 #ifdef SNAPSHOT_PROFILE
         System::Duration texTime = System::get()->getUnixTimeUs();
 #endif
+    }
+    {
+        //s_egl.eglDestroyContext(m_eglDisplay, m_eglContext);
+        s_egl.eglDestroyContext(m_eglDisplay, m_pbufContext);
+        //m_eglContext = s_egl.eglCreateContext(m_eglDisplay, m_eglConfig,
+        //                        EGL_NO_CONTEXT, getGlesMaxContextAttribs());
+        m_pbufContext =
+            s_egl.eglCreateContext(m_eglDisplay, m_eglConfig,
+                                   m_eglContext, getGlesMaxContextAttribs());
+        s_egl.eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                EGL_NO_CONTEXT);
+        assert(m_eglContext);
+        assert(m_pbufContext);
+        ScopedBind scopedBind(m_colorBufferHelper);
         if (s_egl.eglLoadAllImages) {
             s_egl.eglLoadAllImages(m_eglDisplay, stream, &textureLoader);
         }
@@ -1952,11 +1982,13 @@ bool FrameBuffer::onLoad(Stream* stream,
         printf("Texture load time: %lld ms\n",
                (long long)(System::get()->getUnixTimeUs() - texTime) / 1000);
 #endif
+        assert(!s_gles2.glGetError());
     }
     // See comment about subwindow position in onSave().
     m_framebufferWidth = stream->getBe32();
     m_framebufferHeight = stream->getBe32();
     m_dpr = stream->getFloat();
+    printf("dpr %f\n", m_dpr);
     // TODO: resize the window
 
     m_useSubWindow = stream->getBe32();
