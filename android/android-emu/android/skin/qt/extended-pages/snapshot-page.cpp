@@ -514,6 +514,7 @@ void SnapshotPage::updateAfterSelectionChanged() {
     adjustIcons(mUi->snapshotDisplay);
 
     QString selectionInfoString;
+    QString descriptionString;
     QString simpleName;
 
     const WidgetSnapshotItem* theItem = getSelectedSnapshot();
@@ -538,24 +539,26 @@ void SnapshotPage::updateAfterSelectionChanged() {
 
         System::FileSize snapSize = android::snapshot::folderSize(simpleName.toStdString());
 
+        QString description = getDescription(simpleName);
+        if (!description.isEmpty()) {
+            descriptionString = QString("<p><big>%1</big>")
+                                    .arg(description.replace('<', "&lt;").replace('\n', "<br>"));
+        }
+
         if (theItem->isValid()) {
             selectedItemStatus = SelectionStatus::Valid;
             selectionInfoString =
                       tr("<big><b>%1</b></big><br>"
                          "%2, captured %3<br>"
-                         "File: %4")
+                         "File: %4"
+                         "%5")
                               .arg(logicalName,
                                    formattedSize(snapSize),
                                    theItem->dateTime().isValid() ?
                                        theItem->dateTime().toString(Qt::SystemLocaleShortDate) :
                                        tr("(unknown)"),
-                                   simpleName);
-
-            QString description = getDescription(simpleName);
-            if (!description.isEmpty()) {
-                selectionInfoString += QString("<p><big>%1</big>")
-                                       .arg(description.replace('<', "&lt;").replace('\n', "<br>"));
-            }
+                                   simpleName,
+                                   descriptionString);
             mAllowLoad = true;
             mAllowDelete = true;
             // Cannot edit the default snapshot
@@ -568,8 +571,8 @@ void SnapshotPage::updateAfterSelectionChanged() {
                       tr("<big><b>%1</b></big><br>"
                          "%2<br>"
                          "File: %3"
-                         "<div style=\"color:red\">Invalid snapshot</div>")
-                              .arg(logicalName, formattedSize(snapSize), simpleName);
+                         "<div style=\"color:red\">Invalid snapshot</div> %4")
+                              .arg(logicalName, formattedSize(snapSize), simpleName, descriptionString);
             mAllowLoad = false;
             mAllowEdit = false;
             mAllowDelete = true;
@@ -683,7 +686,7 @@ void SnapshotPage::showPreviewImage(const QString& snapshotName, SelectionStatus
     QGraphicsPixmapItem *previewItem;
     bool haveImage = false;
 
-    if (itemStatus == SelectionStatus::Valid && !snapshotName.isEmpty()) {
+    if (!snapshotName.isEmpty()) {
         QPixmap pMap(PathUtils::join(getSnapshotBaseDir(),
                                      snapshotName.toStdString(),
                                      "screenshot.png").c_str());
@@ -840,7 +843,7 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         // Nuke the invalid snapshots.
         if (!snapshotIsValid && !mIsStandAlone) {
             android::base::ThreadLooper::runOnMainLooper([fileName, this] {
-                androidSnapshot_delete(fileName.toStdString().c_str());
+                androidSnapshot_invalidate(fileName.toStdString().c_str());
             });
         }
 
