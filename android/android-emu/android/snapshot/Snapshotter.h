@@ -161,6 +161,7 @@ private:
 
     bool mIsQuickboot = false;
     bool mIsOnExit = false;
+    bool mIsInvalidating = false;
 };
 
 }  // namespace snapshot

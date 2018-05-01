@@ -692,8 +692,6 @@ void Snapshotter::invalidateSnapshot(const char* name) {
 
     if (!name) { name = kDefaultBootSnapshot.c_str(); }
 
-    Snapshot tombstone(name);
-
     if (name == mLoadedSnapshotFile) {
         // We're deleting the "loaded" snapshot, so first finish any pending
         // load, and then clear the snapshot file.  Do it under the VM lock to
@@ -707,15 +705,12 @@ void Snapshotter::invalidateSnapshot(const char* name) {
         CrashReporter::get()->hangDetector().pause(false);
     }
 
+    mIsInvalidating = true;
     mVmOperations.snapshotDelete(name, this, nullptr);
 
     // then delete kRamFileName / kTexturesFileName
     path_delete_file(PathUtils::join(getSnapshotDir(name), kRamFileName).c_str());
     path_delete_file(PathUtils::join(getSnapshotDir(name), kTexturesFileName).c_str());
-
-    // but leave a tombstone
-    path_mkdir_if_needed(getSnapshotDir(name).c_str(), 0777);
-    tombstone.saveFailure(FailureReason::Tombstone);
 }
 
 bool Snapshotter::areSavesSlow(const char* name) {
@@ -848,9 +843,12 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
         if (mLoader && mLoader->snapshot().name() == name) {
             mLoader.reset();
         }
-        path_delete_dir(Snapshot::dataDir(name).c_str());
+        if (!mIsInvalidating) {
+            path_delete_dir(Snapshot::dataDir(name).c_str());
+        }
     }
     CrashReporter::get()->hangDetector().pause(false);
+    mIsInvalidating = false;
     return true;
 }
 

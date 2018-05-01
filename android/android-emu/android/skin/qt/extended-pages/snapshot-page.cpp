@@ -777,7 +777,7 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         // Nuke the invalid snapshots.
         if (!snapshotIsValid && !mIsStandAlone) {
             android::base::ThreadLooper::runOnMainLooper([fileName, this] {
-                androidSnapshot_delete(fileName.toStdString().c_str());
+                androidSnapshot_invalidate(fileName.toStdString().c_str());
             });
         }
 
