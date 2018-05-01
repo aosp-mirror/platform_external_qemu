@@ -1201,6 +1201,10 @@ GL_APICALL void  GL_APIENTRY glDisable(GLenum cap){
         return;
     }
 #endif
+    /*if (cap != GL_BLEND && cap != GL_ALPHA) {
+        ctx->setEnable(cap, false);
+        ctx->dispatcher().glDisable(cap);
+    }*/
     ctx->setEnable(cap, false);
     ctx->dispatcher().glDisable(cap);
 }
@@ -1302,6 +1306,10 @@ GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
 #endif
     ctx->setEnable(cap, true);
     ctx->dispatcher().glEnable(cap);
+    /*if (cap != GL_BLEND && cap != GL_ALPHA) {
+        ctx->setEnable(cap, true);
+        ctx->dispatcher().glEnable(cap);
+    }*/
 }
 
 GL_APICALL void  GL_APIENTRY glEnableVertexAttribArray(GLuint index){

@@ -197,8 +197,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
                          0, texFormat, pixelType, NULL);
 
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -361,10 +361,13 @@ void ColorBuffer::subUpdate(int x,
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     } else {
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+        GLint prevAlignment = 0;
+        s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevAlignment);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format,
                                 p_type, pixels);
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevAlignment);
     }
 
     if (m_fastBlitSupported) {
@@ -449,8 +452,10 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles1.glDeleteTextures(1, &tmpTex);
             s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
         }
+        assert(!s_gles2.glGetError());
 
         RecursiveScopedHelperContext context(m_helper);
+        assert(!s_gles2.glGetError());
         if (!context.isOk()) {
             return false;
         }
@@ -660,4 +665,5 @@ void ColorBuffer::restore() {
         default:
             break;
     }
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 }

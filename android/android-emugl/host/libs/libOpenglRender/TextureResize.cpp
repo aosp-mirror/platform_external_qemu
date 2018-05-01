@@ -359,6 +359,8 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
 }
 
 void TextureResize::resize(GLuint texture) {
+    GLint prevViewport[4] = {};
+    s_gles2.glGetIntegerv(GL_VIEWPORT, prevViewport);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
     s_gles2.glActiveTexture(GL_TEXTURE0);
 
@@ -377,6 +379,8 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, &min_filter);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     s_gles2.glUniform1i(mFBWidth.uTexture, 0);
     s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));
 
@@ -399,6 +403,9 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    s_gles2.glUseProgram(0);
     s_gles2.glDisableVertexAttribArray(mFBWidth.aPosition);
     s_gles2.glDisableVertexAttribArray(mFBHeight.aPosition);
+    s_gles2.glViewport(prevViewport[0], prevViewport[1], prevViewport[2],
+            prevViewport[3]);
 }
