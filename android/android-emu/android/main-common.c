@@ -976,17 +976,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             defaultBytes = defaultPartitionSize;
         }
 
-        uint64_t     dataBytes;
-        const char*  dataPath = hw->disk_dataPartition_initPath;
-
-        if (dataPath == NULL)
-            dataPath = hw->disk_dataPartition_path;
-
-        path_get_size(dataPath, &dataBytes);
-
-        hw->disk_dataPartition_size =
-            _adjustPartitionSize("data", dataBytes, defaultBytes,
-                                 avdInfo_inAndroidBuild(avd));
+        hw->disk_dataPartition_size = defaultBytes;
     }
 
     /** CACHE PARTITION **/

@@ -26,13 +26,12 @@ void PostWorker::post(ColorBuffer* cb) {
 
     GLuint tex = cb->scale();
 
-    // find the x and y values at the origin when "fully scrolled"
-    // multiply by 2 because the texture goes from -1 to 1, not 0 to 1
-    // divide by device pixel ratio because windowing coordinates ignore
-    // DPR,
-    // but the framebuffer includes DPR
-    float fx = 2.f * (m_viewportWidth / dpr - windowWidth) / (float)m_viewportWidth;
-    float fy = 2.f * (m_viewportHeight / dpr - windowHeight) / (float)m_viewportHeight;
+    // Find the x and y values at the origin when "fully scrolled."
+    // Multiply by 2 because the texture goes from -1 to 1, not 0 to 1.
+    // Multiply the windowing coordinates by DPR because they ignore
+    // DPR, but the viewport includes DPR.
+    float fx = 2.f * (m_viewportWidth  - windowWidth  * dpr) / (float)m_viewportWidth;
+    float fy = 2.f * (m_viewportHeight - windowHeight * dpr) / (float)m_viewportHeight;
 
     // finally, compute translation values
     float dx = px * fx;
