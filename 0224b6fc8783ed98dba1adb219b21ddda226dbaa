@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87ed9ae7_4b33ba63",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-05-02T21:03:53Z",
+      "side": 1,
+      "message": "I like it!",
+      "range": {
+        "startLine": 707,
+        "startChar": 11,
+        "endLine": 707,
+        "endChar": 61
+      },
+      "revId": "0224b6fc8783ed98dba1adb219b21ddda226dbaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
