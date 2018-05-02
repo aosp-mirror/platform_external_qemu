@@ -456,7 +456,7 @@ const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
 
     if (isUnrecoverableReason(
             FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
-        return nullptr;
+        saveFailure(FailureReason(mSnapshotPb.failed_to_load_reason_code()));
     }
 
     return &mSnapshotPb;
@@ -550,6 +550,14 @@ const bool Snapshot::checkValid(bool writeFailure) {
         mSuccessfulLoads = 0;
     }
 
+    if (isUnrecoverableReason(
+            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+        if (writeFailure) {
+            saveFailure(FailureReason(mSnapshotPb.failed_to_load_reason_code()));
+        }
+        return false;
+    }
+
     return true;
 }
 
@@ -566,14 +574,6 @@ bool Snapshot::load() {
                 SkinRotation(mSnapshotPb.rotation())) {
         Snapshotter::get().windowAgent().rotate(
                 SkinRotation(mSnapshotPb.rotation()));
-    }
-
-    // Successfully loaded protobuf;
-    // clear existing failure reason if it was not unrecoverable.
-    if (mSnapshotPb.has_failed_to_load_reason_code() &&
-        !isUnrecoverableReason(
-            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
-        mSnapshotPb.clear_failed_to_load_reason_code();
     }
 
     return true;

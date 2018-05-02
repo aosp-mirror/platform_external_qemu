@@ -54,6 +54,7 @@ enum class FailureReason {
     NoTexturesFile,
     SnapshotsNotSupported,
     Canceled,
+    Tombstone,
 
     UnrecoverableErrorLimit = 10000,
 
@@ -73,7 +74,6 @@ enum class FailureReason {
     TexturesFailed,
     AdbOffline,
     OutOfDiskSpace,
-    Tombstone,
 
     InProgressLimit = 30000,
 };
