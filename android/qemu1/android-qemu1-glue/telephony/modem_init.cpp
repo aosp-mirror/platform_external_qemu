@@ -18,8 +18,6 @@ extern "C" {
     #include "hw/hw.h"
 }
 
-#define MODEM_DEV_STATE_SAVE_VERSION 1
-
 static void modem_state_save(QEMUFile* file, void* opaque)
 {
     Stream* const s = stream_from_qemufile(file);
@@ -29,11 +27,8 @@ static void modem_state_save(QEMUFile* file, void* opaque)
 
 static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
 {
-    if (version_id != MODEM_DEV_STATE_SAVE_VERSION)
-        return -1;
-
     Stream* const s = stream_from_qemufile(file);
-    const int res = amodem_state_load((AModem)opaque, (SysFile*)s);
+    const int res = amodem_state_load((AModem)opaque, (SysFile*)s, version_id);
     stream_free(s);
 
     return res;
