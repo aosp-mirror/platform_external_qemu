@@ -256,6 +256,7 @@ struct StylesheetValues {
         {"MAJOR_TITLE_COLOR",               "#617d8a"},  // Text of major tab separators
         {"SCROLL_BKG_COLOR",                "#f6f6f6"},  // Background of scroll bar
         {"SCROLL_HANDLE_COLOR",             "#d9d9d9"},  // Handle of scroller
+        {"SNAPSHOT_INFO_BKG",               "#f9f9f9"},  // Background of snapshot description text
         {TAB_BKG_COLOR_VAR,                 "#ffffff"},  // Background of major tabs
         {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
         {"TAB_DARKENED_COLOR",              "#e6e6e6"},
@@ -265,7 +266,10 @@ struct StylesheetValues {
         {"TITLE_COLOR",                     "#757575"},  // Main page titles
         {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
         {"TOOL_ON_COLOR",                   "#d6d6d6"},  // Main toolbar button ON
+        {"TREE_WIDGET_BKG",                 "#ffffff"},  // List of Snapshots
+        {"TREE_WIDGET_BORDER",              "#e3e3e3"},
         {"LINK_COLOR",                      "#0288D1"},  // Highlighted link
+        {"PREVIEW_IMAGE_BKG",               "#e3e3e3"},  // Behind snapshot preview image
         {"RAISED_COLORED_BKG_COLOR",        "#459388"},  // Colored raised button background color.
         {"RAISED_COLORED_PRESSED_COLOR",    "#5faca0"},  // Colored raised button pressed color.
         {"RAISED_COLORED_COLOR",            "#ffffff"},  // Colored raised button text color.
@@ -290,6 +294,7 @@ struct StylesheetValues {
         {"MAJOR_TITLE_COLOR",            "#e5e6e7"},
         {"SCROLL_BKG_COLOR",             "#333b43"},
         {"SCROLL_HANDLE_COLOR",          "#1d272c"},
+        {"SNAPSHOT_INFO_BKG",            "#273238"},
         {TAB_BKG_COLOR_VAR,              "#394249"},
         {TAB_SELECTED_COLOR_VAR,         "#313c42"},
         {"TAB_DARKENED_COLOR",           "#20292e"},
@@ -299,7 +304,10 @@ struct StylesheetValues {
         {"TITLE_COLOR",                  "#bec1c3"},
         {"TOOL_COLOR",                   "#00bea4"},
         {"TOOL_ON_COLOR",                "#586670"},
+        {"TREE_WIDGET_BKG",              "#394249"},
+        {"TREE_WIDGET_BORDER",           "#494949"},
         {"LINK_COLOR",                   "#29B6F6"},
+        {"PREVIEW_IMAGE_BKG",            "#343d43"},
         {"RAISED_COLORED_BKG_COLOR",     "#459388"},
         {"RAISED_COLORED_PRESSED_COLOR", "#5faca0"},
         {"RAISED_COLORED_COLOR",         "#ffffff"},

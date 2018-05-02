@@ -52,6 +52,10 @@
 *[ColorGroup="Inactive"] {
     color: %%INACTIVE_TEXT_COLOR%%;
 }
+*[ColorGroup="SnapshotInfo"] {
+    background: %%SNAPSHOT_INFO_BKG%%;
+    border: 1px solid %%TREE_WIDGET_BORDER%%;
+}
 *{
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
@@ -110,8 +114,15 @@ QPushButton:pressed[helpButton=true] {
     border: none;
     background: %%TAB_DARKENED_COLOR%%;
 }
+QTreeWidget {
+    border: 1px solid %%TREE_WIDGET_BORDER%%;
+    background: %%TREE_WIDGET_BKG%%;
+}
 QTreeWidget::item {
     height: 28px;
+}
+QGraphicsView {
+    background: %%PREVIEW_IMAGE_BKG%%;
 }
 QWidget[ColorGroup="MajorTab"] {
     border: none;
