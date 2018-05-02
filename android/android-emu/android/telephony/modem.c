@@ -663,7 +663,6 @@ static void amodem_free_call( AModem  modem, AVoiceCall  call );
 void amodem_state_save(AModem modem, SysFile* file)
 {
     // TODO: save more than just calls and call_count - rssi, power, etc.
-
     sys_file_put_byte(file, modem->call_count);
 
     int nn;
@@ -678,16 +677,16 @@ void amodem_state_save(AModem modem, SysFile* file)
       sys_file_put_buffer(file, (uint8_t *)call->number,
                           A_CALL_NUMBER_MAX_SIZE+1);
     }
+    sys_file_put_byte(file, modem->radio_state);
 }
 
-int amodem_state_load(AModem modem, SysFile* file)
+int amodem_state_load(AModem modem, SysFile* file, int version_id)
 {
     // In case there are timers or remote calls.
     int nn;
     for (nn = modem->call_count - 1; nn >= 0; nn--) {
       amodem_free_call( modem, modem->calls + nn);
     }
-
     int call_count = sys_file_get_byte(file);
     for (nn = call_count; nn > 0; nn--) {
       AVoiceCall vcall = amodem_alloc_call( modem );
@@ -698,7 +697,14 @@ int amodem_state_load(AModem modem, SysFile* file)
       call->multi = sys_file_get_be32(file);
       sys_file_get_buffer(file, (uint8_t *)call->number, A_CALL_NUMBER_MAX_SIZE+1 );
     }
-
+    if (version_id == MODEM_DEV_STATE_SAVE_VERSION) {
+        ARadioState radio_state = sys_file_get_byte(file);
+        modem->radio_state = radio_state;
+    } else {
+        // In the past, we forgot to save radio state in amode_state_save(), 
+        // we will by default set radio state on in this case.
+        modem->radio_state = A_RADIO_STATE_ON;
+    }
     modem->snapshotTimeUpdateRequested = 1;
 
     return 0; // >=0 Happy
