@@ -844,17 +844,12 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
             });
         }
 
-        QString logicalName;
+        QString logicalName(fileName);
         QDateTime snapshotDate;
-        if (!snapshotIsValid) {
-            logicalName = fileName;
-        } else {
+        if (protobuf) {
             if (protobuf->has_logical_name()) {
                 logicalName = protobuf->logical_name().c_str();
-            } else {
-                logicalName = fileName;
             }
-
             if (protobuf->has_creation_time()) {
                 snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL * protobuf->creation_time());
             }
