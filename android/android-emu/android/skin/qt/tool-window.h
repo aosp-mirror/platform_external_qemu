@@ -103,6 +103,10 @@ public:
 
     bool shouldClose();
 
+    bool clipboardSharingSupported() const {
+        return mClipboardSupported;
+    }
+
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
@@ -160,6 +164,7 @@ private:
     bool mIsExiting = false;
     bool mAskedWhetherToSaveSnapshot = false;
     bool mAllowExtWindow = false;
+    bool mClipboardSupported = false;
 
     static const UiEmuAgent* sUiEmuAgent;
 
