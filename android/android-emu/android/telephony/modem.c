@@ -678,9 +678,10 @@ void amodem_state_save(AModem modem, SysFile* file)
       sys_file_put_buffer(file, (uint8_t *)call->number,
                           A_CALL_NUMBER_MAX_SIZE+1);
     }
+    sys_file_put_byte(file, modem->radio_state);
 }
 
-int amodem_state_load(AModem modem, SysFile* file)
+int amodem_state_load(AModem modem, SysFile* file, int version_id)
 {
     // In case there are timers or remote calls.
     int nn;
@@ -698,7 +699,14 @@ int amodem_state_load(AModem modem, SysFile* file)
       call->multi = sys_file_get_be32(file);
       sys_file_get_buffer(file, (uint8_t *)call->number, A_CALL_NUMBER_MAX_SIZE+1 );
     }
-
+    if (version_id == MODEM_DEV_STATE_SAVE_VERSION) {
+        ARadioState radio_state = sys_file_get_byte(file);
+        modem->radio_state = radio_state;
+    } else {
+        // In the past, we didn't save radio state in amode_state_save(),
+        // we will by default set radio state on in this case.
+        modem->radio_state = A_RADIO_STATE_ON;
+    }
     modem->snapshotTimeUpdateRequested = 1;
 
     return 0; // >=0 Happy

@@ -16,6 +16,8 @@
 #include "android/telephony/sms.h"
 #include "android/telephony/sysdeps.h"
 
+#define MODEM_DEV_STATE_SAVE_VERSION 2
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -185,7 +187,7 @@ extern int    amodem_update_call( AModem  modem, const char*  number, ACallState
 extern int    amodem_disconnect_call( AModem  modem, const char*  number );
 
 extern void   amodem_state_save( AModem modem, SysFile* file );
-extern int    amodem_state_load( AModem modem, SysFile* file );
+extern int    amodem_state_load( AModem modem, SysFile* file, int version_id);
 
 /**/
 
