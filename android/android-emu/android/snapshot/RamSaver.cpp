@@ -222,12 +222,6 @@ void RamSaver::savePage(int64_t blockOffset,
                     android::base::memoryHint((void*)start, size, MemoryHint::DontNeed);
                 }, kDecommitChunkSize);
 
-                ContiguousRangeMapper decommitter([](uintptr_t start, uintptr_t size) {
-                    android::base::memoryHint((void*)start, size,
-                                              base::MemoryHint::PageOut);
-                }, kDecommitChunkSize);
-
-
 #if SNAPSHOT_PROFILE > 1
                 ScopedMemoryProfiler mem("zeroCheck");
 #endif
@@ -252,8 +246,6 @@ void RamSaver::savePage(int64_t blockOffset,
                     // Decommit or free in chunks of 16 mb.
                     if (page.sizeOnDisk == 0) {
                         zeroPageDeleter.add((uintptr_t)zeroCheckPtr, block.ramBlock.pageSize);
-                    } else {
-                        decommitter.add((uintptr_t)zeroCheckPtr, block.ramBlock.pageSize);
                     }
                 }
             }
@@ -647,19 +639,11 @@ void RamSaver::writePage(WriteInfo&& wi) {
         int64_t currEnd = -1;
         int64_t contigBytes = 0;
 
-        // Decommit on page write.
-        ContiguousRangeMapper writeCombineDecommitter([](uintptr_t start, uintptr_t size) {
-            android::base::memoryHint((void*)start, size,
-                                      base::MemoryHint::PageOut);
-        });
-
         for (int32_t nzcIndex = wi.nonzeroChangedIndexStart;
              nzcIndex < wi.nonzeroChangedIndexEnd; ++nzcIndex) {
 
             int32_t pageIndex = block.nonzeroChangedPages[size_t(nzcIndex)];
             auto& page = block.pages[size_t(pageIndex)];
-            auto origPtr = block.ramBlock.hostPtr +
-                    int64_t(pageIndex) * block.ramBlock.pageSize;
 
             int64_t pos = page.filePos;
             int64_t sz = page.sizeOnDisk;
@@ -673,9 +657,9 @@ void RamSaver::writePage(WriteInfo&& wi) {
                 contigBytes += sz;
             } else {
                 base::pwrite(mStreamFd,
-                        mWriteCombineBuffer.data(),
-                        contigBytes,
-                        currStart);
+                             mWriteCombineBuffer.data(),
+                             contigBytes,
+                             currStart);
                 writeCombinePtr = mWriteCombineBuffer.data();
                 currStart = pos;
                 currEnd = pos + sz;
@@ -684,11 +668,7 @@ void RamSaver::writePage(WriteInfo&& wi) {
 
             memcpy(writeCombinePtr, page.writePtr, sz);
             writeCombinePtr += sz;
-
-            writeCombineDecommitter.add((uintptr_t)origPtr, block.ramBlock.pageSize);
         }
-
-        writeCombineDecommitter.finish();
 
         if (wi.toRelease) {
             mCompressBuffers->release(wi.toRelease);

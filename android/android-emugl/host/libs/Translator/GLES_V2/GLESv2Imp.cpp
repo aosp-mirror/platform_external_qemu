@@ -754,8 +754,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
 
         if (texData) {
             texData->hasStorage = true;
-            texData->maxMipmapLevel = std::max(texData->maxMipmapLevel,
-                    static_cast<unsigned int>(level));
+            texData->setMipmapLevelAtLeast(static_cast<unsigned int>(level));
         }
 
         if (texData && level == 0) {
@@ -814,8 +813,7 @@ void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat,
 
         if (texData) {
             texData->hasStorage = true;
-            texData->maxMipmapLevel = std::max(texData->maxMipmapLevel,
-                    static_cast<unsigned int>(level));
+            texData->setMipmapLevelAtLeast(static_cast<unsigned int>(level));
         }
 
         if (texData && level == 0) {
@@ -1431,10 +1429,22 @@ GL_APICALL void  GL_APIENTRY glGenBuffers(GLsizei n, GLuint* buffers){
     }
 }
 
+static int maxMipmapLevel(GLsizei width, GLsizei height) {
+    // + 0.5 for potential floating point rounding issue
+    return log2(std::max(width, height) + 0.5);
+}
+
 GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
     // Assuming we advertised GL_OES_texture_npot
+    if (ctx->shareGroup().get()) {
+        TextureData *texData = getTextureTargetData(target);
+        if (texData) {
+            texData->setMipmapLevelAtLeast(maxMipmapLevel(texData->width,
+                    texData->height));
+        }
+    }
     ctx->dispatcher().glGenerateMipmap(target);
 }
 
@@ -3248,6 +3258,7 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
         isCoreProfileEmulatedFormat(format)) {
         format = getCoreProfileEmulatedFormat(format);
     }
+    texData->setMipmapLevelAtLeast(level);
     texData->makeDirty();
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
@@ -3619,7 +3630,6 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->format = img->format;
             texData->type = img->type;
             texData->texStorageLevels = img->texStorageLevels;
-            texData->maxMipmapLevel = img->maxMipmapLevel;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(

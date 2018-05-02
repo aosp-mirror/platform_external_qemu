@@ -577,6 +577,13 @@ void SnapshotPage::updateAfterSelectionChanged() {
         }
     }
 
+    if (mInfoWindowIsBig) {
+        mUi->selectionInfo->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    } else {
+        // Small info window: Turn off the scroll bars and trim the text to fit.
+        mUi->selectionInfo->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        selectionInfoString = elideSnapshotInfo(selectionInfoString);
+    }
     mUi->selectionInfo->setHtml(selectionInfoString);
     mUi->reduceInfoButton->setVisible(mInfoWindowIsBig);
     mUi->enlargeInfoButton->setVisible(!mInfoWindowIsBig);
@@ -586,6 +593,62 @@ void SnapshotPage::updateAfterSelectionChanged() {
     }
     enableActions();
     QApplication::restoreOverrideCursor();
+}
+
+// This method is used when the small region is used for
+// the snapshot info. In this case, we do not allow the
+// region to scroll. If the info text does not fit, we
+// trim off the part that doesn't fit, plus we trim one
+// more line. Then we append "..." on the last visible
+// line.
+QString SnapshotPage::elideSnapshotInfo(QString fullString) {
+    QTextDocument* textDocument = mUi->selectionInfo->document();
+
+    if (mSmallInfoRegionSize == 0.0 || mExtraSmallInfoRegionSize == 0.0) {
+        // We need to initialize the size of the small Snapshot Info region.
+        // And that size minus one line of text.
+        mSmallInfoRegionSize = (qreal)mUi->selectionInfo->height();
+        mUi->selectionInfo->setHtml("<b>Some text</b>");
+        qreal baseSize = textDocument->size().rheight();
+        mUi->selectionInfo->setHtml("<b>Some text</b><br><b>...</b>");
+        qreal sizeOfOneLine = textDocument->size().rheight() - baseSize;
+        mExtraSmallInfoRegionSize = mSmallInfoRegionSize - sizeOfOneLine;
+    }
+
+    mUi->selectionInfo->setHtml(fullString);
+    if (textDocument->size().rheight() <= mSmallInfoRegionSize) {
+        // The full string fits. No need to elide.
+        return fullString;
+    }
+    // The full string is too big.
+    // Bisect to find how much fits in the reduced size.
+    int leftLength = 0;
+    int rightLength = fullString.size();
+    while(rightLength - leftLength > 1) {
+        int midLength = (leftLength + rightLength) / 2;
+        mUi->selectionInfo->setHtml(fullString.left(midLength));
+        if (textDocument->size().rheight() > mExtraSmallInfoRegionSize) {
+            rightLength = midLength;
+        } else {
+            leftLength = midLength;
+        }
+    }
+    // We want to truncate fullString at leftLength. But if that leaves
+    // a partial HTML tag, we need to remove the whole tag.
+    int lastLessPosition = fullString.lastIndexOf('<', leftLength);
+    int lastGreaterPosition = fullString.lastIndexOf('>', leftLength);
+    if (lastLessPosition >= 0 && lastGreaterPosition >= 0 &&
+        lastLessPosition > lastGreaterPosition)
+    {
+        leftLength = lastLessPosition;
+    }
+    // If the trimmed string ends with <br>, remove that. We'll add our own.
+    if (fullString.left(leftLength).endsWith("<br>")) {
+        leftLength -= 4;
+    }
+
+    // Trim it and add "..."
+    return (fullString.left(leftLength) + "<br><b>...</b>");
 }
 
 // Adjust the icons for selected vs non-selected rows

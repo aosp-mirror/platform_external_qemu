@@ -1051,7 +1051,11 @@ GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xo
         isCoreProfileEmulatedFormat(format)) {
         format = getCoreProfileEmulatedFormat(format);
     }
-    getTextureTargetData(target)->makeDirty();
+    TextureData* texData = getTextureTargetData(target);
+    if (texData) {
+        texData->setMipmapLevelAtLeast(level);
+        texData->makeDirty();
+    }
     ctx->dispatcher().glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, data);
 }
 

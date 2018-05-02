@@ -36,7 +36,7 @@
      <property name="geometry">
       <rect>
        <x>568</x>
-       <y>417</y>
+       <y>393</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -182,9 +182,9 @@
      <property name="geometry">
       <rect>
        <x>315</x>
-       <y>417</y>
+       <y>393</y>
        <width>289</width>
-       <height>86</height>
+       <height>110</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -247,7 +247,7 @@
        <x>315</x>
        <y>8</y>
        <width>289</width>
-       <height>409</height>
+       <height>385</height>
       </rect>
      </property>
      <property name="frameShape">

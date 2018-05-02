@@ -71,7 +71,6 @@ public:
     // for textures initialized with glTexStorage*), and maxMipmapLevel is for
     // both GLES2 and 3.
     unsigned int texStorageLevels = 0;
-    unsigned int maxMipmapLevel = 0;
     int samples;
     // globalName is used for snapshot when reading data from GPU
     int globalName = 0;
@@ -86,6 +85,7 @@ public:
     GLenum getSwizzle(GLenum component) const;
     void makeDirty();
     void setTarget(GLenum _target);
+    void setMipmapLevelAtLeast(unsigned int level);
 protected:
     std::unordered_map<GLenum, GLint> m_texParam;
     SaveableTexturePtr m_saveableTexture;

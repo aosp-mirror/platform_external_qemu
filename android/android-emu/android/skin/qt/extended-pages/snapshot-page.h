@@ -74,8 +74,9 @@ private:
     void    closeEvent(QCloseEvent* closeEvent);
     void    deleteSnapshot(const WidgetSnapshotItem* theItem);
     void    disableActions();
-    void    enableActions();
     void    editSnapshot(const WidgetSnapshotItem* theItem);
+    QString elideSnapshotInfo(QString fullString);
+    void    enableActions();
     void    getOutputFileName();
     void    highlightItemWithFilename(const QString& fileName);
     void    showPreviewImage(const QString& snapshotName, SelectionStatus itemStatus);
@@ -95,6 +96,9 @@ private:
     bool mAllowDelete = false;
     bool mMadeSelection = false;
     bool mInfoWindowIsBig = false;
+
+    qreal mSmallInfoRegionSize = 0.0;      // The size that fits in the small snashot-info region
+    qreal mExtraSmallInfoRegionSize = 0.0; // One line of text less than 'mSmallInfoSize'
 
     QRect mInfoPanelSmallGeo; // Location and size of the info panel when it is small
     QRect mInfoPanelLargeGeo; // Location and size of the info panel when it is big

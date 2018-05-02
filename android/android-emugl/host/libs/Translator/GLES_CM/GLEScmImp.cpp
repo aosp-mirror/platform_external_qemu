@@ -577,7 +577,8 @@ GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,
 }
 
 static int maxMipmapLevel(GLsizei width, GLsizei height) {
-    return 1 + floor(log2((float)std::max(width, height)));
+    // + 0.5 for potential floating point rounding issue
+    return log2(std::max(width, height) + 0.5);
 }
 
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
@@ -595,9 +596,9 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
                 *needAutoMipmap = texData->requiresAutoMipmap;
             }
             if (texData->requiresAutoMipmap) {
-                texData->maxMipmapLevel = maxMipmapLevel(width, height);
+                texData->setMipmapLevelAtLeast(maxMipmapLevel(width, height));
             } else {
-                texData->maxMipmapLevel = std::max(texData->maxMipmapLevel,
+                texData->setMipmapLevelAtLeast(
                         static_cast<unsigned int>(level));
             }
         }
@@ -667,6 +668,7 @@ GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, 
     delete uncompressed;
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
+        texData->setMipmapLevelAtLeast(level);
         texData->makeDirty();
     }
 }
@@ -1915,15 +1917,19 @@ static bool handleMipmapGeneration(GLenum target, GLenum pname, bool param)
     GET_CTX_RET(false)
     GLES_CM_TRACE()
 
-    if(pname == GL_GENERATE_MIPMAP &&
-       (isCoreProfile() || isGles2Gles() || !ctx->isAutoMipmapSupported()))
-    {
+    if (pname == GL_GENERATE_MIPMAP) {
         TextureData *texData = getTextureTargetData(target);
-        if(texData)
-        {
-            texData->requiresAutoMipmap = param;
+        if (texData) {
+            if (param) {
+                texData->setMipmapLevelAtLeast(maxMipmapLevel(texData->width,
+                    texData->height));
+            }
+            if (isCoreProfile() || isGles2Gles() ||
+                    !ctx->isAutoMipmapSupported()) {
+                texData->requiresAutoMipmap = param;
+                return true;
+            }
         }
-        return true;
     }
 
     return false;
@@ -2055,6 +2061,7 @@ GL_API void GL_APIENTRY  glTexSubImage2D( GLenum target, GLint level, GLint xoff
         {
             ctx->dispatcher().glGenerateMipmapEXT(target);
         }
+        texData->setMipmapLevelAtLeast(level);
         texData->makeDirty();
     }
 }
@@ -2124,7 +2131,6 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
             texData->format = img->format;
             texData->type = img->type;
             texData->texStorageLevels = img->texStorageLevels;
-            texData->maxMipmapLevel = img->maxMipmapLevel;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
@@ -2627,8 +2633,8 @@ GL_API void GL_APIENTRY glGenerateMipmapOES(GLenum target) {
             SET_ERROR_IF(width == 0 || height == 0 ||
                          (width & (width - 1)) != 0 || (height & (height - 1)) != 0,
                          GL_INVALID_OPERATION);
-            texData->maxMipmapLevel = maxMipmapLevel(texData->width,
-                    texData->height);
+            texData->setMipmapLevelAtLeast(maxMipmapLevel(texData->width,
+                    texData->height));
         }
     }
     ctx->dispatcher().glGenerateMipmapEXT(target);

@@ -327,7 +327,6 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_type(texture.type),
       m_border(texture.border),
       m_texStorageLevels(texture.texStorageLevels),
-      m_maxMipmapLevel(texture.maxMipmapLevel),
       m_globalName(texture.globalName),
       m_isDirty(true) {}
 
@@ -822,7 +821,6 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
     eglImage->type = m_type;
     eglImage->width = m_width;
     eglImage->texStorageLevels = m_texStorageLevels;
-    eglImage->maxMipmapLevel = m_maxMipmapLevel;
     eglImage->sync = nullptr;
 }
 
@@ -836,4 +834,8 @@ bool SaveableTexture::isDirty() const {
 
 void SaveableTexture::setTarget(GLenum target) {
     m_target = target;
+}
+
+void SaveableTexture::setMipmapLevelAtLeast(unsigned int level) {
+    m_maxMipmapLevel = std::max(level, m_maxMipmapLevel);
 }
