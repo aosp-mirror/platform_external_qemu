@@ -654,7 +654,8 @@ void ToolWindow::setClipboardCallbacks(const UiEmuAgent* agPtr) {
                 SLOT(onHostClipboardChanged()));
     }
 
-    emit haveClipboardSharingKnown(agPtr->clipboard != nullptr);
+    mClipboardSupported = agPtr->clipboard != nullptr;
+    emit haveClipboardSharingKnown(mClipboardSupported);
 }
 
 void ToolWindow::on_back_button_pressed() {
