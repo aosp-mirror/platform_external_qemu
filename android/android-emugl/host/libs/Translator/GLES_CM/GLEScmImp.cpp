@@ -2429,7 +2429,10 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
     if (framebuffer && !ctx->isFBO(framebuffer)) {
         ctx->genFBOName(framebuffer);
         ctx->setFBOData(framebuffer,
-                ObjectDataPtr(new FramebufferData(framebuffer)));
+                ObjectDataPtr(
+                    new FramebufferData(
+                            framebuffer,
+                            ctx->getFBOGlobalName(framebuffer))));
     }
     int globalBufferName =
             (framebuffer != 0)
@@ -2465,7 +2468,10 @@ GL_API void GLAPIENTRY glGenFramebuffersOES(GLsizei n, GLuint *framebuffers) {
     for (int i=0;i<n;i++) {
         framebuffers[i] = ctx->genFBOName(0, true);
         ctx->setFBOData(framebuffers[i],
-                ObjectDataPtr(new FramebufferData(framebuffers[i])));
+                        ObjectDataPtr(
+                            new FramebufferData(
+                                framebuffers[i],
+                                ctx->getFBOGlobalName(framebuffers[i]))));
     }
 }
 

@@ -52,7 +52,7 @@ const int MAX_ATTACH_POINTS = 19;
 class FramebufferData : public ObjectData
 {
 public:
-    explicit FramebufferData(GLuint name);
+    explicit FramebufferData(GLuint name, GLuint globalName);
     FramebufferData(android::base::Stream* stream);
     ~FramebufferData();
     void onSave(android::base::Stream* stream,
@@ -94,12 +94,17 @@ public:
 
     // Mark the texture handles dirty
     void makeTextureDirty(const getObjDataPtr_t& getObjDataPtr);
+
+    void separateDepthStencilWorkaround(class GLEScontext* ctx);
+
 private:
     inline int attachmentPointIndex(GLenum attachment);
     void detachObject(int idx);
+    void refreshSeparateDepthStencilAttachmentState();
 
 private:
     GLuint m_fbName = 0;
+    GLuint m_fbGlobalName = 0;
     struct attachPoint {
         GLenum target; // OGL if owned, GLES otherwise
         GLuint name; // OGL if owned, GLES otherwise
@@ -112,6 +117,10 @@ private:
     bool m_dirty = false;
     bool m_hasBeenBound = false;
     bool m_hasDrawBuffers = false;
+    bool m_hasSeparateDepthStencil = false;
+    // Invariant: m_separateDSEmulationRbo != 0 iff we are actively
+    // emulating separate depth/stencil buffers.
+    GLuint m_separateDSEmulationRbo = 0;
     std::vector<GLenum> m_drawBuffers = {};
     GLenum m_readBuffer = GL_COLOR_ATTACHMENT0;
 };
