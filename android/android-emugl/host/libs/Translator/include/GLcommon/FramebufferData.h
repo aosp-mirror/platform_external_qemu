@@ -94,6 +94,9 @@ public:
 
     // Mark the texture handles dirty
     void makeTextureDirty(const getObjDataPtr_t& getObjDataPtr);
+
+    void separateDepthStencilWorkaround(class GLEScontext* ctx);
+
 private:
     inline int attachmentPointIndex(GLenum attachment);
     void detachObject(int idx);
@@ -112,6 +115,8 @@ private:
     bool m_dirty = false;
     bool m_hasBeenBound = false;
     bool m_hasDrawBuffers = false;
+    bool m_hasSeparateDepthStencil = false;
+    GLuint m_separateDSEmulationRbo = 0;
     std::vector<GLenum> m_drawBuffers = {};
     GLenum m_readBuffer = GL_COLOR_ATTACHMENT0;
 };
