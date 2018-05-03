@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "23f4fd12_4fe505f4",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/FramebufferData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-05-03T23:04:47Z",
+      "side": 1,
+      "message": "put the bug number here for better documentation?",
+      "range": {
+        "startLine": 346,
+        "startChar": 0,
+        "endLine": 346,
+        "endChar": 16
+      },
+      "revId": "02ed6db6feabb33688cadb80bcfcb7678f59b1b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1fc1a372_7fdb4a78",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/FramebufferData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-05-03T23:04:47Z",
+      "side": 1,
+      "message": "set it to 0 afterwards?",
+      "range": {
+        "startLine": 439,
+        "startChar": 60,
+        "endLine": 439,
+        "endChar": 84
+      },
+      "revId": "02ed6db6feabb33688cadb80bcfcb7678f59b1b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c8c3d4a_cde9975b",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/FramebufferData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-05-03T23:04:47Z",
+      "side": 1,
+      "message": "remove debug prints",
+      "range": {
+        "startLine": 445,
+        "startChar": 4,
+        "endLine": 445,
+        "endChar": 44
+      },
+      "revId": "02ed6db6feabb33688cadb80bcfcb7678f59b1b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
