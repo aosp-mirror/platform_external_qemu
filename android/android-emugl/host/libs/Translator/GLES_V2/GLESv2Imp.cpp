@@ -446,6 +446,10 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
         if (sHasAttachmentWithFormat(ctx, fbObj,
                     depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}))
             enableDepth32fClamp = true;
+
+        // Perform any necessary workarounds for apps that use separate depth/stencil
+        // attachments.
+        fbObj->separateDepthStencilWorkaround(ctx);
     }
 
     // TODO: GLES3: snapshot those enable value as well?
@@ -470,9 +474,10 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
             //if framebuffer wasn't generated before,generate one
             if(!globalFrameBufferName){
                 ctx->genFBOName(framebuffer);
-                ctx->setFBOData(framebuffer,
-                        ObjectDataPtr(new FramebufferData(framebuffer)));
                 globalFrameBufferName = ctx->getFBOGlobalName(framebuffer);
+                ctx->setFBOData(framebuffer,
+                        ObjectDataPtr(new FramebufferData(framebuffer,
+                                                          globalFrameBufferName)));
             }
             // set that this framebuffer has been bound before
             auto fbObj = ctx->getFBOData(framebuffer);
@@ -1455,7 +1460,10 @@ GL_APICALL void  GL_APIENTRY glGenFramebuffers(GLsizei n, GLuint* framebuffers){
         for(int i=0; i<n ;i++) {
             framebuffers[i] = ctx->genFBOName(0, true);
             ctx->setFBOData(framebuffers[i],
-                    ObjectDataPtr(new FramebufferData(framebuffers[i])));
+                ObjectDataPtr(
+                    new FramebufferData(
+                            framebuffers[i],
+                            ctx->getFBOGlobalName(framebuffers[i]))));
         }
     }
 }
