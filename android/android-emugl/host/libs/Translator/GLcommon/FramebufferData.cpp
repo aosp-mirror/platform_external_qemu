@@ -241,6 +241,27 @@ int idx = attachmentPointIndex(attachment);
 
         m_dirty = true;
     }
+
+    if (!name) return;
+
+    if (attachment != GL_DEPTH_ATTACHMENT &&
+        attachment != GL_STENCIL_ATTACHMENT) return;
+
+    GLenum otherAttachment;
+
+    if (attachment == GL_DEPTH_ATTACHMENT) {
+        otherAttachment = GL_STENCIL_ATTACHMENT;
+    }
+
+    if (attachment == GL_STENCIL_ATTACHMENT) {
+        otherAttachment = GL_DEPTH_ATTACHMENT;
+    }
+
+    GLuint otherObject = m_attachPoints[attachmentPointIndex(otherAttachment)].name;
+
+    if (otherObject && otherObject != name) {
+        m_hasSeparateDepthStencil = true;
+    }
 }
 
 GLuint FramebufferData::getAttachment(GLenum attachment,
@@ -318,6 +339,41 @@ GLint FramebufferData::getAttachmentInternalFormat(GLEScontext* ctx, GLenum atta
     }
 }
 
+void FramebufferData::separateDepthStencilWorkaround(GLEScontext* ctx) {
+    // Swiftshader does not need the workaround as it allows separate depth/stencil.
+    if (isGles2Gles()) return;
+
+#ifdef __APPLE__
+    if (!m_hasSeparateDepthStencil || m_separateDSEmulationRbo) return;
+
+    GLuint prevRboBinding;
+    GLuint prevFboBinding;
+    auto& gl = ctx->dispatcher();
+    // Use the depth stencil's dimensions.
+    GLint widthDepth;
+    GLint heightDepth;
+    getAttachmentDimensions(ctx, GL_DEPTH_ATTACHMENT,
+                            &widthDepth, &heightDepth);
+
+    gl.glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&prevRboBinding);
+    gl.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, (GLint*)&prevFboBinding);
+
+    gl.glGenRenderbuffers(1, &m_separateDSEmulationRbo);
+    gl.glBindRenderbuffer(GL_RENDERBUFFER, m_separateDSEmulationRbo);
+    gl.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+                             widthDepth, heightDepth);
+
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ctx->getFBOGlobalName(m_fbName));
+    gl.glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                 GL_RENDERBUFFER, m_separateDSEmulationRbo);
+    gl.glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                 GL_RENDERBUFFER, m_separateDSEmulationRbo);
+
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFboBinding);
+    gl.glBindRenderbuffer(GL_RENDERBUFFER, prevRboBinding);
+#endif
+}
+
 int FramebufferData::attachmentPointIndex(GLenum attachment)
 {
     switch(attachment) {
@@ -378,10 +434,15 @@ void FramebufferData::detachObject(int idx) {
     }
 
     m_attachPoints[idx] = {};
+
+    if (m_separateDSEmulationRbo) {
+        GLEScontext::dispatcher().glDeleteRenderbuffers(1, &m_separateDSEmulationRbo);
+    }
 }
 
 void FramebufferData::validate(GLEScontext* ctx)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     // Do not validate if on another GLES2 backend
     if (isGles2Gles()) return;
     if(!getAttachment(GL_COLOR_ATTACHMENT0_OES, NULL, NULL))

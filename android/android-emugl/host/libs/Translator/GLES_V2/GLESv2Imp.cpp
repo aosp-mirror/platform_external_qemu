@@ -446,6 +446,10 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
         if (sHasAttachmentWithFormat(ctx, fbObj,
                     depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}))
             enableDepth32fClamp = true;
+
+        // Perform any necessary workarounds for apps that use separate depth/stencil
+        // attachments.
+        fbObj->separateDepthStencilWorkaround(ctx);
     }
 
     // TODO: GLES3: snapshot those enable value as well?
