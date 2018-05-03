@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>622</width>
-    <height>580</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <x>0</x>
      <y>20</y>
      <width>630</width>
-     <height>550</height>
+     <height>590</height>
     </rect>
    </property>
    <property name="cursor">
@@ -38,7 +38,7 @@
        <x>20</x>
        <y>10</y>
        <width>584</width>
-       <height>500</height>
+       <height>550</height>
       </rect>
      </property>
      <property name="focusPolicy">
@@ -171,7 +171,7 @@
        <x>20</x>
        <y>10</y>
        <width>584</width>
-       <height>500</height>
+       <height>550</height>
       </rect>
      </property>
      <property name="font">
