@@ -51,6 +51,7 @@ static const char* kGLES2LibName = "libGLESv2.dll";
 
 static const char* kEGLLibName = "libEGL.so";
 static const char* kGLES2LibName = "libGLESv2.so";
+static const char* kNoWindowGLLibName = "libOpenGL.so";
 
 #else // __APPLE__
 
@@ -63,6 +64,7 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
 
 // List of EGL functions of interest to probe with GetProcAddress()
 #define LIST_EGL_FUNCTIONS(X)                                                  \
+    X(EGLBoolean, eglBindAPI, (EGLenum api))                                   \
     X(EGLBoolean, eglChooseConfig,                                             \
       (EGLDisplay display, EGLint const* attrib_list, EGLConfig* configs,      \
        EGLint config_size, EGLint* num_config))                                \
@@ -127,7 +129,12 @@ class EglOsGlLibrary : public GlLibrary {
 public:
     EglOsGlLibrary() {
         char error[256];
-        mLib = emugl::SharedLibrary::open(kGLES2LibName, error, sizeof(error));
+        // Headless host GL only works with nVidia
+        if (strcmp(getenv("ANDROID_NO_WINDOW"), "1") == 0) {
+            printf("loading GL in no-window mode\n");
+        }
+        mLib = emugl::SharedLibrary::open(kGLES2LibName, error,
+                sizeof(error));
         if (!mLib) {
             ERR("%s: Could not open GL library %s [%s]\n", __FUNCTION__,
                 kGLES2LibName, error);
@@ -137,12 +144,18 @@ public:
         if (!mLib) {
             return NULL;
         }
-        return reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
+        GlFunctionPointer ret =  reinterpret_cast<GlFunctionPointer>(
+                mLib->findSymbol(name));
+        if (!ret) {
+            ERR("could not find gl function %s\n", name);
+        }
+        return ret;
     }
     ~EglOsGlLibrary() = default;
 
 private:
     emugl::SharedLibrary* mLib = nullptr;
+    
 };
 
 class EglOsEglPixelFormat : public EglOS::PixelFormat {
@@ -237,16 +250,19 @@ private:
 
 EglOsEglDisplay::EglOsEglDisplay() {
     mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    CHECK_EGL_ERR
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
     CHECK_EGL_ERR
+    mDispatcher.eglBindAPI(EGL_OPENGL_ES_API);
+    CHECK_EGL_ERR
 #ifdef __linux__
-    mGlxDisplay = XOpenDisplay(0);
+    //mGlxDisplay = XOpenDisplay(0);
 #endif // __linux__
 };
 
 EglOsEglDisplay::~EglOsEglDisplay() {
 #ifdef __linux__
-    XCloseDisplay(mGlxDisplay);
+    //XCloseDisplay(mGlxDisplay);
 #endif // __linux__
 }
 
@@ -398,6 +414,7 @@ Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
 Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
                                               EGLNativeWindowType win) {
     D("%s\n", __FUNCTION__);
+    assert(0);
     EGLSurface surface = mDispatcher.eglCreateWindowSurface(
             mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, nullptr);
     CHECK_EGL_ERR
@@ -459,6 +476,7 @@ bool EglOsEglDisplay::isValidNativeWin(Surface* win) {
 }
 
 bool EglOsEglDisplay::isValidNativeWin(EGLNativeWindowType win) {
+    return true;
 #ifdef _WIN32
     return IsWindow(win);
 #elif defined(__linux__)
@@ -476,6 +494,7 @@ bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
                                  const PixelFormat* pixelFormat,
                                  unsigned int* width,
                                  unsigned int* height) {
+    return true;
 #ifdef _WIN32
     RECT r;
     if (!GetClientRect(win, &r)) {
