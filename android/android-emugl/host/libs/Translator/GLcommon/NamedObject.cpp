@@ -63,6 +63,7 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
                                 GL_COMPUTE_SHADER);
                         break;
                 }
+                //assert(m_globalName);
                 break;
             case NamedObjectType::SAMPLER:
                 GLEScontext::dispatcher().glGenSamplers(1, &m_globalName);

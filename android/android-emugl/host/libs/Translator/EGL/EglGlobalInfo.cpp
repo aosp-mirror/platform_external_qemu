@@ -51,7 +51,7 @@ EglGlobalInfo* EglGlobalInfo::getInstance() {
 }
 
 EglGlobalInfo::EglGlobalInfo() {
-    if (isEgl2Egl()) {
+    if (isEgl2Egl() || strcmp(getenv("ANDROID_NO_WINDOW"), "1") == 0) {
         m_engine = EglOS::getEgl2EglHostInstance();
     } else {
         m_engine = EglOS::Engine::getHostInstance();
