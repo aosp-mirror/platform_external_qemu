@@ -110,7 +110,7 @@
       <rect>
        <x>20</x>
        <y>8</y>
-       <width>285</width>
+       <width>295</width>
        <height>28</height>
       </rect>
      </property>
@@ -202,13 +202,16 @@
      <property name="readOnly">
       <bool>true</bool>
      </property>
+     <property name="ColorGroup" stdset="0">
+      <string>SnapshotInfo</string>
+     </property>
     </widget>
     <widget class="QTreeWidget" name="snapshotDisplay">
      <property name="geometry">
       <rect>
        <x>20</x>
        <y>36</y>
-       <width>285</width>
+       <width>295</width>
        <height>487</height>
       </rect>
      </property>
