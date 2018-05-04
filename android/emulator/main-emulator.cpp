@@ -890,22 +890,6 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_swiftshader");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
-
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
-
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle9");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
-
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle11");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
-
 #ifdef __linux__
     if (!useSystemLibs) {
         // Use bundled libstdc++

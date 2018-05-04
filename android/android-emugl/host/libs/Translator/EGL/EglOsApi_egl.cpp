@@ -40,6 +40,8 @@
 #define CHECK_EGL_ERR ((void)0);
 #endif
 
+static bool sIsNoWindow = false;
+
 #ifdef __WIN32
 
 static const char* kEGLLibName = "libEGL.dll";
@@ -51,6 +53,7 @@ static const char* kGLES2LibName = "libGLESv2.dll";
 
 static const char* kEGLLibName = "libEGL.so";
 static const char* kGLES2LibName = "libGLESv2.so";
+static const char* kNoWindowGLLibName = "libOpenGL.so";
 
 #else // __APPLE__
 
@@ -63,6 +66,7 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
 
 // List of EGL functions of interest to probe with GetProcAddress()
 #define LIST_EGL_FUNCTIONS(X)                                                  \
+    X(EGLBoolean, eglBindAPI, (EGLenum api))                                   \
     X(EGLBoolean, eglChooseConfig,                                             \
       (EGLDisplay display, EGLint const* attrib_list, EGLConfig* configs,      \
        EGLint config_size, EGLint* num_config))                                \
@@ -127,7 +131,21 @@ class EglOsGlLibrary : public GlLibrary {
 public:
     EglOsGlLibrary() {
         char error[256];
+        // Headless host GL only works with nVidia on linux
+#ifdef __linux__
+        const char* env = getenv("ANDROID_NO_WINDOW");
+        sIsNoWindow = env && strcmp(env, "1") == 0;
+        if (sIsNoWindow) {
+            // We are using no-window mode with host gpu
+            mLib = emugl::SharedLibrary::open(kNoWindowGLLibName, error,
+                    sizeof(error));
+        } else {
+            mLib = emugl::SharedLibrary::open(kGLES2LibName, error,
+                    sizeof(error));
+        }
+#else //__linux__
         mLib = emugl::SharedLibrary::open(kGLES2LibName, error, sizeof(error));
+#endif //__linux__
         if (!mLib) {
             ERR("%s: Could not open GL library %s [%s]\n", __FUNCTION__,
                 kGLES2LibName, error);
@@ -137,7 +155,12 @@ public:
         if (!mLib) {
             return NULL;
         }
-        return reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
+        GlFunctionPointer ret =  reinterpret_cast<GlFunctionPointer>(
+                mLib->findSymbol(name));
+        if (!ret) {
+            ERR("could not find gl function %s\n", name);
+        }
+        return ret;
     }
     ~EglOsGlLibrary() = default;
 
@@ -237,16 +260,21 @@ private:
 
 EglOsEglDisplay::EglOsEglDisplay() {
     mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    CHECK_EGL_ERR
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
     CHECK_EGL_ERR
 #ifdef __linux__
-    mGlxDisplay = XOpenDisplay(0);
+    if (!sIsNoWindow) {
+        mGlxDisplay = XOpenDisplay(0);
+    }
 #endif // __linux__
 };
 
 EglOsEglDisplay::~EglOsEglDisplay() {
 #ifdef __linux__
-    XCloseDisplay(mGlxDisplay);
+    if (!sIsNoWindow) {
+        XCloseDisplay(mGlxDisplay);
+    }
 #endif // __linux__
 }
 
@@ -262,7 +290,10 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
     // ANGLE does not support GLES1 uses core profile engine.
     // Querying underlying EGL with a conservative set of bits.
     renderableType &= ~EGL_OPENGL_ES_BIT;
-    const EGLint attribList[] = {EGL_RENDERABLE_TYPE, renderableType,
+    const EGLint attribList[] = {
+        EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+        EGL_CONFORMANT, EGL_OPENGL_BIT,
                                  EGL_NONE};
     EGLint numConfigs = 0;
     mDispatcher.eglChooseConfig(mDisplay, attribList, nullptr, 0, &numConfigs);
@@ -280,7 +311,8 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_RENDERABLE_TYPE,
                                        &_renderableType);
         // We do emulate GLES1
-        configInfo.renderable_type = _renderableType | EGL_OPENGL_ES_BIT;
+        configInfo.renderable_type = _renderableType | EGL_OPENGL_ES_BIT |
+                EGL_OPENGL_ES2_BIT;
 
         configInfo.frmt = new EglOsEglPixelFormat(cfg, _renderableType);
         D("config %p renderable type 0x%x\n", cfg, _renderableType);
@@ -348,14 +380,20 @@ EglOsEglDisplay::createContext(EGLint profileMask,
                                const PixelFormat* pixelFormat,
                                Context* sharedContext) {
     (void)profileMask;
+    CHECK_EGL_ERR
 
     D("%s\n", __FUNCTION__);
     const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
-    D("with config %p\n", format->mConfigId);
     // Always GLES3
-    EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
+    //EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
+    //EGLint attrib_list[] = {EGL_NONE};
+    EGLint* attrib_list = nullptr;
     // TODO: support GLES3.1
     EglOsEglContext* nativeSharedCtx = (EglOsEglContext*)sharedContext;
+    D("with config %p shared %p\n", format->mConfigId,
+        nativeSharedCtx ? nativeSharedCtx->context() : nullptr);
+    mDispatcher.eglBindAPI(EGL_OPENGL_API);
+    CHECK_EGL_ERR
     EGLContext newNativeCtx = mDispatcher.eglCreateContext(
             mDisplay, format->mConfigId,
             nativeSharedCtx ? nativeSharedCtx->context() : nullptr,
@@ -364,7 +402,7 @@ EglOsEglDisplay::createContext(EGLint profileMask,
     emugl::SmartPtr<Context> res =
         std::make_shared<EglOsEglContext>(
             &mDispatcher, mDisplay, newNativeCtx);
-    D("%s done\n", __FUNCTION__);
+    D("%s %p done\n", __FUNCTION__, newNativeCtx);
     return res;
 }
 
@@ -451,8 +489,9 @@ void EglOsEglDisplay::swapBuffers(Surface* surface) {
 }
 
 bool EglOsEglDisplay::isValidNativeWin(Surface* win) {
-    if (!win)
+    if (!win) {
         return false;
+    }
     EglOsEglSurface* surface = (EglOsEglSurface*)win;
     return surface->type() == EglOsEglSurface::WINDOW &&
            isValidNativeWin(surface->getWin());
@@ -476,6 +515,7 @@ bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
                                  const PixelFormat* pixelFormat,
                                  unsigned int* width,
                                  unsigned int* height) {
+    return true;
 #ifdef _WIN32
     RECT r;
     if (!GetClientRect(win, &r)) {

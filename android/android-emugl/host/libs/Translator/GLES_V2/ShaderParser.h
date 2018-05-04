@@ -62,7 +62,7 @@ public:
     const ANGLEShaderParser::ShaderLinkInfo& getShaderLinkInfo() const { return m_shaderLinkInfo; }
 
     virtual GenNameInfo getGenNameInfo() const override;
-    const char* getCompiledSrc() const { return m_compiledSrc.c_str(); }
+    const char* getCompiledSrc() const { return m_parsedSrc.c_str(); }
 
 private:
     void convertESSLToGLSL();
