@@ -68,8 +68,8 @@ void RenderbufferData::makeTextureDirty() {
 
 static GLenum s_index2Attachment(int idx);
 
-FramebufferData::FramebufferData(GLuint name) : ObjectData(FRAMEBUFFER_DATA)
-        , m_fbName(name) {
+FramebufferData::FramebufferData(GLuint name, GLuint globalName) : ObjectData(FRAMEBUFFER_DATA)
+        , m_fbName(name), m_fbGlobalName(globalName) {
 }
 
 FramebufferData::FramebufferData(android::base::Stream* stream) :
@@ -216,7 +216,9 @@ void FramebufferData::setAttachment(GLenum attachment,
                GLuint name,
                ObjectDataPtr obj,
                bool takeOwnership) {
-int idx = attachmentPointIndex(attachment);
+
+    int idx = attachmentPointIndex(attachment);
+
     if (!name) {
         detachObject(idx);
         return;
@@ -240,6 +242,8 @@ int idx = attachmentPointIndex(attachment);
         }
 
         m_dirty = true;
+
+        refreshSeparateDepthStencilAttachmentState();
     }
 }
 
@@ -318,6 +322,48 @@ GLint FramebufferData::getAttachmentInternalFormat(GLEScontext* ctx, GLenum atta
     }
 }
 
+void FramebufferData::separateDepthStencilWorkaround(GLEScontext* ctx) {
+    // Swiftshader does not need the workaround as it allows separate depth/stencil.
+    if (isGles2Gles()) return;
+
+    // bug: 78083376
+    //
+    // Some apps rely on using separate depth/stencil attachments with separate
+    // backing images. This affects macOS OpenGL because it does not allow
+    // separate depth/stencil attachments with separate backing images.
+    //
+    // Emulate them here with a single combined backing image.
+#ifdef __APPLE__
+    if (!m_hasSeparateDepthStencil || m_separateDSEmulationRbo) return;
+
+    GLuint prevRboBinding;
+    GLuint prevFboBinding;
+    auto& gl = ctx->dispatcher();
+    // Use the depth stencil's dimensions.
+    GLint widthDepth;
+    GLint heightDepth;
+    getAttachmentDimensions(ctx, GL_DEPTH_ATTACHMENT,
+                            &widthDepth, &heightDepth);
+
+    gl.glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&prevRboBinding);
+    gl.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, (GLint*)&prevFboBinding);
+
+    gl.glGenRenderbuffers(1, &m_separateDSEmulationRbo);
+    gl.glBindRenderbuffer(GL_RENDERBUFFER, m_separateDSEmulationRbo);
+    gl.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+                             widthDepth, heightDepth);
+
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbGlobalName);
+    gl.glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                 GL_RENDERBUFFER, m_separateDSEmulationRbo);
+    gl.glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                 GL_RENDERBUFFER, m_separateDSEmulationRbo);
+
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFboBinding);
+    gl.glBindRenderbuffer(GL_RENDERBUFFER, prevRboBinding);
+#endif
+}
+
 int FramebufferData::attachmentPointIndex(GLenum attachment)
 {
     switch(attachment) {
@@ -378,6 +424,75 @@ void FramebufferData::detachObject(int idx) {
     }
 
     m_attachPoints[idx] = {};
+
+    refreshSeparateDepthStencilAttachmentState();
+}
+
+// bug: 78083376
+//
+// Check attachment state and delete / recreate original depth/stencil
+// attachments if necessary.
+//
+void FramebufferData::refreshSeparateDepthStencilAttachmentState() {
+    m_hasSeparateDepthStencil = false;
+
+    ObjectDataPtr depthObject =
+        m_attachPoints[attachmentPointIndex(GL_DEPTH_ATTACHMENT)].obj;
+    ObjectDataPtr stencilObject =
+        m_attachPoints[attachmentPointIndex(GL_STENCIL_ATTACHMENT)].obj;
+
+    m_hasSeparateDepthStencil = depthObject && stencilObject && (depthObject != stencilObject);
+
+    if (m_hasSeparateDepthStencil) return;
+
+    // Delete the emulated RBO and restore the original
+    // if we don't have separate depth/stencil anymore.
+    auto& gl = GLEScontext::dispatcher();
+
+    if (!m_separateDSEmulationRbo) return;
+
+    gl.glDeleteRenderbuffers(1, &m_separateDSEmulationRbo);
+    m_separateDSEmulationRbo = 0;
+
+    // Now that we don't have separate depth/stencil attachments,
+    // we might need to restore one of the original attachments,
+    // because we were using a nonzero m_separateDSEmulationRbo.
+    GLenum attachmentToRestore =
+        m_attachPoints[attachmentPointIndex(GL_DEPTH_ATTACHMENT)].name ?
+            GL_DEPTH_ATTACHMENT : (
+                m_attachPoints[attachmentPointIndex(GL_STENCIL_ATTACHMENT)].name ?
+                    GL_STENCIL_ATTACHMENT : 0);
+
+    if (!attachmentToRestore) return;
+
+    GLuint objectToRestore =
+        m_attachPoints[attachmentPointIndex(attachmentToRestore)].name;
+
+    GLenum objectTypeToRestore =
+        m_attachPoints[attachmentPointIndex(attachmentToRestore)].target;
+
+    GLuint prevFboBinding;
+    gl.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, (GLint*)&prevFboBinding);
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbGlobalName);
+
+    switch (objectTypeToRestore) {
+    case GL_RENDERBUFFER:
+        gl.glFramebufferRenderbuffer(
+            GL_DRAW_FRAMEBUFFER,
+            attachmentToRestore,
+            GL_RENDERBUFFER,
+            objectToRestore);
+        break;
+    case GL_TEXTURE_2D:
+        gl.glFramebufferTexture2D(
+            GL_DRAW_FRAMEBUFFER,
+            attachmentToRestore,
+            GL_TEXTURE_2D,
+            objectToRestore, 0);
+        break;
+    }
+
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFboBinding);
 }
 
 void FramebufferData::validate(GLEScontext* ctx)
@@ -464,8 +579,7 @@ void FramebufferData::validate(GLEScontext* ctx)
         // the framebuffer to sort things out.
         ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER,0);
         ctx->dispatcher().glBindFramebuffer(
-                GL_FRAMEBUFFER,
-                ctx->getFBOGlobalName(m_fbName));
+                GL_FRAMEBUFFER, m_fbGlobalName);
 
         m_dirty = false;
     }
