@@ -132,6 +132,14 @@ SharedLibrary* SharedLibrary::do_open(const char* libraryName,
     if (!libBaseName) {
         libBaseName = libraryName;
     }
+    if (strcmp(libBaseName, "libEGL.so") == 0 ||
+            strcmp(libBaseName, "libEGL") == 0) {
+        printf("loading egl from:%s\n", getenv("LD_LIBRARY_PATH"));
+    }
+    if (strcmp(libBaseName, "libGLESv2.so") == 0 ||
+            strcmp(libBaseName, "libGLESv2") == 0) {
+        printf("loading gles2 from:%s\n", getenv("LD_LIBRARY_PATH"));
+    }
 
     if (!strchr(libBaseName, '.')) {
         // There is no extension in this library name, so append one.

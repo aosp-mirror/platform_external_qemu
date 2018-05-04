@@ -277,7 +277,7 @@ bool emuglConfig_init(EmuglConfig* config,
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader_indirect";
         }
-        else if (no_window || (blacklisted && !hasUiPreference)) {
+        else if (blacklisted && !hasUiPreference) {
             if (!no_window &&
                 stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Blacklisted GPU driver, using Swiftshader backend\n",
@@ -330,6 +330,13 @@ bool emuglConfig_init(EmuglConfig* config,
         }
     }
 
+#ifdef __linux__
+    if (strcmp(gpu_mode, "host") == 0 && no_window) {
+        fprintf(stderr, "WARNING: -gpu host with -no-window is an experimental "
+                "feature on linux\n");
+        System::get()->envSet("ANDROID_HOST_NO_WINDOW", "1");
+    }
+#endif //__linux__
     // 'host' is a special value corresponding to the default translation
     // to desktop GL, 'guest' does not use host-side emulation,
     // anything else must be checked against existing host-side backends.
@@ -384,7 +391,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
         // backend directory.
         std::string dir = sBackendList->getLibDirPath(config->backend);
         if (dir.size()) {
-            D("Adding to the library search path: %s\n", dir.c_str());
+            printf("Adding to the library search path: %s\n", dir.c_str());
             system->addLibrarySearchDir(dir);
         }
     }
