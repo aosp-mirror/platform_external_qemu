@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "527d1e8c_a6d5d112",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/FramebufferData.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 476,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-05-04T00:32:26Z",
+      "side": 1,
+      "message": "The other function seems to use ctx-\u003egetFBOGlobalName(m_fbName) to get global name. For consistency, would you make them the same? (either both use m_fbGlobalName or ctx-\u003egetFBOGlobalName(m_fbName)",
+      "range": {
+        "startLine": 476,
+        "startChar": 46,
+        "endLine": 476,
+        "endChar": 60
+      },
+      "revId": "dfbd0cb66adebdf5e0ae21d933ac38d7cea71ea5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
