@@ -277,7 +277,7 @@ bool emuglConfig_init(EmuglConfig* config,
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader_indirect";
         }
-        else if (no_window || (blacklisted && !hasUiPreference)) {
+        else if (blacklisted && !hasUiPreference) {
             if (!no_window &&
                 stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Blacklisted GPU driver, using Swiftshader backend\n",
@@ -330,6 +330,10 @@ bool emuglConfig_init(EmuglConfig* config,
         }
     }
 
+    if (strcmp(gpu_mode, "host") == 0 && no_window) {
+        System::get()->envSet("ANDROID_NO_WINDOW", "1");
+        //System::get()->envSet("ANDROID_EGL_ON_EGL", "1");
+    }
     // 'host' is a special value corresponding to the default translation
     // to desktop GL, 'guest' does not use host-side emulation,
     // anything else must be checked against existing host-side backends.

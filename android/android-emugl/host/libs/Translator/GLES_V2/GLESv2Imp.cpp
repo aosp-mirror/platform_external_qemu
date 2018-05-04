@@ -675,6 +675,12 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             ctx->dispatcher().glGetShaderInfoLog(globalShaderName,infoLogLength,NULL,infoLog);
             if (infoLogLength == 0) {
                 infoLog[0] = 0;
+            } else {
+                fprintf(stderr, "original source\n");
+                fprintf(stderr, "%s", sp->getOriginalSrc().c_str());
+                fprintf(stderr, "compiled source\n");
+                fprintf(stderr, "%s", sp->getCompiledSrc());
+                fprintf(stderr, "%s", infoLog);
             }
             sp->setInfoLog(infoLog);
 
@@ -3015,6 +3021,7 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         ShaderParser* sp = (ShaderParser*)objData;
         sp->setSrc(count, string, length);
         if (isGles2Gles()) {
+            assert(0);
             ctx->dispatcher().glShaderSource(globalShaderName, count, string,
                                          length);
         } else {

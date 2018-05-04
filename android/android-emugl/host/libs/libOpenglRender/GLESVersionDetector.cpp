@@ -152,10 +152,11 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
 // (Note: This does not affect the detection of possible core profile configs,
 // just whether to use them)
 bool shouldEnableCoreProfile() {
-    int dispatchMaj, dispatchMin;
+    /*int dispatchMaj, dispatchMin;
     emugl::getGlesVersion(&dispatchMaj, &dispatchMin);
     return emugl::getRenderer() == SELECTED_RENDERER_HOST &&
-           dispatchMaj > 2;
+           dispatchMaj > 2;*/
+    return false;
 }
 
 void sAddExtensionIfSupported(GLESDispatchMaxVersion currVersion,
