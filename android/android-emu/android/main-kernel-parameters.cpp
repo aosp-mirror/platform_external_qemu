@@ -29,8 +29,10 @@ using android::base::StringFormat;
 
 // Note: The ACPI _HID that follows devices/ must match the one defined in the
 // ACPI tables (hw/i386/acpi_build.c)
+//static const char kSysfsAndroidDtDir[] =
+//        "/sys/bus/platform/devices/ANDR0001:00/properties/android/";
 static const char kSysfsAndroidDtDir[] =
-        "/sys/bus/platform/devices/ANDR0001:00/properties/android/";
+        "/proc/device-tree/firmware/android/";
 
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
