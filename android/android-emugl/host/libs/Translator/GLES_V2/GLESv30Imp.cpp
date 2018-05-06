@@ -695,8 +695,8 @@ GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum atta
     GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->getFBOData(fbName);
     if (fbObj) {
-        fbObj->setAttachment(attachment, textarget,
-                              texture, ObjectDataPtr());
+        fbObj->setAttachment(
+            ctx, attachment, textarget, texture, ObjectDataPtr());
     }
 
 }

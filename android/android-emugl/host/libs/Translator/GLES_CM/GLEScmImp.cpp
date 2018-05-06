@@ -2508,8 +2508,9 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     auto fbObj = ctx->getFBOData(fbName);
     if (fbObj) {
-        fbObj->setAttachment(attachment, textarget,
-                              texture, ObjectDataPtr());
+        fbObj->setAttachment(
+            ctx, attachment, textarget,
+            texture, ObjectDataPtr());
     }
 }
 
@@ -2548,7 +2549,8 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     auto fbObj = ctx->getFBOData(fbName);
     if (fbObj) {
-        fbObj->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
+        fbObj->setAttachment(
+            ctx, attachment, renderbuffertarget, renderbuffer, obj);
     }
 
     if (renderbuffer && obj.get() != NULL) {
