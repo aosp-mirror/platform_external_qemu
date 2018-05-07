@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ef8330d3_95064b0a",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-05-07T20:44:04Z",
+      "side": 1,
+      "message": "Unused?",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 17
+      },
+      "revId": "b82a0c1408c63f19c5b0b6838b3a3fee2ce7ffbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f010e1c0_f93c817c",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-05-07T20:44:04Z",
+      "side": 1,
+      "message": "C++ headers: \u003ccinttypes\u003e, \u003ccstdlib\u003e",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 19
+      },
+      "revId": "b82a0c1408c63f19c5b0b6838b3a3fee2ce7ffbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a24e0409_79255ccb",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-05-07T20:44:04Z",
+      "side": 1,
+      "message": "Nit: size_t is standard here.",
+      "range": {
+        "startLine": 24,
+        "startChar": 15,
+        "endLine": 24,
+        "endChar": 23
+      },
+      "revId": "b82a0c1408c63f19c5b0b6838b3a3fee2ce7ffbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0483508_c8dbd5ae",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-05-07T20:44:04Z",
+      "side": 1,
+      "message": "Nit: I recommend C++ casts here since they are more explicit.",
+      "range": {
+        "startLine": 35,
+        "startChar": 8,
+        "endLine": 36,
+        "endChar": 71
+      },
+      "revId": "b82a0c1408c63f19c5b0b6838b3a3fee2ce7ffbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
