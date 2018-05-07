@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2924673_56d30f9c",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-07T22:23:20Z",
+      "side": 1,
+      "message": "please make the class noncopyable (and maybe movable?)",
+      "range": {
+        "startLine": 20,
+        "startChar": 6,
+        "endLine": 20,
+        "endChar": 16
+      },
+      "revId": "35d1aed5e62d7f5b699a0d205f93577011f2f1e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a017100d_ca054167",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-07T22:23:20Z",
+      "side": 1,
+      "message": "please add a static_assert() to make sure |alignment| is a power of two",
+      "revId": "35d1aed5e62d7f5b699a0d205f93577011f2f1e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62d13e1e_c9d817fe",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-07T22:23:20Z",
+      "side": 1,
+      "message": "nit: explicit",
+      "range": {
+        "startLine": 22,
+        "startChar": 4,
+        "endLine": 22,
+        "endChar": 14
+      },
+      "revId": "35d1aed5e62d7f5b699a0d205f93577011f2f1e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4af39b41_6f72cb4e",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-07T22:23:20Z",
+      "side": 1,
+      "message": "this call will make a bytewise copy of the allocated storage, but no copy/move ctors will run. That\u0027s quite a serious restrition - please add a static_assert(std::is_trivially_copyable\u003cT\u003e::value, \"T needs to be trivially copyable\") or only conditionally enable public resize() function for this kind of classes (using enable_if)",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 33
+      },
+      "revId": "35d1aed5e62d7f5b699a0d205f93577011f2f1e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "255b4c11_7bb7c8c3",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-07T22:23:20Z",
+      "side": 1,
+      "message": "std::max() ?",
+      "range": {
+        "startLine": 31,
+        "startChar": 22,
+        "endLine": 31,
+        "endChar": 66
+      },
+      "revId": "35d1aed5e62d7f5b699a0d205f93577011f2f1e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
