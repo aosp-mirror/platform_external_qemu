@@ -664,6 +664,7 @@ LOCAL_SRC_FILES := \
   android/avd/util_unittest.cpp \
   android/avd/util_wrapper_unittest.cpp \
   android/base/ArraySize_unittest.cpp \
+  android/base/AlignedBuf_unittest.cpp \
   android/base/ContiguousRangeMapper_unittest.cpp \
   android/base/async/Looper_unittest.cpp \
   android/base/async/AsyncSocketServer_unittest.cpp \
