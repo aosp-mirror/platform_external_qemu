@@ -22,6 +22,30 @@
       "revId": "316c933533917a4c54f674930b680921511bb07e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56d55658_66c14339",
+        "filename": "android/android-emu/android/snapshot/RamSaver_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-07T22:13:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33f83e9d_64d7b414",
+      "range": {
+        "startLine": 56,
+        "startChar": 4,
+        "endLine": 58,
+        "endChar": 77
+      },
+      "revId": "316c933533917a4c54f674930b680921511bb07e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
