@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c137fbc7_e98314b2",
+        "filename": "android/android-emu/android/snapshot/RamSaver_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-05-07T19:43:50Z",
+      "side": 1,
+      "message": "nit: const? (and const in other places as well)",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 24
+      },
+      "revId": "76e261070fc4ba7e9d6b762566c083cc76ab75f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
