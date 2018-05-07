@@ -656,6 +656,7 @@ LOCAL_C_INCLUDES += \
     $(EMULATOR_GTEST_INCLUDES) \
     $(LIBXML2_INCLUDES) \
     $(EMUGL_INCLUDES) \
+    $(LZ4_INCLUDES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -776,6 +777,7 @@ LOCAL_SRC_FILES := \
   android/proxy/ProxyUtils_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
+  android/snapshot/RamSaver_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
   android/telephony/modem_unittest.cpp \
   android/telephony/sms_unittest.cpp \
