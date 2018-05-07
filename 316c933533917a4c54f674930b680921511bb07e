@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "33f83e9d_64d7b414",
+        "filename": "android/android-emu/android/snapshot/RamSaver_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-05-07T20:48:39Z",
+      "side": 1,
+      "message": "I was about to mention moving this to a helper class until I saw the other CR.  I assume this will either be updated in this CR or another one shortly :-)",
+      "range": {
+        "startLine": 56,
+        "startChar": 4,
+        "endLine": 58,
+        "endChar": 77
+      },
+      "revId": "316c933533917a4c54f674930b680921511bb07e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
