@@ -61,7 +61,8 @@ public:
     void restore(ObjectLocalName localName,
                  const getGlobalName_t& getGlobalName) override;
 
-    void setAttachment(GLenum attachment,
+    void setAttachment(class GLEScontext* ctx,
+                       GLenum attachment,
                        GLenum target,
                        GLuint name,
                        ObjectDataPtr obj,
@@ -108,6 +109,7 @@ private:
     struct attachPoint {
         GLenum target; // OGL if owned, GLES otherwise
         GLuint name; // OGL if owned, GLES otherwise
+        GLuint globalName; // derived from |name| on attachment setting
         // objType is only used in snapshot postLoad, for retrieving obj.
         // objType's data is only valid between loading and postLoad snapshot
         NamedObjectType objType;

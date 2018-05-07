@@ -158,6 +158,9 @@ void FramebufferData::restore(ObjectLocalName localName,
         if (attachPoint.obj) { // binding a render buffer
             assert(attachPoint.obj->getDataType()
                     == RENDERBUFFER_DATA);
+            attachPoint.globalName =
+                getGlobalName(NamedObjectType::RENDERBUFFER,
+                              attachPoint.name);
             RenderbufferData *rbData = (RenderbufferData*)attachPoint.obj.get();
             if (rbData->eglImageGlobalTexObject) {
                 fprintf(stderr, "FramebufferData::restore: warning: "
@@ -168,13 +171,12 @@ void FramebufferData::restore(ObjectLocalName localName,
                         GL_FRAMEBUFFER,
                         s_index2Attachment(i),
                         attachPoint.target,
-                        getGlobalName(NamedObjectType::RENDERBUFFER,
-                                attachPoint.name)
-                        );
+                        attachPoint.globalName);
             }
         } else { // binding a texture
             int texGlobalName = getGlobalName(NamedObjectType::TEXTURE,
                     attachPoint.name);
+            attachPoint.globalName = texGlobalName;
             if (!texGlobalName) {
                 fprintf(stderr, "FramebufferData::restore: warning: "
                         "a texture is deleted without unbinding FBO\n");
@@ -211,7 +213,9 @@ void FramebufferData::makeTextureDirty(const getObjDataPtr_t& getObjDataPtr) {
     }
 }
 
-void FramebufferData::setAttachment(GLenum attachment,
+void FramebufferData::setAttachment(
+               class GLEScontext* ctx,
+               GLenum attachment,
                GLenum target,
                GLuint name,
                ObjectDataPtr obj,
@@ -232,6 +236,15 @@ void FramebufferData::setAttachment(GLenum attachment,
 
         m_attachPoints[idx].target = target;
         m_attachPoints[idx].name = name;
+
+        NamedObjectType namedObjectType =
+            target == GL_RENDERBUFFER ?
+                NamedObjectType::RENDERBUFFER :
+                NamedObjectType::TEXTURE;
+
+        m_attachPoints[idx].globalName =
+            name ? ctx->shareGroup()->getGlobalName(namedObjectType, name) : 0;
+
         m_attachPoints[idx].obj = obj;
         m_attachPoints[idx].owned = takeOwnership;
 
@@ -466,7 +479,7 @@ void FramebufferData::refreshSeparateDepthStencilAttachmentState() {
     if (!attachmentToRestore) return;
 
     GLuint objectToRestore =
-        m_attachPoints[attachmentPointIndex(attachmentToRestore)].name;
+        m_attachPoints[attachmentPointIndex(attachmentToRestore)].globalName;
 
     GLenum objectTypeToRestore =
         m_attachPoints[attachmentPointIndex(attachmentToRestore)].target;
@@ -566,7 +579,7 @@ void FramebufferData::validate(GLEScontext* ctx)
         ctx->dispatcher().glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
         ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
-        setAttachment(GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, ObjectDataPtr(), true);
+        setAttachment(ctx, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, ObjectDataPtr(), true);
 
         ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prev);
     }

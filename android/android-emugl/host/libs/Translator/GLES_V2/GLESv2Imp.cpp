@@ -1045,7 +1045,8 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, kAttachments[i], textarget, 0);
         }
         // detach
-        fbObj->setAttachment(kAttachments[i], (GLenum)0, 0, nullptr, false);
+        fbObj->setAttachment(
+            ctx, kAttachments[i], (GLenum)0, 0, nullptr, false);
     }
 }
 
@@ -1351,7 +1352,8 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
     GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->getFBOData(fbName);
     if (fbObj != NULL) {
-        fbObj->setAttachment(attachment, renderbuffertarget, renderbuffer, obj);
+        fbObj->setAttachment(
+            ctx, attachment, renderbuffertarget, renderbuffer, obj);
     }
 
     if (renderbuffer && obj.get() != NULL) {
@@ -1405,8 +1407,8 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
     GLuint fbName = ctx->getFramebufferBinding(target);
     auto fbObj = ctx->getFBOData(fbName);
     if (fbObj) {
-        fbObj->setAttachment(attachment, textarget,
-                              texture, ObjectDataPtr());
+        fbObj->setAttachment(
+            ctx, attachment, textarget, texture, ObjectDataPtr());
     }
 
     sUpdateFboEmulation(ctx);
