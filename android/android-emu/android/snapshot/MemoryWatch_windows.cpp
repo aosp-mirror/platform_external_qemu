@@ -66,6 +66,9 @@ public:
 
     void join() {
         for (auto range : mRanges) {
+            // Could be on exit with interrupted background loader;
+            // we must also unprotect on host side here as well.
+            protectHostRange(start, length, PAGE_READWRITE);
             android::base::memoryHint(
                 range.first, range.second, MemoryHint::Sequential);
         }
