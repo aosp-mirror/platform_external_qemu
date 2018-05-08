@@ -22,6 +22,30 @@
       "revId": "9b18154c96ccb197cb856164cd041b84f7999275",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbe45753_fd029307",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-08T01:25:02Z",
+      "side": 1,
+      "message": "Got it, thanks! Wasn\u0027t sure the difference between has_trivial_copy_constructor and is_trivially_copyable. Seems to make mingw happy though.",
+      "parentUuid": "2f2aa38f_4acb4531",
+      "range": {
+        "startLine": 39,
+        "startChar": 42,
+        "endLine": 39,
+        "endChar": 63
+      },
+      "revId": "9b18154c96ccb197cb856164cd041b84f7999275",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
