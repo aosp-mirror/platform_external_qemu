@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f2aa38f_4acb4531",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-08T00:50:13Z",
+      "side": 1,
+      "message": "it was called has_trivial_copy_constructor\u003c\u003e there",
+      "range": {
+        "startLine": 39,
+        "startChar": 42,
+        "endLine": 39,
+        "endChar": 63
+      },
+      "revId": "9b18154c96ccb197cb856164cd041b84f7999275",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
