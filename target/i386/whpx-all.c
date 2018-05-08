@@ -659,6 +659,15 @@ static int whpx_handle_mmio(CPUState *cpu, WHV_MEMORY_ACCESS_CONTEXT *ctx)
     }
 
     if (!emu_status.EmulationSuccessful) {
+        if (emu_status.GuestCannotBeFaulted) {
+            /* Resume the VP. This is a workaround for a WHP bug until the
+             * fix is available in the OS.
+             */
+            printf("WHPX: Ignoring expected 'GuestCannotBeFaulted' error "
+                   "while handling MMIO access.\n");
+            return 0;
+        }
+
         /* each byte takes 3 characters to print: "XX " */
         char instruction[sizeof(ctx_copy.InstructionBytes) * 3 + 1];
         int i;
