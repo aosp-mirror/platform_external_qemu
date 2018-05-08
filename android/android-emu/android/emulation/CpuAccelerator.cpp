@@ -923,7 +923,13 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         g->supported_accelerators[CPU_ACCELERATOR_HAX] = true;
     }
 #if HAVE_WHPX
-    if (featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform)) {
+    // WHPX feature enablement:
+    // - Flag needs to be on
+    // - CPU vendor must be Intel
+    char cpu_vendor[16];
+    android_get_x86_cpuid_vendor_id(cpu_vendor, sizeof(cpu_vendor));
+    if (android_get_x86_cpuid_vendor_id_type(cpu_vendor) == VENDOR_ID_INTEL &&
+        featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform)) {
         // WHPX will supersede HAX, if available.
         std::string statusWHPX;
         AndroidCpuAcceleration status_code_WHPX = ProbeWHPX(&statusWHPX);
