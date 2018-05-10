@@ -110,15 +110,9 @@
       <rect>
        <x>20</x>
        <y>8</y>
-       <width>295</width>
+       <width>350</width>
        <height>28</height>
       </rect>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>341</width>
-       <height>16777215</height>
-      </size>
      </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
@@ -181,9 +175,9 @@
     <widget class="QTextEdit" name="selectionInfo">
      <property name="geometry">
       <rect>
-       <x>315</x>
+       <x>370</x>
        <y>413</y>
-       <width>289</width>
+       <width>234</width>
        <height>110</height>
       </rect>
      </property>
@@ -211,15 +205,9 @@
       <rect>
        <x>20</x>
        <y>36</y>
-       <width>295</width>
+       <width>350</width>
        <height>487</height>
       </rect>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>341</width>
-       <height>16777215</height>
-      </size>
      </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
@@ -247,9 +235,9 @@
     <widget class="QGraphicsView" name="preview">
      <property name="geometry">
       <rect>
-       <x>315</x>
+       <x>370</x>
        <y>8</y>
-       <width>289</width>
+       <width>234</width>
        <height>405</height>
       </rect>
      </property>
@@ -263,7 +251,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>70</x>
+       <x>100</x>
        <y>138</y>
        <width>181</width>
        <height>61</height>
@@ -392,7 +380,7 @@
       <rect>
        <x>20</x>
        <y>36</y>
-       <width>285</width>
+       <width>350</width>
        <height>3</height>
       </rect>
      </property>
