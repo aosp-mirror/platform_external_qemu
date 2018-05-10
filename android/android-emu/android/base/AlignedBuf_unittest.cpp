@@ -58,3 +58,17 @@ TEST(AlignedBuf, Basic) {
         EXPECT_EQ(0, bufData[i]);
     }
 }
+
+// Tests that the shared_ptr utility functions of AlignedBuf work correctly.
+TEST(AlignedBuf, SharedPtr) {
+
+    constexpr int align = 64;
+    constexpr int size = 128;
+
+    AlignedBuf<uint32_t, align>::Ptr buf = AlignedBuf<uint32_t, align>::createShared(size);
+
+    for (int i = 0; i < buf->size(); i++) {
+        (*buf)[i] = 0;
+        EXPECT_EQ(0, (*buf)[i]);
+    }
+}
