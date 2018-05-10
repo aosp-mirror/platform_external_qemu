@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "899d7a46_2fd7df87",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-10T17:07:15Z",
+      "side": 1,
+      "message": "I thought it would be helpful to have a message that WHPX could potentially work. What do you think?",
+      "range": {
+        "startLine": 474,
+        "startChar": 24,
+        "endLine": 477,
+        "endChar": 99
+      },
+      "revId": "4382e2cb7330d00084980e7e525ab411e7877dd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
