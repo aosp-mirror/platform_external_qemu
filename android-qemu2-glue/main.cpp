@@ -306,23 +306,25 @@ static int createUserData(AvdInfo* avd,
             needCopyDataPartition = false;
         }
     }
-    if (needCopyDataPartition && path_exists(hw->disk_dataPartition_initPath)) {
-        D("Creating: %s\n", hw->disk_dataPartition_path);
+    if (needCopyDataPartition) {
+        if (path_exists(hw->disk_dataPartition_initPath)) {
+            D("Creating: %s\n", hw->disk_dataPartition_path);
 
-        if (path_copy_file(hw->disk_dataPartition_path,
-                           hw->disk_dataPartition_initPath) < 0) {
-            derror("Could not create %s: %s", hw->disk_dataPartition_path,
-                   strerror(errno));
-            return 1;
-        }
+            if (path_copy_file(hw->disk_dataPartition_path,
+                               hw->disk_dataPartition_initPath) < 0) {
+                derror("Could not create %s: %s", hw->disk_dataPartition_path,
+                       strerror(errno));
+                return 1;
+            }
 
-        if (!hw->hw_arc) {
-            resizeExt4Partition(android_hw->disk_dataPartition_path,
-                                android_hw->disk_dataPartition_size);
+            if (!hw->hw_arc) {
+                resizeExt4Partition(android_hw->disk_dataPartition_path,
+                                    android_hw->disk_dataPartition_size);
+            }
+        } else {
+            derror("Missing initial data partition file: %s",
+                   hw->disk_dataPartition_initPath);
         }
-    } else {
-        derror("Missing initial data partition file: %s",
-               hw->disk_dataPartition_initPath);
     }
 
     return 0;
