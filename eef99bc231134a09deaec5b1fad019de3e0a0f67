@@ -22,6 +22,30 @@
       "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fe2a56b_340635e2",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-10T18:00:45Z",
+      "side": 1,
+      "message": "I wanted to be able to refer to the same buffer from more than one place.\n\nEarlier, I wrote up one with intrusive ref count that does its thing with copy constructors and all (which I preferred initially), but thought shared_ptr would be considered more \"acceptable by others :)\n\nI\u0027ll just implement the copy/move constructors with that then.",
+      "parentUuid": "ceddf789_c390d6e2",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
