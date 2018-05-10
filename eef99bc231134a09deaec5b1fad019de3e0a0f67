@@ -46,6 +46,30 @@
       "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1833bbb7_440334be",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-10T18:11:43Z",
+      "side": 1,
+      "message": "Well, I don\u0027t mind having this in the interface, just pointing that it comes with a cost. shared_ptr\u003c\u003e is better than a hand-written intrusive implementation IMO, but I\u0027d prefer to have a clear warning and to rename it to createForSharing() or something similar. This way it looks bad enough for people to take it as a default :)",
+      "parentUuid": "8fe2a56b_340635e2",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
