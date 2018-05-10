@@ -94,6 +94,30 @@
       "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0dd46d7_736cb2ed",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-10T22:30:14Z",
+      "side": 1,
+      "message": "Well, shared_ptr with make_shared() is as efficient as internal refcount, and gives a benefit of allowing to use the class without any refcount. Also I\u0027d expect it to be both well optimized and tested compared to any new code",
+      "parentUuid": "c88e3d59_5684a22d",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
