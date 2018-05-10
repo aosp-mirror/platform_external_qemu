@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cinttypes>
 #include <cstdlib>
+#include <memory>
 #include <type_traits>
 
 namespace android {
@@ -23,6 +24,13 @@ namespace android {
 template<class T, size_t align>
 class AlignedBuf {
 public:
+    using Ptr = std::shared_ptr<AlignedBuf>;
+
+    static Ptr create(size_t size) {
+        Ptr res = std::make_shared<AlignedBuf>(size);
+        return res;
+    }
+
     explicit AlignedBuf(size_t size) {
         static_assert(align &&
                       ((align & (align - 1)) == 0),
@@ -53,6 +61,14 @@ public:
 
     T* data() {
         return mAligned;
+    }
+
+    T& operator[](size_t index) {
+        return mAligned[index];
+    }
+
+    const T& operator[](size_t index) const {
+        return mAligned[index];
     }
 
 private:
