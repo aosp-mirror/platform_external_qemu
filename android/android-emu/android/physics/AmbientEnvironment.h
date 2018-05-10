@@ -108,7 +108,7 @@ public:
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
 
 private:
-    glm::vec3 mMagneticField = glm::vec3(22.0f, 5.9f, 43.1f);
+    glm::vec3 mMagneticField = glm::vec3(0.0f, 5.9f, -48.4f);
     glm::vec3 mGravity = glm::vec3(0.f, -9.81f, 0.f);
 
     /* celsius */

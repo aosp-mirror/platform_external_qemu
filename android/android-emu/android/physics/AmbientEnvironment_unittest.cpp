@@ -27,7 +27,7 @@ TEST(AmbientEnvironment, DefaultParameters) {
     mTestSystem.setLiveUnixTime(false);
     mTestSystem.setUnixTime(1);
     AmbientEnvironment ambientEnvironment;
-    EXPECT_EQ(glm::vec3(22.0f, 5.9f, 43.1f),
+    EXPECT_EQ(glm::vec3(0.0f, 5.9f, -48.4f),
             ambientEnvironment.getMagneticField());
     EXPECT_EQ(glm::vec3(0.f, -9.81f, 0.f),
             ambientEnvironment.getGravity());
