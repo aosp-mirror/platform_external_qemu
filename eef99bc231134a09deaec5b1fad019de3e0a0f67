@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ceddf789_c390d6e2",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-10T17:57:27Z",
+      "side": 1,
+      "message": "why? shared_ptr\u003c\u003e adds quite a noticable overhead and is usually considered a last resort, after passing by cref, value, moving, unique_ptr\u003c\u003e\nAdding shared_ptr\u003c\u003e to the interface will make it a first choice instead",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
