@@ -118,6 +118,30 @@
       "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84a6b85d_285c8197",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-10T22:56:00Z",
+      "side": 1,
+      "message": "really? Wasn\u0027t there also a scoped mutex getting took with shared_ptr as well?",
+      "parentUuid": "c0dd46d7_736cb2ed",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
