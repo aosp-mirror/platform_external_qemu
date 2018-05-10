@@ -70,6 +70,30 @@
       "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c88e3d59_5684a22d",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-10T19:42:23Z",
+      "side": 1,
+      "message": "Got it :)\n\nWhat about these copy/move constructors with the ref count?",
+      "parentUuid": "1833bbb7_440334be",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
