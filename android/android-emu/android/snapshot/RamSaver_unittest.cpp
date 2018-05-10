@@ -128,3 +128,4 @@ TEST_F(RamSaverTest, SimpleNonzero) {
 
     checkFileEqualToBuffer(golden.data(), golden.size(), ramSaverTestPath);
 }
+
