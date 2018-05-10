@@ -137,6 +137,13 @@ GlobalState gGlobals = {false,  false,  CPU_ACCELERATOR_NONE,
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
 
+static bool isOkToTryWHPX() {
+    char cpu_vendor[16];
+    android_get_x86_cpuid_vendor_id(cpu_vendor, sizeof(cpu_vendor));
+    return android_get_x86_cpuid_vendor_id_type(cpu_vendor) == VENDOR_ID_INTEL &&
+           featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform);
+}
+
 AndroidCpuAcceleration ProbeWHPX(std::string* status) {
     HRESULT hr;
     WHV_CAPABILITY whpx_cap;
@@ -462,7 +469,19 @@ AndroidCpuAcceleration ProbeHaxCpu(std::string* status) {
                     status->assign("Please disable Hyper-V before using the Android Emulator.  "
                                    "Start a command prompt as Administrator, run 'bcdedit /set "
                                    "hypervisorlaunchtype off', reboot.");
+#if HAVE_WHPX
+                    if (isOkToTryWHPX()) {
+                        status->assign("Hyper-V detected and Windows Hypervisor Platform is available. "
+                                       "Please ensure that you are running Windows 10 April 2018 release or later "
+                                       "with both the \"Hyper-V\" and \"Windows Hypervisor Platform\" "
+                                       "features enabled in \"Turn Windows features on or off\".");
+                        return ANDROID_CPU_ACCELERATION_READY;
+                    } else {
+                        return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
+                    }
+#else
                     return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
+#endif
                 } else {
                     // Guest
                     StringAppendFormat(status,
@@ -928,8 +947,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     // - CPU vendor must be Intel
     char cpu_vendor[16];
     android_get_x86_cpuid_vendor_id(cpu_vendor, sizeof(cpu_vendor));
-    if (android_get_x86_cpuid_vendor_id_type(cpu_vendor) == VENDOR_ID_INTEL &&
-        featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform)) {
+    if (isOkToTryWHPX()) {
         // WHPX will supersede HAX, if available.
         std::string statusWHPX;
         AndroidCpuAcceleration status_code_WHPX = ProbeWHPX(&statusWHPX);
@@ -939,6 +957,24 @@ CpuAccelerator GetCurrentCpuAccelerator() {
             status_code = status_code_WHPX;
             status = std::move(statusWHPX);
         }
+
+#ifdef _WIN32
+        // If this is the 32-bit emulator check calling this
+        // function, and HAXM is not installed, and it is OK
+        // to try WHPX, let's assume WHPX is available;
+        // the WHPX dll is 64-bit, so we cannot meaningfully
+        // query it here.
+        if (android::base::System::kProgramBitness == 32 &&
+            status_code != ANDROID_CPU_ACCELERATION_READY) {
+            g->accel = CPU_ACCELERATOR_WHPX;
+            g->supported_accelerators[CPU_ACCELERATOR_WHPX] = true;
+            status_code = ANDROID_CPU_ACCELERATION_READY;
+            status =
+                "HAXM is not installed, "
+                "but Windows Hypervisor Platform is available.";
+        }
+#endif
+
     }
 #endif // HAVE_WHPX
 #if HAVE_HVF
