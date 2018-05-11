@@ -18,10 +18,10 @@
 #include "android/base/Debug.h"
 
 #ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN 1
-#  include <windows.h>
+#define WIN32_LEAN_AND_MEAN 1
+#include <windows.h>
 #else
-#  include <pthread.h>
+#include <pthread.h>
 #endif
 
 #include <assert.h>
@@ -33,19 +33,14 @@ class AutoLock;
 class AutoWriteLock;
 class AutoReadLock;
 
-// Simple wrapper class for mutexes.
-class Lock {
+// A wrapper class for mutexes only suitable for using in static context,
+// where it's OK to leak the underlying system object. Use Lock for scoped or
+// member locks.
+class StaticLock {
 public:
     using AutoLock = android::base::AutoLock;
 
-    constexpr Lock() = default;
-#ifdef _WIN32
-    ~Lock() = default;
-#else
-    ~Lock() {
-        ::pthread_mutex_destroy(&mLock);
-    }
-#endif
+    constexpr StaticLock() = default;
 
     // Acquire the lock.
     void lock() {
@@ -63,13 +58,13 @@ public:
     void unlock() {
         ANDROID_IF_DEBUG(mIsLocked = false;)
 #ifdef _WIN32
-       ::ReleaseSRWLockExclusive(&mLock);
+        ::ReleaseSRWLockExclusive(&mLock);
 #else
-       ::pthread_mutex_unlock(&mLock);
+        ::pthread_mutex_unlock(&mLock);
 #endif
     }
 
-private:
+protected:
     friend class ConditionVariable;
 
 #ifdef _WIN32
@@ -81,11 +76,23 @@ private:
     pthread_mutex_t mLock = PTHREAD_MUTEX_INITIALIZER;
 #endif
     // Both POSIX threads and WinAPI don't allow move (undefined behavior).
-    DISALLOW_COPY_ASSIGN_AND_MOVE(Lock);
+    DISALLOW_COPY_ASSIGN_AND_MOVE(StaticLock);
 
     ANDROID_IF_DEBUG(bool mIsLocked = false;)
 };
 
+// Simple wrapper class for mutexes used in non-static context.
+class Lock : public StaticLock {
+public:
+    using StaticLock::AutoLock;
+
+    constexpr Lock() = default;
+#ifndef _WIN32
+    // The only difference is that POSIX requires a deallocation function call
+    // for its mutexes.
+    ~Lock() { ::pthread_mutex_destroy(&mLock); }
+#endif
+};
 
 class ReadWriteLock {
 public:
@@ -95,36 +102,20 @@ public:
 #ifdef _WIN32
     constexpr ReadWriteLock() = default;
     ~ReadWriteLock() = default;
-    void lockRead() {
-        ::AcquireSRWLockShared(&mLock);
-    }
-    void unlockRead() {
-        ::ReleaseSRWLockShared(&mLock);
-    }
-    void lockWrite() {
-        ::AcquireSRWLockExclusive(&mLock);
-    }
-    void unlockWrite() {
-        ::ReleaseSRWLockExclusive(&mLock);
-    }
+    void lockRead() { ::AcquireSRWLockShared(&mLock); }
+    void unlockRead() { ::ReleaseSRWLockShared(&mLock); }
+    void lockWrite() { ::AcquireSRWLockExclusive(&mLock); }
+    void unlockWrite() { ::ReleaseSRWLockExclusive(&mLock); }
+
 private:
     SRWLOCK mLock = SRWLOCK_INIT;
-#else  // !_WIN32
-    ReadWriteLock() {
-        ::pthread_rwlock_init(&mLock, NULL);
-    }
-    void lockRead() {
-        ::pthread_rwlock_rdlock(&mLock);
-    }
-    void unlockRead() {
-        ::pthread_rwlock_unlock(&mLock);
-    }
-    void lockWrite() {
-        ::pthread_rwlock_wrlock(&mLock);
-    }
-    void unlockWrite() {
-        ::pthread_rwlock_unlock(&mLock);
-    }
+#else   // !_WIN32
+    ReadWriteLock() { ::pthread_rwlock_init(&mLock, NULL); }
+    void lockRead() { ::pthread_rwlock_rdlock(&mLock); }
+    void unlockRead() { ::pthread_rwlock_unlock(&mLock); }
+    void lockWrite() { ::pthread_rwlock_wrlock(&mLock); }
+    void unlockWrite() { ::pthread_rwlock_unlock(&mLock); }
+
 private:
     pthread_rwlock_t mLock;
 #endif  // !_WIN32
@@ -138,9 +129,7 @@ private:
 // NB: not thread-safe (as opposed to the Lock class)
 class AutoLock {
 public:
-    AutoLock(Lock& lock) : mLock(lock) {
-        mLock.lock();
-    }
+    AutoLock(StaticLock& lock) : mLock(lock) { mLock.lock(); }
 
     void lock() {
         assert(!mLocked);
@@ -163,7 +152,7 @@ public:
     }
 
 private:
-    Lock& mLock;
+    StaticLock& mLock;
     bool mLocked = true;
 
     friend class ConditionVariable;
@@ -173,9 +162,7 @@ private:
 
 class AutoWriteLock {
 public:
-    AutoWriteLock(ReadWriteLock& lock) : mLock(lock) {
-        mLock.lockWrite();
-    }
+    AutoWriteLock(ReadWriteLock& lock) : mLock(lock) { mLock.lockWrite(); }
 
     void lockWrite() {
         assert(!mWriteLocked);
@@ -204,9 +191,7 @@ private:
 
 class AutoReadLock {
 public:
-    AutoReadLock(ReadWriteLock& lock) : mLock(lock) {
-        mLock.lockRead();
-    }
+    AutoReadLock(ReadWriteLock& lock) : mLock(lock) { mLock.lockRead(); }
 
     void lockRead() {
         assert(!mReadLocked);

@@ -27,6 +27,7 @@
 using android::base::AutoLock;
 using android::base::ConditionVariable;
 using android::base::Lock;
+using android::base::StaticLock;
 using android::GoldfishSyncCommandQueue;
 
 // Commands can be tagged with with unique id's,
@@ -38,11 +39,10 @@ static uint64_t sUniqueId = 0;
 // |sCommandReplyLock| protects
 // |sUniqueId| and |wait_map|, including
 // the |CommandWaitInfo| structures within.
-static android::base::LazyInstance<Lock> sCommandReplyLock =
-    LAZY_INSTANCE_INIT;
+static StaticLock sCommandReplyLock = {};
 
 uint64_t next_unique_id() {
-    AutoLock lock(sCommandReplyLock.get());
+    AutoLock lock(sCommandReplyLock);
     uint64_t res = sUniqueId;
     sUniqueId += 1;
     return res;
@@ -61,7 +61,7 @@ static std::unordered_map<uint64_t, std::unique_ptr<CommandWaitInfo> >
     wait_map;
 
 static CommandWaitInfo* allocWait(uint64_t id) {
-    AutoLock lock(sCommandReplyLock.get());
+    AutoLock lock(sCommandReplyLock);
     std::unique_ptr<CommandWaitInfo>& res =
         wait_map[id];
     res.reset(new CommandWaitInfo);
@@ -69,7 +69,7 @@ static CommandWaitInfo* allocWait(uint64_t id) {
 }
 
 static void freeWait(uint64_t id) {
-    AutoLock lock(sCommandReplyLock.get());
+    AutoLock lock(sCommandReplyLock);
     wait_map.erase(id);
 }
 

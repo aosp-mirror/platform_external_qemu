@@ -94,7 +94,7 @@ public:
     static void setPosterScale(const char* posterName, float scale);
 
 private:
-    static android::base::LazyInstance<android::base::Lock> mLock;
+    static android::base::StaticLock mLock;
     static VirtualSceneManagerImpl* mImpl;
 };
 

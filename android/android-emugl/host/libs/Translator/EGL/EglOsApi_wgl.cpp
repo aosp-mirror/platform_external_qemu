@@ -1186,6 +1186,8 @@ private:
     static constexpr int kPbufPrimingCount = 8;
 };
 
+constexpr int WglDisplay::kPbufPrimingCount;
+
 class WglLibrary : public GlLibrary {
 public:
     WglLibrary(const WglBaseDispatch* dispatch) : mDispatch(dispatch) {}
