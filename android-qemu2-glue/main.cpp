@@ -1310,7 +1310,7 @@ extern "C" int main(int argc, char** argv) {
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
                 hw->kernel_parameters, rendererConfig.glesMode,
                 rendererConfig.bootPropOpenglesVersion,
-                rendererConfig.glFramebufferSizeBytes, pstore,
+                rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
                 true /* isQemu2 */, hw->hw_arc));
 
         if (!kernel_parameters.get()) {
