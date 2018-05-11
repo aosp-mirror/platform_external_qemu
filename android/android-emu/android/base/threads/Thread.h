@@ -16,6 +16,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/threads/Types.h"
+#include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 
 #ifdef _WIN32
@@ -111,6 +112,7 @@ private:
     static DWORD WINAPI thread_main(void* arg);
 
     HANDLE mThread = nullptr;
+    ConditionVariable mFinishedCv;
 #else // !WIN32
     static void* thread_main(void* arg);
 
