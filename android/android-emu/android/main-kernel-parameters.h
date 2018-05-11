@@ -51,6 +51,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
                                    mem_map ramoops,
+                                   const int vm_heapSize,
                                    bool isQemu2,
                                    bool isCros);
 
