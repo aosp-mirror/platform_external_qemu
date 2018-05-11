@@ -142,6 +142,30 @@
       "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49743f51_3e1969ba",
+        "filename": "android/android-emu/android/base/threads/Thread_win32.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-11T21:54:08Z",
+      "side": 0,
+      "message": "It\u0027s not valid to call WaitFor*() functions from DLLMain(), and that kind of a call deadlocks by design. Do you know if we are calling it from there?",
+      "parentUuid": "14931e83_c2a5d6df",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
