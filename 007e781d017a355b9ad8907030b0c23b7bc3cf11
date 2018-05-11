@@ -94,6 +94,30 @@
       "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f637b362_efe2bdf0",
+        "filename": "android/android-emu/android/base/threads/Thread_win32.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-11T21:32:55Z",
+      "side": 0,
+      "message": "Hmm, ok, then I guess that means that the thread handle is still valid as the thread\u0027s destructor has not been called yet, but the thread is stopped in the sense that it does not show up in gdb, and WaitForSingleObject is definitely hanging on that thread handle still.",
+      "parentUuid": "ae56b207_5fa70bd8",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
