@@ -22,6 +22,30 @@
       "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b40d13a2_0527ec66",
+        "filename": "android/android-emu/android/base/threads/Thread_win32.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-11T18:47:50Z",
+      "side": 0,
+      "message": "It can be difficult to repro and depends on the scenario: what I\u0027ve seen so far, if a thread finishes just as we wait, that might result in a hang in WaitForSingleObject:\n\n1. We\u0027re interrupting RamLoader; telling the reader thread with readerWorker() that its time to stop, then calling Thread::wait on it. Sometimes, I get a hang and then gdb says RamLoader is in Thread::wait, but I don\u0027t see the thread entries in gdb for the reader thread anymore.\n2. We\u0027re cleaning up render threads for snapshot load; we\u0027ve told several threads to stop, and then wait on each one in a loop after stopping them. Sometimes, I see Thread::wait for this code, but there is not a single RenderThread active.",
+      "parentUuid": "d25c1be7_36626a59",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
