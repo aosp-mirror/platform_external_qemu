@@ -214,6 +214,30 @@
       "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba6f5bb4_452998ad",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-11T20:18:48Z",
+      "side": 1,
+      "message": "Well, if you want to just create a copy that works. It doesn\u0027t in case when you want to have a shared access to the same buffer from multiple places. When seeing shared_ptr\u003c\u003e I thought that\u0027s the idea",
+      "parentUuid": "fed6e1f2_962476d3",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
