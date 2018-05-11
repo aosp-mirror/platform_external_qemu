@@ -46,6 +46,30 @@
       "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "167b4017_aa2934dc",
+        "filename": "android/android-emu/android/base/threads/Thread_win32.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-11T18:48:43Z",
+      "side": 0,
+      "message": "Possible scenario:\n\n1. Thread exits, CloseHandle for the thread\n2. Some other thing we dont actually want to wait on gets the same handle\n3. WaitForSingleObject on the old handle but have infinite timeout",
+      "parentUuid": "b40d13a2_0527ec66",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
