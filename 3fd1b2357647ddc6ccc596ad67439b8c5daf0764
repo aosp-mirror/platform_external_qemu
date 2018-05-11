@@ -16,6 +16,24 @@
       "revId": "3fd1b2357647ddc6ccc596ad67439b8c5daf0764",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50e2d731_4773d719",
+        "filename": "android/android-emu/android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-11T21:46:46Z",
+      "side": 0,
+      "message": "you\u0027re right. Actually, LazyInstance\u003c\u003e already doesn\u0027t call any dtors so we\u0027ve been relying on #2 for quite a while",
+      "parentUuid": "197b8be8_746f183b",
+      "revId": "3fd1b2357647ddc6ccc596ad67439b8c5daf0764",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }

@@ -16,6 +16,24 @@
       "revId": "901a3d2e1011a40acdd4bd645ceb1d0d2e057b2b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32372fe4_0113123d",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1189,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-11T21:46:46Z",
+      "side": 1,
+      "message": "debug build wants to have a real variable, so linking would fail without this",
+      "parentUuid": "fc3d7cbd_8227d40c",
+      "revId": "901a3d2e1011a40acdd4bd645ceb1d0d2e057b2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
