@@ -56,12 +56,11 @@ bool Thread::wait(intptr_t* exitStatus) {
         return false;
     }
 
-    // NOTE: Do not hold lock during wait to allow thread_main to
-    // properly update mIsRunning and mFinished on thread exit.
-    if (WaitForSingleObject(mThread, INFINITE) == WAIT_FAILED) {
-        return false;
+    AutoLock locker(mLock);
+    // wait for finish using condition variable
+    while (!mFinished) {
+        mFinishedCv.wait(&locker);
     }
-    DCHECK(mFinished);
 
     if (exitStatus) {
         *exitStatus = mExitStatus;
@@ -96,6 +95,7 @@ DWORD WINAPI Thread::thread_main(void* arg) {
         {
             AutoLock lock(self->mLock);
             self->mFinished = true;
+            self->mFinishedCv.broadcast();
             self->mExitStatus = ret;
         }
 

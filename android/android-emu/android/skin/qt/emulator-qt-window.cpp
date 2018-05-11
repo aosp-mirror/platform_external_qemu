@@ -581,7 +581,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                 if (stage == Snapshotter::Stage::Start) {
                     runOnUiThread([this, op]() {
                         AutoLock lock(mSnapshotStateLock);
-                        mShouldShowSnapshotModalOverlay = true;
+                        // TODO: Figure out why this causes crashes
+                        mShouldShowSnapshotModalOverlay = false;
                         QTimer::singleShot(500, QApplication::instance(),
                             [this, op]() {
                                 AutoLock lock(mSnapshotStateLock);
@@ -598,22 +599,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                     }
                                 }
                             });
-#ifndef __APPLE__ // bug: 77596251
-                        if (mToolWindow) {
-                            mToolWindow->setEnabled(false);
-                        }
-#endif
                     });
                 } else if (stage == Snapshotter::Stage::End) {
                     runOnUiThread([this, op]() {
                         AutoLock lock(mSnapshotStateLock);
                         mShouldShowSnapshotModalOverlay = false;
                         mContainer.hideModalOverlay();
-#ifndef __APPLE__ // bug: 77596251
-                        if (mToolWindow) {
-                            mToolWindow->setEnabled(true);
-                        }
-#endif
                     });
                 }
             });
