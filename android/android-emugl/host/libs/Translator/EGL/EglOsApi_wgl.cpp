@@ -543,12 +543,16 @@ private:
     const WglExtensionsDispatch* m_dispatch = nullptr;
 };
 
+
+static android::base::Lock sGlobalContextLock;
+
 class WinContext : public EglOS::Context {
 public:
     explicit WinContext(const WglExtensionsDispatch* dispatch, HGLRC ctx) :
         mDispatch(dispatch), mCtx(ctx) {}
 
     ~WinContext() {
+        android::base::AutoLock lock(sGlobalContextLock);
         if (!mDispatch->wglDeleteContext(mCtx)) {
             fprintf(stderr, "error deleting WGL context! error 0x%x\n",
                     (unsigned)GetLastError());
@@ -1056,6 +1060,8 @@ public:
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
                              EglOS::Context* context) {
+        android::base::AutoLock lock(sGlobalContextLock);
+
         HDC hdcRead = read ? WinSurface::from(read)->getDC() : NULL;
         HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
         HGLRC hdcContext = context ? WinContext::from(context) : 0;
@@ -1080,11 +1086,21 @@ public:
             //
 
             int count = 100;
-            while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)
-                   && --count > 0
-                   && !GetLastError()) {
-                Sleep(16);
+
+            if (dispatch->wglMakeContextCurrentARB) {
+                while (!dispatch->wglMakeContextCurrentARB(hdcDraw, hdcRead, hdcContext)
+                       && --count > 0
+                       && !GetLastError()) {
+                    Sleep(16);
+                }
+            } else {
+                while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)
+                       && --count > 0
+                       && !GetLastError()) {
+                    Sleep(16);
+                }
             }
+
             if (count <= 0) {
                 D("Error: wglMakeCurrent() failed, error %d\n", (int)GetLastError());
                 return false;
