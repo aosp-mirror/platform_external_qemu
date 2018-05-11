@@ -59,7 +59,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     // Disable apic timer check. b/33963880
     params.add("no_timer_check");
-
     params.addFormat("androidboot.hardware=%s",
                      isQemu2 ? "ranchu" : "goldfish");
 
@@ -177,6 +176,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             params.add("root=/dev/vda1");
         }
     }
+
+    // Enable partitions on loop devices.
+    // This is used by the new "virtual disk" feature used by vold to help
+    // debug and test storage code on devices without physical media.
+    params.add("loop.max_part=7");
 
     if (avdKernelParameters && avdKernelParameters[0]) {
         params.add(avdKernelParameters);
