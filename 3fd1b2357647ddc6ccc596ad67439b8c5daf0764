@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "197b8be8_746f183b",
+        "filename": "android/android-emu/android/base/synchronization/Lock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-05-11T21:04:32Z",
+      "side": 0,
+      "message": "Just to make sure I understand properly. \n1: The compiler will generate the default destructor, which will do nothing. \n2: We rely on the OS to clean up any resources during program termination. (POSIX)\n\nDue to the above do not use the class outside of static context, as 1 will cause leakage.\nDue to 2 we don\u0027t have to do any magic around at_exit registration etc.",
+      "revId": "3fd1b2357647ddc6ccc596ad67439b8c5daf0764",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
