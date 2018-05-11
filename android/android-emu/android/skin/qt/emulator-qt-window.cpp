@@ -2369,7 +2369,9 @@ void EmulatorQtWindow::checkAdbVersionAndWarn() {
             mAdbWarningBox->setText(
                     tr("Could not automatically detect an ADB binary. Some "
                        "emulator functionality will not work until a custom "
-                       "path to ADB  is added in the extended settings page."));
+                       "path to ADB  is added. "
+                       "This can be done in Extended Controls (...) > Settings "
+                       "> General tab > 'Use detected ADB location'"));
         } else {
             mAdbWarningBox->setText(
                     tr("The ADB binary found at %1 is obsolete and has serious"
