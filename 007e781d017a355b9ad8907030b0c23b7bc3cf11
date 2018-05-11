@@ -166,6 +166,30 @@
       "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70a9b4de_7f7f2e12",
+        "filename": "android/android-emu/android/base/threads/Thread_win32.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-11T22:03:47Z",
+      "side": 0,
+      "message": "lol, yes, Ttere could be a good chance we\u0027re doing that considering that we are issuing a lot of these snapshot operations from the main loop or the hmp* handler (which seems to sometimes be from aio context)",
+      "parentUuid": "49743f51_3e1969ba",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
