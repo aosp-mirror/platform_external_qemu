@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6f18f38_255b0075",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-11T20:02:04Z",
+      "side": 1,
+      "message": "I see .addFormat below, could you please use it? I believe we could benefit from having 7 as an integer constant to refer to it somewhere else.",
+      "range": {
+        "startLine": 184,
+        "startChar": 30,
+        "endLine": 184,
+        "endChar": 31
+      },
+      "revId": "04679afbd27a64390276fcaa54296e211812244e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
