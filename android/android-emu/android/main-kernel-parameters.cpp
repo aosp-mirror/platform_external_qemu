@@ -32,6 +32,9 @@ using android::base::StringFormat;
 static const char kSysfsAndroidDtDir[] =
         "/sys/bus/platform/devices/ANDR0001:00/properties/android/";
 
+// Note: defined in platform/system/vold/model/Disk.cpp
+static const unsigned int kMajorBlockLoop = 7;
+
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    int apiLevel,
@@ -177,6 +180,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             params.add("root=/dev/vda1");
         }
     }
+
+    // Enable partitions on loop devices.
+    // This is used by the new "virtual disk" feature used by vold to help
+    // debug and test storage code on devices without physical media.
+    params.addFormat("loop.max_part=%u", kMajorBlockLoop);
 
     if (avdKernelParameters && avdKernelParameters[0]) {
         params.add(avdKernelParameters);
