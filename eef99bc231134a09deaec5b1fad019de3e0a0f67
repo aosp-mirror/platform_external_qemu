@@ -190,6 +190,30 @@
       "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fed6e1f2_962476d3",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-11T02:07:35Z",
+      "side": 1,
+      "message": "What if the copy constructor copied the underlying buffer? Then there wouldn\u0027t need to be an internal refcount and nothing shared_ptr-like would have to be involved.",
+      "parentUuid": "16bce579_4a79863f",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 5
+      },
+      "revId": "eef99bc231134a09deaec5b1fad019de3e0a0f67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
