@@ -190,6 +190,30 @@
       "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96206f8b_b8cba392",
+        "filename": "android/android-emu/android/base/threads/Thread_win32.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-05-11T22:10:27Z",
+      "side": 0,
+      "message": "Yeah, good point Yurii, although I only found one DllMain in the codebase under external/qemu and it looked okay.\n\nDo you have a stack for the thread calling wait() that\u0027s hanging?",
+      "parentUuid": "70a9b4de_7f7f2e12",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
