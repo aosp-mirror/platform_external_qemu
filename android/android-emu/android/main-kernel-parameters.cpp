@@ -178,6 +178,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         }
     }
 
+    // Enable partitions on loop devices.
+    // This is used by the new "virtual disk" feature used by vold to help
+    // debug and test storage code on devices without physical media.
+    params.add("loop.max_part=7");
+
     if (avdKernelParameters && avdKernelParameters[0]) {
         params.add(avdKernelParameters);
     }
