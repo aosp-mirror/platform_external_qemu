@@ -70,6 +70,30 @@
       "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae56b207_5fa70bd8",
+        "filename": "android/android-emu/android/base/threads/Thread_win32.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-11T20:15:55Z",
+      "side": 0,
+      "message": "we only close the thread handle in Thread\u0027s destructor - in that case one can\u0027t call Thread::wait() because the object is already gone",
+      "parentUuid": "167b4017_aa2934dc",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "007e781d017a355b9ad8907030b0c23b7bc3cf11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
