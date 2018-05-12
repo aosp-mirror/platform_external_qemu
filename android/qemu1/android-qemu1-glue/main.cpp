@@ -198,6 +198,7 @@ extern "C" int main(int argc, char **argv) {
         rendererConfig.bootPropOpenglesVersion, /* ro.opengles.version */
         0ULL, /* glFramebufferSizeBytes */
         mem,
+        hw->vm_heapSize,
         false /* isQemu2 */, false /* isCros */);
 
     if (hw->hw_cpu_ncore > 1) {
