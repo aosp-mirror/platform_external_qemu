@@ -57,7 +57,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
 
         RamLoader::RamBlockStructure emptyRamBlockStructure = {};
         mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner),
-                           false /* not for saving only */,
+                           RamLoader::Flags::OnDemandAllowed,
                            emptyRamBlockStructure);
     }
     {
@@ -187,7 +187,7 @@ void Loader::synchronize(bool isOnExit) {
 
             mRamLoader.emplace(
                     StdioStream(ram, StdioStream::kOwner),
-                    true /* saving only */,
+                    RamLoader::Flags::LoadIndexOnly,
                     mRamLoader->getRamBlockStructure());
         }
     }

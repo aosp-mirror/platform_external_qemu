@@ -31,12 +31,6 @@ using android::snapshot::RamSaver;
 static constexpr int kPageSize = 4096;
 using TestRam = AlignedBuf<uint8_t, kPageSize>;
 
-// Needed because Quickboot statically depends on Qt and there is a link
-// failure if the function is not defined.
-bool userSettingIsDontSaveSnapshot() {
-    return false;
-}
-
 class RamSaverTest : public ::testing::Test {
 protected:
     void SetUp() override { mTempDir.reset(new TestTempDir("ramsavertest")); }
