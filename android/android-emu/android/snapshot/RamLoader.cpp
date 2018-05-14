@@ -42,20 +42,21 @@ void RamLoader::FileIndex::clear() {
 }
 
 RamLoader::RamLoader(base::StdioStream&& stream,
-                     bool indexOnly,
+                     Flags flags,
                      const RamLoader::RamBlockStructure& blockStructure)
     : mStream(std::move(stream)),
-      mReaderThread([this]() { readerWorker(); }),
-      mIndexOnly(indexOnly) {
+      mReaderThread([this]() { readerWorker(); }) {
 
-    if (mIndexOnly) {
+    if (nonzero(flags & Flags::LoadIndexOnly)) {
+        mIndexOnly = true;
         applyRamBlockStructure(blockStructure);
         readIndex();
         mStream.close();
         return;
     }
 
-    if (MemoryAccessWatch::isSupported()) {
+    if (nonzero(flags & Flags::OnDemandAllowed) &&
+        MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
                              [this]() { return backgroundPageLoad(); });
         if (mAccessWatch->valid()) {

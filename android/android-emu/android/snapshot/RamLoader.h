@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/EnumFlags.h"
 #include "android/base/Optional.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/MessageChannel.h"
@@ -32,10 +33,18 @@
 namespace android {
 namespace snapshot {
 
+using namespace ::android::base::EnumFlags;
+
 class RamLoader {
     DISALLOW_COPY_AND_ASSIGN(RamLoader);
 
 public:
+    enum class Flags : uint8_t {
+        None = 0x0,
+        LoadIndexOnly = 0x1,
+        OnDemandAllowed = 0x2,
+    };
+
     enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
 
     struct Page;
@@ -63,7 +72,7 @@ public:
     };
 
     RamLoader(base::StdioStream&& stream,
-              bool indexOnly = false,
+              Flags flags,
               const RamBlockStructure& blockStructure = {});
 
     ~RamLoader();
