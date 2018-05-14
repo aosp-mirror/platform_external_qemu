@@ -9,15 +9,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/snapshot/RamLoader.h"
-
 #include "android/base/AlignedBuf.h"
+#include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
-#include "android/base/StringView.h"
-#include "android/base/system/System.h"
 #include "android/base/misc/FileUtils.h"
+#include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/snapshot/RamSnapshotTesting.h"
 
 #include <gtest/gtest.h>
 
@@ -34,8 +33,8 @@ using android::base::TestTempDir;
 using android::snapshot::RamBlock;
 using android::snapshot::RamLoader;
 
-static constexpr int kPageSize = 4096;
-using TestRam = AlignedBuf<uint8_t, kPageSize>;
+namespace android {
+namespace snapshot {
 
 class RamLoaderTest : public ::testing::Test {
 protected:
@@ -43,47 +42,20 @@ protected:
 
     void TearDown() override { mTempDir.reset(); }
 
-    void loadRamFromTestData(StringView filename,
-                 uint8_t* buffer,
-                 size_t size) {
-
-        auto ram =
-            fopen(
-                PathUtils::join(
-                    System::get()->getProgramDirectory(),
-                    "testdata",
-                    filename).c_str(),
-                "rb");
-
-        EXPECT_TRUE(ram);
-
-        RamLoader::RamBlockStructure emptyRamBlockStructure = {};
-
-        // Disallow on-demand load for now.
-        RamLoader ramLoader(StdioStream(ram, StdioStream::kOwner),
-                            RamLoader::Flags::None,
-                            emptyRamBlockStructure);
-
-        const RamBlock block = {
-            // block name needs to match our test data.
-            "ramSaverTestBlock", 0x0, buffer, (int64_t)size, kPageSize,
-        };
-
-        ramLoader.registerBlock(block);
-
-        ramLoader.start(false);
-        ramLoader.join();
-        
-    }
-
     std::unique_ptr<TestTempDir> mTempDir;
 };
 
 // Load prebuilt random RAM file.
 TEST_F(RamLoaderTest, Simple) {
+    auto path = PathUtils::join(System::get()->getProgramDirectory(),
+                                "testdata", "random-ram-100.bin");
 
-    TestRam testRam(100 * kPageSize);
+    TestRamBuffer testRam(100 * kTestingPageSize);
 
-    loadRamFromTestData("random-ram-100.bin",
-                        testRam.data(), testRam.size());
+    loadRamSingleBlock({"ramSaverTestBlock", 0x0, testRam.data(),
+                        (int64_t)testRam.size(), kTestingPageSize},
+                       path);
 }
+
+}  // namespace snapshot
+}  // namespace android
