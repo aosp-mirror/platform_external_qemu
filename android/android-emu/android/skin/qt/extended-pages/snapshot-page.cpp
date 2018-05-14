@@ -601,23 +601,15 @@ void SnapshotPage::updateAfterSelectionChanged() {
 // This method is used when the small region is used for
 // the snapshot info. In this case, we do not allow the
 // region to scroll. If the info text does not fit, we
-// trim off the part that doesn't fit, plus we trim one
-// more line. Then we append "..." on the last visible
-// line.
+// trim off enough that we can append "  ..." and still
+// have the result fit.
 QString SnapshotPage::elideSnapshotInfo(QString fullString) {
+    constexpr char dotdotdot[] = "<b>&nbsp;&nbsp;...</b>";
     QTextDocument* textDocument = mUi->selectionInfo->document();
 
-    if (mSmallInfoRegionSize == 0.0 || mExtraSmallInfoRegionSize == 0.0) {
-        // We need to initialize the size of the small Snapshot Info region.
-        // And that size minus one line of text.
+    if (mSmallInfoRegionSize == 0.0) {
         mSmallInfoRegionSize = (qreal)mUi->selectionInfo->height();
-        mUi->selectionInfo->setHtml("<b>Some text</b>");
-        qreal baseSize = textDocument->size().rheight();
-        mUi->selectionInfo->setHtml("<b>Some text</b><br><b>...</b>");
-        qreal sizeOfOneLine = textDocument->size().rheight() - baseSize;
-        mExtraSmallInfoRegionSize = mSmallInfoRegionSize - sizeOfOneLine;
     }
-
     mUi->selectionInfo->setHtml(fullString);
     if (textDocument->size().rheight() <= mSmallInfoRegionSize) {
         // The full string fits. No need to elide.
@@ -629,8 +621,9 @@ QString SnapshotPage::elideSnapshotInfo(QString fullString) {
     int rightLength = fullString.size();
     while(rightLength - leftLength > 1) {
         int midLength = (leftLength + rightLength) / 2;
-        mUi->selectionInfo->setHtml(fullString.left(midLength));
-        if (textDocument->size().rheight() > mExtraSmallInfoRegionSize) {
+        QString midLengthString = fullString.left(midLength) + dotdotdot;
+        mUi->selectionInfo->setHtml(midLengthString);
+        if (textDocument->size().rheight() > mSmallInfoRegionSize) {
             rightLength = midLength;
         } else {
             leftLength = midLength;
@@ -645,13 +638,8 @@ QString SnapshotPage::elideSnapshotInfo(QString fullString) {
     {
         leftLength = lastLessPosition;
     }
-    // If the trimmed string ends with <br>, remove that. We'll add our own.
-    if (fullString.left(leftLength).endsWith("<br>")) {
-        leftLength -= 4;
-    }
-
-    // Trim it and add "..."
-    return (fullString.left(leftLength) + "<br><b>...</b>");
+    // Trim it and add "  ..."
+    return (fullString.left(leftLength) + dotdotdot);
 }
 
 // Adjust the icons for selected vs non-selected rows

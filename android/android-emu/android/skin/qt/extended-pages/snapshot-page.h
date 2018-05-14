@@ -97,8 +97,7 @@ private:
     bool mMadeSelection = false;
     bool mInfoWindowIsBig = false;
 
-    qreal mSmallInfoRegionSize = 0.0;      // The size that fits in the small snashot-info region
-    qreal mExtraSmallInfoRegionSize = 0.0; // One line of text less than 'mSmallInfoSize'
+    qreal mSmallInfoRegionSize = 0.0; // The size that fits in the small snashot-info region
 
     QRect mInfoPanelSmallGeo; // Location and size of the info panel when it is small
     QRect mInfoPanelLargeGeo; // Location and size of the info panel when it is big
