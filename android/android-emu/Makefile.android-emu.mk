@@ -466,6 +466,7 @@ LOCAL_SRC_FILES := \
     android/snapshot/Quickboot.cpp \
     android/snapshot/RamLoader.cpp \
     android/snapshot/RamSaver.cpp \
+    android/snapshot/RamSnapshotTesting.cpp \
     android/snapshot/Saver.cpp \
     android/snapshot/Snapshot.cpp \
     android/snapshot/Snapshotter.cpp \
@@ -780,6 +781,7 @@ LOCAL_SRC_FILES := \
   android/qt/qt_setup_unittest.cpp \
   android/snapshot/RamLoader_unittest.cpp \
   android/snapshot/RamSaver_unittest.cpp \
+  android/snapshot/RamSnapshot_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
   android/telephony/modem_unittest.cpp \
   android/telephony/sms_unittest.cpp \

@@ -11,10 +11,7 @@
 
 #include "android/base/AlignedBuf.h"
 #include "android/base/StringView.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/files/StdioStream.h"
 #include "android/base/misc/FileUtils.h"
-#include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/snapshot/RamSnapshotTesting.h"
 
@@ -34,25 +31,38 @@ using android::base::TestTempDir;
 namespace android {
 namespace snapshot {
 
-class RamLoaderTest : public ::testing::Test {
+class RamSnapshotTest : public ::testing::Test {
 protected:
-    void SetUp() override { mTempDir.reset(new TestTempDir("ramloadertest")); }
+    void SetUp() override {
+        mTempDir.reset(new TestTempDir("ramsnapshottest"));
+    }
 
     void TearDown() override { mTempDir.reset(); }
 
     std::unique_ptr<TestTempDir> mTempDir;
 };
 
-// Load prebuilt random RAM file.
-TEST_F(RamLoaderTest, Simple) {
-    auto path = PathUtils::join(System::get()->getProgramDirectory(),
-                                "testdata", "random-ram-100.bin");
+TEST_F(RamSnapshotTest, SimpleRandom) {
+    std::string ramPath = mTempDir->makeSubPath("ram.bin");
 
-    TestRamBuffer testRam(100 * kTestingPageSize);
+    const int numPages = 100;
+    const float zeroPageChance = 0.5;
 
-    loadRamSingleBlock({"ramSaverTestBlock", 0x0, testRam.data(),
-                        (int64_t)testRam.size(), kTestingPageSize},
-                       path);
+    auto testRam = generateRandomRam(numPages, zeroPageChance);
+
+    saveRamSingleBlock(RamSaver::Flags::Compress,
+                       {"testRam", 0x0, testRam.data(), (int64_t)testRam.size(),
+                        kTestingPageSize},
+                       ramPath);
+
+    TestRamBuffer testRamOut(numPages * kTestingPageSize);
+    loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
+                        (int64_t)testRamOut.size(), kTestingPageSize},
+                       ramPath);
+
+    for (int i = 0; i < numPages; i++) {
+        EXPECT_EQ(testRamOut[i], testRam[i]);
+    }
 }
 
 }  // namespace snapshot
