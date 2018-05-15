@@ -19,7 +19,7 @@
      <x>0</x>
      <y>20</y>
      <width>630</width>
-     <height>586</height>
+     <height>588</height>
     </rect>
    </property>
    <property name="cursor">
@@ -71,7 +71,7 @@
      <property name="geometry">
       <rect>
        <x>108</x>
-       <y>528</y>
+       <y>527</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -178,7 +178,7 @@
        <x>370</x>
        <y>413</y>
        <width>234</width>
-       <height>110</height>
+       <height>105</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -206,7 +206,7 @@
        <x>20</x>
        <y>36</y>
        <width>350</width>
-       <height>487</height>
+       <height>482</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -268,7 +268,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>528</y>
+       <y>527</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -309,7 +309,7 @@
      <property name="geometry">
       <rect>
        <x>472</x>
-       <y>528</y>
+       <y>527</y>
        <width>132</width>
        <height>36</height>
       </rect>
@@ -338,7 +338,7 @@
      <property name="geometry">
       <rect>
        <x>64</x>
-       <y>528</y>
+       <y>527</y>
        <width>36</width>
        <height>36</height>
       </rect>
@@ -535,6 +535,70 @@
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
      </property>
+    </widget>
+    <widget class="QLabel" name="autoDeleteTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>118</y>
+       <width>281</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Delete invalid snapshots</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="deleteInvalidSnapshots">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>140</y>
+       <width>281</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <property name="maxVisibleItems">
+      <number>3</number>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Automatically</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Ask</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Don't delete</string>
+      </property>
+     </item>
     </widget>
    </widget>
   </widget>
