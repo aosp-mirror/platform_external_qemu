@@ -17,7 +17,6 @@
 #include <atomic>
 #include <cinttypes>
 #include <cstdlib>
-#include <memory>
 #include <type_traits>
 
 namespace android {
@@ -25,36 +24,36 @@ namespace android {
 template <class T, size_t align>
 class AlignedBuf {
 public:
-    explicit AlignedBuf(size_t size) : mRefCount(new std::atomic<int>(1)) {
+    explicit AlignedBuf(size_t size) {
         static_assert(align && ((align & (align - 1)) == 0),
                       "AlignedBuf only supports power-of-2 aligments.");
         resizeImpl(size);
     }
 
-    AlignedBuf(const AlignedBuf& other) {
-        copyFrom(other);
+    AlignedBuf(const AlignedBuf& other) : AlignedBuf(other.mSize) {
+        if (other.mBuffer) { // could have got moved out
+            std::copy(other.mAligned, other.mAligned + other.mSize, mAligned);
+        }
     }
 
     AlignedBuf& operator=(const AlignedBuf& other) {
-        if (this != &other) copyFrom(other);
+        if (this != &other) {
+            AlignedBuf tmp(other);
+            *this = std::move(tmp);
+        }
         return *this;
     }
 
     AlignedBuf(AlignedBuf&& other) { *this = std::move(other); }
 
     AlignedBuf& operator=(AlignedBuf&& other) {
-        if (this != &other) {
+        mBuffer = other.mBuffer;
+        mAligned = other.mAligned;
+        mSize = other.mSize;
 
-            mBuffer = other.mBuffer;
-            mAligned = other.mAligned;
-            mSize = other.mSize;
-            mRefCount = other.mRefCount;
-
-            other.mBuffer = nullptr;
-            other.mAligned = nullptr;
-            other.mSize = 0;
-            other.mRefCount = nullptr;
-        }
+        other.mBuffer = nullptr;
+        other.mAligned = nullptr;
+        other.mSize = 0;
 
         return *this;
     }
@@ -87,28 +86,27 @@ public:
 private:
 
     void resizeImpl(size_t newSize) {
-        size_t pad = std::max(align, sizeof(T));
-        size_t newSizeBytes = newSize * sizeof(T) + pad;
+        if (newSize) {
+            size_t pad = std::max(align, sizeof(T));
+            size_t newSizeBytes = newSize * sizeof(T) + pad;
 
-        mBuffer = static_cast<uint8_t*>(realloc(mBuffer, newSizeBytes));
+            mBuffer = static_cast<uint8_t*>(realloc(mBuffer, newSizeBytes));
 
-        mAligned = reinterpret_cast<T*>(
-                (reinterpret_cast<uintptr_t>(mBuffer) + pad) & ~(align - 1));
+            mAligned = reinterpret_cast<T*>(
+                    (reinterpret_cast<uintptr_t>(mBuffer) + pad) & ~(align - 1));
+
+        } else {
+            if (mBuffer) free(mBuffer);
+            mBuffer = nullptr;
+            mAligned = nullptr;
+        }
 
         mSize = newSize;
-    }
-
-    void copyFrom(const AlignedBuf& other) {
-        if (other.mBuffer) { // could have got moved out
-            resizeImpl(other.mSize);
-            memcpy(mAligned, other.mAligned, other.mSize * sizeof(T));
-        }
     }
 
     uint8_t* mBuffer = nullptr;
     T* mAligned = nullptr;
     size_t mSize = 0;
-    std::atomic<int>* mRefCount = nullptr;
 };
 
 }  // namespace android
