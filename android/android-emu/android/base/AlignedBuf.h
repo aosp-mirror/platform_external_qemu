@@ -17,7 +17,6 @@
 #include <atomic>
 #include <cinttypes>
 #include <cstdlib>
-#include <memory>
 #include <type_traits>
 
 namespace android {
@@ -25,7 +24,7 @@ namespace android {
 template <class T, size_t align>
 class AlignedBuf {
 public:
-    explicit AlignedBuf(size_t size) : mRefCount(new std::atomic<int>(1)) {
+    explicit AlignedBuf(size_t size) {
         static_assert(align && ((align & (align - 1)) == 0),
                       "AlignedBuf only supports power-of-2 aligments.");
         resizeImpl(size);
@@ -48,12 +47,10 @@ public:
             mBuffer = other.mBuffer;
             mAligned = other.mAligned;
             mSize = other.mSize;
-            mRefCount = other.mRefCount;
 
             other.mBuffer = nullptr;
             other.mAligned = nullptr;
             other.mSize = 0;
-            other.mRefCount = nullptr;
         }
 
         return *this;
@@ -108,7 +105,6 @@ private:
     uint8_t* mBuffer = nullptr;
     T* mAligned = nullptr;
     size_t mSize = 0;
-    std::atomic<int>* mRefCount = nullptr;
 };
 
 }  // namespace android
