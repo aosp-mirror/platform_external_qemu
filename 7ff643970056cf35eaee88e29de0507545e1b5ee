@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a3a6d42_3481ebe7",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-15T01:57:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a07cf69_9997b14d",
+      "range": {
+        "startLine": 34,
+        "startChar": 8,
+        "endLine": 34,
+        "endChar": 24
+      },
+      "revId": "7ff643970056cf35eaee88e29de0507545e1b5ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a527594_bc7fec59",
         "filename": "android/android-emu/android/base/AlignedBuf.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-05-15T01:24:15Z",
       "side": 1,
       "message": "this isn\u0027t needed by the standard and common agreement",
+      "range": {
+        "startLine": 45,
+        "startChar": 8,
+        "endLine": 45,
+        "endChar": 29
+      },
+      "revId": "7ff643970056cf35eaee88e29de0507545e1b5ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "add913cb_a13898b7",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-15T01:57:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a527594_bc7fec59",
       "range": {
         "startLine": 45,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a17e996b_2b1a39e2",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-15T01:57:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3b767a68_123ba2b7",
+      "range": {
+        "startLine": 99,
+        "startChar": 6,
+        "endLine": 99,
+        "endChar": 56
+      },
+      "revId": "7ff643970056cf35eaee88e29de0507545e1b5ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b716d581_ba6deaad",
         "filename": "android/android-emu/android/base/AlignedBuf.h",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2018-05-15T01:24:15Z",
       "side": 1,
       "message": "this needs the T to be trivially copyable. You could use std::copy() if you want to not enforce this",
+      "range": {
+        "startLine": 101,
+        "startChar": 11,
+        "endLine": 101,
+        "endChar": 70
+      },
+      "revId": "7ff643970056cf35eaee88e29de0507545e1b5ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70e6015f_562975af",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-15T01:57:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b716d581_ba6deaad",
       "range": {
         "startLine": 101,
         "startChar": 11,
