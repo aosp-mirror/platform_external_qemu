@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94a6188a_98ae089c",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-15T03:45:55Z",
+      "side": 1,
+      "message": "std::copy()\u0027s arguments are (in, in_end -\u003e out)",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 72
+      },
+      "revId": "ae41bb5c93f01130ca546ba96c86ea79b0010e4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eba8bc1d_9ab73621",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-15T03:45:55Z",
+      "side": 1,
+      "message": "this could be a part of resizeImpl() to get rid of alloc/dealloc in case of empty buffer",
+      "range": {
+        "startLine": 36,
+        "startChar": 9,
+        "endLine": 39,
+        "endChar": 9
+      },
+      "revId": "ae41bb5c93f01130ca546ba96c86ea79b0010e4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ee9e92a_f9d066cc",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-15T03:45:55Z",
+      "side": 1,
+      "message": "if (this !\u003d \u0026other) {\n    AlignedBuf tmp(other);\n    *this \u003d std::move(tmp); // could be swap()\n}\nreturn *this;\n\nhttps://stackoverflow.com/questions/3279543/what-is-the-copy-and-swap-idiom",
+      "range": {
+        "startLine": 43,
+        "startChar": 8,
+        "endLine": 43,
+        "endChar": 33
+      },
+      "revId": "ae41bb5c93f01130ca546ba96c86ea79b0010e4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f6d27c6_0fef22e4",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-15T03:45:55Z",
+      "side": 1,
+      "message": "same thing with the order of arrguments",
+      "range": {
+        "startLine": 102,
+        "startChar": 16,
+        "endLine": 102,
+        "endChar": 17
+      },
+      "revId": "ae41bb5c93f01130ca546ba96c86ea79b0010e4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
