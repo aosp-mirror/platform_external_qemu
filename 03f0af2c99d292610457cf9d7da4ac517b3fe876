@@ -22,6 +22,30 @@
       "revId": "03f0af2c99d292610457cf9d7da4ac517b3fe876",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ac598fba_1a40d097",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-15T01:06:02Z",
+      "side": 1,
+      "message": "ah, oops, missed that, sorry. The ref count is not being used and deep copying is what it is doing atm though",
+      "parentUuid": "78860086_f9ab5017",
+      "range": {
+        "startLine": 28,
+        "startChar": 39,
+        "endLine": 28,
+        "endChar": 73
+      },
+      "revId": "03f0af2c99d292610457cf9d7da4ac517b3fe876",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
