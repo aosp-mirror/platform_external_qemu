@@ -85,6 +85,12 @@ constexpr char HTTP_PROXY_PORT[] = "set/proxy/port";
 constexpr char HTTP_PROXY_AUTHENTICATION[] = "set/proxy/authentication";
 constexpr char HTTP_PROXY_USERNAME[] = "set/proxy/username";
 
+constexpr char DELETE_INVALID_SNAPSHOTS[] = "set/deleteInvalidSnapshots";
+// Enum values saved in the settings for save snapshot on exit
+enum class DeleteInvalidSnapshots { Auto, Ask, No };
+// Order of the items on the GUI for deleting invalid snapshots
+enum class DeleteInvalidSnapshotsUiOrder { Auto, Ask, No };
+
 constexpr char LOCATION_PLAYBACK_FILE[] = "loc/playback_file_path";
 constexpr char LOCATION_PLAYBACK_SPEED[] = "loc/playback_speed";
 constexpr char LOCATION_RECENT_ALTITUDE[] = "loc/recent_altitude";
