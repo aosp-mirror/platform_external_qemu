@@ -106,6 +106,21 @@ void initializeResources(
             int maxDualSourceDrawBuffers) {
     ShInitBuiltInResources(&kResources);
 
+    fprintf(stderr, "%s: max vertex attribs %d\n", __func__, attribs);
+    fprintf(stderr, "%s: max uniform vectors %d\n", __func__, uniformVectors);
+    fprintf(stderr, "%s: max varying vectors %d\n", __func__, varyingVectors);
+    fprintf(stderr, "%s: max v tex image units %d\n", __func__, vertexTextureImageUnits);
+    fprintf(stderr, "%s: max combined tex image units %d\n", __func__, combinedTexImageUnits);
+    fprintf(stderr, "%s: max tex image units %d\n", __func__, combinedTexImageUnits);
+    fprintf(stderr, "%s: max fragment uniform vectors %d\n", __func__, fragmentUniformVectors);
+    fprintf(stderr, "%s: max draw buffers %d\n", __func__, drawBuffers);
+    fprintf(stderr, "%s: frag prevision high %d\n", __func__, fragmentPrecisionHigh);
+    fprintf(stderr, "%s: max vertex output components %d\n", __func__, vertexOutputComponents);
+    fprintf(stderr, "%s: max fragment input components %d\n", __func__, fragmentInputComponents);
+    fprintf(stderr, "%s: min prog texeloff %d\n", __func__, minProgramTexelOffset);
+    fprintf(stderr, "%s: max prog texeloff %d\n", __func__, maxProgramTexelOffset);
+    fprintf(stderr, "%s: max dual source draw buffers %d\n", __func__, maxDualSourceDrawBuffers);
+
     kResources.MaxVertexAttribs = attribs; // Defaulted to 8
     kResources.MaxVertexUniformVectors = uniformVectors; // Defaulted to 128
     kResources.MaxVaryingVectors = varyingVectors; // Defaulted to 8
