@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <random>
 #include <vector>
 
 using android::AlignedBuf;
@@ -26,6 +27,9 @@ using android::base::StringView;
 using android::base::TestTempDir;
 using android::snapshot::RamBlock;
 using android::snapshot::RamSaver;
+
+static constexpr int kPageSize = 4096;
+using TestRam = AlignedBuf<uint8_t, kPageSize>;
 
 // Needed because Quickboot statically depends on Qt and there is a link
 // failure if the function is not defined.
@@ -41,19 +45,43 @@ protected:
 
     void saveRamSnapshot(uint8_t* buffer,
                          size_t size,
-                         size_t pageSize,
                          RamSaver::Flags flags,
                          StringView filename) {
         const RamBlock block = {
-                "ramSaverTestBlock", 0x0, buffer, (int64_t)size,
-                (int32_t)pageSize,
+                "ramSaverTestBlock", 0x0, buffer, (int64_t)size, kPageSize,
         };
 
         RamSaver s(filename.c_str(), flags, nullptr, true);
 
         s.registerBlock(block);
-        s.savePage(0x0, 0x0000, pageSize);
+        s.savePage(0x0, 0x0000, kPageSize);
         s.join();
+    }
+
+    TestRam randomRam(size_t numPages, float zeroPageChance) {
+        std::default_random_engine generator;
+        // Use a consistent seed value to avoid flakes
+        generator.seed(0);
+
+        // Distributions for the random patterns and zero pages
+        std::uniform_int_distribution<char> patternDistribution(0, 255);
+        std::bernoulli_distribution zeroPageDistribution(zeroPageChance);
+
+        TestRam res(numPages * kPageSize);
+
+        uint8_t* ram = res.data();
+
+        for (size_t i = 0; i < numPages; ++i) {
+            uint8_t* currentPage = ram + i * kPageSize;
+            if (zeroPageDistribution(generator)) {
+                memset(currentPage, 0x0, kPageSize);
+            } else {
+                char pattern = patternDistribution(generator);
+                memset(ram + i * kPageSize, pattern, kPageSize);
+            }
+        }
+
+        return res;
     }
 
     std::unique_ptr<TestTempDir> mTempDir;
@@ -76,14 +104,13 @@ TEST_F(RamSaverTest, Simple) {
     std::string ramSaverTestPath = mTempDir->makeSubPath("ram.bin");
 
     const int numPages = 10;
-    const int pageSize = 4096;
 
     // Create aligned buf
-    AlignedBuf<uint8_t, pageSize> testRam(numPages * pageSize);
+    TestRam testRam(numPages * kPageSize);
     uint8_t* ramAligned = testRam.data();
-    memset(ramAligned, 0, numPages * pageSize);
+    memset(ramAligned, 0, numPages * kPageSize);
 
-    saveRamSnapshot(ramAligned, testRam.size(), pageSize, RamSaver::Flags::None,
+    saveRamSnapshot(ramAligned, testRam.size(), RamSaver::Flags::None,
                     ramSaverTestPath);
 
     const std::vector<uint8_t> golden = {
@@ -103,15 +130,15 @@ TEST_F(RamSaverTest, SimpleNonzero) {
     std::string ramSaverTestPath = mTempDir->makeSubPath("ram.bin");
 
     const int numPages = 1;
-    const int pageSize = 4096;
+    const int kPageSize = 4096;
 
     // Create aligned buf
-    AlignedBuf<uint8_t, pageSize> testRam(numPages * pageSize);
+    TestRam testRam(numPages * kPageSize);
     uint8_t* ramAligned = testRam.data();
-    memset(ramAligned, 0xff, numPages * pageSize);
+    memset(ramAligned, 0xff, numPages * kPageSize);
 
-    saveRamSnapshot(ramAligned, testRam.size(), pageSize,
-                    RamSaver::Flags::Compress, ramSaverTestPath);
+    saveRamSnapshot(ramAligned, testRam.size(), RamSaver::Flags::Compress,
+                    ramSaverTestPath);
 
     const std::vector<uint8_t> golden = {
             0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x22, 0x1f, 0xff,
@@ -127,4 +154,17 @@ TEST_F(RamSaverTest, SimpleNonzero) {
     };
 
     checkFileEqualToBuffer(golden.data(), golden.size(), ramSaverTestPath);
+}
+
+// Save 100 pages with compression, some zero, some nonzero.
+// Does not actually check contents; just performs saving.
+TEST_F(RamSaverTest, BasicRandom) {
+    const int numPages = 100;
+    const float zeroPageChance = 0.5;
+    std::string ramSaverTestPath = mTempDir->makeSubPath("random-ram-100.bin");
+
+    auto testRam = randomRam(numPages, zeroPageChance);
+
+    saveRamSnapshot(testRam.data(), testRam.size(), RamSaver::Flags::Compress,
+                    ramSaverTestPath);
 }

@@ -18,7 +18,6 @@
 using android::AlignedBuf;
 
 TEST(AlignedBuf, Basic) {
-
     const int numItems = 10;
 
     // Check that the buffers are aligned
@@ -56,5 +55,53 @@ TEST(AlignedBuf, Basic) {
     for (int i = 0; i < numFewItems; i++) {
         bufData[i] = 0;
         EXPECT_EQ(0, bufData[i]);
+    }
+}
+
+// Tests that copy constructor copies underlying buffer.
+TEST(AlignedBuf, Copy) {
+    constexpr int align = 64;
+    constexpr int size = 128;
+
+    AlignedBuf<uint32_t, align> buf(size);
+    AlignedBuf<uint32_t, align> buf2 = buf;
+
+    EXPECT_EQ(buf2.size(), buf.size());
+    EXPECT_NE(buf2.data(), buf.data());
+
+    for (int i = 0; i < buf.size(); i++) {
+        buf[i] = 0;
+    }
+
+    for (int i = 0; i < buf2.size(); i++) {
+        buf2[i] = 1;
+    }
+
+    for (int i = 0; i < buf.size(); i++) {
+        EXPECT_EQ(0, buf[i]);
+    }
+}
+
+// Tests that move constructor preserves underlying buffer.
+TEST(AlignedBuf, Move) {
+    constexpr int align = 64;
+    constexpr int size = 128;
+
+    AlignedBuf<uint32_t, align> buf(size);
+
+    for (int i = 0; i < buf.size(); i++) {
+        buf[i] = 0;
+        EXPECT_EQ(0, buf[i]);
+    }
+
+    AlignedBuf<uint32_t, align> buf2 = std::move(buf);
+
+    EXPECT_EQ(0, buf.size());
+    EXPECT_EQ(size, buf2.size());
+
+    for (int i = 0; i < buf2.size(); i++) {
+        EXPECT_EQ(0, buf2[i]);
+        // Check that it is stil writable.
+        buf2[i] = 0;
     }
 }
