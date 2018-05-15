@@ -85,7 +85,7 @@ build_angle_package () {
     export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
 
     # Ensure the gclient command is available.
-    git_clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools c55ba20c629ef702cd4bb06da9235c4bb7217f96 &&
+    git_clone https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools 8de3800ce55ba459ffcbedcfa52ef5e6e59caab6 &&
     export PATH=`pwd`/depot_tools:"$PATH" &&
 
     # Ensure ninja, included in the depot tools, is used to generator the build
@@ -97,6 +97,9 @@ build_angle_package () {
 
     # Sync the appropriate build files
     run gclient sync &&
+
+    # Run gn
+    run gn gen out/Debug &&
 
     # ninja is provided for each platform in the previously cloned depot_tools
     run ninja -C out/Debug

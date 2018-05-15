@@ -82,6 +82,10 @@ ifeq ($(BUILD_TARGET_OS),linux)
 LOCAL_LDFLAGS += -Wl,-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX),-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader
 endif
 
+ifeq ($(BUILD_TARGET_OS),darwin)
+LOCAL_LDFLAGS += -Wl,-headerpad_max_install_names
+endif
+
 # use Translator's egl/gles headers
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/GLES_V2/
@@ -103,6 +107,7 @@ LOCAL_SRC_FILES := \
     ../Translator/GLES_V2/ANGLEShaderParser.cpp \
     OpenGLTestContext.cpp \
     OpenGL_unittest.cpp \
+    ShaderParser_unittest.cpp \
     StalePtrRegistry_unittest.cpp \
 
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender libemugl_gtest)
