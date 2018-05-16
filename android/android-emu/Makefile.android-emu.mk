@@ -541,6 +541,7 @@ LOCAL_COPY_COMMON_PREBUILT_RESOURCES += \
     virtualscene/Toren1BD/poster.png \
 
 LOCAL_COPY_COMMON_TESTDATA += \
+    snapshots/random-ram-100.bin \
     textureutils/gray_alpha_golden.bmp \
     textureutils/gray_alpha.png \
     textureutils/gray_golden.bmp \
@@ -777,6 +778,7 @@ LOCAL_SRC_FILES := \
   android/proxy/ProxyUtils_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
+  android/snapshot/RamLoader_unittest.cpp \
   android/snapshot/RamSaver_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
   android/telephony/modem_unittest.cpp \
