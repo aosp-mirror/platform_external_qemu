@@ -126,6 +126,10 @@ void GLESv2Context::initEmulatedBuffers() {
         // Create emulated client VBOs
         GLint neededClientVBOs = 0;
         dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &neededClientVBOs);
+
+        // Spec minimum: 16 attribs. Some drivers won't report the right values.
+        neededClientVBOs = std::max(neededClientVBOs, 16);
+
         m_emulatedClientVBOs.resize(neededClientVBOs, 0);
         dispatcher().glGenBuffers(neededClientVBOs, &m_emulatedClientVBOs[0]);
     }
