@@ -153,6 +153,7 @@ int main(int argc, char **argv)
 #include "android/hw-control.h"
 #include "android/hw-qemud.h"
 #include "android/main-common.h"
+#include "android/meminfo.h"
 #include "android/metrics/metrics.h"
 #include "android/multitouch-port.h"
 #include "android/network/control.h"
@@ -3451,6 +3452,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
     char* android_op_dns_server = NULL;
+    int balloon = 0;
 #endif
     module_call_init(MODULE_INIT_TRACE);
 
@@ -4287,11 +4289,14 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 no_hpet = 1;
                 break;
             case QEMU_OPTION_balloon:
-                if (balloon_parse(optarg) < 0) {
-                    error_report("unknown -balloon argument %s", optarg);
-                    return 1;
-                }
-                break;
+#ifdef CONFIG_ANDROID
+              balloon = 1;
+#endif
+              if (balloon_parse(optarg) < 0) {
+                error_report("unknown -balloon argument %s", optarg);
+                return 1;
+              }
+              break;
             case QEMU_OPTION_no_reboot:
                 no_reboot = 1;
                 break;
@@ -5436,6 +5441,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     extern void android_emulator_set_base_port(int);
     android_emulator_set_base_port(android_base_port);
+
 #endif  // CONFIG_ANDROID
 
     if (!realtime_init()) {
@@ -5574,6 +5580,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 1;
     }
 
+    if (balloon) {
+        boot_property_add("qemu.balloon_driver", "1");
+        android_qemu_meminfo_init();
+        qemu_android_emulation_start_balloon();
+    }
+
 #if SNAPSHOT_PROFILE > 1
     printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
 #endif
@@ -5581,6 +5593,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     if (androidSnapshot_quickbootLoad(loadvm)) {
         tryDefaultVmLoad = false;
     }
+
 #endif
     if (replay_mode != REPLAY_MODE_NONE) {
         replay_vmstate_init();
