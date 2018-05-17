@@ -323,6 +323,13 @@ void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr o
          (!(access & GL_MAP_INVALIDATE_RANGE_BIT) &&
           !(access & GL_MAP_INVALIDATE_BUFFER_BIT)))) {
         void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+
+        // map failed, no need to copy or unmap
+        if (!gpu_ptr) {
+            fprintf(stderr, "%s: error: could not map host gpu buffer\n", __func__);
+            return;
+        }
+
         memcpy(mapped, gpu_ptr, length);
         ctx->glUnmapBuffer(target);
     } else {
@@ -349,8 +356,14 @@ void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GL
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
     void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+
+    // map failed, no need to copy or unmap
+    if (!gpu_ptr) {
+        fprintf(stderr, "%s: error: could not map host gpu buffer\n", __func__);
+        return;
+    }
+
     memcpy(gpu_ptr, guest_buffer, length);
-    if (!gpu_ptr) fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
     // |offset| was the absolute offset into the mapping, so just flush offset 0.
     ctx->glFlushMappedBufferRange(target, 0, length);
     ctx->glUnmapBuffer(target);
