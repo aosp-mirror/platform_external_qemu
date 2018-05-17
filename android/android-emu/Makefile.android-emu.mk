@@ -330,6 +330,7 @@ LOCAL_SRC_FILES := \
     android/emulation/android_pipe_unix.cpp \
     android/emulation/android_pipe_zero.c \
     android/emulation/android_qemud.cpp \
+    android/emulation/BalloonDriverManager.cpp \
     android/emulation/bufprint_config_dirs.cpp \
     android/emulation/ClipboardPipe.cpp \
     android/emulation/ComponentVersion.cpp \
@@ -412,6 +413,7 @@ LOCAL_SRC_FILES := \
     android/metrics/SyncMetricsReporter.cpp \
     android/metrics/StudioConfig.cpp \
     android/metrics/TextMetricsWriter.cpp \
+    android/meminfo.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
     android/network/control.cpp \
