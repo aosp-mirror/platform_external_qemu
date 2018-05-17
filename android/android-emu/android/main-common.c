@@ -732,7 +732,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     /* -partition-size is used to specify the max size of both the system
      * and data partition sizes.
      */
-    uint64_t defaultPartitionSize = convertMBToBytes(200);
+    uint64_t defaultPartitionSize = convertMBToBytes(800);
 
     if (opts->partition_size) {
         char*  end;
