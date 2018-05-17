@@ -126,6 +126,10 @@ void GLESv2Context::initEmulatedBuffers() {
         // Create emulated client VBOs
         GLint neededClientVBOs = 0;
         dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &neededClientVBOs);
+
+        // Spec minimum: 16 attribs. Some drivers won't report the right values.
+        neededClientVBOs = std::max(neededClientVBOs, 16);
+
         m_emulatedClientVBOs.resize(neededClientVBOs, 0);
         dispatcher().glGenBuffers(neededClientVBOs, &m_emulatedClientVBOs[0]);
     }
@@ -584,7 +588,13 @@ void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
 
     GLuint prevArrayBuffer;
     s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);
-    s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, m_emulatedClientVBOs[arrayType]);
+
+    if (arrayType < m_emulatedClientVBOs.size()) {
+        s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, m_emulatedClientVBOs[arrayType]);
+    } else {
+        fprintf(stderr, "%s: invalid attribute index: %d\n", __func__, (int)arrayType);
+    }
+
     s_glDispatch.glBufferData(GL_ARRAY_BUFFER, datasize, arr, GL_STREAM_DRAW);
 
     if (isInt) {
