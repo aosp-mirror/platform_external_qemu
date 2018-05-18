@@ -3155,6 +3155,7 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     err = ctx->dispatcher().glGetError();
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
+        ctx->setGLerror(err);                                    \
     }
 }
 
