@@ -665,6 +665,9 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
     saveCollection(stream, m_eglImages, [](
             android::base::Stream* stream,
             const ImagesHndlMap::value_type& img) {
+
+        if (!img.second->globalTexObj->getGlobalName()) return;
+
         stream->putBe32(img.first);
         stream->putBe32(img.second->globalTexObj->getGlobalName());
         // We do not need to save other fields in EglImage. We can load them
