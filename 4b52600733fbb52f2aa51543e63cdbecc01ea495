@@ -22,6 +22,30 @@
       "revId": "4b52600733fbb52f2aa51543e63cdbecc01ea495",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "373d36b5_0b442890",
+        "filename": "android/android-emu/android/telephony/remote_call.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-05-21T17:38:17Z",
+      "side": 1,
+      "message": "True. I agree. I will clean up the code path. \n\nI also realize that once we fix this receiving SMS bug. We have another CTS failure in SmsManagerTest#testSmsBlocking.\nI looked up https://source.android.com/devices/tech/connect/block-numbers#validation\nand tried other blocking number related CTS, they all passed. I will keep looking into this new failure.",
+      "parentUuid": "2dc4c738_6d64c81f",
+      "range": {
+        "startLine": 78,
+        "startChar": 19,
+        "endLine": 78,
+        "endChar": 25
+      },
+      "revId": "4b52600733fbb52f2aa51543e63cdbecc01ea495",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
