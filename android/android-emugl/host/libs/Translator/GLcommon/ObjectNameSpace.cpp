@@ -52,6 +52,8 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
             // They are loaded by GlobalNameSpace before loading
             // share groups
             TextureData* texData = (TextureData*)data.get();
+            if (!texData->globalName) continue;
+
             SaveableTexturePtr saveableTexture =
                     globalNameSpace->getSaveableTextureFromLoad(
                         texData->globalName);
@@ -264,6 +266,9 @@ void NameSpace::setObjectData(ObjectLocalName p_localName,
 void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
     unsigned int globalName = eglImage->globalTexObj->getGlobalName();
     emugl::Mutex::AutoLock lock(m_lock);
+
+    if (!globalName) return;
+
     const auto& saveableTexIt = m_textureMap.find(globalName);
     if (saveableTexIt == m_textureMap.end()) {
         assert(eglImage->saveableTexture);
@@ -276,6 +281,9 @@ void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
 void GlobalNameSpace::preSaveAddTex(TextureData* texture) {
     emugl::Mutex::AutoLock lock(m_lock);
     const auto& saveableTexIt = m_textureMap.find(texture->globalName);
+
+    if (!texture->globalName) return;
+
     if (saveableTexIt == m_textureMap.end()) {
         assert(texture->getSaveableTexture());
         m_textureMap.emplace(texture->globalName,

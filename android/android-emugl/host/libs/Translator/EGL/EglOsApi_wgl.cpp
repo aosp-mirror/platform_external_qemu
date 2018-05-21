@@ -880,6 +880,8 @@ void pixelFormatToConfig(WinGlobals* globals,
     (*addConfigFunc)(addConfigOpaque, &info);
 }
 
+static android::base::StaticLock sGlobalLock;
+
 class WglDisplay : public EglOS::Display {
 public:
     WglDisplay(const WglExtensionsDispatch* dispatch,
@@ -968,6 +970,8 @@ public:
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
 
+        android::base::AutoLock lock(sGlobalLock);
+
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
         HDC dpy = mGlobals->getDummyDC(format);
         if (!dpy) {
@@ -999,6 +1003,7 @@ public:
     virtual EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
+        android::base::AutoLock lock(sGlobalLock);
         (void)info;
 
         bool needPrime = false;
@@ -1036,6 +1041,7 @@ public:
     }
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
+        android::base::AutoLock lock(sGlobalLock);
         if (!pb) return false;
 
         WinSurface* winpb = WinSurface::from(pb);
@@ -1056,6 +1062,7 @@ public:
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
                              EglOS::Context* context) {
+        android::base::AutoLock lock(sGlobalLock);
         HDC hdcRead = read ? WinSurface::from(read)->getDC() : NULL;
         HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
         HGLRC hdcContext = context ? WinContext::from(context) : 0;
@@ -1099,6 +1106,7 @@ public:
     }
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
+        android::base::AutoLock lock(sGlobalLock);
         if (srfc && !mDispatch->SwapBuffers(WinSurface::from(srfc)->getDC())) {
             GetLastError();
         }
