@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2dc4c738_6d64c81f",
+        "filename": "android/android-emu/android/telephony/remote_call.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-21T17:30:30Z",
+      "side": 1,
+      "message": "This is confusing: we check \"number\" but adjust \"temp\". May be we don\u0027t need two separate variables for this?",
+      "range": {
+        "startLine": 78,
+        "startChar": 19,
+        "endLine": 78,
+        "endChar": 25
+      },
+      "revId": "4b52600733fbb52f2aa51543e63cdbecc01ea495",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
