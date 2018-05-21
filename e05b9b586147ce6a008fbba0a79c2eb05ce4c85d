@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f32948a_3dd8b799",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1013,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-21T20:57:29Z",
+      "side": 1,
+      "message": "nit: I feel safer with an explicit check that we are not running in standalone mode here, rather than relying on the deleteInvalidsChoice !\u003d Auto contract.",
+      "range": {
+        "startLine": 1010,
+        "startChar": 0,
+        "endLine": 1013,
+        "endChar": 19
+      },
+      "revId": "e05b9b586147ce6a008fbba0a79c2eb05ce4c85d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
