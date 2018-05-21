@@ -12,6 +12,9 @@
 #      /tmp/qemu2-build \
 #      > external/qemu/android-qemu2-glue/build/Makefile.qemu2-sources.mk
 #
+from __future__ import print_function
+import argparse
+import logging
 import os
 import sys
 
@@ -52,12 +55,12 @@ IGNORED_OBJECTS = [
     ]
 
 CC_OBJECTS = [
-    'disas/arm-a64.o',
-    'disas/libvixl/vixl/a64/decoder-a64.o',
-    'disas/libvixl/vixl/a64/disasm-a64.o',
-    'disas/libvixl/vixl/a64/instructions-a64.o',
-    'disas/libvixl/vixl/compiler-intrinsics.o',
-    'disas/libvixl/vixl/utils.o',
+    '../disas/arm-a64.o',
+    '../disas/libvixl/vixl/a64/decoder-a64.o',
+    '../disas/libvixl/vixl/a64/disasm-a64.o',
+    '../disas/libvixl/vixl/a64/instructions-a64.o',
+    '../disas/libvixl/vixl/compiler-intrinsics.o',
+    '../disas/libvixl/vixl/utils.o',
     ]
 
 # objects which have to be moved to *TARGET files,
@@ -71,14 +74,14 @@ def find_target_lists(build_path, hosts):
        found under |build_path|. |hosts| is a set of hosts to probe for"""
     result = set()
     for host in hosts:
-        for subdir, dirs, files in os.walk(os.path.join(build_path,host)):
+        logging.info("find_target_lists: %s - %s", build_path, host)
+        for _, _, files in os.walk(os.path.join(build_path, host)):
             for efile in files:
                 if efile.startswith(LINK_QEMU_PREFIX):
                     arch = efile[len(LINK_QEMU_PREFIX):]
                     if arch[-5:] == 'w.exe':
                         arch = arch[:-5]
                     result.add(arch)
-            dirs = []
     return sorted(result)
 
 def find_link_map(build_path, host):
@@ -88,31 +91,32 @@ def find_link_map(build_path, host):
     result = {}
     build_path = os.path.join(build_path, host)
     link_prefix = 'LINK-qemu-system-'
-    for subdir, dirs, files in os.walk(build_path):
+    for subdir, _, files in os.walk(build_path):
         for efile in files:
             if efile.startswith(link_prefix):
                 target = efile[len(link_prefix):]
                 # Remove w.exe suffix for Windows binaries.
                 if target[-5:] == 'w.exe':
                     target = target[:-5]
+
                 result[target] = set()
                 with open(os.path.join(subdir,efile)) as lfile:
                     for line in lfile:
                         line = line.strip()
                         if line[-2:] in [ '.o', '.a' ]:
                             result[target].add(line)
-        dirs = []
     return result
 
-def list_files(name, files):
-    print "%s := \\" % name
+def list_files(name, files, output):
+  output.write("%s := \\\n" % name)
 
-    for f in sorted(source_list_from_objects(files)):
-        print "    %s \\" % f
-    print ""
+  for f in sorted(source_list_from_objects(files)):
+      output.write("    %s \\\n" % f)
+  output.write("\n")
 
 
 def source_list_from_objects(objects):
+    logging.info("source_list_from_objects: %s", objects)
     result = set()
     for obj in objects:
         if obj in IGNORED_OBJECTS:
@@ -132,28 +136,44 @@ def source_list_from_objects(objects):
         result.add(obj)
     return sorted(result)
 
-def main(args):
-    """\
-A small script used to generate the sub-Makefiles
-describing the common and target-specific sources
-for the QEMU2 build performed with the emulator's
-build system. This is done by looking at the output
-of a regular QEMU2 build, and finding which files
-were built and where.
+def main(argv):
+    parser = argparse.ArgumentParser(description=
+                                     'Generate the sub-Makefiles '
+                                     'describing the common and '
+                                     'target-specific sources for the QEMU2 '
+                                     'build performed with the emulator\'s '
+                                     'build system. This is done by looking at '
+                                     'the output of a regular QEMU2 build, and '
+                                     'finding which files were built and '
+                                     'where.')
 
-Usage: <program-name> <path-to-build-dir>
+    parser.add_argument('-i', '--input', dest='inputs', type=str, required=True,
+                        help='The input directory containing all the '
+                        'build binaries.')
+    parser.add_argument('-o', '--output', dest='output',
+                        help='the output file to write the resulting '
+                        'makefile to')
+    parser.add_argument('-v', '--verbose',
+                        action="store_const", dest="loglevel",
+                        const=logging.INFO,
+                        help="Be more verbose")
+    args = parser.parse_args()
 
-"""
-    if len(args) != 2:
-        print "ERROR: This script takes a single argument."
-        sys.exit(1)
-    build_dir = args[1]
+    if args.output is None:
+      output = sys.stdout
+    else:
+      output = open(args.output, 'w')
 
-    print "# Auto-generated by %s - DO NOT EDIT !!" % os.path.basename(args[0])
-    print ""
+    logging.basicConfig(level=args.loglevel)
+
+    build_dir = args.inputs
+
+    output.write("# Auto-generated by %s - DO NOT EDIT !!" %
+                 os.path.basename(argv[0]))
+    output.write("\n")
 
     target_list = find_target_lists(build_dir, EXPECTED_HOSTS)
-    #print "# Found targets: %s" % repr(target_list)
+    logging.info( "Found targets: %s", repr(target_list))
 
     host_link_map = {}
     for host in EXPECTED_HOSTS:
@@ -180,7 +200,7 @@ Usage: <program-name> <path-to-build-dir>
         for target in host_link_map[host]:
             common_objects &= host_link_map[host][target]
 
-    list_files('QEMU2_COMMON_SOURCES', common_objects)
+    list_files('QEMU2_COMMON_SOURCES', common_objects, output)
 
     # For each host, the specific common objects that are not shared with
     # all other hosts, but still shared by all targets.
@@ -189,7 +209,8 @@ Usage: <program-name> <path-to-build-dir>
         host_common_map[host] = common_all_objects - common_objects
         for target in host_link_map[host]:
             host_common_map[host] &= host_link_map[host][target]
-        list_files('QEMU2_COMMON_SOURCES_%s' % host, host_common_map[host])
+        list_files('QEMU2_COMMON_SOURCES_%s' % host, host_common_map[host],
+                   output)
 
     # The set of all target-specifc objects.
     all_target_objects = all_objects - common_objects
@@ -208,20 +229,23 @@ Usage: <program-name> <path-to-build-dir>
     for target in target_common_map:
         target_common_objects &= target_common_map[target]
 
-    list_files('QEMU2_TARGET_SOURCES', target_common_objects)
+    list_files('QEMU2_TARGET_SOURCES', target_common_objects, output)
 
     # For each target, find the files shared by all hosts, that only
     # belong to this target.
     for target in target_list:
         target_objects = target_common_map[target] - target_common_objects
-        list_files('QEMU2_TARGET_%s_SOURCES' % target, target_objects)
+        list_files('QEMU2_TARGET_%s_SOURCES' % target, target_objects, output)
 
     # Finally, the target- and host- specific objects.
     for target in target_list:
         for host in host_list:
-            objects = host_link_map[host][target] - target_common_map[target] - \
-                      target_common_objects - common_all_objects
-            list_files('QEMU2_TARGET_%s_SOURCES_%s' % (target, host), objects)
+            objects = (host_link_map[host][target] -
+                       target_common_map[target] -
+                       target_common_objects -
+                       common_all_objects)
+            list_files('QEMU2_TARGET_%s_SOURCES_%s' % (target, host),
+                       objects, output)
 
 if __name__ == "__main__":
     main(sys.argv)
