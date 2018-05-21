@@ -40,10 +40,10 @@ public:
     // efficient to signal the variable before unlocking mutex, while on others
     // (Windows) it's exactly the opposite. Functions implement the best way
     // for each platform and abstract it out from the user.
-    void signalAndUnlock(Lock* lock);
+    void signalAndUnlock(StaticLock* lock);
     void signalAndUnlock(AutoLock* lock);
 
-    void broadcastAndUnlock(Lock* lock);
+    void broadcastAndUnlock(StaticLock* lock);
     void broadcastAndUnlock(AutoLock* lock);
 
     void wait(AutoLock* userLock) {
@@ -70,7 +70,7 @@ public:
     //
 
     template <class Predicate>
-    void wait(Lock* lock, Predicate pred) {
+    void wait(StaticLock* lock, Predicate pred) {
         while (!pred()) {
             this->wait(lock);
         }
@@ -100,11 +100,11 @@ public:
     //
     //    if (!condition) { condVar.wait(&lock); }
     //
-    void wait(Lock* userLock) {
+    void wait(StaticLock* userLock) {
         ::SleepConditionVariableSRW(&mCond, &userLock->mLock, INFINITE, 0);
     }
 
-    bool timedWait(Lock *userLock, System::Duration waitUntilUs) {
+    bool timedWait(StaticLock *userLock, System::Duration waitUntilUs) {
         const auto now = System::get()->getUnixTimeUs();
         const auto timeout =
                 std::max<System::Duration>(0, waitUntilUs  - now) / 1000;
@@ -138,11 +138,11 @@ private:
         pthread_cond_destroy(&mCond);
     }
 
-    void wait(Lock* userLock) {
+    void wait(StaticLock* userLock) {
         pthread_cond_wait(&mCond, &userLock->mLock);
     }
 
-    bool timedWait(Lock* userLock, System::Duration waitUntilUs) {
+    bool timedWait(StaticLock* userLock, System::Duration waitUntilUs) {
         timespec abstime;
         abstime.tv_sec = waitUntilUs / 1000000LL;
         abstime.tv_nsec = (waitUntilUs % 1000000LL) * 1000;
@@ -166,7 +166,7 @@ private:
 };
 
 #ifdef _WIN32
-inline void ConditionVariable::signalAndUnlock(Lock* lock) {
+inline void ConditionVariable::signalAndUnlock(StaticLock* lock) {
     lock->unlock();
     signal();
 }
@@ -175,7 +175,7 @@ inline void ConditionVariable::signalAndUnlock(AutoLock* lock) {
     signal();
 }
 
-inline void ConditionVariable::broadcastAndUnlock(Lock* lock) {
+inline void ConditionVariable::broadcastAndUnlock(StaticLock* lock) {
     lock->unlock();
     broadcast();
 }
@@ -184,7 +184,7 @@ inline void ConditionVariable::broadcastAndUnlock(AutoLock* lock) {
     broadcast();
 }
 #else  // !_WIN32
-inline void ConditionVariable::signalAndUnlock(Lock* lock) {
+inline void ConditionVariable::signalAndUnlock(StaticLock* lock) {
     signal();
     lock->unlock();
 }
@@ -192,7 +192,7 @@ inline void ConditionVariable::signalAndUnlock(AutoLock* lock) {
     signal();
     lock->unlock();
 }
-inline void ConditionVariable::broadcastAndUnlock(Lock* lock) {
+inline void ConditionVariable::broadcastAndUnlock(StaticLock* lock) {
     broadcast();
     lock->unlock();
 }

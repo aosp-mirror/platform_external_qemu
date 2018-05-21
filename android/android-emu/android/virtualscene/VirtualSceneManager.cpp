@@ -42,7 +42,7 @@ static constexpr const char* kPosterFile = "Toren1BD.posters";
 namespace android {
 namespace virtualscene {
 
-LazyInstance<Lock> VirtualSceneManager::mLock = LAZY_INSTANCE_INIT;
+StaticLock VirtualSceneManager::mLock;
 VirtualSceneManagerImpl* VirtualSceneManager::mImpl = nullptr;
 
 // Stores settings for the virtual scene.
@@ -248,7 +248,7 @@ void VirtualSceneManagerImpl::loadPosterInternal(
  ******************************************************************************/
 
 void VirtualSceneManager::parseCmdline() {
-    AutoLock lock(mLock.get());
+    AutoLock lock(mLock);
     if (sSettings.hasInstance()) {
         E("VirtualSceneManager settings already loaded");
         return;
@@ -275,7 +275,7 @@ void VirtualSceneManager::parseCmdline() {
 bool VirtualSceneManager::initialize(const GLESv2Dispatch* gles2,
                                      int width,
                                      int height) {
-    AutoLock lock(mLock.get());
+    AutoLock lock(mLock);
     if (mImpl) {
         E("VirtualSceneManager already initialized");
         return false;
@@ -286,7 +286,7 @@ bool VirtualSceneManager::initialize(const GLESv2Dispatch* gles2,
 }
 
 void VirtualSceneManager::uninitialize() {
-    AutoLock lock(mLock.get());
+    AutoLock lock(mLock);
     if (!mImpl) {
         E("VirtualSceneManager not initialized");
         return;
@@ -299,7 +299,7 @@ void VirtualSceneManager::uninitialize() {
 }
 
 int64_t VirtualSceneManager::render() {
-    AutoLock lock(mLock.get());
+    AutoLock lock(mLock);
     if (!mImpl) {
         E("VirtualSceneManager not initialized");
         return 0L;
@@ -310,7 +310,7 @@ int64_t VirtualSceneManager::render() {
 
 void VirtualSceneManager::setInitialPoster(const char* posterName,
                                            const char* filename) {
-    AutoLock lock(mLock.get());
+    AutoLock lock(mLock);
     sSettings->setInitialPoster(posterName, filename);
 
     // If the scene is active, it will update the poster in the next render()
@@ -322,7 +322,7 @@ void VirtualSceneManager::setInitialPoster(const char* posterName,
 
 bool VirtualSceneManager::loadPoster(const char* posterName,
                                      const char* filename) {
-    AutoLock lock(mLock.get());
+    AutoLock lock(mLock);
     sSettings->setPoster(posterName, filename);
 
     // If the scene is active, it will update the poster in the next render()
@@ -336,7 +336,7 @@ bool VirtualSceneManager::loadPoster(const char* posterName,
 
 void VirtualSceneManager::enumeratePosters(void* context,
                                            EnumeratePostersCallback callback) {
-    AutoLock lock(mLock.get());
+    AutoLock lock(mLock);
 
     const auto& settings = sSettings->getPosterSettings();
     for (const auto& location : sSettings->getPosterLocations()) {
@@ -358,7 +358,7 @@ void VirtualSceneManager::enumeratePosters(void* context,
 }
 
 void VirtualSceneManager::setPosterScale(const char* posterName, float scale) {
-    AutoLock lock(mLock.get());
+    AutoLock lock(mLock);
     sSettings->setPosterScale(posterName, scale);
 
     // Updating the poster scale can be done on any thread, update it now.
