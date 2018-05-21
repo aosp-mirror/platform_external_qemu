@@ -23,5 +23,6 @@ EGLBoolean eglDestroyContext(EGLDisplay display, EGLContext context);
 EGLBoolean eglMakeCurrent(EGLDisplay display, EGLSurface draw, EGLSurface read, EGLContext context);
 EGLContext eglGetCurrentContext(void);
 EGLSurface eglGetCurrentSurface(EGLint readdraw);
+EGLBoolean eglQuerySurface(EGLDisplay display, EGLSurface surface, EGLint attribute, EGLint *value);
 EGLBoolean eglSwapBuffers(EGLDisplay display, EGLSurface surface);
 void* eglGetProcAddress(const char* function_name);
