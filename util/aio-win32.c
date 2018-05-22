@@ -56,10 +56,6 @@ void aio_set_fd_handler(AioContext *ctx,
 
     /* Are we deleting the fd handler? */
     if (!io_read && !io_write) {
-        assert(!node->io_notify);
-        /* Detach the event */
-        WSAEventSelect(node->pfd.fd, NULL, 0);
-
         if (node) {
             /* If aio_poll is in progress, just mark the node as deleted */
             if (qemu_lockcnt_count(&ctx->list_lock)) {
@@ -102,8 +98,8 @@ void aio_set_fd_handler(AioContext *ctx,
 
         event = event_notifier_get_handle(&ctx->notifier);
         WSAEventSelect(node->pfd.fd, event,
-                       (io_read ? FD_READ : 0) | FD_ACCEPT | FD_CLOSE |
-                       FD_CONNECT | (io_write ? FD_WRITE : 0) | FD_OOB);
+                       FD_READ | FD_ACCEPT | FD_CLOSE |
+                       FD_CONNECT | FD_WRITE | FD_OOB);
     }
 
     qemu_lockcnt_unlock(&ctx->list_lock);
@@ -198,7 +194,7 @@ bool aio_prepare(AioContext *ctx)
             break;
         }
 
-        if (node->deleted || (!node->io_read && !node->io_write)) {
+        if (!node->io_read && !node->io_write) {
             fds[i].fd = -1; // ignore
         } else {
             fds[i].fd = node->pfd.fd;
@@ -318,10 +314,9 @@ static bool aio_dispatch_handlers(AioContext *ctx, HANDLE event)
             }
 
             /* if the next select() will return an event, we have progressed */
-            if (event == event_notifier_get_handle(&ctx->notifier) ||
-                (event == INVALID_HANDLE_VALUE && node->e == &ctx->notifier)) {
+            if (event == event_notifier_get_handle(&ctx->notifier)) {
                 WSANETWORKEVENTS ev;
-                WSAEnumNetworkEvents(node->pfd.fd, event_notifier_get_handle(&ctx->notifier), &ev);
+                WSAEnumNetworkEvents(node->pfd.fd, event, &ev);
                 if (ev.lNetworkEvents) {
                     progress = true;
                 }
