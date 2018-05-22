@@ -22,6 +22,30 @@
       "revId": "e05b9b586147ce6a008fbba0a79c2eb05ce4c85d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "971847d0_021146b6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1013,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-05-22T21:40:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6f32948a_3dd8b799",
+      "range": {
+        "startLine": 1010,
+        "startChar": 0,
+        "endLine": 1013,
+        "endChar": 19
+      },
+      "revId": "e05b9b586147ce6a008fbba0a79c2eb05ce4c85d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
