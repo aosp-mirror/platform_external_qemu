@@ -973,6 +973,26 @@ for QT_ARCH in $PREBUILT_ARCHS; do
         fi
         install_prebuilt_dll "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
     done
+
+    # Copy the libexec, resources, and translations directories for QtWebEngine
+    QEMU_INSTALL_DIR=$OUT_DIR/qemu/$HOST_OS-$BUILD_ARCH
+    mkdir -p $QEMU_INSTALL_DIR
+    cp -rf "$QT_SRCDIR/libexec" "$QT_DSTDIR"
+    cp -rf "$QT_SRCDIR/resources" "$QT_DSTDIR"
+    cp -rf "$QT_SRCDIR/translations" "$QT_DSTDIR"
+
+    # For QtWebEngine to find the resources
+    ln -fs "../../../$QT_DSTDIR/translations/qtwebengine_locales" "$QEMU_INSTALL_DIR/qtwebengine_locales"
+
+    QT_LIBEXECS=$(ls "$QT_DSTDIR/libexec")
+    for QT_LIBEXEC in $QT_LIBEXECS; do
+        ln -fs "../../../$QT_DSTDIR/libexec/$QT_LIBEXEC" "$QEMU_INSTALL_DIR/$QT_LIBEXEC"
+    done
+
+    QT_RESOURCES=$(ls "$QT_DSTDIR/resources")
+    for QT_RESOURCE in $QT_RESOURCES; do
+        ln -fs "../../../$QT_DSTDIR/resources/$QT_RESOURCE" "$QEMU_INSTALL_DIR/$QT_RESOURCE"
+    done
 done
 
 # Copy e2fsprogs binaries.
