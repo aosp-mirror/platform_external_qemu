@@ -55,10 +55,10 @@ package_builder_parse_package_list
 ###
 ###  Download the source tarball if needed.
 ###
-QT_SRC_NAME=qt-everywhere-opensource-src-5.7.0
+QT_SRC_NAME=qt-everywhere-src-5.11.0
 QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
-QT_SRC_URL=http://download.qt.io/archive/qt/5.7/5.7.0/single/$QT_SRC_PACKAGE
-QT_SRC_PACKAGE_SHA1=bfc3d07ffba27d96cf070f74148f34a668646a19
+QT_SRC_URL=http://download.qt.io/archive/qt/5.11/5.11.0/single/$QT_SRC_PACKAGE
+QT_SRC_PACKAGE_SHA1=0e69374a1b0b008e9c294b2f4aa5d337e628a183
 
 QT_SRC_PATCH_FOLDER=${QT_SRC_NAME}-patches
 QT_ARCHIVE_DIR=$(builder_archive_dir)
@@ -255,8 +255,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
                     -sdk macosx
-                var_append CFLAGS -mmacosx-version-min=10.8
-                var_append LDFLAGS -mmacosx-version-min=10.8
+                var_append CFLAGS -mmacosx-version-min=10.11
+                var_append LDFLAGS -mmacosx-version-min=10.11
                 var_append LDFLAGS -lc++
                 ;;
         esac
@@ -282,7 +282,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         ) || panic "Could not configure Qt build!"
 
         # Build everything now.
-        QT_MODULES="qtbase qtsvg qtimageformats"
+        QT_MODULES="qtbase qtsvg qtimageformats qtwebengine"
         QT_TARGET_BUILD_MODULES=
         QT_TARGET_INSTALL_MODULES=
         for QT_MODULE in $QT_MODULES; do
@@ -366,6 +366,29 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 "$INSTALL_DIR"/common/include.new
 
         (cd "$INSTALL_DIR/$SYSTEM" && rm -f include && ln -sf ../common/include include)
+
+        # Copy over the libexec, resources and translations folder for QtWebEngine
+        copy_directory \
+                "$(builder_install_prefix)"/libexec \
+                "$INSTALL_DIR/$SYSTEM"/libexec.new
+        directory_atomic_update \
+                "$INSTALL_DIR/$SYSTEM"/libexec \
+                "$INSTALL_DIR/$SYSTEM"/libexec.new
+
+        copy_directory \
+                "$(builder_install_prefix)"/resources \
+                "$INSTALL_DIR/$SYSTEM"/resources.new
+        directory_atomic_update \
+                "$INSTALL_DIR/$SYSTEM"/resources \
+                "$INSTALL_DIR/$SYSTEM"/resources.new
+
+        copy_directory \
+                "$(builder_install_prefix)"/translations \
+                "$INSTALL_DIR/$SYSTEM"/translations.new
+        directory_atomic_update \
+                "$INSTALL_DIR/$SYSTEM"/translations \
+                "$INSTALL_DIR/$SYSTEM"/translations.new
+
 
         # Move qconfig.h into its platform-specific directory now
         run mkdir -p "$INSTALL_DIR/$SYSTEM"/include.system/QtCore/
