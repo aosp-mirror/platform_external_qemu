@@ -377,6 +377,9 @@ static bool sHasAttachmentWithFormat(const GLESv2Context* ctx,
     for (auto attachment : attachments) {
         GLenum target;
         GLuint name = fbData->getAttachment(attachment, &target, NULL);
+
+        if (!name) continue;
+
         if (target == GL_RENDERBUFFER) {
             auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::RENDERBUFFER, name);
