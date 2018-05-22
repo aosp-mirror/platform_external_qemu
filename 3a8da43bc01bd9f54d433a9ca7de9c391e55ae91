@@ -22,6 +22,30 @@
       "revId": "3a8da43bc01bd9f54d433a9ca7de9c391e55ae91",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d0cefbd_eb703241",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 669,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-22T02:06:07Z",
+      "side": 1,
+      "message": "ok, then we\u0027ll just take this out then",
+      "parentUuid": "953aacfb_3349a702",
+      "range": {
+        "startLine": 669,
+        "startChar": 8,
+        "endLine": 669,
+        "endChar": 63
+      },
+      "revId": "3a8da43bc01bd9f54d433a9ca7de9c391e55ae91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
