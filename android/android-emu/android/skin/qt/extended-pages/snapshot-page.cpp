@@ -29,6 +29,7 @@
 
 #include "android/skin/qt/stylesheet.h"
 
+#include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QGraphicsPixmapItem>
@@ -48,6 +49,8 @@ using android::metrics::MetricsReporter;
 using android::snapshot::Quickboot;
 using Ui::Settings::SaveSnapshotOnExit;
 using Ui::Settings::SaveSnapshotOnExitUiOrder;
+using Ui::Settings::DeleteInvalidSnapshots;
+using Ui::Settings::DeleteInvalidSnapshotsUiOrder;
 
 using namespace android::base;
 using namespace android::snapshot;
@@ -56,6 +59,8 @@ namespace pb = android_studio;
 
 static const char CURRENT_SNAPSHOT_ICON_NAME[] = "current_snapshot";
 static const char CURRENT_SNAPSHOT_SELECTED_ICON_NAME[] = "current_snapshot_selected";
+static const char INVALID_SNAPSHOT_ICON_NAME[] = "invalid_snapshot";
+static const char INVALID_SNAPSHOT_SELECTED_ICON_NAME[] = "invalid_snapshot_selected";
 
 static SaveSnapshotOnExit getSaveOnExitChoice();
 
@@ -71,11 +76,13 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         WidgetSnapshotItem(const QString&   fileName,
                            const QString&   logicalName,
                            const QDateTime& dateTime,
-                                 bool       isValid) :
+                                 bool       isValid,
+                                 bool       isTheParent) :
             QTreeWidgetItem((QTreeWidget*)0),
             mFileName(fileName),
             mDateTime(dateTime),
-            mIsValid(isValid)
+            mIsValid(isValid),
+            mIsTheParent(isTheParent)
         {
             setText(COLUMN_NAME, logicalName);
         }
@@ -123,12 +130,16 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         bool isValid() const {
             return mIsValid;
         }
+        bool isTheParent() const {
+            return mIsTheParent;
+        }
 
     private:
         QString   mFileName;
         QString   mParentName;
         QDateTime mDateTime;
-        bool      mIsValid;
+        bool      mIsValid = true;
+        bool      mIsTheParent = false;
 };
 
 SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
@@ -189,6 +200,20 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     // Enable SAVE NOW if we won't overwrite the state on exit
     mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
 
+    QSettings settings;
+    DeleteInvalidSnapshots deleteInvalids = static_cast<DeleteInvalidSnapshots>
+                                            (settings.value(Ui::Settings::DELETE_INVALID_SNAPSHOTS,
+                                                            static_cast<int>(DeleteInvalidSnapshots::Ask))
+                                                      .toInt());
+    DeleteInvalidSnapshotsUiOrder deleteInvalidsUiIdx;
+    switch (deleteInvalids) {
+        default:
+        case DeleteInvalidSnapshots::Ask:  deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::Ask;  break;
+        case DeleteInvalidSnapshots::Auto: deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::Auto; break;
+        case DeleteInvalidSnapshots::No:   deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::No;   break;
+    }
+    mUi->deleteInvalidSnapshots->setCurrentIndex(static_cast<int>(deleteInvalidsUiIdx));
+
     if (mIsStandAlone) {
         QRect widgetGeometry = frameGeometry();
         setFixedHeight(widgetGeometry.height() + 36); // Allow for the title bar
@@ -196,7 +221,9 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
         setStyleSheet(Ui::stylesheetForTheme(getSelectedTheme()));
         setWindowTitle(tr("Manage snapshots"));
         mUi->loadSnapshot->setVisible(false);
+        mUi->deleteSnapshot->setVisible(false); // Cannot delete without QEMU active
         mUi->takeSnapshotButton->setText(tr("CHOOSE SNAPSHOT"));
+        mUi->tabWidget->removeTab(1); // Do not show the Settings tab
 
         getOutputFileName();
     }
@@ -207,6 +234,11 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
                      this, SLOT(slot_snapshotLoadCompleted(int, QString)));
     QObject::connect(this, SIGNAL(saveCompleted(int, QString)),
                      this, SLOT(slot_snapshotSaveCompleted(int, QString)));
+    // Queue the "ask" signal so the pop-up doesn't appear until the
+    // base window has been populated and raised.
+    QObject::connect(this, SIGNAL(askAboutInvalidSnapshots(QStringList)),
+                     this, SLOT(slot_askAboutInvalidSnapshots(QStringList)),
+                     Qt::QueuedConnection);
 }
 
 void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
@@ -484,6 +516,27 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
     }
 }
 
+void SnapshotPage::on_deleteInvalidSnapshots_currentIndexChanged(int uiIndex) {
+    DeleteInvalidSnapshots preferenceValue;
+    switch(static_cast<DeleteInvalidSnapshotsUiOrder>(uiIndex)) {
+        case DeleteInvalidSnapshotsUiOrder::No:
+            preferenceValue = DeleteInvalidSnapshots::No;
+            break;
+        default:
+        case DeleteInvalidSnapshotsUiOrder::Ask:
+            preferenceValue = DeleteInvalidSnapshots::Ask;
+            break;
+        case DeleteInvalidSnapshotsUiOrder::Auto:
+            preferenceValue = DeleteInvalidSnapshots::Auto;
+            break;
+    }
+    QSettings settings;
+    settings.setValue(Ui::Settings::DELETE_INVALID_SNAPSHOTS, static_cast<int>(preferenceValue));
+    // Re-enable our check, so we act on this new setting
+    // when the user goes back to look at the list
+    mDidInitialInvalidCheck = false;
+}
+
 void SnapshotPage::on_tabWidget_currentChanged(int index) {
     // The previous tab may have changed how this tab
     // should look. Refresh the snapshot list to be safe.
@@ -647,13 +700,15 @@ void SnapshotPage::adjustIcons(QTreeWidget* theDisplayList) {
     QTreeWidgetItemIterator iter(theDisplayList);
     for ( ; *iter; iter++) {
         WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iter);
-        if (item->icon(COLUMN_ICON).isNull()) continue;
-        if (item->isSelected()) {
-            item->setIcon(COLUMN_ICON, getIconForCurrentTheme(CURRENT_SNAPSHOT_SELECTED_ICON_NAME));
-        } else {
-            item->setIcon(COLUMN_ICON, getIconForCurrentTheme(CURRENT_SNAPSHOT_ICON_NAME));
-
+        QIcon decoration;
+        if (!item->isValid()) {
+            decoration = item->isSelected() ? getIconForCurrentTheme(INVALID_SNAPSHOT_SELECTED_ICON_NAME)
+                                            : getIconForCurrentTheme(INVALID_SNAPSHOT_ICON_NAME);
+        } else if (item->isTheParent()) {
+            decoration = item->isSelected() ? getIconForCurrentTheme(CURRENT_SNAPSHOT_SELECTED_ICON_NAME)
+                                            : getIconForCurrentTheme(CURRENT_SNAPSHOT_ICON_NAME);
         }
+        item->setIcon(COLUMN_ICON, decoration);
     }
 }
 
@@ -662,7 +717,7 @@ void SnapshotPage::showPreviewImage(const QString& snapshotName, SelectionStatus
     static const QString invalidSnapText =
             tr("<div style=\"text-align:center\">"
                "<p style=\"color:red\"><big>Invalid snapshot</big></p>"
-               "<p style=\"color:%1\"><big>Delete this snapshot to free memory</big></p>"
+               "<p style=\"color:%1\"><big>Delete this snapshot to free disk space</big></p>"
                "</div>");
     static const QString noImageText =
             tr("<div style=\"text-align:center\">"
@@ -808,10 +863,24 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 
     std::string snapshotPath = getSnapshotBaseDir();
 
+    QSettings settings;
+    DeleteInvalidSnapshots deleteInvalidsChoice;
+    if (mIsStandAlone || mDidInitialInvalidCheck) {
+        // Don't auto-delete or ask in stand-alone mode.
+        // Don't auto-delete or ask more than once.
+        deleteInvalidsChoice = DeleteInvalidSnapshots::No;
+    } else {
+        deleteInvalidsChoice = static_cast<DeleteInvalidSnapshots>
+                                    (settings.value(Ui::Settings::DELETE_INVALID_SNAPSHOTS,
+                                                    static_cast<int>(DeleteInvalidSnapshots::Ask))
+                                             .toInt());
+    }
+
     // Find all the directories in the snapshot directory
     QDir snapshotDir(snapshotPath.c_str());
     snapshotDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList snapshotList(snapshotDir.entryList());
+    QStringList invalidSnapshotNames;
 
     // Look at all the directories and make a WidgetSnapshotItem for each one
     int nItems = 0;
@@ -828,7 +897,10 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
                 false /* don't write out the error code to protobuf; we just want
                          to check validity here */));
 
-        // Nuke the invalid snapshots.
+        if (!snapshotIsValid && deleteInvalidsChoice != DeleteInvalidSnapshots::No) {
+            invalidSnapshotNames.append(fileName);
+        }
+        // Decimate the invalid snapshots
         if (!snapshotIsValid && !mIsStandAlone) {
             android::base::ThreadLooper::runOnMainLooper([fileName, this] {
                 androidSnapshot_invalidate(fileName.toStdString().c_str());
@@ -857,8 +929,11 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
             displayWidget = mUi->snapshotDisplay;
         }
 
+        bool snapshotIsTheParent = (fileName == androidSnapshot_loadedSnapshotFile());
+
         WidgetSnapshotItem* thisItem =
-                new WidgetSnapshotItem(fileName, logicalName, snapshotDate, snapshotIsValid);
+                new WidgetSnapshotItem(fileName, logicalName, snapshotDate,
+                                       snapshotIsValid, snapshotIsTheParent);
 
         displayWidget->addTopLevelItem(thisItem);
 
@@ -867,13 +942,13 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
             italic.setPointSize(italic.pointSize() + 1);
             italic.setItalic(true);
             thisItem->setFont(COLUMN_NAME, italic);
-        } else if (fileName == androidSnapshot_loadedSnapshotFile()) {
+            thisItem->setForeground(COLUMN_NAME, QBrush(Qt::gray));
+        } else if (snapshotIsTheParent) {
             // This snapshot was used to start the AVD
             QFont bigBold = thisItem->font(COLUMN_NAME);
             bigBold.setPointSize(bigBold.pointSize() + 2);
             bigBold.setBold(true);
             thisItem->setFont(COLUMN_NAME, bigBold);
-            thisItem->setIcon(COLUMN_ICON, getIconForCurrentTheme("current_snapshot"));
             displayWidget->setCurrentItem(thisItem);
             anItemIsSelected = true;
         } else {
@@ -925,6 +1000,27 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     mUi->snapshotDisplay->header()->resizeSection(COLUMN_ICON, 36);
     mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME, QHeaderView::Stretch);
     mUi->snapshotDisplay->setSortingEnabled(true);
+
+    adjustIcons(mUi->defaultSnapshotDisplay);
+    adjustIcons(mUi->snapshotDisplay);
+
+    if (!mIsStandAlone && !mDidInitialInvalidCheck && !invalidSnapshotNames.isEmpty()) {
+        if (deleteInvalidsChoice == DeleteInvalidSnapshots::Auto) {
+            // Delete the invalid snapshots
+            for (int idx = 0; idx < invalidSnapshotNames.size(); idx++) {
+                QString fileName = invalidSnapshotNames.at(idx);
+                android::base::ThreadLooper::runOnMainLooper([fileName, this] {
+                    androidSnapshot_delete(fileName.toStdString().c_str());
+                    emit(deleteCompleted());
+                });
+            }
+        } else if (deleteInvalidsChoice == DeleteInvalidSnapshots::Ask) {
+            // Emit a signal to ask the user. (After the UI actually displays
+            // all the information we just loaded.)
+            emit askAboutInvalidSnapshots(invalidSnapshotNames);
+        }
+    }
+    mDidInitialInvalidCheck = true;
 }
 
 // TODO: jameskaye@ Enable this code if we decide to provide a hierarchical display.
@@ -1069,6 +1165,59 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //     mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME, QHeaderView::Stretch);
 //     mUi->snapshotDisplay->setSortingEnabled(true);
 // }
+
+
+void SnapshotPage::slot_askAboutInvalidSnapshots(QStringList names) {
+    if (names.size() <= 0) {
+        return;
+    }
+    // Let's see how much disk these occupy
+    System::FileSize totalOccupation = 0;
+
+    for (int idx = 0; idx < names.size(); idx++) {
+        System::FileSize snapSize = android::snapshot::folderSize(names.at(idx).toStdString());
+        totalOccupation += snapSize;
+    }
+    QString questionString;
+    if (names.size() == 1) {
+        questionString = tr("You have one invalid snapshot occupying %1 "
+                            "disk space. Do you want to permanently delete it?")
+                           .arg(formattedSize(totalOccupation));
+    } else {
+        questionString = tr("You have %1 invalid snapshots occupying %2 "
+                            "disk space. Do you want to permanently delete them?")
+                           .arg(QString::number(names.size()),
+                                formattedSize(totalOccupation));
+    }
+
+    QMessageBox msgBox(QMessageBox::Question,
+                       tr("Delete invalid snapshots?"),
+                       questionString,
+                       (QMessageBox::Yes | QMessageBox::Cancel),
+                       this);
+    QCheckBox* goAuto = new QCheckBox(tr("Delete automatically from now on"));
+    msgBox.setCheckBox(goAuto);
+
+    int selection = msgBox.exec();
+
+    if (selection == QMessageBox::Yes) {
+        if (goAuto->isChecked()) {
+            QSettings settings;
+            settings.setValue(Ui::Settings::DELETE_INVALID_SNAPSHOTS,
+                              static_cast<int>(DeleteInvalidSnapshots::Auto));
+            mUi->deleteInvalidSnapshots->setCurrentIndex(
+                    static_cast<int>(DeleteInvalidSnapshotsUiOrder::Auto));
+        }
+        // Delete the invalid snapshots
+        for (int idx = 0; idx < names.size(); idx++) {
+            QString fileName = names.at(idx);
+            android::base::ThreadLooper::runOnMainLooper([fileName, this] {
+                androidSnapshot_delete(fileName.toStdString().c_str());
+                emit(deleteCompleted());
+            });
+        }
+    }
+}
 
 void SnapshotPage::disableActions() {
     // Disable all the action pushbuttons

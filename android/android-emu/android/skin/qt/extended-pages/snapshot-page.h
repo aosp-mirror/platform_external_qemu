@@ -31,23 +31,26 @@ public slots:
     void slot_snapshotLoadCompleted(int status, const QString& name);
     void slot_snapshotSaveCompleted(int status, const QString& name);
     void slot_snapshotDeleteCompleted();
+    void slot_askAboutInvalidSnapshots(QStringList names);
 
 signals:
     void loadCompleted(int status, const QString& name);
     void saveCompleted(int status, const QString& name);
     void deleteCompleted();
+    void askAboutInvalidSnapshots(QStringList names);
 
 private slots:
     void on_defaultSnapshotDisplay_itemSelectionChanged();
-    void on_snapshotDisplay_itemSelectionChanged();
+    void on_deleteInvalidSnapshots_currentIndexChanged(int index);
     void on_deleteSnapshot_clicked();
-    void on_enlargeInfoButton_clicked();
     void on_editSnapshot_clicked();
-    void on_loadSnapshot_clicked();
+    void on_enlargeInfoButton_clicked();
     void on_loadQuickBootNowButton_clicked();
+    void on_loadSnapshot_clicked();
     void on_reduceInfoButton_clicked();
     void on_saveQuickBootNowButton_clicked();
     void on_saveQuickBootOnExit_currentIndexChanged(int index);
+    void on_snapshotDisplay_itemSelectionChanged();
     void on_tabWidget_currentChanged(int index);
     void on_takeSnapshotButton_clicked();
 
@@ -96,6 +99,7 @@ private:
     bool mAllowDelete = false;
     bool mMadeSelection = false;
     bool mInfoWindowIsBig = false;
+    bool mDidInitialInvalidCheck = false;
 
     qreal mSmallInfoRegionSize = 0.0; // The size that fits in the small snashot-info region
 
