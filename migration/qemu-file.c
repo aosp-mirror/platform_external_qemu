@@ -26,11 +26,17 @@
 #include "qemu-common.h"
 #include "qemu/error-report.h"
 #include "qemu/iov.h"
+<<<<<<< HEAD   (a654dc Merge "Fix SMS PDU Internal format handling" into emu-master)
 #include "qemu/sockets.h"
 #include "qemu/coroutine.h"
 #include "migration/migration.h"
 #include "migration/qemu-file.h"
 #include "migration/trace.h"
+=======
+#include "migration.h"
+#include "qemu-file.h"
+#include "trace.h"
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 
 #define IO_BUF_SIZE (1024 * 1024)
 #define MAX_IOV_SIZE MIN(IOV_MAX, 64)
