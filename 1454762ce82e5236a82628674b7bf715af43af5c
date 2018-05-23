@@ -46,6 +46,30 @@
       "revId": "1454762ce82e5236a82628674b7bf715af43af5c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf530cfa_cb338fb3",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-05-23T21:12:10Z",
+      "side": 1,
+      "message": "weird. Leave a comment here and dig more into it later?",
+      "parentUuid": "acbe6c34_6f8b13dd",
+      "range": {
+        "startLine": 1042,
+        "startChar": 12,
+        "endLine": 1042,
+        "endChar": 41
+      },
+      "revId": "1454762ce82e5236a82628674b7bf715af43af5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
