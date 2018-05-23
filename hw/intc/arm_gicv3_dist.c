@@ -11,7 +11,7 @@
 
 #include "qemu/osdep.h"
 #include "qemu/log.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
 #include "gicv3_internal.h"
 
 /* The GICD_NSACR registers contain a two bit field for each interrupt which

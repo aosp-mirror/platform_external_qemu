@@ -16,7 +16,7 @@
  */
 
 #include "qemu/osdep.h"
-#include "hw/net/trace.h"
+#include "trace.h"
 #include "net_rx_pkt.h"
 #include "net/checksum.h"
 #include "net/tap.h"

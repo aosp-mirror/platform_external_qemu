@@ -22,11 +22,12 @@
 #include "qemu/queue.h"
 #include "ui/console.h"
 #include "sysemu/sysemu.h"
-#include "ui/trace.h"
+#include "trace.h"
 
 #include "ui/spice-display.h"
 
 static int debug = 0;
+bool spice_opengl;
 
 static void GCC_FMT_ATTR(2, 3) dprint(int level, const char *fmt, ...)
 {
@@ -1013,7 +1014,7 @@ static void qemu_spice_display_init_one(QemuConsole *con)
 
     ssd->dcl.ops = &display_listener_ops;
 #ifdef HAVE_SPICE_GL
-    if (display_opengl) {
+    if (spice_opengl) {
         ssd->dcl.ops = &display_listener_gl_ops;
         ssd->gl_unblock_bh = qemu_bh_new(qemu_spice_gl_unblock_bh, ssd);
         ssd->gl_unblock_timer = timer_new_ms(QEMU_CLOCK_REALTIME,

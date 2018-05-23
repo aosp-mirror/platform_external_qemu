@@ -33,7 +33,7 @@
 #include "qapi/error.h"
 #include "hw/hw.h"
 #include "hw/pci/pci.h"
-#include "hw/i386/xen/trace.h"
+#include "trace.h"
 
 #define TYPE_XEN_PV_DEVICE  "xen-pvdevice"
 

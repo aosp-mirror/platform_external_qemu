@@ -47,7 +47,7 @@
 #include "sysemu/kvm.h"
 #include "sysemu/qtest.h"
 #include "exec/address-spaces.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 #include "elf.h"
 #include "qemu/cutils.h"
 #include "kvm_ppc.h"
@@ -780,9 +780,6 @@ static void ibm_40p_init(MachineState *machine)
     cmos_checksum = 0x6aa9;
     qbus_walk_children(BUS(isa_bus), prep_set_cmos_checksum, NULL, NULL, NULL,
                        &cmos_checksum);
-
-    /* initialize audio subsystem */
-    audio_init();
 
     /* add some more devices */
     if (defaults_enabled()) {

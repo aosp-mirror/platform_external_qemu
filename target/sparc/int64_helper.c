@@ -22,7 +22,7 @@
 #include "cpu.h"
 #include "exec/helper-proto.h"
 #include "exec/log.h"
-#include "target/sparc/trace.h"
+#include "trace.h"
 
 #define DEBUG_PCALL
 
