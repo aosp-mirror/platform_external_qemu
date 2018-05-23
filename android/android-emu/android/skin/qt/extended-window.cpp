@@ -38,17 +38,16 @@ ExtendedWindow::ExtendedWindow(
     mSizeTweaker(this),
     mSidebarButtons(this)
 {
-    // "Tool" type windows live in another layer on top of everything in OSX, which is undesirable
-    // because it means the extended window must be on top of the emulator window. However, on
-    // Windows and Linux, "Tool" type windows are the only way to make a window that does not have
-    // its own taskbar item.
-#ifdef __APPLE__
-    Qt::WindowFlags flag = Qt::Dialog;
+#ifdef __linux__
+    // On Linux, a Dialog does not show a Close button and a
+    // Tool has a Close button that shows a dot rather than
+    // an X. So we use a SubWindow.
+    setWindowFlags(Qt::SubWindow | Qt::WindowCloseButtonHint);
 #else
-    Qt::WindowFlags flag = Qt::Tool;
+    // On Windows, a SubWindow does not show a Close button.
+    // A Dialog works for Windows and Mac
+    setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
 #endif
-
-    setWindowFlags(flag | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
 
     QSettings settings;
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
