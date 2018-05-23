@@ -27,7 +27,7 @@
 #include "hw/pci/pci.h"
 #include "hw/nvram/eeprom93xx.h"
 #include "hw/scsi/esp.h"
-#include "hw/scsi/trace.h"
+#include "trace.h"
 #include "qapi/error.h"
 #include "qemu/log.h"
 

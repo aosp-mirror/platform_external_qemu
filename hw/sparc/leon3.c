@@ -28,13 +28,12 @@
 #include "hw/hw.h"
 #include "qemu/timer.h"
 #include "hw/ptimer.h"
-#include "sysemu/char.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/qtest.h"
 #include "hw/boards.h"
 #include "hw/loader.h"
 #include "elf.h"
-#include "hw/sparc/trace.h"
+#include "trace.h"
 #include "exec/address-spaces.h"
 
 #include "hw/sparc/grlib.h"
@@ -161,7 +160,6 @@ static void leon3_generic_hw_init(MachineState *machine)
     /* Allocate BIOS */
     prom_size = 8 * 1024 * 1024; /* 8Mb */
     memory_region_init_ram(prom, NULL, "Leon3.bios", prom_size, &error_fatal);
-    vmstate_register_ram_global(prom);
     memory_region_set_readonly(prom, true);
     memory_region_add_subregion(address_space_mem, 0x00000000, prom);
 

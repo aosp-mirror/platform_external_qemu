@@ -42,7 +42,7 @@
 #include "qemu/sockets.h"
 #include "hw/sparc/sun4m.h"
 #include "pcnet.h"
-#include "hw/net/trace.h"
+#include "trace.h"
 #include "sysemu/sysemu.h"
 
 #define TYPE_LANCE "lance"
@@ -165,7 +165,7 @@ static void lance_class_init(ObjectClass *klass, void *data)
     dc->vmsd = &vmstate_lance;
     dc->props = lance_properties;
     /* Reason: pointer property "dma" */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo lance_info = {

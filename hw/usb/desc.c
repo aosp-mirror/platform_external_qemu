@@ -2,7 +2,7 @@
 
 #include "hw/usb.h"
 #include "hw/usb/desc.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 
 /* ------------------------------------------------------------------ */
 

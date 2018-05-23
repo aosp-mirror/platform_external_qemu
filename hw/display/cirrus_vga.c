@@ -28,7 +28,7 @@
  */
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "hw/display/trace.h"
+#include "trace.h"
 #include "hw/hw.h"
 #include "hw/pci/pci.h"
 #include "ui/console.h"

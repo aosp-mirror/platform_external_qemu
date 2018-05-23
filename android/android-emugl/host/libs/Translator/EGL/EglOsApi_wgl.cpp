@@ -543,12 +543,16 @@ private:
     const WglExtensionsDispatch* m_dispatch = nullptr;
 };
 
+
+static android::base::Lock sGlobalContextLock;
+
 class WinContext : public EglOS::Context {
 public:
     explicit WinContext(const WglExtensionsDispatch* dispatch, HGLRC ctx) :
         mDispatch(dispatch), mCtx(ctx) {}
 
     ~WinContext() {
+        android::base::AutoLock lock(sGlobalContextLock);
         if (!mDispatch->wglDeleteContext(mCtx)) {
             fprintf(stderr, "error deleting WGL context! error 0x%x\n",
                     (unsigned)GetLastError());
@@ -880,8 +884,6 @@ void pixelFormatToConfig(WinGlobals* globals,
     (*addConfigFunc)(addConfigOpaque, &info);
 }
 
-static android::base::StaticLock sGlobalLock;
-
 class WglDisplay : public EglOS::Display {
 public:
     WglDisplay(const WglExtensionsDispatch* dispatch,
@@ -970,8 +972,6 @@ public:
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
 
-        android::base::AutoLock lock(sGlobalLock);
-
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
         HDC dpy = mGlobals->getDummyDC(format);
         if (!dpy) {
@@ -1003,7 +1003,6 @@ public:
     virtual EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
-        android::base::AutoLock lock(sGlobalLock);
         (void)info;
 
         bool needPrime = false;
@@ -1041,7 +1040,6 @@ public:
     }
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
-        android::base::AutoLock lock(sGlobalLock);
         if (!pb) return false;
 
         WinSurface* winpb = WinSurface::from(pb);
@@ -1062,7 +1060,8 @@ public:
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
                              EglOS::Context* context) {
-        android::base::AutoLock lock(sGlobalLock);
+        android::base::AutoLock lock(sGlobalContextLock);
+
         HDC hdcRead = read ? WinSurface::from(read)->getDC() : NULL;
         HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
         HGLRC hdcContext = context ? WinContext::from(context) : 0;
@@ -1087,11 +1086,21 @@ public:
             //
 
             int count = 100;
-            while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)
-                   && --count > 0
-                   && !GetLastError()) {
-                Sleep(16);
+
+            if (dispatch->wglMakeContextCurrentARB) {
+                while (!dispatch->wglMakeContextCurrentARB(hdcDraw, hdcRead, hdcContext)
+                       && --count > 0
+                       && !GetLastError()) {
+                    Sleep(16);
+                }
+            } else {
+                while (!dispatch->wglMakeCurrent(hdcDraw, hdcContext)
+                       && --count > 0
+                       && !GetLastError()) {
+                    Sleep(16);
+                }
             }
+
             if (count <= 0) {
                 D("Error: wglMakeCurrent() failed, error %d\n", (int)GetLastError());
                 return false;
@@ -1106,7 +1115,6 @@ public:
     }
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
-        android::base::AutoLock lock(sGlobalLock);
         if (srfc && !mDispatch->SwapBuffers(WinSurface::from(srfc)->getDC())) {
             GetLastError();
         }
@@ -1177,8 +1185,6 @@ private:
     std::unordered_map<const EglOS::PixelFormat*, std::unordered_set<EglOS::Surface* > > mLivePbufs;
     static constexpr int kPbufPrimingCount = 8;
 };
-
-constexpr int WglDisplay::kPbufPrimingCount;
 
 class WglLibrary : public GlLibrary {
 public:

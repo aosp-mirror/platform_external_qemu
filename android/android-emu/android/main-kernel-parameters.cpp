@@ -32,9 +32,6 @@ using android::base::StringFormat;
 static const char kSysfsAndroidDtDir[] =
         "/sys/bus/platform/devices/ANDR0001:00/properties/android/";
 
-// Note: defined in platform/system/vold/model/Disk.cpp
-static const unsigned int kMajorBlockLoop = 7;
-
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    int apiLevel,
@@ -44,7 +41,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
                                    mem_map ramoops,
-                                   const int vm_heapSize,
                                    bool isQemu2,
                                    bool isCros) {
     android::ParameterList params;
@@ -182,11 +178,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         }
     }
 
-    // Enable partitions on loop devices.
-    // This is used by the new "virtual disk" feature used by vold to help
-    // debug and test storage code on devices without physical media.
-    params.addFormat("loop.max_part=%u", kMajorBlockLoop);
-
     if (avdKernelParameters && avdKernelParameters[0]) {
         params.add(avdKernelParameters);
     }
@@ -197,12 +188,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
       params.addFormat("ramoops.mem_address=0x%" PRIx64, ramoops.start);
       params.addFormat("ramoops.mem_size=0x%" PRIx64, ramoops.size);
       params.addFormat("memmap=0x%" PRIx64 "$0x%" PRIx64,  ramoops.size, ramoops.start);
-    }
-
-    if (vm_heapSize > 0) {
-        char  temp[64];
-        snprintf(temp, sizeof(temp), "%dm", vm_heapSize);
-        params.addFormat("qemu.dalvik.vm.heapsize=%s", temp);
     }
 
     // User entered parameters are space separated. Passing false here to prevent

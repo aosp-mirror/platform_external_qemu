@@ -29,6 +29,8 @@
 #include "qapi/error.h"
 #include "hw/sysbus.h"
 #include "hw/pci/msi.h"
+// TODO(jansene): We need to figure out why we need this define:
+#define CONFIG_KVM_IS_POSSIBLE
 #include "sysemu/kvm.h"
 #include "qemu/log.h"
 

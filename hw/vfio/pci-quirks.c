@@ -16,7 +16,7 @@
 #include "qapi/error.h"
 #include "hw/nvram/fw_cfg.h"
 #include "pci.h"
-#include "hw/vfio/trace.h"
+#include "trace.h"
 
 /* Use uin32_t for vendor & device so PCI_ANY_ID expands and cannot match hw */
 static bool vfio_pci_is(VFIOPCIDevice *vdev, uint32_t vendor, uint32_t device)

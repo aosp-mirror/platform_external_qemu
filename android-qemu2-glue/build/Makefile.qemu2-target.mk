@@ -52,6 +52,7 @@ QEMU2_SYSTEM_INCLUDES := \
     $(LOCAL_PATH)/tcg \
     $(LOCAL_PATH)/tcg/i386 \
 
+
 QEMU2_SYSTEM_LDFLAGS := $(QEMU2_DEPS_LDFLAGS)
 
 QEMU2_SYSTEM_LDLIBS := \
@@ -71,6 +72,9 @@ QEMU2_SYSTEM_STATIC_LIBRARIES := \
 
 
 $(call start-emulator-library,libqemu2-system-$(QEMU2_TARGET_SYSTEM))
+
+LOCAL_GENERATED_SOURCES += \
+	$(QEMU2_AUTO_GENERATED_DIR)/target/$(QEMU2_TARGET_TARGET)/generated-helpers.c \
 
 LOCAL_CFLAGS += \
     $(QEMU2_SYSTEM_CFLAGS) \
@@ -118,12 +122,12 @@ LOCAL_SRC_FILES += \
         hax-stub.c \
     ) \
     $(call qemu2-if-target,x86 x86_64, \
-        $(call qemu2-if-os, linux darwin, whpx-stub.c), \
-        whpx-stub.c \
-    ) \
-    $(call qemu2-if-target,x86 x86_64, \
         $(call qemu2-if-os, linux windows, hvf-stub.c), \
         hvf-stub.c \
+    ) \
+    #$(call qemu2-if-target,x86 x86_64, \
+        $(call qemu2-if-os, linux darwin, whpx-stub.c), \
+        whpx-stub.c \
     ) \
 
 
