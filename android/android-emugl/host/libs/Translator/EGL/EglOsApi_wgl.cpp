@@ -511,12 +511,17 @@ public:
         return res;
     }
 
-    void refreshDC() {
+    bool refreshDC() {
         if (!m_dcReleased) releaseDC();
         if (m_dispatch->wglGetPbufferDCARB) {
             m_hdc = m_dispatch->wglGetPbufferDCARB(m_pb);
         }
+
+        if (!m_hdc) return false;
+
         m_dcReleased = false;
+
+        return true;
     }
 
     ~WinSurface() {
@@ -1032,7 +1037,13 @@ public:
 
         PROFILE_SLOW("createPbufferSurface (fast path)");
         EglOS::Surface* surf = freeElts.back();
-        WinSurface::from(surf)->refreshDC();
+        WinSurface* winSurface = WinSurface::from(surf);
+        if (!winSurface->refreshDC()) {
+            // TODO: Figure out why some Intel GPUs can hang flakily if
+            // we just destroy the pbuffer here.
+            mDeletePbufs.push_back(surf);
+            surf = createPbufferSurfaceImpl(pixelFormat);
+        }
         freeElts.pop_back();
 
         mLivePbufs[pixelFormat].insert(surf);
@@ -1055,6 +1066,14 @@ public:
         frees.push_back(pb);
 
         mLivePbufs[pixelFormat].erase(pb);
+
+        for (auto surf : mDeletePbufs) {
+            WinSurface* winSurface = WinSurface::from(surf);
+            mDispatch->wglDestroyPbufferARB(winSurface->getPbuffer());
+            delete winSurface;
+        }
+
+        mDeletePbufs.clear();
 
         return true;
     }
@@ -1175,6 +1194,7 @@ private:
 
     std::unordered_map<const EglOS::PixelFormat*, std::vector<EglOS::Surface* > > mFreePbufs;
     std::unordered_map<const EglOS::PixelFormat*, std::unordered_set<EglOS::Surface* > > mLivePbufs;
+    std::vector<EglOS::Surface*> mDeletePbufs;
     static constexpr int kPbufPrimingCount = 8;
 };
 
