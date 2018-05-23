@@ -377,9 +377,6 @@ static bool sHasAttachmentWithFormat(const GLESv2Context* ctx,
     for (auto attachment : attachments) {
         GLenum target;
         GLuint name = fbData->getAttachment(attachment, &target, NULL);
-
-        if (!name) continue;
-
         if (target == GL_RENDERBUFFER) {
             auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::RENDERBUFFER, name);
@@ -3158,7 +3155,6 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     err = ctx->dispatcher().glGetError();
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
-        ctx->setGLerror(err);                                    \
     }
 }
 

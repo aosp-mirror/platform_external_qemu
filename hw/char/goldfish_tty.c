@@ -17,7 +17,7 @@
 #include "exec/memory.h"
 #include "exec/ram_addr.h"
 #include "migration/qemu-file.h"
-#include "sysemu/char.h"
+#include "chardev/char-fe.h"
 #include "hw/hw.h"
 #include "exec/address-spaces.h"
 #include "hw/sysbus.h"
@@ -246,7 +246,7 @@ static void goldfish_tty_realize(DeviceState *dev, Error **errp)
 
         qemu_chr_fe_init(&s->chr_be, s->cs, &error_abort);
         qemu_chr_fe_set_handlers(s->cs->be, tty_can_receive,
-                                 tty_receive, NULL, s, NULL, false);
+                                 tty_receive, NULL, NULL, s, NULL, false);
     }
 
     instance_id++;

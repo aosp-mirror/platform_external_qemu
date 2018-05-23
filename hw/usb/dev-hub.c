@@ -24,7 +24,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu-common.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 #include "hw/usb.h"
 #include "hw/usb/desc.h"
 #include "qemu/error-report.h"
@@ -208,6 +208,7 @@ static void usb_hub_wakeup(USBPort *port1)
     USBHubPort *port = &s->ports[port1->index];
 
     if (port->wPortStatus & PORT_STAT_SUSPEND) {
+        port->wPortStatus &= ~PORT_STAT_SUSPEND;
         port->wPortChange |= PORT_STAT_C_SUSPEND;
         usb_wakeup(s->intr, 0);
     }
@@ -401,7 +402,20 @@ static void usb_hub_handle_control(USBDevice *dev, USBPacket *p,
                 port->wPortChange &= ~PORT_STAT_C_ENABLE;
                 break;
             case PORT_SUSPEND:
-                port->wPortStatus &= ~PORT_STAT_SUSPEND;
+                if (port->wPortStatus & PORT_STAT_SUSPEND) {
+                    port->wPortStatus &= ~PORT_STAT_SUSPEND;
+
+                    /*
+                     * USB Spec rev2.0 11.24.2.7.2.3 C_PORT_SUSPEND
+                     * "This bit is set on the following transitions:
+                     *  - On transition from the Resuming state to the
+                     *    SendEOP [sic] state"
+                     *
+                     * Note that this includes both remote wake-up and
+                     * explicit ClearPortFeature(PORT_SUSPEND).
+                     */
+                    port->wPortChange |= PORT_STAT_C_SUSPEND;
+                }
                 break;
             case PORT_C_SUSPEND:
                 port->wPortChange &= ~PORT_STAT_C_SUSPEND;

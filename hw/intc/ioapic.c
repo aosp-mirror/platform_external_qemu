@@ -33,7 +33,7 @@
 #include "target/i386/cpu.h"
 #include "hw/i386/apic-msidef.h"
 #include "hw/i386/x86-iommu.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
 
 //#define DEBUG_IOAPIC
 

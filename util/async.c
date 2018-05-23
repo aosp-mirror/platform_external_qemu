@@ -32,7 +32,7 @@
 #include "qemu/atomic.h"
 #include "block/raw-aio.h"
 #include "qemu/coroutine_int.h"
-#include "util/trace.h"
+#include "trace.h"
 
 /***********************************************************/
 /* bottom halves (can be seen as timers which expire ASAP) */

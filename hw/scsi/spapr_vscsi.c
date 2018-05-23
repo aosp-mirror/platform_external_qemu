@@ -42,7 +42,7 @@
 #include "hw/ppc/spapr.h"
 #include "hw/ppc/spapr_vio.h"
 #include "viosrp.h"
-#include "hw/scsi/trace.h"
+#include "trace.h"
 
 #include <libfdt.h>
 

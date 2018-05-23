@@ -2587,6 +2587,18 @@ void tcg_gen_goto_tb(unsigned idx)
     tcg_gen_op1i(INDEX_op_goto_tb, idx);
 }
 
+void tcg_gen_lookup_and_goto_ptr(TCGv addr)
+{
+    if (TCG_TARGET_HAS_goto_ptr && !qemu_loglevel_mask(CPU_LOG_TB_NOCHAIN)) {
+        TCGv_ptr ptr = tcg_temp_new_ptr();
+        gen_helper_lookup_tb_ptr(ptr, tcg_ctx.tcg_env, addr);
+        tcg_gen_op1i(INDEX_op_goto_ptr, GET_TCGV_PTR(ptr));
+        tcg_temp_free_ptr(ptr);
+    } else {
+        tcg_gen_exit_tb(0);
+    }
+}
+
 static inline TCGMemOp tcg_canonicalize_memop(TCGMemOp op, bool is64, bool st)
 {
     /* Trigger the asserts within as early as possible.  */
@@ -2653,16 +2665,18 @@ static void gen_ldst_i64(TCGOpcode opc, TCGv_i64 val, TCGv addr,
 void tcg_gen_qemu_ld_i32(TCGv_i32 val, TCGv addr, TCGArg idx, TCGMemOp memop)
 {
     memop = tcg_canonicalize_memop(memop, 0, 0);
-    trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env,
-                               addr, trace_mem_get_info(memop, 0));
+    // TODO(jansene): We need proper tracer migration from qemu build
+    /* trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env, */
+    /*                            addr, trace_mem_get_info(memop, 0)); */
     gen_ldst_i32(INDEX_op_qemu_ld_i32, val, addr, memop, idx);
 }
 
 void tcg_gen_qemu_st_i32(TCGv_i32 val, TCGv addr, TCGArg idx, TCGMemOp memop)
 {
     memop = tcg_canonicalize_memop(memop, 0, 1);
-    trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env,
-                               addr, trace_mem_get_info(memop, 1));
+    // TODO(jansene): We need proper tracer migration from qemu build
+    /* trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env, */
+    /*                            addr, trace_mem_get_info(memop, 1)); */
     gen_ldst_i32(INDEX_op_qemu_st_i32, val, addr, memop, idx);
 }
 
@@ -2679,8 +2693,9 @@ void tcg_gen_qemu_ld_i64(TCGv_i64 val, TCGv addr, TCGArg idx, TCGMemOp memop)
     }
 
     memop = tcg_canonicalize_memop(memop, 1, 0);
-    trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env,
-                               addr, trace_mem_get_info(memop, 0));
+    // TODO(jansene): We need proper tracer migration from qemu build
+    /* trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env, */
+    /*                            addr, trace_mem_get_info(memop, 0)); */
     gen_ldst_i64(INDEX_op_qemu_ld_i64, val, addr, memop, idx);
 }
 
@@ -2692,8 +2707,8 @@ void tcg_gen_qemu_st_i64(TCGv_i64 val, TCGv addr, TCGArg idx, TCGMemOp memop)
     }
 
     memop = tcg_canonicalize_memop(memop, 1, 1);
-    trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env,
-                               addr, trace_mem_get_info(memop, 1));
+    /* trace_guest_mem_before_tcg(tcg_ctx.cpu, tcg_ctx.tcg_env, */
+    /*                            addr, trace_mem_get_info(memop, 1)); */
     gen_ldst_i64(INDEX_op_qemu_st_i64, val, addr, memop, idx);
 }
 

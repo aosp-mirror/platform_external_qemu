@@ -184,7 +184,6 @@ LOCAL_GENERATED_SOURCES += \
 	$(QEMU2_AUTO_GENERATED_DIR)/io/trace.c \
 	$(QEMU2_AUTO_GENERATED_DIR)/migration/trace.c \
 	$(QEMU2_AUTO_GENERATED_DIR)/block/trace.c \
-	$(QEMU2_AUTO_GENERATED_DIR)/backends/trace.c \
 	$(QEMU2_AUTO_GENERATED_DIR)/hw/block/trace.c \
 	$(QEMU2_AUTO_GENERATED_DIR)/hw/block/dataplane/trace.c \
 	$(QEMU2_AUTO_GENERATED_DIR)/hw/char/trace.c \
@@ -225,7 +224,6 @@ LOCAL_GENERATED_SOURCES += \
 	$(QEMU2_AUTO_GENERATED_DIR)/target/s390x/trace.c \
 	$(QEMU2_AUTO_GENERATED_DIR)/target/ppc/trace.c \
 	$(QEMU2_AUTO_GENERATED_DIR)/qom/trace.c \
-	# $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers.c \
 
 # Stuff from libqemuutil, order follows util/Makefile.objs
 LOCAL_SRC_FILES += \
@@ -247,8 +245,6 @@ LOCAL_SRC_FILES += \
     qobject/json-streamer.c \
     qobject/qbool.c \
     qobject/qdict.c \
-    qobject/qfloat.c \
-    qobject/qint.c \
     qobject/qjson.c \
     qobject/qlist.c \
     qobject/qnull.c \
