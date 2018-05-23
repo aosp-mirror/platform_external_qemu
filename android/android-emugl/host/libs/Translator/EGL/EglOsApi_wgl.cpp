@@ -511,12 +511,17 @@ public:
         return res;
     }
 
-    void refreshDC() {
+    bool refreshDC() {
         if (!m_dcReleased) releaseDC();
         if (m_dispatch->wglGetPbufferDCARB) {
             m_hdc = m_dispatch->wglGetPbufferDCARB(m_pb);
         }
+
+        if (!m_hdc) return false;
+
         m_dcReleased = false;
+
+        return true;
     }
 
     ~WinSurface() {
@@ -1032,7 +1037,12 @@ public:
 
         PROFILE_SLOW("createPbufferSurface (fast path)");
         EglOS::Surface* surf = freeElts.back();
-        WinSurface::from(surf)->refreshDC();
+        WinSurface* winSurface = WinSurface::from(surf);
+        if (!winSurface->refreshDC()) {
+            mDispatch->wglDestroyPbufferARB(winSurface->getPbuffer());
+            delete winSurface;
+            surf = createPbufferSurfaceImpl(pixelFormat);
+        }
         freeElts.pop_back();
 
         mLivePbufs[pixelFormat].insert(surf);
