@@ -1854,7 +1854,7 @@ void FrameBuffer::onSave(Stream* stream,
         pair.second.cb->onSave(s);
         s->putBe32(pair.second.refcount);
         s->putByte(pair.second.opened);
-        s->putBe32(std::max<System::Duration>(0, pair.second.closedTs - now));
+        s->putBe32(std::max<System::Duration>(0, now - pair.second.closedTs));
     });
     stream->putBe32(m_lastPostedColorBuffer);
     saveCollection(stream, m_windows,
@@ -1963,8 +1963,8 @@ bool FrameBuffer::onLoad(Stream* stream,
         const HandleType handle = cb->getHndl();
         const unsigned refCount = stream->getBe32();
         const bool opened = stream->getByte();
-        const System::Duration closedTs = now + stream->getBe32();
-        if (!opened && refCount == 0) {
+        const System::Duration closedTs = now - stream->getBe32();
+        if (refCount == 0) {
             m_colorBufferDelayedCloseList.push_back({closedTs, handle});
         }
         return { handle, { std::move(cb), refCount, opened, closedTs } };
