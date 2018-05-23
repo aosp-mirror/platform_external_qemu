@@ -74,6 +74,7 @@ public:
     }
 
     void onGuestClose(PipeCloseReason reason) override {
+        printf("onGuestClose %d\n", (int)m_uniqueId);
         android_cleanupProcGLObjects(m_uniqueId);
     }
 

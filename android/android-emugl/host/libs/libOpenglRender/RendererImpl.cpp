@@ -177,6 +177,7 @@ void RendererImpl::cleanupRenderThreads() {
 
 void RendererImpl::waitForProcessCleanup() {
     mCleanupThread->waitForCleanup();
+    printf("cleanup done\n");
     // Recreate it to make sure we've started from scratch and that we've
     // finished all in-progress cleanups as well.
     mCleanupThread.reset(new ProcessCleanupThread());
