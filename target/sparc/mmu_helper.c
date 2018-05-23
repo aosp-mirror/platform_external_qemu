@@ -20,7 +20,7 @@
 #include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/exec-all.h"
-#include "target/sparc/trace.h"
+#include "trace.h"
 #include "exec/address-spaces.h"
 
 /* Sparc MMU emulation */

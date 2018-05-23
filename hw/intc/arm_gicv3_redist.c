@@ -11,7 +11,7 @@
 
 #include "qemu/osdep.h"
 #include "qemu/log.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
 #include "gicv3_internal.h"
 
 static uint32_t mask_group(GICv3CPUState *cs, MemTxAttrs attrs)

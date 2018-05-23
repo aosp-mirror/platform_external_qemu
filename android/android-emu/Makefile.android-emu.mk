@@ -466,7 +466,7 @@ LOCAL_SRC_FILES := \
     android/snapshot/Quickboot.cpp \
     android/snapshot/RamLoader.cpp \
     android/snapshot/RamSaver.cpp \
-    android/snapshot/RamSnapshotTesting.cpp \
+	android/snapshot/RamSnapshotTesting.cpp \
     android/snapshot/Saver.cpp \
     android/snapshot/Snapshot.cpp \
     android/snapshot/Snapshotter.cpp \
@@ -542,7 +542,6 @@ LOCAL_COPY_COMMON_PREBUILT_RESOURCES += \
     virtualscene/Toren1BD/poster.png \
 
 LOCAL_COPY_COMMON_TESTDATA += \
-    snapshots/random-ram-100.bin \
     textureutils/gray_alpha_golden.bmp \
     textureutils/gray_alpha.png \
     textureutils/gray_golden.bmp \
@@ -779,7 +778,7 @@ LOCAL_SRC_FILES := \
   android/proxy/ProxyUtils_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
-  android/snapshot/RamLoader_unittest.cpp \
+  android/snapshot/RamLoader_unittest.cppa \
   android/snapshot/RamSaver_unittest.cpp \
   android/snapshot/RamSnapshot_unittest.cpp \
   android/telephony/gsm_unittest.cpp \

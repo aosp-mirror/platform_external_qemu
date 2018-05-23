@@ -30,7 +30,7 @@
 
 #include "hw/sparc/grlib.h"
 
-#include "hw/intc/trace.h"
+#include "trace.h"
 #include "qapi/error.h"
 
 #define IRQMP_MAX_CPU 16
@@ -360,7 +360,7 @@ static void grlib_irqmp_class_init(ObjectClass *klass, void *data)
     dc->reset = grlib_irqmp_reset;
     dc->props = grlib_irqmp_properties;
     /* Reason: pointer properties "set_pil_in", "set_pil_in_opaque" */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
     dc->realize = grlib_irqmp_realize;
 }
 
