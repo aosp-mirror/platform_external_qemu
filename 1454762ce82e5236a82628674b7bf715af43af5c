@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "31371c1d_aec3c718",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-05-23T20:54:25Z",
+      "side": 1,
+      "message": "why not just delete them right here?",
+      "range": {
+        "startLine": 1042,
+        "startChar": 12,
+        "endLine": 1042,
+        "endChar": 41
+      },
+      "revId": "1454762ce82e5236a82628674b7bf715af43af5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
