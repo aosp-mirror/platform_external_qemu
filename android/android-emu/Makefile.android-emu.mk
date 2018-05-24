@@ -746,6 +746,7 @@ LOCAL_SRC_FILES := \
   android/emulation/control/ScreenCapturer_unittest.cpp \
   android/emulation/control/LineConsumer_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
+  android/emulation/Hypervisor_unittest.cpp \
   android/emulation/ParameterList_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
   android/emulation/SetupParameters_unittest.cpp \
