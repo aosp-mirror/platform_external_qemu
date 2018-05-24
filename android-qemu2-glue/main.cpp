@@ -70,6 +70,7 @@ extern "C" {
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/dtb.h"
 #include "android/ui-emu-agent.h"
 
 #ifdef TARGET_AARCH64
@@ -1112,6 +1113,35 @@ extern "C" int main(int argc, char** argv) {
                        avd_dir, avd_dir, avd_dir);
     }
 
+    if (hw->kernel_dtb_enable) {
+        std::string dtbFileName;
+        if (path_exists(hw->kernel_dtb_path)) {
+          dtbFileName = hw->kernel_dtb_path;
+        } else {
+            ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
+            if (userdata_dir) {
+                dtbFileName = PathUtils::join(userdata_dir.get(), "default.dtb");
+
+                ::dtb::Params params;
+                params.vendor_device_location =
+                    StringFormat(
+                        "/dev/block/pci/pci0000:00/0000:00:%02d.0/by-name/vendor",
+                        (fc::isEnabled(fc::EncryptUserData) ? 7 : 6));
+
+                exitStatus = createDtbFile(params, dtbFileName);
+
+                if (exitStatus) {
+                    return exitStatus;
+                }
+            } else {
+                derror("path_dirname failed for '%s'",
+                    hw->disk_dataPartition_path);
+                return 1;
+            }
+        }
+        args.add({"-dtb", dtbFileName});
+    }
+
     // Network
     args.add("-netdev");
     if (opts->net_tap) {
@@ -1311,7 +1341,7 @@ extern "C" int main(int argc, char** argv) {
                 hw->kernel_parameters, rendererConfig.glesMode,
                 rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
-                true /* isQemu2 */, hw->hw_arc));
+                true /* isQemu2 */, hw->hw_arc, hw->kernel_dtb_enable));
 
         if (!kernel_parameters.get()) {
             return 1;
