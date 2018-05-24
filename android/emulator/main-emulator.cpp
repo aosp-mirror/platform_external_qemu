@@ -171,7 +171,9 @@ static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
         "system.img.qcow2", "vendor.img.qcow2", "userdata-qemu.img",
         "userdata-qemu.img.qcow2", "userdata.img", "userdata.img.qcow2", "cache.img",
         "cache.img.qcow2", "version_num.cache", "sdcard.img.qcow2", "encryptionkey.img",
-        "encryptionkey.img.qcow2", "hardware-qemu.ini", "emulator-user.ini"};
+        "encryptionkey.img.qcow2", "hardware-qemu.ini", "emulator-user.ini",
+        "default.dtb"
+    };
     delete_files(avd_folder, files_to_delete, ARRAY_SIZE(files_to_delete));
 }
 
