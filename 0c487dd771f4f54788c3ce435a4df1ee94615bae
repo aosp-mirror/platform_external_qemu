@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "aca3f8be_ff71a5b3",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-05-24T22:39:22Z",
+      "side": 1,
+      "message": "okay. Good to know. I was having some question on that line actually.",
+      "parentUuid": "0218f7ba_6fbf70af",
+      "range": {
+        "startLine": 323,
+        "startChar": 7,
+        "endLine": 325,
+        "endChar": 37
+      },
+      "revId": "0c487dd771f4f54788c3ce435a4df1ee94615bae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a850554b_a62f51ec",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-05-24T22:34:22Z",
       "side": 1,
       "message": "is this intended? It feels to me that we should error-quit, but not crash",
+      "range": {
+        "startLine": 951,
+        "startChar": 0,
+        "endLine": 951,
+        "endChar": 67
+      },
+      "revId": "0c487dd771f4f54788c3ce435a4df1ee94615bae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a3ac9fdb_60efeba5",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 951,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-05-24T22:39:22Z",
+      "side": 1,
+      "message": "I think this is intended. I think to submit a crash report would help us figure out what corner cases make_ext4fs doesn\u0027t handle well.",
+      "parentUuid": "a850554b_a62f51ec",
       "range": {
         "startLine": 951,
         "startChar": 0,
