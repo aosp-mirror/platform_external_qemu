@@ -70,6 +70,7 @@ extern "C" {
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/dtb.h"
 #include "android/ui-emu-agent.h"
 
 #ifdef TARGET_AARCH64
@@ -113,6 +114,9 @@ enum ImageType {
 
 const int kMaxPartitions = IMAGE_TYPE_MAX;
 const int kMaxTargetQemuParams = 16;
+
+const int kVendorUnencryptedPartitionId = 6;
+const int kVendorEncryptedPartitionId = 7;
 
 /*
  * A structure used to model information about a given target CPU architecture.
@@ -1110,6 +1114,28 @@ extern "C" int main(int argc, char** argv) {
                        "userdata-qemu.img.qcow2|"
                        "%s" PATH_SEP "vendor.img.qcow2",
                        avd_dir, avd_dir, avd_dir);
+    }
+
+    if (fc::isEnabled(fc::KernelDeviceTreeBlobSupport)) {
+        ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
+        assert(userdata_dir);
+
+        const std::string dtbFileName =
+            PathUtils::join(userdata_dir.get(), "default.dtb");
+
+        ::dtb::Params params;
+        params.vendor_device_location =
+            StringFormat(
+                "/dev/block/pci/pci0000:00/0000:00:%02d.0/by-name/vendor",
+                (fc::isEnabled(fc::EncryptUserData) ?
+                    kVendorEncryptedPartitionId : kVendorUnencryptedPartitionId));
+
+        exitStatus = createDtbFile(params, dtbFileName);
+
+        if (exitStatus) {
+            return exitStatus;
+        }
+        args.add({"-dtb", dtbFileName});
     }
 
     // Network
