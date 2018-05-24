@@ -117,6 +117,30 @@
       "revId": "0c487dd771f4f54788c3ce435a4df1ee94615bae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "165616bb_f9e0b5ff",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 951,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-05-24T22:59:59Z",
+      "side": 1,
+      "message": "I think in this case where userdata.img cannot be creaed ( I believe this CL can only affect API-P because other system images do have userdata.img). \nI think we can print errors and still crash the emulator so that we can know how often this occurs.\nIf we don\u0027t crash the emulator here and just quit the program. It is probably just the same unstable.",
+      "parentUuid": "b8aade84_33e98ac5",
+      "range": {
+        "startLine": 951,
+        "startChar": 0,
+        "endLine": 951,
+        "endChar": 67
+      },
+      "revId": "0c487dd771f4f54788c3ce435a4df1ee94615bae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
