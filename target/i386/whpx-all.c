@@ -1040,6 +1040,16 @@ static int whpx_vcpu_run(CPUState *cpu)
                     rcx = signature[1];
                     rdx = signature[2];
                     break;
+                case 0x80000001:
+                    rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
+                    /* Remove any support of OSVW */
+                    rcx =
+                        vcpu->exit_ctx.CpuidAccess.DefaultResultRcx &
+                        ~CPUID_EXT3_OSVW;
+
+                    rdx = vcpu->exit_ctx.CpuidAccess.DefaultResultRdx;
+                    rbx = vcpu->exit_ctx.CpuidAccess.DefaultResultRbx;
+                    break;
                 default:
                     rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
                     rcx = vcpu->exit_ctx.CpuidAccess.DefaultResultRcx;
@@ -1458,7 +1468,7 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
-    UINT32 cpuidExitList[] = {1, WHPX_CPUID_SIGNATURE};
+    UINT32 cpuidExitList[] = {1, WHPX_CPUID_SIGNATURE, 0x80000001};
     hr = whp_dispatch.WHvSetPartitionProperty(
         whpx->partition,
         WHvPartitionPropertyCodeCpuidExitList,
