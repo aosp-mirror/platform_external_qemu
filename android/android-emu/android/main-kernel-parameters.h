@@ -42,6 +42,8 @@ typedef struct mem_map {
 // |isQemu2| is true to indicate that this is called from QEMU2, otherwise
 // QEMU1 is assumed.
 // |isCros| is true to indicate that it's a Chrome OS image.
+// |enableDtb| is true to switch android_dt_dir between
+// /sys/bus/platform/devices and /proc/device-tree.
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    int apiLevel,
@@ -53,6 +55,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    mem_map ramoops,
                                    const int vm_heapSize,
                                    bool isQemu2,
-                                   bool isCros);
+                                   bool isCros,
+                                   bool enableDtb);
 
 ANDROID_END_HEADER

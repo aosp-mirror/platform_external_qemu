@@ -47,6 +47,7 @@ LOCAL_SRC_FILES := \
     qemu-user-event-agent-impl.c \
     qemu-virtual-scene-agent-impl.cpp \
     qemu-vm-operations-impl.cpp \
+    dtb.cpp \
     snapshot_compression.cpp \
     telephony/modem_init.c \
     utils/stream.cpp \
