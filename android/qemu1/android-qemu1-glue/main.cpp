@@ -199,7 +199,7 @@ extern "C" int main(int argc, char **argv) {
         0ULL, /* glFramebufferSizeBytes */
         mem,
         hw->vm_heapSize,
-        false /* isQemu2 */, false /* isCros */);
+        false /* isQemu2 */, false /* isCros */, hw->kernel_dtb_enable);
 
     if (hw->hw_cpu_ncore > 1) {
         // Avoid printing this warning all the time because the default
