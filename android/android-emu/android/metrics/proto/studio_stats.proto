@@ -969,7 +969,8 @@ message EmulatorFeatureFlagState {
     ALLOW_SNAPSHOT_MIGRATION = 23;
     WINDOWS_ON_DEMAND_SNAPSHOT_LOAD = 24;
     WINDOWS_HYPERVISOR_PLATFORM = 25;
-    // Next tag: 26
+    KERNEL_DEVICE_TREE_BLOB_SUPPORT = 26;
+    // Next tag: 27
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
