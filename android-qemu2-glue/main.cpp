@@ -598,6 +598,10 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     return false;
 }
 
+static int createDtbFile(const std::string &dtbFilename) {
+    return 1;  // WIP
+}
+
 extern AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
     if (argc < 1) {
@@ -1110,6 +1114,27 @@ extern "C" int main(int argc, char** argv) {
                        "userdata-qemu.img.qcow2|"
                        "%s" PATH_SEP "vendor.img.qcow2",
                        avd_dir, avd_dir, avd_dir);
+    }
+
+    if (hw->kernel_dtb_enable) {
+        std::string dtbFileName;
+        if (path_exists(hw->kernel_dtb_path)) {
+          dtbFileName = hw->kernel_dtb_path;
+        } else {
+            ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
+            if (userdata_dir) {
+                dtbFileName = PathUtils::join(userdata_dir.get(), "default.dtb");
+                exitStatus = createDtbFile(dtbFileName);
+                if (exitStatus) {
+                    return exitStatus;
+                }
+            } else {
+                derror("path_dirname failed for '%s'",
+                    hw->disk_dataPartition_path);
+                return 1;
+            }
+        }
+        args.add({"-dtb", dtbFileName});
     }
 
     // Network
