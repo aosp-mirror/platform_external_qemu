@@ -70,6 +70,7 @@ extern "C" {
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/dtb.h"
 #include "android/ui-emu-agent.h"
 
 #ifdef TARGET_AARCH64
@@ -1110,6 +1111,30 @@ extern "C" int main(int argc, char** argv) {
                        "userdata-qemu.img.qcow2|"
                        "%s" PATH_SEP "vendor.img.qcow2",
                        avd_dir, avd_dir, avd_dir);
+    }
+
+    if (hw->kernel_dtb_enable) {
+        std::string dtbFileName;
+        if (path_exists(hw->kernel_dtb_path)) {
+          dtbFileName = hw->kernel_dtb_path;
+        } else {
+            ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
+            if (userdata_dir) {
+                dtbFileName = PathUtils::join(userdata_dir.get(), "default.dtb");
+
+                ::dtb::Params params;
+                exitStatus = createDtbFile(params, dtbFileName);
+
+                if (exitStatus) {
+                    return exitStatus;
+                }
+            } else {
+                derror("path_dirname failed for '%s'",
+                    hw->disk_dataPartition_path);
+                return 1;
+            }
+        }
+        args.add({"-dtb", dtbFileName});
     }
 
     // Network
