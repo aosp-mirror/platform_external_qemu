@@ -870,12 +870,21 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           ret, m_colorBufferHelper,
                                           m_fastBlitSupported));
     if (cb.get() != NULL) {
-        m_colorbuffers[ret] = { std::move(cb), 1, false };
+        assert(m_colorbuffers.count(ret) == 0);
+        // Android master default api level is 1000
+        int apiLevel = 1000;
+        emugl::getAvdInfo(nullptr, &apiLevel);
+        // pre-O and post-O use different color buffer memory management logic
+        if (apiLevel > 0 && apiLevel < 26) {
+            m_colorbuffers[ret] = { std::move(cb), 1, false, 0 };
 
-        RenderThreadInfo* tInfo = RenderThreadInfo::get();
-        uint64_t puid = tInfo->m_puid;
-        if (puid) {
-            m_procOwnedColorBuffers[puid].insert(ret);
+            RenderThreadInfo* tInfo = RenderThreadInfo::get();
+            uint64_t puid = tInfo->m_puid;
+            if (puid) {
+                m_procOwnedColorBuffers[puid].insert(ret);
+            }
+        } else {
+            m_colorbuffers[ret] = { std::move(cb), 0, false, 0 };
         }
     } else {
         ret = 0;
@@ -1070,14 +1079,18 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     AutoLock mutex(m_lock);
-    closeColorBufferLocked(p_colorbuffer);
-
     uint64_t puid = tInfo->m_puid;
     if (puid) {
         auto ite = m_procOwnedColorBuffers.find(puid);
         if (ite != m_procOwnedColorBuffers.end()) {
-            ite->second.erase(p_colorbuffer);
+            const auto& cb = ite->second.find(p_colorbuffer);
+            if (cb != ite->second.end()) {
+                ite->second.erase(cb);
+                closeColorBufferLocked(p_colorbuffer);
+            }
         }
+    } else {
+        closeColorBufferLocked(p_colorbuffer);
     }
 }
 
@@ -1125,7 +1138,13 @@ void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
            (forced ||
            it->ts + kColorBufferClosingDelaySec <= now)) {
         if (it->cbHandle != 0) {
-            m_colorbuffers.erase(it->cbHandle);
+            for (const auto& ite : m_procOwnedColorBuffers) {
+                if (ite.second.find(it->cbHandle) != ite.second.end()) {
+                    assert(0);
+                }
+            }
+            const auto& cb = m_colorbuffers.find(it->cbHandle);
+            m_colorbuffers.erase(cb);
         }
         ++it;
     }
