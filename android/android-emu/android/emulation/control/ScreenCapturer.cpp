@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/display_agent.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/emulator-window.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"
@@ -28,14 +29,15 @@ namespace emulation {
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* pOutputFilepath) {
     const auto& renderer = android_getOpenglesRenderer();
+    SkinRotation rotation = gQAndroidEmulatorWindowAgent->getRotation();
     if (const auto renderer_ptr = renderer.get()) {
-        return captureScreenshot(renderer_ptr, nullptr, outputDirectoryPath,
-                                 pOutputFilepath);
+        return captureScreenshot(renderer_ptr, nullptr, rotation,
+                                 outputDirectoryPath, pOutputFilepath);
     } else {
         // renderer is nullptr in -gpu guest
         return captureScreenshot(nullptr,
                 emulator_window_get()->uiEmuAgent->display->getFrameBuffer,
-                outputDirectoryPath, pOutputFilepath);
+                rotation, outputDirectoryPath, pOutputFilepath);
     }
 }
 
@@ -43,6 +45,7 @@ bool captureScreenshot(emugl::Renderer* renderer,
                        std::function<void(int* w, int* h, int* lineSize,
                             int* bytesPerPixel, uint8_t** frameBufferData)>
                             getFrameBuffer,
+                       SkinRotation rotation,
                        android::base::StringView outputDirectoryPath,
                        std::string* pOutputFilepath) {
     if (!renderer && !getFrameBuffer) {
@@ -114,7 +117,7 @@ bool captureScreenshot(emugl::Renderer* renderer,
     if (pOutputFilepath) {
         *pOutputFilepath = outputFilePath;
     }
-    savepng(outputFilePath.c_str(), nChannels, width, height, pixels);
+    savepng(outputFilePath.c_str(), nChannels, width, height, rotation, pixels);
     return true;
 }
 
