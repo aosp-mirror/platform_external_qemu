@@ -206,7 +206,9 @@ public:
 #endif
                     std::string fileName = android::base::PathUtils::join(
                             dataDir, "screenshot.png");
+                    // TODO: fix the screenshot rotation?
                     savepng(fileName.c_str(), nChannels, width, height,
+                            SKIN_ROTATION_0,
                             const_cast<unsigned char*>(pixels.data()));
 #if SNAPSHOT_PROFILE > 1
                     printf("Screenshot image write time %lld ms\n",
