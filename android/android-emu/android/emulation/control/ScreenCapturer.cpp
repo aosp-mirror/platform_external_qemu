@@ -28,14 +28,15 @@ namespace emulation {
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* pOutputFilepath) {
     const auto& renderer = android_getOpenglesRenderer();
+    SkinRotation rotation = emulator_window_get()->onion_rotation;
     if (const auto renderer_ptr = renderer.get()) {
-        return captureScreenshot(renderer_ptr, nullptr, outputDirectoryPath,
-                                 pOutputFilepath);
+        return captureScreenshot(renderer_ptr, nullptr, rotation,
+                                 outputDirectoryPath, pOutputFilepath);
     } else {
         // renderer is nullptr in -gpu guest
         return captureScreenshot(nullptr,
                 emulator_window_get()->uiEmuAgent->display->getFrameBuffer,
-                outputDirectoryPath, pOutputFilepath);
+                rotation, outputDirectoryPath, pOutputFilepath);
     }
 }
 
@@ -43,6 +44,7 @@ bool captureScreenshot(emugl::Renderer* renderer,
                        std::function<void(int* w, int* h, int* lineSize,
                             int* bytesPerPixel, uint8_t** frameBufferData)>
                             getFrameBuffer,
+                       SkinRotation rotation,
                        android::base::StringView outputDirectoryPath,
                        std::string* pOutputFilepath) {
     if (!renderer && !getFrameBuffer) {
@@ -114,7 +116,7 @@ bool captureScreenshot(emugl::Renderer* renderer,
     if (pOutputFilepath) {
         *pOutputFilepath = outputFilePath;
     }
-    savepng(outputFilePath.c_str(), nChannels, width, height, pixels);
+    savepng(outputFilePath.c_str(), nChannels, width, height, rotation, pixels);
     return true;
 }
 
