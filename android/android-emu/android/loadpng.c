@@ -128,11 +128,15 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
 }
 
 void savepng(const char* fn, unsigned int nChannels, unsigned int width,
-        unsigned int height, void* pixels) {
+        unsigned int height, SkinRotation rotation, void* pixels) {
     if (nChannels != 3 && nChannels != 4) {
         fprintf(stderr, "savepng only support 3 or 4 channel images\n");
         return;
     }
+    bool isPortrait = rotation == SKIN_ROTATION_0 ||
+            rotation == SKIN_ROTATION_180;
+    unsigned int rows = isPortrait ? height : width;
+    unsigned int cols = isPortrait ? width : height;
     FILE *fp = fopen(fn, "wb");
     if (!fp) {
         LOG("Unable to write to file %s.\n", fn);
@@ -146,18 +150,62 @@ void savepng(const char* fn, unsigned int nChannels, unsigned int width,
     png_init_io(p, fp);
 
     setjmp(png_jmpbuf(p));
-    png_set_IHDR(p, pi, width, height, 8,
+    png_set_IHDR(p, pi, cols, rows, 8,
             nChannels == 3 ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,
             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
             PNG_FILTER_TYPE_DEFAULT);
     png_write_info(p, pi);
 
     setjmp(png_jmpbuf(p));
-    unsigned int i = 0;
-    for (i = 0; i < height; i++) {
-        png_write_row(p, pixels + i * nChannels * width);
+    if (rotation == SKIN_ROTATION_0) {
+        unsigned int i = 0;
+        for (i = 0; i < height; i++) {
+            png_write_row(p, pixels + i * nChannels * width);
+        }
+    } else {
+        char* rowBuffer = malloc(nChannels * cols);
+        char* src = NULL;
+        // Increment in src after scanning one pixel or finishing one row
+        int srcDelta0 = 0;
+        int srcDelta1 = 0;
+        switch (rotation) {
+            case SKIN_ROTATION_0:
+                srcDelta0 = 0;
+                srcDelta1 = 0;
+                src = pixels;
+                break;
+            case SKIN_ROTATION_90:
+                srcDelta0 = - nChannels - nChannels * width;
+                srcDelta1 = nChannels + nChannels * width * height;
+                src = pixels + nChannels * width * (height - 1);
+                break;
+            case SKIN_ROTATION_180:
+                srcDelta0 = - nChannels * 2;
+                srcDelta1 = 0;
+                src = pixels + nChannels * (width * height - 1);
+                break;
+            case SKIN_ROTATION_270:
+                srcDelta0 = - nChannels + nChannels * width;
+                srcDelta1 = - nChannels - nChannels * width * height;
+                src = pixels + nChannels * (width - 1);
+                break;
+        }
+        unsigned int i;
+        unsigned int j;
+        unsigned int c;
+        for (i = 0; i < rows; i++) {
+            char* dst = rowBuffer;
+            for (j = 0; j < cols; j++) {
+                for (c = 0; c < nChannels; c++) {
+                    *(dst ++) = *(src ++);
+                }
+                src += srcDelta0;
+            }
+            png_write_row(p, (void*)rowBuffer);
+            src += srcDelta1;
+        }
+        free(rowBuffer);
     }
-
     setjmp(png_jmpbuf(p));
     png_write_end(p, NULL);
 

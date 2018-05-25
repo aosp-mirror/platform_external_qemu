@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/StringView.h"
+#include "android/skin/rect.h"
 
 #include <functional>
 
@@ -35,6 +36,7 @@ bool captureScreenshot(emugl::Renderer* renderer,
                        std::function<void(int* w, int* h, int* lineSize,
                             int* bytesPerPixel, uint8_t** frameBufferData)>
                             getFrameBuffer,
+                       SkinRotation rotation,
                        android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL);
 
