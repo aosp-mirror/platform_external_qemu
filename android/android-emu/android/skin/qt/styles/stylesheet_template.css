@@ -299,3 +299,7 @@ QToolTip {
     border-width: 2px;
     border-color: %%TOOL_COLOR%%;
 }
+
+#savedPointsArea {
+    border: 1px solid %%TAB_BKG_COLOR%%;
+}
