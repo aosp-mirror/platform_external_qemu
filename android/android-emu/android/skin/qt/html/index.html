@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Android Emulator Location Picker</title>
+<style>
+#map {
+    height: 100%;
+}
+
+html, body {
+    height: 580px;
+    width: 622px;
+    margin: 0px;
+    padding: 0px;
+}
+#description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      #infowindow-content .title {
+        font-weight: bold;
+      }
+
+      #infowindow-content {
+        display: none;
+      }
+
+      #map #infowindow-content {
+        display: inline;
+      }
+
+      .pac-card {
+        margin: 10px 10px 0 0;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        background-color: #fff;
+        font-family: Roboto;
+      }
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+      .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+      }
+
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
+</style>
+</head>
+<body>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
+    <script>
+// Callback function for Maps API
+function initMap() {
+    // Googleplex!
+    var myLatLng = {lat: 37.4220919, lng: -122.0826088};
+
+    // Create a map object and specify the DOM element for display.
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: myLatLng,
+        zoom: 10,
+        disableDefaultUI: true
+    });
+
+    // Create a marker and set its position.
+    gCurrentMarker = new google.maps.Marker({
+        map: map,
+        position: myLatLng
+    });
+
+    // Register a listener that sets a new marker whereever user clicks
+    // on the map.
+    google.maps.event.addListener(map, 'click', function(event) {
+        gCurrentMarker.setMap(null);
+        gCurrentMarker = new google.maps.Marker({
+            map: map,
+            position: event.latLng
+        });
+        // TODO: send the location coordinates to the emulator
+        console.warn('lat=' + event.latLng.lat() + ' lng=' + event.latLng.lng());
+        channel.objects.emulocationserver.sendLocation(event.latLng.lat(), event.latLng.lng());
+    });
+
+
+    // Add Google search box
+    // Create the search box and link it to the UI element.
+      var input = /** @type {HTMLInputElement} */ (
+        document.getElementById('pac-input'));
+      map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+      var searchBox = new google.maps.places.SearchBox(
+        /** @type {HTMLInputElement} */
+        (input));
+
+      // Listen for the event fired when the user selects an item from the
+      // pick list. Retrieve the matching places for that item.
+      google.maps.event.addListener(searchBox, 'places_changed', function() {
+        var places = searchBox.getPlaces();
+
+        for (var i = 0, marker; marker = markers[i]; i++) {
+          marker.setMap(null);
+        }
+
+        // For each place, get the icon, place name, and location.
+        markers = [];
+        var bounds = new google.maps.LatLngBounds();
+        var place = null;
+        var viewport = null;
+        for (var i = 0; place = places[i]; i++) {
+          var image = {
+            url: place.icon,
+            size: new google.maps.Size(71, 71),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(17, 34),
+            scaledSize: new google.maps.Size(25, 25)
+          };
+
+          // Create a marker for each place.
+          var marker = new google.maps.Marker({
+            map: map,
+            icon: image,
+            title: place.name,
+            position: place.geometry.location
+          });
+          viewport = place.geometry.viewport;
+          markers.push(marker);
+
+          bounds.extend(place.geometry.location);
+        }
+        map.setCenter(bounds.getCenter());
+      });
+
+      // Bias the SearchBox results towards places that are within the bounds of the
+      // current map's viewport.
+      google.maps.event.addListener(map, 'bounds_changed', function() {
+        var bounds = map.getBounds();
+        searchBox.setBounds(bounds);
+      });
+}
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyABrfflV49aFWF4Kohsf1VSx68td8f-sFY&callback=initMap" async defer></script>
+</body>
+</html>
