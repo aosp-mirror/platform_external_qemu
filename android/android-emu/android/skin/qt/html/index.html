@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Android Emulator Location Picker</title>
+<style>
+#map {
+    height: 100%;
+}
+
+html, body {
+    height: 580px;
+    width: 622px;
+    margin: 0px;
+    padding: 0px;
+}
+</style>
+</head>
+<body>
+    <h5>Hello world!</h5>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
+    <script>
+// Callback function for Maps API
+function initMap() {
+    // Googleplex!
+    var myLatLng = {lat: 37.4220919, lng: -122.0826088};
+
+    // Create a map object and specify the DOM element for display.
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: myLatLng,
+        zoom: 10
+    });
+
+    // Create a marker and set its position.
+    gCurrentMarker = new google.maps.Marker({
+        map: map,
+        position: myLatLng
+    });
+
+    // Register a listener that sets a new marker whereever user clicks
+    // on the map.
+    google.maps.event.addListener(map, 'click', function(event) {
+        gCurrentMarker.setMap(null);
+        gCurrentMarker = new google.maps.Marker({
+            map: map,
+            position: event.latLng
+        });
+        // TODO: send the location coordinates to the emulator
+        console.warn('lat=' + event.latLng.lat() + ' lng=' + event.latLng.lng());
+        channel.objects.emulocationserver.sendLocation(event.latLng.lat(), event.latLng.lng());
+    });
+}
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyABrfflV49aFWF4Kohsf1VSx68td8f-sFY&callback=initMap" async defer></script>
+</body>
+</html>
