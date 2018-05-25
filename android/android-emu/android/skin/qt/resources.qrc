@@ -14,6 +14,75 @@
         <file alias="styles/stylesheet_template.css">styles/stylesheet_template.css</file>
         <file alias="styles/fonts_stylesheet_template.css">styles/fonts_stylesheet_template.css</file>
     </qresource>
+<!--
+    Including icudtl.dat and QtWebEngineProcess as a resource doesn't work. The workaround right now is to stick these two
+    files in the application directory.
+    <qresource prefix="/libexec">
+        <file alias="QtWebEngineProcess">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/libexec/QtWebEngineProcess</file>
+    </qresource>
+-->
+    <qresource prefix="/resources">
+        <!--<file alias="icudtl.dat">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/resources/icudtl.dat</file>-->
+        <file alias="qtwebengine_resources.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/resources/qtwebengine_resources.pak</file>
+        <file alias="qtwebengine_resources_200p.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/resources/qtwebengine_resources_200p.pak</file>
+        <file alias="qtwebengine_devtools_resources.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/resources/qtwebengine_devtools_resources.pak</file>
+        <file alias="qtwebengine_resources_100p.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/resources/qtwebengine_resources_100p.pak</file>
+    </qresource>
+    <qresource prefix="/translations/qtwebengine_locales">
+        <file alias="am.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/am.pak</file>
+        <file alias="ar.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ar.pak</file>
+        <file alias="bg.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/bg.pak</file>
+        <file alias="bn.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/bn.pak</file>
+        <file alias="ca.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ca.pak</file>
+        <file alias="cs.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/cs.pak</file>
+        <file alias="da.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/da.pak</file>
+        <file alias="de.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/de.pak</file>
+        <file alias="el.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/el.pak</file>
+        <file alias="en-GB.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/en-GB.pak</file>
+        <file alias="en-US.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/en-US.pak</file>
+        <file alias="es-419.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/es-419.pak</file>
+        <file alias="es.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/es.pak</file>
+        <file alias="et.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/et.pak</file>
+        <file alias="fa.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/fa.pak</file>
+        <file alias="fi.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/fi.pak</file>
+        <file alias="fil.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/fil.pak</file>
+        <file alias="fr.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/fr.pak</file>
+        <file alias="gu.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/gu.pak</file>
+        <file alias="he.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/he.pak</file>
+        <file alias="hi.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/hi.pak</file>
+        <file alias="hr.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/hr.pak</file>
+        <file alias="hu.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/hu.pak</file>
+        <file alias="id.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/id.pak</file>
+        <file alias="it.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/it.pak</file>
+        <file alias="ja.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ja.pak</file>
+        <file alias="kn.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/kn.pak</file>
+        <file alias="ko.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ko.pak</file>
+        <file alias="lt.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/lt.pak</file>
+        <file alias="lv.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/lv.pak</file>
+        <file alias="ml.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ml.pak</file>
+        <file alias="mr.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/mr.pak</file>
+        <file alias="ms.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ms.pak</file>
+        <file alias="nb.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/nb.pak</file>
+        <file alias="nl.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/nl.pak</file>
+        <file alias="pl.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/pl.pak</file>
+        <file alias="pt-BR.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/pt-BR.pak</file>
+        <file alias="pt-PT.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/pt-PT.pak</file>
+        <file alias="ro.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ro.pak</file>
+        <file alias="ru.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ru.pak</file>
+        <file alias="sk.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/sk.pak</file>
+        <file alias="sl.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/sl.pak</file>
+        <file alias="sr.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/sr.pak</file>
+        <file alias="sv.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/sv.pak</file>
+        <file alias="sw.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/sw.pak</file>
+        <file alias="ta.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/ta.pak</file>
+        <file alias="te.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/te.pak</file>
+        <file alias="th.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/th.pak</file>
+        <file alias="tr.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/tr.pak</file>
+        <file alias="uk.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/uk.pak</file>
+        <file alias="vi.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/vi.pak</file>
+        <file alias="zh-CN.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/zh-CN.pak</file>
+        <file alias="zh-TW.pak">../../../../../../../prebuilts/android-emulator-build/qt/darwin-x86_64/translations/qtwebengine_locales/zh-TW.pak</file>
+    </qresource>
     <qresource prefix="/lib/fonts">
          <!-- The names 'Roboto*' are used to load the fonts in
               android/skin/qt/winsys-qt.cpp -->

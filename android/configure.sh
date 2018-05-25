@@ -967,6 +967,27 @@ for QT_ARCH in $PREBUILT_ARCHS; do
         fi
         install_prebuilt_dll "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
     done
+
+    # Copy the libexec, resources, and translations directories for QtWebEngine
+#   QT_LIBEXECS=$(cd "$QT_SRCDIR" && find . -name "QtWebEngineProcess" 2>/dev/null)
+#   for QT_LIBEXEC in $QT_LIBEXECS; do
+#       copy_file "$QT_SRCDIR/$QT_LIBEXEC" "$QT_DSTDIR/$QT_LIBEXEC"
+#   done
+
+#   QT_PAKS=$(cd "$QT_SRCDIR" && find . -name "*.pak" 2>/dev/null)
+#   for QT_PAK in $QT_PAKS; do
+#       copy_file "$QT_SRCDIR/$QT_PAK" "$QT_DSTDIR/$QT_PAK"
+#   done
+
+#   QT_DATS=$(cd "$QT_SRCDIR" && find . -name "*.dat" 2>/dev/null)
+#   for QT_DAT in $QT_DATS; do
+#       copy_file "$QT_SRCDIR/$QT_DAT" "$QT_DSTDIR/$QT_DAT"
+#   done
+
+    # Need to put QtWebEngineProcess and icudtl.dat in the appliation directory for QtWebEngine to find it.
+    mkdir -p $OUT_DIR/qemu/$HOST_OS-$BUILD_ARCH
+    copy_file "$QT_SRCDIR/libexec/QtWebEngineProcess" "$OUT_DIR/qemu/$HOST_OS-$BUILD_ARCH/QtWebEngineProcess"
+    copy_file "$QT_SRCDIR/resources/icudtl.dat" "$OUT_DIR/qemu/$HOST_OS-$BUILD_ARCH/icudtl.dat"
 done
 
 # Copy e2fsprogs binaries.

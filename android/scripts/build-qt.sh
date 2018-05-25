@@ -367,6 +367,29 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         (cd "$INSTALL_DIR/$SYSTEM" && rm -f include && ln -sf ../common/include include)
 
+        # Copy over the libexec, resources and translations folder for QtWebEngine
+        copy_directory \
+                "$(builder_install_prefix)"/libexec \
+                "$INSTALL_DIR/$SYSTEM"/libexec.new
+        directory_atomic_update \
+                "$INSTALL_DIR/$SYSTEM"/libexec \
+                "$INSTALL_DIR/$SYSTEM"/libexec.new
+
+        copy_directory \
+                "$(builder_install_prefix)"/resources \
+                "$INSTALL_DIR/$SYSTEM"/resources.new
+        directory_atomic_update \
+                "$INSTALL_DIR/$SYSTEM"/resources \
+                "$INSTALL_DIR/$SYSTEM"/resources.new
+
+        copy_directory \
+                "$(builder_install_prefix)"/translations \
+                "$INSTALL_DIR/$SYSTEM"/translations.new
+        directory_atomic_update \
+                "$INSTALL_DIR/$SYSTEM"/translations \
+                "$INSTALL_DIR/$SYSTEM"/translations.new
+
+
         # Move qconfig.h into its platform-specific directory now
         run mkdir -p "$INSTALL_DIR/$SYSTEM"/include.system/QtCore/
         run mv -f \
