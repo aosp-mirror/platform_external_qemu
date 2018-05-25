@@ -119,6 +119,11 @@ LocationPage::LocationPage(QWidget *parent) :
                 }
                 return false;
     });
+    mWebEngineView.reset(new QWebEngineView(mUi->webEngineContainer));
+    mWebEngineView->setGeometry(mUi->webEngineContainer->geometry());
+    mWebEngineView->load(QUrl("qrc:/html/index.html")); 
+//    mWebEngineView->load(QUrl("https://www.google.com/maps/")); 
+    mWebEngineView->show();
 }
 
 LocationPage::~LocationPage() {

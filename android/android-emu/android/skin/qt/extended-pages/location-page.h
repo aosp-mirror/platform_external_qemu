@@ -17,6 +17,7 @@
 #include "android/metrics/PeriodicReporter.h"
 #include <QTimer>
 #include <QThread>
+#include <QWebEngineView>
 #include <QWidget>
 #include <memory>
 
@@ -122,6 +123,7 @@ private:
     android::base::ConditionVariable mUpdateThreadCv;
     android::base::Lock mUpdateThreadLock;
     bool mShouldCloseUpdateThread = false;
+    std::unique_ptr<QWebEngineView> mWebEngineView;
 };
 
 class GeoDataLoaderThread : public QThread {
