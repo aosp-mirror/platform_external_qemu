@@ -60,6 +60,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/finger-page.cpp \
     android/skin/qt/extended-pages/google-play-page.cpp \
     android/skin/qt/extended-pages/help-page.cpp \
+	android/skin/qt/extended-pages/location-list-item.cpp \
     android/skin/qt/extended-pages/location-page.cpp \
     android/skin/qt/extended-pages/microphone-page.cpp \
     android/skin/qt/extended-pages/record-screen-page.cpp \
@@ -88,6 +89,8 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/virtualscene-control-window.cpp \
     android/skin/qt/VirtualSceneInfoDialog.cpp \
     android/skin/qt/wavefront-obj-parser.cpp \
+	android/skin/qt/websockets/websocketclientwrapper.cpp \
+	android/skin/qt/websockets/websockettransport.cpp \
     android/skin/qt/video-player/Clock.cpp \
     android/skin/qt/video-player/FrameQueue.cpp \
     android/skin/qt/video-player/PacketQueue.cpp \
@@ -117,6 +120,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/finger-page.h \
     android/skin/qt/extended-pages/google-play-page.h \
     android/skin/qt/extended-pages/help-page.h \
+	android/skin/qt/extended-pages/location-list-item.h \
     android/skin/qt/extended-pages/location-page.h \
     android/skin/qt/extended-pages/microphone-page.h \
     android/skin/qt/extended-pages/record-screen-page-tasks.h \
@@ -139,6 +143,8 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/size-tweaker.h \
     android/skin/qt/tool-window.h \
     android/skin/qt/user-actions-counter.h \
+	android/skin/qt/websockets/websocketclientwrapper.h \
+	android/skin/qt/websockets/websockettransport.h \
     android/skin/qt/virtualscene-control-window.h \
     android/skin/qt/video-player/VideoPlayerNotifier.h \
     android/skin/qt/video-player/VideoPlayerWidget.h \
@@ -162,6 +168,7 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/finger-page.ui \
     android/skin/qt/extended-pages/google-play-page.ui \
     android/skin/qt/extended-pages/help-page.ui \
+	android/skin/qt/extended-pages/location-list-item.ui \
     android/skin/qt/extended-pages/location-page.ui \
     android/skin/qt/extended-pages/microphone-page.ui \
     android/skin/qt/extended-pages/record-screen-page.ui \
