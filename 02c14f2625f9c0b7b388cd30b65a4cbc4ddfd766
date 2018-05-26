@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "27bc1c39_6d3bbdd9",
+        "filename": "android-qemu2-glue/dtb.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "230bbf33_78fdaf9f",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 35
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "85c56eed_f3f948f2",
         "filename": "android-qemu2-glue/dtb.cpp",
         "patchSetId": 8
@@ -71,6 +95,54 @@
     },
     {
       "key": {
+        "uuid": "9e7b48c2_d7ab79db",
+        "filename": "android-qemu2-glue/dtb.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d34bd88f_f2864953",
+      "range": {
+        "startLine": 34,
+        "startChar": 18,
+        "endLine": 34,
+        "endChar": 22
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aceecc5e_7458f6b6",
+        "filename": "android-qemu2-glue/dtb.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "85c56eed_f3f948f2",
+      "range": {
+        "startLine": 34,
+        "startChar": 41,
+        "endLine": 34,
+        "endChar": 47
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "74572082_ad6430bc",
         "filename": "android-qemu2-glue/dtb.cpp",
         "patchSetId": 8
@@ -82,6 +154,30 @@
       "writtenOn": "2018-05-25T23:40:01Z",
       "side": 1,
       "message": "can this just be std::string?",
+      "range": {
+        "startLine": 74,
+        "startChar": 4,
+        "endLine": 74,
+        "endChar": 45
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15bbf5c9_7e929318",
+        "filename": "android-qemu2-glue/dtb.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "std::string::data() returns a pointer to immutable data, but this function wants mutable.\n\nconst CharT* data() const;",
+      "parentUuid": "74572082_ad6430bc",
       "range": {
         "startLine": 74,
         "startChar": 4,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "d48a397a_2e45b622",
+        "filename": "android-qemu2-glue/dtb.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "01dff99b_22dc1189",
+      "range": {
+        "startLine": 79,
+        "startChar": 32,
+        "endLine": 79,
+        "endChar": 36
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bf648c47_173100d2",
         "filename": "android-qemu2-glue/dtb.cpp",
         "patchSetId": 8
@@ -128,6 +248,30 @@
       "writtenOn": "2018-05-25T23:40:01Z",
       "side": 1,
       "message": "ScopedStdioFile?",
+      "range": {
+        "startLine": 117,
+        "startChar": 3,
+        "endLine": 117,
+        "endChar": 48
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a0ef8e4_5fb93eef",
+        "filename": "android-qemu2-glue/dtb.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bf648c47_173100d2",
       "range": {
         "startLine": 117,
         "startChar": 3,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "21e8c603_61c36d29",
+        "filename": "android-qemu2-glue/dtb.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0780d92_2eada431",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 72
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5f5d26f1_e99f0fda",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 8
@@ -174,6 +342,30 @@
       "writtenOn": "2018-05-25T23:40:01Z",
       "side": 1,
       "message": "I\u0027d rather make it an assert()",
+      "range": {
+        "startLine": 1121,
+        "startChar": 11,
+        "endLine": 1122,
+        "endChar": 31
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c5aae9a_1f6bb2a4",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1122,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5f5d26f1_e99f0fda",
       "range": {
         "startLine": 1121,
         "startChar": 11,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "88122e26_59cf2694",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1137,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75e3f9e0_ba1af66a",
+      "range": {
+        "startLine": 1136,
+        "startChar": 20,
+        "endLine": 1137,
+        "endChar": 52
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fe8f9dcf_f1f33d58",
         "filename": "android/third_party/libdtb/README",
         "patchSetId": 8
@@ -220,6 +436,30 @@
       "writtenOn": "2018-05-25T23:40:01Z",
       "side": 1,
       "message": "nit: tab",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 1
+      },
+      "revId": "02c14f2625f9c0b7b388cd30b65a4cbc4ddfd766",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ab7e3d6_0fad5bff",
+        "filename": "android/third_party/libdtb/README",
+        "patchSetId": 8
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-26T00:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fe8f9dcf_f1f33d58",
       "range": {
         "startLine": 7,
         "startChar": 0,
