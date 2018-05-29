@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3757b86f_11b49f09",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1133,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-29T18:27:04Z",
+      "side": 1,
+      "message": "check for existence ?\notherwise, you will create it every time the avd is launched;\nwe probably just want to create it on the first time the avd is launched;\nalso remove the dtb with -wipe-data",
+      "range": {
+        "startLine": 1133,
+        "startChar": 8,
+        "endLine": 1133,
+        "endChar": 56
+      },
+      "revId": "66527d70f35ae04747585198b9b01188f054d70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
