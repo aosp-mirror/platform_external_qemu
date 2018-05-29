@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9cacd771_8d493110",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-05-29T19:04:29Z",
+      "side": 1,
+      "message": "I looked up in emulator guest system.\nThe right mod is 0644. I will correct them here. Most likely, it will be corrected by the init in guest.",
+      "parentUuid": "0744f6a8_44f0f399",
+      "range": {
+        "startLine": 284,
+        "startChar": 47,
+        "endLine": 284,
+        "endChar": 51
+      },
+      "revId": "5a822b9b98e6bd07a8ab0ed2a53c067a6f60e12c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6414bd32_dbff57e3",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 3
