@@ -22,6 +22,30 @@
       "revId": "f1066fb5b4b618d2070addb232a3cbd86d8abd87",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b731787_cde6a26c",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-05-29T22:40:38Z",
+      "side": 1,
+      "message": "I can use a constant here instead of magic number but this is what the physical device has.  \nSee https://cs.corp.google.com/aosp-master/system/core/rootdir/init.usb.rc?sq\u0026q\u003dinit.usb.rc+package:%5Eaosp-master$\u0026g\u003d0\u0026l\u003d11",
+      "parentUuid": "314b83ef_95801b81",
+      "range": {
+        "startLine": 284,
+        "startChar": 53,
+        "endLine": 284,
+        "endChar": 57
+      },
+      "revId": "f1066fb5b4b618d2070addb232a3cbd86d8abd87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
