@@ -33,9 +33,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 
+#include "android/utils/file_io.h"
 #ifdef USE_MINGW
 
 #include <winsock2.h>
@@ -46,23 +46,14 @@
 #define L_S_IRUSR 00400
 #define L_S_IWUSR 00200
 #define L_S_IXUSR 00100
+#define S_ISUID 0004000
+#define S_ISGID 0002000
+#define S_ISVTX 0001000
 /* MinGW defines this macro as well */
 #ifdef S_IRWXU
 #undef S_IRWXU
 #endif
 #define S_IRWXU (L_S_IRUSR | L_S_IWUSR | L_S_IXUSR)
-#define S_IRGRP 00040
-#define S_IWGRP 00020
-#define S_IXGRP 00010
-#define S_IRWXG (S_IRGRP | S_IWGRP | S_IXGRP)
-#define S_IROTH 00004
-#define S_IWOTH 00002
-#define S_IXOTH 00001
-#define S_IRWXO (S_IROTH | S_IWOTH | S_IXOTH)
-#define S_ISUID 0004000
-#define S_ISGID 0002000
-#define S_ISVTX 0001000
-
 #else
 
 #include <selinux/selinux.h>
@@ -236,12 +227,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		asprintf(&dentries[i].full_path, "%s%s", full_path, namelist[i]->d_name);
 
 		free(namelist[i]);
-
-#ifdef USE_MINGW
-		ret = stat(dentries[i].full_path, &_stat);
-#else
-		ret = lstat(dentries[i].full_path, &_stat);
-#endif
+		ret = android_lstat(dentries[i].full_path, &_stat);
 		if (ret < 0) {
 			error_errno("lstat");
 			i--;
