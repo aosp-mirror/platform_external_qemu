@@ -45,6 +45,30 @@
       "revId": "5a822b9b98e6bd07a8ab0ed2a53c067a6f60e12c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d98170f_91803657",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-05-29T18:15:27Z",
+      "side": 1,
+      "message": "I asked wdu@ to move it out... The reason is to avoid unexpected side effect in createUserDataExt4Img, because (1) the data are created outside of it so it should not own the data (2) the name of the function does not indicate it might delete the data folder.",
+      "parentUuid": "6414bd32_dbff57e3",
+      "range": {
+        "startLine": 317,
+        "startChar": 8,
+        "endLine": 317,
+        "endChar": 35
+      },
+      "revId": "5a822b9b98e6bd07a8ab0ed2a53c067a6f60e12c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
