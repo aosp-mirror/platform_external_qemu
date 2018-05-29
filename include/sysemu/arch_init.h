@@ -30,11 +30,14 @@ enum {
 
 extern const uint32_t arch_type;
 
+<<<<<<< HEAD   (a654dc Merge "Fix SMS PDU Internal format handling" into emu-master)
 void select_soundhw(const char *optarg);
 void do_acpitable_option(const QemuOpts *opts);
 void do_smbios_option(QemuOpts *opts);
 bool audio_init(void);
 
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 int kvm_available(void);
 int xen_available(void);
 int hax_available(void);

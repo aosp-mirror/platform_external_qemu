@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (a654dc Merge "Fix SMS PDU Internal format handling" into emu-master)
 /*
  *  Host code generation
  *
@@ -2218,3 +2219,5 @@ int page_unprotect(target_ulong address, uintptr_t pc)
     return 0;
 }
 #endif /* CONFIG_USER_ONLY */
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)

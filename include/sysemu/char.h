@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (a654dc Merge "Fix SMS PDU Internal format handling" into emu-master)
 #ifndef QEMU_CHAR_H
 #define QEMU_CHAR_H
 
@@ -499,3 +500,5 @@ extern int term_escape_char;
 void qemu_chr_parse_vc(QemuOpts *opts, ChardevBackend *backend, Error **errp);
 
 #endif
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)

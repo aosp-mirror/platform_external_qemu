@@ -942,9 +942,8 @@ typedef struct OptsFromQDictState {
 static void qemu_opts_from_qdict_1(const char *key, QObject *obj, void *opaque)
 {
     OptsFromQDictState *state = opaque;
-    char buf[32];
+    char buf[32], *tmp = NULL;
     const char *value;
-    int n;
 
     if (!strcmp(key, "id") || *state->errp) {
         return;
@@ -954,6 +953,7 @@ static void qemu_opts_from_qdict_1(const char *key, QObject *obj, void *opaque)
     case QTYPE_QSTRING:
         value = qstring_get_str(qobject_to_qstring(obj));
         break;
+<<<<<<< HEAD   (a654dc Merge "Fix SMS PDU Internal format handling" into emu-master)
     case QTYPE_QINT:
         n = snprintf(buf, sizeof(buf), "%" PRId64,
                      qint_get_int(qobject_to_qint(obj)));
@@ -967,6 +967,11 @@ static void qemu_opts_from_qdict_1(const char *key, QObject *obj, void *opaque)
         assert(n < sizeof(buf));
         (void)n;
         value = buf;
+=======
+    case QTYPE_QNUM:
+        tmp = qnum_to_string(qobject_to_qnum(obj));
+        value = tmp;
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         break;
     case QTYPE_QBOOL:
         pstrcpy(buf, sizeof(buf),
@@ -978,13 +983,14 @@ static void qemu_opts_from_qdict_1(const char *key, QObject *obj, void *opaque)
     }
 
     qemu_opt_set(state->opts, key, value, state->errp);
+    g_free(tmp);
 }
 
 /*
  * Create QemuOpts from a QDict.
- * Use value of key "id" as ID if it exists and is a QString.
- * Only QStrings, QInts, QFloats and QBools are copied.  Entries with
- * other types are silently ignored.
+ * Use value of key "id" as ID if it exists and is a QString.  Only
+ * QStrings, QNums and QBools are copied.  Entries with other types
+ * are silently ignored.
  */
 QemuOpts *qemu_opts_from_qdict(QemuOptsList *list, const QDict *qdict,
                                Error **errp)
@@ -1057,17 +1063,15 @@ void qemu_opts_absorb_qdict(QemuOpts *opts, QDict *qdict, Error **errp)
 QDict *qemu_opts_to_qdict(QemuOpts *opts, QDict *qdict)
 {
     QemuOpt *opt;
-    QObject *val;
 
     if (!qdict) {
         qdict = qdict_new();
     }
     if (opts->id) {
-        qdict_put(qdict, "id", qstring_from_str(opts->id));
+        qdict_put_str(qdict, "id", opts->id);
     }
     QTAILQ_FOREACH(opt, &opts->head, next) {
-        val = QOBJECT(qstring_from_str(opt->str));
-        qdict_put_obj(qdict, opt->name, val);
+        qdict_put_str(qdict, opt->name, opt->str);
     }
     return qdict;
 }
