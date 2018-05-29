@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 
 #include <stddef.h>
@@ -22,7 +23,7 @@ extern void *loadpng(const char *fn, unsigned *_width, unsigned *_height);
 extern void *readpng(const unsigned char*  base, size_t  size, unsigned *_width,
         unsigned *_height);
 extern void savepng(const char* fn, unsigned int nChannels, unsigned int width,
-        unsigned int height, void* pixels);
+        unsigned int height, SkinRotation rotation, void* pixels);
 extern void savebmp(const char* fn, unsigned int nChannels, unsigned int width,
         unsigned int height, void* pixels);
 
