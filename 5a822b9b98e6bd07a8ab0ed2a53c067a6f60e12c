@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "eec067a5_f250f837",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-05-29T20:30:12Z",
+      "side": 1,
+      "message": "On pixel, adb_keys is 0640.",
+      "parentUuid": "9cacd771_8d493110",
+      "range": {
+        "startLine": 284,
+        "startChar": 47,
+        "endLine": 284,
+        "endChar": 51
+      },
+      "revId": "5a822b9b98e6bd07a8ab0ed2a53c067a6f60e12c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6414bd32_dbff57e3",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 3
