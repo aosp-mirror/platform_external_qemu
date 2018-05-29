@@ -29,7 +29,9 @@ LOCAL_SRC_FILES := \
 LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
     $(LIBSPARSE_INCLUDES) \
-    $(LIBSELINUX_INCLUDES)
+    $(LIBSELINUX_INCLUDES) \
+    $(LOCAL_PATH)/../../../android/android-emu
+
 LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
 $(call end-emulator-library)
 
@@ -44,7 +46,13 @@ LOCAL_STATIC_LIBRARIES := \
     emulator-libsparse \
     emulator-libselinux \
     emulator-zlib \
-    $(LIBMMAN_WIN32_STATIC_LIBRARIES)
+    $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
+    android-emu-base
+
+# Link against static libstdc++ on Linux and Windows since the unit-tests
+# cannot pick up our custom versions of the library from
+# $(BUILD_OBJS_DIR)/lib[64]/
+$(call local-link-static-c++lib)
 $(call end-emulator-program)
 
 LOCAL_PATH := $(OLD_LOCAL_PATH)

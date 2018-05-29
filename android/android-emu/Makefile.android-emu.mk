@@ -602,12 +602,12 @@ endif
 
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
+    emulator-libext4_utils \
     $(ANDROID_EMU_BASE_STATIC_LIBRARIES) \
     $(LIBCURL_STATIC_LIBRARIES) \
     $(LIBKEYMASTER3_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
-    emulator-libext4_utils \
     emulator-libsparse \
     emulator-libselinux \
     emulator-libjpeg \
