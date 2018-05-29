@@ -22,6 +22,30 @@
       "revId": "66527d70f35ae04747585198b9b01188f054d70f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a55a98c6_e4e33ec5",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1133,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-29T18:42:17Z",
+      "side": 1,
+      "message": "I looked at other places in this file, we replace a file if android_op_wipe_data is enabled. Is this what we want?",
+      "parentUuid": "3757b86f_11b49f09",
+      "range": {
+        "startLine": 1133,
+        "startChar": 8,
+        "endLine": 1133,
+        "endChar": 56
+      },
+      "revId": "66527d70f35ae04747585198b9b01188f054d70f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
