@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8b9fdaa_e9d1c753",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-29T18:42:35Z",
+      "side": 1,
+      "message": "nit: I think there is a section that removes files when -wipe-data is given; you might want to\nremove the dtb there instead.\n\nalso please do the following tests\n1. make sure it works on images that do not support dtb (no regression)\n2. make sure the dtb work with kvm/hvf/haxm(mac/windows)",
+      "range": {
+        "startLine": 1126,
+        "startChar": 12,
+        "endLine": 1126,
+        "endChar": 32
+      },
+      "revId": "e394d4e3b466c66292b93aace2d17508b9e5a332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
