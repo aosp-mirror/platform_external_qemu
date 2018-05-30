@@ -268,47 +268,61 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     return 0;
 }
 
+static void prepareDataFolder(const char* destDirectory,
+                              const char* srcDirectory) {
+    // The adb_keys file permission will also be set in guest system.
+    // Referencing system/core/rootdir/init.usb.rc
+    static const int kAdbKeyDirFilePerm = 02750;
+    path_copy_dir(destDirectory, srcDirectory);
+    std::string adbKeyPath = PathUtils::join(
+            android::ConfigDirs::getUserDirectory(), "adbkey.pub");
+    if (path_is_regular(adbKeyPath.c_str()) &&
+        path_can_read(adbKeyPath.c_str())) {
+        std::string guestAdbKeyDir =
+                PathUtils::join(destDirectory, "misc", "adb");
+        std::string guestAdbKeyPath =
+                PathUtils::join(guestAdbKeyDir, "adb_keys");
+
+        path_mkdir_if_needed(guestAdbKeyDir.c_str(), kAdbKeyDirFilePerm);
+        path_copy_file(guestAdbKeyPath.c_str(), adbKeyPath.c_str());
+        android_chmod(guestAdbKeyPath.c_str(), 0640);
+    } else {
+        dwarning("cannot read adb public key file: %s", adbKeyPath.c_str());
+    }
+}
+
+static bool creatUserDataExt4Img(AndroidHwConfig* hw,
+                                 const char* dataDirectory) {
+    android_createExt4ImageFromDir(hw->disk_dataPartition_path, dataDirectory,
+                                   android_hw->disk_dataPartition_size, "data");
+
+    // Check if creating user data img succeed
+    System::FileSize diskSize;
+    if (System::get()->pathFileSize(hw->disk_dataPartition_path, &diskSize) &&
+        diskSize > 0) {
+        return true;
+    } else {
+        path_delete_file(hw->disk_dataPartition_path);
+        return false;
+    }
+}
+
 static int createUserData(AvdInfo* avd,
-                          std::string dataPath,
+                          const char* dataPath,
                           AndroidHwConfig* hw) {
     ScopedCPtr<char> initDir(avdInfo_getDataInitDirPath(avd));
     bool needCopyDataPartition = true;
     if (path_exists(initDir.get())) {
-        path_copy_dir(dataPath.c_str(), initDir.get());
-        std::string adbKeyPath = PathUtils::join(
-                android::ConfigDirs::getUserDirectory(), "adbkey.pub");
-        if (path_is_regular(adbKeyPath.c_str()) &&
-            path_can_read(adbKeyPath.c_str())) {
-            std::string guestAdbKeyDir =
-                    PathUtils::join(dataPath, "misc", "adb");
-            std::string guestAdbKeyPath =
-                    PathUtils::join(guestAdbKeyDir, "adb_keys");
-            path_mkdir_if_needed(guestAdbKeyDir.c_str(), 0777);
-            path_copy_file(guestAdbKeyPath.c_str(), adbKeyPath.c_str());
-            android_chmod(guestAdbKeyPath.c_str(), 0777);
-        } else {
-            dwarning("cannot read adb public key file: %s", adbKeyPath.c_str());
-        }
-        android_createExt4ImageFromDir(
-                hw->disk_dataPartition_path, dataPath.c_str(),
-                android_hw->disk_dataPartition_size, "data");
-        // TODO: remove dataPath folder
-
-        // Creating data partition can fail because of insufficient disk space
-        // or non-ascii path on Windows. Fall back to default userdata.img if
-        // it fails.
-        System::FileSize diskSize;
-        if (System::get()->pathFileSize(hw->disk_dataPartition_path,
-                                        &diskSize) &&
-            diskSize > 0) {
-            // We do not need to copy userdata.img if partition creation
-            // succeeded.
-            needCopyDataPartition = false;
-        }
+        D("Creating ext4 userdata partition: %s", dataPath);
+        prepareDataFolder(dataPath, initDir.get());
+        needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
+        path_delete_file(dataPath);
     }
+
     if (needCopyDataPartition) {
         if (path_exists(hw->disk_dataPartition_initPath)) {
-            D("Creating: %s\n", hw->disk_dataPartition_path);
+            D("Creating: %s by copying from %s \n", hw->disk_dataPartition_path,
+              hw->disk_dataPartition_initPath);
 
             if (path_copy_file(hw->disk_dataPartition_path,
                                hw->disk_dataPartition_initPath) < 0) {
@@ -921,9 +935,11 @@ extern "C" int main(int argc, char** argv) {
 
     // Create userdata file from init version if needed.
     if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
-        int ret = createUserData(avd, dataPath, hw);
-        if (ret != 0)
+        int ret = createUserData(avd, dataPath.c_str(), hw);
+        if (ret != 0) {
+            crashhandler_die("Failed to initialize userdata.img.");
             return ret;
+        }
     } else if (!hw->hw_arc) {
         // Resize userdata-qemu.img if the size is smaller than what
         // config.ini says and also delete userdata-qemu.img.qcow2.
