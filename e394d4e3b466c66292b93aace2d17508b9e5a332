@@ -22,6 +22,30 @@
       "revId": "e394d4e3b466c66292b93aace2d17508b9e5a332",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c6f6d29_5d5ac00e",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-30T00:21:48Z",
+      "side": 1,
+      "message": "1. I confirmed the emualtor booting when the feature is off.\n2. I cannot boot it on Linux. I replaced Android/Sdk/system-images/android-P/google_apis/x86_64/kernel-ranchu\n\n./objs/emulator -avd Pixel_XL_API_P -cores 1 -verbose -show-kernel\n\nI see these options populated:\n\n-dtb /usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/default.dtb\nandroidboot.android_dt_dir\u003d/proc/device-tree/firmware/android/\n\nThe .dtb file contains \"/dev/block/pci/pci0000:00/0000:00:07.0/by-name/vendor\".\n\n /usr/local/google/home/rkir/repo-emu-master/external/qemu/objs/qemu/linux-x86_64/qemu-system-x86_64 -dns-server 127.0.0.1 -serial stdio -device goldfish_pstore,addr\u003d0xff018000,size\u003d0x10000,file\u003d/usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/data/misc/pstore/pstore.bin -cpu android64 -enable-kvm -m 1536 -lcd-density 560 -object iothread,id\u003ddisk-iothread -nodefaults -kernel /usr/local/google/home/rkir/Android/Sdk/system-images/android-P/google_apis/x86_64//kernel-ranchu -initrd /usr/local/google/home/rkir/Android/Sdk/system-images/android-P/google_apis/x86_64//ramdisk.img -drive if\u003dnone,index\u003d0,id\u003dsystem,file\u003d/usr/local/google/home/rkir/Android/Sdk/system-images/android-P/google_apis/x86_64//system.img,read-only -device virtio-blk-pci,drive\u003dsystem,iothread\u003ddisk-iothread,modern-pio-notify -drive if\u003dnone,index\u003d1,id\u003dcache,file\u003d/usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/cache.img.qcow2,overlap-check\u003dnone,cache\u003dunsafe,l2-cache-size\u003d1048576 -device virtio-blk-pci,drive\u003dcache,iothread\u003ddisk-iothread,modern-pio-notify -drive if\u003dnone,index\u003d2,id\u003duserdata,file\u003d/usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/userdata-qemu.img.qcow2,overlap-check\u003dnone,cache\u003dunsafe,l2-cache-size\u003d1048576 -device virtio-blk-pci,drive\u003duserdata,iothread\u003ddisk-iothread,modern-pio-notify -drive if\u003dnone,index\u003d3,id\u003dencrypt,file\u003d/usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/encryptionkey.img.qcow2,overlap-check\u003dnone,cache\u003dunsafe,l2-cache-size\u003d1048576 -device virtio-blk-pci,drive\u003dencrypt,iothread\u003ddisk-iothread,modern-pio-notify -drive if\u003dnone,index\u003d4,id\u003dvendor,file\u003d/usr/local/google/home/rkir/Android/Sdk/system-images/android-P/google_apis/x86_64//vendor.img,read-only -device virtio-blk-pci,drive\u003dvendor,iothread\u003ddisk-iothread,modern-pio-notify -drive if\u003dnone,index\u003d5,id\u003dsdcard,file\u003d/usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/sdcard.img.qcow2,overlap-check\u003dnone,cache\u003dunsafe,l2-cache-size\u003d1048576 -device virtio-blk-pci,drive\u003dsdcard,iothread\u003ddisk-iothread,modern-pio-notify -dtb /usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/default.dtb -netdev user,id\u003dmynet -device virtio-net-pci,netdev\u003dmynet -device virtio-rng-pci -show-cursor -L /usr/local/google/home/rkir/repo-emu-master/external/qemu/objs/lib/pc-bios -soundhw hda -vga none -append \u0027qemu\u003d1 no_timer_check androidboot.hardware\u003dranchu clocksource\u003dpit no-kvmclock console\u003dttyS0,38400 android.qemud\u003d1 android.checkjni\u003d1 qemu.gles\u003d1 qemu.encrypt\u003d1 qemu.opengles.version\u003d131072 cma\u003d314M@0-4G qemu.wifi\u003d1 mac80211_hwsim.channels\u003d2 androidboot.android_dt_dir\u003d/proc/device-tree/firmware/android/ skip_initramfs rootwait ro init\u003d/init root\u003d/dev/vda1 loop.max_part\u003d7 ramoops.mem_address\u003d0xff018000 ramoops.mem_size\u003d0x10000 memmap\u003d0x10000$0xff018000 qemu.dalvik.vm.heapsize\u003d384m\u0027 -android-hw /usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/hardware-qemu.ini",
+      "parentUuid": "c8b9fdaa_e9d1c753",
+      "range": {
+        "startLine": 1126,
+        "startChar": 12,
+        "endLine": 1126,
+        "endChar": 32
+      },
+      "revId": "e394d4e3b466c66292b93aace2d17508b9e5a332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
