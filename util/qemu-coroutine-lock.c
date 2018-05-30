@@ -77,10 +77,24 @@ void coroutine_fn qemu_co_queue_wait(CoQueue *queue, CoMutex *mutex)
 void qemu_co_queue_run_restart(Coroutine *co)
 {
     Coroutine *next;
+    QSIMPLEQ_HEAD(, Coroutine) tmp_queue_wakeup =
+        QSIMPLEQ_HEAD_INITIALIZER(tmp_queue_wakeup);
 
     trace_qemu_co_queue_run_restart(co);
-    while ((next = QSIMPLEQ_FIRST(&co->co_queue_wakeup))) {
-        QSIMPLEQ_REMOVE_HEAD(&co->co_queue_wakeup, co_queue_next);
+    // while ((next = QSIMPLEQ_FIRST(&co->co_queue_wakeup))) {
+    //     QSIMPLEQ_REMOVE_HEAD(&co->co_queue_wakeup, co_queue_next);
+    /*
+     * We use temporal queue in order not to touch 'co' after entering
+     * 'next' coroutine.  The thing is that 'next' coroutine can resume
+     * current 'co' coroutine and eventually terminate (free) it (see
+     * linux-aio.c: ioq_submit() where qemu_laio_process_completions()
+     * is invoked).  The rule of thumb is simple: do not touch coroutine
+     * when you enter another one.
+     */
+    QSIMPLEQ_CONCAT(&tmp_queue_wakeup, &co->co_queue_wakeup);
+
+    while ((next = QSIMPLEQ_FIRST(&tmp_queue_wakeup))) {
+        QSIMPLEQ_REMOVE_HEAD(&tmp_queue_wakeup, co_queue_next);
         qemu_coroutine_enter(next);
     }
 }
