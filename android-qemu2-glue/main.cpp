@@ -907,7 +907,9 @@ extern "C" int main(int argc, char** argv) {
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
     // Initialize a persistent ram block.
-    std::string dataPath = PathUtils::join(avdInfo_getContentPath(avd), "data");
+    // dont touch original data folder in build environment
+    std::string dataPath = PathUtils::join(avdInfo_getContentPath(avd),
+            avdInfo_inAndroidBuild(avd) ? "build.avd/data" : "data");
     std::string pstorePath = PathUtils::join(dataPath, "misc", "pstore");
     std::string pstoreFile = PathUtils::join(pstorePath, "pstore.bin");
     if (android_op_wipe_data) {
