@@ -46,6 +46,30 @@
       "revId": "e394d4e3b466c66292b93aace2d17508b9e5a332",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e64092ca_562367b6",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-30T00:51:54Z",
+      "side": 1,
+      "message": "The .dtb file looks correct:\n\ndtc -I dtb /usr/local/google/home/rkir/.android/avd/Pixel_XL_API_P.avd/default.dtb\n/dts-v1/;\n\n/ {\n\n\tfirmware {\n\n\t\tandroid {\n\t\t\tcompatible \u003d \"android,firmware\";\n\n\t\t\tfstab {\n\t\t\t\tcompatible \u003d \"android,fstab\";\n\n\t\t\t\tvendor {\n\t\t\t\t\tcompatible \u003d \"android,vendor\";\n\t\t\t\t\tdev \u003d \"/dev/block/pci/pci0000:00/0000:00:07.0/by-name/vendor\";\n\t\t\t\t\ttype \u003d \"ext4\";\n\t\t\t\t\tmnt_flags \u003d \"noatime,ro,errors\u003dpanic\";\n\t\t\t\t\tfsmgr_flags \u003d \"wait\";\n\t\t\t\t};\n\t\t\t};\n\t\t};\n\t};\n};",
+      "parentUuid": "0c6f6d29_5d5ac00e",
+      "range": {
+        "startLine": 1126,
+        "startChar": 12,
+        "endLine": 1126,
+        "endChar": 32
+      },
+      "revId": "e394d4e3b466c66292b93aace2d17508b9e5a332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
