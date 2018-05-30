@@ -376,6 +376,23 @@ private:
         return args;
     }
 
+    static std::string cloneQcow2(const char* filePath) {
+        return filePath;
+        //std::string tmpDir = System::get()->getTempDir();
+        android::base::StringView dir;
+        android::base::StringView fileName;
+        android::base::PathUtils::split(filePath, &dir, &fileName);
+        android::base::StringView ext = android::base::PathUtils::extension(
+                fileName);
+        fileName = fileName.substr(0, fileName.size() - ext.size());
+        std::string clonedFilePath = android::base::PathUtils::join(dir,
+                std::string(fileName) + "_1" + ext.c_str());
+        fprintf(stderr, "copy from %s\n", filePath);
+        fprintf(stderr, "copy to %s\n", clonedFilePath.c_str());
+        path_copy_file(clonedFilePath.c_str(), filePath);
+        return clonedFilePath;
+    }
+
     android::ParameterList createPartionParameters(ImageType type,
                                                    bool writable) {
         int apiLevel = avdInfo_getApiLevel(m_avd);
@@ -388,6 +405,7 @@ private:
 #endif
 
         std::string deviceParam;
+        std::string bufferString;
         ScopedCPtr<const char> allocatedPath;
         StringView filePath;
         std::string sysImagePath, vendorImagePath;
@@ -452,15 +470,19 @@ private:
                 break;
             case IMAGE_TYPE_CACHE:
                 filePath = m_hw->disk_cachePartition_path;
-                driveParam += StringFormat("index=%d,id=cache,file=%s.qcow2",
-                                           m_driveIndex++, filePath);
+                bufferString = StringFormat("%s.qcow2", filePath);
+                bufferString = cloneQcow2(bufferString.c_str());
+                driveParam += StringFormat("index=%d,id=cache,file=%s",
+                                           m_driveIndex++, bufferString);
                 deviceParam = StringFormat("%s,drive=cache",
                                            kTarget.storageDeviceType);
                 break;
             case IMAGE_TYPE_USER_DATA:
                 filePath = m_hw->disk_dataPartition_path;
-                driveParam += StringFormat("index=%d,id=userdata,file=%s.qcow2",
-                                           m_driveIndex++, filePath);
+                bufferString = StringFormat("%s.qcow2", filePath);
+                bufferString = cloneQcow2(bufferString.c_str());
+                driveParam += StringFormat("index=%d,id=userdata,file=%s",
+                                           m_driveIndex++, bufferString);
                 deviceParam = StringFormat("%s,drive=userdata",
                                            kTarget.storageDeviceType);
                 break;
@@ -468,9 +490,11 @@ private:
                 if (m_hw->hw_sdCard_path != NULL &&
                     strcmp(m_hw->hw_sdCard_path, "")) {
                     filePath = m_hw->hw_sdCard_path;
+                    bufferString = StringFormat("%s.qcow2", filePath);
+                    bufferString = cloneQcow2(bufferString.c_str());
                     driveParam +=
-                            StringFormat("index=%d,id=sdcard,file=%s.qcow2",
-                                         m_driveIndex++, filePath);
+                            StringFormat("index=%d,id=sdcard,file=%s",
+                                         m_driveIndex++, bufferString);
                     deviceParam = StringFormat("%s,drive=sdcard",
                                                kTarget.storageDeviceType);
                 } else {
@@ -692,11 +716,11 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (filelock_create(coreHwIniPath) == NULL) {
-        // The AVD is already in use
-        derror("There's another emulator instance running with "
-               "the current AVD '%s'. Exiting...\n",
-               avdInfo_getName(avd));
-        return 1;
+        /* The AVD is already in use, we still support this as an
+         * experimental feature. Use a temporary hardware-qemu.ini
+         * file though to avoid overwriting the existing one. */
+         TempFile*  tempIni = tempfile_create();
+         coreHwIniPath = tempfile_path(tempIni);
     }
 
     if (snapshotLock) {

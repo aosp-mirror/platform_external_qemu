@@ -18,6 +18,8 @@
 #include <string.h>
 #include <fcntl.h>
 
+#include <stdio.h>
+
 #ifdef _WIN32
 #  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>
@@ -25,7 +27,8 @@
 #  include <unistd.h>
 #endif
 
-#define  D(...)  ((void)0)
+//#define  D(...)  ((void)0)
+#define  D(...)  fprintf(stderr, __VA_ARGS__);
 
 /** TEMP FILE SUPPORT
  **
@@ -51,7 +54,12 @@ static void       tempfile_atexit();
 static TempFile*  _all_tempfiles;
 
 TempFile*
-tempfile_create( void )
+tempfile_create( ) {
+    return tempfile_create_with_ext(NULL);
+}
+
+TempFile*
+tempfile_create_with_ext( const char* ext )
 {
     TempFile*    tempfile;
     const char*  tempname = NULL;
@@ -85,6 +93,9 @@ tempfile_create( void )
     if (p >= end) {
         D( "Xcannot create temporary file in /tmp/android !!" );
         return NULL;
+    }
+    if (ext) {
+        bufprint_temp_file( end, end + strlen(ext), ext);
     }
 
     D( "template: %s", template );

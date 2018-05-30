@@ -950,6 +950,7 @@ static int create_qcow2_images(void) {
      * the image files, but we go the easier (and faster) route and cache the
      * version number that is specified in build.prop.
      */
+    printf("create qcow2 images\n");
     const char* avd_data_dir = avdInfo_getContentPath(android_avdInfo);
     static const char sysimg_version_number_cache_basename[] =
         "version_num.cache";
