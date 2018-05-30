@@ -346,7 +346,10 @@ void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offs
     if (access & GL_MAP_WRITE_BIT) {
         if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
         void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
-        if (!gpu_ptr) fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
+        if (!gpu_ptr) {
+            fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
+            return;
+        }
         memcpy(gpu_ptr, guest_buffer, length);
         *out_res = ctx->glUnmapBuffer(target);
     }
