@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aff3432f_ede0f955",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-30T01:55:27Z",
+      "side": 1,
+      "message": "just making sure this is regenerated",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 60
+      },
+      "revId": "e3eae24ec276511d6279123f9abdc0925f6a7a59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ff941f7_e844f629",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-target.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-30T01:55:27Z",
+      "side": 1,
+      "message": "nit: unneeded new line",
+      "revId": "e3eae24ec276511d6279123f9abdc0925f6a7a59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86b23533_993a9e2d",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-target.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-30T01:55:27Z",
+      "side": 1,
+      "message": "nit:tab",
+      "revId": "e3eae24ec276511d6279123f9abdc0925f6a7a59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bc0b188_f5290960",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-30T01:55:27Z",
+      "side": 1,
+      "message": "looks like this merge is undoing some last Frank\u0027s CLs for snapshot testing and bugfixes. Please make sure it\u0027s rebased all the way",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 34,
+        "endChar": 12
+      },
+      "revId": "e3eae24ec276511d6279123f9abdc0925f6a7a59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8182895b_e31a9c66",
+        "filename": "android/android-emu/android/base/memory/LazyInstance.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-30T01:55:27Z",
+      "side": 1,
+      "message": "same thing about my StaticLock CL",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 95
+      },
+      "revId": "e3eae24ec276511d6279123f9abdc0925f6a7a59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

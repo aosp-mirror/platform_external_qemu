@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "53a92e7e_b6960a71",
+        "filename": ".gitignore",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-30T01:55:27Z",
+      "side": 0,
+      "message": "did you miss this or it is somewhere else?",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 9
+      },
+      "revId": "3768916677991a4c357a78a775bfda401f77f707",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e1760b70_9ec0e987",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-05-30T01:55:27Z",
+      "side": 0,
+      "message": "why all these are removed?",
+      "range": {
+        "startLine": 469,
+        "startChar": 21,
+        "endLine": 469,
+        "endChar": 39
+      },
+      "revId": "3768916677991a4c357a78a775bfda401f77f707",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
