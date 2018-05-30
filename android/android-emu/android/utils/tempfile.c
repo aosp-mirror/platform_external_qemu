@@ -51,7 +51,12 @@ static void       tempfile_atexit();
 static TempFile*  _all_tempfiles;
 
 TempFile*
-tempfile_create( void )
+tempfile_create( ) {
+    return tempfile_create_with_ext(NULL);
+}
+
+TempFile*
+tempfile_create_with_ext( const char* ext )
 {
     TempFile*    tempfile;
     const char*  tempname = NULL;
@@ -82,13 +87,20 @@ tempfile_create( void )
     char  *p = template, *end = p + sizeof(template);
 
     p = bufprint_temp_file( p, end, "emulator-XXXXXX" );
+    if (ext) {
+        bufprint( p, end, ext);
+    }
     if (p >= end) {
-        D( "Xcannot create temporary file in /tmp/android !!" );
+        D( "Xcannot create temporary file in /tmp/android !! " );
         return NULL;
     }
 
-    D( "template: %s", template );
-    tempfd = mkstemp( template );
+    D( "template: %s\n", template );
+    if (ext) {
+        tempfd = mkstemps( template, strlen(ext) );
+    } else {
+        tempfd = mkstemp( template );
+    }
     if (tempfd < 0) {
         D("cannot create temporary file in /tmp/android !!");
         return NULL;
