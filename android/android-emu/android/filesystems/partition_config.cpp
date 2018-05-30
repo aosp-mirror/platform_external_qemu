@@ -328,6 +328,7 @@ bool android_partition_configuration_setup(
         AndroidPartitionSetupFunction setup_func,
         void* setup_opaque,
         char** error_message) {
+    fprintf(stderr, "android_partition_configuration_setup\n");
     // Setup shared state.
     PartitionConfigState state[1] = {{
             .error_message = error_message,
@@ -371,6 +372,8 @@ bool android_partition_configuration_setup(
                           config->fstab_name);
         }
     }
+    fprintf(stderr, "vendor partition path %s\n", config->vendor_partition.path);
+    fprintf(stderr, "vendor partition init path %s\n", config->vendor_partition.init_path);
 
     // Initialize system partition image.
     if (!addNandImage(
