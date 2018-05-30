@@ -1075,8 +1075,7 @@ static int create_qcow2_images(void) {
             bdrv_img_create(
                 qcow2_image_path,
                 QCOW2_SUFFIX,
-                /*absolute path only for sys vendor*/
-                p < 2 ? backing_image_path : image_basename,
+                backing_image_path,
                 fmt,
                 NULL,
                 -1,
