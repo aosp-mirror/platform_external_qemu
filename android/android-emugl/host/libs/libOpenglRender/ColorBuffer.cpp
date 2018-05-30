@@ -176,6 +176,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
+    GLint prevUnpackAlignment;
+    s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
@@ -240,6 +244,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
     }
 
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
+
     s_gles2.glFinish();
     return cb;
 }
@@ -301,6 +307,10 @@ void ColorBuffer::readPixels(int x,
 void ColorBuffer::reformat(GLint internalformat,
                            GLenum format, GLenum type) {
 
+    GLint prevUnpackAlignment;
+    s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     format = sGetUnsizedColorBufferFormat(format);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
@@ -328,6 +338,8 @@ void ColorBuffer::reformat(GLint internalformat,
     m_internalFormat = internalformat;
     m_format = format;
     m_type = type;
+
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 }
 
 void ColorBuffer::subUpdate(int x,
