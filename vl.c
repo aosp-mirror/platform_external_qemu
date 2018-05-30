@@ -751,6 +751,11 @@ typedef struct {
     RunState to;
 } RunStateTransition;
 
+typedef struct {
+    const char* drive;
+    const char* backing_image_path;
+} DriveBackingPair;
+
 static const RunStateTransition runstate_transitions_def[] = {
     /*     from      ->     to      */
     { RUN_STATE_DEBUG, RUN_STATE_RUNNING },
@@ -979,59 +984,46 @@ static int create_qcow2_images(void) {
     }
 
     /* List of paths to all images that can be mounted.*/
-    const char* const image_paths[] = {
-        android_hw->disk_systemPartition_path ?: android_hw->disk_systemPartition_initPath,
-        android_hw->disk_vendorPartition_path ?: android_hw->disk_vendorPartition_initPath,
-        android_hw->disk_cachePartition_path,
-        android_hw->disk_dataPartition_path,
-        android_hw->hw_sdCard_path,
-        android_hw->disk_encryptionKeyPartition_path,
+    const DriveBackingPair image_paths[] = {
+        {"system", android_hw->disk_systemPartition_path ?: android_hw->disk_systemPartition_initPath},
+        {"vendor", android_hw->disk_vendorPartition_path ?: android_hw->disk_vendorPartition_initPath},
+        {"cache", android_hw->disk_cachePartition_path},
+        {"userdata", android_hw->disk_dataPartition_path},
+        {"sdcard", android_hw->hw_sdCard_path},
+        {"encrypt", android_hw->disk_encryptionKeyPartition_path},
     };
     /* List of paths to all images for cros.*/
-    const char* const image_paths_hw_arc[] = {
-        android_hw->disk_systemPartition_initPath,
-        android_hw->disk_vendorPartition_initPath,
-        android_hw->disk_dataPartition_path,
+    const DriveBackingPair image_paths_hw_arc[] = {
+        {"system", android_hw->disk_systemPartition_initPath},
+        {"vendor", android_hw->disk_vendorPartition_initPath},
+        {"userdata", android_hw->disk_dataPartition_path},
     };
     int count = ARRAY_SIZE(image_paths);
-    const char* const * images = image_paths;
+    const DriveBackingPair* images = image_paths;
     if (android_hw->hw_arc) {
         count = ARRAY_SIZE(image_paths_hw_arc);
         images = image_paths_hw_arc;
     }
     int p;
     for (p = 0; p < count; p++) {
-        const char* backing_image_path = images[p];
-        char* qcow2_image_path = NULL;
+        const char* backing_image_path = images[p].backing_image_path;
         if (!backing_image_path ||
             *backing_image_path == '\0') {
             /* If the path is NULL or empty, just ignore it.*/
             continue;
         }
-        char* image_basename = path_basename(backing_image_path);
-        if (p < 2) {
-            /* System & vendor image are special cases, the backing image is
-             * in the SDK folder, but the QCoW2 image that the emulator
-             * uses is created on a per-AVD basis and is placed in the
-             * AVD's data folder.
-             */
-            const char qcow2_suffix[] = "." QCOW2_SUFFIX;
-            size_t path_size = strlen(image_basename) + sizeof(qcow2_suffix) + 1;
-            char* image_qcow2_basename = malloc(path_size);
-            bufprint(image_qcow2_basename, image_qcow2_basename + path_size, "%s%s", image_basename, qcow2_suffix);
-            qcow2_image_path =
-                path_join(avd_data_dir, image_qcow2_basename);
-            free(image_qcow2_basename);
-        } else {
-            /* For all the other images except system image,
-             * just create another file alongside them
-             * with a 'qcow2' extension
-             */
-            const char qcow2_suffix[] = "." QCOW2_SUFFIX;
-            size_t path_size = strlen(backing_image_path) + sizeof(qcow2_suffix) + 1;
-            qcow2_image_path = malloc(path_size);
-            bufprint(qcow2_image_path, qcow2_image_path + path_size, "%s%s", backing_image_path, qcow2_suffix);
+        QemuOpts* opt = qemu_opts_find(qemu_find_opts("drive"), images[p].drive);
+        if (!opt) {
+            continue;
         }
+        const char* qcow2_image_path = qemu_opt_get(opt, "file");
+        const char qcow2_suffix[] = "." QCOW2_SUFFIX;
+        if (0 != strcmp(qcow2_suffix, qcow2_image_path
+                + strlen(qcow2_image_path) - strlen(qcow2_suffix))) {
+            // We are not using qcow2
+            continue;
+        }
+        char* image_basename = path_basename(backing_image_path);
 
         Error* img_creation_error = NULL;
         if (!path_exists(qcow2_image_path) ||
@@ -1058,7 +1050,6 @@ static int create_qcow2_images(void) {
                 true);
         }
         free(image_basename);
-        free(qcow2_image_path);
         if (img_creation_error) {
             error_report("%s", error_get_pretty(img_creation_error));
             return 0;
