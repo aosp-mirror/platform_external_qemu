@@ -95,6 +95,9 @@ extern "C" {
 extern bool android_op_wipe_data;
 extern bool android_op_writable_system;
 
+// Check if we are running multiple emulators on the same AVD
+static bool is_multi_instance = false;
+
 using namespace android::base;
 using android::base::System;
 namespace fc = android::featurecontrol;
@@ -376,6 +379,19 @@ private:
         return args;
     }
 
+    static const char* cloneQcow2IfNeeded(const char* filePath) {
+        if (!is_multi_instance) return filePath;
+        android::base::StringView ext = android::base::PathUtils::extension(
+                filePath);
+        if (ext != ".qcow2") {
+            return filePath;
+        }
+        TempFile* tmpFile = tempfile_create_with_ext(".qcow2");
+        const char* clonedFilePath = tempfile_path(tmpFile);
+        path_copy_file(clonedFilePath, filePath);
+        return clonedFilePath;
+    }
+
     android::ParameterList createPartionParameters(ImageType type,
                                                    bool writable) {
         int apiLevel = avdInfo_getApiLevel(m_avd);
@@ -388,6 +404,8 @@ private:
 #endif
 
         std::string deviceParam;
+        std::string bufferString;
+        const char* qcow2Path;
         ScopedCPtr<const char> allocatedPath;
         StringView filePath;
         std::string sysImagePath, vendorImagePath;
@@ -452,15 +470,19 @@ private:
                 break;
             case IMAGE_TYPE_CACHE:
                 filePath = m_hw->disk_cachePartition_path;
-                driveParam += StringFormat("index=%d,id=cache,file=%s.qcow2",
-                                           m_driveIndex++, filePath);
+                bufferString = StringFormat("%s.qcow2", filePath);
+                bufferString = cloneQcow2IfNeeded(bufferString.c_str());
+                driveParam += StringFormat("index=%d,id=cache,file=%s",
+                                           m_driveIndex++, bufferString);
                 deviceParam = StringFormat("%s,drive=cache",
                                            kTarget.storageDeviceType);
                 break;
             case IMAGE_TYPE_USER_DATA:
                 filePath = m_hw->disk_dataPartition_path;
-                driveParam += StringFormat("index=%d,id=userdata,file=%s.qcow2",
-                                           m_driveIndex++, filePath);
+                bufferString = StringFormat("%s.qcow2", filePath);
+                qcow2Path = cloneQcow2IfNeeded(bufferString.c_str());
+                driveParam += StringFormat("index=%d,id=userdata,file=%s",
+                                           m_driveIndex++, qcow2Path);
                 deviceParam = StringFormat("%s,drive=userdata",
                                            kTarget.storageDeviceType);
                 break;
@@ -468,9 +490,11 @@ private:
                 if (m_hw->hw_sdCard_path != NULL &&
                     strcmp(m_hw->hw_sdCard_path, "")) {
                     filePath = m_hw->hw_sdCard_path;
+                    bufferString = StringFormat("%s.qcow2", filePath);
+                    qcow2Path = cloneQcow2IfNeeded(bufferString.c_str());
                     driveParam +=
-                            StringFormat("index=%d,id=sdcard,file=%s.qcow2",
-                                         m_driveIndex++, filePath);
+                            StringFormat("index=%d,id=sdcard,file=%s",
+                                         m_driveIndex++, qcow2Path);
                     deviceParam = StringFormat("%s,drive=sdcard",
                                                kTarget.storageDeviceType);
                 } else {
@@ -483,9 +507,11 @@ private:
                     m_hw->disk_encryptionKeyPartition_path != NULL &&
                     strcmp(m_hw->disk_encryptionKeyPartition_path, "")) {
                     filePath = m_hw->disk_encryptionKeyPartition_path;
+                    bufferString = StringFormat("%s.qcow2", filePath);
+                    qcow2Path = cloneQcow2IfNeeded(bufferString.c_str());
                     driveParam +=
-                            StringFormat("index=%d,id=encrypt,file=%s.qcow2",
-                                         m_driveIndex++, filePath);
+                            StringFormat("index=%d,id=encrypt,file=%s",
+                                         m_driveIndex++, qcow2Path);
                     deviceParam = StringFormat("%s,drive=encrypt",
                                                kTarget.storageDeviceType);
                 } else {
@@ -692,11 +718,16 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (filelock_create(coreHwIniPath) == NULL) {
-        // The AVD is already in use
-        derror("There's another emulator instance running with "
-               "the current AVD '%s'. Exiting...\n",
-               avdInfo_getName(avd));
-        return 1;
+        /* The AVD is already in use, we still support this as an
+         * experimental feature. Use a temporary hardware-qemu.ini
+         * file though to avoid overwriting the existing one. */
+         TempFile*  tempIni = tempfile_create();
+         coreHwIniPath = tempfile_path(tempIni);
+         is_multi_instance = true;
+         opts->no_snapshot_save = true;
+         dwarning("Running multiple emulator with the same AVD"
+                 "is an experimental feature. "
+                 "Snapshot might be unstable.\n");
     }
 
     if (snapshotLock) {
