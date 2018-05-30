@@ -316,7 +316,7 @@ static int createUserData(AvdInfo* avd,
         D("Creating ext4 userdata partition: %s", dataPath);
         prepareDataFolder(dataPath, initDir.get());
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
-        path_delete_file(dataPath);
+        path_delete_dir(dataPath);
     }
 
     if (needCopyDataPartition) {
