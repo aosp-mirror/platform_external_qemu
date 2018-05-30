@@ -291,6 +291,10 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
     if (wantOverlay && mHaveNewMask) {
         // Create a texture from the mask image and make it
         // available to be blended
+        GLint prevUnpackAlignment;
+        s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
 
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -301,6 +305,8 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
 
         s_gles2.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         s_gles2.glEnable(GL_BLEND);
+
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 
         mHaveNewMask = false;
         mMaskIsValid = true;
