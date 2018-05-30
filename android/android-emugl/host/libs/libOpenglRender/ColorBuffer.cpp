@@ -176,6 +176,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
+    GLint prevUnpackAlignment;
+    s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
@@ -239,6 +243,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 #define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
         cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
     }
+
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 
     s_gles2.glFinish();
     return cb;
