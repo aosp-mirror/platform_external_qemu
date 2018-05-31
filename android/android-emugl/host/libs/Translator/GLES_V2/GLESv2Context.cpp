@@ -54,6 +54,7 @@ static const char* sPickVersionStringPart(int maj, int min) {
 }
 
 void GLESv2Context::setMaxGlesVersion(GLESVersion version) {
+    fprintf(stderr, ">>>>>>>>>>> SETTING GLES MAX VERSION TO %d\n", version);
     s_maxGlesVersion = version;
 }
 
@@ -143,6 +144,9 @@ void GLESv2Context::initEmulatedBuffers() {
 GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
         android::base::Stream* stream, GlLibrary* glLib)
         : GLEScontext(globalNameSpace, stream, glLib) {
+    if (s_maxGlesVersion < maj) {
+        setMaxGlesVersion((GLESVersion)maj);
+    }
     if (stream) {
         assert(maj == m_glesMajorVersion);
         assert(min == m_glesMinorVersion);
@@ -199,6 +203,15 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
 
 void GLESv2Context::postLoadRestoreCtx() {
     GLDispatch& dispatcher = GLEScontext::dispatcher();
+    fprintf(stderr, "GL dispatcher %p\n", &dispatcher);
+
+    if (dispatcher.isInitialized()) {
+        fprintf(stderr, "%s\n", "GL dispatcher initialized.");
+    }
+    else {
+        fprintf(stderr, "%s\n", "GL dispatcher not initialized (!!!!!!!!!!)");
+    }
+
     m_useProgramData = shareGroup()->getObjectDataPtr(
             NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
     const GLuint globalProgramName = shareGroup()->getGlobalName(
@@ -214,6 +227,9 @@ void GLESv2Context::postLoadRestoreCtx() {
             genVAOName(vaoIte.first, false);
         }
         if (m_glesMajorVersion >= 3) {
+            // when major version was not set correctly, glBindVertexArray would
+            // be nullptr and cause a segfault here and later in this function.
+            fprintf(stderr, "GL dispatcher.glBindVertexArray: %p\n", dispatcher.glBindVertexArray);
             dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         }
         for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
@@ -289,6 +305,7 @@ void GLESv2Context::postLoadRestoreCtx() {
         }
     }
     if (m_glesMajorVersion >= 3) {
+        fprintf(stderr, "GL dispatcher.glBindVertexArray: %p\n", dispatcher.glBindVertexArray);
         dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
         auto bindBufferRangeFunc =
                 [this](GLenum target,
