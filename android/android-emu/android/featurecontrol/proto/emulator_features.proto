@@ -49,4 +49,6 @@ enum Feature {
     WindowsOnDemandSnapshotLoad = 24;
 
     WindowsHypervisorPlatform = 25;
+
+    KernelDeviceTreeBlobSupport = 26;
 }
