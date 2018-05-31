@@ -70,6 +70,30 @@
       "revId": "e394d4e3b466c66292b93aace2d17508b9e5a332",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d197879_d1cf0cef",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-05-31T18:36:37Z",
+      "side": 1,
+      "message": "Linux and WHPX boot with and without dtb.",
+      "parentUuid": "e64092ca_562367b6",
+      "range": {
+        "startLine": 1126,
+        "startChar": 12,
+        "endLine": 1126,
+        "endChar": 32
+      },
+      "revId": "e394d4e3b466c66292b93aace2d17508b9e5a332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
