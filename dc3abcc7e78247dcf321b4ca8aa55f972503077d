@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a45d05bb_223d898d",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 16
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-31T22:48:23Z",
+      "side": 1,
+      "message": "remove comment",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 192,
+        "endChar": 1
+      },
+      "revId": "dc3abcc7e78247dcf321b4ca8aa55f972503077d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
