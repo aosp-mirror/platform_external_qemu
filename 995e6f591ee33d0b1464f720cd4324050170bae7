@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "826803fc_4b2548d9",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1056,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-31T00:04:39Z",
+      "side": 1,
+      "message": "cleaner to remove the \"0 !\u003d\"?",
+      "range": {
+        "startLine": 1056,
+        "startChar": 16,
+        "endLine": 1056,
+        "endChar": 21
+      },
+      "revId": "995e6f591ee33d0b1464f720cd4324050170bae7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
