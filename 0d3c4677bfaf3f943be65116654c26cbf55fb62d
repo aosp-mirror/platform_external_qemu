@@ -22,6 +22,30 @@
       "revId": "0d3c4677bfaf3f943be65116654c26cbf55fb62d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6b91ca8_f16b70cc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-05-31T03:18:25Z",
+      "side": 1,
+      "message": "(we do have actual users of migration at the moment, btw)",
+      "parentUuid": "c34c4944_f2ca6af9",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 10
+      },
+      "revId": "0d3c4677bfaf3f943be65116654c26cbf55fb62d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
