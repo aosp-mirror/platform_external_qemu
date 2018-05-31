@@ -399,6 +399,9 @@ EOF
     exit 1
 fi
 
+# Check asan support
+[ "$OPTION_SANITIZER" != "no" ] && [ "$OPTION_MINGW" = "yes" ] && panic "Asan is not supported under windows"
+
 if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
     if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc -a \
          ! -d "$OPTION_AOSP_PREBUILTS_DIR"/clang ]; then
@@ -1044,11 +1047,6 @@ if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
         if [ "$OPTION_MINGW" = "no" ] ; then
           log "Bundling ${LIBCPLUSPLUS}"
           copy_toolchain_lib "${OUT_DIR}/lib64" "$(dirname ${LIBCPLUSPLUS})" libc++
-        fi
-        if [ "$OPTION_SANITIZER" != "no" ] ; then
-          LIBASAN=$("$GEN_SDK" $GEN_SDK_FLAGS --print=libasan-dir unused_parameter)
-          copy_toolchain_lib "${OUT_DIR}/intermediates64" "$LIBASAN" libclang_rt.asan-x86_64-android
-          copy_toolchain_lib "${OUT_DIR}/lib64" "$LIBASAN" libclang_rt.asan-x86_64-android
         fi
         ;;
         *) log "Not copying toolchain libraries for ${BUILD_TARGET_OS}";;
