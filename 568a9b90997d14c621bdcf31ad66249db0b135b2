@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "92fec0c5_3f6d665a",
+        "filename": "android-qemu2-glue/dtb.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-31T19:42:13Z",
+      "side": 1,
+      "message": "static ?",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 4
+      },
+      "revId": "568a9b90997d14c621bdcf31ad66249db0b135b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "63a79235_4ffc194b",
+        "filename": "android-qemu2-glue/dtb.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-31T19:42:13Z",
+      "side": 1,
+      "message": "static ?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 4
+      },
+      "revId": "568a9b90997d14c621bdcf31ad66249db0b135b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a3b9a2b_60de0208",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-31T19:42:13Z",
+      "side": 1,
+      "message": "nit: ordering of include",
+      "range": {
+        "startLine": 73,
+        "startChar": 1,
+        "endLine": 73,
+        "endChar": 35
+      },
+      "revId": "568a9b90997d14c621bdcf31ad66249db0b135b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b6ea909_85a63e4b",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 1136,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-31T19:42:13Z",
+      "side": 1,
+      "message": "add an error message on what happened",
+      "range": {
+        "startLine": 1136,
+        "startChar": 23,
+        "endLine": 1136,
+        "endChar": 33
+      },
+      "revId": "568a9b90997d14c621bdcf31ad66249db0b135b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea28dab7_125dc38c",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 15
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-31T19:42:13Z",
+      "side": 1,
+      "message": "on",
+      "range": {
+        "startLine": 192,
+        "startChar": 31,
+        "endLine": 192,
+        "endChar": 34
+      },
+      "revId": "568a9b90997d14c621bdcf31ad66249db0b135b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac075751_7bc6dd00",
+        "filename": "android/data/advancedFeaturesCanary.ini",
+        "patchSetId": 15
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-05-31T19:42:13Z",
+      "side": 1,
+      "message": "uncomment it",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 192,
+        "endChar": 1
+      },
+      "revId": "568a9b90997d14c621bdcf31ad66249db0b135b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
