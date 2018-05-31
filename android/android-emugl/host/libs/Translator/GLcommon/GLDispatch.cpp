@@ -68,6 +68,15 @@ static const std::unordered_map<std::string, std::string> sAliasExtra = {
                     address = (void *)getGLFuncAddress(it->second.c_str(), glLib); \
                 } \
             } \
+            if (!strcmp(#func_name, "glGetStringi")) { \
+                fprintf(stderr, "================ loading glGetStringi %p\n", address); \
+            } \
+            if (!strcmp(#func_name, "glGetString")) { \
+                fprintf(stderr, "================ loading glGetString (!) %p\n", address); \
+            } \
+            if (!strcmp(#func_name, "glBindVertexArray")) { \
+                fprintf(stderr, "================ loading glBindVertexArray %p\n", address); \
+            } \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
             } else { \
@@ -150,6 +159,9 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
 
     /* Load OpenGL ES 3.x functions through 3.1. Not all are supported;
      * leave it up to EGL to determine support level. */
+
+    fprintf(stderr, "GLDispatch version %d\n", version);
+    fprintf(stderr, "(GLES_3_0 is) %d\n", GLES_3_0);
 
     if (version >= GLES_3_0) {
         LIST_GLES3_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
