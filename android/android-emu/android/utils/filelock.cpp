@@ -426,11 +426,8 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
                         freshness = FRESHNESS_STALE;
                         tries = 1;
                         break;
-                    // Don't try again if timeout occurred.
+                    // Timeout, retry
                     case System::WaitExitResult::Timeout:
-                        freshness = FRESHNESS_FRESH;
-                        tries = 0;
-                        break;
                     // Keep trying no error.
                     case System::WaitExitResult::Error:
                     default:
