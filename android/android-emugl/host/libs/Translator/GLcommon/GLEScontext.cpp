@@ -211,6 +211,8 @@ static std::string getHostExtensionsString(GLDispatch* dispatch) {
         GLenum err = dispatch->glGetError();
         if (err == GL_NO_ERROR) {
             for (int n = 0; n < num_exts; n++) {
+                fprintf(stderr, "%s\n", ">>>>>>>>>>>>>>> glGetStringi attempted");
+                fprintf(stderr, "segfault %s\n", *(int*)(0));
                 const char* ext = reinterpret_cast<const char*>(
                         dispatch->glGetStringi(GL_EXTENSIONS, n));
                 if (ext != NULL) {
@@ -227,6 +229,11 @@ static std::string getHostExtensionsString(GLDispatch* dispatch) {
     // our system does not actually support
     // GL 3.0 style extension getting.
     if (!dispatch->glGetStringi || num_exts == 0) {
+        fprintf(stderr, "glGetStringi %p\n", dispatch->glGetStringi);
+        fprintf(stderr, "glGetString %p\n", dispatch->glGetString);
+        fprintf(stderr, "num exts %d\n", num_exts);
+        fprintf(stderr, "%s\n", ">>>>>>>>>>>>>>> glGetString attempted");
+        fprintf(stderr, "segfault %s\n", *(int*)(0));
         const char* extensions = reinterpret_cast<const char*>(
                 dispatch->glGetString(GL_EXTENSIONS));
         if (extensions) {

@@ -68,6 +68,12 @@ static const std::unordered_map<std::string, std::string> sAliasExtra = {
                     address = (void *)getGLFuncAddress(it->second.c_str(), glLib); \
                 } \
             } \
+            if (!strcmp(#func_name, "glGetStringi")) { \
+                fprintf(stderr, "================ loading glGetStringi %p\n", address); \
+            } \
+            if (!strcmp(#func_name, "glGetString")) { \
+                fprintf(stderr, "================ loading glGetString (!) %p\n", address); \
+            } \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
             } else { \
