@@ -160,6 +160,7 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
         CURRENT_THREAD()                                     \
         if(tls_thread->getError() == EGL_SUCCESS) {          \
           tls_thread->setError(err);                         \
+          fprintf(stderr, "EGLIMP RETURN_ERROR %d\n", err);  \
         }                                                    \
         return ret;
 
@@ -941,6 +942,8 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
     if(!EglValidate::noAttribs(attrib_list)) {
         int i = 0;
         while(attrib_list[i] != EGL_NONE) {
+            fprintf(stderr, "%s: attrib 0x%x\n", __func__, attrib_list[i]);
+
             EGLint attrib_val = attrib_list[i + 1];
             switch(attrib_list[i]) {
             case EGL_CONTEXT_MAJOR_VERSION_KHR:
