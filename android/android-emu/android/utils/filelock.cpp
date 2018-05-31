@@ -284,11 +284,11 @@ static int filelock_lock(FileLock* lock, int liveProcessTimeout /* TODO */) {
 }
 #else
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock, int live_process_timeout) {
+static int filelock_lock(FileLock* lock, int timeout) {
     int    ret;
     int    temp_fd = -1;
     int    lock_fd = -1;
-    int    rc, tries;
+    int    rc;
     FILE*  f = NULL;
     char   pid[8];
     struct stat  st_temp;
@@ -317,19 +317,16 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
     }
 
     /* now attempt to link the temp file to the lock file */
-    for (tries = 4; tries > 0; tries--)
+    do
     {
-        const int kSleepDurationMsMax = 2000;  // 2 seconds.
         const int kSleepDurationMsIncrement = 50;
 
         if (sleep_duration_ms > 0) {
-            if (sleep_duration_ms > kSleepDurationMsMax) {
-                D("Cannot acquire lock file '%s'", lock->lock);
-                goto Fail;
-            }
             System::get()->sleepMs(sleep_duration_ms);
+            timeout -= sleep_duration_ms;
         }
-        sleep_duration_ms += kSleepDurationMsIncrement;
+        sleep_duration_ms = std::max(timeout,
+                sleep_duration_ms + kSleepDurationMsIncrement);
 
         // The return value of link() is buggy on NFS, so ignore it.
         // and use lstat() to look at the result.
@@ -377,7 +374,6 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
 
             goto Fail;
         }
-
         /* if we get there, it means that the link() call failed */
         /* check the lockfile to see if it is stale              */
         typedef enum {
@@ -415,27 +411,13 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
             rc = HANDLE_EINTR(kill(lockpid, 0));
             if (rc == 0 || errno == EPERM) {
                 freshness = FRESHNESS_FRESH;
-                if (live_process_timeout) {
-                    // Try waiting for the specified timeout for
-                    // the locking process to exit. If that doesn't work, bail.
-                    // If we waited until the process exited, the process
-                    // is not fresh anymore.
-                    switch (System::get()->waitForProcessExit(lockpid, live_process_timeout)) {
-                    // Try agian just once if we waited out the process.
-                    case System::WaitExitResult::Exited:
-                        freshness = FRESHNESS_STALE;
-                        tries = 1;
-                        break;
-                    // Don't try again if timeout occurred.
-                    case System::WaitExitResult::Timeout:
-                        freshness = FRESHNESS_FRESH;
-                        tries = 0;
-                        break;
-                    // Keep trying no error.
-                    case System::WaitExitResult::Error:
-                    default:
-                        break;
-                    }
+                // Try checking the locking process to exit.
+                // If that doesn't work, bail.
+                // If we waited until the process exited, the process
+                // is not fresh anymore.
+                if (System::get()->waitForProcessExit(lockpid, 0) ==
+                        System::WaitExitResult::Exited) {
+                    freshness = FRESHNESS_STALE;
                 }
             } else if (rc < 0 && errno == ESRCH) {
                 freshness = FRESHNESS_STALE;
@@ -451,10 +433,8 @@ static int filelock_lock(FileLock* lock, int live_process_timeout) {
         if (freshness == FRESHNESS_STALE) {
             D("Removing stale lockfile '%s'", lock->lock);
             rc = HANDLE_EINTR(unlink(lock->lock));
-            sleep_duration_ms = 0;
-            tries++;
         }
-    }
+    }  while (timeout > 0);
     D("file '%s' is already in use by another process", lock->file);
 
 Fail:
