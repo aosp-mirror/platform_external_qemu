@@ -70,6 +70,30 @@
       "revId": "99dbbbee7dd48f9b0e82c682191f166f8c873b04",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "607688f9_b0b4773d",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-01T23:47:26Z",
+      "side": 1,
+      "message": "Yurii, would you be more specific about which idea you prefer? Retry with live_process_timeout, or retry with a general overall timeout?",
+      "parentUuid": "84071676_df7f1626",
+      "range": {
+        "startLine": 429,
+        "startChar": 18,
+        "endLine": 430,
+        "endChar": 57
+      },
+      "revId": "99dbbbee7dd48f9b0e82c682191f166f8c873b04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
