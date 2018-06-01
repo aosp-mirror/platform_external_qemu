@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "36e10a7d_a7a122b4",
+        "filename": "android/android-emu/android/base/threads/Async_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-01T01:20:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b68aa8a4_f3bf7cd5",
+      "range": {
+        "startLine": 23,
+        "startChar": 24,
+        "endLine": 23,
+        "endChar": 28
+      },
+      "revId": "9ea9517ad563e23c07d49001b0d856bb89aca2d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a2c90897_cecc37fa",
         "filename": "android/android-emu/android/base/threads/Thread_pthread.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-06-01T01:14:00Z",
       "side": 1,
       "message": "nit: you could use a higher-level pattern here, e.g.\n\nconst auto useAttributes \u003d mStackSize !\u003d 0;\nif (useAttributes) { init |attr| }\n...\npthread_create(useAttributes ? \u0026attr : nullptr)\n...\nif (useAttributes) { destroy |attr| }",
+      "range": {
+        "startLine": 59,
+        "startChar": 8,
+        "endLine": 59,
+        "endChar": 20
+      },
+      "revId": "9ea9517ad563e23c07d49001b0d856bb89aca2d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "640b71b5_c90a0cb5",
+        "filename": "android/android-emu/android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-01T01:20:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a2c90897_cecc37fa",
       "range": {
         "startLine": 59,
         "startChar": 8,
