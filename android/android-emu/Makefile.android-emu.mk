@@ -596,9 +596,6 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-weak_framework,Hypervisor
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,OpenGL
 endif
-ifneq (,$(BUILD_SANITIZER))
-   ANDROID_EMU_BASE_LDLIBS += -lclang_rt.asan-x86_64 -ldl
-endif
 
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
@@ -715,6 +712,7 @@ LOCAL_SRC_FILES := \
   android/base/synchronization/ReadWriteLock_unittest.cpp \
   android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
+  android/base/threads/Async_unittest.cpp \
   android/base/threads/FunctorThread_unittest.cpp \
   android/base/threads/ParallelTask_unittest.cpp \
   android/base/threads/Thread_unittest.cpp \

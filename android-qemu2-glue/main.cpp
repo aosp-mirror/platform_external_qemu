@@ -67,6 +67,7 @@ extern "C" {
 #include "hw/misc/goldfish_pstore.h"
 }
 
+#include "android-qemu2-glue/dtb.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
@@ -95,6 +96,9 @@ extern "C" {
 extern bool android_op_wipe_data;
 extern bool android_op_writable_system;
 
+// Check if we are running multiple emulators on the same AVD
+static bool is_multi_instance = false;
+
 using namespace android::base;
 using android::base::System;
 namespace fc = android::featurecontrol;
@@ -113,6 +117,9 @@ enum ImageType {
 
 const int kMaxPartitions = IMAGE_TYPE_MAX;
 const int kMaxTargetQemuParams = 16;
+
+const int kVendorUnencryptedPartitionId = 6;
+const int kVendorEncryptedPartitionId = 7;
 
 /*
  * A structure used to model information about a given target CPU architecture.
@@ -316,7 +323,7 @@ static int createUserData(AvdInfo* avd,
         D("Creating ext4 userdata partition: %s", dataPath);
         prepareDataFolder(dataPath, initDir.get());
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
-        path_delete_file(dataPath);
+        path_delete_dir(dataPath);
     }
 
     if (needCopyDataPartition) {
@@ -376,6 +383,23 @@ private:
         return args;
     }
 
+    static void cloneQcow2IfNeeded(const char* filePath,
+            const char** clonedPath,
+            bool * isCloned) {
+        *isCloned = false;
+        *clonedPath = filePath;
+        if (!is_multi_instance) return;
+        android::base::StringView ext = android::base::PathUtils::extension(
+                filePath);
+        if (ext != ".qcow2") {
+            return;
+        }
+        TempFile* tmpFile = tempfile_create_with_ext(".qcow2");
+        *clonedPath = tempfile_path(tmpFile);
+        path_copy_file(*clonedPath, filePath);
+        *isCloned = true;
+    }
+
     android::ParameterList createPartionParameters(ImageType type,
                                                    bool writable) {
         int apiLevel = avdInfo_getApiLevel(m_avd);
@@ -388,10 +412,13 @@ private:
 #endif
 
         std::string deviceParam;
+        std::string bufferString;
+        const char* qcow2Path;
         ScopedCPtr<const char> allocatedPath;
         StringView filePath;
         std::string sysImagePath, vendorImagePath;
         bool qCow2Format = true;
+        bool needClone = false;
         switch (type) {
             case IMAGE_TYPE_SYSTEM:
                 // API 15 and under images need a read+write system image.
@@ -452,15 +479,22 @@ private:
                 break;
             case IMAGE_TYPE_CACHE:
                 filePath = m_hw->disk_cachePartition_path;
-                driveParam += StringFormat("index=%d,id=cache,file=%s.qcow2",
-                                           m_driveIndex++, filePath);
+                bufferString = StringFormat("%s.qcow2", filePath);
+                cloneQcow2IfNeeded(bufferString.c_str(), &qcow2Path, &needClone);
+                driveParam += StringFormat("index=%d,id=cache,file=%s",
+                                           m_driveIndex++, qcow2Path);
+                if (needClone) driveParam += ",need-rebase";
                 deviceParam = StringFormat("%s,drive=cache",
                                            kTarget.storageDeviceType);
                 break;
             case IMAGE_TYPE_USER_DATA:
                 filePath = m_hw->disk_dataPartition_path;
-                driveParam += StringFormat("index=%d,id=userdata,file=%s.qcow2",
-                                           m_driveIndex++, filePath);
+                bufferString = StringFormat("%s.qcow2", filePath);
+                cloneQcow2IfNeeded(bufferString.c_str(), &qcow2Path,
+                        &needClone);
+                driveParam += StringFormat("index=%d,id=userdata,file=%s",
+                                           m_driveIndex++, qcow2Path);
+                if (needClone) driveParam += ",need-rebase";
                 deviceParam = StringFormat("%s,drive=userdata",
                                            kTarget.storageDeviceType);
                 break;
@@ -468,9 +502,13 @@ private:
                 if (m_hw->hw_sdCard_path != NULL &&
                     strcmp(m_hw->hw_sdCard_path, "")) {
                     filePath = m_hw->hw_sdCard_path;
+                    bufferString = StringFormat("%s.qcow2", filePath);
+                    cloneQcow2IfNeeded(bufferString.c_str(), &qcow2Path,
+                            &needClone);
                     driveParam +=
-                            StringFormat("index=%d,id=sdcard,file=%s.qcow2",
-                                         m_driveIndex++, filePath);
+                            StringFormat("index=%d,id=sdcard,file=%s",
+                                         m_driveIndex++, qcow2Path);
+                    if (needClone) driveParam += ",need-rebase";
                     deviceParam = StringFormat("%s,drive=sdcard",
                                                kTarget.storageDeviceType);
                 } else {
@@ -483,9 +521,13 @@ private:
                     m_hw->disk_encryptionKeyPartition_path != NULL &&
                     strcmp(m_hw->disk_encryptionKeyPartition_path, "")) {
                     filePath = m_hw->disk_encryptionKeyPartition_path;
+                    bufferString = StringFormat("%s.qcow2", filePath);
+                    cloneQcow2IfNeeded(bufferString.c_str(), &qcow2Path,
+                            &needClone);
                     driveParam +=
-                            StringFormat("index=%d,id=encrypt,file=%s.qcow2",
-                                         m_driveIndex++, filePath);
+                            StringFormat("index=%d,id=encrypt,file=%s",
+                                         m_driveIndex++, qcow2Path);
+                    if (needClone) driveParam += ",need-rebase";
                     deviceParam = StringFormat("%s,drive=encrypt",
                                                kTarget.storageDeviceType);
                 } else {
@@ -692,11 +734,16 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (filelock_create(coreHwIniPath) == NULL) {
-        // The AVD is already in use
-        derror("There's another emulator instance running with "
-               "the current AVD '%s'. Exiting...\n",
-               avdInfo_getName(avd));
-        return 1;
+        /* The AVD is already in use, we still support this as an
+         * experimental feature. Use a temporary hardware-qemu.ini
+         * file though to avoid overwriting the existing one. */
+         TempFile*  tempIni = tempfile_create();
+         coreHwIniPath = tempfile_path(tempIni);
+         is_multi_instance = true;
+         opts->no_snapshot_save = true;
+         dwarning("Running multiple emulator with the same AVD"
+                 "is an experimental feature. "
+                 "Snapshot might be unstable.\n");
     }
 
     if (snapshotLock) {
@@ -907,7 +954,9 @@ extern "C" int main(int argc, char** argv) {
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
     // Initialize a persistent ram block.
-    std::string dataPath = PathUtils::join(avdInfo_getContentPath(avd), "data");
+    // dont touch original data folder in build environment
+    std::string dataPath = PathUtils::join(avdInfo_getContentPath(avd),
+            avdInfo_inAndroidBuild(avd) ? "build.avd/data" : "data");
     std::string pstorePath = PathUtils::join(dataPath, "misc", "pstore");
     std::string pstoreFile = PathUtils::join(pstorePath, "pstore.bin");
     if (android_op_wipe_data) {
@@ -1126,6 +1175,30 @@ extern "C" int main(int argc, char** argv) {
                        "userdata-qemu.img.qcow2|"
                        "%s" PATH_SEP "vendor.img.qcow2",
                        avd_dir, avd_dir, avd_dir);
+    }
+
+    if (fc::isEnabled(fc::KernelDeviceTreeBlobSupport)) {
+        ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
+        assert(userdata_dir);
+
+        const std::string dtbFileName =
+            PathUtils::join(userdata_dir.get(), "default.dtb");
+
+        if (android_op_wipe_data || !path_exists(dtbFileName.c_str())) {
+            ::dtb::Params params;
+            params.vendor_device_location =
+                StringFormat(
+                    "/dev/block/pci/pci0000:00/0000:00:%02d.0/by-name/vendor",
+                    (fc::isEnabled(fc::EncryptUserData) ?
+                        kVendorEncryptedPartitionId : kVendorUnencryptedPartitionId));
+
+            exitStatus = createDtbFile(params, dtbFileName);
+            if (exitStatus) {
+                derror("Could not create a DTB file (%s)", dtbFileName.c_str());
+                return exitStatus;
+            }
+        }
+        args.add({"-dtb", dtbFileName});
     }
 
     // Network

@@ -180,6 +180,8 @@ ifneq (,$(BUILD_SANITIZER))
     ifeq ($(BUILD_SANITIZER),address)
         BUILD_TARGET_CFLAGS += -fno-omit-frame-pointer
     endif
+    # Pass the right sanitizer flags to clang/gcc linker
+    BUILD_TARGET_LDFLAGS += $(call if-target-clang, -fsanitize=$(BUILD_SANITIZER))
 endif
 # Enable large-file support (i.e. make off_t a 64-bit value).
 # Fun fact: The mingw32 toolchain still uses 32-bit off_t values by default
@@ -381,10 +383,6 @@ ifeq ($(BUILD_TARGET_OS),windows)
     CXX_STD_LIB := -lstdc++
 else
     CXX_STD_LIB := -lc++
-endif
-
-ifneq (,$(BUILD_SANITIZER))
-   QEMU_SYSTEM_LDLIBS += -lclang_rt.asan-x86_64 -ldl
 endif
 
 

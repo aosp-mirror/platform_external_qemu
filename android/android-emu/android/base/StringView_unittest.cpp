@@ -236,7 +236,8 @@ TEST(StringView, Find) {
     // allocate a string with a stringview that is shorter.
     std::string longString("a b c d e f g");
     StringView longView(longString);
-    StringView shortView(longString.substr(0,1));
+    std::string longStringSub = longString.substr(0, 1);
+    StringView shortView(longStringSub);
 
     EXPECT_EQ(6, longView.find(StringView("d")));
     EXPECT_EQ(no, shortView.find(StringView("d")));
