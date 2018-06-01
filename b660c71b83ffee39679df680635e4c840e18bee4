@@ -142,6 +142,30 @@
       "revId": "b660c71b83ffee39679df680635e4c840e18bee4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cef9cdbb_aafe4e74",
+        "filename": "android/android-emu/android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-01T17:40:26Z",
+      "side": 1,
+      "message": "Sorry-- yeah shared_ptr is thread-safe, but I have been bitten by buggy implementations in the past, so if it\u0027s used (especially in combination with weak_ptr), I recommend testing the edge cases extensively.\n\nFor example, an older MSVC STL had a bug where it was possible to successfully call weak_ptr.lock() while an object was being destructed, leaving the caller with a shared_ptr with a refcount but an invalid object.\n\nYeah I agree disabling wait() for self-deleting threads would be a simplification here-- enabling both wait and self-deleting makes this complicated.",
+      "parentUuid": "fee6cab2_7b04192d",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 19
+      },
+      "revId": "b660c71b83ffee39679df680635e4c840e18bee4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
