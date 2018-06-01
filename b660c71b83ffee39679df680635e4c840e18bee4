@@ -70,6 +70,30 @@
       "revId": "b660c71b83ffee39679df680635e4c840e18bee4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d83355f_22fc8c98",
+        "filename": "android/android-emu/android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-01T14:30:26Z",
+      "side": 1,
+      "message": "Got it, thanks for the tips. I\u0027ll try to rig something up in the next CL",
+      "parentUuid": "286e0ebe_ee74246f",
+      "range": {
+        "startLine": 85,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 19
+      },
+      "revId": "b660c71b83ffee39679df680635e4c840e18bee4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
