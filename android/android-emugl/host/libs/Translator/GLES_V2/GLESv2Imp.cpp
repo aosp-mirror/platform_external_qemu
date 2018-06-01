@@ -194,6 +194,7 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
 }
 
 static void restoreTexture(SaveableTexture* texture) {
+    if (!texture) return;
     texture->touch();
 }
 
