@@ -22,6 +22,30 @@
       "revId": "99dbbbee7dd48f9b0e82c682191f166f8c873b04",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f105145_91436588",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-01T18:19:33Z",
+      "side": 1,
+      "message": "There is a new scenario for the snapshot lock where multiple emulator instances try to load the same snapshot simultaneously. Each instance will only acquire the lock for a short period of time. But the old behavior never retries when fails to acquire the lock (the other emulator instance does not exit). So it causes the second emulator instance to fail to acquire the lock.\n\nOr do you think it would be enough if we just change the snapshot lock from \"filelock_create_timeout\" to \"filelock_create\"?\n\nActually I believe a more appropriate solution is to implement a read-write file lock. Not sure how to do that, though.",
+      "parentUuid": "843c5a1b_7cee58b0",
+      "range": {
+        "startLine": 429,
+        "startChar": 18,
+        "endLine": 430,
+        "endChar": 57
+      },
+      "revId": "99dbbbee7dd48f9b0e82c682191f166f8c873b04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
