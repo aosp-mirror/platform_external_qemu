@@ -47,8 +47,10 @@ bool Thread::start() {
     bool ret = true;
     mStarted = true;
 
+    const auto useAttributes = mStackSize != 0;
+
     pthread_attr_t attr;
-    if (mStackSize != 0) {
+    if (useAttributes) {
         pthread_attr_init(&attr);
         pthread_attr_setstacksize(&attr, mStackSize);
     }
@@ -62,7 +64,7 @@ bool Thread::start() {
         mFinished = true;
     }
 
-    if (mStackSize != 0) {
+    if (useAttributes) {
         pthread_attr_destroy(&attr);
     }
 
