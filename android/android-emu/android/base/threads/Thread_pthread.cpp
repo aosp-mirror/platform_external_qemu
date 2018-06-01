@@ -53,6 +53,11 @@ bool Thread::start() {
         pthread_attr_setstacksize(&attr, mStackSize);
     }
 
+    // Save stack size into a local variable; if pthread_create is short-lived
+    // and deletes itself, we can't rely on mStackSize being valid in the check
+    // below for != 0.
+    int stackSizeTmp = mStackSize;
+
     if (pthread_create(&mThread, mStackSize ? &attr : nullptr, thread_main,
                        this)) {
         ret = false;
@@ -62,7 +67,7 @@ bool Thread::start() {
         mFinished = true;
     }
 
-    if (mStackSize != 0) {
+    if (stackSizeTmp != 0) {
         pthread_attr_destroy(&attr);
     }
 
