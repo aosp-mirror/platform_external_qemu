@@ -21,6 +21,8 @@
 #include <cmath>
 #include <memory>
 
+#include <dlfcn.h>
+
 int getCompressedFormats(int* formats) {
     if(formats){
         //Palette
@@ -50,14 +52,141 @@ int getCompressedFormats(int* formats) {
         formats[MAX_SUPPORTED_PALETTE + 10] =
             GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
         formats[MAX_SUPPORTED_PALETTE + 11] = GL_COMPRESSED_R11_EAC;
+        formats[MAX_SUPPORTED_PALETTE + 11 + 1] = GL_COMPRESSED_RGBA_ASTC_4x4_KHR; // 1
+        formats[MAX_SUPPORTED_PALETTE + 11 + 2] = GL_COMPRESSED_RGBA_ASTC_5x4_KHR; // 2
+        formats[MAX_SUPPORTED_PALETTE + 11 + 3] = GL_COMPRESSED_RGBA_ASTC_5x5_KHR; // 3
+        formats[MAX_SUPPORTED_PALETTE + 11 + 4] = GL_COMPRESSED_RGBA_ASTC_6x5_KHR; // 4
+        formats[MAX_SUPPORTED_PALETTE + 11 + 5] = GL_COMPRESSED_RGBA_ASTC_6x6_KHR; // 5
+        formats[MAX_SUPPORTED_PALETTE + 11 + 6] = GL_COMPRESSED_RGBA_ASTC_8x5_KHR; // 6
+        formats[MAX_SUPPORTED_PALETTE + 11 + 7] = GL_COMPRESSED_RGBA_ASTC_8x6_KHR; // 7
+        formats[MAX_SUPPORTED_PALETTE + 11 + 8] = GL_COMPRESSED_RGBA_ASTC_8x8_KHR; // 8
+        formats[MAX_SUPPORTED_PALETTE + 11 + 9] = GL_COMPRESSED_RGBA_ASTC_10x5_KHR; // 9
+        formats[MAX_SUPPORTED_PALETTE + 11 + 10] = GL_COMPRESSED_RGBA_ASTC_10x6_KHR; // 10
+        formats[MAX_SUPPORTED_PALETTE + 11 + 11] = GL_COMPRESSED_RGBA_ASTC_10x8_KHR; // 11
+        formats[MAX_SUPPORTED_PALETTE + 11 + 12] = GL_COMPRESSED_RGBA_ASTC_10x10_KHR; // 12
+        formats[MAX_SUPPORTED_PALETTE + 11 + 13] = GL_COMPRESSED_RGBA_ASTC_12x10_KHR; // 13
+        formats[MAX_SUPPORTED_PALETTE + 11 + 14] = GL_COMPRESSED_RGBA_ASTC_12x12_KHR; // 14
+        formats[MAX_SUPPORTED_PALETTE + 11 + 15] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR; // 15
+        formats[MAX_SUPPORTED_PALETTE + 11 + 16] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR; // 16
+        formats[MAX_SUPPORTED_PALETTE + 11 + 17] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR; // 17
+        formats[MAX_SUPPORTED_PALETTE + 11 + 18] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR; // 18
+        formats[MAX_SUPPORTED_PALETTE + 11 + 19] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR; // 19
+        formats[MAX_SUPPORTED_PALETTE + 11 + 20] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR; // 20
+        formats[MAX_SUPPORTED_PALETTE + 11 + 21] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR; // 21
+        formats[MAX_SUPPORTED_PALETTE + 11 + 22] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR; // 22
+        formats[MAX_SUPPORTED_PALETTE + 11 + 23] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR; // 23
+        formats[MAX_SUPPORTED_PALETTE + 11 + 24] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR; // 24
+        formats[MAX_SUPPORTED_PALETTE + 11 + 25] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR; // 25
+        formats[MAX_SUPPORTED_PALETTE + 11 + 26] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR; // 26
+        formats[MAX_SUPPORTED_PALETTE + 11 + 27] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR; // 27
+        formats[MAX_SUPPORTED_PALETTE + 11 + 28] = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR; // 28
     }
-    return MAX_SUPPORTED_PALETTE + MAX_ETC_SUPPORTED;
+    return MAX_SUPPORTED_PALETTE + MAX_ETC_SUPPORTED + 28;
 }
 
 #define GL_R16                            0x822A
 #define GL_RG16                           0x822C
 #define GL_R16_SNORM                      0x8F98
 #define GL_RG16_SNORM                     0x8F99
+
+bool isAstcFormat(GLenum internalformat) {
+    switch (internalformat) {
+        case GL_COMPRESSED_RGBA_ASTC_4x4_KHR: // 1
+        case GL_COMPRESSED_RGBA_ASTC_5x4_KHR: // 2
+        case GL_COMPRESSED_RGBA_ASTC_5x5_KHR: // 3
+        case GL_COMPRESSED_RGBA_ASTC_6x5_KHR: // 4
+        case GL_COMPRESSED_RGBA_ASTC_6x6_KHR: // 5
+        case GL_COMPRESSED_RGBA_ASTC_8x5_KHR: // 6
+        case GL_COMPRESSED_RGBA_ASTC_8x6_KHR: // 7
+        case GL_COMPRESSED_RGBA_ASTC_8x8_KHR: // 8
+        case GL_COMPRESSED_RGBA_ASTC_10x5_KHR: // 9
+        case GL_COMPRESSED_RGBA_ASTC_10x6_KHR: // 10
+        case GL_COMPRESSED_RGBA_ASTC_10x8_KHR: // 11
+        case GL_COMPRESSED_RGBA_ASTC_10x10_KHR: // 12
+        case GL_COMPRESSED_RGBA_ASTC_12x10_KHR: // 13
+        case GL_COMPRESSED_RGBA_ASTC_12x12_KHR: // 14
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR: // 15
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR: // 16
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR: // 17
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR: // 18
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR: // 19
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR: // 20
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR: // 21
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR: // 22
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR: // 23
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR: // 24
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR: // 25
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR: // 26
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR: // 27
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR: // 28
+            return true;
+        default:
+            return false;
+    }
+}
+
+void getAstcFormatInfo(GLenum internalformat, int* xblocks, int* yblocks, bool* srgb) {
+    switch (internalformat) {
+        case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+            *xblocks = 4; *yblocks = 4; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+            *xblocks = 5; *yblocks = 4; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+            *xblocks = 5; *yblocks = 5; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+            *xblocks = 6; *yblocks = 5; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+            *xblocks = 6; *yblocks = 6; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+            *xblocks = 8; *yblocks = 5; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+            *xblocks = 8; *yblocks = 6; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+            *xblocks = 8; *yblocks = 8; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+            *xblocks = 10; *yblocks = 5; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+            *xblocks = 10; *yblocks = 6; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+            *xblocks = 10; *yblocks = 8; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+            *xblocks = 10; *yblocks = 10; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+            *xblocks = 12; *yblocks = 10; *srgb = false; break;
+        case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+            *xblocks = 12; *yblocks = 12; *srgb = false; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR:
+            *xblocks = 4; *yblocks = 4; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR:
+            *xblocks = 5; *yblocks = 4; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR:
+            *xblocks = 5; *yblocks = 5; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR:
+            *xblocks = 6; *yblocks = 5; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR:
+            *xblocks = 6; *yblocks = 6; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR:
+            *xblocks = 8; *yblocks = 5; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR:
+            *xblocks = 8; *yblocks = 6; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR:
+            *xblocks = 8; *yblocks = 8; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR:
+            *xblocks = 10; *yblocks = 5; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR:
+            *xblocks = 10; *yblocks = 6; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR:
+            *xblocks = 10; *yblocks = 8; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR:
+            *xblocks = 10; *yblocks = 10; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR:
+            *xblocks = 12; *yblocks = 10; *srgb = true; break;
+        case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR:
+            *xblocks = 12; *yblocks = 12; *srgb = true; break;
+        default:
+            break;
+    }
+}
 
 bool isEtcFormat(GLenum internalformat) {
     switch (internalformat) {
@@ -176,6 +305,10 @@ GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat) {
     }
 }
 
+typedef void (*astc_decode_rgba_t)(uint8_t*, int, int, int, int, uint8_t*);
+
+astc_decode_rgba_t astc_decode_rgba_func = 0;
+
 void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
                             GLenum internalformat, GLsizei width,
                             GLsizei height, GLint border,
@@ -270,6 +403,39 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
         if (emulateCompressedData) {
             delete [] (char*)data;
         }
+    } else if (isAstcFormat(internalformat)) {
+        fprintf(stderr, "%s: processing astc texture\n", __func__);
+        int xblocks;
+        int yblocks;
+        bool srgb;
+        getAstcFormatInfo(internalformat, &xblocks, &yblocks, &srgb);
+
+        if (!astc_decode_rgba_func) {
+            void* lib = dlopen("libastc.dylib", RTLD_NOW);
+
+            if (!lib) {
+                fprintf(stderr, "%s: ERROR: could not open libastc\n", __func__);
+            }
+
+            astc_decode_rgba_func = (astc_decode_rgba_t)dlsym(lib, "astc_decode_rgba");
+
+            if (!astc_decode_rgba_func) {
+                fprintf(stderr, "%s: ERROR: could not load astc_decode_rgba\n", __func__);
+            }
+        }
+
+        const int32_t align = ctx->getUnpackAlignment()-1;
+        const int32_t bpr = ((width * 4) + align) & ~align;
+        const size_t size = bpr * height;
+
+        uint8_t* rgbaBuf = (uint8_t*)malloc(size);
+
+        astc_decode_rgba_func((uint8_t*)data, width, height, xblocks, yblocks, rgbaBuf);
+
+        glTexImage2DPtr(target, level, GL_RGBA8,
+                        width, height, border, GL_RGBA, GL_UNSIGNED_BYTE, rgbaBuf);
+
+        free(rgbaBuf);
     } else if (isPaletteFormat(internalformat)) {
         SET_ERROR_IF(
             level > log2(ctx->getMaxTexSize()) ||

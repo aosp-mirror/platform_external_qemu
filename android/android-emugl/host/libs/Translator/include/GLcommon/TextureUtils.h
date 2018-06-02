@@ -29,6 +29,9 @@ typedef std::function<void(GLenum target, GLint level,
     GLint border, GLenum format, GLenum type, const GLvoid * data)>
         glTexImage2D_t;
 
+bool isAstcFormat(GLenum internalformat);
+void getAstcFormatInfo(GLenum internalformat, int* xblocks, int* yblocks, bool* srgb);
+
 ETC2ImageFormat getEtcFormat(GLenum internalformat);
 bool isEtcFormat(GLenum internalformat);
 bool isPaletteFormat(GLenum internalformat);
