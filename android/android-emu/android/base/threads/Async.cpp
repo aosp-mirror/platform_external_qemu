@@ -15,6 +15,7 @@
 #include "android/base/threads/Async.h"
 
 #include "android/base/threads/FunctorThread.h"
+#include "android/crashreport/crash-handler.h"
 
 #include <memory>
 
@@ -33,6 +34,10 @@ public:
 
     virtual void onExit() override {
         delete this;
+    }
+
+    bool wait(intptr_t* exitStatus) override {
+        crashhandler_die("Tried to wait on a self deleting thread (for Async)");
     }
 };
 
