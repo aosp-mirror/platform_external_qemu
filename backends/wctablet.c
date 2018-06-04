@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (a654dc Merge "Fix SMS PDU Internal format handling" into emu-master)
 /*
  * QEMU Wacom Penpartner serial tablet emulation
  *
@@ -367,3 +368,5 @@ static void register_types(void)
 }
 
 type_init(register_types);
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)

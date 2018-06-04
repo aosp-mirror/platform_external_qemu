@@ -12,8 +12,15 @@
  */
 
 #include "qemu/osdep.h"
+<<<<<<< HEAD   (a654dc Merge "Fix SMS PDU Internal format handling" into emu-master)
 #include <migration/colo.h>
 #include "migration/trace.h"
+=======
+#include "migration.h"
+#include "migration/colo.h"
+#include "migration/vmstate.h"
+#include "trace.h"
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 
 typedef struct {
      bool colo_requested;
