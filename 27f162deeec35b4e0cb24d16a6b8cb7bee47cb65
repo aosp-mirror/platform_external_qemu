@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9cfe8f3e_e315a8f8",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-04T18:17:30Z",
+      "side": 1,
+      "message": "what about the Win32 implementation? This function is only used for linux and Mac",
+      "range": {
+        "startLine": 328,
+        "startChar": 0,
+        "endLine": 328,
+        "endChar": 45
+      },
+      "revId": "27f162deeec35b4e0cb24d16a6b8cb7bee47cb65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd6b1eae_32c9ab60",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-04T18:17:30Z",
+      "side": 1,
+      "message": "waiting for the known timeout here is more efficient - it may end sooner if the process exits instead of sleeping for the whole time",
+      "range": {
+        "startLine": 418,
+        "startChar": 63,
+        "endLine": 418,
+        "endChar": 64
+      },
+      "revId": "27f162deeec35b4e0cb24d16a6b8cb7bee47cb65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
