@@ -69,15 +69,16 @@ QEMU2_LIB_qemuutil += \
     util/lockcnt.c \
     util/log.c \
     util/main-loop.c \
+    util/mmap-alloc.c \
     util/module.c \
     util/notify.c \
     util/osdep.c \
     util/path.c \
-    util/qdist.c \
 
 # This file is auto generated! Do not edit it!
 # There is a better way than modifying this file
 QEMU2_LIB_qemuutil += \
+    util/qdist.c \
     util/qemu-config.c \
     util/qemu-coroutine-io.c \
     util/qemu-coroutine-lock.c \
@@ -92,11 +93,11 @@ QEMU2_LIB_qemuutil += \
     util/qht.c \
     util/range.c \
     util/rcu.c \
-    util/readline.c \
 
 # This file is auto generated! Do not edit it!
 # I know this looks like the easy way out, but don't touch this file!
 QEMU2_LIB_qemuutil += \
+    util/readline.c \
     util/systemd.c \
     util/thread-pool.c \
     util/throttle.c \
@@ -111,7 +112,6 @@ QEMU2_LIB_qemuutil_darwin-x86_64 := \
     util/coroutine-sigaltstack.c \
     util/event_notifier-posix.c \
     util/memfd.c \
-    util/mmap-alloc.c \
     util/oslib-posix.c \
     util/qemu-openpty.c \
     util/qemu-thread-posix.c \
@@ -122,7 +122,6 @@ QEMU2_LIB_qemuutil_linux-x86_64 := \
     util/coroutine-ucontext.c \
     util/event_notifier-posix.c \
     util/memfd.c \
-    util/mmap-alloc.c \
     util/oslib-posix.c \
     util/qemu-openpty.c \
     util/qemu-thread-posix.c \
