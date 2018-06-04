@@ -118,6 +118,30 @@
       "revId": "99dbbbee7dd48f9b0e82c682191f166f8c873b04",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "958c820e_3770f02a",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-04T17:53:40Z",
+      "side": 1,
+      "message": "I changed it to keep retrying until timeout. Please let me know how you think about it.",
+      "parentUuid": "04b6fac3_601e7890",
+      "range": {
+        "startLine": 429,
+        "startChar": 18,
+        "endLine": 430,
+        "endChar": 57
+      },
+      "revId": "99dbbbee7dd48f9b0e82c682191f166f8c873b04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
