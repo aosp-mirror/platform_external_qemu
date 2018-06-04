@@ -229,6 +229,7 @@ const char* keyboard_layout = NULL;
 ram_addr_t ram_size;
 const char *mem_path = NULL;
 int mem_prealloc = 0; /* force preallocation of physical target memory */
+int mem_file_shared = 0; /* share file-backed RAM (allow writes) */
 bool enable_mlock = false;
 int nb_nics;
 NICInfo nd_table[MAX_NICS];
@@ -3913,6 +3914,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_mem_prealloc:
                 mem_prealloc = 1;
                 break;
+#ifdef CONFIG_ANDROID
+            case QEMU_OPTION_mem_file_shared:
+                mem_file_shared = 1;
+                break;
+#endif
             case QEMU_OPTION_d:
                 log_mask = optarg;
                 break;
