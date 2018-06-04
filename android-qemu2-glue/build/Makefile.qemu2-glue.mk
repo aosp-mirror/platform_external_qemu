@@ -67,3 +67,39 @@ QEMU2_GLUE_STATIC_LIBRARIES := \
 QEMU2_GLUE_LDFLAGS := $(EMULATOR_LIBUI_LDFLAGS)
 
 QEMU2_GLUE_LDLIBS := $(EMULATOR_LIBUI_LDLIBS)
+
+# Unit tests for qemu2 glue code
+$(call start-emulator-program, qemu2_glue_unittests)
+
+LOCAL_CFLAGS += $(QEMU2_CFLAGS) -O0
+
+LOCAL_C_INCLUDES += \
+    $(QEMU2_INCLUDES) \
+    $(QEMU2_GLUE_INCLUDES) \
+    $(LOCAL_PATH)/slirp \
+    $(LZ4_INCLUDES) \
+    $(LIBDTB_UTILS_INCLUDES) \
+    $(EMULATOR_GTEST_INCLUDES) \
+
+LOCAL_CFLAGS += $(QEMU2_CFLAGS)
+
+LOCAL_C_INCLUDES += \
+    $(QEMU2_INCLUDES) \
+    $(QEMU2_GLUE_INCLUDES) \
+    $(LOCAL_PATH)/slirp \
+    $(LZ4_INCLUDES) \
+    $(LIBDTB_UTILS_INCLUDES) \
+
+LOCAL_STATIC_LIBRARIES += \
+    $(ANDROID_EMU_STATIC_LIBRARIES) \
+	$(QEMU2_GLUE_STATIC_LIBRARIES) \
+    $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
+    emulator-libgtest \
+    libqemu2-common \
+
+LOCAL_SRC_FILES += \
+  file_ram_unittest.cpp \
+
+LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:%=android-qemu2-glue/%)
+
+$(call end-emulator-program)
