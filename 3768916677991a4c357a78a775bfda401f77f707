@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "38e25fc8_29e63daf",
+        "filename": ".gitignore",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-04T16:23:09Z",
+      "side": 0,
+      "message": "This needs to be removed.",
+      "parentUuid": "53a92e7e_b6960a71",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 9
+      },
+      "revId": "3768916677991a4c357a78a775bfda401f77f707",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e1760b70_9ec0e987",
         "filename": "android/android-emu/Makefile.android-emu.mk",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-05-30T01:55:27Z",
       "side": 0,
       "message": "why all these are removed?",
+      "range": {
+        "startLine": 469,
+        "startChar": 21,
+        "endLine": 469,
+        "endChar": 39
+      },
+      "revId": "3768916677991a4c357a78a775bfda401f77f707",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6ae972b_4164b164",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-04T16:23:09Z",
+      "side": 0,
+      "message": "I stacked merges, tried to merge it into another branch by applying a wrong patch. Will fix.",
+      "parentUuid": "e1760b70_9ec0e987",
       "range": {
         "startLine": 469,
         "startChar": 21,
