@@ -1995,11 +1995,14 @@ handleSendSMSText( const char*  cmd, AModem  modem )
 
         if (index > 0) {
             SmsAddressRec  from[1];
-            char           temp[12];
+            char           temp[15];
+            memset(temp, '\0', 15);
             SmsPDU*        deliver;
             int            nn;
-
-            snprintf( temp, sizeof(temp), "%s", get_phone_number(modem->base_port) );
+            // Use international number format that starts with "+" to be consistent
+            // with the MSISDN value sim_card.c returns for request +CRSM=178,28480,1,4,32.
+            // (b/109671863)
+            snprintf( temp, sizeof(temp), "+%s", get_phone_number(modem->base_port) );
             sms_address_from_str( from, temp, strlen(temp) );
 
             deliver = sms_receiver_create_deliver( modem->sms_receiver, index, from );
