@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "116b9c45_b7a9d308",
+        "filename": "android/android-emu/android/utils/tempfile.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-05T17:19:00Z",
+      "side": 1,
+      "message": "nit: please fix the formatting",
+      "range": {
+        "startLine": 83,
+        "startChar": 5,
+        "endLine": 83,
+        "endChar": 41
+      },
+      "revId": "78a954b170dd7845c8e42de56df3393abe623919",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
