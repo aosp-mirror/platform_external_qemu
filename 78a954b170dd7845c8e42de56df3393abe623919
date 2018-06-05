@@ -22,6 +22,30 @@
       "revId": "78a954b170dd7845c8e42de56df3393abe623919",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7c74074_56ffe3d4",
+        "filename": "android/android-emu/android/utils/tempfile.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-05T18:02:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "116b9c45_b7a9d308",
+      "range": {
+        "startLine": 83,
+        "startChar": 5,
+        "endLine": 83,
+        "endChar": 41
+      },
+      "revId": "78a954b170dd7845c8e42de56df3393abe623919",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
