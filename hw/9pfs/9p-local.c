@@ -955,23 +955,6 @@ static int local_unlinkat_common(FsContext *ctx, int dirfd, const char *name,
     int ret = -1;
 
     if (ctx->export_flags & V9FS_SM_MAPPED_FILE) {
-<<<<<<< HEAD
-        buffer = rpath(ctx, path);
-        err =  qemu_lstat(buffer, &stbuf);
-        g_free(buffer);
-        if (err) {
-            goto err_out;
-        }
-        /*
-         * If directory remove .virtfs_metadata contained in the
-         * directory
-         */
-        if (S_ISDIR(stbuf.st_mode)) {
-            buffer = g_strdup_printf("%s/%s/%s", ctx->fs_root,
-                                     path, VIRTFS_META_DIR);
-            err = remove(buffer);
-            g_free(buffer);
-            if (err < 0 && errno != ENOENT) {
         int map_dirfd;
 
         if (flags == AT_REMOVEDIR) {
@@ -988,7 +971,6 @@ static int local_unlinkat_common(FsContext *ctx, int dirfd, const char *name,
             ret = unlinkat(fd, VIRTFS_META_DIR, AT_REMOVEDIR);
             close_preserve_errno(fd);
             if (ret < 0 && errno != ENOENT) {
->>>>>>> v2.9.0
                 /*
                  * We didn't had the .virtfs_metadata file. May be file created
                  * in non-mapped mode ?. Ignore ENOENT.

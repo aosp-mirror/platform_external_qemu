@@ -143,6 +143,7 @@ QEMU2_CFLAGS += \
 
 # Enable faster migration code when saving RAM to a snapshot
 QEMU2_CFLAGS += \
+    -DCONFIG_VIRTFS \
     -DCONFIG_MIGRATION_RAM_SINGLE_ITERATION
 
 #include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk

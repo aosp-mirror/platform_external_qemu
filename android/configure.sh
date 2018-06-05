@@ -1139,6 +1139,7 @@ echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk
 echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
 echo "CONFIG_ALSA       := $PROBE_ALSA" >> $config_mk
 echo "CONFIG_OSS        := $PROBE_OSS" >> $config_mk
+echo "CONFIG_VIRTFS := y" >> $config_mk
 echo "CONFIG_PULSEAUDIO := $PROBE_PULSEAUDIO" >> $config_mk
 echo "QT_PREBUILTS_DIR  := $QT_PREBUILTS_DIR" >> $config_mk
 

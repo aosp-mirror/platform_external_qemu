@@ -375,9 +375,25 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     chardev/char-fd.c \
     chardev/char-parallel.c \
     chardev/char-pty.c \
-    fsdev/qemu-fsdev-dummy.c \
+    fsdev/qemu-fsdev.c \
+    fsdev/9p-marshal.c \
+    fsdev/9p-iov-marshal.c \
     fsdev/qemu-fsdev-opts.c \
     fsdev/qemu-fsdev-throttle.c \
+hw/9pfs/9p.c \
+hw/9pfs/9p-local.c \
+hw/9pfs/9p-posix-acl.c \
+hw/9pfs/9p-proxy.c \
+hw/9pfs/9p-synth.c \
+hw/9pfs/9p-util.c \
+hw/9pfs/9p-xattr.c \
+hw/9pfs/9p-xattr-user.c \
+hw/9pfs/codir.c \
+hw/9pfs/cofile.c \
+hw/9pfs/cofs.c \
+hw/9pfs/coth.c \
+hw/9pfs/coxattr.c \
+hw/9pfs/virtio-9p-device.c \
     hw/input/virtio-input-host.c \
     hw/tpm/tpm_passthrough.c \
     hw/tpm/tpm_util.c \
