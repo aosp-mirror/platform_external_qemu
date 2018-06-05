@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6617bb40_e63347be",
+        "filename": "hw/9pfs/9p-local.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 991,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-06-05T22:53:08Z",
+      "side": 0,
+      "message": "erwin: this seems like a bad merge",
+      "range": {
+        "startLine": 958,
+        "startChar": 1,
+        "endLine": 991,
+        "endChar": 14
+      },
+      "revId": "8e66379d0c444c2478e19c39667be13422db8c22",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
