@@ -2823,12 +2823,17 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
 
         programData->setLinkStatus(linkStatus);
 
-        GLsizei infoLogLength=0;
-        GLchar* infoLog;
-        ctx->dispatcher().glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
-        infoLog = new GLchar[infoLogLength+1];
-        ctx->dispatcher().glGetProgramInfoLog(globalProgramName,infoLogLength,NULL,infoLog);
-        programData->setInfoLog(infoLog);
+        GLsizei infoLogLength = 0, cLog = 0;
+        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_INFO_LOG_LENGTH,
+                                         &infoLogLength);
+        std::unique_ptr<GLchar[]> log(new GLchar[infoLogLength + 1]);
+        ctx->dispatcher().glGetProgramInfoLog(globalProgramName, infoLogLength,
+                                              &cLog, log.get());
+
+        // Only update when there actually is something to update.
+        if (cLog > 0) {
+            programData->setInfoLog(log.release());
+        }
     }
 }
 
