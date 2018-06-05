@@ -278,6 +278,7 @@ get_zoneinfo_timezone( void )
     if (!android_timezone)
     {
         const char*  tz = getenv( "TZ" );
+        char         temp[ PATH_MAX ];
 
         // if we ever allocate into tz, this object will take care of it.
         android::base::ScopedCPtr<const char> tzDeleter;
@@ -290,7 +291,6 @@ get_zoneinfo_timezone( void )
 
         if (tz == NULL) {
             int          len;
-            char         temp[ PATH_MAX ];
             std::string  tzdir;
             std::string  localtime;
 
