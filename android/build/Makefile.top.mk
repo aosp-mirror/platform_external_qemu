@@ -195,7 +195,7 @@ endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
   # we need Win32 features that are available since Windows 7 (NT 6.1)
-  BUILD_TARGET_CFLAGS += -DWINVER=0x601 -D_WIN32_WINNT=0x601
+  BUILD_TARGET_CFLAGS += -DWINVER=0x601 -D_WIN32_WINNT=0x601 -mcx16
   # LARGEADDRESSAWARE gives more address space to 32-bit process
   BUILD_TARGET_LDFLAGS32 += -Xlinker --large-address-aware
   # Reduce the default stack reserve size on 32-bit Windows as we don't have
@@ -203,7 +203,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
   BUILD_TARGET_LDFLAGS32 += -Xlinker --stack -Xlinker 1048576
 
   # have linker build build-id section for symbol lookup in crash reporting
-  BUILD_TARGET_LDFLAGS += -Xlinker --build-id
+  BUILD_TARGET_LDFLAGS += -Xlinker --build-id -mcx16
 endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)

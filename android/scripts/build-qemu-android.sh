@@ -217,7 +217,7 @@ build_qemu_android () {
 
         # Generate LINK-* files that will be used to generate build files
         # for the emulator build system.
-        LINKPROG_FLAGS="LINKPROG=$BUILD_DIR/link-prog"
+        LINKPROG_FLAGS="LINKPROG=$BUILD_DIR/link-prog AR=$BUILD_DIR/ar-prog"
 
         run mkdir -p "$BUILD_DIR"
         run rm -rf "$BUILD_DIR"/*
@@ -360,6 +360,31 @@ $(builder_gnu_config_host_prefix)$GCC "\$@"
 EOF
         chmod a+x link-prog
 
+        # Create an archiver program that will capture its command-line to a file.
+        cat > ar-prog <<EOF
+#!/bin/sh
+
+# Extract target file.
+seen_rcs=
+target=
+for opt; do
+    if [ "\$opt" = "rcs" ]; then
+      seen_rcs=true
+    elif [ "\$seen_rcs" ]; then
+      target=\$opt
+      seen_rcs=
+    fi
+done
+
+if [ "\$target" ]; then
+  dest=$BUILD_DIR/LINK-\$target
+  mkdir -p \$(dirname \$dest)
+  printf "%s\n" "\$@" > $BUILD_DIR/LINK-\$target
+fi
+$(builder_gnu_config_host_prefix)ar "\$@"
+EOF
+        chmod a+x ar-prog
+
         SDL_CONFIG=$PREFIX/bin/sdl2-config
         export SDL_CONFIG
 
@@ -388,6 +413,7 @@ EOF
             --disable-glusterfs \
             --disable-gtk \
             --disable-guest-agent \
+            --disable-xen \
             --disable-libnfs \
             --disable-libiscsi \
             --disable-libssh2 \
@@ -396,7 +422,6 @@ EOF
             --disable-usb-redir \
             --disable-user \
             --disable-vde \
-            --disable-vhdx \
             --disable-vhost-net \
             --enable-vnc \
             --disable-vnc-sasl \
@@ -423,7 +448,7 @@ EOF
             esac
 
             # Now build everything else in parallel.
-            run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS
+            run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
 
             for QEMU_EXE in $QEMU_TARGET_BUILDS; do
                 if [ ! -f "$QEMU_EXE" ]; then
@@ -468,7 +493,8 @@ EOF
     done
 
     # Copy LINK-* files, adjusting hard-coded paths in them.
-    for LINK_FILE in "$BUILD_DIR"/LINK-qemu-system-*; do
+    for LINK_FILE in "$BUILD_DIR"/LINK-*; do
+        [ -f $LINK_FILE ] && \
         sed \
             -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
             -e 's|'${QEMU_SRCDIR}'|@SRC_DIR@|g' \
@@ -514,6 +540,7 @@ if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
         builder_remote_darwin_scp -r \
             "$REMOTE_SRCDIR"/qemu-system-* \
             "$REMOTE_SRCDIR"/LINK-qemu-system-* \
+            "$REMOTE_SRCDIR"/LINK-*.a \
             "$REMOTE_SRCDIR"/config-host.h \
             "$REMOTE_SRCDIR"/*/config-target.h \
             $BINARY_DIR/

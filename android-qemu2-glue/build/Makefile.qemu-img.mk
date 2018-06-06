@@ -2,6 +2,8 @@ $(call start-emulator-program,qemu-img)
 
 LOCAL_STATIC_LIBRARIES := \
     $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
+    libqemu2-util \
+    libqemu2-stubs \
 
 LOCAL_CFLAGS := \
     $(QEMU2_SYSTEM_CFLAGS) \
@@ -11,6 +13,7 @@ LOCAL_C_INCLUDES := \
     $(QEMU2_SDL2_INCLUDES) \
 
 LOCAL_SRC_FILES := \
+    stubs/exec.c \
     qemu-img.c \
     block.c \
     blockjob.c \
@@ -107,205 +110,14 @@ LOCAL_SRC_FILES := \
     qom/object_interfaces.c \
     qom/qom-qobject.c \
     replication.c \
-    crypto/pbkdf-stub.c \
-    qapi/opts-visitor.c \
-    qapi/qapi-clone-visitor.c \
-    qapi/qapi-dealloc-visitor.c \
-    qapi/qapi-util.c \
-    qapi/qapi-visit-core.c \
-    qapi/qobject-input-visitor.c \
-    qapi/qobject-output-visitor.c \
-    qapi/qmp-dispatch.c \
-    qapi/qmp-event.c \
-    qapi/qmp-registry.c \
-    qapi/string-input-visitor.c \
-    qapi/string-output-visitor.c \
-    qobject/json-lexer.c \
-    qobject/json-parser.c \
-    qobject/json-streamer.c \
-    qobject/qbool.c \
-    qobject/qdict.c \
-    qobject/qfloat.c \
-    qobject/qint.c \
-    qobject/qjson.c \
-    qobject/qlist.c \
-    qobject/qnull.c \
-    qobject/qobject.c \
-    qobject/qstring.c \
-    stubs/arch-query-cpu-def.c \
-    stubs/arch-query-cpu-model-baseline.c \
-    stubs/arch-query-cpu-model-comparison.c \
-    stubs/arch-query-cpu-model-expansion.c \
-    stubs/bdrv-next-monitor-owned.c \
-    stubs/blockdev-close-all-bdrv-states.c \
-    stubs/clock-warp.c \
-    stubs/cpu-get-clock.c \
-    stubs/cpu-get-icount.c \
-    stubs/dump.c \
-    stubs/error-printf.c \
-    stubs/exec.c \
-    stubs/fdset.c \
-    stubs/gdbstub.c \
-    stubs/get-vm-name.c \
-    stubs/iothread-lock.c \
-    stubs/is-daemonized.c \
-    stubs/machine-init-done.c \
-    stubs/migr-blocker.c \
-    stubs/migration.c \
-    stubs/monitor.c \
-    stubs/pc_madt_cpu_entry.c \
-    stubs/qmp_pc_dimm_device_list.c \
-    stubs/qtest.c \
-    stubs/replay.c \
-    stubs/runstate-check.c \
-    stubs/slirp.c \
-    stubs/sysbus.c \
-    stubs/target-get-monitor-def.c \
-    stubs/target-monitor-defs.c \
-    stubs/trace-control.c \
-    stubs/uuid.c \
-    stubs/vm-stop.c \
-    stubs/vmgenid.c \
-    stubs/vmstate.c \
-    trace/control.c \
-    trace/qmp.c \
-    util/abort.c \
-    util/acl.c \
-    util/aiocb.c \
-    util/async.c \
-    util/base64.c \
-    util/bitmap.c \
-    util/bitops.c \
-    util/buffer.c \
-    util/bufferiszero.c \
-    util/crc32c.c \
-    util/cutils.c \
-    util/envlist.c \
-    util/error.c \
-    util/getauxval.c \
-    util/hexdump.c \
-    util/hbitmap.c \
-    util/id.c \
-    util/iohandler.c \
-    util/iov.c \
-    util/keyval.c \
-    util/lockcnt.c \
-    util/log.c \
-    util/main-loop.c \
-    util/module.c \
-    util/notify.c \
-    util/osdep.c \
-    util/path.c \
-    util/qdist.c \
-    util/qemu-config.c \
-    util/qemu-coroutine.c \
-    util/qemu-coroutine-io.c \
-    util/qemu-coroutine-lock.c \
-    util/qemu-coroutine-sleep.c \
-    util/qemu-error.c \
-    util/qemu-option.c \
-    util/qemu-progress.c \
-    util/qemu-sockets.c \
-    util/qemu-timer.c \
-    util/qemu-timer-common.c \
-    util/qht.c \
-    util/range.c \
-    util/rcu.c \
-    util/readline.c \
-    util/timed-average.c \
-    util/thread-pool.c \
-    util/throttle.c \
-    util/unicode.c \
-    util/uri.c \
-    util/uuid.c \
     $(call qemu2-if-windows, \
         block/file-win32.c \
         block/win32-aio.c \
-        stubs/win32-stubs.c \
-        util/aio-win32.c \
-        util/coroutine-win32.c \
-        util/event_notifier-win32.c \
-        util/oslib-win32.c \
-        util/qemu-thread-win32.c \
-        ) \
-    $(call qemu2-if-linux, \
-        util/coroutine-ucontext.c \
-        util/memfd.c \
-        ) \
-    $(call qemu2-if-darwin, \
-        util/coroutine-sigaltstack.c \
         ) \
     $(call qemu2-if-posix, \
         block/file-posix.c \
-        stubs/fd-register.c \
-        util/aio-posix.c \
-        util/event_notifier-posix.c \
-        util/mmap-alloc.c \
-        util/oslib-posix.c \
-        util/qemu-openpty.c \
-        util/qemu-thread-posix.c \
-        ) \
-    $(call qemu2-if-build-target-arch,x86, util/host-utils.c) \
-    $(call qemu2-if-posix, \
-        util/compatfd.c \
         ) \
 
-LOCAL_GENERATED_SOURCES := \
-    $(QEMU2_AUTO_GENERATED_DIR)/qapi-event.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/qapi-types.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/qapi-visit.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/qmp-introspect.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-tcg-tracers.h \
-    $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers-wrappers.h \
-    $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers.h \
-    $(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/util/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/crypto/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/io/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/migration/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/block/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/backends/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/block/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/block/dataplane/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/char/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/intc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/net/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/virtio/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/audio/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/misc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/usb/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/scsi/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/nvram/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/display/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/input/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/timer/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/dma/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/sparc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/sd/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/isa/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/mem/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/i386/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/i386/xen/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/9pfs/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/ppc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/pci/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/s390x/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/vfio/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/acpi/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/arm/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/alpha/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/xen/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/ui/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/audio/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/net/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/arm/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/i386/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/mips/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/sparc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/s390x/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/ppc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/qom/trace.c \
-    # $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers.c \
 
 LOCAL_LDFLAGS := $(QEMU2_SYSTEM_LDFLAGS)
 
