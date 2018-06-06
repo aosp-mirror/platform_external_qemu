@@ -214,7 +214,8 @@ TEST_F(FilePusherTest, enqueueWhilePushing) {
     EXPECT_EQ(kExpectedResults, mResults);
 }
 
-TEST_F(FilePusherTest, cancelWhilePushing) {
+// bug: 93547216
+TEST_F(FilePusherTest, DISABLED_cancelWhilePushing) {
     const vector<ProgressPair> kExpectedProgress = {{0, false}, {1.0 / 3, false}};
     const vector<ResultPair> kExpectedResults = {
             {PATH_SEP "file1", FilePusher::Result::Success},

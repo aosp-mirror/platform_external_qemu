@@ -768,6 +768,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
 
         if (texData && level == 0) {
             assert(texData->target == GL_TEXTURE_2D ||
+                    texData->target == GL_TEXTURE_2D_MULTISAMPLE ||
                     texData->target == GL_TEXTURE_CUBE_MAP);
             if (GLESv2Validate::isCompressedFormat(internalformat)) {
                 texData->compressed = true;
@@ -2822,12 +2823,17 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
 
         programData->setLinkStatus(linkStatus);
 
-        GLsizei infoLogLength=0;
-        GLchar* infoLog;
-        ctx->dispatcher().glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
-        infoLog = new GLchar[infoLogLength+1];
-        ctx->dispatcher().glGetProgramInfoLog(globalProgramName,infoLogLength,NULL,infoLog);
-        programData->setInfoLog(infoLog);
+        GLsizei infoLogLength = 0, cLog = 0;
+        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_INFO_LOG_LENGTH,
+                                         &infoLogLength);
+        std::unique_ptr<GLchar[]> log(new GLchar[infoLogLength + 1]);
+        ctx->dispatcher().glGetProgramInfoLog(globalProgramName, infoLogLength,
+                                              &cLog, log.get());
+
+        // Only update when there actually is something to update.
+        if (cLog > 0) {
+            programData->setInfoLog(log.release());
+        }
     }
 }
 
