@@ -22,6 +22,30 @@
       "revId": "c1008518a9368909860e86acd0247ea189fe2aff",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f325a411_addc5db6",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-06T19:18:06Z",
+      "side": 1,
+      "message": "+1 to eglSetMaxGLESVersion. If we want to set a global value it is better to do it explicitly.",
+      "parentUuid": "bbfb64be_efd4d307",
+      "range": {
+        "startLine": 146,
+        "startChar": 0,
+        "endLine": 148,
+        "endChar": 5
+      },
+      "revId": "c1008518a9368909860e86acd0247ea189fe2aff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
