@@ -1,0 +1,6 @@
+Code-Review+2: android-build-prod (mdb) <android-build-team-robot@google.com>
+Submitted-by: android-build-prod (mdb) <android-build-team-robot@google.com>
+Submitted-at: Wed, 06 Jun 2018 13:58:24 +0000
+Reviewed-on: https://android-review.googlesource.com/700091
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.8-release
