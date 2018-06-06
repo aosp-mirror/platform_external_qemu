@@ -66,6 +66,7 @@ public:
             mLoaderThread->wait();
             mLoaderThread.reset();
         }
+        mStream.close();
         mEndTime = base::System::get()->getHighResTimeUs();
     }
 
