@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "422d90f5_17fcb194",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/OpenGLTestContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-06T19:53:18Z",
+      "side": 1,
+      "message": "I would suggest to put it into the initialization step and always use version 3. It might become an issue later once you have multiple contexts with potentially different versions.",
+      "range": {
+        "startLine": 90,
+        "startChar": 4,
+        "endLine": 90,
+        "endChar": 35
+      },
+      "revId": "1ca4aa6cd0fad1638b2a133e1c95c2a6a38bce42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
