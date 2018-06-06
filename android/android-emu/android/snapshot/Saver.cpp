@@ -11,6 +11,7 @@
 
 #include "android/snapshot/Saver.h"
 
+#include "android/base/files/FileShareOpen.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/snapshot/common.h"
@@ -97,9 +98,9 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
     }
 
     {
-        const auto textures = fopen(
+        const auto textures = android::base::fsopen(
                 PathUtils::join(mSnapshot.dataDir(), kTexturesFileName).c_str(),
-                "wb");
+                "wb", android::base::FileShare::Write);
         if (!textures) {
             mRamSaver.clear();
             return;
