@@ -14,29 +14,38 @@
 
 #include "android/base/Log.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/files/StdioStream.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
-#include "android/base/memory/LazyInstance.h"
+#include "android/base/testing/TestSystem.h"
 #include "android/base/threads/Thread.h"
+#include "android/snapshot/TextureLoader.h"
+#include "android/snapshot/TextureSaver.h"
 
 #include <gtest/gtest.h>
 
-#include "OpenGLTestContext.h"
 #include "GLESv2Decoder.h"
 #include "GLSnapshot.h"
+#include "OpenGLTestContext.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES3/gl31.h>
+#include <memory>
 
 namespace emugl {
 
+using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
-using android::base::AutoLock;
 using android::base::PathUtils;
+using android::base::StdioStream;
 using android::base::System;
+using android::snapshot::TextureLoader;
+using android::snapshot::TextureSaver;
+
 using namespace gltest;
 
 class GLTest : public ::testing::Test {
@@ -57,7 +66,8 @@ protected:
 
     virtual void TearDown() {
         const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
-        egl->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        egl->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                            EGL_NO_CONTEXT);
         destroyContext(m_display, m_context);
         destroySurface(m_display, m_surface);
         destroyDisplay(m_display);
@@ -71,24 +81,121 @@ protected:
 
 class SnapshotTest : public GLTest {
 public:
-    void doSnapshot() {
-        // TODO: use Translator snapshot instead of libGLSnapshot
-        // const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
-        // mSnap.save();
-        // mEGL->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-        // destroyContext(m_display, m_context);
-        // destroySurface(m_display, m_surface);
-        // m_surface = pbufferSurface(m_display, m_config, mWidth, mHeight);
-        // m_context = createContext(m_display, m_config, mMajorVersion, mMinorVersion);
-        // mEGL->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
-        // mSnap.restore();
+    SnapshotTest()
+        : mTestSystem(PATH_SEP "progdir",
+                      System::kProgramBitness,
+                      PATH_SEP "homedir",
+                      PATH_SEP "appdir") {}
+
+    void SetUp() override {
+        GLTest::SetUp();
+        mTestSystem.getTempRoot()->makeSubDir("Snapshots");
+        mSnapshotPath = mTestSystem.getTempRoot()->makeSubPath("Snapshots");
     }
+
+    // Mimics FrameBuffer.onSave, with fewer objects to manage.
+    // |streamFile| is a filename into which the snapshot will be saved.
+    // |textureFile| is a filename into which the textures will be saved.
+    void saveSnapshot(const std::string streamFile,
+                      const std::string textureFile) {
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+
+        std::unique_ptr<StdioStream> m_stream(new StdioStream(
+                fopen(streamFile.c_str(), "wb"), StdioStream::kOwner));
+        auto egl_stream = static_cast<EGLStream>(m_stream.get());
+        std::unique_ptr<TextureSaver> m_texture_saver(
+                new TextureSaver(StdioStream(fopen(textureFile.c_str(), "wb"),
+                                             StdioStream::kOwner)));
+
+        egl->eglPreSaveContext(m_display, m_context, egl_stream);
+        egl->eglSaveAllImages(m_display, egl_stream, &m_texture_saver);
+
+        egl->eglSaveContext(m_display, m_context, egl_stream);
+
+        // Skip saving a bunch of FrameBuffer's fields
+        // Skip saving colorbuffers
+        // Skip saving window surfaces
+
+        egl->eglSaveConfig(m_display, m_config, egl_stream);
+
+        // Skip saving a bunch of process-owned objects
+
+        egl->eglPostSaveContext(m_display, m_context, egl_stream);
+
+        m_stream->close();
+        m_texture_saver->done();
+    }
+
+    // Mimics FrameBuffer.onLoad, with fewer objects to manage.
+    // |streamFile| is a filename from which the snapshot will be loaded.
+    // |textureFile| is a filename from which the textures will be loaded.
+    void loadSnapshot(const std::string streamFile,
+                      const std::string textureFile) {
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+
+        std::unique_ptr<StdioStream> m_stream(new StdioStream(
+                fopen(streamFile.c_str(), "rb"), StdioStream::kOwner));
+        auto egl_stream = static_cast<EGLStream>(m_stream.get());
+        std::shared_ptr<TextureLoader> m_texture_loader(
+                new TextureLoader(StdioStream(fopen(textureFile.c_str(), "rb"),
+                                              StdioStream::kOwner)));
+
+        egl->eglLoadAllImages(m_display, egl_stream, &m_texture_loader);
+
+        EGLint contextAttribs[5] = {EGL_CONTEXT_CLIENT_VERSION, 3,
+                                    EGL_CONTEXT_MINOR_VERSION_KHR, 0, EGL_NONE};
+
+        m_context =
+                egl->eglLoadContext(m_display, &contextAttribs[0], egl_stream);
+        m_config = egl->eglLoadConfig(m_display, egl_stream);
+        m_surface = pbufferSurface(m_display, m_config, 32, 32);
+        egl->eglPostLoadAllImages(m_display, egl_stream);
+
+        m_stream->close();
+        m_texture_loader->join();
+        egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
+    }
+
+    void doSnapshot() {
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+
+        std::string timeStamp =
+                std::to_string(android::base::System::get()->getUnixTime());
+        std::string snapshotFile =
+                mSnapshotPath + PATH_SEP "snapshot_" + timeStamp + ".snap";
+        std::string textureFile =
+                mSnapshotPath + PATH_SEP "textures_" + timeStamp + ".stex";
+
+        saveSnapshot(snapshotFile, textureFile);
+
+        // "teardown" of existing context and surface
+        egl->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                            EGL_NO_CONTEXT);
+        destroyContext(m_display, m_context);
+        destroySurface(m_display, m_surface);
+
+        loadSnapshot(snapshotFile, textureFile);
+
+        EXPECT_TRUE(m_context != EGL_NO_CONTEXT);
+        EXPECT_TRUE(m_surface != EGL_NO_SURFACE);
+    }
+
+protected:
+    android::base::TestSystem mTestSystem;
+    std::string mSnapshotPath = {};
 };
 
-TEST_F(GLTest, InitDestroy) {
-}
+TEST_F(GLTest, InitDestroy) {}
 
-TEST_F(SnapshotTest, InitDestroy) {
+TEST_F(SnapshotTest, InitDestroy) {}
+
+TEST_F(SnapshotTest, SnapshotEnableBlend) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    ASSERT_FALSE(gl->glIsEnabled(GL_BLEND));
+    gl->glEnable(GL_BLEND);
+    ASSERT_TRUE(gl->glIsEnabled(GL_BLEND));
+    doSnapshot();
+    EXPECT_TRUE(gl->glIsEnabled(GL_BLEND));
 }
 
 }  // namespace emugl
