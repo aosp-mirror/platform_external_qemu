@@ -143,6 +143,9 @@ void GLESv2Context::initEmulatedBuffers() {
 GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
         android::base::Stream* stream, GlLibrary* glLib)
         : GLEScontext(globalNameSpace, stream, glLib) {
+    if (s_maxGlesVersion < maj) {
+        setMaxGlesVersion((GLESVersion)maj);
+    }
     if (stream) {
         assert(maj == m_glesMajorVersion);
         assert(min == m_glesMinorVersion);
