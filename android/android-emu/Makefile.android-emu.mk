@@ -120,6 +120,7 @@ LOCAL_SRC_FILES := \
     android/base/files/CompressingStream.cpp \
     android/base/files/DecompressingStream.cpp \
     android/base/files/Fd.cpp \
+    android/base/files/FileShareOpen.cpp \
     android/base/files/IniFile.cpp \
     android/base/files/InplaceStream.cpp \
     android/base/files/MemStream.cpp \
@@ -676,6 +677,7 @@ LOCAL_SRC_FILES := \
   android/base/containers/Lookup_unittest.cpp \
   android/base/containers/SmallVector_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
+  android/base/files/FileShareOpen_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
   android/base/files/InplaceStream_unittest.cpp \
   android/base/files/MemStream_unittest.cpp \
