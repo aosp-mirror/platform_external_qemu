@@ -316,7 +316,7 @@ ssize_t qio_channel_read(QIOChannel *ioc,
                          Error **errp);
 
 /**
- * qio_channel_writev:
+ * qio_channel_write:
  * @ioc: the channel object
  * @buf: the memory regions to send data from
  * @buflen: the length of @buf
