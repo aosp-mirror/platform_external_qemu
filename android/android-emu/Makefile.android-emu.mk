@@ -120,6 +120,7 @@ LOCAL_SRC_FILES := \
     android/base/files/CompressingStream.cpp \
     android/base/files/DecompressingStream.cpp \
     android/base/files/Fd.cpp \
+    android/base/files/FileShareOpen.cpp \
     android/base/files/IniFile.cpp \
     android/base/files/InplaceStream.cpp \
     android/base/files/MemStream.cpp \
