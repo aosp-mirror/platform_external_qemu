@@ -12,6 +12,7 @@
 #include "android/snapshot/Loader.h"
 #include <errno.h>
 
+#include "android/base/files/FileShareOpen.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/snapshot/TextureLoader.h"
@@ -43,8 +44,9 @@ Loader::Loader(const Snapshot& snapshot, int error)
     mDiskKind = System::get()->pathDiskKind(mSnapshot.dataDir());
 
     {
-        const auto ram = fopen(
-                PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str(), "rb");
+        const auto ram = android::base::fsopen(
+                PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str(),
+                "rb", android::base::FileShare::Read);
         if (!ram) {
             mSnapshot.saveFailure(FailureReason::NoRamFile);
             return;
@@ -61,9 +63,9 @@ Loader::Loader(const Snapshot& snapshot, int error)
                            emptyRamBlockStructure);
     }
     {
-        const auto textures = fopen(
+        const auto textures = android::base::fsopen(
                 PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
-                "rb");
+                "rb", android::base::FileShare::Read);
         if (!textures) {
             mSnapshot.saveFailure(FailureReason::NoTexturesFile);
             mRamLoader.clear();
