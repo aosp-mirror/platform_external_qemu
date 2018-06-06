@@ -138,10 +138,7 @@ GlobalState gGlobals = {false,  false,  CPU_ACCELERATOR_NONE,
 #include <WinHvEmulation.h>
 
 static bool isOkToTryWHPX() {
-    char cpu_vendor[16];
-    android_get_x86_cpuid_vendor_id(cpu_vendor, sizeof(cpu_vendor));
-    return android_get_x86_cpuid_vendor_id_type(cpu_vendor) == VENDOR_ID_INTEL &&
-           featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform);
+    return featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform);
 }
 
 AndroidCpuAcceleration ProbeWHPX(std::string* status) {

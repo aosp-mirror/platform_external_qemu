@@ -361,4 +361,6 @@ ifeq (,$(CONFIG_MIN_BUILD))
     include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 endif   # !CONFIG_MIN_BUILD
 
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu-img.mk
+
 LOCAL_PATH := $(QEMU2_OLD_LOCAL_PATH)

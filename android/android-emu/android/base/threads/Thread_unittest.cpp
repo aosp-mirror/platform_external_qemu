@@ -38,22 +38,19 @@ public:
 class OnExitThread : public ::android::base::Thread {
 public:
     static bool onExitCalled;
-    static bool dtorCalled;
 
-    OnExitThread() { onExitCalled = dtorCalled = false; }
+    OnExitThread() { onExitCalled = false; }
 
-    ~OnExitThread() { dtorCalled = true; }
+    ~OnExitThread() { }
 
     virtual intptr_t main() { return 42; }
 
     virtual void onExit() {
         onExitCalled = true;
-        delete this;
     }
 };
 
 bool OnExitThread::onExitCalled = false;
-bool OnExitThread::dtorCalled = false;
 
 class CountingThread : public Thread {
 public:
@@ -173,11 +170,9 @@ TEST(ThreadTest, MultipleThreads) {
 TEST(ThreadTest, OnExit) {
     OnExitThread* thread = new OnExitThread();
     EXPECT_FALSE(OnExitThread::onExitCalled);
-    EXPECT_FALSE(OnExitThread::dtorCalled);
     EXPECT_TRUE(thread->start());
     EXPECT_TRUE(thread->wait(NULL));
     EXPECT_TRUE(OnExitThread::onExitCalled);
-    EXPECT_TRUE(OnExitThread::dtorCalled);
 }
 
 TEST(ThreadTest, tryWait) {

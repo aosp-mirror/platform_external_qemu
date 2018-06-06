@@ -94,6 +94,11 @@ sdk {
             executable true
             builtBy buildDefaultEmulator
         }
+
+        item("$buildDefaultEmulator.output/qemu-img") {
+            executable true
+            builtBy buildDefaultEmulator
+        }
     }
 
     linux {
@@ -201,6 +206,11 @@ sdk {
         }
 
         item("$buildWindowsEmulator.output/emulator64-x86.exe") {
+            executable true
+            builtBy buildWindowsEmulator
+        }
+
+        item("$buildWindowsEmulator.output/qemu-img.exe") {
             executable true
             builtBy buildWindowsEmulator
         }

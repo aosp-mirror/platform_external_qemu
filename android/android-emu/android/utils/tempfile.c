@@ -14,6 +14,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
@@ -77,6 +78,13 @@ tempfile_create_with_ext( const char* ext )
     if (retval == 0) {
         D( "can't create temporary file in '%s'", temp_dir );
         return NULL;
+    }
+    if (ext) {
+        char  temp_oldnamebuff[MAX_PATH];
+
+        strcpy(temp_oldnamebuff, temp_namebuff);
+        strncat(temp_namebuff, ext, strlen(ext));
+        MoveFileEx(temp_oldnamebuff, temp_namebuff, MOVEFILE_REPLACE_EXISTING);
     }
 
     tempname = temp_namebuff;

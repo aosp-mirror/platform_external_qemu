@@ -178,32 +178,6 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>250</y>
-     <width>131</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <weight>50</weight>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>Driving status</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="groupBox_6">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
      <y>190</y>
      <width>481</width>
      <height>21</height>
@@ -343,11 +317,6 @@
    </item>
    <item>
     <property name="text">
-     <string>Low</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
      <string>D1</string>
     </property>
    </item>
@@ -442,94 +411,6 @@
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Title</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBox_no_voice">
-   <property name="geometry">
-    <rect>
-     <x>310</x>
-     <y>280</y>
-     <width>131</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>No voice input</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBox_no_video">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>310</y>
-     <width>96</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>No video</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBox_no_keyboard">
-   <property name="geometry">
-    <rect>
-     <x>310</x>
-     <y>310</y>
-     <width>111</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>No keyboard</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBox_unrestricted">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>250</y>
-     <width>121</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Unrestricted</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBox_limit_msg_len">
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>280</y>
-     <width>131</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Limit message len</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBox_no_config">
-   <property name="geometry">
-    <rect>
-     <x>310</x>
-     <y>250</y>
-     <width>96</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>No config</string>
    </property>
   </widget>
  </widget>

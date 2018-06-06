@@ -28,7 +28,6 @@ using emulator::Status;
 using emulator::VehicleProperty;
 using emulator::VehiclePropValue;
 using emulator::VehicleGear;
-using emulator::VehicleDrivingStatus;
 using emulator::VehicleIgnitionState;
 
 CarSensorData::CarSensorData(QWidget* parent)
@@ -39,11 +38,11 @@ CarSensorData::CarSensorData(QWidget* parent)
 static const enum VehicleGear sComboBoxGearValues[] = {
         VehicleGear::GEAR_NEUTRAL, VehicleGear::GEAR_REVERSE,
         VehicleGear::GEAR_PARK,    VehicleGear::GEAR_DRIVE,
-        VehicleGear::GEAR_LOW,     VehicleGear::GEAR_1,
-        VehicleGear::GEAR_2,       VehicleGear::GEAR_3,
-        VehicleGear::GEAR_4,       VehicleGear::GEAR_5,
-        VehicleGear::GEAR_6,       VehicleGear::GEAR_7,
-        VehicleGear::GEAR_8,       VehicleGear::GEAR_9};
+        VehicleGear::GEAR_1,       VehicleGear::GEAR_2,
+        VehicleGear::GEAR_3,       VehicleGear::GEAR_4,
+        VehicleGear::GEAR_5,       VehicleGear::GEAR_6,
+        VehicleGear::GEAR_7,       VehicleGear::GEAR_8,
+        VehicleGear::GEAR_9};
 
 static const enum VehicleIgnitionState sComboBoxIgnitionStates[] = {
         VehicleIgnitionState::UNDEFINED, VehicleIgnitionState::LOCK,
@@ -70,61 +69,6 @@ void CarSensorData::sendGearChangeMsg(const int gear, const string& gearName) {
     value->add_int32_values(gear);
     string log = "Gear changed to " + gearName;
     mSendEmulatorMsg(emulatorMsg, log);
-}
-
-void CarSensorData::sendDrivingStatusChangeMsg(const int status,
-                                               const string& statusName) {
-    if (mSendEmulatorMsg == nullptr) {
-        return;
-    }
-
-    EmulatorMessage emulatorMsg = makeSetPropMsg();
-    VehiclePropValue* value = emulatorMsg.add_value();
-    value->set_prop(static_cast<int32_t>(VehicleProperty::DRIVING_STATUS));
-    value->add_int32_values(status);
-    string log = "Driving status: " + statusName;
-    mSendEmulatorMsg(emulatorMsg, log);
-}
-
-void CarSensorData::collectDrivingStatusAndReport() {
-    if (mSendEmulatorMsg == nullptr) {
-        return;
-    }
-    string statusMsg;
-    int drivingStatus = 0;
-    if (mUi->checkBox_no_video->isChecked()) {
-        drivingStatus |= static_cast<int32_t>(VehicleDrivingStatus::NO_VIDEO);
-        statusMsg += "NO_VIDEO ";
-    }
-
-    if (mUi->checkBox_no_keyboard->isChecked()) {
-        drivingStatus |=
-                static_cast<int32_t>(VehicleDrivingStatus::NO_KEYBOARD_INPUT);
-        statusMsg += "NO_KEYBOARD_INPUT ";
-    }
-
-    if (mUi->checkBox_limit_msg_len->isChecked()) {
-        drivingStatus |=
-                static_cast<int32_t>(VehicleDrivingStatus::LIMIT_MESSAGE_LEN);
-        statusMsg += "LIMIT_MESSAGE_LEN ";
-    }
-
-    if (mUi->checkBox_no_config->isChecked()) {
-        drivingStatus |= static_cast<int32_t>(VehicleDrivingStatus::NO_CONFIG);
-        statusMsg += "NO_CONFIG ";
-    }
-
-    if (mUi->checkBox_no_voice->isChecked()) {
-        drivingStatus |=
-                static_cast<int32_t>(VehicleDrivingStatus::NO_VOICE_INPUT);
-        statusMsg += "NO_VOICE_INPUT ";
-    }
-
-    if (drivingStatus != 0) {
-        mUi->checkBox_unrestricted->setChecked(false);
-    }
-
-    sendDrivingStatusChangeMsg(drivingStatus, statusMsg);
 }
 
 void CarSensorData::sendIgnitionChangeMsg(const int ignition,
@@ -178,40 +122,6 @@ void CarSensorData::on_checkBox_park_toggled() {
     value->add_int32_values(parkBrakeOn ? 1 : 0);
     string log = "Park brake: " + std::to_string(parkBrakeOn);
     mSendEmulatorMsg(emulatorMsg, log);
-}
-
-void CarSensorData::on_checkBox_unrestricted_toggled() {
-    // unrestricted status and restricted status are mutually exclusive.
-    if (mUi->checkBox_unrestricted->isChecked()) {
-        mUi->checkBox_no_video->setChecked(false);
-        mUi->checkBox_no_keyboard->setChecked(false);
-        mUi->checkBox_limit_msg_len->setChecked(false);
-        mUi->checkBox_no_config->setChecked(false);
-        mUi->checkBox_no_voice->setChecked(false);
-        sendDrivingStatusChangeMsg(
-                static_cast<int32_t>(VehicleDrivingStatus::UNRESTRICTED),
-                "UNRESTRICTED");
-    }
-}
-
-void CarSensorData::on_checkBox_no_video_toggled() {
-    collectDrivingStatusAndReport();
-}
-
-void CarSensorData::on_checkBox_no_keyboard_toggled() {
-    collectDrivingStatusAndReport();
-}
-
-void CarSensorData::on_checkBox_limit_msg_len_toggled() {
-    collectDrivingStatusAndReport();
-}
-
-void CarSensorData::on_checkBox_no_config_toggled() {
-    collectDrivingStatusAndReport();
-}
-
-void CarSensorData::on_checkBox_no_voice_toggled() {
-    collectDrivingStatusAndReport();
 }
 
 void CarSensorData::on_checkBox_fuel_low_toggled() {

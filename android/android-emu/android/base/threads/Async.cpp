@@ -34,6 +34,11 @@ public:
     virtual void onExit() override {
         delete this;
     }
+
+    bool wait(intptr_t* exitStatus) override {
+        fprintf(stderr, "FATAL: tried to wait on a self deleting thread (for Async)\n");
+        abort();
+    }
 };
 
 }

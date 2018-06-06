@@ -33,26 +33,14 @@ private slots:
     void on_car_speedSlider_valueChanged(int value);
     void on_comboBox_gear_currentIndexChanged(int index);
     void on_comboBox_ignition_currentIndexChanged(int index);
-
     void on_checkBox_night_toggled();
     void on_checkBox_park_toggled();
-
-    void on_checkBox_unrestricted_toggled();
-    void on_checkBox_no_video_toggled();
-    void on_checkBox_no_keyboard_toggled();
-    void on_checkBox_limit_msg_len_toggled();
-    void on_checkBox_no_config_toggled();
-    void on_checkBox_no_voice_toggled();
-
     void on_checkBox_fuel_low_toggled();
 
 private:
     std::unique_ptr<Ui::CarSensorData> mUi;
     EmulatorMsgCallback mSendEmulatorMsg;
     void sendGearChangeMsg(const int gear, const std::string& gearName);
-    void sendDrivingStatusChangeMsg(const int status,
-                                    const std::string& statusName);
     void sendIgnitionChangeMsg(const int ignition,
                                const std::string& ignitionName);
-    void collectDrivingStatusAndReport();
 };

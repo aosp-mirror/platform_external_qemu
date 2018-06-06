@@ -532,8 +532,10 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
 static void touchEglImage(EglImage* eglImage,
         SaveableTexture::restorer_t restorer) {
     if (eglImage->needRestore) {
-        restorer(eglImage->saveableTexture.get());
-        eglImage->saveableTexture->fillEglImage(eglImage);
+        if (eglImage->saveableTexture.get()) {
+            restorer(eglImage->saveableTexture.get());
+            eglImage->saveableTexture->fillEglImage(eglImage);
+        }
         eglImage->needRestore = false;
     }
 }

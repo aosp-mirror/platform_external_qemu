@@ -42,9 +42,10 @@ if [[ $MASTER_PATH == ""  ]]
   exit 1
 fi
 
-input_file=$MASTER_PATH/out/soong/.intermediates/hardware/interfaces/vehicle/\
-$VHAL_VERSION/android.hardware.vehicle@$VHAL_VERSION\_genc++_headers\
-/gen/android/hardware/vehicle/$VHAL_VERSION/types.h
+input_file=$MASTER_PATH/out/soong/.intermediates\
+/hardware/interfaces/automotive/vehicle/$VHAL_VERSION\
+/android.hardware.automotive.vehicle@$VHAL_VERSION\_genc++_headers\
+/gen/android/hardware/automotive/vehicle/$VHAL_VERSION/types.h
 
 if [ ! -f "$input_file" ]
   then echo "types.h file not found at $input_file"
