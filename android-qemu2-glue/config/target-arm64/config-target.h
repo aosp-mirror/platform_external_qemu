@@ -5,4 +5,3 @@
 #define CONFIG_SOFTMMU 1
 #define CONFIG_I386_DIS 1
 #define CONFIG_ARM_DIS 1
-#define CONFIG_ARM_A64_DIS 1
