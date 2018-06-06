@@ -84,7 +84,7 @@ public:
     // Wait for thread termination and retrieve exist status into
     // |*exitStatus|. Return true on success, false otherwise.
     // NOTE: |exitStatus| can be NULL.
-    bool  wait(intptr_t *exitStatus = nullptr);
+    virtual bool  wait(intptr_t *exitStatus = nullptr);
 
     // Check whether a thread has terminated. On success, return true
     // and sets |*exitStatus|. On failure, return false.
