@@ -78,6 +78,7 @@ void aio_set_fd_handler(AioContext *ctx,
         }
     } else {
         HANDLE event;
+        long bitmask = FD_OOB;
 
         if (node == NULL) {
             /* Alloc and insert if it's not already there */
@@ -102,10 +103,16 @@ void aio_set_fd_handler(AioContext *ctx,
         node->io_write = io_write;
         node->is_external = is_external;
 
+        if (io_read) {
+            bitmask |= FD_READ | FD_ACCEPT | FD_CLOSE | FD_CONNECT;
+        }
+
+        if (io_write) {
+            bitmask |= FD_WRITE | FD_CONNECT;
+        }
+
         event = event_notifier_get_handle(&ctx->notifier);
-        WSAEventSelect(node->pfd.fd, event,
-                       (io_read ? FD_READ : 0) | FD_ACCEPT | FD_CLOSE |
-                       FD_CONNECT | (io_write ? FD_WRITE : 0) | FD_OOB);
+        WSAEventSelect(node->pfd.fd, event, bitmask);
     }
 
     qemu_lockcnt_unlock(&ctx->list_lock);
