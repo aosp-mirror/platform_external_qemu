@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "3a8a4422_3a0a4aff",
+        "filename": "android/android-emu/android/snapshot/Loader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-07T18:59:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db4e7523_c7e96502",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 54
+      },
+      "revId": "d3d2ee53b990a0c0bf1f13b9a868733d64cff9e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37947800_f3673562",
         "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
         "patchSetId": 6
@@ -59,6 +83,30 @@
       "writtenOn": "2018-06-07T18:54:23Z",
       "side": 1,
       "message": "?",
+      "range": {
+        "startLine": 412,
+        "startChar": 0,
+        "endLine": 412,
+        "endChar": 22
+      },
+      "revId": "d3d2ee53b990a0c0bf1f13b9a868733d64cff9e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3882a271_76142daa",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-07T18:59:31Z",
+      "side": 1,
+      "message": "Failing to acquire the write lock will result in a null mWriter. If we protect it here it will exit gracefully.",
+      "parentUuid": "37947800_f3673562",
       "range": {
         "startLine": 412,
         "startChar": 0,
