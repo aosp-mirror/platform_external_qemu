@@ -39,7 +39,7 @@
 #include "qemu/bitops.h"
 #include "qemu/error-report.h"
 #include "qemu/config-file.h"
-#include "sysemu/char.h"
+#include "chardev/char.h"
 #include "monitor/monitor.h"
 #include "qapi/error.h"
 
@@ -522,7 +522,7 @@ static void ranchu_init(MachineState *machine)
     }
     fdt_add_cpu_nodes(vbi);
 
-    memory_region_init_ram(ram, NULL, "ranchu.ram", machine->ram_size,
+    memory_region_init_ram_nomigrate(ram, NULL, "ranchu.ram", machine->ram_size,
                            &error_abort);
     vmstate_register_ram_global(ram);
     memory_region_add_subregion(sysmem, memmap[RANCHU_MEM].base, ram);

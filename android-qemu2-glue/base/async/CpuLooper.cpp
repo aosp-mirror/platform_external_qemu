@@ -16,6 +16,7 @@
 #include <atomic>
 #include <memory>
 #include <utility>
+#include <cassert>
 
 // These need to go after all STL headers, as they define some macros that make
 // STL go crazy.

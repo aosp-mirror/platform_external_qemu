@@ -1344,7 +1344,7 @@ smspdu_create_deliver_utf8( const unsigned char*   utf8,
     if (leftover > 0)
         num_pdus += 1;
 
-    list = calloc( sizeof(*list), num_pdus + 1 );
+    list = calloc( sizeof(SmsPDU*), num_pdus + 1 );
     if (list == NULL)
         return NULL;
 

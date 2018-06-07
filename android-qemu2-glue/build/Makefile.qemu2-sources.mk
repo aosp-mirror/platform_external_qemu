@@ -2,14 +2,82 @@
 # Modify the qemu makefiles instead and regenerate this file!
 
 QEMU2_LIB_qemuutil := \
+    $(QEMU2_AUTO_GENERATED_DIR)/accel/kvm/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/accel/tcg/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/audio/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/block/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/chardev/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/crypto/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/9pfs/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/acpi/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/alpha/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/arm/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/audio/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/block/dataplane/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/block/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/char/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/display/trace.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_LIB_qemuutil += \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/dma/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/i386/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/i386/xen/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/input/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/intc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/isa/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/mem/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/misc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/net/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/nvram/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/pci/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/ppc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/s390x/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/scsi/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/sd/trace.c \
+
+# This file is auto generated! Do not edit it!
+# Puppies and kittens die when you change this manually
+QEMU2_LIB_qemuutil += \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/sparc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/timer/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/usb/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/vfio/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/virtio/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/xen/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/io/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/linux-user/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/migration/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/nbd/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/net/trace.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-event.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-types.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-visit.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/qapi/trace.c \
+
+# This file is auto generated! Do not edit it!
+# I know this looks like the easy way out, but don't touch this file!
+QEMU2_LIB_qemuutil += \
     $(QEMU2_AUTO_GENERATED_DIR)/qmp-introspect.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/qom/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/arm/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/i386/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/mips/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/ppc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/s390x/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/sparc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/ui/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/util/trace.c \
     qapi/opts-visitor.c \
     qapi/qapi-clone-visitor.c \
     qapi/qapi-dealloc-visitor.c \
     qapi/qapi-util.c \
+
+# This file is auto generated! Do not edit it!
+# There is a better way than modifying this file
+QEMU2_LIB_qemuutil += \
     qapi/qapi-visit-core.c \
     qapi/qmp-dispatch.c \
     qapi/qmp-event.c \
@@ -17,29 +85,24 @@ QEMU2_LIB_qemuutil := \
     qapi/qobject-input-visitor.c \
     qapi/qobject-output-visitor.c \
     qapi/string-input-visitor.c \
-
-# This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
-QEMU2_LIB_qemuutil += \
     qapi/string-output-visitor.c \
     qobject/json-lexer.c \
     qobject/json-parser.c \
     qobject/json-streamer.c \
     qobject/qbool.c \
     qobject/qdict.c \
-    qobject/qfloat.c \
-    qobject/qint.c \
     qobject/qjson.c \
     qobject/qlist.c \
-    qobject/qnull.c \
-    qobject/qobject.c \
-    qobject/qstring.c \
-    trace/control.c \
-    trace/qmp.c \
 
 # This file is auto generated! Do not edit it!
 # Git blame will find you, and you get to merge the next qemu release when you change this!
 QEMU2_LIB_qemuutil += \
+    qobject/qnull.c \
+    qobject/qnum.c \
+    qobject/qobject.c \
+    qobject/qstring.c \
+    trace/control.c \
+    trace/qmp.c \
     util/abort.c \
     util/acl.c \
     util/aiocb.c \
@@ -49,16 +112,17 @@ QEMU2_LIB_qemuutil += \
     util/bitops.c \
     util/buffer.c \
     util/bufferiszero.c \
+
+# This file is auto generated! Do not edit it!
+# Really, just don't do it
+QEMU2_LIB_qemuutil += \
+    util/cacheinfo.c \
     util/crc32c.c \
     util/cutils.c \
     util/envlist.c \
     util/error.c \
     util/fifo8.c \
     util/getauxval.c \
-
-# This file is auto generated! Do not edit it!
-# Really, just don't do it
-QEMU2_LIB_qemuutil += \
     util/hbitmap.c \
     util/hexdump.c \
     util/host-utils.c \
@@ -67,6 +131,10 @@ QEMU2_LIB_qemuutil += \
     util/iov.c \
     util/keyval.c \
     util/lockcnt.c \
+
+# This file is auto generated! Do not edit it!
+# Please, please do not change this manually
+QEMU2_LIB_qemuutil += \
     util/log.c \
     util/main-loop.c \
     util/module.c \
@@ -74,10 +142,6 @@ QEMU2_LIB_qemuutil += \
     util/osdep.c \
     util/path.c \
     util/qdist.c \
-
-# This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
-QEMU2_LIB_qemuutil += \
     util/qemu-config.c \
     util/qemu-coroutine-io.c \
     util/qemu-coroutine-lock.c \
@@ -86,6 +150,10 @@ QEMU2_LIB_qemuutil += \
     util/qemu-error.c \
     util/qemu-option.c \
     util/qemu-progress.c \
+
+# This file is auto generated! Do not edit it!
+# I know this looks like the easy way out, but don't touch this file!
+QEMU2_LIB_qemuutil += \
     util/qemu-sockets.c \
     util/qemu-timer-common.c \
     util/qemu-timer.c \
@@ -93,10 +161,7 @@ QEMU2_LIB_qemuutil += \
     util/range.c \
     util/rcu.c \
     util/readline.c \
-
-# This file is auto generated! Do not edit it!
-# Please, please do not change this manually
-QEMU2_LIB_qemuutil += \
+    util/stats64.c \
     util/systemd.c \
     util/thread-pool.c \
     util/throttle.c \
@@ -104,6 +169,10 @@ QEMU2_LIB_qemuutil += \
     util/unicode.c \
     util/uri.c \
     util/uuid.c \
+
+# This file is auto generated! Do not edit it!
+# Please, please do not change this manually
+QEMU2_LIB_qemuutil += \
 
 QEMU2_LIB_qemuutil_darwin-x86_64 := \
     util/aio-posix.c \
@@ -150,17 +219,18 @@ QEMU2_LIB_qemustub := \
     stubs/bdrv-next-monitor-owned.c \
     stubs/blk-commit-all.c \
     stubs/blockdev-close-all-bdrv-states.c \
+    stubs/change-state-handler.c \
     stubs/clock-warp.c \
     stubs/cpu-get-clock.c \
     stubs/cpu-get-icount.c \
     stubs/dump.c \
     stubs/error-printf.c \
     stubs/fdset.c \
-    stubs/gdbstub.c \
 
 # This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
+# Really, just don't do it
 QEMU2_LIB_qemustub += \
+    stubs/gdbstub.c \
     stubs/get-vm-name.c \
     stubs/iothread-lock.c \
     stubs/iothread.c \
@@ -171,15 +241,16 @@ QEMU2_LIB_qemustub += \
     stubs/monitor.c \
     stubs/notify-event.c \
     stubs/pc_madt_cpu_entry.c \
+    stubs/pci-host-piix.c \
     stubs/qmp_pc_dimm_device_list.c \
     stubs/qtest.c \
     stubs/replay.c \
-    stubs/runstate-check.c \
-    stubs/set-fd-handler.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# There is a better way than modifying this file
 QEMU2_LIB_qemustub += \
+    stubs/runstate-check.c \
+    stubs/set-fd-handler.c \
     stubs/slirp.c \
     stubs/sysbus.c \
     stubs/target-get-monitor-def.c \
@@ -189,6 +260,8 @@ QEMU2_LIB_qemustub += \
     stubs/vm-stop.c \
     stubs/vmgenid.c \
     stubs/vmstate.c \
+    stubs/xen-common.c \
+    stubs/xen-hvm.c \
 
 QEMU2_LIB_qemustub_windows-x86 := \
     stubs/fd-register.c \
@@ -199,69 +272,7 @@ QEMU2_LIB_qemustub_windows-x86_64 := \
     stubs/win32-stubs.c \
 
 QEMU2_COMMON_SOURCES := \
-    $(QEMU2_AUTO_GENERATED_DIR)/audio/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/backends/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/block/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/crypto/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/9pfs/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/acpi/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/alpha/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/arm/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/audio/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/block/dataplane/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/block/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/char/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/display/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/dma/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/i386/trace.c \
-
-# This file is auto generated! Do not edit it!
-# Please, please do not change this manually
-QEMU2_COMMON_SOURCES += \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/i386/xen/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/input/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/intc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/isa/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/mem/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/misc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/net/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/nvram/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/pci/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/ppc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/s390x/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/scsi/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/sd/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/sparc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/timer/trace.c \
-
-# This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
-QEMU2_COMMON_SOURCES += \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/usb/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/vfio/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/virtio/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/hw/xen/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/io/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/linux-user/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/migration/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/net/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/qapi/trace.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qmp-marshal.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/qom/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/arm/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/i386/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/mips/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/ppc/trace.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_COMMON_SOURCES += \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/s390x/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/target/sparc/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/ui/trace.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/util/trace.c \
-    accel.c \
     audio/audio.c \
     audio/mixeng.c \
     audio/noaudio.c \
@@ -271,18 +282,15 @@ QEMU2_COMMON_SOURCES += \
     backends/cryptodev.c \
     backends/hostmem-ram.c \
     backends/hostmem.c \
+    backends/rng-egd.c \
+    backends/rng-random-generic.c \
+    backends/rng.c \
+    backends/tpm.c \
+    block.c \
 
 # This file is auto generated! Do not edit it!
 # I've been autogenerated, don't mess with me
 QEMU2_COMMON_SOURCES += \
-    backends/msmouse.c \
-    backends/rng-egd.c \
-    backends/rng-random-generic.c \
-    backends/rng.c \
-    backends/testdev.c \
-    backends/tpm.c \
-    backends/wctablet.c \
-    block.c \
     block/accounting.c \
     block/backup.c \
     block/blkdebug.c \
@@ -290,10 +298,6 @@ QEMU2_COMMON_SOURCES += \
     block/blkverify.c \
     block/block-backend.c \
     block/bochs.c \
-
-# This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
-QEMU2_COMMON_SOURCES += \
     block/cat.c \
     block/cloop.c \
     block/commit.c \
@@ -302,25 +306,29 @@ QEMU2_COMMON_SOURCES += \
     block/dmg.c \
     block/io.c \
     block/mirror.c \
+
+# This file is auto generated! Do not edit it!
+# Really, just don't do it
+QEMU2_COMMON_SOURCES += \
     block/nbd-client.c \
     block/nbd.c \
     block/null.c \
     block/parallels.c \
     block/qapi.c \
     block/qcow.c \
+    block/qcow2-bitmap.c \
     block/qcow2-cache.c \
-
-# This file is auto generated! Do not edit it!
-# Really, just don't do it
-QEMU2_COMMON_SOURCES += \
     block/qcow2-cluster.c \
     block/qcow2-refcount.c \
     block/qcow2-snapshot.c \
     block/qcow2.c \
     block/qed-check.c \
     block/qed-cluster.c \
-    block/qed-gencb.c \
     block/qed-l2-cache.c \
+
+# This file is auto generated! Do not edit it!
+# Really, just don't do it
+QEMU2_COMMON_SOURCES += \
     block/qed-table.c \
     block/qed.c \
     block/quorum.c \
@@ -328,10 +336,6 @@ QEMU2_COMMON_SOURCES += \
     block/replication.c \
     block/sheepdog.c \
     block/snapshot.c \
-
-# This file is auto generated! Do not edit it!
-# Really, just don't do it
-QEMU2_COMMON_SOURCES += \
     block/stream.c \
     block/throttle-groups.c \
     block/vdi.c \
@@ -340,39 +344,48 @@ QEMU2_COMMON_SOURCES += \
     block/vhdx.c \
     block/vmdk.c \
     block/vpc.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_COMMON_SOURCES += \
     block/vvfat.c \
     block/write-threshold.c \
     blockdev-nbd.c \
     blockdev.c \
     blockjob.c \
+    bootdevice.c \
     bt-host.c \
     bt-vhci.c \
-
-# This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
-QEMU2_COMMON_SOURCES += \
+    chardev/char-fe.c \
     chardev/char-file.c \
     chardev/char-io.c \
     chardev/char-mux.c \
     chardev/char-null.c \
     chardev/char-pipe.c \
     chardev/char-ringbuf.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_COMMON_SOURCES += \
     chardev/char-serial.c \
     chardev/char-socket.c \
     chardev/char-stdio.c \
     chardev/char-udp.c \
     chardev/char.c \
+    chardev/msmouse.c \
+    chardev/testdev.c \
+    chardev/wctablet.c \
     cpus-common.c \
     crypto/aes.c \
     crypto/afsplit.c \
     crypto/block-luks.c \
-
-# This file is auto generated! Do not edit it!
-# Please, please do not change this manually
-QEMU2_COMMON_SOURCES += \
     crypto/block-qcow.c \
     crypto/block.c \
     crypto/cipher.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_COMMON_SOURCES += \
     crypto/desrfb.c \
     crypto/hash-glib.c \
     crypto/hash.c \
@@ -385,13 +398,13 @@ QEMU2_COMMON_SOURCES += \
     crypto/ivgen.c \
     crypto/pbkdf.c \
     crypto/random-platform.c \
-
-# This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
-QEMU2_COMMON_SOURCES += \
     crypto/secret.c \
     crypto/tlscreds.c \
     crypto/tlscredsanon.c \
+
+# This file is auto generated! Do not edit it!
+# Puppies and kittens die when you change this manually
+QEMU2_COMMON_SOURCES += \
     crypto/tlscredsx509.c \
     crypto/tlssession.c \
     crypto/xts.c \
@@ -404,14 +417,15 @@ QEMU2_COMMON_SOURCES += \
     hw/acpi/aml-build.c \
     hw/acpi/bios-linker-loader.c \
     hw/audio/ac97.c \
-
-# This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
-QEMU2_COMMON_SOURCES += \
     hw/audio/es1370.c \
     hw/audio/goldfish_audio.c \
     hw/audio/hda-codec.c \
+
+# This file is auto generated! Do not edit it!
+# Puppies and kittens die when you change this manually
+QEMU2_COMMON_SOURCES += \
     hw/audio/intel-hda.c \
+    hw/audio/soundhw.c \
     hw/block/block.c \
     hw/block/cdrom.c \
     hw/block/hd-geometry.c \
@@ -423,12 +437,12 @@ QEMU2_COMMON_SOURCES += \
     hw/bt/hid.c \
     hw/bt/l2cap.c \
     hw/bt/sdp.c \
+    hw/char/ipoctal232.c \
+    hw/char/serial-isa.c \
 
 # This file is auto generated! Do not edit it!
 # Git blame will find you, and you get to merge the next qemu release when you change this!
 QEMU2_COMMON_SOURCES += \
-    hw/char/ipoctal232.c \
-    hw/char/serial-isa.c \
     hw/char/serial-pci.c \
     hw/char/serial.c \
     hw/char/virtio-console.c \
@@ -438,17 +452,19 @@ QEMU2_COMMON_SOURCES += \
     hw/core/irq.c \
     hw/core/loader.c \
     hw/core/machine.c \
+    hw/core/nmi.c \
     hw/core/or-irq.c \
     hw/core/qdev-properties-system.c \
     hw/core/qdev-properties.c \
     hw/core/qdev.c \
+    hw/core/register.c \
 
 # This file is auto generated! Do not edit it!
 # There is a better way than modifying this file
 QEMU2_COMMON_SOURCES += \
-    hw/core/register.c \
     hw/core/reset.c \
     hw/core/sysbus.c \
+    hw/cpu/core.c \
     hw/display/framebuffer.c \
     hw/display/goldfish_fb.c \
     hw/display/vga-pci.c \
@@ -463,7 +479,7 @@ QEMU2_COMMON_SOURCES += \
     hw/ide/qdev.c \
 
 # This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
+# I've been autogenerated, don't mess with me
 QEMU2_COMMON_SOURCES += \
     hw/input/hid.c \
     hw/input/ps2.c \
@@ -473,17 +489,18 @@ QEMU2_COMMON_SOURCES += \
     hw/ipack/ipack.c \
     hw/ipack/tpci200.c \
     hw/isa/isa-bus.c \
+    hw/misc/edu.c \
     hw/misc/pci-testdev.c \
     hw/misc/unimp.c \
     hw/net/eepro100.c \
     hw/net/ne2000.c \
     hw/net/net_rx_pkt.c \
     hw/net/net_tx_pkt.c \
-    hw/net/pcnet-pci.c \
 
 # This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
+# I've been autogenerated, don't mess with me
 QEMU2_COMMON_SOURCES += \
+    hw/net/pcnet-pci.c \
     hw/net/pcnet.c \
     hw/net/rocker/rocker.c \
     hw/net/rocker/rocker_desc.c \
@@ -498,11 +515,11 @@ QEMU2_COMMON_SOURCES += \
     hw/pci-bridge/pci_bridge_dev.c \
     hw/pci-host/pam.c \
     hw/pci/msi.c \
-    hw/pci/msix.c \
 
 # This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
+# There is a better way than modifying this file
 QEMU2_COMMON_SOURCES += \
+    hw/pci/msix.c \
     hw/pci/pci.c \
     hw/pci/pci_bridge.c \
     hw/pci/pci_host.c \
@@ -517,11 +534,11 @@ QEMU2_COMMON_SOURCES += \
     hw/scsi/esp.c \
     hw/scsi/lsi53c895a.c \
     hw/scsi/megasas.c \
-    hw/scsi/mptconfig.c \
 
 # This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
+# There is a better way than modifying this file
 QEMU2_COMMON_SOURCES += \
+    hw/scsi/mptconfig.c \
     hw/scsi/mptendian.c \
     hw/scsi/mptsas.c \
     hw/scsi/scsi-bus.c \
@@ -536,11 +553,11 @@ QEMU2_COMMON_SOURCES += \
     hw/usb/core.c \
     hw/usb/desc-msos.c \
     hw/usb/desc.c \
-    hw/usb/dev-audio.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# Please, please do not change this manually
 QEMU2_COMMON_SOURCES += \
+    hw/usb/dev-audio.c \
     hw/usb/dev-bluetooth.c \
     hw/usb/dev-hid.c \
     hw/usb/dev-hub.c \
@@ -554,12 +571,13 @@ QEMU2_COMMON_SOURCES += \
     hw/usb/hcd-ehci.c \
     hw/usb/hcd-ohci.c \
     hw/usb/hcd-uhci.c \
-    hw/usb/hcd-xhci.c \
-    hw/usb/libhw.c \
+    hw/usb/hcd-xhci-nec.c \
 
 # This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
+# Puppies and kittens die when you change this manually
 QEMU2_COMMON_SOURCES += \
+    hw/usb/hcd-xhci.c \
+    hw/usb/libhw.c \
     hw/virtio/virtio-bus.c \
     hw/virtio/virtio-mmio.c \
     hw/virtio/virtio-pci.c \
@@ -573,32 +591,37 @@ QEMU2_COMMON_SOURCES += \
     io/channel-tls.c \
     io/channel-util.c \
     io/channel-watch.c \
-    io/channel-websock.c \
-    io/channel.c \
 
 # This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
+# I've been autogenerated, don't mess with me
 QEMU2_COMMON_SOURCES += \
+    io/channel-websock.c \
+    io/channel.c \
     io/dns-resolver.c \
     io/task.c \
     iothread.c \
     migration/block.c \
+    migration/channel.c \
     migration/colo-comm.c \
     migration/colo-failover.c \
     migration/colo.c \
     migration/exec.c \
     migration/fd.c \
+    migration/global_state.c \
     migration/migration.c \
+    migration/page_cache.c \
+
+# This file is auto generated! Do not edit it!
+# Please, please do not change this manually
+QEMU2_COMMON_SOURCES += \
     migration/postcopy-ram.c \
     migration/qemu-file-channel.c \
     migration/qemu-file.c \
     migration/qjson.c \
+    migration/savevm.c \
     migration/socket.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_COMMON_SOURCES += \
     migration/tls.c \
+    migration/vmstate-types.c \
     migration/vmstate.c \
     migration/xbzrle.c \
     nbd/client.c \
@@ -606,6 +629,10 @@ QEMU2_COMMON_SOURCES += \
     nbd/server.c \
     net/checksum.c \
     net/colo-compare.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_COMMON_SOURCES += \
     net/colo.c \
     net/dump.c \
     net/eth.c \
@@ -613,10 +640,6 @@ QEMU2_COMMON_SOURCES += \
     net/filter-mirror.c \
     net/filter-replay.c \
     net/filter-rewriter.c \
-
-# This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
-QEMU2_COMMON_SOURCES += \
     net/filter.c \
     net/hub.c \
     net/net.c \
@@ -624,18 +647,17 @@ QEMU2_COMMON_SOURCES += \
     net/slirp.c \
     net/socket.c \
     net/util.c \
-    page_cache.c \
     qdev-monitor.c \
+
+# This file is auto generated! Do not edit it!
+# Please, please do not change this manually
+QEMU2_COMMON_SOURCES += \
     qemu-io-cmds.c \
     qmp.c \
     qom/container.c \
     qom/cpu.c \
     qom/object.c \
     qom/object_interfaces.c \
-
-# This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
-QEMU2_COMMON_SOURCES += \
     qom/qom-qobject.c \
     replay/replay-audio.c \
     replay/replay-char.c \
@@ -645,16 +667,16 @@ QEMU2_COMMON_SOURCES += \
     replay/replay-net.c \
     replay/replay-snapshot.c \
     replay/replay-time.c \
+
+# This file is auto generated! Do not edit it!
+# Puppies and kittens die when you change this manually
+QEMU2_COMMON_SOURCES += \
     replay/replay.c \
     replication.c \
     slirp/arp_table.c \
     slirp/bootp.c \
     slirp/cksum.c \
     slirp/dhcpv6.c \
-
-# This file is auto generated! Do not edit it!
-# Please, please do not change this manually
-QEMU2_COMMON_SOURCES += \
     slirp/dnssearch.c \
     slirp/if.c \
     slirp/ip6_icmp.c \
@@ -664,16 +686,17 @@ QEMU2_COMMON_SOURCES += \
     slirp/ip_input.c \
     slirp/ip_output.c \
     slirp/mbuf.c \
+
+# This file is auto generated! Do not edit it!
+# I've been autogenerated, don't mess with me
+QEMU2_COMMON_SOURCES += \
     slirp/misc.c \
+    slirp/ncsi.c \
     slirp/ndp_table.c \
     slirp/sbuf.c \
     slirp/slirp.c \
     slirp/socket.c \
     slirp/tcp_input.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_COMMON_SOURCES += \
     slirp/tcp_output.c \
     slirp/tcp_subr.c \
     slirp/tcp_timer.c \
@@ -682,6 +705,10 @@ QEMU2_COMMON_SOURCES += \
     slirp/udp6.c \
     tpm.c \
     ui/console.c \
+
+# This file is auto generated! Do not edit it!
+# Puppies and kittens die when you change this manually
+QEMU2_COMMON_SOURCES += \
     ui/cursor.c \
     ui/input-keymap.c \
     ui/input-legacy.c \
@@ -689,10 +716,6 @@ QEMU2_COMMON_SOURCES += \
     ui/keymaps.c \
     ui/qemu-pixman.c \
     ui/vnc-auth-vencrypt.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_COMMON_SOURCES += \
     ui/vnc-enc-hextile.c \
     ui/vnc-enc-tight.c \
     ui/vnc-enc-zlib.c \
@@ -701,6 +724,10 @@ QEMU2_COMMON_SOURCES += \
     ui/vnc-palette.c \
     ui/vnc-ws.c \
     ui/vnc.c \
+
+# This file is auto generated! Do not edit it!
+# Please, please do not change this manually
+QEMU2_COMMON_SOURCES += \
     ui/x_keymap.c \
 
 QEMU2_COMMON_SOURCES_darwin-x86_64 := \
@@ -737,7 +764,7 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     hw/usb/host-legacy.c \
 
 # This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
+# There is a better way than modifying this file
 QEMU2_COMMON_SOURCES_linux-x86_64 += \
     hw/usb/host-libusb.c \
     net/l2tpv3.c \
@@ -777,30 +804,30 @@ QEMU2_COMMON_SOURCES_windows-x86_64 := \
     os-win32.c \
 
 QEMU2_TARGET_SOURCES := \
+    accel/accel.c \
+    accel/tcg/cpu-exec-common.c \
+    accel/tcg/cpu-exec.c \
+    accel/tcg/cputlb.c \
+    accel/tcg/tcg-all.c \
+    accel/tcg/translate-all.c \
     arch_init.c \
     balloon.c \
-    bootdevice.c \
-    cpu-exec-common.c \
-    cpu-exec.c \
     cpus.c \
-    cputlb.c \
     disas.c \
     dump.c \
     exec.c \
     fpu/softfloat.c \
     gdbstub.c \
     hw/block/dataplane/virtio-blk.c \
-    hw/block/virtio-blk.c \
-    hw/char/goldfish_tty.c \
 
 # This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
+# I've been autogenerated, don't mess with me
 QEMU2_TARGET_SOURCES += \
+    hw/block/virtio-blk.c \
+    hw/char/goldfish_tty.c \
     hw/char/virtio-serial-bus.c \
     hw/core/generic-loader.c \
-    hw/core/nmi.c \
     hw/core/null-machine.c \
-    hw/cpu/core.c \
     hw/display/vga.c \
     hw/display/virtio-gpu-3d.c \
     hw/display/virtio-gpu-pci.c \
@@ -809,15 +836,15 @@ QEMU2_TARGET_SOURCES += \
     hw/input/goldfish_events_common.c \
     hw/input/goldfish_rotary.c \
     hw/intc/goldfish_pic.c \
-    hw/misc/edu.c \
     hw/misc/goldfish_battery.c \
+    hw/misc/goldfish_pipe.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# Puppies and kittens die when you change this manually
 QEMU2_TARGET_SOURCES += \
-    hw/misc/goldfish_pipe.c \
     hw/misc/goldfish_pstore.c \
     hw/misc/goldfish_sync.c \
+    hw/misc/mmio_interface.c \
     hw/net/vhost_net.c \
     hw/net/virtio-net.c \
     hw/scsi/virtio-scsi-dataplane.c \
@@ -832,29 +859,21 @@ QEMU2_TARGET_SOURCES += \
     memory_mapping.c \
 
 # This file is auto generated! Do not edit it!
-# Please, please do not change this manually
+# Really, just don't do it
 QEMU2_TARGET_SOURCES += \
     migration/ram.c \
-    migration/savevm.c \
     monitor.c \
     numa.c \
     qtest.c \
-    tcg-runtime.c \
     tcg/optimize.c \
     tcg/tcg-common.c \
     tcg/tcg-op.c \
+    tcg/tcg-runtime.c \
     tcg/tcg.c \
     trace/control-target.c \
-    translate-all.c \
-    translate-common.c \
-    xen-common-stub.c \
-    xen-hvm-stub.c \
-
-# This file is auto generated! Do not edit it!
-# Really, just don't do it
-QEMU2_TARGET_SOURCES += \
 
 QEMU2_TARGET_aarch64_SOURCES := \
+    accel/stubs/kvm-stub.c \
     disas/arm.c \
     hw/acpi/acpi-stub.c \
     hw/acpi/ipmi-stub.c \
@@ -869,11 +888,11 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/arm/collie.c \
     hw/arm/cubieboard.c \
     hw/arm/digic.c \
-    hw/arm/digic_boards.c \
 
 # This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
+# Puppies and kittens die when you change this manually
 QEMU2_TARGET_aarch64_SOURCES += \
+    hw/arm/digic_boards.c \
     hw/arm/exynos4210.c \
     hw/arm/exynos4_boards.c \
     hw/arm/fsl-imx25.c \
@@ -885,14 +904,15 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/arm/integratorcp.c \
     hw/arm/kzm.c \
     hw/arm/mainstone.c \
+    hw/arm/mps2.c \
     hw/arm/musicpal.c \
     hw/arm/netduino2.c \
-    hw/arm/nseries.c \
-    hw/arm/omap1.c \
 
 # This file is auto generated! Do not edit it!
-# Please, please do not change this manually
+# There is a better way than modifying this file
 QEMU2_TARGET_aarch64_SOURCES += \
+    hw/arm/nseries.c \
+    hw/arm/omap1.c \
     hw/arm/omap2.c \
     hw/arm/omap_sx1.c \
     hw/arm/palm.c \
@@ -906,12 +926,12 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/arm/spitz.c \
     hw/arm/stellaris.c \
     hw/arm/stm32f205_soc.c \
-    hw/arm/strongarm.c \
-    hw/arm/sysbus-fdt.c \
 
 # This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
+# Please, please do not change this manually
 QEMU2_TARGET_aarch64_SOURCES += \
+    hw/arm/strongarm.c \
+    hw/arm/sysbus-fdt.c \
     hw/arm/tosa.c \
     hw/arm/versatilepb.c \
     hw/arm/vexpress.c \
@@ -925,17 +945,18 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/audio/marvell_88w8618.c \
     hw/audio/pl041.c \
     hw/audio/wm8750.c \
-    hw/block/ecc.c \
-    hw/block/m25p80.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# I've been autogenerated, don't mess with me
 QEMU2_TARGET_aarch64_SOURCES += \
+    hw/block/ecc.c \
+    hw/block/m25p80.c \
     hw/block/nand.c \
     hw/block/onenand.c \
     hw/block/pflash_cfi02.c \
     hw/char/bcm2835_aux.c \
     hw/char/cadence_uart.c \
+    hw/char/cmsdk-apb-uart.c \
     hw/char/digic-uart.c \
     hw/char/exynos4210_uart.c \
     hw/char/imx_serial.c \
@@ -943,13 +964,13 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/char/pl011.c \
     hw/char/stm32f2xx_usart.c \
     hw/core/platform-bus.c \
-    hw/core/ptimer.c \
-    hw/cpu/a15mpcore.c \
-    hw/cpu/a9mpcore.c \
 
 # This file is auto generated! Do not edit it!
 # Please, please do not change this manually
 QEMU2_TARGET_aarch64_SOURCES += \
+    hw/core/ptimer.c \
+    hw/cpu/a15mpcore.c \
+    hw/cpu/a9mpcore.c \
     hw/cpu/arm11mpcore.c \
     hw/cpu/realview_mpcore.c \
     hw/display/ads7846.c \
@@ -962,13 +983,13 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/display/pl110.c \
     hw/display/pxa2xx_lcd.c \
     hw/display/ssd0303.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/display/ssd0323.c \
     hw/display/tc6393xb.c \
     hw/display/xlnx_dp.c \
-
-# This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/dma/bcm2835_dma.c \
     hw/dma/omap_dma.c \
     hw/dma/pl080.c \
@@ -981,13 +1002,13 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/gpio/gpio_key.c \
     hw/gpio/imx_gpio.c \
     hw/gpio/max7310.c \
+
+# This file is auto generated! Do not edit it!
+# I've been autogenerated, don't mess with me
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/gpio/omap_gpio.c \
     hw/gpio/pl061.c \
     hw/gpio/zaurus.c \
-
-# This file is auto generated! Do not edit it!
-# Please, please do not change this manually
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/i2c/aspeed_i2c.c \
     hw/i2c/bitbang_i2c.c \
     hw/i2c/exynos4210_i2c.c \
@@ -1000,13 +1021,13 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/input/pl050.c \
     hw/input/pxa2xx_keypad.c \
     hw/input/stellaris_input.c \
+
+# This file is auto generated! Do not edit it!
+# Please, please do not change this manually
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/input/tsc2005.c \
     hw/input/tsc210x.c \
     hw/intc/allwinner-a10-pic.c \
-
-# This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/intc/arm_gic.c \
     hw/intc/arm_gic_common.c \
     hw/intc/arm_gicv2m.c \
@@ -1019,13 +1040,13 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/intc/armv7m_nvic.c \
     hw/intc/aspeed_vic.c \
     hw/intc/bcm2835_ic.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/intc/bcm2836_control.c \
     hw/intc/exynos4210_combiner.c \
     hw/intc/exynos4210_gic.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/intc/imx_avic.c \
     hw/intc/omap_intc.c \
     hw/intc/pl190.c \
@@ -1038,40 +1059,48 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/misc/aspeed_scu.c \
     hw/misc/aspeed_sdmc.c \
     hw/misc/auxbus.c \
+
+# This file is auto generated! Do not edit it!
+# Puppies and kittens die when you change this manually
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/misc/bcm2835_mbox.c \
     hw/misc/bcm2835_property.c \
     hw/misc/bcm2835_rng.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/misc/cbus.c \
     hw/misc/exynos4210_clk.c \
     hw/misc/exynos4210_pmu.c \
+    hw/misc/exynos4210_rng.c \
     hw/misc/imx25_ccm.c \
     hw/misc/imx31_ccm.c \
     hw/misc/imx6_ccm.c \
     hw/misc/imx6_src.c \
     hw/misc/imx_ccm.c \
     hw/misc/max111x.c \
+    hw/misc/mps2-scc.c \
     hw/misc/mst_fpga.c \
+
+# This file is auto generated! Do not edit it!
+# I've been autogenerated, don't mess with me
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/misc/omap_clk.c \
     hw/misc/omap_gpmc.c \
     hw/misc/omap_l4.c \
     hw/misc/omap_sdrc.c \
     hw/misc/omap_tap.c \
-
-# This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/misc/stm32f2xx_syscfg.c \
     hw/misc/tmp105.c \
+    hw/misc/tmp421.c \
     hw/misc/zynq-xadc.c \
     hw/misc/zynq_slcr.c \
     hw/net/allwinner_emac.c \
     hw/net/cadence_gem.c \
+    hw/net/ftgmac100.c \
     hw/net/imx_fec.c \
     hw/net/lan9118.c \
+
+# This file is auto generated! Do not edit it!
+# Please, please do not change this manually
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/net/smc91c111.c \
     hw/net/stellaris_enet.c \
     hw/net/xgmac.c \
@@ -1079,10 +1108,6 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/pci-bridge/i82801b11.c \
     hw/pci-bridge/ioh3420.c \
     hw/pci-bridge/pcie_root_port.c \
-
-# This file is auto generated! Do not edit it!
-# Really, just don't do it
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/pci-bridge/xio3130_downstream.c \
     hw/pci-bridge/xio3130_upstream.c \
     hw/pci-host/gpex.c \
@@ -1091,6 +1116,10 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/sd/bcm2835_sdhost.c \
     hw/sd/omap_mmc.c \
     hw/sd/pl181.c \
+
+# This file is auto generated! Do not edit it!
+# Really, just don't do it
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/sd/pxa2xx_mmci.c \
     hw/sd/ssi-sd.c \
     hw/smbios/smbios.c \
@@ -1098,10 +1127,6 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/ssi/imx_spi.c \
     hw/ssi/omap_spi.c \
     hw/ssi/pl022.c \
-
-# This file is auto generated! Do not edit it!
-# Really, just don't do it
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/ssi/ssi.c \
     hw/ssi/stm32f2xx_spi.c \
     hw/ssi/xilinx_spips.c \
@@ -1110,17 +1135,18 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/timer/arm_mptimer.c \
     hw/timer/arm_timer.c \
     hw/timer/armv7m_systick.c \
+
+# This file is auto generated! Do not edit it!
+# There is a better way than modifying this file
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/timer/aspeed_timer.c \
     hw/timer/cadence_ttc.c \
+    hw/timer/cmsdk-apb-timer.c \
     hw/timer/digic-timer.c \
     hw/timer/ds1338.c \
     hw/timer/exynos4210_mct.c \
     hw/timer/exynos4210_pwm.c \
     hw/timer/exynos4210_rtc.c \
-
-# This file is auto generated! Do not edit it!
-# Please, please do not change this manually
-QEMU2_TARGET_aarch64_SOURCES += \
     hw/timer/imx_epit.c \
     hw/timer/imx_gpt.c \
     hw/timer/omap_gptimer.c \
@@ -1128,18 +1154,17 @@ QEMU2_TARGET_aarch64_SOURCES += \
     hw/timer/pl031.c \
     hw/timer/pxa2xx_timer.c \
     hw/timer/stm32f2xx_timer.c \
+
+# This file is auto generated! Do not edit it!
+# I've been autogenerated, don't mess with me
+QEMU2_TARGET_aarch64_SOURCES += \
     hw/timer/twl92230.c \
     hw/usb/hcd-ehci-sysbus.c \
     hw/usb/hcd-musb.c \
     hw/usb/tusb6010.c \
     hw/watchdog/wdt_aspeed.c \
-    kvm-stub.c \
     target/arm/arch_dump.c \
     target/arm/arm-powerctl.c \
-
-# This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
-QEMU2_TARGET_aarch64_SOURCES += \
     target/arm/arm-semi.c \
     target/arm/cpu.c \
     target/arm/cpu64.c \
@@ -1148,6 +1173,10 @@ QEMU2_TARGET_aarch64_SOURCES += \
     target/arm/gdbstub64.c \
     target/arm/helper-a64.c \
     target/arm/helper.c \
+
+# This file is auto generated! Do not edit it!
+# Please, please do not change this manually
+QEMU2_TARGET_aarch64_SOURCES += \
     target/arm/iwmmxt_helper.c \
     target/arm/kvm-stub.c \
     target/arm/machine.c \
@@ -1155,15 +1184,12 @@ QEMU2_TARGET_aarch64_SOURCES += \
     target/arm/neon_helper.c \
     target/arm/op_helper.c \
     target/arm/psci.c \
-
-# This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
-QEMU2_TARGET_aarch64_SOURCES += \
     target/arm/translate-a64.c \
     target/arm/translate.c \
     whpx-stub.c \
 
 QEMU2_TARGET_arm_SOURCES := \
+    accel/stubs/kvm-stub.c \
     disas/arm.c \
     hw/acpi/acpi-stub.c \
     hw/acpi/ipmi-stub.c \
@@ -1178,11 +1204,11 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/arm/collie.c \
     hw/arm/cubieboard.c \
     hw/arm/digic.c \
-    hw/arm/digic_boards.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# I've been autogenerated, don't mess with me
 QEMU2_TARGET_arm_SOURCES += \
+    hw/arm/digic_boards.c \
     hw/arm/exynos4210.c \
     hw/arm/exynos4_boards.c \
     hw/arm/fsl-imx25.c \
@@ -1194,14 +1220,15 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/arm/integratorcp.c \
     hw/arm/kzm.c \
     hw/arm/mainstone.c \
+    hw/arm/mps2.c \
     hw/arm/musicpal.c \
     hw/arm/netduino2.c \
-    hw/arm/nseries.c \
-    hw/arm/omap1.c \
 
 # This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
+# Git blame will find you, and you get to merge the next qemu release when you change this!
 QEMU2_TARGET_arm_SOURCES += \
+    hw/arm/nseries.c \
+    hw/arm/omap1.c \
     hw/arm/omap2.c \
     hw/arm/omap_sx1.c \
     hw/arm/palm.c \
@@ -1215,12 +1242,12 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/arm/spitz.c \
     hw/arm/stellaris.c \
     hw/arm/stm32f205_soc.c \
-    hw/arm/strongarm.c \
-    hw/arm/sysbus-fdt.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# I know this looks like the easy way out, but don't touch this file!
 QEMU2_TARGET_arm_SOURCES += \
+    hw/arm/strongarm.c \
+    hw/arm/sysbus-fdt.c \
     hw/arm/tosa.c \
     hw/arm/versatilepb.c \
     hw/arm/vexpress.c \
@@ -1234,15 +1261,16 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/audio/wm8750.c \
     hw/block/ecc.c \
     hw/block/m25p80.c \
-    hw/block/nand.c \
-    hw/block/onenand.c \
 
 # This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
+# There is a better way than modifying this file
 QEMU2_TARGET_arm_SOURCES += \
+    hw/block/nand.c \
+    hw/block/onenand.c \
     hw/block/pflash_cfi02.c \
     hw/char/bcm2835_aux.c \
     hw/char/cadence_uart.c \
+    hw/char/cmsdk-apb-uart.c \
     hw/char/digic-uart.c \
     hw/char/exynos4210_uart.c \
     hw/char/imx_serial.c \
@@ -1252,13 +1280,13 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/core/platform-bus.c \
     hw/core/ptimer.c \
     hw/cpu/a15mpcore.c \
+
+# This file is auto generated! Do not edit it!
+# There is a better way than modifying this file
+QEMU2_TARGET_arm_SOURCES += \
     hw/cpu/a9mpcore.c \
     hw/cpu/arm11mpcore.c \
     hw/cpu/realview_mpcore.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_TARGET_arm_SOURCES += \
     hw/display/ads7846.c \
     hw/display/bcm2835_fb.c \
     hw/display/blizzard.c \
@@ -1271,13 +1299,13 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/display/ssd0323.c \
     hw/display/tc6393xb.c \
     hw/dma/bcm2835_dma.c \
+
+# This file is auto generated! Do not edit it!
+# I've been autogenerated, don't mess with me
+QEMU2_TARGET_arm_SOURCES += \
     hw/dma/omap_dma.c \
     hw/dma/pl080.c \
     hw/dma/pl330.c \
-
-# This file is auto generated! Do not edit it!
-# Really, just don't do it
-QEMU2_TARGET_arm_SOURCES += \
     hw/dma/pxa2xx_dma.c \
     hw/dma/soc_dma.c \
     hw/dma/xlnx-zynq-devcfg.c \
@@ -1290,13 +1318,13 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/gpio/zaurus.c \
     hw/i2c/aspeed_i2c.c \
     hw/i2c/bitbang_i2c.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_TARGET_arm_SOURCES += \
     hw/i2c/exynos4210_i2c.c \
     hw/i2c/imx_i2c.c \
     hw/i2c/omap_i2c.c \
-
-# This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
-QEMU2_TARGET_arm_SOURCES += \
     hw/i2c/versatile_i2c.c \
     hw/ide/microdrive.c \
     hw/input/lm832x.c \
@@ -1309,13 +1337,13 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/intc/arm_gic.c \
     hw/intc/arm_gic_common.c \
     hw/intc/arm_gicv2m.c \
+
+# This file is auto generated! Do not edit it!
+# There is a better way than modifying this file
+QEMU2_TARGET_arm_SOURCES += \
     hw/intc/arm_gicv3.c \
     hw/intc/arm_gicv3_common.c \
     hw/intc/arm_gicv3_cpuif.c \
-
-# This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
-QEMU2_TARGET_arm_SOURCES += \
     hw/intc/arm_gicv3_dist.c \
     hw/intc/arm_gicv3_its_common.c \
     hw/intc/arm_gicv3_redist.c \
@@ -1328,13 +1356,13 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/intc/imx_avic.c \
     hw/intc/omap_intc.c \
     hw/intc/pl190.c \
+
+# This file is auto generated! Do not edit it!
+# There is a better way than modifying this file
+QEMU2_TARGET_arm_SOURCES += \
     hw/intc/realview_gic.c \
     hw/misc/a9scu.c \
     hw/misc/arm11scu.c \
-
-# This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
-QEMU2_TARGET_arm_SOURCES += \
     hw/misc/arm_integrator_debug.c \
     hw/misc/arm_l2x0.c \
     hw/misc/arm_sysctl.c \
@@ -1346,16 +1374,18 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/misc/cbus.c \
     hw/misc/exynos4210_clk.c \
     hw/misc/exynos4210_pmu.c \
+    hw/misc/exynos4210_rng.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_TARGET_arm_SOURCES += \
     hw/misc/imx25_ccm.c \
     hw/misc/imx31_ccm.c \
     hw/misc/imx6_ccm.c \
     hw/misc/imx6_src.c \
-
-# This file is auto generated! Do not edit it!
-# Really, just don't do it
-QEMU2_TARGET_arm_SOURCES += \
     hw/misc/imx_ccm.c \
     hw/misc/max111x.c \
+    hw/misc/mps2-scc.c \
     hw/misc/mst_fpga.c \
     hw/misc/omap_clk.c \
     hw/misc/omap_gpmc.c \
@@ -1364,15 +1394,17 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/misc/omap_tap.c \
     hw/misc/stm32f2xx_syscfg.c \
     hw/misc/tmp105.c \
+
+# This file is auto generated! Do not edit it!
+# There is a better way than modifying this file
+QEMU2_TARGET_arm_SOURCES += \
+    hw/misc/tmp421.c \
     hw/misc/zynq-xadc.c \
     hw/misc/zynq_slcr.c \
     hw/net/allwinner_emac.c \
     hw/net/cadence_gem.c \
+    hw/net/ftgmac100.c \
     hw/net/imx_fec.c \
-
-# This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
-QEMU2_TARGET_arm_SOURCES += \
     hw/net/lan9118.c \
     hw/net/smc91c111.c \
     hw/net/stellaris_enet.c \
@@ -1381,6 +1413,10 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/pci-bridge/i82801b11.c \
     hw/pci-bridge/ioh3420.c \
     hw/pci-bridge/pcie_root_port.c \
+
+# This file is auto generated! Do not edit it!
+# I've been autogenerated, don't mess with me
+QEMU2_TARGET_arm_SOURCES += \
     hw/pci-bridge/xio3130_downstream.c \
     hw/pci-bridge/xio3130_upstream.c \
     hw/pci-host/gpex.c \
@@ -1388,10 +1424,6 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/pcmcia/pxa2xx.c \
     hw/sd/bcm2835_sdhost.c \
     hw/sd/omap_mmc.c \
-
-# This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
-QEMU2_TARGET_arm_SOURCES += \
     hw/sd/pl181.c \
     hw/sd/pxa2xx_mmci.c \
     hw/sd/ssi-sd.c \
@@ -1400,6 +1432,10 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/ssi/imx_spi.c \
     hw/ssi/omap_spi.c \
     hw/ssi/pl022.c \
+
+# This file is auto generated! Do not edit it!
+# Puppies and kittens die when you change this manually
+QEMU2_TARGET_arm_SOURCES += \
     hw/ssi/ssi.c \
     hw/ssi/stm32f2xx_spi.c \
     hw/ssi/xilinx_spips.c \
@@ -1407,17 +1443,18 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/timer/allwinner-a10-pit.c \
     hw/timer/arm_mptimer.c \
     hw/timer/arm_timer.c \
-
-# This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
-QEMU2_TARGET_arm_SOURCES += \
     hw/timer/armv7m_systick.c \
     hw/timer/aspeed_timer.c \
     hw/timer/cadence_ttc.c \
+    hw/timer/cmsdk-apb-timer.c \
     hw/timer/digic-timer.c \
     hw/timer/ds1338.c \
     hw/timer/exynos4210_mct.c \
     hw/timer/exynos4210_pwm.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_TARGET_arm_SOURCES += \
     hw/timer/exynos4210_rtc.c \
     hw/timer/imx_epit.c \
     hw/timer/imx_gpt.c \
@@ -1426,18 +1463,17 @@ QEMU2_TARGET_arm_SOURCES += \
     hw/timer/pl031.c \
     hw/timer/pxa2xx_timer.c \
     hw/timer/stm32f2xx_timer.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_TARGET_arm_SOURCES += \
     hw/timer/twl92230.c \
     hw/usb/hcd-ehci-sysbus.c \
     hw/usb/hcd-musb.c \
     hw/usb/tusb6010.c \
     hw/watchdog/wdt_aspeed.c \
-    kvm-stub.c \
     target/arm/arch_dump.c \
     target/arm/arm-powerctl.c \
+
+# This file is auto generated! Do not edit it!
+# There is a better way than modifying this file
+QEMU2_TARGET_arm_SOURCES += \
     target/arm/arm-semi.c \
     target/arm/cpu.c \
     target/arm/crypto_helper.c \
@@ -1445,10 +1481,6 @@ QEMU2_TARGET_arm_SOURCES += \
     target/arm/helper.c \
     target/arm/iwmmxt_helper.c \
     target/arm/kvm-stub.c \
-
-# This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
-QEMU2_TARGET_arm_SOURCES += \
     target/arm/machine.c \
     target/arm/monitor.c \
     target/arm/neon_helper.c \
@@ -1475,7 +1507,7 @@ QEMU2_TARGET_i386_SOURCES := \
     hw/audio/gus.c \
 
 # This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
+# Git blame will find you, and you get to merge the next qemu release when you change this!
 QEMU2_TARGET_i386_SOURCES += \
     hw/audio/gusemu_hal.c \
     hw/audio/gusemu_mixer.c \
@@ -1513,7 +1545,7 @@ QEMU2_TARGET_i386_SOURCES += \
     hw/intc/i8259.c \
 
 # This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
+# I know this looks like the easy way out, but don't touch this file!
 QEMU2_TARGET_i386_SOURCES += \
     hw/intc/i8259_common.c \
     hw/intc/ioapic.c \
@@ -1532,7 +1564,7 @@ QEMU2_TARGET_i386_SOURCES += \
     hw/misc/pc-testdev.c \
 
 # This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
+# Puppies and kittens die when you change this manually
 QEMU2_TARGET_i386_SOURCES += \
     hw/misc/pvpanic.c \
     hw/misc/sga.c \
@@ -1551,7 +1583,7 @@ QEMU2_TARGET_i386_SOURCES += \
     hw/smbios/smbios_type_38.c \
 
 # This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
+# Puppies and kittens die when you change this manually
 QEMU2_TARGET_i386_SOURCES += \
     hw/timer/hpet.c \
     hw/timer/i8254.c \
@@ -1570,7 +1602,7 @@ QEMU2_TARGET_i386_SOURCES += \
     target/i386/helper.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# Please, please do not change this manually
 QEMU2_TARGET_i386_SOURCES += \
     target/i386/int_helper.c \
     target/i386/machine.c \
@@ -1582,8 +1614,10 @@ QEMU2_TARGET_i386_SOURCES += \
     target/i386/smm_helper.c \
     target/i386/svm_helper.c \
     target/i386/translate.c \
+    target/i386/xsave_helper.c \
 
 QEMU2_TARGET_mips64el_SOURCES := \
+    accel/stubs/kvm-stub.c \
     disas/mips.c \
     hw/acpi/core.c \
     hw/acpi/cpu.c \
@@ -1598,11 +1632,11 @@ QEMU2_TARGET_mips64el_SOURCES := \
     hw/audio/fmopl.c \
     hw/audio/gus.c \
     hw/audio/gusemu_hal.c \
-    hw/audio/gusemu_mixer.c \
 
 # This file is auto generated! Do not edit it!
 # Really, just don't do it
 QEMU2_TARGET_mips64el_SOURCES += \
+    hw/audio/gusemu_mixer.c \
     hw/audio/pcspk.c \
     hw/audio/sb16.c \
     hw/block/fdc.c \
@@ -1617,11 +1651,11 @@ QEMU2_TARGET_mips64el_SOURCES += \
     hw/display/vmware_vga.c \
     hw/dma/i8257.c \
     hw/dma/rc4030.c \
-    hw/i2c/pm_smbus.c \
 
 # This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
+# I know this looks like the easy way out, but don't touch this file!
 QEMU2_TARGET_mips64el_SOURCES += \
+    hw/i2c/pm_smbus.c \
     hw/i2c/smbus_ich9.c \
     hw/ide/isa.c \
     hw/ide/piix.c \
@@ -1636,11 +1670,11 @@ QEMU2_TARGET_mips64el_SOURCES += \
     hw/mips/addr.c \
     hw/mips/boston.c \
     hw/mips/cps.c \
-    hw/mips/cputimer.c \
 
 # This file is auto generated! Do not edit it!
 # Please, please do not change this manually
 QEMU2_TARGET_mips64el_SOURCES += \
+    hw/mips/cputimer.c \
     hw/mips/gt64xxx_pci.c \
     hw/mips/mips_fulong2e.c \
     hw/mips/mips_int.c \
@@ -1655,11 +1689,11 @@ QEMU2_TARGET_mips64el_SOURCES += \
     hw/misc/pc-testdev.c \
     hw/net/dp8393x.c \
     hw/net/mipsnet.c \
-    hw/net/ne2000-isa.c \
 
 # This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
+# Really, just don't do it
 QEMU2_TARGET_mips64el_SOURCES += \
+    hw/net/ne2000-isa.c \
     hw/nvram/ds1225y.c \
     hw/pci-host/bonito.c \
     hw/pci-host/xilinx-pcie.c \
@@ -1668,7 +1702,6 @@ QEMU2_TARGET_mips64el_SOURCES += \
     hw/timer/i8254_common.c \
     hw/timer/mc146818rtc.c \
     hw/timer/mips_gictimer.c \
-    kvm-stub.c \
     target/mips/cpu.c \
     target/mips/dsp_helper.c \
     target/mips/gdbstub.c \
@@ -1677,7 +1710,7 @@ QEMU2_TARGET_mips64el_SOURCES += \
     target/mips/machine.c \
 
 # This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
+# There is a better way than modifying this file
 QEMU2_TARGET_mips64el_SOURCES += \
     target/mips/mips-semi.c \
     target/mips/msa_helper.c \
@@ -1686,6 +1719,7 @@ QEMU2_TARGET_mips64el_SOURCES += \
     whpx-stub.c \
 
 QEMU2_TARGET_mipsel_SOURCES := \
+    accel/stubs/kvm-stub.c \
     disas/mips.c \
     hw/acpi/core.c \
     hw/acpi/cpu.c \
@@ -1700,11 +1734,11 @@ QEMU2_TARGET_mipsel_SOURCES := \
     hw/audio/fmopl.c \
     hw/audio/gus.c \
     hw/audio/gusemu_hal.c \
-    hw/audio/gusemu_mixer.c \
 
 # This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
+# Really, just don't do it
 QEMU2_TARGET_mipsel_SOURCES += \
+    hw/audio/gusemu_mixer.c \
     hw/audio/pcspk.c \
     hw/audio/sb16.c \
     hw/block/fdc.c \
@@ -1719,11 +1753,11 @@ QEMU2_TARGET_mipsel_SOURCES += \
     hw/i2c/smbus_ich9.c \
     hw/ide/isa.c \
     hw/ide/piix.c \
-    hw/input/pckbd.c \
 
 # This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
+# There is a better way than modifying this file
 QEMU2_TARGET_mipsel_SOURCES += \
+    hw/input/pckbd.c \
     hw/intc/i8259.c \
     hw/intc/i8259_common.c \
     hw/intc/mips_gic.c \
@@ -1738,11 +1772,11 @@ QEMU2_TARGET_mipsel_SOURCES += \
     hw/mips/mips_mipssim.c \
     hw/mips/mips_r4k.c \
     hw/mips/mips_ranchu.c \
-    hw/misc/mips_cmgcr.c \
 
 # This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
+# Please, please do not change this manually
 QEMU2_TARGET_mipsel_SOURCES += \
+    hw/misc/mips_cmgcr.c \
     hw/misc/mips_cpc.c \
     hw/misc/mips_itu.c \
     hw/misc/pc-testdev.c \
@@ -1753,14 +1787,13 @@ QEMU2_TARGET_mipsel_SOURCES += \
     hw/timer/i8254_common.c \
     hw/timer/mc146818rtc.c \
     hw/timer/mips_gictimer.c \
-    kvm-stub.c \
     target/mips/cpu.c \
     target/mips/dsp_helper.c \
     target/mips/gdbstub.c \
     target/mips/helper.c \
 
 # This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
+# Puppies and kittens die when you change this manually
 QEMU2_TARGET_mipsel_SOURCES += \
     target/mips/lmi_helper.c \
     target/mips/machine.c \
@@ -1788,7 +1821,7 @@ QEMU2_TARGET_x86_64_SOURCES := \
     hw/audio/gus.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# Please, please do not change this manually
 QEMU2_TARGET_x86_64_SOURCES += \
     hw/audio/gusemu_hal.c \
     hw/audio/gusemu_mixer.c \
@@ -1807,7 +1840,7 @@ QEMU2_TARGET_x86_64_SOURCES += \
     hw/i386/amd_iommu.c \
 
 # This file is auto generated! Do not edit it!
-# Really, just don't do it
+# Git blame will find you, and you get to merge the next qemu release when you change this!
 QEMU2_TARGET_x86_64_SOURCES += \
     hw/i386/intel_iommu.c \
     hw/i386/kvmvapic.c \
@@ -1845,7 +1878,7 @@ QEMU2_TARGET_x86_64_SOURCES += \
     hw/misc/pc-testdev.c \
 
 # This file is auto generated! Do not edit it!
-# I've been autogenerated, don't mess with me
+# Really, just don't do it
 QEMU2_TARGET_x86_64_SOURCES += \
     hw/misc/pvpanic.c \
     hw/misc/sga.c \
@@ -1864,7 +1897,7 @@ QEMU2_TARGET_x86_64_SOURCES += \
     hw/smbios/smbios_type_38.c \
 
 # This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
+# There is a better way than modifying this file
 QEMU2_TARGET_x86_64_SOURCES += \
     hw/timer/hpet.c \
     hw/timer/i8254.c \
@@ -1895,6 +1928,7 @@ QEMU2_TARGET_x86_64_SOURCES += \
     target/i386/smm_helper.c \
     target/i386/svm_helper.c \
     target/i386/translate.c \
+    target/i386/xsave_helper.c \
 
 QEMU2_TARGET_aarch64_SOURCES_darwin-x86_64 := \
     disas/arm-a64.cc \
@@ -1906,7 +1940,9 @@ QEMU2_TARGET_aarch64_SOURCES_darwin-x86_64 := \
 
 QEMU2_TARGET_aarch64_SOURCES_linux-x86_64 := \
     hw/misc/ivshmem.c \
+    hw/scsi/vhost-scsi-common.c \
     hw/scsi/vhost-scsi.c \
+    hw/scsi/vhost-user-scsi.c \
     hw/vfio/amd-xgbe.c \
     hw/vfio/calxeda-xgmac.c \
     hw/vfio/common.c \
@@ -1918,6 +1954,10 @@ QEMU2_TARGET_aarch64_SOURCES_linux-x86_64 := \
     hw/virtio/vhost-user.c \
     hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_TARGET_aarch64_SOURCES_linux-x86_64 += \
 
 QEMU2_TARGET_aarch64_SOURCES_windows-x86 := \
     disas/arm-a64.cc \
@@ -1945,7 +1985,9 @@ QEMU2_TARGET_arm_SOURCES_darwin-x86_64 := \
 
 QEMU2_TARGET_arm_SOURCES_linux-x86_64 := \
     hw/misc/ivshmem.c \
+    hw/scsi/vhost-scsi-common.c \
     hw/scsi/vhost-scsi.c \
+    hw/scsi/vhost-user-scsi.c \
     hw/vfio/amd-xgbe.c \
     hw/vfio/calxeda-xgmac.c \
     hw/vfio/common.c \
@@ -1957,6 +1999,10 @@ QEMU2_TARGET_arm_SOURCES_linux-x86_64 := \
     hw/virtio/vhost-user.c \
     hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_TARGET_arm_SOURCES_linux-x86_64 += \
 
 QEMU2_TARGET_arm_SOURCES_windows-x86 := \
     disas/arm-a64.cc \
@@ -1975,7 +2021,7 @@ QEMU2_TARGET_arm_SOURCES_windows-x86_64 := \
     disas/libvixl/vixl/utils.cc \
 
 QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
-    kvm-stub.c \
+    accel/stubs/kvm-stub.c \
     target/i386/hax-all.c \
     target/i386/hax-darwin.c \
     target/i386/hax-mem.c \
@@ -1992,10 +2038,11 @@ QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
     whpx-stub.c \
 
 # This file is auto generated! Do not edit it!
-# I know this looks like the easy way out, but don't touch this file!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
 QEMU2_TARGET_i386_SOURCES_darwin-x86_64 += \
 
 QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
+    accel/kvm/kvm-all.c \
     hw/i386/kvm/apic.c \
     hw/i386/kvm/clock.c \
     hw/i386/kvm/i8254.c \
@@ -2004,27 +2051,28 @@ QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     hw/i386/kvm/pci-assign.c \
     hw/misc/hyperv_testdev.c \
     hw/misc/ivshmem.c \
+    hw/scsi/vhost-scsi-common.c \
     hw/scsi/vhost-scsi.c \
+    hw/scsi/vhost-user-scsi.c \
     hw/vfio/common.c \
     hw/vfio/pci-quirks.c \
     hw/vfio/pci.c \
+
+# This file is auto generated! Do not edit it!
+# I know this looks like the easy way out, but don't touch this file!
+QEMU2_TARGET_i386_SOURCES_linux-x86_64 += \
     hw/vfio/platform.c \
     hw/vfio/spapr.c \
     hw/virtio/vhost-backend.c \
-
-# This file is auto generated! Do not edit it!
-# Puppies and kittens die when you change this manually
-QEMU2_TARGET_i386_SOURCES_linux-x86_64 += \
     hw/virtio/vhost-user.c \
     hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
-    kvm-all.c \
     target/i386/hyperv.c \
     target/i386/kvm.c \
     whpx-stub.c \
 
 QEMU2_TARGET_i386_SOURCES_windows-x86 := \
-    kvm-stub.c \
+    accel/stubs/kvm-stub.c \
     target/i386/hax-all.c \
     target/i386/hax-mem.c \
     target/i386/hax-windows.c \
@@ -2032,7 +2080,7 @@ QEMU2_TARGET_i386_SOURCES_windows-x86 := \
     target/i386/whpx-all.c \
 
 QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
-    kvm-stub.c \
+    accel/stubs/kvm-stub.c \
     target/i386/hax-all.c \
     target/i386/hax-mem.c \
     target/i386/hax-windows.c \
@@ -2043,7 +2091,9 @@ QEMU2_TARGET_mips64el_SOURCES_darwin-x86_64 := \
 
 QEMU2_TARGET_mips64el_SOURCES_linux-x86_64 := \
     hw/misc/ivshmem.c \
+    hw/scsi/vhost-scsi-common.c \
     hw/scsi/vhost-scsi.c \
+    hw/scsi/vhost-user-scsi.c \
     hw/vfio/common.c \
     hw/vfio/pci-quirks.c \
     hw/vfio/pci.c \
@@ -2062,7 +2112,9 @@ QEMU2_TARGET_mipsel_SOURCES_darwin-x86_64 := \
 
 QEMU2_TARGET_mipsel_SOURCES_linux-x86_64 := \
     hw/misc/ivshmem.c \
+    hw/scsi/vhost-scsi-common.c \
     hw/scsi/vhost-scsi.c \
+    hw/scsi/vhost-user-scsi.c \
     hw/vfio/common.c \
     hw/vfio/pci-quirks.c \
     hw/vfio/pci.c \
@@ -2078,7 +2130,7 @@ QEMU2_TARGET_mipsel_SOURCES_windows-x86 := \
 QEMU2_TARGET_mipsel_SOURCES_windows-x86_64 := \
 
 QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
-    kvm-stub.c \
+    accel/stubs/kvm-stub.c \
     target/i386/hax-all.c \
     target/i386/hax-darwin.c \
     target/i386/hax-mem.c \
@@ -2095,10 +2147,11 @@ QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
     whpx-stub.c \
 
 # This file is auto generated! Do not edit it!
-# Git blame will find you, and you get to merge the next qemu release when you change this!
+# I know this looks like the easy way out, but don't touch this file!
 QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 += \
 
 QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
+    accel/kvm/kvm-all.c \
     hw/i386/kvm/apic.c \
     hw/i386/kvm/clock.c \
     hw/i386/kvm/i8254.c \
@@ -2107,27 +2160,28 @@ QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
     hw/i386/kvm/pci-assign.c \
     hw/misc/hyperv_testdev.c \
     hw/misc/ivshmem.c \
+    hw/scsi/vhost-scsi-common.c \
     hw/scsi/vhost-scsi.c \
+    hw/scsi/vhost-user-scsi.c \
     hw/vfio/common.c \
     hw/vfio/pci-quirks.c \
     hw/vfio/pci.c \
+
+# This file is auto generated! Do not edit it!
+# Git blame will find you, and you get to merge the next qemu release when you change this!
+QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 += \
     hw/vfio/platform.c \
     hw/vfio/spapr.c \
     hw/virtio/vhost-backend.c \
-
-# This file is auto generated! Do not edit it!
-# There is a better way than modifying this file
-QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 += \
     hw/virtio/vhost-user.c \
     hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
-    kvm-all.c \
     target/i386/hyperv.c \
     target/i386/kvm.c \
     whpx-stub.c \
 
 QEMU2_TARGET_x86_64_SOURCES_windows-x86 := \
-    kvm-stub.c \
+    accel/stubs/kvm-stub.c \
     target/i386/hax-all.c \
     target/i386/hax-mem.c \
     target/i386/hax-windows.c \
@@ -2135,7 +2189,7 @@ QEMU2_TARGET_x86_64_SOURCES_windows-x86 := \
     target/i386/whpx-all.c \
 
 QEMU2_TARGET_x86_64_SOURCES_windows-x86_64 := \
-    kvm-stub.c \
+    accel/stubs/kvm-stub.c \
     target/i386/hax-all.c \
     target/i386/hax-mem.c \
     target/i386/hax-windows.c \
