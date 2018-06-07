@@ -76,7 +76,6 @@ int main(int argc, char **argv)
 #include "hw/display/goldfish_fb.h"
 #include "monitor/qdev.h"
 #include "sysemu/bt.h"
-#include "sysemu/block-backend.h"
 #include "net/net.h"
 #include "net/slirp.h"
 #include "monitor/monitor.h"
@@ -1016,7 +1015,6 @@ static int create_qcow2_images(void) {
         char* image_basename = path_basename(backing_image_path);
         char* qcow2_path_buffer = NULL;
         const char* qcow2_image_path = NULL;
-        bool need_rebase = false;
         // ChromeOS and Android pass parameters differently
         if (android_hw->hw_arc) {
             if (p < 2) {
@@ -1048,21 +1046,17 @@ static int create_qcow2_images(void) {
             }
             qcow2_image_path = qcow2_path_buffer;
         } else {
-            QemuOpts* opts = qemu_opts_find(qemu_find_opts("drive"),
+            QemuOpts* opt = qemu_opts_find(qemu_find_opts("drive"),
                     images[p].drive);
-            if (!opts) {
+            if (!opt) {
                 continue;
             }
-            qcow2_image_path = qemu_opt_get(opts, "file");
+            qcow2_image_path = qemu_opt_get(opt, "file");
             const char qcow2_suffix[] = "." QCOW2_SUFFIX;
             if (strcmp(qcow2_suffix, qcow2_image_path
                     + strlen(qcow2_image_path) - strlen(qcow2_suffix))) {
                 // We are not using qcow2
                 continue;
-            }
-            if (qemu_opt_find(opts, "need-rebase")) {
-                need_rebase = true;
-                qemu_opt_unset(opts, "need-rebase");
             }
         }
 
@@ -1089,20 +1083,6 @@ static int create_qcow2_images(void) {
                 0,
                 &img_creation_error,
                 true);
-        }
-        if (need_rebase) {
-            QDict *options = qdict_new();
-            qdict_put(options, "driver", qstring_from_str(QCOW2_SUFFIX));
-            Error *local_err = NULL;
-            BlockBackend *blk = blk_new_open(qcow2_image_path,
-                    NULL, options, BDRV_O_RDWR | BDRV_O_NO_BACKING, &local_err);
-            if (!blk) {
-                error_report("Could not open '%s': ", qcow2_image_path);
-                return 0;
-            }
-            BlockDriverState* bs = blk_bs(blk);
-            bdrv_change_backing_file(bs, backing_image_path, NULL);
-            blk_unref(blk);
         }
         free(image_basename);
         free(qcow2_path_buffer);
