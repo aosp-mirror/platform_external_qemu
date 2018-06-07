@@ -50,6 +50,7 @@ protected:
         m_display = getDisplay();
         m_config = createConfig(m_display, 8, 8, 8, 8, 24, 8, 0);
         m_surface = pbufferSurface(m_display, m_config, 32, 32);
+        egl->eglSetMaxGLESVersion(3);
         m_context = createContext(m_display, m_config, 3, 0);
         egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
     }
