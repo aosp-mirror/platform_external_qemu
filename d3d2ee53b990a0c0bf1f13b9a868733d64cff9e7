@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7359c2e8_34ab6c4a",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-07T18:54:23Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 1
+      },
+      "revId": "d3d2ee53b990a0c0bf1f13b9a868733d64cff9e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db4e7523_c7e96502",
+        "filename": "android/android-emu/android/snapshot/Loader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-07T18:54:23Z",
+      "side": 1,
+      "message": "please revise the formatting",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 54
+      },
+      "revId": "d3d2ee53b990a0c0bf1f13b9a868733d64cff9e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37947800_f3673562",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-07T18:54:23Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 412,
+        "startChar": 0,
+        "endLine": 412,
+        "endChar": 22
+      },
+      "revId": "d3d2ee53b990a0c0bf1f13b9a868733d64cff9e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
