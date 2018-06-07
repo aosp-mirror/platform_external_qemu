@@ -1268,6 +1268,13 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                            CpuAccelMode* accel_mode, char** accel_status) {
     assert(accel_status != NULL);
 
+    if (avd) {
+        // AVD with API <=25 currently cannot boot with WHPX.
+        if (avdInfo_getApiLevel(avd) <= 25) {
+            feature_set_enabled_override(kFeature_WindowsHypervisorPlatform, false);
+        }
+    }
+
     /* Handle CPU acceleration options. */
     if (opts->no_accel) {
         if (opts->accel) {
