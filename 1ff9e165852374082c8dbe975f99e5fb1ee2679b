@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "849bb589_4df76f36",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/OpenGL_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-06-07T19:12:18Z",
+      "side": 1,
+      "message": "I didn\u0027t think so either, but these were here before my change, and it seems like other files in this folder do something similar? Already ran clang-format on this file before uploading patchset 4.",
+      "parentUuid": "348f876b_a8e19980",
+      "revId": "1ff9e165852374082c8dbe975f99e5fb1ee2679b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "92daf5db_094c85c0",
         "filename": "android/android-emugl/host/libs/libOpenglRender/OpenGL_unittest.cpp",
         "patchSetId": 3
