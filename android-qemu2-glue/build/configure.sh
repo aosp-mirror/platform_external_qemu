@@ -71,7 +71,7 @@ LINES=$(find . -type f -iname 'trace-events')
 for LINE in $LINES; do
     TRACE=$(echo ${LINE} | sed 's/\.\///')
     DIR=$(dirname $TRACE)
-    NAME=$(echo ${DIR} | sed 's/\//_/g' | sed 's/-/_/g')
+    NAME=$(echo ${DIR} | sed 's/\//_/g')
     if [ "${NAME}" = "." ]; then
         # Special case root
         generate_trace trace-root.c root c trace-events

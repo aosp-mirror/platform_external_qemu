@@ -1,4 +1,5 @@
-common-obj-y += rng.o rng-egd.o rng-random-generic.o
+common-obj-y += rng.o rng-egd.o
+common-obj-$(CONFIG_POSIX) += rng-random.o
 
 common-obj-y += msmouse.o wctablet.o testdev.o
 common-obj-$(CONFIG_BRLAPI) += baum.o
