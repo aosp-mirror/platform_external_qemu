@@ -40,8 +40,6 @@
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/x86_cpuid.h"
-#include "android/avd/info.h"
-#include "android/globals.h"
 
 #ifdef _WIN32
 #include "android/base/files/ScopedFileHandle.h"
@@ -140,9 +138,7 @@ GlobalState gGlobals = {false,  false,  CPU_ACCELERATOR_NONE,
 #include <WinHvEmulation.h>
 
 static bool isOkToTryWHPX() {
-    // AVD with API <=25 currently cannot boot with WHPX.
-    return avdInfo_getApiLevel(android_avdInfo) > 25 &&
-           featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform);
+    return featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform);
 }
 
 AndroidCpuAcceleration ProbeWHPX(std::string* status) {
