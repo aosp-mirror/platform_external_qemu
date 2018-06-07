@@ -12,16 +12,17 @@
 #include "android/snapshot/RamSaver.h"
 
 #include "android/base/ContiguousRangeMapper.h"
+#include "android/base/Profiler.h"
 #include "android/base/Stopwatch.h"
+#include "android/base/files/FileShareOpen.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
-#include "android/base/memory/OnDemand.h"
 #include "android/base/memory/MemoryHints.h"
+#include "android/base/memory/OnDemand.h"
 #include "android/base/misc/FileUtils.h"
-#include "android/base/Profiler.h"
 #include "android/base/system/System.h"
-#include "android/snapshot/RamLoader.h"
 #include "android/snapshot/MemoryWatch.h"
+#include "android/snapshot/RamLoader.h"
 #include "android/utils/debug.h"
 
 #include "MurmurHash3.h"
@@ -89,8 +90,10 @@ RamSaver::RamSaver(const std::string& fileName,
                                         RamSaver::Flags::None;
         mLoader = loader;
         mLoaderOnDemand = loader->onDemandEnabled();
-        mStream = base::StdioStream(fopen(fileName.c_str(), "rb+"),
-                                    base::StdioStream::kOwner);
+        mStream = base::StdioStream(
+                android::base::fsopen(fileName.c_str(), "rb+",
+                                      android::base::FileShare::Write),
+                base::StdioStream::kOwner);
         if (mStream.get()) {
             // Seek to the old index position and start overwriting from there.
             fseeko64(mStream.get(), loader->indexOffset(), SEEK_SET);
@@ -98,8 +101,10 @@ RamSaver::RamSaver(const std::string& fileName,
         }
     } else {
         mFlags = preferredFlags;
-        mStream = base::StdioStream(fopen(fileName.c_str(), "wb"),
-                                    base::StdioStream::kOwner);
+        mStream = base::StdioStream(
+                android::base::fsopen(fileName.c_str(), "wb",
+                                      android::base::FileShare::Write),
+                base::StdioStream::kOwner);
         if (mStream.get()) {
             // Put a placeholder for the index offset right now.
             mStream.putBe64(0);
@@ -406,10 +411,12 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
         mStopping.store(true, std::memory_order_release);
 
         mWorkers.clear();
-        mWriter->enqueue({-1});
-        mWriter.clear();
-        mIndex.startPosInFile = mCurrentStreamPos;
-        writeIndex();
+        if (mWriter) {
+            mWriter->enqueue({-1});
+            mWriter.clear();
+            mIndex.startPosInFile = mCurrentStreamPos;
+            writeIndex();
+        }
 
         mEndTime = System::get()->getHighResTimeUs();
 
