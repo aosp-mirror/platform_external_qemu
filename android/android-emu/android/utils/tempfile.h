@@ -32,8 +32,7 @@ ANDROID_BEGIN_HEADER
 
 typedef struct TempFile   TempFile;
 
-extern  TempFile*    tempfile_create( );
-extern  TempFile*    tempfile_create_with_ext( const char* ext );
+extern  TempFile*    tempfile_create( void );
 extern  const char*  tempfile_path( TempFile*  temp );
 extern  void         tempfile_close( TempFile*  temp );
 
