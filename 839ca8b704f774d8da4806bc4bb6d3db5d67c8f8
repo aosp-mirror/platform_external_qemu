@@ -22,6 +22,30 @@
       "revId": "839ca8b704f774d8da4806bc4bb6d3db5d67c8f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25a0d5a8_4a3261dd",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-07T18:47:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eebc4543_3d877502",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 42
+      },
+      "revId": "839ca8b704f774d8da4806bc4bb6d3db5d67c8f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
