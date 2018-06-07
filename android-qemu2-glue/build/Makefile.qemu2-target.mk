@@ -72,6 +72,9 @@ QEMU2_SYSTEM_STATIC_LIBRARIES := \
 
 $(call start-emulator-library,libqemu2-system-$(QEMU2_TARGET_SYSTEM))
 
+LOCAL_GENERATED_SOURCES += \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/$(QEMU2_TARGET_TARGET)/generated-helpers.c
+
 LOCAL_CFLAGS += \
     $(QEMU2_SYSTEM_CFLAGS) \
     -DPOISON_CONFIG_ANDROID \

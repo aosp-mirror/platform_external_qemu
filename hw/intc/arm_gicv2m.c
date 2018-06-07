@@ -29,6 +29,10 @@
 #include "qapi/error.h"
 #include "hw/sysbus.h"
 #include "hw/pci/msi.h"
+// TODO(jansene): The android and qemu make systems have diverged a lot.
+// this file needs to be compiled without the -DNEED_CPU_H flag. but it does.
+// The define below is to work around this divergence.
+#define CONFIG_KVM_IS_POSSIBLE
 #include "sysemu/kvm.h"
 #include "qemu/log.h"
 
