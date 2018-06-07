@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (b314f6 Merge "Allow emulator with WindowsHypervisorPlatform to run )
 /*
  * QEMU KVM support
  *
@@ -2613,3 +2614,5 @@ static void kvm_type_init(void)
 }
 
 type_init(kvm_type_init);
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (b314f6 Merge "Allow emulator with WindowsHypervisorPlatform to run )
 /*
  * QEMU System Emulator, accelerator interfaces
  *
@@ -154,3 +155,5 @@ static void register_accel_types(void)
 }
 
 type_init(register_accel_types);
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)

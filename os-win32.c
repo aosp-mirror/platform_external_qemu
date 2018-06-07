@@ -61,6 +61,7 @@ void qemu_set_ctrlc_handler(void(*handler)(void)) {
 
 static BOOL WINAPI qemu_ctrl_handler(DWORD type)
 {
+<<<<<<< HEAD   (b314f6 Merge "Allow emulator with WindowsHypervisorPlatform to run )
     if (ctrlc_handler) {
         (*ctrlc_handler)();
     } else {
@@ -68,6 +69,14 @@ static BOOL WINAPI qemu_ctrl_handler(DWORD type)
     }
     fflush(stdout);
     fflush(stderr);
+=======
+    qemu_system_shutdown_request(SHUTDOWN_CAUSE_HOST_SIGNAL);
+    /* Windows 7 kills application when the function returns.
+       Sleep here to give QEMU a try for closing.
+       Sleep period is 10000ms because Windows kills the program
+       after 10 seconds anyway. */
+    Sleep(10000);
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 
     // There are two major ways this handler can be invoked:
     // 1. Ctrl-C in console.

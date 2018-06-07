@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (b314f6 Merge "Allow emulator with WindowsHypervisorPlatform to run )
 = Tracing =
 
 == Introduction ==
@@ -440,3 +441,5 @@ If the translating vCPU has address 0xc1 and code is later executed by vCPU
     baz_trans cpu=0xc1 a=0xd3
     // at guest code execution
     baz_exec cpu=0xc2 a=0xd3
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (b314f6 Merge "Allow emulator with WindowsHypervisorPlatform to run )
 /*
  * QEMU live migration
  *
@@ -405,3 +406,5 @@ PostcopyState postcopy_state_get(void);
 /* Set the state and return the old state */
 PostcopyState postcopy_state_set(PostcopyState new_state);
 #endif
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
