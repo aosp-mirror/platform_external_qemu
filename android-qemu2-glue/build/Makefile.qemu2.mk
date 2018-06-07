@@ -167,7 +167,172 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES += \
     $(QEMU2_COMMON_SOURCES) \
+<<<<<<< HEAD   (ce54a4 Merge "Update build files" into emu-master-dev)
     $(QEMU2_COMMON_SOURCES_$(BUILD_TARGET_TAG)) \
+=======
+    $(QEMU2_COMMON_SOURCES_$(BUILD_TARGET_TAG))
+
+LOCAL_GENERATED_SOURCES += \
+    $(QEMU2_AUTO_GENERATED_DIR)/qapi-event.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/qapi-types.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/qapi-visit.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-tcg-tracers.h \
+    $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers-wrappers.h \
+    $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers.h \
+    $(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/util/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/crypto/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/io/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/migration/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/block/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/block/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/block/dataplane/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/char/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/intc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/net/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/virtio/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/audio/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/misc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/usb/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/scsi/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/nvram/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/display/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/input/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/timer/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/dma/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/sparc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/sd/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/isa/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/mem/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/i386/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/i386/xen/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/9pfs/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/ppc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/pci/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/s390x/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/vfio/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/acpi/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/arm/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/alpha/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/hw/xen/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/ui/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/audio/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/net/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/arm/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/i386/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/mips/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/sparc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/s390x/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/ppc/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/qom/trace.c \
+
+# Stuff from libqemuutil, order follows util/Makefile.objs
+LOCAL_SRC_FILES += \
+    crypto/pbkdf-stub.c \
+    qapi/opts-visitor.c \
+    qapi/qapi-clone-visitor.c \
+    qapi/qapi-dealloc-visitor.c \
+    qapi/qapi-util.c \
+    qapi/qapi-visit-core.c \
+    qapi/qmp-dispatch.c \
+    qapi/qmp-event.c \
+    qapi/qmp-registry.c \
+    qapi/qobject-input-visitor.c \
+    qapi/qobject-output-visitor.c \
+    qapi/string-input-visitor.c \
+    qapi/string-output-visitor.c \
+    qobject/json-lexer.c \
+    qobject/json-parser.c \
+    qobject/json-streamer.c \
+    qobject/qbool.c \
+    qobject/qdict.c \
+    qobject/qjson.c \
+    qobject/qlist.c \
+    qobject/qnull.c \
+    qobject/qnum.c \
+    qobject/qobject.c \
+    qobject/qstring.c \
+    trace/control.c \
+    trace/qmp.c \
+    util/abort.c \
+    util/acl.c \
+    util/aiocb.c \
+    util/async.c \
+    util/base64.c \
+    util/bitmap.c \
+    util/bitops.c \
+    util/buffer.c \
+    util/bufferiszero.c \
+    util/cacheinfo.c \
+    util/crc32c.c \
+    util/cutils.c \
+    util/envlist.c \
+    util/error.c \
+    util/fifo8.c \
+    util/getauxval.c \
+    util/hbitmap.c \
+    util/hexdump.c \
+    util/id.c \
+    util/iohandler.c \
+    util/iov.c \
+    util/keyval.c \
+    util/lockcnt.c \
+    util/log.c \
+    util/main-loop.c \
+    util/module.c \
+    util/notify.c \
+    util/osdep.c \
+    util/path.c \
+    util/qdist.c \
+    util/qemu-config.c \
+    util/qemu-coroutine-io.c \
+    util/qemu-coroutine-lock.c \
+    util/qemu-coroutine-sleep.c \
+    util/qemu-coroutine.c \
+    util/qemu-error.c \
+    util/qemu-option.c \
+    util/qemu-progress.c \
+    util/qemu-sockets.c \
+    util/qemu-timer-common.c \
+    util/qemu-timer.c \
+    util/qht.c \
+    util/range.c \
+    util/rcu.c \
+    util/readline.c \
+    util/stats64.c \
+    util/thread-pool.c \
+    util/throttle.c \
+    util/timed-average.c \
+    util/unicode.c \
+    util/uri.c \
+    util/uuid.c \
+    $(call qemu2-if-windows, \
+        util/aio-win32.c \
+        util/coroutine-win32.c \
+        util/event_notifier-win32.c \
+        util/oslib-win32.c \
+        util/qemu-thread-win32.c \
+        ) \
+    $(call qemu2-if-linux, \
+        util/coroutine-ucontext.c \
+        util/memfd.c \
+        ) \
+    $(call qemu2-if-darwin, \
+        util/coroutine-sigaltstack.c \
+        ) \
+    $(call qemu2-if-posix, \
+        util/aio-posix.c \
+        util/event_notifier-posix.c \
+        util/mmap-alloc.c \
+        util/oslib-posix.c \
+        util/qemu-openpty.c \
+        util/qemu-thread-posix.c \
+        ) \
+    $(call qemu2-if-build-target-arch,x86, util/host-utils.c) \
+    $(call qemu2-if-posix, \
+        util/compatfd.c \
+        ) \
+>>>>>>> BRANCH (86335c Merge tag 'v2.10.2')
 
 $(call gen-hw-config-defs)
 QEMU2_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES)
@@ -211,10 +376,9 @@ include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 QEMU2_TARGET := x86
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
-QEMU2_TARGET := x86_64
-include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-
 ifeq (,$(CONFIG_MIN_BUILD))
+    QEMU2_TARGET := x86_64
+    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
     QEMU2_TARGET := arm
     include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk

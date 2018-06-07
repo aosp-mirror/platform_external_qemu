@@ -1,8 +1,13 @@
+<<<<<<< HEAD   (ce54a4 Merge "Update build files" into emu-master-dev)
 common-obj-y += rng.o rng-egd.o rng-random-generic.o
 
 common-obj-y += msmouse.o wctablet.o testdev.o
 common-obj-$(CONFIG_BRLAPI) += baum.o
 baum.o-cflags := $(SDL_CFLAGS)
+=======
+common-obj-y += rng.o rng-egd.o
+common-obj-$(CONFIG_POSIX) += rng-random-generic.o
+>>>>>>> BRANCH (86335c Merge tag 'v2.10.2')
 
 common-obj-$(CONFIG_TPM) += tpm.o
 

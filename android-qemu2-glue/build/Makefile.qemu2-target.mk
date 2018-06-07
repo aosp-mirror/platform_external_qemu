@@ -72,6 +72,9 @@ QEMU2_SYSTEM_STATIC_LIBRARIES := \
 
 $(call start-emulator-library,libqemu2-system-$(QEMU2_TARGET_SYSTEM))
 
+LOCAL_GENERATED_SOURCES += \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/$(QEMU2_TARGET_TARGET)/generated-helpers.c \
+
 LOCAL_CFLAGS += \
     $(QEMU2_SYSTEM_CFLAGS) \
     -DPOISON_CONFIG_ANDROID \
@@ -83,17 +86,36 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES += \
     $(QEMU2_TARGET_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \
-    $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))
-
-ifeq (arm64,$(QEMU2_TARGET))
-LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
-else ifeq (arm,$(QEMU2_TARGET))
-LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm.c
-else
-LOCAL_SRC_FILES += stubs/gdbstub.c
-endif
+    $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG)) \
 
 LOCAL_SRC_FILES += \
+<<<<<<< HEAD   (ce54a4 Merge "Update build files" into emu-master-dev)
+=======
+    stubs/arch-query-cpu-model-baseline.c \
+    stubs/arch-query-cpu-model-comparison.c \
+    stubs/target-get-monitor-def.c \
+    stubs/xen-hvm.c \
+    $(call qemu2-if-target,arm arm64 mips mips64,\
+        hw/smbios/smbios_type_38-stub.c \
+        stubs/arch-query-cpu-model-expansion.c \
+        stubs/qmp_pc_dimm_device_list.c \
+        stubs/vmgenid.c \
+        ) \
+    $(call qemu2-if-target,x86 x86_64,\
+        $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml.c \
+    , \
+        stubs/pc_madt_cpu_entry.c \
+        stubs/gdbstub.c \
+        stubs/target-monitor-defs.c \
+        ) \
+    $(call qemu2-if-target,mips mips64, \
+        stubs/pci-host-piix.c \
+        stubs/dump.c \
+        stubs/arch-query-cpu-def.c \
+        ) \
+
+LOCAL_SRC_FILES += \
+>>>>>>> BRANCH (86335c Merge tag 'v2.10.2')
     $(call qemu2-if-target,x86 x86_64, \
         $(call qemu2-if-linux, hax-stub.c), \
         hax-stub.c \
@@ -102,7 +124,6 @@ LOCAL_SRC_FILES += \
         $(call qemu2-if-os, linux windows, hvf-stub.c), \
         hvf-stub.c \
     ) \
-
 
 LOCAL_PREBUILTS_OBJ_FILES += \
     $(call qemu2-if-windows,$(QEMU2_AUTO_GENERATED_DIR)/version.o)

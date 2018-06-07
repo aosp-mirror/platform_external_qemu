@@ -58,9 +58,13 @@ void aio_set_fd_handler(AioContext *ctx,
     if (!io_read && !io_write) {
         assert(!node->io_notify);
         /* Detach the event */
+<<<<<<< HEAD   (ce54a4 Merge "Update build files" into emu-master-dev)
         if (node->pfd.fd != -1) {
             WSAEventSelect(node->pfd.fd, NULL, 0);
         }
+=======
+        WSAEventSelect(node->pfd.fd, NULL, 0);
+>>>>>>> BRANCH (86335c Merge tag 'v2.10.2')
 
         if (node) {
             /* If aio_poll is in progress, just mark the node as deleted */
@@ -78,6 +82,7 @@ void aio_set_fd_handler(AioContext *ctx,
         }
     } else {
         HANDLE event;
+        long bitmask = FD_OOB;
 
         if (node == NULL) {
             /* Alloc and insert if it's not already there */
@@ -102,10 +107,22 @@ void aio_set_fd_handler(AioContext *ctx,
         node->io_write = io_write;
         node->is_external = is_external;
 
+        if (io_read) {
+            bitmask |= FD_READ | FD_ACCEPT | FD_CLOSE | FD_CONNECT;
+        }
+
+        if (io_write) {
+            bitmask |= FD_WRITE | FD_CONNECT;
+        }
+
         event = event_notifier_get_handle(&ctx->notifier);
+<<<<<<< HEAD   (ce54a4 Merge "Update build files" into emu-master-dev)
         WSAEventSelect(node->pfd.fd, event,
                        (io_read ? FD_READ : 0) | FD_ACCEPT | FD_CLOSE |
                        FD_CONNECT | (io_write ? FD_WRITE : 0) | FD_OOB);
+=======
+        WSAEventSelect(node->pfd.fd, event, bitmask);
+>>>>>>> BRANCH (86335c Merge tag 'v2.10.2')
     }
 
     qemu_lockcnt_unlock(&ctx->list_lock);
@@ -195,7 +212,11 @@ bool aio_prepare(AioContext *ctx)
      */
     qemu_lockcnt_inc(&ctx->list_lock);
 
+<<<<<<< HEAD   (ce54a4 Merge "Update build files" into emu-master-dev)
     QLIST_FOREACH_RCU(node, &ctx->aio_handlers, node) {
+=======
+    QLIST_FOREACH(node, &ctx->aio_handlers, node) {
+>>>>>>> BRANCH (86335c Merge tag 'v2.10.2')
         if (i >= sizeof(fds) / sizeof(*fds)) {
             break;
         }
@@ -232,7 +253,11 @@ bool aio_prepare(AioContext *ctx)
 
     if (poll_res > 0) {
         i = 0;
+<<<<<<< HEAD   (ce54a4 Merge "Update build files" into emu-master-dev)
         QLIST_FOREACH_RCU(node, &ctx->aio_handlers, node) {
+=======
+        QLIST_FOREACH(node, &ctx->aio_handlers, node) {
+>>>>>>> BRANCH (86335c Merge tag 'v2.10.2')
             node->pfd.revents = 0;
             if (i < fds_count && fds[i].fd >= 0) {
                 if (fds[i].revents & (POLLIN | POLLHUP | POLLERR)) {
