@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eebc4543_3d877502",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-07T14:15:13Z",
+      "side": 1,
+      "message": "please add the other files plus unit tests for FileShareOpen",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 42
+      },
+      "revId": "839ca8b704f774d8da4806bc4bb6d3db5d67c8f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
