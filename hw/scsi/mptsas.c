@@ -31,7 +31,7 @@
 #include "qemu/iov.h"
 #include "hw/scsi/scsi.h"
 #include "block/scsi.h"
-#include "hw/scsi/trace.h"
+#include "trace.h"
 #include "qapi/error.h"
 #include "mptsas.h"
 #include "mpi.h"

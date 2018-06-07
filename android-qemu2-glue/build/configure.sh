@@ -86,6 +86,11 @@ for LINE in $LINES; do
     fi
 done
 
+SUPPORTED_CPUS="i386 aarch64 arm mips"
+for CPU in $SUPPORTED_CPUS; do
+  generate_trace target/$CPU/generated-helpers.c root tcg-helper-c trace-events
+  generate_trace target/$CPU/generated-helpers.h root tcg-helper-h trace-events
+done
 
 bash $QEMU2_TOP_DIR/scripts/hxtool -h \
     < $QEMU2_TOP_DIR/qemu-options.hx \
