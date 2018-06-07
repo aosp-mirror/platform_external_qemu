@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "540c35a8_eff7fe3b",
+        "filename": "android/android-emu/android/base/files/FileShareOpen_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-07T18:55:09Z",
+      "side": 1,
+      "message": "is ths mode correct?",
+      "range": {
+        "startLine": 70,
+        "startChar": 41,
+        "endLine": 70,
+        "endChar": 45
+      },
+      "revId": "bbda4b4dcce15cd243527329fb07fe3102e8c5a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
