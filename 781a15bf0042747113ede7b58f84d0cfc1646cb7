@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da99cd7b_3efd518b",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-08T19:09:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "448ac7c2_fe678ef4",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d7646ec7_dfecaaa3",
         "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
         "patchSetId": 10
@@ -33,6 +51,24 @@
       "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e3bd818_ae018d9f",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-08T19:09:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d7646ec7_dfecaaa3",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "52014100_db58a778",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-08T19:09:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0583d5a3_9f282b28",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "106189e0_951234f6",
         "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2018-06-08T18:36:38Z",
       "side": 1,
       "message": "What does this do?",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d091af1_e3619346",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-08T19:09:52Z",
+      "side": 1,
+      "message": "This is to lessen the surprise factor / remain consistent with the other qemu2 glue source files in libqemu2-glue above that also has its local src directory set to android-qemu2-glue",
+      "parentUuid": "106189e0_951234f6",
       "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
