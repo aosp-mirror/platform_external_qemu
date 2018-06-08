@@ -257,6 +257,7 @@ OPTION_BENCHMARKS=no
 OPTION_LTO=
 OPTION_SNAPSHOT_PROFILE=no
 OPTION_MIN_BUILD=no
+OPTION_TRACE=no
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
 
@@ -345,6 +346,8 @@ for opt do
   ;;
   --sdk-revision=*) ANDROID_SDK_TOOLS_REVISION=$optarg
   ;;
+  --trace) OPTION_TRACE=yes
+  ;;
   --sdk-build-number=*) ANDROID_SDK_TOOLS_BUILD_NUMBER=$optarg
   ;;
   --benchmarks) OPTION_BENCHMARKS=yes
@@ -380,12 +383,12 @@ EOF
     echo "  --symbols                   Generating Breakpad symbol files."
     echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
     echo "  --crash-[staging,prod]      Send crashes to specific server (no crash reporting by default)."
+    echo "  --trace                     Compile with qemu simple qemu trace backend turned on (off by default)."
     echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
     echo "  --mingw                     Build Windows executable on Linux"
-    echo "  --clang                     Build using clang on Linux instead of gcc"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
     echo "  --sanitizer=[...]           Build with LLVM sanitizer (sanitizer=[address, thread])"
@@ -1167,6 +1170,15 @@ echo "LZ4_PREBUILTS_DIR := $LZ4_PREBUILTS_DIR" >> $config_mk
 echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
 echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
+
+if [ "$OPTION_TRACE" = "yes" ] ; then
+  log "Enabling tracing"
+  QEMU2_TRACE=simple,log
+  echo "QEMU2_TRACE := yes" >> $config_mk
+else
+  QEMU2_TRACE=nop
+fi
+
 
 if [ "$HOST_OS" = "linux" ]; then
   echo "LIBBLUEZ_PREBUILTS_DIR := $LIBBLUEZ_PREBUILTS_DIR" >> $config_mk
