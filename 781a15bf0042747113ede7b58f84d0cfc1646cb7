@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "448ac7c2_fe678ef4",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-08T18:36:38Z",
+      "side": 1,
+      "message": "No need to do this twice :-)",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7646ec7_dfecaaa3",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-08T18:36:38Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0583d5a3_9f282b28",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-08T18:36:38Z",
+      "side": 1,
+      "message": "tab (nit)",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "106189e0_951234f6",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 10
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-08T18:36:38Z",
+      "side": 1,
+      "message": "What does this do?",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "494684d2_aaa51bb5",
+        "filename": "exec.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1575,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-08T18:36:38Z",
+      "side": 1,
+      "message": "(Qemu related, no need to change on our side)\n\nIt looks like rb-\u003eflags should be a bitmapped struct. So others can easily see what these flags mean.",
+      "revId": "781a15bf0042747113ede7b58f84d0cfc1646cb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
