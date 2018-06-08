@@ -1067,6 +1067,15 @@ static int whpx_vcpu_run(CPUState *cpu)
                     rdx = vcpu->exit_ctx.CpuidAccess.DefaultResultRdx;
                     rbx = vcpu->exit_ctx.CpuidAccess.DefaultResultRbx;
                     break;
+                case 7:
+                    rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
+                    /* Disable SMAP support*/
+                    rbx =
+                        vcpu->exit_ctx.CpuidAccess.DefaultResultRbx &
+                        ~CPUID_7_0_EBX_SMAP;
+                    rcx = vcpu->exit_ctx.CpuidAccess.DefaultResultRcx;
+                    rdx = vcpu->exit_ctx.CpuidAccess.DefaultResultRdx;
+                    break;
                 case WHPX_CPUID_SIGNATURE:
                     memcpy(signature, "WHPXWHPXWHPX", 12);
                     rax = vcpu->exit_ctx.CpuidAccess.DefaultResultRax;
@@ -1502,7 +1511,7 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
-    UINT32 cpuidExitList[] = {1, WHPX_CPUID_SIGNATURE, 0x80000001};
+    UINT32 cpuidExitList[] = {1, 7, WHPX_CPUID_SIGNATURE, 0x80000001};
     hr = whp_dispatch.WHvSetPartitionProperty(
         whpx->partition,
         WHvPartitionPropertyCodeCpuidExitList,
