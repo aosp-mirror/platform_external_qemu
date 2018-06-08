@@ -94,32 +94,9 @@ LOCAL_SRC_FILES += stubs/gdbstub.c
 endif
 
 LOCAL_SRC_FILES += \
-    stubs/arch-query-cpu-model-baseline.c \
-    stubs/arch-query-cpu-model-comparison.c \
-    stubs/target-get-monitor-def.c \
-    $(call qemu2-if-target,arm arm64 mips mips64,\
-		stubs/arch-query-cpu-model-expansion.c \
-        stubs/qmp_pc_dimm_device_list.c \
-		stubs/vmgenid.c \
-        ) \
-    $(call qemu2-if-target,x86 x86_64,, \
-        stubs/pc_madt_cpu_entry.c \
-        hw/smbios/smbios_type_38-stub.c \
-        stubs/target-monitor-defs.c \
-        ) \
-    $(call qemu2-if-target,mips mips64, \
-        stubs/dump.c \
-        stubs/arch-query-cpu-def.c \
-        ) \
-
-LOCAL_SRC_FILES += \
     $(call qemu2-if-target,x86 x86_64, \
         $(call qemu2-if-linux, hax-stub.c), \
         hax-stub.c \
-    ) \
-    $(call qemu2-if-target,x86 x86_64, \
-        $(call qemu2-if-os, linux darwin, whpx-stub.c), \
-        whpx-stub.c \
     ) \
     $(call qemu2-if-target,x86 x86_64, \
         $(call qemu2-if-os, linux windows, hvf-stub.c), \
@@ -144,6 +121,8 @@ ifeq (,$(CONFIG_MIN_BUILD))
 
     LOCAL_STATIC_LIBRARIES += \
         $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
+        libqemu2-util \
+        libqemu2-stubs \
 
     LOCAL_CFLAGS += \
         $(QEMU2_SYSTEM_CFLAGS) \
@@ -189,6 +168,9 @@ LOCAL_STATIC_LIBRARIES += \
     $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
     $(QEMU2_GLUE_STATIC_LIBRARIES) \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
+    libqemu2-util \
+    libqemu2-stubs \
+
 
 LOCAL_CFLAGS += \
     $(QEMU2_SYSTEM_CFLAGS) \
