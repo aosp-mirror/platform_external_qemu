@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7cb85269_7d243378",
+        "filename": "android-qemu2-glue/build/Makefile.qemu-img.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-06-08T17:04:25Z",
+      "side": 1,
+      "message": "Can we alphabetize these?",
+      "range": {
+        "startLine": 113,
+        "startChar": 3,
+        "endLine": 119,
+        "endChar": 46
+      },
+      "revId": "8febddda2448e9cfe04d052dc3401f432c3cf266",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a0d7889_8dcfeb15",
+        "filename": "android-qemu2-glue/build/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-06-08T17:04:25Z",
+      "side": 1,
+      "message": "Does this default to \"nop\" or \"\"?",
+      "range": {
+        "startLine": 57,
+        "startChar": 47,
+        "endLine": 57,
+        "endChar": 59
+      },
+      "revId": "8febddda2448e9cfe04d052dc3401f432c3cf266",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90ad1a99_8604851f",
+        "filename": "android/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-06-08T17:04:25Z",
+      "side": 1,
+      "message": "Does it really accept on/off in addition to yes/no?",
+      "range": {
+        "startLine": 386,
+        "startChar": 21,
+        "endLine": 386,
+        "endChar": 27
+      },
+      "revId": "8febddda2448e9cfe04d052dc3401f432c3cf266",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
