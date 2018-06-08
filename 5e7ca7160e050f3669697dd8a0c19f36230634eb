@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7fa95e4_809107c3",
+        "filename": "util/mmap-alloc.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-08T16:29:10Z",
+      "side": 1,
+      "message": "you can close the handle after calling MapViewOfFile() - mapping keeps the handle open anyway, and you won\u0027t need to keep tracking the mapping in a separate variable.",
+      "range": {
+        "startLine": 142,
+        "startChar": 5,
+        "endLine": 142,
+        "endChar": 24
+      },
+      "revId": "5e7ca7160e050f3669697dd8a0c19f36230634eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce1f3529_da92cdde",
+        "filename": "util/mmap-alloc.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-08T16:29:10Z",
+      "side": 1,
+      "message": "if you decide to close the handle inside qemu_ram_mmap() then simple UnmapViewOfFile() works here",
+      "range": {
+        "startLine": 168,
+        "startChar": 5,
+        "endLine": 169,
+        "endChar": 6
+      },
+      "revId": "5e7ca7160e050f3669697dd8a0c19f36230634eb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
