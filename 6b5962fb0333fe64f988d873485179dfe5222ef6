@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f28ab70_14a20f7b",
+        "filename": "android/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1379,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-08T16:00:53Z",
+      "side": 1,
+      "message": "nit: remove blank lines?",
+      "range": {
+        "startLine": 1378,
+        "startChar": 0,
+        "endLine": 1379,
+        "endChar": 0
+      },
+      "revId": "6b5962fb0333fe64f988d873485179dfe5222ef6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
