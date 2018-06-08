@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "43f8d9f0_c9964c09",
+        "filename": "android-qemu2-glue/build/Makefile.qemu-img.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-08T17:06:38Z",
+      "side": 1,
+      "message": "Yes, will fix.",
+      "parentUuid": "7cb85269_7d243378",
+      "range": {
+        "startLine": 113,
+        "startChar": 3,
+        "endLine": 119,
+        "endChar": 46
+      },
+      "revId": "8febddda2448e9cfe04d052dc3401f432c3cf266",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8a0d7889_8dcfeb15",
         "filename": "android-qemu2-glue/build/configure.sh",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d41752d6_245967cb",
+        "filename": "android-qemu2-glue/build/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-08T17:06:38Z",
+      "side": 1,
+      "message": "Defaults to nop, which will be optimized out during build.",
+      "parentUuid": "8a0d7889_8dcfeb15",
+      "range": {
+        "startLine": 57,
+        "startChar": 47,
+        "endLine": 57,
+        "endChar": 59
+      },
+      "revId": "8febddda2448e9cfe04d052dc3401f432c3cf266",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "90ad1a99_8604851f",
         "filename": "android/configure.sh",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2018-06-08T17:04:25Z",
       "side": 1,
       "message": "Does it really accept on/off in addition to yes/no?",
+      "range": {
+        "startLine": 386,
+        "startChar": 21,
+        "endLine": 386,
+        "endChar": 27
+      },
+      "revId": "8febddda2448e9cfe04d052dc3401f432c3cf266",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ffedbd56_2fe035ce",
+        "filename": "android/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-08T17:06:38Z",
+      "side": 1,
+      "message": "ah, you\u0027re right. Updating documentation.",
+      "parentUuid": "90ad1a99_8604851f",
       "range": {
         "startLine": 386,
         "startChar": 21,
