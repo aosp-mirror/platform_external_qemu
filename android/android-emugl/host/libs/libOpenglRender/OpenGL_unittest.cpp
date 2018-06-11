@@ -48,6 +48,19 @@ using android::snapshot::TextureSaver;
 
 using namespace gltest;
 
+// Capabilities which, according to the GLES2 spec, start disabled.
+static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
+                                            GL_CULL_FACE,
+                                            GL_DEPTH_TEST,
+                                            GL_POLYGON_OFFSET_FILL,
+                                            GL_SAMPLE_ALPHA_TO_COVERAGE,
+                                            GL_SAMPLE_COVERAGE,
+                                            GL_SCISSOR_TEST,
+                                            GL_STENCIL_TEST};
+
+// Capabilities which, according to the GLES2 spec, start enabled.
+static const GLenum kGLES2CanBeDisabled[] = {GL_DITHER};
+
 class GLTest : public ::testing::Test {
 protected:
     virtual void SetUp() {
@@ -127,6 +140,7 @@ public:
     }
 
     // Mimics FrameBuffer.onLoad, with fewer objects to manage.
+    // Assumes that a valid display is present.
     // |streamFile| is a filename from which the snapshot will be loaded.
     // |textureFile| is a filename from which the textures will be loaded.
     void loadSnapshot(const std::string streamFile,
@@ -156,9 +170,17 @@ public:
         egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
     }
 
-    void doSnapshot() {
-        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    // Performs a teardown and reset of graphics objects in preparation for
+    // a snapshot load.
+    void preloadReset() {
+        GLTest::TearDown();
+        GLTest::SetUp();
+    }
 
+    // Mimics saving and then loading a graphics snapshot.
+    // To verify that state has been reset to some default before the load,
+    // assertions can be performed in |preloadCheck|.
+    void doSnapshot(std::function<void()> preloadCheck = [] {}) {
         std::string timeStamp =
                 std::to_string(android::base::System::get()->getUnixTime());
         std::string snapshotFile =
@@ -168,11 +190,8 @@ public:
 
         saveSnapshot(snapshotFile, textureFile);
 
-        // "teardown" of existing context and surface
-        egl->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                            EGL_NO_CONTEXT);
-        destroyContext(m_display, m_context);
-        destroySurface(m_display, m_surface);
+        preloadReset();
+        preloadCheck();
 
         loadSnapshot(snapshotFile, textureFile);
 
@@ -185,17 +204,42 @@ protected:
     std::string mSnapshotPath = {};
 };
 
+class SnapshotGlEnableTest : public SnapshotTest,
+                             public ::testing::WithParamInterface<GLenum> {};
+
+class SnapshotGlDisableTest : public SnapshotTest,
+                              public ::testing::WithParamInterface<GLenum> {};
+
 TEST_F(GLTest, InitDestroy) {}
 
 TEST_F(SnapshotTest, InitDestroy) {}
 
-TEST_F(SnapshotTest, SnapshotEnableBlend) {
+TEST_P(SnapshotGlEnableTest, PreserveEnable) {
     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
-    ASSERT_FALSE(gl->glIsEnabled(GL_BLEND));
-    gl->glEnable(GL_BLEND);
-    ASSERT_TRUE(gl->glIsEnabled(GL_BLEND));
-    doSnapshot();
-    EXPECT_TRUE(gl->glIsEnabled(GL_BLEND));
+    GLenum capability = GetParam();
+    ASSERT_FALSE(gl->glIsEnabled(capability));
+    gl->glEnable(capability);
+    ASSERT_TRUE(gl->glIsEnabled(capability));
+    doSnapshot([gl, capability] { ASSERT_FALSE(gl->glIsEnabled(capability)); });
+    EXPECT_TRUE(gl->glIsEnabled(capability));
 }
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPreserve,
+                        SnapshotGlEnableTest,
+                        ::testing::ValuesIn(kGLES2CanBeEnabled));
+
+TEST_P(SnapshotGlDisableTest, PreserveDisable) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    GLenum capability = GetParam();
+    ASSERT_TRUE(gl->glIsEnabled(capability));
+    gl->glDisable(capability);
+    ASSERT_FALSE(gl->glIsEnabled(capability));
+    doSnapshot([gl, capability] { ASSERT_TRUE(gl->glIsEnabled(capability)); });
+    EXPECT_FALSE(gl->glIsEnabled(capability));
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPreserve,
+                        SnapshotGlDisableTest,
+                        ::testing::ValuesIn(kGLES2CanBeDisabled));
 
 }  // namespace emugl
