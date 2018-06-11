@@ -187,6 +187,12 @@ LOCAL_SRC_FILES += \
     $(QEMU2_LIB_qemuutil) \
     $(QEMU2_LIB_qemuutil_$(BUILD_TARGET_TAG)) \
 
+# Include the simple tracer if requested
+ifneq (,$(QEMU2_TRACE))
+    LOCAL_SRC_FILES += trace/simple.c
+    LOCAL_CFLAGS += -DCONFIG_TRACE_SIMPLE=1
+endif
+
 $(call end-emulator-library)
 
 # A static library containing all the stubs we

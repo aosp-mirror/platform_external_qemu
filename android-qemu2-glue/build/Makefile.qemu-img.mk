@@ -110,6 +110,13 @@ LOCAL_SRC_FILES := \
     qom/object_interfaces.c \
     qom/qom-qobject.c \
     replication.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/block/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/crypto/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/io/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/qapi/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/qom/trace.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
+    $(QEMU2_AUTO_GENERATED_DIR)/util/trace.c \
     $(call qemu2-if-windows, \
         block/file-win32.c \
         block/win32-aio.c \
