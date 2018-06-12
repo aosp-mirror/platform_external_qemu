@@ -27,30 +27,33 @@
  */
 
 #include "qemu/osdep.h"
-#include "cpu.h"
 #include "hw/boards.h"
-#include "hw/hw.h"
-#include "hw/qdev.h"
 #include "hw/xen/xen.h"
 #include "net/net.h"
-#include "monitor/monitor.h"
-#include "sysemu/sysemu.h"
-#include "qemu/timer.h"
-#include "audio/audio.h"
-#include "migration/migration.h"
-#include "migration/postcopy-ram.h"
+#include "migration.h"
+#include "migration/snapshot.h"
+#include "migration/misc.h"
+#include "migration/register.h"
+#include "migration/global_state.h"
+#include "ram.h"
+#include "qemu-file-channel.h"
+#include "qemu-file.h"
+#include "savevm.h"
+#include "postcopy-ram.h"
 #include "qapi/qmp/qerror.h"
 #include "qemu/error-report.h"
-#include "qemu/sockets.h"
-#include "qemu/queue.h"
 #include "sysemu/cpus.h"
 #include "exec/memory.h"
+#include "exec/target_page.h"
 #include "qmp-commands.h"
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 #include "migration/trace.h"
 #include "qemu/bitops.h"
+=======
+#include "trace.h"
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 #include "qemu/iov.h"
 #include "block/snapshot.h"
-#include "block/qapi.h"
 #include "qemu/cutils.h"
 #include "io/channel-buffer.h"
 #include "io/channel-file.h"
@@ -64,8 +67,26 @@
 
 const unsigned int postcopy_ram_discard_version = 0;
 
-static bool skip_section_footers;
+/* Subcommands for QEMU_VM_COMMAND */
+enum qemu_vm_cmd {
+    MIG_CMD_INVALID = 0,   /* Must be 0 */
+    MIG_CMD_OPEN_RETURN_PATH,  /* Tell the dest to open the Return path */
+    MIG_CMD_PING,              /* Request a PONG on the RP */
 
+    MIG_CMD_POSTCOPY_ADVISE,       /* Prior to any page transfers, just
+                                      warn we might want to do PC */
+    MIG_CMD_POSTCOPY_LISTEN,       /* Start listening for incoming
+                                      pages as it's running. */
+    MIG_CMD_POSTCOPY_RUN,          /* Start execution */
+
+    MIG_CMD_POSTCOPY_RAM_DISCARD,  /* A list of pages to discard that
+                                      were previously sent during
+                                      precopy but are dirty. */
+    MIG_CMD_PACKAGED,          /* Send a wrapped stream within this stream */
+    MIG_CMD_MAX
+};
+
+#define MAX_VM_CMD_PACKAGED_SIZE (1ul << 24)
 static struct mig_cmd_args {
     ssize_t     len; /* -1 = variable */
     const char *name;
@@ -254,7 +275,11 @@ typedef struct SaveStateEntry {
     int instance_id;
     int alias_id;
     int version_id;
+    /* version id read from the stream */
+    int load_version_id;
     int section_id;
+    /* section id read from the stream */
+    int load_section_id;
     SaveVMHandlers *ops;
     const VMStateDescription *vmsd;
     void *opaque;
@@ -265,7 +290,6 @@ typedef struct SaveStateEntry {
 typedef struct SaveState {
     QTAILQ_HEAD(, SaveStateEntry) handlers;
     int global_section_id;
-    bool skip_configuration;
     uint32_t len;
     const char *name;
     uint32_t target_page_bits;
@@ -274,14 +298,7 @@ typedef struct SaveState {
 static SaveState savevm_state = {
     .handlers = QTAILQ_HEAD_INITIALIZER(savevm_state.handlers),
     .global_section_id = 0,
-    .skip_configuration = false,
 };
-
-void savevm_skip_configuration(void)
-{
-    savevm_state.skip_configuration = true;
-}
-
 
 static void configuration_pre_save(void *opaque)
 {
@@ -290,7 +307,7 @@ static void configuration_pre_save(void *opaque)
 
     state->len = strlen(current_name);
     state->name = current_name;
-    state->target_page_bits = TARGET_PAGE_BITS;
+    state->target_page_bits = qemu_target_page_bits();
 }
 
 static int configuration_pre_load(void *opaque)
@@ -301,7 +318,7 @@ static int configuration_pre_load(void *opaque)
      * predates the variable-target-page-bits support and is using the
      * minimum possible value for this CPU.
      */
-    state->target_page_bits = TARGET_PAGE_BITS_MIN;
+    state->target_page_bits = qemu_target_page_bits_min();
     return 0;
 }
 
@@ -316,9 +333,9 @@ static int configuration_post_load(void *opaque, int version_id)
         return -EINVAL;
     }
 
-    if (state->target_page_bits != TARGET_PAGE_BITS) {
+    if (state->target_page_bits != qemu_target_page_bits()) {
         error_report("Received TARGET_PAGE_BITS is %d but local is %d",
-                     state->target_page_bits, TARGET_PAGE_BITS);
+                     state->target_page_bits, qemu_target_page_bits());
         return -EINVAL;
     }
 
@@ -334,7 +351,8 @@ static int configuration_post_load(void *opaque, int version_id)
  */
 static bool vmstate_target_page_bits_needed(void *opaque)
 {
-    return TARGET_PAGE_BITS > TARGET_PAGE_BITS_MIN;
+    return qemu_target_page_bits()
+        > qemu_target_page_bits_min();
 }
 
 static const VMStateDescription vmstate_target_page_bits = {
@@ -583,7 +601,7 @@ int register_savevm_live(DeviceState *dev,
     se->opaque = opaque;
     se->vmsd = NULL;
     /* if this is a live_savem then set is_ram */
-    if (ops->save_live_setup != NULL) {
+    if (ops->save_setup != NULL) {
         se->is_ram = 1;
     }
 
@@ -619,6 +637,7 @@ int register_savevm_live(DeviceState *dev,
     return 0;
 }
 
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 int register_savevm(DeviceState *dev,
                     const char *idstr,
                     int instance_id,
@@ -651,6 +670,8 @@ int register_savevm_with_post_load(DeviceState *dev,
                                 ops, opaque);
 }
 
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 void unregister_savevm(DeviceState *dev, const char *idstr, void *opaque)
 {
     SaveStateEntry *se, *new_se;
@@ -670,7 +691,6 @@ void unregister_savevm(DeviceState *dev, const char *idstr, void *opaque)
         if (strcmp(se->idstr, id) == 0 && se->opaque == opaque) {
             QTAILQ_REMOVE(&savevm_state.handlers, se, entry);
             g_free(se->compat);
-            g_free(se->ops);
             g_free(se);
         }
     }
@@ -740,7 +760,7 @@ void vmstate_unregister(DeviceState *dev, const VMStateDescription *vmsd,
     }
 }
 
-static int vmstate_load(QEMUFile *f, SaveStateEntry *se, int version_id)
+static int vmstate_load(QEMUFile *f, SaveStateEntry *se)
 {
     int res;
 #if SNAPSHOT_PROFILE > 1
@@ -749,16 +769,24 @@ static int vmstate_load(QEMUFile *f, SaveStateEntry *se, int version_id)
 
     trace_vmstate_load(se->idstr, se->vmsd ? se->vmsd->name : "(old)");
     if (!se->vmsd) {         /* Old style */
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         res = se->ops->load_state(f, se->opaque, version_id);
     } else {
         res = vmstate_load_state(f, se->vmsd, se->opaque, version_id);
+=======
+        return se->ops->load_state(f, se->opaque, se->load_version_id);
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
     }
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 #if SNAPSHOT_PROFILE > 1
     int64_t endTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
     printf("load_state(%s) time %.03f ms\n", se->idstr,
             (endTime - beginTime)/1000000.0);
 #endif
     return res;
+=======
+    return vmstate_load_state(f, se->vmsd, se->opaque, se->load_version_id);
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 }
 
 static void vmstate_save_old_style(QEMUFile *f, SaveStateEntry *se, QJSON *vmdesc)
@@ -791,11 +819,6 @@ static void vmstate_save(QEMUFile *f, SaveStateEntry *se, QJSON *vmdesc)
     vmstate_save_state(f, se->vmsd, se->opaque, vmdesc);
 }
 
-void savevm_skip_section_footers(void)
-{
-    skip_section_footers = true;
-}
-
 /*
  * Write the header for device section (QEMU_VM_SECTION START/END/PART/FULL)
  */
@@ -823,7 +846,7 @@ static void save_section_header(QEMUFile *f, SaveStateEntry *se,
  */
 static void save_section_footer(QEMUFile *f, SaveStateEntry *se)
 {
-    if (!skip_section_footers) {
+    if (migrate_get_current()->send_section_footer) {
         qemu_put_byte(f, QEMU_VM_SECTION_FOOTER);
         qemu_put_be32(f, se->section_id);
     }
@@ -838,10 +861,10 @@ static void save_section_footer(QEMUFile *f, SaveStateEntry *se)
  * @len: Length of associated data
  * @data: Data associated with command.
  */
-void qemu_savevm_command_send(QEMUFile *f,
-                              enum qemu_vm_cmd command,
-                              uint16_t len,
-                              uint8_t *data)
+static void qemu_savevm_command_send(QEMUFile *f,
+                                     enum qemu_vm_cmd command,
+                                     uint16_t len,
+                                     uint8_t *data)
 {
     trace_savevm_command_send(command, len);
     qemu_put_byte(f, QEMU_VM_COMMAND);
@@ -900,7 +923,7 @@ void qemu_savevm_send_postcopy_advise(QEMUFile *f)
 {
     uint64_t tmp[2];
     tmp[0] = cpu_to_be64(ram_pagesize_summary());
-    tmp[1] = cpu_to_be64(1ul << qemu_target_page_bits());
+    tmp[1] = cpu_to_be64(qemu_target_page_size());
 
     trace_qemu_savevm_send_postcopy_advise();
     qemu_savevm_command_send(f, MIG_CMD_POSTCOPY_ADVISE, 16, (uint8_t *)tmp);
@@ -980,41 +1003,26 @@ bool qemu_savevm_state_blocked(Error **errp)
     return false;
 }
 
-static bool enforce_config_section(void)
-{
-    MachineState *machine = MACHINE(qdev_get_machine());
-    return machine->enforce_config_section;
-}
-
 void qemu_savevm_state_header(QEMUFile *f)
 {
     trace_savevm_state_header();
     qemu_put_be32(f, QEMU_VM_FILE_MAGIC);
     qemu_put_be32(f, QEMU_VM_FILE_VERSION);
 
-    if (!savevm_state.skip_configuration || enforce_config_section()) {
+    if (migrate_get_current()->send_configuration) {
         qemu_put_byte(f, QEMU_VM_CONFIGURATION);
         vmstate_save_state(f, &vmstate_configuration, &savevm_state, 0);
     }
-
 }
 
-void qemu_savevm_state_begin(QEMUFile *f,
-                             const MigrationParams *params)
+void qemu_savevm_state_setup(QEMUFile *f)
 {
     SaveStateEntry *se;
     int ret;
 
-    trace_savevm_state_begin();
+    trace_savevm_state_setup();
     QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
-        if (!se->ops || !se->ops->set_params) {
-            continue;
-        }
-        se->ops->set_params(params, se->opaque);
-    }
-
-    QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
-        if (!se->ops || !se->ops->save_live_setup) {
+        if (!se->ops || !se->ops->save_setup) {
             continue;
         }
         if (se->ops && se->ops->is_active) {
@@ -1024,7 +1032,7 @@ void qemu_savevm_state_begin(QEMUFile *f,
         }
         save_section_header(f, se, QEMU_VM_SECTION_START);
 
-        ret = se->ops->save_live_setup(f, se->opaque);
+        ret = se->ops->save_setup(f, se->opaque);
         save_section_footer(f, se);
         if (ret < 0) {
             qemu_file_set_error(f, ret);
@@ -1108,7 +1116,7 @@ int qemu_savevm_state_iterate(QEMUFile *f, bool postcopy)
 static bool should_send_vmdesc(void)
 {
     MachineState *machine = MACHINE(qdev_get_machine());
-    bool in_postcopy = migration_in_postcopy(migrate_get_current());
+    bool in_postcopy = migration_in_postcopy();
     return !machine->suppress_vmdesc && !in_postcopy;
 }
 
@@ -1151,13 +1159,14 @@ void qemu_savevm_state_complete_postcopy(QEMUFile *f)
     qemu_fflush(f);
 }
 
-void qemu_savevm_state_complete_precopy(QEMUFile *f, bool iterable_only)
+int qemu_savevm_state_complete_precopy(QEMUFile *f, bool iterable_only,
+                                       bool inactivate_disks)
 {
     QJSON *vmdesc;
     int vmdesc_len;
     SaveStateEntry *se;
     int ret;
-    bool in_postcopy = migration_in_postcopy(migrate_get_current());
+    bool in_postcopy = migration_in_postcopy();
 
     trace_savevm_state_complete_precopy();
 
@@ -1196,16 +1205,16 @@ void qemu_savevm_state_complete_precopy(QEMUFile *f, bool iterable_only)
 
         if (ret < 0) {
             qemu_file_set_error(f, ret);
-            return;
+            return -1;
         }
     }
 
     if (iterable_only) {
-        return;
+        return 0;
     }
 
     vmdesc = qjson_new();
-    json_prop_int(vmdesc, "page_size", TARGET_PAGE_SIZE);
+    json_prop_int(vmdesc, "page_size", qemu_target_page_size());
     json_start_array(vmdesc, "devices");
     QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
 
@@ -1241,6 +1250,15 @@ void qemu_savevm_state_complete_precopy(QEMUFile *f, bool iterable_only)
         json_end_object(vmdesc);
     }
 
+    if (inactivate_disks) {
+        /* Inactivate before sending QEMU_VM_EOF so that the
+         * bdrv_invalidate_cache_all() on the other end won't fail. */
+        ret = bdrv_inactivate_all();
+        if (ret) {
+            qemu_file_set_error(f, ret);
+            return ret;
+        }
+    }
     if (!in_postcopy) {
         /* Postcopy stream will still be going */
         qemu_put_byte(f, QEMU_VM_EOF);
@@ -1258,13 +1276,14 @@ void qemu_savevm_state_complete_precopy(QEMUFile *f, bool iterable_only)
     qjson_destroy(vmdesc);
 
     qemu_fflush(f);
+    return 0;
 }
 
 /* Give an estimate of the amount left to be transferred,
  * the result is split into the amount for units that can and
  * for units that can't do postcopy.
  */
-void qemu_savevm_state_pending(QEMUFile *f, uint64_t max_size,
+void qemu_savevm_state_pending(QEMUFile *f, uint64_t threshold_size,
                                uint64_t *res_non_postcopiable,
                                uint64_t *res_postcopiable)
 {
@@ -1283,7 +1302,7 @@ void qemu_savevm_state_pending(QEMUFile *f, uint64_t max_size,
                 continue;
             }
         }
-        se->ops->save_live_pending(f, se->opaque, max_size,
+        se->ops->save_live_pending(f, se->opaque, threshold_size,
                                    res_non_postcopiable, res_postcopiable);
     }
 }
@@ -1294,8 +1313,8 @@ void qemu_savevm_state_cleanup(void)
 
     trace_savevm_state_cleanup();
     QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
-        if (se->ops && se->ops->cleanup) {
-            se->ops->cleanup(se->opaque);
+        if (se->ops && se->ops->save_cleanup) {
+            se->ops->save_cleanup(se->opaque);
         }
     }
 }
@@ -1313,11 +1332,7 @@ void migrate_set_file_hooks(const QEMUFileHooks* save_hooks,
 static int qemu_savevm_state(QEMUFile *f, Error **errp)
 {
     int ret;
-    MigrationParams params = {
-        .blk = 0,
-        .shared = 0
-    };
-    MigrationState *ms = migrate_init(&params);
+    MigrationState *ms = migrate_init();
     MigrationStatus status;
     ms->to_dst_file = f;
 
@@ -1330,9 +1345,15 @@ static int qemu_savevm_state(QEMUFile *f, Error **errp)
         goto done;
     }
 
+    if (migrate_use_block()) {
+        error_setg(errp, "Block migration and snapshots are incompatible");
+        ret = -EINVAL;
+        goto done;
+    }
+
     qemu_mutex_unlock_iothread();
     qemu_savevm_state_header(f);
-    qemu_savevm_state_begin(f, &params);
+    qemu_savevm_state_setup(f);
     qemu_mutex_lock_iothread();
 
     while (qemu_file_get_error(f) == 0) {
@@ -1343,7 +1364,7 @@ static int qemu_savevm_state(QEMUFile *f, Error **errp)
 
     ret = qemu_file_get_error(f);
     if (ret == 0) {
-        qemu_savevm_state_complete_precopy(f, false);
+        qemu_savevm_state_complete_precopy(f, false, false);
         ret = qemu_file_get_error(f);
     }
     qemu_savevm_state_cleanup();
@@ -1473,13 +1494,13 @@ static int loadvm_postcopy_handle_advise(MigrationIncomingState *mis)
     }
 
     remote_tps = qemu_get_be64(mis->from_src_file);
-    if (remote_tps != (1ul << qemu_target_page_bits())) {
+    if (remote_tps != qemu_target_page_size()) {
         /*
          * Again, some differences could be dealt with, but for now keep it
          * simple.
          */
-        error_report("Postcopy needs matching target page sizes (s=%d d=%d)",
-                     (int)remote_tps, 1 << qemu_target_page_bits());
+        error_report("Postcopy needs matching target page sizes (s=%d d=%zd)",
+                     (int)remote_tps, qemu_target_page_size());
         return -1;
     }
 
@@ -1562,8 +1583,7 @@ static int loadvm_postcopy_ram_handle_discard(MigrationIncomingState *mis,
         block_length = qemu_get_be64(mis->from_src_file);
 
         len -= 16;
-        int ret = ram_discard_range(mis, ramid, start_addr,
-                                    block_length);
+        int ret = ram_discard_range(ramid, start_addr, block_length);
         if (ret) {
             return ret;
         }
@@ -1635,7 +1655,7 @@ static void *postcopy_ram_listen_thread(void *opaque)
      * got a bad migration state).
      */
     migration_incoming_state_destroy();
-
+    qemu_loadvm_state_cleanup();
 
     return NULL;
 }
@@ -1700,10 +1720,13 @@ static void loadvm_postcopy_handle_run_bh(void *opaque)
 
     qemu_announce_self();
 
-    /* Make sure all file formats flush their mutable metadata */
+    /* Make sure all file formats flush their mutable metadata.
+     * If we get an error here, just don't restart the VM yet. */
     bdrv_invalidate_cache_all(&local_err);
     if (local_err) {
         error_report_err(local_err);
+        local_err = NULL;
+        autostart = false;
     }
 
     trace_loadvm_postcopy_handle_run_cpu_sync();
@@ -1868,25 +1891,18 @@ static int loadvm_process_command(QEMUFile *f)
     return 0;
 }
 
-struct LoadStateEntry {
-    QLIST_ENTRY(LoadStateEntry) entry;
-    SaveStateEntry *se;
-    int section_id;
-    int version_id;
-};
-
 /*
  * Read a footer off the wire and check that it matches the expected section
  *
  * Returns: true if the footer was good
  *          false if there is a problem (and calls error_report to say why)
  */
-static bool check_section_footer(QEMUFile *f, LoadStateEntry *le)
+static bool check_section_footer(QEMUFile *f, SaveStateEntry *se)
 {
     uint8_t read_mark;
     uint32_t read_section_id;
 
-    if (skip_section_footers) {
+    if (!migrate_get_current()->send_section_footer) {
         /* No footer to check */
         return true;
     }
@@ -1894,15 +1910,15 @@ static bool check_section_footer(QEMUFile *f, LoadStateEntry *le)
     read_mark = qemu_get_byte(f);
 
     if (read_mark != QEMU_VM_SECTION_FOOTER) {
-        error_report("Missing section footer for %s", le->se->idstr);
+        error_report("Missing section footer for %s", se->idstr);
         return false;
     }
 
     read_section_id = qemu_get_be32(f);
-    if (read_section_id != le->section_id) {
+    if (read_section_id != se->load_section_id) {
         error_report("Mismatched section id in footer for %s -"
                      " read 0x%x expected 0x%x",
-                     le->se->idstr, read_section_id, le->section_id);
+                     se->idstr, read_section_id, se->load_section_id);
         return false;
     }
 
@@ -1910,22 +1926,11 @@ static bool check_section_footer(QEMUFile *f, LoadStateEntry *le)
     return true;
 }
 
-void loadvm_free_handlers(MigrationIncomingState *mis)
-{
-    LoadStateEntry *le, *new_le;
-
-    QLIST_FOREACH_SAFE(le, &mis->loadvm_handlers, entry, new_le) {
-        QLIST_REMOVE(le, entry);
-        g_free(le);
-    }
-}
-
 static int
 qemu_loadvm_section_start_full(QEMUFile *f, MigrationIncomingState *mis)
 {
     uint32_t instance_id, version_id, section_id;
     SaveStateEntry *se;
-    LoadStateEntry *le;
     char idstr[256];
     int ret;
 
@@ -1955,6 +1960,8 @@ qemu_loadvm_section_start_full(QEMUFile *f, MigrationIncomingState *mis)
                      version_id, idstr, se->version_id);
         return -EINVAL;
     }
+    se->load_version_id = version_id;
+    se->load_section_id = section_id;
 
     /* Validate if it is a device's state */
     if (xen_enabled() && se->is_ram) {
@@ -1962,21 +1969,13 @@ qemu_loadvm_section_start_full(QEMUFile *f, MigrationIncomingState *mis)
         return -EINVAL;
     }
 
-    /* Add entry */
-    le = g_malloc0(sizeof(*le));
-
-    le->se = se;
-    le->section_id = section_id;
-    le->version_id = version_id;
-    QLIST_INSERT_HEAD(&mis->loadvm_handlers, le, entry);
-
-    ret = vmstate_load(f, le->se, le->version_id);
+    ret = vmstate_load(f, se);
     if (ret < 0) {
         error_report("error while loading state for instance 0x%x of"
                      " device '%s'", instance_id, idstr);
         return ret;
     }
-    if (!check_section_footer(f, le)) {
+    if (!check_section_footer(f, se)) {
         return -EINVAL;
     }
 
@@ -1987,33 +1986,71 @@ static int
 qemu_loadvm_section_part_end(QEMUFile *f, MigrationIncomingState *mis)
 {
     uint32_t section_id;
-    LoadStateEntry *le;
+    SaveStateEntry *se;
     int ret;
 
     section_id = qemu_get_be32(f);
 
     trace_qemu_loadvm_state_section_partend(section_id);
-    QLIST_FOREACH(le, &mis->loadvm_handlers, entry) {
-        if (le->section_id == section_id) {
+    QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
+        if (se->load_section_id == section_id) {
             break;
         }
     }
-    if (le == NULL) {
+    if (se == NULL) {
         error_report("Unknown savevm section %d", section_id);
         return -EINVAL;
     }
 
-    ret = vmstate_load(f, le->se, le->version_id);
+    ret = vmstate_load(f, se);
     if (ret < 0) {
         error_report("error while loading state section id %d(%s)",
-                     section_id, le->se->idstr);
+                     section_id, se->idstr);
         return ret;
     }
-    if (!check_section_footer(f, le)) {
+    if (!check_section_footer(f, se)) {
         return -EINVAL;
     }
 
     return 0;
+}
+
+static int qemu_loadvm_state_setup(QEMUFile *f)
+{
+    SaveStateEntry *se;
+    int ret;
+
+    trace_loadvm_state_setup();
+    QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
+        if (!se->ops || !se->ops->load_setup) {
+            continue;
+        }
+        if (se->ops && se->ops->is_active) {
+            if (!se->ops->is_active(se->opaque)) {
+                continue;
+            }
+        }
+
+        ret = se->ops->load_setup(f, se->opaque);
+        if (ret < 0) {
+            qemu_file_set_error(f, ret);
+            error_report("Load state of device %s failed", se->idstr);
+            return ret;
+        }
+    }
+    return 0;
+}
+
+void qemu_loadvm_state_cleanup(void)
+{
+    SaveStateEntry *se;
+
+    trace_loadvm_state_cleanup();
+    QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
+        if (se->ops && se->ops->load_cleanup) {
+            se->ops->load_cleanup(se->opaque);
+        }
+    }
 }
 
 static int qemu_loadvm_state_main(QEMUFile *f, MigrationIncomingState *mis)
@@ -2092,7 +2129,11 @@ int qemu_loadvm_state(QEMUFile *f)
         return -ENOTSUP;
     }
 
-    if (!savevm_state.skip_configuration || enforce_config_section()) {
+    if (qemu_loadvm_state_setup(f) != 0) {
+        return -EINVAL;
+    }
+
+    if (migrate_get_current()->send_configuration) {
         if (qemu_get_byte(f) != QEMU_VM_CONFIGURATION) {
             error_report("Configuration section missing");
             return -EINVAL;
@@ -2104,11 +2145,15 @@ int qemu_loadvm_state(QEMUFile *f)
         }
     }
 
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 #if SNAPSHOT_PROFILE > 1
     int64_t vmstateLoadedTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
     printf("vmstate load time %.03f ms\n",
            (vmstateLoadedTime - beginTime)/1000000.0);
 #endif
+=======
+    cpu_synchronize_all_pre_loadvm();
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 
     ret = qemu_loadvm_state_main(f, mis);
     qemu_event_set(&mis->main_thread_load_event);
@@ -2159,6 +2204,7 @@ int qemu_loadvm_state(QEMUFile *f)
         }
     }
 
+    qemu_loadvm_state_cleanup();
     cpu_synchronize_all_post_init();
 
     {
@@ -2182,7 +2228,11 @@ int qemu_loadvm_state(QEMUFile *f)
     return ret;
 }
 
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks)
+=======
+int save_snapshot(const char *name, Error **errp)
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 {
     if (callbacks) {
         memcpy(&s_snapshot_callbacks, callbacks, sizeof(s_snapshot_callbacks));
@@ -2244,22 +2294,35 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
     uint64_t vm_state_size;
     qemu_timeval tv;
     struct tm tm;
-    Error *local_err = NULL;
     AioContext *aio_context;
 
     if (!bdrv_all_can_snapshot(&bs)) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.savevm.on_quick_fail) {
             s_snapshot_callbacks.savevm.on_quick_fail(name, -ENOTSUP);
         }
         messages->out(messages->opaque, "Device '%s' is writable but does not "
                        "support snapshots.\n", bdrv_get_device_name(bs));
+=======
+        error_setg(errp, "Device '%s' is writable but does not support "
+                   "snapshots", bdrv_get_device_name(bs));
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         return ret;
     }
 
     /* Delete old snapshots of the same name */
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
     if (name && bdrv_all_delete_snapshot(name, &bs1, &local_err) < 0) {
         if (s_snapshot_callbacks.savevm.on_quick_fail) {
             s_snapshot_callbacks.savevm.on_quick_fail(name, -EFAULT);
+=======
+    if (name) {
+        ret = bdrv_all_delete_snapshot(name, &bs1, errp);
+        if (ret < 0) {
+            error_prepend(errp, "Error while deleting snapshot on device "
+                          "'%s': ", bdrv_get_device_name(bs1));
+            return ret;
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         }
         messages->err(messages->opaque, local_err,
                      "Error while deleting snapshot on device '%s': ",
@@ -2269,10 +2332,14 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 
     bs = bdrv_all_find_vmstate_bs();
     if (bs == NULL) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.savevm.on_quick_fail) {
             s_snapshot_callbacks.savevm.on_quick_fail(name, -ENOTSUP);
         }
         messages->out(messages->opaque, "No block device can accept snapshots\n");
+=======
+        error_setg(errp, "No block device can accept snapshots");
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         return ret;
     }
     aio_context = bdrv_get_aio_context(bs);
@@ -2281,13 +2348,19 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 
     ret = global_state_store();
     if (ret) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.savevm.on_quick_fail) {
             s_snapshot_callbacks.savevm.on_quick_fail(name, -EFAULT);
         }
         messages->out(messages->opaque, "Error saving global state\n");
+=======
+        error_setg(errp, "Error saving global state");
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         return ret;
     }
     vm_stop(RUN_STATE_SAVE_VM);
+
+    bdrv_drain_all_begin();
 
     aio_context_acquire(aio_context);
 
@@ -2324,10 +2397,15 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
     /* save the VM state */
     f = qemu_fopen_bdrv(bs, 1);
     if (!f) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         ret = -1;
         messages->out(messages->opaque, "Could not open VM state file\n");
+=======
+        error_setg(errp, "Could not open VM state file");
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         goto the_end;
     }
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
     qemu_file_set_hooks(f, sSaveFileHooks);
 
 #if SNAPSHOT_PROFILE > 1
@@ -2337,29 +2415,51 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 #endif
 
     ret = qemu_savevm_state(f, &local_err);
+=======
+    ret = qemu_savevm_state(f, errp);
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
     vm_state_size = qemu_ftell(f);
     qemu_fclose(f);
     if (ret < 0) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         messages->err(messages->opaque, local_err, NULL);
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         goto the_end;
     }
 
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 #if SNAPSHOT_PROFILE > 1
     int64_t endSaveStateBeginSnapTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
     printf("qemu_savevm_state time %.03f ms\n",
             (endSaveStateBeginSnapTime - beginSaveStateTime)/1000000.0);
 #endif
+=======
+    /* The bdrv_all_create_snapshot() call that follows acquires the AioContext
+     * for itself.  BDRV_POLL_WHILE() does not support nested locking because
+     * it only releases the lock once.  Therefore synchronous I/O will deadlock
+     * unless we release the AioContext before bdrv_all_create_snapshot().
+     */
+    aio_context_release(aio_context);
+    aio_context = NULL;
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 
     ret = bdrv_all_create_snapshot(sn, bs, vm_state_size, &bs);
     if (ret < 0) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         messages->out(messages->opaque, "Error while creating snapshot on '%s'\n",
                        bdrv_get_device_name(bs));
+=======
+        error_setg(errp, "Error while creating snapshot on '%s'",
+                   bdrv_get_device_name(bs));
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         goto the_end;
     }
 
     ret = 0;
 
  the_end:
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
     aio_context_release(aio_context);
 
     if (s_snapshot_callbacks.savevm.on_end) {
@@ -2375,6 +2475,14 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
     printf("savevm time %.03f ms\n",
            (endTime - beginTime)/1000000.0);
 #endif // > 0
+=======
+    if (aio_context) {
+        aio_context_release(aio_context);
+    }
+
+    bdrv_drain_all_end();
+
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
     if (saved_vm_running) {
         vm_start();
     }
@@ -2440,6 +2548,7 @@ void qmp_xen_load_devices_state(const char *filename, Error **errp)
     migration_incoming_state_destroy();
 }
 
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 /* Loadvm wants to print messages directly to the console */
 static void printf_wrap_cb(void* dummy, const char* fmt, ...) {
     va_list ap;
@@ -2449,6 +2558,9 @@ static void printf_wrap_cb(void* dummy, const char* fmt, ...) {
 }
 
 int load_vmstate(const char *name)
+=======
+int load_snapshot(const char *name, Error **errp)
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 {
     QEMUMessageCallback cb = {
         .opaque = NULL,
@@ -2471,32 +2583,48 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     MigrationIncomingState *mis = migration_incoming_get_current();
 
     if (!bdrv_all_can_snapshot(&bs)) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.loadvm.on_quick_fail) {
             s_snapshot_callbacks.loadvm.on_quick_fail(name, -ENOTSUP);
         }
         messages->err(messages->opaque, NULL,
                      "Device '%s' is writable but does not support snapshots.",
                      bdrv_get_device_name(bs));
+=======
+        error_setg(errp,
+                   "Device '%s' is writable but does not support snapshots",
+                   bdrv_get_device_name(bs));
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         return -ENOTSUP;
     }
     ret = bdrv_all_find_snapshot(name, &bs);
     if (ret < 0) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.loadvm.on_quick_fail) {
             s_snapshot_callbacks.loadvm.on_quick_fail(name, -ENOENT);
         }
         messages->err(messages->opaque, NULL,
                      "Device '%s' does not have the requested snapshot '%s'",
                      bdrv_get_device_name(bs), name);
+=======
+        error_setg(errp,
+                   "Device '%s' does not have the requested snapshot '%s'",
+                   bdrv_get_device_name(bs), name);
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         return ret;
     }
 
     bs_vm_state = bdrv_all_find_vmstate_bs();
     if (!bs_vm_state) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.loadvm.on_quick_fail) {
             s_snapshot_callbacks.loadvm.on_quick_fail(name, -ENOTSUP);
         }
         messages->err(messages->opaque, NULL,
                      "No block device supports snapshots");
+=======
+        error_setg(errp, "No block device supports snapshots");
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         return -ENOTSUP;
     }
     aio_context = bdrv_get_aio_context(bs_vm_state);
@@ -2511,12 +2639,17 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
         }
         return ret;
     } else if (sn.vm_state_size == 0) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.loadvm.on_quick_fail) {
             s_snapshot_callbacks.loadvm.on_quick_fail(name, -EINVAL);
         }
         messages->err(messages->opaque, NULL,
                      "This is a disk-only snapshot. Revert to it offline "
                      "using qemu-img.");
+=======
+        error_setg(errp, "This is a disk-only snapshot. Revert to it "
+                   " offline using qemu-img");
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         return -EINVAL;
     }
 
@@ -2530,7 +2663,7 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     }
 
     /* Flush all IO requests so they don't interfere with the new state.  */
-    bdrv_drain_all();
+    bdrv_drain_all_begin();
 
 #if SNAPSHOT_PROFILE > 1
     int64_t gotoTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
@@ -2539,13 +2672,17 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
 
     ret = bdrv_all_goto_snapshot(name, &bs);
     if (ret < 0) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.loadvm.on_end) {
             s_snapshot_callbacks.loadvm.on_end(name, ret);
         }
         messages->err(messages->opaque, NULL,
                      "Error %d while activating snapshot '%s' on '%s'",
+=======
+        error_setg(errp, "Error %d while activating snapshot '%s' on '%s'",
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
                      ret, name, bdrv_get_device_name(bs));
-        return ret;
+        goto err_drain;
     }
 
 #if SNAPSHOT_PROFILE > 1
@@ -2556,15 +2693,21 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     /* restore the VM state */
     f = qemu_fopen_bdrv(bs_vm_state, 0);
     if (!f) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         if (s_snapshot_callbacks.loadvm.on_end) {
             s_snapshot_callbacks.loadvm.on_end(name, -EINVAL);
         }
         messages->err(messages->opaque, NULL, "Could not open VM state file");
         return -EINVAL;
+=======
+        error_setg(errp, "Could not open VM state file");
+        ret = -EINVAL;
+        goto err_drain;
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
     }
     qemu_file_set_hooks(f, sLoadFileHooks);
 
-    qemu_system_reset(VMRESET_SILENT);
+    qemu_system_reset(SHUTDOWN_CAUSE_NONE);
     mis->from_src_file = f;
 
 #if SNAPSHOT_PROFILE > 1
@@ -2575,18 +2718,26 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
 
     aio_context_acquire(aio_context);
     ret = qemu_loadvm_state(f);
-    qemu_fclose(f);
+    migration_incoming_state_destroy();
     aio_context_release(aio_context);
 
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
     migration_incoming_state_destroy();
 
     if (s_snapshot_callbacks.loadvm.on_end) {
         s_snapshot_callbacks.loadvm.on_end(name, ret);
     }
+=======
+    bdrv_drain_all_end();
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 
     if (ret < 0) {
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
         messages->err(messages->opaque, NULL,
                      "Error %d while loading VM state", ret);
+=======
+        error_setg(errp, "Error %d while loading VM state", ret);
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
         return ret;
     }
 
@@ -2599,8 +2750,8 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
 #endif // > 0
 
     return 0;
-}
 
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 void hmp_delvm(Monitor *mon, const QDict *qdict)
 {
     const char *name = qdict_get_try_str(qdict, "name");
@@ -2798,6 +2949,11 @@ int qemu_listvms(char(*names)[256], int* names_count, const QEMUMessageCallback*
         *names_count = total;
     }
     return 0;
+=======
+err_drain:
+    bdrv_drain_all_end();
+    return ret;
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 }
 
 void vmstate_register_ram(MemoryRegion *mr, DeviceState *dev)
@@ -2814,4 +2970,14 @@ void vmstate_unregister_ram(MemoryRegion *mr, DeviceState *dev)
 void vmstate_register_ram_global(MemoryRegion *mr)
 {
     vmstate_register_ram(mr, NULL);
+}
+
+bool vmstate_check_only_migratable(const VMStateDescription *vmsd)
+{
+    /* check needed if --only-migratable is specified */
+    if (!migrate_get_current()->only_migratable) {
+        return true;
+    }
+
+    return !(vmsd && vmsd->unmigratable);
 }

@@ -30,8 +30,13 @@
 #include "sysemu/block-backend.h"
 #include "sysemu/blockdev.h"
 #include "sysemu/sysemu.h"
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 #include "sysemu/char.h"
 #include "hw/isa/trace.h"
+=======
+#include "chardev/char.h"
+#include "trace.h"
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 
 
 #define REG_FER 0

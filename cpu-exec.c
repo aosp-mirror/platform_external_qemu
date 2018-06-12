@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 /*
  *  emulator main execution loop
  *
@@ -727,3 +728,5 @@ int cpu_exec(CPUState *cpu)
 
     return ret;
 }
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)

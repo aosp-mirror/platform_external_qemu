@@ -19,6 +19,7 @@ stub-obj-y += is-daemonized.o
 stub-obj-$(CONFIG_LINUX_AIO) += linux-aio.o
 stub-obj-y += machine-init-done.o
 stub-obj-y += migr-blocker.o
+stub-obj-y += change-state-handler.o
 stub-obj-y += monitor.o
 stub-obj-y += notify-event.o
 stub-obj-y += qtest.o
@@ -38,4 +39,10 @@ stub-obj-y += target-monitor-defs.o
 stub-obj-y += target-get-monitor-def.o
 stub-obj-y += pc_madt_cpu_entry.o
 stub-obj-y += vmgenid.o
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 stub-obj-y += migration.o
+=======
+stub-obj-y += xen-common.o
+stub-obj-y += xen-hvm.o
+stub-obj-y += pci-host-piix.o
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 /*
  * QEMU KVM support
  *
@@ -2613,3 +2614,5 @@ static void kvm_type_init(void)
 }
 
 type_init(kvm_type_init);
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
