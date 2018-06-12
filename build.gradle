@@ -74,6 +74,9 @@ sdk {
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/vgabios-cirrus.bin") {
             into 'lib/pc-bios'
         }
+        item("$project.rootDir/../external/qemu/android-info.txt") {
+            into ''
+        }
 
         item("$buildDefaultEmulator.output/emulator64-arm") {
             executable true
@@ -171,6 +174,9 @@ sdk {
         }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/vgabios-cirrus.bin") {
             into 'lib/pc-bios'
+        }
+        item("$project.rootDir/../external/qemu/android-info.txt") {
+            into ''
         }
 
         item("$buildWindowsEmulator.output/emulator-arm.exe") {
