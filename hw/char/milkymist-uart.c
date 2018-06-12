@@ -24,8 +24,13 @@
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
+<<<<<<< HEAD   (215810 Merge "Revert "Only turn on WindowsHypervisorPlatform suppor)
 #include "hw/char/trace.h"
 #include "sysemu/char.h"
+=======
+#include "trace.h"
+#include "chardev/char-fe.h"
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
 #include "qemu/error-report.h"
 
 enum {
@@ -199,7 +204,7 @@ static void milkymist_uart_realize(DeviceState *dev, Error **errp)
     MilkymistUartState *s = MILKYMIST_UART(dev);
 
     qemu_chr_fe_set_handlers(&s->chr, uart_can_rx, uart_rx,
-                             uart_event, s, NULL, true);
+                             uart_event, NULL, s, NULL, true);
 }
 
 static void milkymist_uart_init(Object *obj)

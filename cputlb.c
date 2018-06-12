@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (215810 Merge "Revert "Only turn on WindowsHypervisorPlatform suppor)
 /*
  *  Common CPU TLB handling
  *
@@ -1043,3 +1044,5 @@ static void *atomic_mmu_lookup(CPUArchState *env, target_ulong addr,
 
 #define DATA_SIZE 8
 #include "softmmu_template.h"
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
