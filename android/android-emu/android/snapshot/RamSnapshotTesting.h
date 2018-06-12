@@ -32,6 +32,10 @@ void saveRamSingleBlock(const RamSaver::Flags flags,
 void loadRamSingleBlock(const RamBlock& block,
                         android::base::StringView filename);
 
+void incrementalSaveSingleBlock(const RamSaver::Flags flags,
+                                const RamBlock& block,
+                                android::base::StringView filename);
+                     
 TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance);
 
 }  // namespace snapshot

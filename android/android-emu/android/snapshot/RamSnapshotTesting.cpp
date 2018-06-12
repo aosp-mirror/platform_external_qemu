@@ -65,6 +65,36 @@ void loadRamSingleBlock(const RamBlock& block,
     ramLoader.join();
 }
 
+void incrementalSaveSingleBlock(const RamSaver::Flags flags,
+                                const RamBlock& block,
+                                android::base::StringView filename) {
+
+    auto ram = fopen(filename.c_str(), "rb");
+
+    RamLoader::RamBlockStructure emptyRamBlockStructure = {};
+
+    // Disallow on-demand load for now.
+    RamLoader ramLoader(StdioStream(ram, StdioStream::kOwner),
+                        RamLoader::Flags::None, emptyRamBlockStructure);
+
+    ramLoader.registerBlock(block);
+
+    ramLoader.start(false);
+    ramLoader.join();
+
+    RamSaver s(filename.c_str(), flags, &ramLoader, true);
+
+    const int blockIndex = 0;
+    s.registerBlock(block);
+
+    for (int64_t i = block.startOffset; i < block.startOffset + block.totalSize;
+         i += block.pageSize) {
+        s.savePage(blockIndex, i, block.pageSize);
+    }
+
+    s.join();
+}
+
 TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance) {
     std::default_random_engine generator;
     // Use a consistent seed value to avoid flakes

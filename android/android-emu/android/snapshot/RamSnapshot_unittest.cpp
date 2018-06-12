@@ -65,5 +65,17 @@ TEST_F(RamSnapshotTest, SimpleRandom) {
     }
 }
 
+TEST_F(RamSnapshotTest, IncrementalSaveNoChanges) {
+    auto path = PathUtils::join(System::get()->getProgramDirectory(),
+                                "testdata", "random-ram-100.bin");
+
+    TestRamBuffer testRam(100 * kTestingPageSize);
+
+    incrementalSaveSingleBlock(RamSaver::Flags::Compress,
+            {"ramSaverTestBlock", 0x0, testRam.data(),
+            (int64_t)testRam.size(), kTestingPageSize},
+            path);
+}
+
 }  // namespace snapshot
 }  // namespace android
