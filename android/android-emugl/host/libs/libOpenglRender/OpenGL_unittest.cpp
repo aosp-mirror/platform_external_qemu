@@ -61,6 +61,16 @@ static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
 // Capabilities which, according to the GLES2 spec, start enabled.
 static const GLenum kGLES2CanBeDisabled[] = {GL_DITHER};
 
+// Modes for CullFace
+static const GLenum kGLES2CullFaceModes[] = {GL_BACK, GL_FRONT,
+                                             GL_FRONT_AND_BACK};
+
+// Dimensions for test surface
+static const int kSurfaceSize[] = {32, 32};
+
+// Viewport settings to attempt
+static const GLint kGLES2ViewportValues[] = {10, 10, 100, 100};
+
 class GLTest : public ::testing::Test {
 protected:
     virtual void SetUp() {
@@ -71,7 +81,8 @@ protected:
 
         m_display = getDisplay();
         m_config = createConfig(m_display, 8, 8, 8, 8, 24, 8, 0);
-        m_surface = pbufferSurface(m_display, m_config, 32, 32);
+        m_surface = pbufferSurface(m_display, m_config, kSurfaceSize[0],
+                                   kSurfaceSize[1]);
         egl->eglSetMaxGLESVersion(3);
         m_context = createContext(m_display, m_config, 3, 0);
         egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
@@ -195,8 +206,8 @@ public:
 
         loadSnapshot(snapshotFile, textureFile);
 
-        EXPECT_TRUE(m_context != EGL_NO_CONTEXT);
-        EXPECT_TRUE(m_surface != EGL_NO_SURFACE);
+        EXPECT_NE(m_context, EGL_NO_CONTEXT);
+        EXPECT_NE(m_surface, EGL_NO_SURFACE);
     }
 
 protected:
@@ -204,23 +215,23 @@ protected:
     std::string mSnapshotPath = {};
 };
 
-class SnapshotGlEnableTest : public SnapshotTest,
-                             public ::testing::WithParamInterface<GLenum> {};
-
-class SnapshotGlDisableTest : public SnapshotTest,
-                              public ::testing::WithParamInterface<GLenum> {};
 
 TEST_F(GLTest, InitDestroy) {}
 
 TEST_F(SnapshotTest, InitDestroy) {}
 
+
+class SnapshotGlEnableTest : public SnapshotTest,
+                             public ::testing::WithParamInterface<GLenum> {};
+
 TEST_P(SnapshotGlEnableTest, PreserveEnable) {
     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
     GLenum capability = GetParam();
-    ASSERT_FALSE(gl->glIsEnabled(capability));
+    EXPECT_FALSE(gl->glIsEnabled(capability));
     gl->glEnable(capability);
+    ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
     ASSERT_TRUE(gl->glIsEnabled(capability));
-    doSnapshot([gl, capability] { ASSERT_FALSE(gl->glIsEnabled(capability)); });
+    doSnapshot([gl, capability] { EXPECT_FALSE(gl->glIsEnabled(capability)); });
     EXPECT_TRUE(gl->glIsEnabled(capability));
 }
 
@@ -228,18 +239,100 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotPreserve,
                         SnapshotGlEnableTest,
                         ::testing::ValuesIn(kGLES2CanBeEnabled));
 
+class SnapshotGlDisableTest : public SnapshotTest,
+                              public ::testing::WithParamInterface<GLenum> {};
+
 TEST_P(SnapshotGlDisableTest, PreserveDisable) {
     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
     GLenum capability = GetParam();
-    ASSERT_TRUE(gl->glIsEnabled(capability));
+    EXPECT_TRUE(gl->glIsEnabled(capability));
     gl->glDisable(capability);
+    ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
     ASSERT_FALSE(gl->glIsEnabled(capability));
-    doSnapshot([gl, capability] { ASSERT_TRUE(gl->glIsEnabled(capability)); });
+    doSnapshot([gl, capability] { EXPECT_TRUE(gl->glIsEnabled(capability)); });
     EXPECT_FALSE(gl->glIsEnabled(capability));
 }
 
 INSTANTIATE_TEST_CASE_P(GLES2SnapshotPreserve,
                         SnapshotGlDisableTest,
                         ::testing::ValuesIn(kGLES2CanBeDisabled));
+
+class SnapshotGlViewportTest
+    : public SnapshotTest,
+      public ::testing::WithParamInterface<const GLint*> {};
+
+TEST_P(SnapshotGlViewportTest, SetViewport) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    GLint testViewport[4] = {GetParam()[0], GetParam()[1], GetParam()[2],
+                             GetParam()[3]};
+    GLint viewport[4] = {};
+    gl->glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // initial viewport should match surface size
+    EXPECT_EQ(kSurfaceSize[0], viewport[2]);
+    EXPECT_EQ(kSurfaceSize[1], viewport[3]);
+
+    gl->glViewport(testViewport[0], testViewport[1], testViewport[2],
+                   testViewport[3]);
+    ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
+    gl->glGetIntegerv(GL_VIEWPORT, viewport);
+    for (int i = 0; i < 4; ++i) {
+        ASSERT_EQ(testViewport[i], viewport[i]);
+    }
+
+    doSnapshot([gl] {
+        GLint viewport[4] = {};
+        gl->glGetIntegerv(GL_VIEWPORT, viewport);
+        // initial viewport should match surface size
+        EXPECT_EQ(kSurfaceSize[0], viewport[2]);
+        EXPECT_EQ(kSurfaceSize[1], viewport[3]);
+    });
+
+    gl->glGetIntegerv(GL_VIEWPORT, viewport);
+    for (int i = 0; i < 4; ++i) {
+        ASSERT_EQ(testViewport[i], viewport[i]);
+    }
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPreserve,
+                        SnapshotGlViewportTest,
+                        ::testing::Values(kGLES2ViewportValues));
+
+class SnapshotGlDepthRangeTest
+    : public SnapshotTest,
+      public ::testing::WithParamInterface<const GLfloat*> {};
+
+// TODO(benzene): implement test
+
+class SnapshotGlCullFace : public SnapshotTest,
+                           public ::testing::WithParamInterface<GLenum> {};
+
+TEST_P(SnapshotGlCullFace, SetCullFaceMode) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    const GLenum defaultMode = GL_BACK;
+    GLenum testMode = GetParam();
+    GLint mode;
+    gl->glGetIntegerv(GL_CULL_FACE_MODE, &mode);
+    EXPECT_EQ(defaultMode, mode);
+
+    gl->glCullFace(testMode);
+    ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
+    gl->glGetIntegerv(GL_CULL_FACE_MODE, &mode);
+    ASSERT_EQ(testMode, mode);
+
+    doSnapshot([gl, defaultMode] {
+        GLint mode;
+        gl->glGetIntegerv(GL_CULL_FACE_MODE, &mode);
+        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+        EXPECT_EQ(defaultMode, mode);
+    });
+
+    gl->glGetIntegerv(GL_CULL_FACE_MODE, &mode);
+    EXPECT_EQ(testMode, mode);
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPreserve,
+                        SnapshotGlCullFace,
+                        ::testing::ValuesIn(kGLES2CullFaceModes));
 
 }  // namespace emugl
