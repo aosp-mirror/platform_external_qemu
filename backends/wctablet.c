@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (215810 Merge "Revert "Only turn on WindowsHypervisorPlatform suppor)
 /*
  * QEMU Wacom Penpartner serial tablet emulation
  *
@@ -367,3 +368,5 @@ static void register_types(void)
 }
 
 type_init(register_types);
+=======
+>>>>>>> BRANCH (ba8716 Update version for 2.10.2 release)
