@@ -83,6 +83,10 @@ public:
 
     const T& operator[](size_t index) const { return mAligned[index]; }
 
+    bool operator==(const AlignedBuf& other) const {
+        return 0 == std::memcmp(mAligned, other.mAligned, sizeof(T) * std::min(mSize, other.mSize));
+    }
+
 private:
 
     void resizeImpl(size_t newSize) {

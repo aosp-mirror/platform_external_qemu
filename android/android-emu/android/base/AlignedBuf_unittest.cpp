@@ -105,3 +105,14 @@ TEST(AlignedBuf, Move) {
         buf2[i] = 0;
     }
 }
+
+// Tests that operator== is comparing raw bytes.
+TEST(AlignedBuf, Compare) {
+    constexpr int align = 64;
+    constexpr int size = 128;
+
+    AlignedBuf<uint32_t, align> buf(size);
+    AlignedBuf<uint32_t, align> buf2 = buf;
+
+    EXPECT_EQ(buf, buf2);
+}
