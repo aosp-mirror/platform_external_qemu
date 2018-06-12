@@ -495,7 +495,7 @@ static int os_host_main_loop_wait(int64_t timeout)
 }
 #endif
 
-int main_loop_wait(int nonblocking)
+void main_loop_wait(int nonblocking)
 {
     int ret;
     uint32_t timeout = UINT32_MAX;
@@ -508,9 +508,7 @@ int main_loop_wait(int nonblocking)
     /* poll any events */
     g_array_set_size(gpollfds, 0); /* reset for new iteration */
     /* XXX: separate device handlers from system ones */
-#ifdef CONFIG_SLIRP
     slirp_pollfds_fill(gpollfds, &timeout);
-#endif
 
     if (timeout == UINT32_MAX) {
         timeout_ns = -1;
@@ -551,8 +549,6 @@ int main_loop_wait(int nonblocking)
        missing the warp */
     qemu_start_warp_timer();
     qemu_clock_run_all_timers();
-
-    return ret;
 }
 
 /* Functions to operate on the main QEMU AioContext.  */

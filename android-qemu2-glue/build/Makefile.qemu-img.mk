@@ -38,6 +38,7 @@ LOCAL_SRC_FILES := \
     block/parallels.c \
     block/qapi.c \
     block/qcow.c \
+    block/qcow2-bitmap.c \
     block/qcow2-cache.c \
     block/qcow2-cluster.c \
     block/qcow2-refcount.c \
@@ -45,7 +46,6 @@ LOCAL_SRC_FILES := \
     block/qcow2.c \
     block/qed-check.c \
     block/qed-cluster.c \
-    block/qed-gencb.c \
     block/qed-l2-cache.c \
     block/qed-table.c \
     block/qed.c \
@@ -104,7 +104,6 @@ LOCAL_SRC_FILES := \
     nbd/client.c \
     nbd/common.c \
     nbd/server.c \
-    page_cache.c \
     qom/container.c \
     qom/object.c \
     qom/object_interfaces.c \
