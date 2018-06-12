@@ -7,10 +7,10 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// distributed under the License is distributed on an "AS IS" BASIS, // WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  // See the
+// License for the specific language governing permissions and limitations under
+// the License.
 
 #include "android/base/Log.h"
 #include "android/base/files/PathUtils.h"
@@ -48,6 +48,9 @@ using android::snapshot::TextureSaver;
 
 using namespace gltest;
 
+// Dimensions for test surface
+static const int kSurfaceSize[] = {32, 32};
+
 // Capabilities which, according to the GLES2 spec, start disabled.
 static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
                                             GL_CULL_FACE,
@@ -61,6 +64,25 @@ static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
 // Capabilities which, according to the GLES2 spec, start enabled.
 static const GLenum kGLES2CanBeDisabled[] = {GL_DITHER};
 
+// Modes for CullFace
+static const GLenum kGLES2CullFaceModes[] = {GL_BACK, GL_FRONT,
+                                             GL_FRONT_AND_BACK};
+
+// Viewport settings to attempt
+static const GLint kGLES2TestViewport[] = {10, 10, 100, 100};
+
+// Depth range settings to attempt
+static const GLclampf kGLES2TestDepthRange[] = {0.2f, 0.8f};
+
+// Line width settings to attempt
+static const GLfloat kGLES2TestLineWidths[] = {2.0f};
+
+// Modes for FrontFace
+static const GLenum kGLES2FrontFaceModes[] = {GL_CCW, GL_CW};
+
+// Polygon offset settings to attempt
+static const GLfloat kGLES2TestPolygonOffset[] = {0.5f, 0.5f};
+
 class GLTest : public ::testing::Test {
 protected:
     virtual void SetUp() {
@@ -71,7 +93,8 @@ protected:
 
         m_display = getDisplay();
         m_config = createConfig(m_display, 8, 8, 8, 8, 24, 8, 0);
-        m_surface = pbufferSurface(m_display, m_config, 32, 32);
+        m_surface = pbufferSurface(m_display, m_config, kSurfaceSize[0],
+                                   kSurfaceSize[1]);
         egl->eglSetMaxGLESVersion(3);
         m_context = createContext(m_display, m_config, 3, 0);
         egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
@@ -195,8 +218,8 @@ public:
 
         loadSnapshot(snapshotFile, textureFile);
 
-        EXPECT_TRUE(m_context != EGL_NO_CONTEXT);
-        EXPECT_TRUE(m_surface != EGL_NO_SURFACE);
+        EXPECT_NE(m_context, EGL_NO_CONTEXT);
+        EXPECT_NE(m_surface, EGL_NO_SURFACE);
     }
 
 protected:
@@ -204,42 +227,287 @@ protected:
     std::string mSnapshotPath = {};
 };
 
-class SnapshotGlEnableTest : public SnapshotTest,
-                             public ::testing::WithParamInterface<GLenum> {};
+// For granular testing of snapshot's ability to preserve parts of GL state that
+// can be changed from their default values by GL function calls.
+class SnapshotPreserveTest : public SnapshotTest {
+public:
+    void setDefaultStateCheck(std::function<void()> checkFunc) {
+        m_default_state_check = checkFunc;
+    }
 
-class SnapshotGlDisableTest : public SnapshotTest,
-                              public ::testing::WithParamInterface<GLenum> {};
+    void setChangedStateCheck(std::function<void()> checkFunc) {
+        m_changed_state_check = checkFunc;
+    }
+
+    void setStateChanger(std::function<void()> changeFunc) {
+        m_state_changer = changeFunc;
+    }
+
+    void doCheckedSnapshot() {
+        const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+        m_default_state_check();
+        ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
+        m_state_changer();
+        ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
+        m_changed_state_check();
+        SnapshotTest::doSnapshot([this, gl] {
+            EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+            m_default_state_check();
+        });
+        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+        m_changed_state_check();
+        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+    }
+
+protected:
+    std::function<void()> m_default_state_check = [] { ADD_FAILURE(); };
+    std::function<void()> m_changed_state_check = [] { ADD_FAILURE(); };
+    std::function<void()> m_state_changer = [] { ADD_FAILURE(); };
+};
+
+template <class T>
+class SnapshotSetValueTest : public SnapshotPreserveTest {
+public:
+    void setCheckers(std::function<void(T)> checker,
+                     T valueDefault,
+                     T valueTarget) {
+        setDefaultStateCheck(
+                [checker, valueDefault] { checker(valueDefault); });
+        setChangedStateCheck([checker, valueTarget] { checker(valueTarget); });
+    }
+
+    void configure(T valueDefault,
+                   T valueTarget,
+                   std::function<void(T)> glSetter = nullptr,
+                   std::function<void(T*)> glGetter = nullptr) {
+        if (glGetter != nullptr) {
+            setCheckers(
+                    [glGetter](T expected) {
+                        T value{};
+                        glGetter(&value);
+                        EXPECT_EQ(expected, value);
+                    },
+                    valueDefault, valueTarget);
+        }
+
+        if (glSetter != nullptr) {
+            setStateChanger([valueTarget, glSetter] { glSetter(valueTarget); });
+        }
+    }
+};
 
 TEST_F(GLTest, InitDestroy) {}
 
 TEST_F(SnapshotTest, InitDestroy) {}
 
+class SnapshotGlEnableTest : public SnapshotPreserveTest,
+                             public ::testing::WithParamInterface<GLenum> {};
+
 TEST_P(SnapshotGlEnableTest, PreserveEnable) {
     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
     GLenum capability = GetParam();
-    ASSERT_FALSE(gl->glIsEnabled(capability));
-    gl->glEnable(capability);
-    ASSERT_TRUE(gl->glIsEnabled(capability));
-    doSnapshot([gl, capability] { ASSERT_FALSE(gl->glIsEnabled(capability)); });
-    EXPECT_TRUE(gl->glIsEnabled(capability));
+    setDefaultStateCheck([gl, capability] {
+        EXPECT_FALSE(gl->glIsEnabled(capability));
+    });
+    setStateChanger([gl, capability] { gl->glEnable(capability); });
+    setChangedStateCheck([gl, capability] {
+        EXPECT_TRUE(gl->glIsEnabled(capability));
+    });
+    doCheckedSnapshot();
 }
 
 INSTANTIATE_TEST_CASE_P(GLES2SnapshotPreserve,
                         SnapshotGlEnableTest,
                         ::testing::ValuesIn(kGLES2CanBeEnabled));
 
+class SnapshotGlDisableTest : public SnapshotPreserveTest,
+                              public ::testing::WithParamInterface<GLenum> {};
+
 TEST_P(SnapshotGlDisableTest, PreserveDisable) {
     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
     GLenum capability = GetParam();
-    ASSERT_TRUE(gl->glIsEnabled(capability));
-    gl->glDisable(capability);
-    ASSERT_FALSE(gl->glIsEnabled(capability));
-    doSnapshot([gl, capability] { ASSERT_TRUE(gl->glIsEnabled(capability)); });
-    EXPECT_FALSE(gl->glIsEnabled(capability));
+    setDefaultStateCheck([gl, capability] {
+        EXPECT_TRUE(gl->glIsEnabled(capability));
+    });
+    setStateChanger([gl, capability] { gl->glDisable(capability); });
+    setChangedStateCheck([gl, capability] {
+        EXPECT_FALSE(gl->glIsEnabled(capability));
+    });
+    doCheckedSnapshot();
 }
 
 INSTANTIATE_TEST_CASE_P(GLES2SnapshotPreserve,
                         SnapshotGlDisableTest,
                         ::testing::ValuesIn(kGLES2CanBeDisabled));
+
+class SnapshotGlViewportTest
+    : public SnapshotPreserveTest,
+      public ::testing::WithParamInterface<const GLint*> {};
+
+TEST_P(SnapshotGlViewportTest, SetViewport) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    GLint testViewport[4] = {GetParam()[0], GetParam()[1], GetParam()[2],
+                             GetParam()[3]};
+    setDefaultStateCheck([gl] {
+        GLint viewport[4] = {};
+        gl->glGetIntegerv(GL_VIEWPORT, viewport);
+        // initial viewport should match surface size
+        EXPECT_EQ(kSurfaceSize[0], viewport[2]);
+        EXPECT_EQ(kSurfaceSize[1], viewport[3]);
+    });
+    setStateChanger([gl, testViewport] {
+        gl->glViewport(testViewport[0], testViewport[1], testViewport[2],
+                       testViewport[3]);
+    });
+    setChangedStateCheck([gl, testViewport] {
+        GLint viewport[4] = {};
+        gl->glGetIntegerv(GL_VIEWPORT, viewport);
+        for (int i = 0; i < 4; ++i) {
+            EXPECT_EQ(testViewport[i], viewport[i]);
+        }
+    });
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotTransformation,
+                        SnapshotGlViewportTest,
+                        ::testing::Values(kGLES2TestViewport));
+
+class SnapshotGlDepthRangeTest
+    : public SnapshotPreserveTest,
+      public ::testing::WithParamInterface<const GLclampf*> {};
+
+TEST_P(SnapshotGlDepthRangeTest, SetDepthRange) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    GLclampf testDepthRange[2] = {GetParam()[0], GetParam()[1]};
+    setDefaultStateCheck([gl] {
+        GLfloat depthRange[2] = {};
+        gl->glGetFloatv(GL_DEPTH_RANGE, depthRange);
+        EXPECT_EQ(0.0f, depthRange[0]);
+        EXPECT_EQ(1.0f, depthRange[1]);
+    });
+    setStateChanger([gl, testDepthRange] {
+        gl->glDepthRangef(testDepthRange[0], testDepthRange[1]);
+    });
+    setChangedStateCheck([gl, testDepthRange] {
+        GLfloat depthRange[2] = {};
+        gl->glGetFloatv(GL_DEPTH_RANGE, depthRange);
+        EXPECT_EQ(testDepthRange[0], depthRange[0]);
+        EXPECT_EQ(testDepthRange[1], depthRange[1]);
+    });
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotTransformation,
+                        SnapshotGlDepthRangeTest,
+                        ::testing::Values(kGLES2TestDepthRange));
+
+class SnapshotGlLineWidthTest : public SnapshotPreserveTest,
+                                public ::testing::WithParamInterface<GLfloat> {
+};
+
+TEST_P(SnapshotGlLineWidthTest, SetLineWidth) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    GLfloat testLineWidth = GetParam();
+    setDefaultStateCheck([gl] {
+        GLfloat lineWidth;
+        gl->glGetFloatv(GL_LINE_WIDTH, &lineWidth);
+        EXPECT_EQ(1.0f, lineWidth);
+    });
+    setStateChanger([gl, testLineWidth] { gl->glLineWidth(testLineWidth); });
+    setChangedStateCheck([gl, testLineWidth] {
+        GLfloat lineWidth;
+        gl->glGetFloatv(GL_LINE_WIDTH, &lineWidth);
+        EXPECT_EQ(testLineWidth, lineWidth);
+    });
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
+                        SnapshotGlLineWidthTest,
+                        ::testing::ValuesIn(kGLES2TestLineWidths));
+
+class SnapshotGlCullFaceTest : public SnapshotPreserveTest,
+                               public ::testing::WithParamInterface<GLenum> {};
+
+TEST_P(SnapshotGlCullFaceTest, SetCullFaceMode) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    const GLenum defaultMode = GL_BACK;
+    GLenum testMode = GetParam();
+    setDefaultStateCheck([gl, defaultMode] {
+        GLint mode;
+        gl->glGetIntegerv(GL_CULL_FACE_MODE, &mode);
+        EXPECT_EQ(defaultMode, mode);
+    });
+    setStateChanger([gl, testMode] { gl->glCullFace(testMode); });
+    setChangedStateCheck([gl, testMode] {
+        GLint mode;
+        gl->glGetIntegerv(GL_CULL_FACE_MODE, &mode);
+        EXPECT_EQ(testMode, mode);
+    });
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
+                        SnapshotGlCullFaceTest,
+                        ::testing::ValuesIn(kGLES2CullFaceModes));
+
+class SnapshotGlFrontFaceTest : public SnapshotSetValueTest<GLint>,
+                                public ::testing::WithParamInterface<GLenum> {};
+
+TEST_P(SnapshotGlFrontFaceTest, SetFrontFaceMode) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    GLenum testMode = GetParam();
+    configure(GL_CCW, testMode,
+              std::bind(gl->glFrontFace, std::placeholders::_1) /* setter */,
+              std::bind(gl->glGetIntegerv, GL_FRONT_FACE,
+                        std::placeholders::_1) /* getter */);
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
+                        SnapshotGlFrontFaceTest,
+                        ::testing::ValuesIn(kGLES2FrontFaceModes));
+
+class SnapshotGlPolygonOffsetTest
+    : public SnapshotSetValueTest<GLfloat*>,
+      public ::testing::WithParamInterface<const GLfloat*> {};
+
+TEST_P(SnapshotGlPolygonOffsetTest, SetPolygonOffset) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    GLfloat defaultOffset[2] = {0.0f, 0.0f};
+    GLfloat testOffset[2] = {GetParam()[0], GetParam()[1]};
+    configure(defaultOffset, testOffset,
+              [gl](GLfloat* offset) {
+                  gl->glPolygonOffset(offset[0], offset[1]);
+              },
+              nullptr);
+    setCheckers(
+            [gl](GLfloat* expected) {
+                GLfloat offsetFactor;
+                GLfloat offsetUnits;
+                gl->glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &offsetFactor);
+                gl->glGetFloatv(GL_POLYGON_OFFSET_UNITS, &offsetUnits);
+                EXPECT_EQ(expected[0], offsetFactor);
+                EXPECT_EQ(expected[1], offsetUnits);
+            },
+            defaultOffset, testOffset);
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
+                        SnapshotGlPolygonOffsetTest,
+                        ::testing::Values(kGLES2TestPolygonOffset));
+
+// TODO(benzene): add rasterization function tests for
+// FRONT_FACE --- done
+// POLYGON_OFFSET_FACTOR -- done
+// POLYGON_OFFSET_UNITS -- done
+// POLYGON_OFFSET_FILL -- done in glEnable
+
+// TODO(benzene): see if we can write a template or something to take away even
+// more of the stuff we have to manage with SnapshotPreserveTest
+// it's pretty formulaic for floats, ints, enums...
+// This may have been a bad idea. The lambdas make errors harder to track down.
 
 }  // namespace emugl
