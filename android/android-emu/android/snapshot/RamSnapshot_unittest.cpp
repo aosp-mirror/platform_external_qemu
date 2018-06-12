@@ -46,22 +46,127 @@ TEST_F(RamSnapshotTest, SimpleRandom) {
     std::string ramPath = mTempDir->makeSubPath("ram.bin");
 
     const int numPages = 100;
+    const int numTrials = 100;
     const float zeroPageChance = 0.5;
 
-    auto testRam = generateRandomRam(numPages, zeroPageChance);
+    for (int i = 0; i < numTrials; i++) {
+        auto testRam = generateRandomRam(numPages, zeroPageChance, i);
 
-    saveRamSingleBlock(RamSaver::Flags::Compress,
-                       {"testRam", 0x0, testRam.data(), (int64_t)testRam.size(),
-                        kTestingPageSize},
-                       ramPath);
+        saveRamSingleBlock(RamSaver::Flags::Compress,
+                           {"testRam", 0x0, testRam.data(), (int64_t)testRam.size(),
+                            kTestingPageSize},
+                           ramPath);
 
-    TestRamBuffer testRamOut(numPages * kTestingPageSize);
-    loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
-                        (int64_t)testRamOut.size(), kTestingPageSize},
-                       ramPath);
+        TestRamBuffer testRamOut(numPages * kTestingPageSize);
+        loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
+                            (int64_t)testRamOut.size(), kTestingPageSize},
+                           ramPath);
 
-    for (int i = 0; i < numPages; i++) {
-        EXPECT_EQ(testRamOut[i], testRam[i]);
+        EXPECT_EQ(testRam, testRamOut);
+    }
+}
+
+TEST_F(RamSnapshotTest, IncrementalSaveRandomNoChanges) {
+    std::string ramPath = mTempDir->makeSubPath("ram.bin");
+
+    const int numPages = 100;
+    const int numTrials = 100;
+    const float zeroPageChance = 0.5;
+
+    for (int i = 0; i < numTrials; i++) {
+        auto testRam = generateRandomRam(numPages, zeroPageChance, i);
+
+        saveRamSingleBlock(RamSaver::Flags::Compress,
+                           {"testRam", 0x0, testRam.data(), (int64_t)testRam.size(),
+                            kTestingPageSize},
+                           ramPath);
+
+        incrementalSaveSingleBlock(RamSaver::Flags::Compress,
+                {"testRam", 0x0, testRam.data(),
+                (int64_t)testRam.size(), kTestingPageSize},
+                {"testRam", 0x0, testRam.data(),
+                (int64_t)testRam.size(), kTestingPageSize},
+                ramPath);
+
+        TestRamBuffer testRamOut(numPages * kTestingPageSize);
+        loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
+                            (int64_t)testRamOut.size(), kTestingPageSize},
+                           ramPath);
+
+        EXPECT_EQ(testRam, testRamOut);
+    }
+}
+
+TEST_F(RamSnapshotTest, IncrementalSaveRandom) {
+    std::string ramPath = mTempDir->makeSubPath("ram.bin");
+
+    const int numPages = 100;
+    const int numTrials = 100;
+    const float noChangeChance = 0.5;
+    const float zeroPageChance = 0.5;
+
+    for (int i = 0; i < numTrials; i++) {
+        auto ramToLoad = generateRandomRam(numPages, zeroPageChance, i);
+        auto ramToSave = ramToLoad;
+
+        saveRamSingleBlock(RamSaver::Flags::Compress,
+                           {"testRam", 0x0, ramToLoad.data(), (int64_t)ramToLoad.size(),
+                            kTestingPageSize},
+                           ramPath);
+
+        randomMutateRam(ramToSave, noChangeChance, zeroPageChance, i);
+
+        incrementalSaveSingleBlock(RamSaver::Flags::Compress,
+                {"testRam", 0x0, ramToLoad.data(),
+                (int64_t)ramToLoad.size(), kTestingPageSize},
+                {"testRam", 0x0, ramToSave.data(),
+                (int64_t)ramToSave.size(), kTestingPageSize},
+                ramPath);
+
+        TestRamBuffer testRamOut(numPages * kTestingPageSize);
+        loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
+                            (int64_t)testRamOut.size(), kTestingPageSize},
+                           ramPath);
+
+        EXPECT_EQ(ramToSave, testRamOut);
+    }
+}
+
+TEST_F(RamSnapshotTest, IncrementalSaveRandomMultiStep) {
+    std::string ramPath = mTempDir->makeSubPath("ram.bin");
+
+    const int numPages = 100;
+    const int numTrials = 2;
+    const int steps = 50;
+    const float noChangeChance = 0.75;
+    const float zeroPageChance = 0.5;
+
+    for (int i = 0; i < numTrials; i++) {
+        auto ramToLoad = generateRandomRam(numPages, zeroPageChance, i);
+        auto ramToSave = ramToLoad;
+
+        saveRamSingleBlock(RamSaver::Flags::Compress,
+                           {"testRam", 0x0, ramToLoad.data(), (int64_t)ramToLoad.size(),
+                            kTestingPageSize},
+                           ramPath);
+
+        for (int j = 0; j < steps; j++) {
+            randomMutateRam(ramToSave, noChangeChance, zeroPageChance, i * steps + j);
+
+            incrementalSaveSingleBlock(RamSaver::Flags::Compress,
+                    {"testRam", 0x0, ramToLoad.data(),
+                    (int64_t)ramToLoad.size(), kTestingPageSize},
+                    {"testRam", 0x0, ramToSave.data(),
+                    (int64_t)ramToSave.size(), kTestingPageSize},
+                    ramPath);
+
+            TestRamBuffer testRamOut(numPages * kTestingPageSize);
+            loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
+                                (int64_t)testRamOut.size(), kTestingPageSize},
+                               ramPath);
+
+            EXPECT_EQ(ramToSave, testRamOut);
+        }
     }
 }
 

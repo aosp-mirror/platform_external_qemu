@@ -17,6 +17,7 @@
 #include <atomic>
 #include <cinttypes>
 #include <cstdlib>
+#include <cstring>
 #include <type_traits>
 
 namespace android {
@@ -82,6 +83,10 @@ public:
     T& operator[](size_t index) { return mAligned[index]; }
 
     const T& operator[](size_t index) const { return mAligned[index]; }
+
+    bool operator==(const AlignedBuf& other) const {
+        return 0 == std::memcmp(mAligned, other.mAligned, sizeof(T) * std::min(mSize, other.mSize));
+    }
 
 private:
 
