@@ -732,18 +732,21 @@ extern "C" int main(int argc, char** argv) {
                avdInfo_getName(avd));
         return 1;
     }
-
-    if (filelock_create(coreHwIniPath) == NULL) {
+    if (opts->read_only) {
+        TempFile*  tempIni = tempfile_create();
+        coreHwIniPath = tempfile_path(tempIni);
+        is_multi_instance = true;
+        opts->no_snapshot_save = true;
+        dwarning("Read-only mode enabled. Please refrain from doing "
+                "snapshot save.\n");
+    } else if (filelock_create(coreHwIniPath) == NULL) {
         /* The AVD is already in use, we still support this as an
          * experimental feature. Use a temporary hardware-qemu.ini
          * file though to avoid overwriting the existing one. */
-         TempFile*  tempIni = tempfile_create();
-         coreHwIniPath = tempfile_path(tempIni);
-         is_multi_instance = true;
-         opts->no_snapshot_save = true;
-         dwarning("Running multiple emulator with the same AVD"
-                 "is an experimental feature. "
-                 "Snapshot might be unstable.\n");
+        derror("Running multiple emulators with the same AVD"
+               "is an experimental feature.\n"
+               "Please use -read-only flag to enable this feature.\n");
+        return 1;
     }
 
     if (snapshotLock) {
