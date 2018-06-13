@@ -229,6 +229,7 @@ static int filelock_lock(FileLock* lock, int liveProcessTimeout /* TODO */) {
                     // Need to stop if there is a timeout.
                     case System::WaitExitResult::Timeout:
                         *triesRemaining = 0;
+                        break;
                     // Need to try again if we waited out the process.
                     case System::WaitExitResult::Exited:
                         *triesRemaining = 1;
