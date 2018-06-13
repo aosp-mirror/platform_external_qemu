@@ -17,7 +17,6 @@
 #include "qapi/error.h"
 #include "hw/virtio/virtio-bus.h"
 #include "hw/virtio/virtio-access.h"
-#include "migration/migration.h"
 #include "qemu/error-report.h"
 #include "hw/virtio/vhost-vsock.h"
 #include "qemu/iov.h"
@@ -255,13 +254,15 @@ static void vhost_vsock_post_load_timer_cb(void *opaque)
     vhost_vsock_send_transport_reset(vsock);
 }
 
-static void vhost_vsock_pre_save(void *opaque)
+static int vhost_vsock_pre_save(void *opaque)
 {
     VHostVSock *vsock = opaque;
 
     /* At this point, backend must be stopped, otherwise
      * it might keep writing to memory. */
     assert(!vsock->vhost_dev.started);
+
+    return 0;
 }
 
 static int vhost_vsock_post_load(void *opaque, int version_id)

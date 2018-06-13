@@ -77,7 +77,7 @@ typedef struct BlockJob {
     /**
      * Set to false by the job while the coroutine has yielded and may be
      * re-entered by block_job_enter().  There may still be I/O or event loop
-     * activity pending.
+     * activity pending.  Accessed under block_job_mutex (in blockjob.c).
      */
     bool busy;
 
@@ -134,6 +134,12 @@ typedef struct BlockJob {
     /* ret code passed to block_job_completed.
      */
     int ret;
+
+    /**
+     * Timer that is used by @block_job_sleep_ns. Accessed under
+     * block_job_mutex (in blockjob.c).
+     */
+    QEMUTimer sleep_timer;
 
     /** Non-NULL if this job is part of a transaction */
     BlockJobTxn *txn;
@@ -235,14 +241,6 @@ void block_job_complete(BlockJob *job, Error **errp);
 BlockJobInfo *block_job_query(BlockJob *job, Error **errp);
 
 /**
- * block_job_pause:
- * @job: The job to be paused.
- *
- * Asynchronously pause the specified job.
- */
-void block_job_pause(BlockJob *job);
-
-/**
  * block_job_user_pause:
  * @job: The job to be paused.
  *
@@ -258,14 +256,6 @@ void block_job_user_pause(BlockJob *job);
  * Returns true if the job is user-paused.
  */
 bool block_job_user_paused(BlockJob *job);
-
-/**
- * block_job_resume:
- * @job: The job to be resumed.
- *
- * Resume the specified job.  Must be paired with a preceding block_job_pause.
- */
-void block_job_resume(BlockJob *job);
 
 /**
  * block_job_user_resume:
@@ -335,6 +325,24 @@ void block_job_iostatus_reset(BlockJob *job);
  * cancels all jobs in the transaction.
  */
 BlockJobTxn *block_job_txn_new(void);
+
+/**
+ * block_job_ref:
+ *
+ * Add a reference to BlockJob refcnt, it will be decreased with
+ * block_job_unref, and then be freed if it comes to be the last
+ * reference.
+ */
+void block_job_ref(BlockJob *job);
+
+/**
+ * block_job_unref:
+ *
+ * Release a reference that was previously acquired with block_job_ref
+ * or block_job_create. If it's the last reference to the object, it will be
+ * freed.
+ */
+void block_job_unref(BlockJob *job);
 
 /**
  * block_job_txn_unref:

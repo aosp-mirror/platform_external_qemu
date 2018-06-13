@@ -28,7 +28,6 @@
 #include "hw/hw.h"
 #include "qemu/timer.h"
 #include "hw/ptimer.h"
-#include "sysemu/char.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/qtest.h"
 #include "hw/boards.h"
@@ -108,7 +107,6 @@ static void leon3_set_pil_in(void *opaque, uint32_t pil_in)
 static void leon3_generic_hw_init(MachineState *machine)
 {
     ram_addr_t ram_size = machine->ram_size;
-    const char *cpu_model = machine->cpu_model;
     const char *kernel_filename = machine->kernel_filename;
     SPARCCPU *cpu;
     CPUSPARCState   *env;
@@ -123,15 +121,7 @@ static void leon3_generic_hw_init(MachineState *machine)
     ResetData  *reset_info;
 
     /* Init CPU */
-    if (!cpu_model) {
-        cpu_model = "LEON3";
-    }
-
-    cpu = cpu_sparc_init(cpu_model);
-    if (cpu == NULL) {
-        fprintf(stderr, "qemu: Unable to find Sparc CPU definition\n");
-        exit(1);
-    }
+    cpu = SPARC_CPU(cpu_create(machine->cpu_type));
     env = &cpu->env;
 
     cpu_sparc_set_id(env, 0);
@@ -161,7 +151,6 @@ static void leon3_generic_hw_init(MachineState *machine)
     /* Allocate BIOS */
     prom_size = 8 * 1024 * 1024; /* 8Mb */
     memory_region_init_ram(prom, NULL, "Leon3.bios", prom_size, &error_fatal);
-    vmstate_register_ram_global(prom);
     memory_region_set_readonly(prom, true);
     memory_region_add_subregion(address_space_mem, 0x00000000, prom);
 
@@ -228,6 +217,7 @@ static void leon3_generic_machine_init(MachineClass *mc)
 {
     mc->desc = "Leon-3 generic";
     mc->init = leon3_generic_hw_init;
+    mc->default_cpu_type = SPARC_CPU_TYPE_NAME("LEON3");
 }
 
 DEFINE_MACHINE("leon3_generic", leon3_generic_machine_init)

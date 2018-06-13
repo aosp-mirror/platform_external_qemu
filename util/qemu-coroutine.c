@@ -120,7 +120,21 @@ void qemu_aio_coroutine_enter(AioContext *ctx, Coroutine *co)
     Coroutine *self = qemu_coroutine_self();
     CoroutineAction ret;
 
+    /* Cannot rely on the read barrier for co in aio_co_wake(), as there are
+     * callers outside of aio_co_wake() */
+    const char *scheduled = atomic_mb_read(&co->scheduled);
+
     trace_qemu_aio_coroutine_enter(ctx, self, co, co->entry_arg);
+
+    /* if the Coroutine has already been scheduled, entering it again will
+     * cause us to enter it twice, potentially even after the coroutine has
+     * been deleted */
+    if (scheduled) {
+        fprintf(stderr,
+                "%s: Co-routine was already scheduled in '%s'\n",
+                __func__, scheduled);
+        abort();
+    }
 
     if (co->caller) {
         fprintf(stderr, "Co-routine re-entered recursively\n");
@@ -139,12 +153,20 @@ void qemu_aio_coroutine_enter(AioContext *ctx, Coroutine *co)
 
     qemu_co_queue_run_restart(co);
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     /*
      * BEWARE: in case of ret == COROUTINE_YIELD here at this point
      *         after qemu_co_queue_run_restart() 'co' can be already
      *         freed by other coroutine, which has entered 'co'. So
      *         be careful and do not touch it.
      */
+=======
+    /* Beware, if ret == COROUTINE_YIELD and qemu_co_queue_run_restart()
+     * has started any other coroutine, "co" might have been reentered
+     * and even freed by now!  So be careful and do not touch it.
+     */
+
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
     switch (ret) {
     case COROUTINE_YIELD:
         return;

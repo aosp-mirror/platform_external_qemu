@@ -30,8 +30,13 @@
 #include "sysemu/block-backend.h"
 #include "sysemu/blockdev.h"
 #include "sysemu/sysemu.h"
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #include "sysemu/char.h"
 #include "hw/isa/trace.h"
+=======
+#include "chardev/char.h"
+#include "trace.h"
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 
 
 #define REG_FER 0
@@ -386,6 +391,8 @@ static void pc87312_class_init(ObjectClass *klass, void *data)
     dc->reset = pc87312_reset;
     dc->vmsd = &vmstate_pc87312;
     dc->props = pc87312_properties;
+    /* Reason: Uses parallel_hds[0] in realize(), so it can't be used twice */
+    dc->user_creatable = false;
 }
 
 static const TypeInfo pc87312_type_info = {

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 /*
  * QEMU System Emulator, accelerator interfaces
  *
@@ -154,3 +155,5 @@ static void register_accel_types(void)
 }
 
 type_init(register_accel_types);
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)

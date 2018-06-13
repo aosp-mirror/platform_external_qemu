@@ -80,7 +80,6 @@ static void puv3_board_init(CPUUniCore32State *env, ram_addr_t ram_size)
     /* SDRAM at address zero.  */
     memory_region_init_ram(ram_memory, NULL, "puv3.ram", ram_size,
                            &error_fatal);
-    vmstate_register_ram_global(ram_memory);
     memory_region_add_subregion(get_system_memory(), 0, ram_memory);
 }
 
@@ -93,7 +92,10 @@ static void puv3_load_kernel(const char *kernel_filename)
     if (kernel_filename == NULL && qtest_enabled()) {
         return;
     }
-    assert(kernel_filename != NULL);
+    if (kernel_filename == NULL) {
+        error_report("kernel parameter cannot be empty");
+        exit(1);
+    }
 
     /* only zImage format supported */
     size = load_image_targphys(kernel_filename, KERNEL_LOAD_ADDR,
@@ -110,7 +112,6 @@ static void puv3_load_kernel(const char *kernel_filename)
 static void puv3_init(MachineState *machine)
 {
     ram_addr_t ram_size = machine->ram_size;
-    const char *cpu_model = machine->cpu_model;
     const char *kernel_filename = machine->kernel_filename;
     const char *initrd_filename = machine->initrd_filename;
     CPUUniCore32State *env;
@@ -121,15 +122,7 @@ static void puv3_init(MachineState *machine)
         exit(1);
     }
 
-    if (!cpu_model) {
-        cpu_model = "UniCore-II";
-    }
-
-    cpu = uc32_cpu_init(cpu_model);
-    if (!cpu) {
-        error_report("Unable to find CPU definition");
-        exit(1);
-    }
+    cpu = UNICORE32_CPU(cpu_create(machine->cpu_type));
     env = &cpu->env;
 
     puv3_soc_init(env);
@@ -142,6 +135,7 @@ static void puv3_machine_init(MachineClass *mc)
     mc->desc = "PKUnity Version-3 based on UniCore32";
     mc->init = puv3_init;
     mc->is_default = 1;
+    mc->default_cpu_type = UNICORE32_CPU_TYPE_NAME("UniCore-II");
 }
 
 DEFINE_MACHINE("puv3", puv3_machine_init)

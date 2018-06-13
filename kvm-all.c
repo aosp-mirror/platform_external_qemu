@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 /*
  * QEMU KVM support
  *
@@ -2613,3 +2614,5 @@ static void kvm_type_init(void)
 }
 
 type_init(kvm_type_init);
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
