@@ -157,6 +157,7 @@ typedef struct DumpState {
     uint32_t sh_info;
     bool have_section;
     bool resume;
+    bool detached;
     ssize_t note_size;
     hwaddr memory_offset;
     int fd;
@@ -191,6 +192,8 @@ typedef struct DumpState {
                                   * this could be used to calculate
                                   * how much work we have
                                   * finished. */
+    uint8_t *guest_note;         /* ELF note content */
+    size_t guest_note_size;
 } DumpState;
 
 uint16_t cpu_to_dump16(DumpState *s, uint16_t val);

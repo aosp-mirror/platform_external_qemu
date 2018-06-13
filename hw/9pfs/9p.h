@@ -117,7 +117,18 @@ static inline char *rpath(FsContext *ctx, const char *path)
 #define P9_IOHDRSZ 24
 
 typedef struct V9fsPDU V9fsPDU;
-struct V9fsState;
+typedef struct V9fsState V9fsState;
+
+typedef struct {
+    uint32_t size_le;
+    uint8_t id;
+    uint16_t tag_le;
+} QEMU_PACKED P9MsgHeader;
+/* According to the specification, 9p messages start with a 7-byte header.
+ * Since most of the code uses this header size in literal form, we must be
+ * sure this is indeed the case.
+ */
+QEMU_BUILD_BUG_ON(sizeof(P9MsgHeader) != 7);
 
 struct V9fsPDU
 {
@@ -126,7 +137,7 @@ struct V9fsPDU
     uint8_t id;
     uint8_t cancelled;
     CoQueue complete;
-    struct V9fsState *s;
+    V9fsState *s;
     QLIST_ENTRY(V9fsPDU) next;
     uint32_t idx;
 };
@@ -219,7 +230,7 @@ struct V9fsFidState
     V9fsFidState *rclm_lst;
 };
 
-typedef struct V9fsState
+struct V9fsState
 {
     QLIST_HEAD(, V9fsPDU) free_list;
     QLIST_HEAD(, V9fsPDU) active_list;
@@ -240,7 +251,7 @@ typedef struct V9fsState
     Error *migration_blocker;
     V9fsConf fsconf;
     V9fsQID root_qid;
-} V9fsState;
+};
 
 /* 9p2000.L open flags */
 #define P9_DOTL_RDONLY        00000000
@@ -341,7 +352,7 @@ ssize_t pdu_marshal(V9fsPDU *pdu, size_t offset, const char *fmt, ...);
 ssize_t pdu_unmarshal(V9fsPDU *pdu, size_t offset, const char *fmt, ...);
 V9fsPDU *pdu_alloc(V9fsState *s);
 void pdu_free(V9fsPDU *pdu);
-void pdu_submit(V9fsPDU *pdu);
+void pdu_submit(V9fsPDU *pdu, P9MsgHeader *hdr);
 void v9fs_reset(V9fsState *s);
 
 struct V9fsTransport {
@@ -352,7 +363,7 @@ struct V9fsTransport {
     void        (*init_in_iov_from_pdu)(V9fsPDU *pdu, struct iovec **piov,
                                         unsigned int *pniov, size_t size);
     void        (*init_out_iov_from_pdu)(V9fsPDU *pdu, struct iovec **piov,
-                                         unsigned int *pniov);
+                                         unsigned int *pniov, size_t size);
     void        (*push_and_notify)(V9fsPDU *pdu);
 };
 

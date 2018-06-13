@@ -377,7 +377,7 @@ static int validate_guest_space(unsigned long guest_base,
      * then there is no way we can allocate it.
      */
     if (test_page_addr >= guest_base
-        && test_page_addr <= (guest_base + guest_size)) {
+        && test_page_addr < (guest_base + guest_size)) {
         return -1;
     }
 
@@ -802,14 +802,15 @@ static uint32_t get_elf_hwcap2(void)
 #define ARCH_DLINFO                                     \
     do {                                                \
         PowerPCCPU *cpu = POWERPC_CPU(thread_cpu);              \
-        NEW_AUX_ENT(AT_DCACHEBSIZE, cpu->env.dcache_line_size); \
-        NEW_AUX_ENT(AT_ICACHEBSIZE, cpu->env.icache_line_size); \
-        NEW_AUX_ENT(AT_UCACHEBSIZE, 0);                 \
         /*                                              \
-         * Now handle glibc compatibility.              \
+         * Handle glibc compatibility: these magic entries must \
+         * be at the lowest addresses in the final auxv.        \
          */                                             \
         NEW_AUX_ENT(AT_IGNOREPPC, AT_IGNOREPPC);        \
         NEW_AUX_ENT(AT_IGNOREPPC, AT_IGNOREPPC);        \
+        NEW_AUX_ENT(AT_DCACHEBSIZE, cpu->env.dcache_line_size); \
+        NEW_AUX_ENT(AT_ICACHEBSIZE, cpu->env.icache_line_size); \
+        NEW_AUX_ENT(AT_UCACHEBSIZE, 0);                 \
     } while (0)
 
 static inline void init_thread(struct target_pt_regs *_regs, struct image_info *infop)
@@ -1052,7 +1053,7 @@ static void elf_core_copy_regs(target_elf_gregset_t *regs,
     int i;
 
     for (i = 0; i < 32; i++) {
-        (*regs)[i] = tswapreg(env->gpr[i]);
+        (*regs)[i] = tswapreg(cpu_get_gpr(env, i));
     }
     (*regs)[32] = tswapreg(env->pc);
     (*regs)[33] = tswapreg(cpu_get_sr(env));
@@ -1098,7 +1099,7 @@ static inline void elf_core_copy_regs(target_elf_gregset_t *regs,
     int i;
 
     for (i = 0; i < 16; i++) {
-        (*regs[i]) = tswapreg(env->gregs[i]);
+        (*regs)[i] = tswapreg(env->gregs[i]);
     }
 
     (*regs)[TARGET_REG_PC] = tswapreg(env->pc);
@@ -1731,6 +1732,8 @@ static abi_ulong create_elf_tables(abi_ulong p, int argc, int envc,
 #ifdef ELF_HWCAP2
     size += 2;
 #endif
+    info->auxv_len = size * n;
+
     size += envc + argc + 2;
     size += 1;  /* argc itself */
     size *= n;
@@ -1759,7 +1762,16 @@ static abi_ulong create_elf_tables(abi_ulong p, int argc, int envc,
         put_user_ual(val, u_auxv); u_auxv += n; \
     } while(0)
 
-    /* There must be exactly DLINFO_ITEMS entries here.  */
+#ifdef ARCH_DLINFO
+    /*
+     * ARCH_DLINFO must come first so platform specific code can enforce
+     * special alignment requirements on the AUXV if necessary (eg. PPC).
+     */
+    ARCH_DLINFO;
+#endif
+    /* There must be exactly DLINFO_ITEMS entries here, or the assert
+     * on info->auxv_len will trigger.
+     */
     NEW_AUX_ENT(AT_PHDR, (abi_ulong)(info->load_addr + exec->e_phoff));
     NEW_AUX_ENT(AT_PHENT, (abi_ulong)(sizeof (struct elf_phdr)));
     NEW_AUX_ENT(AT_PHNUM, (abi_ulong)(exec->e_phnum));
@@ -1782,17 +1794,13 @@ static abi_ulong create_elf_tables(abi_ulong p, int argc, int envc,
     if (u_platform) {
         NEW_AUX_ENT(AT_PLATFORM, u_platform);
     }
-#ifdef ARCH_DLINFO
-    /*
-     * ARCH_DLINFO must come last so platform specific code can enforce
-     * special alignment requirements on the AUXV if necessary (eg. PPC).
-     */
-    ARCH_DLINFO;
-#endif
     NEW_AUX_ENT (AT_NULL, 0);
 #undef NEW_AUX_ENT
 
-    info->auxv_len = u_argv - info->saved_auxv;
+    /* Check that our initial calculation of the auxv length matches how much
+     * we actually put into it.
+     */
+    assert(info->auxv_len == u_auxv - info->saved_auxv);
 
     put_user_ual(argc, u_argc);
 

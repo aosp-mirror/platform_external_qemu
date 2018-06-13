@@ -4,6 +4,7 @@
 #include "qemu/module.h"
 #include "qapi-visit.h"
 #include "qapi/opts-visitor.h"
+#include "qemu/config-file.h"
 
 void user_creatable_complete(Object *obj, Error **errp)
 {
@@ -22,13 +23,13 @@ void user_creatable_complete(Object *obj, Error **errp)
     }
 }
 
-bool user_creatable_can_be_deleted(UserCreatable *uc, Error **errp)
+bool user_creatable_can_be_deleted(UserCreatable *uc)
 {
 
     UserCreatableClass *ucc = USER_CREATABLE_GET_CLASS(uc);
 
     if (ucc->can_be_deleted) {
-        return ucc->can_be_deleted(uc, errp);
+        return ucc->can_be_deleted(uc);
     } else {
         return true;
     }
@@ -177,11 +178,24 @@ void user_creatable_del(const char *id, Error **errp)
         return;
     }
 
-    if (!user_creatable_can_be_deleted(USER_CREATABLE(obj), errp)) {
+    if (!user_creatable_can_be_deleted(USER_CREATABLE(obj))) {
         error_setg(errp, "object '%s' is in use, can not be deleted", id);
         return;
     }
+
+    /*
+     * if object was defined on the command-line, remove its corresponding
+     * option group entry
+     */
+    qemu_opts_del(qemu_opts_find(qemu_find_opts_err("object", &error_abort),
+                                 id));
+
     object_unparent(obj);
+}
+
+void user_creatable_cleanup(void)
+{
+    object_unparent(object_get_objects_root());
 }
 
 static void register_types(void)

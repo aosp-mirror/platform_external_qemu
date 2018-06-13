@@ -47,13 +47,13 @@ typedef struct VirtualGfxConsole {
     double scale_x;
     double scale_y;
 #if defined(CONFIG_OPENGL)
-    ConsoleGLState *gls;
+    QemuGLShader *gls;
     EGLContext ectx;
     EGLSurface esurface;
     int glupdates;
     int x, y, w, h;
-    GLuint tex_id;
-    GLuint fbo_id;
+    egl_fb guest_fb;
+    egl_fb win_fb;
     bool y0_top;
     bool scanout_mode;
 #endif

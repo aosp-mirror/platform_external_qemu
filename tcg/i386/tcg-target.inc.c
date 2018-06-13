@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include "tcg-be-ldst.h"
+#include "tcg-pool.inc.c"
 
 #ifdef CONFIG_DEBUG_TCG
 static const char * const tcg_target_reg_names[TCG_TARGET_NB_REGS] = {
@@ -109,25 +109,16 @@ static const int tcg_target_call_oarg_regs[] = {
    detection, as we're not going to go so far as our own inline assembly.
    If not available, default values will be assumed.  */
 #if defined(CONFIG_CPUID_H)
-#include <cpuid.h>
+#include "qemu/cpuid.h"
 #endif
 
-/* For 32-bit, we are going to attempt to determine at runtime whether cmov
-   is available.  */
+/* For 64-bit, we always know that CMOV is available.  */
 #if TCG_TARGET_REG_BITS == 64
 # define have_cmov 1
-#elif defined(CONFIG_CPUID_H) && defined(bit_CMOV)
+#elif defined(CONFIG_CPUID_H)
 static bool have_cmov;
 #else
 # define have_cmov 0
-#endif
-
-/* If bit_MOVBE is defined in cpuid.h (added in GCC version 4.6), we are
-   going to attempt to determine at runtime whether movbe is available.  */
-#if defined(CONFIG_CPUID_H) && defined(bit_MOVBE)
-static bool have_movbe;
-#else
-# define have_movbe 0
 #endif
 
 /* We need these symbols in tcg-target.h, and we can't properly conditionalize
@@ -135,14 +126,13 @@ static bool have_movbe;
 bool have_bmi1;
 bool have_popcnt;
 
-#if defined(CONFIG_CPUID_H) && defined(bit_BMI2)
+#ifdef CONFIG_CPUID_H
+static bool have_movbe;
 static bool have_bmi2;
-#else
-# define have_bmi2 0
-#endif
-#if defined(CONFIG_CPUID_H) && defined(bit_LZCNT)
 static bool have_lzcnt;
 #else
+# define have_movbe 0
+# define have_bmi2 0
 # define have_lzcnt 0
 #endif
 
@@ -203,23 +193,15 @@ static const char *target_parse_constraint(TCGArgConstraint *ct,
         break;
     case 'q':
         ct->ct |= TCG_CT_REG;
-        if (TCG_TARGET_REG_BITS == 64) {
-            tcg_regset_set32(ct->u.regs, 0, 0xffff);
-        } else {
-            tcg_regset_set32(ct->u.regs, 0, 0xf);
-        }
+        ct->u.regs = TCG_TARGET_REG_BITS == 64 ? 0xffff : 0xf;
         break;
     case 'Q':
         ct->ct |= TCG_CT_REG;
-        tcg_regset_set32(ct->u.regs, 0, 0xf);
+        ct->u.regs = 0xf;
         break;
     case 'r':
         ct->ct |= TCG_CT_REG;
-        if (TCG_TARGET_REG_BITS == 64) {
-            tcg_regset_set32(ct->u.regs, 0, 0xffff);
-        } else {
-            tcg_regset_set32(ct->u.regs, 0, 0xff);
-        }
+        ct->u.regs = TCG_TARGET_REG_BITS == 64 ? 0xffff : 0xff;
         break;
     case 'W':
         /* With TZCNT/LZCNT, we can have operand-size as an input.  */
@@ -229,11 +211,7 @@ static const char *target_parse_constraint(TCGArgConstraint *ct,
         /* qemu_ld/st address constraint */
     case 'L':
         ct->ct |= TCG_CT_REG;
-        if (TCG_TARGET_REG_BITS == 64) {
-            tcg_regset_set32(ct->u.regs, 0, 0xffff);
-        } else {
-            tcg_regset_set32(ct->u.regs, 0, 0xff);
-        }
+        ct->u.regs = TCG_TARGET_REG_BITS == 64 ? 0xffff : 0xff;
         tcg_regset_reset_reg(ct->u.regs, TCG_REG_L0);
         tcg_regset_reset_reg(ct->u.regs, TCG_REG_L1);
         break;
@@ -1192,9 +1170,14 @@ static void tcg_out_branch(TCGContext *s, int call, tcg_insn_unit *dest)
         tcg_out_opc(s, call ? OPC_CALL_Jz : OPC_JMP_long, 0, 0, 0);
         tcg_out32(s, disp);
     } else {
-        tcg_out_movi(s, TCG_TYPE_PTR, TCG_REG_R10, (uintptr_t)dest);
-        tcg_out_modrm(s, OPC_GRP5,
-                      call ? EXT5_CALLN_Ev : EXT5_JMPN_Ev, TCG_REG_R10);
+        /* rip-relative addressing into the constant pool.
+           This is 6 + 8 = 14 bytes, as compared to using an
+           an immediate load 10 + 6 = 16 bytes, plus we may
+           be able to re-use the pool constant for more calls.  */
+        tcg_out_opc(s, OPC_GRP5, 0, 0, 0);
+        tcg_out8(s, (call ? EXT5_CALLN_Ev : EXT5_JMPN_Ev) << 3 | 5);
+        new_pool_label(s, (uintptr_t)dest, R_386_PC32, s->code_ptr, -4);
+        tcg_out32(s, 0);
     }
 }
 
@@ -1224,6 +1207,8 @@ static void tcg_out_nopn(TCGContext *s, int n)
 }
 
 #if defined(CONFIG_SOFTMMU)
+#include "tcg-ldst.inc.c"
+
 /* helper signature: helper_ret_ld_mmu(CPUState *env, target_ulong addr,
  *                                     int mmu_idx, uintptr_t ra)
  */
@@ -1882,8 +1867,13 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc,
 
     switch (opc) {
     case INDEX_op_exit_tb:
-        tcg_out_movi(s, TCG_TYPE_PTR, TCG_REG_EAX, a0);
-        tcg_out_jmp(s, tb_ret_addr);
+        /* Reuse the zeroing that exists for goto_ptr.  */
+        if (a0 == 0) {
+            tcg_out_jmp(s, s->code_gen_epilogue);
+        } else {
+            tcg_out_movi(s, TCG_TYPE_PTR, TCG_REG_EAX, a0);
+            tcg_out_jmp(s, tb_ret_addr);
+        }
         break;
     case INDEX_op_goto_tb:
         if (s->tb_jmp_insn_offset) {
@@ -1905,6 +1895,10 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc,
                                  (intptr_t)(s->tb_jmp_target_addr + a0));
         }
         s->tb_jmp_reset_offset[a0] = tcg_current_code_size(s);
+        break;
+    case INDEX_op_goto_ptr:
+        /* jmp to the given host address (could be epilogue) */
+        tcg_out_modrm(s, OPC_GRP5, EXT5_JMPN_Ev, a0);
         break;
     case INDEX_op_br:
         tcg_out_jxx(s, JCC_JMP, arg_label(a0), 0);
@@ -2277,6 +2271,7 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc,
 
 static const TCGTargetOpDef *tcg_target_op_def(TCGOpcode op)
 {
+    static const TCGTargetOpDef r = { .args_ct_str = { "r" } };
     static const TCGTargetOpDef ri_r = { .args_ct_str = { "ri", "r" } };
     static const TCGTargetOpDef re_r = { .args_ct_str = { "re", "r" } };
     static const TCGTargetOpDef qi_r = { .args_ct_str = { "qi", "r" } };
@@ -2299,6 +2294,9 @@ static const TCGTargetOpDef *tcg_target_op_def(TCGOpcode op)
         = { .args_ct_str = { "L", "L", "L", "L" } };
 
     switch (op) {
+    case INDEX_op_goto_ptr:
+        return &r;
+
     case INDEX_op_ld8u_i32:
     case INDEX_op_ld8u_i64:
     case INDEX_op_ld8s_i32:
@@ -2501,7 +2499,7 @@ static const TCGTargetOpDef *tcg_target_op_def(TCGOpcode op)
     return NULL;
 }
 
-static int tcg_target_callee_save_regs[] = {
+static const int tcg_target_callee_save_regs[] = {
 #if TCG_TARGET_REG_BITS == 64
     TCG_REG_RBP,
     TCG_REG_RBX,
@@ -2567,6 +2565,13 @@ static void tcg_target_qemu_prologue(TCGContext *s)
     tcg_out_modrm(s, OPC_GRP5, EXT5_JMPN_Ev, tcg_target_call_iarg_regs[1]);
 #endif
 
+    /*
+     * Return path for goto_ptr. Set return value to 0, a-la exit_tb,
+     * and fall through to the rest of the epilogue.
+     */
+    s->code_gen_epilogue = s->code_ptr;
+    tcg_out_movi(s, TCG_TYPE_REG, TCG_REG_EAX, 0);
+
     /* TB epilogue */
     tb_ret_addr = s->code_ptr;
 
@@ -2585,6 +2590,11 @@ static void tcg_target_qemu_prologue(TCGContext *s)
 #endif
 }
 
+static void tcg_out_nop_fill(tcg_insn_unit *p, int count)
+{
+    memset(p, 0x90, count);
+}
+
 static void tcg_target_init(TCGContext *s)
 {
 #ifdef CONFIG_CPUID_H
@@ -2599,45 +2609,35 @@ static void tcg_target_init(TCGContext *s)
            available, we'll use a small forward branch.  */
         have_cmov = (d & bit_CMOV) != 0;
 #endif
-#ifndef have_movbe
         /* MOVBE is only available on Intel Atom and Haswell CPUs, so we
            need to probe for it.  */
         have_movbe = (c & bit_MOVBE) != 0;
-#endif
-#ifdef bit_POPCNT
         have_popcnt = (c & bit_POPCNT) != 0;
-#endif
     }
 
     if (max >= 7) {
         /* BMI1 is available on AMD Piledriver and Intel Haswell CPUs.  */
         __cpuid_count(7, 0, a, b, c, d);
-#ifdef bit_BMI
         have_bmi1 = (b & bit_BMI) != 0;
-#endif
-#ifndef have_bmi2
         have_bmi2 = (b & bit_BMI2) != 0;
-#endif
     }
-#endif
 
-#ifndef have_lzcnt
     max = __get_cpuid_max(0x8000000, 0);
     if (max >= 1) {
         __cpuid(0x80000001, a, b, c, d);
         /* LZCNT was introduced with AMD Barcelona and Intel Haswell CPUs.  */
         have_lzcnt = (c & bit_LZCNT) != 0;
     }
-#endif
+#endif /* CONFIG_CPUID_H */
 
     if (TCG_TARGET_REG_BITS == 64) {
-        tcg_regset_set32(tcg_target_available_regs[TCG_TYPE_I32], 0, 0xffff);
-        tcg_regset_set32(tcg_target_available_regs[TCG_TYPE_I64], 0, 0xffff);
+        tcg_target_available_regs[TCG_TYPE_I32] = 0xffff;
+        tcg_target_available_regs[TCG_TYPE_I64] = 0xffff;
     } else {
-        tcg_regset_set32(tcg_target_available_regs[TCG_TYPE_I32], 0, 0xff);
+        tcg_target_available_regs[TCG_TYPE_I32] = 0xff;
     }
 
-    tcg_regset_clear(tcg_target_call_clobber_regs);
+    tcg_target_call_clobber_regs = 0;
     tcg_regset_set_reg(tcg_target_call_clobber_regs, TCG_REG_EAX);
     tcg_regset_set_reg(tcg_target_call_clobber_regs, TCG_REG_EDX);
     tcg_regset_set_reg(tcg_target_call_clobber_regs, TCG_REG_ECX);
@@ -2652,7 +2652,7 @@ static void tcg_target_init(TCGContext *s)
         tcg_regset_set_reg(tcg_target_call_clobber_regs, TCG_REG_R11);
     }
 
-    tcg_regset_clear(s->reserved_regs);
+    s->reserved_regs = 0;
     tcg_regset_set_reg(s->reserved_regs, TCG_REG_CALL_STACK);
 }
 

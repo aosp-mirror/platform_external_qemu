@@ -14,6 +14,8 @@
 #define QLIST_H
 
 #include "qapi/qmp/qobject.h"
+#include "qapi/qmp/qnum.h"
+#include "qapi/qmp/qnull.h"
 #include "qemu/queue.h"
 
 typedef struct QListEntry {
@@ -28,6 +30,16 @@ typedef struct QList {
 
 #define qlist_append(qlist, obj) \
         qlist_append_obj(qlist, QOBJECT(obj))
+
+/* Helpers for int, bool, and string */
+#define qlist_append_int(qlist, value) \
+        qlist_append(qlist, qnum_from_int(value))
+#define qlist_append_bool(qlist, value) \
+        qlist_append(qlist, qbool_from_bool(value))
+#define qlist_append_str(qlist, value) \
+        qlist_append(qlist, qstring_from_str(value))
+#define qlist_append_null(qlist) \
+        qlist_append(qlist, qnull())
 
 #define QLIST_FOREACH_ENTRY(qlist, var)             \
         for ((var) = ((qlist)->head.tqh_first);     \
@@ -49,6 +61,7 @@ QObject *qlist_peek(QList *qlist);
 int qlist_empty(const QList *qlist);
 size_t qlist_size(const QList *qlist);
 QList *qobject_to_qlist(const QObject *obj);
+bool qlist_is_equal(const QObject *x, const QObject *y);
 void qlist_destroy_obj(QObject *obj);
 
 static inline const QListEntry *qlist_first(const QList *qlist)
