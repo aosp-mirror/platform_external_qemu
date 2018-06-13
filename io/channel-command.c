@@ -23,7 +23,7 @@
 #include "io/channel-watch.h"
 #include "qapi/error.h"
 #include "qemu/sockets.h"
-#include "io/trace.h"
+#include "trace.h"
 
 
 QIOChannelCommand *

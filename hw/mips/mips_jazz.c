@@ -122,7 +122,6 @@ static void mips_jazz_init(MachineState *machine,
                            enum jazz_model_e jazz_model)
 {
     MemoryRegion *address_space = get_system_memory();
-    const char *cpu_model = machine->cpu_model;
     char *filename;
     int bios_size, n;
     MIPSCPU *cpu;
@@ -130,7 +129,7 @@ static void mips_jazz_init(MachineState *machine,
     CPUMIPSState *env;
     qemu_irq *i8259;
     rc4030_dma *dmas;
-    MemoryRegion *rc4030_dma_mr;
+    IOMMUMemoryRegion *rc4030_dma_mr;
     MemoryRegion *isa_mem = g_new(MemoryRegion, 1);
     MemoryRegion *isa_io = g_new(MemoryRegion, 1);
     MemoryRegion *rtc = g_new(MemoryRegion, 1);
@@ -148,14 +147,7 @@ static void mips_jazz_init(MachineState *machine,
     MemoryRegion *bios2 = g_new(MemoryRegion, 1);
 
     /* init CPUs */
-    if (cpu_model == NULL) {
-        cpu_model = "R4000";
-    }
-    cpu = cpu_mips_init(cpu_model);
-    if (cpu == NULL) {
-        fprintf(stderr, "Unable to find CPU definition\n");
-        exit(1);
-    }
+    cpu = MIPS_CPU(cpu_create(machine->cpu_type));
     env = &cpu->env;
     qemu_register_reset(main_cpu_reset, cpu);
 
@@ -177,7 +169,6 @@ static void mips_jazz_init(MachineState *machine,
 
     memory_region_init_ram(bios, NULL, "mips_jazz.bios", MAGNUM_BIOS_SIZE,
                            &error_fatal);
-    vmstate_register_ram_global(bios);
     memory_region_set_readonly(bios, true);
     memory_region_init_alias(bios2, NULL, "mips_jazz.bios", bios,
                              0, MAGNUM_BIOS_SIZE);
@@ -244,7 +235,6 @@ static void mips_jazz_init(MachineState *machine,
             MemoryRegion *rom_mr = g_new(MemoryRegion, 1);
             memory_region_init_ram(rom_mr, NULL, "g364fb.rom", 0x80000,
                                    &error_fatal);
-            vmstate_register_ram_global(rom_mr);
             memory_region_set_readonly(rom_mr, true);
             uint8_t *rom = memory_region_get_ram_ptr(rom_mr);
             memory_region_add_subregion(address_space, 0x60000000, rom_mr);
@@ -355,6 +345,7 @@ static void mips_magnum_class_init(ObjectClass *oc, void *data)
     mc->desc = "MIPS Magnum";
     mc->init = mips_magnum_init;
     mc->block_default_type = IF_SCSI;
+    mc->default_cpu_type = MIPS_CPU_TYPE_NAME("R4000");
 }
 
 static const TypeInfo mips_magnum_type = {
@@ -370,6 +361,7 @@ static void mips_pica61_class_init(ObjectClass *oc, void *data)
     mc->desc = "Acer Pica 61";
     mc->init = mips_pica61_init;
     mc->block_default_type = IF_SCSI;
+    mc->default_cpu_type = MIPS_CPU_TYPE_NAME("R4000");
 }
 
 static const TypeInfo mips_pica61_type = {

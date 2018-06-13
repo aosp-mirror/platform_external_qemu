@@ -34,7 +34,7 @@
 #include "qemu/error-report.h"
 #include "qemu/range.h"
 #include "qmp-commands.h"
-#include "hw/pci/trace.h"
+#include "trace.h"
 #include "hw/pci/msi.h"
 #include "hw/pci/msix.h"
 #include "exec/address-spaces.h"
@@ -48,6 +48,8 @@
 #else
 # define PCI_DPRINTF(format, ...)       do { } while (0)
 #endif
+
+bool pci_available = true;
 
 static void pcibus_dev_print(Monitor *mon, DeviceState *dev, int indent);
 static char *pcibus_get_dev_path(DeviceState *dev);
@@ -74,7 +76,7 @@ static const VMStateDescription vmstate_pcibus = {
     .version_id = 1,
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
-        VMSTATE_INT32_EQUAL(nirq, PCIBus),
+        VMSTATE_INT32_EQUAL(nirq, PCIBus, NULL),
         VMSTATE_VARRAY_INT32(irq_count, PCIBus,
                              nirq, 0, vmstate_info_int32,
                              int32_t),
@@ -166,6 +168,16 @@ static const TypeInfo pci_bus_info = {
     .instance_size = sizeof(PCIBus),
     .class_size = sizeof(PCIBusClass),
     .class_init = pci_bus_class_init,
+};
+
+static const TypeInfo pcie_interface_info = {
+    .name          = INTERFACE_PCIE_DEVICE,
+    .parent        = TYPE_INTERFACE,
+};
+
+static const TypeInfo conventional_pci_interface_info = {
+    .name          = INTERFACE_CONVENTIONAL_PCI_DEVICE,
+    .parent        = TYPE_INTERFACE,
 };
 
 static const TypeInfo pcie_bus_info = {
@@ -371,6 +383,7 @@ static void pci_bus_init(PCIBus *bus, DeviceState *parent,
 {
     assert(PCI_FUNC(devfn_min) == 0);
     bus->devfn_min = devfn_min;
+    bus->slot_reserved_mask = 0x0;
     bus->address_space_mem = address_space_mem;
     bus->address_space_io = address_space_io;
 
@@ -951,6 +964,16 @@ uint16_t pci_requester_id(PCIDevice *dev)
     return pci_req_id_cache_extract(&dev->requester_id_cache);
 }
 
+static bool pci_bus_devfn_available(PCIBus *bus, int devfn)
+{
+    return !(bus->devices[devfn]);
+}
+
+static bool pci_bus_devfn_reserved(PCIBus *bus, int devfn)
+{
+    return bus->slot_reserved_mask & (1UL << PCI_SLOT(devfn));
+}
+
 /* -1 for devfn means auto assign */
 static PCIDevice *do_pci_register_device(PCIDevice *pci_dev, PCIBus *bus,
                                          const char *name, int devfn,
@@ -974,14 +997,21 @@ static PCIDevice *do_pci_register_device(PCIDevice *pci_dev, PCIBus *bus,
     if (devfn < 0) {
         for(devfn = bus->devfn_min ; devfn < ARRAY_SIZE(bus->devices);
             devfn += PCI_FUNC_MAX) {
-            if (!bus->devices[devfn])
+            if (pci_bus_devfn_available(bus, devfn) &&
+                   !pci_bus_devfn_reserved(bus, devfn)) {
                 goto found;
+            }
         }
-        error_setg(errp, "PCI: no slot/function available for %s, all in use",
-                   name);
+        error_setg(errp, "PCI: no slot/function available for %s, all in use "
+                   "or reserved", name);
         return NULL;
     found: ;
-    } else if (bus->devices[devfn]) {
+    } else if (pci_bus_devfn_reserved(bus, devfn)) {
+        error_setg(errp, "PCI: slot %d function %d not available for %s,"
+                   " reserved",
+                   PCI_SLOT(devfn), PCI_FUNC(devfn), name);
+        return NULL;
+    } else if (!pci_bus_devfn_available(bus, devfn)) {
         error_setg(errp, "PCI: slot %d function %d not available for %s,"
                    " in use by %s",
                    PCI_SLOT(devfn), PCI_FUNC(devfn), name,
@@ -1000,6 +1030,7 @@ static PCIDevice *do_pci_register_device(PCIDevice *pci_dev, PCIBus *bus,
 
     pci_dev->devfn = devfn;
     pci_dev->requester_id_cache = pci_req_id_cache_get(pci_dev);
+    pstrcpy(pci_dev->name, sizeof(pci_dev->name), name);
 
     memory_region_init(&pci_dev->bus_master_container_region, OBJECT(pci_dev),
                        "bus master container", UINT64_MAX);
@@ -1009,7 +1040,6 @@ static PCIDevice *do_pci_register_device(PCIDevice *pci_dev, PCIBus *bus,
     if (qdev_hotplug) {
         pci_init_bus_master(pci_dev);
     }
-    pstrcpy(pci_dev->name, sizeof(pci_dev->name), name);
     pci_dev->irq_state = 0;
     pci_config_alloc(pci_dev);
 
@@ -1083,6 +1113,7 @@ static void pci_qdev_unrealize(DeviceState *dev, Error **errp)
         pc->exit(pci_dev);
     }
 
+    pci_device_deassert_intx(pci_dev);
     do_pci_unregister_device(pci_dev);
 }
 
@@ -1800,6 +1831,7 @@ static const char * const pci_nic_models[] = {
     "e1000",
     "pcnet",
     "virtio",
+    "sungem",
     NULL
 };
 
@@ -1812,6 +1844,7 @@ static const char * const pci_nic_names[] = {
     "e1000",
     "pcnet",
     "virtio-net-pci",
+    "sungem",
     NULL
 };
 
@@ -2235,7 +2268,6 @@ static void pci_add_option_rom(PCIDevice *pdev, bool is_default_rom,
     }
     pdev->has_rom = true;
     memory_region_init_rom(&pdev->rom, OBJECT(pdev), name, size, &error_fatal);
-    vmstate_register_ram(&pdev->rom, &pdev->qdev);
     ptr = memory_region_get_ram_ptr(&pdev->rom);
     load_image(path, ptr);
     g_free(path);
@@ -2258,28 +2290,12 @@ static void pci_del_option_rom(PCIDevice *pdev)
 }
 
 /*
- * if offset = 0,
- * Find and reserve space and add capability to the linked list
- * in pci config space
+ * On success, pci_add_capability() returns a positive value
+ * that the offset of the pci capability.
+ * On failure, it sets an error and returns a negative error
+ * code.
  */
 int pci_add_capability(PCIDevice *pdev, uint8_t cap_id,
-                       uint8_t offset, uint8_t size)
-{
-    int ret;
-    Error *local_err = NULL;
-
-    ret = pci_add_capability2(pdev, cap_id, offset, size, &local_err);
-    if (local_err) {
-        assert(ret < 0);
-        error_report_err(local_err);
-    } else {
-        /* success implies a positive offset in config space */
-        assert(ret > 0);
-    }
-    return ret;
-}
-
-int pci_add_capability2(PCIDevice *pdev, uint8_t cap_id,
                        uint8_t offset, uint8_t size,
                        Error **errp)
 {
@@ -2532,6 +2548,17 @@ static void pci_device_class_init(ObjectClass *klass, void *data)
     pc->realize = pci_default_realize;
 }
 
+static void pci_device_class_base_init(ObjectClass *klass, void *data)
+{
+    if (!object_class_is_abstract(klass)) {
+        ObjectClass *conventional =
+            object_class_dynamic_cast(klass, INTERFACE_CONVENTIONAL_PCI_DEVICE);
+        ObjectClass *pcie =
+            object_class_dynamic_cast(klass, INTERFACE_PCIE_DEVICE);
+        assert(conventional || pcie);
+    }
+}
+
 AddressSpace *pci_device_iommu_address_space(PCIDevice *dev)
 {
     PCIBus *bus = PCI_BUS(dev->bus);
@@ -2656,12 +2683,15 @@ static const TypeInfo pci_device_type_info = {
     .abstract = true,
     .class_size = sizeof(PCIDeviceClass),
     .class_init = pci_device_class_init,
+    .class_base_init = pci_device_class_base_init,
 };
 
 static void pci_register_types(void)
 {
     type_register_static(&pci_bus_info);
     type_register_static(&pcie_bus_info);
+    type_register_static(&conventional_pci_interface_info);
+    type_register_static(&pcie_interface_info);
     type_register_static(&pci_device_type_info);
 }
 
