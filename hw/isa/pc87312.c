@@ -30,8 +30,8 @@
 #include "sysemu/block-backend.h"
 #include "sysemu/blockdev.h"
 #include "sysemu/sysemu.h"
-#include "sysemu/char.h"
-#include "hw/isa/trace.h"
+#include "trace.h"
+#include "chardev/char.h"
 
 
 #define REG_FER 0
@@ -386,6 +386,8 @@ static void pc87312_class_init(ObjectClass *klass, void *data)
     dc->reset = pc87312_reset;
     dc->vmsd = &vmstate_pc87312;
     dc->props = pc87312_properties;
+    /* Reason: Uses parallel_hds[0] in realize(), so it can't be used twice */
+    dc->user_creatable = false;
 }
 
 static const TypeInfo pc87312_type_info = {

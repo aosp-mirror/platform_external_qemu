@@ -14,7 +14,7 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "hw/block/dataplane/trace.h"
+#include "trace.h"
 #include "qemu/iov.h"
 #include "qemu/thread.h"
 #include "qemu/error-report.h"

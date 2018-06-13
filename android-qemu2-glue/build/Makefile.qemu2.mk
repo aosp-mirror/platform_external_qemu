@@ -192,35 +192,17 @@ ifneq (,$(QEMU2_TRACE))
     LOCAL_SRC_FILES += trace/simple.c
     LOCAL_CFLAGS += -DCONFIG_TRACE_SIMPLE=1
 endif
-
 $(call end-emulator-library)
 
-# A static library containing all the stubs we
-# could ever need
-$(call start-emulator-library,libqemu2-stubs)
-LOCAL_CFLAGS += \
-    $(QEMU2_CFLAGS) \
-    -DPOISON_CONFIG_ANDROID \
-
-LOCAL_C_INCLUDES += \
-    $(QEMU2_INCLUDES) \
-
-LOCAL_SRC_FILES += \
-   hw/smbios/smbios_type_38-stub.c \
-    $(QEMU2_LIB_qemustub) \
-    $(QEMU2_LIB_qemustub_$(BUILD_TARGET_TAG)) \
-
-$(call end-emulator-library)
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
 QEMU2_TARGET := x86
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
-QEMU2_TARGET := x86_64
-include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-
 ifeq (,$(CONFIG_MIN_BUILD))
+    QEMU2_TARGET := x86_64
+    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
     QEMU2_TARGET := arm
     include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk

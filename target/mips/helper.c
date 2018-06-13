@@ -20,6 +20,7 @@
 
 #include "cpu.h"
 #include "sysemu/kvm.h"
+#include "internal.h"
 #include "exec/exec-all.h"
 #include "exec/cpu_ldst.h"
 #include "exec/log.h"
@@ -886,6 +887,8 @@ void mips_cpu_do_interrupt(CPUState *cs)
         goto set_DEPC;
     case EXCP_DBp:
         env->CP0_Debug |= 1 << CP0DB_DBp;
+        /* Setup DExcCode - SDBBP instruction */
+        env->CP0_Debug = (env->CP0_Debug & ~(0x1fULL << CP0DB_DEC)) | 9 << CP0DB_DEC;
         goto set_DEPC;
     case EXCP_DDBS:
         env->CP0_Debug |= 1 << CP0DB_DDBS;
