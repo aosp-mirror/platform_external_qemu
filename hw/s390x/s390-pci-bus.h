@@ -24,13 +24,13 @@
 #define TYPE_S390_PCI_BUS "s390-pcibus"
 #define TYPE_S390_PCI_DEVICE "zpci"
 #define TYPE_S390_PCI_IOMMU "s390-pci-iommu"
+#define TYPE_S390_IOMMU_MEMORY_REGION "s390-iommu-memory-region"
 #define FH_MASK_ENABLE   0x80000000
 #define FH_MASK_INSTANCE 0x7f000000
 #define FH_MASK_SHM      0x00ff0000
 #define FH_MASK_INDEX    0x0000ffff
 #define FH_SHM_VFIO      0x00010000
 #define FH_SHM_EMUL      0x00020000
-#define S390_PCIPT_ADAPTER 2
 #define ZPCI_MAX_FID 0xffffffff
 #define ZPCI_MAX_UID 0xffff
 #define UID_UNDEFINED 0
@@ -244,14 +244,6 @@ typedef struct ChscSeiNt2Res {
     uint8_t ccdf[4016];
 } QEMU_PACKED ChscSeiNt2Res;
 
-typedef struct PciCfgSccb {
-    SCCBHeader header;
-    uint8_t atype;
-    uint8_t reserved1;
-    uint16_t reserved2;
-    uint32_t aid;
-} QEMU_PACKED PciCfgSccb;
-
 typedef struct S390MsixInfo {
     bool available;
     uint8_t table_bar;
@@ -267,7 +259,7 @@ typedef struct S390PCIIOMMU {
     S390PCIBusDevice *pbdev;
     AddressSpace as;
     MemoryRegion mr;
-    MemoryRegion iommu_mr;
+    IOMMUMemoryRegion iommu_mr;
     bool enabled;
     uint64_t g_iota;
     uint64_t pba;
@@ -319,8 +311,8 @@ typedef struct S390pciState {
 } S390pciState;
 
 S390pciState *s390_get_phb(void);
-int chsc_sei_nt2_get_event(void *res);
-int chsc_sei_nt2_have_event(void);
+int pci_chsc_sei_nt2_get_event(void *res);
+int pci_chsc_sei_nt2_have_event(void);
 void s390_pci_sclp_configure(SCCB *sccb);
 void s390_pci_sclp_deconfigure(SCCB *sccb);
 void s390_pci_iommu_enable(S390PCIIOMMU *iommu);
@@ -330,6 +322,8 @@ void s390_pci_generate_error_event(uint16_t pec, uint32_t fh, uint32_t fid,
 S390PCIBusDevice *s390_pci_find_dev_by_idx(S390pciState *s, uint32_t idx);
 S390PCIBusDevice *s390_pci_find_dev_by_fh(S390pciState *s, uint32_t fh);
 S390PCIBusDevice *s390_pci_find_dev_by_fid(S390pciState *s, uint32_t fid);
+S390PCIBusDevice *s390_pci_find_dev_by_target(S390pciState *s,
+                                              const char *target);
 S390PCIBusDevice *s390_pci_find_next_avail_dev(S390pciState *s,
                                                S390PCIBusDevice *pbdev);
 

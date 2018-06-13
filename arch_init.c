@@ -27,7 +27,7 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/arch_init.h"
 #include "hw/pci/pci.h"
-#include "hw/audio/audio.h"
+#include "hw/audio/soundhw.h"
 #include "qemu/config-file.h"
 #include "qemu/error-report.h"
 #include "qmp-commands.h"
@@ -85,6 +85,7 @@ int graphic_depth = 32;
 
 const uint32_t arch_type = QEMU_ARCH;
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 struct soundhw {
     const char *name;
     const char *descr;
@@ -211,6 +212,8 @@ bool audio_init(void)
     return true;
 }
 
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 int kvm_available(void)
 {
 #ifdef CONFIG_KVM

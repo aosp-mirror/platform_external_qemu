@@ -48,6 +48,7 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/dma.h"
 #include "qemu/bitops.h"
+#include "qapi/error.h"
 
 /* QEMU sends frames smaller than 60 bytes to ethernet nics.
  * Such frames are rejected by real nics and their emulations.
@@ -494,7 +495,7 @@ static void eepro100_fcp_interrupt(EEPRO100State * s)
 }
 #endif
 
-static void e100_pci_reset(EEPRO100State * s)
+static void e100_pci_reset(EEPRO100State *s, Error **errp)
 {
     E100PCIDeviceInfo *info = eepro100_get_class(s);
     uint32_t device = s->device;
@@ -570,9 +571,18 @@ static void e100_pci_reset(EEPRO100State * s)
         /* Power Management Capabilities */
         int cfg_offset = 0xdc;
         int r = pci_add_capability(&s->dev, PCI_CAP_ID_PM,
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
                                    cfg_offset, PCI_PM_SIZEOF);
         assert(r >= 0);
         (void)r;
+=======
+                                   cfg_offset, PCI_PM_SIZEOF,
+                                   errp);
+        if (r < 0) {
+            return;
+        }
+
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
         pci_set_word(pci_conf + cfg_offset + PCI_PM_PMC, 0x7e21);
 #if 0 /* TODO: replace dummy code for power management emulation. */
         /* TODO: Power Management Control / Status. */
@@ -750,8 +760,8 @@ static void read_cb(EEPRO100State *s)
 
 static void tx_command(EEPRO100State *s)
 {
-    uint32_t tbd_array = le32_to_cpu(s->tx.tbd_array_addr);
-    uint16_t tcb_bytes = (le16_to_cpu(s->tx.tcb_bytes) & 0x3fff);
+    uint32_t tbd_array = s->tx.tbd_array_addr;
+    uint16_t tcb_bytes = s->tx.tcb_bytes & 0x3fff;
     /* Sends larger than MAX_ETH_FRAME_SIZE are allowed, up to 2600 bytes. */
     uint8_t buf[2600];
     uint16_t size = 0;
@@ -770,23 +780,11 @@ static void tx_command(EEPRO100State *s)
     }
     assert(tcb_bytes <= sizeof(buf));
     while (size < tcb_bytes) {
-        uint32_t tx_buffer_address = ldl_le_pci_dma(&s->dev, tbd_address);
-        uint16_t tx_buffer_size = lduw_le_pci_dma(&s->dev, tbd_address + 4);
-#if 0
-        uint16_t tx_buffer_el = lduw_le_pci_dma(&s->dev, tbd_address + 6);
-#endif
-        if (tx_buffer_size == 0) {
-            /* Prevent an endless loop. */
-            logout("loop in %s:%u\n", __FILE__, __LINE__);
-            break;
-        }
-        tbd_address += 8;
         TRACE(RXTX, logout
             ("TBD (simplified mode): buffer address 0x%08x, size 0x%04x\n",
-             tx_buffer_address, tx_buffer_size));
-        tx_buffer_size = MIN(tx_buffer_size, sizeof(buf) - size);
-        pci_dma_read(&s->dev, tx_buffer_address, &buf[size], tx_buffer_size);
-        size += tx_buffer_size;
+             tbd_address, tcb_bytes));
+        pci_dma_read(&s->dev, tbd_address, &buf[size], tcb_bytes);
+        size += tcb_bytes;
     }
     if (tbd_array == 0xffffffff) {
         /* Simplified mode. Was already handled by code above. */
@@ -1859,12 +1857,17 @@ static void e100_nic_realize(PCIDevice *pci_dev, Error **errp)
 {
     EEPRO100State *s = DO_UPCAST(EEPRO100State, dev, pci_dev);
     E100PCIDeviceInfo *info = eepro100_get_class(s);
+    Error *local_err = NULL;
 
     TRACE(OTHER, logout("\n"));
 
     s->device = info->device;
 
-    e100_pci_reset(s);
+    e100_pci_reset(s, &local_err);
+    if (local_err) {
+        error_propagate(errp, local_err);
+        return;
+    }
 
     /* Add 64 * 2 EEPROM. i82557 and i82558 support a 64 word EEPROM,
      * i82559 and later support 64 or 256 word EEPROM. */
@@ -1895,8 +1898,7 @@ static void e100_nic_realize(PCIDevice *pci_dev, Error **errp)
 
     qemu_register_reset(nic_reset, s);
 
-    s->vmstate = g_malloc(sizeof(vmstate_eepro100));
-    memcpy(s->vmstate, &vmstate_eepro100, sizeof(vmstate_eepro100));
+    s->vmstate = g_memdup(&vmstate_eepro100, sizeof(vmstate_eepro100));
     s->vmstate->name = qemu_get_queue(s->nic)->model;
     vmstate_register(&pci_dev->qdev, -1, s->vmstate, s);
 }
@@ -2108,6 +2110,10 @@ static void eepro100_register_types(void)
         type_info.class_init = eepro100_class_init;
         type_info.instance_size = sizeof(EEPRO100State);
         type_info.instance_init = eepro100_instance_init;
+        type_info.interfaces = (InterfaceInfo[]) {
+            { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+            { },
+        };
 
         type_register(&type_info);
     }

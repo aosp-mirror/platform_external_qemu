@@ -41,19 +41,15 @@
 #include "qemu/timer.h"
 #include "qemu/sockets.h"
 #include "hw/sparc/sun4m.h"
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #include "pcnet.h"
 #include "hw/net/trace.h"
+=======
+#include "hw/net/lance.h"
+#include "trace.h"
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 #include "sysemu/sysemu.h"
 
-#define TYPE_LANCE "lance"
-#define SYSBUS_PCNET(obj) \
-    OBJECT_CHECK(SysBusPCNetState, (obj), TYPE_LANCE)
-
-typedef struct {
-    SysBusDevice parent_obj;
-
-    PCNetState state;
-} SysBusPCNetState;
 
 static void parent_lance_reset(void *opaque, int irq, int level)
 {
@@ -165,7 +161,7 @@ static void lance_class_init(ObjectClass *klass, void *data)
     dc->vmsd = &vmstate_lance;
     dc->props = lance_properties;
     /* Reason: pointer property "dma" */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo lance_info = {

@@ -46,7 +46,12 @@
 #include "e1000x_common.h"
 #include "e1000e_core.h"
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #include "hw/net/trace.h"
+=======
+#include "trace.h"
+#include "qapi/error.h"
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 
 #define TYPE_E1000E "e1000e"
 #define E1000E(obj) OBJECT_CHECK(E1000EState, (obj), TYPE_E1000E)
@@ -372,21 +377,26 @@ e1000e_gen_dsn(uint8_t *mac)
 static int
 e1000e_add_pm_capability(PCIDevice *pdev, uint8_t offset, uint16_t pmc)
 {
-    int ret = pci_add_capability(pdev, PCI_CAP_ID_PM, offset, PCI_PM_SIZEOF);
+    Error *local_err = NULL;
+    int ret = pci_add_capability(pdev, PCI_CAP_ID_PM, offset,
+                                 PCI_PM_SIZEOF, &local_err);
 
-    if (ret >= 0) {
-        pci_set_word(pdev->config + offset + PCI_PM_PMC,
-                     PCI_PM_CAP_VER_1_1 |
-                     pmc);
-
-        pci_set_word(pdev->wmask + offset + PCI_PM_CTRL,
-                     PCI_PM_CTRL_STATE_MASK |
-                     PCI_PM_CTRL_PME_ENABLE |
-                     PCI_PM_CTRL_DATA_SEL_MASK);
-
-        pci_set_word(pdev->w1cmask + offset + PCI_PM_CTRL,
-                     PCI_PM_CTRL_PME_STATUS);
+    if (local_err) {
+        error_report_err(local_err);
+        return ret;
     }
+
+    pci_set_word(pdev->config + offset + PCI_PM_PMC,
+                 PCI_PM_CAP_VER_1_1 |
+                 pmc);
+
+    pci_set_word(pdev->wmask + offset + PCI_PM_CTRL,
+                 PCI_PM_CTRL_STATE_MASK |
+                 PCI_PM_CTRL_PME_ENABLE |
+                 PCI_PM_CTRL_DATA_SEL_MASK);
+
+    pci_set_word(pdev->w1cmask + offset + PCI_PM_CTRL,
+                 PCI_PM_CTRL_PME_STATUS);
 
     return ret;
 }
@@ -517,13 +527,15 @@ static void e1000e_qdev_reset(DeviceState *dev)
     e1000e_core_reset(&s->core);
 }
 
-static void e1000e_pre_save(void *opaque)
+static int e1000e_pre_save(void *opaque)
 {
     E1000EState *s = opaque;
 
     trace_e1000e_cb_pre_save();
 
     e1000e_core_pre_save(&s->core);
+
+    return 0;
 }
 
 static int e1000e_post_load(void *opaque, int version_id)
@@ -645,12 +657,12 @@ static PropertyInfo e1000e_prop_disable_vnet,
 
 static Property e1000e_properties[] = {
     DEFINE_NIC_PROPERTIES(E1000EState, conf),
-    DEFINE_PROP_DEFAULT("disable_vnet_hdr", E1000EState, disable_vnet, false,
+    DEFINE_PROP_SIGNED("disable_vnet_hdr", E1000EState, disable_vnet, false,
                         e1000e_prop_disable_vnet, bool),
-    DEFINE_PROP_DEFAULT("subsys_ven", E1000EState, subsys_ven,
+    DEFINE_PROP_SIGNED("subsys_ven", E1000EState, subsys_ven,
                         PCI_VENDOR_ID_INTEL,
                         e1000e_prop_subsys_ven, uint16_t),
-    DEFINE_PROP_DEFAULT("subsys", E1000EState, subsys, 0,
+    DEFINE_PROP_SIGNED("subsys", E1000EState, subsys, 0,
                         e1000e_prop_subsys, uint16_t),
     DEFINE_PROP_END_OF_LIST(),
 };
@@ -702,6 +714,10 @@ static const TypeInfo e1000e_info = {
     .instance_size = sizeof(E1000EState),
     .class_init = e1000e_class_init,
     .instance_init = e1000e_instance_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_PCIE_DEVICE },
+        { }
+    },
 };
 
 static void e1000e_register_types(void)

@@ -28,8 +28,13 @@
 #include "hw/pci/msi.h"
 #include "qemu/iov.h"
 #include "hw/scsi/scsi.h"
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #include "block/scsi.h"
 #include "hw/scsi/trace.h"
+=======
+#include "scsi/constants.h"
+#include "trace.h"
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 
 #include "mptsas.h"
 #include "mpi.h"

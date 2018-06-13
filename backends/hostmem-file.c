@@ -32,6 +32,7 @@ struct HostMemoryBackendFile {
     HostMemoryBackend parent_obj;
 
     bool share;
+    bool discard_data;
     char *mem_path;
 };
 
@@ -51,7 +52,7 @@ file_backend_memory_alloc(HostMemoryBackend *backend, Error **errp)
 #ifndef CONFIG_LINUX
     error_setg(errp, "-mem-path not supported on this host");
 #else
-    if (!memory_region_size(&backend->mr)) {
+    if (!host_memory_backend_mr_inited(backend)) {
         gchar *path;
         backend->force_prealloc = mem_prealloc;
         path = object_get_canonical_path(OBJECT(backend));
@@ -76,7 +77,7 @@ static void set_mem_path(Object *o, const char *str, Error **errp)
     HostMemoryBackend *backend = MEMORY_BACKEND(o);
     HostMemoryBackendFile *fb = MEMORY_BACKEND_FILE(o);
 
-    if (memory_region_size(&backend->mr)) {
+    if (host_memory_backend_mr_inited(backend)) {
         error_setg(errp, "cannot change property value");
         return;
     }
@@ -96,11 +97,35 @@ static void file_memory_backend_set_share(Object *o, bool value, Error **errp)
     HostMemoryBackend *backend = MEMORY_BACKEND(o);
     HostMemoryBackendFile *fb = MEMORY_BACKEND_FILE(o);
 
-    if (memory_region_size(&backend->mr)) {
+    if (host_memory_backend_mr_inited(backend)) {
         error_setg(errp, "cannot change property value");
         return;
     }
     fb->share = value;
+}
+
+static bool file_memory_backend_get_discard_data(Object *o, Error **errp)
+{
+    return MEMORY_BACKEND_FILE(o)->discard_data;
+}
+
+static void file_memory_backend_set_discard_data(Object *o, bool value,
+                                               Error **errp)
+{
+    MEMORY_BACKEND_FILE(o)->discard_data = value;
+}
+
+static void file_backend_unparent(Object *obj)
+{
+    HostMemoryBackend *backend = MEMORY_BACKEND(obj);
+    HostMemoryBackendFile *fb = MEMORY_BACKEND_FILE(obj);
+
+    if (host_memory_backend_mr_inited(backend) && fb->discard_data) {
+        void *ptr = memory_region_get_ram_ptr(&backend->mr);
+        uint64_t sz = memory_region_size(&backend->mr);
+
+        qemu_madvise(ptr, sz, QEMU_MADV_REMOVE);
+    }
 }
 
 static void
@@ -109,9 +134,13 @@ file_backend_class_init(ObjectClass *oc, void *data)
     HostMemoryBackendClass *bc = MEMORY_BACKEND_CLASS(oc);
 
     bc->alloc = file_backend_memory_alloc;
+    oc->unparent = file_backend_unparent;
 
     object_class_property_add_bool(oc, "share",
         file_memory_backend_get_share, file_memory_backend_set_share,
+        &error_abort);
+    object_class_property_add_bool(oc, "discard-data",
+        file_memory_backend_get_discard_data, file_memory_backend_set_discard_data,
         &error_abort);
     object_class_property_add_str(oc, "mem-path",
         get_mem_path, set_mem_path,
