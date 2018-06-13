@@ -189,7 +189,6 @@ struct Slirp {
     /* if states */
     struct quehead if_fastq;   /* fast queue (for interactive data) */
     struct quehead if_batchq;  /* queue for non-interactive data */
-    struct mbuf *next_m;    /* pointer to next mbuf to output */
     bool if_start_busy;     /* avoid if_start recursion */
 
     /* ip states */
@@ -236,6 +235,9 @@ extern Slirp *slirp_instance;
 #endif
 
 void if_start(Slirp *);
+
+/* ncsi.c */
+void ncsi_input(Slirp *slirp, const uint8_t *pkt, int pkt_len);
 
 #ifndef _WIN32
 #include <netdb.h>

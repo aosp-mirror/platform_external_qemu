@@ -355,7 +355,7 @@ static void omap_wd_timer_write(void *opaque, hwaddr addr,
                 /* XXX: on T|E hardware somehow this has no effect,
                  * on Zire 71 it works as specified.  */
                 s->reset = 1;
-                qemu_system_reset_request();
+                qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
             }
         }
         s->last_wr = value & 0xff;
@@ -1545,8 +1545,10 @@ static inline void omap_clkm_idlect1_update(struct omap_mpu_state_s *s,
     if (value & (1 << 11)) {                            /* SETARM_IDLE */
         cpu_interrupt(CPU(s->cpu), CPU_INTERRUPT_HALT);
     }
-    if (!(value & (1 << 10)))				/* WKUP_MODE */
-        qemu_system_shutdown_request();	/* XXX: disable wakeup from IRQ */
+    if (!(value & (1 << 10))) {                         /* WKUP_MODE */
+        /* XXX: disable wakeup from IRQ */
+        qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
+    }
 
 #define SET_CANIDLE(clock, bit)				\
     if (diff & (1 << bit)) {				\
@@ -1693,7 +1695,7 @@ static void omap_clkm_write(void *opaque, hwaddr addr,
         diff = s->clkm.arm_rstct1 ^ value;
         s->clkm.arm_rstct1 = value & 0x0007;
         if (value & 9) {
-            qemu_system_reset_request();
+            qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
             s->clkm.cold_start = 0xa;
         }
         if (diff & ~value & 4) {				/* DSP_RST */
@@ -3848,7 +3850,7 @@ static int omap_validate_tipb_mpui_addr(struct omap_mpu_state_s *s,
 
 struct omap_mpu_state_s *omap310_mpu_init(MemoryRegion *system_memory,
                 unsigned long sdram_size,
-                const char *core)
+                const char *cpu_type)
 {
     int i;
     struct omap_mpu_state_s *s = g_new0(struct omap_mpu_state_s, 1);
@@ -3856,16 +3858,9 @@ struct omap_mpu_state_s *omap310_mpu_init(MemoryRegion *system_memory,
     DriveInfo *dinfo;
     SysBusDevice *busdev;
 
-    if (!core)
-        core = "ti925t";
-
     /* Core */
     s->mpu_model = omap310;
-    s->cpu = cpu_arm_init(core);
-    if (s->cpu == NULL) {
-        fprintf(stderr, "Unable to find CPU definition\n");
-        exit(1);
-    }
+    s->cpu = ARM_CPU(cpu_create(cpu_type));
     s->sdram_size = sdram_size;
     s->sram_size = OMAP15XX_SRAM_SIZE;
 
@@ -3880,7 +3875,6 @@ struct omap_mpu_state_s *omap310_mpu_init(MemoryRegion *system_memory,
     memory_region_add_subregion(system_memory, OMAP_EMIFF_BASE, &s->emiff_ram);
     memory_region_init_ram(&s->imif_ram, NULL, "omap1.sram", s->sram_size,
                            &error_fatal);
-    vmstate_register_ram_global(&s->imif_ram);
     memory_region_add_subregion(system_memory, OMAP_IMIF_BASE, &s->imif_ram);
 
     omap_clkm_init(system_memory, 0xfffece00, 0xe1008000, s);

@@ -24,7 +24,7 @@
 #include "qemu-common.h"
 #include "hw/arm/fsl-imx6.h"
 #include "sysemu/sysemu.h"
-#include "sysemu/char.h"
+#include "chardev/char.h"
 #include "qemu/error-report.h"
 
 #define NAME_SIZE 20
@@ -427,7 +427,6 @@ static void fsl_imx6_realize(DeviceState *dev, Error **errp)
     }
     memory_region_add_subregion(get_system_memory(), FSL_IMX6_OCRAM_ADDR,
                                 &s->ocram);
-    vmstate_register_ram_global(&s->ocram);
 
     /* internal OCRAM (256 KB) is aliased over 1 MB */
     memory_region_init_alias(&s->ocram_alias, NULL, "imx6.ocram_alias",
@@ -441,13 +440,9 @@ static void fsl_imx6_class_init(ObjectClass *oc, void *data)
     DeviceClass *dc = DEVICE_CLASS(oc);
 
     dc->realize = fsl_imx6_realize;
-
-    /*
-     * Reason: creates an ARM CPU, thus use after free(), see
-     * arm_cpu_class_init()
-     */
-    dc->cannot_destroy_with_object_finalize_yet = true;
     dc->desc = "i.MX6 SOC";
+    /* Reason: Uses serial_hds[] in the realize() function */
+    dc->user_creatable = false;
 }
 
 static const TypeInfo fsl_imx6_type_info = {

@@ -30,11 +30,14 @@ enum {
 
 extern const uint32_t arch_type;
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 void select_soundhw(const char *optarg);
 void do_acpitable_option(const QemuOpts *opts);
 void do_smbios_option(QemuOpts *opts);
 bool audio_init(void);
 
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 int kvm_available(void);
 int xen_available(void);
 int hax_available(void);
