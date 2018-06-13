@@ -26,7 +26,7 @@
 #include "hw/isa/isa.h"
 #include "hw/isa/i8257.h"
 #include "qemu/main-loop.h"
-#include "hw/dma/trace.h"
+#include "trace.h"
 
 #define I8257(obj) \
     OBJECT_CHECK(I8257State, (obj), TYPE_I8257)
@@ -601,7 +601,7 @@ static void i8257_class_init(ObjectClass *klass, void *data)
     idc->schedule = i8257_dma_schedule;
     idc->register_channel = i8257_dma_register_channel;
     /* Reason: needs to be wired up by isa_bus_dma() to work */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo i8257_info = {

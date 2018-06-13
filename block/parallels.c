@@ -35,7 +35,7 @@
 #include "qemu/module.h"
 #include "qemu/bswap.h"
 #include "qemu/bitmap.h"
-#include "qapi/util.h"
+#include "migration/blocker.h"
 
 /**************************************************************/
 
@@ -69,12 +69,13 @@ typedef enum ParallelsPreallocMode {
     PRL_PREALLOC_MODE__MAX = 2,
 } ParallelsPreallocMode;
 
-static const char *prealloc_mode_lookup[] = {
-    "falloc",
-    "truncate",
-    NULL,
+static QEnumLookup prealloc_mode_lookup = {
+    .array = (const char *const[]) {
+        "falloc",
+        "truncate",
+    },
+    .size = PRL_PREALLOC_MODE__MAX
 };
-
 
 typedef struct BDRVParallelsState {
     /** Locking is conservative, the lock protects
@@ -100,6 +101,7 @@ typedef struct BDRVParallelsState {
     unsigned int tracks;
 
     unsigned int off_multiplier;
+    Error *migration_blocker;
 } BDRVParallelsState;
 
 
@@ -192,7 +194,7 @@ static int64_t allocate_clusters(BlockDriverState *bs, int64_t sector_num,
                                  int nb_sectors, int *pnum)
 {
     BDRVParallelsState *s = bs->opaque;
-    int64_t pos, space, idx, to_allocate, i;
+    int64_t pos, space, idx, to_allocate, i, len;
 
     pos = block_status(s, sector_num, nb_sectors, pnum);
     if (pos > 0) {
@@ -214,7 +216,11 @@ static int64_t allocate_clusters(BlockDriverState *bs, int64_t sector_num,
     assert(idx < s->bat_size && idx + to_allocate <= s->bat_size);
 
     space = to_allocate * s->tracks;
-    if (s->data_end + space > bdrv_getlength(bs->file->bs) >> BDRV_SECTOR_BITS) {
+    len = bdrv_getlength(bs->file->bs);
+    if (len < 0) {
+        return len;
+    }
+    if (s->data_end + space > (len >> BDRV_SECTOR_BITS)) {
         int ret;
         space += s->prealloc_size;
         if (s->prealloc_mode == PRL_PREALLOC_MODE_FALLOCATE) {
@@ -223,7 +229,8 @@ static int64_t allocate_clusters(BlockDriverState *bs, int64_t sector_num,
                                      space << BDRV_SECTOR_BITS, 0);
         } else {
             ret = bdrv_truncate(bs->file,
-                                (s->data_end + space) << BDRV_SECTOR_BITS);
+                                (s->data_end + space) << BDRV_SECTOR_BITS,
+                                PREALLOC_MODE_OFF, NULL);
         }
         if (ret < 0) {
             return ret;
@@ -456,8 +463,11 @@ static int parallels_check(BlockDriverState *bs, BdrvCheckResult *res,
                 size - res->image_end_offset);
         res->leaks += count;
         if (fix & BDRV_FIX_LEAKS) {
-            ret = bdrv_truncate(bs->file, res->image_end_offset);
+            Error *local_err = NULL;
+            ret = bdrv_truncate(bs->file, res->image_end_offset,
+                                PREALLOC_MODE_OFF, &local_err);
             if (ret < 0) {
+                error_report_err(local_err);
                 res->check_errors++;
                 return ret;
             }
@@ -504,7 +514,7 @@ static int parallels_create(const char *filename, QemuOpts *opts, Error **errp)
 
     blk_set_allow_write_beyond_eof(file, true);
 
-    ret = blk_truncate(file, 0);
+    ret = blk_truncate(file, 0, PREALLOC_MODE_OFF, errp);
     if (ret < 0) {
         goto exit;
     }
@@ -688,19 +698,19 @@ static int parallels_open(BlockDriverState *bs, QDict *options, int flags,
         qemu_opt_get_size_del(opts, PARALLELS_OPT_PREALLOC_SIZE, 0);
     s->prealloc_size = MAX(s->tracks, s->prealloc_size >> BDRV_SECTOR_BITS);
     buf = qemu_opt_get_del(opts, PARALLELS_OPT_PREALLOC_MODE);
-    s->prealloc_mode = qapi_enum_parse(prealloc_mode_lookup, buf,
-            PRL_PREALLOC_MODE__MAX, PRL_PREALLOC_MODE_FALLOCATE, &local_err);
+    s->prealloc_mode = qapi_enum_parse(&prealloc_mode_lookup, buf,
+                                       PRL_PREALLOC_MODE_FALLOCATE,
+                                       &local_err);
     g_free(buf);
     if (local_err != NULL) {
         goto fail_options;
     }
 
-    if (!(flags & BDRV_O_RESIZE) || !bdrv_has_zero_init(bs->file->bs) ||
-            bdrv_truncate(bs->file, bdrv_getlength(bs->file->bs)) != 0) {
+    if (!bdrv_has_zero_init(bs->file->bs)) {
         s->prealloc_mode = PRL_PREALLOC_MODE_FALLOCATE;
     }
 
-    if (flags & BDRV_O_RDWR) {
+    if ((flags & BDRV_O_RDWR) && !(flags & BDRV_O_INACTIVE)) {
         s->header->inuse = cpu_to_le32(HEADER_INUSE_MAGIC);
         ret = parallels_update_header(bs);
         if (ret < 0) {
@@ -712,6 +722,16 @@ static int parallels_open(BlockDriverState *bs, QDict *options, int flags,
     s->bat_dirty_bmap =
         bitmap_new(DIV_ROUND_UP(s->header_size, s->bat_dirty_block));
 
+    /* Disable migration until bdrv_invalidate_cache method is added */
+    error_setg(&s->migration_blocker, "The Parallels format used by node '%s' "
+               "does not support live migration",
+               bdrv_get_device_or_node_name(bs));
+    ret = migrate_add_blocker(s->migration_blocker, &local_err);
+    if (local_err) {
+        error_propagate(errp, local_err);
+        error_free(s->migration_blocker);
+        goto fail;
+    }
     qemu_co_mutex_init(&s->lock);
     return 0;
 
@@ -733,17 +753,18 @@ static void parallels_close(BlockDriverState *bs)
 {
     BDRVParallelsState *s = bs->opaque;
 
-    if (bs->open_flags & BDRV_O_RDWR) {
+    if ((bs->open_flags & BDRV_O_RDWR) && !(bs->open_flags & BDRV_O_INACTIVE)) {
         s->header->inuse = 0;
         parallels_update_header(bs);
-    }
-
-    if (bs->open_flags & BDRV_O_RDWR) {
-        bdrv_truncate(bs->file, s->data_end << BDRV_SECTOR_BITS);
+        bdrv_truncate(bs->file, s->data_end << BDRV_SECTOR_BITS,
+                      PREALLOC_MODE_OFF, NULL);
     }
 
     g_free(s->bat_dirty_bmap);
     qemu_vfree(s->header);
+
+    migrate_del_blocker(s->migration_blocker);
+    error_free(s->migration_blocker);
 }
 
 static QemuOptsList parallels_create_opts = {
