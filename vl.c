@@ -1082,7 +1082,7 @@ static int create_qcow2_images(void) {
                 qcow2_image_path,
                 QCOW2_SUFFIX,
                 /*absolute path only for sys vendor*/
-                p < 2 ? backing_image_path : image_basename,
+                p < 2 || need_rebase ? backing_image_path : image_basename,
                 fmt,
                 NULL,
                 -1,

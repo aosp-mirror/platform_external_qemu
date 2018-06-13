@@ -150,6 +150,8 @@ OPT_FLAG( no_sim, "device has no SIM card" )
 OPT_FLAG( lowram, "device is a low ram device" )
 OPT_FLAG( version, "display emulator version number" )
 OPT_FLAG( no_passive_gps, "disable passive gps updates" )
+OPT_FLAG( read_only, "allow running multiple instances of emulators on the same"
+        " AVD, but cannot save snapshot.")
 
 OPT_PARAM( report_console, "<socket>", "report console port to remote socket" )
 OPT_PARAM( gps, "<device>", "redirect NMEA GPS to character device" )
