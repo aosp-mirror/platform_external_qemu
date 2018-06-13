@@ -215,14 +215,14 @@ bool cryptodev_backend_is_ready(CryptoDevBackend *backend)
 }
 
 static bool
-cryptodev_backend_can_be_deleted(UserCreatable *uc, Error **errp)
+cryptodev_backend_can_be_deleted(UserCreatable *uc)
 {
     return !cryptodev_backend_is_used(CRYPTODEV_BACKEND(uc));
 }
 
 static void cryptodev_backend_instance_init(Object *obj)
 {
-    object_property_add(obj, "queues", "int",
+    object_property_add(obj, "queues", "uint32",
                           cryptodev_backend_get_queues,
                           cryptodev_backend_set_queues,
                           NULL, NULL, NULL);

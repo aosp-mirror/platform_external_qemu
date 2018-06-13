@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 /*
  *  Common CPU TLB handling
  *
@@ -1043,3 +1044,5 @@ static void *atomic_mmu_lookup(CPUArchState *env, target_ulong addr,
 
 #define DATA_SIZE 8
 #include "softmmu_template.h"
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)

@@ -430,19 +430,39 @@ static void omap_i2c_writeb(void *opaque, hwaddr addr,
     }
 }
 
+static uint64_t omap_i2c_readfn(void *opaque, hwaddr addr,
+                                unsigned size)
+{
+    switch (size) {
+    case 2:
+        return omap_i2c_read(opaque, addr);
+    default:
+        return omap_badwidth_read16(opaque, addr);
+    }
+}
+
+static void omap_i2c_writefn(void *opaque, hwaddr addr,
+                             uint64_t value, unsigned size)
+{
+    switch (size) {
+    case 1:
+        /* Only the last fifo write can be 8 bit. */
+        omap_i2c_writeb(opaque, addr, value);
+        break;
+    case 2:
+        omap_i2c_write(opaque, addr, value);
+        break;
+    default:
+        omap_badwidth_write16(opaque, addr, value);
+        break;
+    }
+}
+
 static const MemoryRegionOps omap_i2c_ops = {
-    .old_mmio = {
-        .read = {
-            omap_badwidth_read16,
-            omap_i2c_read,
-            omap_badwidth_read16,
-        },
-        .write = {
-            omap_i2c_writeb, /* Only the last fifo write can be 8 bit.  */
-            omap_i2c_write,
-            omap_badwidth_write16,
-        },
-    },
+    .read = omap_i2c_readfn,
+    .write = omap_i2c_writefn,
+    .valid.min_access_size = 1,
+    .valid.max_access_size = 4,
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
 
@@ -491,7 +511,7 @@ static void omap_i2c_class_init(ObjectClass *klass, void *data)
     dc->props = omap_i2c_properties;
     dc->reset = omap_i2c_reset;
     /* Reason: pointer properties "iclk", "fclk" */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
     dc->realize = omap_i2c_realize;
 }
 

@@ -6,7 +6,7 @@ HXCOMM construct option structures, enums and help message for specified
 HXCOMM architectures.
 HXCOMM HXCOMM can be used for comments, discarded from both texi and C
 
-DEFHEADING(Standard options)
+DEFHEADING(Standard options:)
 STEXI
 @table @option
 ETEXI
@@ -31,7 +31,7 @@ DEF("machine", HAS_ARG, QEMU_OPTION_machine, \
     "-machine [type=]name[,prop[=value][,...]]\n"
     "                selects emulated machine ('-machine help' for list)\n"
     "                property accel=accel1[:accel2[:...]] selects accelerator\n"
-    "                supported accelerators are kvm, xen, tcg (default: tcg)\n"
+    "                supported accelerators are kvm, xen, hax or tcg (default: tcg)\n"
     "                kernel_irqchip=on|off|split controls accelerated irqchip support (default=off)\n"
     "                vmport=on|off|auto controls emulation of vmport (default: auto)\n"
     "                kvm_shadow_mem=size of KVM shadow MMU in bytes\n"
@@ -42,19 +42,33 @@ DEF("machine", HAS_ARG, QEMU_OPTION_machine, \
     "                dea-key-wrap=on|off controls support for DEA key wrapping (default=on)\n"
     "                suppress-vmdesc=on|off disables self-describing migration (default=off)\n"
     "                nvdimm=on|off controls NVDIMM support (default=off)\n"
-    "                enforce-config-section=on|off enforce configuration section migration (default=off)\n",
+    "                enforce-config-section=on|off enforce configuration section migration (default=off)\n"
+    "                s390-squash-mcss=on|off controls support for squashing into default css (default=off)\n",
     QEMU_ARCH_ALL)
 STEXI
 @item -machine [type=]@var{name}[,prop=@var{value}[,...]]
 @findex -machine
 Select the emulated machine by @var{name}. Use @code{-machine help} to list
-available machines. Supported machine properties are:
+available machines.
+
+For architectures which aim to support live migration compatibility
+across releases, each release will introduce a new versioned machine
+type. For example, the 2.8.0 release introduced machine types
+``pc-i440fx-2.8'' and ``pc-q35-2.8'' for the x86_64/i686 architectures.
+
+To allow live migration of guests from QEMU version 2.8.0, to QEMU
+version 2.9.0, the 2.9.0 version must support the ``pc-i440fx-2.8''
+and ``pc-q35-2.8'' machines too. To allow users live migrating VMs
+to skip multiple intermediate releases when upgrading, new releases
+of QEMU will support machine types from many previous versions.
+
+Supported machine properties are:
 @table @option
 @item accel=@var{accels1}[:@var{accels2}[:...]]
 This is used to enable an accelerator. Depending on the target architecture,
-kvm, xen, or tcg can be available. By default, tcg is used. If there is more
-than one accelerator specified, the next one is used if the previous one fails
-to initialize.
+kvm, xen, hax or tcg can be available. By default, tcg is used. If there is
+more than one accelerator specified, the next one is used if the previous one
+fails to initialize.
 @item kernel_irqchip=on|off
 Controls in-kernel irqchip support for the chosen accelerator when available.
 @item gfx_passthru=on|off
@@ -81,6 +95,15 @@ controls whether DEA wrapping keys will be created to allow
 execution of DEA cryptographic functions.  The default is on.
 @item nvdimm=on|off
 Enables or disables NVDIMM support. The default is off.
+@item s390-squash-mcss=on|off
+Enables or disables squashing subchannels into the default css.
+The default is off.
+@item enforce-config-section=on|off
+If @option{enforce-config-section} is set to @var{on}, force migration
+code to send configuration section even if the machine-type sets the
+@option{migration.send-configuration} property to @var{off}.
+NOTE: this parameter is deprecated. Please use @option{-global}
+@option{migration.send-configuration}=@var{on|off} instead.
 @end table
 ETEXI
 
@@ -97,15 +120,15 @@ ETEXI
 
 DEF("accel", HAS_ARG, QEMU_OPTION_accel,
     "-accel [accel=]accelerator[,thread=single|multi]\n"
-    "               select accelerator ('-accel help for list')\n"
-    "               thread=single|multi (enable multi-threaded TCG)", QEMU_ARCH_ALL)
+    "                select accelerator (kvm, xen, hax or tcg; use 'help' for a list)\n"
+    "                thread=single|multi (enable multi-threaded TCG)\n", QEMU_ARCH_ALL)
 STEXI
 @item -accel @var{name}[,prop=@var{value}[,...]]
 @findex -accel
 This is used to enable an accelerator. Depending on the target architecture,
-kvm, xen, or tcg can be available. By default, tcg is used. If there is more
-than one accelerator specified, the next one is used if the previous one fails
-to initialize.
+kvm, xen, hax or tcg can be available. By default, tcg is used. If there is
+more than one accelerator specified, the next one is used if the previous one
+fails to initialize.
 @table @option
 @item thread=single|multi
 Controls number of TCG threads. When the TCG is multi-threaded there will be one
@@ -139,13 +162,18 @@ ETEXI
 
 DEF("numa", HAS_ARG, QEMU_OPTION_numa,
     "-numa node[,mem=size][,cpus=firstcpu[-lastcpu]][,nodeid=node]\n"
-    "-numa node[,memdev=id][,cpus=firstcpu[-lastcpu]][,nodeid=node]\n", QEMU_ARCH_ALL)
+    "-numa node[,memdev=id][,cpus=firstcpu[-lastcpu]][,nodeid=node]\n"
+    "-numa dist,src=source,dst=destination,val=distance\n", QEMU_ARCH_ALL)
 STEXI
 @item -numa node[,mem=@var{size}][,cpus=@var{firstcpu}[-@var{lastcpu}]][,nodeid=@var{node}]
 @itemx -numa node[,memdev=@var{id}][,cpus=@var{firstcpu}[-@var{lastcpu}]][,nodeid=@var{node}]
+@itemx -numa dist,src=@var{source},dst=@var{destination},val=@var{distance}
+@itemx -numa cpu,node-id=@var{node}[,socket-id=@var{x}][,core-id=@var{y}][,thread-id=@var{z}]
 @findex -numa
 Define a NUMA node and assign RAM and VCPUs to it.
+Set the NUMA distance from a source node to a destination node.
 
+Legacy VCPU assignment uses @samp{cpus} option where
 @var{firstcpu} and @var{lastcpu} are CPU indexes. Each
 @samp{cpus} option represent a contiguous range of CPU indexes
 (or a single VCPU if @var{lastcpu} is omitted). A non-contiguous
@@ -159,6 +187,24 @@ a NUMA node:
 -numa node,cpus=0-2,cpus=5
 @end example
 
+@samp{cpu} option is a new alternative to @samp{cpus} option
+which uses @samp{socket-id|core-id|thread-id} properties to assign
+CPU objects to a @var{node} using topology layout properties of CPU.
+The set of properties is machine specific, and depends on used
+machine type/@samp{smp} options. It could be queried with
+@samp{hotpluggable-cpus} monitor command.
+@samp{node-id} property specifies @var{node} to which CPU object
+will be assigned, it's required for @var{node} to be declared
+with @samp{node} option before it's used with @samp{cpu} option.
+
+For example:
+@example
+-M pc \
+-smp 1,sockets=2,maxcpus=2 \
+-numa node,nodeid=0 -numa node,nodeid=1 \
+-numa cpu,node-id=0,socket-id=0 -numa cpu,node-id=1,socket-id=1
+@end example
+
 @samp{mem} assigns a given RAM amount to a node. @samp{memdev}
 assigns RAM from a given memory backend device to a node. If
 @samp{mem} and @samp{memdev} are omitted in all nodes, RAM is
@@ -166,6 +212,17 @@ split equally between them.
 
 @samp{mem} and @samp{memdev} are mutually exclusive. Furthermore,
 if one node uses @samp{memdev}, all of them have to use it.
+
+@var{source} and @var{destination} are NUMA node IDs.
+@var{distance} is the NUMA distance from @var{source} to @var{destination}.
+The distance from a node to itself is always 10. If any pair of nodes is
+given a distance, then all pairs must be given distances. Although, when
+distances are only given in one direction for each pair of nodes, then
+the distances in the opposite directions are assumed to be the same. If,
+however, an asymmetrical pair of distances is given for even one node
+pair, then all node pairs must be provided distance values for both
+directions, even when they are symmetrical. When a node is unreachable
+from another node, set the pair's distance to 255.
 
 Note that the -@option{numa} option doesn't allocate any of the
 specified resources, it just assigns existing resources to NUMA
@@ -224,7 +281,7 @@ STEXI
 Set default value of @var{driver}'s property @var{prop} to @var{value}, e.g.:
 
 @example
-qemu-system-i386 -global ide-drive.physical_block_size=4096 -drive file=file,if=ide,index=0,media=disk
+qemu-system-i386 -global ide-hd.physical_block_size=4096 disk-image.img
 @end example
 
 In particular, you can use this to set driver properties for devices which are
@@ -435,7 +492,7 @@ possible drivers and properties, use @code{-device help} and
 @code{-device @var{driver},help}.
 
 Some drivers are:
-@item -device ipmi-bmc-sim,id=@var{id}[,slave_addr=@var{val}]
+@item -device ipmi-bmc-sim,id=@var{id}[,slave_addr=@var{val}][,sdrfile=@var{file}][,furareasize=@var{val}][,furdatafile=@var{file}]
 
 Add an IPMI BMC.  This is a simulation of a hardware management
 interface processor that normally sits on a system.  It provides
@@ -446,6 +503,19 @@ The IPMI slave address to use for the BMC.  The default is 0x20.
 This address is the BMC's address on the I2C network of management
 controllers.  If you don't know what this means, it is safe to ignore
 it.
+
+@table @option
+@item bmc=@var{id}
+The BMC to connect to, one of ipmi-bmc-sim or ipmi-bmc-extern above.
+@item slave_addr=@var{val}
+Define slave address to use for the BMC.  The default is 0x20.
+@item sdrfile=@var{file}
+file containing raw Sensor Data Records (SDR) data. The default is none.
+@item fruareasize=@var{val}
+size of a Field Replaceable Unit (FRU) area.  The default is 1024.
+@item frudatafile=@var{file}
+file containing raw Field Replaceable Unit (FRU) inventory data. The default is none.
+@end table
 
 @item -device ipmi-bmc-extern,id=@var{id},chardev=@var{id}[,slave_addr=@var{val}]
 
@@ -518,7 +588,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Block device options)
+DEFHEADING(Block device options:)
 STEXI
 @table @option
 ETEXI
@@ -569,6 +639,170 @@ DEF("blockdev", HAS_ARG, QEMU_OPTION_blockdev,
     "          [,read-only=on|off][,detect-zeroes=on|off|unmap]\n"
     "          [,driver specific parameters...]\n"
     "                configure a block backend\n", QEMU_ARCH_ALL)
+STEXI
+@item -blockdev @var{option}[,@var{option}[,@var{option}[,...]]]
+@findex -blockdev
+
+Define a new block driver node. Some of the options apply to all block drivers,
+other options are only accepted for a specific block driver. See below for a
+list of generic options and options for the most common block drivers.
+
+Options that expect a reference to another node (e.g. @code{file}) can be
+given in two ways. Either you specify the node name of an already existing node
+(file=@var{node-name}), or you define a new node inline, adding options
+for the referenced node after a dot (file.filename=@var{path},file.aio=native).
+
+A block driver node created with @option{-blockdev} can be used for a guest
+device by specifying its node name for the @code{drive} property in a
+@option{-device} argument that defines a block device.
+
+@table @option
+@item Valid options for any block driver node:
+
+@table @code
+@item driver
+Specifies the block driver to use for the given node.
+@item node-name
+This defines the name of the block driver node by which it will be referenced
+later. The name must be unique, i.e. it must not match the name of a different
+block driver node, or (if you use @option{-drive} as well) the ID of a drive.
+
+If no node name is specified, it is automatically generated. The generated node
+name is not intended to be predictable and changes between QEMU invocations.
+For the top level, an explicit node name must be specified.
+@item read-only
+Open the node read-only. Guest write attempts will fail.
+@item cache.direct
+The host page cache can be avoided with @option{cache.direct=on}. This will
+attempt to do disk IO directly to the guest's memory. QEMU may still perform an
+internal copy of the data.
+@item cache.no-flush
+In case you don't care about data integrity over host failures, you can use
+@option{cache.no-flush=on}. This option tells QEMU that it never needs to write
+any data to the disk but can instead keep things in cache. If anything goes
+wrong, like your host losing power, the disk storage getting disconnected
+accidentally, etc. your image will most probably be rendered unusable.
+@item discard=@var{discard}
+@var{discard} is one of "ignore" (or "off") or "unmap" (or "on") and controls
+whether @code{discard} (also known as @code{trim} or @code{unmap}) requests are
+ignored or passed to the filesystem. Some machine types may not support
+discard requests.
+@item detect-zeroes=@var{detect-zeroes}
+@var{detect-zeroes} is "off", "on" or "unmap" and enables the automatic
+conversion of plain zero writes by the OS to driver specific optimized
+zero write commands. You may even choose "unmap" if @var{discard} is set
+to "unmap" to allow a zero write to be converted to an @code{unmap} operation.
+@end table
+
+@item Driver-specific options for @code{file}
+
+This is the protocol-level block driver for accessing regular files.
+
+@table @code
+@item filename
+The path to the image file in the local filesystem
+@item aio
+Specifies the AIO backend (threads/native, default: threads)
+@item locking
+Specifies whether the image file is protected with Linux OFD / POSIX locks. The
+default is to use the Linux Open File Descriptor API if available, otherwise no
+lock is applied.  (auto/on/off, default: auto)
+@end table
+Example:
+@example
+-blockdev driver=file,node-name=disk,filename=disk.img
+@end example
+
+@item Driver-specific options for @code{raw}
+
+This is the image format block driver for raw images. It is usually
+stacked on top of a protocol level block driver such as @code{file}.
+
+@table @code
+@item file
+Reference to or definition of the data source block driver node
+(e.g. a @code{file} driver node)
+@end table
+Example 1:
+@example
+-blockdev driver=file,node-name=disk_file,filename=disk.img
+-blockdev driver=raw,node-name=disk,file=disk_file
+@end example
+Example 2:
+@example
+-blockdev driver=raw,node-name=disk,file.driver=file,file.filename=disk.img
+@end example
+
+@item Driver-specific options for @code{qcow2}
+
+This is the image format block driver for qcow2 images. It is usually
+stacked on top of a protocol level block driver such as @code{file}.
+
+@table @code
+@item file
+Reference to or definition of the data source block driver node
+(e.g. a @code{file} driver node)
+
+@item backing
+Reference to or definition of the backing file block device (default is taken
+from the image file). It is allowed to pass an empty string here in order to
+disable the default backing file.
+
+@item lazy-refcounts
+Whether to enable the lazy refcounts feature (on/off; default is taken from the
+image file)
+
+@item cache-size
+The maximum total size of the L2 table and refcount block caches in bytes
+(default: 1048576 bytes or 8 clusters, whichever is larger)
+
+@item l2-cache-size
+The maximum size of the L2 table cache in bytes
+(default: 4/5 of the total cache size)
+
+@item refcount-cache-size
+The maximum size of the refcount block cache in bytes
+(default: 1/5 of the total cache size)
+
+@item cache-clean-interval
+Clean unused entries in the L2 and refcount caches. The interval is in seconds.
+The default value is 0 and it disables this feature.
+
+@item pass-discard-request
+Whether discard requests to the qcow2 device should be forwarded to the data
+source (on/off; default: on if discard=unmap is specified, off otherwise)
+
+@item pass-discard-snapshot
+Whether discard requests for the data source should be issued when a snapshot
+operation (e.g. deleting a snapshot) frees clusters in the qcow2 file (on/off;
+default: on)
+
+@item pass-discard-other
+Whether discard requests for the data source should be issued on other
+occasions where a cluster gets freed (on/off; default: off)
+
+@item overlap-check
+Which overlap checks to perform for writes to the image
+(none/constant/cached/all; default: cached). For details or finer
+granularity control refer to the QAPI documentation of @code{blockdev-add}.
+@end table
+
+Example 1:
+@example
+-blockdev driver=file,node-name=my_file,filename=/tmp/disk.qcow2
+-blockdev driver=qcow2,node-name=hda,file=my_file,overlap-check=none,cache-size=16777216
+@end example
+Example 2:
+@example
+-blockdev driver=qcow2,node-name=disk,file.driver=http,file.filename=http://example.com/image.qcow2
+@end example
+
+@item Driver-specific options for other drivers
+Please refer to the QAPI documentation of the @code{blockdev-add} QMP command.
+
+@end table
+
+ETEXI
 
 DEF("drive", HAS_ARG, QEMU_OPTION_drive,
     "-drive [file=file][,if=type][,bus=n][,unit=m][,media=d][,index=i]\n"
@@ -589,7 +823,12 @@ STEXI
 @item -drive @var{option}[,@var{option}[,@var{option}[,...]]]
 @findex -drive
 
-Define a new drive. Valid options are:
+Define a new drive. This includes creating a block driver node (the backend) as
+well as a guest device, and is mostly a shortcut for defining the corresponding
+@option{-blockdev} and @option{-device} options.
+
+@option{-drive} accepts all options that are accepted by @option{-blockdev}. In
+addition, it knows the following options:
 
 @table @option
 @item file=@var{file}
@@ -601,7 +840,7 @@ Special files such as iSCSI devices can be specified using protocol
 specific URLs. See the section for "Device URL Syntax" for more information.
 @item if=@var{interface}
 This option defines on which type on interface the drive is connected.
-Available types are: ide, scsi, sd, mtd, floppy, pflash, virtio.
+Available types are: ide, scsi, sd, mtd, floppy, pflash, virtio, none.
 @item bus=@var{bus},unit=@var{unit}
 These options define where is connected the drive by defining the bus number and
 the unit id.
@@ -612,69 +851,96 @@ of available connectors of a given interface type.
 This option defines the type of the media: disk or cdrom.
 @item cyls=@var{c},heads=@var{h},secs=@var{s}[,trans=@var{t}]
 These options have the same definition as they have in @option{-hdachs}.
+These parameters are deprecated, use the corresponding parameters
+of @code{-device} instead.
 @item snapshot=@var{snapshot}
 @var{snapshot} is "on" or "off" and controls snapshot mode for the given drive
 (see @option{-snapshot}).
 @item cache=@var{cache}
-@var{cache} is "none", "writeback", "unsafe", "directsync" or "writethrough" and controls how the host cache is used to access block data.
+@var{cache} is "none", "writeback", "unsafe", "directsync" or "writethrough"
+and controls how the host cache is used to access block data. This is a
+shortcut that sets the @option{cache.direct} and @option{cache.no-flush}
+options (as in @option{-blockdev}), and additionally @option{cache.writeback},
+which provides a default for the @option{write-cache} option of block guest
+devices (as in @option{-device}). The modes correspond to the following
+settings:
+
+@c Our texi2pod.pl script doesn't support @multitable, so fall back to using
+@c plain ASCII art (well, UTF-8 art really). This looks okay both in the manpage
+@c and the HTML output.
+@example
+@             │ cache.writeback   cache.direct   cache.no-flush
+─────────────┼─────────────────────────────────────────────────
+writeback    │ on                off            off
+none         │ on                on             off
+writethrough │ off               off            off
+directsync   │ off               on             off
+unsafe       │ on                off            on
+@end example
+
+The default mode is @option{cache=writeback}.
+
 @item aio=@var{aio}
 @var{aio} is "threads", or "native" and selects between pthread based disk I/O and native Linux AIO.
-@item discard=@var{discard}
-@var{discard} is one of "ignore" (or "off") or "unmap" (or "on") and controls whether @dfn{discard} (also known as @dfn{trim} or @dfn{unmap}) requests are ignored or passed to the filesystem.  Some machine types may not support discard requests.
 @item format=@var{format}
 Specify which disk @var{format} will be used rather than detecting
 the format.  Can be used to specify format=raw to avoid interpreting
 an untrusted format header.
 @item serial=@var{serial}
-This option specifies the serial number to assign to the device.
+This option specifies the serial number to assign to the device. This
+parameter is deprecated, use the corresponding parameter of @code{-device}
+instead.
 @item addr=@var{addr}
-Specify the controller's PCI address (if=virtio only).
+Specify the controller's PCI address (if=virtio only). This parameter is
+deprecated, use the corresponding parameter of @code{-device} instead.
 @item werror=@var{action},rerror=@var{action}
 Specify which @var{action} to take on write and read errors. Valid actions are:
 "ignore" (ignore the error and try to continue), "stop" (pause QEMU),
 "report" (report the error to the guest), "enospc" (pause QEMU only if the
 host disk is full; report the error to the guest otherwise).
 The default setting is @option{werror=enospc} and @option{rerror=report}.
-@item readonly
-Open drive @option{file} as read-only. Guest write attempts will fail.
 @item copy-on-read=@var{copy-on-read}
 @var{copy-on-read} is "on" or "off" and enables whether to copy read backing
 file sectors into the image file.
-@item detect-zeroes=@var{detect-zeroes}
-@var{detect-zeroes} is "off", "on" or "unmap" and enables the automatic
-conversion of plain zero writes by the OS to driver specific optimized
-zero write commands. You may even choose "unmap" if @var{discard} is set
-to "unmap" to allow a zero write to be converted to an UNMAP operation.
+@item bps=@var{b},bps_rd=@var{r},bps_wr=@var{w}
+Specify bandwidth throttling limits in bytes per second, either for all request
+types or for reads or writes only.  Small values can lead to timeouts or hangs
+inside the guest.  A safe minimum for disks is 2 MB/s.
+@item bps_max=@var{bm},bps_rd_max=@var{rm},bps_wr_max=@var{wm}
+Specify bursts in bytes per second, either for all request types or for reads
+or writes only.  Bursts allow the guest I/O to spike above the limit
+temporarily.
+@item iops=@var{i},iops_rd=@var{r},iops_wr=@var{w}
+Specify request rate limits in requests per second, either for all request
+types or for reads or writes only.
+@item iops_max=@var{bm},iops_rd_max=@var{rm},iops_wr_max=@var{wm}
+Specify bursts in requests per second, either for all request types or for reads
+or writes only.  Bursts allow the guest I/O to spike above the limit
+temporarily.
+@item iops_size=@var{is}
+Let every @var{is} bytes of a request count as a new request for iops
+throttling purposes.  Use this option to prevent guests from circumventing iops
+limits by sending fewer but larger requests.
+@item group=@var{g}
+Join a throttling quota group with given name @var{g}.  All drives that are
+members of the same group are accounted for together.  Use this option to
+prevent guests from circumventing throttling limits by using many small disks
+instead of a single larger disk.
 @end table
 
-By default, the @option{cache=writeback} mode is used. It will report data
+By default, the @option{cache.writeback=on} mode is used. It will report data
 writes as completed as soon as the data is present in the host page cache.
 This is safe as long as your guest OS makes sure to correctly flush disk caches
 where needed. If your guest OS does not handle volatile disk write caches
 correctly and your host crashes or loses power, then the guest may experience
 data corruption.
 
-For such guests, you should consider using @option{cache=writethrough}. This
+For such guests, you should consider using @option{cache.writeback=off}. This
 means that the host page cache will be used to read and write data, but write
 notification will be sent to the guest only after QEMU has made sure to flush
 each write to the disk. Be aware that this has a major impact on performance.
 
-The host page cache can be avoided entirely with @option{cache=none}.  This will
-attempt to do disk IO directly to the guest's memory.  QEMU may still perform
-an internal copy of the data. Note that this is considered a writeback mode and
-the guest OS must handle the disk write cache correctly in order to avoid data
-corruption on host crashes.
-
-The host page cache can be avoided while only sending write notifications to
-the guest when the data has been flushed to the disk using
-@option{cache=directsync}.
-
-In case you don't care about data integrity over host failures, use
-@option{cache=unsafe}. This option tells QEMU that it never needs to write any
-data to the disk but can instead keep things in cache. If anything goes wrong,
-like your host losing power, the disk storage getting disconnected accidentally,
-etc. your image will most probably be rendered unusable.   When using
-the @option{-snapshot} option, unsafe caching is always used.
+When using the @option{-snapshot} option, unsafe caching is always used.
 
 Copy-on-read avoids accessing the same backing file sectors repeatedly and is
 useful when the backing file is over a slow network.  By default copy-on-read
@@ -776,13 +1042,13 @@ STEXI
 Force hard disk 0 physical geometry (1 <= @var{c} <= 16383, 1 <=
 @var{h} <= 16, 1 <= @var{s} <= 63) and optionally force the BIOS
 translation mode (@var{t}=none, lba or auto). Usually QEMU can guess
-all those parameters. This option is useful for old MS-DOS disk
-images.
+all those parameters. This option is deprecated, please use
+@code{-device ide-hd,cyls=c,heads=h,secs=s,...} instead.
 ETEXI
 
 DEF("fsdev", HAS_ARG, QEMU_OPTION_fsdev,
     "-fsdev fsdriver,id=id[,path=path,][security_model={mapped-xattr|mapped-file|passthrough|none}]\n"
-    " [,writeout=immediate][,readonly][,socket=socket|sock_fd=sock_fd]\n"
+    " [,writeout=immediate][,readonly][,socket=socket|sock_fd=sock_fd][,fmode=fmode][,dmode=dmode]\n"
     " [[,throttling.bps-total=b]|[[,throttling.bps-read=r][,throttling.bps-write=w]]]\n"
     " [[,throttling.iops-total=i]|[[,throttling.iops-read=r][,throttling.iops-write=w]]]\n"
     " [[,throttling.bps-total-max=bm]|[[,throttling.bps-read-max=rm][,throttling.bps-write-max=wm]]]\n"
@@ -792,7 +1058,7 @@ DEF("fsdev", HAS_ARG, QEMU_OPTION_fsdev,
 
 STEXI
 
-@item -fsdev @var{fsdriver},id=@var{id},path=@var{path},[security_model=@var{security_model}][,writeout=@var{writeout}][,readonly][,socket=@var{socket}|sock_fd=@var{sock_fd}]
+@item -fsdev @var{fsdriver},id=@var{id},path=@var{path},[security_model=@var{security_model}][,writeout=@var{writeout}][,readonly][,socket=@var{socket}|sock_fd=@var{sock_fd}][,fmode=@var{fmode}][,dmode=@var{dmode}]
 @findex -fsdev
 Define a new file system device. Valid options are:
 @table @option
@@ -833,6 +1099,12 @@ with virtfs-proxy-helper
 Enables proxy filesystem driver to use passed socket descriptor for
 communicating with virtfs-proxy-helper. Usually a helper like libvirt
 will create socketpair and pass one of the fds as sock_fd
+@item fmode=@var{fmode}
+Specifies the default mode for newly created files on the host. Works only
+with security models "mapped-xattr" and "mapped-file".
+@item dmode=@var{dmode}
+Specifies the default mode for newly created directories on the host. Works
+only with security models "mapped-xattr" and "mapped-file".
 @end table
 
 -fsdev option is used along with -device driver "virtio-9p-pci".
@@ -849,12 +1121,12 @@ ETEXI
 
 DEF("virtfs", HAS_ARG, QEMU_OPTION_virtfs,
     "-virtfs local,path=path,mount_tag=tag,security_model=[mapped-xattr|mapped-file|passthrough|none]\n"
-    "        [,writeout=immediate][,readonly][,socket=socket|sock_fd=sock_fd]\n",
+    "        [,id=id][,writeout=immediate][,readonly][,socket=socket|sock_fd=sock_fd][,fmode=fmode][,dmode=dmode]\n",
     QEMU_ARCH_ALL)
 
 STEXI
 
-@item -virtfs @var{fsdriver}[,path=@var{path}],mount_tag=@var{mount_tag}[,security_model=@var{security_model}][,writeout=@var{writeout}][,readonly][,socket=@var{socket}|sock_fd=@var{sock_fd}]
+@item -virtfs @var{fsdriver}[,path=@var{path}],mount_tag=@var{mount_tag}[,security_model=@var{security_model}][,writeout=@var{writeout}][,readonly][,socket=@var{socket}|sock_fd=@var{sock_fd}][,fmode=@var{fmode}][,dmode=@var{dmode}]
 @findex -virtfs
 
 The general form of a Virtual File system pass-through options are:
@@ -896,6 +1168,12 @@ will create socketpair and pass one of the fds as sock_fd
 @item sock_fd
 Enables proxy filesystem driver to use passed 'sock_fd' as the socket
 descriptor for interfacing with virtfs-proxy-helper
+@item fmode=@var{fmode}
+Specifies the default mode for newly created files on the host. Works only
+with security models "mapped-xattr" and "mapped-file".
+@item dmode=@var{dmode}
+Specifies the default mode for newly created directories on the host. Works
+only with security models "mapped-xattr" and "mapped-file".
 @end table
 ETEXI
 
@@ -913,18 +1191,18 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(USB options)
+DEFHEADING(USB options:)
 STEXI
 @table @option
 ETEXI
 
 DEF("usb", 0, QEMU_OPTION_usb,
-    "-usb            enable the USB driver (will be the default soon)\n",
+    "-usb            enable the USB driver (if it is not used by default yet)\n",
     QEMU_ARCH_ALL)
 STEXI
 @item -usb
 @findex -usb
-Enable the USB driver (will be the default soon)
+Enable the USB driver (if it is not used by default yet).
 ETEXI
 
 DEF("usbdevice", HAS_ARG, QEMU_OPTION_usbdevice,
@@ -934,7 +1212,8 @@ STEXI
 
 @item -usbdevice @var{devname}
 @findex -usbdevice
-Add the USB device @var{devname}. @xref{usb_devices}.
+Add the USB device @var{devname}. Note that this option is deprecated,
+please use @code{-device usb-...} instead. @xref{usb_devices}.
 
 @table @option
 
@@ -977,7 +1256,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Display options)
+DEFHEADING(Display options:)
 STEXI
 @table @option
 ETEXI
@@ -1312,7 +1591,7 @@ output such as guest graphics, guest console, and the QEMU monitor in a
 window. With this option, you can have QEMU listen on VNC display
 @var{display} and redirect the VGA display over the VNC session. It is
 very useful to enable the usb tablet device when using this option
-(option @option{-usbdevice tablet}). When using the VNC display, you
+(option @option{-device usb-tablet}). When using the VNC display, you
 must use the @option{-k} parameter to set the keyboard layout if you are
 not using en-us. Valid syntax for the @var{display} is
 
@@ -1501,7 +1780,7 @@ spec but is traditional QEMU behavior.
 @item key-delay-ms
 
 Set keyboard delay, for key down and key up events, in milliseconds.
-Default is 1.  Keyboards are low-bandwidth devices, so this slowdown
+Default is 10.  Keyboards are low-bandwidth devices, so this slowdown
 can help the device and guest to keep up and not lose events in case
 events are arriving in bulk.  Possible causes for the latter are flaky
 network connections, or scripts for automated testing.
@@ -1514,7 +1793,7 @@ STEXI
 ETEXI
 ARCHHEADING(, QEMU_ARCH_I386)
 
-ARCHHEADING(i386 target only, QEMU_ARCH_I386)
+ARCHHEADING(i386 target only:, QEMU_ARCH_I386)
 STEXI
 @table @option
 ETEXI
@@ -1630,7 +1909,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Network options)
+DEFHEADING(Network options:)
 STEXI
 @table @option
 ETEXI
@@ -2211,7 +2490,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Character device options)
+DEFHEADING(Character device options:)
 STEXI
 
 The general form of a character device option is:
@@ -2544,7 +2823,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Device URL Syntax)
+DEFHEADING(Device URL Syntax:)
 STEXI
 
 In addition to using normal file images for the emulated storage devices,
@@ -2774,7 +3053,7 @@ STEXI
 @end table
 ETEXI
 
-DEFHEADING(Bluetooth(R) options)
+DEFHEADING(Bluetooth(R) options:)
 STEXI
 @table @option
 ETEXI
@@ -2850,13 +3129,15 @@ ETEXI
 DEFHEADING()
 
 #ifdef CONFIG_TPM
-DEFHEADING(TPM device options)
+DEFHEADING(TPM device options:)
 
 DEF("tpmdev", HAS_ARG, QEMU_OPTION_tpmdev, \
     "-tpmdev passthrough,id=id[,path=path][,cancel-path=path]\n"
     "                use path to provide path to a character device; default is /dev/tpm0\n"
     "                use cancel-path to provide path to TPM's cancel sysfs entry; if\n"
-    "                not provided it will be searched for in /sys/class/misc/tpm?/device\n",
+    "                not provided it will be searched for in /sys/class/misc/tpm?/device\n"
+    "-tpmdev emulator,id=id,chardev=dev\n"
+    "                configure the TPM device using chardev backend\n",
     QEMU_ARCH_ALL)
 STEXI
 
@@ -2865,8 +3146,8 @@ The general form of a TPM device option is:
 
 @item -tpmdev @var{backend} ,id=@var{id} [,@var{options}]
 @findex -tpmdev
-Backend type must be:
-@option{passthrough}.
+Backend type must be either one of the following:
+@option{passthrough}, @option{emulator}.
 
 The specific backend type will determine the applicable options.
 The @code{-tpmdev} option creates the TPM backend and requires a
@@ -2916,6 +3197,20 @@ To create a passthrough TPM use the following two options:
 Note that the @code{-tpmdev} id is @code{tpm0} and is referenced by
 @code{tpmdev=tpm0} in the device option.
 
+@item -tpmdev emulator, id=@var{id}, chardev=@var{dev}
+
+(Linux-host only) Enable access to a TPM emulator using Unix domain socket based
+chardev backend.
+
+@option{chardev} specifies the unique ID of a character device backend that provides connection to the software TPM server.
+
+To create a TPM emulator backend device with chardev socket backend:
+@example
+
+-chardev socket,id=chrtpm,path=/tmp/swtpm-sock -tpmdev emulator,id=tpm0,chardev=chrtpm -device tpm-tis,tpmdev=tpm0
+
+@end example
+
 @end table
 
 ETEXI
@@ -2924,7 +3219,7 @@ DEFHEADING()
 
 #endif
 
-DEFHEADING(Linux/Multiboot boot specific)
+DEFHEADING(Linux/Multiboot boot specific:)
 STEXI
 
 When using these options, you can use a given Linux or Multiboot
@@ -2980,7 +3275,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Debug/Expert options)
+DEFHEADING(Debug/Expert options:)
 STEXI
 @table @option
 ETEXI
@@ -3383,6 +3678,11 @@ DEF("xen-attach", 0, QEMU_OPTION_xen_attach,
     "-xen-attach     attach to existing xen domain\n"
     "                xend will use this when starting QEMU\n",
     QEMU_ARCH_ALL)
+DEF("xen-domid-restrict", 0, QEMU_OPTION_xen_domid_restrict,
+    "-xen-domid-restrict     restrict set of available xen operations\n"
+    "                        to specified domain id. (Does not affect\n"
+    "                        xenpv machine type).\n",
+    QEMU_ARCH_ALL)
 STEXI
 @item -xen-domid @var{id}
 @findex -xen-domid
@@ -3395,6 +3695,8 @@ Warning: should not be used when xend is in use (XEN only).
 @findex -xen-attach
 Attach to existing xen domain.
 xend will use this when starting QEMU (XEN only).
+@findex -xen-domid-restrict
+Restrict set of available xen operations to specified domain id (XEN only).
 ETEXI
 
 DEF("no-reboot", 0, QEMU_OPTION_no_reboot, \
@@ -3774,13 +4076,35 @@ Old param mode (ARM only).
 ETEXI
 
 DEF("sandbox", HAS_ARG, QEMU_OPTION_sandbox, \
-    "-sandbox <arg>  Enable seccomp mode 2 system call filter (default 'off').\n",
+    "-sandbox on[,obsolete=allow|deny][,elevateprivileges=allow|deny|children]\n" \
+    "          [,spawn=allow|deny][,resourcecontrol=allow|deny]\n" \
+    "                Enable seccomp mode 2 system call filter (default 'off').\n" \
+    "                use 'obsolete' to allow obsolete system calls that are provided\n" \
+    "                    by the kernel, but typically no longer used by modern\n" \
+    "                    C library implementations.\n" \
+    "                use 'elevateprivileges' to allow or deny QEMU process to elevate\n" \
+    "                    its privileges by blacklisting all set*uid|gid system calls.\n" \
+    "                    The value 'children' will deny set*uid|gid system calls for\n" \
+    "                    main QEMU process but will allow forks and execves to run unprivileged\n" \
+    "                use 'spawn' to avoid QEMU to spawn new threads or processes by\n" \
+    "                     blacklisting *fork and execve\n" \
+    "                use 'resourcecontrol' to disable process affinity and schedular priority\n",
     QEMU_ARCH_ALL)
 STEXI
-@item -sandbox @var{arg}
+@item -sandbox @var{arg}[,obsolete=@var{string}][,elevateprivileges=@var{string}][,spawn=@var{string}][,resourcecontrol=@var{string}]
 @findex -sandbox
 Enable Seccomp mode 2 system call filter. 'on' will enable syscall filtering and 'off' will
 disable it.  The default is 'off'.
+@table @option
+@item obsolete=@var{string}
+Enable Obsolete system calls
+@item elevateprivileges=@var{string}
+Disable set*uid|gid system calls
+@item spawn=@var{string}
+Disable *fork and execve
+@item resourcecontrol=@var{string}
+Disable process affinity and schedular priority
+@end table
 ETEXI
 
 DEF("readconfig", HAS_ARG, QEMU_OPTION_readconfig,
@@ -3802,26 +4126,17 @@ Write device configuration to @var{file}. The @var{file} can be either filename 
 command line and device configuration into file or dash @code{-}) character to print the
 output to stdout. This can be later used as input file for @code{-readconfig} option.
 ETEXI
-DEF("nodefconfig", 0, QEMU_OPTION_nodefconfig,
-    "-nodefconfig\n"
-    "                do not load default config files at startup\n",
-    QEMU_ARCH_ALL)
-STEXI
-@item -nodefconfig
-@findex -nodefconfig
-Normally QEMU loads configuration files from @var{sysconfdir} and @var{datadir} at startup.
-The @code{-nodefconfig} option will prevent QEMU from loading any of those config files.
-ETEXI
+HXCOMM Deprecated, same as -no-user-config
+DEF("nodefconfig", 0, QEMU_OPTION_nodefconfig, "", QEMU_ARCH_ALL)
 DEF("no-user-config", 0, QEMU_OPTION_nouserconfig,
     "-no-user-config\n"
-    "                do not load user-provided config files at startup\n",
+    "                do not load default user-provided config files at startup\n",
     QEMU_ARCH_ALL)
 STEXI
 @item -no-user-config
 @findex -no-user-config
 The @code{-no-user-config} option makes QEMU not load any of the user-provided
-config files on @var{sysconfdir}, but won't make it skip the QEMU-provided config
-files from @var{datadir}.
+config files on @var{sysconfdir}.
 ETEXI
 DEF("trace", HAS_ARG, QEMU_OPTION_trace,
     "-trace [[enable=]<pattern>][,events=<file>][,file=<file>]\n"
@@ -3895,7 +4210,8 @@ STEXI
 @end table
 ETEXI
 DEFHEADING()
-DEFHEADING(Generic object creation)
+
+DEFHEADING(Generic object creation:)
 STEXI
 @table @option
 ETEXI
@@ -3917,7 +4233,7 @@ property must be set.  These objects are placed in the
 
 @table @option
 
-@item -object memory-backend-file,id=@var{id},size=@var{size},mem-path=@var{dir},share=@var{on|off}
+@item -object memory-backend-file,id=@var{id},size=@var{size},mem-path=@var{dir},share=@var{on|off},discard-data=@var{on|off}
 
 Creates a memory file backend object, which can be used to back
 the guest RAM with huge pages. The @option{id} parameter is a
@@ -3929,6 +4245,12 @@ the path to either a shared memory or huge page filesystem mount.
 The @option{share} boolean option determines whether the memory
 region is marked as private to QEMU, or shared. The latter allows
 a co-operating external process to access the QEMU memory region.
+Setting the @option{discard-data} boolean option to @var{on}
+indicates that file contents can be destroyed when QEMU exits,
+to avoid unnecessarily flushing data to the backing file.  Note
+that @option{discard-data} is only an optimization, and QEMU
+might not discard file contents if it aborts unexpectedly or is
+terminated using SIGKILL.
 
 @item -object rng-random,id=@var{id},filename=@var{/dev/random}
 
@@ -4019,26 +4341,25 @@ queue @var{all|rx|tx} is an option that can be applied to any netfilter.
 @option{tx}: the filter is attached to the transmit queue of the netdev,
              where it will receive packets sent by the netdev.
 
-@item -object filter-mirror,id=@var{id},netdev=@var{netdevid},outdev=@var{chardevid}[,queue=@var{all|rx|tx}]
+@item -object filter-mirror,id=@var{id},netdev=@var{netdevid},outdev=@var{chardevid},queue=@var{all|rx|tx}[,vnet_hdr_support]
 
-filter-mirror on netdev @var{netdevid},mirror net packet to chardev
-@var{chardevid}
+filter-mirror on netdev @var{netdevid},mirror net packet to chardev@var{chardevid}, if it has the vnet_hdr_support flag, filter-mirror will mirror packet with vnet_hdr_len.
 
-@item -object filter-redirector,id=@var{id},netdev=@var{netdevid},indev=@var{chardevid},
-outdev=@var{chardevid}[,queue=@var{all|rx|tx}]
+@item -object filter-redirector,id=@var{id},netdev=@var{netdevid},indev=@var{chardevid},outdev=@var{chardevid},queue=@var{all|rx|tx}[,vnet_hdr_support]
 
 filter-redirector on netdev @var{netdevid},redirect filter's net packet to chardev
-@var{chardevid},and redirect indev's packet to filter.
+@var{chardevid},and redirect indev's packet to filter.if it has the vnet_hdr_support flag,
+filter-redirector will redirect packet with vnet_hdr_len.
 Create a filter-redirector we need to differ outdev id from indev id, id can not
 be the same. we can just use indev or outdev, but at least one of indev or outdev
 need to be specified.
 
-@item -object filter-rewriter,id=@var{id},netdev=@var{netdevid},rewriter-mode=@var{mode}[,queue=@var{all|rx|tx}]
+@item -object filter-rewriter,id=@var{id},netdev=@var{netdevid},queue=@var{all|rx|tx},[vnet_hdr_support]
 
 Filter-rewriter is a part of COLO project.It will rewrite tcp packet to
 secondary from primary to keep secondary tcp connection,and rewrite
 tcp packet to primary from secondary make tcp packet can be handled by
-client.
+client.if it has the vnet_hdr_support flag, we can parse packet with vnet header.
 
 usage:
 colo secondary:
@@ -4053,13 +4374,13 @@ Dump the network traffic on netdev @var{dev} to the file specified by
 The file format is libpcap, so it can be analyzed with tools such as tcpdump
 or Wireshark.
 
-@item -object colo-compare,id=@var{id},primary_in=@var{chardevid},secondary_in=@var{chardevid},
-outdev=@var{chardevid}
+@item -object colo-compare,id=@var{id},primary_in=@var{chardevid},secondary_in=@var{chardevid},outdev=@var{chardevid}[,vnet_hdr_support]
 
 Colo-compare gets packet from primary_in@var{chardevid} and secondary_in@var{chardevid}, than compare primary packet with
 secondary packet. If the packets are same, we will output primary
 packet to outdev@var{chardevid}, else we will notify colo-frame
 do checkpoint and send primary packet to outdev@var{chardevid}.
+if it has the vnet_hdr_support flag, colo compare will send/recv packet with vnet_hdr_len.
 
 we must use it with the help of filter-mirror and filter-redirector.
 
@@ -4144,7 +4465,7 @@ The simplest (insecure) usage is to provide the secret inline
 
 The simplest secure usage is to provide the secret via a file
 
- # echo -n "letmein" > mypasswd.txt
+ # printf "letmein" > mypasswd.txt
  # $QEMU -object secret,id=sec0,file=mypasswd.txt,format=raw
 
 For greater security, AES-256-CBC should be used. To illustrate usage,
@@ -4172,7 +4493,7 @@ telling openssl to base64 encode the result, but it could be left
 as raw bytes if desired.
 
 @example
- # SECRET=$(echo -n "letmein" |
+ # SECRET=$(printf "letmein" |
             openssl enc -aes-256-cbc -a -K $KEY -iv $IV)
 @end example
 

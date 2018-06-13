@@ -26,11 +26,17 @@
 #include "qemu-common.h"
 #include "qemu/error-report.h"
 #include "qemu/iov.h"
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 #include "qemu/sockets.h"
 #include "qemu/coroutine.h"
 #include "migration/migration.h"
 #include "migration/qemu-file.h"
 #include "migration/trace.h"
+=======
+#include "migration.h"
+#include "qemu-file.h"
+#include "trace.h"
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 
 #define IO_BUF_SIZE (1024 * 1024)
 #define MAX_IOV_SIZE MIN(IOV_MAX, 64)
