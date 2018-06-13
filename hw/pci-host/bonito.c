@@ -269,7 +269,7 @@ static void bonito_writel(void *opaque, hwaddr addr,
         }
         s->regs[saddr] = val;
         if (reset) {
-            qemu_system_reset_request();
+            qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         }
         break;
     case BONITO_INTENSET:
@@ -825,7 +825,7 @@ static void bonito_class_init(ObjectClass *klass, void *data)
      * PCI-facing part of the host bridge, not usable without the
      * host-facing part, which can't be device_add'ed, yet.
      */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo bonito_info = {
@@ -833,6 +833,10 @@ static const TypeInfo bonito_info = {
     .parent        = TYPE_PCI_DEVICE,
     .instance_size = sizeof(PCIBonitoState),
     .class_init    = bonito_class_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 static void bonito_pcihost_class_init(ObjectClass *klass, void *data)

@@ -28,17 +28,9 @@
 #define QEMU_NORETURN
 #endif
 
-#if QEMU_GNUC_PREREQ(3, 4)
 #define QEMU_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
-#else
-#define QEMU_WARN_UNUSED_RESULT
-#endif
 
-#if QEMU_GNUC_PREREQ(4, 0)
 #define QEMU_SENTINEL __attribute__((sentinel))
-#else
-#define QEMU_SENTINEL
-#endif
 
 #if QEMU_GNUC_PREREQ(4, 3)
 #define QEMU_ARTIFICIAL __attribute__((always_inline, artificial))
@@ -94,7 +86,15 @@
         int:(x) ? -1 : 1; \
     }
 
-#ifdef __COUNTER__
+#if defined(CONFIG_STATIC_ASSERT)
+ #ifdef __cplusplus
+   /* GCC-Minw does not define _Static_assert, hence we fall back on static_assert
+      if this file is brought into C++ */
+   #define QEMU_BUILD_BUG_ON(x) static_assert(!(x), "not expecting: " #x)
+ #else
+   #define QEMU_BUILD_BUG_ON(x) _Static_assert(!(x), "not expecting: " #x)
+ #endif
+#elif defined(__COUNTER__)
 #define QEMU_BUILD_BUG_ON(x) typedef QEMU_BUILD_BUG_ON_STRUCT(x) \
     glue(qemu_build_bug_on__, __COUNTER__) __attribute__((unused))
 #else

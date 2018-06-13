@@ -21,7 +21,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "io/channel-tls.h"
-#include "io/trace.h"
+#include "trace.h"
 
 
 static ssize_t qio_channel_tls_write_handler(const char *buf,
