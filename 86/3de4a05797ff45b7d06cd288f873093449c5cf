@@ -1,0 +1,8 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Huan Ren <huanr@google.com>
+Verified+1: Lingfeng Yang <lfy@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Wed, 13 Jun 2018 18:57:55 +0000
+Reviewed-on: https://android-review.googlesource.com/704771
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.8-release
