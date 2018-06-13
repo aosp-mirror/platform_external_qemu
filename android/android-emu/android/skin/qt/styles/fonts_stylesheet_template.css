@@ -10,23 +10,27 @@
   GNU General Public License for more details.
  */
 
-QGroupBox { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
+QGroupBox, QLabel { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
 QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBox {
+    font-weight: regular;
+    font-size: %%FONT_LARGE%%;
+}
+QTabBar {
     font-weight: regular;
     font-size: %%FONT_LARGE%%;
 }
 *[ColorGroup="Button"] {
     font-weight: regular;
-    font-size: %%FONT_MEDIUM%%;
+    font-size: %%FONT_LARGE%%;
 }
 *[ColorGroup="Tool"] {
     font-weight: bold;
-    font-size: %%FONT_MEDIUM%%;
+    font-size: %%FONT_LARGE%%;
 }
 *[ColorGroup="Instruction"] {
     font-weight: regular;
     font-size: %%FONT_LARGE%%;
 }
 * {
-    font-size: %%FONT_MEDIUM%%;
+    font-size: %%FONT_LARGE%%;
 }

@@ -12,11 +12,12 @@
 
 *[ColorGroup="MajorTab"] {
     color: %%MAJOR_TAB_COLOR%%;
-    padding: 0px 0px 0px 16px;
 }
 *[ColorGroup="MajorTabTitle"] {
     color: %%MAJOR_TITLE_COLOR%%;
-    background-color: %%TAB_BKG_COLOR%%
+    background-color: %%TAB_BKG_COLOR%%;
+    padding: 0px 0px 0px 36px;
+    margin-bottom: 8px;
 }
 
 *[ColorGroup="Link"] {
@@ -129,11 +130,11 @@ QWidget[ColorGroup="MajorTab"] {
     background: %%TAB_BKG_COLOR%%;
 }
 QPushButton[ColorGroup="MajorTab"] {
-    border: none;
     text-align: left;
     color: %%MAJOR_TAB_COLOR%%;
     background: %%TAB_BKG_COLOR%%;
-    padding: 10px 0px 10px 16px;
+    padding: 10px 0px 10px 36px;
+    margin-right: 6px;
 }
 QPushButton[ColorGroup="MajorTabTitle"] {
     border: none;
@@ -143,11 +144,18 @@ QPushButton[ColorGroup="MajorTabTitle"] {
 }
 QPushButton:pressed[ColorGroup="MajorTab"] {
     border: none;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
     background: %%TAB_DARKENED_COLOR%%;
+    margin-right: 6px;
+    color: %%MAJOR_TITLE_COLOR%%;
 }
 QPushButton:checked[ColorGroup="MajorTab"] {
-    border: none;
-    background: %%TAB_SELECTED_COLOR%%;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    background: %%BKG_COLOR%%;
+    margin-right: 6px;
+    color: %%MAJOR_TITLE_COLOR%%;
 }
 QPushButton:pressed[ColorGroup="Button"] {
     border: none;
@@ -218,6 +226,7 @@ QComboBox {
     border-top: 0px;
     border-bottom: 1px solid %%BOX_COLOR%%;
     selection-background-color: %%TAB_BKG_COLOR%%;
+    padding: 4px 4px 4px 0px;
 }
 QComboBox:disabled {
     color: %%DISABLED_PULLDOWN_COLOR%%;
@@ -233,13 +242,14 @@ QComboBox::down-arrow {
     height: 24;
 }
 QListView { min-height: 4em }
-QTabWidget::pane {border: none;}
-QTabWidget::tab-bar {left: 0px;}
+QTabWidget::pane {border-top: 1px solid %%TAB_BKG_COLOR%%;}
+QTabWidget::tab-bar {alignment: center;}
 QTabBar::tab {
     background: %%BKG_COLOR%%;
-    padding-bottom:8px;
-    text-align: left;
-    margin-left: 8
+    padding-bottom:4px;
+    text-align: center;
+    margin-left: 12px;
+    margin-right: 12px;
 }
 QTabBar::tab:selected {
     color: %%TEXT_COLOR%%;
