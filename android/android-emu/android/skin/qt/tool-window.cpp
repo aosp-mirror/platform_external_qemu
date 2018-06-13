@@ -717,8 +717,9 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
 
     // The setting is ASK or we decided to ask anyway.
     auto askMessageSlow =
-        tr("Do you want to save the current state for the next quick boot?"
-           "Note: Recent saves seem to have been slow.");
+        tr("Do you want to save the current state for the next quick boot?\n\n"
+           "Note: Recent saves seem to have been slow. Save can be skipped "
+           "by selecting 'No'.");
     auto askMessageLowRam =
         tr("Do you want to save the current state for the next quick boot?\n\n"
            "Note: Saving the snapshot may take longer because free RAM is low.");
