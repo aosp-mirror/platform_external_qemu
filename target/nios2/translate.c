@@ -29,6 +29,12 @@
 #include "exec/helper-gen.h"
 #include "exec/log.h"
 #include "exec/cpu_ldst.h"
+#include "exec/translator.h"
+
+/* is_jmp field values */
+#define DISAS_JUMP    DISAS_TARGET_0 /* only pc was modified dynamically */
+#define DISAS_UPDATE  DISAS_TARGET_1 /* cpu state was modified dynamically */
+#define DISAS_TB_JUMP DISAS_TARGET_2 /* only pc was modified statically */
 
 #define INSTRUCTION_FLG(func, flags) { (func), (flags) }
 #define INSTRUCTION(func)                  \
@@ -164,7 +170,7 @@ static void gen_goto_tb(DisasContext *dc, int n, uint32_t dest)
     if (use_goto_tb(dc, dest)) {
         tcg_gen_goto_tb(n);
         tcg_gen_movi_tl(dc->cpu_R[R_PC], dest);
-        tcg_gen_exit_tb((tcg_target_long)tb + n);
+        tcg_gen_exit_tb((uintptr_t)tb + n);
     } else {
         tcg_gen_movi_tl(dc->cpu_R[R_PC], dest);
         tcg_gen_exit_tb(0);
@@ -783,7 +789,6 @@ static const char * const regnames[] = {
     "rpc"
 };
 
-static TCGv_ptr cpu_env;
 static TCGv cpu_R[NUM_CORE_REGS];
 
 #include "exec/gen-icount.h"
@@ -799,10 +804,9 @@ static void gen_exception(DisasContext *dc, uint32_t excp)
 }
 
 /* generate intermediate code for basic block 'tb'.  */
-void gen_intermediate_code(CPUNios2State *env, TranslationBlock *tb)
+void gen_intermediate_code(CPUState *cs, TranslationBlock *tb)
 {
-    Nios2CPU *cpu = nios2_env_get_cpu(env);
-    CPUState *cs = CPU(cpu);
+    CPUNios2State *env = cs->env_ptr;
     DisasContext dc1, *dc = &dc1;
     int num_insns;
     int max_insns;
@@ -822,7 +826,7 @@ void gen_intermediate_code(CPUNios2State *env, TranslationBlock *tb)
         max_insns = 1;
     } else {
         int page_insns = (TARGET_PAGE_SIZE - (tb->pc & TARGET_PAGE_MASK)) / 4;
-        max_insns = tb->cflags & CF_COUNT_MASK;
+        max_insns = tb_cflags(tb) & CF_COUNT_MASK;
         if (max_insns == 0) {
             max_insns = CF_COUNT_MASK;
         }
@@ -849,7 +853,7 @@ void gen_intermediate_code(CPUNios2State *env, TranslationBlock *tb)
             break;
         }
 
-        if (num_insns == max_insns && (tb->cflags & CF_LAST_IO)) {
+        if (num_insns == max_insns && (tb_cflags(tb) & CF_LAST_IO)) {
             gen_io_start();
         }
 
@@ -866,7 +870,7 @@ void gen_intermediate_code(CPUNios2State *env, TranslationBlock *tb)
              !tcg_op_buf_full() &&
              num_insns < max_insns);
 
-    if (tb->cflags & CF_LAST_IO) {
+    if (tb_cflags(tb) & CF_LAST_IO) {
         gen_io_end();
     }
 
@@ -902,7 +906,7 @@ void gen_intermediate_code(CPUNios2State *env, TranslationBlock *tb)
         && qemu_log_in_addr_range(tb->pc)) {
         qemu_log_lock();
         qemu_log("IN: %s\n", lookup_symbol(tb->pc));
-        log_target_disas(cs, tb->pc, dc->pc - tb->pc, 0);
+        log_target_disas(cs, tb->pc, dc->pc - tb->pc);
         qemu_log("\n");
         qemu_log_unlock();
     }
@@ -941,8 +945,6 @@ void nios2_cpu_dump_state(CPUState *cs, FILE *f, fprintf_function cpu_fprintf,
 void nios2_tcg_init(void)
 {
     int i;
-
-    cpu_env = tcg_global_reg_new_ptr(TCG_AREG0, "env");
 
     for (i = 0; i < NUM_CORE_REGS; i++) {
         cpu_R[i] = tcg_global_mem_new(cpu_env,

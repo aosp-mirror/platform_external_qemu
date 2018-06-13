@@ -22,6 +22,8 @@
 #include "cpu.h"
 #include "exec/exec-all.h"
 #include "exec/helper-proto.h"
+#include "exception.h"
+#include "sysemu/sysemu.h"
 
 #define TO_SPR(group, number) (((group) << 11) + (number))
 
@@ -37,6 +39,10 @@ void HELPER(mtspr)(CPUOpenRISCState *env,
     switch (spr) {
     case TO_SPR(0, 0): /* VR */
         env->vr = rb;
+        break;
+
+    case TO_SPR(0, 11): /* EVBAR */
+        env->evbar = rb;
         break;
 
     case TO_SPR(0, 16): /* NPC */
@@ -88,6 +94,11 @@ void HELPER(mtspr)(CPUOpenRISCState *env,
     case TO_SPR(0, 64): /* ESR */
         env->esr = rb;
         break;
+
+    case TO_SPR(0, 1024) ... TO_SPR(0, 1024 + (16 * 32)): /* Shadow GPRs */
+        idx = (spr - 1024);
+        env->shadow_gpr[idx / 32][idx % 32] = rb;
+
     case TO_SPR(1, 512) ... TO_SPR(1, 512+DTLB_SIZE-1): /* DTLBW0MR 0-127 */
         idx = spr - TO_SPR(1, 512);
         if (!(rb & 1)) {
@@ -132,6 +143,15 @@ void HELPER(mtspr)(CPUOpenRISCState *env,
     case TO_SPR(5, 2):  /* MACHI */
         env->mac = deposit64(env->mac, 32, 32, rb);
         break;
+    case TO_SPR(8, 0):  /* PMR */
+        env->pmr = rb;
+        if (env->pmr & PMR_DME || env->pmr & PMR_SME) {
+            cpu_restore_state(cs, GETPC());
+            env->pc += 4;
+            cs->halted = 1;
+            raise_exception(cpu, EXCP_HALTED);
+        }
+        break;
     case TO_SPR(9, 0):  /* PICMR */
         env->picmr |= rb;
         break;
@@ -169,7 +189,7 @@ void HELPER(mtspr)(CPUOpenRISCState *env,
         break;
 
     case TO_SPR(10, 1): /* TTCR */
-        env->ttcr = rb;
+        cpu_openrisc_count_set(cpu, rb);
         if (env->ttmr & TIMER_NONE) {
             return;
         }
@@ -206,6 +226,9 @@ target_ulong HELPER(mfspr)(CPUOpenRISCState *env,
     case TO_SPR(0, 4): /* IMMUCFGR */
         return env->immucfgr;
 
+    case TO_SPR(0, 11): /* EVBAR */
+        return env->evbar;
+
     case TO_SPR(0, 16): /* NPC (equals PC) */
         cpu_restore_state(cs, GETPC());
         return env->pc;
@@ -225,6 +248,16 @@ target_ulong HELPER(mfspr)(CPUOpenRISCState *env,
 
     case TO_SPR(0, 64): /* ESR */
         return env->esr;
+
+    case TO_SPR(0, 128): /* COREID */
+        return cpu->parent_obj.cpu_index;
+
+    case TO_SPR(0, 129): /* NUMCORES */
+        return max_cpus;
+
+    case TO_SPR(0, 1024) ... TO_SPR(0, 1024 + (16 * 32)): /* Shadow GPRs */
+        idx = (spr - 1024);
+        return env->shadow_gpr[idx / 32][idx % 32];
 
     case TO_SPR(1, 512) ... TO_SPR(1, 512+DTLB_SIZE-1): /* DTLBW0MR 0-127 */
         idx = spr - TO_SPR(1, 512);
@@ -265,6 +298,9 @@ target_ulong HELPER(mfspr)(CPUOpenRISCState *env,
         return env->mac >> 32;
         break;
 
+    case TO_SPR(8, 0):  /* PMR */
+        return env->pmr;
+
     case TO_SPR(9, 0):  /* PICMR */
         return env->picmr;
 
@@ -276,7 +312,7 @@ target_ulong HELPER(mfspr)(CPUOpenRISCState *env,
 
     case TO_SPR(10, 1): /* TTCR */
         cpu_openrisc_count_update(cpu);
-        return env->ttcr;
+        return cpu_openrisc_count_get(cpu);
 
     default:
         break;

@@ -129,6 +129,8 @@ typedef struct CPUMBState CPUMBState;
 #define PVR0_USER1_MASK                 0x000000FF
 #define PVR0_SPROT_MASK                 0x00000001
 
+#define PVR0_VERSION_SHIFT              8
+
 /* User 2 PVR mask */
 #define PVR1_USER2_MASK                 0xFFFFFFFF
 
@@ -296,6 +298,11 @@ struct MicroBlazeCPU {
         bool stackprot;
         uint32_t base_vectors;
         uint8_t use_fpu;
+        uint8_t use_hw_mul;
+        bool use_barrel;
+        bool use_div;
+        bool use_msr_instr;
+        bool use_pcmp_instr;
         bool use_mmu;
         bool dcache_writeback;
         bool endi;
@@ -324,7 +331,6 @@ int mb_cpu_gdb_read_register(CPUState *cpu, uint8_t *buf, int reg);
 int mb_cpu_gdb_write_register(CPUState *cpu, uint8_t *buf, int reg);
 
 void mb_tcg_init(void);
-MicroBlazeCPU *cpu_mb_init(const char *cpu_model);
 /* you can call this signal handler from your SIGBUS and SIGSEGV
    signal handlers to inform the virtual CPU of exceptions. non zero
    is returned if the signal was handled by the virtual CPU.  */
@@ -337,7 +343,7 @@ int cpu_mb_signal_handler(int host_signum, void *pinfo,
 #define TARGET_PHYS_ADDR_SPACE_BITS 32
 #define TARGET_VIRT_ADDR_SPACE_BITS 32
 
-#define cpu_init(cpu_model) CPU(cpu_mb_init(cpu_model))
+#define cpu_init(cpu_model) cpu_generic_init(TYPE_MICROBLAZE_CPU, cpu_model)
 
 #define cpu_signal_handler cpu_mb_signal_handler
 

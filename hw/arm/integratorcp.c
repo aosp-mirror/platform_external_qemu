@@ -158,7 +158,7 @@ static void integratorcm_do_remap(IntegratorCMState *s)
 static void integratorcm_set_ctrl(IntegratorCMState *s, uint32_t value)
 {
     if (value & 8) {
-        qemu_system_reset_request();
+        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
     }
     if ((s->cm_ctrl ^ value) & 1) {
         /* (value & 1) != 0 means the green "MISC LED" is lit.
@@ -278,7 +278,6 @@ static void integratorcm_init(Object *obj)
                                    1000);
     memory_region_init_ram(&s->flash, obj, "integrator.flash", 0x100000,
                            &error_fatal);
-    vmstate_register_ram_global(&s->flash);
 
     memory_region_init_io(&s->iomem, obj, &integratorcm_ops, s,
                           "integratorcm", 0x00800000);
@@ -573,46 +572,19 @@ static struct arm_boot_info integrator_binfo = {
 static void integratorcp_init(MachineState *machine)
 {
     ram_addr_t ram_size = machine->ram_size;
-    const char *cpu_model = machine->cpu_model;
     const char *kernel_filename = machine->kernel_filename;
     const char *kernel_cmdline = machine->kernel_cmdline;
     const char *initrd_filename = machine->initrd_filename;
-    char **cpustr;
-    ObjectClass *cpu_oc;
-    CPUClass *cc;
     Object *cpuobj;
     ARMCPU *cpu;
-    const char *typename;
     MemoryRegion *address_space_mem = get_system_memory();
     MemoryRegion *ram = g_new(MemoryRegion, 1);
     MemoryRegion *ram_alias = g_new(MemoryRegion, 1);
     qemu_irq pic[32];
     DeviceState *dev, *sic, *icp;
     int i;
-    Error *err = NULL;
 
-    if (!cpu_model) {
-        cpu_model = "arm926";
-    }
-
-    cpustr = g_strsplit(cpu_model, ",", 2);
-
-    cpu_oc = cpu_class_by_name(TYPE_ARM_CPU, cpustr[0]);
-    if (!cpu_oc) {
-        fprintf(stderr, "Unable to find CPU definition\n");
-        exit(1);
-    }
-    typename = object_class_get_name(cpu_oc);
-
-    cc = CPU_CLASS(cpu_oc);
-    cc->parse_features(typename, cpustr[1], &err);
-    g_strfreev(cpustr);
-    if (err) {
-        error_report_err(err);
-        exit(1);
-    }
-
-    cpuobj = object_new(typename);
+    cpuobj = object_new(machine->cpu_type);
 
     /* By default ARM1176 CPUs have EL3 enabled.  This board does not
      * currently support EL3 so the CPU EL3 property is disabled before
@@ -682,6 +654,8 @@ static void integratorcp_machine_init(MachineClass *mc)
 {
     mc->desc = "ARM Integrator/CP (ARM926EJ-S)";
     mc->init = integratorcp_init;
+    mc->ignore_memory_transaction_failures = true;
+    mc->default_cpu_type = ARM_CPU_TYPE_NAME("arm926");
 }
 
 DEFINE_MACHINE("integratorcp", integratorcp_machine_init)

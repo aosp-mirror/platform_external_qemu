@@ -738,15 +738,15 @@ static void test_hbitmap_meta_one(TestHBitmapData *data, const void *unused)
     }
 }
 
-static void test_hbitmap_serialize_granularity(TestHBitmapData *data,
-                                               const void *unused)
+static void test_hbitmap_serialize_align(TestHBitmapData *data,
+                                         const void *unused)
 {
     int r;
 
     hbitmap_test_init(data, L3 * 2, 3);
     g_assert(hbitmap_is_serializable(data->hb));
 
-    r = hbitmap_serialization_granularity(data->hb);
+    r = hbitmap_serialization_align(data->hb);
     g_assert_cmpint(r, ==, 64 << 3);
 }
 
@@ -909,6 +909,22 @@ static void hbitmap_test_add(const char *testpath,
                hbitmap_test_teardown);
 }
 
+static void test_hbitmap_iter_and_reset(TestHBitmapData *data,
+                                        const void *unused)
+{
+    HBitmapIter hbi;
+
+    hbitmap_test_init(data, L1 * 2, 0);
+    hbitmap_set(data->hb, 0, data->size);
+
+    hbitmap_iter_init(&hbi, data->hb, BITS_PER_LONG - 1);
+
+    hbitmap_iter_next(&hbi);
+
+    hbitmap_reset_all(data->hb);
+    hbitmap_iter_next(&hbi);
+}
+
 int main(int argc, char **argv)
 {
     g_test_init(&argc, &argv, NULL);
@@ -958,14 +974,17 @@ int main(int argc, char **argv)
     hbitmap_test_add("/hbitmap/meta/word", test_hbitmap_meta_word);
     hbitmap_test_add("/hbitmap/meta/sector", test_hbitmap_meta_sector);
 
-    hbitmap_test_add("/hbitmap/serialize/granularity",
-                     test_hbitmap_serialize_granularity);
+    hbitmap_test_add("/hbitmap/serialize/align",
+                     test_hbitmap_serialize_align);
     hbitmap_test_add("/hbitmap/serialize/basic",
                      test_hbitmap_serialize_basic);
     hbitmap_test_add("/hbitmap/serialize/part",
                      test_hbitmap_serialize_part);
     hbitmap_test_add("/hbitmap/serialize/zeroes",
                      test_hbitmap_serialize_zeroes);
+
+    hbitmap_test_add("/hbitmap/iter/iter_and_reset",
+                     test_hbitmap_iter_and_reset);
     g_test_run();
 
     return 0;

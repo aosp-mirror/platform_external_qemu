@@ -30,6 +30,7 @@
 #include "hw/sysbus.h"
 #include "exec/address-spaces.h"
 #include "sysemu/sysemu.h"
+#include "cpu.h"
 
 #undef REG_FMT
 #define REG_FMT			"0x%02lx"
@@ -848,7 +849,7 @@ static void spitz_lcd_hsync_handler(void *opaque, int line, int level)
 static void spitz_reset(void *opaque, int line, int level)
 {
     if (level) {
-        qemu_system_reset_request();
+        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
     }
 }
 
@@ -909,18 +910,14 @@ static void spitz_common_init(MachineState *machine,
     DeviceState *scp0, *scp1 = NULL;
     MemoryRegion *address_space_mem = get_system_memory();
     MemoryRegion *rom = g_new(MemoryRegion, 1);
-    const char *cpu_model = machine->cpu_model;
-
-    if (!cpu_model)
-        cpu_model = (model == terrier) ? "pxa270-c5" : "pxa270-c0";
 
     /* Setup CPU & memory */
-    mpu = pxa270_init(address_space_mem, spitz_binfo.ram_size, cpu_model);
+    mpu = pxa270_init(address_space_mem, spitz_binfo.ram_size,
+                      machine->cpu_type);
 
     sl_flash_register(mpu, (model == spitz) ? FLASH_128M : FLASH_1024M);
 
     memory_region_init_ram(rom, NULL, "spitz.rom", SPITZ_ROM, &error_fatal);
-    vmstate_register_ram_global(rom);
     memory_region_set_readonly(rom, true);
     memory_region_add_subregion(address_space_mem, 0, rom);
 
@@ -984,6 +981,8 @@ static void akitapda_class_init(ObjectClass *oc, void *data)
 
     mc->desc = "Sharp SL-C1000 (Akita) PDA (PXA270)";
     mc->init = akita_init;
+    mc->ignore_memory_transaction_failures = true;
+    mc->default_cpu_type = ARM_CPU_TYPE_NAME("pxa270-c0");
 }
 
 static const TypeInfo akitapda_type = {
@@ -999,6 +998,8 @@ static void spitzpda_class_init(ObjectClass *oc, void *data)
     mc->desc = "Sharp SL-C3000 (Spitz) PDA (PXA270)";
     mc->init = spitz_init;
     mc->block_default_type = IF_IDE;
+    mc->ignore_memory_transaction_failures = true;
+    mc->default_cpu_type = ARM_CPU_TYPE_NAME("pxa270-c0");
 }
 
 static const TypeInfo spitzpda_type = {
@@ -1014,6 +1015,8 @@ static void borzoipda_class_init(ObjectClass *oc, void *data)
     mc->desc = "Sharp SL-C3100 (Borzoi) PDA (PXA270)";
     mc->init = borzoi_init;
     mc->block_default_type = IF_IDE;
+    mc->ignore_memory_transaction_failures = true;
+    mc->default_cpu_type = ARM_CPU_TYPE_NAME("pxa270-c0");
 }
 
 static const TypeInfo borzoipda_type = {
@@ -1029,6 +1032,8 @@ static void terrierpda_class_init(ObjectClass *oc, void *data)
     mc->desc = "Sharp SL-C3200 (Terrier) PDA (PXA270)";
     mc->init = terrier_init;
     mc->block_default_type = IF_IDE;
+    mc->ignore_memory_transaction_failures = true;
+    mc->default_cpu_type = ARM_CPU_TYPE_NAME("pxa270-c5");
 }
 
 static const TypeInfo terrierpda_type = {
@@ -1076,7 +1081,7 @@ static void sl_nand_class_init(ObjectClass *klass, void *data)
     dc->vmsd = &vmstate_sl_nand_info;
     dc->props = sl_nand_properties;
     /* Reason: init() method uses drive_get() */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo sl_nand_info = {

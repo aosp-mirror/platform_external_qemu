@@ -1,6 +1,10 @@
 obj-y += mips_r4k.o mips_malta.o mips_mipssim.o
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 obj-y += addr.o cputimer.o mips_int.o
 obj-$(CONFIG_GOLDFISH) += mips_ranchu.o
+=======
+obj-y += addr.o mips_int.o
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 obj-$(CONFIG_JAZZ) += mips_jazz.o
 obj-$(CONFIG_FULONG) += mips_fulong2e.o
 obj-y += gt64xxx_pci.o
