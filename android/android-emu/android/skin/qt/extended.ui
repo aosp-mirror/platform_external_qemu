@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>820</width>
-    <height>620</height>
+    <width>1024</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>820</width>
-    <height>620</height>
+    <width>1024</width>
+    <height>768</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>820</width>
-    <height>620</height>
+    <width>1024</width>
+    <height>768</height>
    </size>
   </property>
   <property name="font">
@@ -48,238 +48,64 @@ font-family: &quot;Roboto&quot;</string>
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
   </property>
-  <widget class="QStackedWidget" name="stackedWidget">
+  <widget class="QWidget" name="stackedWidgetContainer">
    <property name="geometry">
     <rect>
-     <x>198</x>
+     <x>256</x>
      <y>0</y>
-     <width>620</width>
-     <height>620</height>
+     <width>768</width>
+     <height>768</height>
     </rect>
    </property>
-   <property name="layoutDirection">
-    <enum>Qt::LeftToRight</enum>
-   </property>
-   <property name="currentIndex">
-    <number>0</number>
-   </property>
-   <widget class="LocationPage" name="location_page"/>
-   <widget class="CellularPage" name="cellular_page"/>
-   <widget class="BatteryPage" name="batteryPage"/>
-   <widget class="CameraPage" name="cameraPage"/>
-   <widget class="TelephonyPage" name="telephonyPage"/>
-   <widget class="DPadPage" name="dpadPage"/>
-   <widget class="RotaryInputPage" name="rotaryInputPage"/>
-   <widget class="MicrophonePage" name="microphonePage"/>
-   <widget class="FingerPage" name="finger_page"/>
-   <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
-   <widget class="SnapshotPage" name="snapshotPage"/>
-   <widget class="BugreportPage" name="bugreportPage"/>
-   <widget class="RecordScreenPage" name="recordScreenPage"/>
-   <widget class="GooglePlayPage" name="googlePlayPage"/>
-   <widget class="SettingsPage" name="settingsPage"/>
-   <widget class="HelpPage" name="helpPage"/>
-   <widget class="CarDataPage" name="carDataPage"/>
-   <widget class="QWidget" name="page">
-    <widget class="QGroupBox" name="locationGroup_4">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>10</y>
-       <width>491</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Hidden page that holds future widgets for other pages</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="locationGroup_5">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>70</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Cellular page:</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="cell_delayGroupBox">
-     <property name="geometry">
-      <rect>
-       <x>60</x>
-       <y>122</y>
-       <width>161</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Network delay (msec)</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string notr="true">Title</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="cell_delayBox">
-     <property name="geometry">
-      <rect>
-       <x>60</x>
-       <y>140</y>
-       <width>280</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">padding: 3px 3px 3px 3px;</string>
-     </property>
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-     <item>
-      <property name="text">
-       <string>0</string>
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>35-200 (UMTS/3G)</string>
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>150-500 (GPRS)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>80-400 (EDGE/EGPRS)</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QGroupBox" name="themeTitle_3">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>262</y>
-       <width>211</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>On-screen keyboard</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="set_keyboardBox">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>280</y>
-       <width>211</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>24</height>
-      </size>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Toggle</string>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="locationGroup_6">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>200</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Settings page:</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-   </widget>
+      <widget class="LocationPage" name="location_page"/>
+      <widget class="CellularPage" name="cellular_page"/>
+      <widget class="BatteryPage" name="batteryPage"/>
+      <widget class="CameraPage" name="cameraPage"/>
+      <widget class="TelephonyPage" name="telephonyPage"/>
+      <widget class="DPadPage" name="dpadPage"/>
+      <widget class="RotaryInputPage" name="rotaryInputPage"/>
+      <widget class="MicrophonePage" name="microphonePage"/>
+      <widget class="FingerPage" name="finger_page"/>
+      <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
+      <widget class="SnapshotPage" name="snapshotPage"/>
+      <widget class="BugreportPage" name="bugreportPage"/>
+      <widget class="RecordScreenPage" name="recordScreenPage"/>
+      <widget class="GooglePlayPage" name="googlePlayPage"/>
+      <widget class="SettingsPage" name="settingsPage"/>
+      <widget class="HelpPage" name="helpPage"/>
+      <widget class="CarDataPage" name="carDataPage"/>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="Line" name="VertDivider">
    <property name="geometry">
     <rect>
-     <x>194</x>
+     <x>256</x>
      <y>0</y>
      <width>4</width>
-     <height>600</height>
+     <height>768</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -298,13 +124,13 @@ font-family: &quot;Roboto&quot;</string>
     <string notr="true">GradientDivider</string>
    </property>
   </widget>
-  <widget class="QWidget" name="widget" native="true">
+  <widget class="QWidget" name="extendedSidePanel" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>194</width>
-     <height>620</height>
+     <width>256</width>
+     <height>768</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -312,9 +138,6 @@ font-family: &quot;Roboto&quot;</string>
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>MajorTab</string>
@@ -327,7 +150,7 @@ font-family: &quot;Roboto&quot;</string>
      <number>0</number>
     </property>
     <property name="topMargin">
-     <number>12</number>
+     <number>48</number>
     </property>
     <property name="rightMargin">
      <number>0</number>
@@ -336,848 +159,743 @@ font-family: &quot;Roboto&quot;</string>
      <number>0</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
-      <property name="spacing">
-       <number>0</number>
+     <widget class="QLabel" name="devOptionsLabel">
+      <property name="text">
+       <string>DEVELOPER OPTIONS</string>
       </property>
-      <item>
-       <widget class="QPushButton" name="locationButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Location</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/location</normaloff>:/light/location</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="default">
-         <bool>false</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>location</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cellularButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Cellular</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/signal_cellular_3_bar</normaloff>:/light/signal_cellular_3_bar</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="default">
-         <bool>false</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>signal_cellular_3_bar</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="batteryButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Battery</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/battery</normaloff>:/light/battery</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>battery</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="cameraButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Camera</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/camera_iris</normaloff>:/light/camera_iris</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>camera_iris</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="telephoneButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Phone</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/phone</normaloff>:/light/phone</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>phone</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="dpadButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Directional pad</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/dpad</normaloff>:/light/dpad</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>dpad</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="rotaryInputButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Rotary input</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/rotary_input</normaloff>:/light/rotary_input</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>rotary_input</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="microphoneButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Microphone</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/mic</normaloff>:/light/mic</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>mic</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="fingerButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Fingerprint</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/fingerprint</normaloff>:/light/fingerprint</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>fingerprint</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="virtSensorsButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Virtual sensors</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/virtSensors</normaloff>:/light/virtSensors</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>virtSensors</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="bugreportButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Bug report</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/bugreport</normaloff>:/light/bugreport</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>bugreport</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="carDataButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <!-- Default invisible, will change to visible programmatically when running Android Auto
-              system image -->
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Car data</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/android_auto</normaloff>:/light/android_auto</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>android_auto</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>194</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string>/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="lineWidth">
-         <number>2</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>HorizDivider</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="snapshotButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Snapshots</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/snapshot</normaloff>:/light/snapshot</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>snapshot</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="recordScreenButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Screen record</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/record_screen</normaloff>:/light/record_screen</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>record_screen</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="googlePlayButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="visible">
-         <bool>false</bool>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Google Play</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/google_play</normaloff>:/light/google_play</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>google_play</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="settingsButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Settings</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/settings</normaloff>:/light/settings</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>settings</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="helpButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Help</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/help</normaloff>:/light/help</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>help</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+      <property name="ColorGroup" stdset="0">
+       <string notr="true">MajorTabTitle</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="locationButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Location</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/location</normaloff>:/light/location</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="default">
+       <bool>false</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>location</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="cellularButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Cellular</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/signal_cellular_3_bar</normaloff>:/light/signal_cellular_3_bar</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="default">
+       <bool>false</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>signal_cellular_3_bar</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="batteryButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Battery</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/battery</normaloff>:/light/battery</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>battery</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="cameraButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Camera</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/camera_iris</normaloff>:/light/camera_iris</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>camera_iris</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="telephoneButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Phone</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/phone</normaloff>:/light/phone</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>phone</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="dpadButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Directional pad</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/dpad</normaloff>:/light/dpad</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>dpad</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="rotaryInputButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Rotary input</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/rotary_input</normaloff>:/light/rotary_input</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>rotary_input</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="microphoneButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Microphone</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/mic</normaloff>:/light/mic</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>mic</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="fingerButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Fingerprint</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/fingerprint</normaloff>:/light/fingerprint</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>fingerprint</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="virtSensorsButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Virtual sensors</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/virtSensors</normaloff>:/light/virtSensors</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>virtSensors</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="bugreportButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Bug report</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/bugreport</normaloff>:/light/bugreport</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>bugreport</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="carDataButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <!-- Default invisible, will change to visible programmatically when running Android Auto
+            system image -->
+      <property name="visible">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Car data</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/android_auto</normaloff>:/light/android_auto</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>android_auto</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="snapshotButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Snapshots</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/snapshot</normaloff>:/light/snapshot</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>snapshot</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="recordScreenButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="visible">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Screen record</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/record_screen</normaloff>:/light/record_screen</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>record_screen</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="googlePlayButton">
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+       </font>
+      </property>
+      <property name="visible">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>  Google Play</string>
+      </property>
+      <property name="icon">
+       <iconset resource="resources.qrc">
+        <normaloff>:/light/google_play</normaloff>:/light/google_play</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>google_play</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+     </widget>
+    </item>
+  <item>
+   <widget class="Line" name="sidePanelDivider">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>256</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>2</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="ColorGroup" stdset="0">
+     <string>HorizDivider</string>
+    </property>
+   </widget>
+  </item>
+  <item>
+   <widget class="QPushButton" name="settingsButton">
+    <property name="font">
+     <font>
+      <family>Roboto</family>
+     </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string>  Settings</string>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/light/settings</normaloff>:/light/settings</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>20</width>
+      <height>20</height>
+     </size>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>false</bool>
+    </property>
+    <property name="themeIconName" stdset="0">
+     <string>settings</string>
+    </property>
+    <property name="ColorGroup" stdset="0">
+     <string>MajorTab</string>
+    </property>
+   </widget>
+  </item>
+  <item>
+   <widget class="QPushButton" name="helpButton">
+    <property name="font">
+     <font>
+      <family>Roboto</family>
+     </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string>  Help</string>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/light/help</normaloff>:/light/help</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>20</width>
+      <height>20</height>
+     </size>
+    </property>
+    <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
+      <property name="themeIconName" stdset="0">
+       <string>help</string>
+      </property>
+      <property name="ColorGroup" stdset="0">
+       <string>MajorTab</string>
+      </property>
+      <property name="report_metrics" stdset="0">
+       <bool>false</bool>
+      </property>
+     </widget>
     </item>
     <item>
      <spacer name="verticalSpacer">

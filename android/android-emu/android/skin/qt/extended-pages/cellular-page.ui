@@ -2,86 +2,14 @@
 <ui version="4.0">
  <class>CellularPage</class>
  <widget class="QWidget" name="CellularPage">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>622</width>
-    <height>580</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QComboBox" name="cell_standardBox">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>38</y>
-     <width>280</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">padding: 3px 3px 3px 3px;</string>
-   </property>
-   <property name="currentIndex">
-    <number>7</number>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-   <item>
-    <property name="text">
-     <string>GSM</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>HSCSD</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>GPRS</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>EDGE</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>UMTS</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>HSDPA</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>LTE</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Full</string>
-    </property>
-   </item>
-  </widget>
   <widget class="QGroupBox" name="cell_vStatusGroupBox">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>94</y>
+     <x>24</x>
+     <y>127</y>
      <width>111</width>
      <height>24</height>
     </rect>
@@ -118,8 +46,8 @@
   <widget class="QGroupBox" name="cell_stdGroupBox">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>20</y>
+     <x>24</x>
+     <y>48</y>
      <width>131</width>
      <height>24</height>
     </rect>
@@ -133,6 +61,70 @@
    <property name="ColorGroup" stdset="0">
     <string notr="true">Title</string>
    </property>
+   <widget class="QComboBox" name="cell_standardBox">
+    <property name="geometry">
+     <rect>
+      <x>24</x>
+      <y>72</y>
+      <width>280</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Roboto</family>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">padding: 3px 3px 3px 3px;</string>
+    </property>
+    <property name="currentIndex">
+     <number>7</number>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>false</bool>
+    </property>
+    <item>
+     <property name="text">
+      <string>GSM</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>HSCSD</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>GPRS</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>EDGE</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>UMTS</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>HSDPA</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>LTE</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Full</string>
+     </property>
+    </item>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="cell_signalGroupBox">
    <property name="geometry">

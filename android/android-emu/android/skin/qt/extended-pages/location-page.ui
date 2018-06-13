@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>LocationPage</class>
  <widget class="QWidget" name="LocationPage">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>622</width>
-    <height>600</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -18,14 +10,6 @@
     <widget class="QWebEngineView" name="webEngineView" native="true"/>
    </item>
   </layout>
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>622</width>
-     <height>580</height>
-    </rect>
-   </property>
  </widget>
  <customwidgets>
   <customwidget>
