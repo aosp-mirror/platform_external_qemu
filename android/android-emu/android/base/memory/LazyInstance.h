@@ -23,8 +23,7 @@ namespace base {
 namespace internal {
 
 // Older GCC stdlib uses deprecated naming scheme has_xxx instead of is_xxx
-#if (defined(__GNUC__) && !defined(__clang__) && __GNUC__ <= 4) || \
-        defined(__OLD_STD_VERSION__)
+#if (defined(__GNUC__) && !defined(__clang__) && __GNUC__ <= 4) || defined(__OLD_STD_VERSION__)
 template <class T>
 using is_trivially_default_constructible =
         std::has_trivial_default_constructor<T>;
@@ -119,9 +118,6 @@ static_assert(is_trivially_default_constructible<LazyInstanceState>::value,
 
 }  // namespace internal
 
-class Lock;
-class StaticLock;
-
 // LazyInstance template definition, see comment above for usage
 // instructions. It is crucial to make this a POD-struct compatible
 // type [1].
@@ -130,11 +126,6 @@ class StaticLock;
 //
 template <class T>
 struct LazyInstance {
-    static_assert(!std::is_same<T, Lock>::value &&
-                          !std::is_same<T, StaticLock>::value,
-                  "Don't use LazyInstance<Lock | StaticLock>, use StaticLock "
-                  "by value instead");
-
     bool hasInstance() const { return !mState.inNoObjectState(); }
 
     const T& get() const { return *ptr(); }

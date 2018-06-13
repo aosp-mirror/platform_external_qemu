@@ -58,7 +58,6 @@ const char*  android_skin_net_speed = NULL;
 const char*  android_skin_net_delay = NULL;
 
 static const char DEFAULT_SOFTWARE_GPU_MODE[] = "swiftshader_indirect";
-static const int DEFAULT_PARTITION_SIZE_IN_MB = 800;
 
 /***********************************************************************/
 /***********************************************************************/
@@ -733,7 +732,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     /* -partition-size is used to specify the max size of both the system
      * and data partition sizes.
      */
-    uint64_t defaultPartitionSize = convertMBToBytes(DEFAULT_PARTITION_SIZE_IN_MB);
+    uint64_t defaultPartitionSize = convertMBToBytes(200);
 
     if (opts->partition_size) {
         char*  end;

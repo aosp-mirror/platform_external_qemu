@@ -402,12 +402,12 @@ void ich9_lpc_pm_init(PCIDevice *lpc_pci, bool smm_enabled)
          * just link them into fw_cfg here.
          */
         fw_cfg_add_file_callback(fw_cfg, "etc/smi/requested-features",
-                                 NULL, NULL,
+                                 NULL, NULL, NULL,
                                  lpc->smi_guest_features_le,
                                  sizeof lpc->smi_guest_features_le,
                                  false);
         fw_cfg_add_file_callback(fw_cfg, "etc/smi/features-ok",
-                                 smi_features_ok_callback, lpc,
+                                 smi_features_ok_callback, NULL, lpc,
                                  &lpc->smi_features_ok,
                                  sizeof lpc->smi_features_ok,
                                  true);
@@ -606,7 +606,7 @@ static void ich9_rst_cnt_write(void *opaque, hwaddr addr, uint64_t val,
     ICH9LPCState *lpc = opaque;
 
     if (val & 4) {
-        qemu_system_reset_request();
+        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         return;
     }
     lpc->rst_cnt = val & 0xA; /* keep FULL_RST (bit 3) and SYS_RST (bit 1) */
@@ -805,7 +805,7 @@ static void ich9_lpc_class_init(ObjectClass *klass, void *data)
      * Reason: part of ICH9 southbridge, needs to be wired up by
      * pc_q35_init()
      */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
     hc->plug = ich9_pm_device_plug_cb;
     hc->unplug_request = ich9_pm_device_unplug_request_cb;
     hc->unplug = ich9_pm_device_unplug_cb;
@@ -823,6 +823,7 @@ static const TypeInfo ich9_lpc_info = {
     .interfaces = (InterfaceInfo[]) {
         { TYPE_HOTPLUG_HANDLER },
         { TYPE_ACPI_DEVICE_IF },
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
         { }
     }
 };

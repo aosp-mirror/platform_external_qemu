@@ -16,6 +16,7 @@
 extern "C" {
 #include "qemu/osdep.h"
 #include "qemu-common.h"
+#include "exec/cpu-common.h"
 #include "migration/qemu-file.h"
 }
 

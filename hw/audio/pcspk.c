@@ -26,7 +26,7 @@
 #include "hw/hw.h"
 #include "hw/i386/pc.h"
 #include "hw/isa/isa.h"
-#include "hw/audio/audio.h"
+#include "hw/audio/soundhw.h"
 #include "audio/audio.h"
 #include "qemu/timer.h"
 #include "hw/timer/i8254.h"
@@ -69,7 +69,7 @@ static inline void generate_samples(PCSpkState *s)
         const uint32_t n = ((uint64_t)PIT_FREQ << 32) / m;
 
         /* multiple of wavelength for gapless looping */
-        s->samples = (PCSPK_BUF_LEN * PIT_FREQ / m * m / (PIT_FREQ >> 1) + 1) >> 1;
+        s->samples = (QEMU_ALIGN_DOWN(PCSPK_BUF_LEN * PIT_FREQ, m) / (PIT_FREQ >> 1) + 1) >> 1;
         for (i = 0; i < s->samples; ++i)
             s->sample_buf[i] = (64 & (n * i >> 25)) - 32;
     } else {
@@ -223,7 +223,7 @@ static void pcspk_class_initfn(ObjectClass *klass, void *data)
     dc->vmsd = &vmstate_spk;
     dc->props = pcspk_properties;
     /* Reason: realize sets global pcspk_state */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo pcspk_info = {

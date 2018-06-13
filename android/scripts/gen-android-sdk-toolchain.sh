@@ -401,6 +401,7 @@ prepare_build_for_linux() {
 
 
     EXTRA_CFLAGS="-m64"
+    # var_append EXTRA_CFLAGS "-std=c89"
     var_append EXTRA_CFLAGS "-isystem $SYSROOT/usr/include"
     var_append EXTRA_CFLAGS "-isystem $SYSROOT/usr/include/x86_64-linux-gnu"
     var_append EXTRA_CFLAGS ${GCC_LINK_FLAGS}

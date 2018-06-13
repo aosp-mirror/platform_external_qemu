@@ -19,7 +19,7 @@
 #include "qemu/config-file.h"
 #include "qemu/cutils.h"
 #include "qemu/error-report.h"
-#include "sysemu/char.h"
+#include "chardev/char.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/kvm.h"
 #include "sysemu/ranchu.h"
@@ -445,7 +445,7 @@ static void create_cpu_without_cps(const char *cpu_model,
     int i;
 
     for (i = 0; i < smp_cpus; i++) {
-        cpu = cpu_mips_init(cpu_model);
+        cpu = MIPS_CPU(cpu_generic_init(TYPE_MIPS_CPU, cpu_model));
         if (cpu == NULL) {
             FATAL("Unable to find CPU definition\n");
         }
@@ -728,10 +728,10 @@ static void goldfish_reset_io_write(void *opaque, hwaddr addr,
 {
     switch (val) {
     case GOLDFISH_PM_CMD_GORESET:
-        qemu_system_reset_request();
+        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         break;
     case GOLDFISH_PM_CMD_GOSHUTDOWN:
-        qemu_system_shutdown_request();
+        qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
         break;
     default:
         LOGI("Unknown command %llx\n", (unsigned long long)val);
@@ -1000,7 +1000,7 @@ static void mips_ranchu_init(MachineState *machine)
     rp->fdt = fdt;
     rp->fdt_size = fdt_size;
 
-    memory_region_init_ram(ram_lo, NULL, "ranchu_low.ram",
+    memory_region_init_ram_nomigrate(ram_lo, NULL, "ranchu_low.ram",
                            MIN(ram_size, GOLDFISH_IO_SPACE), &error_abort);
     vmstate_register_ram_global(ram_lo);
     memory_region_add_subregion(get_system_memory(), 0, ram_lo);
@@ -1011,7 +1011,7 @@ static void mips_ranchu_init(MachineState *machine)
     memory_region_add_subregion(get_system_memory(),
                                 devmap[RANCHU_GOLDFISH_RESET].base, iomem);
 
-    memory_region_init_ram(bios, NULL, "ranchu.bios", RANCHU_BIOS_SIZE,
+    memory_region_init_ram_nomigrate(bios, NULL, "ranchu.bios", RANCHU_BIOS_SIZE,
                            &error_abort);
     vmstate_register_ram_global(bios);
     memory_region_set_readonly(bios, true);
@@ -1019,7 +1019,7 @@ static void mips_ranchu_init(MachineState *machine)
 
     /* post IO hole, if there is enough RAM */
     if (ram_size > GOLDFISH_IO_SPACE) {
-        memory_region_init_ram(ram_hi, NULL, "ranchu_high.ram",
+        memory_region_init_ram_nomigrate(ram_hi, NULL, "ranchu_high.ram",
                                ram_size - GOLDFISH_IO_SPACE, &error_abort);
         vmstate_register_ram_global(ram_hi);
         memory_region_add_subregion(get_system_memory(),
