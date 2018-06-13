@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "812fd3ea_e5f6fc77",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-13T18:27:26Z",
+      "side": 1,
+      "message": "It may be confusing if we lead with \"Do you want to skip the save\" because that will reverse the Yes/No logic versus the other messages.",
+      "range": {
+        "startLine": 720,
+        "startChar": 0,
+        "endLine": 722,
+        "endChar": 33
+      },
+      "revId": "863de4a05797ff45b7d06cd288f873093449c5cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
