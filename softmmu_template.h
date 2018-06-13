@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 /*
  *  Software MMU support
  *
@@ -431,3 +432,5 @@ void helper_be_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
 #undef helper_be_lds_name
 #undef helper_le_st_name
 #undef helper_be_st_name
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)

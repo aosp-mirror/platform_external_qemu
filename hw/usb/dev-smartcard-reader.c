@@ -270,11 +270,6 @@ typedef struct BulkIn {
     uint32_t pos;
 } BulkIn;
 
-enum {
-    MIGRATION_NONE,
-    MIGRATION_MIGRATED,
-};
-
 typedef struct CCIDBus {
     BusState qbus;
 } CCIDBus;
@@ -306,9 +301,6 @@ typedef struct USBCCIDState {
     CCID_ProtocolDataStructure abProtocolDataStructure;
     uint32_t ulProtocolDataStructureSize;
     uint32_t state_vmstate;
-    uint32_t migration_target_ip;
-    uint16_t migration_target_port;
-    uint8_t  migration_state;
     uint8_t  bmSlotICCState;
     uint8_t  powered;
     uint8_t  notify_slot_change;
@@ -813,7 +805,10 @@ static void ccid_write_data_block(USBCCIDState *s, uint8_t slot, uint8_t seq,
     if (p->b.bError) {
         DPRINTF(s, D_VERBOSE, "error %d\n", p->b.bError);
     }
-    memcpy(p->abData, data, len);
+    if (len) {
+        g_assert_nonnull(data);
+        memcpy(p->abData, data, len);
+    }
     ccid_reset_error_status(s);
     usb_wakeup(s->bulk, 0);
 }
@@ -1240,9 +1235,6 @@ int ccid_card_ccid_attach(CCIDCardState *card)
     USBCCIDState *s = USB_CCID_DEV(dev);
 
     DPRINTF(s, 1, "CCID Attach\n");
-    if (s->migration_state == MIGRATION_MIGRATED) {
-        s->migration_state = MIGRATION_NONE;
-    }
     return 0;
 }
 
@@ -1311,12 +1303,12 @@ static int ccid_card_init(DeviceState *qdev)
     int ret = 0;
 
     if (card->slot != 0) {
-        error_report("Warning: usb-ccid supports one slot, can't add %d",
-                card->slot);
+        warn_report("usb-ccid supports one slot, can't add %d",
+                    card->slot);
         return -1;
     }
     if (s->card != NULL) {
-        error_report("Warning: usb-ccid card already full, not adding");
+        warn_report("usb-ccid card already full, not adding");
         return -1;
     }
     ret = ccid_card_initfn(card);
@@ -1338,9 +1330,6 @@ static void ccid_realize(USBDevice *dev, Error **errp)
     s->intr = usb_ep_get(dev, USB_TOKEN_IN, CCID_INT_IN_EP);
     s->bulk = usb_ep_get(dev, USB_TOKEN_IN, CCID_BULK_IN_EP);
     s->card = NULL;
-    s->migration_state = MIGRATION_NONE;
-    s->migration_target_ip = 0;
-    s->migration_target_port = 0;
     s->dev.speed = USB_SPEED_FULL;
     s->dev.speedmask = USB_SPEED_MASK_FULL;
     s->notify_slot_change = false;
@@ -1371,18 +1360,13 @@ static int ccid_post_load(void *opaque, int version_id)
     return 0;
 }
 
-static void ccid_pre_save(void *opaque)
+static int ccid_pre_save(void *opaque)
 {
     USBCCIDState *s = opaque;
 
     s->state_vmstate = s->dev.state;
-    if (s->dev.attached) {
-        /*
-         * Migrating an open device, ignore reconnection CHR_EVENT to avoid an
-         * erroneous detach.
-         */
-        s->migration_state = MIGRATION_MIGRATED;
-    }
+
+    return 0;
 }
 
 static VMStateDescription bulk_in_vmstate = {
@@ -1447,7 +1431,7 @@ static VMStateDescription ccid_vmstate = {
         VMSTATE_STRUCT_ARRAY(pending_answers, USBCCIDState,
                         PENDING_ANSWERS_NUM, 1, answer_vmstate, Answer),
         VMSTATE_UINT32(pending_answers_num, USBCCIDState),
-        VMSTATE_UINT8(migration_state, USBCCIDState),
+        VMSTATE_UNUSED(1), /* was migration_state */
         VMSTATE_UINT32(state_vmstate, USBCCIDState),
         VMSTATE_END_OF_LIST()
     }

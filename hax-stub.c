@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 /*
  * QEMU HAXM support
  *
@@ -54,3 +55,5 @@ int hax_smp_cpu_exec(CPUState *cpu)
 {
     return -ENOSYS;
 }
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)

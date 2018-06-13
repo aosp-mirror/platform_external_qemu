@@ -210,6 +210,16 @@ struct AUXTOI2CState {
     I2CBus *i2c_bus;
 };
 
+static void aux_bridge_class_init(ObjectClass *oc, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(oc);
+
+    /* This device is private and is created only once for each
+     * aux-bus in aux_init_bus(..). So don't allow the user to add one.
+     */
+    dc->user_creatable = false;
+}
+
 static void aux_bridge_init(Object *obj)
 {
     AUXTOI2CState *s = AUXTOI2C(obj);
@@ -225,6 +235,7 @@ static inline I2CBus *aux_bridge_get_i2c_bus(AUXTOI2CState *bridge)
 static const TypeInfo aux_to_i2c_type_info = {
     .name = TYPE_AUXTOI2C,
     .parent = TYPE_DEVICE,
+    .class_init = aux_bridge_class_init,
     .instance_size = sizeof(AUXTOI2CState),
     .instance_init = aux_bridge_init
 };
@@ -244,7 +255,7 @@ static void aux_slave_dev_print(Monitor *mon, DeviceState *dev, int indent)
 
     monitor_printf(mon, "%*smemory " TARGET_FMT_plx "/" TARGET_FMT_plx "\n",
                    indent, "",
-                   object_property_get_int(OBJECT(s->mmio), "addr", NULL),
+                   object_property_get_uint(OBJECT(s->mmio), "addr", NULL),
                    memory_region_size(s->mmio));
 }
 

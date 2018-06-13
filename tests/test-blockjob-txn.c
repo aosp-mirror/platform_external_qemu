@@ -44,7 +44,7 @@ static void coroutine_fn test_block_job_run(void *opaque)
 
     while (s->iterations--) {
         if (s->use_timer) {
-            block_job_sleep_ns(job, QEMU_CLOCK_REALTIME, 0);
+            block_job_sleep_ns(job, 0);
         } else {
             block_job_yield(job);
         }
@@ -167,6 +167,11 @@ static void test_pair_jobs(int expected1, int expected2)
     block_job_start(job1);
     block_job_start(job2);
 
+    /* Release our reference now to trigger as many nice
+     * use-after-free bugs as possible.
+     */
+    block_job_txn_unref(txn);
+
     if (expected1 == -ECANCELED) {
         block_job_cancel(job1);
     }
@@ -187,8 +192,6 @@ static void test_pair_jobs(int expected1, int expected2)
 
     g_assert_cmpint(result1, ==, expected1);
     g_assert_cmpint(result2, ==, expected2);
-
-    block_job_txn_unref(txn);
 }
 
 static void test_pair_jobs_success(void)

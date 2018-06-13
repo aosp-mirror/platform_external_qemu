@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 /*
  * QEMU Wacom Penpartner serial tablet emulation
  *
@@ -367,3 +368,5 @@ static void register_types(void)
 }
 
 type_init(register_types);
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)

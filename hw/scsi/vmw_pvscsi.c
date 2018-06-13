@@ -28,7 +28,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "hw/scsi/scsi.h"
-#include "block/scsi.h"
+#include "scsi/constants.h"
 #include "hw/pci/msi.h"
 #include "vmw_pvscsi.h"
 #include "hw/scsi/trace.h"
@@ -202,7 +202,7 @@ pvscsi_ring_init_msg(PVSCSIRingInfo *m, PVSCSICmdDescSetupMsgRing *ri)
     uint32_t len_log2;
     uint32_t ring_size;
 
-    if (ri->numPages > PVSCSI_SETUP_MSG_RING_MAX_NUM_PAGES) {
+    if (!ri->numPages || ri->numPages > PVSCSI_SETUP_MSG_RING_MAX_NUM_PAGES) {
         return -1;
     }
     ring_size = ri->numPages * PVSCSI_MAX_NUM_MSG_ENTRIES_PER_PAGE;
@@ -1104,8 +1104,8 @@ static const struct SCSIBusInfo pvscsi_scsi_info = {
         .cancel = pvscsi_request_cancelled,
 };
 
-static int
-pvscsi_init(PCIDevice *pci_dev)
+static void
+pvscsi_realizefn(PCIDevice *pci_dev, Error **errp)
 {
     PVSCSIState *s = PVSCSI(pci_dev);
 
@@ -1139,18 +1139,12 @@ pvscsi_init(PCIDevice *pci_dev)
     }
 
     s->completion_worker = qemu_bh_new(pvscsi_process_completion_queue, s);
-    if (!s->completion_worker) {
-        pvscsi_cleanup_msi(s);
-        return -ENOMEM;
-    }
 
     scsi_bus_new(&s->bus, sizeof(s->bus), DEVICE(pci_dev),
                  &pvscsi_scsi_info, NULL);
     /* override default SCSI bus hotplug-handler, with pvscsi's one */
     qbus_set_hotplug_handler(BUS(&s->bus), DEVICE(s), &error_abort);
     pvscsi_reset_state(s);
-
-    return 0;
 }
 
 static void
@@ -1174,7 +1168,7 @@ pvscsi_reset(DeviceState *dev)
     pvscsi_reset_adapter(s);
 }
 
-static void
+static int
 pvscsi_pre_save(void *opaque)
 {
     PVSCSIState *s = (PVSCSIState *) opaque;
@@ -1183,7 +1177,12 @@ pvscsi_pre_save(void *opaque)
 
     assert(QTAILQ_EMPTY(&s->pending_queue));
     assert(QTAILQ_EMPTY(&s->completion_queue));
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
     (void)s;
+=======
+
+    return 0;
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 }
 
 static int
@@ -1284,7 +1283,7 @@ static void pvscsi_class_init(ObjectClass *klass, void *data)
     PVSCSIClass *pvs_k = PVSCSI_DEVICE_CLASS(klass);
     HotplugHandlerClass *hc = HOTPLUG_HANDLER_CLASS(klass);
 
-    k->init = pvscsi_init;
+    k->realize = pvscsi_realizefn;
     k->exit = pvscsi_uninit;
     k->vendor_id = PCI_VENDOR_ID_VMWARE;
     k->device_id = PCI_DEVICE_ID_VMWARE_PVSCSI;
@@ -1308,6 +1307,8 @@ static const TypeInfo pvscsi_info = {
     .class_init    = pvscsi_class_init,
     .interfaces = (InterfaceInfo[]) {
         { TYPE_HOTPLUG_HANDLER },
+        { INTERFACE_PCIE_DEVICE },
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
         { }
     }
 };

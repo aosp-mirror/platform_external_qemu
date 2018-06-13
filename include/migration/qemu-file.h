@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (0fac8f Merge "Add simple tracing support" into emu-master-dev)
 /*
  * QEMU System Emulator
  *
@@ -316,3 +317,5 @@ static inline void qemu_get_sbe64s(QEMUFile *f, int64_t *pv)
 size_t qemu_get_counted_string(QEMUFile *f, char buf[256]);
 
 #endif
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
