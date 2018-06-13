@@ -22,7 +22,7 @@
 #include "io/task.h"
 #include "qapi/error.h"
 #include "qemu/thread.h"
-#include "io/trace.h"
+#include "trace.h"
 
 struct QIOTask {
     Object *source;

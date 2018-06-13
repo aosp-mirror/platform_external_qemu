@@ -22,7 +22,7 @@
 
 #include "qemu-common.h"
 #include "qemu/iov.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 #include "hw/usb.h"
 #include "hw/usb/desc.h"
 

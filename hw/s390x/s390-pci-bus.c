@@ -23,14 +23,16 @@
 #include "hw/pci/msi.h"
 #include "qemu/error-report.h"
 
-/* #define DEBUG_S390PCI_BUS */
-#ifdef DEBUG_S390PCI_BUS
-#define DPRINTF(fmt, ...) \
-    do { fprintf(stderr, "S390pci-bus: " fmt, ## __VA_ARGS__); } while (0)
-#else
-#define DPRINTF(fmt, ...) \
-    do { } while (0)
+#ifndef DEBUG_S390PCI_BUS
+#define DEBUG_S390PCI_BUS  0
 #endif
+
+#define DPRINTF(fmt, ...)                                         \
+    do {                                                          \
+        if (DEBUG_S390PCI_BUS) {                                  \
+            fprintf(stderr, "S390pci-bus: " fmt, ## __VA_ARGS__); \
+        }                                                         \
+    } while (0)
 
 S390pciState *s390_get_phb(void)
 {
@@ -45,7 +47,7 @@ S390pciState *s390_get_phb(void)
     return phb;
 }
 
-int chsc_sei_nt2_get_event(void *res)
+int pci_chsc_sei_nt2_get_event(void *res)
 {
     ChscSeiNt2Res *nt2_res = (ChscSeiNt2Res *)res;
     PciCcdfAvail *accdf;
@@ -85,7 +87,7 @@ int chsc_sei_nt2_get_event(void *res)
     return rc;
 }
 
-int chsc_sei_nt2_have_event(void)
+int pci_chsc_sei_nt2_have_event(void)
 {
     S390pciState *s = s390_get_phb();
 
@@ -120,15 +122,10 @@ S390PCIBusDevice *s390_pci_find_dev_by_fid(S390pciState *s, uint32_t fid)
 
 void s390_pci_sclp_configure(SCCB *sccb)
 {
-    PciCfgSccb *psccb = (PciCfgSccb *)sccb;
+    IoaCfgSccb *psccb = (IoaCfgSccb *)sccb;
     S390PCIBusDevice *pbdev = s390_pci_find_dev_by_fid(s390_get_phb(),
                                                        be32_to_cpu(psccb->aid));
     uint16_t rc;
-
-    if (be16_to_cpu(sccb->h.length) < 16) {
-        rc = SCLP_RC_INSUFFICIENT_SCCB_LENGTH;
-        goto out;
-    }
 
     if (!pbdev) {
         DPRINTF("sclp config no dev found\n");
@@ -153,15 +150,10 @@ out:
 
 void s390_pci_sclp_deconfigure(SCCB *sccb)
 {
-    PciCfgSccb *psccb = (PciCfgSccb *)sccb;
+    IoaCfgSccb *psccb = (IoaCfgSccb *)sccb;
     S390PCIBusDevice *pbdev = s390_pci_find_dev_by_fid(s390_get_phb(),
                                                        be32_to_cpu(psccb->aid));
     uint16_t rc;
-
-    if (be16_to_cpu(sccb->h.length) < 16) {
-        rc = SCLP_RC_INSUFFICIENT_SCCB_LENGTH;
-        goto out;
-    }
 
     if (!pbdev) {
         DPRINTF("sclp deconfig no dev found\n");
@@ -207,8 +199,8 @@ static S390PCIBusDevice *s390_pci_find_dev_by_uid(S390pciState *s, uint16_t uid)
     return NULL;
 }
 
-static S390PCIBusDevice *s390_pci_find_dev_by_target(S390pciState *s,
-                                                     const char *target)
+S390PCIBusDevice *s390_pci_find_dev_by_target(S390pciState *s,
+                                              const char *target)
 {
     S390PCIBusDevice *pbdev;
 
@@ -248,7 +240,7 @@ static void s390_pci_generate_event(uint8_t cc, uint16_t pec, uint32_t fh,
     SeiContainer *sei_cont;
     S390pciState *s = s390_get_phb();
 
-    sei_cont = g_malloc0(sizeof(SeiContainer));
+    sei_cont = g_new0(SeiContainer, 1);
     sei_cont->fh = fh;
     sei_cont->fid = fid;
     sei_cont->cc = cc;
@@ -354,8 +346,8 @@ out:
     return pte;
 }
 
-static IOMMUTLBEntry s390_translate_iommu(MemoryRegion *mr, hwaddr addr,
-                                          bool is_write)
+static IOMMUTLBEntry s390_translate_iommu(IOMMUMemoryRegion *mr, hwaddr addr,
+                                          IOMMUAccessFlags flag)
 {
     uint64_t pte;
     uint32_t flags;
@@ -405,9 +397,16 @@ static IOMMUTLBEntry s390_translate_iommu(MemoryRegion *mr, hwaddr addr,
     return ret;
 }
 
-static const MemoryRegionIOMMUOps s390_iommu_ops = {
-    .translate = s390_translate_iommu,
-};
+static void s390_pci_iommu_replay(IOMMUMemoryRegion *iommu,
+                                  IOMMUNotifier *notifier)
+{
+    /* It's impossible to plug a pci device on s390x that already has iommu
+     * mappings which need to be replayed, that is due to the "one iommu per
+     * zpci device" construct. But when we support migration of vfio-pci
+     * devices in future, we need to revisit this.
+     */
+    return;
+}
 
 static S390PCIIOMMU *s390_pci_get_iommu(S390pciState *s, PCIBus *bus,
                                         int devfn)
@@ -417,7 +416,7 @@ static S390PCIIOMMU *s390_pci_get_iommu(S390pciState *s, PCIBus *bus,
     S390PCIIOMMU *iommu;
 
     if (!table) {
-        table = g_malloc0(sizeof(S390PCIIOMMUTable));
+        table = g_new0(S390PCIIOMMUTable, 1);
         table->key = key;
         g_hash_table_insert(s->iommu_table, &table->key, table);
     }
@@ -477,19 +476,13 @@ static void s390_msi_ctrl_write(void *opaque, hwaddr addr, uint64_t data,
                                 unsigned int size)
 {
     S390PCIBusDevice *pbdev = opaque;
-    uint32_t idx = data >> ZPCI_MSI_VEC_BITS;
     uint32_t vec = data & ZPCI_MSI_VEC_MASK;
     uint64_t ind_bit;
     uint32_t sum_bit;
-    uint32_t e = 0;
 
-    DPRINTF("write_msix data 0x%" PRIx64 " idx %d vec 0x%x\n", data, idx, vec);
-
-    if (!pbdev) {
-        e |= (vec << ERR_EVENT_MVN_OFFSET);
-        s390_pci_generate_error_event(ERR_EVENT_NOMSI, idx, 0, addr, e);
-        return;
-    }
+    assert(pbdev);
+    DPRINTF("write_msix data 0x%" PRIx64 " idx %d vec 0x%x\n", data,
+            pbdev->idx, vec);
 
     if (pbdev->state != ZPCI_FS_ENABLED) {
         return;
@@ -502,7 +495,7 @@ static void s390_msi_ctrl_write(void *opaque, hwaddr addr, uint64_t data,
                    0x80 >> ((ind_bit + vec) % 8));
     if (!set_ind_atomic(pbdev->routes.adapter.summary_addr + sum_bit / 8,
                                        0x80 >> (sum_bit % 8))) {
-        css_adapter_interrupt(pbdev->isc);
+        css_adapter_interrupt(CSS_IO_ADAPTER_PCI, pbdev->isc);
     }
 }
 
@@ -520,17 +513,18 @@ static const MemoryRegionOps s390_msi_ctrl_ops = {
 void s390_pci_iommu_enable(S390PCIIOMMU *iommu)
 {
     char *name = g_strdup_printf("iommu-s390-%04x", iommu->pbdev->uid);
-    memory_region_init_iommu(&iommu->iommu_mr, OBJECT(&iommu->mr),
-                             &s390_iommu_ops, name, iommu->pal + 1);
+    memory_region_init_iommu(&iommu->iommu_mr, sizeof(iommu->iommu_mr),
+                             TYPE_S390_IOMMU_MEMORY_REGION, OBJECT(&iommu->mr),
+                             name, iommu->pal + 1);
     iommu->enabled = true;
-    memory_region_add_subregion(&iommu->mr, 0, &iommu->iommu_mr);
+    memory_region_add_subregion(&iommu->mr, 0, MEMORY_REGION(&iommu->iommu_mr));
     g_free(name);
 }
 
 void s390_pci_iommu_disable(S390PCIIOMMU *iommu)
 {
     iommu->enabled = false;
-    memory_region_del_subregion(&iommu->mr, &iommu->iommu_mr);
+    memory_region_del_subregion(&iommu->mr, MEMORY_REGION(&iommu->iommu_mr));
     object_unparent(OBJECT(&iommu->iommu_mr));
 }
 
@@ -579,6 +573,10 @@ static int s390_pcihost_init(SysBusDevice *dev)
     s->bus_no = 0;
     QTAILQ_INIT(&s->pending_sei);
     QTAILQ_INIT(&s->zpci_devs);
+
+    css_register_io_adapters(CSS_IO_ADAPTER_PCI, true, false,
+                             S390_ADAPTER_SUPPRESSIBLE, &error_abort);
+
     return 0;
 }
 
@@ -717,7 +715,7 @@ static void s390_pcihost_hot_plug(HotplugHandler *hotplug_dev,
         pbdev->pdev = pdev;
         pbdev->iommu = s390_pci_get_iommu(s, pdev->bus, pdev->devfn);
         pbdev->iommu->pbdev = pbdev;
-        pbdev->state = ZPCI_FS_STANDBY;
+        pbdev->state = ZPCI_FS_DISABLED;
 
         if (s390_pci_msix_init(pbdev)) {
             error_setg(errp, "MSI-X support is mandatory "
@@ -867,7 +865,6 @@ static void s390_pcihost_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     HotplugHandlerClass *hc = HOTPLUG_HANDLER_CLASS(klass);
 
-    dc->cannot_instantiate_with_device_add_yet = true;
     dc->reset = s390_pcihost_reset;
     k->init = s390_pcihost_init;
     hc->plug = s390_pcihost_hot_plug;
@@ -1014,7 +1011,7 @@ static void s390_pci_set_fid(Object *obj, Visitor *v, const char *name,
     zpci->fid_defined = true;
 }
 
-static PropertyInfo s390_pci_fid_propinfo = {
+static const PropertyInfo s390_pci_fid_propinfo = {
     .name = "zpci_fid",
     .get = s390_pci_get_fid,
     .set = s390_pci_set_fid,
@@ -1035,6 +1032,7 @@ static void s390_pci_device_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->desc = "zpci device";
+    set_bit(DEVICE_CATEGORY_MISC, dc->categories);
     dc->reset = s390_pci_device_reset;
     dc->bus_type = TYPE_S390_PCI_BUS;
     dc->realize = s390_pci_device_realize;
@@ -1054,12 +1052,27 @@ static TypeInfo s390_pci_iommu_info = {
     .instance_size = sizeof(S390PCIIOMMU),
 };
 
+static void s390_iommu_memory_region_class_init(ObjectClass *klass, void *data)
+{
+    IOMMUMemoryRegionClass *imrc = IOMMU_MEMORY_REGION_CLASS(klass);
+
+    imrc->translate = s390_translate_iommu;
+    imrc->replay = s390_pci_iommu_replay;
+}
+
+static const TypeInfo s390_iommu_memory_region_info = {
+    .parent = TYPE_IOMMU_MEMORY_REGION,
+    .name = TYPE_S390_IOMMU_MEMORY_REGION,
+    .class_init = s390_iommu_memory_region_class_init,
+};
+
 static void s390_pci_register_types(void)
 {
     type_register_static(&s390_pcihost_info);
     type_register_static(&s390_pcibus_info);
     type_register_static(&s390_pci_device_info);
     type_register_static(&s390_pci_iommu_info);
+    type_register_static(&s390_iommu_memory_region_info);
 }
 
 type_init(s390_pci_register_types)

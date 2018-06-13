@@ -72,13 +72,15 @@
 #include "exec/address-spaces.h"
 #include "hw/sysbus.h"
 #include "qemu/cutils.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 
 #define MAX_IDE_BUS 2
 #define CFG_ADDR 0xf0000510
 #define TBFREQ (100UL * 1000UL * 1000UL)
-#define CLOCKFREQ (266UL * 1000UL * 1000UL)
+#define CLOCKFREQ (900UL * 1000UL * 1000UL)
 #define BUSFREQ (100UL * 1000UL * 1000UL)
+
+#define NDRV_VGA_FILENAME "qemu_vga.ndrv"
 
 /* UniN device */
 static void unin_write(void *opaque, hwaddr addr, uint64_t value,
@@ -122,11 +124,6 @@ static uint64_t translate_kernel_address(void *opaque, uint64_t addr)
     return (addr & 0x0fffffff) + KERNEL_LOAD_ADDR;
 }
 
-static hwaddr round_page(hwaddr addr)
-{
-    return (addr + TARGET_PAGE_SIZE - 1) & TARGET_PAGE_MASK;
-}
-
 static void ppc_core99_reset(void *opaque)
 {
     PowerPCCPU *cpu = opaque;
@@ -160,7 +157,8 @@ static void ppc_core99_init(MachineState *machine)
     MACIOIDEState *macio_ide;
     BusState *adb_bus;
     MacIONVRAMState *nvr;
-    int bios_size;
+    int bios_size, ndrv_size;
+    uint8_t *ndrv_file;
     MemoryRegion *pic_mem, *escc_mem;
     MemoryRegion *escc_bar = g_new(MemoryRegion, 1);
     int ppc_boot_device;
@@ -176,19 +174,8 @@ static void ppc_core99_init(MachineState *machine)
     linux_boot = (kernel_filename != NULL);
 
     /* init CPUs */
-    if (machine->cpu_model == NULL) {
-#ifdef TARGET_PPC64
-        machine->cpu_model = "970fx";
-#else
-        machine->cpu_model = "G4";
-#endif
-    }
     for (i = 0; i < smp_cpus; i++) {
-        cpu = cpu_ppc_init(machine->cpu_model);
-        if (cpu == NULL) {
-            fprintf(stderr, "Unable to find PowerPC CPU definition\n");
-            exit(1);
-        }
+        cpu = POWERPC_CPU(cpu_create(machine->cpu_type));
         env = &cpu->env;
 
         /* Set time-base frequency to 100 Mhz */
@@ -203,7 +190,6 @@ static void ppc_core99_init(MachineState *machine)
     /* allocate and load BIOS */
     memory_region_init_ram(bios, NULL, "ppc_core99.bios", BIOS_SIZE,
                            &error_fatal);
-    vmstate_register_ram_global(bios);
 
     if (bios_name == NULL)
         bios_name = PROM_FILENAME;
@@ -253,7 +239,7 @@ static void ppc_core99_init(MachineState *machine)
         }
         /* load initrd */
         if (initrd_filename) {
-            initrd_base = round_page(kernel_base + kernel_size + KERNEL_GAP);
+            initrd_base = TARGET_PAGE_ALIGN(kernel_base + kernel_size + KERNEL_GAP);
             initrd_size = load_image_targphys(initrd_filename, initrd_base,
                                               ram_size - initrd_base);
             if (initrd_size < 0) {
@@ -261,11 +247,11 @@ static void ppc_core99_init(MachineState *machine)
                              initrd_filename);
                 exit(1);
             }
-            cmdline_base = round_page(initrd_base + initrd_size);
+            cmdline_base = TARGET_PAGE_ALIGN(initrd_base + initrd_size);
         } else {
             initrd_base = 0;
             initrd_size = 0;
-            cmdline_base = round_page(kernel_base + kernel_size + KERNEL_GAP);
+            cmdline_base = TARGET_PAGE_ALIGN(kernel_base + kernel_size + KERNEL_GAP);
         }
         ppc_boot_device = 'm';
     } else {
@@ -348,7 +334,7 @@ static void ppc_core99_init(MachineState *machine)
     pic = g_new0(qemu_irq, 64);
 
     dev = qdev_create(NULL, TYPE_OPENPIC);
-    qdev_prop_set_uint32(dev, "model", OPENPIC_MODEL_RAVEN);
+    qdev_prop_set_uint32(dev, "model", OPENPIC_MODEL_KEYLARGO);
     qdev_init_nofail(dev);
     s = SYS_BUS_DEVICE(dev);
     pic_mem = s->mmio[0].memory;
@@ -494,6 +480,19 @@ static void ppc_core99_init(MachineState *machine)
     fw_cfg_add_i32(fw_cfg, FW_CFG_PPC_BUSFREQ, BUSFREQ);
     fw_cfg_add_i32(fw_cfg, FW_CFG_PPC_NVRAM_ADDR, nvram_addr);
 
+    /* MacOS NDRV VGA driver */
+    filename = qemu_find_file(QEMU_FILE_TYPE_BIOS, NDRV_VGA_FILENAME);
+    if (filename) {
+        ndrv_size = get_image_size(filename);
+        if (ndrv_size != -1) {
+            ndrv_file = g_malloc(ndrv_size);
+            ndrv_size = load_image(filename, ndrv_file);
+
+            fw_cfg_add_file(fw_cfg, "ndrv/qemu_vga.ndrv", ndrv_file, ndrv_size);
+        }
+        g_free(filename);
+    }
+
     qemu_register_boot_set(fw_cfg_boot_set, fw_cfg);
 }
 
@@ -513,6 +512,11 @@ static void core99_machine_class_init(ObjectClass *oc, void *data)
     mc->max_cpus = MAX_CPUS;
     mc->default_boot_order = "cd";
     mc->kvm_type = core99_kvm_type;
+#ifdef TARGET_PPC64
+    mc->default_cpu_type = POWERPC_CPU_TYPE_NAME("970fx_v3.1");
+#else
+    mc->default_cpu_type = POWERPC_CPU_TYPE_NAME("7400_v2.9");
+#endif
 }
 
 static const TypeInfo core99_machine_info = {

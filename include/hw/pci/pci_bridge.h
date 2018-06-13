@@ -33,7 +33,8 @@
 #define PCI_BRIDGE_DEV_PROP_SHPC       "shpc"
 
 int pci_bridge_ssvid_init(PCIDevice *dev, uint8_t offset,
-                          uint16_t svid, uint16_t ssid);
+                          uint16_t svid, uint16_t ssid,
+                          Error **errp);
 
 PCIDevice *pci_bridge_get_device(PCIBus *bus);
 PCIBus *pci_bridge_get_sec_bus(PCIBridge *br);
@@ -65,5 +66,30 @@ void pci_bridge_map_irq(PCIBridge *br, const char* bus_name,
 #define  PCI_BRIDGE_CTL_SEC_DISCARD	0x200	/* Secondary discard timer */
 #define  PCI_BRIDGE_CTL_DISCARD_STATUS	0x400	/* Discard timer status */
 #define  PCI_BRIDGE_CTL_DISCARD_SERR	0x800	/* Discard timer SERR# enable */
+
+typedef struct PCIBridgeQemuCap {
+    uint8_t id;     /* Standard PCI capability header field */
+    uint8_t next;   /* Standard PCI capability header field */
+    uint8_t len;    /* Standard PCI vendor-specific capability header field */
+    uint8_t type;   /* Red Hat vendor-specific capability type.
+                       Types are defined with REDHAT_PCI_CAP_ prefix */
+
+    uint32_t bus_res;   /* Minimum number of buses to reserve */
+    uint64_t io;        /* IO space to reserve */
+    uint32_t mem;       /* Non-prefetchable memory to reserve */
+    /* At most one of the following two fields may be set to a value
+     * different from -1 */
+    uint32_t mem_pref_32; /* Prefetchable memory to reserve (32-bit MMIO) */
+    uint64_t mem_pref_64; /* Prefetchable memory to reserve (64-bit MMIO) */
+} PCIBridgeQemuCap;
+
+#define REDHAT_PCI_CAP_RESOURCE_RESERVE 1
+
+int pci_bridge_qemu_reserve_cap_init(PCIDevice *dev, int cap_offset,
+                              uint32_t bus_reserve, uint64_t io_reserve,
+                              uint32_t mem_non_pref_reserve,
+                              uint32_t mem_pref_32_reserve,
+                              uint64_t mem_pref_64_reserve,
+                              Error **errp);
 
 #endif /* QEMU_PCI_BRIDGE_H */
