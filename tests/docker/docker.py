@@ -13,12 +13,14 @@
 
 import os
 import sys
+sys.path.append(os.path.join(os.path.dirname(__file__),
+                             '..', '..', 'scripts'))
+import argparse
 import subprocess
 import json
 import hashlib
 import atexit
 import uuid
-import argparse
 import tempfile
 import re
 import signal
@@ -38,6 +40,9 @@ def _text_checksum(text):
     """Calculate a digest string unique to the text content"""
     return hashlib.sha1(text).hexdigest()
 
+def _file_checksum(filename):
+    return _text_checksum(open(filename, 'rb').read())
+
 def _guess_docker_command():
     """ Guess a working docker command or raise exception if not found"""
     commands = [["docker"], ["sudo", "-n", "docker"]]
@@ -52,7 +57,7 @@ def _guess_docker_command():
     raise Exception("Cannot find working docker command. Tried:\n%s" % \
                     commands_txt)
 
-def _copy_with_mkdir(src, root_dir, sub_path):
+def _copy_with_mkdir(src, root_dir, sub_path='.'):
     """Copy src into root_dir, creating sub_path as needed."""
     dest_dir = os.path.normpath("%s/%s" % (root_dir, sub_path))
     try:
@@ -100,6 +105,28 @@ def _copy_binary_with_libs(src, dest_dir):
             so_path = os.path.dirname(l)
             _copy_with_mkdir(l , dest_dir, so_path)
 
+def _read_qemu_dockerfile(img_name):
+    df = os.path.join(os.path.dirname(__file__), "dockerfiles",
+                      img_name + ".docker")
+    return open(df, "r").read()
+
+def _dockerfile_preprocess(df):
+    out = ""
+    for l in df.splitlines():
+        if len(l.strip()) == 0 or l.startswith("#"):
+            continue
+        from_pref = "FROM qemu:"
+        if l.startswith(from_pref):
+            # TODO: Alternatively we could replace this line with "FROM $ID"
+            # where $ID is the image's hex id obtained with
+            #    $ docker images $IMAGE --format="{{.Id}}"
+            # but unfortunately that's not supported by RHEL 7.
+            inlining = _read_qemu_dockerfile(l[len(from_pref):])
+            out += _dockerfile_preprocess(inlining)
+            continue
+        out += l + "\n"
+    return out
+
 class Docker(object):
     """ Running Docker commands """
     def __init__(self):
@@ -109,12 +136,15 @@ class Docker(object):
         signal.signal(signal.SIGTERM, self._kill_instances)
         signal.signal(signal.SIGHUP, self._kill_instances)
 
-    def _do(self, cmd, quiet=True, infile=None, **kwargs):
+    def _do(self, cmd, quiet=True, **kwargs):
         if quiet:
             kwargs["stdout"] = DEVNULL
-        if infile:
-            kwargs["stdin"] = infile
         return subprocess.call(self._command + cmd, **kwargs)
+
+    def _do_check(self, cmd, quiet=True, **kwargs):
+        if quiet:
+            kwargs["stdout"] = DEVNULL
+        return subprocess.check_call(self._command + cmd, **kwargs)
 
     def _do_kill_instances(self, only_known, only_active=True):
         cmd = ["ps", "-q"]
@@ -154,7 +184,7 @@ class Docker(object):
         return labels.get("com.qemu.dockerfile-checksum", "")
 
     def build_image(self, tag, docker_dir, dockerfile,
-                    quiet=True, user=False, argv=None):
+                    quiet=True, user=False, argv=None, extra_files_cksum=[]):
         if argv == None:
             argv = []
 
@@ -170,32 +200,33 @@ class Docker(object):
 
         tmp_df.write("\n")
         tmp_df.write("LABEL com.qemu.dockerfile-checksum=%s" %
-                     _text_checksum(dockerfile))
+                     _text_checksum("\n".join([dockerfile] +
+                                    extra_files_cksum)))
         tmp_df.flush()
 
-        self._do(["build", "-t", tag, "-f", tmp_df.name] + argv + \
-                 [docker_dir],
-                 quiet=quiet)
+        self._do_check(["build", "-t", tag, "-f", tmp_df.name] + argv + \
+                       [docker_dir],
+                       quiet=quiet)
 
     def update_image(self, tag, tarball, quiet=True):
         "Update a tagged image using "
 
-        self._do(["build", "-t", tag, "-"], quiet=quiet, infile=tarball)
+        self._do_check(["build", "-t", tag, "-"], quiet=quiet, stdin=tarball)
 
     def image_matches_dockerfile(self, tag, dockerfile):
         try:
             checksum = self.get_image_dockerfile_checksum(tag)
         except Exception:
             return False
-        return checksum == _text_checksum(dockerfile)
+        return checksum == _text_checksum(_dockerfile_preprocess(dockerfile))
 
     def run(self, cmd, keep, quiet):
         label = uuid.uuid1().hex
         if not keep:
             self._instances.append(label)
-        ret = self._do(["run", "--label",
-                        "com.qemu.instance.uuid=" + label] + cmd,
-                       quiet=quiet)
+        ret = self._do_check(["run", "--label",
+                             "com.qemu.instance.uuid=" + label] + cmd,
+                             quiet=quiet)
         if not keep:
             self._instances.remove(label)
         return ret
@@ -237,6 +268,10 @@ class BuildCommand(SubCommand):
                             help="""Specify a binary that will be copied to the
                             container together with all its dependent
                             libraries""")
+        parser.add_argument("--extra-files", "-f", nargs='*',
+                            help="""Specify files that will be copied in the
+                            Docker image, fulfilling the ADD directive from the
+                            Dockerfile""")
         parser.add_argument("--add-current-user", "-u", dest="user",
                             action="store_true",
                             help="Add the current user to image's passwd")
@@ -250,7 +285,8 @@ class BuildCommand(SubCommand):
         tag = args.tag
 
         dkr = Docker()
-        if dkr.image_matches_dockerfile(tag, dockerfile):
+        if "--no-cache" not in argv and \
+           dkr.image_matches_dockerfile(tag, dockerfile):
             if not args.quiet:
                 print "Image is up to date."
         else:
@@ -270,16 +306,24 @@ class BuildCommand(SubCommand):
                     print "%s exited with code %d" % (docker_pre, rc)
                     return 1
 
-            # Do we include a extra binary?
+            # Copy any extra files into the Docker context. These can be
+            # included by the use of the ADD directive in the Dockerfile.
+            cksum = []
             if args.include_executable:
-                _copy_binary_with_libs(args.include_executable,
-                                       docker_dir)
+                # FIXME: there is no checksum of this executable and the linked
+                # libraries, once the image built any change of this executable
+                # or any library won't trigger another build.
+                _copy_binary_with_libs(args.include_executable, docker_dir)
+            for filename in args.extra_files or []:
+                _copy_with_mkdir(filename, docker_dir)
+                cksum += [_file_checksum(filename)]
 
             argv += ["--build-arg=" + k.lower() + "=" + v
                         for k, v in os.environ.iteritems()
                         if k.lower() in FILTERED_ENV_NAMES]
             dkr.build_image(tag, docker_dir, dockerfile,
-                            quiet=args.quiet, user=args.user, argv=argv)
+                            quiet=args.quiet, user=args.user, argv=argv,
+                            extra_files_cksum=cksum)
 
             rmtree(docker_dir)
 

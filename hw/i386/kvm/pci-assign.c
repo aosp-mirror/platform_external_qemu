@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 /*
  * Copyright (c) 2007, Neocleus Corporation.
  *
@@ -1896,3 +1897,5 @@ static void assigned_dev_load_option_rom(AssignedDevice *dev)
                                    dev->host.domain, dev->host.bus,
                                    dev->host.slot, dev->host.function);
 }
+=======
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)

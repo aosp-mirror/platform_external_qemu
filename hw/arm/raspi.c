@@ -153,8 +153,8 @@ static void raspi2_init(MachineState *machine)
     qdev_prop_set_drive(carddev, "drive", blk, &error_fatal);
     object_property_set_bool(OBJECT(carddev), true, "realized", &error_fatal);
 
-    vcram_size = object_property_get_int(OBJECT(&s->soc), "vcram-size",
-                                         &error_abort);
+    vcram_size = object_property_get_uint(OBJECT(&s->soc), "vcram-size",
+                                          &error_abort);
     setup_boot(machine, 2, machine->ram_size - vcram_size);
 }
 
@@ -167,6 +167,9 @@ static void raspi2_machine_init(MachineClass *mc)
     mc->no_floppy = 1;
     mc->no_cdrom = 1;
     mc->max_cpus = BCM2836_NCPUS;
+    mc->min_cpus = BCM2836_NCPUS;
+    mc->default_cpus = BCM2836_NCPUS;
     mc->default_ram_size = 1024 * 1024 * 1024;
+    mc->ignore_memory_transaction_failures = true;
 };
 DEFINE_MACHINE("raspi2", raspi2_machine_init)

@@ -24,6 +24,11 @@
 #define QEMU_COPYRIGHT "Copyright (c) 2003-2017 " \
     "Fabrice Bellard and the QEMU Project developers"
 
+/* Bug reporting information for --help arguments, About dialogs, etc */
+#define QEMU_HELP_BOTTOM \
+    "See <https://qemu.org/contribute/report-a-bug> for how to report bugs.\n" \
+    "More information on the QEMU project at <https://qemu.org>."
+
 /* main function, renamed */
 #if defined(CONFIG_COCOA)
 int qemu_main(int argc, char **argv, char **envp);
@@ -78,6 +83,7 @@ int qemu_openpty_raw(int *aslave, char *pty_name);
     sendto(sockfd, buf, len, flags, destaddr, addrlen)
 #endif
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 /* ANDROID_BEGIN */
 #ifdef _WIN32
 /* For the Android emulator, filepath are UTF-8 encoded, which the default
@@ -91,12 +97,23 @@ int qemu_lstat(const char* filepath, struct stat* st);
 #endif
 /* ANDROID_END */
 
+=======
+extern bool tcg_allowed;
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 void tcg_exec_init(unsigned long tb_size);
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 
 extern bool g_tcg_enabled;
 static __inline__ bool tcg_enabled(void) {
     return g_tcg_enabled;
 }
+=======
+#ifdef CONFIG_TCG
+#define tcg_enabled() (tcg_allowed)
+#else
+#define tcg_enabled() 0
+#endif
+>>>>>>> BRANCH (7c1beb Update version for 2.11.1 release)
 
 void cpu_exec_init_all(void);
 void cpu_exec_step_atomic(CPUState *cpu);
@@ -164,6 +181,7 @@ void qemu_hexdump(const char *buf, FILE *fp, const char *prefix, size_t size);
 int parse_debug_env(const char *name, int max, int initial);
 
 const char *qemu_ether_ntoa(const MACAddr *mac);
+char *size_to_str(uint64_t val);
 void page_size_init(void);
 
 /* returns non-zero if dump is in progress, otherwise zero is
