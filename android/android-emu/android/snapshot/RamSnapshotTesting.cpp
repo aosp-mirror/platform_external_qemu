@@ -33,18 +33,23 @@ namespace snapshot {
 
 using TestRamBuffer = AlignedBuf<uint8_t, kTestingPageSize>;
 
+static void mockQemuPageSave(RamSaver& saver, const RamBlock& block) {
+    const int blockIndex = 0;
+
+    for (int64_t i = block.startOffset; i < block.startOffset + block.totalSize;
+         i += block.pageSize) {
+        saver.savePage(blockIndex, i, block.pageSize);
+    }
+}
+
 void saveRamSingleBlock(const RamSaver::Flags flags,
                         const RamBlock& block,
                         android::base::StringView filename) {
     RamSaver s(filename.c_str(), flags, nullptr, true);
 
-    const int blockIndex = 0;
     s.registerBlock(block);
 
-    for (int64_t i = block.startOffset; i < block.startOffset + block.totalSize;
-         i += block.pageSize) {
-        s.savePage(blockIndex, i, block.pageSize);
-    }
+    mockQemuPageSave(s, block);
 
     s.join();
 }
@@ -65,10 +70,36 @@ void loadRamSingleBlock(const RamBlock& block,
     ramLoader.join();
 }
 
-TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance) {
+void incrementalSaveSingleBlock(const RamSaver::Flags flags,
+                                const RamBlock& blockToLoad,
+                                const RamBlock& blockToSave,
+                                android::base::StringView filename) {
+
+    auto ram = fopen(filename.c_str(), "rb");
+
+    RamLoader::RamBlockStructure emptyRamBlockStructure = {};
+
+    // Disallow on-demand load for now.
+    RamLoader ramLoader(StdioStream(ram, StdioStream::kOwner),
+                        RamLoader::Flags::None, emptyRamBlockStructure);
+
+    ramLoader.registerBlock(blockToLoad);
+
+    ramLoader.start(false);
+
+    RamSaver s(filename.c_str(), flags, &ramLoader, true);
+
+    s.registerBlock(blockToSave);
+
+    mockQemuPageSave(s, blockToSave);
+
+    s.join();
+}
+
+TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance, int seed) {
     std::default_random_engine generator;
     // Use a consistent seed value to avoid flakes
-    generator.seed(0);
+    generator.seed(seed);
 
     // Distributions for the random patterns and zero pages
     std::uniform_int_distribution<char> patternDistribution(0, 255);
@@ -89,6 +120,26 @@ TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance) {
     }
 
     return res;
+}
+
+void randomMutateRam(TestRamBuffer& ram, float noChangeChance, float zeroPageChance, int seed) {
+    std::default_random_engine generator;
+    generator.seed(seed);
+
+    std::uniform_int_distribution<char> patternDistribution(0, 255);
+    std::bernoulli_distribution noChangeDistribution(noChangeChance);
+    std::bernoulli_distribution zeroPageDistribution(zeroPageChance);
+
+    for (size_t i = 0; i < ram.size(); i += kTestingPageSize) {
+        if (noChangeDistribution(generator)) continue;
+
+        if (zeroPageDistribution(generator)) {
+            memset(ram.data() + i, 0x0, kTestingPageSize);
+        } else {
+            char pattern = patternDistribution(generator);
+            memset(ram.data() + i, pattern, kTestingPageSize);
+        }
+    }
 }
 
 }  // namespace snapshot
