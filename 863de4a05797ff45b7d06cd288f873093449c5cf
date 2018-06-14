@@ -22,6 +22,52 @@
       "revId": "863de4a05797ff45b7d06cd288f873093449c5cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e66d887_f05e1d89",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 735,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-06-14T15:34:53Z",
+      "side": 1,
+      "message": "We might also make it more clear by re-labeling the buttons. (I didn\u0027t test this code, but I think it\u0027s close.)\n\nQPushButton* saveButton \u003d msgBox.addButton(QMessageBox::Yes);\nsaveButton.setText(tr(\"Save\"));\nQPushButton* dontSaveButton \u003d msgBox.addButton(QMessageBox::No);\ndontSaveButton.setText(tr(\"Don\u0027t save\"));",
+      "range": {
+        "startLine": 730,
+        "startChar": 4,
+        "endLine": 735,
+        "endChar": 29
+      },
+      "revId": "863de4a05797ff45b7d06cd288f873093449c5cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6cf1d97_eaddac3f",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-06-14T15:34:53Z",
+      "side": 1,
+      "message": "This test is still good, because the \"Save\" button was bound to ::Yes",
+      "range": {
+        "startLine": 761,
+        "startChar": 7,
+        "endLine": 761,
+        "endChar": 38
+      },
+      "revId": "863de4a05797ff45b7d06cd288f873093449c5cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
