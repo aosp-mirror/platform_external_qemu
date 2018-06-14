@@ -106,6 +106,13 @@ LOCAL_SRC_FILES := \
     OpenGLTestContext.cpp \
     OpenGL_unittest.cpp \
     StalePtrRegistry_unittest.cpp \
+    GLSnapshotTesting.h \
+    GLSnapshotTesting.cpp \
+    GLSnapshot_unittest.cpp \
+    GLSnapshotTransformation_unittest.cpp \
+    GLSnapshotRasterization_unittest.cpp \
+    GLSnapshotMultisampling_unittest.cpp \
+    GLSnapshotPixelOperations_unittest.cpp
 
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender libemugl_gtest)
 $(call emugl-end-module)
