@@ -48,6 +48,26 @@ using android::snapshot::TextureSaver;
 
 using namespace gltest;
 
+struct GlSampleCoverage {
+    GLclampf value;
+    GLboolean invert;
+};
+using GlSampleCoverage = struct GlSampleCoverage;
+
+struct GlStencilFunc {
+    GLenum func;
+    GLint ref;
+    GLuint mask;
+};
+using GlStencilFunc = struct GlStencilFunc;
+
+struct GlStencilOp {
+    GLenum sfail;
+    GLenum dpfail;
+    GLenum dppass;
+};
+using GlStencilOp = struct GlStencilOp;
+
 // Dimensions for test surface
 static const int kSurfaceSize[] = {32, 32};
 
@@ -83,11 +103,33 @@ static const GLenum kGLES2FrontFaceModes[] = {GL_CCW, GL_CW};
 // Polygon offset settings to attempt
 static const GLfloat kGLES2TestPolygonOffset[] = {0.5f, 0.5f};
 
+// Sample coverage settings to attempt
+static const GlSampleCoverage kGLES2TestSampleCoverages[] = {{0.3, true},
+                                                             {0, false}};
+
+// Scissor box settings to attempt
+static const GLint kGLES2TestScissorBox[] = {2, 3, 10, 20};
+
+// Valid Stencil test functions
+static const GLenum kGLES2StencilFuncs[] = {GL_NEVER,   GL_ALWAYS,  GL_LESS,
+                                            GL_LEQUAL,  GL_EQUAL,   GL_GEQUAL,
+                                            GL_GREATER, GL_NOTEQUAL};
+// Valid Stencil test result operations
+static const GLenum kGLES2StencilOps[] = {GL_KEEP,      GL_ZERO,     GL_REPLACE,
+                                          GL_INCR,      GL_DECR,     GL_INVERT,
+                                          GL_INCR_WRAP, GL_DECR_WRAP};
+// Stencil reference value to attempt
+static const GLint kGLES2StencilRef = 1;
+// Stencil default mask; max GLuint is clamped to a signed GLint by GetInteger?
+static const GLuint kGLES2StencilDefaultMask = 0x7FFFFFFF;
+// Stencil mask values to attempt
+static const GLuint kGLES2StencilMasks[] = {0, 1, 0x1000000, 0x7FFFFFFF};
+
 class GLTest : public ::testing::Test {
 protected:
     virtual void SetUp() {
         const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
-        const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+        gl = LazyLoadedGLESv2Dispatch::get();
         EXPECT_TRUE(egl != nullptr);
         EXPECT_TRUE(gl != nullptr);
 
@@ -109,6 +151,7 @@ protected:
         destroyDisplay(m_display);
     }
 
+    const GLESv2Dispatch* gl;
     EGLDisplay m_display;
     EGLConfig m_config;
     EGLSurface m_surface;
@@ -232,35 +275,34 @@ protected:
 class SnapshotPreserveTest : public SnapshotTest {
 public:
     // Asserts that we are working from a clean starting state.
-    virtual void defaultStateCheck(const GLESv2Dispatch* gl) {
+    virtual void defaultStateCheck() {
         ADD_FAILURE() << "Snapshot test needs a default state check function.";
     }
 
     // Asserts that any expected changes to state have occurred.
-    virtual void changedStateCheck(const GLESv2Dispatch* gl) {
+    virtual void changedStateCheck() {
         ADD_FAILURE()
                 << "Snapshot test needs a post-change state check function.";
     }
 
     // Modifies the state.
-    virtual void stateChange(const GLESv2Dispatch* gl) {
+    virtual void stateChange() {
         ADD_FAILURE() << "Snapshot test needs a state-changer function.";
     }
 
     // Sets up a non-default state and asserts that a snapshot preserves it.
     virtual void doCheckedSnapshot() {
-        const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
-        defaultStateCheck(gl);
+        defaultStateCheck();
         ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
-        stateChange(gl);
+        stateChange();
         ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
-        changedStateCheck(gl);
-        SnapshotTest::doSnapshot([this, gl] {
+        changedStateCheck();
+        SnapshotTest::doSnapshot([this] {
             EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-            defaultStateCheck(gl);
+            defaultStateCheck();
         });
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        changedStateCheck(gl);
+        changedStateCheck();
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
     }
 };
@@ -279,16 +321,12 @@ public:
     }
 
     // Checks part of state against an expected value.
-    virtual void stateCheck(const GLESv2Dispatch* gl, T expected) {
+    virtual void stateCheck(T expected) {
         ADD_FAILURE() << "Snapshot test needs a state-check function.";
     };
 
-    void defaultStateCheck(const GLESv2Dispatch* gl) override {
-        stateCheck(gl, *m_default_value);
-    }
-    void changedStateCheck(const GLESv2Dispatch* gl) override {
-        stateCheck(gl, *m_changed_value);
-    }
+    void defaultStateCheck() override { stateCheck(*m_default_value); }
+    void changedStateCheck() override { stateCheck(*m_changed_value); }
 
     void doCheckedSnapshot() override {
         if (m_default_value == nullptr || m_changed_value == nullptr) {
@@ -308,15 +346,13 @@ TEST_F(SnapshotTest, InitDestroy) {}
 
 class SnapshotGlEnableTest : public SnapshotPreserveTest,
                              public ::testing::WithParamInterface<GLenum> {
-    void defaultStateCheck(const GLESv2Dispatch* gl) override {
+    void defaultStateCheck() override {
         EXPECT_FALSE(gl->glIsEnabled(GetParam()));
     }
-    void changedStateCheck(const GLESv2Dispatch* gl) override {
+    void changedStateCheck() override {
         EXPECT_TRUE(gl->glIsEnabled(GetParam()));
     }
-    void stateChange(const GLESv2Dispatch* gl) override {
-        gl->glEnable(GetParam());
-    }
+    void stateChange() override { gl->glEnable(GetParam()); }
 };
 
 TEST_P(SnapshotGlEnableTest, PreserveEnable) {
@@ -329,15 +365,13 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotCapability,
 
 class SnapshotGlDisableTest : public SnapshotPreserveTest,
                               public ::testing::WithParamInterface<GLenum> {
-    void defaultStateCheck(const GLESv2Dispatch* gl) override {
+    void defaultStateCheck() override {
         EXPECT_TRUE(gl->glIsEnabled(GetParam()));
     }
-    void changedStateCheck(const GLESv2Dispatch* gl) override {
+    void changedStateCheck() override {
         EXPECT_FALSE(gl->glIsEnabled(GetParam()));
     }
-    void stateChange(const GLESv2Dispatch* gl) override {
-        gl->glDisable(GetParam());
-    }
+    void stateChange() override { gl->glDisable(GetParam()); }
 };
 
 TEST_P(SnapshotGlDisableTest, PreserveDisable) {
@@ -351,21 +385,21 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotCapability,
 class SnapshotGlViewportTest
     : public SnapshotPreserveTest,
       public ::testing::WithParamInterface<const GLint*> {
-    void defaultStateCheck(const GLESv2Dispatch* gl) override {
+    void defaultStateCheck() override {
         GLint viewport[4] = {};
         gl->glGetIntegerv(GL_VIEWPORT, viewport);
         // initial viewport should match surface size
         EXPECT_EQ(kSurfaceSize[0], viewport[2]);
         EXPECT_EQ(kSurfaceSize[1], viewport[3]);
     }
-    void changedStateCheck(const GLESv2Dispatch* gl) override {
+    void changedStateCheck() override {
         GLint viewport[4] = {};
         gl->glGetIntegerv(GL_VIEWPORT, viewport);
         for (int i = 0; i < 4; ++i) {
             EXPECT_EQ(GetParam()[i], viewport[i]);
         }
     }
-    void stateChange(const GLESv2Dispatch* gl) override {
+    void stateChange() override {
         gl->glViewport(GetParam()[0], GetParam()[1], GetParam()[2],
                        GetParam()[3]);
     }
@@ -382,13 +416,13 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotTransformation,
 class SnapshotGlDepthRangeTest
     : public SnapshotSetValueTest<GLclampf*>,
       public ::testing::WithParamInterface<const GLclampf*> {
-    void stateCheck(const GLESv2Dispatch* gl, GLclampf* expected) override {
+    void stateCheck(GLclampf* expected) override {
         GLfloat depthRange[2] = {};
         gl->glGetFloatv(GL_DEPTH_RANGE, depthRange);
         EXPECT_EQ(expected[0], depthRange[0]);
         EXPECT_EQ(expected[1], depthRange[1]);
     }
-    void stateChange(const GLESv2Dispatch* gl) override {
+    void stateChange() override {
         gl->glDepthRangef(GetParam()[0], GetParam()[1]);
     }
 };
@@ -406,14 +440,12 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotTransformation,
 
 class SnapshotGlLineWidthTest : public SnapshotSetValueTest<GLfloat>,
                                 public ::testing::WithParamInterface<GLfloat> {
-    void stateCheck(const GLESv2Dispatch* gl, GLfloat expected) {
+    void stateCheck(GLfloat expected) {
         GLfloat lineWidth;
         gl->glGetFloatv(GL_LINE_WIDTH, &lineWidth);
         EXPECT_EQ(expected, lineWidth);
     }
-    void stateChange(const GLESv2Dispatch* gl) override {
-        gl->glLineWidth(GetParam());
-    }
+    void stateChange() override { gl->glLineWidth(GetParam()); }
 };
 
 TEST_P(SnapshotGlLineWidthTest, SetLineWidth) {
@@ -427,14 +459,12 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
 
 class SnapshotGlCullFaceTest : public SnapshotSetValueTest<GLenum>,
                                public ::testing::WithParamInterface<GLenum> {
-    void stateCheck(const GLESv2Dispatch* gl, GLenum expected) {
+    void stateCheck(GLenum expected) {
         GLint mode;
         gl->glGetIntegerv(GL_CULL_FACE_MODE, &mode);
         EXPECT_EQ(expected, mode);
     }
-    void stateChange(const GLESv2Dispatch* gl) override {
-        gl->glCullFace(GetParam());
-    }
+    void stateChange() override { gl->glCullFace(GetParam()); }
 };
 
 TEST_P(SnapshotGlCullFaceTest, SetCullFaceMode) {
@@ -448,14 +478,12 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
 
 class SnapshotGlFrontFaceTest : public SnapshotSetValueTest<GLenum>,
                                 public ::testing::WithParamInterface<GLenum> {
-    void stateCheck(const GLESv2Dispatch* gl, GLenum expected) {
+    void stateCheck(GLenum expected) {
         GLint mode;
         gl->glGetIntegerv(GL_FRONT_FACE, &mode);
         EXPECT_EQ(expected, mode);
     }
-    void stateChange(const GLESv2Dispatch* gl) override {
-        gl->glFrontFace(GetParam());
-    }
+    void stateChange() override { gl->glFrontFace(GetParam()); }
 };
 
 TEST_P(SnapshotGlFrontFaceTest, SetFrontFaceMode) {
@@ -470,14 +498,14 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
 class SnapshotGlPolygonOffsetTest
     : public SnapshotSetValueTest<GLfloat*>,
       public ::testing::WithParamInterface<const GLfloat*> {
-    void stateCheck(const GLESv2Dispatch* gl, GLfloat* expected) {
+    void stateCheck(GLfloat* expected) {
         GLfloat factor, units;
         gl->glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &factor);
         gl->glGetFloatv(GL_POLYGON_OFFSET_UNITS, &units);
         EXPECT_EQ(expected[0], factor);
         EXPECT_EQ(expected[1], units);
     }
-    void stateChange(const GLESv2Dispatch* gl) override {
+    void stateChange() override {
         gl->glPolygonOffset(GetParam()[0], GetParam()[1]);
     }
 };
@@ -492,5 +520,201 @@ TEST_P(SnapshotGlPolygonOffsetTest, SetPolygonOffset) {
 INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
                         SnapshotGlPolygonOffsetTest,
                         ::testing::Values(kGLES2TestPolygonOffset));
+
+class SnapshotGlSampleCoverageTest
+    : public SnapshotSetValueTest<GlSampleCoverage>,
+      public ::testing::WithParamInterface<GlSampleCoverage> {
+    void stateCheck(GlSampleCoverage expected) {
+        GLfloat value;
+        gl->glGetFloatv(GL_SAMPLE_COVERAGE_VALUE, &value);
+        EXPECT_EQ(expected.value, value);
+        GLboolean invert;
+        gl->glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, &invert);
+        EXPECT_EQ(expected.invert, invert);
+    }
+    void stateChange() {
+        gl->glSampleCoverage(GetParam().value, GetParam().invert);
+    }
+};
+
+TEST_P(SnapshotGlSampleCoverageTest, SetSampleCoverage) {
+    GlSampleCoverage defaultCoverage = {1.0f, false};
+    setExpectedValues(defaultCoverage, GetParam());
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotMultisampling,
+                        SnapshotGlSampleCoverageTest,
+                        ::testing::ValuesIn(kGLES2TestSampleCoverages));
+
+class SnapshotGlScissorBoxTest
+    : public SnapshotSetValueTest<GLint*>,
+      public ::testing::WithParamInterface<const GLint*> {
+    void stateCheck(GLint* expected) override {
+        GLint box[4] = {};
+        gl->glGetIntegerv(GL_SCISSOR_BOX, box);
+        for (int i = 0; i < 4; ++i) {
+            EXPECT_EQ(expected[i], box[i]);
+        }
+    }
+    void stateChange() override {
+        gl->glScissor(GetParam()[0], GetParam()[1], GetParam()[2],
+                      GetParam()[3]);
+    }
+};
+
+TEST_P(SnapshotGlScissorBoxTest, SetScissorBox) {
+    GLint defaultViewport[] = {0, 0, kSurfaceSize[0], kSurfaceSize[1]};
+    GLint testViewport[] = {GetParam()[0], GetParam()[1], GetParam()[2],
+                            GetParam()[3]};
+    setExpectedValues(defaultViewport, testViewport);
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlScissorBoxTest,
+                        ::testing::Values(kGLES2TestScissorBox));
+
+// Tests preservation of stencil test conditional state, set by glStencilFunc.
+class SnapshotGlStencilConditionsTest
+    : public SnapshotSetValueTest<GlStencilFunc> {
+    void stateCheck(GlStencilFunc expected) {
+        GLint frontFunc, frontRef, frontMask, backFunc, backRef, backMask;
+        gl->glGetIntegerv(GL_STENCIL_FUNC, &frontFunc);
+        gl->glGetIntegerv(GL_STENCIL_REF, &frontRef);
+        gl->glGetIntegerv(GL_STENCIL_VALUE_MASK, &frontMask);
+        gl->glGetIntegerv(GL_STENCIL_BACK_FUNC, &backFunc);
+        gl->glGetIntegerv(GL_STENCIL_BACK_REF, &backRef);
+        gl->glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, &backMask);
+        EXPECT_EQ(expected.func, frontFunc);
+        EXPECT_EQ(expected.ref, frontRef);
+        EXPECT_EQ(expected.mask, frontMask);
+        EXPECT_EQ(expected.func, backFunc);
+        EXPECT_EQ(expected.ref, backRef);
+        EXPECT_EQ(expected.mask, backMask);
+    }
+    void stateChange() override {
+        GlStencilFunc sFunc = *m_changed_value;
+        gl->glStencilFunc(sFunc.func, sFunc.ref, sFunc.mask);
+    }
+};
+
+class SnapshotGlStencilFuncTest : public SnapshotGlStencilConditionsTest,
+                                  public ::testing::WithParamInterface<GLenum> {
+};
+
+class SnapshotGlStencilMaskTest : public SnapshotGlStencilConditionsTest,
+                                  public ::testing::WithParamInterface<GLuint> {
+};
+
+TEST_P(SnapshotGlStencilFuncTest, SetStencilFunc) {
+    GlStencilFunc defaultStencilFunc = {GL_ALWAYS, 0, kGLES2StencilDefaultMask};
+    GlStencilFunc testStencilFunc = {GetParam(), kGLES2StencilRef, 0};
+    setExpectedValues(defaultStencilFunc, testStencilFunc);
+    doCheckedSnapshot();
+}
+
+TEST_P(SnapshotGlStencilMaskTest, SetStencilMask) {
+    GlStencilFunc defaultStencilFunc = {GL_ALWAYS, 0, kGLES2StencilDefaultMask};
+    GlStencilFunc testStencilFunc = {GL_ALWAYS, kGLES2StencilRef, GetParam()};
+    setExpectedValues(defaultStencilFunc, testStencilFunc);
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlStencilFuncTest,
+                        ::testing::ValuesIn(kGLES2StencilFuncs));
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlStencilMaskTest,
+                        ::testing::ValuesIn(kGLES2StencilMasks));
+
+class SnapshotGlStencilConsequenceTest
+    : public SnapshotSetValueTest<GlStencilOp> {
+    void stateCheck(GlStencilOp expected) override {
+        GLint frontFail, frontDepthFail, frontDepthPass, backFail,
+                backDepthFail, backDepthPass;
+        gl->glGetIntegerv(GL_STENCIL_FAIL, &frontFail);
+        gl->glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &frontDepthFail);
+        gl->glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &frontDepthPass);
+        gl->glGetIntegerv(GL_STENCIL_BACK_FAIL, &backFail);
+        gl->glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_FAIL, &backDepthFail);
+        gl->glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_PASS, &backDepthPass);
+        EXPECT_EQ(expected.sfail, frontFail);
+        EXPECT_EQ(expected.dpfail, frontDepthFail);
+        EXPECT_EQ(expected.dppass, frontDepthPass);
+        EXPECT_EQ(expected.sfail, backFail);
+        EXPECT_EQ(expected.dpfail, backDepthFail);
+        EXPECT_EQ(expected.dppass, backDepthPass);
+    }
+    void stateChange() override {
+        GlStencilOp sOp = *m_changed_value;
+        gl->glStencilOp(sOp.sfail, sOp.dpfail, sOp.dppass);
+    }
+};
+
+class SnapshotGlStencilFailTest : public SnapshotGlStencilConsequenceTest,
+                                  public ::testing::WithParamInterface<GLenum> {
+};
+
+class SnapshotGlStencilDepthFailTest
+    : public SnapshotGlStencilConsequenceTest,
+      public ::testing::WithParamInterface<GLenum> {};
+
+class SnapshotGlStencilDepthPassTest
+    : public SnapshotGlStencilConsequenceTest,
+      public ::testing::WithParamInterface<GLenum> {};
+
+TEST_P(SnapshotGlStencilFailTest, SetStencilOps) {
+    GlStencilOp defaultStencilOp = {GL_KEEP, GL_KEEP, GL_KEEP};
+    GlStencilOp testStencilOp = {GetParam(), GL_KEEP, GL_KEEP};
+    setExpectedValues(defaultStencilOp, testStencilOp);
+    doCheckedSnapshot();
+}
+
+TEST_P(SnapshotGlStencilDepthFailTest, SetStencilOps) {
+    GlStencilOp defaultStencilOp = {GL_KEEP, GL_KEEP, GL_KEEP};
+    GlStencilOp testStencilOp = {GL_KEEP, GetParam(), GL_KEEP};
+    setExpectedValues(defaultStencilOp, testStencilOp);
+    doCheckedSnapshot();
+}
+
+TEST_P(SnapshotGlStencilDepthPassTest, SetStencilOps) {
+    GlStencilOp defaultStencilOp = {GL_KEEP, GL_KEEP, GL_KEEP};
+    GlStencilOp testStencilOp = {GL_KEEP, GL_KEEP, GetParam()};
+    setExpectedValues(defaultStencilOp, testStencilOp);
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlStencilFailTest,
+                        ::testing::ValuesIn(kGLES2StencilOps));
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlStencilDepthFailTest,
+                        ::testing::ValuesIn(kGLES2StencilOps));
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlStencilDepthPassTest,
+                        ::testing::ValuesIn(kGLES2StencilOps));
+
+class SnapshotGlDepthFuncTest : public SnapshotSetValueTest<GLenum>,
+                                public ::testing::WithParamInterface<GLenum> {
+    void stateCheck(GLenum expected) override {
+        GLint depthFunc;
+        gl->glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
+        EXPECT_EQ(expected, depthFunc);
+    }
+    void stateChange() { gl->glDepthFunc(*m_changed_value); }
+};
+
+TEST_P(SnapshotGlDepthFuncTest, SetDepthFunc) {
+    setExpectedValues(GL_LESS, GetParam());
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlDepthFuncTest,
+                        ::testing::ValuesIn(kGLES2StencilFuncs));
 
 }  // namespace emugl
