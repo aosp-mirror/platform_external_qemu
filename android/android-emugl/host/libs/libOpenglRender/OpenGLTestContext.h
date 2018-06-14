@@ -21,6 +21,9 @@
 
 namespace gltest {
 
+// Dimensions for test surface
+static const int kSurfaceSize[] = {32, 32};
+
 EGLDisplay getDisplay();
 EGLConfig createConfig(EGLDisplay dpy, EGLint r, EGLint g, EGLint b, EGLint a, EGLint d, EGLint s, EGLint ms);
 EGLSurface pbufferSurface(EGLDisplay dpy, ::EGLConfig config, EGLint w, EGLint h);
@@ -29,4 +32,16 @@ void destroyContext(EGLDisplay dpy, EGLContext cxt);
 void destroySurface(EGLDisplay dpy, EGLSurface surface);
 void destroyDisplay(EGLDisplay dpy);
 
-}
+class GLTest : public ::testing::Test {
+protected:
+    virtual void SetUp();
+    virtual void TearDown();
+
+    const GLESv2Dispatch* gl;
+    EGLDisplay m_display;
+    EGLConfig m_config;
+    EGLSurface m_surface;
+    EGLContext m_context;
+};
+
+}  // namespace gltest
