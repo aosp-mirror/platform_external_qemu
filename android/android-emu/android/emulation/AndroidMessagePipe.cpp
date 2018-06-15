@@ -32,7 +32,7 @@
 namespace android {
 
 AndroidMessagePipe::AndroidMessagePipe(void* hwPipe,
-                                       Service* service,
+                                       android::AndroidPipe::Service* service,
                                        DecodeAndExecuteFunction cb,
                                        base::Stream* stream)
     : AndroidPipe(hwPipe, service), m_cb(cb) {
@@ -156,6 +156,12 @@ void AndroidMessagePipe::resetToInitState() {
                   "kMessageHeaderNumBytes should be <= 4 bytes");
     m_expected = kMessageHeaderNumBytes;
     mGuestWaitingState = GuestWaitingState::SendMesgLength;
+}
+
+void AndroidMessagePipe::resetRecvPayload(DataBuffer&& buffer) {
+    mRecvPayloadBuffer = std::move(buffer);
+    m_expected = 0;
+    switchGuestWaitingState();
 }
 
 void AndroidMessagePipe::switchGuestWaitingState() {

@@ -52,6 +52,17 @@ public:
         ANDROID_IF_DEBUG(mIsLocked = true;)
     }
 
+    bool tryLock() {
+        bool ret = false;
+#ifdef _WIN32
+        ret = ::TryAcquireSRWLockExclusive(&mLock);
+#else
+        ret = ::pthread_mutex_trylock(&mLock) == 0;
+#endif
+        ANDROID_IF_DEBUG(mIsLocked = true;)
+        return ret;
+    }
+
     ANDROID_IF_DEBUG(bool isLocked() const { return mIsLocked; })
 
     // Release the lock.
