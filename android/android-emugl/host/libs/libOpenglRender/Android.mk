@@ -102,16 +102,18 @@ LOCAL_SYMBOL_FILE := render_api.entries
 LOCAL_INSTALL_OPENGL := true
 
 LOCAL_SRC_FILES := \
+	$(host_common_SRC_FILES) \
     ../Translator/GLES_V2/ANGLEShaderParser.cpp \
-    OpenGLTestContext.cpp \
-    OpenGL_unittest.cpp \
-    StalePtrRegistry_unittest.cpp \
     GLSnapshotTesting.cpp \
     GLSnapshot_unittest.cpp \
     GLSnapshotTransformation_unittest.cpp \
     GLSnapshotRasterization_unittest.cpp \
     GLSnapshotMultisampling_unittest.cpp \
-    GLSnapshotPixelOperations_unittest.cpp
+    GLSnapshotPixelOperations_unittest.cpp \
+    OpenGLTestContext.cpp \
+    OpenGL_unittest.cpp \
+    StalePtrRegistry_unittest.cpp \
+    TextureDraw_unittest.cpp \
 
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender libemugl_gtest)
 $(call emugl-end-module)
