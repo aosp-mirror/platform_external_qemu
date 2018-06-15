@@ -22,6 +22,30 @@
       "revId": "e6d75d28d4b681aeb356595260320cdb61a5541d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1862f8a_e80f87c8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-15T23:38:18Z",
+      "side": 1,
+      "message": "That\u0027s a good idea. It could be more difficult to debug some failures if only the first one is shown, so I guess I\u0027ll put in something to output one failure per row.",
+      "parentUuid": "1a725c4c_cf31c08f",
+      "range": {
+        "startLine": 77,
+        "startChar": 16,
+        "endLine": 78,
+        "endChar": 68
+      },
+      "revId": "e6d75d28d4b681aeb356595260320cdb61a5541d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
