@@ -12,6 +12,7 @@
 
 #include "ui_poster-image-well.h"
 
+#include <QMimeData>
 #include <QWidget>
 #include <memory>
 
