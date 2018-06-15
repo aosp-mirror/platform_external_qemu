@@ -1637,6 +1637,7 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
          if (ret != -1) {
              pData->linkedAttribLocation(name, ret);
          }
+     fprintf(stderr, "%s: attrib loc of %s is %d\n", __func__, name, ret);
          return ret;
      }
      return -1;

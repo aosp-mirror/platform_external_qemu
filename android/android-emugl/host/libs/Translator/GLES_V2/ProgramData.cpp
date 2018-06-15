@@ -436,7 +436,7 @@ void ProgramData::restore(ObjectLocalName localName,
                 continue;
             }
             dispatcher.glBindAttribLocation(globalName, attribLocs.second,
-                    attribLocs.first.c_str());
+                    getTranslatedName(attribLocs.first).c_str());
         }
         if (mGlesMajorVersion >= 3) {
             std::unique_ptr<const char*> varyings(
@@ -454,7 +454,7 @@ void ProgramData::restore(ObjectLocalName localName,
 #ifdef DEBUG
         for (const auto& attribLocs : linkedAttribLocs) {
             assert(dispatcher.glGetAttribLocation(globalName,
-                attribLocs.first.c_str()) == attribLocs.second);
+                getTranslatedName(attribLocs.first).c_str())) == attribLocs.second);
         }
 #endif // DEBUG
         for (const auto& uniform : mUniNameToGuestLoc) {
@@ -662,12 +662,26 @@ ProgramData::getTranslatedName(StringView userVarName) const {
         return userVarName;
     }
     // TODO: translate uniform array names
+
     for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+        fprintf(stderr, "%s: map:\n", __func__);
+
+        if (attachedShaders[i].linkedSource.empty() &&
+            attachedShaders[i].shader) {
+            attachedShaders[i].linkedSource = attachedShaders[i].shader->getOriginalSrc();
+            attachedShaders[i].linkInfo = attachedShaders[i].shader->getShaderLinkInfo();
+        }
+
+        for (auto elt : attachedShaders[i].linkInfo.nameMap) {
+            fprintf(stderr, "%s: [%s] -> [%s]\n", __func__, elt.first.c_str(), elt.second.c_str());
+            
+        }
         if (const auto name = android::base::find(
                 attachedShaders[i].linkInfo.nameMap, userVarName)) {
             return *name;
         }
     }
+    fprintf(stderr, "%s: fail to find %s\n", __func__, userVarName.c_str());
     return userVarName;
 }
 
@@ -678,6 +692,11 @@ ProgramData::getDetranslatedName(StringView driverName) const {
     }
     // TODO: detranslate uniform array names
     for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+        if (attachedShaders[i].linkedSource.empty() &&
+            attachedShaders[i].shader) {
+            attachedShaders[i].linkedSource = attachedShaders[i].shader->getOriginalSrc();
+            attachedShaders[i].linkInfo = attachedShaders[i].shader->getShaderLinkInfo();
+        }
         if (const auto name = android::base::find(
                 attachedShaders[i].linkInfo.nameMapReverse, driverName)) {
             return *name;
@@ -692,6 +711,8 @@ bool ProgramData::attachShader(GLuint shader, ShaderParser* shaderData,
     if (s.localName == 0) {
         s.localName = shader;
         s.shader = shaderData;
+        s.linkedSource = s.shader->getOriginalSrc();
+        s.linkInfo = s.shader->getShaderLinkInfo();
         return true;
     }
     return false;
@@ -738,7 +759,7 @@ static bool sCheckVariables(ProgramData* pData,
                             const ANGLEShaderParser::ShaderLinkInfo& a,
                             const ANGLEShaderParser::ShaderLinkInfo& b);
 static void sInitializeUniformLocs(ProgramData* pData,
-                                   const std::vector<sh::ShaderVariable>& uniforms);
+                                   const std::vector<st_shader_variable>& uniforms);
 
 bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
     const ANGLEShaderParser::ShaderLinkInfo& fragLinkInfo =
@@ -762,7 +783,7 @@ void ProgramData::setLinkStatus(GLint status) {
     mGuestLocToHostLoc.clear();
     mGuestLocToHostLoc[-1] = -1;
     if (status) {
-        std::vector<sh::ShaderVariable> allUniforms;
+        std::vector<st_shader_variable> allUniforms;
         bool is310 = false;
         for (auto& s : attachedShaders) {
             if (s.localName) {
@@ -815,45 +836,47 @@ enum ValidationQualifier {
     VARYING,
 };
 
-static const char* sQualifierString(ValidationQualifier q) {
+static const char* sQualifierString(st_variable_datatype q) {
     switch (q) {
-    case ValidationQualifier::UNIFORM:
-        return kUniformQualifier;
-    case ValidationQualifier::VARYING:
-        return kVaryingQualifier;
+        case ST_VARIABLE_UNIFORM:
+            return kUniformQualifier;
+        case ST_VARIABLE_VARYING:
+            return kVaryingQualifier;
     }
     return kUnknownQualifier;
 }
 
 static bool sVarCheck(ProgramData* pData,
-                      ValidationQualifier qualifier,
-                      const sh::ShaderVariable& a,
-                      const sh::ShaderVariable& b) {
+                      st_variable_datatype type,
+                      const st_shader_variable& a,
+                      const st_shader_variable& b) {
     bool res = true;
 
-    if (qualifier == ValidationQualifier::UNIFORM &&
+    if (type == ST_VARIABLE_UNIFORM &&
         a.precision != b.precision) {
         std::ostringstream err;
-        err << sQualifierString(qualifier) << " " << a.name << " ";
+        err << "Uniform " << a.name << " ";
         err << kDifferentPrecisionErr;
         pData->appendValidationErrMsg(err);
         res = false;
     }
 
-    if (a.isStruct() != b.isStruct() ||
+    bool aIsStruct = a.fields_count > 0;
+    bool bIsStruct = b.fields_count > 0;
+    if (aIsStruct != bIsStruct ||
         a.type != b.type) {
         std::ostringstream err;
-        err << sQualifierString(qualifier) << " " << a.name << " ";
+        err << sQualifierString(type) << " " << a.name << " ";
         err << kDifferentTypeErr;
         pData->appendValidationErrMsg(err);
         res = false;
     }
 
-    if (a.isStruct()) {
-        for (const auto& afield : a.fields) {
-            for (const auto& bfield : b.fields) {
-                if (afield.name != bfield.name) continue;
-                res = res && sVarCheck(pData, qualifier, afield, bfield);
+    if (aIsStruct) {
+        for (int i = 0; i < a.fields_count; i++) {
+            for (int j = 0; j < b.fields_count; j++) {
+                if (strcmp(a.fields[i].name, b.fields[i].name)) continue;
+                res = res && sVarCheck(pData, type, a.fields[i], b.fields[i]);
             }
         }
     }
@@ -862,12 +885,12 @@ static bool sVarCheck(ProgramData* pData,
 }
 
 static bool sInterfaceBlockCheck(ProgramData* pData,
-                                 const sh::InterfaceBlock& a,
-                                 const sh::InterfaceBlock& b) {
+                                 const st_interface_block& a,
+                                 const st_interface_block& b) {
     bool res = true;
 
     if (a.layout != b.layout ||
-        a.isRowMajorLayout != b.isRowMajorLayout) {
+        a.is_row_major_layout != b.is_row_major_layout) {
         std::ostringstream err;
         err << "interface block " << a.name << " ";
         err << kDifferentLayoutQualifierErr;
@@ -875,7 +898,7 @@ static bool sInterfaceBlockCheck(ProgramData* pData,
         res = false;
     }
 
-    if (a.fields.size() != b.fields.size()) {
+    if (a.fields_count != b.fields_count) {
         std::ostringstream err;
         err << "interface block " << a.name << " ";
         err << kDifferentTypeErr;
@@ -883,15 +906,15 @@ static bool sInterfaceBlockCheck(ProgramData* pData,
         res = false;
     }
 
-    for (const auto& afield : a.fields) {
-        for (const auto& bfield : b.fields) {
-            if (afield.name != bfield.name) continue;
-            res = res && sVarCheck(pData, ValidationQualifier::VARYING,
-                                   afield, bfield);
-            if (afield.isRowMajorLayout != bfield.isRowMajorLayout) {
+    for (int i = 0; i < a.fields_count; i++) {
+        for (int j = 0; j < b.fields_count; j++) {
+            if (strcmp(a.fields[i].name, b.fields[i].name)) continue;
+            res = res && sVarCheck(pData, ST_VARIABLE_VARYING,
+                                   a.fields[i], b.fields[i]);
+            if (a.fields[i].is_row_major_layout != b.fields[i].is_row_major_layout) {
                 std::ostringstream err;
                 err << "interface block field ";
-                err << a.name << "." << afield.name << " ";
+                err << std::string(a.name) << "." << std::string(a.fields[i].name) << " ";
                 err << kDifferentLayoutQualifierErr;
                 pData->appendValidationErrMsg(err);
                 res = false;
@@ -907,19 +930,19 @@ static bool sCheckUndecl(
         const ANGLEShaderParser::ShaderLinkInfo& vertLinkInfo) {
     bool res = true;
     for (const auto& felt : fragLinkInfo.varyings) {
-        if (felt.isBuiltIn()) continue;
+        if (felt.is_built_in) continue;
 
         bool declaredInVertShader = false;
         for (const auto& velt : vertLinkInfo.varyings) {
-            if (velt.name == felt.name) {
+            if (!strcmp(velt.name, felt.name)) {
                 declaredInVertShader = true;
                 break;
             }
         }
 
-        if (!declaredInVertShader && felt.staticUse) {
+        if (!declaredInVertShader && felt.static_use) {
             std::ostringstream err;
-            err << "varying " << felt.name << " ";
+            err << "varying " << std::string(felt.name) << " ";
             err << kUsedUndeclaredErr;
             pData->appendValidationErrMsg(err);
             res = false;
@@ -940,7 +963,7 @@ static bool sCheckLimits(
     std::unordered_set<GLuint> explicitlyBound;
     int numImplicitlyBound = 0;
     for (const auto& elt : vertShaderLinkInfo.attributes) {
-        if (const auto loc = android::base::find(pData->boundAttribLocs, elt.name)) {
+        if (const auto loc = android::base::find(pData->boundAttribLocs, std::string(elt.name))) {
             explicitlyBound.insert(*loc);
         } else {
             numImplicitlyBound++;
@@ -968,21 +991,21 @@ static bool sCheckVariables(ProgramData* pData,
 
     for (const auto& aelt : a.uniforms) {
         for (const auto& belt : b.uniforms) {
-            if (aelt.name != belt.name) continue;
-            res = res && sVarCheck(pData, ValidationQualifier::UNIFORM, aelt, belt);
+            if (strcmp(aelt.name, belt.name)) continue;
+            res = res && sVarCheck(pData, ST_VARIABLE_UNIFORM, aelt, belt);
         }
     }
 
     for (const auto& aelt : a.varyings) {
         for (const auto& belt : b.varyings) {
-            if (aelt.name != belt.name) continue;
-            res = res && sVarCheck(pData, ValidationQualifier::VARYING, aelt, belt);
+            if (strcmp(aelt.name, belt.name)) continue;
+            res = res && sVarCheck(pData, ST_VARIABLE_VARYING, aelt, belt);
         }
     }
 
     for (const auto& aelt : a.interfaceBlocks) {
         for (const auto& belt : b.interfaceBlocks) {
-            if (aelt.name != belt.name) continue;
+            if (strcmp(aelt.name, belt.name)) continue;
             res = res && sInterfaceBlockCheck(pData, aelt, belt);
         }
     }
@@ -990,24 +1013,24 @@ static bool sCheckVariables(ProgramData* pData,
     return res;
 }
 
-static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBase, const sh::ShaderVariable& var) {
-    bool isArr = var.arraySize > 0;
-    int baseSize = isArr ? var.arraySize : 1;
+static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBase, const st_shader_variable& var) {
+    bool isArr = var.array_sizes_count > 0;
+    int baseSize = isArr ? var.array_sizes[0] : 1;
 
-    if (var.isStruct()) {
+    if (var.fields_count > 0) {
         if (isArr) {
-            for (int k = 0; k < var.arraySize; k++) {
-                for (const auto& field : var.fields) {
-                    std::vector<char> keyBuf(keyBase.length() + field.name.length() + 20, 0);
-                    snprintf(keyBuf.data(), keyBuf.size(), "%s[%d].%s", keyBase.c_str(), k, field.name.c_str());
-                    sRecursiveLocInitalize(pData, std::string(keyBuf.data()), field);
+            for (int k = 0; k < var.array_sizes[0]; k++) {
+                for (int i = 0; i < var.fields_count; i++) {
+                    std::vector<char> keyBuf(keyBase.length() + strlen(var.fields[i].name) + 20, 0);
+                    snprintf(keyBuf.data(), keyBuf.size(), "%s[%d].%s", keyBase.c_str(), k, var.fields[i].name);
+                    sRecursiveLocInitalize(pData, std::string(keyBuf.data()), var.fields[i]);
                 }
             }
         } else {
-            for (const auto& field : var.fields) {
-                std::vector<char> keyBuf(keyBase.length() + field.name.length() + 20, 0);
-                snprintf(keyBuf.data(), keyBuf.size(), "%s.%s", keyBase.c_str(), field.name.c_str());
-                sRecursiveLocInitalize(pData, std::string(keyBuf.data()), field);
+            for (int i = 0; i < var.fields_count; i++) {
+                std::vector<char> keyBuf(keyBase.length() + strlen(var.fields[i].name) + 20, 0);
+                snprintf(keyBuf.data(), keyBuf.size(), "%s.%s", keyBase.c_str(), var.fields[i].name);
+                sRecursiveLocInitalize(pData, std::string(keyBuf.data()), var.fields[i]);
             }
         }
     } else {
@@ -1028,7 +1051,7 @@ static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBas
 }
 
 static void sInitializeUniformLocs(ProgramData* pData,
-                                   const std::vector<sh::ShaderVariable>& uniforms) {
+                                   const std::vector<st_shader_variable>& uniforms) {
     // initialize in order of indices
     std::vector<std::string> orderedUniforms;
     GLint uniform_count;
