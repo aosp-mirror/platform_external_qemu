@@ -15,8 +15,13 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/gps/GpsFix.h"
 #include "android/metrics/PeriodicReporter.h"
+#include "android/skin/qt/websockets/websocketclientwrapper.h"
+#include "android/skin/qt/websockets/websockettransport.h"
 #include <QTimer>
 #include <QThread>
+#include <QWebChannel>
+#include <QWebEngineView>
+#include <QWebSocketServer>
 #include <QWidget>
 #include <memory>
 
@@ -35,6 +40,7 @@ public:
 
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
+    Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng);
 
     static void writeDeviceLocationToSettings(double lat,
                                               double lon,
@@ -43,6 +49,9 @@ signals:
     void locationUpdateRequired(double latitude, double longitude, double altitude);
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
+
+    // a way to send location updates to the js code
+    void locationChanged(QString lat, QString lng);
 
 private slots:
     void on_loc_GpxKmlButton_clicked();
@@ -79,6 +88,9 @@ private slots:
     void locationPlaybackStop();
     void timeout();
 
+    void on_singlePoint_importGpxButton_clicked();
+    void on_singlePoint_setLocationButton_clicked();
+
 private:
     void finishGeoDataLoading(
         const QString& file_name,
@@ -99,7 +111,6 @@ private:
                              int col,
                              QString* outErrorMessage);
 
-    std::unique_ptr<Ui::LocationPage> mUi;
     QDoubleValidator mAltitudeValidator;
     GpsFixArray          mGpsFixesArray;
     int                  mGpsNextPopulateIndex = 0;
@@ -112,6 +123,15 @@ private:
     double mPreviousLat = 0.0;
     double mPreviousLon = 0.0;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+
+    // Last point sent to the emulator from the map
+    QString mLastLat = "-122.084";
+    QString mLastLng = "37.422";;
+
+	std::unique_ptr<QWebSocketServer> mServer;
+	std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
+	std::unique_ptr<QWebChannel> mWebChannel;
+    std::unique_ptr<Ui::LocationPage> mUi;
 };
 
 class GeoDataLoaderThread : public QThread {
