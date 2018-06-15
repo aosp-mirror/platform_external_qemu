@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "44e3e2c9_9c6089bf",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-15T22:37:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "112607a6_638c810d",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 1
+      },
+      "revId": "d80e345167b48fb11c9d8664ae02e720be32d8e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3368975a_586a7eed",
         "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw_unittest.cpp",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "d80e345167b48fb11c9d8664ae02e720be32d8e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2bdff0d_2c1f334a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-15T22:37:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3368975a_586a7eed",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 4
+      },
+      "revId": "d80e345167b48fb11c9d8664ae02e720be32d8e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
