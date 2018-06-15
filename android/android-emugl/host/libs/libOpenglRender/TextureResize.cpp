@@ -279,6 +279,7 @@ TextureResize::~TextureResize() {
 }
 
 GLuint TextureResize::update(GLuint texture) {
+    return texture;
     // Store the viewport. The viewport is clobbered due to the framebuffers.
     GLint vport[4] = { 0, };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);

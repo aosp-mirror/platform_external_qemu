@@ -24,7 +24,7 @@ EGLDisplay getDisplay() {
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
 
     if (sDisplayNeedsInit) {
-        egl->eglUseOsEglApi(true);
+        egl->eglUseOsEglApi(false);
     }
 
     EGLDisplay dpy = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
