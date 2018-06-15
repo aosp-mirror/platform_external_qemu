@@ -162,10 +162,8 @@ TextureDraw::TextureDraw() :
     mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, "translation");
     mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "tex");
 
-#if 0
     printf("SLOTS position=%d inCoord=%d texture=%d translation=%d\n",
           mPositionSlot, mInCoordSlot, mTextureSlot, mTranslationSlot);
-#endif
 
     // Create vertex and index buffers.
     s_gles2.glGenBuffers(1, &mVertexBuffer);
@@ -202,24 +200,20 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
 
     s_gles2.glUseProgram(mProgram);
 
-#ifndef NDEBUG
     GLenum err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not use program error=0x%x\n",
             __FUNCTION__, err);
     }
-#endif
 
     // Setup the |position| attribute values.
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
 
-#ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not bind GL_ARRAY_BUFFER error=0x%x\n",
             __FUNCTION__, err);
     }
-#endif
 
     s_gles2.glEnableVertexAttribArray(mPositionSlot);
     s_gles2.glVertexAttribPointer(mPositionSlot,
@@ -229,13 +223,11 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
                                   sizeof(Vertex),
                                   0);
 
-#ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could glVertexAttribPointer with mPositionSlot error=0x%x\n",
             __FUNCTION__, err);
     }
-#endif
 
     // Setup the |inCoord| attribute values.
     s_gles2.glEnableVertexAttribArray(mInCoordSlot);
@@ -256,7 +248,6 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
     // setup the |translation| uniform value.
     s_gles2.glUniform2f(mTranslationSlot, dx, dy);
 
-#ifndef NDEBUG
     // Validate program, just to be sure.
     s_gles2.glValidateProgram(mProgram);
     GLint validState = 0;
@@ -268,17 +259,14 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
         ERR("%s: Could not run program: '%s'\n", __FUNCTION__, messages);
         return false;
     }
-#endif
 
     // Do the rendering.
     s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
-#ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) error=0x%x\n",
             __FUNCTION__, err);
     }
-#endif
 
     // We may only get 0, 90, 180, 270 in |rotation| so far.
     const int intRotation = ((int)rotation)/90;
@@ -320,13 +308,11 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
         s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
     }
 
-#ifndef NDEBUG
     err = s_gles2.glGetError();
     if (err != GL_NO_ERROR) {
         ERR("%s: Could not glDrawElements() error=0x%x\n",
             __FUNCTION__, err);
     }
-#endif
 
     // TODO(digit): Restore previous program state.
     // For now, reset back to zero and assume other users will

@@ -12,17 +12,51 @@
 #include "ANGLEShaderParser.h"
 
 #include "android/base/synchronization/Lock.h"
+#include "android/base/memory/LazyInstance.h"
+
+#include "emugl/common/shared_library.h"
 
 #include <map>
 #include <string>
-
-#define SH_GLES31_SPEC ((ShShaderSpec)0x8B88)
-#define GL_COMPUTE_SHADER 0x91B9
 
 namespace ANGLEShaderParser {
 
 ShBuiltInResources kResources;
 bool kInitialized = false;
+
+class STLibrary {
+public:
+
+    STLibrary() {
+        static const char kLibName[] =
+                "libShaderTranslator.dylib";
+        char error[256];
+        lib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));
+
+        if (!lib) {
+            fprintf(stderr, "%s: failed to get shader translator lib %s [%s]\n", __func__,
+                    kLibName, error);
+        }
+
+#define DEFINE_ST_DISPATCH_FIELD(name) \
+    name##_t name;
+
+#define FIND_ST_SYMBOL(name) \
+        this->name = (name##_t)lib->findSymbol(#name); \
+        fprintf(stderr, "%s: %s -> %p\n", __func__, #name, this->name);
+
+        LIST_ST_FUNCS(FIND_ST_SYMBOL);
+
+        this->STInitialize();
+    }
+
+    emugl::SharedLibrary* lib = nullptr;
+
+    LIST_ST_FUNCS(DEFINE_ST_DISPATCH_FIELD);
+};
+
+
+static android::base::LazyInstance<STLibrary> sLib = LAZY_INSTANCE_INIT;
 
 struct ShaderSpecKey {
     GLenum shaderType;
@@ -36,9 +70,9 @@ static ShShaderSpec sInputSpecForVersion(int esslVersion) {
         case 300:
             return SH_GLES3_SPEC;
         case 310:
-            return SH_GLES31_SPEC;
+            return SH_GLES3_1_SPEC;
     }
-    return SH_GLES31_SPEC;
+    return SH_GLES3_1_SPEC;
 }
 
 static ShShaderOutput sOutputSpecForVersion(bool coreProfileHost, int esslVersion) {
@@ -78,7 +112,7 @@ static ShaderCompilerMap sCompilerMap;
 static ShHandle getShaderCompiler(bool coreProfileHost, ShaderSpecKey key) {
     if (sCompilerMap.find(key) == sCompilerMap.end()) {
         sCompilerMap[key] =
-            ShConstructCompiler(
+            sLib->STConstructCompiler(
                     key.shaderType,
                     sInputSpecForVersion(key.esslVersion),
                     sOutputSpecForVersion(coreProfileHost, key.esslVersion),
@@ -104,7 +138,8 @@ void initializeResources(
             int minProgramTexelOffset,
             int maxProgramTexelOffset,
             int maxDualSourceDrawBuffers) {
-    ShInitBuiltInResources(&kResources);
+
+    sLib->STGenerateResources(&kResources);
 
     kResources.MaxVertexAttribs = attribs; // Defaulted to 8
     kResources.MaxVertexUniformVectors = uniformVectors; // Defaulted to 128
@@ -126,7 +161,6 @@ void initializeResources(
 
     kResources.OES_standard_derivatives = 1;
     kResources.OES_EGL_image_external = 0;
-    kResources.EXT_gpu_shader5 = 1;
 }
 
 bool globalInitialize(
@@ -145,10 +179,7 @@ bool globalInitialize(
             int maxProgramTexelOffset,
             int maxDualSourceDrawBuffers) {
 
-    if (!ShInitialize()) {
-        fprintf(stderr, "Global ANGLE shader compiler initialzation failed.\n");
-        return false;
-    }
+    sLib.get();
 
     initializeResources(
             attribs,
@@ -175,22 +206,56 @@ static void getShaderLinkInfo(int esslVersion,
                               ShaderLinkInfo* linkInfo) {
     linkInfo->esslVersion = esslVersion;
 
-    linkInfo->nameMap = *ShGetNameHashingMap(compilerHandle);
+    struct st_name_hashing_map raw_map = sLib->STGetNameHashingMap(compilerHandle);
+
+    for (int i = 0; i < raw_map.count; i++) {
+        fprintf(stderr, "%s: usr %s -> compiled %s\n", __func__, raw_map.user_names[i], raw_map.compiled_names[i]);
+        linkInfo->nameMap[raw_map.user_names[i]] = raw_map.compiled_names[i];
+    }
+
+    int uniformCount;
+    int varyingsCount;
+    int attributesCount;
+    int outputVarsCount;
+    int interfaceBlocksCount;
+
+    sLib->STGetUniforms(compilerHandle, &uniformCount, nullptr);
+    sLib->STGetVaryings(compilerHandle, &varyingsCount, nullptr);
+    sLib->STGetAttributes(compilerHandle, &attributesCount, nullptr);
+    sLib->STGetOutputVariables(compilerHandle, &outputVarsCount, nullptr);
+    sLib->STGetInterfaceBlocks(compilerHandle, &interfaceBlocksCount, nullptr);
+
+    linkInfo->uniforms.resize(uniformCount);
+    linkInfo->varyings.resize(varyingsCount);
+    linkInfo->attributes.resize(attributesCount);
+    linkInfo->outputVars.resize(outputVarsCount);
+    linkInfo->interfaceBlocks.resize(interfaceBlocksCount);
+
+    sLib->STGetUniforms(compilerHandle, &uniformCount, linkInfo->uniforms.data());
+    sLib->STGetVaryings(compilerHandle, &varyingsCount, linkInfo->varyings.data());
+    sLib->STGetAttributes(compilerHandle, &attributesCount, linkInfo->attributes.data());
+    sLib->STGetOutputVariables(compilerHandle, &outputVarsCount, linkInfo->outputVars.data());
+    sLib->STGetInterfaceBlocks(compilerHandle, &interfaceBlocksCount, linkInfo->interfaceBlocks.data());
+
+    for (int i = 0; i < uniformCount; i++) {
+        linkInfo->nameMap[linkInfo->uniforms[i].name] = linkInfo->uniforms[i].mapped_name;
+    }
+
+    for (int i = 0; i < varyingsCount; i++) {
+        linkInfo->nameMap[linkInfo->varyings[i].name] = linkInfo->varyings[i].mapped_name;
+    }
+
+    for (int i = 0; i < attributesCount; i++) {
+        linkInfo->nameMap[linkInfo->attributes[i].name] = linkInfo->attributes[i].mapped_name;
+    }
+
+    for (int i = 0; i < outputVarsCount; i++) {
+        linkInfo->nameMap[linkInfo->outputVars[i].name] = linkInfo->outputVars[i].mapped_name;
+    }
+    
     for (const auto& elt : linkInfo->nameMap) {
         linkInfo->nameMapReverse[elt.second] = elt.first;
     }
-
-    auto uniforms = ShGetUniforms(compilerHandle);
-    auto varyings = ShGetVaryings(compilerHandle);
-    auto attributes = ShGetAttributes(compilerHandle);
-    auto outputVars = ShGetOutputVariables(compilerHandle);
-    auto interfaceBlocks = ShGetInterfaceBlocks(compilerHandle);
-
-    if (uniforms) linkInfo->uniforms = *uniforms;
-    if (varyings) linkInfo->varyings = *varyings;
-    if (attributes) linkInfo->attributes = *attributes;
-    if (outputVars) linkInfo->outputVars = *outputVars;
-    if (interfaceBlocks) linkInfo->interfaceBlocks = *interfaceBlocks;
 }
 
 static int detectShaderESSLVersion(const char* const* strings) {
@@ -261,16 +326,20 @@ bool translate(bool hostUsesCoreProfile,
 
     // Pass in the entire src as 1 string, ask for compiled GLSL object code
     // and information about all compiled variables.
-    int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE | SH_VARIABLES);
+    int res = sLib->STCompile(compilerHandle, &src, 1, SH_OBJECT_CODE | SH_VARIABLES);
 
     // The compilers return references that may not be valid in the future,
     // and we manually clear them immediately anyway.
-    *outInfolog = std::string(ShGetInfoLog(compilerHandle));
-    *outObjCode = std::string(ShGetObjectCode(compilerHandle));
+    *outInfolog = std::string(sLib->STGetInfoLog(compilerHandle));
+    *outObjCode = std::string(sLib->STGetObjectCode(compilerHandle));
 
+    fprintf(stderr, "%s: tr %s out info log  %s obj %s\n", __func__,
+            src,
+            outInfolog->c_str(),
+            outObjCode->c_str());
     if (outShaderLinkInfo) getShaderLinkInfo(esslVersion, compilerHandle, outShaderLinkInfo);
 
-    ShClearResults(compilerHandle);
+    sLib->STClearResults(compilerHandle);
 
     return res;
 }
