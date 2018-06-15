@@ -27,6 +27,9 @@ set(QT5_INCLUDE_DIRS
     ${PREBUILT_ROOT}/include/QtCore
     ${PREBUILT_ROOT}/include/QtGui
     ${PREBUILT_ROOT}/include/QtSvg
+    ${PREBUILT_ROOT}/include/QtWebChannel
+    ${PREBUILT_ROOT}/include/QtWebEngineWidgets
+    ${PREBUILT_ROOT}/include/QtWebSockets
     ${PREBUILT_ROOT}/include/QtWidgets)
 
 set(QT5_INCLUDE_DIR ${QT5_INCLUDE_DIRS})

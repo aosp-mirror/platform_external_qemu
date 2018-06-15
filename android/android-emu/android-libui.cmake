@@ -75,6 +75,8 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/virtualscene-control-window.cpp
     android/skin/qt/VirtualSceneInfoDialog.cpp
     android/skin/qt/wavefront-obj-parser.cpp
+    android/skin/qt/websockets/websocketclientwrapper.cpp
+    android/skin/qt/websockets/websockettransport.cpp
     android/skin/qt/video-player/Clock.cpp
     android/skin/qt/video-player/FrameQueue.cpp
     android/skin/qt/video-player/PacketQueue.cpp
