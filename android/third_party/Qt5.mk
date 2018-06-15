@@ -8,7 +8,7 @@ QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
 QT_UIC_TOOL_LDPATH := $(QT_TOP64_DIR)/lib
 QT_UIC_TOOL := $(QT_TOP64_DIR)/bin/uic
 
-QT_LDLIBS := -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg
+QT_LDLIBS := -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg -lQt5WebChannel -lQt5WebEngine -lQt5WebEngineWidgets -lQt5WebSockets -lQt5Network
 ifeq ($(BUILD_TARGET_OS),windows)
     # On Windows, linking to mingw32 is required. The library is provided
     # by the toolchain, and depends on a main() function provided by qtmain
@@ -35,3 +35,8 @@ QT_INCLUDES := \
     $(QT_INCLUDE_DIR)/QtGui \
     $(QT_INCLUDE_DIR)/QtSvg \
     $(QT_INCLUDE_DIR)/QtWidgets \
+    $(QT_INCLUDE_DIR)/QtWebChannel \
+    $(QT_INCLUDE_DIR)/QtWebEngine \
+    $(QT_INCLUDE_DIR)/QtWebEngineWidgets \
+    $(QT_INCLUDE_DIR)/QtWebSockets \
+    $(QT_INCLUDE_DIR)/QtNetwork \

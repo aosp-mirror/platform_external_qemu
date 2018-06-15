@@ -13,6 +13,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
@@ -22,9 +23,15 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
 
 #include <QFileDialog>
+#include <QItemDelegate>
 #include <QSettings>
+#include <QWebEngineProfile>
+#include <QWebEngineScript>
+#include <QWebEngineScriptCollection>
+
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -47,6 +54,32 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutAltitude);
 static void getDeviceVelocity(double* speed, double* heading);
 static void putdeviceVelocity(double speed, double heading);
+
+class BackgroundDelegate : public QItemDelegate {
+public:
+  explicit BackgroundDelegate(QObject *parent = 0)
+      : QItemDelegate(parent){}
+  void paint(QPainter *painter, const QStyleOptionViewItem &option,
+             const QModelIndex &index) const {
+    QStyleOptionViewItem nonSelect(option);
+    if (option.state & QStyle::State_Selected) {
+        // Put the "selected" color in the background
+        painter->fillRect(option.rect, QBrush(getColorForCurrentTheme(Ui::TABLE_SELECTED_VAR)));
+        // Don't have the default highlighting of the selected row;
+        // we'll deal with that explicitly.
+        nonSelect.state = option.state & ~QStyle::State_Selected;
+    }
+    if (index.row() > 0) {
+        // Draw a dividing line at the top of this row
+        painter->setPen(getColorForCurrentTheme(Ui::TABLE_BOTTOM_COLOR_VAR));
+        painter->drawLine(option.rect.x(),
+                          option.rect.y(),
+                          option.rect.x() + option.rect.width() - 1,
+                          option.rect.y());
+    }
+    QItemDelegate::paint(painter, nonSelect, index);
+  }
+};
 
 static const QAndroidLocationAgent* sLocationAgent = nullptr;
 static double sDeviceSpeed = 0.0; // Knots
@@ -100,6 +133,84 @@ LocationPage::LocationPage(QWidget *parent) :
 {
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
+
+    bool useLocationV2 = 1; // ?? feature_is_enabled(kFeature_LocationUiV2);
+
+    if (useLocationV2) {
+        // Hide the old tab on the Location page
+        mUi->locationTabs->removeTab(3);
+    } else {
+        mUi->locationTabs->setTabText(3, "");
+        // Hide the new tabs on the Location page
+        mUi->locationTabs->removeTab(2);
+        mUi->locationTabs->removeTab(1);
+        mUi->locationTabs->removeTab(0);
+    }
+
+  if (useLocationV2) {
+    QFile webChannelJsFile(":/html/js/qwebchannel.js");
+    if(!webChannelJsFile.open(QIODevice::ReadOnly)) {
+        qDebug() << QString("Couldn't open qwebchannel.js file: %1").arg(webChannelJsFile.errorString());
+    }
+    else {
+        qDebug() << "OK pointWebEngineProfile";
+        QByteArray webChannelJs = webChannelJsFile.readAll();
+        webChannelJs.append(
+                "\n"
+                        "var wsUri = 'ws://localhost:12345';"
+                "var socket = new WebSocket(wsUri);"
+                "socket.onclose = function() {"
+                    "console.error('web channel closed');"
+                "};"
+                "socket.onerror = function(error) {"
+                    "console.error('web channel error: ' + error);"
+                "};"
+                "socket.onopen = function() {"
+                    "window.channel = new QWebChannel(socket, function(channel) {"
+                        "channel.objects.emulocationserver.locationChanged.connect(function(lat, lng) {"
+                                "if (setDeviceLocation) {"
+                            "setDeviceLocation(lat, lng);"
+                        "}"
+                        "});"
+                    "});"
+                "}");
+
+        QWebEngineScript script;
+        script.setSourceCode(webChannelJs);
+        script.setName("qwebchannel.js");
+        script.setWorldId(QWebEngineScript::MainWorld);
+        script.setInjectionPoint(QWebEngineScript::DocumentCreation);
+        script.setRunsOnSubFrames(false);
+
+        mUi->pointWebEngineView->page()->scripts().insert(script);
+
+        mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
+                            QWebSocketServer::NonSecureMode));
+        if (!mServer->listen(QHostAddress::LocalHost, 12345)) {
+            printf("Unable to open web socket port 12345.");
+        }
+
+        // wrap WebSocket clients in QWebChannelAbstractTransport objects
+        mClientWrapper.reset(new WebSocketClientWrapper(mServer.get()));
+
+        // setup the channel
+        mWebChannel.reset(new QWebChannel(mUi->pointWebEngineView->page()));
+        QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
+                         mWebChannel.get(), &QWebChannel::connectTo);
+
+        // setup the dialog and publish it to the QWebChannel
+        mWebChannel->registerObject(QStringLiteral("emulocationserver"), this);
+
+        mUi->pointWebEngineView->page()->load(QUrl("qrc:/html/index.html"));
+    }
+    mPointItemBuilder = new PointItemBuilder(mUi->pointList);
+
+    mUi->pointList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
+    mUi->pointList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
+
+    scanForPoints();
+    populatePointListTable();
+  } else { // !useLocationV2
     mTimer.setSingleShot(true);
 
     // We can only send 1 decimal of altitude (in meters).
@@ -153,6 +264,7 @@ LocationPage::LocationPage(QWidget *parent) :
                 }
                 return false;
     });
+  }
 }
 
 LocationPage::~LocationPage() {
@@ -197,6 +309,11 @@ void LocationPage::shutDown() {
     sGlobals->shouldCloseUpdateThread = true;
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
     sGlobals->updateThread.wait();
+}
+
+void LocationPage::updateTheme() {
+    // Re-do the lists of routes and points
+    populatePointListTable();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -616,6 +733,37 @@ void LocationPage::updateControlsAfterLoading() {
     setButtonEnabled(mUi->loc_GpxKmlButton, theme, true);
     setButtonEnabled(mUi->loc_playStopButton, theme, true);
     mNowLoadingGeoData = false;
+}
+
+void LocationPage::sendLocation(const QString& lat, const QString& lng) {
+	qDebug() << "lat=" << lat << ", lng=" << lng;
+    mLastLat = lat;
+    mLastLng = lng;
+}
+
+void LocationPage::on_singlePoint_importGpxButton_clicked() {
+#if 0 // ??
+    printf("NOT IMPLEMENTED\n");
+#else // ??
+    makePointProtobuf();
+    scanForPoints();
+    populatePointListTable();
+#endif // ??
+}
+
+void LocationPage::on_singlePoint_setLocationButton_clicked() {
+    qDebug() << "Setting location [lat=" << mLastLat << ", lng="
+             << mLastLng << "]";
+
+    if (!sLocationAgent || !sLocationAgent->gpsSendLoc) {
+        return;
+    }
+
+    timeval timeVal = {};
+    gettimeofday(&timeVal, nullptr);
+    sLocationAgent->gpsSendLoc(mLastLat.toDouble(), mLastLng.toDouble(), 0.0, 4, &timeVal);
+    // To set the location on the map
+    emit locationChanged(mLastLat, mLastLng);
 }
 
 // static

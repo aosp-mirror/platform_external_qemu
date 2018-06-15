@@ -11,12 +11,22 @@
 #pragma once
 
 #include "ui_location-page.h"
+
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/gps/GpsFix.h"
+#include "android/location/Point.h"
 #include "android/metrics/PeriodicReporter.h"
+#include "android/skin/qt/websockets/websocketclientwrapper.h"
+#include "android/skin/qt/websockets/websockettransport.h"
+
+#include <QTableWidget>
 #include <QTimer>
 #include <QThread>
+#include <QVector>
+#include <QWebChannel>
+#include <QWebEngineView>
+#include <QWebSocketServer>
 #include <QWidget>
 #include <memory>
 
@@ -30,11 +40,15 @@ public:
     explicit LocationPage(QWidget *parent = 0);
     ~LocationPage();
 
+    void makePointProtobuf(); // ??
     static void setLocationAgent(const QAndroidLocationAgent* agent);
     static void shutDown();
 
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
+    Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng);
+
+    void updateTheme();
 
     static void writeDeviceLocationToSettings(double lat,
                                               double lon,
@@ -43,6 +57,9 @@ signals:
     void locationUpdateRequired(double latitude, double longitude, double altitude);
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
+
+    // a way to send location updates to the js code
+    void locationChanged(QString lat, QString lng);
 
 private slots:
     void on_loc_GpxKmlButton_clicked();
@@ -79,7 +96,45 @@ private slots:
     void locationPlaybackStop();
     void timeout();
 
+    void on_singlePoint_importGpxButton_clicked();
+    void on_singlePoint_setLocationButton_clicked();
+    void on_pointList_cellPressed(int row, int column);
+    void on_pointList_itemSelectionChanged();
+
 private:
+    class PointItemBuilder {
+    public:
+        PointItemBuilder(QTableWidget* tableWidget) :
+            mTableWidget(tableWidget)
+        {
+            if (tableWidget != nullptr) {
+                mFieldWidth = tableWidget->columnWidth(0);
+                mFieldHeight = tableWidget->rowHeight(0) - ROW_SEPARATION;
+
+                tableWidget->setIconSize(QSize(mFieldWidth, mFieldHeight));
+            }
+        }
+
+        QTableWidgetItem* pointItem(QString name, QString description, const QIcon& icon, bool isSelected);
+        QTableWidgetItem* dotDotItem(bool isSelected);
+
+    private:
+        const int ICON_SIZE = 20;
+        const int ROW_SEPARATION = 2;
+        const int TEXT_SEPARATION = 4;
+        const int HORIZ_PADDING = 6;
+
+        QTableWidget* mTableWidget = nullptr;
+        int mFieldWidth;
+        int mFieldHeight;
+    };
+
+    struct pointListElement {
+        QString protoFilePath;
+        QString logicalName;
+        QString description;
+    };
+
     void finishGeoDataLoading(
         const QString& file_name,
         bool ok,
@@ -94,12 +149,16 @@ private:
     void writeLocationPlaybackSpeedToSettings(int speed);
     int getLocationPlaybackSpeedFromSettings();
 
+    void writePointProtobufByName(const QString& pointFormalName,
+                                  const emulator_location::PointMetadata& protobuf);
+    void writePointProtobufFullPath(const QString& protoFullPath,
+                                    const emulator_location::PointMetadata& protobuf);
+
     static bool validateCell(QTableWidget* table,
                              int row,
                              int col,
                              QString* outErrorMessage);
 
-    std::unique_ptr<Ui::LocationPage> mUi;
     QDoubleValidator mAltitudeValidator;
     GpsFixArray          mGpsFixesArray;
     int                  mGpsNextPopulateIndex = 0;
@@ -110,6 +169,22 @@ private:
     bool mLocationUsed = false;
     int mRowToSend;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+
+    // Last point sent to the emulator from the map
+    QString mLastLat = "-122.084";
+    QString mLastLng = "37.422";
+
+    void editPoint(int pointIdx);
+    void deletePoint(int pointIdx);
+    void populatePointListTable();
+    void scanForPoints();
+
+	std::unique_ptr<QWebSocketServer> mServer;
+	std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
+	std::unique_ptr<QWebChannel> mWebChannel;
+    QVector<struct pointListElement> mPointList;
+    PointItemBuilder*    mPointItemBuilder;
+    std::unique_ptr<Ui::LocationPage> mUi;
 };
 
 class GeoDataLoaderThread : public QThread {
