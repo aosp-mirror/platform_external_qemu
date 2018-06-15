@@ -35,6 +35,7 @@
 #include "android/logcat-pipe.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
+#include "android/snapshot/SnapshotPipe.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/path.h"
@@ -329,6 +330,8 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
+    android::snapshot::registerSnapshotPipeService();
+
 #ifndef _WIN32
     // bug: 70566718
     // for now, just use software keymaster3 in the guest
