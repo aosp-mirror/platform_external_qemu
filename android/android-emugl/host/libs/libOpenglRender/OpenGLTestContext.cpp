@@ -114,4 +114,28 @@ void destroyDisplay(EGLDisplay dpy) {
     sDisplayNeedsInit = true;
 }
 
+void GLTest::SetUp() {
+    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    gl = LazyLoadedGLESv2Dispatch::get();
+    EXPECT_TRUE(egl != nullptr);
+    EXPECT_TRUE(gl != nullptr);
+
+    m_display = getDisplay();
+    m_config = createConfig(m_display, 8, 8, 8, 8, 24, 8, 0);
+    m_surface = pbufferSurface(m_display, m_config, kSurfaceSize[0],
+                               kSurfaceSize[1]);
+    egl->eglSetMaxGLESVersion(3);
+    m_context = createContext(m_display, m_config, 3, 0);
+    egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
+}
+
+void GLTest::TearDown() {
+    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    egl->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                        EGL_NO_CONTEXT);
+    destroyContext(m_display, m_context);
+    destroySurface(m_display, m_surface);
+    destroyDisplay(m_display);
+}
+
 } // namespace gltest
