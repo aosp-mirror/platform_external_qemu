@@ -13,6 +13,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
@@ -25,6 +26,10 @@
 
 #include <QFileDialog>
 #include <QSettings>
+#include <QWebEngineProfile>
+#include <QWebEngineScript>
+#include <QWebEngineScriptCollection>
+
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -93,6 +98,77 @@ LocationPage::LocationPage(QWidget *parent) :
 {
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
+
+    bool useLocationV2 = feature_is_enabled(kFeature_LocationUiV2);
+
+    if (useLocationV2) {
+        // Hide the old tab on the Location page
+        mUi->locationTabs->removeTab(3);
+    } else {
+        mUi->locationTabs->setTabText(3, "");
+        // Hide the new tabs on the Location page
+        mUi->locationTabs->removeTab(2);
+        mUi->locationTabs->removeTab(1);
+        mUi->locationTabs->removeTab(0);
+    }
+
+  if (useLocationV2) {
+    QFile webChannelJsFile(":/html/js/qwebchannel.js");
+    if(!webChannelJsFile.open(QIODevice::ReadOnly)) {
+        qDebug() << QString("Couldn't open qwebchannel.js file: %1").arg(webChannelJsFile.errorString());
+    }
+    else {
+        qDebug() << "OK pointWebEngineProfile";
+        QByteArray webChannelJs = webChannelJsFile.readAll();
+        webChannelJs.append(
+                "\n"
+                        "var wsUri = 'ws://localhost:12345';"
+                "var socket = new WebSocket(wsUri);"
+                "socket.onclose = function() {"
+                    "console.error('web channel closed');"
+                "};"
+                "socket.onerror = function(error) {"
+                    "console.error('web channel error: ' + error);"
+                "};"
+                "socket.onopen = function() {"
+                    "window.channel = new QWebChannel(socket, function(channel) {"
+                        "channel.objects.emulocationserver.locationChanged.connect(function(lat, lng) {"
+                                "if (setDeviceLocation) {"
+                            "setDeviceLocation(lat, lng);"
+                        "}"
+                        "});"
+                    "});"
+                "}");
+
+        QWebEngineScript script;
+        script.setSourceCode(webChannelJs);
+        script.setName("qwebchannel.js");
+        script.setWorldId(QWebEngineScript::MainWorld);
+        script.setInjectionPoint(QWebEngineScript::DocumentCreation);
+        script.setRunsOnSubFrames(false);
+
+        mUi->pointWebEngineView->page()->scripts().insert(script);
+
+        mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
+                            QWebSocketServer::NonSecureMode));
+            if (!mServer->listen(QHostAddress::LocalHost, 12345)) {
+                printf("Unable to open web socket port 12345.");
+            }
+
+            // wrap WebSocket clients in QWebChannelAbstractTransport objects
+            mClientWrapper.reset(new WebSocketClientWrapper(mServer.get()));
+
+            // setup the channel
+        mWebChannel.reset(new QWebChannel(mUi->pointWebEngineView->page()));
+            QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
+                             mWebChannel.get(), &QWebChannel::connectTo);
+
+            // setup the dialog and publish it to the QWebChannel
+            mWebChannel->registerObject(QStringLiteral("emulocationserver"), this);
+
+            mUi->pointWebEngineView->page()->load(QUrl("qrc:/html/index.html"));
+    }
+  } else { // !useLocationV2
     mTimer.setSingleShot(true);
 
     // We can only send 1 decimal of altitude (in meters).
@@ -148,6 +224,7 @@ LocationPage::LocationPage(QWidget *parent) :
                 }
                 return false;
     });
+  }
 }
 
 LocationPage::~LocationPage() {
@@ -598,6 +675,31 @@ void LocationPage::updateControlsAfterLoading() {
     setButtonEnabled(mUi->loc_GpxKmlButton, theme, true);
     setButtonEnabled(mUi->loc_playStopButton, theme, true);
     mNowLoadingGeoData = false;
+}
+
+void LocationPage::sendLocation(const QString& lat, const QString& lng) {
+	qDebug() << "lat=" << lat << ", lng=" << lng;
+    mLastLat = lat;
+    mLastLng = lng;
+}
+
+void LocationPage::on_singlePoint_importGpxButton_clicked() {
+    printf("NOT IMPLEMENTED\n");
+}
+
+void LocationPage::on_singlePoint_setLocationButton_clicked() {
+    qDebug() << "Setting location [lat=" << mLastLat << ", lng="
+             << mLastLng << "]";
+
+    if (!sLocationAgent || !sLocationAgent->gpsSendLoc) {
+        return;
+    }
+
+    timeval timeVal = {};
+    gettimeofday(&timeVal, nullptr);
+    sLocationAgent->gpsSendLoc(mLastLat.toDouble(), mLastLng.toDouble(), 0.0, 4, &timeVal);
+    // To set the location on the map
+    emit locationChanged(mLastLat, mLastLng);
 }
 
 // static

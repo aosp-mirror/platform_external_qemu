@@ -22,6 +22,7 @@
 #include <QDesktopWidget>
 #include <QPainter>
 #include <QScreen>
+#include <QStyle>
 #include <QTextStream>
 
 #ifdef __APPLE__
