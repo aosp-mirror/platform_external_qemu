@@ -32,7 +32,7 @@
 namespace android {
 
 AndroidMessagePipe::AndroidMessagePipe(void* hwPipe,
-                                       Service* service,
+                                       android::AndroidPipe::Service* service,
                                        DecodeAndExecuteFunction cb,
                                        base::Stream* stream)
     : AndroidPipe(hwPipe, service), m_cb(cb) {
