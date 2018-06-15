@@ -120,7 +120,7 @@ private:
     // glLinkProgram and all attribute locations retrieved by glGetAttribLocation
     std::unordered_map<std::string, GLuint> linkedAttribLocs;
     std::unordered_map<GLuint, GLUniformDesc> uniforms;
-    AttachedShader attachedShaders[NUM_SHADER_TYPE] = {};
+    mutable AttachedShader attachedShaders[NUM_SHADER_TYPE] = {};
     std::string validationInfoLog;
     std::unique_ptr<const GLchar[]> infoLog;
     GLint  LinkStatus;
