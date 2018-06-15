@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a725c4c_cf31c08f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-15T23:16:27Z",
+      "side": 1,
+      "message": "The downside of this is that it\u0027s going to produce potentially thousands of errors is the image is wrong.  Here\u0027s a cool helper that can compare a row at a time and output the indices that don\u0027t match:\n\ntesting::AssertionResult RowsMatch(unsigned char* expected,\n                                   unsigned char* actual, size_t rowBytes) {\n    for (size_t i \u003d 0; i \u003c rowBytes; ++i) {\n        if (expected[i] !\u003d actual[i]) {\n            return testing::AssertionFailure() \u003c\u003c \"array[\" \u003c\u003c i \u003c\u003c \"] \"\n                \u003c\u003c \"(\" \u003c\u003c actual[i] \u003c\u003c \") !\u003d expected[\" \u003c\u003c i \u003c\u003c \"] \"\n                \u003c\u003c \"(\" \u003c\u003c expected[i] \u003c\u003c \")\";\n        }\n    }\n\n    return testing::AssertionSuccess();\n}\n\nWith that it can be reduced to one error per row, or even early-out on the first failure if the EXPECT_EQ is changed to ASSERT_EQ:\n\nfor (int i \u003d 0; i \u003c height; i++) {\n    ASSERT_EQ(pixels[(height - i - 1) * width * bpp], pixelsOut[i * width * bpp], width * bpp)\n        \u003c\u003c \"Row mismatch \" \u003c\u003c i;\n}\n\n(Note: Code isn\u0027t guaranteed to compile)",
+      "range": {
+        "startLine": 77,
+        "startChar": 16,
+        "endLine": 78,
+        "endChar": 68
+      },
+      "revId": "e6d75d28d4b681aeb356595260320cdb61a5541d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
