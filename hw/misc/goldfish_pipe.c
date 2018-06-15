@@ -961,10 +961,12 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                     pipe,
                     pipe->command_buffer->dma_maphost_params.dma_paddr,
                     pipe->command_buffer->dma_maphost_params.sz);
+            pipe->command_buffer->status = 0;
             break;
         case PIPE_CMD_DMA_UNMAPHOST:
             service_ops->dma_remove_buffer(
                     pipe->command_buffer->dma_maphost_params.dma_paddr);
+            pipe->command_buffer->status = 0;
             break;
         default:
             D("%s: command=%d (0x%x)\n", __func__, command, command);
