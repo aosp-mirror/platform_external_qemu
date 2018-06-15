@@ -13,6 +13,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
@@ -22,9 +23,13 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
 
 #include <QFileDialog>
+#include <QItemDelegate>
 #include <QSettings>
+#include <QWebEngineProfile>
+
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -35,10 +40,11 @@
 using android::base::AutoLock;
 using android::base::LazyInstance;
 
-static constexpr double kGplexLon = -122.084;
-static constexpr double kGplexLat =   37.422;
-static constexpr double kGplexAlt =    5.0; // Meters
-static constexpr double MAX_SPEED =  666.0; // Arbitrary (~speed of sound in knots)
+static constexpr double kGplexLon       = -122.084;
+static constexpr double kGplexLat       =   37.422;
+static constexpr double kGplexAlt       =    5.0; // Meters
+static constexpr double MAX_SPEED       =  666.0; // Arbitrary (~speed of sound in knots)
+static constexpr double UPDATE_INTERVAL = 1000.0; // 1 second
 
 static double getHeading(double startLat, double startLon, double endLat, double endLon);
 static double getDistanceNm(double startLat, double startLon, double endLat, double endLon);
@@ -50,6 +56,32 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutAltitude,
                                           double* pOutVelocity,
                                           double* pOutHeading);
+
+class BackgroundDelegate : public QItemDelegate {
+public:
+  explicit BackgroundDelegate(QObject *parent = 0)
+      : QItemDelegate(parent){}
+  void paint(QPainter *painter, const QStyleOptionViewItem &option,
+             const QModelIndex &index) const {
+    QStyleOptionViewItem nonSelect(option);
+    if (option.state & QStyle::State_Selected) {
+        // Put the "selected" color in the background
+        painter->fillRect(option.rect, QBrush(getColorForCurrentTheme(Ui::TABLE_SELECTED_VAR)));
+        // Don't have the default highlighting of the selected row;
+        // we'll deal with that explicitly.
+        nonSelect.state = option.state & ~QStyle::State_Selected;
+    }
+    if (index.row() > 0) {
+        // Draw a dividing line at the top of this row
+        painter->setPen(getColorForCurrentTheme(Ui::TABLE_BOTTOM_COLOR_VAR));
+        painter->drawLine(option.rect.x(),
+                          option.rect.y(),
+                          option.rect.x() + option.rect.width() - 1,
+                          option.rect.y());
+    }
+    QItemDelegate::paint(painter, nonSelect, index);
+  }
+};
 
 static const QAndroidLocationAgent* sLocationAgent = nullptr;
 
@@ -101,6 +133,38 @@ LocationPage::LocationPage(QWidget *parent) :
 {
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
+
+    bool useLocationV2 = 1; // ?? feature_is_enabled(kFeature_LocationUiV2);
+
+    if (useLocationV2) {
+        // Hide the old tab on the Location page
+        mUi->locationTabs->removeTab(3);
+        // Hide the V2 widgets that are not functional yet
+        mUi->locationTabs->removeTab(2); // "Settings"
+        mUi->locationTabs->removeTab(1); // "Routes"
+        mUi->loc_pointSortBox->hide();       // "Sort by ..."
+    } else {
+        mUi->locationTabs->setTabText(3, ""); // "V1"
+        // Hide the new tabs on the Location page
+        mUi->locationTabs->removeTab(2); // "Settings"
+        mUi->locationTabs->removeTab(1); // "Routes"
+        mUi->locationTabs->removeTab(0); // "Single points"
+        mUi->loc_pointList->setRowCount(0);
+    }
+
+  if (useLocationV2) {
+    setUpWebEngine(mUi->loc_pointWebEngineView->page(), "qrc:/html/index.html");
+
+    mPointItemBuilder = new PointItemBuilder(mUi->loc_pointList);
+
+    mUi->loc_pointList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
+    mUi->loc_pointList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
+
+    scanForPoints();
+    populatePointListWidget();
+    highlightPointListWidget();
+
+  } else { // !useLocationV2
     mTimer.setSingleShot(true);
 
     mUi->loc_latitudeInput->setMinValue(-90.0);
@@ -149,6 +213,7 @@ LocationPage::LocationPage(QWidget *parent) :
                 }
                 return false;
     });
+  }
 }
 
 LocationPage::~LocationPage() {
@@ -195,6 +260,18 @@ void LocationPage::shutDown() {
     sGlobals->shouldCloseUpdateThread = true;
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
     sGlobals->updateThread.wait();
+}
+
+void LocationPage::updateTheme() {
+    // Set the icons in the Mode of Travel pull-down.
+    // (I couldn't figure out how to extend adjustAllButtonsForTheme()
+    //  to include QComboBox items that have icons. I could find all
+    //  QComboBox items that have icons, but I could not read their
+    //  properties to get 'iconThemeName'.)
+    mUi->loc_travelMode->setItemIcon(0, getIconForCurrentTheme("car"));
+    mUi->loc_travelMode->setItemIcon(1, getIconForCurrentTheme("walk"));
+    mUi->loc_travelMode->setItemIcon(2, getIconForCurrentTheme("bike"));
+    mUi->loc_travelMode->setItemIcon(3, getIconForCurrentTheme("transit"));
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -457,11 +534,11 @@ void LocationPage::locationPlaybackStop()
     mNowPlaying = false;
 }
 
-
 void LocationPage::timeout() {
     bool cellOK;
     QTableWidgetItem *theItem;
 
+    printf("l-p: In timeout() V1!!\n"); // ??
     // Check if we've reached the end of the dataset.
     if (mRowToSend < 0  ||
         mRowToSend >= mUi->loc_pathTable->rowCount()) {
@@ -553,6 +630,7 @@ void LocationPage::timeout() {
     }
 }
 
+
 void LocationPage::geoDataThreadStarted() {
     {
         QSignalBlocker blocker(mUi->loc_pathTable);
@@ -602,6 +680,18 @@ void LocationPage::updateControlsAfterLoading() {
     setButtonEnabled(mUi->loc_GpxKmlButton, theme, true);
     setButtonEnabled(mUi->loc_playStopButton, theme, true);
     mNowLoadingGeoData = false;
+}
+
+// Give the device the location that is now showing on
+// the map UI
+void LocationPage::sendMostRecentUiLocation() {
+    // Update the location marker on the map
+    emit locationChanged(mLastLat, mLastLng);
+
+    writeDeviceLocationToSettings(mLastLat.toDouble(),
+                                  mLastLng.toDouble(),
+                                  0.0);
+    sendLocationToDevice();
 }
 
 // static
