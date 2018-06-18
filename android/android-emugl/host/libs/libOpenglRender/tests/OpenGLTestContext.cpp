@@ -16,6 +16,8 @@
 
 #include "OpenGLTestContext.h"
 
+#include "GLTestGlobals.h"
+
 namespace gltest {
 
 static bool sDisplayNeedsInit = true;
@@ -24,7 +26,7 @@ EGLDisplay getDisplay() {
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
 
     if (sDisplayNeedsInit) {
-        egl->eglUseOsEglApi(true);
+        egl->eglUseOsEglApi(!shouldUseHostGpu());
     }
 
     EGLDisplay dpy = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);

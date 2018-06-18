@@ -14,6 +14,8 @@
 
 #include "GLTestUtils.h"
 
+using android::AlignedBuf;
+
 namespace gltest {
 
 testing::AssertionResult RowMatches(int rowIndex, size_t rowBytes,
@@ -44,6 +46,72 @@ testing::AssertionResult ImageMatches(int width, int height, int bpp, int rowLen
     } else {
         return testing::AssertionSuccess();
     }
+}
+
+TestTexture createTestPatternRGB888(int width, int height) {
+    int bpp = 3;
+
+    TestTexture res(bpp * width * height);
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            res[i * bpp * width + j * bpp + 0] = i % 0x100;
+            res[i * bpp * width + j * bpp + 1] = j % 0x100;
+            res[i * bpp * width + j * bpp + 2] = (i * width + j) % 0x100;
+        }
+    }
+
+    return res;
+}
+
+TestTexture createTestPatternRGBA8888(int width, int height) {
+    int bpp = 4;
+
+    TestTexture res(bpp * width * height);
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            res[i * bpp * width + j * bpp + 0] = i % 0x100;
+            res[i * bpp * width + j * bpp + 1] = j % 0x100;
+            res[i * bpp * width + j * bpp + 2] = (i * width + j) % 0x100;
+            res[i * bpp * width + j * bpp + 3] = (width - j) % 0x100;
+        }
+    }
+
+    return res;
+}
+
+TestTexture createTestTextureRGB888SingleColor(int width, int height, float r, float g, float b) {
+    int bpp = 3;
+
+    TestTexture res(bpp * width * height);
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            res[i * bpp * width + j * bpp + 0] = r * 255.0f;
+            res[i * bpp * width + j * bpp + 1] = g * 255.0f;
+            res[i * bpp * width + j * bpp + 2] = b * 255.0f;
+        }
+    }
+
+    return res;
+}
+
+TestTexture createTestTextureRGBA8888SingleColor(int width, int height, float r, float g, float b, float a) {
+    int bpp = 4;
+
+    TestTexture res(bpp * width * height);
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            res[i * bpp * width + j * bpp + 0] = r * 255.0f;
+            res[i * bpp * width + j * bpp + 1] = g * 255.0f;
+            res[i * bpp * width + j * bpp + 2] = b * 255.0f;
+            res[i * bpp * width + j * bpp + 3] = a * 255.0f;
+        }
+    }
+
+    return res;
 }
 
 } // namespace gltest

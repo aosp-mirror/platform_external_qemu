@@ -18,6 +18,9 @@
 
 #include "android/base/system/System.h"
 
+#include "RenderThreadInfo.h"
+
+#include "GLTestGlobals.h"
 #include "GLTestUtils.h"
 #include "OpenGLTestContext.h"
 #include "OSWindow.h"
@@ -34,25 +37,16 @@ protected:
         ASSERT_NE(nullptr, LazyLoadedEGLDispatch::get());
         ASSERT_NE(nullptr, LazyLoadedGLESv2Dispatch::get());
 
-        const int width = 256;
-        const int height = 256;
-        const int x = 400;
-        const int y = 400;
-
-        mWindow = CreateOSWindow();
-        mUseSubWindow = mWindow->initialize("FrameBufferTest", width, height);
-
-        bool useHostGpu = System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
+        bool useHostGpu = shouldUseHostGpu();
+        mWindow = createOrGetTestWindow(mXOffset, mYOffset, mWidth, mHeight);
+        mUseSubWindow = mWindow != nullptr;
 
         if (mUseSubWindow) {
-            mWindow->setVisible(true);
-            mWindow->setPosition(x, y);
             ASSERT_NE(nullptr, mWindow->getFramebufferNativeWindow());
-            mWindow->messageLoop();
 
             EXPECT_TRUE(
                 FrameBuffer::initialize(
-                    width, height,
+                    mWidth, mHeight,
                     mUseSubWindow,
                     !useHostGpu /* egl2egl */));
             mFb = FrameBuffer::getFB();
@@ -61,35 +55,100 @@ protected:
             mFb->setupSubWindow(
                 (FBNativeWindowType)(uintptr_t)
                 mWindow->getFramebufferNativeWindow(),
-                0, 0, width, height, width, height, 1.0, 0, false);
+                0, 0,
+                mWidth, mHeight, mWidth, mHeight, 1.0, 0, false);
 
             mWindow->messageLoop();
         } else {
             EXPECT_TRUE(
                 FrameBuffer::initialize(
-                    width, height,
+                    mWidth, mHeight,
                     mUseSubWindow,
                     !useHostGpu /* egl2egl */));
             mFb = FrameBuffer::getFB();
             ASSERT_NE(nullptr, mFb);
         }
+
+        mRenderThreadInfo = new RenderThreadInfo();
     }
 
     virtual void TearDown() override {
         if (mFb) {
             mFb->finalize();
+            delete mFb;
         }
-        if (mWindow) {
-            mWindow->destroy();
-        }
+        delete mRenderThreadInfo;
     }
 
     bool mUseSubWindow = false;
     OSWindow* mWindow = nullptr;
     FrameBuffer* mFb = nullptr;
+    RenderThreadInfo* mRenderThreadInfo = nullptr;
+
+    int mWidth = 256;
+    int mHeight = 256;
+    int mXOffset= 400;
+    int mYOffset= 400;
 };
 
 TEST_F(FrameBufferTest, FrameBufferBasic) {
+}
+
+TEST_F(FrameBufferTest, CreateColorBuffer) {
+    HandleType handle =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_NE(0, handle);
+    // FramBuffer::finalize handles color buffer destruction here
+}
+
+TEST_F(FrameBufferTest, CreateCloseColorBuffer) {
+    HandleType handle =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_NE(0, handle);
+    mFb->closeColorBuffer(handle);
+}
+
+TEST_F(FrameBufferTest, CreateOpenCloseColorBuffer) {
+    HandleType handle =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_NE(0, handle);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle));
+    mFb->closeColorBuffer(handle);
+}
+
+TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer) {
+    HandleType handle =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_NE(0, handle);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle));
+
+    TestTexture forUpdate = createTestPatternRGBA8888(mWidth, mHeight);
+    mFb->updateColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, forUpdate.data());
+
+    TestTexture forRead = createTestTextureRGBA8888SingleColor(mWidth, mHeight, 0.0f, 0.0f, 0.0f, 0.0f);
+    mFb->readColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, forRead.data());
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(), forRead.data()));
+
+    mFb->closeColorBuffer(handle);
+}
+
+// bug: 110105029
+TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer_FormatChange) {
+    HandleType handle =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    EXPECT_NE(0, handle);
+    EXPECT_EQ(0, mFb->openColorBuffer(handle));
+
+    TestTexture forUpdate = createTestPatternRGB888(mWidth, mHeight);
+    mFb->updateColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGB, GL_UNSIGNED_BYTE, forUpdate.data());
+
+    TestTexture forRead = createTestTextureRGB888SingleColor(mWidth, mHeight, 0.0f, 0.0f, 0.0f);
+    mFb->readColorBuffer(handle, 0, 0, mWidth, mHeight, GL_RGB, GL_UNSIGNED_BYTE, forRead.data());
+
+    EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(), forRead.data()));
+
+    mFb->closeColorBuffer(handle);
 }
 
 }  // namespace emugl
