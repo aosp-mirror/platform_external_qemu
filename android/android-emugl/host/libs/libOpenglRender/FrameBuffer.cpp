@@ -505,6 +505,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_glRenderer = (const char*)s_gles2.glGetString(GL_RENDERER);
     fb->m_glVersion = (const char*)s_gles2.glGetString(GL_VERSION);
 
+    DBG("GL Vendor %s\n", fb->m_glVendor);
+    DBG("GL Renderer %s\n", fb->m_glRenderer);
+    DBG("GL Extensions %s\n", fb->m_glVersion);
+    GL_LOG("GL Vendor %s", fb->m_glVendor);
+    GL_LOG("GL Renderer %s", fb->m_glRenderer);
+    GL_LOG("GL Extensions %s", fb->m_glVersion);
+
     fb->m_textureDraw = new TextureDraw();
     if (!fb->m_textureDraw) {
         ERR("Failed: creation of TextureDraw instance\n");
