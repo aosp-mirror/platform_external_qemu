@@ -240,6 +240,9 @@ private:
     GLuint m_fbo = 0;
     GLenum m_internalFormat = 0;
 
+    // |m_format| and |m_type| are for reformatting purposes only
+    // to work around bugs in the guest. No need to snapshot those.
+    bool m_needFormatCheck = true;
     GLenum m_format = 0; // TODO: Currently we treat m_internalFormat same as
                          // m_format, but if underlying drivers can take it,
                          // it may be a better idea to distinguish them, with
