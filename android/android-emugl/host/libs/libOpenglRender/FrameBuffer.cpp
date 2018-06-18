@@ -157,6 +157,9 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     // the string pointer may become invalid when the context is destroyed
     const char* s = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
     char* extString = strdup(s ? s : "");
+    fprintf(stderr, "%s: Vendor %s\n", __func__, s_gles2.glGetString(GL_VENDOR));
+    fprintf(stderr, "%s: Renderer %s\n", __func__, s_gles2.glGetString(GL_RENDERER));
+    fprintf(stderr, "%s: Extensions %s\n", __func__, extString);
 
     // It is rare but some drivers actually fail this...
     if (!s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL)) {
