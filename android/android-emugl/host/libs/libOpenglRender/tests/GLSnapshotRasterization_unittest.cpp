@@ -28,9 +28,15 @@ static const GLfloat kGLES2TestPolygonOffset[] = {0.5f, 0.5f};
 class SnapshotGlLineWidthTest : public SnapshotSetValueTest<GLfloat>,
                                 public ::testing::WithParamInterface<GLfloat> {
     void stateCheck(GLfloat expected) {
+        GLfloat lineWidthRange[2];
+        gl->glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, lineWidthRange);
+
         GLfloat lineWidth;
         gl->glGetFloatv(GL_LINE_WIDTH, &lineWidth);
-        EXPECT_EQ(expected, lineWidth);
+
+        if (expected <= lineWidthRange[1]) {
+            EXPECT_EQ(expected, lineWidth);
+        }
     }
     void stateChange() override { gl->glLineWidth(GetParam()); }
 };
