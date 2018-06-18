@@ -40,6 +40,9 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int height,
                                     SubWindowRepaintCallback repaint_callback,
                                     void* repaint_callback_param) {
+
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+
    // The call to this function is protected by a lock
    // in FrameBuffer so it is safe to check and initialize s_display here
    if (!s_display) {
@@ -49,6 +52,7 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
     XSetWindowAttributes wa;
     wa.event_mask = StructureNotifyMask;
     wa.override_redirect = True;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     Window win = XCreateWindow(s_display,
                                p_window,
                                x,
@@ -61,10 +65,15 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                CopyFromParent,
                                CWEventMask,
                                &wa);
+    fprintf(stderr, "%s:%d arrive window %lu\n", __func__, __LINE__, win);
     XMapWindow(s_display,win);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     XSetWindowBackground(s_display, win, BlackPixel(s_display, 0));
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     XEvent e;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     XIfEvent(s_display, &e, WaitForMapNotify, (char *)win);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     return win;
 }
 
