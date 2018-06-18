@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 namespace emugl {
+namespace snapshottest {
 
 // Line width settings to attempt
 static const GLfloat kGLES2TestLineWidths[] = {2.0f};
@@ -108,4 +109,5 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
                         SnapshotGlPolygonOffsetTest,
                         ::testing::Values(kGLES2TestPolygonOffset));
 
+}  // namespace snapshottest
 }  // namespace emugl

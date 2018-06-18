@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 namespace emugl {
+namespace snapshottest {
 
 // Scissor box settings to attempt
 static const GLint kGLES2TestScissorBox[] = {2, 3, 10, 20};
@@ -203,4 +204,21 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
                         SnapshotGlDepthFuncTest,
                         ::testing::ValuesIn(kGLES2StencilFuncs));
 
+class SnapshotGlBlendEquationTest
+    : public SnapshotChangeGlobalsTest,
+      public ::testing::WithParamInterface<GLenum> {};
+
+TEST_P(SnapshotGlBlendEquationTest, SetBlendEquationRGB) {
+    std::vector<GLenum> defaultEquation = {GL_FUNC_ADD};
+    std::vector<GLenum> testEquation = {GetParam()};
+    setExpectedGlobal<GLenum>(GL_BLEND_EQUATION_RGB, defaultEquation,
+                              testEquation);
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlBlendEquationTest,
+                        ::testing::ValuesIn(kGLES2BlendEquationModes));
+
+}  // namespace snapshottest
 }  // namespace emugl

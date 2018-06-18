@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 namespace emugl {
+namespace snapshottest {
 
 // Sample coverage settings to attempt
 static const GlSampleCoverage kGLES2TestSampleCoverages[] = {{0.3, true},
@@ -49,4 +50,5 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotMultisampling,
                         SnapshotGlSampleCoverageTest,
                         ::testing::ValuesIn(kGLES2TestSampleCoverages));
 
+}  // namespace snapshottest
 }  // namespace emugl

@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 namespace emugl {
+namespace snapshottest {
 
 // Viewport settings to attempt
 static const GLint kGLES2TestViewport[] = {10, 10, 100, 100};
@@ -81,4 +82,5 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotTransformation,
                         SnapshotGlDepthRangeTest,
                         ::testing::Values(kGLES2TestDepthRange));
 
+}  // namespace snapshottest
 }  // namespace emugl

@@ -22,29 +22,29 @@
 
 #include "OpenGLTestContext.h"
 
+#include <map>
 #include <memory>
+#include <vector>
 
 namespace emugl {
+namespace snapshottest {
 
 struct GlSampleCoverage {
     GLclampf value;
     GLboolean invert;
 };
-using GlSampleCoverage = struct GlSampleCoverage;
 
 struct GlStencilFunc {
     GLenum func;
     GLint ref;
     GLuint mask;
 };
-using GlStencilFunc = struct GlStencilFunc;
 
 struct GlStencilOp {
     GLenum sfail;
     GLenum dpfail;
     GLenum dppass;
 };
-using GlStencilOp = struct GlStencilOp;
 
 // Capabilities which, according to the GLES2 spec, start disabled.
 static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
@@ -74,6 +74,100 @@ static const GLenum kGLES2StencilFuncs[] = {GL_NEVER,   GL_ALWAYS,  GL_LESS,
 static const GLenum kGLES2StencilOps[] = {GL_KEEP,      GL_ZERO,     GL_REPLACE,
                                           GL_INCR,      GL_DECR,     GL_INVERT,
                                           GL_INCR_WRAP, GL_DECR_WRAP};
+
+// Valid Blend equation modes
+static const GLenum kGLES2BlendEquationModes[] = {GL_FUNC_ADD, GL_FUNC_SUBTRACT,
+                                                  GL_FUNC_REVERSE_SUBTRACT};
+
+struct GlValues {
+    std::vector<GLboolean> bools;
+    std::vector<GLint> ints;
+    std::vector<GLuint> uints;
+    std::vector<GLenum> enums;
+    std::vector<GLfloat> floats;
+    std::vector<GLclampf> clampfs;
+};
+
+enum class GlGetterType { Booleanv, Integerv, Floatv, Enabled };
+
+struct GlGlobalCheckInfo {
+    GlGetterType getterType;
+    GLuint size;
+};
+
+static const GlGlobalCheckInfo kEnableGlobalMeta = {GlGetterType::Enabled, 1};
+
+static const std::map<GLenum, GlGlobalCheckInfo> kGLES2GlobalMeta = {
+        {GL_BLEND, kEnableGlobalMeta},
+        {GL_CULL_FACE, kEnableGlobalMeta},
+        {GL_DEPTH_TEST, kEnableGlobalMeta},
+        {GL_POLYGON_OFFSET_FILL, kEnableGlobalMeta},
+        {GL_SAMPLE_ALPHA_TO_COVERAGE, kEnableGlobalMeta},
+        {GL_SAMPLE_COVERAGE, kEnableGlobalMeta},
+        {GL_SCISSOR_TEST, kEnableGlobalMeta},
+        {GL_STENCIL_TEST, kEnableGlobalMeta},
+        {GL_DITHER, kEnableGlobalMeta},
+};
+
+using GlobalStateMap = std::map<GLenum, GlValues>;
+
+static const GlValues kDisabledCapabilityValues = {.bools = {false}};
+
+static const GlobalStateMap kGLES2DefaultGlobalState = {
+        {GL_BLEND, kDisabledCapabilityValues},
+        {GL_CULL_FACE, kDisabledCapabilityValues},
+        {GL_DEPTH_TEST, kDisabledCapabilityValues},
+        {GL_POLYGON_OFFSET_FILL, kDisabledCapabilityValues},
+        {GL_SAMPLE_ALPHA_TO_COVERAGE, kDisabledCapabilityValues},
+        {GL_SAMPLE_COVERAGE, kDisabledCapabilityValues},
+        {GL_SCISSOR_TEST, kDisabledCapabilityValues},
+        {GL_STENCIL_TEST, kDisabledCapabilityValues},
+        {GL_DITHER, {.bools = {true}}},
+};
+
+template <class T>
+static std::vector<T> retreiveGlobal(const GLESv2Dispatch* gl,
+                                     GlGetterType type,
+                                     GLenum name,
+                                     GLuint size) {
+    std::vector<T> values;
+    values.resize(size);
+    switch (type) {
+        case GlGetterType::Enabled:
+            values.push_back(gl->glIsEnabled(name));
+            break;
+        case GlGetterType::Booleanv:
+            gl->glGetBooleanv(name, (GLboolean*)&values);
+            break;
+        case GlGetterType::Integerv:
+            gl->glGetIntegerv(name, (GLint*)&values);
+            break;
+        case GlGetterType::Floatv:
+            gl->glGetFloatv(name, (GLfloat*)&values);
+            break;
+    }
+    return values;
+};
+
+template <class T>
+static std::function<void()> createChecker(const GLESv2Dispatch* gl,
+                                           GLenum name,
+                                           GlGetterType type,
+                                           std::vector<T> expected) {
+    fprintf(stderr, "creating checker for %d\n", name);
+    return [gl, name, &type, &expected]() {
+        fprintf(stderr, "retreiving globals %d\n", name);
+        auto values = retreiveGlobal<T>(gl, type, name, expected.size());
+        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+        for (int i = 0; i < values.size(); ++i) {
+            fprintf(stderr, "checking value %d vs %d\n", expected[i],
+                    values[i]);
+            EXPECT_EQ(expected[i], values[i]);
+        }
+    };
+};
+
+using GlobalCheckerList = std::vector<std::function<void()>>;
 
 class SnapshotTest : public gltest::GLTest {
 public:
@@ -152,7 +246,7 @@ public:
     // Checks part of state against an expected value.
     virtual void stateCheck(T expected) {
         ADD_FAILURE() << "Snapshot test needs a state-check function.";
-    };
+    }
 
     void defaultStateCheck() override { stateCheck(*m_default_value); }
     void changedStateCheck() override { stateCheck(*m_changed_value); }
@@ -169,4 +263,64 @@ protected:
     std::unique_ptr<T> m_changed_value;
 };
 
+class SnapshotChangeGlobalsTest : public SnapshotPreserveTest {
+public:
+    template <class T>
+    void setExpectedGlobal(GLenum paramName,
+                           std::vector<T> defaults,
+                           std::vector<T> changed) {
+        fprintf(stderr, "Setting expected global %d\n", paramName);
+        m_default_checkers.push_back(createChecker<T>(
+                gl, paramName, kGLES2GlobalMeta.at(paramName).getterType,
+                defaults));
+        m_changed_checkers.push_back(createChecker<T>(
+                gl, paramName, kGLES2GlobalMeta.at(paramName).getterType,
+                changed));
+        fprintf(stderr, "Done setting expected global %s\n", "yay");
+    }
+
+    void defaultStateCheck() override {
+        fprintf(stderr, "default state check %s\n", "yay");
+        for (auto checker : m_default_checkers) {
+            checker();
+        }
+        fprintf(stderr, "done with default state check %s\n", "yay");
+    }
+    void changedStateCheck() override {
+        fprintf(stderr, "changed state check %s\n", "yay");
+        for (auto checker : m_changed_checkers) {
+            checker();
+        }
+        fprintf(stderr, "done with changed state check %s\n", "yay");
+    }
+
+    void doCheckedSnapshot() override {
+        fprintf(stderr, "Starting snapshot %s\n", "yay");
+        if (m_default_checkers.size() == 0 || m_changed_checkers.size() == 0) {
+            ADD_FAILURE() << "Snapshot test was not given any expected values "
+                             "to assert.";
+        }
+        SnapshotPreserveTest::doCheckedSnapshot();
+    }
+
+protected:
+    GlobalCheckerList m_default_checkers;
+    GlobalCheckerList m_changed_checkers;
+};
+
+/* TEST_HOPEFUL(SnapshotChangeGlobalsTest<>) {
+    // specify getvalues
+    // getFunctionv, GL_ENUM, size, defaultexpect, changedexpect
+    // getFunctionv, GL_ENUM, size, defaultexpect, changedexpect
+
+    // ... but size and function come free with GL_ENUM after a lookup.
+    // at some point we will have to specify the defaults for everything too
+    // but let's delay that for now
+
+    // specify statechange
+    // lambda( glfunction with params )
+}
+*/
+
+}  // namespace snapshottest
 }  // namespace emugl

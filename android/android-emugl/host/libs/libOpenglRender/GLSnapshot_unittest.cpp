@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 namespace emugl {
+namespace snapshottest {
 
 TEST_F(SnapshotTest, InitDestroy) {}
 
@@ -59,4 +60,5 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotCapability,
                         SnapshotGlDisableTest,
                         ::testing::ValuesIn(kGLES2CanBeDisabled));
 
+}  // namespace snapshottest
 }  // namespace emugl

@@ -32,6 +32,7 @@
 #include <memory>
 
 namespace emugl {
+namespace snapshottest {
 
 using android::base::LazyInstance;
 using android::base::StdioStream;
@@ -141,4 +142,5 @@ void SnapshotPreserveTest::doCheckedSnapshot() {
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
 }
 
+}  // namespace snapshottest
 }  // namespace emugl
