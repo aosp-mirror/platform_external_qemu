@@ -721,6 +721,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         m_subWin = ::createSubWindow(p_window, m_x, m_y, m_windowWidth,
                                      m_windowHeight, subWindowRepaint, this);
         if (m_subWin) {
+            fprintf(stderr, "%s: created sub window, hehe\n", __func__);
             m_nativeWindow = p_window;
 
             // create EGLSurface from the generated subwindow
@@ -738,6 +739,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 
                 success = true;
             }
+        } else {
+            fprintf(stderr, "%s: non success\n", __func__);
         }
     }
 
