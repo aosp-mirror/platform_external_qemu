@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a666bfa3_fcd5a8cb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotShaders_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-19T03:11:06Z",
+      "side": 1,
+      "message": "You can use raw strings R\"(....)\"; to avoid putting many \" and \\n",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 0
+      },
+      "revId": "f420079b1ea90d621ba728ffa412a364f0a2261a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9426ed0a_8ce1cd89",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotShaders_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-19T03:11:06Z",
+      "side": 1,
+      "message": "Yeah, according to the spec, GL_SHADER_SOURCE_LENGTH should include the null terminator.",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 60
+      },
+      "revId": "f420079b1ea90d621ba728ffa412a364f0a2261a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
