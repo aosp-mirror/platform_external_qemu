@@ -12,8 +12,11 @@ PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
     mBindSubwin(cb) {}
 
 void PostWorker::post(ColorBuffer* cb) {
+    fprintf(stderr, "%s: call\n", __func__);
+    mBindSubwin();
     // bind the subwindow eglSurface
     if (!m_initialized) {
+        fprintf(stderr, "%s: bind subwindow egl surface\n", __func__);
         m_initialized = mBindSubwin();
     }
 
@@ -49,6 +52,7 @@ void PostWorker::post(ColorBuffer* cb) {
 // when the refresh is a display change, for instance)
 // and resets the posting viewport.
 void PostWorker::viewport(int width, int height) {
+    fprintf(stderr, "%s: call w h %d %d\n", __func__, width, height);
     // rebind the subwindow eglSurface unconditionally---
     // this could be from a display change
     m_initialized = mBindSubwin();

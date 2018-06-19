@@ -17,6 +17,8 @@
 #include "android/base/system/System.h"
 #include "android/base/memory/LazyInstance.h"
 
+#include "emugl/common/misc.h"
+
 using android::base::LazyInstance;
 using android::base::System;
 
@@ -61,7 +63,16 @@ public:
 static LazyInstance<TestWindow> sTestWindow = LAZY_INSTANCE_INIT;
 
 bool shouldUseHostGpu() {
-    return System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
+    // Also set the global emugl renderer accordingly.
+    bool useHost = System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
+
+    if (useHost) {
+        emugl::setRenderer(SELECTED_RENDERER_HOST);
+    } else {
+        emugl::setRenderer(SELECTED_RENDERER_SWIFTSHADER_INDIRECT);
+    }
+
+    return useHost;
 }
 
 OSWindow* createOrGetTestWindow(int xoffset, int yoffset, int width, int height) {

@@ -739,6 +739,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         m_subWin = ::createSubWindow(p_window, m_x, m_y, m_windowWidth,
                                      m_windowHeight, subWindowRepaint, this);
         if (m_subWin) {
+            fprintf(stderr, "%s: success\n", __func__);
             m_nativeWindow = p_window;
 
             // create EGLSurface from the generated subwindow
@@ -751,6 +752,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 destroySubWindow(m_subWin);
                 m_subWin = (EGLNativeWindowType)0;
             } else {
+                fprintf(stderr, "%s: 2222222222success\n", __func__);
                 m_px = 0;
                 m_py = 0;
 
@@ -780,6 +782,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         }
 
         if (success && redrawSubwindow) {
+            fprintf(stderr, "%s: redraw\n", __func__);
             // Subwin creation or movement was successful,
             // update viewport and z rotation and draw
             // the last posted color buffer.
