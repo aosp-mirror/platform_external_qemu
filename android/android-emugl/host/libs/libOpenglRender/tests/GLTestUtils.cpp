@@ -81,6 +81,12 @@ TestTexture createTestPatternRGBA8888(int width, int height) {
     return res;
 }
 
+static float clamp(float x, float low, float high) {
+    if (x < low) return low;
+    if (x > high) return high;
+    return x;
+}
+
 TestTexture createTestTextureRGB888SingleColor(int width, int height, float r, float g, float b) {
     int bpp = 3;
 
@@ -88,9 +94,9 @@ TestTexture createTestTextureRGB888SingleColor(int width, int height, float r, f
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            res[i * bpp * width + j * bpp + 0] = r * 255.0f;
-            res[i * bpp * width + j * bpp + 1] = g * 255.0f;
-            res[i * bpp * width + j * bpp + 2] = b * 255.0f;
+            res[i * bpp * width + j * bpp + 0] = clamp(r, 0.0f, 1.0f) * 255.0f;
+            res[i * bpp * width + j * bpp + 1] = clamp(g, 0.0f, 1.0f) * 255.0f;
+            res[i * bpp * width + j * bpp + 2] = clamp(b, 0.0f, 1.0f) * 255.0f;
         }
     }
 
@@ -104,10 +110,10 @@ TestTexture createTestTextureRGBA8888SingleColor(int width, int height, float r,
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            res[i * bpp * width + j * bpp + 0] = r * 255.0f;
-            res[i * bpp * width + j * bpp + 1] = g * 255.0f;
-            res[i * bpp * width + j * bpp + 2] = b * 255.0f;
-            res[i * bpp * width + j * bpp + 3] = a * 255.0f;
+            res[i * bpp * width + j * bpp + 0] = clamp(r, 0.0f, 1.0f) * 255.0f;
+            res[i * bpp * width + j * bpp + 1] = clamp(g, 0.0f, 1.0f) * 255.0f;
+            res[i * bpp * width + j * bpp + 2] = clamp(b, 0.0f, 1.0f) * 255.0f;
+            res[i * bpp * width + j * bpp + 3] = clamp(a, 0.0f, 1.0f) * 255.0f;
         }
     }
 

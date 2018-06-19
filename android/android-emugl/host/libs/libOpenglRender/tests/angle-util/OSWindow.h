@@ -41,6 +41,10 @@ class OSWindow
 
     virtual void* getFramebufferNativeWindow() const = 0;
 
+    virtual float getDevicePixelRatio() const {
+        return 1.0f;
+    }
+
     virtual void messageLoop() = 0;
 
     bool popEvent(Event *event);
