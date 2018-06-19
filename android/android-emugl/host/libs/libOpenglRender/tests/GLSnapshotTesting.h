@@ -30,21 +30,18 @@ struct GlSampleCoverage {
     GLclampf value;
     GLboolean invert;
 };
-using GlSampleCoverage = struct GlSampleCoverage;
 
 struct GlStencilFunc {
     GLenum func;
     GLint ref;
     GLuint mask;
 };
-using GlStencilFunc = struct GlStencilFunc;
 
 struct GlStencilOp {
     GLenum sfail;
     GLenum dpfail;
     GLenum dppass;
 };
-using GlStencilOp = struct GlStencilOp;
 
 // Capabilities which, according to the GLES2 spec, start disabled.
 static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
@@ -75,6 +72,24 @@ static const GLenum kGLES2StencilOps[] = {GL_KEEP,      GL_ZERO,     GL_REPLACE,
                                           GL_INCR,      GL_DECR,     GL_INVERT,
                                           GL_INCR_WRAP, GL_DECR_WRAP};
 
+// SnapshotTest - A helper class for performing a test related to saving or
+// loading GL translator snapshots. As a test fixture, its setup will prepare a
+// fresh GL state and paths for temporary snapshot files.
+//
+// doSnapshot saves a snapshot, clears the GL state, then loads the snapshot.
+// saveSnapshot and loadSnapshot can be used to perform saves and loads
+// independently.
+//
+// Usage example:
+//     TEST_F(SnapshotTest, PreserveFooBar) {
+//         // clean GL state is ready
+//         EXPECT_TRUE(fooBarState());
+//         modifyGlStateFooBar();
+//         EXPECT_FALSE(fooBarState());  // GL state has been changed
+//         doSnapshot(); // saves, resets, and reloads the state
+//         EXPECT_FALSE(fooBarState());  // Snapshot preserved the state change
+//     }
+//
 class SnapshotTest : public gltest::GLTest {
 public:
     SnapshotTest()
@@ -112,8 +127,32 @@ protected:
     std::string mSnapshotPath = {};
 };
 
-// Abstract, for granular testing of snapshot's ability to preserve parts of GL
-// state.
+// SnapshotPreserveTest - A helper class building on SnapshotTest for granular
+// testing of the GL snapshot. This is specifically for the common case where a
+// piece of GL state has a known default, and our test aims to verify that the
+// snapshot preserves this piece of state when it has been changed from the
+// default.
+//
+// This acts as an abstract class; implementations should override the state
+// check state change functions to perform the assertions and operations
+// relevant to the part of GL state that they are testing.
+// doCheckedSnapshot can be but does not need to be overwritten. It performs the
+// following:
+//      - check for default state
+//      - make state changes, check that the state changes are in effect
+//      - save a snapshot, reset the GL state, then check for default state
+//      - load the snapshot, check that the state changes are in effect again
+//
+// Usage example with a subclass:
+//     class SnapshotEnableFooTest : public SnapshotPreserveTest {
+//         void defaultStateCheck() override { EXPECT_FALSE(isFooEnabled()); }
+//         void changedStateCheck() override { EXPECT_TRUE(isFooEnabled());  }
+//         void stateChange() override { enableFoo(); }
+//     };
+//     TEST_F(SnapshotEnableFooTest, PreserveFooEnable) {
+//         doCheckedSnapshot();
+//     }
+//
 class SnapshotPreserveTest : public SnapshotTest {
 public:
     // Asserts that we are working from a clean starting state.
@@ -136,9 +175,23 @@ public:
     virtual void doCheckedSnapshot();
 };
 
-// For testing preservation of pieces of GL state that can be checked via
-// comparison(s) which are the same for both a known default and after
-// predictable changes.
+// SnapshotSetValueTest - A helper class for testing preservation of pieces of
+// GL state where default and changed state checks are comparisons against the
+// same type of expected reference value.
+//
+// The expected |m_default_value| and |m_changed_value| should be set before
+// a checked snapshot is attempted.
+//
+// Usage example with a subclass:
+//     class SnapshotSetFooTest : public SnapshotSetValueTest<Foo> {
+//         void stateCheck(Foo expected) { EXPECT_EQ(expected, getFoo()); }
+//         void stateChange() override { setFoo(*m_changed_value); }
+//     };
+//     TEST_F(SnapshotSetFooTest, SetFooValue) {
+//         setExpectedValues(kFooDefaultValue, kFooTestValue);
+//         doCheckedSnapshot();
+//     }
+//
 template <class T>
 class SnapshotSetValueTest : public SnapshotPreserveTest {
 public:
