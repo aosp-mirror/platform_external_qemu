@@ -110,6 +110,7 @@ LOCAL_SRC_FILES := \
     tests/GLSnapshotRasterization_unittest.cpp \
     tests/GLSnapshotMultisampling_unittest.cpp \
     tests/GLSnapshotPixelOperations_unittest.cpp \
+    tests/GLSnapshotShaders_unittest.cpp \
     tests/OpenGL_unittest.cpp \
     tests/OpenGLTestContext.cpp \
     tests/StalePtrRegistry_unittest.cpp \
