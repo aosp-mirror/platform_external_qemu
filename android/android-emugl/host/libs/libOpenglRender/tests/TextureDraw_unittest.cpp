@@ -14,24 +14,13 @@
 
 #include <gtest/gtest.h>
 
+#include "GLTestUtils.h"
 #include "OpenGLTestContext.h"
 #include "TextureDraw.h"
 
 namespace emugl {
 
 using namespace gltest;
-
-static testing::AssertionResult RowsMatch(unsigned char* expected,
-                                          unsigned char* actual, int rowIndex, size_t rowBytes) {
-    for (size_t i = 0; i < rowBytes; ++i) {
-        if (expected[i] != actual[i]) {
-            return testing::AssertionFailure() <<
-                       "row " << rowIndex << " byte " << i << " mismatch. expected: " <<
-                       "(" << expected[i] << "), actual: " << "(" << actual[i] << ")";
-        }
-    }
-    return testing::AssertionSuccess();
-}
 
 TEST_F(GLTest, TextureDrawBasic) {
     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
@@ -87,10 +76,9 @@ TEST_F(GLTest, TextureDrawBasic) {
     // Check that the texture is drawn upside down (because that's what SurfaceFlinger wants)
     for (int i = 0; i < height; i++) {
         size_t rowBytes = width * bpp;
-        EXPECT_TRUE(RowsMatch(pixels.data() + i * rowBytes,
-                              pixelsOut.data() + (height - i - 1) * rowBytes,
-                              i,
-                              width * bpp));
+        EXPECT_TRUE(RowMatches(i, width * bpp,
+                               pixels.data() + i * rowBytes,
+                               pixelsOut.data() + (height - i - 1) * rowBytes));
     }
 }
 
