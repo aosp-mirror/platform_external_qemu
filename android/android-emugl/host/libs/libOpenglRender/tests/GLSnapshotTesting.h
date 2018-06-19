@@ -30,21 +30,18 @@ struct GlSampleCoverage {
     GLclampf value;
     GLboolean invert;
 };
-using GlSampleCoverage = struct GlSampleCoverage;
 
 struct GlStencilFunc {
     GLenum func;
     GLint ref;
     GLuint mask;
 };
-using GlStencilFunc = struct GlStencilFunc;
 
 struct GlStencilOp {
     GLenum sfail;
     GLenum dpfail;
     GLenum dppass;
 };
-using GlStencilOp = struct GlStencilOp;
 
 // Capabilities which, according to the GLES2 spec, start disabled.
 static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
