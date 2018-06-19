@@ -69,9 +69,17 @@ public:
 
     virtual void stateChange() override {
         m_shader_name = gl->glCreateShader(m_shader_state.type);
+        m_shader_state_changer();
     }
 
     void loadSource(std::string sourceString) {
+        GLboolean compiler;
+        gl->glGetBooleanv(GL_SHADER_COMPILER, &compiler);
+        if (compiler == GL_FALSE) {
+            fprintf(stderr, "Shader compiler is not supported.\n");
+            return;
+        }
+
         if (m_shader_name == 0) {
             ADD_FAILURE() << "Cannot set source without a shader name";
         }
@@ -88,6 +96,30 @@ public:
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
     }
 
+    void compile(GLboolean expectCompileStatus = GL_TRUE) {
+        GLboolean compiler;
+        gl->glGetBooleanv(GL_SHADER_COMPILER, &compiler);
+        if (compiler == GL_FALSE) {
+            fprintf(stderr, "Shader compiler is not supported.\n");
+            return;
+        }
+
+        if (m_shader_name == 0) {
+            ADD_FAILURE() << "Cannot compile shader without a shader name";
+        }
+        if (m_shader_state.source.length() == 0) {
+            ADD_FAILURE() << "Shader needs source to compile";
+        }
+        gl->glCompileShader(m_shader_name);
+        m_shader_state.compileStatus = expectCompileStatus;
+    }
+
+    // Supply a lambda as |changer| to perform additional state setup after the
+    // shader has been created but before the snapshot is performed.
+    void setShaderStateChanger(std::function<void()> changer) {
+        m_shader_state_changer = changer;
+    }
+
 protected:
     void checkParameter(GLenum paramName, GLenum expected) {
         GLint value;
@@ -98,6 +130,7 @@ protected:
 
     GLShaderState m_shader_state = {};
     GLuint m_shader_name;
+    std::function<void()> m_shader_state_changer = [] {};
 };
 
 class SnapshotGlVertexShaderTest : public SnapshotGlShaderTest {
@@ -109,15 +142,17 @@ TEST_F(SnapshotGlVertexShaderTest, CreateVertexShader) {
     doCheckedSnapshot();
 }
 
-class SnapshotGlLoadVertexShaderTest : public SnapshotGlVertexShaderTest {
-public:
-    void stateChange() override {
-        SnapshotGlVertexShaderTest::stateChange();
-        loadSource(std::string(kTestVertexShaderSource));
-    }
-};
+TEST_F(SnapshotGlVertexShaderTest, SetVertexShaderSource) {
+    setShaderStateChanger(
+            [this] { loadSource(std::string(kTestVertexShaderSource)); });
+    doCheckedSnapshot();
+}
 
-TEST_F(SnapshotGlLoadVertexShaderTest, SetVertexShaderSource) {
+TEST_F(SnapshotGlVertexShaderTest, CompileVertexShader) {
+    setShaderStateChanger([this] {
+        loadSource(std::string(kTestVertexShaderSource));
+        compile();
+    });
     doCheckedSnapshot();
 }
 
@@ -130,15 +165,17 @@ TEST_F(SnapshotGlFragmentShaderTest, CreateFragmentShader) {
     doCheckedSnapshot();
 }
 
-class SnapshotGlLoadFragmentShaderTest : public SnapshotGlFragmentShaderTest {
-public:
-    void stateChange() override {
-        SnapshotGlFragmentShaderTest::stateChange();
-        loadSource(std::string(kTestFragmentShaderSource));
-    }
-};
+TEST_F(SnapshotGlFragmentShaderTest, SetFragmentShaderSource) {
+    setShaderStateChanger(
+            [this] { loadSource(std::string(kTestFragmentShaderSource)); });
+    doCheckedSnapshot();
+}
 
-TEST_F(SnapshotGlLoadFragmentShaderTest, SetFragmentShaderSource) {
+TEST_F(SnapshotGlFragmentShaderTest, CompileFragmentShader) {
+    setShaderStateChanger([this] {
+        loadSource(std::string(kTestFragmentShaderSource));
+        compile();
+    });
     doCheckedSnapshot();
 }
 
