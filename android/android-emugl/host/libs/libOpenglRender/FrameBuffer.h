@@ -548,6 +548,7 @@ private:
         Post = 0,
         Viewport = 1,
         Clear = 2,
+        Exit = 3,
     };
 
     struct Post {

@@ -572,10 +572,19 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
 FrameBuffer::~FrameBuffer() {
     finalize();
 
+    if (m_postThread.isStarted()) {
+        m_postThread.enqueue({ PostCmd::Exit, });
+    }
+
     delete m_textureDraw;
     delete m_configs;
     delete m_colorBufferHelper;
     free(m_fbImage);
+
+    if (s_theFrameBuffer) {
+        s_theFrameBuffer = nullptr;
+    }
+    sInitialized.store(false, std::memory_order_relaxed);
 }
 
 WorkerProcessingResult
@@ -607,6 +616,8 @@ FrameBuffer::postWorkerFunc(const Post& post) {
         case PostCmd::Clear:
             m_postWorker->clear();
             break;
+        case PostCmd::Exit:
+            return WorkerProcessingResult::Stop;
         default:
             break;
     }
