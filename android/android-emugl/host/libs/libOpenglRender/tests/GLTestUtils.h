@@ -13,11 +13,17 @@
 // limitations under the License.
 #pragma once
 
-#include <gtest/gtest.h>
+#include "android/base/AlignedBuf.h"
 
 #include "render_api_platform_types.h"
 
+#include <GLES3/gl31.h>
+
+#include <gtest/gtest.h>
+
 namespace gltest {
+
+using TestTexture = android::AlignedBuf<uint8_t, 4>;
 
 testing::AssertionResult RowMatches(int rowIndex, size_t rowBytes,
                                     unsigned char* expected, unsigned char* actual);
@@ -27,5 +33,14 @@ testing::AssertionResult ImageMatches(int width, int height, int bpp, int rowLen
 
 
 FBNativeWindowType createTestNativeWindow(int x, int y, int width, int height, int dpr);
+
+// Creates an asymmetric test pattern with various formats.
+TestTexture createTestPatternRGB888(int width, int height);
+TestTexture createTestPatternRGBA8888(int width, int height);
+
+// Creates a test pattern of the specified color.
+TestTexture createTestTextureRGB888SingleColor(int width, int height, float r, float g, float b);
+TestTexture createTestTextureRGBA8888SingleColor(int width, int height, float r, float g, float b, float a);
+
 
 } // namespace gltest
