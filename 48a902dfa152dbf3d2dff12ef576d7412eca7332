@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "67ec0489_2a950380",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLTestUtils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-19T18:40:21Z",
+      "side": 1,
+      "message": "this looks confusing to me. converting float to byte?",
+      "range": {
+        "startLine": 91,
+        "startChar": 49,
+        "endLine": 91,
+        "endChar": 60
+      },
+      "revId": "48a902dfa152dbf3d2dff12ef576d7412eca7332",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
