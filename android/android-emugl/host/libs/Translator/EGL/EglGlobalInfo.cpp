@@ -33,9 +33,12 @@ emugl::LazyInstance<EglGlobalInfo> sSingleton = LAZY_INSTANCE_INIT;
 
 void EglGlobalInfo::setEgl2Egl(EGLBoolean enable) {
     if (sSingleton.hasInstance()) {
-        fprintf(stderr,
-                "WARNING: setting EGL engine type"
-                " after it is created, takes no effect.\n");
+        if (enable != isEgl2Egl()) {
+            fprintf(stderr,
+                    "WARNING: "
+                    "attempting to change whether underlying engine is EGL "
+                    "after it has been set!\n");
+        }
         return;
     }
     setGles2Gles(enable);
