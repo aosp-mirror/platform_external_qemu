@@ -29,6 +29,7 @@ struct GlVertexAttrib {
     GLboolean enabled;
     GLvoid* pointer;
     GlValues values;
+    GLuint bufferBinding;
 };
 
 static const GlVertexAttrib kGLES2DefaultVertexAttrib = {
@@ -38,7 +39,8 @@ static const GlVertexAttrib kGLES2DefaultVertexAttrib = {
         .stride = 0,
         .enabled = GL_FALSE,
         .pointer = nullptr,
-        .values = {.ints = {}, .floats = {0, 0, 0, 1}}};
+        .values = {.ints = {}, .floats = {0, 0, 0, 1}},
+        .bufferBinding = 0};
 
 static const GlVertexAttrib kTestVertexAttrib = {
         .size = 2,
@@ -47,7 +49,8 @@ static const GlVertexAttrib kTestVertexAttrib = {
         .stride = 8,
         .enabled = GL_TRUE,
         .pointer = nullptr,
-        .values = {.ints = {}, .floats = {.1, .3, .9, .5}}};
+        .values = {.ints = {}, .floats = {.1, .3, .9, .5}},
+        .bufferBinding = 0};
 
 class SnapshotGlVertexAttributesTest
     : public SnapshotSetValueTest<GlVertexAttrib> {
@@ -61,6 +64,8 @@ public:
         checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_STRIDE, &expected.stride);
         checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_ENABLED,
                           (GLint*)&expected.enabled);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING,
+                          (GLint*)&expected.bufferBinding);
 
         GLvoid* pointer;
         gl->glGetVertexAttribPointerv(m_index, GL_VERTEX_ATTRIB_ARRAY_POINTER,
@@ -99,6 +104,15 @@ public:
     void stateChange() override {
         // set parameters
         GlVertexAttrib changed = *m_changed_value;
+
+        if (changed.bufferBinding != 0) {
+            // TODO(benzene): set up buffer if needs binding
+            // This needs to be done before the call to glVertexAttribPointer,
+            // which will copy ARRAY_BUFFER_BINDING into the attrib's binding
+            ADD_FAILURE() << "testing buffer binding for vertex attributes not "
+                             "implemented yet";
+        }
+
         gl->glVertexAttribPointer(m_index, changed.size, changed.type,
                                   changed.normalized, changed.stride,
                                   changed.pointer);
