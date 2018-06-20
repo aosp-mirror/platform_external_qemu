@@ -796,6 +796,7 @@ LOCAL_SRC_FILES := \
   android/utils/dns_unittest.cpp \
   android/utils/eintr_wrapper_unittest.cpp \
   android/utils/file_data_unittest.cpp \
+  android/utils/filelock_unittest.cpp \
   android/utils/format_unittest.cpp \
   android/utils/host_bitness_unittest.cpp \
   android/utils/path_unittest.cpp \
