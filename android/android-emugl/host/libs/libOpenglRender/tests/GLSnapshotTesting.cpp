@@ -38,7 +38,7 @@ using android::base::StdioStream;
 using android::snapshot::TextureLoader;
 using android::snapshot::TextureSaver;
 
-using namespace gltest;
+using namespace emugl;
 
 void SnapshotTest::SetUp() {
     GLTest::SetUp();
@@ -93,8 +93,8 @@ void SnapshotTest::loadSnapshot(const std::string streamFile,
 
     m_context = egl->eglLoadContext(m_display, &contextAttribs[0], egl_stream);
     m_config = egl->eglLoadConfig(m_display, egl_stream);
-    m_surface = pbufferSurface(m_display, m_config, kSurfaceSize[0],
-                               kSurfaceSize[0]);
+    m_surface = pbufferSurface(m_display, m_config, kTestSurfaceSize[0],
+                               kTestSurfaceSize[0]);
     egl->eglPostLoadAllImages(m_display, egl_stream);
 
     m_stream->close();

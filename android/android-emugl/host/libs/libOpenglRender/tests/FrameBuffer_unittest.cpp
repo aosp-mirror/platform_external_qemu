@@ -14,22 +14,14 @@
 
 #include <gtest/gtest.h>
 
-#include "FrameBuffer.h"
-
 #include "android/base/system/System.h"
 
-#include "RenderThreadInfo.h"
-
-#include "GLTestGlobals.h"
+#include "Standalone.h"
 #include "GLTestUtils.h"
-#include "OpenGLTestContext.h"
-#include "OSWindow.h"
 
 using android::base::System;
 
 namespace emugl {
-
-using namespace gltest;
 
 class FrameBufferTest : public ::testing::Test {
 protected:
