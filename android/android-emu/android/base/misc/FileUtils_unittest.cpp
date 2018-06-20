@@ -56,4 +56,33 @@ TEST(FileUtils, stringToFile) {
     tempfile_close(tf);
 }
 
+// Tests readFileIntoString
+TEST(FileUtils, fileToString) {
+    const int bytesToTest = 100;
+
+    std::vector<uint8_t> testPattern;
+
+    for (int i = 0; i < bytesToTest; i++) {
+        testPattern.push_back(i % 3 == 0 ? 0x0 : 0x1a);
+    }
+
+    TempFile* tf = tempfile_create();
+
+    ScopedFd fd(HANDLE_EINTR(open(tempfile_path(tf), O_RDWR, 0600)));
+    EXPECT_NE(-1, fd.get());
+
+    HANDLE_EINTR(write(fd.get(), testPattern.data(), bytesToTest));
+
+    fd.close();
+
+    const auto testOutput = readFileIntoString(tempfile_path(tf));
+
+    EXPECT_TRUE(testOutput);
+    EXPECT_EQ(bytesToTest, testOutput->size());
+
+    for (int i = 0; i < bytesToTest; i++) {
+        EXPECT_EQ((char)testPattern[i], (char)testOutput->at(i));
+    }
+}
+
 }  // namespace android
