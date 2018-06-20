@@ -12,7 +12,8 @@
 #include "qemu/osdep.h"
 #include "qemu/hbitmap.h"
 #include "qemu/host-utils.h"
-#include "util/trace.h"
+#include "trace.h"
+#include "crypto/hash.h"
 
 /* HBitmaps provides an array of bits.  The bits are stored as usual in an
  * array of unsigned longs, but HBitmap is also optimized to provide fast
@@ -106,8 +107,9 @@ unsigned long hbitmap_iter_skip_words(HBitmapIter *hbi)
 
     unsigned long cur;
     do {
-        cur = hbi->cur[--i];
+        i--;
         pos >>= BITS_PER_LEVEL;
+        cur = hbi->cur[i] & hb->levels[i][pos];
     } while (cur == 0);
 
     /* Check for end of iteration.  We always use fewer than BITS_PER_LONG
@@ -139,6 +141,26 @@ unsigned long hbitmap_iter_skip_words(HBitmapIter *hbi)
     return cur;
 }
 
+int64_t hbitmap_iter_next(HBitmapIter *hbi)
+{
+    unsigned long cur = hbi->cur[HBITMAP_LEVELS - 1] &
+            hbi->hb->levels[HBITMAP_LEVELS - 1][hbi->pos];
+    int64_t item;
+
+    if (cur == 0) {
+        cur = hbitmap_iter_skip_words(hbi);
+        if (cur == 0) {
+            return -1;
+        }
+    }
+
+    /* The next call will resume work from the next bit.  */
+    hbi->cur[HBITMAP_LEVELS - 1] = cur & (cur - 1);
+    item = ((uint64_t)hbi->pos << BITS_PER_LEVEL) + ctzl(cur);
+
+    return item << hbi->granularity;
+}
+
 void hbitmap_iter_init(HBitmapIter *hbi, const HBitmap *hb, uint64_t first)
 {
     unsigned i, bit;
@@ -164,6 +186,45 @@ void hbitmap_iter_init(HBitmapIter *hbi, const HBitmap *hb, uint64_t first)
             hbi->cur[i] &= ~(1UL << bit);
         }
     }
+}
+
+int64_t hbitmap_next_zero(const HBitmap *hb, uint64_t start)
+{
+    size_t pos = (start >> hb->granularity) >> BITS_PER_LEVEL;
+    unsigned long *last_lev = hb->levels[HBITMAP_LEVELS - 1];
+    uint64_t sz = hb->sizes[HBITMAP_LEVELS - 1];
+    unsigned long cur = last_lev[pos];
+    unsigned start_bit_offset =
+            (start >> hb->granularity) & (BITS_PER_LONG - 1);
+    int64_t res;
+
+    cur |= (1UL << start_bit_offset) - 1;
+    assert((start >> hb->granularity) < hb->size);
+
+    if (cur == (unsigned long)-1) {
+        do {
+            pos++;
+        } while (pos < sz && last_lev[pos] == (unsigned long)-1);
+
+        if (pos >= sz) {
+            return -1;
+        }
+
+        cur = last_lev[pos];
+    }
+
+    res = (pos << BITS_PER_LEVEL) + ctol(cur);
+    if (res >= hb->size) {
+        return -1;
+    }
+
+    res = res << hb->granularity;
+    if (res < start) {
+        assert(((start - res) >> hb->granularity) == 0);
+        return start;
+    }
+
+    return res;
 }
 
 bool hbitmap_empty(const HBitmap *hb)
@@ -391,14 +452,14 @@ bool hbitmap_is_serializable(const HBitmap *hb)
 {
     /* Every serialized chunk must be aligned to 64 bits so that endianness
      * requirements can be fulfilled on both 64 bit and 32 bit hosts.
-     * We have hbitmap_serialization_granularity() which converts this
+     * We have hbitmap_serialization_align() which converts this
      * alignment requirement from bitmap bits to items covered (e.g. sectors).
      * That value is:
      *    64 << hb->granularity
      * Since this value must not exceed UINT64_MAX, hb->granularity must be
      * less than 58 (== 64 - 6, where 6 is ld(64), i.e. 1 << 6 == 64).
      *
-     * In order for hbitmap_serialization_granularity() to always return a
+     * In order for hbitmap_serialization_align() to always return a
      * meaningful value, bitmaps that are to be serialized must have a
      * granularity of less than 58. */
 
@@ -415,7 +476,7 @@ bool hbitmap_get(const HBitmap *hb, uint64_t item)
     return (hb->levels[HBITMAP_LEVELS - 1][pos >> BITS_PER_LEVEL] & bit) != 0;
 }
 
-uint64_t hbitmap_serialization_granularity(const HBitmap *hb)
+uint64_t hbitmap_serialization_align(const HBitmap *hb)
 {
     assert(hbitmap_is_serializable(hb));
 
@@ -432,7 +493,7 @@ static void serialization_chunk(const HBitmap *hb,
                                 unsigned long **first_el, uint64_t *el_count)
 {
     uint64_t last = start + count - 1;
-    uint64_t gran = hbitmap_serialization_granularity(hb);
+    uint64_t gran = hbitmap_serialization_align(hb);
 
     assert((start & (gran - 1)) == 0);
     assert((last >> hb->granularity) < hb->size);
@@ -530,6 +591,23 @@ void hbitmap_deserialize_zeroes(HBitmap *hb, uint64_t start, uint64_t count,
     }
 }
 
+void hbitmap_deserialize_ones(HBitmap *hb, uint64_t start, uint64_t count,
+                              bool finish)
+{
+    uint64_t el_count;
+    unsigned long *first;
+
+    if (!count) {
+        return;
+    }
+    serialization_chunk(hb, start, count, &first, &el_count);
+
+    memset(first, 0xff, el_count * sizeof(unsigned long));
+    if (finish) {
+        hbitmap_deserialize_finish(hb);
+    }
+}
+
 void hbitmap_deserialize_finish(HBitmap *bitmap)
 {
     int64_t i, size, prev_size;
@@ -552,6 +630,7 @@ void hbitmap_deserialize_finish(HBitmap *bitmap)
     }
 
     bitmap->levels[0][0] |= 1UL << (BITS_PER_LONG - 1);
+    bitmap->count = hb_count_between(bitmap, 0, bitmap->size - 1);
 }
 
 void hbitmap_free(HBitmap *hb)
@@ -688,4 +767,14 @@ void hbitmap_free_meta(HBitmap *hb)
     assert(hb->meta);
     hbitmap_free(hb->meta);
     hb->meta = NULL;
+}
+
+char *hbitmap_sha256(const HBitmap *bitmap, Error **errp)
+{
+    size_t size = bitmap->sizes[HBITMAP_LEVELS - 1] * sizeof(unsigned long);
+    char *data = (char *)bitmap->levels[HBITMAP_LEVELS - 1];
+    char *hash = NULL;
+    qcrypto_hash_digest(QCRYPTO_HASH_ALG_SHA256, data, size, &hash, errp);
+
+    return hash;
 }

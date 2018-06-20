@@ -30,7 +30,6 @@
 #include "exec/ioport.h"
 
 #include "qemu-common.h"
-#include "strings.h"
 #include "hax-i386.h"
 #include "sysemu/accel.h"
 #include "sysemu/sysemu.h"
@@ -156,7 +155,7 @@ int hax_stop_emulation(CPUState * cpu)
          * Sync the vcpu state to HAX kernel module
          */
         hax_vcpu_sync_state(env, 1);
-        cpu->hax_vcpu_dirty = false;
+        cpu->vcpu_dirty = false;
         return 1;
     }
 
@@ -360,7 +359,7 @@ int hax_init_vcpu(CPUState *cpu)
 
     cpu->hax_vcpu = hax_global.vm->vcpus[cpu->cpu_index];
     cpu->hax_vcpu->emulation_state = HAX_EMULATE_STATE_INITIAL;
-    cpu->hax_vcpu_dirty = true;
+    cpu->vcpu_dirty = true;
     qemu_register_reset(hax_reset_vcpu_state, (CPUArchState *) (cpu->env_ptr));
 
     return ret;
@@ -685,9 +684,9 @@ static int hax_vcpu_hax_exec(CPUArchState *env, int ug_platform)
 
 vcpu_run:
     do {
-        if (cpu->hax_vcpu_dirty) {
+        if (cpu->vcpu_dirty) {
             hax_vcpu_sync_state(env, 1);
-            cpu->hax_vcpu_dirty = false;
+            cpu->vcpu_dirty = false;
         }
 
         int hax_ret;
@@ -703,7 +702,9 @@ vcpu_run:
             hax_ret = hax_vcpu_run(vcpu);
         } else {
             qemu_mutex_unlock_iothread();
+            cpu_exec_start(cpu);
             hax_ret = hax_vcpu_run(vcpu);
+            cpu_exec_end(cpu);
             qemu_mutex_lock_iothread();
             current_cpu = cpu;
         }
@@ -730,14 +731,14 @@ vcpu_run:
         /* Guest state changed, currently only for shutdown */
         case HAX_EXIT_STATECHANGE:
             fprintf(stdout, "VCPU shutdown request\n");
-            qemu_system_shutdown_request();
+            qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
             hax_vcpu_sync_state(env, 0);
             ret = HAX_EMUL_EXITLOOP;
             break;
         case HAX_EXIT_UNKNOWN_VMEXIT:
             fprintf(stderr, "Unknown VMX exit %x from guest\n",
                     ht->_exit_reason);
-            qemu_system_reset_request();
+            qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
             hax_vcpu_sync_state(env, 0);
             cpu_dump_state(cpu, stderr, fprintf, 0);
             ret = -1;
@@ -777,7 +778,7 @@ vcpu_run:
         }
         default:
             fprintf(stderr, "Unknown exit %x from HAX\n", ht->_exit_status);
-            qemu_system_reset_request();
+            qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
             hax_vcpu_sync_state(env, 0);
             cpu_dump_state(cpu, stderr, fprintf, 0);
             ret = HAX_EMUL_EXITLOOP;
@@ -797,12 +798,12 @@ static void do_hax_cpu_synchronize_state(CPUState *cpu, run_on_cpu_data arg)
     CPUArchState *env = cpu->env_ptr;
 
     hax_arch_get_registers(env);
-    cpu->hax_vcpu_dirty = true;
+    cpu->vcpu_dirty = true;
 }
 
 void hax_cpu_synchronize_state(CPUState *cpu)
 {
-    if (!cpu->hax_vcpu_dirty) {
+    if (!cpu->vcpu_dirty) {
         run_on_cpu(cpu, do_hax_cpu_synchronize_state, RUN_ON_CPU_NULL);
     }
 }
@@ -813,7 +814,7 @@ static void do_hax_cpu_synchronize_post_reset(CPUState *cpu,
     CPUArchState *env = cpu->env_ptr;
 
     hax_vcpu_sync_state(env, 1);
-    cpu->hax_vcpu_dirty = false;
+    cpu->vcpu_dirty = false;
 }
 
 void hax_cpu_synchronize_post_reset(CPUState *cpu)
@@ -826,7 +827,7 @@ static void do_hax_cpu_synchronize_post_init(CPUState *cpu, run_on_cpu_data arg)
     CPUArchState *env = cpu->env_ptr;
 
     hax_vcpu_sync_state(env, 1);
-    cpu->hax_vcpu_dirty = false;
+    cpu->vcpu_dirty = false;
 }
 
 void hax_cpu_synchronize_post_init(CPUState *cpu)
@@ -868,6 +869,16 @@ int hax_vcpu_exec(CPUState * cpu)
     }
 
     return ret;
+}
+
+static void do_hax_cpu_synchronize_pre_loadvm(CPUState *cpu, run_on_cpu_data arg)
+{
+    cpu->vcpu_dirty = true;
+}
+
+void hax_cpu_synchronize_pre_loadvm(CPUState *cpu)
+{
+    run_on_cpu(cpu, do_hax_cpu_synchronize_pre_loadvm, RUN_ON_CPU_NULL);
 }
 
 int hax_smp_cpu_exec(CPUState *cpu)

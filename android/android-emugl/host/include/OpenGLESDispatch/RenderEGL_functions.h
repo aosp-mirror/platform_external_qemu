@@ -25,7 +25,6 @@
   X(EGLBoolean, eglMakeCurrent, (EGLDisplay display, EGLSurface draw, EGLSurface read, EGLContext context)) \
   X(EGLContext, eglGetCurrentContext, ()) \
   X(EGLSurface, eglGetCurrentSurface, (EGLint readdraw)) \
-  X(EGLBoolean, eglQuerySurface, (EGLDisplay display, EGLSurface surface, EGLint attribute, EGLint * value)) \
   X(EGLBoolean, eglSwapBuffers, (EGLDisplay display, EGLSurface surface)) \
   X(void*, eglGetProcAddress, (const char* function_name)) \
 

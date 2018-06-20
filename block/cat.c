@@ -16,11 +16,12 @@
 #include "block/block_int.h"
 #include "qemu/module.h"
 #include "qemu/bswap.h"
+#include "migration/misc.h"
 #include "migration/migration.h"
-#include "qapi/qmp/qint.h"
-#include "qapi/qmp/qbool.h"
 #include "qapi/qmp/qstring.h"
+#include "qapi/qmp/qdict.h"
 #include "qemu/cutils.h"
+
 
 #define MAX_BACKING_COUNT 32
 
@@ -214,9 +215,10 @@ static int cat_snapshot_create(BlockDriverState *bs, QEMUSnapshotInfo *sn_info)
 static int cat_snapshot_goto(BlockDriverState *bs, const char *snapshot_id)
 {
      BDRVCATState* s = bs->opaque;
+    Error *local_err = NULL;
      int i, ret;
      for (i = 0; i < s->count; i++) {
-         ret = bdrv_snapshot_goto(s->backings[i]->bs, snapshot_id);
+         ret = bdrv_snapshot_goto(s->backings[i]->bs, snapshot_id, &local_err);
          if (ret) return ret;
      }
      return 0;
