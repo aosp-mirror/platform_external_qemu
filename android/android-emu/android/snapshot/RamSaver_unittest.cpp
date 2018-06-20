@@ -40,12 +40,12 @@ protected:
 static void checkFileEqualToBuffer(const uint8_t* buffer,
                                    size_t size,
                                    StringView filename) {
-    const auto fileContents = android::readFileIntoString(filename);
+    const auto fileContents = android::readFileIntoVector(filename);
 
     EXPECT_TRUE(fileContents);
     EXPECT_LE(size, fileContents->size());
     for (size_t i = 0; i < size; i++) {
-        EXPECT_EQ((char)buffer[i], fileContents->at(i));
+        EXPECT_EQ(buffer[i], fileContents->at(i));
     }
 }
 

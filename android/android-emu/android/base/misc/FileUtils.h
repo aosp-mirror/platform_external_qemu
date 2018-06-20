@@ -14,7 +14,9 @@
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 
+#include <cinttypes>
 #include <string>
+#include <vector>
 
 namespace android {
 
@@ -22,8 +24,15 @@ namespace android {
 // Returns false if something went wrong
 bool readFileIntoString(int fd, std::string* file_contents);
 
+// Reads from |fd| into |file_contents|
+// Returns false if something went wrong
+bool readFileIntoVector(int fd, std::vector<uint8_t>* file_contents);
+
 // Reads |name| file
 base::Optional<std::string> readFileIntoString(base::StringView name);
+
+// Reads |name| file into a vector
+base::Optional<std::vector<uint8_t> > readFileIntoVector(base::StringView name);
 
 // Writes |file_contents| to |fd|
 // Returns false if something went wrong
