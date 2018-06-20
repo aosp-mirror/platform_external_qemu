@@ -1,5 +1,4 @@
-
-// Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,16 +13,12 @@
 // limitations under the License.
 #pragma once
 
+#include "FrameBuffer.h"
 #include "OSWindow.h"
+#include "RenderThreadInfo.h"
+#include "SampleApplication.h"
+#include "SearchPathsSetup.h"
+#include "ShaderUtils.h"
 
-namespace gltest {
-
-// Determines whether the host GPU should be used.
-bool shouldUseHostGpu();
-
-// Creates or adjusts the current test window.
-// On some systems, test window creation can fail (such as when on a headless server).
-// In that case, this function will return nullptr.
-OSWindow* createOrGetTestWindow(int xoffset, int yoffset, int width, int height);
-
-} // namespace gltest
+#include "emugl/common/misc.h"
+#include "emugl/common/OpenGLDispatchLoader.h"

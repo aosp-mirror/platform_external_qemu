@@ -19,10 +19,10 @@
 
 #include "emugl/common/OpenGLDispatchLoader.h"
 
-namespace gltest {
+namespace emugl {
 
 // Dimensions for test surface
-static const int kSurfaceSize[] = {32, 32};
+static const int kTestSurfaceSize[] = {32, 32};
 
 EGLDisplay getDisplay();
 EGLConfig createConfig(EGLDisplay dpy, EGLint r, EGLint g, EGLint b, EGLint a, EGLint d, EGLint s, EGLint ms);
@@ -44,4 +44,4 @@ protected:
     EGLContext m_context;
 };
 
-}  // namespace gltest
+}  // namespace emugl
