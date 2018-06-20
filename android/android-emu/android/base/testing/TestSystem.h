@@ -48,6 +48,8 @@ namespace base {
 //
 class TestSystem : public System {
 public:
+    using System::getEnvironmentVariable;
+
     TestSystem(StringView launcherDir,
                int hostBitness,
                StringView homeDir = "/home",

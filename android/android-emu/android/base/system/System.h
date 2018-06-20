@@ -225,10 +225,6 @@ public:
     // UTF-8 text string.
     virtual std::string envGet(StringView varname) const = 0;
 
-    // Static version that queries host environment variables
-    // regardless of being TestSystem.
-    static std::string getEnvironmentVariable(StringView varname);
-
     // Set the value of a given environment variable.
     // If |varvalue| is NULL or empty, this unsets the variable.
     // Equivalent to setenv().
@@ -463,6 +459,10 @@ protected:
     static Optional<Duration> pathModificationTimeInternal(StringView path);
     static Optional<DiskKind> diskKindInternal(StringView path);
     static Optional<DiskKind> diskKindInternal(int fd);
+
+    // Static version that queries host environment variables
+    // regardless of being TestSystem.
+    static std::string getEnvironmentVariable(StringView varname);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
