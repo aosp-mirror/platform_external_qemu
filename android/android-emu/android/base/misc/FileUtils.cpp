@@ -60,7 +60,8 @@ bool writeStringToFile(int fd, const std::string& file_contents) {
 base::Optional<std::string> readFileIntoString(base::StringView name) {
     std::ifstream is(name.isNullTerminated()
                              ? name.c_str()
-                             : std::string(name.data(), name.size()).c_str());
+                             : std::string(name.data(), name.size()).c_str(),
+                     std::ios_base::binary);
     if (!is) {
         return {};
     }
