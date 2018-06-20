@@ -95,7 +95,7 @@ static const GLenum kGLES2StencilOps[] = {GL_KEEP,      GL_ZERO,     GL_REPLACE,
 //         EXPECT_FALSE(fooBarState());  // Snapshot preserved the state change
 //     }
 //
-class SnapshotTest : public gltest::GLTest {
+class SnapshotTest : public emugl::GLTest {
 public:
     SnapshotTest()
         : mTestSystem(PATH_SEP "progdir",
