@@ -94,6 +94,30 @@
       "revId": "4f7361e43c3a977f2b6196ba8b4cba0225adc4e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3bc4763_c2244b5a",
+        "filename": "android/android-emu/android/base/misc/FileUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-20T17:18:39Z",
+      "side": 1,
+      "message": "The only thing that text-binary mode controls is the \\n-\\r\\n conversion. Text files are stored with \\r\\n as newlines, and binary files are stored as-is, without any modifications by the system.\nIn some old printer hardware one needed to send both \u0027line feed\u0027 and \u0027carriage return\u0027 command characters to move to a new line, and DOS (or even some predecessor) added this translation layer, where if one writes \\n into a text file it adds an \\r character there, so printing \u0027just works\u0027. Yep, that thing keeps haunting us ever since.\n\nReading/writing files in binary mode just forces Windows to stop messing around. It\u0027s also much faster as the OS doesn\u0027t need to check the stream\u0027s each character for the conversion purposes",
+      "parentUuid": "b02b3be4_9b88be9f",
+      "range": {
+        "startLine": 84,
+        "startChar": 21,
+        "endLine": 86,
+        "endChar": 67
+      },
+      "revId": "4f7361e43c3a977f2b6196ba8b4cba0225adc4e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
