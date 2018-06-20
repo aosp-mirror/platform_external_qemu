@@ -20,8 +20,6 @@
 
 namespace emugl {
 
-using namespace gltest;
-
 TEST_F(GLTest, TextureDrawBasic) {
     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
 
