@@ -10,6 +10,8 @@
 // GNU General Public License for more details.
 
 #include "android/base/misc/FileUtils.h"
+
+#include "android/base/files/ScopedFd.h"
 #include "android/utils/eintr_wrapper.h"
 
 #include <assert.h>
@@ -27,6 +29,8 @@
 #include <string>
 #include <utility>
 
+using android::base::ScopedFd;
+
 namespace android {
 
 bool readFileIntoString(int fd, std::string* file_contents) {
@@ -40,6 +44,25 @@ bool readFileIntoString(int fd, std::string* file_contents) {
     }
 
     std::string buf((size_t)size, '\0');
+    ssize_t result = HANDLE_EINTR(read(fd, &buf[0], size));
+    if (result != size) {
+        return false;
+    }
+    *file_contents = std::move(buf);
+    return true;
+}
+
+bool readFileIntoVector(int fd, std::vector<uint8_t>* file_contents) {
+    off_t size = lseek(fd, 0, SEEK_END);
+    if (size == (off_t)-1) {
+        return false;
+    }
+    off_t err = lseek(fd, 0, SEEK_SET);
+    if (err == (off_t)-1) {
+        return false;
+    }
+
+    std::vector<uint8_t> buf((size_t)size);
     ssize_t result = HANDLE_EINTR(read(fd, &buf[0], size));
     if (result != size) {
         return false;
@@ -69,6 +92,27 @@ base::Optional<std::string> readFileIntoString(base::StringView name) {
     ss << is.rdbuf();
     return ss.str();
 }
+
+base::Optional<std::vector<uint8_t> > readFileIntoVector(base::StringView name) {
+#ifdef _WIN32
+    int flags = O_RDONLY | O_BINARY;
+#else
+    int flags = O_RDONLY;
+#endif
+
+    ScopedFd fd(HANDLE_EINTR(open(name.c_str(), flags)));
+
+    if (fd.get() <= 0) return {};
+
+    std::vector<uint8_t> res;
+
+    if (!readFileIntoVector(fd.get(), &res)) {
+        return {};
+    }
+
+    return res;
+}
+
 
 bool setFileSize(int fd, int64_t size) {
 #ifdef _WIN32
