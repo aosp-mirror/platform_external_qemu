@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f02ef90_f9ad6b96",
+        "filename": "android/android-emu/android/base/misc/FileUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-20T16:09:11Z",
+      "side": 1,
+      "message": "the issue could be in these lseek() operations, as Win32\u0027s off_t is 4 bytes on x86\nOn the other hand, reading a file that\u0027s 2GB+ into memory isn\u0027t really a good idea anyway",
+      "range": {
+        "startLine": 37,
+        "startChar": 3,
+        "endLine": 44,
+        "endChar": 5
+      },
+      "revId": "c899921376aba360d640e68f65046091c0457b56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
