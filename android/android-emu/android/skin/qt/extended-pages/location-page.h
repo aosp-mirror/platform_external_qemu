@@ -41,6 +41,7 @@ public:
 signals:
     void locationUpdateRequired(double latitude, double longitude, double altitude);
     void populateNextGeoDataChunk();
+    void targetHeadingChanged(double heading);
 
 private slots:
     void on_loc_GpxKmlButton_clicked();
@@ -117,6 +118,8 @@ private:
     bool mNowLoadingGeoData = false;
     bool mLocationUsed = false;
     int mRowToSend;
+    double mPreviousLat = 0.0;
+    double mPreviousLon = 0.0;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     android::base::FunctorThread mUpdateThread;
     android::base::ConditionVariable mUpdateThreadCv;

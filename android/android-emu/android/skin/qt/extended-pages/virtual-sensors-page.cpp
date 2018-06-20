@@ -336,6 +336,18 @@ void VirtualSensorsPage::reportVirtualSensorsInteraction() {
     }
 }
 
+void VirtualSensorsPage::setTargetHeadingDegrees(double heading) {
+    while (heading > 180.0) {
+        heading -= 360.0;
+    }
+    while (heading <= -180.0) {
+        heading += 360.0;
+    }
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
+                               PHYSICAL_INTERPOLATION_STEP,
+                               -90.0, 0.0, -heading);
+}
+
 void VirtualSensorsPage::onTargetStateChanged() {
     emit updateTargetStateRequired();
 }
