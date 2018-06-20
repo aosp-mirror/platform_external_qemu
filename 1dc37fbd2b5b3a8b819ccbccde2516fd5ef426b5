@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94215503_3996bb88",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-20T18:34:53Z",
+      "side": 1,
+      "message": "please make it protected, so only TestSystem has access. Otherwise people may either start using it directly in production code, or at least get confused with what to call every time",
+      "range": {
+        "startLine": 230,
+        "startChar": 23,
+        "endLine": 230,
+        "endChar": 45
+      },
+      "revId": "1dc37fbd2b5b3a8b819ccbccde2516fd5ef426b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
