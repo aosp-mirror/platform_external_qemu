@@ -22,6 +22,30 @@
       "revId": "c899921376aba360d640e68f65046091c0457b56",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7c4bbee_587dd772",
+        "filename": "android/android-emu/android/base/misc/FileUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-20T16:43:55Z",
+      "side": 1,
+      "message": "The files I\u0027m working with are generally under 4096 bytes; looks like it is triggered sequences ending in 0x0, 0x1",
+      "parentUuid": "7f02ef90_f9ad6b96",
+      "range": {
+        "startLine": 37,
+        "startChar": 3,
+        "endLine": 44,
+        "endChar": 5
+      },
+      "revId": "c899921376aba360d640e68f65046091c0457b56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
