@@ -21,7 +21,11 @@
 #include "qemu/thread.h"
 #include "qemu/thread_local.h"
 #include "qemu/notify.h"
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #include "sysemu/sysemu.h"
+=======
+#include "trace.h"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 #include <process.h>
 
 static bool name_threads;
@@ -53,24 +57,49 @@ static void error_exit(int err, const char *msg)
 void qemu_mutex_init(QemuMutex *mutex)
 {
     InitializeSRWLock(&mutex->lock);
+    mutex->initialized = true;
 }
 
 void qemu_mutex_destroy(QemuMutex *mutex)
 {
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
+=======
+    assert(mutex->initialized);
+    mutex->initialized = false;
+    InitializeSRWLock(&mutex->lock);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 }
 
-void qemu_mutex_lock(QemuMutex *mutex)
+void qemu_mutex_lock_impl(QemuMutex *mutex, const char *file, const int line)
 {
+    assert(mutex->initialized);
+    trace_qemu_mutex_lock(mutex, file, line);
+
     AcquireSRWLockExclusive(&mutex->lock);
+    trace_qemu_mutex_locked(mutex, file, line);
 }
 
-int qemu_mutex_trylock(QemuMutex *mutex)
+int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
 {
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     return !TryAcquireSRWLockExclusive(&mutex->lock);
+=======
+    int owned;
+
+    assert(mutex->initialized);
+    owned = TryAcquireSRWLockExclusive(&mutex->lock);
+    if (owned) {
+        trace_qemu_mutex_locked(mutex, file, line);
+        return 0;
+    }
+    return -EBUSY;
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 }
 
-void qemu_mutex_unlock(QemuMutex *mutex)
+void qemu_mutex_unlock_impl(QemuMutex *mutex, const char *file, const int line)
 {
+    assert(mutex->initialized);
+    trace_qemu_mutex_unlock(mutex, file, line);
     ReleaseSRWLockExclusive(&mutex->lock);
 }
 
@@ -100,42 +129,100 @@ void qemu_cond_wait(QemuCond *cond, QemuMutex *mutex)
 void qemu_rec_mutex_init(QemuRecMutex *mutex)
 {
     InitializeCriticalSection(&mutex->lock);
+    mutex->initialized = true;
 }
 
 void qemu_rec_mutex_destroy(QemuRecMutex *mutex)
 {
+    assert(mutex->initialized);
+    mutex->initialized = false;
     DeleteCriticalSection(&mutex->lock);
 }
 
 void qemu_rec_mutex_lock(QemuRecMutex *mutex)
 {
+    assert(mutex->initialized);
     EnterCriticalSection(&mutex->lock);
 }
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
+=======
+int qemu_rec_mutex_trylock(QemuRecMutex *mutex)
+{
+    assert(mutex->initialized);
+    return !TryEnterCriticalSection(&mutex->lock);
+}
+
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 void qemu_rec_mutex_unlock(QemuRecMutex *mutex)
 {
+    assert(mutex->initialized);
     LeaveCriticalSection(&mutex->lock);
 }
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
+=======
+void qemu_cond_init(QemuCond *cond)
+{
+    memset(cond, 0, sizeof(*cond));
+    InitializeConditionVariable(&cond->var);
+    cond->initialized = true;
+}
+
+void qemu_cond_destroy(QemuCond *cond)
+{
+    assert(cond->initialized);
+    cond->initialized = false;
+    InitializeConditionVariable(&cond->var);
+}
+
+void qemu_cond_signal(QemuCond *cond)
+{
+    assert(cond->initialized);
+    WakeConditionVariable(&cond->var);
+}
+
+void qemu_cond_broadcast(QemuCond *cond)
+{
+    assert(cond->initialized);
+    WakeAllConditionVariable(&cond->var);
+}
+
+void qemu_cond_wait_impl(QemuCond *cond, QemuMutex *mutex, const char *file, const int line)
+{
+    assert(cond->initialized);
+    trace_qemu_mutex_unlock(mutex, file, line);
+    SleepConditionVariableSRW(&cond->var, &mutex->lock, INFINITE, 0);
+    trace_qemu_mutex_locked(mutex, file, line);
+}
+
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 void qemu_sem_init(QemuSemaphore *sem, int init)
 {
     /* Manual reset.  */
     sem->sema = CreateSemaphore(NULL, init, LONG_MAX, NULL);
+    sem->initialized = true;
 }
 
 void qemu_sem_destroy(QemuSemaphore *sem)
 {
+    assert(sem->initialized);
+    sem->initialized = false;
     CloseHandle(sem->sema);
 }
 
 void qemu_sem_post(QemuSemaphore *sem)
 {
+    assert(sem->initialized);
     ReleaseSemaphore(sem->sema, 1, NULL);
 }
 
 int qemu_sem_timedwait(QemuSemaphore *sem, int ms)
 {
-    int rc = WaitForSingleObject(sem->sema, ms);
+    int rc;
+
+    assert(sem->initialized);
+    rc = WaitForSingleObject(sem->sema, ms);
     if (rc == WAIT_OBJECT_0) {
         return 0;
     }
@@ -147,6 +234,7 @@ int qemu_sem_timedwait(QemuSemaphore *sem, int ms)
 
 void qemu_sem_wait(QemuSemaphore *sem)
 {
+    assert(sem->initialized);
     if (WaitForSingleObject(sem->sema, INFINITE) != WAIT_OBJECT_0) {
         error_exit(GetLastError(), __func__);
     }
@@ -180,15 +268,19 @@ void qemu_event_init(QemuEvent *ev, bool init)
     /* Manual reset.  */
     ev->event = CreateEvent(NULL, TRUE, TRUE, NULL);
     ev->value = (init ? EV_SET : EV_FREE);
+    ev->initialized = true;
 }
 
 void qemu_event_destroy(QemuEvent *ev)
 {
+    assert(ev->initialized);
+    ev->initialized = false;
     CloseHandle(ev->event);
 }
 
 void qemu_event_set(QemuEvent *ev)
 {
+    assert(ev->initialized);
     /* qemu_event_set has release semantics, but because it *loads*
      * ev->value we need a full memory barrier here.
      */
@@ -205,6 +297,7 @@ void qemu_event_reset(QemuEvent *ev)
 {
     unsigned value;
 
+    assert(ev->initialized);
     value = atomic_read(&ev->value);
     smp_mb_acquire();
     if (value == EV_SET) {
@@ -219,6 +312,7 @@ void qemu_event_wait(QemuEvent *ev)
 {
     unsigned value;
 
+    assert(ev->initialized);
     value = atomic_read(&ev->value);
     smp_mb_acquire();
     if (value != EV_SET) {

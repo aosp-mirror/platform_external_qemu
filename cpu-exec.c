@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 /*
  *  emulator main execution loop
  *
@@ -727,3 +728,5 @@ int cpu_exec(CPUState *cpu)
 
     return ret;
 }
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

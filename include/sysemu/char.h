@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #ifndef QEMU_CHAR_H
 #define QEMU_CHAR_H
 
@@ -499,3 +500,5 @@ extern int term_escape_char;
 void qemu_chr_parse_vc(QemuOpts *opts, ChardevBackend *backend, Error **errp);
 
 #endif
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

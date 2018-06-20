@@ -26,11 +26,17 @@
 #include "qemu-common.h"
 #include "qemu/error-report.h"
 #include "qemu/iov.h"
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #include "qemu/sockets.h"
 #include "qemu/coroutine.h"
 #include "migration/migration.h"
 #include "migration/qemu-file.h"
 #include "migration/trace.h"
+=======
+#include "migration.h"
+#include "qemu-file.h"
+#include "trace.h"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
 #define IO_BUF_SIZE (1024 * 1024)
 #define MAX_IOV_SIZE MIN(IOV_MAX, 64)
@@ -255,7 +261,7 @@ size_t ram_control_save_page(QEMUFile *f, ram_addr_t block_offset,
     if (f->hooks && f->hooks->save_page) {
         int ret = f->hooks->save_page(f, f->opaque, block_offset,
                                       offset, size, bytes_sent);
-
+        f->bytes_xfer += size;
         if (ret != RAM_SAVE_CONTROL_DELAYED) {
             if (bytes_sent && *bytes_sent > 0) {
                 qemu_update_position(f, *bytes_sent);
@@ -774,6 +780,19 @@ size_t qemu_get_counted_string(QEMUFile *f, char buf[256])
     buf[res] = 0;
 
     return res == len ? res : 0;
+}
+
+/*
+ * Put a string with one preceding byte containing its length. The length of
+ * the string should be less than 256.
+ */
+void qemu_put_counted_string(QEMUFile *f, const char *str)
+{
+    size_t len = strlen(str);
+
+    assert(len < 256);
+    qemu_put_byte(f, len);
+    qemu_put_buffer(f, (const uint8_t *)str, len);
 }
 
 /*

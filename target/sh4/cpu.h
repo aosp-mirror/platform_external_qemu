@@ -24,6 +24,7 @@
 #include "cpu-qom.h"
 
 #define TARGET_LONG_BITS 32
+#define ALIGNED_ONLY
 
 /* CPU Subtypes */
 #define SH_CPU_SH7750  (1 << 0)
@@ -39,12 +40,14 @@
 
 #include "exec/cpu-defs.h"
 
-#include "fpu/softfloat.h"
-
 #define TARGET_PAGE_BITS 12	/* 4k XXXXX */
 
 #define TARGET_PHYS_ADDR_SPACE_BITS 32
-#define TARGET_VIRT_ADDR_SPACE_BITS 32
+#ifdef CONFIG_USER_ONLY
+# define TARGET_VIRT_ADDR_SPACE_BITS 31
+#else
+# define TARGET_VIRT_ADDR_SPACE_BITS 32
+#endif
 
 #define SR_MD 30
 #define SR_RB 29
@@ -90,16 +93,25 @@
 #define FPSCR_RM_NEAREST       (0 << 0)
 #define FPSCR_RM_ZERO          (1 << 0)
 
+#define DELAY_SLOT_MASK        0x7
 #define DELAY_SLOT             (1 << 0)
 #define DELAY_SLOT_CONDITIONAL (1 << 1)
-#define DELAY_SLOT_TRUE        (1 << 2)
-#define DELAY_SLOT_CLEARME     (1 << 3)
-/* The dynamic value of the DELAY_SLOT_TRUE flag determines whether the jump
- * after the delay slot should be taken or not. It is calculated from SR_T.
- *
- * It is unclear if it is permitted to modify the SR_T flag in a delay slot.
- * The use of DELAY_SLOT_TRUE flag makes us accept such SR_T modification.
- */
+#define DELAY_SLOT_RTE         (1 << 2)
+
+#define TB_FLAG_PENDING_MOVCA  (1 << 3)
+
+#define GUSA_SHIFT             4
+#ifdef CONFIG_USER_ONLY
+#define GUSA_EXCLUSIVE         (1 << 12)
+#define GUSA_MASK              ((0xff << GUSA_SHIFT) | GUSA_EXCLUSIVE)
+#else
+/* Provide dummy versions of the above to allow tests against tbflags
+   to be elided while avoiding ifdefs.  */
+#define GUSA_EXCLUSIVE         0
+#define GUSA_MASK              0
+#endif
+
+#define TB_FLAG_ENVFLAGS_MASK  (DELAY_SLOT_MASK | GUSA_MASK)
 
 typedef struct tlb_t {
     uint32_t vpn;		/* virtual page number */
@@ -149,7 +161,8 @@ typedef struct CPUSH4State {
     uint32_t sgr;		/* saved global register 15 */
     uint32_t dbr;		/* debug base register */
     uint32_t pc;		/* program counter */
-    uint32_t delayed_pc;	/* target of delayed jump */
+    uint32_t delayed_pc;        /* target of delayed branch */
+    uint32_t delayed_cond;      /* condition of delayed branch */
     uint32_t mach;		/* multiply and accumulate high */
     uint32_t macl;		/* multiply and accumulate low */
     uint32_t pr;		/* procedure register */
@@ -173,7 +186,9 @@ typedef struct CPUSH4State {
     tlb_t itlb[ITLB_SIZE];	/* instruction translation table */
     tlb_t utlb[UTLB_SIZE];	/* unified translation table */
 
-    uint32_t ldst;
+    /* LDST = LOCK_ADDR != -1.  */
+    uint32_t lock_addr;
+    uint32_t lock_value;
 
     /* Fields up to this point are cleared by a CPU reset */
     struct {} end_reset_fields;
@@ -222,12 +237,14 @@ void superh_cpu_dump_state(CPUState *cpu, FILE *f,
 hwaddr superh_cpu_get_phys_page_debug(CPUState *cpu, vaddr addr);
 int superh_cpu_gdb_read_register(CPUState *cpu, uint8_t *buf, int reg);
 int superh_cpu_gdb_write_register(CPUState *cpu, uint8_t *buf, int reg);
+void superh_cpu_do_unaligned_access(CPUState *cpu, vaddr addr,
+                                    MMUAccessType access_type,
+                                    int mmu_idx, uintptr_t retaddr);
 
 void sh4_translate_init(void);
-SuperHCPU *cpu_sh4_init(const char *cpu_model);
 int cpu_sh4_signal_handler(int host_signum, void *pinfo,
                            void *puc);
-int superh_cpu_handle_mmu_fault(CPUState *cpu, vaddr address, int rw,
+int superh_cpu_handle_mmu_fault(CPUState *cpu, vaddr address, int size, int rw,
                                 int mmu_idx);
 
 void sh4_cpu_list(FILE *f, fprintf_function cpu_fprintf);
@@ -255,7 +272,9 @@ int cpu_sh4_is_cached(CPUSH4State * env, target_ulong addr);
 
 void cpu_load_tlb(CPUSH4State * env);
 
-#define cpu_init(cpu_model) CPU(cpu_sh4_init(cpu_model))
+#define SUPERH_CPU_TYPE_SUFFIX "-" TYPE_SUPERH_CPU
+#define SUPERH_CPU_TYPE_NAME(model) model SUPERH_CPU_TYPE_SUFFIX
+#define CPU_RESOLVING_TYPE TYPE_SUPERH_CPU
 
 #define cpu_signal_handler cpu_sh4_signal_handler
 #define cpu_list sh4_cpu_list
@@ -266,7 +285,13 @@ void cpu_load_tlb(CPUSH4State * env);
 #define MMU_USER_IDX 1
 static inline int cpu_mmu_index (CPUSH4State *env, bool ifetch)
 {
-    return (env->sr & (1u << SR_MD)) == 0 ? 1 : 0;
+    /* The instruction in a RTE delay slot is fetched in privileged
+       mode, but executed in user mode.  */
+    if (ifetch && (env->flags & DELAY_SLOT_RTE)) {
+        return 0;
+    } else {
+        return (env->sr & (1u << SR_MD)) == 0 ? 1 : 0;
+    }
 }
 
 #include "exec/cpu-all.h"
@@ -361,8 +386,6 @@ static inline int cpu_ptel_pr (uint32_t ptel)
 #define PTEA_TC        (1 << 3)
 #define cpu_ptea_tc(ptea) (((ptea) & PTEA_TC) >> 3)
 
-#define TB_FLAG_PENDING_MOVCA  (1 << 4)
-
 static inline target_ulong cpu_read_sr(CPUSH4State *env)
 {
     return env->sr | (env->sr_m << SR_M) |
@@ -382,13 +405,13 @@ static inline void cpu_get_tb_cpu_state(CPUSH4State *env, target_ulong *pc,
                                         target_ulong *cs_base, uint32_t *flags)
 {
     *pc = env->pc;
-    *cs_base = 0;
-    *flags = (env->flags & (DELAY_SLOT | DELAY_SLOT_CONDITIONAL
-                    | DELAY_SLOT_TRUE | DELAY_SLOT_CLEARME))   /* Bits  0- 3 */
+    /* For a gUSA region, notice the end of the region.  */
+    *cs_base = env->flags & GUSA_MASK ? env->gregs[0] : 0;
+    *flags = env->flags /* TB_FLAG_ENVFLAGS_MASK: bits 0-2, 4-12 */
             | (env->fpscr & (FPSCR_FR | FPSCR_SZ | FPSCR_PR))  /* Bits 19-21 */
             | (env->sr & ((1u << SR_MD) | (1u << SR_RB)))      /* Bits 29-30 */
             | (env->sr & (1u << SR_FD))                        /* Bit 15 */
-            | (env->movcal_backup ? TB_FLAG_PENDING_MOVCA : 0); /* Bit 4 */
+            | (env->movcal_backup ? TB_FLAG_PENDING_MOVCA : 0); /* Bit 3 */
 }
 
 #endif /* SH4_CPU_H */

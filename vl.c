@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
+#include "qapi/error.h"
 #include "qemu-version.h"
 #include "qemu/cutils.h"
 #include "qemu/help_option.h"
@@ -31,14 +33,19 @@
 #include "sysemu/rng-random-generic.h"
 
 #ifdef CONFIG_SECCOMP
+#include <sys/prctl.h>
 #include "sysemu/seccomp.h"
 #endif
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #if defined(CONFIG_VDE)
 #include <libvdeplug.h>
 #endif
 
 #if defined(CONFIG_SDL) && !defined(CONFIG_ANDROID)
+=======
+#ifdef CONFIG_SDL
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 #if defined(__APPLE__) || defined(main)
 #include <SDL.h>
 int qemu_main(int argc, char **argv);
@@ -63,9 +70,9 @@ int main(int argc, char **argv)
 #include "hw/boards.h"
 #include "sysemu/accel.h"
 #include "hw/usb.h"
-#include "hw/i386/pc.h"
 #include "hw/isa/isa.h"
 #include "hw/scsi/scsi.h"
+#include "hw/display/vga.h"
 #include "hw/bt.h"
 #include "sysemu/watchdog.h"
 #include "hw/smbios/smbios.h"
@@ -86,29 +93,28 @@ int main(int argc, char **argv)
 #include "sysemu/numa.h"
 #include "exec/gdbstub.h"
 #include "qemu/timer.h"
-#include "sysemu/char.h"
+#include "chardev/char.h"
 #include "qemu/bitmap.h"
 #include "qemu/log.h"
 #include "sysemu/blockdev.h"
 #include "hw/block/block.h"
-#include "migration/block.h"
+#include "migration/misc.h"
+#include "migration/snapshot.h"
+#include "migration/global_state.h"
 #include "sysemu/tpm.h"
 #include "sysemu/dma.h"
+#include "hw/audio/soundhw.h"
 #include "audio/audio.h"
-#include "migration/migration.h"
 #include "sysemu/cpus.h"
 #include "migration/colo.h"
+#include "migration/postcopy-ram.h"
 #include "sysemu/kvm.h"
 #include "sysemu/hax.h"
 #include "sysemu/hvf.h"
 #include "qapi/qobject-input-visitor.h"
-#include "qapi/qobject-input-visitor.h"
-#include "qapi-visit.h"
-#include "qapi/qmp/qjson.h"
 #include "qemu/option.h"
 #include "qemu/config-file.h"
 #include "qemu-options.h"
-#include "qmp-commands.h"
 #include "qemu/main-loop.h"
 #ifdef CONFIG_VIRTFS
 #include "fsdev/qemu-fsdev.h"
@@ -129,10 +135,14 @@ int main(int argc, char **argv)
 #include "qapi/string-input-visitor.h"
 #include "qapi/opts-visitor.h"
 #include "qom/object_interfaces.h"
-#include "qapi-event.h"
 #include "exec/semihost.h"
 #include "crypto/init.h"
 #include "sysemu/replay.h"
+#include "qapi/qapi-events-run-state.h"
+#include "qapi/qapi-visit-block-core.h"
+#include "qapi/qapi-commands-block-core.h"
+#include "qapi/qapi-commands-misc.h"
+#include "qapi/qapi-commands-run-state.h"
 #include "qapi/qmp/qerror.h"
 #include "sysemu/iothread.h"
 
@@ -223,7 +233,6 @@ static const char *data_dir[16];
 static int data_dir_idx;
 const char *bios_name = NULL;
 enum vga_retrace_method vga_retrace_method = VGA_RETRACE_DUMB;
-int request_opengl = -1;
 int display_opengl;
 const char* keyboard_layout = NULL;
 ram_addr_t ram_size;
@@ -237,18 +246,16 @@ static int rtc_utc = 1;
 static int rtc_date_offset = -1; /* -1 means no change */
 QEMUClockType rtc_clock;
 int vga_interface_type = VGA_NONE;
-static int full_screen = 0;
-static int no_frame = 0;
-int no_quit = 0;
-static bool grab_on_hover;
+static DisplayOptions dpy;
+int no_frame;
 Chardev *serial_hds[MAX_SERIAL_PORTS];
 Chardev *parallel_hds[MAX_PARALLEL_PORTS];
 Chardev *virtcon_hds[MAX_VIRTIO_CONSOLES];
 Chardev *sclp_hds[MAX_SCLP_CONSOLES];
 int win2k_install_hack = 0;
 int singlestep = 0;
-int smp_cpus = 1;
-int max_cpus = 1;
+int smp_cpus;
+unsigned int max_cpus;
 int smp_cores = 1;
 int smp_threads = 1;
 int acpi_enabled = 1;
@@ -280,7 +287,6 @@ bool boot_strict;
 uint8_t *boot_splash_filedata;
 size_t boot_splash_filedata_size;
 uint8_t qemu_extra_params_fw[2];
-int only_migratable; /* turn it off unless user states otherwise */
 
 int icount_align_option;
 
@@ -299,6 +305,7 @@ static NotifierList machine_init_done_notifiers =
 bool xen_allowed;
 uint32_t xen_domid;
 enum xen_mode xen_mode = XEN_EMULATE;
+bool xen_domid_restrict;
 
 static int has_defaults = 1;
 static int default_serial = 1;
@@ -362,6 +369,22 @@ static QemuOptsList qemu_sandbox_opts = {
         {
             .name = "enable",
             .type = QEMU_OPT_BOOL,
+        },
+        {
+            .name = "obsolete",
+            .type = QEMU_OPT_STRING,
+        },
+        {
+            .name = "elevateprivileges",
+            .type = QEMU_OPT_STRING,
+        },
+        {
+            .name = "spawn",
+            .type = QEMU_OPT_STRING,
+        },
+        {
+            .name = "resourcecontrol",
+            .type = QEMU_OPT_STRING,
         },
         { /* end of list */ }
     },
@@ -786,6 +809,7 @@ static const RunStateTransition runstate_transitions_def[] = {
 
     { RUN_STATE_PAUSED, RUN_STATE_RUNNING },
     { RUN_STATE_PAUSED, RUN_STATE_FINISH_MIGRATE },
+    { RUN_STATE_PAUSED, RUN_STATE_POSTMIGRATE },
     { RUN_STATE_PAUSED, RUN_STATE_PRELAUNCH },
     { RUN_STATE_PAUSED, RUN_STATE_COLO},
 
@@ -798,6 +822,7 @@ static const RunStateTransition runstate_transitions_def[] = {
     { RUN_STATE_PRELAUNCH, RUN_STATE_INMIGRATE },
 
     { RUN_STATE_FINISH_MIGRATE, RUN_STATE_RUNNING },
+    { RUN_STATE_FINISH_MIGRATE, RUN_STATE_PAUSED },
     { RUN_STATE_FINISH_MIGRATE, RUN_STATE_POSTMIGRATE },
     { RUN_STATE_FINISH_MIGRATE, RUN_STATE_PRELAUNCH },
     { RUN_STATE_FINISH_MIGRATE, RUN_STATE_COLO},
@@ -853,7 +878,7 @@ bool runstate_check(RunState state)
 
 bool runstate_store(char *str, size_t size)
 {
-    const char *state = RunState_lookup[current_run_state];
+    const char *state = RunState_str(current_run_state);
     size_t len = strlen(state) + 1;
 
     if (len > size) {
@@ -886,8 +911,8 @@ void runstate_set(RunState new_state)
 
     if (!runstate_valid_transitions[current_run_state][new_state]) {
         error_report("invalid runstate transition: '%s' -> '%s'",
-                     RunState_lookup[current_run_state],
-                     RunState_lookup[new_state]);
+                     RunState_str(current_run_state),
+                     RunState_str(new_state));
         abort();
     }
     trace_runstate_set(new_state);
@@ -1313,8 +1338,8 @@ static void bt_vhci_add(int vlan_id)
     struct bt_scatternet_s *vlan = qemu_find_bt_vlan(vlan_id);
 
     if (!vlan->slave)
-        error_report("warning: adding a VHCI to an empty scatternet %i",
-                     vlan_id);
+        warn_report("adding a VHCI to an empty scatternet %i",
+                    vlan_id);
 
     bt_vhci_init(bt_new_hci(vlan));
 }
@@ -1340,8 +1365,8 @@ static struct bt_device_s *bt_device_add(const char *opt)
     vlan = qemu_find_bt_vlan(vlan_id);
 
     if (!vlan->slave)
-        error_report("warning: adding a slave device to an empty scatternet %i",
-                     vlan_id);
+        warn_report("adding a slave device to an empty scatternet %i",
+                    vlan_id);
 
     if (!strcmp(devname, "keyboard"))
         return bt_keyboard_init(vlan);
@@ -1391,10 +1416,73 @@ static int bt_parse(const char *opt)
 
 static int parse_sandbox(void *opaque, QemuOpts *opts, Error **errp)
 {
-    /* FIXME: change this to true for 1.3 */
     if (qemu_opt_get_bool(opts, "enable", false)) {
 #ifdef CONFIG_SECCOMP
-        if (seccomp_start() < 0) {
+        uint32_t seccomp_opts = QEMU_SECCOMP_SET_DEFAULT
+                | QEMU_SECCOMP_SET_OBSOLETE;
+        const char *value = NULL;
+
+        value = qemu_opt_get(opts, "obsolete");
+        if (value) {
+            if (g_str_equal(value, "allow")) {
+                seccomp_opts &= ~QEMU_SECCOMP_SET_OBSOLETE;
+            } else if (g_str_equal(value, "deny")) {
+                /* this is the default option, this if is here
+                 * to provide a little bit of consistency for
+                 * the command line */
+            } else {
+                error_report("invalid argument for obsolete");
+                return -1;
+            }
+        }
+
+        value = qemu_opt_get(opts, "elevateprivileges");
+        if (value) {
+            if (g_str_equal(value, "deny")) {
+                seccomp_opts |= QEMU_SECCOMP_SET_PRIVILEGED;
+            } else if (g_str_equal(value, "children")) {
+                seccomp_opts |= QEMU_SECCOMP_SET_PRIVILEGED;
+
+                /* calling prctl directly because we're
+                 * not sure if host has CAP_SYS_ADMIN set*/
+                if (prctl(PR_SET_NO_NEW_PRIVS, 1)) {
+                    error_report("failed to set no_new_privs "
+                                 "aborting");
+                    return -1;
+                }
+            } else if (g_str_equal(value, "allow")) {
+                /* default value */
+            } else {
+                error_report("invalid argument for elevateprivileges");
+                return -1;
+            }
+        }
+
+        value = qemu_opt_get(opts, "spawn");
+        if (value) {
+            if (g_str_equal(value, "deny")) {
+                seccomp_opts |= QEMU_SECCOMP_SET_SPAWN;
+            } else if (g_str_equal(value, "allow")) {
+                /* default value */
+            } else {
+                error_report("invalid argument for spawn");
+                return -1;
+            }
+        }
+
+        value = qemu_opt_get(opts, "resourcecontrol");
+        if (value) {
+            if (g_str_equal(value, "deny")) {
+                seccomp_opts |= QEMU_SECCOMP_SET_RESOURCECTL;
+            } else if (g_str_equal(value, "allow")) {
+                /* default value */
+            } else {
+                error_report("invalid argument for resourcecontrol");
+                return -1;
+            }
+        }
+
+        if (seccomp_start(seccomp_opts) < 0) {
             error_report("failed to install seccomp syscall filter "
                          "in the kernel");
             return -1;
@@ -1737,53 +1825,16 @@ static void igd_gfx_passthru(void)
 static int usb_device_add(const char *devname)
 {
     USBDevice *dev = NULL;
-#ifndef CONFIG_LINUX
-    const char *p;
-#endif
 
     if (!machine_usb(current_machine)) {
         return -1;
     }
 
-    /* drivers with .usbdevice_name entry in USBDeviceInfo */
     dev = usbdevice_create(devname);
-    if (dev)
-        goto done;
-
-    /* the other ones */
-#ifndef CONFIG_LINUX
-    /* only the linux version is qdev-ified, usb-bsd still needs this */
-    if (strstart(devname, "host:", &p)) {
-        dev = usb_host_device_open(usb_bus_find(-1), p);
-    }
-#endif
     if (!dev)
         return -1;
 
-done:
     return 0;
-}
-
-static int usb_device_del(const char *devname)
-{
-    int bus_num, addr;
-    const char *p;
-
-    if (strstart(devname, "host:", &p)) {
-        return -1;
-    }
-
-    if (!machine_usb(current_machine)) {
-        return -1;
-    }
-
-    p = strchr(devname, '.');
-    if (!p)
-        return -1;
-    bus_num = strtoul(devname, NULL, 0);
-    addr = strtoul(p + 1, NULL, 0);
-
-    return usb_device_delete_addr(bus_num, addr);
 }
 
 static int usb_parse(const char *cmdline)
@@ -1794,22 +1845,6 @@ static int usb_parse(const char *cmdline)
         error_report("could not add USB device '%s'", cmdline);
     }
     return r;
-}
-
-void hmp_usb_add(Monitor *mon, const QDict *qdict)
-{
-    const char *devname = qdict_get_str(qdict, "devname");
-    if (usb_device_add(devname) < 0) {
-        error_report("could not add USB device '%s'", devname);
-    }
-}
-
-void hmp_usb_del(Monitor *mon, const QDict *qdict)
-{
-    const char *devname = qdict_get_str(qdict, "devname");
-    if (usb_device_del(devname) < 0) {
-        error_report("could not delete USB device '%s'", devname);
-    }
 }
 
 /***********************************************************/
@@ -1961,8 +1996,9 @@ void vm_state_notify(int running, RunState state)
     }
 }
 
-static int reset_requested;
-static int shutdown_requested, shutdown_signal = -1;
+static ShutdownCause reset_requested;
+static ShutdownCause shutdown_requested;
+static int shutdown_signal;
 static pid_t shutdown_pid;
 static int powerdown_requested;
 static int debug_requested;
@@ -1976,6 +2012,7 @@ static NotifierList wakeup_notifiers =
     NOTIFIER_LIST_INITIALIZER(wakeup_notifiers);
 static uint32_t wakeup_reason_mask = ~(1 << QEMU_WAKEUP_REASON_NONE);
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #ifdef CONFIG_ANDROID
 static int64_t s_shutdown_request_uptime_ms;
 static int64_t s_reset_request_uptime_ms;
@@ -1991,23 +2028,26 @@ static void set_shutdown_requested(void) {
 }
 
 int qemu_shutdown_requested_get(void)
+=======
+ShutdownCause qemu_shutdown_requested_get(void)
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 {
     return shutdown_requested;
 }
 
-int qemu_reset_requested_get(void)
+ShutdownCause qemu_reset_requested_get(void)
 {
     return reset_requested;
 }
 
 static int qemu_shutdown_requested(void)
 {
-    return atomic_xchg(&shutdown_requested, 0);
+    return atomic_xchg(&shutdown_requested, SHUTDOWN_CAUSE_NONE);
 }
 
 static void qemu_kill_report(void)
 {
-    if (!qtest_driver() && shutdown_signal != -1) {
+    if (!qtest_driver() && shutdown_signal) {
         if (shutdown_pid == 0) {
             /* This happens for eg ^C at the terminal, so it's worth
              * avoiding printing an odd message in that case.
@@ -2021,18 +2061,19 @@ static void qemu_kill_report(void)
                          shutdown_cmd ? shutdown_cmd : "<unknown process>");
             g_free(shutdown_cmd);
         }
-        shutdown_signal = -1;
+        shutdown_signal = 0;
     }
 }
 
-static int qemu_reset_requested(void)
+static ShutdownCause qemu_reset_requested(void)
 {
-    int r = reset_requested;
+    ShutdownCause r = reset_requested;
+
     if (r && replay_checkpoint(CHECKPOINT_RESET_REQUESTED)) {
-        reset_requested = 0;
+        reset_requested = SHUTDOWN_CAUSE_NONE;
         return r;
     }
-    return false;
+    return SHUTDOWN_CAUSE_NONE;
 }
 
 static int qemu_suspend_requested(void)
@@ -2064,7 +2105,10 @@ static int qemu_debug_requested(void)
     return r;
 }
 
-void qemu_system_reset(bool report)
+/*
+ * Reset the VM. Issue an event unless @reason is SHUTDOWN_CAUSE_NONE.
+ */
+void qemu_system_reset(ShutdownCause reason)
 {
     MachineClass *mc;
 
@@ -2077,15 +2121,16 @@ void qemu_system_reset(bool report)
     } else {
         qemu_devices_reset();
     }
-    if (report) {
-        qapi_event_send_reset(&error_abort);
+    if (reason) {
+        qapi_event_send_reset(shutdown_caused_by_guest(reason),
+                              &error_abort);
     }
     cpu_synchronize_all_post_reset();
 }
 
 void qemu_system_guest_panicked(GuestPanicInformation *info)
 {
-    qemu_log_mask(LOG_GUEST_ERROR, "Guest crashed\n");
+    qemu_log_mask(LOG_GUEST_ERROR, "Guest crashed");
 
     if (current_cpu) {
         current_cpu->crash_occurred = true;
@@ -2096,32 +2141,47 @@ void qemu_system_guest_panicked(GuestPanicInformation *info)
     if (!no_shutdown) {
         qapi_event_send_guest_panicked(GUEST_PANIC_ACTION_POWEROFF,
                                        !!info, info, &error_abort);
-        qemu_system_shutdown_request();
+        qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_PANIC);
     }
 
     if (info) {
         if (info->type == GUEST_PANIC_INFORMATION_TYPE_HYPER_V) {
-            qemu_log_mask(LOG_GUEST_ERROR, "HV crash parameters: (%#"PRIx64
+            qemu_log_mask(LOG_GUEST_ERROR, "\nHV crash parameters: (%#"PRIx64
                           " %#"PRIx64" %#"PRIx64" %#"PRIx64" %#"PRIx64")\n",
                           info->u.hyper_v.arg1,
                           info->u.hyper_v.arg2,
                           info->u.hyper_v.arg3,
                           info->u.hyper_v.arg4,
                           info->u.hyper_v.arg5);
+        } else if (info->type == GUEST_PANIC_INFORMATION_TYPE_S390) {
+            qemu_log_mask(LOG_GUEST_ERROR, " on cpu %d: %s\n"
+                          "PSW: 0x%016" PRIx64 " 0x%016" PRIx64"\n",
+                          info->u.s390.core,
+                          S390CrashReason_str(info->u.s390.reason),
+                          info->u.s390.psw_mask,
+                          info->u.s390.psw_addr);
         }
         qapi_free_GuestPanicInformation(info);
     }
 }
 
-void qemu_system_reset_request(void)
+void qemu_system_reset_request(ShutdownCause reason)
 {
     if (no_reboot) {
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
         set_shutdown_requested();
+=======
+        shutdown_requested = reason;
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     } else {
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
         reset_requested = 1;
 #ifdef CONFIG_ANDROID
         s_reset_request_uptime_ms = get_uptime_ms();
 #endif
+=======
+        reset_requested = reason;
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     }
     cpu_stop_current();
     qemu_notify_event();
@@ -2188,20 +2248,34 @@ void qemu_system_killed(int signal, pid_t pid)
     /* Cannot call qemu_system_shutdown_request directly because
      * we are in a signal handler.
      */
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     set_shutdown_requested();
+=======
+    shutdown_requested = SHUTDOWN_CAUSE_HOST_SIGNAL;
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     qemu_notify_event();
 }
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 void qemu_system_invalidate_exit_snapshot(void)
 {
     invalidate_exit_snapshot = 1;
 }
 
 void qemu_system_shutdown_request(void)
+=======
+void qemu_system_shutdown_request(ShutdownCause reason)
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 {
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     trace_qemu_system_shutdown_request();
     replay_shutdown_request();
     set_shutdown_requested();
+=======
+    trace_qemu_system_shutdown_request(reason);
+    replay_shutdown_request(reason);
+    shutdown_requested = reason;
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     qemu_notify_event();
 }
 
@@ -2232,12 +2306,15 @@ void qemu_system_debug_request(void)
 static bool main_loop_should_exit(void)
 {
     RunState r;
+    ShutdownCause request;
+
     if (qemu_debug_requested()) {
         vm_stop(RUN_STATE_DEBUG);
     }
     if (qemu_suspend_requested()) {
         qemu_system_suspend();
     }
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     if (qemu_shutdown_requested()) {
 #ifdef CONFIG_ANDROID
         if (invalidate_exit_snapshot) {
@@ -2246,17 +2323,23 @@ static bool main_loop_should_exit(void)
             androidSnapshot_quickbootSave(NULL);
         }
 #endif
+=======
+    request = qemu_shutdown_requested();
+    if (request) {
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
         qemu_kill_report();
-        qapi_event_send_shutdown(&error_abort);
+        qapi_event_send_shutdown(shutdown_caused_by_guest(request),
+                                 &error_abort);
         if (no_shutdown) {
             vm_stop(RUN_STATE_SHUTDOWN);
         } else {
             return true;
         }
     }
-    if (qemu_reset_requested()) {
+    request = qemu_reset_requested();
+    if (request) {
         pause_all_vcpus();
-        qemu_system_reset(VMRESET_REPORT);
+        qemu_system_reset(request);
         resume_all_vcpus();
         if (!runstate_check(RUN_STATE_RUNNING) &&
                 !runstate_check(RUN_STATE_INMIGRATE)) {
@@ -2265,7 +2348,7 @@ static bool main_loop_should_exit(void)
     }
     if (qemu_wakeup_requested()) {
         pause_all_vcpus();
-        qemu_system_reset(VMRESET_SILENT);
+        qemu_system_reset(SHUTDOWN_CAUSE_NONE);
         notifier_list_notify(&wakeup_notifiers, &wakeup_reason);
         wakeup_reason = QEMU_WAKEUP_REASON_NONE;
         resume_all_vcpus();
@@ -2299,7 +2382,11 @@ static void main_loop(void)
 
 static void version(void)
 {
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     printf("QEMU emulator version " QEMU_VERSION " " QEMU_PKGVERSION ", "
+=======
+    printf("QEMU emulator version " QEMU_FULL_VERSION "\n"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
            QEMU_COPYRIGHT "\n");
 }
 
@@ -2318,7 +2405,9 @@ static int help(int exitcode)
            "ctrl-alt-n      switch to virtual console 'n'\n"
            "ctrl-alt        toggle mouse and keyboard grab\n"
            "\n"
-           "When using -nographic, press 'ctrl-a h' to get some help.\n");
+           "When using -nographic, press 'ctrl-a h' to get some help.\n"
+           "\n"
+           QEMU_HELP_BOTTOM "\n");
 
     return exitcode;
 }
@@ -2439,6 +2528,7 @@ static bool select_vgahw(const char *p)
     return true;
 }
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 typedef enum DisplayType {
     DT_DEFAULT,
     DT_CURSES,
@@ -2450,17 +2540,25 @@ typedef enum DisplayType {
 } DisplayType;
 
 static DisplayType select_display(const char *p)
+=======
+static void parse_display(const char *p)
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 {
     const char *opts;
-    DisplayType display = DT_DEFAULT;
 
     if (strstart(p, "sdl", &opts)) {
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #if defined(CONFIG_SDL) || defined(CONFIG_ANDROID)
         display = DT_SDL;
+=======
+        dpy.type = DISPLAY_TYPE_SDL;
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
         while (*opts) {
             const char *nextopt;
 
             if (strstart(opts, ",frame=", &nextopt)) {
+                g_printerr("The frame= sdl option is deprecated, and will be\n"
+                           "removed in a future release.\n");
                 opts = nextopt;
                 if (strstart(opts, "on", &nextopt)) {
                     no_frame = 0;
@@ -2489,19 +2587,21 @@ static DisplayType select_display(const char *p)
                 }
             } else if (strstart(opts, ",window_close=", &nextopt)) {
                 opts = nextopt;
+                dpy.has_window_close = true;
                 if (strstart(opts, "on", &nextopt)) {
-                    no_quit = 0;
+                    dpy.window_close = true;
                 } else if (strstart(opts, "off", &nextopt)) {
-                    no_quit = 1;
+                    dpy.window_close = false;
                 } else {
                     goto invalid_sdl_args;
                 }
             } else if (strstart(opts, ",gl=", &nextopt)) {
                 opts = nextopt;
+                dpy.has_gl = true;
                 if (strstart(opts, "on", &nextopt)) {
-                    request_opengl = 1;
+                    dpy.gl = true;
                 } else if (strstart(opts, "off", &nextopt)) {
-                    request_opengl = 0;
+                    dpy.gl = false;
                 } else {
                     goto invalid_sdl_args;
                 }
@@ -2512,10 +2612,13 @@ static DisplayType select_display(const char *p)
             }
             opts = nextopt;
         }
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #else
         error_report("SDL support is disabled");
         return DT_ERROR;
 #endif
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     } else if (strstart(p, "vnc", &opts)) {
         if (*opts == '=') {
             vnc_parse(opts + 1, &error_fatal);
@@ -2523,34 +2626,41 @@ static DisplayType select_display(const char *p)
             error_report("VNC requires a display argument vnc=<display>");
             return DT_ERROR;
         }
+    } else if (strstart(p, "egl-headless", &opts)) {
+        dpy.type = DISPLAY_TYPE_EGL_HEADLESS;
     } else if (strstart(p, "curses", &opts)) {
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #ifdef CONFIG_CURSES
         display = DT_CURSES;
 #else
         error_report("curses support is disabled");
         return DT_ERROR;
 #endif
+=======
+        dpy.type = DISPLAY_TYPE_CURSES;
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     } else if (strstart(p, "gtk", &opts)) {
-#ifdef CONFIG_GTK
-        display = DT_GTK;
+        dpy.type = DISPLAY_TYPE_GTK;
         while (*opts) {
             const char *nextopt;
 
             if (strstart(opts, ",grab_on_hover=", &nextopt)) {
                 opts = nextopt;
+                dpy.u.gtk.has_grab_on_hover = true;
                 if (strstart(opts, "on", &nextopt)) {
-                    grab_on_hover = true;
+                    dpy.u.gtk.grab_on_hover = true;
                 } else if (strstart(opts, "off", &nextopt)) {
-                    grab_on_hover = false;
+                    dpy.u.gtk.grab_on_hover = false;
                 } else {
                     goto invalid_gtk_args;
                 }
             } else if (strstart(opts, ",gl=", &nextopt)) {
                 opts = nextopt;
+                dpy.has_gl = true;
                 if (strstart(opts, "on", &nextopt)) {
-                    request_opengl = 1;
+                    dpy.gl = true;
                 } else if (strstart(opts, "off", &nextopt)) {
-                    request_opengl = 0;
+                    dpy.gl = false;
                 } else {
                     goto invalid_gtk_args;
                 }
@@ -2561,23 +2671,27 @@ static DisplayType select_display(const char *p)
             }
             opts = nextopt;
         }
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #else
         error_report("GTK support is disabled");
         return DT_ERROR;
 #endif
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     } else if (strstart(p, "none", &opts)) {
-        display = DT_NONE;
+        dpy.type = DISPLAY_TYPE_NONE;
     } else {
         error_report("unknown display type");
         return DT_ERROR;
     }
-
-    return display;
 }
 
 static int balloon_parse(const char *arg)
 {
     QemuOpts *opts;
+
+    warn_report("This option is deprecated. "
+                "Use '--device virtio-balloon' to enable the balloon device.");
 
     if (strcmp(arg, "none") == 0) {
         return 0;
@@ -2636,6 +2750,24 @@ char *qemu_find_file(int type, const char *name)
     return NULL;
 }
 
+static void qemu_add_data_dir(const char *path)
+{
+    int i;
+
+    if (path == NULL) {
+        return;
+    }
+    if (data_dir_idx == ARRAY_SIZE(data_dir)) {
+        return;
+    }
+    for (i = 0; i < data_dir_idx; i++) {
+        if (strcmp(data_dir[i], path) == 0) {
+            return; /* duplicate */
+        }
+    }
+    data_dir[data_dir_idx++] = g_strdup(path);
+}
+
 static inline bool nonempty_str(const char *str)
 {
     return str && *str;
@@ -2670,8 +2802,8 @@ static int parse_fw_cfg(void *opaque, QemuOpts *opts, Error **errp)
         return -1;
     }
     if (strncmp(name, "opt/", 4) != 0) {
-        error_report("warning: externally provided fw_cfg item names "
-                     "should be prefixed with \"opt/\"");
+        warn_report("externally provided fw_cfg item names "
+                    "should be prefixed with \"opt/\"");
     }
     if (nonempty_str(str)) {
         size = strlen(str); /* NUL terminator NOT included in fw_cfg blob */
@@ -2712,10 +2844,12 @@ static int chardev_init_func(void *opaque, QemuOpts *opts, Error **errp)
 {
     Error *local_err = NULL;
 
-    qemu_chr_new_from_opts(opts, &local_err);
-    if (local_err) {
-        error_report_err(local_err);
-        return -1;
+    if (!qemu_chr_new_from_opts(opts, &local_err)) {
+        if (local_err) {
+            error_report_err(local_err);
+            return -1;
+        }
+        exit(0);
     }
     return 0;
 }
@@ -2750,8 +2884,9 @@ static int mon_init_func(void *opaque, QemuOpts *opts, Error **errp)
     if (qemu_opt_get_bool(opts, "pretty", 0))
         flags |= MONITOR_USE_PRETTY;
 
-    if (qemu_opt_get_bool(opts, "default", 0)) {
-        error_report("option 'default' does nothing and is deprecated");
+    /* OOB is off by default */
+    if (qemu_opt_get_bool(opts, "x-oob", 0)) {
+        flags |= MONITOR_USE_OOB;
     }
 
     chardev = qemu_opt_get(opts, "chardev");
@@ -3048,7 +3183,7 @@ static void qemu_run_exit_notifiers(void)
     notifier_list_notify(&exit_notifiers, NULL);
 }
 
-static bool machine_init_done;
+bool machine_init_done;
 
 void qemu_add_machine_init_done_notifier(Notifier *notify)
 {
@@ -3065,8 +3200,8 @@ void qemu_remove_machine_init_done_notifier(Notifier *notify)
 
 static void qemu_run_machine_init_done_notifiers(void)
 {
-    notifier_list_notify(&machine_init_done_notifiers, NULL);
     machine_init_done = true;
+    notifier_list_notify(&machine_init_done_notifiers, NULL);
 }
 
 static const QEMUOption *lookup_opt(int argc, const char **argv,
@@ -3176,9 +3311,16 @@ static int machine_set_property(void *opaque,
  */
 static bool object_create_initial(const char *type)
 {
-    if (g_str_equal(type, "rng-egd")) {
+    if (g_str_equal(type, "rng-egd") ||
+        g_str_has_prefix(type, "pr-manager-")) {
         return false;
     }
+
+#if defined(CONFIG_VHOST_USER) && defined(CONFIG_LINUX)
+    if (g_str_equal(type, "cryptodev-vhost-user")) {
+        return false;
+    }
+#endif
 
     /*
      * return false for concrete netfilters since
@@ -3365,6 +3507,7 @@ static int qemu_read_default_config_file(void)
     return 0;
 }
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #if defined(CONFIG_ANDROID)
 
 static int is_opengl_alive = 1;
@@ -3443,6 +3586,28 @@ int main(int argc, char **argv)
 }
 
 static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
+=======
+static void user_register_global_props(void)
+{
+    qemu_opts_foreach(qemu_find_opts("global"),
+                      global_init_func, NULL, NULL);
+}
+
+/*
+ * Note: we should see that these properties are actually having a
+ * priority: accel < machine < user. This means e.g. when user
+ * specifies something in "-global", it'll always be used with highest
+ * priority than either machine/accelerator compat properties.
+ */
+static void register_global_properties(MachineState *ms)
+{
+    accel_register_compat_props(ms->accelerator);
+    machine_register_compat_props(ms);
+    user_register_global_props();
+}
+
+int main(int argc, char **argv, char **envp)
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 {
     int i;
     int snapshot, linux_boot;
@@ -3451,9 +3616,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     const char *boot_order = NULL;
     const char *boot_once = NULL;
     DisplayState *ds;
-    int cyls, heads, secs, translation;
     QemuOpts *opts, *machine_opts;
-    QemuOpts *hda_opts = NULL, *icount_opts = NULL, *accel_opts = NULL;
+    QemuOpts *icount_opts = NULL, *accel_opts = NULL;
     QemuOptsList *olist;
     int optind;
     const char *optarg;
@@ -3468,10 +3632,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     const char *qtest_log = NULL;
     const char *pid_file = NULL;
     const char *incoming = NULL;
-    bool defconfig = true;
     bool userconfig = true;
     bool nographic = false;
-    DisplayType display_type = DT_DEFAULT;
     int display_remote = 0;
     const char *log_mask = NULL;
     const char *log_file = NULL;
@@ -3482,6 +3644,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     Error *main_loop_err = NULL;
     Error *err = NULL;
     bool list_data_dirs = false;
+    char *dir, **dirs;
     typedef struct BlockdevOptions_queue {
         BlockdevOptions *bdo;
         Location loc;
@@ -3503,13 +3666,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     qemu_init_cpu_list();
     qemu_init_cpu_loop();
+
     qemu_mutex_lock_iothread();
 
     error_set_progname(argv[0]);
     qemu_init_exec_dir(argv[0]);
 
     module_call_init(MODULE_INIT_QOM);
-    monitor_init_qmp_commands();
 
     qemu_add_opts(&qemu_drive_opts);
     qemu_add_drive_opts(&qemu_legacy_drive_opts);
@@ -3519,6 +3682,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     qemu_add_opts(&qemu_chardev_opts);
     qemu_add_opts(&qemu_device_opts);
     qemu_add_opts(&qemu_netdev_opts);
+    qemu_add_opts(&qemu_nic_opts);
     qemu_add_opts(&qemu_net_opts);
     qemu_add_opts(&qemu_rtc_opts);
     qemu_add_opts(&qemu_global_opts);
@@ -3544,6 +3708,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     module_call_init(MODULE_INIT_OPTS);
 
     runstate_init();
+    postcopy_infrastructure_init();
 
     if (qcrypto_init(&err) < 0) {
         error_reportf_err(err, "cannot initialize crypto: ");
@@ -3556,8 +3721,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     cpu_model = NULL;
     snapshot = 0;
-    cyls = heads = secs = 0;
-    translation = BIOS_ATA_TRANSLATION_AUTO;
 
     nb_nics = 0;
 
@@ -3580,8 +3743,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             }
             switch (popt->index) {
             case QEMU_OPTION_nodefconfig:
-                defconfig = false;
-                break;
             case QEMU_OPTION_nouserconfig:
                 userconfig = false;
                 break;
@@ -3589,7 +3750,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         }
     }
 
-    if (defconfig && userconfig) {
+    if (userconfig) {
         if (qemu_read_default_config_file() < 0) {
           return 1;
         }
@@ -3606,7 +3767,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         if (optind >= argc)
             break;
         if (argv[optind][0] != '-') {
-            hda_opts = drive_add(IF_DEFAULT, 0, argv[optind++], HD_OPTS);
+            drive_add(IF_DEFAULT, 0, argv[optind++], HD_OPTS);
         } else {
             const QEMUOption *popt;
 
@@ -3635,21 +3796,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 }
                 break;
             case QEMU_OPTION_hda:
-                {
-                    char buf[256];
-                    if (cyls == 0)
-                        snprintf(buf, sizeof(buf), "%s", HD_OPTS);
-                    else
-                        snprintf(buf, sizeof(buf),
-                                 "%s,cyls=%d,heads=%d,secs=%d%s",
-                                 HD_OPTS , cyls, heads, secs,
-                                 translation == BIOS_ATA_TRANSLATION_LBA ?
-                                 ",trans=lba" :
-                                 translation == BIOS_ATA_TRANSLATION_NONE ?
-                                 ",trans=none" : "");
-                    drive_add(IF_DEFAULT, 0, optarg, buf);
-                    break;
-                }
             case QEMU_OPTION_hdb:
             case QEMU_OPTION_hdc:
             case QEMU_OPTION_hdd:
@@ -3700,6 +3846,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_snapshot:
                 snapshot = 1;
                 break;
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
             case QEMU_OPTION_hdachs:
                 {
                     const char *p;
@@ -3762,6 +3909,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     }
                 }
                 break;
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
             case QEMU_OPTION_numa:
                 opts = qemu_opts_parse_noisily(qemu_find_opts("numa"),
                                                optarg, true);
@@ -3770,20 +3919,24 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 }
                 break;
             case QEMU_OPTION_display:
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
                 display_type = select_display(optarg);
                 if (display_type == DT_ERROR) {
                     return 1;
                 }
+=======
+                parse_display(optarg);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
                 break;
             case QEMU_OPTION_nographic:
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse_noisily(olist, "graphics=off", false);
                 nographic = true;
-                display_type = DT_NONE;
+                dpy.type = DISPLAY_TYPE_NONE;
                 break;
             case QEMU_OPTION_curses:
 #ifdef CONFIG_CURSES
-                display_type = DT_CURSES;
+                dpy.type = DISPLAY_TYPE_CURSES;
 #else
                 error_report("curses support is disabled");
                 return 1;
@@ -3838,6 +3991,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 default_net = 0;
                 if (net_client_parse(qemu_find_opts("netdev"), optarg) == -1) {
                     return 1;
+                }
+                break;
+            case QEMU_OPTION_nic:
+                default_net = 0;
+                if (net_client_parse(qemu_find_opts("nic"), optarg) == -1) {
+                    exit(1);
                 }
                 break;
             case QEMU_OPTION_net:
@@ -3931,8 +4090,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_L:
                 if (is_help_option(optarg)) {
                     list_data_dirs = true;
-                } else if (data_dir_idx < ARRAY_SIZE(data_dir)) {
-                    data_dir[data_dir_idx++] = optarg;
+                } else {
+                    qemu_add_data_dir(optarg);
                 }
                 break;
             case QEMU_OPTION_bios:
@@ -3950,6 +4109,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 break;
             case QEMU_OPTION_localtime:
                 rtc_utc = 0;
+                warn_report("This option is deprecated, "
+                            "use '-rtc base=localtime' instead.");
                 break;
             case QEMU_OPTION_vga:
                 vga_model = optarg;
@@ -4046,7 +4207,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_virtfs: {
                 QemuOpts *fsdev;
                 QemuOpts *device;
-                const char *writeout, *sock_fd, *socket;
+                const char *writeout, *sock_fd, *socket, *path, *security_model;
 
                 olist = qemu_find_opts("virtfs");
                 if (!olist) {
@@ -4064,10 +4225,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     return 1;
                 }
                 fsdev = qemu_opts_create(qemu_find_opts("fsdev"),
+                                         qemu_opts_id(opts) ?:
                                          qemu_opt_get(opts, "mount_tag"),
                                          1, NULL);
                 if (!fsdev) {
-                    error_report("duplicate fsdev id: %s",
+                    error_report("duplicate or invalid fsdev id: %s",
                                  qemu_opt_get(opts, "mount_tag"));
                     return 1;
                 }
@@ -4084,11 +4246,15 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 }
                 qemu_opt_set(fsdev, "fsdriver",
                              qemu_opt_get(opts, "fsdriver"), &error_abort);
-                qemu_opt_set(fsdev, "path", qemu_opt_get(opts, "path"),
-                             &error_abort);
-                qemu_opt_set(fsdev, "security_model",
-                             qemu_opt_get(opts, "security_model"),
-                             &error_abort);
+                path = qemu_opt_get(opts, "path");
+                if (path) {
+                    qemu_opt_set(fsdev, "path", path, &error_abort);
+                }
+                security_model = qemu_opt_get(opts, "security_model");
+                if (security_model) {
+                    qemu_opt_set(fsdev, "security_model", security_model,
+                                 &error_abort);
+                }
                 socket = qemu_opt_get(opts, "socket");
                 if (socket) {
                     qemu_opt_set(fsdev, "socket", socket, &error_abort);
@@ -4105,7 +4271,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                                           &error_abort);
                 qemu_opt_set(device, "driver", "virtio-9p-pci", &error_abort);
                 qemu_opt_set(device, "fsdev",
-                             qemu_opt_get(opts, "mount_tag"), &error_abort);
+                             qemu_opts_id(fsdev), &error_abort);
                 qemu_opt_set(device, "mount_tag",
                              qemu_opt_get(opts, "mount_tag"), &error_abort);
                 break;
@@ -4175,9 +4341,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 break;
 #endif
             case QEMU_OPTION_full_screen:
-                full_screen = 1;
+                dpy.has_full_screen = true;
+                dpy.full_screen = true;
                 break;
             case QEMU_OPTION_no_frame:
+                g_printerr("The -no-frame switch is deprecated, and will be\n"
+                           "removed in a future release.\n");
                 no_frame = 1;
                 break;
             case QEMU_OPTION_alt_grab:
@@ -4187,11 +4356,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 ctrl_grab = 1;
                 break;
             case QEMU_OPTION_no_quit:
-                no_quit = 1;
+                dpy.has_window_close = true;
+                dpy.window_close = false;
                 break;
             case QEMU_OPTION_sdl:
 #ifdef CONFIG_SDL
-                display_type = DT_SDL;
+                dpy.type = DISPLAY_TYPE_SDL;
                 break;
 #else
                 error_report("SDL support is disabled");
@@ -4211,6 +4381,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 };
 
                 qdev_prop_register_global(&slew_lost_ticks);
+                warn_report("This option is deprecated, "
+                            "use '-rtc driftfix=slew' instead.");
                 break;
             }
             case QEMU_OPTION_acpitable:
@@ -4267,10 +4439,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse_noisily(olist, "accel=tcg", false);
                 break;
-            case QEMU_OPTION_no_kvm_pit: {
-                error_report("warning: ignoring deprecated option");
-                break;
-            }
             case QEMU_OPTION_no_kvm_pit_reinjection: {
                 static GlobalProperty kvm_pit_lost_tick_policy = {
                     .driver   = "kvm-pit",
@@ -4278,8 +4446,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     .value    = "discard",
                 };
 
-                error_report("warning: deprecated, replaced by "
-                             "-global kvm-pit.lost_tick_policy=discard");
+                warn_report("deprecated, replaced by "
+                            "-global kvm-pit.lost_tick_policy=discard");
                 qdev_prop_register_global(&kvm_pit_lost_tick_policy);
                 break;
             }
@@ -4287,27 +4455,21 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 accel_opts = qemu_opts_parse_noisily(qemu_find_opts("accel"),
                                                      optarg, true);
                 optarg = qemu_opt_get(accel_opts, "accel");
-
-                olist = qemu_find_opts("machine");
-                if (strcmp("kvm", optarg) == 0) {
-                    qemu_opts_parse_noisily(olist, "accel=kvm", false);
-                } else if (strcmp("xen", optarg) == 0) {
-                    qemu_opts_parse_noisily(olist, "accel=xen", false);
-                } else if (strcmp("tcg", optarg) == 0) {
-                    qemu_opts_parse_noisily(olist, "accel=tcg", false);
-                } else {
-                    if (!is_help_option(optarg)) {
-                        error_printf("Unknown accelerator: %s", optarg);
-                    }
-                    error_printf("Supported accelerators: kvm, xen, tcg\n");
-                    exit(1);
+                if (!optarg || is_help_option(optarg)) {
+                    error_printf("Possible accelerators: kvm, xen, hax, tcg\n");
+                    exit(0);
                 }
+                opts = qemu_opts_create(qemu_find_opts("machine"), NULL,
+                                        false, &error_abort);
+                qemu_opt_set(opts, "accel", optarg, &error_abort);
                 break;
             case QEMU_OPTION_usb:
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse_noisily(olist, "usb=on", false);
                 break;
             case QEMU_OPTION_usbdevice:
+                error_report("'-usbdevice' is deprecated, please use "
+                             "'-device usb-...' instead");
                 olist = qemu_find_opts("machine");
                 qemu_opts_parse_noisily(olist, "usb=on", false);
                 add_device_config(DEV_USB, optarg);
@@ -4409,9 +4571,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     return 1;
                 }
                 break;
-            case QEMU_OPTION_tdf:
-                error_report("warning: ignoring deprecated option");
-                break;
             case QEMU_OPTION_name:
                 opts = qemu_opts_parse_noisily(qemu_find_opts("name"),
                                                optarg, true);
@@ -4436,9 +4595,14 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                  */
                 break;
             case QEMU_OPTION_startdate:
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
                 if (!configure_rtc_date_offset(optarg, 1)) {
                     return 1;
                 }
+=======
+                warn_report("This option is deprecated, use '-rtc base=' instead.");
+                configure_rtc_date_offset(optarg, 1);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
                 break;
             case QEMU_OPTION_rtc:
                 opts = qemu_opts_parse_noisily(qemu_find_opts("rtc"), optarg,
@@ -4451,9 +4615,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 }
                 break;
             case QEMU_OPTION_tb_size:
-                tcg_tb_size = strtol(optarg, NULL, 0);
-                if (tcg_tb_size < 0) {
-                    tcg_tb_size = 0;
+#ifndef CONFIG_TCG
+                error_report("TCG is disabled");
+                exit(1);
+#endif
+                if (qemu_strtoul(optarg, NULL, 0, &tcg_tb_size) < 0) {
+                    error_report("Invalid argument to -tb-size");
+                    exit(1);
                 }
                 break;
             case QEMU_OPTION_icount:
@@ -4470,7 +4638,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 incoming = optarg;
                 break;
             case QEMU_OPTION_only_migratable:
-                only_migratable = 1;
+                /*
+                 * TODO: we can remove this option one day, and we
+                 * should all use:
+                 *
+                 * "-global migration.only-migratable=true"
+                 */
+                qemu_global_option("migration.only-migratable=true");
                 break;
             case QEMU_OPTION_nodefaults:
                 has_defaults = 0;
@@ -4495,6 +4669,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     return 1;
                 }
                 xen_mode = XEN_ATTACH;
+                break;
+            case QEMU_OPTION_xen_domid_restrict:
+                if (!(xen_available())) {
+                    error_report("Option not supported for this target");
+                    exit(1);
+                }
+                xen_domid_restrict = true;
                 break;
             case QEMU_OPTION_trace:
                 g_free(trace_file);
@@ -4683,6 +4864,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
     os_daemonize();
+    rcu_disable_atfork();
 
     if (pid_file && qemu_create_pidfile(pid_file) != 0) {
         error_report("could not acquire pid file: %s", strerror(errno));
@@ -4926,18 +5108,20 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         qemu_set_log(0);
     }
 
-    /* If no data_dir is specified then try to find it relative to the
-       executable path.  */
-    if (data_dir_idx < ARRAY_SIZE(data_dir)) {
-        data_dir[data_dir_idx] = os_find_datadir();
-        if (data_dir[data_dir_idx] != NULL) {
-            data_dir_idx++;
-        }
+    /* add configured firmware directories */
+    dirs = g_strsplit(CONFIG_QEMU_FIRMWAREPATH, G_SEARCHPATH_SEPARATOR_S, 0);
+    for (i = 0; dirs[i] != NULL; i++) {
+        qemu_add_data_dir(dirs[i]);
     }
-    /* If all else fails use the install path specified when building. */
-    if (data_dir_idx < ARRAY_SIZE(data_dir)) {
-        data_dir[data_dir_idx++] = CONFIG_QEMU_DATADIR;
-    }
+    g_strfreev(dirs);
+
+    /* try to find datadir relative to the executable path */
+    dir = os_find_datadir();
+    qemu_add_data_dir(dir);
+    g_free(dir);
+
+    /* add the datadir specified when building */
+    qemu_add_data_dir(CONFIG_QEMU_DATADIR);
 
     /* -L help lists the data directories and exits. */
     if (list_data_dirs) {
@@ -4947,14 +5131,33 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 0;
     }
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     if (!smp_parse(qemu_opts_find(qemu_find_opts("smp-opts"), NULL))) {
         return 1;
     }
+=======
+    /* machine_class: default to UP */
+    machine_class->max_cpus = machine_class->max_cpus ?: 1;
+    machine_class->min_cpus = machine_class->min_cpus ?: 1;
+    machine_class->default_cpus = machine_class->default_cpus ?: 1;
 
-    machine_class->max_cpus = machine_class->max_cpus ?: 1; /* Default to UP */
+    /* default to machine_class->default_cpus */
+    smp_cpus = machine_class->default_cpus;
+    max_cpus = machine_class->default_cpus;
+
+    smp_parse(qemu_opts_find(qemu_find_opts("smp-opts"), NULL));
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
+
+    /* sanity-check smp_cpus and max_cpus against machine_class */
+    if (smp_cpus < machine_class->min_cpus) {
+        error_report("Invalid SMP CPUs %d. The min CPUs "
+                     "supported by machine '%s' is %d", smp_cpus,
+                     machine_class->name, machine_class->min_cpus);
+        exit(1);
+    }
     if (max_cpus > machine_class->max_cpus) {
-        error_report("Number of SMP CPUs requested (%d) exceeds max CPUs "
-                     "supported by machine '%s' (%d)", max_cpus,
+        error_report("Invalid SMP CPUs %d. The max CPUs "
+                     "supported by machine '%s' is %d", max_cpus,
                      machine_class->name, machine_class->max_cpus);
         return 1;;
     }
@@ -5020,7 +5223,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             return 1;
         }
 #ifdef CONFIG_CURSES
-        if (display_type == DT_CURSES) {
+        if (dpy.type == DISPLAY_TYPE_CURSES) {
             error_report("curses display cannot be used with -daemonize");
             return 1;
         }
@@ -5071,6 +5274,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         display_remote++;
     }
 #endif
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     if (display_type == DT_DEFAULT && !display_remote) {
 #if defined(CONFIG_GTK)
         display_type = DT_GTK;
@@ -5082,29 +5286,34 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         vnc_parse("localhost:0,to=99,id=default", &error_abort);
 #else
         display_type = DT_NONE;
+=======
+    if (dpy.type == DISPLAY_TYPE_DEFAULT && !display_remote) {
+        if (!qemu_display_find_default(&dpy)) {
+            dpy.type = DISPLAY_TYPE_NONE;
+#if defined(CONFIG_VNC)
+            vnc_parse("localhost:0,to=99,id=default", &error_abort);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 #endif
+        }
+    }
+    if (dpy.type == DISPLAY_TYPE_DEFAULT) {
+        dpy.type = DISPLAY_TYPE_NONE;
     }
 
-    if ((no_frame || alt_grab || ctrl_grab) && display_type != DT_SDL) {
+    if ((no_frame || alt_grab || ctrl_grab) && dpy.type != DISPLAY_TYPE_SDL) {
         error_report("-no-frame, -alt-grab and -ctrl-grab are only valid "
                      "for SDL, ignoring option");
     }
-    if (no_quit && (display_type != DT_GTK && display_type != DT_SDL)) {
+    if (dpy.has_window_close &&
+        (dpy.type != DISPLAY_TYPE_GTK && dpy.type != DISPLAY_TYPE_SDL)) {
         error_report("-no-quit is only valid for GTK and SDL, "
                      "ignoring option");
     }
 
-    if (display_type == DT_GTK) {
-        early_gtk_display_init(request_opengl);
-    }
-
-    if (display_type == DT_SDL) {
-        sdl_display_early_init(request_opengl);
-    }
-
+    qemu_display_early_init(&dpy);
     qemu_console_early_init();
 
-    if (request_opengl == 1 && display_opengl == 0) {
+    if (dpy.has_gl && dpy.gl && display_opengl == 0) {
 #if defined(CONFIG_OPENGL)
         error_report("OpenGL is not supported by the display");
 #else
@@ -5160,6 +5369,18 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     if (configure_accelerator(current_machine) < 0) {
         return 1;
     }
+
+    /*
+     * Register all the global properties, including accel properties,
+     * machine properties, and user-specified ones.
+     */
+    register_global_properties(current_machine);
+
+    /*
+     * Migration object can only be created after global properties
+     * are applied correctly.
+     */
+    migration_object_init();
 
     if (qtest_chrdev) {
         qtest_init(qtest_chrdev, qtest_log, &error_fatal);
@@ -5232,7 +5453,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         qemu_opts_del(icount_opts);
     }
 
-    qemu_tcg_configure(accel_opts, &error_fatal);
+    if (tcg_enabled()) {
+        qemu_tcg_configure(accel_opts, &error_fatal);
+    }
 
     if (default_net) {
         QemuOptsList *net = qemu_find_opts("net");
@@ -5244,8 +5467,14 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     colo_info_init();
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     if (net_init_clients() < 0) {
         return 1;
+=======
+    if (net_init_clients(&err) < 0) {
+        error_report_err(err);
+        exit(1);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     }
 
 #ifdef CONFIG_ANDROID
@@ -5277,11 +5506,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 1;
     }
 
-#ifdef CONFIG_TPM
     if (tpm_init() < 0) {
         return 1;
     }
-#endif
 
     /* init the bluetooth world */
     if (foreach_device_config(DEV_BT, bt_parse))
@@ -5297,6 +5524,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     blk_mig_init();
     ram_mig_init();
+    dirty_bitmap_mig_init();
 
     /* If the currently selected machine wishes to override the units-per-bus
      * property of its default HBA interface type, do so now. */
@@ -5336,7 +5564,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 1;
     }
 
-    parse_numa_opts(machine_class);
+    /*
+     * Note: qtest_enabled() (which is used in monitor_qapi_event_init())
+     * depends on configure_accelerator() above.
+     */
+    monitor_init_globals();
 
     if (qemu_opts_foreach(qemu_find_opts("mon"),
                           mon_init_func, NULL, NULL)) {
@@ -5377,6 +5609,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             return (i == 1 ? 1 : 0);
     }
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     machine_register_compat_props(current_machine);
 
     qemu_opts_foreach(qemu_find_opts("global"),
@@ -5455,6 +5688,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
 #endif  // CONFIG_ANDROID
 
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     /* This checkpoint is required by replay to separate prior clock
        reading from the other reads, because timer polling functions query
        clock values from the log. */
@@ -5465,18 +5700,29 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     current_machine->maxram_size = maxram_size;
     current_machine->ram_slots = ram_slots;
     current_machine->boot_order = boot_order;
-    current_machine->cpu_model = cpu_model;
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     machine_class->init(current_machine);
     if (error_during_init != NULL) {
         return 1;
     }
+=======
+    /* parse features once if machine provides default cpu_type */
+    current_machine->cpu_type = machine_class->default_cpu_type;
+    if (cpu_model) {
+        current_machine->cpu_type = parse_cpu_model(cpu_model);
+    }
+    parse_numa_opts(current_machine);
+
+    machine_run_board_init(current_machine);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
 #ifdef CONFIG_ANDROID
     if (!qemu_android_emulation_setup()) {
         return 1;
     }
 
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     if (snapshot_list) {
         androidSnapshot_listStdout();
     }
@@ -5492,6 +5738,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     if (!audio_init()) {
         return 1;
     }
+=======
+    soundhw_init();
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
     if (hax_enabled()) {
         hax_sync_vcpus();
@@ -5520,18 +5769,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     cpu_synchronize_all_post_init();
 
-    numa_post_machine_init();
-
     rom_reset_order_override();
-
-    /*
-     * Create frontends for -drive if=scsi leftovers.
-     * Normally, frontends for -drive get created by machine
-     * initialization for onboard SCSI HBAs.  However, we create a few
-     * more ever since SCSI qdevification, but this is pretty much an
-     * implementation accident, and deprecated.
-     */
-    scsi_legacy_handle_cmdline();
 
     /* Did we create any drives that we failed to create a device for? */
     drive_check_orphaned();
@@ -5554,25 +5792,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         qemu_register_reset(restore_boot_order, g_strdup(boot_order));
     }
 
-    ds = init_displaystate();
-
     /* init local displays */
-    switch (display_type) {
-    case DT_CURSES:
-        curses_display_init(ds, full_screen);
-        break;
-    case DT_SDL:
-        sdl_display_init(ds, full_screen, no_frame);
-        break;
-    case DT_COCOA:
-        cocoa_display_init(ds, full_screen);
-        break;
-    case DT_GTK:
-        gtk_display_init(ds, full_screen, grab_on_hover);
-        break;
-    default:
-        break;
-    }
+    ds = init_displaystate();
+    qemu_display_init(ds, &dpy);
 
     /* must be after terminal init, SDL library changes signal handlers */
     os_setup_signal_handling();
@@ -5609,7 +5831,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
        reading from the other reads, because timer polling functions query
        clock values from the log. */
     replay_checkpoint(CHECKPOINT_RESET);
-    qemu_system_reset(VMRESET_SILENT);
+    qemu_system_reset(SHUTDOWN_CAUSE_NONE);
     register_global_state();
 
     bool tryDefaultVmLoad = true;
@@ -5631,8 +5853,15 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
     if (replay_mode != REPLAY_MODE_NONE) {
         replay_vmstate_init();
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
     } else if (tryDefaultVmLoad && loadvm) {
         if (load_vmstate(loadvm) < 0) {
+=======
+    } else if (loadvm) {
+        Error *local_err = NULL;
+        if (load_snapshot(loadvm, &local_err) < 0) {
+            error_report_err(local_err);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
             autostart = 0;
         }
     }
@@ -5661,9 +5890,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     skin_winsys_report_entering_main_loop();
 #endif
     main_loop();
-    replay_disable_events();
-    iothread_stop_all();
 
+    gdbserver_cleanup();
+
+    /* No more vcpu or device emulation activity beyond this point */
+    vm_shutdown();
+
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #ifdef CONFIG_ANDROID
     android_report_session_phase(ANDROID_SESSION_PHASE_EXIT);
     crashhandler_exitmode("after main_loop");
@@ -5677,6 +5910,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     if (on_main_loop_done) {
         on_main_loop_done();
     }
+=======
+    bdrv_close_all();
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
     res_free();
 #ifdef CONFIG_TPM
@@ -5690,10 +5926,14 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
 
     /* vhost-user must be cleaned up before chardevs.  */
+    tpm_cleanup();
     net_cleanup();
     audio_cleanup();
     monitor_cleanup();
     qemu_chr_cleanup();
+    user_creatable_cleanup();
+    migration_object_finalize();
+    /* TODO: unref root container, check all devices are ok */
 
     if (qemu_mutex_iothread_locked()) {
         qemu_mutex_unlock_iothread();

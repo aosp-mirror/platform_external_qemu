@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 /*
  *  Host code generation
  *
@@ -2218,3 +2219,5 @@ int page_unprotect(target_ulong address, uintptr_t pc)
     return 0;
 }
 #endif /* CONFIG_USER_ONLY */
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

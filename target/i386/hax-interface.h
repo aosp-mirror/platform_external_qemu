@@ -369,8 +369,11 @@ struct hax_protect_ram_info {
 #define HAX_CAP_MEMQUOTA           0x2
 #define HAX_CAP_UG                 0x4
 #define HAX_CAP_64BIT_RAMBLOCK     0x8
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 #define HAX_CAP_64BIT_SETRAM       0x10
 #define HAX_CAP_RAM_PROTECTION     0x20
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
 struct hax_capabilityinfo {
     /* bit 0: 1 - working

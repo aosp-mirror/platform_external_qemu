@@ -22,23 +22,27 @@
 #ifndef QEMU_HAX_H
 #define QEMU_HAX_H
 
-#include "config-host.h"
 #include "qemu-common.h"
 
 int hax_sync_vcpus(void);
 int hax_init_vcpu(CPUState *cpu);
 int hax_vcpu_exec(CPUState *cpu);
 int hax_smp_cpu_exec(CPUState *cpu);
+<<<<<<< HEAD   (40a6f3 Merge "[snapshot] Tweak message about slow saves" into emu-m)
 int hax_vcpu_emulation_mode(CPUState *cpu);
 int hax_stop_emulation(CPUState *cpu);
 int hax_stop_translate(CPUState *cpu);
 int hax_populate_ram(uint64_t va, uint64_t size);
 int hax_gpa_protect(uint64_t va, uint64_t size, uint64_t flags);
 bool hax_gpa_protection_supported(void);
+=======
+int hax_populate_ram(uint64_t va, uint64_t size);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
 void hax_cpu_synchronize_state(CPUState *cpu);
 void hax_cpu_synchronize_post_reset(CPUState *cpu);
 void hax_cpu_synchronize_post_init(CPUState *cpu);
+void hax_cpu_synchronize_pre_loadvm(CPUState *cpu);
 
 void* hax_gpa2hva(uint64_t gpa, bool* found);
 int hax_hva2gpa(void* hva, uint64_t length, int array_size,
