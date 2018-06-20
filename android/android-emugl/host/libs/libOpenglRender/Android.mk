@@ -108,6 +108,7 @@ LOCAL_SRC_FILES := \
     tests/angle-util/OSWindow.cpp \
     tests/FrameBuffer_unittest.cpp \
     tests/GLSnapshot_unittest.cpp \
+    tests/GLSnapshotBuffers_unittest.cpp \
     tests/GLSnapshotTesting.cpp \
     tests/GLSnapshotTransformation_unittest.cpp \
     tests/GLSnapshotRasterization_unittest.cpp \
