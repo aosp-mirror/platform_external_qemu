@@ -56,8 +56,8 @@ protected:
                 (FBNativeWindowType)(uintptr_t)
                 mWindow->getFramebufferNativeWindow(),
                 0, 0,
-                mWidth, mHeight, mWidth, mHeight, 1.0, 0, false);
-
+                mWidth, mHeight, mWidth, mHeight,
+                mWindow->getDevicePixelRatio(), 0, false);
             mWindow->messageLoop();
         } else {
             EXPECT_TRUE(
@@ -149,6 +149,80 @@ TEST_F(FrameBufferTest, CreateOpenUpdateCloseColorBuffer_FormatChange) {
     EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(), forRead.data()));
 
     mFb->closeColorBuffer(handle);
+}
+
+TEST_F(FrameBufferTest, Configs) {
+    const FbConfigList* configs = mFb->getConfigs();
+    EXPECT_GE(configs->size(), 0);
+}
+
+TEST_F(FrameBufferTest, CreateRenderContext) {
+    HandleType handle = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    EXPECT_NE(0, handle);
+}
+
+TEST_F(FrameBufferTest, CreateWindowSurface) {
+    HandleType handle = mFb->createWindowSurface(0, mWidth, mHeight);
+    EXPECT_NE(0, handle);
+}
+
+TEST_F(FrameBufferTest, CreateBindRenderContext) {
+    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+}
+
+TEST_F(FrameBufferTest, BasicBlit) {
+    auto gl = LazyLoadedGLESv2Dispatch::get();
+
+    HandleType colorBuffer =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
+
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+    EXPECT_TRUE(mFb->setWindowSurfaceColorBuffer(surface, colorBuffer));
+
+    float colors[3][4] = {
+        { 1.0f, 0.0f, 0.0f, 1.0f},
+        { 0.0f, 1.0f, 0.0f, 1.0f},
+        { 0.0f, 0.0f, 1.0f, 1.0f},
+    };
+
+    for (int i = 0; i < 3; i++) {
+        float* color = colors[i];
+
+        gl->glClearColor(color[0], color[1], color[2], color[3]);
+        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mFb->flushWindowSurfaceColorBuffer(surface);
+
+        TestTexture targetBuffer =
+            createTestTextureRGBA8888SingleColor(
+                mWidth, mHeight, color[0], color[1], color[2], color[3]);
+
+        TestTexture forRead =
+            createTestTextureRGBA8888SingleColor(
+                mWidth, mHeight, 0.0f, 0.0f, 0.0f, 0.0f);
+
+        mFb->readColorBuffer(
+            colorBuffer, 0, 0, mWidth, mHeight,
+            GL_RGBA, GL_UNSIGNED_BYTE, forRead.data());
+
+        EXPECT_TRUE(
+            ImageMatches(
+                mWidth, mHeight, 4, mWidth,
+                targetBuffer.data(), forRead.data()));
+
+        if (mUseSubWindow) {
+            mFb->post(colorBuffer);
+            mWindow->messageLoop();
+        }
+    }
+
+    EXPECT_TRUE(mFb->bindContext(0, 0, 0));
+    mFb->closeColorBuffer(colorBuffer);
+    mFb->closeColorBuffer(colorBuffer);
+    mFb->DestroyWindowSurface(surface);
 }
 
 }  // namespace emugl

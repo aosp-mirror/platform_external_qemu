@@ -607,6 +607,11 @@ void* OSXWindow::getFramebufferNativeWindow() const
     return static_cast<void*>(mWindow);
 }
 
+float OSXWindow::getDevicePixelRatio() const
+{
+    return [[NSScreen mainScreen] backingScaleFactor];
+}
+
 void OSXWindow::messageLoop()
 {
     @autoreleasepool
