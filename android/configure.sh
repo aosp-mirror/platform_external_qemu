@@ -257,6 +257,7 @@ OPTION_BENCHMARKS=no
 OPTION_LTO=
 OPTION_SNAPSHOT_PROFILE=no
 OPTION_MIN_BUILD=no
+OPTION_AEMU_ONLY=no
 OPTION_TRACE=no
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
@@ -359,6 +360,8 @@ for opt do
   --snapshot-profile-level=*) OPTION_SNAPSHOT_PROFILE=$optarg
   ;;
   -min|--min-build) OPTION_MIN_BUILD=yes
+  ;;
+  -aemuonly|--aemu-only) OPTION_AEMU_ONLY=yes
   ;;
   *)
     echo "unknown option '$opt', use --help"
@@ -825,6 +828,10 @@ case $HOST_OS in
         ;;
 esac
 
+if [ "$OPTION_AEMU_ONLY" == "yes" ]; then
+    PREBUILT_ARCHS="x86_64"
+fi
+
 ###
 ### Copy ANGLE if available
 ###
@@ -852,14 +859,12 @@ if [ -d $ANGLE_PREBUILTS_DIR ]; then
                 fi
                 ANGLE_LIBNAME=$LIBNAME$ANGLE_SUFFIX
                 ANGLE_SRCDIR=$ANGLE_PREBUILTS_DIR/$ANGLE_HOST-$ANGLE_ARCH
-                for ANGLE_DX in 9 ""; do
-                    ANGLE_DSTDIR="$OUT_DIR/$ANGLE_LIBDIR/gles_angle$ANGLE_DX"
-                    ANGLE_DSTLIB="$ANGLE_LIBNAME"
-                    if [ -f "$ANGLE_SRCDIR/lib/dx$ANGLE_DX/$ANGLE_LIBNAME" ]; then
-                        install_prebuilt_dll "$ANGLE_SRCDIR/lib/dx$ANGLE_DX/$ANGLE_LIBNAME" \
-                                         "$ANGLE_DSTDIR/$ANGLE_DSTLIB"
-                    fi
-                done
+                ANGLE_DSTDIR="$OUT_DIR/$ANGLE_LIBDIR/gles_angle$ANGLE_DX"
+                ANGLE_DSTLIB="$ANGLE_LIBNAME"
+                if [ -f "$ANGLE_SRCDIR/lib/dx$ANGLE_DX/$ANGLE_LIBNAME" ]; then
+                    install_prebuilt_dll "$ANGLE_SRCDIR/lib/dx$ANGLE_DX/$ANGLE_LIBNAME" \
+                                     "$ANGLE_DSTDIR/$ANGLE_DSTLIB"
+                fi
             done
         done
     fi
@@ -910,7 +915,7 @@ fi
 ###  Copy Mesa if available
 ###
 MESA_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/mesa
-if [ -d $MESA_PREBUILTS_DIR ]; then
+if [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU_ONLY" == "no"]; then
     log "Copying Mesa prebuilt libraries from $MESA_PREBUILTS_DIR"
     case $HOST_OS in
         windows)
@@ -1136,6 +1141,9 @@ fi
 
 if [ "$OPTION_MIN_BUILD" = "yes" ]; then
     echo "CONFIG_MIN_BUILD  := true" >> $config_mk
+fi
+if [ "$OPTION_AEMU_ONLY" = "yes" ]; then
+    echo "CONFIG_AEMU_ONLY  := true" >> $config_mk
 fi
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk
