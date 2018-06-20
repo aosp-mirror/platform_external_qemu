@@ -910,21 +910,7 @@ public:
     }
 
     std::string envGet(StringView varname) const override {
-#ifdef _WIN32
-        Win32UnicodeString varname_unicode(varname);
-        const wchar_t* value = _wgetenv(varname_unicode.c_str());
-        if (!value) {
-            return std::string();
-        } else {
-            return Win32UnicodeString::convertToUtf8(value);
-        }
-#else
-        const char* value = getenv(varname.c_str());
-        if (!value) {
-            value = "";
-        }
-        return std::string(value);
-#endif
+        return getEnvironmentVariable(varname);
     }
 
     void envSet(StringView varname, StringView varvalue) override {
@@ -2245,6 +2231,25 @@ bool System::isUnderDiskPressure(StringView path, System::FileSize* freeDisk) {
     }
 
     return false;
+}
+
+// static
+std::string System::getEnvironmentVariable(StringView varname) {
+#ifdef _WIN32
+    Win32UnicodeString varname_unicode(varname);
+    const wchar_t* value = _wgetenv(varname_unicode.c_str());
+    if (!value) {
+        return std::string();
+    } else {
+        return Win32UnicodeString::convertToUtf8(value);
+    }
+#else
+    const char* value = getenv(varname.c_str());
+    if (!value) {
+        value = "";
+    }
+    return std::string(value);
+#endif
 }
 
 std::string toString(OsType osType) {
