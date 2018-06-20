@@ -44,6 +44,69 @@ host_common_SRC_FILES := \
     WindowSurface.cpp \
     YUVConverter.cpp \
 
+# Common configuration for standalone apps such as tests and samples############
+standalone_common_SRC_FILES := \
+    $(host_common_SRC_FILES) \
+    ../Translator/GLES_V2/ANGLEShaderParser.cpp \
+    standalone_common/angle-util/OSWindow.cpp \
+    standalone_common/SampleApplication.cpp \
+    standalone_common/SearchPathsSetup.cpp \
+    standalone_common/ShaderUtils.cpp \
+
+ifeq ($(BUILD_TARGET_OS),linux)
+    standalone_common_SRC_FILES += standalone_common/angle-util/x11/X11Window.cpp
+endif
+
+ifeq ($(BUILD_TARGET_OS),darwin)
+    standalone_common_SRC_FILES += standalone_common/angle-util/osx/OSXWindow.mm
+endif
+
+ifeq ($(BUILD_TARGET_OS),windows)
+    standalone_common_SRC_FILES += standalone_common/angle-util/windows/WindowsTimer.cpp
+    standalone_common_SRC_FILES += standalone_common/angle-util/windows/win32/Win32Window.cpp
+endif
+
+standalone_common_LDLIBS := -lm
+
+ifeq ($(BUILD_TARGET_OS),linux)
+    standalone_common_LDLIBS += -lX11 -lrt
+endif
+
+ifeq ($(BUILD_TARGET_OS),darwin)
+    standalone_common_LDLIBS += -Wl,-framework,AppKit
+endif
+
+ifeq ($(BUILD_TARGET_OS),windows)
+    standalone_common_LDLIBS += -lgdi32
+endif
+
+standalone_common_LDFLAGS :=
+
+ifeq ($(BUILD_TARGET_OS),darwin)
+    standalone_common_LDFLAGS += -Wl,-headerpad_max_install_names
+endif
+
+standalone_common_C_INCLUDES := \
+    $(LOCAL_PATH) \
+    $(EMUGL_PATH)/host/include \
+    $(EMUGL_PATH)/host/libs/Translator/include \
+    $(EMUGL_PATH)/host/libs/Translator/GLES_V2/ \
+    $(EMUGL_PATH)/host/libs/libOpenGLESDispatch \
+    $(EMUGL_PATH)/host/include/OpenGLESDispatch \
+    $(EMUGL_PATH)/host/libs/libGLSnapshot \
+    $(ANGLE_TRANSLATION_INCLUDES) \
+    $(EMUGL_PATH)/host/libs/libOpenglRender/standalone_common \
+    $(EMUGL_PATH)/host/libs/libOpenglRender/standalone_common/angle-util \
+
+standalone_common_STATIC_LIBRARIES := \
+    $(ANGLE_TRANSLATION_STATIC_LIBRARIES) \
+    libOpenGLESDispatch \
+    libGLSnapshot \
+    libemugl_common \
+    android-emu \
+    android-emu-base \
+    emulator-lz4 \
+
 ### host libOpenglRender #################################################
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
 
@@ -70,42 +133,29 @@ $(call emugl-export,CFLAGS,$(EMUGL_USER_CFLAGS))
 
 $(call emugl-end-module)
 
-### OpenglRender unittests
-$(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_unittests)
-$(call emugl-import,libOpenglCodecCommon)
+# standalone static library for tests and samples###############################
+$(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender_standalone_common)
+$(call emugl-import,libOpenglCodecCommon libemugl_gtest)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
 
-$(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include)
-$(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
-$(call emugl-export,LDLIBS,-lm)
-
-ifeq ($(BUILD_TARGET_OS),linux)
-LOCAL_LDFLAGS += -Wl,-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX),-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader
-endif
-
-# use Translator's egl/gles headers
-LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
-LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/GLES_V2/
-LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libOpenGLESDispatch
-LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/include/OpenGLESDispatch
-LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libGLSnapshot
-LOCAL_C_INCLUDES += $(ANGLE_TRANSLATION_INCLUDES)
-LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libOpenglRender/tests/angle-util
-LOCAL_STATIC_LIBRARIES += $(ANGLE_TRANSLATION_STATIC_LIBRARIES)
-LOCAL_STATIC_LIBRARIES += libOpenGLESDispatch
-LOCAL_STATIC_LIBRARIES += libGLSnapshot
-LOCAL_STATIC_LIBRARIES += libemugl_common
-LOCAL_STATIC_LIBRARIES += android-emu
-LOCAL_STATIC_LIBRARIES += android-emu-base
-LOCAL_STATIC_LIBRARIES += emulator-lz4
-
-LOCAL_SYMBOL_FILE := render_api.entries
-
-LOCAL_INSTALL_OPENGL := true
+LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)
+LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)
 
 LOCAL_SRC_FILES := \
-    $(host_common_SRC_FILES) \
-    ../Translator/GLES_V2/ANGLEShaderParser.cpp \
-    tests/angle-util/OSWindow.cpp \
+    $(standalone_common_SRC_FILES) \
+
+LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)
+
+$(call emugl-end-module)
+
+# Tests#########################################################################
+$(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_unittests)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_standalone_common libemugl_gtest)
+
+LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)
+LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)
+
+LOCAL_SRC_FILES := \
     tests/FrameBuffer_unittest.cpp \
     tests/GLSnapshot_unittest.cpp \
     tests/GLSnapshotTesting.cpp \
@@ -115,29 +165,38 @@ LOCAL_SRC_FILES := \
     tests/GLSnapshotPixelOperations_unittest.cpp \
     tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotVertexAttributes_unittest.cpp \
-    tests/GLTestGlobals.cpp \
     tests/GLTestUtils.cpp \
     tests/OpenGL_unittest.cpp \
     tests/OpenGLTestContext.cpp \
     tests/StalePtrRegistry_unittest.cpp \
     tests/TextureDraw_unittest.cpp \
 
+LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)
+LOCAL_LDLIBS += $(standalone_common_LDLIBS)
+
+LOCAL_INSTALL_OPENGL := true
 ifeq ($(BUILD_TARGET_OS),linux)
-    LOCAL_SRC_FILES += tests/angle-util/x11/X11Window.cpp
-    LOCAL_LDLIBS += -lX11 -lrt
+LOCAL_LDFLAGS += -Wl,-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX),-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader
 endif
-
-ifeq ($(BUILD_TARGET_OS),darwin)
-    LOCAL_SRC_FILES += tests/angle-util/osx/OSXWindow.mm
-    LOCAL_LDLIBS += -Wl,-framework,AppKit
-	LOCAL_LDFLAGS += -Wl,-headerpad_max_install_names
-endif
-
-ifeq ($(BUILD_TARGET_OS),windows)
-    LOCAL_SRC_FILES += tests/angle-util/windows/WindowsTimer.cpp
-    LOCAL_SRC_FILES += tests/angle-util/windows/win32/Win32Window.cpp
-    LOCAL_LDLIBS += -lgdi32
-endif
-
-$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender libemugl_gtest)
 $(call emugl-end-module)
+
+# Samples#######################################################################
+
+make_sample = \
+    $(eval $(call emugl-begin-executable, $1)) \
+    $(eval $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_standalone_common)) \
+    $(eval LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)) \
+    $(eval LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)) \
+    $(eval LOCAL_SRC_FILES := samples/$1.cpp) \
+    $(eval LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)) \
+    $(eval LOCAL_INSTALL_OPENGL := true) \
+    $(eval LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)) \
+    $(eval LOCAL_LDLIBS += $(standalone_common_LDLIBS)) \
+    $(eval $(call emugl-end-module)) \
+
+# Only build samples on 64-bit hosts
+ifeq ($(BUILD_TARGET_SUFFIX),64)
+
+$(call make_sample,HelloTriangle)
+
+endif

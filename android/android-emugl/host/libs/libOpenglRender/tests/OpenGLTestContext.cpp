@@ -16,9 +16,9 @@
 
 #include "OpenGLTestContext.h"
 
-#include "GLTestGlobals.h"
+#include "Standalone.h"
 
-namespace gltest {
+namespace emugl {
 
 static bool sDisplayNeedsInit = true;
 
@@ -117,6 +117,8 @@ void destroyDisplay(EGLDisplay dpy) {
 }
 
 void GLTest::SetUp() {
+    setupStandaloneLibrarySearchPaths();
+
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
     gl = LazyLoadedGLESv2Dispatch::get();
     EXPECT_TRUE(egl != nullptr);
@@ -124,8 +126,8 @@ void GLTest::SetUp() {
 
     m_display = getDisplay();
     m_config = createConfig(m_display, 8, 8, 8, 8, 24, 8, 0);
-    m_surface = pbufferSurface(m_display, m_config, kSurfaceSize[0],
-                               kSurfaceSize[1]);
+    m_surface = pbufferSurface(m_display, m_config, kTestSurfaceSize[0],
+                               kTestSurfaceSize[1]);
     egl->eglSetMaxGLESVersion(3);
     m_context = createContext(m_display, m_config, 3, 0);
     egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
@@ -140,4 +142,4 @@ void GLTest::TearDown() {
     destroyDisplay(m_display);
 }
 
-} // namespace gltest
+} // namespace emugl

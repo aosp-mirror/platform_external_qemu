@@ -14,6 +14,13 @@
 
 #include "emugl/common/shared_library.h"
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/FunctionView.h"
+#include "android/base/memory/LazyInstance.h"
+
+#include <functional>
+#include <vector>
+
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
@@ -23,7 +30,32 @@
 #include <stdlib.h>
 #endif
 
+using android::base::FunctionView;
+using android::base::LazyInstance;
+using android::base::PathUtils;
+
 namespace emugl {
+
+class LibrarySearchPaths {
+public:
+    LibrarySearchPaths() = default;
+
+    void addPath(const char* path) {
+        fprintf(stderr, "%s: add %s\n", __func__, path);
+        mPaths.push_back(path);
+    }
+
+    void forEachPath(FunctionView<void(const std::string&)> func) {
+        for (const auto& path: mPaths) {
+            func(path);
+        }
+    }
+
+private:
+    std::vector<std::string> mPaths;
+};
+
+static LazyInstance<LibrarySearchPaths> sSearchPaths = LAZY_INSTANCE_INIT;
 
 SharedLibrary::LibraryMap SharedLibrary::s_libraryMap = LibraryMap();
 
@@ -57,7 +89,21 @@ SharedLibrary* SharedLibrary::open(const char* libraryName,
 SharedLibrary* SharedLibrary::do_open(const char* libraryName,
                                    char* error,
                                    size_t errorSize) {
+    fprintf(stderr, "%s: search %s\n", __func__, libraryName);
     HMODULE lib = LoadLibrary(libraryName);
+    fprintf(stderr, "%s: result %p\n", __func__, lib);
+
+    // Try a bit harder to find the shared library if we cannot find it.
+    if (!lib) {
+        sSearchPaths->forEachPath([&lib, libraryName](const std::string& path) {
+            if (!lib) {
+                auto libName = PathUtils::join(path, libraryName);
+            fprintf(stderr, "%s: alt path %s wanted %s\n", __func__, libName.c_str(), libraryName);
+                lib = LoadLibrary(libName.c_str());
+            }
+        });
+    }
+
     if (lib) {
         return new SharedLibrary(lib);
     }
@@ -155,10 +201,28 @@ SharedLibrary* SharedLibrary::do_open(const char* libraryName,
     void* lib = dlopen(libraryName, RTLD_NOW);
     if (lib == NULL) {
         lib = dlopen(libPath, RTLD_NOW);
+
+        sSearchPaths->forEachPath([&lib, libraryName, libPath](const std::string& path) {
+            if (!lib) {
+                auto libName = PathUtils::join(path, libraryName);
+                lib = dlopen(libName.c_str(), RTLD_NOW);
+                if (!lib) {
+                    auto libPathName = PathUtils::join(path, libPath);
+                    lib = dlopen(libPathName.c_str(), RTLD_NOW);
+                }
+            }
+        });
     }
 #else
     void* lib = dlopen(libPath, RTLD_NOW);
 #endif
+
+    sSearchPaths->forEachPath([&lib, libPath](const std::string& path) {
+        if (!lib) {
+            auto libPathName = PathUtils::join(path, libPath);
+            lib = dlopen(libPathName.c_str(), RTLD_NOW);
+        }
+    });
 
     if (path) {
         free(path);
@@ -189,5 +253,10 @@ SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
 }
 
 #endif  // !_WIN32
+
+// static
+void SharedLibrary::addLibrarySearchPath(const char* path) {
+    sSearchPaths->addPath(path);
+}
 
 }  // namespace emugl
