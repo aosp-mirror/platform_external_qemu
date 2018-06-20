@@ -162,9 +162,13 @@ endef
 endif  # BUILD_TARGET_OS == windows
 
 include $(LOCAL_PATH)/android/android-emu/Makefile.android-emu.mk
-include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
+
+ifeq (,$(CONFIG_AEMU64_ONLY))
+    include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
+endif   # !CONFIG_MIN_BUILD
 
 ifeq (,$(CONFIG_MIN_BUILD))
+ifeq (,$(CONFIG_AEMU64_ONLY))
     include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-common.mk
 
     # We want to build all variants of the emulator binaries. This makes
@@ -178,6 +182,7 @@ ifeq (,$(CONFIG_MIN_BUILD))
 
     EMULATOR_TARGET_ARCH := mips
     include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+endif   # !CONFIG_AEMU64_ONLY
 endif   # !CONFIG_MIN_BUILD
 
 ##############################################################################
@@ -185,6 +190,8 @@ endif   # !CONFIG_MIN_BUILD
 ###
 ###  emulator: LAUNCHER FOR TARGET-SPECIFIC EMULATOR
 ###
+
+ifeq (,$(CONFIG_AEMU64_ONLY))
 
 # NOTE: Build as 32-bit or 64-bit executable, depending on the value of
 #       EMULATOR_PROGRAM_BITNESS.
@@ -254,6 +261,8 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     $(call end-emulator-program)
 endif  # BUILD_TARGET_BITS == EMULATOR_PROGRAM_BITNESS
 
+endif # !CONFIG_AEMU64_ONLY
+
 ##############################################################################
 ##############################################################################
 ###
@@ -267,5 +276,7 @@ include $(EMUGL_SRCDIR)/Android.mk
 ###  QEMU2
 ###
 ifdef QEMU2_TOP_DIR
+ifeq (,$(CONFIG_AEMU64_ONLY))
 include $(QEMU2_TOP_DIR)/android-qemu2-glue/build/Makefile.qemu2.mk
+endif # !CONFIG_AEMU64_ONLY
 endif

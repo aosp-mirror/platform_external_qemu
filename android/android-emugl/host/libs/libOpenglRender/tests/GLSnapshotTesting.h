@@ -26,6 +26,11 @@
 
 namespace emugl {
 
+struct GlValues {
+    std::vector<GLint> ints;
+    std::vector<GLfloat> floats;
+};
+
 struct GlSampleCoverage {
     GLclampf value;
     GLboolean invert;
@@ -212,7 +217,7 @@ public:
 
     void doCheckedSnapshot() override {
         if (m_default_value == nullptr || m_changed_value == nullptr) {
-            ADD_FAILURE() << "Snapshot test not provided expected values.";
+            FAIL() << "Snapshot test not provided expected values.";
         }
         SnapshotPreserveTest::doCheckedSnapshot();
     }

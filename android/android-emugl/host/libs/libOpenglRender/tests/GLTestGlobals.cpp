@@ -63,9 +63,9 @@ public:
 static LazyInstance<TestWindow> sTestWindow = LAZY_INSTANCE_INIT;
 
 bool shouldUseHostGpu() {
-    // Also set the global emugl renderer accordingly.
-    bool useHost = System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
+    bool useHost = System::getEnvironmentVariable("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
 
+    // Also set the global emugl renderer accordingly.
     if (useHost) {
         emugl::setRenderer(SELECTED_RENDERER_HOST);
     } else {
@@ -75,7 +75,14 @@ bool shouldUseHostGpu() {
     return useHost;
 }
 
+bool shouldUseWindow() {
+    bool useWindow = System::getEnvironmentVariable("ANDROID_EMU_TEST_WITH_WINDOW") == "1";
+    return useWindow;
+}
+
 OSWindow* createOrGetTestWindow(int xoffset, int yoffset, int width, int height) {
+    if (!shouldUseWindow()) return nullptr;
+
     if (!sTestWindow.hasInstance()) {
         sTestWindow.get();
         sTestWindow->initializeWithRect(xoffset, yoffset, width, height);
