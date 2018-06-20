@@ -75,7 +75,7 @@ public:
         checkParameter(GL_SHADER_SOURCE_LENGTH, m_shader_state.sourceLength);
     }
 
-    virtual void stateChange() override {
+    void stateChange() override {
         m_shader_name = gl->glCreateShader(m_shader_state.type);
         m_shader_state_changer();
     }
