@@ -46,6 +46,30 @@
       "revId": "c899921376aba360d640e68f65046091c0457b56",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "edb673a9_a3c7abc5",
+        "filename": "android/android-emu/android/base/misc/FileUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-20T16:53:01Z",
+      "side": 1,
+      "message": "Actually the problem is 0x1a 0x0 which is interpreted as the end of the file on Windows",
+      "parentUuid": "b7c4bbee_587dd772",
+      "range": {
+        "startLine": 37,
+        "startChar": 3,
+        "endLine": 44,
+        "endChar": 5
+      },
+      "revId": "c899921376aba360d640e68f65046091c0457b56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
