@@ -176,6 +176,10 @@ ExtendedWindow::ExtendedWindow(
             SIGNAL(coarseOrientationChanged(SkinRotation)),
             eW,
             SLOT(rotateSkin(SkinRotation)));
+    connect(mExtendedUi->location_page,
+            SIGNAL(targetHeadingChanged(double)),
+            mExtendedUi->virtualSensorsPage,
+            SLOT(setTargetHeadingDegrees(double)));
 
     const auto enableClipboardSharing =
             settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
