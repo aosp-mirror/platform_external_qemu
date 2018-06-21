@@ -109,7 +109,7 @@ static int net_dump_state_init(DumpState *s, const char *filename,
 
     fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0644);
     if (fd < 0) {
-        error_setg_errno(errp, errno, "-net dump: can't open %s", filename);
+        error_setg_errno(errp, errno, "net dump: can't open %s", filename);
         return -1;
     }
 
@@ -122,7 +122,7 @@ static int net_dump_state_init(DumpState *s, const char *filename,
     hdr.linktype = 1;
 
     if (write(fd, &hdr, sizeof(hdr)) < sizeof(hdr)) {
-        error_setg_errno(errp, errno, "-net dump write error");
+        error_setg_errno(errp, errno, "net dump write error");
         close(fd);
         return -1;
     }
@@ -136,6 +136,7 @@ static int net_dump_state_init(DumpState *s, const char *filename,
     return 0;
 }
 
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 /* Dumping via VLAN netclient */
 
 struct DumpNetClient {
@@ -232,6 +233,8 @@ int net_init_dump(const Netdev *netdev, const char *name,
 
 /* Dumping via filter */
 
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 #define TYPE_FILTER_DUMP "filter-dump"
 
 #define FILTER_DUMP(obj) \
@@ -326,7 +329,7 @@ static void filter_dump_instance_init(Object *obj)
 
     nfds->maxlen = 65536;
 
-    object_property_add(obj, "maxlen", "int", filter_dump_get_maxlen,
+    object_property_add(obj, "maxlen", "uint32", filter_dump_get_maxlen,
                         filter_dump_set_maxlen, NULL, NULL, NULL);
     object_property_add_str(obj, "file", file_dump_get_filename,
                             file_dump_set_filename, NULL);

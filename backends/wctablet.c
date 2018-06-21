@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 /*
  * QEMU Wacom Penpartner serial tablet emulation
  *
@@ -367,3 +368,5 @@ static void register_types(void)
 }
 
 type_init(register_types);
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

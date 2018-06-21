@@ -36,24 +36,19 @@
  */
 
 #include "qemu/osdep.h"
-#include "hw/sysbus.h"
-#include "net/net.h"
 #include "qemu/timer.h"
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 #include "qemu/sockets.h"
 #include "hw/sparc/sun4m.h"
 #include "pcnet.h"
 #include "hw/net/trace.h"
+=======
+#include "hw/sparc/sparc32_dma.h"
+#include "hw/net/lance.h"
+#include "trace.h"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 #include "sysemu/sysemu.h"
 
-#define TYPE_LANCE "lance"
-#define SYSBUS_PCNET(obj) \
-    OBJECT_CHECK(SysBusPCNetState, (obj), TYPE_LANCE)
-
-typedef struct {
-    SysBusDevice parent_obj;
-
-    PCNetState state;
-} SysBusPCNetState;
 
 static void parent_lance_reset(void *opaque, int irq, int level)
 {
@@ -165,7 +160,7 @@ static void lance_class_init(ObjectClass *klass, void *data)
     dc->vmsd = &vmstate_lance;
     dc->props = lance_properties;
     /* Reason: pointer property "dma" */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo lance_info = {
