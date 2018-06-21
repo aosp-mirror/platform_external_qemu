@@ -22,6 +22,30 @@
       "revId": "2a9f948d54ddf31419c899fc21fa2887bf5d1d9e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3054c98c_96d383cf",
+        "filename": "android/android-emu/android/utils/filelock_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-21T19:11:50Z",
+      "side": 1,
+      "message": "Because of the grammar of pipe() we cannot do it easily :(\n\n(pipe() takes int[2] as input. what\u0027s worse, we need to pair mChildSendPipe with mParentRecvPipe in pipe() :o",
+      "parentUuid": "78274c5c_d4dd0b3d",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 27
+      },
+      "revId": "2a9f948d54ddf31419c899fc21fa2887bf5d1d9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
