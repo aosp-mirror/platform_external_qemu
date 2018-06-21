@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "53df3ac2_ba19f090",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-06-21T21:31:05Z",
+      "side": 1,
+      "message": "More info than I want to know!",
+      "parentUuid": "806ac2e6_7a1d7e60",
+      "range": {
+        "startLine": 759,
+        "startChar": 0,
+        "endLine": 762,
+        "endChar": 33
+      },
+      "revId": "c6e2245a21c95ba049276adcfa7592b6fa610f0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56e55fb3_b2d1c2d4",
         "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "c6e2245a21c95ba049276adcfa7592b6fa610f0b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "176f6b08_2a0a05b5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 771,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-06-21T21:31:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56e55fb3_b2d1c2d4",
+      "range": {
+        "startLine": 771,
+        "startChar": 11,
+        "endLine": 771,
+        "endChar": 19
+      },
+      "revId": "c6e2245a21c95ba049276adcfa7592b6fa610f0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
