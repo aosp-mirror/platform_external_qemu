@@ -1145,7 +1145,7 @@ if [ "$OPTION_MIN_BUILD" = "yes" ]; then
     echo "CONFIG_MIN_BUILD  := true" >> $config_mk
 fi
 if [ "$OPTION_AEMU64_ONLY" = "yes" ]; then
-    echo "CONFIG_AEMU64_only  := true" >> $config_mk
+    echo "CONFIG_AEMU64_ONLY  := true" >> $config_mk
 fi
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk
