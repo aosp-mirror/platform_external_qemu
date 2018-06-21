@@ -25,7 +25,7 @@
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "sysemu/sysemu.h"
-#include "hw/timer/trace.h"
+#include "trace.h"
 #include "qemu/timer.h"
 #include "hw/ptimer.h"
 #include "qemu/error-report.h"
@@ -90,7 +90,7 @@ static void sysctl_icap_write(MilkymistSysctlState *s, uint32_t value)
     trace_milkymist_sysctl_icap_write(value);
     switch (value & 0xffff) {
     case 0x000e:
-        qemu_system_shutdown_request();
+        qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
         break;
     }
 }
@@ -195,7 +195,7 @@ static void sysctl_write(void *opaque, hwaddr addr, uint64_t value,
         s->regs[addr] = 1;
         break;
     case R_SYSTEM_ID:
-        qemu_system_reset_request();
+        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         break;
 
     case R_GPIO_IN:

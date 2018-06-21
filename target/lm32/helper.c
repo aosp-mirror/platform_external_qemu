@@ -25,7 +25,7 @@
 #include "exec/semihost.h"
 #include "exec/log.h"
 
-int lm32_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int rw,
+int lm32_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int size, int rw,
                               int mmu_idx)
 {
     LM32CPU *cpu = LM32_CPU(cs);
@@ -217,11 +217,6 @@ bool lm32_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
         return true;
     }
     return false;
-}
-
-LM32CPU *cpu_lm32_init(const char *cpu_model)
-{
-    return LM32_CPU(cpu_generic_init(TYPE_LM32_CPU, cpu_model));
 }
 
 /* Some soc ignores the MSB on the address bus. Thus creating a shadow memory

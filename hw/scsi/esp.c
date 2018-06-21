@@ -26,8 +26,7 @@
 #include "qemu/osdep.h"
 #include "hw/sysbus.h"
 #include "hw/scsi/esp.h"
-#include "hw/scsi/trace.h"
-#include "qapi/error.h"
+#include "trace.h"
 #include "qemu/log.h"
 
 /*
@@ -592,19 +591,6 @@ const VMStateDescription vmstate_esp = {
     }
 };
 
-#define TYPE_ESP "esp"
-#define ESP(obj) OBJECT_CHECK(SysBusESPState, (obj), TYPE_ESP)
-
-typedef struct {
-    /*< private >*/
-    SysBusDevice parent_obj;
-    /*< public >*/
-
-    MemoryRegion iomem;
-    uint32_t it_shift;
-    ESPState esp;
-} SysBusESPState;
-
 static void sysbus_esp_mem_write(void *opaque, hwaddr addr,
                                  uint64_t val, unsigned int size)
 {
@@ -632,11 +618,11 @@ static const MemoryRegionOps sysbus_esp_mem_ops = {
     .valid.accepts = esp_mem_accepts,
 };
 
-void esp_init(hwaddr espaddr, int it_shift,
-              ESPDMAMemoryReadWriteFunc dma_memory_read,
-              ESPDMAMemoryReadWriteFunc dma_memory_write,
-              void *dma_opaque, qemu_irq irq, qemu_irq *reset,
-              qemu_irq *dma_enable)
+ESPState *esp_init(hwaddr espaddr, int it_shift,
+                   ESPDMAMemoryReadWriteFunc dma_memory_read,
+                   ESPDMAMemoryReadWriteFunc dma_memory_write,
+                   void *dma_opaque, qemu_irq irq, qemu_irq *reset,
+                   qemu_irq *dma_enable)
 {
     DeviceState *dev;
     SysBusDevice *s;
@@ -644,7 +630,7 @@ void esp_init(hwaddr espaddr, int it_shift,
     ESPState *esp;
 
     dev = qdev_create(NULL, TYPE_ESP);
-    sysbus = ESP(dev);
+    sysbus = ESP_STATE(dev);
     esp = &sysbus->esp;
     esp->dma_memory_read = dma_memory_read;
     esp->dma_memory_write = dma_memory_write;
@@ -658,6 +644,8 @@ void esp_init(hwaddr espaddr, int it_shift,
     sysbus_mmio_map(s, 0, espaddr);
     *reset = qdev_get_gpio_in(dev, 0);
     *dma_enable = qdev_get_gpio_in(dev, 1);
+
+    return esp;
 }
 
 static const struct SCSIBusInfo esp_scsi_info = {
@@ -672,7 +660,7 @@ static const struct SCSIBusInfo esp_scsi_info = {
 
 static void sysbus_esp_gpio_demux(void *opaque, int irq, int level)
 {
-    SysBusESPState *sysbus = ESP(opaque);
+    SysBusESPState *sysbus = ESP_STATE(opaque);
     ESPState *s = &sysbus->esp;
 
     switch (irq) {
@@ -688,7 +676,7 @@ static void sysbus_esp_gpio_demux(void *opaque, int irq, int level)
 static void sysbus_esp_realize(DeviceState *dev, Error **errp)
 {
     SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
-    SysBusESPState *sysbus = ESP(dev);
+    SysBusESPState *sysbus = ESP_STATE(dev);
     ESPState *s = &sysbus->esp;
 
     sysbus_init_irq(sbd, &s->irq);
@@ -706,7 +694,7 @@ static void sysbus_esp_realize(DeviceState *dev, Error **errp)
 
 static void sysbus_esp_hard_reset(DeviceState *dev)
 {
-    SysBusESPState *sysbus = ESP(dev);
+    SysBusESPState *sysbus = ESP_STATE(dev);
     esp_hard_reset(&sysbus->esp);
 }
 

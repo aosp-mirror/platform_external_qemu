@@ -30,6 +30,7 @@
 #include "qemu/iov.h"
 #include "net/net.h"
 #include "qemu/cutils.h"
+#include "qemu/error-report.h"
 
 void strpadcpy(char *buf, int buf_size, const char *str, char pad)
 {
@@ -294,6 +295,115 @@ static int check_strtox_error(const char *nptr, char *ep,
     }
 
     return -libc_errno;
+}
+
+/**
+ * Convert string @nptr to an integer, and store it in @result.
+ *
+ * This is a wrapper around strtol() that is harder to misuse.
+ * Semantics of @nptr, @endptr, @base match strtol() with differences
+ * noted below.
+ *
+ * @nptr may be null, and no conversion is performed then.
+ *
+ * If no conversion is performed, store @nptr in *@endptr and return
+ * -EINVAL.
+ *
+ * If @endptr is null, and the string isn't fully converted, return
+ * -EINVAL.  This is the case when the pointer that would be stored in
+ * a non-null @endptr points to a character other than '\0'.
+ *
+ * If the conversion overflows @result, store INT_MAX in @result,
+ * and return -ERANGE.
+ *
+ * If the conversion underflows @result, store INT_MIN in @result,
+ * and return -ERANGE.
+ *
+ * Else store the converted value in @result, and return zero.
+ */
+int qemu_strtoi(const char *nptr, const char **endptr, int base,
+                int *result)
+{
+    char *ep;
+    long long lresult;
+
+    if (!nptr) {
+        if (endptr) {
+            *endptr = nptr;
+        }
+        return -EINVAL;
+    }
+
+    errno = 0;
+    lresult = strtoll(nptr, &ep, base);
+    if (lresult < INT_MIN) {
+        *result = INT_MIN;
+        errno = ERANGE;
+    } else if (lresult > INT_MAX) {
+        *result = INT_MAX;
+        errno = ERANGE;
+    } else {
+        *result = lresult;
+    }
+    return check_strtox_error(nptr, ep, endptr, errno);
+}
+
+/**
+ * Convert string @nptr to an unsigned integer, and store it in @result.
+ *
+ * This is a wrapper around strtoul() that is harder to misuse.
+ * Semantics of @nptr, @endptr, @base match strtoul() with differences
+ * noted below.
+ *
+ * @nptr may be null, and no conversion is performed then.
+ *
+ * If no conversion is performed, store @nptr in *@endptr and return
+ * -EINVAL.
+ *
+ * If @endptr is null, and the string isn't fully converted, return
+ * -EINVAL.  This is the case when the pointer that would be stored in
+ * a non-null @endptr points to a character other than '\0'.
+ *
+ * If the conversion overflows @result, store UINT_MAX in @result,
+ * and return -ERANGE.
+ *
+ * Else store the converted value in @result, and return zero.
+ *
+ * Note that a number with a leading minus sign gets converted without
+ * the minus sign, checked for overflow (see above), then negated (in
+ * @result's type).  This is exactly how strtoul() works.
+ */
+int qemu_strtoui(const char *nptr, const char **endptr, int base,
+                 unsigned int *result)
+{
+    char *ep;
+    long long lresult;
+
+    if (!nptr) {
+        if (endptr) {
+            *endptr = nptr;
+        }
+        return -EINVAL;
+    }
+
+    errno = 0;
+    lresult = strtoull(nptr, &ep, base);
+
+    /* Windows returns 1 for negative out-of-range values.  */
+    if (errno == ERANGE) {
+        *result = -1;
+    } else {
+        if (lresult > UINT_MAX) {
+            *result = UINT_MAX;
+            errno = ERANGE;
+        } else if (lresult < INT_MIN) {
+            *result = UINT_MAX;
+            errno = ERANGE;
+        } else {
+            *result = lresult;
+        }
+    }
+    return check_strtox_error(nptr, ep, endptr, errno);
 }
 
 /**
@@ -601,7 +711,7 @@ int parse_debug_env(const char *name, int max, int initial)
         return initial;
     }
     if (debug < 0 || debug > max || errno != 0) {
-        fprintf(stderr, "warning: %s not in [0, %d]", name, max);
+        warn_report("%s not in [0, %d]", name, max);
         return initial;
     }
     return debug;
@@ -618,4 +728,29 @@ const char *qemu_ether_ntoa(const MACAddr *mac)
              mac->a[0], mac->a[1], mac->a[2], mac->a[3], mac->a[4], mac->a[5]);
 
     return ret;
+}
+
+/*
+ * Return human readable string for size @val.
+ * @val can be anything that uint64_t allows (no more than "16 EiB").
+ * Use IEC binary units like KiB, MiB, and so forth.
+ * Caller is responsible for passing it to g_free().
+ */
+char *size_to_str(uint64_t val)
+{
+    static const char *suffixes[] = { "", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei" };
+    unsigned long div;
+    int i;
+
+    /*
+     * The exponent (returned in i) minus one gives us
+     * floor(log2(val * 1024 / 1000).  The correction makes us
+     * switch to the higher power when the integer part is >= 1000.
+     * (see e41b509d68afb1f for more info)
+     */
+    frexp(val / (1000.0 / 1024.0), &i);
+    i = (i - 1) / 10;
+    div = 1ULL << (i * 10);
+
+    return g_strdup_printf("%0.3g %sB", (double)val / div, suffixes[i]);
 }
