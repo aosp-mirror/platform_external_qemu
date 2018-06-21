@@ -368,6 +368,10 @@ OPT_NO_TESTS=
 option_register_var "--no-tests" OPT_NO_TESTS \
        "Do not run tests after build completes."
 
+OPT_MIN_BUILD=
+option_register_var "--min-build" OPT_MIN_BUILD \
+       "Only build the qemu2 x64 host x86/x64 target binaries."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -712,6 +716,9 @@ build_darwin_binaries_on () {
     if [ "$OPT_NO_TESTS" ]; then
         var_append DARWIN_BUILD_FLAGS "--no-tests"
     fi
+    if [ "$OPT_MIN_BUILD" ]; then
+        var_append DARWIN_BUILD_FLAGS "--min-build"
+    fi
     if [ "$OPT_CRASH_STAGING" ]; then
         var_append DARWIN_BUILD_FLAGS "--crash-staging"
     elif [ "$OPT_CRASH_PROD" ]; then
@@ -796,6 +803,10 @@ fi
 
 if [ "$OPT_NO_TESTS" ]; then
     var_append REBUILD_FLAGS "--no-tests"
+fi
+
+if [ "$OPT_MIN_BUILD" ]; then
+    var_append REBUILD_FLAGS "--min-build"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
