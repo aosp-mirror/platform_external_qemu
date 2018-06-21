@@ -23,7 +23,6 @@
 #include "cpu.h"
 #include "qemu-common.h"
 #include "hw/qdev-properties.h"
-#include "migration/vmstate.h"
 #include "linux-user/syscall_defs.h"
 #include "exec/exec-all.h"
 
@@ -53,15 +52,9 @@ static void tilegx_cpu_dump_state(CPUState *cs, FILE *f,
                 env->pc, env->spregs[TILEGX_SPR_CMPEXCH]);
 }
 
-TileGXCPU *cpu_tilegx_init(const char *cpu_model)
+static ObjectClass *tilegx_cpu_class_by_name(const char *cpu_model)
 {
-    TileGXCPU *cpu;
-
-    cpu = TILEGX_CPU(object_new(TYPE_TILEGX_CPU));
-
-    object_property_set_bool(OBJECT(cpu), true, "realized", NULL);
-
-    return cpu;
+    return object_class_by_name(TYPE_TILEGX_CPU);
 }
 
 static void tilegx_cpu_set_pc(CPUState *cs, vaddr value)
@@ -110,14 +103,8 @@ static void tilegx_cpu_initfn(Object *obj)
     CPUState *cs = CPU(obj);
     TileGXCPU *cpu = TILEGX_CPU(obj);
     CPUTLGState *env = &cpu->env;
-    static bool tcg_initialized;
 
     cs->env_ptr = env;
-
-    if (tcg_enabled() && !tcg_initialized) {
-        tcg_initialized = true;
-        tilegx_tcg_init();
-    }
 }
 
 static void tilegx_cpu_do_interrupt(CPUState *cs)
@@ -125,8 +112,8 @@ static void tilegx_cpu_do_interrupt(CPUState *cs)
     cs->exception_index = -1;
 }
 
-static int tilegx_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int rw,
-                                       int mmu_idx)
+static int tilegx_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int size,
+                                       int rw, int mmu_idx)
 {
     TileGXCPU *cpu = TILEGX_CPU(cs);
 
@@ -154,12 +141,13 @@ static void tilegx_cpu_class_init(ObjectClass *oc, void *data)
     CPUClass *cc = CPU_CLASS(oc);
     TileGXCPUClass *tcc = TILEGX_CPU_CLASS(oc);
 
-    tcc->parent_realize = dc->realize;
-    dc->realize = tilegx_cpu_realizefn;
+    device_class_set_parent_realize(dc, tilegx_cpu_realizefn,
+                                    &tcc->parent_realize);
 
     tcc->parent_reset = cc->reset;
     cc->reset = tilegx_cpu_reset;
 
+    cc->class_by_name = tilegx_cpu_class_by_name;
     cc->has_work = tilegx_cpu_has_work;
     cc->do_interrupt = tilegx_cpu_do_interrupt;
     cc->cpu_exec_interrupt = tilegx_cpu_exec_interrupt;
@@ -167,6 +155,7 @@ static void tilegx_cpu_class_init(ObjectClass *oc, void *data)
     cc->set_pc = tilegx_cpu_set_pc;
     cc->handle_mmu_fault = tilegx_cpu_handle_mmu_fault;
     cc->gdb_num_core_regs = 0;
+    cc->tcg_initialize = tilegx_tcg_init;
 }
 
 static const TypeInfo tilegx_cpu_type_info = {

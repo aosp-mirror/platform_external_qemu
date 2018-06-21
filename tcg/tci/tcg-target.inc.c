@@ -22,8 +22,6 @@
  * THE SOFTWARE.
  */
 
-#include "tcg-be-null.h"
-
 /* TODO list:
  * - See TODO comments in code.
  */
@@ -294,7 +292,7 @@ static const int tcg_target_reg_alloc_order[] = {
 #endif
 };
 
-#if MAX_OPC_PARAM_IARGS != 5
+#if MAX_OPC_PARAM_IARGS != 6
 # error Fix needed, number of supported input arguments changed!
 #endif
 
@@ -307,14 +305,16 @@ static const int tcg_target_call_iarg_regs[] = {
     TCG_REG_R4,
 #endif
     TCG_REG_R5,
+    TCG_REG_R6,
 #if TCG_TARGET_REG_BITS == 32
     /* 32 bit hosts need 2 * MAX_OPC_PARAM_IARGS registers. */
-    TCG_REG_R6,
     TCG_REG_R7,
 #if TCG_TARGET_NB_REGS >= 16
     TCG_REG_R8,
     TCG_REG_R9,
     TCG_REG_R10,
+    TCG_REG_R11,
+    TCG_REG_R12,
 #else
 # error Too few input registers available
 #endif
@@ -392,7 +392,7 @@ static const char *target_parse_constraint(TCGArgConstraint *ct,
     case 'L':                   /* qemu_ld constraint */
     case 'S':                   /* qemu_st constraint */
         ct->ct |= TCG_CT_REG;
-        tcg_regset_set32(ct->u.regs, 0, BIT(TCG_TARGET_NB_REGS) - 1);
+        ct->u.regs = BIT(TCG_TARGET_NB_REGS) - 1;
         break;
     default:
         return NULL;
@@ -872,16 +872,13 @@ static void tcg_target_init(TCGContext *s)
     tcg_debug_assert(tcg_op_defs_max <= UINT8_MAX);
 
     /* Registers available for 32 bit operations. */
-    tcg_regset_set32(tcg_target_available_regs[TCG_TYPE_I32], 0,
-                     BIT(TCG_TARGET_NB_REGS) - 1);
+    tcg_target_available_regs[TCG_TYPE_I32] = BIT(TCG_TARGET_NB_REGS) - 1;
     /* Registers available for 64 bit operations. */
-    tcg_regset_set32(tcg_target_available_regs[TCG_TYPE_I64], 0,
-                     BIT(TCG_TARGET_NB_REGS) - 1);
+    tcg_target_available_regs[TCG_TYPE_I64] = BIT(TCG_TARGET_NB_REGS) - 1;
     /* TODO: Which registers should be set here? */
-    tcg_regset_set32(tcg_target_call_clobber_regs, 0,
-                     BIT(TCG_TARGET_NB_REGS) - 1);
+    tcg_target_call_clobber_regs = BIT(TCG_TARGET_NB_REGS) - 1;
 
-    tcg_regset_clear(s->reserved_regs);
+    s->reserved_regs = 0;
     tcg_regset_set_reg(s->reserved_regs, TCG_REG_CALL_STACK);
 
     /* We use negative offsets from "sp" so that we can distinguish

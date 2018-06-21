@@ -21,6 +21,38 @@ import sys
 import shutil
 import subprocess
 
+
+class SetLikeList(list):
+  """A set like list has set operations defined on a standard list.
+
+  This means that every object only occurs once, and you can do the usual
+  set operations on this list.
+
+  Note that this thing is super expensive, and should only be used if
+  insertion order is important.
+  """
+
+  def add(self, item):
+    if item not in self:
+      self.append(item)
+
+  def __sub__(self, other):
+    for idx in xrange(len(self) - 1, 0, -1):
+      if self[idx] in other:
+        del self[idx]
+    return self
+
+  def __and__(self, other):
+    for idx in xrange(len(self) - 1, 0, -1):
+      if self[idx] not in other:
+        del self[idx]
+    return self
+
+  # def __or__(self, other):
+  #   for item in other:
+  #     self.add(item)
+
+
 TARGET_SUFFIX = '-softmmu'
 
 EXPECTED_HOSTS = set(
@@ -46,6 +78,7 @@ IGNORED_OBJECTS = [
     '../ui/sdl2-2d.o',
     '../ui/sdl2-input.o',
     '../vl.o',
+    'trace-root.o',
     'trace/generated-helpers.o',
     '/version.o',  # something from the Windows build
     # A lot of stubs are not used..
@@ -71,7 +104,8 @@ REMARKS = [
     'you change this!',
 ]
 
-HEADER = 'This file is auto generated! Do not edit it!'
+HEADER = ('# This file is auto generated! Do not edit it!\n'
+          '# Even the order matters, so do not change manually!')
 
 qemu_files = []
 
@@ -93,7 +127,7 @@ def find_target_lists(build_path, hosts):
 
 def read_link_file(link_file):
   """Parses the link file, returning all the .o entries."""
-  result = set()
+  result = SetLikeList()
   with open(link_file) as lfile:
     content = lfile.readlines()
     for obj in content:
@@ -132,11 +166,11 @@ def list_files(name, files, output):
   idx = 0
   output.write('%s := \\\n' % name)
 
-  for f in sorted(source_list_from_objects(files)):
+  for f in source_list_from_objects(files):
     idx += 1
     output.write('    %s \\\n' % f)
     if idx % 15 == 0:
-      output.write('\n# %s\n# %s\n' % (HEADER, REMARKS[idx  % len(REMARKS)]))
+      output.write('\n%s\n# %s\n' % (HEADER, REMARKS[idx % len(REMARKS)]))
       output.write('%s += \\\n' % name)
 
   output.write('\n')
@@ -149,7 +183,7 @@ def normalize(obj):
 
 
 def source_list_from_objects(objects):
-  result = set()
+  result = SetLikeList()
   for obj in objects:
     if obj[-2:] == '.a':
       continue
@@ -165,7 +199,7 @@ def source_list_from_objects(objects):
     if (is_generated(obj)):
       obj = '$(QEMU2_AUTO_GENERATED_DIR)/' + obj
     result.add(obj)
-  return sorted(result)
+  return result
 
 
 def copy_config(source_dir, host, qemu_root):
@@ -208,6 +242,13 @@ def main(argv):
       help='the output file to write the resulting '
       'makefile to')
   parser.add_argument(
+      '-s',
+      '--host_set',
+      dest='hosts',
+      action='append',
+      help='Restrict the generated sources only to this host set. '
+      'DO NOT USE, ONLY USED FOR MAKING MERGES EASIER"')
+  parser.add_argument(
       '-v',
       '--verbose',
       action='store_const',
@@ -215,6 +256,9 @@ def main(argv):
       const=logging.INFO,
       help='Be more verbose')
   args = parser.parse_args()
+
+  if not args.hosts:
+    args.hosts = EXPECTED_HOSTS
 
   if args.output is None:
     output = sys.stdout
@@ -227,7 +271,7 @@ def main(argv):
       ['git', 'ls-files'], cwd=args.root).split('\n')
 
   # First copy the configs over
-  for host in EXPECTED_HOSTS:
+  for host in args.hosts:
     copy_config(args.inputs, host, args.root)
 
   build_dir = args.inputs
@@ -238,16 +282,16 @@ def main(argv):
       '# Modify the qemu makefiles instead and regenerate this file!\n')
   output.write('\n')
 
-  target_list = find_target_lists(build_dir, EXPECTED_HOSTS)
+  target_list = find_target_lists(build_dir, args.hosts)
   logging.info('Found targets: %s', repr(target_list))
 
   all_dependencies = {}
-  for host in EXPECTED_HOSTS:
+  for host in args.hosts:
     all_dependencies[host] = find_link_files(build_dir, host)
 
   host_link_map = {}
   host_lib_map = {}
-  for host in EXPECTED_HOSTS:
+  for host in args.hosts:
     host_link_map[host] = {}
     host_lib_map[host] = {}
     for target in target_list:
@@ -260,7 +304,7 @@ def main(argv):
         host_lib_map[host][lib] = all_dependencies[host][lib]
 
   # Remove all duplicates that could have come in from libs.
-  for host in EXPECTED_HOSTS:
+  for host in args.hosts:
     for lib in host_lib_map[host]:
       for target in host_link_map[host]:
         host_link_map[host][target] = set([
@@ -272,26 +316,16 @@ def main(argv):
 
   # The set of all objects, both for targets as well as libraries.
   all_objects = set()
-  all_libs = {}
   for host in host_list:
-    for lib in host_lib_map[host]:
-      logging.info('Considering %s: %s', host, lib)
-      if lib not in all_libs:
-        all_libs[lib] = set(host_lib_map[host][lib])
-      else:
-        all_libs[lib] &= host_lib_map[host][lib]
     for target in host_link_map[host]:
       all_objects |= host_link_map[host][target]
 
   # First construct all the lib dependencies
-  for lib in all_libs:
-    lib_name = lib[3:-2]
-    list_files('QEMU2_LIB_%s' % lib_name, all_libs[lib], output)
-    for host in host_list:
-      host_lib_map[host][lib] -= all_libs[lib]
-      if host_lib_map[host][lib]:
-        list_files('QEMU2_LIB_%s_%s' % (lib_name, host),
-                   host_lib_map[host][lib], output)
+  for host in host_list:
+    for lib in host_lib_map[host]:
+      lib_name = lib[3:-2]
+      list_files('QEMU2_LIB_%s_%s' % (lib_name, host), host_lib_map[host][lib],
+                 output)
 
   left = all_objects.copy()
   # The set of all objects whose path begins with ../

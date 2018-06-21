@@ -11,25 +11,24 @@
  */
 
 #include "qemu/osdep.h"
-#include "qemu/timer.h"
 #include "sysemu/sysemu.h"
-#include "migration/colo.h"
-#include "io/channel-buffer.h"
-#include "migration/trace.h"
-#include "qemu/error-report.h"
 #include "qapi/error.h"
+#include "qapi/qapi-commands-migration.h"
+#include "qemu-file-channel.h"
+#include "migration.h"
+#include "qemu-file.h"
+#include "savevm.h"
+#include "migration/colo.h"
+#include "block.h"
+#include "io/channel-buffer.h"
+#include "trace.h"
+#include "qemu/error-report.h"
 #include "migration/failover.h"
 #include "replication.h"
-#include "qmp-commands.h"
 
 static bool vmstate_loading;
 
 #define COLO_BUFFER_BASE_SIZE (4 * 1024 * 1024)
-
-bool colo_supported(void)
-{
-    return true;
-}
 
 bool migration_in_colo_state(void)
 {
@@ -63,7 +62,7 @@ static void secondary_vm_do_failover(void)
                         FAILOVER_STATUS_RELAUNCH);
         if (old_state != FAILOVER_STATUS_ACTIVE) {
             error_report("Unknown error while do failover for secondary VM,"
-                         "old_state: %s", FailoverStatus_lookup[old_state]);
+                         "old_state: %s", FailoverStatus_str(old_state));
         }
         return;
     }
@@ -93,7 +92,7 @@ static void secondary_vm_do_failover(void)
                                    FAILOVER_STATUS_COMPLETED);
     if (old_state != FAILOVER_STATUS_ACTIVE) {
         error_report("Incorrect state (%s) while doing failover for "
-                     "secondary VM", FailoverStatus_lookup[old_state]);
+                     "secondary VM", FailoverStatus_str(old_state));
         return;
     }
     /* Notify COLO incoming thread that failover work is finished */
@@ -128,7 +127,7 @@ static void primary_vm_do_failover(void)
                                    FAILOVER_STATUS_COMPLETED);
     if (old_state != FAILOVER_STATUS_ACTIVE) {
         error_report("Incorrect state (%s) while doing failover for Primary VM",
-                     FailoverStatus_lookup[old_state]);
+                     FailoverStatus_str(old_state));
         return;
     }
     /* Notify COLO thread that failover work is finished */
@@ -153,6 +152,7 @@ void qmp_xen_set_replication(bool enable, bool primary,
                              bool has_failover, bool failover,
                              Error **errp)
 {
+#ifdef CONFIG_REPLICATION
     ReplicationMode mode = primary ?
                            REPLICATION_MODE_PRIMARY :
                            REPLICATION_MODE_SECONDARY;
@@ -171,10 +171,14 @@ void qmp_xen_set_replication(bool enable, bool primary,
         }
         replication_stop_all(failover, failover ? NULL : errp);
     }
+#else
+    abort();
+#endif
 }
 
 ReplicationStatus *qmp_query_xen_replication_status(Error **errp)
 {
+#ifdef CONFIG_REPLICATION
     Error *err = NULL;
     ReplicationStatus *s = g_new0(ReplicationStatus, 1);
 
@@ -189,11 +193,18 @@ ReplicationStatus *qmp_query_xen_replication_status(Error **errp)
 
     error_free(err);
     return s;
+#else
+    abort();
+#endif
 }
 
 void qmp_xen_colo_do_checkpoint(Error **errp)
 {
+#ifdef CONFIG_REPLICATION
     replication_do_checkpoint_all(errp);
+#else
+    abort();
+#endif
 }
 
 static void colo_send_message(QEMUFile *f, COLOMessage msg,
@@ -212,7 +223,7 @@ static void colo_send_message(QEMUFile *f, COLOMessage msg,
     if (ret < 0) {
         error_setg_errno(errp, -ret, "Can't send COLO message");
     }
-    trace_colo_send_message(COLOMessage_lookup[msg]);
+    trace_colo_send_message(COLOMessage_str(msg));
 }
 
 static void colo_send_message_value(QEMUFile *f, COLOMessage msg,
@@ -232,7 +243,7 @@ static void colo_send_message_value(QEMUFile *f, COLOMessage msg,
     ret = qemu_file_get_error(f);
     if (ret < 0) {
         error_setg_errno(errp, -ret, "Failed to send value for message:%s",
-                         COLOMessage_lookup[msg]);
+                         COLOMessage_str(msg));
     }
 }
 
@@ -251,7 +262,7 @@ static COLOMessage colo_receive_message(QEMUFile *f, Error **errp)
         error_setg(errp, "%s: Invalid message", __func__);
         return msg;
     }
-    trace_colo_receive_message(COLOMessage_lookup[msg]);
+    trace_colo_receive_message(COLOMessage_str(msg));
     return msg;
 }
 
@@ -289,7 +300,7 @@ static uint64_t colo_receive_message_value(QEMUFile *f, uint32_t expect_msg,
     ret = qemu_file_get_error(f);
     if (ret < 0) {
         error_setg_errno(errp, -ret, "Failed to get value for COLO message: %s",
-                         COLOMessage_lookup[expect_msg]);
+                         COLOMessage_str(expect_msg));
     }
     return value;
 }
@@ -333,12 +344,11 @@ static int colo_do_checkpoint_transaction(MigrationState *s,
     }
 
     /* Disable block migration */
-    s->params.blk = 0;
-    s->params.shared = 0;
+    migrate_set_block_enabled(false, &local_err);
     qemu_savevm_state_header(fb);
-    qemu_savevm_state_begin(fb, &s->params);
+    qemu_savevm_state_setup(fb);
     qemu_mutex_lock_iothread();
-    qemu_savevm_state_complete_precopy(fb, false);
+    qemu_savevm_state_complete_precopy(fb, false, false);
     qemu_mutex_unlock_iothread();
 
     qemu_fflush(fb);
@@ -611,7 +621,7 @@ void *colo_process_incoming_thread(void *opaque)
         }
 
         qemu_mutex_lock_iothread();
-        qemu_system_reset(VMRESET_SILENT);
+        qemu_system_reset(SHUTDOWN_CAUSE_NONE);
         vmstate_loading = true;
         if (qemu_loadvm_state(fb) < 0) {
             error_report("COLO: loadvm failed");
