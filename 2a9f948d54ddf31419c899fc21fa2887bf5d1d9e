@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78274c5c_d4dd0b3d",
+        "filename": "android/android-emu/android/utils/filelock_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-21T18:55:05Z",
+      "side": 1,
+      "message": "It might be clearer to rename to separate ints:\n\nmChildSendPipe\nmChildRecvPipe\nmParentSendPipe\nmParentRecvPipe",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 27
+      },
+      "revId": "2a9f948d54ddf31419c899fc21fa2887bf5d1d9e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
