@@ -23,7 +23,7 @@
 #include "qemu-common.h"
 #include "hw/usb.h"
 #include "qemu/iov.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 
 static void usb_combined_packet_add(USBCombinedPacket *combined, USBPacket *p)
 {

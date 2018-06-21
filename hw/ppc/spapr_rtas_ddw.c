@@ -22,7 +22,7 @@
 #include "qemu/error-report.h"
 #include "hw/ppc/spapr.h"
 #include "hw/pci-host/spapr.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 
 static int spapr_phb_get_active_win_num_cb(Object *child, void *opaque)
 {

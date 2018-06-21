@@ -42,21 +42,20 @@ void RamLoader::FileIndex::clear() {
 }
 
 RamLoader::RamLoader(base::StdioStream&& stream,
-                     Flags flags,
+                     bool indexOnly,
                      const RamLoader::RamBlockStructure& blockStructure)
     : mStream(std::move(stream)),
-      mReaderThread([this]() { readerWorker(); }) {
+      mReaderThread([this]() { readerWorker(); }),
+      mIndexOnly(indexOnly) {
 
-    if (nonzero(flags & Flags::LoadIndexOnly)) {
-        mIndexOnly = true;
+    if (mIndexOnly) {
         applyRamBlockStructure(blockStructure);
         readIndex();
         mStream.close();
         return;
     }
 
-    if (nonzero(flags & Flags::OnDemandAllowed) &&
-        MemoryAccessWatch::isSupported()) {
+    if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
                              [this]() { return backgroundPageLoad(); });
         if (mAccessWatch->valid()) {
@@ -486,6 +485,10 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         RamLoader::Page* page) {
     if (page) {
         fillPageData(page);
+#ifndef _WIN32
+        delete[] page->data;
+        page->data = nullptr;
+#endif
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
@@ -515,8 +518,19 @@ void RamLoader::loadRamPage(void* ptr) {
     }
 
     Page& page = this->page(ptr);
+#ifdef _WIN32
     readDataFromDisk(&page, nullptr);
+#else
+    uint8_t buf[kDefaultPageSize];
+    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page) ? buf : nullptr);
+#endif
     fillPageData(&page);
+#ifndef _WIN32
+    if (page.data != buf) {
+        delete[] page.data;
+    }
+    page.data = nullptr;
+#endif
 }
 
 bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
@@ -593,11 +607,6 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
                 mHasError = true;
                 return false;
             }
-
-            if (allocateBuffer && !preallocatedBuffer) {
-                delete [] buf;
-            }
-
             buf = decompressed;
         }
     }
@@ -634,12 +643,12 @@ void RamLoader::fillPageData(Page* pagePtr) {
         if (!res) {
             mHasError = true;
         }
-
+#ifdef _WIN32
         if (page.data) {
-            delete [] page.data;
-            page.data = nullptr;
+            delete[] page.data;
+            page.data = NULL;
         }
-
+#endif
         page.state.store(uint8_t(res ? State::Filled : State::Error),
                          std::memory_order_release);
     }
