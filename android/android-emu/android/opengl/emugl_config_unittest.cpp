@@ -408,8 +408,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
     EXPECT_STREQ("GPU emulation is disabled under Chrome Remote Desktop without Swiftshader", config.status);
 }
 
-// TODO: Get -no-window to work with non-guest rendering again
-TEST(EmuglConfig, DISABLED_initNoWindowWithSwiftshader) {
+TEST(EmuglConfig, initNoWindowWithSwiftshader) {
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());
