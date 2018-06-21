@@ -137,7 +137,7 @@ static void onenand_intr_update(OneNANDState *s)
     qemu_set_irq(s->intr, ((s->intstatus >> 15) ^ (~s->config[0] >> 6)) & 1);
 }
 
-static void onenand_pre_save(void *opaque)
+static int onenand_pre_save(void *opaque)
 {
     OneNANDState *s = opaque;
     if (s->current == s->otp) {
@@ -147,6 +147,8 @@ static void onenand_pre_save(void *opaque)
     } else {
         s->current_direction = 0;
     }
+
+    return 0;
 }
 
 static int onenand_post_load(void *opaque, int version_id)
@@ -518,10 +520,6 @@ static void onenand_command(OneNANDState *s)
         s->intstatus |= ONEN_INT;
 
         for (b = 0; b < s->blocks; b ++) {
-            if (b >= s->blocks) {
-                s->status |= ONEN_ERR_CMD;
-                break;
-            }
             if (s->blockwp[b] == ONEN_LOCK_LOCKTIGHTEN)
                 break;
 
@@ -661,12 +659,12 @@ static uint64_t onenand_read(void *opaque, hwaddr addr,
     case 0xff02:	/* ECC Result of spare area data */
     case 0xff03:	/* ECC Result of main area data */
     case 0xff04:	/* ECC Result of spare area data */
-        hw_error("%s: imeplement ECC\n", __FUNCTION__);
+        hw_error("%s: implement ECC\n", __func__);
         return 0x0000;
     }
 
     fprintf(stderr, "%s: unknown OneNAND register %x\n",
-                    __FUNCTION__, offset);
+                    __func__, offset);
     return 0;
 }
 
@@ -711,7 +709,7 @@ static void onenand_write(void *opaque, hwaddr addr,
 
         default:
             fprintf(stderr, "%s: unknown OneNAND boot command %"PRIx64"\n",
-                            __FUNCTION__, value);
+                            __func__, value);
         }
         break;
 
@@ -762,7 +760,7 @@ static void onenand_write(void *opaque, hwaddr addr,
 
     default:
         fprintf(stderr, "%s: unknown OneNAND register %x\n",
-                        __FUNCTION__, offset);
+                        __func__, offset);
     }
 }
 
@@ -807,7 +805,7 @@ static int onenand_initfn(SysBusDevice *sbd)
     }
     s->otp = memset(g_malloc((64 + 2) << PAGE_SHIFT),
                     0xff, (64 + 2) << PAGE_SHIFT);
-    memory_region_init_ram(&s->ram, OBJECT(s), "onenand.ram",
+    memory_region_init_ram_nomigrate(&s->ram, OBJECT(s), "onenand.ram",
                            0xc000 << s->shift, &error_fatal);
     vmstate_register_ram_global(&s->ram);
     ram = memory_region_get_ram_ptr(&s->ram);

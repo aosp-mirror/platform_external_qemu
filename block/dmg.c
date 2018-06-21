@@ -111,7 +111,7 @@ static void update_max_chunk_size(BDRVDMGState *s, uint32_t chunk,
         uncompressed_sectors = s->sectorcounts[chunk];
         break;
     case 1: /* copy */
-        uncompressed_sectors = (s->lengths[chunk] + 511) / 512;
+        uncompressed_sectors = DIV_ROUND_UP(s->lengths[chunk], 512);
         break;
     case 2: /* zero */
         /* as the all-zeroes block may be large, it is treated specially: the
@@ -419,8 +419,18 @@ static int dmg_open(BlockDriverState *bs, QDict *options, int flags,
         return -EINVAL;
     }
 
+    if (!bdrv_is_read_only(bs)) {
+        error_report("Opening dmg images without an explicit read-only=on "
+                     "option is deprecated. Future versions will refuse to "
+                     "open the image instead of automatically marking the "
+                     "image read-only.");
+        ret = bdrv_set_read_only(bs, true, errp);
+        if (ret < 0) {
+            return ret;
+        }
+    }
+
     block_module_load_one("dmg-bz2");
-    bs->read_only = true;
 
     s->n_chunks = 0;
     s->offsets = s->lengths = s->sectors = s->sectorcounts = NULL;

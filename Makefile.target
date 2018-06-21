@@ -11,9 +11,9 @@ $(call set-vpath, $(SRC_PATH):$(BUILD_DIR))
 ifdef CONFIG_LINUX
 QEMU_CFLAGS += -I../linux-headers
 endif
-QEMU_CFLAGS += -I.. -I$(SRC_PATH)/target/$(TARGET_BASE_ARCH) -DNEED_CPU_H
+QEMU_CFLAGS += -iquote .. -iquote $(SRC_PATH)/target/$(TARGET_BASE_ARCH) -DNEED_CPU_H
 
-QEMU_CFLAGS+=-I$(SRC_PATH)/include
+QEMU_CFLAGS+=-iquote $(SRC_PATH)/include
 
 ifdef CONFIG_USER_ONLY
 # user emulator name
@@ -22,7 +22,7 @@ QEMU_PROG_BUILD = $(QEMU_PROG)
 else
 # system emulator name
 QEMU_PROG=qemu-system-$(TARGET_NAME)$(EXESUF)
-ifneq (,$(findstring -mwindows,$(libs_softmmu)))
+ifneq (,$(findstring -mwindows,$(SDL_LIBS)))
 # Terminate program name with a 'w' because the linker builds a windows executable.
 QEMU_PROGW=qemu-system-$(TARGET_NAME)w$(EXESUF)
 $(QEMU_PROG): $(QEMU_PROGW)
@@ -48,7 +48,10 @@ else
 TARGET_TYPE=system
 endif
 
-$(QEMU_PROG).stp-installed: $(BUILD_DIR)/trace-events-all
+tracetool-y = $(SRC_PATH)/scripts/tracetool.py
+tracetool-y += $(shell find $(SRC_PATH)/scripts/tracetool -name "*.py")
+
+$(QEMU_PROG).stp-installed: $(BUILD_DIR)/trace-events-all $(tracetool-y)
 	$(call quiet-command,$(TRACETOOL) \
 		--group=all \
 		--format=stap \
@@ -58,7 +61,7 @@ $(QEMU_PROG).stp-installed: $(BUILD_DIR)/trace-events-all
 		--target-type=$(TARGET_TYPE) \
 		$< > $@,"GEN","$(TARGET_DIR)$(QEMU_PROG).stp-installed")
 
-$(QEMU_PROG).stp: $(BUILD_DIR)/trace-events-all
+$(QEMU_PROG).stp: $(BUILD_DIR)/trace-events-all $(tracetool-y)
 	$(call quiet-command,$(TRACETOOL) \
 		--group=all \
 		--format=stap \
@@ -68,7 +71,7 @@ $(QEMU_PROG).stp: $(BUILD_DIR)/trace-events-all
 		--target-type=$(TARGET_TYPE) \
 		$< > $@,"GEN","$(TARGET_DIR)$(QEMU_PROG).stp")
 
-$(QEMU_PROG)-simpletrace.stp: $(BUILD_DIR)/trace-events-all
+$(QEMU_PROG)-simpletrace.stp: $(BUILD_DIR)/trace-events-all $(tracetool-y)
 	$(call quiet-command,$(TRACETOOL) \
 		--group=all \
 		--format=simpletrace-stap \
@@ -88,21 +91,16 @@ all: $(PROGS) stap
 
 #########################################################
 # cpu emulator library
-obj-y = exec.o translate-all.o cpu-exec.o
-obj-y += translate-common.o
-obj-y += cpu-exec-common.o
-obj-y += tcg/tcg.o tcg/tcg-op.o tcg/optimize.o
-obj-$(CONFIG_TCG_INTERPRETER) += tci.o
-obj-y += tcg/tcg-common.o
+obj-y += exec.o
+obj-y += accel/
+obj-$(CONFIG_TCG) += tcg/tcg.o tcg/tcg-op.o tcg/tcg-op-vec.o tcg/tcg-op-gvec.o
+obj-$(CONFIG_TCG) += tcg/tcg-common.o tcg/optimize.o
+obj-$(CONFIG_TCG_INTERPRETER) += tcg/tci.o
 obj-$(CONFIG_TCG_INTERPRETER) += disas/tci.o
 obj-y += fpu/softfloat.o
 obj-y += target/$(TARGET_BASE_ARCH)/
 obj-y += disas.o
-obj-y += tcg-runtime.o
 obj-$(call notempty,$(TARGET_XML_FILES)) += gdbstub-xml.o
-obj-$(call lnot,$(CONFIG_HAX))  += hax-stub.o
-obj-$(call lnot,$(CONFIG_KVM))  += kvm-stub.o
-obj-$(call lnot,$(CONFIG_WHPX)) += whpx-stub.o
 
 obj-$(CONFIG_LIBDECNUMBER) += libdecnumber/decContext.o
 obj-$(CONFIG_LIBDECNUMBER) += libdecnumber/decNumber.o
@@ -120,7 +118,7 @@ QEMU_CFLAGS+=-I$(SRC_PATH)/linux-user/$(TARGET_ABI_DIR) \
              -I$(SRC_PATH)/linux-user
 
 obj-y += linux-user/
-obj-y += gdbstub.o thunk.o user-exec.o user-exec-stub.o
+obj-y += gdbstub.o thunk.o
 
 endif #CONFIG_LINUX_USER
 
@@ -133,7 +131,7 @@ QEMU_CFLAGS+=-I$(SRC_PATH)/bsd-user -I$(SRC_PATH)/bsd-user/$(TARGET_ABI_DIR) \
 			 -I$(SRC_PATH)/bsd-user/$(HOST_VARIANT_DIR)
 
 obj-y += bsd-user/
-obj-y += gdbstub.o user-exec.o user-exec-stub.o
+obj-y += gdbstub.o
 
 endif #CONFIG_BSD_USER
 
@@ -141,20 +139,13 @@ endif #CONFIG_BSD_USER
 # System emulator target
 ifdef CONFIG_SOFTMMU
 obj-y += arch_init.o cpus.o monitor.o gdbstub.o balloon.o ioport.o numa.o
-obj-y += qtest.o bootdevice.o
+obj-y += qtest.o
 obj-y += hw/
-obj-$(CONFIG_KVM) += kvm-all.o
-obj-y += memory.o cputlb.o
+obj-y += memory.o
 obj-y += memory_mapping.o
 obj-y += dump.o
-obj-y += migration/ram.o migration/savevm.o
+obj-y += migration/ram.o
 LIBS := $(libs_softmmu) $(LIBS)
-
-# xen support
-obj-$(CONFIG_XEN) += xen-common.o
-obj-$(CONFIG_XEN_I386) += xen-hvm.o xen-mapcache.o
-obj-$(call lnot,$(CONFIG_XEN)) += xen-common-stub.o
-obj-$(call lnot,$(CONFIG_XEN_I386)) += xen-hvm-stub.o
 
 # Hardware support
 ifeq ($(TARGET_NAME), sparc64)
@@ -189,8 +180,7 @@ dummy := $(call unnest-vars,.., \
                qom-obj-y \
                io-obj-y \
                common-obj-y \
-               common-obj-m \
-               trace-obj-y)
+               common-obj-m)
 target-obj-y := $(target-obj-y-save)
 all-obj-y += $(common-obj-y)
 all-obj-y += $(target-obj-y)
@@ -202,7 +192,7 @@ all-obj-$(CONFIG_SOFTMMU) += $(io-obj-y)
 
 $(QEMU_PROG_BUILD): config-devices.mak
 
-COMMON_LDADDS = $(trace-obj-y) ../libqemuutil.a ../libqemustub.a
+COMMON_LDADDS = ../libqemuutil.a
 
 # build either PROG or PROGW
 $(QEMU_PROG_BUILD): $(all-obj-y) $(COMMON_LDADDS)

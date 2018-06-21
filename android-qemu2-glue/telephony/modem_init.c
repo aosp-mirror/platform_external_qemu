@@ -18,6 +18,7 @@
 #include "hw/hw.h"
 
 #include <assert.h>
+#include "migration/register.h"
 
 extern int sim_is_present();
 
@@ -37,17 +38,20 @@ static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
     return res;
 }
 
+static SaveVMHandlers modem_vmhandlers = {
+    .save_state = modem_state_save,
+    .load_state = modem_state_load,
+};
 
 void qemu_android_modem_init(int base_port) {
     android_modem_init(base_port, sim_is_present());
 
     assert(android_modem_serial_line != NULL);
 
-    register_savevm(NULL,
+    register_savevm_live(NULL,
                     "android_modem",
                     0,
                     MODEM_DEV_STATE_SAVE_VERSION,
-                    modem_state_save,
-                    modem_state_load,
+                    &modem_vmhandlers,
                     android_modem);
 }

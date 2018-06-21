@@ -17,6 +17,8 @@
 #include "hw/misc/goldfish_pstore.h"
 #include "exec/address-spaces.h"
 #include "io/channel-file.h"
+#include "migration/qemu-file.h"
+#include "migration/qemu-file-channel.h"
 
 #define GOLDFISH_PSTORE(obj) OBJECT_CHECK(goldfish_pstore, (obj), TYPE_GOLDFISH_PSTORE)
 
@@ -120,7 +122,7 @@ static void goldfish_pstore_realize(DeviceState *dev, Error **errp) {
   goldfish_pstore *s = GOLDFISH_PSTORE(dev);
 
   // Reserve a slot of memory that we will use for our pstore.
-  memory_region_init_ram(&s->memory, OBJECT(s), GOLDFISH_PSTORE_DEV_ID, s->size,
+  memory_region_init_ram_nomigrate(&s->memory, OBJECT(s), GOLDFISH_PSTORE_DEV_ID, s->size,
                          errp);
 
   // Ok, now we just need to move it to the right physical address.

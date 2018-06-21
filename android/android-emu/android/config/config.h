@@ -6,7 +6,9 @@
  */
 #include "config-host.h"
 
-#define CONFIG_SOFTMMU 1
-#ifndef _WIN32
-#define CONFIG_NAND_LIMITS 1
+#ifdef _QEMU1
+  #define CONFIG_SOFTMMU 1
+  #ifndef _WIN32
+    #define CONFIG_NAND_LIMITS 1
+  #endif
 #endif

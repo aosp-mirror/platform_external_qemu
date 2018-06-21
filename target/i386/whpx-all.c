@@ -883,7 +883,6 @@ static void whpx_vcpu_post_run(CPUState *cpu)
     struct whpx_vcpu *vcpu = get_whpx_vcpu(cpu);
     struct CPUX86State *env = (CPUArchState *)(cpu->env_ptr);
     X86CPU *x86_cpu = X86_CPU(cpu);
-
     env->eflags = vcpu->exit_ctx.VpContext.Rflags;
 
     uint64_t tpr = vcpu->exit_ctx.VpContext.Cr8;
@@ -1495,7 +1494,6 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
-    memset(&prop, 0, sizeof(WHV_PARTITION_PROPERTY));
     prop.ExtendedVmExits.X64MsrExit = 1;
     prop.ExtendedVmExits.X64CpuidExit = 1;
     hr = whp_dispatch.WHvSetPartitionProperty(

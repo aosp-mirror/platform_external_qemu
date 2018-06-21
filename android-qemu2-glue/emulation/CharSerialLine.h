@@ -15,7 +15,7 @@
 #include "android/emulation/SerialLine.h"
 extern "C" {
   #include "qemu/osdep.h"
-  #include "sysemu/char.h"
+  #include "chardev/char-fe.h"
 }
 
 // QEMU1-specific implementation of the generic SerialLine interface,

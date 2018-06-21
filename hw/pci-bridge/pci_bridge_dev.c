@@ -49,7 +49,7 @@ struct PCIBridgeDev {
 };
 typedef struct PCIBridgeDev PCIBridgeDev;
 
-static int pci_bridge_dev_initfn(PCIDevice *dev)
+static void pci_bridge_dev_realize(PCIDevice *dev, Error **errp)
 {
     PCIBridge *br = PCI_BRIDGE(dev);
     PCIBridgeDev *bridge_dev = PCI_BRIDGE_DEV(dev);
@@ -62,7 +62,7 @@ static int pci_bridge_dev_initfn(PCIDevice *dev)
         dev->config[PCI_INTERRUPT_PIN] = 0x1;
         memory_region_init(&bridge_dev->bar, OBJECT(dev), "shpc-bar",
                            shpc_bar_size(dev));
-        err = shpc_init(dev, &br->sec_bus, &bridge_dev->bar, 0);
+        err = shpc_init(dev, &br->sec_bus, &bridge_dev->bar, 0, errp);
         if (err) {
             goto shpc_error;
         }
@@ -71,7 +71,7 @@ static int pci_bridge_dev_initfn(PCIDevice *dev)
         bridge_dev->msi = ON_OFF_AUTO_OFF;
     }
 
-    err = slotid_cap_init(dev, 0, bridge_dev->chassis_nr, 0);
+    err = slotid_cap_init(dev, 0, bridge_dev->chassis_nr, 0, errp);
     if (err) {
         goto slotid_error;
     }
@@ -87,7 +87,7 @@ static int pci_bridge_dev_initfn(PCIDevice *dev)
             /* Can't satisfy user's explicit msi=on request, fail */
             error_append_hint(&local_err, "You have to use msi=auto (default) "
                     "or msi=off with this machine type.\n");
-            error_report_err(local_err);
+            error_propagate(errp, local_err);
             goto msi_error;
         }
         assert(!local_err || bridge_dev->msi == ON_OFF_AUTO_AUTO);
@@ -101,7 +101,7 @@ static int pci_bridge_dev_initfn(PCIDevice *dev)
         pci_register_bar(dev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY |
                          PCI_BASE_ADDRESS_MEM_TYPE_64, &bridge_dev->bar);
     }
-    return 0;
+    return;
 
 msi_error:
     slotid_cap_cleanup(dev);
@@ -111,8 +111,6 @@ slotid_error:
     }
 shpc_error:
     pci_bridge_exitfn(dev);
-
-    return err;
 }
 
 static void pci_bridge_dev_exitfn(PCIDevice *dev)
@@ -163,7 +161,7 @@ static Property pci_bridge_dev_properties[] = {
     DEFINE_PROP_ON_OFF_AUTO(PCI_BRIDGE_DEV_PROP_MSI, PCIBridgeDev, msi,
                             ON_OFF_AUTO_AUTO),
     DEFINE_PROP_BIT(PCI_BRIDGE_DEV_PROP_SHPC, PCIBridgeDev, flags,
-                    PCI_BRIDGE_DEV_F_SHPC_REQ, false),
+                    PCI_BRIDGE_DEV_F_SHPC_REQ, true),
     DEFINE_PROP_END_OF_LIST(),
 };
 
@@ -176,6 +174,7 @@ static bool pci_device_shpc_present(void *opaque, int version_id)
 
 static const VMStateDescription pci_bridge_dev_vmstate = {
     .name = "pci_bridge",
+    .priority = MIG_PRI_PCI_BUS,
     .fields = (VMStateField[]) {
         VMSTATE_PCI_DEVICE(parent_obj, PCIBridge),
         SHPC_VMSTATE(shpc, PCIDevice, pci_device_shpc_present),
@@ -216,7 +215,7 @@ static void pci_bridge_dev_class_init(ObjectClass *klass, void *data)
     PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
     HotplugHandlerClass *hc = HOTPLUG_HANDLER_CLASS(klass);
 
-    k->init = pci_bridge_dev_initfn;
+    k->realize = pci_bridge_dev_realize;
     k->exit = pci_bridge_dev_exitfn;
     k->config_write = pci_bridge_dev_write_config;
     k->vendor_id = PCI_VENDOR_ID_REDHAT;
@@ -240,6 +239,7 @@ static const TypeInfo pci_bridge_dev_info = {
     .instance_finalize = pci_bridge_dev_instance_finalize,
     .interfaces = (InterfaceInfo[]) {
         { TYPE_HOTPLUG_HANDLER },
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
         { }
     }
 };
