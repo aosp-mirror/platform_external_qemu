@@ -17,6 +17,8 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 namespace emugl {
 
 struct GlVertexAttrib {
@@ -35,7 +37,7 @@ static const GlVertexAttrib kGLES2DefaultVertexAttrib = {
         .normalized = GL_FALSE,
         .stride = 0,
         .enabled = GL_FALSE,
-        .pointer = NULL,
+        .pointer = nullptr,
         .values = {.ints = {}, .floats = {0, 0, 0, 1}}};
 
 static const GlVertexAttrib kTestVertexAttrib = {
@@ -44,7 +46,7 @@ static const GlVertexAttrib kTestVertexAttrib = {
         .normalized = GL_TRUE,
         .stride = 8,
         .enabled = GL_TRUE,
-        .pointer = NULL,
+        .pointer = nullptr,
         .values = {.ints = {}, .floats = {.1, .3, .9, .5}}};
 
 class SnapshotGlVertexAttributesTest
@@ -59,6 +61,12 @@ public:
         checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_STRIDE, &expected.stride);
         checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_ENABLED,
                           (GLint*)&expected.enabled);
+
+        GLvoid* pointer;
+        gl->glGetVertexAttribPointerv(m_index, GL_VERTEX_ATTRIB_ARRAY_POINTER,
+                                      &pointer);
+        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+        EXPECT_EQ(expected.pointer, pointer);
 
         // check element value
         switch (expected.type) {
@@ -166,21 +174,23 @@ protected:
                              GLfloat* expected,
                              GLuint size = 1) {
         std::vector<GLfloat> values;
-        values.resize(size);
+        values.resize(std::max((GLuint)4, size));
         gl->glGetVertexAttribfv(m_index, paramName, &(values[0]));
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
         for (int i = 0; i < size; ++i) {
-            EXPECT_EQ(expected[i], values[i]);
+            EXPECT_EQ(expected[i], values[i]) << "float value for " << paramName
+                                              << " at attribute index " << i;
         }
     }
 
     void checkIntParameter(GLenum paramName, GLint* expected, GLuint size = 1) {
         std::vector<GLint> values;
-        values.resize(size);
+        values.resize(std::max((GLuint)4, size));
         gl->glGetVertexAttribiv(m_index, paramName, &(values[0]));
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
         for (int i = 0; i < size; ++i) {
-            EXPECT_EQ(expected[i], values[i]);
+            EXPECT_EQ(expected[i], values[i]) << "int value for " << paramName
+                                              << " at attribute index " << i;
         }
     }
 
