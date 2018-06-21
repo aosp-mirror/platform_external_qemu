@@ -1377,31 +1377,27 @@ help_gpu(stralloc_t* out)
 {
     PRINTF(
     "  Use -gpu <mode> to override the mode of hardware OpenGL ES emulation\n"
-    "  indicated by the AVD. Valid values for <mode> are:\n\n"
+    "  indicated by the AVD. The following <mode> values should cover most\n"
+    "  use cases:\n\n"
 
-    "     on       -> enable GPU emulation\n"
-    "     off      -> disable GPU emulation\n"
-    "     auto     -> use the setting from the AVD (default)\n"
-    "     enabled  -> same as 'on'\n"
-    "     disabled -> same as 'off'\n"
-    "     guest    -> use guest-side OpenGL ES implementation\n\n"
-    "     angle    -> use ANGLE (OPENGL to DirectX) translator on Windows\n\n"
-    "     angle9   -> use ANGLE (OPENGL to DirectX9) translator on Windows\n\n"
+    "     auto (default)       -> Auto-select the renderer\n"
+    "     host                 -> use the host system's OpenGL driver\n"
+    "     swiftshader_indirect -> use SwiftShader software renderer on the\n"
+    "                             host, which can be beneficial if you are\n"
+    "                             experiencing issues with your GPU drivers\n"
+    "                             or need to run on systems without GPUs.\n"
+    "     angle_indirect       -> Use ANGLE, an OpenGL ES to D3D11 renderer\n"
+    "                             (Windows 7 SP1 + Platform update, \n"
+    "                             Windows 8.1+, or Windows 10 only) \n"
+    "     guest                -> Use guest-side software rendering. For\n"
+    "                             advanced users only. Warning: slow!\n"
 
     "  Note that enabling GPU emulation if the system image does not support it\n"
     "  will prevent the proper display of the emulated framebuffer.\n\n"
 
-    "  You can always disable GPU emulation (i.e. '-gpu off'), and this will\n"
-    "  force the virtual device to use the slow software renderer instead.\n"
-    "  Note that OpenGLES 2.0 is _not_ supported by it.\n\n"
-
     "  The 'auto' mode is the default. In this mode, the hw.gpu.enabled setting\n"
     "  in the AVD's " CORE_HARDWARE_INI " file will determine whether GPU emulation\n"
     "  is enabled.\n\n"
-
-    "  Even if hardware GPU emulation is enabled, if the host-side OpenGL ES\n"
-    "  emulation library cannot be initialized, the emulator will run with GPU\n"
-    "  emulation disabled rather than failing to start.\n"
     );
 }
 
