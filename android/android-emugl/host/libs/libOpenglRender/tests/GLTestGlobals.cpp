@@ -14,13 +14,13 @@
 
 #include "GLTestGlobals.h"
 
-#include "android/base/system/System.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/testing/TestSystem.h"
 
 #include "emugl/common/misc.h"
 
 using android::base::LazyInstance;
-using android::base::System;
+using android::base::TestSystem;
 
 namespace gltest {
 
@@ -63,7 +63,7 @@ public:
 static LazyInstance<TestWindow> sTestWindow = LAZY_INSTANCE_INIT;
 
 bool shouldUseHostGpu() {
-    bool useHost = System::getEnvironmentVariable("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
+    bool useHost = TestSystem::getEnvironmentVariable("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
 
     // Also set the global emugl renderer accordingly.
     if (useHost) {
@@ -76,7 +76,7 @@ bool shouldUseHostGpu() {
 }
 
 bool shouldUseWindow() {
-    bool useWindow = System::getEnvironmentVariable("ANDROID_EMU_TEST_WITH_WINDOW") == "1";
+    bool useWindow = TestSystem::getEnvironmentVariable("ANDROID_EMU_TEST_WITH_WINDOW") == "1";
     return useWindow;
 }
 
