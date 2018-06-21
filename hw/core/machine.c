@@ -13,12 +13,14 @@
 #include "qemu/osdep.h"
 #include "hw/boards.h"
 #include "qapi/error.h"
-#include "qapi-visit.h"
+#include "qapi/qapi-visit-common.h"
 #include "qapi/visitor.h"
 #include "hw/sysbus.h"
 #include "sysemu/sysemu.h"
+#include "sysemu/numa.h"
 #include "qemu/error-report.h"
 #include "qemu/cutils.h"
+#include "sysemu/qtest.h"
 
 static char *machine_get_accel(Object *obj, Error **errp)
 {
@@ -332,46 +334,77 @@ static bool machine_get_enforce_config_section(Object *obj, Error **errp)
     return ms->enforce_config_section;
 }
 
-static void error_on_sysbus_device(SysBusDevice *sbdev, void *opaque)
+static char *machine_get_memory_encryption(Object *obj, Error **errp)
 {
-    error_report("Option '-device %s' cannot be handled by this machine",
-                 object_class_get_name(object_get_class(OBJECT(sbdev))));
-    exit(1);
+    MachineState *ms = MACHINE(obj);
+
+    return g_strdup(ms->memory_encryption);
+}
+
+static void machine_set_memory_encryption(Object *obj, const char *value,
+                                        Error **errp)
+{
+    MachineState *ms = MACHINE(obj);
+
+    g_free(ms->memory_encryption);
+    ms->memory_encryption = g_strdup(value);
+}
+
+void machine_class_allow_dynamic_sysbus_dev(MachineClass *mc, const char *type)
+{
+    strList *item = g_new0(strList, 1);
+
+    item->value = g_strdup(type);
+    item->next = mc->allowed_dynamic_sysbus_devices;
+    mc->allowed_dynamic_sysbus_devices = item;
+}
+
+static void validate_sysbus_device(SysBusDevice *sbdev, void *opaque)
+{
+    MachineState *machine = opaque;
+    MachineClass *mc = MACHINE_GET_CLASS(machine);
+    bool allowed = false;
+    strList *wl;
+
+    for (wl = mc->allowed_dynamic_sysbus_devices;
+         !allowed && wl;
+         wl = wl->next) {
+        allowed |= !!object_dynamic_cast(OBJECT(sbdev), wl->value);
+    }
+
+    if (!allowed) {
+        error_report("Option '-device %s' cannot be handled by this machine",
+                     object_class_get_name(object_get_class(OBJECT(sbdev))));
+        exit(1);
+    }
 }
 
 static void machine_init_notify(Notifier *notifier, void *data)
 {
-    Object *machine = qdev_get_machine();
-    ObjectClass *oc = object_get_class(machine);
-    MachineClass *mc = MACHINE_CLASS(oc);
-
-    if (mc->has_dynamic_sysbus) {
-        /* Our machine can handle dynamic sysbus devices, we're all good */
-        return;
-    }
+    MachineState *machine = MACHINE(qdev_get_machine());
 
     /*
-     * Loop through all dynamically created devices and check whether there
-     * are sysbus devices among them. If there are, error out.
+     * Loop through all dynamically created sysbus devices and check if they are
+     * all allowed.  If a device is not allowed, error out.
      */
-    foreach_dynamic_sysbus_device(error_on_sysbus_device, NULL);
+    foreach_dynamic_sysbus_device(validate_sysbus_device, machine);
 }
 
 HotpluggableCPUList *machine_query_hotpluggable_cpus(MachineState *machine)
 {
     int i;
-    Object *cpu;
     HotpluggableCPUList *head = NULL;
-    const char *cpu_type;
+    MachineClass *mc = MACHINE_GET_CLASS(machine);
 
-    cpu = machine->possible_cpus->cpus[0].cpu;
-    assert(cpu); /* Boot cpu is always present */
-    cpu_type = object_get_typename(cpu);
+    /* force board to initialize possible_cpus if it hasn't been done yet */
+    mc->possible_cpu_arch_ids(machine);
+
     for (i = 0; i < machine->possible_cpus->len; i++) {
+        Object *cpu;
         HotpluggableCPUList *list_item = g_new0(typeof(*list_item), 1);
         HotpluggableCPU *cpu_item = g_new0(typeof(*cpu_item), 1);
 
-        cpu_item->type = g_strdup(cpu_type);
+        cpu_item->type = g_strdup(machine->possible_cpus->cpus[i].type);
         cpu_item->vcpus_count = machine->possible_cpus->cpus[i].vcpus_count;
         cpu_item->props = g_memdup(&machine->possible_cpus->cpus[i].props,
                                    sizeof(*cpu_item->props));
@@ -388,6 +421,102 @@ HotpluggableCPUList *machine_query_hotpluggable_cpus(MachineState *machine)
     return head;
 }
 
+/**
+ * machine_set_cpu_numa_node:
+ * @machine: machine object to modify
+ * @props: specifies which cpu objects to assign to
+ *         numa node specified by @props.node_id
+ * @errp: if an error occurs, a pointer to an area to store the error
+ *
+ * Associate NUMA node specified by @props.node_id with cpu slots that
+ * match socket/core/thread-ids specified by @props. It's recommended to use
+ * query-hotpluggable-cpus.props values to specify affected cpu slots,
+ * which would lead to exact 1:1 mapping of cpu slots to NUMA node.
+ *
+ * However for CLI convenience it's possible to pass in subset of properties,
+ * which would affect all cpu slots that match it.
+ * Ex for pc machine:
+ *    -smp 4,cores=2,sockets=2 -numa node,nodeid=0 -numa node,nodeid=1 \
+ *    -numa cpu,node-id=0,socket_id=0 \
+ *    -numa cpu,node-id=1,socket_id=1
+ * will assign all child cores of socket 0 to node 0 and
+ * of socket 1 to node 1.
+ *
+ * On attempt of reassigning (already assigned) cpu slot to another NUMA node,
+ * return error.
+ * Empty subset is disallowed and function will return with error in this case.
+ */
+void machine_set_cpu_numa_node(MachineState *machine,
+                               const CpuInstanceProperties *props, Error **errp)
+{
+    MachineClass *mc = MACHINE_GET_CLASS(machine);
+    bool match = false;
+    int i;
+
+    if (!mc->possible_cpu_arch_ids) {
+        error_setg(errp, "mapping of CPUs to NUMA node is not supported");
+        return;
+    }
+
+    /* disabling node mapping is not supported, forbid it */
+    assert(props->has_node_id);
+
+    /* force board to initialize possible_cpus if it hasn't been done yet */
+    mc->possible_cpu_arch_ids(machine);
+
+    for (i = 0; i < machine->possible_cpus->len; i++) {
+        CPUArchId *slot = &machine->possible_cpus->cpus[i];
+
+        /* reject unsupported by board properties */
+        if (props->has_thread_id && !slot->props.has_thread_id) {
+            error_setg(errp, "thread-id is not supported");
+            return;
+        }
+
+        if (props->has_core_id && !slot->props.has_core_id) {
+            error_setg(errp, "core-id is not supported");
+            return;
+        }
+
+        if (props->has_socket_id && !slot->props.has_socket_id) {
+            error_setg(errp, "socket-id is not supported");
+            return;
+        }
+
+        /* skip slots with explicit mismatch */
+        if (props->has_thread_id && props->thread_id != slot->props.thread_id) {
+                continue;
+        }
+
+        if (props->has_core_id && props->core_id != slot->props.core_id) {
+                continue;
+        }
+
+        if (props->has_socket_id && props->socket_id != slot->props.socket_id) {
+                continue;
+        }
+
+        /* reject assignment if slot is already assigned, for compatibility
+         * of legacy cpu_index mapping with SPAPR core based mapping do not
+         * error out if cpu thread and matched core have the same node-id */
+        if (slot->props.has_node_id &&
+            slot->props.node_id != props->node_id) {
+            error_setg(errp, "CPU is already assigned to node-id: %" PRId64,
+                       slot->props.node_id);
+            return;
+        }
+
+        /* assign slot to node as it's matched '-numa cpu' key */
+        match = true;
+        slot->props.node_id = props->node_id;
+        slot->props.has_node_id = props->has_node_id;
+    }
+
+    if (!match) {
+        error_setg(errp, "no match found");
+    }
+}
+
 static void machine_class_init(ObjectClass *oc, void *data)
 {
     MachineClass *mc = MACHINE_CLASS(oc);
@@ -400,13 +529,14 @@ static void machine_class_init(ObjectClass *oc, void *data)
      * On Linux, each node's border has to be 8MB aligned
      */
     mc->numa_mem_align_shift = 23;
+    mc->numa_auto_assign_ram = numa_default_auto_assign_ram;
 
     object_class_property_add_str(oc, "accel",
         machine_get_accel, machine_set_accel, &error_abort);
     object_class_property_set_description(oc, "accel",
         "Accelerator list", &error_abort);
 
-    object_class_property_add(oc, "kernel-irqchip", "OnOffSplit",
+    object_class_property_add(oc, "kernel-irqchip", "on|off|split",
         NULL, machine_set_kernel_irqchip,
         NULL, NULL, &error_abort);
     object_class_property_set_description(oc, "kernel-irqchip",
@@ -498,6 +628,12 @@ static void machine_class_init(ObjectClass *oc, void *data)
         &error_abort);
     object_class_property_set_description(oc, "enforce-config-section",
         "Set on to enforce configuration section migration", &error_abort);
+
+    object_class_property_add_str(oc, "memory-encryption",
+        machine_get_memory_encryption, machine_set_memory_encryption,
+        &error_abort);
+    object_class_property_set_description(oc, "memory-encryption",
+        "Set memory encyption object to use", &error_abort);
 }
 
 static void machine_class_base_init(ObjectClass *oc, void *data)
@@ -580,6 +716,119 @@ bool machine_mem_merge(MachineState *machine)
     return machine->mem_merge;
 }
 
+static char *cpu_slot_to_string(const CPUArchId *cpu)
+{
+    GString *s = g_string_new(NULL);
+    if (cpu->props.has_socket_id) {
+        g_string_append_printf(s, "socket-id: %"PRId64, cpu->props.socket_id);
+    }
+    if (cpu->props.has_core_id) {
+        if (s->len) {
+            g_string_append_printf(s, ", ");
+        }
+        g_string_append_printf(s, "core-id: %"PRId64, cpu->props.core_id);
+    }
+    if (cpu->props.has_thread_id) {
+        if (s->len) {
+            g_string_append_printf(s, ", ");
+        }
+        g_string_append_printf(s, "thread-id: %"PRId64, cpu->props.thread_id);
+    }
+    return g_string_free(s, false);
+}
+
+static void machine_numa_finish_init(MachineState *machine)
+{
+    int i;
+    bool default_mapping;
+    GString *s = g_string_new(NULL);
+    MachineClass *mc = MACHINE_GET_CLASS(machine);
+    const CPUArchIdList *possible_cpus = mc->possible_cpu_arch_ids(machine);
+
+    assert(nb_numa_nodes);
+    for (i = 0; i < possible_cpus->len; i++) {
+        if (possible_cpus->cpus[i].props.has_node_id) {
+            break;
+        }
+    }
+    default_mapping = (i == possible_cpus->len);
+
+    for (i = 0; i < possible_cpus->len; i++) {
+        const CPUArchId *cpu_slot = &possible_cpus->cpus[i];
+
+        if (!cpu_slot->props.has_node_id) {
+            /* fetch default mapping from board and enable it */
+            CpuInstanceProperties props = cpu_slot->props;
+
+            props.node_id = mc->get_default_cpu_node_id(machine, i);
+            if (!default_mapping) {
+                /* record slots with not set mapping,
+                 * TODO: make it hard error in future */
+                char *cpu_str = cpu_slot_to_string(cpu_slot);
+                g_string_append_printf(s, "%sCPU %d [%s]",
+                                       s->len ? ", " : "", i, cpu_str);
+                g_free(cpu_str);
+
+                /* non mapped cpus used to fallback to node 0 */
+                props.node_id = 0;
+            }
+
+            props.has_node_id = true;
+            machine_set_cpu_numa_node(machine, &props, &error_fatal);
+        }
+    }
+    if (s->len && !qtest_enabled()) {
+        warn_report("CPU(s) not present in any NUMA nodes: %s",
+                    s->str);
+        warn_report("All CPU(s) up to maxcpus should be described "
+                    "in NUMA config, ability to start up with partial NUMA "
+                    "mappings is obsoleted and will be removed in future");
+    }
+    g_string_free(s, true);
+}
+
+void machine_run_board_init(MachineState *machine)
+{
+    MachineClass *machine_class = MACHINE_GET_CLASS(machine);
+
+    if (nb_numa_nodes) {
+        machine_numa_finish_init(machine);
+    }
+
+    /* If the machine supports the valid_cpu_types check and the user
+     * specified a CPU with -cpu check here that the user CPU is supported.
+     */
+    if (machine_class->valid_cpu_types && machine->cpu_type) {
+        ObjectClass *class = object_class_by_name(machine->cpu_type);
+        int i;
+
+        for (i = 0; machine_class->valid_cpu_types[i]; i++) {
+            if (object_class_dynamic_cast(class,
+                                          machine_class->valid_cpu_types[i])) {
+                /* The user specificed CPU is in the valid field, we are
+                 * good to go.
+                 */
+                break;
+            }
+        }
+
+        if (!machine_class->valid_cpu_types[i]) {
+            /* The user specified CPU is not valid */
+            error_report("Invalid CPU type: %s", machine->cpu_type);
+            error_printf("The valid types are: %s",
+                         machine_class->valid_cpu_types[0]);
+            for (i = 1; machine_class->valid_cpu_types[i]; i++) {
+                error_printf(", %s", machine_class->valid_cpu_types[i]);
+            }
+            error_printf("\n");
+
+            exit(1);
+        }
+    }
+
+    machine_class->init(machine);
+}
+
 static void machine_class_finalize(ObjectClass *klass, void *data)
 {
     MachineClass *mc = MACHINE_CLASS(klass);
@@ -590,31 +839,11 @@ static void machine_class_finalize(ObjectClass *klass, void *data)
     g_free(mc->name);
 }
 
-static void register_compat_prop(const char *driver,
-                                 const char *property,
-                                 const char *value)
-{
-    GlobalProperty *p = g_new0(GlobalProperty, 1);
-    /* Machine compat_props must never cause errors: */
-    p->errp = &error_abort;
-    p->driver = driver;
-    p->property = property;
-    p->value = value;
-    qdev_prop_register_global(p);
-}
-
-static void machine_register_compat_for_subclass(ObjectClass *oc, void *opaque)
-{
-    GlobalProperty *p = opaque;
-    register_compat_prop(object_class_get_name(oc), p->property, p->value);
-}
-
 void machine_register_compat_props(MachineState *machine)
 {
     MachineClass *mc = MACHINE_GET_CLASS(machine);
     int i;
     GlobalProperty *p;
-    ObjectClass *oc;
 
     if (!mc->compat_props) {
         return;
@@ -622,22 +851,9 @@ void machine_register_compat_props(MachineState *machine)
 
     for (i = 0; i < mc->compat_props->len; i++) {
         p = g_array_index(mc->compat_props, GlobalProperty *, i);
-        oc = object_class_by_name(p->driver);
-        if (oc && object_class_is_abstract(oc)) {
-            /* temporary hack to make sure we do not override
-             * globals set explicitly on -global: if an abstract class
-             * is on compat_props, register globals for all its
-             * non-abstract subtypes instead.
-             *
-             * This doesn't solve the problem for cases where
-             * a non-abstract typename mentioned on compat_props
-             * has subclasses, like spapr-pci-host-bridge.
-             */
-            object_class_foreach(machine_register_compat_for_subclass,
-                                 p->driver, false, p);
-        } else {
-            register_compat_prop(p->driver, p->property, p->value);
-        }
+        /* Machine compat_props must never cause errors: */
+        p->errp = &error_abort;
+        qdev_prop_register_global(p);
     }
 }
 

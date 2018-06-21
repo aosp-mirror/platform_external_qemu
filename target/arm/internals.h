@@ -51,27 +51,6 @@ static inline bool excp_is_internal(int excp)
         || excp == EXCP_SEMIHOST;
 }
 
-/* Exception names for debug logging; note that not all of these
- * precisely correspond to architectural exceptions.
- */
-static const char * const excnames[] = {
-    [EXCP_UDEF] = "Undefined Instruction",
-    [EXCP_SWI] = "SVC",
-    [EXCP_PREFETCH_ABORT] = "Prefetch Abort",
-    [EXCP_DATA_ABORT] = "Data Abort",
-    [EXCP_IRQ] = "IRQ",
-    [EXCP_FIQ] = "FIQ",
-    [EXCP_BKPT] = "Breakpoint",
-    [EXCP_EXCEPTION_EXIT] = "QEMU v7M exception exit",
-    [EXCP_KERNEL_TRAP] = "QEMU intercept of kernel commpage",
-    [EXCP_HVC] = "Hypervisor Call",
-    [EXCP_HYP_TRAP] = "Hypervisor Trap",
-    [EXCP_SMC] = "Secure Monitor Call",
-    [EXCP_VIRQ] = "Virtual IRQ",
-    [EXCP_VFIQ] = "Virtual FIQ",
-    [EXCP_SEMIHOST] = "Semihosting call",
-};
-
 /* Scale factor for generic timers, ie number of ns per tick.
  * This gives a 62.5MHz timer.
  */
@@ -81,6 +60,39 @@ static const char * const excnames[] = {
 FIELD(V7M_CONTROL, NPRIV, 0, 1)
 FIELD(V7M_CONTROL, SPSEL, 1, 1)
 FIELD(V7M_CONTROL, FPCA, 2, 1)
+FIELD(V7M_CONTROL, SFPA, 3, 1)
+
+/* Bit definitions for v7M exception return payload */
+FIELD(V7M_EXCRET, ES, 0, 1)
+FIELD(V7M_EXCRET, RES0, 1, 1)
+FIELD(V7M_EXCRET, SPSEL, 2, 1)
+FIELD(V7M_EXCRET, MODE, 3, 1)
+FIELD(V7M_EXCRET, FTYPE, 4, 1)
+FIELD(V7M_EXCRET, DCRS, 5, 1)
+FIELD(V7M_EXCRET, S, 6, 1)
+FIELD(V7M_EXCRET, RES1, 7, 25) /* including the must-be-1 prefix */
+
+/* Minimum value which is a magic number for exception return */
+#define EXC_RETURN_MIN_MAGIC 0xff000000
+/* Minimum number which is a magic number for function or exception return
+ * when using v8M security extension
+ */
+#define FNC_RETURN_MIN_MAGIC 0xfefffffe
+
+/* We use a few fake FSR values for internal purposes in M profile.
+ * M profile cores don't have A/R format FSRs, but currently our
+ * get_phys_addr() code assumes A/R profile and reports failures via
+ * an A/R format FSR value. We then translate that into the proper
+ * M profile exception and FSR status bit in arm_v7m_cpu_do_interrupt().
+ * Mostly the FSR values we use for this are those defined for v7PMSA,
+ * since we share some of that codepath. A few kinds of fault are
+ * only for M profile and have no A/R equivalent, though, so we have
+ * to pick a value from the reserved range (which we never otherwise
+ * generate) to use for these.
+ * These values will never be visible to the guest.
+ */
+#define M_FAKE_FSR_NSC_EXEC 0xf /* NS executing in S&NSC memory */
+#define M_FAKE_FSR_SFAULT 0xe /* SecureFault INVTRAN, INVEP or AUVIOL */
 
 /*
  * For AArch64, map a given EL to an index in the banked_spsr array.
@@ -231,6 +243,7 @@ enum arm_exception_class {
     EC_AA64_HVC               = 0x16,
     EC_AA64_SMC               = 0x17,
     EC_SYSTEMREGISTERTRAP     = 0x18,
+    EC_SVEACCESSTRAP          = 0x19,
     EC_INSNABORT              = 0x20,
     EC_INSNABORT_SAME_EL      = 0x21,
     EC_PCALIGNMENT            = 0x22,
@@ -369,6 +382,11 @@ static inline uint32_t syn_fp_access_trap(int cv, int cond, bool is_16bit)
         | (cv << 24) | (cond << 20);
 }
 
+static inline uint32_t syn_sve_access_trap(void)
+{
+    return EC_SVEACCESSTRAP << ARM_EL_EC_SHIFT;
+}
+
 static inline uint32_t syn_insn_abort(int same_el, int ea, int s1ptw, int fsc)
 {
     return (EC_INSNABORT << ARM_EL_EC_SHIFT) | (same_el << ARM_EL_EC_SHIFT)
@@ -416,9 +434,10 @@ static inline uint32_t syn_breakpoint(int same_el)
         | ARM_EL_IL | 0x22;
 }
 
-static inline uint32_t syn_wfx(int cv, int cond, int ti)
+static inline uint32_t syn_wfx(int cv, int cond, int ti, bool is_16bit)
 {
     return (EC_WFX_TRAP << ARM_EL_EC_SHIFT) |
+           (is_16bit ? 0 : (1 << ARM_EL_IL_SHIFT)) |
            (cv << 24) | (cond << 20) | ti;
 }
 
@@ -465,21 +484,229 @@ void arm_handle_psci_call(ARMCPU *cpu);
 #endif
 
 /**
+ * arm_clear_exclusive: clear the exclusive monitor
+ * @env: CPU env
+ * Clear the CPU's exclusive monitor, like the guest CLREX instruction.
+ */
+static inline void arm_clear_exclusive(CPUARMState *env)
+{
+    env->exclusive_addr = -1;
+}
+
+/**
+ * ARMFaultType: type of an ARM MMU fault
+ * This corresponds to the v8A pseudocode's Fault enumeration,
+ * with extensions for QEMU internal conditions.
+ */
+typedef enum ARMFaultType {
+    ARMFault_None,
+    ARMFault_AccessFlag,
+    ARMFault_Alignment,
+    ARMFault_Background,
+    ARMFault_Domain,
+    ARMFault_Permission,
+    ARMFault_Translation,
+    ARMFault_AddressSize,
+    ARMFault_SyncExternal,
+    ARMFault_SyncExternalOnWalk,
+    ARMFault_SyncParity,
+    ARMFault_SyncParityOnWalk,
+    ARMFault_AsyncParity,
+    ARMFault_AsyncExternal,
+    ARMFault_Debug,
+    ARMFault_TLBConflict,
+    ARMFault_Lockdown,
+    ARMFault_Exclusive,
+    ARMFault_ICacheMaint,
+    ARMFault_QEMU_NSCExec, /* v8M: NS executing in S&NSC memory */
+    ARMFault_QEMU_SFault, /* v8M: SecureFault INVTRAN, INVEP or AUVIOL */
+} ARMFaultType;
+
+/**
  * ARMMMUFaultInfo: Information describing an ARM MMU Fault
+ * @type: Type of fault
+ * @level: Table walk level (for translation, access flag and permission faults)
+ * @domain: Domain of the fault address (for non-LPAE CPUs only)
  * @s2addr: Address that caused a fault at stage 2
  * @stage2: True if we faulted at stage 2
  * @s1ptw: True if we faulted at stage 2 while doing a stage 1 page-table walk
+ * @ea: True if we should set the EA (external abort type) bit in syndrome
  */
 typedef struct ARMMMUFaultInfo ARMMMUFaultInfo;
 struct ARMMMUFaultInfo {
+    ARMFaultType type;
     target_ulong s2addr;
+    int level;
+    int domain;
     bool stage2;
     bool s1ptw;
+    bool ea;
 };
 
+/**
+ * arm_fi_to_sfsc: Convert fault info struct to short-format FSC
+ * Compare pseudocode EncodeSDFSC(), though unlike that function
+ * we set up a whole FSR-format code including domain field and
+ * putting the high bit of the FSC into bit 10.
+ */
+static inline uint32_t arm_fi_to_sfsc(ARMMMUFaultInfo *fi)
+{
+    uint32_t fsc;
+
+    switch (fi->type) {
+    case ARMFault_None:
+        return 0;
+    case ARMFault_AccessFlag:
+        fsc = fi->level == 1 ? 0x3 : 0x6;
+        break;
+    case ARMFault_Alignment:
+        fsc = 0x1;
+        break;
+    case ARMFault_Permission:
+        fsc = fi->level == 1 ? 0xd : 0xf;
+        break;
+    case ARMFault_Domain:
+        fsc = fi->level == 1 ? 0x9 : 0xb;
+        break;
+    case ARMFault_Translation:
+        fsc = fi->level == 1 ? 0x5 : 0x7;
+        break;
+    case ARMFault_SyncExternal:
+        fsc = 0x8 | (fi->ea << 12);
+        break;
+    case ARMFault_SyncExternalOnWalk:
+        fsc = fi->level == 1 ? 0xc : 0xe;
+        fsc |= (fi->ea << 12);
+        break;
+    case ARMFault_SyncParity:
+        fsc = 0x409;
+        break;
+    case ARMFault_SyncParityOnWalk:
+        fsc = fi->level == 1 ? 0x40c : 0x40e;
+        break;
+    case ARMFault_AsyncParity:
+        fsc = 0x408;
+        break;
+    case ARMFault_AsyncExternal:
+        fsc = 0x406 | (fi->ea << 12);
+        break;
+    case ARMFault_Debug:
+        fsc = 0x2;
+        break;
+    case ARMFault_TLBConflict:
+        fsc = 0x400;
+        break;
+    case ARMFault_Lockdown:
+        fsc = 0x404;
+        break;
+    case ARMFault_Exclusive:
+        fsc = 0x405;
+        break;
+    case ARMFault_ICacheMaint:
+        fsc = 0x4;
+        break;
+    case ARMFault_Background:
+        fsc = 0x0;
+        break;
+    case ARMFault_QEMU_NSCExec:
+        fsc = M_FAKE_FSR_NSC_EXEC;
+        break;
+    case ARMFault_QEMU_SFault:
+        fsc = M_FAKE_FSR_SFAULT;
+        break;
+    default:
+        /* Other faults can't occur in a context that requires a
+         * short-format status code.
+         */
+        g_assert_not_reached();
+    }
+
+    fsc |= (fi->domain << 4);
+    return fsc;
+}
+
+/**
+ * arm_fi_to_lfsc: Convert fault info struct to long-format FSC
+ * Compare pseudocode EncodeLDFSC(), though unlike that function
+ * we fill in also the LPAE bit 9 of a DFSR format.
+ */
+static inline uint32_t arm_fi_to_lfsc(ARMMMUFaultInfo *fi)
+{
+    uint32_t fsc;
+
+    switch (fi->type) {
+    case ARMFault_None:
+        return 0;
+    case ARMFault_AddressSize:
+        fsc = fi->level & 3;
+        break;
+    case ARMFault_AccessFlag:
+        fsc = (fi->level & 3) | (0x2 << 2);
+        break;
+    case ARMFault_Permission:
+        fsc = (fi->level & 3) | (0x3 << 2);
+        break;
+    case ARMFault_Translation:
+        fsc = (fi->level & 3) | (0x1 << 2);
+        break;
+    case ARMFault_SyncExternal:
+        fsc = 0x10 | (fi->ea << 12);
+        break;
+    case ARMFault_SyncExternalOnWalk:
+        fsc = (fi->level & 3) | (0x5 << 2) | (fi->ea << 12);
+        break;
+    case ARMFault_SyncParity:
+        fsc = 0x18;
+        break;
+    case ARMFault_SyncParityOnWalk:
+        fsc = (fi->level & 3) | (0x7 << 2);
+        break;
+    case ARMFault_AsyncParity:
+        fsc = 0x19;
+        break;
+    case ARMFault_AsyncExternal:
+        fsc = 0x11 | (fi->ea << 12);
+        break;
+    case ARMFault_Alignment:
+        fsc = 0x21;
+        break;
+    case ARMFault_Debug:
+        fsc = 0x22;
+        break;
+    case ARMFault_TLBConflict:
+        fsc = 0x30;
+        break;
+    case ARMFault_Lockdown:
+        fsc = 0x34;
+        break;
+    case ARMFault_Exclusive:
+        fsc = 0x35;
+        break;
+    default:
+        /* Other faults can't occur in a context that requires a
+         * long-format status code.
+         */
+        g_assert_not_reached();
+    }
+
+    fsc |= 1 << 9;
+    return fsc;
+}
+
+static inline bool arm_extabort_type(MemTxResult result)
+{
+    /* The EA bit in syndromes and fault status registers is an
+     * IMPDEF classification of external aborts. ARM implementations
+     * usually use this to indicate AXI bus Decode error (0) or
+     * Slave error (1); in QEMU we follow that.
+     */
+    return result != MEMTX_DECODE_ERROR;
+}
+
 /* Do a page table walk and add page to TLB if possible */
-bool arm_tlb_fill(CPUState *cpu, vaddr address, int rw, int mmu_idx,
-                  uint32_t *fsr, ARMMMUFaultInfo *fi);
+bool arm_tlb_fill(CPUState *cpu, vaddr address,
+                  MMUAccessType access_type, int mmu_idx,
+                  ARMMMUFaultInfo *fi);
 
 /* Return true if the stage 1 translation regime is using LPAE format page
  * tables */
@@ -491,11 +718,74 @@ void arm_cpu_do_unaligned_access(CPUState *cs, vaddr vaddr,
                                  int mmu_idx, uintptr_t retaddr,
                                  unsigned size);
 
+/* arm_cpu_do_transaction_failed: handle a memory system error response
+ * (eg "no device/memory present at address") by raising an external abort
+ * exception
+ */
+void arm_cpu_do_transaction_failed(CPUState *cs, hwaddr physaddr,
+                                   vaddr addr, unsigned size,
+                                   MMUAccessType access_type,
+                                   int mmu_idx, MemTxAttrs attrs,
+                                   MemTxResult response, uintptr_t retaddr);
+
 /* Call the EL change hook if one has been registered */
 static inline void arm_call_el_change_hook(ARMCPU *cpu)
 {
     if (cpu->el_change_hook) {
         cpu->el_change_hook(cpu, cpu->el_change_hook_opaque);
+    }
+}
+
+/* Return true if this address translation regime is secure */
+static inline bool regime_is_secure(CPUARMState *env, ARMMMUIdx mmu_idx)
+{
+    switch (mmu_idx) {
+    case ARMMMUIdx_S12NSE0:
+    case ARMMMUIdx_S12NSE1:
+    case ARMMMUIdx_S1NSE0:
+    case ARMMMUIdx_S1NSE1:
+    case ARMMMUIdx_S1E2:
+    case ARMMMUIdx_S2NS:
+    case ARMMMUIdx_MPrivNegPri:
+    case ARMMMUIdx_MUserNegPri:
+    case ARMMMUIdx_MPriv:
+    case ARMMMUIdx_MUser:
+        return false;
+    case ARMMMUIdx_S1E3:
+    case ARMMMUIdx_S1SE0:
+    case ARMMMUIdx_S1SE1:
+    case ARMMMUIdx_MSPrivNegPri:
+    case ARMMMUIdx_MSUserNegPri:
+    case ARMMMUIdx_MSPriv:
+    case ARMMMUIdx_MSUser:
+        return true;
+    default:
+        g_assert_not_reached();
+    }
+}
+
+/* Return the FSR value for a debug exception (watchpoint, hardware
+ * breakpoint or BKPT insn) targeting the specified exception level.
+ */
+static inline uint32_t arm_debug_exception_fsr(CPUARMState *env)
+{
+    ARMMMUFaultInfo fi = { .type = ARMFault_Debug };
+    int target_el = arm_debug_target_el(env);
+    bool using_lpae = false;
+
+    if (target_el == 2 || arm_el_is_aa64(env, target_el)) {
+        using_lpae = true;
+    } else {
+        if (arm_feature(env, ARM_FEATURE_LPAE) &&
+            (env->cp15.tcr_el[target_el].raw_tcr & TTBCR_EAE)) {
+            using_lpae = true;
+        }
+    }
+
+    if (using_lpae) {
+        return arm_fi_to_lfsc(&fi);
+    } else {
+        return arm_fi_to_sfsc(&fi);
     }
 }
 

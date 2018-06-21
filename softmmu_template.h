@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 /*
  *  Software MMU support
  *
@@ -431,3 +432,5 @@ void helper_be_st_name(CPUArchState *env, target_ulong addr, DATA_TYPE val,
 #undef helper_be_lds_name
 #undef helper_le_st_name
 #undef helper_be_st_name
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

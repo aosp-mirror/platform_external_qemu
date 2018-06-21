@@ -22,15 +22,21 @@
  * THE SOFTWARE.
  */
 #include "qemu/osdep.h"
+#include "qemu/error-report.h"
 #include "qapi/error.h"
 #include "qemu-common.h"
 #include "cpu.h"
 #include "hw/hw.h"
 #include "hw/pci/pci.h"
-#include "hw/pci-host/apb.h"
+#include "hw/pci/pci_bridge.h"
+#include "hw/pci/pci_bus.h"
+#include "hw/pci/pci_host.h"
+#include "hw/pci-host/sabre.h"
 #include "hw/i386/pc.h"
 #include "hw/char/serial.h"
+#include "hw/char/parallel.h"
 #include "hw/timer/m48t59.h"
+#include "hw/input/i8042.h"
 #include "hw/block/fdc.h"
 #include "net/net.h"
 #include "qemu/timer.h"
@@ -42,26 +48,19 @@
 #include "hw/nvram/fw_cfg.h"
 #include "hw/sysbus.h"
 #include "hw/ide.h"
+#include "hw/ide/pci.h"
 #include "hw/loader.h"
 #include "elf.h"
+#include "trace.h"
 #include "qemu/cutils.h"
-
-//#define DEBUG_EBUS
-
-#ifdef DEBUG_EBUS
-#define EBUS_DPRINTF(fmt, ...)                                  \
-    do { printf("EBUS: " fmt , ## __VA_ARGS__); } while (0)
-#else
-#define EBUS_DPRINTF(fmt, ...)
-#endif
 
 #define KERNEL_LOAD_ADDR     0x00404000
 #define CMDLINE_ADDR         0x003ff000
 #define PROM_SIZE_MAX        (4 * 1024 * 1024)
 #define PROM_VADDR           0x000ffd00000ULL
-#define APB_SPECIAL_BASE     0x1fe00000000ULL
-#define APB_MEM_BASE         0x1ff00000000ULL
-#define APB_PCI_IO_BASE      (APB_SPECIAL_BASE + 0x02000000ULL)
+#define PBM_SPECIAL_BASE     0x1fe00000000ULL
+#define PBM_MEM_BASE         0x1ff00000000ULL
+#define PBM_PCI_IO_BASE      (PBM_SPECIAL_BASE + 0x02000000ULL)
 #define PROM_FILENAME        "openbios-sparc64"
 #define NVRAM_SIZE           0x2000
 #define MAX_IDE_BUS          2
@@ -73,21 +72,24 @@
 #define IVEC_MAX             0x40
 
 struct hwdef {
-    const char * const default_cpu_model;
     uint16_t machine_id;
     uint64_t prom_addr;
     uint64_t console_serial_base;
 };
 
 typedef struct EbusState {
-    PCIDevice pci_dev;
+    /*< private >*/
+    PCIDevice parent_obj;
+
+    ISABus *isa_bus;
+    qemu_irq isa_bus_irqs[ISA_NUM_IRQS];
+    uint64_t console_serial_base;
     MemoryRegion bar0;
     MemoryRegion bar1;
 } EbusState;
 
-void DMA_init(ISABus *bus, int high_page_enable)
-{
-}
+#define TYPE_EBUS "ebus"
+#define EBUS(obj) OBJECT_CHECK(EbusState, (obj), TYPE_EBUS)
 
 static void fw_cfg_boot_set(void *opaque, const char *boot_device,
                             Error **errp)
@@ -165,8 +167,7 @@ static uint64_t sun4u_load_kernel(const char *kernel_filename,
                                               RAM_size - KERNEL_LOAD_ADDR);
         }
         if (kernel_size < 0) {
-            fprintf(stderr, "qemu: could not load kernel '%s'\n",
-                    kernel_filename);
+            error_report("could not load kernel '%s'", kernel_filename);
             exit(1);
         }
         /* load initrd above kernel */
@@ -178,8 +179,8 @@ static uint64_t sun4u_load_kernel(const char *kernel_filename,
                                                *initrd_addr,
                                                RAM_size - *initrd_addr);
             if ((int)*initrd_size < 0) {
-                fprintf(stderr, "qemu: could not load initial ram disk '%s'\n",
-                        initrd_filename);
+                error_report("could not load initial ram disk '%s'",
+                             initrd_filename);
                 exit(1);
             }
         }
@@ -202,50 +203,133 @@ typedef struct ResetData {
     uint64_t prom_addr;
 } ResetData;
 
-static void isa_irq_handler(void *opaque, int n, int level)
-{
-    static const int isa_irq_to_ivec[16] = {
-        [1] = 0x29, /* keyboard */
-        [4] = 0x2b, /* serial */
-        [6] = 0x27, /* floppy */
-        [7] = 0x22, /* parallel */
-        [12] = 0x2a, /* mouse */
-    };
-    qemu_irq *irqs = opaque;
-    int ivec;
+#define TYPE_SUN4U_POWER "power"
+#define SUN4U_POWER(obj) OBJECT_CHECK(PowerDevice, (obj), TYPE_SUN4U_POWER)
 
-    assert(n < 16);
-    ivec = isa_irq_to_ivec[n];
-    EBUS_DPRINTF("Set ISA IRQ %d level %d -> ivec 0x%x\n", n, level, ivec);
-    if (ivec) {
-        qemu_set_irq(irqs[ivec], level);
+typedef struct PowerDevice {
+    SysBusDevice parent_obj;
+
+    MemoryRegion power_mmio;
+} PowerDevice;
+
+/* Power */
+static void power_mem_write(void *opaque, hwaddr addr,
+                            uint64_t val, unsigned size)
+{
+    /* According to a real Ultra 5, bit 24 controls the power */
+    if (val & 0x1000000) {
+        qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
+    }
+}
+
+static const MemoryRegionOps power_mem_ops = {
+    .write = power_mem_write,
+    .endianness = DEVICE_NATIVE_ENDIAN,
+    .valid = {
+        .min_access_size = 4,
+        .max_access_size = 4,
+    },
+};
+
+static void power_realize(DeviceState *dev, Error **errp)
+{
+    PowerDevice *d = SUN4U_POWER(dev);
+    SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
+
+    memory_region_init_io(&d->power_mmio, OBJECT(dev), &power_mem_ops, d,
+                          "power", sizeof(uint32_t));
+
+    sysbus_init_mmio(sbd, &d->power_mmio);
+}
+
+static void power_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+
+    dc->realize = power_realize;
+}
+
+static const TypeInfo power_info = {
+    .name          = TYPE_SUN4U_POWER,
+    .parent        = TYPE_SYS_BUS_DEVICE,
+    .instance_size = sizeof(PowerDevice),
+    .class_init    = power_class_init,
+};
+
+static void ebus_isa_irq_handler(void *opaque, int n, int level)
+{
+    EbusState *s = EBUS(opaque);
+    qemu_irq irq = s->isa_bus_irqs[n];
+
+    /* Pass ISA bus IRQs onto their gpio equivalent */
+    trace_ebus_isa_irq_handler(n, level);
+    if (irq) {
+        qemu_set_irq(irq, level);
     }
 }
 
 /* EBUS (Eight bit bus) bridge */
-static ISABus *
-pci_ebus_init(PCIBus *bus, int devfn, qemu_irq *irqs)
+static void ebus_realize(PCIDevice *pci_dev, Error **errp)
 {
+    EbusState *s = EBUS(pci_dev);
+    SysBusDevice *sbd;
+    DeviceState *dev;
     qemu_irq *isa_irq;
-    PCIDevice *pci_dev;
-    ISABus *isa_bus;
+    DriveInfo *fd[MAX_FD];
+    int i;
 
-    pci_dev = pci_create_simple(bus, devfn, "ebus");
-    isa_bus = ISA_BUS(qdev_get_child_bus(DEVICE(pci_dev), "isa.0"));
-    isa_irq = qemu_allocate_irqs(isa_irq_handler, irqs, 16);
-    isa_bus_irqs(isa_bus, isa_irq);
-    return isa_bus;
-}
-
-static void pci_ebus_realize(PCIDevice *pci_dev, Error **errp)
-{
-    EbusState *s = DO_UPCAST(EbusState, pci_dev, pci_dev);
-
-    if (!isa_bus_new(DEVICE(pci_dev), get_system_memory(),
-                     pci_address_space_io(pci_dev), errp)) {
+    s->isa_bus = isa_bus_new(DEVICE(pci_dev), get_system_memory(),
+                             pci_address_space_io(pci_dev), errp);
+    if (!s->isa_bus) {
+        error_setg(errp, "unable to instantiate EBUS ISA bus");
         return;
     }
 
+    /* ISA bus */
+    isa_irq = qemu_allocate_irqs(ebus_isa_irq_handler, s, ISA_NUM_IRQS);
+    isa_bus_irqs(s->isa_bus, isa_irq);
+    qdev_init_gpio_out_named(DEVICE(s), s->isa_bus_irqs, "isa-irq",
+                             ISA_NUM_IRQS);
+
+    /* Serial ports */
+    i = 0;
+    if (s->console_serial_base) {
+        serial_mm_init(pci_address_space(pci_dev), s->console_serial_base,
+                       0, NULL, 115200, serial_hds[i], DEVICE_BIG_ENDIAN);
+        i++;
+    }
+    serial_hds_isa_init(s->isa_bus, i, MAX_SERIAL_PORTS);
+
+    /* Parallel ports */
+    parallel_hds_isa_init(s->isa_bus, MAX_PARALLEL_PORTS);
+
+    /* Keyboard */
+    isa_create_simple(s->isa_bus, "i8042");
+
+    /* Floppy */
+    for (i = 0; i < MAX_FD; i++) {
+        fd[i] = drive_get(IF_FLOPPY, 0, i);
+    }
+    dev = DEVICE(isa_create(s->isa_bus, TYPE_ISA_FDC));
+    if (fd[0]) {
+        qdev_prop_set_drive(dev, "driveA", blk_by_legacy_dinfo(fd[0]),
+                            &error_abort);
+    }
+    if (fd[1]) {
+        qdev_prop_set_drive(dev, "driveB", blk_by_legacy_dinfo(fd[1]),
+                            &error_abort);
+    }
+    qdev_prop_set_uint32(dev, "dma", -1);
+    qdev_init_nofail(dev);
+
+    /* Power */
+    dev = qdev_create(NULL, TYPE_SUN4U_POWER);
+    qdev_init_nofail(dev);
+    sbd = SYS_BUS_DEVICE(dev);
+    memory_region_add_subregion(pci_address_space_io(pci_dev), 0x7240,
+                                sysbus_mmio_get_region(sbd, 0));
+
+    /* PCI */
     pci_dev->config[0x04] = 0x06; // command = bus master, pci mem
     pci_dev->config[0x05] = 0x00;
     pci_dev->config[0x06] = 0xa0; // status = fast back-to-back, 66MHz, no error
@@ -257,26 +341,38 @@ static void pci_ebus_realize(PCIDevice *pci_dev, Error **errp)
                              0, 0x1000000);
     pci_register_bar(pci_dev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &s->bar0);
     memory_region_init_alias(&s->bar1, OBJECT(s), "bar1", get_system_io(),
-                             0, 0x4000);
+                             0, 0x8000);
     pci_register_bar(pci_dev, 1, PCI_BASE_ADDRESS_SPACE_IO, &s->bar1);
 }
+
+static Property ebus_properties[] = {
+    DEFINE_PROP_UINT64("console-serial-base", EbusState,
+                       console_serial_base, 0),
+    DEFINE_PROP_END_OF_LIST(),
+};
 
 static void ebus_class_init(ObjectClass *klass, void *data)
 {
     PCIDeviceClass *k = PCI_DEVICE_CLASS(klass);
+    DeviceClass *dc = DEVICE_CLASS(klass);
 
-    k->realize = pci_ebus_realize;
+    k->realize = ebus_realize;
     k->vendor_id = PCI_VENDOR_ID_SUN;
     k->device_id = PCI_DEVICE_ID_SUN_EBUS;
     k->revision = 0x01;
     k->class_id = PCI_CLASS_BRIDGE_OTHER;
+    dc->props = ebus_properties;
 }
 
 static const TypeInfo ebus_info = {
-    .name          = "ebus",
+    .name          = TYPE_EBUS,
     .parent        = TYPE_PCI_DEVICE,
-    .instance_size = sizeof(EbusState),
     .class_init    = ebus_class_init,
+    .instance_size = sizeof(EbusState),
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 #define TYPE_OPENPROM "openprom"
@@ -324,21 +420,21 @@ static void prom_init(hwaddr addr, const char *bios_name)
         ret = -1;
     }
     if (ret < 0 || ret > PROM_SIZE_MAX) {
-        fprintf(stderr, "qemu: could not load prom '%s'\n", bios_name);
+        error_report("could not load prom '%s'", bios_name);
         exit(1);
     }
 }
 
-static int prom_init1(SysBusDevice *dev)
+static void prom_init1(Object *obj)
 {
-    PROMState *s = OPENPROM(dev);
+    PROMState *s = OPENPROM(obj);
+    SysBusDevice *dev = SYS_BUS_DEVICE(obj);
 
-    memory_region_init_ram(&s->prom, OBJECT(s), "sun4u.prom", PROM_SIZE_MAX,
+    memory_region_init_ram_nomigrate(&s->prom, obj, "sun4u.prom", PROM_SIZE_MAX,
                            &error_fatal);
     vmstate_register_ram_global(&s->prom);
     memory_region_set_readonly(&s->prom, true);
     sysbus_init_mmio(dev, &s->prom);
-    return 0;
 }
 
 static Property prom_properties[] = {
@@ -348,9 +444,7 @@ static Property prom_properties[] = {
 static void prom_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
-    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
 
-    k->init = prom_init1;
     dc->props = prom_properties;
 }
 
@@ -359,6 +453,7 @@ static const TypeInfo prom_info = {
     .parent        = TYPE_SYS_BUS_DEVICE,
     .instance_size = sizeof(PROMState),
     .class_init    = prom_class_init,
+    .instance_init = prom_init1,
 };
 
 
@@ -373,15 +468,15 @@ typedef struct RamDevice {
 } RamDevice;
 
 /* System RAM */
-static int ram_init1(SysBusDevice *dev)
+static void ram_realize(DeviceState *dev, Error **errp)
 {
     RamDevice *d = SUN4U_RAM(dev);
+    SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
 
-    memory_region_init_ram(&d->ram, OBJECT(d), "sun4u.ram", d->size,
+    memory_region_init_ram_nomigrate(&d->ram, OBJECT(d), "sun4u.ram", d->size,
                            &error_fatal);
     vmstate_register_ram_global(&d->ram);
-    sysbus_init_mmio(dev, &d->ram);
-    return 0;
+    sysbus_init_mmio(sbd, &d->ram);
 }
 
 static void ram_init(hwaddr addr, ram_addr_t RAM_size)
@@ -409,9 +504,8 @@ static Property ram_properties[] = {
 static void ram_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
-    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
 
-    k->init = ram_init1;
+    dc->realize = ram_realize;
     dc->props = ram_properties;
 }
 
@@ -430,71 +524,113 @@ static void sun4uv_init(MemoryRegion *address_space_mem,
     Nvram *nvram;
     unsigned int i;
     uint64_t initrd_addr, initrd_size, kernel_addr, kernel_size, kernel_entry;
-    PCIBus *pci_bus, *pci_bus2, *pci_bus3;
-    ISABus *isa_bus;
+    SabreState *sabre;
+    PCIBus *pci_bus, *pci_busA, *pci_busB;
+    PCIDevice *ebus, *pci_dev;
     SysBusDevice *s;
-    qemu_irq *ivec_irqs, *pbm_irqs;
     DriveInfo *hd[MAX_IDE_BUS * MAX_IDE_DEVS];
-    DriveInfo *fd[MAX_FD];
-    DeviceState *dev;
+    DeviceState *iommu, *dev;
     FWCfgState *fw_cfg;
+    NICInfo *nd;
+    MACAddr macaddr;
+    bool onboard_nic;
 
     /* init CPUs */
-    cpu = sparc64_cpu_devinit(machine->cpu_model, hwdef->default_cpu_model,
-                              hwdef->prom_addr);
+    cpu = sparc64_cpu_devinit(machine->cpu_type, hwdef->prom_addr);
+
+    /* IOMMU */
+    iommu = qdev_create(NULL, TYPE_SUN4U_IOMMU);
+    qdev_init_nofail(iommu);
 
     /* set up devices */
     ram_init(0, machine->ram_size);
 
     prom_init(hwdef->prom_addr, bios_name);
 
-    ivec_irqs = qemu_allocate_irqs(sparc64_cpu_set_ivec_irq, cpu, IVEC_MAX);
-    pci_bus = pci_apb_init(APB_SPECIAL_BASE, APB_MEM_BASE, ivec_irqs, &pci_bus2,
-                           &pci_bus3, &pbm_irqs);
-    pci_vga_init(pci_bus);
+    /* Init sabre (PCI host bridge) */
+    sabre = SABRE_DEVICE(qdev_create(NULL, TYPE_SABRE));
+    qdev_prop_set_uint64(DEVICE(sabre), "special-base", PBM_SPECIAL_BASE);
+    qdev_prop_set_uint64(DEVICE(sabre), "mem-base", PBM_MEM_BASE);
+    object_property_set_link(OBJECT(sabre), OBJECT(iommu), "iommu",
+                             &error_abort);
+    qdev_init_nofail(DEVICE(sabre));
 
-    // XXX Should be pci_bus3
-    isa_bus = pci_ebus_init(pci_bus, -1, pbm_irqs);
-
-    i = 0;
-    if (hwdef->console_serial_base) {
-        serial_mm_init(address_space_mem, hwdef->console_serial_base, 0,
-                       NULL, 115200, serial_hds[i], DEVICE_BIG_ENDIAN);
-        i++;
+    /* Wire up PCI interrupts to CPU */
+    for (i = 0; i < IVEC_MAX; i++) {
+        qdev_connect_gpio_out_named(DEVICE(sabre), "ivec-irq", i,
+            qdev_get_gpio_in_named(DEVICE(cpu), "ivec-irq", i));
     }
 
-    serial_hds_isa_init(isa_bus, i, MAX_SERIAL_PORTS);
-    parallel_hds_isa_init(isa_bus, MAX_PARALLEL_PORTS);
+    pci_bus = PCI_HOST_BRIDGE(sabre)->bus;
+    pci_busA = pci_bridge_get_sec_bus(sabre->bridgeA);
+    pci_busB = pci_bridge_get_sec_bus(sabre->bridgeB);
 
-    for(i = 0; i < nb_nics; i++)
-        pci_nic_init_nofail(&nd_table[i], pci_bus, "ne2k_pci", NULL);
+    /* Only in-built Simba APBs can exist on the root bus, slot 0 on busA is
+       reserved (leaving no slots free after on-board devices) however slots
+       0-3 are free on busB */
+    pci_bus->slot_reserved_mask = 0xfffffffc;
+    pci_busA->slot_reserved_mask = 0xfffffff1;
+    pci_busB->slot_reserved_mask = 0xfffffff0;
+
+    ebus = pci_create_multifunction(pci_busA, PCI_DEVFN(1, 0), true, TYPE_EBUS);
+    qdev_prop_set_uint64(DEVICE(ebus), "console-serial-base",
+                         hwdef->console_serial_base);
+    qdev_init_nofail(DEVICE(ebus));
+
+    /* Wire up "well-known" ISA IRQs to PBM legacy obio IRQs */
+    qdev_connect_gpio_out_named(DEVICE(ebus), "isa-irq", 7,
+        qdev_get_gpio_in_named(DEVICE(sabre), "pbm-irq", OBIO_LPT_IRQ));
+    qdev_connect_gpio_out_named(DEVICE(ebus), "isa-irq", 6,
+        qdev_get_gpio_in_named(DEVICE(sabre), "pbm-irq", OBIO_FDD_IRQ));
+    qdev_connect_gpio_out_named(DEVICE(ebus), "isa-irq", 1,
+        qdev_get_gpio_in_named(DEVICE(sabre), "pbm-irq", OBIO_KBD_IRQ));
+    qdev_connect_gpio_out_named(DEVICE(ebus), "isa-irq", 12,
+        qdev_get_gpio_in_named(DEVICE(sabre), "pbm-irq", OBIO_MSE_IRQ));
+    qdev_connect_gpio_out_named(DEVICE(ebus), "isa-irq", 4,
+        qdev_get_gpio_in_named(DEVICE(sabre), "pbm-irq", OBIO_SER_IRQ));
+
+    pci_dev = pci_create_simple(pci_busA, PCI_DEVFN(2, 0), "VGA");
+
+    memset(&macaddr, 0, sizeof(MACAddr));
+    onboard_nic = false;
+    for (i = 0; i < nb_nics; i++) {
+        nd = &nd_table[i];
+
+        if (!nd->model || strcmp(nd->model, "sunhme") == 0) {
+            if (!onboard_nic) {
+                pci_dev = pci_create_multifunction(pci_busA, PCI_DEVFN(1, 1),
+                                                   true, "sunhme");
+                memcpy(&macaddr, &nd->macaddr.a, sizeof(MACAddr));
+                onboard_nic = true;
+            } else {
+                pci_dev = pci_create(pci_busB, -1, "sunhme");
+            }
+        } else {
+            pci_dev = pci_create(pci_busB, -1, nd->model);
+        }
+
+        dev = &pci_dev->qdev;
+        qdev_set_nic_properties(dev, nd);
+        qdev_init_nofail(dev);
+    }
+
+    /* If we don't have an onboard NIC, grab a default MAC address so that
+     * we have a valid machine id */
+    if (!onboard_nic) {
+        qemu_macaddr_default_if_unset(&macaddr);
+    }
 
     ide_drive_get(hd, ARRAY_SIZE(hd));
 
-    pci_cmd646_ide_init(pci_bus, hd, 1);
-
-    isa_create_simple(isa_bus, "i8042");
-
-    /* Floppy */
-    for(i = 0; i < MAX_FD; i++) {
-        fd[i] = drive_get(IF_FLOPPY, 0, i);
-    }
-    dev = DEVICE(isa_create(isa_bus, TYPE_ISA_FDC));
-    if (fd[0]) {
-        qdev_prop_set_drive(dev, "driveA", blk_by_legacy_dinfo(fd[0]),
-                            &error_abort);
-    }
-    if (fd[1]) {
-        qdev_prop_set_drive(dev, "driveB", blk_by_legacy_dinfo(fd[1]),
-                            &error_abort);
-    }
-    qdev_prop_set_uint32(dev, "dma", -1);
-    qdev_init_nofail(dev);
+    pci_dev = pci_create(pci_busA, PCI_DEVFN(3, 0), "cmd646-ide");
+    qdev_prop_set_uint32(&pci_dev->qdev, "secondary", 1);
+    qdev_init_nofail(&pci_dev->qdev);
+    pci_ide_create_devs(pci_dev, hd);
 
     /* Map NVRAM into I/O (ebus) space */
     nvram = m48t59_init(NULL, 0, 0, NVRAM_SIZE, 1968, 59);
     s = SYS_BUS_DEVICE(nvram);
-    memory_region_add_subregion(get_system_io(), 0x2000,
+    memory_region_add_subregion(pci_address_space_io(ebus), 0x2000,
                                 sysbus_mmio_get_region(s, 0));
  
     initrd_size = 0;
@@ -512,9 +648,16 @@ static void sun4uv_init(MemoryRegion *address_space_mem,
                            /* XXX: need an option to load a NVRAM image */
                            0,
                            graphic_width, graphic_height, graphic_depth,
-                           (uint8_t *)&nd_table[0].macaddr);
+                           (uint8_t *)&macaddr);
 
-    fw_cfg = fw_cfg_init_io(BIOS_CFG_IOPORT);
+    dev = qdev_create(NULL, TYPE_FW_CFG_IO);
+    qdev_prop_set_bit(dev, "dma_enabled", false);
+    object_property_add_child(OBJECT(ebus), TYPE_FW_CFG, OBJECT(dev), NULL);
+    qdev_init_nofail(dev);
+    memory_region_add_subregion(pci_address_space_io(ebus), BIOS_CFG_IOPORT,
+                                &FW_CFG_IO(dev)->comb_iomem);
+
+    fw_cfg = FW_CFG(dev);
     fw_cfg_add_i16(fw_cfg, FW_CFG_NB_CPUS, (uint16_t)smp_cpus);
     fw_cfg_add_i16(fw_cfg, FW_CFG_MAX_CPUS, (uint16_t)max_cpus);
     fw_cfg_add_i64(fw_cfg, FW_CFG_RAM_SIZE, (uint64_t)ram_size);
@@ -547,14 +690,12 @@ enum {
 static const struct hwdef hwdefs[] = {
     /* Sun4u generic PC-like machine */
     {
-        .default_cpu_model = "TI UltraSparc IIi",
         .machine_id = sun4u_id,
         .prom_addr = 0x1fff0000000ULL,
         .console_serial_base = 0,
     },
     /* Sun4v generic PC-like machine */
     {
-        .default_cpu_model = "Sun UltraSparc T1",
         .machine_id = sun4v_id,
         .prom_addr = 0x1fff0000000ULL,
         .console_serial_base = 0,
@@ -583,6 +724,7 @@ static void sun4u_class_init(ObjectClass *oc, void *data)
     mc->max_cpus = 1; /* XXX for now */
     mc->is_default = 1;
     mc->default_boot_order = "c";
+    mc->default_cpu_type = SPARC_CPU_TYPE_NAME("TI-UltraSparc-IIi");
 }
 
 static const TypeInfo sun4u_type = {
@@ -600,6 +742,7 @@ static void sun4v_class_init(ObjectClass *oc, void *data)
     mc->block_default_type = IF_IDE;
     mc->max_cpus = 1; /* XXX for now */
     mc->default_boot_order = "c";
+    mc->default_cpu_type = SPARC_CPU_TYPE_NAME("Sun-UltraSparc-T1");
 }
 
 static const TypeInfo sun4v_type = {
@@ -610,6 +753,7 @@ static const TypeInfo sun4v_type = {
 
 static void sun4u_register_types(void)
 {
+    type_register_static(&power_info);
     type_register_static(&ebus_info);
     type_register_static(&prom_info);
     type_register_static(&ram_info);
