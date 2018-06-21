@@ -36,7 +36,7 @@
 #include "cpu.h"
 #include "hw/hw.h"
 #include "hw/scsi/scsi.h"
-#include "block/scsi.h"
+#include "scsi/constants.h"
 #include "srp.h"
 #include "hw/qdev.h"
 #include "hw/ppc/spapr.h"
@@ -1215,8 +1215,7 @@ void spapr_vscsi_create(VIOsPAPRBus *bus)
     dev = qdev_create(&bus->bus, "spapr-vscsi");
 
     qdev_init_nofail(dev);
-    scsi_bus_legacy_handle_cmdline(&VIO_SPAPR_VSCSI_DEVICE(dev)->bus,
-                                   false);
+    scsi_bus_legacy_handle_cmdline(&VIO_SPAPR_VSCSI_DEVICE(dev)->bus);
 }
 
 static int spapr_vscsi_devnode(VIOsPAPRDevice *dev, void *fdt, int node_off)

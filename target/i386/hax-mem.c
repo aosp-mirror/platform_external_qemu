@@ -12,6 +12,7 @@
 #include "cpu.h"
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
+#include "qemu/error-report.h"
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"
@@ -24,9 +25,57 @@ static void hax_dump_memslots(void)
     hax_slot *slot;
     int i;
 
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
     for (i = 0; i < HAX_MAX_SLOTS; ++i) {
         slot = &hax_global.memslots[i];
         if (slot->flags & HAX_RAM_INFO_INVALID)
+=======
+    DPRINTF("%s updates:\n", __func__);
+    QTAILQ_FOREACH(entry, &mappings, entry) {
+        DPRINTF("\t%c 0x%016" PRIx64 "->0x%016" PRIx64 " VA 0x%016" PRIx64
+                "%s\n", entry->flags & HAX_RAM_INFO_INVALID ? '-' : '+',
+                entry->start_pa, entry->start_pa + entry->size, entry->host_va,
+                entry->flags & HAX_RAM_INFO_ROM ? " ROM" : "");
+    }
+}
+
+static void hax_insert_mapping_before(HAXMapping *next, uint64_t start_pa,
+                                      uint32_t size, uint64_t host_va,
+                                      uint8_t flags)
+{
+    HAXMapping *entry;
+
+    entry = g_malloc0(sizeof(*entry));
+    entry->start_pa = start_pa;
+    entry->size = size;
+    entry->host_va = host_va;
+    entry->flags = flags;
+    if (!next) {
+        QTAILQ_INSERT_TAIL(&mappings, entry, entry);
+    } else {
+        QTAILQ_INSERT_BEFORE(next, entry, entry);
+    }
+}
+
+static bool hax_mapping_is_opposite(HAXMapping *entry, uint64_t host_va,
+                                    uint8_t flags)
+{
+    /* removed then added without change for the read-only flag */
+    bool nop_flags = (entry->flags ^ flags) == HAX_RAM_INFO_INVALID;
+
+    return (entry->host_va == host_va) && nop_flags;
+}
+
+static void hax_update_mapping(uint64_t start_pa, uint32_t size,
+                               uint64_t host_va, uint8_t flags)
+{
+    uint64_t end_pa = start_pa + size;
+    HAXMapping *entry, *next;
+
+    QTAILQ_FOREACH_SAFE(entry, &mappings, entry, next) {
+        uint32_t chunk_sz;
+        if (start_pa >= entry->start_pa + entry->size) {
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
             continue;
         fprintf(stderr, "Slot %d start %016llx end %016llx hva %p flags %x\n",
                 i,
@@ -53,6 +102,7 @@ void* hax_gpa2hva(uint64_t gpa, bool *found)
             *found = true;
             return (void *)((char *)(hslot->hva) + (gpa - hslot->start));
         }
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
     }
 
     return NULL;
@@ -86,7 +136,49 @@ int hax_hva2gpa(void *hva, uint64_t length, int array_size,
                 gpa[count] = hslot->start + (hva_num - hva_start_num);
                 size[count] = min(length,
                                   hslot->size - (hva_num - hva_start_num));
+=======
+        if (start_pa < entry->start_pa) {
+            chunk_sz = end_pa <= entry->start_pa ? size
+                                                 : entry->start_pa - start_pa;
+            hax_insert_mapping_before(entry, start_pa, chunk_sz,
+                                      host_va, flags);
+            start_pa += chunk_sz;
+            host_va += chunk_sz;
+            size -= chunk_sz;
+        } else if (start_pa > entry->start_pa) {
+            /* split the existing chunk at start_pa */
+            chunk_sz = start_pa - entry->start_pa;
+            hax_insert_mapping_before(entry, entry->start_pa, chunk_sz,
+                                      entry->host_va, entry->flags);
+            entry->start_pa += chunk_sz;
+            entry->host_va += chunk_sz;
+            entry->size -= chunk_sz;
+        }
+        /* now start_pa == entry->start_pa */
+        chunk_sz = MIN(size, entry->size);
+        if (chunk_sz) {
+            bool nop = hax_mapping_is_opposite(entry, host_va, flags);
+            bool partial = chunk_sz < entry->size;
+            if (partial) {
+                /* remove the beginning of the existing chunk */
+                entry->start_pa += chunk_sz;
+                entry->host_va += chunk_sz;
+                entry->size -= chunk_sz;
+                if (!nop) {
+                    hax_insert_mapping_before(entry, start_pa, chunk_sz,
+                                              host_va, flags);
+                }
+            } else { /* affects the full mapping entry */
+                if (nop) { /* no change to this mapping, remove it */
+                    QTAILQ_REMOVE(&mappings, entry, entry);
+                    g_free(entry);
+                } else { /* update mapping properties */
+                    entry->host_va = host_va;
+                    entry->flags = flags;
+                }
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
             }
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
             count++;
         // End of this hva region is in this slot.
         // Its start is outside of this slot.
@@ -95,6 +187,112 @@ int hax_hva2gpa(void *hva, uint64_t length, int array_size,
             if (count < array_size) {
                 gpa[count] = hslot->start;
                 size[count] = hva_num + length - hva_start_num;
+=======
+            start_pa += chunk_sz;
+            host_va += chunk_sz;
+            size -= chunk_sz;
+        }
+        if (!size) { /* we are done */
+            break;
+        }
+    }
+    if (size) { /* add the leftover */
+        hax_insert_mapping_before(NULL, start_pa, size, host_va, flags);
+    }
+}
+
+static void hax_process_section(MemoryRegionSection *section, uint8_t flags)
+{
+    MemoryRegion *mr = section->mr;
+    hwaddr start_pa = section->offset_within_address_space;
+    ram_addr_t size = int128_get64(section->size);
+    unsigned int delta;
+    uint64_t host_va;
+    uint32_t max_mapping_size;
+
+    /* We only care about RAM and ROM regions */
+    if (!memory_region_is_ram(mr)) {
+        if (memory_region_is_romd(mr)) {
+            /* HAXM kernel module does not support ROMD yet  */
+            warn_report("Ignoring ROMD region 0x%016" PRIx64 "->0x%016" PRIx64,
+                        start_pa, start_pa + size);
+        }
+        return;
+    }
+
+    /* Adjust start_pa and size so that they are page-aligned. (Cf
+     * kvm_set_phys_mem() in kvm-all.c).
+     */
+    delta = qemu_real_host_page_size - (start_pa & ~qemu_real_host_page_mask);
+    delta &= ~qemu_real_host_page_mask;
+    if (delta > size) {
+        return;
+    }
+    start_pa += delta;
+    size -= delta;
+    size &= qemu_real_host_page_mask;
+    if (!size || (start_pa & ~qemu_real_host_page_mask)) {
+        return;
+    }
+
+    host_va = (uintptr_t)memory_region_get_ram_ptr(mr)
+            + section->offset_within_region + delta;
+    if (memory_region_is_rom(section->mr)) {
+        flags |= HAX_RAM_INFO_ROM;
+    }
+
+    /*
+     * The kernel module interface uses 32-bit sizes:
+     * https://github.com/intel/haxm/blob/master/API.md#hax_vm_ioctl_set_ram
+     *
+     * If the mapping size is longer than 32 bits, we can't process it in one
+     * call into the kernel. Instead, we split the mapping into smaller ones,
+     * and call hax_update_mapping() on each.
+     */
+    max_mapping_size = UINT32_MAX & qemu_real_host_page_mask;
+    while (size > max_mapping_size) {
+        hax_update_mapping(start_pa, max_mapping_size, host_va, flags);
+        start_pa += max_mapping_size;
+        size -= max_mapping_size;
+        host_va += max_mapping_size;
+    }
+    /* Now size <= max_mapping_size */
+    hax_update_mapping(start_pa, (uint32_t)size, host_va, flags);
+}
+
+static void hax_region_add(MemoryListener *listener,
+                           MemoryRegionSection *section)
+{
+    memory_region_ref(section->mr);
+    hax_process_section(section, 0);
+}
+
+static void hax_region_del(MemoryListener *listener,
+                           MemoryRegionSection *section)
+{
+    hax_process_section(section, HAX_RAM_INFO_INVALID);
+    memory_region_unref(section->mr);
+}
+
+static void hax_transaction_begin(MemoryListener *listener)
+{
+    g_assert(QTAILQ_EMPTY(&mappings));
+}
+
+static void hax_transaction_commit(MemoryListener *listener)
+{
+    if (!QTAILQ_EMPTY(&mappings)) {
+        HAXMapping *entry, *next;
+
+        if (DEBUG_HAX_MEM) {
+            hax_mapping_dump_list();
+        }
+        QTAILQ_FOREACH_SAFE(entry, &mappings, entry, next) {
+            if (entry->flags & HAX_RAM_INFO_INVALID) {
+                /* for unmapping, put the values expected by the kernel */
+                entry->flags = HAX_RAM_INFO_INVALID;
+                entry->host_va = 0;
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
             }
             count++;
         // This slot belongs to this hva region completely.
@@ -545,12 +743,16 @@ int hax_gpa_protect(uint64_t gpa, uint64_t size, uint64_t flags) {
 static void hax_ram_block_added(RAMBlockNotifier *n, void *host, size_t size)
 {
     /*
-     * In HAX, QEMU allocates the virtual address, and HAX kernel
-     * populates the memory with physical memory. Currently we have no
-     * paging, so user should make sure enough free memory in advance.
+     * We must register each RAM block with the HAXM kernel module, or
+     * hax_set_ram() will fail for any mapping into the RAM block:
+     * https://github.com/intel/haxm/blob/master/API.md#hax_vm_ioctl_alloc_ram
+     *
+     * Old versions of the HAXM kernel module (< 6.2.0) used to preallocate all
+     * host physical pages for the RAM block as part of this registration
+     * process, hence the name hax_populate_ram().
      */
     if (hax_populate_ram((uint64_t)(uintptr_t)host, size) < 0) {
-        fprintf(stderr, "HAX failed to populate RAM");
+        fprintf(stderr, "HAX failed to populate RAM\n");
         abort();
     }
 }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 /*
  * QEMU System Emulator
  *
@@ -316,3 +317,5 @@ static inline void qemu_get_sbe64s(QEMUFile *f, int64_t *pv)
 size_t qemu_get_counted_string(QEMUFile *f, char buf[256]);
 
 #endif
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

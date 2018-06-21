@@ -12,11 +12,18 @@
 #include "clients.h"
 #include "net/vhost_net.h"
 #include "net/vhost-user.h"
-#include "sysemu/char.h"
+#include "chardev/char-fe.h"
+#include "qapi/error.h"
+#include "qapi/qapi-commands-net.h"
 #include "qemu/config-file.h"
 #include "qemu/error-report.h"
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 #include "qmp-commands.h"
 #include "net/trace.h"
+=======
+#include "qemu/option.h"
+#include "trace.h"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
 typedef struct VhostUserState {
     NetClientState nc;
@@ -107,6 +114,7 @@ static int vhost_user_start(int queues, NetClientState *ncs[], CharBackend *be)
 err:
     if (net) {
         vhost_net_cleanup(net);
+        g_free(net);
     }
     vhost_user_stop(i, ncs);
     return -1;
@@ -151,10 +159,11 @@ static void vhost_user_cleanup(NetClientState *nc)
         s->vhost_net = NULL;
     }
     if (nc->queue_index == 0) {
-        Chardev *chr = qemu_chr_fe_get_driver(&s->chr);
-
-        qemu_chr_fe_deinit(&s->chr);
-        qemu_chr_delete(chr);
+        if (s->watch) {
+            g_source_remove(s->watch);
+            s->watch = 0;
+        }
+        qemu_chr_fe_deinit(&s->chr, true);
     }
 
     qemu_purge_queued_packets(nc);
@@ -214,7 +223,7 @@ static void chr_closed_bh(void *opaque)
     vhost_user_stop(queues, ncs);
 
     qemu_chr_fe_set_handlers(&s->chr, NULL, NULL, net_vhost_user_event,
-                             opaque, NULL, true);
+                             NULL, opaque, NULL, true);
 
     if (err) {
         error_report_err(err);
@@ -260,7 +269,7 @@ static void net_vhost_user_event(void *opaque, int event)
 
             g_source_remove(s->watch);
             s->watch = 0;
-            qemu_chr_fe_set_handlers(&s->chr, NULL, NULL, NULL,
+            qemu_chr_fe_set_handlers(&s->chr, NULL, NULL, NULL, NULL,
                                      NULL, NULL, false);
 
             aio_bh_schedule_oneshot(ctx, chr_closed_bh, opaque);
@@ -308,7 +317,8 @@ static int net_vhost_user_init(NetClientState *peer, const char *device,
             return -1;
         }
         qemu_chr_fe_set_handlers(&s->chr, NULL, NULL,
-                                 net_vhost_user_event, nc0->name, NULL, true);
+                                 net_vhost_user_event, NULL, nc0->name, NULL,
+                                 true);
     } while (!s->started);
 
     assert(s->vhost_net);
