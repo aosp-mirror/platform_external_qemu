@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "c519139a_e51eb4fa",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-22T23:48:38Z",
+      "side": 1,
+      "message": "Ooo, I like that.  I think that would still work for repeated usage, such as:\n\nauto str2 \u003d c_str(myString);  // Returns a c_str object, not actually a function call\nfunctionAcceptingConstCharPointer(str2);",
+      "parentUuid": "93418fd3_4376fa7a",
+      "range": {
+        "startLine": 262,
+        "startChar": 6,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "86d5822b_33866538",
         "filename": "android/android-emu/android/base/StringView.h",
         "patchSetId": 1
@@ -154,6 +178,24 @@
       "writtenOn": "2018-06-22T23:38:43Z",
       "side": 1,
       "message": "could you please add a basic test for a null-terminated getter?",
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "332e6c53_b604f5df",
+        "filename": "android/android-emu/android/base/misc/StringUtils_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-22T23:48:38Z",
+      "side": 1,
+      "message": "I\u0027m not sure if I understand... I have some tests in StringView_unittest.cpp for the NullTerminated helper.",
+      "parentUuid": "90edc336_414eb12c",
       "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
