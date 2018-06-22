@@ -33,6 +33,7 @@
 #include <iostream>
 #include <string>
 
+using android::base::NullTerminated;
 using android::base::StringView;
 using android::base::System;
 using android::base::TestSystem;
@@ -53,8 +54,8 @@ static void checkMediaFile(StringView file,
                            AVCodecID expAudioId) {
     AVFormatContext* fmtCtx = nullptr;
 
-    EXPECT_TRUE(avformat_open_input(&fmtCtx, file.c_str(), nullptr, nullptr) ==
-                0);
+    EXPECT_TRUE(avformat_open_input(&fmtCtx, NullTerminated(file).c_str(),
+                                    nullptr, nullptr) == 0);
     AVScopedPtr<AVFormatContext> pFmtCtx = makeAVScopedPtr(fmtCtx);
 
     // Code from av_dump_format to calulate the duration

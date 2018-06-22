@@ -20,6 +20,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
+using android::base::NullTerminated;
 using android::base::PathUtils;
 using android::base::StdioStream;
 using android::base::System;
@@ -29,7 +30,8 @@ namespace snapshot {
 
 Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
-    if (path_mkdir_if_needed(mSnapshot.dataDir().c_str(), 0777) != 0) {
+    if (path_mkdir_if_needed(NullTerminated(mSnapshot.dataDir()).c_str(),
+                             0777) != 0) {
         return;
     }
     {
@@ -118,7 +120,7 @@ Saver::~Saver() {
     mRamSaver.clear();
     mTextureSaver.reset();
     if (deleteDirectory) {
-        path_delete_dir(mSnapshot.dataDir().c_str());
+        path_delete_dir(NullTerminated(mSnapshot.dataDir()).c_str());
     }
 }
 
@@ -173,7 +175,7 @@ void Saver::cancel() {
     }
 
     // TODO next: texture save cancel
-    path_delete_dir(mSnapshot.dataDir().c_str());
+    path_delete_dir(NullTerminated(mSnapshot.dataDir()).c_str());
 
     mSnapshot.saveFailure(FailureReason::Canceled);
 }

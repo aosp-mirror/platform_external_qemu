@@ -11,11 +11,12 @@
 
 #pragma once
 
+#include "android/base/Optional.h"
 #include "android/base/TypeTraits.h"
 
 #include <algorithm>
+#include <cstring>
 #include <string>
-#include <string.h>
 
 namespace android {
 namespace base {
@@ -118,8 +119,7 @@ public:
     constexpr StringView(std::nullptr_t) :
             mString(""), mSize(0) {}
 
-    constexpr const char* c_str() const { return mString; }
-    constexpr const char* str() const { return mString; }
+    std::string str() const { return std::string(mString, mString + mSize); }
     constexpr const char* data() const { return mString; }
     constexpr size_t size() const { return mSize; }
 
@@ -242,6 +242,46 @@ inline bool operator >(const StringView& x, const StringView& y) {
 inline bool operator<=(const StringView& x, const StringView& y) {
     return !(x > y);
 }
+
+// Helper to get a null-terminated const char* from a string view.
+// Only allocates if the StringView is not null terminated.
+//
+// Usage:
+//
+//      StringView myString = ...;
+//      printf("Contents: %s\n", NullTerminated(myString).c_str());
+//
+// The lifetime of the returned c_str() will continue until the NullTerminated
+// object is destructed.  If it needs to exist beyond the current function call,
+// cache the instance.
+//
+//      StringView myString = ...;
+//      NullTerminated myNullTerminatedString(myString);
+//      functionAcceptingConstCharPointer(myNullTerminatedString.c_str());
+//
+class NullTerminated {
+public:
+    NullTerminated(const StringView& stringView) : mStringView(stringView) {}
+
+    // Returns a null-terminated char*, potentially creating a copy to add a
+    // null terminator.
+    const char* c_str() {
+        if (mStringView.isNullTerminated()) {
+            return mStringView.data();
+        } else {
+            // Create the std::string copy on-demand.
+            if (!mStringCopy) {
+                mStringCopy = mStringView.str();
+            }
+
+            return mStringCopy->c_str();
+        }
+    }
+
+private:
+    const StringView mStringView;
+    Optional<std::string> mStringCopy;
+};
 
 }  // namespace base
 }  // namespace android

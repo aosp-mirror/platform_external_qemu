@@ -43,14 +43,14 @@ namespace base {
 char* strDup(StringView view) {
     // Same as strdup(str.c_str()) but avoids a strlen() call.
     char* ret = static_cast<char*>(malloc(view.size() + 1u));
-    ::memcpy(ret, view.c_str(), view.size());
+    ::memcpy(ret, view.data(), view.size());
     ret[view.size()] = '\0';
     return ret;
 }
 
 bool strContains(StringView haystack, const char* needle) {
-    return ::memmem(haystack.c_str(), haystack.size(),
-                    needle, ::strlen(needle)) != nullptr;
+    return ::memmem(haystack.data(), haystack.size(), needle,
+                    ::strlen(needle)) != nullptr;
 }
 
 std::string trim(const std::string& in) {

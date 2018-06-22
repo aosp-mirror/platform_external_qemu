@@ -228,8 +228,10 @@ bool FfmpegRecorderImpl::initOutputContext(
 
     // allocate the output media context
     AVFormatContext* outputCtx;
-    avformat_alloc_output_context2(&outputCtx, nullptr, containerFormat.c_str(),
-                                   mEncodedOutputPath.c_str());
+    avformat_alloc_output_context2(
+            &outputCtx, nullptr,
+            android::base::NullTerminated(containerFormat).c_str(),
+            mEncodedOutputPath.c_str());
     if (outputCtx == nullptr) {
         LOG(ERROR) << __func__ << ": avformat_alloc_output_context2 failed";
         return false;

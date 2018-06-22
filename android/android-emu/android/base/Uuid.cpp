@@ -94,7 +94,7 @@ Uuid::Uuid(StringView asString) {
     static_assert(sizeof(Uuid::data_t) >= sizeof(uuid_t),
                   "Uuid::data_t is too small on Posix");
 
-    if (uuid_parse(asString.c_str(),
+    if (uuid_parse(NullTerminated(asString).c_str(),
                    static_cast<asSystem<uuid_t>>(dataPtr())) < 0) {
         *this = Uuid();
     }

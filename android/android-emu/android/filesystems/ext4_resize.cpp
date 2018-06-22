@@ -35,6 +35,7 @@ using android::base::Win32Utils;
 #include <sys/wait.h>
 #endif
 
+using android::base::NullTerminated;
 using android::base::RunOptions;
 using android::base::StringView;
 using android::base::System;
@@ -71,7 +72,7 @@ static int runExt4Program(StringView program,
     std::string executable = System::get()->findBundledExecutable(program);
     if (executable.empty()) {
         fprintf(stderr, "ERROR: couldn't get path to %s binary\n",
-                program.c_str());
+                NullTerminated(program).c_str());
         return -1;
     }
 
@@ -91,7 +92,7 @@ static int runExt4Program(StringView program,
     if (exitCode != 0) {
         fprintf(stderr,
                 "ERROR: resizing partition %s failed with exit code %d\n",
-                program.c_str(), (int)exitCode);
+                NullTerminated(program).c_str(), (int)exitCode);
         return exitCode;
     }
     return 0;

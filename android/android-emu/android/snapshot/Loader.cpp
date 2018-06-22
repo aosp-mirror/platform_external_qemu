@@ -32,7 +32,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
         return;
     }
 
-    if (!path_is_dir(mSnapshot.dataDir().c_str())) {
+    if (!path_is_dir(base::NullTerminated(mSnapshot.dataDir()).c_str())) {
         return;
     }
 

@@ -689,10 +689,10 @@ void Snapshotter::deleteSnapshot(const char* name) {
 }
 
 void Snapshotter::invalidateSnapshot(const char* name) {
+    base::StringView nameString = name ? name : kDefaultBootSnapshot;
+    auto nameValidated = base::NullTerminated(nameString);
 
-    if (!name) { name = kDefaultBootSnapshot.c_str(); }
-
-    Snapshot tombstone(name);
+    Snapshot tombstone(nameValidated.c_str());
 
     if (name == mLoadedSnapshotFile) {
         // We're deleting the "loaded" snapshot, so first finish any pending
@@ -711,8 +711,12 @@ void Snapshotter::invalidateSnapshot(const char* name) {
     mVmOperations.snapshotDelete(name, this, nullptr);
 
     // then delete kRamFileName / kTexturesFileName
-    path_delete_file(PathUtils::join(getSnapshotDir(name), kRamFileName).c_str());
-    path_delete_file(PathUtils::join(getSnapshotDir(name), kTexturesFileName).c_str());
+    path_delete_file(
+            PathUtils::join(getSnapshotDir(nameValidated.c_str()), kRamFileName)
+                    .c_str());
+    path_delete_file(PathUtils::join(getSnapshotDir(nameValidated.c_str()),
+                                     kTexturesFileName)
+                             .c_str());
 
     tombstone.saveFailure(FailureReason::Tombstone);
 }
@@ -848,7 +852,8 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
             mLoader.reset();
         }
         if (!mIsInvalidating) {
-            path_delete_dir(Snapshot::dataDir(name).c_str());
+            path_delete_dir(
+                    base::NullTerminated(Snapshot::dataDir(name)).c_str());
         }
     }
     CrashReporter::get()->hangDetector().pause(false);

@@ -213,7 +213,7 @@ LogStream& LogStream::operator<<(unsigned long long v) {
 
 LogStream& LogStream::operator<<(android::base::StringView v) {
     if (!v.empty()) {
-        append(v.c_str(), v.size());
+        append(v.data(), v.size());
     }
     return *this;
 }

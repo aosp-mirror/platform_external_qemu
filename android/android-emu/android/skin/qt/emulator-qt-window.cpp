@@ -97,6 +97,7 @@ using android::base::kNullopt;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::makeOptional;
+using android::base::NullTerminated;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::StringView;
@@ -1739,7 +1740,7 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
 
         case ApkInstaller::Result::kInstallFailed:
             msg = tr("The APK failed to install.<br/> Error: %1")
-                          .arg(errorString.c_str());
+                          .arg(NullTerminated(errorString).c_str());
             break;
 
         default:
@@ -1801,16 +1802,18 @@ void EmulatorQtWindow::adbPushDone(StringView filePath,
             return;
         case FilePusher::Result::ProcessStartFailure:
             msg = tr("Could not launch process to copy %1")
-                          .arg(filePath.c_str());
+                          .arg(NullTerminated(filePath).c_str());
             break;
         case FilePusher::Result::FileReadError:
-            msg = tr("Could not locate %1").arg(filePath.c_str());
+            msg = tr("Could not locate %1")
+                          .arg(NullTerminated(filePath).c_str());
             break;
         case FilePusher::Result::AdbPushFailure:
-            msg = tr("'adb push' failed for %1").arg(filePath.c_str());
+            msg = tr("'adb push' failed for %1")
+                          .arg(NullTerminated(filePath).c_str());
             break;
         default:
-            msg = tr("Could not copy %1").arg(filePath.c_str());
+            msg = tr("Could not copy %1").arg(NullTerminated(filePath).c_str());
     }
     showErrorDialog(msg, tr("File Copy"));
 }
