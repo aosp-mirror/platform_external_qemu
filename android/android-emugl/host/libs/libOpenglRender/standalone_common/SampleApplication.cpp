@@ -148,6 +148,8 @@ private:
 SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate) :
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate) {
 
+    setupStandaloneLibrarySearchPaths();
+
     LazyLoadedEGLDispatch::get();
     LazyLoadedGLESv2Dispatch::get();
 

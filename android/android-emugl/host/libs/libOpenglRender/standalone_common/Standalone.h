@@ -17,6 +17,7 @@
 #include "OSWindow.h"
 #include "RenderThreadInfo.h"
 #include "SampleApplication.h"
+#include "SearchPathsSetup.h"
 #include "ShaderUtils.h"
 
 #include "emugl/common/misc.h"

@@ -50,6 +50,7 @@ standalone_common_SRC_FILES := \
     ../Translator/GLES_V2/ANGLEShaderParser.cpp \
     standalone_common/angle-util/OSWindow.cpp \
     standalone_common/SampleApplication.cpp \
+    standalone_common/SearchPathsSetup.cpp \
     standalone_common/ShaderUtils.cpp \
 
 ifeq ($(BUILD_TARGET_OS),linux)

@@ -117,6 +117,8 @@ void destroyDisplay(EGLDisplay dpy) {
 }
 
 void GLTest::SetUp() {
+    setupStandaloneLibrarySearchPaths();
+
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
     gl = LazyLoadedGLESv2Dispatch::get();
     EXPECT_TRUE(egl != nullptr);
