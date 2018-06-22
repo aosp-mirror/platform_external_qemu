@@ -78,10 +78,6 @@ $(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include)
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
 $(call emugl-export,LDLIBS,-lm)
 
-ifeq ($(BUILD_TARGET_OS),linux)
-LOCAL_LDFLAGS += -Wl,-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX),-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader
-endif
-
 # use Translator's egl/gles headers
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/GLES_V2/
@@ -99,8 +95,6 @@ LOCAL_STATIC_LIBRARIES += android-emu-base
 LOCAL_STATIC_LIBRARIES += emulator-lz4
 
 LOCAL_SYMBOL_FILE := render_api.entries
-
-LOCAL_INSTALL_OPENGL := true
 
 LOCAL_SRC_FILES := \
     $(host_common_SRC_FILES) \

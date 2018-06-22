@@ -34,6 +34,8 @@ using namespace gltest;
 class FrameBufferTest : public ::testing::Test {
 protected:
     virtual void SetUp() override {
+        setupStandaloneLibrarySearchPaths();
+
         ASSERT_NE(nullptr, LazyLoadedEGLDispatch::get());
         ASSERT_NE(nullptr, LazyLoadedGLESv2Dispatch::get());
 
