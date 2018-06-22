@@ -25,9 +25,6 @@ static const GLint kGLES2TestScissorBox[] = {2, 3, 10, 20};
 // Stencil reference value to attempt
 static const GLint kGLES2TestStencilRef = 1;
 
-// Stencil default mask; max GLuint is clamped to a signed GLint by GetInteger?
-static const GLuint kGLES2StencilDefaultMask = 0x7FFFFFFF;
-
 // Stencil mask values to attempt
 static const GLuint kGLES2TestStencilMasks[] = {0, 1, 0x1000000, 0x7FFFFFFF};
 
@@ -38,7 +35,7 @@ class SnapshotGlScissorBoxTest
         GLint box[4] = {};
         gl->glGetIntegerv(GL_SCISSOR_BOX, box);
         for (int i = 0; i < 4; ++i) {
-            EXPECT_EQ(expected[i], box[i]);
+            EXPECT_EQ(expected[i], box[i]) << " at box index " << i;
         }
     }
     void stateChange() override {
@@ -48,11 +45,14 @@ class SnapshotGlScissorBoxTest
 };
 
 TEST_P(SnapshotGlScissorBoxTest, SetScissorBox) {
-    GLint defaultViewport[] = {0, 0, kTestSurfaceSize[0],
-                               kTestSurfaceSize[1]};
-    GLint testViewport[] = {GetParam()[0], GetParam()[1], GetParam()[2],
-                            GetParam()[3]};
-    setExpectedValues(defaultViewport, testViewport);
+    // different drivers act differently; get the default scissorbox
+    GLint defaultBox[4] = {};
+    gl->glGetIntegerv(GL_SCISSOR_BOX, defaultBox);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    GLint testBox[] = {GetParam()[0], GetParam()[1], GetParam()[2],
+                       GetParam()[3]};
+    setExpectedValues(defaultBox, testBox);
     doCheckedSnapshot();
 }
 
@@ -93,14 +93,26 @@ class SnapshotGlStencilMaskTest : public SnapshotGlStencilConditionsTest,
 };
 
 TEST_P(SnapshotGlStencilFuncTest, SetStencilFunc) {
-    GlStencilFunc defaultStencilFunc = {GL_ALWAYS, 0, kGLES2StencilDefaultMask};
+    // different drivers act differently; get the default mask
+    GLint defaultStencilMask;
+    gl->glGetIntegerv(GL_STENCIL_VALUE_MASK, &defaultStencilMask);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    GlStencilFunc defaultStencilFunc = {GL_ALWAYS, 0,
+                                        (GLuint)defaultStencilMask};
     GlStencilFunc testStencilFunc = {GetParam(), kGLES2TestStencilRef, 0};
     setExpectedValues(defaultStencilFunc, testStencilFunc);
     doCheckedSnapshot();
 }
 
 TEST_P(SnapshotGlStencilMaskTest, SetStencilMask) {
-    GlStencilFunc defaultStencilFunc = {GL_ALWAYS, 0, kGLES2StencilDefaultMask};
+    // different drivers act differently; get the default mask
+    GLint defaultStencilMask;
+    gl->glGetIntegerv(GL_STENCIL_VALUE_MASK, &defaultStencilMask);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    GlStencilFunc defaultStencilFunc = {GL_ALWAYS, 0,
+                                        (GLuint)defaultStencilMask};
     GlStencilFunc testStencilFunc = {GL_ALWAYS, kGLES2TestStencilRef,
                                      GetParam()};
     setExpectedValues(defaultStencilFunc, testStencilFunc);
