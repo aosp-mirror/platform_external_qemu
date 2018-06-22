@@ -168,6 +168,30 @@
     },
     {
       "key": {
+        "uuid": "29e9a043_4ba74ab2",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-22T23:56:27Z",
+      "side": 1,
+      "message": "and if the committee ever finalizes the unified call syntax proposal c_str(var) will be the same thing for both views and regular std::strings, calling .c_str() for the latter",
+      "parentUuid": "abebbf30_0c025852",
+      "range": {
+        "startLine": 262,
+        "startChar": 6,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "86d5822b_33866538",
         "filename": "android/android-emu/android/base/StringView.h",
         "patchSetId": 1
