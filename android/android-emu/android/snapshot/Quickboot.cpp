@@ -33,6 +33,7 @@
 
 #include <cassert>
 
+using android::base::c_str;
 using android::base::Stopwatch;
 using android::base::StringFormat;
 using android::base::StringView;
@@ -78,7 +79,7 @@ static void reportAdbConnectionRetries(uint32_t retries) {
     });
 }
 
-constexpr StringView Quickboot::kDefaultBootSnapshot;
+constexpr const char* Quickboot::kDefaultBootSnapshot;
 static Quickboot* sInstance = nullptr;
 
 Quickboot& Quickboot::get() {
@@ -104,7 +105,7 @@ void Quickboot::reportSuccessfulLoad(StringView name,
     auto& loader = Snapshotter::get().loader();
     loader.reportSuccessful();
     const auto durationMs = mLoadTimeMs - startTimeMs;
-    auto stats = Snapshotter::get().getLoadStats(name.c_str(), durationMs);
+    auto stats = Snapshotter::get().getLoadStats(c_str(name), durationMs);
 
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         auto load = event->mutable_emulator_details()->mutable_quickboot_load();
@@ -119,7 +120,7 @@ void Quickboot::reportSuccessfulLoad(StringView name,
 void Quickboot::reportSuccessfulSave(StringView name,
                                      System::WallDuration durationMs,
                                      System::WallDuration sessionUptimeMs) {
-    auto stats = Snapshotter::get().getSaveStats(name.c_str(), durationMs);
+    auto stats = Snapshotter::get().getSaveStats(c_str(name), durationMs);
 
     MetricsReporter::get().report([stats, sessionUptimeMs](pb::AndroidStudioEvent* event) {
         auto save = event->mutable_emulator_details()->mutable_quickboot_save();
@@ -266,12 +267,12 @@ bool Quickboot::load(StringView name) {
         // Don't try to delete it completely as that is a heavyweight
         // operation and we are in the middle of crashing.
         CrashReporter::get()->addCrashCallback([this, &name]() {
-            Snapshotter::get().onCrashedSnapshot(name.c_str());
+            Snapshotter::get().onCrashedSnapshot(c_str(name));
         });
 
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
-        auto res = snapshotter.load(true /* isQuickboot */, name.c_str());
+        auto res = snapshotter.load(true /* isQuickboot */, c_str(name));
         mLoaded = false;
         mLoadStatus = res;
         mLoadTimeMs = System::get()->getHighResTimeUs() / 1000;
@@ -419,7 +420,7 @@ bool Quickboot::save(StringView name) {
                     emuglConfig_renderer_to_string(
                             emuglConfig_get_current_renderer()),
                     int(emuglConfig_get_current_renderer()));
-            Snapshotter::get().deleteSnapshot(name.c_str());
+            Snapshotter::get().deleteSnapshot(c_str(name));
         } else {
             dwarning(
                     "Not saving snapshot (renderer type '%s' (%d) "
@@ -447,15 +448,15 @@ bool Quickboot::save(StringView name) {
     dprint("Saving state on exit with session uptime %d ms",
            int(sessionUptimeMs));
     Stopwatch sw;
-    auto res = Snapshotter::get().save(true /* is on exit (so loader can be interrupted) */,
-                                       name.c_str());
+    auto res = Snapshotter::get().save(
+            true /* is on exit (so loader can be interrupted) */, c_str(name));
     if (res != OperationStatus::Ok) {
         mWindow.showMessage(
                 "State saving failed, cleaning out the snapshot",
                 WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
 
         dwarning("State saving failed, cleaning out the snapshot.");
-        Snapshotter::get().deleteSnapshot(name.c_str());
+        Snapshotter::get().deleteSnapshot(c_str(name));
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_FAILED);
         return false;
@@ -470,7 +471,7 @@ void Quickboot::invalidate(StringView name) {
     if (name.empty()) {
         name = kDefaultBootSnapshot;
     }
-    Snapshotter::get().deleteSnapshot(name.c_str());
+    Snapshotter::get().deleteSnapshot(c_str(name));
 }
 
 }  // namespace snapshot

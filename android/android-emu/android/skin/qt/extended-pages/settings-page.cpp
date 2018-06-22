@@ -377,15 +377,17 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
 void SettingsPage::on_set_saveSnapNowButton_clicked() {
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
-    android::base::ThreadLooper::runOnMainLooper( []() {
-        androidSnapshot_save(android::snapshot::kDefaultBootSnapshot.c_str()); });
+    android::base::ThreadLooper::runOnMainLooper([]() {
+        androidSnapshot_save(android::snapshot::kDefaultBootSnapshot);
+    });
 }
 
 void SettingsPage::on_set_loadSnapNowButton_clicked() {
     // Invoke the snapshot load function.
     // But don't run it on the UI thread.
-    android::base::ThreadLooper::runOnMainLooper( []() {
-        androidSnapshot_load(android::snapshot::kDefaultBootSnapshot.c_str()); });
+    android::base::ThreadLooper::runOnMainLooper([]() {
+        androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
+    });
 }
 #endif
 

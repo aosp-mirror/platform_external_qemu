@@ -35,7 +35,7 @@
 using namespace android::base;
 using namespace android::metrics;
 
-static constexpr StringView kSpoolDir = ".android/metrics/spool";
+static constexpr const char* kSpoolDir = ".android/metrics/spool";
 
 namespace {
 
@@ -53,7 +53,7 @@ public:
         mSystem.envSet("ANDROID_SDK_HOME", mRoot->pathString());
     }
 
-    std::string spoolDir() { return mRoot->makeSubPath(kSpoolDir.c_str()); }
+    std::string spoolDir() { return mRoot->makeSubPath(kSpoolDir); }
     static std::string sessionId() { return Uuid::nullUuidStr; }
 
     void makeSpoolDir() { path_mkdir_if_needed(spoolDir().c_str(), 0700); }
@@ -161,7 +161,7 @@ TEST_F(FileMetricsWriterTest, finalizeAbandonedSessionFilesManyFiles) {
     EXPECT_EQ(2 * sessions.size(), files.size());
 
     for (const auto& file : files) {
-        EXPECT_STREQ(PathUtils::extension(file).c_str(), ".trk");
+        EXPECT_STREQ(c_str(PathUtils::extension(file)), ".trk");
 
         // make sure all files have a known session ID in the name
         EXPECT_NE(sessions.end(),
@@ -240,7 +240,7 @@ TEST_F(FileMetricsWriterTest, writeSimple) {
     // read the event back.
     auto files = mSystem.scanDirEntries(spoolDir(), true);
     ASSERT_EQ(1U, files.size());
-    EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trk");
+    EXPECT_STREQ(PathUtils::extension(files[0]).data(), ".trk");
 
     std::ifstream in(files[0], std::ios_base::binary);
     EXPECT_TRUE(in);
@@ -277,7 +277,7 @@ TEST_F(FileMetricsWriterTest, writeMultiple) {
     // read the event back.
     auto files = mSystem.scanDirEntries(spoolDir(), true);
     ASSERT_EQ(1U, files.size());
-    EXPECT_STREQ(PathUtils::extension(files[0]).c_str(), ".trk");
+    EXPECT_STREQ(PathUtils::extension(files[0]).data(), ".trk");
 
     std::ifstream in(files[0], std::ios_base::binary);
     EXPECT_TRUE(in);
@@ -342,7 +342,7 @@ TEST_F(FileMetricsWriterTest, writeLimited) {
     ASSERT_EQ(0U, size);
 
     for (size_t i = 0; i < event.size(); ++i) {
-        EXPECT_STREQ(PathUtils::extension(files[i]).c_str(), ".trk");
+        EXPECT_STREQ(PathUtils::extension(files[i]).data(), ".trk");
         std::ifstream in(files[i], std::ios_base::binary);
         EXPECT_TRUE(in);
         wireless_android_play_playlog::LogEvent readEvent;
@@ -415,7 +415,7 @@ TEST_F(FileMetricsWriterTest, writeTimered) {
                                           ".trk";
                                }));
 
-    EXPECT_STREQ(PathUtils::extension(files.front()).c_str(), ".trk");
+    EXPECT_STREQ(PathUtils::extension(files.front()).data(), ".trk");
 
     // read the event back and make sure they're correct.
     std::ifstream in(files.front(), std::ios_base::binary);

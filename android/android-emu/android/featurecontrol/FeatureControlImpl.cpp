@@ -280,10 +280,11 @@ FeatureControlImpl::FeatureControlImpl() {
             static constexpr char format[] =
                     "Feature: '%s' (%d), value: %d, default: %d, is overridden: %d\n";
             char buffer[sizeof(format) + 100 + 3 + 1 + 1 + 1] = {};
-            int count = snprintf(buffer, sizeof(buffer), format,
-                                 toString(feature.name).c_str(),
-                                 (int)feature.name, feature.currentVal,
-                                 feature.defaultVal, feature.isOverridden);
+            int count =
+                    snprintf(buffer, sizeof(buffer), format,
+                             base::c_str(toString(feature.name)).get(),
+                             (int)feature.name, feature.currentVal,
+                             feature.defaultVal, feature.isOverridden);
             HANDLE_EINTR(write(file.get(),
                                buffer, std::min<int>(count, sizeof(buffer))));
         }

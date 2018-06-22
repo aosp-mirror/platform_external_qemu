@@ -76,13 +76,14 @@ struct StudioXml {
 };
 }  // namespace
 
+using android::ConfigDirs;
+using android::base::c_str;
 using android::base::PathUtils;
 using android::base::strDup;
+using android::base::stringLiteralLength;
 using android::base::StringView;
 using android::base::System;
 using android::base::Version;
-using android::base::stringLiteralLength;
-using android::ConfigDirs;
 using android::studio::UpdateChannel;
 
 namespace android {
@@ -219,9 +220,7 @@ base::Version lastestAndroidStudioVersion() {
     }
     StringView basename;
     PathUtils::split(studio, nullptr, &basename);
-    return basename.isNullTerminated()
-                   ? extractAndroidStudioVersion(basename.c_str())
-                   : extractAndroidStudioVersion(std::string(basename).c_str());
+    return extractAndroidStudioVersion(c_str(basename));
 }
 
 struct UpdateChannelInfo {

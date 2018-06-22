@@ -112,8 +112,8 @@ private:
 
         virtual intptr_t main() override {
             if (mData.size() > 0) {
-                if (!android::base::socketSendAll(
-                            mInSocket.get(), mData.c_str(), mData.size())) {
+                if (!android::base::socketSendAll(mInSocket.get(), mData.data(),
+                                                  mData.size())) {
                     DPLOG(ERROR) << "I/O error when sending data";
                     return -1;
                 }
@@ -193,7 +193,7 @@ TEST(AdbGuestPipe, DISABLED_createOneGuest) {
     char buffer[kMessage.size() + 1] = {};
     const ssize_t expectedSize = static_cast<ssize_t>(kMessage.size());
     EXPECT_EQ(expectedSize, blockingRead(guest, buffer, kMessage.size()));
-    EXPECT_STREQ(kMessage.c_str(), buffer);
+    EXPECT_STREQ(kMessage.data(), buffer);
 
     EXPECT_EQ(1, guest->write("x", 1));
 }

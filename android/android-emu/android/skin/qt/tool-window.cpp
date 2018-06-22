@@ -705,9 +705,8 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
 
     // If the setting is ALWAYS, we might want to ask anyway, such as when
     // previous saves were known to be slow, or the system has low RAM.
-    bool savesWereSlow =
-        androidSnapshot_areSavesSlow(
-            android::snapshot::kDefaultBootSnapshot.c_str());
+    bool savesWereSlow = androidSnapshot_areSavesSlow(
+            android::snapshot::kDefaultBootSnapshot);
     bool hasLowRam = System::isUnderMemoryPressure();
 
     if (saveOnExitChoice == SaveSnapshotOnExit::Always &&

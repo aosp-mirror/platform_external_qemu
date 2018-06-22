@@ -28,6 +28,7 @@
 #include <string.h>
 #include <unordered_set>
 
+using android::base::c_str;
 using android::base::StringView;
 
 GLUniformDesc::GLUniformDesc(const char* name, GLint location, GLsizei count, GLboolean transpose,
@@ -460,16 +461,16 @@ void ProgramData::restore(ObjectLocalName localName,
         }
 #endif // DEBUG
         for (const auto& uniform : mUniNameToGuestLoc) {
-            GLint hostLoc = dispatcher.glGetUniformLocation(globalName,
-                    getTranslatedName(uniform.first).c_str());
+            GLint hostLoc = dispatcher.glGetUniformLocation(
+                    globalName, c_str(getTranslatedName(uniform.first)));
             if (hostLoc != -1) {
                 mGuestLocToHostLoc.emplace(uniform.second, hostLoc);
             }
         }
         for (const auto& uniformEntry : uniforms) {
             const auto& uniform = uniformEntry.second;
-            GLint location = dispatcher.glGetUniformLocation(globalName,
-                    getTranslatedName(uniform.mGuestName).c_str());
+            GLint location = dispatcher.glGetUniformLocation(
+                    globalName, c_str(getTranslatedName(uniform.mGuestName)));
             if (location == -1) {
                 // Location changed after loading from a snapshot.
                 // likely loading from different GPU backend (and they
@@ -1070,20 +1071,20 @@ static void sInitializeUniformLocs(ProgramData* pData,
 }
 
 void ProgramData::initGuestUniformLocForKey(StringView key) {
-    if (mUniNameToGuestLoc.find(key.c_str()) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
+    if (mUniNameToGuestLoc.find(key) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
         mCurrUniformBaseLoc++;
     }
 }
 
 void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
     bool newUniform = false;
-    if (mUniNameToGuestLoc.find(key.c_str()) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
+    if (mUniNameToGuestLoc.find(key) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
         newUniform = true;
     }
-    if (mUniNameToGuestLoc.find(key2.c_str()) == mUniNameToGuestLoc.end()) {
-        mUniNameToGuestLoc[key2.c_str()] = mCurrUniformBaseLoc;
+    if (mUniNameToGuestLoc.find(key2) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key2] = mCurrUniformBaseLoc;
         newUniform = true;
     }
 
@@ -1136,7 +1137,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
         }
     } else {
         return dispatcher.glGetUniformLocation(
-                   ProgramName, getTranslatedName(uniName).c_str());
+                ProgramName, c_str(getTranslatedName(uniName)));
     }
 }
 

@@ -204,9 +204,8 @@ bool IniFile::readFromMemory(StringView data)
     class OnePassIBuf : public std::streambuf {
     public:
         OnePassIBuf(StringView data) {
-            setg(const_cast<char*>(data.c_str()),
-                 const_cast<char*>(data.c_str()),
-                 const_cast<char*>(data.c_str()) + data.size());
+            setg(const_cast<char*>(data.data()), const_cast<char*>(data.data()),
+                 const_cast<char*>(data.data()) + data.size());
         }
     };
     OnePassIBuf ibuf(data);
@@ -296,7 +295,7 @@ std::string IniFile::makeValidKey(StringView str) {
 
 string IniFile::makeValidValue(StringView str) {
     std::ostringstream res;
-    for (const char* ch = str.c_str(); *ch != '\0'; ch++) {
+    for (const char* ch = str.begin(); ch != str.end() && *ch != '\0'; ch++) {
         if (*ch == '%')
             res << *ch;
         res << *ch;
@@ -422,15 +421,20 @@ double IniFile::getDouble(const string& key, double defaultValue) const {
 }
 
 static bool isBoolTrue(StringView value) {
-    const char* cstr = value.c_str();
-    return strcasecmp("yes", cstr) == 0 || strcasecmp("true", cstr) == 0 ||
-           strcasecmp("1", cstr) == 0;
+    const char* cstr = value.data();
+    const size_t size = value.size();
+
+    return strncasecmp("yes", cstr, size) == 0 ||
+           strncasecmp("true", cstr, size) == 0 ||
+           strncasecmp("1", cstr, size) == 0;
 }
 
 static bool isBoolFalse(StringView value) {
-    const char* cstr = value.c_str();
-    return strcasecmp("no", cstr) == 0 || strcasecmp("false", cstr) == 0 ||
-           strcasecmp("0", cstr) == 0;
+    const char* cstr = value.data();
+    const size_t size = value.size();
+    return strncasecmp("no", cstr, size) == 0 ||
+           strncasecmp("false", cstr, size) == 0 ||
+           strncasecmp("0", cstr, size) == 0;
 }
 
 bool IniFile::getBool(const string& key, bool defaultValue) const {
@@ -463,7 +467,7 @@ static IniFile::DiskSize parseDiskSize(StringView valueStr,
 
     char* end;
     errno = 0;
-    IniFile::DiskSize result = strtoll(valueStr.c_str(), &end, 10);
+    IniFile::DiskSize result = strtoll(c_str(valueStr), &end, 10);
     bool malformed = (errno != 0);
     if (!malformed) {
         switch (*end) {

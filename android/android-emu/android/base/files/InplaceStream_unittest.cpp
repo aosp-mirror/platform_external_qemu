@@ -129,7 +129,7 @@ TEST(InplaceStream, saveLoad) {
     stream2.load(&saveStream);
     EXPECT_EQ(val, stream2.getBe32());
     EXPECT_EQ(fval, stream2.getFloat());
-    EXPECT_STREQ(sval.c_str(), stream2.getString().c_str());
+    EXPECT_STREQ(c_str(sval), stream2.getString().c_str());
 }
 
 TEST(InplaceStream, getPosAndAdvance) {

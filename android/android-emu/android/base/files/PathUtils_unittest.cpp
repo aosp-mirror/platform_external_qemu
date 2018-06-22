@@ -499,14 +499,14 @@ TEST(PathUtils, extension) {
     };
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
         EXPECT_STREQ(
-            kData[n].expected,
-            PathUtils::extension(kData[n].input, kData[n].host).c_str());
+                kData[n].expected,
+                PathUtils::extension(kData[n].input, kData[n].host).data());
 
         // make sure the overload without host parameter works correctly too
         if (kData[n].host == PathUtils::HOST_TYPE) {
             EXPECT_STREQ(
-                PathUtils::extension(kData[n].input, kData[n].host).c_str(),
-                PathUtils::extension(kData[n].input).c_str());
+                    PathUtils::extension(kData[n].input, kData[n].host).data(),
+                    PathUtils::extension(kData[n].input).data());
         }
     }
 }
