@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bd87275c_29ee8f17",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-22T23:48:32Z",
+      "side": 1,
+      "message": "wow, that\u0027s an awesome find, thanks!",
+      "parentUuid": "3feb4c75_28816c75",
+      "range": {
+        "startLine": 436,
+        "startChar": 20,
+        "endLine": 439,
+        "endChar": 51
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "42aaae4d_aa1589df",
         "filename": "android/android-emu/android/base/StringView.h",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "side": 1,
       "message": "In my other project there\u0027s a function c_str(StringView) which returns a type convertible to const char*. Inside there\u0027s either an optional\u003cstring\u003e or a raw pointer to the string view\u0027s data. It might be slightly nicer-looking alternative:\n\nprintf(c_str(path_view)) vs printf(NullTerminated(path_view).c_str())\n\nIt doesn\u0027t cover repeated usage though",
       "parentUuid": "42aaae4d_aa1589df",
+      "range": {
+        "startLine": 262,
+        "startChar": 6,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "801357bd_cfdc967d",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-22T23:48:32Z",
+      "side": 1,
+      "message": "The c_str function seems nicer to type, although I feel like it might get confused with .c_str(). generally I think it would be ideal if the name could be shorter.",
+      "parentUuid": "93418fd3_4376fa7a",
       "range": {
         "startLine": 262,
         "startChar": 6,
