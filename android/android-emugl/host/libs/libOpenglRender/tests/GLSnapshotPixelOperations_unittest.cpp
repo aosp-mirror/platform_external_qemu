@@ -48,8 +48,8 @@ class SnapshotGlScissorBoxTest
 };
 
 TEST_P(SnapshotGlScissorBoxTest, SetScissorBox) {
-    GLint defaultViewport[] = {0, 0, gltest::kSurfaceSize[0],
-                               gltest::kSurfaceSize[1]};
+    GLint defaultViewport[] = {0, 0, kTestSurfaceSize[0],
+                               kTestSurfaceSize[1]};
     GLint testViewport[] = {GetParam()[0], GetParam()[1], GetParam()[2],
                             GetParam()[3]};
     setExpectedValues(defaultViewport, testViewport);

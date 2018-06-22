@@ -11,13 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#pragma once
 
-#include <gtest/gtest.h>
-
-#include "OpenGLTestContext.h"
+#include <GLES2/gl2.h>
 
 namespace emugl {
 
-TEST_F(GLTest, InitDestroy) {}
+GLuint compileShader(GLenum shaderType, const char* src);
+GLint compileAndLinkShaderProgram(const char* vshaderSrc, const char* fshaderSrc);
 
-}  // namespace emugl
+} // namespace emugl
