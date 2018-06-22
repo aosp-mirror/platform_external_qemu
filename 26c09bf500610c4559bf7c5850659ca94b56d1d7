@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3feb4c75_28816c75",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-22T22:26:27Z",
+      "side": 1,
+      "message": "This was actually a misuse of StringView, where an strdup allocated string was stored in a StringView, and then it was attached to a ScopedCPtr to release it.  It wouldn\u0027t have crashed, but I inverted the behavior so that we store directly into the ScopedCPtr instead.",
+      "range": {
+        "startLine": 436,
+        "startChar": 20,
+        "endLine": 439,
+        "endChar": 51
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "42aaae4d_aa1589df",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-22T22:26:27Z",
+      "side": 1,
+      "message": "I\u0027m open to naming suggestions here",
+      "range": {
+        "startLine": 262,
+        "startChar": 6,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
