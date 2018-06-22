@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc535c92_ffdf3b6c",
+        "filename": "android/android-emu/android/utils/filelock_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-22T19:20:40Z",
+      "side": 1,
+      "message": "this is a lot of ifdefs to split the code throughout. Could it be cleaner to factor out the parts that need splitting into an extra class, and then have just one #ifdef _WIN32 controlling htat?",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 182,
+        "endChar": 6
+      },
+      "revId": "45f3cc671e4b70946666cdb7a6fdf74a6e7f61c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
