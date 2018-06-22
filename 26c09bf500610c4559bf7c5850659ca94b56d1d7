@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "abebbf30_0c025852",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-22T23:50:16Z",
+      "side": 1,
+      "message": "I could try CStr, but I think that c_str(...) is consistent with the STL\u0027s std::begin(), std::end(), etc.",
+      "parentUuid": "c519139a_e51eb4fa",
+      "range": {
+        "startLine": 262,
+        "startChar": 6,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "86d5822b_33866538",
         "filename": "android/android-emu/android/base/StringView.h",
         "patchSetId": 1
