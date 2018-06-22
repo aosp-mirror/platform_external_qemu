@@ -245,7 +245,7 @@ TEST(AdbHostListener, notifyServer) {
             StringFormat("%04x%s", message.size(), message.c_str());
     EXPECT_EQ(expected.size(), static_cast<size_t>(bufferSize));
     EXPECT_EQ(expected.size(), serverThread.view().size());
-    EXPECT_STREQ(expected.c_str(), serverThread.view().c_str());
+    EXPECT_STREQ(expected.data(), serverThread.view().data());
 }
 
 }  // namespace emulation

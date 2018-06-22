@@ -93,6 +93,7 @@
 #include <vector>
 
 using android::base::AutoLock;
+using android::base::c_str;
 using android::base::kNullopt;
 using android::base::LazyInstance;
 using android::base::Lock;
@@ -1739,7 +1740,7 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
 
         case ApkInstaller::Result::kInstallFailed:
             msg = tr("The APK failed to install.<br/> Error: %1")
-                          .arg(errorString.c_str());
+                          .arg(c_str(errorString).get());
             break;
 
         default:
@@ -1801,16 +1802,16 @@ void EmulatorQtWindow::adbPushDone(StringView filePath,
             return;
         case FilePusher::Result::ProcessStartFailure:
             msg = tr("Could not launch process to copy %1")
-                          .arg(filePath.c_str());
+                          .arg(c_str(filePath).get());
             break;
         case FilePusher::Result::FileReadError:
-            msg = tr("Could not locate %1").arg(filePath.c_str());
+            msg = tr("Could not locate %1").arg(c_str(filePath).get());
             break;
         case FilePusher::Result::AdbPushFailure:
-            msg = tr("'adb push' failed for %1").arg(filePath.c_str());
+            msg = tr("'adb push' failed for %1").arg(c_str(filePath).get());
             break;
         default:
-            msg = tr("Could not copy %1").arg(filePath.c_str());
+            msg = tr("Could not copy %1").arg(c_str(filePath).get());
     }
     showErrorDialog(msg, tr("File Copy"));
 }

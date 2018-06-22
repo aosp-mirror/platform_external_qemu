@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <random>
 
+using android::base::c_str;
 using android::base::StdioStream;
 
 #ifndef userSettingIsDontSaveSnapshot
@@ -45,7 +46,7 @@ static void mockQemuPageSave(RamSaver& saver, const RamBlock& block) {
 void saveRamSingleBlock(const RamSaver::Flags flags,
                         const RamBlock& block,
                         android::base::StringView filename) {
-    RamSaver s(filename.c_str(), flags, nullptr, true);
+    RamSaver s(filename, flags, nullptr, true);
 
     s.registerBlock(block);
 
@@ -56,7 +57,7 @@ void saveRamSingleBlock(const RamSaver::Flags flags,
 
 void loadRamSingleBlock(const RamBlock& block,
                         android::base::StringView filename) {
-    auto ram = fopen(filename.c_str(), "rb");
+    auto ram = fopen(c_str(filename), "rb");
 
     RamLoader::RamBlockStructure emptyRamBlockStructure = {};
 
@@ -74,8 +75,7 @@ void incrementalSaveSingleBlock(const RamSaver::Flags flags,
                                 const RamBlock& blockToLoad,
                                 const RamBlock& blockToSave,
                                 android::base::StringView filename) {
-
-    auto ram = fopen(filename.c_str(), "rb");
+    auto ram = fopen(c_str(filename), "rb");
 
     RamLoader::RamBlockStructure emptyRamBlockStructure = {};
 
@@ -87,7 +87,7 @@ void incrementalSaveSingleBlock(const RamSaver::Flags flags,
 
     ramLoader.start(false);
 
-    RamSaver s(filename.c_str(), flags, &ramLoader, true);
+    RamSaver s(filename, flags, &ramLoader, true);
 
     s.registerBlock(blockToSave);
 

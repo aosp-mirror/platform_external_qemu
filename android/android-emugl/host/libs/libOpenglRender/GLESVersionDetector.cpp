@@ -26,9 +26,11 @@
 
 #include <algorithm>
 
+using android::base::c_str;
+using android::base::OsType;
 using android::base::StringView;
 using android::base::System;
-using android::base::OsType;
+
 // Config + context attributes to query the underlying OpenGL if it is
 // a OpenGL ES backend. Only try for OpenGL ES 3, and assume OpenGL ES 2
 // exists (if it doesn't, this is the least of our problems).
@@ -166,7 +168,7 @@ void sAddExtensionIfSupported(GLESDispatchMaxVersion currVersion,
     // If we chose a GLES version less than or equal to
     // the |extVersion| the extension |ext| is tagged with,
     // filter it according to the whitelist.
-    if (emugl::hasExtension(from.c_str(), ext.c_str()) &&
+    if (emugl::hasExtension(from.c_str(), c_str(ext)) &&
         currVersion > extVersion) {
         to += ext;
         to += " ";

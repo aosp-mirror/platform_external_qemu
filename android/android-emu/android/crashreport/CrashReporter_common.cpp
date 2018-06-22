@@ -42,6 +42,7 @@
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
+using android::base::c_str;
 using android::base::PathUtils;
 using android::base::ScopedFd;
 using android::base::StringView;
@@ -87,10 +88,10 @@ CrashReporter::CrashReporter()
       // job to keep these unique
       mDataExchangeDir(
               PathUtils::join(mDumpDir, Uuid::generateFast().toString())),
-      mHangDetector([](base::StringView message) {
+      mHangDetector([](StringView message) {
           if (CrashSystem::CrashType::CRASHUPLOAD !=
               CrashSystem::CrashType::NONE) {
-              CrashReporter::get()->GenerateDumpAndDie(message.c_str());
+              CrashReporter::get()->GenerateDumpAndDie(c_str(message));
           }
       }) {
     mProtobufData.reserve(kCrashInfoProtobufStrInitialSize);
@@ -166,11 +167,10 @@ static void formatDataFileName(char (&buffer)[N], StringView baseName) {
     // don't do any dynamic allocation here - it might be called during dump
     // writing, e.g. because of OOM exception
     memset(&buffer[0], 0, N);
-    snprintf(buffer, N - 1,
-             "%s%c%s",
+    snprintf(buffer, N - 1, "%s%c%s",
              CrashReporter::get()->getDataExchangeDir().c_str(),
              System::kDirSeparator,
-             (baseName.empty() ? "additional_data.txt" : baseName.c_str()));
+             (baseName.empty() ? "additional_data.txt" : c_str(baseName)));
 }
 
 void CrashReporter::attachData(StringView name, StringView data, bool replace) {
@@ -189,7 +189,7 @@ bool CrashReporter::attachFile(StringView sourceFullName,
     char fullName[PATH_MAX + 1];
     formatDataFileName(fullName, destBaseName);
 
-    return path_copy_file_safe(fullName, sourceFullName.c_str()) >= 0;
+    return path_copy_file_safe(fullName, c_str(sourceFullName)) >= 0;
 }
 
 ScopedFd CrashReporter::openDataAttachFile(StringView name, bool replace, bool binary) {

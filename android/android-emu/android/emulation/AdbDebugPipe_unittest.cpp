@@ -30,7 +30,7 @@ TEST(AdbDebugPipe, noOutput) {
     EXPECT_EQ(0, guest->connect("qemud:adb-debug"));
     constexpr StringView kMessage = "Hello debug world!";
     EXPECT_EQ(static_cast<ssize_t>(kMessage.size()),
-              guest->write(kMessage.c_str(), kMessage.size()));
+              guest->write(kMessage.data(), kMessage.size()));
 }
 
 TEST(AdbDebugPipe, withOutput) {
@@ -42,7 +42,7 @@ TEST(AdbDebugPipe, withOutput) {
     EXPECT_EQ(0, guest->connect("qemud:adb-debug"));
     constexpr StringView kMessage = "Hello debug world!";
     EXPECT_EQ(static_cast<ssize_t>(kMessage.size()),
-              guest->write(kMessage.c_str(), kMessage.size()));
+              guest->write(kMessage.data(), kMessage.size()));
 
     EXPECT_EQ(kMessage, outStream->view());
 }

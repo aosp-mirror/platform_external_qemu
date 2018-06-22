@@ -32,7 +32,7 @@ public:
 
     ~Quickboot();
 
-    static constexpr base::StringView kDefaultBootSnapshot = "default_boot";
+    static constexpr const char* kDefaultBootSnapshot = "default_boot";
 
     bool load(base::StringView name);
     bool save(base::StringView name);

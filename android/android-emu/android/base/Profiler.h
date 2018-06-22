@@ -89,14 +89,13 @@ public:
                                         MemoryProfiler::MemoryUsageBytes,
                                         MemoryProfiler::MemoryUsageBytes)>;
 
-    ScopedMemoryProfiler(StringView tag) :
-        mProfiler(), mTag(tag.c_str()) {
+    ScopedMemoryProfiler(StringView tag) : mProfiler(), mTag(tag) {
         mProfiler.start();
         check("(start)");
     }
 
-    ScopedMemoryProfiler(StringView tag, Callback c) :
-        mProfiler(), mTag(tag.c_str()), mCallback(c) {
+    ScopedMemoryProfiler(StringView tag, Callback c)
+        : mProfiler(), mTag(tag), mCallback(c) {
         mProfiler.start();
         check("(start)");
     }
@@ -120,9 +119,8 @@ private:
                               MemoryProfiler::MemoryUsageBytes change) {
         double megabyte = 1024.0 * 1024.0;
         fprintf(stderr, "%s %s: %f mb current. change: %f mb\n",
-                tag.c_str(), stage.c_str(),
-                (double)currentResident / megabyte,
-                (double)change / megabyte);
+                c_str(tag).get(), c_str(stage).get(),
+                (double)currentResident / megabyte, (double)change / megabyte);
     }};
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedMemoryProfiler);
