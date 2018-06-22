@@ -45,6 +45,70 @@
       "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93418fd3_4376fa7a",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-22T23:38:43Z",
+      "side": 1,
+      "message": "In my other project there\u0027s a function c_str(StringView) which returns a type convertible to const char*. Inside there\u0027s either an optional\u003cstring\u003e or a raw pointer to the string view\u0027s data. It might be slightly nicer-looking alternative:\n\nprintf(c_str(path_view)) vs printf(NullTerminated(path_view).c_str())\n\nIt doesn\u0027t cover repeated usage though",
+      "parentUuid": "42aaae4d_aa1589df",
+      "range": {
+        "startLine": 262,
+        "startChar": 6,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86d5822b_33866538",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-22T23:38:43Z",
+      "side": 1,
+      "message": "should this be emplace() to get rid of an assignment?",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 274,
+        "endChar": 48
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90edc336_414eb12c",
+        "filename": "android/android-emu/android/base/misc/StringUtils_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-22T23:38:43Z",
+      "side": 1,
+      "message": "could you please add a basic test for a null-terminated getter?",
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
