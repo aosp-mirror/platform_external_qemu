@@ -49,7 +49,7 @@ static const GlVertexAttrib kTestVertexAttrib = {
         .stride = 8,
         .enabled = GL_TRUE,
         .pointer = nullptr,
-        .values = {.ints = {}, .floats = {.1, .3, .9, .5}},
+        .values = {.ints = {}, .floats = {.1, .3}},
         .bufferBinding = 0};
 
 class SnapshotGlVertexAttributesTest
@@ -57,15 +57,14 @@ class SnapshotGlVertexAttributesTest
 public:
     void stateCheck(GlVertexAttrib expected) override {
         // check parameters
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_SIZE, &expected.size);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_TYPE, (GLint*)&expected.type);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_SIZE, expected.size);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_TYPE, expected.type);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_STRIDE, expected.stride);
         checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED,
-                          (GLint*)&expected.normalized);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_STRIDE, &expected.stride);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_ENABLED,
-                          (GLint*)&expected.enabled);
+                          expected.normalized);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_ENABLED, expected.enabled);
         checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING,
-                          (GLint*)&expected.bufferBinding);
+                          expected.bufferBinding);
 
         GLvoid* pointer;
         gl->glGetVertexAttribPointerv(m_index, GL_VERTEX_ATTRIB_ARRAY_POINTER,
@@ -80,20 +79,22 @@ public:
             case GL_SHORT:
             case GL_UNSIGNED_SHORT:
             case GL_FIXED:
-                if (expected.values.ints.size() < expected.size) {
-                    FAIL() << "Not enough int values provided.";
+                if (expected.values.ints.size() != expected.size) {
+                    FAIL() << "size was " << expected.size << " but "
+                           << expected.values.ints.size()
+                           << " reference ints provided.";
                 }
                 checkIntParameter(GL_CURRENT_VERTEX_ATTRIB,
-                                  (GLint*)&expected.values.ints[0],
-                                  expected.size);
+                                  expected.values.ints);
                 break;
             case GL_FLOAT:
-                if (expected.values.floats.size() < expected.size) {
-                    FAIL() << "Not enough float values provided.";
+                if (expected.values.floats.size() != expected.size) {
+                    FAIL() << "size was " << expected.size << " but "
+                           << expected.values.floats.size()
+                           << " reference floats provided.";
                 }
                 checkFloatParameter(GL_CURRENT_VERTEX_ATTRIB,
-                                    (GLfloat*)&expected.values.floats[0],
-                                    expected.size);
+                                    expected.values.floats);
                 break;
             default:
                 ADD_FAILURE() << "Unexpected type " << expected.type
@@ -184,25 +185,33 @@ public:
     }
 
 protected:
-    void checkFloatParameter(GLenum paramName,
-                             GLfloat* expected,
-                             GLuint size = 1) {
+    void checkFloatParameter(GLenum paramName, GLfloat expected) {
+        std::vector<GLfloat> v = {expected};
+        checkFloatParameter(paramName, v);
+    }
+
+    void checkFloatParameter(GLenum paramName, std::vector<GLfloat> expected) {
         std::vector<GLfloat> values;
-        values.resize(std::max((GLuint)4, size));
+        values.resize(std::max((GLuint)4, (GLuint)expected.size()));
         gl->glGetVertexAttribfv(m_index, paramName, &(values[0]));
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < expected.size(); ++i) {
             EXPECT_EQ(expected[i], values[i]) << "float value for " << paramName
                                               << " at attribute index " << i;
         }
     }
 
-    void checkIntParameter(GLenum paramName, GLint* expected, GLuint size = 1) {
+    void checkIntParameter(GLenum paramName, GLint expected) {
+        std::vector<GLint> v = {expected};
+        checkIntParameter(paramName, v);
+    }
+
+    void checkIntParameter(GLenum paramName, std::vector<GLint> expected) {
         std::vector<GLint> values;
-        values.resize(std::max((GLuint)4, size));
+        values.resize(std::max((GLuint)4, (GLuint)expected.size()));
         gl->glGetVertexAttribiv(m_index, paramName, &(values[0]));
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < expected.size(); ++i) {
             EXPECT_EQ(expected[i], values[i]) << "int value for " << paramName
                                               << " at attribute index " << i;
         }
