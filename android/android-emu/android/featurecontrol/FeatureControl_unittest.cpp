@@ -251,9 +251,9 @@ TEST_F(FeatureControlTest, readUserSettings) {
 }
 
 TEST_F(FeatureControlTest, stringConversion) {
-#define FEATURE_CONTROL_ITEM(item) \
+#define FEATURE_CONTROL_ITEM(item)           \
     EXPECT_EQ(item, stringToFeature(#item)); \
-    EXPECT_STREQ(#item, FeatureControlImpl::toString(item).c_str());
+    EXPECT_STREQ(#item, FeatureControlImpl::toString(item).data());
 #include "FeatureControlDefHost.h"
 #include "FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
@@ -320,16 +320,16 @@ TEST_F(FeatureControlTest, parseCommandLine) {
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
     ParamList feature1 = {
-            (char*)FeatureControlImpl::toString(Feature::Wifi).c_str()};
+            (char*)FeatureControlImpl::toString(Feature::Wifi).data()};
     ParamList feature2 = {
             (char*)FeatureControlImpl::toString(Feature::EncryptUserData)
-                    .c_str()};
+                    .data()};
     ParamList feature3 = {
             (char*)FeatureControlImpl::toString(Feature::GLPipeChecksum)
-                    .c_str()};
+                    .data()};
     std::string feature4str =
             "-" + (std::string)FeatureControlImpl::toString(Feature::HYPERV);
-    ParamList feature4 = {(char*)feature4str.c_str()};
+    ParamList feature4 = {(char*)feature4str.data()};
     feature1.next = &feature2;
     feature2.next = &feature3;
     feature3.next = &feature4;

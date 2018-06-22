@@ -40,7 +40,10 @@
 
 #define ALLOW_CHANGE_RENDERER
 
+using android::base::c_str;
+using android::base::endsWith;
 using android::base::IniFile;
+using android::base::makeCustomScopedPtr;
 using android::base::Optional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
@@ -48,8 +51,6 @@ using android::base::ScopedFd;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
-using android::base::endsWith;
-using android::base::makeCustomScopedPtr;
 
 using android::protobuf::loadProtobuf;
 using android::protobuf::ProtobufLoadResult;
@@ -66,14 +67,14 @@ static void fillImageInfo(pb::Image::Type type,
                           pb::Image* image) {
     image->set_type(type);
     *image->mutable_path() = path;
-    if (path.empty() || !path_is_regular(path.c_str())) {
+    if (path.empty() || !path_is_regular(c_str(path))) {
         image->set_present(false);
         return;
     }
 
     image->set_present(true);
     struct stat st;
-    if (!android_stat(path.c_str(), &st)) {
+    if (!android_stat(c_str(path), &st)) {
         image->set_size(st.st_size);
         image->set_modification_time(st.st_mtime);
     }
@@ -86,14 +87,14 @@ static bool verifyImageInfo(pb::Image::Type type,
         return false;
     }
     const bool savedPresent = in.has_present() && in.present();
-    const bool realPresent = !path.empty() && path_is_regular(path.c_str());
+    const bool realPresent = !path.empty() && path_is_regular(c_str(path));
     if (savedPresent != realPresent) {
         return false;
     }
     struct stat st;
     static_assert(sizeof(st.st_size >= sizeof(uint64_t)),
                   "Bad size member in struct stat, fix build options");
-    if (android_stat(path.c_str(), &st) != 0) {
+    if (android_stat(c_str(path), &st) != 0) {
         if (in.has_size() || in.has_modification_time()) {
             return false;
         }

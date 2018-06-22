@@ -599,7 +599,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
 void AdbGuestPipe::setReply(StringView reply, State newState) {
     CHECK(newState == State::SendingAcceptReplyOk);
     CHECK(reply.size() <= sizeof(mBuffer));
-    memcpy(mBuffer, reply.c_str(), reply.size());
+    memcpy(mBuffer, reply.data(), reply.size());
     mBufferSize = reply.size();
     mBufferPos = 0;
     mState = newState;
@@ -609,7 +609,7 @@ void AdbGuestPipe::setExpectedGuestCommand(StringView command, State newState) {
     CHECK(newState == State::WaitingForGuestAcceptCommand ||
           newState == State::WaitingForGuestStartCommand);
     CHECK(command.size() <= sizeof(mBuffer));
-    memcpy(mBuffer, command.c_str(), command.size());
+    memcpy(mBuffer, command.data(), command.size());
     mBufferSize = command.size();
     mBufferPos = 0;
     mState = newState;

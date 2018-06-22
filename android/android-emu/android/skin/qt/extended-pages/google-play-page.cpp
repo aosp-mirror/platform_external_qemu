@@ -13,6 +13,7 @@
 
 #include "android/skin/qt/error-dialog.h"
 
+using android::base::c_str;
 using android::base::StringView;
 using android::emulation::GooglePlayServices;
 
@@ -157,7 +158,7 @@ void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
 
     switch (result) {
         case GooglePlayServices::Result::Success:
-            textEdit->setPlainText(QString(outString.c_str()));
+            textEdit->setPlainText(QString(c_str(outString)));
             return;
 
         case GooglePlayServices::Result::AppNotInstalled:

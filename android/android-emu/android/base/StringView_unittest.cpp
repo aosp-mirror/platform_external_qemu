@@ -25,7 +25,7 @@ TEST(StringView, InitEmpty) {
 TEST(StringView, InitWithCString) {
     static const char* kString = "Hello";
     StringView view(kString);
-    EXPECT_STREQ(kString, view.str());
+    EXPECT_STREQ(kString, view.data());
     EXPECT_FALSE(view.empty());
     EXPECT_EQ(strlen(kString), view.size());
 }
@@ -33,7 +33,7 @@ TEST(StringView, InitWithCString) {
 TEST(StringView, InitWithConstBuffer) {
     static const char kString[] = "Hello";
     StringView view(kString);
-    EXPECT_STREQ(kString, view.str());
+    EXPECT_STREQ(kString, view.data());
     EXPECT_FALSE(view.empty());
     EXPECT_EQ(strlen(kString), view.size());
 }
@@ -42,7 +42,7 @@ TEST(StringView, InitWithMutableBuffer) {
     char string[128] = "Hello";
     ASSERT_NE(stringLiteralLength(string), strlen(string));
     StringView view(string);
-    EXPECT_STREQ(string, view.str());
+    EXPECT_STREQ(string, view.data());
     EXPECT_FALSE(view.empty());
     EXPECT_EQ(strlen(string), view.size());
 }
@@ -62,7 +62,7 @@ TEST(StringView, InitConstexpr) {
 
     // these lines compile only if the argument is a compile-time constant
     checkConst<kStringView[0]> checker1;
-    checkConst<kStringView.c_str()[1]> checker2;
+    checkConst<kStringView.data()[1]> checker2;
     checkConst<kStringView.begin()[2]> checker3;
     checkConst<kStringView.size()> checker4;
     checkConst<kStringView.empty()> checker5;
@@ -73,7 +73,7 @@ TEST(StringView, InitWithStringView) {
     StringView view1(kString);
     StringView view2(view1);
     EXPECT_FALSE(view2.empty());
-    EXPECT_STREQ(kString, view2.str());
+    EXPECT_STREQ(kString, view2.data());
     EXPECT_EQ(strlen(kString), view2.size());
 }
 
@@ -83,7 +83,7 @@ TEST(StringView, Clear) {
     view.clear();
     EXPECT_TRUE(view.empty());
     EXPECT_EQ(0U, view.size());
-    EXPECT_STREQ("", view.str());
+    EXPECT_STREQ("", view.data());
 }
 
 TEST(StringView, SetEmpty) {
@@ -102,7 +102,7 @@ TEST(StringView, SetWithCString) {
     static const char kString[] = "Wow";
     StringView view("Hello6");
     view.set(kString);
-    EXPECT_EQ(kString, view.str());
+    EXPECT_EQ(kString, view.data());
     EXPECT_EQ(strlen(kString), view.size());
 }
 
@@ -111,7 +111,7 @@ TEST(StringView, SetWithStringView) {
     StringView view1(kString);
     StringView view("Nope");
     view.set(view1);
-    EXPECT_EQ(kString, view.str());
+    EXPECT_EQ(kString, view.data());
     EXPECT_EQ(strlen(kString), view.size());
 }
 
@@ -262,9 +262,9 @@ TEST(StringView, GetSubstr) {
 
     StringView s1234("12341234");
     EXPECT_EQ(s1234, s1234.getSubstr(StringView("12341234")));
-    EXPECT_EQ(s1234, s1234.getSubstr(StringView("12")).c_str());
-    EXPECT_EQ(s1234.substr(1), s1234.getSubstr(StringView("23")).c_str());
-    EXPECT_EQ(s1234.substr(2), s1234.getSubstr(StringView("34")).c_str());
+    EXPECT_EQ(s1234, s1234.getSubstr(StringView("12")).data());
+    EXPECT_EQ(s1234.substr(1), s1234.getSubstr(StringView("23")).data());
+    EXPECT_EQ(s1234.substr(2), s1234.getSubstr(StringView("34")).data());
 
     StringView s1234prefix = s1234.substr(0, 4);
     EXPECT_EQ(empty, s1234prefix.getSubstr("3412"));
@@ -330,6 +330,26 @@ TEST(StringView, SubstrAbs) {
     EXPECT_EQ(StringView("4"), StringView("1234").substrAbs(3));
     EXPECT_EQ(StringView("34"), StringView("1234").substrAbs(2));
     EXPECT_EQ(StringView("234"), StringView("1234").substrAbs(1));
+}
+
+TEST(StringView, NullTerminated) {
+    const char* kString = "0123456789";
+    StringView str(kString);
+    StringView firstByte(kString, 1);
+
+    // Normally, a slice doesn't modify the string so STREQ could not stop at
+    // the end.
+    EXPECT_STREQ(firstByte.data(), kString);
+
+    // But when wrapped in CStrWrapper, it is copied.
+    EXPECT_STREQ(c_str(firstByte), "0");
+
+    // If the string is already null terminated, it doesn't copy.
+    EXPECT_EQ(c_str(str).get(), kString);
+
+    EXPECT_STREQ(c_str(StringView()), "");
+    EXPECT_STREQ(c_str(StringView("")), "");
+    EXPECT_STREQ(c_str(StringView(kString, size_t(0))), "");
 }
 
 // TODO(digit): String

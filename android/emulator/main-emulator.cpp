@@ -634,16 +634,13 @@ int main(int argc, char** argv)
     char* emulatorPath = nullptr;
     StringView progDir;
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
-        D("try dir %s", candidates[i].c_str());
+        D("try dir %s", candidates[i].data());
         progDir = candidates[i];
         if (ranchu == RANCHU_ON) {
-            emulatorPath = getQemuExecutablePath(progDir.c_str(),
-                                                 avdArch,
-                                                 force64bitTarget,
-                                                 wantedBitness);
+            emulatorPath = getQemuExecutablePath(
+                    progDir.data(), avdArch, force64bitTarget, wantedBitness);
         } else {
-            emulatorPath = getClassicEmulatorPath(progDir.c_str(),
-                                                  avdArch,
+            emulatorPath = getClassicEmulatorPath(progDir.data(), avdArch,
                                                   &wantedBitness);
         }
         D("Trying emulator path '%s'", emulatorPath);
@@ -669,14 +666,14 @@ int main(int argc, char** argv)
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
-    updateLibrarySearchPath(wantedBitness, useSystemLibs, progDir.c_str());
+    updateLibrarySearchPath(wantedBitness, useSystemLibs, progDir.data());
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
 
     /* Add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv(wantedBitness, progDir.c_str());
+    androidQtSetupEnv(wantedBitness, progDir.data());
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().

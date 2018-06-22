@@ -26,9 +26,9 @@
 using namespace android::base;
 using namespace android::metrics;
 
-static constexpr StringView kVersion = "version";
-static constexpr StringView kFullVersion = "fullVersion";
-static constexpr StringView kQemuVersion = "qemuVersion";
+static constexpr const char* kVersion = "version";
+static constexpr const char* kFullVersion = "fullVersion";
+static constexpr const char* kQemuVersion = "qemuVersion";
 
 namespace {
 
@@ -69,13 +69,11 @@ TEST_F(AsyncMetricsReporterTest, reportConditional) {
 
         // Verify the fields AsyncMetricsReporter is supposed to fill in.
         EXPECT_TRUE(asEvent.has_product_details());
-        EXPECT_STREQ(kVersion.c_str(),
-                     asEvent.product_details().version().c_str());
-        EXPECT_STREQ(kFullVersion.c_str(),
-                     asEvent.product_details().build().c_str());
+        EXPECT_STREQ(kVersion, asEvent.product_details().version().c_str());
+        EXPECT_STREQ(kFullVersion, asEvent.product_details().build().c_str());
 
         EXPECT_TRUE(asEvent.has_emulator_details());
-        EXPECT_STREQ(kQemuVersion.c_str(),
+        EXPECT_STREQ(kQemuVersion,
                      asEvent.emulator_details().core_version().c_str());
     };
 

@@ -29,12 +29,13 @@
 #include <fcntl.h>
 
 using android::base::AutoLock;
+using android::base::c_str;
 using android::base::Looper;
 using android::base::makeCustomScopedPtr;
 using android::base::PathUtils;
-using android::base::System;
-using android::base::StringView;
 using android::base::StringFormat;
+using android::base::StringView;
+using android::base::System;
 using android::base::Uuid;
 
 namespace android {
@@ -73,7 +74,7 @@ static std::string formatFilename(StringView sessionId,
 // owerwritten. On Windows rename() never overwrites target.
 static bool renameIfNotExists(StringView from, StringView to) {
 #ifdef _WIN32
-    return rename(from.c_str(), to.c_str()) == 0;
+    return rename(c_str(from), c_str(to)) == 0;
 #else
     if (System::get()->pathExists(to)) {
         return false;
@@ -81,7 +82,7 @@ static bool renameIfNotExists(StringView from, StringView to) {
     // There's a small chance of race condition here, but we don't actually
     // rename files in several threads, so it's OK.
     // TODO(zyy): use renameat2() on Linux to make it atomic.
-    if (HANDLE_EINTR(rename(from.c_str(), to.c_str())) != 0) {
+    if (HANDLE_EINTR(rename(c_str(from), c_str(to))) != 0) {
         return false;
     }
     return true;

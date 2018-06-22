@@ -33,6 +33,7 @@
 #include <iostream>
 #include <string>
 
+using android::base::c_str;
 using android::base::StringView;
 using android::base::System;
 using android::base::TestSystem;
@@ -53,7 +54,7 @@ static void checkMediaFile(StringView file,
                            AVCodecID expAudioId) {
     AVFormatContext* fmtCtx = nullptr;
 
-    EXPECT_TRUE(avformat_open_input(&fmtCtx, file.c_str(), nullptr, nullptr) ==
+    EXPECT_TRUE(avformat_open_input(&fmtCtx, c_str(file), nullptr, nullptr) ==
                 0);
     AVScopedPtr<AVFormatContext> pFmtCtx = makeAVScopedPtr(fmtCtx);
 

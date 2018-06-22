@@ -49,7 +49,7 @@ TEST(AdbHostServer, notify) {
     constexpr StringView kExpected = "0012host:emulator:7648";
     EXPECT_EQ(kExpected.size(), static_cast<size_t>(bufferSize));
     EXPECT_EQ(kExpected.size(), serverThread.view().size());
-    EXPECT_STREQ(kExpected.c_str(), serverThread.view().c_str());
+    EXPECT_STREQ(kExpected.data(), serverThread.view().data());
 }
 
 TEST(AdbHostServer, getClientPortDefault) {
