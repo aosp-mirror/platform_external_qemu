@@ -223,6 +223,24 @@
       "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7e398e0_58bb8865",
+        "filename": "android/android-emu/android/base/misc/StringUtils_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-22T23:50:19Z",
+      "side": 1,
+      "message": "ohh, sorry, I\u0027ve mixed the files and thought that\u0027s the only changes for the String*View* tests",
+      "parentUuid": "332e6c53_b604f5df",
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
