@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "52476948_c6641524",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-22T18:06:23Z",
+      "side": 1,
+      "message": "How is this window destroyed?",
+      "range": {
+        "startLine": 157,
+        "startChar": 4,
+        "endLine": 157,
+        "endChar": 11
+      },
+      "revId": "e97524408453f74526f1b4cb4df89cf92d3697f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de59d0a1_12782b76",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-22T18:06:23Z",
+      "side": 1,
+      "message": "Disable copy?",
+      "range": {
+        "startLine": 35,
+        "startChar": 6,
+        "endLine": 35,
+        "endChar": 23
+      },
+      "revId": "e97524408453f74526f1b4cb4df89cf92d3697f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dbb526dd_99fff3e8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-06-22T18:06:23Z",
+      "side": 1,
+      "message": "It should be possible to make these std::unique_ptr, it\u0027s valid to have a unique_ptr around an incomplete type as long as the types are completed in any code that calls the destructor (the cpp which contains SampleApplication::~SampleApplication in this case)",
+      "range": {
+        "startLine": 54,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 50
+      },
+      "revId": "e97524408453f74526f1b4cb4df89cf92d3697f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
