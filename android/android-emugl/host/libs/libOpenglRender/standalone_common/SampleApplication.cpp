@@ -23,13 +23,20 @@
 
 #include "Standalone.h"
 
+#include "FenceSync.h"
+
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES3/gl3.h>
+
 using android::base::AutoLock;
 using android::base::ConditionVariable;
+using android::base::FunctorThread;
 using android::base::LazyInstance;
 using android::base::Lock;
+using android::base::MessageChannel;
 using android::base::System;
 using android::base::TestSystem;
-using android::base::FunctorThread;
 
 namespace emugl {
 
@@ -144,6 +151,48 @@ private:
     FunctorThread mThread;
 };
 
+// app -> SF queue: separate storage, bindTexture blits
+// SF queue -> HWC: shared storage
+class ColorBufferQueue { // Note: we could have called this BufferQueue but there is another
+                         // class of name BufferQueue that does something totally different
+
+public:
+    static constexpr int kCapacity = 3;
+    struct Item {
+        unsigned int colorBuffer;
+        FenceSync* sync;
+    };
+
+    ColorBufferQueue() = default;
+
+    void queueBuffer(const Item& item) {
+        mQueue.send(item);
+    }
+
+    void dequeueBuffer(Item* outItem) {
+        mQueue.receive(outItem);
+    }
+
+private:
+    MessageChannel<Item, kCapacity> mQueue;
+};
+
+class ScopedRender {
+public:
+    ScopedRender(unsigned int context, unsigned int surface) :
+        mThreadInfo(new RenderThreadInfo()) {
+        FrameBuffer* fb = FrameBuffer::getFB();
+        fb->bindContext(context, surface, surface);
+    }
+
+    ~ScopedRender() {
+        FrameBuffer::getFB()->bindContext(0, 0, 0);
+        delete mThreadInfo;
+    }
+private:
+    RenderThreadInfo* mThreadInfo;
+};
+
 // SampleApplication implementation/////////////////////////////////////////////
 SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate) :
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate) {
@@ -214,6 +263,113 @@ void SampleApplication::drawLoop() {
             mWindow->messageLoop();
         }
     }
+}
+
+void SampleApplication::surfaceFlingerComposerLoop() {
+    fprintf(stderr, "%s: call\n", __func__);
+
+    // create enough color buffers, window surfaces, and render contexts
+    // for everyone
+
+    ColorBufferQueue app2sfQueue;
+    ColorBufferQueue sf2appQueue;
+    ColorBufferQueue sf2hwcQueue;
+    ColorBufferQueue hwc2sfQueue;
+
+    std::vector<unsigned int> sfColorBuffers;
+    std::vector<unsigned int> hwcColorBuffers;
+
+    for (int i = 0; i < ColorBufferQueue::kCapacity; i++) {
+        sfColorBuffers.push_back(mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE));
+        hwcColorBuffers.push_back(mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE));
+    }
+
+    for (int i = 0; i < ColorBufferQueue::kCapacity; i++) {
+        mFb->openColorBuffer(sfColorBuffers[i]);
+        mFb->openColorBuffer(hwcColorBuffers[i]);
+    }
+
+    unsigned int appSurface = mFb->createWindowSurface(0, mWidth, mHeight);
+    unsigned int sfSurface = mFb->createWindowSurface(0, mWidth, mHeight);
+    unsigned int hwcSurface = mFb->createWindowSurface(0, mWidth, mHeight);
+
+    unsigned int appContext = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    unsigned int sfContext = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    unsigned int hwcContext = mFb->createRenderContext(0, 0, GLESApi_3_0);
+
+    // prime the queue
+    for (int i = 0; i < ColorBufferQueue::kCapacity; i++) {
+        sf2appQueue.push_back({ sfColorBuffers[i], nullptr });
+        hwc2sfQueue.push_back({ sfColorBuffers[i], nullptr });
+    }
+
+    FunctorThread appThread([&]() {
+        ScopedRender(appContext, appSurface);
+        ColorBufferQueue::Item item;
+        sf2appQueue.dequeueBuffer(&item);
+
+        mFb->setWindowSurfaceColorBuffer(surface, item.colorBuffer);
+        this->initialize();
+
+        while (true) {
+            this->draw();
+            mFb->flushWindowSurfaceColorBuffer(appSurface);
+            FenceSync* sync = new FenceSync(false /* no native fence */, true /* destroy when signaled */);
+            app2sfQueue.queueBuffer({ item.colorBuffer, sync }); 
+            sf2appQueue.dequeueBuffer(item);
+            mFb->setWindowSurfaceColorBuffer(surface, item.colorBuffer);
+        }
+    });
+
+    FunctorThread sfThread([&]() {
+        ScopedRender(sfContext, sfSurface);
+        auto gl = LazyLoadedGLESv2Dispatch::get();
+        // TODO: initialize
+
+        GLint blitTexture;
+        gl->glGenTextures(1, &blitTexture);
+        gl->glBindTexture(GL_TEXTURE_2D, blitTexture);
+
+        ColorBufferQueue::Item appItem;
+        ColorBufferQueue::Item hwcItem;
+
+        while (true) {
+            hwc2sfQueue.dequeueBuffer(&hwcItem);
+            mFb->setWindowSurfaceColorBuffer(sfSurface, hwcItem.colorBuffer);
+
+            app2sfQueue.dequeueBuffer(&appItem);
+            mFb->bindColorBufferToTexture(appItem.colorBuffer);
+
+            // TODO: render it as a quad
+
+            mFb->flushWindowSurfaceColorBuffer(sfSurface);
+            sf2hwcQueue.queueBuffer({ hwcItem.colorBuffer, nullptr});
+        }
+    });
+
+    FunctorThread hwcThread([&]() {
+        Vsync vsync(mRefreshRate);
+        // ScopedRender(hwcContext, hwcSurface);
+
+        ColorBufferQueue::Item sfItem;
+        while (true) {
+            sf2hwcQueue.dequeueBuffer(&sfItem);
+            vsync.waitUntilNextVsync();
+            if (mUseSubWindow) {
+                mFb->post(sfItem.colorBuffer);
+                hwc2sfQueue.queueBuffer({ sfItem.colorBuffer, nullptr });
+                mWindow->messageLoop();
+            }
+        }
+    });
+
+    hwcThread.start();
+    sfThread.start();
+    appThread.start();
+
+    appThread.wait();
+    sfThread.wait();
+    hwcThread.wait();
 }
 
 } // namespace emugl
