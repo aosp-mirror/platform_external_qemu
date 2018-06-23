@@ -14,8 +14,11 @@
 
 #pragma once
 
+#include "android/base/Compiler.h"
+
 #include <cinttypes>
 #include <functional>
+#include <memory>
 
 class FrameBuffer;
 class OSWindow;
@@ -38,7 +41,29 @@ public:
                       int refreshRate = 60);
     ~SampleApplication();
 
+    // A basic draw loop that works similar to most simple
+    // GL apps that run on desktop.
+    //
+    // Per frame:
+    //
+    // a single GL context for drawing,
+    // a color buffer to blit,
+    // and a call to post that color buffer.
+    void rebind();
     void drawLoop();
+
+    // A more complex loop that uses 3 separate contexts
+    // to simulate what goes on in Android:
+    //
+    // Per frame
+    //
+    // a GL 'app' context for drawing,
+    // a SurfaceFlinger context for rendering the "Layer",
+    // and a HWC context for posting.
+    void surfaceFlingerComposerLoop();
+
+    // TODO:
+    // void HWC2Loop();
 
 protected:
     virtual void initialize() = 0;
@@ -51,8 +76,8 @@ private:
 
     bool mUseSubWindow = false;
     OSWindow* mWindow = nullptr;
-    FrameBuffer* mFb = nullptr;
-    RenderThreadInfo* mRenderThreadInfo = nullptr;
+    std::unique_ptr<FrameBuffer> mFb = {};
+    std::unique_ptr<RenderThreadInfo> mRenderThreadInfo = {};
 
     int mXOffset= 400;
     int mYOffset= 400;
@@ -60,6 +85,8 @@ private:
     unsigned int mColorBuffer = 0;
     unsigned int mContext = 0;
     unsigned int mSurface = 0;
+
+    DISALLOW_COPY_ASSIGN_AND_MOVE(SampleApplication);
 };
 
 } // namespace emugl
