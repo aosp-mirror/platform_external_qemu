@@ -199,5 +199,7 @@ make_sample = \
 ifeq ($(BUILD_TARGET_SUFFIX),64)
 
 $(call make_sample,HelloTriangle)
+$(call make_sample,HelloSurfaceFlinger)
+$(call make_sample,CreateDestroyContext)
 
 endif
