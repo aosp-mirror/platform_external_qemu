@@ -23,13 +23,20 @@
 
 #include "Standalone.h"
 
+#include "FenceSync.h"
+
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES3/gl3.h>
+
 using android::base::AutoLock;
 using android::base::ConditionVariable;
+using android::base::FunctorThread;
 using android::base::LazyInstance;
 using android::base::Lock;
+using android::base::MessageChannel;
 using android::base::System;
 using android::base::TestSystem;
-using android::base::FunctorThread;
 
 namespace emugl {
 
@@ -144,6 +151,32 @@ private:
     FunctorThread mThread;
 };
 
+// app -> SF queue: separate storage, bindTexture blits
+// SF queue -> HWC: shared storage
+class ColorBufferQueue { // Note: we could have called this BufferQueue but there is another
+                         // class of name BufferQueue that does something totally different
+
+public:
+    static constexpr int kCapacity = 3;
+    struct Item {
+        unsigned int colorBuffer = 0;
+        FenceSync* sync = nullptr;
+    };
+
+    ColorBufferQueue() = default;
+
+    void queueBuffer(const Item& item) {
+        mQueue.send(item);
+    }
+
+    void dequeueBuffer(Item* outItem) {
+        mQueue.receive(outItem);
+    }
+
+private:
+    MessageChannel<Item, kCapacity> mQueue;
+};
+
 // SampleApplication implementation/////////////////////////////////////////////
 SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate) :
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate) {
@@ -214,6 +247,179 @@ void SampleApplication::drawLoop() {
             mWindow->messageLoop();
         }
     }
+}
+
+void SampleApplication::surfaceFlingerComposerLoop() {
+    ColorBufferQueue app2sfQueue;
+    ColorBufferQueue sf2appQueue;
+    ColorBufferQueue sf2hwcQueue;
+    ColorBufferQueue hwc2sfQueue;
+
+    std::vector<unsigned int> sfColorBuffers;
+    std::vector<unsigned int> hwcColorBuffers;
+
+    for (int i = 0; i < ColorBufferQueue::kCapacity; i++) {
+        sfColorBuffers.push_back(mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE));
+        hwcColorBuffers.push_back(mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE));
+    }
+
+    for (int i = 0; i < ColorBufferQueue::kCapacity; i++) {
+        mFb->openColorBuffer(sfColorBuffers[i]);
+        mFb->openColorBuffer(hwcColorBuffers[i]);
+    }
+
+    // prime the queue
+    for (int i = 0; i < ColorBufferQueue::kCapacity; i++) {
+        sf2appQueue.queueBuffer({ sfColorBuffers[i], nullptr });
+        hwc2sfQueue.queueBuffer({ hwcColorBuffers[i], nullptr });
+    }
+
+    auto newFence = [] {
+        auto gl = LazyLoadedGLESv2Dispatch::get();
+        FenceSync* sync = new FenceSync(false, false);
+        gl->glFlush();
+        return sync;
+    };
+
+    FunctorThread appThread([&]() {
+        RenderThreadInfo* tInfo = new RenderThreadInfo;
+        unsigned int appContext = mFb->createRenderContext(0, 0, GLESApi_3_0);
+        unsigned int appSurface = mFb->createWindowSurface(0, mWidth, mHeight);
+        mFb->bindContext(appContext, appSurface, appSurface);
+
+        ColorBufferQueue::Item sfItem = {};
+
+        sf2appQueue.dequeueBuffer(&sfItem);
+        mFb->setWindowSurfaceColorBuffer(appSurface, sfItem.colorBuffer);
+
+        this->initialize();
+
+        while (true) {
+            this->draw();
+            mFb->flushWindowSurfaceColorBuffer(appSurface);
+            app2sfQueue.queueBuffer({ sfItem.colorBuffer, newFence() });
+
+            sf2appQueue.dequeueBuffer(&sfItem);
+            mFb->setWindowSurfaceColorBuffer(appSurface, sfItem.colorBuffer);
+            if (sfItem.sync) { sfItem.sync->wait(EGL_FOREVER_KHR); delete sfItem.sync; }
+        }
+
+        delete tInfo;
+    });
+
+    FunctorThread sfThread([&]() {
+        RenderThreadInfo* tInfo = new RenderThreadInfo;
+        unsigned int sfContext = mFb->createRenderContext(0, 0, GLESApi_3_0);
+        unsigned int sfSurface = mFb->createWindowSurface(0, mWidth, mHeight);
+        mFb->bindContext(sfContext, sfSurface, sfSurface);
+
+        auto gl = LazyLoadedGLESv2Dispatch::get();
+
+        static constexpr char blitVshaderSrc[] = R"(#version 300 es
+        precision highp float;
+        layout (location = 0) in vec2 pos;
+        layout (location = 1) in vec2 texcoord;
+        out vec2 texcoord_varying;
+        void main() {
+            gl_Position = vec4(pos, 0.0, 1.0);
+            texcoord_varying = texcoord;
+        })";
+
+        static constexpr char blitFshaderSrc[] = R"(#version 300 es
+        precision highp float;
+        uniform sampler2D tex;
+        in vec2 texcoord_varying;
+        out vec4 fragColor;
+        void main() {
+            fragColor = texture(tex, texcoord_varying);
+        })";
+
+        GLint blitProgram =
+            compileAndLinkShaderProgram(
+                blitVshaderSrc, blitFshaderSrc);
+
+        GLint samplerLoc = gl->glGetUniformLocation(blitProgram, "tex");
+
+        GLuint blitVbo;
+        gl->glGenBuffers(1, &blitVbo);
+        gl->glBindBuffer(GL_ARRAY_BUFFER, blitVbo);
+        const float attrs[] = {
+            -1.0f, -1.0f, 0.0f, 1.0f,
+            1.0f, -1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, 0.0f,
+            -1.0f, 1.0f, 0.0f, 0.0f,
+        };
+        gl->glBufferData(GL_ARRAY_BUFFER, sizeof(attrs), attrs, GL_STATIC_DRAW);
+        gl->glEnableVertexAttribArray(0);
+        gl->glEnableVertexAttribArray(1);
+
+        gl->glVertexAttribPointer(
+            0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+        gl->glVertexAttribPointer(
+            1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+            (GLvoid*)(uintptr_t)(2 * sizeof(GLfloat)));
+
+        GLuint blitTexture;
+        gl->glActiveTexture(GL_TEXTURE0);
+        gl->glGenTextures(1, &blitTexture);
+        gl->glBindTexture(GL_TEXTURE_2D, blitTexture);
+
+        gl->glUseProgram(blitProgram);
+        gl->glUniform1i(samplerLoc, 0);
+
+        ColorBufferQueue::Item appItem = {};
+        ColorBufferQueue::Item hwcItem = {};
+
+        while (true) {
+            hwc2sfQueue.dequeueBuffer(&hwcItem);
+            if (hwcItem.sync) { hwcItem.sync->wait(EGL_FOREVER_KHR); }
+
+            mFb->setWindowSurfaceColorBuffer(sfSurface, hwcItem.colorBuffer);
+
+            app2sfQueue.dequeueBuffer(&appItem);
+            if (appItem.sync) { appItem.sync->wait(EGL_FOREVER_KHR); }
+
+            mFb->bindColorBufferToTexture(appItem.colorBuffer);
+
+            gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+            gl->glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            mFb->flushWindowSurfaceColorBuffer(sfSurface);
+
+            if (appItem.sync) { delete appItem.sync; }
+            if (hwcItem.sync) { delete hwcItem.sync; }
+
+            sf2appQueue.queueBuffer({ appItem.colorBuffer, newFence() });
+            sf2hwcQueue.queueBuffer({ hwcItem.colorBuffer, newFence() });
+        }
+        delete tInfo;
+    });
+
+    sfThread.start();
+    appThread.start();
+
+    Vsync vsync(mRefreshRate);
+    ColorBufferQueue::Item sfItem = {};
+    while (true) {
+        sf2hwcQueue.dequeueBuffer(&sfItem);
+        if (sfItem.sync) { sfItem.sync->wait(EGL_FOREVER_KHR); delete sfItem.sync; }
+
+        vsync.waitUntilNextVsync();
+        mFb->post(sfItem.colorBuffer);
+        if (mUseSubWindow) {
+            mWindow->messageLoop();
+        }
+        hwc2sfQueue.queueBuffer({ sfItem.colorBuffer, newFence() });
+    }
+
+    appThread.wait();
+    sfThread.wait();
 }
 
 } // namespace emugl
