@@ -38,7 +38,28 @@ public:
                       int refreshRate = 60);
     ~SampleApplication();
 
+    // A basic draw loop that works similar to most simple
+    // GL apps that run on desktop.
+    //
+    // Per frame:
+    //
+    // a single GL context for drawing,
+    // a color buffer to blit,
+    // and a call to post that color buffer.
     void drawLoop();
+
+    // A more complex loop that uses 3 separate contexts
+    // to simulate what goes on in Android:
+    //
+    // Per frame
+    //
+    // a GL 'app' context for drawing,
+    // a SurfaceFlinger context for rendering the "Layer",
+    // and a HWC context for posting.
+    void surfaceFlingerComposerLoop();
+
+    // TODO:
+    // void HWC2Loop();
 
 protected:
     virtual void initialize() = 0;
