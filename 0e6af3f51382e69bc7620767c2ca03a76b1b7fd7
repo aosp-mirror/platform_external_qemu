@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb40e327_4df86f8f",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-06-23T05:00:43Z",
+      "side": 1,
+      "message": "why inheritance ?",
+      "range": {
+        "startLine": 36,
+        "startChar": 10,
+        "endLine": 36,
+        "endChar": 49
+      },
+      "revId": "0e6af3f51382e69bc7620767c2ca03a76b1b7fd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
