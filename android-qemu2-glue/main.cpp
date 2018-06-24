@@ -743,7 +743,7 @@ extern "C" int main(int argc, char** argv) {
         /* The AVD is already in use, we still support this as an
          * experimental feature. Use a temporary hardware-qemu.ini
          * file though to avoid overwriting the existing one. */
-        derror("Running multiple emulators with the same AVD"
+        derror("Running multiple emulators with the same AVD "
                "is an experimental feature.\n"
                "Please use -read-only flag to enable this feature.\n");
         return 1;
