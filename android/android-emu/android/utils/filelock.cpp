@@ -131,6 +131,21 @@ static bool retry(Func func, int tries = 4, int timeoutMs = 100) {
     }
 }
 
+template <class Func>
+static bool retry_with_limit(Func func, int tries = 4, int timeoutMs = 100) {
+    for (;;) {
+        --tries;
+        int retval = func(&tries);
+
+        if (retval) return true;
+        if (tries == 0) {
+            return false;
+        }
+
+        System::get()->sleepMs(timeoutMs);
+    }
+}
+
 static bool delete_file(const android::base::Win32UnicodeString& name) {
     return retry([&name]() {
         // Make sure the file isn't marked readonly, or deletion may fail.
@@ -148,92 +163,93 @@ static bool delete_dir(const android::base::Win32UnicodeString& name) {
 }
 
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock, int timeout) {
+static int filelock_lock(FileLock* lock, int liveProcessTimeout /* TODO */) {
     lock->lock_handle = nullptr;
     const auto unicodeDir = android::base::Win32UnicodeString(lock->lock);
     const auto unicodeName = android::base::Win32UnicodeString(lock->temp);
 
     HANDLE lockHandle = INVALID_HANDLE_VALUE;
-    bool createFileResult = false;
-    int sleep_duration_ms = std::min(200, timeout);
-    for (;;) {
-        bool slept = false;
-        if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
-            ::GetLastError() != ERROR_ALREADY_EXISTS) {
-            fprintf(stderr, "%s: error not already exists\n", __func__);
-            continue;
-        }
+    const bool createFileResult = retry_with_limit(
+        [&lockHandle, &unicodeDir, &unicodeName, liveProcessTimeout](int* triesRemaining) {
+            if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
+                ::GetLastError() != ERROR_ALREADY_EXISTS) {
+                fprintf(stderr, "%s: error not already exists\n", __func__);
+                return false;
+            }
 
-        // Open/create a lock file with a flags combination like:
-        //  - open for writing only
-        //  - allow only one process to open file for writing (our process)
-        // Together, this guarantees that the file can only be opened when
-        // our process is alive and keeps a handle to it.
-        // As soon as our process ends or we close/delete it - other lock
-        // can be acquired.
-        // Note: FILE_FLAG_DELETE_ON_CLOSE doesn't work well here, as
-        //  everyone else would need to open the file in FILE_SHARE_DELETE
-        //  mode, and both Android Studio and cmd.exe don't use it. Fix
-        //  at least the Android Studio part before trying to add this flag
-        //  instead of the manual deletion code.
-        lockHandle = ::CreateFileW(
-                unicodeName.c_str(),
-                GENERIC_WRITE,    // open only for writing
-                FILE_SHARE_READ,  // allow others to read the file, but not
-                                  // to write to it or not to delete it
-                nullptr,          // no special security attributes
-                CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
-                nullptr);  // no template file
-        DWORD lastErr = GetLastError();
-        if (lockHandle == INVALID_HANDLE_VALUE &&
-            (lastErr == ERROR_ACCESS_DENIED ||
-             lastErr == ERROR_SHARING_VIOLATION)) {
-
-            HANDLE getpidHandle =
-                ::CreateFileW(
+            // Open/create a lock file with a flags combination like:
+            //  - open for writing only
+            //  - allow only one process to open file for writing (our process)
+            // Together, this guarantees that the file can only be opened when
+            // our process is alive and keeps a handle to it.
+            // As soon as our process ends or we close/delete it - other lock
+            // can be acquired.
+            // Note: FILE_FLAG_DELETE_ON_CLOSE doesn't work well here, as
+            //  everyone else would need to open the file in FILE_SHARE_DELETE
+            //  mode, and both Android Studio and cmd.exe don't use it. Fix
+            //  at least the Android Studio part before trying to add this flag
+            //  instead of the manual deletion code.
+            lockHandle = ::CreateFileW(
                     unicodeName.c_str(),
-                    GENERIC_READ, // open only for reading
-                    FILE_SHARE_READ | FILE_SHARE_WRITE, // allow others to r+w the file (we only read, but
-                                                        // the write flag needs to be there to fit with
-                                                        // the original process, or this call fails)
-                    nullptr,               // default security
-                    OPEN_EXISTING,         // existing file only
-                    FILE_ATTRIBUTE_NORMAL, // normal file
-                    nullptr);              // no template file
+                    GENERIC_WRITE,    // open only for writing
+                    FILE_SHARE_READ,  // allow others to read the file, but not
+                                      // to write to it or not to delete it
+                    nullptr,          // no special security attributes
+                    CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
+                    nullptr);  // no template file
+            DWORD lastErr = GetLastError();
+            if (lockHandle == INVALID_HANDLE_VALUE &&
+                (lastErr == ERROR_ACCESS_DENIED ||
+                 lastErr == ERROR_SHARING_VIOLATION)) {
 
-            // Read the pid of the locking process.
-            char buf[12] = {};
-            DWORD bytesRead;
-            if (::ReadFile(getpidHandle, buf, 12, &bytesRead, nullptr)) {
+                HANDLE getpidHandle =
+                    ::CreateFileW(
+                        unicodeName.c_str(),
+                        GENERIC_READ, // open only for reading
+                        FILE_SHARE_READ | FILE_SHARE_WRITE, // allow others to r+w the file (we only read, but
+                                                            // the write flag needs to be there to fit with
+                                                            // the original process, or this call fails)
+                        nullptr,               // default security
+                        OPEN_EXISTING,         // existing file only
+                        FILE_ATTRIBUTE_NORMAL, // normal file
+                        nullptr);              // no template file
+
+                // Read the pid of the locking process.
+                char buf[12] = {};
+                DWORD bytesRead;
+                if (!::ReadFile(getpidHandle, buf, 12, &bytesRead, nullptr)) {
+                    return false;
+                }
+
                 DWORD lockingPid;
                 if (sscanf(buf, "%lu", &lockingPid) == 1) {
                     // Try waiting for the specified timeout for
                     // the locking process to exit. If that doesn't work, bail.
-                    System::get()->waitForProcessExit(lockingPid,
-                            sleep_duration_ms);
-                    slept = true;
+                    switch (System::get()->waitForProcessExit(lockingPid, liveProcessTimeout)) {
+                    // Need to stop if there is a timeout.
+                    case System::WaitExitResult::Timeout:
+                        *triesRemaining = 0;
+                    // Need to try again if we waited out the process.
+                    case System::WaitExitResult::Exited:
+                        *triesRemaining = 1;
+                    // Need to keep trying if there was an error.
+                    case System::WaitExitResult::Error:
+                    default:
+                        break;
+                    }
+                } else {
+                    return false;
                 }
+
+                // Sometimes a previous file gets readonly attribute even when
+                // its parent process has exited; that prevents us from opening
+                // it for writing.
+                SetFileAttributesW(unicodeName.c_str(), FILE_ATTRIBUTE_NORMAL);
             }
-            // Sometimes a previous file gets readonly attribute even when
-            // its parent process has exited; that prevents us from opening
-            // it for writing.
-            SetFileAttributesW(unicodeName.c_str(), FILE_ATTRIBUTE_NORMAL);
-        }
-        if (lockHandle != INVALID_HANDLE_VALUE) {
-            createFileResult = true;
-            break;
-        }
-        if (timeout == 0) {
-            break;
-        }
-        if (sleep_duration_ms > 0) {
-            if (!slept) {
-                System::get()->sleepMs(sleep_duration_ms);
-            }
-            timeout -= sleep_duration_ms;
-        }
-        sleep_duration_ms = std::min(sleep_duration_ms, timeout);
-    }
+            return lockHandle != INVALID_HANDLE_VALUE;
+        },
+        5,      // tries
+        200);   // sleep timeout between tries
 
     if (!createFileResult) {
         assert(lockHandle == INVALID_HANDLE_VALUE);
@@ -268,11 +284,11 @@ static int filelock_lock(FileLock* lock, int timeout) {
 }
 #else
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock, int timeout) {
+static int filelock_lock(FileLock* lock, int live_process_timeout) {
     int    ret;
     int    temp_fd = -1;
     int    lock_fd = -1;
-    int    rc;
+    int    rc, tries;
     FILE*  f = NULL;
     char   pid[8];
     struct stat  st_temp;
@@ -301,7 +317,20 @@ static int filelock_lock(FileLock* lock, int timeout) {
     }
 
     /* now attempt to link the temp file to the lock file */
-    for (;;) {
+    for (tries = 4; tries > 0; tries--)
+    {
+        const int kSleepDurationMsMax = 2000;  // 2 seconds.
+        const int kSleepDurationMsIncrement = 50;
+
+        if (sleep_duration_ms > 0) {
+            if (sleep_duration_ms > kSleepDurationMsMax) {
+                D("Cannot acquire lock file '%s'", lock->lock);
+                goto Fail;
+            }
+            System::get()->sleepMs(sleep_duration_ms);
+        }
+        sleep_duration_ms += kSleepDurationMsIncrement;
+
         // The return value of link() is buggy on NFS, so ignore it.
         // and use lstat() to look at the result.
         rc = HANDLE_EINTR(link(lock->temp, lock->lock));
@@ -348,6 +377,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
 
             goto Fail;
         }
+
         /* if we get there, it means that the link() call failed */
         /* check the lockfile to see if it is stale              */
         typedef enum {
@@ -381,20 +411,32 @@ static int filelock_lock(FileLock* lock, int timeout) {
             IGNORE_EINTR(close(lockfd));
         }
         /* if there is a PID, check that it is still alive */
-        bool slept = false;
         if (lockpid > 0) {
             rc = HANDLE_EINTR(kill(lockpid, 0));
             if (rc == 0 || errno == EPERM) {
                 freshness = FRESHNESS_FRESH;
-                // Try checking the locking process to exit.
-                // If that doesn't work, bail.
-                // If we waited until the process exited, the process
-                // is not fresh anymore.
-                if (System::get()->waitForProcessExit(lockpid,
-                        sleep_duration_ms) == System::WaitExitResult::Exited) {
-                    freshness = FRESHNESS_STALE;
+                if (live_process_timeout) {
+                    // Try waiting for the specified timeout for
+                    // the locking process to exit. If that doesn't work, bail.
+                    // If we waited until the process exited, the process
+                    // is not fresh anymore.
+                    switch (System::get()->waitForProcessExit(lockpid, live_process_timeout)) {
+                    // Try agian just once if we waited out the process.
+                    case System::WaitExitResult::Exited:
+                        freshness = FRESHNESS_STALE;
+                        tries = 1;
+                        break;
+                    // Don't try again if timeout occurred.
+                    case System::WaitExitResult::Timeout:
+                        freshness = FRESHNESS_FRESH;
+                        tries = 0;
+                        break;
+                    // Keep trying no error.
+                    case System::WaitExitResult::Error:
+                    default:
+                        break;
+                    }
                 }
-                slept = true;
             } else if (rc < 0 && errno == ESRCH) {
                 freshness = FRESHNESS_STALE;
             }
@@ -409,18 +451,9 @@ static int filelock_lock(FileLock* lock, int timeout) {
         if (freshness == FRESHNESS_STALE) {
             D("Removing stale lockfile '%s'", lock->lock);
             rc = HANDLE_EINTR(unlink(lock->lock));
+            sleep_duration_ms = 0;
+            tries++;
         }
-
-        const int kSleepDurationMsIncrement = 50;
-        if (timeout == 0) break;
-        if (sleep_duration_ms > 0) {
-            timeout -= sleep_duration_ms;
-            if (!slept) {
-                System::get()->sleepMs(sleep_duration_ms);
-            }
-        }
-        sleep_duration_ms = std::min(timeout,
-                sleep_duration_ms + kSleepDurationMsIncrement);
     }
     D("file '%s' is already in use by another process", lock->file);
 
