@@ -215,14 +215,17 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         case $SYSTEM in
             linux-x86_64)
                 var_append QMAKE_CXXFLAGS -D__extern_always_inline=inline
+                var_append QMAKE_CXXFLAGS "-I /usr/local/google/home/joshuaduong/qt-build/src/qt-everywhere-src-5.11.0/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/include"
                 var_append EXTRA_CONFIGURE_FLAGS \
                         -qt-xcb \
                         -no-use-gold-linker \
                         -platform linux-clang \
                         -c++std c++11 \
                         QMAKE_CXXFLAGS+=$QMAKE_CXXFLAGS
+
                 var_append LD_LIBRARY_PATH \
                   $(dirname $(aosp_clang_libcplusplus))
+                var_append EXTRA_PKG_CONFIGS "/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/common/qtwebengine-deps/linux-x86_64/lib/pkgconfig"
                 ;;
             windows*)
                 case $SYSTEM in
@@ -278,7 +281,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             export CPPFLAGS &&
             export LD_LIBRARY_PATH &&
             export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
-            export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+            echo "PKG_CONFIG_LIBDIR=$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
+            export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH:$EXTRA_PKG_CONFIGS" &&
+            echo "PKG_CONFIG_PATH=$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH:$EXTRA_PKG_CONFIGS" &&
             run "$(builder_src_dir)"/$QT_SRC_NAME/configure \
                 -prefix $_SHU_BUILDER_PREFIX \
                 $EXTRA_CONFIGURE_FLAGS
