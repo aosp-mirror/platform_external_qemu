@@ -190,9 +190,9 @@ void GLESpointer::onLoad(android::base::Stream* stream) {
     m_bufferName = stream->getBe32();
     if (m_attribType == ARRAY) {
         m_dataSize = stream->getBe32();
+        m_data = reinterpret_cast<GLvoid*>(stream->getBe64());
         m_ownData.resize(m_dataSize);
         stream->read(m_ownData.data(), m_dataSize);
-        m_data = m_ownData.data();
     }
     m_buffOffset = stream->getBe32();
     m_isInt = stream->getByte();
@@ -213,6 +213,7 @@ void GLESpointer::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_bufferName);
     if (m_attribType == ARRAY) {
         stream->putBe32(m_dataSize);
+        stream->putBe64(reinterpret_cast<uint64_t>(m_data));
         stream->write(m_data, m_dataSize);
     }
     stream->putBe32(m_buffOffset);

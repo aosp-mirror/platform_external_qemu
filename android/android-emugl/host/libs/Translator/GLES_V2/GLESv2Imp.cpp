@@ -2630,38 +2630,36 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribiv(GLuint index, GLenum pname, GLi
     GET_CTX_V2();
     SET_ERROR_IF(s_invalidVertexAttribIndex(index), GL_INVALID_VALUE);
     const GLESpointer* p = ctx->getPointer(index);
-    if(p) {
-        switch(pname){
-        case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING:
-            *params = 0;
-            break;
-        case GL_VERTEX_ATTRIB_ARRAY_ENABLED:
-            *params = p->isEnable();
-            break;
-        case GL_VERTEX_ATTRIB_ARRAY_SIZE:
-            *params = p->getSize();
-            break;
-        case GL_VERTEX_ATTRIB_ARRAY_STRIDE:
-            *params = p->getStride();
-            break;
-        case GL_VERTEX_ATTRIB_ARRAY_TYPE:
-            *params = p->getType();
-            break;
-        case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:
-            *params = p->isNormalize();
-            break;
-        case GL_CURRENT_VERTEX_ATTRIB:
-            if(index == 0)
-            {
-                const float* att0 = ctx->getAtt0();
-                for(int i=0; i<4; i++)
-                    params[i] = (GLint)att0[i];
-            }
-            else
-                ctx->dispatcher().glGetVertexAttribiv(index,pname,params);
-            break;
-        default:
-            ctx->setGLerror(GL_INVALID_ENUM);
+    if (p) {
+        switch (pname) {
+            case GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING:
+                *params = p->getBufferName();
+                break;
+            case GL_VERTEX_ATTRIB_ARRAY_ENABLED:
+                *params = p->isEnable();
+                break;
+            case GL_VERTEX_ATTRIB_ARRAY_SIZE:
+                *params = p->getSize();
+                break;
+            case GL_VERTEX_ATTRIB_ARRAY_STRIDE:
+                *params = p->getStride();
+                break;
+            case GL_VERTEX_ATTRIB_ARRAY_TYPE:
+                *params = p->getType();
+                break;
+            case GL_VERTEX_ATTRIB_ARRAY_NORMALIZED:
+                *params = p->isNormalize();
+                break;
+            case GL_CURRENT_VERTEX_ATTRIB:
+                if (index == 0) {
+                    const float* att0 = ctx->getAtt0();
+                    for (int i = 0; i < 4; i++)
+                        params[i] = (GLint)att0[i];
+                } else
+                    ctx->dispatcher().glGetVertexAttribiv(index, pname, params);
+                break;
+            default:
+                ctx->setGLerror(GL_INVALID_ENUM);
         }
     } else {
         ctx->setGLerror(GL_INVALID_VALUE);
@@ -2674,8 +2672,14 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribPointerv(GLuint index, GLenum pnam
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
 
     const GLESpointer* p = ctx->getPointer(index);
-    if(p) {
-        *pointer = const_cast<void *>( p->getBufferData());
+    if (p) {
+        if (p->getBufferName() == 0) {
+            // vertex attrib has no buffer, return array data pointer
+            *pointer = const_cast<GLvoid*>(p->getArrayData());
+        } else {
+            // vertex attrib has buffer, return offset
+            *pointer = reinterpret_cast<GLvoid*>(p->getBufferOffset());
+        }
     } else {
         ctx->setGLerror(GL_INVALID_VALUE);
     }

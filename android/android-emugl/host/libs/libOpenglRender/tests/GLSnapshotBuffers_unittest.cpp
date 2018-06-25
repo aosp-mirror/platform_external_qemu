@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "GLSnapshotTestStateUtils.h"
 #include "GLSnapshotTesting.h"
 #include "OpenGLTestContext.h"
 
@@ -20,12 +21,6 @@
 #include <map>
 
 namespace emugl {
-
-struct GlBufferData {
-    GLsizeiptr size;
-    GLvoid* bytes;
-    GLenum usage;
-};
 
 static const GLenum kGLES2GlobalBufferBindings[] = {
         GL_ARRAY_BUFFER_BINDING, GL_ELEMENT_ARRAY_BUFFER_BINDING};
@@ -79,24 +74,8 @@ public:
     // Creates a buffer with the properties in |data| and records its state so
     // it can be checked for preservation after a snapshot.
     GLuint addBuffer(GlBufferData data) {
-        // We bind to GL_ARRAY_BUFFER in order to set up buffer data,
-        // so let's hold on to what the old binding was so we can restore it
-        GLuint currentArrayBuffer;
-        gl->glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&currentArrayBuffer);
-        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-
-        GLuint name;
-        gl->glGenBuffers(1, &name);
-        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-
-        gl->glBindBuffer(GL_ARRAY_BUFFER, name);
-        gl->glBufferData(GL_ARRAY_BUFFER, data.size, data.bytes, data.usage);
-
+        GLuint name = createBuffer(gl, data);
         m_buffers_data[name] = data;
-
-        // Restore the old binding
-        gl->glBindBuffer(GL_ARRAY_BUFFER, currentArrayBuffer);
-        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
         return name;
     }
 
