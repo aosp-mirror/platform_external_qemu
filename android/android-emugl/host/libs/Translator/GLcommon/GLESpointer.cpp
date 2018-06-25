@@ -34,6 +34,12 @@ const GLvoid* GLESpointer::getArrayData() const {
 }
 
 GLvoid* GLESpointer::getBufferData() const {
+    if (m_buffer) {
+        fprintf(stderr, "%s %s: m_buffer was present, returning data\n", __FILE__, __func__);
+    }
+    else {
+        fprintf(stderr, "%s %s: no m_buffer trying to return data\n", __FILE__, __func__);
+    }
     return m_buffer
                    ? static_cast<unsigned char*>(m_buffer->getData()) +
                              m_buffOffset
@@ -109,6 +115,7 @@ void GLESpointer::setArray(GLint size,
     m_stride = stride;
     m_dataSize = dataSize;
     m_data = data;
+    fprintf(stderr, "%s %s: setting array\n", __FILE__, __func__);
     m_buffer = nullptr;
     m_bufferName = 0;
     m_buffOffset = 0;
@@ -131,6 +138,7 @@ void GLESpointer::setBuffer(GLint size,
     m_stride = stride;
     m_dataSize = 0;
     m_data = nullptr;
+    fprintf(stderr, "%s %s: setting buffer\n", __FILE__, __func__);
     m_buffer = buf;
     m_bufferName = bufferName;
     m_buffOffset = offset;
@@ -178,6 +186,12 @@ void GLESpointer::restoreBufferObj(
         std::function<GLESbuffer*(GLuint)> getBufferObj) {
     if (m_attribType != BUFFER) return;
     m_buffer = getBufferObj(m_bufferName);
+    if (m_buffer) {
+        fprintf(stderr, "%s %s: restored buffer %d\n", __FILE__, __func__, m_bufferName);
+    }
+    else {
+        fprintf(stderr, "%s %s: failed to restore buffer %d\n", __FILE__, __func__, m_bufferName);
+    }
 }
 
 void GLESpointer::onLoad(android::base::Stream* stream) {
@@ -187,6 +201,7 @@ void GLESpointer::onLoad(android::base::Stream* stream) {
     m_enabled = stream->getByte();
     m_normalize = stream->getByte();
     m_attribType = (GLESpointer::AttribType)stream->getByte();
+    fprintf(stderr, "%s: AttribType on load: %d\n", __FILE__, m_attribType);
     m_bufferName = stream->getBe32();
     if (m_attribType == ARRAY) {
         m_dataSize = stream->getBe32();
@@ -210,6 +225,7 @@ void GLESpointer::onSave(android::base::Stream* stream) const {
     stream->putByte(m_enabled);
     stream->putByte(m_normalize);
     stream->putByte(m_attribType);
+    fprintf(stderr, "%s: AttribType on save: %d\n", __FILE__, m_attribType );
     stream->putBe32(m_bufferName);
     if (m_attribType == ARRAY) {
         stream->putBe32(m_dataSize);

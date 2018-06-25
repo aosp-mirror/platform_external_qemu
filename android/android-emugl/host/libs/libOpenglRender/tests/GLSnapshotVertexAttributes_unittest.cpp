@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "GLSnapshotTesting.h"
+#include "GLSnapshotTestStateUtils.h"
 #include "OpenGLTestContext.h"
 
 #include <gtest/gtest.h>
@@ -48,127 +49,31 @@ static const GlVertexAttrib kTestVertexAttrib = {
         .normalized = GL_TRUE,
         .stride = 8,
         .enabled = GL_TRUE,
-        .pointer = nullptr,
+        .pointer = (GLvoid*)0x000145,
         .values = {.ints = {}, .floats = {.1, .3}},
         .bufferBinding = 0};
+
+static const GlBufferData kTestAttachedBuffer = {
+    .size = 16,
+    .bytes = nullptr,
+    .usage = GL_STATIC_DRAW
+};
 
 class SnapshotGlVertexAttributesTest
     : public SnapshotSetValueTest<GlVertexAttrib> {
 public:
-    void stateCheck(GlVertexAttrib expected) override {
-        // check parameters
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_SIZE, expected.size);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_TYPE, expected.type);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_STRIDE, expected.stride);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED,
-                          expected.normalized);
+    virtual void stateCheck(GlVertexAttrib expected) override {
         checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_ENABLED, expected.enabled);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING,
-                          expected.bufferBinding);
-
-        GLvoid* pointer;
-        gl->glGetVertexAttribPointerv(m_index, GL_VERTEX_ATTRIB_ARRAY_POINTER,
-                                      &pointer);
-        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        EXPECT_EQ(expected.pointer, pointer);
-
-        // check element value
-        switch (expected.type) {
-            case GL_BYTE:
-            case GL_UNSIGNED_BYTE:
-            case GL_SHORT:
-            case GL_UNSIGNED_SHORT:
-            case GL_FIXED:
-                if (expected.values.ints.size() != expected.size) {
-                    FAIL() << "size was " << expected.size << " but "
-                           << expected.values.ints.size()
-                           << " reference ints provided.";
-                }
-                checkIntParameter(GL_CURRENT_VERTEX_ATTRIB,
-                                  expected.values.ints);
-                break;
-            case GL_FLOAT:
-                if (expected.values.floats.size() != expected.size) {
-                    FAIL() << "size was " << expected.size << " but "
-                           << expected.values.floats.size()
-                           << " reference floats provided.";
-                }
-                checkFloatParameter(GL_CURRENT_VERTEX_ATTRIB,
-                                    expected.values.floats);
-                break;
-            default:
-                ADD_FAILURE() << "Unexpected type " << expected.type
-                              << " for vertex attribute " << m_index;
-        }
     }
 
-    void stateChange() override {
-        // set parameters
+    virtual void stateChange() override {
         GlVertexAttrib changed = *m_changed_value;
-
-        if (changed.bufferBinding != 0) {
-            // TODO(benzene): set up buffer if needs binding
-            // This needs to be done before the call to glVertexAttribPointer,
-            // which will copy ARRAY_BUFFER_BINDING into the attrib's binding
-            ADD_FAILURE() << "testing buffer binding for vertex attributes not "
-                             "implemented yet";
-        }
-
-        gl->glVertexAttribPointer(m_index, changed.size, changed.type,
-                                  changed.normalized, changed.stride,
-                                  changed.pointer);
-        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-
         if (changed.enabled) {
             gl->glEnableVertexAttribArray(m_index);
         } else {
             gl->glDisableVertexAttribArray(m_index);
         }
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-
-        // set element value
-        switch (changed.type) {
-            case GL_BYTE:
-            case GL_UNSIGNED_BYTE:
-            case GL_SHORT:
-            case GL_UNSIGNED_SHORT:
-            case GL_FIXED:
-                if (changed.values.ints.size() < changed.size) {
-                    FAIL() << "Not enough int values provided.";
-                }
-                // TODO(benzene): support GLES3+
-                FAIL() << "GLES2 only supports float vertex attributes "
-                          "(VertexAttrib{1234}f).";
-            case GL_FLOAT:
-                if (changed.values.floats.size() < changed.size) {
-                    FAIL() << "Not enough float values provided.";
-                }
-                switch (changed.size) {
-                    case 1:
-                        gl->glVertexAttrib1fv(
-                                m_index, (GLfloat*)&changed.values.floats[0]);
-                        break;
-                    case 2:
-                        gl->glVertexAttrib2fv(
-                                m_index, (GLfloat*)&changed.values.floats[0]);
-                        break;
-                    case 3:
-                        gl->glVertexAttrib3fv(
-                                m_index, (GLfloat*)&changed.values.floats[0]);
-                        break;
-                    case 4:
-                        gl->glVertexAttrib4fv(
-                                m_index, (GLfloat*)&changed.values.floats[0]);
-                        break;
-                    default:
-                        ADD_FAILURE() << "Unsupported size " << changed.size
-                                      << " for vertex attribute " << m_index;
-                }
-                break;
-            default:
-                ADD_FAILURE() << "Unsupported type " << changed.type
-                              << " for vertex attribute " << m_index;
-        }
     }
 
     void selectIndex(GLuint index) {
@@ -220,9 +125,181 @@ protected:
     GLuint m_index = 0;
 };
 
-TEST_F(SnapshotGlVertexAttributesTest, PreserveVertexAttributes) {
+class SnapshotGlVertexAttribCurrentTest : public SnapshotGlVertexAttributesTest {
+public:
+    void stateCheck(GlVertexAttrib expected) override {
+        SnapshotGlVertexAttributesTest::stateCheck(expected);
+
+        // check current element value
+        switch (expected.type) {
+            case GL_BYTE:
+            case GL_UNSIGNED_BYTE:
+            case GL_SHORT:
+            case GL_UNSIGNED_SHORT:
+            case GL_FIXED:
+                if (expected.values.ints.size() != expected.size) {
+                    FAIL() << "size was " << expected.size << " but "
+                           << expected.values.ints.size()
+                           << " reference ints provided.";
+                }
+                checkIntParameter(GL_CURRENT_VERTEX_ATTRIB,
+                                  expected.values.ints);
+                break;
+            case GL_FLOAT:
+                if (expected.values.floats.size() != expected.size) {
+                    FAIL() << "size was " << expected.size << " but "
+                           << expected.values.floats.size()
+                           << " reference floats provided.";
+                }
+                checkFloatParameter(GL_CURRENT_VERTEX_ATTRIB,
+                                    expected.values.floats);
+                break;
+            default:
+                ADD_FAILURE() << "Unexpected type " << expected.type
+                              << " for vertex attribute " << m_index;
+        }
+    }
+
+    void stateChange() override {
+        SnapshotGlVertexAttributesTest::stateChange();
+        GlVertexAttrib changed = *m_changed_value;
+        switch (changed.type) {
+            case GL_BYTE:
+            case GL_UNSIGNED_BYTE:
+            case GL_SHORT:
+            case GL_UNSIGNED_SHORT:
+            case GL_FIXED:
+                if (changed.values.ints.size() < changed.size) {
+                    FAIL() << "Not enough int values provided.";
+                }
+                // TODO(benzene): support GLES3+
+                FAIL() << "GLES2 only supports float vertex attributes "
+                          "(VertexAttrib{1234}f).";
+            case GL_FLOAT:
+                if (changed.values.floats.size() < changed.size) {
+                    FAIL() << "Not enough float values provided.";
+                }
+                switch (changed.size) {
+                    case 1:
+                        gl->glVertexAttrib1fv(
+                                m_index, (GLfloat*)&changed.values.floats[0]);
+                        break;
+                    case 2:
+                        gl->glVertexAttrib2fv(
+                                m_index, (GLfloat*)&changed.values.floats[0]);
+                        break;
+                    case 3:
+                        gl->glVertexAttrib3fv(
+                                m_index, (GLfloat*)&changed.values.floats[0]);
+                        break;
+                    case 4:
+                        gl->glVertexAttrib4fv(
+                                m_index, (GLfloat*)&changed.values.floats[0]);
+                        break;
+                    default:
+                        ADD_FAILURE() << "Unsupported size " << changed.size
+                                      << " for vertex attribute " << m_index;
+                }
+                break;
+            default:
+                ADD_FAILURE() << "Unsupported type " << changed.type
+                              << " for vertex attribute " << m_index;
+        }
+    }
+};
+
+class SnapshotGlVertexAttribArrayTest : public SnapshotGlVertexAttributesTest {
+public:
+    virtual void stateCheck(GlVertexAttrib expected) override {
+        SnapshotGlVertexAttributesTest::stateCheck(expected);
+        // check parameters
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_SIZE, expected.size);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_TYPE, expected.type);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_STRIDE, expected.stride);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED,
+                          expected.normalized);
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING,
+                          expected.bufferBinding);
+
+        GLvoid* pointer;
+        gl->glGetVertexAttribPointerv(m_index, GL_VERTEX_ATTRIB_ARRAY_POINTER,
+                                      &pointer);
+        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+        EXPECT_EQ(expected.pointer, pointer);
+    }
+
+    virtual void stateChange() override {
+        SnapshotGlVertexAttributesTest::stateChange();
+        GlVertexAttrib changed = *m_changed_value;
+        gl->glVertexAttribPointer(m_index, changed.size, changed.type,
+                                  changed.normalized, changed.stride,
+                                  changed.pointer);
+    }
+};
+
+class SnapshotGlVertexAttribBufferTest : public SnapshotGlVertexAttribArrayTest {
+public:
+    void stateCheck(GlVertexAttrib expected) override {
+        SnapshotGlVertexAttribArrayTest::stateCheck(expected);
+    }
+
+    void stateChange() override {
+        GlVertexAttrib changed = *m_changed_value;
+
+        // Set up buffer to be bound before glVertexAttribPointer,
+        // which will copy ARRAY_BUFFER_BINDING into the attrib's binding
+        if (gl->glIsBuffer(changed.bufferBinding) == GL_TRUE) {
+            fprintf(stderr, "binding buffer %d\n", changed.bufferBinding);
+            gl->glBindBuffer(GL_ARRAY_BUFFER, changed.bufferBinding);
+            EXPECT_EQ(GL_NO_ERROR, gl->glGetError()) << "Failed to bind buffer " << changed.bufferBinding;
+            GLint bindresult;
+            gl->glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &bindresult);
+            EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+            fprintf(stderr, "bound array buffer is now %d\n", bindresult);
+        }
+        else {
+            ADD_FAILURE() << "Tried to bind buffer with vertex attributes but " << changed.bufferBinding << " is not a valid buffer.";
+        }
+
+        SnapshotGlVertexAttribArrayTest::stateChange();
+
+        if (changed.bufferBinding != 0) {
+            // Clear the array buffer binding
+            gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
+            EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+            GLint bindresult;
+            gl->glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &bindresult);
+            EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+            fprintf(stderr, "bound array buffer is now %d\n", bindresult);
+        }
+
+    }
+};
+
+
+TEST_F(SnapshotGlVertexAttribCurrentTest, PreserveVertexAttributes) {
     selectIndex(31);
     setExpectedValues(kGLES2DefaultVertexAttrib, kTestVertexAttrib);
+    doCheckedSnapshot();
+}
+
+TEST_F(SnapshotGlVertexAttribBufferTest, AttachArrayBuffer) {
+    selectIndex(15);
+    GLfloat testBuffContents[] = {
+        0.1f, 0.2f, 0.3f, 0.4f,
+        0.5f, 0.6f, 0.7f, 0.8f,
+        0.9f, 1.0f, 1.1f, 1.2f,
+        1.3f, 1.4f, 1.5f, 1.6f,
+    };
+    GlBufferData data = kTestAttachedBuffer;
+    fprintf(stderr, "Test buffer contents are at %p\n", testBuffContents);
+    data.bytes = testBuffContents;
+    GLuint buffer = createBuffer(gl, data);
+    GlVertexAttrib withBuffer = kTestVertexAttrib;
+    withBuffer.bufferBinding = buffer;
+    withBuffer.pointer = reinterpret_cast<GLvoid*>(4);
+    setExpectedValues(kGLES2DefaultVertexAttrib, withBuffer);
     doCheckedSnapshot();
 }
 
