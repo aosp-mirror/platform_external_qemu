@@ -22,6 +22,52 @@
       "revId": "0e6af3f51382e69bc7620767c2ca03a76b1b7fd7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "568c26bf_4d929a93",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-25T15:35:50Z",
+      "side": 1,
+      "message": "in case of some bug in the code or just bad guest (which is an external actor and controlled by the user) this line will hang forever - so the whole emulator will, too\nThere has to be a more robust way to detect a misuse and bail out without hanging or crashing the whole emulator/guest. Perfect way of handling it is making only the specific guest\u0027s app crash",
+      "range": {
+        "startLine": 57,
+        "startChar": 12,
+        "endLine": 57,
+        "endChar": 25
+      },
+      "revId": "0e6af3f51382e69bc7620767c2ca03a76b1b7fd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78c101af_740e9155",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-25T15:35:50Z",
+      "side": 1,
+      "message": "is there any way to make everything non-static?",
+      "range": {
+        "startLine": 144,
+        "startChar": 0,
+        "endLine": 145,
+        "endChar": 37
+      },
+      "revId": "0e6af3f51382e69bc7620767c2ca03a76b1b7fd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
