@@ -538,6 +538,14 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
 GLEScontext::~GLEScontext() {
     auto& gl = dispatcher();
 
+    if (m_blitState.program) {
+        gl.glDeleteProgram(m_blitState.program);
+        gl.glDeleteTextures(1, &m_blitState.tex);
+        gl.glDeleteVertexArrays(1, &m_blitState.vao);
+        gl.glDeleteBuffers(1, &m_blitState.vbo);
+        gl.glDeleteFramebuffers(1, &m_blitState.fbo);
+    }
+
     if (m_textureEmulationProg) {
         gl.glDeleteProgram(m_textureEmulationProg);
         gl.glDeleteTextures(2, m_textureEmulationTextures);
@@ -2434,6 +2442,9 @@ GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
         fprintf(stderr, "%s: fail to link program. infolog: %s\n", __func__,
                 &infoLog[0]);
     }
+
+    gl.glDeleteShader(vshader);
+    gl.glDeleteShader(fshader);
 
     return program;
 }

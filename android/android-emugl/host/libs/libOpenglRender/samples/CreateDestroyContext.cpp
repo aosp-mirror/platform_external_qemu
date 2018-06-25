@@ -74,7 +74,7 @@ private:
 int main(int argc, char** argv) {
 
     emugl::CreateDestroyContext app;
-    app.surfaceFlingerComposerLoop();
+    app.drawLoop();
 
     return 0;
 }
