@@ -2675,6 +2675,7 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribPointerv(GLuint index, GLenum pnam
 
     const GLESpointer* p = ctx->getPointer(index);
     if(p) {
+        fprintf(stderr, "%s %s: getting vertex attrib ptr data\n", __FILE__, __func__ );
         *pointer = const_cast<void *>( p->getBufferData());
     } else {
         ctx->setGLerror(GL_INVALID_VALUE);
@@ -3592,6 +3593,7 @@ static void s_glPrepareVertexAttribPointer(GLESv2Context* ctx, GLuint index, GLi
                 break;
         }
     }
+    fprintf(stderr, "%s %s: Trying to bind indexed buffer\n", __FILE__, __func__);
     ctx->bindIndexedBuffer(0, index, ctx->getBuffer(GL_ARRAY_BUFFER), (GLintptr)ptr, 0, effectiveStride);
     ctx->setVertexAttribFormat(index, size, type, normalized, 0, isInt);
     // Still needed to deal with client arrays
@@ -3605,6 +3607,7 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
 
     s_glPrepareVertexAttribPointer(ctx, index, size, type, normalized, stride, ptr, 0, false);
     if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+        fprintf(stderr, "%s %s: dispatcher being called\n", __FILE__, __func__);
         ctx->dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
     }
 }

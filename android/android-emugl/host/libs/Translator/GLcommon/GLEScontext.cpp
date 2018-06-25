@@ -903,9 +903,12 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
                 m_shareGroup
                         ->getObjectData(NamedObjectType::VERTEXBUFFER,
                                         bufferName));
+        fprintf(stderr, "%s %s: setting buffer, buffer name is %d\n", __FILE__, __func__, bufferName);
+        fprintf(stderr, "%s %s: vertex buffer object is %p\n", __FILE__, __func__, vbo);
         m_currVaoState[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
+    fprintf(stderr, "%s %s: setting array, no buffer name given\n", __FILE__, __func__);
     m_currVaoState[arrType]->setArray(size,type,stride,data,dataSize,normalize,isInt);
     return data;
 }
@@ -1189,6 +1192,7 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
     if (index >= bindings->size()) {
             return;
     }
+    fprintf(stderr, "%s %s: binding buffer %d\n", __FILE__, __func__, buffer);
     auto& bufferBinding = (*bindings)[index];
     bufferBinding.buffer = buffer;
     bufferBinding.offset = offset;

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "GLSnapshotTesting.h"
+#include "GLSnapshotTestStateUtils.h"
 #include "OpenGLTestContext.h"
 
 #include <gtest/gtest.h>
@@ -51,6 +52,12 @@ static const GlVertexAttrib kTestVertexAttrib = {
         .pointer = nullptr,
         .values = {.ints = {}, .floats = {.1, .3}},
         .bufferBinding = 0};
+
+static const GlBufferData kTestAttachedBuffer = {
+    .size = 16,
+    .bytes = nullptr,
+    .usage = GL_STATIC_DRAW
+};
 
 class SnapshotGlVertexAttributesTest
     : public SnapshotSetValueTest<GlVertexAttrib> {
@@ -107,17 +114,41 @@ public:
         GlVertexAttrib changed = *m_changed_value;
 
         if (changed.bufferBinding != 0) {
-            // TODO(benzene): set up buffer if needs binding
-            // This needs to be done before the call to glVertexAttribPointer,
+            // Set up buffer to be bound before glVertexAttribPointer,
             // which will copy ARRAY_BUFFER_BINDING into the attrib's binding
-            ADD_FAILURE() << "testing buffer binding for vertex attributes not "
-                             "implemented yet";
+
+            if (gl->glIsBuffer(changed.bufferBinding) == GL_TRUE) {
+                fprintf(stderr, "binding buffer %d\n", changed.bufferBinding);
+                gl->glBindBuffer(GL_ARRAY_BUFFER, changed.bufferBinding);
+                EXPECT_EQ(GL_NO_ERROR, gl->glGetError()) << "Failed to bind buffer " << changed.bufferBinding;
+                GLint bindresult;
+                gl->glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &bindresult);
+                EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+                fprintf(stderr, "bound array buffer is now %d\n", bindresult);
+            }
+            else {
+                ADD_FAILURE() << "Tried to bind buffer with vertex attributes but " << changed.bufferBinding << " is not a valid buffer.";
+            }
         }
 
         gl->glVertexAttribPointer(m_index, changed.size, changed.type,
                                   changed.normalized, changed.stride,
                                   changed.pointer);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING,
+                          changed.bufferBinding);
+
+        if (changed.bufferBinding != 0) {
+            // Clear the array buffer binding
+            gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
+            EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+            GLint bindresult;
+            gl->glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &bindresult);
+            EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+            fprintf(stderr, "bound array buffer is now %d\n", bindresult);
+        }
 
         if (changed.enabled) {
             gl->glEnableVertexAttribArray(m_index);
@@ -223,6 +254,24 @@ protected:
 TEST_F(SnapshotGlVertexAttributesTest, PreserveVertexAttributes) {
     selectIndex(31);
     setExpectedValues(kGLES2DefaultVertexAttrib, kTestVertexAttrib);
+    doCheckedSnapshot();
+}
+
+TEST_F(SnapshotGlVertexAttributesTest, AttachArrayBuffer) {
+    selectIndex(15);
+    GLfloat testBuffContents[] = {
+        0.1f, 0.2f, 0.3f, 0.4f,
+        0.5f, 0.6f, 0.7f, 0.8f,
+        0.9f, 1.0f, 1.1f, 1.2f,
+        1.3f, 1.4f, 1.5f, 1.6f,
+    };
+    GlBufferData data = kTestAttachedBuffer;
+    data.bytes = testBuffContents;
+    GLuint buffer = createBuffer(gl, data);
+    GlVertexAttrib withBuffer = kTestVertexAttrib;
+    withBuffer.bufferBinding = buffer;
+    withBuffer.pointer = (GLvoid*)4;
+    setExpectedValues(kGLES2DefaultVertexAttrib, withBuffer);
     doCheckedSnapshot();
 }
 
