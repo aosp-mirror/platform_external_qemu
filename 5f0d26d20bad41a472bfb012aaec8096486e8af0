@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5798dc91_1b83161b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/samples/CreateDestroyContext.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-06-25T18:53:35Z",
+      "side": 1,
+      "message": "Why do we need to close ColorBuffer twice?",
+      "revId": "5f0d26d20bad41a472bfb012aaec8096486e8af0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
