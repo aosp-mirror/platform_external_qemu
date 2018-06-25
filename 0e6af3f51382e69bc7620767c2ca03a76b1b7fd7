@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "78fdaa18_cf5f0c18",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-25T18:04:09Z",
+      "side": 1,
+      "message": "We need to change its behavior to add a lock into it. We would allow for only 1 instance of the pipe at a time to make it less complicated.",
+      "parentUuid": "fb40e327_4df86f8f",
+      "range": {
+        "startLine": 36,
+        "startChar": 10,
+        "endLine": 36,
+        "endChar": 49
+      },
+      "revId": "0e6af3f51382e69bc7620767c2ca03a76b1b7fd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "568c26bf_4d929a93",
         "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "59981d53_48f128ec",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-25T18:04:09Z",
+      "side": 1,
+      "message": "I will think about this and come back to it. I can do a try lock and print error if fails.",
+      "parentUuid": "568c26bf_4d929a93",
+      "range": {
+        "startLine": 57,
+        "startChar": 12,
+        "endLine": 57,
+        "endChar": 25
+      },
+      "revId": "0e6af3f51382e69bc7620767c2ca03a76b1b7fd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "78c101af_740e9155",
         "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2018-06-25T15:35:50Z",
       "side": 1,
       "message": "is there any way to make everything non-static?",
+      "range": {
+        "startLine": 144,
+        "startChar": 0,
+        "endLine": 145,
+        "endChar": 37
+      },
+      "revId": "0e6af3f51382e69bc7620767c2ca03a76b1b7fd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d30db053_0293a1bd",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-06-25T18:04:09Z",
+      "side": 1,
+      "message": "It would be difficult. The main issue is we would need to pass sMetaData between two very different pipes. The receiver gets it in onLoad from outside of the snapshot. There seems to be some leak in the existing implementation, though. I will try to make it more robust.",
+      "parentUuid": "78c101af_740e9155",
       "range": {
         "startLine": 144,
         "startChar": 0,
