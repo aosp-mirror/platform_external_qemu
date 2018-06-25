@@ -739,7 +739,7 @@ extern "C" int main(int argc, char** argv) {
         opts->no_snapshot_save = true;
         dwarning("Read-only mode enabled. Please refrain from doing "
                 "snapshot save.\n");
-    } else if (filelock_create(coreHwIniPath) == NULL) {
+    } else if (filelock_create_timeout(coreHwIniPath, 2000) == NULL) {
         /* The AVD is already in use, we still support this as an
          * experimental feature. Use a temporary hardware-qemu.ini
          * file though to avoid overwriting the existing one. */
