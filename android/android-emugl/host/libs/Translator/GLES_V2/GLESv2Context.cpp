@@ -210,6 +210,7 @@ void GLESv2Context::postLoadRestoreCtx() {
 
     // vertex attribute pointers
     for (const auto& vaoIte : m_vaoStateMap) {
+        fprintf(stderr, "%s: vao state map loop\n", __FILE__);
         if (vaoIte.first != 0) {
             genVAOName(vaoIte.first, false);
         }
@@ -217,6 +218,7 @@ void GLESv2Context::postLoadRestoreCtx() {
             dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         }
         for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
+            //fprintf(stderr, "%s: pointers loop\n", __FILE__);
             GLESpointer* glesPointer = glesPointerIte.second;
 
             // don't skip enabling if the guest assumes it was enabled.
@@ -227,16 +229,20 @@ void GLESv2Context::postLoadRestoreCtx() {
             // attribute 0 are bound right before draw, no need to bind it here
             if (glesPointer->getAttribType() == GLESpointer::VALUE
                     && glesPointerIte.first == 0) {
+                fprintf(stderr, "%s: break!!!!!!!!\n", __FILE__);
                 break;
             }
+            fprintf(stderr, "%s: type %d\n", __FILE__, glesPointer->getAttribType());
             switch (glesPointer->getAttribType()) {
                 case GLESpointer::BUFFER: {
                     const GLuint globalBufferName = shareGroup()
                             ->getGlobalName(NamedObjectType::VERTEXBUFFER,
                                             glesPointer->getBufferName());
                     if (!globalBufferName) {
+                        fprintf(stderr, "%s: !globalBufferName \n", __FILE__);
                         continue;
                     }
+                    fprintf(stderr, "%s: restore buffer obj\n", __FILE__);
                     glesPointer->restoreBufferObj(getBufferObj);
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
