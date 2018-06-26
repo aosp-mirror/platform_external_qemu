@@ -21,6 +21,17 @@
 #include <cmath>
 #include <memory>
 
+#include "android/base/AlignedBuf.h"
+
+#include <astc-codec/astc-codec.h>
+
+using android::AlignedBuf;
+
+#define GL_R16 0x822A
+#define GL_RG16 0x822C
+#define GL_R16_SNORM 0x8F98
+#define GL_RG16_SNORM 0x8F99
+
 int getCompressedFormats(int* formats) {
     if(formats){
         //Palette
@@ -52,46 +63,6 @@ int getCompressedFormats(int* formats) {
         formats[MAX_SUPPORTED_PALETTE + 11] = GL_COMPRESSED_R11_EAC;
     }
     return MAX_SUPPORTED_PALETTE + MAX_ETC_SUPPORTED;
-}
-
-#define GL_R16                            0x822A
-#define GL_RG16                           0x822C
-#define GL_R16_SNORM                      0x8F98
-#define GL_RG16_SNORM                     0x8F99
-
-bool isEtcFormat(GLenum internalformat) {
-    switch (internalformat) {
-    case GL_ETC1_RGB8_OES:
-    case GL_COMPRESSED_RGB8_ETC2:
-    case GL_COMPRESSED_SRGB8_ETC2:
-    case GL_COMPRESSED_RGBA8_ETC2_EAC:
-    case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
-    case GL_COMPRESSED_R11_EAC:
-    case GL_COMPRESSED_SIGNED_R11_EAC:
-    case GL_COMPRESSED_RG11_EAC:
-    case GL_COMPRESSED_SIGNED_RG11_EAC:
-    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-        return true;
-    }
-    return false;
-}
-
-bool isPaletteFormat(GLenum internalformat)  {
-    switch (internalformat) {
-    case GL_PALETTE4_RGB8_OES:
-    case GL_PALETTE4_RGBA8_OES:
-    case GL_PALETTE4_R5_G6_B5_OES:
-    case GL_PALETTE4_RGBA4_OES:
-    case GL_PALETTE4_RGB5_A1_OES:
-    case GL_PALETTE8_RGB8_OES:
-    case GL_PALETTE8_RGBA8_OES:
-    case GL_PALETTE8_R5_G6_B5_OES:
-    case GL_PALETTE8_RGBA4_OES:
-    case GL_PALETTE8_RGB5_A1_OES:
-        return true;
-    }
-    return false;
 }
 
 ETC2ImageFormat getEtcFormat(GLenum internalformat) {
@@ -128,6 +99,143 @@ ETC2ImageFormat getEtcFormat(GLenum internalformat) {
             break;
     }
     return etcFormat;
+}
+
+#define ASTC_FORMATS_LIST(EXPAND_MACRO) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_4x4_KHR, astc_codec::FootprintType::k4x4, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_5x4_KHR, astc_codec::FootprintType::k5x4, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_5x5_KHR, astc_codec::FootprintType::k5x5, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_6x5_KHR, astc_codec::FootprintType::k6x5, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_6x6_KHR, astc_codec::FootprintType::k6x6, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_8x5_KHR, astc_codec::FootprintType::k8x5, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_8x6_KHR, astc_codec::FootprintType::k8x6, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_8x8_KHR, astc_codec::FootprintType::k8x8, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_10x5_KHR, astc_codec::FootprintType::k10x5, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_10x6_KHR, astc_codec::FootprintType::k10x6, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_10x8_KHR, astc_codec::FootprintType::k10x8, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_10x10_KHR, astc_codec::FootprintType::k10x10, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_12x10_KHR, astc_codec::FootprintType::k12x10, false) \
+    EXPAND_MACRO(GL_COMPRESSED_RGBA_ASTC_12x12_KHR, astc_codec::FootprintType::k12x12, false) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR, astc_codec::FootprintType::k4x4, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR, astc_codec::FootprintType::k5x4, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR, astc_codec::FootprintType::k5x5, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR, astc_codec::FootprintType::k6x5, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR, astc_codec::FootprintType::k6x6, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR, astc_codec::FootprintType::k8x5, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR, astc_codec::FootprintType::k8x6, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR, astc_codec::FootprintType::k8x8, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR, astc_codec::FootprintType::k10x5, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR, astc_codec::FootprintType::k10x6, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR, astc_codec::FootprintType::k10x8, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR, astc_codec::FootprintType::k10x10, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR, astc_codec::FootprintType::k12x10, true) \
+    EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR, astc_codec::FootprintType::k12x12, true) \
+
+
+const int astc_formats[] = {GL_COMPRESSED_RGBA_ASTC_4x4_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_5x4_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_5x5_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_6x5_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_6x6_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_8x5_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_8x6_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_8x8_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_10x5_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_10x6_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_10x8_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_10x10_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_12x10_KHR,
+                            GL_COMPRESSED_RGBA_ASTC_12x12_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR,
+                            GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR};
+
+void getAstcFormatInfo(GLenum internalformat,
+                       astc_codec::FootprintType* footprint,
+                       bool* srgb) {
+    switch (internalformat) {
+#define ASTC_FORMAT(typeName, footprintType, srgbValue) \
+        case typeName: \
+            *footprint = footprintType; *srgb = srgbValue; break; \
+        
+        ASTC_FORMATS_LIST(ASTC_FORMAT)
+#undef ASTC_FORMAT
+        default:
+            assert(false && "Invalid ASTC format");
+            break;
+    }
+}
+
+void getAstcFormats(const GLint** formats, size_t* formatsCount) {
+    static constexpr GLint kATSCFormats[] = {
+#define ASTC_FORMAT(typeName, footprintType, srgbValue) \
+        typeName,
+
+        ASTC_FORMATS_LIST(ASTC_FORMAT)
+#undef ASTC_FORMAT
+    };
+
+    *formats = kATSCFormats;
+    *formatsCount = sizeof(kATSCFormats) / sizeof(kATSCFormats[0]);
+}
+
+bool isAstcFormat(GLenum internalformat) {
+    switch (internalformat) {
+#define ASTC_FORMAT(typeName, footprintType, srgbValue) \
+        case typeName:
+
+        ASTC_FORMATS_LIST(ASTC_FORMAT)
+#undef ASTC_FORMAT
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool isEtcFormat(GLenum internalformat) {
+    switch (internalformat) {
+    case GL_ETC1_RGB8_OES:
+    case GL_COMPRESSED_RGB8_ETC2:
+    case GL_COMPRESSED_SRGB8_ETC2:
+    case GL_COMPRESSED_RGBA8_ETC2_EAC:
+    case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+    case GL_COMPRESSED_R11_EAC:
+    case GL_COMPRESSED_SIGNED_R11_EAC:
+    case GL_COMPRESSED_RG11_EAC:
+    case GL_COMPRESSED_SIGNED_RG11_EAC:
+    case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+    case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+        return true;
+    }
+    return false;
+}
+
+bool isPaletteFormat(GLenum internalformat)  {
+    switch (internalformat) {
+    case GL_PALETTE4_RGB8_OES:
+    case GL_PALETTE4_RGBA8_OES:
+    case GL_PALETTE4_R5_G6_B5_OES:
+    case GL_PALETTE4_RGBA4_OES:
+    case GL_PALETTE4_RGB5_A1_OES:
+    case GL_PALETTE8_RGB8_OES:
+    case GL_PALETTE8_RGBA8_OES:
+    case GL_PALETTE8_R5_G6_B5_OES:
+    case GL_PALETTE8_RGBA4_OES:
+    case GL_PALETTE8_RGB5_A1_OES:
+        return true;
+    }
+    return false;
 }
 
 GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat) {
@@ -270,6 +378,27 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
         if (emulateCompressedData) {
             delete [] (char*)data;
         }
+    } else if (isAstcFormat(internalformat)) {
+        astc_codec::FootprintType footprint;
+        bool srgb;
+        getAstcFormatInfo(internalformat, &footprint, &srgb);
+
+        const int32_t align = ctx->getUnpackAlignment() - 1;
+        const int32_t stride = ((width * 4) + align) & ~align;
+        const size_t size = stride * height;
+
+        AlignedBuf<uint8_t, 64> alignedUncompressedData(size);
+
+        const bool result = astc_codec::ASTCDecompressToRGBA(
+                reinterpret_cast<const uint8_t*>(data), imageSize, width,
+                height, footprint, alignedUncompressedData.data(), size,
+                stride);
+        SET_ERROR_IF(!result, GL_INVALID_VALUE);
+
+        glTexImage2DPtr(target, level, srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8, width,
+                        height, border, GL_RGBA, GL_UNSIGNED_BYTE,
+                        alignedUncompressedData.data());
+
     } else if (isPaletteFormat(internalformat)) {
         SET_ERROR_IF(
             level > log2(ctx->getMaxTexSize()) ||
