@@ -70,6 +70,30 @@
       "revId": "ffc268994f1890323170f3166eda77792dd14076",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c915e35_448fb7bb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotVertexAttributes_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-06-26T21:53:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "46bcba4e_9074c064",
+      "range": {
+        "startLine": 25,
+        "startChar": 32,
+        "endLine": 25,
+        "endChar": 39
+      },
+      "revId": "ffc268994f1890323170f3166eda77792dd14076",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
