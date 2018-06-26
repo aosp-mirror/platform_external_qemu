@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d8e8096_9326a590",
+        "filename": "android/rebuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-26T23:43:49Z",
+      "side": 1,
+      "message": "nit: extra line",
+      "revId": "d73eb31cfd3a9dd4eee83ff9c20345f6443cec12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "198a915a_fd159575",
+        "filename": "android/scripts/coverage.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-06-26T23:43:49Z",
+      "side": 1,
+      "message": "where is this needed?",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 2
+      },
+      "revId": "d73eb31cfd3a9dd4eee83ff9c20345f6443cec12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
