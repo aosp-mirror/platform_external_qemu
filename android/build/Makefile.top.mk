@@ -57,8 +57,8 @@ BUILD_OPT_LDFLAGS :=
 ifeq ($(BUILD_DEBUG),true)
     BUILD_OPT_CFLAGS += -O0 -DANDROID_DEBUG
     # Enable code coverage for debug builds.
-    BUILD_TARGET_CFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping)
-    BUILD_OPT_LDFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping)
+    BUILD_TARGET_CFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping -fprofile-arcs -ftest-coverage)
+    BUILD_OPT_LDFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping -fprofile-arcs -ftest-coverage --coverage)
 else
     ifneq (windows,$(BUILD_TARGET_OS))
         BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1

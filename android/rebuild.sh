@@ -283,8 +283,14 @@ if [ -z "$NO_TESTS" ]; then
     if [ "$FAILURES" ]; then
         panic "Unit test failures: $FAILURES"
     fi
+
+    if [ "$OPTDEBUG" = true] ; then
+      echo "Creating coverage report under $OUT_DIR/emu.html. (slow)"
+      run android/scripts/coverage.sh --out-dir=$OUT_DIR || panic "Unable to create coverage report"
+    fi
 else
     echo "Ignoring unit tests suite."
 fi
+
 
 echo "Done. !!"
