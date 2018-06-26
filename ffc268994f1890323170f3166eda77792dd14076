@@ -22,6 +22,30 @@
       "revId": "ffc268994f1890323170f3166eda77792dd14076",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5410fe2_935e2c1d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotVertexAttributes_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-06-26T19:46:20Z",
+      "side": 1,
+      "message": "Seems like just the terminology they use for if you provide values directly using glVertexAttrib. The enum to get them is called GL_CURRENT_VERTEX_ATTRIB. In the GLES2 spec, section 2.7, it says \"Current generic attribute values define generic attributes for a vertex when a vertex array defining that data is not enabled\"",
+      "parentUuid": "ee184da4_1a164fc7",
+      "range": {
+        "startLine": 25,
+        "startChar": 32,
+        "endLine": 25,
+        "endChar": 39
+      },
+      "revId": "ffc268994f1890323170f3166eda77792dd14076",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
