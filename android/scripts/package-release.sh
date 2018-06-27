@@ -684,8 +684,11 @@ build_darwin_binaries_on () {
     copy_directory "$AOSP_BUILD_PREBUILTS"/protobuf \
             "$DARWIN_BUILD_PREBUILTS"/protobuf
 
-    copy_directory "$AOSP_BUILD_PREBUILTS"/common/virtualscene \
+    copy_directory "$AOSP_BUILD_PREBUILTS"/common/snapshots \
             "$DARWIN_BUILD_PREBUILTS"/common/virtualscene
+
+    copy_directory "$AOSP_BUILD_PREBUILTS"/common/testdata \
+            "$DARWIN_BUILD_PREBUILTS"/common/testdata /
 
     run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR" --strip-components 1
 
