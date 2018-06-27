@@ -283,6 +283,14 @@ if [ -z "$NO_TESTS" ]; then
     if [ "$FAILURES" ]; then
         panic "Unit test failures: $FAILURES"
     fi
+
+    if [ "$OPTDEBUG" = true ] ; then
+        # TODO(jansene): Enable when we have clang support under windows.
+        if [ -z "$MINGW" ]; then
+            echo "Creating coverage report under $OUT_DIR/coverage/emu-coverage.html. (slow)"
+            run android/scripts/coverage.sh --out-dir=$OUT_DIR  --verbosity=$VERBOSE || panic "Unable to create coverage report"
+        fi
+    fi
 else
     echo "Ignoring unit tests suite."
 fi
