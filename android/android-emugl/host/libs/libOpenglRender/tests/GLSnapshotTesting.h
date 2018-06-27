@@ -48,6 +48,12 @@ struct GlStencilOp {
     GLenum dppass;
 };
 
+struct GlBufferData {
+    GLsizeiptr size;
+    GLvoid* bytes;
+    GLenum usage;
+};
+
 // Capabilities which, according to the GLES2 spec, start disabled.
 static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
                                             GL_CULL_FACE,
