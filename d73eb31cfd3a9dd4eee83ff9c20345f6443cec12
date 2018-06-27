@@ -39,6 +39,30 @@
       "revId": "d73eb31cfd3a9dd4eee83ff9c20345f6443cec12",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42603f6f_e6199856",
+        "filename": "android/scripts/coverage.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-06-27T07:05:20Z",
+      "side": 1,
+      "message": "We rely on a python gcovr package, which we will install in a virtual environment under our build directory.\n\nIf you run this script again, and the virtual environment already exists we do not need to recreate it.",
+      "parentUuid": "198a915a_fd159575",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 2
+      },
+      "revId": "d73eb31cfd3a9dd4eee83ff9c20345f6443cec12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
