@@ -52,6 +52,7 @@ standalone_common_SRC_FILES := \
     standalone_common/SampleApplication.cpp \
     standalone_common/SearchPathsSetup.cpp \
     standalone_common/ShaderUtils.cpp \
+    standalone_common/GoldfishOpenGLDispatch.cpp \
 
 ifeq ($(BUILD_TARGET_OS),linux)
     standalone_common_SRC_FILES += standalone_common/angle-util/x11/X11Window.cpp
@@ -73,7 +74,8 @@ ifeq ($(BUILD_TARGET_OS),linux)
 endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
-    standalone_common_LDLIBS += -Wl,-framework,AppKit
+    standalone_common_LDLIBS += -Wl,-framework,AppKit,-framework,CoreMedia -Wl,-framework,AudioUnit, -Wl,-framework,AVFoundation, -Wl,-framework,Cocoa, -Wl,-framework,CoreAudio, -Wl,-framework,CoreMedia, -Wl,-framework,CoreVideo, -Wl,-framework,ForceFeedback, -Wl,-framework,IOKit, -Wl,-framework,QTKit, -Wl,-framework,VideoDecodeAcceleration, -Wl,-framework,VideoToolbox,
+
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
@@ -99,6 +101,7 @@ standalone_common_C_INCLUDES := \
     $(EMUGL_PATH)/host/libs/libOpenglRender/standalone_common/angle-util \
 
 standalone_common_STATIC_LIBRARIES := \
+	$(ANDROID_EMU_STATIC_LIBRARIES) \
     $(ANGLE_TRANSLATION_STATIC_LIBRARIES) \
     libOpenGLESDispatch \
     libGLSnapshot \
@@ -168,6 +171,7 @@ LOCAL_SRC_FILES := \
     tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotVertexAttributes_unittest.cpp \
     tests/GLTestUtils.cpp \
+    tests/GoldfishOpenGLDispatch_unittest.cpp \
     tests/OpenGL_unittest.cpp \
     tests/OpenGLTestContext.cpp \
     tests/StalePtrRegistry_unittest.cpp \
