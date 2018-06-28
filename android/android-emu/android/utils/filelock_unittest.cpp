@@ -14,6 +14,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/utils/path.h"
+#include "android/utils/eintr_wrapper.h"
 
 #include <gtest/gtest.h>
 #include <memory>
@@ -65,6 +66,39 @@ protected:
     virtual bool isParentProcess() const = 0;
     virtual size_t writeToOther(void* buffer, size_t size) = 0;
     virtual size_t readFromOther(void* buffer, size_t size) = 0;
+    virtual void killChild() = 0;
+    bool expectLockFail(int timeout = 0) {
+        FileLock* lock = filelock_create_timeout(mFileLockPath.c_str(),
+                timeout);
+        EXPECT_EQ(lock, nullptr);
+        bool ret = lock == nullptr;
+        if (lock) {
+            filelock_release(lock);
+        }
+        return ret;
+    }
+    bool expectLockSuccessAndRelease(int timeout = 0) {
+        FileLock* lock = filelock_create_timeout(mFileLockPath.c_str(),
+                timeout);
+        EXPECT_NE(lock, nullptr);
+        bool ret = lock != nullptr;
+        if (lock) {
+            filelock_release(lock);
+        }
+        return ret;
+    }
+    void assertChildSuccess() {
+        ASSERT_TRUE(isParentProcess());
+        uint8_t succeed = 0;
+        readFromOther(&succeed, sizeof(uint8_t));
+        ASSERT_EQ(succeed, 1);
+    }
+    bool expectReady() {
+        uint8_t ready;
+        readFromOther(&ready, sizeof(uint8_t));
+        EXPECT_EQ(ready, 1);
+        return ready;
+    }
     std::unique_ptr<android::base::TestTempDir> mTempDir;
     std::string mFileLockPath;
 };
@@ -103,15 +137,14 @@ public:
                                exePath, getTestCaseName(), getTestName(),
                                mChildRead, mChildWrite, mFileLockPath.c_str()));
             STARTUPINFO si;
-            PROCESS_INFORMATION pi;
             memset(&si, 0, sizeof(si));
-            memset(&pi, 0, sizeof(pi));
+            memset(&mPi, 0, sizeof(mPi));
             si.cb = sizeof(si);
             si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
             si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
             si.dwFlags |= STARTF_USESTDHANDLES;
             ASSERT_TRUE(CreateProcess(nullptr, cmdBuffer, nullptr, nullptr,
-                                      true, 0, nullptr, nullptr, &si, &pi));
+                                      true, 0, nullptr, nullptr, &si, &mPi));
         } else {
             mFileLockPath = sFileLockPath;
             mChildRead = sChildRead;
@@ -124,6 +157,12 @@ public:
         if (isParentProcess()) {
             CloseHandle(mParentRead);
             CloseHandle(mParentWrite);
+            if (mPi.hProcess) {
+                CloseHandle(mPi.hProcess);
+            }
+            if (mPi.hThread) {
+                CloseHandle(mPi.hThread);
+            }
         }
         if (!isParentProcess()) {
             exit(0);
@@ -144,10 +183,21 @@ protected:
         ReadFile(pipe, buffer, size, &ret, nullptr);
         return ret;
     }
+    void killChild() override {
+        ASSERT_TRUE(TerminateProcess(mPi.hProcess, 0));
+        if (mPi.hProcess) {
+            CloseHandle(mPi.hProcess);
+        }
+        if (mPi.hThread) {
+            CloseHandle(mPi.hThread);
+        }
+        memset(&mPi, 0, sizeof(mPi));
+    }
     HANDLE mChildRead;
     HANDLE mChildWrite;
     HANDLE mParentRead;
     HANDLE mParentWrite;
+    PROCESS_INFORMATION mPi;
 };
 
 #else
@@ -162,8 +212,8 @@ public:
         ASSERT_TRUE(mTempDir->makeSubFile(kFileLockName));
         ASSERT_EQ(pipe(mPipe0), 0);
         ASSERT_EQ(pipe(mPipe1), 0);
-        mPid = fork();
-        ASSERT_GE(mPid, 0);
+        mChildPid = fork();
+        ASSERT_GE(mChildPid, 0);
 
         filelock_init();
     }
@@ -178,7 +228,7 @@ public:
     }
 
 protected:
-    bool isParentProcess() const override { return mPid == 0; }
+    bool isParentProcess() const override { return mChildPid != 0; }
     size_t writeToOther(void* buffer, size_t size) override {
         int pipe = isParentProcess() ? mPipe0[1] : mPipe1[1];
         return write(pipe, buffer, size);
@@ -187,7 +237,12 @@ protected:
         int pipe = isParentProcess() ? mPipe1[0] : mPipe0[0];
         return read(pipe, buffer, size);
     }
-    int mPid = 0;
+    void killChild() override {
+        ASSERT_TRUE(isParentProcess());
+        ASSERT_EQ(0, HANDLE_EINTR(kill(mChildPid, SIGKILL)));
+        waitpid(mChildPid, nullptr, 0);
+    }
+    int mChildPid = 0;
     int mPipe0[2] = {};
     int mPipe1[2] = {};
 };
@@ -201,23 +256,33 @@ TEST_F_WITH_NAME(FileLockTest, createConflict) {
         ASSERT_NE(lock, nullptr);
         uint8_t ready = 1;
         writeToOther(&ready, sizeof(uint8_t));
-        uint8_t succeed = 0;
-        readFromOther(&succeed, sizeof(uint8_t));
-        ASSERT_EQ(succeed, 1);
+        assertChildSuccess();
         filelock_release(lock);
     } else {
         // Child process
-        uint8_t ready;
         uint8_t succeed = 1;
-        readFromOther(&ready, sizeof(uint8_t));
-        EXPECT_EQ(ready, 1);
-        succeed &= ready == 1;
+        succeed &= expectReady();
+        succeed &= expectLockFail();
+        // We must report the succeed bit back to parent process.
+        // Or the test scheduler cannot catch it.
+        writeToOther(&succeed, sizeof(uint8_t));
+    }
+}
+
+TEST_F_WITH_NAME(FileLockTest, createTimeout) {
+    if (isParentProcess()) {
+        // Parent process
         FileLock* lock = filelock_create(mFileLockPath.c_str());
-        EXPECT_EQ(lock, nullptr);
-        succeed &= lock == nullptr;
-        if (lock) {
-            filelock_release(lock);
-        }
+        ASSERT_NE(lock, nullptr);
+        uint8_t ready = 1;
+        writeToOther(&ready, sizeof(uint8_t));
+        assertChildSuccess();
+        filelock_release(lock);
+    } else {
+        // Child process
+        uint8_t succeed = 1;
+        succeed &= expectReady();
+        succeed &= expectLockFail(500);
         // We must report the succeed bit back to parent process.
         // Or the test scheduler cannot catch it.
         writeToOther(&succeed, sizeof(uint8_t));
@@ -232,56 +297,85 @@ TEST_F_WITH_NAME(FileLockTest, createAndRelease) {
         filelock_release(lock);
         uint8_t ready = 1;
         writeToOther(&ready, sizeof(uint8_t));
-        uint8_t succeed = 0;
-        readFromOther(&succeed, sizeof(uint8_t));
-        ASSERT_EQ(succeed, 1);
+        assertChildSuccess();
     } else {
         // Child process
-        uint8_t ready;
         uint8_t succeed = 1;
-        readFromOther(&ready, sizeof(uint8_t));
-        EXPECT_EQ(ready, 1);
-        succeed &= ready == 1;
-        FileLock* lock = filelock_create(mFileLockPath.c_str());
-        EXPECT_NE(lock, nullptr);
-        succeed &= lock != nullptr;
-        if (lock) {
-            filelock_release(lock);
-        }
+        succeed &= expectReady();
+        succeed &= expectLockSuccessAndRelease();
         // We must report the succeed bit back to parent process.
         // Or the test scheduler cannot catch it.
         writeToOther(&succeed, sizeof(uint8_t));
     }
 }
 
-TEST_F_WITH_NAME(FileLockTest, waitForStale) {
+TEST_F_WITH_NAME(FileLockTest, waitForRelease) {
     if (isParentProcess()) {
         // Parent process
         FileLock* lock = filelock_create(mFileLockPath.c_str());
         ASSERT_NE(lock, nullptr);
         uint8_t ready = 1;
         writeToOther(&ready, sizeof(uint8_t));
+        assertChildSuccess();
+
+        writeToOther(&ready, sizeof(uint8_t));
         android::base::System::get()->sleepMs(500);
         filelock_release(lock);
-        uint8_t succeed = 0;
-        readFromOther(&succeed, sizeof(uint8_t));
-        ASSERT_EQ(succeed, 1);
+        assertChildSuccess();
     } else {
         // Child process
-        uint8_t ready;
         uint8_t succeed = 1;
-        readFromOther(&ready, sizeof(uint8_t));
-        EXPECT_EQ(ready, 1);
-        succeed &= ready == 1;
-        FileLock* lock = filelock_create_timeout(mFileLockPath.c_str(), 1000);
+        succeed &= expectReady();
+        succeed &= expectLockFail();
+        writeToOther(&succeed, sizeof(uint8_t));
+
+        succeed &= expectReady();
+        succeed &= expectLockSuccessAndRelease(1000);
+        writeToOther(&succeed, sizeof(uint8_t));
+    }
+}
+
+TEST_F_WITH_NAME(FileLockTest, childSuicideStaleLock) {
+    if (isParentProcess()) {
+        // Parent process
+        uint8_t ready = 1;
+        assertChildSuccess();
+        expectLockFail(500);
+        writeToOther(&ready, sizeof(uint8_t));
+        expectLockSuccessAndRelease(1000);
+    } else {
+        // Child process
+        uint8_t succeed = 1;
+        FileLock* lock = filelock_create(mFileLockPath.c_str());
         EXPECT_NE(lock, nullptr);
         succeed &= lock != nullptr;
-        if (lock) {
-            filelock_release(lock);
-        }
-        // We must report the succeed bit back to parent process.
-        // Or the test scheduler cannot catch it.
         writeToOther(&succeed, sizeof(uint8_t));
+        expectReady();
+        android::base::System::get()->sleepMs(500);
+        exit(0);
+    }
+}
+
+TEST_F_WITH_NAME(FileLockTest, killChildStaleLock) {
+    if (isParentProcess()) {
+        // Parent process
+        uint8_t ready = 1;
+        assertChildSuccess();
+        expectLockFail(500);
+        writeToOther(&ready, sizeof(uint8_t));
+        killChild();
+        expectLockSuccessAndRelease(2000);
+    } else {
+        // Child process
+        uint8_t succeed = 1;
+        FileLock* lock = filelock_create(mFileLockPath.c_str());
+        EXPECT_NE(lock, nullptr);
+        succeed &= lock != nullptr;
+        writeToOther(&succeed, sizeof(uint8_t));
+        expectReady();
+        android::base::System::get()->sleepMs(5000);
+        // should not hit here
+        ADD_FAILURE();
     }
 }
 
