@@ -40,17 +40,32 @@
 // Define function typedefs.
 LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DEFINE_TYPE)
 LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DEFINE_TYPE)
+
+#ifndef __ANDROID__
 LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DEFINE_TYPE)
+#endif
 
 // Define EGLDispatch structure.
 struct EGLDispatch {
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
     LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
+#ifndef __ANDROID__
     LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
+#endif
 };
-
-// Initialize EGLDispatch function. Return true on success, false on failure.
-bool init_egl_dispatch();
 
 // Global EGLDispatch instance. Call init_egl_dispatch() before using it.
 extern EGLDispatch s_egl;
+
+// Initialize EGLDispatch function. Return true on success, false on failure.
+// Uses environment variable ANDROID_EGL_LIB or the constant DEFAULT_EGL_LIB.
+// Returns true on success.
+bool init_egl_dispatch();
+
+// Initialize a particular EGL dispatch struct given a particular library path.
+// Returns true on success.
+bool init_egl_dispatch_from(const char* libPath, EGLDispatch* egl_dispatch, void* library_out);
+
+// Initialize a particular EGL dispatch struct given an existing library pointer.
+// Returns true on success.
+bool init_egl_dispatch_from_lib(void* library, EGLDispatch* egl_dispatch);
