@@ -309,6 +309,8 @@ typedef struct AModemRec_
     int                 oper_index;
     int                 oper_count;
     AOperatorRec        operators[ MAX_OPERATORS ];
+    bool                has_allowed_carriers;
+    bool                has_excluded_carriers;
 
     /* data connection contexts */
     ADataContextRec     data_contexts[ MAX_DATA_CONTEXTS ];
@@ -635,6 +637,9 @@ amodem_reset( AModem  modem )
     strcpy( modem->operators[1].name[2], OPERATOR_ROAMING_MCCMNC );
 
     modem->operators[1].status        = A_STATUS_AVAILABLE;
+
+    modem->has_allowed_carriers = false;
+    modem->has_excluded_carriers = false;
 
     modem->voice_mode   = A_REGISTRATION_UNSOL_ENABLED_FULL;
     modem->voice_state  = A_REGISTRATION_HOME;
@@ -1585,7 +1590,13 @@ handleSIMStatusReq( const char*  cmd, AModem  modem )
 
     switch (asimcard_get_status(modem->sim)) {
         case A_SIM_STATUS_ABSENT:    answer = "+CPIN: ABSENT"; break;
-        case A_SIM_STATUS_READY:     answer = "+CPIN: READY"; break;
+        case A_SIM_STATUS_READY:
+            if (modem->has_allowed_carriers || modem->has_excluded_carriers) {
+                answer = "+CPIN: RESTRICTED";
+            } else {
+                answer = "+CPIN: READY";
+            }
+            break;
         case A_SIM_STATUS_NOT_READY: answer = "+CMERROR: NOT READY"; break;
         case A_SIM_STATUS_PIN:       answer = "+CPIN: SIM PIN"; break;
         case A_SIM_STATUS_PUK:       answer = "+CPIN: SIM PUK"; break;
@@ -1594,6 +1605,24 @@ handleSIMStatusReq( const char*  cmd, AModem  modem )
             answer = "ERROR: internal error";
     }
     return answer;
+}
+
+static const char*
+handleSetCarrierRestrictionsReq( const char*  cmd, AModem  modem )
+{
+    int len_allowed_carriers;
+    int len_excluded_carriers;
+
+    if (sscanf(cmd, "+CRRSTR=%d,%d",
+               &len_allowed_carriers,
+               &len_excluded_carriers) == 2) {
+        modem->has_allowed_carriers = len_allowed_carriers > 0;
+        modem->has_excluded_carriers = len_excluded_carriers > 0;
+        return NULL;
+    } else {
+        return amodem_printf( modem, "+CME ERROR: %d",
+                              kCmeErrorInvalidCharactersInTextString);
+    }
 }
 
 /* TODO: Will we need this?
@@ -2744,6 +2773,9 @@ static const struct {
     /* see getSIMStatus() */
     { "+CPIN?", NULL, handleSIMStatusReq },
     { "+CNMI?", "+CNMI: 1,2,2,1,1", NULL },
+
+    /* set carrier restrictions */
+    { "!+CRRSTR=", NULL, handleSetCarrierRestrictionsReq },
 
     /* see isRadioOn() */
     { "+CFUN?", NULL, handleRadioPowerReq },
