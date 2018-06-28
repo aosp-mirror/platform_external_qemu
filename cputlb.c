@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 /*
  *  Common CPU TLB handling
  *
@@ -1043,3 +1044,5 @@ static void *atomic_mmu_lookup(CPUArchState *env, target_ulong addr,
 
 #define DATA_SIZE 8
 #include "softmmu_template.h"
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

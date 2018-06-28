@@ -78,6 +78,7 @@ void aio_set_fd_handler(AioContext *ctx,
         }
     } else {
         HANDLE event;
+        long bitmask = 0;
 
         if (node == NULL) {
             /* Alloc and insert if it's not already there */
@@ -102,10 +103,22 @@ void aio_set_fd_handler(AioContext *ctx,
         node->io_write = io_write;
         node->is_external = is_external;
 
+        if (io_read) {
+            bitmask |= FD_READ | FD_ACCEPT | FD_CLOSE;
+        }
+
+        if (io_write) {
+            bitmask |= FD_WRITE | FD_CONNECT;
+        }
+
         event = event_notifier_get_handle(&ctx->notifier);
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
         WSAEventSelect(node->pfd.fd, event,
                        (io_read ? FD_READ : 0) | FD_ACCEPT | FD_CLOSE |
                        FD_CONNECT | (io_write ? FD_WRITE : 0) | FD_OOB);
+=======
+        WSAEventSelect(node->pfd.fd, event, bitmask);
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
     }
 
     qemu_lockcnt_unlock(&ctx->list_lock);
@@ -439,5 +452,7 @@ void aio_context_setup(AioContext *ctx)
 void aio_context_set_poll_params(AioContext *ctx, int64_t max_ns,
                                  int64_t grow, int64_t shrink, Error **errp)
 {
-    error_setg(errp, "AioContext polling is not implemented on Windows");
+    if (max_ns) {
+        error_setg(errp, "AioContext polling is not implemented on Windows");
+    }
 }

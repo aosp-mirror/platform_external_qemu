@@ -24,12 +24,16 @@
 #include "hw/hw.h"
 #include "hw/pci/pci.h"
 #include "sysemu/dma.h"
-#include "sysemu/block-backend.h"
 #include "hw/pci/msi.h"
 #include "qemu/iov.h"
 #include "hw/scsi/scsi.h"
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 #include "block/scsi.h"
 #include "hw/scsi/trace.h"
+=======
+#include "scsi/constants.h"
+#include "trace.h"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
 #include "mptsas.h"
 #include "mpi.h"

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 /*
  *  Host code generation
  *
@@ -2218,3 +2219,5 @@ int page_unprotect(target_ulong address, uintptr_t pc)
     return 0;
 }
 #endif /* CONFIG_USER_ONLY */
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

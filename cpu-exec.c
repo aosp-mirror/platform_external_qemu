@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 /*
  *  emulator main execution loop
  *
@@ -727,3 +728,5 @@ int cpu_exec(CPUState *cpu)
 
     return ret;
 }
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

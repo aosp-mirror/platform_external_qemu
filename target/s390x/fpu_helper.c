@@ -20,9 +20,11 @@
 
 #include "qemu/osdep.h"
 #include "cpu.h"
+#include "internal.h"
 #include "exec/exec-all.h"
 #include "exec/cpu_ldst.h"
 #include "exec/helper-proto.h"
+#include "fpu/softfloat.h"
 
 /* #define DEBUG_HELPER */
 #ifdef DEBUG_HELPER
@@ -43,7 +45,7 @@ static void ieee_exception(CPUS390XState *env, uint32_t dxc, uintptr_t retaddr)
     /* Install the DXC code.  */
     env->fpc = (env->fpc & ~0xff00) | (dxc << 8);
     /* Trap.  */
-    runtime_exception(env, PGM_DATA, retaddr);
+    s390_program_interrupt(env, PGM_DATA, ILEN_AUTO, retaddr);
 }
 
 /* Should be called after any operation that may raise IEEE exceptions.  */
@@ -583,6 +585,33 @@ uint64_t HELPER(fixb)(CPUS390XState *env, uint64_t ah, uint64_t al, uint32_t m3)
     set_float_rounding_mode(hold, &env->fpu_status);
     handle_exceptions(env, GETPC());
     return RET128(ret);
+}
+
+/* 32-bit FP compare and signal */
+uint32_t HELPER(keb)(CPUS390XState *env, uint64_t f1, uint64_t f2)
+{
+    int cmp = float32_compare(f1, f2, &env->fpu_status);
+    handle_exceptions(env, GETPC());
+    return float_comp_to_cc(env, cmp);
+}
+
+/* 64-bit FP compare and signal */
+uint32_t HELPER(kdb)(CPUS390XState *env, uint64_t f1, uint64_t f2)
+{
+    int cmp = float64_compare(f1, f2, &env->fpu_status);
+    handle_exceptions(env, GETPC());
+    return float_comp_to_cc(env, cmp);
+}
+
+/* 128-bit FP compare and signal */
+uint32_t HELPER(kxb)(CPUS390XState *env, uint64_t ah, uint64_t al,
+                     uint64_t bh, uint64_t bl)
+{
+    int cmp = float128_compare(make_float128(ah, al),
+                               make_float128(bh, bl),
+                               &env->fpu_status);
+    handle_exceptions(env, GETPC());
+    return float_comp_to_cc(env, cmp);
 }
 
 /* 32-bit FP multiply and add */

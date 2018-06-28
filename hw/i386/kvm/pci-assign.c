@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 /*
  * Copyright (c) 2007, Neocleus Corporation.
  *
@@ -1896,3 +1897,5 @@ static void assigned_dev_load_option_rom(AssignedDevice *dev)
                                    dev->host.domain, dev->host.bus,
                                    dev->host.slot, dev->host.function);
 }
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

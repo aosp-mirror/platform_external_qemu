@@ -50,9 +50,12 @@ struct hax_state {
     struct hax_vm *vm;
     uint64_t mem_quota;
     bool supports_64bit_ramblock;
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
     bool supports_64bit_setram;
     bool supports_ram_protection;
     struct hax_slot memslots[HAX_MAX_SLOTS];
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 };
 
 #define HAX_MAX_VCPU 0x10

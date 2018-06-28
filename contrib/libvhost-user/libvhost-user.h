@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <sys/poll.h>
 #include <linux/vhost.h>
 #include "standard-headers/linux/virtio_ring.h"
 
@@ -29,10 +30,27 @@
 
 #define VHOST_MEMORY_MAX_NREGIONS 8
 
+typedef enum VhostSetConfigType {
+    VHOST_SET_CONFIG_TYPE_MASTER = 0,
+    VHOST_SET_CONFIG_TYPE_MIGRATION = 1,
+} VhostSetConfigType;
+
+/*
+ * Maximum size of virtio device config space
+ */
+#define VHOST_USER_MAX_CONFIG_SIZE 256
+
 enum VhostUserProtocolFeature {
     VHOST_USER_PROTOCOL_F_MQ = 0,
     VHOST_USER_PROTOCOL_F_LOG_SHMFD = 1,
     VHOST_USER_PROTOCOL_F_RARP = 2,
+    VHOST_USER_PROTOCOL_F_REPLY_ACK = 3,
+    VHOST_USER_PROTOCOL_F_NET_MTU = 4,
+    VHOST_USER_PROTOCOL_F_SLAVE_REQ = 5,
+    VHOST_USER_PROTOCOL_F_CROSS_ENDIAN = 6,
+    VHOST_USER_PROTOCOL_F_CRYPTO_SESSION = 7,
+    VHOST_USER_PROTOCOL_F_PAGEFAULT = 8,
+    VHOST_USER_PROTOCOL_F_CONFIG = 9,
 
     VHOST_USER_PROTOCOL_F_MAX
 };
@@ -60,7 +78,17 @@ typedef enum VhostUserRequest {
     VHOST_USER_GET_QUEUE_NUM = 17,
     VHOST_USER_SET_VRING_ENABLE = 18,
     VHOST_USER_SEND_RARP = 19,
-    VHOST_USER_INPUT_GET_CONFIG = 20,
+    VHOST_USER_NET_SET_MTU = 20,
+    VHOST_USER_SET_SLAVE_REQ_FD = 21,
+    VHOST_USER_IOTLB_MSG = 22,
+    VHOST_USER_SET_VRING_ENDIAN = 23,
+    VHOST_USER_GET_CONFIG = 24,
+    VHOST_USER_SET_CONFIG = 25,
+    VHOST_USER_CREATE_CRYPTO_SESSION = 26,
+    VHOST_USER_CLOSE_CRYPTO_SESSION = 27,
+    VHOST_USER_POSTCOPY_ADVISE  = 28,
+    VHOST_USER_POSTCOPY_LISTEN  = 29,
+    VHOST_USER_POSTCOPY_END     = 30,
     VHOST_USER_MAX
 } VhostUserRequest;
 
@@ -81,6 +109,18 @@ typedef struct VhostUserLog {
     uint64_t mmap_size;
     uint64_t mmap_offset;
 } VhostUserLog;
+
+typedef struct VhostUserConfig {
+    uint32_t offset;
+    uint32_t size;
+    uint32_t flags;
+    uint8_t region[VHOST_USER_MAX_CONFIG_SIZE];
+} VhostUserConfig;
+
+static VhostUserConfig c __attribute__ ((unused));
+#define VHOST_USER_CONFIG_HDR_SIZE (sizeof(c.offset) \
+                                   + sizeof(c.size) \
+                                   + sizeof(c.flags))
 
 #if defined(_WIN32)
 # define VU_PACKED __attribute__((gcc_struct, packed))
@@ -104,6 +144,7 @@ typedef struct VhostUserMsg {
         struct vhost_vring_addr addr;
         VhostUserMemory memory;
         VhostUserLog log;
+        VhostUserConfig config;
     } payload;
 
     int fds[VHOST_MEMORY_MAX_NREGIONS];
@@ -131,6 +172,11 @@ typedef void (*vu_set_features_cb) (VuDev *dev, uint64_t features);
 typedef int (*vu_process_msg_cb) (VuDev *dev, VhostUserMsg *vmsg,
                                   int *do_reply);
 typedef void (*vu_queue_set_started_cb) (VuDev *dev, int qidx, bool started);
+typedef bool (*vu_queue_is_processed_in_order_cb) (VuDev *dev, int qidx);
+typedef int (*vu_get_config_cb) (VuDev *dev, uint8_t *config, uint32_t len);
+typedef int (*vu_set_config_cb) (VuDev *dev, const uint8_t *data,
+                                 uint32_t offset, uint32_t size,
+                                 uint32_t flags);
 
 typedef struct VuDevIface {
     /* called by VHOST_USER_GET_FEATURES to get the features bitmask */
@@ -147,6 +193,16 @@ typedef struct VuDevIface {
     vu_process_msg_cb process_msg;
     /* tells when queues can be processed */
     vu_queue_set_started_cb queue_set_started;
+    /*
+     * If the queue is processed in order, in which case it will be
+     * resumed to vring.used->idx. This can help to support resuming
+     * on unmanaged exit/crash.
+     */
+    vu_queue_is_processed_in_order_cb queue_is_processed_in_order;
+    /* get the config space of the device */
+    vu_get_config_cb get_config;
+    /* set the config space of the device */
+    vu_set_config_cb set_config;
 } VuDevIface;
 
 typedef void (*vu_queue_handler_cb) (VuDev *dev, int qidx);
@@ -192,11 +248,11 @@ typedef struct VuVirtq {
 } VuVirtq;
 
 enum VuWatchCondtion {
-    VU_WATCH_IN = 1 << 0,
-    VU_WATCH_OUT = 1 << 1,
-    VU_WATCH_PRI = 1 << 2,
-    VU_WATCH_ERR = 1 << 3,
-    VU_WATCH_HUP = 1 << 4,
+    VU_WATCH_IN = POLLIN,
+    VU_WATCH_OUT = POLLOUT,
+    VU_WATCH_PRI = POLLPRI,
+    VU_WATCH_ERR = POLLERR,
+    VU_WATCH_HUP = POLLHUP,
 };
 
 typedef void (*vu_panic_cb) (VuDev *dev, const char *err);
@@ -211,6 +267,7 @@ struct VuDev {
     VuDevRegion regions[VHOST_MEMORY_MAX_NREGIONS];
     VuVirtq vq[VHOST_MAX_NR_VIRTQUEUE];
     int log_call_fd;
+    int slave_fd;
     uint64_t log_size;
     uint8_t *log_table;
     uint64_t features;
@@ -228,6 +285,10 @@ struct VuDev {
      * re-initialize */
     vu_panic_cb panic;
     const VuDevIface *iface;
+
+    /* Postcopy data */
+    int postcopy_ufd;
+    bool postcopy_listening;
 };
 
 typedef struct VuVirtqElement {
@@ -278,11 +339,12 @@ bool vu_dispatch(VuDev *dev);
 /**
  * vu_gpa_to_va:
  * @dev: a VuDev context
+ * @plen: guest memory size
  * @guest_addr: guest address
  *
  * Translate a guest address to a pointer. Returns NULL on failure.
  */
-void *vu_gpa_to_va(VuDev *dev, uint64_t guest_addr);
+void *vu_gpa_to_va(VuDev *dev, uint64_t *plen, uint64_t guest_addr);
 
 /**
  * vu_get_queue:
@@ -327,13 +389,22 @@ void vu_queue_set_notification(VuDev *dev, VuVirtq *vq, int enable);
 bool vu_queue_enabled(VuDev *dev, VuVirtq *vq);
 
 /**
- * vu_queue_enabled:
+ * vu_queue_started:
  * @dev: a VuDev context
  * @vq: a VuVirtq queue
  *
- * Returns: whether the queue is empty.
+ * Returns: whether the queue is started.
  */
-int vu_queue_empty(VuDev *dev, VuVirtq *vq);
+bool vu_queue_started(const VuDev *dev, const VuVirtq *vq);
+
+/**
+ * vu_queue_empty:
+ * @dev: a VuDev context
+ * @vq: a VuVirtq queue
+ *
+ * Returns: true if the queue is empty or not ready.
+ */
+bool vu_queue_empty(VuDev *dev, VuVirtq *vq);
 
 /**
  * vu_queue_notify:
@@ -350,7 +421,8 @@ void vu_queue_notify(VuDev *dev, VuVirtq *vq);
  * @vq: a VuVirtq queue
  * @sz: the size of struct to return (must be >= VuVirtqElement)
  *
- * Returns: a VuVirtqElement filled from the queue or NULL.
+ * Returns: a VuVirtqElement filled from the queue or NULL. The
+ * returned element must be free()-d by the caller.
  */
 void *vu_queue_pop(VuDev *dev, VuVirtq *vq, size_t sz);
 

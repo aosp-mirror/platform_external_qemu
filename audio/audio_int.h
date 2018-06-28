@@ -25,7 +25,7 @@
 #ifndef QEMU_AUDIO_INT_H
 #define QEMU_AUDIO_INT_H
 
-#ifdef CONFIG_COREAUDIO
+#ifdef CONFIG_AUDIO_COREAUDIO
 #define FLOAT_MIXENG
 /* #define RECIPROCAL */
 #endif
@@ -141,6 +141,7 @@ struct SWVoiceIn {
     QLIST_ENTRY (SWVoiceIn) entries;
 };
 
+typedef struct audio_driver audio_driver;
 struct audio_driver {
     const char *name;
     const char *descr;
@@ -154,6 +155,7 @@ struct audio_driver {
     int voice_size_out;
     int voice_size_in;
     int ctl_caps;
+    QLIST_ENTRY(audio_driver) next;
 };
 
 struct audio_pcm_ops {
@@ -203,6 +205,7 @@ struct AudioState {
     int vm_running;
 };
 
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 extern struct audio_driver no_audio_driver;
 extern struct audio_driver oss_audio_driver;
 extern struct audio_driver sdl_audio_driver;
@@ -213,7 +216,12 @@ extern struct audio_driver dsound_audio_driver;
 extern struct audio_driver pa_audio_driver;
 extern struct audio_driver spice_audio_driver;
 extern struct audio_driver winaudio_audio_driver;
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 extern const struct mixeng_volume nominal_volume;
+
+void audio_driver_register(audio_driver *drv);
+audio_driver *audio_driver_lookup(const char *name);
 
 void audio_pcm_init_info (struct audio_pcm_info *info, struct audsettings *as);
 void audio_pcm_info_clear_buf (struct audio_pcm_info *info, void *buf, int len);
@@ -252,11 +260,5 @@ static inline int audio_ring_dist (int dst, int src, int len)
 
 #define AUDIO_STRINGIFY_(n) #n
 #define AUDIO_STRINGIFY(n) AUDIO_STRINGIFY_(n)
-
-#if defined _MSC_VER || defined __GNUC__
-#define AUDIO_FUNC __FUNCTION__
-#else
-#define AUDIO_FUNC __FILE__ ":" AUDIO_STRINGIFY (__LINE__)
-#endif
 
 #endif /* QEMU_AUDIO_INT_H */

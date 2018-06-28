@@ -415,7 +415,7 @@ static const VMStateDescription vmstate_uhci = {
     .post_load = uhci_post_load,
     .fields = (VMStateField[]) {
         VMSTATE_PCI_DEVICE(dev, UHCIState),
-        VMSTATE_UINT8_EQUAL(num_ports_vmstate, UHCIState),
+        VMSTATE_UINT8_EQUAL(num_ports_vmstate, UHCIState, NULL),
         VMSTATE_STRUCT_ARRAY(ports, UHCIState, NB_PORTS, 1,
                              vmstate_uhci_port, UHCIPort),
         VMSTATE_UINT16(cmd, UHCIState),
@@ -1323,6 +1323,10 @@ static const TypeInfo uhci_pci_type_info = {
     .class_size    = sizeof(UHCIPCIDeviceClass),
     .abstract = true,
     .class_init = uhci_class_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 static void uhci_data_class_init(ObjectClass *klass, void *data)

@@ -27,7 +27,12 @@
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 #include "hw/display/trace.h"
+=======
+#include "trace.h"
+#include "qapi/error.h"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 #include "qemu/error-report.h"
 #include "qapi/error.h"
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 #ifndef QEMU_CHAR_H
 #define QEMU_CHAR_H
 
@@ -499,3 +500,5 @@ extern int term_escape_char;
 void qemu_chr_parse_vc(QemuOpts *opts, ChardevBackend *backend, Error **errp);
 
 #endif
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

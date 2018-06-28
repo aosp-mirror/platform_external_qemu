@@ -12,8 +12,15 @@
  */
 
 #include "qemu/osdep.h"
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 #include <migration/colo.h>
 #include "migration/trace.h"
+=======
+#include "migration.h"
+#include "migration/colo.h"
+#include "migration/vmstate.h"
+#include "trace.h"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
 typedef struct {
      bool colo_requested;
@@ -32,11 +39,13 @@ COLOMode get_colo_mode(void)
     }
 }
 
-static void colo_info_pre_save(void *opaque)
+static int colo_info_pre_save(void *opaque)
 {
     COLOInfo *s = opaque;
 
     s->colo_requested = migrate_colo_enabled();
+
+    return 0;
 }
 
 static bool colo_info_need(void *opaque)

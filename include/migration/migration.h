@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (234aaa Merge "Fix mac package-release build" into emu-master-dev)
 /*
  * QEMU live migration
  *
@@ -405,3 +406,5 @@ PostcopyState postcopy_state_get(void);
 /* Set the state and return the old state */
 PostcopyState postcopy_state_set(PostcopyState new_state);
 #endif
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
