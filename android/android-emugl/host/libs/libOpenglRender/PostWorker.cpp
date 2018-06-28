@@ -40,6 +40,7 @@ void PostWorker::post(ColorBuffer* cb) {
     //
     // render the color buffer to the window and apply the overlay
     //
+    fprintf(stderr, "%s: post here================================================================================\n", __func__);
     cb->postWithOverlay(tex, zRot, dx, dy);
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
