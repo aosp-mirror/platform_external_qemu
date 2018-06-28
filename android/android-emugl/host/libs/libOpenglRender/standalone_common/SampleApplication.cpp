@@ -109,47 +109,47 @@ OSWindow* createOrGetTestWindow(int xoffset, int yoffset, int width, int height)
     return sTestWindow->window;
 }
 
-class Vsync {
-public:
-    Vsync(int refreshRate = 60) :
-        mRefreshRate(refreshRate),
-        mRefreshIntervalUs(1000000ULL / mRefreshRate),
-        mThread([this] {
-            while (true) {
-                if (mShouldStop) return 0;
-                System::get()->sleepUs(mRefreshIntervalUs);
-                AutoLock lock(mLock);
-                mSync = 1;
-                mCv.signal();
-            }
-            return 0;
-        }) {
-        mThread.start();
-    }
+// class Vsync {
+// public:
+//     Vsync(int refreshRate = 60) :
+//         mRefreshRate(refreshRate),
+//         mRefreshIntervalUs(1000000ULL / mRefreshRate),
+//         mThread([this] {
+//             while (true) {
+//                 if (mShouldStop) return 0;
+//                 System::get()->sleepUs(mRefreshIntervalUs);
+//                 AutoLock lock(mLock);
+//                 mSync = 1;
+//                 mCv.signal();
+//             }
+//             return 0;
+//         }) {
+//         mThread.start();
+//     }
 
-    ~Vsync() {
-        mShouldStop = true;
-    }
+//     ~Vsync() {
+//         mShouldStop = true;
+//     }
 
-    void waitUntilNextVsync() {
-        AutoLock lock(mLock);
-        mSync = 0;
-        while (!mSync) {
-            mCv.wait(&mLock);
-        }
-    }
+//     void waitUntilNextVsync() {
+//         AutoLock lock(mLock);
+//         mSync = 0;
+//         while (!mSync) {
+//             mCv.wait(&mLock);
+//         }
+//     }
 
-private:
-    int mShouldStop = false;
-    int mRefreshRate = 60;
-    uint64_t mRefreshIntervalUs;
-    volatile int mSync = 0;
+// private:
+//     int mShouldStop = false;
+//     int mRefreshRate = 60;
+//     uint64_t mRefreshIntervalUs;
+//     volatile int mSync = 0;
 
-    Lock mLock;
-    ConditionVariable mCv;
+//     Lock mLock;
+//     ConditionVariable mCv;
 
-    FunctorThread mThread;
-};
+//     FunctorThread mThread;
+// };
 
 // app -> SF queue: separate storage, bindTexture blits
 // SF queue -> HWC: shared storage
@@ -182,6 +182,8 @@ private:
 // SampleApplication implementation/////////////////////////////////////////////
 SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate) :
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate) {
+
+    fprintf(stderr, "SAMPLE APPLICATION CONSTRUCTOR %s\n", __func__);
 
     setupStandaloneLibrarySearchPaths();
 
