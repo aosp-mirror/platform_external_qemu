@@ -46,23 +46,33 @@ bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table)
         libName = DEFAULT_GLES_V2_LIB;
     }
 
+    return gles2_dispatch_init_from(libName, &s_egl, dispatch_table, &s_gles2_lib);
+}
+
+bool gles2_dispatch_init_from(const char* libPath,
+                              EGLDispatch* egl_dispatch,
+                              GLESv2Dispatch* dispatch_table,
+                              void* library_out)
+{
     char error[256];
-    s_gles2_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
-    if (!s_gles2_lib) {
+    auto lib = emugl::SharedLibrary::open(libPath, error, sizeof(error));
+    if (!lib) {
         fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
-                libName, error);
+                libPath, error);
         return false;
     }
+
+    *(emugl::SharedLibrary**)library_out = lib;
 
     //
     // init the GLES dispatch table
     //
 #define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) \
     dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-            s_gles2_lib->findSymbol(#function_name)); \
-    if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+            lib->findSymbol(#function_name)); \
+    if ((!dispatch_table-> function_name) && egl_dispatch->eglGetProcAddress) \
         dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-            s_egl.eglGetProcAddress(#function_name)); \
+            egl_dispatch->eglGetProcAddress(#function_name)); \
 
     LIST_GLES2_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
 

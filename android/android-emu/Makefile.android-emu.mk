@@ -347,6 +347,7 @@ LOCAL_SRC_FILES := \
     android/emulation/GoldfishDma.cpp \
     android/emulation/GoldfishSyncCommandQueue.cpp \
     android/emulation/goldfish_sync.cpp \
+    android/emulation/hostpipe/HostGoldfishPipe.cpp \
     android/emulation/LogcatPipe.cpp \
     android/emulation/Keymaster3.cpp \
     android/emulation/FakeRotatingCameraSensor.cpp \
@@ -361,6 +362,7 @@ LOCAL_SRC_FILES := \
     android/emulation/serial_line.cpp \
     android/emulation/SerialLine.cpp \
     android/emulation/SetupParameters.cpp \
+    android/emulation/testing/TestAndroidPipeDevice.cpp \
     android/emulation/VmLock.cpp \
     android/error-messages.cpp \
     android/featurecontrol/FeatureControl.cpp \
@@ -750,7 +752,6 @@ LOCAL_SRC_FILES := \
   android/emulation/ParameterList_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
   android/emulation/SetupParameters_unittest.cpp \
-  android/emulation/testing/TestAndroidPipeDevice.cpp \
   android/emulation/VmLock_unittest.cpp \
   android/error-messages_unittest.cpp \
   android/featurecontrol/FeatureControl_unittest.cpp \
