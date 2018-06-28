@@ -49,8 +49,14 @@ struct EGLDispatch {
     LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
 };
 
-// Initialize EGLDispatch function. Return true on success, false on failure.
-bool init_egl_dispatch();
-
 // Global EGLDispatch instance. Call init_egl_dispatch() before using it.
 extern EGLDispatch s_egl;
+
+// Initialize EGLDispatch function. Return true on success, false on failure.
+// Uses environment variable ANDROID_EGL_LIB or the constant DEFAULT_EGL_LIB.
+// Returns true on success.
+bool init_egl_dispatch();
+
+// Initialize a particular EGL dispatch struct given a particular library path.
+// Returns true on success.
+bool init_egl_dispatch_from(const char* libPath, EGLDispatch* egl_dispatch);

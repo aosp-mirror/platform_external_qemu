@@ -54,15 +54,30 @@ bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table)
         return false;
     }
 
+    return gles2_dispatch_init_from(libName, &s_egl, dispatch_table);
+}
+
+bool gles2_dispatch_init_from(const char* libPath,
+                              EGLDispatch* egl_dispatch,
+                              GLESv2Dispatch* dispatch_table)
+{
+    char error[256];
+    auto lib = emugl::SharedLibrary::open(libPath, error, sizeof(error));
+    if (!lib) {
+        fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
+                libPath, error);
+        return false;
+    }
+
     //
     // init the GLES dispatch table
     //
 #define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) \
     dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-            s_gles2_lib->findSymbol(#function_name)); \
-    if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+            lib->findSymbol(#function_name)); \
+    if ((!dispatch_table-> function_name) && egl_dispatch->eglGetProcAddress) \
         dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-            s_egl.eglGetProcAddress(#function_name)); \
+            egl_dispatch->eglGetProcAddress(#function_name)); \
 
     LIST_GLES2_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
 

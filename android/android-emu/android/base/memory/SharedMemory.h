@@ -138,6 +138,8 @@ public:
     memory_type get() const { return mAddr; }
     memory_type operator*() const { return get(); }
 
+    handle_type getFd() { return mFd; }
+
 private:
     int openInternal(int oflag, int mode);
     void clear() {

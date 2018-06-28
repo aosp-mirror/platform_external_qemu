@@ -52,6 +52,7 @@ standalone_common_SRC_FILES := \
     standalone_common/SampleApplication.cpp \
     standalone_common/SearchPathsSetup.cpp \
     standalone_common/ShaderUtils.cpp \
+    standalone_common/GoldfishOpenGLDispatch.cpp \
 
 ifeq ($(BUILD_TARGET_OS),linux)
     standalone_common_SRC_FILES += standalone_common/angle-util/x11/X11Window.cpp
@@ -168,6 +169,7 @@ LOCAL_SRC_FILES := \
     tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotVertexAttributes_unittest.cpp \
     tests/GLTestUtils.cpp \
+    tests/GoldfishOpenGLDispatch_unittest.cpp \
     tests/OpenGL_unittest.cpp \
     tests/OpenGLTestContext.cpp \
     tests/StalePtrRegistry_unittest.cpp \
