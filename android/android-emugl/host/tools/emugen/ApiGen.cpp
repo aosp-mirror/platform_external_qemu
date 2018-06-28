@@ -967,8 +967,9 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     // helper macros
     fprintf(fp,
+            "#define OPENGL_DEBUG_PRINTOUT\n"
             "#ifdef OPENGL_DEBUG_PRINTOUT\n"
-            "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n"
+            "#  define DEBUG(...) do { fprintf(stderr, __VA_ARGS__); } while(0)\n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
             "#endif\n\n");

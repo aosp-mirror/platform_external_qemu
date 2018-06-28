@@ -8,6 +8,7 @@
 #define LIST_RENDER_EGL_FUNCTIONS(X) \
   X(EGLint, eglGetError, ()) \
   X(EGLDisplay, eglGetDisplay, (EGLNativeDisplayType dpy)) \
+  X(EGLDisplay, eglGetCurrentDisplay, ()) \
   X(EGLBoolean, eglTerminate, (EGLDisplay dpy)) \
   X(EGLBoolean, eglInitialize, (EGLDisplay dpy, EGLint* major, EGLint* minor)) \
   X(char*, eglQueryString, (EGLDisplay dpy, EGLint id)) \
@@ -28,6 +29,7 @@
   X(EGLBoolean, eglQuerySurface, (EGLDisplay display, EGLSurface surface, EGLint attribute, EGLint * value)) \
   X(EGLBoolean, eglSwapBuffers, (EGLDisplay display, EGLSurface surface)) \
   X(void*, eglGetProcAddress, (const char* function_name)) \
+  X(EGLBoolean, eglQueryContext, (EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint * value)) \
 
 
 #endif  // RENDER_EGL_FUNCTIONS_H
