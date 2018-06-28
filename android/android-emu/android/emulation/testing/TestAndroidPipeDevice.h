@@ -43,7 +43,7 @@ public:
         // Create new Guest instance.
         static Guest* create();
 
-        // Destructor, closes the connection, if any.
+        // Destructor, closes connections, if any.
         virtual ~Guest() {}
 
         // Try to connect to a named service. |name| can be
@@ -71,6 +71,16 @@ public:
 
         // Return the AndroidPipe associated with this guest.
         virtual void* getPipe() const = 0;
+
+        // Opens/closes additional pipe instances.
+        virtual void* open() = 0;
+        virtual void close(void* pipe) = 0;
+
+        // Read/write/poll but for a particular pipe.
+        virtual ssize_t read(void* pipe, void* buffer, size_t len) = 0;
+        virtual ssize_t write(void* pipe, const void* buffer, size_t len) = 0;
+        virtual unsigned poll(void* pipe) const = 0;
+
 
     protected:
         // Private constructor.
