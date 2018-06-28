@@ -259,6 +259,7 @@ OPTION_SNAPSHOT_PROFILE=no
 OPTION_MIN_BUILD=no
 OPTION_AEMU64_ONLY=no
 OPTION_TRACE=no
+OPTION_GOLDFISH_OPENGL_DIR=no
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
 
@@ -362,6 +363,8 @@ for opt do
   -min|--min-build) OPTION_MIN_BUILD=yes
   ;;
   -aemu64only|--aemu64-only) OPTION_AEMU64_ONLY=yes
+  ;;
+  -goldfish-opengl|--goldfish-opengl=*) OPTION_GOLDFISH_OPENGL_DIR=yes
   ;;
   *)
     echo "unknown option '$opt', use --help"
@@ -1146,6 +1149,9 @@ if [ "$OPTION_MIN_BUILD" = "yes" ]; then
 fi
 if [ "$OPTION_AEMU64_ONLY" = "yes" ]; then
     echo "CONFIG_AEMU64_ONLY  := true" >> $config_mk
+fi
+if [ "$OPTION_GOLDFISH_OPENGL_DIR" = "yes" ]; then
+    echo "CONFIG_GOLDFISH_OPENGL_DIR  := $OPTION_GOLDFISH_OPENGL_DIR" >> $config_mk
 fi
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk

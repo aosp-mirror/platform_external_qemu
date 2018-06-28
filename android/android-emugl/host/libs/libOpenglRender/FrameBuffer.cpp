@@ -248,8 +248,17 @@ void FrameBuffer::finalize() {
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         bool egl2egl) {
+
+    if (egl2egl) {
+        emugl::setRenderer(SELECTED_RENDERER_SWIFTSHADER_INDIRECT);
+    } else {
+        emugl::setRenderer(SELECTED_RENDERER_HOST);
+    }
+    
+        fprintf(stderr, "%s: init subwindow %d\n", __func__, useSubWindow);
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
+        fprintf(stderr, "%s: already init\n", __func__);
         return true;
     }
 
@@ -522,6 +531,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // Keep the singleton framebuffer pointer
     //
     s_theFrameBuffer = fb.release();
+    fprintf(stderr, "%s: fb %p\n", __func__, s_theFrameBuffer);
+
     {
         // Nothing else to do - we're ready to rock!
         AutoLock lock(sGlobals->lock);
@@ -1684,6 +1695,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
     ret = true;
 
     if (m_subWin) {
+        fprintf(stderr, "%s: use sub window\n", __func__);
         markOpened(&c->second);
         c->second.cb->touch();
 
@@ -1692,6 +1704,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
         postCmd.cb = c->second.cb.get();
         sendPostWorkerCmd(postCmd);
     } else {
+        fprintf(stderr, "%s: no sub window\n", __func__);
         // If there is no sub-window, don't display anything, the client will
         // rely on m_onPost to get the pixels instead.
         ret = true;

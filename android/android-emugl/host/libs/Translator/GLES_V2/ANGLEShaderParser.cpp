@@ -249,6 +249,8 @@ bool translate(bool hostUsesCoreProfile,
     key.shaderType = shaderType;
     key.esslVersion = esslVersion;
 
+    fprintf(stderr, "%s: host core? %d\n", __func__, hostUsesCoreProfile);
+
     ShHandle compilerHandle = getShaderCompiler(hostUsesCoreProfile, key);
 
     if (!compilerHandle) {
