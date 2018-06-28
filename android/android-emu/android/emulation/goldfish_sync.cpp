@@ -189,6 +189,7 @@ bool goldfish_sync_device_exists() {
 }
 
 void goldfish_sync_set_hw_funcs(GoldfishSyncDeviceInterface* hw_funcs) {
+    fprintf(stderr, "%s: call\n", __func__);
     sGoldfishSyncHwFuncs = hw_funcs;
     GoldfishSyncCommandQueue::setQueueCommand
         (sGoldfishSyncHwFuncs->doHostCommand);
