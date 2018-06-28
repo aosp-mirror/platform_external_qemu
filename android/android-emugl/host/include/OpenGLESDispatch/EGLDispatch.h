@@ -19,6 +19,12 @@
 #include "OpenGLESDispatch/RenderEGL_extensions_functions.h"
 #include "OpenGLESDispatch/RenderEGL_snapshot_functions.h"
 
+#ifdef __ANDROID__
+
+#define EGLStream EGLStreamKHR
+
+#endif
+
 // This header is used to define the EGLDispatch structure that contains
 // pointers to the EGL shared library used by libOpenglRender. Normally,
 // this will be our own libEGL_translator, but one could imagine a
@@ -49,8 +55,18 @@ struct EGLDispatch {
     LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
 };
 
-// Initialize EGLDispatch function. Return true on success, false on failure.
-bool init_egl_dispatch();
-
 // Global EGLDispatch instance. Call init_egl_dispatch() before using it.
 extern EGLDispatch s_egl;
+
+// Initialize EGLDispatch function. Return true on success, false on failure.
+// Uses environment variable ANDROID_EGL_LIB or the constant DEFAULT_EGL_LIB.
+// Returns true on success.
+bool init_egl_dispatch();
+
+// Initialize a particular EGL dispatch struct given a particular library path.
+// Returns true on success.
+bool init_egl_dispatch_from(const char* libPath, EGLDispatch* egl_dispatch, void* library_out);
+
+// Initialize a particular EGL dispatch struct given an existing library pointer.
+// Returns true on success.
+bool init_egl_dispatch_from_lib(void* library, EGLDispatch* egl_dispatch);
