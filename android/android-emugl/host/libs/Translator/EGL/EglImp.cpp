@@ -1649,13 +1649,16 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
     GLESVersion glesVersion = GLES_2_0;
     switch (version) {
     case 0:
+        fprintf(stderr, "%s: GLES 2 MAX\n", __func__);
         glesVersion = GLES_2_0;
         break;
     case 1:
+        fprintf(stderr, "%s: GLES 3 MAX\n", __func__);
         glesVersion = GLES_3_0;
         break;
     case 2:
     case 3: // TODO: GLES 3.2 support?
+        fprintf(stderr, "%s: GLES 3.1 MAX\n", __func__);
         glesVersion = GLES_3_1;
         break;
     }
@@ -1663,6 +1666,7 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
     // If egl2egl, set internal gles version to 3 as
     // that is what we use (EglOsApi_egl.cpp)
     if (EglGlobalInfo::isEgl2Egl()) {
+        fprintf(stderr, "%s: GLES 3.0 MAX (EGL2EGL)\n", __func__);
         glesVersion = GLES_3_0;
     }
 

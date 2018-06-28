@@ -6,6 +6,7 @@
 
 EGLint eglGetError(void);
 EGLDisplay eglGetDisplay(EGLNativeDisplayType dpy);
+EGLDisplay eglGetCurrentDisplay(void);
 EGLBoolean eglTerminate(EGLDisplay dpy);
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint* major, EGLint* minor);
 char* eglQueryString(EGLDisplay dpy, EGLint id);
@@ -26,3 +27,5 @@ EGLSurface eglGetCurrentSurface(EGLint readdraw);
 EGLBoolean eglQuerySurface(EGLDisplay display, EGLSurface surface, EGLint attribute, EGLint *value);
 EGLBoolean eglSwapBuffers(EGLDisplay display, EGLSurface surface);
 void* eglGetProcAddress(const char* function_name);
+EGLBoolean eglQueryContext(EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value);
+
