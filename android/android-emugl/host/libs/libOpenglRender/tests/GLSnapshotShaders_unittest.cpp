@@ -83,6 +83,7 @@ public:
     void loadSource(std::string sourceString) {
         GLboolean compiler;
         gl->glGetBooleanv(GL_SHADER_COMPILER, &compiler);
+        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
         if (compiler == GL_FALSE) {
             fprintf(stderr, "Shader compiler is not supported.\n");
             return;
@@ -99,7 +100,6 @@ public:
         }
         const char* source = sourceString.c_str();
         const char** sources = &source;
-        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
         gl->glShaderSource(m_shader_name, 1, sources, &len);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
     }
@@ -133,7 +133,8 @@ protected:
         GLint value;
         gl->glGetShaderiv(m_shader_name, paramName, &value);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        EXPECT_EQ(expected, value);
+        EXPECT_EQ(expected, value) << "mismatch on parameter " << paramName
+                                   << " for shader " << m_shader_name;
     }
 
     GlShaderState m_shader_state = {};
