@@ -37,6 +37,9 @@ struct GLESv2Dispatch {
 
 bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table);
 
+class EGLDispatch;
+bool gles2_dispatch_init_from(const char* libName, EGLDispatch* egl_dispatch, GLESv2Dispatch* dispatch_table, void* library_out);
+
 // Used to initialize the decoder.
 void* gles2_dispatch_get_proc_func(const char* name, void* userData);
 // Used to check for unimplemented.
