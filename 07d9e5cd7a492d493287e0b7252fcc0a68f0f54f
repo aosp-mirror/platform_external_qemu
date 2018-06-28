@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e4f1d50_cd21452b",
+        "filename": "hw/intc/arm_gicv2m.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-06-28T17:06:46Z",
+      "side": 1,
+      "message": "Delete",
+      "range": {
+        "startLine": 33,
+        "startChar": 64,
+        "endLine": 33,
+        "endChar": 77
+      },
+      "revId": "07d9e5cd7a492d493287e0b7252fcc0a68f0f54f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
