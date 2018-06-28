@@ -429,3 +429,60 @@ void SampleApplication::surfaceFlingerComposerLoop() {
 }
 
 } // namespace emugl
+
+static int hook_setSwapInterval(struct ANativeWindow* window, int interval) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+static int hook_dequeueBuffer_DEPRECATED(struct ANativeWindow* window, struct ANativeWindowBuffer** buffer) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static int hook_lockBuffer_DEPRECATED(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static int hook_queueBuffer_DEPRECATED(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static int hook_query(const struct ANativeWindow* window, int what, int* value) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static int hook_perform(struct ANativeWindow* window, int operation, ... ) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static int hook_cancelBuffer_DEPRECATED(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static int hook_dequeueBuffer(struct ANativeWindow* window, struct ANativeWindowBuffer** buffer, int* fenceFd) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static int hook_queueBuffer(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer, int fenceFd) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static int hook_cancelBuffer(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer, int fenceFd) {
+    fprintf(stderr, "%s:%p call\n", __func__, window);
+    return 0;
+}
+
+static void hook_incRef(struct android_native_base_t* common) {
+    fprintf(stderr, "%s:%p call\n", __func__, common);
+}
+
+static void hook_decRef(struct android_native_base_t* common) {
+    fprintf(stderr, "%s:%p call\n", __func__, common);
+}
