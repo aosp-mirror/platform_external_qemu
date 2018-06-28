@@ -392,7 +392,7 @@ Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
         D("create pbuffer surface failed\n");
         return nullptr;
     }
-    return new EglOsEglSurface(EglOS::Surface::PBUFFER, surface);
+    return new EglOsEglSurface(EglOS::Surface::PBUFFER, EGL_NO_SURFACE);
 }
 
 Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,

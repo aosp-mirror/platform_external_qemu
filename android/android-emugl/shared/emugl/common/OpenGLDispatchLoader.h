@@ -44,12 +44,29 @@ private:
     bool mValid;
 };
 
+struct DispatchTables {
+    EGLDispatch egl;
+    GLESv1Dispatch gles1;
+    GLESv2Dispatch gles2;
+    void* eglLib;
+    void* gles1Lib;
+    void* gles2Lib;
+};
+
 // Note that the dispatch table is provided by libOpenGLESDispatch as the
 // 's_egl' global variable.
 struct LazyLoadedEGLDispatch {
     // Return pointer to EGLDispatch table, or nullptr if there was
     // an error when trying to initialize/load the library.
     static const EGLDispatch* get();
+
+    // Return pointer to a set of EGL/GLESv1/GLESv2 libraries
+    // from a custom library path.
+    // Pointer remains allocated until deleted by user.
+    static const DispatchTables* getLibrariesFrom(
+        const char* eglPath,
+        const char* glesv1Path,
+        const char* glesv2Path);
 
     LazyLoadedEGLDispatch();
 

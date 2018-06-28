@@ -482,6 +482,7 @@ private:
 }  // namespace
 
 void registerPipeService() {
+    fprintf(stderr, "%s: call\n", __func__);
     android::AndroidPipe::Service::add(new EmuglPipe::Service());
     registerGLProcessPipeService();
 }

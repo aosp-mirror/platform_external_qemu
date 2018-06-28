@@ -894,8 +894,8 @@ typedef void (GL_APIENTRYP PFNGLDISCARDFRAMEBUFFEREXTPROC) (GLenum target, GLsiz
 #ifndef GL_EXT_multi_draw_arrays
 #define GL_EXT_multi_draw_arrays 1
 #ifdef GL_GLEXT_PROTOTYPES
-GL_API void GL_APIENTRY glMultiDrawArraysEXT (GLenum, GLint *, GLsizei *, GLsizei);
-GL_API void GL_APIENTRY glMultiDrawElementsEXT (GLenum, const GLsizei *, GLenum, const GLvoid* *, GLsizei);
+GL_API void GL_APIENTRY glMultiDrawArraysEXT (GLenum, const GLint *, const GLsizei *, GLsizei);
+GL_API void GL_APIENTRY glMultiDrawElementsEXT (GLenum, const GLsizei *, GLenum, const GLvoid* const*, GLsizei);
 #endif /* GL_GLEXT_PROTOTYPES */
 typedef void (GL_APIENTRYP PFNGLMULTIDRAWARRAYSEXTPROC) (GLenum mode, GLint *first, GLsizei *count, GLsizei primcount);
 typedef void (GL_APIENTRYP PFNGLMULTIDRAWELEMENTSEXTPROC) (GLenum mode, const GLsizei *count, GLenum type, const GLvoid* *indices, GLsizei primcount);
