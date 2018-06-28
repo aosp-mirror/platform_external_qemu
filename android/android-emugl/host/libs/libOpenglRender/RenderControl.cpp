@@ -214,6 +214,7 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
         emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion) &&
         eglStr.find("EGL_KHR_create_context") == std::string::npos) {
         eglStr += "EGL_KHR_create_context ";
+        eglStr += "EGL_KHR_get_all_proc_addresses ";
     }
 
     int len = eglStr.size() + 1;
