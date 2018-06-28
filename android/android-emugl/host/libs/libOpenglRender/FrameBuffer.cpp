@@ -257,6 +257,12 @@ void FrameBuffer::finalize() {
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         bool egl2egl) {
+
+    if (egl2egl) {
+        emugl::setRenderer(SELECTED_RENDERER_SWIFTSHADER_INDIRECT);
+    } else {
+        emugl::setRenderer(SELECTED_RENDERER_HOST);
+    }
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;

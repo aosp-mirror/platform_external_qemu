@@ -97,4 +97,14 @@ include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLES12Translator/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLSnapshot/Android.mk
 
+ifeq ($(BUILD_TARGET_SUFFIX),64)
+
+# Fake Android guest code
+include $(EMUGL_PATH)/guest/Android.mk
+# Host-side encoder+decoder combination library
+# Includes goldfish-opengl, libOpenglRender, and Translator
+include $(EMUGL_PATH)/combo/Android.mk
+
+endif
+
 LOCAL_PATH := $(EMUGL_OLD_LOCAL_PATH)
