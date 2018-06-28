@@ -93,8 +93,9 @@ protected:
         gl->glGetVertexAttribfv(m_index, paramName, &(values[0]));
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
         for (int i = 0; i < expected.size(); ++i) {
-            EXPECT_EQ(expected[i], values[i]) << "float value for " << paramName
-                                              << " at attribute index " << i;
+            EXPECT_EQ(expected[i], values[i])
+                    << "float value for " << paramName
+                    << " for vertex attribute " << m_index;
         }
     }
 
@@ -109,8 +110,9 @@ protected:
         gl->glGetVertexAttribiv(m_index, paramName, &(values[0]));
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
         for (int i = 0; i < expected.size(); ++i) {
-            EXPECT_EQ(expected[i], values[i]) << "int value for " << paramName
-                                              << " at attribute index " << i;
+            EXPECT_EQ(expected[i], values[i])
+                    << "int value for " << paramName << " for vertex attribute "
+                    << m_index;
         }
     }
 
