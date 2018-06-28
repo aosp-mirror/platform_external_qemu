@@ -29,9 +29,11 @@
 #include "qemu/sockets.h"	// struct in_addr needed for libslirp.h
 #include "sysemu/qtest.h"
 #include "sysemu/cpus.h"
+#include "sysemu/replay.h"
 #include "slirp/libslirp.h"
 #include "qemu/main-loop.h"
 #include "block/aio.h"
+#include "qemu/error-report.h"
 
 #define DEBUG_MAIN_LOOP_PERF 0
 
@@ -245,27 +247,27 @@ static int os_host_main_loop_wait(int64_t timeout)
         static bool notified;
 
         if (!notified && !qtest_enabled() && !qtest_driver()) {
-            fprintf(stderr,
-                    "main-loop: WARNING: I/O thread spun for %d iterations\n",
-                    MAX_MAIN_LOOP_SPIN);
+            warn_report("I/O thread spun for %d iterations",
+                        MAX_MAIN_LOOP_SPIN);
             notified = true;
         }
 
         timeout = SCALE_MS;
     }
 
+
     if (timeout) {
         spin_counter = 0;
-        qemu_mutex_unlock_iothread();
     } else {
         spin_counter++;
     }
+    qemu_mutex_unlock_iothread();
+    replay_mutex_unlock();
 
     ret = qemu_poll_ns((GPollFD *)gpollfds->data, gpollfds->len, timeout);
 
-    if (timeout) {
-        qemu_mutex_lock_iothread();
-    }
+    replay_mutex_lock();
+    qemu_mutex_lock_iothread();
 
     glib_pollfds_poll();
 
@@ -471,7 +473,12 @@ static int os_host_main_loop_wait(int64_t timeout)
     poll_timeout_ns = qemu_soonest_timeout(poll_timeout_ns, timeout);
 
     qemu_mutex_unlock_iothread();
+
+    replay_mutex_unlock();
+
     g_poll_ret = qemu_poll_ns(poll_fds, n_poll_fds + w->num, poll_timeout_ns);
+
+    replay_mutex_lock();
 
     qemu_mutex_lock_iothread();
     if (g_poll_ret > 0) {
@@ -495,7 +502,7 @@ static int os_host_main_loop_wait(int64_t timeout)
 }
 #endif
 
-int main_loop_wait(int nonblocking)
+void main_loop_wait(int nonblocking)
 {
     int ret;
     uint32_t timeout = UINT32_MAX;
@@ -508,9 +515,7 @@ int main_loop_wait(int nonblocking)
     /* poll any events */
     g_array_set_size(gpollfds, 0); /* reset for new iteration */
     /* XXX: separate device handlers from system ones */
-#ifdef CONFIG_SLIRP
     slirp_pollfds_fill(gpollfds, &timeout);
-#endif
 
     if (timeout == UINT32_MAX) {
         timeout_ns = -1;
@@ -551,8 +556,6 @@ int main_loop_wait(int nonblocking)
        missing the warp */
     qemu_start_warp_timer();
     qemu_clock_run_all_timers();
-
-    return ret;
 }
 
 /* Functions to operate on the main QEMU AioContext.  */

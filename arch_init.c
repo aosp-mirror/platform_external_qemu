@@ -27,10 +27,10 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/arch_init.h"
 #include "hw/pci/pci.h"
-#include "hw/audio/audio.h"
+#include "hw/audio/soundhw.h"
+#include "qapi/qapi-commands-misc.h"
 #include "qemu/config-file.h"
 #include "qemu/error-report.h"
-#include "qmp-commands.h"
 #include "hw/acpi/acpi.h"
 #include "qemu/help_option.h"
 
@@ -53,6 +53,8 @@ int graphic_depth = 32;
 #define QEMU_ARCH QEMU_ARCH_CRIS
 #elif defined(TARGET_I386)
 #define QEMU_ARCH QEMU_ARCH_I386
+#elif defined(TARGET_HPPA)
+#define QEMU_ARCH QEMU_ARCH_HPPA
 #elif defined(TARGET_M68K)
 #define QEMU_ARCH QEMU_ARCH_M68K
 #elif defined(TARGET_LM32)
@@ -69,6 +71,8 @@ int graphic_depth = 32;
 #define QEMU_ARCH QEMU_ARCH_OPENRISC
 #elif defined(TARGET_PPC)
 #define QEMU_ARCH QEMU_ARCH_PPC
+#elif defined(TARGET_RISCV)
+#define QEMU_ARCH QEMU_ARCH_RISCV
 #elif defined(TARGET_S390X)
 #define QEMU_ARCH QEMU_ARCH_S390X
 #elif defined(TARGET_SH4)
@@ -84,132 +88,6 @@ int graphic_depth = 32;
 #endif
 
 const uint32_t arch_type = QEMU_ARCH;
-
-struct soundhw {
-    const char *name;
-    const char *descr;
-    int enabled;
-    int isa;
-    union {
-        int (*init_isa) (ISABus *bus);
-        int (*init_pci) (PCIBus *bus);
-    } init;
-};
-
-static struct soundhw soundhw[9];
-static int soundhw_count;
-
-void isa_register_soundhw(const char *name, const char *descr,
-                          int (*init_isa)(ISABus *bus))
-{
-    assert(soundhw_count < ARRAY_SIZE(soundhw) - 1);
-    soundhw[soundhw_count].name = name;
-    soundhw[soundhw_count].descr = descr;
-    soundhw[soundhw_count].isa = 1;
-    soundhw[soundhw_count].init.init_isa = init_isa;
-    soundhw_count++;
-}
-
-void pci_register_soundhw(const char *name, const char *descr,
-                          int (*init_pci)(PCIBus *bus))
-{
-    assert(soundhw_count < ARRAY_SIZE(soundhw) - 1);
-    soundhw[soundhw_count].name = name;
-    soundhw[soundhw_count].descr = descr;
-    soundhw[soundhw_count].isa = 0;
-    soundhw[soundhw_count].init.init_pci = init_pci;
-    soundhw_count++;
-}
-
-void select_soundhw(const char *optarg)
-{
-    struct soundhw *c;
-
-    if (is_help_option(optarg)) {
-    show_valid_cards:
-
-        if (soundhw_count) {
-             printf("Valid sound card names (comma separated):\n");
-             for (c = soundhw; c->name; ++c) {
-                 printf ("%-11s %s\n", c->name, c->descr);
-             }
-             printf("\n-soundhw all will enable all of the above\n");
-        } else {
-             printf("Machine has no user-selectable audio hardware "
-                    "(it may or may not have always-present audio hardware).\n");
-        }
-        exit(!is_help_option(optarg));
-    }
-    else {
-        size_t l;
-        const char *p;
-        char *e;
-        int bad_card = 0;
-
-        if (!strcmp(optarg, "all")) {
-            for (c = soundhw; c->name; ++c) {
-                c->enabled = 1;
-            }
-            return;
-        }
-
-        p = optarg;
-        while (*p) {
-            e = strchr(p, ',');
-            l = !e ? strlen(p) : (size_t) (e - p);
-
-            for (c = soundhw; c->name; ++c) {
-                if (!strncmp(c->name, p, l) && !c->name[l]) {
-                    c->enabled = 1;
-                    break;
-                }
-            }
-
-            if (!c->name) {
-                if (l > 80) {
-                    error_report("Unknown sound card name (too big to show)");
-                }
-                else {
-                    error_report("Unknown sound card name `%.*s'",
-                                 (int) l, p);
-                }
-                bad_card = 1;
-            }
-            p += l + (e != NULL);
-        }
-
-        if (bad_card) {
-            goto show_valid_cards;
-        }
-    }
-}
-
-bool audio_init(void)
-{
-    struct soundhw *c;
-    ISABus *isa_bus = (ISABus *) object_resolve_path_type("", TYPE_ISA_BUS, NULL);
-    PCIBus *pci_bus = (PCIBus *) object_resolve_path_type("", TYPE_PCI_BUS, NULL);
-
-    for (c = soundhw; c->name; ++c) {
-        if (c->enabled) {
-            if (c->isa) {
-                if (!isa_bus) {
-                    error_report("ISA bus not available for %s", c->name);
-                    return false;
-                }
-                c->init.init_isa(isa_bus);
-            } else {
-                if (!pci_bus) {
-                    error_report("PCI bus not available for %s", c->name);
-                    return false;
-                }
-                c->init.init_pci(pci_bus);
-            }
-        }
-    }
-
-    return true;
-}
 
 int kvm_available(void)
 {

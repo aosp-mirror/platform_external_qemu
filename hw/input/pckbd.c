@@ -26,6 +26,7 @@
 #include "hw/isa/isa.h"
 #include "hw/i386/pc.h"
 #include "hw/input/ps2.h"
+#include "hw/input/i8042.h"
 #include "sysemu/sysemu.h"
 
 /* debug PC keyboard */
@@ -226,7 +227,7 @@ static void outport_write(KBDState *s, uint32_t val)
     s->outport = val;
     qemu_set_irq(s->a20_out, (val >> 1) & 1);
     if (!(val & 1)) {
-        qemu_system_reset_request();
+        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
     }
 }
 
@@ -301,7 +302,7 @@ static void kbd_write_command(void *opaque, hwaddr addr,
         s->outport &= ~KBD_OUT_A20;
         break;
     case KBD_CCMD_RESET:
-        qemu_system_reset_request();
+        qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         break;
     case KBD_CCMD_NO_OP:
         /* ignore that */
@@ -480,7 +481,6 @@ void i8042_mm_init(qemu_irq kbd_irq, qemu_irq mouse_irq,
     qemu_register_reset(kbd_reset, s);
 }
 
-#define TYPE_I8042 "i8042"
 #define I8042(obj) OBJECT_CHECK(ISAKBDState, (obj), TYPE_I8042)
 
 typedef struct ISAKBDState {
