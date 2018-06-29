@@ -66,6 +66,31 @@ testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
     return testing::AssertionSuccess();
 }
 
+testing::AssertionResult compareGlobalGlFloatv(const GLESv2Dispatch* gl,
+                                               GLenum name,
+                                               std::vector<GLfloat> expected,
+                                               GLuint size) {
+    std::vector<GLfloat> current;
+    current.resize(std::max(size, static_cast<GLuint>(expected.size())));
+    gl->glGetFloatv(name, &current[0]);
+
+    int mismatches = 0;
+    std::stringstream message;
+    for (int i = 0; i < expected.size(); i++) {
+        if (expected[i] != current[i]) {
+            mismatches++;
+            message << "    at index " << i << ":\n\tvalue was:\t" << current[i]
+                    << "\n\t expected:\t" << expected[i] << "\n";
+        }
+    }
+    if (mismatches > 0) {
+        return testing::AssertionFailure()
+               << "GL global floatv for parameter " << name << " mismatched\n"
+               << message.str() << "  ";
+    }
+    return testing::AssertionSuccess();
+}
+
 void SnapshotTest::SetUp() {
     GLTest::SetUp();
     mTestSystem.getTempRoot()->makeSubDir("Snapshots");

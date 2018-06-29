@@ -159,13 +159,14 @@ LOCAL_SRC_FILES := \
     tests/FrameBuffer_unittest.cpp \
     tests/GLSnapshot_unittest.cpp \
     tests/GLSnapshotBuffers_unittest.cpp \
+    tests/GLSnapshotFramebufferControl_unittest.cpp \
+    tests/GLSnapshotMultisampling_unittest.cpp \
+    tests/GLSnapshotPixelOperations_unittest.cpp \
+    tests/GLSnapshotRasterization_unittest.cpp \
+    tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotTesting.cpp \
     tests/GLSnapshotTestStateUtils.cpp \
     tests/GLSnapshotTransformation_unittest.cpp \
-    tests/GLSnapshotRasterization_unittest.cpp \
-    tests/GLSnapshotMultisampling_unittest.cpp \
-    tests/GLSnapshotPixelOperations_unittest.cpp \
-    tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotVertexAttributes_unittest.cpp \
     tests/GLTestUtils.cpp \
     tests/OpenGL_unittest.cpp \
