@@ -280,15 +280,14 @@ public:
             break;
         }
         EGLint maxMipmap = info->hasMipmap ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
-
+        bool isLegacyOpenGL =
+            sSupportInfo->maxOpenGLProfile == MAC_OPENGL_PROFILE_LEGACY;
         MacSurface* result = new MacSurface(
-                nsCreatePBuffer(
-                        glTexTarget,
-                        glTexFormat,
-                        maxMipmap,
-                        info->width,
-                        info->height),
-                MacSurface::PBUFFER);
+            isLegacyOpenGL
+                ? nsCreatePBuffer(glTexTarget, glTexFormat, maxMipmap,
+                                  info->width, info->height)
+                : nullptr,
+            MacSurface::PBUFFER);
 
         result->setHasMipmap(info->hasMipmap);
         return result;
