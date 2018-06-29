@@ -71,6 +71,7 @@ endif
 
 ifeq (windows,$(BUILD_TARGET_OS))
    BUILD_TARGET_CFLAGS += -falign-functions -ftracer
+   BUILD_OPT_LDFLAGS += -static-libgcc
 endif
 
 # Clang has strong opinions about our code, so lets start with
