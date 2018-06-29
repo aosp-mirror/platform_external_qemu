@@ -2075,6 +2075,11 @@ void GLEScontext::initDefaultFBO(
         setViewport(0, 0, width, height);
         dispatcher().glViewport(0, 0, width, height);
     }
+    // same for the scissor
+    if (!m_isScissor) {
+        setScissor(0, 0, width, height);
+        dispatcher().glScissor(0, 0, width, height);
+    }
 }
 
 
