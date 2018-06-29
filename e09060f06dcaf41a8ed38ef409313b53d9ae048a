@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d897cb1_a7caa4fd",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-06-29T16:55:57Z",
+      "side": 1,
+      "message": "could you please explain why this is needed in a comment?",
+      "range": {
+        "startLine": 74,
+        "startChar": 3,
+        "endLine": 74,
+        "endChar": 38
+      },
+      "revId": "e09060f06dcaf41a8ed38ef409313b53d9ae048a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
