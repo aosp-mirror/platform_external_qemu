@@ -497,6 +497,7 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_colorMaskA = static_cast<GLboolean>(stream->getByte());
 
             m_clearColorR = static_cast<GLclampf>(stream->getBe32());
+            fprintf(stderr, "Loading clear color R is %f\n", m_clearColorR);
             m_clearColorG = static_cast<GLclampf>(stream->getBe32());
             m_clearColorB = static_cast<GLclampf>(stream->getBe32());
             m_clearColorA = static_cast<GLclampf>(stream->getBe32());
@@ -682,6 +683,7 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putByte(m_colorMaskB);
         stream->putByte(m_colorMaskA);
 
+        fprintf(stderr, "Saving clear color R is %f\n", m_clearColorR);
         stream->putBe32(m_clearColorR);
         stream->putBe32(m_clearColorG);
         stream->putBe32(m_clearColorB);
@@ -858,6 +860,7 @@ void GLEScontext::postLoadRestoreCtx() {
                 m_stencilStates[i].m_dpfail, m_stencilStates[i].m_dppass);
     }
 
+    fprintf(stderr, "Post-load: clear color call, red is %f\n", m_clearColorR);
     dispatcher.glClearColor(m_clearColorR, m_clearColorG, m_clearColorB,
             m_clearColorA);
     if (isGles2Gles()) {
@@ -1574,6 +1577,7 @@ void GLEScontext::setColorMask(GLboolean red, GLboolean green, GLboolean blue,
 
 void GLEScontext::setClearColor(GLclampf red, GLclampf green, GLclampf blue,
         GLclampf alpha) {
+    fprintf(stderr, "Setting clear color red %f\n", red);
     m_clearColorR = red;
     m_clearColorG = green;
     m_clearColorB = blue;
