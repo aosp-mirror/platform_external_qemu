@@ -53,9 +53,7 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
 class SnapshotGlCullFaceTest : public SnapshotSetValueTest<GLenum>,
                                public ::testing::WithParamInterface<GLenum> {
     void stateCheck(GLenum expected) {
-        GLint mode;
-        gl->glGetIntegerv(GL_CULL_FACE_MODE, &mode);
-        EXPECT_EQ(expected, mode);
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_CULL_FACE_MODE, expected));
     }
     void stateChange() override { gl->glCullFace(GetParam()); }
 };
@@ -72,9 +70,7 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotRasterization,
 class SnapshotGlFrontFaceTest : public SnapshotSetValueTest<GLenum>,
                                 public ::testing::WithParamInterface<GLenum> {
     void stateCheck(GLenum expected) {
-        GLint mode;
-        gl->glGetIntegerv(GL_FRONT_FACE, &mode);
-        EXPECT_EQ(expected, mode);
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_FRONT_FACE, expected));
     }
     void stateChange() override { gl->glFrontFace(GetParam()); }
 };
@@ -92,11 +88,10 @@ class SnapshotGlPolygonOffsetTest
     : public SnapshotSetValueTest<GLfloat*>,
       public ::testing::WithParamInterface<const GLfloat*> {
     void stateCheck(GLfloat* expected) {
-        GLfloat factor, units;
-        gl->glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &factor);
-        gl->glGetFloatv(GL_POLYGON_OFFSET_UNITS, &units);
-        EXPECT_EQ(expected[0], factor);
-        EXPECT_EQ(expected[1], units);
+        EXPECT_TRUE(compareGlobalGlFloat(gl, GL_POLYGON_OFFSET_FACTOR,
+                                         expected[0]));
+        EXPECT_TRUE(
+                compareGlobalGlFloat(gl, GL_POLYGON_OFFSET_UNITS, expected[1]));
     }
     void stateChange() override {
         gl->glPolygonOffset(GetParam()[0], GetParam()[1]);

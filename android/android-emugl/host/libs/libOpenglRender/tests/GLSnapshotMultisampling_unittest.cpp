@@ -27,12 +27,12 @@ class SnapshotGlSampleCoverageTest
     : public SnapshotSetValueTest<GlSampleCoverage>,
       public ::testing::WithParamInterface<GlSampleCoverage> {
     void stateCheck(GlSampleCoverage expected) {
-        GLfloat value;
-        gl->glGetFloatv(GL_SAMPLE_COVERAGE_VALUE, &value);
-        EXPECT_EQ(expected.value, value);
+        EXPECT_TRUE(compareGlobalGlFloat(gl, GL_SAMPLE_COVERAGE_VALUE,
+                                         expected.value));
         GLboolean invert;
         gl->glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, &invert);
-        EXPECT_EQ(expected.invert, invert);
+        EXPECT_EQ(expected.invert, invert)
+                << "Expected different sample coverage 'invert'";
     }
     void stateChange() {
         gl->glSampleCoverage(GetParam().value, GetParam().invert);

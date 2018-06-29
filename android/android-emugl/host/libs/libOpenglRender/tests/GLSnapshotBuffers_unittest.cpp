@@ -30,15 +30,12 @@ class SnapshotGlBufferObjectsTest : public SnapshotPreserveTest {
 public:
     void defaultStateCheck() override {
         for (GLenum bindTarget : kGLES2GlobalBufferBindings) {
-            GLint arrayBinding;
-            gl->glGetIntegerv(bindTarget, &arrayBinding);
-            EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-            // By default, no buffers are bound.
-            EXPECT_EQ(0, arrayBinding);
+            EXPECT_TRUE(compareGlobalGlInt(gl, bindTarget, 0))
+                    << "no global buffer object bindings are bound by default";
         }
-        // None of the added buffers should exist
         for (auto& it : m_buffers_data) {
-            EXPECT_EQ(GL_FALSE, gl->glIsBuffer(it.first));
+            EXPECT_EQ(GL_FALSE, gl->glIsBuffer(it.first))
+                    << "test-added buffer objects should not exist by default";
         }
     }
 
@@ -57,13 +54,12 @@ public:
                     FAIL() << "Unknown binding location " << it.first;
             }
 
-            GLint boundBuffer;
-            gl->glGetIntegerv(boundTarget, &boundBuffer);
-            EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-            EXPECT_EQ(it.second, boundBuffer);
+            EXPECT_TRUE(compareGlobalGlInt(gl, boundTarget, it.second))
+                    << "buffer binding " << boundTarget
+                    << " should be bound to " << it.second;
         }
 
-        // Check that all buffers have the correct data
+        // Check that all buffers have the correct attributes
         for (auto& it : m_buffers_data) {
             checkBufferData(it.first, it.second);
         }
@@ -121,7 +117,8 @@ protected:
         GLint value;
         gl->glGetBufferParameteriv(target, paramName, &value);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        EXPECT_EQ(expected, value);
+        EXPECT_EQ(expected, value) << " mismatch on parameter " << paramName
+                                   << " for buffer bound to " << target;
     }
 
     std::map<GLenum, GLuint> m_bindings;
