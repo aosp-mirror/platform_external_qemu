@@ -121,6 +121,14 @@ testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
                                               GLenum name,
                                               GLfloat expected);
 
+// Compares a vector of global GL values, known by |name| and retrieved as a
+// float array, against |expected| values.
+// Specify |size| if more space is needed than the size of |expected|.
+testing::AssertionResult compareGlobalGlFloatv(const GLESv2Dispatch* gl,
+                                               GLenum name,
+                                               std::vector<GLfloat> expected,
+                                               GLuint size = 0);
+
 // SnapshotTest - A helper class for performing a test related to saving or
 // loading GL translator snapshots. As a test fixture, its setup will prepare a
 // fresh GL state and paths for temporary snapshot files.
