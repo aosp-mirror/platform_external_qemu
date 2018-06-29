@@ -22,6 +22,30 @@
       "revId": "e09060f06dcaf41a8ed38ef409313b53d9ae048a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbc88f8a_9c08ab74",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2018-06-29T18:42:19Z",
+      "side": 1,
+      "message": "We\u0027re building GCC with --enable-shared so we can get libgcc_eh.a (which is needed for building with Clang).  But in this config, the way the static libraries are built, the linker prefers to use symbols from the shared library instead of the static library.  In our setup, this\u0027d imply carrying the shared libgcc*.DLL as extra baggage.  We\u0027re instead using -static-libgcc to prefer the static libraries (i.e. the old behavior) even if shared libgcc is available.",
+      "parentUuid": "2d897cb1_a7caa4fd",
+      "range": {
+        "startLine": 74,
+        "startChar": 3,
+        "endLine": 74,
+        "endChar": 38
+      },
+      "revId": "e09060f06dcaf41a8ed38ef409313b53d9ae048a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
