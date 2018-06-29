@@ -22,11 +22,24 @@ namespace emugl {
 // Scissor box settings to attempt
 static const GLint kGLES2TestScissorBox[] = {2, 3, 10, 20};
 
+// Default stencil operation modes
+static const GlStencilOp kGLES2DefaultStencilOp = {GL_KEEP, GL_KEEP, GL_KEEP};
+
 // Stencil reference value to attempt
 static const GLint kGLES2TestStencilRef = 1;
 
 // Stencil mask values to attempt
 static const GLuint kGLES2TestStencilMasks[] = {0, 1, 0x1000000, 0x7FFFFFFF};
+
+// Blend function settings to attempt
+static const GlBlendFunc kGLES2TestBlendFuncs[] = {
+        {GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+         GL_ONE_MINUS_DST_COLOR},
+        {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA,
+         GL_ONE_MINUS_DST_ALPHA},
+        {GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA,
+         GL_ONE_MINUS_CONSTANT_ALPHA},
+        {GL_SRC_ALPHA_SATURATE, GL_ONE, GL_SRC_ALPHA_SATURATE, GL_ONE}};
 
 class SnapshotGlScissorBoxTest
     : public SnapshotSetValueTest<GLint*>,
@@ -64,19 +77,15 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
 class SnapshotGlStencilConditionsTest
     : public SnapshotSetValueTest<GlStencilFunc> {
     void stateCheck(GlStencilFunc expected) {
-        GLint frontFunc, frontRef, frontMask, backFunc, backRef, backMask;
-        gl->glGetIntegerv(GL_STENCIL_FUNC, &frontFunc);
-        gl->glGetIntegerv(GL_STENCIL_REF, &frontRef);
-        gl->glGetIntegerv(GL_STENCIL_VALUE_MASK, &frontMask);
-        gl->glGetIntegerv(GL_STENCIL_BACK_FUNC, &backFunc);
-        gl->glGetIntegerv(GL_STENCIL_BACK_REF, &backRef);
-        gl->glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, &backMask);
-        EXPECT_EQ(expected.func, frontFunc);
-        EXPECT_EQ(expected.ref, frontRef);
-        EXPECT_EQ(expected.mask, frontMask);
-        EXPECT_EQ(expected.func, backFunc);
-        EXPECT_EQ(expected.ref, backRef);
-        EXPECT_EQ(expected.mask, backMask);
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_FUNC, expected.func));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_REF, expected.ref));
+        EXPECT_TRUE(
+                compareGlobalGlInt(gl, GL_STENCIL_VALUE_MASK, expected.mask));
+        EXPECT_TRUE(
+                compareGlobalGlInt(gl, GL_STENCIL_BACK_FUNC, expected.func));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_BACK_REF, expected.ref));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_BACK_VALUE_MASK,
+                                       expected.mask));
     }
     void stateChange() override {
         GlStencilFunc sFunc = *m_changed_value;
@@ -130,20 +139,17 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
 class SnapshotGlStencilConsequenceTest
     : public SnapshotSetValueTest<GlStencilOp> {
     void stateCheck(GlStencilOp expected) override {
-        GLint frontFail, frontDepthFail, frontDepthPass, backFail,
-                backDepthFail, backDepthPass;
-        gl->glGetIntegerv(GL_STENCIL_FAIL, &frontFail);
-        gl->glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &frontDepthFail);
-        gl->glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &frontDepthPass);
-        gl->glGetIntegerv(GL_STENCIL_BACK_FAIL, &backFail);
-        gl->glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_FAIL, &backDepthFail);
-        gl->glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_PASS, &backDepthPass);
-        EXPECT_EQ(expected.sfail, frontFail);
-        EXPECT_EQ(expected.dpfail, frontDepthFail);
-        EXPECT_EQ(expected.dppass, frontDepthPass);
-        EXPECT_EQ(expected.sfail, backFail);
-        EXPECT_EQ(expected.dpfail, backDepthFail);
-        EXPECT_EQ(expected.dppass, backDepthPass);
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_FAIL, expected.sfail));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_PASS_DEPTH_FAIL,
+                                       expected.dpfail));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_PASS_DEPTH_PASS,
+                                       expected.dppass));
+        EXPECT_TRUE(
+                compareGlobalGlInt(gl, GL_STENCIL_BACK_FAIL, expected.sfail));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_BACK_PASS_DEPTH_FAIL,
+                                       expected.dpfail));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_BACK_PASS_DEPTH_PASS,
+                                       expected.dppass));
     }
     void stateChange() override {
         GlStencilOp sOp = *m_changed_value;
@@ -164,23 +170,20 @@ class SnapshotGlStencilDepthPassTest
       public ::testing::WithParamInterface<GLenum> {};
 
 TEST_P(SnapshotGlStencilFailTest, SetStencilOps) {
-    GlStencilOp defaultStencilOp = {GL_KEEP, GL_KEEP, GL_KEEP};
     GlStencilOp testStencilOp = {GetParam(), GL_KEEP, GL_KEEP};
-    setExpectedValues(defaultStencilOp, testStencilOp);
+    setExpectedValues(kGLES2DefaultStencilOp, testStencilOp);
     doCheckedSnapshot();
 }
 
 TEST_P(SnapshotGlStencilDepthFailTest, SetStencilOps) {
-    GlStencilOp defaultStencilOp = {GL_KEEP, GL_KEEP, GL_KEEP};
     GlStencilOp testStencilOp = {GL_KEEP, GetParam(), GL_KEEP};
-    setExpectedValues(defaultStencilOp, testStencilOp);
+    setExpectedValues(kGLES2DefaultStencilOp, testStencilOp);
     doCheckedSnapshot();
 }
 
 TEST_P(SnapshotGlStencilDepthPassTest, SetStencilOps) {
-    GlStencilOp defaultStencilOp = {GL_KEEP, GL_KEEP, GL_KEEP};
     GlStencilOp testStencilOp = {GL_KEEP, GL_KEEP, GetParam()};
-    setExpectedValues(defaultStencilOp, testStencilOp);
+    setExpectedValues(kGLES2DefaultStencilOp, testStencilOp);
     doCheckedSnapshot();
 }
 
@@ -199,9 +202,7 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
 class SnapshotGlDepthFuncTest : public SnapshotSetValueTest<GLenum>,
                                 public ::testing::WithParamInterface<GLenum> {
     void stateCheck(GLenum expected) override {
-        GLint depthFunc;
-        gl->glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
-        EXPECT_EQ(expected, depthFunc);
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_DEPTH_FUNC, expected));
     }
     void stateChange() { gl->glDepthFunc(*m_changed_value); }
 };
@@ -214,5 +215,55 @@ TEST_P(SnapshotGlDepthFuncTest, SetDepthFunc) {
 INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
                         SnapshotGlDepthFuncTest,
                         ::testing::ValuesIn(kGLES2StencilFuncs));
+
+class SnapshotGlBlendEquationTest
+    : public SnapshotSetValueTest<GLenum>,
+      public ::testing::WithParamInterface<GLenum> {
+    void stateCheck(GLenum expected) override {
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_BLEND_EQUATION_RGB, expected));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_BLEND_EQUATION_ALPHA, expected));
+    }
+    void stateChange() { gl->glBlendEquation(*m_changed_value); }
+};
+
+TEST_P(SnapshotGlBlendEquationTest, SetBlendEquation) {
+    setExpectedValues(GL_FUNC_ADD, GetParam());
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlBlendEquationTest,
+                        ::testing::ValuesIn(kGLES2BlendEquations));
+
+class SnapshotGlBlendFuncTest
+    : public SnapshotSetValueTest<GlBlendFunc>,
+      public ::testing::WithParamInterface<GlBlendFunc> {
+    void stateCheck(GlBlendFunc expected) {
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_BLEND_SRC_RGB, expected.srcRGB));
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_BLEND_DST_RGB, expected.dstRGB));
+        EXPECT_TRUE(
+                compareGlobalGlInt(gl, GL_BLEND_SRC_ALPHA, expected.srcAlpha));
+        EXPECT_TRUE(
+                compareGlobalGlInt(gl, GL_BLEND_DST_ALPHA, expected.dstAlpha));
+    }
+    void stateChange() {
+        GlBlendFunc target = *m_changed_value;
+        gl->glBlendFuncSeparate(target.srcRGB, target.dstRGB, target.srcAlpha,
+                                target.dstAlpha);
+    }
+};
+
+TEST_P(SnapshotGlBlendFuncTest, SetBlendFunc) {
+    GlBlendFunc defaultBlendFunc = {.srcRGB = GL_ONE,
+                                    .dstRGB = GL_ZERO,
+                                    .srcAlpha = GL_ONE,
+                                    .dstAlpha = GL_ZERO};
+    setExpectedValues(defaultBlendFunc, GetParam());
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
+                        SnapshotGlBlendFuncTest,
+                        ::testing::ValuesIn(kGLES2TestBlendFuncs));
 
 }  // namespace emugl
