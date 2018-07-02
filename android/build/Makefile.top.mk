@@ -57,8 +57,8 @@ BUILD_OPT_LDFLAGS :=
 ifeq ($(BUILD_DEBUG),true)
     BUILD_OPT_CFLAGS += -O0 -DANDROID_DEBUG
     # Enable code coverage for debug builds.
-    BUILD_TARGET_CFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping)
-    BUILD_OPT_LDFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping)
+    BUILD_TARGET_CFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping -fprofile-arcs -ftest-coverage)
+    BUILD_OPT_LDFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping -fprofile-arcs -ftest-coverage --coverage)
 else
     ifneq (windows,$(BUILD_TARGET_OS))
         BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
@@ -71,6 +71,15 @@ endif
 
 ifeq (windows,$(BUILD_TARGET_OS))
    BUILD_TARGET_CFLAGS += -falign-functions -ftracer
+
+   # pirama@google.com: We're building GCC with --enable-shared so we can get
+   # libgcc_eh.a (which is needed for building with Clang).  But in this
+   # config, the way the static libraries are built, the linker prefers to use
+   # symbols from the shared library instead of the static library.  In our
+   # setup, this'd imply carrying the shared libgcc*.DLL as extra baggage.
+   # We're instead using -static-libgcc to prefer the static libraries (i.e.
+   # the old behavior) even if shared libgcc is available.
+   BUILD_OPT_LDFLAGS += -static-libgcc
 endif
 
 # Clang has strong opinions about our code, so lets start with

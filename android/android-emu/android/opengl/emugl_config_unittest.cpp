@@ -75,6 +75,18 @@ TEST(EmuglConfig, init) {
         EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
     }
 
+    // Check that "host" mode is available with -no-window if explicitly
+    // specified on command line.
+    {
+        EmuglConfig config;
+        EXPECT_TRUE(emuglConfig_init(
+                    &config, true, "host", "host", 0, true, false, false,
+                    WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+        EXPECT_TRUE(config.enabled);
+        EXPECT_STREQ("host", config.backend);
+        EXPECT_STREQ("GPU emulation enabled using 'host' mode", config.status);
+    }
+
     {
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(
@@ -408,8 +420,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithoutSwiftshader) {
     EXPECT_STREQ("GPU emulation is disabled under Chrome Remote Desktop without Swiftshader", config.status);
 }
 
-// TODO: Get -no-window to work with non-guest rendering again
-TEST(EmuglConfig, DISABLED_initNoWindowWithSwiftshader) {
+TEST(EmuglConfig, initNoWindowWithSwiftshader) {
     TestSystem testSys("foo", System::kProgramBitness, "/");
     TestTempDir* myDir = testSys.getTempRoot();
     myDir->makeSubDir(System::get()->getLauncherDirectory().c_str());

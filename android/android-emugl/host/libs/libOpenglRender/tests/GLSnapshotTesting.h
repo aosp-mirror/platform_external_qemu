@@ -48,6 +48,19 @@ struct GlStencilOp {
     GLenum dppass;
 };
 
+struct GlBlendFunc {
+    GLenum srcRGB;
+    GLenum dstRGB;
+    GLenum srcAlpha;
+    GLenum dstAlpha;
+};
+
+struct GlBufferData {
+    GLsizeiptr size;
+    GLvoid* bytes;
+    GLenum usage;
+};
+
 // Capabilities which, according to the GLES2 spec, start disabled.
 static const GLenum kGLES2CanBeEnabled[] = {GL_BLEND,
                                             GL_CULL_FACE,
@@ -77,6 +90,37 @@ static const GLenum kGLES2StencilOps[] = {GL_KEEP,      GL_ZERO,     GL_REPLACE,
                                           GL_INCR,      GL_DECR,     GL_INVERT,
                                           GL_INCR_WRAP, GL_DECR_WRAP};
 
+// Modes for the BlendEquation
+static const GLenum kGLES2BlendEquations[] = {GL_FUNC_ADD, GL_FUNC_SUBTRACT,
+                                              GL_FUNC_REVERSE_SUBTRACT};
+
+// Valid Blend functions
+static const GLenum kGLES2BlendFuncs[] = {GL_ZERO,
+                                          GL_ONE,
+                                          GL_SRC_COLOR,
+                                          GL_ONE_MINUS_SRC_COLOR,
+                                          GL_DST_COLOR,
+                                          GL_ONE_MINUS_DST_COLOR,
+                                          GL_SRC_ALPHA,
+                                          GL_ONE_MINUS_SRC_ALPHA,
+                                          GL_CONSTANT_COLOR,
+                                          GL_ONE_MINUS_CONSTANT_COLOR,
+                                          GL_CONSTANT_ALPHA,
+                                          GL_ONE_MINUS_CONSTANT_ALPHA,
+                                          GL_SRC_ALPHA_SATURATE};
+
+// Compares a global GL value, known by |name| and retrieved as an integer,
+// against an |expected| value.
+testing::AssertionResult compareGlobalGlInt(const GLESv2Dispatch* gl,
+                                            GLenum name,
+                                            GLint expected);
+
+// Compares a global GL value, known by |name| and retrieved as a float, against
+// an |expected| value.
+testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
+                                              GLenum name,
+                                              GLfloat expected);
+
 // SnapshotTest - A helper class for performing a test related to saving or
 // loading GL translator snapshots. As a test fixture, its setup will prepare a
 // fresh GL state and paths for temporary snapshot files.
@@ -95,7 +139,7 @@ static const GLenum kGLES2StencilOps[] = {GL_KEEP,      GL_ZERO,     GL_REPLACE,
 //         EXPECT_FALSE(fooBarState());  // Snapshot preserved the state change
 //     }
 //
-class SnapshotTest : public gltest::GLTest {
+class SnapshotTest : public emugl::GLTest {
 public:
     SnapshotTest()
         : mTestSystem(PATH_SEP "progdir",

@@ -32,8 +32,8 @@ class SnapshotGlViewportTest
         GLint viewport[4] = {};
         gl->glGetIntegerv(GL_VIEWPORT, viewport);
         // initial viewport should match surface size
-        EXPECT_EQ(gltest::kSurfaceSize[0], viewport[2]);
-        EXPECT_EQ(gltest::kSurfaceSize[1], viewport[3]);
+        EXPECT_EQ(kTestSurfaceSize[0], viewport[2]);
+        EXPECT_EQ(kTestSurfaceSize[1], viewport[3]);
     }
     void changedStateCheck() override {
         GLint viewport[4] = {};
