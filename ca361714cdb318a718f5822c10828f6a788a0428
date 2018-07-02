@@ -22,6 +22,30 @@
       "revId": "ca361714cdb318a718f5822c10828f6a788a0428",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0995443_9b65b937",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotTesting.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-02T20:13:46Z",
+      "side": 1,
+      "message": "Done; anywhere else?",
+      "parentUuid": "151cc9ae_4a49eef5",
+      "range": {
+        "startLine": 86,
+        "startChar": 39,
+        "endLine": 86,
+        "endChar": 53
+      },
+      "revId": "ca361714cdb318a718f5822c10828f6a788a0428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
