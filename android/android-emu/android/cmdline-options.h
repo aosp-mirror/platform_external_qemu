@@ -202,6 +202,8 @@ OPT_LIST(feature, "<name|-name>", "Force-enable or disable (-name) the features"
 OPT_PARAM(sim_access_rules_file, "<file>", "Use SIM access rules from specified file")
 OPT_PARAM(phone_number, "<phone_number>", "Sets the phone number of the emulated device")
 
+CFG_PARAM(dtb_config, "<file>", "specifies device tree keys and values")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

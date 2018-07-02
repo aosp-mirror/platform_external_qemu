@@ -52,37 +52,48 @@ int createDtbFile(const Params& params, const std::string &dtbFilename) {
     char lit_mnt_flags[] = "mnt_flags";
     char lit_fsmgr_flags[] = "fsmgr_flags";
 
-    char lit_vendor_compatible_value[] = "android,vendor";
-    char lit_fstab_compatibe_value[] = "android,fstab";
-    char lit_android_compatibe_value[] = "android,firmware";
+    char lit_fstab_compatible_value[] = "android,fstab";
+    char lit_android_compatible_value[] = "android,firmware";
 
-    char lit_type_value[] = "ext4";
-    char lit_mnt_flags_value[] = "noatime,ro,errors=panic";
-    char lit_fsmgr_flags_value[] = "wait";
+    std::vector<char> vendor_compatible(
+        params.vendor_compatible.begin(), params.vendor_compatible.end());
+    vendor_compatible.push_back(0);
 
     std::vector<char> vendor_device_location(
         params.vendor_device_location.begin(), params.vendor_device_location.end());
     vendor_device_location.push_back(0);
 
-    initProperty(lit_compatible, lit_android_compatibe_value,
+    std::vector<char> vendor_type(
+        params.vendor_type.begin(), params.vendor_type.end());
+    vendor_type.push_back(0);
+
+    std::vector<char> vendor_mnt_flags(
+        params.vendor_mnt_flags.begin(), params.vendor_mnt_flags.end());
+    vendor_mnt_flags.push_back(0);
+
+    std::vector<char> vendor_fsmgr_flags(
+        params.vendor_fsmgr_flags.begin(), params.vendor_fsmgr_flags.end());
+    vendor_fsmgr_flags.push_back(0);
+
+    initProperty(lit_compatible, lit_android_compatible_value,
         &android_properties[0], nullptr);
 
-    initProperty(lit_compatible, lit_fstab_compatibe_value,
+    initProperty(lit_compatible, lit_fstab_compatible_value,
         &fstab_properties[0], nullptr);
 
-    initProperty(lit_compatible, lit_vendor_compatible_value,
+    initProperty(lit_compatible, vendor_compatible.data(),
         &vendor_properties[0], &vendor_properties[1]);
 
     initProperty(lit_dev, vendor_device_location.data(),
         &vendor_properties[1], &vendor_properties[2]);
 
-    initProperty(lit_type, lit_type_value,
+    initProperty(lit_type, vendor_type.data(),
         &vendor_properties[2], &vendor_properties[3]);
 
-    initProperty(lit_mnt_flags, lit_mnt_flags_value,
+    initProperty(lit_mnt_flags, vendor_mnt_flags.data(),
         &vendor_properties[3], &vendor_properties[4]);
 
-    initProperty(lit_fsmgr_flags, lit_fsmgr_flags_value,
+    initProperty(lit_fsmgr_flags, vendor_fsmgr_flags.data(),
         &vendor_properties[4], NULL);
 
     struct node root;

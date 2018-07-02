@@ -16,7 +16,11 @@
 namespace dtb {
 
 struct Params {
-    std::string vendor_device_location;  // location of the vendor partition.
+  std::string vendor_compatible;       // compatible value of the vendor partition.
+  std::string vendor_device_location;  // location of the vendor partition.
+  std::string vendor_type;             // fs type of the vendor partition.
+  std::string vendor_mnt_flags;        // mnt_flags of the vendor partition.
+  std::string vendor_fsmgr_flags;      // fsmgr_flags of the vendor partition.
 };
 
 /*

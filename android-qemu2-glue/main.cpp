@@ -14,6 +14,9 @@
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
+
+#include "android/base/files/IniFile.h"
+
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
@@ -1179,31 +1182,46 @@ extern "C" int main(int argc, char** argv) {
                        "%s" PATH_SEP "vendor.img.qcow2",
                        avd_dir, avd_dir, avd_dir);
     }
-
     if (fc::isEnabled(fc::KernelDeviceTreeBlobSupport)) {
         ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
         assert(userdata_dir);
 
         const std::string dtbFileName =
             PathUtils::join(userdata_dir.get(), "default.dtb");
-
-        if (android_op_wipe_data || !path_exists(dtbFileName.c_str())) {
+        const std::string dtbConfigFileName =
+            PathUtils::join(userdata_dir.get(), opts->dtb_config);
+        // use function createDtbFile() to write desired config file
+        if (path_exists(dtbConfigFileName.c_str())) {
+            FileData configProps[1];
             ::dtb::Params params;
-            params.vendor_device_location =
-                StringFormat(
-                    "/dev/block/pci/pci0000:00/0000:00:%02d.0/by-name/vendor",
-                    (fc::isEnabled(fc::EncryptUserData) ?
-                        kVendorEncryptedPartitionId : kVendorUnencryptedPartitionId));
-
-            exitStatus = createDtbFile(params, dtbFileName);
-            if (exitStatus) {
-                derror("Could not create a DTB file (%s)", dtbFileName.c_str());
-                return exitStatus;
+            int ret = fileData_initFromFile(configProps, dtbConfigFileName.c_str());
+            if (ret < 0) {
+                derror("Error reading DTB config file (%s)", dtbConfigFileName.c_str());
+                return 1;
+            }
+            else {
+                derror("Read DTB config file (%s)", dtbConfigFileName.c_str());
+                android::base::IniFile config((const char*)configProps->data, configProps->size);
+                // fill in keys and values to params
+                params.vendor_compatible = config.getString("android.fstab.vendor.compatible", "android,vendor");
+                params.vendor_device_location = config.getString("android.fstab.vendor.dev",
+                                                                StringFormat(
+                                                                    "/dev/block/pci/pci0000:00/0000:00:0%02d.0/by-name/vendor",
+                                                                    (fc::isEnabled(fc::EncryptUserData) ?
+                                                                    kVendorEncryptedPartitionId : kVendorUnencryptedPartitionId)));
+                params.vendor_type = config.getString("android.fstab.vendor.type", "android,vendor");
+                params.vendor_mnt_flags = config.getString("android.fstab.vendor.mnt_flags", "noatime,ro,errors=panic");
+                params.vendor_fsmgr_flags = config.getString("android.fstab.vendor.fsmgr_flags", "wait");
+                exitStatus = createDtbFile(params, dtbFileName);
+                if (exitStatus) {
+                    derror("Could not create a DTB file (%s)", dtbFileName.c_str());
+                    return exitStatus;
+                }
             }
         }
+        //dwarning("x86 arch do go in this block 0.0a");
         args.add({"-dtb", dtbFileName});
     }
-
     // Network
     args.add("-netdev");
     if (opts->net_tap) {
