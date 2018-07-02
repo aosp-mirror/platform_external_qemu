@@ -1138,49 +1138,65 @@ static void build_android_dt_aml(Aml *scope,
 
     aml_append(dev, aml_name_decl("_HID", aml_string(hid_name)));
     aml_append(dev, aml_name_decl("_STR", aml_unicode(str_name)));
+    const char* acpi_ini_file = avdInfo_getAcpiIniPath(android_avdInfo);
 
-    /* All AVDs have a system.img. Some also have a vendor.img. */
-    system_device_in_guest = avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
-    vendor_device_in_guest = avdInfo_getVendorImageDevicePathInGuest( android_avdInfo);
-    if (system_device_in_guest) {
-        ++npartitions;
-    }
-    if (vendor_device_in_guest) {
-        ++npartitions;
-    }
-    /* 5 properties per partition, plus 2 more "compatible" nodes */
-    properties = aml_package(2 + npartitions * 5);
-    /* ACPI _DSD does not support nested properties (at least not in a
-     * straightforward manner), so we have to use a flat layout.
-     */
-    append_string_property(properties, "android.compatible",
-                           "android,firmware");
-    append_string_property(properties, "android.fstab.compatible",
-                           "android,fstab");
+    if (acpi_ini_file == NULL) {
+        /* All AVDs have a system.img. Some also have a vendor.img. */
+        system_device_in_guest = avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
+        vendor_device_in_guest = avdInfo_getVendorImageDevicePathInGuest( android_avdInfo);
+        if (system_device_in_guest) {
+            ++npartitions;
+        }
+        if (vendor_device_in_guest) {
+            ++npartitions;
+        }
+        /* 5 properties per partition, plus 2 more "compatible" nodes */
+        properties = aml_package(2 + npartitions * 5);
+        /* ACPI _DSD does not support nested properties (at least not in a
+         * straightforward manner), so we have to use a flat layout.
+         */
+        append_string_property(properties, "android.compatible",
+                               "android,firmware");
+        append_string_property(properties, "android.fstab.compatible",
+                               "android,fstab");
 
-    if (system_device_in_guest) {
-        append_string_property(properties, "android.fstab.system.compatible",
-                           "android,system");
-        append_string_property(properties, "android.fstab.system.dev",
-                           system_device_in_guest);
-        append_string_property(properties, "android.fstab.system.type", "ext4");
-        append_string_property(properties, "android.fstab.system.mnt_flags", "ro");
-        append_string_property(properties, "android.fstab.system.fsmgr_flags",
-                           "wait");
-        free(system_device_in_guest);
-    }
+        if (system_device_in_guest) {
+            append_string_property(properties, "android.fstab.system.compatible",
+                                   "android,system");
+            append_string_property(properties, "android.fstab.system.dev",
+                                   system_device_in_guest);
+            append_string_property(properties, "android.fstab.system.type", "ext4");
+            append_string_property(properties, "android.fstab.system.mnt_flags", "ro");
+            append_string_property(properties, "android.fstab.system.fsmgr_flags",
+                                   "wait");
+            free(system_device_in_guest);
+        }
 
-    if (vendor_device_in_guest) {
-        append_string_property(properties, "android.fstab.vendor.compatible",
-                               "android,vendor");
-        append_string_property(properties, "android.fstab.vendor.dev",
-                               vendor_device_in_guest);
-        append_string_property(properties, "android.fstab.vendor.type", "ext4");
-        append_string_property(properties, "android.fstab.vendor.mnt_flags",
-                               "ro");
-        append_string_property(properties, "android.fstab.vendor.fsmgr_flags",
-                               "wait");
-        free(vendor_device_in_guest);
+        if (vendor_device_in_guest) {
+            append_string_property(properties, "android.fstab.vendor.compatible",
+                                   "android,vendor");
+            append_string_property(properties, "android.fstab.vendor.dev",
+                                   vendor_device_in_guest);
+            append_string_property(properties, "android.fstab.vendor.type", "ext4");
+            append_string_property(properties, "android.fstab.vendor.mnt_flags",
+                                   "ro");
+            append_string_property(properties, "android.fstab.vendor.fsmgr_flags",
+                                   "wait");
+            free(vendor_device_in_guest);
+        }
+    } else {
+        CIniFile* acpiIni = iniFile_newFromFile(acpi_ini_file);
+        int num_properties = iniFile_getPairCount(acpiIni);
+        properties = aml_package(num_properties);
+        int i;
+        for (i = 0; i < num_properties; ++i) {
+            char *key, *value;
+            if (iniFile_getEntry(acpiIni, i, &key, &value) == 0) {
+                append_string_property(properties, key, value);
+                free(key);
+                free(value);
+            }
+        } 
     }
 
     dsd = aml_package(2);
