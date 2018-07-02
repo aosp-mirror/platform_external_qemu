@@ -15,12 +15,15 @@
 */
 #include "ApiGen.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/system/System.h"
 #include "EntryPoint.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "strUtils.h"
 #include <errno.h>
 #include <sys/types.h>
+
+using android::base::System;
 
 /* Define this to 1 to enable support for the 'isLarge' variable flag
  * that instructs the encoder to send large data buffers by a direct
@@ -934,6 +937,9 @@ int ApiGen::genContextImpl(const std::string &filename, SideType side)
     return 0;
 }
 
+static float currMemUsage() {
+}
+
 int ApiGen::genDecoderImpl(const std::string &filename)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
@@ -962,13 +968,16 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_dec.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include \"ProtocolUtils.h\"\n\n");
     fprintf(fp, "#include \"ChecksumCalculatorThreadInfo.h\"\n\n");
+    fprintf(fp, "#include \"android/base/system/System.h\"\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
+    fprintf(fp, "static float sGetMemUsage() { auto usage = android::base::System::get()->getMemUsage(); float resident = usage.resident / 1048576.0f; return resident; }\n\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
     // helper macros
     fprintf(fp,
+            "#define OPENGL_DEBUG_PRINTOUT\n"
             "#ifdef OPENGL_DEBUG_PRINTOUT\n"
-            "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n"
+            "#  define DEBUG(fmt,...) do { fprintf(stderr, \"%%5.3f resident: \" fmt, sGetMemUsage(), ##__VA_ARGS__); } while(0)\n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
             "#endif\n\n");

@@ -371,28 +371,7 @@ EglOsEglDisplay::createContext(EGLint profileMask,
 Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
                                                const PbufferInfo* info) {
     D("%s\n", __FUNCTION__);
-    const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
-    EGLint attrib[] = {EGL_WIDTH,
-                       info->width,
-                       EGL_HEIGHT,
-                       info->height,
-                       EGL_LARGEST_PBUFFER,
-                       info->largest,
-                       EGL_TEXTURE_FORMAT,
-                       info->format,
-                       EGL_TEXTURE_TARGET,
-                       info->target,
-                       EGL_MIPMAP_TEXTURE,
-                       info->hasMipmap,
-                       EGL_NONE};
-    EGLSurface surface = mDispatcher.eglCreatePbufferSurface(
-            mDisplay, format->mConfigId, attrib);
-    CHECK_EGL_ERR
-    if (surface == EGL_NO_SURFACE) {
-        D("create pbuffer surface failed\n");
-        return nullptr;
-    }
-    return new EglOsEglSurface(EglOS::Surface::PBUFFER, surface);
+    return new EglOsEglSurface(EglOS::Surface::PBUFFER, EGL_NO_SURFACE);
 }
 
 Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
@@ -409,14 +388,7 @@ Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
 }
 
 bool EglOsEglDisplay::releasePbuffer(Surface* pb) {
-    D("%s\n", __FUNCTION__);
-    if (!pb)
-        return false;
-    EglOsEglSurface* surface = (EglOsEglSurface*)pb;
-    bool ret = mDispatcher.eglDestroySurface(mDisplay, surface->getHndl());
-    CHECK_EGL_ERR
-    D("%s done\n", __FUNCTION__);
-    return ret;
+    return true;
 }
 
 bool EglOsEglDisplay::makeCurrent(Surface* read,
