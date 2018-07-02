@@ -1597,6 +1597,14 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
+    if (opts->acpi_config != NULL) {
+        if (!path_exists(opts->acpi_config)) {
+            D("Invalid ACPI config file path: %s, using default", opts->acpi_config);
+        } else {
+            avdInfo_setAcpiIniPath(avd, opts->acpi_config);
+        }
+    }
+
     emulator_has_network_option =
             (opts->netspeed && (opts->netspeed[0] != '\0')) ||
             (opts->netdelay && (opts->netdelay[0] != '\0')) ||
