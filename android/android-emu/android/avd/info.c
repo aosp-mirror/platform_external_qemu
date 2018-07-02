@@ -108,6 +108,7 @@ struct AvdInfo {
     char*     androidBuildRoot;
     char*     targetArch;
     char*     targetAbi;
+    char*     acpiIniPath;
 
     /* for the normal virtual device case */
     char*     deviceName;
@@ -192,6 +193,7 @@ avdInfo_free( AvdInfo*  i )
         if (i->inAndroidBuild) {
             AFREE(i->androidOut);
             AFREE(i->androidBuildRoot);
+            AFREE(i->acpiIniPath);
         }
 
         AFREE(i->deviceName);
@@ -1531,6 +1533,13 @@ avdInfo_setImageFile( AvdInfo*  i, AvdImageType  imageType,
     i->imagePath[imageType] = ASTRDUP(imagePath);
 }
 
+void
+avdInfo_setAcpiIniPath( AvdInfo* i, const char* iniPath )
+{
+    assert(i != NULL);
+
+    i->acpiIniPath = ASTRDUP(iniPath);
+}
 const char*
 avdInfo_getContentPath( const AvdInfo*  i )
 {
@@ -1541,6 +1550,12 @@ const char*
 avdInfo_getRootIniPath( const AvdInfo*  i )
 {
     return i->rootIniPath;
+}
+
+const char*
+avdInfo_getAcpiIniPath( const AvdInfo* i )
+{
+    return i->acpiIniPath;
 }
 
 int
