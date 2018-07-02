@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 /*
  * QEMU live migration
  *
@@ -405,3 +406,5 @@ PostcopyState postcopy_state_get(void);
 /* Set the state and return the old state */
 PostcopyState postcopy_state_set(PostcopyState new_state);
 #endif
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

@@ -20,12 +20,7 @@
 #ifndef TARGET_I386_HAX_WINDOWS_H
 #define TARGET_I386_HAX_WINDOWS_H
 
-#include <windows.h>
-#include <memory.h>
-#include <malloc.h>
 #include <winioctl.h>
-#include <string.h>
-#include <stdio.h>
 #include <windef.h>
 
 #define HAX_INVALID_FD INVALID_HANDLE_VALUE
@@ -64,10 +59,13 @@ static inline int hax_invalid_fd(hax_fd fd)
                                             METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define HAX_VM_IOCTL_ADD_RAMBLOCK  CTL_CODE(HAX_DEVICE_TYPE, 0x913, \
                                             METHOD_BUFFERED, FILE_ANY_ACCESS)
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 #define HAX_VM_IOCTL_SET_RAM2      CTL_CODE(HAX_DEVICE_TYPE, 0x914, \
                                             METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define HAX_VM_IOCTL_PROTECT_RAM   CTL_CODE(HAX_DEVICE_TYPE, 0x915, \
                                             METHOD_BUFFERED, FILE_ANY_ACCESS)
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 
 #define HAX_VCPU_IOCTL_RUN      CTL_CODE(HAX_DEVICE_TYPE, 0x906, \
                                          METHOD_BUFFERED, FILE_ANY_ACCESS)

@@ -25,8 +25,13 @@
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 #include "hw/char/trace.h"
 #include "sysemu/char.h"
+=======
+#include "trace.h"
+#include "chardev/char-fe.h"
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 #include "qemu/error-report.h"
 
 enum {
@@ -266,7 +271,7 @@ static void lm32_uart_realize(DeviceState *dev, Error **errp)
     LM32UartState *s = LM32_UART(dev);
 
     qemu_chr_fe_set_handlers(&s->chr, uart_can_rx, uart_rx,
-                             uart_event, s, NULL, true);
+                             uart_event, NULL, s, NULL, true);
 }
 
 static const VMStateDescription vmstate_lm32_uart = {

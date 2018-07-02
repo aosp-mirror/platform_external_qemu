@@ -30,7 +30,6 @@
 #include "qemu/osdep.h"
 #include "hw/pci/pci.h"
 #include "net/net.h"
-#include "hw/loader.h"
 #include "qemu/timer.h"
 #include "sysemu/dma.h"
 #include "sysemu/sysemu.h"
@@ -365,6 +364,10 @@ static const TypeInfo pcnet_info = {
     .instance_size = sizeof(PCIPCNetState),
     .class_init    = pcnet_class_init,
     .instance_init = pcnet_instance_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 static void pci_pcnet_register_types(void)

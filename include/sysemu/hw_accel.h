@@ -53,6 +53,22 @@ static inline void cpu_synchronize_post_init(CPUState *cpu)
     if (whpx_enabled()) {
         whpx_cpu_synchronize_post_init(cpu);
     }
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
+=======
+}
+
+static inline void cpu_synchronize_pre_loadvm(CPUState *cpu)
+{
+    if (kvm_enabled()) {
+        kvm_cpu_synchronize_pre_loadvm(cpu);
+    }
+    if (hax_enabled()) {
+        hax_cpu_synchronize_pre_loadvm(cpu);
+    }
+    if (whpx_enabled()) {
+        whpx_cpu_synchronize_pre_loadvm(cpu);
+    }
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
 }
 
 #endif /* QEMU_HW_ACCEL_H */

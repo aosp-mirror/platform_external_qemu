@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (af7376 Merge "Move getEnvironmentVariable to TestSystem" into emu-m)
 /*
  * QEMU HAXM support
  *
@@ -54,3 +55,5 @@ int hax_smp_cpu_exec(CPUState *cpu)
 {
     return -ENOSYS;
 }
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

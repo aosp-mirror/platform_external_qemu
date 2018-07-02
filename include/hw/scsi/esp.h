@@ -2,15 +2,11 @@
 #define QEMU_HW_ESP_H
 
 #include "hw/scsi/scsi.h"
+#include "hw/sysbus.h"
 
 /* esp.c */
 #define ESP_MAX_DEVS 7
 typedef void (*ESPDMAMemoryReadWriteFunc)(void *opaque, uint8_t *buf, int len);
-void esp_init(hwaddr espaddr, int it_shift,
-              ESPDMAMemoryReadWriteFunc dma_memory_read,
-              ESPDMAMemoryReadWriteFunc dma_memory_write,
-              void *dma_opaque, qemu_irq irq, qemu_irq *reset,
-              qemu_irq *dma_enable);
 
 #define ESP_REGS 16
 #define TI_BUFSZ 16
@@ -51,6 +47,19 @@ struct ESPState {
     void *dma_opaque;
     void (*dma_cb)(ESPState *s);
 };
+
+#define TYPE_ESP "esp"
+#define ESP_STATE(obj) OBJECT_CHECK(SysBusESPState, (obj), TYPE_ESP)
+
+typedef struct {
+    /*< private >*/
+    SysBusDevice parent_obj;
+    /*< public >*/
+
+    MemoryRegion iomem;
+    uint32_t it_shift;
+    ESPState esp;
+} SysBusESPState;
 
 #define ESP_TCLO   0x0
 #define ESP_TCMID  0x1
@@ -122,6 +131,11 @@ struct ESPState {
 #define TCHI_FAS100A 0x4
 #define TCHI_AM53C974 0x12
 
+ESPState *esp_init(hwaddr espaddr, int it_shift,
+                   ESPDMAMemoryReadWriteFunc dma_memory_read,
+                   ESPDMAMemoryReadWriteFunc dma_memory_write,
+                   void *dma_opaque, qemu_irq irq, qemu_irq *reset,
+                   qemu_irq *dma_enable);
 void esp_dma_enable(ESPState *s, int irq, int level);
 void esp_request_cancelled(SCSIRequest *req);
 void esp_command_complete(SCSIRequest *req, uint32_t status, size_t resid);

@@ -25,8 +25,19 @@
 #include "hw/ppc/pnv.h"
 #include "hw/ppc/pnv_core.h"
 #include "hw/ppc/pnv_xscom.h"
+#include "hw/ppc/xics.h"
 
-static void powernv_cpu_reset(void *opaque)
+static const char *pnv_core_cpu_typename(PnvCore *pc)
+{
+    const char *core_type = object_class_get_name(object_get_class(OBJECT(pc)));
+    int len = strlen(core_type) - strlen(PNV_CORE_TYPE_SUFFIX);
+    char *s = g_strdup_printf(POWERPC_CPU_TYPE_NAME("%.*s"), len, core_type);
+    const char *cpu_type = object_class_get_name(object_class_by_name(s));
+    g_free(s);
+    return cpu_type;
+}
+
+static void pnv_cpu_reset(void *opaque)
 {
     PowerPCCPU *cpu = opaque;
     CPUState *cs = CPU(cpu);
@@ -43,14 +54,14 @@ static void powernv_cpu_reset(void *opaque)
     env->msr |= MSR_HVB; /* Hypervisor mode */
 }
 
-static void powernv_cpu_init(PowerPCCPU *cpu, Error **errp)
+static void pnv_cpu_init(PowerPCCPU *cpu, Error **errp)
 {
     CPUPPCState *env = &cpu->env;
     int core_pir;
     int thread_index = 0; /* TODO: TCG supports only one thread */
     ppc_spr_t *pir = &env->spr_cb[SPR_PIR];
 
-    core_pir = object_property_get_int(OBJECT(cpu), "core-pir", &error_abort);
+    core_pir = object_property_get_uint(OBJECT(cpu), "core-pir", &error_abort);
 
     /*
      * The PIR of a thread is the core PIR + the thread index. We will
@@ -62,7 +73,7 @@ static void powernv_cpu_init(PowerPCCPU *cpu, Error **errp)
     /* Set time-base frequency to 512 MHz */
     cpu_ppc_tb_init(env, PNV_TIMEBASE_FREQ);
 
-    qemu_register_reset(powernv_cpu_reset, cpu);
+    qemu_register_reset(pnv_cpu_reset, cpu);
 }
 
 /*
@@ -110,7 +121,7 @@ static const MemoryRegionOps pnv_core_xscom_ops = {
     .endianness = DEVICE_BIG_ENDIAN,
 };
 
-static void pnv_core_realize_child(Object *child, Error **errp)
+static void pnv_core_realize_child(Object *child, XICSFabric *xi, Error **errp)
 {
     Error *local_err = NULL;
     CPUState *cs = CPU(child);
@@ -122,7 +133,13 @@ static void pnv_core_realize_child(Object *child, Error **errp)
         return;
     }
 
-    powernv_cpu_init(cpu, &local_err);
+    cpu->intc = icp_create(child, TYPE_PNV_ICP, xi, &local_err);
+    if (local_err) {
+        error_propagate(errp, local_err);
+        return;
+    }
+
+    pnv_cpu_init(cpu, &local_err);
     if (local_err) {
         error_propagate(errp, local_err);
         return;
@@ -133,13 +150,20 @@ static void pnv_core_realize(DeviceState *dev, Error **errp)
 {
     PnvCore *pc = PNV_CORE(OBJECT(dev));
     CPUCore *cc = CPU_CORE(OBJECT(dev));
-    PnvCoreClass *pcc = PNV_CORE_GET_CLASS(OBJECT(dev));
-    const char *typename = object_class_get_name(pcc->cpu_oc);
+    const char *typename = pnv_core_cpu_typename(pc);
     size_t size = object_type_get_instance_size(typename);
     Error *local_err = NULL;
     void *obj;
     int i, j;
     char name[32];
+    Object *xi;
+
+    xi = object_property_get_link(OBJECT(dev), "xics", &local_err);
+    if (!xi) {
+        error_setg(errp, "%s: required link 'xics' not found: %s",
+                   __func__, error_get_pretty(local_err));
+        return;
+    }
 
     pc->threads = g_malloc0(size * cc->nr_threads);
     for (i = 0; i < cc->nr_threads; i++) {
@@ -160,7 +184,7 @@ static void pnv_core_realize(DeviceState *dev, Error **errp)
     for (j = 0; j < cc->nr_threads; j++) {
         obj = pc->threads + j * size;
 
-        pnv_core_realize_child(obj, &local_err);
+        pnv_core_realize_child(obj, XICS_FABRIC(xi), &local_err);
         if (local_err) {
             goto err;
         }
@@ -168,7 +192,7 @@ static void pnv_core_realize(DeviceState *dev, Error **errp)
 
     snprintf(name, sizeof(name), "xscom-core.%d", cc->core_id);
     pnv_xscom_region_init(&pc->xscom_regs, OBJECT(dev), &pnv_core_xscom_ops,
-                          pc, name, PNV_XSCOM_EX_CORE_SIZE);
+                          pc, name, PNV_XSCOM_EX_SIZE);
     return;
 
 err:
@@ -188,46 +212,30 @@ static Property pnv_core_properties[] = {
 static void pnv_core_class_init(ObjectClass *oc, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(oc);
-    PnvCoreClass *pcc = PNV_CORE_CLASS(oc);
 
     dc->realize = pnv_core_realize;
     dc->props = pnv_core_properties;
-    pcc->cpu_oc = cpu_class_by_name(TYPE_POWERPC_CPU, data);
 }
 
-static const TypeInfo pnv_core_info = {
-    .name           = TYPE_PNV_CORE,
-    .parent         = TYPE_CPU_CORE,
-    .instance_size  = sizeof(PnvCore),
-    .class_size     = sizeof(PnvCoreClass),
-    .abstract       = true,
-};
-
-static const char *pnv_core_models[] = {
-    "POWER8E", "POWER8", "POWER8NVL", "POWER9"
-};
-
-static void pnv_core_register_types(void)
-{
-    int i ;
-
-    type_register_static(&pnv_core_info);
-    for (i = 0; i < ARRAY_SIZE(pnv_core_models); ++i) {
-        TypeInfo ti = {
-            .parent = TYPE_PNV_CORE,
-            .instance_size = sizeof(PnvCore),
-            .class_init = pnv_core_class_init,
-            .class_data = (void *) pnv_core_models[i],
-        };
-        ti.name = pnv_core_typename(pnv_core_models[i]);
-        type_register(&ti);
-        g_free((void *)ti.name);
+#define DEFINE_PNV_CORE_TYPE(cpu_model)         \
+    {                                           \
+        .parent = TYPE_PNV_CORE,                \
+        .name = PNV_CORE_TYPE_NAME(cpu_model),  \
     }
-}
 
-type_init(pnv_core_register_types)
+static const TypeInfo pnv_core_infos[] = {
+    {
+        .name           = TYPE_PNV_CORE,
+        .parent         = TYPE_CPU_CORE,
+        .instance_size  = sizeof(PnvCore),
+        .class_size     = sizeof(PnvCoreClass),
+        .class_init = pnv_core_class_init,
+        .abstract       = true,
+    },
+    DEFINE_PNV_CORE_TYPE("power8e_v2.1"),
+    DEFINE_PNV_CORE_TYPE("power8_v2.0"),
+    DEFINE_PNV_CORE_TYPE("power8nvl_v1.0"),
+    DEFINE_PNV_CORE_TYPE("power9_v2.0"),
+};
 
-char *pnv_core_typename(const char *model)
-{
-    return g_strdup_printf(TYPE_PNV_CORE "-%s", model);
-}
+DEFINE_TYPES(pnv_core_infos)

@@ -21,6 +21,7 @@
 #include "qemu/osdep.h"
 
 #include "crypto/random.h"
+#include "qapi/error.h"
 
 #include <gnutls/gnutls.h>
 #include <gnutls/crypto.h>
@@ -41,3 +42,6 @@ int qcrypto_random_bytes(uint8_t *buf,
 
     return 0;
 }
+
+
+int qcrypto_random_init(Error **errp G_GNUC_UNUSED) { return 0; }
