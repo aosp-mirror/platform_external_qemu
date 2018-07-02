@@ -38,7 +38,33 @@ using android::base::StdioStream;
 using android::snapshot::TextureLoader;
 using android::snapshot::TextureSaver;
 
-using namespace gltest;
+testing::AssertionResult compareGlobalGlInt(const GLESv2Dispatch* gl,
+                                            GLenum name,
+                                            GLint expected) {
+    GLint current;
+    gl->glGetIntegerv(name, &current);
+    if (expected != current) {
+        return testing::AssertionFailure()
+               << "GL global int mismatch for parameter " << name
+               << ":\n\tvalue was:\t" << current << "\n\t expected:\t"
+               << expected << "\t";
+    }
+    return testing::AssertionSuccess();
+}
+
+testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
+                                              GLenum name,
+                                              GLfloat expected) {
+    GLfloat current;
+    gl->glGetFloatv(name, &current);
+    if (expected != current) {
+        return testing::AssertionFailure()
+               << "GL global float mismatch for parameter " << name
+               << ":\n\tvalue was:\t" << current << "\n\t expected:\t"
+               << expected << "\t";
+    }
+    return testing::AssertionSuccess();
+}
 
 void SnapshotTest::SetUp() {
     GLTest::SetUp();
@@ -93,8 +119,8 @@ void SnapshotTest::loadSnapshot(const std::string streamFile,
 
     m_context = egl->eglLoadContext(m_display, &contextAttribs[0], egl_stream);
     m_config = egl->eglLoadConfig(m_display, egl_stream);
-    m_surface = pbufferSurface(m_display, m_config, kSurfaceSize[0],
-                               kSurfaceSize[0]);
+    m_surface = pbufferSurface(m_display, m_config, kTestSurfaceSize[0],
+                               kTestSurfaceSize[0]);
     egl->eglPostLoadAllImages(m_display, egl_stream);
 
     m_stream->close();
@@ -127,18 +153,31 @@ void SnapshotTest::doSnapshot(std::function<void()> preloadCheck = [] {}) {
 }
 
 void SnapshotPreserveTest::doCheckedSnapshot() {
-    defaultStateCheck();
-    ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
-    stateChange();
-    ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
-    changedStateCheck();
+    {
+        SCOPED_TRACE("during pre-snapshot default state check");
+        defaultStateCheck();
+        ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
+    }
+    {
+        SCOPED_TRACE("during pre-snapshot state change");
+        stateChange();
+        ASSERT_EQ(GL_NO_ERROR, gl->glGetError());
+    }
+    {
+        SCOPED_TRACE("during pre-snapshot changed state check");
+        changedStateCheck();
+    }
     SnapshotTest::doSnapshot([this] {
+        SCOPED_TRACE("during post-reset default state check");
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
         defaultStateCheck();
     });
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-    changedStateCheck();
-    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+    {
+        SCOPED_TRACE("during post-snapshot changed state check");
+        changedStateCheck();
+        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+    }
 }
 
 }  // namespace emugl

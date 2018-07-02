@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-namespace gltest {
+namespace emugl {
 
 using TestTexture = android::AlignedBuf<uint8_t, 4>;
 
@@ -43,4 +43,4 @@ TestTexture createTestTextureRGB888SingleColor(int width, int height, float r, f
 TestTexture createTestTextureRGBA8888SingleColor(int width, int height, float r, float g, float b, float a);
 
 
-} // namespace gltest
+} // namespace emugl

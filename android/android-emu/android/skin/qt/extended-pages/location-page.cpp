@@ -35,6 +35,8 @@ using android::base::LazyInstance;
 static const double kGplexLon = -122.084;
 static const double kGplexLat =   37.422;
 
+static double getHeading(double startLat, double startLon, double endLat, double endLon);
+
 const QAndroidLocationAgent* LocationPage::sLocationAgent = nullptr;
 
 struct LocationPageGlobals {
@@ -87,6 +89,8 @@ LocationPage::LocationPage(QWidget *parent) :
     double curLat, curLon, curAlt;
     getDeviceLocation(&curLat, &curLon, &curAlt);
     updateDisplayedLocation(curLat, curLon, curAlt);
+    mPreviousLat = curLat;
+    mPreviousLon = curLon;
 
     mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
     mUi->loc_latitudeInput->setValue(curLat);
@@ -210,19 +214,23 @@ void LocationPage::on_loc_sendPointButton_clicked() {
     mUi->loc_latitudeInput->forceUpdate();
     mUi->loc_longitudeInput->forceUpdate();
 
+    double lat = 0.0;
+    double lon = 0.0;
     double altitude = mUi->loc_altitudeInput->text().toDouble();
     if (altitude < -1000.0 || altitude > 10000.0) {
-        double lat;
-        double lon;
         double validAltitude;
         getDeviceLocationFromSettings(&lat, &lon, &validAltitude);
         mUi->loc_altitudeInput->setText(QString::number(validAltitude));
     }
 
     mUpdateThreadLock.lock();
-    updateDisplayedLocation(mUi->loc_latitudeInput->value(),
-                            mUi->loc_longitudeInput->value(),
-                            mUi->loc_altitudeInput->text().toDouble());
+    lat = mUi->loc_latitudeInput->value(),
+    lon = mUi->loc_longitudeInput->value(),
+    altitude = mUi->loc_altitudeInput->text().toDouble();
+    updateDisplayedLocation(lat, lon, altitude);
+
+    mPreviousLat = lat;
+    mPreviousLon = lon;
 
     mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
 }
@@ -467,6 +475,12 @@ void LocationPage::timeout() {
     double lon = theItem->text().toDouble(&cellOK);
     theItem = mUi->loc_pathTable->item(mRowToSend, 3);
     double alt = theItem->text().toDouble(&cellOK);
+
+    double direction = getHeading(mPreviousLat, mPreviousLon, lat, lon);
+    emit targetHeadingChanged(direction);
+
+    mPreviousLat = lat;
+    mPreviousLon = lon;
 
     // Update the appearance of the table:
     // 1. Clear the "play arrow" icon from the previous point, if necessary.
@@ -735,4 +749,30 @@ GeoDataLoaderThread* GeoDataLoaderThread::newInstance(const QObject* handler,
     connect(new_instance, &QThread::finished, new_instance, &QObject::deleteLater);
 
     return new_instance;
+}
+
+// Determine the bearing from a starting location to an ending location.
+// The ouput and all inputs are in degrees.
+// The output is +/-180 with 0 = north, 90 = east, etc.
+static double getHeading(double startLat, double startLon, double endLat, double endLon) {
+
+    // The calculation for the initial bearing is
+    //    aa = cos(latEnd) * sin(delta lon)
+    //    bb = cos(latStart) * sin(latEnd) - sin(latStart) * cos(latEnd) * cos(delta lon)
+    //    bearing = atan2(aa, bb)
+
+    // We need to do the calculations in radians
+
+    double startLatRadians = startLat * M_PI / 180.0;
+    double startLonRadians = startLon * M_PI / 180.0;
+    double endLatRadians   = endLat   * M_PI / 180.0;
+    double endLonRadians   = endLon   * M_PI / 180.0;
+
+    double deltaLonRadians = endLonRadians - startLonRadians;
+
+    double aa = cos(endLatRadians) * sin(deltaLonRadians);
+    double bb =   ( cos(startLatRadians) * sin(endLatRadians) )
+                - ( sin(startLatRadians) * cos(endLatRadians) * cos(deltaLonRadians) );
+
+    return (atan2(aa, bb) * 180.0 / M_PI);
 }

@@ -11,13 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#pragma once
 
-#include <gtest/gtest.h>
+#include "GLSnapshotTesting.h"
 
-#include "OpenGLTestContext.h"
+#include <GLES2/gl2.h>
+#include <GLES3/gl31.h>
 
 namespace emugl {
 
-TEST_F(GLTest, InitDestroy) {}
+GLuint createBuffer(const GLESv2Dispatch* gl, GlBufferData data);
 
 }  // namespace emugl

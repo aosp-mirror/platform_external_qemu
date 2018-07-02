@@ -80,6 +80,9 @@ signals:
 
 public slots:
     void onVirtualSceneControlsEngaged(bool engaged);
+    // Sets the device orientation to: face up, pointing in the
+    // desired direction (north = 0.0, east = 90.0)
+    void setTargetHeadingDegrees(double heading);
 
 private slots:
     void on_rotateToPortrait_clicked();

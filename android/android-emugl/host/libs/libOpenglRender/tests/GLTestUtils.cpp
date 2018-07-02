@@ -16,7 +16,7 @@
 
 using android::AlignedBuf;
 
-namespace gltest {
+namespace emugl {
 
 testing::AssertionResult RowMatches(int rowIndex, size_t rowBytes,
                                     unsigned char* expected, unsigned char* actual) {
@@ -120,4 +120,4 @@ TestTexture createTestTextureRGBA8888SingleColor(int width, int height, float r,
     return res;
 }
 
-} // namespace gltest
+} // namespace emugl

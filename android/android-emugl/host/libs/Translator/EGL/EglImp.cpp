@@ -102,6 +102,7 @@ EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EG
 EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
 EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
 EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
+EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
@@ -125,6 +126,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglSetImageFenceANDROID },
         {"eglWaitImageFenceANDROID",
                 (__eglMustCastToProperFunctionPointerType)eglWaitImageFenceANDROID },
+        {"eglAddLibrarySearchPathANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglAddLibrarySearchPathANDROID },
 };
 
 static const int s_eglExtensionsSize =
@@ -1530,6 +1533,10 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
 EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay dpy, void* fence) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->waitSync((GLsync)fence, 0, -1);
+}
+
+EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path) {
+    emugl::SharedLibrary::addLibrarySearchPath(path);
 }
 
 /*********************************************************************************/
