@@ -23,6 +23,7 @@
 #include "OpenGLTestContext.h"
 
 #include <memory>
+#include <vector>
 
 namespace emugl {
 
@@ -109,6 +110,12 @@ static const GLenum kGLES2BlendFuncs[] = {GL_ZERO,
                                           GL_ONE_MINUS_CONSTANT_ALPHA,
                                           GL_SRC_ALPHA_SATURATE};
 
+// Compares a global GL value, known by |name| and retrieved as a boolean,
+// against an |expected| value.
+testing::AssertionResult compareGlobalGlBoolean(const GLESv2Dispatch* gl,
+                                                GLenum name,
+                                                GLboolean expected);
+
 // Compares a global GL value, known by |name| and retrieved as an integer,
 // against an |expected| value.
 testing::AssertionResult compareGlobalGlInt(const GLESv2Dispatch* gl,
@@ -120,6 +127,32 @@ testing::AssertionResult compareGlobalGlInt(const GLESv2Dispatch* gl,
 testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
                                               GLenum name,
                                               GLfloat expected);
+
+// Compares a vector of global GL values, known by |name| and retrieved as a
+// boolean array, against |expected| values.
+// Specify |size| if more space is needed than the size of |expected|.
+testing::AssertionResult compareGlobalGlBooleanv(
+        const GLESv2Dispatch* gl,
+        GLenum name,
+        const std::vector<GLboolean>& expected,
+        GLuint size = 0);
+
+// Compares a vector of global GL values, known by |name| and retrieved as an
+// integer array, against |expected| values.
+// Specify |size| if more space is needed than the size of |expected|.
+testing::AssertionResult compareGlobalGlIntv(const GLESv2Dispatch* gl,
+                                             GLenum name,
+                                             const std::vector<GLint>& expected,
+                                             GLuint size = 0);
+
+// Compares a vector of global GL values, known by |name| and retrieved as a
+// float array, against |expected| values.
+// Specify |size| if more space is needed than the size of |expected|.
+testing::AssertionResult compareGlobalGlFloatv(
+        const GLESv2Dispatch* gl,
+        GLenum name,
+        const std::vector<GLfloat>& expected,
+        GLuint size = 0);
 
 // SnapshotTest - A helper class for performing a test related to saving or
 // loading GL translator snapshots. As a test fixture, its setup will prepare a
