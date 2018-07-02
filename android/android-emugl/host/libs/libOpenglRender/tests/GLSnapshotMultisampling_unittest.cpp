@@ -29,10 +29,8 @@ class SnapshotGlSampleCoverageTest
     void stateCheck(GlSampleCoverage expected) {
         EXPECT_TRUE(compareGlobalGlFloat(gl, GL_SAMPLE_COVERAGE_VALUE,
                                          expected.value));
-        GLboolean invert;
-        gl->glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, &invert);
-        EXPECT_EQ(expected.invert, invert)
-                << "Expected different sample coverage 'invert'";
+        EXPECT_TRUE(compareGlobalGlBoolean(gl, GL_SAMPLE_COVERAGE_INVERT,
+                                           expected.invert));
     }
     void stateChange() {
         gl->glSampleCoverage(GetParam().value, GetParam().invert);
