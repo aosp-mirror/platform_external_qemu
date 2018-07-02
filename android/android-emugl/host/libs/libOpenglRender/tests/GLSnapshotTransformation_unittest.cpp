@@ -20,14 +20,14 @@
 namespace emugl {
 
 // Viewport settings to attempt
-static const GLint kGLES2TestViewport[] = {10, 10, 100, 100};
+static const std::vector<GLint> kGLES2TestViewport = {10, 10, 100, 100};
 
 // Depth range settings to attempt
-static const GLclampf kGLES2TestDepthRange[] = {0.2f, 0.8f};
+static const std::vector<GLclampf> kGLES2TestDepthRange = {0.2f, 0.8f};
 
 class SnapshotGlViewportTest
     : public SnapshotPreserveTest,
-      public ::testing::WithParamInterface<const GLint*> {
+      public ::testing::WithParamInterface<std::vector<GLint>> {
     void defaultStateCheck() override {
         GLint viewport[4] = {};
         gl->glGetIntegerv(GL_VIEWPORT, viewport);
@@ -36,11 +36,7 @@ class SnapshotGlViewportTest
         EXPECT_EQ(kTestSurfaceSize[1], viewport[3]);
     }
     void changedStateCheck() override {
-        GLint viewport[4] = {};
-        gl->glGetIntegerv(GL_VIEWPORT, viewport);
-        for (int i = 0; i < 4; ++i) {
-            EXPECT_EQ(GetParam()[i], viewport[i]);
-        }
+        EXPECT_TRUE(compareGlobalGlIntv(gl, GL_VIEWPORT, GetParam()));
     }
     void stateChange() override {
         gl->glViewport(GetParam()[0], GetParam()[1], GetParam()[2],
@@ -57,23 +53,20 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotTransformation,
                         ::testing::Values(kGLES2TestViewport));
 
 class SnapshotGlDepthRangeTest
-    : public SnapshotSetValueTest<GLclampf*>,
-      public ::testing::WithParamInterface<const GLclampf*> {
-    void stateCheck(GLclampf* expected) override {
-        GLfloat depthRange[2] = {};
-        gl->glGetFloatv(GL_DEPTH_RANGE, depthRange);
-        EXPECT_EQ(expected[0], depthRange[0]);
-        EXPECT_EQ(expected[1], depthRange[1]);
+    : public SnapshotSetValueTest<std::vector<GLclampf>>,
+      public ::testing::WithParamInterface<std::vector<GLclampf>> {
+    void stateCheck(std::vector<GLclampf> expected) override {
+        EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_DEPTH_RANGE, expected));
     }
     void stateChange() override {
-        gl->glDepthRangef(GetParam()[0], GetParam()[1]);
+        std::vector<GLclampf> testRange = GetParam();
+        gl->glDepthRangef(testRange[0], testRange[1]);
     }
 };
 
 TEST_P(SnapshotGlDepthRangeTest, SetDepthRange) {
-    GLclampf defaultRange[2] = {0.0f, 1.0f};
-    GLclampf testRange[2] = {GetParam()[0], GetParam()[1]};
-    setExpectedValues(defaultRange, testRange);
+    std::vector<GLclampf> defaultRange = {0.0f, 1.0f};
+    setExpectedValues(defaultRange, GetParam());
     doCheckedSnapshot();
 }
 
