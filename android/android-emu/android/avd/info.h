@@ -297,11 +297,17 @@ int          avdInfo_lockImageFile( const AvdInfo*  i, AvdImageType  imageType, 
 /* Manually set the path of a given image file. */
 void         avdInfo_setImageFile( AvdInfo*  i, AvdImageType  imageType, const char*  imagePath );
 
+/* Manually set the path of the acpi ini path. */
+void         avdInfo_setAcpiIniPath( AvdInfo*  i, const char*  iniPath );
+
 /* Returns the content path of the virtual device */
 const char*  avdInfo_getContentPath( const AvdInfo*  i );
 
 /* Returns the root ini path of the virtual device */
 const char*  avdInfo_getRootIniPath( const AvdInfo*  i );
+
+/* Returns the acpi configuration path of the virtual device*/
+const char*  avdInfo_getAcpiIniPath( const AvdInfo*  i );
 
 /* Retrieve the AVD's specific skin information.
  * On exit:
