@@ -496,12 +496,12 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_colorMaskB = static_cast<GLboolean>(stream->getByte());
             m_colorMaskA = static_cast<GLboolean>(stream->getByte());
 
-            m_clearColorR = static_cast<GLclampf>(stream->getBe32());
-            m_clearColorG = static_cast<GLclampf>(stream->getBe32());
-            m_clearColorB = static_cast<GLclampf>(stream->getBe32());
-            m_clearColorA = static_cast<GLclampf>(stream->getBe32());
+            m_clearColorR = static_cast<GLclampf>(stream->getFloat());
+            m_clearColorG = static_cast<GLclampf>(stream->getFloat());
+            m_clearColorB = static_cast<GLclampf>(stream->getFloat());
+            m_clearColorA = static_cast<GLclampf>(stream->getFloat());
 
-            m_clearDepth = static_cast<GLclampf>(stream->getBe32());
+            m_clearDepth = static_cast<GLclampf>(stream->getFloat());
             m_clearStencil = static_cast<GLint>(stream->getBe32());
 
             // share group is supposed to be loaded by EglContext and reset
@@ -682,12 +682,12 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putByte(m_colorMaskB);
         stream->putByte(m_colorMaskA);
 
-        stream->putBe32(m_clearColorR);
-        stream->putBe32(m_clearColorG);
-        stream->putBe32(m_clearColorB);
-        stream->putBe32(m_clearColorA);
+        stream->putFloat(m_clearColorR);
+        stream->putFloat(m_clearColorG);
+        stream->putFloat(m_clearColorB);
+        stream->putFloat(m_clearColorA);
 
-        stream->putBe32(m_clearDepth);
+        stream->putFloat(m_clearDepth);
         stream->putBe32(m_clearStencil);
 
         // share group is supposed to be saved / loaded by EglContext

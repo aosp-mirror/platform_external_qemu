@@ -20,7 +20,7 @@
 namespace emugl {
 
 // Scissor box settings to attempt
-static const GLint kGLES2TestScissorBox[] = {2, 3, 10, 20};
+static const std::vector<GLint> kGLES2TestScissorBox = {2, 3, 10, 20};
 
 // Default stencil operation modes
 static const GlStencilOp kGLES2DefaultStencilOp = {GL_KEEP, GL_KEEP, GL_KEEP};
@@ -42,14 +42,10 @@ static const GlBlendFunc kGLES2TestBlendFuncs[] = {
         {GL_SRC_ALPHA_SATURATE, GL_ONE, GL_SRC_ALPHA_SATURATE, GL_ONE}};
 
 class SnapshotGlScissorBoxTest
-    : public SnapshotSetValueTest<GLint*>,
-      public ::testing::WithParamInterface<const GLint*> {
-    void stateCheck(GLint* expected) override {
-        GLint box[4] = {};
-        gl->glGetIntegerv(GL_SCISSOR_BOX, box);
-        for (int i = 0; i < 4; ++i) {
-            EXPECT_EQ(expected[i], box[i]) << " at box index " << i;
-        }
+    : public SnapshotSetValueTest<std::vector<GLint>>,
+      public ::testing::WithParamInterface<std::vector<GLint>> {
+    void stateCheck(std::vector<GLint> expected) override {
+        EXPECT_TRUE(compareGlobalGlIntv(gl, GL_SCISSOR_BOX, expected));
     }
     void stateChange() override {
         gl->glScissor(GetParam()[0], GetParam()[1], GetParam()[2],
@@ -59,13 +55,12 @@ class SnapshotGlScissorBoxTest
 
 TEST_P(SnapshotGlScissorBoxTest, SetScissorBox) {
     // different drivers act differently; get the default scissorbox
-    GLint defaultBox[4] = {};
-    gl->glGetIntegerv(GL_SCISSOR_BOX, defaultBox);
+    std::vector<GLint> defaultBox;
+    defaultBox.resize(4);
+    gl->glGetIntegerv(GL_SCISSOR_BOX, &defaultBox[0]);
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
 
-    GLint testBox[] = {GetParam()[0], GetParam()[1], GetParam()[2],
-                       GetParam()[3]};
-    setExpectedValues(defaultBox, testBox);
+    setExpectedValues(defaultBox, GetParam());
     doCheckedSnapshot();
 }
 
