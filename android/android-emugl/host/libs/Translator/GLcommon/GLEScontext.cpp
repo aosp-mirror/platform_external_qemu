@@ -2603,6 +2603,8 @@ bool GLEScontext::setupImageBlitForTexture(uint32_t width,
         gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
+    gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+
     if (m_blitState.samples > 0) {
         GLint rWidth = width;
         GLint rHeight = height;
