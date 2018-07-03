@@ -22,6 +22,30 @@
       "revId": "ec6102dfe8ed4c8858afcdbdc83468e1f0b72e4c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9aa7bd5f_6ca97470",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-03T20:55:09Z",
+      "side": 1,
+      "message": "Unfortunately the gl headers #define that symbol, so it fails to compile.  I just added an underscore at the end, but whatever makes the most sense is fine.",
+      "parentUuid": "04ec2ea2_c62424a4",
+      "range": {
+        "startLine": 99,
+        "startChar": 9,
+        "endLine": 99,
+        "endChar": 43
+      },
+      "revId": "ec6102dfe8ed4c8858afcdbdc83468e1f0b72e4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
