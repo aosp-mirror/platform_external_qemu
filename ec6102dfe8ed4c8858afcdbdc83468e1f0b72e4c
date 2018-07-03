@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "04ec2ea2_c62424a4",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-03T20:52:07Z",
+      "side": 1,
+      "message": "nit: make them have the same naming convention?",
+      "range": {
+        "startLine": 99,
+        "startChar": 9,
+        "endLine": 99,
+        "endChar": 43
+      },
+      "revId": "ec6102dfe8ed4c8858afcdbdc83468e1f0b72e4c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
