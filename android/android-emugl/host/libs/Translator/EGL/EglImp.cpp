@@ -1436,6 +1436,13 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image)
 {
     VALIDATE_DISPLAY(display);
+    unsigned int imagehndl = SafeUIntFromPointer(image);
+    ImagePtr img = getEGLImage(imagehndl);
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    if(img->sync) {
+        iface->deleteSync((GLsync)img->sync);
+        img->sync = nullptr;
+    }
     return dpy->destroyImageKHR(image) ? EGL_TRUE:EGL_FALSE;
 }
 
@@ -1524,7 +1531,6 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
         iface->deleteSync((GLsync)img->sync);
         img->sync = nullptr;
     }
-
     GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     img->sync = res;
     return (void*)res;
