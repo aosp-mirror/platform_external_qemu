@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d07791c9_4fa2c05c",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2606,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-03T21:59:34Z",
+      "side": 1,
+      "message": "Can you check the current GL_READ_FRAMEBUFFER binding before issuing the call? It will make things a bit faster / smoother in the common case",
+      "range": {
+        "startLine": 2606,
+        "startChar": 2,
+        "endLine": 2606,
+        "endChar": 64
+      },
+      "revId": "43bfedfbf0844ad1de095a39baf099409bc468c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
