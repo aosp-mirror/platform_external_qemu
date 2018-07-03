@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0ea61f0_5d5dc855",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-03T23:04:54Z",
+      "side": 1,
+      "message": "could you please move these into the LocationPageGlobals struct? Otherwise global ctors-dtors _will_ make emulator crash",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 56
+      },
+      "revId": "e5bcc02f668c7c955f15dfa6030f7126db9412be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a668dd1_7cf78283",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-03T23:04:54Z",
+      "side": 1,
+      "message": "nit: AutoLock?",
+      "range": {
+        "startLine": 59,
+        "startChar": 8,
+        "endLine": 59,
+        "endChar": 32
+      },
+      "revId": "e5bcc02f668c7c955f15dfa6030f7126db9412be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0bf5abb_760ccd5a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-03T23:04:54Z",
+      "side": 1,
+      "message": "this loop relies too much on the condition variable - but it can possibly return from the timedWait() function even without any signaling. there should be a separate flag \"sendLocation\" here, unless we\u0027re ok with sending it more often than once in 10 sec with no changes (with the way QEMU uses interrupts internally potentially much more often on Linux)",
+      "range": {
+        "startLine": 59,
+        "startChar": 7,
+        "endLine": 70,
+        "endChar": 35
+      },
+      "revId": "e5bcc02f668c7c955f15dfa6030f7126db9412be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "163f9053_2d764778",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-03T23:04:54Z",
+      "side": 1,
+      "message": "nit: AutoLock?",
+      "range": {
+        "startLine": 139,
+        "startChar": 4,
+        "endLine": 139,
+        "endChar": 21
+      },
+      "revId": "e5bcc02f668c7c955f15dfa6030f7126db9412be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61737465_f3c7874c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-03T23:04:54Z",
+      "side": 1,
+      "message": "nit: AutoLock?",
+      "revId": "e5bcc02f668c7c955f15dfa6030f7126db9412be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51791fa8_4db22818",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-03T23:04:54Z",
+      "side": 1,
+      "message": "nit: AutoLock?",
+      "range": {
+        "startLine": 508,
+        "startChar": 4,
+        "endLine": 508,
+        "endChar": 21
+      },
+      "revId": "e5bcc02f668c7c955f15dfa6030f7126db9412be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
