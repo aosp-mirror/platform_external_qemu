@@ -24,7 +24,8 @@
 #include "qapi/error.h"
 #include "qom/cpu.h"
 #include "qemu/log.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
+#include "sysemu/kvm.h"
 
 /* #define DEBUG_GIC */
 
@@ -92,6 +93,7 @@ void gic_update(GICState *s)
         best_irq = 1023;
         for (irq = 0; irq < s->num_irq; irq++) {
             if (GIC_TEST_ENABLED(irq, cm) && gic_test_pending(s, irq, cm) &&
+                (!GIC_TEST_ACTIVE(irq, cm)) &&
                 (irq < GIC_INTERNAL || GIC_TARGET(irq) & cm)) {
                 if (GIC_GET_PRIORITY(irq, cpu) < best_prio) {
                     best_prio = GIC_GET_PRIORITY(irq, cpu);
@@ -254,7 +256,8 @@ static int gic_get_group_priority(GICState *s, int cpu, int irq)
     if (gic_has_groups(s) &&
         !(s->cpu_ctlr[cpu] & GICC_CTLR_CBPR) &&
         GIC_TEST_GROUP(irq, (1 << cpu))) {
-        bpr = s->abpr[cpu];
+        bpr = s->abpr[cpu] - 1;
+        assert(bpr >= 0);
     } else {
         bpr = s->bpr[cpu];
     }
@@ -502,6 +505,11 @@ static void gic_set_cpu_control(GICState *s, int cpu, uint32_t value,
 
 static uint8_t gic_get_running_priority(GICState *s, int cpu, MemTxAttrs attrs)
 {
+    if ((s->revision != REV_11MPCORE) && (s->running_priority[cpu] > 0xff)) {
+        /* Idle priority */
+        return 0xff;
+    }
+
     if (s->security_extn && !attrs.secure) {
         if (s->running_priority[cpu] & 0x80) {
             /* Running priority in upper half of range: return the Non-secure
@@ -1204,8 +1212,13 @@ static MemTxResult gic_cpu_read(GICState *s, int cpu, int offset,
         break;
     case 0x08: /* Binary Point */
         if (s->security_extn && !attrs.secure) {
-            /* BPR is banked. Non-secure copy stored in ABPR. */
-            *data = s->abpr[cpu];
+            if (s->cpu_ctlr[cpu] & GICC_CTLR_CBPR) {
+                /* NS view of BPR when CBPR is 1 */
+                *data = MIN(s->bpr[cpu] + 1, 7);
+            } else {
+                /* BPR is banked. Non-secure copy stored in ABPR. */
+                *data = s->abpr[cpu];
+            }
         } else {
             *data = s->bpr[cpu];
         }
@@ -1260,7 +1273,8 @@ static MemTxResult gic_cpu_read(GICState *s, int cpu, int offset,
     default:
         qemu_log_mask(LOG_GUEST_ERROR,
                       "gic_cpu_read: Bad offset %x\n", (int)offset);
-        return MEMTX_ERROR;
+        *data = 0;
+        break;
     }
     return MEMTX_OK;
 }
@@ -1277,7 +1291,12 @@ static MemTxResult gic_cpu_write(GICState *s, int cpu, int offset,
         break;
     case 0x08: /* Binary Point */
         if (s->security_extn && !attrs.secure) {
-            s->abpr[cpu] = MAX(value & 0x7, GIC_MIN_ABPR);
+            if (s->cpu_ctlr[cpu] & GICC_CTLR_CBPR) {
+                /* WI when CBPR is 1 */
+                return MEMTX_OK;
+            } else {
+                s->abpr[cpu] = MAX(value & 0x7, GIC_MIN_ABPR);
+            }
         } else {
             s->bpr[cpu] = MAX(value & 0x7, GIC_MIN_BPR);
         }
@@ -1328,7 +1347,7 @@ static MemTxResult gic_cpu_write(GICState *s, int cpu, int offset,
     default:
         qemu_log_mask(LOG_GUEST_ERROR,
                       "gic_cpu_write: Bad offset %x\n", (int)offset);
-        return MEMTX_ERROR;
+        return MEMTX_OK;
     }
     gic_update(s);
     return MEMTX_OK;
@@ -1412,6 +1431,12 @@ static void arm_gic_realize(DeviceState *dev, Error **errp)
         return;
     }
 
+    if (kvm_enabled() && !kvm_arm_supports_user_irq()) {
+        error_setg(errp, "KVM with user space irqchip only works when the "
+                         "host kernel supports KVM_CAP_ARM_USER_IRQ");
+        return;
+    }
+
     /* This creates distributor and main CPU interface (s->cpuiomem[0]) */
     gic_init_irqs_and_mmio(s, gic_set_irq, gic_ops);
 
@@ -1436,8 +1461,7 @@ static void arm_gic_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     ARMGICClass *agc = ARM_GIC_CLASS(klass);
 
-    agc->parent_realize = dc->realize;
-    dc->realize = arm_gic_realize;
+    device_class_set_parent_realize(dc, arm_gic_realize, &agc->parent_realize);
 }
 
 static const TypeInfo arm_gic_info = {

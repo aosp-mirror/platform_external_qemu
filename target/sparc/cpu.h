@@ -29,8 +29,6 @@
 
 #include "exec/cpu-defs.h"
 
-#include "fpu/softfloat.h"
-
 /*#define EXCP_INTERRUPT 0x100*/
 
 /* trap definitions */
@@ -240,7 +238,7 @@ typedef struct trap_state {
 #endif
 #define TARGET_INSN_START_EXTRA_WORDS 1
 
-typedef struct sparc_def_t {
+struct sparc_def_t {
     const char *name;
     target_ulong iu_version;
     uint32_t fpu_version;
@@ -254,7 +252,7 @@ typedef struct sparc_def_t {
     uint32_t features;
     uint32_t nwindows;
     uint32_t maxtl;
-} sparc_def_t;
+};
 
 #define CPU_FEATURE_FLOAT        (1 << 0)
 #define CPU_FEATURE_FLOAT128     (1 << 1)
@@ -529,7 +527,7 @@ struct CPUSPARCState {
 #define SOFTINT_INTRMASK (0xFFFE)
 #define SOFTINT_REG_MASK (SOFTINT_STIMER|SOFTINT_INTRMASK|SOFTINT_TIMER)
 #endif
-    sparc_def_t *def;
+    sparc_def_t def;
 
     void *irq_manager;
     void (*qemu_irq_ack)(CPUSPARCState *env, void *irq_manager, int intno);
@@ -579,11 +577,10 @@ void cpu_raise_exception_ra(CPUSPARCState *, int, uintptr_t) QEMU_NORETURN;
 
 #ifndef NO_CPU_IO_DEFS
 /* cpu_init.c */
-SPARCCPU *cpu_sparc_init(const char *cpu_model);
 void cpu_sparc_set_id(CPUSPARCState *env, unsigned int cpu);
 void sparc_cpu_list(FILE *f, fprintf_function cpu_fprintf);
 /* mmu_helper.c */
-int sparc_cpu_handle_mmu_fault(CPUState *cpu, vaddr address, int rw,
+int sparc_cpu_handle_mmu_fault(CPUState *cpu, vaddr address, int size, int rw,
                                int mmu_idx);
 target_ulong mmu_probe(CPUSPARCState *env, target_ulong address, int mmulev);
 void dump_mmu(FILE *f, fprintf_function cpu_fprintf, CPUSPARCState *env);
@@ -595,7 +592,7 @@ int sparc_cpu_memory_rw_debug(CPUState *cpu, vaddr addr,
 
 
 /* translate.c */
-void gen_intermediate_code_init(CPUSPARCState *env);
+void sparc_tcg_init(void);
 
 /* cpu-exec.c */
 
@@ -655,9 +652,9 @@ hwaddr cpu_get_phys_page_nofault(CPUSPARCState *env, target_ulong addr,
 #endif
 int cpu_sparc_signal_handler(int host_signum, void *pinfo, void *puc);
 
-#ifndef NO_CPU_IO_DEFS
-#define cpu_init(cpu_model) CPU(cpu_sparc_init(cpu_model))
-#endif
+#define SPARC_CPU_TYPE_SUFFIX "-" TYPE_SPARC_CPU
+#define SPARC_CPU_TYPE_NAME(model) model SPARC_CPU_TYPE_SUFFIX
+#define CPU_RESOLVING_TYPE TYPE_SPARC_CPU
 
 #define cpu_signal_handler cpu_sparc_signal_handler
 #define cpu_list sparc_cpu_list
@@ -679,7 +676,7 @@ int cpu_sparc_signal_handler(int host_signum, void *pinfo, void *puc);
 #if defined (TARGET_SPARC64)
 static inline int cpu_has_hypervisor(CPUSPARCState *env1)
 {
-    return env1->def->features & CPU_FEATURE_HYPV;
+    return env1->def.features & CPU_FEATURE_HYPV;
 }
 
 static inline int cpu_hypervisor_mode(CPUSPARCState *env1)
@@ -788,14 +785,14 @@ static inline void cpu_get_tb_cpu_state(CPUSPARCState *env, target_ulong *pc,
     if (env->pstate & PS_AM) {
         flags |= TB_FLAG_AM_ENABLED;
     }
-    if ((env->def->features & CPU_FEATURE_FLOAT)
+    if ((env->def.features & CPU_FEATURE_FLOAT)
         && (env->pstate & PS_PEF)
         && (env->fprs & FPRS_FEF)) {
         flags |= TB_FLAG_FPU_ENABLED;
     }
     flags |= env->asi << TB_FLAG_ASI_SHIFT;
 #else
-    if ((env->def->features & CPU_FEATURE_FLOAT) && env->psref) {
+    if ((env->def.features & CPU_FEATURE_FLOAT) && env->psref) {
         flags |= TB_FLAG_FPU_ENABLED;
     }
 #endif

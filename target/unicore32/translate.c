@@ -16,6 +16,7 @@
 #include "tcg-op.h"
 #include "qemu/log.h"
 #include "exec/cpu_ldst.h"
+#include "exec/translator.h"
 
 #include "exec/helper-proto.h"
 #include "exec/helper-gen.h"
@@ -45,11 +46,14 @@ typedef struct DisasContext {
 #define IS_USER(s)      1
 #endif
 
+/* is_jmp field values */
+#define DISAS_JUMP    DISAS_TARGET_0 /* only pc was modified dynamically */
+#define DISAS_UPDATE  DISAS_TARGET_1 /* cpu state was modified dynamically */
+#define DISAS_TB_JUMP DISAS_TARGET_2 /* only pc was modified statically */
 /* These instructions trap after executing, so defer them until after the
    conditional executions state has been updated.  */
-#define DISAS_SYSCALL 5
+#define DISAS_SYSCALL DISAS_TARGET_3
 
-static TCGv_env cpu_env;
 static TCGv_i32 cpu_R[32];
 
 /* FIXME:  These should be removed.  */
@@ -68,9 +72,6 @@ static const char *regnames[] = {
 void uc32_translate_init(void)
 {
     int i;
-
-    cpu_env = tcg_global_reg_new_ptr(TCG_AREG0, "env");
-    tcg_ctx.tcg_env = cpu_env;
 
     for (i = 0; i < 32; i++) {
         cpu_R[i] = tcg_global_mem_new_i32(cpu_env,
@@ -1229,7 +1230,7 @@ static void do_datap(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
     if (UCOP_OPCODES != 0x0f && UCOP_OPCODES != 0x0d) {
         tmp = load_reg(s, UCOP_REG_N);
     } else {
-        TCGV_UNUSED(tmp);
+        tmp = NULL;
     }
 
     switch (UCOP_OPCODES) {
@@ -1651,7 +1652,7 @@ static void do_ldst_m(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
 
     /* compute total size */
     loaded_base = 0;
-    TCGV_UNUSED(loaded_var);
+    loaded_var = NULL;
     n = 0;
     for (i = 0; i < 6; i++) {
         if (UCOP_SET(i)) {
@@ -1869,10 +1870,9 @@ static void disas_uc32_insn(CPUUniCore32State *env, DisasContext *s)
 }
 
 /* generate intermediate code for basic block 'tb'.  */
-void gen_intermediate_code(CPUUniCore32State *env, TranslationBlock *tb)
+void gen_intermediate_code(CPUState *cs, TranslationBlock *tb)
 {
-    UniCore32CPU *cpu = uc32_env_get_cpu(env);
-    CPUState *cs = CPU(cpu);
+    CPUUniCore32State *env = cs->env_ptr;
     DisasContext dc1, *dc = &dc1;
     target_ulong pc_start;
     uint32_t next_page_start;
@@ -1896,7 +1896,7 @@ void gen_intermediate_code(CPUUniCore32State *env, TranslationBlock *tb)
     cpu_F1d = tcg_temp_new_i64();
     next_page_start = (pc_start & TARGET_PAGE_MASK) + TARGET_PAGE_SIZE;
     num_insns = 0;
-    max_insns = tb->cflags & CF_COUNT_MASK;
+    max_insns = tb_cflags(tb) & CF_COUNT_MASK;
     if (max_insns == 0) {
         max_insns = CF_COUNT_MASK;
     }
@@ -1929,7 +1929,7 @@ void gen_intermediate_code(CPUUniCore32State *env, TranslationBlock *tb)
             goto done_generating;
         }
 
-        if (num_insns == max_insns && (tb->cflags & CF_LAST_IO)) {
+        if (num_insns == max_insns && (tb_cflags(tb) & CF_LAST_IO)) {
             gen_io_start();
         }
 
@@ -1954,7 +1954,7 @@ void gen_intermediate_code(CPUUniCore32State *env, TranslationBlock *tb)
              dc->pc < next_page_start &&
              num_insns < max_insns);
 
-    if (tb->cflags & CF_LAST_IO) {
+    if (tb_cflags(tb) & CF_LAST_IO) {
         if (dc->condjmp) {
             /* FIXME:  This can theoretically happen with self-modifying
                code.  */
@@ -2027,7 +2027,7 @@ done_generating:
         qemu_log_lock();
         qemu_log("----------------\n");
         qemu_log("IN: %s\n", lookup_symbol(pc_start));
-        log_target_disas(cs, pc_start, dc->pc - pc_start, 0);
+        log_target_disas(cs, pc_start, dc->pc - pc_start);
         qemu_log("\n");
         qemu_log_unlock();
     }

@@ -148,7 +148,7 @@ static void tc6393xb_gpio_set(void *opaque, int line, int level)
 //    TC6393xbState *s = opaque;
 
     if (line > TC6393XB_GPIOS) {
-        printf("%s: No GPIO pin %i\n", __FUNCTION__, line);
+        printf("%s: No GPIO pin %i\n", __func__, line);
         return;
     }
 
@@ -172,6 +172,7 @@ static void tc6393xb_gpio_handler_update(TC6393xbState *s)
     int bit;
 
     level = s->gpio_level & s->gpio_dir;
+    level &= MAKE_64BIT_MASK(0, TC6393XB_GPIOS);
 
     for (diff = s->prev_level ^ level; diff; diff ^= 1 << bit) {
         bit = ctz32(diff);
@@ -588,7 +589,6 @@ TC6393xbState *tc6393xb_init(MemoryRegion *sysmem, uint32_t base, qemu_irq irq)
 
     memory_region_init_ram(&s->vram, NULL, "tc6393xb.vram", 0x100000,
                            &error_fatal);
-    vmstate_register_ram_global(&s->vram);
     s->vram_ptr = memory_region_get_ram_ptr(&s->vram);
     memory_region_add_subregion(sysmem, base + 0x100000, &s->vram);
     s->scr_width = 480;

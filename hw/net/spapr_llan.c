@@ -34,7 +34,7 @@
 #include "hw/ppc/spapr.h"
 #include "hw/ppc/spapr_vio.h"
 #include "sysemu/sysemu.h"
-#include "hw/net/trace.h"
+#include "trace.h"
 
 #include <libfdt.h>
 

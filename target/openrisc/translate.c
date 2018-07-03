@@ -27,6 +27,7 @@
 #include "qemu/log.h"
 #include "qemu/bitops.h"
 #include "exec/cpu_ldst.h"
+#include "exec/translator.h"
 
 #include "exec/helper-proto.h"
 #include "exec/helper-gen.h"
@@ -36,6 +37,11 @@
 
 #define LOG_DIS(str, ...) \
     qemu_log_mask(CPU_LOG_TB_IN_ASM, "%08x: " str, dc->pc, ## __VA_ARGS__)
+
+/* is_jmp field values */
+#define DISAS_JUMP    DISAS_TARGET_0 /* only pc was modified dynamically */
+#define DISAS_UPDATE  DISAS_TARGET_1 /* cpu state was modified dynamically */
+#define DISAS_TB_JUMP DISAS_TARGET_2 /* only pc was modified statically */
 
 typedef struct DisasContext {
     TranslationBlock *tb;
@@ -47,7 +53,6 @@ typedef struct DisasContext {
     bool singlestep_enabled;
 } DisasContext;
 
-static TCGv_env cpu_env;
 static TCGv cpu_sr;
 static TCGv cpu_R[32];
 static TCGv cpu_R0;
@@ -74,8 +79,6 @@ void openrisc_translate_init(void)
     };
     int i;
 
-    cpu_env = tcg_global_reg_new_ptr(TCG_AREG0, "env");
-    tcg_ctx.tcg_env = cpu_env;
     cpu_sr = tcg_global_mem_new(cpu_env,
                                 offsetof(CPUOpenRISCState, sr), "sr");
     cpu_dflag = tcg_global_mem_new_i32(cpu_env,
@@ -107,7 +110,8 @@ void openrisc_translate_init(void)
                                      "mac");
     for (i = 0; i < 32; i++) {
         cpu_R[i] = tcg_global_mem_new(cpu_env,
-                                      offsetof(CPUOpenRISCState, gpr[i]),
+                                      offsetof(CPUOpenRISCState,
+                                               shadow_gpr[0][i]),
                                       regnames[i]);
     }
     cpu_R0 = cpu_R[0];
@@ -1517,10 +1521,10 @@ static void disas_openrisc_insn(DisasContext *dc, OpenRISCCPU *cpu)
     }
 }
 
-void gen_intermediate_code(CPUOpenRISCState *env, struct TranslationBlock *tb)
+void gen_intermediate_code(CPUState *cs, struct TranslationBlock *tb)
 {
+    CPUOpenRISCState *env = cs->env_ptr;
     OpenRISCCPU *cpu = openrisc_env_get_cpu(env);
-    CPUState *cs = CPU(cpu);
     struct DisasContext ctx, *dc = &ctx;
     uint32_t pc_start;
     uint32_t next_page_start;
@@ -1539,7 +1543,7 @@ void gen_intermediate_code(CPUOpenRISCState *env, struct TranslationBlock *tb)
 
     next_page_start = (pc_start & TARGET_PAGE_MASK) + TARGET_PAGE_SIZE;
     num_insns = 0;
-    max_insns = tb->cflags & CF_COUNT_MASK;
+    max_insns = tb_cflags(tb) & CF_COUNT_MASK;
 
     if (max_insns == 0) {
         max_insns = CF_COUNT_MASK;
@@ -1582,7 +1586,7 @@ void gen_intermediate_code(CPUOpenRISCState *env, struct TranslationBlock *tb)
             break;
         }
 
-        if (num_insns == max_insns && (tb->cflags & CF_LAST_IO)) {
+        if (num_insns == max_insns && (tb_cflags(tb) & CF_LAST_IO)) {
             gen_io_start();
         }
         disas_openrisc_insn(dc, cpu);
@@ -1605,7 +1609,7 @@ void gen_intermediate_code(CPUOpenRISCState *env, struct TranslationBlock *tb)
              && (dc->pc < next_page_start)
              && num_insns < max_insns);
 
-    if (tb->cflags & CF_LAST_IO) {
+    if (tb_cflags(tb) & CF_LAST_IO) {
         gen_io_end();
     }
 
@@ -1646,7 +1650,7 @@ void gen_intermediate_code(CPUOpenRISCState *env, struct TranslationBlock *tb)
 
     if (qemu_loglevel_mask(CPU_LOG_TB_IN_ASM)
         && qemu_log_in_addr_range(pc_start)) {
-        log_target_disas(cs, pc_start, tb->size, 0);
+        log_target_disas(cs, pc_start, tb->size);
         qemu_log("\n");
         qemu_log_unlock();
     }
@@ -1662,7 +1666,7 @@ void openrisc_cpu_dump_state(CPUState *cs, FILE *f,
 
     cpu_fprintf(f, "PC=%08x\n", env->pc);
     for (i = 0; i < 32; ++i) {
-        cpu_fprintf(f, "R%02d=%08x%c", i, env->gpr[i],
+        cpu_fprintf(f, "R%02d=%08x%c", i, cpu_get_gpr(env, i),
                     (i % 4) == 3 ? '\n' : ' ');
     }
 }

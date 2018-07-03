@@ -14,6 +14,10 @@
 #include "cpu.h"
 #include "kvm_arm.h"
 
+void kvm_cpu_synchronize_pre_loadvm(CPUState *cpu)
+{
+}
+
 bool write_kvmstate_to_list(ARMCPU *cpu)
 {
     abort();
