@@ -402,10 +402,14 @@ EOF
             $DEBUG_FLAGS \
             $LIBUSB_FLAGS \
             $AUDIO_BACKENDS_FLAG \
+            $WHPX_FLAG \
             --disable-attr \
+            --disable-bluez \
+            --disable-brlapi \
             --disable-blobs \
             --disable-bzip2 \
             --disable-cap-ng \
+            --disable-capstone \
             --disable-cocoa \
             --disable-curl \
             --disable-curses \
@@ -413,23 +417,30 @@ EOF
             --disable-glusterfs \
             --disable-gtk \
             --disable-guest-agent \
-            --disable-xen \
-            --disable-libnfs \
+            --disable-guest-agent-msi \
             --disable-libiscsi \
+            --disable-jemalloc \
+            --disable-libnfs \
             --disable-libssh2 \
             --disable-seccomp \
+            --disable-smartcard \
             --disable-spice \
+            --disable-tools \
             --disable-usb-redir \
             --disable-user \
             --disable-vde \
+            --disable-vte \
+            --disable-vxhs \
             --disable-vhost-net \
-            --enable-vnc \
             --disable-vnc-sasl \
             --disable-werror \
-            $WHPX_FLAG \
+            --disable-xen \
+            --disable-xen-pci-passthrough \
+            --disable-xfsctl \
             --enable-sdl \
-            --with-sdlabi=2.0 \
             --enable-trace-backends=nop \
+            --enable-vnc \
+            --with-sdlabi=2.0 \
             &&
 
             case $1 in

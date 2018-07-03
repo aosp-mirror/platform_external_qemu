@@ -69,18 +69,15 @@ remote_number_string_to_port( const char*  number )
 {
     char*  end;
     long   num;
+    const char*  temp = number;
     int    len;
 
     len = strlen(number);
     if (len > 0 && number[len-1] == ';')
         len--;
-    if (len > 0 && number[0] == '+'){
-        len--;
-        number++;
-    }
     if (len == 11 && !strncmp(number, get_phone_number_prefix(), 7))
-        number += 7;
-    num = strtol( number, &end, 10 );
+        temp += 7;
+    num = strtol( temp, &end, 10 );
 
     if (end == NULL || *end || (int)num != num )
         return -1;

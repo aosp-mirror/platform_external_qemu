@@ -34,10 +34,12 @@ static void vfio_amd_xgbe_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     VFIOAmdXgbeDeviceClass *vcxc =
         VFIO_AMD_XGBE_DEVICE_CLASS(klass);
-    vcxc->parent_realize = dc->realize;
-    dc->realize = amd_xgbe_realize;
+    device_class_set_parent_realize(dc, amd_xgbe_realize,
+                                    &vcxc->parent_realize);
     dc->desc = "VFIO AMD XGBE";
     dc->vmsd = &vfio_platform_amd_xgbe_vmstate;
+    /* Supported by TYPE_VIRT_MACHINE */
+    dc->user_creatable = true;
 }
 
 static const TypeInfo vfio_amd_xgbe_dev_info = {

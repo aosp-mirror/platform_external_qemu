@@ -65,11 +65,11 @@
  * denote numbers, true, false or null.  The special QObject input
  * visitor returned by qobject_input_visitor_new_keyval() mostly hides
  * this by automatically converting strings to the type the visitor
- * expects.  Breaks down for alternate types and type 'any', where the
- * visitor's expectation isn't clear.  Code visiting such types needs
- * to do the conversion itself, but only when using this keyval
- * visitor.  Awkward.  Alternate types without a string member don't
- * work at all.
+ * expects.  Breaks down for type 'any', where the visitor's
+ * expectation isn't clear.  Code visiting 'any' needs to do the
+ * conversion itself, but only when using this keyval visitor.
+ * Awkward.  Note that we carefully restrict alternate types to avoid
+ * similar ambiguity.
  *
  * Additional syntax for use with an implied key:
  *
@@ -81,8 +81,9 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
+#include "qapi/qmp/qdict.h"
+#include "qapi/qmp/qlist.h"
 #include "qapi/qmp/qstring.h"
-#include "qapi/util.h"
 #include "qemu/cutils.h"
 #include "qemu/option.h"
 
@@ -220,7 +221,7 @@ static const char *keyval_parse_one(QDict *qdict, const char *params,
             if (!next) {
                 return NULL;
             }
-            cur = qobject_to_qdict(next);
+            cur = qobject_to(QDict, next);
             assert(cur);
         }
 
@@ -313,7 +314,7 @@ static QObject *keyval_listify(QDict *cur, GSList *key_of_cur, Error **errp)
             has_member = true;
         }
 
-        qdict = qobject_to_qdict(ent->value);
+        qdict = qobject_to(QDict, ent->value);
         if (!qdict) {
             continue;
         }

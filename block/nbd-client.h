@@ -17,19 +17,25 @@
 
 #define MAX_NBD_REQUESTS    16
 
+typedef struct {
+    Coroutine *coroutine;
+    uint64_t offset;        /* original offset of the request */
+    bool receiving;         /* waiting for read_reply_co? */
+} NBDClientRequest;
+
 typedef struct NBDClientSession {
     QIOChannelSocket *sioc; /* The master data channel */
     QIOChannel *ioc; /* The current I/O channel which may differ (eg TLS) */
-    uint16_t nbdflags;
-    off_t size;
+    NBDExportInfo info;
 
     CoMutex send_mutex;
     CoQueue free_sema;
     Coroutine *read_reply_co;
     int in_flight;
 
-    Coroutine *recv_coroutine[MAX_NBD_REQUESTS];
+    NBDClientRequest requests[MAX_NBD_REQUESTS];
     NBDReply reply;
+    bool quit;
 } NBDClientSession;
 
 NBDClientSession *nbd_get_client_session(BlockDriverState *bs);
@@ -42,17 +48,23 @@ int nbd_client_init(BlockDriverState *bs,
                     Error **errp);
 void nbd_client_close(BlockDriverState *bs);
 
-int nbd_client_co_pdiscard(BlockDriverState *bs, int64_t offset, int count);
+int nbd_client_co_pdiscard(BlockDriverState *bs, int64_t offset, int bytes);
 int nbd_client_co_flush(BlockDriverState *bs);
 int nbd_client_co_pwritev(BlockDriverState *bs, uint64_t offset,
                           uint64_t bytes, QEMUIOVector *qiov, int flags);
 int nbd_client_co_pwrite_zeroes(BlockDriverState *bs, int64_t offset,
-                                int count, BdrvRequestFlags flags);
+                                int bytes, BdrvRequestFlags flags);
 int nbd_client_co_preadv(BlockDriverState *bs, uint64_t offset,
                          uint64_t bytes, QEMUIOVector *qiov, int flags);
 
 void nbd_client_detach_aio_context(BlockDriverState *bs);
 void nbd_client_attach_aio_context(BlockDriverState *bs,
                                    AioContext *new_context);
+
+int coroutine_fn nbd_client_co_block_status(BlockDriverState *bs,
+                                            bool want_zero,
+                                            int64_t offset, int64_t bytes,
+                                            int64_t *pnum, int64_t *map,
+                                            BlockDriverState **file);
 
 #endif /* NBD_CLIENT_H */

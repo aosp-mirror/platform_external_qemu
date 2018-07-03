@@ -37,7 +37,7 @@
 #include "hw/ppc/spapr_vio.h"
 #include "hw/ppc/xics.h"
 #include "hw/ppc/fdt.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 
 #include <libfdt.h>
 
@@ -126,8 +126,9 @@ static int vio_make_devnode(VIOsPAPRDevice *dev,
     }
 
     if (dev->irq) {
-        uint32_t ints_prop[] = {cpu_to_be32(dev->irq), 0};
+        uint32_t ints_prop[2];
 
+        spapr_dt_xics_irq(ints_prop, dev->irq, false);
         ret = fdt_setprop(fdt, node_off, "interrupts", ints_prop,
                           sizeof(ints_prop));
         if (ret < 0) {
@@ -454,7 +455,7 @@ static void spapr_vio_busdev_realize(DeviceState *qdev, Error **errp)
         dev->qdev.id = id;
     }
 
-    dev->irq = spapr_ics_alloc(spapr->ics, dev->irq, false, &local_err);
+    dev->irq = spapr_irq_alloc(spapr, dev->irq, false, &local_err);
     if (local_err) {
         error_propagate(errp, local_err);
         return;
@@ -557,8 +558,8 @@ const VMStateDescription vmstate_spapr_vio = {
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
         /* Sanity check */
-        VMSTATE_UINT32_EQUAL(reg, VIOsPAPRDevice),
-        VMSTATE_UINT32_EQUAL(irq, VIOsPAPRDevice),
+        VMSTATE_UINT32_EQUAL(reg, VIOsPAPRDevice, NULL),
+        VMSTATE_UINT32_EQUAL(irq, VIOsPAPRDevice, NULL),
 
         /* General VIO device state */
         VMSTATE_UINT64(signal_state, VIOsPAPRDevice),

@@ -381,46 +381,56 @@ static CPUWatchpoint *find_hw_watchpoint(CPUState *cpu, target_ulong addr)
     return NULL;
 }
 
-static bool kvm_arm_pmu_support_ctrl(CPUState *cs, struct kvm_device_attr *attr)
-{
-    return kvm_vcpu_ioctl(cs, KVM_HAS_DEVICE_ATTR, attr) == 0;
-}
-
-int kvm_arm_pmu_create(CPUState *cs, int irq)
+static bool kvm_arm_pmu_set_attr(CPUState *cs, struct kvm_device_attr *attr)
 {
     int err;
 
+    err = kvm_vcpu_ioctl(cs, KVM_HAS_DEVICE_ATTR, attr);
+    if (err != 0) {
+        error_report("PMU: KVM_HAS_DEVICE_ATTR: %s", strerror(-err));
+        return false;
+    }
+
+    err = kvm_vcpu_ioctl(cs, KVM_SET_DEVICE_ATTR, attr);
+    if (err != 0) {
+        error_report("PMU: KVM_SET_DEVICE_ATTR: %s", strerror(-err));
+        return false;
+    }
+
+    return true;
+}
+
+void kvm_arm_pmu_init(CPUState *cs)
+{
+    struct kvm_device_attr attr = {
+        .group = KVM_ARM_VCPU_PMU_V3_CTRL,
+        .attr = KVM_ARM_VCPU_PMU_V3_INIT,
+    };
+
+    if (!ARM_CPU(cs)->has_pmu) {
+        return;
+    }
+    if (!kvm_arm_pmu_set_attr(cs, &attr)) {
+        error_report("failed to init PMU");
+        abort();
+    }
+}
+
+void kvm_arm_pmu_set_irq(CPUState *cs, int irq)
+{
     struct kvm_device_attr attr = {
         .group = KVM_ARM_VCPU_PMU_V3_CTRL,
         .addr = (intptr_t)&irq,
         .attr = KVM_ARM_VCPU_PMU_V3_IRQ,
-        .flags = 0,
     };
 
-    if (!kvm_arm_pmu_support_ctrl(cs, &attr)) {
-        return 0;
+    if (!ARM_CPU(cs)->has_pmu) {
+        return;
     }
-
-    err = kvm_vcpu_ioctl(cs, KVM_SET_DEVICE_ATTR, &attr);
-    if (err < 0) {
-        fprintf(stderr, "KVM_SET_DEVICE_ATTR failed: %s\n",
-                strerror(-err));
+    if (!kvm_arm_pmu_set_attr(cs, &attr)) {
+        error_report("failed to set irq for PMU");
         abort();
     }
-
-    attr.group = KVM_ARM_VCPU_PMU_V3_CTRL;
-    attr.attr = KVM_ARM_VCPU_PMU_V3_INIT;
-    attr.addr = 0;
-    attr.flags = 0;
-
-    err = kvm_vcpu_ioctl(cs, KVM_SET_DEVICE_ATTR, &attr);
-    if (err < 0) {
-        fprintf(stderr, "KVM_SET_DEVICE_ATTR failed: %s\n",
-                strerror(-err));
-        abort();
-    }
-
-    return 1;
 }
 
 static inline void set_feature(uint64_t *features, int feature)
@@ -433,7 +443,7 @@ static inline void unset_feature(uint64_t *features, int feature)
     *features &= ~(1ULL << feature);
 }
 
-bool kvm_arm_get_host_cpu_features(ARMHostCPUClass *ahcc)
+bool kvm_arm_get_host_cpu_features(ARMHostCPUFeatures *ahcf)
 {
     /* Identify the feature bits corresponding to the host CPU, and
      * fill out the ARMHostCPUClass fields accordingly. To do this
@@ -461,8 +471,8 @@ bool kvm_arm_get_host_cpu_features(ARMHostCPUClass *ahcc)
         return false;
     }
 
-    ahcc->target = init.target;
-    ahcc->dtb_compatible = "arm,arm-v8";
+    ahcf->target = init.target;
+    ahcf->dtb_compatible = "arm,arm-v8";
 
     kvm_arm_destroy_scratch_host_vcpu(fdarray);
 
@@ -476,7 +486,7 @@ bool kvm_arm_get_host_cpu_features(ARMHostCPUClass *ahcc)
     set_feature(&features, ARM_FEATURE_AARCH64);
     set_feature(&features, ARM_FEATURE_PMU);
 
-    ahcc->features = features;
+    ahcf->features = features;
 
     return true;
 }
@@ -508,8 +518,7 @@ int kvm_arch_init_vcpu(CPUState *cs)
     if (!arm_feature(&cpu->env, ARM_FEATURE_AARCH64)) {
         cpu->kvm_init_features[0] |= 1 << KVM_ARM_VCPU_EL1_32BIT;
     }
-    if (!kvm_irqchip_in_kernel() ||
-        !kvm_check_extension(cs->kvm_state, KVM_CAP_ARM_PMU_V3)) {
+    if (!kvm_check_extension(cs->kvm_state, KVM_CAP_ARM_PMU_V3)) {
             cpu->has_pmu = false;
     }
     if (cpu->has_pmu) {
@@ -687,21 +696,16 @@ int kvm_arch_put_registers(CPUState *cs, int level)
         }
     }
 
-    /* Advanced SIMD and FP registers
-     * We map Qn = regs[2n+1]:regs[2n]
-     */
+    /* Advanced SIMD and FP registers. */
     for (i = 0; i < 32; i++) {
-        int rd = i << 1;
-        uint64_t fp_val[2];
+        uint64_t *q = aa64_vfp_qreg(env, i);
 #ifdef HOST_WORDS_BIGENDIAN
-        fp_val[0] = env->vfp.regs[rd + 1];
-        fp_val[1] = env->vfp.regs[rd];
+        uint64_t fp_val[2] = { q[1], q[0] };
+        reg.addr = (uintptr_t)fp_val;
 #else
-        fp_val[1] = env->vfp.regs[rd + 1];
-        fp_val[0] = env->vfp.regs[rd];
+        reg.addr = (uintptr_t)q;
 #endif
         reg.id = AARCH64_SIMD_CORE_REG(fp_regs.vregs[i]);
-        reg.addr = (uintptr_t)(&fp_val);
         ret = kvm_vcpu_ioctl(cs, KVM_SET_ONE_REG, &reg);
         if (ret) {
             return ret;
@@ -828,24 +832,18 @@ int kvm_arch_get_registers(CPUState *cs)
         env->spsr = env->banked_spsr[i];
     }
 
-    /* Advanced SIMD and FP registers
-     * We map Qn = regs[2n+1]:regs[2n]
-     */
+    /* Advanced SIMD and FP registers */
     for (i = 0; i < 32; i++) {
-        uint64_t fp_val[2];
+        uint64_t *q = aa64_vfp_qreg(env, i);
         reg.id = AARCH64_SIMD_CORE_REG(fp_regs.vregs[i]);
-        reg.addr = (uintptr_t)(&fp_val);
+        reg.addr = (uintptr_t)q;
         ret = kvm_vcpu_ioctl(cs, KVM_GET_ONE_REG, &reg);
         if (ret) {
             return ret;
         } else {
-            int rd = i << 1;
 #ifdef HOST_WORDS_BIGENDIAN
-            env->vfp.regs[rd + 1] = fp_val[0];
-            env->vfp.regs[rd] = fp_val[1];
-#else
-            env->vfp.regs[rd + 1] = fp_val[1];
-            env->vfp.regs[rd] = fp_val[0];
+            uint64_t t;
+            t = q[0], q[0] = q[1], q[1] = t;
 #endif
         }
     }
@@ -940,7 +938,7 @@ bool kvm_arm_handle_debug(CPUState *cs, struct kvm_debug_exit_arch *debug_exit)
              * single step at this point so something has gone wrong.
              */
             error_report("%s: guest single-step while debugging unsupported"
-                         " (%"PRIx64", %"PRIx32")\n",
+                         " (%"PRIx64", %"PRIx32")",
                          __func__, env->pc, debug_exit->hsr);
             return false;
         }
@@ -965,7 +963,7 @@ bool kvm_arm_handle_debug(CPUState *cs, struct kvm_debug_exit_arch *debug_exit)
         break;
     }
     default:
-        error_report("%s: unhandled debug exit (%"PRIx32", %"PRIx64")\n",
+        error_report("%s: unhandled debug exit (%"PRIx32", %"PRIx64")",
                      __func__, debug_exit->hsr, env->pc);
     }
 

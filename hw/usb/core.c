@@ -27,7 +27,7 @@
 #include "qemu-common.h"
 #include "hw/usb.h"
 #include "qemu/iov.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 
 void usb_pick_speed(USBPort *port)
 {
@@ -98,6 +98,14 @@ void usb_wakeup(USBEndpoint *ep, unsigned int stream)
     USBDevice *dev = ep->dev;
     USBBus *bus = usb_bus_from_device(dev);
 
+    if (!qdev_hotplug) {
+        /*
+         * This is machine init cold plug.  No need to wakeup anyone,
+         * all devices will be reset anyway.  And trying to wakeup can
+         * cause problems due to hitting uninitialized devices.
+         */
+        return;
+    }
     if (dev->remote_wakeup && dev->port && dev->port->ops->wakeup) {
         dev->port->ops->wakeup(dev->port);
     }
