@@ -22,6 +22,30 @@
       "revId": "3f32ac852741d161a16eba1106588bebb53cac6d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07f76c1e_861efcaf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-04T19:06:56Z",
+      "side": 1,
+      "message": "The surface to be presented is framebuffer 0. We emulated the surface with custom framebuffer objects. I do notice that perhaps we should refine it to read from either the emulated read fbo 0 or draw fbo 0 depending on what surface was passed as an argument to eglSwapBuffers though.",
+      "parentUuid": "dbf5b312_2dddb8e6",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 33
+      },
+      "revId": "3f32ac852741d161a16eba1106588bebb53cac6d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
