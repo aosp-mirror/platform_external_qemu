@@ -65,11 +65,13 @@ public:
     // TODO:
     // void HWC2Loop();
 
+    // Just initialize, draw, and swap buffers once.
+    void drawOnce();
+
 protected:
     virtual void initialize() = 0;
     virtual void draw() = 0;
 
-private:
     int mWidth = 256;
     int mHeight = 256;
     int mRefreshRate = 60;
@@ -83,8 +85,8 @@ private:
     int mYOffset= 400;
 
     unsigned int mColorBuffer = 0;
-    unsigned int mContext = 0;
     unsigned int mSurface = 0;
+    unsigned int mContext = 0;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(SampleApplication);
 };
