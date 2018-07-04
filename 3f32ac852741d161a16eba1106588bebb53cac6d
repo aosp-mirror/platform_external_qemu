@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dbf5b312_2dddb8e6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2018-07-04T14:02:58Z",
+      "side": 1,
+      "message": "I\u0027m not sure if this is correct. eglSwapBuffers takes the surface to be presented as an argument. So it\u0027s independent of draw or read framebuffer (those affect what GL is drawing to/reading from, not what EGL swaps).",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 33
+      },
+      "revId": "3f32ac852741d161a16eba1106588bebb53cac6d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
