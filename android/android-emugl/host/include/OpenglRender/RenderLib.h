@@ -49,6 +49,12 @@ public:
     // physically contiguous DMA region at particular offsets.
     virtual void setDmaOps(emugl_dma_ops) = 0;
 
+    virtual void* getGL(void) = 0;
+
+    virtual void* getEGL(void) = 0;
+
+    virtual bool getDSCC(void**, void**, void**, void **) = 0;
+
     // initRenderer - initialize the OpenGL renderer object.
     //
     // |width| and |height| are the framebuffer dimensions that will be reported
