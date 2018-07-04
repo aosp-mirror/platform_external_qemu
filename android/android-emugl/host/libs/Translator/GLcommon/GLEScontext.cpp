@@ -2603,10 +2603,18 @@ bool GLEScontext::setupImageBlitForTexture(uint32_t width,
         gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
-    // Reset read framebuffer back to default.
+    // In eglSwapBuffers, the surface must be bound as the draw surface of
+    // the current context, which corresponds to m_defaultFBO here.
+    //
+    // EGL 1.4 spec:
+    //
+    // 3.9.3 Posting Semantics surface must be bound to the draw surface of the
+    // calling thread’s current context, for the current rendering API. This
+    // restriction may be lifted in future EGL revisions.
+    //
     const GLuint readFboBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
     if (readFboBinding != 0) {
-        gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+        gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultFBO);
     }
 
     if (m_blitState.samples > 0) {
