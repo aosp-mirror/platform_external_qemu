@@ -22,6 +22,30 @@
       "revId": "365f9c2c898d312db88d75e3122a4787b7cc9977",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39cb417a_60d7efed",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/DefaultFramebufferBlit_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-06T17:22:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5be251d8_9eed5542",
+      "range": {
+        "startLine": 75,
+        "startChar": 8,
+        "endLine": 75,
+        "endChar": 41
+      },
+      "revId": "365f9c2c898d312db88d75e3122a4787b7cc9977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
