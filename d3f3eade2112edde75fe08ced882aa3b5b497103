@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7fd2ec1_8d6596ea",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1192,
+      "author": {
+        "id": 1139803
+      },
+      "writtenOn": "2018-07-06T07:42:11Z",
+      "side": 1,
+      "message": "If a semicolon, \";\", does not end a line, it needs to be followed by a space, \" \". So instead of:\n  for (i \u003d 0;i \u003c num_properties;++i) {\nuse:\n  for (i \u003d 0; i \u003c num_properties; ++i) {",
+      "range": {
+        "startLine": 1192,
+        "startChar": 8,
+        "endLine": 1192,
+        "endChar": 44
+      },
+      "revId": "d3f3eade2112edde75fe08ced882aa3b5b497103",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "356e4bc1_df600270",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1198,
+      "author": {
+        "id": 1139803
+      },
+      "writtenOn": "2018-07-06T07:42:11Z",
+      "side": 1,
+      "message": "Move these free\u0027s inside the if statement above. If iniFile_getEntry fails, key and value won\u0027t be touched.",
+      "range": {
+        "startLine": 1197,
+        "startChar": 0,
+        "endLine": 1198,
+        "endChar": 24
+      },
+      "revId": "d3f3eade2112edde75fe08ced882aa3b5b497103",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
