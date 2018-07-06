@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5be251d8_9eed5542",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/DefaultFramebufferBlit_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-06T17:14:35Z",
+      "side": 1,
+      "message": "Nit: Unnecessary if statement",
+      "range": {
+        "startLine": 75,
+        "startChar": 8,
+        "endLine": 75,
+        "endChar": 41
+      },
+      "revId": "365f9c2c898d312db88d75e3122a4787b7cc9977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
