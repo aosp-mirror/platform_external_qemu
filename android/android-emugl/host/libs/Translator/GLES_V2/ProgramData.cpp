@@ -69,13 +69,14 @@ static int s_glShaderType2ShaderType(GLenum type) {
     return ProgramData::NUM_SHADER_TYPE;
 }
 
-ProgramData::ProgramData(int glesMaj, int glesMin) :
-    ObjectData(PROGRAM_DATA),
-    LinkStatus(GL_FALSE),
-    IsInUse(false),
-    DeleteStatus(false),
-    mGlesMajorVersion(glesMaj),
-    mGlesMinorVersion(glesMin) {}
+ProgramData::ProgramData(int glesMaj, int glesMin)
+    : ObjectData(PROGRAM_DATA),
+      LinkStatus(GL_FALSE),
+      IsInUse(false),
+      DeleteStatus(false),
+      ValidateStatus(false),
+      mGlesMajorVersion(glesMaj),
+      mGlesMinorVersion(glesMin) {}
 
 ProgramData::ProgramData(android::base::Stream* stream) :
     ObjectData(stream) {
@@ -121,6 +122,8 @@ ProgramData::ProgramData(android::base::Stream* stream) :
     LinkStatus = stream->getBe32();
     IsInUse = stream->getByte();
     DeleteStatus = stream->getByte();
+    ValidateStatus = stream->getByte();
+
     mGlesMajorVersion = stream->getByte();
     mGlesMinorVersion = stream->getByte();
     loadCollection(stream, &mUniNameToGuestLoc,
@@ -357,6 +360,7 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
     stream->putBe32(LinkStatus);
     stream->putByte(IsInUse);
     stream->putByte(DeleteStatus);
+    stream->putByte(ValidateStatus);
 
     stream->putByte(mGlesMajorVersion);
     stream->putByte(mGlesMinorVersion);
