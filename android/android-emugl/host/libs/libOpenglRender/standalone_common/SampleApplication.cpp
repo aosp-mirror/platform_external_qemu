@@ -428,4 +428,14 @@ void SampleApplication::surfaceFlingerComposerLoop() {
     sfThread.wait();
 }
 
+void SampleApplication::drawOnce() {
+    this->initialize();
+    this->draw();
+    mFb->flushWindowSurfaceColorBuffer(mSurface);
+    if (mUseSubWindow) {
+        mFb->post(mColorBuffer);
+        mWindow->messageLoop();
+    }
+}
+
 } // namespace emugl
