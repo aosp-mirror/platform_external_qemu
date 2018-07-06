@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "11b1e9b6_e8537e3a",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1192,
+      "author": {
+        "id": 1336478
+      },
+      "writtenOn": "2018-07-06T09:25:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c7fd2ec1_8d6596ea",
+      "range": {
+        "startLine": 1192,
+        "startChar": 8,
+        "endLine": 1192,
+        "endChar": 44
+      },
+      "revId": "d3f3eade2112edde75fe08ced882aa3b5b497103",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "356e4bc1_df600270",
         "filename": "hw/i386/acpi-build.c",
         "patchSetId": 8
@@ -45,6 +69,30 @@
       "revId": "d3f3eade2112edde75fe08ced882aa3b5b497103",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a91bbb40_68500317",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1198,
+      "author": {
+        "id": 1336478
+      },
+      "writtenOn": "2018-07-06T09:25:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "356e4bc1_df600270",
+      "range": {
+        "startLine": 1197,
+        "startChar": 0,
+        "endLine": 1198,
+        "endChar": 24
+      },
+      "revId": "d3f3eade2112edde75fe08ced882aa3b5b497103",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
