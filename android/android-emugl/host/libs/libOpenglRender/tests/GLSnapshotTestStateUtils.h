@@ -18,8 +18,14 @@
 #include <GLES2/gl2.h>
 #include <GLES3/gl31.h>
 
+#include <string>
+
 namespace emugl {
 
 GLuint createBuffer(const GLESv2Dispatch* gl, GlBufferData data);
+
+GLuint loadAndCompileShader(const GLESv2Dispatch* gl,
+                            GLenum shaderType,
+                            const char* src);
 
 }  // namespace emugl

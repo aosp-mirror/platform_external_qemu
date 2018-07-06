@@ -2272,11 +2272,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
             ProgramData* programData = (ProgramData*)objData;
-            if (programData->getLinkStatus() == GL_TRUE)
-                ctx->dispatcher().glGetProgramiv(globalProgramName, pname,
-                                                 params);
-            else
-                params[0] = GL_FALSE;
+            params[0] = programData->getValidateStatus() ? GL_TRUE : GL_FALSE;
             }
             break;
         case GL_INFO_LOG_LENGTH:
@@ -3039,12 +3035,15 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         ShaderParser* sp = (ShaderParser*)objData;
         sp->setSrc(count, string, length);
         if (isGles2Gles()) {
+            fprintf(stderr, "%s %s %d \n", __FILE__, __func__, __LINE__);
             ctx->dispatcher().glShaderSource(globalShaderName, count, string,
                                          length);
         } else {
+            fprintf(stderr, "%s %s %d \n", __FILE__, __func__, __LINE__);
             ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
         }
+        fprintf(stderr, "%s %s %d \n", __FILE__, __func__, __LINE__);
     }
 }
 
@@ -3498,12 +3497,19 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
         ProgramData* programData = (ProgramData*)objData;
         ctx->dispatcher().glValidateProgram(globalProgramName);
 
-        GLsizei infoLogLength=0;
-        GLchar* infoLog;
+        GLint validateStatus;
+        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_VALIDATE_STATUS,
+                                         &validateStatus);
+        programData->setValidateStatus(static_cast<bool>(validateStatus));
+
+        GLsizei infoLogLength = 0, cLength = 0;
         ctx->dispatcher().glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
-        infoLog = new GLchar[infoLogLength+1];
-        ctx->dispatcher().glGetProgramInfoLog(globalProgramName,infoLogLength,NULL,infoLog);
-        programData->setInfoLog(infoLog);
+        std::unique_ptr<GLchar[]> infoLog(new GLchar[infoLogLength + 1]);
+        ctx->dispatcher().glGetProgramInfoLog(globalProgramName, infoLogLength,
+                                              &cLength, infoLog.get());
+        if (cLength > 0) {
+            programData->setInfoLog(infoLog.release());
+        }
     }
 }
 

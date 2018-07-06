@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "GLSnapshotTesting.h"
-#include "OpenGLTestContext.h"
 
 #include <gtest/gtest.h>
 
@@ -73,6 +72,16 @@ public:
         checkParameter(GL_COMPILE_STATUS, m_shader_state.compileStatus);
         checkParameter(GL_INFO_LOG_LENGTH, m_shader_state.infoLogLength);
         checkParameter(GL_SHADER_SOURCE_LENGTH, m_shader_state.sourceLength);
+
+        // Info log
+        GLsizei logLength;
+        gl->glGetShaderiv(m_shader_name, GL_INFO_LOG_LENGTH, &logLength);
+        std::vector<GLchar> log;
+        log.resize(logLength);
+        GLsizei actualLength;
+        gl->glGetShaderInfoLog(m_shader_name, logLength, &actualLength,
+                               log.data());
+        fprintf(stderr, "shader log: %s\n", log.data());
     }
 
     void stateChange() override {
@@ -80,7 +89,7 @@ public:
         m_shader_state_changer();
     }
 
-    void loadSource(std::string sourceString) {
+    void loadSource(const std::string& sourceString) {
         GLboolean compiler;
         gl->glGetBooleanv(GL_SHADER_COMPILER, &compiler);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
