@@ -86,7 +86,7 @@ template <class T>
 testing::AssertionResult compareVector(
         const std::vector<T>& expected,
         const std::vector<T>& actual,
-        const std::string& description = "vector") {
+        const std::string& description) {
     int mismatches = 0;
     std::stringstream message;
     for (int i = 0; i < expected.size(); i++) {

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "GLSnapshotTesting.h"
-#include "OpenGLTestContext.h"
+#include "GLSnapshotTestStateUtils.h"
 
 #include <gtest/gtest.h>
 
@@ -80,15 +80,7 @@ public:
         m_shader_state_changer();
     }
 
-    void loadSource(std::string sourceString) {
-        GLboolean compiler;
-        gl->glGetBooleanv(GL_SHADER_COMPILER, &compiler);
-        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        if (compiler == GL_FALSE) {
-            fprintf(stderr, "Shader compiler is not supported.\n");
-            return;
-        }
-
+    void loadSource(const std::string& sourceString) {
         if (m_shader_name == 0) {
             FAIL() << "Cannot set source without a shader name";
         }
@@ -98,10 +90,7 @@ public:
             m_shader_state.sourceLength =
                     len + 1;  // Counts the null terminator
         }
-        const char* source = sourceString.c_str();
-        const char** sources = &source;
-        gl->glShaderSource(m_shader_name, 1, sources, &len);
-        EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+        loadShaderSource(gl, m_shader_name, sourceString);
     }
 
     void compile(GLboolean expectCompileStatus = GL_TRUE) {
