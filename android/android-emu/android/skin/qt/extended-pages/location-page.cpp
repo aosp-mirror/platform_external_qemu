@@ -32,12 +32,17 @@
 
 using android::base::LazyInstance;
 
-static const double kGplexLon = -122.084;
-static const double kGplexLat =   37.422;
+static constexpr double kGplexLon = -122.084;
+static constexpr double kGplexLat =   37.422;
 
 static double getHeading(double startLat, double startLon, double endLat, double endLon);
+static void sendLocationToDevice();
+static void getDeviceLocation(double* pLatitude, double* pLongitude, double* pAltitude);
+static void getDeviceLocationFromSettings(double* pOutLatitude,
+                                          double* pOutLongitude,
+                                          double* pOutAltitude);
 
-const QAndroidLocationAgent* LocationPage::sLocationAgent = nullptr;
+static const QAndroidLocationAgent* sLocationAgent = nullptr;
 
 struct LocationPageGlobals {
     LocationPage* locationPagePtr = nullptr;
@@ -45,24 +50,29 @@ struct LocationPageGlobals {
 
 static LazyInstance<LocationPageGlobals> sGlobals = LAZY_INSTANCE_INIT;
 
-LocationPage::LocationPage(QWidget *parent) :
-    QWidget(parent),
-    mUi(new Ui::LocationPage),
-    mUpdateThread([this]() {
+// For sending periodic GPS updates
+static bool                             sShouldCloseUpdateThread = false;
+static android::base::ConditionVariable sUpdateThreadCv;
+static android::base::Lock              sUpdateThreadLock;
+static android::base::FunctorThread sUpdateThread([]() {
         // update location every 10 seconds, until we exit
-        mUpdateThreadLock.lock();
-        while (!mShouldCloseUpdateThread) {
+        sUpdateThreadLock.lock();
+        while (!sShouldCloseUpdateThread) {
             if (sLocationAgent &&
                 sLocationAgent->gpsGetPassiveUpdate()) {
                 sendLocationToDevice();
             }
             // wait 10 sec
-            mUpdateThreadCv.timedWait(&mUpdateThreadLock,
+            sUpdateThreadCv.timedWait(&sUpdateThreadLock,
                     android::base::System::get()->getUnixTimeUs()
                     + 10 * 1000 * 1000);
         }
-        mUpdateThreadLock.unlock();
-    })
+        sUpdateThreadLock.unlock();
+    });
+
+LocationPage::LocationPage(QWidget *parent) :
+    QWidget(parent),
+    mUi(new Ui::LocationPage)
 {
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
@@ -108,8 +118,6 @@ LocationPage::LocationPage(QWidget *parent) :
             SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
     mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
 
-    mUpdateThread.start();
-
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
             60 * 10 * 1000,  // reporting period
@@ -128,10 +136,10 @@ LocationPage::LocationPage(QWidget *parent) :
 LocationPage::~LocationPage() {
     sGlobals->locationPagePtr = nullptr;
 
-    mUpdateThreadLock.lock();
-    mShouldCloseUpdateThread = true;
-    mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
-    mUpdateThread.wait();
+    sUpdateThreadLock.lock();
+    sShouldCloseUpdateThread = true;
+    sUpdateThreadCv.signalAndUnlock(&sUpdateThreadLock);
+    sUpdateThread.wait();
     if (mGeoDataLoader != nullptr) {
         // If there's a loader thread running in the background,
         // ignore all signals from it and wait for it to finish.
@@ -160,6 +168,8 @@ void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
     writeDeviceLocationToSettings(curLat, curLon, curAlt);
 
     sendLocationToDevice();
+
+    sUpdateThread.start();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -223,7 +233,7 @@ void LocationPage::on_loc_sendPointButton_clicked() {
         mUi->loc_altitudeInput->setText(QString::number(validAltitude));
     }
 
-    mUpdateThreadLock.lock();
+    sUpdateThreadLock.lock();
     lat = mUi->loc_latitudeInput->value(),
     lon = mUi->loc_longitudeInput->value(),
     altitude = mUi->loc_altitudeInput->text().toDouble();
@@ -232,7 +242,7 @@ void LocationPage::on_loc_sendPointButton_clicked() {
     mPreviousLat = lat;
     mPreviousLon = lon;
 
-    mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
+    sUpdateThreadCv.signalAndUnlock(&sUpdateThreadLock);
 }
 
 void LocationPage::updateDisplayedLocation(double lat, double lon, double alt) {
@@ -495,11 +505,11 @@ void LocationPage::timeout() {
     mUi->loc_pathTable->scrollToItem(currentItem);
     mUi->loc_pathTable->setCurrentItem(currentItem);
 
-    mUpdateThreadLock.lock();
+    sUpdateThreadLock.lock();
     updateDisplayedLocation(lat, lon, alt);
 
     // Send the command.
-    mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
+    sUpdateThreadCv.signalAndUnlock(&sUpdateThreadLock);
 
     // Go on to the next row
     mRowToSend++;
@@ -625,10 +635,9 @@ int LocationPage::getLocationPlaybackSpeedFromSettings() {
     }
 }
 
-// static
-void LocationPage::getDeviceLocationFromSettings(double* pOutLatitude,
-                                                 double* pOutLongitude,
-                                                 double* pOutAltitude) {
+static void getDeviceLocationFromSettings(double* pOutLatitude,
+                                          double* pOutLongitude,
+                                          double* pOutAltitude) {
 
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
@@ -671,11 +680,7 @@ void LocationPage::writeDeviceLocationToSettings(double lat,
 
 // Get the current location from the device. If that fails, use
 // the saved location from this UI.
-// (static function)
-void LocationPage::getDeviceLocation(double* pLatitude,
-                                     double* pLongitude,
-                                     double* pAltitude)
-{
+static void getDeviceLocation(double* pLatitude, double* pLongitude, double* pAltitude) {
     bool gotDeviceLoc = false;
 
     if (sLocationAgent && sLocationAgent->gpsGetLoc) {
@@ -689,8 +694,7 @@ void LocationPage::getDeviceLocation(double* pLatitude,
 }
 
 // Send a GPS location to the device
-// (static function)
-void LocationPage::sendLocationToDevice() {
+static void sendLocationToDevice() {
     if (sLocationAgent && sLocationAgent->gpsSendLoc) {
         // Send these to the device
         double latitude;
