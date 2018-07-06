@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d448078_faaab772",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-06T17:00:17Z",
+      "side": 1,
+      "message": "What is the difference between mSurface and mSurfaceRead?",
+      "range": {
+        "startLine": 88,
+        "startChar": 17,
+        "endLine": 88,
+        "endChar": 25
+      },
+      "revId": "66f608f7a2e6958a20949372933628f68b56c6d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
