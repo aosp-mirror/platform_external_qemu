@@ -93,10 +93,20 @@ private:
     void writeLocationPlaybackSpeedToSettings(int speed);
     int getLocationPlaybackSpeedFromSettings();
 
+    static void getDeviceLocationFromSettings(double* pOutLatitude,
+                                              double* pOutLongitude,
+                                              double* pOutAltitude);
+
+    static void getDeviceLocation(double* pOutLatitude,
+                                  double* pOutLongitude,
+                                  double* pOutAltitude);
+    static void sendLocationToDevice();
     static bool validateCell(QTableWidget* table,
                              int row,
                              int col,
                              QString* outErrorMessage);
+
+    static const QAndroidLocationAgent* sLocationAgent;
 
     std::unique_ptr<Ui::LocationPage> mUi;
     QDoubleValidator mAltitudeValidator;
@@ -111,6 +121,10 @@ private:
     double mPreviousLat = 0.0;
     double mPreviousLon = 0.0;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+    android::base::FunctorThread mUpdateThread;
+    android::base::ConditionVariable mUpdateThreadCv;
+    android::base::Lock mUpdateThreadLock;
+    bool mShouldCloseUpdateThread = false;
 };
 
 class GeoDataLoaderThread : public QThread {
