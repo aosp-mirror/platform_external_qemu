@@ -2266,19 +2266,22 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
         //validate status should not return GL_TRUE if link failed
         case GL_VALIDATE_STATUS:
             {
+            fprintf(stderr, "%s %s validate status\n", __FILE__, __func__);
             auto objData = ctx->shareGroup()->getObjectData(
                     NamedObjectType::SHADER_OR_PROGRAM, program);
             SET_ERROR_IF(!objData, GL_INVALID_OPERATION);
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
             ProgramData* programData = (ProgramData*)objData;
-            if (programData->getLinkStatus() == GL_TRUE)
+            if (programData->getLinkStatus() == GL_TRUE) {
                 ctx->dispatcher().glGetProgramiv(globalProgramName, pname,
                                                  params);
-            else
+                fprintf(stderr, "making dispatcher deal with it\n");
+            } else {
+                fprintf(stderr, "setting false because link status is false\n");
                 params[0] = GL_FALSE;
             }
-            break;
+        } break;
         case GL_INFO_LOG_LENGTH:
             {
             auto objData = ctx->shareGroup()->getObjectData(
