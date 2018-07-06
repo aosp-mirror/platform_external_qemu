@@ -225,10 +225,6 @@ SampleApplication::~SampleApplication() {
         mFb->DestroyWindowSurface(mSurface);
         mFb->finalize();
     }
-
-    if (mWindow) {
-        mWindow->destroy();
-    }
 }
 
 void SampleApplication::rebind() {
