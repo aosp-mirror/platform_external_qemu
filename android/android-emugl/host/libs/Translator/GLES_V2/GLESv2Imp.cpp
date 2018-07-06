@@ -2272,13 +2272,8 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
             ProgramData* programData = (ProgramData*)objData;
-            if (programData->getLinkStatus() == GL_TRUE)
-                ctx->dispatcher().glGetProgramiv(globalProgramName, pname,
-                                                 params);
-            else
-                params[0] = GL_FALSE;
-            }
-            break;
+            params[0] = programData->getValidateStatus() ? GL_TRUE : GL_FALSE;
+        } break;
         case GL_INFO_LOG_LENGTH:
             {
             auto objData = ctx->shareGroup()->getObjectData(
@@ -3497,6 +3492,11 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* programData = (ProgramData*)objData;
         ctx->dispatcher().glValidateProgram(globalProgramName);
+
+        GLint validateStatus;
+        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_VALIDATE_STATUS,
+                                         &validateStatus);
+        programData->setValidateStatus(static_cast<bool>(validateStatus));
 
         GLsizei infoLogLength=0;
         GLchar* infoLog;

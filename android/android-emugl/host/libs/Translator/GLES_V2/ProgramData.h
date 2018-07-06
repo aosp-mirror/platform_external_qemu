@@ -52,7 +52,7 @@ struct AttachedShader {
     ANGLEShaderParser::ShaderLinkInfo linkInfo = {};
 };
 
-class ProgramData:public ObjectData{
+class ProgramData : public ObjectData {
 public:
     enum ShaderType {
         VERTEX = 0,
@@ -98,6 +98,9 @@ public:
     bool getDeleteStatus() const { return DeleteStatus; }
     void setDeleteStatus(bool status) { DeleteStatus = status; }
 
+    bool getValidateStatus() const { return ValidateStatus; }
+    void setValidateStatus(bool status) { ValidateStatus = status; }
+
     // boundAttribLocs stores the attribute locations assigned by
     // glBindAttribLocation.
     // It will take effect after glLinkProgram.
@@ -123,9 +126,10 @@ private:
     AttachedShader attachedShaders[NUM_SHADER_TYPE] = {};
     std::string validationInfoLog;
     std::unique_ptr<const GLchar[]> infoLog;
-    GLint  LinkStatus;
+    GLint   LinkStatus;
     bool    IsInUse;
     bool    DeleteStatus;
+    bool    ValidateStatus;
     GLuint  ProgramName;
     std::unordered_map<GLuint, GLuint> mUniformBlockBinding;
     std::vector<std::string> mTransformFeedbacks;

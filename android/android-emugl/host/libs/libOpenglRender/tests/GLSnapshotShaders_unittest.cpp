@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "GLSnapshotTestStateUtils.h"
 #include "GLSnapshotTesting.h"
-#include "OpenGLTestContext.h"
 
 #include <gtest/gtest.h>
 
@@ -80,7 +80,7 @@ public:
         m_shader_state_changer();
     }
 
-    void loadSource(std::string sourceString) {
+    void loadSource(const std::string& sourceString) {
         GLboolean compiler;
         gl->glGetBooleanv(GL_SHADER_COMPILER, &compiler);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
