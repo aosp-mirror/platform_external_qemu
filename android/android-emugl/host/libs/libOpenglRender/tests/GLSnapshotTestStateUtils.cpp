@@ -43,4 +43,21 @@ GLuint createBuffer(const GLESv2Dispatch* gl, GlBufferData data) {
     return name;
 };
 
+void loadShaderSource(const GLESv2Dispatch* gl,
+                      GLuint shader,
+                      const std::string& sourceString) {
+    GLboolean compiler;
+    gl->glGetBooleanv(GL_SHADER_COMPILER, &compiler);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+    if (compiler == GL_FALSE) {
+        fprintf(stderr, "Shader compiler is not supported.\n");
+        return;
+    }
+    const char* source = sourceString.c_str();
+    const char** sources = &source;
+    GLint len = sourceString.length();
+    gl->glShaderSource(shader, 1, sources, &len);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+}
+
 }  // namespace emugl

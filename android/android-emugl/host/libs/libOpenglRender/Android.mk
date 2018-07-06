@@ -156,6 +156,7 @@ LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)
 LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)
 
 LOCAL_SRC_FILES := \
+    standalone_common/ShaderUtils.cpp \
     tests/DefaultFramebufferBlit_unittest.cpp \
     tests/FrameBuffer_unittest.cpp \
     tests/GLSnapshot_unittest.cpp \
@@ -163,6 +164,7 @@ LOCAL_SRC_FILES := \
     tests/GLSnapshotFramebufferControl_unittest.cpp \
     tests/GLSnapshotMultisampling_unittest.cpp \
     tests/GLSnapshotPixelOperations_unittest.cpp \
+    tests/GLSnapshotPrograms_unittest.cpp \
     tests/GLSnapshotRasterization_unittest.cpp \
     tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotTesting.cpp \

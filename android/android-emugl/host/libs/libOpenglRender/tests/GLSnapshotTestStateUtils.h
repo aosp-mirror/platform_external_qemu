@@ -22,4 +22,8 @@ namespace emugl {
 
 GLuint createBuffer(const GLESv2Dispatch* gl, GlBufferData data);
 
+void loadShaderSource(const GLESv2Dispatch* gl,
+                      GLuint shader,
+                      const std::string& source);
+
 }  // namespace emugl
