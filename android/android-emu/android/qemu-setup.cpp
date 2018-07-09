@@ -10,40 +10,38 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/adb-server.h"
 #include "android/android.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/boot-properties.h"
-#include "android/crashreport/CrashReporter.h"
+#include "android/car.h"
+#include "android/clipboard-pipe.h"
+#include "android/cmdline-option.h"
 #include "android/console.h"
 #include "android/constants.h"
-#include "android/adb-server.h"
-#include "android/android.h"
-#include "android/cmdline-option.h"
-#include "android/clipboard-pipe.h"
-#include "android/console.h"
+#include "android/crashreport/CrashReporter.h"
+#include "android/emulation/FakeRotatingCameraSensor.h"
+#include "android/emulation/Keymaster3.h"
+#include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/android_pipe_pingpong.h"
 #include "android/emulation/android_pipe_throttle.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/android_pipe_zero.h"
-#include "android/emulation/FakeRotatingCameraSensor.h"
-#include "android/emulation/QemuMiscPipe.h"
-#include "android/emulation/Keymaster3.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
-#include "android/car.h"
 #include "android/logcat-pipe.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
+#include "android/snapshot/SnapshotPipe.h"
+#include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
 #include "android/utils/path.h"
 #include "android/utils/sockets.h"
 #include "android/utils/system.h"
-#include "android/utils/bufprint.h"
 #include "android/utils/timezone.h"
 #include "android/version.h"
-
 
 #include <stdbool.h>
 
@@ -329,6 +327,8 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
+    android::snapshot::registerSnapshotPipeService();
+
 #ifndef _WIN32
     // bug: 70566718
     // for now, just use software keymaster3 in the guest

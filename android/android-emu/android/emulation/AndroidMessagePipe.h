@@ -74,7 +74,7 @@ public:
 
         bool canLoad() const override { return true; }
 
-        AndroidPipe* load(void* hwPipe,
+        virtual AndroidPipe* load(void* hwPipe,
                           const char* args,
                           base::Stream* stream) override {
             return new AndroidMessagePipe(hwPipe, this, m_cb, stream);
@@ -89,17 +89,21 @@ public:
     };
 
     AndroidMessagePipe(void* hwPipe,
-                       Service* service,
+                       android::AndroidPipe::Service* service,
                        DecodeAndExecuteFunction cb,
                        base::Stream* loadStream = nullptr);
 
     void onSave(base::Stream* stream) override;
 
-    void onGuestClose(PipeCloseReason reason) override {}
+    void onGuestClose(PipeCloseReason reason) override {
+        delete this;
+    }
     unsigned onGuestPoll() const override;
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override;
     int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) override;
     void onGuestWantWakeOn(int flags) override {}
+protected:
+    void resetRecvPayload(DataBuffer&& buffer);
 
 private:
     void resetToInitState();
