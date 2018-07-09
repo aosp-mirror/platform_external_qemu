@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3acc98b_cd014d66",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-09T16:31:07Z",
+      "side": 1,
+      "message": "what about getting rid of realloc() in favor of manual https://en.cppreference.com/w/cpp/memory/c/aligned_alloc + std::copy() + free() ?",
+      "range": {
+        "startLine": 101,
+        "startChar": 44,
+        "endLine": 101,
+        "endChar": 51
+      },
+      "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
