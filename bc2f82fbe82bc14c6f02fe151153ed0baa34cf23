@@ -94,6 +94,30 @@
       "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0e1f7a8_6a2dc8d4",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-09T20:06:23Z",
+      "side": 1,
+      "message": "posix_memalign seems more limited than the previous scheme; one cannot allocate on alignments less than sizeof(void*), which means no 4 byte alignments, which in turn mean we can\u0027t match the default settings in OpenGL texture write/read",
+      "parentUuid": "462e1fad_134b7e2f",
+      "range": {
+        "startLine": 101,
+        "startChar": 44,
+        "endLine": 101,
+        "endChar": 51
+      },
+      "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
