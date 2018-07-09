@@ -1,0 +1,51 @@
+syntax = "proto2";
+
+package offworld;
+
+enum ModuleName {
+  UNKNOWN = 0;
+  SNAPSHOT = 1;
+  AR_TESTING = 2; // TODO jwmcglynn@: rename it as you like
+}
+
+message GuestSend {
+  message ModuleSnapshot {
+    message CreateCheckpoint {
+      optional string snapshot_name = 1;
+    }
+    message GotoCheckpoint {
+      optional string snapshot_name = 1;
+      optional bytes metadata = 2;
+    }
+    oneof function {
+      CreateCheckpoint create_checkpoint_param = 1;
+      GotoCheckpoint goto_checkpoint_param = 2;
+    }
+  }
+  message ModuleArTesting { // TODO
+  }
+  oneof module {
+    ModuleSnapshot snapshot = 1;
+    ModuleArTesting arTesting = 2;
+  }
+}
+
+message GuestRecv {
+  message ModuleSnapshot {
+    message CreateCheckpoint {
+      optional bytes metadata = 1;
+    }
+    message GotoCheckpoint {
+    }
+    oneof function {
+      CreateCheckpoint create_checkpoint_param = 1;
+      GotoCheckpoint goto_checkpoint_param = 2;
+    }
+  }
+  message ModuleArTesting { // TODO
+  }
+  oneof module {
+    ModuleSnapshot snapshot = 1;
+    ModuleArTesting arTesting = 2;
+  }
+}
