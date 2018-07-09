@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ababe1e0_ec8c2a14",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-09T23:25:46Z",
+      "side": 1,
+      "message": "now there are 3 copies, one memset(0) and two allocations here. you can at least create a temp vector and copy the existing elements into it in the ctor - std::vector\u003cT\u003e temp(mAligned, mAligned + keepSize), and you can use free() + malloc() instead of realloc() to get rid of extra copy there",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 69
+      },
+      "revId": "75981c6ca4ac0184497d0b0fa82fde530823ede0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
