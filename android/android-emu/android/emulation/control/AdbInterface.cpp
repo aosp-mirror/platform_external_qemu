@@ -91,6 +91,8 @@ public:
                                 System::Duration timeout_ms,
                                 bool want_output = true) final;
 
+    void startServer();
+
 private:
     explicit AdbInterfaceImpl(Looper* looper,
                               AdbLocator* locator,
@@ -178,6 +180,22 @@ Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
     return Optional<int>(protocol);
 }
 
+void AdbInterfaceImpl::startServer() {
+    Optional<int> daemon = mDaemon->getProtocolVersion();
+    // Start a server if we cannot determine there's on running.
+    if (!daemon) {
+        const System::Duration kFiveSeconds = 5 * 1000;
+        LOG(VERBOSE) << "Starting adb server";
+        runAdbCommand({"start-server"},
+                      [this](const android::emulation::OptionalAdbCommandResult&
+                                     result) {
+                          if (!result || result->exit_code) {
+                              LOG(INFO) << "Unable to start adb server";
+                          }
+                      },
+                     kFiveSeconds);
+    }
+}
 
 std::unique_ptr<AdbInterface> AdbInterface::Builder::build() {
     if (!mLocator) {
@@ -187,8 +205,9 @@ std::unique_ptr<AdbInterface> AdbInterface::Builder::build() {
         setAdbDaemon(new AdbDaemonImpl());
     }
 
-    AdbInterface* adb = new AdbInterfaceImpl(mLooper, mLocator.release(),
+    AdbInterfaceImpl* adb = new AdbInterfaceImpl(mLooper, mLocator.release(),
                                     mDaemon.release());
+    adb->startServer();
     return std::unique_ptr<AdbInterface>(adb);
 }
 

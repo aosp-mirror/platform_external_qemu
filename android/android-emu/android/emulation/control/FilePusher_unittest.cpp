@@ -58,8 +58,27 @@ public:
                             [this](double progress, bool done) {
                                 mProgresses.push_back({progress, done});
                             }));
+        android::base::TestSystem::ShellCommand cmd =
+                [this](const vector<string>& command, System::Duration,
+                       System::ProcessExitCode* outExitCode, System::Pid*,
+                       const string&) {
+                    EXPECT_GE(command.size(), 4U);
+                    EXPECT_EQ("adb", command[0]);
+                    EXPECT_EQ("-s", command[1]);
+                    EXPECT_EQ("emulator-0", command[2]);
+                    EXPECT_EQ("push", command[3]);
+
+                    while (this->mAtomicNumCommands <= 0) {
+                        System::get()->sleepMs(2);
+                    }
+                    if (outExitCode) {
+                        *outExitCode = this->mFakeExitCode;
+                    }
+                    return this->mFakeRunCommandResult;
+                };
+
         // By default, the 'adb push' command will always block.
-        mTestSystem->setShellCommand(&FilePusherTest::fakeShellCommand, this);
+        mTestSystem->setShellCommand(cmd);
         mAtomicNumCommands = 0;
     }
 
@@ -68,28 +87,6 @@ public:
         mAdb.reset();
         delete mLooper;
         mTestSystem.reset();
-    }
-
-    static bool fakeShellCommand(void* opaque,
-                                 const vector<string>& command,
-                                 System::Duration,
-                                 System::ProcessExitCode* outExitCode,
-                                 System::Pid*,
-                                 const string&) {
-        EXPECT_GE(command.size(), 4U);
-        EXPECT_EQ("adb", command[0]);
-        EXPECT_EQ("-s", command[1]);
-        EXPECT_EQ("emulator-0", command[2]);
-        EXPECT_EQ("push", command[3]);
-
-        auto thisPtr = static_cast<FilePusherTest*>(opaque);
-        while(thisPtr->mAtomicNumCommands <= 0) {
-            System::get()->sleepMs(2);
-        }
-        if (outExitCode) {
-            *outExitCode = thisPtr->mFakeExitCode;
-        }
-        return thisPtr->mFakeRunCommandResult;
     }
 
     void looperAdvance(int numCommands) {

@@ -69,7 +69,6 @@ public:
           mPrevSystem(System::setForTesting(this)),
           mTimes(),
           mShellFunc(NULL),
-          mShellOpaque(NULL),
           mUnixTime(),
           mPid() {
           }
@@ -343,18 +342,16 @@ public:
     // Type of a helper function that can be used during unit-testing to
     // receive the parameters of a runCommand() call. Register it
     // with setShellCommand().
-    typedef bool(ShellCommand)(void* opaque,
-                               const std::vector<std::string>& commandLine,
+    using ShellCommand =
+            std::function<bool(const std::vector<std::string>& commandLine,
                                System::Duration timeoutMs,
                                System::ProcessExitCode* outExitCode,
                                System::Pid* outChildPid,
-                               const std::string& outputFile);
+                               const std::string& outputFile)>;
 
-    // Register a silent shell function. |shell| is the function callback,
-    // and |shellOpaque| a user-provided pointer passed as its first parameter.
-    void setShellCommand(ShellCommand* shell, void* shellOpaque) {
+    // Register a silent shell function. |shell| is the function callback
+    void setShellCommand(ShellCommand shell) {
         mShellFunc = shell;
-        mShellOpaque = shellOpaque;
     }
 
     bool runCommand(const std::vector<std::string>& commandLine,
@@ -371,7 +368,7 @@ public:
         bool result = true;
 
         if (mShellFunc) {
-            result = (*mShellFunc)(mShellOpaque, commandLine, timeoutMs,
+            result = (mShellFunc)(commandLine, timeoutMs,
                                    outExitCode, outChildPid, outputFile);
         }
 
@@ -469,8 +466,7 @@ private:
     std::vector<std::string> mEnvPairs;
     System* mPrevSystem;
     Times mTimes;
-    ShellCommand* mShellFunc;
-    void* mShellOpaque;
+    ShellCommand mShellFunc;
     mutable Duration mUnixTime;
     mutable Duration mUnixTimeLastQueried = 0;
     bool mUnixTimeLive = false;
