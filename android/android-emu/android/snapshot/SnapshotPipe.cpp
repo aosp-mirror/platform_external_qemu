@@ -11,8 +11,10 @@
 
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/AndroidMessagePipe.h"
 #include "android/snapshot/interface.h"
+#include "android/snapshot/proto/offworld.pb.h"
 
 #include <assert.h>
 #include <atomic>
@@ -67,12 +69,8 @@ public:
         ANDROID_IF_DEBUG(assert(sLock.isLocked()));
         mIsLoad = static_cast<bool>(loadStream);
         if (mIsLoad) {
-            DataBuffer recvBuffer;
-            int32_t dataSize = sMetaData.size();
-            encode(&dataSize, sizeof(dataSize), &recvBuffer);
-            encode(sMetaData.data(), dataSize, &recvBuffer);
-            resetRecvPayload(std::move(recvBuffer));
-            sMetaData.clear();
+            resetRecvPayload(std::move(sMetaData));
+            // sMetaData should be cleared after the move
         }
     }
     ~SnapshotPipe() {
@@ -95,7 +93,30 @@ private:
     }
     static void decodeAndExecute(const std::vector<uint8_t>& input,
             std::vector<uint8_t>* output) {
-        const uint8_t* data = input.data();
+        offworld::GuestSend guestSendPb;
+        if (!guestSendPb.ParseFromArray(input.data(), input.size())) {
+            crashhandler_die("Offworld lib message parsing failed.");
+        }
+        bool shouldReply = false;
+        offworld::GuestRecv guestRecvPb;
+        switch (guestSendPb.module_case()) {
+            case offworld::GuestSend::ModuleCase::kSnapshot:
+                handleSnapshotPb(guestSendPb, &shouldReply, &guestRecvPb);
+                break;
+            case offworld::GuestSend::ModuleCase::kArTesting:
+                // TODO
+                break;
+            default:
+                fprintf(stderr, "Error: offworld lib received unrecognized "
+                        "message!");
+        }
+        if (shouldReply) {
+            output->resize(guestRecvPb.ByteSize());
+            guestRecvPb.SerializeToArray(output, output->size());
+        } else {
+            output->clear();
+        }
+        /*const uint8_t* data = input.data();
         int32_t opCode;
         decode(opCode, data);
         switch (static_cast<OP>(opCode)) {
@@ -140,15 +161,62 @@ private:
                         "Error: received bad command from snapshot"
                         " pipe\n");
                 assert(0);
+        }*/
+    }
+    static void handleSnapshotPb(const offworld::GuestSend& guestSend,
+            bool* shouldReply, offworld::GuestRecv* guerstRecv) {
+        const offworld::GuestSend::ModuleSnapshot& snapshotPb
+                = guestSend.snapshot();
+        using MS = offworld::GuestSend::ModuleSnapshot;
+        switch (snapshotPb.function_case()) {
+            case MS::FunctionCase::kCreateCheckpointParam: {
+                const std::string& snapshotName
+                        = snapshotPb.create_checkpoint_param().snapshot_name();
+                gQAndroidVmOperations->vmStop();
+                android::base::ThreadLooper::runOnMainLooper(
+                        [snapshotName]() {
+                            androidSnapshot_save(snapshotName.data());
+                            gQAndroidVmOperations->vmStart();
+                        });
+                *shouldReply = false;
+                break;
+            }
+            case MS::FunctionCase::kGotoCheckpointParam: {
+                const MS::GotoCheckpoint& gotoCheckpointParam
+                        = snapshotPb.goto_checkpoint_param();
+                const std::string& snapshotName
+                        = gotoCheckpointParam.snapshot_name();
+                // Note: metadata are raw bytes, not necessary a string. It is
+                // just protobuf encodes them into strings. The data should be
+                // handled as raw bytes (no extra '\0' at the end). Please try
+                // not to use metadata.c_str().
+                offworld::GuestRecv guestRecv;
+                const std::string& metadata
+                        = gotoCheckpointParam.metadata();
+                guestRecv.mutable_snapshot()->
+                        mutable_create_checkpoint_param()->
+                        set_metadata(metadata);
+                sMetaData.resize(guestRecv.ByteSize());
+                guestRecv.SerializeToArray(sMetaData.data(), sMetaData.size());
+                android::base::ThreadLooper::runOnMainLooper([snapshotName]() {
+                    androidSnapshot_load(snapshotName.data());
+                });
+                *shouldReply = false;
+                break;
+            }
+            default:
+                fprintf(stderr, "Error: offworld lib received unrecognized "
+                        "message!");
+                *shouldReply = false;
         }
     }
     enum class OP : int32_t { Save = 0, Load = 1 };
     bool mIsLoad;
-    static std::vector<char> sMetaData;
+    static DataBuffer sMetaData;
     static android::base::Lock sLock;
 };
 
-std::vector<char> SnapshotPipe::sMetaData = {};
+android::AndroidMessagePipe::DataBuffer SnapshotPipe::sMetaData = {};
 android::base::Lock SnapshotPipe::sLock = {};
 
 }  // namespace
