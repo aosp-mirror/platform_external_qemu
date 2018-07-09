@@ -116,3 +116,25 @@ TEST(AlignedBuf, Compare) {
 
     EXPECT_EQ(buf, buf2);
 }
+
+// Tests that resize preserves contents.
+TEST(AlignedBuf, Resize) {
+    constexpr int initialSize = 5;
+    constexpr char contents[] = { 0xa, 0xb, 0xc, 0xd };
+
+    AlignedBuf<char, 4096> buf(initialSize);
+
+    auto check = [&]() {
+        for (int i = 0; i < initialSize; i++) {
+            EXPECT_EQ(contents[i], buf[i]);
+        }
+    };
+
+    memcpy(buf.data(), contents, initialSize);
+    check();
+
+    for (int i = 0; i < 10; i++) {
+        buf.resize(initialSize + i * 4096);
+        check();
+    }
+}
