@@ -46,6 +46,30 @@
       "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "661018d5_dfcaf355",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-09T19:03:42Z",
+      "side": 1,
+      "message": "well, each OS has its own version of the aligned allocation before that:\nmingw: _aligned_malloc() / _aligned_free()\nposix: posix_memalign() / free()",
+      "parentUuid": "0f961fb6_1001ddcd",
+      "range": {
+        "startLine": 101,
+        "startChar": 44,
+        "endLine": 101,
+        "endChar": 51
+      },
+      "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
