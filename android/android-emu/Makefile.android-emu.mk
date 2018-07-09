@@ -470,6 +470,7 @@ LOCAL_SRC_FILES := \
     android/snapshot/RamSnapshotTesting.cpp \
     android/snapshot/Saver.cpp \
     android/snapshot/Snapshot.cpp \
+    android/snapshot/SnapshotPipe.cpp \
     android/snapshot/Snapshotter.cpp \
     android/snapshot/TextureLoader.cpp \
     android/snapshot/TextureSaver.cpp \
