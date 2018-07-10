@@ -142,6 +142,30 @@
       "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb615f00_ee5d1990",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T02:09:38Z",
+      "side": 1,
+      "message": "Cool, thanks for the pointer :)\n\nI guess that means we can just max(sizeof(void*), align)",
+      "parentUuid": "1e923982_57e44a23",
+      "range": {
+        "startLine": 101,
+        "startChar": 44,
+        "endLine": 101,
+        "endChar": 51
+      },
+      "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
