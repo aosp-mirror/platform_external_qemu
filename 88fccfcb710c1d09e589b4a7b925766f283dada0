@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3b4e8835_000321ba",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-10T21:51:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34dc2431_eaf6f02b",
+      "range": {
+        "startLine": 81,
+        "startChar": 22,
+        "endLine": 81,
+        "endChar": 26
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b54b173d_260e90dd",
         "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8573980e_bff76c95",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-10T21:51:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b54b173d_260e90dd",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 15
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ef5d6f9e_c6739b9d",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-10T21:51:03Z",
+      "side": 1,
+      "message": "I change it into a simple error print and return. Let\u0027s talk about error code in a separate CL.",
+      "parentUuid": "8a7cafaf_fe8c2da4",
+      "range": {
+        "startLine": 93,
+        "startChar": 12,
+        "endLine": 93,
+        "endChar": 28
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8459fb8_c9512697",
         "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
         "patchSetId": 4
@@ -91,6 +163,30 @@
       "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7a6c35c_7c38e0a5",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-10T21:51:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8459fb8_c9512697",
+      "range": {
+        "startLine": 105,
+        "startChar": 16,
+        "endLine": 106,
+        "endChar": 36
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -161,6 +257,30 @@
       "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "76444a2c_753698de",
+        "filename": "android/android-emu/android/snapshot/proto/offworld.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-10T21:51:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5d86e21a_bb629b7a",
+      "range": {
+        "startLine": 11,
+        "startChar": 8,
+        "endLine": 11,
+        "endChar": 17
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
