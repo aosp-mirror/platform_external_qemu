@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faba7390_3a187c9f",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T14:38:37Z",
+      "side": 1,
+      "message": "nit: line up outExitCode",
+      "range": {
+        "startLine": 372,
+        "startChar": 34,
+        "endLine": 372,
+        "endChar": 36
+      },
+      "revId": "e990a4c3e71bf610641155995354cb27a91f881e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9cdc171_37aee0c4",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T14:38:37Z",
+      "side": 1,
+      "message": "nit: one",
+      "range": {
+        "startLine": 185,
+        "startChar": 53,
+        "endLine": 185,
+        "endChar": 55
+      },
+      "revId": "e990a4c3e71bf610641155995354cb27a91f881e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "232d61ef_a0685b6c",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T14:38:37Z",
+      "side": 1,
+      "message": "Can you add a comment to this test that describes the phenomenon being tested?",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 33
+      },
+      "revId": "e990a4c3e71bf610641155995354cb27a91f881e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
