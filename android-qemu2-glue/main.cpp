@@ -118,9 +118,6 @@ enum ImageType {
 const int kMaxPartitions = IMAGE_TYPE_MAX;
 const int kMaxTargetQemuParams = 16;
 
-const int kVendorUnencryptedPartitionId = 6;
-const int kVendorEncryptedPartitionId = 7;
-
 /*
  * A structure used to model information about a given target CPU architecture.
  * |androidArch| is the architecture name, following Android conventions.
@@ -1189,16 +1186,20 @@ extern "C" int main(int argc, char** argv) {
 
         if (android_op_wipe_data || !path_exists(dtbFileName.c_str())) {
             ::dtb::Params params;
-            params.vendor_device_location =
-                StringFormat(
-                    "/dev/block/pci/pci0000:00/0000:00:%02d.0/by-name/vendor",
-                    (fc::isEnabled(fc::EncryptUserData) ?
-                        kVendorEncryptedPartitionId : kVendorUnencryptedPartitionId));
 
-            exitStatus = createDtbFile(params, dtbFileName);
-            if (exitStatus) {
-                derror("Could not create a DTB file (%s)", dtbFileName.c_str());
-                return exitStatus;
+            char *vendor_path = avdInfo_getVendorImageDevicePathInGuest(avd);
+            if (vendor_path) {
+                params.vendor_device_location = vendor_path;
+                free(vendor_path);
+
+                exitStatus = createDtbFile(params, dtbFileName);
+                if (exitStatus) {
+                    derror("Could not create a DTB file (%s)", dtbFileName.c_str());
+                    return exitStatus;
+                }
+            } else {
+                derror("No vendor path found");
+                return 1;
             }
         }
         args.add({"-dtb", dtbFileName});
