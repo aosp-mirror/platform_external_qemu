@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "caba99c3_d4fa2b43",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2275,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T14:18:33Z",
+      "side": 1,
+      "message": "Nice find! Did this affect any of the results you got with snapshot? Presumably, if the program hasn\u0027t linked, it shouldn\u0027t validate either, but could it be possible the validate status returned true anyway?",
+      "range": {
+        "startLine": 2275,
+        "startChar": 7,
+        "endLine": 2275,
+        "endChar": 71
+      },
+      "revId": "3014057d6b8666a841fa7d400f5eca86f2f48edb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99245e4d_010a81b3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotPrograms_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T14:18:33Z",
+      "side": 1,
+      "message": "Nice :D",
+      "range": {
+        "startLine": 234,
+        "startChar": 0,
+        "endLine": 242,
+        "endChar": 17
+      },
+      "revId": "3014057d6b8666a841fa7d400f5eca86f2f48edb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
