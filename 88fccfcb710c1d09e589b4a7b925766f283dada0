@@ -22,6 +22,30 @@
       "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "715654da_595a8100",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-10T17:55:12Z",
+      "side": 1,
+      "message": "This is for making sure we do the snapshot right in the middle of the snapshot call. Otherwise because of the async pattern, the VM will keep running and the snapshot will be triggered at a later stage, making it impossible for us to deliver the message from load calls.\n\nI don\u0027t feel like it causes the freeze because I don\u0027t need to run this code to repro the freeze. But who knows. Maybe this module caused some crazy stuff.",
+      "parentUuid": "5334d9b1_05938a5c",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 27
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
