@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e1b2dbc8_5ca23f36",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2275,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-10T21:37:00Z",
+      "side": 1,
+      "message": "In every case I tried, if the program hadn\u0027t yet linked, validate status would be false. Before these changes the test was failing for swiftshader (after loading a snapshot where validate should be true, still returned false) but not on host GPU; might actually be a swiftshader bug?",
+      "parentUuid": "caba99c3_d4fa2b43",
+      "range": {
+        "startLine": 2275,
+        "startChar": 7,
+        "endLine": 2275,
+        "endChar": 71
+      },
+      "revId": "3014057d6b8666a841fa7d400f5eca86f2f48edb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "99245e4d_010a81b3",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotPrograms_unittest.cpp",
         "patchSetId": 7

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b6070c0_9fdf9281",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-10T21:37:00Z",
+      "side": 1,
+      "message": "While we\u0027re messing with what\u0027s saved here, maybe we should make the types for the GLbooleans consistent? LinkStatus, DeleteStatus, and ValidateStatus are all booleans in the spec.",
+      "revId": "eec94ad96ac369c181167b8bb20364223cea574b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
