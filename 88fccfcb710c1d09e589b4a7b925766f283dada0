@@ -2,6 +2,98 @@
   "comments": [
     {
       "key": {
+        "uuid": "34dc2431_eaf6f02b",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-10T21:37:56Z",
+      "side": 1,
+      "message": "Nit: Guest",
+      "range": {
+        "startLine": 81,
+        "startChar": 22,
+        "endLine": 81,
+        "endChar": 26
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b54b173d_260e90dd",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-10T21:37:56Z",
+      "side": 1,
+      "message": "uint32_t ?",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 15
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a7cafaf_fe8c2da4",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-10T21:37:56Z",
+      "side": 1,
+      "message": "Will this crash the emulator?  I think we should be hardened so that invalid input won\u0027t crash the host, otherwise it\u0027s almost a denial-of-service.  Instead, we should return some sort of \"error\" response.  We could have some known result codes, such as success, incompatible, and unknown error.",
+      "range": {
+        "startLine": 93,
+        "startChar": 12,
+        "endLine": 93,
+        "endChar": 28
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8459fb8_c9512697",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-10T21:37:56Z",
+      "side": 1,
+      "message": "Use E(...) macro?",
+      "range": {
+        "startLine": 105,
+        "startChar": 16,
+        "endLine": 106,
+        "endChar": 36
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5334d9b1_05938a5c",
         "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
         "patchSetId": 4
@@ -42,6 +134,29 @@
         "startChar": 0,
         "endLine": 129,
         "endChar": 27
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d86e21a_bb629b7a",
+        "filename": "android/android-emu/android/snapshot/proto/offworld.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-10T21:37:56Z",
+      "side": 1,
+      "message": "I recommend adding a version number here so that we can detect if offworld/emulator are out of sync.",
+      "range": {
+        "startLine": 11,
+        "startChar": 8,
+        "endLine": 11,
+        "endChar": 17
       },
       "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
