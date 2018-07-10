@@ -46,6 +46,30 @@
       "revId": "75981c6ca4ac0184497d0b0fa82fde530823ede0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ddb15a2_34bbe437",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T02:15:30Z",
+      "side": 1,
+      "message": "Done in https://android-review.googlesource.com/c/platform/external/qemu/+/714808",
+      "parentUuid": "19d07b3f_8e1870ef",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 69
+      },
+      "revId": "75981c6ca4ac0184497d0b0fa82fde530823ede0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
