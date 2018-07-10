@@ -34,7 +34,7 @@ AndroidPipe* AdbDebugPipe::Service::load(void* hwPipe,
 }
 
 void AdbDebugPipe::onGuestClose(PipeCloseReason reason) {
-    // Nothing to do here
+    delete this;
 }
 
 unsigned AdbDebugPipe::onGuestPoll() const {

@@ -34,6 +34,7 @@ LogcatPipe::LogcatPipe(void* hwPipe, Service* svc)
     }
 
 void LogcatPipe::onGuestClose(PipeCloseReason reason) {
+    delete this;
 }
 
 unsigned LogcatPipe::onGuestPoll() const {
