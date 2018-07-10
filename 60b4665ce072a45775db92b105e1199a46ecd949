@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "846683d4_68384a3a",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1143,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-07-10T05:21:10Z",
+      "side": 1,
+      "message": "please re-org like this:\nif (acpi_ini_file) {\n} else {\n}",
+      "range": {
+        "startLine": 1143,
+        "startChar": 4,
+        "endLine": 1143,
+        "endChar": 32
+      },
+      "revId": "60b4665ce072a45775db92b105e1199a46ecd949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
