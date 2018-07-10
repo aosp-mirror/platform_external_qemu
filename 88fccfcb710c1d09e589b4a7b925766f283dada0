@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5334d9b1_05938a5c",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T14:48:27Z",
+      "side": 1,
+      "message": "Why do we need to vmstop earlier here? Does this have something to do with the freeze you\u0027re seeing?",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 27
+      },
+      "revId": "88fccfcb710c1d09e589b4a7b925766f283dada0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
