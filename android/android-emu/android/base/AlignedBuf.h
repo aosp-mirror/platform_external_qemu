@@ -20,6 +20,12 @@
 #include <cstring>
 #include <type_traits>
 
+#include <stdio.h>
+
+#ifdef _WIN32
+#include <malloc.h>
+#endif
+
 namespace android {
 
 template <class T, size_t align>
@@ -33,7 +39,7 @@ public:
 
     AlignedBuf(const AlignedBuf& other) : AlignedBuf(other.mSize) {
         if (other.mBuffer) { // could have got moved out
-            std::copy(other.mAligned, other.mAligned + other.mSize, mAligned);
+            std::copy(other.mBuffer, other.mBuffer + other.mSize, mBuffer);
         }
     }
 
@@ -49,17 +55,15 @@ public:
 
     AlignedBuf& operator=(AlignedBuf&& other) {
         mBuffer = other.mBuffer;
-        mAligned = other.mAligned;
         mSize = other.mSize;
 
         other.mBuffer = nullptr;
-        other.mAligned = nullptr;
         other.mSize = 0;
 
         return *this;
     }
 
-    ~AlignedBuf() { if (mBuffer) free(mBuffer); } // account for getting moved out
+    ~AlignedBuf() { if (mBuffer) freeImpl(mBuffer); } // account for getting moved out
 
     void resize(size_t newSize) {
 #if (defined(__GNUC__) && !defined(__clang__) && __GNUC__ <= 4) || \
@@ -78,14 +82,14 @@ public:
 
     size_t size() const { return mSize; }
 
-    T* data() { return mAligned; }
+    T* data() { return mBuffer; }
 
-    T& operator[](size_t index) { return mAligned[index]; }
+    T& operator[](size_t index) { return mBuffer[index]; }
 
-    const T& operator[](size_t index) const { return mAligned[index]; }
+    const T& operator[](size_t index) const { return mBuffer[index]; }
 
     bool operator==(const AlignedBuf& other) const {
-        return 0 == std::memcmp(mAligned, other.mAligned, sizeof(T) * std::min(mSize, other.mSize));
+        return 0 == std::memcmp(mBuffer, other.mBuffer, sizeof(T) * std::min(mSize, other.mSize));
     }
 
 private:
@@ -93,24 +97,47 @@ private:
     void resizeImpl(size_t newSize) {
         if (newSize) {
             size_t pad = std::max(align, sizeof(T));
-            size_t newSizeBytes = newSize * sizeof(T) + pad;
+            size_t keepSize = std::min(newSize, mSize);
+            size_t newSizeBytes = ((align - 1 + newSize * sizeof(T) + pad) / align) * align;
 
-            mBuffer = static_cast<uint8_t*>(realloc(mBuffer, newSizeBytes));
-
-            mAligned = reinterpret_cast<T*>(
-                    (reinterpret_cast<uintptr_t>(mBuffer) + pad) & ~(align - 1));
-
+            std::vector<T> temp(mBuffer, mBuffer + keepSize);
+            mBuffer = static_cast<T*>(reallocImpl(mBuffer, newSizeBytes));
+            std::copy(temp.data(), temp.data() + keepSize, mBuffer);
         } else {
-            if (mBuffer) free(mBuffer);
+            if (mBuffer) freeImpl(mBuffer);
             mBuffer = nullptr;
-            mAligned = nullptr;
         }
 
         mSize = newSize;
     }
 
-    uint8_t* mBuffer = nullptr;
-    T* mAligned = nullptr;
+    void* reallocImpl(void* oldPtr, size_t sizeBytes) {
+        if (oldPtr) { freeImpl(oldPtr); }
+        // Platform aligned malloc might not behave right
+        // if we give it an alignemnt value smaller than sizeof(void*).
+        size_t actualAlign = std::max(align, sizeof(void*));
+#ifdef _WIN32
+        return _aligned_malloc(sizeBytes, actualAlign);
+#else
+        void* res;
+        if (posix_memalign(&res, actualAlign, sizeBytes)) {
+            fprintf(stderr, "%s: failed to alloc aligned memory\n", __func__);
+            abort();
+        }
+        return res;
+#endif
+    }
+
+    void freeImpl(void* ptr) {
+#ifdef _WIN32
+        _aligned_free(ptr);
+#else
+        free(ptr);
+#endif
+
+    }
+
+    T* mBuffer = nullptr;
     size_t mSize = 0;
 };
 
