@@ -94,15 +94,12 @@ private:
         if (newSize) {
             size_t pad = std::max(align, sizeof(T));
             size_t newSizeBytes = newSize * sizeof(T) + pad;
-            size_t keepSize = std::min(newSize, mSize);
 
-            std::vector<T> temp(keepSize);
-            std::copy(mAligned, mAligned + keepSize, temp.data());
             mBuffer = static_cast<uint8_t*>(realloc(mBuffer, newSizeBytes));
 
             mAligned = reinterpret_cast<T*>(
                     (reinterpret_cast<uintptr_t>(mBuffer) + pad) & ~(align - 1));
-            std::copy(temp.data(), temp.data() + keepSize, mAligned);
+
         } else {
             if (mBuffer) free(mBuffer);
             mBuffer = nullptr;
