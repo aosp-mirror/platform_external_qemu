@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9ef7d046_7e106188",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-10T14:30:48Z",
+      "side": 1,
+      "message": "Was the crash on exit bug a combination of:\n\n- separate non-POD outside Lazyinstance\n- Using the location page dtor to stop the thread; if the user hadn\u0027t opened the extended window but still shut down the emulator, update thread would keep running and then interfere with lower-level shutdown procedures?",
+      "range": {
+        "startLine": 190,
+        "startChar": 0,
+        "endLine": 190,
+        "endChar": 31
+      },
+      "revId": "22d14b9cf01cef4ceb52300777206fdadf301b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cf27b5f2_df815f8b",
         "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
         "patchSetId": 2
