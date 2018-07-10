@@ -694,6 +694,9 @@ void GLESv2Context::initExtensionString() {
         *s_glExtensions+="GL_EXT_color_buffer_float ";
     if (s_glSupport.ext_GL_EXT_color_buffer_half_float)
         *s_glExtensions+="GL_EXT_color_buffer_half_float ";
+    if (getenv("ANDROID_EMU_GL_TEST_BGRA") &&
+        s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888)
+        *s_glExtensions+="GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 ";
 }
 
 int GLESv2Context::getMaxTexUnits() {
