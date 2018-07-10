@@ -118,6 +118,30 @@
       "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e923982_57e44a23",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-10T00:00:21Z",
+      "side": 1,
+      "message": "https://en.cppreference.com/w/cpp/types/max_align_t\n\u003e\u003ePointers returned by allocation functions such as std::malloc are suitably aligned for any object, which means they are aligned at least as strict as std::max_align_t.\n\u003e\u003estd::max_align_t is usually synonymous with the largest scalar type, which is long double on most platforms, and its alignment requirement is either 8 or 16.\n\nthis means any dynamic allocation is aligned at least to 8 bytes. There are no 4 byte alignments on x64 systems at all",
+      "parentUuid": "b0e1f7a8_6a2dc8d4",
+      "range": {
+        "startLine": 101,
+        "startChar": 44,
+        "endLine": 101,
+        "endChar": 51
+      },
+      "revId": "bc2f82fbe82bc14c6f02fe151153ed0baa34cf23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
