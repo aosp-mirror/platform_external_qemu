@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5f7687ec_fd898628",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-10T22:04:42Z",
+      "side": 1,
+      "message": "The thought is that the loop would run during shutdown and its call to sendLocationToDevice() would access something that was already destroyed.",
+      "parentUuid": "9ef7d046_7e106188",
+      "range": {
+        "startLine": 190,
+        "startChar": 0,
+        "endLine": 190,
+        "endChar": 31
+      },
+      "revId": "22d14b9cf01cef4ceb52300777206fdadf301b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cf27b5f2_df815f8b",
         "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "22d14b9cf01cef4ceb52300777206fdadf301b82",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92de195f_d8174d4b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-10T22:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf27b5f2_df815f8b",
+      "range": {
+        "startLine": 191,
+        "startChar": 0,
+        "endLine": 194,
+        "endChar": 25
+      },
+      "revId": "22d14b9cf01cef4ceb52300777206fdadf301b82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
