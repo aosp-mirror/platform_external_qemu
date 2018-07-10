@@ -22,6 +22,98 @@
       "revId": "9e241e9166b908960773a36d8a47c22cd2a85e27",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b39807e_f564c967",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 1137,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-07-10T20:19:48Z",
+      "side": 1,
+      "message": "Could you please rename this to nproperties and move this variable into the the block where it is used and init it with \"2\".",
+      "range": {
+        "startLine": 1137,
+        "startChar": 4,
+        "endLine": 1137,
+        "endChar": 24
+      },
+      "revId": "9e241e9166b908960773a36d8a47c22cd2a85e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00557a3d_0cab7c85",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 1162,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-07-10T20:19:48Z",
+      "side": 1,
+      "message": "I believe it is better to nproperties +\u003d 5 here because system and vendor could use different numbers of properties.",
+      "range": {
+        "startLine": 1162,
+        "startChar": 12,
+        "endLine": 1162,
+        "endChar": 26
+      },
+      "revId": "9e241e9166b908960773a36d8a47c22cd2a85e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3fcf0fb_60317c17",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 1165,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-07-10T20:19:48Z",
+      "side": 1,
+      "message": "Same.",
+      "range": {
+        "startLine": 1165,
+        "startChar": 14,
+        "endLine": 1165,
+        "endChar": 25
+      },
+      "revId": "9e241e9166b908960773a36d8a47c22cd2a85e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f4019609_73f11c2a",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 1168,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-07-10T20:19:48Z",
+      "side": 1,
+      "message": "(nproperties)",
+      "range": {
+        "startLine": 1168,
+        "startChar": 32,
+        "endLine": 1168,
+        "endChar": 53
+      },
+      "revId": "9e241e9166b908960773a36d8a47c22cd2a85e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
