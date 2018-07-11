@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "75219f32_62af990a",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 1539,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-07-11T20:32:42Z",
+      "side": 1,
+      "message": "I think you can remove checking for path_exists here or return a proper error without crashing.",
+      "parentUuid": "c4d3366c_5e9c0d6a",
+      "range": {
+        "startLine": 1539,
+        "startChar": 24,
+        "endLine": 1539,
+        "endChar": 35
+      },
+      "revId": "9e241e9166b908960773a36d8a47c22cd2a85e27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4b39807e_f564c967",
         "filename": "hw/i386/acpi-build.c",
         "patchSetId": 12
