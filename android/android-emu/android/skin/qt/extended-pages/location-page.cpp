@@ -45,6 +45,8 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
 
 static const QAndroidLocationAgent* sLocationAgent = nullptr;
 
+static void updateThreadLoop();
+
 struct LocationPageGlobals {
     LocationPage* locationPagePtr = nullptr;
 
@@ -52,11 +54,12 @@ struct LocationPageGlobals {
     bool                             shouldCloseUpdateThread = false;
     android::base::ConditionVariable updateThreadCv;
     android::base::Lock              updateThreadLock;
+    android::base::FunctorThread     updateThread { &updateThreadLoop };
 };
 
 static LazyInstance<LocationPageGlobals> sGlobals = LAZY_INSTANCE_INIT;
 
-static android::base::FunctorThread sUpdateThread ([]() {
+static void updateThreadLoop() {
     // Update the location every 10 seconds, until we exit
     static constexpr int sleepMicrosec = 10 * 1000 * 1000;
     AutoLock lock(sGlobals->updateThreadLock);
@@ -82,7 +85,7 @@ static android::base::FunctorThread sUpdateThread ([]() {
         }
         wakeTime = now + sleepMicrosec;
     }
-});
+}
 
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
@@ -180,15 +183,15 @@ void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
 
     sendLocationToDevice();
 
-    sUpdateThread.start();
+    sGlobals->updateThread.start();
 }
 
 // static
 void LocationPage::shutDown() {
     AutoLock lock(sGlobals->updateThreadLock);
     sGlobals->shouldCloseUpdateThread = true;
-    sGlobals->updateThreadCv.signalAndUnlock(&sGlobals->updateThreadLock);
-    sUpdateThread.wait();
+    sGlobals->updateThreadCv.signalAndUnlock(&lock);
+    sGlobals->updateThread.wait();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -260,7 +263,7 @@ void LocationPage::on_loc_sendPointButton_clicked() {
 
     mPreviousLat = lat;
     mPreviousLon = lon;
-    sGlobals->updateThreadCv.signalAndUnlock(&sGlobals->updateThreadLock);
+    sGlobals->updateThreadCv.signalAndUnlock(&lock);
 }
 
 void LocationPage::updateDisplayedLocation(double lat, double lon, double alt) {
@@ -527,7 +530,7 @@ void LocationPage::timeout() {
     updateDisplayedLocation(lat, lon, alt);
 
     // Send the command.
-    sGlobals->updateThreadCv.signalAndUnlock(&sGlobals->updateThreadLock);
+    sGlobals->updateThreadCv.signalAndUnlock(&lock);
 
     // Go on to the next row
     mRowToSend++;
