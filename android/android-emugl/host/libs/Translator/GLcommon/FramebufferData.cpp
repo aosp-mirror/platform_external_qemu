@@ -31,10 +31,15 @@ RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     width = stream->getBe32();
     height = stream->getBe32();
     internalformat = stream->getBe32();
+    fprintf(stderr, "%s %s loaded format 0x%x\n", __FILE__, __func__,
+            internalformat);
     hostInternalFormat = stream->getBe32();
+    fprintf(stderr, "%s %s loaded host format 0x%x\n", __FILE__, __func__,
+            hostInternalFormat);
 }
 
 void RenderbufferData::onSave(android::base::Stream* stream, unsigned int globalName) const {
+    fprintf(stderr, "%s %s %d \n", __FILE__, __func__, __LINE__);
     ObjectData::onSave(stream, globalName);
     stream->putBe32(attachedFB);
     stream->putBe32(attachedPoint);
@@ -46,7 +51,11 @@ void RenderbufferData::onSave(android::base::Stream* stream, unsigned int global
     stream->putBe32(width);
     stream->putBe32(height);
     stream->putBe32(internalformat);
+    fprintf(stderr, "%s %s saved format 0x%x\n", __FILE__, __func__,
+            internalformat);
     stream->putBe32(hostInternalFormat);
+    fprintf(stderr, "%s %s saved host format 0x%x\n", __FILE__, __func__,
+            hostInternalFormat);
 }
 
 void RenderbufferData::restore(ObjectLocalName localName,
@@ -56,6 +65,8 @@ void RenderbufferData::restore(ObjectLocalName localName,
             localName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glBindRenderbuffer(GL_RENDERBUFFER, globalName);
+    fprintf(stderr, "%s %s Restoring renderbuffer format 0x%x\n", __FILE__,
+            __func__, hostInternalFormat);
     dispatcher.glRenderbufferStorage(GL_RENDERBUFFER, hostInternalFormat, width,
             height);
 }
@@ -122,6 +133,7 @@ void FramebufferData::onSave(android::base::Stream* stream, unsigned int globalN
 }
 
 void FramebufferData::postLoad(const getObjDataPtr_t& getObjDataPtr) {
+    fprintf(stderr, "%s %s %d \n", __FILE__, __func__, __LINE__);
     for (auto& attachPoint : m_attachPoints) {
         if (NamedObjectType::NULLTYPE != attachPoint.objType) {
             attachPoint.obj = getObjDataPtr(attachPoint.objType,
@@ -139,6 +151,7 @@ void FramebufferData::postLoad(const getObjDataPtr_t& getObjDataPtr) {
 
 void FramebufferData::restore(ObjectLocalName localName,
            const getGlobalName_t& getGlobalName) {
+    fprintf(stderr, "%s %s %d \n", __FILE__, __func__, __LINE__);
     ObjectData::restore(localName, getGlobalName);
     if (!hasBeenBoundAtLeastOnce()) return;
     int globalName = getGlobalName(NamedObjectType::FRAMEBUFFER,
@@ -231,8 +244,7 @@ void FramebufferData::setAttachment(
         m_attachPoints[idx].name != name ||
         m_attachPoints[idx].obj.get() != obj.get() ||
         m_attachPoints[idx].owned != takeOwnership) {
-
-        detachObject(idx); 
+        detachObject(idx);
 
         m_attachPoints[idx].target = target;
         m_attachPoints[idx].name = name;
