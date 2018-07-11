@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce01be84_fead5ec3",
+        "filename": "android/scripts/build-virglrenderer.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-11T21:38:54Z",
+      "side": 1,
+      "message": "should we just put this in aosp platform/external/virglrenderer so we can trak whats going on with our things and prevent bad actor from replacing the https://anongit.freedesktop.org with viruses?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 61
+      },
+      "revId": "ca4e3afc8812f6269764c4d14eb88d99274955f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
