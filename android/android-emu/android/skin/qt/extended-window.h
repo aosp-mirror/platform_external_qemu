@@ -55,6 +55,12 @@ public:
     ~ExtendedWindow();
 
     static void setAgent(const UiEmuAgent* agentPtr);
+    // Some pages on the extended window perform actions even if the UI
+    // is not created.
+    // In this case the dtor is not called when the Emulator exits, so
+    // someone needs to call 'shutdown' to let us know we should stop
+    // those actions.
+    static void shutDown();
 
     void show();
     void showPane(ExtendedWindowPane pane);
