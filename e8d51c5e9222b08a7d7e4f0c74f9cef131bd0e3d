@@ -22,6 +22,30 @@
       "revId": "e8d51c5e9222b08a7d7e4f0c74f9cef131bd0e3d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "67011a14_5c4e5f7b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-11T21:09:12Z",
+      "side": 1,
+      "message": "Thanks, I\u0027ll try that.",
+      "parentUuid": "19ceace6_9d628c6f",
+      "range": {
+        "startLine": 57,
+        "startChar": 52,
+        "endLine": 57,
+        "endChar": 68
+      },
+      "revId": "e8d51c5e9222b08a7d7e4f0c74f9cef131bd0e3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
