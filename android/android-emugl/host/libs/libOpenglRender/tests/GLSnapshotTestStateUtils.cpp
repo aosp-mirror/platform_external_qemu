@@ -43,4 +43,28 @@ GLuint createBuffer(const GLESv2Dispatch* gl, GlBufferData data) {
     return name;
 };
 
+GLuint loadAndCompileShader(const GLESv2Dispatch* gl,
+                            GLenum shaderType,
+                            const char* src) {
+    GLuint shader = gl->glCreateShader(shaderType);
+    gl->glShaderSource(shader, 1, (const GLchar* const*)&src, nullptr);
+    gl->glCompileShader(shader);
+
+    GLint compileStatus;
+    gl->glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    EXPECT_EQ(GL_TRUE, compileStatus);
+
+    if (compileStatus != GL_TRUE) {
+        GLsizei infoLogLength;
+        gl->glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog;
+        infoLog.resize(infoLogLength);
+        gl->glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
+        fprintf(stderr, "%s: fail to compile. infolog %s\n", __func__,
+                &infoLog[0]);
+    }
+
+    return shader;
+}
+
 }  // namespace emugl

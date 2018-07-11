@@ -69,13 +69,14 @@ static int s_glShaderType2ShaderType(GLenum type) {
     return ProgramData::NUM_SHADER_TYPE;
 }
 
-ProgramData::ProgramData(int glesMaj, int glesMin) :
-    ObjectData(PROGRAM_DATA),
-    LinkStatus(GL_FALSE),
-    IsInUse(false),
-    DeleteStatus(false),
-    mGlesMajorVersion(glesMaj),
-    mGlesMinorVersion(glesMin) {}
+ProgramData::ProgramData(int glesMaj, int glesMin)
+    : ObjectData(PROGRAM_DATA),
+      LinkStatus(false),
+      IsInUse(false),
+      DeleteStatus(false),
+      ValidateStatus(false),
+      mGlesMajorVersion(glesMaj),
+      mGlesMinorVersion(glesMin) {}
 
 ProgramData::ProgramData(android::base::Stream* stream) :
     ObjectData(stream) {
@@ -110,17 +111,13 @@ ProgramData::ProgramData(android::base::Stream* stream) :
         s.linkedSource = stream->getString();
     }
     validationInfoLog = stream->getString();
+    infoLog = stream->getString();
 
-    std::string infoLogRead = stream->getString();
-    size_t infoSize = infoLogRead.length();
-    if (infoSize) {
-        GLchar* info = new GLchar[infoSize + 1];
-        memcpy(info, infoLogRead.c_str(), infoSize + 1);
-        infoLog.reset(info);
-    }
-    LinkStatus = stream->getBe32();
+    LinkStatus = stream->getByte();
     IsInUse = stream->getByte();
     DeleteStatus = stream->getByte();
+    ValidateStatus = stream->getByte();
+
     mGlesMajorVersion = stream->getByte();
     mGlesMinorVersion = stream->getByte();
     loadCollection(stream, &mUniNameToGuestLoc,
@@ -353,10 +350,11 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
         // This is for compatibility over different rendering backends
     }
     stream->putString(validationInfoLog);
-    stream->putString(infoLog.get());
-    stream->putBe32(LinkStatus);
+    stream->putString(infoLog);
+    stream->putByte(LinkStatus);
     stream->putByte(IsInUse);
     stream->putByte(DeleteStatus);
+    stream->putByte(ValidateStatus);
 
     stream->putByte(mGlesMajorVersion);
     stream->putByte(mGlesMinorVersion);
@@ -439,13 +437,13 @@ void ProgramData::restore(ObjectLocalName localName,
                     attribLocs.first.c_str());
         }
         if (mGlesMajorVersion >= 3) {
-            std::unique_ptr<const char*> varyings(
-                    new const char*[mTransformFeedbacks.size()]);
+            std::vector<const char*> varyings;
+            varyings.resize(mTransformFeedbacks.size());
             for (size_t i = 0; i < mTransformFeedbacks.size(); i++) {
-                varyings.get()[i] = mTransformFeedbacks[i].c_str();
+                varyings[i] = mTransformFeedbacks[i].c_str();
             }
-            dispatcher.glTransformFeedbackVaryings(globalName,
-                    mTransformFeedbacks.size(), varyings.get(),
+            dispatcher.glTransformFeedbackVaryings(
+                    globalName, mTransformFeedbacks.size(), varyings.data(),
                     mTransformFeedbackBufferMode);
             mTransformFeedbacks.clear();
         }
@@ -627,17 +625,16 @@ GenNameInfo ProgramData::getGenNameInfo() const {
 }
 
 void ProgramData::setErrInfoLog() {
-    size_t bytes = validationInfoLog.length() + 1;
-    infoLog.reset(new GLchar[bytes]);
-    memcpy((char*)infoLog.get(), &validationInfoLog[0], bytes);
+    infoLog.clear();
+    infoLog = std::string(validationInfoLog);
 }
 
 void ProgramData::setInfoLog(const GLchar* log) {
-    infoLog.reset(log);
+    infoLog = std::string(log);
 }
 
 const GLchar* ProgramData::getInfoLog() const {
-    return infoLog.get() ? infoLog.get() : (const GLchar*)"";
+    return infoLog.c_str();
 }
 
 GLuint ProgramData::getAttachedVertexShader() const {
@@ -757,7 +754,7 @@ bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
 }
 
 void ProgramData::setLinkStatus(GLint status) {
-    LinkStatus = status;
+    LinkStatus = (status == GL_FALSE) ? false : true;
     mUniNameToGuestLoc.clear();
     mGuestLocToHostLoc.clear();
     mGuestLocToHostLoc[-1] = -1;
@@ -793,7 +790,7 @@ void ProgramData::setLinkStatus(GLint status) {
     }
 }
 
-GLint ProgramData::getLinkStatus() const {
+bool ProgramData::getLinkStatus() const {
     return LinkStatus;
 }
 
