@@ -22,6 +22,30 @@
       "revId": "ca4e3afc8812f6269764c4d14eb88d99274955f3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bac8fe06_a339672b",
+        "filename": "android/scripts/build-virglrenderer.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-07-11T22:34:48Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ce01be84_fead5ec3",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 61
+      },
+      "revId": "ca4e3afc8812f6269764c4d14eb88d99274955f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
