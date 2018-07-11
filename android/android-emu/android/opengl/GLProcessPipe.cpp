@@ -75,6 +75,7 @@ public:
 
     void onGuestClose(PipeCloseReason reason) override {
         android_cleanupProcGLObjects(m_uniqueId);
+        delete this;
     }
 
     unsigned onGuestPoll() const override {
