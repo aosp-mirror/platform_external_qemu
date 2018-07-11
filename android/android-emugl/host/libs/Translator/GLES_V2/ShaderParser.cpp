@@ -105,19 +105,23 @@ static const char kAlwaysInvalidShader[] =
     "indeed invalid when translation fails.";
 
 void ShaderParser::convertESSLToGLSL() {
-    std::string infolog;
+    if (isGles2Gles()) {
+        m_parsedSrc = m_originalSrc;
+        return;
+    }
+    std::string translationLog;
     std::string parsedSource;
     m_valid =
         ANGLEShaderParser::translate(
             m_coreProfile,
             m_originalSrc.c_str(),
             m_type,
-            &infolog,
+            &translationLog,
             &parsedSource,
             &m_shaderLinkInfo);
 
     if (!m_valid) {
-        m_infoLog = static_cast<const GLchar*>(infolog.c_str());
+        m_infoLog = static_cast<const GLchar*>(translationLog.c_str());
         m_parsedSrc = kAlwaysInvalidShader;
     } else {
         m_parsedSrc = parsedSource;

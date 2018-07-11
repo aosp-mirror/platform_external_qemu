@@ -1630,8 +1630,8 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
          RET_AND_SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                               GL_INVALID_OPERATION, -1);
          ProgramData* pData = (ProgramData*)objData;
-         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,
-                              GL_INVALID_OPERATION, -1);
+         RET_AND_SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION,
+                              -1);
          int ret = ctx->dispatcher().glGetAttribLocation(
              globalProgramName, pData->getTranslatedName(name).c_str());
          if (ret != -1) {
@@ -2260,7 +2260,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
             ProgramData* programData = (ProgramData*)objData;
-            params[0] = programData->getLinkStatus();
+            params[0] = programData->getLinkStatus() ? GL_TRUE : GL_FALSE;
             }
             break;
         //validate status should not return GL_TRUE if link failed
@@ -2272,11 +2272,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramiv(GLuint program, GLenum pname, GLint*
             SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                          GL_INVALID_OPERATION);
             ProgramData* programData = (ProgramData*)objData;
-            if (programData->getLinkStatus() == GL_TRUE)
-                ctx->dispatcher().glGetProgramiv(globalProgramName, pname,
-                                                 params);
-            else
-                params[0] = GL_FALSE;
+            params[0] = programData->getValidateStatus() ? GL_TRUE : GL_FALSE;
             }
             break;
         case GL_INFO_LOG_LENGTH:
@@ -2539,7 +2535,7 @@ GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfl
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
-        SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
+        SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformfv(globalProgramName,
             pData->getHostUniformLocation(location), params);
     }
@@ -2556,7 +2552,7 @@ GL_APICALL void  GL_APIENTRY glGetUniformiv(GLuint program, GLint location, GLin
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
-        SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
+        SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformiv(globalProgramName,
             pData->getHostUniformLocation(location), params);
     }
@@ -2572,7 +2568,7 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
-        RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
+        RET_AND_SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION, -1);
         return pData->getGuestUniformLocation(name);
     }
     return -1;
@@ -3504,12 +3500,19 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
         ProgramData* programData = (ProgramData*)objData;
         ctx->dispatcher().glValidateProgram(globalProgramName);
 
-        GLsizei infoLogLength=0;
-        GLchar* infoLog;
+        GLint validateStatus;
+        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_VALIDATE_STATUS,
+                                         &validateStatus);
+        programData->setValidateStatus(static_cast<bool>(validateStatus));
+
+        GLsizei infoLogLength = 0, cLength = 0;
         ctx->dispatcher().glGetProgramiv(globalProgramName,GL_INFO_LOG_LENGTH,&infoLogLength);
-        infoLog = new GLchar[infoLogLength+1];
-        ctx->dispatcher().glGetProgramInfoLog(globalProgramName,infoLogLength,NULL,infoLog);
-        programData->setInfoLog(infoLog);
+        std::unique_ptr<GLchar[]> infoLog(new GLchar[infoLogLength + 1]);
+        ctx->dispatcher().glGetProgramInfoLog(globalProgramName, infoLogLength,
+                                              &cLength, infoLog.get());
+        if (cLength > 0) {
+            programData->setInfoLog(infoLog.release());
+        }
     }
 }
 
