@@ -20,17 +20,16 @@
 
 namespace emugl {
 
-TEST_F(GLTest, TextureDrawBasic) {
-    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+namespace {
 
+void TestTextureDrawBasic(const GLESv2Dispatch* gl, GLenum internalformat,
+                          GLenum format) {
     GLint viewport[4] = {};
     gl->glGetIntegerv(GL_VIEWPORT, viewport);
     EXPECT_EQ(0, viewport[0]);
     EXPECT_EQ(0, viewport[1]);
     const int width = viewport[2];
     const int height = viewport[3];
-    const GLint internalformat = (GLint)GL_RGBA;
-    const GLenum format = GL_RGBA;
     const GLenum type = GL_UNSIGNED_BYTE;
     const int bpp = 4;
     const int bytes = width * height * bpp;
@@ -78,6 +77,20 @@ TEST_F(GLTest, TextureDrawBasic) {
                                pixels.data() + i * rowBytes,
                                pixelsOut.data() + (height - i - 1) * rowBytes));
     }
+}
+
+}  // namespace
+
+#define GL_BGRA_EXT 0x80E1
+
+TEST_F(GLTest, TextureDrawBasic) {
+     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+     TestTextureDrawBasic(gl, GL_RGBA, GL_RGBA);
+     const char* ext = (const char *)gl->glGetString(GL_EXTENSIONS);
+     if (strstr(ext, "GL_EXT_texture_format_BGRA8888")) {
+         fprintf(stderr, "Testing BGRA8888 format texture\n");
+         TestTextureDrawBasic(gl, GL_BGRA_EXT, GL_BGRA_EXT);
+     }
 }
 
 }  // namespace emugl
