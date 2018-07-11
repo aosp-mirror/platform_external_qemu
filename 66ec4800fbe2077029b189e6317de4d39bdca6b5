@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "260cc0d8_9cc4eac6",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 3148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-11T00:08:50Z",
+      "side": 1,
+      "message": "How did GL_BGRA even become the internal format? Something weird is going on here.\n\nAre you aware of the GL_EXT_texture_format_BGRA8888 extension? That\u0027s a much newer OpenGL ES extension for BGRA where there is BGRA internal format. If the user assumes support for this, the only safe way is to check for BGRA internal format on the host or underlying ES driver",
+      "range": {
+        "startLine": 3144,
+        "startChar": 0,
+        "endLine": 3148,
+        "endChar": 5
+      },
+      "revId": "66ec4800fbe2077029b189e6317de4d39bdca6b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
