@@ -16,6 +16,24 @@
       "revId": "7e6f940e1c54ebcbacf7cb1c77c19073b141307b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79b85bc2_e40ab85f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-07-11T17:42:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9671b69_420b8199",
+      "revId": "7e6f940e1c54ebcbacf7cb1c77c19073b141307b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
