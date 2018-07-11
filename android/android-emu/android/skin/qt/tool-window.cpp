@@ -566,6 +566,7 @@ void ToolWindow::closeExtendedWindow() {
     // If user is clicking the 'x' button like crazy, we may get multiple
     // close events here, so make sure the function doesn't screw the state for
     // a next call.
+    ExtendedWindow::shutDown();
     mExtendedWindow.clear();
 }
 
