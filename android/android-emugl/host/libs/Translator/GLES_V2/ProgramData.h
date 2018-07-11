@@ -52,7 +52,7 @@ struct AttachedShader {
     ANGLEShaderParser::ShaderLinkInfo linkInfo = {};
 };
 
-class ProgramData:public ObjectData{
+class ProgramData : public ObjectData {
 public:
     enum ShaderType {
         VERTEX = 0,
@@ -86,9 +86,12 @@ public:
     bool validateLink(ShaderParser* frag, ShaderParser* vert);
     // setLinkStatus resets uniform location virtualization as well
     void setLinkStatus(GLint status);
-    GLint getLinkStatus() const;
+    bool getLinkStatus() const;
 
     void setErrInfoLog();
+
+    // make sure this is never called with a 0-length log returned from
+    // glGetProgramLog; it can be garbage without a null terminator.
     void setInfoLog(const GLchar *log);
     const GLchar* getInfoLog() const;
 
@@ -97,6 +100,9 @@ public:
 
     bool getDeleteStatus() const { return DeleteStatus; }
     void setDeleteStatus(bool status) { DeleteStatus = status; }
+
+    bool getValidateStatus() const { return ValidateStatus; }
+    void setValidateStatus(bool status) { ValidateStatus = status; }
 
     // boundAttribLocs stores the attribute locations assigned by
     // glBindAttribLocation.
@@ -122,10 +128,11 @@ private:
     std::unordered_map<GLuint, GLUniformDesc> uniforms;
     AttachedShader attachedShaders[NUM_SHADER_TYPE] = {};
     std::string validationInfoLog;
-    std::unique_ptr<const GLchar[]> infoLog;
-    GLint  LinkStatus;
-    bool    IsInUse;
-    bool    DeleteStatus;
+    std::string infoLog;
+    bool LinkStatus;
+    bool IsInUse;
+    bool DeleteStatus;
+    bool ValidateStatus;
     GLuint  ProgramName;
     std::unordered_map<GLuint, GLuint> mUniformBlockBinding;
     std::vector<std::string> mTransformFeedbacks;

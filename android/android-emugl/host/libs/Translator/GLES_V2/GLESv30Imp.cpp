@@ -260,7 +260,7 @@ GL_APICALL void GL_APIENTRY glGetUniformuiv(GLuint program, GLint location, GLui
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
-        SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
+        SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
         int hostLoc = s_getHostLocOrSetError(location);
         SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformuiv(globalProgramName, hostLoc, params);
