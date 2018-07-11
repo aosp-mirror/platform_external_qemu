@@ -40,8 +40,14 @@ public:
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
     SaveableTexturePtr saveableTexture = {};
-    GLenum internalformat = GL_RGBA8;
-    GLenum hostInternalFormat = GL_RGBA8;
+
+    // We call on the dispatcher rather than returning these values when
+    // glGetRenderbufferParameter is called, so the initial format values here
+    // are unimportant; hostInternalFormat still being GL_NONE indicates
+    // we can skip the glRenderbufferStorage call when restoring this state.
+    GLenum internalformat = GL_RGBA4;
+    GLenum hostInternalFormat = GL_NONE;
+
     GLsizei width = 0;
     GLsizei height = 0;
     GLint samples = 0;
