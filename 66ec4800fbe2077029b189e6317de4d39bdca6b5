@@ -46,6 +46,30 @@
       "revId": "66ec4800fbe2077029b189e6317de4d39bdca6b5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec4d8f7c_a739aefb",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 3148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-11T00:23:14Z",
+      "side": 1,
+      "message": "Ok, sounds good. then what\u0027s the expected behavior in terms of GL errors when running all the different legal/illegal combinations? Can you write a test for that?",
+      "parentUuid": "2cc48609_5dfe8113",
+      "range": {
+        "startLine": 3144,
+        "startChar": 0,
+        "endLine": 3148,
+        "endChar": 5
+      },
+      "revId": "66ec4800fbe2077029b189e6317de4d39bdca6b5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
