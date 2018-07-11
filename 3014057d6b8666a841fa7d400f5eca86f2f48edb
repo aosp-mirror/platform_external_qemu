@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "64230ab9_c0386c68",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2275,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-11T17:18:55Z",
+      "side": 1,
+      "message": "Maybe not. Since getValidateStatus isn\u0027t called as part of restore, the value in GL_VALIDATE_STATUS isn\u0027t updated on snapshot load? Having the ProgramData store it should take care of it.",
+      "parentUuid": "e1b2dbc8_5ca23f36",
+      "range": {
+        "startLine": 2275,
+        "startChar": 7,
+        "endLine": 2275,
+        "endChar": 71
+      },
+      "revId": "3014057d6b8666a841fa7d400f5eca86f2f48edb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "99245e4d_010a81b3",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotPrograms_unittest.cpp",
         "patchSetId": 7
@@ -69,6 +93,30 @@
       "revId": "3014057d6b8666a841fa7d400f5eca86f2f48edb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "529cbd85_53599a75",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotPrograms_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-11T17:18:55Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "99245e4d_010a81b3",
+      "range": {
+        "startLine": 234,
+        "startChar": 0,
+        "endLine": 242,
+        "endChar": 17
+      },
+      "revId": "3014057d6b8666a841fa7d400f5eca86f2f48edb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
