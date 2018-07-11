@@ -208,6 +208,11 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
     }
 }
 
+// static
+void ExtendedWindow::shutDown() {
+    LocationPage::shutDown();
+}
+
 void ExtendedWindow::show() {
     QFrame::show();
 
