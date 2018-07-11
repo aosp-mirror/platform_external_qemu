@@ -2227,7 +2227,14 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
     }
 
     ctx->dispatcher().glGetRenderbufferParameteriv(target,pname,params);
+    fprintf(stderr, "%s %s %d called dispatcher get 0x%x, returned %d \n",
+            __FILE__, __func__, __LINE__, pname, params[0]);
     if (pname == GL_RENDERBUFFER_INTERNAL_FORMAT && *params == GL_RGBA) {
+        fprintf(stderr, "%s %s %d inside, setting GL_RGBA4 \n", __FILE__,
+                __func__, __LINE__);
+        // TODO(benzene): investigate this. Why does this occur only on the
+        // pre-snapshot check? I guess the restored state has some differences
+        // to the fresh-constructed state
         *params = GL_RGBA4;
     }
 }
@@ -2962,6 +2969,8 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
         }
     }
 
+    fprintf(stderr, "%s %s %d internalformat is 0x%x \n", __FILE__, __func__,
+            __LINE__, internalformat);
 
     // Get current bounded renderbuffer
     // raise INVALID_OPERATIOn if no renderbuffer is bounded
@@ -2972,7 +2981,11 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
     if (!rbData) { *err = GL_INVALID_OPERATION; return GL_NONE; }
 
     rbData->internalformat = internalformat;
+    fprintf(stderr, "%s %s %d internalformat is 0x%x \n", __FILE__, __func__,
+            __LINE__, internalformat);
     rbData->hostInternalFormat = internal;
+    fprintf(stderr, "%s %s %d hostinternalformat is 0x%x \n", __FILE__,
+            __func__, __LINE__, internal);
     rbData->width = width;
     rbData->height = height;
     rbData->samples = samples;
@@ -2995,6 +3008,8 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     internalformat = sPrepareRenderbufferStorage(internalformat, width, height, 0, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
+    fprintf(stderr, "%s calling with internalformat %x\n", __func__,
+            internalformat);
 }
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){

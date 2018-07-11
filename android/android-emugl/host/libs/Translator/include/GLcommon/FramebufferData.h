@@ -40,8 +40,8 @@ public:
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
     SaveableTexturePtr saveableTexture = {};
-    GLenum internalformat = GL_RGBA8;
-    GLenum hostInternalFormat = GL_RGBA8;
+    GLenum internalformat = GL_RGBA4;  // Default INTERNAL_FORMAT value is RGBA4
+    GLenum hostInternalFormat = GL_RGBA4;
     GLsizei width = 0;
     GLsizei height = 0;
     GLint samples = 0;
