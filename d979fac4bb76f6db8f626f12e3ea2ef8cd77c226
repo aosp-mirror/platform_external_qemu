@@ -22,6 +22,29 @@
       "revId": "d979fac4bb76f6db8f626f12e3ea2ef8cd77c226",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66cac132_45e8271f",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-12T17:34:08Z",
+      "side": 1,
+      "message": "Should we think about concurrency issues now that we have a string here in addition to pure scalar values? Is it possible for setPaddingAndCutout to be issued from loadMask while in the middle of retrying the ADB command, possibly being able to see sCutoutType in intermediate states?",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 5
+      },
+      "revId": "d979fac4bb76f6db8f626f12e3ea2ef8cd77c226",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
