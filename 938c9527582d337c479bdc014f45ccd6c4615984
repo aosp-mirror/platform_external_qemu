@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2400d3bb_8a78d54a",
+        "filename": "tinyepoxy/tinyepoxy.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-12T23:40:45Z",
+      "side": 1,
+      "message": "Please move tinyepoxy to android/third_party. Our intention is to keep the root repo dir a QEMU-like checkout as close to that as possible with minimal interference.",
+      "revId": "938c9527582d337c479bdc014f45ccd6c4615984",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
