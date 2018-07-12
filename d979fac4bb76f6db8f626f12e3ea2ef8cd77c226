@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f94a194b_95d49ffc",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-12T17:30:15Z",
+      "side": 1,
+      "message": "What about grouping up all the static globals into a static LazyInstance\u003cScreenMaskGlobals\u003e or something, to avoid destructors running at the wrong time and an easier way to track all the global state?\n\nIt looks like it is trending towards a class that is internal to this .cpp file with all the static functions in here as well.",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 27
+      },
+      "revId": "d979fac4bb76f6db8f626f12e3ea2ef8cd77c226",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
