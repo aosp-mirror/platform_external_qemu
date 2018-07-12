@@ -36,7 +36,6 @@ using android::base::LazyInstance;
 static constexpr double kGplexLon = -122.084;
 static constexpr double kGplexLat =   37.422;
 
-static double getHeading(double startLat, double startLon, double endLat, double endLon);
 static void sendLocationToDevice();
 static void getDeviceLocation(double* pLatitude, double* pLongitude, double* pAltitude);
 static void getDeviceLocationFromSettings(double* pOutLatitude,
