@@ -153,22 +153,27 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
 
     hWinHvPlatform = LoadLibraryW(L"WinHvPlatform.dll");
     if (hWinHvPlatform) {
+        fprintf(stderr, "%s: found WHPX dll. checking capabilities\n", __func__);
         WHvGetCapability_t f_WHvGetCapability = (
             WHvGetCapability_t)GetProcAddress(hWinHvPlatform, "WHvGetCapability");
         if (f_WHvGetCapability) {
+            fprintf(stderr, "%s: found WHvGetCapability. running....\n", __func__);
             hr = f_WHvGetCapability(WHvCapabilityCodeHypervisorPresent, &whpx_cap,
                                     sizeof(whpx_cap), &whpx_cap_size);
             if (FAILED(hr) || !whpx_cap.HypervisorPresent) {
+                fprintf(stderr, "%s: failed to run WHvGetCapability or no WHPX found. hr=%08lx, present? %d\n", __func__, hr, whpx_cap.HypervisorPresent);
                 StringAppendFormat(status,
                                    "WHPX: No accelerator found, hr=%08lx.",
                                    hr);
                 acc_available = false;
             }
         } else {
+            fprintf(stderr, "Could not load library function 'WHvGetCapability'.\n");
             status->assign("Could not load library function 'WHvGetCapability'.");
             acc_available = false;
         }
     } else {
+        fprintf(stderr, "Could not load library 'WinHvPlatform.dll'.\n");
         status->assign("Could not load library 'WinHvPlatform.dll'.");
         acc_available = false;
     }
@@ -176,12 +181,15 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
     if (hWinHvPlatform)
         FreeLibrary(hWinHvPlatform);
 
-    if (!acc_available)
+    if (!acc_available) {
+        fprintf(stderr, "Acceleration not available, return 'not installed.'\n");
         return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
+    }
 
     auto ver = android::base::Win32Utils::getWindowsVersion();
     if (!ver) {
         status->assign("Could not extract Windows version.");
+        fprintf(stderr, "Could not extract Windows version, return 'error'\n");
         return ANDROID_CPU_ACCELERATION_ERROR;
     }
 
@@ -191,6 +199,7 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
              ver->dwMinorVersion,
              ver->dwBuildNumber);
 
+        fprintf(stderr, "WHPX is installed and usable.\n");
     StringAppendFormat(
             status, "WHPX (%s) is installed and usable.",
             version_str);

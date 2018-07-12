@@ -115,6 +115,7 @@ static void virtio_blk_rw_complete(void *opaque, int ret)
              * the memory until the request is completed (which will
              * happen on the other side of the migration).
              */
+            fprintf(stderr, "%s: FAIL\n", __func__);
             if (virtio_blk_handle_rw_error(req, -ret, is_read)) {
                 continue;
             }
@@ -134,6 +135,7 @@ static void virtio_blk_flush_complete(void *opaque, int ret)
 
     aio_context_acquire(blk_get_aio_context(s->conf.conf.blk));
     if (ret) {
+            fprintf(stderr, "%s: FAIL\n", __func__);
         if (virtio_blk_handle_rw_error(req, -ret, 0)) {
             goto out;
         }
