@@ -456,8 +456,6 @@ QemudService* qemud_service_register(const char* service_name,
                                      QemudServiceConnect serv_connect,
                                      QemudServiceSave serv_save,
                                      QemudServiceLoad serv_load) {
-    assert(isInited);
-
     QemudService* const sv =
             qemud_service_new(service_name,
                               max_clients,
