@@ -74,6 +74,16 @@ AndroidPipe* LogcatPipe::Service::create(void* hwPipe, const char* args) {
     return new LogcatPipe(hwPipe, this);
 }
 
+AndroidPipe* LogcatPipe::Service::load(void* hwPipe,
+                  const char* args,
+                  android::base::Stream* stream) {
+    return new LogcatPipe(hwPipe, this);
+}
+
+bool LogcatPipe::Service::canLoad() const {
+    return true;
+}
+
 }  // namespace emulation
 }  // namespace android
 

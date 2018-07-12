@@ -27,6 +27,10 @@ public:
     public:
         Service();
         AndroidPipe* create(void* hwPipe, const char* args) override;
+        AndroidPipe* load(void* hwPipe,
+                          const char* args,
+                          android::base::Stream* stream) override;
+        bool canLoad() const override;
     };
 
     LogcatPipe(void* hwPipe, Service* svc);
