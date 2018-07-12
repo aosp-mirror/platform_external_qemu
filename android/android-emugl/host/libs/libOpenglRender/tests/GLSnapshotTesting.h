@@ -110,6 +110,17 @@ static const GLenum kGLES2BlendFuncs[] = {GL_ZERO,
                                           GL_ONE_MINUS_CONSTANT_ALPHA,
                                           GL_SRC_ALPHA_SATURATE};
 
+// Returns a string useful for failure messages describing |enumValue|.
+std::string describeGlEnum(GLenum enumValue);
+
+// For building other compare functions which return AssertionResult.
+// Compares an |actual| against an |expected| value. Returns a failure values
+// do not match; provide |description| to attach details to the failure message.
+template <class T>
+testing::AssertionResult compareValue(T expected,
+                                      T actual,
+                                      const std::string& description = "");
+
 // Compares a global GL value, known by |name| and retrieved as a boolean,
 // against an |expected| value.
 testing::AssertionResult compareGlobalGlBoolean(const GLESv2Dispatch* gl,
@@ -127,6 +138,16 @@ testing::AssertionResult compareGlobalGlInt(const GLESv2Dispatch* gl,
 testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
                                               GLenum name,
                                               GLfloat expected);
+
+// For building other compare functions which return AssertionResult.
+// Compare the values at each index of a vector |actual| against an |expected|.
+// Returns a failure if any values are mismatched; provide |description| to
+// attach details to the failure message.
+template <class T>
+testing::AssertionResult compareVector(
+        const std::vector<T>& expected,
+        const std::vector<T>& actual,
+        const std::string& description = "vector");
 
 // Compares a vector of global GL values, known by |name| and retrieved as a
 // boolean array, against |expected| values.
