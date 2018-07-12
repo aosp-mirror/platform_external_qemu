@@ -37,6 +37,8 @@ include $(LOCAL_PATH)/android/third_party/tinyobjloader.mk
 include $(LOCAL_PATH)/android/third_party/picosha2/picosha2.mk
 include $(LOCAL_PATH)/android/third_party/libdtb/libdtb.mk
 
+include $(LOCAL_PATH)/tinyepoxy/tinyepoxy.mk
+
 # Bluez only works on linux
 ifeq ($(BUILD_TARGET_OS),linux)
   include $(LOCAL_PATH)/android/third_party/libbluez.mk
