@@ -43,6 +43,7 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
     // host GPU states are not touched until postLoadRestore is called.
     // GlobalNames are not yet generated.
     size_t objSize = stream->getBe32();
+    printf("obj size %d\n", (int)objSize);
     for (size_t obj = 0; obj < objSize; obj++) {
         ObjectLocalName localName = stream->getBe64();
         ObjectDataPtr data = loadObject((NamedObjectType)m_type,

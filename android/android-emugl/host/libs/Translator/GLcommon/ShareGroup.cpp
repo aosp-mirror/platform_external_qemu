@@ -380,9 +380,11 @@ ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
         ++ite;
     }
     if (ite == m_groups.end()) {
+        printf("creating share group %lu\n", p_existingGroupID);
         return createShareGroup(p_groupName, p_existingGroupID, stream,
                                 loadObject);
     } else {
+        printf("attaching share group %lu\n", p_existingGroupID);
         return attachShareGroup(p_groupName, ite->first);
     }
 }

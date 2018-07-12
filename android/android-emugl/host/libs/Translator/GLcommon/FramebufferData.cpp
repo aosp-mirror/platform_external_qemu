@@ -90,6 +90,7 @@ FramebufferData::FramebufferData(android::base::Stream* stream) :
     m_hasDrawBuffers = stream->getByte();
     android::base::loadBuffer(stream, &m_drawBuffers);
     m_readBuffer = stream->getBe32();
+    printf("name %d read buffer %d\n", m_fbName, m_readBuffer);
 }
 
 FramebufferData::~FramebufferData() {

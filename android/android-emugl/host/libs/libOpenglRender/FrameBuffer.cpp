@@ -1986,7 +1986,9 @@ bool FrameBuffer::onLoad(Stream* stream,
 
     loadCollection(stream, &m_contexts,
                    [this](Stream* stream) -> RenderContextMap::value_type {
+        printf("loading ctx total %d\n", (int)m_contexts.size());
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
+        assert(ctx->getHndl());
         return { ctx ? ctx->getHndl() : 0, ctx };
     });
     assert(!android::base::find(m_contexts, 0));

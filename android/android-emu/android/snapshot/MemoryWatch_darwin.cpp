@@ -180,6 +180,7 @@ public:
 
 // static
 bool MemoryAccessWatch::isSupported() {
+    return false;
     // TODO: HAXM
     return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HVF;
 }
