@@ -349,6 +349,8 @@ void ColorBuffer::subUpdate(int x,
         return;
     }
 
+    touch();
+
     p_format = sGetUnsizedColorBufferFormat(p_format);
 
     if (m_needFormatCheck) {
@@ -357,8 +359,6 @@ void ColorBuffer::subUpdate(int x,
         }
         m_needFormatCheck = false;
     }
-
-    touch();
 
     if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
         m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
