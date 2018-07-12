@@ -161,6 +161,8 @@ GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
                     GLuint val = stream->getBe32();
                     return std::make_pair(idx, val);
                 });
+                printf("att0 arr len %d att0 neeeds disable %d\n", m_att0ArrayLength, m_att0NeedsDisable);
+        printf("useProgram %d bindSampler %d\n", m_useProgram, (int)m_bindSampler.size());
     } else {
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;

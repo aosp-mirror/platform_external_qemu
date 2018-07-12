@@ -933,6 +933,7 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
     EglConfig* cfg = nullptr;
     if (!stream) {
         cfg = dpy->getConfig(config);
+        assert(cfg);
         if (!cfg) return EGL_NO_CONTEXT;
     }
 
@@ -948,6 +949,7 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
             switch(attrib_list[i]) {
             case EGL_CONTEXT_MAJOR_VERSION_KHR:
                 major_version = attrib_val;
+                printf("maj ver %d\n", attrib_val);
                 break;
             case EGL_CONTEXT_MINOR_VERSION_KHR:
                 minor_version = attrib_val;
@@ -1010,12 +1012,19 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
          case 1:
              glesVersion = GLES_3_1;
              break;
+         case 2:
+             glesVersion = GLES_2_0;
+             break;
          default:
+             printf("minor version %d\n", minor_version);
+             assert(false);
              RETURN_ERROR(EGL_NO_CONTEXT, EGL_BAD_ATTRIBUTE);
              break;
          }
          break;
      default:
+         printf("major version %d\n", major_version);
+         assert(false);
          RETURN_ERROR(EGL_NO_CONTEXT, EGL_BAD_ATTRIBUTE);
          break;
     }
@@ -1026,12 +1035,14 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
         glesCtx = iface->createGLESContext(major_version, minor_version,
                 dpy->getGlobalNameSpace(), stream);
     } else { // there is no interface for this gles version
+        assert(false);
                 RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_ATTRIBUTE);
     }
 
     if(share_context != EGL_NO_CONTEXT) {
         ContextPtr sharedCtxPtr = dpy->getContext(share_context);
         if(!sharedCtxPtr.get()) {
+            assert(false);
             RETURN_ERROR(EGL_NO_CONTEXT,EGL_BAD_CONTEXT);
         }
         shareGroupId = sharedCtxPtr->getShareGroup()->getId();
@@ -1046,10 +1057,12 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
                                   dpy->getManager(glesVersion),
                                   stream));
     if(ctx->nativeType()) {
+        printf("returning good ctx\n");
         return dpy->addContext(ctx);
     } else {
         iface->deleteGLESContext(glesCtx);
     }
+    assert(false);
 
     return EGL_NO_CONTEXT;
 }

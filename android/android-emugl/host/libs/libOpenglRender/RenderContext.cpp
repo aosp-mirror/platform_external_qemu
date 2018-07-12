@@ -61,6 +61,11 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
     } else if (version == GLESApi_3_1) {
         majorVersion = 3;
         minorVersion = 1;
+    } else if (version == GLESApi_3_2) {
+        majorVersion = 3;
+        minorVersion = 2;
+    } else {
+        printf("clientVersion %d\n", clientVersion);
     }
 
     android::base::SmallFixedVector<EGLint, 7> contextAttribs = {
@@ -137,7 +142,7 @@ RenderContext *RenderContext::onLoad(android::base::Stream* stream,
             EGLDisplay display) {
     HandleType hndl = static_cast<HandleType>(stream->getBe32());
     GLESApi version = static_cast<GLESApi>(stream->getBe32());
-
+    printf("ctx on load hndl %d version %d\n", hndl, version);
     return createImpl(display, (EGLConfig)0, EGL_NO_CONTEXT, hndl, version,
                       stream);
 }

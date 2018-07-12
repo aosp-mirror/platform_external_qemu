@@ -290,7 +290,7 @@ AdbCommand::AdbCommand(Looper* looper,
 }
 
 void AdbCommand::start(int checkTimeoutMs) {
-    if (!mTask && !mFinished) {
+    /*if (!mTask && !mFinished) {
         auto shared = shared_from_this();
         mTask.reset(new ParallelTask<OptionalAdbCommandResult>(
                 mLooper,
@@ -302,7 +302,7 @@ void AdbCommand::start(int checkTimeoutMs) {
                 },
                 checkTimeoutMs));
         mTask->start();
-    }
+    }*/
 }
 
 void AdbCommand::taskDoneFunction(const OptionalAdbCommandResult& result) {
@@ -338,6 +338,7 @@ bool AdbCommand::wait(System::Duration timeoutMs) {
 }
 
 void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
+    /*
     if (mCommand.empty() || mCommand.front().empty()) {
         result->clear();
         return;
@@ -356,7 +357,7 @@ void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
     if (command_ran) {
         result->emplace(exit_code,
                         mWantOutput ? mOutputFilePath : std::string());
-    }
+    }*/
 }
 
 AdbCommandResult::AdbCommandResult(System::ProcessExitCode exitCode,

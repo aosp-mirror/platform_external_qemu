@@ -37,6 +37,7 @@ typedef enum {
     GLES_2_0 = 2,
     GLES_3_0 = 3,
     GLES_3_1 = 4,
+    GLES_3_2 = 5,
     MAX_GLES_VERSION //Must be last
 } GLESVersion;
 

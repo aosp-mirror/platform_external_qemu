@@ -634,7 +634,8 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
             static_cast<FrameworkFormat>(stream->getBe32());
     EGLImageKHR eglImage = reinterpret_cast<EGLImageKHR>(stream->getBe32());
     EGLImageKHR blitEGLImage = reinterpret_cast<EGLImageKHR>(stream->getBe32());
-
+    printf("hndl %d width %d height %d\n", (int)hndl, (int)width, (int)height);
+    assert(0);
     if (!eglImage) {
         return create(p_display, width, height, internalFormat, frameworkFormat,
                       hndl, helper, fastBlitSupported);

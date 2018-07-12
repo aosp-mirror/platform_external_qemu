@@ -1984,12 +1984,27 @@ bool FrameBuffer::onLoad(Stream* stream,
     m_statsNumFrames = stream->getBe32();
     m_statsStartTime = stream->getBe64();
 
-    loadCollection(stream, &m_contexts,
+    {
+        const int size = stream->getBe32();
+        for (int i = 0; i < 5; ++i) {
+            RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
+            assert(ctx->getHndl());
+            m_contexts.emplace(ctx->getHndl(), ctx);
+        }
+    }
+    /*loadCollection(stream, &m_contexts,
                    [this](Stream* stream) -> RenderContextMap::value_type {
+        printf("loading ctx total %d\n", (int)m_contexts.size());
+        
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
+        assert(ctx->getHndl());
         return { ctx ? ctx->getHndl() : 0, ctx };
-    });
+    });*/
     assert(!android::base::find(m_contexts, 0));
+    for (int i = 0; i < 10; i++) {
+        printf("%d ", stream->getBe32());
+    }
+    assert(0);
 
     auto now = System::get()->getUnixTime();
     loadCollection(stream, &m_colorbuffers,
@@ -2006,6 +2021,9 @@ bool FrameBuffer::onLoad(Stream* stream,
         }
         return { handle, { std::move(cb), refCount, opened, closedTs } };
     });
+    ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
+                                              m_colorBufferHelper,
+                                              m_fastBlitSupported));
     m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
     GL_LOG("Got lasted posted color buffer from snapshot");
 
