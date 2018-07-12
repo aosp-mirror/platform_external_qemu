@@ -55,8 +55,8 @@ public:
             }
 
             EXPECT_TRUE(compareGlobalGlInt(gl, boundTarget, it.second))
-                    << "buffer binding " << boundTarget
-                    << " should be bound to " << it.second;
+                    << "buffer binding " << describeGlEnum(boundTarget)
+                    << " should be bound with " << it.second;
         }
 
         // Check that all buffers have the correct attributes
@@ -100,10 +100,12 @@ protected:
 
         gl->glBindBuffer(GL_ARRAY_BUFFER, name);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        checkBufferParameter(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, (GLint)data.size);
-        checkBufferParameter(GL_ARRAY_BUFFER, GL_BUFFER_USAGE,
-                             (GLint)data.usage);
-
+        EXPECT_TRUE(compareBufferParameter(GL_ARRAY_BUFFER, GL_BUFFER_SIZE,
+                                           (GLint)data.size))
+                << "for buffer " << name;
+        EXPECT_TRUE(compareBufferParameter(GL_ARRAY_BUFFER, GL_BUFFER_USAGE,
+                                           (GLint)data.usage))
+                << "for buffer " << name;
         // TODO(benzene): compare actual buffer contents?
         // in GLES2 there doesn't seem to be a way to directly read the buffer
         // contents
@@ -113,12 +115,16 @@ protected:
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
     }
 
-    void checkBufferParameter(GLenum target, GLenum paramName, GLint expected) {
+    testing::AssertionResult compareBufferParameter(GLenum target,
+                                                    GLenum paramName,
+                                                    GLint expected) {
         GLint value;
         gl->glGetBufferParameteriv(target, paramName, &value);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        EXPECT_EQ(expected, value) << " mismatch on parameter " << paramName
-                                   << " for buffer bound to " << target;
+        return compareValue<GLint>(
+                expected, value,
+                "mismatch on parameter " + describeGlEnum(paramName) +
+                        " for buffer bound to " + describeGlEnum(target));
     }
 
     std::map<GLenum, GLuint> m_bindings;
