@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ffb4faf_c6d2bda7",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/FramebufferData.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-12T22:41:19Z",
+      "side": 1,
+      "message": "Nice find!",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 40
+      },
+      "revId": "bdd8d0d95ee3c6c1a582f760499446896395fd48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
