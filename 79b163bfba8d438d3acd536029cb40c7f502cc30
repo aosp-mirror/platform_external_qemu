@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a879aa5d_5e34ca51",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotVertexAttributes_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-12T19:26:19Z",
+      "side": 1,
+      "message": "The templates for this look good.",
+      "range": {
+        "startLine": 99,
+        "startChar": 15,
+        "endLine": 99,
+        "endChar": 38
+      },
+      "revId": "79b163bfba8d438d3acd536029cb40c7f502cc30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
