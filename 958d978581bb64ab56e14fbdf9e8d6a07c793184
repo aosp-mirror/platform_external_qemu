@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c76ec511_cf9b5b87",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 1142,
+      "author": {
+        "id": 1336478
+      },
+      "writtenOn": "2018-07-13T01:20:05Z",
+      "side": 1,
+      "message": "iniFile_neweFromFile will always return a non-null object, so checking acpi_ini_file will be a better approach.",
+      "parentUuid": "a66c2b49_bcda817b",
+      "range": {
+        "startLine": 1141,
+        "startChar": 0,
+        "endLine": 1142,
+        "endChar": 63
+      },
+      "revId": "958d978581bb64ab56e14fbdf9e8d6a07c793184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0148a0a2_8329be47",
         "filename": "hw/i386/acpi-build.c",
         "patchSetId": 13
@@ -45,6 +69,30 @@
       "revId": "958d978581bb64ab56e14fbdf9e8d6a07c793184",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30527a2c_080cd4dc",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 1156,
+      "author": {
+        "id": 1336478
+      },
+      "writtenOn": "2018-07-13T01:20:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0148a0a2_8329be47",
+      "range": {
+        "startLine": 1156,
+        "startChar": 22,
+        "endLine": 1156,
+        "endChar": 56
+      },
+      "revId": "958d978581bb64ab56e14fbdf9e8d6a07c793184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
