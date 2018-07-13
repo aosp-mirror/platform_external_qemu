@@ -88,6 +88,7 @@ public:
     }
 
     void changedStateCheck() override {
+        SCOPED_TRACE("test program name = " + std::to_string(m_program_name));
         EXPECT_EQ(GL_TRUE, gl->glIsProgram(m_program_name));
         EXPECT_TRUE(
                 compareGlobalGlInt(gl, GL_CURRENT_PROGRAM, m_current_program));
@@ -111,6 +112,7 @@ public:
         ASSERT_EQ(m_program_state.attributes.size(),
                   currentState.attributes.size());
         for (int i = 0; i < currentState.attributes.size(); i++) {
+            SCOPED_TRACE("active attribute i = " + std::to_string(i));
             EXPECT_EQ(m_program_state.attributes[i].size,
                       currentState.attributes[i].size);
             EXPECT_EQ(m_program_state.attributes[i].type,
@@ -128,6 +130,7 @@ public:
         ASSERT_EQ(m_program_state.uniforms.size(),
                   currentState.uniforms.size());
         for (int i = 0; i < currentState.uniforms.size(); i++) {
+            SCOPED_TRACE("active uniform i = " + std::to_string(i));
             EXPECT_EQ(m_program_state.uniforms[i].size,
                       currentState.uniforms[i].size);
             EXPECT_EQ(m_program_state.uniforms[i].type,
@@ -138,6 +141,7 @@ public:
                       currentState.uniforms[i].location);
 
             for (int j = 0; j < currentState.uniforms[i].size; j++) {
+                SCOPED_TRACE("value j = " + std::to_string(j));
                 GlValues& expectedVal = m_program_state.uniforms[i].values[j];
                 GlValues& currentVal = currentState.uniforms[i].values[j];
                 if (currentVal.floats.size() > 0 &&
