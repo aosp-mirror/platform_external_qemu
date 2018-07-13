@@ -651,6 +651,11 @@ probe_prebuilts_dir "lz4" LZ4_PREBUILTS_DIR common/lz4
 ###
 probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
 
+###
+###  virglrenderer probe
+###
+probe_prebuilts_dir "virglrenderer" VIRGLRENDERER_PREBUILTS_DIR common/virglrenderer
+
 CACERTS_FILE="$PROGDIR/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
     panic "Missing cacerts file: $CACERTS_FILE"
@@ -1180,6 +1185,7 @@ echo "LZ4_PREBUILTS_DIR := $LZ4_PREBUILTS_DIR" >> $config_mk
 echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
 echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
+echo "VIRGLRENDERER_PREBUILTS_DIR := $VIRGLRENDERER_PREBUILTS_DIR" >> $config_mk
 
 if [ "$OPTION_TRACE" = "yes" ] ; then
   log "Enabling tracing"
