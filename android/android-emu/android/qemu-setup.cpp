@@ -300,6 +300,7 @@ static bool setup_console_and_adb_ports(int console_port,
     if (register_adb_service) {
         android_adb_service_init();
     }
+
     return true;
 }
 
