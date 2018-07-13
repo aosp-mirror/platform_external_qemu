@@ -35,6 +35,7 @@
 #include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/utils/debug.h"
 #include "android/utils/file_data.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
@@ -137,6 +138,8 @@ GlobalState gGlobals = {false,  false,  CPU_ACCELERATOR_NONE,
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
 
+#define WHPX_DBG(...) VERBOSE_PRINT(init, __VA_ARGS__)
+
 static bool isOkToTryWHPX() {
     return featurecontrol::isEnabled(featurecontrol::WindowsHypervisorPlatform);
 }
@@ -151,24 +154,33 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
     typedef HRESULT (WINAPI *WHvGetCapability_t) (
         WHV_CAPABILITY_CODE, VOID*, UINT32, UINT32*);
 
+    WHPX_DBG("Checking whether Windows Hypervisor Platform (WHPX) is available.");
+
     hWinHvPlatform = LoadLibraryW(L"WinHvPlatform.dll");
     if (hWinHvPlatform) {
+        WHPX_DBG("WinHvPlatform.dll found. Looking for WHvGetCapability...");
         WHvGetCapability_t f_WHvGetCapability = (
             WHvGetCapability_t)GetProcAddress(hWinHvPlatform, "WHvGetCapability");
         if (f_WHvGetCapability) {
+            WHPX_DBG("WHvGetCapability found. Querying WHPX capabilities...");
             hr = f_WHvGetCapability(WHvCapabilityCodeHypervisorPresent, &whpx_cap,
                                     sizeof(whpx_cap), &whpx_cap_size);
             if (FAILED(hr) || !whpx_cap.HypervisorPresent) {
+                WHPX_DBG("WHvGetCapability failed. hr=0x%08lx whpx_cap.HypervisorPresent? %d\n",
+                         hr, whpx_cap.HypervisorPresent);
                 StringAppendFormat(status,
                                    "WHPX: No accelerator found, hr=%08lx.",
                                    hr);
                 acc_available = false;
             }
         } else {
+            WHPX_DBG("Could not load library function 'WHvGetCapability'.");
             status->assign("Could not load library function 'WHvGetCapability'.");
             acc_available = false;
         }
     } else {
+        WHPX_DBG("Could not load library WinHvPlatform.dll");
+        fprintf(stderr, "Could not load library 'WinHvPlatform.dll'.\n");
         status->assign("Could not load library 'WinHvPlatform.dll'.");
         acc_available = false;
     }
@@ -176,11 +188,14 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
     if (hWinHvPlatform)
         FreeLibrary(hWinHvPlatform);
 
-    if (!acc_available)
+    if (!acc_available) {
+        WHPX_DBG("WHPX is either not available or not installed.");
         return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
+    }
 
     auto ver = android::base::Win32Utils::getWindowsVersion();
     if (!ver) {
+        WHPX_DBG("Could not extract Windows version.");
         status->assign("Could not extract Windows version.");
         return ANDROID_CPU_ACCELERATION_ERROR;
     }
@@ -191,6 +206,7 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
              ver->dwMinorVersion,
              ver->dwBuildNumber);
 
+    WHPX_DBG("WHPX (%s) is installed and usable.", version_str);
     StringAppendFormat(
             status, "WHPX (%s) is installed and usable.",
             version_str);
