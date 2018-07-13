@@ -22,6 +22,30 @@
       "revId": "826bfec39c307f1594608f3b2c6353ed698df968",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "413f29fc_51c23d4c",
+        "filename": "android/android-emu/android/cmdline-options.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1336478
+      },
+      "writtenOn": "2018-07-13T04:56:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "00181964_2172fb1f",
+      "range": {
+        "startLine": 205,
+        "startChar": 33,
+        "endLine": 205,
+        "endChar": 71
+      },
+      "revId": "826bfec39c307f1594608f3b2c6353ed698df968",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
