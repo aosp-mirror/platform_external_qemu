@@ -56,8 +56,10 @@ void RenderbufferData::restore(ObjectLocalName localName,
             localName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glBindRenderbuffer(GL_RENDERBUFFER, globalName);
-    dispatcher.glRenderbufferStorage(GL_RENDERBUFFER, hostInternalFormat, width,
-            height);
+    if (hostInternalFormat != GL_NONE) {
+        dispatcher.glRenderbufferStorage(GL_RENDERBUFFER, hostInternalFormat,
+                                         width, height);
+    }
 }
 
 void RenderbufferData::makeTextureDirty() {
@@ -231,8 +233,7 @@ void FramebufferData::setAttachment(
         m_attachPoints[idx].name != name ||
         m_attachPoints[idx].obj.get() != obj.get() ||
         m_attachPoints[idx].owned != takeOwnership) {
-
-        detachObject(idx); 
+        detachObject(idx);
 
         m_attachPoints[idx].target = target;
         m_attachPoints[idx].name = name;

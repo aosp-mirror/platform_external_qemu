@@ -2227,6 +2227,9 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
     }
 
     ctx->dispatcher().glGetRenderbufferParameteriv(target,pname,params);
+
+    // An uninitialized renderbuffer storage may give a format of GL_RGBA on
+    // some drivers; GLES2 default is GL_RGBA4.
     if (pname == GL_RENDERBUFFER_INTERNAL_FORMAT && *params == GL_RGBA) {
         *params = GL_RGBA4;
     }
@@ -2957,7 +2960,6 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
                 break;
         }
     }
-
 
     // Get current bounded renderbuffer
     // raise INVALID_OPERATIOn if no renderbuffer is bounded
