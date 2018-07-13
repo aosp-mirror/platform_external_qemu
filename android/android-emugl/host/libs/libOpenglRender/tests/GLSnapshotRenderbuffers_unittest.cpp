@@ -101,13 +101,10 @@ protected:
     testing::AssertionResult compareParameter(GLenum name, GLint expected) {
         GLint actual;
         gl->glGetRenderbufferParameteriv(GL_RENDERBUFFER, name, &actual);
-        if (expected != actual) {
-            return testing::AssertionFailure()
-                   << "GL Renderbuffer object parameter mismatch for " << name
-                   << ":\n\tvalue was:\t" << actual << "\n\t expected:\t"
-                   << expected << "\t";
-        }
-        return testing::AssertionSuccess();
+        return compareValue<GLint>(
+                expected, actual,
+                "GL Renderbuffer object mismatch for param " +
+                        describeGlEnum(name) + ":");
     }
 
     GLuint m_renderbuffer_name = 0;
