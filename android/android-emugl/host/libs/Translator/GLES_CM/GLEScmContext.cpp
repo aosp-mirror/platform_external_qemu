@@ -42,6 +42,14 @@ void GLEScmContext::init() {
     if(!m_initialized) {
         GLEScontext::init();
 
+        addVertexArrayObject(0);
+        setVertexArrayObject(0);
+
+        m_currVaoState[GL_COLOR_ARRAY]          = new GLESpointer();
+        m_currVaoState[GL_NORMAL_ARRAY]         = new GLESpointer();
+        m_currVaoState[GL_VERTEX_ARRAY]         = new GLESpointer();
+        m_currVaoState[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
+
         m_texCoords = new GLESpointer[kMaxTextureUnits];
         m_currVaoState[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
 
@@ -88,7 +96,6 @@ void GLEScmContext::initDefaultFBO(
 GLEScmContext::GLEScmContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream)
     : GLEScontext(globalNameSpace, stream, nullptr) {
-    // TODO: snapshot support
     if (stream) {
         assert(maj == m_glesMajorVersion);
         assert(min == m_glesMinorVersion);
@@ -148,14 +155,6 @@ GLEScmContext::GLEScmContext(int maj, int min,
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
 
-        addVertexArrayObject(0);
-        setVertexArrayObject(0);
-
-        m_currVaoState[GL_COLOR_ARRAY]          = new GLESpointer();
-        m_currVaoState[GL_NORMAL_ARRAY]         = new GLESpointer();
-        m_currVaoState[GL_VERTEX_ARRAY]         = new GLESpointer();
-        m_currVaoState[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
-
         mProjMatrices.resize(1, glm::mat4());
         mModelviewMatrices.resize(1, glm::mat4());
         mTextureMatrices.resize(kMaxTextureUnits, { glm::mat4() });
@@ -207,7 +206,9 @@ GLEScmContext::~GLEScmContext(){
         delete[] m_texCoords;
         m_texCoords = NULL;
     }
-    m_currVaoState[GL_TEXTURE_COORD_ARRAY] = NULL;
+    if (m_vaoStateMap.size()) {
+        m_currVaoState[GL_TEXTURE_COORD_ARRAY] = NULL;
+    }
 
     if (m_coreProfileEngine) {
         delete m_coreProfileEngine;
