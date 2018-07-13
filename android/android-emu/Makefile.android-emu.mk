@@ -616,6 +616,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-tinyobjloader \
     emulator-zlib \
     emulator-murmurhash \
+    emulator-tinyepoxy \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
