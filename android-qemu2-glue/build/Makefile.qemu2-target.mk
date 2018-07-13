@@ -65,6 +65,8 @@ QEMU2_SYSTEM_LDLIBS := \
 
 QEMU2_SYSTEM_STATIC_LIBRARIES := \
     emulator-zlib \
+    emulator-virglrenderer \
+    emulator-tinyepoxy \
     $(LIBUSB_STATIC_LIBRARIES) \
     $(call qemu2-if-linux, emulator-libbluez) \
 
