@@ -37,19 +37,44 @@ using android::base::StdioStream;
 using android::snapshot::TextureLoader;
 using android::snapshot::TextureSaver;
 
+std::string describeGlEnum(GLenum enumValue) {
+    std::ostringstream description;
+    description << "0x" << std::hex << enumValue;
+    return description.str();
+}
+
+template <class T>
+testing::AssertionResult compareValue(T expected,
+                                      T actual,
+                                      const std::string& description) {
+    if (expected != actual) {
+        return testing::AssertionFailure()
+               << description << "\n\tvalue was:\t"
+               << testing::PrintToString(actual) << "\n\t expected:\t"
+               << testing::PrintToString(expected) << "\t";
+    }
+    return testing::AssertionSuccess();
+}
+
+template testing::AssertionResult compareValue<GLboolean>(GLboolean,
+                                                          GLboolean,
+                                                          const std::string&);
+template testing::AssertionResult compareValue<GLint>(GLint,
+                                                      GLint,
+                                                      const std::string&);
+template testing::AssertionResult compareValue<GLfloat>(GLfloat,
+                                                        GLfloat,
+                                                        const std::string&);
+
 testing::AssertionResult compareGlobalGlBoolean(const GLESv2Dispatch* gl,
                                                 GLenum name,
                                                 GLboolean expected) {
     GLboolean current;
     gl->glGetBooleanv(name, &current);
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-    if (expected != current) {
-        return testing::AssertionFailure()
-               << "GL global boolean mismatch for parameter " << name
-               << ":\n\tvalue was:\t" << current << "\n\t expected:\t"
-               << expected << "\t";
-    }
-    return testing::AssertionSuccess();
+    return compareValue<GLboolean>(expected, current,
+                                   "GL global boolean mismatch for parameter " +
+                                           describeGlEnum(name) + ":");
 }
 
 testing::AssertionResult compareGlobalGlInt(const GLESv2Dispatch* gl,
@@ -58,13 +83,9 @@ testing::AssertionResult compareGlobalGlInt(const GLESv2Dispatch* gl,
     GLint current;
     gl->glGetIntegerv(name, &current);
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-    if (expected != current) {
-        return testing::AssertionFailure()
-               << "GL global int mismatch for parameter " << name
-               << ":\n\tvalue was:\t" << current << "\n\t expected:\t"
-               << expected << "\t";
-    }
-    return testing::AssertionSuccess();
+    return compareValue<GLint>(expected, current,
+                               "GL global int mismatch for parameter " +
+                                       describeGlEnum(name) + ":");
 }
 
 testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
@@ -73,30 +94,34 @@ testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
     GLfloat current;
     gl->glGetFloatv(name, &current);
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-    if (expected != current) {
-        return testing::AssertionFailure()
-               << "GL global float mismatch for parameter " << name
-               << ":\n\tvalue was:\t" << current << "\n\t expected:\t"
-               << expected << "\t";
-    }
-    return testing::AssertionSuccess();
+    return compareValue<GLfloat>(expected, current,
+                                 "GL global float mismatch for parameter " +
+                                         describeGlEnum(name) + ":");
 }
 
 // Compare the values at each index of a vector |actual| against an |expected|.
 // Returns a failure if any values are mismatched; provide |description| to
 // attach details to the failure message.
 template <class T>
-testing::AssertionResult compareVector(
-        const std::vector<T>& expected,
-        const std::vector<T>& actual,
-        const std::string& description = "vector") {
-    int mismatches = 0;
+testing::AssertionResult compareVector(const std::vector<T>& expected,
+                                       const std::vector<T>& actual,
+                                       const std::string& description) {
     std::stringstream message;
+    if (expected.size() != actual.size()) {
+        message << "    (!) sizes do not match (actual " << actual.size()
+                << ", expected " << expected.size() << ")\n";
+    }
+
+    int mismatches = 0;
     for (int i = 0; i < expected.size(); i++) {
-        if (expected[i] != actual[i]) {
+        if (i >= actual.size()) {
+            message << "    no match for:\t"
+                    << testing::PrintToString(expected[i]) << "\n";
+        } else if (expected[i] != actual[i]) {
             mismatches++;
-            message << "    at index " << i << ":\n\tvalue was:\t" << actual[i]
-                    << "\n\t expected:\t" << expected[i] << "\n";
+            message << "    at index " << i << ":\n\tvalue was:\t"
+                    << testing::PrintToString(actual[i]) << "\n\t expected:\t"
+                    << testing::PrintToString(expected[i]) << "\n";
         }
     }
     if (mismatches > 0) {
@@ -106,6 +131,19 @@ testing::AssertionResult compareVector(
     }
     return testing::AssertionSuccess();
 }
+
+template testing::AssertionResult compareVector<GLboolean>(
+        const std::vector<GLboolean>&,
+        const std::vector<GLboolean>&,
+        const std::string&);
+template testing::AssertionResult compareVector<GLint>(
+        const std::vector<GLint>&,
+        const std::vector<GLint>&,
+        const std::string&);
+template testing::AssertionResult compareVector<GLfloat>(
+        const std::vector<GLfloat>&,
+        const std::vector<GLfloat>&,
+        const std::string&);
 
 testing::AssertionResult compareGlobalGlBooleanv(
         const GLESv2Dispatch* gl,
@@ -118,7 +156,7 @@ testing::AssertionResult compareGlobalGlBooleanv(
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
     return compareVector<GLboolean>(
             expected, current,
-            "GL global booleanv parameter " + std::to_string(name));
+            "GL global booleanv parameter " + describeGlEnum(name));
 }
 
 testing::AssertionResult compareGlobalGlIntv(const GLESv2Dispatch* gl,
@@ -131,7 +169,7 @@ testing::AssertionResult compareGlobalGlIntv(const GLESv2Dispatch* gl,
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
     return compareVector<GLint>(
             expected, current,
-            "GL global intv parameter " + std::to_string(name));
+            "GL global intv parameter " + describeGlEnum(name));
 }
 
 testing::AssertionResult compareGlobalGlFloatv(
@@ -145,7 +183,7 @@ testing::AssertionResult compareGlobalGlFloatv(
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
     return compareVector<GLfloat>(
             expected, current,
-            "GL global floatv parameter " + std::to_string(name));
+            "GL global floatv parameter " + describeGlEnum(name));
 }
 
 void SnapshotTest::SetUp() {

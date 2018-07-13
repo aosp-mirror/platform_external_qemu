@@ -55,7 +55,8 @@ class SnapshotGlVertexAttributesTest
     : public SnapshotSetValueTest<GlVertexAttrib> {
 public:
     virtual void stateCheck(GlVertexAttrib expected) override {
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_ENABLED, expected.enabled);
+        EXPECT_TRUE(compareIntParameter(GL_VERTEX_ATTRIB_ARRAY_ENABLED,
+                                        expected.enabled));
     }
 
     virtual void stateChange() override {
@@ -82,38 +83,42 @@ public:
     }
 
 protected:
-    void checkFloatParameter(GLenum paramName, GLfloat expected) {
+    testing::AssertionResult compareFloatParameter(GLenum paramName,
+                                                   GLfloat expected) {
         std::vector<GLfloat> v = {expected};
-        checkFloatParameter(paramName, v);
+        return compareFloatParameter(paramName, v);
     }
 
-    void checkFloatParameter(GLenum paramName, std::vector<GLfloat> expected) {
+    testing::AssertionResult compareFloatParameter(
+            GLenum paramName,
+            const std::vector<GLfloat>& expected) {
         std::vector<GLfloat> values;
         values.resize(std::max((GLuint)4, (GLuint)expected.size()));
         gl->glGetVertexAttribfv(m_index, paramName, &(values[0]));
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        for (int i = 0; i < expected.size(); ++i) {
-            EXPECT_EQ(expected[i], values[i])
-                    << "float value for " << paramName
-                    << " for vertex attribute " << m_index;
-        }
+        return compareVector<GLfloat>(
+                expected, values,
+                "float(s) for parameter " + describeGlEnum(paramName) +
+                        " of vertex attribute " + std::to_string(m_index));
     }
 
-    void checkIntParameter(GLenum paramName, GLint expected) {
+    testing::AssertionResult compareIntParameter(GLenum paramName,
+                                                 GLint expected) {
         std::vector<GLint> v = {expected};
-        checkIntParameter(paramName, v);
+        return compareIntParameter(paramName, v);
     }
 
-    void checkIntParameter(GLenum paramName, std::vector<GLint> expected) {
+    testing::AssertionResult compareIntParameter(
+            GLenum paramName,
+            const std::vector<GLint>& expected) {
         std::vector<GLint> values;
         values.resize(std::max((GLuint)4, (GLuint)expected.size()));
         gl->glGetVertexAttribiv(m_index, paramName, &(values[0]));
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        for (int i = 0; i < expected.size(); ++i) {
-            EXPECT_EQ(expected[i], values[i])
-                    << "int value for " << paramName << " for vertex attribute "
-                    << m_index;
-        }
+        return compareVector<GLint>(
+                expected, values,
+                "int(s) for parameter " + describeGlEnum(paramName) +
+                        " of vertex attribute " + std::to_string(m_index));
     }
 
     GLuint m_index = 0;
@@ -132,12 +137,12 @@ public:
             case GL_SHORT:
             case GL_UNSIGNED_SHORT:
             case GL_FIXED:
-                checkIntParameter(GL_CURRENT_VERTEX_ATTRIB,
-                                  expected.values.ints);
+                EXPECT_TRUE(compareIntParameter(GL_CURRENT_VERTEX_ATTRIB,
+                                                expected.values.ints));
                 break;
             case GL_FLOAT:
-                checkFloatParameter(GL_CURRENT_VERTEX_ATTRIB,
-                                    expected.values.floats);
+                EXPECT_TRUE(compareFloatParameter(GL_CURRENT_VERTEX_ATTRIB,
+                                                  expected.values.floats));
                 break;
             default:
                 ADD_FAILURE() << "Unexpected type " << expected.type
@@ -192,13 +197,16 @@ public:
     virtual void stateCheck(GlVertexAttrib expected) override {
         SnapshotGlVertexAttributesTest::stateCheck(expected);
         // check parameters
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_SIZE, expected.size);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_TYPE, expected.type);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_STRIDE, expected.stride);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED,
-                          expected.normalized);
-        checkIntParameter(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING,
-                          expected.bufferBinding);
+        EXPECT_TRUE(compareIntParameter(GL_VERTEX_ATTRIB_ARRAY_SIZE,
+                                        expected.size));
+        EXPECT_TRUE(compareIntParameter(GL_VERTEX_ATTRIB_ARRAY_TYPE,
+                                        expected.type));
+        EXPECT_TRUE(compareIntParameter(GL_VERTEX_ATTRIB_ARRAY_STRIDE,
+                                        expected.stride));
+        EXPECT_TRUE(compareIntParameter(GL_VERTEX_ATTRIB_ARRAY_NORMALIZED,
+                                        expected.normalized));
+        EXPECT_TRUE(compareIntParameter(GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING,
+                                        expected.bufferBinding));
 
         GLvoid* pointer;
         gl->glGetVertexAttribPointerv(m_index, GL_VERTEX_ATTRIB_ARRAY_POINTER,

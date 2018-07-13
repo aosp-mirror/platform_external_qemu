@@ -67,11 +67,17 @@ public:
     }
 
     void changedStateCheck() override {
-        checkParameter(GL_SHADER_TYPE, m_shader_state.type);
-        checkParameter(GL_DELETE_STATUS, m_shader_state.deleteStatus);
-        checkParameter(GL_COMPILE_STATUS, m_shader_state.compileStatus);
-        checkParameter(GL_INFO_LOG_LENGTH, m_shader_state.infoLogLength);
-        checkParameter(GL_SHADER_SOURCE_LENGTH, m_shader_state.sourceLength);
+        SCOPED_TRACE("for shader " + std::to_string(m_shader_name));
+
+        EXPECT_TRUE(compareParameter(GL_SHADER_TYPE, m_shader_state.type));
+        EXPECT_TRUE(compareParameter(GL_DELETE_STATUS,
+                                     m_shader_state.deleteStatus));
+        EXPECT_TRUE(compareParameter(GL_COMPILE_STATUS,
+                                     m_shader_state.compileStatus));
+        EXPECT_TRUE(compareParameter(GL_INFO_LOG_LENGTH,
+                                     m_shader_state.infoLogLength));
+        EXPECT_TRUE(compareParameter(GL_SHADER_SOURCE_LENGTH,
+                                     m_shader_state.sourceLength));
     }
 
     void stateChange() override {
@@ -128,12 +134,15 @@ public:
     }
 
 protected:
-    void checkParameter(GLenum paramName, GLenum expected) {
+    testing::AssertionResult compareParameter(GLenum paramName,
+                                              GLenum expected) {
         GLint value;
         gl->glGetShaderiv(m_shader_name, paramName, &value);
         EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
-        EXPECT_EQ(expected, value) << "mismatch on parameter " << paramName
-                                   << " for shader " << m_shader_name;
+        return compareValue<GLint>(
+                expected, value,
+                "mismatch on parameter " + describeGlEnum(paramName) +
+                        " for shader " + std::to_string(m_shader_name));
     }
 
     GlShaderState m_shader_state = {};
