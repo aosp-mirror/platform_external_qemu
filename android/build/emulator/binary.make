@@ -112,6 +112,11 @@ $(foreach src,$(LOCAL_PROTO_SOURCES), \
     $(eval $(call compile-proto-source,$(src))) \
 )
 
+$(foreach src,$(LOCAL_GRPC_SOURCES), \
+    $(eval $(call compile-grpc-source,$(src))) \
+    $(eval $(call compile-proto-source,$(src))) \
+)
+
 $(foreach src,$(LOCAL_GENERATED_C_SOURCES), \
     $(eval $(call compile-generated-c-source,$(src))) \
 )

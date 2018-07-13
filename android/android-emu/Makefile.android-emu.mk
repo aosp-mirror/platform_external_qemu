@@ -275,6 +275,7 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
+    $(GRPC_INCLUDES)
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -528,6 +529,15 @@ ifeq ($(BUILD_TARGET_OS),windows)
         android/camera/camera-capture-windows.cpp \
         android/windows_installer.cpp \
 
+endif
+
+
+# GRPC is only available in 64 bits.
+ifndef  EMULATOR_BUILD_32BITS
+  LOCAL_GRPC_SOURCES := android/emulation/control/emulator_controller.proto
+  LOCAL_SRC_FILES += android/emulation/control/EmulatorService.cpp
+else
+  LOCAL_SRC_FILES += android/emulation/control/EmulatorServiceStub.cpp
 endif
 
 # This file can get included multiple times, with different variable
