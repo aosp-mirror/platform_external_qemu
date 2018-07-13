@@ -22,6 +22,30 @@
       "revId": "d776a30b08b29a55c02dab7612f3940997238585",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a552a2a4_ef41a96a",
+        "filename": "android-qemu2-glue/display.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-13T16:56:50Z",
+      "side": 1,
+      "message": "This is pretty much a few merges, rebase upstream or a variable setting away from breaking the emulator IMO",
+      "parentUuid": "9c1535ce_1b6b46d0",
+      "range": {
+        "startLine": 214,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 19
+      },
+      "revId": "d776a30b08b29a55c02dab7612f3940997238585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
