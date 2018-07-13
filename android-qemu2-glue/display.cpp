@@ -21,6 +21,7 @@
 
 extern "C" {
 #include "qemu/osdep.h"
+#include "sysemu/sysemu.h"
 #include "ui/console.h"
 }
 
@@ -229,7 +230,9 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
 }
 
 extern "C" void sdl_display_early_init(int opengl) {
-    (void)opengl;
+    if (opengl == 1 && android_hw->hw_arc) {
+        display_opengl = 1;
+    }
 }
 
 extern "C" bool sdl_display_init(DisplayState* ds,

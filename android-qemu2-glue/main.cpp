@@ -1269,16 +1269,6 @@ extern "C" int main(int argc, char** argv) {
         args.add(kTarget.qemuExtraArgs[idx]);
     }
 
-    if (hw->hw_arc) {
-        /* We don't use goldfish_fb in cros. Just use virtio vga now */
-        args.add2("-vga", "virtio");
-
-        /* We don't use goldfish_events for touch events in cros.
-         * Just use usb device now.
-         */
-        args.add2("-usbdevice", "tablet");
-    }
-
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
 
     if (gQAndroidBatteryAgent && gQAndroidBatteryAgent->setHasBattery) {
@@ -1421,6 +1411,17 @@ extern "C" int main(int argc, char** argv) {
             } else {
                 args.add(argv[i]);
             }
+        }
+
+        if (hw->hw_arc) {
+            /* We don't use goldfish_fb in cros. Just use virtio vga now */
+            args.add2("-vga", "virtio");
+
+            /* We don't use goldfish_events for touch events in cros.
+             * Just use usb device now.
+             */
+            args.add2("-usbdevice", "tablet");
+            if (!isGuestMode) args.add2("-display", "sdl,gl=on");
         }
 
         args.add(bluetooth.getQemuParameters());
