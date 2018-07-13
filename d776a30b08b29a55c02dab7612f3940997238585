@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9c1535ce_1b6b46d0",
+        "filename": "android-qemu2-glue/display.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-13T16:56:18Z",
+      "side": 1,
+      "message": "Please restrict the new field settings to hw_arc only, unless you can write a unit test that expects these callbacks to never be used when running Android.",
+      "range": {
+        "startLine": 214,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 19
+      },
+      "revId": "d776a30b08b29a55c02dab7612f3940997238585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
