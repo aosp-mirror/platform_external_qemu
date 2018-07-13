@@ -112,7 +112,8 @@ QEMU2_INCLUDES += \
 
 QEMU2_INCLUDES += $(QEMU2_GLIB_INCLUDES) \
                   $(QEMU2_PIXMAN_INCLUDES) \
-                  $(LIBUSB_INCLUDES)
+                  $(LIBUSB_INCLUDES) \
+                  $(VIRGLRENDERER_INCLUDES)
 
 QEMU2_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
@@ -144,6 +145,10 @@ QEMU2_CFLAGS += \
 # Enable faster migration code when saving RAM to a snapshot
 QEMU2_CFLAGS += \
     -DCONFIG_MIGRATION_RAM_SINGLE_ITERATION
+
+# Enable VIRGL
+QEMU2_CFLAGS += \
+    -DCONFIG_VIRGL
 
 #include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
