@@ -26,6 +26,8 @@
 #include "config-host.h"
 
 #include "OpenglRender/render_api_functions.h"
+#include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -79,6 +81,9 @@ static bool sEgl2egl;
 static emugl::RenderLibPtr sRenderLib = nullptr;
 static emugl::RendererPtr sRenderer = nullptr;
 
+static EGLDispatch* sEgl;
+static GLESv2Dispatch* sGLES;
+
 int android_initOpenglesEmulation() {
     char* error = NULL;
 
@@ -120,6 +125,9 @@ int android_initOpenglesEmulation() {
             sEgl2egl = true;
         }
     }
+
+    sEgl = (EGLDispatch *)sRenderLib->getEGL();
+    sGLES = (GLESv2Dispatch *)sRenderLib->getGL();
 
     return 0;
 
@@ -370,4 +378,106 @@ void android_cleanupProcGLObjects(uint64_t puid) {
     if (sRenderer) {
         sRenderer->cleanupProcGLObjects(puid);
     }
+}
+
+static void* sDisplay, * sSurface, * sConfig, * sContext;
+static EGLint s_gles_attr[5];
+
+extern void tinyepoxy_init(GLESv2Dispatch* gles, int version);
+
+static bool prepare_epoxy(void) {
+    void* unused;
+    if (!sRenderLib->getDSCC(&sDisplay, &sSurface, &sConfig, &unused)) {
+        return false;
+    }
+    int major, minor;
+    sRenderLib->getGlesVersion(&major, &minor);
+    EGLint attr[] = {
+        EGL_CONTEXT_CLIENT_VERSION, major,
+        EGL_CONTEXT_MINOR_VERSION_KHR, minor,
+        EGL_NONE
+    };
+    sContext = sEgl->eglCreateContext(sDisplay, sConfig, EGL_NO_CONTEXT,
+                                      attr);
+    if (sContext == nullptr) {
+        return false;
+    }
+    static_assert(sizeof(attr) == sizeof(s_gles_attr), "Mismatch");
+    memcpy(s_gles_attr, attr, sizeof(s_gles_attr));
+    tinyepoxy_init(sGLES, major * 10 + minor);
+    return true;
+}
+
+struct DisplayChangeListener;
+struct QEMUGLParams;
+
+void * android_gl_create_context(DisplayChangeListener * unuse1,
+                                 QEMUGLParams* unuse2) {
+    static bool ok =  prepare_epoxy();
+    if (!ok) {
+        return nullptr;
+    }
+    sEgl->eglMakeCurrent(sDisplay, sSurface, sSurface, sContext);
+    return sEgl->eglCreateContext(sDisplay, sConfig, sContext, s_gles_attr);
+}
+
+void android_gl_destroy_context(DisplayChangeListener* unused, void * ctx) {
+    sEgl->eglDestroyContext(sDisplay, ctx);
+}
+
+int android_gl_make_context_current(DisplayChangeListener* unused, void * ctx) {
+    return sEgl->eglMakeCurrent(sDisplay, sSurface, sSurface, ctx);
+}
+
+static GLuint s_tex_id, s_fbo_id;
+static uint32_t s_gfx_h, s_gfx_w;
+static bool s_y0_top;
+
+// ui/gtk-egl.c:gd_egl_scanout_texture as reference.
+void android_gl_scanout_texture(DisplayChangeListener* unuse,
+                                uint32_t backing_id,
+                                bool backing_y_0_top,
+                                uint32_t backing_width,
+                                uint32_t backing_height,
+                                uint32_t x, uint32_t y,
+                                uint32_t w, uint32_t h) {
+    s_tex_id = backing_id;
+    s_gfx_h = h;
+    s_gfx_w = w;
+    s_y0_top = backing_y_0_top;
+    sEgl->eglMakeCurrent(sDisplay, sSurface, sSurface, sContext);
+    if (!s_fbo_id) {
+        sGLES->glGenFramebuffers(1, &s_fbo_id);
+    }
+    sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
+    sGLES->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0,
+                                  GL_TEXTURE_2D, backing_id, 0);
+}
+
+// ui/gtk-egl.c:gd_egl_scanout_flush as reference.
+void android_gl_scanout_flush(DisplayChangeListener* unuse,
+                              uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    if (!s_fbo_id)  {
+        return;
+    }
+    sEgl->eglMakeCurrent(sDisplay, sSurface, sSurface, sContext);
+
+    sGLES->glBindFramebuffer(GL_READ_FRAMEBUFFER, s_fbo_id);
+    sGLES->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+    int y1 = s_y0_top ? 0 : s_gfx_h;
+    int y2 = s_y0_top ? s_gfx_h : 0;
+
+    int width, height;
+    if (!sEgl->eglQuerySurface(sDisplay, sSurface, EGL_WIDTH, &width)
+        ||!sEgl->eglQuerySurface(sDisplay, sSurface, EGL_HEIGHT, &height)) {
+        DD("can't query surface\n");
+        return;
+    }
+    sGLES->glViewport(0, 0, width, height);
+    sGLES->glBlitFramebuffer(0, y1, s_gfx_w, y2,
+                             0, 0, width, height,
+                             GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    sEgl->eglSwapBuffers(sDisplay, sSurface);
+    sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
 }
