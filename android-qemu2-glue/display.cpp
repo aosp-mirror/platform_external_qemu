@@ -115,6 +115,19 @@ static void android_display_refresh(DisplayChangeListener* dcl) {
     }
 }
 
+extern void * android_gl_create_context(DisplayChangeListener*, QEMUGLParams *);
+extern void android_gl_destroy_context(DisplayChangeListener*, void *);
+extern int android_gl_make_context_current(DisplayChangeListener*, void *);
+extern void android_gl_scanout_texture(DisplayChangeListener*, uint32_t, bool,
+                                       uint32_t, uint32_t, uint32_t, uint32_t,
+                                       uint32_t, uint32_t);
+extern void android_gl_scanout_flush(DisplayChangeListener *, uint32_t,
+                                     uint32_t, uint32_t, uint32_t);
+
+static void android_gl_scanout_disable(DisplayChangeListener *dcl) {
+    fprintf(stderr, "stub %s\n", __func__);
+}
+
 static QemuConsole* find_graphic_console() {
     // find the first graphic console (Android emulator has only one usually)
     for (int i = 0;; i++) {
@@ -197,6 +210,18 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     dclOps.dpy_refresh = &android_display_refresh;
     dclOps.dpy_gfx_update = &android_display_update;
     dclOps.dpy_gfx_switch = &android_display_switch;
+
+    if (android_hw->hw_arc) {
+        dclOps.dpy_gl_ctx_create       = &android_gl_create_context;
+        dclOps.dpy_gl_ctx_destroy      = &android_gl_destroy_context;
+        dclOps.dpy_gl_ctx_make_current = &android_gl_make_context_current;
+        dclOps.dpy_gl_scanout_disable  = &android_gl_scanout_disable;
+        dclOps.dpy_gl_scanout_texture  = &android_gl_scanout_texture;
+        dclOps.dpy_gl_update           = &android_gl_scanout_flush;
+
+        dcl->con = con;
+    }
+
     dcl->ops = &dclOps;
     register_displaychangelistener(dcl);
 
