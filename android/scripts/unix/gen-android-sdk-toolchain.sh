@@ -695,6 +695,9 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CFLAGS "-DNOMINMAX"
     var_append EXTRA_CFLAGS "-D_CRT_SECURE_NO_WARNINGS"
     var_append EXTRA_CFLAGS "-D_USE_MATH_DEFINES"
+    # Target Win 7 >
+    var_append EXTRA_CFLAGS "-D_WIN32_WINNT=0x0601"
+    var_append EXTRA_CFLAGS "-D_WINVER=0x0601"
     var_append EXTRA_CFLAGS "-Wno-msvc-not-found"
     var_append EXTRA_CFLAGS "-Wno-address-of-packed-member"
     var_append EXTRA_CFLAGS "-Wno-incompatible-ms-struct"
@@ -720,6 +723,9 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CXXFLAGS "-D_AMD64_"
     var_append EXTRA_CXXFLAGS "-DWIN32_LEAN_AND_MEAN"
     var_append EXTRA_CXXFLAGS "-DNOMINMAX"
+    # Target Win 7 >
+    var_append EXTRA_CXXFLAGS "-D_WIN32_WINNT=0x0601"
+    var_append EXTRA_CXXFLAGS "-D_WINVER=0x0601"
     var_append EXTRA_CXXFLAGS "-D_CRT_SECURE_NO_WARNINGS"
     var_append EXTRA_CXXFLAGS "-D_USE_MATH_DEFINES"
     var_append EXTRA_CXXFLAGS "-Wno-msvc-not-found"

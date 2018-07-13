@@ -1128,6 +1128,14 @@ help_ports(stralloc_t*  out)
     "  If both ports aren't available on startup, the emulator will exit.\n\n");
 }
 
+static void
+help_grpc(stralloc_t*  out)
+{
+    PRINTF(
+    "  Enables the gRPC service to control the emulator..\n\n"
+    "    <port> is the TCP port used to bind the gRPC service\n\n"
+    "  If the gRPC service will not be started if the port is not available on startup.\n\n");
+}
 
 static void
 help_onion(stralloc_t*  out)

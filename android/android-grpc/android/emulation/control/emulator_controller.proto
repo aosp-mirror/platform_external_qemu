@@ -1,0 +1,129 @@
+// Copyright (C) 2018 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "android.emulation.control";
+option java_outer_classname = "";
+option objc_class_prefix = "AEC";
+
+package android.emulation.control;
+
+import "google/protobuf/empty.proto";
+
+// An EmulatorController service lets you control the emulator.
+service EmulatorController {
+    rpc setRotation(Rotation) returns (Rotation) {}
+    rpc getRotation(google.protobuf.Empty) returns (Rotation) {}
+
+    rpc setBattery(BatteryState) returns (BatteryState) {}
+    rpc getBattery(google.protobuf.Empty) returns (BatteryState) {}
+
+    rpc getGps(google.protobuf.Empty) returns (GpsState) {}
+    rpc setGps(GpsState) returns (GpsState) {}
+
+    rpc sendTouch(TouchEvent) returns (google.protobuf.Empty) {}
+    rpc sendKey(KeyEvent) returns (google.protobuf.Empty) {}
+    rpc sendMouse(MouseEvent) returns (google.protobuf.Empty) {}
+    rpc sendRotary(RotaryEvent) returns (google.protobuf.Empty) {}
+
+    rpc getVmConfiguration(google.protobuf.Empty) returns (VmConfiguration) {}
+
+}
+
+message VmConfiguration {
+    enum VmHypervisorType {
+    HV_UNKNOWN = 0;
+    HV_NONE = 1;
+    HV_KVM = 2;
+    HV_HAXM = 3;
+    HV_HVF = 4;
+    HV_WHPX =5;
+    };
+
+    VmHypervisorType hypervisorType = 1;
+    int32 numberOfCpuCores =2 ;
+    int64 ramSizeBytes = 3;
+}
+
+
+message RotaryEvent {
+    int32 delta = 1;
+}
+
+message MouseEvent {
+    int32 x = 1;
+    int32 y = 2;
+    int32 z = 3;
+    int32 buttons = 4;
+}
+
+message KeyEvent {
+    uint32 key = 1;
+}
+
+message TouchEvent {
+    bool isTouching = 1;
+    int32 touchId = 2;
+}
+
+message GpsState {
+    bool passiveUpdate = 1;
+    double latitude = 2;
+    double longitude = 3;
+    double speed = 4;
+    double heading = 5;
+    double elevation = 6;
+    int32 satellites = 7;
+}
+
+message BatteryState {
+    enum BatteryStatus {
+        BATTERY_STATUS_UNKNOWN = 0;
+        BATTERY_STATUS_CHARGING = 1;
+        BATTERY_STATUS_DISCHARGING = 2;
+        BATTERY_STATUS_NOT_CHARGING = 3;
+        BATTERY_STATUS_FULL = 4;
+    };
+    enum BatteryCharger {
+        BATTERY_CHARGER_NONE = 0;
+        BATTERY_CHARGER_AC = 1;
+        BATTERY_CHARGER_USB = 2;
+        BATTERY_CHARGER_WIRELESS = 3;
+    };
+
+    enum BatteryHealth {
+        BATTERY_HEALTH_GOOD = 0;
+        BATTERY_HEALTH_FAILED = 1;
+        BATTERY_HEALTH_DEAD = 2;
+        BATTERY_HEALTH_OVERVOLTAGE = 3;
+        BATTERY_HEALTH_OVERHEATED = 4;
+    };
+    bool hasBattery = 1;
+    bool isPresent = 2;
+    BatteryCharger charger = 3;
+    int32 chargeLevel = 4;
+    BatteryHealth health = 5;
+    BatteryStatus status = 6;
+}
+
+message Rotation {
+    enum SkinRotation {
+        SKIN_ROTATION_0 = 0;
+        SKIN_ROTATION_90 = 1;
+        SKIN_ROTATION_180 = 2;
+        SKIN_ROTATION_270 = 3;
+    }
+    SkinRotation rotation = 1;
+}

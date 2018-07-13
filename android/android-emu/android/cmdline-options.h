@@ -215,6 +215,8 @@ OPT_FLAG(allow_host_audio, "Allows sending of audio from audio input devices. Ot
 
 OPT_PARAM(perf_stat, "<file>", "Run periodic perf stat reporter in the background and write output to specified file.")
 
+OPT_PARAM( grpc, "<port>", "TCP ports used for the gRPC bridge" )
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

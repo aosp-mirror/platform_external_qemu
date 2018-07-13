@@ -353,7 +353,7 @@ android_add_library(ssl)
 target_include_directories(ssl PUBLIC ${BORING_SSL_ROOT}/src/include)
 target_include_directories(ssl PRIVATE ${BORING_SSL_ROOT}/src/ssl)
 android_target_compile_definitions(ssl windows-x86_64 PUBLIC "-DWIN32_LEAN_AND_MEAN=1")
-android_target_compile_options(ssl windows PRIVATE "-std=c99" "-UNDEBUG")
+android_target_compile_options(ssl windows PRIVATE  "-UNDEBUG")
 
 # Setup the crypto libraries:
 if(LINUX_X86_64 OR DARWIN_X86_64)
