@@ -70,6 +70,30 @@
       "revId": "d776a30b08b29a55c02dab7612f3940997238585",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f70408ea_5600cf65",
+        "filename": "android-qemu2-glue/display.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-13T17:14:50Z",
+      "side": 1,
+      "message": "Suppose we rebase to a different vl.c where the display opengl is not 0, then emulator breaks right way for android, but not arc. Or nay other change in the display registration form upstream that makes the gl callbacks used. Or even a new team member joins either android emu or cros emulator team and \"unified\" the display devices not knowing the context.\n\nThe bigger point I\u0027m trying to make here is to please code in a way that doesn\u0027t cause untested wide sweeping changes like this.",
+      "parentUuid": "df9b71d3_f6a81abd",
+      "range": {
+        "startLine": 214,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 19
+      },
+      "revId": "d776a30b08b29a55c02dab7612f3940997238585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
