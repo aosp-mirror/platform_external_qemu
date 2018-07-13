@@ -206,7 +206,9 @@ GLEScmContext::~GLEScmContext(){
         delete[] m_texCoords;
         m_texCoords = NULL;
     }
-    m_currVaoState[GL_TEXTURE_COORD_ARRAY] = NULL;
+    if (m_vaoStateMap.size()) {
+        m_currVaoState[GL_TEXTURE_COORD_ARRAY] = NULL;
+    }
 
     if (m_coreProfileEngine) {
         delete m_coreProfileEngine;
