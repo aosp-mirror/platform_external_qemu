@@ -585,6 +585,26 @@ $$(UIC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(QT_UIC_TOOL)
 LOCAL_GENERATED_SOURCES += $$(UIC_SRC)
 endef
 
+# Generate and compile a .proto service file through the 'protoc' tool.
+define compile-grpc-source
+SRC := $(1)
+OUT_SRC := $$(generated-proto-sources-dir)/$$(SRC:%.proto=%.grpc.pb.cc)
+ifeq (,$$(strip $$(PROTO_GRPC_PLUGIN)))
+    $$(error PROTOC_TOOL is not defined when trying to generate $$(OUT_SRC) !!)
+endif
+$$(OUT_SRC): PRIVATE_SRC := $$(LOCAL_PATH)/$$(SRC)
+$$(OUT_SRC): PRIVATE_DST_DIR := $$(dir $$(OUT_SRC))
+$$(OUT_SRC): PRIVATE_DST := $$(OUT_SRC)
+$$(OUT_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.proto=%))
+$$(OUT_SRC): $$(LOCAL_PATH)/$$(SRC) $$(PROTOC_TOOL) $$(generated-proto-sources-dir)/$$(SRC:%.proto=%.pb.cc)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "Grpc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
+	$(hide) $$(PROTOC_TOOL) -I$$(dir $$(PRIVATE_SRC)) --grpc_out=$$(PRIVATE_DST_DIR) --plugin=protoc-gen-grpc=$$(PROTO_GRPC_PLUGIN) $$(PRIVATE_SRC)
+
+$$(eval $$(call compile-generated-cxx-source,$$(OUT_SRC)))
+endef
+
+
 # Generate and compile a .proto Protobuf source file through the 'protoc' tool.
 # NOTE: This expects PROTOC_TOOL to be defined.
 define compile-proto-source

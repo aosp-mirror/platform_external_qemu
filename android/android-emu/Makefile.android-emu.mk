@@ -275,8 +275,12 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
+    $(GRPC_INCLUDES)
+
+LOCAL_GRPC_SOURCES := android/emulation/control/emulator_controller.proto
 
 LOCAL_SRC_FILES := \
+    android/emulation/control/EmulatorService.cpp \
     android/adb-server.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
@@ -625,10 +629,12 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
 
+
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
     $(LIBCURL_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
+
 
 ifeq ($(BUILD_TARGET_OS),windows)
 # For CoTaskMemFree used in camera-capture-windows.cpp
