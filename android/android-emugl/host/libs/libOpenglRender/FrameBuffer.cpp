@@ -1251,6 +1251,13 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             m_procOwnedRenderContext.erase(procIte);
         }
     }
+    int apiLevel = 1000;
+    emugl::getAvdInfo(nullptr, &apiLevel);
+    if (!m_procOwnedColorBuffers.size() && apiLevel >= 26) {
+        // Guest is down, tear down all color buffers.
+        m_colorbuffers.clear();
+        m_colorBufferDelayedCloseList.clear();
+    }
 }
 
 void FrameBuffer::markOpened(ColorBufferRef* cbRef) {
