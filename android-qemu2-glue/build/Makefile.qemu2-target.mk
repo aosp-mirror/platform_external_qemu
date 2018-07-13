@@ -172,6 +172,7 @@ LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     libqemu2-util \
     libqemu2-stubs \
+    $(GRPC_STATIC_LIBRARIES) \
 
 
 LOCAL_CFLAGS += \

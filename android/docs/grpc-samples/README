@@ -1,0 +1,52 @@
+## Installation
+First you need to install ProtocolBuffers 3.0.0-beta-3 or later.
+
+```sh
+mkdir tmp
+cd tmp
+git clone https://github.com/google/protobuf
+cd protobuf
+./autogen.sh
+./configure
+make
+make check
+sudo make install
+```
+
+Then, `go get -u` as usual the following packages:
+
+```sh
+go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+go get -u github.com/golang/protobuf/protoc-gen-go
+```
+next you will need to compile the proto files so we can access the service:
+
+```sh
+export QEMU_ROOT="$my_repo/external/qemu"
+mkdir $GOPATH/src/android_emulation_control
+protoc -I/usr/local/include -I$QEMU_ROOT \
+  -I$GOPATH/src \
+  -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+  --go_out=plugins=grpc:/tmp \
+  $QEMU_ROOT/android/android-emu/android/emulation/control/emulator_controller.proto
+protoc -I/usr/local/include -I$QEMU_ROOT -I$GOPATH/src \
+       -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+       --grpc-gateway_out=logtostderr=true,grpc_api_configuration=$QEMU_ROOT/android/android-emu/android/emulation/control/api_config.yaml:/tmp \
+       $QEMU_ROOT/android/android-emu/android/emulation/control/emulator_controller.proto
+```
+
+Next we can place them in the right location on the $GOPATH and run the http bridge:
+
+```sh
+mv  /tmp/android/android-emu/android/emulation/control/emulator_controller*  $GO_PATH/src/android_emulation_control
+cd $QEMU_ROOT/android/android-emu/android/emulation/control/grpc-samples
+go httpbridge.go
+```
+
+Now you should be able to access the emulator over http as follows:
+
+```sh
+curl -H "Accept: application/json" -X POST -d '{"key": "30"}' http://localhost:8080/v1/key
+```
+
