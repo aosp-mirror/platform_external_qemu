@@ -46,6 +46,30 @@
       "revId": "d776a30b08b29a55c02dab7612f3940997238585",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df9b71d3_f6a81abd",
+        "filename": "android-qemu2-glue/display.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-07-13T17:02:18Z",
+      "side": 1,
+      "message": "Could you say more about the second comment?",
+      "parentUuid": "a552a2a4_ef41a96a",
+      "range": {
+        "startLine": 214,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 19
+      },
+      "revId": "d776a30b08b29a55c02dab7612f3940997238585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
