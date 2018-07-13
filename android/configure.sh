@@ -656,6 +656,11 @@ probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
 ###
 probe_prebuilts_dir "virglrenderer" VIRGLRENDERER_PREBUILTS_DIR common/virglrenderer
 
+###
+###  Grpc library probe
+###
+probe_prebuilts_dir "grpc" GRPC_PREBUILTS_DIR common/grpc
+
 CACERTS_FILE="$PROGDIR/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
     panic "Missing cacerts file: $CACERTS_FILE"
@@ -1181,6 +1186,7 @@ echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 # libuuid is a part of e2fsprogs package
 echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
 echo "PROTOBUF_PREBUILTS_DIR := $PROTOBUF_PREBUILTS_DIR" >> $config_mk
+echo "GRPC_PREBUILTS_DIR := $GRPC_PREBUILTS_DIR" >> $config_mk
 echo "LZ4_PREBUILTS_DIR := $LZ4_PREBUILTS_DIR" >> $config_mk
 echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk

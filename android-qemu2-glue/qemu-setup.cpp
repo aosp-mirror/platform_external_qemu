@@ -19,6 +19,7 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/console.h"
+#include "android/cmdline-option.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/snapshot/interface.h"
@@ -43,6 +44,8 @@
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/snapshot_compression.h"
 
+#include "android/emulation/control/EmulatorService.h"
+
 #include <random>
 
 extern "C" {
@@ -63,6 +66,7 @@ extern char* op_http_proxy;
 
 using android::VmLock;
 using android::DmaMap;
+using android::emulation::control::EmulatorControllerService;
 
 extern "C" void ranchu_device_tree_setup(void *fdt) {
     /* fstab */
@@ -105,6 +109,9 @@ extern "C" void rng_random_generic_read_random_bytes(void *buf, int size) {
     }
     stream.read(buf, size);
 }
+
+
+static std::unique_ptr<EmulatorControllerService> g_controler_service;
 
 bool qemu_android_emulation_early_setup() {
     // Ensure that the looper is set for the main thread and for any
@@ -188,10 +195,22 @@ bool qemu_android_emulation_setup() {
                 addWatchedLooper(new android::qemu::CpuLooper(i));
     }
 
+    int grpc = 0;
+    if (android_cmdLineOptions->grpc &&
+        sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
+        g_controler_service = EmulatorControllerService::Builder()
+                                      .withConsoleAgents(&consoleAgents)
+                                      .withPort(grpc)
+                                      .build();
+    }
+
     return true;
 }
 
 void qemu_android_emulation_teardown() {
     android::qemu::skipTimerOps();
     androidSnapshot_finalize();
+    if (g_controler_service) {
+        g_controler_service->stop();
+    }
 }

@@ -106,6 +106,9 @@ git_clone_depth1 () {
     fi
     run git clone --depth 1 --branch "$BRANCH" "$GIT_URL" "$DST_DIR" ||
             panic "Could not clone (depth=1) git repository: $GIT_URL"
+    run cd "$DST_DIR"
+    run git submodule update --init "$DST_DIR"
+    run cd "$OLD_DIR"
 }
 
 # Clone a git repository, and checkout a specific branch & commit.
@@ -113,10 +116,11 @@ git_clone_depth1 () {
 # $2: Destination directory.
 # $3: Branch / Commit
 git_clone () {
-    local GIT_URL DST_DIR BRANCH CHECK_REV
+    local GIT_URL DST_DIR BRANCH CHECK_REV OLD_DIR
     GIT_URL=$1
     DST_DIR=$2
     BRANCH=$3
+    OLD_DIR=$PWD
 
     if [ -d "$DST_DIR" ]; then
         panic "Git destination directory already exists: $DST_DIR"
@@ -125,6 +129,9 @@ git_clone () {
             panic "Could not clone git repository: $GIT_URL"
     run git -C "$DST_DIR" checkout $BRANCH ||
             panic "Could not checkout $GIT_URL - $BRANCH"
+    run cd "$DST_DIR"
+    run git submodule update --init "$DST_DIR"
+    run cd "$OLD_DIR"
 }
 
 # Check if git branch exists in remote repository
@@ -173,7 +180,13 @@ create_sorted_tar_archive () {
             var_append TARFLAGS "--owner=android --group=android"
             var_append TARFLAGS "--mtime=2015-01-01"
     esac
-    run tar cJf "$DST_FILE" $TARFLAGS -C "$SRC_DIR" $FILES ||
+    # Make sure we can handle large file names
+    LIST_FILES=$(mktemp /tmp/tar_list.XXXXXX)
+    for FILE in $FILES
+    do
+      echo $FILE >> $LIST_FILES
+    done
+    run tar cJf "$DST_FILE" $TARFLAGS -C "$SRC_DIR" -T "$LIST_FILES" ||
             panic "Could not create archive"
 }
 
