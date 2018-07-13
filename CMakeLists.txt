@@ -23,6 +23,7 @@ set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING "The tools revision to use, if any
 set(OPTION_SDK_TOOLS_BUILD_NUMBER "" CACHE STRING "The sdk buildnumber to use, if any.")
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
+set(GRPC FALSE CACHE BOOL "True if the emulator should be build with GRPC support")
 set(QEMU_UPSTREAM TRUE CACHE BOOL "True if the upstream version of qemu should be build.")
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
