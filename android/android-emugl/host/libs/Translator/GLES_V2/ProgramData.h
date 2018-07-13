@@ -84,6 +84,10 @@ public:
 
     void appendValidationErrMsg(std::ostringstream& ss);
     bool validateLink(ShaderParser* frag, ShaderParser* vert);
+
+    bool getValidateStatus() const { return ValidateStatus; }
+    void setValidateStatus(bool status) { ValidateStatus = status; }
+
     // setLinkStatus resets uniform location virtualization as well
     void setLinkStatus(GLint status);
     bool getLinkStatus() const;
@@ -100,9 +104,6 @@ public:
 
     bool getDeleteStatus() const { return DeleteStatus; }
     void setDeleteStatus(bool status) { DeleteStatus = status; }
-
-    bool getValidateStatus() const { return ValidateStatus; }
-    void setValidateStatus(bool status) { ValidateStatus = status; }
 
     // boundAttribLocs stores the attribute locations assigned by
     // glBindAttribLocation.
@@ -129,10 +130,10 @@ private:
     AttachedShader attachedShaders[NUM_SHADER_TYPE] = {};
     std::string validationInfoLog;
     std::string infoLog;
+    bool ValidateStatus;
     bool LinkStatus;
     bool IsInUse;
     bool DeleteStatus;
-    bool ValidateStatus;
     GLuint  ProgramName;
     std::unordered_map<GLuint, GLuint> mUniformBlockBinding;
     std::vector<std::string> mTransformFeedbacks;
