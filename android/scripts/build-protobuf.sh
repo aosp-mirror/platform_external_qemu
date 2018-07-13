@@ -27,7 +27,7 @@ PROGRAM_PARAMETERS=""
 
 PROGRAM_DESCRIPTION=\
 "Build prebuilt protobuf for Linux, Windows and Darwin."
-
+t
 package_builder_register_options
 
 aosp_dir_register_option

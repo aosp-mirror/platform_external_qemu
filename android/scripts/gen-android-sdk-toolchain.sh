@@ -270,14 +270,13 @@ gen_wrapper_toolchain () {
         SRC_PREFIX=${SRC_PREFIX%%-}-
     fi
 
-    case $SRC_PREFIX in
-        *mingw*)
-            PROGRAMS="$PROGRAMS windres"
-            case $CURRENT_HOST in
-                windows-x86)
-                    EXTRA_WINDRESFLAGS="--target=pe-i386"
-                    ;;
-            esac
+    case $CURRENT_HOST in
+        windows-x86)
+             PROGRAMS="$PROGRAMS windres"
+            EXTRA_WINDRESFLAGS="--target=pe-i386"
+            ;;
+        windows-x86_64)
+             PROGRAMS="$PROGRAMS windres"
             ;;
     esac
 

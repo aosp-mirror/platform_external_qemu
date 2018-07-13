@@ -275,6 +275,7 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
+    $(GRPC_INCLUDES)
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -530,6 +531,15 @@ ifeq ($(BUILD_TARGET_OS),windows)
 
 endif
 
+
+# GRPC is only available in 64 bits.
+ifndef  EMULATOR_BUILD_32BITS
+  LOCAL_GRPC_SOURCES := android/emulation/control/emulator_controller.proto
+  LOCAL_SRC_FILES += android/emulation/control/EmulatorService.cpp
+else
+  LOCAL_SRC_FILES += android/emulation/control/EmulatorServiceStub.cpp
+endif
+
 # This file can get included multiple times, with different variable
 # declarations. We only want to set LOCAL_COPY_COMMON_PREBUILT_RESOURCES and
 # LOCAL_COPY_COMMON_TESTDATA once. GNUmake will complain that we are overriding
@@ -625,10 +635,12 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
 
+
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
     $(LIBCURL_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
+
 
 ifeq ($(BUILD_TARGET_OS),windows)
 # For CoTaskMemFree used in camera-capture-windows.cpp
