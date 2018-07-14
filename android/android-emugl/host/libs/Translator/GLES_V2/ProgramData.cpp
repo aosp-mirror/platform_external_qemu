@@ -71,10 +71,10 @@ static int s_glShaderType2ShaderType(GLenum type) {
 
 ProgramData::ProgramData(int glesMaj, int glesMin)
     : ObjectData(PROGRAM_DATA),
+      ValidateStatus(false),
       LinkStatus(false),
       IsInUse(false),
       DeleteStatus(false),
-      ValidateStatus(false),
       mGlesMajorVersion(glesMaj),
       mGlesMinorVersion(glesMin) {}
 
@@ -113,10 +113,11 @@ ProgramData::ProgramData(android::base::Stream* stream) :
     validationInfoLog = stream->getString();
     infoLog = stream->getString();
 
+    stream->getBe16(); /* padding to maintain snapshot file compatibility */
+    ValidateStatus = stream->getByte();
     LinkStatus = stream->getByte();
     IsInUse = stream->getByte();
     DeleteStatus = stream->getByte();
-    ValidateStatus = stream->getByte();
 
     mGlesMajorVersion = stream->getByte();
     mGlesMinorVersion = stream->getByte();
@@ -351,10 +352,13 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
     }
     stream->putString(validationInfoLog);
     stream->putString(infoLog);
+
+    stream->putBe16(0 /* padding to maintain snapshot file compatibility */);
+    stream->putByte(ValidateStatus);
     stream->putByte(LinkStatus);
+
     stream->putByte(IsInUse);
     stream->putByte(DeleteStatus);
-    stream->putByte(ValidateStatus);
 
     stream->putByte(mGlesMajorVersion);
     stream->putByte(mGlesMinorVersion);
