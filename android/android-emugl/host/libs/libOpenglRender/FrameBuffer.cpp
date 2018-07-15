@@ -1104,12 +1104,10 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
             const auto& cb = ite->second.find(p_colorbuffer);
             if (cb != ite->second.end()) {
                 ite->second.erase(cb);
-                closeColorBufferLocked(p_colorbuffer);
             }
         }
-    } else {
-        closeColorBufferLocked(p_colorbuffer);
     }
+    closeColorBufferLocked(p_colorbuffer);
 }
 
 void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
