@@ -383,12 +383,15 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
             default:
                 break;
         }
+
+        fprintf(stderr, "%s %s %d loading %d \n", __FILE__, __func__, __LINE__, m_globalName);
         // Load tex param
         loadCollection(stream, &m_texParam,
                 [](android::base::Stream* stream)
                     -> std::unordered_map<GLenum, GLint>::value_type {
                     GLenum pname = stream->getBe32();
                     GLint value = stream->getBe32();
+                    //fprintf(stderr, "parameter 0x%x: 0x%x\n", pname, value);
                     return std::make_pair(pname, value);
                 });
     } else if (m_target != 0) {
@@ -580,11 +583,13 @@ void SaveableTexture::onSave(
             saveParam(kTexParamGles3,
                     sizeof(kTexParamGles3) / sizeof(kTexParamGles3[0]));
         }
+        fprintf(stderr, "saving global name %d\n", m_globalName);
         saveCollection(stream, texParam,
                 [](android::base::Stream* s,
                     const std::unordered_map<GLenum, GLint>::value_type& pair) {
                     s->putBe32(pair.first);
                     s->putBe32(pair.second);
+                    //fprintf(stderr, "saving parameter 0x%x: 0x%x\n", pair.first, pair.second);
                 });
         // Restore environment
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
@@ -775,6 +780,11 @@ void SaveableTexture::restore() {
             default:
                 break;
         }
+
+        fprintf(stderr, "%s %s %d Restoring tex parameters %d\n", __FILE__,
+                __func__,
+                __LINE__, m_globalName);
+
         // Restore tex param
         TextureSwizzle emulatedBaseSwizzle;
         if (isCoreProfile()) {
