@@ -22,6 +22,30 @@
       "revId": "e105da0fd0074fb3b74329833a282aa502f76b01",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d6402f9d_7b4b3956",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 1156,
+      "author": {
+        "id": 1336478
+      },
+      "writtenOn": "2018-07-16T09:21:10Z",
+      "side": 1,
+      "message": "Changing into ACPI_BUILD_DPRINTF, which will print when DEBUG_ACPI_BUILD flag is on.",
+      "parentUuid": "ae99dc44_055c63a4",
+      "range": {
+        "startLine": 1156,
+        "startChar": 8,
+        "endLine": 1156,
+        "endChar": 20
+      },
+      "revId": "e105da0fd0074fb3b74329833a282aa502f76b01",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
