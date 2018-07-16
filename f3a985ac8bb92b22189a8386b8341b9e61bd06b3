@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5867cd04_633d0ffc",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-16T14:51:08Z",
+      "side": 1,
+      "message": "Would it be cleaner / same behavior to unconditionally set to false here?",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 9
+      },
+      "revId": "f3a985ac8bb92b22189a8386b8341b9e61bd06b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a1286c9_1e12e699",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-16T14:51:08Z",
+      "side": 1,
+      "message": "Should we have 3 separate concurrently updated variables here? One atomic is hard to reason about already, but 3 together would be much more complex to reason about as r/w coherency would only hold for individual atomic variables and still allow reordering between different ones.\n\nWhat if we controlled the concurrency in sGlobals with a Lock member? We could take the lock while setting the padding and cutout in this function, and when the adb command result is handled. That way, it looks more obvious that there\u0027s no concurrent access of the same QStrings.",
+      "range": {
+        "startLine": 140,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 1
+      },
+      "revId": "f3a985ac8bb92b22189a8386b8341b9e61bd06b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
