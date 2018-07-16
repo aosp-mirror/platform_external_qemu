@@ -85,6 +85,33 @@ void TextureData::onSave(android::base::Stream* stream, unsigned int globalName)
 void TextureData::restore(ObjectLocalName localName,
             const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+
+    GLenum getTarget;
+    switch (target) {
+        case GL_TEXTURE_CUBE_MAP:
+            getTarget = GL_TEXTURE_BINDING_CUBE_MAP;
+        case GL_TEXTURE_2D:
+            getTarget = GL_TEXTURE_BINDING_2D;
+            break;
+        default:
+            fprintf(stderr,
+                    "Tried to restore unsupported texture target 0x%x\n",
+                    target);
+            return;
+    }
+
+    GLint oldBind;
+    dispatcher.glGetIntegerv(getTarget, &oldBind);
+    dispatcher.glBindTexture(target, globalName);
+
+    for (auto& pair : m_texParam) {
+        if (pair.second) {
+            dispatcher.glTexParameteri(target, pair.first, pair.second);
+        }
+    }
+
+    dispatcher.glBindTexture(target, oldBind);
 }
 
 void TextureData::setSaveableTexture(SaveableTexturePtr&& saveableTexture) {
