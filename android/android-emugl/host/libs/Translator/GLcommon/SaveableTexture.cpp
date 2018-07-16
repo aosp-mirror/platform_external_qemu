@@ -383,6 +383,7 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
             default:
                 break;
         }
+
         // Load tex param
         loadCollection(stream, &m_texParam,
                 [](android::base::Stream* stream)

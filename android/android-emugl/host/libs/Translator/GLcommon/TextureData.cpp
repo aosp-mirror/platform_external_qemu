@@ -85,6 +85,20 @@ void TextureData::onSave(android::base::Stream* stream, unsigned int globalName)
 void TextureData::restore(ObjectLocalName localName,
             const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+
+    GLint oldBind;
+    dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D, &oldBind);
+    dispatcher.glBindTexture(GL_TEXTURE_2D, globalName);
+
+    for (auto& pair : m_texParam) {
+        if (pair.second) {
+            dispatcher.glTexParameteri(GL_TEXTURE_2D, pair.first, pair.second);
+        }
+    }
+
+    dispatcher.glBindTexture(GL_TEXTURE_2D, oldBind);
+
 }
 
 void TextureData::setSaveableTexture(SaveableTexturePtr&& saveableTexture) {
