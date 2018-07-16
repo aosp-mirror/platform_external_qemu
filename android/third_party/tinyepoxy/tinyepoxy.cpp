@@ -73,7 +73,6 @@ STUB(glDisableClientState)
 STUB(glDisableIndexedEXT)
 STUB(glDrawArraysInstancedARB)
 STUB(glDrawArraysInstancedBaseInstance)
-STUB(glDrawElementsBaseVertex)
 STUB(glDrawElementsInstancedARB)
 STUB(glDrawElementsInstancedBaseVertex)
 STUB(glDrawPixels)
@@ -120,6 +119,71 @@ void tinyepoxy_init(GLESv2Dispatch* gles, int version) {
     epoxy_glBindFramebufferEXT = gles->glBindFramebuffer;
     epoxy_glFramebufferTexture2DEXT = gles->glFramebufferTexture2D;
 }
+
+template<typename T> static void set_index_type(unsigned int *dst, void *src,
+                                                int index, int base) {
+    dst[index] = ((T *)src)[index] + base;
+}
+
+static void GL_APIENTRY glDrawElementsBaseVertex(GLenum mode,
+                                                 GLsizei count,
+                                                 GLenum type,
+                                                 GLintptr indices,
+                                                 GLint base) {
+    size_t el_size;
+    void (*set_index)(unsigned int*, void*, int, int);
+    switch (type) {
+        case GL_UNSIGNED_BYTE:
+            el_size = 1;
+            set_index = &set_index_type<unsigned char>;
+            break;
+        case GL_UNSIGNED_SHORT:
+            el_size = 2;
+            set_index = &set_index_type<unsigned short>;
+            break;
+        case GL_UNSIGNED_INT:
+            el_size = 4;
+            set_index = &set_index_type<unsigned int>;
+            break;
+        default:
+            fprintf(stderr, "Unsupported type: %x\n", type);
+            return;
+    }
+    size_t isize = el_size * count;
+    size_t osize = sizeof(unsigned int) * count;
+    GLint old_bid = 0;
+    s_gles2->glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &old_bid);
+    void* orig;
+    if (old_bid) {
+        orig = s_gles2->glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, indices,
+                                         isize, GL_MAP_READ_BIT);
+    } else {
+        orig = (void *)indices;
+    }
+    if (orig == NULL) {
+        fprintf(stderr, "Can't map\n");
+        return;
+    }
+
+    unsigned int *tmp = (unsigned int *)malloc(osize);
+    if (tmp == NULL) fatal("can't malloc", __func__);
+    for (int i = 0; i < count; ++i) {
+        set_index(tmp, orig, i, base);
+    }
+    if (old_bid) {
+        s_gles2->glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+        s_gles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+    s_gles2->glDrawElements(mode, count, GL_UNSIGNED_INT, tmp);
+    free(tmp);
+    if (old_bid) {
+        s_gles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, old_bid);
+    }
+}
+
+void GL_APIENTRY (* epoxy_glDrawElementsBaseVertex)(GLenum, GLsizei, GLenum,
+                                                    GLintptr, GLint)
+        = &glDrawElementsBaseVertex;
 
 extern "C" {
 
