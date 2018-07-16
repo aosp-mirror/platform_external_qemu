@@ -82,6 +82,7 @@ public:
     const SaveableTexturePtr& getSaveableTexture() const;
     void resetSaveableTexture();
     void setTexParam(GLenum pname, GLint param);
+    GLint getTexParam(GLenum pname);
     GLenum getSwizzle(GLenum component) const;
     void makeDirty();
     void setTarget(GLenum _target);

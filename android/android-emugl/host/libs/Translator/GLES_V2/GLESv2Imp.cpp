@@ -2508,9 +2508,10 @@ GL_APICALL void  GL_APIENTRY glGetTexParameterfv(GLenum target, GLenum pname, GL
     TextureData* texData = getTextureTargetData(target);
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         *params = (GLfloat)(texData->getSwizzle(pname));
-    } else {
-        ctx->dispatcher().glGetTexParameterfv(target,pname,params);
+        return;
     }
+
+    ctx->dispatcher().glGetTexParameterfv(target,pname,params);
 }
 
 GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GLint* params){
@@ -2522,9 +2523,10 @@ GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GL
     TextureData* texData = getTextureTargetData(target);
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         *params = texData->getSwizzle(pname);
-    } else {
-        ctx->dispatcher().glGetTexParameteriv(target,pname,params);
+        return;
     }
+
+    ctx->dispatcher().glGetTexParameteriv(target,pname,params);
 }
 
 GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfloat* params){
