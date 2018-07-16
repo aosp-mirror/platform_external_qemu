@@ -85,6 +85,7 @@ void TextureData::onSave(android::base::Stream* stream, unsigned int globalName)
 void TextureData::restore(ObjectLocalName localName,
             const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
+    // TODO(benzene): restore loaded texture parameters from m_texParam?
 }
 
 void TextureData::setSaveableTexture(SaveableTexturePtr&& saveableTexture) {
@@ -101,6 +102,10 @@ void TextureData::resetSaveableTexture() {
 
 void TextureData::setTexParam(GLenum pname, GLint param) {
     m_texParam[pname] = param;
+}
+
+GLint TextureData::getTexParam(GLenum pname) {
+    return m_texParam[pname];
 }
 
 GLenum TextureData::getSwizzle(GLenum component) const {
