@@ -271,6 +271,7 @@ static TextureData* getTextureData(ObjectLocalName tex){
     auto objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
     if(!objData){
+        fprintf(stderr, "%s %s %d New texturedata! \n", __FILE__, __func__, __LINE__);
         texData = new TextureData();
         ctx->shareGroup()->setObjectData(NamedObjectType::TEXTURE, tex,
                                          ObjectDataPtr(texData));
@@ -959,10 +960,10 @@ GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
             ctx->dispatcher().glGetBooleanv(GL_TEXTURE_GEN_R,&state_r);
             *params = state_s && state_t && state_r ? GL_TRUE: GL_FALSE;
         }
-    break; 
+    break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = (GLboolean)getCompressedFormats(NULL); 
-    break;    
+        *params = (GLboolean)getCompressedFormats(NULL);
+    break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
             int nparams = getCompressedFormats(NULL);
@@ -1059,7 +1060,7 @@ GL_API void GL_APIENTRY  glGetFixedv( GLenum pname, GLfixed *params) {
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
         *params = I2X(getCompressedFormats(NULL));
         return;
-    break;    
+    break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
             int nparams = getCompressedFormats(NULL);
@@ -1101,10 +1102,10 @@ GL_API void GL_APIENTRY  glGetFloatv( GLenum pname, GLfloat *params) {
     case GL_TEXTURE_GEN_STR_OES:
         glGetIntegerv(pname,&i);
         *params = (GLfloat)i;
-    break;   
+    break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = (GLfloat)getCompressedFormats(NULL); 
-    break;    
+        *params = (GLfloat)getCompressedFormats(NULL);
+    break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
             int nparams = getCompressedFormats(NULL);
@@ -1129,7 +1130,7 @@ GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params) {
     {
         return;
     }
-    
+
     GLint i;
     GLfloat f;
 

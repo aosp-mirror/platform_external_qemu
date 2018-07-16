@@ -257,10 +257,12 @@ static TextureData* getTextureData(ObjectLocalName tex) {
     auto objData =
             ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
     if(!objData){
+        fprintf(stderr, "%s %s %d new v2 texturedata named %llu! \n", __FILE__, __func__, __LINE__, tex);
         texData = new TextureData();
         ctx->shareGroup()->setObjectData(NamedObjectType::TEXTURE, tex,
                                          ObjectDataPtr(texData));
     } else {
+        fprintf(stderr, "%s %s %d existing v2 texturedata named %llu! \n", __FILE__, __func__, __LINE__, tex);
         texData = (TextureData*)objData;
     }
     return texData;
@@ -550,6 +552,8 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
         texData->globalName = globalTextureName;
     }
 
+    fprintf(stderr, "%s %s %d Dispatching bind target 0x%x with tex %d \n", __FILE__, __func__, __LINE__,
+                target, texture);
     ctx->setBindedTexture(target,texture);
     ctx->dispatcher().glBindTexture(target,globalTextureName);
 
@@ -2508,7 +2512,15 @@ GL_APICALL void  GL_APIENTRY glGetTexParameterfv(GLenum target, GLenum pname, GL
     TextureData* texData = getTextureTargetData(target);
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         *params = (GLfloat)(texData->getSwizzle(pname));
-    } else {
+        return;
+    }
+
+    // If we have recorded texture parameters, return those
+    if (texData && texData->getTexParam(pname)) {
+        fprintf(stderr, "tex param named 0x%x: %d\n", pname, texData->getTexParam(pname));
+        *params = (GLfloat)(texData->getTexParam(pname));
+    }
+    else {
         ctx->dispatcher().glGetTexParameterfv(target,pname,params);
     }
 }
@@ -2520,9 +2532,24 @@ GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GL
                  GL_INVALID_ENUM);
 
     TextureData* texData = getTextureTargetData(target);
+
+    if (texData) {
+        // TODO(benzene) figure out the conditions when we want this
+        // probably when getTexParam gives a non-NONE value?
+        fprintf(stderr, "tex param named 0x%x: %d\n", pname, texData->getTexParam(pname));
+    }
+
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         *params = texData->getSwizzle(pname);
-    } else {
+        return;
+    }
+
+    // If we have recorded texture parameters, return those
+    if (texData && texData->getTexParam(pname)) {
+        fprintf(stderr, "tex param named 0x%x: %d\n", pname, texData->getTexParam(pname));
+        *params = texData->getTexParam(pname);
+    }
+    else {
         ctx->dispatcher().glGetTexParameteriv(target,pname,params);
     }
 }

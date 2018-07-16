@@ -889,6 +889,7 @@ ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,
         case NamedObjectType::VERTEXBUFFER:
             return ObjectDataPtr(new GLESbuffer(stream));
         case NamedObjectType::TEXTURE:
+            fprintf(stderr, "%s %s %d localname %llu \n", __FILE__, __func__, __LINE__, localName);
             return ObjectDataPtr(new TextureData(stream));
         case NamedObjectType::FRAMEBUFFER:
             return ObjectDataPtr(new FramebufferData(stream));

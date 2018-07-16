@@ -223,6 +223,7 @@ ObjectDataPtr ShareGroup::GetObject(ObjectType type, ObjectLocalName name,
       obj = ObjectDataPtr(new BufferData(name));
       break;
     case TEXTURE:
+      fprintf(stderr, "%s %s %d \n", __FILE__, __func__, __LINE__);
       obj = ObjectDataPtr(new TextureData(name));
       break;
     case RENDERBUFFER:

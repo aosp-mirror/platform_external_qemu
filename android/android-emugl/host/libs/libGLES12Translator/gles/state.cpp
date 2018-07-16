@@ -882,6 +882,7 @@ void TextureContext::Init(int max_texture_units, int max_texture_size) {
       texture_units_[i][j].global_target = target;
     }
 
+    fprintf(stderr, "%s %s %d \n", __FILE__, __func__, __LINE__);
     TextureDataPtr data(new TextureData(0));
     data->Bind(target, max_texture_levels_);
     default_textures_.push_back(data);
