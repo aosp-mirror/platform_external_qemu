@@ -99,8 +99,27 @@ void TextureData::resetSaveableTexture() {
     m_saveableTexture.reset(new SaveableTexture(*this));
 }
 
+unsigned int TextureData::getGlobalName() const {
+    if (m_saveableTexture) {
+        if (globalName != m_saveableTexture->getGlobalName()) {
+            fprintf(stderr,
+                    "(!) TextureData global name does not match "
+                    "SaveableTexture global name.\n");
+        }
+        return m_saveableTexture->getGlobalName();
+    }
+    return globalName;
+}
+
+void TextureData::setGlobalName(unsigned int name) {
+    globalName = name;
+    if (m_saveableTexture) {
+        m_saveableTexture->setGlobalName(name);
+    }
+}
+
 void TextureData::setTexParam(GLenum pname, GLint param) {
-    m_texParam[pname] = param;
+    // m_texParam[pname] = param;
 }
 
 GLenum TextureData::getSwizzle(GLenum component) const {

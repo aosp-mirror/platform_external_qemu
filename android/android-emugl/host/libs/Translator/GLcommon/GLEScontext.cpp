@@ -2398,9 +2398,9 @@ void GLEScontext::copyTexImageWithEmulation(
     // now the emulated version has been rendered and written to the read FBO
     // with the correct swizzle.
     if (isCubeMapFaceTarget(target)) {
-        gl.glBindTexture(GL_TEXTURE_CUBE_MAP, texData->globalName);
+        gl.glBindTexture(GL_TEXTURE_CUBE_MAP, texData->getGlobalName());
     } else {
-        gl.glBindTexture(target, texData->globalName);
+        gl.glBindTexture(target, texData->getGlobalName());
     }
 
     if (isSubImage) {

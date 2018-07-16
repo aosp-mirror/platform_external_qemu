@@ -169,6 +169,7 @@ LOCAL_SRC_FILES := \
     tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotTesting.cpp \
     tests/GLSnapshotTestStateUtils.cpp \
+    tests/GLSnapshotTextures_unittest.cpp \
     tests/GLSnapshotTransformation_unittest.cpp \
     tests/GLSnapshotVertexAttributes_unittest.cpp \
     tests/GLTestUtils.cpp \
