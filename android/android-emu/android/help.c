@@ -1610,6 +1610,8 @@ help_sim_access_rules_file(stralloc_t* out)
 
 #define help_phone_number NULL
 
+#define help_acpi_config NULL
+
 typedef struct {
     const char*  name;
     const char*  template;
