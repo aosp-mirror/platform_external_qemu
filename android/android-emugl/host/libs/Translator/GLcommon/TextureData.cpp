@@ -85,6 +85,34 @@ void TextureData::onSave(android::base::Stream* stream, unsigned int globalName)
 void TextureData::restore(ObjectLocalName localName,
             const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
+    // GLDispatch& dispatcher = GLEScontext::dispatcher();
+
+    // GLenum getTarget;
+    // switch (target) {
+    //     case GL_TEXTURE_CUBE_MAP:
+    //         getTarget = GL_TEXTURE_BINDING_CUBE_MAP;
+    //     case GL_TEXTURE_2D:
+    //         getTarget = GL_TEXTURE_BINDING_2D;
+    //         break;
+    //     default:
+    //         fprintf(stderr,
+    //                 "Tried to restore unsupported texture target 0x%x\n",
+    //                 target);
+    //         return;
+    // }
+
+    // GLint oldBind;
+    // dispatcher.glGetIntegerv(getTarget, &oldBind);
+    // dispatcher.glBindTexture(target, globalName);
+    // fprintf(stderr, "Binding texturedata global 0x%x\n", globalName);
+
+    // for (auto& pair : m_texParam) {
+    //     if (pair.second) {
+    //         dispatcher.glTexParameteri(target, pair.first, pair.second);
+    //     }
+    // }
+
+    // dispatcher.glBindTexture(target, oldBind);
 }
 
 void TextureData::setSaveableTexture(SaveableTexturePtr&& saveableTexture) {
@@ -99,8 +127,20 @@ void TextureData::resetSaveableTexture() {
     m_saveableTexture.reset(new SaveableTexture(*this));
 }
 
+unsigned int TextureData::getGlobalName() const {
+    return globalName;//m_saveableTexture.getGlobalObject()->getGlobalName();
+}
+
+void TextureData::setGlobalName(unsigned int name) {
+    globalName = name;
+    if (m_saveableTexture) {
+        m_saveableTexture->setGlobalName(name);
+    }
+}
+
 void TextureData::setTexParam(GLenum pname, GLint param) {
     m_texParam[pname] = param;
+    // why does this even exist
 }
 
 GLenum TextureData::getSwizzle(GLenum component) const {
