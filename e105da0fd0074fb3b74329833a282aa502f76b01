@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ae99dc44_055c63a4",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 1156,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-07-16T06:53:31Z",
+      "side": 1,
+      "message": "this is not an error; probably only need to print something when -verbose is given",
+      "range": {
+        "startLine": 1156,
+        "startChar": 8,
+        "endLine": 1156,
+        "endChar": 20
+      },
+      "revId": "e105da0fd0074fb3b74329833a282aa502f76b01",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
