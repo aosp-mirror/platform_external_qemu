@@ -56,6 +56,9 @@
 #include <windows.h>
 #endif
 
+#include <sys/types.h>
+#include <sys/wait.h>
+
 using android::base::PathUtils;
 using android::base::RunOptions;
 using android::base::ScopedCPtr;
@@ -225,6 +228,35 @@ static bool checkOsVersion() {
     return true;
 #endif  // _WIN32
 }
+
+static int get_child_memory(int childpid) {
+
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "/proc/%d/status", childpid);
+    size_t size = 0;
+    std::ifstream fin;
+
+        fin.open(buf);
+        if (!fin.good()) {
+            fprintf(stderr, "cannot read %s\n", buf);
+            return -1;
+        }
+
+        int resident = 0;
+        std::string line;
+        while (std::getline(fin, line)) {
+            if (sscanf(line.c_str(), "VmRSS:%lu", &size) == 1) {
+                resident = size / 1024;
+                fprintf(stderr, "child has %dM memory\n", resident);
+                break;
+            }
+        }
+        fin.close();
+
+        fprintf(stderr, "==child has %dM memory\n", resident);
+        return resident;
+}
+
 
 /* Main routine */
 int main(int argc, char** argv)
@@ -715,7 +747,32 @@ int main(int argc, char** argv)
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.
-    safe_execv(emulatorPath, argv);
+
+    while(1) {
+        int childpid;
+        int status;
+        childpid = fork();
+        if (childpid==0) {
+            safe_execv(emulatorPath, argv);
+        } else {
+            fprintf(stderr, "no waiting for child to quit\n");
+            while(1) {
+            fprintf(stderr, "sleep 2 sec now waiting for child to quit\n");
+                usleep(1000 * 1000 * 2);
+            fprintf(stderr, "sleep 2 sec done no waiting for child to quit\n");
+                int childmem = get_child_memory(childpid);
+                if (childmem <= 0) return -2;
+                if (childmem > 4500) {
+                    kill(childpid, SIGKILL);
+                    break;
+                }
+            }
+                usleep(1000 * 1000 * 2);
+            while (wait(&status) > 0){;}
+                usleep(1000 * 1000 * 2);
+            fprintf(stderr, "qemu died, restart it\n");
+        }
+    }
 
     /* We could not launch the program ! */
     fprintf(stderr, "Could not launch '%s': %s\n", emulatorPath, strerror(errno));
