@@ -75,7 +75,9 @@ public:
     bool isDirty() const;
     void setTarget(GLenum target);
     void setMipmapLevelAtLeast(unsigned int level);
-public:
+
+    unsigned int getGlobalName();
+
     // precondition: (1) a context must be properly bound
     //               (2) m_fileReader is set up
     void restore();

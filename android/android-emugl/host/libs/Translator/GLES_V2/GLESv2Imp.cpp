@@ -546,8 +546,11 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
             fprintf(stderr, "%s: Set invalid operation!\n", __func__);
         }
         SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
+        texData->setGlobalName(globalTextureName);
+        if (!texData->wasBound) {
+            texData->resetSaveableTexture();
+        }
         texData->wasBound = true;
-        texData->globalName = globalTextureName;
     }
 
     ctx->setBindedTexture(target,texture);
@@ -804,7 +807,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
                 ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
                         globalTextureName);
                 texData->sourceEGLImage = 0;
-                texData->globalName = globalTextureName;
+                texData->setGlobalName(globalTextureName);
             }
             texData->resetSaveableTexture();
         }
@@ -2508,9 +2511,9 @@ GL_APICALL void  GL_APIENTRY glGetTexParameterfv(GLenum target, GLenum pname, GL
     TextureData* texData = getTextureTargetData(target);
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         *params = (GLfloat)(texData->getSwizzle(pname));
-    } else {
-        ctx->dispatcher().glGetTexParameterfv(target,pname,params);
+        return;
     }
+    ctx->dispatcher().glGetTexParameterfv(target, pname, params);
 }
 
 GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GLint* params){
@@ -2522,9 +2525,9 @@ GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GL
     TextureData* texData = getTextureTargetData(target);
     if (sShouldEmulateSwizzles(texData, target, pname)) {
         *params = texData->getSwizzle(pname);
-    } else {
-        ctx->dispatcher().glGetTexParameteriv(target,pname,params);
+        return;
     }
+    ctx->dispatcher().glGetTexParameteriv(target, pname, params);
 }
 
 GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfloat* params){
@@ -3667,7 +3670,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->type = img->type;
             texData->texStorageLevels = img->texStorageLevels;
             texData->sourceEGLImage = imagehndl;
-            texData->globalName = img->globalTexObj->getGlobalName();
+            texData->setGlobalName(img->globalTexObj->getGlobalName());
             texData->setSaveableTexture(
                     SaveableTexturePtr(img->saveableTexture));
             if (img->sync) {
