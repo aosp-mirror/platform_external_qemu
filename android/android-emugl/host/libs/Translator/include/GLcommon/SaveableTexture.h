@@ -75,7 +75,11 @@ public:
     bool isDirty() const;
     void setTarget(GLenum target);
     void setMipmapLevelAtLeast(unsigned int level);
-public:
+
+    // global name gets set during bind; name may be needed for onSave
+    void setGlobalName(unsigned int name);
+    unsigned int getGlobalName();
+
     // precondition: (1) a context must be properly bound
     //               (2) m_fileReader is set up
     void restore();
