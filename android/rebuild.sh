@@ -20,6 +20,9 @@ HELP=
 
 for OPT; do
     case $OPT in
+        --sdk-build-number=*)
+            ANDROID_SDK_TOOLS_BUILD_NUMBER=${OPT##--sdk-build-number=}
+            ;;
         --aosp-prebuilts-dir=*)
             ANDROID_EMULATOR_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
             ;;
@@ -285,10 +288,17 @@ if [ -z "$NO_TESTS" ]; then
     fi
 
     if [ "$OPTDEBUG" = true ] ; then
-        # TODO(jansene): Enable when we have clang support under windows.
         if [ -z "$MINGW" ]; then
-            echo "Creating coverage report under $OUT_DIR/coverage/emu-coverage.html. (slow)"
-            run android/scripts/coverage.sh --out-dir=$OUT_DIR  --verbosity=$VERBOSE || panic "Unable to create coverage report"
+            if [ -z "$ANDROID_SDK_TOOLS_BUILD_NUMBER" ]; then
+                echo "Creating coverage report under $OUT_DIR/coverage/emu-coverage.html. (slow)"
+                run android/scripts/coverage.sh --out-dir=$OUT_DIR  --verbosity=$VERBOSE || panic "Unable to create coverage report"
+            else
+                echo "Best effort creating coverage XML & CSV under $OUT_DIR/coverage (slow)"
+                run android/scripts/coverage.sh --out-dir=$OUT_DIR  \
+                  --verbosity=$VERBOSE \
+                  --buildid=$ANDROID_SDK_TOOLS_BUILD_NUMBER \
+                  --csv
+          fi
         fi
     fi
 else
