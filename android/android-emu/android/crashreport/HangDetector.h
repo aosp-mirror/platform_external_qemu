@@ -42,11 +42,13 @@ class HangDetector {
 
 public:
     using HangCallback = std::function<void(base::StringView message)>;
+    using HangPredicate = std::function<bool()>;
 
     HangDetector(HangCallback&& hangCallback);
     ~HangDetector();
 
     void addWatchedLooper(base::Looper* looper);
+    void addPredicateCheck(HangPredicate&& predicate, std::string msg = "");
     void pause(bool paused);
     void stop();
 
@@ -71,6 +73,7 @@ private:
     const HangCallback mHangCallback;
 
     std::vector<std::unique_ptr<LooperWatcher>> mLoopers;
+    std::vector<std::pair<HangPredicate, std::string>> mPredicates;
     bool mPaused = false;
     bool mStopping = false;
     base::Lock mLock;

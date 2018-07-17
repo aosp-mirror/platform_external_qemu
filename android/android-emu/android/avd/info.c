@@ -1277,7 +1277,7 @@ avdInfo_getVendorInitImagePath( const AvdInfo*  i )
 static bool
 is_x86ish(const AvdInfo* i)
 {
-    if (strncmp(i->targetAbi, "x86", 3) == 0) {
+    if (i && strncmp(i->targetAbi, "x86", 3) == 0) {
         return true;
     } else {
         return false;
