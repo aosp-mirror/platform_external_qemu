@@ -19,12 +19,14 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/console.h"
+#include "android/cmdline-option.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/snapshot/interface.h"
 
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/utils/debug.h"
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
@@ -186,6 +188,19 @@ bool qemu_android_emulation_setup() {
     for (int i = 0; i < nCores; ++i) {
         android::crashreport::CrashReporter::get()->hangDetector().
                 addWatchedLooper(new android::qemu::CpuLooper(i));
+    }
+
+    if (android_cmdLineOptions && android_cmdLineOptions->detect_image_hang) {
+        dwarning("Enabled event overflow detection.\n");
+        const int kMaxEventsDropped = 1024;
+        android::crashreport::CrashReporter::get()
+                ->hangDetector()
+                .addPredicateCheck(
+                        [] {
+                            return gQAndroidUserEventAgent->eventsDropped() >
+                                    kMaxEventsDropped;
+                        },
+                        "The goldfish event queue is overflowing, the system is no longer responding.");
     }
 
     return true;
