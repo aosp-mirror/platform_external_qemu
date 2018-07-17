@@ -23,11 +23,12 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
+using android::base::c_str;
+using android::base::makeCustomScopedPtr;
 using android::base::ScopedCPtr;
 using android::base::ScopedFd;
 using android::base::StringView;
 using android::base::System;
-using android::base::makeCustomScopedPtr;
 
 namespace android {
 namespace protobuf {
@@ -35,9 +36,8 @@ namespace protobuf {
 ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
                                         System::FileSize* bytesUsed,
                                         ProtobufLoadCallback loadCb) {
-    const auto file =
-            ScopedFd(::open(fileName.c_str(),
-                            O_RDONLY | O_BINARY | O_CLOEXEC, 0644));
+    const auto file = ScopedFd(
+            ::open(c_str(fileName), O_RDONLY | O_BINARY | O_CLOEXEC, 0644));
 
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
@@ -64,7 +64,7 @@ ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
     if (bytesUsed) *bytesUsed = 0;
 
     google::protobuf::io::FileOutputStream stream(
-            ::open(fileName.c_str(),
+            ::open(c_str(fileName),
                    O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644));
 
     stream.SetCloseOnDelete(true);

@@ -169,7 +169,7 @@ IVersionExtractor::Versions VersionExtractor::extractVersions(
     LIBXML_TEST_VERSION
 
     const xmlAutoPtr<xmlDoc> doc(
-            xmlReadMemory(data.c_str(), data.size(), "none.xml", nullptr, 0));
+            xmlReadMemory(data.data(), data.size(), "none.xml", nullptr, 0));
     if (!doc) {
         return {};
     }

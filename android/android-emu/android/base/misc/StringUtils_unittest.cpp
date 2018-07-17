@@ -58,8 +58,8 @@ TEST(StringUtils, strDupWithStringView) {
     StringView view("Hello World");
     char* s = strDup(view);
     EXPECT_TRUE(s);
-    EXPECT_STREQ(view.c_str(), s);
-    EXPECT_NE(view.c_str(), s);
+    EXPECT_STREQ(view.data(), s);
+    EXPECT_NE(view.data(), s);
     free(s);
 }
 
@@ -67,8 +67,8 @@ TEST(StringUtils, strDupWithStdString) {
     std::string str("Hello World");
     char* s = strDup(str);
     EXPECT_TRUE(s);
-    EXPECT_STREQ(str.c_str(), s);
-    EXPECT_NE(str.c_str(), s);
+    EXPECT_STREQ(str.data(), s);
+    EXPECT_NE(str.data(), s);
     free(s);
 }
 

@@ -134,8 +134,8 @@ static int processArguments(int argc, const char* const* argv) {
                 std::begin(options), std::end(options),
                 [arg](const Option& opt) { return arg == opt.arg; });
         if (opt == std::end(options)) {
-            printf("%s:\n%d\nUnknown argument\n%s\n",
-                   arg.c_str(), kGenericError, arg.c_str());
+            printf("%s:\n%d\nUnknown argument\n%s\n", arg.data(), kGenericError,
+                   arg.data());
             continue;
         }
 
@@ -151,11 +151,8 @@ static int processArguments(int argc, const char* const* argv) {
             break;
         }
 
-        printf("%s:\n%d\n%s\n%s\n",
-               arg.c_str(),
-               handlerRes.first,
-               handlerRes.second.c_str(),
-               arg.c_str());
+        printf("%s:\n%d\n%s\n%s\n", arg.data(), handlerRes.first,
+               handlerRes.second.c_str(), arg.data());
     }
 
     return retCode.valueOr(kGenericError);
