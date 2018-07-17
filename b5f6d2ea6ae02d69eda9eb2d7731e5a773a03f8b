@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b564441f_6f793c02",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-17T20:27:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d70a42b_702883d5",
+      "range": {
+        "startLine": 265,
+        "startChar": 17,
+        "endLine": 265,
+        "endChar": 33
+      },
+      "revId": "b5f6d2ea6ae02d69eda9eb2d7731e5a773a03f8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9f48560_9f8326e5",
         "filename": "android/android-emu/android/base/Uuid.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-07-17T01:11:53Z",
       "side": 1,
       "message": "nit: this space isn\u0027t needed anymore",
+      "range": {
+        "startLine": 97,
+        "startChar": 64,
+        "endLine": 97,
+        "endChar": 65
+      },
+      "revId": "b5f6d2ea6ae02d69eda9eb2d7731e5a773a03f8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0c1e432_b0ff9cae",
+        "filename": "android/android-emu/android/base/Uuid.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-17T20:27:56Z",
+      "side": 1,
+      "message": "Weird, I blame clang-format.  Fixed.",
+      "parentUuid": "e9f48560_9f8326e5",
       "range": {
         "startLine": 97,
         "startChar": 64,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "96371883_5ef5ce33",
+        "filename": "android/android-emu/android/base/system/Win32Utils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-17T20:27:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aeda957a_d6d4929c",
+      "revId": "b5f6d2ea6ae02d69eda9eb2d7731e5a773a03f8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0a5c25bf_0c2b5fe4",
         "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
         "patchSetId": 2
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "4bcf6af1_be16567c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/google-play-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-17T20:27:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a5c25bf_0c2b5fe4",
+      "range": {
+        "startLine": 161,
+        "startChar": 43,
+        "endLine": 161,
+        "endChar": 59
+      },
+      "revId": "b5f6d2ea6ae02d69eda9eb2d7731e5a773a03f8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "800cc0da_83e5f7f9",
         "filename": "android/android-emu/android/virtualscene/TextureUtils.cpp",
         "patchSetId": 2
@@ -99,6 +189,30 @@
       "writtenOn": "2018-07-17T01:11:53Z",
       "side": 1,
       "message": "nit: or .get()",
+      "range": {
+        "startLine": 77,
+        "startChar": 10,
+        "endLine": 77,
+        "endChar": 23
+      },
+      "revId": "b5f6d2ea6ae02d69eda9eb2d7731e5a773a03f8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "977599b2_6433eb0a",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-17T20:27:56Z",
+      "side": 1,
+      "message": "Fixed, I did this originally before introducing .get() and must have missed updating it.  Thanks!",
+      "parentUuid": "800cc0da_83e5f7f9",
       "range": {
         "startLine": 77,
         "startChar": 10,
