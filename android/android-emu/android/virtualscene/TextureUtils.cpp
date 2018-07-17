@@ -67,14 +67,14 @@ TextureUtils::Result TextureUtils::createPlaceholder() {
 Optional<TextureUtils::Result> TextureUtils::load(const char* filename) {
     const base::StringView extension = PathUtils::extension(filename);
 
-    if (strcasecmp(extension.c_str(), ".png") == 0) {
+    if (strncasecmp(extension.data(), ".png", extension.size()) == 0) {
         return loadPNG(filename);
-    } else if (strcasecmp(extension.c_str(), ".jpg") == 0 ||
-               strcasecmp(extension.c_str(), ".jpeg") == 0) {
+    } else if (strncasecmp(extension.data(), ".jpg", extension.size()) == 0 ||
+               strncasecmp(extension.data(), ".jpeg", extension.size()) == 0) {
         return loadJPEG(filename);
     } else {
         E("%s: Unsupported file format %s", __FUNCTION__,
-          std::string(extension).c_str());
+          base::c_str(extension).get());
         return {};
     }
 }

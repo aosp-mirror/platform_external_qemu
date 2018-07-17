@@ -36,7 +36,7 @@ ParseResult parseConfigurationString(android::base::StringView str) {
     // Skip optional http:// prefix.
     static constexpr android::base::StringView kHttpPrefix = "http://";
     if (static_cast<size_t>(end - pos) >= kHttpPrefix.size() &&
-        !memcmp(pos, kHttpPrefix.c_str(), kHttpPrefix.size())) {
+        !memcmp(pos, kHttpPrefix.data(), kHttpPrefix.size())) {
         pos += kHttpPrefix.size();
     }
 

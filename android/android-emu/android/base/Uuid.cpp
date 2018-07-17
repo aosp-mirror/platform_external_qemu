@@ -46,7 +46,7 @@ Uuid::Uuid(StringView asString) {
 
     if (::UuidFromStringA(const_cast<unsigned char*>(
                                   reinterpret_cast<const unsigned char*>(
-                                          asString.c_str())),
+                                          c_str(asString).get())),
                           static_cast<UUID*>(dataPtr())) != RPC_S_OK) {
         *this = Uuid();
     }
@@ -94,8 +94,8 @@ Uuid::Uuid(StringView asString) {
     static_assert(sizeof(Uuid::data_t) >= sizeof(uuid_t),
                   "Uuid::data_t is too small on Posix");
 
-    if (uuid_parse(asString.c_str(),
-                   static_cast<asSystem<uuid_t>>(dataPtr())) < 0) {
+    if (uuid_parse(c_str(asString), static_cast<asSystem<uuid_t>>(dataPtr())) <
+        0) {
         *this = Uuid();
     }
 }
