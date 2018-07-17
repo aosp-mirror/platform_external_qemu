@@ -429,12 +429,13 @@ private:
                                 ?: avdInfo_getSystemInitImagePath(m_avd));
                 if (writable) {
                     const char* systemDir = avdInfo_getContentPath(m_avd);
-                    filePath = path_join(
+
+                    allocatedPath.reset(path_join(
                             systemDir,
-                            get_qcow2_image_basename(sysImagePath).c_str());
+                            get_qcow2_image_basename(sysImagePath).c_str()));
+                    filePath = allocatedPath.get();
                     driveParam += StringFormat("index=%d,id=system,file=%s",
                                                m_driveIndex++, filePath);
-                    allocatedPath.reset(filePath.c_str());
                 } else {
                     qCow2Format = false;
                     filePath = sysImagePath.c_str();
@@ -457,12 +458,12 @@ private:
                                 ?: avdInfo_getVendorInitImagePath(m_avd));
                 if (writable) {
                     const char* systemDir = avdInfo_getContentPath(m_avd);
-                    filePath = path_join(
+                    allocatedPath.reset(path_join(
                             systemDir,
-                            get_qcow2_image_basename(vendorImagePath).c_str());
+                            get_qcow2_image_basename(vendorImagePath).c_str()));
+                    filePath = allocatedPath.get();
                     driveParam += StringFormat("index=%d,id=vendor,file=%s",
                                                m_driveIndex++, filePath);
-                    allocatedPath.reset(filePath.c_str());
                 } else {
                     qCow2Format = false;
                     filePath = vendorImagePath.c_str();

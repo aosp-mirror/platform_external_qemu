@@ -921,9 +921,9 @@ public:
         _wputenv(Win32UnicodeString(envStr).release());
 #else
         if (varvalue.empty()) {
-            unsetenv(varname.c_str());
+            unsetenv(c_str(varname));
         } else {
-            setenv(varname.c_str(), varvalue.c_str(), 1);
+            setenv(c_str(varname), c_str(varvalue), 1);
         }
 #endif
     }
@@ -934,7 +934,7 @@ public:
         const wchar_t* value = _wgetenv(varname_unicode.c_str());
         return value && value[0] != L'\0';
 #else
-        const char* value = getenv(varname.c_str());
+        const char* value = getenv(c_str(varname));
         return value && value[0] != '\0';
 #endif
     }
@@ -1045,7 +1045,7 @@ public:
         return Optional<std::string>(command);
       }
 
-      ScopedCPtr<char> exe(::path_search_exec(command.c_str()));
+      ScopedCPtr<char> exe(::path_search_exec(c_str(command)));
       if (exe && pathCanExec(exe.get())) {
         return Optional<std::string>(exe.get());
       }
@@ -1615,7 +1615,7 @@ int pathStat(StringView path, PathStat* st) {
 #ifdef _WIN32
     return _wstat64(win32Path(path).c_str(), st);
 #else   // !_WIN32
-    return HANDLE_EINTR(stat(path.c_str(), st));
+    return HANDLE_EINTR(stat(c_str(path), st));
 #endif  // !_WIN32
 }
 
@@ -1639,7 +1639,7 @@ int pathAccess(StringView path, int mode) {
     }
     return _waccess(win32Path(path).c_str(), win32mode);
 #else   // !_WIN32
-    return HANDLE_EINTR(access(path.c_str(), mode));
+    return HANDLE_EINTR(access(c_str(path), mode));
 #endif  // !_WIN32
 }
 
@@ -1717,7 +1717,7 @@ std::vector<std::string> System::scanDirInternal(StringView dirPath) {
         _findclose(findIndex);
     }
 #else  // !_WIN32
-    DIR* dir = ::opendir(dirPath.c_str());
+    DIR* dir = ::opendir(c_str(dirPath));
     if (dir) {
         for (;;) {
             struct dirent* entry = ::readdir(dir);
@@ -1745,7 +1745,7 @@ bool System::pathIsLinkInternal(StringView path) {
     return false;
 #else
     struct stat fileStatus;
-    if (lstat(path.c_str(), &fileStatus)) {
+    if (lstat(c_str(path), &fileStatus)) {
         return false;
     }
     return S_ISLNK(fileStatus.st_mode);
@@ -1816,19 +1816,16 @@ bool System::deleteFileInternal(StringView path) {
         return false;
     }
 
-    int remove_res = -1;
+    int remove_res = remove(c_str(path));
 
 #ifdef _WIN32
-    remove_res = remove(path.c_str());
     if (remove_res < 0) {
         // Windows sometimes just fails to delete a file
         // on the first try.
         // Sleep a little bit and try again here.
         System::get()->sleepMs(1);
-        remove_res = remove(path.c_str());
+        remove_res = remove(c_str(path));
     }
-#else
-    remove_res = remove(path.c_str());
 #endif
 
     if (remove_res != 0) {
@@ -1841,7 +1838,8 @@ bool System::deleteFileInternal(StringView path) {
 bool System::pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes) {
 #ifdef _WIN32
     ULARGE_INTEGER freeBytesAvailableToUser;
-    bool result = GetDiskFreeSpaceEx(path.c_str(), &freeBytesAvailableToUser, NULL, NULL);
+    bool result = GetDiskFreeSpaceEx(c_str(path), &freeBytesAvailableToUser,
+                                     NULL, NULL);
     if (!result) {
         return false;
     }
@@ -1849,7 +1847,7 @@ bool System::pathFreeSpaceInternal(StringView path, FileSize* spaceInBytes) {
     return true;
 #else
     struct statvfs fsStatus;
-    int result = statvfs(path.c_str(), &fsStatus);
+    int result = statvfs(c_str(path), &fsStatus);
     if (result != 0) {
         return false;
     }
@@ -2244,7 +2242,7 @@ std::string System::getEnvironmentVariable(StringView varname) {
         return Win32UnicodeString::convertToUtf8(value);
     }
 #else
-    const char* value = getenv(varname.c_str());
+    const char* value = getenv(c_str(varname));
     if (!value) {
         value = "";
     }

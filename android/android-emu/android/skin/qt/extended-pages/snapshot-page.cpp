@@ -429,15 +429,15 @@ void SnapshotPage::on_loadSnapshot_clicked() {
 void SnapshotPage::on_saveQuickBootNowButton_clicked() {
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
-    android::base::ThreadLooper::runOnMainLooper( []() {
-        androidSnapshot_save(Quickboot::kDefaultBootSnapshot.c_str()); });
+    android::base::ThreadLooper::runOnMainLooper(
+            []() { androidSnapshot_save(Quickboot::kDefaultBootSnapshot); });
 }
 
 void SnapshotPage::on_loadQuickBootNowButton_clicked() {
     // Invoke the snapshot load function.
     // But don't run it on the UI thread.
-    android::base::ThreadLooper::runOnMainLooper( []() {
-        androidSnapshot_load(Quickboot::kDefaultBootSnapshot.c_str()); });
+    android::base::ThreadLooper::runOnMainLooper(
+            []() { androidSnapshot_load(Quickboot::kDefaultBootSnapshot); });
 }
 
 void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snapshotFileName) {
@@ -615,7 +615,7 @@ void SnapshotPage::updateAfterSelectionChanged() {
             mAllowLoad = true;
             mAllowDelete = true;
             // Cannot edit the default snapshot
-            mAllowEdit = simpleName != Quickboot::kDefaultBootSnapshot.c_str();
+            mAllowEdit = simpleName != Quickboot::kDefaultBootSnapshot;
             mAllowTake = mAllowEdit || !mIsStandAlone;
         } else {
             // Invalid snapshot directory
@@ -834,10 +834,8 @@ void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snap
     // If there was a loaded snapshot, set that snapshot as the parent
     // of this one.
     const char* parentName = androidSnapshot_loadedSnapshotFile();
-    if (parentName &&
-        parentName[0] != '\0' &&
-        strcmp(parentName, Quickboot::kDefaultBootSnapshot.c_str()))
-    {
+    if (parentName && parentName[0] != '\0' &&
+        strcmp(parentName, Quickboot::kDefaultBootSnapshot)) {
         writeParentToProtobuf(snapshotName, QString(parentName));
     }
 
@@ -920,7 +918,7 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 
         // Create a top-level item.
         QTreeWidget* displayWidget;
-        if (fileName == Quickboot::kDefaultBootSnapshot.c_str()) {
+        if (fileName == Quickboot::kDefaultBootSnapshot) {
             // Use the "default" section of the display.
             logicalName = "QuickBoot";
             displayWidget = mUi->defaultSnapshotDisplay;

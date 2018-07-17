@@ -96,7 +96,7 @@ void Win32UnicodeString::reset(const char* str, size_t len) {
 }
 
 void Win32UnicodeString::reset(StringView str) {
-    reset(str.c_str(), str.size());
+    reset(str.data(), str.size());
 }
 
 void Win32UnicodeString::resize(size_t newSize) {

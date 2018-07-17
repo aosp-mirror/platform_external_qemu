@@ -102,13 +102,14 @@ bool GifConverterImpl::initialize(android::base::StringView inFilename,
 }
 
 bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
+    auto inFilenameValidated = android::base::c_str(inFilename);
     int ret;
 
     // open the input video file
     AVFormatContext* ifmt_ctx = nullptr;
-    if ((ret = avformat_open_input(&ifmt_ctx, inFilename.c_str(), nullptr,
+    if ((ret = avformat_open_input(&ifmt_ctx, inFilenameValidated, nullptr,
                                    nullptr)) < 0) {
-        LOG(ERROR) << "Cannot open input file: [" << inFilename.c_str() << "]";
+        LOG(ERROR) << "Cannot open input file: [" << inFilenameValidated << "]";
         return false;
     }
     mInputContext = makeAVScopedPtr(ifmt_ctx);
@@ -119,7 +120,7 @@ bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
         return false;
     }
 
-    av_dump_format(mInputContext.get(), 0, inFilename.c_str(), 0);
+    av_dump_format(mInputContext.get(), 0, inFilenameValidated, 0);
 
     // find the video stream, GIF supports only video, no audio
     for (int i = 0; i < mInputContext->nb_streams; i++) {
@@ -150,13 +151,15 @@ bool GifConverterImpl::initInputContext(android::base::StringView inFilename) {
 
 bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
                                          uint32_t bitrate) {
+    auto outFilenameValidated = android::base::c_str(outFilename);
+
     // open the output gif file
     AVFormatContext* ofmt_ctx = nullptr;
     avformat_alloc_output_context2(&ofmt_ctx, nullptr, nullptr,
-                                   outFilename.c_str());
+                                   outFilenameValidated);
     if (ofmt_ctx == nullptr) {
         LOG(ERROR) << "Could not create output context for ["
-                   << outFilename.c_str() << "]";
+                   << outFilenameValidated << "]";
         return false;
     }
     mOutputContext = makeAVScopedPtr(ofmt_ctx);
@@ -199,13 +202,13 @@ bool GifConverterImpl::initOutputContext(android::base::StringView outFilename,
     if (mOutputContext->oformat->flags & AVFMT_GLOBALHEADER)
         enc_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-    av_dump_format(mOutputContext.get(), 0, outFilename.c_str(), 1);
+    av_dump_format(mOutputContext.get(), 0, outFilenameValidated, 1);
 
     if (!(mOutputContext->oformat->flags & AVFMT_NOFILE)) {
-        ret = avio_open(&mOutputContext->pb, outFilename.c_str(),
+        ret = avio_open(&mOutputContext->pb, outFilenameValidated,
                         AVIO_FLAG_WRITE);
         if (ret < 0) {
-            LOG(ERROR) << "Could not open output file [" << outFilename.c_str()
+            LOG(ERROR) << "Could not open output file [" << outFilenameValidated
                        << "]";
             return false;
         }

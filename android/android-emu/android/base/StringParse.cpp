@@ -103,7 +103,9 @@ extern "C" int SscanfWithCLocaleWithArgs(const char* string,
     // dot with the expected decimal separator in |string|.
 
     std::string fixedString;
-    string = fixStringForFloats(string, format, &fixedString).c_str();
+    auto fixedStringRef =
+            c_str(fixStringForFloats(string, format, &fixedString));
+    string = fixedStringRef;
 
 #else  // !_WIN32
 
