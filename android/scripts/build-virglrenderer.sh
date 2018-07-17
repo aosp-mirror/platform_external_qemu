@@ -28,9 +28,6 @@ PROGRAM_PARAMETERS=""
 PROGRAM_DESCRIPTION=\
 "Build prebuilt virglrenderer for Linux, Windows and Darwin."
 
-GIT_URL=https://anongit.freedesktop.org/git/virglrenderer.git
-GIT_COMMIT=fd0ed16
-
 package_builder_register_options
 
 aosp_dir_register_option
@@ -54,8 +51,7 @@ PKG_SRC_DIR=$TEMP_DIR/build/virglrenderer
 
 prepare_source_tree() {
   dump "Preparing source tree"
-  git clone  "$GIT_URL" "$PKG_SRC_DIR"
-  (cd "$PKG_SRC_DIR" && git reset --hard "$GIT_COMMIT")
+  copy_directory "$AOSP_DIR/external/virglrenderer" "$PKG_SRC_DIR"
   NOCONFIGURE=1 run $PKG_SRC_DIR/autogen.sh
 }
 
