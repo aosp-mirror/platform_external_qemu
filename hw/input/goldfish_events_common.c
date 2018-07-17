@@ -81,6 +81,13 @@ static unsigned dequeue_event(GoldfishEvDevState *s)
     return n;
 }
 
+static int g_events_dropped = 0;
+
+int goldfish_event_drop_count() {
+    return g_events_dropped;
+}
+
+
 void goldfish_enqueue_event(GoldfishEvDevState *s,
                    unsigned int type, unsigned int code, int value)
 {
@@ -91,10 +98,12 @@ void goldfish_enqueue_event(GoldfishEvDevState *s,
     }
 
     if (enqueued + 3 > MAX_EVENTS) {
-        fprintf(stderr, "##KBD: Full queue, lose event\n");
+        g_events_dropped++;
+        fprintf(stderr, "##KBD: Full queue, dropping event, current drop count: %d\n", g_events_dropped);
         return;
     }
 
+    g_events_dropped = 0;
     if (s->state == STATE_LIVE) {
         qemu_irq_lower(s->irq);
         qemu_irq_raise(s->irq);
