@@ -27,10 +27,10 @@
 using namespace android::base;
 using namespace android::metrics;
 
-static constexpr StringView kVersion = "version";
-static constexpr StringView kFullVersion = "fullVersion";
-static constexpr StringView kQemuVersion = "qemuVersion";
-static constexpr StringView kSessionId = "session";
+static constexpr const char* kVersion = "version";
+static constexpr const char* kFullVersion = "fullVersion";
+static constexpr const char* kQemuVersion = "qemuVersion";
+static constexpr const char* kSessionId = "session";
 
 namespace {
 
@@ -60,7 +60,7 @@ TEST_F(MetricsReporterTest, isEnabled) {
 
 TEST_F(MetricsReporterTest, sessionId) {
     createReporter();
-    EXPECT_STREQ(kSessionId.c_str(), mReporter->sessionId().c_str());
+    EXPECT_STREQ(kSessionId, mReporter->sessionId().c_str());
 }
 
 TEST_F(MetricsReporterTest, get) {
@@ -93,11 +93,10 @@ TEST_F(MetricsReporterTest, sendToWriter) {
                   asEvent.product_details().product());
 
         if (expectVersions) {
-            EXPECT_STREQ(kVersion.c_str(),
-                         asEvent.product_details().version().c_str());
-            EXPECT_STREQ(kFullVersion.c_str(),
+            EXPECT_STREQ(kVersion, asEvent.product_details().version().c_str());
+            EXPECT_STREQ(kFullVersion,
                          asEvent.product_details().build().c_str());
-            EXPECT_STREQ(kQemuVersion.c_str(),
+            EXPECT_STREQ(kQemuVersion,
                          asEvent.emulator_details().core_version().c_str());
         } else {
             EXPECT_FALSE(asEvent.product_details().has_version());

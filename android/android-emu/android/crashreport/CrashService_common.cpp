@@ -66,6 +66,7 @@
 
 #define WAIT_INTERVAL_MS 100
 
+using android::base::c_str;
 using android::base::PathUtils;
 using android::base::StringFormat;
 using android::base::StringView;
@@ -315,11 +316,11 @@ std::unique_ptr<CrashService> CrashService::makeCrashService(
 }
 
 std::string CrashService::readFile(StringView path) {
-    std::ifstream is(path.c_str());
+    std::ifstream is(c_str(path));
 
     if (!is) {
         std::string errmsg;
-        errmsg = std::string("Error, Can't open file ") + path.c_str() +
+        errmsg = std::string("Error, Can't open file ") + path.str() +
                  " for reading. Errno=" + std::to_string(errno) + "\n";
         return errmsg;
     }
@@ -335,7 +336,8 @@ std::string CrashService::getSysInfo() {
     for (const std::string& file : files) {
         // By convention we only show files that end with .txt, other files
         // may have binary content that will not display in a readable way.
-        if (strcasecmp(PathUtils::extension(file).c_str(), ".txt") == 0) {
+        StringView extension = PathUtils::extension(file);
+        if (strncasecmp(extension.data(), ".txt", extension.size()) == 0) {
             // Prepend each piece with the name of the file as a separator
             StringView basename;
             if (PathUtils::split(file, nullptr, &basename)) {

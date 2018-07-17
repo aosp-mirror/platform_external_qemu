@@ -50,6 +50,7 @@ public:
     // |commandLine| is an input string, that may contain spaces, quotes or
     // backslashes. The function returns a new string that contains a version
     // of |commandLine| that can be decoded properly by CommandLineToArgv().
+    // |commandLine| must be null-terminated.
     static std::string quoteCommandLine(StringView commandLine);
 
     // Creates a UTF-8 encoded error message string from a Windows System Error

@@ -21,9 +21,11 @@ namespace base {
 
 // static
 std::string Win32Utils::quoteCommandLine(StringView commandLine) {
+    assert(commandLine.isNullTerminated());
+
     // If |commandLine| doesn't contain any problematic character, just return
     // it as-is.
-    size_t n = strcspn(commandLine.c_str(), " \t\v\n\"");
+    size_t n = strcspn(commandLine.data(), " \t\v\n\"");
     if (commandLine[n] == '\0') {
         return commandLine;
     }

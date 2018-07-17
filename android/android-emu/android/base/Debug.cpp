@@ -31,7 +31,7 @@ namespace base {
 
 #ifdef __linux__
 static std::string readFile(StringView path) {
-    std::ifstream is(path.c_str());
+    std::ifstream is(c_str(path));
 
     if (!is) {
         return {};

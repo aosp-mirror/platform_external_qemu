@@ -50,6 +50,8 @@
 #include <numeric>
 #include <unordered_map>
 
+using android::base::c_str;
+
 extern "C" {
 
 //decleration
@@ -321,7 +323,8 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
         ProgramData* pData = (ProgramData*)objData;
 
         ctx->dispatcher().glBindAttribLocation(
-            globalProgramName, index, pData->getTranslatedName(name).c_str());
+                globalProgramName, index,
+                c_str(pData->getTranslatedName(name)));
 
         pData->bindAttribLocation(name, index);
     }
@@ -1551,7 +1554,7 @@ static void s_getActiveAttribOrUniform(bool isUniform, GLEScontext* ctx,
     if (size) *size = hostSize;
     if (type) *type = hostType;
     // use the guest's bufsize, but don't run over.
-    if (name) memcpy(name, guestVarName.c_str(), strlenForGuest + 1);
+    if (name) memcpy(name, guestVarName.data(), strlenForGuest + 1);
 }
 
 GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name){
@@ -1633,7 +1636,7 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
          RET_AND_SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION,
                               -1);
          int ret = ctx->dispatcher().glGetAttribLocation(
-             globalProgramName, pData->getTranslatedName(name).c_str());
+                 globalProgramName, c_str(pData->getTranslatedName(name)));
          if (ret != -1) {
              pData->linkedAttribLocation(name, ret);
          }

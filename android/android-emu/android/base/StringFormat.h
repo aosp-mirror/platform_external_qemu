@@ -46,11 +46,12 @@ void StringAppendFormatWithArgs(std::string* string,
 // an argument of the formatting list to a POD value which can be passed
 // into the sprintf()-like C function
 
-// Anything which can be used to construct a string view goes here and unpacks
-// into a const char*
-constexpr const char* unpackFormatArg(StringView str) {
-    return str.str();
+// Anything which can be used to construct a string goes here and unpacks into
+// a const char*
+inline const char* unpackFormatArg(const std::string& str) {
+    return str.c_str();
 }
+
 // Forward all PODs as-is
 template <class T>
 constexpr T&& unpackFormatArg(T&& t,
