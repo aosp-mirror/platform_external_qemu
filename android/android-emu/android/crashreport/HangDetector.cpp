@@ -162,6 +162,7 @@ void HangDetector::workerThread() {
     base::AutoLock lock(mLock);
     for (;;) {
         auto waitUntilUs = nextDeadline();
+
         while (!mStopping &&
                (base::System::get()->getUnixTimeUs() < waitUntilUs ||
                 mPaused)) {
@@ -180,8 +181,31 @@ void HangDetector::workerThread() {
         for (auto&& lw : mLoopers) {
             lw->process(mHangCallback);
         }
+
+        // Check to see if any of the predicates evaluate to true.
+        for(const auto& predicate : mPredicates) {
+            if(predicate.first()) {
+                const auto message = base::StringFormat(
+                        "Failed hang detection predicate: '%s'",
+                        predicate.second);
+
+                derror("%s", message.c_str());
+                if (mHangCallback && !android::base::IsDebuggerAttached()) {
+                    mHangCallback(message);
+                }
+            }
+        }
     }
 }
+void HangDetector::addPredicateCheck(HangPredicate&& predicate, std::string msg) {
+    base::AutoLock lock(mLock);
+
+    // The following holds:
+    //    predicate() ->  []predicate() (i.e. once predicate becomes true, it is
+    //    will always return true.
+    mPredicates.emplace_back(std::make_pair(predicate, msg));
+}
+
 
 base::System::Duration HangDetector::hangTimeoutMs() {
     // x86 and x64 run pretty fast, but other types of images could be really
