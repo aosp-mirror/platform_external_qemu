@@ -192,6 +192,30 @@
     },
     {
       "key": {
+        "uuid": "d16bcb57_d8d93601",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-17T01:00:06Z",
+      "side": 1,
+      "message": "Updated to define a c_str helper in the global scope.  It returns a CStrWrapper object that is implicitly convertible to const char*.  For some cases where this implicit conversion doesn\u0027t work, there is also get() method.",
+      "parentUuid": "29e9a043_4ba74ab2",
+      "range": {
+        "startLine": 262,
+        "startChar": 6,
+        "endLine": 262,
+        "endChar": 20
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "86d5822b_33866538",
         "filename": "android/android-emu/android/base/StringView.h",
         "patchSetId": 1
@@ -212,6 +236,30 @@
       "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce2372ef_d94ebbe5",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-17T01:00:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86d5822b_33866538",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 274,
+        "endChar": 48
+      },
+      "revId": "26c09bf500610c4559bf7c5850659ca94b56d1d7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
