@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "828e158b_b8e76cb3",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-18T22:03:17Z",
+      "side": 1,
+      "message": "lock the |mLock| first, mutex _must_ be unlocked by the same thread as the one locked it",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 48,
+        "endChar": 53
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f16d6871_6a3fc547",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-18T22:03:17Z",
+      "side": 1,
+      "message": "the general pattern for conditional variable waiting is a loop. Spurious wakeup may cause the test to fail otherwise\nuse the code like this:\n\nauto waitUntil \u003d time() + maxTimeout;\nAutoLock lock(mLock);\nwhile (!mHangDetected \u0026\u0026 cv.timedWait(mLock, waitUntil)) {\n    ;\n}\nEXPECT_TRUE(mHangDetected);\n\n1. calculate the point in time to wait until once, as the loop could use it many times\n2. lock the mutex to protect |mHangDetected| accesses\n3. check the bool variable first, as the parallel thread could\u0027ve already set it\n4. wait in a loop to neutralize potential spurious wakeups\n5. bail out on timeout (timedWait() \u003d\u003d false)",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 22
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3eb631af_ee856ee8",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-18T22:03:17Z",
+      "side": 1,
+      "message": "fyi: Windows implementation of timedWait() calls System::get()-\u003egetUnixTimeUs()",
+      "range": {
+        "startLine": 54,
+        "startChar": 23,
+        "endLine": 54,
+        "endChar": 32
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82490c48_61f9aa9a",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-18T22:03:17Z",
+      "side": 1,
+      "message": "lock the |mLock| before waiting",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 0
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7cfa0a87_b4d0ae29",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-18T22:03:17Z",
+      "side": 1,
+      "message": "use a more generic name, e.g. |kMaxPredicateWaitTimeoutMin|\notherwise FIVE_MINUTES \u003d\u003d 10 * 60 * 1000 will happen",
+      "range": {
+        "startLine": 60,
+        "startChar": 27,
+        "endLine": 60,
+        "endChar": 39
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
