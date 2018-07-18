@@ -70,9 +70,8 @@ void PostWorker::clear() {
 }
 
 PostWorker::~PostWorker() {
-    s_egl.eglMakeCurrent(
-        mFb->getDisplay(),
-        EGL_NO_SURFACE,
-        EGL_NO_SURFACE,
-        EGL_NO_CONTEXT);
+    if (mFb->getDisplay() != EGL_NO_DISPLAY) {
+        s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
+                             EGL_NO_CONTEXT);
+    }
 }

@@ -45,7 +45,8 @@ protected:
     virtual void SetUp() override {
         setupStandaloneLibrarySearchPaths();
 
-        ASSERT_NE(nullptr, LazyLoadedEGLDispatch::get());
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+        ASSERT_NE(nullptr, egl);
         ASSERT_NE(nullptr, LazyLoadedGLESv2Dispatch::get());
 
         bool useHostGpu = shouldUseHostGpu();
@@ -60,6 +61,7 @@ protected:
                     mWidth, mHeight,
                     mUseSubWindow,
                     !useHostGpu /* egl2egl */));
+
             mFb = FrameBuffer::getFB();
             EXPECT_NE(nullptr, mFb);
 
@@ -69,7 +71,9 @@ protected:
                 0, 0,
                 mWidth, mHeight, mWidth, mHeight,
                 mWindow->getDevicePixelRatio(), 0, false);
+
             mWindow->messageLoop();
+
         } else {
             EXPECT_TRUE(
                 FrameBuffer::initialize(
@@ -80,10 +84,11 @@ protected:
             ASSERT_NE(nullptr, mFb);
         }
 
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         mRenderThreadInfo = new RenderThreadInfo();
 
         // Snapshots
-
         mTestSystem.getTempRoot()->makeSubDir("Snapshots");
         mSnapshotPath = mTestSystem.getTempRoot()->makeSubPath("Snapshots");
         mTimeStamp = std::to_string(android::base::System::get()->getUnixTime());
@@ -93,10 +98,11 @@ protected:
 
     virtual void TearDown() override {
         if (mFb) {
-            mFb->finalize();
-            delete mFb;
+            delete mFb;  // destructor calls finalize
         }
         delete mRenderThreadInfo;
+        EXPECT_EQ(EGL_SUCCESS, LazyLoadedEGLDispatch::get()->eglGetError())
+                << "FrameBufferTest TearDown found EGL error";
     }
 
     void saveSnapshot() {
