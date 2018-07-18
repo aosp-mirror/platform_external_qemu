@@ -134,6 +134,8 @@ protected:
 
     virtual void TearDown() override {
         mApp.reset();
+        EXPECT_EQ(EGL_SUCCESS, LazyLoadedEGLDispatch::get()->eglGetError())
+                << "DefaultFramebufferBlitTest TearDown found an EGL error";
     }
 
     std::unique_ptr<ClearColor> mApp;

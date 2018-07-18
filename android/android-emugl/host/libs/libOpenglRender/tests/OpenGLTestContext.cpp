@@ -142,6 +142,9 @@ void GLTest::TearDown() {
     destroyContext(m_display, m_context);
     destroySurface(m_display, m_surface);
     destroyDisplay(m_display);
+
+    EXPECT_EQ(EGL_SUCCESS, egl->eglGetError())
+            << "GLTest TearDown found EGL error";
 }
 
 } // namespace emugl
