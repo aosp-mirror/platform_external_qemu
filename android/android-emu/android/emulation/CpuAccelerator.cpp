@@ -32,6 +32,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/cpu_accelerator.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -81,9 +82,11 @@
 #  error "Unsupported host platform!"
 #endif
 
+
 namespace android {
 
 using base::StringAppendFormat;
+using base::StringView;
 using base::ScopedFd;
 using base::Version;
 
@@ -704,29 +707,9 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
 #elif defined(__APPLE__)
 
 using android::base::System;
-using android::base::StringView;
 static Version currentMacOSVersion(std::string* status) {
     std::string osProductVersion = System::get()->getOsName();
-    // Example os version :  Max OS X 10.12.4
-    size_t pos = osProductVersion.rfind(' ');
-    if (strncmp("Error: ", osProductVersion.c_str(), 7) == 0 ||
-        pos == std::string::npos) {
-        StringAppendFormat(status,
-                "Internal error: failed to parse OS version '%s'",
-                osProductVersion);
-        return Version(0,0,0);
-    }
-
-    auto ver = Version(StringView(osProductVersion.c_str() + pos + 1,
-                       osProductVersion.size() - pos - 1));
-    if (!ver.isValid()) {
-        StringAppendFormat(status,
-                           "Internal error: failed to parse OS version '%s'",
-                           osProductVersion);
-        return Version(0,0,0);
-    }
-
-    return ver;
+    return parseMacOSVersionString(osProductVersion, status);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -1238,6 +1221,28 @@ Version GetCurrentCpuAcceleratorVersion() {
     }
     return (g->accel != CPU_ACCELERATOR_NONE) ? Version(g->version)
                                               : Version::invalid();
+}
+
+Version parseMacOSVersionString(const std::string& str, std::string* status) {
+    size_t pos = str.rfind(' ');
+    if (strncmp("Error: ", str.c_str(), 7) == 0 ||
+        pos == std::string::npos) {
+        StringAppendFormat(status,
+                "Internal error: failed to parse OS version '%s'",
+                str);
+        return Version(0,0,0);
+    }
+
+    auto ver = Version(StringView(str.c_str() + pos + 1,
+                       str.size() - pos - 1));
+    if (!ver.isValid()) {
+        StringAppendFormat(status,
+                           "Internal error: failed to parse OS version '%s'",
+                           str);
+        return Version(0,0,0);
+    }
+
+    return ver;
 }
 
 }  // namespace android
