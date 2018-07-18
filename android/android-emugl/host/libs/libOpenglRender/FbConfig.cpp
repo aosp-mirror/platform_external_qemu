@@ -107,11 +107,23 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
         mEglConfig(hostConfig), mAttribValues() {
     mAttribValues = new GLint[kConfigAttributesLen];
     for (size_t i = 0; i < kConfigAttributesLen; ++i) {
+        EGLint err = s_egl.eglGetError();
+        if (err != EGL_SUCCESS) {
+            fprintf(stderr, "%s %s %d: EGL error 0x%x, i=%zu, attrib=0x%x\n",
+                    __FILE__, __func__, __LINE__, err, i, kConfigAttributes[i]);
+        }
+
         mAttribValues[i] = 0;
         s_egl.eglGetConfigAttrib(hostDisplay,
                                  hostConfig,
                                  kConfigAttributes[i],
                                  &mAttribValues[i]);
+
+        err = s_egl.eglGetError();
+        if (err != EGL_SUCCESS) {
+            fprintf(stderr, "%s %s %d: EGL error 0x%x, i=%zu, attrib=0x%x\n",
+                    __FILE__, __func__, __LINE__, err, i, kConfigAttributes[i]);
+        }
 
         // This implementation supports guest window surfaces by wrapping
         // them around host Pbuffers, so always report it to the guest.
@@ -141,15 +153,17 @@ FbConfigList::FbConfigList(EGLDisplay display) : mDisplay(display) {
         E("%s: Could not get number of host EGL configs\n", __FUNCTION__);
         return;
     }
+
     EGLConfig* hostConfigs = new EGLConfig[numHostConfigs];
     s_egl.eglGetConfigs(display, hostConfigs, numHostConfigs, &numHostConfigs);
-
     mConfigs = new FbConfig*[numHostConfigs];
+
     for (EGLint i = 0;  i < numHostConfigs; ++i) {
         // Filter out configs that are not compatible with our implementation.
         if (!isCompatibleHostConfig(hostConfigs[i], display)) {
             continue;
         }
+
         mConfigs[mCount] = new FbConfig(hostConfigs[i], display);
         mCount++;
     }

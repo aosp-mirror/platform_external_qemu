@@ -16,6 +16,10 @@
 #include "EglValidate.h"
 #include <GLcommon/GLutils.h>
 
+#ifndef EGL_PRESERVED_RESOURCES
+#define EGL_PRESERVED_RESOURCES 0x3030
+#endif
+
 // static
 bool EglValidate::confAttrib(EGLint attrib) {
     switch(attrib) {
@@ -24,17 +28,20 @@ bool EglValidate::confAttrib(EGLint attrib) {
     case EGL_GREEN_SIZE:
     case EGL_BLUE_SIZE:
     case EGL_ALPHA_SIZE:
+    case EGL_ALPHA_MASK_SIZE:
     case EGL_BIND_TO_TEXTURE_RGB:
     case EGL_BIND_TO_TEXTURE_RGBA:
     case EGL_CONFIG_CAVEAT:
     case EGL_CONFIG_ID:
     case EGL_DEPTH_SIZE:
     case EGL_LEVEL:
+    case EGL_LUMINANCE_SIZE:
     case EGL_MAX_PBUFFER_WIDTH:
     case EGL_MAX_PBUFFER_HEIGHT:
     case EGL_MAX_PBUFFER_PIXELS:
     case EGL_MAX_SWAP_INTERVAL:
     case EGL_MIN_SWAP_INTERVAL:
+    case EGL_PRESERVED_RESOURCES:
     case EGL_RENDERABLE_TYPE:
     case EGL_NATIVE_RENDERABLE:
     case EGL_NATIVE_VISUAL_ID:
