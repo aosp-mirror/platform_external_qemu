@@ -317,7 +317,7 @@ void qemu_init_exec_dir(const char *argv0)
         p--;
     }
     *p = 0;
-    if (access(buf, R_OK) == 0) {
+    if (access(buf, R_ACCESS_OK) == 0) {
         pstrcpy(exec_dir, sizeof(exec_dir), buf);
     }
 }

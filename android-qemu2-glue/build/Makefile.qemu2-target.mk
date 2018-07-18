@@ -82,6 +82,11 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_SYSTEM_INCLUDES) \
     $(call qemu2-if-target,arm arm64,$(LOCAL_PATH)/disas/libvixl) \
 
+ifeq ($(BUILD_TARGET_OS),windows)
+    LOCAL_C_INCLUDES += $(LIBGETOPT_INCLUDES)
+    LOCAL_STATIC_LIBRARIES := emulator-libgetopt
+endif
+
 LOCAL_SRC_FILES += \
     $(QEMU2_TARGET_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \

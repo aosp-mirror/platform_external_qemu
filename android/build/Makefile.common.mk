@@ -49,6 +49,11 @@ ifneq ($(BUILD_TARGET_OS),windows)
   include $(LOCAL_PATH)/android/third_party/libusb.mk
 endif
 
+# build getopt for Windows
+ifeq ($(BUILD_TARGET_OS),windows)
+  include $(LOCAL_PATH)/android/third_party/libgetopt/sources.mk
+endif
+
 ifeq (true,$(BUILD_BENCHMARKS))
 include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
 include $(LOCAL_PATH)/android/third_party/google-benchmark/sources.mk
