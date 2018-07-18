@@ -39,6 +39,10 @@ typedef unsigned int u32;
 typedef unsigned short int u16;
 typedef unsigned char u8;
 
+#ifdef _WIN32
+typedef long long off64_t;
+#endif
+
 #define DIV_ROUND_UP(x, y) (((x) + (y) - 1)/(y))
 #define ALIGN(x, y) ((y) * DIV_ROUND_UP((x), (y)))
 #define ALIGN_DOWN(x, y) ((y) * ((x) / (y)))

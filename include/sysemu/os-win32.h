@@ -26,9 +26,12 @@
 #ifndef QEMU_OS_WIN32_H
 #define QEMU_OS_WIN32_H
 
+#include <basetsd.h>
+#include <io.h>
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
+typedef SSIZE_T ssize_t;
 
 /* QEMU uses sigsetjmp()/siglongjmp() as the portable way to specify
  * "longjmp and don't touch the signal masks". Since we know that the

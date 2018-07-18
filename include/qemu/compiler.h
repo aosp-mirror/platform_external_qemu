@@ -46,7 +46,7 @@
 #define QEMU_ARTIFICIAL
 #endif
 
-#if defined(_WIN32)
+#if defined(__MINGW32__)
 # define QEMU_PACKED __attribute__((gcc_struct, packed))
 #else
 # define QEMU_PACKED __attribute__((packed))

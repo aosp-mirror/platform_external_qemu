@@ -826,7 +826,19 @@ static inline int64_t get_clock_realtime(void)
 {
     struct timeval tv;
 
+#ifndef _WIN32
     gettimeofday(&tv, NULL);
+#else
+    const unsigned long long WIN32_FT_OFFSET = 116444736000000000ULL;
+    union {
+      unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+      FILETIME ft;
+    }  _now;
+
+    GetSystemTimeAsFileTime (&_now.ft);
+    tv.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+    tv.tv_sec= (long)((_now.ns100 - WIN32_FT_OFFSET) / 10000000ULL);
+#endif
     return tv.tv_sec * 1000000000LL + (tv.tv_usec * 1000);
 }
 
