@@ -169,23 +169,6 @@ ifeq (,$(CONFIG_AEMU64_ONLY))
     include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
 endif   # !CONFIG_MIN_BUILD
 
-ifeq (,$(CONFIG_MIN_BUILD))
-ifeq (,$(CONFIG_AEMU64_ONLY))
-    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-common.mk
-
-    # We want to build all variants of the emulator binaries. This makes
-    # it easier to catch target-specific regressions during emulator development.
-    EMULATOR_TARGET_ARCH := arm
-    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
-
-    # Note: the same binary handles x86 and x86_64
-    EMULATOR_TARGET_ARCH := x86
-    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
-
-    EMULATOR_TARGET_ARCH := mips
-    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
-endif   # !CONFIG_AEMU64_ONLY
-endif   # !CONFIG_MIN_BUILD
 
 ##############################################################################
 ##############################################################################

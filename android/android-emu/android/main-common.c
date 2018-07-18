@@ -554,9 +554,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         int    kernelFileLen;
 
         if (kernelFile == NULL) {
-            kernelFile = is_qemu2 ?
-                    avdInfo_getRanchuKernelPath(avd) :
-                    avdInfo_getKernelPath(avd);
+            kernelFile = avdInfo_getRanchuKernelPath(avd);
             if (kernelFile == NULL) {
                 derror("This AVD's configuration is missing a kernel file! "
                        "Please ensure the file \"%s\" is in the same location "
@@ -665,12 +663,12 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     }
 
     // make sure we're using the proper engine (qemu1/qemu2) for the kernel
-    if (is_qemu2 && kernelVersion < KERNEL_VERSION_3_10_0) {
+    if (kernelVersion < KERNEL_VERSION_3_10_0) {
         derror("New emulator backend requires minimum kernel version 3.10+ (currently got lower)\n"
                "Please make sure you've got updated system images and do not force the specific "
                "kernel image together with the engine version");
         return false;
-    } else if (!is_qemu2 && kernelVersion >= KERNEL_VERSION_3_10_0) {
+    } else if (kernelVersion >= KERNEL_VERSION_3_10_0) {
         char* kernel_file = path_basename(hw->kernel_path);
         if (kernel_file && !strcmp(kernel_file, "kernel-ranchu")) {
             derror("This kernel requires the new emulation engine\n"
@@ -1231,15 +1229,6 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         hw->vm_heapSize = maxVmHeapSize;
     }
 
-    const bool is_qemu1 = !is_qemu2;
-    if (is_qemu1 && avdInfo_getSnapshotPresent(avd)) {
-        const bool load_previous_snapshot = !opts->no_snapshot_load;
-        const bool save_snapshot_on_exit = !opts->no_snapshot_save;
-        if (load_previous_snapshot || save_snapshot_on_exit) {
-            android_op_writable_system = true;
-        }
-    }
-
     if (!android_op_writable_system) {
         D("System image is read only");
     } else {
@@ -1443,7 +1432,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     android_cmdLineOptions = opts;
 
-    opts->ranchu = is_qemu2;
+    opts->ranchu = true;
 
     while ((*p_argc)-- > 1) {
         const char* opt = (++*p_argv)[0];
@@ -1518,11 +1507,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                 if (inAndroidBuild) {
                     derror("You must use the -snapstorage <file> option to specify a snapshot storage file!\n");
                 } else {
-                    if (is_qemu2) {
-                        android_snapshot_list_ok = true;
-                    } else {
-                        return false;
-                    }
+                    android_snapshot_list_ok = true;
                 }
                 if (!android_snapshot_list_ok) {
                     return false;
@@ -1722,20 +1707,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     /* If we have a valid snapshot storage path */
     if (opts->snapstorage) {
-        if (is_qemu2) {
-            dwarning("QEMU2 does not support legacy snapshots - option will be ignored.");
-        } else {
-            // QEMU2 does not support some of the flags below, and the emulator
-            // will fail to start if they are passed in, so for now, ignore them
-            str_reset(&hw->disk_snapStorage_path, opts->snapstorage);
-
-            if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
-                if (opts->snapshot == NULL) {
-                    str_reset(&opts->snapshot, "default-boot");
-                    D("autoconfig: -snapshot %s", opts->snapshot);
-                }
-            }
-        }
+        dwarning("QEMU2 does not support legacy snapshots - option will be ignored.");
     }
 
     if (!opts->logcat || opts->logcat[0] == 0) {
@@ -1811,7 +1783,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     // DNS server support. Validate the option if any, find the DNS
     // server IP addresses, then rewrite the option value with the
     // results.
-    if (is_qemu2 && opts->dns_server) {
+    if (opts->dns_server) {
         // When dns server is provided after '-dns-server', qemu2 handles it in
         // the glue code (see android-qemu2-glue/qemu-setup-dns-servers.cpp).
         // If there are no dns servers provided for qemu2, take the dns servers
@@ -1845,21 +1817,15 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     // Virtual CPU core count.
     if (opts->cores) {
-        if (is_qemu2) {
-            char* end = NULL;
-            long val = strtol(opts->cores, &end, 10);
-            if (*end != '\0' || val <= 0 || val > 64) {
-                derror("Invalid value for -cores <count> parameter: %s\n",
-                    "Valid values are decimal count between 1 and 64\n",
-                    opts->cores);
-                return false;
-            }
-            hw->hw_cpu_ncore = (int)val;
-        } else {
-            dwarning("Classic QEMU doesn't support -cores option, only one\n"
-                     "virtual CPU can be emulated with this engine.\n");
-            str_reset_null(&opts->cores);
+        char* end = NULL;
+        long val = strtol(opts->cores, &end, 10);
+        if (*end != '\0' || val <= 0 || val > 64) {
+            derror("Invalid value for -cores <count> parameter: %s\n",
+                   "Valid values are decimal count between 1 and 64\n",
+                   opts->cores);
+            return false;
         }
+        hw->hw_cpu_ncore = (int)val;
     }
 
     // Unix pipe paths

@@ -77,27 +77,10 @@ sdk {
         item("$project.rootDir/../external/qemu/android-info.txt") {
             into ''
         }
-
-        item("$buildDefaultEmulator.output/emulator64-arm") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
-        item("$buildDefaultEmulator.output/emulator64-mips") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
-        item("$buildDefaultEmulator.output/emulator64-x86") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
         item("$buildDefaultEmulator.output/emulator64-crash-service") {
             executable true
             builtBy buildDefaultEmulator
         }
-
         item("$buildDefaultEmulator.output/qemu-img") {
             executable true
             builtBy buildDefaultEmulator
@@ -178,44 +161,14 @@ sdk {
         item("$project.rootDir/../external/qemu/android-info.txt") {
             into ''
         }
-
-        item("$buildWindowsEmulator.output/emulator-arm.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/emulator-mips.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/emulator-x86.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
         item("$buildWindowsEmulator.output/emulator-crash-service.exe") {
             executable true
             builtBy buildWindowsEmulator
         }
-
         item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
             executable true
             builtBy buildWindowsEmulator
         }
-
-        item("$buildWindowsEmulator.output/emulator64-arm.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-
-        item("$buildWindowsEmulator.output/emulator64-mips.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-
-        item("$buildWindowsEmulator.output/emulator64-x86.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-
         item("$buildWindowsEmulator.output/qemu-img.exe") {
             executable true
             builtBy buildWindowsEmulator
