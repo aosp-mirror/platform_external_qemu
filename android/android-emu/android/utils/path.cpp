@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include <winbase.h>
+typedef SSIZE_T ssize_t;
 #else
 #include <unistd.h>
 #include <sys/stat.h>

@@ -26,6 +26,8 @@
 
 #include <algorithm>
 
+using std::max;
+
 static const GLenum kTexParam[] = {
     GL_TEXTURE_MIN_FILTER,
     GL_TEXTURE_MAG_FILTER,
@@ -465,13 +467,13 @@ void SaveableTexture::onSave(
                     unsigned int& height = imgData.get()[level].m_height;
                     unsigned int& depth = imgData.get()[level].m_depth;
                     width = level == 0 ? m_width :
-                        std::max<unsigned int>(
+                        max<unsigned int>(
                             imgData.get()[level - 1].m_width / 2, 1);
                     height = level == 0 ? m_height :
-                        std::max<unsigned int>(
+                        max<unsigned int>(
                             imgData.get()[level - 1].m_height / 2, 1);
                     depth = level == 0 ? m_depth :
-                        std::max<unsigned int>(
+                        max<unsigned int>(
                             imgData.get()[level - 1].m_depth / 2, 1);
                     android::base::SmallFixedVector<unsigned char, 16>& buffer
                         = imgData.get()[level].m_data;
@@ -490,7 +492,7 @@ void SaveableTexture::onSave(
                             GLint glDepth;
                             dispatcher.glGetTexLevelParameteriv(target, level,
                                     GL_TEXTURE_DEPTH, &glDepth);
-                            depth = static_cast<unsigned int>(std::max(glDepth,
+                            depth = static_cast<unsigned int>(max(glDepth,
                                     1));
                         }
                     } else {
@@ -837,5 +839,5 @@ void SaveableTexture::setTarget(GLenum target) {
 }
 
 void SaveableTexture::setMipmapLevelAtLeast(unsigned int level) {
-    m_maxMipmapLevel = std::max(level, m_maxMipmapLevel);
+    m_maxMipmapLevel = max(level, m_maxMipmapLevel);
 }

@@ -4,7 +4,11 @@
 
 #include <stddef.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/time.h>
+#endif
 
 using namespace android::base;
 
@@ -83,10 +87,25 @@ int iolooper_has_operations(IoLooper* iol) {
     return asWaiter(iol)->hasFds();
 }
 
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
+#define _WIN32_FT_OFFSET (116444736000000000ULL)
 int64_t iolooper_now(void) {
     struct timeval time_now;
+#ifdef _WIN32
+    // Taken from qemu_gettimeofday() from oslib-win32.c
+    union {
+      unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+      FILETIME ft;
+    }  _now;
+
+    GetSystemTimeAsFileTime (&_now.ft);
+    time_now.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+    time_now.tv_sec= (long)((_now.ns100 - _WIN32_FT_OFFSET) / 10000000ULL);
+    return (int64_t)time_now.tv_sec * time_now.tv_usec / 1000;
+#else
     return gettimeofday(&time_now, NULL) ? -1 : (int64_t)time_now.tv_sec * 1000LL +
                                                 time_now.tv_usec / 1000;
+#endif
 }
 
 int iolooper_wait_absolute(IoLooper* iol, int64_t deadline) {
