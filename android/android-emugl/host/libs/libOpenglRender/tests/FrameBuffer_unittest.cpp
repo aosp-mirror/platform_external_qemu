@@ -340,4 +340,28 @@ TEST_F(FrameBufferTest, SnapshotColorBufferSubUpdateRestore) {
     mFb->closeColorBuffer(handle);
 }
 
+// bug: 111558407
+// Tests that ColorBuffer's blit path is retained on save/restore.
+TEST_F(FrameBufferTest, SnapshotFastBlitRestore) {
+    HandleType handle = mFb->createColorBuffer(mWidth, mHeight, GL_RGBA,
+                                               FRAMEWORK_FORMAT_GL_COMPATIBLE);
+
+    EXPECT_TRUE(mFb->isFastBlitSupported());
+
+    mFb->lock();
+    EXPECT_EQ(mFb->isFastBlitSupported(),
+              mFb->getColorBuffer_locked(handle)->isFastBlitSupported());
+    mFb->unlock();
+
+    saveSnapshot();
+    loadSnapshot();
+
+    mFb->lock();
+    EXPECT_EQ(mFb->isFastBlitSupported(),
+              mFb->getColorBuffer_locked(handle)->isFastBlitSupported());
+    mFb->unlock();
+
+    mFb->closeColorBuffer(handle);
+}
+
 }  // namespace emugl

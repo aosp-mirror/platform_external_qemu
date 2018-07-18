@@ -648,6 +648,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     cb->m_height = height;
     cb->m_internalFormat = internalFormat;
     cb->m_frameworkFormat = frameworkFormat;
+    cb->m_fastBlitSupported = fastBlitSupported;
     return cb;
 }
 
