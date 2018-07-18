@@ -205,6 +205,11 @@ void FrameBuffer::waitUntilInitialized() {
 }
 
 void FrameBuffer::finalize() {
+    fprintf(stderr, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> FINALIZING FRAMEBUFFER\n\n");
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     AutoLock lock(sGlobals->lock);
     sInitialized.store(true, std::memory_order_relaxed);
     sGlobals->condVar.broadcastAndUnlock(&lock);
@@ -219,15 +224,29 @@ void FrameBuffer::finalize() {
         return;
     }
 
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     m_colorbuffers.clear();
     m_colorBufferDelayedCloseList.clear();
     if (m_useSubWindow) {
         removeSubWindow_locked();
     }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     m_windows.clear();
     m_contexts.clear();
     if (m_eglDisplay != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
+
+        if (EGL_SUCCESS != s_egl.eglGetError()) {
+            fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+        }
+
         if (m_eglContext != EGL_NO_CONTEXT) {
             s_egl.eglDestroyContext(m_eglDisplay, m_eglContext);
             m_eglContext = EGL_NO_CONTEXT;
@@ -241,16 +260,37 @@ void FrameBuffer::finalize() {
             m_pbufSurface = EGL_NO_SURFACE;
         }
         m_eglDisplay = EGL_NO_DISPLAY;
+
+        if (EGL_SUCCESS != s_egl.eglGetError()) {
+            fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+       }
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     m_readbackThread.enqueue({ReadbackCmd::Exit});
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
 }
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         bool egl2egl) {
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     //
@@ -261,6 +301,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     if (!fb) {
         ERR("Failed to create fb\n");
         return false;
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     if (s_egl.eglUseOsEglApi)
@@ -274,12 +318,20 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return false;
     }
 
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     GL_LOG("call eglInitialize");
     if (!s_egl.eglInitialize(fb->m_eglDisplay, &fb->m_caps.eglMajor,
                              &fb->m_caps.eglMinor)) {
         ERR("Failed to eglInitialize\n");
         GL_LOG("Failed to eglInitialize");
         return false;
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     DBG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
@@ -289,11 +341,19 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     GLESDispatchMaxVersion dispatchMaxVersion =
             calcMaxVersionFromDispatch(fb->m_eglDisplay);
 
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     FrameBuffer::setMaxGLESVersion(dispatchMaxVersion);
     if (s_egl.eglSetMaxGLESVersion) {
         // eglSetMaxGLESVersion must be called before any context binding
         // because it changes how we initialize the dispatcher table.
         s_egl.eglSetMaxGLESVersion(dispatchMaxVersion);
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     int glesMaj, glesMin;
@@ -328,6 +388,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         // Could not create GLES2 context - drop GL2 capability
         ERR("Failed to obtain GLES 2.x extensions string!\n");
         return false;
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     //
@@ -376,6 +440,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     fb->m_eglConfig = all_configs[exact_match_index];
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
 
     GL_LOG("attempting to create egl context");
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
@@ -446,6 +514,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         }
     }
 
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     //
     // Fail initialization if not all of the following extensions
     // exist:
@@ -465,6 +537,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     if (fb->m_configs->empty()) {
         ERR("Failed: Initialize set of configs\n");
         return false;
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     //
@@ -518,6 +594,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return false;
     }
 
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     //
     // Keep the singleton framebuffer pointer
     //
@@ -527,6 +607,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         AutoLock lock(sGlobals->lock);
         sInitialized.store(true, std::memory_order_release);
         sGlobals->condVar.broadcastAndUnlock(&lock);
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     GL_LOG("basic EGL initialization successful");
@@ -571,6 +655,9 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
 
 FrameBuffer::~FrameBuffer() {
     finalize();
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
 
     if (m_postThread.isStarted()) {
         m_postThread.enqueue({ PostCmd::Exit, });
@@ -585,6 +672,9 @@ FrameBuffer::~FrameBuffer() {
         s_theFrameBuffer = nullptr;
     }
     sInitialized.store(false, std::memory_order_relaxed);
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
 }
 
 WorkerProcessingResult
@@ -668,11 +758,19 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  float dpr,
                                  float zRot,
                                  bool deleteExisting) {
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
     GL_LOG("Begin setupSubWindow");
     if (!m_useSubWindow) {
         ERR("%s: Cannot create native sub-window in this configuration\n",
             __FUNCTION__);
         return false;
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
     }
 
     // Do a quick check before even taking the lock - maybe we don't need to
@@ -726,6 +824,11 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         removeSubWindow_locked();
     }
 
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
+
     bool success = false;
 
     // If the subwindow doesn't exist, create it with the appropriate dimensions
@@ -758,6 +861,11 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             }
         }
     }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
 
 
     // At this point, if the subwindow doesn't exist, it is because it either
@@ -805,6 +913,11 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         }
     }
 
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
+
     if (success && redrawSubwindow) {
         bool bindSuccess = bind_locked();
         assert(bindSuccess);
@@ -813,6 +926,11 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         unbind_locked();
     }
     mutex.unlock();
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FRAMEBUFFER LINE %d\n", __LINE__);
+    }
+
 
     // Nobody ever checks for the return code, so there will be no retries or
     // even aborted run; if we don't mark the framebuffer as initialized here

@@ -113,6 +113,13 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
                                  kConfigAttributes[i],
                                  &mAttribValues[i]);
 
+
+        EGLint err;
+        if (EGL_SUCCESS != (err = s_egl.eglGetError())) {
+            fprintf(stderr, "EGL ERROR IN FBCONFIG LINE %d: 0x%x, i=%zu, attrib=0x%x\n",
+                     __LINE__, err, i, kConfigAttributes[i]);
+        }
+
         // This implementation supports guest window surfaces by wrapping
         // them around host Pbuffers, so always report it to the guest.
         if (kConfigAttributes[i] == EGL_SURFACE_TYPE) {
@@ -126,6 +133,12 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
                 mAttribValues[i] &= ~EGL_OPENGL_ES3_BIT;
             }
         }
+        if (EGL_SUCCESS != s_egl.eglGetError()) {
+            fprintf(stderr, "EGL ERROR IN FBCONFIG LINE %d\n", __LINE__);
+        }
+    }
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FBCONFIG LINE %d\n", __LINE__);
     }
 }
 
@@ -136,22 +149,56 @@ FbConfigList::FbConfigList(EGLDisplay display) : mDisplay(display) {
         return;
     }
 
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FBCONFIGLIST LINE %d\n", __LINE__);
+    }
+
     EGLint numHostConfigs = 0;
     if (!s_egl.eglGetConfigs(display, NULL, 0, &numHostConfigs)) {
         E("%s: Could not get number of host EGL configs\n", __FUNCTION__);
         return;
     }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FBCONFIGLIST LINE %d\n", __LINE__);
+    }
+
     EGLConfig* hostConfigs = new EGLConfig[numHostConfigs];
     s_egl.eglGetConfigs(display, hostConfigs, numHostConfigs, &numHostConfigs);
 
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FBCONFIGLIST LINE %d\n", __LINE__);
+    }
+
     mConfigs = new FbConfig*[numHostConfigs];
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FBCONFIGLIST LINE %d\n", __LINE__);
+    }
+
     for (EGLint i = 0;  i < numHostConfigs; ++i) {
         // Filter out configs that are not compatible with our implementation.
         if (!isCompatibleHostConfig(hostConfigs[i], display)) {
             continue;
         }
+
+
+        if (EGL_SUCCESS != s_egl.eglGetError()) {
+            fprintf(stderr, "EGL ERROR IN FBCONFIGLIST LINE %d\n", __LINE__);
+        }
+
         mConfigs[mCount] = new FbConfig(hostConfigs[i], display);
         mCount++;
+
+
+        if (EGL_SUCCESS != s_egl.eglGetError()) {
+            fprintf(stderr, "EGL ERROR IN FBCONFIGLIST LINE %d\n", __LINE__);
+        }
+    }
+
+    if (EGL_SUCCESS != s_egl.eglGetError()) {
+        fprintf(stderr, "EGL ERROR IN FBCONFIGLIST LINE %d\n", __LINE__);
     }
 
     delete [] hostConfigs;

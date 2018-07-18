@@ -43,25 +43,39 @@ public:
 protected:
 
     virtual void SetUp() override {
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         setupStandaloneLibrarySearchPaths();
 
         ASSERT_NE(nullptr, LazyLoadedEGLDispatch::get());
         ASSERT_NE(nullptr, LazyLoadedGLESv2Dispatch::get());
 
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         bool useHostGpu = shouldUseHostGpu();
         mWindow = createOrGetTestWindow(mXOffset, mYOffset, mWidth, mHeight);
         mUseSubWindow = mWindow != nullptr;
 
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         if (mUseSubWindow) {
             ASSERT_NE(nullptr, mWindow->getFramebufferNativeWindow());
+
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
 
             EXPECT_TRUE(
                 FrameBuffer::initialize(
                     mWidth, mHeight,
                     mUseSubWindow,
                     !useHostGpu /* egl2egl */));
+
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
             mFb = FrameBuffer::getFB();
             EXPECT_NE(nullptr, mFb);
+
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
 
             mFb->setupSubWindow(
                 (FBNativeWindowType)(uintptr_t)
@@ -69,8 +83,14 @@ protected:
                 0, 0,
                 mWidth, mHeight, mWidth, mHeight,
                 mWindow->getDevicePixelRatio(), 0, false);
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
             mWindow->messageLoop();
+
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
         } else {
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
             EXPECT_TRUE(
                 FrameBuffer::initialize(
                     mWidth, mHeight,
@@ -78,6 +98,8 @@ protected:
                     !useHostGpu /* egl2egl */));
             mFb = FrameBuffer::getFB();
             ASSERT_NE(nullptr, mFb);
+
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
         }
 
         mRenderThreadInfo = new RenderThreadInfo();
@@ -92,11 +114,21 @@ protected:
     }
 
     virtual void TearDown() override {
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         if (mFb) {
-            mFb->finalize();
-            delete mFb;
+            //mFb->finalize();
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+            mFb->bindContext(0, 0, 0);
+            delete mFb; // destructor calls finalize
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         }
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         delete mRenderThreadInfo;
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
     }
 
     void saveSnapshot() {
