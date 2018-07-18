@@ -621,7 +621,6 @@ EOF
 
     dump "[$PKG_NAME] Copying license files."
     mkdir -p "$TEMP_PKG_DIR"/licenses/
-    cp android/qemu1/COPYING android/qemu1/COPYING.LIB "$TEMP_PKG_DIR"/licenses/
 
     dump "[$PKG_NAME] Creating tarball."
     PKG_FILE=$PKG_DIR/$PKG_PREFIX-$PKG_REVISION-$SYSTEM.tar.bz2

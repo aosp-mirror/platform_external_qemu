@@ -33,10 +33,6 @@ struct AvdSettings {
     }
 };
 
-const AvdSettings kAvdGingerbreadArm = {9, "arm", "ttyS", false};
-const AvdSettings kAvdGingerbreadX86 = {9, "x86", "ttyS", false};
-const AvdSettings kAvdIcsArm = {14, "arm", "ttyS", false};
-const AvdSettings kAvdIcsX86 = {14, "x86", "ttyS", false};
 const AvdSettings kAvdMarshmallowArm = {23, "arm", "ttyAMA", true};
 const AvdSettings kAvdMarshmallowX86 = {23, "x86", "ttyGF", true};
 const AvdSettings kAvdMarshmallowMips = {23, "mips", "ttyS", true};
@@ -59,92 +55,6 @@ TEST(SetupParameters, setupVirtualSerialPorts) {
         bool showKernel;
         bool shellConsole;
     } kData[] = {
-            // Gingerbread ARM
-            {
-                    "android.qemud=ttyS1 console=0",
-                    "-serial null -serial android-qemud -serial null",
-                    &kAvdGingerbreadArm, false, false,
-            },
-            {
-                    "console=ttyS0 android.qemud=ttyS1",
-                    "-serial android-kmsg -serial android-qemud -serial null",
-                    &kAvdGingerbreadArm, true, false,
-            },
-            {
-                    "android.qemud=ttyS1 androidboot.console=ttyS2 console=0",
-                    "-serial null -serial android-qemud -serial foo-serial",
-                    &kAvdGingerbreadArm, false, true,
-            },
-            {
-                    "console=ttyS0 android.qemud=ttyS1 "
-                    "androidboot.console=ttyS2",
-                    "-serial android-kmsg -serial android-qemud -serial "
-                    "foo-serial",
-                    &kAvdGingerbreadArm, true, true,
-            },
-
-            // Gingerbread X86
-            {
-                    "android.qemud=ttyS1 console=0",
-                    "-serial null -serial android-qemud", &kAvdGingerbreadX86,
-                    false, false,
-            },
-            {
-                    "console=ttyS0 android.qemud=ttyS1",
-                    "-serial foo-serial -serial android-qemud",
-                    &kAvdGingerbreadX86, true, false,
-            },
-            {
-                    "android.qemud=ttyS1 androidboot.console=ttyS0 console=0",
-                    "-serial foo-serial -serial android-qemud",
-                    &kAvdGingerbreadX86, false, true,
-            },
-            {
-                    "console=ttyS0 android.qemud=ttyS1 "
-                    "androidboot.console=ttyS0",
-                    "-serial foo-serial -serial android-qemud",
-                    &kAvdGingerbreadX86, true, true,
-            },
-
-            // Ice Cream Sandwich ARM
-            {
-                    "android.qemud=1 console=0", "-serial null -serial null",
-                    &kAvdIcsArm, false, false,
-            },
-            {
-                    "console=ttyS0 android.qemud=1",
-                    "-serial android-kmsg -serial null", &kAvdIcsArm, true,
-                    false,
-            },
-            {
-                    "android.qemud=1 androidboot.console=ttyS1 console=0",
-                    "-serial null -serial foo-serial", &kAvdIcsArm, false, true,
-            },
-            {
-                    "console=ttyS0 android.qemud=1 androidboot.console=ttyS1",
-                    "-serial android-kmsg -serial foo-serial", &kAvdIcsArm,
-                    true, true,
-            },
-
-            // Ice Cream Sandwich X86
-            {
-                    "android.qemud=1 console=0", "-serial null -serial null",
-                    &kAvdIcsX86, false, false,
-            },
-            {
-                    "console=ttyS0 android.qemud=1",
-                    "-serial android-kmsg -serial null", &kAvdIcsX86, true,
-                    false,
-            },
-            {
-                    "android.qemud=1 androidboot.console=ttyS1 console=0",
-                    "-serial null -serial foo-serial", &kAvdIcsX86, false, true,
-            },
-            {
-                    "console=ttyS0 android.qemud=1 androidboot.console=ttyS1",
-                    "-serial android-kmsg -serial foo-serial", &kAvdIcsX86,
-                    true, true,
-            },
 
             // Marshmallow ARM
             {
