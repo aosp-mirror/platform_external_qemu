@@ -261,6 +261,30 @@
     },
     {
       "key": {
+        "uuid": "b5b1d2fa_6a4bf680",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-18T18:06:38Z",
+      "side": 1,
+      "message": "Well, sleeps never guarantee anything - it\u0027s much safer to be able to wait until some function has been called instead of relying on sleeps. E.g. set some flag in the predicate function and wait for it to become set here. Otherwise some heavily loaded test servers will have occasional failures, with no real repro anywhere else",
+      "parentUuid": "10a82911_9e2822af",
+      "range": {
+        "startLine": 48,
+        "startChar": 47,
+        "endLine": 48,
+        "endChar": 66
+      },
+      "revId": "221524eb1bf0ff7f18c7e34df40a0a668a5b4d30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "57ff95b1_c7e26a4e",
         "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
         "patchSetId": 2
