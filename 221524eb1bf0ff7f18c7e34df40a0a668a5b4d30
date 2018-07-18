@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "b670ed72_46b0d8fa",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1280,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-07-18T16:37:30Z",
+      "side": 1,
+      "message": "Yes, during the unit tests. The hang detector has a dependency on android_avdInfo, which is null. Let me move this to HangDetector, add some comments and explicitly set it to nullptr in the test.",
+      "parentUuid": "a935db60_852f8a77",
+      "range": {
+        "startLine": 1280,
+        "startChar": 8,
+        "endLine": 1280,
+        "endChar": 13
+      },
+      "revId": "221524eb1bf0ff7f18c7e34df40a0a668a5b4d30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "15bae558_ef49a3bd",
         "filename": "android/android-emu/android/crashreport/HangDetector.cpp",
         "patchSetId": 2
@@ -116,6 +140,30 @@
       "revId": "221524eb1bf0ff7f18c7e34df40a0a668a5b4d30",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3cac38c6_eb288e7b",
+        "filename": "android/android-emu/android/crashreport/HangDetector.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-07-18T16:37:30Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "15bae558_ef49a3bd",
+      "range": {
+        "startLine": 201,
+        "startChar": 0,
+        "endLine": 204,
+        "endChar": 34
+      },
+      "revId": "221524eb1bf0ff7f18c7e34df40a0a668a5b4d30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -142,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "08e3f15c_2a432fd2",
+        "filename": "android/android-emu/android/crashreport/HangDetector.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-07-18T16:37:30Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3e32cc55_aa2e2e10",
+      "range": {
+        "startLine": 205,
+        "startChar": 66,
+        "endLine": 205,
+        "endChar": 69
+      },
+      "revId": "221524eb1bf0ff7f18c7e34df40a0a668a5b4d30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbef770f_f1cd679c",
         "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
         "patchSetId": 2
@@ -153,6 +225,30 @@
       "writtenOn": "2018-07-17T20:41:35Z",
       "side": 1,
       "message": "why? I don\u0027t see anything relying on any time that passed here",
+      "range": {
+        "startLine": 48,
+        "startChar": 47,
+        "endLine": 48,
+        "endChar": 66
+      },
+      "revId": "221524eb1bf0ff7f18c7e34df40a0a668a5b4d30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10a82911_9e2822af",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-07-18T16:37:30Z",
+      "side": 1,
+      "message": "The hang detector starts a worker thread to check for actual hangs. We need to give the worker thread a chance to make progress.",
+      "parentUuid": "fbef770f_f1cd679c",
       "range": {
         "startLine": 48,
         "startChar": 47,
