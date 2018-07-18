@@ -20,4 +20,25 @@ namespace emugl {
 
 TEST_F(GLTest, InitDestroy) {}
 
+TEST_F(GLTest, SetUpMulticontext) {
+    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    EXPECT_TRUE(egl != nullptr);
+    EXPECT_TRUE(gl != nullptr);
+
+    egl->eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                        EGL_NO_CONTEXT);
+    EGLSurface duoSurface = pbufferSurface(
+            m_display, m_config, kTestSurfaceSize[0], kTestSurfaceSize[1]);
+    EGLContext duoContext = createContext(m_display, m_config, 3, 0);
+
+    egl->eglMakeCurrent(m_display, duoSurface, duoSurface, duoContext);
+    EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
+    destroyContext(m_display, duoContext);
+    destroySurface(m_display, duoSurface);
+
+    egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
+    EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+}
+
 }  // namespace emugl
