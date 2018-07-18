@@ -22,6 +22,30 @@
       "revId": "7a684fb9537e001eb274f4217d7ff0fd1f6629a3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a77b6a39_18f7cf0c",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 721,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-18T18:03:53Z",
+      "side": 1,
+      "message": "Sorry about this, thanks for the fix!",
+      "parentUuid": "fbc2148f_44bab486",
+      "range": {
+        "startLine": 721,
+        "startChar": 52,
+        "endLine": 721,
+        "endChar": 56
+      },
+      "revId": "7a684fb9537e001eb274f4217d7ff0fd1f6629a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
