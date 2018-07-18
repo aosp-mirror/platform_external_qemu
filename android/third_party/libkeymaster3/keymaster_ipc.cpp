@@ -23,7 +23,11 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/time.h>
+#endif
 
 #ifdef DEBUG
 #   define  DD(...)    do { printf("%s:%d: ", __FUNCTION__, __LINE__); printf(__VA_ARGS__); printf("\n");fflush(stdout); } while (0)
@@ -206,6 +210,9 @@ int keymaster_ipc_call(const std::vector<uint8_t> &cinput, std::vector<uint8_t> 
     return 0;
 }
 
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
+#define _WIN32_FT_OFFSET (116444736000000000ULL)
+
 class SoftwareOnlyHidlKeymasterEnforcement : public ::keymaster::KeymasterEnforcement {
   public:
     SoftwareOnlyHidlKeymasterEnforcement() : KeymasterEnforcement(64, 64) {}
@@ -218,7 +225,19 @@ class SoftwareOnlyHidlKeymasterEnforcement : public ::keymaster::KeymasterEnforc
         return static_cast<uint32_t>(tp.tv_sec);
 #else
         timeval tv;
+#ifdef _WIN32
+
+        // Taken from qemu_gettimeofday() from oslib-win32.c
+        union {
+          unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+          FILETIME ft;
+        }  _now;
+
+        GetSystemTimeAsFileTime (&_now.ft);
+        tv.tv_sec= (long)((_now.ns100 - _WIN32_FT_OFFSET) / 10000000ULL);
+#else
         gettimeofday(&tv, nullptr);
+#endif
         return static_cast<uint32_t>(tv.tv_sec);
 #endif
     }

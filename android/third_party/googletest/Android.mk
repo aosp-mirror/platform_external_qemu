@@ -26,6 +26,10 @@ $(call start-emulator-library, emulator-libgtest)
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_INCLUDES)
 LOCAL_CPP_EXTENSION := .cc
 LOCAL_CFLAGS += -O0 -Wno-unused-variable
+ifeq ($(BUILD_TARGET_OS),windows)
+    LOCAL_CXXFLAGS += -fcxx-exceptions
+    LOCAL_CXXFLAGS += -Wno-unused-local-typedef
+endif
 LOCAL_SRC_FILES := $(EMULATOR_GTEST_SOURCES)
 $(call end-emulator-library)
 

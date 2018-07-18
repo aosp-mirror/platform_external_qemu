@@ -25,6 +25,10 @@
 #include <assert.h>
 #include <string.h>
 
+#ifdef _WIN32
+#define strncasecmp _strnicmp
+#endif
+
 namespace android {
 namespace base {
 

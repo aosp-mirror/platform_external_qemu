@@ -27,7 +27,11 @@ extern "C" {
 #define _FILE_OFFSET_BITS 64
 #define _LARGEFILE64_SOURCE 1
 #include <sys/types.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+typedef long long off64_t;
+#endif
 
 #include <sys/types.h>
 #include <errno.h>
