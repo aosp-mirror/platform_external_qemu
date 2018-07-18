@@ -36,6 +36,13 @@
 #include "qemu/main-loop.h"
 #include "qemu/throttle.h"
 
+#ifdef _WIN32
+#ifndef PATH_MAX
+#include <ehstorioctl.h>
+#define PATH_MAX MAX_PATH
+#endif  // !PATH_MAX
+#endif  // _WIN32
+
 #define BLOCK_FLAG_ENCRYPT          1
 #define BLOCK_FLAG_LAZY_REFCOUNTS   8
 

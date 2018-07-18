@@ -15,7 +15,11 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 uint64_t android_verbose = 0;
 

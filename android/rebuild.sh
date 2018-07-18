@@ -14,6 +14,7 @@ PROGDIR=$(dirname "$0")
 VERBOSE=1
 
 MINGW=
+CLANG_WINDOWS=
 NO_TESTS=
 OUT_DIR=objs
 HELP=
@@ -24,7 +25,16 @@ for OPT; do
             ANDROID_EMULATOR_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
             ;;
         --mingw)
+            if [ "$CLANG_WINDOWS" ]; then
+              panic "Choose either mingw or clang-windows, not both."
+            fi
             MINGW=true
+            ;;
+        --clang-windows)
+            CLANG_WINDOWS=true
+            if [ "$MINGW" ]; then
+              panic "Choose either mingw or clang-windows, not both."
+            fi
             ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
@@ -106,7 +116,7 @@ check_file_type_substring () {
 # Define EXPECTED_32BIT_FILE_TYPE and EXPECTED_64BIT_FILE_TYPE depending
 # on the current target platform. Then EXPECTED_EMULATOR_BITNESS and
 # EXPECTED_EMULATOR_FILE_TYPE accordingly.
-if [ "$MINGW" ]; then
+if [ "$MINGW" ] || [ "$CLANG_WINDOWS" ]; then
     EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
     EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
     EXPECTED_EMULATOR_BITNESS=32
@@ -153,7 +163,7 @@ RUN_GEN_ENTRIES_TESTS=true
 
 EXE_SUFFIX=
 
-if [ "$MINGW" ]; then
+if [ "$MINGW" ] || [ "$CLANG_WINDOWS" ]; then
     EXE_SUFFIX=.exe
 fi
 
@@ -170,7 +180,7 @@ OSX_DEPLOYMENT_TARGET=10.8
 # List all executables to check later.
 EXECUTABLES="emulator emulator64-arm emulator64-x86 emulator64-mips"
 if [ "$HOST_OS" = "Linux" ]; then
-  if [ -z "$MINGW" ]; then
+  if [ -z "$MINGW" ] && [ -z "$CLANG_WINDOWS" ]; then
     EXECUTABLES="$EXECUTABLES emulator-arm emulator-x86 emulator-mips"
   fi
 fi
@@ -253,7 +263,7 @@ if [ -z "$NO_TESTS" ]; then
 
     # Check that the windows executables all have icons.
     # First need to locate the windres tool.
-    if [ "$MINGW" ]; then
+    if [ "$MINGW" ] || [ "$CLANG_WINDOWS" ]; then
         echo "Checking windows executables icons."
         if [ ! -f "$CONFIG_MAKE" ]; then
             echo "FAIL: Could not find \$CONFIG_MAKE !?"
@@ -286,7 +296,7 @@ if [ -z "$NO_TESTS" ]; then
 
     if [ "$OPTDEBUG" = true ] ; then
         # TODO(jansene): Enable when we have clang support under windows.
-        if [ -z "$MINGW" ]; then
+        if [ -z "$MINGW" ] && [ -z "$CLANG_WINDOWS" ]; then
             echo "Creating coverage report under $OUT_DIR/coverage/emu-coverage.html. (slow)"
             run android/scripts/coverage.sh --out-dir=$OUT_DIR  --verbosity=$VERBOSE || panic "Unable to create coverage report"
         fi

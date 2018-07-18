@@ -70,24 +70,28 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <vector>
 #include <unordered_set>
 
-#ifndef _WIN32
 #include <fcntl.h>
 #include <dirent.h>
+
+#ifndef _WIN32
 #include <pwd.h>
 #include <signal.h>
 #include <sys/statvfs.h>
 #include <sys/times.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
+#else
+#include <io.h>
+#include <time.h>
+#include <winsock2.h>
 #endif
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 
 #if defined (__linux__)
 #include <fstream>
@@ -104,6 +108,13 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #define environ (*_NSGetEnviron())
 #else
 extern "C" char** environ;
+#endif
+
+#ifdef _WIN32
+#define F_ACCESS_OK 0   /* Check for file existence */
+#define X_ACCESS_OK 1   /* Check for execute permission */
+#define W_ACCESS_OK 2   /* Check for write permission */
+#define R_ACCESS_OK 4   /* Check for read permission */
 #endif
 
 namespace android {
@@ -1101,8 +1112,22 @@ public:
     }
 
     Duration getUnixTimeUs() const override {
+        /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
+        constexpr unsigned long long win32_ft_offset = 116444736000000000ULL;
         timeval tv;
+#ifdef _WIN32
+        // Taken from qemu_gettimeofday() from oslib-win32.c
+        union {
+          unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+          FILETIME ft;
+        }  _now;
+
+        GetSystemTimeAsFileTime (&_now.ft);
+        tv.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+        tv.tv_sec= (long)((_now.ns100 - win32_ft_offset) / 10000000ULL);
+#else
         gettimeofday(&tv, nullptr);
+#endif
         return tv.tv_sec * 1000000LL + tv.tv_usec;
     }
 
@@ -1133,8 +1158,23 @@ public:
         std::string temp_file_path =
                 PathUtils::join(tmp_dir, temp_filename_pattern);
 
+#ifdef _WIN32
+        // mktemp_s() does not open the file, so we'll have to do that
+        // separately.
+        auto err = _mktemp_s((char*)temp_file_path.data(),
+                             temp_file_path.size() + 1); // +1 for null terminator
+        if (err != 0) {
+            return {};
+        }
+
+        auto tmpfd = android::base::ScopedFd(
+                _sopen((char*)temp_file_path.data(),
+                       _O_RDWR | _O_CREAT | _O_EXCL | _O_BINARY,
+                       _SH_DENYRW, _S_IREAD | _S_IWRITE));
+#else
         auto tmpfd =
                 android::base::ScopedFd(mkstemp((char*)temp_file_path.data()));
+#endif
         if (!tmpfd.valid()) {
             return {};
         }
@@ -1621,7 +1661,7 @@ int pathStat(StringView path, PathStat* st) {
 
 int fdStat(int fd, PathStat* st) {
 #ifdef _WIN32
-    return fstat64(fd, st);
+    return _fstat64(fd, st);
 #else   // !_WIN32
     return HANDLE_EINTR(fstat(fd, st));
 #endif  // !_WIN32
@@ -1631,10 +1671,10 @@ int pathAccess(StringView path, int mode) {
 #ifdef _WIN32
     // Convert |mode| to win32 permission bits.
     int win32mode = 0x0;
-    if ((mode & R_OK) || (mode & X_OK)) {
+    if ((mode & R_ACCESS_OK) || (mode & X_ACCESS_OK)) {
         win32mode |= 0x4;
     }
-    if (mode & W_OK) {
+    if (mode & W_ACCESS_OK) {
         win32mode |= 0x2;
     }
     return _waccess(win32Path(path).c_str(), win32mode);
@@ -1757,7 +1797,7 @@ bool System::pathExistsInternal(StringView path) {
     if (path.empty()) {
         return false;
     }
-    int ret = pathAccess(path, F_OK);
+    int ret = pathAccess(path, F_ACCESS_OK);
     return (ret == 0) || (errno != ENOENT);
 }
 
@@ -1792,7 +1832,7 @@ bool System::pathCanReadInternal(StringView path) {
     if (path.empty()) {
         return false;
     }
-    return pathAccess(path, R_OK) == 0;
+    return pathAccess(path, R_ACCESS_OK) == 0;
 }
 
 // static
@@ -1800,7 +1840,7 @@ bool System::pathCanWriteInternal(StringView path) {
     if (path.empty()) {
         return false;
     }
-    return pathAccess(path, W_OK) == 0;
+    return pathAccess(path, W_ACCESS_OK) == 0;
 }
 
 // static
@@ -1808,7 +1848,7 @@ bool System::pathCanExecInternal(StringView path) {
     if (path.empty()) {
         return false;
     }
-    return pathAccess(path, X_OK) == 0;
+    return pathAccess(path, X_ACCESS_OK) == 0;
 }
 
 bool System::deleteFileInternal(StringView path) {

@@ -34,10 +34,15 @@
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
 #include <GLcommon/ScopedGLState.h>
+#ifndef _WIN32
 #include <strings.h>
+#endif
 #include <string.h>
 
 #include <numeric>
+
+using std::min;
+using std::max;
 
 //decleration
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
@@ -281,7 +286,7 @@ void GLEScontext::addVertexArrayObject(GLuint array) {
                     new GLESpointer()));
     }
     assert(m_vaoStateMap.count(array) == 0);  // Overwriting existing entry, leaking memory
-    m_vaoStateMap[array] = VAOState(0, map, std::max(s_glSupport.maxVertexAttribs, s_glSupport.maxVertexAttribBindings));
+    m_vaoStateMap[array] = VAOState(0, map, max(s_glSupport.maxVertexAttribs, s_glSupport.maxVertexAttribBindings));
 }
 
 void GLEScontext::removeVertexArrayObject(GLuint array) {
@@ -320,7 +325,7 @@ GLuint GLEScontext::getVertexArrayObject() const {
 }
 
 bool GLEScontext::vertexAttributesBufferBacked() {
-    int numVtxAttrib = std::min(s_glSupport.maxVertexAttribs,
+    int numVtxAttrib = min(s_glSupport.maxVertexAttribs,
             static_cast<int>(m_currVaoState.bufferBindings().size()));
     for (int i = 0; i < numVtxAttrib; i++) {
         if (m_currVaoState[i]->isEnable() &&
@@ -404,7 +409,7 @@ void GLEScontext::setGLerror(GLenum err) {
 
 void GLEScontext::setActiveTexture(GLenum tex) {
    m_activeTexture = tex - GL_TEXTURE0;
-   m_maxUsedTexUnit = std::max(m_activeTexture, m_maxUsedTexUnit);
+   m_maxUsedTexUnit = max(m_activeTexture, m_maxUsedTexUnit);
 }
 
 GLEScontext::GLEScontext() {}

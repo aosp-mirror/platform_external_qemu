@@ -26,9 +26,20 @@
 #ifndef QEMU_OS_WIN32_H
 #define QEMU_OS_WIN32_H
 
+#include <basetsd.h>
+#include <io.h>
+#include <process.h>
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
+// include getopt.h from emulator-libgetopt
+#include <getopt.h>
+typedef SSIZE_T ssize_t;
+typedef long long off64_t;
+
+#define getpid() _getpid()
+#define gettimeofday(tv,tz) qemu_gettimeofday(tv)
+#define strcasecmp _stricmp
 
 /* QEMU uses sigsetjmp()/siglongjmp() as the portable way to specify
  * "longjmp and don't touch the signal masks". Since we know that the
