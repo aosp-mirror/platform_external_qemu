@@ -23,7 +23,11 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/time.h>
+#endif
 
 #ifdef DEBUG
 #   define  DD(...)    do { printf("%s:%d: ", __FUNCTION__, __LINE__); printf(__VA_ARGS__); printf("\n");fflush(stdout); } while (0)
