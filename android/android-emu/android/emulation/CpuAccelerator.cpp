@@ -718,7 +718,7 @@ static Version currentMacOSVersion(std::string* status) {
     }
 
     auto ver = Version(StringView(osProductVersion.c_str() + pos + 1,
-                       osProductVersion.size() - pos));
+                       osProductVersion.size() - pos - 1));
     if (!ver.isValid()) {
         StringAppendFormat(status,
                            "Internal error: failed to parse OS version '%s'",
