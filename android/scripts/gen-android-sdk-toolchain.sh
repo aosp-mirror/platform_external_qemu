@@ -455,6 +455,83 @@ prepare_build_for_windows () {
     var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
  }
 
+prepare_build_for_windows_clang() {
+    CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
+    CLANG_DIR=$(realpath $CLANG_BINDIR/..)
+    GNU_CONFIG_HOST=x86_64-linux
+    CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | head -n 1 | awk '{print $4}')
+
+#   local CLANG_LINK_FLAGS="-Wno-missing-braces"
+#   local MSVC_DIR=$AOSP_DIR/prebuilts/android-emulator-build/msvc
+
+#   var_append CLANG_LINK_FLAGS "-I$MSVC_DIR/msvc/include"
+#   var_append CLANG_LINK_FLAGS "-I$MSVC_DIR/extras/include"
+#   var_append CLANG_LINK_FLAGS "-I$MSVC_DIR/win10sdk/include/10.0.16299.0/ucrt"
+#   var_append CLANG_LINK_FLAGS "-I$MSVC_DIR/win10sdk/include/10.0.16299.0/um"
+#   var_append CLANG_LINK_FLAGS "-I$MSVC_DIR/win10sdk/include/10.0.16299.0/shared"
+#   var_append CLANG_LINK_FLAGS "-I$MSVC_DIR/win10sdk/include/10.0.16299.0/winrt"
+#   var_append CLANG_LINK_FLAGS "-I$MSVC_DIR/win10sdk/include/10.0.16299.0/hypervisor"
+
+#   var_append CLANG_LINK_FLAGS "-L$MSVC_DIR/msvc/lib/x64"
+#   var_append CLANG_LINK_FLAGS "-L$MSVC_DIR/win10sdk/lib/10.0.16299.0/ucrt/x64"
+#   var_append CLANG_LINK_FLAGS "-L$MSVC_DIR/win10sdk/lib/10.0.16299.0/um/x64"
+#   var_append CLANG_LINK_FLAGS "-fuse-ld=lld"
+#   var_append CLANG_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/lib/linux/"
+#   var_append CLANG_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/"
+#   var_append CLANG_LINK_FLAGS "-Wno-msvc-not-found"
+#   var_append CLANG_LINK_FLAGS "-Wno-expansion-to-defined"
+#   var_append CLANG_LINK_FLAGS "-Wno-ignored-attributes"
+#   var_append CLANG_LINK_FLAGS "-Wno-unused-local-typedef"
+#   var_append CLANG_LINK_FLAGS "-Wno-int-to-void-pointer-cast"
+#   var_append CLANG_LINK_FLAGS "-Wno-ignored-pragma-intrinsic"
+#   var_append CLANG_LINK_FLAGS "-Wno-pragma-pack"
+#   var_append CLANG_LINK_FLAGS "-Wno-microsoft-anon-tag"
+#   var_append CLANG_LINK_FLAGS "-Wno-incompatible-pointer-types"
+#   var_append CLANG_LINK_FLAGS "-Wno-invalid-token-paste"
+#   var_append CLANG_LINK_FLAGS "-Wno-microsoft-include"
+#   var_append CLANG_LINK_FLAGS "-Wno-microsoft-enum-forward-reference"
+#   var_append CLANG_LINK_FLAGS "-DLIEF_DISABLE_FROZEN=on"
+#   var_append CLANG_LINK_FLAGS "-D_CRT_SECURE_NO_WARNINGS"
+
+#   var_append CLANG_LINK_FLAGS "-Wl,-verbose"
+#   var_append CLANG_LINK_FLAGS "-v"
+#   if [ $(get_verbosity) -gt 3 ]; then
+#     # This will get pretty crazy, but useful if you want to debug linker issues.
+#     var_append CLANG_LINK_FLAGS "-Wl,-verbose"
+#     var_append CLANG_LINK_FLAGS "-v"
+#   else
+#     # You're likely to always hit this due to our linker workarounds..
+#     var_append CLANG_LINK_FLAGS "-Wno-unused-command-line-argument"
+#   fi
+
+#   case $CURRENT_HOST in
+#     windows-x86)
+#         EXTRA_CFLAGS="-target i386-pc-win32"
+#         EXTRA_CXXFLAGS="-target i386-pc-win32"
+#         ;;
+#     windows-x86_64)
+#         EXTRA_CFLAGS="-target x86_64-pc-win32"
+#         EXTRA_CXXFLAGS="-target x86_64-pc-win32"
+#         ;;
+#   esac
+
+#   var_append EXTRA_MSVC_FLAGS "-fcxx-exceptions"
+#   var_append EXTRA_CFLAGS ${CLANG_LINK_FLAGS}
+
+#   var_append EXTRA_CXXFLAGS ${CLANG_LINK_FLAGS} ${EXTRA_MSVC_FLAGS}
+
+#   var_append EXTRA_LDFLAGS "-L$MSVC_DIR/msvc/lib/x64"
+#   var_append EXTRA_LDFLAGS "-L$MSVC_DIR/win10sdk/lib/10.0.16299.0/ucrt/x64"
+#   var_append EXTRA_LDFLAGS "-L$MSVC_DIR/win10sdk/lib/10.0.16299.0/um/x64"
+#   var_append EXTRA_LDFLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/lib/linux/"
+#   var_append EXTRA_LDFLAGS "-L${CLANG_BINDIR}/../lib64/"
+
+#   if [ "$OPT_CXX11" ]; then
+#       var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
+#   fi
+#   var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
+}
+
 
 # Prints info based on the passed in parameter
 # $1 The information we want to print, from { binprefix, sysroot, clang-dir,
@@ -516,7 +593,8 @@ prepare_build_for_host () {
             prepare_build_for_darwin
             ;;
         windows-*)
-            prepare_build_for_windows
+            #prepare_build_for_windows
+            prepare_build_for_windows_clang
     esac
 
 

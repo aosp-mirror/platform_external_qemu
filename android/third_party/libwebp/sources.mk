@@ -107,7 +107,7 @@ LOCAL_SRC_FILES := \
 LOCAL_C_INCLUDES := $(LIBWEBP_INCLUDES) $(LOCAL_PATH)/src
 
 ifeq (windows,$(BUILD_TARGET_OS))
-LOCAL_CFLAGS := -DUSE_MINGW=1
+LOCAL_CFLAGS := -Wno-unused-local-typedef
 endif
 
 $(call end-emulator-library)

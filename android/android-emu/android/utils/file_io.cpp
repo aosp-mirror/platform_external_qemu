@@ -20,7 +20,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #ifdef _WIN32
 #include <direct.h>
@@ -71,7 +73,7 @@ int android_stat(const char* path, struct stat* buf) {
     // are getting. The incoming struct is a "struct _stati64" and this is the
     // matching call for that struct. Unfortunately the macro doesn't take care
     // of that.
-    return _wstati64(Win32UnicodeString(path).c_str(), buf);
+    return _wstati64(Win32UnicodeString(path).c_str(), reinterpret_cast<struct _stati64*>(buf));
 #else
     return stat(path, buf);
 #endif
@@ -128,7 +130,9 @@ int android_chmod(const char* path, mode_t mode) {
 //
 // Unfortunately stat is not weakly linked which is why it is not listed here
 // and any code that calls stat should use android_stat instead.
-#ifdef _WIN32
+
+//#ifdef _WIN32
+#if 0
 
 // getcwd cannot use the same macro as the other calls because it places data
 // in one of its parameters and it returns a char pointer, not a result code

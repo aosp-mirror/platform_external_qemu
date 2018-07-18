@@ -30,6 +30,10 @@ extern "C" {
 #define D(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
 #define D_ACTIVE VERBOSE_CHECK(virtualscene)
 
+#ifdef _WIN32
+#define strncasecmp _strnicmp
+#endif
+
 using android::base::Optional;
 using android::base::PathUtils;
 using android::base::ScopedStdioFile;

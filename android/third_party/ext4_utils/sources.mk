@@ -5,9 +5,12 @@ LIBEXT4_UTILS_INCLUDES := $(LOCAL_PATH)/include
 
 LIBEXT4_UTILS_CFLAGS := -DHOST
 LIBEXT4_UTILS_CFLAGS += -Wno-error
+LIBEXT4_UTILS_LDLIBS :=
 
 ifeq ($(BUILD_TARGET_OS),windows)
     LIBEXT4_UTILS_CFLAGS += -DUSE_MINGW=1
+    # for htonl
+    LIBEXT4_UTILS_LDLIBS += -lws2_32
 endif
 
 $(call start-emulator-library,emulator-libext4_utils)
@@ -33,12 +36,14 @@ LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/../../../android/android-emu
 
 LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
+
 $(call end-emulator-library)
 
 $(call start-emulator-program,emulator$(BUILD_TARGET_SUFFIX)_make_ext4fs)
 LOCAL_SRC_FILES := src/make_ext4fs_main.c
 LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
+    $(LIBGETOPT_INCLUDES) \
     $(LIBSELINUX_INCLUDES)
 LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
 LOCAL_STATIC_LIBRARIES := \
@@ -46,8 +51,10 @@ LOCAL_STATIC_LIBRARIES := \
     emulator-libsparse \
     emulator-libselinux \
     emulator-zlib \
+    emulator-libgetopt \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     android-emu-base
+LOCAL_LDLIBS := $(LIBEXT4_UTILS_LDLIBS)
 
 $(call local-link-static-c++lib)
 $(call end-emulator-program)

@@ -275,6 +275,10 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
+    $(LIBGETOPT_INCLUDES) \
+
+LOCAL_STATIC_LIBRARIES := \
+    emulator-libgetopt
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \

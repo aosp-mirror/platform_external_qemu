@@ -11,7 +11,7 @@
 # include <sys/endian.h>
 # include <sys/types.h>
 # include <machine/bswap.h>
-#elif defined(CONFIG_BYTESWAP_H)
+#elif !defined(_WIN32) && defined(CONFIG_BYTESWAP_H)
 # include <byteswap.h>
 
 static inline uint16_t bswap16(uint16_t x)

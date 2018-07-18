@@ -157,7 +157,7 @@ static char* hax_get_intel_HAXM_installer_path() {
     int relative_path_length = strlen(relative_path);
     if (length + relative_path_length > PATH_MAX - 1) return NULL;
     strncpy(buf + length, relative_path, relative_path_length + 1);
-    if (access(buf, R_OK) == 0) {
+    if (access(buf, R_ACCESS_OK) == 0) {
         return g_strdup(buf);
     } else {
         return NULL;

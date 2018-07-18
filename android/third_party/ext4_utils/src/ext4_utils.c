@@ -29,7 +29,9 @@
 #include <string.h>
 
 #ifdef USE_MINGW
+#include <io.h>
 #include <winsock2.h>
+#include <dirent.h>
 #else
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
@@ -306,7 +308,11 @@ void ext4_create_resize_inode()
 
 	inode_attach_resize(inode, reserve_inode_alloc);
 
+#ifndef _WIN32
 	inode->i_mode = S_IFREG | S_IRUSR | S_IWUSR;
+#else
+	inode->i_mode = S_IFREG | _S_IREAD | S_IWRITE;
+#endif
 	inode->i_links_count = 1;
 
 	free_alloc(reserve_inode_alloc);
@@ -330,7 +336,11 @@ void ext4_create_journal_inode()
 		return;
 	}
 
+#ifndef _WIN32
 	inode->i_mode = S_IFREG | S_IRUSR | S_IWUSR;
+#else
+	inode->i_mode = S_IFREG | _S_IREAD | S_IWRITE;
+#endif
 	inode->i_links_count = 1;
 
 	journal_superblock_t *jsb = (journal_superblock_t *)journal_data;

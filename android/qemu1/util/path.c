@@ -7,9 +7,11 @@
 #define _GNU_SOURCE 1
 #endif
 #include <sys/types.h>
+#ifndef _WIN32
 #include <sys/param.h>
-#include <dirent.h>
 #include <unistd.h>
+#endif
+#include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>

@@ -46,6 +46,31 @@ static const char kYaffsFstabContent[] = "yaffs2";
 // A special file path prefix corresponding to an YAFFS2 partition.
 #define YAFFS_PATH_PREFIX "/YAFFS_FILE"
 
+#ifdef _WIN32
+// From https://msdn.microsoft.com/en-us/library/28d5ce15.aspx
+int vasprintf( char** buf, const char* format, va_list args )
+{
+    int     len;
+
+    if (buf == NULL) {
+        return -1;
+    }
+
+    len = _vscprintf( format, args ) // _vscprintf doesn't count
+                                + 1; // terminating '\0'
+
+    if (len <= 0) {
+        return len;
+    }
+
+    *buf = (char*)malloc( len * sizeof(char) );
+
+    vsprintf( *buf, format, args ); // C4996
+    // Note: vsprintf is deprecated; consider using vsprintf_s instead
+    return len;
+}
+#endif
+
 static bool strStartsWith(const char* path, const char* prefix) {
     return !strncmp(path, prefix, strlen(prefix));
 }

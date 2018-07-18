@@ -28,16 +28,19 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#ifndef _WIN32
 #include <libgen.h>
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/types.h>
 
 #include "android/utils/file_io.h"
 #ifdef USE_MINGW
 
+#include <io.h>
 #include <winsock2.h>
 
 /* These match the Linux definitions of these flags.
@@ -65,6 +68,33 @@
 #endif
 
 #ifdef USE_MINGW
+// From https://msdn.microsoft.com/en-us/library/28d5ce15.aspx
+static int asprintf( char** buf, char * format, ... )
+{
+    va_list args;
+    int     len;
+
+    if (buf == NULL) {
+        return -1;
+    }
+
+    // retrieve the variable arguments
+    va_start( args, format );
+
+    len = _vscprintf( format, args ) // _vscprintf doesn't count
+                                + 1; // terminating '\0'
+
+    if (len <= 0) {
+        return len;
+    }
+
+    *buf = (char*)malloc( len * sizeof(char) );
+
+    vsprintf( *buf, format, args ); // C4996
+    // Note: vsprintf is deprecated; consider using vsprintf_s instead
+    return len;
+}
+
 static int scandir_win(const char* path, struct dirent ***namelist) {
     int pathSize = strlen(path);
     int nameBufferSize = pathSize + 1 + 1;
@@ -236,7 +266,11 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		}
 
 		dentries[i].size = _stat.st_size;
+#ifndef _WIN32
 		dentries[i].mode = _stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
+#else
+		dentries[i].mode = _stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU);
+#endif
 		dentries[i].mtime = _stat.st_mtime;
 		if (fs_config_func != NULL) {
 			uint64_t capabilities;

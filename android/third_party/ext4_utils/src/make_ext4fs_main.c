@@ -15,9 +15,13 @@
  */
 
 #include <fcntl.h>
-#include <libgen.h>
 #include <stdio.h>
+#include <getopt.h>
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #if defined(__linux__)
 #include <linux/fs.h>
@@ -44,12 +48,29 @@ struct selabel_handle;
 #define O_BINARY 0
 #endif
 
+#ifdef _WIN32
+typedef long long off64_t;
+#ifndef STDIN_FILENO
+#define STDIN_FILENO _fileno(stdin)
+#endif  // !STDIN_FILENO
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO _fileno(stdout)
+#endif  // !STDOUT_FILENO
+#define lseek64 _lseeki64
+#endif
+
 extern struct fs_info info;
 
 
 static void usage(char *path)
 {
-	fprintf(stderr, "%s [ -l <len> ] [ -j <journal size> ] [ -b <block_size> ]\n", basename(path));
+#ifdef _WIN32
+        char basename[_MAX_FNAME];
+        _splitpath(path, NULL, NULL, basename, NULL);
+        fprintf(stderr, "%s [ -l <len> ] [ -j <journal size> ] [ -b <block_size> ]\n", basename);
+#else
+        fprintf(stderr, "%s [ -l <len> ] [ -j <journal size> ] [ -b <block_size> ]\n", basename(path));
+#endif
 	fprintf(stderr, "    [ -g <blocks per group> ] [ -i <inodes> ] [ -I <inode size> ]\n");
 	fprintf(stderr, "    [ -L <label> ] [ -f ] [ -a <android mountpoint> ]\n");
 	fprintf(stderr, "    [ -S file_contexts ]\n");

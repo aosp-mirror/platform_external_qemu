@@ -22,12 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include "config-host.h"
 #include "sysemu/sysemu.h"
 #include "qemu-options.h"
@@ -97,7 +101,7 @@ char *os_find_datadir(const char *argv0)
     while (p != buf && *p != '\\')
         p--;
     *p = 0;
-    if (access(buf, R_OK) == 0) {
+    if (access(buf, R_ACCESS_OK) == 0) {
         return g_strdup(buf);
     }
     return NULL;

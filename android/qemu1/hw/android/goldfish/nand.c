@@ -48,7 +48,10 @@
 
 #define  XLOG  xlog
 
+#if 0
+// Use off64_t?
 AASSERT_STATIC(sizeof(off_t) >= 8U)
+#endif
 
 static void
 xlog( const char*  format, ... )

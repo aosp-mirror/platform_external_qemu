@@ -17,6 +17,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifdef _WIN32
+typedef int mode_t;
+#endif
+
 ANDROID_BEGIN_HEADER
 
 FILE* android_fopen(const char* path, const char* mode);

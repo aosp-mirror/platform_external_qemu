@@ -29,6 +29,7 @@
 #include <stdio.h>  // for FILE
 #include <sys/types.h>  // only for ssize_t, *sigh*
 
+#include "qemu/osdep.h" // for ssize_t
 #include "qemu/typedefs.h"  // for QEMUFile
 
 struct iovec;

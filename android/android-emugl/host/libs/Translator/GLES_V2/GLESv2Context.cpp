@@ -128,7 +128,7 @@ void GLESv2Context::initEmulatedBuffers() {
         dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &neededClientVBOs);
 
         // Spec minimum: 16 attribs. Some drivers won't report the right values.
-        neededClientVBOs = std::max(neededClientVBOs, 16);
+        neededClientVBOs = (std::max)(neededClientVBOs, 16);
 
         m_emulatedClientVBOs.resize(neededClientVBOs, 0);
         dispatcher().glGenBuffers(neededClientVBOs, &m_emulatedClientVBOs[0]);
@@ -413,7 +413,7 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
     }
 
     if (count > m_att0ArrayLength) {
-        const unsigned newLen = std::max(count, 2 * m_att0ArrayLength);
+        const unsigned newLen = (std::max)(count, 2 * m_att0ArrayLength);
         m_att0Array.reset(new GLfloat[4 * newLen]);
         m_att0ArrayLength = newLen;
         m_attribute0valueChanged = true;

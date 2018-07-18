@@ -16,10 +16,13 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #ifdef _WIN32
 #include <io.h>
+#include <basetsd.h>
+typedef SSIZE_T ssize_t;
+#else
+#include <unistd.h>
 #endif
 
 #include <fstream>

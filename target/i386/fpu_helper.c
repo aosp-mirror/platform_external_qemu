@@ -1501,6 +1501,7 @@ uint64_t helper_xgetbv(CPUX86State *env, uint32_t ecx)
         break;
     }
     raise_exception_ra(env, EXCP0D_GPF, GETPC());
+    return 0;
 }
 
 void helper_xsetbv(CPUX86State *env, uint32_t ecx, uint64_t mask)

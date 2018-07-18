@@ -17,6 +17,8 @@
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC
 
+using std::min;
+
 namespace android {
 namespace recording {
 
@@ -42,7 +44,7 @@ bool VP9Codec::configAndOpenEncoder(const AVFormatContext* oc,
     c->width = mParams.width;
     c->height = mParams.height;
     c->thread_count =
-            std::min(8, android::base::System::get()->getCpuCoreCount() * 2);
+            min(8, android::base::System::get()->getCpuCoreCount() * 2);
 
     stream->time_base = (AVRational){1, static_cast<int>(mParams.fps)};
     c->time_base = stream->time_base;

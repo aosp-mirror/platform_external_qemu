@@ -23,6 +23,10 @@
 #include "backed_block.h"
 #include "sparse_defs.h"
 
+#ifdef _WIN32
+#define strdup _strdup
+#endif
+
 struct backed_block {
 	unsigned int block;
 	unsigned int len;

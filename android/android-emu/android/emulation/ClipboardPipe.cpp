@@ -16,6 +16,8 @@
 
 #include <cassert>
 
+using std::min;
+
 namespace android {
 namespace emulation {
 
@@ -64,7 +66,7 @@ int ClipboardPipe::processOperation(OperationType operation,
     while (pipeBuf != endPipeBuf) {
         // Decide how many bytes need to be read/written during the current
         // iteration.
-        auto iterBytes = std::min(
+        auto iterBytes = min(
                 state->size(), static_cast<int>(pipeBuf->size) - pipeBufOffset);
         if (iterBytes == 0) {
             // Looks like we've finished early on the host. That's OK as guest

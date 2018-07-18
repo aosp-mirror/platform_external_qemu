@@ -9,7 +9,11 @@
 #define _INPUT_H
 
 
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
+#endif
 #include <sys/types.h>
 #include "standard-headers/linux/types.h"
 

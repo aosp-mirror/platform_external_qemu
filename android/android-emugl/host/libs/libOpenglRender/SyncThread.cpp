@@ -27,7 +27,11 @@
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/sync_device.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
+#endif
 
 #define DEBUG 0
 

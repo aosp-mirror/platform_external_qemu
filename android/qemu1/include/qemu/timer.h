@@ -1,6 +1,7 @@
 #ifndef QEMU_TIMER_H
 #define QEMU_TIMER_H
 
+#include "qemu/osdep.h"
 #include "qemu/typedefs.h"
 #include "qemu-common.h"
 #include "qemu/notify.h"
@@ -702,7 +703,7 @@ static inline int64_t get_ticks_per_sec(void)
 /* real time host monotonic timer */
 static inline int64_t get_clock_realtime(void)
 {
-    struct timeval tv;
+    qemu_timeval tv;
 
     gettimeofday(&tv, NULL);
     return tv.tv_sec * 1000000000LL + (tv.tv_usec * 1000);

@@ -102,7 +102,8 @@ TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance, int seed)
     generator.seed(seed);
 
     // Distributions for the random patterns and zero pages
-    std::uniform_int_distribution<char> patternDistribution(0, 255);
+    // msvc doesn't like char.
+    std::uniform_int_distribution<unsigned short> patternDistribution(0, 255);
     std::bernoulli_distribution zeroPageDistribution(zeroPageChance);
 
     TestRamBuffer res(numPages * kTestingPageSize);
@@ -114,7 +115,7 @@ TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance, int seed)
         if (zeroPageDistribution(generator)) {
             memset(currentPage, 0x0, kTestingPageSize);
         } else {
-            char pattern = patternDistribution(generator);
+            auto pattern = patternDistribution(generator);
             memset(ram + i * kTestingPageSize, pattern, kTestingPageSize);
         }
     }
@@ -126,7 +127,7 @@ void randomMutateRam(TestRamBuffer& ram, float noChangeChance, float zeroPageCha
     std::default_random_engine generator;
     generator.seed(seed);
 
-    std::uniform_int_distribution<char> patternDistribution(0, 255);
+    std::uniform_int_distribution<unsigned short> patternDistribution(0, 255);
     std::bernoulli_distribution noChangeDistribution(noChangeChance);
     std::bernoulli_distribution zeroPageDistribution(zeroPageChance);
 
@@ -136,7 +137,7 @@ void randomMutateRam(TestRamBuffer& ram, float noChangeChance, float zeroPageCha
         if (zeroPageDistribution(generator)) {
             memset(ram.data() + i, 0x0, kTestingPageSize);
         } else {
-            char pattern = patternDistribution(generator);
+            auto pattern = patternDistribution(generator);
             memset(ram.data() + i, pattern, kTestingPageSize);
         }
     }

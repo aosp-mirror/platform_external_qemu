@@ -124,13 +124,14 @@ do_windows_zlib_package () {
     ZLIB_VERSION=$(package_list_get_version zlib)
     dump "$(builder_text) Building zlib-$ZLIB_VERSION"
     ZLIB_PACKAGE=$(package_list_get_filename zlib)
-    unpack_archive "$(builder_archive_dir)/$ZLIB_PACKAGE" "$BUILD_DIR"
+#    unpack_archive "$(builder_archive_dir)/$ZLIB_PACKAGE" "$BUILD_DIR"
+    unpack_and_patch zlib 
     (
         run cd "$BUILD_DIR/zlib-$ZLIB_VERSION" &&
         export BINARY_PATH=$PREFIX/bin &&
         export INCLUDE_PATH=$PREFIX/include &&
         export LIBRARY_PATH=$PREFIX/lib &&
-        run make -fwin32/Makefile.gcc install \
+        run make -fwin32/Makefile.clang-msvc install \
                 PREFIX=$(builder_gnu_config_host_prefix) \
                 LOC=$LOC \
                 LDFLAGS=$LDFLAGS
@@ -265,10 +266,17 @@ do_dtc_package () {
     #       library, then 'install' it manually !!
     (
         run cd "$(builder_build_dir)/$PKG-$PKG_VERSION" &&
-        CC=$(builder_gnu_config_host_prefix)gcc
+        CC=$(builder_gnu_config_host_prefix)clang
         AR=$(builder_gnu_config_host_prefix)ar
         CCFLAGS=
-        LIBNAME=libfdt.a
+        case $(builder_host) in
+            windows-*)
+                LIBNAME=libfdt.lib
+                ;;
+            *)
+                LIBNAME=libfdt.a
+                ;;
+        esac
         var_append CCFLAGS "-Ilibfdt"
         case $(builder_host) in
             linux-*|darwin-*)
@@ -320,12 +328,17 @@ build_qemu_android_deps () {
     do_dtc_package dtc
 
     # libffi is required by glib.
-    do_autotools_package libffi
+    (
+      export EXTRA_CPPFLAGS="-DFFI_BUILDING" &&
+      do_autotools_package libffi --disable-docs
+    )
 
     # Must define LIBFFI_CFLAGS and LIBFFI_LIBS to ensure
     # that GLib picks it up properly. Note that libffi places
     # its headers and libraries in uncommon places.
+    echo "GETTING LIBFFI_VERSION"
     LIBFFI_VERSION=$(package_list_get_version libffi)
+    echo "GOT LIBFFI_VERSION"
     LIBFFI_CFLAGS="-I$PREFIX/lib/libffi-$LIBFFI_VERSION/include"
     LIBFFI_LIBS="$PREFIX/lib/libffi.la"
     if [ ! -f "$LIBFFI_LIBS" ]; then

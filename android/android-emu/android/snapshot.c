@@ -39,7 +39,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#include <sys/types.h>
+#endif
 
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"

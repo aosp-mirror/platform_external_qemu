@@ -16,6 +16,11 @@
 #include <inttypes.h>
 #include <sys/types.h>
 
+#ifdef _WIN32
+#include <basetsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 ANDROID_BEGIN_HEADER
 
 // Opaque declaration for an object modelling a stream of bytes.

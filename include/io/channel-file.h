@@ -23,6 +23,10 @@
 
 #include "io/channel.h"
 
+#ifdef _WIN32
+typedef int mode_t;
+#endif
+
 #define TYPE_QIO_CHANNEL_FILE "qio-channel-file"
 #define QIO_CHANNEL_FILE(obj)                                     \
     OBJECT_CHECK(QIOChannelFile, (obj), TYPE_QIO_CHANNEL_FILE)

@@ -21,17 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include <zlib.h>
 
 /* Needed early for CONFIG_BSD etc. */
 #include "config-host.h"
 
+#include <dirent.h>
 #ifndef _WIN32
 #include <sys/times.h>
 #include <sys/wait.h>
@@ -43,7 +48,6 @@
 #include <netinet/in.h>
 #include <net/if.h>
 #include <arpa/inet.h>
-#include <dirent.h>
 #include <netdb.h>
 #include <sys/select.h>
 #ifdef CONFIG_BSD

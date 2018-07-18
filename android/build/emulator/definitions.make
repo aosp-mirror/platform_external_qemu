@@ -618,9 +618,9 @@ define ev-local-link-static-c++lib
     ifeq (darwin,$(BUILD_TARGET_OS))
         LOCAL_LDLIBS += $(CXX_STD_LIB)
     endif # BUILD_TARGET_OS = darwin
-    ifeq (windows,$(BUILD_TARGET_OS))
-        LOCAL_LDLIBS += -Wl,-Bstatic -lstdc++ -lwinpthread -Wl,-Bdynamic
-    endif # BUILD_TARGET_OS = windows
+#   ifeq (windows,$(BUILD_TARGET_OS))
+#       LOCAL_LDLIBS += -Wl,-Bstatic -lstdc++ -lwinpthread -Wl,-Bdynamic
+#   endif # BUILD_TARGET_OS = windows
     LOCAL_LD := $(call local-build-var,LD)
 endef
 

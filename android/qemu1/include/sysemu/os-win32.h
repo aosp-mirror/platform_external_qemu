@@ -28,10 +28,54 @@
 
 #define socket_close  winsock2_socket_close3
 
+#include <basetsd.h>
+#include <direct.h>
+#include <io.h>
+#include <process.h>
 #include <winsock2.h>
 #include <windows.h>
+#include <ws2tcpip.h>
+#include <ehstorioctl.h>
+#include <stdint.h>
+
+typedef SSIZE_T ssize_t;
+typedef long long off64_t;
+#ifdef _WIN64
+typedef int64_t pid_t;
+#else
+typedef int pid_t;
+#endif
 
 #undef socket_close
+
+// substitutes for mingw R_OK, W_OK, X_OK, F_OK
+#define F_ACCESS_OK 0   /* Check for file existence */
+#define X_ACCESS_OK 1   /* Check for execute permission */
+#define W_ACCESS_OK 2   /* Check for write permission */
+#define R_ACCESS_OK 4   /* Check for read permission */
+
+#define S_IRUSR _S_IREAD
+#define S_IWUSR _S_IWRITE
+
+#define pclose _pclose
+#define localtime_r(i, m) localtime_s(m, i)
+#define gmtime_r(i, m) gmtime_s(m, i)
+#define getcwd(buf, len) _getcwd(buf, len)
+#define getpid() _getpid()
+#define gettimeofday(tv,tz) qemu_gettimeofday(tv)
+#define strcasecmp _stricmp
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif  // !PATH_MAX
+#ifndef STDERR_FILENO
+#define STDERR_FILENO _fileno(stderr)
+#endif  // !STDERR_FILENO
+#ifndef STDIN_FILENO
+#define STDIN_FILENO _fileno(stdin)
+#endif  // !STDIN_FILENO
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO _fileno(stdout)
+#endif  // !STDOUT_FILENO
 
 /* Workaround for older versions of MinGW. */
 #ifndef ECONNREFUSED
@@ -65,7 +109,7 @@
  * That is what we need for QEMU. Passing the value of register rsp (default)
  * lets longjmp try a stack unwinding which will crash with generated code. */
 # undef setjmp
-# define setjmp(env) _setjmp(env, NULL)
+# define setjmp(env) _setjmp(env)
 #endif
 /* QEMU uses sigsetjmp()/siglongjmp() as the portable way to specify
  * "longjmp and don't touch the signal masks". Since we know that the

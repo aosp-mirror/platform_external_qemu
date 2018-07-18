@@ -169,10 +169,14 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/tcg \
     $(ZLIB_INCLUDES) \
     $(LIBBLUEZ_INCLUDES) \
+    $(call qemu2-if-windows, $(LIBGETOPT_INCLUDES)) \
 
 LOCAL_SRC_FILES += \
     $(QEMU2_COMMON_SOURCES) \
     $(QEMU2_COMMON_SOURCES_$(BUILD_TARGET_TAG)) \
+
+LOCAL_STATIC_LIBRARIES := \
+    $(call qemu2-if-windows, emulator-libgetopt)
 
 $(call gen-hw-config-defs)
 QEMU2_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES)
@@ -187,6 +191,10 @@ LOCAL_CFLAGS += \
 
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
+    $(call qemu2-if-windows, $(LIBGETOPT_INCLUDES)) \
+
+LOCAL_STATIC_LIBRARIES := \
+    $(call qemu2-if-windows, emulator-libgetopt)
 
 LOCAL_SRC_FILES += \
     $(QEMU2_LIB_qemuutil) \
@@ -209,6 +217,7 @@ LOCAL_CFLAGS += \
 
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
+    $(call qemu2-if-windows, $(LIBGETOPT_INCLUDES)) \
 
 LOCAL_SRC_FILES += \
    hw/smbios/smbios_type_38-stub.c \

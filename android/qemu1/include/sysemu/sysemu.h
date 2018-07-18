@@ -2,6 +2,7 @@
 #define SYSEMU_H
 /* Misc. things related to the system emulator.  */
 
+#include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "qemu/option.h"
 #include "qemu/queue.h"

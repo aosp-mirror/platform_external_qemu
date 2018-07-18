@@ -18,7 +18,11 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <errno.h>
 
 AConfig*

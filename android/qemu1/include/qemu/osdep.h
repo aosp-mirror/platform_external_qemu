@@ -17,7 +17,11 @@
 #define WEXITSTATUS(x) (x)
 #endif
 
+#ifdef _WIN32
+#include "sysemu/os-win32.h"
+#else
 #include <sys/time.h>
+#endif
 
 #if defined(CONFIG_SOLARIS) && CONFIG_SOLARIS_VERSION < 10
 /* [u]int_fast*_t not in <sys/int_types.h> */

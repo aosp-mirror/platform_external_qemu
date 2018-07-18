@@ -24,10 +24,28 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #ifndef O_BINARY
 #define O_BINARY 0
+#endif
+
+#ifdef _WIN32
+#define lseek(a,b,c) _lseek(a,c,b)
+#define close _close
+#define open _open
+typedef long long off64_t;
+#ifndef STDIN_FILENO
+#define STDIN_FILENO _fileno(stdin)
+#endif  // !STDIN_FILENO
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO _fileno(stdout)
+#endif  // !STDOUT_FILENO
 #endif
 
 void usage()

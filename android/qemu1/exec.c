@@ -29,7 +29,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <inttypes.h>
 
 #include "cpu.h"

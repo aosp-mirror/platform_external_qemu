@@ -14,7 +14,11 @@
 #include "android/base/Compiler.h"
 
 #include <errno.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 namespace android {
 namespace base {

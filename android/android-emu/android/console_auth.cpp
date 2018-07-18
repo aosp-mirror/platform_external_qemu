@@ -27,10 +27,14 @@ extern "C" {
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #ifndef _WIN32
 #define O_BINARY 0
+#else
+typedef int mode_t;
 #endif
 
 #define E(...) derror(__VA_ARGS__)

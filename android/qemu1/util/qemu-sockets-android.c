@@ -17,7 +17,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "qemu/sockets.h"
 #include "qemu-common.h" /* for qemu_isdigit */

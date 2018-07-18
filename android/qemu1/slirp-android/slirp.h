@@ -50,7 +50,9 @@ typedef char *caddr_t;
 # include <sys/bitypes.h>
 #endif
 
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 
 #ifdef NEED_TYPEDEFS
 typedef char int8_t;
@@ -81,7 +83,7 @@ typedef unsigned char u_int8_t;
 # endif
 #endif /* NEED_TYPEDEFS */
 
-#ifdef HAVE_UNISTD_H
+#if defined(HAVE_UNISTD_H) && !defined(_WIN32)
 # include <unistd.h>
 #endif
 
