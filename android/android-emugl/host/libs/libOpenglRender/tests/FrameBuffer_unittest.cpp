@@ -48,6 +48,9 @@ protected:
         ASSERT_NE(nullptr, LazyLoadedEGLDispatch::get());
         ASSERT_NE(nullptr, LazyLoadedGLESv2Dispatch::get());
 
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         bool useHostGpu = shouldUseHostGpu();
         mWindow = createOrGetTestWindow(mXOffset, mYOffset, mWidth, mHeight);
         mUseSubWindow = mWindow != nullptr;
@@ -60,6 +63,8 @@ protected:
                     mWidth, mHeight,
                     mUseSubWindow,
                     !useHostGpu /* egl2egl */));
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
             mFb = FrameBuffer::getFB();
             EXPECT_NE(nullptr, mFb);
 
@@ -69,7 +74,10 @@ protected:
                 0, 0,
                 mWidth, mHeight, mWidth, mHeight,
                 mWindow->getDevicePixelRatio(), 0, false);
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
             mWindow->messageLoop();
+
         } else {
             EXPECT_TRUE(
                 FrameBuffer::initialize(
@@ -78,6 +86,8 @@ protected:
                     !useHostGpu /* egl2egl */));
             mFb = FrameBuffer::getFB();
             ASSERT_NE(nullptr, mFb);
+
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
         }
 
         mRenderThreadInfo = new RenderThreadInfo();
@@ -92,11 +102,18 @@ protected:
     }
 
     virtual void TearDown() override {
+        SCOPED_TRACE("FrameBufferTest teardown");
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
+
         if (mFb) {
-            mFb->finalize();
-            delete mFb;
+            // mFb->finalize();
+            delete mFb;  // destructor calls finalize
+            EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
         }
+
         delete mRenderThreadInfo;
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError());
     }
 
     void saveSnapshot() {

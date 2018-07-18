@@ -158,6 +158,7 @@ LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)
 LOCAL_SRC_FILES := \
     tests/DefaultFramebufferBlit_unittest.cpp \
     tests/FrameBuffer_unittest.cpp \
+    tests/GLMulticontext_unittest.cpp \
     tests/GLSnapshot_unittest.cpp \
     tests/GLSnapshotBuffers_unittest.cpp \
     tests/GLSnapshotFramebufferControl_unittest.cpp \
