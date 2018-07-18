@@ -113,6 +113,12 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
                                  kConfigAttributes[i],
                                  &mAttribValues[i]);
 
+        EGLint err = s_egl.eglGetError();
+        if (err != EGL_SUCCESS) {
+            E("%s %s %d: EGL error 0x%x, i=%zu, attrib=0x%x\n", __FILE__,
+                __func__, __LINE__, err, i, kConfigAttributes[i]);
+        }
+
         // This implementation supports guest window surfaces by wrapping
         // them around host Pbuffers, so always report it to the guest.
         if (kConfigAttributes[i] == EGL_SURFACE_TYPE) {
