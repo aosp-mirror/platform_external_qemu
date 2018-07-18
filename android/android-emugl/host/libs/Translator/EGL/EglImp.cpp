@@ -786,7 +786,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglGetConfigAttrib(EGLDisplay display, EGLConfig c
     VALIDATE_DISPLAY(display);
     VALIDATE_CONFIG(config);
     if(!EglValidate::confAttrib(attribute)){
-         RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
+        fprintf(stderr, "%s %s %d bad attrib %d\n", __FILE__, __func__,
+                __LINE__, attribute);
+        RETURN_ERROR(EGL_FALSE, EGL_BAD_ATTRIBUTE);
     }
     return cfg->getConfAttrib(attribute,value)? EGL_TRUE:EGL_FALSE;
 }
