@@ -12,7 +12,11 @@
 #include "android/tcpdump.h"
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
+#endif
 
 int  qemu_tcpdump_active;
 
@@ -108,6 +112,7 @@ qemu_tcpdump_stop( void )
     capture_file = NULL;
 }
 
+#define _WIN32_FT_OFFSET (116444736000000000ULL)
 void
 qemu_tcpdump_packet( const void*  base, int  len )
 {
@@ -125,7 +130,19 @@ qemu_tcpdump_packet( const void*  base, int  len )
     if (len2 > PCAP_SNAPLEN)
         len2 = PCAP_SNAPLEN;
 
+#ifdef _WIN32
+    // Taken from qemu_gettimeofday() from oslib-win32.c
+    union {
+      unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+      FILETIME ft;
+    }  _now;
+
+    GetSystemTimeAsFileTime (&_now.ft);
+    now.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+    now.tv_sec= (long)((_now.ns100 - _WIN32_FT_OFFSET) / 10000000ULL);
+#else
     gettimeofday(&now, NULL);
+#endif
     h.ts_sec   = (uint32_t) now.tv_sec;
     h.ts_usec  = (uint32_t) now.tv_usec;
     h.incl_len = (uint32_t) len2;

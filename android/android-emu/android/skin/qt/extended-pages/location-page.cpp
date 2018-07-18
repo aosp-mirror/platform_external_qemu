@@ -28,7 +28,13 @@
 #include <algorithm>
 #include <string>
 #include <utility>
+#ifdef _WIN32
+// For M_PI
+#define _USE_MATH_DEFINES
+#include <math.h>
+#else
 #include <unistd.h>
+#endif
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -714,6 +720,8 @@ static void getDeviceLocation(double* pLatitude, double* pLongitude, double* pAl
     }
 }
 
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
+#define _WIN32_FT_OFFSET (116444736000000000ULL)
 // Send a GPS location to the device
 static void sendLocationToDevice() {
     if (sLocationAgent && sLocationAgent->gpsSendLoc) {
@@ -724,7 +732,19 @@ static void sendLocationToDevice() {
         getDeviceLocation(&latitude, &longitude, &altitude);
 
         timeval timeVal = {};
+#ifdef _WIN32
+    // Taken from qemu_gettimeofday() from oslib-win32.c
+    union {
+      unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+      FILETIME ft;
+    }  _now;
+
+    GetSystemTimeAsFileTime (&_now.ft);
+    timeVal.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+    timeVal.tv_sec= (long)((_now.ns100 - _WIN32_FT_OFFSET) / 10000000ULL);
+#else
         gettimeofday(&timeVal, nullptr);
+#endif
         sLocationAgent->gpsSendLoc(latitude, longitude, altitude, 4, &timeVal);
     }
 }

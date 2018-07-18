@@ -19,6 +19,11 @@
 #include <iterator>
 #include <utility>
 
+#ifdef _WIN32
+#define fseeko64 _fseeki64
+#define ftello64 _ftelli64
+#endif
+
 using android::base::CompressingStream;
 using android::base::System;
 

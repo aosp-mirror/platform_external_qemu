@@ -67,7 +67,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #define  DEBUG  1
 
@@ -84,6 +86,9 @@
 #endif
 
 #define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
+#define _WIN32_FT_OFFSET (116444736000000000ULL)
 
 typedef struct ControlGlobalRec_*  ControlGlobal;
 
@@ -2497,7 +2502,19 @@ do_geo_fix( ControlClient  client, char*  args )
     }
 
     memset(&tVal, 0, sizeof(tVal));
+#ifdef _WIN32
+    // Taken from qemu_gettimeofday() from oslib-win32.c
+    union {
+      unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+      FILETIME ft;
+    }  _now;
+
+    GetSystemTimeAsFileTime (&_now.ft);
+    tVal.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+    tVal.tv_sec= (long)((_now.ns100 - _WIN32_FT_OFFSET) / 10000000ULL);
+#else
     gettimeofday(&tVal, NULL);
+#endif
 
     // Also update the settings.
     if (location_agent_qt_settings_func) {

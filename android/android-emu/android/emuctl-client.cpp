@@ -135,7 +135,7 @@ static SkinRotation guessScreenOrientation() {
         SKIN_ROTATION_90
     };
 
-    float min_diff_norm = std::numeric_limits<float>::max();
+    float min_diff_norm = (std::numeric_limits<float>::max)();
     int gravity_direction_index = 2;
     float acceleration[3];
     sGlobals->sensors->getSensor(

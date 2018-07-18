@@ -46,10 +46,17 @@ BUILD_TARGET_CFLAGS := \
     -g -fno-exceptions \
     $(call if-target-clang,, -fno-unwind-tables) \
     $(BUILD_WARNING_CFLAGS)
-BUILD_TARGET_CXXFLAGS := \
-    -fno-rtti \
-    -DGOOGLE_PROTOBUF_NO_RTTI \
-    $(BUILD_WARNING_CXXFLAGS)
+
+ifeq (windows,$(BUILD_TARGET_OS))
+    BUILD_TARGET_CXXFLAGS := \
+        -DGOOGLE_PROTOBUF_NO_RTTI \
+        $(BUILD_WARNING_CXXFLAGS)
+else
+    BUILD_TARGET_CXXFLAGS := \
+        -fno-rtti \
+        -DGOOGLE_PROTOBUF_NO_RTTI \
+        $(BUILD_WARNING_CXXFLAGS)
+endif
 
 BUILD_OPT_CFLAGS :=
 BUILD_OPT_LDFLAGS :=
@@ -70,7 +77,7 @@ else
 endif
 
 ifeq (windows,$(BUILD_TARGET_OS))
-   BUILD_TARGET_CFLAGS += -falign-functions -ftracer
+   #BUILD_TARGET_CFLAGS += -falign-functions -ftracer
 
    # pirama@google.com: We're building GCC with --enable-shared so we can get
    # libgcc_eh.a (which is needed for building with Clang).  But in this
@@ -118,6 +125,18 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-lambda-capture \
                       -Wno-unused-private-field \
                       -Wno-unused-value \
+                      -Wno-format \
+                      -Wno-incompatible-ms-struct \
+                      -Wno-return-type \
+                      -Wno-c++11-narrowing \
+		      -Wno-cast-calling-convention \
+		      -Wno-comment \
+
+ifeq (windows,$(BUILD_TARGET_OS))
+    CLANG_COMPILER_FLAGS += \
+		            -Wno-unused-local-typedef \
+    			    -fcxx-exceptions
+endif
 
 # Add your tidy checks here.
 CLANG_TIDY_CHECKS=-*, \
@@ -254,8 +273,23 @@ ifeq ($(BUILD_TARGET_OS),windows)
   # Ensure that printf() et al use GNU printf format specifiers as required
   # by QEMU. This is important when using the newer Mingw64 cross-toolchain.
   # See http://sourceforge.net/apps/trac/mingw-w64/wiki/gnu%20printf
-  BUILD_TARGET_CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
+  #BUILD_TARGET_CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
+    BUILD_TARGET_LDFLAGS += \
+	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/lib/x64 \
+	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/lib/10.0.16299.0/ucrt/x64 \
+	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/lib/10.0.16299.0/um/x64
 endif
+    BUILD_TARGET_CFLAGS += \
+	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/msvc/include \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/ucrt \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/um \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/shared
+
+    BUILD_TARGET_CXXFLAGS += \
+	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/msvc/include \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/ucrt \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/um \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/shared
 
 # Enable warning, except those related to missing field initializers
 # (the QEMU coding style loves using these).

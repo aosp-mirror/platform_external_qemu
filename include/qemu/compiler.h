@@ -46,7 +46,7 @@
 #define QEMU_ARTIFICIAL
 #endif
 
-#if defined(_WIN32)
+#if defined(__MINGW32__)
 # define QEMU_PACKED __attribute__((gcc_struct, packed))
 #else
 # define QEMU_PACKED __attribute__((packed))
@@ -87,7 +87,14 @@
 #endif
 
 #define typeof_field(type, field) typeof(((type *)0)->field)
+#ifndef _WIN32
 #define type_check(t1,t2) ((t1*)0 - (t2*)0)
+#else
+// TODO: This check will throw a compile-time error if the pointers are
+// incompatible. But clang is throwing it on a uint32_t* and enum*. Need to
+// figure out how to fix this.
+#define type_check(t1,t2) 0
+#endif
 
 #define QEMU_BUILD_BUG_ON_STRUCT(x) \
     struct { \

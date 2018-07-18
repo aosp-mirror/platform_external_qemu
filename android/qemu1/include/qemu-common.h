@@ -34,16 +34,22 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
+#ifndef _WIN32
 #include <strings.h>
+#endif
 #include <inttypes.h>
 #include <limits.h>
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include <assert.h>
 #include <signal.h>
 #include <glib.h>

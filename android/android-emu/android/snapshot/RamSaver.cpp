@@ -40,6 +40,12 @@
 #include <Hypervisor/hv.h>
 #endif
 
+#ifdef _WIN32
+#define fseeko64 _fseeki64
+#endif
+
+using std::min;
+
 namespace android {
 namespace snapshot {
 
@@ -130,7 +136,7 @@ RamSaver::RamSaver(const std::string& fileName,
     mWriteCombineBuffer.resize(kCompressBufferBatchSize * kDefaultPageSize);
 
     mWorkers.emplace(
-            std::min(System::get()->getCpuCoreCount() - 1, 2),
+            min(System::get()->getCpuCoreCount() - 1, 2),
             [this](QueuedPageInfo&& pi) {
                 mIncStats.measure(StatTime::TotalHandlingPageSave, [&] {
                     handlePageSave(std::move(pi));

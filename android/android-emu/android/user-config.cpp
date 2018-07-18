@@ -20,7 +20,11 @@
 #include "android/utils/path.h"
 #include <stdlib.h>
 #include <errno.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
+#endif
 
 #define  D(...)   VERBOSE_PRINT(init,__VA_ARGS__)
 
@@ -29,6 +33,9 @@
 #else
 #  define  DD(...)  ((void)0)
 #endif
+
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
+#define _WIN32_FT_OFFSET (116444736000000000ULL)
 
 struct AUserConfig {
     ABool        changed;
@@ -152,7 +159,19 @@ auserConfig_new( AvdInfo*  info )
     if (needUUID) {
         struct timeval  tm;
 
+#ifdef _WIN32
+        // Taken from qemu_gettimeofday() from oslib-win32.c
+        union {
+          unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+          FILETIME ft;
+        }  _now;
+
+        GetSystemTimeAsFileTime (&_now.ft);
+        tm.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+        tm.tv_sec= (long)((_now.ns100 - _WIN32_FT_OFFSET) / 10000000ULL);
+#else
         gettimeofday( &tm, NULL );
+#endif
         uc->uuid    = (uint64_t)tm.tv_sec*1000 + tm.tv_usec/1000;
         uc->changed = 1;
         DD("    Generated UUID = %lld", uc->uuid);

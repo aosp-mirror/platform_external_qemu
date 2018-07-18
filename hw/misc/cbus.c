@@ -301,6 +301,7 @@ static inline uint16_t retu_read(CBusRetu *s, int reg)
     default:
         hw_error("%s: bad register %02x\n", __FUNCTION__, reg);
     }
+    return 0;
 }
 
 static inline void retu_write(CBusRetu *s, int reg, uint16_t val)
@@ -540,6 +541,7 @@ static inline uint16_t tahvo_read(CBusTahvo *s, int reg)
     default:
         hw_error("%s: bad register %02x\n", __FUNCTION__, reg);
     }
+    return 0;
 }
 
 static inline void tahvo_write(CBusTahvo *s, int reg, uint16_t val)

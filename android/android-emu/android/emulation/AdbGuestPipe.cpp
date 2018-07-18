@@ -49,6 +49,8 @@
 
 #define DINIT(...) do { if (DEBUG || VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+using std::min;
+
 namespace android {
 namespace emulation {
 
@@ -529,7 +531,7 @@ int AdbGuestPipe::onGuestRecvReply(AndroidPipeBuffer* buffers, int numBuffers) {
         uint8_t* data = buffers[0].data;
         size_t dataSize = buffers[0].size;
         while (dataSize > 0) {
-            size_t avail = std::min(mBufferSize - mBufferPos, dataSize);
+            size_t avail = min(mBufferSize - mBufferPos, dataSize);
             memcpy(data, mBuffer + mBufferPos, avail);
             data += avail;
             dataSize -= avail;
@@ -561,7 +563,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
         const char* data = reinterpret_cast<const char*>(buffers[0].data);
         size_t dataSize = buffers[0].size;
         while (dataSize > 0) {
-            size_t avail = std::min(mBufferSize - mBufferPos, dataSize);
+            size_t avail = min(mBufferSize - mBufferPos, dataSize);
             if (memcmp(data, mBuffer + mBufferPos, avail) != 0) {
                 // Mismatched, this is not what the pipe is expecting.
                 // Closing the connection now is easier than sending 'ko'.

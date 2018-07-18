@@ -1,6 +1,7 @@
 #ifndef QEMU_TIMER_H
 #define QEMU_TIMER_H
 
+#include "qemu/osdep.h"
 #include "qemu/typedefs.h"
 #include "qemu-common.h"
 #include "qemu/notify.h"

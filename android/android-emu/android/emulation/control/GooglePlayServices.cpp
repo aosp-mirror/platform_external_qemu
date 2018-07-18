@@ -14,6 +14,7 @@
 
 #include "android/emulation/control/GooglePlayServices.h"
 
+#include <cctype>
 #include <istream>
 #include <string>
 

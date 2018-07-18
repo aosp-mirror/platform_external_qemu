@@ -826,10 +826,23 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
  *******************************************************************************/
 
 /* Returns current time in microseconds. */
+#define _WIN32_FT_OFFSET (116444736000000000ULL)
 static __inline__ uint64_t _get_timestamp(void) {
     struct timeval t;
     t.tv_sec = t.tv_usec = 0;
+#ifdef _WIN32
+    // Taken from qemu_gettimeofday() from oslib-win32.c
+    union {
+      unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+      FILETIME ft;
+    }  _now;
+
+    GetSystemTimeAsFileTime (&_now.ft);
+    t.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+    t.tv_sec= (long)((_now.ns100 - _WIN32_FT_OFFSET) / 10000000ULL);
+#else
     gettimeofday(&t, NULL);
+#endif
     return (uint64_t)t.tv_sec * 1000000LL + t.tv_usec;
 }
 

@@ -19,13 +19,16 @@
 #include <cassert>
 #include <utility>
 
+using std::min;
+using std::max;
+
 namespace android {
 namespace snapshot {
 
 namespace compress {
 
 int workerCount() {
-    return std::max(2, std::min(4, base::System::get()->getCpuCoreCount() - 1));
+    return max(2, min(4, base::System::get()->getCpuCoreCount() - 1));
 }
 
 int32_t compress(const uint8_t* data,

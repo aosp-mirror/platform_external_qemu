@@ -427,6 +427,7 @@ static int ssys_board_class(const ssys_state *s)
     default:
         hw_error("ssys_board_class: Unknown class 0x%08x\n", did0);
     }
+    return 0;
 }
 
 static uint64_t ssys_read(void *opaque, hwaddr offset,

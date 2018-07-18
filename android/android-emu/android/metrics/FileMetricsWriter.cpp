@@ -28,6 +28,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef _WIN32
+#include <io.h>
+#endif
+
 using android::base::AutoLock;
 using android::base::c_str;
 using android::base::Looper;
