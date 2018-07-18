@@ -12,11 +12,18 @@
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/internal/CpuAccelerator.h"
 
+#include "android/base/StringView.h"
+#include "android/base/system/System.h"
+
 #include <gtest/gtest.h>
 
 #include <string>
 
 #include <stdio.h>
+
+using android::base::StringView;
+using android::base::System;
+using android::base::Version;
 
 namespace android {
 
@@ -117,6 +124,25 @@ TEST(cpuAcceleratorParseVersionScript, Test) {
     ASSERT_EQ(-1, cpuAcceleratorParseVersionScript(""));
 }
 
+TEST(CpuAccelerator, GetMacOSVersionOnMac) {
+    std::string osVersionStr = System::get()->getOsName();
+
+    printf("Mac OS version string: length %zu string: [%s]\n",
+           osVersionStr.size(), osVersionStr.c_str());
+
+    std::string status;
+    EXPECT_GT(parseMacOSVersionString(osVersionStr, &status), Version(9,0,0));
+    EXPECT_EQ(0, status.size());
+}
+
 #endif // __APPLE__
+
+TEST(CpuAccelerator, GetMacOSVersionGeneral) {
+    std::string osVersionStr = "Mac OS X 10.13.6";
+    std::string status;
+    EXPECT_GT(parseMacOSVersionString(osVersionStr, &status), Version(9,0,0));
+
+    EXPECT_EQ(0, status.size());
+}
 
 }  // namespace android
