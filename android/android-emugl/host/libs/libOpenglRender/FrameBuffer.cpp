@@ -224,10 +224,12 @@ void FrameBuffer::finalize() {
     if (m_useSubWindow) {
         removeSubWindow_locked();
     }
+
     m_windows.clear();
     m_contexts.clear();
     if (m_eglDisplay != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
+
         if (m_eglContext != EGL_NO_CONTEXT) {
             s_egl.eglDestroyContext(m_eglDisplay, m_eglContext);
             m_eglContext = EGL_NO_CONTEXT;
@@ -239,6 +241,10 @@ void FrameBuffer::finalize() {
         if (m_pbufSurface != EGL_NO_SURFACE) {
             s_egl.eglDestroySurface(m_eglDisplay, m_pbufSurface);
             m_pbufSurface = EGL_NO_SURFACE;
+        }
+        if (m_eglSurface != EGL_NO_SURFACE) {
+            s_egl.eglDestroySurface(m_eglDisplay, m_eglSurface);
+            m_eglSurface = EGL_NO_SURFACE;
         }
         m_eglDisplay = EGL_NO_DISPLAY;
     }
@@ -467,6 +473,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return false;
     }
 
+    EGLint err = s_egl.eglGetError();
+    if (err != EGL_SUCCESS) {
+        fprintf(stderr, "%s %s %d: EGL error 0x%x\n", __FILE__, __func__,
+                __LINE__, err);
+    }
+
     //
     // Check that we have config for each GLES and GLES2
     //
@@ -585,6 +597,12 @@ FrameBuffer::~FrameBuffer() {
         s_theFrameBuffer = nullptr;
     }
     sInitialized.store(false, std::memory_order_relaxed);
+
+    m_readbackThread.join();
+    m_postThread.join();
+
+    m_readbackWorker.reset();
+    m_postWorker.reset();
 }
 
 WorkerProcessingResult
@@ -758,7 +776,6 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             }
         }
     }
-
 
     // At this point, if the subwindow doesn't exist, it is because it either
     // couldn't be created
