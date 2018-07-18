@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90019c5b_d63731f2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-18T02:34:33Z",
+      "side": 1,
+      "message": "Can we get away with using GL_FRAMEBUFFER (or in gles1, GL_FRAMEBUFFER_OES with glBindFramebufferOES?)?\n\nTeh idea is that GL_FRAMEBUFFER in gles2 will occupy both GL_READ_FRAMEBUFFER + GL_DRAW_FRAMEBUFFER bindings, but that\u0027s fine with glCopyTex(Sub)image2d.\n\nand since it\u0027s not gles3, we don\u0027t have glRenderbufferStorageMultisample for multisampled rendering (and we don\u0027t support multisampled FBO 0 (heh, for now)), and thus we don\u0027t have to use glBlitFramebuffer to resolve, which would need us to bind the color buffer texture separately to the draw fbo.",
+      "range": {
+        "startLine": 420,
+        "startChar": 0,
+        "endLine": 426,
+        "endChar": 13
+      },
+      "revId": "f4809001301048173ac761124c7029dfc2253055",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
