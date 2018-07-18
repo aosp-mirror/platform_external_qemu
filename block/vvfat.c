@@ -34,6 +34,10 @@
 #include "qapi/qmp/qstring.h"
 #include "qemu/cutils.h"
 
+#ifdef _WIN32
+#include <direct.h>
+#endif
+
 #ifndef S_IWGRP
 #define S_IWGRP 0
 #endif
@@ -526,7 +530,11 @@ static uint16_t fat_datetime(time_t time,int return_time) {
     struct tm* t;
     struct tm t1;
     t = &t1;
+#ifdef _WIN32
+    localtime_s(t, &time);
+#else
     localtime_r(&time,t);
+#endif
     if(return_time)
 	return cpu_to_le16((t->tm_sec/2)|(t->tm_min<<5)|(t->tm_hour<<11));
     return cpu_to_le16((t->tm_mday)|((t->tm_mon+1)<<5)|((t->tm_year-80)<<9));
@@ -2577,8 +2585,12 @@ static int handle_renames_and_mkdirs(BDRVVVFATState* s)
 	    mapping_t* mapping;
 	    int j, parent_path_len;
 
+#ifdef _WIN32
 #ifdef __MINGW32__
             if (mkdir(commit->path))
+#else
+            if (_mkdir(commit->path))
+#endif  // __MINGW32__
                 return -5;
 #else
             if (mkdir(commit->path, 0755))
@@ -2724,7 +2736,11 @@ static int handle_deletes(BDRVVVFATState* s)
 			int j, next_dir_index = s->directory.next,
 			first_dir_index = mapping->info.dir.first_dir_index;
 
+#ifdef _WIN32
+                        if (_rmdir(mapping->path) < 0) {
+#else
 			if (rmdir(mapping->path) < 0) {
+#endif
 			    if (errno == ENOTEMPTY) {
 				deferred++;
 				continue;
