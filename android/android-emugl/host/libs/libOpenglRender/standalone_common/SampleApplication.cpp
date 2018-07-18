@@ -180,12 +180,13 @@ private:
 };
 
 // SampleApplication implementation/////////////////////////////////////////////
-SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate) :
+SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate, GLESApi glVersion) :
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate) {
 
     setupStandaloneLibrarySearchPaths();
 
     LazyLoadedEGLDispatch::get();
+    if (glVersion == GLESApi_CM) LazyLoadedGLESv1Dispatch::get();
     LazyLoadedGLESv2Dispatch::get();
 
     bool useHostGpu = shouldUseHostGpu();
@@ -211,7 +212,7 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
     mRenderThreadInfo.reset(new RenderThreadInfo());
 
     mColorBuffer = mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
-    mContext = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    mContext = mFb->createRenderContext(0, 0, glVersion);
     mSurface = mFb->createWindowSurface(0, mWidth, mHeight);
 
     mFb->bindContext(mContext, mSurface, mSurface);

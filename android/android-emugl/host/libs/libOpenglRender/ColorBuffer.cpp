@@ -411,10 +411,24 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
             s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
 
+            const bool isGles3 = tInfo->currContext->clientVersion() > GLESApi_2;
+
+            // Make sure that we unbind any existing GL_READ_FRAMEBUFFER before
+            // calling glCopyTexSubImage2D, otherwise we may blit from the
+            // guest's current read framebuffer instead of the EGL read buffer.
+            // Note that GL_READ_FRAMEBUFFER is only available in GLESv3.
+            GLint prev_read_fbo = 0;
+            if (isGles3) {
+                s_gles2.glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prev_read_fbo);
+                if (prev_read_fbo != 0) {
+                    s_gles2.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+                }
+            }
+
             // If the read buffer is multisampled, we need to resolve.
             GLint samples;
             s_gles2.glGetIntegerv(GL_SAMPLE_BUFFERS, &samples);
-            if (tInfo->currContext->clientVersion() > GLESApi_2 && samples > 0) {
+            if (isGles3 && samples > 0) {
                 s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 
                 GLuint resolve_fbo;
@@ -435,9 +449,15 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
                 s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
                 s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
             } else {
+                // If the buffer is not multisampled, perform a normal texture copy.
                 s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                         m_height);
             }
+
+            if (isGles3 && prev_read_fbo != 0) {
+                s_gles2.glBindFramebuffer(GL_READ_FRAMEBUFFER, (GLuint)prev_read_fbo);
+            }
+
             s_gles2.glDeleteTextures(1, &tmpTex);
             s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
 
