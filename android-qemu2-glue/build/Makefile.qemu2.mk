@@ -219,26 +219,8 @@ $(call end-emulator-library)
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
-QEMU2_TARGET := x86
-include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-
-QEMU2_TARGET := x86_64
-include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-
-ifeq (,$(CONFIG_MIN_BUILD))
-
-    QEMU2_TARGET := arm
-    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-
-    QEMU2_TARGET := arm64
-    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-
-    QEMU2_TARGET := mips
-    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-
-    QEMU2_TARGET := mips64
-    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-endif   # !CONFIG_MIN_BUILD
+$(foreach QEMU2_TARGET, $(QEMU2_TARGETS), \
+  $(eval include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk))
 
 # TODO(jansene): This gets included twice in the windows build (32 bit/64 bit)
 # causing targets to be overridden.
