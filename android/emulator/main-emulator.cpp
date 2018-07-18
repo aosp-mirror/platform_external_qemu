@@ -84,10 +84,6 @@ using android::base::System;
 #define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
-static char* getClassicEmulatorPath(const char* progDir,
-                                    const char* avdArch,
-                                    int* wantedBitness);
-
 static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,
                                    bool force64bitTarget,
@@ -533,24 +529,7 @@ int main(int argc, char** argv)
     bool isSnapshotPresent = false;
 
     if (engine) {
-        if (!strcmp(engine, "auto")) {
-            if (isSnapshotPresent) {
-                fprintf(stderr, "WARNING: only classic engine supports snapshot, option 'auto' ignored.\n");
-            } else {
-                ranchu = RANCHU_AUTODETECT;
-            }
-        } else if (!strcmp(engine, "classic")) {
-            ranchu = RANCHU_OFF;
-        } else if (!strcmp(engine, "qemu2")) {
-            if (isSnapshotPresent) {
-                fprintf(stderr, "WARNING: qemu2 does not support snapshot, option 'qemu2' ignored.\n");
-            } else {
-                ranchu = RANCHU_ON;
-            }
-        } else {
-            APANIC("Invalid -engine value '%s', please use one of: auto, classic, qemu2\n",
-                   engine);
-        }
+        fprintf(stderr, "WARNING: The engine option is deprecated, and no longer functional.\n");
     }
 
     if (ranchu == RANCHU_AUTODETECT) {
@@ -588,12 +567,12 @@ int main(int argc, char** argv)
         }
     }
 
+    if (ranchu != RANCHU_ON) {
+        APANIC("The classic engine is deprecated, unable to launch this avd.");
+    }
+    //
     // Sanity checks.
     if (avdName) {
-        if (ranchu == RANCHU_OFF && !isCpuArchSupportedByGoldfish(avdArch)) {
-            APANIC("CPU Architecture '%s' is not supported by the classic emulator",
-                   avdArch);
-        }
         if (ranchu == RANCHU_ON && !isCpuArchSupportedByRanchu(avdArch)) {
             APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
                    avdArch);
@@ -611,12 +590,6 @@ int main(int argc, char** argv)
             }
         }
     }
-#ifdef _WIN32
-    // Windows version of Qemu1 works only in x86 mode
-    if (ranchu == RANCHU_OFF) {
-        wantedBitness = 32;
-    }
-#endif
 
     // in some cases, progDirSystem is incorrect, so we have to
     // search from the folder from the command line
@@ -636,13 +609,8 @@ int main(int argc, char** argv)
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
         D("try dir %s", candidates[i].data());
         progDir = candidates[i];
-        if (ranchu == RANCHU_ON) {
-            emulatorPath = getQemuExecutablePath(
-                    progDir.data(), avdArch, force64bitTarget, wantedBitness);
-        } else {
-            emulatorPath = getClassicEmulatorPath(progDir.data(), avdArch,
-                                                  &wantedBitness);
-        }
+        emulatorPath = getQemuExecutablePath(
+                progDir.data(), avdArch, force64bitTarget, wantedBitness);
         D("Trying emulator path '%s'", emulatorPath);
         if (path_exists(emulatorPath)) {
             break;
@@ -778,28 +746,6 @@ static char* probeTargetEmulatorPath(const char* progDir,
     }
 
     return NULL;
-}
-
-// Find the absolute path to the classic emulator binary that supports CPU architecture
-// |avdArch|. |progDir| is the program's directory.
-static char* getClassicEmulatorPath(const char* progDir,
-                                    const char* avdArch,
-                                    int* wantedBitness) {
-    const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
-    if (!emulatorSuffix) {
-        APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
-    }
-    D("Looking for emulator-%s to emulate '%s' CPU", emulatorSuffix,
-      avdArch);
-
-    char* result = probeTargetEmulatorPath(progDir,
-                                           emulatorSuffix,
-                                           wantedBitness);
-    if (!result) {
-        APANIC("Missing emulator engine program for '%s' CPU.\n", avdArch);
-    }
-    D("return result: %s", result);
-    return result;
 }
 
 // Convert an emulator-specific CPU architecture name |avdArch| into the
