@@ -22,6 +22,30 @@
       "revId": "f4809001301048173ac761124c7029dfc2253055",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "118948f9_4f68437c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-18T23:19:49Z",
+      "side": 1,
+      "message": "Updated.  Note that glBindFramebufferOES requires an extension, and in our test environment it\u0027s both possible to have a framebuffer returned from GL_FRAMEBUFFER_BINDING_OES and not be able to set it with glBindFramebufferOES.\n\nTo avoid having to check the extension, I am using the gles2 API which has the same underlying storage.",
+      "parentUuid": "90019c5b_d63731f2",
+      "range": {
+        "startLine": 420,
+        "startChar": 0,
+        "endLine": 426,
+        "endChar": 13
+      },
+      "revId": "f4809001301048173ac761124c7029dfc2253055",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
