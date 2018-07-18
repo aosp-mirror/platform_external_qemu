@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8aef3768_14fba844",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-18T15:49:24Z",
+      "side": 1,
+      "message": "Please either make this a separate test case, or just don\u0027t do it. This case will be really hard to repro because it\u0027s machine-dependent; at least print out the version string so the log would help to understand what exactly caused failure. Print it in quotes and also print out the length, to make sure there\u0027s enough data to repro it.",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 6
+      },
+      "revId": "85271a65560b6d9d23516c9de99013e1d17f68e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
