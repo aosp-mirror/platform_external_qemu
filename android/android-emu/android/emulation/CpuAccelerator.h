@@ -94,4 +94,7 @@ std::pair<AndroidHyperVStatus, std::string> GetHyperVStatus();
 // (and a text explanation as well)
 std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo();
 
+// For testing
+base::Version parseMacOSVersionString(const std::string& str, std::string* status);
+
 }  // namespace android
