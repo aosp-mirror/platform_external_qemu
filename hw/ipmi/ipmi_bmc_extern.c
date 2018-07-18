@@ -99,6 +99,72 @@ ipmb_checksum(const unsigned char *data, int size, unsigned char start)
         return csum;
 }
 
+#if 1
+static bool checkReset(IPMIBmcExtern *ibe)
+{
+    if (ibe->connected && ibe->send_reset) {
+        /* Send the reset */
+        ibe->outbuf[0] = VM_CMD_RESET;
+        ibe->outbuf[1] = VM_CMD_CHAR;
+        ibe->outlen = 2;
+        ibe->outpos = 0;
+        ibe->send_reset = false;
+        ibe->sending_cmd = true;
+        return true;
+    }
+    return false;
+}
+
+static void continue_send(IPMIBmcExtern *ibe)
+{
+    int ret;
+    if (ibe->outlen == 0 && !checkReset(ibe)) {
+        if (ibe->waiting_rsp) {
+            /* Make sure we get a response within 4 seconds. */
+            timer_mod_ns(ibe->extern_timer,
+                         qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + 4000000000ULL);
+        }
+        return;
+    }
+
+    while (true) {
+        ret = qemu_chr_fe_write(&ibe->chr, ibe->outbuf + ibe->outpos,
+                                ibe->outlen - ibe->outpos);
+        if (ret > 0) {
+            ibe->outpos += ret;
+        }
+        if (ibe->outpos < ibe->outlen) {
+            /* Not fully transmitted, try again in a 10ms */
+            timer_mod_ns(ibe->extern_timer,
+                         qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + 10000000);
+        } else {
+            /* Sent */
+            ibe->outlen = 0;
+            ibe->outpos = 0;
+            if (!ibe->sending_cmd) {
+                ibe->waiting_rsp = true;
+            } else {
+                ibe->sending_cmd = false;
+            }
+
+            if (checkReset(ibe)) {
+                continue;
+            }
+
+            if (ibe->waiting_rsp) {
+                /* Make sure we get a response within 4 seconds. */
+                timer_mod_ns(ibe->extern_timer,
+                             qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + 4000000000ULL);
+            }
+            break;
+        }
+    }
+}
+#endif
+
+#if 0
+// This function is crashing the clang compiler when cross-compiling to windows
+// on linux. I rewrote it and removed the jumps.
 static void continue_send(IPMIBmcExtern *ibe)
 {
     int ret;
@@ -144,6 +210,7 @@ static void continue_send(IPMIBmcExtern *ibe)
     }
     return;
 }
+#endif
 
 static void extern_timeout(void *opaque)
 {

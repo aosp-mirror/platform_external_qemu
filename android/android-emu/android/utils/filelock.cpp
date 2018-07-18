@@ -17,6 +17,8 @@
 #include "android/utils/lock.h"
 #include "android/utils/path.h"
 
+#include <algorithm>
+
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -155,7 +157,8 @@ static int filelock_lock(FileLock* lock, int timeout) {
 
     HANDLE lockHandle = INVALID_HANDLE_VALUE;
     bool createFileResult = false;
-    int sleep_duration_ms = std::min(200, timeout);
+    using std::min;
+    int sleep_duration_ms = min(200, timeout);
     for (;;) {
         bool slept = false;
         if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
@@ -232,7 +235,8 @@ static int filelock_lock(FileLock* lock, int timeout) {
             }
             timeout -= sleep_duration_ms;
         }
-        sleep_duration_ms = std::min(sleep_duration_ms, timeout);
+        using std::min;
+        sleep_duration_ms = min(sleep_duration_ms, timeout);
     }
 
     if (!createFileResult) {

@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include <winbase.h>
+#include <direct.h>
 #else
 #include <unistd.h>
 #include <sys/stat.h>
@@ -53,6 +54,11 @@
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
 
 #ifdef _WIN32
+typedef SSIZE_T ssize_t;
+#define F_ACCESS_OK 0   /* Check for file existence */
+#define X_ACCESS_OK 1   /* Check for execute permission */
+#define W_ACCESS_OK 2   /* Check for write permission */
+#define R_ACCESS_OK 4   /* Check for read permission */
 using android::base::arraySize;
 using android::base::ScopedFileHandle;
 using android::base::Win32UnicodeString;
@@ -421,13 +427,13 @@ path_copy_file( const char*  dest, const char*  source )
     if (status != 0 || isSameFile) {
         return status;
     }
-    if (android_access(source, R_OK) < 0) {
+    if (android_access(source, R_ACCESS_OK) < 0) {
         D("%s: source file is un-readable: %s\n",
           __FUNCTION__, source);
 
         // If the |source| exists but unreadable, create empty |dest| before
         // failing.
-        if (android_access(source, F_OK) == 0) {
+        if (android_access(source, F_ACCESS_OK) == 0) {
             path_empty_file(dest);
         }
 
@@ -695,7 +701,11 @@ APosixStatus path_delete_dir(const char* path) {
         name = dirScanner_nextFull(dirScanner.get());
     }
 
+#ifdef _WIN32
+    auto res = _rmdir(path);
+#else
     auto res = rmdir(path);
+#endif
     fullRes = fullRes ? fullRes : res;
     return fullRes;
 }

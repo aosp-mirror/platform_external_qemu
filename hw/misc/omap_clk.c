@@ -1110,6 +1110,7 @@ struct clk *omap_findclk(struct omap_mpu_state_s *mpu, const char *name)
         if (!strcmp(i->name, name) || (i->alias && !strcmp(i->alias, name)))
             return i;
     hw_error("%s: %s not found\n", __FUNCTION__, name);
+    return NULL;
 }
 
 void omap_clk_get(struct clk *clk)

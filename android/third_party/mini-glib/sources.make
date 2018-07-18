@@ -15,6 +15,7 @@ LOCAL_SRC_FILES := src/glib-mini.c
 
 ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += src/glib-mini-win32.c
+LOCAL_CFLAGS += -Wno-unused-local-typedef
 endif
 
 $(call end-emulator-library)
