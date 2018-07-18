@@ -205,6 +205,8 @@ void FrameBuffer::waitUntilInitialized() {
 }
 
 void FrameBuffer::finalize() {
+    fprintf(stderr, " ! finalizing FrameBuffer ------------- \n");
+
     AutoLock lock(sGlobals->lock);
     sInitialized.store(true, std::memory_order_relaxed);
     sGlobals->condVar.broadcastAndUnlock(&lock);
@@ -224,10 +226,12 @@ void FrameBuffer::finalize() {
     if (m_useSubWindow) {
         removeSubWindow_locked();
     }
+
     m_windows.clear();
     m_contexts.clear();
     if (m_eglDisplay != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(m_eglDisplay, NULL, NULL, NULL);
+
         if (m_eglContext != EGL_NO_CONTEXT) {
             s_egl.eglDestroyContext(m_eglDisplay, m_eglContext);
             m_eglContext = EGL_NO_CONTEXT;
@@ -244,6 +248,12 @@ void FrameBuffer::finalize() {
     }
 
     m_readbackThread.enqueue({ReadbackCmd::Exit});
+
+    EGLint err;
+    if ((err = s_egl.eglGetError()) != EGL_SUCCESS) {
+        fprintf(stderr, "%s %s %d: EGL error 0x%x\n", __FILE__, __func__,
+                __LINE__, err);
+    }
 }
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
@@ -467,6 +477,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return false;
     }
 
+    EGLint err;
+    if ((err = s_egl.eglGetError()) != EGL_SUCCESS) {
+        fprintf(stderr, "%s %s %d: EGL error 0x%x\n", __FILE__, __func__,
+                __LINE__, err);
+    }
+
     //
     // Check that we have config for each GLES and GLES2
     //
@@ -585,6 +601,12 @@ FrameBuffer::~FrameBuffer() {
         s_theFrameBuffer = nullptr;
     }
     sInitialized.store(false, std::memory_order_relaxed);
+
+    EGLint err;
+    if ((err = s_egl.eglGetError()) != EGL_SUCCESS) {
+        fprintf(stderr, "%s %s %d: EGL error 0x%x\n", __FILE__, __func__,
+                __LINE__, err);
+    }
 }
 
 WorkerProcessingResult
@@ -758,7 +780,6 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             }
         }
     }
-
 
     // At this point, if the subwindow doesn't exist, it is because it either
     // couldn't be created
