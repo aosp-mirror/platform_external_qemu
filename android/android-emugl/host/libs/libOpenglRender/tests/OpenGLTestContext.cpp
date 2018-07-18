@@ -142,6 +142,11 @@ void GLTest::TearDown() {
     destroyContext(m_display, m_context);
     destroySurface(m_display, m_surface);
     destroyDisplay(m_display);
+
+    EGLint error = egl->eglGetError();
+    if (error != EGL_SUCCESS) {
+        fprintf(stderr, "GLTest teardown found EGL error 0x%x\n", error);
+    }
 }
 
 } // namespace emugl
