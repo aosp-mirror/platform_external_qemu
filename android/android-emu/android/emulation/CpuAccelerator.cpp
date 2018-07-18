@@ -180,7 +180,6 @@ AndroidCpuAcceleration ProbeWHPX(std::string* status) {
         }
     } else {
         WHPX_DBG("Could not load library WinHvPlatform.dll");
-        fprintf(stderr, "Could not load library 'WinHvPlatform.dll'.\n");
         status->assign("Could not load library 'WinHvPlatform.dll'.");
         acc_available = false;
     }
