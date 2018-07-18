@@ -20,7 +20,11 @@
 #include "android/utils/path.h"
 #include <stdlib.h>
 #include <errno.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
+#endif
 
 #define  D(...)   VERBOSE_PRINT(init,__VA_ARGS__)
 

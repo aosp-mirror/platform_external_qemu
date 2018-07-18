@@ -14,7 +14,9 @@
 #include "exec/exec-all.h"
 #include "exec/ioport.h"
 #include "qemu-common.h"
+#ifndef _WIN32
 #include "strings.h"
+#endif
 #include "sysemu/accel.h"
 #include "sysemu/whpx.h"
 #include "sysemu/sysemu.h"

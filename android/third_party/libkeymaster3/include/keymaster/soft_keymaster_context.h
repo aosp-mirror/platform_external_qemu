@@ -20,6 +20,15 @@
 #include <memory>
 #include <string>
 
+#ifdef _WIN32
+// Defined in openssl/base.h and msvc's wincrypt.h
+#ifdef X509_NAME
+#undef X509_NAME
+#endif
+#ifdef X509_CERT_PAIR
+#undef X509_CERT_PAIR
+#endif
+#endif  // _WIN32
 #include <openssl/evp.h>
 
 #include <hardware/keymaster0.h>

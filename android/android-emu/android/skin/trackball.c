@@ -13,9 +13,20 @@
 #include "android/skin/image.h"
 #include "android/utils/system.h"
 
+#ifdef _WIN32
+// to get M_PI
+#define _USE_MATH_DEFINES
+#endif
 #include <math.h>
 #include <stdlib.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <sys/time.h>
+#endif
+
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
+#define _WIN32_FT_OFFSET (116444736000000000ULL)
 
 // Return the number of milliseconds since the start of this module.
 static uint32_t get_ticks(void) {
@@ -23,7 +34,19 @@ static uint32_t get_ticks(void) {
     static uint32_t tick_offset;
 
     struct timeval tv;
+#ifdef _WIN32
+    // Taken from qemu_gettimeofday() from oslib-win32.c
+    union {
+      unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+      FILETIME ft;
+    }  _now;
+
+    GetSystemTimeAsFileTime (&_now.ft);
+    tv.tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+    tv.tv_sec= (long)((_now.ns100 - _WIN32_FT_OFFSET) / 10000000ULL);
+#else
     gettimeofday(&tv, NULL);
+#endif
 
     uint32_t now =
             (uint32_t)(tv.tv_sec * 1000U) + (uint32_t)(tv.tv_usec / 1000U);

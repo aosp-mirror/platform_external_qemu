@@ -23,7 +23,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #ifdef _WIN32
 #include "android/base/system/Win32Utils.h"
@@ -32,6 +31,7 @@
 
 using android::base::Win32Utils;
 #else
+#include <unistd.h>
 #include <sys/wait.h>
 #endif
 
