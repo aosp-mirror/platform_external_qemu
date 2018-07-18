@@ -223,6 +223,8 @@ public:
 
     HandleType getHndl() const;
 
+    bool isFastBlitSupported() const { return m_fastBlitSupported; }
+
 public:
     void restore();
 
