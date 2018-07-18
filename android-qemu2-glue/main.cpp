@@ -83,7 +83,9 @@ extern "C" {
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <algorithm>
 
 #include "android/version.h"

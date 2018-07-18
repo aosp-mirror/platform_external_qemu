@@ -204,6 +204,15 @@ size_t buffer_find_nonzero_offset(const void *buf, size_t len)
     for (i = BUFFER_FIND_NONZERO_OFFSET_UNROLL_FACTOR;
          i < len / sizeof(VECTYPE);
          i += BUFFER_FIND_NONZERO_OFFSET_UNROLL_FACTOR) {
+#ifdef _WIN32
+        VECTYPE tmp0 = _mm_or_si128(p[i + 0], p[i + 1]);
+        VECTYPE tmp1 = _mm_or_si128(p[i + 2], p[i + 3]);
+        VECTYPE tmp2 = _mm_or_si128(p[i + 4], p[i + 5]);
+        VECTYPE tmp3 = _mm_or_si128(p[i + 6], p[i + 7]);
+        VECTYPE tmp01 = _mm_or_si128(tmp0, tmp1);
+        VECTYPE tmp23 = _mm_or_si128(tmp2, tmp3);
+        if (!ALL_EQ(_mm_or_si128(tmp01, tmp23), zero)) {
+#else
         VECTYPE tmp0 = p[i + 0] | p[i + 1];
         VECTYPE tmp1 = p[i + 2] | p[i + 3];
         VECTYPE tmp2 = p[i + 4] | p[i + 5];
@@ -211,6 +220,7 @@ size_t buffer_find_nonzero_offset(const void *buf, size_t len)
         VECTYPE tmp01 = tmp0 | tmp1;
         VECTYPE tmp23 = tmp2 | tmp3;
         if (!ALL_EQ(tmp01 | tmp23, zero)) {
+#endif
             break;
         }
     }

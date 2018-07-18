@@ -93,9 +93,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#ifndef _WIN32
 #include <sys/time.h>
-#include <time.h>
 #include <unistd.h>
+#endif
+#include <time.h>
 #include <zlib.h>
 
 /* Needed early for CONFIG_BSD etc. */
@@ -1520,7 +1522,7 @@ qemu_find_file_with_subdir(const char* data_dir, const char* subdir, const char*
 
     snprintf(buf, len, "%s/%s%s", data_dir, subdir, name);
     VERBOSE_PRINT(init,"    trying to find: %s\n", buf);
-    if (access(buf, R_OK)) {
+    if (access(buf, R_ACCESS_OK)) {
         g_free(buf);
         return NULL;
     }
@@ -1534,7 +1536,7 @@ char *qemu_find_file(int type, const char *name)
 
     /* If name contains path separators then try it as a straight path.  */
     if ((strchr(name, '/') || strchr(name, '\\'))
-        && access(name, R_OK) == 0) {
+        && access(name, R_ACCESS_OK) == 0) {
         return strdup(name);
     }
     switch (type) {

@@ -305,6 +305,7 @@ target_ulong helper_get_dr(CPUX86State *env, int reg)
         }
     }
     raise_exception_err_ra(env, EXCP06_ILLOP, 0, GETPC());
+    return 0;
 }
 
 /* Check if Port I/O is trapped by a breakpoint.  */

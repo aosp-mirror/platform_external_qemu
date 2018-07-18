@@ -21,12 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include <zlib.h>
 
 #include "android/tcpdump.h"

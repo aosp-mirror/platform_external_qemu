@@ -82,6 +82,11 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_SYSTEM_INCLUDES) \
     $(call qemu2-if-target,arm arm64,$(LOCAL_PATH)/disas/libvixl) \
 
+ifeq ($(BUILD_TARGET_OS),windows)
+    LOCAL_C_INCLUDES += $(LIBGETOPT_INCLUDES)
+    LOCAL_STATIC_LIBRARIES := emulator-libgetopt
+endif
+
 LOCAL_SRC_FILES += \
     $(QEMU2_TARGET_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \
@@ -125,6 +130,7 @@ ifeq (,$(CONFIG_MIN_BUILD))
         $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
         libqemu2-util \
         libqemu2-stubs \
+	emulator-libgetopt \
 
     LOCAL_CFLAGS += \
         $(QEMU2_SYSTEM_CFLAGS) \
@@ -132,6 +138,7 @@ ifeq (,$(CONFIG_MIN_BUILD))
     LOCAL_C_INCLUDES += \
         $(QEMU2_SYSTEM_INCLUDES) \
         $(QEMU2_SDL2_INCLUDES) \
+        $(LIBGETOPT_INCLUDES) \
 
     LOCAL_SRC_FILES += \
         $(call qemu2-if-target,x86 x86_64, \
@@ -172,6 +179,7 @@ LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     libqemu2-util \
     libqemu2-stubs \
+    emulator-libgetopt \
 
 
 LOCAL_CFLAGS += \
@@ -182,6 +190,7 @@ LOCAL_C_INCLUDES += \
     $(QEMU2_SYSTEM_INCLUDES) \
     $(QEMU2_GLUE_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
+    $(LIBGETOPT_INCLUDES) \
 
 # For now, use stubs/sdl-null.c as an empty/fake SDL UI backend.
 # TODO: Use the glue code to use the Qt-based UI instead.

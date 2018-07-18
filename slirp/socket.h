@@ -138,6 +138,8 @@ static inline socklen_t sockaddr_size(struct sockaddr_storage *a)
     default:
         g_assert_not_reached();
     }
+
+    return 0;
 }
 
 const char* sockaddr_to_string(const struct sockaddr_storage* ss);

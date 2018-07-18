@@ -32,12 +32,14 @@
 #include "hw/msmouse.h"
 #include "qapi/qmp/types.h"
 
+#ifndef _WIN32
 #include <unistd.h>
+#include <sys/time.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
-#include <sys/time.h>
 #include <zlib.h>
 
 #ifndef _WIN32

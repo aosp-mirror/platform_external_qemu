@@ -73,6 +73,8 @@ LOCAL_C_INCLUDES := $(LIBKEYMASTER3_INCLUDES) \
 
 ifeq (windows,$(BUILD_TARGET_OS))
 LOCAL_CFLAGS := -DUSE_MINGW=1
+LOCAL_CFLAGS += -Wno-unused-local-typedef
+LOCAL_CXXFLAGS += -fcxx-exceptions
 endif
 
 $(call end-emulator-library)

@@ -1446,7 +1446,7 @@ GL_APICALL void  GL_APIENTRY glGenBuffers(GLsizei n, GLuint* buffers){
 
 static int maxMipmapLevel(GLsizei width, GLsizei height) {
     // + 0.5 for potential floating point rounding issue
-    return log2(std::max(width, height) + 0.5);
+    return log2((std::max)(width, height) + 0.5);
 }
 
 GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
@@ -1548,7 +1548,7 @@ static void s_getActiveAttribOrUniform(bool isUniform, GLEScontext* ctx,
 
     // Don't overstate how many non-nullterminator characters
     // we are returning.
-    int strlenForGuest = std::min((int)(bufsize - 1), (int)guestVarName.size());
+    int strlenForGuest = (std::min)((int)(bufsize - 1), (int)guestVarName.size());
 
     if (length) *length = strlenForGuest;
     if (size) *size = hostSize;

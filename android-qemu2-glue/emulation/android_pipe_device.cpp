@@ -129,12 +129,16 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
             static_assert(
                     sizeof(AndroidPipeBuffer) == sizeof(GoldfishPipeBuffer),
                     "Invalid PipeBuffer sizes");
+            // static_assert with offsetof() does not work with MSVC, as
+            // offsetof() is defined with a reinterpret_cast.
+#ifndef _WIN32
             static_assert(offsetof(AndroidPipeBuffer, data) ==
                                   offsetof(GoldfishPipeBuffer, data),
                           "Invalid PipeBuffer::data offsets");
             static_assert(offsetof(AndroidPipeBuffer, size) ==
                                   offsetof(GoldfishPipeBuffer, size),
                           "Invalid PipeBuffer::size offsets");
+#endif
             return android_pipe_guest_recv(
                     hostPipe, reinterpret_cast<AndroidPipeBuffer*>(buffers),
                     numBuffers);

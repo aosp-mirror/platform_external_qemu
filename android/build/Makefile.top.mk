@@ -46,10 +46,17 @@ BUILD_TARGET_CFLAGS := \
     -g -fno-exceptions \
     $(call if-target-clang,, -fno-unwind-tables) \
     $(BUILD_WARNING_CFLAGS)
-BUILD_TARGET_CXXFLAGS := \
-    -fno-rtti \
-    -DGOOGLE_PROTOBUF_NO_RTTI \
-    $(BUILD_WARNING_CXXFLAGS)
+
+ifeq (windows,$(BUILD_TARGET_OS))
+    BUILD_TARGET_CXXFLAGS := \
+        -DGOOGLE_PROTOBUF_NO_RTTI \
+        $(BUILD_WARNING_CXXFLAGS)
+else
+    BUILD_TARGET_CXXFLAGS := \
+        -fno-rtti \
+        -DGOOGLE_PROTOBUF_NO_RTTI \
+        $(BUILD_WARNING_CXXFLAGS)
+endif
 
 BUILD_OPT_CFLAGS :=
 BUILD_OPT_LDFLAGS :=
@@ -70,7 +77,7 @@ else
 endif
 
 ifeq (windows,$(BUILD_TARGET_OS))
-   BUILD_TARGET_CFLAGS += -falign-functions -ftracer
+   #BUILD_TARGET_CFLAGS += -falign-functions -ftracer
 
    # pirama@google.com: We're building GCC with --enable-shared so we can get
    # libgcc_eh.a (which is needed for building with Clang).  But in this
@@ -119,6 +126,58 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-private-field \
                       -Wno-unused-value \
 
+ifeq (windows,$(BUILD_TARGET_OS))
+    CLANG_COMPILER_FLAGS_TARGET= \
+		            $(CLANG_COMPILER_FLAGS) \
+			    -Wno-msvc-not-found \
+			    -Wno-expansion-to-defined \
+			    -Wno-ignored-attributes \
+		            -Wno-unused-local-typedef \
+			    -Wno-int-to-void-pointer-cast \
+			    -Wno-ignored-pragma-intrinsic \
+			    -Wno-pragma-pack \
+			    -Wno-microsoft-anon-tag \
+			    -Wno-incompatible-pointer-types \
+			    -Wno-invalid-token-paste \
+			    -Wno-microsoft-include \
+			    -Wno-microsoft-enum-forward-reference \
+                            -Wno-format \
+                            -Wno-incompatible-ms-struct \
+                            -Wno-return-type \
+                            -Wno-c++11-narrowing \
+		            -Wno-cast-calling-convention \
+		            -Wno-comment \
+		            -Wno-invalid-noreturn \
+		            -Wno-microsoft-cast \
+			    -Wno-unused-command-line-argument \
+    			    -fcxx-exceptions \
+			    -DLIEF_DISABLE_FROZEN=on \
+			    -D_CRT_SECURE_NO_WARNINGS
+
+    CLANG_COMPILER_CXXFLAGS_TARGET= \
+				    -std=c++14 \
+				    -Werror=c++14-compat
+
+    CLANG_COMPILER_LDFLAGS_TARGET = \
+	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/lib/x64 \
+	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/lib/10.0.16299.0/ucrt/x64 \
+	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/lib/10.0.16299.0/um/x64
+    CLANG_COMPILER_FLAGS_TARGET += \
+	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/msvc/include \
+	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/extras/include \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/ucrt \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/um \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/winrt \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/hypervisor \
+    	-I/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/include/10.0.16299.0/shared
+
+    ifneq (,$(EMULATOR_BUILD_32BITS))
+        CLANG_COMPILER_FLAGS_TARGET += -target i386-pc-win32
+    else
+        CLANG_COMPILER_FLAGS_TARGET += -target x86_64-pc-win32
+    endif
+endif
+
 # Add your tidy checks here.
 CLANG_TIDY_CHECKS=-*, \
                   modernize-*. \
@@ -133,7 +192,8 @@ CLANG_TIDY_CHECKS=-*, \
 # you do not want to be analyzed.
 CLANG_TIDY_HEADER_INCLUDE=android.*(!Compiler.h)
 
-BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS))
+BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS_TARGET))
+BUILD_TARGET_CXXFLAGS += $(call if-target-clang,$(CLANG_COMPILER_CXXFLAGS_TARGET))
 BUILD_HOST_CFLAGS   += $(call if-host-clang,$(CLANG_COMPILER_FLAGS))
 
 ifeq (true,$(BUILD_ENABLE_LTO))
@@ -181,6 +241,10 @@ BUILD_TARGET_LDFLAGS := $(BUILD_OPT_LDFLAGS)
 
 ifeq (darwin,$(BUILD_TARGET_OS))
   BUILD_TARGET_LDFLAGS += -w
+endif
+
+ifeq (windows,$(BUILD_TARGET_OS))
+    BUILD_TARGET_LDFLAGS += $(call if-target-clang,$(CLANG_COMPILER_LDFLAGS_TARGET))
 endif
 
 BUILD_TARGET_LDFLAGS32 :=
@@ -254,7 +318,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
   # Ensure that printf() et al use GNU printf format specifiers as required
   # by QEMU. This is important when using the newer Mingw64 cross-toolchain.
   # See http://sourceforge.net/apps/trac/mingw-w64/wiki/gnu%20printf
-  BUILD_TARGET_CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
+  #BUILD_TARGET_CFLAGS += -D__USE_MINGW_ANSI_STDIO=1
 endif
 
 # Enable warning, except those related to missing field initializers
@@ -275,8 +339,10 @@ BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
 BUILD_TARGET_CFLAGS += -D__packed=__attribute\(\(packed\)\)
 
 # Copy the current target cflags into the host ones.
-BUILD_HOST_CXXFLAGS += $(BUILD_TARGET_CXXFLAGS)
-BUILD_HOST_LDFLAGS += $(BUILD_TARGET_LDFLAGS)
+ifneq ($(BUILD_TARGET_OS),windows)
+    BUILD_HOST_CXXFLAGS += $(BUILD_TARGET_CXXFLAGS)
+    BUILD_HOST_LDFLAGS += $(BUILD_TARGET_LDFLAGS)
+endif
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
@@ -368,7 +434,7 @@ endif
 ifeq ($(BUILD_TARGET_OS),windows)
   # amd64-mingw32msvc- toolchain still name it ws2_32.  May change it once amd64-mingw32msvc-
   # is stabilized
-  QEMU_SYSTEM_LDLIBS += -lwinmm -lws2_32 -liphlpapi
+  #QEMU_SYSTEM_LDLIBS += -lwinmm -lws2_32 -liphlpapi
 else
   QEMU_SYSTEM_LDLIBS += -lpthread
 endif

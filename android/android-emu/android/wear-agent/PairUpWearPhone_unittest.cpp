@@ -19,7 +19,9 @@
 #include <gtest/gtest.h>
 
 #include <stdio.h>
+#ifndef _WIN32
 #include <sys/unistd.h>
+#endif
 
 #define DEBUG_TEST 0
 

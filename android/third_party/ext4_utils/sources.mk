@@ -39,6 +39,7 @@ $(call start-emulator-program,emulator$(BUILD_TARGET_SUFFIX)_make_ext4fs)
 LOCAL_SRC_FILES := src/make_ext4fs_main.c
 LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
+    $(LIBGETOPT_INCLUDES) \
     $(LIBSELINUX_INCLUDES)
 LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
 LOCAL_STATIC_LIBRARIES := \
@@ -46,6 +47,7 @@ LOCAL_STATIC_LIBRARIES := \
     emulator-libsparse \
     emulator-libselinux \
     emulator-zlib \
+    emulator-libgetopt \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     android-emu-base
 

@@ -14,6 +14,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+typedef int mode_t;
 #endif
 
 using android::base::StringView;

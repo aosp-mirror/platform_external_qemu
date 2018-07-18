@@ -4,6 +4,7 @@ LOCAL_STATIC_LIBRARIES := \
     $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
     libqemu2-util \
     libqemu2-stubs \
+    emulator-libgetopt \
 
 LOCAL_CFLAGS := \
     $(QEMU2_SYSTEM_CFLAGS) \
@@ -11,6 +12,7 @@ LOCAL_CFLAGS := \
 LOCAL_C_INCLUDES := \
     $(QEMU2_SYSTEM_INCLUDES) \
     $(QEMU2_SDL2_INCLUDES) \
+    $(LIBGETOPT_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     stubs/exec.c \

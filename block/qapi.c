@@ -566,7 +566,11 @@ void bdrv_snapshot_dump(fprintf_function func_fprintf, void *f,
                      "ID", "TAG", "VM SIZE", "DATE", "VM CLOCK");
     } else {
         ti = sn->date_sec;
+#ifdef _WIN32
+        localtime_s(&tm, &ti);
+#else
         localtime_r(&ti, &tm);
+#endif
         strftime(date_buf, sizeof(date_buf),
                  "%Y-%m-%d %H:%M:%S", &tm);
         secs = sn->vm_clock_nsec / 1000000000;

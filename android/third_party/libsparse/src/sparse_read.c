@@ -25,7 +25,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include <sparse/sparse.h>
 
@@ -38,6 +42,10 @@
 #if defined(__APPLE__) && defined(__MACH__)
 #define lseek64 lseek
 #define off64_t off_t
+#endif
+
+#ifdef _WIN32
+#define lseek64 _lseeki64
 #endif
 
 #define SPARSE_HEADER_MAJOR_VER 1

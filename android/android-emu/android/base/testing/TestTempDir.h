@@ -23,6 +23,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <direct.h>
+#include <io.h>
 #undef ERROR
 #include <errno.h>
 #include <stdio.h>
@@ -33,7 +35,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#define mkdir _mkdir
+#define rmdir _rmdir
+#endif
 
 namespace android {
 namespace base {

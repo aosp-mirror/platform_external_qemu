@@ -20,7 +20,14 @@
 #include "android/utils/compiler.h"
 
 #include <stddef.h>
+#include <stdio.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <basetsd.h>
+#include <io.h>
+typedef SSIZE_T ssize_t;
+#endif
 
 ANDROID_BEGIN_HEADER
 

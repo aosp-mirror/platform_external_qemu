@@ -127,7 +127,7 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
 
     if (playStoreImage) {
         maxVersion =
-            std::min(maxVersion,
+            (std::min)(maxVersion,
                      GLES_DISPATCH_MAX_VERSION_3_0);
     }
 

@@ -30,6 +30,10 @@
 #include "qemu/cutils.h"
 #include "sysemu/replay.h"
 
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#endif
+
 #define AUDIO_CAP "audio"
 #include "audio_int.h"
 

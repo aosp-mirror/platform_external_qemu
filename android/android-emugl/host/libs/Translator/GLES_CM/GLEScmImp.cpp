@@ -578,7 +578,7 @@ GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,
 
 static int maxMipmapLevel(GLsizei width, GLsizei height) {
     // + 0.5 for potential floating point rounding issue
-    return log2(std::max(width, height) + 0.5);
+    return log2((std::max)(width, height) + 0.5);
 }
 
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,

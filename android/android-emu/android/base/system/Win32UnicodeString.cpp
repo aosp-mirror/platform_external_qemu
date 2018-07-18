@@ -20,6 +20,8 @@
 
 #include <string.h>
 
+using std::min;
+
 namespace android {
 namespace base {
 
@@ -110,7 +112,7 @@ void Win32UnicodeString::resize(size_t newSize) {
     } else {
         wchar_t* oldStr = mStr;
         mStr = new wchar_t[newSize + 1u];
-        size_t copySize = std::min(newSize, mSize);
+        size_t copySize = min(newSize, mSize);
         ::memcpy(mStr, oldStr ? oldStr : L"", copySize * sizeof(wchar_t));
         mStr[copySize] = L'\0';
         mStr[newSize] = L'\0';

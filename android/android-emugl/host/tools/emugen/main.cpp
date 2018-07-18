@@ -20,7 +20,7 @@
 #include "strUtils.h"
 #include "ApiGen.h"
 #include "TypeFactory.h"
-#include "getopt.h"
+#include <getopt.h>
 
 const std::string SPEC_EXTENSION = std::string(".in");
 const std::string ATTRIB_EXTENSION = std::string(".attrib");

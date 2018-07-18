@@ -67,18 +67,20 @@ extern int daemon(int, int);
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef _WIN32
 #include <strings.h>
+#include <unistd.h>
+#include <sys/time.h>
+#endif
 #include <inttypes.h>
 #include <limits.h>
 /* Put unistd.h before time.h as that triggers localtime_r/gmtime_r
  * function availability on recentish Mingw-w64 platforms. */
-#include <unistd.h>
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <assert.h>
 /* setjmp must be declared before sysemu/os-win32.h
  * because it is redefined there. */
@@ -98,6 +100,15 @@ extern int daemon(int, int);
 
 #ifdef _WIN32
 #include "sysemu/os-win32.h"
+#endif
+
+#ifdef _WIN32
+typedef SSIZE_T ssize_t;
+#ifdef _WIN64
+typedef int64_t pid_t;
+#else
+typedef int pid_t;
+#endif
 #endif
 
 #ifdef CONFIG_POSIX

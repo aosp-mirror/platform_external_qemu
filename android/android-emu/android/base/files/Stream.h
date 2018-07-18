@@ -18,6 +18,10 @@
 #include <inttypes.h>
 #include <sys/types.h>
 
+#ifdef _WIN32
+#include <basetsd.h>
+typedef SSIZE_T ssize_t;
+#endif
 namespace android {
 namespace base {
 

@@ -6,6 +6,10 @@ $(eval \
 	$(call on-first-run,FIRST_INCLUDE:= true,FIRST_INCLUDE:=) \
 )
 
+# build getopt for Windows
+ifeq ($(BUILD_TARGET_OS),windows)
+  include $(LOCAL_PATH)/android/third_party/libgetopt/sources.mk
+endif
 
 # Build libext4_utils and related modules/
 include $(LOCAL_PATH)/android/third_party/zlib.mk

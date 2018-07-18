@@ -27,8 +27,11 @@
  */
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#else
 #include <time.h>
+#endif
 
 #include "qemu/osdep.h"
 #include "qemu-common.h"

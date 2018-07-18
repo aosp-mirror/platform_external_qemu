@@ -950,6 +950,9 @@ static void *atomic_mmu_lookup(CPUArchState *env, target_ulong addr,
 
  stop_the_world:
     cpu_loop_exit_atomic(ENV_GET_CPU(env), retaddr);
+
+    // Should never reach here. Just to silence compiler error.
+    return NULL;
 }
 
 #ifdef TARGET_WORDS_BIGENDIAN

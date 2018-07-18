@@ -151,6 +151,7 @@ compile () {
 # try to link the recently built file into an executable. error log in $TMPL
 #
 link() {
+    log2 "link() LDFLAGS=$EXTRA_LDFLAGS"
     log2 "Link      : $LD -o $TMPE $TMPO $LDFLAGS"
     $LD -o $TMPE $TMPO $LDFLAGS 2> $TMPL
 }
@@ -250,6 +251,7 @@ OPTION_HELP=no
 OPTION_STRIP=yes
 OPTION_CRASHUPLOAD=NONE
 OPTION_MINGW=no
+OPTION_CLANG_WINDOWS=no
 OPTION_GLES=
 OPTION_SDK_REV=
 OPTION_SYMBOLS=no
@@ -306,7 +308,17 @@ for opt do
 
   --debug) OPTION_DEBUG=yes; OPTION_STRIP=no
   ;;
-  --mingw) OPTION_MINGW=yes
+  --mingw)
+    if [ "$OPTION_CLANG_WINDOWS" = "yes" ] ; then
+      panic "Choose either mingw or clang-windows, not both."
+    fi
+    OPTION_MINGW=yes
+  ;;
+  --clang-windows)
+    if [ "$OPTION_MINGW" = "yes" ] ; then
+      panic "Choose either mingw or clang-windows, not both."
+    fi
+    OPTION_CLANG_WINDOWS=yes
   ;;
   --sanitizer=*) OPTION_SANITIZER=$optarg
   ;;
@@ -391,7 +403,8 @@ EOF
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
-    echo "  --mingw                     Build Windows executable on Linux"
+    echo "  --mingw                     Build Windows executable on Linux using mingw"
+    echo "  --clang-windows             Build Windows executable on Linux using clang"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
     echo "  --sanitizer=[...]           Build with LLVM sanitizer (sanitizer=[address, thread])"
@@ -406,7 +419,7 @@ EOF
 fi
 
 # Check asan support
-[ "$OPTION_SANITIZER" != "no" ] && [ "$OPTION_MINGW" = "yes" ] && panic "Asan is not supported under windows"
+[ "$OPTION_SANITIZER" != "no" ] && ([ "$OPTION_MINGW" = "yes" ] || [ "$OPTION_CLANG_WINDOWS" = "yes" ]) && panic "Asan is not supported under windows"
 
 if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
     if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc -a \
@@ -523,6 +536,35 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
     HOST_OS=windows
     HOST_TAG=$HOST_OS-$HOST_ARCH
+fi
+
+if [ "$OPTION_CLANG_WINDOWS" = "yes" ] ; then
+    # Are we on Linux ?
+    log "Clang      : Checking for Linux host"
+    if [ "$HOST_OS" != "linux" ] ; then
+        echo "Sorry, but mingw compilation is only supported on Linux !"
+        exit 1
+    fi
+    TEST_SHELL=wine
+    WINE_CMD=$(which wine 2>/dev/null || true)
+    if [ -z "$WINE_CMD" ]; then
+        echo "${RED}WARNING: Wine is not installed on this machine!! Unit tests will be ignored and will not run!!${RESET}"
+        TEST_SHELL="true ||"
+    fi
+    WIN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows-x86_64"
+    "$GEN_SDK" $WIN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+    BINPREFIX=$("$GEN_SDK" $WIN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
+    CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang"
+    CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang++"
+    LD=$CC
+    AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
+    OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
+    HOST_OS=windows
+    HOST_TAG=$HOST_OS-$HOST_ARCH
+    MSVC_DIR=/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc
+    log2 "MSVC_DIR=$MSVC_DIR"
+    LDFLAGS="-L$MSVC_DIR/msvc/lib/x64 -L$MSVC_DIR/win10sdk/lib/10.0.16299.0/ucrt/x64 -L$MSVC_DIR/win10sdk/lib/10.0.16299.0/um/x64"
+    log2 "clang_windows: LDFLAGS=$LDFLAGS"
 fi
 
 # Try to find the GLES emulation headers and libraries automatically
@@ -750,7 +792,7 @@ feature_check_header HAVE_MACHINE_BSWAP_H "<machine/bswap.h>"
 feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
 # check for Mingw version.
-if [ "$HOST_OS" = "windows" ]; then
+if [ "$HOST_OS" = "windows" ] && [ "$OPTION_MINGW" = "yes" ]; then
 log "Mingw      : Probing for GCC version."
 GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
 GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)

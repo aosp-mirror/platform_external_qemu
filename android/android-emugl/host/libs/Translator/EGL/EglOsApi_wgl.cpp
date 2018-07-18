@@ -1045,7 +1045,7 @@ public:
             // Creating many pbuffers in a batch is faster than interrupting
             // the process at various times to create them one at a time.
             PROFILE_SLOW("createPbufferSurface (slow path)");
-            int toCreate = std::max((int)mLivePbufs[pixelFormat].size(), kPbufPrimingCount);
+            int toCreate = (std::max)((int)mLivePbufs[pixelFormat].size(), kPbufPrimingCount);
             for (int i = 0; i < toCreate; i++) {
                 freeElts.push_back(createPbufferSurfaceImpl(pixelFormat));
             }

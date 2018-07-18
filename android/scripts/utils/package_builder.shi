@@ -768,7 +768,7 @@ builder_build_autotools_package_full_install () {
         run mkdir -p "$PKG_BUILD_DIR" &&
         run cd "$PKG_BUILD_DIR" &&
         export LDFLAGS="-L$_SHU_BUILDER_PREFIX/lib" &&
-        export CPPFLAGS="-I$_SHU_BUILDER_PREFIX/include" &&
+        export CPPFLAGS="$EXTRA_CPPFLAGS -I$_SHU_BUILDER_PREFIX/include" &&
         export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
         export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
         run "$PKG_SRC_DIR"/configure \

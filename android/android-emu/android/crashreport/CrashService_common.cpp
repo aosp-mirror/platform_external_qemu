@@ -57,7 +57,9 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef _WIN32
 #include <strings.h>
+#endif
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -65,6 +67,10 @@
 #define I(...) printf(__VA_ARGS__)
 
 #define WAIT_INTERVAL_MS 100
+
+#ifdef _WIN32
+#define strncasecmp _strnicmp
+#endif
 
 using android::base::c_str;
 using android::base::PathUtils;

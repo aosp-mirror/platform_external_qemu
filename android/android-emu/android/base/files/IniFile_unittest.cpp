@@ -110,21 +110,21 @@ TEST_F(IniFileTest, readWrite) {
             {"zeroInt", 0},
             {"positiveInt", 1},
             {"negativeInt", -1},
-            {"maxInt", numeric_limits<int>::max()},
-            {"minInt", numeric_limits<int>::min()},
+            {"maxInt", (numeric_limits<int>::max)()},
+            {"minInt", (numeric_limits<int>::min)()},
             {"lowestInt", numeric_limits<int>::lowest()}};
     static const unordered_map<string, int64_t> int64Data = {
             {"zeroInt64", 0ULL},
             {"positiveInt64", 1ULL},
             {"negativeInt64", -1ULL},
-            {"maxInt64", numeric_limits<int64_t>::max()},
-            {"minInt64", numeric_limits<int64_t>::min()},
+            {"maxInt64", (numeric_limits<int64_t>::max)()},
+            {"minInt64", (numeric_limits<int64_t>::min)()},
             {"lowestInt64", numeric_limits<int64_t>::lowest()}};
     static const unordered_map<string, double> doubleData = {
             {"zeroDouble", 0.0},
             {"positiveDouble", 1.5},
             {"negativeDouble", -1.5},
-            {"maxDouble", numeric_limits<double>::max()},
+            {"maxDouble", (numeric_limits<double>::max)()},
             // minDouble fails because of rounding errors.
             // {"minDouble", numeric_limits<double>::min()},
             {"lowestDouble", numeric_limits<double>::lowest()}};

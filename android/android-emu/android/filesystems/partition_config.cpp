@@ -32,6 +32,31 @@ typedef struct {
     PartitionConfigBackend* backend;
 } PartitionConfigState;
 
+#ifdef _WIN32
+// From https://msdn.microsoft.com/en-us/library/28d5ce15.aspx
+int vasprintf( char** buf, const char* format, va_list args )
+{
+    int     len;
+
+    if (buf == NULL) {
+        return -1;
+    }
+
+    len = _vscprintf( format, args ) // _vscprintf doesn't count
+                                + 1; // terminating '\0'
+
+    if (len <= 0) {
+        return len;
+    }
+
+    *buf = (char*)malloc( len * sizeof(char) );
+
+    vsprintf( *buf, format, args ); // C4996
+    // Note: vsprintf is deprecated; consider using vsprintf_s instead
+    return len;
+}
+#endif
+
 // Helper function used to record an error message into the |state|,
 // then return false. |format| is a typical printf()-like formatting
 // string followed by optional arguments. Always return false to

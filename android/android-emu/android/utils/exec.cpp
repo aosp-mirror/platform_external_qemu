@@ -13,10 +13,12 @@
 
 #include "android/base/system/Win32UnicodeString.h"
 
-#include <unistd.h>
 
 #ifdef _WIN32
 #include <vector>
+#include <process.h> // for _P_NOWAIT
+#else
+#include <unistd.h>
 #endif
 
 #ifdef _WIN32

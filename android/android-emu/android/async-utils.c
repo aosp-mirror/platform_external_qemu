@@ -16,7 +16,9 @@
 #include "android/async-utils.h"
 #include "android/utils/eintr_wrapper.h"
 
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 void
 asyncReader_init(AsyncReader* ar,

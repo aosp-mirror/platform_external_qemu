@@ -13,6 +13,12 @@ LOCAL_C_INCLUDES += \
     $(LZ4_INCLUDES) \
     $(LIBDTB_UTILS_INCLUDES) \
 
+ifeq ($(BUILD_TARGET_OS),windows)
+    LOCAL_C_INCLUDES += $(LIBGETOPT_INCLUDES)
+    LOCAL_STATIC_LIBRARIES := emulator-libgetopt
+endif
+
+
 LOCAL_SRC_FILES := \
     android_qemud.cpp \
     audio-capturer.cpp \

@@ -25,7 +25,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include <sparse/sparse.h>
 
@@ -36,6 +40,17 @@
 #if defined(__APPLE__) && defined(__MACH__)
 #define lseek64 lseek
 #define off64_t off_t
+#endif
+
+#ifdef _WIN32
+#define lseek64 _lseeki64
+typedef long long off64_t;
+#ifndef STDIN_FILENO
+#define STDIN_FILENO _fileno(stdin)
+#endif  // !STDIN_FILENO
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO _fileno(stdout)
+#endif  // !STDOUT_FILENO
 #endif
 
 void usage()

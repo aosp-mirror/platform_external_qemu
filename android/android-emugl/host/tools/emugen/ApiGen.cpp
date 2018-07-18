@@ -174,6 +174,7 @@ int ApiGen::genContext(const std::string & filename, SideType side)
             m_basename.c_str(),
             side == CLIENT_SIDE ? "client" : "server");
     fprintf(fp, "\n#include \"%s_types.h\"\n", m_basename.c_str());
+    fprintf(fp, "#include <stdint.h>\n");
 
     StringVec & contextHeaders = side == CLIENT_SIDE ? m_clientContextHeaders : m_serverContextHeaders;
     for (size_t i = 0; i < contextHeaders.size(); i++) {

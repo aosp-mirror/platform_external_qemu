@@ -10,6 +10,7 @@ LOCAL_SRC_FILES := \
     Parser.cpp \
     strUtils.cpp \
     TypeFactory.cpp \
+    getopt.c \
 
 ifeq ($(BUILD_HOST_OS),linux)
   # Make sure libc++.so can be found

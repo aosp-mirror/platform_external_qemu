@@ -20,7 +20,9 @@
 #include <algorithm>
 
 #include <fcntl.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 

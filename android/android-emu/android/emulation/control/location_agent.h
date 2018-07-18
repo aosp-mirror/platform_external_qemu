@@ -15,7 +15,15 @@
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
+#ifdef _WIN32
+// Don't include if winsock.h was already included, or we'll get redefinition
+// errors.
+#ifndef _WINSOCKAPI_
+#include <winsock2.h>
+#endif
+#else
 #include <sys/time.h>
+#endif
 
 ANDROID_BEGIN_HEADER
 

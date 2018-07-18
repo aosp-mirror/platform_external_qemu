@@ -15,7 +15,8 @@
  */
 
 #define _FILE_OFFSET_BITS 64
-#define _LARGEFILE64_SOURCE 1
+// This will include unistd.h, which doesn't work with clang for windows
+//#define _LARGEFILE64_SOURCE 1
 
 #include <fcntl.h>
 #include <inttypes.h>
@@ -27,7 +28,15 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
+
+// zconf.h is including unistd.h if HAVE_UNISTD_H is defined
+// in another file.
+#if defined(_WIN32) && defined(HAVE_UNISTD_H)
+#undef HAVE_UNISTD_H
+#endif
 #include <zlib.h>
 
 #include "defs.h"
@@ -40,6 +49,7 @@
 #else
 #define NOMINMAX
 #include <windows.h>
+#include <io.h>
 #define ftruncate64 ftruncate
 #endif
 
@@ -48,6 +58,10 @@
 #define ftruncate64 ftruncate
 #define mmap64 mmap
 #define off64_t off_t
+#endif
+
+#ifdef _WIN32
+#define lseek64 _lseeki64
 #endif
 
 #define min(a, b) \
