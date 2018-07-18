@@ -134,6 +134,9 @@ protected:
 
     virtual void TearDown() override {
         mApp.reset();
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+        EXPECT_EQ(EGL_SUCCESS, egl->eglGetError())
+                << "teardown found an EGL error";
     }
 
     std::unique_ptr<ClearColor> mApp;
