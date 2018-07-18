@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e66eeb8_e8c98660",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-18T18:26:08Z",
+      "side": 1,
+      "message": "does saving via console command still works?",
+      "range": {
+        "startLine": 151,
+        "startChar": 4,
+        "endLine": 151,
+        "endChar": 43
+      },
+      "revId": "7f5230f6c9690d4c982a181039f5f60e4cdbc11c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
