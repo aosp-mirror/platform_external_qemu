@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "RenderContext.h"
 
 #include <cinttypes>
 #include <functional>
@@ -38,7 +39,7 @@ OSWindow* createOrGetTestWindow(int xoffset, int yoffset, int width, int height)
 class SampleApplication {
 public:
     SampleApplication(int windowWidth = 256, int windowHeight = 256,
-                      int refreshRate = 60);
+                      int refreshRate = 60, GLESApi glVersion = GLESApi_3_0);
     ~SampleApplication();
 
     // A basic draw loop that works similar to most simple

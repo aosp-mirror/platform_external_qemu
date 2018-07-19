@@ -22,9 +22,43 @@ using android::base::System;
 
 namespace emugl {
 
+struct ClearColorParam {
+    const GLESApi glVersion;
+    const bool fastBlit;
+
+    ClearColorParam(GLESApi glVersion, bool fastBlit)
+        : glVersion(glVersion), fastBlit(fastBlit) {}
+};
+
+static void PrintTo(const ClearColorParam& param, std::ostream* os) {
+    *os << "ClearColorParam(";
+
+    switch (param.glVersion) {
+        case GLESApi_CM:  *os << "GLESApi_CM";  break;
+        case GLESApi_2:   *os << "GLESApi_2";   break;
+        case GLESApi_3_0: *os << "GLESApi_3_0"; break;
+        case GLESApi_3_1: *os << "GLESApi_3_1"; break;
+        case GLESApi_3_2: *os << "GLESApi_3_2"; break;
+        default: *os << "GLESApi(" << int(param.glVersion) << ")"; break;
+    }
+
+    *os << ", " << (param.fastBlit ? "fast blit" : "slow blit") << ")";
+}
+
 class ClearColor final : public SampleApplication {
 public:
-    ClearColor() : SampleApplication(256, 256, 60) { }
+    ClearColor(ClearColorParam param) : SampleApplication(256, 256, 60, param.glVersion) {
+        if (!param.fastBlit) {
+            // Disable fast blit and then recreate the color buffer to apply the
+            // change.
+            mFb->disableFastBlit();
+
+            mFb->closeColorBuffer(mColorBuffer);
+            mColorBuffer = mFb->createColorBuffer(
+                    mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+            mFb->setWindowSurfaceColorBuffer(mSurface, mColorBuffer);
+        }
+    }
 
     ~ClearColor() {
         auto gl = LazyLoadedGLESv2Dispatch::get();
@@ -39,6 +73,10 @@ public:
         mGreen = g;
         mBlue = b;
         mAlpha = a;
+    }
+
+    void setUseFboCombined(bool useFbo) {
+        mUseFboCombined = useFbo;
     }
 
     void setUseFbo(bool useFboDraw, bool useFboRead) {
@@ -70,7 +108,7 @@ public:
     void draw() override {
         auto gl = LazyLoadedGLESv2Dispatch::get();
 
-        gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        gl->glBindFramebuffer(GL_FRAMEBUFFER, mUseFboCombined ? mFbo : 0);
 
         if (mUseFboDraw) {
             gl->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFbo);
@@ -81,6 +119,10 @@ public:
 
         gl->glClearColor(mRed, mGreen, mBlue, mAlpha);
         gl->glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    void setNonDefaultCombinedFbo() {
+        setUseFboCombined(true);
     }
 
     void setNonDefaultDrawFbo() {
@@ -114,6 +156,7 @@ public:
     }
 
 private:
+    bool mUseFboCombined = false;
     bool mUseFboDraw = false;
     bool mUseFboRead = false;
 
@@ -126,10 +169,13 @@ private:
     float mAlpha = 1.0f;
 };
 
-class DefaultFramebufferBlitTest : public ::testing::Test {
+static constexpr float kDrawColorRed[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+static constexpr float kDrawColorGreen[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+
+class CombinedFramebufferBlit : public ::testing::Test, public ::testing::WithParamInterface<ClearColorParam> {
 protected:
     virtual void SetUp() override {
-        mApp.reset(new ClearColor());
+        mApp.reset(new ClearColor(GetParam()));
     }
 
     virtual void TearDown() override {
@@ -139,16 +185,37 @@ protected:
     std::unique_ptr<ClearColor> mApp;
 };
 
-static constexpr float kDrawColorRed[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
-static constexpr float kDrawColorGreen[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-
-TEST_F(DefaultFramebufferBlitTest, DefaultDrawDefaultRead) {
+TEST_P(CombinedFramebufferBlit, DefaultDrawDefaultRead) {
     // Draw to default framebuffer; color should show up
     mApp->drawWithColor(kDrawColorRed);
     mApp->verifySwappedColor(kDrawColorRed);
 }
 
-TEST_F(DefaultFramebufferBlitTest, NonDefaultDrawNonDefaultRead) {
+TEST_P(CombinedFramebufferBlit, NonDefault) {
+    mApp->drawWithColor(kDrawColorRed);
+    mApp->verifySwappedColor(kDrawColorRed);
+
+    // Color should not be affected by the draw to a non-default framebuffer.
+    mApp->setNonDefaultCombinedFbo();
+
+    mApp->drawWithColor(kDrawColorGreen);
+    mApp->verifySwappedColor(kDrawColorRed);
+}
+
+// Test blitting both with and without the fast blit path.
+INSTANTIATE_TEST_CASE_P(CombinedFramebufferBlitTest,
+                        CombinedFramebufferBlit,
+                        testing::Values(
+                            ClearColorParam(GLESApi_CM, true),
+                            ClearColorParam(GLESApi_CM, false),
+                            ClearColorParam(GLESApi_2, true),
+                            ClearColorParam(GLESApi_2, false),
+                            ClearColorParam(GLESApi_3_0, true),
+                            ClearColorParam(GLESApi_3_0, false)));
+
+class NonDefaultFramebufferBlit : public CombinedFramebufferBlit { };
+
+TEST_P(NonDefaultFramebufferBlit, NonDefaultDrawNonDefaultRead) {
     mApp->drawWithColor(kDrawColorRed);
     mApp->verifySwappedColor(kDrawColorRed);
 
@@ -163,7 +230,7 @@ TEST_F(DefaultFramebufferBlitTest, NonDefaultDrawNonDefaultRead) {
     mApp->verifySwappedColor(kDrawColorRed);
 }
 
-TEST_F(DefaultFramebufferBlitTest, DefaultDrawNonDefaultRead) {
+TEST_P(NonDefaultFramebufferBlit, DefaultDrawNonDefaultRead) {
     mApp->drawWithColor(kDrawColorRed);
     mApp->verifySwappedColor(kDrawColorRed);
 
@@ -176,8 +243,7 @@ TEST_F(DefaultFramebufferBlitTest, DefaultDrawNonDefaultRead) {
     mApp->verifySwappedColor(kDrawColorGreen);
 }
 
-
-TEST_F(DefaultFramebufferBlitTest, NonDefaultDrawDefaultRead) {
+TEST_P(NonDefaultFramebufferBlit, NonDefaultDrawDefaultRead) {
     mApp->drawWithColor(kDrawColorRed);
     mApp->verifySwappedColor(kDrawColorRed);
 
@@ -190,5 +256,13 @@ TEST_F(DefaultFramebufferBlitTest, NonDefaultDrawDefaultRead) {
     mApp->drawWithColor(kDrawColorGreen);
     mApp->verifySwappedColor(kDrawColorRed);
 }
+
+// Test blitting both with and without the fast blit path.
+INSTANTIATE_TEST_CASE_P(DefaultFramebufferBlitTest,
+                        NonDefaultFramebufferBlit,
+                        testing::Values(
+                            ClearColorParam(GLESApi_3_0, true),
+                            ClearColorParam(GLESApi_3_0, false)));
+
 
 }  // namespace emugl
