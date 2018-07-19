@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "6fd475d6_6a43a79a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FbConfig.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-19T21:48:58Z",
+      "side": 1,
+      "message": "Interesting; try it on a recent P image and the cts from go/ab test-suits x86_64 android-cts. We\u0027ve seen this failure before, but haven\u0027t seen it on P lately.",
+      "parentUuid": "9ce05af7_9808cde3",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 41
+      },
+      "revId": "20a34a2ab970ee78aa1802a22efb8958af7c75fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "71312dd0_590aaf84",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 11
