@@ -148,6 +148,22 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     mUi(new Ui::SnapshotPage())
 {
     mUi->setupUi(this);
+    if (android_cmdLineOptions->read_only) {
+        // Stand-alone.
+        // Overlay a mask and text saying that snapshots are disabled.
+        mUi->noSnapshot_mask->raise();
+        mUi->noSnapshot_message->raise();
+        // Hide widgets that look bad when showing through the overlay
+        mUi->noneAvailableLabel->hide();
+        mUi->reduceInfoButton->hide();
+        return;
+    }
+
+    // Hide the overlay that obscures the page. Hide the text
+    // that says snapshots are disabled.
+    mUi->noSnapshot_mask->hide();
+    mUi->noSnapshot_message->hide();
+
     mUi->defaultSnapshotDisplay->sortByColumn(COLUMN_NAME, Qt::AscendingOrder);
     mUi->snapshotDisplay->sortByColumn(COLUMN_NAME, Qt::AscendingOrder);
 
@@ -847,6 +863,11 @@ void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snap
 }
 
 void SnapshotPage::populateSnapshotDisplay() {
+    if (android_cmdLineOptions->read_only) {
+        // Leave the list empty because snapshots
+        // are disabled in read-only mode
+        return;
+    }
     // (In the future, we may also want a hierarchical display.)
     populateSnapshotDisplay_flat();
 }
