@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "574e348b_48c2868d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FbConfig.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-19T17:35:25Z",
+      "side": 1,
+      "message": "This might cause problems in dEQP as the error could get cleared when the test expects there to be an error.",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 41
+      },
+      "revId": "20a34a2ab970ee78aa1802a22efb8958af7c75fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71312dd0_590aaf84",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-19T17:35:25Z",
+      "side": 1,
+      "message": "cool!",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 246,
+        "endChar": 9
+      },
+      "revId": "20a34a2ab970ee78aa1802a22efb8958af7c75fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59b7b175_5a9a9ed1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-19T17:35:25Z",
+      "side": 1,
+      "message": "Nice finds :)",
+      "range": {
+        "startLine": 592,
+        "startChar": 0,
+        "endLine": 597,
+        "endChar": 25
+      },
+      "revId": "20a34a2ab970ee78aa1802a22efb8958af7c75fb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
