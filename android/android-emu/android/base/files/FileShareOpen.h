@@ -23,5 +23,9 @@ enum class FileShare {
 
 FILE* fsopen(const char* filename, const char* mode, FileShare fileshare);
 
+// Create a file. This operation is safe for multi-processing if other process
+// tries to share open the file during the creation.
+void createFileForShare(const char* filename);
+
 }  // namespace base
 }  // namespace android

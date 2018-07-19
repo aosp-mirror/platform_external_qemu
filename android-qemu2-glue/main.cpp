@@ -13,6 +13,7 @@
 #include "android/avd/hw-config.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
+#include "android/base/files/FileShareOpen.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -743,6 +744,19 @@ extern "C" int main(int argc, char** argv) {
         derror("Running multiple emulators with the same AVD "
                "is an experimental feature.\n"
                "Please use -read-only flag to enable this feature.\n");
+        return 1;
+    }
+
+    const char* multiInstanceLock = avdInfo_getMultiInstanceLockFilePath(avd);
+    if (!System::get()->pathIsFile(multiInstanceLock)) {
+        android::base::createFileForShare(multiInstanceLock);
+    }
+    android::base::FileShare shareMode = opts->read_only ? FileShare::Read
+                                                         : FileShare::Write;
+    const char* mode = opts->read_only ? "rb" : "wb";
+    if (!android::base::fsopen(multiInstanceLock, mode, shareMode)) {
+        derror("Another emulator instance is running. Please close it or "
+                "run all emulators with -read-only flag.\n");
         return 1;
     }
 
