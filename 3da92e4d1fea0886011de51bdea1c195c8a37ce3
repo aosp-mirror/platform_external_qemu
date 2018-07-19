@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8726eb4_a28b0362",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-19T16:58:04Z",
+      "side": 1,
+      "message": "pass the autolock object here, otherwise it will try to unlock the lock too",
+      "range": {
+        "startLine": 49,
+        "startChar": 45,
+        "endLine": 49,
+        "endChar": 51
+      },
+      "revId": "3da92e4d1fea0886011de51bdea1c195c8a37ce3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
