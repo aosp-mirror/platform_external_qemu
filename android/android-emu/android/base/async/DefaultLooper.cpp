@@ -290,6 +290,9 @@ void DefaultLooper::FdWatch::addEvents(unsigned events) {
     unsigned newEvents = mWantedEvents | events;
     if (newEvents != mWantedEvents) {
         mWantedEvents = newEvents;
+        if (!defaultLooper()) {
+            return;
+        }
         defaultLooper()->updateFdWatch(mFd, newEvents);
     }
 }
