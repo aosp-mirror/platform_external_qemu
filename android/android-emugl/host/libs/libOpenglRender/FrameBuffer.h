@@ -176,7 +176,7 @@ public:
     // |p_share| is either EGL_NO_CONTEXT or the handle of a shared context.
     // |version| specifies the GLES version as a GLESApi enum.
     // Return a new handle value, which will be 0 in case of error.
-    HandleType createRenderContext(int p_config, HandleType p_share, 
+    HandleType createRenderContext(int p_config, HandleType p_share,
         GLESApi version = GLESApi_CM);
 
     // Create a new WindowSurface instance from this display instance.
@@ -418,6 +418,9 @@ public:
     int getZrot() const { return m_zRot; }
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
+    // Used during tests to disable fast blit.
+    void disableFastBlit();
+
     // Fill GLES usage protobuf
     void fillGLESUsages(android_studio::EmulatorGLESUsages*);
     // Save a screenshot of the previous frame.
