@@ -355,6 +355,8 @@ const char*  avdInfo_getCoreHwIniPath( const AvdInfo* i );
  * whether or not the current AVD is undergoing a snapshot operation. */
 const char*  avdInfo_getSnapshotLockFilePath( const AvdInfo* i );
 
+const char*  avdInfo_getMultiInstanceLockFilePath( const AvdInfo* i );
+
 /* Describes the ways emulator may set up host adb <-> guest adbd communication:
  *  legacy - ADBD communicates with the emulator via forwarded TCP port 5555.
  *  pipe   - ADBD communicates with the emulator via 'adb' pipe service.

@@ -136,6 +136,7 @@ struct AvdInfo {
     char*     skinDirPath;  /* skin directory */
     char*     coreHardwareIniPath;  /* core hardware.ini path */
     char*     snapshotLockPath;  /* core snapshot.lock path */
+    char*     multiInstanceLockPath;
 
     FileData  buildProperties[1];  /* build.prop file */
     FileData  bootProperties[1];   /* boot.prop file */
@@ -815,6 +816,17 @@ _avdInfo_getSnapshotLockFilePath( AvdInfo* i, const char* basePath )
     return 0;
 }
 
+static int
+_avdInfo_getMultiInstanceLockFilePath( AvdInfo* i, const char* basePath )
+{
+    i->multiInstanceLockPath = _getFullFilePath(basePath, MULTIINSTANCE_LOCK);
+    if (i->multiInstanceLockPath == NULL) {
+        DD("Path too long for %s: %s", MULTIINSTANCE_LOCK, basePath);
+        return -1;
+    }
+    D("using multi-instance lock path: %s", i->multiInstanceLockPath);
+    return 0;
+}
 
 static void
 _avdInfo_readPropertyFile(const AvdInfo* i,
@@ -827,7 +839,6 @@ _avdInfo_readPropertyFile(const AvdInfo* i,
         D("Read property file at %s", filePath);
     }
 }
-
 
 static void
 _avdInfo_extractBuildProperties(AvdInfo* i) {
@@ -903,7 +914,8 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
          _avdInfo_getContentPath(i) < 0 ||
          _avdInfo_getConfigIni(i)   < 0 ||
          _avdInfo_getCoreHwIniPath(i, i->contentPath) < 0 ||
-         _avdInfo_getSnapshotLockFilePath(i, i->contentPath) < 0 )
+         _avdInfo_getSnapshotLockFilePath(i, i->contentPath) < 0 ||
+         _avdInfo_getMultiInstanceLockFilePath(i, i->contentPath) < 0)
         goto FAIL;
 
     i->apiLevel = _avdInfo_getApiLevel(i, &i->isMarshmallowOrHigher);
@@ -1033,7 +1045,8 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
      * from build files. */
     if (_avdInfo_getConfigIni(i) < 0 ||
         _avdInfo_getCoreHwIniPath(i, i->androidOut) < 0 ||
-        _avdInfo_getSnapshotLockFilePath(i, i->androidOut) < 0)
+        _avdInfo_getSnapshotLockFilePath(i, i->androidOut) < 0 ||
+        _avdInfo_getMultiInstanceLockFilePath(i, i->androidOut) < 0)
         goto FAIL;
 
     /* Read the build skin's hardware.ini, if any */
@@ -1594,6 +1607,12 @@ const char*
 avdInfo_getSnapshotLockFilePath( const AvdInfo* i )
 {
     return i->snapshotLockPath;
+}
+
+const char*
+avdInfo_getMultiInstanceLockFilePath( const AvdInfo* i )
+{
+    return i->multiInstanceLockPath;
 }
 
 void
