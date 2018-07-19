@@ -602,6 +602,52 @@
     </widget>
    </widget>
   </widget>
+  <widget class="QLabel" name="noSnapshot_mask">
+   <property name="geometry">
+    <rect>
+     <x>4</x>
+     <y>4</y>
+     <width>612</width>
+     <height>612</height>
+    </rect>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgba(128, 128, 128, 200)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="noSnapshot_message">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>260</y>
+     <width>621</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgba(128, 128, 128, 0)</string>
+   </property>
+   <property name="text">
+    <string>Snapshots are disabled because &quot;-read-only&quot; was specified.</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <zorder>noSnapshot_mask</zorder>
+  <zorder>noSnapshot_message</zorder>
+  <zorder>tabWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>
