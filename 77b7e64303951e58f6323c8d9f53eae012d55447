@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "d5ffd5fe_5cbeb805",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-19T05:11:40Z",
+      "side": 1,
+      "message": "so, what about locking |mLock| in this function?",
+      "parentUuid": "027d0add_6243cfe2",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 48,
+        "endChar": 53
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f16d6871_6a3fc547",
         "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
         "patchSetId": 4
