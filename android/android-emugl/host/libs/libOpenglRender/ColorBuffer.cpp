@@ -411,10 +411,39 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
             s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
 
+            const bool isGles3 = tInfo->currContext->clientVersion() > GLESApi_2;
+
+            GLint prev_read_fbo = 0;
+            if (isGles3) {
+                // Make sure that we unbind any existing GL_READ_FRAMEBUFFER
+                // before calling glCopyTexSubImage2D, otherwise we may blit
+                // from the guest's current read framebuffer instead of the EGL
+                // read buffer.
+                s_gles2.glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prev_read_fbo);
+                if (prev_read_fbo != 0) {
+                    s_gles2.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+                }
+            } else {
+                // On GLES 2, there are not separate read/draw framebuffers,
+                // only GL_FRAMEBUFFER.  Per the EGL 1.4 spec section 3.9.3,
+                // the draw surface must be bound to the calling thread's
+                // current context, so GL_FRAMEBUFFER should be 0.  However, the
+                // error case is not strongly defined and generating a new error
+                // may break existing apps.
+                //
+                // Instead of the obviously wrong behavior of posting whatever
+                // GL_FRAMEBUFFER is currently bound to, fix up the
+                // GL_FRAMEBUFFER if it is non-zero.
+                s_gles2.glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev_read_fbo);
+                if (prev_read_fbo != 0) {
+                    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                }
+            }
+
             // If the read buffer is multisampled, we need to resolve.
             GLint samples;
             s_gles2.glGetIntegerv(GL_SAMPLE_BUFFERS, &samples);
-            if (tInfo->currContext->clientVersion() > GLESApi_2 && samples > 0) {
+            if (isGles3 && samples > 0) {
                 s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 
                 GLuint resolve_fbo;
@@ -435,9 +464,21 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
                 s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
                 s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
             } else {
+                // If the buffer is not multisampled, perform a normal texture copy.
                 s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                         m_height);
             }
+
+            if (prev_read_fbo != 0) {
+                if (isGles3) {
+                    s_gles2.glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                                              (GLuint)prev_read_fbo);
+                } else {
+                    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER,
+                                              (GLuint)prev_read_fbo);
+                }
+            }
+
             s_gles2.glDeleteTextures(1, &tmpTex);
             s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
 
@@ -453,6 +494,17 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             // we need to change the egl image to be of the same format,
             // or we get some really psychedelic patterns.
         } else {
+            // Like in the GLES 2 path above, correct the case where
+            // GL_FRAMEBUFFER_OES is not bound to zero so that we don't blit
+            // from arbitrary framebuffers.
+            // Use GLES 2 because it internally has the same value as the GLES 1
+            // API and it doesn't require GL_OES_framebuffer_object.
+            GLint prev_fbo = 0;
+            s_gles2.glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev_fbo);
+            if (prev_fbo != 0) {
+                s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+
             s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
             s_gles1.glGenTextures(1, &tmpTex);
             s_gles1.glBindTexture(GL_TEXTURE_2D, tmpTex);
@@ -461,6 +513,10 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
                     m_height);
             s_gles1.glDeleteTextures(1, &tmpTex);
             s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
+
+            if (prev_fbo != 0) {
+                s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)prev_fbo);
+            }
         }
 
         RecursiveScopedHelperContext context(m_helper);
