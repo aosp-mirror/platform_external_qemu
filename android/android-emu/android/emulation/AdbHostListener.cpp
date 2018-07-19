@@ -37,6 +37,7 @@ using android::base::AsyncSocketServer;
 using android::base::ScopedSocket;
 
 bool AdbHostListener::reset(int adbPort) {
+    printf("AdbHostListener::reset\n");
     if (adbPort < 0) {
         mServer.reset();
     } else if (!mServer || adbPort != mServer->port()) {
@@ -62,12 +63,14 @@ bool AdbHostListener::reset(int adbPort) {
 }
 
 void AdbHostListener::startListening() {
+    printf("AdbHostListener::startListening\n");
     if (mServer) {
         mServer->startListening();
     }
 }
 
 void AdbHostListener::stopListening() {
+    printf("AdbHostListener::stopListening\n");
     if (mServer) {
         mServer->stopListening();
     }
@@ -80,6 +83,7 @@ void AdbHostListener::notifyServer() {
 }
 
 bool AdbHostListener::onHostServerConnection(int socket) {
+    printf("AdbHostListener::onHostServerConnection\n");
     mGuestAgent->onHostConnection(ScopedSocket(socket));
     return true;
 }
