@@ -1546,6 +1546,17 @@ help_cores(stralloc_t* out)
 }
 
 static void
+help_detect_image_hang(stralloc_t* out)
+{
+    PRINTF(
+    "  Enable the detection of overflowing goldfish event buffers.\n"
+    "  An overflowing event buffer could indicate that the system image"
+    "  unable to process any events and is hung. \n"
+    "  Detection of hangs will result in crash and associated bug report. \n"
+    );
+}
+
+static void
 help_metrics_to_console(stralloc_t* out)
 {
     PRINTF(
