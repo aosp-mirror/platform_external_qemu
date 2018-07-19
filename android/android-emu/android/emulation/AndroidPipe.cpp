@@ -522,7 +522,9 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
     writeOptionalString(stream, mArgs.c_str());
 
     // Save pipe-specific state now.
-    onSave(stream);
+    if (mService->canLoad()) {
+        onSave(stream);
+    }
 
     // Save the pending wake or close operations as well.
     const int pendingFlags = sGlobals->pipeWaker.getPendingFlags(mHwPipe);
