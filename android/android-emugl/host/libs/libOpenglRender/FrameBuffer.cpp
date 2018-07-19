@@ -533,6 +533,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     return true;
 }
 
+void FrameBuffer::disableFastBlit() {
+    m_fastBlitSupported = false;
+}
 
 void FrameBuffer::fillGLESUsages(android_studio::EmulatorGLESUsages* usages) {
     if (s_egl.eglFillUsages) {
