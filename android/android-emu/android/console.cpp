@@ -2263,6 +2263,13 @@ static int do_snapshot_list(ControlClient client, char* args) {
 }
 
 static int do_snapshot_save(ControlClient client, char* args) {
+    if (android_cmdLineOptions->read_only) {
+        control_write(
+                client,
+                "KO: Snapshot save is disabled because \"-read-only\" was specified\n");
+        return -1;
+    }
+
     if (args == NULL) {
         control_write(
                 client,
@@ -2276,6 +2283,13 @@ static int do_snapshot_save(ControlClient client, char* args) {
 }
 
 static int do_snapshot_load(ControlClient client, char* args) {
+    if (android_cmdLineOptions->read_only) {
+        control_write(
+                client,
+                "KO: Snapshot load is disabled because \"-read-only\" was specified\n");
+        return -1;
+    }
+
     if (args == NULL) {
         control_write(
                 client,
@@ -2289,6 +2303,13 @@ static int do_snapshot_load(ControlClient client, char* args) {
 }
 
 static int do_snapshot_del(ControlClient client, char* args) {
+    if (android_cmdLineOptions->read_only) {
+        control_write(
+                client,
+                "KO: Snapshot delete is disabled because \"-read-only\" was specified\n");
+        return -1;
+    }
+
     if (args == NULL) {
         control_write(
                 client,
