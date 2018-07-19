@@ -10,12 +10,15 @@
 // GNU General Public License for more details.
 
 #include "android/base/files/FileShareOpen.h"
+#include "android/base/files/FileShareOpenImpl.h"
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
 #include <memory>
+
+#include <windows.h>
 
 namespace {
 
@@ -85,6 +88,32 @@ TEST_F(FileShareTest, writeReadRefuse) {
     EXPECT_FALSE(f2);
     if (f1) {
         fclose(f1);
+    }
+    if (f2) {
+        fclose(f2);
+    }
+}
+
+TEST_F(FileShareTest, createOnReadShareRead) {
+    void* f1 = android::base::internal::openFileForShare(mFilePath.c_str());
+    EXPECT_TRUE(f1);
+    FILE* f2 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
+    EXPECT_TRUE(f2);
+    if (f1) {
+        android::base::internal::closeFileForShare(f1);
+    }
+    if (f2) {
+        fclose(f2);
+    }
+}
+
+TEST_F(FileShareTest, createOnReadShareWrite) {
+    void* f1 = android::base::internal::openFileForShare(mFilePath.c_str());
+    EXPECT_TRUE(f1);
+    FILE* f2 = fsopen(mFilePath.c_str(), "w", FileShare::Write);
+    EXPECT_TRUE(f2);
+    if (f1) {
+        android::base::internal::closeFileForShare(f1);
     }
     if (f2) {
         fclose(f2);
