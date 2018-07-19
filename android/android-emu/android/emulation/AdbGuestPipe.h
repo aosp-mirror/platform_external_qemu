@@ -14,6 +14,8 @@
 #include "android/base/async/Looper.h"
 #include "android/base/async/ScopedSocketWatch.h"
 #include "android/base/StringView.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/threads/Thread.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/featurecontrol/feature_control.h"
@@ -83,10 +85,16 @@ public:
 
         // Create a new AdbGuestPipe instance.
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override;
+        bool canLoad() const override;
+        AndroidPipe* load(void* hwPipe,
+                          const char* args,
+                          android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
         virtual void onHostConnection(ScopedSocket&& socket) override;
 
+        void preLoad(android::base::Stream* stream);
+        void postLoad(android::base::Stream* stream);
         // Called when a new adb pipe connection is opened by
         // the guest. Note that this does *not* transfer ownership of |pipe|.
         // Technically, AndroidPipe instances are owned by the virtual device.
@@ -138,13 +146,11 @@ public:
     }
 
     void resetConnection();
-
+    void onSave(android::base::Stream* stream) override;
 private:
-    AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent)
-        : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
-        setExpectedGuestCommand("accept", State::WaitingForGuestAcceptCommand);
-        mPlayStoreImage = android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage);
-    }
+    AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent,
+            android::base::Stream* stream, bool resetSocket);
+    void onLoad(android::base::Stream* stream, bool resetSocket);
 
     // Return current service with the right type.
     Service* service() const {
@@ -202,6 +208,16 @@ private:
             mHostSocket;  // current host socket, if connected.
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
+    int mSocket = 0;
+    std::vector<uint8_t> mRecvBuffer = std::vector<uint8_t>(4096);
+    int mRecvBufferBegin = 0;
+    int mRecvBufferEnd = 0;
+    int mRecvBufferErrno = 0;
+    std::unique_ptr<android::base::Thread> mRecvThread;
+    bool startRecvThread();
+    void joinRecvThread();
+    android::base::Lock mRecvLock;
+    bool mRecvShouldStop = false;
 };
 
 }  // namespace emulation

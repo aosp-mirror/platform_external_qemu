@@ -17,7 +17,7 @@ void android::base::SocketWatchDeleter::operator()(
         android::base::Looper::FdWatch* watch) const {
     int fd = watch->fd();
     if (fd >= 0) {
-        socketClose(watch->fd());
+        //socketClose(watch->fd());
     }
     delete watch;
 }
