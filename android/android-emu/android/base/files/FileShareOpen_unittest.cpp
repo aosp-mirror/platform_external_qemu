@@ -90,3 +90,29 @@ TEST_F(FileShareTest, writeReadRefuse) {
         fclose(f2);
     }
 }
+
+TEST_F(FileShareTest, mixWithFopenRead) {
+    FILE* f1 = fopen(mFilePath.c_str(), "wb");
+    EXPECT_TRUE(f1);
+    FILE* f2 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
+    EXPECT_TRUE(f2);
+    if (f1) {
+        fclose(f1);
+    }
+    if (f2) {
+        fclose(f2);
+    }
+}
+
+TEST_F(FileShareTest, mixWithFopenWrite) {
+    FILE* f1 = fopen(mFilePath.c_str(), "wb");
+    EXPECT_TRUE(f1);
+    FILE* f2 = fsopen(mFilePath.c_str(), "w", FileShare::Write);
+    EXPECT_TRUE(f2);
+    if (f1) {
+        fclose(f1);
+    }
+    if (f2) {
+        fclose(f2);
+    }
+}
