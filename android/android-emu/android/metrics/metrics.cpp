@@ -378,6 +378,10 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::KERNEL_DEVICE_TREE_BLOB_SUPPORT;
         case android::featurecontrol::LocationUiV2:
             return android_studio::EmulatorFeatureFlagState::LOCATION_UI_V2;
+        case android::featurecontrol::SnapshotAdb:
+            // TODO: uncomment the following line when we get the studio stats
+            // ready
+            // return android_studio::EmulatorFeatureFlagState::SNAPSHOT_ADB;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }
