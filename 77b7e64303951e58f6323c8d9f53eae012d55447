@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "027d0add_6243cfe2",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-07-19T03:58:40Z",
+      "side": 1,
+      "message": "I totally missed this.",
+      "parentUuid": "828e158b_b8e76cb3",
+      "range": {
+        "startLine": 47,
+        "startChar": 12,
+        "endLine": 48,
+        "endChar": 53
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f16d6871_6a3fc547",
         "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
         "patchSetId": 4
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "15860eb1_5a06c790",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-07-19T03:58:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f16d6871_6a3fc547",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 22
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82490c48_61f9aa9a",
         "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
         "patchSetId": 4
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "ee2c5941_b20252a4",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-07-19T03:58:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "82490c48_61f9aa9a",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 0
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7cfa0a87_b4d0ae29",
         "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
         "patchSetId": 4
@@ -114,6 +186,30 @@
       "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17fb3952_fe1b71f8",
+        "filename": "android/android-emu/android/crashreport/HangDetector_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-07-19T03:58:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7cfa0a87_b4d0ae29",
+      "range": {
+        "startLine": 60,
+        "startChar": 27,
+        "endLine": 60,
+        "endChar": 39
+      },
+      "revId": "77b7e64303951e58f6323c8d9f53eae012d55447",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
