@@ -694,7 +694,7 @@ int make_ext4fs_internal(int fd, const char *_directory,
 
 	sparse_file_destroy(ext4_sparse_file);
 	ext4_sparse_file = NULL;
-
+	ext4_free_fs_aux_info();
 	free(mountpoint);
 	free(directory);
 
