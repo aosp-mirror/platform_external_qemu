@@ -240,6 +240,10 @@ void FrameBuffer::finalize() {
             s_egl.eglDestroySurface(m_eglDisplay, m_pbufSurface);
             m_pbufSurface = EGL_NO_SURFACE;
         }
+        if (m_eglSurface != EGL_NO_SURFACE) {
+            s_egl.eglDestroySurface(m_eglDisplay, m_eglSurface);
+            m_eglSurface = EGL_NO_SURFACE;
+        }
         m_eglDisplay = EGL_NO_DISPLAY;
     }
 
@@ -588,6 +592,12 @@ FrameBuffer::~FrameBuffer() {
         s_theFrameBuffer = nullptr;
     }
     sInitialized.store(false, std::memory_order_relaxed);
+
+    m_readbackThread.join();
+    m_postThread.join();
+
+    m_readbackWorker.reset();
+    m_postWorker.reset();
 }
 
 WorkerProcessingResult
@@ -761,7 +771,6 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             }
         }
     }
-
 
     // At this point, if the subwindow doesn't exist, it is because it either
     // couldn't be created
@@ -1656,10 +1665,13 @@ void FrameBuffer::createAndBindTrivialSharedContext(EGLContext* contextOut,
 
 void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
                                                        EGLSurface surface) {
-    s_egl.eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    if (m_eglDisplay != EGL_NO_DISPLAY) {
+        s_egl.eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                             EGL_NO_CONTEXT);
 
-    s_egl.eglDestroyContext(m_eglDisplay, context);
-    s_egl.eglDestroySurface(m_eglDisplay, surface);
+        s_egl.eglDestroyContext(m_eglDisplay, context);
+        s_egl.eglDestroySurface(m_eglDisplay, surface);
+    }
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
