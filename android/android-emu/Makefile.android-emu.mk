@@ -678,6 +678,7 @@ LOCAL_SRC_FILES := \
   android/base/containers/CircularBuffer_unittest.cpp \
   android/base/containers/Lookup_unittest.cpp \
   android/base/containers/SmallVector_unittest.cpp \
+  android/base/containers/StaticMap_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
   android/base/files/FileShareOpen_unittest.cpp \
   android/base/files/IniFile_unittest.cpp \
