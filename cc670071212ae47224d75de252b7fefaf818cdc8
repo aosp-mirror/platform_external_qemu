@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d46d1b8b_9516f8d2",
+        "filename": "android/android-emu/android/base/containers/StaticMap.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-20T18:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7ac8fae1_af386f70",
+      "range": {
+        "startLine": 42,
+        "startChar": 32,
+        "endLine": 42,
+        "endChar": 33
+      },
+      "revId": "cc670071212ae47224d75de252b7fefaf818cdc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "58203d49_d0c22106",
         "filename": "android/android-emu/android/base/containers/StaticMap.h",
         "patchSetId": 3
@@ -45,6 +69,30 @@
       "revId": "cc670071212ae47224d75de252b7fefaf818cdc8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3fb69bba_1d5a2001",
+        "filename": "android/android-emu/android/base/containers/StaticMap.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-20T18:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "58203d49_d0c22106",
+      "range": {
+        "startLine": 48,
+        "startChar": 48,
+        "endLine": 48,
+        "endChar": 49
+      },
+      "revId": "cc670071212ae47224d75de252b7fefaf818cdc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
