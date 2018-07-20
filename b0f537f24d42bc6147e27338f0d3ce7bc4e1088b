@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91bb3a9a_df832425",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-20T21:12:46Z",
+      "side": 1,
+      "message": "please double check that we handle _fsopen() well in our unicode interceptor .cpp\nuser directory often contains non-ASCII characters, and that\u0027s where all AVDs live",
+      "range": {
+        "startLine": 44,
+        "startChar": 17,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "b0f537f24d42bc6147e27338f0d3ce7bc4e1088b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97d191f2_1233298a",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-20T21:12:46Z",
+      "side": 1,
+      "message": "please _always_ use the \"W\" version and convert to utf16 with our Win32UnicodeString class. Otherwise there will be trouble",
+      "range": {
+        "startLine": 52,
+        "startChar": 17,
+        "endLine": 52,
+        "endChar": 28
+      },
+      "revId": "b0f537f24d42bc6147e27338f0d3ce7bc4e1088b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
