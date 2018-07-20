@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ac8fae1_af386f70",
+        "filename": "android/android-emu/android/base/containers/StaticMap.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-20T18:48:43Z",
+      "side": 1,
+      "message": "make it const, please. it\u0027s ok to declare mutex member mutable to achieve constness in such methods",
+      "range": {
+        "startLine": 42,
+        "startChar": 32,
+        "endLine": 42,
+        "endChar": 33
+      },
+      "revId": "cc670071212ae47224d75de252b7fefaf818cdc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58203d49_d0c22106",
+        "filename": "android/android-emu/android/base/containers/StaticMap.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-20T18:48:43Z",
+      "side": 1,
+      "message": "const as well, please",
+      "range": {
+        "startLine": 48,
+        "startChar": 48,
+        "endLine": 48,
+        "endChar": 49
+      },
+      "revId": "cc670071212ae47224d75de252b7fefaf818cdc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
