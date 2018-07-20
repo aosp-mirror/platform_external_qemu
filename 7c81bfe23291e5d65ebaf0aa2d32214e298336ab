@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "61f4403d_470e2748",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-20T01:11:52Z",
+      "side": 1,
+      "message": "there\u0027s a very small chance for file to still be open at this moment, and other emulator trying to fsopen() it. Will that work?",
+      "range": {
+        "startLine": 752,
+        "startChar": 8,
+        "endLine": 753,
+        "endChar": 21
+      },
+      "revId": "7c81bfe23291e5d65ebaf0aa2d32214e298336ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
