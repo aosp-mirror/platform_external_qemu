@@ -11,6 +11,9 @@
 
 #include "android/emulation/qemud/android_qemud_client.h"
 
+#include "android/base/containers/StaticMap.h"
+#include "android/base/memory/LazyInstance.h"
+
 #include "android/emulation/android_pipe_host.h"
 #include "android/emulation/qemud/android_qemud_common.h"
 #include "android/emulation/qemud/android_qemud_multiplexer.h"
@@ -20,6 +23,10 @@
 #include <errno.h>
 #include <stdlib.h>
 
+using android::base::LazyInstance;
+using android::base::StaticMap;
+
+static LazyInstance<StaticMap<QemudClient*, const char*>> sAllocatedClients = LAZY_INSTANCE_INIT;
 
 QemudClient* qemud_client_new(QemudService* service,
                               int channelId,
@@ -40,6 +47,7 @@ QemudClient* qemud_client_new(QemudService* service,
                                         m->serial,
                                         &m->clients);
 
+    sAllocatedClients->set(c, service->name);
     qemud_service_add_client(service, c);
     return c;
 }
@@ -243,22 +251,26 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
         c->need_header = 1;
         data = c->payload->buff;
 
-        /* Technically, calling 'clie_recv' can destroy client object 'c'
-         * if it decides to close the connection, so ensure we don't
-         * use/dereference it after the call. */
         if (c->clie_recv)
             c->clie_recv(c->clie_opaque, c->payload->buff, c->payload->size, c);
 
         AFREE(data);
 
-        /* Reset the payload buffer as well. */
-        qemud_sink_reset(c->payload, 0, 0);
+        /* It's possible |clie_recv| resulted in a disconnect and free. Check
+         * before resetting |c->payload|. */
+        if (sAllocatedClients->get(c)) {
+            /* Reset the payload buffer as well. */
+            qemud_sink_reset(c->payload, 0, 0);
+        }
     }
 }
 
 /* Frees memory allocated for the qemud client.
  */
 void _qemud_client_free(QemudClient* c) {
+
+    sAllocatedClients->erase(c);
+
     if (c != NULL) {
         if (qemud_is_pipe_client(c)) {
             /* Free outstanding messages. */
