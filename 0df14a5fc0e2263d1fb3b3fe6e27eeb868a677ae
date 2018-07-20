@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "baa5171d_965e1a71",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-20T21:52:03Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5f5bd396_2c02b4bf",
+      "revId": "0df14a5fc0e2263d1fb3b3fe6e27eeb868a677ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fef2930_c0d927f8",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
         "patchSetId": 18
