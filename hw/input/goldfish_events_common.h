@@ -237,6 +237,5 @@ void goldfish_events_write(void *opaque, hwaddr offset, uint64_t val, unsigned s
 void goldfish_events_set_bits(GoldfishEvDevState *s, int type, int bitl, int bith);
 void goldfish_events_set_bit(GoldfishEvDevState *s, int  type, int  bit);
 void goldfish_events_clr_bit(GoldfishEvDevState *s, int type, int bit);
-int goldfish_event_drop_count();
 
 #endif // GOLDFISH_EVENTS_UTIL_H
