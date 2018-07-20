@@ -43,6 +43,8 @@ ANDROID_BEGIN_HEADER
  */
 #define SNAPSHOT_LOCK "snapshot.lock"
 
+#define MULTIINSTANCE_LOCK "multiinstance.lock"
+
 /* The file where the crash reporter holds a copy of
  * the hardware properties. This file is in a temporary
  * directory set up by the crash reporter.

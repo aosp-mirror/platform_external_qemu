@@ -15,17 +15,11 @@
 
 namespace android {
 namespace base {
+namespace internal {
+    // Functions for testing purpose
+    void* openFileForShare(const char* filename);
+    void closeFileForShare(void* fileHandle);
+}
+}
+}
 
-enum class FileShare {
-    Read,
-    Write,
-};
-
-FILE* fsopen(const char* filename, const char* mode, FileShare fileshare);
-
-// Create a file. This operation is safe for multi-processing if other process
-// tries to fsopen the file during the creation.
-void createFileForShare(const char* filename);
-
-}  // namespace base
-}  // namespace android
