@@ -52,13 +52,14 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
             // They are loaded by GlobalNameSpace before loading
             // share groups
             TextureData* texData = (TextureData*)data.get();
-            if (!texData->globalName) continue;
+            if (!texData->getGlobalName())
+                continue;
 
             SaveableTexturePtr saveableTexture =
                     globalNameSpace->getSaveableTextureFromLoad(
-                        texData->globalName);
+                            texData->getGlobalName());
             texData->setSaveableTexture(std::move(saveableTexture));
-            texData->globalName = 0;
+            texData->setGlobalName(0);
         }
         setObjectData(localName, std::move(data));
     }
@@ -85,7 +86,7 @@ void NameSpace::touchTextures() {
 
         NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
         setGlobalObject(obj.first, texNamedObj);
-        texData->globalName = texNamedObj->getGlobalName();
+        texData->setGlobalName(texNamedObj->getGlobalName());
         texData->restore(0, nullptr);
     }
 }
@@ -280,17 +281,18 @@ void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
 
 void GlobalNameSpace::preSaveAddTex(TextureData* texture) {
     emugl::Mutex::AutoLock lock(m_lock);
-    const auto& saveableTexIt = m_textureMap.find(texture->globalName);
+    const auto& saveableTexIt = m_textureMap.find(texture->getGlobalName());
 
-    if (!texture->globalName) return;
+    if (!texture->getGlobalName())
+        return;
 
     if (saveableTexIt == m_textureMap.end()) {
         assert(texture->getSaveableTexture());
-        m_textureMap.emplace(texture->globalName,
-                texture->getSaveableTexture());
+        m_textureMap.emplace(texture->getGlobalName(),
+                             texture->getSaveableTexture());
     } else {
-        assert(m_textureMap[texture->globalName]
-                == texture->getSaveableTexture());
+        assert(m_textureMap[texture->getGlobalName()] ==
+               texture->getSaveableTexture());
     }
 }
 

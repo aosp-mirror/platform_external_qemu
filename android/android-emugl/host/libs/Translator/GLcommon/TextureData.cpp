@@ -99,6 +99,14 @@ void TextureData::resetSaveableTexture() {
     m_saveableTexture.reset(new SaveableTexture(*this));
 }
 
+unsigned int TextureData::getGlobalName() const {
+    return globalName;
+}
+
+void TextureData::setGlobalName(unsigned int name) {
+    globalName = name;
+}
+
 void TextureData::setTexParam(GLenum pname, GLint param) {
     m_texParam[pname] = param;
 }

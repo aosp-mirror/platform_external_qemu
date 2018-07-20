@@ -72,8 +72,6 @@ public:
     // both GLES2 and 3.
     unsigned int texStorageLevels = 0;
     int samples;
-    // globalName is used for snapshot when reading data from GPU
-    int globalName = 0;
     void onSave(android::base::Stream* stream,
                 unsigned int globalName) const override;
     void restore(ObjectLocalName localName,
@@ -81,12 +79,25 @@ public:
     void setSaveableTexture(SaveableTexturePtr&& saveableTexture);
     const SaveableTexturePtr& getSaveableTexture() const;
     void resetSaveableTexture();
+
+    unsigned int getGlobalName() const;
+    void setGlobalName(unsigned name);
+
+    // deprecated; texture parameters are dealt with by SaveableTexture
     void setTexParam(GLenum pname, GLint param);
     GLenum getSwizzle(GLenum component) const;
+
     void makeDirty();
     void setTarget(GLenum _target);
     void setMipmapLevelAtLeast(unsigned int level);
 protected:
+    // globalName is set during bind, used for snapshot when reading data from
+    // GPU Usually this should be kept by saveableTexture, but we might not have
+    // one yet.
+    unsigned int globalName = 0;
+
+    // deprecated; texture parameters are dealt with by SaveableTexture
     std::unordered_map<GLenum, GLint> m_texParam;
+
     SaveableTexturePtr m_saveableTexture;
 };
