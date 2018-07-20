@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "281332a9_af98f25b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-20T21:45:21Z",
+      "side": 1,
+      "message": "does it make sense that there need to be a reset here? The issue I\u0027m trying to solve is that SaveableTexture uses its globalName in onSave to bind the correct texture object, and it never gets that; maybe there should be a better place to provide it.",
+      "revId": "0df14a5fc0e2263d1fb3b3fe6e27eeb868a677ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6fef2930_c0d927f8",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
         "patchSetId": 18
