@@ -180,33 +180,13 @@ void HangDetector::workerThread() {
         for (auto&& lw : mLoopers) {
             lw->process(mHangCallback);
         }
-
-        // Check to see if any of the predicates evaluate to true.
-        for(const auto& predicate : mPredicates) {
-            if(predicate.first()) {
-                const auto message = base::StringFormat(
-                        "Failed hang detection predicate: '%s'",
-                        predicate.second);
-
-                derror("%s", message.c_str());
-                if (mHangCallback && !android::base::IsDebuggerAttached()) {
-                    mHangCallback(message);
-                }
-            }
-        }
     }
 }
-void HangDetector::addPredicateCheck(HangPredicate&& predicate, std::string&& msg) {
-    base::AutoLock lock(mLock);
-    mPredicates.emplace_back(std::make_pair(std::move(predicate), std::move(msg)));
-}
-
 
 base::System::Duration HangDetector::hangTimeoutMs() {
     // x86 and x64 run pretty fast, but other types of images could be really
     // slow - so let's have a longer timeout for those.
-    // Note that android_avdInfo is not set in unit tests.
-    if (android_avdInfo && avdInfo_is_x86ish(android_avdInfo)) {
+    if (avdInfo_is_x86ish(android_avdInfo)) {
         return kTaskProcessingTimeoutMs;
     }
     // something around 100 seconds should be fine.
