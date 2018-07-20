@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65ea8673_cd12904f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-20T19:39:05Z",
+      "side": 1,
+      "message": "please do not modify the global name in SaveableTexture unless it is during a snapshot load. If we have a need for updating, please create a new SaveableTexture instead. Otherwise it will change its EGL image siblings while it should instead orphan itself. Please use texData-\u003eresetSaveableTexture(); (as it is used 2 lines bellow) to create a new SaveableTexture, when you need to update its global name.",
+      "range": {
+        "startLine": 807,
+        "startChar": 16,
+        "endLine": 807,
+        "endChar": 58
+      },
+      "revId": "c8827bb35b4b6710af37116d6f0bb9961b605aa8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
