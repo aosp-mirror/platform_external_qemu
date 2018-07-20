@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5f5bd396_2c02b4bf",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-20T21:48:52Z",
+      "side": 1,
+      "message": "It make sense here but please make sure it is only triggered the first time it is bound. (Don\u0027t overwrite it in the second bind) Because in GL, texture objects are only initialized during their first bind.",
+      "parentUuid": "281332a9_af98f25b",
+      "revId": "0df14a5fc0e2263d1fb3b3fe6e27eeb868a677ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6fef2930_c0d927f8",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
         "patchSetId": 18
