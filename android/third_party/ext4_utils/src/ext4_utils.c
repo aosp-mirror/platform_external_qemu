@@ -125,6 +125,7 @@ void ext4_create_fs_aux_info()
 	if (!aux_info.bg_desc)
 		critical_error_errno("calloc");
 	aux_info.xattrs = NULL;
+	aux_info.jsb = NULL;
 }
 
 void ext4_free_fs_aux_info()
@@ -137,6 +138,7 @@ void ext4_free_fs_aux_info()
 	}
 	free(aux_info.sb);
 	free(aux_info.bg_desc);
+	free(aux_info.jsb);
 }
 
 /* Fill in the superblock memory buffer based on the filesystem parameters */
@@ -334,6 +336,7 @@ void ext4_create_journal_inode()
 	inode->i_links_count = 1;
 
 	journal_superblock_t *jsb = (journal_superblock_t *)journal_data;
+	aux_info.jsb = jsb;
 	jsb->s_header.h_magic = htonl(JBD2_MAGIC_NUMBER);
 	jsb->s_header.h_blocktype = htonl(JBD2_SUPERBLOCK_V2);
 	jsb->s_blocksize = htonl(info.block_size);
