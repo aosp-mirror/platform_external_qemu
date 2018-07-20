@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0dd9df02_8328076d",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-20T20:45:22Z",
+      "side": 1,
+      "message": "We actually want to clear only one at a time.\nBut I\u0027ve removed these flags in favor of a queue of things to do.",
+      "parentUuid": "5867cd04_633d0ffc",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 9
+      },
+      "revId": "f3a985ac8bb92b22189a8386b8341b9e61bd06b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a1286c9_1e12e699",
         "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "f3a985ac8bb92b22189a8386b8341b9e61bd06b3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "556f48b0_8fba67a6",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-20T20:45:22Z",
+      "side": 1,
+      "message": "I changed it to have a queue of actions. I acquire the lock before updating the sGlobal members and the queue. I release the lock when all the queued actions have completed.",
+      "parentUuid": "9a1286c9_1e12e699",
+      "range": {
+        "startLine": 140,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 1
+      },
+      "revId": "f3a985ac8bb92b22189a8386b8341b9e61bd06b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
