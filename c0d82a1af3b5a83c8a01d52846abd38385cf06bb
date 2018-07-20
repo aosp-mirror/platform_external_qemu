@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2d17fb3_a3766081",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-20T21:08:34Z",
+      "side": 1,
+      "message": "You can make it a queue of std::function\u003cvoid()\u003e\u0027s so that closures with data can be passed as each item of funcQueue. That way, each queue item has its own copy of the relevant data and there\u0027s no chance of corrupting the data with concurrent accesses to sGlobals (which can happen even when adbLock is doing its job)",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 35
+      },
+      "revId": "c0d82a1af3b5a83c8a01d52846abd38385cf06bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7f8d937_da54bb54",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-20T21:08:34Z",
+      "side": 1,
+      "message": "I think this function should old the adb lock because it might change funcQueue.",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 89
+      },
+      "revId": "c0d82a1af3b5a83c8a01d52846abd38385cf06bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
