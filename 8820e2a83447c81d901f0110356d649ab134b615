@@ -22,6 +22,29 @@
       "revId": "8820e2a83447c81d901f0110356d649ab134b615",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92708950_55224556",
+        "filename": "android/android-emu/android/emulation/qemud/android_qemud_client.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-20T16:32:01Z",
+      "side": 1,
+      "message": "what about this comment? it says the whole |c| can be destroyed",
+      "range": {
+        "startLine": 246,
+        "startChar": 11,
+        "endLine": 248,
+        "endChar": 45
+      },
+      "revId": "8820e2a83447c81d901f0110356d649ab134b615",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
