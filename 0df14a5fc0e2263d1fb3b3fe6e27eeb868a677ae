@@ -39,6 +39,30 @@
       "revId": "0df14a5fc0e2263d1fb3b3fe6e27eeb868a677ae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9601263d_95829530",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-20T21:47:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fef2930_c0d927f8",
+      "range": {
+        "startLine": 80,
+        "startChar": 4,
+        "endLine": 80,
+        "endChar": 42
+      },
+      "revId": "0df14a5fc0e2263d1fb3b3fe6e27eeb868a677ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
