@@ -69,6 +69,30 @@
       "revId": "8820e2a83447c81d901f0110356d649ab134b615",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12ce9765_4bbe236f",
+        "filename": "android/android-emu/android/emulation/qemud/android_qemud_client.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-20T16:38:20Z",
+      "side": 1,
+      "message": "what about this: since the emulator seems to run fine in asan with this, enforce a contract to never free in client recv, since that\u0027s a very inconvenient protocol",
+      "parentUuid": "ff263d7a_1767b928",
+      "range": {
+        "startLine": 246,
+        "startChar": 11,
+        "endLine": 248,
+        "endChar": 45
+      },
+      "revId": "8820e2a83447c81d901f0110356d649ab134b615",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
