@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "773af631_eb7cfe00",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-20T21:32:08Z",
+      "side": 1,
+      "message": "Done. Updated to _wfsopen. Also updated unit tests to use non-ascii path.",
+      "parentUuid": "91bb3a9a_df832425",
+      "range": {
+        "startLine": 44,
+        "startChar": 17,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "b0f537f24d42bc6147e27338f0d3ce7bc4e1088b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "97d191f2_1233298a",
         "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "b0f537f24d42bc6147e27338f0d3ce7bc4e1088b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c906dac8_d110885b",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-20T21:32:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "97d191f2_1233298a",
+      "range": {
+        "startLine": 52,
+        "startChar": 17,
+        "endLine": 52,
+        "endChar": 28
+      },
+      "revId": "b0f537f24d42bc6147e27338f0d3ce7bc4e1088b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
