@@ -17,7 +17,6 @@
 
 #include "qemu/osdep.h"
 #include "hw/input/goldfish_events.h"
-#include "hw/input/goldfish_events_common.h"
 #include "hw/input/goldfish_rotary.h"
 #include "ui/console.h"
 
@@ -83,9 +82,7 @@ static const QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendRotaryEvent = user_event_rotary,
         .sendGenericEvent = user_event_generic,
         .sendGenericEvents = user_event_generic_events,
-        .onNewUserEvent = on_new_event,
-        .eventsDropped = goldfish_event_drop_count };
-
+        .onNewUserEvent = on_new_event};
 
 const QAndroidUserEventAgent* const gQAndroidUserEventAgent =
         &sQAndroidUserEventAgent;
