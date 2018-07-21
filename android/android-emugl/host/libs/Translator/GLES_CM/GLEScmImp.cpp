@@ -426,8 +426,11 @@ GL_API void GL_APIENTRY  glBindTexture( GLenum target, GLuint texture) {
             texData->setTarget(target);
         //if texture was already bound to another target
         SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
+        texData->setGlobalName(globalTextureName);
+        if (!texData->wasBound) {
+            texData->resetSaveableTexture();
+        }
         texData->wasBound = true;
-        texData->globalName = globalTextureName;
     }
 
     ctx->setBindedTexture(target, texture, globalTextureName);
@@ -631,7 +634,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
                 ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
                         globalTextureName);
                 texData->sourceEGLImage = 0;
-                texData->globalName = globalTextureName;
+                texData->setGlobalName(globalTextureName);
             }
             texData->resetSaveableTexture();
         }
@@ -948,7 +951,7 @@ GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
             glGetIntegerv(pname,&name);
             *params = name!=0 ? GL_TRUE: GL_FALSE;
         }
-    break;
+        break;
     case GL_TEXTURE_GEN_STR_OES:
         {
             GLboolean state_s = GL_FALSE;
@@ -959,10 +962,10 @@ GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
             ctx->dispatcher().glGetBooleanv(GL_TEXTURE_GEN_R,&state_r);
             *params = state_s && state_t && state_r ? GL_TRUE: GL_FALSE;
         }
-    break; 
+        break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = (GLboolean)getCompressedFormats(NULL); 
-    break;    
+        *params = (GLboolean)getCompressedFormats(NULL);
+        break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
             int nparams = getCompressedFormats(NULL);
@@ -973,7 +976,7 @@ GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
                 delete [] iparams;
             }
         }
-    break;
+        break;
     case GL_GENERATE_MIPMAP_HINT:
         if (isCoreProfile()) {
             TO_GLBOOL(params, ctx->getHint(GL_GENERATE_MIPMAP_HINT));
@@ -1059,7 +1062,7 @@ GL_API void GL_APIENTRY  glGetFixedv( GLenum pname, GLfixed *params) {
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
         *params = I2X(getCompressedFormats(NULL));
         return;
-    break;    
+        break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
             int nparams = getCompressedFormats(NULL);
@@ -1071,7 +1074,7 @@ GL_API void GL_APIENTRY  glGetFixedv( GLenum pname, GLfixed *params) {
             }
             return;
         }
-    break;
+        break;
     default:
         ctx->dispatcher().glGetFloatv(pname,fParams);
     }
@@ -1101,10 +1104,10 @@ GL_API void GL_APIENTRY  glGetFloatv( GLenum pname, GLfloat *params) {
     case GL_TEXTURE_GEN_STR_OES:
         glGetIntegerv(pname,&i);
         *params = (GLfloat)i;
-    break;   
+        break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = (GLfloat)getCompressedFormats(NULL); 
-    break;    
+        *params = (GLfloat)getCompressedFormats(NULL);
+        break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
             int nparams = getCompressedFormats(NULL);
@@ -1115,7 +1118,7 @@ GL_API void GL_APIENTRY  glGetFloatv( GLenum pname, GLfloat *params) {
                 delete [] iparams;
             }
         }
-    break;
+        break;
     default:
         ctx->dispatcher().glGetFloatv(pname,params);
     }
@@ -1129,7 +1132,7 @@ GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params) {
     {
         return;
     }
-    
+
     GLint i;
     GLfloat f;
 
@@ -2132,7 +2135,7 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
             texData->type = img->type;
             texData->texStorageLevels = img->texStorageLevels;
             texData->sourceEGLImage = imagehndl;
-            texData->globalName = img->globalTexObj->getGlobalName();
+            texData->setGlobalName(img->globalTexObj->getGlobalName());
             texData->setSaveableTexture(
                     SaveableTexturePtr(img->saveableTexture));
             if (img->sync) {
