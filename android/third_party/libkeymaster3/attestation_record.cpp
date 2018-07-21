@@ -556,7 +556,7 @@ keymaster_error_t build_attestation_record(const AuthorizationSet& attestation_p
     error = build_auth_list(tee_enforced, key_desc->tee_enforced);
     if (error != KM_ERROR_OK)
         return error;
-    key_desc->tee_enforced->root_of_trust = new KM_ROOT_OF_TRUST();
+    key_desc->tee_enforced->root_of_trust = (KM_ROOT_OF_TRUST*)malloc(sizeof(KM_ROOT_OF_TRUST));
     memset(key_desc->tee_enforced->root_of_trust, 0, sizeof(KM_ROOT_OF_TRUST));
     key_desc->tee_enforced->root_of_trust->verified_boot_key = ASN1_OCTET_STRING_new();
     key_desc->tee_enforced->root_of_trust->device_locked = ASN1_NULL_new();
