@@ -103,6 +103,7 @@ struct fs_aux_info {
 	struct ext2_group_desc *bg_desc;
 	struct block_group_info *bgs;
 	struct xattr_list_element *xattrs;
+	journal_superblock_t *jsb;
 	u32 first_data_block;
 	u64 len_blocks;
 	u32 inode_table_blocks;
