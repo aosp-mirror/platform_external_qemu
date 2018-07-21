@@ -327,7 +327,7 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_type(texture.type),
       m_border(texture.border),
       m_texStorageLevels(texture.texStorageLevels),
-      m_globalName(texture.globalName),
+      m_globalName(texture.getGlobalName()),
       m_isDirty(true) {}
 
 SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
@@ -448,7 +448,8 @@ void SaveableTexture::onSave(
             default:
                 break;
         }
-        dispatcher.glBindTexture(m_target, m_globalName);
+
+        dispatcher.glBindTexture(m_target, getGlobalName());
         // Get the number of mipmap levels.
         unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
                 m_maxMipmapLevel + 1;
@@ -667,7 +668,7 @@ void SaveableTexture::restore() {
             default:
                 break;
         }
-        dispatcher.glBindTexture(m_target, m_globalName);
+        dispatcher.glBindTexture(m_target, getGlobalName());
         // Restore texture data
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Get the number of mipmap levels.
@@ -838,4 +839,11 @@ void SaveableTexture::setTarget(GLenum target) {
 
 void SaveableTexture::setMipmapLevelAtLeast(unsigned int level) {
     m_maxMipmapLevel = std::max(level, m_maxMipmapLevel);
+}
+
+unsigned int SaveableTexture::getGlobalName() {
+    if (m_globalTexObj) {
+        return m_globalTexObj->getGlobalName();
+    }
+    return m_globalName;
 }
