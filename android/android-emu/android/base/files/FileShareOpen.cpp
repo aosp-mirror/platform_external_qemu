@@ -13,10 +13,21 @@
 #include <cstdio>
 
 #include "android/base/files/FileShareOpen.h"
+#include "android/base/files/FileShareOpenImpl.h"
+
+void android::base::createFileForShare(const char* filename) {
+    void* handle = internal::openFileForShare(filename);
+    if (handle) {
+        internal::closeFileForShare(handle);
+    }
+}
 
 #ifdef _WIN32
 
+#include "android/base/system/Win32UnicodeString.h"
+
 #include <share.h>
+#include <windows.h>
 
 FILE* android::base::fsopen(const char* filename,
                             const char* mode,
@@ -32,12 +43,31 @@ FILE* android::base::fsopen(const char* filename,
             shflag = _SH_DENYRW;
             break;
     }
-    FILE* file = _fsopen(filename, mode, shflag);
+    const Win32UnicodeString filenameW(filename);
+    const Win32UnicodeString modeW(mode);
+    FILE* file = _wfsopen(filenameW.c_str(), modeW.c_str(), shflag);
     if (!file) {
         fprintf(stderr, "%s open failed errno %d\n", filename, errno);
     }
     return file;
 }
+
+void* android::base::internal::openFileForShare(const char* filename) {
+    const Win32UnicodeString filenameW(filename);
+    void* hndl = CreateFileW(filenameW.c_str(), 0,
+            FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (hndl != INVALID_HANDLE_VALUE) {
+        return hndl;
+    } else {
+        return nullptr;
+    }
+}
+
+void android::base::internal::closeFileForShare(void* fileHandle) {
+    CloseHandle(fileHandle);
+}
+
 #else
 #include <sys/file.h>
 #include <unistd.h>
@@ -68,6 +98,14 @@ FILE* android::base::fsopen(const char* filename,
         return nullptr;
     }
     return file;
+}
+
+void* android::base::internal::openFileForShare(const char* filename) {
+    return fopen(filename, "a");
+}
+
+void android::base::internal::closeFileForShare(void* fileHandle) {
+    fclose((FILE*)fileHandle);
 }
 
 #endif
