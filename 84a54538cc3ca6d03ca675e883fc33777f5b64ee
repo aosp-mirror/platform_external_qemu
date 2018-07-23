@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "623a7a24_0bb4bfdb",
+        "filename": "android/android-emu/android/avd/util_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-23T15:35:29Z",
+      "side": 1,
+      "message": "ScopedCPtr\u003c\u003e?",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 52,
+        "endChar": 17
+      },
+      "revId": "84a54538cc3ca6d03ca675e883fc33777f5b64ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "085fc1ae_f75aa353",
+        "filename": "android/android-emu/android/avd/util_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-23T15:35:29Z",
+      "side": 1,
+      "message": "looks like this one could leak if the function decides to return non-null",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 28
+      },
+      "revId": "84a54538cc3ca6d03ca675e883fc33777f5b64ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c1d2d321_2223f6be",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_linux.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-23T15:35:29Z",
+      "side": 1,
+      "message": "hmmm",
+      "range": {
+        "startLine": 194,
+        "startChar": 0,
+        "endLine": 195,
+        "endChar": 46
+      },
+      "revId": "84a54538cc3ca6d03ca675e883fc33777f5b64ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
