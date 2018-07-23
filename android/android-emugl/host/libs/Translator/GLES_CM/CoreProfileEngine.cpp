@@ -511,7 +511,7 @@ void CoreProfileEngine::setupArrayForDraw(
                     data = mCtx->getColor();
                     break;
                 case GL_TEXTURE_COORD_ARRAY:
-                    size = 4;
+                    size = 3;
                     data = mCtx->getMultiTexCoord(mCtx->getActiveTextureUnit());
                     break;
                 default:
