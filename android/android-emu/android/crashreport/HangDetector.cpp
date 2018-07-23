@@ -28,7 +28,9 @@ class HangDetector::LooperWatcher {
     DISALLOW_COPY_AND_ASSIGN(LooperWatcher);
 
 public:
-    LooperWatcher(base::Looper* looper);
+    LooperWatcher(base::Looper* looper,
+                  base::System::Duration hangTimeoutMs,
+                  base::System::Duration hangCheckTimeoutMs);
     ~LooperWatcher();
 
     LooperWatcher(LooperWatcher&&) = default;
@@ -47,13 +49,18 @@ private:
     bool mIsTaskRunning = false;
 
     base::Optional<base::System::Duration> mLastCheckTimeUs;
-    base::System::Duration mTimeoutMs = HangDetector::hangTimeoutMs();
-
+    const base::System::Duration mTimeoutMs;
+    const base::System::Duration mHangCheckTimeoutMs;
     std::unique_ptr<base::Lock> mLock{new base::Lock()};
 };
 
-HangDetector::LooperWatcher::LooperWatcher(base::Looper* looper)
-    : mLooper(looper) {}
+HangDetector::LooperWatcher::LooperWatcher(
+        base::Looper* looper,
+        base::System::Duration hangTimeoutMs,
+        base::System::Duration hangCheckTimeoutMs)
+    : mLooper(looper),
+      mTimeoutMs(hangTimeoutMs),
+      mHangCheckTimeoutMs(hangCheckTimeoutMs) {}
 
 HangDetector::LooperWatcher::~LooperWatcher() {
     if (mTask) {
@@ -93,7 +100,7 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
                 hangCallback(message);
             }
         }
-    } else if (now > mLastCheckTimeUs.valueOr(0) + kHangCheckTimeoutMs * 1000) {
+    } else if (now > mLastCheckTimeUs.valueOr(0) + mHangCheckTimeoutMs * 1000) {
         startHangCheckLocked();
     }
 }
@@ -112,8 +119,9 @@ void HangDetector::LooperWatcher::taskComplete() {
     mIsTaskRunning = false;
 }
 
-HangDetector::HangDetector(HangCallback&& hangCallback)
+HangDetector::HangDetector(HangCallback&& hangCallback, Timing timing)
     : mHangCallback(std::move(hangCallback)),
+      mTiming(timing),
       mWorkerThread([this]() { workerThread(); }) {
     mWorkerThread.start();
 }
@@ -124,7 +132,8 @@ HangDetector::~HangDetector() {
 
 void HangDetector::addWatchedLooper(base::Looper* looper) {
     base::AutoLock lock(mLock);
-    mLoopers.emplace_back(new LooperWatcher(looper));
+    mLoopers.emplace_back(new LooperWatcher(looper, hangTimeoutMs(),
+                                            mTiming.hangCheckTimeoutMs));
     if (!mPaused && !mStopping) {
         mLoopers.back()->startHangCheck();
     }
@@ -155,13 +164,14 @@ void HangDetector::stop() {
 }
 
 void HangDetector::workerThread() {
-    auto nextDeadline = []() {
+    auto nextDeadline = [this]() {
         return base::System::get()->getUnixTimeUs() +
-               kHangLoopIterationTimeoutMs * 1000;
+               mTiming.hangLoopIterationTimeoutMs * 1000;
     };
     base::AutoLock lock(mLock);
     for (;;) {
         auto waitUntilUs = nextDeadline();
+
         while (!mStopping &&
                (base::System::get()->getUnixTimeUs() < waitUntilUs ||
                 mPaused)) {
@@ -180,17 +190,38 @@ void HangDetector::workerThread() {
         for (auto&& lw : mLoopers) {
             lw->process(mHangCallback);
         }
+
+        // Check to see if any of the predicates evaluate to true.
+        for (const auto& predicate : mPredicates) {
+            if (predicate.first()) {
+                const auto message = base::StringFormat(
+                        "Failed hang detection predicate: '%s'",
+                        predicate.second);
+
+                derror("%s", message.c_str());
+                if (mHangCallback && !android::base::IsDebuggerAttached()) {
+                    mHangCallback(message);
+                }
+            }
+        }
     }
+}
+void HangDetector::addPredicateCheck(HangPredicate&& predicate,
+                                     std::string&& msg) {
+    base::AutoLock lock(mLock);
+    mPredicates.emplace_back(
+            std::make_pair(std::move(predicate), std::move(msg)));
 }
 
 base::System::Duration HangDetector::hangTimeoutMs() {
     // x86 and x64 run pretty fast, but other types of images could be really
     // slow - so let's have a longer timeout for those.
-    if (avdInfo_is_x86ish(android_avdInfo)) {
-        return kTaskProcessingTimeoutMs;
+    // Note that android_avdInfo is not set in unit tests.
+    if (android_avdInfo && avdInfo_is_x86ish(android_avdInfo)) {
+        return mTiming.taskProcessingTimeoutMs;
     }
     // something around 100 seconds should be fine.
-    return kTaskProcessingTimeoutMs * 7;
+    return mTiming.taskProcessingTimeoutMs * 7;
 }
 
 }  // namespace crashreport

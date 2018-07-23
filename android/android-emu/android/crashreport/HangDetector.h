@@ -14,9 +14,9 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
+#include "android/base/async/Looper.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
@@ -41,12 +41,27 @@ class HangDetector {
     DISALLOW_COPY_AND_ASSIGN(HangDetector);
 
 public:
-    using HangCallback = std::function<void(base::StringView message)>;
+    struct Timing {
+        // Timeout between worker thread's loop iterations.
+        const base::System::Duration hangLoopIterationTimeoutMs;
+        // How long is it OK to process a task before we consider it hanging.
+        const base::System::Duration taskProcessingTimeoutMs;
+        // Timeout between hang checks.
+        const base::System::Duration hangCheckTimeoutMs;
+    };
 
-    HangDetector(HangCallback&& hangCallback);
+    using HangCallback = std::function<void(base::StringView message)>;
+    using HangPredicate = std::function<bool()>;
+
+    HangDetector(HangCallback&& hangCallback, Timing timing = defaultTiming());
     ~HangDetector();
 
     void addWatchedLooper(base::Looper* looper);
+
+    // We implicitly assume:
+    //    predicate() -> []predicate() (if a predicate becomes true, it will
+    //    always return true, we only need to infer a system hangs once)
+    void addPredicateCheck(HangPredicate&& predicate, std::string&& msg = "");
     void pause(bool paused);
     void stop();
 
@@ -54,23 +69,22 @@ private:
     void workerThread();
 
 private:
-    // Timeout between worker thread's loop iterations.
-    static constexpr base::System::Duration kHangLoopIterationTimeoutMs =
-            5 * 1000;
-    // How long is it OK to process a task before we consider it hanging.
-    static constexpr base::System::Duration kTaskProcessingTimeoutMs =
-            15 * 1000;
-    // Timeout between hang checks.
-    static constexpr base::System::Duration kHangCheckTimeoutMs = 15 * 1000;
+    static constexpr Timing defaultTiming() {
+        return {.hangLoopIterationTimeoutMs = 5 * 1000,
+                .taskProcessingTimeoutMs = 15 * 1000,
+                .hangCheckTimeoutMs = 15 * 1000};
+    }
 
-    static base::System::Duration hangTimeoutMs();
+    base::System::Duration hangTimeoutMs();
 
     // A class that watches a single looper.
     class LooperWatcher;
 
     const HangCallback mHangCallback;
 
+    const Timing mTiming;
     std::vector<std::unique_ptr<LooperWatcher>> mLoopers;
+    std::vector<std::pair<HangPredicate, std::string>> mPredicates;
     bool mPaused = false;
     bool mStopping = false;
     base::Lock mLock;
