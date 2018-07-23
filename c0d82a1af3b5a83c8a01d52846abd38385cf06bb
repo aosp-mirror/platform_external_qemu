@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "c67d60af_d2b5caa4",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-23T21:35:13Z",
+      "side": 1,
+      "message": "Cool. Done.",
+      "parentUuid": "ab9d1964_934c1a25",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 35
+      },
+      "revId": "c0d82a1af3b5a83c8a01d52846abd38385cf06bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d7f8d937_da54bb54",
         "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
         "patchSetId": 4
@@ -69,6 +93,30 @@
       "revId": "c0d82a1af3b5a83c8a01d52846abd38385cf06bb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da15ac72_983fa085",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-23T21:35:13Z",
+      "side": 1,
+      "message": "It\u0027s acquired and held before this runs. This releases the lock when it\u0027s done.\nI updated the comments to make this more clear.",
+      "parentUuid": "d7f8d937_da54bb54",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 89
+      },
+      "revId": "c0d82a1af3b5a83c8a01d52846abd38385cf06bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
