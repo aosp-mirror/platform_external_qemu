@@ -51,4 +51,6 @@ enum Feature {
     WindowsHypervisorPlatform = 25;
 
     KernelDeviceTreeBlobSupport = 26;
+
+    LocationUiV2 = 27;
 }
