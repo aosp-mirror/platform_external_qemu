@@ -190,8 +190,9 @@ public:
 };
 
 bool MemoryAccessWatch::isSupported() {
-    base::ScopedFd ufd(int(syscall(__NR_userfaultfd, O_CLOEXEC)));
-    return checkUserfaultFdCaps(ufd.get());
+    return false;
+    // base::ScopedFd ufd(int(syscall(__NR_userfaultfd, O_CLOEXEC)));
+    // return checkUserfaultFdCaps(ufd.get());
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
