@@ -59,7 +59,7 @@ int ping_binary_send(struct socket* so, struct mbuf* m, int hlen) {
     }
     FILE* p = popen(ping_cmd, "r");
     if (!p) {
-        error_report("popen failed for ping binary");
+        error_report("Failed to popen: %s due to: %s", ping_cmd, strerror(errno));
         return -1;
     }
 
