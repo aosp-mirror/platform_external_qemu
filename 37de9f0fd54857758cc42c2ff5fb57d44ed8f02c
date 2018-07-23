@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7dba781e_da819382",
+        "filename": "android/android-emu/android/base/AlignedBuf_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-23T04:25:46Z",
+      "side": 1,
+      "message": "please either use the android::base::arraySize() function here, or std::array\u003c\u003e instead of char[]",
+      "range": {
+        "startLine": 122,
+        "startChar": 4,
+        "endLine": 123,
+        "endChar": 55
+      },
+      "revId": "37de9f0fd54857758cc42c2ff5fb57d44ed8f02c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
