@@ -119,7 +119,7 @@ TEST(AlignedBuf, Compare) {
 
 // Tests that resize preserves contents.
 TEST(AlignedBuf, Resize) {
-    constexpr int initialSize = 5;
+    constexpr int initialSize = 4;
     constexpr char contents[] = { 0xa, 0xb, 0xc, 0xd };
 
     AlignedBuf<char, 4096> buf(initialSize);
