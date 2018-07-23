@@ -17,12 +17,38 @@ task buildDefaultEmulator(type: BuildEmulator) {
     output = new File(project.buildDir, "default")
 }
 
+task buildEmulatorCodeCoverage(type: BuildEmulator) {
+    debug = true
+    revision = props."Pkg.Revision"
+    build_number = System.getenv("BUILD_NUMBER")
+    output = new File(project.buildDir, "coverage")
+}
+
+
 task buildWindowsEmulator(type: BuildEmulator) {
     revision = props."Pkg.Revision"
     build_number = System.getenv("BUILD_NUMBER")
     output = new File(project.buildDir, "windows")
     windows = true
 }
+
+// Package all data to construct a coverage report.
+task packageCodeCoverage(type: Zip) {
+    dependsOn buildEmulatorCodeCoverage
+    outputs.upToDateWhen { false }
+    archiveName = "code-coverage.zip"
+    destinationDir = new File(project.buildDir, "coverage")
+    from(buildEmulatorCodeCoverage.output) {
+        include "**/*.csv"
+    }
+    from(buildEmulatorCodeCoverage.output) {
+        include "**/*.gcda"
+    }
+    from(buildEmulatorCodeCoverage.output) {
+        include "**/*.gcno"
+    }
+}
+
 
 sdk {
     common(mac, linux) {
@@ -101,6 +127,13 @@ sdk {
         item("$buildDefaultEmulator.output/qemu-img") {
             executable true
             builtBy buildDefaultEmulator
+        }
+
+        // This will make it end up in the Debug configuration.
+        item("$buildEmulatorCodeCoverage.output/code-coverage.zip") {
+            debug true
+            into ''
+            builtBy  packageCodeCoverage
         }
     }
 
