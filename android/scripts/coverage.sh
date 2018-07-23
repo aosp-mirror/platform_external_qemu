@@ -33,6 +33,12 @@ option_register_var "--jobs=<count>" OPT_NUM_JOBS "Same as -j<count>."
 OPT_OUT=objs
 option_register_var "--out-dir=<dir>" OPT_OUT "Use specific output directory"
 
+OPT_CSV=
+option_register_var  "--csv" OPT_CSV "Produce a CSV instead of html"
+
+OPT_BUILDID=-1
+option_register_var "--buildid=<buildid>" OPT_BUILDID "Use the given build id for csv generation."
+
 aosp_dir_register_option
 
 aosp_dir_parse_option
@@ -61,13 +67,31 @@ run pip install gcovr
 
 
 run mkdir -p "$OPT_OUT/coverage"
-run gcovr \
-  -j $NUM_JOBS \
-  --root $QEMU2_TOP_DIR \
-  --print-summary \
-  --output $OPT_OUT/coverage/emu-coverage.html \
-  --gcov-executable "${CLANG_BINDIR}/llvm-cov gcov" \
-  --html-title "$TITLE" \
-  --html-details \
-  --html \
-
+if [ "$OPT_CSV" ]; then
+  COVXML=$OPT_OUT/coverage/emu-coverage.xml
+  run gcovr \
+    -j $NUM_JOBS \
+    --root $QEMU2_TOP_DIR \
+    --print-summary \
+    --output $COVXML \
+    --gcov-executable "${CLANG_BINDIR}/llvm-cov gcov" \
+    --xml \
+    --xml-pretty \
+    --verbose \
+    $OPT_OUT
+  run xsltproc --param buildid $OPT_BUILDID \
+    $QEMU2_TOP_DIR/android/scripts/coverage.xsl \
+    $COVXML > "$OPT_OUT/coverage/emu-coverage.csv"
+else
+  run gcovr \
+    -j $NUM_JOBS \
+    --root $QEMU2_TOP_DIR \
+    --print-summary \
+    --output $OPT_OUT/coverage/emu-coverage.html \
+    --gcov-executable "${CLANG_BINDIR}/llvm-cov gcov" \
+    --html-title "$TITLE" \
+    --html-details \
+    --html \
+    --verbose \
+    $OPT_OUT
+fi
