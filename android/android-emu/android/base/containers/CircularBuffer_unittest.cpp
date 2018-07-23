@@ -111,7 +111,7 @@ TEST(CircularBuffer, PopBack) {
 
 TEST(CircularBuffer, MoveOnlyType) {
    CircularBuffer<std::unique_ptr<int>> cb(1);
-   std::unique_ptr<int> ptr(new int[1]);
+   std::unique_ptr<int> ptr(new int);
    *ptr = 10098;
    cb.push_back(std::move(ptr));
    EXPECT_EQ(10098, *cb.back());
