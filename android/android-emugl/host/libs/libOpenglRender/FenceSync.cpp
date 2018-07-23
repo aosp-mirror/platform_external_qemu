@@ -28,13 +28,21 @@
 
 #include <unordered_set>
 
+static int totalFencesCreated = 0;
+static int totalFencesDestroyed = 0;
+
 FenceSync::FenceSync(bool hasNativeFence,
                      bool destroyWhenSignaled) :
     mDestroyWhenSignaled(destroyWhenSignaled) {
+
+        ++totalFencesCreated;
+
     addToRegistry();
 
     assert(mCount == 1);
     if (hasNativeFence) incRef();
+
+    fprintf(stderr, "%s: total fences %d destroyd %d native? %d DWS? %d\n", __func__, totalFencesCreated, totalFencesDestroyed, hasNativeFence, destroyWhenSignaled);
 
     // assumes that there is a valid + current OpenGL context
     assert(RenderThreadInfo::get());
@@ -47,6 +55,10 @@ FenceSync::FenceSync(bool hasNativeFence,
 }
 
 FenceSync::~FenceSync() {
+    ++totalFencesDestroyed;
+
+    fprintf(stderr, "%s: total fences %d destroyd %d DWS? %d\n", __func__, totalFencesCreated, totalFencesDestroyed, mDestroyWhenSignaled);
+
     removeFromRegistry();
 }
 
