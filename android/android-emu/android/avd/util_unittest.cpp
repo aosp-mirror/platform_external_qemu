@@ -13,6 +13,7 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/utils/file_data.h"
 #include "android/base/ArraySize.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestSystem.h"
 
 #include <iostream>
@@ -22,6 +23,7 @@
 #include "android/base/testing/TestTempDir.h"
 
 
+using android::base::ScopedCPtr;
 using android::base::TestSystem;
 using android::base::TestTempDir;
 
@@ -49,7 +51,8 @@ TEST(AvdUtil, path_getAvdSystemPath) {
     // A relative path should be resolved from ANRDOID_AVD_HOME
     writeToFile(avdConfig, "image.sysdir.1=sysimg");
 
-    std::unique_ptr<char[]> path(path_getAvdSystemPath("q", sdkRoot.c_str()));
+    ScopedCPtr<char> path(path_getAvdSystemPath("q", sdkRoot.c_str()));
+
     EXPECT_STREQ((sdkRoot + "/sysimg").c_str(), path.get());
 
     // An absolute path should be usuable as well
@@ -57,11 +60,14 @@ TEST(AvdUtil, path_getAvdSystemPath) {
                  "image.sysdir.1=" + tmp->pathString() + "/nothome");
 
     path.reset(path_getAvdSystemPath("q", sdkRoot.c_str()));
+
     EXPECT_STREQ((tmp->pathString() + "/nothome").c_str(), path.get());
 
     std::string noBufferOverflow(MAX_PATH * 2, 'Z');
     writeToFile(avdConfig, "image.sysdir.1=" + noBufferOverflow);
+
     path.reset(path_getAvdSystemPath("q", sdkRoot.c_str()));
+
     EXPECT_EQ(nullptr, path.get());
 }
 
