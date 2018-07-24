@@ -26,4 +26,16 @@ GLuint loadAndCompileShader(const GLESv2Dispatch* gl,
                             GLenum shaderType,
                             const char* src);
 
+// Binds the active texture in target to a temporary framebuffer object
+// and retrieves its texel data using glReadPixels.
+std::vector<GLubyte> getTextureImageData(const GLESv2Dispatch* gl,
+                                         GLenum textureTarget,
+                                         GLuint texture,
+                                         GLint level,
+                                         GLint x,
+                                         GLint y,
+                                         GLsizei width,
+                                         GLsizei height,
+                                         GLenum type);
+
 }  // namespace emugl

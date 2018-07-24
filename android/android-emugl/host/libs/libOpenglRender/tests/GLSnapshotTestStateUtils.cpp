@@ -15,6 +15,7 @@
 #include "GLSnapshotTestStateUtils.h"
 
 #include "GLSnapshotTesting.h"
+#include "OpenglCodecCommon/glUtils.h"
 
 #include <gtest/gtest.h>
 
@@ -65,6 +66,36 @@ GLuint loadAndCompileShader(const GLESv2Dispatch* gl,
     }
 
     return shader;
+}
+
+std::vector<GLubyte> getTextureImageData(const GLESv2Dispatch* gl,
+                                         GLenum textureTarget,
+                                         GLuint texture,
+                                         GLint level,
+                                         GLint x,
+                                         GLint y,
+                                         GLsizei width,
+                                         GLsizei height,
+                                         GLenum type) {
+    std::vector<GLubyte> out = {};
+    out.resize(width * height * glSizeof(type));
+
+    GLuint framebuffer;
+    gl->glGenFramebuffers(1, &framebuffer);
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                               textureTarget, textureTarget, level);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+    gl->glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                     out.data());  // TODO(benzene): flexible format/type?
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->glDeleteFramebuffers(1, &framebuffer);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+    return out;
 }
 
 }  // namespace emugl
