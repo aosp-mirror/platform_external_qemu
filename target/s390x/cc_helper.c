@@ -20,6 +20,7 @@
 
 #include "qemu/osdep.h"
 #include "cpu.h"
+#include "internal.h"
 #include "exec/exec-all.h"
 #include "exec/helper-proto.h"
 #include "qemu/host-utils.h"
@@ -563,7 +564,7 @@ void HELPER(sacf)(CPUS390XState *env, uint64_t a1)
         break;
     default:
         HELPER_LOG("unknown sacf mode: %" PRIx64 "\n", a1);
-        program_interrupt(env, PGM_SPECIFICATION, 2);
+        s390_program_interrupt(env, PGM_SPECIFICATION, 2, GETPC());
         break;
     }
 }

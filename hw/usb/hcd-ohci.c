@@ -33,7 +33,7 @@
 #include "hw/pci/pci.h"
 #include "hw/sysbus.h"
 #include "hw/qdev-dma.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 
 /* This causes frames to occur 1000x slower */
 //#define OHCI_TIME_WARP 1
@@ -936,15 +936,17 @@ static int ohci_service_iso_td(OHCIState *ohci, struct ohci_ed *ed,
     return 1;
 }
 
-#ifdef trace_event_get_state
 static void ohci_td_pkt(const char *msg, const uint8_t *buf, size_t len)
 {
-    bool print16 = !!trace_event_get_state(TRACE_USB_OHCI_TD_PKT_SHORT);
-    bool printall = !!trace_event_get_state(TRACE_USB_OHCI_TD_PKT_FULL);
+    bool print16;
+    bool printall;
     const int width = 16;
     int i;
     char tmp[3 * width + 1];
     char *p = tmp;
+
+    print16 = !!trace_event_get_state_backends(TRACE_USB_OHCI_TD_PKT_SHORT);
+    printall = !!trace_event_get_state_backends(TRACE_USB_OHCI_TD_PKT_FULL);
 
     if (!printall && !print16) {
         return;
@@ -967,11 +969,6 @@ static void ohci_td_pkt(const char *msg, const uint8_t *buf, size_t len)
         p += sprintf(p, " %.2x", buf[i]);
     }
 }
-#else
-static void ohci_td_pkt(const char *msg, const uint8_t *buf, size_t len)
-{
-}
-#endif
 
 /* Service a transport descriptor.
    Returns nonzero to terminate processing of this endpoint.  */
@@ -2002,7 +1999,9 @@ typedef struct {
     /*< public >*/
 
     OHCIState ohci;
+    char *masterbus;
     uint32_t num_ports;
+    uint32_t firstport;
     dma_addr_t dma_offset;
 } OHCISysBusState;
 
@@ -2010,10 +2009,15 @@ static void ohci_realize_pxa(DeviceState *dev, Error **errp)
 {
     OHCISysBusState *s = SYSBUS_OHCI(dev);
     SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
+    Error *err = NULL;
 
-    /* Cannot fail as we pass NULL for masterbus */
-    usb_ohci_init(&s->ohci, dev, s->num_ports, s->dma_offset, NULL, 0,
-                  &address_space_memory, &error_abort);
+    usb_ohci_init(&s->ohci, dev, s->num_ports, s->dma_offset,
+                  s->masterbus, s->firstport,
+                  &address_space_memory, &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
     sysbus_init_irq(sbd, &s->ohci.irq);
     sysbus_init_mmio(sbd, &s->ohci.mem);
 }
@@ -2142,10 +2146,16 @@ static const TypeInfo ohci_pci_info = {
     .parent        = TYPE_PCI_DEVICE,
     .instance_size = sizeof(OHCIPCIState),
     .class_init    = ohci_pci_class_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 static Property ohci_sysbus_properties[] = {
+    DEFINE_PROP_STRING("masterbus", OHCISysBusState, masterbus),
     DEFINE_PROP_UINT32("num-ports", OHCISysBusState, num_ports, 3),
+    DEFINE_PROP_UINT32("firstport", OHCISysBusState, firstport, 0),
     DEFINE_PROP_DMAADDR("dma-offset", OHCISysBusState, dma_offset, 0),
     DEFINE_PROP_END_OF_LIST(),
 };

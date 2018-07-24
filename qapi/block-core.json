@@ -1,11 +1,12 @@
 # -*- Mode: Python -*-
 
 ##
-# == QAPI block core definitions (vm unrelated)
+# == Block core (VM unrelated)
 ##
 
-# QAPI common definitions
 { 'include': 'common.json' }
+{ 'include': 'crypto.json' }
+{ 'include': 'sockets.json' }
 
 ##
 # @SnapshotInfo:
@@ -33,6 +34,27 @@
             'vm-clock-sec': 'int', 'vm-clock-nsec': 'int' } }
 
 ##
+# @ImageInfoSpecificQCow2EncryptionBase:
+#
+# @format: The encryption format
+#
+# Since: 2.10
+##
+{ 'struct': 'ImageInfoSpecificQCow2EncryptionBase',
+  'data': { 'format': 'BlockdevQcow2EncryptionFormat'}}
+
+##
+# @ImageInfoSpecificQCow2Encryption:
+#
+# Since: 2.10
+##
+{ 'union': 'ImageInfoSpecificQCow2Encryption',
+  'base': 'ImageInfoSpecificQCow2EncryptionBase',
+  'discriminator': 'format',
+  'data': { 'aes': 'QCryptoBlockInfoQCow',
+            'luks': 'QCryptoBlockInfoLUKS' } }
+
+##
 # @ImageInfoSpecificQCow2:
 #
 # @compat: compatibility level
@@ -44,6 +66,9 @@
 #
 # @refcount-bits: width of a refcount entry in bits (since 2.3)
 #
+# @encrypt: details about encryption parameters; only set if image
+#           is encrypted (since 2.10)
+#
 # Since: 1.7
 ##
 { 'struct': 'ImageInfoSpecificQCow2',
@@ -51,7 +76,8 @@
       'compat': 'str',
       '*lazy-refcounts': 'bool',
       '*corrupt': 'bool',
-      'refcount-bits': 'int'
+      'refcount-bits': 'int',
+      '*encrypt': 'ImageInfoSpecificQCow2Encryption'
   } }
 
 ##
@@ -259,8 +285,7 @@
 #
 # @encrypted: true if the backing device is encrypted
 #
-# @encryption_key_missing: true if the backing device is encrypted but an
-#                          valid encryption key is missing
+# @encryption_key_missing: Deprecated; always false
 #
 # @detect_zeroes: detect and optimize zero writes (Since 2.1)
 #
@@ -401,10 +426,13 @@
 # @active: The bitmap is actively monitoring for new writes, and can be cleared,
 #          deleted, or used for backup operations.
 #
+# @locked: The bitmap is currently in-use by some operation and can not be
+#          cleared, deleted, or used for backup operations. (Since 2.12)
+#
 # Since: 2.4
 ##
 { 'enum': 'DirtyBitmapStatus',
-  'data': ['active', 'disabled', 'frozen'] }
+  'data': ['active', 'disabled', 'frozen', 'locked'] }
 
 ##
 # @BlockDirtyInfo:
@@ -426,12 +454,115 @@
            'status': 'DirtyBitmapStatus'} }
 
 ##
+# @BlockLatencyHistogramInfo:
+#
+# Block latency histogram.
+#
+# @boundaries: list of interval boundary values in nanoseconds, all greater
+#              than zero and in ascending order.
+#              For example, the list [10, 50, 100] produces the following
+#              histogram intervals: [0, 10), [10, 50), [50, 100), [100, +inf).
+#
+# @bins: list of io request counts corresponding to histogram intervals.
+#        len(@bins) = len(@boundaries) + 1
+#        For the example above, @bins may be something like [3, 1, 5, 2],
+#        and corresponding histogram looks like:
+#
+#        5|           *
+#        4|           *
+#        3| *         *
+#        2| *         *    *
+#        1| *    *    *    *
+#         +------------------
+#             10   50   100
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockLatencyHistogramInfo',
+  'data': {'boundaries': ['uint64'], 'bins': ['uint64'] } }
+
+##
+# @x-block-latency-histogram-set:
+#
+# Manage read, write and flush latency histograms for the device.
+#
+# If only @device parameter is specified, remove all present latency histograms
+# for the device. Otherwise, add/reset some of (or all) latency histograms.
+#
+# @device: device name to set latency histogram for.
+#
+# @boundaries: list of interval boundary values (see description in
+#              BlockLatencyHistogramInfo definition). If specified, all
+#              latency histograms are removed, and empty ones created for all
+#              io types with intervals corresponding to @boundaries (except for
+#              io types, for which specific boundaries are set through the
+#              following parameters).
+#
+# @boundaries-read: list of interval boundary values for read latency
+#                   histogram. If specified, old read latency histogram is
+#                   removed, and empty one created with intervals
+#                   corresponding to @boundaries-read. The parameter has higher
+#                   priority then @boundaries.
+#
+# @boundaries-write: list of interval boundary values for write latency
+#                    histogram.
+#
+# @boundaries-flush: list of interval boundary values for flush latency
+#                    histogram.
+#
+# Returns: error if device is not found or any boundary arrays are invalid.
+#
+# Since: 2.12
+#
+# Example: set new histograms for all io types with intervals
+# [0, 10), [10, 50), [50, 100), [100, +inf):
+#
+# -> { "execute": "block-latency-histogram-set",
+#      "arguments": { "device": "drive0",
+#                     "boundaries": [10, 50, 100] } }
+# <- { "return": {} }
+#
+# Example: set new histogram only for write, other histograms will remain
+# not changed (or not created):
+#
+# -> { "execute": "block-latency-histogram-set",
+#      "arguments": { "device": "drive0",
+#                     "boundaries-write": [10, 50, 100] } }
+# <- { "return": {} }
+#
+# Example: set new histograms with the following intervals:
+#   read, flush: [0, 10), [10, 50), [50, 100), [100, +inf)
+#   write: [0, 1000), [1000, 5000), [5000, +inf)
+#
+# -> { "execute": "block-latency-histogram-set",
+#      "arguments": { "device": "drive0",
+#                     "boundaries": [10, 50, 100],
+#                     "boundaries-write": [1000, 5000] } }
+# <- { "return": {} }
+#
+# Example: remove all latency histograms:
+#
+# -> { "execute": "block-latency-histogram-set",
+#      "arguments": { "device": "drive0" } }
+# <- { "return": {} }
+##
+{ 'command': 'x-block-latency-histogram-set',
+  'data': {'device': 'str',
+           '*boundaries': ['uint64'],
+           '*boundaries-read': ['uint64'],
+           '*boundaries-write': ['uint64'],
+           '*boundaries-flush': ['uint64'] } }
+
+##
 # @BlockInfo:
 #
 # Block device information.  This structure describes a virtual device and
 # the backing device associated with it.
 #
 # @device: The device name associated with the virtual device.
+#
+# @qdev: The qdev ID, or if no ID is assigned, the QOM path of the block
+#        device. (since 2.10)
 #
 # @type: This field is returned only for compatibility reasons, it should
 #        not be used (always returns 'unknown')
@@ -449,7 +580,8 @@
 #
 # @io-status: @BlockDeviceIoStatus. Only present if the device
 #             supports it and the VM is configured to stop on errors
-#             (supported device models: virtio-blk, ide, scsi-disk)
+#             (supported device models: virtio-blk, IDE, SCSI except
+#             scsi-generic)
 #
 # @inserted: @BlockDeviceInfo describing the device if media is
 #            present
@@ -457,17 +589,43 @@
 # Since:  0.14.0
 ##
 { 'struct': 'BlockInfo',
-  'data': {'device': 'str', 'type': 'str', 'removable': 'bool',
+  'data': {'device': 'str', '*qdev': 'str', 'type': 'str', 'removable': 'bool',
            'locked': 'bool', '*inserted': 'BlockDeviceInfo',
            '*tray_open': 'bool', '*io-status': 'BlockDeviceIoStatus',
            '*dirty-bitmaps': ['BlockDirtyInfo'] } }
+
+##
+# @BlockMeasureInfo:
+#
+# Image file size calculation information.  This structure describes the size
+# requirements for creating a new image file.
+#
+# The size requirements depend on the new image file format.  File size always
+# equals virtual disk size for the 'raw' format, even for sparse POSIX files.
+# Compact formats such as 'qcow2' represent unallocated and zero regions
+# efficiently so file size may be smaller than virtual disk size.
+#
+# The values are upper bounds that are guaranteed to fit the new image file.
+# Subsequent modification, such as internal snapshot or bitmap creation, may
+# require additional space and is not covered here.
+#
+# @required: Size required for a new image file, in bytes.
+#
+# @fully-allocated: Image file size, in bytes, once data has been written
+#                   to all sectors.
+#
+# Since: 2.10
+##
+{ 'struct': 'BlockMeasureInfo',
+  'data': {'required': 'int', 'fully-allocated': 'int'} }
 
 ##
 # @query-block:
 #
 # Get a list of BlockInfo for all virtual block devices.
 #
-# Returns: a list of @BlockInfo describing each virtual block device
+# Returns: a list of @BlockInfo describing each virtual block device. Filter
+# nodes that were created implicitly are skipped over.
 #
 # Since: 0.14.0
 #
@@ -527,6 +685,7 @@
 #                   }
 #                }
 #             },
+#             "qdev": "ide_disk",
 #             "type":"unknown"
 #          },
 #          {
@@ -534,12 +693,15 @@
 #             "device":"ide1-cd0",
 #             "locked":false,
 #             "removable":true,
+#             "qdev": "/machine/unattached/device[23]",
+#             "tray_open": false,
 #             "type":"unknown"
 #          },
 #          {
 #             "device":"floppy0",
 #             "locked":false,
 #             "removable":true,
+#             "qdev": "/machine/unattached/device[20]",
 #             "type":"unknown"
 #          },
 #          {
@@ -671,6 +833,12 @@
 # @timed_stats: Statistics specific to the set of previously defined
 #               intervals of time (Since 2.5)
 #
+# @x_rd_latency_histogram: @BlockLatencyHistogramInfo. (Since 2.12)
+#
+# @x_wr_latency_histogram: @BlockLatencyHistogramInfo. (Since 2.12)
+#
+# @x_flush_latency_histogram: @BlockLatencyHistogramInfo. (Since 2.12)
+#
 # Since: 0.14.0
 ##
 { 'struct': 'BlockDeviceStats',
@@ -683,7 +851,10 @@
            'failed_flush_operations': 'int', 'invalid_rd_operations': 'int',
            'invalid_wr_operations': 'int', 'invalid_flush_operations': 'int',
            'account_invalid': 'bool', 'account_failed': 'bool',
-           'timed_stats': ['BlockDeviceTimedStats'] } }
+           'timed_stats': ['BlockDeviceTimedStats'],
+           '*x_rd_latency_histogram': 'BlockLatencyHistogramInfo',
+           '*x_wr_latency_histogram': 'BlockLatencyHistogramInfo',
+           '*x_flush_latency_histogram': 'BlockLatencyHistogramInfo' } }
 
 ##
 # @BlockStats:
@@ -723,7 +894,8 @@
 #               information, but not "backing".
 #               If false or omitted, the behavior is as before - query all the
 #               device backends, recursively including their "parent" and
-#               "backing". (Since 2.3)
+#               "backing". Filter nodes that were created implicitly are
+#               skipped over in this mode. (Since 2.3)
 #
 # Returns: A list of @BlockStats for each virtual block devices.
 #
@@ -896,6 +1068,77 @@
   'data': ['commit', 'stream', 'mirror', 'backup'] }
 
 ##
+# @BlockJobVerb:
+#
+# Represents command verbs that can be applied to a blockjob.
+#
+# @cancel: see @block-job-cancel
+#
+# @pause: see @block-job-pause
+#
+# @resume: see @block-job-resume
+#
+# @set-speed: see @block-job-set-speed
+#
+# @complete: see @block-job-complete
+#
+# @dismiss: see @block-job-dismiss
+#
+# @finalize: see @block-job-finalize
+#
+# Since: 2.12
+##
+{ 'enum': 'BlockJobVerb',
+  'data': ['cancel', 'pause', 'resume', 'set-speed', 'complete', 'dismiss',
+           'finalize' ] }
+
+##
+# @BlockJobStatus:
+#
+# Indicates the present state of a given blockjob in its lifetime.
+#
+# @undefined: Erroneous, default state. Should not ever be visible.
+#
+# @created: The job has been created, but not yet started.
+#
+# @running: The job is currently running.
+#
+# @paused: The job is running, but paused. The pause may be requested by
+#          either the QMP user or by internal processes.
+#
+# @ready: The job is running, but is ready for the user to signal completion.
+#         This is used for long-running jobs like mirror that are designed to
+#         run indefinitely.
+#
+# @standby: The job is ready, but paused. This is nearly identical to @paused.
+#           The job may return to @ready or otherwise be canceled.
+#
+# @waiting: The job is waiting for other jobs in the transaction to converge
+#           to the waiting state. This status will likely not be visible for
+#           the last job in a transaction.
+#
+# @pending: The job has finished its work, but has finalization steps that it
+#           needs to make prior to completing. These changes may require
+#           manual intervention by the management process if manual was set
+#           to true. These changes may still fail.
+#
+# @aborting: The job is in the process of being aborted, and will finish with
+#            an error. The job will afterwards report that it is @concluded.
+#            This status may not be visible to the management process.
+#
+# @concluded: The job has finished all work. If manual was set to true, the job
+#             will remain in the query list until it is dismissed.
+#
+# @null: The job is in the process of being dismantled. This state should not
+#        ever be visible externally.
+#
+# Since: 2.12
+##
+{ 'enum': 'BlockJobStatus',
+  'data': ['undefined', 'created', 'running', 'paused', 'ready', 'standby',
+           'waiting', 'pending', 'aborting', 'concluded', 'null' ] }
+
+##
 # @BlockJobInfo:
 #
 # Information about a long-running block device operation.
@@ -921,12 +1164,22 @@
 #
 # @ready: true if the job may be completed (since 2.2)
 #
+# @status: Current job state/status (since 2.12)
+#
+# @auto-finalize: Job will finalize itself when PENDING, moving to
+#                 the CONCLUDED state. (since 2.12)
+#
+# @auto-dismiss: Job will dismiss itself when CONCLUDED, moving to the NULL
+#                state and disappearing from the query list. (since 2.12)
+#
 # Since: 1.1
 ##
 { 'struct': 'BlockJobInfo',
   'data': {'type': 'str', 'device': 'str', 'len': 'int',
            'offset': 'int', 'busy': 'bool', 'paused': 'bool', 'speed': 'int',
-           'io-status': 'BlockDeviceIoStatus', 'ready': 'bool'} }
+           'io-status': 'BlockDeviceIoStatus', 'ready': 'bool',
+           'status': 'BlockJobStatus',
+           'auto-finalize': 'bool', 'auto-dismiss': 'bool' } }
 
 ##
 # @query-block-jobs:
@@ -945,39 +1198,7 @@
 # This command sets the password of a block device that has not been open
 # with a password and requires one.
 #
-# The two cases where this can happen are a block device is created through
-# QEMU's initial command line or a block device is changed through the legacy
-# @change interface.
-#
-# In the event that the block device is created through the initial command
-# line, the VM will start in the stopped state regardless of whether '-S' is
-# used.  The intention is for a management tool to query the block devices to
-# determine which ones are encrypted, set the passwords with this command, and
-# then start the guest with the @cont command.
-#
-# Either @device or @node-name must be set but not both.
-#
-# @device: the name of the block backend device to set the password on
-#
-# @node-name: graph node name to set the password on (Since 2.0)
-#
-# @password: the password to use for the device
-#
-# Returns: nothing on success
-#          If @device is not a valid block device, DeviceNotFound
-#          If @device is not encrypted, DeviceNotEncrypted
-#
-# Notes:  Not all block formats support encryption and some that do are not
-#         able to validate that a password is correct.  Disk corruption may
-#         occur if an invalid password is specified.
-#
-# Since: 0.14.0
-#
-# Example:
-#
-# -> { "execute": "block_passwd", "arguments": { "device": "ide0-hd0",
-#                                                "password": "12345" } }
-# <- { "return": {} }
+# This command is now obsolete and will always return an error since 2.10
 #
 ##
 { 'command': 'block_passwd', 'data': {'*device': 'str',
@@ -1062,7 +1283,7 @@
 # @overlay: reference to the existing block device that will become
 #           the overlay of @node, as part of creating the snapshot.
 #           It must not have a current backing file (this can be
-#           achieved by passing "backing": "" to blockdev-add).
+#           achieved by passing "backing": null to blockdev-add).
 #
 # Since: 2.5
 ##
@@ -1108,6 +1329,18 @@
 #                   default 'report' (no limitations, since this applies to
 #                   a different block device than @device).
 #
+# @auto-finalize: When false, this job will wait in a PENDING state after it has
+#                 finished its work, waiting for @block-job-finalize.
+#                 When true, this job will automatically perform its abort or
+#                 commit actions.
+#                 Defaults to true. (Since 2.12)
+#
+# @auto-dismiss: When false, this job will wait in a CONCLUDED state after it
+#                has completed ceased all work, and wait for @block-job-dismiss.
+#                When true, this job will automatically disappear from the query
+#                list without user intervention.
+#                Defaults to true. (Since 2.12)
+#
 # Note: @on-source-error and @on-target-error only affect background
 # I/O.  If an error occurs during a guest write request, the device's
 # rerror/werror actions will be used.
@@ -1116,10 +1349,12 @@
 ##
 { 'struct': 'DriveBackup',
   'data': { '*job-id': 'str', 'device': 'str', 'target': 'str',
-            '*format': 'str', 'sync': 'MirrorSyncMode', '*mode': 'NewImageMode',
-            '*speed': 'int', '*bitmap': 'str', '*compress': 'bool',
+            '*format': 'str', 'sync': 'MirrorSyncMode',
+            '*mode': 'NewImageMode', '*speed': 'int',
+            '*bitmap': 'str', '*compress': 'bool',
             '*on-source-error': 'BlockdevOnError',
-            '*on-target-error': 'BlockdevOnError' } }
+            '*on-target-error': 'BlockdevOnError',
+            '*auto-finalize': 'bool', '*auto-dismiss': 'bool' } }
 
 ##
 # @BlockdevBackup:
@@ -1149,6 +1384,18 @@
 #                   default 'report' (no limitations, since this applies to
 #                   a different block device than @device).
 #
+# @auto-finalize: When false, this job will wait in a PENDING state after it has
+#                 finished its work, waiting for @block-job-finalize.
+#                 When true, this job will automatically perform its abort or
+#                 commit actions.
+#                 Defaults to true. (Since 2.12)
+#
+# @auto-dismiss: When false, this job will wait in a CONCLUDED state after it
+#                has completed ceased all work, and wait for @block-job-dismiss.
+#                When true, this job will automatically disappear from the query
+#                list without user intervention.
+#                Defaults to true. (Since 2.12)
+#
 # Note: @on-source-error and @on-target-error only affect background
 # I/O.  If an error occurs during a guest write request, the device's
 # rerror/werror actions will be used.
@@ -1157,11 +1404,10 @@
 ##
 { 'struct': 'BlockdevBackup',
   'data': { '*job-id': 'str', 'device': 'str', 'target': 'str',
-            'sync': 'MirrorSyncMode',
-            '*speed': 'int',
-            '*compress': 'bool',
+            'sync': 'MirrorSyncMode', '*speed': 'int', '*compress': 'bool',
             '*on-source-error': 'BlockdevOnError',
-            '*on-target-error': 'BlockdevOnError' } }
+            '*on-target-error': 'BlockdevOnError',
+            '*auto-finalize': 'bool', '*auto-dismiss': 'bool' } }
 
 ##
 # @blockdev-snapshot-sync:
@@ -1206,11 +1452,11 @@
 # Example:
 #
 # -> { "execute": "blockdev-add",
-#      "arguments": { "options": { "driver": "qcow2",
-#                                  "node-name": "node1534",
-#                                  "file": { "driver": "file",
-#                                            "filename": "hd1.qcow2" },
-#                                  "backing": "" } } }
+#      "arguments": { "driver": "qcow2",
+#                     "node-name": "node1534",
+#                     "file": { "driver": "file",
+#                               "filename": "hd1.qcow2" },
+#                     "backing": null } }
 #
 # <- { "return": {} }
 #
@@ -1560,10 +1806,20 @@
 # @granularity: the bitmap granularity, default is 64k for
 #               block-dirty-bitmap-add
 #
+# @persistent: the bitmap is persistent, i.e. it will be saved to the
+#              corresponding block device image file on its close. For now only
+#              Qcow2 disks support persistent bitmaps. Default is false for
+#              block-dirty-bitmap-add. (Since: 2.10)
+#
+# @autoload: ignored and deprecated since 2.12.
+#            Currently, all dirty tracking bitmaps are loaded from Qcow2 on
+#            open.
+#
 # Since: 2.4
 ##
 { 'struct': 'BlockDirtyBitmapAdd',
-  'data': { 'node': 'str', 'name': 'str', '*granularity': 'uint32' } }
+  'data': { 'node': 'str', 'name': 'str', '*granularity': 'uint32',
+            '*persistent': 'bool', '*autoload': 'bool' } }
 
 ##
 # @block-dirty-bitmap-add:
@@ -1590,7 +1846,8 @@
 # @block-dirty-bitmap-remove:
 #
 # Stop write tracking and remove the dirty bitmap that was created
-# with block-dirty-bitmap-add.
+# with block-dirty-bitmap-add. If the bitmap is persistent, remove it from its
+# storage too.
 #
 # Returns: nothing on success
 #          If @node is not a valid block device or node, DeviceNotFound
@@ -1631,6 +1888,33 @@
 ##
 { 'command': 'block-dirty-bitmap-clear',
   'data': 'BlockDirtyBitmap' }
+
+##
+# @BlockDirtyBitmapSha256:
+#
+# SHA256 hash of dirty bitmap data
+#
+# @sha256: ASCII representation of SHA256 bitmap hash
+#
+# Since: 2.10
+##
+  { 'struct': 'BlockDirtyBitmapSha256',
+    'data': {'sha256': 'str'} }
+
+##
+# @x-debug-block-dirty-bitmap-sha256:
+#
+# Get bitmap SHA256
+#
+# Returns: BlockDirtyBitmapSha256 on success
+#          If @node is not a valid block device, DeviceNotFound
+#          If @name is not found or if hashing has failed, GenericError with an
+#          explanation
+#
+# Since: 2.10
+##
+  { 'command': 'x-debug-block-dirty-bitmap-sha256',
+    'data': 'BlockDirtyBitmap', 'returns': 'BlockDirtyBitmapSha256' }
 
 ##
 # @blockdev-mirror:
@@ -1731,6 +2015,24 @@
 # Since: 1.1
 #
 # Example:
+#
+# -> { "execute": "block_set_io_throttle",
+#      "arguments": { "id": "virtio-blk-pci0/virtio-backend",
+#                     "bps": 0,
+#                     "bps_rd": 0,
+#                     "bps_wr": 0,
+#                     "iops": 512,
+#                     "iops_rd": 0,
+#                     "iops_wr": 0,
+#                     "bps_max": 0,
+#                     "bps_rd_max": 0,
+#                     "bps_wr_max": 0,
+#                     "iops_max": 0,
+#                     "iops_rd_max": 0,
+#                     "iops_wr_max": 0,
+#                     "bps_max_length": 0,
+#                     "iops_size": 0 } }
+# <- { "return": {} }
 #
 # -> { "execute": "block_set_io_throttle",
 #      "arguments": { "id": "ide0-1-0",
@@ -1838,6 +2140,54 @@
             '*bps_wr_max_length': 'int', '*iops_max_length': 'int',
             '*iops_rd_max_length': 'int', '*iops_wr_max_length': 'int',
             '*iops_size': 'int', '*group': 'str' } }
+
+##
+# @ThrottleLimits:
+#
+# Limit parameters for throttling.
+# Since some limit combinations are illegal, limits should always be set in one
+# transaction. All fields are optional. When setting limits, if a field is
+# missing the current value is not changed.
+#
+# @iops-total:             limit total I/O operations per second
+# @iops-total-max:         I/O operations burst
+# @iops-total-max-length:  length of the iops-total-max burst period, in seconds
+#                          It must only be set if @iops-total-max is set as well.
+# @iops-read:              limit read operations per second
+# @iops-read-max:          I/O operations read burst
+# @iops-read-max-length:   length of the iops-read-max burst period, in seconds
+#                          It must only be set if @iops-read-max is set as well.
+# @iops-write:             limit write operations per second
+# @iops-write-max:         I/O operations write burst
+# @iops-write-max-length:  length of the iops-write-max burst period, in seconds
+#                          It must only be set if @iops-write-max is set as well.
+# @bps-total:              limit total bytes per second
+# @bps-total-max:          total bytes burst
+# @bps-total-max-length:   length of the bps-total-max burst period, in seconds.
+#                          It must only be set if @bps-total-max is set as well.
+# @bps-read:               limit read bytes per second
+# @bps-read-max:           total bytes read burst
+# @bps-read-max-length:    length of the bps-read-max burst period, in seconds
+#                          It must only be set if @bps-read-max is set as well.
+# @bps-write:              limit write bytes per second
+# @bps-write-max:          total bytes write burst
+# @bps-write-max-length:   length of the bps-write-max burst period, in seconds
+#                          It must only be set if @bps-write-max is set as well.
+# @iops-size:              when limiting by iops max size of an I/O in bytes
+#
+# Since: 2.11
+##
+{ 'struct': 'ThrottleLimits',
+  'data': { '*iops-total' : 'int', '*iops-total-max' : 'int',
+            '*iops-total-max-length' : 'int', '*iops-read' : 'int',
+            '*iops-read-max' : 'int', '*iops-read-max-length' : 'int',
+            '*iops-write' : 'int', '*iops-write-max' : 'int',
+            '*iops-write-max-length' : 'int', '*bps-total' : 'int',
+            '*bps-total-max' : 'int', '*bps-total-max-length' : 'int',
+            '*bps-read' : 'int', '*bps-read-max' : 'int',
+            '*bps-read-max-length' : 'int', '*bps-write' : 'int',
+            '*bps-write-max' : 'int', '*bps-write-max-length' : 'int',
+            '*iops-size' : 'int' } }
 
 ##
 # @block-stream:
@@ -1951,6 +2301,12 @@
 # BLOCK_JOB_CANCELLED event.  Before that happens the job is still visible when
 # enumerated using query-block-jobs.
 #
+# Note that if you issue 'block-job-cancel' after 'drive-mirror' has indicated
+# (via the event BLOCK_JOB_READY) that the source and destination are
+# synchronized, then the event triggered by this command changes to
+# BLOCK_JOB_COMPLETED, to indicate that the mirroring has ended and the
+# destination now has a point-in-time copy tied to the time of the cancellation.
+#
 # For streaming, the image file retains its backing file unless the streaming
 # operation happens to complete just as it is being cancelled.  A new streaming
 # operation can be started at a later time to finish copying all data from the
@@ -1960,8 +2316,9 @@
 #          the name of the parameter), but since QEMU 2.7 it can have
 #          other values.
 #
-# @force: whether to allow cancellation of a paused job (default
-#         false).  Since 1.3.
+# @force: If true, and the job has already emitted the event BLOCK_JOB_READY,
+#         abandon the job immediately (even if it is paused) instead of waiting
+#         for the destination to complete its final synchronization (since 1.3)
 #
 # Returns: Nothing on success
 #          If no background operation is active on this device, DeviceNotActive
@@ -2046,6 +2403,44 @@
 { 'command': 'block-job-complete', 'data': { 'device': 'str' } }
 
 ##
+# @block-job-dismiss:
+#
+# For jobs that have already concluded, remove them from the block-job-query
+# list. This command only needs to be run for jobs which were started with
+# QEMU 2.12+ job lifetime management semantics.
+#
+# This command will refuse to operate on any job that has not yet reached
+# its terminal state, BLOCK_JOB_STATUS_CONCLUDED. For jobs that make use of
+# BLOCK_JOB_READY event, block-job-cancel or block-job-complete will still need
+# to be used as appropriate.
+#
+# @id: The job identifier.
+#
+# Returns: Nothing on success
+#
+# Since: 2.12
+##
+{ 'command': 'block-job-dismiss', 'data': { 'id': 'str' } }
+
+##
+# @block-job-finalize:
+#
+# Once a job that has manual=true reaches the pending state, it can be
+# instructed to finalize any graph changes and do any necessary cleanup
+# via this command.
+# For jobs in a transaction, instructing one job to finalize will force
+# ALL jobs in the transaction to finalize, so it is only necessary to instruct
+# a single member job to finalize.
+#
+# @id: The job identifier.
+#
+# Returns: Nothing on success
+#
+# Since: 2.12
+##
+{ 'command': 'block-job-finalize', 'data': { 'id': 'str' } }
+
+##
 # @BlockdevDiscardOptions:
 #
 # Determines how to handle discard requests.
@@ -2108,15 +2503,19 @@
 #
 # Drivers that are supported in block device operations.
 #
+# @vxhs: Since 2.10
+# @throttle: Since 2.11
+# @nvme: Since 2.12
+#
 # Since: 2.9
 ##
 { 'enum': 'BlockdevDriver',
   'data': [ 'blkdebug', 'blkverify', 'bochs', 'cloop',
             'dmg', 'file', 'ftp', 'ftps', 'gluster', 'host_cdrom',
             'host_device', 'http', 'https', 'iscsi', 'luks', 'nbd', 'nfs',
-            'null-aio', 'null-co', 'parallels', 'qcow', 'qcow2', 'qed',
+            'null-aio', 'null-co', 'nvme', 'parallels', 'qcow', 'qcow2', 'qed',
             'quorum', 'raw', 'rbd', 'replication', 'sheepdog', 'ssh',
-            'vdi', 'vhdx', 'vmdk', 'vpc', 'vvfat' ] }
+            'throttle', 'vdi', 'vhdx', 'vmdk', 'vpc', 'vvfat', 'vxhs' ] }
 
 ##
 # @BlockdevOptionsFile:
@@ -2124,12 +2523,20 @@
 # Driver specific block device options for the file backend.
 #
 # @filename:    path to the image file
+# @pr-manager:  the id for the object that will handle persistent reservations
+#               for this device (default: none, forward the commands via SG_IO;
+#               since 2.11)
 # @aio:         AIO backend (default: threads) (since: 2.8)
+# @locking:     whether to enable file locking. If set to 'auto', only enable
+#               when Open File Descriptor (OFD) locking API is available
+#               (default: auto, since 2.10)
 #
 # Since: 2.9
 ##
 { 'struct': 'BlockdevOptionsFile',
   'data': { 'filename': 'str',
+            '*pr-manager': 'str',
+            '*locking': 'OnOffAuto',
             '*aio': 'BlockdevAioOptions' } }
 
 ##
@@ -2146,6 +2553,19 @@
 ##
 { 'struct': 'BlockdevOptionsNull',
   'data': { '*size': 'int', '*latency-ns': 'uint64' } }
+
+##
+# @BlockdevOptionsNVMe:
+#
+# Driver specific block device options for the NVMe backend.
+#
+# @device:    controller address of the NVMe device.
+# @namespace: namespace number of the device, starting from 1.
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevOptionsNVMe',
+  'data': { 'device': 'str', 'namespace': 'int' } }
 
 ##
 # @BlockdevOptionsVVFAT:
@@ -2204,15 +2624,14 @@
 # besides their data source and an optional backing file.
 #
 # @backing:     reference to or definition of the backing file block
-#               device (if missing, taken from the image file content). It is
-#               allowed to pass an empty string here in order to disable the
-#               default backing file.
+#               device, null disables the backing file entirely.
+#               Defaults to the backing file stored the image file.
 #
 # Since: 2.9
 ##
 { 'struct': 'BlockdevOptionsGenericCOWFormat',
   'base': 'BlockdevOptionsGenericFormat',
-  'data': { '*backing': 'BlockdevRef' } }
+  'data': { '*backing': 'BlockdevRefOrNull' } }
 
 ##
 # @Qcow2OverlapCheckMode:
@@ -2275,6 +2694,63 @@
             'mode':  'Qcow2OverlapCheckMode' } }
 
 ##
+# @BlockdevQcowEncryptionFormat:
+#
+# @aes: AES-CBC with plain64 initialization vectors
+#
+# Since: 2.10
+##
+{ 'enum': 'BlockdevQcowEncryptionFormat',
+  'data': [ 'aes' ] }
+
+##
+# @BlockdevQcowEncryption:
+#
+# Since: 2.10
+##
+{ 'union': 'BlockdevQcowEncryption',
+  'base': { 'format': 'BlockdevQcowEncryptionFormat' },
+  'discriminator': 'format',
+  'data': { 'aes': 'QCryptoBlockOptionsQCow' } }
+
+##
+# @BlockdevOptionsQcow:
+#
+# Driver specific block device options for qcow.
+#
+# @encrypt:               Image decryption options. Mandatory for
+#                         encrypted images, except when doing a metadata-only
+#                         probe of the image.
+#
+# Since: 2.10
+##
+{ 'struct': 'BlockdevOptionsQcow',
+  'base': 'BlockdevOptionsGenericCOWFormat',
+  'data': { '*encrypt': 'BlockdevQcowEncryption' } }
+
+
+
+##
+# @BlockdevQcow2EncryptionFormat:
+# @aes: AES-CBC with plain64 initialization venctors
+#
+# Since: 2.10
+##
+{ 'enum': 'BlockdevQcow2EncryptionFormat',
+  'data': [ 'aes', 'luks' ] }
+
+##
+# @BlockdevQcow2Encryption:
+#
+# Since: 2.10
+##
+{ 'union': 'BlockdevQcow2Encryption',
+  'base': { 'format': 'BlockdevQcow2EncryptionFormat' },
+  'discriminator': 'format',
+  'data': { 'aes': 'QCryptoBlockOptionsQCow',
+            'luks': 'QCryptoBlockOptionsLUKS'} }
+
+##
 # @BlockdevOptionsQcow2:
 #
 # Driver specific block device options for qcow2.
@@ -2302,12 +2778,20 @@
 # @l2-cache-size:         the maximum size of the L2 table cache in
 #                         bytes (since 2.2)
 #
+# @l2-cache-entry-size:   the size of each entry in the L2 cache in
+#                         bytes. It must be a power of two between 512
+#                         and the cluster size. The default value is
+#                         the cluster size (since 2.12)
+#
 # @refcount-cache-size:   the maximum size of the refcount block cache
 #                         in bytes (since 2.2)
 #
 # @cache-clean-interval:  clean unused entries in the L2 and refcount
 #                         caches. The interval is in seconds. The default value
 #                         is 0 and it disables this feature (since 2.5)
+# @encrypt:               Image decryption options. Mandatory for
+#                         encrypted images, except when doing a metadata-only
+#                         probe of the image. (since 2.10)
 #
 # Since: 2.9
 ##
@@ -2320,9 +2804,67 @@
             '*overlap-check': 'Qcow2OverlapChecks',
             '*cache-size': 'int',
             '*l2-cache-size': 'int',
+            '*l2-cache-entry-size': 'int',
             '*refcount-cache-size': 'int',
-            '*cache-clean-interval': 'int' } }
+            '*cache-clean-interval': 'int',
+            '*encrypt': 'BlockdevQcow2Encryption' } }
 
+##
+# @SshHostKeyCheckMode:
+#
+# @none             Don't check the host key at all
+# @hash             Compare the host key with a given hash
+# @known_hosts      Check the host key against the known_hosts file
+#
+# Since: 2.12
+##
+{ 'enum': 'SshHostKeyCheckMode',
+  'data': [ 'none', 'hash', 'known_hosts' ] }
+
+##
+# @SshHostKeyCheckHashType:
+#
+# @md5              The given hash is an md5 hash
+# @sha1             The given hash is an sha1 hash
+#
+# Since: 2.12
+##
+{ 'enum': 'SshHostKeyCheckHashType',
+  'data': [ 'md5', 'sha1' ] }
+
+##
+# @SshHostKeyHash:
+#
+# @type             The hash algorithm used for the hash
+# @hash             The expected hash value
+#
+# Since: 2.12
+##
+{ 'struct': 'SshHostKeyHash',
+  'data': { 'type': 'SshHostKeyCheckHashType',
+            'hash': 'str' }}
+
+##
+# @SshHostKeyDummy:
+#
+# For those union branches that don't need additional fields.
+#
+# Since: 2.12
+##
+{ 'struct': 'SshHostKeyDummy',
+  'data': {} }
+
+##
+# @SshHostKeyCheck:
+#
+# Since: 2.12
+##
+{ 'union': 'SshHostKeyCheck',
+  'base': { 'mode': 'SshHostKeyCheckMode' },
+  'discriminator': 'mode',
+  'data': { 'none': 'SshHostKeyDummy',
+            'hash': 'SshHostKeyHash',
+            'known_hosts': 'SshHostKeyDummy' } }
 
 ##
 # @BlockdevOptionsSsh:
@@ -2334,20 +2876,29 @@
 # @user:                user as which to connect, defaults to current
 #                       local user name
 #
-# TODO: Expose the host_key_check option in QMP
+# @host-key-check:      Defines how and what to check the host key against
+#                       (default: known_hosts)
 #
 # Since: 2.9
 ##
 { 'struct': 'BlockdevOptionsSsh',
   'data': { 'server': 'InetSocketAddress',
             'path': 'str',
-            '*user': 'str' } }
+            '*user': 'str',
+            '*host-key-check': 'SshHostKeyCheck' } }
 
 
 ##
 # @BlkdebugEvent:
 #
 # Trigger events supported by blkdebug.
+#
+# @l1_shrink_write_table:      write zeros to the l1 table to shrink image.
+#                              (since 2.11)
+#
+# @l1_shrink_free_l2_clusters: discard the l2 tables. (since 2.11)
+#
+# @cor_write: a write due to copy-on-read (since 2.11)
 #
 # Since: 2.9
 ##
@@ -2365,7 +2916,9 @@
             'cluster_alloc_bytes', 'cluster_free', 'flush_to_os',
             'flush_to_disk', 'pwritev_rmw_head', 'pwritev_rmw_after_head',
             'pwritev_rmw_tail', 'pwritev_rmw_after_tail', 'pwritev',
-            'pwritev_zero', 'pwritev_done', 'empty_image_prepare' ] }
+            'pwritev_zero', 'pwritev_done', 'empty_image_prepare',
+            'l1_shrink_write_table', 'l1_shrink_free_l2_clusters',
+            'cor_write'] }
 
 ##
 # @BlkdebugInjectErrorOptions:
@@ -2428,8 +2981,33 @@
 #
 # @config:          filename of the configuration file
 #
-# @align:           required alignment for requests in bytes,
-#                   must be power of 2, or 0 for default
+# @align:           required alignment for requests in bytes, must be
+#                   positive power of 2, or 0 for default
+#
+# @max-transfer:    maximum size for I/O transfers in bytes, must be
+#                   positive multiple of @align and of the underlying
+#                   file's request alignment (but need not be a power of
+#                   2), or 0 for default (since 2.10)
+#
+# @opt-write-zero:  preferred alignment for write zero requests in bytes,
+#                   must be positive multiple of @align and of the
+#                   underlying file's request alignment (but need not be a
+#                   power of 2), or 0 for default (since 2.10)
+#
+# @max-write-zero:  maximum size for write zero requests in bytes, must be
+#                   positive multiple of @align, of @opt-write-zero, and of
+#                   the underlying file's request alignment (but need not
+#                   be a power of 2), or 0 for default (since 2.10)
+#
+# @opt-discard:     preferred alignment for discard requests in bytes, must
+#                   be positive multiple of @align and of the underlying
+#                   file's request alignment (but need not be a power of
+#                   2), or 0 for default (since 2.10)
+#
+# @max-discard:     maximum size for discard requests in bytes, must be
+#                   positive multiple of @align, of @opt-discard, and of
+#                   the underlying file's request alignment (but need not
+#                   be a power of 2), or 0 for default (since 2.10)
 #
 # @inject-error:    array of error injection descriptions
 #
@@ -2440,7 +3018,9 @@
 { 'struct': 'BlockdevOptionsBlkdebug',
   'data': { 'image': 'BlockdevRef',
             '*config': 'str',
-            '*align': 'int',
+            '*align': 'int', '*max-transfer': 'int32',
+            '*opt-write-zero': 'int32', '*max-write-zero': 'int32',
+            '*opt-discard': 'int32', '*max-discard': 'int32',
             '*inject-error': ['BlkdebugInjectErrorOptions'],
             '*set-state': ['BlkdebugSetStateOptions'] } }
 
@@ -2520,7 +3100,7 @@
 { 'struct': 'BlockdevOptionsGluster',
   'data': { 'volume': 'str',
             'path': 'str',
-            'server': ['SocketAddressFlat'],
+            'server': ['SocketAddress'],
             '*debug': 'int',
             '*logfile': 'str' } }
 
@@ -2632,7 +3212,7 @@
 # Since: 2.9
 ##
 { 'struct': 'BlockdevOptionsSheepdog',
-  'data': { 'server': 'SocketAddressFlat',
+  'data': { 'server': 'SocketAddress',
             'vdi': 'str',
             '*snap-id': 'uint32',
             '*tag': 'str' } }
@@ -2780,11 +3360,15 @@
 #               "name1=content1; name2=content2;" as explained by
 #               CURLOPT_COOKIE(3). Defaults to no cookies.
 #
+# @cookie-secret: ID of a QCryptoSecret object providing the cookie data in a
+#                 secure way. See @cookie for the format. (since 2.10)
+#
 # Since: 2.9
 ##
 { 'struct': 'BlockdevOptionsCurlHttp',
   'base': 'BlockdevOptionsCurlBase',
-  'data': { '*cookie': 'str' } }
+  'data': { '*cookie': 'str',
+            '*cookie-secret': 'str'} }
 
 ##
 # @BlockdevOptionsCurlHttps:
@@ -2799,12 +3383,16 @@
 # @sslverify:   Whether to verify the SSL certificate's validity (defaults to
 #               true)
 #
+# @cookie-secret: ID of a QCryptoSecret object providing the cookie data in a
+#                 secure way. See @cookie for the format. (since 2.10)
+#
 # Since: 2.9
 ##
 { 'struct': 'BlockdevOptionsCurlHttps',
   'base': 'BlockdevOptionsCurlBase',
   'data': { '*cookie': 'str',
-            '*sslverify': 'bool' } }
+            '*sslverify': 'bool',
+            '*cookie-secret': 'str'} }
 
 ##
 # @BlockdevOptionsCurlFtp:
@@ -2840,14 +3428,14 @@
 #
 # @server:      NBD server address
 #
-# @exp:         export name
+# @exp:      export name
 #
 # @tls-creds:   TLS credentials ID
 #
 # Since: 2.9
 ##
 { 'struct': 'BlockdevOptionsNbd',
-  'data': { 'server': 'SocketAddressFlat',
+  'data': { 'server': 'SocketAddress',
             '*exp': 'str',
             '*tls-creds': 'str' } }
 
@@ -2866,6 +3454,36 @@
   'data': { '*offset': 'int', '*size': 'int' } }
 
 ##
+# @BlockdevOptionsVxHS:
+#
+# Driver specific block device options for VxHS
+#
+# @vdisk-id:    UUID of VxHS volume
+# @server:      vxhs server IP, port
+# @tls-creds:   TLS credentials ID
+#
+# Since: 2.10
+##
+{ 'struct': 'BlockdevOptionsVxHS',
+  'data': { 'vdisk-id': 'str',
+            'server': 'InetSocketAddressBase',
+            '*tls-creds': 'str' } }
+
+##
+# @BlockdevOptionsThrottle:
+#
+# Driver specific block device options for the throttle driver
+#
+# @throttle-group:   the name of the throttle-group object to use. It
+#                    must already exist.
+# @file:             reference to or definition of the data source block device
+# Since: 2.11
+##
+{ 'struct': 'BlockdevOptionsThrottle',
+  'data': { 'throttle-group': 'str',
+            'file' : 'BlockdevRef'
+             } }
+##
 # @BlockdevOptions:
 #
 # Options for creating a block device.  Many options are available for all
@@ -2876,10 +3494,15 @@
 #                 This option is required on the top level of blockdev-add.
 # @discard:       discard-related options (default: ignore)
 # @cache:         cache-related options
-# @read-only:     whether the block device should be read-only
-#                 (default: false)
+# @read-only:     whether the block device should be read-only (default: false).
+#                 Note that some block drivers support only read-only access,
+#                 either generally or in certain configurations. In this case,
+#                 the default value does not work and the option must be
+#                 specified explicitly.
 # @detect-zeroes: detect and optimize zero writes (Since 2.1)
 #                 (default: off)
+# @force-share:   force share all permission on added nodes.
+#                 Requires read-only=true. (Since 2.10)
 #
 # Remaining options are determined by the block driver.
 #
@@ -2891,6 +3514,7 @@
             '*discard': 'BlockdevDiscardOptions',
             '*cache': 'BlockdevCacheOptions',
             '*read-only': 'bool',
+            '*force-share': 'bool',
             '*detect-zeroes': 'BlockdevDetectZeroesOptions' },
   'discriminator': 'driver',
   'data': {
@@ -2913,9 +3537,10 @@
       'nfs':        'BlockdevOptionsNfs',
       'null-aio':   'BlockdevOptionsNull',
       'null-co':    'BlockdevOptionsNull',
+      'nvme':       'BlockdevOptionsNVMe',
       'parallels':  'BlockdevOptionsGenericFormat',
       'qcow2':      'BlockdevOptionsQcow2',
-      'qcow':       'BlockdevOptionsGenericCOWFormat',
+      'qcow':       'BlockdevOptionsQcow',
       'qed':        'BlockdevOptionsGenericCOWFormat',
       'quorum':     'BlockdevOptionsQuorum',
       'raw':        'BlockdevOptionsRaw',
@@ -2923,11 +3548,13 @@
       'replication':'BlockdevOptionsReplication',
       'sheepdog':   'BlockdevOptionsSheepdog',
       'ssh':        'BlockdevOptionsSsh',
+      'throttle':   'BlockdevOptionsThrottle',
       'vdi':        'BlockdevOptionsGenericFormat',
       'vhdx':       'BlockdevOptionsGenericFormat',
       'vmdk':       'BlockdevOptionsGenericCOWFormat',
       'vpc':        'BlockdevOptionsGenericFormat',
-      'vvfat':      'BlockdevOptionsVVFAT'
+      'vvfat':      'BlockdevOptionsVVFAT',
+      'vxhs':       'BlockdevOptionsVxHS'
   } }
 
 ##
@@ -2936,15 +3563,31 @@
 # Reference to a block device.
 #
 # @definition:      defines a new block device inline
-# @reference:       references the ID of an existing block device. An
-#                   empty string means that no block device should be
-#                   referenced.
+# @reference:       references the ID of an existing block device
 #
 # Since: 2.9
 ##
 { 'alternate': 'BlockdevRef',
   'data': { 'definition': 'BlockdevOptions',
             'reference': 'str' } }
+
+##
+# @BlockdevRefOrNull:
+#
+# Reference to a block device.
+#
+# @definition:      defines a new block device inline
+# @reference:       references the ID of an existing block device.
+#                   An empty string means that no block device should
+#                   be referenced.  Deprecated; use null instead.
+# @null:            No block device should be referenced (since 2.10)
+#
+# Since: 2.9
+##
+{ 'alternate': 'BlockdevRefOrNull',
+  'data': { 'definition': 'BlockdevOptions',
+            'reference': 'str',
+            'null': 'null' } }
 
 ##
 # @blockdev-add:
@@ -3032,6 +3675,428 @@
 { 'command': 'blockdev-del', 'data': { 'node-name': 'str' } }
 
 ##
+# @BlockdevCreateOptionsFile:
+#
+# Driver specific image creation options for file.
+#
+# @filename         Filename for the new image file
+# @size             Size of the virtual disk in bytes
+# @preallocation    Preallocation mode for the new image (default: off)
+# @nocow            Turn off copy-on-write (valid only on btrfs; default: off)
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsFile',
+  'data': { 'filename':         'str',
+            'size':             'size',
+            '*preallocation':   'PreallocMode',
+            '*nocow':           'bool' } }
+
+##
+# @BlockdevCreateOptionsGluster:
+#
+# Driver specific image creation options for gluster.
+#
+# @location         Where to store the new image file
+# @size             Size of the virtual disk in bytes
+# @preallocation    Preallocation mode for the new image (default: off)
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsGluster',
+  'data': { 'location':         'BlockdevOptionsGluster',
+            'size':             'size',
+            '*preallocation':   'PreallocMode' } }
+
+##
+# @BlockdevCreateOptionsLUKS:
+#
+# Driver specific image creation options for LUKS.
+#
+# @file             Node to create the image format on
+# @size             Size of the virtual disk in bytes
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsLUKS',
+  'base': 'QCryptoBlockCreateOptionsLUKS',
+  'data': { 'file':             'BlockdevRef',
+            'size':             'size' } }
+
+##
+# @BlockdevCreateOptionsNfs:
+#
+# Driver specific image creation options for NFS.
+#
+# @location         Where to store the new image file
+# @size             Size of the virtual disk in bytes
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsNfs',
+  'data': { 'location':         'BlockdevOptionsNfs',
+            'size':             'size' } }
+
+##
+# @BlockdevCreateOptionsParallels:
+#
+# Driver specific image creation options for parallels.
+#
+# @file             Node to create the image format on
+# @size             Size of the virtual disk in bytes
+# @cluster-size     Cluster size in bytes (default: 1 MB)
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsParallels',
+  'data': { 'file':             'BlockdevRef',
+            'size':             'size',
+            '*cluster-size':    'size' } }
+
+##
+# @BlockdevCreateOptionsQcow:
+#
+# Driver specific image creation options for qcow.
+#
+# @file             Node to create the image format on
+# @size             Size of the virtual disk in bytes
+# @backing-file     File name of the backing file if a backing file
+#                   should be used
+# @encrypt          Encryption options if the image should be encrypted
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsQcow',
+  'data': { 'file':             'BlockdevRef',
+            'size':             'size',
+            '*backing-file':    'str',
+            '*encrypt':         'QCryptoBlockCreateOptions' } }
+
+##
+# @BlockdevQcow2Version:
+#
+# @v2:  The original QCOW2 format as introduced in qemu 0.10 (version 2)
+# @v3:  The extended QCOW2 format as introduced in qemu 1.1 (version 3)
+#
+# Since: 2.12
+##
+{ 'enum': 'BlockdevQcow2Version',
+  'data': [ 'v2', 'v3' ] }
+
+
+##
+# @BlockdevCreateOptionsQcow2:
+#
+# Driver specific image creation options for qcow2.
+#
+# @file             Node to create the image format on
+# @size             Size of the virtual disk in bytes
+# @version          Compatibility level (default: v3)
+# @backing-file     File name of the backing file if a backing file
+#                   should be used
+# @backing-fmt      Name of the block driver to use for the backing file
+# @encrypt          Encryption options if the image should be encrypted
+# @cluster-size     qcow2 cluster size in bytes (default: 65536)
+# @preallocation    Preallocation mode for the new image (default: off)
+# @lazy-refcounts   True if refcounts may be updated lazily (default: off)
+# @refcount-bits    Width of reference counts in bits (default: 16)
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsQcow2',
+  'data': { 'file':             'BlockdevRef',
+            'size':             'size',
+            '*version':         'BlockdevQcow2Version',
+            '*backing-file':    'str',
+            '*backing-fmt':     'BlockdevDriver',
+            '*encrypt':         'QCryptoBlockCreateOptions',
+            '*cluster-size':    'size',
+            '*preallocation':   'PreallocMode',
+            '*lazy-refcounts':  'bool',
+            '*refcount-bits':   'int' } }
+
+##
+# @BlockdevCreateOptionsQed:
+#
+# Driver specific image creation options for qed.
+#
+# @file             Node to create the image format on
+# @size             Size of the virtual disk in bytes
+# @backing-file     File name of the backing file if a backing file
+#                   should be used
+# @backing-fmt      Name of the block driver to use for the backing file
+# @cluster-size     Cluster size in bytes (default: 65536)
+# @table-size       L1/L2 table size (in clusters)
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsQed',
+  'data': { 'file':             'BlockdevRef',
+            'size':             'size',
+            '*backing-file':    'str',
+            '*backing-fmt':     'BlockdevDriver',
+            '*cluster-size':    'size',
+            '*table-size':      'int' } }
+
+##
+# @BlockdevCreateOptionsRbd:
+#
+# Driver specific image creation options for rbd/Ceph.
+#
+# @location         Where to store the new image file. This location cannot
+#                   point to a snapshot.
+# @size             Size of the virtual disk in bytes
+# @cluster-size     RBD object size
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsRbd',
+  'data': { 'location':         'BlockdevOptionsRbd',
+            'size':             'size',
+            '*cluster-size' :   'size' } }
+
+##
+# @SheepdogRedundancyType:
+#
+# @full             Create a fully replicated vdi with x copies
+# @erasure-coded    Create an erasure coded vdi with x data strips and
+#                   y parity strips
+#
+# Since: 2.12
+##
+{ 'enum': 'SheepdogRedundancyType',
+  'data': [ 'full', 'erasure-coded' ] }
+
+##
+# @SheepdogRedundancyFull:
+#
+# @copies           Number of copies to use (between 1 and 31)
+#
+# Since: 2.12
+##
+{ 'struct': 'SheepdogRedundancyFull',
+  'data': { 'copies': 'int' }}
+
+##
+# @SheepdogRedundancyErasureCoded:
+#
+# @data-strips      Number of data strips to use (one of {2,4,8,16})
+# @parity-strips    Number of parity strips to use (between 1 and 15)
+#
+# Since: 2.12
+##
+{ 'struct': 'SheepdogRedundancyErasureCoded',
+  'data': { 'data-strips': 'int',
+            'parity-strips': 'int' }}
+
+##
+# @SheepdogRedundancy:
+#
+# Since: 2.12
+##
+{ 'union': 'SheepdogRedundancy',
+  'base': { 'type': 'SheepdogRedundancyType' },
+  'discriminator': 'type',
+  'data': { 'full': 'SheepdogRedundancyFull',
+            'erasure-coded': 'SheepdogRedundancyErasureCoded' } }
+
+##
+# @BlockdevCreateOptionsSheepdog:
+#
+# Driver specific image creation options for Sheepdog.
+#
+# @location         Where to store the new image file
+# @size             Size of the virtual disk in bytes
+# @backing-file     File name of a base image
+# @preallocation    Preallocation mode (allowed values: off, full)
+# @redundancy       Redundancy of the image
+# @object-size      Object size of the image
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsSheepdog',
+  'data': { 'location':         'BlockdevOptionsSheepdog',
+            'size':             'size',
+            '*backing-file':    'str',
+            '*preallocation':   'PreallocMode',
+            '*redundancy':      'SheepdogRedundancy',
+            '*object-size':     'size' } }
+
+##
+# @BlockdevCreateOptionsSsh:
+#
+# Driver specific image creation options for SSH.
+#
+# @location         Where to store the new image file
+# @size             Size of the virtual disk in bytes
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsSsh',
+  'data': { 'location':         'BlockdevOptionsSsh',
+            'size':             'size' } }
+
+##
+# @BlockdevCreateOptionsVdi:
+#
+# Driver specific image creation options for VDI.
+#
+# @file             Node to create the image format on
+# @size             Size of the virtual disk in bytes
+# @preallocation    Preallocation mode for the new image (allowed values: off,
+#                   metadata; default: off)
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsVdi',
+  'data': { 'file':             'BlockdevRef',
+            'size':             'size',
+            '*preallocation':   'PreallocMode' } }
+
+##
+# @BlockdevVhdxSubformat:
+#
+# @dynamic: Growing image file
+# @fixed:   Preallocated fixed-size image file
+#
+# Since: 2.12
+##
+{ 'enum': 'BlockdevVhdxSubformat',
+  'data': [ 'dynamic', 'fixed' ] }
+
+##
+# @BlockdevCreateOptionsVhdx:
+#
+# Driver specific image creation options for vhdx.
+#
+# @file             Node to create the image format on
+# @size             Size of the virtual disk in bytes
+# @log-size         Log size in bytes, must be a multiple of 1 MB
+#                   (default: 1 MB)
+# @block-size       Block size in bytes, must be a multiple of 1 MB and not
+#                   larger than 256 MB (default: automatically choose a block
+#                   size depending on the image size)
+# @subformat        vhdx subformat (default: dynamic)
+# @block-state-zero Force use of payload blocks of type 'ZERO'. Non-standard,
+#                   but default.  Do not set to 'off' when using 'qemu-img
+#                   convert' with subformat=dynamic.
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsVhdx',
+  'data': { 'file':                 'BlockdevRef',
+            'size':                 'size',
+            '*log-size':            'size',
+            '*block-size':          'size',
+            '*subformat':           'BlockdevVhdxSubformat',
+            '*block-state-zero':    'bool' } }
+
+##
+# @BlockdevVpcSubformat:
+#
+# @dynamic: Growing image file
+# @fixed:   Preallocated fixed-size image file
+#
+# Since: 2.12
+##
+{ 'enum': 'BlockdevVpcSubformat',
+  'data': [ 'dynamic', 'fixed' ] }
+
+##
+# @BlockdevCreateOptionsVpc:
+#
+# Driver specific image creation options for vpc (VHD).
+#
+# @file             Node to create the image format on
+# @size             Size of the virtual disk in bytes
+# @subformat        vhdx subformat (default: dynamic)
+# @force-size       Force use of the exact byte size instead of rounding to the
+#                   next size that can be represented in CHS geometry
+#                   (default: false)
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateOptionsVpc',
+  'data': { 'file':                 'BlockdevRef',
+            'size':                 'size',
+            '*subformat':           'BlockdevVpcSubformat',
+            '*force-size':          'bool' } }
+
+##
+# @BlockdevCreateNotSupported:
+#
+# This is used for all drivers that don't support creating images.
+#
+# Since: 2.12
+##
+{ 'struct': 'BlockdevCreateNotSupported', 'data': {}}
+
+##
+# @BlockdevCreateOptions:
+#
+# Options for creating an image format on a given node.
+#
+# @driver           block driver to create the image format
+#
+# Since: 2.12
+##
+{ 'union': 'BlockdevCreateOptions',
+  'base': {
+      'driver':         'BlockdevDriver' },
+  'discriminator': 'driver',
+  'data': {
+      'blkdebug':       'BlockdevCreateNotSupported',
+      'blkverify':      'BlockdevCreateNotSupported',
+      'bochs':          'BlockdevCreateNotSupported',
+      'cloop':          'BlockdevCreateNotSupported',
+      'dmg':            'BlockdevCreateNotSupported',
+      'file':           'BlockdevCreateOptionsFile',
+      'ftp':            'BlockdevCreateNotSupported',
+      'ftps':           'BlockdevCreateNotSupported',
+      'gluster':        'BlockdevCreateOptionsGluster',
+      'host_cdrom':     'BlockdevCreateNotSupported',
+      'host_device':    'BlockdevCreateNotSupported',
+      'http':           'BlockdevCreateNotSupported',
+      'https':          'BlockdevCreateNotSupported',
+      'iscsi':          'BlockdevCreateNotSupported',
+      'luks':           'BlockdevCreateOptionsLUKS',
+      'nbd':            'BlockdevCreateNotSupported',
+      'nfs':            'BlockdevCreateOptionsNfs',
+      'null-aio':       'BlockdevCreateNotSupported',
+      'null-co':        'BlockdevCreateNotSupported',
+      'nvme':           'BlockdevCreateNotSupported',
+      'parallels':      'BlockdevCreateOptionsParallels',
+      'qcow':           'BlockdevCreateOptionsQcow',
+      'qcow2':          'BlockdevCreateOptionsQcow2',
+      'qed':            'BlockdevCreateOptionsQed',
+      'quorum':         'BlockdevCreateNotSupported',
+      'raw':            'BlockdevCreateNotSupported',
+      'rbd':            'BlockdevCreateOptionsRbd',
+      'replication':    'BlockdevCreateNotSupported',
+      'sheepdog':       'BlockdevCreateOptionsSheepdog',
+      'ssh':            'BlockdevCreateOptionsSsh',
+      'throttle':       'BlockdevCreateNotSupported',
+      'vdi':            'BlockdevCreateOptionsVdi',
+      'vhdx':           'BlockdevCreateOptionsVhdx',
+      'vmdk':           'BlockdevCreateNotSupported',
+      'vpc':            'BlockdevCreateOptionsVpc',
+      'vvfat':          'BlockdevCreateNotSupported',
+      'vxhs':           'BlockdevCreateNotSupported'
+  } }
+
+##
+# @x-blockdev-create:
+#
+# Create an image format on a given node.
+# TODO Replace with something asynchronous (block job?)
+#
+# Since: 2.12
+##
+{ 'command': 'x-blockdev-create',
+  'data': 'BlockdevCreateOptions',
+  'boxed': true }
+
+##
 # @blockdev-open-tray:
 #
 # Opens a block device's tray. If there is a block driver state tree inserted as
@@ -3115,7 +4180,7 @@
             '*id': 'str' } }
 
 ##
-# @x-blockdev-remove-medium:
+# @blockdev-remove-medium:
 #
 # Removes a medium (a block driver state tree) from a block device. That block
 # device's tray must currently be open (unless there is no attached guest
@@ -3123,18 +4188,13 @@
 #
 # If the tray is open and there is no medium inserted, this will be a no-op.
 #
-# @device: Block device name (deprecated, use @id instead)
+# @id:     The name or QOM path of the guest device
 #
-# @id:     The name or QOM path of the guest device (since: 2.8)
-#
-# Note: This command is still a work in progress and is considered experimental.
-# Stay away from it unless you want to help with its development.
-#
-# Since: 2.5
+# Since: 2.12
 #
 # Example:
 #
-# -> { "execute": "x-blockdev-remove-medium",
+# -> { "execute": "blockdev-remove-medium",
 #      "arguments": { "id": "ide0-1-0" } }
 #
 # <- { "error": { "class": "GenericError",
@@ -3152,54 +4212,47 @@
 #
 # <- { "return": {} }
 #
-# -> { "execute": "x-blockdev-remove-medium",
-#      "arguments": { "device": "ide0-1-0" } }
+# -> { "execute": "blockdev-remove-medium",
+#      "arguments": { "id": "ide0-1-0" } }
 #
 # <- { "return": {} }
 #
 ##
-{ 'command': 'x-blockdev-remove-medium',
-  'data': { '*device': 'str',
-            '*id': 'str' } }
+{ 'command': 'blockdev-remove-medium',
+  'data': { 'id': 'str' } }
 
 ##
-# @x-blockdev-insert-medium:
+# @blockdev-insert-medium:
 #
 # Inserts a medium (a block driver state tree) into a block device. That block
 # device's tray must currently be open (unless there is no attached guest
 # device) and there must be no medium inserted already.
 #
-# @device:    Block device name (deprecated, use @id instead)
-#
-# @id:        The name or QOM path of the guest device (since: 2.8)
+# @id:        The name or QOM path of the guest device
 #
 # @node-name: name of a node in the block driver state graph
 #
-# Note: This command is still a work in progress and is considered experimental.
-# Stay away from it unless you want to help with its development.
-#
-# Since: 2.5
+# Since: 2.12
 #
 # Example:
 #
 # -> { "execute": "blockdev-add",
 #      "arguments": {
-#          "options": { "node-name": "node0",
-#                       "driver": "raw",
-#                       "file": { "driver": "file",
-#                                 "filename": "fedora.iso" } } } }
+#          "node-name": "node0",
+#          "driver": "raw",
+#          "file": { "driver": "file",
+#                    "filename": "fedora.iso" } } }
 # <- { "return": {} }
 #
-# -> { "execute": "x-blockdev-insert-medium",
+# -> { "execute": "blockdev-insert-medium",
 #      "arguments": { "id": "ide0-1-0",
 #                     "node-name": "node0" } }
 #
 # <- { "return": {} }
 #
 ##
-{ 'command': 'x-blockdev-insert-medium',
-  'data': { '*device': 'str',
-            '*id': 'str',
+{ 'command': 'blockdev-insert-medium',
+  'data': { 'id': 'str',
             'node-name': 'str'} }
 
 
@@ -3227,8 +4280,8 @@
 #
 # Changes the medium inserted into a block device by ejecting the current medium
 # and loading a new image file which is inserted as the new medium (this command
-# combines blockdev-open-tray, x-blockdev-remove-medium,
-# x-blockdev-insert-medium and blockdev-close-tray).
+# combines blockdev-open-tray, blockdev-remove-medium, blockdev-insert-medium
+# and blockdev-close-tray).
 #
 # @device:          Block device name (deprecated, use @id instead)
 #
@@ -3361,7 +4414,8 @@
 #
 # @node-name: node name. Note that errors may be reported for the root node
 #             that is directly attached to a guest device rather than for the
-#             node where the error occurred. (Since: 2.8)
+#             node where the error occurred. The node name is not present if
+#             the drive is empty. (Since: 2.8)
 #
 # @operation: I/O operation
 #
@@ -3392,7 +4446,8 @@
 #
 ##
 { 'event': 'BLOCK_IO_ERROR',
-  'data': { 'device': 'str', 'node-name': 'str', 'operation': 'IoOperationType',
+  'data': { 'device': 'str', '*node-name': 'str',
+            'operation': 'IoOperationType',
             'action': 'BlockErrorAction', '*nospace': 'bool',
             'reason': 'str' } }
 
@@ -3538,6 +4593,30 @@
             'speed' : 'int' } }
 
 ##
+# @BLOCK_JOB_PENDING:
+#
+# Emitted when a block job is awaiting explicit authorization to finalize graph
+# changes via @block-job-finalize. If this job is part of a transaction, it will
+# not emit this event until the transaction has converged first.
+#
+# @type: job type
+#
+# @id: The job identifier.
+#
+# Since: 2.12
+#
+# Example:
+#
+# <- { "event": "BLOCK_JOB_WAITING",
+#      "data": { "device": "drive0", "type": "mirror" },
+#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
+#
+##
+{ 'event': 'BLOCK_JOB_PENDING',
+  'data': { 'type'  : 'BlockJobType',
+            'id'    : 'str' } }
+
+##
 # @PreallocMode:
 #
 # Preallocation mode of QEMU image file
@@ -3563,7 +4642,7 @@
 # means the device should be extended to avoid pausing for
 # disk exhaustion.
 # The event is one shot. Once triggered, it needs to be
-# re-registered with another block-set-threshold command.
+# re-registered with another block-set-write-threshold command.
 #
 # @node-name: graph node name on which the threshold was exceeded.
 #
@@ -3630,6 +4709,10 @@
 # does not support all kinds of operations, all kinds of children, nor
 # all block drivers.
 #
+# FIXME Removing children from a quorum node means introducing gaps in the
+# child indices. This cannot be represented in the 'children' list of
+# BlockdevOptionsQuorum, as returned by .bdrv_refresh_filename().
+#
 # Warning: The data in a new quorum child MUST be consistent with that of
 # the rest of the array.
 #
@@ -3640,10 +4723,10 @@
 # 1. Add a new node to a quorum
 # -> { "execute": "blockdev-add",
 #      "arguments": {
-#          "options": { "driver": "raw",
-#                       "node-name": "new_node",
-#                        "file": { "driver": "file",
-#                                  "filename": "test.raw" } } } }
+#          "driver": "raw",
+#          "node-name": "new_node",
+#          "file": { "driver": "file",
+#                    "filename": "test.raw" } } }
 # <- { "return": {} }
 # -> { "execute": "x-blockdev-change",
 #      "arguments": { "parent": "disk1",
@@ -3661,3 +4744,43 @@
   'data' : { 'parent': 'str',
              '*child': 'str',
              '*node': 'str' } }
+
+##
+# @x-blockdev-set-iothread:
+#
+# Move @node and its children into the @iothread.  If @iothread is null then
+# move @node and its children into the main loop.
+#
+# The node must not be attached to a BlockBackend.
+#
+# @node-name: the name of the block driver node
+#
+# @iothread: the name of the IOThread object or null for the main loop
+#
+# @force: true if the node and its children should be moved when a BlockBackend
+#         is already attached
+#
+# Note: this command is experimental and intended for test cases that need
+# control over IOThreads only.
+#
+# Since: 2.12
+#
+# Example:
+#
+# 1. Move a node into an IOThread
+# -> { "execute": "x-blockdev-set-iothread",
+#      "arguments": { "node-name": "disk1",
+#                     "iothread": "iothread0" } }
+# <- { "return": {} }
+#
+# 2. Move a node into the main loop
+# -> { "execute": "x-blockdev-set-iothread",
+#      "arguments": { "node-name": "disk1",
+#                     "iothread": null } }
+# <- { "return": {} }
+#
+##
+{ 'command': 'x-blockdev-set-iothread',
+  'data' : { 'node-name': 'str',
+             'iothread': 'StrOrNull',
+             '*force': 'bool' } }

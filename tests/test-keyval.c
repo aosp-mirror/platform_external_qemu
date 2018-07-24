@@ -12,6 +12,8 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
+#include "qapi/qmp/qdict.h"
+#include "qapi/qmp/qlist.h"
 #include "qapi/qmp/qstring.h"
 #include "qapi/qobject-input-visitor.h"
 #include "test-qapi-visit.h"
@@ -193,7 +195,7 @@ static void check_list012(QList *qlist)
 
     g_assert(qlist);
     for (i = 0; i < ARRAY_SIZE(expected); i++) {
-        qstr = qobject_to_qstring(qlist_pop(qlist));
+        qstr = qobject_to(QString, qlist_pop(qlist));
         g_assert(qstr);
         g_assert_cmpstr(qstring_get_str(qstr), ==, expected[i]);
         QDECREF(qstr);
@@ -614,21 +616,26 @@ static void test_keyval_visit_alternate(void)
     Error *err = NULL;
     Visitor *v;
     QDict *qdict;
-    AltNumStr *ans;
-    AltNumInt *ani;
+    AltStrObj *aso;
+    AltNumEnum *ane;
+    AltEnumBool *aeb;
 
     /*
      * Can't do scalar alternate variants other than string.  You get
      * the string variant if there is one, else an error.
+     * TODO make it work for unambiguous cases like AltEnumBool below
      */
-    qdict = keyval_parse("a=1,b=2", NULL, &error_abort);
+    qdict = keyval_parse("a=1,b=2,c=on", NULL, &error_abort);
     v = qobject_input_visitor_new_keyval(QOBJECT(qdict));
     QDECREF(qdict);
     visit_start_struct(v, NULL, NULL, 0, &error_abort);
-    visit_type_AltNumStr(v, "a", &ans, &error_abort);
-    g_assert_cmpint(ans->type, ==, QTYPE_QSTRING);
-    g_assert_cmpstr(ans->u.s, ==, "1");
-    visit_type_AltNumInt(v, "a", &ani, &err);
+    visit_type_AltStrObj(v, "a", &aso, &error_abort);
+    g_assert_cmpint(aso->type, ==, QTYPE_QSTRING);
+    g_assert_cmpstr(aso->u.s, ==, "1");
+    qapi_free_AltStrObj(aso);
+    visit_type_AltNumEnum(v, "b", &ane, &err);
+    error_free_or_abort(&err);
+    visit_type_AltEnumBool(v, "c", &aeb, &err);
     error_free_or_abort(&err);
     visit_end_struct(v, NULL);
     visit_free(v);
@@ -647,13 +654,16 @@ static void test_keyval_visit_any(void)
     QDECREF(qdict);
     visit_start_struct(v, NULL, NULL, 0, &error_abort);
     visit_type_any(v, "a", &any, &error_abort);
-    qlist = qobject_to_qlist(any);
+    qlist = qobject_to(QList, any);
     g_assert(qlist);
-    qstr = qobject_to_qstring(qlist_pop(qlist));
+    qstr = qobject_to(QString, qlist_pop(qlist));
     g_assert_cmpstr(qstring_get_str(qstr), ==, "null");
-    qstr = qobject_to_qstring(qlist_pop(qlist));
+    QDECREF(qstr);
+    qstr = qobject_to(QString, qlist_pop(qlist));
     g_assert_cmpstr(qstring_get_str(qstr), ==, "1");
     g_assert(qlist_empty(qlist));
+    QDECREF(qstr);
+    qobject_decref(any);
     visit_check_struct(v, &error_abort);
     visit_end_struct(v, NULL);
     visit_free(v);

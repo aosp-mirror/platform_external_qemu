@@ -35,7 +35,7 @@
 #include "qemu/cutils.h"
 #include "qemu/error-report.h"
 #include "qemu/log.h"
-#include "sysemu/char.h"
+#include "chardev/char.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/qtest.h"
@@ -232,7 +232,7 @@ static void boston_platreg_write(void *opaque, hwaddr addr,
         break;
     case PLAT_SOFTRST_CTL:
         if (val & PLAT_SOFTRST_CTL_SYSRESET) {
-            qemu_system_reset_request();
+            qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         }
         break;
     default:
@@ -245,16 +245,6 @@ static void boston_platreg_write(void *opaque, hwaddr addr,
 static const MemoryRegionOps boston_platreg_ops = {
     .read = boston_platreg_read,
     .write = boston_platreg_write,
-    .endianness = DEVICE_NATIVE_ENDIAN,
-};
-
-static void boston_flash_write(void *opaque, hwaddr addr,
-                               uint64_t val, unsigned size)
-{
-}
-
-static const MemoryRegionOps boston_flash_ops = {
-    .write = boston_flash_write,
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
 
@@ -437,7 +427,6 @@ static void boston_mach_init(MachineState *machine)
     DeviceState *dev;
     BostonState *s;
     Error *err = NULL;
-    const char *cpu_model;
     MemoryRegion *flash, *ddr, *ddr_low_alias, *lcd, *platreg;
     MemoryRegion *sys_mem = get_system_memory();
     XilinxPCIEHost *pcie2;
@@ -453,26 +442,24 @@ static void boston_mach_init(MachineState *machine)
         exit(1);
     }
 
-    cpu_model = machine->cpu_model ?: "I6400";
-
     dev = qdev_create(NULL, TYPE_MIPS_BOSTON);
     qdev_init_nofail(dev);
 
     s = BOSTON(dev);
     s->mach = machine;
-    s->cps = g_new0(MIPSCPSState, 1);
 
-    if (!cpu_supports_cps_smp(cpu_model)) {
+    if (!cpu_supports_cps_smp(machine->cpu_type)) {
         error_report("Boston requires CPUs which support CPS");
         exit(1);
     }
 
-    is_64b = cpu_supports_isa(cpu_model, ISA_MIPS64);
+    is_64b = cpu_supports_isa(machine->cpu_type, ISA_MIPS64);
 
-    object_initialize(s->cps, sizeof(MIPSCPSState), TYPE_MIPS_CPS);
+    s->cps = MIPS_CPS(object_new(TYPE_MIPS_CPS));
     qdev_set_parent_bus(DEVICE(s->cps), sysbus_get_default());
 
-    object_property_set_str(OBJECT(s->cps), cpu_model, "cpu-model", &err);
+    object_property_set_str(OBJECT(s->cps), machine->cpu_type, "cpu-type",
+                            &err);
     object_property_set_int(OBJECT(s->cps), smp_cpus, "num-vp", &err);
     object_property_set_bool(OBJECT(s->cps), true, "realized", &err);
 
@@ -484,8 +471,8 @@ static void boston_mach_init(MachineState *machine)
     sysbus_mmio_map_overlap(SYS_BUS_DEVICE(s->cps), 0, 0, 1);
 
     flash =  g_new(MemoryRegion, 1);
-    memory_region_init_rom_device(flash, NULL, &boston_flash_ops, s,
-                                  "boston.flash", 128 * M_BYTE, &err);
+    memory_region_init_rom_nomigrate(flash, NULL,
+                                     "boston.flash", 128 * M_BYTE, &err);
     memory_region_add_subregion_overlap(sys_mem, 0x18000000, flash, 0);
 
     ddr = g_new(MemoryRegion, 1);
@@ -533,13 +520,13 @@ static void boston_mach_init(MachineState *machine)
     chr = qemu_chr_new("lcd", "vc:320x240");
     qemu_chr_fe_init(&s->lcd_display, chr, NULL);
     qemu_chr_fe_set_handlers(&s->lcd_display, NULL, NULL,
-                             boston_lcd_event, s, NULL, true);
+                             boston_lcd_event, NULL, s, NULL, true);
 
     ahci = pci_create_simple_multifunction(&PCI_BRIDGE(&pcie2->root)->sec_bus,
                                            PCI_DEVFN(0, 0),
                                            true, TYPE_ICH9_AHCI);
-    g_assert(ARRAY_SIZE(hd) == ICH_AHCI(ahci)->ahci.ports);
-    ide_drive_get(hd, ICH_AHCI(ahci)->ahci.ports);
+    g_assert(ARRAY_SIZE(hd) == ahci_get_num_ports(ahci));
+    ide_drive_get(hd, ahci_get_num_ports(ahci));
     ahci_ide_create_devs(ahci, hd);
 
     if (machine->firmware) {
@@ -572,6 +559,7 @@ static void boston_mach_class_init(MachineClass *mc)
     mc->block_default_type = IF_IDE;
     mc->default_ram_size = 1 * G_BYTE;
     mc->max_cpus = 16;
+    mc->default_cpu_type = MIPS_CPU_TYPE_NAME("I6400");
 }
 
 DEFINE_MACHINE("boston", boston_mach_class_init)

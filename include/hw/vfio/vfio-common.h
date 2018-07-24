@@ -26,6 +26,7 @@
 #include "exec/memory.h"
 #include "qemu/queue.h"
 #include "qemu/notify.h"
+#include "ui/console.h"
 #ifdef CONFIG_LINUX
 #include <linux/vfio.h>
 #endif
@@ -45,6 +46,7 @@
 enum {
     VFIO_DEVICE_TYPE_PCI = 0,
     VFIO_DEVICE_TYPE_PLATFORM = 1,
+    VFIO_DEVICE_TYPE_CCW = 2,
 };
 
 typedef struct VFIOMmap {
@@ -94,7 +96,7 @@ typedef struct VFIOContainer {
 
 typedef struct VFIOGuestIOMMU {
     VFIOContainer *container;
-    MemoryRegion *iommu;
+    IOMMUMemoryRegion *iommu;
     hwaddr iommu_offset;
     IOMMUNotifier n;
     QLIST_ENTRY(VFIOGuestIOMMU) giommu_next;
@@ -114,6 +116,7 @@ typedef struct VFIODevice {
     struct VFIOGroup *group;
     char *sysfsdev;
     char *name;
+    DeviceState *dev;
     int fd;
     int type;
     bool reset_works;
@@ -139,6 +142,27 @@ typedef struct VFIOGroup {
     QLIST_ENTRY(VFIOGroup) next;
     QLIST_ENTRY(VFIOGroup) container_next;
 } VFIOGroup;
+
+typedef struct VFIODMABuf {
+    QemuDmaBuf buf;
+    uint32_t pos_x, pos_y, pos_updates;
+    uint32_t hot_x, hot_y, hot_updates;
+    int dmabuf_id;
+    QTAILQ_ENTRY(VFIODMABuf) next;
+} VFIODMABuf;
+
+typedef struct VFIODisplay {
+    QemuConsole *con;
+    struct {
+        VFIORegion buffer;
+        DisplaySurface *surface;
+    } region;
+    struct {
+        QTAILQ_HEAD(, VFIODMABuf) bufs;
+        VFIODMABuf *primary;
+        VFIODMABuf *cursor;
+    } dmabuf;
+} VFIODisplay;
 
 void vfio_put_base_device(VFIODevice *vbasedev);
 void vfio_disable_irqindex(VFIODevice *vbasedev, int index);
@@ -169,6 +193,7 @@ int vfio_get_region_info(VFIODevice *vbasedev, int index,
                          struct vfio_region_info **info);
 int vfio_get_dev_region_info(VFIODevice *vbasedev, uint32_t type,
                              uint32_t subtype, struct vfio_region_info **info);
+bool vfio_has_region_cap(VFIODevice *vbasedev, int region, uint16_t cap_type);
 #endif
 extern const MemoryListener vfio_prereg_listener;
 

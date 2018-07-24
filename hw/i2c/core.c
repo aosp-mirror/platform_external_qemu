@@ -10,30 +10,12 @@
 #include "qemu/osdep.h"
 #include "hw/i2c/i2c.h"
 
-typedef struct I2CNode I2CNode;
-
-struct I2CNode {
-    I2CSlave *elt;
-    QLIST_ENTRY(I2CNode) next;
-};
-
 #define I2C_BROADCAST 0x00
-
-struct I2CBus
-{
-    BusState qbus;
-    QLIST_HEAD(, I2CNode) current_devs;
-    uint8_t saved_address;
-    bool broadcast;
-};
 
 static Property i2c_props[] = {
     DEFINE_PROP_UINT8("address", struct I2CSlave, address, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
-
-#define TYPE_I2C_BUS "i2c-bus"
-#define I2C_BUS(obj) OBJECT_CHECK(I2CBus, (obj), TYPE_I2C_BUS)
 
 static const TypeInfo i2c_bus_info = {
     .name = TYPE_I2C_BUS,
@@ -41,7 +23,7 @@ static const TypeInfo i2c_bus_info = {
     .instance_size = sizeof(I2CBus),
 };
 
-static void i2c_bus_pre_save(void *opaque)
+static int i2c_bus_pre_save(void *opaque)
 {
     I2CBus *bus = opaque;
 
@@ -53,6 +35,8 @@ static void i2c_bus_pre_save(void *opaque)
             bus->saved_address = I2C_BROADCAST;
         }
     }
+
+    return 0;
 }
 
 static const VMStateDescription vmstate_i2c_bus = {

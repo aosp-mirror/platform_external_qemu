@@ -10,6 +10,7 @@
  *
  */
 
+#include "qemu/osdep.h"
 #include "sysemu/hvf.h"
 
 int hvf_enabled(void)

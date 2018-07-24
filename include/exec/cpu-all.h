@@ -159,8 +159,12 @@ extern unsigned long guest_base;
 extern int have_guest_base;
 extern unsigned long reserved_va;
 
-#define GUEST_ADDR_MAX (reserved_va ? reserved_va : \
+#if HOST_LONG_BITS <= TARGET_VIRT_ADDR_SPACE_BITS
+#define GUEST_ADDR_MAX (~0ul)
+#else
+#define GUEST_ADDR_MAX (reserved_va ? reserved_va - 1 : \
                                     (1ul << TARGET_VIRT_ADDR_SPACE_BITS) - 1)
+#endif
 #else
 
 #include "exec/hwaddr.h"
@@ -229,8 +233,6 @@ extern int target_page_bits;
 /* Using intptr_t ensures that qemu_*_page_mask is sign-extended even
  * when intptr_t is 32-bit and we are aligning a long long.
  */
-extern uintptr_t qemu_real_host_page_size;
-extern intptr_t qemu_real_host_page_mask;
 extern uintptr_t qemu_host_page_size;
 extern intptr_t qemu_host_page_mask;
 
@@ -247,6 +249,9 @@ extern intptr_t qemu_host_page_mask;
 /* original state of the write flag (used when tracking self-modifying
    code */
 #define PAGE_WRITE_ORG 0x0010
+/* Invalidate the TLB entry immediately, helpful for s390x
+ * Low-Address-Protection. Used with PAGE_WRITE in tlb_set_page_with_attrs() */
+#define PAGE_WRITE_INV 0x0040
 #if defined(CONFIG_BSD) && defined(CONFIG_USER_ONLY)
 /* FIXME: Code that sets/uses this is broken and needs to go away.  */
 #define PAGE_RESERVED  0x0020

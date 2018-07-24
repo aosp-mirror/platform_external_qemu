@@ -20,6 +20,7 @@ extern "C" {
 #include "qemu-common.h"
 #include "qom/object.h"
 #include "migration/vmstate.h"
+#include "migration/register.h"
 }
 
 /* Version number of snapshots code. Increment whenever the data saved
@@ -42,14 +43,19 @@ static int qemud_load(QEMUFile* f, void* opaque, int version) {
     return ret;
 }
 
+static SaveVMHandlers qemud_vmhandlers;
+
 void android_qemu2_qemud_init(void) {
     (void) android_qemud_get_serial_line();
 
-    register_savevm(nullptr,
-                    "qemud",
-                    0,
-                    QEMUD_SAVE_VERSION,
-                    qemud_save,
-                    qemud_load,
-                    qemud_multiplexer);
+    // Workaround gcc 4.8 bug: 55606
+    qemud_vmhandlers.save_state = qemud_save;
+    qemud_vmhandlers.load_state = qemud_load;
+
+    register_savevm_live(nullptr,
+                         "qemud",
+                         0,
+                         QEMUD_SAVE_VERSION,
+                         &qemud_vmhandlers,
+                         qemud_multiplexer);
 }

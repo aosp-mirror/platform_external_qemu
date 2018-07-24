@@ -297,6 +297,7 @@ struct EHCIState {
      */
     QEMUTimer *frame_timer;
     QEMUBH *async_bh;
+    bool working;
     uint32_t astate;         /* Current state in asynchronous schedule */
     uint32_t pstate;         /* Current state in periodic schedule     */
     USBPort ports[NB_PORTS];
@@ -343,6 +344,7 @@ typedef struct EHCIPCIState {
 #define TYPE_SYS_BUS_EHCI "sysbus-ehci-usb"
 #define TYPE_EXYNOS4210_EHCI "exynos4210-ehci-usb"
 #define TYPE_TEGRA2_EHCI "tegra2-ehci-usb"
+#define TYPE_PPC4xx_EHCI "ppc4xx-ehci-usb"
 #define TYPE_FUSBH200_EHCI "fusbh200-ehci-usb"
 
 #define SYS_BUS_EHCI(obj) \

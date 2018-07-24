@@ -21,7 +21,7 @@ extern "C" {
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "qemu/timer.h"
-#include "sysemu/char.h"
+#include "chardev/char.h"
 }  // extern "C"
 
 #include <list>

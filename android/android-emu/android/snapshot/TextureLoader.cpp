@@ -11,6 +11,7 @@
 
 #include "android/snapshot/TextureLoader.h"
 
+#include "android/base/EintrWrapper.h"
 #include "android/base/files/DecompressingStream.h"
 
 #include <assert.h>
@@ -40,7 +41,7 @@ bool TextureLoader::start() {
 void TextureLoader::loadTexture(uint32_t texId, const loader_t& loader) {
     android::base::AutoLock scopedLock(mLock);
     assert(mIndex.count(texId));
-    fseeko64(mStream.get(), mIndex[texId], SEEK_SET);
+    HANDLE_EINTR(fseeko64(mStream.get(), mIndex[texId], SEEK_SET));
     switch (mVersion) {
         case 1:
             loader(&mStream);
@@ -65,7 +66,7 @@ bool TextureLoader::readIndex() {
         mDiskSize = size;
     }
     auto indexPos = mStream.getBe64();
-    fseeko64(mStream.get(), static_cast<int64_t>(indexPos), SEEK_SET);
+    HANDLE_EINTR(fseeko64(mStream.get(), static_cast<int64_t>(indexPos), SEEK_SET));
     mVersion = mStream.getBe32();
     if (mVersion < 1 || mVersion > 2) {
         return false;

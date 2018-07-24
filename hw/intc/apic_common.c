@@ -25,7 +25,7 @@
 #include "qapi/visitor.h"
 #include "hw/i386/apic.h"
 #include "hw/i386/apic_internal.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
 #include "sysemu/hax.h"
 #include "sysemu/kvm.h"
 #include "hw/qdev.h"
@@ -364,7 +364,7 @@ static int apic_pre_load(void *opaque)
     return 0;
 }
 
-static void apic_dispatch_pre_save(void *opaque)
+static int apic_dispatch_pre_save(void *opaque)
 {
     APICCommonState *s = APIC_COMMON(opaque);
     APICCommonClass *info = APIC_COMMON_GET_CLASS(s);
@@ -372,6 +372,8 @@ static void apic_dispatch_pre_save(void *opaque)
     if (info->pre_save) {
         info->pre_save(s);
     }
+
+    return 0;
 }
 
 static int apic_dispatch_post_load(void *opaque, int version_id)
@@ -454,10 +456,10 @@ static void apic_common_get_id(Object *obj, Visitor *v, const char *name,
                                void *opaque, Error **errp)
 {
     APICCommonState *s = APIC_COMMON(obj);
-    int64_t value;
+    uint32_t value;
 
     value = s->apicbase & MSR_IA32_APICBASE_EXTD ? s->initial_apic_id : s->id;
-    visit_type_int(v, name, &value, errp);
+    visit_type_uint32(v, name, &value, errp);
 }
 
 static void apic_common_set_id(Object *obj, Visitor *v, const char *name,
@@ -466,14 +468,14 @@ static void apic_common_set_id(Object *obj, Visitor *v, const char *name,
     APICCommonState *s = APIC_COMMON(obj);
     DeviceState *dev = DEVICE(obj);
     Error *local_err = NULL;
-    int64_t value;
+    uint32_t value;
 
     if (dev->realized) {
         qdev_prop_set_after_realize(dev, name, errp);
         return;
     }
 
-    visit_type_int(v, name, &value, &local_err);
+    visit_type_uint32(v, name, &value, &local_err);
     if (local_err) {
         error_propagate(errp, local_err);
         return;
@@ -488,7 +490,7 @@ static void apic_common_initfn(Object *obj)
     APICCommonState *s = APIC_COMMON(obj);
 
     s->id = s->initial_apic_id = -1;
-    object_property_add(obj, "id", "int",
+    object_property_add(obj, "id", "uint32",
                         apic_common_get_id,
                         apic_common_set_id, NULL, NULL, NULL);
 }
@@ -505,7 +507,7 @@ static void apic_common_class_init(ObjectClass *klass, void *data)
      * Reason: APIC and CPU need to be wired up by
      * x86_cpu_apic_create()
      */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo apic_common_type = {

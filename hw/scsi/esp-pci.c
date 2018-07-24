@@ -27,7 +27,7 @@
 #include "hw/pci/pci.h"
 #include "hw/nvram/eeprom93xx.h"
 #include "hw/scsi/esp.h"
-#include "hw/scsi/trace.h"
+#include "trace.h"
 #include "qapi/error.h"
 #include "qemu/log.h"
 
@@ -398,6 +398,10 @@ static const TypeInfo esp_pci_info = {
     .parent = TYPE_PCI_DEVICE,
     .instance_size = sizeof(PCIESPState),
     .class_init = esp_pci_class_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 typedef struct {

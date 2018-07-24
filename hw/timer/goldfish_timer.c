@@ -15,6 +15,7 @@
 #include "cpu.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
+#include "migration/register.h"
 
 enum {
     TIMER_TIME_LOW          = 0x00, /* get low bits of current time        */
@@ -175,6 +176,10 @@ static const MemoryRegionOps mips_qemu_timer_ops = {
     .write = goldfish_rtc_write,
     .endianness = DEVICE_NATIVE_ENDIAN,
 };
+static SaveVMHandlers goldfish_rtc_vmhandlers = {
+    .save_state = goldfish_rtc_save,
+    .load_state = goldfish_rtc_load
+};
 
 static void goldfish_rtc_realize(DeviceState *dev, Error **errp)
 {
@@ -187,12 +192,11 @@ static void goldfish_rtc_realize(DeviceState *dev, Error **errp)
             "goldfish_rtc", 0x1000);
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
-    register_savevm(NULL,
+    register_savevm_live(NULL,
                     "goldfish_rtc",
                     0,
                     GOLDFISH_RTC_SAVE_VERSION,
-                    goldfish_rtc_save,
-                    goldfish_rtc_load,
+                    &goldfish_rtc_vmhandlers,
                     s);
 }
 
