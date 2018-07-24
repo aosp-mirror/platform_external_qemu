@@ -15,6 +15,7 @@
 #include "GLSnapshotTestStateUtils.h"
 
 #include "GLSnapshotTesting.h"
+#include "OpenglCodecCommon/glUtils.h"
 
 #include <gtest/gtest.h>
 
@@ -65,6 +66,41 @@ GLuint loadAndCompileShader(const GLESv2Dispatch* gl,
     }
 
     return shader;
+}
+
+std::vector<GLubyte> getTextureImageData(const GLESv2Dispatch* gl,
+                                         GLuint texture,
+                                         GLenum target,
+                                         GLint level,
+                                         GLsizei width,
+                                         GLsizei height,
+                                         GLenum format,
+                                         GLenum type) {
+    std::vector<GLubyte> out = {};
+    out.resize(width * height * glUtilsPixelBitSize(format, type));
+
+    // switch to auxiliary framebuffer
+    // TODO(benzene): don't assume we're using the default framebuffer
+    GLuint framebuffer;
+    gl->glGenFramebuffers(1, &framebuffer);
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target,
+                               texture, level);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+    gl->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                     out.data());  // TODO(benzene): flexible format/type?
+                                   // seems like RGBA/UNSIGNED_BYTE is the only
+                                   // guaranteed supported format+type
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    // restore framebuffer
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->glDeleteFramebuffers(1, &framebuffer);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    return out;
 }
 
 }  // namespace emugl
