@@ -45,6 +45,9 @@ typedef struct QAndroidUserEventAgent {
 
     // notify the emulator that new user event is available
     void (*onNewUserEvent)(void);
+
+    // Number of events that have been dropped.
+    int (*eventsDropped)();
 } QAndroidUserEventAgent;
 
 ANDROID_END_HEADER
