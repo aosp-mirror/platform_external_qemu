@@ -387,7 +387,7 @@ intptr_t RenderThread::main() {
     // should not contain this thread information at all.
 
     // exit sync thread, if any.
-    SyncThread::destroySyncThread();
+    // SyncThread::destroySyncThread();
 
     if (!FrameBuffer::getFB()->isShuttingDown()) {
         // Release references to the current thread's context/surfaces if any

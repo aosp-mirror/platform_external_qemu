@@ -73,19 +73,32 @@ RenderThreadInfo* RenderThreadInfo::get() {
 //
 // So we maintain a StalePtrRegistry<SyncThread>, sSyncThreadRegistry,
 // with getPtr removing entries from stale database.
-static android::base::LazyInstance<StalePtrRegistry<SyncThread> >
+static ::emugl::LazyInstance<StalePtrRegistry<SyncThread> >
     sSyncThreadRegistry = LAZY_INSTANCE_INIT;
+
+class GlobalSyncThread {
+public:
+    GlobalSyncThread() {
+        mSyncThread.reset(new SyncThread(EGL_NO_CONTEXT));
+    }
+
+    SyncThread* syncThreadPtr() { return mSyncThread.get(); }
+
+private:
+    std::unique_ptr<SyncThread> mSyncThread;
+};
+
+static ::emugl::LazyInstance<GlobalSyncThread> sGlobalSyncThread = LAZY_INSTANCE_INIT;
 
 // createSyncThread() tracks new sync threads in the registry.
 void RenderThreadInfo::createSyncThread() {
-    syncThread.reset(new SyncThread(currContext->getEGLContext()));
-    sSyncThreadRegistry->addPtr(syncThread.get());
+    syncThread = sGlobalSyncThread->syncThreadPtr();
+    sSyncThreadRegistry->addPtr(syncThread);
 }
 
 // destroySyncThread() should untrack.
 void RenderThreadInfo::destroySyncThread() {
-    sSyncThreadRegistry->removePtr(syncThread.get());
-    syncThread.reset(nullptr);
+    sSyncThreadRegistry->removePtr(syncThread);
 }
 
 void RenderThreadInfo::onSave(Stream* stream) {
@@ -114,8 +127,8 @@ void RenderThreadInfo::onSave(Stream* stream) {
 
     stream->putBe64(m_puid);
 
-    if (syncThread.get()) {
-        syncThreadAlias = (uint64_t)(uintptr_t)syncThread.get();
+    if (syncThread) {
+        syncThreadAlias = (uint64_t)(uintptr_t)syncThread;
     }
     stream->putBe64(syncThreadAlias);
 
@@ -158,8 +171,8 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
             eglCtx = currContext->getEGLContext();
         }
 
-        syncThread.reset(new SyncThread(eglCtx));
-        sSyncThreadRegistry->remapStalePtr(syncThreadAlias, syncThread.get());
+        syncThread = sGlobalSyncThread->syncThreadPtr();
+        sSyncThreadRegistry->remapStalePtr(syncThreadAlias, syncThread);
 
         // Note that the values in sSyncThreadRegistry will only be used for a
         // very short time, because after the snapshot is restored, the guest

@@ -262,25 +262,25 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
 SyncThread* SyncThread::getSyncThread() {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
-    if (!tInfo->syncThread.get()) {
+    if (!tInfo->syncThread) {
         DPRINT("starting a sync thread for render thread info=%p", tInfo);
         tInfo->createSyncThread();
     }
 
-    return tInfo->syncThread.get();
+    return tInfo->syncThread;
 }
 
 /* static */
 void SyncThread::destroySyncThread() {
-    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    // RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
-    DPRINT("exiting a sync thread for render thread info=%p.", tInfo);
+    // DPRINT("exiting a sync thread for render thread info=%p.", tInfo);
 
-    if (!tInfo || !tInfo->syncThread) return;
+    // if (!tInfo || !tInfo->syncThread) return;
 
-    tInfo->syncThread->cleanup();
-    tInfo->syncThread->wait();
-    tInfo->destroySyncThread();
+    // tInfo->syncThread->cleanup();
+    // tInfo->syncThread->wait();
+    // tInfo->destroySyncThread();
 }
 
 /* static */

@@ -67,7 +67,9 @@ struct RenderThreadInfo {
     WindowSurfaceSet                m_windowSet;
 
     // Sync timeline info + sync thread pointer
-    std::unique_ptr<SyncThread>     syncThread;
+    // Not owned
+    SyncThread* syncThread = nullptr;
+
     // Mapping to sync thread pointer value on snapshot save/load
     uint64_t syncThreadAlias = 0;
 
