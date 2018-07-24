@@ -603,7 +603,8 @@ std::vector<float> GLEScmContext::getMultiTexCoord(uint32_t index) const {
     return // s, t, r components
         { mMultiTexCoord[index].floatVal[0],
           mMultiTexCoord[index].floatVal[1],
-          mMultiTexCoord[index].floatVal[2], };
+          mMultiTexCoord[index].floatVal[2],
+          mMultiTexCoord[index].floatVal[3] };
 }
 
 GLenum GLEScmContext::getTextureEnvMode() {
