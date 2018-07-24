@@ -33,11 +33,10 @@
 #include "hw/timer/m48t59.h"
 #include "qemu/log.h"
 #include "qemu/error-report.h"
-#include "qapi/error.h"
 #include "hw/loader.h"
 #include "sysemu/kvm.h"
 #include "kvm_ppc.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 
 //#define PPC_DEBUG_IRQ
 //#define PPC_DEBUG_TB
@@ -412,7 +411,7 @@ static void ppce500_set_irq(void *opaque, int pin, int level)
             if (level) {
                 LOG_IRQ("%s: reset the PowerPC system\n",
                             __func__);
-                qemu_system_reset_request();
+                qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
             }
             break;
         case PPCE500_INPUT_RESET_CORE:
@@ -937,11 +936,13 @@ void cpu_ppc_clock_vm_state_change(void *opaque, int running,
  *  final pages of memory (which happens between vm_stop()
  *  and pre_save()) takes max_downtime.
  */
-static void timebase_pre_save(void *opaque)
+static int timebase_pre_save(void *opaque)
 {
     PPCTimebase *tb = opaque;
 
     timebase_save(tb);
+
+    return 0;
 }
 
 const VMStateDescription vmstate_ppc_timebase = {
@@ -1356,50 +1357,4 @@ void PPC_debug_write (void *opaque, uint32_t addr, uint32_t val)
         qemu_set_log(val | 0x100);
         break;
     }
-}
-
-/* CPU device-tree ID helpers */
-int ppc_get_vcpu_dt_id(PowerPCCPU *cpu)
-{
-    return cpu->cpu_dt_id;
-}
-
-PowerPCCPU *ppc_get_vcpu_by_dt_id(int cpu_dt_id)
-{
-    CPUState *cs;
-
-    CPU_FOREACH(cs) {
-        PowerPCCPU *cpu = POWERPC_CPU(cs);
-
-        if (cpu->cpu_dt_id == cpu_dt_id) {
-            return cpu;
-        }
-    }
-
-    return NULL;
-}
-
-void ppc_cpu_parse_features(const char *cpu_model)
-{
-    CPUClass *cc;
-    ObjectClass *oc;
-    const char *typename;
-    gchar **model_pieces;
-
-    model_pieces = g_strsplit(cpu_model, ",", 2);
-    if (!model_pieces[0]) {
-        error_report("Invalid/empty CPU model name");
-        exit(1);
-    }
-
-    oc = cpu_class_by_name(TYPE_POWERPC_CPU, model_pieces[0]);
-    if (oc == NULL) {
-        error_report("Unable to find CPU definition: %s", model_pieces[0]);
-        exit(1);
-    }
-
-    typename = object_class_get_name(oc);
-    cc = CPU_CLASS(oc);
-    cc->parse_features(typename, model_pieces[1], &error_fatal);
-    g_strfreev(model_pieces);
 }

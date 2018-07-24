@@ -28,17 +28,9 @@
 #define QEMU_NORETURN
 #endif
 
-#if QEMU_GNUC_PREREQ(3, 4)
 #define QEMU_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
-#else
-#define QEMU_WARN_UNUSED_RESULT
-#endif
 
-#if QEMU_GNUC_PREREQ(4, 0)
 #define QEMU_SENTINEL __attribute__((sentinel))
-#else
-#define QEMU_SENTINEL
-#endif
 
 #if QEMU_GNUC_PREREQ(4, 3)
 #define QEMU_ARTIFICIAL __attribute__((always_inline, artificial))
@@ -94,12 +86,26 @@
         int:(x) ? -1 : 1; \
     }
 
-#ifdef __COUNTER__
-#define QEMU_BUILD_BUG_ON(x) typedef QEMU_BUILD_BUG_ON_STRUCT(x) \
+/* QEMU_BUILD_BUG_MSG() emits the message given if _Static_assert is
+ * supported; otherwise, it will be omitted from the compiler error
+ * message (but as it remains present in the source code, it can still
+ * be useful when debugging). */
+#if defined(CONFIG_STATIC_ASSERT)
+ #ifdef __cplusplus
+   /* GCC-Minw does not define _Static_assert, hence we fall back on static_assert
+      if this file is brought into C++ */
+   #define QEMU_BUILD_BUG_MSG(x, msg) static_assert(!(x), msg)
+ #else
+   #define QEMU_BUILD_BUG_MSG(x, msg) _Static_assert(!(x), msg)
+ #endif
+#elif defined(__COUNTER__)
+#define QEMU_BUILD_BUG_MSG(x, msg) typedef QEMU_BUILD_BUG_ON_STRUCT(x) \
     glue(qemu_build_bug_on__, __COUNTER__) __attribute__((unused))
 #else
-#define QEMU_BUILD_BUG_ON(x)
+#define QEMU_BUILD_BUG_MSG(x, msg)
 #endif
+
+#define QEMU_BUILD_BUG_ON(x) QEMU_BUILD_BUG_MSG(x, "not expecting: " #x)
 
 #define QEMU_BUILD_BUG_ON_ZERO(x) (sizeof(QEMU_BUILD_BUG_ON_STRUCT(x)) - \
                                    sizeof(QEMU_BUILD_BUG_ON_STRUCT(x)))
@@ -127,5 +133,47 @@
 #ifdef POISON_CONFIG_ANDROID
 #pragma GCC poison CONFIG_ANDROID
 #endif
+#ifndef __has_feature
+#define __has_feature(x) 0 /* compatibility with non-clang compilers */
+#endif
+/* Implement C11 _Generic via GCC builtins.  Example:
+ *
+ *    QEMU_GENERIC(x, (float, sinf), (long double, sinl), sin) (x)
+ *
+ * The first argument is the discriminator.  The last is the default value.
+ * The middle ones are tuples in "(type, expansion)" format.
+ */
+
+/* First, find out the number of generic cases.  */
+#define QEMU_GENERIC(x, ...) \
+    QEMU_GENERIC_(typeof(x), __VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+
+/* There will be extra arguments, but they are not used.  */
+#define QEMU_GENERIC_(x, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, count, ...) \
+    QEMU_GENERIC##count(x, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)
+
+/* Two more helper macros, this time to extract items from a parenthesized
+ * list.
+ */
+#define QEMU_FIRST_(a, b) a
+#define QEMU_SECOND_(a, b) b
+
+/* ... and a final one for the common part of the "recursion".  */
+#define QEMU_GENERIC_IF(x, type_then, else_)                                   \
+    __builtin_choose_expr(__builtin_types_compatible_p(x,                      \
+                                                       QEMU_FIRST_ type_then), \
+                          QEMU_SECOND_ type_then, else_)
+
+/* CPP poor man's "recursion".  */
+#define QEMU_GENERIC1(x, a0, ...) (a0)
+#define QEMU_GENERIC2(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC1(x, __VA_ARGS__))
+#define QEMU_GENERIC3(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC2(x, __VA_ARGS__))
+#define QEMU_GENERIC4(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC3(x, __VA_ARGS__))
+#define QEMU_GENERIC5(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC4(x, __VA_ARGS__))
+#define QEMU_GENERIC6(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC5(x, __VA_ARGS__))
+#define QEMU_GENERIC7(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC6(x, __VA_ARGS__))
+#define QEMU_GENERIC8(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC7(x, __VA_ARGS__))
+#define QEMU_GENERIC9(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC8(x, __VA_ARGS__))
+#define QEMU_GENERIC10(x, a0, ...) QEMU_GENERIC_IF(x, a0, QEMU_GENERIC9(x, __VA_ARGS__))
 
 #endif /* COMPILER_H */

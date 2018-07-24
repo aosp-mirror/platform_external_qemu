@@ -32,9 +32,10 @@
 
 #include "qemu/osdep.h"
 #include "sysemu/block-backend.h"
+#include "qapi/qapi-types-block.h"
 #include "qemu/bswap.h"
 #include "hw/block/block.h"
-#include "hw/block/trace.h"
+#include "trace.h"
 
 struct partition {
         uint8_t boot_ind;           /* 0x80 - active */

@@ -9,7 +9,7 @@
 #include "qemu/osdep.h"
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
-#include "util/trace.h"
+#include "trace.h"
 
 #ifdef CONFIG_LINUX
 #include "qemu/futex.h"

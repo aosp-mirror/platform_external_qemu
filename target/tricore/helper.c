@@ -19,6 +19,7 @@
 
 #include "cpu.h"
 #include "exec/exec-all.h"
+#include "fpu/softfloat.h"
 
 enum {
     TLBRET_DIRTY = -4,
@@ -78,11 +79,6 @@ int cpu_tricore_handle_mmu_fault(CPUState *cs, target_ulong address,
     return ret;
 }
 
-TriCoreCPU *cpu_tricore_init(const char *cpu_model)
-{
-    return TRICORE_CPU(cpu_generic_init(TYPE_TRICORE_CPU, cpu_model));
-}
-
 static void tricore_cpu_list_entry(gpointer data, gpointer user_data)
 {
     ObjectClass *oc = data;
@@ -105,7 +101,7 @@ void tricore_cpu_list(FILE *f, fprintf_function cpu_fprintf)
     };
     GSList *list;
 
-    list = object_class_get_list(TYPE_TRICORE_CPU, false);
+    list = object_class_get_list_sorted(TYPE_TRICORE_CPU, false);
     (*cpu_fprintf)(f, "Available CPUs:\n");
     g_slist_foreach(list, tricore_cpu_list_entry, &s);
     g_slist_free(list);

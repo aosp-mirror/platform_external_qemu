@@ -16,7 +16,6 @@
 extern "C" {
 #pragma GCC diagnostic push
   #include "qemu/osdep.h"
-  #include "sysemu/char.h"
 #pragma GCC diagnostic pop
 }
 
@@ -33,12 +32,12 @@ CharSerialLine::CharSerialLine(Chardev* dev) {
 
 CharSerialLine::~CharSerialLine() {
     if (mBackend.chr) {
-        qemu_chr_delete(mBackend.chr);
+        object_unparent(OBJECT(mBackend.chr));
     }
 }
 
 void CharSerialLine::addHandlers(void* opaque, CanReadFunc canReadFunc, ReadFunc readFunc) {
-    qemu_chr_fe_set_handlers(&mBackend, canReadFunc, readFunc, NULL, opaque, NULL, false);
+    qemu_chr_fe_set_handlers(&mBackend, canReadFunc, readFunc, NULL, NULL, opaque, NULL, false);
 }
 
 int CharSerialLine::write(const uint8_t* data, int len) {

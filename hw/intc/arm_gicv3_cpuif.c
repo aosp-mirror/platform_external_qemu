@@ -15,7 +15,7 @@
 #include "qemu/osdep.h"
 #include "qemu/bitops.h"
 #include "qemu/main-loop.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
 #include "gicv3_internal.h"
 #include "cpu.h"
 
@@ -216,18 +216,35 @@ static uint32_t icv_gprio_mask(GICv3CPUState *cs, int group)
 {
     /* Return a mask word which clears the subpriority bits from
      * a priority value for a virtual interrupt in the specified group.
-     * This depends on the VBPR value:
+     * This depends on the VBPR value.
+     * If using VBPR0 then:
      *  a BPR of 0 means the group priority bits are [7:1];
      *  a BPR of 1 means they are [7:2], and so on down to
      *  a BPR of 7 meaning no group priority bits at all.
+     * If using VBPR1 then:
+     *  a BPR of 0 is impossible (the minimum value is 1)
+     *  a BPR of 1 means the group priority bits are [7:1];
+     *  a BPR of 2 means they are [7:2], and so on down to
+     *  a BPR of 7 meaning the group priority is [7].
+     *
      * Which BPR to use depends on the group of the interrupt and
      * the current ICH_VMCR_EL2.VCBPR settings.
+     *
+     * This corresponds to the VGroupBits() pseudocode.
      */
+    int bpr;
+
     if (group == GICV3_G1NS && cs->ich_vmcr_el2 & ICH_VMCR_EL2_VCBPR) {
         group = GICV3_G0;
     }
 
-    return ~0U << (read_vbpr(cs, group) + 1);
+    bpr = read_vbpr(cs, group);
+    if (group == GICV3_G1NS) {
+        assert(bpr > 0);
+        bpr--;
+    }
+
+    return ~0U << (bpr + 1);
 }
 
 static bool icv_hppi_can_preempt(GICv3CPUState *cs, uint64_t lr)
@@ -674,20 +691,37 @@ static uint32_t icc_gprio_mask(GICv3CPUState *cs, int group)
 {
     /* Return a mask word which clears the subpriority bits from
      * a priority value for an interrupt in the specified group.
-     * This depends on the BPR value:
+     * This depends on the BPR value. For CBPR0 (S or NS):
      *  a BPR of 0 means the group priority bits are [7:1];
      *  a BPR of 1 means they are [7:2], and so on down to
      *  a BPR of 7 meaning no group priority bits at all.
+     * For CBPR1 NS:
+     *  a BPR of 0 is impossible (the minimum value is 1)
+     *  a BPR of 1 means the group priority bits are [7:1];
+     *  a BPR of 2 means they are [7:2], and so on down to
+     *  a BPR of 7 meaning the group priority is [7].
+     *
      * Which BPR to use depends on the group of the interrupt and
      * the current ICC_CTLR.CBPR settings.
+     *
+     * This corresponds to the GroupBits() pseudocode.
      */
+    int bpr;
+
     if ((group == GICV3_G1 && cs->icc_ctlr_el1[GICV3_S] & ICC_CTLR_EL1_CBPR) ||
         (group == GICV3_G1NS &&
          cs->icc_ctlr_el1[GICV3_NS] & ICC_CTLR_EL1_CBPR)) {
         group = GICV3_G0;
     }
 
-    return ~0U << ((cs->icc_bpr[group] & 7) + 1);
+    bpr = cs->icc_bpr[group] & 7;
+
+    if (group == GICV3_G1NS) {
+        assert(bpr > 0);
+        bpr--;
+    }
+
+    return ~0U << (bpr + 1);
 }
 
 static bool icc_no_enabled_hppi(GICv3CPUState *cs)
@@ -802,7 +836,7 @@ static uint64_t icc_pmr_read(CPUARMState *env, const ARMCPRegInfo *ri)
         /* NS access and Group 0 is inaccessible to NS: return the
          * NS view of the current priority
          */
-        if (value & 0x80) {
+        if ((value & 0x80) == 0) {
             /* Secure priorities not visible to NS */
             value = 0;
         } else if (value != 0xff) {
@@ -837,7 +871,7 @@ static void icc_pmr_write(CPUARMState *env, const ARMCPRegInfo *ri,
             /* Current PMR in the secure range, don't allow NS to change it */
             return;
         }
-        value = (value >> 1) & 0x80;
+        value = (value >> 1) | 0x80;
     }
     cs->icc_pmr_el1 = value;
     gicv3_cpuif_update(cs);
@@ -1388,6 +1422,7 @@ static void icc_bpr_write(CPUARMState *env, const ARMCPRegInfo *ri,
 {
     GICv3CPUState *cs = icc_cs_from_env(env);
     int grp = (ri->crm == 8) ? GICV3_G0 : GICV3_G1;
+    uint64_t minval;
 
     if (icv_access(env, grp == GICV3_G0 ? HCR_FMO : HCR_IMO)) {
         icv_bpr_write(env, ri, value);
@@ -1413,6 +1448,11 @@ static void icc_bpr_write(CPUARMState *env, const ARMCPRegInfo *ri,
         (cs->icc_ctlr_el1[GICV3_NS] & ICC_CTLR_EL1_CBPR)) {
         /* reads return bpr0 + 1 sat to 7, writes ignored */
         return;
+    }
+
+    minval = (grp == GICV3_G1NS) ? GIC_MIN_BPR_NS : GIC_MIN_BPR;
+    if (value < minval) {
+        value = minval;
     }
 
     cs->icc_bpr[grp] = value & 7;
@@ -1569,7 +1609,7 @@ static uint64_t icc_rpr_read(CPUARMState *env, const ARMCPRegInfo *ri)
     if (arm_feature(env, ARM_FEATURE_EL3) &&
         !arm_is_secure(env) && (env->cp15.scr_el3 & SCR_FIQ)) {
         /* NS GIC access and Group 0 is inaccessible to NS */
-        if (prio & 0x80) {
+        if ((prio & 0x80) == 0) {
             /* NS mustn't see priorities in the Secure half of the range */
             prio = 0;
         } else if (prio != 0xff) {
@@ -1999,11 +2039,7 @@ static void icc_reset(CPUARMState *env, const ARMCPRegInfo *ri)
     cs->icc_pmr_el1 = 0;
     cs->icc_bpr[GICV3_G0] = GIC_MIN_BPR;
     cs->icc_bpr[GICV3_G1] = GIC_MIN_BPR;
-    if (arm_feature(env, ARM_FEATURE_EL3)) {
-        cs->icc_bpr[GICV3_G1NS] = GIC_MIN_BPR_NS;
-    } else {
-        cs->icc_bpr[GICV3_G1NS] = GIC_MIN_BPR;
-    }
+    cs->icc_bpr[GICV3_G1NS] = GIC_MIN_BPR_NS;
     memset(cs->icc_apr, 0, sizeof(cs->icc_apr));
     memset(cs->icc_igrpen, 0, sizeof(cs->icc_igrpen));
     cs->icc_ctlr_el3 = ICC_CTLR_EL3_NDS | ICC_CTLR_EL3_A3V |
@@ -2014,7 +2050,7 @@ static void icc_reset(CPUARMState *env, const ARMCPRegInfo *ri)
     cs->ich_hcr_el2 = 0;
     memset(cs->ich_lr_el2, 0, sizeof(cs->ich_lr_el2));
     cs->ich_vmcr_el2 = ICH_VMCR_EL2_VFIQEN |
-        (icv_min_vbpr(cs) << ICH_VMCR_EL2_VBPR1_SHIFT) |
+        ((icv_min_vbpr(cs) + 1) << ICH_VMCR_EL2_VBPR1_SHIFT) |
         (icv_min_vbpr(cs) << ICH_VMCR_EL2_VBPR0_SHIFT);
 }
 

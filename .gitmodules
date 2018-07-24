@@ -18,13 +18,10 @@
 	url = git://git.qemu-project.org/openhackware.git
 [submodule "roms/qemu-palcode"]
 	path = roms/qemu-palcode
-	url = git://github.com/rth7680/qemu-palcode.git
+	url = git://git.qemu.org/qemu-palcode.git
 [submodule "roms/sgabios"]
 	path = roms/sgabios
 	url = git://git.qemu-project.org/sgabios.git
-[submodule "pixman"]
-	path = pixman
-	url = git://anongit.freedesktop.org/pixman
 [submodule "dtc"]
 	path = dtc
 	url = git://git.qemu-project.org/dtc.git
@@ -34,3 +31,6 @@
 [submodule "roms/skiboot"]
 	path = roms/skiboot
 	url = git://git.qemu.org/skiboot.git
+[submodule "roms/QemuMacDrivers"]
+	path = roms/QemuMacDrivers
+	url = git://git.qemu.org/QemuMacDrivers.git

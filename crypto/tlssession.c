@@ -24,7 +24,7 @@
 #include "crypto/tlscredsx509.h"
 #include "qapi/error.h"
 #include "qemu/acl.h"
-#include "crypto/trace.h"
+#include "trace.h"
 
 #ifdef CONFIG_GNUTLS
 

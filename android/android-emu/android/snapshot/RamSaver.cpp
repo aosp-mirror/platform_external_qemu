@@ -14,6 +14,7 @@
 #include "android/base/ContiguousRangeMapper.h"
 #include "android/base/Profiler.h"
 #include "android/base/Stopwatch.h"
+#include "android/base/EintrWrapper.h"
 #include "android/base/files/FileShareOpen.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
@@ -553,7 +554,7 @@ void RamSaver::writeIndex() {
         base::pwrite(mStreamFd, stream.buffer().data(), stream.buffer().size(),
                      mIndex.startPosInFile);
         setFileSize(mStreamFd, int64_t(mDiskSize));
-        fseeko64(mStream.get(), 0, SEEK_SET);
+        HANDLE_EINTR(fseeko64(mStream.get(), 0, SEEK_SET));
         mStream.putBe64(uint64_t(mIndex.startPosInFile));
         mHasError = ferror(mStream.get()) != 0;
         mStream.close();

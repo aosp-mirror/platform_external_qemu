@@ -41,7 +41,6 @@
                          according to jump_pc[T2] */
 
 /* global register indexes */
-static TCGv_env cpu_env;
 static TCGv_ptr cpu_regwptr;
 static TCGv cpu_cc_src, cpu_cc_src2, cpu_cc_dst;
 static TCGv_i32 cpu_cc_op;
@@ -171,18 +170,13 @@ static TCGv_i32 gen_load_fpr_F(DisasContext *dc, unsigned int src)
         return TCGV_HIGH(cpu_fpr[src / 2]);
     }
 #else
+    TCGv_i32 ret = get_temp_i32(dc);
     if (src & 1) {
-        return MAKE_TCGV_I32(GET_TCGV_I64(cpu_fpr[src / 2]));
+        tcg_gen_extrl_i64_i32(ret, cpu_fpr[src / 2]);
     } else {
-        TCGv_i32 ret = get_temp_i32(dc);
-        TCGv_i64 t = tcg_temp_new_i64();
-
-        tcg_gen_shri_i64(t, cpu_fpr[src / 2], 32);
-        tcg_gen_extrl_i64_i32(ret, t);
-        tcg_temp_free_i64(t);
-
-        return ret;
+        tcg_gen_extrh_i64_i32(ret, cpu_fpr[src / 2]);
     }
+    return ret;
 #endif
 }
 
@@ -195,7 +189,7 @@ static void gen_store_fpr_F(DisasContext *dc, unsigned int dst, TCGv_i32 v)
         tcg_gen_mov_i32(TCGV_HIGH(cpu_fpr[dst / 2]), v);
     }
 #else
-    TCGv_i64 t = MAKE_TCGV_I64(GET_TCGV_I32(v));
+    TCGv_i64 t = (TCGv_i64)v;
     tcg_gen_deposit_i64(cpu_fpr[dst / 2], cpu_fpr[dst / 2], t,
                         (dst & 1 ? 0 : 32), 32);
 #endif
@@ -380,29 +374,25 @@ static inline void gen_goto_tb(DisasContext *s, int tb_num,
 static inline void gen_mov_reg_N(TCGv reg, TCGv_i32 src)
 {
     tcg_gen_extu_i32_tl(reg, src);
-    tcg_gen_shri_tl(reg, reg, PSR_NEG_SHIFT);
-    tcg_gen_andi_tl(reg, reg, 0x1);
+    tcg_gen_extract_tl(reg, reg, PSR_NEG_SHIFT, 1);
 }
 
 static inline void gen_mov_reg_Z(TCGv reg, TCGv_i32 src)
 {
     tcg_gen_extu_i32_tl(reg, src);
-    tcg_gen_shri_tl(reg, reg, PSR_ZERO_SHIFT);
-    tcg_gen_andi_tl(reg, reg, 0x1);
+    tcg_gen_extract_tl(reg, reg, PSR_ZERO_SHIFT, 1);
 }
 
 static inline void gen_mov_reg_V(TCGv reg, TCGv_i32 src)
 {
     tcg_gen_extu_i32_tl(reg, src);
-    tcg_gen_shri_tl(reg, reg, PSR_OVF_SHIFT);
-    tcg_gen_andi_tl(reg, reg, 0x1);
+    tcg_gen_extract_tl(reg, reg, PSR_OVF_SHIFT, 1);
 }
 
 static inline void gen_mov_reg_C(TCGv reg, TCGv_i32 src)
 {
     tcg_gen_extu_i32_tl(reg, src);
-    tcg_gen_shri_tl(reg, reg, PSR_CARRY_SHIFT);
-    tcg_gen_andi_tl(reg, reg, 0x1);
+    tcg_gen_extract_tl(reg, reg, PSR_CARRY_SHIFT, 1);
 }
 
 static inline void gen_op_add_cc(TCGv dst, TCGv src1, TCGv src2)
@@ -636,12 +626,8 @@ static inline void gen_op_mulscc(TCGv dst, TCGv src1, TCGv src2)
 
     // b2 = T0 & 1;
     // env->y = (b2 << 31) | (env->y >> 1);
-    tcg_gen_andi_tl(r_temp, cpu_cc_src, 0x1);
-    tcg_gen_shli_tl(r_temp, r_temp, 31);
-    tcg_gen_shri_tl(t0, cpu_y, 1);
-    tcg_gen_andi_tl(t0, t0, 0x7fffffff);
-    tcg_gen_or_tl(t0, t0, r_temp);
-    tcg_gen_andi_tl(cpu_y, t0, 0xffffffff);
+    tcg_gen_extract_tl(t0, cpu_y, 1, 31);
+    tcg_gen_deposit_tl(cpu_y, t0, cpu_cc_src, 31, 1);
 
     // b1 = N ^ V;
     gen_mov_reg_N(t0, cpu_psr);
@@ -2107,6 +2093,11 @@ static DisasASI get_asi(DisasContext *dc, int insn, TCGMemOp memop)
             type = GET_ASI_BFILL;
             break;
         }
+
+        /* MMU_PHYS_IDX is used when the MMU is disabled to passthrough the
+         * permissions check in get_physical_address(..).
+         */
+        mem_idx = (dc->mem_idx == MMU_PHYS_IDX) ? MMU_PHYS_IDX : mem_idx;
     } else {
         gen_exception(dc, TT_PRIV_INSN);
         type = GET_ASI_EXCP;
@@ -2450,7 +2441,7 @@ static void gen_ldstub_asi(DisasContext *dc, TCGv dst, TCGv addr, int insn)
     default:
         /* ??? In theory, this should be raise DAE_invalid_asi.
            But the SS-20 roms do ldstuba [%l0] #ASI_M_CTL, %o1.  */
-        if (parallel_cpus) {
+        if (tb_cflags(dc->tb) & CF_PARALLEL) {
             gen_helper_exit_atomic(cpu_env);
         } else {
             TCGv_i32 r_asi = tcg_const_i32(da.asi);
@@ -5747,10 +5738,9 @@ static void disas_sparc_insn(DisasContext * dc, unsigned int insn)
     }
 }
 
-void gen_intermediate_code(CPUSPARCState * env, TranslationBlock * tb)
+void gen_intermediate_code(CPUState *cs, TranslationBlock * tb)
 {
-    SPARCCPU *cpu = sparc_env_get_cpu(env);
-    CPUState *cs = CPU(cpu);
+    CPUSPARCState *env = cs->env_ptr;
     target_ulong pc_start, last_pc;
     DisasContext dc1, *dc = &dc1;
     int num_insns;
@@ -5765,7 +5755,7 @@ void gen_intermediate_code(CPUSPARCState * env, TranslationBlock * tb)
     dc->npc = (target_ulong) tb->cs_base;
     dc->cc_op = CC_OP_DYNAMIC;
     dc->mem_idx = tb->flags & TB_FLAG_MMU_MASK;
-    dc->def = env->def;
+    dc->def = &env->def;
     dc->fpu_enabled = tb_fpu_enabled(tb->flags);
     dc->address_mask_32bit = tb_am_enabled(tb->flags);
     dc->singlestep = (cs->singlestep_enabled || singlestep);
@@ -5781,7 +5771,7 @@ void gen_intermediate_code(CPUSPARCState * env, TranslationBlock * tb)
 #endif
 
     num_insns = 0;
-    max_insns = tb->cflags & CF_COUNT_MASK;
+    max_insns = tb_cflags(tb) & CF_COUNT_MASK;
     if (max_insns == 0) {
         max_insns = CF_COUNT_MASK;
     }
@@ -5810,7 +5800,7 @@ void gen_intermediate_code(CPUSPARCState * env, TranslationBlock * tb)
             goto exit_gen_loop;
         }
 
-        if (num_insns == max_insns && (tb->cflags & CF_LAST_IO)) {
+        if (num_insns == max_insns && (tb_cflags(tb) & CF_LAST_IO)) {
             gen_io_start();
         }
 
@@ -5837,7 +5827,7 @@ void gen_intermediate_code(CPUSPARCState * env, TranslationBlock * tb)
              num_insns < max_insns);
 
  exit_gen_loop:
-    if (tb->cflags & CF_LAST_IO) {
+    if (tb_cflags(tb) & CF_LAST_IO) {
         gen_io_end();
     }
     if (!dc->is_br) {
@@ -5864,16 +5854,15 @@ void gen_intermediate_code(CPUSPARCState * env, TranslationBlock * tb)
         qemu_log_lock();
         qemu_log("--------------\n");
         qemu_log("IN: %s\n", lookup_symbol(pc_start));
-        log_target_disas(cs, pc_start, last_pc + 4 - pc_start, 0);
+        log_target_disas(cs, pc_start, last_pc + 4 - pc_start);
         qemu_log("\n");
         qemu_log_unlock();
     }
 #endif
 }
 
-void gen_intermediate_code_init(CPUSPARCState *env)
+void sparc_tcg_init(void)
 {
-    static int inited;
     static const char gregnames[32][4] = {
         "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
         "o0", "o1", "o2", "o3", "o4", "o5", "o6", "o7",
@@ -5926,15 +5915,6 @@ void gen_intermediate_code_init(CPUSPARCState *env)
 
     unsigned int i;
 
-    /* init various static tables */
-    if (inited) {
-        return;
-    }
-    inited = 1;
-
-    cpu_env = tcg_global_reg_new_ptr(TCG_AREG0, "env");
-    tcg_ctx.tcg_env = cpu_env;
-
     cpu_regwptr = tcg_global_mem_new_ptr(cpu_env,
                                          offsetof(CPUSPARCState, regwptr),
                                          "regwptr");
@@ -5947,7 +5927,7 @@ void gen_intermediate_code_init(CPUSPARCState *env)
         *rtl[i].ptr = tcg_global_mem_new(cpu_env, rtl[i].off, rtl[i].name);
     }
 
-    TCGV_UNUSED(cpu_regs[0]);
+    cpu_regs[0] = NULL;
     for (i = 1; i < 8; ++i) {
         cpu_regs[i] = tcg_global_mem_new(cpu_env,
                                          offsetof(CPUSPARCState, gregs[i]),
