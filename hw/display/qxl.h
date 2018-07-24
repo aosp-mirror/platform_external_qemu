@@ -3,7 +3,6 @@
 
 #include "qemu-common.h"
 
-#include "ui/console.h"
 #include "hw/hw.h"
 #include "hw/pci/pci.h"
 #include "vga_int.h"
@@ -119,6 +118,8 @@ typedef struct PCIQXLDevice {
     uint32_t          vram_size_mb;
     uint32_t          vram32_size_mb;
     uint32_t          vgamem_size_mb;
+    uint32_t          xres;
+    uint32_t          yres;
 
     /* qxl_render_update state */
     int                render_update_cookie_num;
@@ -131,7 +132,7 @@ typedef struct PCIQXLDevice {
 #define PCI_QXL(obj) OBJECT_CHECK(PCIQXLDevice, (obj), TYPE_PCI_QXL)
 
 #define PANIC_ON(x) if ((x)) {                         \
-    printf("%s: PANIC %s failed\n", __FUNCTION__, #x); \
+    printf("%s: PANIC %s failed\n", __func__, #x); \
     abort();                                           \
 }
 

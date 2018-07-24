@@ -27,7 +27,6 @@ extern "C" {
 #include "qemu/osdep.h"
 
 #include "exec/cpu-common.h"
-#include "migration/migration.h"
 #include "migration/qemu-file.h"
 #include "qapi/error.h"
 #include "qapi/qmp/qobject.h"
@@ -462,11 +461,20 @@ static void set_exiting() {
     sExiting = true;
 }
 
+
+static void system_reset_request() {
+    qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
+}
+
+static void system_shutdown_request() {
+    qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
-        .vmReset = qemu_system_reset_request,
-        .vmShutdown = qemu_system_shutdown_request,
+        .vmReset = system_reset_request,
+        .vmShutdown = system_shutdown_request,
         .vmIsRunning = qemu_vm_is_running,
         .snapshotList = qemu_snapshot_list,
         .snapshotSave = qemu_snapshot_save,

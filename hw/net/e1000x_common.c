@@ -29,7 +29,7 @@
 
 #include "e1000x_common.h"
 
-#include "hw/net/trace.h"
+#include "trace.h"
 
 bool e1000x_rx_ready(PCIDevice *d, uint32_t *mac)
 {

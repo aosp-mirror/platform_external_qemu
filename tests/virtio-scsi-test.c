@@ -10,7 +10,7 @@
 
 #include "qemu/osdep.h"
 #include "libqtest.h"
-#include "block/scsi.h"
+#include "scsi/constants.h"
 #include "libqos/libqos-pc.h"
 #include "libqos/libqos-spapr.h"
 #include "libqos/virtio.h"
@@ -34,20 +34,22 @@ typedef struct {
 
 static QOSState *qvirtio_scsi_start(const char *extra_opts)
 {
+    QOSState *qs;
     const char *arch = qtest_get_arch();
-    const char *cmd = "-drive id=drv0,if=none,file=/dev/null,format=raw "
+    const char *cmd = "-drive id=drv0,if=none,file=null-co://,format=raw "
                       "-device virtio-scsi-pci,id=vs0 "
                       "-device scsi-hd,bus=vs0.0,drive=drv0 %s";
 
     if (strcmp(arch, "i386") == 0 || strcmp(arch, "x86_64") == 0) {
-        return qtest_pc_boot(cmd, extra_opts ? : "");
+        qs = qtest_pc_boot(cmd, extra_opts ? : "");
+    } else if (strcmp(arch, "ppc64") == 0) {
+        qs = qtest_spapr_boot(cmd, extra_opts ? : "");
+    } else {
+        g_printerr("virtio-scsi tests are only available on x86 or ppc64\n");
+        exit(EXIT_FAILURE);
     }
-    if (strcmp(arch, "ppc64") == 0) {
-        return qtest_spapr_boot(cmd, extra_opts ? : "");
-    }
-
-    g_printerr("virtio-scsi tests are only available on x86 or ppc64\n");
-    exit(EXIT_FAILURE);
+    global_qtest = qs->qts;
+    return qs;
 }
 
 static void qvirtio_scsi_stop(QOSState *qs)
@@ -121,7 +123,8 @@ static uint8_t virtio_scsi_do_command(QVirtIOSCSI *vs, const uint8_t *cdb,
     }
 
     qvirtqueue_kick(vs->dev, vq, free_head);
-    qvirtio_wait_queue_isr(vs->dev, vq, QVIRTIO_SCSI_TIMEOUT_US);
+    qvirtio_wait_used_elem(vs->dev, vq, free_head, NULL,
+                           QVIRTIO_SCSI_TIMEOUT_US);
 
     response = readb(resp_addr +
                      offsetof(struct virtio_scsi_cmd_resp, response));
@@ -149,7 +152,7 @@ static QVirtIOSCSI *qvirtio_scsi_pci_init(int slot)
 
     vs->qs = qvirtio_scsi_start("-drive file=blkdebug::null-co://,"
                                 "if=none,id=dr1,format=raw,file.align=4k "
-                                "-device scsi-disk,drive=dr1,lun=0,scsi-id=1");
+                                "-device scsi-hd,drive=dr1,lun=0,scsi-id=1");
     dev = qvirtio_pci_device_find(vs->qs->pcibus, VIRTIO_ID_SCSI);
     vs->dev = (QVirtioDevice *)dev;
     g_assert(dev != NULL);
@@ -192,31 +195,12 @@ static void pci_nop(void)
 
 static void hotplug(void)
 {
-    QDict *response;
     QOSState *qs;
 
-    qs = qvirtio_scsi_start("-drive id=drv1,if=none,file=/dev/null,format=raw");
-    response = qmp("{\"execute\": \"device_add\","
-                   " \"arguments\": {"
-                   "   \"driver\": \"scsi-hd\","
-                   "   \"id\": \"scsi-hd\","
-                   "   \"drive\": \"drv1\""
-                   "}}");
-
-    g_assert(response);
-    g_assert(!qdict_haskey(response, "error"));
-    QDECREF(response);
-
-    response = qmp("{\"execute\": \"device_del\","
-                   " \"arguments\": {"
-                   "   \"id\": \"scsi-hd\""
-                   "}}");
-
-    g_assert(response);
-    g_assert(!qdict_haskey(response, "error"));
-    g_assert(qdict_haskey(response, "event"));
-    g_assert(!strcmp(qdict_get_str(response, "event"), "DEVICE_DELETED"));
-    QDECREF(response);
+    qs = qvirtio_scsi_start(
+            "-drive id=drv1,if=none,file=null-co://,format=raw");
+    qtest_qmp_device_add("scsi-hd", "scsihd", "'drive': 'drv1'");
+    qtest_qmp_device_del("scsihd");
     qvirtio_scsi_stop(qs);
 }
 
@@ -232,6 +216,9 @@ static void test_unaligned_write_same(void)
     const uint8_t write_same_cdb_2[VIRTIO_SCSI_CDB_SIZE] = {
         0x41, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x33, 0x00, 0x00
     };
+    const uint8_t write_same_cdb_ndob[VIRTIO_SCSI_CDB_SIZE] = {
+        0x41, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x33, 0x00, 0x00
+    };
 
     vs = qvirtio_scsi_pci_init(PCI_SLOT);
 
@@ -240,6 +227,9 @@ static void test_unaligned_write_same(void)
 
     g_assert_cmphex(0, ==,
         virtio_scsi_do_command(vs, write_same_cdb_2, NULL, 0, buf2, 512, NULL));
+
+    g_assert_cmphex(0, ==,
+        virtio_scsi_do_command(vs, write_same_cdb_ndob, NULL, 0, NULL, 0, NULL));
 
     qvirtio_scsi_pci_free(vs);
 }

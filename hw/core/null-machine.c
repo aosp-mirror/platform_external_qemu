@@ -24,9 +24,9 @@ static void machine_none_init(MachineState *mch)
 {
     CPUState *cpu = NULL;
 
-    /* Initialize CPU (if a model has been specified) */
-    if (mch->cpu_model) {
-        cpu = cpu_init(mch->cpu_model);
+    /* Initialize CPU (if user asked for it) */
+    if (mch->cpu_type) {
+        cpu = cpu_create(mch->cpu_type);
         if (!cpu) {
             error_report("Unable to initialize CPU");
             exit(1);
@@ -39,6 +39,12 @@ static void machine_none_init(MachineState *mch)
 
         memory_region_allocate_system_memory(ram, NULL, "ram", mch->ram_size);
         memory_region_add_subregion(get_system_memory(), 0, ram);
+    }
+
+    if (mch->kernel_filename) {
+        error_report("The -kernel parameter is not supported "
+                     "(use the generic 'loader' device instead).");
+        exit(1);
     }
 }
 

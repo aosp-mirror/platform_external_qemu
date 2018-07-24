@@ -24,7 +24,7 @@
 
 #include "qemu/osdep.h"
 #include "hw/sysbus.h"
-#include "hw/audio/trace.h"
+#include "trace.h"
 
 /*
  * In addition to Crystal CS4231 there is a DMA controller on Sparc.

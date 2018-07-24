@@ -22,7 +22,7 @@
 #include "exec/address-spaces.h"
 #include "hw/boards.h"
 #include "qapi/error.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 
 #define TYPE_RS6000MC "rs6000-mc"
 #define RS6000MC_DEVICE(obj) \
