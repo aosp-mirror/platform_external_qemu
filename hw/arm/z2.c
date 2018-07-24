@@ -23,9 +23,11 @@
 #include "hw/block/flash.h"
 #include "sysemu/block-backend.h"
 #include "ui/console.h"
+#include "hw/audio/wm8750.h"
 #include "audio/audio.h"
 #include "exec/address-spaces.h"
 #include "sysemu/qtest.h"
+#include "cpu.h"
 
 #ifdef DEBUG_Z2
 #define DPRINTF(fmt, ...) \
@@ -296,7 +298,6 @@ static const TypeInfo aer915_info = {
 
 static void z2_init(MachineState *machine)
 {
-    const char *cpu_model = machine->cpu_model;
     const char *kernel_filename = machine->kernel_filename;
     const char *kernel_cmdline = machine->kernel_cmdline;
     const char *initrd_filename = machine->initrd_filename;
@@ -309,12 +310,8 @@ static void z2_init(MachineState *machine)
     I2CBus *bus;
     DeviceState *wm;
 
-    if (!cpu_model) {
-        cpu_model = "pxa270-c5";
-    }
-
     /* Setup CPU & memory */
-    mpu = pxa270_init(address_space_mem, z2_binfo.ram_size, cpu_model);
+    mpu = pxa270_init(address_space_mem, z2_binfo.ram_size, machine->cpu_type);
 
 #ifdef TARGET_WORDS_BIGENDIAN
     be = 1;
@@ -323,8 +320,8 @@ static void z2_init(MachineState *machine)
 #endif
     dinfo = drive_get(IF_PFLASH, 0, 0);
     if (!dinfo && !qtest_enabled()) {
-        fprintf(stderr, "Flash image must be given with the "
-                "'pflash' parameter\n");
+        error_report("Flash image must be given with the "
+                     "'pflash' parameter");
         exit(1);
     }
 
@@ -333,7 +330,7 @@ static void z2_init(MachineState *machine)
                                dinfo ? blk_by_legacy_dinfo(dinfo) : NULL,
                                sector_len, Z2_FLASH_SIZE / sector_len,
                                4, 0, 0, 0, 0, be)) {
-        fprintf(stderr, "qemu: Error registering flash memory.\n");
+        error_report("Error registering flash memory");
         exit(1);
     }
 
@@ -350,7 +347,7 @@ static void z2_init(MachineState *machine)
     z2_lcd = ssi_create_slave(mpu->ssp[1], "zipit-lcd");
     bus = pxa2xx_i2c_bus(mpu->i2c[0]);
     i2c_create_slave(bus, TYPE_AER915, 0x55);
-    wm = i2c_create_slave(bus, "wm8750", 0x1b);
+    wm = i2c_create_slave(bus, TYPE_WM8750, 0x1b);
     mpu->i2s->opaque = wm;
     mpu->i2s->codec_out = wm8750_dac_dat;
     mpu->i2s->codec_in = wm8750_adc_dat;
@@ -370,6 +367,8 @@ static void z2_machine_init(MachineClass *mc)
 {
     mc->desc = "Zipit Z2 (PXA27x)";
     mc->init = z2_init;
+    mc->ignore_memory_transaction_failures = true;
+    mc->default_cpu_type = ARM_CPU_TYPE_NAME("pxa270-c5");
 }
 
 DEFINE_MACHINE("z2", z2_machine_init)

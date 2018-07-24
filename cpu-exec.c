@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (7c0165 Merge "Merge "Improve error logging for ping failures." into)
 /*
  *  emulator main execution loop
  *
@@ -727,3 +728,5 @@ int cpu_exec(CPUState *cpu)
 
     return ret;
 }
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

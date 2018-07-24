@@ -25,6 +25,7 @@
 #include "hw/block/flash.h"
 #include "ui/console.h"
 #include "hw/i2c/i2c.h"
+#include "hw/audio/wm8750.h"
 #include "sysemu/block-backend.h"
 #include "exec/address-spaces.h"
 #include "ui/pixel_ops.h"
@@ -898,7 +899,7 @@ static void mv88w8618_pit_write(void *opaque, hwaddr offset,
 
     case MP_BOARD_RESET:
         if (value == MP_BOARD_RESET_MAGIC) {
-            qemu_system_reset_request();
+            qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
         }
         break;
     }
@@ -1570,7 +1571,6 @@ static struct arm_boot_info musicpal_binfo = {
 
 static void musicpal_init(MachineState *machine)
 {
-    const char *cpu_model = machine->cpu_model;
     const char *kernel_filename = machine->kernel_filename;
     const char *kernel_cmdline = machine->kernel_cmdline;
     const char *initrd_filename = machine->initrd_filename;
@@ -1590,14 +1590,7 @@ static void musicpal_init(MachineState *machine)
     MemoryRegion *ram = g_new(MemoryRegion, 1);
     MemoryRegion *sram = g_new(MemoryRegion, 1);
 
-    if (!cpu_model) {
-        cpu_model = "arm926";
-    }
-    cpu = cpu_arm_init(cpu_model);
-    if (!cpu) {
-        fprintf(stderr, "Unable to find CPU definition\n");
-        exit(1);
-    }
+    cpu = ARM_CPU(cpu_create(machine->cpu_type));
 
     /* For now we use a fixed - the original - RAM size */
     memory_region_allocate_system_memory(ram, NULL, "musicpal.ram",
@@ -1606,7 +1599,6 @@ static void musicpal_init(MachineState *machine)
 
     memory_region_init_ram(sram, NULL, "musicpal.sram", MP_SRAM_SIZE,
                            &error_fatal);
-    vmstate_register_ram_global(sram);
     memory_region_add_subregion(address_space_mem, MP_SRAM_BASE, sram);
 
     dev = sysbus_create_simple(TYPE_MV88W8618_PIC, MP_PIC_BASE,
@@ -1635,7 +1627,7 @@ static void musicpal_init(MachineState *machine)
         flash_size = blk_getlength(blk);
         if (flash_size != 8*1024*1024 && flash_size != 16*1024*1024 &&
             flash_size != 32*1024*1024) {
-            fprintf(stderr, "Invalid flash image size\n");
+            error_report("Invalid flash image size");
             exit(1);
         }
 
@@ -1700,7 +1692,7 @@ static void musicpal_init(MachineState *machine)
         qdev_connect_gpio_out(key_dev, i, qdev_get_gpio_in(dev, i + 15));
     }
 
-    wm8750_dev = i2c_create_slave(i2c, "wm8750", MP_WM_ADDR);
+    wm8750_dev = i2c_create_slave(i2c, TYPE_WM8750, MP_WM_ADDR);
     dev = qdev_create(NULL, "mv88w8618_audio");
     s = SYS_BUS_DEVICE(dev);
     qdev_prop_set_ptr(dev, "wm8750", wm8750_dev);
@@ -1719,6 +1711,8 @@ static void musicpal_machine_init(MachineClass *mc)
 {
     mc->desc = "Marvell 88w8618 / MusicPal (ARM926EJ-S)";
     mc->init = musicpal_init;
+    mc->ignore_memory_transaction_failures = true;
+    mc->default_cpu_type = ARM_CPU_TYPE_NAME("arm926");
 }
 
 DEFINE_MACHINE("musicpal", musicpal_machine_init)

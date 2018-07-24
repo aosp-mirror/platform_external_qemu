@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (7c0165 Merge "Merge "Improve error logging for ping failures." into)
 /*
  * QEMU System Emulator, accelerator interfaces
  *
@@ -154,3 +155,5 @@ static void register_accel_types(void)
 }
 
 type_init(register_accel_types);
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

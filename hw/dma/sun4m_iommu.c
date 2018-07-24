@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (7c0165 Merge "Merge "Improve error logging for ping failures." into)
 /*
  * QEMU Sun4m iommu emulation
  *
@@ -391,3 +392,5 @@ static void iommu_register_types(void)
 }
 
 type_init(iommu_register_types)
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)
