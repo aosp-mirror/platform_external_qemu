@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "GLSnapshotTesting.h"
+#include "OpenglCodecCommon/glUtils.h"
 
 #include <gtest/gtest.h>
 
@@ -23,11 +24,35 @@ struct GlTextureUnitState {
     GLuint bindingCubeMap;
 };
 
+struct GlTextureImageState {
+    GLenum format;
+    GLenum type;
+    GLsizei width;
+    GLsizei height;
+
+    GLboolean isCompressed;
+    GLsizei compressedSize;
+
+    std::vector<GLubyte> bytes;
+};
+
+using GlMipmapArray = std::vector<GlTextureImageState>;
+
 struct GlTextureObjectState {
     GLenum minFilter;
     GLenum magFilter;
     GLenum wrapS;
     GLenum wrapT;
+
+    GLenum target;
+    GlMipmapArray images2D;
+    std::vector<GlMipmapArray> imagesCubeMap;
+};
+
+static const GLenum kGLES2TextureCubeMapSides[] = {
+        GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+        GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
 };
 
 class SnapshotGlTextureUnitActiveTest : public SnapshotPreserveTest {
@@ -166,23 +191,14 @@ class SnapshotGlTextureObjectTest : public SnapshotPreserveTest {
 public:
     void defaultStateCheck() override {
         EXPECT_EQ(GL_FALSE, gl->glIsTexture(m_object_name));
-
-        EXPECT_TRUE(compareGlobalGlInt(gl, GL_ACTIVE_TEXTURE, GL_TEXTURE0));
-        EXPECT_TRUE(compareGlobalGlInt(gl, GL_TEXTURE_BINDING_2D, 0));
-
-        EXPECT_TRUE(compareParameter(GL_TEXTURE_MIN_FILTER,
-                                     GL_NEAREST_MIPMAP_LINEAR));
-        EXPECT_TRUE(compareParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-        EXPECT_TRUE(compareParameter(GL_TEXTURE_WRAP_S, GL_REPEAT));
-        EXPECT_TRUE(compareParameter(GL_TEXTURE_WRAP_T, GL_REPEAT));
     }
 
     void changedStateCheck() override {
         EXPECT_EQ(GL_TRUE, gl->glIsTexture(m_object_name));
 
         EXPECT_TRUE(compareGlobalGlInt(gl, GL_ACTIVE_TEXTURE, GL_TEXTURE0));
-        EXPECT_TRUE(
-                compareGlobalGlInt(gl, GL_TEXTURE_BINDING_2D, m_object_name));
+        EXPECT_TRUE(compareGlobalGlInt(gl, getTargetBindingName(m_state.target),
+                                       m_object_name));
 
         EXPECT_TRUE(compareParameter(GL_TEXTURE_MIN_FILTER, m_state.minFilter));
         EXPECT_TRUE(compareParameter(GL_TEXTURE_MAG_FILTER, m_state.magFilter));
@@ -193,9 +209,81 @@ public:
     void stateChange() override {
         gl->glGenTextures(1, &m_object_name);
 
-        // Bind to texture unit TEXTURE0, GL_TEXTURE_2D for test simplicity
+        // Bind to texture unit TEXTURE0 for test simplicity
         gl->glActiveTexture(GL_TEXTURE0);
-        gl->glBindTexture(GL_TEXTURE_2D, m_object_name);
+        gl->glBindTexture(m_state.target, m_object_name);
+
+        // Set texture sample parameters
+        gl->glTexParameteri(m_state.target, GL_TEXTURE_MIN_FILTER,
+                            m_state.minFilter);
+        gl->glTexParameteri(m_state.target, GL_TEXTURE_MAG_FILTER,
+                            m_state.magFilter);
+        gl->glTexParameteri(m_state.target, GL_TEXTURE_WRAP_S, m_state.wrapS);
+        gl->glTexParameteri(m_state.target, GL_TEXTURE_WRAP_T, m_state.wrapT);
+
+        auto initImageFunc = [this](GLenum imageTarget, GlMipmapArray& levels) {
+            for (int i = 0; i < levels.size(); i++) {
+                levels[i].bytes.resize(levels[i].width * levels[i].height *
+                                       glSizeof(GL_UNSIGNED_BYTE));
+                gl->glTexImage2D(imageTarget, i, levels[i].format,
+                                 levels[i].width, levels[i].height, 0,
+                                 levels[i].format, GL_UNSIGNED_BYTE,
+                                 levels[i].bytes.data());
+                fprintf(stderr, "Created Tex2D for mipmap level %d\n", i);
+            }
+        };
+
+        switch (m_state.target) {
+            case GL_TEXTURE_2D: {
+                initImageFunc(m_state.target, m_state.images2D);
+                // for (int i = 0; i < m_state.images2D.size(); i++) {
+                //      m_state.images2D[i].bytes.resize(m_state.images2D[i].width
+                //      *
+                //          m_state.images2D[i].height *
+                //          glSizeof(GL_UNSIGNED_BYTE));
+                //      gl->glTexImage2D(m_state.target, i,
+                //      m_state.images2D[i].format,
+                //              m_state.images2D[i].width,
+                //              m_state.images2D[i].height, 0,
+                //              m_state.images2D[i].format, GL_UNSIGNED_BYTE,
+                //              m_state.images2D[i].bytes.data());
+                //      fprintf(stderr, "Created Tex2D for 2d mipmap level
+                //      %d\n", i);
+                //  }
+            } break;
+            case GL_TEXTURE_CUBE_MAP: {
+                if (m_state.imagesCubeMap.size() > 6) {
+                    ADD_FAILURE() << "Test texture cube map had "
+                                  << m_state.imagesCubeMap.size()
+                                  << " 'sides' of data.";
+                    break;
+                }
+                for (int j = 0; j < m_state.imagesCubeMap.size(); j++) {
+                    GLenum side = kGLES2TextureCubeMapSides[j];
+                    initImageFunc(side, m_state.imagesCubeMap[j]);
+                    // for (int i = 0; i < m_state.imagesCubeMap[j].size(); i++)
+                    // {
+                    //     m_state.imagesCubeMap[j][i].bytes.resize(m_state.imagesCubeMap[j][i].width
+                    //     *
+                    //         m_state.imagesCubeMap[j][i].height *
+                    //         glSizeof(GL_UNSIGNED_BYTE));
+                    //     gl->glTexImage2D(side, i,
+                    //     m_state.imagesCubeMap[j][i].format,
+                    //             m_state.imagesCubeMap[j][i].width,
+                    //             m_state.imagesCubeMap[j][i].height, 0,
+                    //             m_state.imagesCubeMap[j][i].format,
+                    //             GL_UNSIGNED_BYTE,
+                    //             m_state.imagesCubeMap[j][i].bytes.data());
+                    //     fprintf(stderr, "Created Tex2D for cube face 0x%x
+                    //     level %d\n", side, i);
+                    // }
+                }
+            } break;
+            default:
+                ADD_FAILURE()
+                        << "Unsupported texture target " << m_state.target;
+                break;
+        }
 
         m_state_changer();
     }
@@ -206,34 +294,182 @@ public:
 
 protected:
     // Compares a symbolic constant value |expected| against the parameter named
-    // |paramName| of the texture object which is bound in unit TEXTURE0's
-    // binding for TEXTURE_2D.
+    // |paramName| of the texture object which is bound in unit TEXTURE0.
     testing::AssertionResult compareParameter(GLenum paramName,
                                               GLenum expected) {
         GLint actual;
-        gl->glGetTexParameteriv(GL_TEXTURE_2D, paramName, &actual);
+        gl->glGetTexParameteriv(m_state.target, paramName, &actual);
         return compareValue<GLint>(
                 expected, actual,
                 "GL texture object " + std::to_string(m_object_name) +
-                        " mismatch for param " + describeGlEnum(paramName));
+                        " mismatch for param " + describeGlEnum(paramName) +
+                        " on target " + describeGlEnum(m_state.target));
+    }
+
+    GLenum getTargetBindingName(GLenum target) {
+        switch (target) {
+            case GL_TEXTURE_2D:
+                return GL_TEXTURE_BINDING_2D;
+            case GL_TEXTURE_CUBE_MAP:
+                return GL_TEXTURE_BINDING_CUBE_MAP;
+            default:
+                ADD_FAILURE()
+                        << "Test unsupported texture bind target " << target;
+                return 0;
+        }
     }
 
     GLuint m_object_name;
-    GlTextureObjectState m_state;
+    GlTextureObjectState m_state = {};
 
     std::function<void()> m_state_changer = [] {};
 };
 
 TEST_F(SnapshotGlTextureObjectTest, SetObjectParameters) {
-    setStateChanger([this] {
-        m_state = {GL_LINEAR, GL_NEAREST, GL_MIRRORED_REPEAT, GL_CLAMP_TO_EDGE};
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                            m_state.minFilter);
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                            m_state.magFilter);
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_state.wrapS);
-        gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_state.wrapT);
-    });
+    m_state = {
+            .minFilter = GL_LINEAR,
+            .magFilter = GL_NEAREST,
+            .wrapS = GL_MIRRORED_REPEAT,
+            .wrapT = GL_CLAMP_TO_EDGE,
+            .target = GL_TEXTURE_2D,
+    };
+    doCheckedSnapshot();
+}
+
+TEST_F(SnapshotGlTextureObjectTest, Create2DMipmap) {
+    m_state = {.minFilter = GL_LINEAR,
+               .magFilter = GL_NEAREST,
+               .wrapS = GL_MIRRORED_REPEAT,
+               .wrapT = GL_CLAMP_TO_EDGE,
+               .target = GL_TEXTURE_2D,
+               .images2D = {{GL_RGBA,
+                             GL_UNSIGNED_BYTE,
+                             4,
+                             4,
+                             false,
+                             0,
+                             {
+                                     0x11,
+                                     0x22,
+                                     0x33,
+                                     0x44,
+                                     0x55,
+                                     0x66,
+                                     0x77,
+                                     0x88,
+                                     0x99,
+                                     0xaa,
+                                     0xbb,
+                                     0xcc,
+                                     0xdd,
+                                     0xee,
+                                     0xff,
+                                     0x00,
+                             }},
+                            {GL_RGBA,
+                             GL_UNSIGNED_SHORT_4_4_4_4,
+                             2,
+                             2,
+                             false,
+                             0,
+                             {
+                                     0x51,
+                                     0x52,
+                                     0x53,
+                                     0x54,
+                             }},
+                            {GL_RGBA,
+                             GL_UNSIGNED_SHORT_5_5_5_1,
+                             1,
+                             1,
+                             false,
+                             0,
+                             {
+                                     0xab,
+                             }}}};
+    doCheckedSnapshot();
+}
+
+TEST_F(SnapshotGlTextureObjectTest, CreateCubeMap) {
+    m_state = {.minFilter = GL_LINEAR,
+               .magFilter = GL_NEAREST,
+               .wrapS = GL_MIRRORED_REPEAT,
+               .wrapT = GL_CLAMP_TO_EDGE,
+               .target = GL_TEXTURE_CUBE_MAP,
+               .imagesCubeMap = {
+                       {{GL_RGBA,
+                         GL_UNSIGNED_SHORT_4_4_4_4,
+                         2,
+                         2,
+                         false,
+                         0,
+                         {
+                                 0x11,
+                                 0x12,
+                                 0x13,
+                                 0x14,
+                         }}},
+                       {{GL_RGBA,
+                         GL_UNSIGNED_SHORT_4_4_4_4,
+                         2,
+                         2,
+                         false,
+                         0,
+                         {
+                                 0x21,
+                                 0x22,
+                                 0x23,
+                                 0x24,
+                         }}},
+                       {{GL_RGBA,
+                         GL_UNSIGNED_SHORT_4_4_4_4,
+                         2,
+                         2,
+                         false,
+                         0,
+                         {
+                                 0x31,
+                                 0x32,
+                                 0x33,
+                                 0x34,
+                         }}},
+                       {{GL_RGBA,
+                         GL_UNSIGNED_SHORT_4_4_4_4,
+                         2,
+                         2,
+                         false,
+                         0,
+                         {
+                                 0x41,
+                                 0x42,
+                                 0x43,
+                                 0x44,
+                         }}},
+                       {{GL_RGBA,
+                         GL_UNSIGNED_SHORT_4_4_4_4,
+                         2,
+                         2,
+                         false,
+                         0,
+                         {
+                                 0x51,
+                                 0x52,
+                                 0x53,
+                                 0x54,
+                         }}},
+                       {{GL_RGBA,
+                         GL_UNSIGNED_SHORT_4_4_4_4,
+                         2,
+                         2,
+                         false,
+                         0,
+                         {
+                                 0x61,
+                                 0x62,
+                                 0x63,
+                                 0x64,
+                         }}},
+               }};
     doCheckedSnapshot();
 }
 

@@ -26,4 +26,6 @@ GLuint loadAndCompileShader(const GLESv2Dispatch* gl,
                             GLenum shaderType,
                             const char* src);
 
+std::vector<GLubyte> getTextureImageData();
+
 }  // namespace emugl
