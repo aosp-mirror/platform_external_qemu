@@ -51,6 +51,8 @@ QEMU2_SYSTEM_INCLUDES := \
     $(LOCAL_PATH)/target/$(QEMU2_TARGET_TARGET) \
     $(LOCAL_PATH)/tcg \
     $(LOCAL_PATH)/tcg/i386 \
+    $(LOCAL_PATH)/accel/tcg \
+
 
 QEMU2_SYSTEM_LDFLAGS := $(QEMU2_DEPS_LDFLAGS)
 
@@ -74,6 +76,9 @@ QEMU2_SYSTEM_STATIC_LIBRARIES := \
 
 $(call start-emulator-library,libqemu2-system-$(QEMU2_TARGET_SYSTEM))
 
+LOCAL_GENERATED_SOURCES += \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/$(QEMU2_TARGET_TARGET)/generated-helpers.c
+
 LOCAL_CFLAGS += \
     $(QEMU2_SYSTEM_CFLAGS) \
     -DPOISON_CONFIG_ANDROID \
@@ -89,20 +94,22 @@ LOCAL_SRC_FILES += \
 
 ifeq (arm64,$(QEMU2_TARGET))
 LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
+LOCAL_SRC_FILES += hw/smbios/smbios_type_38-stub.c
 else ifeq (arm,$(QEMU2_TARGET))
 LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm.c
+LOCAL_SRC_FILES += hw/smbios/smbios_type_38-stub.c
 else
 LOCAL_SRC_FILES += stubs/gdbstub.c
 endif
 
 LOCAL_SRC_FILES += \
     $(call qemu2-if-target,x86 x86_64, \
-        $(call qemu2-if-linux, hax-stub.c), \
-        hax-stub.c \
-    ) \
-    $(call qemu2-if-target,x86 x86_64, \
         $(call qemu2-if-os, linux windows, hvf-stub.c), \
         hvf-stub.c \
+    ) \
+    #$(call qemu2-if-target,x86 x86_64, \
+        $(call qemu2-if-os, linux darwin, whpx-stub.c), \
+        whpx-stub.c \
     ) \
 
 
@@ -124,7 +131,6 @@ ifeq (,$(CONFIG_MIN_BUILD))
     LOCAL_STATIC_LIBRARIES += \
         $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
         libqemu2-util \
-        libqemu2-stubs \
 
     LOCAL_CFLAGS += \
         $(QEMU2_SYSTEM_CFLAGS) \
@@ -171,7 +177,6 @@ LOCAL_STATIC_LIBRARIES += \
     $(QEMU2_GLUE_STATIC_LIBRARIES) \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     libqemu2-util \
-    libqemu2-stubs \
 
 
 LOCAL_CFLAGS += \

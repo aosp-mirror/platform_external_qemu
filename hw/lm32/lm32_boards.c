@@ -18,6 +18,7 @@
  */
 
 #include "qemu/osdep.h"
+#include "qemu/error-report.h"
 #include "qemu-common.h"
 #include "cpu.h"
 #include "hw/sysbus.h"
@@ -75,7 +76,6 @@ static void main_cpu_reset(void *opaque)
 
 static void lm32_evr_init(MachineState *machine)
 {
-    const char *cpu_model = machine->cpu_model;
     const char *kernel_filename = machine->kernel_filename;
     LM32CPU *cpu;
     CPULM32State *env;
@@ -101,14 +101,7 @@ static void lm32_evr_init(MachineState *machine)
 
     reset_info = g_malloc0(sizeof(ResetInfo));
 
-    if (cpu_model == NULL) {
-        cpu_model = "lm32-full";
-    }
-    cpu = cpu_lm32_init(cpu_model);
-    if (cpu == NULL) {
-        fprintf(stderr, "qemu: unable to find CPU '%s'\n", cpu_model);
-        exit(1);
-    }
+    cpu = LM32_CPU(cpu_create(machine->cpu_type));
 
     env = &cpu->env;
     reset_info->cpu = cpu;
@@ -156,8 +149,7 @@ static void lm32_evr_init(MachineState *machine)
         }
 
         if (kernel_size < 0) {
-            fprintf(stderr, "qemu: could not load kernel '%s'\n",
-                    kernel_filename);
+            error_report("could not load kernel '%s'", kernel_filename);
             exit(1);
         }
     }
@@ -167,7 +159,6 @@ static void lm32_evr_init(MachineState *machine)
 
 static void lm32_uclinux_init(MachineState *machine)
 {
-    const char *cpu_model = machine->cpu_model;
     const char *kernel_filename = machine->kernel_filename;
     const char *kernel_cmdline = machine->kernel_cmdline;
     const char *initrd_filename = machine->initrd_filename;
@@ -202,14 +193,7 @@ static void lm32_uclinux_init(MachineState *machine)
 
     reset_info = g_malloc0(sizeof(ResetInfo));
 
-    if (cpu_model == NULL) {
-        cpu_model = "lm32-full";
-    }
-    cpu = cpu_lm32_init(cpu_model);
-    if (cpu == NULL) {
-        fprintf(stderr, "qemu: unable to find CPU '%s'\n", cpu_model);
-        exit(1);
-    }
+    cpu = LM32_CPU(cpu_create(machine->cpu_type));
 
     env = &cpu->env;
     reset_info->cpu = cpu;
@@ -258,8 +242,7 @@ static void lm32_uclinux_init(MachineState *machine)
         }
 
         if (kernel_size < 0) {
-            fprintf(stderr, "qemu: could not load kernel '%s'\n",
-                    kernel_filename);
+            error_report("could not load kernel '%s'", kernel_filename);
             exit(1);
         }
     }
@@ -303,6 +286,7 @@ static void lm32_evr_class_init(ObjectClass *oc, void *data)
     mc->desc = "LatticeMico32 EVR32 eval system";
     mc->init = lm32_evr_init;
     mc->is_default = 1;
+    mc->default_cpu_type = LM32_CPU_TYPE_NAME("lm32-full");
 }
 
 static const TypeInfo lm32_evr_type = {
@@ -318,6 +302,7 @@ static void lm32_uclinux_class_init(ObjectClass *oc, void *data)
     mc->desc = "lm32 platform for uClinux and u-boot by Theobroma Systems";
     mc->init = lm32_uclinux_init;
     mc->is_default = 0;
+    mc->default_cpu_type = LM32_CPU_TYPE_NAME("lm32-full");
 }
 
 static const TypeInfo lm32_uclinux_type = {

@@ -3,6 +3,16 @@
 
 #include "exec/hwaddr.h"
 #include "hw/nvram/fw_cfg_keys.h"
+#include "hw/sysbus.h"
+#include "sysemu/dma.h"
+
+#define TYPE_FW_CFG     "fw_cfg"
+#define TYPE_FW_CFG_IO  "fw_cfg_io"
+#define TYPE_FW_CFG_MEM "fw_cfg_mem"
+
+#define FW_CFG(obj)     OBJECT_CHECK(FWCfgState,    (obj), TYPE_FW_CFG)
+#define FW_CFG_IO(obj)  OBJECT_CHECK(FWCfgIoState,  (obj), TYPE_FW_CFG_IO)
+#define FW_CFG_MEM(obj) OBJECT_CHECK(FWCfgMemState, (obj), TYPE_FW_CFG_MEM)
 
 typedef struct FWCfgFile {
     uint32_t  size;        /* file size */
@@ -33,7 +43,47 @@ typedef struct FWCfgDmaAccess {
     uint64_t address;
 } QEMU_PACKED FWCfgDmaAccess;
 
-typedef void (*FWCfgReadCallback)(void *opaque);
+typedef void (*FWCfgCallback)(void *opaque);
+typedef void (*FWCfgWriteCallback)(void *opaque, off_t start, size_t len);
+
+struct FWCfgState {
+    /*< private >*/
+    SysBusDevice parent_obj;
+    /*< public >*/
+
+    uint16_t file_slots;
+    FWCfgEntry *entries[2];
+    int *entry_order;
+    FWCfgFiles *files;
+    uint16_t cur_entry;
+    uint32_t cur_offset;
+    Notifier machine_ready;
+
+    int fw_cfg_order_override;
+
+    bool dma_enabled;
+    dma_addr_t dma_addr;
+    AddressSpace *dma_as;
+    MemoryRegion dma_iomem;
+};
+
+struct FWCfgIoState {
+    /*< private >*/
+    FWCfgState parent_obj;
+    /*< public >*/
+
+    MemoryRegion comb_iomem;
+};
+
+struct FWCfgMemState {
+    /*< private >*/
+    FWCfgState parent_obj;
+    /*< public >*/
+
+    MemoryRegion ctl_iomem, data_iomem;
+    uint32_t data_width;
+    MemoryRegionOps wide_data_ops;
+};
 
 /**
  * fw_cfg_add_bytes:
@@ -132,7 +182,8 @@ void fw_cfg_add_file(FWCfgState *s, const char *filename, void *data,
  * fw_cfg_add_file_callback:
  * @s: fw_cfg device being modified
  * @filename: name of new fw_cfg file item
- * @callback: callback function
+ * @select_cb: callback function when selecting
+ * @write_cb: callback function after a write
  * @callback_opaque: argument to be passed into callback function
  * @data: pointer to start of item data
  * @len: size of item data
@@ -151,7 +202,9 @@ void fw_cfg_add_file(FWCfgState *s, const char *filename, void *data,
  * with FW_CFG_DMA_CTL_SELECT).
  */
 void fw_cfg_add_file_callback(FWCfgState *s, const char *filename,
-                              FWCfgReadCallback callback, void *callback_opaque,
+                              FWCfgCallback select_cb,
+                              FWCfgWriteCallback write_cb,
+                              void *callback_opaque,
                               void *data, size_t len, bool read_only);
 
 /**

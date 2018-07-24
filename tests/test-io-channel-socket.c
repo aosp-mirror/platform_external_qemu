@@ -22,76 +22,8 @@
 #include "io/channel-socket.h"
 #include "io/channel-util.h"
 #include "io-channel-helpers.h"
+#include "socket-helpers.h"
 #include "qapi/error.h"
-
-#ifndef AI_ADDRCONFIG
-# define AI_ADDRCONFIG 0
-#endif
-#ifndef EAI_ADDRFAMILY
-# define EAI_ADDRFAMILY 0
-#endif
-
-static int check_bind(const char *hostname, bool *has_proto)
-{
-    int fd = -1;
-    struct addrinfo ai, *res = NULL;
-    int rc;
-    int ret = -1;
-
-    memset(&ai, 0, sizeof(ai));
-    ai.ai_flags = AI_CANONNAME | AI_ADDRCONFIG;
-    ai.ai_family = AF_UNSPEC;
-    ai.ai_socktype = SOCK_STREAM;
-
-    /* lookup */
-    rc = getaddrinfo(hostname, NULL, &ai, &res);
-    if (rc != 0) {
-        if (rc == EAI_ADDRFAMILY ||
-            rc == EAI_FAMILY) {
-            *has_proto = false;
-            goto done;
-        }
-        goto cleanup;
-    }
-
-    fd = qemu_socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (fd < 0) {
-        goto cleanup;
-    }
-
-    if (bind(fd, res->ai_addr, res->ai_addrlen) < 0) {
-        if (errno == EADDRNOTAVAIL) {
-            *has_proto = false;
-            goto done;
-        }
-        goto cleanup;
-    }
-
-    *has_proto = true;
- done:
-    ret = 0;
-
- cleanup:
-    if (fd != -1) {
-        close(fd);
-    }
-    if (res) {
-        freeaddrinfo(res);
-    }
-    return ret;
-}
-
-static int check_protocol_support(bool *has_ipv4, bool *has_ipv6)
-{
-    if (check_bind("127.0.0.1", has_ipv4) < 0) {
-        return -1;
-    }
-    if (check_bind("::1", has_ipv6) < 0) {
-        return -1;
-    }
-
-    return 0;
-}
 
 
 static void test_io_channel_set_socket_bufs(QIOChannel *src,
@@ -125,12 +57,12 @@ static void test_io_channel_setup_sync(SocketAddress *listen_addr,
     lioc = qio_channel_socket_new();
     qio_channel_socket_listen_sync(lioc, listen_addr, &error_abort);
 
-    if (listen_addr->type == SOCKET_ADDRESS_KIND_INET) {
+    if (listen_addr->type == SOCKET_ADDRESS_TYPE_INET) {
         SocketAddress *laddr = qio_channel_socket_get_local_address(
             lioc, &error_abort);
 
-        g_free(connect_addr->u.inet.data->port);
-        connect_addr->u.inet.data->port = g_strdup(laddr->u.inet.data->port);
+        g_free(connect_addr->u.inet.port);
+        connect_addr->u.inet.port = g_strdup(laddr->u.inet.port);
 
         qapi_free_SocketAddress(laddr);
     }
@@ -179,19 +111,19 @@ static void test_io_channel_setup_async(SocketAddress *listen_addr,
     lioc = qio_channel_socket_new();
     qio_channel_socket_listen_async(
         lioc, listen_addr,
-        test_io_channel_complete, &data, NULL);
+        test_io_channel_complete, &data, NULL, NULL);
 
     g_main_loop_run(data.loop);
     g_main_context_iteration(g_main_context_default(), FALSE);
 
     g_assert(!data.err);
 
-    if (listen_addr->type == SOCKET_ADDRESS_KIND_INET) {
+    if (listen_addr->type == SOCKET_ADDRESS_TYPE_INET) {
         SocketAddress *laddr = qio_channel_socket_get_local_address(
             lioc, &error_abort);
 
-        g_free(connect_addr->u.inet.data->port);
-        connect_addr->u.inet.data->port = g_strdup(laddr->u.inet.data->port);
+        g_free(connect_addr->u.inet.port);
+        connect_addr->u.inet.port = g_strdup(laddr->u.inet.port);
 
         qapi_free_SocketAddress(laddr);
     }
@@ -200,7 +132,7 @@ static void test_io_channel_setup_async(SocketAddress *listen_addr,
 
     qio_channel_socket_connect_async(
         QIO_CHANNEL_SOCKET(*src), connect_addr,
-        test_io_channel_complete, &data, NULL);
+        test_io_channel_complete, &data, NULL, NULL);
 
     g_main_loop_run(data.loop);
     g_main_context_iteration(g_main_context_default(), FALSE);
@@ -300,16 +232,14 @@ static void test_io_channel_ipv4(bool async)
     SocketAddress *listen_addr = g_new0(SocketAddress, 1);
     SocketAddress *connect_addr = g_new0(SocketAddress, 1);
 
-    listen_addr->type = SOCKET_ADDRESS_KIND_INET;
-    listen_addr->u.inet.data = g_new(InetSocketAddress, 1);
-    *listen_addr->u.inet.data = (InetSocketAddress) {
+    listen_addr->type = SOCKET_ADDRESS_TYPE_INET;
+    listen_addr->u.inet = (InetSocketAddress) {
         .host = g_strdup("127.0.0.1"),
         .port = NULL, /* Auto-select */
     };
 
-    connect_addr->type = SOCKET_ADDRESS_KIND_INET;
-    connect_addr->u.inet.data = g_new(InetSocketAddress, 1);
-    *connect_addr->u.inet.data = (InetSocketAddress) {
+    connect_addr->type = SOCKET_ADDRESS_TYPE_INET;
+    connect_addr->u.inet = (InetSocketAddress) {
         .host = g_strdup("127.0.0.1"),
         .port = NULL, /* Filled in later */
     };
@@ -338,16 +268,14 @@ static void test_io_channel_ipv6(bool async)
     SocketAddress *listen_addr = g_new0(SocketAddress, 1);
     SocketAddress *connect_addr = g_new0(SocketAddress, 1);
 
-    listen_addr->type = SOCKET_ADDRESS_KIND_INET;
-    listen_addr->u.inet.data = g_new(InetSocketAddress, 1);
-    *listen_addr->u.inet.data = (InetSocketAddress) {
+    listen_addr->type = SOCKET_ADDRESS_TYPE_INET;
+    listen_addr->u.inet = (InetSocketAddress) {
         .host = g_strdup("::1"),
         .port = NULL, /* Auto-select */
     };
 
-    connect_addr->type = SOCKET_ADDRESS_KIND_INET;
-    connect_addr->u.inet.data = g_new(InetSocketAddress, 1);
-    *connect_addr->u.inet.data = (InetSocketAddress) {
+    connect_addr->type = SOCKET_ADDRESS_TYPE_INET;
+    connect_addr->u.inet = (InetSocketAddress) {
         .host = g_strdup("::1"),
         .port = NULL, /* Filled in later */
     };
@@ -378,13 +306,11 @@ static void test_io_channel_unix(bool async)
     SocketAddress *connect_addr = g_new0(SocketAddress, 1);
 
 #define TEST_SOCKET "test-io-channel-socket.sock"
-    listen_addr->type = SOCKET_ADDRESS_KIND_UNIX;
-    listen_addr->u.q_unix.data = g_new0(UnixSocketAddress, 1);
-    listen_addr->u.q_unix.data->path = g_strdup(TEST_SOCKET);
+    listen_addr->type = SOCKET_ADDRESS_TYPE_UNIX;
+    listen_addr->u.q_unix.path = g_strdup(TEST_SOCKET);
 
-    connect_addr->type = SOCKET_ADDRESS_KIND_UNIX;
-    connect_addr->u.q_unix.data = g_new0(UnixSocketAddress, 1);
-    connect_addr->u.q_unix.data->path = g_strdup(TEST_SOCKET);
+    connect_addr->type = SOCKET_ADDRESS_TYPE_UNIX;
+    connect_addr->u.q_unix.path = g_strdup(TEST_SOCKET);
 
     test_io_channel(async, listen_addr, connect_addr, true);
 
@@ -427,13 +353,11 @@ static void test_io_channel_unix_fd_pass(void)
     fdsend[1] = testfd;
     fdsend[2] = testfd;
 
-    listen_addr->type = SOCKET_ADDRESS_KIND_UNIX;
-    listen_addr->u.q_unix.data = g_new0(UnixSocketAddress, 1);
-    listen_addr->u.q_unix.data->path = g_strdup(TEST_SOCKET);
+    listen_addr->type = SOCKET_ADDRESS_TYPE_UNIX;
+    listen_addr->u.q_unix.path = g_strdup(TEST_SOCKET);
 
-    connect_addr->type = SOCKET_ADDRESS_KIND_UNIX;
-    connect_addr->u.q_unix.data = g_new0(UnixSocketAddress, 1);
-    connect_addr->u.q_unix.data->path = g_strdup(TEST_SOCKET);
+    connect_addr->type = SOCKET_ADDRESS_TYPE_UNIX;
+    connect_addr->u.q_unix.path = g_strdup(TEST_SOCKET);
 
     test_io_channel_setup_sync(listen_addr, connect_addr, &src, &dst);
 
@@ -574,7 +498,7 @@ int main(int argc, char **argv)
      * each protocol to avoid breaking tests on machines
      * with either IPv4 or IPv6 disabled.
      */
-    if (check_protocol_support(&has_ipv4, &has_ipv6) < 0) {
+    if (socket_check_protocol_support(&has_ipv4, &has_ipv6) < 0) {
         return 1;
     }
 

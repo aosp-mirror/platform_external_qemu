@@ -16,8 +16,9 @@
 #include "qemu-common.h"
 #include "qemu/error-report.h"
 #include "qemu/main-loop.h"
-#include "hw/misc/trace.h"
+#include "trace.h"
 #include "hw/misc/goldfish_sync.h"
+#include "migration/register.h"
 
 #include <assert.h>
 
@@ -493,6 +494,11 @@ static int goldfish_sync_load(QEMUFile* file, void* opaque, int version_id) {
     return 0;
 }
 
+static SaveVMHandlers goldfish_sync_vmhandlers= {
+    .save_state = goldfish_sync_save,
+    .load_state = goldfish_sync_load
+};
+
 // goldfish_sync_realize is called on startup if the sync device is enabled.
 // It does the work of setting up the I/O, command queue, and function pointers.
 static void goldfish_sync_realize(DeviceState *dev, Error **errp) {
@@ -513,9 +519,8 @@ static void goldfish_sync_realize(DeviceState *dev, Error **errp) {
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
-    register_savevm(
-        dev, "goldfish_sync", 0, 1,
-        goldfish_sync_save, goldfish_sync_load, s);
+    register_savevm_live(dev, "goldfish_sync", 0, 1, &goldfish_sync_vmhandlers,
+                         s);
 }
 
 static Property goldfish_sync_properties[] = {

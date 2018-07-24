@@ -33,8 +33,6 @@
 
 #include "exec/cpu-defs.h"
 
-#include "fpu/softfloat.h"
-
 #define ICACHE_LINE_SIZE 32
 #define DCACHE_LINE_SIZE 32
 
@@ -242,13 +240,11 @@ struct CPUAlphaState {
     uint8_t fpcr_dyn_round;
     uint8_t fpcr_flush_to_zero;
 
-    /* The Internal Processor Registers.  Some of these we assume always
-       exist for use in user-mode.  */
-    uint8_t ps;
-    uint8_t intr_flag;
-    uint8_t pal_mode;
-    uint8_t fen;
+    /* Mask of PALmode, Processor State et al.  Most of this gets copied
+       into the TranslatorBlock flags and controls code generation.  */
+    uint32_t flags;
 
+    /* The high 32-bits of the processor cycle counter.  */
     uint32_t pcc_ofs;
 
     /* These pass data from the exception logic in the translator and
@@ -399,24 +395,37 @@ enum {
 };
 
 /* Processor status constants.  */
-enum {
-    /* Low 3 bits are interrupt mask level.  */
-    PS_INT_MASK = 7,
+/* Low 3 bits are interrupt mask level.  */
+#define PS_INT_MASK   7u
 
-    /* Bits 4 and 5 are the mmu mode.  The VMS PALcode uses all 4 modes;
-       The Unix PALcode only uses bit 4.  */
-    PS_USER_MODE = 8
-};
+/* Bits 4 and 5 are the mmu mode.  The VMS PALcode uses all 4 modes;
+   The Unix PALcode only uses bit 4.  */
+#define PS_USER_MODE  8u
+
+/* CPUAlphaState->flags constants.  These are layed out so that we
+   can set or reset the pieces individually by assigning to the byte,
+   or manipulated as a whole.  */
+
+#define ENV_FLAG_PAL_SHIFT    0
+#define ENV_FLAG_PS_SHIFT     8
+#define ENV_FLAG_RX_SHIFT     16
+#define ENV_FLAG_FEN_SHIFT    24
+
+#define ENV_FLAG_PAL_MODE     (1u << ENV_FLAG_PAL_SHIFT)
+#define ENV_FLAG_PS_USER      (PS_USER_MODE << ENV_FLAG_PS_SHIFT)
+#define ENV_FLAG_RX_FLAG      (1u << ENV_FLAG_RX_SHIFT)
+#define ENV_FLAG_FEN          (1u << ENV_FLAG_FEN_SHIFT)
+
+#define ENV_FLAG_TB_MASK \
+    (ENV_FLAG_PAL_MODE | ENV_FLAG_PS_USER | ENV_FLAG_FEN)
 
 static inline int cpu_mmu_index(CPUAlphaState *env, bool ifetch)
 {
-    if (env->pal_mode) {
-        return MMU_KERNEL_IDX;
-    } else if (env->ps & PS_USER_MODE) {
-        return MMU_USER_IDX;
-    } else {
-        return MMU_KERNEL_IDX;
+    int ret = env->flags & ENV_FLAG_PS_USER ? MMU_USER_IDX : MMU_KERNEL_IDX;
+    if (env->flags & ENV_FLAG_PAL_MODE) {
+        ret = MMU_KERNEL_IDX;
     }
+    return ret;
 }
 
 enum {
@@ -458,9 +467,9 @@ enum {
 
 void alpha_translate_init(void);
 
-AlphaCPU *cpu_alpha_init(const char *cpu_model);
-
-#define cpu_init(cpu_model) CPU(cpu_alpha_init(cpu_model))
+#define ALPHA_CPU_TYPE_SUFFIX "-" TYPE_ALPHA_CPU
+#define ALPHA_CPU_TYPE_NAME(model) model ALPHA_CPU_TYPE_SUFFIX
+#define CPU_RESOLVING_TYPE TYPE_ALPHA_CPU
 
 void alpha_cpu_list(FILE *f, fprintf_function cpu_fprintf);
 /* you can call this signal handler from your SIGBUS and SIGSEGV
@@ -468,7 +477,7 @@ void alpha_cpu_list(FILE *f, fprintf_function cpu_fprintf);
    is returned if the signal was handled by the virtual CPU.  */
 int cpu_alpha_signal_handler(int host_signum, void *pinfo,
                              void *puc);
-int alpha_cpu_handle_mmu_fault(CPUState *cpu, vaddr address, int rw,
+int alpha_cpu_handle_mmu_fault(CPUState *cpu, vaddr address, int size, int rw,
                                int mmu_idx);
 void QEMU_NORETURN dynamic_excp(CPUAlphaState *, uintptr_t, int, int);
 void QEMU_NORETURN arith_excp(CPUAlphaState *, uintptr_t, int, uint64_t);
@@ -478,45 +487,19 @@ void cpu_alpha_store_fpcr (CPUAlphaState *env, uint64_t val);
 uint64_t cpu_alpha_load_gr(CPUAlphaState *env, unsigned reg);
 void cpu_alpha_store_gr(CPUAlphaState *env, unsigned reg, uint64_t val);
 #ifndef CONFIG_USER_ONLY
-QEMU_NORETURN void alpha_cpu_unassigned_access(CPUState *cpu, hwaddr addr,
-                                               bool is_write, bool is_exec,
-                                               int unused, unsigned size);
+void alpha_cpu_do_transaction_failed(CPUState *cs, hwaddr physaddr,
+                                     vaddr addr, unsigned size,
+                                     MMUAccessType access_type,
+                                     int mmu_idx, MemTxAttrs attrs,
+                                     MemTxResult response, uintptr_t retaddr);
 #endif
-
-/* Bits in TB->FLAGS that control how translation is processed.  */
-enum {
-    TB_FLAGS_PAL_MODE = 1,
-    TB_FLAGS_FEN = 2,
-    TB_FLAGS_USER_MODE = 8,
-
-    TB_FLAGS_AMASK_SHIFT = 4,
-    TB_FLAGS_AMASK_BWX = AMASK_BWX << TB_FLAGS_AMASK_SHIFT,
-    TB_FLAGS_AMASK_FIX = AMASK_FIX << TB_FLAGS_AMASK_SHIFT,
-    TB_FLAGS_AMASK_CIX = AMASK_CIX << TB_FLAGS_AMASK_SHIFT,
-    TB_FLAGS_AMASK_MVI = AMASK_MVI << TB_FLAGS_AMASK_SHIFT,
-    TB_FLAGS_AMASK_TRAP = AMASK_TRAP << TB_FLAGS_AMASK_SHIFT,
-    TB_FLAGS_AMASK_PREFETCH = AMASK_PREFETCH << TB_FLAGS_AMASK_SHIFT,
-};
 
 static inline void cpu_get_tb_cpu_state(CPUAlphaState *env, target_ulong *pc,
                                         target_ulong *cs_base, uint32_t *pflags)
 {
-    int flags = 0;
-
     *pc = env->pc;
     *cs_base = 0;
-
-    if (env->pal_mode) {
-        flags = TB_FLAGS_PAL_MODE;
-    } else {
-        flags = env->ps & PS_USER_MODE;
-    }
-    if (env->fen) {
-        flags |= TB_FLAGS_FEN;
-    }
-    flags |= env->amask << TB_FLAGS_AMASK_SHIFT;
-
-    *pflags = flags;
+    *pflags = env->flags & ENV_FLAG_TB_MASK;
 }
 
 #endif /* ALPHA_CPU_H */

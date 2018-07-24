@@ -148,10 +148,17 @@ void vnc_jobs_consume_buffer(VncState *vs)
             if (vs->ioc_tag) {
                 g_source_remove(vs->ioc_tag);
             }
-            vs->ioc_tag = qio_channel_add_watch(
-                vs->ioc, G_IO_IN | G_IO_OUT, vnc_client_io, vs, NULL);
+            if (vs->disconnecting == FALSE) {
+                vs->ioc_tag = qio_channel_add_watch(
+                    vs->ioc, G_IO_IN | G_IO_OUT, vnc_client_io, vs, NULL);
+            }
         }
         buffer_move(&vs->output, &vs->jobs_buffer);
+
+        if (vs->job_update == VNC_STATE_UPDATE_FORCE) {
+            vs->force_update_offset = vs->output.offset;
+        }
+        vs->job_update = VNC_STATE_UPDATE_NONE;
     }
     flush = vs->ioc != NULL && vs->abort != true;
     vnc_unlock_output(vs);

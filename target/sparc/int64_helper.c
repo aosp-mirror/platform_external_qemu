@@ -22,7 +22,7 @@
 #include "cpu.h"
 #include "exec/helper-proto.h"
 #include "exec/log.h"
-#include "target/sparc/trace.h"
+#include "trace.h"
 
 #define DEBUG_PCALL
 
@@ -147,7 +147,7 @@ void sparc_cpu_do_interrupt(CPUState *cs)
         }
     }
 
-    if (env->def->features & CPU_FEATURE_GL) {
+    if (env->def.features & CPU_FEATURE_GL) {
         tsptr->tstate |= (env->gl & 7ULL) << 40;
         cpu_gl_switch_gregs(env, env->gl + 1);
         env->gl++;
