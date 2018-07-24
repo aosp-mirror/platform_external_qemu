@@ -385,10 +385,6 @@ intptr_t RenderThread::main() {
 
     // Don't check for snapshots here: if we're already exiting then snapshot
     // should not contain this thread information at all.
-
-    // exit sync thread, if any.
-    SyncThread::destroySyncThread();
-
     if (!FrameBuffer::getFB()->isShuttingDown()) {
         // Release references to the current thread's context/surfaces if any
         FrameBuffer::getFB()->bindContext(0, 0, 0);

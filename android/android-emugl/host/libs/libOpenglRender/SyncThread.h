@@ -73,21 +73,8 @@ public:
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_EXIT|
     void cleanup();
 
-    // We assume the invariant that sync threads correspond 1:1
-    // with render threads.
-    // Therefore, we create and destroy sync threads using
-    // only the two functions below, |getSyncThread| and |destroySyncThread|.
-    // - |getSyncThread| looks at render thread's TLS for a sync thread.
-    //   If there isn't one, a sync thread is created and initialized.
-    // - |destroySyncThread| cleans up and deletes the sync thread,
-    //   if there is one started already.
-    //   It is meant to be called whenever render threads exit or
-    //   EGL contexts are destroyed.
-    static SyncThread* getSyncThread();
-    static void destroySyncThread();
-
-    // Safe way to get SyncThread*'s across snapshots.
-    static SyncThread* getFromHandle(uint64_t handle);
+    // Obtains the global sync thread.
+    static SyncThread* get();
 
 private:
     // |initSyncContext| creates an EGL context expressly for calling

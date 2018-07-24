@@ -23,11 +23,13 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "android/base/memory/LazyInstance.h"
 #include "android/utils/debug.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/sync_device.h"
 
 #include <sys/time.h>
+#include <memory>
 
 #define DEBUG 0
 
@@ -49,6 +51,23 @@ static uint64_t curr_ms() {
 #define DPRINT(...)
 
 #endif
+
+using android::base::LazyInstance;
+
+// The single global sync thread instance.
+class GlobalSyncThread {
+public:
+    GlobalSyncThread() {
+        mSyncThread.reset(new SyncThread(EGL_NO_CONTEXT));
+    }
+
+    SyncThread* syncThreadPtr() { return mSyncThread.get(); }
+
+private:
+    std::unique_ptr<SyncThread> mSyncThread;
+};
+
+static LazyInstance<GlobalSyncThread> sGlobalSyncThread = LAZY_INSTANCE_INIT;
 
 static const uint32_t kTimelineInterval = 1;
 static const uint64_t kDefaultTimeoutNsecs = 5ULL * 1000ULL * 1000ULL * 1000ULL;
@@ -259,34 +278,6 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
 // Interface for libOpenglRender TLS
 
 /* static */
-SyncThread* SyncThread::getSyncThread() {
-    RenderThreadInfo* tInfo = RenderThreadInfo::get();
-
-    if (!tInfo->syncThread.get()) {
-        DPRINT("starting a sync thread for render thread info=%p", tInfo);
-        tInfo->createSyncThread();
-    }
-
-    return tInfo->syncThread.get();
-}
-
-/* static */
-void SyncThread::destroySyncThread() {
-    RenderThreadInfo* tInfo = RenderThreadInfo::get();
-
-    DPRINT("exiting a sync thread for render thread info=%p.", tInfo);
-
-    if (!tInfo || !tInfo->syncThread) return;
-
-    tInfo->syncThread->cleanup();
-    tInfo->syncThread->wait();
-    tInfo->destroySyncThread();
-}
-
-/* static */
-SyncThread* SyncThread::getFromHandle(uint64_t alias) {
-    return RenderThreadInfo::getSyncThreadRegistry()->getPtr(
-            alias,
-            reinterpret_cast<SyncThread*>(alias) /* return cast as default */,
-            true /* remove if getting stale ptr */);
+SyncThread* SyncThread::get() {
+    return sGlobalSyncThread->syncThreadPtr();
 }
