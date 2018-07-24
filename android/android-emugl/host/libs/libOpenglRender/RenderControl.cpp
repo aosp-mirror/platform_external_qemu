@@ -493,8 +493,6 @@ static uint32_t rcCreateContext(uint32_t config,
 
 static void rcDestroyContext(uint32_t context)
 {
-    SyncThread::destroySyncThread();
-
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -774,30 +772,26 @@ static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
 // We will then need to use the host to find out
 // when to signal that native fence fd. We use
 // SyncThread for that.
-//
-// The purpose of |rcTriggerWait| is to tell which
-// SyncThread which sync object / timeline to signal.
 static void rcTriggerWait(uint64_t eglsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline) {
+    // We don't use per render thread sync threads anymore.
+    // Ignore but not remove (for backward compat)
+    (void)thread_ptr;
+
     FenceSync* fenceSync = (FenceSync*)(uintptr_t)eglsync_ptr;
     EGLSYNC_DPRINT("eglsync=0x%llx "
                    "fenceSync=%p "
                    "thread_ptr=0x%llx "
                    "timeline=0x%llx",
                    eglsync_ptr, fenceSync, thread_ptr, timeline);
-    SyncThread* syncThread =
-        SyncThread::getFromHandle(thread_ptr);
-    syncThread->triggerWait(fenceSync, timeline);
+    SyncThread::get()->triggerWait(fenceSync, timeline);
 }
 
-// |rcCreateSyncKHR| implements the guest's
-// |eglCreateSyncKHR| by calling the host's implementation
-// of |eglCreateSyncKHR|. A SyncThread is also started
-// that corresponds to the current rendering thread, for
-// purposes of signaling any native fence fd's that
-// get created in the guest off the sync object
-// created here.
+// |rcCreateSyncKHR| implements the guest's |eglCreateSyncKHR| by calling the
+// host's implementation of |eglCreateSyncKHR|. A SyncThread is also notified
+// for purposes of signaling any native fence fd's that get created in the
+// guest off the sync object created here.
 static void rcCreateSyncKHR(EGLenum type,
                             EGLint* attribs,
                             uint32_t num_attribs,
@@ -824,7 +818,7 @@ static void rcCreateSyncKHR(EGLenum type,
     s_gles2.glFlush();
 
     if (syncthread_out) *syncthread_out =
-        reinterpret_cast<uint64_t>(SyncThread::getSyncThread());
+        reinterpret_cast<uint64_t>(SyncThread::get());
 
     if (eglsync_out) {
         uint64_t res = (uint64_t)(uintptr_t)fenceSync;
