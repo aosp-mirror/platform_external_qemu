@@ -15,6 +15,7 @@
 #include "GLSnapshotTestStateUtils.h"
 
 #include "GLSnapshotTesting.h"
+#include "OpenglCodecCommon/glUtils.h"
 
 #include <gtest/gtest.h>
 
@@ -65,6 +66,83 @@ GLuint loadAndCompileShader(const GLESv2Dispatch* gl,
     }
 
     return shader;
+}
+
+std::vector<GLubyte> getTextureImageData(const GLESv2Dispatch* gl,
+                                         GLenum textureTarget,
+                                         GLuint texture,
+                                         GLint level,
+                                         GLint x,
+                                         GLint y,
+                                         GLsizei width,
+                                         GLsizei height,
+                                         GLenum format,
+                                         GLenum type) {
+    std::vector<GLubyte> out = {};
+    out.resize(width * height * glUtilsPixelBitSize(format, type));
+
+    // get current COLOR_ATTACHMENT0
+    // GLint oldColorName, oldColorType, oldColorLevel, oldColorTarget;
+    // gl->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
+    //         GL_COLOR_ATTACHMENT0,
+    //         GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,
+    //         &oldColorType);
+    // if (oldColorType != GL_NONE) {
+    //     gl->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
+    //             GL_COLOR_ATTACHMENT0,
+    //             GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME,
+    //             &oldColorName);
+    //     if (oldColorType == GL_TEXTURE) {
+    //         gl->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
+    //             GL_COLOR_ATTACHMENT0,
+    //             GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL,
+    //             &oldColorLevel);
+    //         gl->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
+    //             GL_COLOR_ATTACHMENT0,
+    //             GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE,
+    //             &oldColorTarget);
+    //     }
+    //     if (oldColorTarget == 0) {
+    //         oldColorTarget = GL_TEXTURE_2D;
+    //     }
+    // }
+
+    GLuint framebuffer;
+    gl->glGenFramebuffers(1, &framebuffer);
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                               textureTarget, texture, level);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+    gl->glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                     out.data());  // TODO(benzene): flexible format/type?
+                                   // seems like RGBA/UNSIGNED_BYTE is the only
+                                   // guaranteed supported format+type
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    // restore COLOR_ATTACHMENT0
+    // switch (oldColorType) {
+    //     case GL_RENDERBUFFER:
+    //         gl->glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+    //         GL_COLOR_ATTACHMENT0,
+    //                 GL_RENDERBUFFER, oldColorName);
+    //         break;
+    //     case GL_TEXTURE:
+    //         gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+    //                 oldColorTarget, oldColorName, oldColorLevel);
+    //         break;
+    //     case GL_NONE:
+    //     default:
+    //         // ???
+    //         break;
+    // }
+
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->glDeleteFramebuffers(1, &framebuffer);
+    EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
+
+    return out;
 }
 
 }  // namespace emugl
