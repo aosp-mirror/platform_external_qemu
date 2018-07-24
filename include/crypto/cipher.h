@@ -21,7 +21,7 @@
 #ifndef QCRYPTO_CIPHER_H
 #define QCRYPTO_CIPHER_H
 
-#include "qapi-types.h"
+#include "qapi/qapi-types-crypto.h"
 
 typedef struct QCryptoCipher QCryptoCipher;
 
@@ -80,6 +80,7 @@ struct QCryptoCipher {
     QCryptoCipherAlgorithm alg;
     QCryptoCipherMode mode;
     void *opaque;
+    void *driver;
 };
 
 /**

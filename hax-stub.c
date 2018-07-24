@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (7c0165 Merge "Merge "Improve error logging for ping failures." into)
 /*
  * QEMU HAXM support
  *
@@ -54,3 +55,5 @@ int hax_smp_cpu_exec(CPUState *cpu)
 {
     return -ENOSYS;
 }
+=======
+>>>>>>> BRANCH (4743c2 Update version for v2.12.0 release)

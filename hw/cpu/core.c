@@ -6,6 +6,7 @@
  * This work is licensed under the terms of the GNU GPL, version 2 or later.
  * See the COPYING file in the top-level directory.
  */
+#include "qemu/osdep.h"
 #include "hw/cpu/core.h"
 #include "qapi/visitor.h"
 #include "qapi/error.h"
@@ -30,6 +31,11 @@ static void core_prop_set_core_id(Object *obj, Visitor *v, const char *name,
     visit_type_int(v, name, &value, &local_err);
     if (local_err) {
         error_propagate(errp, local_err);
+        return;
+    }
+
+    if (value < 0) {
+        error_setg(errp, "Invalid core id %"PRId64, value);
         return;
     }
 

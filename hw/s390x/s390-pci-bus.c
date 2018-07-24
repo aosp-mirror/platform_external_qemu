@@ -23,14 +23,16 @@
 #include "hw/pci/msi.h"
 #include "qemu/error-report.h"
 
-/* #define DEBUG_S390PCI_BUS */
-#ifdef DEBUG_S390PCI_BUS
-#define DPRINTF(fmt, ...) \
-    do { fprintf(stderr, "S390pci-bus: " fmt, ## __VA_ARGS__); } while (0)
-#else
-#define DPRINTF(fmt, ...) \
-    do { } while (0)
+#ifndef DEBUG_S390PCI_BUS
+#define DEBUG_S390PCI_BUS  0
 #endif
+
+#define DPRINTF(fmt, ...)                                         \
+    do {                                                          \
+        if (DEBUG_S390PCI_BUS) {                                  \
+            fprintf(stderr, "S390pci-bus: " fmt, ## __VA_ARGS__); \
+        }                                                         \
+    } while (0)
 
 S390pciState *s390_get_phb(void)
 {
@@ -45,7 +47,7 @@ S390pciState *s390_get_phb(void)
     return phb;
 }
 
-int chsc_sei_nt2_get_event(void *res)
+int pci_chsc_sei_nt2_get_event(void *res)
 {
     ChscSeiNt2Res *nt2_res = (ChscSeiNt2Res *)res;
     PciCcdfAvail *accdf;
@@ -85,7 +87,7 @@ int chsc_sei_nt2_get_event(void *res)
     return rc;
 }
 
-int chsc_sei_nt2_have_event(void)
+int pci_chsc_sei_nt2_have_event(void)
 {
     S390pciState *s = s390_get_phb();
 
@@ -120,15 +122,10 @@ S390PCIBusDevice *s390_pci_find_dev_by_fid(S390pciState *s, uint32_t fid)
 
 void s390_pci_sclp_configure(SCCB *sccb)
 {
-    PciCfgSccb *psccb = (PciCfgSccb *)sccb;
+    IoaCfgSccb *psccb = (IoaCfgSccb *)sccb;
     S390PCIBusDevice *pbdev = s390_pci_find_dev_by_fid(s390_get_phb(),
                                                        be32_to_cpu(psccb->aid));
     uint16_t rc;
-
-    if (be16_to_cpu(sccb->h.length) < 16) {
-        rc = SCLP_RC_INSUFFICIENT_SCCB_LENGTH;
-        goto out;
-    }
 
     if (!pbdev) {
         DPRINTF("sclp config no dev found\n");
@@ -153,15 +150,10 @@ out:
 
 void s390_pci_sclp_deconfigure(SCCB *sccb)
 {
-    PciCfgSccb *psccb = (PciCfgSccb *)sccb;
+    IoaCfgSccb *psccb = (IoaCfgSccb *)sccb;
     S390PCIBusDevice *pbdev = s390_pci_find_dev_by_fid(s390_get_phb(),
                                                        be32_to_cpu(psccb->aid));
     uint16_t rc;
-
-    if (be16_to_cpu(sccb->h.length) < 16) {
-        rc = SCLP_RC_INSUFFICIENT_SCCB_LENGTH;
-        goto out;
-    }
 
     if (!pbdev) {
         DPRINTF("sclp deconfig no dev found\n");
@@ -207,8 +199,8 @@ static S390PCIBusDevice *s390_pci_find_dev_by_uid(S390pciState *s, uint16_t uid)
     return NULL;
 }
 
-static S390PCIBusDevice *s390_pci_find_dev_by_target(S390pciState *s,
-                                                     const char *target)
+S390PCIBusDevice *s390_pci_find_dev_by_target(S390pciState *s,
+                                              const char *target)
 {
     S390PCIBusDevice *pbdev;
 
@@ -248,7 +240,7 @@ static void s390_pci_generate_event(uint8_t cc, uint16_t pec, uint32_t fh,
     SeiContainer *sei_cont;
     S390pciState *s = s390_get_phb();
 
-    sei_cont = g_malloc0(sizeof(SeiContainer));
+    sei_cont = g_new0(SeiContainer, 1);
     sei_cont->fh = fh;
     sei_cont->fid = fid;
     sei_cont->cc = cc;
@@ -317,49 +309,187 @@ static uint64_t get_st_pto(uint64_t entry)
             : 0;
 }
 
-static uint64_t s390_guest_io_table_walk(uint64_t guest_iota,
-                                  uint64_t guest_dma_address)
+static bool rt_entry_isvalid(uint64_t entry)
 {
-    uint64_t sto_a, pto_a, px_a;
-    uint64_t sto, pto, pte;
-    uint32_t rtx, sx, px;
-
-    rtx = calc_rtx(guest_dma_address);
-    sx = calc_sx(guest_dma_address);
-    px = calc_px(guest_dma_address);
-
-    sto_a = guest_iota + rtx * sizeof(uint64_t);
-    sto = address_space_ldq(&address_space_memory, sto_a,
-                            MEMTXATTRS_UNSPECIFIED, NULL);
-    sto = get_rt_sto(sto);
-    if (!sto) {
-        pte = 0;
-        goto out;
-    }
-
-    pto_a = sto + sx * sizeof(uint64_t);
-    pto = address_space_ldq(&address_space_memory, pto_a,
-                            MEMTXATTRS_UNSPECIFIED, NULL);
-    pto = get_st_pto(pto);
-    if (!pto) {
-        pte = 0;
-        goto out;
-    }
-
-    px_a = pto + px * sizeof(uint64_t);
-    pte = address_space_ldq(&address_space_memory, px_a,
-                            MEMTXATTRS_UNSPECIFIED, NULL);
-
-out:
-    return pte;
+    return (entry & ZPCI_TABLE_VALID_MASK) == ZPCI_TABLE_VALID;
 }
 
-static IOMMUTLBEntry s390_translate_iommu(MemoryRegion *mr, hwaddr addr,
-                                          bool is_write)
+static bool pt_entry_isvalid(uint64_t entry)
 {
-    uint64_t pte;
-    uint32_t flags;
+    return (entry & ZPCI_PTE_VALID_MASK) == ZPCI_PTE_VALID;
+}
+
+static bool entry_isprotected(uint64_t entry)
+{
+    return (entry & ZPCI_TABLE_PROT_MASK) == ZPCI_TABLE_PROTECTED;
+}
+
+/* ett is expected table type, -1 page table, 0 segment table, 1 region table */
+static uint64_t get_table_index(uint64_t iova, int8_t ett)
+{
+    switch (ett) {
+    case ZPCI_ETT_PT:
+        return calc_px(iova);
+    case ZPCI_ETT_ST:
+        return calc_sx(iova);
+    case ZPCI_ETT_RT:
+        return calc_rtx(iova);
+    }
+
+    return -1;
+}
+
+static bool entry_isvalid(uint64_t entry, int8_t ett)
+{
+    switch (ett) {
+    case ZPCI_ETT_PT:
+        return pt_entry_isvalid(entry);
+    case ZPCI_ETT_ST:
+    case ZPCI_ETT_RT:
+        return rt_entry_isvalid(entry);
+    }
+
+    return false;
+}
+
+/* Return true if address translation is done */
+static bool translate_iscomplete(uint64_t entry, int8_t ett)
+{
+    switch (ett) {
+    case 0:
+        return (entry & ZPCI_TABLE_FC) ? true : false;
+    case 1:
+        return false;
+    }
+
+    return true;
+}
+
+static uint64_t get_frame_size(int8_t ett)
+{
+    switch (ett) {
+    case ZPCI_ETT_PT:
+        return 1ULL << 12;
+    case ZPCI_ETT_ST:
+        return 1ULL << 20;
+    case ZPCI_ETT_RT:
+        return 1ULL << 31;
+    }
+
+    return 0;
+}
+
+static uint64_t get_next_table_origin(uint64_t entry, int8_t ett)
+{
+    switch (ett) {
+    case ZPCI_ETT_PT:
+        return entry & ZPCI_PTE_ADDR_MASK;
+    case ZPCI_ETT_ST:
+        return get_st_pto(entry);
+    case ZPCI_ETT_RT:
+        return get_rt_sto(entry);
+    }
+
+    return 0;
+}
+
+/**
+ * table_translate: do translation within one table and return the following
+ *                  table origin
+ *
+ * @entry: the entry being translated, the result is stored in this.
+ * @to: the address of table origin.
+ * @ett: expected table type, 1 region table, 0 segment table and -1 page table.
+ * @error: error code
+ */
+static uint64_t table_translate(S390IOTLBEntry *entry, uint64_t to, int8_t ett,
+                                uint16_t *error)
+{
+    uint64_t tx, te, nto = 0;
+    uint16_t err = 0;
+
+    tx = get_table_index(entry->iova, ett);
+    te = address_space_ldq(&address_space_memory, to + tx * sizeof(uint64_t),
+                           MEMTXATTRS_UNSPECIFIED, NULL);
+
+    if (!te) {
+        err = ERR_EVENT_INVALTE;
+        goto out;
+    }
+
+    if (!entry_isvalid(te, ett)) {
+        entry->perm &= IOMMU_NONE;
+        goto out;
+    }
+
+    if (ett == ZPCI_ETT_RT && ((te & ZPCI_TABLE_LEN_RTX) != ZPCI_TABLE_LEN_RTX
+                               || te & ZPCI_TABLE_OFFSET_MASK)) {
+        err = ERR_EVENT_INVALTL;
+        goto out;
+    }
+
+    nto = get_next_table_origin(te, ett);
+    if (!nto) {
+        err = ERR_EVENT_TT;
+        goto out;
+    }
+
+    if (entry_isprotected(te)) {
+        entry->perm &= IOMMU_RO;
+    } else {
+        entry->perm &= IOMMU_RW;
+    }
+
+    if (translate_iscomplete(te, ett)) {
+        switch (ett) {
+        case ZPCI_ETT_PT:
+            entry->translated_addr = te & ZPCI_PTE_ADDR_MASK;
+            break;
+        case ZPCI_ETT_ST:
+            entry->translated_addr = (te & ZPCI_SFAA_MASK) |
+                (entry->iova & ~ZPCI_SFAA_MASK);
+            break;
+        }
+        nto = 0;
+    }
+out:
+    if (err) {
+        entry->perm = IOMMU_NONE;
+        *error = err;
+    }
+    entry->len = get_frame_size(ett);
+    return nto;
+}
+
+uint16_t s390_guest_io_table_walk(uint64_t g_iota, hwaddr addr,
+                                  S390IOTLBEntry *entry)
+{
+    uint64_t to = s390_pci_get_table_origin(g_iota);
+    int8_t ett = 1;
+    uint16_t error = 0;
+
+    entry->iova = addr & PAGE_MASK;
+    entry->translated_addr = 0;
+    entry->perm = IOMMU_RW;
+
+    if (entry_isprotected(g_iota)) {
+        entry->perm &= IOMMU_RO;
+    }
+
+    while (to) {
+        to = table_translate(entry, to, ett--, &error);
+    }
+
+    return error;
+}
+
+static IOMMUTLBEntry s390_translate_iommu(IOMMUMemoryRegion *mr, hwaddr addr,
+                                          IOMMUAccessFlags flag)
+{
     S390PCIIOMMU *iommu = container_of(mr, S390PCIIOMMU, iommu_mr);
+    S390IOTLBEntry *entry;
+    uint64_t iova = addr & PAGE_MASK;
+    uint16_t error = 0;
     IOMMUTLBEntry ret = {
         .target_as = &address_space_memory,
         .iova = 0,
@@ -382,32 +512,44 @@ static IOMMUTLBEntry s390_translate_iommu(MemoryRegion *mr, hwaddr addr,
     DPRINTF("iommu trans addr 0x%" PRIx64 "\n", addr);
 
     if (addr < iommu->pba || addr > iommu->pal) {
-        return ret;
+        error = ERR_EVENT_OORANGE;
+        goto err;
     }
 
-    pte = s390_guest_io_table_walk(s390_pci_get_table_origin(iommu->g_iota),
-                                   addr);
-    if (!pte) {
-        return ret;
-    }
-
-    flags = pte & ZPCI_PTE_FLAG_MASK;
-    ret.iova = addr;
-    ret.translated_addr = pte & ZPCI_PTE_ADDR_MASK;
-    ret.addr_mask = 0xfff;
-
-    if (flags & ZPCI_PTE_INVALID) {
-        ret.perm = IOMMU_NONE;
+    entry = g_hash_table_lookup(iommu->iotlb, &iova);
+    if (entry) {
+        ret.iova = entry->iova;
+        ret.translated_addr = entry->translated_addr;
+        ret.addr_mask = entry->len - 1;
+        ret.perm = entry->perm;
     } else {
-        ret.perm = IOMMU_RW;
+        ret.iova = iova;
+        ret.addr_mask = ~PAGE_MASK;
+        ret.perm = IOMMU_NONE;
     }
 
+    if (flag != IOMMU_NONE && !(flag & ret.perm)) {
+        error = ERR_EVENT_TPROTE;
+    }
+err:
+    if (error) {
+        iommu->pbdev->state = ZPCI_FS_ERROR;
+        s390_pci_generate_error_event(error, iommu->pbdev->fh,
+                                      iommu->pbdev->fid, addr, 0);
+    }
     return ret;
 }
 
-static const MemoryRegionIOMMUOps s390_iommu_ops = {
-    .translate = s390_translate_iommu,
-};
+static void s390_pci_iommu_replay(IOMMUMemoryRegion *iommu,
+                                  IOMMUNotifier *notifier)
+{
+    /* It's impossible to plug a pci device on s390x that already has iommu
+     * mappings which need to be replayed, that is due to the "one iommu per
+     * zpci device" construct. But when we support migration of vfio-pci
+     * devices in future, we need to revisit this.
+     */
+    return;
+}
 
 static S390PCIIOMMU *s390_pci_get_iommu(S390pciState *s, PCIBus *bus,
                                         int devfn)
@@ -417,7 +559,7 @@ static S390PCIIOMMU *s390_pci_get_iommu(S390pciState *s, PCIBus *bus,
     S390PCIIOMMU *iommu;
 
     if (!table) {
-        table = g_malloc0(sizeof(S390PCIIOMMUTable));
+        table = g_new0(S390PCIIOMMUTable, 1);
         table->key = key;
         g_hash_table_insert(s->iommu_table, &table->key, table);
     }
@@ -436,6 +578,8 @@ static S390PCIIOMMU *s390_pci_get_iommu(S390pciState *s, PCIBus *bus,
                                         PCI_FUNC(devfn));
         memory_region_init(&iommu->mr, OBJECT(iommu), mr_name, UINT64_MAX);
         address_space_init(&iommu->as, &iommu->mr, as_name);
+        iommu->iotlb = g_hash_table_new_full(g_int64_hash, g_int64_equal,
+                                             NULL, g_free);
         table->iommu[PCI_SLOT(devfn)] = iommu;
 
         g_free(mr_name);
@@ -477,19 +621,13 @@ static void s390_msi_ctrl_write(void *opaque, hwaddr addr, uint64_t data,
                                 unsigned int size)
 {
     S390PCIBusDevice *pbdev = opaque;
-    uint32_t idx = data >> ZPCI_MSI_VEC_BITS;
     uint32_t vec = data & ZPCI_MSI_VEC_MASK;
     uint64_t ind_bit;
     uint32_t sum_bit;
-    uint32_t e = 0;
 
-    DPRINTF("write_msix data 0x%" PRIx64 " idx %d vec 0x%x\n", data, idx, vec);
-
-    if (!pbdev) {
-        e |= (vec << ERR_EVENT_MVN_OFFSET);
-        s390_pci_generate_error_event(ERR_EVENT_NOMSI, idx, 0, addr, e);
-        return;
-    }
+    assert(pbdev);
+    DPRINTF("write_msix data 0x%" PRIx64 " idx %d vec 0x%x\n", data,
+            pbdev->idx, vec);
 
     if (pbdev->state != ZPCI_FS_ENABLED) {
         return;
@@ -502,7 +640,7 @@ static void s390_msi_ctrl_write(void *opaque, hwaddr addr, uint64_t data,
                    0x80 >> ((ind_bit + vec) % 8));
     if (!set_ind_atomic(pbdev->routes.adapter.summary_addr + sum_bit / 8,
                                        0x80 >> (sum_bit % 8))) {
-        css_adapter_interrupt(pbdev->isc);
+        css_adapter_interrupt(CSS_IO_ADAPTER_PCI, pbdev->isc);
     }
 }
 
@@ -520,17 +658,19 @@ static const MemoryRegionOps s390_msi_ctrl_ops = {
 void s390_pci_iommu_enable(S390PCIIOMMU *iommu)
 {
     char *name = g_strdup_printf("iommu-s390-%04x", iommu->pbdev->uid);
-    memory_region_init_iommu(&iommu->iommu_mr, OBJECT(&iommu->mr),
-                             &s390_iommu_ops, name, iommu->pal + 1);
+    memory_region_init_iommu(&iommu->iommu_mr, sizeof(iommu->iommu_mr),
+                             TYPE_S390_IOMMU_MEMORY_REGION, OBJECT(&iommu->mr),
+                             name, iommu->pal + 1);
     iommu->enabled = true;
-    memory_region_add_subregion(&iommu->mr, 0, &iommu->iommu_mr);
+    memory_region_add_subregion(&iommu->mr, 0, MEMORY_REGION(&iommu->iommu_mr));
     g_free(name);
 }
 
 void s390_pci_iommu_disable(S390PCIIOMMU *iommu)
 {
     iommu->enabled = false;
-    memory_region_del_subregion(&iommu->mr, &iommu->iommu_mr);
+    g_hash_table_remove_all(iommu->iotlb);
+    memory_region_del_subregion(&iommu->mr, MEMORY_REGION(&iommu->iommu_mr));
     object_unparent(OBJECT(&iommu->iommu_mr));
 }
 
@@ -545,6 +685,7 @@ static void s390_pci_iommu_free(S390pciState *s, PCIBus *bus, int32_t devfn)
     }
 
     table->iommu[PCI_SLOT(devfn)] = NULL;
+    g_hash_table_destroy(iommu->iotlb);
     address_space_destroy(&iommu->as);
     object_unparent(OBJECT(&iommu->mr));
     object_unparent(OBJECT(iommu));
@@ -560,10 +701,10 @@ static int s390_pcihost_init(SysBusDevice *dev)
 
     DPRINTF("host_init\n");
 
-    b = pci_register_bus(DEVICE(dev), NULL,
-                         s390_pci_set_irq, s390_pci_map_irq, NULL,
-                         get_system_memory(), get_system_io(), 0, 64,
-                         TYPE_PCI_BUS);
+    b = pci_register_root_bus(DEVICE(dev), NULL,
+                              s390_pci_set_irq, s390_pci_map_irq, NULL,
+                              get_system_memory(), get_system_io(), 0, 64,
+                              TYPE_PCI_BUS);
     pci_setup_iommu(b, s390_pci_dma_iommu, s);
 
     bus = BUS(b);
@@ -579,6 +720,10 @@ static int s390_pcihost_init(SysBusDevice *dev)
     s->bus_no = 0;
     QTAILQ_INIT(&s->pending_sei);
     QTAILQ_INIT(&s->zpci_devs);
+
+    css_register_io_adapters(CSS_IO_ADAPTER_PCI, true, false,
+                             S390_ADAPTER_SUPPRESSIBLE, &error_abort);
+
     return 0;
 }
 
@@ -671,6 +816,11 @@ static void s390_pcihost_hot_plug(HotplugHandler *hotplug_dev,
         PCIBridge *pb = PCI_BRIDGE(dev);
         PCIDevice *pdev = PCI_DEVICE(dev);
 
+        if (pdev->cap_present & QEMU_PCI_CAP_MULTIFUNCTION) {
+            error_setg(errp, "multifunction not supported in s390");
+            return;
+        }
+
         pci_bridge_map_irq(pb, dev->id, s390_pci_map_irq);
         pci_setup_iommu(&pb->sec_bus, s390_pci_dma_iommu, s);
 
@@ -682,19 +832,24 @@ static void s390_pcihost_hot_plug(HotplugHandler *hotplug_dev,
             s->bus_no += 1;
             pci_default_write_config(pdev, PCI_SECONDARY_BUS, s->bus_no, 1);
             do {
-                pdev = pdev->bus->parent_dev;
+                pdev = pci_get_bus(pdev)->parent_dev;
                 pci_default_write_config(pdev, PCI_SUBORDINATE_BUS,
                                          s->bus_no, 1);
-            } while (pdev->bus && pci_bus_num(pdev->bus));
+            } while (pci_get_bus(pdev) && pci_dev_bus_num(pdev));
         }
     } else if (object_dynamic_cast(OBJECT(dev), TYPE_PCI_DEVICE)) {
         pdev = PCI_DEVICE(dev);
+
+        if (pdev->cap_present & QEMU_PCI_CAP_MULTIFUNCTION) {
+            error_setg(errp, "multifunction not supported in s390");
+            return;
+        }
 
         if (!dev->id) {
             /* In the case the PCI device does not define an id */
             /* we generate one based on the PCI address         */
             dev->id = g_strdup_printf("auto_%02x:%02x.%01x",
-                                      pci_bus_num(pdev->bus),
+                                      pci_dev_bus_num(pdev),
                                       PCI_SLOT(pdev->devfn),
                                       PCI_FUNC(pdev->devfn));
         }
@@ -715,9 +870,9 @@ static void s390_pcihost_hot_plug(HotplugHandler *hotplug_dev,
         }
 
         pbdev->pdev = pdev;
-        pbdev->iommu = s390_pci_get_iommu(s, pdev->bus, pdev->devfn);
+        pbdev->iommu = s390_pci_get_iommu(s, pci_get_bus(pdev), pdev->devfn);
         pbdev->iommu->pbdev = pbdev;
-        pbdev->state = ZPCI_FS_STANDBY;
+        pbdev->state = ZPCI_FS_DISABLED;
 
         if (s390_pci_msix_init(pbdev)) {
             error_setg(errp, "MSI-X support is mandatory "
@@ -809,7 +964,7 @@ static void s390_pcihost_hot_unplug(HotplugHandler *hotplug_dev,
 
     s390_pci_generate_plug_event(HP_EVENT_STANDBY_TO_RESERVED,
                                  pbdev->fh, pbdev->fid);
-    bus = pci_dev->bus;
+    bus = pci_get_bus(pci_dev);
     devfn = pci_dev->devfn;
     object_unparent(OBJECT(pci_dev));
     s390_pci_msix_free(pbdev);
@@ -867,7 +1022,6 @@ static void s390_pcihost_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     HotplugHandlerClass *hc = HOTPLUG_HANDLER_CLASS(klass);
 
-    dc->cannot_instantiate_with_device_add_yet = true;
     dc->reset = s390_pcihost_reset;
     k->init = s390_pcihost_init;
     hc->plug = s390_pcihost_hot_plug;
@@ -1014,7 +1168,7 @@ static void s390_pci_set_fid(Object *obj, Visitor *v, const char *name,
     zpci->fid_defined = true;
 }
 
-static PropertyInfo s390_pci_fid_propinfo = {
+static const PropertyInfo s390_pci_fid_propinfo = {
     .name = "zpci_fid",
     .get = s390_pci_get_fid,
     .set = s390_pci_set_fid,
@@ -1035,6 +1189,7 @@ static void s390_pci_device_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->desc = "zpci device";
+    set_bit(DEVICE_CATEGORY_MISC, dc->categories);
     dc->reset = s390_pci_device_reset;
     dc->bus_type = TYPE_S390_PCI_BUS;
     dc->realize = s390_pci_device_realize;
@@ -1054,12 +1209,27 @@ static TypeInfo s390_pci_iommu_info = {
     .instance_size = sizeof(S390PCIIOMMU),
 };
 
+static void s390_iommu_memory_region_class_init(ObjectClass *klass, void *data)
+{
+    IOMMUMemoryRegionClass *imrc = IOMMU_MEMORY_REGION_CLASS(klass);
+
+    imrc->translate = s390_translate_iommu;
+    imrc->replay = s390_pci_iommu_replay;
+}
+
+static const TypeInfo s390_iommu_memory_region_info = {
+    .parent = TYPE_IOMMU_MEMORY_REGION,
+    .name = TYPE_S390_IOMMU_MEMORY_REGION,
+    .class_init = s390_iommu_memory_region_class_init,
+};
+
 static void s390_pci_register_types(void)
 {
     type_register_static(&s390_pcihost_info);
     type_register_static(&s390_pcibus_info);
     type_register_static(&s390_pci_device_info);
     type_register_static(&s390_pci_iommu_info);
+    type_register_static(&s390_iommu_memory_region_info);
 }
 
 type_init(s390_pci_register_types)
