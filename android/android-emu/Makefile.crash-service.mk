@@ -150,6 +150,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
     android/crashreport/CrashService_unittest.cpp \
     android/crashreport/CrashSystem_unittest.cpp \
+    android/crashreport/HangDetector_unittest.cpp \
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
