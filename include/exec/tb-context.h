@@ -31,9 +31,8 @@ typedef struct TBContext TBContext;
 
 struct TBContext {
 
-    TranslationBlock *tbs;
+    GTree *tb_tree;
     struct qht htable;
-    int nb_tbs;
     /* any access to the tbs or the page table must use this lock */
     QemuMutex tb_lock;
 
@@ -41,5 +40,7 @@ struct TBContext {
     unsigned tb_flush_count;
     int tb_phys_invalidate_count;
 };
+
+extern TBContext tb_ctx;
 
 #endif

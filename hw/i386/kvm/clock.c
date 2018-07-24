@@ -19,6 +19,7 @@
 #include "qemu/host-utils.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/kvm.h"
+#include "sysemu/hw_accel.h"
 #include "kvm_i386.h"
 #include "hw/sysbus.h"
 #include "hw/kvm/clock.h"
@@ -61,7 +62,7 @@ static uint64_t kvmclock_current_nsec(KVMClockState *s)
 {
     CPUState *cpu = first_cpu;
     CPUX86State *env = cpu->env_ptr;
-    hwaddr kvmclock_struct_pa = env->system_time_msr & ~1ULL;
+    hwaddr kvmclock_struct_pa;
     uint64_t migration_tsc = env->tsc;
     struct pvclock_vcpu_time_info time;
     uint64_t delta;
@@ -69,11 +70,14 @@ static uint64_t kvmclock_current_nsec(KVMClockState *s)
     uint64_t nsec_hi;
     uint64_t nsec;
 
+    cpu_synchronize_state(cpu);
+
     if (!(env->system_time_msr & 1ULL)) {
         /* KVM clock not active */
         return 0;
     }
 
+    kvmclock_struct_pa = env->system_time_msr & ~1ULL;
     cpu_physical_memory_read(kvmclock_struct_pa, &time, sizeof(time));
 
     assert(time.tsc_timestamp <= migration_tsc);
@@ -238,6 +242,19 @@ static const VMStateDescription kvmclock_reliable_get_clock = {
 };
 
 /*
+ * When migrating, assume the source has an unreliable
+ * KVM_GET_CLOCK unless told otherwise.
+ */
+static int kvmclock_pre_load(void *opaque)
+{
+    KVMClockState *s = opaque;
+
+    s->clock_is_reliable = false;
+
+    return 0;
+}
+
+/*
  * When migrating, read the clock just before migration,
  * so that the guest clock counts during the events
  * between:
@@ -251,17 +268,20 @@ static const VMStateDescription kvmclock_reliable_get_clock = {
  *  final pages of memory (which happens between vm_stop()
  *  and pre_save()) takes max_downtime.
  */
-static void kvmclock_pre_save(void *opaque)
+static int kvmclock_pre_save(void *opaque)
 {
     KVMClockState *s = opaque;
 
     kvm_update_clock(s);
+
+    return 0;
 }
 
 static const VMStateDescription kvmclock_vmsd = {
     .name = "kvmclock",
     .version_id = 1,
     .minimum_version_id = 1,
+    .pre_load = kvmclock_pre_load,
     .pre_save = kvmclock_pre_save,
     .fields = (VMStateField[]) {
         VMSTATE_UINT64(clock, KVMClockState),

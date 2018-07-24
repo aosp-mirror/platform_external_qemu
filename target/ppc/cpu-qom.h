@@ -181,6 +181,7 @@ typedef struct PowerPCCPUClass {
     DeviceRealize parent_realize;
     DeviceUnrealize parent_unrealize;
     void (*parent_reset)(CPUState *cpu);
+    void (*parent_parse_features)(const char *type, char *str, Error **errp);
 
     uint32_t pvr;
     bool (*pvr_match)(struct PowerPCCPUClass *pcc, uint32_t pvr);
@@ -190,6 +191,7 @@ typedef struct PowerPCCPUClass {
     uint64_t insns_flags;
     uint64_t insns_flags2;
     uint64_t msr_mask;
+    uint64_t lpcr_pm;           /* Power-saving mode Exit Cause Enable bits */
     powerpc_mmu_t   mmu_model;
     powerpc_excp_t  excp_model;
     powerpc_input_t bus_model;
@@ -197,6 +199,7 @@ typedef struct PowerPCCPUClass {
     int bfd_mach;
     uint32_t l1_dcache_size, l1_icache_size;
     const struct ppc_segment_page_sizes *sps;
+    struct ppc_radix_page_info *radix_page_info;
     void (*init_proc)(CPUPPCState *env);
     int  (*check_pow)(CPUPPCState *env);
     int (*handle_mmu_fault)(PowerPCCPU *cpu, vaddr eaddr, int rwx, int mmu_idx);

@@ -11,7 +11,8 @@
  */
 
 #include "qemu/osdep.h"
-#include "qmp-commands.h"
+#include "qapi/error.h"
+#include "qapi/qapi-commands-misc.h"
 #include "hw/acpi/acpi.h"
 #include "hw/acpi/aml-build.h"
 #include "hw/acpi/vmgenid.h"
@@ -124,7 +125,7 @@ void vmgenid_add_fw_cfg(VmGenIdState *vms, FWCfgState *s, GArray *guid)
     fw_cfg_add_file(s, VMGENID_GUID_FW_CFG_FILE, guid->data,
                     VMGENID_FW_CFG_SIZE);
     /* Create a read-write fw_cfg file for Address */
-    fw_cfg_add_file_callback(s, VMGENID_ADDR_FW_CFG_FILE, NULL, NULL,
+    fw_cfg_add_file_callback(s, VMGENID_ADDR_FW_CFG_FILE, NULL, NULL, NULL,
                              vms->vmgenid_addr_le,
                              ARRAY_SIZE(vms->vmgenid_addr_le), false);
 }
@@ -162,21 +163,6 @@ static void vmgenid_update_guest(VmGenIdState *vms)
     }
 }
 
-static void vmgenid_set_guid(Object *obj, const char *value, Error **errp)
-{
-    VmGenIdState *vms = VMGENID(obj);
-
-    if (!strcmp(value, "auto")) {
-        qemu_uuid_generate(&vms->guid);
-    } else if (qemu_uuid_parse(value, &vms->guid) < 0) {
-        error_setg(errp, "'%s. %s': Failed to parse GUID string: %s",
-                   object_get_typename(OBJECT(vms)), VMGENID_GUID, value);
-        return;
-    }
-
-    vmgenid_update_guest(vms);
-}
-
 /* After restoring an image, we need to update the guest memory and notify
  * it of a potential change to VM Generation ID
  */
@@ -205,17 +191,11 @@ static void vmgenid_handle_reset(void *opaque)
     memset(vms->vmgenid_addr_le, 0, ARRAY_SIZE(vms->vmgenid_addr_le));
 }
 
-static Property vmgenid_properties[] = {
-    DEFINE_PROP_BOOL("x-write-pointer-available", VmGenIdState,
-                     write_pointer_available, true),
-    DEFINE_PROP_END_OF_LIST(),
-};
-
 static void vmgenid_realize(DeviceState *dev, Error **errp)
 {
     VmGenIdState *vms = VMGENID(dev);
 
-    if (!vms->write_pointer_available) {
+    if (!bios_linker_loader_can_write_pointer()) {
         error_setg(errp, "%s requires DMA write support in fw_cfg, "
                    "which this machine type does not provide", VMGENID_DEVICE);
         return;
@@ -230,7 +210,14 @@ static void vmgenid_realize(DeviceState *dev, Error **errp)
     }
 
     qemu_register_reset(vmgenid_handle_reset, vms);
+
+    vmgenid_update_guest(vms);
 }
+
+static Property vmgenid_device_properties[] = {
+    DEFINE_PROP_UUID(VMGENID_GUID, VmGenIdState, guid),
+    DEFINE_PROP_END_OF_LIST(),
+};
 
 static void vmgenid_device_class_init(ObjectClass *klass, void *data)
 {
@@ -238,15 +225,9 @@ static void vmgenid_device_class_init(ObjectClass *klass, void *data)
 
     dc->vmsd = &vmstate_vmgenid;
     dc->realize = vmgenid_realize;
+    dc->props = vmgenid_device_properties;
     dc->hotpluggable = false;
-    dc->props = vmgenid_properties;
-
-    object_class_property_add_str(klass, VMGENID_GUID, NULL,
-                                  vmgenid_set_guid, NULL);
-    object_class_property_set_description(klass, VMGENID_GUID,
-                                    "Set Global Unique Identifier "
-                                    "(big-endian) or auto for random value",
-                                    NULL);
+    set_bit(DEVICE_CATEGORY_MISC, dc->categories);
 }
 
 static const TypeInfo vmgenid_device_info = {

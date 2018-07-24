@@ -3,7 +3,6 @@ $(call start-emulator-program,qemu-img)
 LOCAL_STATIC_LIBRARIES := \
     $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
     libqemu2-util \
-    libqemu2-stubs \
 
 LOCAL_CFLAGS := \
     $(QEMU2_SYSTEM_CFLAGS) \
@@ -13,10 +12,7 @@ LOCAL_C_INCLUDES := \
     $(QEMU2_SDL2_INCLUDES) \
 
 LOCAL_SRC_FILES := \
-    stubs/exec.c \
-    qemu-img.c \
     block.c \
-    blockjob.c \
     block/accounting.c \
     block/backup.c \
     block/blkdebug.c \
@@ -38,6 +34,7 @@ LOCAL_SRC_FILES := \
     block/parallels.c \
     block/qapi.c \
     block/qcow.c \
+    block/qcow2-bitmap.c \
     block/qcow2-cache.c \
     block/qcow2-cluster.c \
     block/qcow2-refcount.c \
@@ -45,7 +42,6 @@ LOCAL_SRC_FILES := \
     block/qcow2.c \
     block/qed-check.c \
     block/qed-cluster.c \
-    block/qed-gencb.c \
     block/qed-l2-cache.c \
     block/qed-table.c \
     block/qed.c \
@@ -65,6 +61,7 @@ LOCAL_SRC_FILES := \
     block/vvfat.c \
     block/write-threshold.c \
     blockdev-nbd.c \
+    blockjob.c \
     crypto/aes.c \
     crypto/afsplit.c \
     crypto/block-luks.c \
@@ -91,6 +88,8 @@ LOCAL_SRC_FILES := \
     crypto/xts.c \
     disas/i386.c \
     io/channel-buffer.c \
+    io/dns-resolver.c \
+    io/net-listener.c \
     io/channel-command.c \
     io/channel-file.c \
     io/channel-socket.c \
@@ -104,12 +103,13 @@ LOCAL_SRC_FILES := \
     nbd/client.c \
     nbd/common.c \
     nbd/server.c \
-    page_cache.c \
+    qemu-img.c \
     qom/container.c \
     qom/object.c \
     qom/object_interfaces.c \
     qom/qom-qobject.c \
     replication.c \
+    stubs/exec.c \
     $(QEMU2_AUTO_GENERATED_DIR)/block/trace.c \
     $(QEMU2_AUTO_GENERATED_DIR)/crypto/trace.c \
     $(QEMU2_AUTO_GENERATED_DIR)/io/trace.c \
@@ -121,6 +121,9 @@ LOCAL_SRC_FILES := \
         block/file-win32.c \
         block/win32-aio.c \
         ) \
+    $(call qemu2-if-linux, \
+        scsi/pr-manager.c \
+        )\
     $(call qemu2-if-posix, \
         block/file-posix.c \
         ) \

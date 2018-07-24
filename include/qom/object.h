@@ -14,7 +14,7 @@
 #ifndef QEMU_OBJECT_H
 #define QEMU_OBJECT_H
 
-#include "qapi-types.h"
+#include "qapi/qapi-builtin-types.h"
 #include "qemu/queue.h"
 
 struct TypeImpl;
@@ -78,6 +78,28 @@ typedef struct InterfaceInfo InterfaceInfo;
  * In the above example, we create a simple type that is described by #TypeInfo.
  * #TypeInfo describes information about the type including what it inherits
  * from, the instance and class size, and constructor/destructor hooks.
+ *
+ * Alternatively several static types could be registered using helper macro
+ * DEFINE_TYPES()
+ *
+ * <example>
+ *   <programlisting>
+ * static const TypeInfo device_types_info[] = {
+ *     {
+ *         .name = TYPE_MY_DEVICE_A,
+ *         .parent = TYPE_DEVICE,
+ *         .instance_size = sizeof(MyDeviceA),
+ *     },
+ *     {
+ *         .name = TYPE_MY_DEVICE_B,
+ *         .parent = TYPE_DEVICE,
+ *         .instance_size = sizeof(MyDeviceB),
+ *     },
+ * };
+ *
+ * DEFINE_TYPES(device_types_info)
+ *   </programlisting>
+ * </example>
  *
  * Every type has an #ObjectClass associated with it.  #ObjectClass derivatives
  * are instantiated dynamically but there is only ever one instance for any
@@ -764,7 +786,7 @@ ObjectClass *object_get_class(Object *obj);
  *
  * Returns: The QOM typename of @obj.
  */
-const char *object_get_typename(Object *obj);
+const char *object_get_typename(const Object *obj);
 
 /**
  * type_register_static:
@@ -773,7 +795,7 @@ const char *object_get_typename(Object *obj);
  * @info and all of the strings it points to should exist for the life time
  * that the type is registered.
  *
- * Returns: 0 on failure, the new #Type on success.
+ * Returns: the new #Type.
  */
 Type type_register_static(const TypeInfo *info);
 
@@ -784,9 +806,33 @@ Type type_register_static(const TypeInfo *info);
  * Unlike type_register_static(), this call does not require @info or its
  * string members to continue to exist after the call returns.
  *
- * Returns: 0 on failure, the new #Type on success.
+ * Returns: the new #Type.
  */
 Type type_register(const TypeInfo *info);
+
+/**
+ * type_register_static_array:
+ * @infos: The array of the new type #TypeInfo structures.
+ * @nr_infos: number of entries in @infos
+ *
+ * @infos and all of the strings it points to should exist for the life time
+ * that the type is registered.
+ */
+void type_register_static_array(const TypeInfo *infos, int nr_infos);
+
+/**
+ * DEFINE_TYPES:
+ * @type_array: The array containing #TypeInfo structures to register
+ *
+ * @type_array should be static constant that exists for the life time
+ * that the type is registered.
+ */
+#define DEFINE_TYPES(type_array)                                            \
+static void do_qemu_init_ ## type_array(void)                               \
+{                                                                           \
+    type_register_static_array(type_array, ARRAY_SIZE(type_array));         \
+}                                                                           \
+type_init(do_qemu_init_ ## type_array)
 
 /**
  * object_class_dynamic_cast_assert:
@@ -865,6 +911,17 @@ void object_class_foreach(void (*fn)(ObjectClass *klass, void *opaque),
  * Returns: A singly-linked list of the classes in reverse hashtable order.
  */
 GSList *object_class_get_list(const char *implements_type,
+                              bool include_abstract);
+
+/**
+ * object_class_get_list_sorted:
+ * @implements_type: The type to filter for, including its derivatives.
+ * @include_abstract: Whether to include abstract classes.
+ *
+ * Returns: A singly-linked list of the classes in alphabetical
+ * case-insensitive order.
+ */
+GSList *object_class_get_list_sorted(const char *implements_type,
                               bool include_abstract);
 
 /**
@@ -969,6 +1026,22 @@ typedef struct ObjectPropertyIterator {
  */
 void object_property_iter_init(ObjectPropertyIterator *iter,
                                Object *obj);
+
+/**
+ * object_class_property_iter_init:
+ * @klass: the class
+ *
+ * Initializes an iterator for traversing all properties
+ * registered against an object class and all parent classes.
+ *
+ * It is forbidden to modify the property list while iterating,
+ * whether removing or adding properties.
+ *
+ * This can be used on abstract classes as it does not create a temporary
+ * instance.
+ */
+void object_class_property_iter_init(ObjectPropertyIterator *iter,
+                                     ObjectClass *klass);
 
 /**
  * object_property_iter_next:
@@ -1094,6 +1167,29 @@ int64_t object_property_get_int(Object *obj, const char *name,
                                 Error **errp);
 
 /**
+ * object_property_set_uint:
+ * @value: the value to be written to the property
+ * @name: the name of the property
+ * @errp: returns an error if this function fails
+ *
+ * Writes an unsigned integer value to a property.
+ */
+void object_property_set_uint(Object *obj, uint64_t value,
+                              const char *name, Error **errp);
+
+/**
+ * object_property_get_uint:
+ * @obj: the object
+ * @name: the name of the property
+ * @errp: returns an error if this function fails
+ *
+ * Returns: the value of the property, converted to an unsigned integer, or 0
+ * an error occurs (including when the property value is not an integer).
+ */
+uint64_t object_property_get_uint(Object *obj, const char *name,
+                                  Error **errp);
+
+/**
  * object_property_get_enum:
  * @obj: the object
  * @name: the name of the property
@@ -1191,6 +1287,17 @@ Object *object_get_root(void);
 Object *object_get_objects_root(void);
 
 /**
+ * object_get_internal_root:
+ *
+ * Get the container object that holds internally used object
+ * instances.  Any object which is put into this container must not be
+ * user visible, and it will not be exposed in the QOM tree.
+ *
+ * Returns: the internal object container
+ */
+Object *object_get_internal_root(void);
+
+/**
  * object_get_canonical_path_component:
  *
  * Returns: The final component in the object's canonical path.  The canonical
@@ -1213,12 +1320,12 @@ gchar *object_get_canonical_path(Object *obj);
  *   ambiguous match
  *
  * There are two types of supported paths--absolute paths and partial paths.
- * 
+ *
  * Absolute paths are derived from the root object and can follow child<> or
  * link<> properties.  Since they can follow link<> properties, they can be
  * arbitrarily long.  Absolute paths look like absolute filenames and are
  * prefixed with a leading slash.
- * 
+ *
  * Partial paths look like relative filenames.  They do not begin with a
  * prefix.  The matching rules for partial paths are subtle but designed to make
  * specifying objects easy.  At each level of the composition tree, the partial
@@ -1296,7 +1403,7 @@ typedef enum {
  * callback function.  It allows the link property to be set and never returns
  * an error.
  */
-void object_property_allow_set_link(Object *, const char *,
+void object_property_allow_set_link(const Object *, const char *,
                                     Object *, Error **);
 
 /**
@@ -1329,7 +1436,7 @@ void object_property_allow_set_link(Object *, const char *,
  */
 void object_property_add_link(Object *obj, const char *name,
                               const char *type, Object **child,
-                              void (*check)(Object *obj, const char *name,
+                              void (*check)(const Object *obj, const char *name,
                                             Object *val, Error **errp),
                               ObjectPropertyLinkFlags flags,
                               Error **errp);
@@ -1392,14 +1499,14 @@ void object_class_property_add_bool(ObjectClass *klass, const char *name,
  */
 void object_property_add_enum(Object *obj, const char *name,
                               const char *typename_,
-                              const char * const *strings,
+                              const QEnumLookup *lookup,
                               int (*get)(Object *, Error **),
                               void (*set)(Object *, int, Error **),
                               Error **errp);
 
 void object_class_property_add_enum(ObjectClass *klass, const char *name,
                                     const char *typename_,
-                                    const char * const *strings,
+                                    const QEnumLookup *lookup,
                                     int (*get)(Object *, Error **),
                                     void (*set)(Object *, int, Error **),
                                     Error **errp);

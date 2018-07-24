@@ -1,6 +1,7 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "cpu.h"
+#include "internal.h"
 #include "hw/hw.h"
 #include "migration/cpu.h"
 
@@ -211,8 +212,8 @@ const VMStateDescription vmstate_tlb = {
 
 const VMStateDescription vmstate_mips_cpu = {
     .name = "cpu",
-    .version_id = 9,
-    .minimum_version_id = 9,
+    .version_id = 10,
+    .minimum_version_id = 10,
     .post_load = cpu_post_load,
     .fields = (VMStateField[]) {
         /* Active TC */
@@ -252,6 +253,9 @@ const VMStateDescription vmstate_mips_cpu = {
         VMSTATE_UINTTL(env.CP0_Context, MIPSCPU),
         VMSTATE_INT32(env.CP0_PageMask, MIPSCPU),
         VMSTATE_INT32(env.CP0_PageGrain, MIPSCPU),
+        VMSTATE_UINTTL(env.CP0_SegCtl0, MIPSCPU),
+        VMSTATE_UINTTL(env.CP0_SegCtl1, MIPSCPU),
+        VMSTATE_UINTTL(env.CP0_SegCtl2, MIPSCPU),
         VMSTATE_INT32(env.CP0_Wired, MIPSCPU),
         VMSTATE_INT32(env.CP0_SRSConf0, MIPSCPU),
         VMSTATE_INT32(env.CP0_SRSConf1, MIPSCPU),
@@ -272,14 +276,13 @@ const VMStateDescription vmstate_mips_cpu = {
         VMSTATE_INT32(env.CP0_Cause, MIPSCPU),
         VMSTATE_UINTTL(env.CP0_EPC, MIPSCPU),
         VMSTATE_INT32(env.CP0_PRid, MIPSCPU),
-        VMSTATE_INT32(env.CP0_EBase, MIPSCPU),
+        VMSTATE_UINTTL(env.CP0_EBase, MIPSCPU),
         VMSTATE_INT32(env.CP0_Config0, MIPSCPU),
         VMSTATE_INT32(env.CP0_Config1, MIPSCPU),
         VMSTATE_INT32(env.CP0_Config2, MIPSCPU),
         VMSTATE_INT32(env.CP0_Config3, MIPSCPU),
         VMSTATE_INT32(env.CP0_Config6, MIPSCPU),
         VMSTATE_INT32(env.CP0_Config7, MIPSCPU),
-        VMSTATE_UINT64(env.CP0_LLAddr, MIPSCPU),
         VMSTATE_UINT64_ARRAY(env.CP0_MAAR, MIPSCPU, MIPS_MAAR_MAX),
         VMSTATE_INT32(env.CP0_MAARI, MIPSCPU),
         VMSTATE_UINTTL(env.lladdr, MIPSCPU),

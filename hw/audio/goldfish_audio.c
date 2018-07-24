@@ -14,7 +14,7 @@
 #include "audio/audio.h"
 #include "hw/sysbus.h"
 #include "qemu/error-report.h"
-#include "hw/audio/trace.h"
+#include "trace.h"
 
 #define TYPE_GOLDFISH_AUDIO "goldfish_audio"
 #define GOLDFISH_AUDIO(obj) OBJECT_CHECK(struct goldfish_audio_state, (obj), TYPE_GOLDFISH_AUDIO)

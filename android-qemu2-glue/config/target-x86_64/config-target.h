@@ -2,6 +2,7 @@
 #define TARGET_X86_64 1
 #define TARGET_NAME "x86_64"
 #define TARGET_I386 1
+#define CONFIG_TCG 1
 #ifdef __linux__
 
 #define CONFIG_KVM 1
