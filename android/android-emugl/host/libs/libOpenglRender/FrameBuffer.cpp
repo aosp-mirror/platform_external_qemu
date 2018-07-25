@@ -533,6 +533,11 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         sGlobals->condVar.broadcastAndUnlock(&lock);
     }
 
+    // Start up the single sync thread if GLAsyncSwap enabled
+    if (emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap)) {
+        SyncThread::get();
+    }
+
     GL_LOG("basic EGL initialization successful");
     return true;
 }
