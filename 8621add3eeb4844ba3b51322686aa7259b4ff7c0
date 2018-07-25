@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "134e58f0_957af2a5",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-25T02:01:48Z",
+      "side": 1,
+      "message": "Is it important that cornerOverlayType not be accessed from multiple threads? We could ensure it does not, by adding sGlobals-\u003ecornerOverlayType to the lambda capture list.",
+      "range": {
+        "startLine": 144,
+        "startChar": 30,
+        "endLine": 144,
+        "endChar": 57
+      },
+      "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b90d4c4e_47634fed",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-25T02:01:48Z",
+      "side": 1,
+      "message": "example: [cutoutType \u003d sGlobals-\u003ecutoutType]() { ... }\n\nwould create a copy\n\nhttps://en.cppreference.com/w/cpp/language/lambda#Lambda_capture\n\n\"The identifier in any capture without an initializer (other than the this-capture) is looked up using usual unqualified name lookup in the reaching scope of the lambda. The result of the lookup must be a variable with automatic storage duration declared in the reaching scope. The variable (or this) is explicitly captured.\n\nA capture with an initializer acts as if it declares and explicitly captures a variable declared with type auto, whose declarative region is the body of the lambda expression (that is, it is not in scope within its initializer), except that:\n\nif the capture is by-copy, the non-static data member of the closure object is another way to refer to that auto variable.\nif the capture is by-reference, the reference variable\u0027s lifetime ends when the lifetime of the closure object ends\nThis is used to capture move-only types with a capture such as x \u003d std::move(x).\n\nThis also makes it possible to capture by const reference, with \u0026cr \u003d std::as_const(x) or similar.\n\nint x \u003d 4;\nauto y \u003d [\u0026r \u003d x, x \u003d x + 1]()-\u003eint\n    {\n        r +\u003d 2;\n        return x * x;\n    }(); // updates ::x to 6 and initializes y to 25.\"",
+      "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f418b05f_a04e39db",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-25T02:01:48Z",
+      "side": 1,
+      "message": "same for sGlobals-\u003ecutoutType",
+      "range": {
+        "startLine": 167,
+        "startChar": 30,
+        "endLine": 167,
+        "endChar": 50
+      },
+      "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
