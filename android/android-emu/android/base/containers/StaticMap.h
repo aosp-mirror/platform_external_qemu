@@ -17,6 +17,7 @@
 #include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
 
+#include <functional>
 #include <unordered_map>
 
 namespace android {
@@ -52,6 +53,20 @@ public:
             return android::base::kNullopt;
         }
         return it->second;
+    }
+
+    using ForEachWithEraseFunc = std::function<bool (K, V)>;
+
+    void forEachWithErase(ForEachWithEraseFunc&& f) {
+        AutoLock lock(mLock);
+        auto it = mItems.begin();
+        for (; it != mItems.end();) {
+            if (f(it->first, it->second)) {
+                it = mItems.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
 private:

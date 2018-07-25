@@ -339,11 +339,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     if (asyncSwapEnabled && name == GL_EXTENSIONS) {
         glStr += kAsyncSwapStrV2;
         glStr += " "; // for compatibility with older system images
-        // Only enable EGL_KHR_wait_sync for host gpu.
-        if (emugl::getRenderer() == SELECTED_RENDERER_HOST) {
             glStr += kAsyncSwapStrV3;
             glStr += " ";
-        }
     }
 
     if (dmaEnabled && name == GL_EXTENSIONS) {
