@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77b579f0_2a0a1ae8",
+        "filename": "android/android-emu/android/base/containers/StaticMap.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-25T17:28:00Z",
+      "side": 1,
+      "message": "this kind of algorithm is usually called \"eraseIf()\"\nyou can actually use a FunctionView here",
+      "range": {
+        "startLine": 60,
+        "startChar": 9,
+        "endLine": 60,
+        "endChar": 25
+      },
+      "revId": "14ed10774a55c81f1ef52062a834a266feb53a6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc3d00bc_2b3c6fe2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-25T17:28:00Z",
+      "side": 1,
+      "message": "I\u0027m pretty sure it won\u0027t compile with \"\u003d\" here, just remove it",
+      "range": {
+        "startLine": 78,
+        "startChar": 27,
+        "endLine": 78,
+        "endChar": 28
+      },
+      "revId": "14ed10774a55c81f1ef52062a834a266feb53a6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9643d4f6_11e51ad7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-25T17:28:00Z",
+      "side": 1,
+      "message": "nit\nbtw, do you need those only for debugging? use ANDROID_IF_DEBUG() then",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 27
+      },
+      "revId": "14ed10774a55c81f1ef52062a834a266feb53a6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
