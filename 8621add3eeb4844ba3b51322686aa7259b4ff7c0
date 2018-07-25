@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "44430bf5_50132cac",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-25T19:04:22Z",
+      "side": 1,
+      "message": "I think it\u0027s all protected by the lock, but I like the concept of capturing the values anyway.",
+      "parentUuid": "134e58f0_957af2a5",
+      "range": {
+        "startLine": 144,
+        "startChar": 30,
+        "endLine": 144,
+        "endChar": 57
+      },
+      "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b90d4c4e_47634fed",
         "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
         "patchSetId": 5
@@ -39,6 +63,24 @@
       "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e56baf07_c25820a6",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-25T19:04:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b90d4c4e_47634fed",
+      "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -62,6 +104,30 @@
       "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7c071b3_9b981252",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-25T19:04:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f418b05f_a04e39db",
+      "range": {
+        "startLine": 167,
+        "startChar": 30,
+        "endLine": 167,
+        "endChar": 50
+      },
+      "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
