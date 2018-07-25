@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3488d709_99568618",
+        "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-25T19:05:52Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "44430bf5_50132cac",
+      "range": {
+        "startLine": 144,
+        "startChar": 30,
+        "endLine": 144,
+        "endChar": 57
+      },
+      "revId": "8621add3eeb4844ba3b51322686aa7259b4ff7c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b90d4c4e_47634fed",
         "filename": "android/android-emu/android/skin/qt/screen-mask.cpp",
         "patchSetId": 5
