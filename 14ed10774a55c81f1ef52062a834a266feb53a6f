@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "570410cd_b2032bb8",
+        "filename": "android/android-emu/android/base/containers/StaticMap.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-25T17:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77b579f0_2a0a1ae8",
+      "range": {
+        "startLine": 60,
+        "startChar": 9,
+        "endLine": 60,
+        "endChar": 25
+      },
+      "revId": "14ed10774a55c81f1ef52062a834a266feb53a6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc3d00bc_2b3c6fe2",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "4e7c10e3_30ab001f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-25T17:37:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc3d00bc_2b3c6fe2",
+      "range": {
+        "startLine": 78,
+        "startChar": 27,
+        "endLine": 78,
+        "endChar": 28
+      },
+      "revId": "14ed10774a55c81f1ef52062a834a266feb53a6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9643d4f6_11e51ad7",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
         "patchSetId": 3
@@ -68,6 +116,30 @@
       "revId": "14ed10774a55c81f1ef52062a834a266feb53a6f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87ba0ba1_6f91992f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-25T17:37:44Z",
+      "side": 1,
+      "message": "Ah, thanks for catching this; it is not needed.",
+      "parentUuid": "9643d4f6_11e51ad7",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 27
+      },
+      "revId": "14ed10774a55c81f1ef52062a834a266feb53a6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
