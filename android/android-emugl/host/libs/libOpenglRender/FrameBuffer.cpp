@@ -127,6 +127,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     int n;
     if (!s_egl.eglChooseConfig(p_dpy, configAttribs, &config, 1, &n) ||
         n == 0) {
+        GL_LOG("Could not find GLES 2.x config!", __FUNCTION__);
         ERR("%s: Could not find GLES 2.x config!\n", __FUNCTION__);
         return NULL;
     }
@@ -135,6 +136,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
 
     surface = s_egl.eglCreatePbufferSurface(p_dpy, config, pbufAttribs);
     if (surface == EGL_NO_SURFACE) {
+        GL_LOG("Could not create GLES 2.x Pbuffer!");
         ERR("%s: Could not create GLES 2.x Pbuffer!\n", __FUNCTION__);
         return NULL;
     }
@@ -142,12 +144,14 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
                                             getGlesMaxContextAttribs());
     if (ctx == EGL_NO_CONTEXT) {
+        GL_LOG("Could not create GLES 2.x Context!");
         ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         return NULL;
     }
 
     if (!s_egl.eglMakeCurrent(p_dpy, surface, surface, ctx)) {
+        GL_LOG("Could not make GLES 2.x context current!");
         ERR("%s: Could not make GLES 2.x context current!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
         s_egl.eglDestroyContext(p_dpy, ctx);
@@ -160,6 +164,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
 
     // It is rare but some drivers actually fail this...
     if (!s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL)) {
+        GL_LOG("Could not unbind context. Please try updating graphics card driver!");
         ERR("%s: Could not unbind context. Please try updating graphics card "
             "driver!\n",
             __FUNCTION__);
@@ -263,6 +268,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     std::unique_ptr<FrameBuffer> fb(
             new FrameBuffer(width, height, useSubWindow));
     if (!fb) {
+        GL_LOG("Failed to create fb");
         ERR("Failed to create fb\n");
         return false;
     }
@@ -274,6 +280,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     fb->m_eglDisplay = s_egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (fb->m_eglDisplay == EGL_NO_DISPLAY) {
+        GL_LOG("Failed to Initialize backend EGL display");
         ERR("Failed to Initialize backend EGL display\n");
         return false;
     }
@@ -281,8 +288,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     GL_LOG("call eglInitialize");
     if (!s_egl.eglInitialize(fb->m_eglDisplay, &fb->m_caps.eglMajor,
                              &fb->m_caps.eglMinor)) {
-        ERR("Failed to eglInitialize\n");
         GL_LOG("Failed to eglInitialize");
+        ERR("Failed to eglInitialize\n");
         return false;
     }
 
@@ -330,6 +337,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             getGLES2ExtensionString(fb->m_eglDisplay));
     if (!gles2Extensions) {
         // Could not create GLES2 context - drop GL2 capability
+        GL_LOG("Failed to obtain GLES 2.x extensions string!");
         ERR("Failed to obtain GLES 2.x extensions string!\n");
         return false;
     }
@@ -375,6 +383,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     if (exact_match_index < 0) {
+        GL_LOG("Failed on eglChooseConfig");
         ERR("Failed on eglChooseConfig\n");
         return false;
     }
@@ -385,6 +394,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                               EGL_NO_CONTEXT, getGlesMaxContextAttribs());
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
+        GL_LOG("Failed to create context 0x%x", s_egl.eglGetError());
         ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
         return false;
     }
@@ -402,6 +412,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                    fb->m_eglContext, getGlesMaxContextAttribs());
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
+        GL_LOG("Failed to create Pbuffer Context 0x%x", s_egl.eglGetError());
         ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
         return false;
     }
@@ -417,6 +428,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_pbufSurface = s_egl.eglCreatePbufferSurface(
             fb->m_eglDisplay, fb->m_eglConfig, pbufAttribs);
     if (fb->m_pbufSurface == EGL_NO_SURFACE) {
+        GL_LOG("Failed to create pbuf surface for FB 0x%x", s_egl.eglGetError());
         ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
         return false;
     }
@@ -425,6 +437,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // Make the context current
     ScopedBind bind(fb->m_colorBufferHelper);
     if (!bind.isOk()) {
+        GL_LOG("Failed to make current");
         ERR("Failed to make current\n");
         return false;
     }
@@ -457,6 +470,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //     GL_OES_EGL_IMAGE (by both GLES implementations [1 and 2])
     //
     if (!fb->m_caps.has_eglimage_texture_2d) {
+        GL_LOG("Failed: Missing egl_image related extension(s)");
         ERR("Failed: Missing egl_image related extension(s)\n");
         return false;
     }
@@ -467,6 +481,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     fb->m_configs = new FbConfigList(fb->m_eglDisplay);
     if (fb->m_configs->empty()) {
+        GL_LOG("Failed: Initialize set of configs");
         ERR("Failed: Initialize set of configs\n");
         return false;
     }
@@ -495,6 +510,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // If no configs at all, exit
     //
     if (nGLConfigs + nGL2Configs == 0) {
+        GL_LOG("Failed: No GLES 2.x configs found!");
         ERR("Failed: No GLES 2.x configs found!\n");
         return false;
     }
@@ -518,6 +534,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     fb->m_textureDraw = new TextureDraw();
     if (!fb->m_textureDraw) {
+        GL_LOG("Failed: creation of TextureDraw instance");
         ERR("Failed: creation of TextureDraw instance\n");
         return false;
     }
