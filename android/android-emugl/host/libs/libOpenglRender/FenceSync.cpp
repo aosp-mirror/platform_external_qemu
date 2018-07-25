@@ -23,18 +23,80 @@
 #include "StalePtrRegistry.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/containers/StaticMap.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
 #include <unordered_set>
 
+using android::base::AutoLock;
+using android::base::LazyInstance;
+using android::base::Lock;
+using android::base::StaticMap;
+
+// Timeline class is meant to delete native fences after the
+// sync device has incremented the timeline.  We assume a
+// maximum number of outstanding timelines in the guest (16) in
+// order to derive when a native fence is definitely safe to
+// delete. After at least that many timeline increments have
+// happened, we sweep away the remaining native fences.
+// The function that performs the deleting,
+// incrementTimelineAndDeleteOldFences(), happens on the SyncThread.
+
+class Timeline {
+public:
+    Timeline() = default;
+
+    static constexpr int kMaxGuestTimelines = 16;
+    void addFence(FenceSync* fence) {
+        mFences.set(fence, mTime.load() + kMaxGuestTimelines);
+    }
+
+    void incrementTimelineAndDeleteOldFences() {
+        ++mTime;
+        sweep();
+    }
+
+    void sweep() {
+        mFences.eraseIf([time = mTime.load()](FenceSync* fence, int fenceTime) {
+            FenceSync* actual = FenceSync::getFromHandle((uint64_t)(uintptr_t)fence);
+            if (!actual) return true;
+
+            bool shouldErase = fenceTime <= time;
+            if (shouldErase) {
+                if (!actual->decRef() &&
+                    actual->shouldDestroyWhenSignaled()) {
+                    actual->decRef();
+                }
+            }
+            return shouldErase;
+        });
+    }
+
+private:
+    std::atomic<int> mTime {0};
+    StaticMap<FenceSync*, int> mFences;
+};
+
+static LazyInstance<Timeline> sTimeline = LAZY_INSTANCE_INIT;
+
+// static
+void FenceSync::incrementTimelineAndDeleteOldFences() {
+    sTimeline->incrementTimelineAndDeleteOldFences();
+}
+
 FenceSync::FenceSync(bool hasNativeFence,
                      bool destroyWhenSignaled) :
     mDestroyWhenSignaled(destroyWhenSignaled) {
+
     addToRegistry();
 
     assert(mCount == 1);
-    if (hasNativeFence) incRef();
+    if (hasNativeFence) {
+        incRef();
+        sTimeline->addFence(this);
+    }
 
     // assumes that there is a valid + current OpenGL context
     assert(RenderThreadInfo::get());
@@ -62,21 +124,6 @@ EGLint FenceSync::wait(uint64_t timeout) {
 
 void FenceSync::waitAsync() {
     s_egl.eglWaitSyncKHR(mDisplay, mSync, 0);
-}
-
-void FenceSync::signaledNativeFd() {
-    if (!decRef() && mDestroyWhenSignaled) {
-        decRef();
-    }
-    // NOTE: Do not use anything like this construction:
-    // decRef();
-    // if (mDestroyWhenSignaled) ...
-    // If the object was originally constructed with
-    // mDestroyWhenSignaled == false,
-    // the first decRef() will have destroyed this object,
-    // which would make subsequent access to
-    // |mDestroyWhenSignaled| corrupt memory immediately.
-    // Please keep this in mind.
 }
 
 void FenceSync::destroy() {
