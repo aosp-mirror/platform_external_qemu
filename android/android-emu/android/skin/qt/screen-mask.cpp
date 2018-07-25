@@ -13,27 +13,40 @@
 #include "android/skin/qt/screen-mask.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/emulator-window.h"
 #include "android/globals.h"
 #include "android/utils/aconfig-file.h"
 
 #include <QDir>
 #include <QImageReader>
+#include <QQueue>
 #include <QString>
 
+using android::base::LazyInstance;
 using android::base::PathUtils;
 using android::emulation::AdbInterface;
 
+struct ScreenMaskGlobals {
+    // These allow us to re-send an ADB command
+    AdbInterface*        adbInterface = nullptr;
+    int                  adbRetryCountdown = 0;
+
+    QString              cutoutType;
+    QString              cornerOverlayType;
+    const char*          roundedContentPadding = 0;
+    android::base::Lock  adbLock;
+    QImage               screenMaskImage;
+
+    QQueue<std::function<void()>> funcQueue;
+};
+
+static LazyInstance<ScreenMaskGlobals> sGlobals = LAZY_INSTANCE_INIT;
+
 namespace ScreenMask {
 
-// These allow us to re-send an ADB command
-static AdbInterface* sAdbInterface = nullptr;
-static const char* sRoundedContentPadding = 0;
-static int sRetryCount = 0;
-
-static QImage sScreenMaskImage;
-
-static void sendAdbPaddingCommand();
+static constexpr int INITIAL_ADB_RETRY_LIMIT = 50;   // Max # retries for first ADB request
+static constexpr int SUBSEQUENT_ADB_RETRY_LIMIT = 5; // Max # retries for subsquent ADB requests
 
 // Load the image of the mask and set it for use on the
 // AVD's display
@@ -50,69 +63,131 @@ static void loadMaskImage(AConfig* config, char* skinDir, char* skinName) {
 
     // Read and decode this file
     QImageReader imageReader(maskPath);
-    sScreenMaskImage = imageReader.read();
-    if (sScreenMaskImage.isNull()) {
+    sGlobals->screenMaskImage = imageReader.read();
+    if (sGlobals->screenMaskImage.isNull()) {
         return;
     }
-    emulator_window_set_screen_mask(sScreenMaskImage.width(),
-                                    sScreenMaskImage.height(),
-                                    sScreenMaskImage.bits());
+    emulator_window_set_screen_mask(sGlobals->screenMaskImage.width(),
+                                    sGlobals->screenMaskImage.height(),
+                                    sGlobals->screenMaskImage.bits());
 }
 
-// Receive the results of the ADB command to set the padding value.
-// Re-try if the command failed.
+// Receive the results of the ADB command.
+// Either retry the current command, send the next command, or exit.
+//
+// adbLock should be acquired before sending the first ADB command. The
+// lock will remain held until this handler releases it.
 static void handleAdbResult(const android::emulation::OptionalAdbCommandResult& result) {
-
-    if (++sRetryCount > 50) {
-        // Too many failures. Give up.
-        return;
+    if (--sGlobals->adbRetryCountdown <= 0 ||
+            (result && (result->exit_code == 0)))
+    {
+        // Time out or success for this command.
+        // Either way, retire this command.
+        (void)sGlobals->funcQueue.dequeue();
+        if (sGlobals->funcQueue.isEmpty()) {
+            sGlobals->adbLock.unlock();
+            return;
+        }
+        sGlobals->adbRetryCountdown = SUBSEQUENT_ADB_RETRY_LIMIT;
     }
-
-    if (!result || (result->exit_code != 0)) {
-        // The command failed. Try again.
-        sendAdbPaddingCommand();
-    }
+    // Invoke the function at the head of the queue.
+    (sGlobals->funcQueue.head())();
 }
 
-// Send the ADB command to set the padding value.
-// The command is run asynchronously, so this function
-// returns immediately.
-static void sendAdbPaddingCommand() {
-    // Use ADB to send this value to the device:
-    // "adb shell settings put secure sysui_rounded_content_padding <nn>"
+static void setPaddingAndCutout(AConfig* config) {
+    // Grab the lock and hold it until we've emptied 'funcQueue'
+    sGlobals->adbLock.lock();
+    sGlobals->funcQueue.clear();
 
-    if (!sAdbInterface) {
-        return;
-    }
-
-    sAdbInterface->runAdbCommand(
-                {"shell", "settings", "put", "secure",
-                 "sysui_rounded_content_padding", sRoundedContentPadding },
-                 handleAdbResult, 5000);
-}
-
-// Get the padding value and apply it to the device
-static void setPadding(AConfig* config) {
-
+    // Padding
     // If the AVD display has rounded corners, the items on the
     // top line of the device display need to be moved in, away
-    // from the sides. Get the amount that they should be moved,
-    // and send that number to the device. The layout has this
-    // number as parts/portrait/foreground/padding
+    // from the sides.
+    //
+    // Pading for Oreo:
+    // Get the amount that the icons should be moved, and send
+    // that number to the device. The layout has this number as
+    // parts/portrait/foreground/padding
+    sGlobals->roundedContentPadding = aconfig_str(config, "padding", 0);
+    if (sGlobals->roundedContentPadding && sGlobals->roundedContentPadding[0] != '\0') {
+        sGlobals->funcQueue.enqueue(
+            [paddingValue = sGlobals->roundedContentPadding]() {
+                // Use ADB to send the padding value to the device:
+                // "adb shell settings put secure sysui_rounded_content_padding <nn>"
+                if (!sGlobals->adbInterface) {
+                    return;
+                }
+                sGlobals->adbInterface->runAdbCommand(
+                            { "shell", "settings", "put", "secure",
+                              "sysui_rounded_content_padding",
+                              paddingValue },
+                            handleAdbResult, 5000);
+            });
+    }
 
-    sRoundedContentPadding = aconfig_str(config, "padding", 0);
-    if (sRoundedContentPadding && sRoundedContentPadding[0] != '\0') {
-        sendAdbPaddingCommand();
+    // Padding for P and later:
+    // The padding value is set by selecting a resource overlay. The
+    // layout has the overlay name as parts/portrait/foreground/corner.
+    const char* cornerKeyword = aconfig_str(config, "corner", 0);
+    if (cornerKeyword && cornerKeyword[0] != '\0') {
+        sGlobals->cornerOverlayType = "com.android.internal.display.corner.emulation.";
+        sGlobals->cornerOverlayType += cornerKeyword;
+        sGlobals->funcQueue.enqueue(
+            [overlayString = sGlobals->cornerOverlayType.toStdString()]()
+            {
+                // Use ADB to enable a corner overlay on the device:
+                // "adb shell cmd overlay enable-exclusive
+                //         --category com.android.internal.display.corner.emulation.<type>"
+                if (!sGlobals->adbInterface) {
+                    return;
+                }
+                sGlobals->adbInterface->runAdbCommand(
+                            { "shell", "cmd", "overlay",
+                              "enable-exclusive", "--category",
+                              overlayString.c_str() },
+                            handleAdbResult, 5000);
+            });
+    }
+
+    // Cutout
+    // If the AVD display has a cutout, send a command to the device
+    // to have it adjust the screen layout appropriately. The layout
+    // has the emulated cutout name as parts/portrait/foreground/cutout.
+    const char* cutoutKeyword = aconfig_str(config, "cutout", 0);
+    if (cutoutKeyword && cutoutKeyword[0] != '\0') {
+        sGlobals->cutoutType = "com.android.internal.display.cutout.emulation.";
+        sGlobals->cutoutType += cutoutKeyword;
+        sGlobals->funcQueue.enqueue(
+            [cutoutString = sGlobals->cutoutType.toStdString()]() {
+                // Use ADB to enable a cutout overlay on the device:
+                // "adb shell cmd overlay enable-exclusive
+                //        --category com.android.internal.display.cutout.emulation.<type>"
+                if (!sGlobals->adbInterface) {
+                    return;
+                }
+                sGlobals->adbInterface->runAdbCommand(
+                            { "shell", "cmd", "overlay",
+                              "enable-exclusive", "--category",
+                              cutoutString.c_str() },
+                            handleAdbResult, 5000);
+            });
+    }
+    if (sGlobals->funcQueue.isEmpty()) {
+        sGlobals->adbLock.unlock();
+    } else {
+        // Start the ADB command process
+        sGlobals->adbRetryCountdown = INITIAL_ADB_RETRY_LIMIT;
+        (sGlobals->funcQueue.head())();
     }
 }
 
 // Handle the screen mask. This includes the mask image itself
-// and any associated padding offset.
+// and any associated cutout and padding offset.
 void loadMask(AdbInterface* adbInterface) {
     char* skinName;
     char* skinDir;
 
-    sAdbInterface = adbInterface; // We'll need this later
+    sGlobals->adbInterface = adbInterface; // We'll need this later
 
     avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
     QString layoutPath = PathUtils::join(skinDir, skinName, "layout").c_str();
@@ -132,7 +207,7 @@ void loadMask(AdbInterface* adbInterface) {
     AConfig* foregroundConfig = aconfig_find(nextConfig, "foreground");
 
     if (foregroundConfig != NULL) {
-        setPadding(foregroundConfig);
+        setPaddingAndCutout(foregroundConfig);
         loadMaskImage(foregroundConfig, skinDir, skinName);
     }
 }
