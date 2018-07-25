@@ -16,18 +16,14 @@
 
 #include "SyncThread.h"
 
-#include "DispatchTables.h"
-#include "FrameBuffer.h"
-#include "RenderThreadInfo.h"
-#include "StalePtrRegistry.h"
-
-#include "OpenGLESDispatch/EGLDispatch.h"
-
+#include "android/base/memory/LazyInstance.h"
 #include "android/utils/debug.h"
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/OpenGLDispatchLoader.h"
 #include "emugl/common/sync_device.h"
 
 #include <sys/time.h>
+#include <memory>
 
 #define DEBUG 0
 
@@ -50,24 +46,32 @@ static uint64_t curr_ms() {
 
 #endif
 
+using android::base::LazyInstance;
+
+// The single global sync thread instance.
+class GlobalSyncThread {
+public:
+    GlobalSyncThread() = default;
+
+    SyncThread* syncThreadPtr() { return &mSyncThread; }
+
+private:
+    SyncThread mSyncThread;
+};
+
+static LazyInstance<GlobalSyncThread> sGlobalSyncThread = LAZY_INSTANCE_INIT;
+
 static const uint32_t kTimelineInterval = 1;
 static const uint64_t kDefaultTimeoutNsecs = 5ULL * 1000ULL * 1000ULL * 1000ULL;
 
-SyncThread::SyncThread(EGLContext parentContext) :
-    emugl::Thread(android::base::ThreadFlags::MaskSignals, 512 * 1024),
-    mDisplay(EGL_NO_DISPLAY),
-    mContext(0), mSurf(0) {
-    if (parentContext == EGL_NO_CONTEXT) {
-        DPRINT("Warning: attempted to start a SyncThread "
-               "with EGL_NO_CONTEXT as parent context!");
-    }
-
-    FrameBuffer *fb = FrameBuffer::getFB();
-    mDisplay = fb->getDisplay();
-
+SyncThread::SyncThread() :
+    emugl::Thread(android::base::ThreadFlags::MaskSignals, 512 * 1024) {
     this->start();
-
     initSyncContext();
+}
+
+SyncThread::~SyncThread() {
+    cleanup();
 }
 
 void SyncThread::triggerWait(FenceSync* fenceSync,
@@ -87,7 +91,7 @@ void SyncThread::cleanup() {
     DPRINT("enter");
     SyncThreadCmd to_send;
     to_send.opCode = SYNC_THREAD_EXIT;
-    sendAsync(to_send);
+    sendAndWaitForResult(to_send);
     DPRINT("exit");
 }
 
@@ -150,21 +154,39 @@ void SyncThread::sendAsync(SyncThreadCmd& cmd) {
 }
 
 void SyncThread::doSyncContextInit() {
-    // |mTLS| is cleaned up on doExit(), which is called
-    // when RenderThreads exit.
-    // Note that this will make the subsequent
-    // FrameBuffer::*** calls use |mTLS| as thread local storage,
-    // because the semantics of the |RenderThreadInfo| constructor
-    // are to both create the object _and_ to set it to
-    // the thread local copy.
-    mTLS = new RenderThreadInfo();
+    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
 
-    DPRINT("enter");
-    FrameBuffer::getFB()->createTrivialContext(0, // no share context
-                                               &this->mContext,
-                                               &this->mSurf);
-    FrameBuffer::getFB()->bindContext(mContext, mSurf, mSurf);
-    DPRINT("exit");
+    mDisplay = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    int eglMaj, eglMin;
+    egl->eglInitialize(mDisplay, &eglMaj , &eglMin);
+
+    const EGLint configAttribs[] = {
+        EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_NONE,
+    };
+
+    EGLint nConfigs;
+    EGLConfig config;
+
+    egl->eglChooseConfig(mDisplay, configAttribs, &config, 1, &nConfigs);
+
+    const EGLint pbufferAttribs[] = {
+        EGL_WIDTH, 1,
+        EGL_HEIGHT, 1,
+        EGL_NONE,
+    };
+
+    mSurface =
+        egl->eglCreatePbufferSurface(mDisplay, config, pbufferAttribs);
+
+    const EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+    mContext = egl->eglCreateContext(mDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+
+    egl->eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
 }
 
 void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
@@ -228,13 +250,15 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
 
 void SyncThread::doExit() {
 
-    // This sequence parallels the exit sequence
-    // in RenderThread.
-    FrameBuffer::getFB()->bindContext(0, 0, 0);
-    FrameBuffer::getFB()->DestroyWindowSurface(mSurf);
-    FrameBuffer::getFB()->drainWindowSurface();
-    FrameBuffer::getFB()->drainRenderContext();
-    delete mTLS;
+    if (mContext == EGL_NO_CONTEXT) return;
+
+    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+
+    egl->eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    egl->eglDestroyContext(mDisplay, mContext);
+    egl->eglDestroySurface(mDisplay, mContext);
+    mContext = EGL_NO_CONTEXT;
+    mSurface = EGL_NO_SURFACE;
 }
 
 int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
@@ -256,37 +280,7 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
     return result;
 }
 
-// Interface for libOpenglRender TLS
-
 /* static */
-SyncThread* SyncThread::getSyncThread() {
-    RenderThreadInfo* tInfo = RenderThreadInfo::get();
-
-    if (!tInfo->syncThread.get()) {
-        DPRINT("starting a sync thread for render thread info=%p", tInfo);
-        tInfo->createSyncThread();
-    }
-
-    return tInfo->syncThread.get();
-}
-
-/* static */
-void SyncThread::destroySyncThread() {
-    RenderThreadInfo* tInfo = RenderThreadInfo::get();
-
-    DPRINT("exiting a sync thread for render thread info=%p.", tInfo);
-
-    if (!tInfo || !tInfo->syncThread) return;
-
-    tInfo->syncThread->cleanup();
-    tInfo->syncThread->wait();
-    tInfo->destroySyncThread();
-}
-
-/* static */
-SyncThread* SyncThread::getFromHandle(uint64_t alias) {
-    return RenderThreadInfo::getSyncThreadRegistry()->getPtr(
-            alias,
-            reinterpret_cast<SyncThread*>(alias) /* return cast as default */,
-            true /* remove if getting stale ptr */);
+SyncThread* SyncThread::get() {
+    return sGlobalSyncThread->syncThreadPtr();
 }
