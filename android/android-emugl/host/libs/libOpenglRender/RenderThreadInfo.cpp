@@ -52,42 +52,6 @@ RenderThreadInfo* RenderThreadInfo::get() {
     return static_cast<RenderThreadInfo*>(s_tls->get());
 }
 
-// Each RenderThreadInfo may have 1 SyncThread associated with it.
-// These SyncThreads must be handled carefully for snapshots:
-// 1. The guest might ask for a SyncThread handle that doesn't
-// exist on the host anymore.
-// 2. The host might allocate a new SyncThread that has the same
-// uint64_t handle as a stale SyncThread on the guest.
-//
-// This problem has some convenient properties:
-//
-// 1. Since RenderThread and SyncThread 1:1, and rcTriggerWait +
-// rcCreateSyncKHR are in 1:1, and rcTriggerWait is the only API call
-// that has a SyncThread handle as argument, we only have one
-// inconsistent call to rcTriggerWait per sync thread,
-// then the rest will update when rcClientWaitSyncKHR is called next
-// (and reads the new sync thread handle).
-// 2. Only ~1 such rcTriggerWait is pending total, I believe this
-// is because there is usually not much eglSwapBuffers activity
-// going on at any time.
-//
-// So we maintain a StalePtrRegistry<SyncThread>, sSyncThreadRegistry,
-// with getPtr removing entries from stale database.
-static android::base::LazyInstance<StalePtrRegistry<SyncThread> >
-    sSyncThreadRegistry = LAZY_INSTANCE_INIT;
-
-// createSyncThread() tracks new sync threads in the registry.
-void RenderThreadInfo::createSyncThread() {
-    syncThread.reset(new SyncThread(currContext->getEGLContext()));
-    sSyncThreadRegistry->addPtr(syncThread.get());
-}
-
-// destroySyncThread() should untrack.
-void RenderThreadInfo::destroySyncThread() {
-    sSyncThreadRegistry->removePtr(syncThread.get());
-    syncThread.reset(nullptr);
-}
-
 void RenderThreadInfo::onSave(Stream* stream) {
     if (currContext) {
         stream->putBe32(currContext->getHndl());
@@ -114,12 +78,11 @@ void RenderThreadInfo::onSave(Stream* stream) {
 
     stream->putBe64(m_puid);
 
-    if (syncThread.get()) {
-        syncThreadAlias = (uint64_t)(uintptr_t)syncThread.get();
-    }
-    stream->putBe64(syncThreadAlias);
-
-    sSyncThreadRegistry->makeCurrentPtrsStale();
+    // No need to associate render threads with sync threads
+    // if there is a global sync thread. This is only needed
+    // to maintain backward compatibility with snapshot file format.
+    // (Used to be: stream->putBe64(syncThreadAlias))
+    stream->putBe64(0);
 }
 
 bool RenderThreadInfo::onLoad(Stream* stream) {
@@ -143,37 +106,8 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
 
     m_puid = stream->getBe64();
 
-    syncThreadAlias = stream->getBe64();
-
-    if (syncThreadAlias) {
-
-        // We need to create a new sync thread super early if we are restoring
-        // renderthreadinfo, since there could be a pending rcTriggerWait.
-        // Additionally, that rcTriggerWait most likely uses the old pointer
-        // value, so we need to remap it to the new one temporarily.  If not,
-        // rcTriggerWait refers to a garbage pointer and undefined behavior
-        // results.
-        EGLContext eglCtx = EGL_NO_CONTEXT;
-        if (currContext) {
-            eglCtx = currContext->getEGLContext();
-        }
-
-        syncThread.reset(new SyncThread(eglCtx));
-        sSyncThreadRegistry->remapStalePtr(syncThreadAlias, syncThread.get());
-
-        // Note that the values in sSyncThreadRegistry will only be used for a
-        // very short time, because after the snapshot is restored, the guest
-        // will know about the new SyncThread* pointers and we will most likely
-        // not have to use the map anymore.  However, the map still needs to
-        // stay around in case we restored from snapshot, waited a while, and
-        // then woke up a guest rendering thread that still had the old value
-        // of rcTriggerWait.
-    }
+    // (Used to be: syncThreadAlias = stream->getBe64())
+    stream->getBe64();
 
     return true;
-}
-
-/* static */
-StalePtrRegistry<SyncThread>* RenderThreadInfo::getSyncThreadRegistry() {
-    return sSyncThreadRegistry.ptr();
 }

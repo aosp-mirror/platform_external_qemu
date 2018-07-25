@@ -57,7 +57,9 @@ public:
     // - constructor: start up the sync thread for a given context.
     // The initialization of the sync thread is nonblocking.
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_INIT|
-    SyncThread(EGLContext context);
+    SyncThread();
+    ~SyncThread();
+
     // |triggerWait|: async wait with a given FenceSync object.
     // We use the wait() method to do a eglClientWaitSyncKHR.
     // After wait is over, the timeline will be incremented,
@@ -73,21 +75,12 @@ public:
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_EXIT|
     void cleanup();
 
-    // We assume the invariant that sync threads correspond 1:1
-    // with render threads.
-    // Therefore, we create and destroy sync threads using
-    // only the two functions below, |getSyncThread| and |destroySyncThread|.
-    // - |getSyncThread| looks at render thread's TLS for a sync thread.
-    //   If there isn't one, a sync thread is created and initialized.
-    // - |destroySyncThread| cleans up and deletes the sync thread,
-    //   if there is one started already.
-    //   It is meant to be called whenever render threads exit or
-    //   EGL contexts are destroyed.
-    static SyncThread* getSyncThread();
-    static void destroySyncThread();
+    // Obtains the global sync thread.
+    static SyncThread* get();
 
-    // Safe way to get SyncThread*'s across snapshots.
-    static SyncThread* getFromHandle(uint64_t handle);
+    // Destroys and recreates the sync thread, for use on snapshot load.
+    static void destroy();
+    static void recreate();
 
 private:
     // |initSyncContext| creates an EGL context expressly for calling
@@ -125,9 +118,8 @@ private:
 
     // EGL objects / object handles specific to
     // a sync thread.
-    EGLDisplay mDisplay;
-    RenderThreadInfo* mTLS;
-    uint32_t mContext;
-    uint32_t mSurf;
+    EGLDisplay mDisplay = EGL_NO_DISPLAY;
+    EGLContext mContext = EGL_NO_CONTEXT;
+    EGLSurface mSurface = EGL_NO_SURFACE;
 };
 
