@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "b1ef8053_0810b584",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-25T17:38:28Z",
+      "side": 1,
+      "message": "BTW I found another one in FenceSync.h; could that possibly result in bad behavior even if compilable?",
+      "parentUuid": "4e7c10e3_30ab001f",
+      "range": {
+        "startLine": 78,
+        "startChar": 27,
+        "endLine": 78,
+        "endChar": 28
+      },
+      "revId": "14ed10774a55c81f1ef52062a834a266feb53a6f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9643d4f6_11e51ad7",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FenceSync.cpp",
         "patchSetId": 3
