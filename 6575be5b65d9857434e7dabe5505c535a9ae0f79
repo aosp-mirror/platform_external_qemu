@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2c62cf18_92c2230b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotTestStateUtils.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-25T19:15:37Z",
+      "side": 1,
+      "message": "Don\u0027t worry about the flexible types. They are not in the spec and swiftshader is not going to support it. Instead, you can consider uploading a floating point texture, reading it back in unsigned_byte and expecting them to match within some rounding error.",
+      "range": {
+        "startLine": 93,
+        "startChar": 35,
+        "endLine": 95,
+        "endChar": 70
+      },
+      "revId": "6575be5b65d9857434e7dabe5505c535a9ae0f79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
