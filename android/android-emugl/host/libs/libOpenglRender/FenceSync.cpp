@@ -23,18 +23,64 @@
 #include "StalePtrRegistry.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/containers/StaticMap.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
 #include <unordered_set>
 
-FenceSync::FenceSync(bool hasNativeFence,
+using android::base::AutoLock;
+using android::base::LazyInstance;
+using android::base::Lock;
+using android::base::StaticMap;
+
+class Timeline {
+public:
+    Timeline() = default;
+
+    void addFence(FenceSync* fence) {
+        mFences.set(fence, mTime.load());
+    }
+
+    void incrementTimeline() {
+        ++mTime;
+        sweep();
+    }
+
+    void sweep() {
+        mFences.forEachWithErase([time = mTime.load()](FenceSync* fence, int fenceTime) {
+            bool shouldErase = fenceTime < time;
+            if (shouldErase) {
+                fence->decRef();
+            }
+            return shouldErase;
+        });
+    }
+
+private:
+    std::atomic<int> mTime = { 0 };
+    StaticMap<FenceSync*, int> mFences;
+};
+
+static LazyInstance<Timeline> sTimeline = LAZY_INSTANCE_INIT;
+
+// static
+void FenceSync::incrementTimeline() {
+    sTimeline->incrementTimeline();
+}
+
+FenceSync::FenceSync(bool hasNative,
                      bool destroyWhenSignaled) :
+    mHasNative(hasNative),
     mDestroyWhenSignaled(destroyWhenSignaled) {
     addToRegistry();
 
     assert(mCount == 1);
-    if (hasNativeFence) incRef();
+    if (hasNative) {
+        incRef();
+        sTimeline->addFence(this);
+    }
 
     // assumes that there is a valid + current OpenGL context
     assert(RenderThreadInfo::get());
@@ -62,21 +108,6 @@ EGLint FenceSync::wait(uint64_t timeout) {
 
 void FenceSync::waitAsync() {
     s_egl.eglWaitSyncKHR(mDisplay, mSync, 0);
-}
-
-void FenceSync::signaledNativeFd() {
-    if (!decRef() && mDestroyWhenSignaled) {
-        decRef();
-    }
-    // NOTE: Do not use anything like this construction:
-    // decRef();
-    // if (mDestroyWhenSignaled) ...
-    // If the object was originally constructed with
-    // mDestroyWhenSignaled == false,
-    // the first decRef() will have destroyed this object,
-    // which would make subsequent access to
-    // |mDestroyWhenSignaled| corrupt memory immediately.
-    // Please keep this in mind.
 }
 
 void FenceSync::destroy() {
