@@ -241,7 +241,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     //   So, despite the faulty GPU driver, not incrementing is too heavyweight a response.
 
     emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
-    cmd->fenceSync->signaledNativeFd();
+    FenceSync::incrementTimelineAndDeleteOldFences();
 
     DPRINT("done timeline increment");
 

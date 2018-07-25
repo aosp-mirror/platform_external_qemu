@@ -14,6 +14,7 @@
 
 #include "android/base/Compiler.h"
 
+#include "android/base/FunctionView.h"
 #include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -52,6 +53,20 @@ public:
             return android::base::kNullopt;
         }
         return it->second;
+    }
+
+    using ErasePredicate = android::base::FunctionView<bool(K, V)>;
+
+    void eraseIf(ErasePredicate p) {
+        AutoLock lock(mLock);
+        auto it = mItems.begin();
+        for (; it != mItems.end();) {
+            if (p(it->first, it->second)) {
+                it = mItems.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
 private:

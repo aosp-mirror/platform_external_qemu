@@ -73,15 +73,14 @@ public:
     // waitAsync wraps eglWaitSyncKHR.
     void waitAsync();
 
-    // signaledNativeFd(): upon when the native fence fd
-    // is signaled due to the sync object being signaled,
-    // this method does the following:
-    // - adjusts the reference count down by 1. There is a corresponding
-    //   +1 to the count added at the beginning in the constructor,
-    //   if this fence object is of type EGL_SYNC_NATIVE_FENCE_ANDROID (2).
-    // - if |mDestroyWhenSignaled| is true, this method decrements the
-    //   reference count again to destroy it (3).
-    void signaledNativeFd();
+    bool shouldDestroyWhenSignaled() const {
+        return mDestroyWhenSignaled;
+    }
+
+    // When a native fence gets signaled, this function is called to update the
+    // timeline counter in the FenceSync internal timeline and delete old
+    // fences.
+    static void incrementTimelineAndDeleteOldFences();
 
     // incRef() / decRef() increment/decrement refence counts in order
     // to deal with sync object destruction. This is a simple reference
@@ -124,7 +123,7 @@ public:
     static void onLoad(android::base::Stream* stream);
 private:
     bool mDestroyWhenSignaled;
-    std::atomic<int> mCount = {1};
+    std::atomic<int> mCount {1};
 
     // EGL state needed for calling OpenGL sync operations.
     EGLDisplay mDisplay;
