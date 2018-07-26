@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7507367e_b959a48e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-26T18:39:11Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ca4b1c00_80294c44",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 24
+      },
+      "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "adea118a_8201f249",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.h",
         "patchSetId": 1
@@ -54,6 +78,24 @@
       "side": 1,
       "message": "hmm... what does it say?",
       "parentUuid": "adea118a_8201f249",
+      "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c1f37e8b_4d3f015f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-26T18:39:11Z",
+      "side": 1,
+      "message": "In file included from android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.h:17:\nIn file included from ./../gtest/include/gtest/gtest.h:58:\nIn file included from ./../gtest/include/gtest/internal/gtest-internal.h:63:\n./../gtest/include/gtest/internal/gtest-type-util.h:108:1: error: declaration of anonymous struct must be a definition\nstruct None {};\n^\n./../gtest/include/gtest/internal/gtest-type-util.h:108:1: error: declaration does not declare anything\n      [-Werror,-Wmissing-declarations]\n./../gtest/include/gtest/internal/gtest-type-util.h:728:25: error: expected a type\ntemplate \u003ctypename T1 \u003d internal::None, typename T2 \u003d internal::None,\n                        ^\n./../gtest/include/gtest/internal/gtest-type-util.h:728:25: error: expected \u0027,\u0027 or \u0027\u003e\u0027 in template-parameter-list\n./../gtest/include/gtest/internal/gtest-type-util.h:728:39: error: expected unqualified-id\ntemplate \u003ctypename T1 \u003d internal::None, typename T2 \u003d internal::None,\n                                      ^\n./../gtest/include/gtest/internal/gtest-type-util.h:761:24: error: expected unqualified-id\nstruct Types\u003cinternal::None, internal::None, internal::None, internal::None,\n                       ^\n/usr/local/google/home/benzene/emu/master/prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.15-4.8/sysroot/usr/include/X11/X.h:115:30: note: \n      expanded from macro \u0027None\u0027\n#define None                 0L /* universal null resource or null atom */",
+      "parentUuid": "79e4d271_58cc4ac5",
       "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
