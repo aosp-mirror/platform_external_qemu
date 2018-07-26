@@ -99,6 +99,24 @@
       "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53ba0b15_71856e6b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-26T18:47:21Z",
+      "side": 1,
+      "message": "The last line...\n\nYou can try to #ifdef None #undef None #endif before including gtest?",
+      "parentUuid": "c1f37e8b_4d3f015f",
+      "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
