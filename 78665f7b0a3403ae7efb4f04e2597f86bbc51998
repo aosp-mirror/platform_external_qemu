@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "02857ccc_c3d4a9d6",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-26T18:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9468024_0a14fa70",
+      "range": {
+        "startLine": 245,
+        "startChar": 28,
+        "endLine": 245,
+        "endChar": 58
+      },
+      "revId": "78665f7b0a3403ae7efb4f04e2597f86bbc51998",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d91797b7_31036df5",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "78665f7b0a3403ae7efb4f04e2597f86bbc51998",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af3496d0_41901d95",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-26T18:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d91797b7_31036df5",
+      "range": {
+        "startLine": 255,
+        "startChar": 15,
+        "endLine": 255,
+        "endChar": 33
+      },
+      "revId": "78665f7b0a3403ae7efb4f04e2597f86bbc51998",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
