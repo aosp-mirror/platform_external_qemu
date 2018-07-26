@@ -1260,7 +1260,6 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
-
     if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
         ctx->dispatcher().glDrawArrays(mode,first,count);
