@@ -69,6 +69,54 @@
       "revId": "c56fa99a3fe16352f8d2939f5ed10cae3dd79b58",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc3f30cc_6739d856",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-26T19:05:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f627adb0_1c0ba689",
+      "range": {
+        "startLine": 228,
+        "startChar": 5,
+        "endLine": 254,
+        "endChar": 6
+      },
+      "revId": "c56fa99a3fe16352f8d2939f5ed10cae3dd79b58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b562a758_37ed05e8",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-26T19:05:02Z",
+      "side": 1,
+      "message": "I was thinking about doing that, but I would much rather edit snapshot compatbility stuff all in Snapshot.cpp, as it\u0027s the one place we do our checks and I would like to keep it that way.\n\nAdding a new feature would then cause invalidation of snapshots unless it was recorded here, but that is currently the option with less risk.",
+      "parentUuid": "ab98c338_85c7f90a",
+      "range": {
+        "startLine": 228,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 6
+      },
+      "revId": "c56fa99a3fe16352f8d2939f5ed10cae3dd79b58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
