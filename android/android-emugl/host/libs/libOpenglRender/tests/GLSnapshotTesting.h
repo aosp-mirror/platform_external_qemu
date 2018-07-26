@@ -18,9 +18,9 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 
-#include <gtest/gtest.h>
-
 #include "OpenGLTestContext.h"
+
+#include <gtest/gtest.h>
 
 #include <memory>
 #include <vector>
