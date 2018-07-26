@@ -167,6 +167,7 @@ LOCAL_SRC_FILES := \
     tests/GLSnapshotPrograms_unittest.cpp \
     tests/GLSnapshotRasterization_unittest.cpp \
     tests/GLSnapshotRenderbuffers_unittest.cpp \
+    tests/GLSnapshotRendering_unittest.cpp \
     tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotTesting.cpp \
     tests/GLSnapshotTestStateUtils.cpp \
