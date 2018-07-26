@@ -1257,10 +1257,10 @@ static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
 }
 
 GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei count){
+    fprintf(stderr, "%s %s %d Reached glDrawArrays\n", __FILE__, __func__, __LINE__ );
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
-
     if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
         ctx->dispatcher().glDrawArrays(mode,first,count);
@@ -1292,6 +1292,7 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 }
 
 GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
+    fprintf(stderr, "%s %s %d reached GLESv2IMP \n", __FILE__, __func__, __LINE__);
     GET_CTX();
     if (isCoreProfile()) {
         switch (cap) {
