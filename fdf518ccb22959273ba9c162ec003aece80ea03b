@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7078f5e1_ce39f31b",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-26T23:03:20Z",
+      "side": 1,
+      "message": "I\u0027m not a fan of this, how about creating a custom FdWrapper object, storing that in a unique_ptr, and moving that around instead?  Using a unique_ptr with a custom deleter and then releasing to avoid the behavior seems error-prone.",
+      "range": {
+        "startLine": 293,
+        "startChar": 8,
+        "endLine": 294,
+        "endChar": 30
+      },
+      "revId": "fdf518ccb22959273ba9c162ec003aece80ea03b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec7869fc_ba4989bb",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-26T23:03:20Z",
+      "side": 1,
+      "message": "Doesn\u0027t this leak memory?",
+      "range": {
+        "startLine": 310,
+        "startChar": 4,
+        "endLine": 310,
+        "endChar": 26
+      },
+      "revId": "fdf518ccb22959273ba9c162ec003aece80ea03b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9f4e8be_997c58ec",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-26T23:03:20Z",
+      "side": 1,
+      "message": "const bool needLoadbuffer \u003d stream-\u003egetByte();\n\nneedLoadBuffer can be const and doesn\u0027t need to be declared in the parent scope",
+      "range": {
+        "startLine": 343,
+        "startChar": 8,
+        "endLine": 344,
+        "endChar": 42
+      },
+      "revId": "fdf518ccb22959273ba9c162ec003aece80ea03b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5cc79654_4bfc5f23",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-26T23:03:20Z",
+      "side": 1,
+      "message": "It would be nice if this recvbuffer logic could be refactored into its own class, maybe a BufferedSocketReader?",
+      "range": {
+        "startLine": 609,
+        "startChar": 20,
+        "endLine": 614,
+        "endChar": 38
+      },
+      "revId": "fdf518ccb22959273ba9c162ec003aece80ea03b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96918aa8_9d865be8",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-26T23:03:20Z",
+      "side": 1,
+      "message": "Why the sleep?",
+      "range": {
+        "startLine": 858,
+        "startChar": 4,
+        "endLine": 858,
+        "endChar": 39
+      },
+      "revId": "fdf518ccb22959273ba9c162ec003aece80ea03b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1671119f_f26f07f0",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-26T23:03:20Z",
+      "side": 1,
+      "message": "Nit: remove commented code?",
+      "range": {
+        "startLine": 100,
+        "startChar": 8,
+        "endLine": 100,
+        "endChar": 62
+      },
+      "revId": "fdf518ccb22959273ba9c162ec003aece80ea03b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d5992c45_b475da0c",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-26T23:03:20Z",
+      "side": 1,
+      "message": "Nit: I recommend moving these helpers above the member variables to keep the member variables grouped together.",
+      "range": {
+        "startLine": 224,
+        "startChar": 4,
+        "endLine": 225,
+        "endChar": 50
+      },
+      "revId": "fdf518ccb22959273ba9c162ec003aece80ea03b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
