@@ -22,9 +22,9 @@
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 
-#include <gtest/gtest.h>
-
 #include "OpenGLTestContext.h"
+
+#include <gtest/gtest.h>
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>

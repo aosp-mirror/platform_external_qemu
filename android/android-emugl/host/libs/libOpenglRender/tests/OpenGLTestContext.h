@@ -13,11 +13,20 @@
 // limitations under the License.
 #pragma once
 
+#include "emugl/common/OpenGLDispatchLoader.h"
+
+// gtest has its own definitions for None and Bool
+#ifdef None
+    #undef None
+#endif
+#ifdef Bool
+    #undef Bool
+#endif
+#include <gtest/gtest.h>
+
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES3/gl31.h>
-
-#include "emugl/common/OpenGLDispatchLoader.h"
 
 namespace emugl {
 
