@@ -273,8 +273,8 @@ void SampleApplication::surfaceFlingerComposerLoop() {
         hwc2sfQueue.queueBuffer(ColorBufferQueue::Item(hwcColorBuffers[i], nullptr));
     }
 
-    auto newFence = [] {
-        auto gl = LazyLoadedGLESv2Dispatch::get();
+    auto newFence = [this] {
+        auto gl = getGlDispatch();
         FenceSync* sync = new FenceSync(false, false);
         gl->glFlush();
         return sync;
@@ -313,7 +313,7 @@ void SampleApplication::surfaceFlingerComposerLoop() {
         unsigned int sfSurface = mFb->createWindowSurface(0, mWidth, mHeight);
         mFb->bindContext(sfContext, sfSurface, sfSurface);
 
-        auto gl = LazyLoadedGLESv2Dispatch::get();
+        auto gl = getGlDispatch();
 
         static constexpr char blitVshaderSrc[] = R"(#version 300 es
         precision highp float;
@@ -433,6 +433,10 @@ void SampleApplication::drawOnce() {
         mFb->post(mColorBuffer);
         mWindow->messageLoop();
     }
+}
+
+const GLESv2Dispatch* SampleApplication::getGlDispatch() {
+    return LazyLoadedGLESv2Dispatch::get();
 }
 
 } // namespace emugl
