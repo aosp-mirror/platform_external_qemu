@@ -117,6 +117,24 @@
       "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80a2386b_3e682fdc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-26T19:22:21Z",
+      "side": 1,
+      "message": "Seems like it worked, had to do so for Bool too.",
+      "parentUuid": "53ba0b15_71856e6b",
+      "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
