@@ -20,7 +20,6 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
-#include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
@@ -52,11 +51,14 @@ using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
 
+using android::featurecontrol::Feature;
+
 using android::protobuf::loadProtobuf;
 using android::protobuf::ProtobufLoadResult;
 using android::protobuf::saveProtobuf;
 using android::protobuf::ProtobufSaveResult;
 
+namespace fc = android::featurecontrol;
 namespace pb = emulator_snapshot;
 
 namespace android {
@@ -207,6 +209,93 @@ bool Snapshot::verifyHost(const pb::Host& host, bool writeFailure) {
     return true;
 }
 
+static constexpr Feature sInsensitiveFeatures[] = {
+    // ForceANGLE/Swiftshader only cause a different renderer to be selected.
+    fc::ForceANGLE,
+    fc::ForceSwiftshader,
+    // Hypervisor-related flags only control the possible set of selected
+    // hypervisors, and don't reflect the current hypervisor, which is handled
+    // in the vm config check already.
+    fc::HYPERV,
+    fc::HVF,
+    fc::KVM,
+    fc::HAXM,
+    fc::WindowsHypervisorPlatform,
+    // Snapshot feature controls enablement of snapshots, not snapshot data
+    fc::FastSnapshotV1,
+    // Controlled by GL extensions advertised to guest; safe to use
+    fc::IgnoreHostOpenGLErrors,
+    // Meta feature affecting snapshot validation, does not affect snapshot data
+    fc::AllowSnapshotMigration,
+    // Only controls whether the RAM snapshot is loaded on demand, not the data itself
+    fc::WindowsOnDemandSnapshotLoad,
+    // UI features that don't change snapshot data
+    fc::LocationUiV2,
+    fc::ScreenRecording,
+    fc::VirtualScene,
+    fc::GenericSnapshotsUI,
+    // No guest feature flags seem safe to snapshot.
+};
+
+const std::unordered_set<Feature> Snapshot::getSnapshotInsensitiveFeatures() {
+    std::unordered_set<Feature> res;
+    for (int i = 0; i < sizeof(sInsensitiveFeatures) / sizeof(Feature); i++) {
+        res.insert(sInsensitiveFeatures[i]);
+    }
+    return res;
+}
+
+// static
+bool Snapshot::isFeatureSnapshotInsensitive(Feature input) {
+    for (int i = 0; i < sizeof(sInsensitiveFeatures) / sizeof(Feature); i++) {
+        if (input == sInsensitiveFeatures[i]) return true;
+    }
+    return false;
+}
+
+bool Snapshot::isCompatibleWithCurrentFeatures() {
+    return verifyFeatureFlags(mSnapshotPb.config());
+}
+
+bool Snapshot::verifyFeatureFlags(const pb::Config& config) {
+
+    auto enabledFeatures = fc::getEnabled();
+
+    enabledFeatures.erase(
+        std::remove_if(
+            enabledFeatures.begin(),
+            enabledFeatures.end(),
+            isFeatureSnapshotInsensitive),
+        enabledFeatures.end());
+
+    // need a conversion from int to Feature here
+    std::vector<Feature> configFeatures;
+
+    for (auto it = config.enabled_features().begin();
+         it != config.enabled_features().end();
+         ++it) {
+        configFeatures.push_back((Feature)(*it));
+    }
+
+    configFeatures.erase(
+        std::remove_if(
+            configFeatures.begin(),
+            configFeatures.end(),
+            isFeatureSnapshotInsensitive),
+        configFeatures.end());
+
+    if (int(enabledFeatures.size()) != configFeatures.size() ||
+        !std::equal(configFeatures.begin(),
+                    configFeatures.end(), enabledFeatures.begin(),
+                    [](int l, Feature r) {
+                        return int(l) == r;
+                    })) {
+        return false;
+    }
+
+    return true;
+}
+
 bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
     VmConfiguration vmConfig;
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
@@ -230,13 +319,7 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
 #endif // ALLOW_CHANGE_RENDERER
     }
 
-    const auto enabledFeatures = android::featurecontrol::getEnabled();
-    if (int(enabledFeatures.size()) != config.enabled_features().size() ||
-        !std::equal(config.enabled_features().begin(),
-                    config.enabled_features().end(), enabledFeatures.begin(),
-                    [](int l, android::featurecontrol::Feature r) {
-                        return int(l) == r;
-                    })) {
+    if (!verifyFeatureFlags(config)) {
         if (writeFailure) saveFailure(FailureReason::ConfigMismatchFeatures);
         return false;
     }
@@ -288,7 +371,10 @@ base::Optional<std::string> Snapshot::parent() {
 
 
 Snapshot::Snapshot(const char* name)
-    : mName(name), mDataDir(getSnapshotDir(name)), mSaveStats(kMaxSaveStatsHistory) {
+    : Snapshot(name, getSnapshotDir(name).c_str()) { }
+
+Snapshot::Snapshot(const char* name, const char* dataDir)
+    : mName(name), mDataDir(dataDir), mSaveStats(kMaxSaveStatsHistory) {
 
     // All persisted snapshot protobuf fields across
     // saves / loads go here.
@@ -311,6 +397,20 @@ std::vector<Snapshot> Snapshot::getExistingSnapshots() {
     }
     return res;
 }
+
+void Snapshot::initProto() {
+    mSnapshotPb.Clear();
+    mSnapshotPb.set_version(kVersion);
+    mSnapshotPb.set_creation_time(System::get()->getUnixTime());
+}
+
+void Snapshot::saveEnabledFeatures() {
+    for (auto f : fc::getEnabled()) {
+        if (isFeatureSnapshotInsensitive(f)) continue;
+        mSnapshotPb.mutable_config()->add_enabled_features(int(f));
+    }
+}
+
 bool Snapshot::save() {
     // In saving, we assume the state is different,
     // so we reset the invalid/successful counters.
@@ -321,10 +421,7 @@ bool Snapshot::save() {
         return false;
     }
 
-    mSnapshotPb.Clear();
-
-    mSnapshotPb.set_version(kVersion);
-    mSnapshotPb.set_creation_time(System::get()->getUnixTime());
+    initProto();
 
     VmConfiguration vmConfig;
     Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
@@ -336,9 +433,8 @@ bool Snapshot::save() {
     if (auto gpuString = currentGpuDriverString()) {
         mSnapshotPb.mutable_host()->set_gpu_driver(*gpuString);
     }
-    for (auto f : android::featurecontrol::getEnabled()) {
-        mSnapshotPb.mutable_config()->add_enabled_features(int(f));
-    }
+
+    saveEnabledFeatures();
 
     for (const auto& image : kImages) {
         ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
@@ -468,8 +564,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
         return false;
     }
 
-    if (android::featurecontrol::isEnabled(
-            android::featurecontrol::AllowSnapshotMigration)) {
+    if (fc::isEnabled(fc::AllowSnapshotMigration)) {
         return true;
     }
 
