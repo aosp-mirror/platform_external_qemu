@@ -165,6 +165,30 @@
       "revId": "c56fa99a3fe16352f8d2939f5ed10cae3dd79b58",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fac8e03_e300791d",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-26T19:17:20Z",
+      "side": 1,
+      "message": "That\u0027s a good point. I\u0027ve moved the actual list to a new header file in featurecontrol, but kept the logic in this file.",
+      "parentUuid": "04fe352a_14be7017",
+      "range": {
+        "startLine": 228,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 6
+      },
+      "revId": "c56fa99a3fe16352f8d2939f5ed10cae3dd79b58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
