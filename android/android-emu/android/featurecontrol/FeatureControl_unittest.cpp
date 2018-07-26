@@ -12,120 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/featurecontrol/FeatureControlImpl.h"
+#include "android/featurecontrol/testing/FeatureControlTest.h"
 
-#include "android/base/StringView.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/base/testing/TestTempDir.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/cmdline-option.h"
 
 #include <gtest/gtest.h>
 
-#include <fstream>
-#include <memory>
-#include <string>
-
 namespace android {
 namespace featurecontrol {
-
-namespace {
-
-class FeatureControlTest : public ::testing::Test {
-public:
-    void SetUp() override {
-        mTempDir.reset(new base::TestTempDir("featurecontroltest"));
-        mDefaultIniHostFilePath =
-                mTempDir->makeSubPath("defaultSettingsHost.ini").c_str();
-        mDefaultIniGuestFilePath =
-                mTempDir->makeSubPath("defaultSettingsGuest.ini").c_str();
-        mUserIniHostFilePath =
-                mTempDir->makeSubPath("userSettingsHost.ini").c_str();
-        mUserIniGuestFilePath =
-                mTempDir->makeSubPath("userSettingsGuest.ini").c_str();
-
-#define FEATURE_CONTROL_ITEM(item) \
-        #item " = on\n"
-        mAllOnIni =
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
-        ;
-#undef FEATURE_CONTROL_ITEM
-
-#define FEATURE_CONTROL_ITEM(item) #item " = on\n"
-        mAllOnIniGuestOnly =
-#include "FeatureControlDefGuest.h"
-                ;
-#undef FEATURE_CONTROL_ITEM
-
-#define FEATURE_CONTROL_ITEM(item) #item " = off\n"
-        mAllOffIni =
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
-        ;
-#undef FEATURE_CONTROL_ITEM
-
-#define FEATURE_CONTROL_ITEM(item) #item " = off\n"
-        mAllOffIniGuestOnly =
-#include "FeatureControlDefGuest.h"
-                ;
-#undef FEATURE_CONTROL_ITEM
-
-#define FEATURE_CONTROL_ITEM(item) #item " = default\n"
-        mAllDefaultIni =
-#include "FeatureControlDefHost.h"
-#include "FeatureControlDefGuest.h"
-        ;
-#undef FEATURE_CONTROL_ITEM
-
-#define FEATURE_CONTROL_ITEM(item) #item " = default\n"
-        mAllDefaultIniGuestOnly =
-#include "FeatureControlDefGuest.h"
-                ;
-#undef FEATURE_CONTROL_ITEM
-    }
-protected:
-    void writeDefaultIniHost(android::base::StringView data) {
-        writeIni(mDefaultIniHostFilePath, data);
-    }
-    void writeDefaultIniGuest(android::base::StringView data) {
-        writeIni(mDefaultIniGuestFilePath, data);
-    }
-    void writeUserIniHost(android::base::StringView data) {
-        writeIni(mUserIniHostFilePath, data);
-    }
-    void writeUserIniGuest(android::base::StringView data) {
-        writeIni(mUserIniGuestFilePath, data);
-    }
-    void loadAllIni() {
-        FeatureControlImpl::get().init(
-                mDefaultIniHostFilePath, mDefaultIniGuestFilePath,
-                mUserIniHostFilePath, mUserIniGuestFilePath);
-    }
-    std::unique_ptr<base::TestTempDir> mTempDir;
-    std::string mDefaultIniHostFilePath;
-    std::string mDefaultIniGuestFilePath;
-    std::string mUserIniHostFilePath;
-    std::string mUserIniGuestFilePath;
-    std::string mAllOnIni;
-    std::string mAllOnIniGuestOnly;
-    std::string mAllOffIni;
-    std::string mAllOffIniGuestOnly;
-    std::string mAllDefaultIni;
-    std::string mAllDefaultIniGuestOnly;
-
-private:
-    void writeIni(android::base::StringView filename,
-                  android::base::StringView data) {
-        std::ofstream outFile(filename,
-                              std::ios_base::out | std::ios_base::trunc);
-        ASSERT_TRUE(outFile.good());
-        outFile.write(data.data(), data.size());
-    }
-};
-
-}  // namespace
 
 TEST_F(FeatureControlTest, overrideSetting) {
     writeDefaultIniHost(mAllOffIni);
