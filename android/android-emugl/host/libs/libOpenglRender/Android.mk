@@ -156,6 +156,7 @@ LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)
 LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)
 
 LOCAL_SRC_FILES := \
+    samples/HelloTriangleImp.cpp \
     tests/DefaultFramebufferBlit_unittest.cpp \
     tests/FrameBuffer_unittest.cpp \
     tests/GLSnapshot_unittest.cpp \
@@ -167,6 +168,7 @@ LOCAL_SRC_FILES := \
     tests/GLSnapshotPrograms_unittest.cpp \
     tests/GLSnapshotRasterization_unittest.cpp \
     tests/GLSnapshotRenderbuffers_unittest.cpp \
+    tests/GLSnapshotRendering_unittest.cpp \
     tests/GLSnapshotShaders_unittest.cpp \
     tests/GLSnapshotTesting.cpp \
     tests/GLSnapshotTestStateUtils.cpp \
@@ -196,6 +198,7 @@ make_sample = \
     $(eval LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)) \
     $(eval LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)) \
     $(eval LOCAL_SRC_FILES := samples/$1.cpp) \
+    $(eval LOCAL_SRC_FILES += $(if $(wildcard $(EMUGL_PATH)/host/libs/libOpenglRender/samples/$1Imp.cpp), samples/$1Imp.cpp,)) \
     $(eval LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)) \
     $(eval LOCAL_INSTALL_OPENGL := true) \
     $(eval LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)) \
