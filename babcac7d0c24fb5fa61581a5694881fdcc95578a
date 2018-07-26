@@ -135,6 +135,24 @@
       "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d26be61f_27c3dd85",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-26T19:24:50Z",
+      "side": 1,
+      "message": "crazy x windows header..",
+      "parentUuid": "80a2386b_3e682fdc",
+      "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
