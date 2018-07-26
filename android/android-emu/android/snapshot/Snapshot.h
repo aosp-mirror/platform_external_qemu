@@ -15,6 +15,7 @@
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/proto/snapshot.pb.h"
 
@@ -27,6 +28,7 @@ namespace snapshot {
 class Snapshot final {
 public:
     Snapshot(const char* name);
+    explicit Snapshot(const char* name, const char* dataDir);
 
     static std::vector<Snapshot> getExistingSnapshots();
 
@@ -63,11 +65,19 @@ public:
 
     base::Optional<std::string> parent();
 
+    // For dealing with snapshot-insensitive feature flags
+    static const std::vector<android::featurecontrol::Feature> getSnapshotInsensitiveFeatures();
+    static bool isFeatureSnapshotInsensitive(android::featurecontrol::Feature feature);
+    void initProto();
+    void saveEnabledFeatures();
+    bool writeSnapshotToDisk();
+    bool isCompatibleWithCurrentFeatures();
+
 private:
     void loadProtobufOnce();
     bool verifyHost(const emulator_snapshot::Host& host, bool writeFailure);
     bool verifyConfig(const emulator_snapshot::Config& config, bool writeFailure);
-    bool writeSnapshotToDisk();
+    bool verifyFeatureFlags(const emulator_snapshot::Config& config);
 
     std::string mName;
     std::string mDataDir;

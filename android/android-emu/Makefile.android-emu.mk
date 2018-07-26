@@ -758,6 +758,7 @@ LOCAL_SRC_FILES := \
   android/error-messages_unittest.cpp \
   android/featurecontrol/FeatureControl_unittest.cpp \
   android/featurecontrol/HWMatching_unittest.cpp \
+  android/featurecontrol/testing/FeatureControlTest.cpp \
   android/filesystems/ext4_resize_unittest.cpp \
   android/filesystems/ext4_utils_unittest.cpp \
   android/filesystems/fstab_parser_unittest.cpp \
@@ -786,6 +787,7 @@ LOCAL_SRC_FILES := \
   android/snapshot/RamLoader_unittest.cpp \
   android/snapshot/RamSaver_unittest.cpp \
   android/snapshot/RamSnapshot_unittest.cpp \
+  android/snapshot/Snapshot_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
   android/telephony/modem_unittest.cpp \
   android/telephony/sms_unittest.cpp \
