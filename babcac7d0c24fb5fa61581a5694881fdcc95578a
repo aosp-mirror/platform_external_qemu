@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "adea118a_8201f249",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-07-26T18:34:02Z",
+      "side": 1,
+      "message": "interestingly, if gtest is included after OpenGLDispatchLoader, errors occur.",
+      "revId": "babcac7d0c24fb5fa61581a5694881fdcc95578a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
