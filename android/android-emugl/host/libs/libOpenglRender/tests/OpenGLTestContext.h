@@ -13,11 +13,13 @@
 // limitations under the License.
 #pragma once
 
+#include <gtest/gtest.h>
+
+#include "emugl/common/OpenGLDispatchLoader.h"
+
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES3/gl31.h>
-
-#include "emugl/common/OpenGLDispatchLoader.h"
 
 namespace emugl {
 
