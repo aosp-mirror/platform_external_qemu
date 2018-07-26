@@ -5666,6 +5666,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
 #ifdef CONFIG_ANDROID
     android_report_session_phase(ANDROID_SESSION_PHASE_EXIT);
+    fprintf(stderr, "%s: exiting\n", __func__);
     crashhandler_exitmode("after main_loop");
     android_wear_agent_stop();
     socket_drainer_stop();

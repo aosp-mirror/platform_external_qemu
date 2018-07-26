@@ -547,6 +547,7 @@ ImagePtr EglDisplay::getImage(EGLImageKHR img,
     unsigned int hndl = SafeUIntFromPointer(img);
     ImagesHndlMap::const_iterator i( m_eglImages.find(hndl) );
     if (i == m_eglImages.end()) {
+        fprintf(stderr, "%s: egl img not found\n", __func__);
         return ImagePtr();
     }
     touchEglImage(i->second.get(), restorer);

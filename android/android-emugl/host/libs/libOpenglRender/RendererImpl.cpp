@@ -125,6 +125,7 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl
 }
 
 void RendererImpl::stop(bool wait) {
+    fprintf(stderr, "RendererImpl::%s: call\n", __func__);
     android::base::AutoLock lock(mChannelsLock);
     mStopped = true;
     auto channels = std::move(mChannels);
@@ -145,6 +146,7 @@ void RendererImpl::stop(bool wait) {
                             std::make_move_iterator(channels.end()));
 
     if (!wait) {
+        fprintf(stderr, "RendererImpl::%s: exit 2\n", __func__);
         return;
     }
 
@@ -156,6 +158,7 @@ void RendererImpl::stop(bool wait) {
         c->renderThread()->wait();
     }
     mStoppedChannels.clear();
+    fprintf(stderr, "RendererImpl::%s: exit\n", __func__);
 }
 
 void RendererImpl::cleanupRenderThreads() {

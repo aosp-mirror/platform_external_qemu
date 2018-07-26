@@ -394,6 +394,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         return false;
     }
 
+    fprintf(stderr, "%s: call eglimg %p\n", __func__, m_eglImage);
     touch();
 
     if (m_fastBlitSupported) {

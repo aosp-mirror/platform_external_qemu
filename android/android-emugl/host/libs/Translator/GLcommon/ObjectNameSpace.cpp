@@ -233,6 +233,12 @@ NameSpace::replaceGlobalObject(ObjectLocalName p_localName,
                                NamedObjectPtr p_namedObject)
 {
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
+    if (!n->second) {
+        fprintf(stderr, "%s: invalid name 1\n", __func__);
+    }
+    if (!p_namedObject) {
+        fprintf(stderr, "%s: invalid name 2\n", __func__);
+    }
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         (*n).second = p_namedObject;
@@ -380,6 +386,7 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
 }
 
 void GlobalNameSpace::clearTextureMap() {
+    fprintf(stderr, "%s: call\n", __func__);
     decltype(m_textureMap)().swap(m_textureMap);
 }
 

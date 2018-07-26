@@ -794,6 +794,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
 
     const bool alreadyClosed = mClosed;
     mClosed = true;
+    fprintf(stderr, "%s: clsoe event\n", __func__);
     crashhandler_exitmode(__FUNCTION__);
 
     // Make sure we cancel everything related to startup dialog here, otherwise
