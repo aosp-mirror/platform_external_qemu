@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "992c68b1_68bdfcde",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotShaders_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T23:17:13Z",
+      "side": 1,
+      "message": "You may want to add a 0 byte at the end so that it is null terminated; it looks like the spec says glGetShaderSource\u0027s length argument is in characters, not bytes:\n\nhttps://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glGetShaderSource.xhtml",
+      "range": {
+        "startLine": 84,
+        "startChar": 8,
+        "endLine": 84,
+        "endChar": 52
+      },
+      "revId": "bc9f0dd7f37bda90ae0a5cd2f3a3f1fbef0aa5a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0d05c29_076ec463",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotShaders_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T23:17:13Z",
+      "side": 1,
+      "message": "Same for infolog",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 45
+      },
+      "revId": "bc9f0dd7f37bda90ae0a5cd2f3a3f1fbef0aa5a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35d3e527_851dd351",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotShaders_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T23:17:13Z",
+      "side": 1,
+      "message": ":D",
+      "range": {
+        "startLine": 237,
+        "startChar": 32,
+        "endLine": 237,
+        "endChar": 70
+      },
+      "revId": "bc9f0dd7f37bda90ae0a5cd2f3a3f1fbef0aa5a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
