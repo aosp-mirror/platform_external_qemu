@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "32f7b25a_e4246a92",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-27T19:30:19Z",
+      "side": 1,
+      "message": "do you want to add a lock for this? is it possible that in the middle of handleUICommand, mInCloseButtonState goes from false to true?",
+      "range": {
+        "startLine": 332,
+        "startChar": 43,
+        "endLine": 332,
+        "endChar": 62
+      },
+      "revId": "c089ac4e151e0dd6841eaed9c401e91690b88cae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
