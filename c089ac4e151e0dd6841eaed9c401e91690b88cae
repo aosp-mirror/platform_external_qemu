@@ -46,6 +46,30 @@
       "revId": "c089ac4e151e0dd6841eaed9c401e91690b88cae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f3d349d_0b61d9f0",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-27T20:00:05Z",
+      "side": 1,
+      "message": "My impression is also that the input events are serialized on a single thread.",
+      "parentUuid": "4dc599b3_771e808e",
+      "range": {
+        "startLine": 332,
+        "startChar": 43,
+        "endLine": 332,
+        "endChar": 62
+      },
+      "revId": "c089ac4e151e0dd6841eaed9c401e91690b88cae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
