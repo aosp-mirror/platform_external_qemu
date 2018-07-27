@@ -94,6 +94,30 @@
       "revId": "c089ac4e151e0dd6841eaed9c401e91690b88cae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d3425ea_a5545c62",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T21:30:06Z",
+      "side": 1,
+      "message": "Crap, that would leave a gap where bad creation could still happen after the close click event. Thanks for catching this; put up a new CL for tat.",
+      "parentUuid": "7b05f5b0_af4128cd",
+      "range": {
+        "startLine": 332,
+        "startChar": 43,
+        "endLine": 332,
+        "endChar": 62
+      },
+      "revId": "c089ac4e151e0dd6841eaed9c401e91690b88cae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
