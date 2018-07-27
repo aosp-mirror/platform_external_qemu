@@ -18,6 +18,7 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/debug.h"
 #include "android/utils/dns.h"
+#include "android/version.h"
 
 #include <algorithm>
 #include <memory>
@@ -68,6 +69,12 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     params.addFormat("androidboot.hardware=%s",
                      isQemu2 ? "ranchu" : "goldfish");
+
+    {
+        std::string myserialno(EMULATOR_VERSION_STRING);
+        std::replace(myserialno.begin(), myserialno.end(), '.', 'X');
+        params.addFormat("androidboot.serialno=EMULATOR%s", myserialno.c_str());
+    }
 
     // TODO: enable this with option
     // params.addFormat("androidboot.logcat=*:D");
