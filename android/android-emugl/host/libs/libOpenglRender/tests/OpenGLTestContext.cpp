@@ -116,10 +116,10 @@ void destroyDisplay(EGLDisplay dpy) {
     sDisplayNeedsInit = true;
 }
 
+
 void GLTest::SetUp() {
     setupStandaloneLibrarySearchPaths();
 
-    android::base::System::get()->envSet("ANDROID_EMU_GL_TEST_BGRA", "1");
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
     gl = LazyLoadedGLESv2Dispatch::get();
     EXPECT_TRUE(egl != nullptr);
