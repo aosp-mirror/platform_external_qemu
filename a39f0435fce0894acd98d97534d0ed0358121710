@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e31453b7_5fed2765",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-27T20:49:47Z",
+      "side": 1,
+      "message": "please use the linux/freebsd extension and add \"e\" to the |mode| to make it set FD_CLOEXEC when opening the file. Otherwise there\u0027s still a small chance of leak if exec() is called between fopen() and fcntl()\n\nhttp://man7.org/linux/man-pages/man3/fopen.3.html",
+      "range": {
+        "startLine": 78,
+        "startChar": 33,
+        "endLine": 78,
+        "endChar": 37
+      },
+      "revId": "a39f0435fce0894acd98d97534d0ed0358121710",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
