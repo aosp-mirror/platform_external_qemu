@@ -792,6 +792,10 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         return;
     }
 
+    if (mToolWindow) {
+        mToolWindow->setEnabled(false);
+    }
+
     const bool alreadyClosed = mClosed;
     mClosed = true;
     crashhandler_exitmode(__FUNCTION__);
