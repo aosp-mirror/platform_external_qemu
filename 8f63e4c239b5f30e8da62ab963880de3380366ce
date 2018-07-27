@@ -22,6 +22,30 @@
       "revId": "8f63e4c239b5f30e8da62ab963880de3380366ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "85a04894_8888e5ba",
+        "filename": "android/android-emu/android/skin/qt/tool-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T22:14:53Z",
+      "side": 1,
+      "message": "Ah that\u0027s right, heh :) Done",
+      "parentUuid": "a553fad8_710639c4",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 175,
+        "endChar": 57
+      },
+      "revId": "8f63e4c239b5f30e8da62ab963880de3380366ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
