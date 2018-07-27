@@ -14,6 +14,7 @@
 
 #include "android/base/files/FileShareOpen.h"
 #include "android/base/files/FileShareOpenImpl.h"
+#include "android/base/StringFormat.h"
 
 void android::base::createFileForShare(const char* filename) {
     void* handle = internal::openFileForShare(filename);
@@ -75,6 +76,14 @@ void android::base::internal::closeFileForShare(void* fileHandle) {
 FILE* android::base::fsopen(const char* filename,
                             const char* mode,
                             android::base::FileShare fileshare) {
+    std::string tmp;
+    // "e" is a glibc extension from glibc 2.7, it open the file with
+    // O_CLOEXEC flag. It doesn't work for macOS/Windows actually but it
+    // also doesn't hurt.
+    if (!strchr(mode, 'e')) {
+        tmp = StringFormat("%se", mode);
+        mode = tmp.c_str();
+    }
     FILE* file = fopen(filename, mode);
     if (!file) {
         return nullptr;
@@ -92,7 +101,6 @@ FILE* android::base::fsopen(const char* filename,
             break;
     }
     int fd = fileno(file);
-    fcntl(fd, F_SETFD, FD_CLOEXEC);
     if (flock(fd, operation | LOCK_NB) == -1) {
         fclose(file);
         fprintf(stderr, "%s lock failed errno %d\n", filename, errno);
