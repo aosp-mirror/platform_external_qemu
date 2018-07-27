@@ -184,6 +184,7 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate) {
 
     setupStandaloneLibrarySearchPaths();
+    android::base::System::get()->envSet("ANDROID_EMU_GL_TEST_BGRA", "1");
 
     LazyLoadedEGLDispatch::get();
     if (glVersion == GLESApi_CM) LazyLoadedGLESv1Dispatch::get();
