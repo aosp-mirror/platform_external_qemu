@@ -329,7 +329,7 @@ void ToolWindow::show() {
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
 
     // Many UI commands require extended window. Construct it here.
-    if (mAllowExtWindow && !mIsExiting && !mInCloseButtonState) {
+    if (mAllowExtWindow && !mIsExiting) {
         mExtendedWindow.get();
     }
 
@@ -782,16 +782,15 @@ bool ToolWindow::shouldClose() {
     bool actuallyExit = askWhetherToSaveSnapshot();
     if (actuallyExit) {
         parentWidget()->close();
-        mInCloseButtonState = false;
         return true;
     }
 
-    mInCloseButtonState = false;
+    setEnabled(true);
     return false;
 }
 
 void ToolWindow::on_close_button_clicked() {
-    mInCloseButtonState = true;
+    setEnabled(false);
 
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier)) {
         // The user shift-clicked on the X
@@ -800,7 +799,6 @@ void ToolWindow::on_close_button_clicked() {
         android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
         parentWidget()->close();
 
-        mInCloseButtonState = false;
         return;
     }
     shouldClose();
@@ -907,7 +905,7 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 }
 
 void ToolWindow::on_more_button_clicked() {
-    if (mAllowExtWindow) {
+    if (mAllowExtWindow && !mIsExiting) {
         mExtendedWindow.get()->show();
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
