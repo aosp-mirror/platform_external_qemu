@@ -327,10 +327,12 @@ void ToolWindow::show() {
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
+
     // Many UI commands require extended window. Construct it here.
-    if (mAllowExtWindow && !mIsExiting) {
+    if (mAllowExtWindow && !mIsExiting && !mInCloseButtonState) {
         mExtendedWindow.get();
     }
+
     switch (cmd) {
         case QtUICommand::SHOW_PANE_LOCATION:
             if (down) {
@@ -780,19 +782,25 @@ bool ToolWindow::shouldClose() {
     bool actuallyExit = askWhetherToSaveSnapshot();
     if (actuallyExit) {
         parentWidget()->close();
+        mInCloseButtonState = false;
         return true;
     }
 
+    mInCloseButtonState = false;
     return false;
 }
 
 void ToolWindow::on_close_button_clicked() {
+    mInCloseButtonState = true;
+
     if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier)) {
         // The user shift-clicked on the X
         // This counts as us asking and having the user say "don't save"
         mAskedWhetherToSaveSnapshot = true;
         android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
         parentWidget()->close();
+
+        mInCloseButtonState = false;
         return;
     }
     shouldClose();
