@@ -1528,9 +1528,11 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
     }
 
     if (hw->hw_arc) {
-        // Chrome OS has a different graphics pipeline, disable GPU
-        // acceleration for now.
-        str_reset(&hw->hw_gpu_mode, "off");
+        // Chrome OS GPU acceleration is not perfect now, disable it
+        // in "default" mode, it still can be enabled with explicit
+        // setting.
+        if (hw->hw_gpu_mode == NULL || !strcmp(hw->hw_gpu_mode, "auto"))
+            str_reset(&hw->hw_gpu_mode, "off");
         str_reset(&hw->hw_cpu_arch, "x86_64");
     }
 
