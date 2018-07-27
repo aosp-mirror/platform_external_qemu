@@ -162,6 +162,7 @@ private:
     SizeTweaker mSizeTweaker;
     bool mTopSwitched = false;
     bool mIsExiting = false;
+    bool mInCloseButtonState = false;
     bool mAskedWhetherToSaveSnapshot = false;
     bool mAllowExtWindow = false;
     bool mClipboardSupported = false;
