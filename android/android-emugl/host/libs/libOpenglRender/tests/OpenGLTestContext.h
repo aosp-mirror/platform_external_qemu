@@ -41,6 +41,8 @@ void destroyContext(EGLDisplay dpy, EGLContext cxt);
 void destroySurface(EGLDisplay dpy, EGLSurface surface);
 void destroyDisplay(EGLDisplay dpy);
 
+void setUpPathsAndEnvironment();
+
 class GLTest : public ::testing::Test {
 protected:
     virtual void SetUp();

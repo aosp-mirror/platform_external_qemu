@@ -15,6 +15,7 @@
 #include "GLSnapshotTestStateUtils.h"
 #include "GLSnapshotTesting.h"
 #include "GLTestUtils.h"
+#include "OpenGLTestContext.h"
 #include "OpenglCodecCommon/glUtils.h"
 #include "Standalone.h"
 #include "samples/HelloTriangle.h"
@@ -58,7 +59,6 @@ public:
         mValid = gles2_dispatch_init(this);
         if (mValid) {
             overrideFunctions();
-            fprintf(stderr, "SnapshotTestDispatch initialized.\n");
         }
         else {
             fprintf(stderr, "SnapshotTestDispatch failed to initialize.\n");
@@ -172,10 +172,13 @@ const GLESv2Dispatch* getSnapshotTestDispatch() {
     return sSnapshotTestDispatch.ptr();
 }
 
-TEST_F(GLTest, OverrideDispatch) {
-    gl = getSnapshotTestDispatch();
+TEST(SnapshotGlRenderingSampleTest, OverrideDispatch) {
+    setUpPathsAndEnvironment();
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    const GLESv2Dispatch* testGl = getSnapshotTestDispatch();
     EXPECT_NE(nullptr, gl);
-    EXPECT_NE(gl->glDrawArrays, LazyLoadedGLESv2Dispatch::get()->glDrawArrays);
+    EXPECT_NE(nullptr, testGl);
+    EXPECT_NE(gl->glDrawArrays, testGl->glDrawArrays);
 }
 
 class SnapshotTestTriangle : public HelloTriangle {
