@@ -782,7 +782,6 @@ bool ToolWindow::shouldClose() {
     bool actuallyExit = askWhetherToSaveSnapshot();
     if (actuallyExit) {
         parentWidget()->close();
-        mInCloseButtonState = false;
         return true;
     }
 
@@ -800,7 +799,6 @@ void ToolWindow::on_close_button_clicked() {
         android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
         parentWidget()->close();
 
-        mInCloseButtonState = false;
         return;
     }
     shouldClose();
@@ -907,7 +905,7 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
 }
 
 void ToolWindow::on_more_button_clicked() {
-    if (mAllowExtWindow) {
+    if (mAllowExtWindow && !mIsExiting && !mInCloseButtonState) {
         mExtendedWindow.get()->show();
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();

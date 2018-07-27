@@ -161,6 +161,18 @@ private:
     UserActionsCounterPtr mUserActionsCounter;
     SizeTweaker mSizeTweaker;
     bool mTopSwitched = false;
+
+    // Currently, the extended window is constructed when tool bar buttons are
+    // clicked. However, this can cause problems on emulator exit if things are
+    // getting deallocated at the same time the emulator begins the exiting
+    // process, but before |mIsExiting| is true.
+    //
+    // To fix this case, if the emulator is closed from the tool window, we'd
+    // like to prevent the extended window from getting constructed even if the
+    // user has pressed a tool bar button after the close event.  In this
+    // situation, first |mInCloseButtonState| is set to true, then sometime
+    // later, it is set to false only if a snapshot Ask -> Cancel happened,
+    // otherwise both it and |mIsExiting| is set to true.
     bool mIsExiting = false;
     bool mInCloseButtonState = false;
     bool mAskedWhetherToSaveSnapshot = false;
