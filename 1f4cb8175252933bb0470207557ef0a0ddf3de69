@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b23ac4d_f7bfeb56",
+        "filename": "android/android-emu/android/location/Route.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T19:59:05Z",
+      "side": 1,
+      "message": "there are LoadProtobuf utility functions for this\n\nsee\n\nandroid/android-emu/android/protobuf/LoadSave.h",
+      "range": {
+        "startLine": 52,
+        "startChar": 1,
+        "endLine": 57,
+        "endChar": 5
+      },
+      "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5674e2d2_65a4a4aa",
+        "filename": "android/android-emu/android/location/proto/route.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T19:59:05Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "range": {
+        "startLine": 20,
+        "startChar": 34,
+        "endLine": 20,
+        "endChar": 36
+      },
+      "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e50bcca9_a897997b",
+        "filename": "android/android-emu/android/location/proto/route.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T19:59:05Z",
+      "side": 1,
+      "message": "this could be an enum in the protobuf",
+      "range": {
+        "startLine": 41,
+        "startChar": 12,
+        "endLine": 41,
+        "endChar": 18
+      },
+      "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ac648b2_27370e4b",
+        "filename": "android/android-emu/android/location/proto/route.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T19:59:05Z",
+      "side": 1,
+      "message": "In our protobuf style guide, did we do something like prefer optional field unless abs. necessary?",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 32
+      },
+      "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
