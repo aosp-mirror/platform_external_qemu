@@ -46,7 +46,7 @@ namespace metrics {
 #ifdef _WIN32
 static constexpr int kCommonOpenFlags = O_BINARY | O_NOINHERIT;
 #else
-static constexpr int kCommonOpenFlags = 0;
+static constexpr int kCommonOpenFlags = O_CLOEXEC;
 #endif
 
 // Extensions for an active temporary logging file and for the finalized one.
