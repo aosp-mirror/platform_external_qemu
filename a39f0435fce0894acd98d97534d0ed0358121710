@@ -22,6 +22,30 @@
       "revId": "a39f0435fce0894acd98d97534d0ed0358121710",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b6d5955_b6eb4ad6",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-07-27T20:51:40Z",
+      "side": 1,
+      "message": "thanks, that\u0027s a great idea. Will come with anther CL.",
+      "parentUuid": "e31453b7_5fed2765",
+      "range": {
+        "startLine": 78,
+        "startChar": 33,
+        "endLine": 78,
+        "endChar": 37
+      },
+      "revId": "a39f0435fce0894acd98d97534d0ed0358121710",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
