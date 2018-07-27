@@ -14,8 +14,9 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "RenderContext.h"
+#include "android/base/Compiler.h"
 
 #include <cinttypes>
 #include <functional>
@@ -72,6 +73,8 @@ public:
 protected:
     virtual void initialize() = 0;
     virtual void draw() = 0;
+
+    virtual const GLESv2Dispatch* getGlDispatch();
 
     int mWidth = 256;
     int mHeight = 256;
