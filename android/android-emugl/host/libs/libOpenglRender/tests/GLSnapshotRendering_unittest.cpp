@@ -69,6 +69,7 @@ public:
 protected:
     void overrideFunctions() {
         this->glDrawArrays = (glDrawArrays_t)test_glDrawArrays;
+        this->glDrawElements = (glDrawElements_t)test_glDrawElements;
     }
 
     void saveSnapshot() {
@@ -114,20 +115,20 @@ protected:
         m_texture_loader->join();
     }
 
-    static void test_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
+    static void testDraw(std::function<void()> doDraw) {
         const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
         ASSERT_NE(nullptr, gl);
 
         FrameBuffer* fb = FrameBuffer::getFB();
         if (!fb) {
             ADD_FAILURE() << "No framebuffer, test cannot snapshot.";
-            gl->glDrawArrays(mode, first, count);
+            doDraw();
             return;
         }
 
         // save then draw
         ((SnapshotTestDispatch*)getSnapshotTestDispatch())->saveSnapshot();
-        gl->glDrawArrays(mode, first, count);
+        doDraw();
 
         GLuint width, height, bytesPerPixel;
         width = fb->getWidth();
@@ -142,7 +143,7 @@ protected:
 
         // load and redraw
         ((SnapshotTestDispatch*)getSnapshotTestDispatch())->loadSnapshot();
-        gl->glDrawArrays(mode, first, count);
+        doDraw();
 
         // compare the framebuffer contents
         std::vector<GLubyte> postPixels = {};
@@ -152,6 +153,22 @@ protected:
 
         EXPECT_TRUE(ImageMatches(width, height, bytesPerPixel, width,
                                  prePixels.data(), postPixels.data()));
+    }
+
+    static void test_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
+        testDraw([&] {
+            LazyLoadedGLESv2Dispatch::get()->glDrawArrays(mode, first, count);
+        });
+    }
+
+    static void test_glDrawElements(GLenum mode,
+                                    GLsizei count,
+                                    GLenum type,
+                                    const GLvoid* indices) {
+        testDraw([&] {
+            LazyLoadedGLESv2Dispatch::get()->glDrawElements(mode, count, type,
+                                                            indices);
+        });
     }
 
     bool mValid = false;
@@ -176,6 +193,7 @@ TEST_F(GLTest, OverrideDispatch) {
     gl = getSnapshotTestDispatch();
     EXPECT_NE(nullptr, gl);
     EXPECT_NE(gl->glDrawArrays, LazyLoadedGLESv2Dispatch::get()->glDrawArrays);
+    EXPECT_NE(gl->glDrawElements, LazyLoadedGLESv2Dispatch::get()->glDrawElements);
 }
 
 class SnapshotTestTriangle : public HelloTriangle {
