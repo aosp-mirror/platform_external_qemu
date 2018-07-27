@@ -67,7 +67,7 @@ protected:
             emugl::compileAndLinkShaderProgram(
                 vshaderSrc,fshaderSrc);
 
-        auto gl = LazyLoadedGLESv2Dispatch::get();
+        auto gl = getGlDispatch();
 
         mTransformLoc = gl->glGetUniformLocation(program, "transform");
 
@@ -98,7 +98,7 @@ protected:
     void draw() override {
         glm::mat4 rot = glm::rotate(glm::mat4(), mTime, glm::vec3(0.0f, 0.0f, 1.0f));
 
-        auto gl = LazyLoadedGLESv2Dispatch::get();
+        auto gl = getGlDispatch();
 
         gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         gl->glUniformMatrix4fv(mTransformLoc, 1, GL_FALSE, glm::value_ptr(rot));
