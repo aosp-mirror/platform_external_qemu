@@ -70,6 +70,30 @@
       "revId": "c089ac4e151e0dd6841eaed9c401e91690b88cae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b05f5b0_af4128cd",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-27T20:35:54Z",
+      "side": 1,
+      "message": "Can you add some comment about the expected values of |mInCloseButtonState| during different phases? E.g. I see it being changed back to \"false\" in many places that actually close the emulator, and that looks very strange",
+      "parentUuid": "7f3d349d_0b61d9f0",
+      "range": {
+        "startLine": 332,
+        "startChar": 43,
+        "endLine": 332,
+        "endChar": 62
+      },
+      "revId": "c089ac4e151e0dd6841eaed9c401e91690b88cae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
