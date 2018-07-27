@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "95fbdde6_bf81eac2",
+        "filename": "android/android-emu/android/metrics/proto/studio_stats.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-27T18:32:34Z",
+      "side": 1,
+      "message": "Do we support these deprecated annotations? Have you verified by trying to build this and send metrics on all 3 platforms?",
+      "range": {
+        "startLine": 37,
+        "startChar": 1,
+        "endLine": 37,
+        "endChar": 59
+      },
+      "revId": "5d17c0f2a68fb978b72673c9861942b63d3afb11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
