@@ -92,6 +92,7 @@ FILE* android::base::fsopen(const char* filename,
             break;
     }
     int fd = fileno(file);
+    fcntl(fd, F_SETFD, FD_CLOEXEC);
     if (flock(fd, operation | LOCK_NB) == -1) {
         fclose(file);
         fprintf(stderr, "%s lock failed errno %d\n", filename, errno);
