@@ -106,6 +106,7 @@ public:
     bool clipboardSharingSupported() const {
         return mClipboardSupported;
     }
+    void forwardKeyToEmulator(uint32_t keycode, bool down);
 
 signals:
     void guestClipboardChanged(QString text);
@@ -114,7 +115,6 @@ signals:
 private:
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardGenericEventToEmulator(int type, int code, int value);
-    void forwardKeyToEmulator(uint32_t keycode, bool down);
 
     // Handle a full key press (down + up) in a single call.
     void handleUICommand(QtUICommand cmd) {
