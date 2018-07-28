@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e55d83b_9c0d1461",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotPixels_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-28T05:34:24Z",
+      "side": 1,
+      "message": "Thanks! Some guidance for future CLs relating to this is, let\u0027s try testing texture pixels save/load in the presence of GL_UNPACK_ROW_LENGTH !\u003d 0. That has historically been a pretty fragile path.",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 35
+      },
+      "revId": "0112f513887c4777a4dc659a9bf132edb7070bde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
