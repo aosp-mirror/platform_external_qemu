@@ -465,6 +465,8 @@ private:
     int m_statsNumFrames = 0;
     long long m_statsStartTime = 0;
 
+    bool m_cbStats = false;
+
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;
