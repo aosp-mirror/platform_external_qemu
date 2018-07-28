@@ -26,6 +26,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/containers/StaticMap.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -40,6 +41,7 @@
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
+using android::base::StaticMap;
 using android::base::Stream;
 using android::base::System;
 using android::base::WorkerProcessingResult;
@@ -189,6 +191,69 @@ struct InitializedGlobals {
 // happy path doesn't need to lock the mutex.
 static std::atomic<bool> sInitialized{false};
 static LazyInstance<InitializedGlobals> sGlobals = {};
+
+enum ColorBufferUsages {
+    Nil = 0,
+    Create = 1 << 0,
+    Open = 1 << 1,
+    BindToTexture = 1 << 2,
+    Read = 1 << 3,
+    Update = 1 << 4,
+    Blit = 1 << 5,
+    Post = 1 << 6,
+};
+
+static LazyInstance<StaticMap<HandleType, int>> sCbUsages =
+    LAZY_INSTANCE_INIT;
+
+static void summarizeCbs() {
+    int create = 0;
+    int open = 0;
+    int bindtotexture = 0;
+    int read = 0;
+    int update = 0;
+    int blit = 0;
+    int post = 0;
+
+    int createOnly = 0;
+    int openOnly = 0;
+
+    sCbUsages->eraseIf([&](HandleType h, int u) {
+        if (u & (int)ColorBufferUsages::Create) { ++create; if (u == (u & (int)ColorBufferUsages::Create)) { ++createOnly; } }
+        if (u & (int)ColorBufferUsages::Open) { ++open; if (u == (u & ((int)ColorBufferUsages::Create | (int)ColorBufferUsages::Open))) { ++openOnly; } }
+        if (u & (int)ColorBufferUsages::BindToTexture) { ++bindtotexture; }
+        if (u & (int)ColorBufferUsages::Read) { ++read; }
+        if (u & (int)ColorBufferUsages::Update) { ++update; }
+        if (u & (int)ColorBufferUsages::Blit) { ++blit; }
+        if (u & (int)ColorBufferUsages::Post) { ++post; }
+            return false;
+            });
+
+    fprintf(stderr, "%s: cb stats: create %d open %d bindtotexture %d read %d update %d blit %d post %d createOnly %d openOnly %d\n", __func__,
+            create,
+            open,
+            bindtotexture,
+            read,
+            update,
+            blit,
+            post,
+            createOnly,
+            openOnly);
+}
+
+#define WRITE_CB_USAGE(handle, usage) if (m_cbStats) { \
+    auto currUsage = sCbUsages->get(handle); \
+    if (!currUsage && usage != (int)ColorBufferUsages::Create) { \
+        fprintf(stderr, "%s: warning: usage 0x%x on deleted cb handle 0x%x!\n", \
+                __func__, \
+                usage, \
+                handle); \
+    } \
+    int res = (int)(currUsage ? *currUsage : ColorBufferUsages::Nil) | (int)usage; \
+    sCbUsages->set(handle, res); \
+} \
+
+#define ERASE_CB_STAT(handle) if (m_cbStats) { sCbUsages->erase(handle); }
 
 void FrameBuffer::waitUntilInitialized() {
     if (sInitialized.load(std::memory_order_relaxed)) {
@@ -587,6 +652,7 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_windowHeight(p_height),
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
+      m_cbStats(getenv("SHOW_COLORBUFFER_STATS") != nullptr),
       m_colorBufferHelper(new ColorBufferHelper(this)),
       m_readbackThread(
           [this](FrameBuffer::Readback&& readback) {
@@ -938,10 +1004,15 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
         } else {
             m_colorbuffers[ret] = { std::move(cb), 0, false, 0 };
         }
+
+        WRITE_CB_USAGE(ret, ColorBufferUsages::Create);
+
     } else {
         ret = 0;
         DBG("Create color buffer failed.\n");
     }
+
+    
     return ret;
 }
 
@@ -1111,6 +1182,8 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 
     AutoLock mutex(m_lock);
 
+    WRITE_CB_USAGE(p_colorbuffer, ColorBufferUsages::Open);
+
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
@@ -1165,6 +1238,7 @@ void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
     // Instead, put it on a 'delayed close' list to return to it later.
     if (--c->second.refcount == 0) {
         if (forced) {
+            ERASE_CB_STAT(p_colorbuffer);
             eraseDelayedCloseColorBufferLocked(c->first, c->second.closedTs);
             m_colorbuffers.erase(c);
         } else {
@@ -1197,6 +1271,7 @@ void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
             }
             const auto& cb = m_colorbuffers.find(it->cbHandle);
             m_colorbuffers.erase(cb);
+            ERASE_CB_STAT(it->cbHandle);
         }
         ++it;
     }
@@ -1307,6 +1382,7 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
     WindowSurface* surface = (*w).second.first.get();
     surface->flushColorBuffer();
 
+    WRITE_CB_USAGE(surface->getAttachedColorBuffer()->getHndl(), ColorBufferUsages::Blit);
     return true;
 }
 
@@ -1355,6 +1431,8 @@ void FrameBuffer::readColorBuffer(HandleType p_colorbuffer,
     }
 
     (*c).second.cb->readPixels(x, y, width, height, format, type, pixels);
+
+    WRITE_CB_USAGE(p_colorbuffer, ColorBufferUsages::Read);
 }
 
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
@@ -1375,6 +1453,8 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
 
     (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
 
+    WRITE_CB_USAGE(p_colorbuffer, ColorBufferUsages::Update);
+
     return true;
 }
 
@@ -1387,6 +1467,7 @@ bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer) {
         return false;
     }
 
+    WRITE_CB_USAGE(p_colorbuffer, ColorBufferUsages::BindToTexture);
     return (*c).second.cb->bindToTexture();
 }
 
@@ -1718,6 +1799,8 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
 
     m_lastPostedColorBuffer = p_colorbuffer;
 
+    WRITE_CB_USAGE(p_colorbuffer, ColorBufferUsages::Post);
+
     ret = true;
 
     if (m_subWin) {
@@ -1748,6 +1831,9 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                    (float)usage.resident / 1048576.0f);
             m_statsStartTime = currTime;
             m_statsNumFrames = 0;
+            if (m_cbStats) {
+                summarizeCbs();
+            }
         }
     }
 

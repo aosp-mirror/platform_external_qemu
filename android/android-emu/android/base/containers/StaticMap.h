@@ -32,7 +32,7 @@ public:
 
     void set(const K& key, const V& value) {
         AutoLock lock(mLock);
-        mItems.emplace(key, value);
+        mItems[key] = value;
     }
 
     void erase(const K& key) {
