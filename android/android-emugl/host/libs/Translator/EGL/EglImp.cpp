@@ -1460,6 +1460,7 @@ EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, con
 }
 
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
     if (g_eglInfo->isEgl2Egl()) {
         return EGL_CONDITION_SATISFIED_KHR;
     }
