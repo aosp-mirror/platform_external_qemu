@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3c7c58dc_1c38436c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotShaders_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-28T01:05:01Z",
+      "side": 1,
+      "message": "Ah ok, the spec says\n\n\"The size of the buffer required to store the returned source code string can be obtained by calling glGetShader with the value GL_SHADER_SOURCE_LENGTH.\"",
+      "parentUuid": "43b2b9ee_411c5367",
+      "range": {
+        "startLine": 84,
+        "startChar": 8,
+        "endLine": 84,
+        "endChar": 52
+      },
+      "revId": "bc9f0dd7f37bda90ae0a5cd2f3a3f1fbef0aa5a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0d05c29_076ec463",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/GLSnapshotShaders_unittest.cpp",
         "patchSetId": 2
