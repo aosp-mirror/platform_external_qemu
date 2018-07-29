@@ -1964,6 +1964,10 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
             pixels.data());
 }
 
+void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
+    fprintf(stderr, "FrameBuffer::%s: call for 0x%x\n", __func__, handle);
+}
+
 void FrameBuffer::onSave(Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
