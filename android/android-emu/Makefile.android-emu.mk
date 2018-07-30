@@ -62,6 +62,11 @@ include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
 
 ###############################################################################
 #
+# Location-routes protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/location/proto/LocationProto.mk
+
+###############################################################################
+#
 # Snapshot protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/snapshot/proto/SnapshotProto.mk
 
@@ -392,6 +397,8 @@ LOCAL_SRC_FILES := \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
+    android/location/Point.cpp \
+    android/location/Route.cpp \
     android/main-common.c \
     android/main-help.cpp \
     android/main-emugl.cpp \
@@ -619,6 +626,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-tinyepoxy \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
+    $(LOCATION_PROTO_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
     $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
     $(SNAPSHOT_PROTO_STATIC_LIBRARIES) \
@@ -768,8 +776,10 @@ LOCAL_SRC_FILES := \
   android/filesystems/testing/TestSupport.cpp \
   android/gps/GpxParser_unittest.cpp \
   android/gps/KmlParser_unittest.cpp \
-  android/kernel/kernel_utils_unittest.cpp \
   android/hw-lcd_unittest.cpp \
+  android/kernel/kernel_utils_unittest.cpp \
+  android/location/Point_unittest.cpp \
+  android/location/Route_unittest.cpp \
   android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
