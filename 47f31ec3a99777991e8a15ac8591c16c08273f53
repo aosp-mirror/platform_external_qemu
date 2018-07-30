@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d62b8e3f_3677727a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-30T17:59:31Z",
+      "side": 1,
+      "message": "envSet isn\u0027t safe/going to work for the current process, it only affects subprocesses\n\nhttps://rachelbythebay.com/w/2017/01/30/env/\n\nand we can assume that our opengl test will be multithreaded\n\nI recommend getting lepton@ to fix this",
+      "range": {
+        "startLine": 187,
+        "startChar": 2,
+        "endLine": 187,
+        "endChar": 74
+      },
+      "revId": "47f31ec3a99777991e8a15ac8591c16c08273f53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
