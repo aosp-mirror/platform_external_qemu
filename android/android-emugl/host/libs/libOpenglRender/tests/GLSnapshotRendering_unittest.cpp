@@ -58,7 +58,6 @@ public:
         mValid = gles2_dispatch_init(this);
         if (mValid) {
             overrideFunctions();
-            fprintf(stderr, "SnapshotTestDispatch initialized.\n");
         }
         else {
             fprintf(stderr, "SnapshotTestDispatch failed to initialize.\n");
@@ -189,11 +188,13 @@ const GLESv2Dispatch* getSnapshotTestDispatch() {
     return sSnapshotTestDispatch.ptr();
 }
 
-TEST_F(GLTest, OverrideDispatch) {
-    gl = getSnapshotTestDispatch();
+TEST(SnapshotGlRenderingSampleTest, OverrideDispatch) {
+    const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+    const GLESv2Dispatch* testGl = getSnapshotTestDispatch();
     EXPECT_NE(nullptr, gl);
-    EXPECT_NE(gl->glDrawArrays, LazyLoadedGLESv2Dispatch::get()->glDrawArrays);
-    EXPECT_NE(gl->glDrawElements, LazyLoadedGLESv2Dispatch::get()->glDrawElements);
+    EXPECT_NE(nullptr, testGl);
+    EXPECT_NE(gl->glDrawArrays, testGl->glDrawArrays);
+    EXPECT_NE(gl->glDrawElements, testGl->glDrawElements);
 }
 
 class SnapshotTestTriangle : public HelloTriangle {

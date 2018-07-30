@@ -92,12 +92,10 @@ void TestTextureDrawBasic(const GLESv2Dispatch* gl, GLenum internalformat,
 #define GL_BGRA_EXT 0x80E1
 
 TEST_F(GLTest, TextureDrawBasic) {
-     const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
-     TestTextureDrawBasic(gl, GL_RGBA, GL_RGBA, true);
-     const char* ext = (const char *)gl->glGetString(GL_EXTENSIONS);
-     bool bgra_ok = strstr(ext, "GL_EXT_texture_format_BGRA8888");
-     TestTextureDrawBasic(gl, GL_BGRA_EXT, GL_BGRA_EXT, bgra_ok);
-     TestTextureDrawBasic(gl, GL_RGBA, GL_BGRA_EXT, false);
+    TestTextureDrawBasic(gl, GL_RGBA, GL_RGBA, true);
+    // Assumes BGRA is supported
+    TestTextureDrawBasic(gl, GL_BGRA_EXT, GL_BGRA_EXT, true);
+    TestTextureDrawBasic(gl, GL_RGBA, GL_BGRA_EXT, false);
 }
 
 }  // namespace emugl
