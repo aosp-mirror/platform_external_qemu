@@ -217,6 +217,30 @@
     },
     {
       "key": {
+        "uuid": "7db65e02_fa15f4bb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-07-30T18:56:40Z",
+      "side": 1,
+      "message": "Almost, we detect host support and almost every host(desktop gl and swiftshader) come with support for it...",
+      "parentUuid": "b931c894_fd03ea02",
+      "range": {
+        "startLine": 187,
+        "startChar": 2,
+        "endLine": 187,
+        "endChar": 74
+      },
+      "revId": "47f31ec3a99777991e8a15ac8591c16c08273f53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "421e6d00_418ec552",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.cpp",
         "patchSetId": 2
