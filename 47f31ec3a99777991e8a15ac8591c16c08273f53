@@ -117,6 +117,29 @@
       "revId": "47f31ec3a99777991e8a15ac8591c16c08273f53",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43e6fd28_4cf55bc0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-30T18:18:10Z",
+      "side": 1,
+      "message": "probably this needs to read the environment variable before deciding on pass/fail?",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 99,
+        "endChar": 59
+      },
+      "revId": "47f31ec3a99777991e8a15ac8591c16c08273f53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
