@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "4ac1268b_6cefa14f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-30T18:16:40Z",
+      "side": 1,
+      "message": "Well, I\u0027ve still had problems with the env variable actually counting after it was set at least in other threads, and we don\u0027t know if the user started any other threads before running any sample application code. Can we have some solution that does not require setenv?",
+      "parentUuid": "af317ee5_89741404",
+      "range": {
+        "startLine": 187,
+        "startChar": 2,
+        "endLine": 187,
+        "endChar": 74
+      },
+      "revId": "47f31ec3a99777991e8a15ac8591c16c08273f53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "421e6d00_418ec552",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.cpp",
         "patchSetId": 2
