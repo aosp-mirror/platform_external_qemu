@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "f02aac5d_59e969f1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-07-30T18:35:36Z",
+      "side": 1,
+      "message": "Is that easy for us to call fc:setEnabledOverride in test?\nIf we can do that, I can change to use the way you suggested. Otherwise, we still need to\nfigure out how to fix tests.",
+      "parentUuid": "f886276f_5b9be729",
+      "range": {
+        "startLine": 187,
+        "startChar": 2,
+        "endLine": 187,
+        "endChar": 74
+      },
+      "revId": "47f31ec3a99777991e8a15ac8591c16c08273f53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "421e6d00_418ec552",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.cpp",
         "patchSetId": 2
