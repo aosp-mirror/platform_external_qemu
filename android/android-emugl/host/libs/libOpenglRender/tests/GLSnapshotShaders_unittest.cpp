@@ -42,11 +42,12 @@ void main() {
 
 struct GlShaderState {
     GLenum type;
-    std::string source;
     GLboolean deleteStatus;
     GLboolean compileStatus;
     GLint infoLogLength;
+    std::vector<GLchar> infoLog;
     GLint sourceLength;
+    std::string source;
 };
 
 // SnapshotGlShaderTest - A helper class for testing snapshot's preservation of
@@ -78,11 +79,38 @@ public:
                                      m_shader_state.infoLogLength));
         EXPECT_TRUE(compareParameter(GL_SHADER_SOURCE_LENGTH,
                                      m_shader_state.sourceLength));
+
+        std::vector<GLchar> srcData = {};
+        srcData.resize(m_shader_state.sourceLength);
+        gl->glGetShaderSource(m_shader_name, m_shader_state.sourceLength,
+                              nullptr, srcData.data());
+        if (srcData.data() == NULL) {
+            EXPECT_EQ(0, m_shader_state.source.length()) << "source is empty";
+        } else {
+            EXPECT_STREQ(m_shader_state.source.c_str(), srcData.data());
+        }
+
+        std::vector<GLchar> infoLogData = {};
+        infoLogData.resize(m_shader_state.infoLogLength);
+        gl->glGetShaderInfoLog(m_shader_name, m_shader_state.infoLogLength,
+                               nullptr, infoLogData.data());
+        if (infoLogData.data() == NULL) {
+            EXPECT_EQ(0, m_shader_state.infoLogLength) << "info log is empty";
+        } else {
+            EXPECT_STREQ(m_shader_state.infoLog.data(), infoLogData.data());
+        }
     }
 
     void stateChange() override {
         m_shader_name = gl->glCreateShader(m_shader_state.type);
         m_shader_state_changer();
+
+        // Store state of info log
+        gl->glGetShaderiv(m_shader_name, GL_INFO_LOG_LENGTH,
+                          &m_shader_state.infoLogLength);
+        m_shader_state.infoLog.resize(m_shader_state.infoLogLength);
+        gl->glGetShaderInfoLog(m_shader_name, m_shader_state.infoLogLength,
+                               nullptr, m_shader_state.infoLog.data());
     }
 
     void loadSource(const std::string& sourceString) {
@@ -155,20 +183,29 @@ public:
     SnapshotGlVertexShaderTest() { m_shader_state = {GL_VERTEX_SHADER}; }
 };
 
-TEST_F(SnapshotGlVertexShaderTest, CreateVertexShader) {
+TEST_F(SnapshotGlVertexShaderTest, Create) {
     doCheckedSnapshot();
 }
 
-TEST_F(SnapshotGlVertexShaderTest, SetVertexShaderSource) {
+TEST_F(SnapshotGlVertexShaderTest, SetSource) {
     setShaderStateChanger(
             [this] { loadSource(std::string(kTestVertexShaderSource)); });
     doCheckedSnapshot();
 }
 
-TEST_F(SnapshotGlVertexShaderTest, CompileVertexShader) {
+TEST_F(SnapshotGlVertexShaderTest, CompileSuccess) {
     setShaderStateChanger([this] {
         loadSource(std::string(kTestVertexShaderSource));
         compile();
+    });
+    doCheckedSnapshot();
+}
+
+TEST_F(SnapshotGlVertexShaderTest, CompileFail) {
+    std::string failedShader = "vec3 hi my name is compile failed";
+    setShaderStateChanger([this, &failedShader] {
+        loadSource(failedShader);
+        compile(GL_FALSE);
     });
     doCheckedSnapshot();
 }
@@ -178,20 +215,29 @@ public:
     SnapshotGlFragmentShaderTest() { m_shader_state = {GL_FRAGMENT_SHADER}; }
 };
 
-TEST_F(SnapshotGlFragmentShaderTest, CreateFragmentShader) {
+TEST_F(SnapshotGlFragmentShaderTest, Create) {
     doCheckedSnapshot();
 }
 
-TEST_F(SnapshotGlFragmentShaderTest, SetFragmentShaderSource) {
+TEST_F(SnapshotGlFragmentShaderTest, SetSource) {
     setShaderStateChanger(
             [this] { loadSource(std::string(kTestFragmentShaderSource)); });
     doCheckedSnapshot();
 }
 
-TEST_F(SnapshotGlFragmentShaderTest, CompileFragmentShader) {
+TEST_F(SnapshotGlFragmentShaderTest, CompileSuccess) {
     setShaderStateChanger([this] {
         loadSource(std::string(kTestFragmentShaderSource));
         compile();
+    });
+    doCheckedSnapshot();
+}
+
+TEST_F(SnapshotGlFragmentShaderTest, CompileFail) {
+    std::string failedShader = "vec3 nice to meet you compile failed";
+    setShaderStateChanger([this, &failedShader] {
+        loadSource(failedShader);
+        compile(GL_FALSE);
     });
     doCheckedSnapshot();
 }
