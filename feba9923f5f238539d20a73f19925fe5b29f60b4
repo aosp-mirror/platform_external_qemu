@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a93bd4b8_5079a960",
+        "filename": "android/android-emu/android/emulation/ClipboardPipe.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-07-30T22:46:41Z",
+      "side": 1,
+      "message": "Do we specifically need to have the the \"using std::min\" instead of putting \"std::min\" in the place where it is used?",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 15
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
