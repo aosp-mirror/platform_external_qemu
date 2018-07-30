@@ -169,6 +169,30 @@
     },
     {
       "key": {
+        "uuid": "e5e22d9d_c6e1fd29",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-07-30T18:49:38Z",
+      "side": 1,
+      "message": "Another quick question, so before my change, we do detect host bgra support and set some variable and do something based on that variable in actual code path, but we don\u0027t advertise bgra support. So the question is: is this something we want?  I mean, support bgra in actual code but don\u0027t advertise it.",
+      "parentUuid": "f02aac5d_59e969f1",
+      "range": {
+        "startLine": 187,
+        "startChar": 2,
+        "endLine": 187,
+        "endChar": 74
+      },
+      "revId": "47f31ec3a99777991e8a15ac8591c16c08273f53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "421e6d00_418ec552",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/OpenGLTestContext.cpp",
         "patchSetId": 2
@@ -251,6 +275,30 @@
       "side": 1,
       "message": "I found that the test fails because it reads the env var and thinks BGRA8888 is not supported, so it expects an error on line 58 but doesn\u0027t get one.",
       "parentUuid": "43e6fd28_4cf55bc0",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 99,
+        "endChar": 59
+      },
+      "revId": "47f31ec3a99777991e8a15ac8591c16c08273f53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b811d9b_7973e47a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-07-30T18:49:38Z",
+      "side": 1,
+      "message": "So this is for fixing that test? actual this is a new test added by me and as a quick fix: you can just comment out this test and add a todo there since android side , you don\u0027t use bgra and don\u0027t care about it. I will fix this after we have an agreement to how to get this done correctly.",
+      "parentUuid": "97efb0ec_a3d205b6",
       "range": {
         "startLine": 97,
         "startChar": 0,
