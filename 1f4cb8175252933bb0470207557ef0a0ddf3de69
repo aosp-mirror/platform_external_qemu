@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7487f784_dc68fa76",
+        "filename": "android/android-emu/android/location/Route.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-30T17:21:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3b23ac4d_f7bfeb56",
+      "range": {
+        "startLine": 52,
+        "startChar": 1,
+        "endLine": 57,
+        "endChar": 5
+      },
+      "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5674e2d2_65a4a4aa",
         "filename": "android/android-emu/android/location/proto/route.proto",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22545473_cf321e56",
+        "filename": "android/android-emu/android/location/proto/route.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-30T17:21:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5674e2d2_65a4a4aa",
+      "range": {
+        "startLine": 20,
+        "startChar": 34,
+        "endLine": 20,
+        "endChar": 36
+      },
+      "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "40b5c2ea_86552b11",
+        "filename": "android/android-emu/android/location/proto/route.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-30T17:21:02Z",
+      "side": 1,
+      "message": "I had thought that extending a protobuf enum in the future caused problems, but that appears not to be the case.\nDone.",
+      "parentUuid": "e50bcca9_a897997b",
+      "range": {
+        "startLine": 41,
+        "startChar": 12,
+        "endLine": 41,
+        "endChar": 18
+      },
+      "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ac648b2_27370e4b",
         "filename": "android/android-emu/android/location/proto/route.proto",
         "patchSetId": 1
@@ -91,6 +163,30 @@
       "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd2996c2_bc7409ca",
+        "filename": "android/android-emu/android/location/proto/route.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-07-30T17:21:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2ac648b2_27370e4b",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 32
+      },
+      "revId": "1f4cb8175252933bb0470207557ef0a0ddf3de69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
