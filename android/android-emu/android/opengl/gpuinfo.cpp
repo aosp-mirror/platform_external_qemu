@@ -246,6 +246,14 @@ static const BlacklistEntry sGpuBlacklist[] = {
         // Intel Crestine
         {"8086", nullptr, "2a02", nullptr, nullptr, nullptr, "W"},
         {"8086", nullptr, "2a12", nullptr, nullptr, nullptr, "W"},
+
+        // Display-only devices
+
+        // Matrix MGA G200eW
+        {"102b", nullptr, "0532", nullptr, nullptr, nullptr, nullptr},
+
+        // VMWare SVGA 3D
+        {"15ad", nullptr, "0405", nullptr, nullptr, nullptr, nullptr},
 };
 
 // If any blacklist entry matches any gpu, return true.
