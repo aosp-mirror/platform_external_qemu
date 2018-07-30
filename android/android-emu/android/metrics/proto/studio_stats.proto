@@ -499,7 +499,7 @@ message AndroidStudioEvent {
     GFX_TRACE_TRACE_STARTED = 85;
     // The GPU Debugger tracing was stopped.
     GFX_TRACE_TRACE_STOPPED = 86;
-    // A UI command influencing the the GPU Debugger was selected.
+    // A UI command influencing the GPU Debugger was selected.
     GFX_TRACE_COMMAND_SELECTED = 87;
     // A link from  the GPU Debugger tracing results was clicked.
     GFX_TRACE_LINK_CLICKED = 88;
@@ -1782,13 +1782,13 @@ message JniInspectionEvent {
   enum JniInspectionType {
     UNKNOWN_JNI_INSPECTION_EVENT = 0;
     // Set when the "missing function" inspection quickfix is used.
-    MISSING_FUNCTION = 1;
+    MISSING_FUNCTION_INSPECTION_EVENT = 1;
     // Set when the "extern C" inspection quickfix is used.
-    EXTERN_C = 2;
+    EXTERN_C_INSPECTION_EVENT = 2;
     // Set when the "parameters" inspection quickfix is used.
-    PARAMETERS = 3;
+    PARAMETERS_INSPECTION_EVENT = 3;
     // Set when the OnLoad / OnUnload inspection quickfix is used.
-    ONLOAD = 4;
+    ONLOAD_INSPECTION_EVENT = 4;
   }
 
   optional JniInspectionType type = 1;
@@ -3326,7 +3326,7 @@ message AndroidAttribute {
     // a Google library.
     APPLICATION = 2;
     // This attribute is used in the design preview only. It does not affect
-    // the the Android application at runtime.
+    // the Android application at runtime.
     TOOLS = 3;
   }
 
@@ -4594,11 +4594,11 @@ message StudioToolWindowActionStats {
   enum EventType {
     UNKNOWN_EVENT_TYPE = 0;
 
-    REGISTERED = 1;
+    REGISTERED_EVENT_TYPE = 1;
 
-    OPEN = 2;
+    OPEN_EVENT_TYPE = 2;
 
-    CLOSED = 3;
+    CLOSED_EVENT_TYPE = 3;
   }
   // Id of the tool window
   // e.g. 'Assistant'
