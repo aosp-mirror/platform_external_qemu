@@ -12,7 +12,6 @@
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
-#include "qemu/error-report.h"
 #include "monitor/monitor.h"
 #include "hw/misc/goldfish_battery.h"
 
@@ -26,7 +25,6 @@ enum {
     BATTERY_INT_STATUS = 0x00,
     /* set this to enable IRQ */
     BATTERY_INT_ENABLE = 0x04,
-
     BATTERY_AC_ONLINE = 0x08,
     BATTERY_STATUS = 0x0C,
     BATTERY_HEALTH = 0x10,
@@ -312,8 +310,6 @@ static uint64_t goldfish_battery_read(void *opaque, hwaddr offset, unsigned size
         case BATTERY_CURRENT_MAX:
             return s->current_max;
         default:
-            error_report ("goldfish_battery_read: Bad offset " TARGET_FMT_plx,
-                    offset);
             return 0;
     }
 }
@@ -334,10 +330,6 @@ static void goldfish_battery_write(void *opaque, hwaddr offset, uint64_t val,
                 qemu_set_irq(s->irq, now_active);
             }
             break;
-
-        default:
-            error_report("goldfish_battery_write: Bad offset " TARGET_FMT_plx,
-                    offset);
     }
 }
 
