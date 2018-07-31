@@ -72,15 +72,6 @@ bool androidEmuglConfigInit(EmuglConfig* config,
          onBlacklist = isHostGpuBlacklisted();
     }
 
-    if (avdName) {
-        // This is for testing purposes only.
-        ScopedCPtr<const char> testGpuBlacklist(
-                path_getAvdGpuBlacklisted(avdName));
-        if (testGpuBlacklist.get()) {
-            onBlacklist = !strcmp(testGpuBlacklist.get(), "yes");
-        }
-    }
-
     if (gpuChoice && !strcmp(gpuChoice, "auto")) {
         if (onBlacklist) {
             dwarning("Your GPU drivers may have a bug. "
