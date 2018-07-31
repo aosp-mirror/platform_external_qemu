@@ -17,10 +17,11 @@
 #include "android/physics/PhysicalModel.h"
 
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
 
+#include "android/automation/proto/automation.pb.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
@@ -28,7 +29,6 @@
 #include "android/hw-sensors.h"
 #include "android/physics/AmbientEnvironment.h"
 #include "android/physics/InertialModel.h"
-#include "android/physics/proto/physics.pb.h"
 #include "android/utils/debug.h"
 #include "android/utils/looper.h"
 #include "android/utils/stream.h"
@@ -43,6 +43,8 @@
 using android::base::PathUtils;
 using android::base::StdioStream;
 using android::base::System;
+
+namespace pb = emulator_automation;
 
 namespace android {
 namespace physics {
@@ -232,6 +234,11 @@ PHYSICAL_PARAMETERS_LIST
     void physicalStateStabilized();
     void targetStateChanged();
 
+    template <typename ValueType>
+    void generateEvent(PhysicalParameter type,
+                       PhysicalInterpolation mode,
+                       ValueType value);
+
     /*
      * Ticks the physical model.
      */
@@ -262,7 +269,8 @@ PHYSICAL_PARAMETERS_LIST
     PlaybackState mPlaybackState = PLAYBACK_STATE_NONE;
     int64_t mPlaybackAndRecordingStartTimeNs = 0L;
 
-    emulator_physics::TargetCommand mNextPlaybackCommand;
+    pb::Time mNextPlaybackCommandTime;
+    pb::PhysicalModelEvent mNextPlaybackCommand;
     std::unique_ptr<StdioStream> mRecordingAndPlaybackStream;
 
     const uint32_t kPlaybackFileVersion = 1;
@@ -312,25 +320,25 @@ PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
             nullptr;
 }
 
-emulator_physics::TargetCommand_InterpolationMethod toProto(
+pb::PhysicalModelEvent_InterpolationMethod toProto(
         PhysicalInterpolation interpolation) {
     switch (interpolation) {
         case PHYSICAL_INTERPOLATION_SMOOTH:
-            return emulator_physics::TargetCommand_InterpolationMethod_Smooth;
+            return pb::PhysicalModelEvent_InterpolationMethod_Smooth;
         case PHYSICAL_INTERPOLATION_STEP:
-            return emulator_physics::TargetCommand_InterpolationMethod_Step;
+            return pb::PhysicalModelEvent_InterpolationMethod_Step;
         default:
             assert(false);  // should never happen
-            return emulator_physics::TargetCommand_InterpolationMethod_Smooth;
+            return pb::PhysicalModelEvent_InterpolationMethod_Smooth;
     }
 }
 
 PhysicalInterpolation fromProto(
-        emulator_physics::TargetCommand_InterpolationMethod interpolation) {
+        pb::PhysicalModelEvent_InterpolationMethod interpolation) {
     switch (interpolation) {
-        case emulator_physics::TargetCommand_InterpolationMethod_Smooth:
+        case pb::PhysicalModelEvent_InterpolationMethod_Smooth:
             return PHYSICAL_INTERPOLATION_SMOOTH;
-        case emulator_physics::TargetCommand_InterpolationMethod_Step:
+        case pb::PhysicalModelEvent_InterpolationMethod_Step:
             return PHYSICAL_INTERPOLATION_STEP;
         default:
             W("%s: Unknown interpolation mode %d.  Defaulting to smooth.",
@@ -339,10 +347,27 @@ PhysicalInterpolation fromProto(
     }
 }
 
-PhysicalParameter fromProto(emulator_physics::TargetCommand_PhysicalParameter param) {
+pb::PhysicalModelEvent_ParameterType toProto(PhysicalParameter param) {
     switch (param) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
-#define PROTO_ENUM(x) emulator_physics::TargetCommand_PhysicalParameter_##x
+#define PROTO_ENUM(x) pb::PhysicalModelEvent_ParameterType_##x
+
+#define PHYSICAL_PARAMETER_(x, y, z, w) \
+    case PHYSICAL_PARAMETER_ENUM(x):    \
+        return PROTO_ENUM(x);
+        PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+#undef PHYSICAL_PARAMETER_ENUM
+        default:
+            assert(false);  // should never happen
+            return pb::PhysicalModelEvent_ParameterType_ParameterType_MIN;
+    }
+}
+
+PhysicalParameter fromProto(pb::PhysicalModelEvent_ParameterType param) {
+    switch (param) {
+#define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
+#define PROTO_ENUM(x) pb::PhysicalModelEvent_ParameterType_##x
 
 #define PHYSICAL_PARAMETER_(x,y,z,w) \
         case PROTO_ENUM(x):\
@@ -356,55 +381,78 @@ PHYSICAL_PARAMETERS_LIST
     }
 }
 
-float getProtoValue_float(const emulator_physics::TargetCommand& target) {
-    if (target.value_size() != 1) {
+float getProtoValue_float(const pb::PhysicalModelEvent& target) {
+    if (!target.has_value() || target.value().data_size() != 1) {
         W("%s: Error in parsed physics command.  Float parameters should have "
-          "exactly one value.  Found %d.", __FUNCTION__, target.value_size());
+          "exactly one value.  Found %d.",
+          __FUNCTION__, target.value().data_size());
         return 0.f;
     }
-    return target.value(0);
+    return target.value().data(0);
 }
 
-vec3 getProtoValue_vec3(const emulator_physics::TargetCommand& target) {
-    if (target.value_size() != 3) {
+vec3 getProtoValue_vec3(const pb::PhysicalModelEvent& target) {
+    if (!target.has_value() || target.value().data_size() != 3) {
         W("%s: Error in parsed physics command.  Vec3 parameters should have "
-          "exactly three values.  Found %d.", __FUNCTION__,
-          target.value_size());
-        return vec3 {0.f, 0.f, 0.f};
+          "exactly three values.  Found %d.",
+          __FUNCTION__, target.value().data_size());
+        return vec3{0.f, 0.f, 0.f};
     }
-    return vec3{target.value(0), target.value(1), target.value(2)};
+    const pb::PhysicalModelEvent_ParameterValue& value = target.value();
+    return vec3{value.data(0), value.data(1), value.data(2)};
 }
 
-void setProtoValue(emulator_physics::TargetCommand* target, float value) {
-    target->add_value(value);
+void setProtoValue(pb::PhysicalModelEvent* target, float value) {
+    target->mutable_value()->add_data(value);
 }
 
-void setProtoValue(emulator_physics::TargetCommand* target, vec3 value) {
-    target->add_value(value.x);
-    target->add_value(value.y);
-    target->add_value(value.z);
+void setProtoValue(pb::PhysicalModelEvent* target, vec3 value) {
+    pb::PhysicalModelEvent_ParameterValue* pbValue = target->mutable_value();
+    pbValue->add_data(value.x);
+    pbValue->add_data(value.y);
+    pbValue->add_data(value.z);
 }
 
-bool parseNextCommand(StdioStream* inStream,
-                      emulator_physics::TargetCommand& outCommand) {
-    std::string nextCommand = inStream->getString();
-    return !nextCommand.empty() &&
-            outCommand.ParseFromString(nextCommand) &&
-            outCommand.has_physical_parameter() &&
-            outCommand.has_time() &&
-            outCommand.has_interpolation_method();
+static bool isPhysicalModelEventValid(const pb::PhysicalModelEvent& event) {
+    return (event.has_type() && event.has_interpolation_method());
+}
+
+static bool parseNextCommand(StdioStream* inStream,
+                             pb::Time* outTime,
+                             pb::PhysicalModelEvent* outCommand) {
+    const std::string nextCommand = inStream->getString();
+
+    pb::RecordedEvent event;
+    if (nextCommand.empty() || !event.ParseFromString(nextCommand)) {
+        return false;
+    }
+
+    if (!event.has_stream_type() ||
+        event.stream_type() != pb::RecordedEvent_StreamType_PHYSICAL_MODEL) {
+        // Currently if other stream types are present the recording is
+        // considered invalid.
+        return false;
+    }
+
+    if (!event.has_event_time() || !event.has_physical_model() ||
+        !isPhysicalModelEventValid(event.physical_model())) {
+        return false;
+    }
+
+    *outTime = event.event_time();
+    *outCommand = event.physical_model();
+    return true;
 }
 
 void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     while (mPlaybackState == PLAYBACK_STATE_PLAYING &&
            time_ns >= mPlaybackAndRecordingStartTimeNs +
-                   mNextPlaybackCommand.time()) {
+                              mNextPlaybackCommandTime.timestamp()) {
         setCurrentTimeInternal(mPlaybackAndRecordingStartTimeNs +
-                mNextPlaybackCommand.time());
-        switch (fromProto(mNextPlaybackCommand.physical_parameter())) {
+                               mNextPlaybackCommandTime.timestamp());
+        switch (fromProto(mNextPlaybackCommand.type())) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
-#define UNION_VALUE_NAME(x) x
 #define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
 #define GET_PROTO_VALUE_FUNCTION_NAME(x) getProtoValue_##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) \
@@ -417,13 +465,13 @@ PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PROTO_VALUE_FUNCTION_NAME
 #undef SET_TARGET_INTERNAL_FUNCTION_NAME
-#undef UNION_VALUE_NAME
 #undef PHYSICAL_PARAMETER_ENUM
             default:
                 break;
         }
         if (!parseNextCommand(mRecordingAndPlaybackStream.get(),
-                              mNextPlaybackCommand)) {
+                              &mNextPlaybackCommandTime,
+                              &mNextPlaybackCommand)) {
             stopRecordAndPlayback();
         }
     }
@@ -817,7 +865,8 @@ int PhysicalModelImpl::load(Stream* f) {
     // first load targets
     const int32_t num_physical_parameters = stream_get_be32(f);
     if (num_physical_parameters > MAX_PHYSICAL_PARAMETERS) {
-        D("%s: cannot load: snapshot requires %d physical parameters, %d available\n",
+        D("%s: cannot load: snapshot requires %d physical parameters, %d "
+          "available\n",
           __FUNCTION__, num_physical_parameters, MAX_PHYSICAL_PARAMETERS);
         return -EIO;
     }
@@ -854,7 +903,8 @@ PHYSICAL_PARAMETERS_LIST
     /* check number of physical sensors */
     int32_t num_sensors = stream_get_be32(f);
     if (num_sensors > MAX_SENSORS) {
-        D("%s: cannot load: snapshot requires %d physical sensors, %d available\n",
+        D("%s: cannot load: snapshot requires %d physical sensors, %d "
+          "available\n",
           __FUNCTION__, num_sensors, MAX_SENSORS);
         return -EIO;
     }
@@ -941,9 +991,11 @@ int PhysicalModelImpl::playback(const char* filename) {
         return -1;
     }
 
-    if (!parseNextCommand(playbackStream.get(), mNextPlaybackCommand)) {
-        E("%s: Invalid physics file %s.  Physical Motion will "
-          "not be played back.", __FUNCTION__, filename);
+    if (!parseNextCommand(playbackStream.get(), &mNextPlaybackCommandTime,
+                          &mNextPlaybackCommand)) {
+        E("%s: Invalid physics file %s.  Physical Motion will not be played "
+          "back.",
+          __FUNCTION__, filename);
         return -1;
     }
     mRecordingAndPlaybackStream.swap(playbackStream);
@@ -962,30 +1014,14 @@ int PhysicalModelImpl::stopRecordAndPlayback() {
 #define SET_TARGET_FUNCTION_NAME(x) setTarget##x
 #define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
-#define PROTO_ENUM(x) emulator_physics::TargetCommand_PhysicalParameter_##x
-#define UNION_VALUE_NAME(x) x
-#define PHYSICAL_PARAMETER_(x,y,z,w) void PhysicalModelImpl::SET_TARGET_FUNCTION_NAME(z)(\
-        w value, PhysicalInterpolation mode) {\
-    if (mPlaybackState != PLAYBACK_STATE_PLAYING) {\
-        if (mPlaybackState == PLAYBACK_STATE_RECORDING) {\
-            emulator_physics::TargetCommand command;\
-            command.set_physical_parameter(PROTO_ENUM(x));\
-            command.set_time(mModelTimeNs - mPlaybackAndRecordingStartTimeNs);\
-            command.set_interpolation_method(toProto(mode));\
-            setProtoValue(&command, value);\
-            assert(mRecordingAndPlaybackStream.get());\
-            std::string encodedProto;\
-            if (command.SerializeToString(&encodedProto)) {\
-                mRecordingAndPlaybackStream->putString(encodedProto);\
-            }\
-        }\
-        SET_TARGET_INTERNAL_FUNCTION_NAME(z)(value, mode);\
-    }\
-}
+#define PHYSICAL_PARAMETER_(x, y, z, w)                         \
+    void PhysicalModelImpl::SET_TARGET_FUNCTION_NAME(z)(        \
+            w value, PhysicalInterpolation mode) {              \
+        generateEvent(PHYSICAL_PARAMETER_ENUM(x), mode, value); \
+        SET_TARGET_INTERNAL_FUNCTION_NAME(z)(value, mode);      \
+    }
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
-#undef UNION_VALUE_NAME
-#undef PROTO_ENUM
 #undef PHYSICAL_PARAMETER_ENUM
 #undef SET_TARGET_INTERNAL_FUNCTION_NAME
 #undef SET_TARGET_FUNCTION_NAME
@@ -1027,12 +1063,38 @@ void PhysicalModelImpl::targetStateChanged() {
     }
 }
 
+template <typename ValueType>
+void PhysicalModelImpl::generateEvent(PhysicalParameter type,
+                   PhysicalInterpolation mode,
+                   ValueType value) {
+    if (mPlaybackState != PLAYBACK_STATE_RECORDING) {
+        return;
+    }
+
+    pb::RecordedEvent event;
+    event.set_stream_type(pb::RecordedEvent_StreamType_PHYSICAL_MODEL);
+    event.mutable_event_time()->set_timestamp(mModelTimeNs -
+                                              mPlaybackAndRecordingStartTimeNs);
+
+    pb::PhysicalModelEvent* command = event.mutable_physical_model();
+    command->set_type(toProto(type));
+    command->set_interpolation_method(toProto(mode));
+    setProtoValue(command, value);
+
+    assert(mRecordingAndPlaybackStream.get());
+    std::string encodedProto;
+    if (event.SerializeToString(&encodedProto)) {
+        mRecordingAndPlaybackStream->putString(encodedProto);
+    }
+}
+
 void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(
             reinterpret_cast<PhysicalModel*>(opaque));
     if (impl != nullptr) {
         const DurationNs now_ns =
-                looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+                looper_nowNsWithClock(looper_getForThread(),
+                LOOPER_CLOCK_VIRTUAL);
         impl->setCurrentTime(now_ns);
 
         // if the model is still changing, schedule another timer.
