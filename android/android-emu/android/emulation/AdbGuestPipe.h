@@ -11,14 +11,19 @@
 
 #pragma once
 
+#include "android/base/StringView.h"
 #include "android/base/async/Looper.h"
 #include "android/base/async/ScopedSocketWatch.h"
-#include "android/base/StringView.h"
-#include "android/emulation/AndroidPipe.h"
+#include "android/base/sockets/ScopedSocket.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/threads/Thread.h"
 #include "android/emulation/AdbTypes.h"
-#include "android/featurecontrol/feature_control.h"
+#include "android/emulation/AndroidPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/feature_control.h"
 
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace android {
@@ -75,6 +80,25 @@ public:
     using StringView = ::android::base::StringView;
     using ScopedSocket = ::android::base::ScopedSocket;
 
+    class AdbScopedSocketWatcher {
+    public:
+        AdbScopedSocketWatcher() = default;
+        AdbScopedSocketWatcher(AdbScopedSocketWatcher&& other);
+        AdbScopedSocketWatcher& operator=(AdbScopedSocketWatcher&& other);
+        AdbScopedSocketWatcher(android::base::Looper::FdWatch* fdWatcher);
+        AdbScopedSocketWatcher(android::base::Looper::FdWatch* fdWatcher,
+                               ScopedSocket&& socket);
+        void swapSocketAndClear(ScopedSocket* socket);
+        void reset();
+        android::base::Looper::FdWatch* fdWatcher();
+        const android::base::Looper::FdWatch* fdWatcher() const;
+        bool valid() const;
+
+    private:
+        std::unique_ptr<android::base::Looper::FdWatch> mFdWatcher;
+        ScopedSocket mSocket;
+    };
+
     // AndroidPipe::Service class
     class Service : public AndroidPipe::Service, public AdbGuestAgent {
     public:
@@ -83,10 +107,17 @@ public:
 
         // Create a new AdbGuestPipe instance.
         virtual AndroidPipe* create(void* mHwPipe, const char* args) override;
+        bool canLoad() const override;
+        AndroidPipe* load(void* hwPipe,
+                          const char* args,
+                          android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
         virtual void onHostConnection(ScopedSocket&& socket) override;
 
+        void preLoad(android::base::Stream* stream) override;
+        void postLoad(android::base::Stream* stream) override;
+        void postSave(android::base::Stream* stream) override;
         // Called when a new adb pipe connection is opened by
         // the guest. Note that this does *not* transfer ownership of |pipe|.
         // Technically, AndroidPipe instances are owned by the virtual device.
@@ -107,6 +138,11 @@ public:
         // For pipes in the middle of deletion to notify the service
         // that they are gone.
         void unregisterActivePipe(AdbGuestPipe* pipe);
+        // Check if a socket should be recycled for snapshot (if yes recycle it)
+        void recycleSocket(AdbScopedSocketWatcher&& socket);
+        void registerForRecycle(int socket);
+        void hostCloseSocket(int fd);
+        android::base::ScopedSocket reclaimSocket(int fd);
 
     private:
 
@@ -116,6 +152,7 @@ public:
         AdbHostAgent* mHostAgent;
         std::vector<AdbGuestPipe*> mPipes;
         AdbGuestPipe* mCurrentActivePipe = nullptr;
+        std::unordered_map<int, android::base::ScopedSocket> mRecycledSockets;
     };
 
     virtual ~AdbGuestPipe();
@@ -138,13 +175,14 @@ public:
     }
 
     void resetConnection();
+    void onSave(android::base::Stream* stream) override;
 
 private:
-    AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent)
-        : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
-        setExpectedGuestCommand("accept", State::WaitingForGuestAcceptCommand);
-        mPlayStoreImage = android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage);
-    }
+    AdbGuestPipe(void* mHwPipe,
+                 Service* service,
+                 AdbHostAgent* hostAgent,
+                 android::base::Stream* stream);
+    void onLoad(android::base::Stream* stream);
 
     // Return current service with the right type.
     Service* service() const {
@@ -160,6 +198,25 @@ private:
         ProxyingData,
         ClosedByGuest,
         ClosedByHost,
+    };
+
+    class BufferedSocketReader {
+    public:
+        enum class DrainBehavior {
+            Clear,
+            AppendToBuffer
+        };
+        void drainSocket(int socket, DrainBehavior drainBehavior);
+        bool hasData() const;
+        size_t readData(void* data, size_t dataSize);
+        size_t getReadableDataSize() const;
+        void onSave(android::base::Stream* stream);
+        void onLoad(android::base::Stream* stream);
+
+    private:
+        std::vector<uint8_t> mRecvBuffer;
+        int mRecvBufferBegin = 0;
+        int mRecvBufferEnd = 0;
     };
 
     // Used for debugging.
@@ -192,16 +249,18 @@ private:
     // whether one already occured or not.
     void waitForHostConnection();
 
+    bool shouldUseRecvBuffer();
+
     // Command/reply buffer and cursor.
     char mBuffer[16];        // the command being accepted or reply being sent.
     size_t mBufferSize = 0;  // size of valid bytes in mBuffer.
     size_t mBufferPos = 0;   // number of matched command bytes on input/output.
 
     State mState = State::WaitingForGuestAcceptCommand;  // current pipe state.
-    android::base::ScopedSocketWatch
-            mHostSocket;  // current host socket, if connected.
+    AdbScopedSocketWatcher mHostSocket;  // current host socket, if connected.
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
+    BufferedSocketReader mRecvBuffer;
 };
 
 }  // namespace emulation
