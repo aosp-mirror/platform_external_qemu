@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "a1ff3538_49842d23",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T23:40:39Z",
+      "side": 1,
+      "message": "In general, this kind of message gets outdated often; more, it\u0027s just a guess that could be completely off and the user might get angry or screw up their system setup because of it. Can we instead create a \u0027troubleshooting memory problems\u0027 help page on the Android Studio web portal and give the link here?",
+      "parentUuid": "af579043_008254b0",
+      "range": {
+        "startLine": 111,
+        "startChar": 17,
+        "endLine": 111,
+        "endChar": 64
+      },
+      "revId": "eaca9d7e3ae0d5ffb668b79a6a5a5fe19f94fdb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "01fe8785_f5311d59",
         "filename": "util/oslib-win32.c",
         "patchSetId": 2
