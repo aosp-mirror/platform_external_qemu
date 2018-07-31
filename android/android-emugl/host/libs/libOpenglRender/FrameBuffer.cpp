@@ -1239,6 +1239,11 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             if (procIte != m_procOwnedWindowSurfaces.end()) {
                 for (auto whndl : procIte->second) {
                     auto w = m_windows.find(whndl);
+                    if (w == m_windows.end()) {
+                        fprintf(stderr, "%s %s %d no window\n", __FILE__,
+                                __func__, __LINE__);
+                        continue;
+                    }
                     closeColorBufferLocked(w->second.second, forced);
                     m_windows.erase(w);
                 }

@@ -23,6 +23,8 @@
 #include <array>
 #include <utility>
 
+static int WIZARD_INT = 333333;
+
 static constexpr int toIndex(NamedObjectType type) {
     return static_cast<int>(type);
 }
@@ -58,6 +60,10 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
                 });
         }
     }
+
+    // if (stream) {
+    //     fprintf(stderr, "%s Loading WIZARD_INT %d: %d\n", __FILE__, WIZARD_INT, stream->getBe32());
+    // }
 }
 
 void ShareGroup::preSave(GlobalNameSpace *globalNameSpace) {
@@ -77,6 +83,9 @@ void ShareGroup::onSave(android::base::Stream* stream) {
     for (auto ns : m_nameSpace) {
         ns->onSave(stream);
     }
+
+    // fprintf(stderr, "%s Saving WIZARD_INT %d\n", __FILE__, WIZARD_INT);
+    // stream->putBe32(WIZARD_INT);
 }
 
 void ShareGroup::postSave(android::base::Stream* stream) {
@@ -383,7 +392,34 @@ ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
         return createShareGroup(p_groupName, p_existingGroupID, stream,
                                 loadObject);
     } else {
+        if (stream) {
+            // We're loading a snapshot; groups should have been cleared.
+            // Destroy and recreate the group.
+            deleteShareGroup(p_groupName);
+            return createShareGroup(p_groupName, p_existingGroupID, stream,
+                                loadObject);
+        }
         return attachShareGroup(p_groupName, ite->first);
+
+        // auto attached = attachShareGroup(p_groupName, ite->first);
+        // if (stream) {
+        //     // reload namespace
+        //     fprintf(stderr, "%s Reloading namespace\n", __FILE__);
+        //     for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES);
+        //          i++) {
+        //         delete attached->m_nameSpace[i];
+        //         attached->m_nameSpace[i] = new NameSpace(static_cast<NamedObjectType>(i),
+        //                                        m_globalNameSpace, stream, loadObject);
+        //     };
+        //     attached->m_needLoadRestore = true;
+        //     for (auto ns : attached->m_nameSpace) {
+        //         ns->postLoad(
+        //                 [attached](NamedObjectType p_type, ObjectLocalName p_localName) {
+        //                     return attached->getObjectDataPtrNoLock(p_type, p_localName);
+        //             });
+        //     }
+        // }
+        // return attached;
     }
 }
 

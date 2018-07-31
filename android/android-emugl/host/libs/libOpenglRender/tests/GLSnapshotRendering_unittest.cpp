@@ -108,6 +108,7 @@ protected:
         std::shared_ptr<TextureLoader> m_texture_loader(
                 new TextureLoader(StdioStream(fopen(mTextureFile.c_str(), "rb"),
                                               StdioStream::kOwner)));
+
         fb->onLoad(m_stream.get(), m_texture_loader);
 
         m_stream->close();
@@ -127,12 +128,23 @@ protected:
 
         // save then draw
         ((SnapshotTestDispatch*)getSnapshotTestDispatch())->saveSnapshot();
+        EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE,
+                                          {0.2f, 0.2f, 0.3f, 0.0f}));
         doDraw();
 
         GLuint width, height, bytesPerPixel;
         width = fb->getWidth();
         height = fb->getHeight();
         bytesPerPixel = glUtilsPixelBitSize(GL_RGBA, GL_UNSIGNED_BYTE) / 8;
+
+        // clear
+        gl->glFinish();
+        gl->glClearColor(0, 0, 0, 1);
+        gl->glClear(GL_COLOR_BUFFER_BIT);
+        gl->glFinish();
+        EXPECT_TRUE(
+                compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {0, 0, 0, 1}));
+        fprintf(stderr, "Cleared buffer.\n");
 
         // save the framebuffer contents
         std::vector<GLubyte> prePixels = {};
@@ -142,6 +154,8 @@ protected:
 
         // load and redraw
         ((SnapshotTestDispatch*)getSnapshotTestDispatch())->loadSnapshot();
+        EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE,
+                                          {0.2f, 0.2f, 0.3f, 0.0f}));
         doDraw();
 
         // compare the framebuffer contents
@@ -150,12 +164,15 @@ protected:
         gl->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                          postPixels.data());
 
+        EXPECT_EQ(prePixels, postPixels);
+        EXPECT_TRUE(compareVector<GLubyte>(prePixels, postPixels));
         EXPECT_TRUE(ImageMatches(width, height, bytesPerPixel, width,
                                  prePixels.data(), postPixels.data()));
     }
 
     static void test_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
         testDraw([&] {
+            fprintf(stderr, "Drawing.\n");
             LazyLoadedGLESv2Dispatch::get()->glDrawArrays(mode, first, count);
         });
     }
@@ -198,13 +215,38 @@ TEST(SnapshotGlRenderingSampleTest, OverrideDispatch) {
 }
 
 class SnapshotTestTriangle : public HelloTriangle {
+public:
+    void drawLoop() {
+        this->initialize();
+        while (mFrameCount < 5) {
+            this->draw();
+            mFb->flushWindowSurfaceColorBuffer(mSurface);
+            if (mUseSubWindow) {
+                mFb->post(mColorBuffer);
+                mWindow->messageLoop();
+            }
+        }
+    }
+
 protected:
     const GLESv2Dispatch* getGlDispatch() { return getSnapshotTestDispatch(); }
+
+    void draw() override {
+        HelloTriangle::draw();
+        mFrameCount++;
+    }
+
+    int mFrameCount = 0;
 };
 
-TEST(SnapshotGlRenderingSampleTest, DrawTriangle) {
+TEST(SnapshotGlRenderingSampleTest, DrawTriangleOnce) {
     SnapshotTestTriangle app;
     app.drawOnce();
+}
+
+TEST(SnapshotGlRenderingSampleTest, DrawTriangleLoop) {
+    SnapshotTestTriangle app;
+    app.drawLoop();
 }
 
 }  // namespace emugl
