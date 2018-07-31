@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
@@ -21,9 +20,11 @@
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 
-#include "Standalone.h"
+#include "GLSnapshotTesting.h"
 #include "GLTestUtils.h"
+#include "Standalone.h"
 
+#include <gtest/gtest.h>
 #include <memory>
 
 using android::base::System;
@@ -113,6 +114,9 @@ protected:
     }
 
     void loadSnapshot() {
+        // unbind so load will destroy previous objects
+        mFb->bindContext(0, 0, 0);
+
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
                     fopen(mSnapshotFile.c_str(), "rb"), StdioStream::kOwner));
         std::shared_ptr<TextureLoader> m_texture_loader(
@@ -297,6 +301,31 @@ TEST_F(FrameBufferTest, BasicBlit) {
 TEST_F(FrameBufferTest, SnapshotSmokeTest) {
     saveSnapshot();
     loadSnapshot();
+}
+
+// Tests that the snapshot restores the clear color state, by changing the clear
+// color in between save and load. If this fails, it means failure to restore a
+// number of different states from GL contexts.
+TEST_F(FrameBufferTest, SnapshotPreserveColorClear) {
+    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+
+    auto gl = LazyLoadedGLESv2Dispatch::get();
+    gl->glClearColor(1, 1, 1, 1);
+    gl->glClear(GL_COLOR_BUFFER_BIT);
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {1, 1, 1, 1}));
+
+    saveSnapshot();
+
+    gl->glClearColor(0.5, 0.5, 0.5, 0.5);
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE,
+                                      {0.5, 0.5, 0.5, 0.5}));
+
+    loadSnapshot();
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {1, 1, 1, 1}));
 }
 
 // Tests that snapshot works to save the state of a single ColorBuffer; we
