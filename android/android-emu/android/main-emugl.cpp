@@ -72,13 +72,20 @@ bool androidEmuglConfigInit(EmuglConfig* config,
          onBlacklist = isHostGpuBlacklisted();
     }
 
+
     if (avdName) {
-        // This is for testing purposes only.
-        ScopedCPtr<const char> testGpuBlacklist(
-                path_getAvdGpuBlacklisted(avdName));
-        if (testGpuBlacklist.get()) {
-            onBlacklist = !strcmp(testGpuBlacklist.get(), "yes");
-        }
+        // bug: 111742771
+        //
+        // Somewhere along the way, we advertised blacklisted=no in avd config,
+        // while that was for testing purposes only.  Then the blacklist is
+        // simply not working.
+        //
+        // Work around this by disabling this testing-only path.
+        // ScopedCPtr<const char> testGpuBlacklist(
+        //         path_getAvdGpuBlacklisted(avdName));
+        // if (testGpuBlacklist.get()) {
+        //     onBlacklist = !strcmp(testGpuBlacklist.get(), "yes");
+        // }
     }
 
     if (gpuChoice && !strcmp(gpuChoice, "auto")) {
