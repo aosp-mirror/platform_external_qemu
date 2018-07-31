@@ -164,6 +164,10 @@ public:
     // Returns just the free RAM on the system. Useful in many cases.
     static int freeRamMb();
 
+#ifdef _WIN32
+    static bool win32MemoryCommitInfo(float* totalMb, float* limitMb);
+#endif
+
     // Measures whether or not the system is considered in a memory pressure
     // state, and returns true if so. Optionally, a freeRamMb output pointer
     // can be given so the caller can see how much RAM is actually free.
