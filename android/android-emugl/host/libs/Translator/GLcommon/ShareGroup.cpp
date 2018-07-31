@@ -383,6 +383,9 @@ ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
         return createShareGroup(p_groupName, p_existingGroupID, stream,
                                 loadObject);
     } else {
+        // If we are loading a snapshot and there is an existing group,
+        // something has gone wrong - they should have been destroyed.
+        assert(stream == nullptr);
         return attachShareGroup(p_groupName, ite->first);
     }
 }
