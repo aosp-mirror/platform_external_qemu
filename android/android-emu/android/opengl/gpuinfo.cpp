@@ -180,6 +180,72 @@ static const BlacklistEntry sGpuBlacklist[] = {
 
         {"NVIDIA (0x10de)", nullptr, "0x0393", nullptr, nullptr,
          nullptr, "M"},  // NVIDIA GeForce 7300 GT (Mac)
+
+        // GPUs with < OpenGL 2.1 support
+
+        // Intel Auburn
+        {"8086", nullptr, "7800", nullptr, nullptr, nullptr, nullptr},
+
+        // Intel Portola
+        {"8086", nullptr, "1240", nullptr, nullptr, nullptr, nullptr},
+
+        // Intel Whitney
+        {"8086", nullptr, "7121", nullptr, nullptr, nullptr, nullptr},
+        {"8086", nullptr, "7123", nullptr, nullptr, nullptr, nullptr},
+        {"8086", nullptr, "7125", nullptr, nullptr, nullptr, nullptr},
+
+        // Intel Solano
+        {"8086", nullptr, "1132", nullptr, nullptr, nullptr, nullptr},
+
+        // Intel Brookdale
+        {"8086", nullptr, "2562", nullptr, nullptr, nullptr, nullptr},
+
+        // Intel Almador
+        {"8086", nullptr, "3577", nullptr, nullptr, nullptr, nullptr},
+
+        // Intel Springdale
+        {"8086", nullptr, "2572", nullptr, nullptr, nullptr, nullptr},
+
+        // Intel Montara
+        {"8086", nullptr, "3582", nullptr, nullptr, nullptr, nullptr},
+        {"8086", nullptr, "358e", nullptr, nullptr, nullptr, nullptr},
+
+        // Intel Grantsdale (2.1 desktop / ES 2.0 on Linux supported)
+        {"8086", nullptr, "2582", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "258a", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Alviso
+        {"8086", nullptr, "2592", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Lakeport
+        {"8086", nullptr, "2772", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Calistoga
+        {"8086", nullptr, "27a2", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "27ae", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Bearlake
+        {"8086", nullptr, "29c2", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "29b2", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "29d2", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Pineview
+        {"8086", nullptr, "a001", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "a011", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Lakeport
+        {"8086", nullptr, "2972", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Broadwater
+        {"8086", nullptr, "2992", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "29a2", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Bearlake 2
+        {"8086", nullptr, "2982", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Crestine
+        {"8086", nullptr, "2a02", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "2a12", nullptr, nullptr, nullptr, "W"},
 };
 
 // If any blacklist entry matches any gpu, return true.
