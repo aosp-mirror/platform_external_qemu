@@ -2218,6 +2218,32 @@ bool System::isUnderMemoryPressure(int* freeRamMb_out) {
     return currentFreeRam < kMemoryPressureLimitMb;
 }
 
+#ifdef _WIN32
+// static
+// Windows will fail VirtualAlloc if there is not enough
+// commit remaining. We need to watch out for this when we use
+// VirtualAlloc.
+bool System::win32MemoryCommitInfo(float* totalMb, float* limitMb) {
+
+    PERFORMANCE_INFORMATION pi = { sizeof(pi) };
+
+    if (!GetPerformanceInfo(&pi, sizeof(pi))) {
+        fprintf(stderr, "ERROR: GetPerformanceInfo() failed.\n");
+        return false;
+    }
+
+    auto commitTotalBytes = pi.PageSize * pi.CommitTotal;
+    auto commitLimitBytes = pi.PageSize * pi.CommitLimit;
+
+    constexpr float oneMbBytes = 1048576.0f;
+
+    if (totalMb) *totalMb = commitTotalBytes / oneMbBytes;
+    if (limitMb) *limitMb = commitLimitBytes / oneMbBytes;
+
+    return true;
+}
+#endif
+
 // static
 bool System::isUnderDiskPressure(StringView path, System::FileSize* freeDisk) {
     System::FileSize availableSpace;

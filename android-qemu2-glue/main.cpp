@@ -1147,6 +1147,35 @@ extern "C" int main(int argc, char** argv) {
     }
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
+#ifdef _WIN32
+    static constexpr float kCommitSafetyFactor = 1.2f;
+    float commitCurrentMb = 0.0f;
+    float commitTotalMb = 0.0f;
+    if (System::win32MemoryCommitInfo(
+            &commitCurrentMb,
+            &commitTotalMb)) {
+
+        float neededMb = hw->hw_ramSize * kCommitSafetyFactor;
+        float remainingMb = commitTotalMb - commitCurrentMb;
+
+        if (remainingMb < neededMb) {
+            derror("Insufficient RAM free for launching emulator.\n"
+                   "Please free up memory (close other programs and files)\n"
+                   "or decrease the AVD RAM size\n"
+                   "and try again.\n"
+                   "    Currently committed: %f MB\n"
+                   "    Total committed: %f MB\n"
+                   "    Remaining: %f MB\n"
+                   "    Needed: %f MB\n",
+                   commitCurrentMb,
+                   commitTotalMb,
+                   remainingMb,
+                   neededMb);
+            return 1;
+        }
+    }
+#endif
+
     // Memory size
     args.add("-m");
     args.addFormat("%d", hw->hw_ramSize);
