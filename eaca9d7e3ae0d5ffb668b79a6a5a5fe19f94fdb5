@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7b88caf_286045c3",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T23:30:41Z",
+      "side": 1,
+      "message": "use double instead - it\u0027s both faster and more precise",
+      "range": {
+        "startLine": 87,
+        "startChar": 14,
+        "endLine": 87,
+        "endChar": 19
+      },
+      "revId": "eaca9d7e3ae0d5ffb668b79a6a5a5fe19f94fdb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af579043_008254b0",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T23:30:41Z",
+      "side": 1,
+      "message": "nit: this sounds kind of passive aggressive to me... :)",
+      "range": {
+        "startLine": 111,
+        "startChar": 17,
+        "endLine": 111,
+        "endChar": 64
+      },
+      "revId": "eaca9d7e3ae0d5ffb668b79a6a5a5fe19f94fdb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "01fe8785_f5311d59",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T23:30:41Z",
+      "side": 1,
+      "message": "this won\u0027t help much as it\u0027s not captured in our crash logs in any way. More of it, exit(1) may cause some crash because of Qt\u0027s threading and is not safe generally.",
+      "range": {
+        "startLine": 106,
+        "startChar": 8,
+        "endLine": 126,
+        "endChar": 23
+      },
+      "revId": "eaca9d7e3ae0d5ffb668b79a6a5a5fe19f94fdb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
