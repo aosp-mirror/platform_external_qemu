@@ -185,7 +185,8 @@ public:
     //    specified in p_existingGroupID and attach p_groupName to the same
     //    ShareGroup instance.
     //
-    ShareGroupPtr attachShareGroup(void *p_groupName, void *p_existingGroupName);
+    ShareGroupPtr attachShareGroup(void *p_groupName, void *p_existingGroupName,
+                android::base::Stream* stream = nullptr);
     ShareGroupPtr attachOrCreateShareGroup(void *p_groupName,
         uint64_t p_existingGroupID, android::base::Stream* stream,
         const ObjectData::loadObject_t& loadObject);

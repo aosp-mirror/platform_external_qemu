@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
@@ -21,9 +20,11 @@
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 
-#include "Standalone.h"
+#include "GLSnapshotTesting.h"
 #include "GLTestUtils.h"
+#include "Standalone.h"
 
+#include <gtest/gtest.h>
 #include <memory>
 
 using android::base::System;
@@ -85,11 +86,12 @@ protected:
         mRenderThreadInfo = new RenderThreadInfo();
 
         // Snapshots
-        mTestSystem.getTempRoot()->makeSubDir("Snapshots");
-        mSnapshotPath = mTestSystem.getTempRoot()->makeSubPath("Snapshots");
+        mTestSystem.getTempRoot()->makeSubDir("FramebufferSnapshots");
+        mSnapshotPath = mTestSystem.getTempRoot()->makeSubPath("FramebufferSnapshots");
         mTimeStamp = std::to_string(android::base::System::get()->getUnixTime());
         mSnapshotFile = mSnapshotPath + PATH_SEP "snapshot_" + mTimeStamp + ".snap";
         mTextureFile = mSnapshotPath + PATH_SEP "textures_" + mTimeStamp + ".stex";
+        fprintf(stderr, "Snapshot file is %s\n", mSnapshotFile.c_str());
     }
 
     virtual void TearDown() override {
@@ -102,6 +104,8 @@ protected:
     }
 
     void saveSnapshot() {
+        fprintf(stderr, "Saving snapshot file is %s\n", mSnapshotFile.c_str());
+
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
                     fopen(mSnapshotFile.c_str(), "wb"), StdioStream::kOwner));
         std::shared_ptr<TextureSaver> m_texture_saver(new TextureSaver(StdioStream(
@@ -113,6 +117,7 @@ protected:
     }
 
     void loadSnapshot() {
+        fprintf(stderr, "Loading snapshot file is %s\n", mSnapshotFile.c_str());
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
                     fopen(mSnapshotFile.c_str(), "rb"), StdioStream::kOwner));
         std::shared_ptr<TextureLoader> m_texture_loader(
@@ -295,8 +300,32 @@ TEST_F(FrameBufferTest, BasicBlit) {
 
 // Tests that snapshot works with an empty FrameBuffer.
 TEST_F(FrameBufferTest, SnapshotSmokeTest) {
+    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
+
+    HandleType surf1 = mFb->createWindowSurface(0, 32, 32);
+    HandleType surf2 = mFb->createWindowSurface(0, 32, 32);
+    HandleType surf3 = mFb->createWindowSurface(0, 32, 32);
+    HandleType surf4 = mFb->createWindowSurface(0, 32, 32);
+
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+
+    auto gl = LazyLoadedGLESv2Dispatch::get();
+    gl->glClearColor(1, 1, 1, 1);
+    gl->glClear(GL_COLOR_BUFFER_BIT);
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {1, 1, 1, 1}));
+
     saveSnapshot();
+
+    gl->glClearColor(0, 0, 0, 0);
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {0, 0, 0, 0}));
+
     loadSnapshot();
+    // fails because bad surface handle
+    // TODO(benzene): investigate why this is
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {1, 1, 1, 1}));
 }
 
 // Tests that snapshot works to save the state of a single ColorBuffer; we

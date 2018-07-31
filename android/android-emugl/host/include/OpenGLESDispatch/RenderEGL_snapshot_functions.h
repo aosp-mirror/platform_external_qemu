@@ -17,6 +17,7 @@
   X(void, eglUseOsEglApi, (EGLBoolean enable)) \
   X(void, eglSetMaxGLESVersion, (EGLint glesVersion)) \
   X(void, eglFillUsages, (void* usages)) \
+  X(EGLBoolean, eglResetObjectNames, (EGLDisplay display)) \
 
 
 #endif  // RENDER_EGL_SNAPSHOT_FUNCTIONS_H

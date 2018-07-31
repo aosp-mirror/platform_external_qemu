@@ -45,6 +45,8 @@ static void convertFixedIndirectLoop(const char* dataIn,unsigned int strideIn,vo
 static void convertByteDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
 static void convertByteIndirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,GLsizei count,GLenum indices_type,const GLvoid* indices,unsigned int strideOut,int attribSize);
 
+static int MAGICKER_NUMBER = 888888;
+
 void BufferBinding::onLoad(android::base::Stream* stream) {
     buffer = stream->getBe32();
     offset = stream->getBe32();
@@ -382,6 +384,7 @@ void GLEScontext::restore() {
     postLoadRestoreShareGroup();
     if (m_needRestoreFromSnapshot) {
         postLoadRestoreCtx();
+        fprintf(stderr, "\n================== restoring context =========================\n\n");
         m_needRestoreFromSnapshot = false;
     }
 }
@@ -500,6 +503,8 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_clearColorG = static_cast<GLclampf>(stream->getFloat());
             m_clearColorB = static_cast<GLclampf>(stream->getFloat());
             m_clearColorA = static_cast<GLclampf>(stream->getFloat());
+            fprintf(stderr, "Loading cleardcolor %f %f %f %f\n", m_clearColorR, m_clearColorG,
+                    m_clearColorB, m_clearColorA);
 
             m_clearDepth = static_cast<GLclampf>(stream->getFloat());
             m_clearStencil = static_cast<GLint>(stream->getBe32());
@@ -520,9 +525,11 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_defaultFBODrawBuffer = static_cast<GLenum>(stream->getBe32());
             m_defaultFBOReadBuffer = static_cast<GLenum>(stream->getBe32());
 
+            fprintf(stderr, "\t\t>>>>>>>>>>> ctx needRestore set to true \n");
             m_needRestoreFromSnapshot = true;
         }
     }
+
     ObjectData::loadObject_t loader = [this](NamedObjectType type,
                                              long long unsigned int localName,
                                              android::base::Stream* stream) {
@@ -530,6 +537,15 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
     };
     m_fboNameSpace = new NameSpace(NamedObjectType::FRAMEBUFFER,
                                    globalNameSpace, stream, loader);
+
+    // if (stream) {
+    //     fprintf(stderr, "Loaded magicker number %d: %d\n", MAGICKER_NUMBER, stream->getBe32());
+    //     MAGICKER_NUMBER ++;
+    // }
+    // else {
+    //     fprintf(stderr, "No stream when loading context\n");
+    // }
+
     // do not load m_vaoNameSpace
     m_vaoNameSpace = new NameSpace(NamedObjectType::VERTEX_ARRAY_OBJECT,
                                    globalNameSpace, nullptr, loader);
@@ -682,6 +698,8 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putByte(m_colorMaskB);
         stream->putByte(m_colorMaskA);
 
+        fprintf(stderr, "Saving cleardcolor %f %f %f %f\n", m_clearColorR, m_clearColorG,
+                    m_clearColorB, m_clearColorA);
         stream->putFloat(m_clearColorR);
         stream->putFloat(m_clearColorG);
         stream->putFloat(m_clearColorB);
@@ -704,6 +722,9 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_defaultFBOReadBuffer);
     }
     m_fboNameSpace->onSave(stream);
+
+    // fprintf(stderr, "Saving magicker number %d\n", MAGICKER_NUMBER);
+    // stream->putBe32(MAGICKER_NUMBER);
     // do not save m_vaoNameSpace
 }
 

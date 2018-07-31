@@ -46,6 +46,14 @@ EglDisplay::~EglDisplay() {
     delete m_idpy;
 }
 
+void EglDisplay::resetObjectNameManagers() {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    delete m_manager[GLES_1_1];
+    delete m_manager[GLES_2_0];
+    m_manager[GLES_1_1] = new ObjectNameManager(&m_globalNameSpace);
+    m_manager[GLES_2_0] = new ObjectNameManager(&m_globalNameSpace);
+}
+
 void EglDisplay::initialize(int renderableType) {
     emugl::Mutex::AutoLock mutex(m_lock);
     m_initialized = true;

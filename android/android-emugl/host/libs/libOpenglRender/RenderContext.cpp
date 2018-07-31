@@ -30,6 +30,8 @@
 
 extern GLESv1Dispatch s_gles1;
 
+static int MAGICKEST_NUMBER = 111111;
+
 RenderContext* RenderContext::create(EGLDisplay display,
                                      EGLConfig config,
                                      EGLContext sharedContext,
@@ -77,11 +79,18 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
 
     EGLContext context;
     if (stream && s_egl.eglLoadContext) {
+        fprintf(stderr, "%s Loading EglContext.\n", __FILE__);
         context = s_egl.eglLoadContext(display, &contextAttribs[0], stream);
     } else {
+        fprintf(stderr, "%s Creating EglContext.\n", __FILE__);
         context = s_egl.eglCreateContext(
             display, config, sharedContext, &contextAttribs[0]);
     }
+
+    if (stream) {
+        fprintf(stderr, "%s loaded MAGICKEST_NUMBER %d: %d\n", __FILE__, MAGICKEST_NUMBER, stream->getBe32());
+    }
+
     if (context == EGL_NO_CONTEXT) {
         fprintf(stderr, "%s: failed to create context (EGL_NO_CONTEXT result)\n", __func__);
         return NULL;
@@ -125,19 +134,28 @@ RenderContext::~RenderContext() {
 }
 
 void RenderContext::onSave(android::base::Stream* stream) {
+    fprintf(stderr, "\n\n%s %s %d ^^^^^^^^^^^ rendercontext onsave\n", __FILE__, __func__, __LINE__);
+    fprintf(stderr, "rctx hdl: %d, ver: %d\n", mHndl, static_cast<uint32_t>(mVersion));
     stream->putBe32(mHndl);
     stream->putBe32(static_cast<uint32_t>(mVersion));
     assert(s_egl.eglCreateContext);
     if (s_egl.eglSaveContext) {
+        fprintf(stderr, "%s %s %d saving context in rendercontext onsave\n", __FILE__, __func__, __LINE__);
         s_egl.eglSaveContext(mDisplay, mContext, static_cast<EGLStream>(stream));
     }
+    else {
+        fprintf(stderr, "%s %s %d no context save in rendercontext onsave \n", __FILE__, __func__, __LINE__);
+    }
+    stream->putBe32(MAGICKEST_NUMBER);
+    fprintf(stderr, "saved MAGICKEST_NUMBER %d\n", MAGICKEST_NUMBER);
 }
 
 RenderContext *RenderContext::onLoad(android::base::Stream* stream,
             EGLDisplay display) {
     HandleType hndl = static_cast<HandleType>(stream->getBe32());
     GLESApi version = static_cast<GLESApi>(stream->getBe32());
-
+    fprintf(stderr, "\n\n%s %s %d vvvvvvvvvvvvvvv rendercontext onload\n", __FILE__, __func__, __LINE__);
+    fprintf(stderr, "rctx hdl: %d, ver: %d\n", hndl, static_cast<uint32_t>(version));
     return createImpl(display, (EGLConfig)0, EGL_NO_CONTEXT, hndl, version,
                       stream);
 }

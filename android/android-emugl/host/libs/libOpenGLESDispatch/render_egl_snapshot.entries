@@ -10,6 +10,7 @@ EGLBoolean eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream)
 EGLBoolean eglSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
 EGLBoolean eglSaveAllImages(EGLDisplay display, EGLStream stream, const void* textureSaver);
 
+EGLBoolean eglResetObjectNames(EGLDisplay display);
 EGLBoolean eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
 
 EGLBoolean eglPostLoadAllImages(EGLDisplay display, EGLStream stream);

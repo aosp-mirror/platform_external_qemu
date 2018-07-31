@@ -46,6 +46,10 @@ using android::base::WorkerProcessingResult;
 
 namespace {
 
+int MAGIC_NUMBER_1 = 14501948;
+int MAGIC_NUMBER_2 = 18943579;
+int MAGIC_NUMBER_3 = 25462848;
+
 // Helper class to call the bind_locked() / unbind_locked() properly.
 typedef ColorBuffer::RecursiveScopedHelperContext ScopedBind;
 
@@ -1237,8 +1241,14 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
         {
             auto procIte = m_procOwnedWindowSurfaces.find(puid);
             if (procIte != m_procOwnedWindowSurfaces.end()) {
+                fprintf(stderr, "looking for proc-owned window handle in m_windows\n");
                 for (auto whndl : procIte->second) {
                     auto w = m_windows.find(whndl);
+                    if (w == m_windows.end()) {
+                        fprintf(stderr, "%s %s %d no window for handle: %d\n", __FILE__,
+                                __func__, __LINE__, whndl);
+                        continue;
+                    }
                     closeColorBufferLocked(w->second.second, forced);
                     m_windows.erase(w);
                 }
@@ -1406,6 +1416,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
                               HandleType p_drawSurface,
                               HandleType p_readSurface) {
     if (m_shuttingDown) {
+        fprintf(stderr, "%s %s %d shutting down\n", __FILE__, __func__, __LINE__);
         return false;
     }
 
@@ -1419,11 +1430,19 @@ bool FrameBuffer::bindContext(HandleType p_context,
     //
     if (p_context || p_drawSurface || p_readSurface) {
         ctx = getContext_locked(p_context);
-        if (!ctx)
+        if (!ctx) {
+            fprintf(stderr, "%s %s %d no context\n", __FILE__, __func__, __LINE__);
             return false;
+        }
+        fprintf(stderr, "m_windows contains: %lu\n", m_windows.size());
+        for (auto& pair : m_windows) {
+            fprintf(stderr, "pair in m_windows %d : %p, %d\n", pair.first, pair.second.first.get(), pair.second.second);
+        }
+        fprintf(stderr, "p_drawSurface is %d\n", p_drawSurface);
         WindowSurfaceMap::iterator w(m_windows.find(p_drawSurface));
         if (w == m_windows.end()) {
             // bad surface handle
+            fprintf(stderr, "%s %s %d bad surface handle\n", __FILE__, __func__, __LINE__);
             return false;
         }
         draw = (*w).second.first;
@@ -1432,6 +1451,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
             WindowSurfaceMap::iterator w(m_windows.find(p_readSurface));
             if (w == m_windows.end()) {
                 // bad surface handle
+                fprintf(stderr, "%s %s %d bad surface handle\n", __FILE__, __func__, __LINE__);
                 return false;
             }
             read = (*w).second.first;
@@ -1444,6 +1464,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
                               ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT)) {
+        fprintf(stderr, "%s %s %d eglMakeCurrent failed\n", __FILE__, __func__, __LINE__);
         ERR("eglMakeCurrent failed\n");
         return false;
     }
@@ -1915,10 +1936,17 @@ void FrameBuffer::onSave(Stream* stream,
     stream->putBe32(m_statsNumFrames);
     stream->putBe64(m_statsStartTime);
 
+    // MAGIC NUMBER to make sure everything is in order
+    stream->putBe32(MAGIC_NUMBER_1);
+
+    fprintf(stderr, "saving, m_contexts size is %lu\n", m_contexts.size());
     saveCollection(stream, m_contexts,
                    [](Stream* s, const RenderContextMap::value_type& pair) {
         pair.second->onSave(s);
     });
+
+    // MAGIC NUMBER to make sure everything is in order
+    stream->putBe32(MAGIC_NUMBER_2);
 
     // We don't need to save |m_colorBufferCloseTsMap| here - there's enough
     // information to reconstruct it when loading.
@@ -1931,8 +1959,14 @@ void FrameBuffer::onSave(Stream* stream,
         s->putBe32(std::max<System::Duration>(0, now - pair.second.closedTs));
     });
     stream->putBe32(m_lastPostedColorBuffer);
+
+    // MAGIC NUMBER to make sure everything is in order
+    stream->putBe32(MAGIC_NUMBER_3);
+
+    fprintf(stderr, "\n\tSaving windows...\n" );
     saveCollection(stream, m_windows,
                    [](Stream* s, const WindowSurfaceMap::value_type& pair) {
+        fprintf(stderr, "\t\t]\tSaving window %d: %p , %d\n", pair.first, pair.second.first.get(), pair.second.second);
         pair.second.first->onSave(s);
         s->putBe32(pair.second.second); // Color buffer handle.
     });
@@ -1956,6 +1990,7 @@ void FrameBuffer::onSave(Stream* stream,
             s_egl.eglPostSaveContext(m_eglDisplay, m_pbufContext, stream);
         }
     }
+    fprintf(stderr, "m_windows size at end of save is %lu\n", m_windows.size());
 }
 
 bool FrameBuffer::onLoad(Stream* stream,
@@ -1994,6 +2029,11 @@ bool FrameBuffer::onLoad(Stream* stream,
             performDelayedColorBufferCloseLocked(true);
         }
         m_colorBufferDelayedCloseList.clear();
+
+        // TODO(benzene): remove this, this causes segfaults
+        //s_egl.eglResetObjectNames(m_eglDisplay);
+
+
         assert(m_contexts.empty());
         assert(m_windows.empty());
         assert(m_colorbuffers.empty());
@@ -2021,12 +2061,17 @@ bool FrameBuffer::onLoad(Stream* stream,
     m_statsNumFrames = stream->getBe32();
     m_statsStartTime = stream->getBe64();
 
+    fprintf(stderr, "MAGIC NUMBER 1 %d: loaded %d\n", MAGIC_NUMBER_1, stream->getBe32());
+
     loadCollection(stream, &m_contexts,
                    [this](Stream* stream) -> RenderContextMap::value_type {
         RenderContextPtr ctx(RenderContext::onLoad(stream, m_eglDisplay));
         return { ctx ? ctx->getHndl() : 0, ctx };
     });
     assert(!android::base::find(m_contexts, 0));
+    fprintf(stderr, "loaded, m_contexts size is %lu\n", m_contexts.size());
+
+    fprintf(stderr, "MAGIC NUMBER 2 %d: loaded %d\n", MAGIC_NUMBER_2, stream->getBe32());
 
     auto now = System::get()->getUnixTime();
     loadCollection(stream, &m_colorbuffers,
@@ -2046,11 +2091,15 @@ bool FrameBuffer::onLoad(Stream* stream,
     m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
     GL_LOG("Got lasted posted color buffer from snapshot");
 
+    fprintf(stderr, "MAGIC NUMBER 3 %d: loaded %d\n", MAGIC_NUMBER_3, stream->getBe32());
+
+    fprintf(stderr, "\n\tLoading windows...\n");
     loadCollection(stream, &m_windows,
                    [this](Stream* stream) -> WindowSurfaceMap::value_type {
         WindowSurfacePtr window(WindowSurface::onLoad(stream, m_eglDisplay));
         HandleType handle = window->getHndl();
         HandleType colorBufferHandle = stream->getBe32();
+        fprintf(stderr, "\t\t]\tLoading window %d: %p , %d\n", handle, window.get(), colorBufferHandle);
         return { handle, { std::move(window), colorBufferHandle } };
     });
 
@@ -2063,6 +2112,7 @@ bool FrameBuffer::onLoad(Stream* stream,
         s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
 
+    fprintf(stderr, "m_windows size at end of load is %lu\n", m_windows.size());
     registerTriggerWait();
     return true;
     // TODO: restore memory management

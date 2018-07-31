@@ -140,6 +140,7 @@ extern "C" {
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
 EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
 
+EGLAPI EGLBoolean EGLAPIENTRY eglResetObjectNames(EGLDisplay display);
 EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
@@ -1133,13 +1134,19 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
     if(releaseContext) { //releasing current context
        if(prevCtx.get()) {
+            if (prevCtx.get()->getGlesContext()) {
+                //fprintf(stderr, "\t !!!!!!!!! prevCtx needRestore %d \n", prevCtx->getGlesContext()->needRestore());
+            }
+
            g_eglInfo->getIface(prevCtx->version())->flush();
            if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
            }
            thread->updateInfo(ContextPtr(),dpy,NULL,ShareGroupPtr(),dpy->getManager(prevCtx->version()));
+           // fprintf(stderr, "%s %s %d\n", __FILE__, __func__, __LINE__);
        }
     } else { //assining new context
+        // fprintf(stderr, "%s %s %d\n", __FILE__, __func__, __LINE__);
         VALIDATE_CONTEXT(context);
         VALIDATE_SURFACE(draw,newDrawSrfc);
         VALIDATE_SURFACE(read,newReadSrfc);
@@ -1148,15 +1155,25 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         EglSurface* newReadPtr = newReadSrfc.get();
         ContextPtr  newCtx     = ctx;
 
+        if (prevCtx.get() && prevCtx.get()->getGlesContext()) {
+            // fprintf(stderr, "\t !!!!!!!!! prevCtx needRestore %d \n", prevCtx->getGlesContext()->needRestore());
+        }
+        if (newCtx.get() && newCtx.get()->getGlesContext()) {
+            fprintf(stderr, "\t !!!!!!!!! newCtx needRestore %d \n", newCtx->getGlesContext()->needRestore());
+        }
+
+        // fprintf(stderr, "newctx %p prevctx %p\n",newCtx.get(), prevCtx.get());
         if (newCtx.get() && prevCtx.get()) {
             if (newCtx.get() == prevCtx.get()) {
                 if (newDrawPtr == prevCtx->draw().get() &&
                     newReadPtr == prevCtx->read().get()) {
                     // nothing to do
+                    // fprintf(stderr, "%s %s %d NOTHING DONE RET TRUE\n", __FILE__, __func__, __LINE__);
                     return EGL_TRUE;
                 }
             }
             else {
+                // fprintf(stderr, "%s %s %d releasecontext set true\n", __FILE__, __func__, __LINE__);
                 // Make sure previous context is detached from surfaces
                 releaseContext = true;
             }
@@ -1198,6 +1215,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
             thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
             newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
+            // fprintf(stderr, "%s %s %d should init context\n", __FILE__, __func__, __LINE__);
+            // fprintf(stderr, "new context needRestore %d \n", newCtx->getGlesContext()->needRestore());
             g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
             g_eglInfo->sweepDestroySurfaces();
         }
@@ -1548,6 +1567,12 @@ EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path) {
 }
 
 /*********************************************************************************/
+
+EGLAPI EGLBoolean EGLAPIENTRY eglResetObjectNames(EGLDisplay display) {
+    VALIDATE_DISPLAY(display);
+    dpy->resetObjectNameManagers();
+    return EGL_TRUE;
+}
 
 EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);

@@ -23,6 +23,8 @@
 #include <array>
 #include <utility>
 
+static int WIZARD_INT = 333333;
+
 static constexpr int toIndex(NamedObjectType type) {
     return static_cast<int>(type);
 }
@@ -58,9 +60,14 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
                 });
         }
     }
+
+    // if (stream) {
+    //     fprintf(stderr, "%s Loading WIZARD_INT %d: %d\n", __FILE__, WIZARD_INT, stream->getBe32());
+    // }
 }
 
 void ShareGroup::preSave(GlobalNameSpace *globalNameSpace) {
+    fprintf(stderr, "ShareGroup presave\n");
     ObjectDataAutoLock lock(this);
     if (m_saveStage == PreSaved) return;
     assert(m_saveStage == Empty);
@@ -77,6 +84,9 @@ void ShareGroup::onSave(android::base::Stream* stream) {
     for (auto ns : m_nameSpace) {
         ns->onSave(stream);
     }
+
+    // fprintf(stderr, "%s Saving WIZARD_INT %d\n", __FILE__, WIZARD_INT);
+    // stream->putBe32(WIZARD_INT);
 }
 
 void ShareGroup::postSave(android::base::Stream* stream) {
@@ -352,16 +362,19 @@ ObjectNameManager::getShareGroup(void *p_groupName)
 
 ShareGroupPtr
 ObjectNameManager::attachShareGroup(void *p_groupName,
-                                    void *p_existingGroupName)
+                                    void *p_existingGroupName,
+                                    android::base::Stream* stream)
 {
     emugl::Mutex::AutoLock lock(m_lock);
 
     ShareGroupsMap::iterator s( m_groups.find(p_existingGroupName) );
     if (s == m_groups.end()) {
         // ShareGroup is not found !!!
+        fprintf(stderr, "%s %s ShareGroup not found \n", __FILE__, __func__);
         return ShareGroupPtr();
     }
 
+    fprintf(stderr, "%s %s ShareGroup found. \n", __FILE__, __func__);
     ShareGroupPtr shareGroupReturn((*s).second);
     if (m_groups.find(p_groupName) == m_groups.end()) {
         m_groups.emplace(p_groupName, shareGroupReturn);
@@ -380,10 +393,30 @@ ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
         ++ite;
     }
     if (ite == m_groups.end()) {
+        fprintf(stderr, "%s Creating sharegroup %p \n", __FILE__, p_groupName);
         return createShareGroup(p_groupName, p_existingGroupID, stream,
                                 loadObject);
     } else {
-        return attachShareGroup(p_groupName, ite->first);
+        fprintf(stderr, "%s Attaching sharegroup %p \n", __FILE__, p_groupName);
+        ShareGroupPtr attached = attachShareGroup(p_groupName, ite->first, stream);
+        if (stream) {
+            // reload namespace
+            fprintf(stderr, "%s Reloading namespace\n", __FILE__);
+            for (int i = 0; i < toIndex(NamedObjectType::NUM_OBJECT_TYPES);
+                 i++) {
+                delete attached->m_nameSpace[i];
+                attached->m_nameSpace[i] = new NameSpace(static_cast<NamedObjectType>(i),
+                                               m_globalNameSpace, stream, loadObject);
+            };
+            attached->m_needLoadRestore = true;
+            for (auto ns : attached->m_nameSpace) {
+                ns->postLoad(
+                        [attached](NamedObjectType p_type, ObjectLocalName p_localName) {
+                            return attached->getObjectDataPtrNoLock(p_type, p_localName);
+                    });
+            }
+        }
+        return attached;
     }
 }
 
@@ -404,6 +437,7 @@ void *ObjectNameManager::getGlobalContext()
 }
 
 void ObjectNameManager::preSave() {
+    fprintf(stderr, "ObjectNameManager presave\n");
     for (auto& shareGroup : m_groups) {
         shareGroup.second->preSave(m_globalNameSpace);
     }

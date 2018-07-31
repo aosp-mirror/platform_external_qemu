@@ -22,6 +22,8 @@
 
 #include <GLcommon/GLEScontext.h>
 
+static int MAGE_NUMBER = 222222;
+
 unsigned int EglContext::s_nextContextHndl = 0;
 
 extern EglGlobalInfo* g_eglInfo; // defined in EglImp.cpp
@@ -77,7 +79,12 @@ EglContext::EglContext(EglDisplay *dpy,
             m_config->nativeFormat(),
             globalSharedContext);
 
+    if (stream) {
+        fprintf(stderr, "%s Loading MAGE_NUMBER %d: %d\n", __FILE__, MAGE_NUMBER, stream->getBe32());
+    }
+
     if (m_native) {
+        fprintf(stderr, "%s Loading sharegroups\n", __FILE__);
         // When loading from a snapshot, the first context within a share group
         // will load share group data.
         m_shareGroup = mngr->attachOrCreateShareGroup(
@@ -85,6 +92,7 @@ EglContext::EglContext(EglDisplay *dpy,
                 [glesCtx](NamedObjectType type,
                           ObjectLocalName localName,
                           android::base::Stream* stream) {
+                    fprintf(stderr, "%s Loading object type: %hd, name %llu\n", __FILE__, type, localName);
                     return glesCtx->loadObject(type, localName, stream);
                 });
         if (stream) {
@@ -187,6 +195,10 @@ void EglContext::onSave(android::base::Stream* stream) {
     stream->putBe32(getConfig()->id());
     // Save shared group ID
     stream->putBe64(m_shareGroup->getId());
+
+    fprintf(stderr, "%s Saving MAGE_NUMBER %d\n", __FILE__, MAGE_NUMBER);
+    stream->putBe32(MAGE_NUMBER);
+
     m_shareGroup->onSave(stream);
 }
 

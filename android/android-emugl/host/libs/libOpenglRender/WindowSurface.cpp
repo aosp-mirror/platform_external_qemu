@@ -208,6 +208,7 @@ static void saveHndlOrNull(obj_t obj, android::base::Stream* stream) {
 }
 
 void WindowSurface::onSave(android::base::Stream* stream) const {
+    fprintf(stderr, "\t> %s %s %d \n", __FILE__, __func__, __LINE__);
     stream->putBe32(getHndl());
     saveHndlOrNull(mAttachedColorBuffer, stream);
     saveHndlOrNull(mReadContext, stream);
@@ -221,6 +222,7 @@ void WindowSurface::onSave(android::base::Stream* stream) const {
 
 WindowSurface * WindowSurface::onLoad(android::base::Stream* stream,
             EGLDisplay display) {
+    fprintf(stderr, "\t> %s %s %d \n", __FILE__, __func__, __LINE__);
     FrameBuffer* fb = FrameBuffer::getFB();
     HandleType hndl = stream->getBe32();
     HandleType cb = stream->getBe32();
