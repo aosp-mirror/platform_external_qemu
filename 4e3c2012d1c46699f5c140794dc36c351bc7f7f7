@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "812010c0_4812d4bd",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-31T17:08:53Z",
+      "side": 1,
+      "message": "Nit: When reviewing this and other similar blocks in this file, with a if statement and writing to the stream inside each block, I had to search to make sure that both blocks wrote to the stream.  This would be an easy mistake to make, I think it would be less error-prone if putBe32 was always done unconditionally.  For example, I\u0027d restructure this as:\n\nint hostSocketFd \u003d 0;\nif (mHostSocket.valid()) {\n    hostSocketFd \u003d mHostSocket.fdWatcher()-\u003efd();\n    // ...\n}\nstream-\u003eputBe32(hostSocketFd);\n\n-or-\n\nstream-\u003eputBe32(mHostSocket.valid() ? mHostSocket.fdWatcher()-\u003efd() : 0);\nif (mHostSocket.valid()) {\n    // ...\n}",
+      "range": {
+        "startLine": 456,
+        "startChar": 8,
+        "endLine": 456,
+        "endChar": 27
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "134d5c26_57f43706",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-31T17:08:53Z",
+      "side": 1,
+      "message": "If appendToRecvBuffer is false, would we want to clear mRecvBuffer as well?",
+      "range": {
+        "startLine": 911,
+        "startChar": 7,
+        "endLine": 911,
+        "endChar": 27
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "afe21472_89e22a29",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-31T17:08:53Z",
+      "side": 1,
+      "message": "\u003d default ?",
+      "range": {
+        "startLine": 85,
+        "startChar": 33,
+        "endLine": 85,
+        "endChar": 35
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82bfd95c_7ef26f1d",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-31T17:08:53Z",
+      "side": 1,
+      "message": "Nit: I think you can omit this.",
+      "range": {
+        "startLine": 91,
+        "startChar": 8,
+        "endLine": 91,
+        "endChar": 44
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0d69468_24de09a1",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-31T17:08:53Z",
+      "side": 1,
+      "message": "Nit: When reading the code that calls this, it wasn\u0027t immediately clear what this parameter did.  For readability, I like to use an enum for this:\n\nenum class DrainBehavior {\n    Clear,\n    AppendToBuffer\n};",
+      "range": {
+        "startLine": 208,
+        "startChar": 37,
+        "endLine": 208,
+        "endChar": 56
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
