@@ -23,6 +23,7 @@
 #include "android/snapshot/TextureSaver.h"
 
 #include "OpenGLTestContext.h"
+#include "Standalone.h"
 
 #include <gtest/gtest.h>
 
@@ -187,9 +188,27 @@ testing::AssertionResult compareGlobalGlFloatv(
 }
 
 void SnapshotTest::SetUp() {
-    GLTest::SetUp();
+    //GLTest::SetUp();
+    setupStandaloneLibrarySearchPaths();
+
+    gl = LazyLoadedGLESv2Dispatch::get();
+
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        delete fb;
+    }
+    FrameBuffer::initialize(kTestSurfaceSize[0], kTestSurfaceSize[1],
+            false, !shouldUseHostGpu());
+
     mTestSystem.getTempRoot()->makeSubDir("Snapshots");
     mSnapshotPath = mTestSystem.getTempRoot()->makeSubPath("Snapshots");
+}
+
+void SnapshotTest::TearDown() {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        delete fb;
+    }
 }
 
 void SnapshotTest::saveSnapshot(const std::string streamFile,
@@ -199,23 +218,26 @@ void SnapshotTest::saveSnapshot(const std::string streamFile,
     std::unique_ptr<StdioStream> m_stream(new StdioStream(
             fopen(streamFile.c_str(), "wb"), StdioStream::kOwner));
     auto egl_stream = static_cast<EGLStream>(m_stream.get());
-    std::unique_ptr<TextureSaver> m_texture_saver(new TextureSaver(StdioStream(
+    std::shared_ptr<TextureSaver> m_texture_saver(new TextureSaver(StdioStream(
             fopen(textureFile.c_str(), "wb"), StdioStream::kOwner)));
+    // std::unique_ptr<TextureSaver> m_texture_saver(new TextureSaver(StdioStream(
+    //         fopen(textureFile.c_str(), "wb"), StdioStream::kOwner)));
 
-    egl->eglPreSaveContext(m_display, m_context, egl_stream);
-    egl->eglSaveAllImages(m_display, egl_stream, &m_texture_saver);
+    FrameBuffer::getFB()->onSave(m_stream.get(), m_texture_saver);
+    // egl->eglPreSaveContext(m_display, m_context, egl_stream);
+    // egl->eglSaveAllImages(m_display, egl_stream, &m_texture_saver);
 
-    egl->eglSaveContext(m_display, m_context, egl_stream);
+    // egl->eglSaveContext(m_display, m_context, egl_stream);
 
-    // Skip saving a bunch of FrameBuffer's fields
-    // Skip saving colorbuffers
-    // Skip saving window surfaces
+    // // Skip saving a bunch of FrameBuffer's fields
+    // // Skip saving colorbuffers
+    // // Skip saving window surfaces
 
-    egl->eglSaveConfig(m_display, m_config, egl_stream);
+    // egl->eglSaveConfig(m_display, m_config, egl_stream);
 
-    // Skip saving a bunch of process-owned objects
+    // // Skip saving a bunch of process-owned objects
 
-    egl->eglPostSaveContext(m_display, m_context, egl_stream);
+    // egl->eglPostSaveContext(m_display, m_context, egl_stream);
 
     m_stream->close();
     m_texture_saver->done();
@@ -232,25 +254,34 @@ void SnapshotTest::loadSnapshot(const std::string streamFile,
             new TextureLoader(StdioStream(fopen(textureFile.c_str(), "rb"),
                                           StdioStream::kOwner)));
 
-    egl->eglLoadAllImages(m_display, egl_stream, &m_texture_loader);
+    FrameBuffer::getFB()->onLoad(m_stream.get(), m_texture_loader);
 
-    EGLint contextAttribs[5] = {EGL_CONTEXT_CLIENT_VERSION, 3,
-                                EGL_CONTEXT_MINOR_VERSION_KHR, 0, EGL_NONE};
+    // egl->eglLoadAllImages(m_display, egl_stream, &m_texture_loader);
 
-    m_context = egl->eglLoadContext(m_display, &contextAttribs[0], egl_stream);
-    m_config = egl->eglLoadConfig(m_display, egl_stream);
-    m_surface = pbufferSurface(m_display, m_config, kTestSurfaceSize[0],
-                               kTestSurfaceSize[0]);
-    egl->eglPostLoadAllImages(m_display, egl_stream);
+    // EGLint contextAttribs[5] = {EGL_CONTEXT_CLIENT_VERSION, 3,
+    //                             EGL_CONTEXT_MINOR_VERSION_KHR, 0, EGL_NONE};
+
+    // m_context = egl->eglLoadContext(m_display, &contextAttribs[0], egl_stream);
+    // m_config = egl->eglLoadConfig(m_display, egl_stream);
+    // m_surface = pbufferSurface(m_display, m_config, kTestSurfaceSize[0],
+    //                            kTestSurfaceSize[0]);
+    // egl->eglPostLoadAllImages(m_display, egl_stream);
 
     m_stream->close();
     m_texture_loader->join();
-    egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
+    // egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
 }
 
 void SnapshotTest::preloadReset() {
-    GLTest::TearDown();
-    GLTest::SetUp();
+    TearDown();
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        fb->
+    }
+    else {
+        FrameBuffer::initialize(kTestSurfaceSize[0], kTestSurfaceSize[1],
+                false, !shouldUseHostGpu());
+    }
 }
 
 void SnapshotTest::doSnapshot(std::function<void()> preloadCheck = [] {}) {
@@ -268,8 +299,9 @@ void SnapshotTest::doSnapshot(std::function<void()> preloadCheck = [] {}) {
 
     loadSnapshot(snapshotFile, textureFile);
 
-    EXPECT_NE(m_context, EGL_NO_CONTEXT);
-    EXPECT_NE(m_surface, EGL_NO_SURFACE);
+    EXPECT_NE(nullptr, FrameBuffer::getFB());
+    // EXPECT_NE(m_context, EGL_NO_CONTEXT);
+    // EXPECT_NE(m_surface, EGL_NO_SURFACE);
 }
 
 void SnapshotPreserveTest::doCheckedSnapshot() {

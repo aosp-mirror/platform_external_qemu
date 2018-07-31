@@ -193,7 +193,7 @@ testing::AssertionResult compareGlobalGlFloatv(
 //         EXPECT_FALSE(fooBarState());  // Snapshot preserved the state change
 //     }
 //
-class SnapshotTest : public emugl::GLTest {
+class SnapshotTest : public ::testing::Test {
 public:
     SnapshotTest()
         : mTestSystem(PATH_SEP "progdir",
@@ -202,6 +202,7 @@ public:
                       PATH_SEP "appdir") {}
 
     void SetUp() override;
+    void TearDown() override;
 
     // Mimics FrameBuffer.onSave, with fewer objects to manage.
     // |streamFile| is a filename into which the snapshot will be saved.
@@ -228,6 +229,8 @@ public:
 protected:
     android::base::TestSystem mTestSystem;
     std::string mSnapshotPath = {};
+
+    const GLESv2Dispatch* gl;
 };
 
 // SnapshotPreserveTest - A helper class building on SnapshotTest for granular
