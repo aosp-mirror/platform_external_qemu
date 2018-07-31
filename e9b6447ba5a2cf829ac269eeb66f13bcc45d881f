@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "848dde10_7a871c97",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 0,
+      "message": "if you\u0027re fighting the min macro from Windows.h then instead you could write (std::min)(a,b)\nparenthesis suppress macro expansion and force the compiler to use std::min function",
+      "range": {
+        "startLine": 199,
+        "startChar": 25,
+        "endLine": 199,
+        "endChar": 33
+      },
+      "revId": "e9b6447ba5a2cf829ac269eeb66f13bcc45d881f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

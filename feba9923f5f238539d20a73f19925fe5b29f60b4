@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "d2e72afd_77d68920",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "it could also be better to use the wide version of the function that accepts wchar_t* via Win32UnicodeString",
+      "range": {
+        "startLine": 1164,
+        "startChar": 7,
+        "endLine": 1167,
+        "endChar": 22
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a533d1f1_0ebbb356",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "these operations need to be done in a loop for some predefined number of iterations, otherwise there\u0027s a chance that other thread/process generates the same name (because the only internal input there is the current system time), and then one of those fails to open the file",
+      "range": {
+        "startLine": 1164,
+        "startChar": 6,
+        "endLine": 1170,
+        "endChar": 45
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95e1d899_21b3c866",
+        "filename": "android/android-emu/android/curl-support.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "nit: static",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 3
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a93bd4b8_5079a960",
         "filename": "android/android-emu/android/emulation/ClipboardPipe.cpp",
         "patchSetId": 13
@@ -18,6 +87,138 @@
         "startChar": 0,
         "endLine": 19,
         "endChar": 15
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2485bce_b351d25f",
+        "filename": "android/android-emu/android/filesystems/partition_config.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "make it static please",
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d81912a_650c49d0",
+        "filename": "android/android-emu/android/qemu-tcpdump.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "what about defining this as a function somewhere in android/base/system/ and reusing everywhere?",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 145,
+        "endChar": 6
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ae24a62_affe757d",
+        "filename": "android/android-emu/android/utils/mapfile.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "AFAIK there\u0027s something like this in our custom mman-win32 library",
+      "range": {
+        "startLine": 189,
+        "startChar": 0,
+        "endLine": 202,
+        "endChar": 6
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0f822a3_a17bc008",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 13
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "nit: lots of tab characters in this file",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 1
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1aeee68_c36d4ac3",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 13
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "hmmm :)",
+      "range": {
+        "startLine": 278,
+        "startChar": 3,
+        "endLine": 278,
+        "endChar": 92
+      },
+      "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38cb55aa_43f7936e",
+        "filename": "android/third_party/libsparse/src/output_file.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-07-31T17:18:48Z",
+      "side": 1,
+      "message": "it might be needed to support files \u003e2GB, which is quite common for images",
+      "range": {
+        "startLine": 19,
+        "startChar": 10,
+        "endLine": 19,
+        "endChar": 29
       },
       "revId": "feba9923f5f238539d20a73f19925fe5b29f60b4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
