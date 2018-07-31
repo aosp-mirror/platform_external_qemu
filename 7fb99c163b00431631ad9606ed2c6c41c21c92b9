@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "abb69c9f_716131aa",
+        "filename": "android/android-emu/android/main-emugl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-31T21:40:39Z",
+      "side": 1,
+      "message": "should we remove blacklisted\u003dno in avd config instead?",
+      "revId": "7fb99c163b00431631ad9606ed2c6c41c21c92b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
