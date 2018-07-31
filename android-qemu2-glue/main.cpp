@@ -1147,6 +1147,13 @@ extern "C" int main(int argc, char** argv) {
     }
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
+    // check for sufficient free memory before continuing.
+    // Use the "memory pressure" statistic
+
+    if (System::isUnderMemoryPressure(nullptr)) {
+        fprintf(stderr, "ERROR: Memory pressure detected\n");
+    }
+
     // Memory size
     args.add("-m");
     args.addFormat("%d", hw->hw_ramSize);
