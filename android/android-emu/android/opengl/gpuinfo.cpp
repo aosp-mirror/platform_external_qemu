@@ -246,6 +246,40 @@ static const BlacklistEntry sGpuBlacklist[] = {
         // Intel Crestine
         {"8086", nullptr, "2a02", nullptr, nullptr, nullptr, "W"},
         {"8086", nullptr, "2a12", nullptr, nullptr, nullptr, "W"},
+
+        // Display-only devices
+
+        // Microsoft Basic Render Driver
+        {"1414", nullptr, "008c", nullptr, nullptr, nullptr, nullptr},
+
+        // Matrix MGA G200eW
+        {"102b", nullptr, "0532", nullptr, nullptr, nullptr, nullptr},
+
+        // VMWare SVGA 3D
+        {"15ad", nullptr, "0405", nullptr, nullptr, nullptr, nullptr},
+
+        // Citrix Display Only Adapter
+        {"5853", nullptr, "1002", nullptr, nullptr, nullptr, nullptr},
+
+        // SeaBIOS Display-Only Device?
+        {"1b36", nullptr, "0100", nullptr, nullptr, nullptr, nullptr},
+
+        // Devices incapable of reliably calling wglMakeCurrent
+        // when switching HDC
+
+        // Intel Eaglelake
+        {"8086", nullptr, "2e42", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "2e92", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "2e12", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "2e32", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "2e22", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Cantiga
+        {"8086", nullptr, "2a42", nullptr, nullptr, nullptr, "W"},
+
+        // Intel Ironlake
+        {"8086", nullptr, "0042", nullptr, nullptr, nullptr, "W"},
+        {"8086", nullptr, "0046", nullptr, nullptr, nullptr, "W"},
 };
 
 // If any blacklist entry matches any gpu, return true.
