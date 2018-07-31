@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4c2d3249_5988849b",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-31T18:17:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "812010c0_4812d4bd",
+      "range": {
+        "startLine": 456,
+        "startChar": 8,
+        "endLine": 456,
+        "endChar": 27
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "134d5c26_57f43706",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 19
@@ -36,6 +60,30 @@
       "writtenOn": "2018-07-31T17:08:53Z",
       "side": 1,
       "message": "If appendToRecvBuffer is false, would we want to clear mRecvBuffer as well?",
+      "range": {
+        "startLine": 911,
+        "startChar": 7,
+        "endLine": 911,
+        "endChar": 27
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c46e6ee1_d2274948",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-31T18:17:23Z",
+      "side": 1,
+      "message": "Let\u0027s not; it might have leftover from the previous snapshot load.",
+      "parentUuid": "134d5c26_57f43706",
       "range": {
         "startLine": 911,
         "startChar": 7,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "0ba96021_d235e7a4",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-31T18:17:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "afe21472_89e22a29",
+      "range": {
+        "startLine": 85,
+        "startChar": 33,
+        "endLine": 85,
+        "endChar": 35
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bfd95c_7ef26f1d",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
         "patchSetId": 19
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "be4b0c3c_a0694b72",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-31T18:17:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82bfd95c_7ef26f1d",
+      "range": {
+        "startLine": 91,
+        "startChar": 8,
+        "endLine": 91,
+        "endChar": 44
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0d69468_24de09a1",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
         "patchSetId": 19
@@ -114,6 +210,30 @@
       "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b2e08f71_35c0365d",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 19
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-07-31T18:17:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0d69468_24de09a1",
+      "range": {
+        "startLine": 208,
+        "startChar": 37,
+        "endLine": 208,
+        "endChar": 56
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
