@@ -1266,7 +1266,8 @@ static bool find_dirty_block(RAMState *rs, PageSearchStatus *pss, bool *again)
         *again = false;
         return false;
     }
-    if ((pss->page << TARGET_PAGE_BITS) >= pss->block->used_length) {
+    if (((ram_addr_t)pss->page << TARGET_PAGE_BITS)
+        >= pss->block->used_length) {
         /* Didn't find anything in this RAM Block */
         pss->page = 0;
         pss->block = QLIST_NEXT_RCU(pss->block, next);
