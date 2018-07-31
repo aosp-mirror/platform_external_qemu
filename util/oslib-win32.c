@@ -40,6 +40,7 @@
 
 /* this must come after including "trace.h" */
 #include <shlobj.h>
+#include <psapi.h>
 
 void *qemu_oom_check(void *ptr)
 {
@@ -67,6 +68,8 @@ void *qemu_memalign(size_t alignment, size_t size)
     return qemu_oom_check(qemu_try_memalign(alignment, size));
 }
 
+bool win32InsufficientMemMessage = false;
+
 void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared)
 {
     void *ptr;
@@ -75,6 +78,60 @@ void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared)
        has 64Kb granularity, but at least it guarantees us that the
        memory is page aligned. */
     ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+
+    // On failure, check the commit size.
+    if (!ptr) {
+        bool notEnoughCommit = false;
+        bool shouldTryAgain = false;
+        SIZE_T commitTotalBytes, commitLimitBytes;
+        const float oneMbBytes = 1048576.0f;
+        const float safetyFactor = 1.2f;
+        float totalMb, limitMb, neededMb, remainingMb;
+
+        PERFORMANCE_INFORMATION pi = { sizeof(pi) };
+
+        if (!GetPerformanceInfo(&pi, sizeof(pi))) {
+            fprintf(stderr, "ERROR: GetPerformanceInfo() failed.\n");
+            return ptr;
+        }
+
+        commitTotalBytes = pi.PageSize * pi.CommitTotal;
+        commitLimitBytes = pi.PageSize * pi.CommitLimit;
+
+        totalMb = commitTotalBytes / oneMbBytes;
+        limitMb = commitLimitBytes / oneMbBytes;
+        neededMb = size / oneMbBytes;
+        remainingMb = limitMb - totalMb;
+
+        if (neededMb * 1.2 > limitMb - totalMb) {
+            fprintf(stderr,
+                "ERROR: Insufficient RAM free for launching emulator.\n"
+                "Please free up memory (close other programs and files)\n"
+                "or decrease the AVD RAM size and try again.\n"
+                "It may also be a good idea to make sure that in\n"
+                "Control Panel > System > Advanced > \n"
+                "Performance > Settings > Virtual Memory, that\n"
+                "\"Automatically manage paging file size for all drives\"\n"
+                "is checked, and the system is set to manage page file size.\n"
+                "Stats:\n"
+                "    Currently committed: %f MB\n"
+                "    Commit limit: %f MB\n"
+                "    Remaining: %f MB\n"
+                "    Needed: %f MB\n",
+                totalMb,
+                limitMb,
+                remainingMb,
+                neededMb);
+            win32InsufficientMemMessage = true;
+            return ptr;
+        } else {
+            // Maybe things cleared up. Try again.
+            ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+            trace_qemu_anon_ram_alloc(size, ptr);
+            return ptr;
+        }
+    }
+
     trace_qemu_anon_ram_alloc(size, ptr);
     return ptr;
 }
