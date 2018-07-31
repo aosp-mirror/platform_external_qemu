@@ -78,6 +78,7 @@ QEMU2_SDL2_LDLIBS := \
         -lwinmm \
         -lole32 \
         -loleaut32 \
+        -lpsapi \
         -lshell32 \
         -lversion \
         -luuid \
