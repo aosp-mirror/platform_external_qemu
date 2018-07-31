@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
@@ -21,9 +20,11 @@
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 
-#include "Standalone.h"
+#include "GLSnapshotTesting.h"
 #include "GLTestUtils.h"
+#include "Standalone.h"
 
+#include <gtest/gtest.h>
 #include <memory>
 
 using android::base::System;
@@ -295,8 +296,19 @@ TEST_F(FrameBufferTest, BasicBlit) {
 
 // Tests that snapshot works with an empty FrameBuffer.
 TEST_F(FrameBufferTest, SnapshotSmokeTest) {
+    auto gl = LazyLoadedGLESv2Dispatch::get();
+    gl->glClearColor(1, 1, 1, 1);
+    gl->glClear(GL_COLOR_BUFFER_BIT);
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {1, 1, 1, 1}));
+
     saveSnapshot();
+
+    gl->glClearColor(0, 0, 0, 0);
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {0, 0, 0, 0}));
+
     loadSnapshot();
+
+    EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {1, 1, 1, 1}));
 }
 
 // Tests that snapshot works to save the state of a single ColorBuffer; we
