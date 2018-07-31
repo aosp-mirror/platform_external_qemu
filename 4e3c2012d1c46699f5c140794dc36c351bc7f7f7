@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "2ef8ba31_d6356e52",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-07-31T18:31:52Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c46e6ee1_d2274948",
+      "range": {
+        "startLine": 911,
+        "startChar": 7,
+        "endLine": 911,
+        "endChar": 27
+      },
+      "revId": "4e3c2012d1c46699f5c140794dc36c351bc7f7f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "afe21472_89e22a29",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
         "patchSetId": 19
