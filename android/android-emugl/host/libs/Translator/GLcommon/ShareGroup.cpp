@@ -383,6 +383,13 @@ ShareGroupPtr ObjectNameManager::attachOrCreateShareGroup(void *p_groupName,
         return createShareGroup(p_groupName, p_existingGroupID, stream,
                                 loadObject);
     } else {
+        if (stream) {
+            // We're loading a snapshot; groups should have been cleared.
+            // Destroy and recreate the group.
+            deleteShareGroup(p_groupName);
+            return createShareGroup(p_groupName, p_existingGroupID, stream,
+                                    loadObject);
+        }
         return attachShareGroup(p_groupName, ite->first);
     }
 }

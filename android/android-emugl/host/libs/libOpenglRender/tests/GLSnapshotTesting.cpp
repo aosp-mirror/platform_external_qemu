@@ -119,9 +119,18 @@ testing::AssertionResult compareVector(const std::vector<T>& expected,
                     << testing::PrintToString(expected[i]) << "\n";
         } else if (expected[i] != actual[i]) {
             mismatches++;
-            message << "    at index " << i << ":\n\tvalue was:\t"
-                    << testing::PrintToString(actual[i]) << "\n\t expected:\t"
-                    << testing::PrintToString(expected[i]) << "\n";
+            if (mismatches < 25) {
+                message << "    at index " << i << ":\n\tvalue was:\t"
+                        << testing::PrintToString(actual[i])
+                        << "\n\t expected:\t"
+                        << testing::PrintToString(expected[i]) << "\n";
+            } else if (mismatches == 25) {
+                message << "    ... and indices " << i;
+            } else if (mismatches < 100) {
+                message << ", " << i;
+            } else if (mismatches == 100) {
+                message << ", etc...";
+            }
         }
     }
     if (mismatches > 0) {
