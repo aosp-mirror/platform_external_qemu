@@ -97,13 +97,15 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
 
 static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
                                              const char* avdArch,
+                                             const char* sysDir,
                                              const char* androidOut);
 
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
+                                             const char* sysDir,
                                              const char* androidOut);
 
-static std::string getAvdSystemPath(const char* avdName);
+static std::string getAvdSystemPath(const char* avdName, const char* optionalSysPath);
 
 #ifdef _WIN32
 static const char kExeExtension[] = ".exe";
@@ -232,6 +234,7 @@ int main(int argc, char** argv)
     const char* avdName = NULL;
     const char* avdArch = NULL;
     const char* engine = NULL;
+    const char* sysDir = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
     bool force32bit = false;
@@ -352,6 +355,11 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt, "-webcam-list")) {
             doListWebcams = true;
+            continue;
+        }
+
+        if (!strcmp(opt, "-sysdir") && nn+1 < argc) {
+            sysDir = argv[nn+1];
             continue;
         }
 
@@ -568,7 +576,7 @@ int main(int argc, char** argv)
                     // builds appropriately. For now this only works reliably for
                     // regular SDK AVD configurations.
                     if (checkAvdSystemDirForKernelRanchu(avdName, avdArch,
-                                                         androidOut)) {
+                                                         sysDir, androidOut)) {
                         D("Auto-config: -engine qemu2 (based on configuration)");
                         ranchu = RANCHU_ON;
                     } else {
@@ -598,7 +606,7 @@ int main(int argc, char** argv)
             APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
                    avdArch);
         }
-        std::string systemPath = getAvdSystemPath(avdName);
+        std::string systemPath = getAvdSystemPath(avdName, sysDir);
         if (systemPath.empty()) {
             const char* env = getenv("ANDROID_SDK_ROOT");
             if (!env || !env[0]) {
@@ -629,7 +637,8 @@ int main(int argc, char** argv)
 
     D("emuDirName: '%s'", emuDirName.c_str());
 
-    bool force64bitTarget = is32bitImageOn64bitRanchuKernel(avdName, avdArch, androidOut);
+    bool force64bitTarget = is32bitImageOn64bitRanchuKernel(avdName, avdArch,
+                                                            sysDir, androidOut);
     const StringView candidates[] = {progDirSystem, emuDirName, argv0DirName};
     char* emulatorPath = nullptr;
     StringView progDir;
@@ -926,10 +935,16 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
 }
 
 // Return the system directory path of a given AVD named |avdName|.
+// If |optionalSysPath| is non-null, this simply returns that. Otherwise
+// this searches for a valid path.
 // Return empty string on failure.
-static std::string getAvdSystemPath(const char* avdName) {
+static std::string getAvdSystemPath(const char* avdName, const char* optionalSysPath) {
     std::string result;
     if (!avdName) {
+        return result;
+    }
+    if (optionalSysPath) {
+        result = optionalSysPath;
         return result;
     }
     char* sdkRootPath = path_getSdkRoot();
@@ -948,6 +963,7 @@ static std::string getAvdSystemPath(const char* avdName) {
 // check for 32bit image running on 64bit ranchu kernel
 static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
                                                const char* avdArch,
+                                               const char* sysDir,
                                                const char* androidOut) {
     // only appliable to 32bit image
     if (strcmp(avdArch, "x86") && strcmp(avdArch, "arm") && strcmp(avdArch, "mips")) {
@@ -959,7 +975,7 @@ static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
     if (androidOut) {
         asprintf(&kernel_file, "%s/kernel-ranchu-64", androidOut);
     } else {
-        std::string systemImagePath = getAvdSystemPath(avdName);
+        std::string systemImagePath = getAvdSystemPath(avdName, sysDir);
         asprintf(&kernel_file, "%s/%s", systemImagePath.c_str(),
                  "kernel-ranchu-64");
     }
@@ -973,6 +989,7 @@ static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
 // Verify and AVD's system image directory to see if it supports ranchu.
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
+                                             const char* sysDir,
                                              const char* androidOut) {
     bool result = false;
     char* kernel_file = NULL;
@@ -996,7 +1013,7 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                  androidBuildTop, avdArch, "kernel-ranchu");
     } else {
         // This is a regular SDK AVD launch.
-        std::string systemImagePath = getAvdSystemPath(avdName);
+        std::string systemImagePath = getAvdSystemPath(avdName, sysDir);
         if (systemImagePath.empty()) {
             D("Cannot find system image path. Please define "
               "ANDROID_SDK_ROOT");
