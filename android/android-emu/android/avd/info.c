@@ -15,6 +15,7 @@
 #include "android/avd/util.h"
 #include "android/avd/keys.h"
 #include "android/base/ArraySize.h"
+#include "android/cmdline-option.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/utils/bufprint.h"
@@ -706,6 +707,15 @@ _avdInfo_getSearchPaths( AvdInfo*  i )
 {
     if (i->configIni == NULL)
         return true;
+
+    if (android_cmdLineOptions->sysdir) {
+        // The user specified a path on the command line.
+        // Use only that.
+        i->numSearchPaths = 1;
+        i->searchPaths[0] = android_cmdLineOptions->sysdir;
+        DD("using one search path from the command line for this AVD");
+        return true;
+    }
 
     i->numSearchPaths = _getSearchPaths( i->configIni,
                                          i->sdkRootPath,
