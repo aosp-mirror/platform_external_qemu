@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "34389178_af777b8e",
+        "filename": "exec.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1995,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-01T04:29:32Z",
+      "side": 1,
+      "message": "you can also use _exit() instead of exit(). It kills the process instantly, so there won\u0027t be any crashes anywhere. On the other hand, it will leave all lock files open, and other stuff I\u0027m not sure about. Need to double check if emulator can start after that",
+      "range": {
+        "startLine": 1992,
+        "startChar": 20,
+        "endLine": 1995,
+        "endChar": 48
+      },
+      "revId": "1f6591afd9282078e6e27feb19200870de3ca2a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "de8ee5e0_29ed0730",
         "filename": "util/oslib-win32.c",
         "patchSetId": 3
