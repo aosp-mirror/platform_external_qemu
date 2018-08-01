@@ -226,8 +226,12 @@ static void qemu_input_event_trace(QemuConsole *src, InputEvent *evt)
                                          name, key->down);
             break;
         case KEY_VALUE_KIND_QCODE:
-            name = QKeyCode_str(key->key->u.qcode.data);
-            trace_input_event_key_qcode(idx, name, key->down);
+            // The android emulator already has a keycode translator in place
+            // and is using raw linux codes that are sent to the emulator.
+            // Hence we just log the raw code data without translating to and
+            // from qcodes.
+            trace_input_event_key_number(idx, key->key->u.qcode.data, "",
+                                         key->down);
             break;
         case KEY_VALUE_KIND__MAX:
             /* keep gcc happy */
