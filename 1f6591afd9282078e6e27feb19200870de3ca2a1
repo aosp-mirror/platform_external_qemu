@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e3d388b8_44125f6b",
+        "filename": "exec.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1995,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-01T05:59:55Z",
+      "side": 1,
+      "message": "Cool, thanks for the tip. Sounds like kill -9. Tested, emulator can start the next time.",
+      "parentUuid": "34389178_af777b8e",
+      "range": {
+        "startLine": 1992,
+        "startChar": 20,
+        "endLine": 1995,
+        "endChar": 48
+      },
+      "revId": "1f6591afd9282078e6e27feb19200870de3ca2a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "de8ee5e0_29ed0730",
         "filename": "util/oslib-win32.c",
         "patchSetId": 3
@@ -45,6 +69,30 @@
       "revId": "1f6591afd9282078e6e27feb19200870de3ca2a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18b71a54_a4ceab51",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-01T05:59:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de8ee5e0_29ed0730",
+      "range": {
+        "startLine": 116,
+        "startChar": 17,
+        "endLine": 117,
+        "endChar": 61
+      },
+      "revId": "1f6591afd9282078e6e27feb19200870de3ca2a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
