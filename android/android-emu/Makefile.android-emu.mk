@@ -420,6 +420,7 @@ LOCAL_SRC_FILES := \
     android/metrics/SyncMetricsReporter.cpp \
     android/metrics/StudioConfig.cpp \
     android/metrics/TextMetricsWriter.cpp \
+    android/multi-instance.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
     android/network/control.cpp \
