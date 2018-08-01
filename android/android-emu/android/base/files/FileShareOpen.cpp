@@ -53,6 +53,13 @@ FILE* android::base::fsopen(const char* filename,
     return file;
 }
 
+bool android::base::updateFileShare(FILE* file, FileShare fileshare) {
+    // TODO: have windows support
+    // BUG: 112265408
+    fprintf(stderr, "Error: updateFileShare not supported on windows\n");
+    return false;
+}
+
 void* android::base::internal::openFileForShare(const char* filename) {
     const Win32UnicodeString filenameW(filename);
     void* hndl = CreateFileW(filenameW.c_str(), 0,
@@ -73,6 +80,17 @@ void android::base::internal::closeFileForShare(void* fileHandle) {
 #include <sys/file.h>
 #include <unistd.h>
 
+static int getFlockOperation(android::base::FileShare fileshare) {
+    switch (fileshare) {
+        case android::base::FileShare::Read:
+            return LOCK_SH;
+        case android::base::FileShare::Write:
+            return LOCK_EX;
+        default:
+            return LOCK_SH;
+    }
+}
+
 FILE* android::base::fsopen(const char* filename,
                             const char* mode,
                             android::base::FileShare fileshare) {
@@ -88,18 +106,7 @@ FILE* android::base::fsopen(const char* filename,
     if (!file) {
         return nullptr;
     }
-    int operation = LOCK_SH;
-    switch (fileshare) {
-        case FileShare::Read:
-            operation = LOCK_SH;
-            break;
-        case FileShare::Write:
-            operation = LOCK_EX;
-            break;
-        default:
-            operation = LOCK_SH;
-            break;
-    }
+    int operation = getFlockOperation(fileshare);
     int fd = fileno(file);
     if (flock(fd, operation | LOCK_NB) == -1) {
         fclose(file);
@@ -107,6 +114,12 @@ FILE* android::base::fsopen(const char* filename,
         return nullptr;
     }
     return file;
+}
+
+bool android::base::updateFileShare(FILE* file, FileShare fileshare) {
+    int operation = getFlockOperation(fileshare);
+    int fd = fileno(file);
+    return -1 != flock(fd, operation | LOCK_NB);
 }
 
 void* android::base::internal::openFileForShare(const char* filename) {

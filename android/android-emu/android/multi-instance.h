@@ -11,25 +11,13 @@
 
 #pragma once
 
-#include <cstdio>
+#include "android/base/files/FileShareOpen.h"
 
 namespace android {
-namespace base {
+namespace multiinstance {
 
-enum class FileShare {
-    Read,
-    Write,
-};
+extern bool initInstanceShareMode(base::FileShare shareMode);
+extern bool updateInstanceShareMode(base::FileShare shareMode);
 
-FILE* fsopen(const char* filename, const char* mode, FileShare fileshare);
-
-bool updateFileShare(FILE* file, FileShare fileshare);
-
-// Create a file. This operation is safe for multi-processing if other process
-// tries to fsopen the file during the creation.
-void createFileForShare(const char* filename);
-
-bool updateFileShare(FILE* file, FileShare fileshare);
-
-}  // namespace base
+}  // namespace multiinstance
 }  // namespace android
