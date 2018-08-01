@@ -139,6 +139,7 @@ public:
                                Helper* helper,
                                bool fastBlitSupported);
 
+    void initialize();
     // Sometimes things happen and we need to reformat the GL texture
     // used. This function replaces the format of the underlying texture
     // with the internalformat / format / type combination specified.
@@ -233,6 +234,8 @@ private:
     void waitSync();
 
 private:
+    bool m_initilaized = false;
+    int m_bytesPerPixel = 3; 
     GLuint m_tex = 0;
     GLuint m_blitTex = 0;
     EGLImageKHR m_eglImage = nullptr;

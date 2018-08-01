@@ -1117,6 +1117,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
         ERR("FB: openColorBuffer cb handle %#x not found\n", p_colorbuffer);
         return -1;
     }
+    c->second.cb->initialize();
     c->second.refcount++;
     markOpened(&c->second);
 
