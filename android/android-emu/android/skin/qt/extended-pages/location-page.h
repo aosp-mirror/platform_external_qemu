@@ -58,7 +58,8 @@ signals:
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
 
-    // a way to send location updates to the js code
+    // Ways to send location updates to the js code
+    void showLocation(QString lat, QString lng);
     void locationChanged(QString lat, QString lng);
 
 private slots:
@@ -96,7 +97,7 @@ private slots:
     void locationPlaybackStop();
     void timeout();
 
-    void on_singlePoint_importGpxButton_clicked();
+    void on_savePoint_clicked();
     void on_singlePoint_setLocationButton_clicked();
     void on_pointList_cellPressed(int row, int column);
     void on_pointList_itemSelectionChanged();
@@ -133,6 +134,8 @@ private:
         QString protoFilePath;
         QString logicalName;
         QString description;
+        double  latitude;
+        double  longitude;
     };
 
     void finishGeoDataLoading(
@@ -141,6 +144,7 @@ private:
         const QString& error_message,
         bool ignore_error);
 
+    void sendMostRecentLocation();
     void updateControlsAfterLoading();
 
     void writeLocationPlaybackFilePathToSettings(const QString& file);

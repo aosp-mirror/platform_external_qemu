@@ -130,14 +130,26 @@ function initMap() {
     });
 
 
-    setDeviceLocation = function(lat, lng) {
-        // Called from Qt code to show the blue marker to display the emulator location on the map.
-        console.warn('Setting location to lat=' + lat + ', lng=' + lng);
+    showPendingLocation = function(lat, lng) {
+        // Called from Qt code to show a pending location on the UI map.
+        // This point has NOT been sent to the AVD.
         // Code to set location marker on the map. Move this to a signal event handler.
 
         var latLng = new google.maps.LatLng(lat, lng);
         infoWindow.setPosition(latLng);
-        infoWindow.setContent('Device location set here.');
+        infoWindow.setContent('Pending location');
+        infoWindow.open(gMap);
+        gMap.setCenter(latLng);
+    }
+
+    setDeviceLocation = function(lat, lng) {
+        // Called from Qt code to show the blue marker to display the emulator location on the map.
+//        console.warn('Setting location to lat=' + lat + ', lng=' + lng);
+        // Code to set location marker on the map. Move this to a signal event handler.
+
+        var latLng = new google.maps.LatLng(lat, lng);
+        infoWindow.setPosition(latLng);
+        infoWindow.setContent('Device location');
         infoWindow.open(gMap);
         gMap.setCenter(latLng);
     }

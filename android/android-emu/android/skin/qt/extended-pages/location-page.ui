@@ -67,7 +67,7 @@
            <item>
             <layout class="QHBoxLayout" name="hboxImportGPX">
              <item>
-              <widget class="RaisedMaterialButton" name="singlePoint_importGpxButton">
+              <widget class="RaisedMaterialButton" name="savePoint">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -95,7 +95,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Import GPX</string>
+                <string>SAVE POINT</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -322,7 +322,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Set as location</string>
+                <string>SET LOCATION</string>
                </property>
                <property name="flat">
                 <bool>true</bool>

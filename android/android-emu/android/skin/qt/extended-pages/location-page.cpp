@@ -157,7 +157,7 @@ LocationPage::LocationPage(QWidget *parent) :
         QByteArray webChannelJs = webChannelJsFile.readAll();
         webChannelJs.append(
                 "\n"
-                        "var wsUri = 'ws://localhost:12345';"
+                "var wsUri = 'ws://localhost:12345';"
                 "var socket = new WebSocket(wsUri);"
                 "socket.onclose = function() {"
                     "console.error('web channel closed');"
@@ -167,10 +167,15 @@ LocationPage::LocationPage(QWidget *parent) :
                 "};"
                 "socket.onopen = function() {"
                     "window.channel = new QWebChannel(socket, function(channel) {"
+                        "channel.objects.emulocationserver.showLocation.connect(function(lat, lng) {"
+                            "if (showPendingLocation) {"
+                                "showPendingLocation(lat, lng);"
+                            "}"
+                        "});"
                         "channel.objects.emulocationserver.locationChanged.connect(function(lat, lng) {"
-                                "if (setDeviceLocation) {"
-                            "setDeviceLocation(lat, lng);"
-                        "}"
+                            "if (setDeviceLocation) {"
+                                "setDeviceLocation(lat, lng);"
+                            "}"
                         "});"
                     "});"
                 "}");
@@ -735,35 +740,18 @@ void LocationPage::updateControlsAfterLoading() {
     mNowLoadingGeoData = false;
 }
 
-void LocationPage::sendLocation(const QString& lat, const QString& lng) {
-	qDebug() << "lat=" << lat << ", lng=" << lng;
-    mLastLat = lat;
-    mLastLng = lng;
-}
-
-void LocationPage::on_singlePoint_importGpxButton_clicked() {
-#if 0 // ??
-    printf("NOT IMPLEMENTED\n");
-#else // ??
-    makePointProtobuf();
-    scanForPoints();
-    populatePointListTable();
-#endif // ??
-}
-
-void LocationPage::on_singlePoint_setLocationButton_clicked() {
-    qDebug() << "Setting location [lat=" << mLastLat << ", lng="
-             << mLastLng << "]";
+void LocationPage::sendMostRecentLocation() {
+    // Set the location on the map
+    emit locationChanged(mLastLat, mLastLng);
 
     if (!sLocationAgent || !sLocationAgent->gpsSendLoc) {
         return;
     }
-
+    // Send the location to the device
     timeval timeVal = {};
     gettimeofday(&timeVal, nullptr);
-    sLocationAgent->gpsSendLoc(mLastLat.toDouble(), mLastLng.toDouble(), 0.0, 4, &timeVal);
-    // To set the location on the map
-    emit locationChanged(mLastLat, mLastLng);
+    sLocationAgent->gpsSendLoc(mLastLat.toDouble(), mLastLng.toDouble(),
+                               0.0, 4, &timeVal);
 }
 
 // static

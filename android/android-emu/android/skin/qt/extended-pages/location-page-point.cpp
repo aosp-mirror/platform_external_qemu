@@ -49,6 +49,39 @@ void LocationPage::makePointProtobuf() { // ?? Debug only
     writePointProtobufByName(pointName, ptMetadata);
 }
 
+// Invoked when the user clicks on the map
+void LocationPage::sendLocation(const QString& lat, const QString& lng) {
+    qDebug() << "l-p: sendLocation(): Map clicked: lat=" << lat << ", lng=" << lng;
+    mLastLat = lat;
+    mLastLng = lng;
+
+    // De-select all saved points
+    mUi->pointList->setCurrentItem(nullptr);
+    populatePointListTable();
+}
+
+void LocationPage::on_savePoint_clicked() {
+    QDateTime now = QDateTime::currentDateTime();
+    QString pointName("point_" + now.toString("yyyy-MM-dd_HH-mm-ss"));
+
+    emulator_location::PointMetadata ptMetadata;
+    QString logicalName = pointName;
+    ptMetadata.set_logical_name(logicalName.toStdString());
+    ptMetadata.set_creation_time(now.toMSecsSinceEpoch() / 1000LL);
+    ptMetadata.set_latitude(mLastLat.toDouble());
+    ptMetadata.set_longitude(mLastLng.toDouble());
+    ptMetadata.set_altitude(0.0);
+
+    writePointProtobufByName(pointName, ptMetadata);
+
+    scanForPoints();
+    populatePointListTable();
+}
+
+void LocationPage::on_singlePoint_setLocationButton_clicked() {
+    sendMostRecentLocation();
+}
+
 // Populate mPointList with the points that are found on disk
 void LocationPage::scanForPoints() {
 
@@ -89,8 +122,9 @@ void LocationPage::scanForPoints() {
         pointListElement listElement;
         listElement.protoFilePath = protoFilePath.c_str();
         listElement.logicalName = pointMetadata->logical_name().c_str();
-        listElement.description = pointMetadata->has_description() ?
-                                          pointMetadata->description().c_str() : "";
+        listElement.description = pointMetadata->description().c_str();
+        listElement.latitude = pointMetadata->latitude();
+        listElement.longitude = pointMetadata->longitude();
 
         mPointList.append(listElement);
     }
@@ -148,8 +182,17 @@ void LocationPage::on_pointList_cellPressed(int row, int column) {
 }
 
 void LocationPage::on_pointList_itemSelectionChanged() {
-    if (mUi->pointList->currentRow() < 0) return;
+    int selectedRow = mUi->pointList->currentRow();
+    if (selectedRow < 0) return;
 
+    auto thisPoint = mPointList.at(selectedRow);
+    mLastLat = QString::number(thisPoint.latitude);
+    mLastLng = QString::number(thisPoint.longitude);
+
+    // Show the location, but do not send it to the device
+    emit showLocation(mLastLat, mLastLng);
+
+    // Redraw the table to show the new selection
     populatePointListTable();
 }
 
@@ -192,7 +235,6 @@ void LocationPage::editPoint(int pointIdx) {
     int selection = editDialog.exec();
 
     if (selection == QDialog::Rejected) {
-        printf("l-p-p: Edit: canceled\n"); // ??
         return;
     }
 
@@ -202,7 +244,6 @@ void LocationPage::editPoint(int pointIdx) {
     if ((!newName.isEmpty() && newName != oldName) ||
         newDescription != oldDescription             )
     {
-//        printf("l-p-p: Edit: Something changed...\n"); // ??
         // Something changed. Read the existing Protobuf,
         // update it, and write it back out.
         QApplication::setOverrideCursor(Qt::WaitCursor);
@@ -225,7 +266,6 @@ void LocationPage::editPoint(int pointIdx) {
         populatePointListTable();
         QApplication::restoreOverrideCursor();
     }
-//    else printf("l-p-p: Edit: Nothing new\n"); // ??
 }
 
 void LocationPage::deletePoint(int pointIdx) {
@@ -233,8 +273,6 @@ void LocationPage::deletePoint(int pointIdx) {
         printf("l-p-p: deletePoint(%d) Invalid index!\n", pointIdx); // ??
         return;
     }
-    printf("l-p-p: deletePoint(%d)\n", pointIdx); // ??
-
     auto thisPoint = mPointList.at(pointIdx);
 
     QMessageBox msgBox(QMessageBox::Question,
@@ -253,13 +291,12 @@ void LocationPage::deletePoint(int pointIdx) {
         std::string protobufName = thisPoint.protoFilePath.toStdString();
         android::base::StringView dirName;
         bool haveDirName = android::base::PathUtils::split(protobufName,
-                                                           &dirName, nullptr /* base name */);
+                                                           &dirName,
+                                                           nullptr /* base name */);
         if (haveDirName) {
-            printf("Deleting \"%s\" ...\n", dirName.str().c_str()); // ??
             path_delete_dir(dirName.str().c_str());
-
             scanForPoints();
-            printf("l-p-p: deletePoint() calling populatePointListTable()\n"); // ??
+            mUi->pointList->setCurrentItem(nullptr);
             populatePointListTable();
         }
         else printf("l-p-p: Could not get directory from path! \"%s\"\n",  protobufName.c_str()); // ??
