@@ -145,8 +145,11 @@ private:
                 offworld::GuestRecv::ModuleSnapshot::CreateCheckpoint guestRecv;
                 guestRecv.set_metadata(metadata);
                 encodeGuestRecvFrame(guestRecv, &sMetaData);
+                gQAndroidVmOperations->vmStop();
+                //if ()
                 android::base::ThreadLooper::runOnMainLooper([snapshotName]() {
                     androidSnapshot_load(snapshotName.data());
+                    gQAndroidVmOperations->vmStart();
                 });
                 *shouldReply = false;
                 break;
