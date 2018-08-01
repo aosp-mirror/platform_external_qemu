@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7ef1a02f_7f2f9106",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-01T03:26:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f7b88caf_286045c3",
+      "range": {
+        "startLine": 87,
+        "startChar": 14,
+        "endLine": 87,
+        "endChar": 19
+      },
+      "revId": "eaca9d7e3ae0d5ffb668b79a6a5a5fe19f94fdb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af579043_008254b0",
         "filename": "util/oslib-win32.c",
         "patchSetId": 2
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "a362071e_fd40d1a9",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-01T03:26:47Z",
+      "side": 1,
+      "message": "Done (put up cl for docs website)",
+      "parentUuid": "a1ff3538_49842d23",
+      "range": {
+        "startLine": 111,
+        "startChar": 17,
+        "endLine": 111,
+        "endChar": 64
+      },
+      "revId": "eaca9d7e3ae0d5ffb668b79a6a5a5fe19f94fdb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "01fe8785_f5311d59",
         "filename": "util/oslib-win32.c",
         "patchSetId": 2
@@ -92,6 +140,30 @@
       "revId": "eaca9d7e3ae0d5ffb668b79a6a5a5fe19f94fdb5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b2582c7_4cba1932",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-01T03:26:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "01fe8785_f5311d59",
+      "range": {
+        "startLine": 106,
+        "startChar": 8,
+        "endLine": 126,
+        "endChar": 23
+      },
+      "revId": "eaca9d7e3ae0d5ffb668b79a6a5a5fe19f94fdb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
