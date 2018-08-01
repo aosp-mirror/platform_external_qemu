@@ -231,6 +231,12 @@ public:
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
     void waitSync();
+    bool isIntialized();
+    void initialize();
+    static bool setGLFormat(GLenum p_internalFormat,
+                            GLenum* texFormat,
+                            GLenum* pixelType,
+                            int* bytesPerPixel);
 
 private:
     GLuint m_tex = 0;
