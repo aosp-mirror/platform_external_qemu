@@ -231,6 +231,8 @@ public:
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
     void waitSync();
+    bool isIntialized();
+    void initialize();
 
 private:
     GLuint m_tex = 0;
