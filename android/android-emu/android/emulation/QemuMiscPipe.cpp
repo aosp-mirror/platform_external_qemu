@@ -37,8 +37,8 @@ static bool beginWith(const std::vector<uint8_t>& input, const char* keyword) {
 
 static void getRandomBytes(int bytes, std::vector<uint8_t>* outputp) {
     android::base::MemStream stream;
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
     std::uniform_int_distribution<int> uniform_dist(0,255); //fill a byte
 
     for (int i=0; i < bytes; ++i) {
