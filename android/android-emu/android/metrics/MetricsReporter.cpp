@@ -173,6 +173,10 @@ std::string MetricsReporter::anonymize(base::StringView s) {
     return picosha2::get_hash_hex_string(hasher);
 }
 
+const base::System::Duration MetricsReporter::getStartTimeMs() {
+  return mStartTimeMs;
+}
+
 void MetricsReporter::sendToWriter(
         android_studio::AndroidStudioEvent* event) {
     wireless_android_play_playlog::LogEvent logEvent;

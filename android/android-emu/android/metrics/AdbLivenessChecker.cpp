@@ -176,6 +176,7 @@ bool AdbLivenessChecker::runBootCheck() {
                     if (bool(*result->output >> out) && out == '1') {
                         sLivenessStatus.bootComplete = true;
                         mBootCheckTask.stopAsync();
+                        dropBootMetrics(BootResult::kBootCompleted);
                     } else {
                         sLivenessStatus.bootComplete = false;
                     }
@@ -309,6 +310,21 @@ void AdbLivenessChecker::dropMetrics(const CheckResult& result) {
                             static_cast<int>(result)));
         });
     }
+}
+
+void AdbLivenessChecker::dropBootMetrics(const BootResult& result) {
+    // We only report if boot is detected as successful, or if it is detected
+    // as failing. In both cases, we want to collect the time taken to reach
+    // that conclusion.
+    auto timeMs = System::get()->getUnixTimeUs() / 1000;
+    auto durationMs = timeMs - mReporter->getStartTimeMs();
+    mReporter->report([result, durationMs](android_studio::AndroidStudioEvent* event) {
+        event->mutable_emulator_details()->mutable_boot_info()->set_boot_status(
+                static_cast<android_studio::EmulatorBootInfo::BootStatus>(
+                        static_cast<int>(result)));
+        event->mutable_emulator_details()->mutable_boot_info()->set_duration_ms(
+                durationMs);
+    });
 }
 
 }  // namespace metrics
