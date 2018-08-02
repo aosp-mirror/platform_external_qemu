@@ -21,6 +21,7 @@
 #include "android/skin/qt/websockets/websockettransport.h"
 
 #include <QTableWidget>
+#include <QTableWidgetItem>
 #include <QTimer>
 #include <QThread>
 #include <QVector>
@@ -32,6 +33,7 @@
 
 struct QAndroidLocationAgent;
 class GeoDataLoaderThread;
+
 class LocationPage : public QWidget
 {
     Q_OBJECT
@@ -40,7 +42,6 @@ public:
     explicit LocationPage(QWidget *parent = 0);
     ~LocationPage();
 
-    void makePointProtobuf(); // ??
     static void setLocationAgent(const QAndroidLocationAgent* agent);
     static void shutDown();
 
@@ -99,10 +100,20 @@ private slots:
 
     void on_savePoint_clicked();
     void on_singlePoint_setLocationButton_clicked();
-    void on_pointList_cellPressed(int row, int column);
+    void on_pointList_cellClicked(int row, int column);
     void on_pointList_itemSelectionChanged();
 
 private:
+    typedef struct {
+        QString protoFilePath;
+        QString logicalName;
+        QString description;
+        double  latitude;
+        double  longitude;
+    } PointListElement;
+
+    class PointWidgetItem;
+
     class PointItemBuilder {
     public:
         PointItemBuilder(QTableWidget* tableWidget) :
@@ -116,8 +127,11 @@ private:
             }
         }
 
-        QTableWidgetItem* pointItem(QString name, QString description, const QIcon& icon, bool isSelected);
-        QTableWidgetItem* dotDotItem(bool isSelected);
+//        PointWidgetItem* pointWidgetItem(const PointListElement* listItem,
+//                                         const QIcon& icon, bool isSelected);
+        void highlightPointWidgetItem(LocationPage::PointWidgetItem* theItem,
+                                      bool isSelected);
+        void highlightDotDotWidgetItem(QTableWidgetItem* dotDotItem, bool isSelected);
 
     private:
         const int ICON_SIZE = 20;
@@ -130,12 +144,25 @@ private:
         int mFieldHeight;
     };
 
-    struct pointListElement {
-        QString protoFilePath;
-        QString logicalName;
-        QString description;
-        double  latitude;
-        double  longitude;
+    class PointWidgetItem : public QTableWidgetItem {
+        public:
+            PointWidgetItem(const PointListElement* boundPointElement) :
+                pointElement(boundPointElement)
+            {
+                QTableWidgetItem();
+            }
+
+            // Sort by the logical name
+            bool operator < (const QTableWidgetItem &other) const {
+                const PointListElement* otherElement = ((PointWidgetItem&)other).pointElement;
+
+//                printf("l-p.h: Comparing \"%s\" : \"%s\"\n", // ??
+//                       mPointElement->logicalName.toStdString().c_str(), // ??
+//                       otherElement ->logicalName.toStdString().c_str()); // ??
+
+                return pointElement->logicalName < otherElement->logicalName;
+            }
+            const PointListElement* pointElement;
     };
 
     void finishGeoDataLoading(
@@ -153,8 +180,8 @@ private:
     void writeLocationPlaybackSpeedToSettings(int speed);
     int getLocationPlaybackSpeedFromSettings();
 
-    void writePointProtobufByName(const QString& pointFormalName,
-                                  const emulator_location::PointMetadata& protobuf);
+    std::string writePointProtobufByName(const QString& pointFormalName,
+                                         const emulator_location::PointMetadata& protobuf);
     void writePointProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::PointMetadata& protobuf);
 
@@ -178,15 +205,18 @@ private:
     QString mLastLat = "-122.084";
     QString mLastLng = "37.422";
 
-    void editPoint(int pointIdx);
-    void deletePoint(int pointIdx);
-    void populatePointListTable();
+    void editPoint(int row);
+    void deletePoint(int row);
+    void highlightPointListWidget();
+    void populatePointListWidget();
     void scanForPoints();
 
-	std::unique_ptr<QWebSocketServer> mServer;
-	std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
-	std::unique_ptr<QWebChannel> mWebChannel;
-    QVector<struct pointListElement> mPointList;
+    std::unique_ptr<QWebSocketServer> mServer;
+    std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
+    std::unique_ptr<QWebChannel> mWebChannel;
+
+    QVector<PointListElement> mPointList;
+    QString mSelectedPointName;
     PointItemBuilder*    mPointItemBuilder;
     std::unique_ptr<Ui::LocationPage> mUi;
 };
@@ -216,3 +246,36 @@ private:
     QString mFileName;
     GpsFixArray* mFixes = nullptr;
 };
+
+#if 0 // ??
+class PointWidgetItem : public QTableWidgetItem {
+    public:
+        PointWidgetItem(const struct PointListElement* pointElement) :
+            mPointElement(pointElement)
+        {
+            QTableWidgetItem();
+        }
+
+//        const struct PointListElement* getPointElement() { return mPointElement; }
+
+//         // Sort by the logical name
+//         bool operator < (const QTableWidgetItem &other) const {
+// //            printf("l-p.h: Comparing \"%s\" : \"%s\"\n", // ??
+// //                   logicalName.toStdString().c_str(), // ??
+// //                   ((PointListElement&)other).logicalName.toStdString().c_str()); // ??
+//
+// //            return logicalName < ((PointWidgetItem&)other).logicalName;
+// // this->element->logicalName
+//             return false;
+//         }
+
+    private:
+         const struct PointListElement* mPointElement;
+//        int     listIndex;
+//        QString protoFilePath;
+//        QString logicalName;
+//        QString description;
+//        double  latitude;
+//        double  longitude;
+};
+#endif // ??

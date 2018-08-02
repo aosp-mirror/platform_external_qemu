@@ -214,7 +214,8 @@ LocationPage::LocationPage(QWidget *parent) :
     mUi->pointList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
 
     scanForPoints();
-    populatePointListTable();
+    populatePointListWidget();
+    highlightPointListWidget();
   } else { // !useLocationV2
     mTimer.setSingleShot(true);
 
@@ -318,7 +319,9 @@ void LocationPage::shutDown() {
 
 void LocationPage::updateTheme() {
     // Re-do the lists of routes and points
-    populatePointListTable();
+    highlightPointListWidget();
+//    populatePointListWidget();
+//    populateRouteListWidget();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -752,6 +755,7 @@ void LocationPage::sendMostRecentLocation() {
     gettimeofday(&timeVal, nullptr);
     sLocationAgent->gpsSendLoc(mLastLat.toDouble(), mLastLng.toDouble(),
                                0.0, 4, &timeVal);
+    // ?? Must also use this value in the periodic update thread
 }
 
 // static
