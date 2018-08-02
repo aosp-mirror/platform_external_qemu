@@ -1547,7 +1547,9 @@ message EmulatorDetails {
   optional EmulatorCameraSession camera = 27;
   // Metrics for virtual scene camera sessions.
   optional EmulatorVirtualSceneSession virtual_scene = 28;
-  // Next tag: 29
+  // Metrics for emulator boot status and time.
+  optional EmulatorBootInfo boot_info = 29;
+  // Next tag: 30
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
@@ -4083,6 +4085,8 @@ message GradleSyncStats {
   optional int64 ide_time_ms = 4;
   // Whether the embedded maven repository is enabled
   optional bool embedded_repo_enabled = 5;
+  // What type of sync was performed
+  optional GradleSyncType sync_type = 6;
 
   // List of triggers for gradle Sync
   enum Trigger {
@@ -4100,6 +4104,20 @@ message GradleSyncStats {
     TRIGGER_VARIANT_SELECTION_CHANGED_BY_USER = 5;
     // Project modifications done by PSD
     TRIGGER_PSD_CHANGES = 6;
+  }
+
+  // List of sync types
+  enum GradleSyncType {
+    // Default (used to identify sync done before we tracked this)
+    GRADLE_SYNC_TYPE_UNKNOWN = 0;
+    // IDEA sync
+    GRADLE_SYNC_TYPE_IDEA = 1;
+    // Single variant sync
+    GRADLE_SYNC_TYPE_SINGLE_VARIANT = 2;
+    // Compound sync
+    GRADLE_SYNC_TYPE_COMPOUND = 3;
+    // Shipped sync
+    GRADLE_SYNC_TYPE_SHIPPED = 4;
   }
 }
 
@@ -4797,4 +4815,16 @@ message UserSentiment {
     POSITIVE = 1;
     NEGATIVE = 2;
   }
+}
+
+// Detailed info about emulator boot up.
+message EmulatorBootInfo {
+  enum BootStatus {
+    UNKNOWN_STATUS = 0;
+    BOOT_COMPLETED = 1;
+    BOOT_FAILED = 2;
+  }
+  optional BootStatus boot_status = 1;
+  // How long it took to boot, either successfully or not.
+  optional uint64 duration_ms = 2;
 }
