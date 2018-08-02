@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b4a94bd_a6f0be85",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-02T23:06:57Z",
+      "side": 1,
+      "message": "make this private? since it is not calling the initialize code.",
+      "range": {
+        "startLine": 145,
+        "startChar": 4,
+        "endLine": 145,
+        "endChar": 68
+      },
+      "revId": "2778c053a8c7cf235ae8da2a0ee2796ec5ceb357",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
