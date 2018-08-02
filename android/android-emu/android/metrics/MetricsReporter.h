@@ -87,6 +87,8 @@ public:
     // Returns an anonymized copy of |s| string, using the Android Studio's
     // salt value + some hashing algorithm.
     std::string anonymize(base::StringView s);
+    // Returns the start time.
+    const base::System::Duration getStartTimeMs();
 
 protected:
     MetricsReporter(bool enabled, MetricsWriter::Ptr writer,
