@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e1e6299e_a5259ac2",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-02T22:52:25Z",
+      "side": 1,
+      "message": "does it run when you do a snapshot load?",
+      "revId": "a93fb70543fccf1993a40ba9791bea54339b95f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
