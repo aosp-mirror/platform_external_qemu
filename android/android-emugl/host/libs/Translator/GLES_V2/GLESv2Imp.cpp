@@ -3654,12 +3654,18 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (img) {
+
+        // Could be from a bad snapshot; in this case, skip.
+        if (!img->globalTexObj) return;
+
         // Create the texture object in the underlying EGL implementation,
         // flag to the OpenGL layer to skip the image creation and map the
         // current binded texture object to the existing global object.
         if (ctx->shareGroup().get()) {
             ObjectLocalName tex = ctx->getTextureLocalName(target,ctx->getBindedTexture(target));
-            // replace mapping and bind the new global object
+
+            // Replace mapping for this local texture id
+            // with |img|'s global GL texture id
             ctx->shareGroup()->replaceGlobalObject(NamedObjectType::TEXTURE, tex,
                                                    img->globalTexObj);
             ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexObj->getGlobalName());
