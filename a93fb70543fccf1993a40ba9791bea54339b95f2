@@ -16,6 +16,24 @@
       "revId": "a93fb70543fccf1993a40ba9791bea54339b95f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7a30078_b6cc6691",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1345938
+      },
+      "writtenOn": "2018-08-02T23:24:22Z",
+      "side": 1,
+      "message": "Yes, but it\u0027s not directly related, since this is running in the adb liveness check.\nWhen booting from quickboot, the following would happen:\n\nemulator_details {\n  ...\n  quickboot_load {\n    state: EMULATOR_QUICKBOOT_LOAD_SUCCEEDED\n  }\n  snapshot_loads {\n    load_state: EMULATOR_SNAPSHOT_LOAD_SUCCEEDED_NORMAL\n  }\n}\n\nFollowed by the boot metrics:\n\nemulator_details {\n  boot_info {\n    boot_status: BOOT_COMPLETED\n    duration_ms: 2758\n  }\n}\n\n\nIf I load another snapshot, I will see another snapshot_loads, but not followed by another boot_info, because adb liveness checker already finds the image as booted up the first time.",
+      "parentUuid": "e1e6299e_a5259ac2",
+      "revId": "a93fb70543fccf1993a40ba9791bea54339b95f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
