@@ -71,6 +71,12 @@ protected:
         kFailureEmulatorDead = 4
     };
 
+    enum class BootResult {
+        kNoResult = 0,
+        kBootCompleted = 1,
+        kBootFailed = 2
+    };
+
     // Called by the RecurrentTask.
     bool adbCheckRequest();
     bool runBootCheck();
@@ -81,6 +87,7 @@ protected:
     void reportCheckResult(const CheckResult& result);
 
     void dropMetrics(const CheckResult& result);
+    void dropBootMetrics(const BootResult& result);
 
 private:
     android::emulation::AdbInterface* mAdb;
