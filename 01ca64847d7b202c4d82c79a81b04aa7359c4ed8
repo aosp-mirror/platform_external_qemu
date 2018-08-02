@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fcec7760_d6f5febd",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-02T19:46:29Z",
+      "side": 1,
+      "message": "nit: maybe add an empty line after the def? They mix up and become difficult to read.",
+      "revId": "01ca64847d7b202c4d82c79a81b04aa7359c4ed8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
