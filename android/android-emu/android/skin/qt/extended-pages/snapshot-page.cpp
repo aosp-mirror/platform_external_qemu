@@ -871,13 +871,21 @@ void SnapshotPage::populateSnapshotDisplay() {
     populateSnapshotDisplay_flat();
 }
 
+void sClearTreeWidget(QTreeWidget* tree) {
+    for (int i = 0; i < tree->topLevelItemCount(); i++) {
+        delete tree->takeTopLevelItem(0);
+    }
+}
+
 // Populate the list of snapshot WITHOUT the hierarchy of parentage
 void SnapshotPage::populateSnapshotDisplay_flat() {
 
     mUi->defaultSnapshotDisplay->setSortingEnabled(false); // Don't sort during modification
     mUi->snapshotDisplay->setSortingEnabled(false);
-    mUi->defaultSnapshotDisplay->clear();
-    mUi->snapshotDisplay->clear();
+    sClearTreeWidget(mUi->defaultSnapshotDisplay);
+    sClearTreeWidget(mUi->snapshotDisplay);
+//     mUi->defaultSnapshotDisplay->clear();
+//     mUi->snapshotDisplay->clear();
 
     std::string snapshotPath = getSnapshotBaseDir();
 
