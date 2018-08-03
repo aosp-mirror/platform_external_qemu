@@ -435,6 +435,7 @@ void SnapshotPage::on_loadSnapshot_clicked() {
     QString fileName = theItem->fileName();
     QApplication::setOverrideCursor(Qt::WaitCursor);
     disableActions();
+    setShowSnapshotDisplay(false);
     android::base::ThreadLooper::runOnMainLooper([fileName, this] {
         AndroidSnapshotStatus status = androidSnapshot_load(fileName.toStdString().c_str());
         emit(loadCompleted((int)status, fileName));
@@ -442,21 +443,29 @@ void SnapshotPage::on_loadSnapshot_clicked() {
 }
 
 void SnapshotPage::on_saveQuickBootNowButton_clicked() {
+    setEnabled(false);
+    setShowSnapshotDisplay(false);
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
     android::base::ThreadLooper::runOnMainLooper(
-            []() { androidSnapshot_save(Quickboot::kDefaultBootSnapshot); });
+            [this]() { AndroidSnapshotStatus status = androidSnapshot_save(Quickboot::kDefaultBootSnapshot);
+                       emit(saveCompleted((int)status, Quickboot::kDefaultBootSnapshot)); });
 }
 
 void SnapshotPage::on_loadQuickBootNowButton_clicked() {
+    setEnabled(false);
+    setShowSnapshotDisplay(false);
     // Invoke the snapshot load function.
     // But don't run it on the UI thread.
     android::base::ThreadLooper::runOnMainLooper(
-            []() { androidSnapshot_load(Quickboot::kDefaultBootSnapshot); });
+            [this]() { AndroidSnapshotStatus status = androidSnapshot_load(Quickboot::kDefaultBootSnapshot);
+                       emit(loadCompleted((int)status, Quickboot::kDefaultBootSnapshot)); });
 }
 
 void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snapshotFileName) {
     AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
+
+    setEnabled(true);
 
     if (status != SNAPSHOT_STATUS_OK) {
         enableActions();
@@ -796,6 +805,8 @@ void SnapshotPage::showEvent(QShowEvent* ee) {
 // In stand-alone mode, it is used to choose the selected
 // snapshot.
 void SnapshotPage::on_takeSnapshotButton_clicked() {
+    setShowSnapshotDisplay(false);
+
     if (mIsStandAlone) {
         mMadeSelection = true;
         close();
@@ -839,6 +850,8 @@ void SnapshotPage::closeEvent(QCloseEvent* closeEvent) {
 void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snapshotName) {
     AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
 
+    setEnabled(true);
+
     if (status != SNAPSHOT_STATUS_OK) {
         enableActions();
         QApplication::restoreOverrideCursor();
@@ -861,16 +874,6 @@ void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snap
     QApplication::restoreOverrideCursor();
 }
 
-void SnapshotPage::populateSnapshotDisplay() {
-    if (android_cmdLineOptions->read_only) {
-        // Leave the list empty because snapshots
-        // are disabled in read-only mode
-        return;
-    }
-    // (In the future, we may also want a hierarchical display.)
-    populateSnapshotDisplay_flat();
-}
-
 void sClearTreeWidget(QTreeWidget* tree) {
 #ifdef __APPLE__
     // bug: 112196179
@@ -886,13 +889,32 @@ void sClearTreeWidget(QTreeWidget* tree) {
     tree->clear();
 }
 
+void SnapshotPage::clearSnapshotDisplay() {
+    sClearTreeWidget(mUi->defaultSnapshotDisplay);
+    sClearTreeWidget(mUi->snapshotDisplay);
+}
+
+void SnapshotPage::setShowSnapshotDisplay(bool show) {
+    mUi->defaultSnapshotDisplay->setVisible(show);
+    mUi->snapshotDisplay->setVisible(show);
+}
+
+void SnapshotPage::populateSnapshotDisplay() {
+    if (android_cmdLineOptions->read_only) {
+        // Leave the list empty because snapshots
+        // are disabled in read-only mode
+        return;
+    }
+    // (In the future, we may also want a hierarchical display.)
+    populateSnapshotDisplay_flat();
+}
+
 // Populate the list of snapshot WITHOUT the hierarchy of parentage
 void SnapshotPage::populateSnapshotDisplay_flat() {
 
     mUi->defaultSnapshotDisplay->setSortingEnabled(false); // Don't sort during modification
     mUi->snapshotDisplay->setSortingEnabled(false);
-    sClearTreeWidget(mUi->defaultSnapshotDisplay);
-    sClearTreeWidget(mUi->snapshotDisplay);
+    clearSnapshotDisplay();
 
     std::string snapshotPath = getSnapshotBaseDir();
 
@@ -995,8 +1017,7 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 
     if (nItems <= 0) {
         // Hide the lists and say that there are no snapshots
-        mUi->defaultSnapshotDisplay->setVisible(false);
-        mUi->snapshotDisplay->setVisible(false);
+        setShowSnapshotDisplay(false);
         mUi->noneAvailableLabel->setVisible(true);
         return;
     }
@@ -1018,8 +1039,6 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         }
     }
 
-    mUi->defaultSnapshotDisplay->setVisible(true);
-    mUi->snapshotDisplay->setVisible(true);
     mUi->noneAvailableLabel->setVisible(false);
 
     mUi->defaultSnapshotDisplay->header()->setStretchLastSection(false);
@@ -1054,6 +1073,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         }
     }
     mDidInitialInvalidCheck = true;
+
+    setShowSnapshotDisplay(true);
 }
 
 // TODO: jameskaye@ Enable this code if we decide to provide a hierarchical display.
