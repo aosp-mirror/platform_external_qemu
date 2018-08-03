@@ -85,7 +85,8 @@ void* RenderLibImpl::getEGL(void) {
     return &s_egl;
 }
 
-bool RenderLibImpl::getDSCC(void** display, void** surface, void** config, void** context) {
+bool RenderLibImpl::getDSCC(void** display, void** surface, void** config,
+                            void** context, int* width, int* height) {
     FrameBuffer* fb  = FrameBuffer::getFB();
     if (fb == nullptr) {
         return false;
@@ -95,6 +96,8 @@ bool RenderLibImpl::getDSCC(void** display, void** surface, void** config, void*
     *surface = fb->getWindowSurface();
     *config = fb->getConfig();
     *context = fb->getContext();
+    *width = fb->windowWidth() * fb->getDpr();
+    *height = fb->windowHeight() * fb->getDpr();
 
     return (*display && *surface  && *config && *context);
 }
