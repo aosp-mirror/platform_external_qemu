@@ -40,6 +40,7 @@
 
 /* this must come after including "trace.h" */
 #include <shlobj.h>
+#include <psapi.h>
 
 void *qemu_oom_check(void *ptr)
 {
@@ -67,6 +68,8 @@ void *qemu_memalign(size_t alignment, size_t size)
     return qemu_oom_check(qemu_try_memalign(alignment, size));
 }
 
+bool win32InsufficientMemMessage = false;
+
 void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared)
 {
     void *ptr;
@@ -75,6 +78,58 @@ void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared)
        has 64Kb granularity, but at least it guarantees us that the
        memory is page aligned. */
     ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+
+    // On failure, check the commit size.
+    if (!ptr) {
+        bool notEnoughCommit = false;
+        bool shouldTryAgain = false;
+        SIZE_T commitTotalBytes, commitLimitBytes;
+        const double oneMbBytes = 1048576.0;
+        const double safetyFactor = 1.2;
+        double totalMb, limitMb, neededMb, remainingMb;
+
+        PERFORMANCE_INFORMATION pi = { sizeof(pi) };
+
+        if (!GetPerformanceInfo(&pi, sizeof(pi))) {
+            fprintf(stderr, "ERROR: GetPerformanceInfo() failed.\n");
+            return ptr;
+        }
+
+        commitTotalBytes = pi.PageSize * pi.CommitTotal;
+        commitLimitBytes = pi.PageSize * pi.CommitLimit;
+
+        totalMb = commitTotalBytes / oneMbBytes;
+        limitMb = commitLimitBytes / oneMbBytes;
+        neededMb = size / oneMbBytes;
+        remainingMb = limitMb - totalMb;
+
+        if (neededMb * 1.2 > limitMb - totalMb) {
+            fprintf(stderr,
+                "ERROR: Insufficient RAM free for launching emulator.\n"
+                "Please free up memory (close other programs and files),\n"
+                "or decrease the AVD RAM size and try again.\n"
+                "Stats:\n"
+                "    Currently committed: %f MB\n"
+                "    Commit limit: %f MB\n"
+                "    Remaining: %f MB\n"
+                "    Needed: %f MB\n"
+                "For more info, see the Emulator Troubleshooting website:\n"
+                "https://developer.android.com/studio/run/emulator-troubleshooting#windows_free_ram_and_commit_charge\n"
+                "under \"Windows: Free RAM and commit charge\".",
+                totalMb,
+                limitMb,
+                remainingMb,
+                neededMb);
+            win32InsufficientMemMessage = true;
+            return ptr;
+        } else {
+            // Maybe things cleared up. Try again.
+            ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+            trace_qemu_anon_ram_alloc(size, ptr);
+            return ptr;
+        }
+    }
+
     trace_qemu_anon_ram_alloc(size, ptr);
     return ptr;
 }

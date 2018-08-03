@@ -1987,6 +1987,12 @@ static void ram_block_add(RAMBlock *new_block, Error **errp, bool shared)
             new_block->host = phys_mem_alloc(new_block->max_length,
                                              &new_block->mr->align, shared);
             if (!new_block->host) {
+#ifdef _WIN32
+                if (win32InsufficientMemMessage) {
+                    qemu_mutex_unlock_ramlist();
+                    _exit(1);
+                }
+#endif
                 error_setg_errno(errp, errno,
                                  "cannot set up guest memory '%s'",
                                  memory_region_name(new_block->mr));
