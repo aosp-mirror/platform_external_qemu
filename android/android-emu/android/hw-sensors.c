@@ -396,10 +396,9 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     // requested frequency. Also make sure we have at least a minimal delay,
     // otherwise this timer would hijack the main loop thread and won't allow
     // guest to ever run.
-    // Note: (-1) is needed to account for an overhead of the timer firing on
-    //  the host and execution of the tick function. 1ms is enough, as the
-    //  overhead is very small; on the other hand, it's always present - that's
-    //  why we can't just have (delay_ms) here.
+    // Note: While there is some overhead in this code, it is signifcantly less
+    //  than 1ms. Just delay by exactly (delay_ms) below to keep the actual rate
+    //  as close to the desired rate as possible.
     // Note2: Let's cap the minimal tick interval to 10ms, to make sure:
     // - We never overload the main QEMU loop.
     // - Some CTS hardware test cases require a limit on the maximum update rate,
@@ -409,7 +408,7 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     } else if (delay_ms > 60 * 60 * 1000) {
         delay_ms = 60 * 60 * 1000;
     }
-    loopTimer_startRelative(cl->timer, delay_ms - 1);
+    loopTimer_startRelative(cl->timer, delay_ms);
 }
 
 /* handle incoming messages from the HAL module */
