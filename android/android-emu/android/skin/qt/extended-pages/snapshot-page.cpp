@@ -428,7 +428,6 @@ void SnapshotPage::on_deleteSnapshot_clicked() {
 }
 
 void SnapshotPage::on_loadSnapshot_clicked() {
-    AndroidSnapshotStatus status;
 
     const WidgetSnapshotItem* theItem = getSelectedSnapshot();
     if (!theItem) return;
@@ -436,8 +435,8 @@ void SnapshotPage::on_loadSnapshot_clicked() {
     QString fileName = theItem->fileName();
     QApplication::setOverrideCursor(Qt::WaitCursor);
     disableActions();
-    android::base::ThreadLooper::runOnMainLooper([&status, fileName, this] {
-        status = androidSnapshot_load(fileName.toStdString().c_str());
+    android::base::ThreadLooper::runOnMainLooper([fileName, this] {
+        AndroidSnapshotStatus status = androidSnapshot_load(fileName.toStdString().c_str());
         emit(loadCompleted((int)status, fileName));
     });
 }
@@ -801,15 +800,15 @@ void SnapshotPage::on_takeSnapshotButton_clicked() {
         mMadeSelection = true;
         close();
     } else {
-        AndroidSnapshotStatus status;
 
         QString snapshotName("snap_"
                              + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss"));
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
         disableActions();
-        android::base::ThreadLooper::runOnMainLooper([&status, snapshotName, this] {
-            status = androidSnapshot_save(snapshotName.toStdString().c_str());
+        android::base::ThreadLooper::runOnMainLooper([snapshotName, this] {
+            AndroidSnapshotStatus status =
+            androidSnapshot_save(snapshotName.toStdString().c_str());
             emit(saveCompleted((int)status, snapshotName));
         });
     }
