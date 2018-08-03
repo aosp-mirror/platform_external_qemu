@@ -67,6 +67,10 @@ private:
 
     void    showEvent(QShowEvent* ee) override;
 
+    void    clearSnapshotDisplay();
+    void    setShowSnapshotDisplay(bool show);
+    void    setOperationInProgress(bool inProgress);
+
     void    populateSnapshotDisplay();
     void    populateSnapshotDisplay_flat();
 
