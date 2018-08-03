@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b1567956_5a672499",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T23:51:25Z",
+      "side": 1,
+      "message": "bug #?",
+      "range": {
+        "startLine": 57,
+        "startChar": 7,
+        "endLine": 57,
+        "endChar": 11
+      },
+      "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2dfdd706_3d82e35e",
+        "filename": "android/android-emu/android/multi-instance.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T23:51:25Z",
+      "side": 1,
+      "message": "what about making this a class and putting an instance into the SnapshotPipe? It would work exactly as well as it is now, but instead of having some hidden state in statics it all would get moved into the object, making it easier to test and use\n\nWell, looking at the actual usage pattern it needs to be initialized in main() and then passed into the pipe. That will be quite hard :(",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 1
+      },
+      "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f1265352_41344599",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T23:51:25Z",
+      "side": 1,
+      "message": "init to something just in case of \"default\"?",
+      "range": {
+        "startLine": 155,
+        "startChar": 54,
+        "endLine": 155,
+        "endChar": 55
+      },
+      "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87dde6ec_5dac7561",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T23:51:25Z",
+      "side": 1,
+      "message": "maybe just log a warning in case when new system image runs on an old emulator build? Otherwise it will (1) crash the debug build completely and (2) will do nothing at all on release builds",
+      "range": {
+        "startLine": 164,
+        "startChar": 28,
+        "endLine": 164,
+        "endChar": 42
+      },
+      "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e550ecb7_f398f4d9",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T23:51:25Z",
+      "side": 1,
+      "message": "should the whole offworld library implementation have some kind of built-in authorization? As of now anyone can send this message into the pipe and make emulator save or load a snapshot. WCPGW knowing that some teams use the emulator for security scans?",
+      "range": {
+        "startLine": 174,
+        "startChar": 20,
+        "endLine": 175,
+        "endChar": 0
+      },
+      "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
