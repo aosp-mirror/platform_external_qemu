@@ -743,19 +743,16 @@ void LocationPage::updateControlsAfterLoading() {
     mNowLoadingGeoData = false;
 }
 
-void LocationPage::sendMostRecentLocation() {
-    // Set the location on the map
+// Give the device the location that is now showing on
+// the map UI
+void LocationPage::sendMostRecentUiLocation() {
+    // Update the location marker on the map
     emit locationChanged(mLastLat, mLastLng);
 
-    if (!sLocationAgent || !sLocationAgent->gpsSendLoc) {
-        return;
-    }
-    // Send the location to the device
-    timeval timeVal = {};
-    gettimeofday(&timeVal, nullptr);
-    sLocationAgent->gpsSendLoc(mLastLat.toDouble(), mLastLng.toDouble(),
-                               0.0, 4, &timeVal);
-    // ?? Must also use this value in the periodic update thread
+    writeDeviceLocationToSettings(mLastLat.toDouble(),
+                                  mLastLng.toDouble(),
+                                  0.0);
+    sendLocationToDevice();
 }
 
 // static

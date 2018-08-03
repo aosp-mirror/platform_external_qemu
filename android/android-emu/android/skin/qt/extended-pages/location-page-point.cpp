@@ -64,13 +64,13 @@ void LocationPage::on_savePoint_clicked() {
 }
 
 void LocationPage::on_singlePoint_setLocationButton_clicked() {
-    sendMostRecentLocation();
+    sendMostRecentUiLocation();
 }
 
 // Populate mPointList with the points that are found on disk
 void LocationPage::scanForPoints() {
 
-    printf("l-p-p: >>>>> Starting scanForPoints()\n"); // ??
+//    printf("l-p-p: >>>>> Starting scanForPoints()\n"); // ??
     mPointList.clear();
 
     // Get the directory
@@ -96,7 +96,6 @@ void LocationPage::scanForPoints() {
                 join(pointDirectoryName.c_str(),
                      pointName.toStdString().c_str(),
                      PROTO_FILE_NAME);
-//        printf("    Pbuf name \"%s\"\n", protoFilePath.c_str()); // ??
 
         android::location::Point point(protoFilePath.c_str());
 
@@ -113,7 +112,7 @@ void LocationPage::scanForPoints() {
 
         mPointList.append(listElement);
     }
-    printf("l-p-p: <<<<< Exit scanForPoints()\n"); // ??
+//    printf("l-p-p: <<<<< Exit scanForPoints()\n"); // ??
 }
 
 // Populate the UI list of points from mPointList
@@ -128,7 +127,7 @@ void LocationPage::populatePointListWidget() {
 
     int nItems = mPointList.size();
 
-    // ?? Check if this selection is needed
+    // ?? Try to modify this block to fix the current drag problem
     int selectedRow = std::min(mUi->pointList->currentRow(), nItems - 1);
     if (selectedRow >= 0) {
         mUi->pointList->setCurrentCell(selectedRow, 0); // (Helps if the user drags the selection)
@@ -143,17 +142,15 @@ void LocationPage::populatePointListWidget() {
 
     // All done updating. Enable sorting now.
     mUi->pointList->sortByColumn(0, Qt::AscendingOrder);
-    printf("l-p-p: populatePointListWidget() enabling sorting\n"); // ??
     mUi->pointList->setSortingEnabled(true);
-//    printf("l-p-p: populatePointListWidget() Sorting is disabled!\n"); // ??
 }
 
 // Update the UI list of points to highlight the
 // row that is selected
 void LocationPage::highlightPointListWidget() {
-    printf("l-p-p: In highlightPointListWidget()\n"); // ??
+    // Update the QTableWidgetItems that are associated
+    // with this widget
     for (int row = 0; row < mUi->pointList->rowCount(); row++) {
-
         PointWidgetItem* pointItem = (PointWidgetItem*)mUi->pointList->takeItem(row, 0);
         bool isSelected = (mSelectedPointName == pointItem->pointElement->protoFilePath);
         mPointItemBuilder->highlightPointWidgetItem(pointItem, isSelected);
@@ -171,35 +168,21 @@ void LocationPage::highlightPointListWidget() {
 }
 
 void LocationPage::on_pointList_cellClicked(int row, int column) {
-    printf("cellClicked: (%d, %d)\n", row, column); // ??
-#if 0
-//    highlightPointListWidget();
-//    auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(row, 0));
-//    auto pointElement = widgetItem->getPointElement();
-//    printf("Direct name %s; indirect name %s\n",
-//           mPointList[row].logicalName.toStdString().c_str(),
-//           pointElement->logicalName.toStdString().c_str());
-#else
+    printf("l-p-p: Cell clicked\n");
     mUi->pointList->setCurrentCell(row, 0, QItemSelectionModel::Rows);
-
+#if 0 // ??
     auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(row, 0));
     auto pointElement = widgetItem->pointElement;
 
-    mSelectedPointName = pointElement->protoFilePath;
-//    if (mSelectedPointElement != pointElement) {
-//        mSelectedPointElement = pointElement;
-//        highlightPointListWidget();
-
-//        printf("l-p-p: UI row %d, name %s, element addr %lx\n", // ??
-//               selectedRow, pointElement->logicalName.toStdString().c_str(), // ??
-//               (long)pointElement); // ??
+    if (mSelectedPointName != pointElement->protoFilePath) {
+        mSelectedPointName = pointElement->protoFilePath;
         mLastLat = QString::number(pointElement->latitude);
         mLastLng = QString::number(pointElement->longitude);
 
         // Show the location, but do not send it to the device
         emit showLocation(mLastLat, mLastLng);
-//    }
-
+    }
+#endif // ??
     if (column == 1) {
         QMenu* popMenu = new QMenu(this);
         QAction* editAction   = popMenu->addAction(tr("Edit"));
@@ -215,16 +198,18 @@ void LocationPage::on_pointList_cellClicked(int row, int column) {
             printf("Got SOME OTHER ACTION\n");
         }
     }
-#endif
 }
 
 void LocationPage::on_pointList_itemSelectionChanged() {
+    printf("l-p-p: Selection changed\n");
 #if 0 // ??
     highlightPointListWidget();
 #else // ??
 // ?? Dragging does not highlight correctly!
     int selectedRow = mUi->pointList->currentRow();
     if (selectedRow < 0) return;
+
+    mUi->pointList->setCurrentCell(selectedRow, 0, QItemSelectionModel::Rows);
 
     auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(selectedRow, 0));
     auto pointElement = widgetItem->pointElement;
@@ -238,9 +223,6 @@ void LocationPage::on_pointList_itemSelectionChanged() {
     mSelectedPointName = pointElement->protoFilePath;
     printf("l-p-p: Changed selection to %s\n", mSelectedPointName.toStdString().c_str()); // ??
 
-//    printf("l-p-p: UI row %d, name %s, element addr %lx\n", // ??
-//           selectedRow, pointElement->logicalName.toStdString().c_str(), // ??
-//           (long)pointElement); // ??
     mLastLat = QString::number(pointElement->latitude);
     mLastLng = QString::number(pointElement->longitude);
 

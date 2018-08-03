@@ -127,8 +127,6 @@ private:
             }
         }
 
-//        PointWidgetItem* pointWidgetItem(const PointListElement* listItem,
-//                                         const QIcon& icon, bool isSelected);
         void highlightPointWidgetItem(LocationPage::PointWidgetItem* theItem,
                                       bool isSelected);
         void highlightDotDotWidgetItem(QTableWidgetItem* dotDotItem, bool isSelected);
@@ -155,11 +153,6 @@ private:
             // Sort by the logical name
             bool operator < (const QTableWidgetItem &other) const {
                 const PointListElement* otherElement = ((PointWidgetItem&)other).pointElement;
-
-//                printf("l-p.h: Comparing \"%s\" : \"%s\"\n", // ??
-//                       mPointElement->logicalName.toStdString().c_str(), // ??
-//                       otherElement ->logicalName.toStdString().c_str()); // ??
-
                 return pointElement->logicalName < otherElement->logicalName;
             }
             const PointListElement* pointElement;
@@ -171,7 +164,7 @@ private:
         const QString& error_message,
         bool ignore_error);
 
-    void sendMostRecentLocation();
+    void sendMostRecentUiLocation();
     void updateControlsAfterLoading();
 
     void writeLocationPlaybackFilePathToSettings(const QString& file);
@@ -246,36 +239,3 @@ private:
     QString mFileName;
     GpsFixArray* mFixes = nullptr;
 };
-
-#if 0 // ??
-class PointWidgetItem : public QTableWidgetItem {
-    public:
-        PointWidgetItem(const struct PointListElement* pointElement) :
-            mPointElement(pointElement)
-        {
-            QTableWidgetItem();
-        }
-
-//        const struct PointListElement* getPointElement() { return mPointElement; }
-
-//         // Sort by the logical name
-//         bool operator < (const QTableWidgetItem &other) const {
-// //            printf("l-p.h: Comparing \"%s\" : \"%s\"\n", // ??
-// //                   logicalName.toStdString().c_str(), // ??
-// //                   ((PointListElement&)other).logicalName.toStdString().c_str()); // ??
-//
-// //            return logicalName < ((PointWidgetItem&)other).logicalName;
-// // this->element->logicalName
-//             return false;
-//         }
-
-    private:
-         const struct PointListElement* mPointElement;
-//        int     listIndex;
-//        QString protoFilePath;
-//        QString logicalName;
-//        QString description;
-//        double  latitude;
-//        double  longitude;
-};
-#endif // ??

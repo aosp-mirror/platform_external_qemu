@@ -129,16 +129,14 @@ function initMap() {
         channel.objects.emulocationserver.sendLocation(event.latLng.lat(), event.latLng.lng());
     });
 
-
     showPendingLocation = function(lat, lng) {
         // Called from Qt code to show a pending location on the UI map.
         // This point has NOT been sent to the AVD.
         // Code to set location marker on the map. Move this to a signal event handler.
 
         var latLng = new google.maps.LatLng(lat, lng);
-        infoWindow.setPosition(latLng);
-        infoWindow.setContent('Pending location');
-        infoWindow.open(gMap);
+        gCurrentMarker.setPosition(latLng);
+        gCurrentMarker.setIcon(null); // Default "pin"
         gMap.setCenter(latLng);
     }
 
@@ -147,10 +145,23 @@ function initMap() {
 //        console.warn('Setting location to lat=' + lat + ', lng=' + lng);
         // Code to set location marker on the map. Move this to a signal event handler.
 
+// ?? See https://developers.google.com/maps/documentation/javascript/custom-markers
+
         var latLng = new google.maps.LatLng(lat, lng);
-        infoWindow.setPosition(latLng);
-        infoWindow.setContent('Device location');
-        infoWindow.open(gMap);
+        gCurrentMarker.setPosition(latLng);
+        var blueDot = 'data:image/svg+xml, \
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"> \
+                    <circle cx="12" cy="12" r="10" fill="#black" opacity=".1" /> \
+                    <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" fill="#4286f5" /> \
+                </svg>';
+        var image = {
+          url: blueDot,
+          size: new google.maps.Size(24, 24),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(12, 12),
+          scaledSize: new google.maps.Size(25, 25)
+        };
+        gCurrentMarker.setIcon(image);
         gMap.setCenter(latLng);
     }
 
