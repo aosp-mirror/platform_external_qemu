@@ -871,13 +871,28 @@ void SnapshotPage::populateSnapshotDisplay() {
     populateSnapshotDisplay_flat();
 }
 
+void sClearTreeWidget(QTreeWidget* tree) {
+#ifdef __APPLE__
+    // bug: 112196179
+    // QAccessibility is buggy on macOS.  We need to remove tree
+    // items one by one, or QAccessbility will go out of sync and cause a
+    // segfault.
+    // More background info:
+    // https://blog.inventic.eu/2015/05/crash-in-qtreewidget-qtreeview-index-mapping-on-mac-osx-10-10-part-iii/
+    while (tree->topLevelItemCount()) {
+        delete tree->takeTopLevelItem(0);
+    }
+#endif
+    tree->clear();
+}
+
 // Populate the list of snapshot WITHOUT the hierarchy of parentage
 void SnapshotPage::populateSnapshotDisplay_flat() {
 
     mUi->defaultSnapshotDisplay->setSortingEnabled(false); // Don't sort during modification
     mUi->snapshotDisplay->setSortingEnabled(false);
-    mUi->defaultSnapshotDisplay->clear();
-    mUi->snapshotDisplay->clear();
+    sClearTreeWidget(mUi->defaultSnapshotDisplay);
+    sClearTreeWidget(mUi->snapshotDisplay);
 
     std::string snapshotPath = getSnapshotBaseDir();
 
