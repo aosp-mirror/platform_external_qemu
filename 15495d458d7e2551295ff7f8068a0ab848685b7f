@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "660a8e51_c00809b8",
+        "filename": "util/mmap-alloc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T16:33:04Z",
+      "side": 1,
+      "message": "this isn\u0027t quite right: on Windows page size is still 4k, but the memory allocation granularity  is 64k. This means one can map only 4k of any file, but the start address has to always be a multiple of 64k.\nbtw, it\u0027s possible to get it from ::GetSystemInfo() call instead of hardcoding",
+      "range": {
+        "startLine": 24,
+        "startChar": 8,
+        "endLine": 24,
+        "endChar": 26
+      },
+      "revId": "15495d458d7e2551295ff7f8068a0ab848685b7f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e23b0e65_11324651",
+        "filename": "util/mmap-alloc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T16:33:04Z",
+      "side": 1,
+      "message": "nit: please align",
+      "range": {
+        "startLine": 147,
+        "startChar": 2,
+        "endLine": 147,
+        "endChar": 3
+      },
+      "revId": "15495d458d7e2551295ff7f8068a0ab848685b7f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
