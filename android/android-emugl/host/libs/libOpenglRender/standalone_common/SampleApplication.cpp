@@ -210,6 +210,8 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
     }
 
     mRenderThreadInfo.reset(new RenderThreadInfo());
+    // Assign some arbitrary puid so FrameBuffer will manage handles
+    mRenderThreadInfo->m_puid = 11111;
 
     mColorBuffer = mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
     mContext = mFb->createRenderContext(0, 0, glVersion);

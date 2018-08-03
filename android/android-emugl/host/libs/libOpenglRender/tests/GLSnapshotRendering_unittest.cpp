@@ -40,6 +40,12 @@ using android::snapshot::TextureSaver;
 // Global dispatch object with functions overridden for snapshot testing
 static const GLESv2Dispatch* getSnapshotTestDispatch();
 
+struct SnapshotBindRestoreHandles {
+    HandleType context;
+    HandleType drawSurface;
+    HandleType readSurface;
+};
+
 // SnapshotTestDispatch - a GL dispatcher with some of its functions overridden
 // that can act as a drop-in replacement for GLESv2Dispatch. These functions are
 // given wrappers that perform a test of the GL snapshot when they are called.
@@ -63,6 +69,10 @@ public:
             fprintf(stderr, "SnapshotTestDispatch failed to initialize.\n");
             ADD_FAILURE() << "SnapshotTestDispatch could not initialize.";
         }
+    }
+
+    void setBindRestoreHandles(SnapshotBindRestoreHandles handles) {
+        mRestoreHandles = handles;
     }
 
 protected:
@@ -113,6 +123,12 @@ protected:
 
         m_stream->close();
         m_texture_loader->join();
+
+        if (mRestoreHandles.context != 0) {
+            fb->bindContext(mRestoreHandles.context,
+                    mRestoreHandles.drawSurface,
+                    mRestoreHandles.readSurface);
+        }
     }
 
     static void testDraw(std::function<void()> doDraw) {
@@ -195,6 +211,8 @@ protected:
     std::string mSnapshotPath = {};
     std::string mSnapshotFile = {};
     std::string mTextureFile = {};
+
+    SnapshotBindRestoreHandles mRestoreHandles;
 };
 
 static LazyInstance<SnapshotTestDispatch> sSnapshotTestDispatch =
@@ -232,6 +250,8 @@ protected:
     const GLESv2Dispatch* getGlDispatch() { return getSnapshotTestDispatch(); }
 
     void draw() override {
+        ((SnapshotTestDispatch*)getSnapshotTestDispatch())->setBindRestoreHandles(
+            {mContext, mSurface, mSurface});
         HelloTriangle::draw();
         mFrameCount++;
     }
@@ -239,12 +259,12 @@ protected:
     int mFrameCount = 0;
 };
 
-TEST(SnapshotGlRenderingSampleTest, DISABLED_DrawTriangleOnce) {
+TEST(SnapshotGlRenderingSampleTest, DrawTriangleOnce) {
     SnapshotTestTriangle app;
     app.drawOnce();
 }
 
-TEST(SnapshotGlRenderingSampleTest, DISABLED_DrawTriangleLoop) {
+TEST(SnapshotGlRenderingSampleTest, DrawTriangleLoop) {
     SnapshotTestTriangle app;
     app.drawLoop();
 }
