@@ -120,8 +120,16 @@ void LocationPage::populatePointListWidget() {
     // Disable sorting while we're updating the table
     mUi->pointList->setSortingEnabled(false);
 
-    // Set the dotdotdot column to take the available space. This prevents
-    // horizontal scrolling for an unreasonably wide final column.
+    // Set the dotdotdot column to take the available space. This
+    // prevents the widget from scrolling horizontally due to an
+    // unreasonably wide final column.
+    // ?? The first time through, the widget width is not reported
+    //    correctly. Thus this does not work correctly until the
+    //    second time through.
+//    printf("l.p.p Widths: col 0 %d, col 1 %d, widget %d\n", // ??
+//           mUi->pointList->columnWidth(0), // ??
+//           mUi->pointList->columnWidth(1), // ??
+//           mUi->pointList->width()); // ??
     mUi->pointList->setColumnWidth(1,
             mUi->pointList->width() - mUi->pointList->columnWidth(0));
 
@@ -164,19 +172,6 @@ void LocationPage::highlightPointListWidget() {
 void LocationPage::on_pointList_cellClicked(int row, int column) {
     printf("l-p-p: Cell clicked\n");
     mUi->pointList->setCurrentCell(row, 0, QItemSelectionModel::Rows);
-#if 0 // ??
-    auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(row, 0));
-    auto pointElement = widgetItem->pointElement;
-
-    if (mSelectedPointName != pointElement->protoFilePath) {
-        mSelectedPointName = pointElement->protoFilePath;
-        mLastLat = QString::number(pointElement->latitude);
-        mLastLng = QString::number(pointElement->longitude);
-
-        // Show the location, but do not send it to the device
-        emit showLocation(mLastLat, mLastLng);
-    }
-#endif // ??
     if (column == 1) {
         QMenu* popMenu = new QMenu(this);
         QAction* editAction   = popMenu->addAction(tr("Edit"));
@@ -195,12 +190,8 @@ void LocationPage::on_pointList_cellClicked(int row, int column) {
 }
 
 void LocationPage::on_pointList_itemSelectionChanged() {
-#if 0 // ??
-    highlightPointListWidget();
-#else // ??
-// ?? Dragging does not highlight correctly!
     int selectedRow = mUi->pointList->currentRow();
-    printf("l-p-p: In itemSelectionChanged() for row %2d\n", selectedRow); // ??
+//    printf("l-p-p: In itemSelectionChanged() for row %2d\n", selectedRow); // ??
     if (selectedRow < 0) return;
 
     mUi->pointList->setCurrentCell(selectedRow, 0, QItemSelectionModel::Rows);
@@ -218,7 +209,7 @@ void LocationPage::on_pointList_itemSelectionChanged() {
     }
 
     mSelectedPointName = pointElement->protoFilePath;
-    printf("l-p-p: Changed selection to %s\n", mSelectedPointName.toStdString().c_str()); // ??
+//    printf("l-p-p: Changed selection to %s\n", mSelectedPointName.toStdString().c_str()); // ??
 
     mLastLat = QString::number(pointElement->latitude);
     mLastLng = QString::number(pointElement->longitude);
@@ -228,14 +219,10 @@ void LocationPage::on_pointList_itemSelectionChanged() {
 
     // Redraw the table to show the new selection
     highlightPointListWidget();
-//    populatePointListWidget();
-    // Re-select that row now that the UI was re-created
-//    mUi->pointList->setCurrentCell(selectedRow, 0);
-#endif
 }
 
 void LocationPage::editPoint(int row) {
-    printf("In editPoint for row %d\n", row); // ??
+//    printf("In editPoint for row %d\n", row); // ??
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
@@ -298,14 +285,12 @@ void LocationPage::editPoint(int row) {
         emulator_location::PointMetadata pointMetadata(*oldPointMetadata);
 
         if (!newName.isEmpty()) {
-//            pointElement->logicalName = newName;
             pointMetadata.set_logical_name(newName.toStdString().c_str());
         }
-//        pointElement->description = newDescription;
         pointMetadata.set_description(newDescription.toStdString().c_str());
 
         writePointProtobufFullPath(pointElement->protoFilePath, pointMetadata);
-        printf("l-p-p: editPoint(): Re-reading protobufs and repopulating everything\n"); // ??
+//        printf("l-p-p: editPoint(): Re-reading protobufs and repopulating everything\n"); // ??
         scanForPoints();
         populatePointListWidget();
         highlightPointListWidget();
@@ -318,7 +303,7 @@ void LocationPage::deletePoint(int row) {
         printf("l-p-p: deletePoint(%d) Invalid row!\n", row); // ??
         return;
     }
-    printf("l-p-p: deletePoint(%d)\n", row); // ??
+//    printf("l-p-p: deletePoint(%d)\n", row); // ??
     auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(row, 0));
     auto thisPoint = widgetItem->pointElement;
 
@@ -352,67 +337,8 @@ void LocationPage::deletePoint(int row) {
 
         QApplication::restoreOverrideCursor();
     }
-    printf("l-p-p: deletePoint: Exiting\n"); // ??
+//    printf("l-p-p: deletePoint: Exiting\n"); // ??
 }
-
-#if 0 // ??
-LocationPage::PointWidgetItem*
-LocationPage::PointItemBuilder::pointWidgetItem(const PointListElement* listItem) {
-    QColor foregroundColor = getColorForCurrentTheme(Ui::THEME_TEXT_COLOR);
-    QColor backgroundColor = isSelected ? getColorForCurrentTheme(Ui::TABLE_SELECTED_VAR)
-                                        : getColorForCurrentTheme(Ui::TAB_BKG_COLOR_VAR);
-
-    if (isSelected) // ??
-        printf("l-p-p: Building selected: addr %lx, %s\n", // ??
-               (long)listItem, listItem->logicalName.toStdString().c_str()); // ??
-
-    QPixmap basePixmap(mFieldWidth, mFieldHeight);
-    basePixmap.fill(backgroundColor);
-    QPainter painter(&basePixmap);
-    painter.setPen(foregroundColor);
-
-    QFont baseFont = painter.font();
-    int baseFontHeight = painter.fontInfo().pointSize();
-
-    QFont bigFont = baseFont;
-    bigFont.setPointSize(bigFont.pointSize() + 2);
-    painter.setFont(bigFont);
-    int bigFontHeight = painter.fontInfo().pointSize();
-
-    int vertPosition = (mFieldHeight - (bigFontHeight + TEXT_SEPARATION + baseFontHeight)) / 2;
-    vertPosition += bigFontHeight;
-    painter.drawText(HORIZ_PADDING, vertPosition, listItem->logicalName);
-
-    painter.setFont(baseFont);
-    vertPosition += bigFontHeight + TEXT_SEPARATION;
-    painter.drawText(HORIZ_PADDING, vertPosition, listItem->description);
-
-    QPixmap transportIcon = icon.pixmap(ICON_SIZE, ICON_SIZE);
-
-    vertPosition = (mFieldHeight - ICON_SIZE) / 2;
-
-    int horizPosition = mFieldWidth - ICON_SIZE;
-
-    horizPosition -= HORIZ_PADDING;
-
-    painter.drawPixmap(QRect(horizPosition, vertPosition, ICON_SIZE, ICON_SIZE), transportIcon);
-
-//    struct bogusStruct mPLE;
-//    PWI* ppwwii = new PWI(&mPLE);
-
-
-//    struct PointListElement newElement4;
-//    PointWidgetItem* item4 = new PointWidgetItem(&newElement4); // ??
-
-//    struct PointListElement* newElement3 = (struct PointListElement*)malloc(sizeof(struct PointListElement)); // ??
-//    PointWidgetItem* item3 = new PointWidgetItem(newElement3); // ??
-
-//    PointWidgetItem* item = new PointWidgetItem(0); // ?? OK
-
-    item->setIcon(basePixmap);
-    return new PointWidgetItem(listItem);
-}
-#endif // ??
 
 void
 LocationPage::PointItemBuilder::highlightPointWidgetItem(LocationPage::PointWidgetItem* theItem,

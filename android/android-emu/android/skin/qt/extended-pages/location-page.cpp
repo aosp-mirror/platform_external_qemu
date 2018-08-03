@@ -140,15 +140,16 @@ LocationPage::LocationPage(QWidget *parent) :
         // Hide the old tab on the Location page
         mUi->locationTabs->removeTab(3);
         // Hide the V2 widgets that are not functional yet
-        mUi->locationTabs->removeTab(2); // Settings
-        mUi->locationTabs->removeTab(1); // Routes
-        mUi->pointSortBox->hide();       // Sort by ...
+        mUi->locationTabs->removeTab(2); // "Settings"
+        mUi->locationTabs->removeTab(1); // "Routes"
+        mUi->pointSortBox->hide();       // "Sort by ..."
     } else {
-        mUi->locationTabs->setTabText(3, ""); // V1
+        mUi->locationTabs->setTabText(3, ""); // "V1"
         // Hide the new tabs on the Location page
-        mUi->locationTabs->removeTab(2); // Settings
-        mUi->locationTabs->removeTab(1); // Routes
-        mUi->locationTabs->removeTab(0); // Single points
+        mUi->locationTabs->removeTab(2); // "Settings"
+        mUi->locationTabs->removeTab(1); // "Routes"
+        mUi->locationTabs->removeTab(0); // "Single points"
+        mUi->pointList->setRowCount(0);
     }
 
   if (useLocationV2) {

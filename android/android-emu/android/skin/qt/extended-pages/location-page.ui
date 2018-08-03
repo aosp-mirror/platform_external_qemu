@@ -57,9 +57,25 @@
           <number>24</number>
          </property>
          <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>24</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <layout class="QVBoxLayout" name="vboxLayoutPointLeft">
            <property name="spacing">
-            <number>24</number>
+            <number>12</number>
            </property>
            <item>
             <widget class="QWebEngineView" name="pointWebEngineView" native="true"/>
@@ -101,7 +117,7 @@
                 <bool>true</bool>
                </property>
                <property name="ColorGroup" stdset="0">
-                <string>Tool</string>
+                <string notr="true">Button</string>
                </property>
                <property name="report_metrics" stdset="0">
                 <bool>false</bool>
@@ -123,12 +139,28 @@
              </item>
             </layout>
            </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>14</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </item>
          <item>
           <layout class="QVBoxLayout" name="vboxLayoutPointRight">
            <property name="spacing">
-            <number>24</number>
+            <number>12</number>
            </property>
            <item>
             <layout class="QHBoxLayout" name="hboxLayout3">
@@ -193,7 +225,7 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>346</width>
+                <width>332</width>
                 <height>70</height>
                </rect>
               </property>
@@ -228,7 +260,7 @@
                   <bool>false</bool>
                  </property>
                  <property name="rowCount">
-                  <number>0</number>
+                  <number>1</number>
                  </property>
                  <property name="columnCount">
                   <number>2</number>
@@ -260,6 +292,7 @@
                  <attribute name="verticalHeaderMinimumSectionSize">
                   <number>21</number>
                  </attribute>
+                 <row/>
                  <column/>
                  <column/>
                 </widget>
@@ -318,7 +351,7 @@
                 <bool>true</bool>
                </property>
                <property name="ColorGroup" stdset="0">
-                <string>Tool</string>
+                <string notr="true">Button</string>
                </property>
                <property name="report_metrics" stdset="0">
                 <bool>false</bool>
@@ -327,7 +360,39 @@
              </item>
             </layout>
            </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>14</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>18</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
