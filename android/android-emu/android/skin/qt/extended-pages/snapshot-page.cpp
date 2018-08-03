@@ -443,21 +443,27 @@ void SnapshotPage::on_loadSnapshot_clicked() {
 }
 
 void SnapshotPage::on_saveQuickBootNowButton_clicked() {
+    setEnabled(false);
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
     android::base::ThreadLooper::runOnMainLooper(
-            []() { androidSnapshot_save(Quickboot::kDefaultBootSnapshot); });
+            [this]() { AndroidSnapshotStatus status = androidSnapshot_save(Quickboot::kDefaultBootSnapshot);
+                       emit(saveCompleted((int)status, Quickboot::kDefaultBootSnapshot)); });
 }
 
 void SnapshotPage::on_loadQuickBootNowButton_clicked() {
+    setEnabled(false);
     // Invoke the snapshot load function.
     // But don't run it on the UI thread.
     android::base::ThreadLooper::runOnMainLooper(
-            []() { androidSnapshot_load(Quickboot::kDefaultBootSnapshot); });
+            [this]() { AndroidSnapshotStatus status = androidSnapshot_load(Quickboot::kDefaultBootSnapshot);
+                       emit(loadCompleted((int)status, Quickboot::kDefaultBootSnapshot)); });
 }
 
 void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snapshotFileName) {
     AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
+
+    setEnabled(true);
 
     if (status != SNAPSHOT_STATUS_OK) {
         enableActions();
@@ -840,6 +846,8 @@ void SnapshotPage::closeEvent(QCloseEvent* closeEvent) {
 void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snapshotName) {
     AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
 
+    setEnabled(true);
+
     if (status != SNAPSHOT_STATUS_OK) {
         enableActions();
         QApplication::restoreOverrideCursor();
@@ -922,6 +930,7 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         // Decimate the invalid snapshots
         if (!snapshotIsValid && !mIsStandAlone) {
             android::base::ThreadLooper::runOnMainLooper([fileName, this] {
+                Snapshot snap(fileName.toStdString().c_str());
                 androidSnapshot_invalidate(fileName.toStdString().c_str());
             });
         }
