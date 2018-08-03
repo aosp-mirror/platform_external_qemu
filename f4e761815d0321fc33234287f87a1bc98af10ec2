@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "61983330_4d8f7095",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T16:21:08Z",
+      "side": 1,
+      "message": "actually it might be easier to get these values right here from |sRenderLib| instead of caching those and making sure they never get stale if user resized the window.",
+      "range": {
+        "startLine": 473,
+        "startChar": 28,
+        "endLine": 473,
+        "endChar": 34
+      },
+      "revId": "f4e761815d0321fc33234287f87a1bc98af10ec2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba54afd5_125eec6c",
+        "filename": "android/android-emugl/host/include/OpenglRender/RenderLib.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-03T16:21:08Z",
+      "side": 1,
+      "message": "1. Could you please document the parameters here?\n2. IMO it would be better to create a struct and return it from the function instead of using a bunch of out parameters",
+      "range": {
+        "startLine": 56,
+        "startChar": 1,
+        "endLine": 56,
+        "endChar": 73
+      },
+      "revId": "f4e761815d0321fc33234287f87a1bc98af10ec2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
