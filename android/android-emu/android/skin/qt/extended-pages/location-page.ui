@@ -36,7 +36,7 @@
      </property>
      <widget class="QWidget" name="singlePointTab">
       <attribute name="title">
-       <string>Single point</string>
+       <string>Single points</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout1">
        <property name="leftMargin">
@@ -228,7 +228,7 @@
                   <bool>false</bool>
                  </property>
                  <property name="rowCount">
-                  <number>10</number>
+                  <number>0</number>
                  </property>
                  <property name="columnCount">
                   <number>2</number>
@@ -260,16 +260,6 @@
                  <attribute name="verticalHeaderMinimumSectionSize">
                   <number>21</number>
                  </attribute>
-                 <row/>
-                 <row/>
-                 <row/>
-                 <row/>
-                 <row/>
-                 <row/>
-                 <row/>
-                 <row/>
-                 <row/>
-                 <row/>
                  <column/>
                  <column/>
                 </widget>

@@ -126,16 +126,10 @@ void LocationPage::populatePointListWidget() {
             mUi->pointList->width() - mUi->pointList->columnWidth(0));
 
     int nItems = mPointList.size();
-
-    // ?? Try to modify this block to fix the current drag problem
-    int selectedRow = std::min(mUi->pointList->currentRow(), nItems - 1);
-    if (selectedRow >= 0) {
-        mUi->pointList->setCurrentCell(selectedRow, 0); // (Helps if the user drags the selection)
-        mUi->pointList->scrollToItem(mUi->pointList->currentItem());
-    }
     mUi->pointList->setRowCount(nItems);
 
     for (int idx = 0; idx < nItems; idx++) {
+//        printf("l-p-p: List %2d: %s\n", idx, mPointList[idx].logicalName.toStdString().c_str()); // ??
         mUi->pointList->setItem(idx, 0, new PointWidgetItem(&mPointList[idx]));
         mUi->pointList->setItem(idx, 1, new QTableWidgetItem());
     }
@@ -201,12 +195,12 @@ void LocationPage::on_pointList_cellClicked(int row, int column) {
 }
 
 void LocationPage::on_pointList_itemSelectionChanged() {
-    printf("l-p-p: Selection changed\n");
 #if 0 // ??
     highlightPointListWidget();
 #else // ??
 // ?? Dragging does not highlight correctly!
     int selectedRow = mUi->pointList->currentRow();
+    printf("l-p-p: In itemSelectionChanged() for row %2d\n", selectedRow); // ??
     if (selectedRow < 0) return;
 
     mUi->pointList->setCurrentCell(selectedRow, 0, QItemSelectionModel::Rows);
@@ -216,7 +210,10 @@ void LocationPage::on_pointList_itemSelectionChanged() {
 
     if (mSelectedPointName == pointElement->protoFilePath) {
         // No change in the selection
-        printf("l-p-p: No change to selection\n"); // ??
+        if (selectedRow >= 0) {
+            mUi->pointList->setCurrentCell(selectedRow, 0); // (Helps if the user drags the selection)
+            mUi->pointList->scrollToItem(mUi->pointList->currentItem());
+        }
         return;
     }
 
