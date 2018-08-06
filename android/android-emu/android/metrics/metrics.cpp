@@ -379,6 +379,7 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
         case android::featurecontrol::LocationUiV2:
             return android_studio::EmulatorFeatureFlagState::LOCATION_UI_V2;
         case android::featurecontrol::SnapshotAdb:
+        case android::featurecontrol::QuickbootFileBacked:
             // TODO: uncomment the following line when we get the studio stats
             // ready
             // return android_studio::EmulatorFeatureFlagState::SNAPSHOT_ADB;
