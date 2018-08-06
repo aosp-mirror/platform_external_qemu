@@ -177,6 +177,10 @@ void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
             (uint32_t)(size + align),
             NULL);
 
+    if (!fileMapping) {
+        return MAP_FAILED;
+    }
+
     void* ptr =
         MapViewOfFile(
             fileMapping,   // handle to map object
@@ -184,6 +188,11 @@ void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
             0, 0, 0);
 
     CloseHandle(fileMapping);
+
+    if (!ptr) {
+        return MAP_FAILED;
+    }
+
     return ptr;
 #endif
 }
