@@ -88,6 +88,10 @@ RamSaver::RamSaver(const std::string& fileName,
     if (incremental) {
         mFlags = loader->compressed() ? RamSaver::Flags::Compress :
                                         RamSaver::Flags::None;
+        if (nonzero(preferredFlags & RamSaver::Flags::Async)) {
+            mFlags |= RamSaver::Flags::Async;
+        }
+
         mLoader = loader;
         mLoaderOnDemand = loader->onDemandEnabled();
         mStream = base::StdioStream(
@@ -117,6 +121,10 @@ RamSaver::RamSaver(const std::string& fileName,
     }
 
     mStreamFd = fileno(mStream.get());
+
+    if (nonzero(mFlags & Flags::Async)) {
+        mIndex.flags |= int32_t(FileIndex::Flags::SeparateBackingStore);
+    }
 
     if (nonzero(mFlags & Flags::Compress)) {
         mIndex.flags |= int32_t(FileIndex::Flags::CompressedPages);
@@ -158,6 +166,12 @@ void RamSaver::registerBlock(const RamBlock& block) {
 void RamSaver::savePage(int64_t blockOffset,
                         int64_t /*pageOffset*/,
                         int32_t /*pageSize*/) {
+
+    // Don't save any pages if in Async
+    // (we assume a separate async saving mechanism, such as
+    // having a separate backing store)
+    if (nonzero(mFlags & RamSaver::Flags::Async)) return;
+
     if (mLastBlockIndex < 0) {
         mLastBlockIndex = 0;
 #if SNAPSHOT_PROFILE > 1
