@@ -142,6 +142,8 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         bool      mIsTheParent = false;
 };
 
+static SnapshotPage* sInstance = nullptr;
+
 SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QWidget(parent),
     mIsStandAlone(standAlone),
@@ -256,6 +258,12 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QObject::connect(this, SIGNAL(askAboutInvalidSnapshots(QStringList)),
                      this, SLOT(slot_askAboutInvalidSnapshots(QStringList)),
                      Qt::QueuedConnection);
+    sInstance = this;
+}
+
+// static
+SnapshotPage* SnapshotPage::get() {
+    return sInstance;
 }
 
 void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
@@ -1085,8 +1093,6 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         }
     }
     mDidInitialInvalidCheck = true;
-
-    setOperationInProgress(false);
 }
 
 // TODO: jameskaye@ Enable this code if we decide to provide a hierarchical display.
