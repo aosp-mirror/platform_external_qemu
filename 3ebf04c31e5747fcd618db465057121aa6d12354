@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b836fee1_cf2dbb6c",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T18:49:14Z",
+      "side": 1,
+      "message": "Nit: Maybe call this \"original\" feature flags?",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 85,
+        "endChar": 0
+      },
+      "revId": "3ebf04c31e5747fcd618db465057121aa6d12354",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3284636d_0e52ae6f",
+        "filename": "android/data/emu-backup-feature-flags.protobuf",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T18:49:14Z",
+      "side": 1,
+      "message": "Do you have a script to copy this file and insert the header?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 20
+      },
+      "revId": "3ebf04c31e5747fcd618db465057121aa6d12354",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
