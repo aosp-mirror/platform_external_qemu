@@ -352,6 +352,12 @@ bool Quickboot::save(StringView name) {
     const bool shouldTrySaving =
             mLoaded || isSnapshotAlive();
 
+    if (Snapshotter::get().hasRamFile() &&
+        !Snapshotter::get().isRamFileShared()) {
+        dwarning("Not saving state: RAM not mapped as shared");
+        return false;
+    }
+
     if (!shouldTrySaving) {
         // Emulator hasn't booted yet or is otherwise not live,
         // and this isn't a quickboot-loaded session. Don't save.
@@ -482,7 +488,21 @@ bool androidSnapshot_quickbootLoad(const char* name) {
 }
 
 bool androidSnapshot_quickbootSave(const char* name) {
-    return android::snapshot::Quickboot::get().save(name);
+    bool ramMapShared =
+        android::snapshot::Snapshotter::get().isRamFileShared();
+
+    bool needsInvalidation =
+        android_avdParams->flags & AVDINFO_SNAPSHOT_INVALIDATE;
+
+    bool saveResult = android::snapshot::Quickboot::get().save(name);
+
+    // If we fail a save with RAM map shared, the quickboot snapshot
+    // needs to get deleted.
+    if (!saveResult && (ramMapShared || needsInvalidation)) {
+        androidSnapshot_quickbootInvalidate(name);
+    }
+
+    return saveResult;
 }
 
 void androidSnapshot_quickbootInvalidate(const char* name) {

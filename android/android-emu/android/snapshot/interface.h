@@ -72,4 +72,20 @@ void androidSnapshot_list(void* opaque,
                           int (*cbOut)(void* opaque, const char* buf, int strlen),
                           int (*cbErr)(void* opaque, const char* buf, int strlen));
 
+// Notify snapshot interface that we are using file-backed RAM.
+void androidSnapshot_setRamFile(const char* path, int shared);
+
+// Retrieves path to potential RAM map of snapshot.
+// Creates the directory if needed.
+// Resulting pointer must be freed.
+const char* androidSnapshot_getRamFilePath(const char* name);
+
+typedef enum {
+    SNAPSHOT_RAM_FILE_NONE,
+    SNAPSHOT_RAM_FILE_SHARED,
+    SNAPSHOT_RAM_FILE_PRIVATE,
+} AndroidSnapshotRamFileMode;
+
+AndroidSnapshotRamFileMode androidSnapshot_getRamFileInfo();
+
 ANDROID_END_HEADER
