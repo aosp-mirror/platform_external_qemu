@@ -27,6 +27,8 @@ class SnapshotPage : public QWidget
 public:
     explicit SnapshotPage(QWidget* parent = 0, bool standAlone = false);
 
+    static SnapshotPage* get();
+
 public slots:
     void slot_snapshotLoadCompleted(int status, const QString& name);
     void slot_snapshotSaveCompleted(int status, const QString& name);

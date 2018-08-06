@@ -142,6 +142,8 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         bool      mIsTheParent = false;
 };
 
+static SnapshotPage* sInstance = nullptr;
+
 SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QWidget(parent),
     mIsStandAlone(standAlone),
@@ -256,6 +258,12 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QObject::connect(this, SIGNAL(askAboutInvalidSnapshots(QStringList)),
                      this, SLOT(slot_askAboutInvalidSnapshots(QStringList)),
                      Qt::QueuedConnection);
+    sInstance = this;
+}
+
+// static
+SnapshotPage* SnapshotPage::get() {
+    return sInstance;
 }
 
 void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {

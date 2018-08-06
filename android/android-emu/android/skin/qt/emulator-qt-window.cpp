@@ -602,6 +602,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         if (mToolWindow) {
                             mToolWindow->setEnabled(false);
                         }
+                        if (SnapshotPage::get()) {
+                            SnapshotPage::get()->setOperationInProgress(true);
+                        }
                     });
                 } else if (stage == Snapshotter::Stage::End) {
                     runOnUiThread([this, op]() {
@@ -610,6 +613,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         mContainer.hideModalOverlay();
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
+                        }
+                        if (SnapshotPage::get()) {
+                            SnapshotPage::get()->setOperationInProgress(true);
                         }
                     });
                 }
