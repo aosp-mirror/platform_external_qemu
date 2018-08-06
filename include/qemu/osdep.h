@@ -259,9 +259,7 @@ void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared);
 void qemu_vfree(void *ptr);
 void qemu_anon_ram_free(void *ptr, size_t size);
 
-#ifdef _WIN32
-extern bool win32InsufficientMemMessage;
-#endif
+extern bool insufficientMemMessage;
 
 #define QEMU_MADV_INVALID -1
 

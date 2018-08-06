@@ -134,6 +134,8 @@ void *qemu_memalign(size_t alignment, size_t size)
     return qemu_oom_check(qemu_try_memalign(alignment, size));
 }
 
+bool insufficientMemMessage = false;
+
 /* alloc shared memory pages */
 void *qemu_anon_ram_alloc(size_t size, uint64_t *alignment, bool shared)
 {
@@ -141,6 +143,13 @@ void *qemu_anon_ram_alloc(size_t size, uint64_t *alignment, bool shared)
     void *ptr = qemu_ram_mmap(-1, size, align, shared);
 
     if (ptr == MAP_FAILED) {
+        if (errno == ENOMEM) {
+            fprintf(stderr,
+                "ERROR: Insufficient RAM free for launching emulator.\n"
+                "Please free up memory (close other programs and files),\n"
+                "or decrease the AVD RAM size and try again.\n");
+            insufficientMemMessage = true;
+        }
         return NULL;
     }
 
