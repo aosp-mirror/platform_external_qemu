@@ -302,6 +302,7 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
     }
 
     if (!verifyFeatureFlags(config)) {
+        printf("different feature flags!!!\n");
         if (writeFailure) saveFailure(FailureReason::ConfigMismatchFeatures);
         return false;
     }
