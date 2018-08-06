@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf7fabfd_a13a06ad",
+        "filename": "android/android-emu/android/multi-instance.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T21:54:17Z",
+      "side": 1,
+      "message": "This would be a good candidate for LazyInstance and a MultiInstanceState class",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 35
+      },
+      "revId": "c42bcda01804a566fd211dab7aafae8c03c04312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d768bd4_1cd06d0d",
+        "filename": "android/android-emu/android/multi-instance.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T21:54:17Z",
+      "side": 1,
+      "message": "Does this need to update sShareMode?",
+      "range": {
+        "startLine": 45,
+        "startChar": 29,
+        "endLine": 45,
+        "endChar": 52
+      },
+      "revId": "c42bcda01804a566fd211dab7aafae8c03c04312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9b0d93e_d1dc0f9c",
+        "filename": "android/android-emu/android/multi-instance.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T21:54:17Z",
+      "side": 1,
+      "message": "Nit: go/emu-style says to use lower_case (and avoid the underscore if necessary).  Maybe multiinstance?",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 25
+      },
+      "revId": "c42bcda01804a566fd211dab7aafae8c03c04312",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
