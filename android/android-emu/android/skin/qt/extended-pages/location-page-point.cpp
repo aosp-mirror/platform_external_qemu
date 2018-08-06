@@ -145,6 +145,9 @@ void LocationPage::populatePointListWidget() {
     // All done updating. Enable sorting now.
     mUi->pointList->sortByColumn(0, Qt::AscendingOrder);
     mUi->pointList->setSortingEnabled(true);
+
+    // If the list is empty, show an overlay saying that.
+    mUi->noSavedPoints_mask->setVisible(nItems <= 0);
 }
 
 // Update the UI list of points to highlight the

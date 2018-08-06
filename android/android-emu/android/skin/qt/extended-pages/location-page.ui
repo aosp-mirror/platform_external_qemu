@@ -6,1036 +6,870 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
-    <height>242</height>
+    <width>622</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
+  <widget class="QTabWidget" name="locationTabs">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>20</y>
+     <width>630</width>
+     <height>588</height>
+    </rect>
+   </property>
+   <property name="cursor">
+    <cursorShape>ArrowCursor</cursorShape>
+   </property>
+   <property name="currentIndex">
     <number>0</number>
    </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
-   <item row="0" column="0">
-    <widget class="QTabWidget" name="locationTabs">
-     <property name="cursor">
-      <cursorShape>ArrowCursor</cursorShape>
+   <widget class="QWidget" name="singlePointsTab">
+    <attribute name="title">
+     <string>Single points</string>
+    </attribute>
+    <widget class="QTableWidget" name="pointList">
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>38</y>
+       <width>272</width>
+       <height>480</height>
+      </rect>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="showGrid">
+      <bool>false</bool>
+     </property>
+     <property name="cornerButtonEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="rowCount">
+      <number>1</number>
+     </property>
+     <property name="columnCount">
+      <number>2</number>
+     </property>
+     <attribute name="horizontalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="horizontalHeaderCascadingSectionResizes">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>232</number>
+     </attribute>
+     <attribute name="horizontalHeaderHighlightSections">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>20</number>
+     </attribute>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>48</number>
+     </attribute>
+     <attribute name="verticalHeaderMinimumSectionSize">
+      <number>21</number>
+     </attribute>
+     <row/>
+     <column/>
+     <column/>
+    </widget>
+    <widget class="QWebEngineView" name="pointWebEngineView" native="true">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>300</width>
+       <height>498</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="savePoint">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>528</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>SAVE POINT</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="singlePoint_setLocationButton">
+     <property name="geometry">
+      <rect>
+       <x>472</x>
+       <y>528</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>SET LOCATION</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="savedPointsLabel">
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>20</y>
+       <width>78</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Saved points</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="pointSortBox">
+     <property name="geometry">
+      <rect>
+       <x>472</x>
+       <y>20</y>
+       <width>132</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
      </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="singlePointTab">
-      <attribute name="title">
-       <string>Single points</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout1">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Sort by name</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="noSavedPoints_mask">
+     <property name="geometry">
+      <rect>
+       <x>342</x>
+       <y>48</y>
+       <width>252</width>
+       <height>460</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgba(128, 128, 128, 200)</string>
+     </property>
+     <property name="text">
+      <string>No points have been saved</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="routesTab">
+    <attribute name="title">
+     <string>Routes</string>
+    </attribute>
+    <layout class="QGridLayout" name="gridLayout2">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>24</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item row="0" column="0">
+      <layout class="QHBoxLayout" name="hboxLayout2">
+       <property name="spacing">
         <number>24</number>
        </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item row="0" column="0">
-        <layout class="QHBoxLayout" name="hboxLayoutPointLeft">
+       <item>
+        <layout class="QVBoxLayout" name="vboxLayout1">
          <property name="spacing">
           <number>24</number>
          </property>
          <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>24</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          <widget class="QWebEngineView" name="routesWebEngineView" native="true"/>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="vboxLayoutPointLeft">
-           <property name="spacing">
-            <number>12</number>
-           </property>
+          <layout class="QHBoxLayout" name="hboxLayout5">
            <item>
-            <widget class="QWebEngineView" name="pointWebEngineView" native="true"/>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="hboxImportGPX">
-             <item>
-              <widget class="RaisedMaterialButton" name="savePoint">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>120</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>120</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <family>Roboto</family>
-                 <pointsize>10</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>SAVE POINT</string>
-               </property>
-               <property name="flat">
-                <bool>true</bool>
-               </property>
-               <property name="ColorGroup" stdset="0">
-                <string notr="true">Button</string>
-               </property>
-               <property name="report_metrics" stdset="0">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="hSpacerImportGPX">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
+            <widget class="RaisedMaterialButton" name="importGpxButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>14</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="vboxLayoutPointRight">
-           <property name="spacing">
-            <number>12</number>
-           </property>
-           <item>
-            <layout class="QHBoxLayout" name="hboxLayout3">
-             <item>
-              <widget class="QLabel" name="networkTypeLabel">
-               <property name="text">
-                <string>Saved points</string>
-               </property>
-               <property name="ColorGroup" stdset="0">
-                <string notr="true">Title</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="hSpacer1">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QComboBox" name="pointSortBox">
-               <property name="font">
-                <font>
-                 <family>Roboto</family>
-                </font>
-               </property>
-               <property name="currentIndex">
-                <number>0</number>
-               </property>
-               <property name="report_metrics" stdset="0">
-                <bool>false</bool>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Sort by name</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QScrollArea" name="savedPointsArea">
              <property name="minimumSize">
               <size>
-               <width>348</width>
-               <height>0</height>
+               <width>120</width>
+               <height>36</height>
               </size>
              </property>
-             <property name="widgetResizable">
+             <property name="maximumSize">
+              <size>
+               <width>120</width>
+               <height>36</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Roboto</family>
+               <pointsize>10</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Import GPX</string>
+             </property>
+             <property name="flat">
               <bool>true</bool>
              </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>332</width>
-                <height>70</height>
-               </rect>
-              </property>
-              <layout class="QGridLayout" name="gridLayout4">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item row="0" column="0">
-                <widget class="QTableWidget" name="pointList">
-                 <property name="horizontalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
-                 </property>
-                 <property name="selectionMode">
-                  <enum>QAbstractItemView::SingleSelection</enum>
-                 </property>
-                 <property name="selectionBehavior">
-                  <enum>QAbstractItemView::SelectRows</enum>
-                 </property>
-                 <property name="showGrid">
-                  <bool>false</bool>
-                 </property>
-                 <property name="cornerButtonEnabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="rowCount">
-                  <number>1</number>
-                 </property>
-                 <property name="columnCount">
-                  <number>2</number>
-                 </property>
-                 <attribute name="horizontalHeaderVisible">
-                  <bool>false</bool>
-                 </attribute>
-                 <attribute name="horizontalHeaderCascadingSectionResizes">
-                  <bool>true</bool>
-                 </attribute>
-                 <attribute name="horizontalHeaderDefaultSectionSize">
-                  <number>300</number>
-                 </attribute>
-                 <attribute name="horizontalHeaderHighlightSections">
-                  <bool>false</bool>
-                 </attribute>
-                 <attribute name="horizontalHeaderMinimumSectionSize">
-                  <number>20</number>
-                 </attribute>
-                 <attribute name="horizontalHeaderStretchLastSection">
-                  <bool>true</bool>
-                 </attribute>
-                 <attribute name="verticalHeaderVisible">
-                  <bool>false</bool>
-                 </attribute>
-                 <attribute name="verticalHeaderDefaultSectionSize">
-                  <number>48</number>
-                 </attribute>
-                 <attribute name="verticalHeaderMinimumSectionSize">
-                  <number>21</number>
-                 </attribute>
-                 <row/>
-                 <column/>
-                 <column/>
-                </widget>
-               </item>
-              </layout>
-             </widget>
+             <property name="ColorGroup" stdset="0">
+              <string>Tool</string>
+             </property>
+             <property name="report_metrics" stdset="0">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="hboxLayout4">
-             <item>
-              <spacer name="hSpacer2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="RaisedMaterialButton" name="singlePoint_setLocationButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>120</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>120</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <family>Roboto</family>
-                 <pointsize>10</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>SET LOCATION</string>
-               </property>
-               <property name="flat">
-                <bool>true</bool>
-               </property>
-               <property name="ColorGroup" stdset="0">
-                <string notr="true">Button</string>
-               </property>
-               <property name="report_metrics" stdset="0">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_2">
+            <spacer name="hSpacer3">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
+              <enum>Qt::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>20</width>
-               <height>14</height>
+               <width>40</width>
+               <height>20</height>
               </size>
              </property>
             </spacer>
            </item>
           </layout>
          </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>18</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
         </layout>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="routesTab">
-      <attribute name="title">
-       <string>Routes</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout2">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>24</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item row="0" column="0">
-        <layout class="QHBoxLayout" name="hboxLayout2">
-         <property name="spacing">
-          <number>24</number>
-         </property>
-         <item>
-          <layout class="QVBoxLayout" name="vboxLayout1">
-           <property name="spacing">
-            <number>24</number>
-           </property>
-           <item>
-            <widget class="QWebEngineView" name="routesWebEngineView" native="true"/>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="hboxLayout5">
-             <item>
-              <widget class="RaisedMaterialButton" name="importGpxButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>120</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>120</width>
-                 <height>36</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <family>Roboto</family>
-                 <pointsize>10</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Import GPX</string>
-               </property>
-               <property name="flat">
-                <bool>true</bool>
-               </property>
-               <property name="ColorGroup" stdset="0">
-                <string>Tool</string>
-               </property>
-               <property name="report_metrics" stdset="0">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="hSpacer3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="settingsTab">
-      <attribute name="title">
-       <string>Settings</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout3">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>24</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item row="0" column="0">
-        <widget class="QLabel" name="todoLabel">
-         <property name="text">
-          <string>TODO</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string>v1</string>
-      </attribute>
-      <widget class="RaisedMaterialButton" name="loc_sendPointButton">
-       <property name="geometry">
-        <rect>
-         <x>462</x>
-         <y>202</y>
-         <width>132</width>
-         <height>36</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Roboto</family>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="settingsTab">
+    <attribute name="title">
+     <string>Settings</string>
+    </attribute>
+    <layout class="QGridLayout" name="gridLayout3">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>24</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="todoLabel">
        <property name="text">
-        <string>SEND</string>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Button</string>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
+        <string>TODO</string>
        </property>
       </widget>
-      <widget class="QComboBox" name="loc_modeSwitch">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>32</y>
-         <width>140</width>
-         <height>25</height>
-        </rect>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-       <item>
-        <property name="text">
-         <string>Decimal</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Sexigesimal</string>
-        </property>
-       </item>
-      </widget>
-      <widget class="QGroupBox" name="locationGroup_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>232</y>
-         <width>180</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Roboto</family>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">border: 0px;</string>
-       </property>
-       <property name="title">
-        <string>GPS data playback</string>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Title</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="loc_altitudeInput">
-       <property name="geometry">
-        <rect>
-         <x>314</x>
-         <y>172</y>
-         <width>280</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="accessibleDescription">
-        <string>Altitude in meters</string>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="class" stdset="0">
-        <string>EditableValue</string>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="QGroupBox" name="locationGroup_3">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>2</y>
-         <width>180</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Roboto</family>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">border: 0px;</string>
-       </property>
-       <property name="title">
-        <string>GPS data point</string>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Title</string>
-       </property>
-      </widget>
-      <widget class="QTableWidget" name="loc_pathTable">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>272</y>
-         <width>584</width>
-         <height>271</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Roboto</family>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <property name="showGrid">
-        <bool>false</bool>
-       </property>
-       <property name="rowCount">
-        <number>1</number>
-       </property>
-       <property name="columnCount">
-        <number>6</number>
-       </property>
-       <attribute name="horizontalHeaderCascadingSectionResizes">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <row/>
-       <column>
-        <property name="text">
-         <string>Delay (sec)</string>
-        </property>
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="textAlignment">
-         <set>AlignTrailing|AlignVCenter</set>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Latitude</string>
-        </property>
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="textAlignment">
-         <set>AlignTrailing|AlignVCenter</set>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Longitude</string>
-        </property>
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="textAlignment">
-         <set>AlignTrailing|AlignVCenter</set>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Elevation</string>
-        </property>
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="textAlignment">
-         <set>AlignTrailing|AlignVCenter</set>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Name</string>
-        </property>
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="textAlignment">
-         <set>AlignTrailing|AlignVCenter</set>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Description</string>
-        </property>
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="textAlignment">
-         <set>AlignTrailing|AlignVCenter</set>
-        </property>
-       </column>
-      </widget>
-      <widget class="QComboBox" name="loc_playbackSpeed">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>557</y>
-         <width>111</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-       <item>
-        <property name="text">
-         <string>Speed 1X</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Speed 2X</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Speed 3X</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Speed 4X</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Speed 5X</string>
-        </property>
-       </item>
-      </widget>
-      <widget class="QLabel" name="label_14">
-       <property name="geometry">
-        <rect>
-         <x>314</x>
-         <y>152</y>
-         <width>140</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Altitude (meters)</string>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Title</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_15">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>32</y>
-         <width>140</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Coordinate system</string>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Title</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_12">
-       <property name="geometry">
-        <rect>
-         <x>314</x>
-         <y>92</y>
-         <width>140</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Latitude</string>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Title</string>
-       </property>
-      </widget>
-      <widget class="AngleInputWidget" name="loc_latitudeInput" native="true">
-       <property name="geometry">
-        <rect>
-         <x>314</x>
-         <y>112</y>
-         <width>280</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="RaisedMaterialButton" name="loc_GpxKmlButton">
-       <property name="geometry">
-        <rect>
-         <x>462</x>
-         <y>552</y>
-         <width>132</width>
-         <height>36</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <family>Roboto</family>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>LOAD GPX/KML</string>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Button</string>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="QGroupBox" name="loc_currentLocLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>92</y>
-         <width>180</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Roboto</family>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">border: 0px;</string>
-       </property>
-       <property name="title">
-        <string>Currently reported location</string>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Title</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_13">
-       <property name="geometry">
-        <rect>
-         <x>314</x>
-         <y>32</y>
-         <width>140</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Longitude</string>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Title</string>
-       </property>
-      </widget>
-      <widget class="RaisedMaterialButton" name="loc_playStopButton">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>552</y>
-         <width>36</width>
-         <height>36</height>
-        </rect>
-       </property>
-       <property name="accessibleDescription">
-        <string>Play</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources.qrc">
-         <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-       <property name="themeIconName" stdset="0">
-        <string>play_arrow</string>
-       </property>
-       <property name="themeIconName_disabled" stdset="0">
-        <string>play_arrow_disabled</string>
-       </property>
-       <property name="ColorGroup" stdset="0">
-        <string>Button</string>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="AngleInputWidget" name="loc_longitudeInput" native="true">
-       <property name="geometry">
-        <rect>
-         <x>314</x>
-         <y>52</y>
-         <width>280</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-      <widget class="QTextBrowser" name="loc_currentLoc">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>110</y>
-         <width>280</width>
-         <height>60</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <family>Roboto</family>
-        </font>
-       </property>
-      </widget>
-     </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>v1</string>
+    </attribute>
+    <widget class="RaisedMaterialButton" name="loc_sendPointButton">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>202</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>SEND</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
-   </item>
-  </layout>
+    <widget class="QComboBox" name="loc_modeSwitch">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>32</y>
+       <width>140</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Decimal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Sexigesimal</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="locationGroup_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>232</y>
+       <width>180</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>GPS data playback</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="loc_altitudeInput">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>172</y>
+       <width>280</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Altitude in meters</string>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="class" stdset="0">
+      <string>EditableValue</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="locationGroup_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>2</y>
+       <width>180</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>GPS data point</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="loc_pathTable">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>272</y>
+       <width>584</width>
+       <height>271</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="showGrid">
+      <bool>false</bool>
+     </property>
+     <property name="rowCount">
+      <number>1</number>
+     </property>
+     <property name="columnCount">
+      <number>6</number>
+     </property>
+     <attribute name="horizontalHeaderCascadingSectionResizes">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <row/>
+     <column>
+      <property name="text">
+       <string>Delay (sec)</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Latitude</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Longitude</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Elevation</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Description</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+    </widget>
+    <widget class="QComboBox" name="loc_playbackSpeed">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>557</y>
+       <width>111</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Speed 1X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 2X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 3X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 4X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 5X</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_14">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>152</y>
+       <width>140</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Altitude (meters)</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_15">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>32</y>
+       <width>140</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Coordinate system</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_12">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>92</y>
+       <width>140</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Latitude</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="AngleInputWidget" name="loc_latitudeInput" native="true">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>112</y>
+       <width>280</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="loc_GpxKmlButton">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>552</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>LOAD GPX/KML</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="loc_currentLocLabel">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>92</y>
+       <width>180</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Currently reported location</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_13">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>32</y>
+       <width>140</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Longitude</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="loc_playStopButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>552</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Play</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>play_arrow</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>play_arrow_disabled</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="AngleInputWidget" name="loc_longitudeInput" native="true">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>52</y>
+       <width>280</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QTextBrowser" name="loc_currentLoc">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>280</width>
+       <height>60</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+    </widget>
+   </widget>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>
