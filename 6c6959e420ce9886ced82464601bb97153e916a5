@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f73d9b97_c0a120b7",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 646,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-06T19:50:12Z",
+      "side": 1,
+      "message": "nit: bool?",
+      "range": {
+        "startLine": 646,
+        "startChar": 47,
+        "endLine": 646,
+        "endChar": 50
+      },
+      "revId": "6c6959e420ce9886ced82464601bb97153e916a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1d257fc_f83d60f3",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-06T19:50:12Z",
+      "side": 1,
+      "message": "nit: should we either rename all of them as ram file or ram map? The current naming seems somewhat inconsistent.",
+      "range": {
+        "startLine": 128,
+        "startChar": 9,
+        "endLine": 128,
+        "endChar": 18
+      },
+      "revId": "6c6959e420ce9886ced82464601bb97153e916a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
