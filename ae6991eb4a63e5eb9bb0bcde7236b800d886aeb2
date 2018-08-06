@@ -234,6 +234,30 @@
       "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1b5be3d_86f44321",
+        "filename": "android/android-emu/android/snapshot/interface.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T21:29:04Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b79c5d4b_335ff59e",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 61
+      },
+      "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
