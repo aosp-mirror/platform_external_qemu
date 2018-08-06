@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f965b8ea_cd85ffc9",
+        "filename": "android/android-emu/android/snapshot/interface.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T20:50:41Z",
+      "side": 1,
+      "message": "Could this just be strdup?  strdup(PathUtils::join(...).c_str());",
+      "range": {
+        "startLine": 108,
+        "startChar": 4,
+        "endLine": 112,
+        "endChar": 15
+      },
+      "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
