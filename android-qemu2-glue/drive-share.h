@@ -11,17 +11,14 @@
 
 #pragma once
 
-#include "android/base/files/FileShareOpen.h"
+#include "android/utils/compiler.h"
 
-namespace android {
-namespace multiinstance {
+ANDROID_BEGIN_HEADER
 
-typedef void (*UpdateDriveShareModeFunc)(base::FileShare shareMode);
+struct QemuOpts;
+struct Error;
 
-extern bool initInstanceShareMode(base::FileShare shareMode);
-extern bool updateInstanceShareMode(base::FileShare shareMode);
-extern void setUpdateDriveShareModeFunc(
-        UpdateDriveShareModeFunc updateDriveShareModeFunc);
+extern void android_drive_share_init();
+extern int android_drive_init(void* opaque, QemuOpts* opts, Error** errp);
 
-}  // namespace multiinstance
-}  // namespace android
+ANDROID_END_HEADER
