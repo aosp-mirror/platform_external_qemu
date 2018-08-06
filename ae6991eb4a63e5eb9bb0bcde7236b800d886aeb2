@@ -114,6 +114,30 @@
       "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b79c5d4b_335ff59e",
+        "filename": "android/android-emu/android/snapshot/interface.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-06T21:02:28Z",
+      "side": 1,
+      "message": "True, it wouldn\u0027t absolutely need to be accessed from C (it would be in android-qemu2-glue/main.cpp), it\u0027s just currently following the convention of the other functions. It might be simpler for the user to assume everything from this file is C style though.",
+      "parentUuid": "aa903afe_fb6f680e",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 61
+      },
+      "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
