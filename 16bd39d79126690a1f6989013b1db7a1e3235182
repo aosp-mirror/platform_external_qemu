@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4ae40a5_971118be",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 854,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-06T23:07:31Z",
+      "side": 1,
+      "message": "it would default to private mode when read_only?",
+      "revId": "16bd39d79126690a1f6989013b1db7a1e3235182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
