@@ -46,6 +46,7 @@
 #include "android/process_setup.h"
 #include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
+#include "android/snapshot/interface.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
@@ -837,6 +838,21 @@ extern "C" int main(int argc, char** argv) {
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
         if (!opts->no_snapshot_load) {
             args.add2("-loadvm", opts->snapshot);
+        }
+    }
+
+    bool useQuickbootRamFile =
+        feature_is_enabled(kFeature_QuickbootFileBacked) &&
+        !opts->snapshot;
+
+    if (useQuickbootRamFile) {
+        const char* memPath = androidSnapshot_getRamFilePath(NULL);
+
+        args.add2("-mem-path", memPath);
+        AFREE((void*)memPath);
+
+        if (!opts->read_only) {
+            args.add("-mem-file-shared");
         }
     }
 
