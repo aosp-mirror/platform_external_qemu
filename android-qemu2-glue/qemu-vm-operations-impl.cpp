@@ -174,6 +174,9 @@ static bool qemu_snapshot_load(const char* name,
         qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer));
 
     bool failed = loadVmRes != 0;
+    if (failed) {
+        printf("qemu_loadvm failed\n");
+    }
 
     // loadvm may have failed, but try to restart the current vm anyway, to
     // prevent hanging on generic snapshot load errors such as snapshots not

@@ -257,11 +257,16 @@ OperationStatus Snapshotter::prepareForLoading(const char* name) {
     return mLoader->status();
 }
 
+static int failureReport(void* opaque, const char* buff, int len) {
+    fprintf(stderr, "snapshot failed: %s\n", buff);
+    return 0;
+}
+
 OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     mLastLoadDuration = android::base::kNullopt;
     mIsQuickboot = isQuickboot;
     Stopwatch sw;
-    mVmOperations.snapshotLoad(name, this, nullptr);
+    mVmOperations.snapshotLoad(name, this, failureReport);
     mIsQuickboot = false;
     mLastLoadDuration.emplace(sw.elapsedUs() / 1000);
 
@@ -275,6 +280,7 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     // we didn't reallocate mLoader, or even deallocated it.
     // Quit early here.
     if (!mLoader) {
+        printf("loader deleted\n");
         return OperationStatus::Error;
     }
 
@@ -580,6 +586,7 @@ void Snapshotter::handleGenericLoad(const char* name,
     if (loadStatus != OperationStatus::Ok) {
         // Check if the error is about something done as just a check or
         // we've started actually loading the VM data
+        assert(mLoader);
         if (auto failureReason = loader().snapshot().failureReason()) {
             if (reportMetrics) {
                 appendFailedLoad(pb::EmulatorSnapshotLoadState::
