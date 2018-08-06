@@ -4285,6 +4285,15 @@ STEXI
 Run a script when the TAP interface specifed by -net-tap goes down.
 ETEXI
 
+DEF("read-only", 0, QEMU_OPTION_read_only,
+    "-read-only mark the session as read-only and abandon all snapshot or any" \
+    " disk changes at exit.\n", QEMU_ARCH_ALL)
+STEXI
+@item -read-only
+@findex -read-only
+Abandon changes on exit
+ETEXI
+
 #endif  // CONFIG_ANDROID
 
 HXCOMM This is the last statement. Insert new options before this line!
