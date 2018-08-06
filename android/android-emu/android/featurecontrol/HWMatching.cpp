@@ -18,6 +18,7 @@
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/misc/FileUtils.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
@@ -79,15 +80,35 @@ static LazyInstance<FeaturePatternQueryThread> sFeaturePatternQueryThread =
 static const char kCachedPatternsFilename[] =
     "emu-last-feature-flags.protobuf";
 
+static const char kBackupPatternsFilename[] =
+    "emu-original-feature-flags.protobuf";
+
 static bool tryParseFeaturePatternsProtobuf(
         const std::string& filename,
         emulator_features::EmulatorFeaturePatterns* out_patterns) {
     std::ifstream in(filename, std::ios::binary);
 
-    if (!out_patterns->ParseFromIstream(&in)) {
-        D("failed to parse protobuf file");
+    if (out_patterns->ParseFromIstream(&in)) {
+        D("successfully parsed as binary.");
+        return true;
+    }
+
+    D("failed to parse protobuf file in binary mode, retrying in text mode");
+    in.close();
+
+    auto asText = android::readFileIntoString(filename);
+
+    if (!asText) {
+        D("could not read file into string, failed");
         return false;
     }
+
+    if (!google::protobuf::TextFormat::ParseFromString(*asText, out_patterns)) {
+        D("could not parse in text mode, failed");
+        return false;
+    }
+
+    D("successfully parsed as text.");
 
     return true;
 }
@@ -105,7 +126,11 @@ public:
         mFilename(
             android::base::PathUtils::join(
                 android::ConfigDirs::getUserDirectory(),
-                kCachedPatternsFilename)) { }
+                kCachedPatternsFilename)),
+        mOriginalFileName(
+            android::base::PathUtils::join(
+               System::get()->getLauncherDirectory(), "lib",
+               kBackupPatternsFilename)) { }
 
     ~PatternsFileAccessor() {
         if (mFileLock)
@@ -114,7 +139,14 @@ public:
 
     bool read(emulator_features::EmulatorFeaturePatterns* patterns) {
         if (!acquire()) return false;
-        return tryParseFeaturePatternsProtobuf(mFilename, patterns);
+
+        if (tryParseFeaturePatternsProtobuf(mFilename, patterns)) {
+            D("Found downloaded feature flags\n");
+            return true;
+        }
+
+        D("Could not find downloaded feature flags, trying origin %s\n", mOriginalFileName.c_str());
+        return tryParseFeaturePatternsProtobuf(mOriginalFileName, patterns);
     }
 
     bool write(emulator_features::EmulatorFeaturePatterns& patterns) {
@@ -164,6 +196,7 @@ private:
     }
 
     std::string mFilename = {};
+    std::string mOriginalFileName = {};
     FileLock* mFileLock = nullptr;
 
     DISALLOW_COPY_AND_ASSIGN(PatternsFileAccessor);
