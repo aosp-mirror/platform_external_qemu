@@ -271,6 +271,13 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
         onLoadingFailed(name, -EINVAL);
     }
 
+    // If -EINVAL was the failure error,
+    // we didn't reallocate mLoader, or even deallocated it.
+    // Quit early here.
+    if (!mLoader) {
+        return OperationStatus::Error;
+    }
+
     mLoadedSnapshotFile =
             (mLoader->status() == OperationStatus::Ok) ? name : "";
     return mLoader->status();
