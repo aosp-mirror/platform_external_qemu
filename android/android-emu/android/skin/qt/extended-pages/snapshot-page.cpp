@@ -148,6 +148,9 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     mUi(new Ui::SnapshotPage())
 {
     mUi->setupUi(this);
+
+    mUi->inProgressLabel->hide();
+
     if (android_cmdLineOptions->read_only) {
         // Stand-alone.
         // Overlay a mask and text saying that snapshots are disabled.
@@ -155,7 +158,6 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
         mUi->noSnapshot_message->raise();
         // Hide widgets that look bad when showing through the overlay
         mUi->noneAvailableLabel->hide();
-        mUi->inProgressLabel->hide();
         mUi->reduceInfoButton->hide();
         return;
     }
