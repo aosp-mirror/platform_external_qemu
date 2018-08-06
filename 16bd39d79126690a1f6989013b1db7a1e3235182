@@ -16,6 +16,24 @@
       "revId": "16bd39d79126690a1f6989013b1db7a1e3235182",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a97b6d8_05a68abb",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 854,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-06T23:08:18Z",
+      "side": 1,
+      "message": "Yes, read only would mean no writing to the ram file, and if we don\u0027t put -mem-file-shared, it\u0027s mapped private.",
+      "parentUuid": "e4ae40a5_971118be",
+      "revId": "16bd39d79126690a1f6989013b1db7a1e3235182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
