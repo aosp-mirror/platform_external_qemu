@@ -9,18 +9,39 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include <algorithm>
 #include <errno.h>
 #include <cstdio>
 
 #include "android/base/files/FileShareOpen.h"
 #include "android/base/files/FileShareOpenImpl.h"
 #include "android/base/StringFormat.h"
+#include "android/base/threads/Thread.h"
 
 void android::base::createFileForShare(const char* filename) {
     void* handle = internal::openFileForShare(filename);
     if (handle) {
         internal::closeFileForShare(handle);
     }
+}
+
+FILE* android::base::fsopenWithTimeout(const char* filename, const char* mode,
+        android::base::FileShare fileshare, int timeoutMs) {
+    if (timeoutMs <= 0) {
+        return fsopen(filename, mode, fileshare);
+    }
+    FILE* ret = nullptr;
+    int waited = 0;
+    while (!ret && waited < timeoutMs) {
+        ret = fsopen(filename, mode, fileshare);
+        if (ret) {
+            return ret;
+        }
+        int wait = std::min(timeoutMs - waited, 200);
+        android::base::Thread::sleepMs(wait);
+        waited += wait;
+    }
+    return nullptr;
 }
 
 #ifdef _WIN32
