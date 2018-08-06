@@ -381,13 +381,15 @@ void android_cleanupProcGLObjects(uint64_t puid) {
 }
 
 static void* sDisplay, * sSurface, * sConfig, * sContext;
+static int sWidth, sHeight;
 static EGLint s_gles_attr[5];
 
 extern void tinyepoxy_init(GLESv2Dispatch* gles, int version);
 
 static bool prepare_epoxy(void) {
     void* unused;
-    if (!sRenderLib->getDSCC(&sDisplay, &sSurface, &sConfig, &unused)) {
+    if (!sRenderLib->getDSCC(&sDisplay, &sSurface, &sConfig, &unused,
+                             &sWidth, &sHeight)) {
         return false;
     }
     int major, minor;
@@ -468,15 +470,9 @@ void android_gl_scanout_flush(DisplayChangeListener* unuse,
     int y1 = s_y0_top ? 0 : s_gfx_h;
     int y2 = s_y0_top ? s_gfx_h : 0;
 
-    int width, height;
-    if (!sEgl->eglQuerySurface(sDisplay, sSurface, EGL_WIDTH, &width)
-        ||!sEgl->eglQuerySurface(sDisplay, sSurface, EGL_HEIGHT, &height)) {
-        DD("can't query surface\n");
-        return;
-    }
-    sGLES->glViewport(0, 0, width, height);
+    sGLES->glViewport(0, 0, sWidth, sHeight);
     sGLES->glBlitFramebuffer(0, y1, s_gfx_w, y2,
-                             0, 0, width, height,
+                             0, 0, sWidth, sHeight,
                              GL_COLOR_BUFFER_BIT, GL_NEAREST);
     sEgl->eglSwapBuffers(sDisplay, sSurface);
     sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);

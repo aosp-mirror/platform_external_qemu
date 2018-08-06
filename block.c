@@ -2070,6 +2070,8 @@ free_exit:
     return ret;
 }
 
+#define _PR_ fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
+
 static BlockDriverState *
 bdrv_open_child_bs(const char *filename, QDict *options, const char *bdref_key,
                    BlockDriverState *parent, const BdrvChildRole *child_role,
@@ -2100,12 +2102,15 @@ bdrv_open_child_bs(const char *filename, QDict *options, const char *bdref_key,
                        bdref_key);
         }
         QDECREF(image_options);
+        _PR_
         goto done;
     }
 
+    _PR_
     bs = bdrv_open_inherit(filename, reference, image_options, 0,
                            parent, child_role, errp);
     if (!bs) {
+        _PR_
         goto done;
     }
 
@@ -2243,6 +2248,8 @@ out:
  * should be opened. If specified, neither options nor a filename may be given,
  * nor can an existing BDS be reused (that is, *pbs has to be NULL).
  */
+
+
 static BlockDriverState *bdrv_open_inherit(const char *filename,
                                            const char *reference,
                                            QDict *options, int flags,
@@ -2259,6 +2266,7 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
     Error *local_err = NULL;
     QDict *snapshot_options = NULL;
     int snapshot_flags = 0;
+    _PR_
 
     assert(!child_role || !flags);
     assert(!child_role == !parent);
@@ -2266,18 +2274,21 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
     if (reference) {
         bool options_non_empty = options ? qdict_size(options) : false;
         QDECREF(options);
-
+        printf("file name %s options_non_empty %d\n", filename, options_non_empty);
         if (filename || options_non_empty) {
             error_setg(errp, "Cannot reference an existing block device with "
                        "additional options or a new filename");
+            _PR_
             return NULL;
         }
 
         bs = bdrv_lookup_bs(reference, reference, errp);
         if (!bs) {
+            _PR_
             return NULL;
         }
 
+        _PR_
         bdrv_ref(bs);
         return bs;
     }
@@ -2291,9 +2302,11 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
 
     /* json: syntax counts as explicit options, as if in the QDict */
     parse_json_protocol(options, &filename, &local_err);
+    _PR_
     if (local_err) {
         goto fail;
     }
+    _PR_
 
     bs->explicit_options = qdict_clone_shallow(options);
 
@@ -2307,6 +2320,7 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
     if (local_err) {
         goto fail;
     }
+    _PR_
 
     /*
      * Set the BDRV_O_RDWR and BDRV_O_ALLOW_RDWR flags.
@@ -2345,6 +2359,7 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
             goto fail;
         }
     }
+    _PR_
 
     assert(drvname || !(flags & BDRV_O_PROTOCOL));
 
@@ -2363,29 +2378,36 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
 
         file_bs = bdrv_open_child_bs(filename, options, "file", bs,
                                      &child_file, true, &local_err);
+        _PR_
         if (local_err) {
             goto fail;
         }
+        _PR_
         if (file_bs != NULL) {
             file = blk_new(BLK_PERM_CONSISTENT_READ, BLK_PERM_ALL);
             blk_insert_bs(file, file_bs, &local_err);
             bdrv_unref(file_bs);
+            _PR_
             if (local_err) {
                 goto fail;
             }
+            _PR_
 
             qdict_put(options, "file",
                       qstring_from_str(bdrv_get_node_name(file_bs)));
         }
     }
+    _PR_
 
     /* Image format probing */
     bs->probed = !drv;
     if (!drv && file) {
         ret = find_image_format(file, filename, &drv, &local_err);
+        _PR_
         if (ret < 0) {
             goto fail;
         }
+        _PR_
         /*
          * This option update would logically belong in bdrv_fill_options(),
          * but we first need to open bs->file for the probing to work, while
@@ -2400,9 +2422,11 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
         qdict_put(bs->options, "driver", qstring_from_str(drv->format_name));
         qdict_put(options, "driver", qstring_from_str(drv->format_name));
     } else if (!drv) {
+        _PR_
         error_setg(errp, "Must specify either driver or file");
         goto fail;
     }
+    _PR_
 
     /* BDRV_O_PROTOCOL must be set iff a protocol BDS is about to be created */
     assert(!!(flags & BDRV_O_PROTOCOL) == !!drv->bdrv_file_open);
@@ -2415,6 +2439,7 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
     if (ret < 0) {
         goto fail;
     }
+    _PR_
 
     if (file) {
         blk_unref(file);
@@ -2428,6 +2453,7 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
             goto close_and_fail;
         }
     }
+    _PR_
 
     bdrv_refresh_filename(bs);
 
@@ -2435,9 +2461,11 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
     if (qdict_size(options) != 0) {
         const QDictEntry *entry = qdict_first(options);
         if (flags & BDRV_O_PROTOCOL) {
+            _PR_
             error_setg(errp, "Block protocol '%s' doesn't support the option "
                        "'%s'", drv->format_name, entry->key);
         } else {
+            _PR_
             error_setg(errp,
                        "Block format '%s' does not support the option '%s'",
                        drv->format_name, entry->key);
@@ -2445,6 +2473,7 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
 
         goto close_and_fail;
     }
+    _PR_
 
     if (!bdrv_key_required(bs)) {
         bdrv_parent_cb_change_media(bs, true);
@@ -2475,6 +2504,7 @@ static BlockDriverState *bdrv_open_inherit(const char *filename,
         bdrv_unref(bs);
         bs = snapshot_bs;
     }
+    _PR_
 
     return bs;
 
@@ -2490,6 +2520,7 @@ fail:
     bs->options = NULL;
     bdrv_unref(bs);
     error_propagate(errp, local_err);
+    _PR_
     return NULL;
 
 close_and_fail:
@@ -2497,6 +2528,7 @@ close_and_fail:
     QDECREF(snapshot_options);
     QDECREF(options);
     error_propagate(errp, local_err);
+    _PR_
     return NULL;
 }
 

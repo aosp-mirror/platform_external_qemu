@@ -77,13 +77,17 @@ std::vector<GLubyte> getTextureImageData(const GLESv2Dispatch* gl,
                                          GLenum format,
                                          GLenum type) {
     std::vector<GLubyte> out = {};
-    out.resize(width * height * glUtilsPixelBitSize(format, type));
+    out.resize(width * height *
+               glUtilsPixelBitSize(GL_RGBA /* format */,
+                                   GL_UNSIGNED_BYTE /* type */) / 8);
 
     // switch to auxiliary framebuffer
-    // TODO(benzene): don't assume we're using the default framebuffer
-    GLuint framebuffer;
-    gl->glGenFramebuffers(1, &framebuffer);
-    gl->glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    GLint oldFramebuffer;
+    gl->glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFramebuffer);
+
+    GLuint auxFramebuffer;
+    gl->glGenFramebuffers(1, &auxFramebuffer);
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, auxFramebuffer);
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
 
     gl->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target,
@@ -95,9 +99,9 @@ std::vector<GLubyte> getTextureImageData(const GLESv2Dispatch* gl,
                                    // guaranteed supported format+type
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
 
-    // restore framebuffer
-    gl->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    gl->glDeleteFramebuffers(1, &framebuffer);
+    // restore old framebuffer
+    gl->glBindFramebuffer(GL_FRAMEBUFFER, oldFramebuffer);
+    gl->glDeleteFramebuffers(1, &auxFramebuffer);
     EXPECT_EQ(GL_NO_ERROR, gl->glGetError());
 
     return out;

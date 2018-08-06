@@ -368,7 +368,7 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
         s->health = POWER_SUPPLY_HEALTH_GOOD;
         s->present = 1;
         s->capacity = 100;   // 100% charged
-        s->charge_counter = 10;
+        s->charge_counter = 10000;
     } else {
         s->hw_has_battery = 0;
         s->status = POWER_SUPPLY_STATUS_UNKNOWN;

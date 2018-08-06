@@ -34,6 +34,7 @@ using RamBlock = ::SnapshotRamBlock;
 enum class IndexFlags {
     Empty = 0,
     CompressedPages = 0x01,
+    SeparateBackingStore = 0x02,
 };
 
 enum class OperationStatus {

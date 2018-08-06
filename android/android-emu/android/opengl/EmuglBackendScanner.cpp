@@ -41,7 +41,7 @@ std::vector<std::string> EmuglBackendScanner::scanDir(const char* execDir,
         programBitness = System::get()->getProgramBitness();
     }
     const char* subdir = (programBitness == 64) ? "lib64" : "lib";
-    std::string subDir = StringFormat("%s/%s/", execDir, subdir);
+    std::string subDir = StringFormat("%s" PATH_SEP "%s" PATH_SEP, execDir, subdir);
 
     std::vector<std::string> entries = System::get()->scanDirEntries(subDir);
 
@@ -56,7 +56,7 @@ std::vector<std::string> EmuglBackendScanner::scanDir(const char* execDir,
         }
 
         // Check that it is a directory.
-        std::string full_dir = StringFormat("%s/%s", subDir.c_str(), entry.c_str());
+        std::string full_dir = StringFormat("%s" PATH_SEP "%s", subDir.c_str(), entry.c_str());
         if (!System::get()->pathIsDir(full_dir)) {
             continue;
         }

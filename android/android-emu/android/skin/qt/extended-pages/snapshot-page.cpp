@@ -142,12 +142,17 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         bool      mIsTheParent = false;
 };
 
+static SnapshotPage* sInstance = nullptr;
+
 SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QWidget(parent),
     mIsStandAlone(standAlone),
     mUi(new Ui::SnapshotPage())
 {
     mUi->setupUi(this);
+
+    mUi->inProgressLabel->hide();
+
     if (android_cmdLineOptions->read_only) {
         // Stand-alone.
         // Overlay a mask and text saying that snapshots are disabled.
@@ -255,6 +260,12 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QObject::connect(this, SIGNAL(askAboutInvalidSnapshots(QStringList)),
                      this, SLOT(slot_askAboutInvalidSnapshots(QStringList)),
                      Qt::QueuedConnection);
+    sInstance = this;
+}
+
+// static
+SnapshotPage* SnapshotPage::get() {
+    return sInstance;
 }
 
 void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
@@ -279,6 +290,7 @@ void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
     if (selection == QMessageBox::Ok) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
         disableActions();
+        setOperationInProgress(true);
         android::base::ThreadLooper::runOnMainLooper([fileName, this] {
             androidSnapshot_delete(fileName.toStdString().c_str());
             emit(deleteCompleted());
@@ -428,7 +440,6 @@ void SnapshotPage::on_deleteSnapshot_clicked() {
 }
 
 void SnapshotPage::on_loadSnapshot_clicked() {
-    AndroidSnapshotStatus status;
 
     const WidgetSnapshotItem* theItem = getSelectedSnapshot();
     if (!theItem) return;
@@ -436,28 +447,37 @@ void SnapshotPage::on_loadSnapshot_clicked() {
     QString fileName = theItem->fileName();
     QApplication::setOverrideCursor(Qt::WaitCursor);
     disableActions();
-    android::base::ThreadLooper::runOnMainLooper([&status, fileName, this] {
-        status = androidSnapshot_load(fileName.toStdString().c_str());
+    setOperationInProgress(true);
+    android::base::ThreadLooper::runOnMainLooper([fileName, this] {
+        AndroidSnapshotStatus status = androidSnapshot_load(fileName.toStdString().c_str());
         emit(loadCompleted((int)status, fileName));
     });
 }
 
 void SnapshotPage::on_saveQuickBootNowButton_clicked() {
+    setEnabled(false);
+    setOperationInProgress(true);
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
     android::base::ThreadLooper::runOnMainLooper(
-            []() { androidSnapshot_save(Quickboot::kDefaultBootSnapshot); });
+            [this]() { AndroidSnapshotStatus status = androidSnapshot_save(Quickboot::kDefaultBootSnapshot);
+                       emit(saveCompleted((int)status, Quickboot::kDefaultBootSnapshot)); });
 }
 
 void SnapshotPage::on_loadQuickBootNowButton_clicked() {
+    setEnabled(false);
+    setOperationInProgress(true);
     // Invoke the snapshot load function.
     // But don't run it on the UI thread.
     android::base::ThreadLooper::runOnMainLooper(
-            []() { androidSnapshot_load(Quickboot::kDefaultBootSnapshot); });
+            [this]() { AndroidSnapshotStatus status = androidSnapshot_load(Quickboot::kDefaultBootSnapshot);
+                       emit(loadCompleted((int)status, Quickboot::kDefaultBootSnapshot)); });
 }
 
 void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snapshotFileName) {
     AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
+
+    setEnabled(true);
 
     if (status != SNAPSHOT_STATUS_OK) {
         enableActions();
@@ -797,19 +817,21 @@ void SnapshotPage::showEvent(QShowEvent* ee) {
 // In stand-alone mode, it is used to choose the selected
 // snapshot.
 void SnapshotPage::on_takeSnapshotButton_clicked() {
+    setOperationInProgress(true);
+
     if (mIsStandAlone) {
         mMadeSelection = true;
         close();
     } else {
-        AndroidSnapshotStatus status;
 
         QString snapshotName("snap_"
                              + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss"));
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
         disableActions();
-        android::base::ThreadLooper::runOnMainLooper([&status, snapshotName, this] {
-            status = androidSnapshot_save(snapshotName.toStdString().c_str());
+        android::base::ThreadLooper::runOnMainLooper([snapshotName, this] {
+            AndroidSnapshotStatus status =
+            androidSnapshot_save(snapshotName.toStdString().c_str());
             emit(saveCompleted((int)status, snapshotName));
         });
     }
@@ -840,6 +862,8 @@ void SnapshotPage::closeEvent(QCloseEvent* closeEvent) {
 void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snapshotName) {
     AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
 
+    setEnabled(true);
+
     if (status != SNAPSHOT_STATUS_OK) {
         enableActions();
         QApplication::restoreOverrideCursor();
@@ -862,6 +886,41 @@ void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snap
     QApplication::restoreOverrideCursor();
 }
 
+void sClearTreeWidget(QTreeWidget* tree) {
+#ifdef __APPLE__
+    // bug: 112196179
+    // QAccessibility is buggy on macOS.  We need to remove tree
+    // items one by one, or QAccessbility will go out of sync and cause a
+    // segfault.
+    // More background info:
+    // https://blog.inventic.eu/2015/05/crash-in-qtreewidget-qtreeview-index-mapping-on-mac-osx-10-10-part-iii/
+    while (tree->topLevelItemCount()) {
+        delete tree->takeTopLevelItem(0);
+    }
+#endif
+    tree->clear();
+}
+
+void SnapshotPage::clearSnapshotDisplay() {
+    sClearTreeWidget(mUi->defaultSnapshotDisplay);
+    sClearTreeWidget(mUi->snapshotDisplay);
+}
+
+void SnapshotPage::setShowSnapshotDisplay(bool show) {
+    mUi->defaultSnapshotDisplay->setVisible(show);
+    mUi->snapshotDisplay->setVisible(show);
+}
+
+void SnapshotPage::setOperationInProgress(bool inProgress) {
+    if (inProgress) {
+        setShowSnapshotDisplay(false);
+        mUi->inProgressLabel->show();
+    } else {
+        setShowSnapshotDisplay(true);
+        mUi->inProgressLabel->hide();
+    }
+}
+
 void SnapshotPage::populateSnapshotDisplay() {
     if (android_cmdLineOptions->read_only) {
         // Leave the list empty because snapshots
@@ -877,8 +936,7 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 
     mUi->defaultSnapshotDisplay->setSortingEnabled(false); // Don't sort during modification
     mUi->snapshotDisplay->setSortingEnabled(false);
-    mUi->defaultSnapshotDisplay->clear();
-    mUi->snapshotDisplay->clear();
+    clearSnapshotDisplay();
 
     std::string snapshotPath = getSnapshotBaseDir();
 
@@ -981,8 +1039,7 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 
     if (nItems <= 0) {
         // Hide the lists and say that there are no snapshots
-        mUi->defaultSnapshotDisplay->setVisible(false);
-        mUi->snapshotDisplay->setVisible(false);
+        setShowSnapshotDisplay(false);
         mUi->noneAvailableLabel->setVisible(true);
         return;
     }
@@ -1004,8 +1061,6 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         }
     }
 
-    mUi->defaultSnapshotDisplay->setVisible(true);
-    mUi->snapshotDisplay->setVisible(true);
     mUi->noneAvailableLabel->setVisible(false);
 
     mUi->defaultSnapshotDisplay->header()->setStretchLastSection(false);

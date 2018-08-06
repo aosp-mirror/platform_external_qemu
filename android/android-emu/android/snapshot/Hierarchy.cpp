@@ -106,7 +106,7 @@ public:
                 roots.push_back(s.name());
                 D("root: %s", s.name().c_str());
             } else {
-                const auto& p = *(s.parent());
+                const auto p = *(s.parent());
                 if (mValidParents.find(p) != mValidParents.end()) {
                     mNextParentMap[s.name()] = p;
                     auto& children = deps[p];

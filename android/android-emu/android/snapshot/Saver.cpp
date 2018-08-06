@@ -23,12 +23,14 @@
 using android::base::c_str;
 using android::base::PathUtils;
 using android::base::StdioStream;
+using android::base::StringView;
 using android::base::System;
 
 namespace android {
 namespace snapshot {
 
-Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
+Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
+             base::StringView ramMapFile, bool ramFileShared)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (path_mkdir_if_needed(c_str(mSnapshot.dataDir()), 0777) != 0) {
         return;
@@ -36,6 +38,15 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
     {
         const auto ramFile = PathUtils::join(mSnapshot.dataDir(), kRamFileName);
         auto flags = RamSaver::Flags::None;
+
+        // If we're using a file-backed RAM that is writing through,
+        // no need to save pages synchronously on exit.
+        if (isOnExit &&
+            !ramMapFile.empty() &&
+            ramFileShared) {
+            flags |= RamSaver::Flags::Async;
+        }
+
         const auto compressEnvVar =
                 System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
         if (compressEnvVar == "1" || compressEnvVar == "yes" ||

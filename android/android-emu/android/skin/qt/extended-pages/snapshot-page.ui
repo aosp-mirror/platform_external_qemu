@@ -400,6 +400,25 @@
       <string>HorizDivider2</string>
      </property>
     </widget>
+    <widget class="QLabel" name="inProgressLabel">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>190</y>
+       <width>181</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Operation in progress</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
     <zorder>deleteSnapshot</zorder>
     <zorder>defaultSnapshotDisplay</zorder>
     <zorder>selectionInfo</zorder>
@@ -412,6 +431,7 @@
     <zorder>line</zorder>
     <zorder>reduceInfoButton</zorder>
     <zorder>enlargeInfoButton</zorder>
+    <zorder>inProgressLabel</zorder>
    </widget>
    <widget class="QWidget" name="settingsTab">
     <attribute name="title">

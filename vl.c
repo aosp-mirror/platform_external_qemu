@@ -141,8 +141,14 @@ int main(int argc, char **argv)
 #undef socket_connect
 #undef socket_listen
 
+#include "android-qemu2-glue/android_qemud.h"
+#include "android-qemu2-glue/drive-share.h"
+#include "android-qemu2-glue/looper-qemu.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/qemu-setup.h"
 #include "android/android.h"
 #include "android/boot-properties.h"
+#include "android/camera/camera-service.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/cros.h"
 #include "android/emulation/bufprint_config_dirs.h"
@@ -162,12 +168,12 @@ int main(int argc, char **argv)
 #include "android/opengles.h"
 #include "android/session_phase_reporter.h"
 #include "android/skin/winsys.h"
-#include "android/snapshot.h"
 #include "android/snaphost-android.h"
+#include "android/snapshot.h"
 #include "android/snapshot/interface.h"
 #include "android/telephony/modem_driver.h"
-#include "android/update-check/update_check.h"
 #include "android/ui-emu-agent.h"
+#include "android/update-check/update_check.h"
 #include "android/utils/async.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -178,17 +184,12 @@ int main(int argc, char **argv)
 #include "android/utils/looper.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
-#include "android/utils/system.h"
 #include "android/utils/socket_drainer.h"
+#include "android/utils/system.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/timezone.h"
 #include "android/version.h"
 #include "android/wear-agent/android_wear_agent.h"
-#include "android-qemu2-glue/android_qemud.h"
-#include "android-qemu2-glue/looper-qemu.h"
-#include "android-qemu2-glue/qemu-control-impl.h"
-#include "android-qemu2-glue/qemu-setup.h"
-#include "android/camera/camera-service.h"
 
 #include "hw/input/goldfish_events.h"
 #include "hw/misc/goldfish_pstore.h"
@@ -5320,10 +5321,19 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         qemu_opts_foreach(qemu_find_opts("drive"), drive_enable_snapshot,
                           NULL, NULL);
     }
+
+#ifdef CONFIG_ANDROID
+    android_drive_share_init();
+    if (qemu_opts_foreach(qemu_find_opts("drive"), android_drive_init,
+                          &machine_class->block_default_type, NULL)) {
+      return 1;
+    }
+#else   // CONFIG_ANDROID
     if (qemu_opts_foreach(qemu_find_opts("drive"), drive_init_func,
                           &machine_class->block_default_type, NULL)) {
         return 1;
     }
+#endif  // CONFIG_ANDROID
 
     if (!default_drive(default_cdrom, snapshot,
                        machine_class->block_default_type, 2, CDROM_OPTS)) {

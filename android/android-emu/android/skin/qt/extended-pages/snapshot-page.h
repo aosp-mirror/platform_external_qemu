@@ -27,6 +27,10 @@ class SnapshotPage : public QWidget
 public:
     explicit SnapshotPage(QWidget* parent = 0, bool standAlone = false);
 
+    static SnapshotPage* get();
+
+    void    setOperationInProgress(bool inProgress);
+
 public slots:
     void slot_snapshotLoadCompleted(int status, const QString& name);
     void slot_snapshotSaveCompleted(int status, const QString& name);
@@ -66,6 +70,9 @@ private:
     static constexpr int COLUMN_NAME = 1;
 
     void    showEvent(QShowEvent* ee) override;
+
+    void    clearSnapshotDisplay();
+    void    setShowSnapshotDisplay(bool show);
 
     void    populateSnapshotDisplay();
     void    populateSnapshotDisplay_flat();

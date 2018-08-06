@@ -202,7 +202,7 @@ protected:
     const GLESv2Dispatch* getGlDispatch() { return getSnapshotTestDispatch(); }
 };
 
-TEST(SnapshotGlRenderingSampleTest, DrawTriangle) {
+TEST(SnapshotGlRenderingSampleTest, DISABLED_DrawTriangle) {
     SnapshotTestTriangle app;
     app.drawOnce();
 }

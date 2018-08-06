@@ -1,0 +1,53 @@
+syntax = "proto2";
+
+package emulator_automation;
+
+message Time {
+    optional int64 timestamp = 1;
+}
+
+message RecordedEvent {
+    enum StreamType {
+        PHYSICAL_MODEL = 0;
+        TOUCH = 1;
+    }
+
+    optional Time event_time = 1;
+    optional StreamType stream_type = 2;
+
+    optional PhysicalModelEvent physical_model = 3;
+    optional TouchEvent touch = 4;
+}
+
+message PhysicalModelEvent {
+    enum ParameterType {
+        POSITION = 0;
+        ROTATION = 1;
+        MAGNETIC_FIELD = 2;
+        TEMPERATURE = 3;
+        PROXIMITY = 4;
+        LIGHT = 5;
+        PRESSURE = 6;
+        HUMIDITY = 7;
+        VELOCITY = 8;
+        AMBIENT_MOTION = 9;
+    }
+
+    enum InterpolationMethod {
+        Smooth = 0;
+        Step = 1;
+    }
+
+    message ParameterValue {
+      repeated float data = 1;
+    }
+
+    optional ParameterType type = 1;
+    optional InterpolationMethod interpolation_method = 2;
+    optional ParameterValue value = 3;
+}
+
+message TouchEvent {
+    optional float x = 1;
+    optional float y = 2;
+}

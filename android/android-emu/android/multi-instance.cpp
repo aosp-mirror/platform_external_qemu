@@ -19,9 +19,10 @@
 
 namespace {
 struct MultiInstanceState {
-    bool initialized = false;
     android::base::FileShare shareMode = android::base::FileShare::Write;
     FILE* sharedFile = nullptr;
+    android::multiinstance::UpdateDriveShareModeFunc updateDriveShareModeFunc =
+            nullptr;
 };
 static android::base::LazyInstance<MultiInstanceState> sMultiInstanceState =
         LAZY_INSTANCE_INIT;
@@ -29,7 +30,7 @@ static android::base::LazyInstance<MultiInstanceState> sMultiInstanceState =
 
 bool android::multiinstance::initInstanceShareMode(
         android::base::FileShare shareMode) {
-    if (sMultiInstanceState->initialized) {
+    if (sMultiInstanceState.hasInstance()) {
         return sMultiInstanceState->shareMode == shareMode;
     }
     AvdInfo* avd = android_avdInfo;
@@ -48,19 +49,29 @@ bool android::multiinstance::initInstanceShareMode(
                "run all emulators with -read-only flag.\n");
         return false;
     }
-    sMultiInstanceState->initialized = true;
     sMultiInstanceState->shareMode = shareMode;
     return true;
 }
 
 bool android::multiinstance::updateInstanceShareMode(
         base::FileShare shareMode) {
-    assert(sMultiInstanceState->initialized);
+    assert(sMultiInstanceState.hasInstance());
+    if (sMultiInstanceState->shareMode == shareMode) {
+        return true;
+    }
     if (android::base::updateFileShare(sMultiInstanceState->sharedFile,
                                        shareMode)) {
+        if (sMultiInstanceState->updateDriveShareModeFunc) {
+            sMultiInstanceState->updateDriveShareModeFunc(shareMode);
+        }
         sMultiInstanceState->shareMode = shareMode;
         return true;
     } else {
         return false;
     }
+}
+
+void android::multiinstance::setUpdateDriveShareModeFunc(
+        UpdateDriveShareModeFunc updateDriveShareModeFunc) {
+    sMultiInstanceState->updateDriveShareModeFunc = updateDriveShareModeFunc;
 }

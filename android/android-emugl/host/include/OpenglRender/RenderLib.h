@@ -53,7 +53,7 @@ public:
 
     virtual void* getEGL(void) = 0;
 
-    virtual bool getDSCC(void**, void**, void**, void **) = 0;
+    virtual bool getDSCC(void**, void**, void**, void**, int* , int*) = 0;
 
     // initRenderer - initialize the OpenGL renderer object.
     //
