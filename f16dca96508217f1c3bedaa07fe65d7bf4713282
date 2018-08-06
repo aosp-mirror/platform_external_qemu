@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "52ef330b_8ea900f4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-06T15:23:28Z",
+      "side": 1,
+      "message": "the main window has a code setting up a set of callbacks for snapshot operations. I feel that using those is safer compared to only reacting on button clicks here - because there are different ways to start snapshot operations, e.g. the console",
+      "range": {
+        "startLine": 283,
+        "startChar": 8,
+        "endLine": 283,
+        "endChar": 30
+      },
+      "revId": "f16dca96508217f1c3bedaa07fe65d7bf4713282",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
