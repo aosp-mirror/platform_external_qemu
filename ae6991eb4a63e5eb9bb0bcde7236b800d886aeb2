@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "3ccb5abc_24d56a9d",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T20:57:18Z",
+      "side": 1,
+      "message": "Nit: const, and maybe combine the ramMapShared and needsInvalidation into one bool?",
+      "range": {
+        "startLine": 491,
+        "startChar": 4,
+        "endLine": 491,
+        "endChar": 8
+      },
+      "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "351f981e_36c7f60c",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T20:57:18Z",
+      "side": 1,
+      "message": "Nit: This is redundant.",
+      "range": {
+        "startLine": 170,
+        "startChar": 24,
+        "endLine": 170,
+        "endChar": 29
+      },
+      "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f965b8ea_cd85ffc9",
         "filename": "android/android-emu/android/snapshot/interface.cpp",
         "patchSetId": 6
@@ -18,6 +64,52 @@
         "startChar": 4,
         "endLine": 112,
         "endChar": 15
+      },
+      "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f31af5bc_30f20c43",
+        "filename": "android/android-emu/android/snapshot/interface.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T20:57:18Z",
+      "side": 1,
+      "message": "Nit: const or inline?",
+      "range": {
+        "startLine": 116,
+        "startChar": 4,
+        "endLine": 116,
+        "endChar": 8
+      },
+      "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa903afe_fb6f680e",
+        "filename": "android/android-emu/android/snapshot/interface.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T20:57:18Z",
+      "side": 1,
+      "message": "I don\u0027t see any code that\u0027s calling this yet, but I wonder if this would make more sense to return a std::string given the free() req.  Is this accessed from C?",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 61
       },
       "revId": "ae6991eb4a63e5eb9bb0bcde7236b800d886aeb2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
