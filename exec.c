@@ -65,9 +65,7 @@
 #include "migration/vmstate.h"
 
 #include "qemu/range.h"
-#ifndef _WIN32
 #include "qemu/mmap-alloc.h"
-#endif
 
 #include "monitor/monitor.h"
 
@@ -98,6 +96,9 @@ static MemoryRegion io_mem_unassigned;
  * This used_length size can change across reboots.
  */
 #define RAM_RESIZEABLE (1 << 2)
+
+/* RAM is a mapped file */
+#define RAM_MAPPED (1 << 3)
 
 /* UFFDIO_ZEROPAGE is available on this RAMBlock to atomically
  * zero the page and wake waiting processes.
@@ -1562,7 +1563,10 @@ long qemu_getrampagesize(void)
 }
 #endif
 
-#ifdef __linux__
+#ifdef _WIN32
+#define MAP_FAILED 0
+#endif
+
 static int64_t get_file_size(int fd)
 {
     int64_t size = lseek(fd, 0, SEEK_END);
@@ -1701,7 +1705,6 @@ static void *file_ram_alloc(RAMBlock *block,
     block->fd = fd;
     return area;
 }
-#endif
 
 /* Allocate space within the ram_addr_t space that governs the
  * dirty bitmaps.
@@ -1795,6 +1798,11 @@ const char *qemu_ram_get_idstr(RAMBlock *rb)
 bool qemu_ram_is_shared(RAMBlock *rb)
 {
     return rb->flags & RAM_SHARED;
+}
+
+bool qemu_ram_is_mapped(RAMBlock *rb)
+{
+    return rb->flags & RAM_MAPPED;
 }
 
 /* Note: Only set at the start of postcopy */
@@ -2045,7 +2053,6 @@ static void ram_block_add(RAMBlock *new_block, Error **errp, bool shared)
     }
 }
 
-#ifdef __linux__
 RAMBlock *qemu_ram_alloc_from_fd(ram_addr_t size, MemoryRegion *mr,
                                  bool share, int fd,
                                  Error **errp)
@@ -2089,7 +2096,7 @@ RAMBlock *qemu_ram_alloc_from_fd(ram_addr_t size, MemoryRegion *mr,
     new_block->mr = mr;
     new_block->used_length = size;
     new_block->max_length = size;
-    new_block->flags = share ? RAM_SHARED : 0;
+    new_block->flags = RAM_MAPPED | (share ? RAM_SHARED : 0);
     new_block->host = file_ram_alloc(new_block, size, fd, !file_size, errp);
     if (!new_block->host) {
         g_free(new_block);
@@ -2131,7 +2138,6 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
 
     return block;
 }
-#endif
 
 static
 RAMBlock *qemu_ram_alloc_internal(ram_addr_t size, ram_addr_t max_size,

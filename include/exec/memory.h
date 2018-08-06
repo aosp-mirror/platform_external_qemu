@@ -506,7 +506,6 @@ void memory_region_init_resizeable_ram(MemoryRegion *mr,
                                                        uint64_t length,
                                                        void *host),
                                        Error **errp);
-#ifdef __linux__
 /**
  * memory_region_init_ram_from_file:  Initialize RAM memory region with a
  *                                    mmap-ed backend.
@@ -556,7 +555,6 @@ void memory_region_init_ram_from_fd(MemoryRegion *mr,
                                     bool share,
                                     int fd,
                                     Error **errp);
-#endif
 
 /**
  * memory_region_init_ram_ptr:  Initialize RAM memory region from a
