@@ -677,6 +677,13 @@ fi
 mkdir -p $OUT_DIR/lib
 cp -f "$ADVANCED_FEATURE_FILE_CANARY" "$OUT_DIR/lib/"
 
+SERVER_FLAGS_BACKUP="$PROGDIR/data/emu-original-feature-flags.protobuf"
+if [ ! -f "$SERVER_FLAGS_BACKUP" ]; then
+    panic "Missing server feature flags backup file: $SERVER_FLAGS_BACKUP"
+fi
+mkdir -p $OUT_DIR/lib
+cp -f "$SERVER_FLAGS_BACKUP" "$OUT_DIR/lib/"
+
 ###
 ###  Breakpad probe
 ###
