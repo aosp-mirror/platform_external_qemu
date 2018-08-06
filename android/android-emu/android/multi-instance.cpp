@@ -22,6 +22,8 @@ struct MultiInstanceState {
     bool initialized = false;
     android::base::FileShare shareMode = android::base::FileShare::Write;
     FILE* sharedFile = nullptr;
+    android::multiinstance::UpdateDriveShareModeFunc updateDriveShareModeFunc =
+            nullptr;
 };
 static android::base::LazyInstance<MultiInstanceState> sMultiInstanceState =
         LAZY_INSTANCE_INIT;
@@ -56,11 +58,20 @@ bool android::multiinstance::initInstanceShareMode(
 bool android::multiinstance::updateInstanceShareMode(
         base::FileShare shareMode) {
     assert(sMultiInstanceState->initialized);
+    if (sMultiInstanceState->shareMode == shareMode) {
+        return true;
+    }
     if (android::base::updateFileShare(sMultiInstanceState->sharedFile,
                                        shareMode)) {
+        sMultiInstanceState->updateDriveShareModeFunc(shareMode);
         sMultiInstanceState->shareMode = shareMode;
         return true;
     } else {
         return false;
     }
+}
+
+void android::multiinstance::setUpdateDriveShareModeFunc(
+        UpdateDriveShareModeFunc updateDriveShareModeFunc) {
+    sMultiInstanceState->updateDriveShareModeFunc = updateDriveShareModeFunc;
 }
