@@ -68,7 +68,7 @@ void *qemu_memalign(size_t alignment, size_t size)
     return qemu_oom_check(qemu_try_memalign(alignment, size));
 }
 
-bool win32InsufficientMemMessage = false;
+bool insufficientMemMessage = false;
 
 void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared)
 {
@@ -120,7 +120,7 @@ void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared)
                 limitMb,
                 remainingMb,
                 neededMb);
-            win32InsufficientMemMessage = true;
+            insufficientMemMessage = true;
             return ptr;
         } else {
             // Maybe things cleared up. Try again.
