@@ -291,7 +291,7 @@ void Snapshotter::prepareLoaderForSaving(const char* name) {
         mLoader->status() != OperationStatus::Ok) {
         mLoader.reset();
     } else {
-        mLoader->synchronize(mIsOnExit);
+        mLoader->synchronize(mIsOnExit && (mRamFile.empty() || !mRamFileShared));
     }
 }
 
@@ -628,7 +628,9 @@ OperationStatus Snapshotter::prepareForSaving(const char* name) {
             name, (mLoader && mLoader->status() != OperationStatus::Error)
                           ? &mLoader->ramLoader()
                           : nullptr,
-            mIsOnExit));
+            mIsOnExit,
+            mRamFile,
+            mRamFileShared));
     mVmOperations.vmStart();
     mSaver->prepare();
     return mSaver->status();
@@ -646,6 +648,11 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
     mVmOperations.snapshotSave(name, this, nullptr);
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
     return mSaver->status();
+}
+
+void Snapshotter::setRamFile(const char* path, bool shared) {
+    mRamFile = path;
+    mRamFileShared = shared;
 }
 
 void Snapshotter::cancelSave() {
@@ -758,7 +765,9 @@ bool Snapshotter::onStartSaving(const char* name) {
                 name, (mLoader && mLoader->status() != OperationStatus::Error)
                               ? &mLoader->ramLoader()
                               : nullptr,
-                mIsOnExit));
+                mIsOnExit,
+                mRamFile,
+                mRamFileShared));
     }
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);
