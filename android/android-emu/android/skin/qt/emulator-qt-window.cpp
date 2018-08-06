@@ -38,6 +38,7 @@
 #include "android/skin/qt/QtLooper.h"
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/screen-mask.h"
 #include "android/skin/qt/winsys-qt.h"
@@ -602,6 +603,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         if (mToolWindow) {
                             mToolWindow->setEnabled(false);
                         }
+                        if (SnapshotPage::get()) {
+                            SnapshotPage::get()->setOperationInProgress(true);
+                        }
                     });
                 } else if (stage == Snapshotter::Stage::End) {
                     runOnUiThread([this, op]() {
@@ -610,6 +614,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         mContainer.hideModalOverlay();
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
+                        }
+                        if (SnapshotPage::get()) {
+                            SnapshotPage::get()->setOperationInProgress(false);
                         }
                     });
                 }
