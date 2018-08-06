@@ -104,6 +104,7 @@ function initMap() {
     gMap = new google.maps.Map(document.getElementById('map'), {
         center: lastLatLng,
         zoom: 10,
+        zoomControl: true,
         disableDefaultUI: true
     });
 
@@ -142,17 +143,16 @@ function initMap() {
 
     setDeviceLocation = function(lat, lng) {
         // Called from Qt code to show the blue marker to display the emulator location on the map.
-//        console.warn('Setting location to lat=' + lat + ', lng=' + lng);
         // Code to set location marker on the map. Move this to a signal event handler.
-
-// ?? See https://developers.google.com/maps/documentation/javascript/custom-markers
 
         var latLng = new google.maps.LatLng(lat, lng);
         gCurrentMarker.setPosition(latLng);
         var blueDot = 'data:image/svg+xml, \
-                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"> \
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" \
+                        viewBox="0 0 24 24" fill="#000000"> \
                     <circle cx="12" cy="12" r="10" fill="#black" opacity=".1" /> \
-                    <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" fill="#4286f5" /> \
+                    <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" \
+                        fill="#4286f5" /> \
                 </svg>';
         var image = {
           url: blueDot,
@@ -162,7 +162,6 @@ function initMap() {
           scaledSize: new google.maps.Size(25, 25)
         };
         gCurrentMarker.setIcon(image);
-        gMap.setCenter(latLng);
     }
 
     // Add Google search box
