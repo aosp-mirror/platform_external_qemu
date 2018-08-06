@@ -5661,6 +5661,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
 #endif
 
+    if (mem_path) {
+        androidSnapshot_setRamFile(mem_path, mem_file_shared);
+    }
+
     if (androidSnapshot_quickbootLoad(loadvm)) {
         tryDefaultVmLoad = false;
     }
