@@ -209,6 +209,8 @@ BlockBackend *blk_new_open(const char *filename, const char *reference,
     }
 
     blk = blk_new(perm, BLK_PERM_ALL);
+    printf("filename: %s, reference: %p, flags: %d\n", filename, reference, flags);
+    qdict_print(options);
     bs = bdrv_open(filename, reference, options, flags, errp);
     if (!bs) {
         blk_unref(blk);
