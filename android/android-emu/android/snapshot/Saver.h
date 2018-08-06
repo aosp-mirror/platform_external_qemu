@@ -13,6 +13,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
+#include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/RamSaver.h"
@@ -28,7 +29,9 @@ class Saver {
 
 public:
     Saver(const Snapshot& snapshot, RamLoader* loader,
-          bool isOnExit);
+          bool isOnExit,
+          base::StringView ramMapFile,
+          bool ramFileShared);
     ~Saver();
 
     RamSaver& ramSaver() { return *mRamSaver; }
