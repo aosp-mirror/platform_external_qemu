@@ -968,8 +968,12 @@ DEF("net-tap-script-up", HAS_ARG, QEMU_OPTION_net_tap_script_up,
 DEF("net-tap-script-down", HAS_ARG, QEMU_OPTION_net_tap_script_down,
 "-net-tap-script-down <script> script to run when TAP interface goes down\n", QEMU_ARCH_ALL)
 
+
 DEF("mem-file-shared", 0, QEMU_OPTION_mem_file_shared,
 "-mem-file-shared (use with -mem-path) initializes RAM backing file (specified in -mem-path) as a shared mapping\n", QEMU_ARCH_ALL)
+
+DEF("read-only", 0, QEMU_OPTION_read_only,
+"-read-only mark the session as read-only and abandon all snapshot or any disk changes at exit.\n", QEMU_ARCH_ALL)
 
 #endif  // CONFIG_ANDROID
 
