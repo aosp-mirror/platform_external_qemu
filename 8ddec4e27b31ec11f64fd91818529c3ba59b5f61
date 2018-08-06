@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc1592b8_be90ff3d",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-06T18:13:45Z",
+      "side": 1,
+      "message": "merge those 2 into one \"if\"?",
+      "range": {
+        "startLine": 270,
+        "startChar": 0,
+        "endLine": 278,
+        "endChar": 5
+      },
+      "revId": "8ddec4e27b31ec11f64fd91818529c3ba59b5f61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
