@@ -1563,10 +1563,6 @@ long qemu_getrampagesize(void)
 }
 #endif
 
-#ifdef _WIN32
-#define MAP_FAILED 0
-#endif
-
 static int64_t get_file_size(int fd)
 {
     int64_t size = lseek(fd, 0, SEEK_END);

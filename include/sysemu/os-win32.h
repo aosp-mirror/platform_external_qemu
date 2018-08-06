@@ -30,6 +30,8 @@
 #include <windows.h>
 #include <ws2tcpip.h>
 
+#define MAP_FAILED ((void*)(-1))
+
 /* QEMU uses sigsetjmp()/siglongjmp() as the portable way to specify
  * "longjmp and don't touch the signal masks". Since we know that the
  * savemask parameter will always be zero we can safely define these
