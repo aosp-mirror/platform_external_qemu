@@ -11,13 +11,22 @@
 
 #pragma once
 
+#include <string>
+
 #include "android/base/files/FileShareOpen.h"
 
 namespace android {
 namespace multiinstance {
 
+typedef bool (*UpdateDriveShareModeFunc)(const char* snapshotName,
+                                         base::FileShare shareMode);
+
 extern bool initInstanceShareMode(base::FileShare shareMode);
-extern bool updateInstanceShareMode(base::FileShare shareMode);
+extern bool updateInstanceShareMode(const char* snapshotName,
+                                    base::FileShare shareMode);
+extern void setUpdateDriveShareModeFunc(
+        UpdateDriveShareModeFunc updateDriveShareModeFunc);
+extern base::FileShare getInstanceShareMode();
 
 }  // namespace multiinstance
 }  // namespace android
