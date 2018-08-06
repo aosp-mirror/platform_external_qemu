@@ -147,13 +147,14 @@ private:
                 guestRecv.set_metadata(metadata);
                 encodeGuestRecvFrame(guestRecv, &sMetaData);
                 gQAndroidVmOperations->vmStop();
+                // TODO
+                android::base::FileShare shareMode =
+                        android::multiinstance::getInstanceShareMode();
                 if (gotoCheckpointParam.has_share_mode() &&
                     gotoCheckpointParam.share_mode() !=
                             MS::GotoCheckpoint::UNKNOWN &&
                     gotoCheckpointParam.share_mode() !=
                             MS::GotoCheckpoint::UNCHANGED) {
-                    android::base::FileShare shareMode =
-                            android::base::FileShare::Read;
                     switch (gotoCheckpointParam.share_mode()) {
                         case MS::GotoCheckpoint::READ_ONLY:
                             shareMode = android::base::FileShare::Read;
@@ -168,13 +169,14 @@ private:
                             shareMode = android::base::FileShare::Read;
                             break;
                     }
+                }
+                android::base::ThreadLooper::runOnMainLooper([snapshotName,
+                        shareMode]() {
                     bool res = android::multiinstance::updateInstanceShareMode(
                             shareMode);
                     if (!res) {
                         fprintf(stderr, "WARNING: share mode update failure\n");
                     }
-                }
-                android::base::ThreadLooper::runOnMainLooper([snapshotName]() {
                     androidSnapshot_load(snapshotName.data());
                     gQAndroidVmOperations->vmStart();
                 });
