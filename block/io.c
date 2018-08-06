@@ -2410,9 +2410,11 @@ int bdrv_flush(BlockDriverState *bs)
     };
 
     if (qemu_in_coroutine()) {
+        //fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
         /* Fast-path if already in coroutine context */
         bdrv_flush_co_entry(&flush_co);
     } else {
+        fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
         co = qemu_coroutine_create(bdrv_flush_co_entry, &flush_co);
         bdrv_coroutine_enter(bs, co);
         BDRV_POLL_WHILE(bs, flush_co.ret == NOT_DONE);

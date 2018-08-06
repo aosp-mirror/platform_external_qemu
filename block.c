@@ -1886,10 +1886,13 @@ static void bdrv_detach_child(BdrvChild *child)
 void bdrv_root_unref_child(BdrvChild *child)
 {
     BlockDriverState *child_bs;
-
+    fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
     child_bs = child->bs;
+    fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
     bdrv_detach_child(child);
+    fprintf(stderr, "%s: %d child_bs %p\n", __FILE__, __LINE__, child_bs);
     bdrv_unref(child_bs);
+    fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
 }
 
 void bdrv_unref_child(BlockDriverState *parent, BdrvChild *child)
@@ -2902,6 +2905,7 @@ void bdrv_reopen_abort(BDRVReopenState *reopen_state)
 
 static void bdrv_close(BlockDriverState *bs)
 {
+    fprintf(stderr, "%s: %d file name %s\n", __FILE__, __LINE__, bs->filename);
     BdrvAioNotifier *ban, *ban_next;
 
     assert(!bs->job);

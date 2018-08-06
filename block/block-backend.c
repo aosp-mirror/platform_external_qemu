@@ -209,6 +209,8 @@ BlockBackend *blk_new_open(const char *filename, const char *reference,
     }
 
     blk = blk_new(perm, BLK_PERM_ALL);
+    printf("filename: %s, reference: %p, flags: %d\n", filename, reference, flags);
+    qdict_print(options);
     bs = bdrv_open(filename, reference, options, flags, errp);
     if (!bs) {
         blk_unref(blk);
@@ -542,14 +544,20 @@ BlockBackend *blk_by_public(BlockBackendPublic *public)
  */
 void blk_remove_bs(BlockBackend *blk)
 {
+    fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
     notifier_list_notify(&blk->remove_bs_notifiers, blk);
+    fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
     if (blk->public.throttle_state) {
+        fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
         throttle_timers_detach_aio_context(&blk->public.throttle_timers);
     }
 
+    fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
     blk_update_root_state(blk);
-
+    fprintf(stderr, "%s: %d root %p\n", __FILE__, __LINE__, blk->root);
+    
     bdrv_root_unref_child(blk->root);
+    fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
     blk->root = NULL;
 }
 

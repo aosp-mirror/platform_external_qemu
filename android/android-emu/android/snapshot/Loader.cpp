@@ -104,6 +104,7 @@ Loader::~Loader() {
     if (mTextureLoader) {
         mTextureLoader->join();
     }
+    assert(0);
 }
 
 void Loader::interrupt() {

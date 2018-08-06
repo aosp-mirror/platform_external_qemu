@@ -21,6 +21,7 @@
 #include "qemu/queue.h"
 #include "qemu-common.h"
 #include "qemu/cutils.h"
+#include "android/qemu1/include/qapi/qmp/qobject.h"
 
 /**
  * qdict_new(): Create a new QDict
@@ -35,6 +36,55 @@ QDict *qdict_new(void)
     qobject_init(QOBJECT(qdict), QTYPE_QDICT);
 
     return qdict;
+}
+
+
+static void qdict_flatten_qdict(QDict *qdict, QDict *target,
+                                const char *prefix);
+
+void qobject_print(QObject* qobject) {
+    switch (qobject_type(qobject)) {
+        case QTYPE_QINT:
+            printf("%ld", qint_get_int(qobject_to_qint(qobject)));
+            break;
+        case QTYPE_QSTRING:
+            printf("%s", qstring_get_str(qobject_to_qstring(qobject)));
+            break;
+        case QTYPE_QBOOL:
+            printf("%d", qbool_get_bool(qobject_to_qbool(qobject)));
+            break;
+        default:
+            printf("qobj type %d", qobject_type(qobject));
+            break;
+    }
+}
+
+void qdict_print(QDict* qdict) {
+    if (!qdict) {
+        printf("empty qdict\n");
+        return;
+    }
+    QDict *target;
+    QObject *value;
+    const QDictEntry *entry, *next;
+    char *new_key;
+    bool delete;
+ 
+    target = qdict_new();
+    qdict_flatten_qdict(qdict, target, NULL);
+
+    entry = qdict_first(qdict);
+ 
+    printf("qdict size %zu\n", qdict_size(qdict));
+    while (entry != NULL) {
+ 
+        next = qdict_next(qdict, entry);
+        value = qdict_entry_value(entry);
+        printf("%s\t: ", entry->key);
+        qobject_print(value);
+        printf("\n");
+        entry = next;
+    }
 }
 
 /**
@@ -465,9 +515,6 @@ void qdict_set_default_str(QDict *dst, const char *key, const char *val)
 
     qdict_put(dst, key, qstring_from_str(val));
 }
-
-static void qdict_flatten_qdict(QDict *qdict, QDict *target,
-                                const char *prefix);
 
 static void qdict_flatten_qlist(QList *qlist, QDict *target, const char *prefix)
 {

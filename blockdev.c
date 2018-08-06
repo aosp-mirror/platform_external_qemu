@@ -864,10 +864,15 @@ DriveInfo *drive_new(QemuOpts *all_opts, BlockInterfaceType block_default_type)
     /* Get a QDict for processing the options */
     bs_opts = qdict_new();
     qemu_opts_to_qdict(all_opts, bs_opts);
+    #define _PR_FILE_ fprintf(stderr, "%s: %d id %s file %s\n", __FILE__, __LINE__, \
+            qdict_get_try_str(bs_opts, "id"), qdict_get_try_str(bs_opts, "file"));
+
+    _PR_FILE_
 
     legacy_opts = qemu_opts_create(&qemu_legacy_drive_opts, NULL, 0,
                                    &error_abort);
     qemu_opts_absorb_qdict(legacy_opts, bs_opts, &local_err);
+    _PR_FILE_
     if (local_err) {
         error_report_err(local_err);
         goto fail;
@@ -896,6 +901,8 @@ DriveInfo *drive_new(QemuOpts *all_opts, BlockInterfaceType block_default_type)
 
     /* copy-on-read is disabled with a warning for read-only devices */
     read_only |= qemu_opt_get_bool(legacy_opts, BDRV_OPT_READ_ONLY, false);
+    printf("drive_new read only %d\n",
+            qemu_opt_get_bool(legacy_opts, BDRV_OPT_READ_ONLY, false));
     copy_on_read = qemu_opt_get_bool(legacy_opts, "copy-on-read", false);
 
     if (read_only && copy_on_read) {
@@ -1080,7 +1087,11 @@ DriveInfo *drive_new(QemuOpts *all_opts, BlockInterfaceType block_default_type)
         qdict_put(bs_opts, "rerror", qstring_from_str(rerror));
     }
 
+    _PR_FILE_
+    
     /* Actual block device init: Functionality shared with blockdev-add */
+    qdict_print(bs_opts);
+    printf("filename: %s\n", filename);
     blk = blockdev_init(filename, bs_opts, &local_err);
     bs_opts = NULL;
     if (!blk) {

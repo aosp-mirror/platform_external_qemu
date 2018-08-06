@@ -165,14 +165,18 @@ int bdrv_snapshot_create(BlockDriverState *bs,
 {
     BlockDriver *drv = bs->drv;
     if (!drv) {
+        fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
         return -ENOMEDIUM;
     }
     if (drv->bdrv_snapshot_create) {
+        fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
         return drv->bdrv_snapshot_create(bs, sn_info);
     }
     if (bs->file) {
+        fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
         return bdrv_snapshot_create(bs->file->bs, sn_info);
     }
+    fprintf(stderr, "%s: %d\n", __FILE__, __LINE__);
     return -ENOTSUP;
 }
 
