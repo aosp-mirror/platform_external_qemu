@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2da3a28d_9d81f77a",
+        "filename": "util/mmap-alloc.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T21:34:12Z",
+      "side": 1,
+      "message": "Check return value, this returns null if CreateFileMapping fails.",
+      "range": {
+        "startLine": 142,
+        "startChar": 11,
+        "endLine": 142,
+        "endChar": 22
+      },
+      "revId": "51e1cacfe46409d8c5ed8b9eac7727624b96d2c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "623f4445_c85b9612",
+        "filename": "util/mmap-alloc.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-06T21:34:12Z",
+      "side": 1,
+      "message": "Same here, check return",
+      "range": {
+        "startLine": 152,
+        "startChar": 8,
+        "endLine": 152,
+        "endChar": 21
+      },
+      "revId": "51e1cacfe46409d8c5ed8b9eac7727624b96d2c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
