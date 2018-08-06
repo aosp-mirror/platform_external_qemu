@@ -22,6 +22,30 @@
       "revId": "8ddec4e27b31ec11f64fd91818529c3ba59b5f61",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0163b4cf_49755da1",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-06T18:22:21Z",
+      "side": 1,
+      "message": "actually onLoadingFailed can delete mLoader, so it\u0027s not safe to merge",
+      "parentUuid": "dc1592b8_be90ff3d",
+      "range": {
+        "startLine": 270,
+        "startChar": 0,
+        "endLine": 278,
+        "endChar": 5
+      },
+      "revId": "8ddec4e27b31ec11f64fd91818529c3ba59b5f61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
