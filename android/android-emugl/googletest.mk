@@ -11,7 +11,7 @@ LOCAL_PATH := $(EMULATOR_GTEST_SOURCES_DIR)
 common_SRC_FILES := \
     googletest/src/gtest-all.cc \
     googlemock/src/gmock-all.cc \
-    googlemock/src/gmock_main.cc
+    ../qemu/android/third_party/googletest/gtest_emu_main.cc
 
 common_INCLUDES := \
     $(LOCAL_PATH)/googletest/include \

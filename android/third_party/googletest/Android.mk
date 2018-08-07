@@ -22,8 +22,7 @@ EMULATOR_GTEST_INCLUDES := \
 EMULATOR_GTEST_SOURCES := \
     googletest/src/gtest-all.cc \
     googlemock/src/gmock-all.cc \
-    googlemock/src/gmock_main.cc
-
+    ../qemu/android/third_party/googletest/gtest_emu_main.cc
 
 old_LOCAL_PATH := $(LOCAL_PATH)
 
@@ -34,6 +33,8 @@ LOCAL_C_INCLUDES += \
     $(EMULATOR_GTEST_SOURCES_DIR)/googletest \
     $(EMULATOR_GTEST_SOURCES_DIR)/googlemock \
     $(EMULATOR_GTEST_INCLUDES)
+# ANDROID_EMU_BASE_INCLUDES is not available when this file is included, so hardcode it.
+LOCAL_C_INCLUDES += $(EMULATOR_GTEST_SOURCES_DIR)/../qemu/android/android-emu
 LOCAL_CPP_EXTENSION := .cc
 LOCAL_CFLAGS += -O0 -Wno-unused-variable
 LOCAL_SRC_FILES := $(EMULATOR_GTEST_SOURCES)
@@ -41,3 +42,6 @@ $(call end-emulator-library)
 
 LOCAL_PATH := $(old_LOCAL_PATH)
 
+EMULATOR_GTEST_STATIC_LIBRARIES := \
+    emulator-libgtest \
+    android-emu-base

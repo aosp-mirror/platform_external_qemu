@@ -21,9 +21,13 @@ LOCAL_LIBRARIES := $(foreach lib,\
     $(LOCAL_WHOLE_STATIC_LIBRARIES) $(LOCAL_STATIC_LIBRARIES),\
     $(call local-library-path,$(lib)))
 
+LOCAL_LDFLAGS += \
+    $(foreach lib,$(LOCAL_SHARED_LIBRARIES), \
+        -L$(dir $(call local-shared-library-path,$(lib)))) \
+
 LOCAL_LDLIBS := \
     $(call local-static-libraries-ldlibs) \
-    $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call local-shared-library-path,$(lib))) \
+    $(foreach lib,$(LOCAL_SHARED_LIBRARIES), -l:$(notdir $(call local-shared-library-path,$(lib)))) \
     $(LOCAL_LDLIBS)
 
 $(LOCAL_BUILT_MODULE): PRIVATE_LDFLAGS := $(LDFLAGS) $(LOCAL_LDFLAGS)
