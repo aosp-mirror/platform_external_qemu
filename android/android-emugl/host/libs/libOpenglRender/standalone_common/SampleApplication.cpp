@@ -189,6 +189,13 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
     if (glVersion == GLESApi_CM) LazyLoadedGLESv1Dispatch::get();
     LazyLoadedGLESv2Dispatch::get();
 
+    // Set API level for proper FrameBuffer behavior
+    emugl::setAvdInfo(false /* isPhone */, 24 /* API level */);
+
+    mRenderThreadInfo.reset(new RenderThreadInfo());
+    // Assign an arbitrary puid so FrameBuffer manages our handles
+    mRenderThreadInfo->m_puid = 11111;
+
     bool useHostGpu = shouldUseHostGpu();
     mWindow = createOrGetTestWindow(mXOffset, mYOffset, mWidth, mHeight);
     mUseSubWindow = mWindow != nullptr;
@@ -208,8 +215,6 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
             mWindow->getDevicePixelRatio(), 0, false);
         mWindow->messageLoop();
     }
-
-    mRenderThreadInfo.reset(new RenderThreadInfo());
 
     mColorBuffer = mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
     mContext = mFb->createRenderContext(0, 0, glVersion);

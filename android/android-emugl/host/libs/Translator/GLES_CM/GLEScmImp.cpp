@@ -138,7 +138,9 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
     }
+    fprintf(stderr, "%s initContext\n", __FILE__);
     if (ctx->needRestore()) {
+        fprintf(stderr, "%s needs restore\n", __FILE__);
         ctx->restore();
     }
 }

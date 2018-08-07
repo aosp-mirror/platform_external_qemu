@@ -127,7 +127,9 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
     }
+    fprintf(stderr, "%s initContext\n", __FILE__);
     if (ctx->needRestore()) {
+        fprintf(stderr, "%s restoring\n", __FILE__);
         ctx->restore();
     }
 }
@@ -196,6 +198,7 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
 }
 
 static void restoreTexture(SaveableTexture* texture) {
+    fprintf(stderr, "Restoring texture %d < %s\n", texture->getGlobalName(), __FILE__);
     if (!texture) return;
     texture->touch();
 }
@@ -217,6 +220,8 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (!img ||
         !ctx->shareGroup().get()) {
+        fprintf(stderr, "%s imghandle: %d, img: \t%p \n", __FILE__, imagehndl, img.get());
+        fprintf(stderr, "%s sharegroup: \t%p \n", __FILE__, ctx->shareGroup().get());
         emugl_crash_reporter("FATAL: blitFromCurrentReadBufferANDROID: "
                              "image (%p) or share group (%p) not found",
                              img.get(), ctx->shareGroup().get());

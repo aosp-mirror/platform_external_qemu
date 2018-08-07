@@ -40,6 +40,14 @@ using android::snapshot::TextureSaver;
 // Global dispatch object with functions overridden for snapshot testing
 static const GLESv2Dispatch* getSnapshotTestDispatch();
 
+// Holds handles for context that needs to be bound
+struct SnapshotHandles {
+    HandleType drawSurface;
+    HandleType readSurface;
+    HandleType context;
+    HandleType colorBuffer;
+};
+
 // SnapshotTestDispatch - a GL dispatcher with some of its functions overridden
 // that can act as a drop-in replacement for GLESv2Dispatch. These functions are
 // given wrappers that perform a test of the GL snapshot when they are called.
@@ -65,6 +73,21 @@ public:
         }
     }
 
+    void captureCurrentHandles(SnapshotHandles handles) {
+        //mSaveDisplay = display;
+        mHandles = handles;
+        fprintf(stderr, "Handles captured\n");
+        // mSaveDrawSurface = handles.drawSurface;
+        // mSaveReadSurface = handles.readSurface;
+        // mSaveContext = handles.context;
+        // const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+        // mSaveDisplay = egl->eglGetCurrentDisplay();
+        // mSaveDrawSurface = egl->eglGetCurrentSurface(EGL_DRAW);
+        // mSaveReadSurface = egl->eglGetCurrentSurface(EGL_READ);
+        // mSaveContext = egl->eglGetCurrentContext();
+        // fprintf(stderr, "Tracking EGL context %p\n", mSaveContext);
+    }
+
 protected:
     void overrideFunctions() {
         this->glDrawArrays = (glDrawArrays_t)test_glDrawArrays;
@@ -79,7 +102,7 @@ protected:
 
         std::string timeStamp =
                 std::to_string(android::base::System::get()->getUnixTime())
-                + "-" + std::to_string(saveCount);
+                + "-" + std::to_string(loadCount);
         mSnapshotFile =
                 mSnapshotPath + PATH_SEP "snapshot_" + timeStamp + ".snap";
         mTextureFile =
@@ -103,6 +126,8 @@ protected:
             FAIL() << "Could not get FrameBuffer during snapshot test.";
         }
 
+        //fb->bindContext(0, 0, 0);
+
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
                 fopen(mSnapshotFile.c_str(), "rb"), StdioStream::kOwner));
         std::shared_ptr<TextureLoader> m_texture_loader(
@@ -113,11 +138,26 @@ protected:
 
         m_stream->close();
         m_texture_loader->join();
+
+        // if (mSaveDisplay != EGL_NO_DISPLAY) {
+            // const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+            // egl->eglMakeCurrent(mSaveDisplay, mSaveDrawSurface,
+            //         mSaveReadSurface, mSaveContext);
+        if (mHandles.context) {
+            fprintf(stderr, "Binding context after load\n");
+            fb->bindContext(mHandles.context, mHandles.drawSurface,
+                     mHandles.readSurface);
+            //fb->setWindowSurfaceColorBuffer(mHandles.drawSurface, mHandles.colorBuffer);
+        }
+        // }
+        loadCount++;
     }
 
     static void testDraw(std::function<void()> doDraw) {
         const GLESv2Dispatch* gl = LazyLoadedGLESv2Dispatch::get();
+        const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
         ASSERT_NE(nullptr, gl);
+        ASSERT_NE(nullptr, egl);
 
         FrameBuffer* fb = FrameBuffer::getFB();
         if (!fb) {
@@ -129,17 +169,8 @@ protected:
         // save then draw
         ((SnapshotTestDispatch*)getSnapshotTestDispatch())->saveSnapshot();
         doDraw();
-
         EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE,
                                           {0.2f, 0.2f, 0.3f, 0.0f}));
-
-        // change clear to be sure snapshot worked
-        gl->glFinish();
-        gl->glClearColor(0, 0, 0, 1);
-        gl->glClear(GL_COLOR_BUFFER_BIT);
-        gl->glFinish();
-        EXPECT_TRUE(
-                compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {0, 0, 0, 1}));
 
         // save the framebuffer contents
         GLuint width, height, bytesPerPixel;
@@ -151,13 +182,32 @@ protected:
         gl->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                          prePixels.data());
 
+        gl->glFinish();
+        gl->glClearColor(0.5, 0.5, 0.5, 0.5);
+        gl->glClear(GL_COLOR_BUFFER_BIT);
+        gl->glFinish();
+        EXPECT_TRUE(
+                compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {0.5, 0.5, 0.5, 0.5}));
+
         // load and redraw
         ((SnapshotTestDispatch*)getSnapshotTestDispatch())->loadSnapshot();
+        //egl->eglMakeCurrent(getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        // egl->eglMakeCurrent(fb->getDisplay(),
+        //         fb->getWindowSurface(),
+        //         fb->getWindowSurface(),
+        //         fb->getContext());
+        //fb->bindContext(fb->getContext(), fb->getWindowSurface(), fb->getWindowSurface());
+        // fb->lock();
+        // fb->bind_locked();
+        // fb->unbind_locked();
+        // fb->unlock();
         doDraw();
 
         // check that clear is restored
         EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE,
                                           {0.2f, 0.2f, 0.3f, 0.0f}));
+
+        fprintf(stderr, "reached pre-read-pixels\n");
 
         // compare the framebuffer contents
         std::vector<GLubyte> postPixels = {};
@@ -165,10 +215,14 @@ protected:
         gl->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                          postPixels.data());
 
+        fprintf(stderr, "reached comparisons\n");
+
         EXPECT_EQ(prePixels, postPixels);
         EXPECT_TRUE(compareVector<GLubyte>(prePixels, postPixels));
         EXPECT_TRUE(ImageMatches(width, height, bytesPerPixel, width,
                                  prePixels.data(), postPixels.data()));
+
+        fprintf(stderr, "ended test\n");
     }
 
     static void test_glDrawArrays(GLenum mode, GLint first, GLsizei count) {
@@ -189,7 +243,17 @@ protected:
 
     bool mValid = false;
 
-    int saveCount = 0;
+    int loadCount = 0;
+
+    SnapshotHandles mHandles;
+    //HandleType mSaveDisplay;
+    // HandleType mSaveDrawSurface;
+    // HandleType mSaveReadSurface;
+    // HandleType mSaveContext;
+    // EGLDisplay mSaveDisplay = EGL_NO_DISPLAY;
+    // EGLSurface mSaveDrawSurface = EGL_NO_SURFACE;
+    // EGLSurface mSaveReadSurface = EGL_NO_SURFACE;
+    // EGLContext mSaveContext = EGL_NO_CONTEXT;
 
     android::base::TestSystem mTestSystem;
     std::string mSnapshotPath = {};
@@ -231,7 +295,12 @@ public:
 protected:
     const GLESv2Dispatch* getGlDispatch() { return getSnapshotTestDispatch(); }
 
+    SnapshotHandles getHandles() {
+        return { mSurface, mSurface, mContext, mColorBuffer };
+    }
+
     void draw() override {
+        ((SnapshotTestDispatch*)getSnapshotTestDispatch())->captureCurrentHandles(getHandles());
         HelloTriangle::draw();
         mFrameCount++;
     }
@@ -239,7 +308,7 @@ protected:
     int mFrameCount = 0;
 };
 
-TEST(SnapshotGlRenderingSampleTest, DISABLED_DrawTriangleOnce) {
+TEST(SnapshotGlRenderingSampleTest, DrawTriangleOnce) {
     SnapshotTestTriangle app;
     app.drawOnce();
 }

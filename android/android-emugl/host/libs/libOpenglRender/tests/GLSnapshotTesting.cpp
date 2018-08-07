@@ -254,6 +254,7 @@ void SnapshotTest::loadSnapshot(const std::string streamFile,
 
     m_stream->close();
     m_texture_loader->join();
+    fprintf(stderr, "snapshottest purposeful makecurrent\n");
     egl->eglMakeCurrent(m_display, m_surface, m_surface, m_context);
 }
 

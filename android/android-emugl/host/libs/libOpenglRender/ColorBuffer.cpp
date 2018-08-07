@@ -251,10 +251,13 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 }
 
 ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
-    : m_display(display), m_helper(helper), mHndl(hndl) {}
+    : m_display(display), m_helper(helper), mHndl(hndl) {
+        fprintf(stderr, "CREATING COLORBUFFER %d\n", hndl);
+    }
 
 ColorBuffer::~ColorBuffer() {
     RecursiveScopedHelperContext context(m_helper);
+    fprintf(stderr, "%s: DESTROYING COLORBUFFER %d\n", __func__, getHndl());
 
     if (m_blitEGLImage) {
         s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
@@ -667,6 +670,7 @@ HandleType ColorBuffer::getHndl() const {
 }
 
 void ColorBuffer::onSave(android::base::Stream* stream) {
+    fprintf(stderr, "SAVING COLORBUFFER %d %s\n", getHndl(), __FILE__);
     stream->putBe32(getHndl());
     stream->putBe32(static_cast<uint32_t>(m_width));
     stream->putBe32(static_cast<uint32_t>(m_height));
@@ -682,6 +686,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
                                  EGLDisplay p_display,
                                  Helper* helper,
                                  bool fastBlitSupported) {
+    fprintf(stderr, "%s COLORBUFFER LOADING\n", __FILE__);
     HandleType hndl = static_cast<HandleType>(stream->getBe32());
     GLuint width = static_cast<GLuint>(stream->getBe32());
     GLuint height = static_cast<GLuint>(stream->getBe32());
@@ -692,9 +697,14 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     EGLImageKHR blitEGLImage = reinterpret_cast<EGLImageKHR>(stream->getBe32());
 
     if (!eglImage) {
+        fprintf(stderr, "%s COLORBUFFER CREATING EGL IMAGE\n", __FILE__);
         return create(p_display, width, height, internalFormat, frameworkFormat,
                       hndl, helper, fastBlitSupported);
     }
+    else {
+        fprintf(stderr, "%s COLORBUFFER ALREADY HAD EGL IMAGE\n", __FILE__);
+    }
+
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
     cb->mNeedRestore = true;
     cb->m_eglImage = eglImage;

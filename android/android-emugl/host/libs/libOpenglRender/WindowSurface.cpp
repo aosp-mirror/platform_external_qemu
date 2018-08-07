@@ -35,9 +35,17 @@ WindowSurface::WindowSurface(EGLDisplay display,
         mHndl(hndl) {}
 
 WindowSurface::~WindowSurface() {
+    // if (mAttachedColorBuffer) {
+    //     fprintf(stderr, "%s: Destroying windowsurface holding colorbuffer %d < %s\n",
+    //             __func__, mAttachedColorBuffer->getHndl(), __FILE__);
+    // }
+    // else {
+    //     fprintf(stderr, "%s: No attached colorbuffer to window surface\n", __func__);
+    // }
     if (mSurface) {
         s_egl.eglDestroySurface(mDisplay, mSurface);
     }
+    // fprintf(stderr, "Done destroying egl surface %p on windowsurface < %s\n", mSurface, __FILE__);
 }
 
 WindowSurface *WindowSurface::create(EGLDisplay display,
@@ -208,6 +216,7 @@ static void saveHndlOrNull(obj_t obj, android::base::Stream* stream) {
 }
 
 void WindowSurface::onSave(android::base::Stream* stream) const {
+    fprintf(stderr, "\t> %s %s %d \n", __FILE__, __func__, __LINE__);
     stream->putBe32(getHndl());
     saveHndlOrNull(mAttachedColorBuffer, stream);
     saveHndlOrNull(mReadContext, stream);
@@ -221,6 +230,7 @@ void WindowSurface::onSave(android::base::Stream* stream) const {
 
 WindowSurface * WindowSurface::onLoad(android::base::Stream* stream,
             EGLDisplay display) {
+    fprintf(stderr, "\t> %s %s %d \n", __FILE__, __func__, __LINE__);
     FrameBuffer* fb = FrameBuffer::getFB();
     HandleType hndl = stream->getBe32();
     HandleType cb = stream->getBe32();

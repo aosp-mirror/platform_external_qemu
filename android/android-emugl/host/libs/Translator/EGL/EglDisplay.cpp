@@ -46,6 +46,14 @@ EglDisplay::~EglDisplay() {
     delete m_idpy;
 }
 
+void EglDisplay::resetObjectNameManagers() {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    delete m_manager[GLES_1_1];
+    delete m_manager[GLES_2_0];
+    m_manager[GLES_1_1] = new ObjectNameManager(&m_globalNameSpace);
+    m_manager[GLES_2_0] = new ObjectNameManager(&m_globalNameSpace);
+}
+
 void EglDisplay::initialize(int renderableType) {
     emugl::Mutex::AutoLock mutex(m_lock);
     m_initialized = true;
@@ -520,6 +528,7 @@ EGLContext EglDisplay::addContext(ContextPtr ctx ) {
 
 EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    fprintf(stderr, "Adding image %d\n", SafeUIntFromPointer(img.get()));
     do {
         ++m_nextEglImageId;
     } while(m_nextEglImageId == 0
@@ -546,15 +555,24 @@ ImagePtr EglDisplay::getImage(EGLImageKHR img,
     /* img is "key" in map<unsigned int, ImagePtr>. */
     unsigned int hndl = SafeUIntFromPointer(img);
     ImagesHndlMap::const_iterator i( m_eglImages.find(hndl) );
+    // for (auto iit : m_eglImages) {
+    //     //fprintf(stderr, "\nlooked over image %d, %p \n", iit.first, iit.second.get());
+    // }
+    // fprintf(stderr, "DONE LOOKING THROUGH IMAGES\n");
     if (i == m_eglImages.end()) {
+        fprintf(stderr, "Display could not find image %d < %s\n", hndl, __FILE__);
         return ImagePtr();
     }
+    fprintf(stderr, "Display found image %d < %s\n", hndl, __FILE__);
     touchEglImage(i->second.get(), restorer);
     return i->second;
 }
 
 bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {
     emugl::Mutex::AutoLock mutex(m_lock);
+
+    fprintf(stderr, "Destroying image %d\n", SafeUIntFromPointer(img));
+
     /* img is "key" in map<unsigned int, ImagePtr>. */
     unsigned int hndl = SafeUIntFromPointer(img);
     ImagesHndlMap::iterator i( m_eglImages.find(hndl) );
@@ -651,6 +669,7 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
                                  const android::snapshot::ITextureSaverPtr& textureSaver,
                                  SaveableTexture::saver_t saver,
                                  SaveableTexture::restorer_t restorer) {
+    fprintf(stderr, "\n!\nSaving all images < %s\n", __FILE__);
     // we could consider calling presave for all ShareGroups from here
     // but it would introduce overheads because not all share groups need to be
     // saved
@@ -667,16 +686,20 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
     saveCollection(stream, m_eglImages, [](
             android::base::Stream* stream,
             const ImagesHndlMap::value_type& img) {
+        fprintf(stderr, "EGL image saving: handle %d, name %d \n", img.first,
+                img.second->globalTexObj->getGlobalName());
         stream->putBe32(img.first);
         stream->putBe32(img.second->globalTexObj->getGlobalName());
         // We do not need to save other fields in EglImage. We can load them
         // from SaveableTexture.
     });
+    fprintf(stderr, "Done.\n\n\n");
 }
 
 void EglDisplay::onLoadAllImages(android::base::Stream* stream,
                                  const android::snapshot::ITextureLoaderPtr& textureLoader,
                                  SaveableTexture::creator_t creator) {
+    fprintf(stderr, "\n!\nLoading all images < %s\n", __FILE__);
     if (!m_eglImages.empty()) {
         // Could be triggered by this bug:
         // b/36654917
@@ -693,6 +716,7 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
         android::base::Stream* stream) {
         unsigned int hndl = stream->getBe32();
         unsigned int globalName = stream->getBe32();
+        fprintf(stderr, "EGL image loading: handle %d, name %d \n", hndl, globalName);
         ImagePtr eglImg(new EglImage);
         eglImg->imageId = hndl;
         eglImg->saveableTexture =
@@ -700,6 +724,7 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
         eglImg->needRestore = true;
         return std::make_pair(hndl, std::move(eglImg));
     });
+    fprintf(stderr, "Done.\n\n\n");
 }
 
 void EglDisplay::postLoadAllImages(android::base::Stream* stream) {

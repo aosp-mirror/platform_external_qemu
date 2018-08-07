@@ -21,6 +21,7 @@ EGLBoolean eglReleaseThread(void);
 EGLContext eglCreateContext(EGLDisplay display, EGLConfig config, EGLContext share_context, const EGLint* attrib_list);
 EGLBoolean eglDestroyContext(EGLDisplay display, EGLContext context);
 EGLBoolean eglMakeCurrent(EGLDisplay display, EGLSurface draw, EGLSurface read, EGLContext context);
+EGLDisplay eglGetCurrentDisplay(void);
 EGLContext eglGetCurrentContext(void);
 EGLSurface eglGetCurrentSurface(EGLint readdraw);
 EGLBoolean eglQuerySurface(EGLDisplay display, EGLSurface surface, EGLint attribute, EGLint *value);

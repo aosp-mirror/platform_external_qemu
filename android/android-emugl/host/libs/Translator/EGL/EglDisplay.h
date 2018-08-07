@@ -112,6 +112,8 @@ public:
                          SaveableTexture::creator_t creator);
     void postLoadAllImages(android::base::Stream* stream);
 
+    void resetObjectNameManagers();
+
 private:
     static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 

@@ -86,11 +86,12 @@ protected:
         mRenderThreadInfo = new RenderThreadInfo();
 
         // Snapshots
-        mTestSystem.getTempRoot()->makeSubDir("Snapshots");
-        mSnapshotPath = mTestSystem.getTempRoot()->makeSubPath("Snapshots");
+        mTestSystem.getTempRoot()->makeSubDir("FramebufferSnapshots");
+        mSnapshotPath = mTestSystem.getTempRoot()->makeSubPath("FramebufferSnapshots");
         mTimeStamp = std::to_string(android::base::System::get()->getUnixTime());
         mSnapshotFile = mSnapshotPath + PATH_SEP "snapshot_" + mTimeStamp + ".snap";
         mTextureFile = mSnapshotPath + PATH_SEP "textures_" + mTimeStamp + ".stex";
+        fprintf(stderr, "Snapshot file is %s\n", mSnapshotFile.c_str());
     }
 
     virtual void TearDown() override {
@@ -103,6 +104,8 @@ protected:
     }
 
     void saveSnapshot() {
+        fprintf(stderr, "Saving snapshot file is %s\n", mSnapshotFile.c_str());
+
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
                     fopen(mSnapshotFile.c_str(), "wb"), StdioStream::kOwner));
         std::shared_ptr<TextureSaver> m_texture_saver(new TextureSaver(StdioStream(
@@ -114,6 +117,7 @@ protected:
     }
 
     void loadSnapshot() {
+        fprintf(stderr, "Loading snapshot file is %s\n", mSnapshotFile.c_str());
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
                     fopen(mSnapshotFile.c_str(), "rb"), StdioStream::kOwner));
         std::shared_ptr<TextureLoader> m_texture_loader(
@@ -223,8 +227,10 @@ TEST_F(FrameBufferTest, CreateRenderContext) {
 
 // Tests creating window surface from FrameBuffer.
 TEST_F(FrameBufferTest, CreateWindowSurface) {
+    fprintf(stderr, "Started CreateWindowSurface test\n");
     HandleType handle = mFb->createWindowSurface(0, mWidth, mHeight);
     EXPECT_NE(0, handle);
+    fprintf(stderr, "Finished CreateWindowSurface test\n");
 }
 
 // Tests eglMakeCurrent from FrameBuffer.
