@@ -32,6 +32,16 @@ using android::AlignedBuf;
 #define GL_R16_SNORM 0x8F98
 #define GL_RG16_SNORM 0x8F99
 
+bool isCompressedFormatNativelySupported(GLEScontext* ctx,
+                                         GLenum internalformat) {
+    if (ctx->getCaps()->ext_GL_KHR_texture_compression_astc_ldr &&
+        isAstcFormat(internalformat)) {
+        return true;
+    }
+
+    return false;
+}
+
 int getCompressedFormats(int* formats) {
     if(formats){
         //Palette

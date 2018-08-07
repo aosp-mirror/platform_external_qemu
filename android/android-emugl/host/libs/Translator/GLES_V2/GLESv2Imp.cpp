@@ -712,15 +712,27 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || imageSize < 0, GL_INVALID_VALUE);
 
-    GLint prevUnpack;
-    ctx->dispatcher().glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpack);
-    ctx->dispatcher().glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    if (isCompressedFormatNativelySupported(ctx, internalformat)) {
+        ctx->dispatcher().glCompressedTexImage2D(target, level, internalformat,
+                                                 width, height, border,
+                                                 imageSize, data);
 
-    doCompressedTexImage2D(ctx, target, level, internalformat,
-                                width, height, border,
-                                imageSize, data, glTexImage2D);
+        GLint err = ctx->dispatcher().glGetError();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "%s: got err :( 0x%x format 0x%x\n", __func__, err,
+                    internalformat);
+            ctx->setGLerror(err);
+        }
+    } else {
+        GLint prevUnpack;
+        ctx->dispatcher().glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpack);
+        ctx->dispatcher().glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    ctx->dispatcher().glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpack);
+        doCompressedTexImage2D(ctx, target, level, internalformat, width,
+                               height, border, imageSize, data, glTexImage2D);
+
+        ctx->dispatcher().glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpack);
+    }
 
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
