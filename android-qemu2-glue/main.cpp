@@ -13,7 +13,6 @@
 #include "android/avd/hw-config.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
-#include "android/base/files/FileShareOpen.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -26,9 +25,9 @@
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
-#include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/ParameterList.h"
+#include "android/emulation/control/ScreenCapturer.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
@@ -40,6 +39,7 @@
 #include "android/main-common-ui.h"
 #include "android/main-common.h"
 #include "android/main-kernel-parameters.h"
+#include "android/multi-instance.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/opengles.h"
@@ -747,16 +747,9 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
-    const char* multiInstanceLock = avdInfo_getMultiInstanceLockFilePath(avd);
-    if (!System::get()->pathIsFile(multiInstanceLock)) {
-        android::base::createFileForShare(multiInstanceLock);
-    }
     android::base::FileShare shareMode = opts->read_only ? FileShare::Read
                                                          : FileShare::Write;
-    const char* mode = opts->read_only ? "rb" : "wb";
-    if (!android::base::fsopen(multiInstanceLock, mode, shareMode)) {
-        derror("Another emulator instance is running. Please close it or "
-                "run all emulators with -read-only flag.\n");
+    if (!android::multiinstance::initInstanceShareMode(shareMode)) {
         return 1;
     }
 

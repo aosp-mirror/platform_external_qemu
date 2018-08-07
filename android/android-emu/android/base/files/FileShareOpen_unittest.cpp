@@ -118,3 +118,25 @@ TEST_F(FileShareTest, createShareWrite) {
         fclose(f2);
     }
 }
+
+#ifndef _WIN32
+TEST_F(FileShareTest, updateShareReadToWrite) {
+    FILE* f1 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
+    EXPECT_TRUE(f1);
+    EXPECT_TRUE(updateFileShare(f1, FileShare::Write));
+    FILE* f2 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
+    EXPECT_FALSE(f2);
+    fclose(f1);
+}
+
+TEST_F(FileShareTest, updateShareWriteToRead) {
+    FILE* f1 = fsopen(mFilePath.c_str(), "w", FileShare::Write);
+    EXPECT_TRUE(f1);
+    EXPECT_TRUE(updateFileShare(f1, FileShare::Read));
+    FILE* f2 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
+    EXPECT_TRUE(f2);
+    fclose(f1);
+    fclose(f2);
+}
+
+#endif  // ifndef _WIN32
