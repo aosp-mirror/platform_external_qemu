@@ -14,6 +14,7 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulator-window.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
@@ -56,6 +57,8 @@ using namespace android::base;
 using namespace android::snapshot;
 
 namespace pb = android_studio;
+namespace fc = android::featurecontrol;
+using fc::Feature;
 
 static const char CURRENT_SNAPSHOT_ICON_NAME[] = "current_snapshot";
 static const char CURRENT_SNAPSHOT_SELECTED_ICON_NAME[] = "current_snapshot_selected";
@@ -187,8 +190,13 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     // Save QuickBoot snapshot on exit
     QString avdNameWithUnderscores(android_hw->avd_name);
 
-    mUi->saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
-                                          + avdNameWithUnderscores.replace('_', ' '));
+    if (fc::isEnabled(fc::QuickbootFileBacked)) {
+        mUi->saveOnExitTitle->setText(QString(tr("(Requires restart) Quick-boot save for AVD: "))
+                + avdNameWithUnderscores.replace('_', ' '));
+    } else {
+        mUi->saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
+                + avdNameWithUnderscores.replace('_', ' '));
+    }
 
     SaveSnapshotOnExit saveOnExitChoice = getSaveOnExitChoice();
     switch (saveOnExitChoice) {
@@ -218,8 +226,23 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
     }
-    // Enable SAVE NOW if we won't overwrite the state on exit
-    mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
+
+    // In file-backed Quickboot, the 'save now' button is always disabled.
+    if (fc::isEnabled(fc::QuickbootFileBacked)) {
+        mUi->saveQuickBootOnExit->setItemText(
+            static_cast<int>(SaveSnapshotOnExitUiOrder::Always),
+            QString(tr("Auto-save")));
+        mUi->saveQuickBootOnExit->setItemText(
+            static_cast<int>(SaveSnapshotOnExitUiOrder::Never),
+            QString(tr("Reload saved state (if any), no auto-save")));
+        mUi->saveQuickBootOnExit->setItemText(
+            static_cast<int>(SaveSnapshotOnExitUiOrder::Ask),
+            QString(tr("Ask")));
+        mUi->saveQuickBootNowButton->setEnabled(false);
+    } else {
+        // Enable SAVE NOW if we won't overwrite the state on exit
+        mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
+    }
 
     QSettings settings;
     DeleteInvalidSnapshots deleteInvalids = static_cast<DeleteInvalidSnapshots>
@@ -538,8 +561,16 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
             preferenceValue = SaveSnapshotOnExit::Always;
             break;
     }
-    // Enable SAVE STATE NOW if we won't overwrite the state on exit
-    mUi->saveQuickBootNowButton->setEnabled(preferenceValue != SaveSnapshotOnExit::Always);
+
+    if (fc::isEnabled(fc::QuickbootFileBacked)) {
+        mUi->saveQuickBootNowButton->setEnabled(false);
+        // TODO: loadQuickBootNowButton requires unmap
+        // and remap of ram file
+        mUi->loadQuickBootNowButton->setEnabled(false);
+    } else {
+        // Enable SAVE STATE NOW if we won't overwrite the state on exit
+        mUi->saveQuickBootNowButton->setEnabled(preferenceValue != SaveSnapshotOnExit::Always);
+    }
 
     // Save for only this AVD
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
