@@ -16,6 +16,7 @@
 #include "GLSnapshotTesting.h"
 #include "GLTestUtils.h"
 #include "OpenglCodecCommon/glUtils.h"
+#include "RenderThreadInfo.h"
 #include "Standalone.h"
 #include "samples/HelloTriangle.h"
 
@@ -77,9 +78,24 @@ protected:
             FAIL() << "Could not get FrameBuffer during snapshot test.";
         }
 
+        // Keep thread's context and surface handles so we can restore the bind
+        // after load is complete.
+        RenderThreadInfo* threadInfo = RenderThreadInfo::get();
+        if (threadInfo) {
+            mContext = threadInfo->currContext
+                               ? threadInfo->currContext->getHndl()
+                               : 0;
+            mDrawSurface = threadInfo->currDrawSurf
+                                   ? threadInfo->currDrawSurf->getHndl()
+                                   : 0;
+            mReadSurface = threadInfo->currReadSurf
+                                   ? threadInfo->currReadSurf->getHndl()
+                                   : 0;
+        }
+
         std::string timeStamp =
-                std::to_string(android::base::System::get()->getUnixTime())
-                + "-" + std::to_string(saveCount);
+                std::to_string(android::base::System::get()->getUnixTime()) +
+                "-" + std::to_string(mLoadCount);
         mSnapshotFile =
                 mSnapshotPath + PATH_SEP "snapshot_" + timeStamp + ".snap";
         mTextureFile =
@@ -103,15 +119,24 @@ protected:
             FAIL() << "Could not get FrameBuffer during snapshot test.";
         }
 
+        // unbind so load will destroy previous objects
+        fb->bindContext(0, 0, 0);
+
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
                 fopen(mSnapshotFile.c_str(), "rb"), StdioStream::kOwner));
         std::shared_ptr<TextureLoader> m_texture_loader(
                 new TextureLoader(StdioStream(fopen(mTextureFile.c_str(), "rb"),
                                               StdioStream::kOwner)));
+
         fb->onLoad(m_stream.get(), m_texture_loader);
 
         m_stream->close();
         m_texture_loader->join();
+
+        // rebind to context
+        fb->bindContext(mContext, mDrawSurface, mReadSurface);
+
+        mLoadCount++;
     }
 
     static void testDraw(std::function<void()> doDraw) {
@@ -127,22 +152,39 @@ protected:
 
         // save then draw
         ((SnapshotTestDispatch*)getSnapshotTestDispatch())->saveSnapshot();
+        // Since current framebuffer contents are not saved, we need to draw
+        // onto a clean slate in order to check the result of the draw call
+        gl->glClear(GL_COLOR_BUFFER_BIT);
         doDraw();
 
+        // save the framebuffer contents
         GLuint width, height, bytesPerPixel;
         width = fb->getWidth();
         height = fb->getHeight();
         bytesPerPixel = glUtilsPixelBitSize(GL_RGBA, GL_UNSIGNED_BYTE) / 8;
-
-        // save the framebuffer contents
         std::vector<GLubyte> prePixels = {};
         prePixels.resize(width * height * bytesPerPixel);
         gl->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                          prePixels.data());
 
+        // To verify that the snapshot is restoring our context, we modify the
+        // clear color.
+        std::vector<GLfloat> oldClear = {};
+        oldClear.resize(4);
+        gl->glGetFloatv(GL_COLOR_CLEAR_VALUE, oldClear.data());
+        EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, oldClear));
+        gl->glClearColor(1, 1, 1, 1);
+        gl->glClear(GL_COLOR_BUFFER_BIT);
+        EXPECT_TRUE(
+                compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, {1, 1, 1, 1}));
+
         // load and redraw
         ((SnapshotTestDispatch*)getSnapshotTestDispatch())->loadSnapshot();
+        gl->glClear(GL_COLOR_BUFFER_BIT);
         doDraw();
+
+        // check that clear is restored
+        EXPECT_TRUE(compareGlobalGlFloatv(gl, GL_COLOR_CLEAR_VALUE, oldClear));
 
         // compare the framebuffer contents
         std::vector<GLubyte> postPixels = {};
@@ -172,12 +214,16 @@ protected:
 
     bool mValid = false;
 
-    int saveCount = 0;
+    int mLoadCount = 0;
 
     android::base::TestSystem mTestSystem;
     std::string mSnapshotPath = {};
     std::string mSnapshotFile = {};
     std::string mTextureFile = {};
+
+    HandleType mContext;
+    HandleType mDrawSurface;
+    HandleType mReadSurface;
 };
 
 static LazyInstance<SnapshotTestDispatch> sSnapshotTestDispatch =
@@ -198,13 +244,34 @@ TEST(SnapshotGlRenderingSampleTest, OverrideDispatch) {
 }
 
 class SnapshotTestTriangle : public HelloTriangle {
+public:
+    void drawLoop() {
+        this->initialize();
+        while (mFrameCount < 5) {
+            this->draw();
+            mFrameCount++;
+            mFb->flushWindowSurfaceColorBuffer(mSurface);
+            if (mUseSubWindow) {
+                mFb->post(mColorBuffer);
+                mWindow->messageLoop();
+            }
+        }
+    }
+
 protected:
     const GLESv2Dispatch* getGlDispatch() { return getSnapshotTestDispatch(); }
+
+    int mFrameCount = 0;
 };
 
 TEST(SnapshotGlRenderingSampleTest, DrawTriangle) {
     SnapshotTestTriangle app;
     app.drawOnce();
+}
+
+TEST(SnapshotGlRenderingSampleTest, DrawTriangleLoop) {
+    SnapshotTestTriangle app;
+    app.drawLoop();
 }
 
 }  // namespace emugl
