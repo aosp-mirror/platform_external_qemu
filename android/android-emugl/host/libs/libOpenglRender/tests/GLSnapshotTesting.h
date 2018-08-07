@@ -143,6 +143,7 @@ testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
 // Compare the values at each index of a vector |actual| against an |expected|.
 // Returns a failure if any values are mismatched; provide |description| to
 // attach details to the failure message.
+// |actual| is allowed to contain more elements than |expected|.
 template <class T>
 testing::AssertionResult compareVector(
         const std::vector<T>& expected,
