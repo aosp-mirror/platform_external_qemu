@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fcb6084_8af0bb56",
+        "filename": "android/android-emu/android/multi-instance.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-07T18:32:26Z",
+      "side": 1,
+      "message": "For LazyInstance, I was thinking that we would use sMultiInstanceState.hasInstance() here instead of having an explicit \"initialized\" variable.",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 40
+      },
+      "revId": "3e35242afbb901a62669d4ffc6d85453c4f64cdc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

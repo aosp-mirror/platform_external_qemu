@@ -234,6 +234,30 @@
       "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d04d188d_ea94cd9d",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-07T18:32:26Z",
+      "side": 1,
+      "message": "Yeah, I think so.  What I have been thinking is some sort of dialog that pops up asking for permission on the host, or a command line option that can override for tests.",
+      "parentUuid": "a20d8a68_48b7d6e5",
+      "range": {
+        "startLine": 174,
+        "startChar": 20,
+        "endLine": 175,
+        "endChar": 0
+      },
+      "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
