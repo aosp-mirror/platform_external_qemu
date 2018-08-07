@@ -1712,6 +1712,44 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
         s_glSupport.GL_OES_RGB8_RGBA8 = true;
 
+    // Check for native ASTC support.
+    if (strstr(cstring, "GL_KHR_texture_compression_astc_ldr")) {
+        s_glSupport.ext_GL_KHR_texture_compression_astc_ldr = true;
+    } else {
+        // If the extension is not present, it may still be supported but not
+        // advertised.  Enumerate texture formats to confirm.
+        int numFormats = 0;
+        s_glDispatch.glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS,
+                                   &numFormats);
+        if (numFormats > 0) {
+            std::vector<GLint> supportedFormats(numFormats);
+            s_glDispatch.glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS,
+                                       supportedFormats.data());
+
+            bool allFormatsSupported = true;
+            const GLint* astcFormats = nullptr;
+            size_t astcFormatsCount = 0;
+            getAstcFormats(&astcFormats, &astcFormatsCount);
+
+            for (size_t i = 0; i < astcFormatsCount; ++i) {
+                const GLint format = astcFormats[i];
+                if (std::find(supportedFormats.begin(), supportedFormats.end(),
+                              format) == supportedFormats.end()) {
+                    printf("Format %d not supported\n", format);
+                    allFormatsSupported = false;
+                    break;
+                }
+            }
+
+            if (allFormatsSupported) {
+                s_glSupport.ext_GL_KHR_texture_compression_astc_ldr = true;
+            }
+        }
+    }
+
+    if (s_glSupport.ext_GL_KHR_texture_compression_astc_ldr) {
+        printf("=== System supports native ASTC decoding\n");
+    }
 }
 
 void GLEScontext::buildStrings(const char* baseVendor,

@@ -115,6 +115,16 @@ int getCompressedFormats(int* formats) {
     return kCount;
 }
 
+bool isCompressedFormatNativelySupported(GLEScontext* ctx,
+                                         GLenum internalformat) {
+    if (ctx->getCaps()->ext_GL_KHR_texture_compression_astc_ldr &&
+        isAstcFormat(internalformat)) {
+        return true;
+    }
+
+    return false;
+}
+
 ETC2ImageFormat getEtcFormat(GLenum internalformat) {
     ETC2ImageFormat etcFormat = EtcRGB8;
     switch (internalformat) {
