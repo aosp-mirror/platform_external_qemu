@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43eaa540_b8639d33",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-07T22:24:28Z",
+      "side": 1,
+      "message": "please don\u0027t forget to remove it",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 10
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4cb742d2_828f325a",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-07T22:24:28Z",
+      "side": 1,
+      "message": "it doesn\u0027t look as opaque to me now. Why not force the type in the function signature?",
+      "range": {
+        "startLine": 59,
+        "startChar": 4,
+        "endLine": 59,
+        "endChar": 73
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "054b57f9_c8c52bd3",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-07T22:24:28Z",
+      "side": 1,
+      "message": "you have dereferenced this @ line 60, checking for null will make the compiler go crazy",
+      "range": {
+        "startLine": 64,
+        "startChar": 8,
+        "endLine": 64,
+        "endChar": 31
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "01aaebf1_be072ff5",
+        "filename": "android-qemu2-glue/drive-share.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-07T22:24:28Z",
+      "side": 1,
+      "message": "nit: (void) for C",
+      "range": {
+        "startLine": 21,
+        "startChar": 37,
+        "endLine": 21,
+        "endChar": 38
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b8ffa2c_daa11cf3",
+        "filename": "android-qemu2-glue/drive-share.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-07T22:24:28Z",
+      "side": 1,
+      "message": "nit: \"struct QemuOpts*, struct Error**\" if you want it to be usable from C",
+      "range": {
+        "startLine": 22,
+        "startChar": 44,
+        "endLine": 22,
+        "endChar": 52
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eed1a3ad_c2e10472",
+        "filename": "android/android-emu/android/multi-instance.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-07T22:24:28Z",
+      "side": 1,
+      "message": "this crashes if the function is nullptr",
+      "range": {
+        "startLine": 66,
+        "startChar": 29,
+        "endLine": 66,
+        "endChar": 53
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
