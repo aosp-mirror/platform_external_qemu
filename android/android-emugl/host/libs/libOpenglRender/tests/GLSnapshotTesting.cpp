@@ -99,9 +99,6 @@ testing::AssertionResult compareGlobalGlFloat(const GLESv2Dispatch* gl,
                                          describeGlEnum(name) + ":");
 }
 
-// Compare the values at each index of a vector |actual| against an |expected|.
-// Returns a failure if any values are mismatched; provide |description| to
-// attach details to the failure message.
 template <class T>
 testing::AssertionResult compareVector(const std::vector<T>& expected,
                                        const std::vector<T>& actual,
@@ -115,18 +112,36 @@ testing::AssertionResult compareVector(const std::vector<T>& expected,
     int mismatches = 0;
     for (int i = 0; i < expected.size(); i++) {
         if (i >= actual.size()) {
-            message << "    no match for:\t"
-                    << testing::PrintToString(expected[i]) << "\n";
+            if (mismatches < 10) {
+                mismatches++;
+                message << "    no match for:\t"
+                        << testing::PrintToString(expected[i]) << "\n";
+            } else {
+                mismatches += expected.size() - i;
+                message << "\n    nothing can match remaining elements.\n";
+                break;
+            }
         } else if (expected[i] != actual[i]) {
             mismatches++;
-            message << "    at index " << i << ":\n\tvalue was:\t"
-                    << testing::PrintToString(actual[i]) << "\n\t expected:\t"
-                    << testing::PrintToString(expected[i]) << "\n";
+            if (mismatches < 15) {
+                message << "    at index " << i << ":\n\tvalue was:\t"
+                        << testing::PrintToString(actual[i])
+                        << "\n\t expected:\t"
+                        << testing::PrintToString(expected[i]) << "\n";
+            } else if (mismatches == 15) {
+                message << "    ... and indices " << i;
+            } else if (mismatches < 50) {
+                message << ", " << i;
+            } else if (mismatches == 50) {
+                message << ", etc...";
+            }
         }
     }
     if (mismatches > 0) {
         return testing::AssertionFailure()
                << description << " had " << mismatches << " mismatches.\n"
+               << "  expected: " << testing::PrintToString(expected) << "\n"
+               << "    actual: " << testing::PrintToString(actual) << "\n"
                << message.str() << "  ";
     }
     return testing::AssertionSuccess();

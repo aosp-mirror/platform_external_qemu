@@ -384,7 +384,7 @@ public:
                         levels[i].width * levels[i].height *
                         glUtilsPixelBitSize(
                                 levels[i].format,
-                                GL_UNSIGNED_BYTE /* levels[i].type */));
+                                GL_UNSIGNED_BYTE /* levels[i].type */) / 8);
                 gl->glTexImage2D(imageTarget, i, levels[i].format,
                                  levels[i].width, levels[i].height, 0,
                                  levels[i].format,
