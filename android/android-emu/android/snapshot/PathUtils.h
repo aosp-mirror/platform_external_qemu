@@ -23,6 +23,7 @@ std::string getSnapshotBaseDir();
 std::string getSnapshotDir(const char* snapshotName);
 std::string getSnapshotDepsFileName();
 std::vector<std::string> getSnapshotDirEntries();
+std::string getQuickbootChoiceIniPath();
 
 base::System::FileSize folderSize(const std::string& snapshotName);
 

@@ -64,7 +64,10 @@ void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
 using Ui::Settings::SaveSnapshotOnExit;
 using android::base::System;
 using android::metrics::MetricsReporter;
+
 namespace pb = android_studio;
+namespace fc = android::featurecontrol;
+using fc::Feature;
 
 template <typename T>
 ToolWindow::WindowHolder<T>::WindowHolder(ToolWindow* tw,
@@ -158,10 +161,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Left ROTATE_LEFT\n"
             "Ctrl+Right ROTATE_RIGHT\n";
 
-    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage)) {
+    if (fc::isEnabled(fc::PlayStoreImage)) {
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
     }
-    if (android::featurecontrol::isEnabled(android::featurecontrol::ScreenRecording)) {
+    if (fc::isEnabled(fc::ScreenRecording)) {
         default_shortcuts += "Ctrl+Shift+R SHOW_PANE_RECORD_SCREEN\n";
     }
 
@@ -713,8 +716,8 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     bool hasLowRam = System::isUnderMemoryPressure();
 
     if (saveOnExitChoice == SaveSnapshotOnExit::Always &&
-        !savesWereSlow &&
-        !hasLowRam) {
+        (fc::isEnabled(fc::QuickbootFileBacked) ||
+        (!savesWereSlow && !hasLowRam))) {
         return true;
     }
 
@@ -729,11 +732,19 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     auto askMessageDefault =
         tr("Do you want to save the current state for the next quick boot?");
 
+    auto askMessageNonFileBacked =
+        savesWereSlow ? askMessageSlow :
+        (hasLowRam ? askMessageLowRam : askMessageDefault);
+
+    auto askMessage = fc::isEnabled(fc::QuickbootFileBacked) ?
+        tr("In the next emulator session, "
+           "do you want to auto-save emulator state?")
+        : askMessageNonFileBacked;
+
     int64_t startTime = get_uptime_ms();
     QMessageBox msgBox(QMessageBox::Question,
                        tr("Save quick-boot state"),
-                       savesWereSlow ? askMessageSlow :
-                           (hasLowRam ? askMessageLowRam : askMessageDefault),
+                       askMessage,
                        (QMessageBox::Yes | QMessageBox::No),
                        this);
     // Add a Cancel button to enable the MessageBox's X.
