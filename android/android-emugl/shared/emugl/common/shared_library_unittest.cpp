@@ -21,15 +21,6 @@
 #include <limits.h>
 #include <string.h>
 
-// Hack to get the current executable's full path.
-namespace testing {
-namespace internal {
-
-extern std::string g_executable_path;
-
-}  // namespace internal
-}  // namespace testing
-
 namespace emugl {
 
 namespace {
@@ -48,27 +39,7 @@ std::string GetTestLibraryName() {
 #endif
     static const char kTestLibrarySuffix[] = "emugl_test_shared_library";
 
-    const char* exec_path = testing::internal::g_executable_path.c_str();
-
-#ifdef _WIN32
-    const char* p = strrchr(exec_path, '/');
-    const char* p2 = strrchr(exec_path, '\\');
-    if (p2) {
-        if (!p || p2 > p) {
-            p = p2;
-        }
-    }
-#else
-    const char* p = strrchr(exec_path, '/');
-#endif
-
-    std::string path;
-
-    if (!p) {
-        path = "./";
-    } else {
-        path = std::string(exec_path, p - exec_path + 1U);
-    }
+    std::string path = "./";
     path += kSubDir;
     path += kLibraryPrefix;
     path += kTestLibrarySuffix;
