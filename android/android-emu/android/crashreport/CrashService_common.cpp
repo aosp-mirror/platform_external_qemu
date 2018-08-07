@@ -403,7 +403,7 @@ void CrashService::collectProcessList()
     }
 
     const auto command = StringFormat(
-                             "ps aux >%s/%s",
+                             "ps aux >%s" PATH_SEP "%s",
                              mDataDirectory,
                              CrashReporter::kProcessListFileName);
     system(command.c_str());
