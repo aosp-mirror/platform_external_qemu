@@ -88,4 +88,7 @@ typedef enum {
 
 AndroidSnapshotRamFileMode androidSnapshot_getRamFileInfo();
 
+void androidSnapshot_writeQuickbootChoice(bool save);
+bool androidSnapshot_getQuickbootChoice();
+
 ANDROID_END_HEADER

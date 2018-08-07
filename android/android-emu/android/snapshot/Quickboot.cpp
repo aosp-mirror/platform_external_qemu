@@ -15,6 +15,7 @@
 #include "android/base/Stopwatch.h"
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -24,6 +25,7 @@
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
 #include "android/snapshot/Loader.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Saver.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/TextureLoader.h"
@@ -393,8 +395,10 @@ bool Quickboot::save(StringView name) {
         return false;
     }
 
-    if (android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT) {
-        // UI says not to save
+    if (!Snapshotter::get().isRamFileShared() &&
+        android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT) {
+        // UI says not to save, and there's no need to preserve
+        // the current 'shared' session
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_UI);
         return false;
@@ -502,9 +506,33 @@ bool androidSnapshot_quickbootSave(const char* name) {
         androidSnapshot_quickbootInvalidate(name);
     }
 
+    // Write user choice to the ini file if we are using file-backed RAM.
+    if (android::snapshot::Snapshotter::get().hasRamFile()) {
+        bool wantedSaveOnExit = !(android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT);
+        androidSnapshot_writeQuickbootChoice(wantedSaveOnExit);
+    }
+
     return saveResult;
 }
 
 void androidSnapshot_quickbootInvalidate(const char* name) {
     android::snapshot::Quickboot::get().invalidate(name);
+}
+
+void androidSnapshot_writeQuickbootChoice(bool save) {
+    auto iniPath =
+        android::snapshot::getQuickbootChoiceIniPath();
+    android::base::IniFile ini(iniPath);
+    ini.setBool("saveOnExit", save);
+    ini.write();
+}
+
+bool androidSnapshot_getQuickbootChoice() {
+    auto iniPath =
+        android::snapshot::getQuickbootChoiceIniPath();
+    android::base::IniFile ini(iniPath);
+    ini.read();
+    bool res = ini.getBool("saveOnExit", true /* save on exit wanted */);
+
+    return res;
 }

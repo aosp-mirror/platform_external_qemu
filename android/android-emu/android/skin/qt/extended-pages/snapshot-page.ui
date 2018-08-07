@@ -26,7 +26,7 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="snapshotsTab">
     <attribute name="title">
@@ -619,6 +619,28 @@
        <string>Don't delete</string>
       </property>
      </item>
+    </widget>
+    <widget class="QLabel" name="autoSaveNoteLabel">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>32</y>
+       <width>281</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Note: Auto-save setting will only take effect the next emulator session. Please restart the emulator if the state will potentially be lost or overwritten.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
     </widget>
    </widget>
   </widget>
