@@ -340,8 +340,10 @@ $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): $$(_TST)
 	@echo "Running $$(PRIVATE_TST)"
 	@mkdir -p $$(dir $$(PRIVATE_DST))
-	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
-	$(hide) LLVM_PROFILE_FILE=$(call local-test-result-path)/$$(PRIVATE_TST).profraw $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
+	$(eval current_dir=$(shell pwd))
+	@export WINEPATH=$(current_dir)/$(BUILD_OBJS_DIR)/lib
+	$(hide) cd $(BUILD_OBJS_DIR); \
+		LLVM_PROFILE_FILE=$(current_dir)/$(call local-test-result-path)/$$(PRIVATE_TST).profraw $(TEST_SHELL) $(current_dir)/$$(PRIVATE_TST) --gtest_output=xml:$(current_dir)/$(call local-test-result-path)/$$(PRIVATE_TST).xml
 	@touch $$(PRIVATE_DST)
 endef
 
