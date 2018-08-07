@@ -142,7 +142,7 @@ testing::AssertionResult compareVector(const std::vector<T>& expected,
                << description << " had " << mismatches << " mismatches.\n"
                << "  expected: " << testing::PrintToString(expected) << "\n"
                << "    actual: " << testing::PrintToString(actual) << "\n"
-               << message.str() << "  ";
+               << message.str() << "  \n";
     }
     return testing::AssertionSuccess();
 }
