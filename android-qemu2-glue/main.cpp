@@ -851,7 +851,12 @@ extern "C" int main(int argc, char** argv) {
         args.add2("-mem-path", memPath);
         AFREE((void*)memPath);
 
-        if (!opts->read_only) {
+        bool mapAsShared =
+            !opts->read_only &&
+            !opts->no_snapshot_save &&
+            androidSnapshot_getQuickbootChoice();
+
+        if (mapAsShared) {
             args.add("-mem-file-shared");
         }
     }
