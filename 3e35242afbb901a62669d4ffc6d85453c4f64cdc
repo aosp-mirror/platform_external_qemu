@@ -22,6 +22,30 @@
       "revId": "3e35242afbb901a62669d4ffc6d85453c4f64cdc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "369d8b2e_42450347",
+        "filename": "android/android-emu/android/multi-instance.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-07T18:40:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fcb6084_8af0bb56",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 40
+      },
+      "revId": "3e35242afbb901a62669d4ffc6d85453c4f64cdc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

@@ -258,6 +258,30 @@
       "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3325303_1d656f7f",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-07T18:40:42Z",
+      "side": 1,
+      "message": "In that case we could put it into feature control which provides a command line option as well as an ini file.",
+      "parentUuid": "d04d188d_ea94cd9d",
+      "range": {
+        "startLine": 174,
+        "startChar": 20,
+        "endLine": 175,
+        "endChar": 0
+      },
+      "revId": "d431f5f5f06bd653ba956c7d1451b48775918585",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
