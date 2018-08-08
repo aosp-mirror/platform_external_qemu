@@ -630,3 +630,6 @@ void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
     settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
     emit disableMouseWheelChanged(checked);
 }
+
+void SettingsPage::on_set_restartEmulator_pressed() {
+}
