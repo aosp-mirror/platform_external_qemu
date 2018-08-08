@@ -22,9 +22,12 @@ testing::AssertionResult RowMatches(int rowIndex, size_t rowBytes,
                                     unsigned char* expected, unsigned char* actual) {
     for (size_t i = 0; i < rowBytes; ++i) {
         if (expected[i] != actual[i]) {
-            return testing::AssertionFailure() <<
-                       "row " << rowIndex << " byte " << i << " mismatch. expected: " <<
-                       "(" << expected[i] << "), actual: " << "(" << actual[i] << ")";
+            return testing::AssertionFailure()
+                   << "row " << rowIndex << " byte " << i
+                   << " mismatch. expected: "
+                   << "(" << testing::PrintToString(expected[i])
+                   << "), actual: "
+                   << "(" << testing::PrintToString(actual[i]) << ")";
         }
     }
     return testing::AssertionSuccess();
@@ -33,16 +36,31 @@ testing::AssertionResult RowMatches(int rowIndex, size_t rowBytes,
 testing::AssertionResult ImageMatches(int width, int height, int bpp, int rowLength,
                                       unsigned char* expected, unsigned char* actual) {
     int rowMismatches = 0;
+    std::stringstream rowList;
+    std::stringstream rowDetails;
+    rowList << "on ";
     for (int i = 0; i < height * rowLength; i += rowLength) {
         size_t rowBytes = width * bpp;
-        if (!RowMatches(i / rowLength, rowBytes, expected + i, actual + i)) {
+        testing::AssertionResult rowResult = RowMatches(
+                i / rowLength, rowBytes, expected + i * bpp, actual + i * bpp);
+        if (!rowResult) {
             ++rowMismatches;
+            if (rowMismatches < 50) {
+                rowList << ((rowMismatches != 1) ? ", " : "")
+                        << (i / rowLength);
+                rowDetails << "\t" << rowResult.message() << "\n";
+            }
+            if (rowMismatches == 50) {
+                rowList << " and more";
+                rowDetails << "\t...";
+            }
         }
     }
-
     if (rowMismatches) {
-        return testing::AssertionFailure() <<
-               "Mismatch in image: " << rowMismatches << " rows mismatch.";
+        return testing::AssertionFailure()
+               << "Mismatch in image: " << rowMismatches << " rows mismatch "
+               << rowList.str() << ".\n"
+               << rowDetails.str();
     } else {
         return testing::AssertionSuccess();
     }
