@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "15590c29_2a2b6109",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ShareGroup.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-08T17:52:13Z",
+      "side": 1,
+      "message": "please don\u0027t put the assert here. It will use this code path when there is more than 1 shared context.",
+      "range": {
+        "startLine": 388,
+        "startChar": 8,
+        "endLine": 388,
+        "endChar": 34
+      },
+      "revId": "ab7ce0c2c95d66c5c5e84b3b5257e3079a1d4a4a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
