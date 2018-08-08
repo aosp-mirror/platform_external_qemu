@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78d3db25_1220fdde",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-08T19:16:43Z",
+      "side": 1,
+      "message": "have you tried System::get()-\u003egetProgramDirectory()?",
+      "revId": "0b1a5e7d088b849722fc5c5d588e05bb83fa1155",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
