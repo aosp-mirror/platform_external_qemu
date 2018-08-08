@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f3aa383_5de277b1",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-08T02:05:17Z",
+      "side": 1,
+      "message": "This could be ever so slightly faster if we could skip the glGetIntegerv call and query ctx for the unpack alignment; it could work with ctx-\u003egetUnpackAlignment()\n\nIt also feels like there might be some potential error here that setting unpack alignment to 1 would fix :) Nice catch. Would it also be safer to make sure UNPACK_ROW_LENGTH, UNPACK_SKIP_PIXELS/ROWS (and anything else that might come up from https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glPixelStore.xhtml) are also 1 during the emulated call?",
+      "range": {
+        "startLine": 715,
+        "startChar": 0,
+        "endLine": 716,
+        "endChar": 70
+      },
+      "revId": "fa6f44b0c722f82e98021973339bbac5cafdd468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f76d9a0_8650317b",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-08T02:05:17Z",
+      "side": 1,
+      "message": "nit:trailing whitespace",
+      "range": {
+        "startLine": 171,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 8
+      },
+      "revId": "fa6f44b0c722f82e98021973339bbac5cafdd468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
