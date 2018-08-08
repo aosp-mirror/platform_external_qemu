@@ -22,6 +22,30 @@
       "revId": "c2f7d3a71394205c2a6eea6582d0fbec7d7bfe1a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ebd3c37_878ff9ac",
+        "filename": "android/android-emugl/shared/emugl/common/shared_library_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-08T18:40:18Z",
+      "side": 1,
+      "message": "For this particular test, it doesn\u0027t appear to matter.  Before this change, this code already existed, I just removed surrounding code.  Note that kSubDir always uses \"/\" as well, so that would need to be updated as well.\n\nI\u0027d like to opt to leave this as-is for the time being, if it starts causing issues on Windows we can revisit.",
+      "parentUuid": "53fdafc6_6cd70b96",
+      "range": {
+        "startLine": 42,
+        "startChar": 25,
+        "endLine": 42,
+        "endChar": 26
+      },
+      "revId": "c2f7d3a71394205c2a6eea6582d0fbec7d7bfe1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
