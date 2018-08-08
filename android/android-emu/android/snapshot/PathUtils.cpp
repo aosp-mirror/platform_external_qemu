@@ -46,5 +46,11 @@ base::System::FileSize folderSize(const std::string& snapshotName) {
             base::PathUtils::join(getSnapshotBaseDir(), snapshotName));
 }
 
+std::string getQuickbootChoiceIniPath() {
+    auto avdDir = avdInfo_getContentPath(android_avdInfo);
+    auto path = base::PathUtils::join(avdDir, "quickbootChoice.ini");
+    return path;
+}
+
 }  // namespace snapshot
 }  // namespace android
