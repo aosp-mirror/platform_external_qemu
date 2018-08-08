@@ -279,7 +279,7 @@ bool propertyFile_findProductName(const FileData* data,
 
 char* path_getBuildBuildProp(const char* androidOut) {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
-    p = bufprint(temp, end, "%s/system/build.prop", androidOut);
+    p = bufprint(temp, end, "%s"PATH_SEP"system"PATH_SEP"build.prop", androidOut);
     if (p >= end) {
         D("ANDROID_BUILD_OUT is too long: %s\n", androidOut);
         return NULL;
@@ -294,7 +294,7 @@ char* path_getBuildBuildProp(const char* androidOut) {
 
 char* path_getBuildBootProp(const char* androidOut) {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
-    p = bufprint(temp, end, "%s/boot.prop", androidOut);
+    p = bufprint(temp, end, "%s"PATH_SEP"boot.prop", androidOut);
     if (p >= end) {
         D("ANDROID_BUILD_OUT is too long: %s\n", androidOut);
         return NULL;
@@ -392,7 +392,7 @@ path_getAvdSystemPath(const char* avdName,
         if (path_is_absolute(searchPath)) {
           p = strncpy(temp, searchPath, sizeof(temp));
         } else {
-          p = bufprint(temp, end, "%s/%s", sdkRoot, searchPath);
+          p = bufprint(temp, end, "%s"PATH_SEP"%s", sdkRoot, searchPath);
         }
         free(searchPath);
         if (p >= end || !path_is_dir(temp)) {

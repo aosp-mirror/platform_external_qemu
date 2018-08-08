@@ -15,6 +15,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
 #include "android/opengl/EmuglBackendScanner.h"
+#include "android/utils/path.h"
 
 #define DEBUG 0
 
@@ -61,7 +62,7 @@ std::string EmuglBackendList::getLibDirPath(const char* name) {
         nameNoSuffix.erase(nameNoSuffixLen);
     }
     return android::base::StringFormat(
-            "%s/%s/gles_%s",
+            "%s" PATH_SEP "%s" PATH_SEP "gles_%s",
             mExecDir,
             mProgramBitness == 64 ? "lib64" : "lib",
             nameNoSuffix.c_str());
@@ -109,7 +110,7 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
     }
 
     std::string path = android::base::StringFormat(
-            "%s/%s%s%s",
+            "%s" PATH_SEP "%s%s%s",
             getLibDirPath(name),
             kLibPrefix,
             libraryName,
