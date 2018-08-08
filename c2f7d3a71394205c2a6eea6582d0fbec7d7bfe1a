@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "53fdafc6_6cd70b96",
+        "filename": "android/android-emugl/shared/emugl/common/shared_library_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-08T17:47:48Z",
+      "side": 1,
+      "message": "use PATH_SEP for platform compatibility?",
+      "range": {
+        "startLine": 42,
+        "startChar": 25,
+        "endLine": 42,
+        "endChar": 26
+      },
+      "revId": "c2f7d3a71394205c2a6eea6582d0fbec7d7bfe1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
