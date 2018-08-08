@@ -9,6 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/memory/LazyInstance.h"
+
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/raised-material-button.h"
 #include "android/skin/qt/stylesheet.h"
@@ -20,6 +22,10 @@
 #include <QStringList>
 #include <QTemporaryFile>
 #include <QVariant>
+
+#include <functional>
+
+using android::base::FunctionView;
 
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
 {
@@ -183,4 +189,30 @@ void setFrameOnTop(QFrame* frame, bool onTop) {
         frame->show();
     }
 #endif
+}
+
+class QuitCallback {
+public:
+    QuitCallback() = default;
+
+    void registerFunc(FunctionView<void()> func) {
+        mFunc = func;
+    }
+
+    void run() {
+        if (mFunc) mFunc();
+    }
+
+private:
+    FunctionView<void()> mFunc;
+};
+
+static android::base::LazyInstance<QuitCallback> sQuitCallback = LAZY_INSTANCE_INIT;
+
+void registerQuitCallback(FunctionView<void()> func) {
+    sQuitCallback->registerFunc(func);
+}
+
+void runQuitCallback() {
+    sQuitCallback->run();
 }

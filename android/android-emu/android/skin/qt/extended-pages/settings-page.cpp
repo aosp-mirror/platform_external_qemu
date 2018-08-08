@@ -12,6 +12,7 @@
 #include "android/skin/qt/extended-pages/settings-page.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/ProcessControl.h"
 #include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/qt-settings.h"
 
@@ -629,4 +630,10 @@ void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
     emit disableMouseWheelChanged(checked);
+}
+
+void SettingsPage::on_set_restartEmulator_pressed() {
+    fprintf(stderr, "%s: call\n", __func__);
+    android::base::setEmulatorRestartOnExit();
+    runQuitCallback();
 }

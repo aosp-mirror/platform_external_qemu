@@ -11,10 +11,14 @@
 
 #include "android/settings-agent.h"
 
+#include "android/base/FunctionView.h"
+
 #include <QFrame>
 #include <QIcon>
 #include <QPushButton>
 #include <QString>
+
+#include <functional>
 
 // Sets the button state to enabled or disabled, and sets the
 // corresponding icon for the button.
@@ -41,3 +45,7 @@ QIcon getIconForCurrentTheme(const QString& icon_name);
 
 // Set a frame's window flags to be always on top
 void setFrameOnTop(QFrame* frame, bool onTop);
+
+// Register and run a callback to exit the emulator.
+void registerQuitCallback(android::base::FunctionView<void()> func);
+void runQuitCallback();
