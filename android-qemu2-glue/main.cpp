@@ -15,6 +15,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
@@ -712,6 +713,12 @@ extern "C" int main(int argc, char** argv) {
         derror("Not enough disk space to run AVD '%s'. Exiting...\n",
                avdInfo_getName(avd));
         return 1;
+    }
+
+    if (avdInfo_inAndroidBuild(avd) || opts->read_only) {
+        android::base::disableRestart();
+    } else {
+        android::base::finalizeEmulatorRestartParameters(avdInfo_getContentPath(avd));
     }
 
     // Lock the AVD as soon as we can to make sure other copy won't do anything

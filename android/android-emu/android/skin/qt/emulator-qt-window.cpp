@@ -18,6 +18,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Async.h"
 #include "android/cpu_accelerator.h"
@@ -621,6 +622,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                     });
                 }
             });
+
+    android::base::registerEmulatorQuitCallback([] {
+        android::base::ThreadLooper::runOnMainLooper([] {
+            EmulatorQtWindow::getInstance()->requestClose();
+        });
+    });
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
@@ -790,6 +797,7 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+
     if (!mToolWindow->shouldClose()) {
         event->ignore();
         return;
