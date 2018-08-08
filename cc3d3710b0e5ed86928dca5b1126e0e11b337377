@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2f079d87_bd3226fb",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-08T18:24:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "43eaa540_b8639d33",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 10
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4cb742d2_828f325a",
         "filename": "android-qemu2-glue/drive-share.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-08-07T22:24:28Z",
       "side": 1,
       "message": "it doesn\u0027t look as opaque to me now. Why not force the type in the function signature?",
+      "range": {
+        "startLine": 59,
+        "startChar": 4,
+        "endLine": 59,
+        "endChar": 73
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00dc3ca8_ff4d174e",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-08T18:24:14Z",
+      "side": 1,
+      "message": "This is for matching the signature our existing implementation is using in vl.c, which is doing something like \"qemu_opts_foreach(qemu_find_opts(\"drive\"), drive_init_func, \u0026machine_class-\u003eblock_default_type, NULL)\"",
+      "parentUuid": "4cb742d2_828f325a",
       "range": {
         "startLine": 59,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "8fc6f3b2_7e25efcc",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-08T18:24:14Z",
+      "side": 1,
+      "message": "Ack, lol",
+      "parentUuid": "054b57f9_c8c52bd3",
+      "range": {
+        "startLine": 64,
+        "startChar": 8,
+        "endLine": 64,
+        "endChar": 31
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "01aaebf1_be072ff5",
         "filename": "android-qemu2-glue/drive-share.h",
         "patchSetId": 2
@@ -91,6 +163,30 @@
       "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7ee05132_bc452cd2",
+        "filename": "android-qemu2-glue/drive-share.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-08T18:24:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "01aaebf1_be072ff5",
+      "range": {
+        "startLine": 21,
+        "startChar": 37,
+        "endLine": 21,
+        "endChar": 38
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "45690acd_64c8c6e4",
+        "filename": "android-qemu2-glue/drive-share.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-08T18:24:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8b8ffa2c_daa11cf3",
+      "range": {
+        "startLine": 22,
+        "startChar": 44,
+        "endLine": 22,
+        "endChar": 52
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eed1a3ad_c2e10472",
         "filename": "android/android-emu/android/multi-instance.cpp",
         "patchSetId": 2
@@ -137,6 +257,30 @@
       "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "24fae3d0_41db9999",
+        "filename": "android/android-emu/android/multi-instance.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-08T18:24:14Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "eed1a3ad_c2e10472",
+      "range": {
+        "startLine": 66,
+        "startChar": 29,
+        "endLine": 66,
+        "endChar": 53
+      },
+      "revId": "cc3d3710b0e5ed86928dca5b1126e0e11b337377",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
