@@ -22,6 +22,30 @@
       "revId": "ab7ce0c2c95d66c5c5e84b3b5257e3079a1d4a4a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd83ed04_d017d3d5",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ShareGroup.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1326037
+      },
+      "writtenOn": "2018-08-08T18:11:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "15590c29_2a2b6109",
+      "range": {
+        "startLine": 388,
+        "startChar": 8,
+        "endLine": 388,
+        "endChar": 34
+      },
+      "revId": "ab7ce0c2c95d66c5c5e84b3b5257e3079a1d4a4a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
