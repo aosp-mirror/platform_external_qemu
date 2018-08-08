@@ -34,6 +34,7 @@
 #include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
 #include "android/camera/camera-list.h"
 #include "android/main-emugl.h"
@@ -665,6 +666,22 @@ int main(int argc, char** argv)
     }
 
     D("Found target-specific %d-bit emulator binary: %s", wantedBitness, emulatorPath);
+
+    fprintf(stderr, "emulator launcher main: progdir: %s launcher: %s cwd: %s argv0name: %s\n",
+            System::get()->getProgramDirectory().c_str(),
+            System::get()->getLauncherDirectory().c_str(),
+            System::get()->getCurrentDirectory().c_str(),
+            argv[0]);
+
+    android::base::ProcessLaunchParameters launchParams = {
+        System::get()->getCurrentDirectory(),
+        PathUtils::join(System::get()->getProgramDirectory(), PathUtils::decompose(argv[0]).back()),
+        android::base::makeArgvStrings(argc, (const char**)argv),
+    };
+
+    auto launchParamsFile = PathUtils::join(System::get()->getLauncherDirectory(), "emu-launch-params.txt");
+    android::base::saveLaunchParameters(launchParams, launchParamsFile);
+    android::base::loadLaunchParameters(launchParamsFile);
 
     /* Replace it in our command-line */
     argv[0] = emulatorPath;
