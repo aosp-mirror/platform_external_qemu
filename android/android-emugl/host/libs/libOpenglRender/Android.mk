@@ -185,10 +185,6 @@ LOCAL_SRC_FILES := \
 LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)
 LOCAL_LDLIBS += $(standalone_common_LDLIBS)
 
-LOCAL_INSTALL_OPENGL := true
-ifeq ($(BUILD_TARGET_OS),linux)
-LOCAL_LDFLAGS += -Wl,-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX),-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader
-endif
 $(call emugl-end-module)
 
 # Samples#######################################################################
@@ -201,7 +197,6 @@ make_sample = \
     $(eval LOCAL_SRC_FILES := samples/$1.cpp) \
     $(eval LOCAL_SRC_FILES += $(if $(wildcard $(EMUGL_PATH)/host/libs/libOpenglRender/samples/$1Imp.cpp), samples/$1Imp.cpp,)) \
     $(eval LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)) \
-    $(eval LOCAL_INSTALL_OPENGL := true) \
     $(eval LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)) \
     $(eval LOCAL_LDLIBS += $(standalone_common_LDLIBS)) \
     $(eval $(call emugl-end-module)) \

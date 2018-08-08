@@ -16,31 +16,35 @@
 
 #include "android/base/files/PathUtils.h"
 
+#include "android/base/testing/TestSystem.h"
+
 #include "emugl/common/OpenGLDispatchLoader.h"
 #include "emugl/common/shared_library.h"
 
 #include <string>
 
 using android::base::PathUtils;
+using android::base::TestSystem;
 
 namespace emugl {
 
 static bool searchPathsSetup = false;
 
 void setupStandaloneLibrarySearchPaths() {
-#ifdef _WIN32
     if (searchPathsSetup) return;
 
-    std::string lib64Path("lib64");
+    std::string lib64Path(PathUtils::join(TestSystem::getProgramDirectoryFromPlatform(), "lib64"));
+
+    fprintf(stderr, "%s: %s\n", __func__, TestSystem::getProgramDirectoryFromPlatform().c_str());
+
     std::string lib64SwiftshaderPath = PathUtils::join(lib64Path, "gles_swiftshader");
-    SharedLibrary::addLibrarySearchPath(lib64Path.c_str());
     SharedLibrary::addLibrarySearchPath(lib64SwiftshaderPath.c_str());
+    SharedLibrary::addLibrarySearchPath(lib64Path.c_str());
 
     const auto egl = LazyLoadedEGLDispatch::get();
-    egl->eglAddLibrarySearchPathANDROID(lib64Path.c_str());
     egl->eglAddLibrarySearchPathANDROID(lib64SwiftshaderPath.c_str());
+    egl->eglAddLibrarySearchPathANDROID(lib64Path.c_str());
     searchPathsSetup = true;
-#endif
 }
 
 } // namespace emugl

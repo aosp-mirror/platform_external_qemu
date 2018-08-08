@@ -101,6 +101,7 @@ public:
         D("loading %s\n", kEGLLibName);
         char error[256];
         mLib = emugl::SharedLibrary::open(kEGLLibName, error, sizeof(error));
+        fprintf(stderr, "%s: egl %p\n", __func__, mLib);
         if (!mLib) {
             ERR("%s: Could not open EGL library %s [%s]\n", __FUNCTION__,
                 kEGLLibName, error);
@@ -128,6 +129,7 @@ public:
     EglOsGlLibrary() {
         char error[256];
         mLib = emugl::SharedLibrary::open(kGLES2LibName, error, sizeof(error));
+        fprintf(stderr, "%s: call. lib %p\n", __func__, mLib);
         if (!mLib) {
             ERR("%s: Could not open GL library %s [%s]\n", __FUNCTION__,
                 kGLES2LibName, error);

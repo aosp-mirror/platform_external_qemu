@@ -202,12 +202,16 @@ SharedLibrary* SharedLibrary::do_open(const char* libraryName,
             if (!lib) {
                 auto libName = PathUtils::join(path, libraryName);
                 lib = dlopen(libName.c_str(), RTLD_NOW);
+                if (lib) { fprintf(stderr, "%s: FOund: %s\n", __func__, libName.c_str()); }
                 if (!lib) {
                     auto libPathName = PathUtils::join(path, libPath);
                     lib = dlopen(libPathName.c_str(), RTLD_NOW);
+                    if (lib) { fprintf(stderr, "%s: FOund2: %s\n", __func__, libPathName.c_str()); }
                 }
             }
         });
+    } else {
+                    if (lib) { fprintf(stderr, "%s: FOund3: %s\n", __func__, libraryName); }
     }
 #else
     void* lib = dlopen(libPath, RTLD_NOW);
