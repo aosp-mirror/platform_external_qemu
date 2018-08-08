@@ -621,6 +621,10 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                     });
                 }
             });
+
+    registerQuitCallback([] {
+        android::base::ThreadLooper::runOnMainLooper([] {
+                EmulatorQtWindow::getInstance()->requestClose(); }); });
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
@@ -790,6 +794,7 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+
     if (!mToolWindow->shouldClose()) {
         event->ignore();
         return;
