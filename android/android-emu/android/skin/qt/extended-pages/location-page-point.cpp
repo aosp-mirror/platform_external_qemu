@@ -22,6 +22,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QDoubleValidator>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
@@ -227,6 +228,9 @@ void LocationPage::on_pointList_itemSelectionChanged() {
 void LocationPage::editPoint(int row) {
 //    printf("In editPoint for row %d\n", row); // ??
 
+// ?? Create a new validator class as a QDoubleValidator
+//    and disable the Save button if the value is not good.
+
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
 
@@ -248,6 +252,24 @@ void LocationPage::editPoint(int row) {
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
 
+#if 1 // ??
+    // ?? Need validators for these
+    // Latitude
+    dialogLayout->addWidget(new QLabel(tr("Latitude")));
+    QLineEdit* latitudeEdit = new QLineEdit(this);
+    QString oldLatText = QString::number(pointElement->latitude);
+    latitudeEdit->setText(oldLatText);
+    latitudeEdit->setValidator(new QDoubleValidator(-90.0, 90.0, 2)); // ??
+    dialogLayout->addWidget(latitudeEdit);
+
+    // Longitude
+    dialogLayout->addWidget(new QLabel(tr("Longitude")));
+    QLineEdit* longitudeEdit = new QLineEdit(this);
+    QString oldLngText = QString::number(pointElement->longitude);
+    longitudeEdit->setText(oldLngText);
+    dialogLayout->addWidget(longitudeEdit);
+#endif // ??
+
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Save |
                                                        QDialogButtonBox::Cancel,
                                                        Qt::Horizontal);
@@ -265,6 +287,9 @@ void LocationPage::editPoint(int row) {
 
     int selection = editDialog.exec();
 
+    printf("Received: Lat \"%s\", Lng \"%s\"\n", // ??
+           latitudeEdit ->text().toStdString().c_str(), // ??
+           longitudeEdit->text().toStdString().c_str());  // ??
     if (selection == QDialog::Rejected) {
         return;
     }
