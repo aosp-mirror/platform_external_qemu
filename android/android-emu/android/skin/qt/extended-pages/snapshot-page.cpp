@@ -1003,6 +1003,11 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     bool anItemIsSelected = false;
     for (const QString& fileName : snapshotList) {
 
+        if (fc::isEnabled(fc::QuickbootFileBacked) &&
+            fileName == Quickboot::kDefaultBootSnapshot) {
+            continue;
+        }
+
         Snapshot theSnapshot(fileName.toStdString().c_str());
 
         const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
