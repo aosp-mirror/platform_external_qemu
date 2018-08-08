@@ -29,6 +29,9 @@ typedef struct QAndroidLibuiAgent {
     // Requests UI code to gracefully shut down and exit. Doesn't wait for it to
     // complete.
     void (*requestExit)(int exitCode, const char* message);
+
+    // Requests UI code to restart the emulator. Also doesn't wait.
+    void (*requestRestart)(int exitCode, const char* message);
 } QAndroidLibuiAgent;
 
 ANDROID_END_HEADER
