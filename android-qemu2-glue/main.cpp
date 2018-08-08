@@ -1446,6 +1446,11 @@ extern "C" int main(int argc, char** argv) {
     args.add2("-android-hw", coreHwIniPath);
     crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
 
+    fprintf(stderr, "android-qemu2-glue main: progdir: %s launcher: %s cwd: %s\n",
+            System::get()->getProgramDirectory().c_str(),
+            System::get()->getLauncherDirectory().c_str(),
+            getcwd(0, 0));
+
     if (VERBOSE_CHECK(init)) {
         printf("QEMU options list:\n");
         for (int i = 0; i < args.size(); i++) {

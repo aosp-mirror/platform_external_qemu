@@ -718,6 +718,12 @@ int main(int argc, char** argv)
         printf("\n");
     }
 
+    fprintf(stderr, "emulator launcher main: progdir: %s launcher: %s cwd: %s argv0name: %s\n",
+            System::get()->getProgramDirectory().c_str(),
+            System::get()->getLauncherDirectory().c_str(),
+            getcwd(0, 0),
+            argv[0]);
+
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.
