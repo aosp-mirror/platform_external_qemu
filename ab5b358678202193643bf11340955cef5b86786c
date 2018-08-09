@@ -22,6 +22,30 @@
       "revId": "ab5b358678202193643bf11340955cef5b86786c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0b070c3_67239f0c",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 720,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-09T18:10:06Z",
+      "side": 1,
+      "message": "the restart button is now removed, and changing the snapshot button will trigger a restart dialog. The restart dialog will now require the user to restart to apply the new setting, so I\u0027m not sure we would need the explicit restart button so far.",
+      "parentUuid": "5d53cd2a_5017b9eb",
+      "range": {
+        "startLine": 720,
+        "startChar": 8,
+        "endLine": 720,
+        "endChar": 40
+      },
+      "revId": "ab5b358678202193643bf11340955cef5b86786c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
