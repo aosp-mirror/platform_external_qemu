@@ -220,7 +220,10 @@ public:
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
 
-public:
+    void postSelf(uint32_t composeMode, float* edges,
+                           float* crop, int blendMode,
+                           float alpha, uint8_t* color);
+ public:
     void restore();
 
 private:

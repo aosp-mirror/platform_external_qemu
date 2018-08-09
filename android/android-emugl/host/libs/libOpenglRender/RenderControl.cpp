@@ -167,6 +167,9 @@ static constexpr android::base::StringView kGLESDynamicVersion_2 = "ANDROID_EMU_
 static constexpr android::base::StringView kGLESDynamicVersion_3_0 = "ANDROID_EMU_gles_max_version_3_0";
 static constexpr android::base::StringView kGLESDynamicVersion_3_1 = "ANDROID_EMU_gles_max_version_3_1";
 
+// HWComposer Host Composition
+static constexpr android::base::StringView kHostCompositionV1 = "ANDROID_EMU_host_composition_v1";
+
 static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_no_host_error";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
@@ -232,6 +235,10 @@ static bool shouldEnableAsyncSwap() {
            emugl_sync_device_exists() &&
            isPhone &&
            sizeof(void*) == 8;
+}
+
+static bool shouleEnableHostCompose() {
+    return emugl_feature_is_enabled(android::featurecontrol::HostComposition);
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -330,6 +337,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     bool asyncSwapEnabled = shouldEnableAsyncSwap();
     bool dmaEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA);
+    bool hostCompositionEnabled = shouleEnableHostCompose();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -348,6 +356,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (dmaEnabled && name == GL_EXTENSIONS) {
         glStr += kDmaStr;
+        glStr += " ";
+    }
+
+    if (hostCompositionEnabled && name == GL_EXTENSIONS) {
+        glStr += kHostCompositionV1;
         glStr += " ";
     }
 
@@ -904,6 +917,27 @@ static void rcSetPuid(uint64_t puid) {
     tInfo->m_puid = puid;
 }
 
+static void dumpCompose(uint32_t targetColorBuffer, uint32_t numLayers,
+                        uint32_t bufferSize, void* buffer) {
+    printf("rcCompose:\n");
+    printf("targetColorBuffer %d\n", targetColorBuffer);
+    uint32_t* b = (uint32_t*)buffer;
+    for (int i = 0; i < numLayers; i++) {
+        printf("Layer %d:\n", i);
+        printf("\thandle: %d\t left: %d\t top: %d\t right: %d\t bottom: %d\n",
+               *b, *(b+1), *(b+2), *(b+3), *(b+4));
+        b = b + 5;
+    }
+}
+
+static void rcCompose(uint32_t bufferSize, void* buffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->compose(bufferSize, buffer);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -943,4 +977,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcUpdateColorBufferDMA = rcUpdateColorBufferDMA;
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
+    dec->rcCompose = rcCompose;
 }

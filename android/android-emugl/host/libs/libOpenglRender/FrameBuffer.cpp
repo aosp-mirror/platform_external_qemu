@@ -555,6 +555,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         SyncThread::get();
     }
 
+//    fb->mTargetColorBuffer = fb->createColorBuffer(width, height, GL_RGBA,
+//                                                   FRAMEWORK_FORMAT_GL_COMPATIBLE);
+
     GL_LOG("basic EGL initialization successful");
     return true;
 }
@@ -653,6 +656,15 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             break;
         case PostCmd::Exit:
             return WorkerProcessingResult::Stop;
+        case PostCmd::ComposeSelf:
+            m_postWorker->composeSelf(post.cb, post.l);
+            break;
+        case PostCmd::ComposeStart:
+            s_gles2.glClear(GL_COLOR_BUFFER_BIT);
+            break;
+        case PostCmd::ComposeDone:
+            m_postWorker->composeDone();
+            break;
         default:
             break;
     }
@@ -1609,7 +1621,8 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed in binding subwindow!\n");
+            ERR("eglMakeCurrent failed in binding subwindow %d!\n",
+                s_egl.eglGetError());
             return false;
         }
     }
@@ -1876,6 +1889,51 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     c->second.cb->readPixels(0, 0, *width, *height,
             nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
             pixels.data());
+}
+
+void FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
+    AutoLock mutex(m_lock);
+    struct composeDevice* p = (struct composeDevice*)buffer;
+    struct composeLayer *l = (struct composeLayer*)p->layer;
+
+    if (p->targetHandle != 0) {
+        // should not be here
+        printf("Error: not support compose target cb %d\n", p->targetHandle);
+    }
+
+    printf("compose %d layers\n", p->numLayers);
+    Post composeStart;
+    composeStart.cmd = PostCmd::ComposeStart;
+    sendPostWorkerCmd(composeStart);
+    for (int i = 0; i < p->numLayers; i++, l++) {
+        ColorBufferMap::iterator c;
+        if (l->composeMode == 2) {
+            HandleType p_colorbuffer = l->cbHandle;
+            c = m_colorbuffers.find(p_colorbuffer);
+            if (c == m_colorbuffers.end()) {
+                // bad colorbuffer handle
+                printf("%s: fail to find colorbuffer %d\n", __FUNCTION__, p_colorbuffer);
+                continue;
+            }
+        }
+        Post postCmd;
+        postCmd.cmd = PostCmd::ComposeSelf;
+        if (l->composeMode == 2) {
+            postCmd.cb = c->second.cb.get();
+        }
+        postCmd.l = l;
+        sendPostWorkerCmd(postCmd);
+    }
+
+    if (p->targetHandle != 0) {
+        post(p->targetHandle, false);
+        unbind_locked();
+    }
+    else {
+        Post postCmd;
+        postCmd.cmd = PostCmd::ComposeDone;
+        sendPostWorkerCmd(postCmd);
+    }
 }
 
 void FrameBuffer::onSave(Stream* stream,

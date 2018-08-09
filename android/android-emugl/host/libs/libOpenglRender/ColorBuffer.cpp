@@ -756,3 +756,16 @@ void ColorBuffer::restore() {
             break;
     }
 }
+
+void ColorBuffer::postSelf(uint32_t composeMode, float* edges,
+                           float* crop, int mode,
+                           float alpha, uint8_t* color) {
+    float c[4];
+    c[0] = crop[0]/m_width;
+    c[1] = crop[1]/m_height;
+    c[2] = crop[2]/m_width;
+    c[3] = crop[3]/m_height;
+    m_helper->getTextureDraw()->drawSelf(composeMode, edges, c, mode, alpha,
+                                         color, m_tex, m_eglImage);
+}
+

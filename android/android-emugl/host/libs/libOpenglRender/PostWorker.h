@@ -11,6 +11,7 @@
 class ColorBuffer;
 class FrameBuffer;
 struct RenderThreadInfo;
+struct composeLayer;
 
 class PostWorker {
 public:
@@ -31,6 +32,9 @@ public:
     // clear: blanks out emulator display when refreshing the subwindow
     // if there is no last posted color buffer to show yet.
     void clear();
+
+    void composeSelf(ColorBuffer* cb, struct composeLayer* l);
+    void composeDone();
 
 private:
     EGLContext mContext;

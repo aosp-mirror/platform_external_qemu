@@ -33,6 +33,11 @@ void PostWorker::post(ColorBuffer* cb) {
     float fx = 2.f * (m_viewportWidth  - windowWidth  * dpr) / (float)m_viewportWidth;
     float fy = 2.f * (m_viewportHeight - windowHeight * dpr) / (float)m_viewportHeight;
 
+    printf("windowWidth %d windowHeight %d viewportWidth%d viewportHeight%d\n",
+           windowWidth, windowHeight, m_viewportWidth, m_viewportHeight);
+    printf("dpr %f fx %f, fy %f, px %f, py %f\n", dpr, fx, fy, px, py);
+
+
     // finally, compute translation values
     float dx = px * fx;
     float dy = py * fy;
@@ -66,6 +71,47 @@ void PostWorker::viewport(int width, int height) {
 void PostWorker::clear() {
     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
                     GL_STENCIL_BUFFER_BIT);
+    s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
+}
+
+void PostWorker::composeSelf(ColorBuffer* cb, struct composeLayer *l) {
+    if (!l) {
+        ERR("%s: null layer", __FUNCTION__);
+        return;
+    }
+    if (l->composeMode != 2 && l->composeMode != 3) {
+        ERR("%s: invalid composition mode %d", __FUNCTION__, l->composeMode);
+        return;
+    }
+
+    int windowWidth = mFb->windowWidth();
+    int windowHeight = mFb->windowHeight();
+    float edges[4];
+    edges[0] = 2.0 * l->displayFrame.left/windowWidth - 1;
+    edges[1] = 1 - 2.0 * l->displayFrame.top/windowHeight;
+    edges[2] = 2.0 * l->displayFrame.right/windowWidth - 1;
+    edges[3] = 1- 2.0 * l->displayFrame.bottom/windowHeight;
+    printf("\tcomposeMode %d color %d %d %d %d mode %d alpha %f %d %d %d %d "
+           "%f %f %f %f\n",
+           l->composeMode, l->color.r, l->color.g, l->color.b, l->color.a,
+           l->blendMode, l->alpha,
+           l->displayFrame.left, l->displayFrame.top, l->displayFrame.right,
+           l->displayFrame.bottom, l->crop.left, l->crop.top, l->crop.right,
+           l->crop.bottom);
+
+    if (l->composeMode == 2) {
+        cb->postSelf(l->composeMode, edges, (float*)(&l->crop), l->blendMode,
+                     l->alpha, (uint8_t*)(&l->color));
+    }
+    else {
+        mFb->getTextureDraw()->drawSelf(l->composeMode, edges, (float*)(&l->crop),
+                                        l->blendMode, l->alpha,
+                                        (uint8_t*)(&l->color), 0, 0);
+    }
+    return;
+}
+
+void PostWorker::composeDone() {
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
