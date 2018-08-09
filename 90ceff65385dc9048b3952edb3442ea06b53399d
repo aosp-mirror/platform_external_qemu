@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a7713b4_fbe8342c",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-09T22:19:49Z",
+      "side": 1,
+      "message": "Thanks for the catch. Looks like things are fine 1x on all 3 platforms, and 2x on Mac is OK (has pixelated svg), but I set Windows to 200% manually in the \"Text and other stuff\" setting and the icon is now super tiny",
+      "parentUuid": "74442480_437cc029",
+      "range": {
+        "startLine": 60,
+        "startChar": 30,
+        "endLine": 60,
+        "endChar": 32
+      },
+      "revId": "90ceff65385dc9048b3952edb3442ea06b53399d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0f80a336_d3b5b829",
         "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.h",
         "patchSetId": 5
