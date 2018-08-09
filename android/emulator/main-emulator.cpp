@@ -34,6 +34,7 @@
 #include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
 #include "android/camera/camera-list.h"
 #include "android/main-emugl.h"
@@ -243,6 +244,8 @@ int main(int argc, char** argv)
     bool queryVersion = false;
     bool doListWebcams = false;
     bool cleanUpAvdContent = false;
+    bool isRestart = false;
+    int restartPid = -1;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -300,6 +303,20 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt, "-wipe-data")) {
             cleanUpAvdContent = true;
+            continue;
+        }
+
+        if (!strcmp(opt, "-read-only")) {
+            android::base::disableRestart();
+            continue;
+        }
+
+        if (!strcmp(opt, "-is-restart")) {
+            isRestart = true;
+            if (nn + 1 < argc) {
+                restartPid = atoi(argv[nn + 1]);
+                nn++;
+            }
             continue;
         }
 
@@ -460,6 +477,12 @@ int main(int argc, char** argv)
       " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
       EMULATOR_CL_SHA1);
 #endif
+
+    // If this is a restart, wait for the restartPid to exit.
+    if (isRestart && restartPid > -1) {
+        System::get()->waitForProcessExit(restartPid, 10000 /* maximum of 10 seconds */);
+    }
+
     /* If there is an AVD name, we're going to extract its target architecture
      * by looking at its config.ini
      */
@@ -492,6 +515,8 @@ int main(int argc, char** argv)
         avdArch = path_getAvdTargetArch(avdName);
         D("Found AVD target architecture: %s", avdArch);
     } else {
+        android::base::disableRestart();
+
         /* Otherwise, using the ANDROID_PRODUCT_OUT directory */
         androidOut = getenv("ANDROID_PRODUCT_OUT");
 
@@ -665,6 +690,11 @@ int main(int argc, char** argv)
     }
 
     D("Found target-specific %d-bit emulator binary: %s", wantedBitness, emulatorPath);
+
+    if (avdName) {
+        /* Save restart parameters before we modify argv */
+        android::base::initializeEmulatorRestartParameters(argc, argv, path_getAvdContentPath(avdName));
+    }
 
     /* Replace it in our command-line */
     argv[0] = emulatorPath;
