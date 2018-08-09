@@ -3216,6 +3216,16 @@ do_kill( ControlClient  client, char*  args )
     return 0;
 }
 
+static int
+do_restart( ControlClient  client, char*  args )
+{
+    control_write( client, "OK: restarting emulator, bye bye\r\n" );
+    DINIT("Emulator restart by console restart command.\n");
+    fflush(stdout);
+    client->global->libui_agent->requestRestart(0, "Restarted by console command");
+    return 0;
+}
+
 static int do_debug(ControlClient client, char* args) {
     if (!args) {
         control_write(client, "KO: argument missing, try 'debug <tags>'\r\n");
@@ -3271,6 +3281,8 @@ extern const CommandDefRec main_commands[] = {
          NULL, NULL, do_crash_on_exit},
 
         {"kill", "kill the emulator instance", NULL, NULL, do_kill, NULL},
+
+        {"restart", "restart the emulator instance", NULL, NULL, do_restart, NULL},
 
         {"network", "manage network settings",
          "allows you to manage the settings related to the network data "
