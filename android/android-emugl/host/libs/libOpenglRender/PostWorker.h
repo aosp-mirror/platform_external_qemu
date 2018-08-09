@@ -32,6 +32,10 @@ public:
     // if there is no last posted color buffer to show yet.
     void clear();
 
+    void postSelf(ColorBuffer* cb, const float edges[4], const float crop[4],
+                  int32_t mode, float alpha);
+    void done();
+
 private:
     EGLContext mContext;
     EGLSurface mSurf;
