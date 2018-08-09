@@ -11,10 +11,12 @@
 
 #include "android/android.h"
 #include "android/avd/hw-config.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
@@ -714,6 +716,12 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    if (avdInfo_inAndroidBuild(avd) || opts->read_only) {
+        android::base::disableRestart();
+    } else {
+        android::base::finalizeEmulatorRestartParameters(avdInfo_getContentPath(avd));
+    }
+
     // Lock the AVD as soon as we can to make sure other copy won't do anything
     // stupid before detecting that the AVD is already in use.
     const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
@@ -1322,6 +1330,14 @@ extern "C" int main(int argc, char** argv) {
             // UI only. emulator_initUserInterface() is done, so we're done.
             return 0;
         }
+
+        // Register the quit callback
+        android::base::registerEmulatorQuitCallback([] {
+            android::base::ThreadLooper::runOnMainLooper([] {
+                skin_winsys_quit_request();
+            });
+        });
+
 #if (SNAPSHOT_PROFILE > 1)
         printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
                get_uptime_ms());
