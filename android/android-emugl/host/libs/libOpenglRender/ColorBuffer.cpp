@@ -756,3 +756,8 @@ void ColorBuffer::restore() {
             break;
     }
 }
+
+void ColorBuffer::postSelf(float* edges, int mode, float alpha) {
+     m_helper->getTextureDraw()->drawSelf(edges, mode, alpha, m_tex, m_eglImage);
+}
+

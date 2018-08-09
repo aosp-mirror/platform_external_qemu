@@ -220,6 +220,7 @@ public:
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
 
+    void postSelf(float* edges, int mode, float alpha);
 public:
     void restore();
 
