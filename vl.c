@@ -150,6 +150,7 @@ int main(int argc, char **argv)
 #undef socket_listen
 
 #include "android/android.h"
+#include "android/base/process-control.h"
 #include "android/boot-properties.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/cros.h"
@@ -5746,5 +5747,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     } else {
         fprintf(stderr, "Unexpected: iothread lock lost.");
     }
+
+#ifdef CONFIG_ANDROID
+    handle_emulator_restart();
+#endif
     return 0;
 }
