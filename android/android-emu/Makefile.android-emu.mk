@@ -149,6 +149,7 @@ LOCAL_SRC_FILES := \
     android/base/Log.cpp \
     android/base/memory/LazyInstance.cpp \
     android/base/memory/MemoryHints.cpp \
+    android/base/ProcessControl.cpp \
     android/base/system/System.cpp \
     android/base/threads/Async.cpp \
     android/base/threads/FunctorThread.cpp \
@@ -715,6 +716,7 @@ LOCAL_SRC_FILES := \
   android/base/network/IpAddress_unittest.cpp \
   android/base/network/NetworkUtils_unittest.cpp \
   android/base/Optional_unittest.cpp \
+  android/base/ProcessControl_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
   android/base/sockets/SocketUtils_unittest.cpp \

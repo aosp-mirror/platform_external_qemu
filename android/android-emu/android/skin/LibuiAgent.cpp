@@ -10,6 +10,8 @@
 
 #include "android/skin/LibuiAgent.h"
 
+#include "android/base/ProcessControl.h"
+
 #include "android/skin/charmap.h"
 #include "android/skin/keycode-buffer.h"
 #include "android/skin/winsys.h"
@@ -69,6 +71,11 @@ static const QAndroidLibuiAgent kLibuiAgent = {
         [](int exitCode, const char* message) {
             // Unfortunately we don't have any way of passing code/message now.
             skin_winsys_quit_request();
-        }};
+        },
+        // requestRestart
+        [](int exitCode, const char* message) {
+            android::base::restartEmulator();
+        },
+};
 
 const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;
