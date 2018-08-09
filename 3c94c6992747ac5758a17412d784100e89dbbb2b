@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0a57e56_ca2d29ab",
+        "filename": "android/android-emu/android/skin/qt/images/all/ic_info_outline_0BA_24dp.svg",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-09T21:28:04Z",
+      "side": 0,
+      "message": "Jim: Qt seemed to have made this 48x48 and doesn\u0027t respect the \"width\" and \"height\" arguments in the header. So I just divided every coordinate in here by 2.",
+      "revId": "3c94c6992747ac5758a17412d784100e89dbbb2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
