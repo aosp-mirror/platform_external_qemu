@@ -1107,7 +1107,8 @@ message EmulatorFeatureFlagState {
     LOCATION_UI_V2 = 28;
     GENERIC_INCREMENTAL_SNAPSHOT = 29;
     SNAPSHOT_ADB = 30;
-    // Next tag: 31
+    HOST_COMPOSITION_V1 = 31;
+    // Next tag: 32
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

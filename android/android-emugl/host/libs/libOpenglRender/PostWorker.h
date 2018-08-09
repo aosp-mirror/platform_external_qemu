@@ -2,8 +2,11 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/synchronization/Lock.h"
+#include "Hwc2.h"
 
 #include <EGL/egl.h>
+#include <GLES/gl.h>
+#include <GLES3/gl3.h>
 
 #include <functional>
 #include <vector>
@@ -32,6 +35,12 @@ public:
     // if there is no last posted color buffer to show yet.
     void clear();
 
+    // compose: compse the layers into final framebuffer
+    void compose(struct composeDevice* p);
+
+private:
+    void composeLayer(ColorBuffer* cb, struct composeLayer* l);
+
 private:
     EGLContext mContext;
     EGLSurface mSurf;
@@ -43,5 +52,6 @@ private:
     bool m_initialized = false;
     int m_viewportWidth = 0;
     int m_viewportHeight = 0;
+    GLuint m_composeFbo = 0;
     DISALLOW_COPY_AND_ASSIGN(PostWorker);
 };

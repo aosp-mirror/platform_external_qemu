@@ -698,6 +698,8 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             }
             sp->setInfoLog(infoLog);
 
+//            printf("infoLog: %s", infoLog);
+
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
             sp->setCompileStatus(compileStatus == GL_FALSE ? false : true);
         } else {
@@ -707,6 +709,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             if (compileStatus != GL_FALSE) {
                 fprintf(stderr, "%s: Warning: underlying GL compiled invalid shader!\n", __func__);
             }
+//            printf("infoLog1: %s", sp->getInfoLog());
         }
     }
 }
