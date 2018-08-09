@@ -697,7 +697,6 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
                 infoLog[0] = 0;
             }
             sp->setInfoLog(infoLog);
-
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
             sp->setCompileStatus(compileStatus == GL_FALSE ? false : true);
         } else {
