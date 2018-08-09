@@ -623,14 +623,14 @@
     <widget class="QLabel" name="autoSaveNoteLabel">
      <property name="geometry">
       <rect>
-       <x>320</x>
-       <y>32</y>
+       <x>20</x>
+       <y>68</y>
        <width>281</width>
-       <height>61</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>Note: Auto-save setting will only take effect the next emulator session. Please restart the emulator if the state will potentially be lost or overwritten.</string>
+      <string>Requires emulator restart for changes to be applied.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
