@@ -109,8 +109,6 @@ private:
     bool mNowLoadingGeoData = false;
     bool mLocationUsed = false;
     int mRowToSend;
-    double mPreviousLat = 0.0;
-    double mPreviousLon = 0.0;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };
 

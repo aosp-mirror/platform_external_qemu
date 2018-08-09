@@ -2525,7 +2525,9 @@ do_geo_fix( ControlClient  client, char*  args )
         location_agent_qt_settings_func(params[GEO_LAT], params[GEO_LONG], altitude);
     }
     client->global->location_agent->gpsSendLoc(params[GEO_LAT], params[GEO_LONG],
-                                               altitude, n_satellites, &tVal);
+                                               altitude,
+                                               0.0, 0.0, // Speed and heading
+                                               n_satellites, &tVal);
 
     return 0;
 }
