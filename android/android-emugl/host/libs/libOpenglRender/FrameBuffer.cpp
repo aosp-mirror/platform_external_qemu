@@ -555,6 +555,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         SyncThread::get();
     }
 
+//    fb->mTargetColorBuffer = fb->createColorBuffer(width, height, GL_RGBA,
+//                                                   FRAMEWORK_FORMAT_GL_COMPATIBLE);
+
     GL_LOG("basic EGL initialization successful");
     return true;
 }
@@ -653,6 +656,12 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             break;
         case PostCmd::Exit:
             return WorkerProcessingResult::Stop;
+        case PostCmd::PostSelf:
+            m_postWorker->postSelf(post.cb, (float*)post.edges);
+            break;
+        case PostCmd::Done:
+            m_postWorker->done();
+            break;
         default:
             break;
     }
@@ -1609,7 +1618,8 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed in binding subwindow!\n");
+            ERR("eglMakeCurrent failed in binding subwindow %d!\n",
+                s_egl.eglGetError());
             return false;
         }
     }
@@ -1876,6 +1886,62 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     c->second.cb->readPixels(0, 0, *width, *height,
             nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
             pixels.data());
+}
+
+void FrameBuffer::compose(uint32_t targetColorBuffer, uint32_t numLayers,
+                          uint32_t bufferSize, void* buffer) {
+    AutoLock mutex(m_lock);
+  //This is in HWC HAL thread, may not have context and surface
+  //use the default pbufferone? Try with main context first
+    //bindSubwin_locked();
+    //bind_locked();
+
+  //create a colorBuffere if targetColorBuffer == 0
+//    HandleType cb = (targetColorBuffer == 0) ? mTargetColorBuffer :
+//                                               targetColorBuffer;
+    
+  //bind targetColorBuffer to renderbuffer
+  //  bindColorBufferToRenderbuffer(cb);
+  //
+  //bind layerColorBuffers in each layer to texture
+    uint32_t *p = (uint32_t*)buffer;
+    for (int i = 0; i < numLayers; i++) {
+        //bindColorBufferToTexture(*p++);
+        HandleType p_colorbuffer = *p++;
+        ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+        if (c == m_colorbuffers.end()) {
+            // bad colorbuffer handle
+            printf("%s: fail to find colorbuffer %d", __FUNCTION__, p_colorbuffer);
+            continue;
+        }
+        uint32_t left = *p++;
+        uint32_t top = *p++;
+        uint32_t right = *p++;
+        uint32_t bottom = *p++;
+        printf("compose: %d %d %d %d w %d h %d\n", left, top, right, bottom, m_windowWidth, m_windowHeight);
+        float l = 2.0*left/m_windowWidth - 1;
+        float t = 1 - 2.0* top/m_windowHeight;
+        float r = 2.0*right/m_windowWidth - 1;
+        float b = 1- 2.0*bottom/m_windowHeight;
+        Post postCmd;
+        postCmd.cmd = PostCmd::PostSelf;
+        postCmd.cb = c->second.cb.get();
+        postCmd.edges[0] = l;
+        postCmd.edges[1] = t;
+        postCmd.edges[2] = r;
+        postCmd.edges[3] = b;
+        sendPostWorkerCmd(postCmd);
+        //draw each layer
+        //(*c).second.cb->postSelf(l, t, r, b);
+    }
+    Post postCmd;
+    postCmd.cmd = PostCmd::Done;
+    sendPostWorkerCmd(postCmd);
+
+    //s_egl.eglSwapBuffers(getDisplay(), getWindowSurface());
+    // post the result
+    // post(cb);
+    //unbind_locked();
 }
 
 void FrameBuffer::onSave(Stream* stream,

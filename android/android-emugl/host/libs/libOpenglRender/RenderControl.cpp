@@ -904,6 +904,29 @@ static void rcSetPuid(uint64_t puid) {
     tInfo->m_puid = puid;
 }
 
+static void dumpCompose(uint32_t targetColorBuffer, uint32_t numLayers,
+                        uint32_t bufferSize, void* buffer) {
+    printf("rcCompose:\n");
+    printf("targetColorBuffer %d\n", targetColorBuffer);
+    uint32_t* b = (uint32_t*)buffer;
+    for (int i = 0; i < numLayers; i++) {
+        printf("Layer %d:\n", i);
+        printf("\thandle: %d\t left: %d\t top: %d\t right: %d\t bottom: %d\n",
+               *b, *(b+1), *(b+2), *(b+3), *(b+4));
+        b = b + 5;
+    }
+
+}
+static void rcCompose(uint32_t targetColorBuffer, uint32_t numLayers,
+                      uint32_t bufferSize, void* buffer) {
+    dumpCompose(targetColorBuffer, numLayers, bufferSize, buffer);
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->compose(targetColorBuffer, numLayers, bufferSize, buffer);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -943,4 +966,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcUpdateColorBufferDMA = rcUpdateColorBufferDMA;
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
+    dec->rcCompose = rcCompose;
 }
