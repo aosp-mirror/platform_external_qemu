@@ -33,6 +33,11 @@ void PostWorker::post(ColorBuffer* cb) {
     float fx = 2.f * (m_viewportWidth  - windowWidth  * dpr) / (float)m_viewportWidth;
     float fy = 2.f * (m_viewportHeight - windowHeight * dpr) / (float)m_viewportHeight;
 
+    printf("windowWidth %d windowHeight %d viewportWidth%d viewportHeight%d\n",
+           windowWidth, windowHeight, m_viewportWidth, m_viewportHeight);
+    printf("dpr %f fx %f, fy %f, px %f, py %f\n", dpr, fx, fy, px, py);
+
+
     // finally, compute translation values
     float dx = px * fx;
     float dy = py * fy;
@@ -66,6 +71,15 @@ void PostWorker::viewport(int width, int height) {
 void PostWorker::clear() {
     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
                     GL_STENCIL_BUFFER_BIT);
+    s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
+}
+
+void PostWorker::postSelf(ColorBuffer* cb, const float edges[4], const float crop[4],
+                          int mode, float alpha) {
+    cb->postSelf(edges, crop, mode, alpha);
+}
+
+void PostWorker::done() {
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 

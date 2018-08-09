@@ -395,6 +395,7 @@ public:
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
+    void compose(uint32_t bufferSize, void* buffer);
 
     ~FrameBuffer();
 
@@ -548,12 +549,29 @@ private:
     bool m_asyncReadbackSupported = true;
     bool m_guestPostedAFrame = false;
 
+    struct composeLayer {
+        uint32_t cbHandle;
+        uint32_t displayFrame[4];
+        float crop[4];
+        int32_t blendMode;
+        float alpha;
+    };
+    struct composeDevice {
+        uint32_t version;
+        uint32_t targetHandle;
+        uint32_t numLayers;
+        struct composeLayer layer[0];
+    };
+
     // Posting
     enum class PostCmd {
         Post = 0,
         Viewport = 1,
         Clear = 2,
         Exit = 3,
+        PostSelf = 4,
+        ComposeStart = 5,
+        Done = 6,
     };
 
     struct Post {
@@ -565,6 +583,10 @@ private:
                 int height;
             } viewport;
         };
+        float edges[4];
+        float crop[4];
+        int32_t mode;
+        float alpha;
     };
 
     std::unique_ptr<PostWorker> m_postWorker = {};
@@ -573,5 +595,7 @@ private:
     void sendPostWorkerCmd(Post post);
 
     bool m_fastBlitSupported = false;
+    HandleType mTargetColorBuffer = 0;
 };
+
 #endif

@@ -555,6 +555,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         SyncThread::get();
     }
 
+//    fb->mTargetColorBuffer = fb->createColorBuffer(width, height, GL_RGBA,
+//                                                   FRAMEWORK_FORMAT_GL_COMPATIBLE);
+
     GL_LOG("basic EGL initialization successful");
     return true;
 }
@@ -653,6 +656,16 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             break;
         case PostCmd::Exit:
             return WorkerProcessingResult::Stop;
+        case PostCmd::PostSelf:
+            m_postWorker->postSelf(post.cb, post.edges, post.crop,
+                                   post.mode, post.alpha);
+            break;
+        case PostCmd::ComposeStart:
+            s_gles2.glClear(GL_COLOR_BUFFER_BIT);
+            break;
+        case PostCmd::Done:
+            m_postWorker->done();
+            break;
         default:
             break;
     }
@@ -1609,7 +1622,8 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed in binding subwindow!\n");
+            ERR("eglMakeCurrent failed in binding subwindow %d!\n",
+                s_egl.eglGetError());
             return false;
         }
     }
@@ -1876,6 +1890,67 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     c->second.cb->readPixels(0, 0, *width, *height,
             nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
             pixels.data());
+}
+
+void FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
+    AutoLock mutex(m_lock);
+    struct composeDevice* p = (struct composeDevice*)buffer;
+    struct composeLayer *l = (struct composeLayer*)p->layer;
+
+    if (p->targetHandle != 0) {
+        bind_locked();
+        bindColorBufferToRenderbuffer(p->targetHandle);
+    }
+
+    printf("compose %d layers\n", p->numLayers);
+    Post composeStart;
+    composeStart.cmd = PostCmd::ComposeStart;
+    sendPostWorkerCmd(composeStart);
+    for (int i = 0; i < p->numLayers; i++, l++) {
+        //bindColorBufferToTexture(*p++);
+        HandleType p_colorbuffer = l->cbHandle;
+        ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+        if (c == m_colorbuffers.end()) {
+            // bad colorbuffer handle
+            printf("%s: fail to find colorbuffer %d\n", __FUNCTION__, p_colorbuffer);
+            continue;
+        }
+        float edges[4];
+        edges[0] = 2.0 * l->displayFrame[0]/m_windowWidth - 1;
+        edges[1] = 1 - 2.0 * l->displayFrame[1]/m_windowHeight;
+        edges[2] = 2.0 * l->displayFrame[2]/m_windowWidth - 1;
+        edges[3] = 1- 2.0 * l->displayFrame[3]/m_windowHeight;
+        printf("\tmode %d alpha %f %d %d %d %d w %d h %d %f %f %f %f\n",
+               l->blendMode, l->alpha,
+               l->displayFrame[0], l->displayFrame[1], l->displayFrame[2],
+               l->displayFrame[3], m_windowWidth, m_windowHeight,
+               l->crop[0], l->crop[1], l->crop[2], l->crop[3]);
+         if (p->targetHandle != 0) {
+            (*c).second.cb->postSelf(edges, l->crop, l->blendMode, l->alpha);
+        }
+        else {
+            Post postCmd;
+            postCmd.cmd = PostCmd::PostSelf;
+            postCmd.cb = c->second.cb.get();
+            memcpy(postCmd.edges, edges, sizeof(edges));
+            memcpy(postCmd.crop, l->crop, sizeof(l->crop));
+            postCmd.mode = l->blendMode;
+            postCmd.alpha = l->alpha;
+            sendPostWorkerCmd(postCmd);
+        }
+    }
+    if (p->targetHandle != 0) {
+        post(p->targetHandle, false);
+        unbind_locked();
+    }
+    else {
+        Post postCmd;
+        postCmd.cmd = PostCmd::Done;
+        sendPostWorkerCmd(postCmd);
+    }
+    //s_egl.eglSwapBuffers(getDisplay(), getWindowSurface());
+    // post the result
+    // post(cb);
 }
 
 void FrameBuffer::onSave(Stream* stream,
