@@ -59,3 +59,8 @@ rcCreateSyncKHR
     len glsync_out sizeof(uint64_t)
     dir syncthread_out out
     len syncthread_out sizeof(uint64_t)
+
+rcCompose
+    dir buffer in
+    len buffer bufferSize
+    flag flushOnEncode
