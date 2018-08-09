@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "ecbe7d96_48fa2a27",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-09T23:10:37Z",
+      "side": 1,
+      "message": "Seems good on Windows 200% now.",
+      "parentUuid": "3a7713b4_fbe8342c",
+      "range": {
+        "startLine": 60,
+        "startChar": 30,
+        "endLine": 60,
+        "endChar": 32
+      },
+      "revId": "90ceff65385dc9048b3952edb3442ea06b53399d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0f80a336_d3b5b829",
         "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.h",
         "patchSetId": 5
@@ -69,6 +93,30 @@
       "revId": "90ceff65385dc9048b3952edb3442ea06b53399d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c19c0a4f_b0a83633",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/snapshot-page.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-09T23:10:37Z",
+      "side": 1,
+      "message": "This was to line up with the functions above it. I\u0027ve ground it there to make it more clear.",
+      "parentUuid": "0f80a336_d3b5b829",
+      "range": {
+        "startLine": 111,
+        "startChar": 9,
+        "endLine": 111,
+        "endChar": 10
+      },
+      "revId": "90ceff65385dc9048b3952edb3442ea06b53399d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
