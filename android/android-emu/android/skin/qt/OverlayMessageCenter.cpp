@@ -57,6 +57,7 @@ OverlayChildWidget::OverlayChildWidget(OverlayMessageCenter* parent,
         mIcon = new QLabel(this);
         mIcon->setPixmap(icon);
         mIcon->setAlignment(Qt::AlignTop);
+        mIcon->setFixedHeight(24);
         layout()->addWidget(mIcon);
     }
 
@@ -267,7 +268,7 @@ QPixmap OverlayMessageCenter::icon(Icon type) {
 
     auto factor = mSizeTweaker.scaleFactor();
     const bool highDpi = std::max(factor.x(), factor.y()) >= 1.5;
-    return QPixmap(QString(":/all/%1%2").arg(name).arg(highDpi ? "_2x" : ""));
+    return QPixmap(QString(":/all/%1").arg(name));
 }
 
 static const char kDismissProperty[] = "dismissing";
