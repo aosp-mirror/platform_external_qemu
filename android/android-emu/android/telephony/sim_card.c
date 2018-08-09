@@ -382,7 +382,7 @@ http://m2msupport.net/m2msupport/atcsim-generic-sim-access/
     if (!first_double_quote_ptr || strlen(first_double_quote_ptr) < 17
             || strncmp("00880080", first_double_quote_ptr + 1, 8)) {
         // instruction code not supported or invalid
-        snprintf(s_buffer, sizeof(s_buffer), "+CSIM=4, \"6D00\"");
+        snprintf(s_buffer, sizeof(s_buffer), "+CSIM:4, \"6D06\"");
         return s_buffer;
     }
 
@@ -404,7 +404,7 @@ http://m2msupport.net/m2msupport/atcsim-generic-sim-access/
     int resp_len = proxy_base64_encode(response, sizeof(response), base64_response,
             sizeof(base64_response));
     if (resp_len >= sizeof(base64_response)) {
-        snprintf(s_buffer, sizeof(s_buffer), "+CSIM=4, \"9866\""); // no more memory
+        snprintf(s_buffer, sizeof(s_buffer), "+CSIM:4, \"9866\""); // no more memory
         return s_buffer;
     }
     base64_response[resp_len] = '\0';
