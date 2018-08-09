@@ -332,6 +332,7 @@ void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
 void SnapshotPage::slot_snapshotDeleteCompleted() {
     populateSnapshotDisplay();
     enableActions();
+    setOperationInProgress(false);
     QApplication::restoreOverrideCursor();
 }
 
