@@ -23,11 +23,11 @@
 #include "android/base/files/Stream.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
+#include "FrameworkFormats.h"
+#include "Hwc2.h"
 #include "RenderContext.h"
 
 #include <memory>
-
-#include "FrameworkFormats.h"
 
 class TextureDraw;
 class TextureResize;
@@ -220,6 +220,9 @@ public:
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
 
+    void postLayer(struct composeLayer *l, int frameWidth, int frameHeight);
+    void initialize();
+    GLuint getTexture() { return m_tex; }
 public:
     void restore();
 
@@ -227,7 +230,7 @@ private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
     void waitSync();
     bool isIntialized();
-    void initialize();
+//    void initialize();
     // Sometimes things happen and we need to reformat the GL texture
     // used. This function replaces the format of the underlying texture
     // with the internalformat / format / type combination specified.

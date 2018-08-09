@@ -16,7 +16,9 @@
 #define TEXTURE_DRAW_H
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES2/gl2.h>
+#include "Hwc2.h"
 
 // Helper class used to draw a simple texture to the current framebuffer.
 // Usage is pretty simple:
@@ -49,6 +51,8 @@ public:
     }
 
     void setScreenMask(int width, int height, const unsigned char* rgbaData);
+    void drawLayer(struct composeLayer *l, int frameWidth, int frameHeight,
+                   int cbWidth, int cbHeight, GLuint texture);
 
 private:
     bool drawImpl(GLuint texture, float rotationDegrees, float dx, float dy, bool wantOverlay);
@@ -59,6 +63,9 @@ private:
     GLint mPositionSlot;
     GLint mInCoordSlot;
     GLint mTextureSlot;
+    GLint mAlpha;
+    GLint mComposeMode;
+    GLint mColor;
     GLint mTranslationSlot;
     GLuint mVertexBuffer;
     GLuint mIndexBuffer;

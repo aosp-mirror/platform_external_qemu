@@ -378,6 +378,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::KERNEL_DEVICE_TREE_BLOB_SUPPORT;
         case android::featurecontrol::LocationUiV2:
             return android_studio::EmulatorFeatureFlagState::LOCATION_UI_V2;
+        case android::featurecontrol::HostComposition:
+            return android_studio::EmulatorFeatureFlagState::HOST_COMPOSITION_V1;
         case android::featurecontrol::SnapshotAdb:
         case android::featurecontrol::QuickbootFileBacked:
             // TODO: uncomment the following line when we get the studio stats
