@@ -564,12 +564,15 @@ private:
     const WglExtensionsDispatch* m_dispatch = nullptr;
 };
 
+static android::base::StaticLock sGlobalLock;
+
 class WinContext : public EglOS::Context {
 public:
     explicit WinContext(const WglExtensionsDispatch* dispatch, HGLRC ctx) :
         mDispatch(dispatch), mCtx(ctx) {}
 
     ~WinContext() {
+        android::base::AutoLock lock(sGlobalLock);
         if (!mDispatch->wglDeleteContext(mCtx)) {
             fprintf(stderr, "error deleting WGL context! error 0x%x\n",
                     (unsigned)GetLastError());
@@ -900,8 +903,6 @@ void pixelFormatToConfig(WinGlobals* globals,
 
     (*addConfigFunc)(addConfigOpaque, &info);
 }
-
-static android::base::StaticLock sGlobalLock;
 
 class WglDisplay : public EglOS::Display {
 public:
