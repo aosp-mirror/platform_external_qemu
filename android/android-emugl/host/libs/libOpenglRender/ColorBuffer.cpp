@@ -756,3 +756,30 @@ void ColorBuffer::restore() {
             break;
     }
 }
+
+void ColorBuffer::composeStart() {
+    touch();
+    initialize();
+    if (bindFbo(&m_fbo, m_tex)) {
+        s_gles2.glClear(GL_COLOR_BUFFER_BIT);
+    }
+    else {
+        printf("Error bind Fbo for composition\n");
+    }
+}
+
+void ColorBuffer::postLayer(uint32_t composeMode, uint32_t* edges,
+                           float* crop, int mode,
+                           float alpha, uint8_t* color,
+                           int w, int h) {
+    waitSync();
+
+    float c[4];
+    c[0] = crop[0]/m_width;
+    c[1] = crop[1]/m_height;
+    c[2] = crop[2]/m_width;
+    c[3] = crop[3]/m_height;
+    m_helper->getTextureDraw()->drawLayer(composeMode, edges, c, mode, alpha,
+                                          color, m_tex, m_eglImage, w, h);
+}
+

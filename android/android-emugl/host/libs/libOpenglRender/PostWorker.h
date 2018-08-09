@@ -11,6 +11,7 @@
 class ColorBuffer;
 class FrameBuffer;
 struct RenderThreadInfo;
+struct composeLayer;
 
 class PostWorker {
 public:

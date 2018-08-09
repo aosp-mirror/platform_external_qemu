@@ -220,6 +220,12 @@ public:
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
 
+    void composeStart();
+    void postLayer(uint32_t composeMode, uint32_t* edges,
+                           float* crop, int blendMode,
+                           float alpha, uint8_t* color,
+                           int w, int h);
+    void initialize();
 public:
     void restore();
 
@@ -227,7 +233,7 @@ private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
     void waitSync();
     bool isIntialized();
-    void initialize();
+//    void initialize();
     // Sometimes things happen and we need to reformat the GL texture
     // used. This function replaces the format of the underlying texture
     // with the internalformat / format / type combination specified.

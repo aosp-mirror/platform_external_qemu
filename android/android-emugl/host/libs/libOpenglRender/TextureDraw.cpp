@@ -70,11 +70,19 @@ const char kVertexShaderSource[] =
 
 // Similarly, just interpolate texture coordinates.
 const char kFragmentShaderSource[] =
+    "precision mediump float;\n"
     "varying lowp vec2 outCoord;\n"
     "uniform sampler2D tex;\n"
+    "uniform float alpha;\n"
+    "uniform int composeMode;\n"
+    "uniform vec4 color ;\n"
 
     "void main(void) {\n"
-    "  gl_FragColor = texture2D(tex, outCoord);\n"
+    "  if (composeMode == 2) {\n"
+    "    gl_FragColor = alpha * texture2D(tex, outCoord);\n"
+    "  } else {\n"
+    "    gl_FragColor = alpha * color;\n"
+    "  }\n"
     "}\n";
 
 // Hard-coded arrays of vertex information.
@@ -125,6 +133,7 @@ TextureDraw::TextureDraw() :
         mPositionSlot(-1),
         mInCoordSlot(-1),
         mTextureSlot(-1),
+        mAlpha(-1),
         mTranslationSlot(-1),
         mMaskTexture(0),
         mHaveNewMask(false),
@@ -161,6 +170,14 @@ TextureDraw::TextureDraw() :
 
     mTranslationSlot = s_gles2.glGetUniformLocation(mProgram, "translation");
     mTextureSlot = s_gles2.glGetUniformLocation(mProgram, "tex");
+    mAlpha = s_gles2.glGetUniformLocation(mProgram, "alpha");
+    mComposeMode = s_gles2.glGetUniformLocation(mProgram, "composeMode");
+    mColor = s_gles2.glGetUniformLocation(mProgram, "color");
+
+    // set default alpha value 1.0
+    s_gles2.glUniform1f(mAlpha, 1.0);
+    // set default composeMode value 2
+    s_gles2.glUniform1i(mComposeMode, 2);
 
 #if 0
     printf("SLOTS position=%d inCoord=%d texture=%d translation=%d\n",
@@ -210,8 +227,7 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
     }
 #endif
 
-    // Setup the |position| attribute values.
-    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+   s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
 
 #ifndef NDEBUG
     err = s_gles2.glGetError();
@@ -363,4 +379,235 @@ void TextureDraw::setScreenMask(int width, int height, const unsigned char* rgba
     mMaskHeight = height;
 
     mHaveNewMask = true;
+}
+
+void TextureDraw::drawLayer(uint32_t composeMode, uint32_t* edge,
+                            float* crop,int blendMode, float alpha,
+                            uint8_t* color, GLuint texture, EGLImageKHR eglImage,
+                            int w, int h) {
+    if (!mProgram) {
+        ERR("%s: no program\n", __FUNCTION__);
+        return;
+    }
+
+#if 0
+    float l, t, r, b;
+    // We may only get 0, 90, 180, 270 in |rotation| so far.
+    const int intRotation = ((int)rotation)/90;
+    assert(intRotation >= 0 && intRotation <= 3);
+    const intptr_t indexShift = intRotation * kIndicesPerDraw;
+
+    switch (intRotation) {
+    case 0:
+        l = edge[0];
+        t = edge[1];
+        r = edge[2];
+        b = edge[3];
+        break;
+    case 1:
+        l = w - edge[3];
+        t = edge[0];
+        r = w - edge[1];
+        b = edge[2];
+        break;
+    case 2:
+        l = w - edge[2];
+        t = h - edge[3];
+        r = w - edge[0];
+        b = h - edge[1];
+        break;
+    case 3:
+        l = edge[1];
+        t = h - edge[2];
+        r = edge[3];
+        b = h - edge[0];
+    }
+    float edges[4];
+    edges[0] = 2.0 * l/w - 1;
+    edges[1] = 1 - 2.0 * t/h;
+    edges[2] = 2.0 * r/w - 1;
+    edges[3] = 1- 2.0 * b/h;
+#endif
+
+    float edges[4];
+    edges[0] = 2.0 * (w - edge[2])/w - 1;
+    edges[1] = 1 - 2.0 * (h - edge[3])/h;
+    edges[2] = 2.0 * (w - edge[0])/w - 1;
+    edges[3] = 1- 2.0 * (h - edge[1])/h;
+
+    Vertex vertices[] = {
+        {{ edges[2], edges[3], +0 }, { crop[2], crop[1] }},
+        {{ edges[2], edges[1], +0 }, { crop[2], crop[3] }},
+        {{ edges[0], edges[1], +0 }, { crop[0], crop[3] }},
+        {{ edges[0], edges[3], +0 }, { crop[0], crop[1] }},
+    };
+
+    // TODO(digit): Save previous program state.
+    s_gles2.glUseProgram(mProgram);
+
+    if (composeMode != 2) {
+        s_gles2.glUniform1i(mComposeMode, composeMode);
+        s_gles2.glUniform4i(mColor, color[0], color[1], color[2], color[3]);
+    }
+
+
+    // HWC2_BLEND_MODE_PREMULTIPLIED == 2
+    if (blendMode == 2) {
+        s_gles2.glUniform1f(mAlpha, alpha);
+        s_gles2.glEnable(GL_BLEND);
+        s_gles2.glBlendFunc((blendMode == 2) ? GL_ONE : GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+#ifndef NDEBUG
+    GLenum err = s_gles2.glGetError();
+    if (err != GL_NO_ERROR) {
+        ERR("%s: Could not use program error=0x%x\n",
+            __FUNCTION__, err);
+    }
+#endif
+
+    // Setup the |position| attribute values.
+    GLuint vertexBuffer;
+    s_gles2.glGenBuffers(1, &vertexBuffer);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    s_gles2.glBufferData(
+            GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+     // Setup the |position| attribute values.
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
+#ifndef NDEBUG
+    err = s_gles2.glGetError();
+    if (err != GL_NO_ERROR) {
+        ERR("%s: Could not bind GL_ARRAY_BUFFER error=0x%x\n",
+            __FUNCTION__, err);
+    }
+#endif
+
+    s_gles2.glEnableVertexAttribArray(mPositionSlot);
+    s_gles2.glVertexAttribPointer(mPositionSlot,
+                                  3,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  sizeof(Vertex),
+                                  0);
+
+#ifndef NDEBUG
+    err = s_gles2.glGetError();
+    if (err != GL_NO_ERROR) {
+        ERR("%s: Could glVertexAttribPointer with mPositionSlot error=0x%x\n",
+            __FUNCTION__, err);
+    }
+#endif
+
+    // Setup the |inCoord| attribute values.
+    s_gles2.glEnableVertexAttribArray(mInCoordSlot);
+    s_gles2.glVertexAttribPointer(mInCoordSlot,
+                                  2,
+                                  GL_FLOAT,
+                                  GL_FALSE,
+                                  sizeof(Vertex),
+                                  reinterpret_cast<GLvoid*>(
+                                        static_cast<uintptr_t>(
+                                                sizeof(float) * 3)));
+
+    // setup the |texture| uniform value.
+    if (composeMode == 2) {
+        s_gles2.glActiveTexture(GL_TEXTURE0);
+//        s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
+        s_gles2.glUniform1i(mTextureSlot, 0);
+    }
+
+    // setup the |translation| uniform value.
+    s_gles2.glUniform2f(mTranslationSlot, 0, 0);
+
+#ifndef NDEBUG
+    // Validate program, just to be sure.
+    s_gles2.glValidateProgram(mProgram);
+    GLint validState = 0;
+    s_gles2.glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &validState);
+    if (validState == GL_FALSE) {
+        GLchar messages[256] = {};
+        s_gles2.glGetProgramInfoLog(
+                mProgram, sizeof(messages), 0, &messages[0]);
+        ERR("%s: Could not run program: '%s'\n", __FUNCTION__, messages);
+        return false;
+    }
+#endif
+
+    // Do the rendering.
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+#ifndef NDEBUG
+    err = s_gles2.glGetError();
+    if (err != GL_NO_ERROR) {
+        ERR("%s: Could not glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) error=0x%x\n",
+            __FUNCTION__, err);
+    }
+#endif
+
+
+    s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE, 0);
+//    s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
+//                           (const GLvoid*)indexShift);
+
+//    if (wantOverlay && mHaveNewMask) {
+//        // Create a texture from the mask image and make it
+//        // available to be blended
+//        GLint prevUnpackAlignment;
+//        s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+//        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//
+//        s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
+//
+//        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//        s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mMaskWidth, mMaskHeight, 0,
+//                             GL_RGBA, GL_UNSIGNED_BYTE, mMaskPixels);
+//
+//        s_gles2.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//        s_gles2.glEnable(GL_BLEND);
+//
+//        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
+//
+//        mHaveNewMask = false;
+//        mMaskIsValid = true;
+//    }
+//
+//    if (wantOverlay && mMaskIsValid) {
+//        s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
+//        s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
+//                               (const GLvoid*)indexShift);
+//        // Reset to the "normal" texture
+//        s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
+//    }
+
+#ifndef NDEBUG
+    err = s_gles2.glGetError();
+    if (err != GL_NO_ERROR) {
+        ERR("%s: Could not glDrawElements() error=0x%x\n",
+            __FUNCTION__, err);
+    }
+#endif
+
+    s_gles2.glDeleteBuffers(1, &vertexBuffer);
+
+    // Restore default values
+    if (composeMode != 2) {
+        s_gles2.glUniform1i(mComposeMode, 2);
+    }
+    if (blendMode == 2) {
+        s_gles2.glDisable(GL_BLEND);
+        s_gles2.glUniform1f(mAlpha, 1.0);
+    }
+
+    // TODO(digit): Restore previous program state.
+    // For now, reset back to zero and assume other users will
+    // follow the same protocol.
+    s_gles2.glUseProgram(0);
+    s_gles2.glDisableVertexAttribArray(mPositionSlot);
+    s_gles2.glDisableVertexAttribArray(mInCoordSlot);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }

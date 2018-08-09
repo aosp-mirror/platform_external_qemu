@@ -7,6 +7,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+
 PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
     mFb(FrameBuffer::getFB()),
     mBindSubwin(cb) {}
@@ -32,6 +33,11 @@ void PostWorker::post(ColorBuffer* cb) {
     // DPR, but the viewport includes DPR.
     float fx = 2.f * (m_viewportWidth  - windowWidth  * dpr) / (float)m_viewportWidth;
     float fy = 2.f * (m_viewportHeight - windowHeight * dpr) / (float)m_viewportHeight;
+
+    printf("windowWidth %d windowHeight %d viewportWidth%d viewportHeight%d\n",
+           windowWidth, windowHeight, m_viewportWidth, m_viewportHeight);
+    printf("dpr %f fx %f, fy %f, px %f, py %f zRot %d\n", dpr, fx, fy, px, py, zRot);
+
 
     // finally, compute translation values
     float dx = px * fx;

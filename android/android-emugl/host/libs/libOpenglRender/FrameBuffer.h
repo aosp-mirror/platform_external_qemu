@@ -69,6 +69,53 @@ typedef std::unordered_map<uint64_t, ColorBufferSet> ProcOwnedColorBuffers;
 typedef std::unordered_set<HandleType> EGLImageSet;
 typedef std::unordered_map<uint64_t, EGLImageSet> ProcOwnedEGLImages;
 
+typedef enum {
+    HWC2_COMPOSITION_INVALID = 0,
+    HWC2_COMPOSITION_CLIENT = 1,
+    HWC2_COMPOSITION_DEVICE = 2,
+    HWC2_COMPOSITION_SOLID_COLOR = 3,
+    HWC2_COMPOSITION_CURSOR = 4,
+    HWC2_COMPOSITION_SIDEBAND = 5,
+} hwc2_composition_t;
+
+typedef struct hwc_color {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+} hwc_color_t;
+
+typedef struct hwc_frect {
+    float left;
+    float top;
+    float right;
+    float bottom;
+} hwc_frect_t;
+
+typedef struct hwc_rect {
+    int left;
+    int top;
+    int right;
+    int bottom;
+} hwc_rect_t;
+
+struct composeLayer {
+    uint32_t cbHandle;
+    hwc2_composition_t composeMode;
+    hwc_rect_t displayFrame;
+    hwc_frect_t crop;
+    int32_t blendMode;
+    float alpha;
+    hwc_color_t color;
+};
+
+struct composeDevice {
+    uint32_t version;
+    uint32_t targetHandle;
+    uint32_t numLayers;
+    struct composeLayer layer[0];
+};
+
 // A structure used to list the capabilities of the underlying EGL
 // implementation that the FrameBuffer instance depends on.
 // |has_eglimage_texture_2d| is true iff the EGL_KHR_gl_texture_2D_image
@@ -395,6 +442,7 @@ public:
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
+    bool compose(uint32_t bufferSize, void* buffer);
 
     ~FrameBuffer();
 
@@ -428,6 +476,8 @@ public:
     // Note: swiftshader_indirect does not work with 3 channels
     void getScreenshot(unsigned int nChannels, unsigned int* width,
             unsigned int* height, std::vector<unsigned char>& pixels);
+    ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -474,6 +524,7 @@ private:
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+    ColorBuffer* m_targetCb = nullptr;
 
     // A collection of color buffers that were closed without any usages
     // (|opened| == false).
@@ -506,6 +557,7 @@ private:
     TextureDraw* m_textureDraw = nullptr;
     EGLConfig  m_eglConfig = nullptr;
     HandleType m_lastPostedColorBuffer = 0;
+
     float      m_zRot = 0;
     float      m_px = 0;
     float      m_py = 0;
@@ -573,5 +625,7 @@ private:
     void sendPostWorkerCmd(Post post);
 
     bool m_fastBlitSupported = false;
+    HandleType mTargetColorBuffer = 0;
 };
+
 #endif

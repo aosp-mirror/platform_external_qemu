@@ -1609,7 +1609,8 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed in binding subwindow!\n");
+            ERR("eglMakeCurrent failed in binding subwindow %d!\n",
+                s_egl.eglGetError());
             return false;
         }
     }
@@ -1808,7 +1809,8 @@ bool FrameBuffer::repost(bool needLockAndBind) {
     GL_LOG("Reposting framebuffer.");
     if (m_lastPostedColorBuffer &&
         sInitialized.load(std::memory_order_relaxed)) {
-        GL_LOG("Has last posted colorbuffer and is initialized; post.");
+        //GL_LOG("Has last posted colorbuffer and is initialized; post.");
+        printf("Has last posted colorbuffer and is initialized; post.\n");
         return postImpl(m_lastPostedColorBuffer, needLockAndBind,
                         true /* need repaint */);
     } else {
@@ -1876,6 +1878,85 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     c->second.cb->readPixels(0, 0, *width, *height,
             nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
             pixels.data());
+}
+
+bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
+    AutoLock mutex(m_lock);
+    struct composeDevice* p = (struct composeDevice*)buffer;
+    struct composeLayer *l = (struct composeLayer*)p->layer;
+
+    if (p->targetHandle != 0) {
+        // should not be here
+        ERR("Error: not support compose target cb %d\n", p->targetHandle);
+    }
+
+    if (m_targetCb == nullptr) {
+        HandleType ret = 0;
+        ret = genHandle_locked();
+
+        ColorBufferPtr cb(ColorBuffer::create(getDisplay(), m_framebufferWidth,
+                                              m_framebufferHeight,
+                                              GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE,
+                                              ret, m_colorBufferHelper,
+                                              m_fastBlitSupported));
+        m_targetCb = cb.get();
+        if (cb.get() != NULL) {
+            assert(m_colorbuffers.count(ret) == 0);
+            // Android master default api level is 1000
+            int apiLevel = 1000;
+            emugl::getAvdInfo(nullptr, &apiLevel);
+            // pre-O and post-O use different color buffer memory management logic
+            if (apiLevel > 0 && apiLevel < 26) {
+                m_colorbuffers[ret] = { std::move(cb), 1, false, 0 };
+            } else {
+                m_colorbuffers[ret] = { std::move(cb), 0, false, 0 };
+            }
+            m_targetCb->initialize();
+        } else {
+            ret = 0;
+            printf("Create color buffer failed.\n");
+            return false;
+        }
+    }
+
+    bind_locked();
+    m_targetCb->composeStart();
+    printf("compose %d layers\n", p->numLayers);
+    for (int i = 0; i < p->numLayers; i++, l++) {
+        printf("\tcomposeMode %d color %d %d %d %d blendMode %d alpha %f %d %d %d %d "
+           "%f %f %f %f\n",
+           l->composeMode, l->color.r, l->color.g, l->color.b, l->color.a,
+           l->blendMode, l->alpha,
+           l->displayFrame.left, l->displayFrame.top, l->displayFrame.right,
+           l->displayFrame.bottom, l->crop.left, l->crop.top, l->crop.right,
+           l->crop.bottom);
+
+        ColorBufferMap::iterator c;
+        if (l->composeMode == 2) {
+            HandleType p_colorbuffer = l->cbHandle;
+            c = m_colorbuffers.find(p_colorbuffer);
+            if (c == m_colorbuffers.end()) {
+                // bad colorbuffer handle
+                ERR("%s: fail to find colorbuffer %d\n", __FUNCTION__, p_colorbuffer);
+                continue;
+            }
+            (c->second.cb.get())->postLayer(2, (uint32_t*)(&l->displayFrame),
+                                           (float*)(&l->crop), l->blendMode, l->alpha,
+                                           (uint8_t*)(&l->color),
+                                            m_framebufferWidth, m_framebufferHeight);
+        }
+        else {
+            m_textureDraw->drawLayer(l->composeMode, (uint32_t*)(&l->displayFrame),
+                                    (float*)(&l->crop), l->blendMode, l->alpha,
+                                    (uint8_t*)(&l->color), 0, 0,
+                                     m_framebufferWidth, m_framebufferHeight);
+        }
+    }
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    unbind_locked();
+    post(m_targetCb->getHndl(), false);
+
+    return true;
 }
 
 void FrameBuffer::onSave(Stream* stream,
