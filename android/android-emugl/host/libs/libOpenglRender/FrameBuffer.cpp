@@ -651,6 +651,10 @@ FrameBuffer::postWorkerFunc(const Post& post) {
         case PostCmd::Clear:
             m_postWorker->clear();
             break;
+        case PostCmd::Compose: {
+            m_postWorker->compose(post.d);
+            break;
+        }
         case PostCmd::Exit:
             return WorkerProcessingResult::Stop;
         default:
@@ -1611,7 +1615,8 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed in binding subwindow!\n");
+            ERR("eglMakeCurrent failed in binding subwindow %d!\n",
+                s_egl.eglGetError());
             return false;
         }
     }
@@ -1810,7 +1815,8 @@ bool FrameBuffer::repost(bool needLockAndBind) {
     GL_LOG("Reposting framebuffer.");
     if (m_lastPostedColorBuffer &&
         sInitialized.load(std::memory_order_relaxed)) {
-        GL_LOG("Has last posted colorbuffer and is initialized; post.");
+        //GL_LOG("Has last posted colorbuffer and is initialized; post.");
+        printf("Has last posted colorbuffer and is initialized; post.\n");
         return postImpl(m_lastPostedColorBuffer, needLockAndBind,
                         true /* need repaint */);
     } else {
@@ -1880,6 +1886,56 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
             pixels.data());
 }
 
+bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
+    AutoLock mutex(m_lock);
+    struct composeDevice* p = (struct composeDevice*)buffer;
+    struct composeLayer *l = (struct composeLayer*)p->layer;
+
+    // Our current design does either all surfaceflinger composition
+    // or all host compostion, no hybrid case.
+    if (p->targetHandle != 0) {
+        // should not be here
+        ERR("Error: not support compose target cb %d\n", p->targetHandle);
+    }
+
+    if (m_targetCb == nullptr) {
+        HandleType ret = 0;
+        ret = genHandle_locked();
+
+        ColorBufferPtr cb(ColorBuffer::create(getDisplay(), m_framebufferWidth,
+                                              m_framebufferHeight,
+                                              GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE,
+                                              ret, m_colorBufferHelper,
+                                              m_fastBlitSupported));
+        m_targetCb = cb.get();
+        if (m_targetCb != NULL) {
+            assert(m_colorbuffers.count(ret) == 0);
+            // Android master default api level is 1000
+            int apiLevel = 1000;
+            emugl::getAvdInfo(nullptr, &apiLevel);
+            // pre-O and post-O use different color buffer memory management logic
+            if (apiLevel > 0 && apiLevel < 26) {
+                m_colorbuffers[ret] = { std::move(cb), 1, false, 0 };
+            } else {
+                m_colorbuffers[ret] = { std::move(cb), 0, false, 0 };
+            }
+//            m_targetCb->initialize();
+        } else {
+            ret = 0;
+            ERR("Create color buffer failed.\n");
+            return false;
+        }
+    }
+
+    Post composeCmd;
+    composeCmd.cmd = PostCmd::Compose;
+    composeCmd.d = p;
+    sendPostWorkerCmd(composeCmd);
+
+    post(m_targetCb->getHndl(), false);
+    return true;
+}
+
 void FrameBuffer::onSave(Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
@@ -1939,6 +1995,7 @@ void FrameBuffer::onSave(Stream* stream,
         s->putBe32(std::max<System::Duration>(0, now - pair.second.closedTs));
     });
     stream->putBe32(m_lastPostedColorBuffer);
+    stream->putBe32((m_targetCb)? m_targetCb->getHndl() : 0);
     saveCollection(stream, m_windows,
                    [](Stream* s, const WindowSurfaceMap::value_type& pair) {
         pair.second.first->onSave(s);
@@ -2053,6 +2110,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     });
     m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
     GL_LOG("Got lasted posted color buffer from snapshot");
+    m_targetCb = findColorBuffer(static_cast<HandleType>(stream->getBe32()));
 
     loadCollection(stream, &m_windows,
                    [this](Stream* stream) -> WindowSurfaceMap::value_type {
@@ -2082,4 +2140,14 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+ColorBuffer* FrameBuffer::findColorBuffer(HandleType p_colorbuffer) {
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        return nullptr;
+    }
+    else {
+        return c->second.cb.get();
+    }
 }

@@ -756,3 +756,14 @@ void ColorBuffer::restore() {
             break;
     }
 }
+
+GLuint ColorBuffer::getTexture() {
+    touch();
+    initialize();
+    return m_tex;
+}
+
+void ColorBuffer::postLayer(struct composeLayer *l, int frameWidth, int frameHeight) {
+    //waitSync();
+    m_helper->getTextureDraw()->drawLayer(l, frameWidth, frameHeight, m_width, m_height, m_tex);
+}
