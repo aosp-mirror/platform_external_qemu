@@ -223,6 +223,11 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
         return;
     }
 
+    // Could be a bad snapshot load
+    if (!img->saveableTexture || !img->globalTexObj) {
+        return;
+    }
+
     img->saveableTexture->makeDirty();
     GLuint globalTexObj = img->globalTexObj->getGlobalName();
     ctx->blitFromReadBufferToTextureFlipped(
