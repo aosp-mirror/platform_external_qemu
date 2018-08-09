@@ -47,6 +47,7 @@ void launchProcessFromParameters(const ProcessLaunchParameters& launchParams, bo
 
 // Restart mechanism
 void disableRestart(); // Disables the restart mechanism.
+bool isRestartDisabled();
 void initializeEmulatorRestartParameters(int argc, char** argv, const char* paramFolder);
 void setEmulatorRestartOnExit();
 

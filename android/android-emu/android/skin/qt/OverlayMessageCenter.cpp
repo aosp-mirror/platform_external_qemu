@@ -57,6 +57,7 @@ OverlayChildWidget::OverlayChildWidget(OverlayMessageCenter* parent,
         mIcon = new QLabel(this);
         mIcon->setPixmap(icon);
         mIcon->setAlignment(Qt::AlignTop);
+        mIcon->setFixedHeight(24);
         layout()->addWidget(mIcon);
     }
 
