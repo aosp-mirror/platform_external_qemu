@@ -12,6 +12,7 @@
 
 #include "ui_snapshot-page.h"
 
+#include "android/skin/qt/qt-settings.h"
 #include "android/snapshot/proto/snapshot.pb.h"
 
 #include <QDateTime>
@@ -19,6 +20,8 @@
 #include <QString>
 #include <QWidget>
 #include <memory>
+
+Q_DECLARE_METATYPE(Ui::Settings::SaveSnapshotOnExit);
 
 class SnapshotPage : public QWidget
 {
@@ -36,12 +39,18 @@ public slots:
     void slot_snapshotSaveCompleted(int status, const QString& name);
     void slot_snapshotDeleteCompleted();
     void slot_askAboutInvalidSnapshots(QStringList names);
+    void slot_confirmAutosaveChoiceAndRestart(
+             Ui::Settings::SaveSnapshotOnExit previousSetting,
+             Ui::Settings::SaveSnapshotOnExit nextSetting);
 
 signals:
     void loadCompleted(int status, const QString& name);
     void saveCompleted(int status, const QString& name);
     void deleteCompleted();
     void askAboutInvalidSnapshots(QStringList names);
+    void confirmAutosaveChoiceAndRestart(
+             Ui::Settings::SaveSnapshotOnExit previousSetting,
+             Ui::Settings::SaveSnapshotOnExit nextSetting);
 
 private slots:
     void on_defaultSnapshotDisplay_itemSelectionChanged();
@@ -96,6 +105,7 @@ private:
     void    writeLogicalNameAndParentToProtobuf(const QString& fileName,
                                                 const QString& logicalName,
                                                 const QString& parentName);
+    void    changeUiFromSaveOnExitSetting(Ui::Settings::SaveSnapshotOnExit choice);
 
     const WidgetSnapshotItem* getSelectedSnapshot();
 
