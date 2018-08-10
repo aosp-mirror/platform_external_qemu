@@ -734,7 +734,7 @@ static char* bufprint_emulatorName(char* p,
                                    const char* prefix,
                                    const char* archSuffix) {
     if (progDir) {
-        p = bufprint(p, end, "%s" PATH_SEP, progDir);
+        p = bufprint(p, end, "%s/", progDir);
     }
     p = bufprint(p, end, "%s%s%s", prefix, archSuffix, kExeExtension);
     return p;
@@ -867,7 +867,7 @@ static char* getQemuExecutablePath(const char* progDir,
     char* fullPathEnd = fullPath + sizeof(fullPath);
     char* tail = bufprint(fullPath,
                           fullPathEnd,
-                          "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP "qemu-system-%s%s",
+                          "%s/qemu/%s-%s/qemu-system-%s%s",
                           progDir,
                           kHostOs,
                           hostArch,
@@ -886,7 +886,7 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
     char fullPath[PATH_MAX];
     char* tail = fullPath;
 
-    tail = bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s", launcherDir,
+    tail = bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s", launcherDir,
                     libSubDir);
 
     if (tail >= fullPath + sizeof(fullPath)) {
@@ -898,19 +898,19 @@ static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_swiftshader");
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_swiftshader");
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle");
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle");
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle9");
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle9");
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle11");
+    bufprint(fullPath, fullPath + sizeof(fullPath), "%s/%s/%s", launcherDir, libSubDir, "gles_angle11");
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
@@ -973,10 +973,10 @@ static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
     bool result = false;
     char* kernel_file = NULL;
     if (androidOut) {
-        asprintf(&kernel_file, "%s" PATH_SEP "kernel-ranchu-64", androidOut);
+        asprintf(&kernel_file, "%s/kernel-ranchu-64", androidOut);
     } else {
         std::string systemImagePath = getAvdSystemPath(avdName, sysDir);
-        asprintf(&kernel_file, "%s" PATH_SEP "%s", systemImagePath.c_str(),
+        asprintf(&kernel_file, "%s/%s", systemImagePath.c_str(),
                  "kernel-ranchu-64");
     }
     result = path_exists(kernel_file);
@@ -1009,7 +1009,7 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
             D("Invalid Android build top: %s", androidBuildTop);
             return false;
         }
-        asprintf(&kernel_file, "%s" PATH_SEP "prebuilts" PATH_SEP "qemu-kernel" PATH_SEP "%s" PATH_SEP "%s",
+        asprintf(&kernel_file, "%s/prebuilts/qemu-kernel/%s/%s",
                  androidBuildTop, avdArch, "kernel-ranchu");
     } else {
         // This is a regular SDK AVD launch.
@@ -1019,12 +1019,12 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
               "ANDROID_SDK_ROOT");
             return false;
         }
-        asprintf(&kernel_file, "%s" PATH_SEP "%s", systemImagePath.c_str(),
+        asprintf(&kernel_file, "%s/%s", systemImagePath.c_str(),
                  "kernel-ranchu");
         result = path_exists(kernel_file);
         if (result == false) {
             AFREE(kernel_file);
-            asprintf(&kernel_file, "%s" PATH_SEP "%s", systemImagePath.c_str(),
+            asprintf(&kernel_file, "%s/%s", systemImagePath.c_str(),
                     "kernel-ranchu-64");
         }
     }
