@@ -115,7 +115,7 @@ _getFullFilePath(const char* rootPath, const char* fileName) {
     } else {
         char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
-        p = bufprint(temp, end, "%s"PATH_SEP"%s", rootPath, fileName);
+        p = bufprint(temp, end, "%s/%s", rootPath, fileName);
         if (p >= end) {
             return NULL;
         }
@@ -209,12 +209,12 @@ _getSdkImagePath( const char*  fileName )
                     subdir = dirScanner_next(scanner);
                     if (!subdir) break;
 
-                    q = bufprint(p, end, PATH_SEP"%s"PATH_SEP"images"PATH_SEP"%s", subdir, fileName);
+                    q = bufprint(p, end, "/%s/images/%s", subdir, fileName);
                     if (q >= end || !path_exists(temp))
                         continue;
 
                     found = 1;
-                    p = bufprint(p, end, PATH_SEP"%s"PATH_SEP"images", subdir);
+                    p = bufprint(p, end, "/%s/images", subdir);
                     break;
                 }
                 dirScanner_free(scanner);
@@ -239,7 +239,7 @@ _getSdkImage( const char*  path, const char*  file )
     char  temp[MAX_PATH];
     char  *p = temp, *end = p + sizeof(temp);
 
-    p = bufprint(temp, end, "%s"PATH_SEP"%s", path, file);
+    p = bufprint(temp, end, "%s/%s", path, file);
     if (p >= end || !path_exists(temp))
         return NULL;
 
@@ -458,7 +458,7 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
 
         if (!opts->data) {
             /* check for userdata-qemu.img in the data directory */
-            bufprint(tmp, tmpend, "%s"PATH_SEP"userdata-qemu.img", opts->datadir);
+            bufprint(tmp, tmpend, "%s/userdata-qemu.img", opts->datadir);
             if (!path_exists(tmp)) {
                 derror(
                 "You did not provide the name of an Android Virtual Device\n"
@@ -475,7 +475,7 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
         }
 
         if (!opts->snapstorage && opts->datadir) {
-            bufprint(tmp, tmpend, "%s"PATH_SEP"snapshots.img", opts->datadir);
+            bufprint(tmp, tmpend, "%s/snapshots.img", opts->datadir);
             if (path_exists(tmp)) {
                 str_reset(&opts->snapstorage, tmp);
                 D("autoconfig: -snapstorage %s", opts->snapstorage);
@@ -1046,7 +1046,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
                 /* If -datadir <path> is used, look for a sdcard.img file here */
                 if (opts->datadir) {
                     char tmp[PATH_MAX], *tmpend = tmp + sizeof(tmp);
-                    bufprint(tmp, tmpend, "%s"PATH_SEP"%s", opts->datadir, "system.img");
+                    bufprint(tmp, tmpend, "%s/%s", opts->datadir, "system.img");
                     if (path_exists(tmp)) {
                         str_reset(&opts->sdcard, tmp);
                         break;

@@ -131,7 +131,7 @@ parse_skin_files(const char*      skinDirPath,
     int  checkAlias = 1;
 
     if (skinDirPath != NULL) {
-        bufprint(tmp, tmp+sizeof(tmp), "%s"PATH_SEP"%s", skinDirPath, skinName);
+        bufprint(tmp, tmp+sizeof(tmp), "%s/%s", skinDirPath, skinName);
         if (path_exists(tmp)) {
             checkAlias = 0;
         } else {
@@ -184,7 +184,7 @@ parse_skin_files(const char*      skinDirPath,
         exit(1);
     }
 
-    snprintf(tmp, sizeof tmp, "%s"PATH_SEP"%s"PATH_SEP"layout", skinDirPath, skinName);
+    snprintf(tmp, sizeof tmp, "%s/%s/layout", skinDirPath, skinName);
     D("trying to load skin file '%s'", tmp);
 
     if(aconfig_load_file(root, tmp) < 0) {
@@ -193,7 +193,7 @@ parse_skin_files(const char*      skinDirPath,
         goto DEFAULT_SKIN;
     }
 
-    snprintf(tmp, sizeof tmp, "%s"PATH_SEP"%s"PATH_SEP, skinDirPath, skinName);
+    snprintf(tmp, sizeof tmp, "%s/%s/", skinDirPath, skinName);
     path = tmp;
     goto FOUND_SKIN;
 
