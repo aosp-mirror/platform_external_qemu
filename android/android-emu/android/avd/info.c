@@ -248,7 +248,7 @@ static int _getSearchPaths(CIniFile* configIni,
         if (path != NULL) {
             DD("    found image search path: %s", path);
             if (!path_is_absolute(path)) {
-                p = bufprint(temp, end, "%s"PATH_SEP"%s", sdkRootPath, path);
+                p = bufprint(temp, end, "%s/%s", sdkRootPath, path);
                 AFREE(path);
                 path = ASTRDUP(temp);
             }
@@ -285,7 +285,7 @@ _getFullFilePath( const char* rootPath, const char* fileName )
     } else {
         char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
-        p = bufprint(temp, end, "%s"PATH_SEP"%s", rootPath, fileName);
+        p = bufprint(temp, end, "%s/%s", rootPath, fileName);
         if (p >= end) {
             return NULL;
         }
@@ -302,7 +302,7 @@ _checkSkinPath( const char*  skinPath )
     char  temp[MAX_PATH], *p=temp, *end=p+sizeof(temp);
 
     /* for now, if it has a 'layout' file, it is a valid skin path */
-    p = bufprint(temp, end, "%s"PATH_SEP"layout", skinPath);
+    p = bufprint(temp, end, "%s/layout", skinPath);
     if (p >= end || !path_exists(temp))
         return 0;
 
@@ -321,7 +321,7 @@ _checkSkinSkinsDir( const char*  skinDirRoot,
     char*        result;
     char         temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
 
-    p = bufprint(temp, end, "%s"PATH_SEP"skins"PATH_SEP"%s", skinDirRoot, skinName);
+    p = bufprint(temp, end, "%s/skins/%s", skinDirRoot, skinName);
     DD("Probing skin directory: %s", temp);
     if (p >= end || !path_exists(temp)) {
         DD("    ignore bad skin directory %s", temp);
@@ -349,7 +349,7 @@ _checkSkinSkinsDir( const char*  skinDirRoot,
             if (strncmp(file, "alias-", 6) || file[6] == 0)
                 continue;
 
-            p = bufprint(temp, end, "%s"PATH_SEP"skins"PATH_SEP"%s", skinDirRoot, file+6);
+            p = bufprint(temp, end, "%s/skins/%s", skinDirRoot, file+6);
             if (p < end && _checkSkinPath(temp)) {
                 /* yes, it's an alias */
                 DD("    skin alias '%s' points to skin directory: %s",
@@ -396,7 +396,7 @@ _getSkinPathFromName( const char*  skinName,
     }
 
     /* is the skin name a relative path from the SDK root ? */
-    p = bufprint(temp, end, "%s"PATH_SEP"%s", sdkRootPath, skinName);
+    p = bufprint(temp, end, "%s/%s", sdkRootPath, skinName);
     if (p < end && _checkSkinPath(temp)) {
         skinName = temp;
         goto FOUND_IT;
@@ -663,7 +663,7 @@ _avdInfo_getContentFilePath(const AvdInfo*  i, const char* fileName)
 {
     char temp[MAX_PATH], *p = temp, *end = p + sizeof(temp);
 
-    p = bufprint(p, end, "%s"PATH_SEP"%s", i->contentPath, fileName);
+    p = bufprint(p, end, "%s/%s", i->contentPath, fileName);
     if (p >= end) {
         derror("can't access virtual device content directory");
         return NULL;
@@ -747,7 +747,7 @@ _avdInfo_getSdkFilePath(const AvdInfo*  i, const char*  fileName)
         for (nn = 0; nn < i->numSearchPaths; nn++) {
             const char* searchDir = i->searchPaths[nn];
 
-            p = bufprint(temp, end, "%s"PATH_SEP"%s", searchDir, fileName);
+            p = bufprint(temp, end, "%s/%s", searchDir, fileName);
             if (p < end && path_exists(temp)) {
                 DD("found %s in search dir: %s", fileName, searchDir);
                 goto FOUND;
@@ -1003,7 +1003,7 @@ int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath)
 {
     char  temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
-    p = bufprint(temp, end, "%s"PATH_SEP"%s"PATH_SEP"hardware.ini", skinDirPath, skinName);
+    p = bufprint(temp, end, "%s/%s/hardware.ini", skinDirPath, skinName);
     if (p >= end || !path_exists(temp)) {
         DD("no skin-specific hardware.ini in %s", skinDirPath);
         return 0;
@@ -1134,13 +1134,13 @@ avdInfo_getKernelPath( const AvdInfo*  i )
             suffix = "-armv7";
         }
 
-        p = bufprint(temp, end, "%s"PATH_SEP"kernel", i->androidOut);
+        p = bufprint(temp, end, "%s/kernel", i->androidOut);
         if (p < end && path_exists(temp)) {
             str_reset(&kernelPath, temp);
             break;
         }
 
-        p = bufprint(temp, end, "%s"PATH_SEP"prebuilts"PATH_SEP"qemu-kernel"PATH_SEP"%s"PATH_SEP"kernel-qemu%s",
+        p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/kernel-qemu%s",
                      i->androidBuildRoot, i->targetArch, suffix);
         if (p >= end || !path_exists(temp)) {
             derror("bad workspace: cannot find prebuilt kernel in: %s", temp);
@@ -1186,7 +1186,7 @@ avdInfo_getRanchuKernelPath( const AvdInfo*  i )
             suffix = "-mips32r5";
         }
 
-        p = bufprint(temp, end, "%s"PATH_SEP"prebuilts"PATH_SEP"qemu-kernel"PATH_SEP"%s"PATH_SEP"ranchu"PATH_SEP"kernel-qemu%s",
+        p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/ranchu/kernel-qemu%s",
                      i->androidBuildRoot, i->targetArch, suffix);
         if (p >= end || !path_exists(temp)) {
             /* arm64 and mips64 are special: their kernel-qemu is actually kernel-ranchu */
@@ -1513,7 +1513,7 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
 
     /* Auto-disable keyboard emulation on sapphire platform builds */
     if (i->androidOut != NULL) {
-        char*  p = strrchr(i->androidOut, *PATH_SEP);
+        char*  p = strrchr(i->androidOut, '/');
         if (p != NULL && !strcmp(p,"sapphire")) {
             hw->hw_keyboard = 0;
         }
@@ -1680,7 +1680,7 @@ avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
         /* If there is no skin listed in the config.ini, try to see if
          * there is one single 'skin' directory in the content directory.
          */
-        p = bufprint(temp, end, "%s"PATH_SEP"skin", i->contentPath);
+        p = bufprint(temp, end, "%s/skin", i->contentPath);
         if (p < end && _checkSkinPath(temp)) {
             D("using skin content from %s", temp);
             AFREE(i->skinName);
@@ -1717,11 +1717,11 @@ avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
         if (skinPath != NULL)
             break;
 
-#define  PREBUILT_SKINS_ROOT "development"PATH_SEP"tools"PATH_SEP"emulator"
+#define  PREBUILT_SKINS_ROOT "development/tools/emulator"
 
         /* if we are in the Android build, try the prebuilt directory */
         if (i->inAndroidBuild) {
-            p = bufprint( temp, end, "%s"PATH_SEP"%s",
+            p = bufprint( temp, end, "%s/%s",
                         i->androidBuildRoot, PREBUILT_SKINS_ROOT );
             if (p < end) {
                 skinPath = _checkSkinSkinsDir(temp, skinName);
