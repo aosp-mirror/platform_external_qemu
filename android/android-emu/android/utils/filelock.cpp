@@ -336,7 +336,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
              */
             win_pid_len = strlen(lock->lock) + 1 + sizeof(WIN_PIDFILE_NAME);
             win_pid = (char *) malloc(win_pid_len);
-            snprintf(win_pid, win_pid_len, "%s/" WIN_PIDFILE_NAME, lock->lock);
+            snprintf(win_pid, win_pid_len, "%s" PATH_SEP WIN_PIDFILE_NAME, lock->lock);
             HANDLE_EINTR(unlink(win_pid));
             free(win_pid);
 
