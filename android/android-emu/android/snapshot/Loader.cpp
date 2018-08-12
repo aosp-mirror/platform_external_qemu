@@ -25,7 +25,7 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
-Loader::Loader(const Snapshot& snapshot, int error)
+Loader::Loader(const Snapshot& snapshot, RamFileInfo ramFileInfo, int error)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (error) {
         mSnapshot.saveFailure(errnoToFailure(error));
@@ -60,6 +60,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
         RamLoader::RamBlockStructure emptyRamBlockStructure = {};
         mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner),
                            RamLoader::Flags::OnDemandAllowed,
+                           ramFileInfo,
                            emptyRamBlockStructure);
     }
     {
@@ -190,6 +191,7 @@ void Loader::synchronize(bool isOnExit) {
             mRamLoader.emplace(
                     StdioStream(ram, StdioStream::kOwner),
                     RamLoader::Flags::LoadIndexOnly,
+                    RamFileInfo(),
                     mRamLoader->getRamBlockStructure());
         }
     }

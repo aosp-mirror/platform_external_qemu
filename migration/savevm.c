@@ -3014,12 +3014,14 @@ int qemu_listvms(char(*names)[256], int* names_count, const QEMUMessageCallback*
 
 void vmstate_register_ram(MemoryRegion *mr, DeviceState *dev)
 {
+    qemu_ram_set_migrate(mr->ram_block, true);
     qemu_ram_set_idstr(mr->ram_block,
                        memory_region_name(mr), dev);
 }
 
 void vmstate_unregister_ram(MemoryRegion *mr, DeviceState *dev)
 {
+    qemu_ram_set_migrate(mr->ram_block, false);
     qemu_ram_unset_idstr(mr->ram_block);
 }
 
