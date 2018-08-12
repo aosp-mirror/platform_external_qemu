@@ -125,8 +125,8 @@ public:
     void addOperationCallback(Callback&& cb);
 
     bool isQuickboot() const { return mIsQuickboot; }
-    bool hasRamFile() const { return !mRamFile.empty(); }
-    bool isRamFileShared() const { return !mRamFile.empty() && mRamFileShared; }
+    bool hasRamFile() const { return !mRamFileInfo.path.empty(); }
+    bool isRamFileShared() const { return hasRamFile() && mRamFileInfo.shared; }
 
 private:
     bool onStartSaving(const char* name);
@@ -167,8 +167,7 @@ private:
     bool mIsOnExit = false;
     bool mIsInvalidating = false;
 
-    std::string mRamFile;
-    bool mRamFileShared = false;
+    RamFileInfo mRamFileInfo;
 };
 
 }  // namespace snapshot

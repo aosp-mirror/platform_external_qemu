@@ -21,6 +21,7 @@
 #include "android/base/Stopwatch.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
+#include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 
 #include <algorithm>
@@ -43,8 +44,10 @@ void RamLoader::FileIndex::clear() {
 
 RamLoader::RamLoader(base::StdioStream&& stream,
                      Flags flags,
+                     RamFileInfo ramFileInfo,
                      const RamLoader::RamBlockStructure& blockStructure)
     : mStream(std::move(stream)),
+      mRamFileInfo(ramFileInfo),
       mReaderThread([this]() { readerWorker(); }) {
 
     if (nonzero(flags & Flags::LoadIndexOnly)) {
@@ -131,17 +134,6 @@ bool RamLoader::start(bool isQuickboot) {
     if (!readIndex()) {
         mHasError = true;
         return false;
-    }
-
-    if (mIsQuickboot &&
-        nonzero(mIndex.flags & IndexFlags::SeparateBackingStore)) {
-       // we are using a file-backed RAM to load; return early.
-       mEndTime = base::System::get()->getHighResTimeUs();
-#if SNAPSHOT_PROFILE > 1
-       printf("File-backed RAM load complete in %.03f ms\n",
-              (mEndTime - mStartTime) / 1000.0);
-#endif
-       return true;
     }
 
     if (!mAccessWatch) {
@@ -267,6 +259,7 @@ bool RamLoader::readIndex() {
     mIndex.flags = IndexFlags(stream.getBe32());
     const bool compressed = nonzero(mIndex.flags & IndexFlags::CompressedPages);
     auto pageCount = stream.getBe32();
+
     mIndex.pages.reserve(pageCount);
     int64_t runningFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
@@ -311,7 +304,17 @@ void RamLoader::readBlockPages(base::Stream* stream,
     const auto blockIndex = std::distance(mIndex.blocks.begin(), blockIt);
 
     const auto blockPagesCount = stream->getBe32();
+
+    uint32_t blockFlags = stream->getBe32();
+    std::string memPath = stream->getString();
+
     FileIndex::Block& block = *blockIt;
+
+    if ((blockFlags & SNAPSHOT_RAM_MAPPED_SHARED) ||
+        block.ramBlock.readonly) {
+        return;
+    }
+
     auto pageIt = mIndex.pages.end();
     block.pagesBegin = pageIt;
     mIndex.pages.resize(mIndex.pages.size() + blockPagesCount);
@@ -666,6 +669,37 @@ bool RamLoader::readAllPages() {
 #if SNAPSHOT_PROFILE > 1
     auto startTime = base::System::get()->getHighResTimeUs();
 #endif
+
+//     if (false) {
+//         // stdio stream the path
+//         // make an fd
+//         // assume no index; just read it all
+// 
+//         fprintf(stderr, "%s: read Everything\n", __func__);
+// 
+//         const char* name = androidSnapshot_getRamFilePath(0);
+//         base::StdioStream stream(
+//             fopen(name, "rb"), base::StdioStream::kOwner);
+// 
+//         int fd = fileno(stream.get());
+// 
+//         // assume ram is first blk
+//         const auto& ramBlock = mIndex.blocks[0].ramBlock;
+// 
+//         uint8_t* hostPtr = ramBlock.hostPtr;
+//         uint64_t totalSz = ramBlock.totalSize;
+// 
+//         size_t readChunkSize = 16 * 1048576;
+//        
+//         for (size_t i = 0; i < totalSz; i += readChunkSize) {
+//             HANDLE_EINTR(base::pread(fd, hostPtr + i, readChunkSize, i));
+//         }
+// 
+//         close(fd);
+//         // delete the index
+//         return true;
+//     }
+
     if (nonzero(mIndex.flags & IndexFlags::CompressedPages) && !mAccessWatch) {
         startDecompressor();
     }

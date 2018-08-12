@@ -73,6 +73,7 @@ public:
 
     RamLoader(base::StdioStream&& stream,
               Flags flags,
+              RamFileInfo ramFileInfo,
               const RamBlockStructure& blockStructure = {});
 
     ~RamLoader();
@@ -148,6 +149,9 @@ private:
     int mStreamFd;  // An FD for the |mStream|'s underlying open file.
     bool mWasStarted = false;
     std::atomic<bool> mHasError{false};
+
+    // Information about the mapped ram file, if any.
+    RamFileInfo mRamFileInfo;
 
     base::Optional<MemoryAccessWatch> mAccessWatch;
     base::FunctorThread mReaderThread;
