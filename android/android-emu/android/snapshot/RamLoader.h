@@ -73,12 +73,14 @@ public:
 
     RamLoader(base::StdioStream&& stream,
               Flags flags,
+              RamFileInfo ramFileInfo,
               const RamBlockStructure& blockStructure = {});
 
     ~RamLoader();
 
     RamBlockStructure getRamBlockStructure() const;
     void applyRamBlockStructure(const RamBlockStructure& blockStructure);
+    void clearIndex();
 
     void loadRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
@@ -117,6 +119,10 @@ public:
         return true;
     }
 
+    bool didLoadFromFileBacking() {
+        return mLoadedFromFileBacking;
+    }
+
 private:
 
     bool readIndex();
@@ -148,6 +154,9 @@ private:
     int mStreamFd;  // An FD for the |mStream|'s underlying open file.
     bool mWasStarted = false;
     std::atomic<bool> mHasError{false};
+
+    // Information about the mapped ram file, if any.
+    RamFileInfo mRamFileInfo;
 
     base::Optional<MemoryAccessWatch> mAccessWatch;
     base::FunctorThread mReaderThread;
@@ -182,6 +191,9 @@ private:
 
     // Whether or not we just want to reload the index.
     bool mIndexOnly = false;
+
+    // Whether we loaded eagerly from a ram.img
+    bool mLoadedFromFileBacking = false;
 };
 
 struct RamLoader::Page {

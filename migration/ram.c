@@ -2996,8 +2996,9 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
                             ret = -EINVAL;
                         }
                     }
-                    ram_control_load_hook(f, RAM_CONTROL_BLOCK_REG,
-                                          block->idstr);
+                    if (qemu_ram_is_migrate(block)) {
+                        ram_control_load_hook(f, RAM_CONTROL_BLOCK_REG, block->idstr);
+                    }
                 } else {
                     error_report("Unknown ramblock \"%s\", cannot "
                                  "accept migration", id);
