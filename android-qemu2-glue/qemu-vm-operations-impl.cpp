@@ -296,14 +296,22 @@ static const QEMUFileHooks sSaveHooks = {
             qemu_put_be64(f, RAM_SAVE_FLAG_HOOK);
             if (flags == RAM_CONTROL_SETUP) {
                 // Register all blocks for saving.
-                qemu_ram_foreach_block(
+                qemu_ram_foreach_block_with_file_info(
                         [](const char* block_name, void* host_addr,
-                           ram_addr_t offset, ram_addr_t length, void* opaque) {
+                           ram_addr_t offset, ram_addr_t length,
+                           uint32_t flags, const char* path, void* opaque) {
                             SnapshotRamBlock block = {
                                     block_name, (int64_t)offset,
-                                    (uint8_t*)host_addr, (int64_t)length};
+                                    (uint8_t*)host_addr, (int64_t)length,
+                                    0 /* page size to fill in later */,
+                                    flags, path };
                             block.pageSize = (int32_t)qemu_ram_pagesize(
                                     qemu_ram_block_by_name(block_name));
+                            fprintf(stderr, "%s: name: %s offset 0x%llx host %p len 0x%llx\n", __func__,
+                                    block_name,
+                                    (unsigned long long)offset,
+                                    host_addr,
+                                    (unsigned long long)length);
                             sSnapshotCallbacks.ramOps.registerBlock(
                                     sSnapshotCallbacksOpaque, SNAPSHOT_SAVE,
                                     &block);
@@ -351,10 +359,17 @@ static const QEMUFileHooks sLoadHooks = {
                 case RAM_CONTROL_BLOCK_REG: {
                     SnapshotRamBlock block;
                     block.id = static_cast<const char*>(data);
-                    qemu_ram_foreach_block(
+                    qemu_ram_foreach_block_with_file_info(
                             [](const char* block_name, void* host_addr,
                                ram_addr_t offset, ram_addr_t length,
+                               uint32_t flags, const char* path,
                                void* opaque) {
+
+                                fprintf(stderr, "%s: name: %s offset 0x%llx host %p len 0x%llx\n", __func__,
+                                        block_name,
+                                    (unsigned long long)offset,
+                                    host_addr,
+                                    (unsigned long long)length);
                                 auto block =
                                         static_cast<SnapshotRamBlock*>(opaque);
                                 if (strcmp(block->id, block_name) != 0) {
@@ -363,6 +378,8 @@ static const QEMUFileHooks sLoadHooks = {
                                 block->startOffset = offset;
                                 block->hostPtr = (uint8_t*)host_addr;
                                 block->totalSize = length;
+                                block->flags = flags;
+                                block->path = path;
                                 return 1;
                             },
                             &block);

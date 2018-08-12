@@ -121,6 +121,19 @@ typedef int (RAMBlockIterFunc)(const char *block_name, void *host_addr,
 int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque);
 int ram_block_discard_range(RAMBlock *rb, uint64_t start, size_t length);
 
+typedef int (RAMBlockIterFuncWithFileInfo)(
+    const char *block_name,
+    void *host_addr,
+    ram_addr_t offset,
+    ram_addr_t length,
+    uint32_t flags,
+    const char* path,
+    void *opaque);
+
+int qemu_ram_foreach_block_with_file_info(
+    RAMBlockIterFuncWithFileInfo func,
+    void *opaque);
+
 #endif
 
 #endif /* CPU_COMMON_H */

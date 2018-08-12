@@ -25,7 +25,7 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
-Loader::Loader(const Snapshot& snapshot, int error)
+Loader::Loader(const Snapshot& snapshot, RamFileInfo ramFileInfo, int error)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (error) {
         mSnapshot.saveFailure(errnoToFailure(error));
@@ -60,6 +60,7 @@ Loader::Loader(const Snapshot& snapshot, int error)
         RamLoader::RamBlockStructure emptyRamBlockStructure = {};
         mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner),
                            RamLoader::Flags::OnDemandAllowed,
+                           ramFileInfo,
                            emptyRamBlockStructure);
     }
     {
@@ -129,6 +130,9 @@ void Loader::complete(bool succeeded) {
             mSnapshot.saveFailure(FailureReason::RamFailed);
         }
         return;
+    } else if (mRamLoader && mRamLoader->didNeedRestoreFromRamFile()) {
+        fprintf(stderr, "%s: nontristed index\n", __func__);
+        path_delete_file(PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str());
     }
     if (!mTextureLoader || mTextureLoader->hasError()) {
         if (!mSnapshot.failureReason()) {
@@ -180,6 +184,13 @@ void Loader::synchronize(bool isOnExit) {
             mRamLoader->join();
             mRamLoader->invalidateGaps();
         }
+        fprintf(stderr, "%s: call\n", __func__);
+        if (mRamLoader->didNeedRestoreFromRamFile()) {
+            fprintf(stderr, "%s: wtf\n", __func__);
+            mRamLoader->join();
+            mRamLoader->invalidateGaps();
+            return;
+        }
 
         if (!mRamLoader->hasGaps()) {
             const auto ram = fopen(
@@ -190,6 +201,7 @@ void Loader::synchronize(bool isOnExit) {
             mRamLoader.emplace(
                     StdioStream(ram, StdioStream::kOwner),
                     RamLoader::Flags::LoadIndexOnly,
+                    RamFileInfo(),
                     mRamLoader->getRamBlockStructure());
         }
     }

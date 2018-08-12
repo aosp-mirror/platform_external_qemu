@@ -279,7 +279,8 @@ int __hvf_set_memory(hvf_slot *slot) {
     macslot->gpa_start = slot->start;
     macslot->size = slot->size;
     macslot->hva = slot->mem;
-    DPRINTF("%s: hv_vm_map for hva 0x%llx gpa [0x%llx 0x%llx]\n", __func__,
+    fprintf(stderr,
+            "%s: hv_vm_map for hva 0x%llx gpa [0x%llx 0x%llx]\n", __func__,
             (unsigned long long)(slot->mem),
             (unsigned long long)macslot->gpa_start,
             (unsigned long long)(macslot->gpa_start + macslot->size));

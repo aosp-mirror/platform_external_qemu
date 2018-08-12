@@ -124,6 +124,7 @@ RamSaver::RamSaver(const std::string& fileName,
     mStreamFd = fileno(mStream.get());
 
     if (nonzero(mFlags & Flags::Async)) {
+        fprintf(stderr, "%s: ASYNC!\n", __func__);
         mIndex.flags |= int32_t(FileIndex::Flags::SeparateBackingStore);
     }
 
@@ -168,11 +169,6 @@ void RamSaver::savePage(int64_t blockOffset,
                         int64_t /*pageOffset*/,
                         int32_t /*pageSize*/) {
 
-    // Don't save any pages if in Async
-    // (we assume a separate async saving mechanism, such as
-    // having a separate backing store)
-    if (nonzero(mFlags & RamSaver::Flags::Async)) return;
-
     if (mLastBlockIndex < 0) {
         mLastBlockIndex = 0;
 #if SNAPSHOT_PROFILE > 1
@@ -195,6 +191,12 @@ void RamSaver::savePage(int64_t blockOffset,
     }
 
     auto& block = mIndex.blocks[size_t(mLastBlockIndex)];
+
+    if (block.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) {
+        // No need to save this block as it's mapped as shared
+        return;
+    }
+
     if (block.pages.empty()) {
         // First time we see a page for this block - save all its pages now.
         auto& ramBlock = block.ramBlock;
@@ -526,6 +528,13 @@ void RamSaver::writeIndex() {
             stream.putByte(uint8_t(id.size()));
             stream.write(id.data(), id.size());
             stream.putBe32(uint32_t(b.pages.size()));
+            stream.putBe32(b.ramBlock.flags);
+            stream.putString(b.ramBlock.path);
+
+            if (b.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) {
+                fprintf(stderr, "%s: Not saving %s, mapped shared\n", __func__, b.ramBlock.id);
+                continue;
+            }
 
             for (const FileIndex::Block::Page& page : b.pages) {
                 stream.putPackedNum(uint64_t(

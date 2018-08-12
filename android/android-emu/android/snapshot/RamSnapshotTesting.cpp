@@ -63,7 +63,9 @@ void loadRamSingleBlock(const RamBlock& block,
 
     // Disallow on-demand load for now.
     RamLoader ramLoader(StdioStream(ram, StdioStream::kOwner),
-                        RamLoader::Flags::None, emptyRamBlockStructure);
+                        RamLoader::Flags::None,
+                        RamFileInfo(),
+                        emptyRamBlockStructure);
 
     ramLoader.registerBlock(block);
 
@@ -81,7 +83,9 @@ void incrementalSaveSingleBlock(const RamSaver::Flags flags,
 
     // Disallow on-demand load for now.
     RamLoader ramLoader(StdioStream(ram, StdioStream::kOwner),
-                        RamLoader::Flags::None, emptyRamBlockStructure);
+                        RamLoader::Flags::None,
+                        RamFileInfo(),
+                        emptyRamBlockStructure);
 
     ramLoader.registerBlock(blockToLoad);
 

@@ -73,6 +73,7 @@ public:
 
     RamLoader(base::StdioStream&& stream,
               Flags flags,
+              RamFileInfo ramFileInfo,
               const RamBlockStructure& blockStructure = {});
 
     ~RamLoader();
@@ -117,6 +118,9 @@ public:
         return true;
     }
 
+    bool didNeedRestoreFromRamFile() {
+        return mNeedRestoreFromRamFile;
+    }
 private:
 
     bool readIndex();
@@ -148,6 +152,12 @@ private:
     int mStreamFd;  // An FD for the |mStream|'s underlying open file.
     bool mWasStarted = false;
     std::atomic<bool> mHasError{false};
+
+    // Information about the mapped ram file, if any.
+    RamFileInfo mRamFileInfo;
+    // Whether or not we are migrating from file-backed to
+    // non-file-backed.
+    bool mNeedRestoreFromRamFile = false;
 
     base::Optional<MemoryAccessWatch> mAccessWatch;
     base::FunctorThread mReaderThread;

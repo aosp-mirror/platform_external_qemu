@@ -252,7 +252,7 @@ OperationStatus Snapshotter::prepareForLoading(const char* name) {
     if (mSaver && mSaver->snapshot().name() == name) {
         mSaver.reset();
     }
-    mLoader.reset(new Loader(name));
+    mLoader.reset(new Loader(name, RamFileInfo()));
     mLoader->prepare();
     return mLoader->status();
 }
@@ -291,7 +291,7 @@ void Snapshotter::prepareLoaderForSaving(const char* name) {
         mLoader->status() != OperationStatus::Ok) {
         mLoader.reset();
     } else {
-        mLoader->synchronize(mIsOnExit && (mRamFile.empty() || !mRamFileShared));
+        mLoader->synchronize(mIsOnExit && (!hasRamFile() || !isRamFileShared()));
     }
 }
 
@@ -629,8 +629,8 @@ OperationStatus Snapshotter::prepareForSaving(const char* name) {
                           ? &mLoader->ramLoader()
                           : nullptr,
             mIsOnExit,
-            mRamFile,
-            mRamFileShared));
+            mRamFileInfo.path,
+            mRamFileInfo.shared));
     mVmOperations.vmStart();
     mSaver->prepare();
     return mSaver->status();
@@ -651,8 +651,8 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
 }
 
 void Snapshotter::setRamFile(const char* path, bool shared) {
-    mRamFile = path;
-    mRamFileShared = shared;
+    mRamFileInfo.path = path;
+    mRamFileInfo.shared = shared;
 }
 
 void Snapshotter::cancelSave() {
@@ -766,8 +766,8 @@ bool Snapshotter::onStartSaving(const char* name) {
                               ? &mLoader->ramLoader()
                               : nullptr,
                 mIsOnExit,
-                mRamFile,
-                mRamFileShared));
+                mRamFileInfo.path,
+                mRamFileInfo.shared));
     }
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);
@@ -804,7 +804,8 @@ bool Snapshotter::onStartLoading(const char* name) {
         if (mLoader) {
             mLoader->interrupt();
         }
-        mLoader.reset(new Loader(name));
+        fprintf(stderr, "%s: call\n", __func__);
+        mLoader.reset(new Loader(name, mRamFileInfo));
     }
     mLoader->start();
     if (mLoader->status() == OperationStatus::Error) {
@@ -844,7 +845,7 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
         if (mLoader) mLoader->onInvalidSnapshotLoad();
         return;
     }
-    mLoader.reset(new Loader(name, -err));
+    mLoader.reset(new Loader(name, RamFileInfo(), -err));
     mLoader->complete(false);
     mLoadedSnapshotFile.clear();
 

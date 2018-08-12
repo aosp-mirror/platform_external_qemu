@@ -2132,6 +2132,7 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
         return NULL;
     }
 
+    block->path = mem_path;
     return block;
 }
 
@@ -3752,6 +3753,26 @@ int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque)
     RAMBLOCK_FOREACH(block) {
         ret = func(block->idstr, block->host, block->offset,
                    block->used_length, opaque);
+        if (ret) {
+            break;
+        }
+    }
+    rcu_read_unlock();
+    return ret;
+}
+
+int qemu_ram_foreach_block_with_file_info(RAMBlockIterFuncWithFileInfo func, void *opaque)
+{
+    RAMBlock *block;
+    int ret = 0;
+
+    rcu_read_lock();
+    RAMBLOCK_FOREACH(block) {
+        ret = func(block->idstr, block->host, block->offset,
+                   block->used_length,
+                   block->flags,
+                   block->path,
+                   opaque);
         if (ret) {
             break;
         }
