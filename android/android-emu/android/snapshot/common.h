@@ -16,6 +16,7 @@
 #include "android/snapshot/interface.h"
 
 #include <memory>
+#include <string>
 #include <stdint.h>
 
 namespace android {
@@ -28,6 +29,11 @@ class TextureLoader;
 using ITextureSaverPtr = std::shared_ptr<ITextureSaver>;
 using ITextureLoaderPtr = std::shared_ptr<ITextureLoader>;
 using ITextureLoaderWPtr = std::weak_ptr<ITextureLoader>;
+
+// Taken from exec.c, these #defines
+// are for the |flags| field in SnapshotRamBlock.
+#define SNAPSHOT_RAM_MAPPED_SHARED (1 << 1)
+#define SNAPSHOT_RAM_MAPPED (1 << 3)
 
 using RamBlock = ::SnapshotRamBlock;
 
@@ -102,6 +108,11 @@ constexpr const char* kTexturesFileName = "textures.bin";
 
 void resetSnapshotLiveness();
 bool isSnapshotAlive();
+
+struct RamFileInfo {
+    std::string path;
+    bool shared = false;
+};
 
 }  // namespace snapshot
 }  // namespace android

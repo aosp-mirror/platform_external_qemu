@@ -21,6 +21,7 @@
 #include "android/base/Stopwatch.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
+#include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 
 #include <algorithm>
@@ -37,14 +38,21 @@ namespace android {
 namespace snapshot {
 
 void RamLoader::FileIndex::clear() {
+    for (auto& block : blocks) {
+        if (block.ramBlock.path) {
+            free((void*)block.ramBlock.path);
+        }
+    }
     decltype(pages)().swap(pages);
     decltype(blocks)().swap(blocks);
 }
 
 RamLoader::RamLoader(base::StdioStream&& stream,
                      Flags flags,
+                     RamFileInfo ramFileInfo,
                      const RamLoader::RamBlockStructure& blockStructure)
     : mStream(std::move(stream)),
+      mRamFileInfo(ramFileInfo),
       mReaderThread([this]() { readerWorker(); }) {
 
     if (nonzero(flags & Flags::LoadIndexOnly)) {
@@ -79,6 +87,7 @@ RamLoader::~RamLoader() {
         }
         assert(hasError() || !mAccessWatch);
     }
+    mIndex.clear();
 }
 
 RamLoader::RamBlockStructure RamLoader::getRamBlockStructure() const {
@@ -89,6 +98,9 @@ RamLoader::RamBlockStructure RamLoader::getRamBlockStructure() const {
 
     for (const auto& blockInfo : mIndex.blocks) {
         res.blocks.push_back(blockInfo.ramBlock);
+        if (blockInfo.ramBlock.path) {
+            res.blocks.back().path = strdup(blockInfo.ramBlock.path);
+        }
     }
 
     return res;
@@ -131,17 +143,6 @@ bool RamLoader::start(bool isQuickboot) {
     if (!readIndex()) {
         mHasError = true;
         return false;
-    }
-
-    if (mIsQuickboot &&
-        nonzero(mIndex.flags & IndexFlags::SeparateBackingStore)) {
-       // we are using a file-backed RAM to load; return early.
-       mEndTime = base::System::get()->getHighResTimeUs();
-#if SNAPSHOT_PROFILE > 1
-       printf("File-backed RAM load complete in %.03f ms\n",
-              (mEndTime - mStartTime) / 1000.0);
-#endif
-       return true;
     }
 
     if (!mAccessWatch) {
@@ -267,6 +268,7 @@ bool RamLoader::readIndex() {
     mIndex.flags = IndexFlags(stream.getBe32());
     const bool compressed = nonzero(mIndex.flags & IndexFlags::CompressedPages);
     auto pageCount = stream.getBe32();
+
     mIndex.pages.reserve(pageCount);
     int64_t runningFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
@@ -311,7 +313,58 @@ void RamLoader::readBlockPages(base::Stream* stream,
     const auto blockIndex = std::distance(mIndex.blocks.begin(), blockIt);
 
     const auto blockPagesCount = stream->getBe32();
+
+    uint32_t savedFlags = stream->getBe32();
+    std::string savedMemPath = stream->getString();
+
     FileIndex::Block& block = *blockIt;
+
+    // No need to load readonly ram blocks, since they will
+    // be initialized the same way (or we will bump snapshot protocol version)
+    if (block.ramBlock.readonly) return;
+
+    // Now query the ram block flags from the stream,
+    // and compare with the actual loaded ram block.
+    uint32_t activeFlags = block.ramBlock.flags;
+    std::string activeMemPath = block.ramBlock.path;
+
+    // Ram block was a file mapping, and current emulator session
+    // is using the same file. No need to do anything more,
+    // even if we mapped privately in this session instead
+    // of shared.
+    if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+        ((activeFlags & SNAPSHOT_RAM_MAPPED_SHARED) ||
+         (activeFlags & SNAPSHOT_RAM_MAPPED)) &&
+        savedMemPath == activeMemPath) {
+        return;
+    }
+
+    // If the current session does not have a mapped filed,
+    // we need to do some kind of normal RAM load.
+    if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+        !(activeFlags & SNAPSHOT_RAM_MAPPED)) {
+
+        fprintf(stderr, "%s: read Everything\n", __func__);
+
+        base::StdioStream ramFileStream(
+            fopen(savedMemPath.c_str(), "rb"),
+            base::StdioStream::kOwner);
+
+        int ramFileFd = fileno(ramFileStream.get());
+
+        uint8_t* hostPtr = block.ramBlock.hostPtr;
+        uint64_t totalSz = block.ramBlock.totalSize;
+
+        static constexpr size_t readChunkSize = 16 * 1048576;
+
+        for (size_t i = 0; i < totalSz; i += readChunkSize) {
+            HANDLE_EINTR(base::pread(ramFileFd, hostPtr + i, readChunkSize, i));
+        }
+
+        fprintf(stderr, "%s: read Everything done\n", __func__);
+        return;
+    }
+
     auto pageIt = mIndex.pages.end();
     block.pagesBegin = pageIt;
     mIndex.pages.resize(mIndex.pages.size() + blockPagesCount);
@@ -666,6 +719,7 @@ bool RamLoader::readAllPages() {
 #if SNAPSHOT_PROFILE > 1
     auto startTime = base::System::get()->getHighResTimeUs();
 #endif
+
     if (nonzero(mIndex.flags & IndexFlags::CompressedPages) && !mAccessWatch) {
         startDecompressor();
     }

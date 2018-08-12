@@ -42,6 +42,10 @@ typedef struct {
     uint8_t* hostPtr;
     int64_t totalSize;
     int32_t pageSize;
+    uint32_t flags;
+    const char* path;
+    bool readonly;
+    bool needRestoreFromRamFile;
 } SnapshotRamBlock;
 
 typedef struct {

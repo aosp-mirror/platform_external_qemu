@@ -54,6 +54,11 @@ using StatAction = IncrementalStats::Action;
 using StatTime = IncrementalStats::Time;
 
 void RamSaver::FileIndex::clear() {
+    for (auto& block : blocks) {
+        if (block.ramBlock.path) {
+            free((void*)block.ramBlock.path);
+        }
+    }
     decltype(blocks)().swap(blocks);
 }
 
@@ -158,6 +163,7 @@ RamSaver::RamSaver(const std::string& fileName,
 
 RamSaver::~RamSaver() {
     join();
+    mIndex.clear();
 }
 
 void RamSaver::registerBlock(const RamBlock& block) {
@@ -167,11 +173,6 @@ void RamSaver::registerBlock(const RamBlock& block) {
 void RamSaver::savePage(int64_t blockOffset,
                         int64_t /*pageOffset*/,
                         int32_t /*pageSize*/) {
-
-    // Don't save any pages if in Async
-    // (we assume a separate async saving mechanism, such as
-    // having a separate backing store)
-    if (nonzero(mFlags & RamSaver::Flags::Async)) return;
 
     if (mLastBlockIndex < 0) {
         mLastBlockIndex = 0;
@@ -195,6 +196,13 @@ void RamSaver::savePage(int64_t blockOffset,
     }
 
     auto& block = mIndex.blocks[size_t(mLastBlockIndex)];
+
+    if ((block.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) ||
+        block.ramBlock.readonly) {
+        // No need to save this block as it's mapped as shared
+        return;
+    }
+
     if (block.pages.empty()) {
         // First time we see a page for this block - save all its pages now.
         auto& ramBlock = block.ramBlock;
@@ -526,6 +534,13 @@ void RamSaver::writeIndex() {
             stream.putByte(uint8_t(id.size()));
             stream.write(id.data(), id.size());
             stream.putBe32(uint32_t(b.pages.size()));
+            stream.putBe32(b.ramBlock.flags);
+            stream.putString(b.ramBlock.path);
+
+            if ((b.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) ||
+                b.ramBlock.readonly) {
+                continue;
+            }
 
             for (const FileIndex::Block::Page& page : b.pages) {
                 stream.putPackedNum(uint64_t(
