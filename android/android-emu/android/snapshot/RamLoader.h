@@ -67,6 +67,7 @@ public:
     };
 
     struct RamBlockStructure {
+        ~RamBlockStructure();
         uint64_t pageSize;
         std::vector<RamBlock> blocks;
     };
@@ -79,6 +80,7 @@ public:
 
     RamBlockStructure getRamBlockStructure() const;
     void applyRamBlockStructure(const RamBlockStructure& blockStructure);
+    void clearIndex();
 
     void loadRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
@@ -115,6 +117,10 @@ public:
             *duration = mEndTime - mStartTime;
         }
         return true;
+    }
+
+    bool didLoadFromFileBacking() const {
+        return mLoadedFromFileBacking;
     }
 
 private:
@@ -182,6 +188,9 @@ private:
 
     // Whether or not we just want to reload the index.
     bool mIndexOnly = false;
+
+    // Whether we loaded eagerly from a ram.img
+    bool mLoadedFromFileBacking = false;
 };
 
 struct RamLoader::Page {
