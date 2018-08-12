@@ -51,7 +51,8 @@ TEST_F(RamLoaderTest, Simple) {
     TestRamBuffer testRam(100 * kTestingPageSize);
 
     loadRamSingleBlock({"ramSaverTestBlock", 0x0, testRam.data(),
-                        (int64_t)testRam.size(), kTestingPageSize},
+                        (int64_t)testRam.size(), kTestingPageSize,
+                        0, nullptr, false, false},
                        path);
 }
 
