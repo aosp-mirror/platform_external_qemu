@@ -34,10 +34,13 @@ struct RAMBlock {
     uint32_t flags;
     /* Protected by iothread lock.  */
     char idstr[256];
+    bool migrate;
     /* RCU-enabled, writes protected by the ramlist lock */
     QLIST_ENTRY(RAMBlock) next;
     QLIST_HEAD(, RAMBlockNotifier) ramblock_notifiers;
     int fd;
+    /* Tracking file path for this RAMBlock, if any. */
+    const char* path;
     size_t page_size;
     /* dirty bitmap used during migration */
     unsigned long *bmap;
