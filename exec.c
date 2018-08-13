@@ -1791,6 +1791,11 @@ const char *qemu_ram_get_idstr(RAMBlock *rb)
     return rb->idstr;
 }
 
+bool qemu_ram_is_migrate(RAMBlock* rb)
+{
+    return rb->migrate;
+}
+
 bool qemu_ram_is_shared(RAMBlock *rb)
 {
     return rb->flags & RAM_SHARED;
@@ -1851,6 +1856,10 @@ void qemu_ram_unset_idstr(RAMBlock *block)
     if (block) {
         memset(block->idstr, 0, sizeof(block->idstr));
     }
+}
+
+void qemu_ram_set_migrate(RAMBlock* block, bool migrate) {
+    block->migrate = migrate;
 }
 
 size_t qemu_ram_pagesize(RAMBlock *rb)
@@ -2132,6 +2141,7 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
         return NULL;
     }
 
+    block->path = mem_path;
     return block;
 }
 
@@ -3752,6 +3762,32 @@ int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque)
     RAMBLOCK_FOREACH(block) {
         ret = func(block->idstr, block->host, block->offset,
                    block->used_length, opaque);
+        if (ret) {
+            break;
+        }
+    }
+    rcu_read_unlock();
+    return ret;
+}
+
+int qemu_ram_foreach_migrate_block_with_file_info(RAMBlockIterFuncWithFileInfo func, void *opaque)
+{
+    RAMBlock *block;
+    int ret = 0;
+
+    rcu_read_lock();
+    RAMBLOCK_FOREACH(block) {
+        ret = 0;
+
+        if (block->migrate) {
+            ret = func(block->idstr, block->host, block->offset,
+                       block->used_length,
+                       block->flags,
+                       block->path,
+                       block->mr->readonly,
+                       opaque);
+        }
+
         if (ret) {
             break;
         }
