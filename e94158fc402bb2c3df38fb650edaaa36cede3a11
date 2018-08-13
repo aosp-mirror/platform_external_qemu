@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d78115a_01a19463",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:54:33Z",
+      "side": 1,
+      "message": "nit: use our version of strDup()",
+      "range": {
+        "startLine": 309,
+        "startChar": 32,
+        "endLine": 309,
+        "endChar": 38
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c1626a7_44fc5a2d",
+        "filename": "android/android-emu/android/emulation/control/vm_operations.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:54:33Z",
+      "side": 1,
+      "message": "please add a comment that this needs to be free()-ed",
+      "range": {
+        "startLine": 46,
+        "startChar": 16,
+        "endLine": 46,
+        "endChar": 20
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9cf42f1d_5f21f174",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:54:33Z",
+      "side": 1,
+      "message": "please add a dtor to RamBlockStructure, otherwise each call is a potential leak of strdup()-ed paths",
+      "range": {
+        "startLine": 95,
+        "startChar": 40,
+        "endLine": 95,
+        "endChar": 60
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06540554_0473e011",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:54:33Z",
+      "side": 1,
+      "message": "you\u0027ve been checking for non-null here everywhere else, please also check when converting to string - otherwise it may crash",
+      "range": {
+        "startLine": 331,
+        "startChar": 47,
+        "endLine": 331,
+        "endChar": 51
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "85f147c9_f3936b93",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:54:33Z",
+      "side": 1,
+      "message": "check for error?",
+      "range": {
+        "startLine": 352,
+        "startChar": 0,
+        "endLine": 354,
+        "endChar": 39
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c1b54ea7_2d84a654",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:54:33Z",
+      "side": 1,
+      "message": "close the |ramFileStream| instead, otherwise it will try to close the fd you\u0027ve already closed - and it can easily be reused by someone else at that point",
+      "range": {
+        "startLine": 371,
+        "startChar": 0,
+        "endLine": 373,
+        "endChar": 25
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6927521_b11ae1db",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:54:33Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 379,
+        "startChar": 0,
+        "endLine": 385,
+        "endChar": 8
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c4c7b63_8d277d9d",
+        "filename": "android/android-emu/android/snapshot/RamLoader.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:54:33Z",
+      "side": 1,
+      "message": "nit: const",
+      "range": {
+        "startLine": 121,
+        "startChar": 33,
+        "endLine": 121,
+        "endChar": 35
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
