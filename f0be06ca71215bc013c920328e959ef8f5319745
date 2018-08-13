@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "53b73670_c68ea9c3",
+        "filename": "android/android-emu/android/base/files/PathUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T21:58:30Z",
+      "side": 1,
+      "message": "I\u0027m sorry, but I don\u0027t understand what will it do. Could you please add an example of a rebased path to the comment?",
+      "range": {
+        "startLine": 242,
+        "startChar": 1,
+        "endLine": 244,
+        "endChar": 42
+      },
+      "revId": "f0be06ca71215bc013c920328e959ef8f5319745",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
