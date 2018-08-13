@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "366149b6_529ce07d",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-13T23:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d78115a_01a19463",
+      "range": {
+        "startLine": 309,
+        "startChar": 32,
+        "endLine": 309,
+        "endChar": 38
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c1626a7_44fc5a2d",
         "filename": "android/android-emu/android/emulation/control/vm_operations.h",
         "patchSetId": 6
@@ -45,6 +69,30 @@
       "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "615269ec_7c1458f1",
+        "filename": "android/android-emu/android/emulation/control/vm_operations.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-13T23:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c1626a7_44fc5a2d",
+      "range": {
+        "startLine": 46,
+        "startChar": 16,
+        "endLine": 46,
+        "endChar": 20
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "d1f81f8c_f802b90a",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-13T23:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9cf42f1d_5f21f174",
+      "range": {
+        "startLine": 95,
+        "startChar": 40,
+        "endLine": 95,
+        "endChar": 60
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "06540554_0473e011",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 6
@@ -91,6 +163,30 @@
       "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b79c285c_96af9c30",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-13T23:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "06540554_0473e011",
+      "range": {
+        "startLine": 331,
+        "startChar": 47,
+        "endLine": 331,
+        "endChar": 51
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "e0e95ba6_8ac42bfa",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-13T23:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "85f147c9_f3936b93",
+      "range": {
+        "startLine": 352,
+        "startChar": 0,
+        "endLine": 354,
+        "endChar": 39
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c1b54ea7_2d84a654",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 6
@@ -137,6 +257,30 @@
       "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19702591_91dd1d2b",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-13T23:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c1b54ea7_2d84a654",
+      "range": {
+        "startLine": 371,
+        "startChar": 0,
+        "endLine": 373,
+        "endChar": 25
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "4bc0c283_121538af",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-13T23:58:11Z",
+      "side": 1,
+      "message": "That was supposed to be an explanation of what happens when switching from non-file-backed to file-backed. Revised.",
+      "parentUuid": "a6927521_b11ae1db",
+      "range": {
+        "startLine": 379,
+        "startChar": 0,
+        "endLine": 385,
+        "endChar": 8
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c4c7b63_8d277d9d",
         "filename": "android/android-emu/android/snapshot/RamLoader.h",
         "patchSetId": 6
@@ -183,6 +351,30 @@
       "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75bbcb20_30390921",
+        "filename": "android/android-emu/android/snapshot/RamLoader.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-13T23:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c4c7b63_8d277d9d",
+      "range": {
+        "startLine": 121,
+        "startChar": 33,
+        "endLine": 121,
+        "endChar": 35
+      },
+      "revId": "e94158fc402bb2c3df38fb650edaaa36cede3a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
