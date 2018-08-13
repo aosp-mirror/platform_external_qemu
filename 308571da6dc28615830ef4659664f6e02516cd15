@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3084158_f28d8939",
+        "filename": "android/android-emu/android/base/files/PathUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-13T23:40:51Z",
+      "side": 1,
+      "message": "Minor nit: When I look at this, I think of it as \"makeRelative\", it\u0027s converting an absolute path and making it relative to a base.  Consider naming it that?\n\nAdditionally, what scenarios is this used?  If we don\u0027t care if the paths escape the root, would we want to insert \"../\" into the paths?  If not, consider erroring out if the root isn\u0027t part of the path instead of returning the absolute path back.  Returning the absolute is okay too, but that should be part of the contract-- make relative if possible, but always return the path.",
+      "range": {
+        "startLine": 327,
+        "startChar": 23,
+        "endLine": 327,
+        "endChar": 29
+      },
+      "revId": "308571da6dc28615830ef4659664f6e02516cd15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
