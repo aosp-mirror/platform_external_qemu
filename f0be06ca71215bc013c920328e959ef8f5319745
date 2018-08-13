@@ -46,6 +46,30 @@
       "revId": "f0be06ca71215bc013c920328e959ef8f5319745",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcf6d846_5e275845",
+        "filename": "android/android-emu/android/base/files/PathUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-13T23:46:15Z",
+      "side": 1,
+      "message": "Oh, that\u0027s why I didn\u0027t get it. The common meaning of \u0027rebase\u0027 operation is: https://github.com/premake/premake-core/wiki/path.rebase\nThis function is closer to \"removePrefix\", or \"relativeTo\" functions I\u0027ve seen",
+      "parentUuid": "c5613612_4ee402c0",
+      "range": {
+        "startLine": 242,
+        "startChar": 1,
+        "endLine": 244,
+        "endChar": 42
+      },
+      "revId": "f0be06ca71215bc013c920328e959ef8f5319745",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
