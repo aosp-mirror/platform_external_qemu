@@ -193,7 +193,7 @@ extern "C" int main(int argc, char **argv) {
     int apiLevel = avdInfo_getApiLevel(avd);
     mem_map mem = { 0 };
     char* kernelParameters = emulator_getKernelParameters(
-        opts, kTargetArch, apiLevel, serialPrefix, hw->kernel_parameters,
+        opts, kTargetArch, apiLevel, serialPrefix, hw->kernel_parameters, NULL,  // TODO: does qemu1 need to to support verified boot?
         rendererConfig.glesMode,
         rendererConfig.bootPropOpenglesVersion, /* ro.opengles.version */
         0ULL, /* glFramebufferSizeBytes */

@@ -33,6 +33,8 @@ typedef struct mem_map {
 // |avdKernelParameters| are the optional extra kernel parameters stored
 // in the AVD's kernel.parameters hardware property, if any. They will
 // be appended to the result.
+// |fileKernelParameters| are optional extra kernel parameters provided
+// by a text file.  They will be appended to the result.
 // |glesMode| is the EGL/GLES emulation mode.
 // |glesGuestCmaMB| is the size in megabytes of the contiguous memory
 // allocation to be used when |glesMode| is kAndroidGlesEmulationGuest.
@@ -47,6 +49,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int apiLevel,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
+                                   const char* fileKernelParameters,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
