@@ -2232,6 +2232,59 @@ bool System::isUnderDiskPressure(StringView path, System::FileSize* freeDisk) {
 }
 
 // static
+System::FileSize System::getFilePageSizeForPath(StringView path) {
+    System::FileSize pageSize;
+
+#ifdef _WIN32
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    // Use dwAllocationGranularity
+    // as that is what we need to align
+    // the pointer to (64k on most systems)
+    pageSize = (System::FileSize)sysinfo.dwAllocationGranularity;
+#else // _WIN32
+
+#ifdef __linux__
+    struct statvfs fsStatus;
+    int ret;
+
+    do {
+        ret = statvfs(c_str(path), &fsStatus);
+    } while (ret != 0 && errno == EINTR);
+
+    if (ret != 0) {
+        fprintf(stderr, "Couldn't statvfs() path: %s\n",
+                strerror(errno));
+        pageSize = (System::FileSize)getpagesize();
+    } else {
+        if (fsStatus.f_type == HUGETLBFS_MAGIC) {
+            fprintf(stderr, "hugepage detected. size: %u\n",
+                    fsStatus.f_bsize);
+            /* It's hugepage, return the huge page size */
+            pageSize = (System::FileSize)fsStatus.f_bsize;
+        } else {
+            pageSize = (System::FileSize)getpagesize();
+        }
+    }
+#else // __linux
+    pageSize = (System::FileSize)getpagesize();
+#endif // !__linux__
+
+#endif // !_WIN32
+
+    return pageSize;
+}
+
+// static
+System::FileSize System::getAlignedFileSize(System::FileSize align, System::FileSize size) {
+#ifndef ROUND_UP
+#define ROUND_UP(n, d) (((n) + (d) - 1) & -(0 ? (n) : (d)))
+#endif
+
+    return ROUND_UP(size, align);
+}
+
+// static
 std::string System::getEnvironmentVariable(StringView varname) {
 #ifdef _WIN32
     Win32UnicodeString varname_unicode(varname);
