@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0d8c0f0_d34392c8",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-14T20:41:21Z",
+      "side": 1,
+      "message": "Feel free to skip, but seeing these allocated pointers returned and splitting up the AFREE makes me want to C++ify this.  For example, we could create a unique_ptr that automatically calls free (copied from one of the stackoverflow comments here https://stackoverflow.com/questions/27440953/stdunique-ptr-for-c-functions-that-need-free)\n\nstruct FreeDeleter {\n    template \u003ctypename T\u003e\n    void operator()(T *p) const {\n        std::free(const_cast\u003cstd::remove_const_t\u003cT\u003e*\u003e(p));\n    }\n};\n\ntemplate \u003ctypename T\u003e\nusing unique_c_ptr\u003dstd::unique_ptr\u003cT, FreeDeleter\u003e;\n\nNote that std::free is fine here, because AFREE translates to android_free, and android_free doesn\u0027t add anything-- free() already no-ops if passing a null pointer.",
+      "range": {
+        "startLine": 850,
+        "startChar": 8,
+        "endLine": 850,
+        "endChar": 67
+      },
+      "revId": "050d8b8136daf003058bab5c1c62a75a9441758f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
