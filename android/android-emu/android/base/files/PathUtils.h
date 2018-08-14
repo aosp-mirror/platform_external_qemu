@@ -93,7 +93,7 @@ public:
         return addTrailingDirSeparator(path, HOST_TYPE);
     }
 
-    // If |path} starts with a root prefix, return its size in bytes, or
+    // If |path| starts with a root prefix, return its size in bytes, or
     // 0 otherwise. The definition of valid root prefixes depends on the
     // value of |hostType|. For HOST_POSIX, it's any path that begins
     // with a slash (/). For HOST_WIN32, the following prefixes are
@@ -238,6 +238,21 @@ public:
     static void simplifyComponents(std::vector<std::string>* components);
     template <class String>
     static void simplifyComponents(std::vector<String>* components);
+
+    // Returns a version of |path| that is relative to |base|.
+    // This can be useful for converting absolute paths to
+    // relative paths given |base|.
+    // Example:
+    // |base|: C:\Users\foo
+    // |path|: C:\Users\foo\AppData\Local\Android\Sdk
+    // would give
+    // AppData\Local\Android\Sdk.
+    // If |base| is not a prefix of |path|, fails by returning
+    // the original |path| unmodified.
+    static std::string relativeTo(StringView base, StringView path, HostType hostType);
+    static std::string relativeTo(StringView base, StringView path) {
+        return relativeTo(base, path, HOST_TYPE);
+    }
 };
 
 // Useful shortcuts to avoid too much typing.
