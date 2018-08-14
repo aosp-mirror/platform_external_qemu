@@ -847,18 +847,25 @@ extern "C" int main(int argc, char** argv) {
         !opts->snapshot;
 
     if (useQuickbootRamFile) {
-        const char* memPath = androidSnapshot_getRamFilePath(NULL);
+        ScopedCPtr<const char> memPath(
+            androidSnapshot_initRamFilePath(hw->hw_ramSize, nullptr));
 
-        args.add2("-mem-path", memPath);
-        AFREE((void*)memPath);
+        if (memPath) {
+            args.add2("-mem-path", memPath.get());
 
-        bool mapAsShared =
-            !opts->read_only &&
-            !opts->no_snapshot_save &&
-            androidSnapshot_getQuickbootChoice();
+            bool mapAsShared =
+                !opts->read_only &&
+                !opts->no_snapshot_save &&
+                androidSnapshot_getQuickbootChoice();
 
-        if (mapAsShared) {
-            args.add("-mem-file-shared");
+            if (mapAsShared) {
+                args.add("-mem-file-shared");
+            }
+        } else {
+            fprintf(stderr, "Warning: could not initialize Quickboot RAM file. "
+                            "Please ensure enough disk space for the guest RAM size "
+                            "(%d MB) along with a safety factor.", hw->hw_ramSize);
+            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
         }
     }
 

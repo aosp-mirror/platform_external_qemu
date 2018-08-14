@@ -92,6 +92,7 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #if defined (__linux__)
 #include <fstream>
 #include <string>
+#include <sys/vfs.h>
 #endif
 
 // This variable is a pointer to a zero-terminated array of all environment
@@ -2229,6 +2230,62 @@ bool System::isUnderDiskPressure(StringView path, System::FileSize* freeDisk) {
     }
 
     return false;
+}
+
+// static
+System::FileSize System::getFilePageSizeForPath(StringView path) {
+    System::FileSize pageSize;
+
+#ifdef _WIN32
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    // Use dwAllocationGranularity
+    // as that is what we need to align
+    // the pointer to (64k on most systems)
+    pageSize = (System::FileSize)sysinfo.dwAllocationGranularity;
+#else // _WIN32
+
+#ifdef __linux__
+
+#define HUGETLBFS_MAGIC       0x958458f6
+
+    // From QEMU util/mmap-alloc.c
+    // The point is to check for hugepage fs
+    struct statfs fs;
+    int ret;
+
+    do {
+        ret = statfs(c_str(path), &fs);
+    } while (ret != 0 && errno == EINTR);
+
+    if (ret != 0) {
+        fprintf(stderr, "Couldn't statfs() path: %s\n",
+                strerror(errno));
+        pageSize = (System::FileSize)getpagesize();
+    } else {
+        if (fs.f_type == HUGETLBFS_MAGIC) {
+            /* It's hugepage, return the huge page size */
+            pageSize = (System::FileSize)fs.f_bsize;
+        } else {
+            pageSize = (System::FileSize)getpagesize();
+        }
+    }
+#else // __linux
+    pageSize = (System::FileSize)getpagesize();
+#endif // !__linux__
+
+#endif // !_WIN32
+
+    return pageSize;
+}
+
+// static
+System::FileSize System::getAlignedFileSize(System::FileSize align, System::FileSize size) {
+#ifndef ROUND_UP
+#define ROUND_UP(n, d) (((n) + (d) - 1) & -(0 ? (n) : (d)))
+#endif
+
+    return ROUND_UP(size, align);
 }
 
 // static
