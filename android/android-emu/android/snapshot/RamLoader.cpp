@@ -377,11 +377,20 @@ void RamLoader::readBlockPages(base::Stream* stream,
         return;
     }
 
-    // In the case where the ram block did not have a file mapping,
-    // but our current session does have a file mapping i.e.,
-    // !(savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
-    // (activeFlags & SNAPSHOT_RAM_MAPPED)
-    // just load normally (continue without doing anything different)
+    // In the case where the ram block did not have a file mapping, but our
+    // current session does have a file mapping i.e., !(savedFlags &
+    // SNAPSHOT_RAM_MAPPED_SHARED) && (activeFlags & SNAPSHOT_RAM_MAPPED) just
+    // load normally (continue without doing anything different)...
+    //
+    // except in the cases when not using an mprotect-like accessor,
+    // which is all eager RAM loads, which happen quite a lot.
+    // Then we might leave nonzero pages in ram.img that really should be zero.
+    // To be safe, just zero initialize the whole thing.
+    if (!(savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+        (activeFlags & SNAPSHOT_RAM_MAPPED)) {
+        memset(block.ramBlock.hostPtr, 0x0, block.ramBlock.totalSize);
+        mLoadedToFileBacking = true;
+    }
 
     auto pageIt = mIndex.pages.end();
     block.pagesBegin = pageIt;

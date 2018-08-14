@@ -16,6 +16,7 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/debug.h"
 
 #include <fcntl.h>
@@ -42,6 +43,9 @@
 #endif
 #endif
 
+namespace fc = android::featurecontrol;
+using fc::Feature;
+
 namespace android {
 namespace snapshot {
 
@@ -57,6 +61,16 @@ static bool checkUserfaultFdCaps(int ufd) {
     }
 
     uint64_t ioctlMask = 1ull << _UFFDIO_REGISTER | 1ull << _UFFDIO_UNREGISTER;
+
+    if (fc::isEnabled(Feature::QuickbootFileBacked)) {
+        if (!(apiStruct.features & UFFD_FEATURE_MISSING_SHMEM)) {
+            dwarning(
+                "Using file-backed Quickboot, but "
+                "missing UFFD_FEATURE_MISSING_SHMEM.");
+            return false;
+        }
+    }
+
     if ((apiStruct.ioctls & ioctlMask) != ioctlMask) {
         dwarning(
                 "Missing userfault features: %llu",
