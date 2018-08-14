@@ -12,34 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include "android/base/system/System.h"
-
+#include "GLSnapshotTestStateUtils.h"
+#include "GLSnapshotTesting.h"
+#include "GLTestUtils.h"
+#include "OpenglCodecCommon/glUtils.h"
+#include "RenderThreadInfo.h"
 #include "Standalone.h"
+#include "samples/HelloTriangle.h"
 
-#include <functional>
+#include "android/base/files/PathUtils.h"
+#include "android/base/files/StdioStream.h"
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/system/System.h"
+#include "android/base/testing/TestSystem.h"
+#include "android/snapshot/TextureLoader.h"
+#include "android/snapshot/TextureSaver.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <gtest/gtest.h>
 
-using android::base::System;
-
-namespace emugl {
-
-class HelloTriangle : public SampleApplication {
-protected:
-    struct VertexAttributes {
-        float position[2];
-        float color[3];
-    };
-    void initialize() override;
-    void draw() override;
-
-private:
-    GLint mTransformLoc;
-    GLuint mBuffer;
-    float mTime = 0.0f;
-};
-
-}  // namespace emugl
+namespace emugl {}  // namespace emugl
