@@ -22,6 +22,30 @@
       "revId": "050d8b8136daf003058bab5c1c62a75a9441758f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8861d2c6_0b151b82",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-14T20:44:33Z",
+      "side": 1,
+      "message": "Good point; we have ScopedCPtr that does something similar.",
+      "parentUuid": "d0d8c0f0_d34392c8",
+      "range": {
+        "startLine": 850,
+        "startChar": 8,
+        "endLine": 850,
+        "endChar": 67
+      },
+      "revId": "050d8b8136daf003058bab5c1c62a75a9441758f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
