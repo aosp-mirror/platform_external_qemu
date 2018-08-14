@@ -183,7 +183,8 @@ void Loader::synchronize(bool isOnExit) {
 
         // If we transitioned from file backed to non-file-backed, we will
         // need to rewrite the index and cannot use a previous index.
-        if (mRamLoader->didLoadFromFileBacking()) {
+        // Otherwise, there will be a lot of confusing cases to handle.
+        if (mRamLoader->didSwitchFileBacking()) {
             mRamLoader.clear();
             return;
         }

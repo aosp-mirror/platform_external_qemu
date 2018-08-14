@@ -119,8 +119,8 @@ public:
         return true;
     }
 
-    bool didLoadFromFileBacking() const {
-        return mLoadedFromFileBacking;
+    bool didSwitchFileBacking() const {
+        return mLoadedFromFileBacking || mLoadedToFileBacking;
     }
 
 private:
@@ -191,6 +191,9 @@ private:
 
     // Whether we loaded eagerly from a ram.img
     bool mLoadedFromFileBacking = false;
+
+    // Whether we loaded to a ram.img
+    bool mLoadedToFileBacking = false;
 };
 
 struct RamLoader::Page {

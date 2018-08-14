@@ -194,9 +194,15 @@ void RamSaver::savePage(int64_t blockOffset,
 
     auto& block = mIndex.blocks[size_t(mLastBlockIndex)];
 
-    if ((block.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) ||
-        block.ramBlock.readonly) {
+    if (block.ramBlock.readonly) {
+        // No need to save this block as it's readonly
+        return;
+    }
+
+    if ((block.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+        nonzero(mFlags & RamSaver::Flags::Async)) {
         // No need to save this block as it's mapped as shared
+        // and we are in async saving mode.
         return;
     }
 
@@ -531,11 +537,21 @@ void RamSaver::writeIndex() {
             stream.putByte(uint8_t(id.size()));
             stream.write(id.data(), id.size());
             stream.putBe32(uint32_t(b.pages.size()));
-            stream.putBe32(b.ramBlock.flags);
-            stream.putString(b.ramBlock.path);
 
-            if ((b.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) ||
-                b.ramBlock.readonly) {
+            if (nonzero(mFlags & RamSaver::Flags::Async)) {
+                stream.putBe32(b.ramBlock.flags);
+                stream.putString(b.ramBlock.path);
+            } else {
+                stream.putBe32(0);
+                stream.putString("");
+            }
+
+            if (b.ramBlock.readonly) {
+                continue;
+            }
+
+            if ((b.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+                nonzero(mFlags & RamSaver::Flags::Async)) {
                 continue;
             }
 
