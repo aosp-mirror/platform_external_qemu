@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ceed3cf_3c580019",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-14T23:50:52Z",
+      "side": 1,
+      "message": "Please state the comparison in absolute numbers.",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 41
+      },
+      "revId": "d406f89994e0f38808527417ffd9527dbc473b75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "816427bc_9b4d5e2f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-14T23:50:52Z",
+      "side": 1,
+      "message": "have you verified asan still works?",
+      "revId": "d406f89994e0f38808527417ffd9527dbc473b75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
