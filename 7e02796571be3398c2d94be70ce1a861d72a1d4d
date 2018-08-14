@@ -22,6 +22,30 @@
       "revId": "7e02796571be3398c2d94be70ce1a861d72a1d4d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "042be0ca_5da35655",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_linux.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-14T16:23:00Z",
+      "side": 1,
+      "message": "btw, kernel docs have this:\n\n\u003eThe userland application that wants to use userfaultfd with hugetlbfs\n\u003eor shared memory need to set the corresponding flag in\n\u003euffdio_api.features to enable those features.",
+      "parentUuid": "751399f4_a9ab9a9d",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 25
+      },
+      "revId": "7e02796571be3398c2d94be70ce1a861d72a1d4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
