@@ -12,6 +12,7 @@
 #include "android/snapshot/interface.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/Loader.h"
@@ -21,6 +22,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
+using android::base::System;
 using android::snapshot::FailureReason;
 using android::snapshot::OperationStatus;
 using android::snapshot::Snapshotter;
@@ -107,6 +109,29 @@ const char* androidSnapshot_getRamFilePath(const char* _name) {
 
     auto mapPath = android::base::PathUtils::join(dir, "ram.img");
     return strdup(mapPath.c_str());
+}
+
+bool androidSnapshot_sufficientDiskForRamFile(uint64_t memSize, const char* path) {
+    // Address the case where there was a previous ram.img there
+    // and RAM size was reconfigured.
+    System::FileSize existingSize = 0;
+    System::get()->pathFileSize(path, &existingSize);
+
+    if (memSize <= existingSize) {
+        return true;
+    }
+
+    System::FileSize spaceNeeded = (System::FileSize)memSize - existingSize;
+
+    System::FileSize availableSpace;
+
+    if (!System::get()->pathFreeSpace(path, &availableSpace)) {
+        return true;
+    }
+
+    static constexpr System::FileSize kSafetyFactor = System::kDiskPressureLimitBytes;
+
+    return availableSpace >= spaceNeeded + kSafetyFactor;
 }
 
 AndroidSnapshotRamFileMode androidSnapshot_getRamFileInfo() {
