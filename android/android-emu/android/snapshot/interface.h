@@ -80,6 +80,10 @@ void androidSnapshot_setRamFile(const char* path, int shared);
 // Resulting pointer must be freed.
 const char* androidSnapshot_getRamFilePath(const char* name);
 
+// Checks whether there is sufficient disk space to allocate a new ram file,
+// given the guest RAM size and the intended path.
+bool androidSnapshot_sufficientDiskForRamFile(uint64_t memSize, const char* path);
+
 typedef enum {
     SNAPSHOT_RAM_FILE_NONE,
     SNAPSHOT_RAM_FILE_SHARED,
