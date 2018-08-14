@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bc305aa5_9ace0182",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-14T00:59:39Z",
+      "side": 1,
+      "message": "All of this code to keep track of the ram blocks seems error-prone.  I\u0027m not sure how much work this would be since the struct uses C-style, but ideally the struct would have a copy constructor/destructor to clean this up.  Maybe even use a std::string directly?",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 5
+      },
+      "revId": "cd9eb8b4c8f6b9b8234598744039116e8fc9e5b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
