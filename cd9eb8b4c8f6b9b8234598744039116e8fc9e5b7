@@ -46,6 +46,30 @@
       "revId": "cd9eb8b4c8f6b9b8234598744039116e8fc9e5b7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4d8bde6_0800b20e",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-14T02:08:49Z",
+      "side": 1,
+      "message": "Actually this gives me an idea, since its\u0027 exposed as void* in the QEMU C code, perhaps a Fwd DEcl might wrk",
+      "parentUuid": "c4eb299d_6bc4c1c3",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 5
+      },
+      "revId": "cd9eb8b4c8f6b9b8234598744039116e8fc9e5b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
