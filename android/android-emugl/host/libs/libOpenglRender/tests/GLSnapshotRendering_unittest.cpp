@@ -245,6 +245,8 @@ TEST(SnapshotGlRenderingSampleTest, OverrideDispatch) {
 
 class SnapshotTestTriangle : public HelloTriangle {
 public:
+    virtual ~SnapshotTestTriangle() {}
+
     void drawLoop() {
         this->initialize();
         while (mFrameCount < 5) {
@@ -264,14 +266,29 @@ protected:
     int mFrameCount = 0;
 };
 
-TEST(SnapshotGlRenderingSampleTest, DrawTriangle) {
-    SnapshotTestTriangle app;
-    app.drawOnce();
+template <typename T>
+class SnapshotGlRenderingSampleTest : public ::testing::Test {
+protected:
+    virtual void SetUp() override { mApp.reset(new T()); }
+
+    virtual void TearDown() override {
+        mApp.reset();
+        EXPECT_EQ(EGL_SUCCESS, LazyLoadedEGLDispatch::get()->eglGetError())
+                << "SnapshotGlRenderingSampleTest TearDown found an EGL error";
+    }
+
+    std::unique_ptr<T> mApp;
+};
+
+using TestSampleApps = ::testing::Types<SnapshotTestTriangle>;
+TYPED_TEST_CASE(SnapshotGlRenderingSampleTest, TestSampleApps);
+
+TYPED_TEST(SnapshotGlRenderingSampleTest, SnapshotDrawOnce) {
+    this->mApp->drawOnce();
 }
 
-TEST(SnapshotGlRenderingSampleTest, DrawTriangleLoop) {
-    SnapshotTestTriangle app;
-    app.drawLoop();
+TYPED_TEST(SnapshotGlRenderingSampleTest, SnapshotDrawLoop) {
+    this->mApp->drawLoop();
 }
 
 }  // namespace emugl
