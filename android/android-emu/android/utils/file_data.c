@@ -57,8 +57,11 @@ void fileData_initEmpty(FileData* data) {
 }
 
 
-int fileData_initFromFile(FileData* data, const char* filePath) {
-    FILE* f = fopen(filePath, "rb");
+static int fileData_initFromFileCommon(
+        FileData* data,
+        const char* filePath,
+        bool string_mode) {
+    FILE* f = fopen(filePath, string_mode ? "r" : "rb");
     if (!f)
         return -errno;
 
@@ -85,7 +88,10 @@ int fileData_initFromFile(FileData* data, const char* filePath) {
             break;
         }
 
-        char* buffer = malloc((size_t)fileSize);
+        char* buffer = malloc(
+                string_mode ?
+                (size_t)fileSize + 1 :
+                (size_t)fileSize);
         if (!buffer) {
             ret = -errno;
             break;
@@ -101,12 +107,26 @@ int fileData_initFromFile(FileData* data, const char* filePath) {
             break;
         }
 
+        if (string_mode) {
+          buffer[readLen++] = '\0';
+        }
+
         fileData_initWith(data, buffer, readLen);
 
     } while (0);
 
     fclose(f);
     return ret;
+}
+
+
+int fileData_initFromFile(FileData* data, const char* filePath) {
+  return fileData_initFromFileCommon(data, filePath, false);
+}
+
+
+int fileData_initStrFromFile(FileData* data, const char* filePath) {
+  return fileData_initFromFileCommon(data, filePath, true);
 }
 
 
