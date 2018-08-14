@@ -12,6 +12,7 @@
 #include "android/snapshot/interface.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/Loader.h"
@@ -21,6 +22,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
+using android::base::System;
 using android::snapshot::FailureReason;
 using android::snapshot::OperationStatus;
 using android::snapshot::Snapshotter;
@@ -98,7 +100,7 @@ void androidSnapshot_setRamFile(const char* path, int shared) {
     Snapshotter::get().setRamFile(path, shared);
 }
 
-const char* androidSnapshot_getRamFilePath(const char* _name) {
+const char* androidSnapshot_initRamFilePath(int memSizeMb, const char* _name) {
     const char* name =
         _name ? _name : android::snapshot::kDefaultBootSnapshot;
 
@@ -106,6 +108,44 @@ const char* androidSnapshot_getRamFilePath(const char* _name) {
     path_mkdir_if_needed(dir.c_str(), 0744);
 
     auto mapPath = android::base::PathUtils::join(dir, "ram.img");
+
+    System::FileSize filePageSize = System::getFilePageSizeForPath(mapPath.c_str());
+
+    // QEMU adds an extra |filePageSize| padding on the end on Windows.
+    System::FileSize ramSizeBytesWithAlign =
+#ifdef _WIN32
+        System::getAlignedFileSize(filePageSize, memSizeMb * 1048576ULL) + filePageSize;
+#else
+        System::getAlignedFileSize(filePageSize, memSizeMb * 1048576ULL);
+#endif
+
+    // Address the case where there was a previous ram.img there
+    // and RAM size was reconfigured.
+    System::FileSize existingSize = 0;
+    System::get()->pathFileSize(mapPath, &existingSize);
+
+    if (existingSize != ramSizeBytesWithAlign) {
+        fprintf(stderr, "Refreshing RAM file (size mismatch): existing %llu curr %llu\n",
+                (unsigned long long)existingSize,
+                (unsigned long long)ramSizeBytesWithAlign);
+        path_delete_file(mapPath.c_str());
+        existingSize = 0;
+    }
+
+    System::FileSize spaceNeeded = (System::FileSize)ramSizeBytesWithAlign - existingSize;
+
+    System::FileSize availableSpace;
+
+    if (!System::get()->pathFreeSpace(mapPath, &availableSpace)) {
+        return strdup(mapPath.c_str());
+    }
+
+    static constexpr System::FileSize kSafetyFactor = System::kDiskPressureLimitBytes;
+
+    if (availableSpace < spaceNeeded + kSafetyFactor) {
+        return nullptr;
+    }
+
     return strdup(mapPath.c_str());
 }
 

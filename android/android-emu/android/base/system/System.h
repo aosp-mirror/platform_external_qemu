@@ -173,6 +173,9 @@ public:
     static constexpr System::FileSize kDiskPressureLimitBytes = 2147483648ULL;
     static bool isUnderDiskPressure(StringView path, System::FileSize* freeDisk = nullptr);
 
+    static System::FileSize getFilePageSizeForPath(StringView path);
+    static System::FileSize getAlignedFileSize(System::FileSize align, System::FileSize size);
+
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__
     static const int kProgramBitness = 64;

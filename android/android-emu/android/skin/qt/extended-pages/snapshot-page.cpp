@@ -188,15 +188,6 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
                                mInfoPanelSmallGeo.width(),
                                mInfoPanelSmallGeo.y() + mInfoPanelSmallGeo.height() - previewGeo.y());
 
-    // Save QuickBoot snapshot on exit
-    QString avdNameWithUnderscores(android_hw->avd_name);
-
-    if (fc::isEnabled(fc::QuickbootFileBacked)) {
-        mUi->saveOnExitTitle->setText(QString(tr("Auto-save emulator state?")));
-    } else {
-        mUi->saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
-                + avdNameWithUnderscores.replace('_', ' '));
-    }
 
     SaveSnapshotOnExit saveOnExitChoice = getSaveOnExitChoice();
     changeUiFromSaveOnExitSetting(saveOnExitChoice);
@@ -207,6 +198,7 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
 
     // In file-backed Quickboot, the 'save now' button is always disabled.
     if (fc::isEnabled(fc::QuickbootFileBacked)) {
+        mUi->saveOnExitTitle->setText(QString(tr("Auto-save emulator state")));
 
         // Migrate "Ask" users to "Always"
         if (saveOnExitChoice == SaveSnapshotOnExit::Ask) {
@@ -239,7 +231,17 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
         if (android::base::isRestartDisabled()) {
             mUi->saveQuickBootOnExit->setEnabled(false);
         }
+
+        if (saveOnExitChoice == SaveSnapshotOnExit::Always) {
+            mUi->noneAvailableLabel->setText(QString(tr("Auto-saving Quickboot state...")));
+        }
     } else {
+        // Save QuickBoot snapshot on exit
+        QString avdNameWithUnderscores(android_hw->avd_name);
+
+        mUi->saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
+                + avdNameWithUnderscores.replace('_', ' '));
+
         // Enable SAVE NOW if we won't overwrite the state on exit
         mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
 
