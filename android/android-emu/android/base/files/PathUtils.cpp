@@ -323,5 +323,26 @@ void PathUtils::simplifyComponents(std::vector<StringView>* components) {
     simplifyComponents<StringView>(components);
 }
 
+// static
+std::string PathUtils::relativeTo(StringView base, StringView path, HostType hostType) {
+    std::vector<StringView> baseDecomposed = decompose(base, hostType);
+    std::vector<StringView> pathDecomposed = decompose(path, hostType);
+
+    if (baseDecomposed.size() > pathDecomposed.size()) return path.str();
+
+    for (size_t i = 0; i < baseDecomposed.size(); i++) {
+        if (baseDecomposed[i] != pathDecomposed[i]) return path.str();
+    }
+
+    std::string result =
+        recompose(
+            std::vector<StringView>(
+                pathDecomposed.begin() + baseDecomposed.size(),
+                pathDecomposed.end()),
+            hostType);
+
+    return result;
+}
+
 }  // namespace base
 }  // namespace android
