@@ -43,6 +43,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int apiLevel,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
+                                   const char* fileKernelParameters,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
@@ -200,6 +201,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (avdKernelParameters && avdKernelParameters[0]) {
         params.add(avdKernelParameters);
+    }
+
+    // Add kernel parameters from config file, if they exist
+    if (fileKernelParameters && fileKernelParameters[0]) {
+        params.add(fileKernelParameters);
     }
 
     // Configure the ramoops module, and mark the region where ramoops lives as
