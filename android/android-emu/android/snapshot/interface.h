@@ -78,7 +78,8 @@ void androidSnapshot_setRamFile(const char* path, int shared);
 // Retrieves path to potential RAM map of snapshot.
 // Creates the directory if needed.
 // Resulting pointer must be freed.
-const char* androidSnapshot_getRamFilePath(const char* name);
+// If there is insufficient disk space, returns NULL.
+const char* androidSnapshot_initRamFilePath(int memSizeMb, const char* name);
 
 typedef enum {
     SNAPSHOT_RAM_FILE_NONE,

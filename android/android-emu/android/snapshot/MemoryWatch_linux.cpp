@@ -64,7 +64,7 @@ static bool checkUserfaultFdCaps(int ufd) {
 
     if (fc::isEnabled(Feature::QuickbootFileBacked)) {
         if (!(apiStruct.features & UFFD_FEATURE_MISSING_SHMEM)) {
-            dwarning(
+            VERBOSE_PRINT(snapshot, 
                 "Using file-backed Quickboot, but "
                 "missing UFFD_FEATURE_MISSING_SHMEM.");
             return false;
