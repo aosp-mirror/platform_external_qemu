@@ -52,6 +52,12 @@ void fileData_initEmpty(FileData* fileData);
 // On failure, return -errno code, and set |fileData| to FILE_DATA_INIT.
 int fileData_initFromFile(FileData* fileData, const char* filePath);
 
+// Initialize a FileData as fileData_initFromFile but append a '\0'
+// at the end of the data.  This allows the data to be easily used
+// as a cstr.  The final FileData.size parameter will include the trailing
+// '\0'.
+int fileData_initStrFromFile(FileData* fileData, const char* filePath);
+
 // Initialize a FileData by copying a memory buffer.
 // |fileData| is the address of the FileData value to initialize.
 // |buffer| is the address of the input buffer that will be copied

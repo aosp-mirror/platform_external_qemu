@@ -1411,12 +1411,22 @@ extern "C" int main(int argc, char** argv) {
             fc::setEnabledOverride(fc::GLAsyncSwap, false);
         }
 
+        // TODO: If going this route, this logic might best be moved to it's own
+        // file.  It depends on if qemu1 needs to support the feature too.
+        FileData kernelParamFileData;
+        std::string kernelParamPath = android::base::PathUtils::join(
+                android::ConfigDirs::getUserDirectory(), "KernelParams.txt");
+        fileData_initStrFromFile(&kernelParamFileData, kernelParamPath.c_str());
+
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, rendererConfig.glesMode,
+                hw->kernel_parameters, (const char*)kernelParamFileData.data,
+                rendererConfig.glesMode,
                 rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
                 true /* isQemu2 */, hw->hw_arc));
+
+        fileData_done(&kernelParamFileData);
 
         if (!kernel_parameters.get()) {
             return 1;
