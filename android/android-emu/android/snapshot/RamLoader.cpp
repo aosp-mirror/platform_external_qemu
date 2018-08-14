@@ -390,6 +390,9 @@ void RamLoader::readBlockPages(base::Stream* stream,
         (activeFlags & SNAPSHOT_RAM_MAPPED)) {
         memset(block.ramBlock.hostPtr, 0x0, block.ramBlock.totalSize);
         mLoadedToFileBacking = true;
+        // Make the page size consistent as well.
+        block.ramBlock.pageSize = prevPageSizeOnDisk;
+        mPageSize = block.ramBlock.pageSize;
     }
 
     auto pageIt = mIndex.pages.end();
