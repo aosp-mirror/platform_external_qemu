@@ -511,5 +511,37 @@ TEST(PathUtils, extension) {
     }
 }
 
+TEST(PathUtils, relativeTo) {
+    static const struct {
+        PathUtils::HostType host;
+        const char* base;
+        const char* path;
+        const char* expected;
+    } kData[] = {
+        { PathUtils::HOST_POSIX, "NotPrefix", "a/NotPrefix/b/c", "a/NotPrefix/b/c" },
+        { PathUtils::HOST_WIN32, "NotPrefix", "a\\NotPrefix\\b\\c", "a\\NotPrefix\\b\\c" },
+
+        { PathUtils::HOST_POSIX, "PrefixTooLong", "Prefix", "Prefix" },
+        { PathUtils::HOST_WIN32, "PrefixTooLong", "Prefix", "Prefix" },
+
+        { PathUtils::HOST_POSIX, "PrefixOnly", "PrefixOnly", "" },
+        { PathUtils::HOST_WIN32, "PrefixOnly", "PrefixOnly", "" },
+
+        { PathUtils::HOST_POSIX, "a/b", "a/b/c", "c" },
+        { PathUtils::HOST_WIN32, "a\\b", "a\\b\\c", "c" },
+
+        { PathUtils::HOST_POSIX, "/a/b", "/a/b/c", "c" },
+        { PathUtils::HOST_WIN32, "c:\\a\\b", "c:\\a\\b\\c", "c" },
+
+        { PathUtils::HOST_POSIX, "Not/Dir", "Not/DirBoundary", "Not/DirBoundary" },
+        { PathUtils::HOST_WIN32, "Not\\Dir", "Not\\DirBoundary", "Not\\DirBoundary" },
+    };
+
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        EXPECT_STREQ(kData[n].expected,
+            PathUtils::relativeTo(kData[n].base, kData[n].path, kData[n].host).data());
+    }
+}
+
 }  // namespace android
 }  // namespace base
