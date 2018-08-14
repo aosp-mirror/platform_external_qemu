@@ -71,7 +71,9 @@ RAMBlock *qemu_ram_block_from_host(void *ptr, bool round_offset,
 ram_addr_t qemu_ram_block_host_offset(RAMBlock *rb, void *host);
 void qemu_ram_set_idstr(RAMBlock *block, const char *name, DeviceState *dev);
 void qemu_ram_unset_idstr(RAMBlock *block);
+void qemu_ram_set_migrate(RAMBlock *block, bool migrate);
 const char *qemu_ram_get_idstr(RAMBlock *rb);
+bool qemu_ram_is_migrate(RAMBlock* rb);
 bool qemu_ram_is_shared(RAMBlock *rb);
 bool qemu_ram_is_uf_zeroable(RAMBlock *rb);
 void qemu_ram_set_uf_zeroable(RAMBlock *rb);
@@ -120,6 +122,20 @@ typedef int (RAMBlockIterFunc)(const char *block_name, void *host_addr,
 
 int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque);
 int ram_block_discard_range(RAMBlock *rb, uint64_t start, size_t length);
+
+typedef int (RAMBlockIterFuncWithFileInfo)(
+    const char *block_name,
+    void *host_addr,
+    ram_addr_t offset,
+    ram_addr_t length,
+    uint32_t flags,
+    const char* path,
+    bool readonly,
+    void *opaque);
+
+int qemu_ram_foreach_migrate_block_with_file_info(
+    RAMBlockIterFuncWithFileInfo func,
+    void *opaque);
 
 #endif
 

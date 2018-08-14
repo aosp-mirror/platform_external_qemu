@@ -25,6 +25,10 @@ constexpr int kTestingPageSize = 4096;
 
 using TestRamBuffer = AlignedBuf<uint8_t, kTestingPageSize>;
 
+RamBlock makeRam(android::base::StringView name,
+                 uint8_t* hostPtr,
+                 int64_t size);
+
 void saveRamSingleBlock(const RamSaver::Flags flags,
                         const RamBlock& block,
                         android::base::StringView filename);

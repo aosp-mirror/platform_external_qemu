@@ -36,18 +36,12 @@ typedef enum {
     SNAPSHOT_OPS_COUNT
 } SnapshotOperation;
 
-typedef struct {
-    const char* id;
-    int64_t startOffset;
-    uint8_t* hostPtr;
-    int64_t totalSize;
-    int32_t pageSize;
-} SnapshotRamBlock;
+struct SnapshotRamBlock;
 
 typedef struct {
     void (*registerBlock)(void* opaque,
                           SnapshotOperation operation,
-                          const SnapshotRamBlock* block);
+                          const struct SnapshotRamBlock* block);
     int (*startLoading)(void* opaque);
     void (*savePage)(void* opaque,
                      int64_t blockOffset,

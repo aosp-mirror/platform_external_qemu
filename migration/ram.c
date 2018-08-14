@@ -1271,8 +1271,8 @@ static bool find_dirty_block(RAMState *rs, PageSearchStatus *pss, bool *again)
         /* Didn't find anything in this RAM Block */
         pss->page = 0;
         pss->block = QLIST_NEXT_RCU(pss->block, next);
-        if (!pss->block) {
-            /* Hit the end of the list */
+        if (!pss->block || !qemu_ram_is_migrate(pss->block)) {
+            /* Hit the end of the list, or block not migratable */
             pss->block = QLIST_FIRST_RCU(&ram_list.blocks);
             /* Flag that we've looped */
             pss->complete_round = true;
@@ -2996,8 +2996,9 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
                             ret = -EINVAL;
                         }
                     }
-                    ram_control_load_hook(f, RAM_CONTROL_BLOCK_REG,
-                                          block->idstr);
+                    if (qemu_ram_is_migrate(block)) {
+                        ram_control_load_hook(f, RAM_CONTROL_BLOCK_REG, block->idstr);
+                    }
                 } else {
                     error_report("Unknown ramblock \"%s\", cannot "
                                  "accept migration", id);
