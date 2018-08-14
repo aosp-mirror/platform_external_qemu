@@ -32,30 +32,6 @@ struct GlValues {
     std::vector<GLfloat> floats;
 };
 
-struct GlSampleCoverage {
-    GLclampf value;
-    GLboolean invert;
-};
-
-struct GlStencilFunc {
-    GLenum func;
-    GLint ref;
-    GLuint mask;
-};
-
-struct GlStencilOp {
-    GLenum sfail;
-    GLenum dpfail;
-    GLenum dppass;
-};
-
-struct GlBlendFunc {
-    GLenum srcRGB;
-    GLenum dstRGB;
-    GLenum srcAlpha;
-    GLenum dstAlpha;
-};
-
 struct GlBufferData {
     GLsizeiptr size;
     GLvoid* bytes;
