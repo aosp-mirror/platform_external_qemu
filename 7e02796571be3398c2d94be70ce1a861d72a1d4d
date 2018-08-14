@@ -70,6 +70,30 @@
       "revId": "7e02796571be3398c2d94be70ce1a861d72a1d4d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf096ee6_d39b65f9",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_linux.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-14T16:48:41Z",
+      "side": 1,
+      "message": "Done (for the dwarning)",
+      "parentUuid": "60566424_9bffa892",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 25
+      },
+      "revId": "7e02796571be3398c2d94be70ce1a861d72a1d4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
