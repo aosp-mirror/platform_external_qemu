@@ -849,16 +849,24 @@ extern "C" int main(int argc, char** argv) {
     if (useQuickbootRamFile) {
         const char* memPath = androidSnapshot_getRamFilePath(NULL);
 
-        args.add2("-mem-path", memPath);
-        AFREE((void*)memPath);
+        // Only create the new RAM file if there is sufficient disk space.
+        if (androidSnapshot_sufficientDiskForRamFile(
+                (uint64_t)((uint64_t)hw->hw_ramSize * 1048576ULL),
+                memPath)) {
 
-        bool mapAsShared =
-            !opts->read_only &&
-            !opts->no_snapshot_save &&
-            androidSnapshot_getQuickbootChoice();
+            args.add2("-mem-path", memPath);
+            AFREE((void*)memPath);
 
-        if (mapAsShared) {
-            args.add("-mem-file-shared");
+            bool mapAsShared =
+                !opts->read_only &&
+                !opts->no_snapshot_save &&
+                androidSnapshot_getQuickbootChoice();
+
+            if (mapAsShared) {
+                args.add("-mem-file-shared");
+            }
+        } else {
+            AFREE((void*)memPath);
         }
     }
 
