@@ -223,6 +223,14 @@ static bool qemu_snapshot_delete(const char* name,
     return qemu_delvm(name, MessageCallback(opaque, nullptr, errConsumer)) == 0;
 }
 
+static bool qemu_snapshot_remap(bool shared,
+                                void* opaque,
+                                LineConsumerCallback errConsumer) {
+    android::RecursiveScopedVmLock vmlock;
+    fprintf(stderr, "%s: call. shared? %d\n", __func__, shared);
+    return true;
+}
+
 static SnapshotCallbacks sSnapshotCallbacks = {};
 static void* sSnapshotCallbacksOpaque = nullptr;
 
@@ -506,6 +514,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotSave = qemu_snapshot_save,
         .snapshotLoad = qemu_snapshot_load,
         .snapshotDelete = qemu_snapshot_delete,
+        .snapshotRemap = qemu_snapshot_remap,
         .setSnapshotCallbacks = set_snapshot_callbacks,
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,

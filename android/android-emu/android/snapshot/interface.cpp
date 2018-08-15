@@ -22,6 +22,8 @@
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
+#include <fstream>
+
 using android::base::System;
 using android::snapshot::FailureReason;
 using android::snapshot::OperationStatus;
@@ -100,14 +102,16 @@ void androidSnapshot_setRamFile(const char* path, int shared) {
     Snapshotter::get().setRamFile(path, shared);
 }
 
-const char* androidSnapshot_initRamFilePath(int memSizeMb, const char* _name) {
+const char* androidSnapshot_prepareAutosave(int memSizeMb, const char* _name) {
     const char* name =
         _name ? _name : android::snapshot::kDefaultBootSnapshot;
 
     std::string dir = android::snapshot::getSnapshotDir(name);
     path_mkdir_if_needed(dir.c_str(), 0744);
 
-    auto mapPath = android::base::PathUtils::join(dir, "ram.img");
+    auto mapPath =
+        android::base::PathUtils::join(
+            dir, android::snapshot::kMappedRamFileName);
 
     System::FileSize filePageSize = System::getFilePageSizeForPath(mapPath.c_str());
 
@@ -119,17 +123,27 @@ const char* androidSnapshot_initRamFilePath(int memSizeMb, const char* _name) {
         System::getAlignedFileSize(filePageSize, memSizeMb * 1048576ULL);
 #endif
 
-    // Address the case where there was a previous ram.img there
-    // and RAM size was reconfigured.
     System::FileSize existingSize = 0;
-    System::get()->pathFileSize(mapPath, &existingSize);
 
-    if (existingSize != ramSizeBytesWithAlign) {
-        fprintf(stderr, "Refreshing RAM file (size mismatch): existing %llu curr %llu\n",
-                (unsigned long long)existingSize,
-                (unsigned long long)ramSizeBytesWithAlign);
-        path_delete_file(mapPath.c_str());
-        existingSize = 0;
+    // Delete the snapshot dir if RAM file still dirty.
+    if (androidSnapshot_isRamFileDirty(name)) {
+        fprintf(stderr, "Found invalid RAM file. Deleting snapshot\n");
+        path_delete_dir(dir.c_str());
+        // Reinitialize the directory since QEMU might need it created already
+        // for the next RAM file.
+        path_mkdir_if_needed(dir.c_str(), 0744);
+    } else {
+        // Address the case where there was a previous ram.img there
+        // and RAM size was reconfigured.
+        System::get()->pathFileSize(mapPath, &existingSize);
+
+        if (existingSize != ramSizeBytesWithAlign) {
+            fprintf(stderr, "Refreshing RAM file (size mismatch): existing %llu curr %llu\n",
+                    (unsigned long long)existingSize,
+                    (unsigned long long)ramSizeBytesWithAlign);
+            path_delete_file(mapPath.c_str());
+            existingSize = 0;
+        }
     }
 
     System::FileSize spaceNeeded = (System::FileSize)ramSizeBytesWithAlign - existingSize;
@@ -147,6 +161,40 @@ const char* androidSnapshot_initRamFilePath(int memSizeMb, const char* _name) {
     }
 
     return strdup(mapPath.c_str());
+}
+
+void androidSnapshot_setRamFileDirty(const char* _name, bool setDirty) {
+    const char* name =
+        _name ? _name : android::snapshot::kDefaultBootSnapshot;
+
+    std::string dir = android::snapshot::getSnapshotDir(name);
+    path_mkdir_if_needed(dir.c_str(), 0744);
+
+    auto dirtyPath =
+        android::base::PathUtils::join(
+            dir, android::snapshot::kMappedRamFileDirtyName);
+
+    if (setDirty) {
+        std::ofstream file(dirtyPath.c_str(), std::ios::trunc);
+        file << "1";
+    } else {
+        path_delete_file(dirtyPath.c_str());
+    }
+}
+
+bool androidSnapshot_isRamFileDirty(const char* _name) {
+    const char* name =
+        _name ? _name : android::snapshot::kDefaultBootSnapshot;
+
+    std::string dir = android::snapshot::getSnapshotDir(name);
+
+    auto dirtyPath =
+        android::base::PathUtils::join(
+                dir, android::snapshot::kMappedRamFileDirtyName);
+
+    System::FileSize existingSize = 0;
+    bool result = System::get()->pathFileSize(dirtyPath, &existingSize);
+    return result || existingSize;
 }
 
 AndroidSnapshotRamFileMode androidSnapshot_getRamFileInfo() {

@@ -2322,6 +2322,18 @@ static int do_snapshot_del(ControlClient client, char* args) {
     return success ? 0 : -1;
 }
 
+static int do_snapshot_remap(ControlClient client, char* args) {
+    bool shared = true;
+
+    if (args && strlen(args) >= 1) {
+        shared = (args[0] == '1');
+    }
+
+    bool success = vmopers(client)->snapshotRemap(shared, client,
+                                                  control_write_err_cb);
+    return success ? 0 : -1;
+}
+
 static const CommandDefRec  snapshot_commands[] =
 {
     { "list", "list available state snapshots",
@@ -2343,6 +2355,10 @@ static const CommandDefRec  snapshot_commands[] =
     { "delete", "delete state snapshot",
     "'avd snapshot delete <name>' will delete the state snapshot with the given name\r\n",
     NULL, do_snapshot_del, NULL },
+
+    { "remap", "remap current snapshot RAM",
+    "'avd snapshot remap <shared?>' will remap the current snapshot's RAM as shared or not based on |shared?|. If |shared?| changes, it will cause a snapshot save, remapping, then a snapshot load.\r\n",
+    NULL, do_snapshot_remap, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
