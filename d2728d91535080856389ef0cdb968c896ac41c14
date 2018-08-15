@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bd0baa6_d077c090",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-15T01:21:24Z",
+      "side": 1,
+      "message": "This is missing a \\n",
+      "range": {
+        "startLine": 867,
+        "startChar": 63,
+        "endLine": 867,
+        "endChar": 64
+      },
+      "revId": "d2728d91535080856389ef0cdb968c896ac41c14",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
