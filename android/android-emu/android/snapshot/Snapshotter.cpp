@@ -657,6 +657,10 @@ void Snapshotter::setRamFile(const char* path, bool shared) {
     mRamFileShared = shared;
 }
 
+void Snapshotter::setRamFileShared(bool shared) {
+    mRamFileShared = shared;
+}
+
 void Snapshotter::cancelSave() {
     if (!mSaver)
         return;

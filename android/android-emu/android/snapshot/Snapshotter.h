@@ -75,6 +75,7 @@ public:
     OperationStatus save(bool isOnExit, const char* name);
 
     void setRamFile(const char* path, bool shared);
+    void setRamFileShared(bool shared);
 
     // Cancels the current save operation, and queries
     // whether saving was canceled.
