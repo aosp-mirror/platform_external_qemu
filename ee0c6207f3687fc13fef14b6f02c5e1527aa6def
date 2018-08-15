@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87055bea_f9ac6744",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T22:55:57Z",
+      "side": 1,
+      "message": "What about our android app developers targeting apps for spaceship passengers or the \"texting while flying fighter jets\" crowd",
+      "range": {
+        "startLine": 38,
+        "startChar": 44,
+        "endLine": 38,
+        "endChar": 83
+      },
+      "revId": "ee0c6207f3687fc13fef14b6f02c5e1527aa6def",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46c56841_77854c5d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T22:55:57Z",
+      "side": 1,
+      "message": "nit: D?",
+      "range": {
+        "startLine": 48,
+        "startChar": 15,
+        "endLine": 48,
+        "endChar": 16
+      },
+      "revId": "ee0c6207f3687fc13fef14b6f02c5e1527aa6def",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fef634d7_275a1f2d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T22:55:57Z",
+      "side": 1,
+      "message": "Was this needed to pass the CTS test?",
+      "range": {
+        "startLine": 527,
+        "startChar": 0,
+        "endLine": 529,
+        "endChar": 9
+      },
+      "revId": "ee0c6207f3687fc13fef14b6f02c5e1527aa6def",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
