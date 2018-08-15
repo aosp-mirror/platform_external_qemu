@@ -19,6 +19,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 
+#include "qemu/abort.h"
 #include "qemu/cutils.h"
 #include "cpu.h"
 #include "exec/exec-all.h"
@@ -40,6 +41,7 @@
 #else /* !CONFIG_USER_ONLY */
 #include "hw/hw.h"
 #include "exec/memory.h"
+#include "exec/memory-remap.h"
 #include "exec/ioport.h"
 #include "sysemu/dma.h"
 #include "sysemu/numa.h"
@@ -1572,6 +1574,35 @@ static int64_t get_file_size(int fd)
     return size;
 }
 
+static int try_open_existing_ram_file(const char* path) {
+    int fd = -1;
+
+    // If an existing file is 4GB, Windows open() by itself fails.
+    // So use CreateFile() instead.
+#ifdef _WIN32
+    HANDLE fh =
+        CreateFile(
+            path,
+            // Must be both, or we cannot CreateFileMapping with PAGE_READWRITE
+            GENERIC_READ | GENERIC_WRITE,
+            // Need both read and write sharing to enable multiple instances.
+            // Even though we will not really be writing to the RAM file with
+            // multiple instances, the file needs to be opened to allow us to
+            // proceed.
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL,
+            // Need to fail on file-not-found to follow the same path as QEMU
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL);
+    fd = _open_osfhandle((intptr_t)fh, _O_RDWR);
+#else
+    fd = open(path, O_RDWR);
+#endif
+
+    return fd;
+}
+
 static int file_ram_open(const char *path,
                          const char *region_name,
                          bool *created,
@@ -1584,28 +1615,9 @@ static int file_ram_open(const char *path,
 
     *created = false;
     for (;;) {
-        // If an existing file is 4GB, Windows open() by itself fails.
-        // So use CreateFile() instead.
-#ifdef _WIN32
-        HANDLE fh =
-            CreateFile(
-                path,
-                // Must be both, or we cannot CreateFileMapping with PAGE_READWRITE
-                GENERIC_READ | GENERIC_WRITE,
-                // Need both read and write sharing to enable multiple instances.
-                // Even though we will not really be writing to the RAM file with
-                // multiple instances, the file needs to be opened to allow us to
-                // proceed.
-                FILE_SHARE_READ | FILE_SHARE_WRITE,
-                NULL,
-                // Need to fail on file-not-found to follow the same path as QEMU
-                OPEN_EXISTING,
-                FILE_ATTRIBUTE_NORMAL,
-                NULL);
-        fd = _open_osfhandle((intptr_t)fh, _O_RDWR);
-#else
-        fd = open(path, O_RDWR);
-#endif
+
+        fd = try_open_existing_ram_file(path);
+
         if (fd >= 0) {
             /* @path names an existing file, use it */
             break;
@@ -1725,6 +1737,7 @@ static void *file_ram_alloc(RAMBlock *block,
     }
 
     block->fd = fd;
+    block->mapped_size = memory;
     return area;
 }
 
@@ -2171,7 +2184,7 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
         return NULL;
     }
 
-    block->path = mem_path;
+    block->path = g_strdup(mem_path);
     return block;
 }
 
@@ -2323,6 +2336,119 @@ void qemu_ram_remap(ram_addr_t addr, ram_addr_t length)
     }
 }
 #endif /* !_WIN32 */
+
+static void ram_block_teardown_backing(RAMBlock* block) {
+
+    if (block->fd >= 0) {
+        qemu_ram_munmap(block->host, block->max_length);
+#ifdef _WIN32
+        _close(block->fd);
+#else
+        close(block->fd);
+#endif
+        block->fd = -1;
+    } else {
+        qemu_anon_ram_free(block->host, block->max_length);
+    }
+
+    if (block->path) {
+        g_free((void*)block->path);
+        block->path = NULL;
+    }
+
+    block->flags = 0;
+}
+
+void ram_block_remap_backing(RAMBlock* block, const char* mem_path, int shared)
+{
+    rcu_read_lock();
+
+    // Check against bad usage, since the first move of this function
+    // is to free |block->path|.
+    if (mem_path && block->path &&
+        (mem_path == block->path)) {
+        qemu_abort(
+            "%s: Not allowed to alias mem_path and block->path!\n",
+            __func__);
+    }
+
+    ram_block_teardown_backing(block);
+
+    if (mem_path) {
+        block->path = g_strdup(mem_path);
+        block->flags = RAM_MAPPED | (shared ? RAM_SHARED : 0);
+
+        // Assume it exists
+        block->fd = try_open_existing_ram_file(block->path);
+
+        if (block->fd < 0) {
+            rcu_read_unlock();
+            qemu_abort(
+                "error opening new ram file "
+                "for guest memory '%s' at %s\n",
+                memory_region_name(block->mr),
+                block->path);
+            abort();
+        }
+
+        // Assume the mapped size hasn't changed
+        block->host =
+            qemu_ram_mmap(
+                block->fd,
+                block->mapped_size,
+                block->mr->align,
+                block->flags & RAM_SHARED);
+
+        if (!block->host) {
+            rcu_read_unlock();
+            qemu_abort("cannot remap backing for guest memory '%s' "
+                       "to new file (shared: %d)",
+                       memory_region_name(block->mr),
+                       shared);
+        }
+    } else {
+        block->host =
+            phys_mem_alloc(
+                block->max_length,
+                &block->mr->align,
+                shared);
+
+        if (!block->host) {
+            rcu_read_unlock();
+
+            if (insufficientMemMessage) {
+                // Insufficient for allocation; exit.
+                _exit(1);
+            }
+
+            // Fatal error in allocation.
+            qemu_abort(
+                "cannot remap backing for guest memory '%s' "
+                "to anonymous backing",
+                memory_region_name(block->mr));
+            abort();
+        }
+    }
+
+    rcu_read_unlock();
+}
+
+void ram_blocks_remap_shared(int shared)
+{
+    RAMBlock *block;
+
+    RAMBLOCK_FOREACH(block) {
+        char* remap_path;
+
+        if (!block->path) continue;
+
+        remap_path = g_strdup(block->path);
+        ram_block_remap_backing(block, remap_path, shared);
+        g_free(remap_path);
+    }
+
+    memory_listeners_refresh_topology();
+}
 
 /* Return a host pointer to ram allocated with qemu_ram_alloc.
  * This should not be used for general purpose DMA.  Use address_space_map
