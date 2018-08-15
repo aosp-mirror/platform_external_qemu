@@ -108,6 +108,7 @@ size_t qemu_mempath_getpagesize(const char *mem_path)
 
 void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
 {
+    fprintf(stderr, "%s: mapping as shared? %d\n", __func__, shared);
 #ifndef _WIN32
     /*
      * Note: this always allocates at least one extra page of virtual address
