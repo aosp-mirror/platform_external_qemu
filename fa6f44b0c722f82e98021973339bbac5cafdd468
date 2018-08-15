@@ -169,6 +169,30 @@
     },
     {
       "key": {
+        "uuid": "dec26678_8868c26e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-15T03:32:01Z",
+      "side": 1,
+      "message": "Yeah, I agree.  Given that this is independent from ASTC and already exists, are you okay with me filing a bug as an IOU?",
+      "parentUuid": "f931d0b1_a9a9c42f",
+      "range": {
+        "startLine": 715,
+        "startChar": 0,
+        "endLine": 716,
+        "endChar": 70
+      },
+      "revId": "fa6f44b0c722f82e98021973339bbac5cafdd468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4f76d9a0_8650317b",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
         "patchSetId": 3
