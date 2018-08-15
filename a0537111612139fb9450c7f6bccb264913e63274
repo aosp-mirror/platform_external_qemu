@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6678044c_44869924",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_linux.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-15T23:42:35Z",
+      "side": 1,
+      "message": "nit: remove commented out code?",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 12
+      },
+      "revId": "a0537111612139fb9450c7f6bccb264913e63274",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
