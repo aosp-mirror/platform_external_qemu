@@ -162,7 +162,16 @@
     <property name="spacing">
      <number>0</number>
     </property>
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
    </layout>
@@ -214,6 +223,9 @@
         <width>36</width>
         <height>0</height>
        </size>
+      </property>
+      <property name="accessibleDescription">
+       <string>Play/Stop</string>
       </property>
       <property name="text">
        <string/>
@@ -335,8 +347,9 @@
     </item>
    </layout>
   </widget>
- <zorder>rec_playerOverlayWidget</zorder>
- <zorder>rec_recordOverlayWidget</zorder>
+  <zorder>widget</zorder>
+  <zorder>rec_playerOverlayWidget</zorder>
+  <zorder>rec_recordOverlayWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>
