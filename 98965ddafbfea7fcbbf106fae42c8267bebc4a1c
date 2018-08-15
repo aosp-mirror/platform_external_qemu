@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7ac05f64_9b96368c",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-15T01:22:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8e58a8b0_71f0dcf5",
+      "range": {
+        "startLine": 253,
+        "startChar": 19,
+        "endLine": 253,
+        "endChar": 37
+      },
+      "revId": "98965ddafbfea7fcbbf106fae42c8267bebc4a1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9233dd0_d5a429a9",
         "filename": "android-qemu2-glue/drive-share.cpp",
         "patchSetId": 19
@@ -45,6 +69,30 @@
       "revId": "98965ddafbfea7fcbbf106fae42c8267bebc4a1c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bcb4e6f8_bc9ec043",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-15T01:22:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e9233dd0_d5a429a9",
+      "range": {
+        "startLine": 322,
+        "startChar": 0,
+        "endLine": 322,
+        "endChar": 60
+      },
+      "revId": "98965ddafbfea7fcbbf106fae42c8267bebc4a1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
