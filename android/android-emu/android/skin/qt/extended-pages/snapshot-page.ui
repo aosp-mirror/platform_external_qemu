@@ -77,7 +77,7 @@
       </rect>
      </property>
      <property name="accessibleDescription">
-      <string>Play</string>
+      <string>Delete</string>
      </property>
      <property name="text">
       <string/>
@@ -344,7 +344,7 @@
       </rect>
      </property>
      <property name="accessibleDescription">
-      <string>Play</string>
+      <string>Edit</string>
      </property>
      <property name="text">
       <string/>
