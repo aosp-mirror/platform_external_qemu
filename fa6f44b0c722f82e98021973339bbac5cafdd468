@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "62f4e0c9_c05c71b3",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-15T03:23:21Z",
+      "side": 1,
+      "message": "Hmm, yeah you\u0027re right it could potentially read out of bounds in that case.  It seems like the only property that we account for is actually the alignment :-)\n\nIn fact, does glCompressedTexImage2D actually use any of the unpack properties?  The only thing referenced in http://docs.gl/es3/glCompressedTexImage2D is GL_PIXEL_UNPACK_BUFFER_BINDING",
+      "parentUuid": "1cb5770b_b2eaeaca",
+      "range": {
+        "startLine": 715,
+        "startChar": 0,
+        "endLine": 716,
+        "endChar": 70
+      },
+      "revId": "fa6f44b0c722f82e98021973339bbac5cafdd468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4f76d9a0_8650317b",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
         "patchSetId": 3
