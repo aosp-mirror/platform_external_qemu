@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c9dd19a5_dcc0b428",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-15T00:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "81aa85c0_29f48629",
+      "range": {
+        "startLine": 177,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 5
+      },
+      "revId": "96c9de92c8b0c6a386b43756c772cf2433695653",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f0984615_c5d86a6f",
         "filename": "include/qemu/iov.h",
         "patchSetId": 13
@@ -36,6 +60,30 @@
       "writtenOn": "2018-08-15T00:49:54Z",
       "side": 1,
       "message": "do we still need these casts?",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 19
+      },
+      "revId": "96c9de92c8b0c6a386b43756c772cf2433695653",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b022e5b4_35a38416",
+        "filename": "include/qemu/iov.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-15T00:53:30Z",
+      "side": 1,
+      "message": "yes c++ complaints about them (c doesn\u0027t care)",
+      "parentUuid": "f0984615_c5d86a6f",
       "range": {
         "startLine": 51,
         "startChar": 0,

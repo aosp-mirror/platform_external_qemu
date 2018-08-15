@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6815e11b_d26ae346",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-15T00:53:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ef9b5fc_f768c432",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 283,
+        "endChar": 35
+      },
+      "revId": "037d7494566b1b127c79f17436b960452bca5a58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7f553351_7e0cbc00",
         "filename": "qemu-options.hx",
         "patchSetId": 14
