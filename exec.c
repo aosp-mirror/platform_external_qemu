@@ -1699,6 +1699,7 @@ static void *file_ram_alloc(RAMBlock *block,
     }
 
     block->fd = fd;
+    block->mapped_size = memory;
     return area;
 }
 

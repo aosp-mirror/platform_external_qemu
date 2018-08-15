@@ -40,6 +40,7 @@ extern "C" {
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 #include "exec/cpu-common.h"
+#include "exec/memory-remap.h"
 }
 
 #include <string>
@@ -221,6 +222,22 @@ static bool qemu_snapshot_delete(const char* name,
                                  LineConsumerCallback errConsumer) {
     android::RecursiveScopedVmLock vmlock;
     return qemu_delvm(name, MessageCallback(opaque, nullptr, errConsumer)) == 0;
+}
+
+static bool qemu_snapshot_remap(bool shared,
+                                void* opaque,
+                                LineConsumerCallback errConsumer) {
+
+    android::RecursiveScopedVmLock vmlock;
+
+    qemu_snapshot_save("default_boot");
+
+    fprintf(stderr, "%s: call. shared? %d\n", __func__, shared);
+    ram_blocks_remap_shared(shared);
+    memory_listeners_refresh_topology();
+
+    qemu_snapshot_load("default_boot");
+    return true;
 }
 
 static SnapshotCallbacks sSnapshotCallbacks = {};
@@ -506,6 +523,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotSave = qemu_snapshot_save,
         .snapshotLoad = qemu_snapshot_load,
         .snapshotDelete = qemu_snapshot_delete,
+        .snapshotRemap = qemu_snapshot_remap,
         .setSnapshotCallbacks = set_snapshot_callbacks,
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,

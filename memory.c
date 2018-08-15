@@ -18,16 +18,19 @@
 #include "qemu-common.h"
 #include "cpu.h"
 #include "exec/memory.h"
+#include "exec/memory-remap.h"
 #include "exec/address-spaces.h"
 #include "exec/ioport.h"
 #include "qapi/visitor.h"
 #include "qemu/bitops.h"
 #include "qemu/error-report.h"
+#include "qemu/mmap-alloc.h"
 #include "qom/object.h"
 #include "trace-root.h"
 
 #include "exec/memory-internal.h"
 #include "exec/ram_addr.h"
+#include "exec/ramlist.h"
 #include "sysemu/kvm.h"
 #include "sysemu/sysemu.h"
 #include "hw/misc/mmio_interface.h"
@@ -938,6 +941,97 @@ static void address_space_update_topology_pass(AddressSpace *as,
     }
 }
 
+void address_space_refresh_topology(AddressSpace *as)
+{
+    FlatView *curr_view = address_space_to_flatview(as);
+    unsigned i = 0;
+    FlatRange *fr = NULL;
+
+    assert(curr_view);
+
+    fprintf(stderr, "%s: as %p flatview %p\n", __func__, as, curr_view);
+
+    while (i < curr_view->nr) {
+        fr = &curr_view->ranges[i];
+        MEMORY_LISTENER_UPDATE_REGION(fr, as, Reverse, region_del);
+        ++i;
+    }
+
+    i = 0;
+
+    while (i < curr_view->nr) {
+        fr = &curr_view->ranges[i];
+        MEMORY_LISTENER_UPDATE_REGION(fr, as, Forward, region_add);
+        ++i;
+    }
+
+}
+
+void ram_block_remap_backing(RAMBlock* block, const char* mem_path, int shared)
+{
+    // TODO
+}
+
+void ram_blocks_remap_shared(int shared)
+{
+    RAMBlock *block;
+
+    rcu_read_lock();
+
+    RAMBLOCK_FOREACH(block) {
+        if (!block->path) continue;
+
+        fprintf(stderr, "%s: found RAM block %p with path %s\n", __func__, block, block->path);
+
+        if (block->fd) {
+            qemu_ram_munmap(block->host, block->max_length);
+            close(block->fd);
+        }
+
+        // Assume exists
+        block->fd = open(block->path, O_RDWR);
+
+        if (block->fd >= 0) {
+            fprintf(stderr, "%s: successfully reopened .fd %d\n", __func__, block->fd);
+        } else {
+            fprintf(stderr, "%s: some other error %d\n", __func__, errno);
+            abort();
+        }
+
+        // assume file size is valid
+
+        if (shared) {
+#define RAM_MAPPED (1 << 3)
+#define RAM_SHARED     (1 << 1)
+            
+            block->flags |= RAM_MAPPED | RAM_SHARED;
+        } else {
+            block->flags &= ~(RAM_SHARED);
+        }
+
+        block->host = qemu_ram_mmap(block->fd, block->mapped_size, block->mr->align, block->flags & RAM_SHARED);
+
+        if (block->host) {
+            fprintf(stderr, "%s: Success remap ram @ %p\n", __func__, block->host);
+        } else {
+            fprintf(stderr, "%s: Failed remap ram\n", __func__);
+            abort();
+        }
+    }
+
+    rcu_read_unlock();
+}
+
+void memory_listeners_refresh_topology() {
+
+    AddressSpace *as;
+
+    QTAILQ_FOREACH(as, &address_spaces, address_spaces_link) {
+        address_space_refresh_topology(as);
+    }
+}
+
+
 static void flatviews_init(void)
 {
     static FlatView *empty_view;
@@ -1556,6 +1650,9 @@ void memory_region_init_ram_from_file(MemoryRegion *mr,
                                       Error **errp)
 {
     memory_region_init(mr, owner, name, size);
+
+    fprintf(stderr, "%s: init ram region %p file path %s\n", __func__, mr, path);
+
     mr->ram = true;
     mr->terminates = true;
     mr->destructor = memory_region_destructor_ram;
@@ -2285,6 +2382,9 @@ static void memory_region_add_subregion_common(MemoryRegion *mr,
                                                MemoryRegion *subregion)
 {
     assert(!subregion->container);
+
+    fprintf(stderr, "%s: subregion %p container %p offset 0x%llx\n", __func__, subregion, mr, (unsigned long long)offset);
+
     subregion->container = mr;
     subregion->addr = offset;
     memory_region_update_container_subregions(subregion);
@@ -3081,6 +3181,9 @@ void memory_region_init_ram(MemoryRegion *mr,
     Error *err = NULL;
 
     memory_region_init_ram_nomigrate(mr, owner, name, size, &err);
+
+    fprintf(stderr, "%s: init ram %p name %s size 0x%llx\n", __func__, mr, name, (unsigned long long)size);
+
     if (err) {
         error_propagate(errp, err);
         return;
@@ -3105,6 +3208,9 @@ void memory_region_init_rom(MemoryRegion *mr,
     Error *err = NULL;
 
     memory_region_init_rom_nomigrate(mr, owner, name, size, &err);
+
+    fprintf(stderr, "%s: init rom %p name %s size 0x%llx\n", __func__, mr, name, (unsigned long long)size);
+
     if (err) {
         error_propagate(errp, err);
         return;
@@ -3132,6 +3238,9 @@ void memory_region_init_rom_device(MemoryRegion *mr,
 
     memory_region_init_rom_device_nomigrate(mr, owner, ops, opaque,
                                             name, size, &err);
+
+    fprintf(stderr, "%s: init rom %p name %s size 0x%llx\n", __func__, mr, name, (unsigned long long)size);
+
     if (err) {
         error_propagate(errp, err);
         return;
