@@ -537,6 +537,7 @@ void RamSaver::writeIndex() {
             stream.putByte(uint8_t(id.size()));
             stream.write(id.data(), id.size());
             stream.putBe32(uint32_t(b.pages.size()));
+            stream.putBe32(uint32_t(b.ramBlock.pageSize));
 
             if (nonzero(mFlags & RamSaver::Flags::Async)) {
                 stream.putBe32(b.ramBlock.flags);

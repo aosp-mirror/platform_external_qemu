@@ -311,6 +311,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
     const auto blockIndex = std::distance(mIndex.blocks.begin(), blockIt);
 
     const auto blockPagesCount = stream->getBe32();
+    const auto blockPageSizeFromSave = stream->getBe32();
 
     uint32_t savedFlags = stream->getBe32();
     std::string savedMemPath = stream->getString();
@@ -390,6 +391,9 @@ void RamLoader::readBlockPages(base::Stream* stream,
         (activeFlags & SNAPSHOT_RAM_MAPPED)) {
         memset(block.ramBlock.hostPtr, 0x0, block.ramBlock.totalSize);
         mLoadedToFileBacking = true;
+        // Make the page size consistent as well.
+        block.ramBlock.pageSize = blockPageSizeFromSave;
+        mPageSize = block.ramBlock.pageSize;
     }
 
     auto pageIt = mIndex.pages.end();
