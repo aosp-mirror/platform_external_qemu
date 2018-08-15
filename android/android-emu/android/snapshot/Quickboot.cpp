@@ -283,9 +283,10 @@ bool Quickboot::load(StringView name) {
             mLoadedSnapshotName = name;
             reportSuccessfulLoad(name, startTimeMs);
             startLivenessMonitor();
-        } else if (auto failureReason =
-                        snapshotter.loader().snapshot().failureReason())
+        } else if (snapshotter.hasLoader() &&
+                   (snapshotter.loader().snapshot().failureReason()))
         {
+            auto failureReason = snapshotter.loader().snapshot().failureReason();
             // Failed: the error is about something done before the real load
             // (e.g. condition check)
             decideFailureReport(failureReason);
