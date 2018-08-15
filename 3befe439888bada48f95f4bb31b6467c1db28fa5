@@ -22,6 +22,30 @@
       "revId": "3befe439888bada48f95f4bb31b6467c1db28fa5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29710fa6_4597b455",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-15T01:00:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1bd3d25d_8cb8b4fd",
+      "range": {
+        "startLine": 256,
+        "startChar": 3,
+        "endLine": 256,
+        "endChar": 40
+      },
+      "revId": "3befe439888bada48f95f4bb31b6467c1db28fa5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
