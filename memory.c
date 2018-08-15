@@ -938,6 +938,50 @@ static void address_space_update_topology_pass(AddressSpace *as,
     }
 }
 
+void address_space_refresh_topology(AddressSpace *as)
+{
+    FlatView *curr_view = address_space_to_flatview(as);
+    unsigned i = 0;
+    FlatRange *fr = NULL;
+
+    assert(curr_view);
+
+    fprintf(stderr, "%s: as %p flatview %p\n", __func__, as, curr_view);
+
+    while (i < curr_view->nr) {
+        fr = &curr_view->ranges[i];
+        MEMORY_LISTENER_UPDATE_REGION(fr, as, Reverse, region_del);
+        ++i;
+    }
+
+    i = 0;
+
+    while (i < curr_view->nr) {
+        fr = &curr_view->ranges[i];
+        MEMORY_LISTENER_UPDATE_REGION(fr, as, Forward, region_add);
+        ++i;
+    }
+
+}
+
+void memory_listeners_refresh_topology() {
+
+    AddressSpace *as;
+
+    /* Render unique FVs */
+    QTAILQ_FOREACH(as, &address_spaces, address_spaces_link) {
+        address_space_refresh_topology(as);
+
+        // MemoryRegion *physmr = memory_region_get_flatview_root(as->root);
+
+        // if (g_hash_table_lookup(flat_views, physmr)) {
+        //     continue;
+        // }
+
+        // generate_memory_topology(physmr);
+    }
+}
+
 static void flatviews_init(void)
 {
     static FlatView *empty_view;
@@ -1556,6 +1600,9 @@ void memory_region_init_ram_from_file(MemoryRegion *mr,
                                       Error **errp)
 {
     memory_region_init(mr, owner, name, size);
+
+    fprintf(stderr, "%s: init ram region %p file path %s\n", __func__, mr, path);
+
     mr->ram = true;
     mr->terminates = true;
     mr->destructor = memory_region_destructor_ram;
@@ -2285,6 +2332,9 @@ static void memory_region_add_subregion_common(MemoryRegion *mr,
                                                MemoryRegion *subregion)
 {
     assert(!subregion->container);
+
+    fprintf(stderr, "%s: subregion %p container %p offset 0x%llx\n", __func__, subregion, mr, (unsigned long long)offset);
+
     subregion->container = mr;
     subregion->addr = offset;
     memory_region_update_container_subregions(subregion);
@@ -3081,6 +3131,9 @@ void memory_region_init_ram(MemoryRegion *mr,
     Error *err = NULL;
 
     memory_region_init_ram_nomigrate(mr, owner, name, size, &err);
+
+    fprintf(stderr, "%s: init ram %p name %s size 0x%llx\n", __func__, mr, name, (unsigned long long)size);
+
     if (err) {
         error_propagate(errp, err);
         return;
@@ -3105,6 +3158,9 @@ void memory_region_init_rom(MemoryRegion *mr,
     Error *err = NULL;
 
     memory_region_init_rom_nomigrate(mr, owner, name, size, &err);
+
+    fprintf(stderr, "%s: init rom %p name %s size 0x%llx\n", __func__, mr, name, (unsigned long long)size);
+
     if (err) {
         error_propagate(errp, err);
         return;
@@ -3132,6 +3188,9 @@ void memory_region_init_rom_device(MemoryRegion *mr,
 
     memory_region_init_rom_device_nomigrate(mr, owner, ops, opaque,
                                             name, size, &err);
+
+    fprintf(stderr, "%s: init rom %p name %s size 0x%llx\n", __func__, mr, name, (unsigned long long)size);
+
     if (err) {
         error_propagate(errp, err);
         return;

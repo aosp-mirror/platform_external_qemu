@@ -1528,6 +1528,11 @@ void memory_listener_register(MemoryListener *listener, AddressSpace *filter);
  */
 void memory_listener_unregister(MemoryListener *listener);
 
+/*
+ * Calls region_del and region_add for registered memory listeners.
+ */
+void memory_listeners_refresh_topology();
+
 /**
  * memory_global_dirty_log_start: begin dirty logging for all regions
  */
