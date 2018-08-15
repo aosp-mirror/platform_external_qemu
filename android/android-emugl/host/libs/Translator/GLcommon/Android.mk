@@ -50,6 +50,8 @@ $(call emugl-end-module)
 
 ### EGL unit tests ########################
 
+ifeq (,$(CONFIG_MIN_BUILD))
+
 $(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)GLcommon_unittests)
 
 LOCAL_SRC_FILES := Etc2_unittest.cpp
@@ -57,3 +59,4 @@ $(call emugl-import,libGLcommon libemugl_gtest)
 $(call local-link-static-c++lib)
 $(call emugl-end-module)
 
+endif # !CONFIG_MIN_BUILD

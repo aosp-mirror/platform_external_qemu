@@ -35,6 +35,8 @@ host_commonSources := \
     shared_library_unittest.cpp \
     stringparsing_unittest.cpp
 
+ifeq (,$(CONFIG_MIN_BUILD))
+
 $(call emugl-begin-executable,emugl$(BUILD_TARGET_SUFFIX)_common_host_unittests)
 LOCAL_SRC_FILES := $(host_commonSources)
 $(call emugl-import,libemugl_common libemugl_gtest)
@@ -45,3 +47,5 @@ $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)emugl_test_shared_lib
 LOCAL_SRC_FILES := testing/test_shared_library.cpp
 LOCAL_CFLAGS := -fvisibility=default
 $(call emugl-end-module)
+
+endif # !CONFIG_MIN_BUILD

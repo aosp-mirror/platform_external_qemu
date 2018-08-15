@@ -149,6 +149,8 @@ LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)
 $(call emugl-end-module)
 
 # Tests#########################################################################
+ifeq (,$(CONFIG_MIN_BUILD))
+
 $(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_unittests)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_standalone_common libemugl_gtest)
 
@@ -192,6 +194,8 @@ LOCAL_LDFLAGS += -Wl,-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX),-rpath,$
 endif
 $(call emugl-end-module)
 
+endif # !CONFIG_MIN_BUILD
+
 # Samples#######################################################################
 
 make_sample = \
@@ -208,6 +212,7 @@ make_sample = \
     $(eval $(call emugl-end-module)) \
 
 # Only build samples on 64-bit hosts
+ifeq (,$(CONFIG_MIN_BUILD))
 ifeq ($(BUILD_TARGET_SUFFIX),64)
 
 $(call make_sample,HelloTriangle)
@@ -215,3 +220,4 @@ $(call make_sample,HelloSurfaceFlinger)
 $(call make_sample,CreateDestroyContext)
 
 endif
+endif # !CONFIG_MIN_BUILD

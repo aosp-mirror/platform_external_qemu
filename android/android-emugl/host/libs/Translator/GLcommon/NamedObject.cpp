@@ -44,6 +44,7 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
                 break;
             case NamedObjectType::FRAMEBUFFER:
                 GLEScontext::dispatcher().glGenFramebuffers(1,&m_globalName);
+                fprintf(stderr, "generated framebuffer %u (global name)\n", m_globalName);
                 break;
             case NamedObjectType::SHADER_OR_PROGRAM:
                 switch (genNameInfo.m_shaderProgramType) {

@@ -17,6 +17,7 @@
 #include "GLcommon/GLDispatch.h"
 #include "GLcommon/GLLibrary.h"
 
+#include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Thread.h"
 
 #include "emugl/common/lazy_instance.h"

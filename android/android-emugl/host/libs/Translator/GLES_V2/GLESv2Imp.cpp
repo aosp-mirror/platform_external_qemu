@@ -477,16 +477,19 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     bool isDefaultFBO = !framebuffer;
     if (isDefaultFBO) {
        globalFrameBufferName = ctx->getDefaultFBOGlobalName();
+       fprintf(stderr, "%s: is default fbo. local name %u global name %u\n", __func__, framebuffer, globalFrameBufferName);
        ctx->dispatcher().glBindFramebuffer(target, globalFrameBufferName);
        ctx->setFramebufferBinding(target, 0);
     } else {
         globalFrameBufferName = framebuffer;
         if(framebuffer){
             globalFrameBufferName = ctx->getFBOGlobalName(framebuffer);
+       fprintf(stderr, "%s: is NOT default fbo. local name %u global name %u\n", __func__, framebuffer, globalFrameBufferName);
             //if framebuffer wasn't generated before,generate one
             if(!globalFrameBufferName){
                 ctx->genFBOName(framebuffer);
                 globalFrameBufferName = ctx->getFBOGlobalName(framebuffer);
+                fprintf(stderr, "%s: creating new global name %u\n", __func__, globalFrameBufferName);
                 ctx->setFBOData(framebuffer,
                         ObjectDataPtr(new FramebufferData(framebuffer,
                                                           globalFrameBufferName)));
@@ -2857,6 +2860,9 @@ GL_APICALL void  GL_APIENTRY glPixelStorei(GLenum pname, GLint param){
     switch (pname) {
     case GL_PACK_ALIGNMENT:
     case GL_UNPACK_ALIGNMENT:
+        if(!((param==1)||(param==2)||(param==4)||(param==8))) {
+            fprintf(stderr, "%s: wrong param pname 0x%x param %d\n", __func__,pname,param);
+        }
         SET_ERROR_IF(!((param==1)||(param==2)||(param==4)||(param==8)), GL_INVALID_VALUE);
         break;
     default:
@@ -3768,6 +3774,8 @@ GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
         // directly.
         ctx->setVAOEverBound();
     }
+    auto globalName = ctx->getVAOGlobalName(array);
+    fprintf(stderr, "%s: local %u global %u\n", __func__, array, globalName);
     ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
 }
 

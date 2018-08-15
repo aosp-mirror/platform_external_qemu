@@ -18,6 +18,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/synchronization/Lock.h"
 
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
@@ -38,6 +39,8 @@
 #include <string.h>
 
 #include <numeric>
+
+static android::base::StaticLock sGlobalGLESContextLock = {};
 
 //decleration
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
@@ -536,6 +539,9 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
 }
 
 GLEScontext::~GLEScontext() {
+
+    android::base::AutoLock lock(sGlobalGLESContextLock);
+
     auto& gl = dispatcher();
 
     if (m_blitState.program) {
@@ -560,6 +566,7 @@ GLEScontext::~GLEScontext() {
         gl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
         gl.glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl.glDeleteFramebuffers(1, &m_defaultFBO);
+        fprintf(stderr, "%s: Deleted the default FBO %u\n", __func__, m_defaultFBO);
     }
 
     if (m_defaultReadFBO && (m_defaultReadFBO != m_defaultFBO)) {
@@ -1987,9 +1994,12 @@ void GLEScontext::initDefaultFBO(
         GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
         GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
 
+    android::base::AutoLock lock(sGlobalGLESContextLock);
+
     if (!m_defaultFBO) {
         dispatcher().glGenFramebuffers(1, &m_defaultFBO);
         m_defaultReadFBO = m_defaultFBO;
+        fprintf(stderr, "%s: gen default fbo %u\n", __func__, m_defaultFBO);
     }
 
     bool needReallocateRbo = false;
@@ -2044,7 +2054,9 @@ void GLEScontext::initDefaultFBO(
                                 *eglReadSurfaceRBColorId, *eglReadSurfaceRBDepthId);
     }
 
+    fprintf(stderr, "%s: bind the default fbo %u\n", __func__, m_defaultFBO);
     dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+    fprintf(stderr, "%s: bind the default fbo %u (after)\n", __func__, m_defaultFBO);
 
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *eglSurfaceRBColorId);
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
@@ -2065,6 +2077,8 @@ void GLEScontext::initDefaultFBO(
     }
 
     dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prevRbo);
+    fprintf(stderr, "%s: restored rbo binding\n", __func__, prevRbo);
+
     GLuint prevDrawFBOBinding = getFramebufferBinding(GL_FRAMEBUFFER);
     GLuint prevReadFBOBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
 
@@ -2641,6 +2655,8 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
                                                      GLint internalFormat,
                                                      GLenum format,
                                                      GLenum type) {
+    android::base::AutoLock lock(sGlobalGLESContextLock);
+
     // TODO: these might also matter
     (void)format;
     (void)type;

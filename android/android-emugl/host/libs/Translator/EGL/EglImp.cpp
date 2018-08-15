@@ -1123,6 +1123,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                                              EGLContext context) {
     VALIDATE_DISPLAY(display);
 
+    emugl::Mutex::AutoLock mutex(s_eglLock);
+
     bool releaseContext = EglValidate::releaseContext(context, read, draw);
     if(!releaseContext && EglValidate::badContextMatch(context, read, draw)) {
         RETURN_ERROR(EGL_FALSE, EGL_BAD_MATCH);
@@ -1186,7 +1188,6 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         }
 
         {
-            emugl::Mutex::AutoLock mutex(s_eglLock);
             if (!dpy->nativeType()->makeCurrent(
                         newReadPtr->native(),
                         newDrawPtr->native(),
