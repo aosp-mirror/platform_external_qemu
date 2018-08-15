@@ -634,7 +634,8 @@ OperationStatus Snapshotter::prepareForSaving(const char* name) {
                           : nullptr,
             mIsOnExit,
             mRamFile,
-            mRamFileShared));
+            mRamFileShared,
+            mIsRemapping));
     mVmOperations.vmStart();
     mSaver->prepare();
     return mSaver->status();
@@ -656,6 +657,10 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
 
 void Snapshotter::setRamFile(const char* path, bool shared) {
     mRamFile = path;
+    mRamFileShared = shared;
+}
+
+void Snapshotter::setRamFileShared(bool shared) {
     mRamFileShared = shared;
 }
 
@@ -777,7 +782,8 @@ bool Snapshotter::onStartSaving(const char* name) {
                               : nullptr,
                 mIsOnExit,
                 mRamFile,
-                mRamFileShared));
+                mRamFileShared,
+                mIsRemapping));
     }
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);
