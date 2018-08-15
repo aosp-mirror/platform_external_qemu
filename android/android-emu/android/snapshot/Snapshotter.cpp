@@ -599,6 +599,7 @@ void Snapshotter::handleGenericLoad(const char* name,
                         "Snapshot '%s' can not be loaded (%d). "
                         "Fatal error, resetting current session",
                         name, int(*failureReason)));
+                deleteSnapshot(name);
                 mVmOperations.vmReset();
             }
         } else {
@@ -606,6 +607,7 @@ void Snapshotter::handleGenericLoad(const char* name,
                 StringFormat(
                     "Snapshot '%s' can not be loaded (reason not set). "
                     "Fatal error, resetting current session", name));
+            deleteSnapshot(name);
             mVmOperations.vmReset();
             if (reportMetrics) {
                 appendFailedLoad(pb::EmulatorSnapshotLoadState::
@@ -695,10 +697,12 @@ OperationStatus Snapshotter::loadGeneric(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
-    invalidateSnapshot(name);
+    std::string nameWithStorage(name);
+    fprintf(stderr, "%s: for %s\n", __func__, nameWithStorage.c_str());
+    invalidateSnapshot(nameWithStorage.c_str());
 
     // then delete the folder and refresh hierarchy
-    path_delete_dir(getSnapshotDir(name).c_str());
+    path_delete_dir(getSnapshotDir(nameWithStorage.c_str()).c_str());
     Hierarchy::get()->currentInfo();
 }
 
@@ -724,12 +728,15 @@ void Snapshotter::invalidateSnapshot(const char* name) {
     mIsInvalidating = true;
     mVmOperations.snapshotDelete(name, this, nullptr);
 
-    // then delete kRamFileName / kTexturesFileName
+    // then delete kRamFileName / kTexturesFileName / kMappedRamFileName
     path_delete_file(
             PathUtils::join(getSnapshotDir(nameValidated), kRamFileName)
                     .c_str());
     path_delete_file(
             PathUtils::join(getSnapshotDir(nameValidated), kTexturesFileName)
+                    .c_str());
+    path_delete_file(
+            PathUtils::join(getSnapshotDir(nameValidated), kMappedRamFileName)
                     .c_str());
 
     tombstone.saveFailure(FailureReason::Tombstone);

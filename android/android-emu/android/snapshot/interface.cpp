@@ -107,7 +107,9 @@ const char* androidSnapshot_initRamFilePath(int memSizeMb, const char* _name) {
     std::string dir = android::snapshot::getSnapshotDir(name);
     path_mkdir_if_needed(dir.c_str(), 0744);
 
-    auto mapPath = android::base::PathUtils::join(dir, "ram.img");
+    auto mapPath =
+        android::base::PathUtils::join(
+            dir, android::snapshot::kMappedRamFileName);
 
     System::FileSize filePageSize = System::getFilePageSizeForPath(mapPath.c_str());
 

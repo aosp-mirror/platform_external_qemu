@@ -286,10 +286,11 @@ bool Quickboot::load(StringView name) {
         } else if (snapshotter.hasLoader() &&
                    (snapshotter.loader().snapshot().failureReason()))
         {
+            auto name = snapshotter.loader().snapshot().name();
             auto failureReason = snapshotter.loader().snapshot().failureReason();
             // Failed: the error is about something done before the real load
             // (e.g. condition check)
-            decideFailureReport(failureReason);
+            decideFailureReport(name, failureReason);
         } else {
             // Failed: the error is a problem with loading the VM
             mWindow.showMessage(
@@ -305,7 +306,8 @@ bool Quickboot::load(StringView name) {
     return true;
 }
 
-void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failureReason) {
+void Quickboot::decideFailureReport(StringView name,
+                                    const base::Optional<FailureReason>& failureReason) {
     if (*failureReason == FailureReason::Empty ||
         *failureReason >= FailureReason::ValidationErrorLimit)
     {
@@ -317,8 +319,11 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
                                  SNAPSHOT_LOAD))
                         .c_str(),
                 WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
-        mVmOps.vmReset();
+
         Snapshotter::get().loader().reportInvalid();
+        Snapshotter::get().deleteSnapshot(c_str(name));
+
+        mVmOps.vmReset();
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_FAILED,
                          *failureReason);
