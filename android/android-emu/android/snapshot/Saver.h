@@ -31,7 +31,8 @@ public:
     Saver(const Snapshot& snapshot, RamLoader* loader,
           bool isOnExit,
           base::StringView ramMapFile,
-          bool ramFileShared);
+          bool ramFileShared,
+          bool isRemapping);
     ~Saver();
 
     RamSaver& ramSaver() { return *mRamSaver; }

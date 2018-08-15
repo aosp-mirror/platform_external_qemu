@@ -2322,6 +2322,18 @@ static int do_snapshot_del(ControlClient client, char* args) {
     return success ? 0 : -1;
 }
 
+static int do_snapshot_remap(ControlClient client, char* args) {
+    bool shared = true;
+
+    if (args && strlen(args) >= 1) {
+        shared = (args[0] == '1');
+    }
+
+    bool success = vmopers(client)->snapshotRemap(shared, client,
+                                                  control_write_err_cb);
+    return success ? 0 : -1;
+}
+
 static const CommandDefRec  snapshot_commands[] =
 {
     { "list", "list available state snapshots",
@@ -2343,6 +2355,24 @@ static const CommandDefRec  snapshot_commands[] =
     { "delete", "delete state snapshot",
     "'avd snapshot delete <name>' will delete the state snapshot with the given name\r\n",
     NULL, do_snapshot_del, NULL },
+
+    { "remap", "remap current snapshot RAM",
+    "'avd snapshot remap <auto-save>' will activate or shut off Quickboot auto-saving\r\n"
+    "while the emulator is running.\r\n"
+    "<auto-save> value of 0: deactivae auto-save\r\n"
+    "<auto-save> value of 1: activate auto-save\r\n"
+    "- It is required that the current loaded snapshot be the Quickboot snapshot (default_boot).\r\n"
+    "- If auto-saving is currently active and gets deactivated, a snapshot will be saved\r\n"
+    "  to establish the last state.\r\n"
+    "- If the emulator is not currently auto-saving and a remap command is issued,\r\n"
+    "  the Quickboot snapshot will be reloaded with auto-saving enabled or disabled\r\n"
+    "  according to the value of the <auto-save> argument.\r\n"
+    "- This allows the user to set a checkpoint in the middle of running the emulator:\r\n"
+    "  by starting the emulator with auto-save enabled, then issuing 'avd snapshot remap 0'\r\n"
+    "  to disable auto-save and thus set the checkpoint. Subsequent 'avd snapshot remap 0'\r\n"
+    "  commands will then repeatedly rewind to that checkpoint.\r\n"
+    "  Issuing 'avd snapshot remap 1' after that will rewind again but activate auto-saving.\r\n",
+    NULL, do_snapshot_remap, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
