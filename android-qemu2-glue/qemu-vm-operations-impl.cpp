@@ -23,6 +23,7 @@
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/VmLock.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/interface.h"
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/PathUtils.h"
 
@@ -40,6 +41,7 @@ extern "C" {
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 #include "exec/cpu-common.h"
+#include "exec/memory-remap.h"
 }
 
 #include <string>
@@ -221,6 +223,70 @@ static bool qemu_snapshot_delete(const char* name,
                                  LineConsumerCallback errConsumer) {
     android::RecursiveScopedVmLock vmlock;
     return qemu_delvm(name, MessageCallback(opaque, nullptr, errConsumer)) == 0;
+}
+
+static bool qemu_snapshot_remap(bool shared,
+                                void* opaque,
+                                LineConsumerCallback errConsumer) {
+
+    android::RecursiveScopedVmLock vmlock;
+
+    auto currentRamFileStatus = androidSnapshot_getRamFileInfo();
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_NONE) {
+        fprintf(stderr, "%s: no ram file. no-op\n", __func__);
+    }
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_SHARED && shared) {
+        fprintf(stderr, "%s: previously shared, still shared, no-op.\n", __func__);
+    }
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_SHARED && !shared) {
+        fprintf(stderr, "%s: previously shared, not shared after. save and remap\n", __func__);
+    }
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_PRIVATE && shared) {
+        fprintf(stderr, "%s: previously private, shared after. remap and load\n", __func__);
+    }
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_PRIVATE && !shared) {
+        fprintf(stderr, "%s: previously private, private after. remap and load\n", __func__);
+    }
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_NONE) {
+        return true;
+    }
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_SHARED && shared) return true;
+
+    bool wasVmRunning = runstate_is_running() != 0;
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_SHARED && !shared) {
+        vm_stop(RUN_STATE_SAVE_VM);
+
+        qemu_savevm("default_boot", MessageCallback(opaque, nullptr, errConsumer));
+
+        ram_blocks_remap_shared(shared);
+        memory_listeners_refresh_topology();
+
+        if (wasVmRunning) {
+            fprintf(stderr, "%s: start vm again after save and remap\n", __func__);
+            vm_start();
+        }
+        return true;
+    } else {
+        vm_stop(RUN_STATE_RESTORE_VM);
+        ram_blocks_remap_shared(shared);
+        memory_listeners_refresh_topology();
+
+        qemu_loadvm("default_boot", MessageCallback(opaque, nullptr, errConsumer));
+
+        if (wasVmRunning) {
+            fprintf(stderr, "%s: start vm again after remap and load\n", __func__);
+            vm_start();
+        }
+        return true;
+    }
 }
 
 static SnapshotCallbacks sSnapshotCallbacks = {};
@@ -506,6 +572,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotSave = qemu_snapshot_save,
         .snapshotLoad = qemu_snapshot_load,
         .snapshotDelete = qemu_snapshot_delete,
+        .snapshotRemap = qemu_snapshot_remap,
         .setSnapshotCallbacks = set_snapshot_callbacks,
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,

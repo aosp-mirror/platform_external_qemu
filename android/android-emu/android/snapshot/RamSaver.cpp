@@ -116,6 +116,8 @@ RamSaver::RamSaver(const std::string& fileName,
         }
     }
 
+            mFlags |= RamSaver::Flags::Async;
+
     if (!mStream.get()) {
         mHasError = true;
         return;
