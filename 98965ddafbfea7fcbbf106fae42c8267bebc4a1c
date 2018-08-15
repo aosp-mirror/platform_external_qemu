@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e58a8b0_71f0dcf5",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T01:14:26Z",
+      "side": 1,
+      "message": "could this be initDrivePath?",
+      "range": {
+        "startLine": 253,
+        "startChar": 19,
+        "endLine": 253,
+        "endChar": 37
+      },
+      "revId": "98965ddafbfea7fcbbf106fae42c8267bebc4a1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9233dd0_d5a429a9",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T01:14:26Z",
+      "side": 1,
+      "message": "drive_new looks like it sets a bunch of things, but this doesn\u0027t set as much.\n\nCould we go into more detail in this comment?",
+      "range": {
+        "startLine": 322,
+        "startChar": 0,
+        "endLine": 322,
+        "endChar": 60
+      },
+      "revId": "98965ddafbfea7fcbbf106fae42c8267bebc4a1c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
