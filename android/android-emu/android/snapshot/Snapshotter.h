@@ -111,6 +111,7 @@ public:
 
     Saver& saver() { return *mSaver; }
     Loader& loader() { return *mLoader; }
+    bool hasLoader() const { return mLoader ? true : false ; }
 
     const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
     const QAndroidEmulatorWindowAgent& windowAgent() const {
