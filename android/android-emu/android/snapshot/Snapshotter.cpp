@@ -577,7 +577,7 @@ void Snapshotter::handleGenericSave(const char* name,
 void Snapshotter::handleGenericLoad(const char* name,
                                     OperationStatus loadStatus,
                                     bool reportMetrics) {
-    if (loadStatus != OperationStatus::Ok) {
+    if (loadStatus != OperationStatus::Ok && hasLoader()) {
         // Check if the error is about something done as just a check or
         // we've started actually loading the VM data
         if (auto failureReason = loader().snapshot().failureReason()) {
