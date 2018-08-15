@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "f931d0b1_a9a9c42f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T03:26:59Z",
+      "side": 1,
+      "message": "Yeah I\u0027m also not sure on whether glCompressedTexImage2D would be affected by those, from skimming the spec.\n\nI\u0027m leaning toward \"it is not affected by them\" since the compressed format input data might not even have the concept of pixel rows, but we could load the data via glBufferData and GL_PIXEL_UNPACK_BUFFER.",
+      "parentUuid": "62f4e0c9_c05c71b3",
+      "range": {
+        "startLine": 715,
+        "startChar": 0,
+        "endLine": 716,
+        "endChar": 70
+      },
+      "revId": "fa6f44b0c722f82e98021973339bbac5cafdd468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4f76d9a0_8650317b",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
         "patchSetId": 3
