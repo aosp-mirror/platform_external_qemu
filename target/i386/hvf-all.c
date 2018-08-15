@@ -341,6 +341,9 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
 static void hvf_region_add(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
+    fprintf(stderr, "%s: call. for [0x%llx 0x%llx]\n", __func__,
+             (unsigned long long)section->offset_within_address_space,
+             (unsigned long long)(section->offset_within_address_space + int128_get64(section->size)));
     DPRINTF("%s: call. for [0x%llx 0x%llx]\n", __func__,
              (unsigned long long)section->offset_within_address_space,
              (unsigned long long)(section->offset_within_address_space + int128_get64(section->size)));
@@ -350,6 +353,9 @@ static void hvf_region_add(MemoryListener * listener,
 static void hvf_region_del(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
+    fprintf(stderr, "%s: call. for [0x%llx 0x%llx]\n", __func__,
+             (unsigned long long)section->offset_within_address_space,
+             (unsigned long long)(section->offset_within_address_space + int128_get64(section->size)));
     DPRINTF("%s: call. for [0x%llx 0x%llx]\n", __func__,
              (unsigned long long)section->offset_within_address_space,
              (unsigned long long)(section->offset_within_address_space + int128_get64(section->size)));
