@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "1cb5770b_b2eaeaca",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T03:00:58Z",
+      "side": 1,
+      "message": "Ok, sounds good.\n\nJust to check: for row length, the case I was thinking of was that, if we decompressed to a 4x4 rgba texture, and the row length was 8 pixels, and we unpacked to a tightly packed sequence of 4x4x4bpp \u003d 64 bytes, wouldn\u0027t glTexImage2D expect the third row to occur at 8 px * 4bpp * 2 rows \u003d byte 64 and the fourth row to occur at 8 px * 4bpp * 3 rows \u003d byte 96 which might read out of bounds? Though, it\u0027s late / I\u0027m tired so I might be getting something completely backwards here",
+      "parentUuid": "ea4e8d7e_2f059b6c",
+      "range": {
+        "startLine": 715,
+        "startChar": 0,
+        "endLine": 716,
+        "endChar": 70
+      },
+      "revId": "fa6f44b0c722f82e98021973339bbac5cafdd468",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f76d9a0_8650317b",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureUtils.cpp",
         "patchSetId": 3
