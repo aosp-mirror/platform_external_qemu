@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ef9b5fc_f768c432",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T00:49:54Z",
+      "side": 1,
+      "message": "remove extraneous print (and in other places)",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 283,
+        "endChar": 35
+      },
+      "revId": "037d7494566b1b127c79f17436b960452bca5a58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f553351_7e0cbc00",
+        "filename": "qemu-options.hx",
+        "patchSetId": 14
+      },
+      "lineNbr": 4287,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-15T00:49:54Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "range": {
+        "startLine": 4287,
+        "startChar": 0,
+        "endLine": 4287,
+        "endChar": 8
+      },
+      "revId": "037d7494566b1b127c79f17436b960452bca5a58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
