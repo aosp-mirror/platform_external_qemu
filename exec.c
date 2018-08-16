@@ -1584,8 +1584,21 @@ static int file_ram_open(const char *path,
 
     *created = false;
     for (;;) {
+        // If an existing file is 4GB, Windows open() by itself fails.
+        // So use CreateFile() instead.
 #ifdef _WIN32
-        fd = _open(path, O_RDWR);
+        HANDLE fh =
+            CreateFile(
+                path,
+                // Must be both, or we cannot CreateFileMapping with PAGE_READWRITE
+                GENERIC_READ | GENERIC_WRITE,
+                FILE_SHARE_READ,
+                NULL,
+                // Need to fail on file-not-found to follow the same path as QEMU
+                OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL,
+                NULL);
+        fd = _open_osfhandle((intptr_t)fh, _O_RDWR);
 #else
         fd = open(path, O_RDWR);
 #endif
@@ -1593,7 +1606,12 @@ static int file_ram_open(const char *path,
             /* @path names an existing file, use it */
             break;
         }
+#ifdef _WIN32
+        // CreateFile on a nonexistent file in Windows returns EBADF.
+        if (errno == ENOENT || errno == EBADF) {
+#else
         if (errno == ENOENT) {
+#endif
             /* @path names a file that doesn't exist, create it */
             fd = open(path, O_RDWR | O_CREAT | O_EXCL, 0644);
             if (fd >= 0) {
