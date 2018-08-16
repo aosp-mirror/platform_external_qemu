@@ -74,7 +74,7 @@ TEST(Path, GetAbsolute) {
     };
 
     android::base::TestSystem testSystem("/bin", 32);
-    testSystem.setCurrentDirectoryForTesting("/home");
+    testSystem.setCurrentDirectory("/home");
 
     for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
         const char* path = kData[n].path;

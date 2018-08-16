@@ -14,6 +14,9 @@
 
 #include "emugl/common/shared_library.h"
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+
 #include <gtest/gtest.h>
 
 #include <string>
@@ -21,14 +24,8 @@
 #include <limits.h>
 #include <string.h>
 
-// Hack to get the current executable's full path.
-namespace testing {
-namespace internal {
-
-extern std::string g_executable_path;
-
-}  // namespace internal
-}  // namespace testing
+using android::base::PathUtils;
+using android::base::System;
 
 namespace emugl {
 
@@ -41,37 +38,16 @@ namespace {
 std::string GetTestLibraryName() {
 #ifdef __x86_64__
     static const char kLibraryPrefix[] = "lib64";
-    static const char kSubDir[] = "lib64/";
+    static const char kSubDir[] = "lib64";
 #else
     static const char kLibraryPrefix[] = "lib";
-    static const char kSubDir[] = "lib/";
+    static const char kSubDir[] = "lib";
 #endif
     static const char kTestLibrarySuffix[] = "emugl_test_shared_library";
 
-    const char* exec_path = testing::internal::g_executable_path.c_str();
-
-#ifdef _WIN32
-    const char* p = strrchr(exec_path, '/');
-    const char* p2 = strrchr(exec_path, '\\');
-    if (p2) {
-        if (!p || p2 > p) {
-            p = p2;
-        }
-    }
-#else
-    const char* p = strrchr(exec_path, '/');
-#endif
-
-    std::string path;
-
-    if (!p) {
-        path = "./";
-    } else {
-        path = std::string(exec_path, p - exec_path + 1U);
-    }
-    path += kSubDir;
-    path += kLibraryPrefix;
-    path += kTestLibrarySuffix;
+    std::string path =
+            PathUtils::join(System::get()->getProgramDirectory(), kSubDir,
+                            std::string(kLibraryPrefix) + kTestLibrarySuffix);
     printf("Library path: %s\n", path.c_str());
     return path;
 }
