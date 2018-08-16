@@ -834,6 +834,12 @@ extern "C" int main(int argc, char** argv) {
     if (opts->audio && !strcmp(opts->audio, "none"))
         args.add("-no-audio");
 
+    // Just dont' use snapshots on 32 bit - crashes galore
+    if (System::get()->getProgramBitness() == 32) {
+        feature_set_enabled_override(kFeature_FastSnapshotV1, false);
+        feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
+    }
+
     // Generic snapshots command line option
 
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
