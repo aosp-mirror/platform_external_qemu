@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e55ca227_ab4fa959",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-08-16T21:15:31Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "7ceed3cf_3c580019",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 41
+      },
+      "revId": "d406f89994e0f38808527417ffd9527dbc473b75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "816427bc_9b4d5e2f",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
