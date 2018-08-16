@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d7dc6bc_749999c7",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-16T00:53:53Z",
+      "side": 1,
+      "message": "I tried putting them in a script and openig in quick succession, but didnt notice anything wrong. Can we detect this problem? If so, could we print an error message? Maybe in the bdrv* stuff below if any of the calls fail.",
+      "range": {
+        "startLine": 299,
+        "startChar": 0,
+        "endLine": 300,
+        "endChar": 58
+      },
+      "revId": "5645003b8e11154d6cbd94193e7d681d2cbb54d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
