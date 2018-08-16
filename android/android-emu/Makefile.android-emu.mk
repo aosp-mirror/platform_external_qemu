@@ -848,7 +848,7 @@ LOCAL_CFLAGS += -O0
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
-    emulator-libgtest \
+    $(EMULATOR_GTEST_STATIC_LIBRARIES) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from
@@ -891,7 +891,7 @@ LOCAL_CFLAGS += -O0
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
-    emulator-libgtest \
+    $(EMULATOR_GTEST_STATIC_LIBRARIES) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from
@@ -1013,7 +1013,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_CFLAGS += -O0 -UNDEBUG
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
-    emulator-libgtest \
+    $(EMULATOR_GTEST_STATIC_LIBRARIES) \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(FFMPEG_STATIC_LIBRARIES) \
     $(LIBX264_STATIC_LIBRARIES) \

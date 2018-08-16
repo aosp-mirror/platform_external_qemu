@@ -53,6 +53,8 @@ emugl-begin-module = \
 emugl-end-module = \
     $(if $(filter linux,$(BUILD_TARGET_OS)), \
       $(eval LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64:\$$$$ORIGIN/lib)) \
+    $(if $(filter darwin,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_LDFLAGS += -Wl,-install_name,@rpath/$(_emugl_MODULE)$(BUILD_TARGET_DLLEXT))) \
     $(if $(_emugl_HOST),$(eval LOCAL_HOST_BUILD := true))\
     $(eval $(end-emulator-module-ev)) \
     $(eval LOCAL_BUILD_FILE :=) \

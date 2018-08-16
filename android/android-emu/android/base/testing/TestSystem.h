@@ -123,8 +123,10 @@ public:
 
     virtual std::string getCurrentDirectory() const override { return mCurrentDir; }
 
-    // Set current directory during unit-testing.
-    void setCurrentDirectoryForTesting(StringView path) { mCurrentDir = path; }
+    virtual bool setCurrentDirectory(StringView path) override {
+        mCurrentDir = path;
+        return true;
+    }
 
     virtual int getHostBitness() const override { return mHostBitness; }
 

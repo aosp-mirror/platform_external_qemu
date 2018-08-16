@@ -25,42 +25,16 @@
 #include <unistd.h>
 #endif
 
-#define TEST_F_WITH_NAME(test_fixture, test_name)               \
-    GTEST_TEST_WITH_NAME(test_fixture, test_name, test_fixture, \
-                         ::testing::internal::GetTypeId<test_fixture>())
-
-#define GTEST_TEST_WITH_NAME(test_case_name, test_name, parent_class,          \
-                             parent_id)                                        \
-    class GTEST_TEST_CLASS_NAME_(test_case_name, test_name)                    \
-        : public parent_class {                                                \
-    public:                                                                    \
-        GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}                 \
-        const char* getTestCaseName() override { return #test_case_name; }     \
-        const char* getTestName() override { return #test_name; }              \
-                                                                               \
-    private:                                                                   \
-        virtual void TestBody();                                               \
-        static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;  \
-        GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_case_name, \
-                                                               test_name));    \
-    };                                                                         \
-                                                                               \
-    ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_case_name,          \
-                                                      test_name)::test_info_ = \
-            ::testing::internal::MakeAndRegisterTestInfo(                      \
-                    #test_case_name, #test_name, NULL, NULL, (parent_id),      \
-                    parent_class::SetUpTestCase,                               \
-                    parent_class::TearDownTestCase,                            \
-                    new ::testing::internal::TestFactoryImpl<                  \
-                            GTEST_TEST_CLASS_NAME_(test_case_name,             \
-                                                   test_name)>);               \
-    void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
-
 namespace {
 class FileLockTestInterface : public ::testing::Test {
 public:
-    virtual const char* getTestCaseName() { return "FileLockTest"; }
-    virtual const char* getTestName() = 0;
+    static const char* getTestCaseName() {
+        return ::testing::UnitTest::GetInstance()->current_test_info()->test_case_name();
+    }
+
+    static const char* getTestName() {
+        return ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    }
 
 protected:
     virtual bool isParentProcess() const = 0;
@@ -249,7 +223,7 @@ protected:
 #endif
 }
 
-TEST_F_WITH_NAME(FileLockTest, createConflict) {
+TEST_F(FileLockTest, createConflict) {
     if (isParentProcess()) {
         // Parent process
         FileLock* lock = filelock_create(mFileLockPath.c_str());
@@ -269,7 +243,7 @@ TEST_F_WITH_NAME(FileLockTest, createConflict) {
     }
 }
 
-TEST_F_WITH_NAME(FileLockTest, createTimeout) {
+TEST_F(FileLockTest, createTimeout) {
     if (isParentProcess()) {
         // Parent process
         FileLock* lock = filelock_create(mFileLockPath.c_str());
@@ -289,7 +263,7 @@ TEST_F_WITH_NAME(FileLockTest, createTimeout) {
     }
 }
 
-TEST_F_WITH_NAME(FileLockTest, createAndRelease) {
+TEST_F(FileLockTest, createAndRelease) {
     if (isParentProcess()) {
         // Parent process
         FileLock* lock = filelock_create(mFileLockPath.c_str());
@@ -309,7 +283,7 @@ TEST_F_WITH_NAME(FileLockTest, createAndRelease) {
     }
 }
 
-TEST_F_WITH_NAME(FileLockTest, waitForRelease) {
+TEST_F(FileLockTest, waitForRelease) {
     if (isParentProcess()) {
         // Parent process
         FileLock* lock = filelock_create(mFileLockPath.c_str());
@@ -335,7 +309,7 @@ TEST_F_WITH_NAME(FileLockTest, waitForRelease) {
     }
 }
 
-TEST_F_WITH_NAME(FileLockTest, childSuicideStaleLock) {
+TEST_F(FileLockTest, childSuicideStaleLock) {
     if (isParentProcess()) {
         // Parent process
         uint8_t ready = 1;
@@ -356,7 +330,7 @@ TEST_F_WITH_NAME(FileLockTest, childSuicideStaleLock) {
     }
 }
 
-TEST_F_WITH_NAME(FileLockTest, killChildStaleLock) {
+TEST_F(FileLockTest, killChildStaleLock) {
     if (isParentProcess()) {
         // Parent process
         uint8_t ready = 1;
