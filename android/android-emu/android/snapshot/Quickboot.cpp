@@ -139,6 +139,9 @@ constexpr int kBootTimeoutMs = 7 * 1000;
 constexpr int kMaxAdbConnectionRetries = 2;
 
 static int bootTimeoutMs() {
+    if (android_cmdLineOptions->read_only) {
+        return kBootTimeoutMs * 10;
+    }
     if (avdInfo_is_x86ish(android_avdInfo)) {
         return kBootTimeoutMs;
     }
@@ -147,7 +150,11 @@ static int bootTimeoutMs() {
 
 void Quickboot::startLivenessMonitor() {
     resetSnapshotLiveness();
-    mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
+    if (android_cmdLineOptions->read_only) {
+        mLivenessTimer->startRelative(kLivenessTimerTimeoutMs * 10);
+    } else {
+        mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
+    }
 }
 
 void Quickboot::onLivenessTimer() {
@@ -161,7 +168,8 @@ void Quickboot::onLivenessTimer() {
 
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
-        if (mAdbConnectionRetries < kMaxAdbConnectionRetries) {
+        if (android_cmdLineOptions->read_only ||
+            mAdbConnectionRetries < kMaxAdbConnectionRetries) {
             mWindow.showMessage(
                     StringFormat("Guest isn't online after %d seconds, "
                                  "retrying ADB connection",
