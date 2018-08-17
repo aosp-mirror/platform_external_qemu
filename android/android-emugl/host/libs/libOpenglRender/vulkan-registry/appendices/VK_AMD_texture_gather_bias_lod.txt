@@ -1,0 +1,104 @@
+include::meta/VK_AMD_texture_gather_bias_lod.txt[]
+
+*Last Modified Date*::
+    2017-03-21
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+  - Requires the
+    https://www.khronos.org/registry/spir-v/extensions/AMD/SPV_AMD_texture_gather_bias_lod.html[+SPV_AMD_texture_gather_bias_lod+]
+    SPIR-V extension.
+*Contributors*::
+  - Dominik Witczak, AMD
+  - Daniel Rakos, AMD
+  - Graham Sellers, AMD
+  - Matthaeus G. Chajdas, AMD
+  - Qun Lin, AMD
+  - Rex Xu, AMD
+  - Timothy Lottes, AMD
+
+This extension adds two related features.
+
+Firstly, support for the following SPIR-V extension in Vulkan is added:
+
+  * +SPV_AMD_texture_gather_bias_lod+
+
+Secondly, the extension allows the application to query which formats can be
+used together with the new function prototypes introduced by the SPIR-V
+extension.
+
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD
+
+=== New Enums
+
+None.
+
+=== New SPIR-V Capabilities
+
+  * <<spirvenv-capabilities-table-imagegatherbiaslodamd,code:ImageGatherBiasLodAMD>>
+
+=== New Structures
+
+  * slink:VkTextureLODGatherFormatPropertiesAMD
+
+=== New Functions
+
+None.
+
+=== Examples
+
+[source,c++]
+--------------------------------------
+
+struct VkTextureLODGatherFormatPropertiesAMD
+{
+    VkStructureType sType;
+    const void*     pNext;
+    VkBool32        supportsTextureGatherLODBiasAMD;
+};
+
+// ----------------------------------------------------------------------------------------
+// How to detect if an image format can be used with the new function prototypes.
+VkPhysicalDeviceImageFormatInfo2   formatInfo;
+VkImageFormatProperties2           formatProps;
+VkTextureLODGatherFormatPropertiesAMD textureLODGatherSupport;
+
+textureLODGatherSupport.sType = VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD;
+textureLODGatherSupport.pNext = nullptr;
+
+formatInfo.sType  = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2;
+formatInfo.pNext  = nullptr;
+formatInfo.format = ...;
+formatInfo.type   = ...;
+formatInfo.tiling = ...;
+formatInfo.usage  = ...;
+formatInfo.flags  = ...;
+
+formatProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
+formatProps.pNext = &textureLODGatherSupport;
+
+vkGetPhysicalDeviceImageFormatProperties2(physical_device, &formatInfo, &formatProps);
+
+if (textureLODGatherSupport.supportsTextureGatherLODBiasAMD == VK_TRUE)
+{
+    // physical device supports SPV_AMD_texture_gather_bias_lod for the specified
+    // format configuration.
+}
+else
+{
+    // physical device does not support SPV_AMD_texture_gather_bias_lod for the
+    // specified format configuration.
+}
+--------------------------------------
+
+=== Version History
+
+   * Revision 1, 2017-03-21 (Dominik Witczak)
+     - Initial draft

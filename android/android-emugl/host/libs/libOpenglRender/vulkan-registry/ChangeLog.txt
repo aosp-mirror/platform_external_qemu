@@ -1,0 +1,4152 @@
+Update Log for the Vulkan-Docs repository on Github. Updates are in reverse
+chronological order starting with the latest public release.
+
+This summarizes the periodic public updates, not individual commits. Updates
+on Github are done as single large patches at the release point, collecting
+together the resolution of many Khronos internal issues, along with any
+public pull requests that have been accepted.
+
+-----------------------------------------------------
+
+Change log for August 13, 2018 Vulkan 1.1.83 spec update:
+
+  * Update release number to 83.
+
+Public Issues:
+
+  * Use [%inline] directive for all SVGs to reduce file size (public pull
+    request 734).
+  * Convert XML `value` aliases into \<alias> tags (public pull request
+    747).
+  * Fix metadoc script showing non-selected extensions (public pull request
+    748).
+  * Reapply public pull request 742 to make
+    ename:VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT part of the
+    graphices pipeline (public pull request 749).
+  * Fix numerous typos related to accidental duplication of words (public
+    pull request 760).
+  * Fix `vk.xml` contact typos (public pull request 761).
+
+
+Internal Issues:
+
+  * Add images to the <<Standard sample locations>> table (internal issue
+    1115).
+  * Add a definition of "`Inherited from`" precision in the
+    <<spirvenv-precision-operation, Precision and Operation of SPIR-V
+    Instructions>> section (internal issue 1314).
+  * Clarify that both built-in and user-defined variables count against the
+    location limits for shader interfaces in the
+    <<interfaces-iointerfaces-locations, Location Assignment>> section
+    (internal issue 1316).
+  * Merge "`required`" capabilities into the <<spirvenv-capabilities-table,
+    list of optional: SPIR-V capabilities>> (internal issue 1320).
+  * Relax the layout matching rules of descriptors referring to only a
+    single aspect of a depth/stencil image, by reference to the new
+    <<resources-image-layouts-matching-rule, Image Layout Matching Rules>>
+    section (internal issue 1346).
+  * Revert extension metadoc generator warning about name mismatches to a
+    diagnostic, due to annoying warnings in build output for conscious
+    choices we've made (internal issue 1351).
+
+Other Issues:
+
+  * Reserve bits for pending vendor extensions.
+  * Make Vulkan consistent with SPIR-V regarding code:DepthReplacing and
+    code:FragDepth in the <<interfaces-builtin-variables, Built-In
+    Variables>> section.
+  * Add missing ChangeLog entries for the previous three spec updates.
+
+-----------------------------------------------------
+
+Change log for July 30, 2018 Vulkan 1.1.82 spec update:
+
+  * Update release number to 82.
+
+Public Issues:
+
+  * Add flink:vkDestroyPipelineLayout valid usage statement that the layout
+    must not have been used with command buffers still in the recording
+    state (public issue 730).
+  * Correct \<unused> tag for elink:VkResult in `vk.xml` (public merge
+    request 746).
+
+Internal Issues:
+
+  * Add a valid usage statement to flink:vkQueueSubmit, and similar language
+    to the definitions of <<synchronization-queue-transfers-acquire, acquire
+    operations>> requiring that an acquire operation follow a previous
+    release of the same subresource (internal issue 1290).
+  * Add <<resources-image-format-features,Image Format Features>> and
+    <<resources-image-view-format-features,Image View Format Features>>
+    sections that precisely define the slink:VkFormatFeatures supported by
+    images and image views, and rewrite valid usage statements to reference
+    these sections instead of duplicating language (internal issue 1310).
+  * Reword and consolidate synchronization valid usage statements for
+    flink:vkCmdPipelineBarrier such that they correctly account for mutiple
+    possible self-dependencies (internal issue 1322).
+  * Change order of <<Standard sample locations>> for 2xMSAA (internal issue
+    1347).
+  * Add definitions of "`<<Correctly Rounded>>`" and "`<<ULP>>`" in the
+    SPIR-V environment appendix, and "`Units in the Last Place (ULP)`" in
+    the glossary.
+
+New Extensions:
+
+  * `VK_NV_device_diagnostic_checkpoints`
+
+-----------------------------------------------------
+
+Change log for July 23, 2018 Vulkan 1.1.81 spec update:
+
+  * Update release number to 81.
+
+Public Issues:
+
+  * Fix missing "`valid`" phrasing in some obscure cases (public pull
+    request 605).
+  * Replace improper use of cannot: referring to the implementation in the
+    description of the
+    <<features-limits-maxUpdateAfterBindDescriptorsInAllPools,
+    pname:maxUpdateAfterBindDescriptorsInAllPools>> limit (public pull
+    request 738).
+  * Reorder description of bits in elink:VkPipelineStageFlagBits and the
+    <<synchronization-pipeline-stages-supported, Supported pipeline stage
+    flags>> table to match their definition order (public pull request 740).
+  * Add description of ename:VK_BUFFER_USAGE_CONDITIONAL_RENDERING_BIT_EXT
+    to elink:VkBufferUsageFlagBits (public pull request 741).
+  * Fix value usage statement for slink:VkSubpassDependency stage mask
+    parameters (public pull request 742).
+  * Fix visible markup in registry schema document (public pull request
+    #745).
+
+Internal Issues:
+
+  * Make the <<geometry-invocations, geometry shader invocation
+    description>> and <<shaders-geometry-execution, Geometry Shader
+    Execution>> descriptions consistent with other pipeline stages (internal
+    issue 1325).
+  * Mark the `VK_NV_glsl_shader` extension as deprecated.
+  * Adjust the per-instance vertex attribute offset formula specified by
+    `VK_EXT_vertex_attribute_divisor` for
+    slink:VkVertexInputBindingDivisorDescriptionEXT so that the interaction
+    between pname:firstInstance and pname:divisor matches the OpenGL
+    convention (internal issue 1333).
+
+-----------------------------------------------------
+
+Change log for July 7, 2018 Vulkan 1.1.80 spec update:
+
+  * Update release number to 80.
+
+Public Issues:
+
+  * Remove unused "`API Order`" term from glossary (public issue 657).
+  * Dynamically generate the extension appendix includes based on
+    information in `vk.xml`, including new metadata tags describing
+    deprecated, obsoleted, and promoted extensions (public pull request
+    690).
+
+Internal Issues:
+
+  * Add valid usage statements to flink:vkCmdBindDescriptorSets to keep
+    offsets + range less than or equal to the buffer size (internal issue
+    1174).
+
+New Extensions:
+
+  * `VK_EXT_conditional_render`
+  * `VK_KHR_create_renderpass2` (public issue 736)
+  * `VK_KHR_8bit_storage` (public issue 737)
+
+-----------------------------------------------------
+
+Change log for July 1, 2018 Vulkan 1.1.79 spec update:
+
+  * Update release number to 79.
+
+Public Issues:
+
+  * Add a note to the <<features-required-format-support, Required Format
+    Support>> section clarifying that the required formats don't depend on
+    the used flags (public issue 671).
+  * Add a valid usage statement for flink:vkUpdateDescriptors that was
+    previously described for slink:VkImageSubresourceRange, but not as a
+    valid usage statement (public issue 713).
+  * Modify implicit valid usage generator script to not emit 'must: not be
+    0' for a parameter that is a pointer to a flags field, such as
+    pname:pPeerMemoryFeatures (public issue 729).
+
+Internal Issues:
+
+  * Add definitions of "`obsoleted`" and "`deprecated`", and modify the
+    definition of "`promoted`" in the <<glossary, Glossary>> (internal issue
+    988).
+  * Add language for integer texel output conversions (the conversion is
+    undefined) to the <<textures-output-format-conversion]] Texel Output
+    Format Conversion>> section. Simplify and clarify the floating-point
+    conversion language in the <<fundamentals-general, General
+    Requirements>> section and the new <<fundamentals-fp-conversion,
+    Floating-Point Format Conversions>> section, and remove obsolete
+    language in the format-specific floating-point sections (internal issue
+    1275).
+  * Add the elink:VkVendorId enumerated type to the Vulkan API / XML /
+    header, so reserved Khronos vendor IDs can be referred to symbolically
+    by clients. Note that only Khronos vendor IDs (e.g. non-PCI vendor IDs)
+    are defined (internal issue 1299).
+  * Fix typo in the <<fig-non-strict-lines, Non strict lines>> table
+    (internal issue 1315).
+  * Clean up and simplify the
+    <<features-formats-requiring-sampler-ycbcr-conversion, YCbCr format
+    properties>> table and use symbols consistently with other tables. Add a
+    column for the number of planes.
+  * Add code:Float16 to the <<spirvenv-capabilities-table, List of optional
+    SPIR-V capabilities>> for the `VK_AMD_gpu_shader_half_float` extension.
+
+-----------------------------------------------------
+
+Change log for June 18, 2018 Vulkan 1.1.78 spec update:
+
+  * Update release number to 78.
+
+Public Issues:
+
+  * Change markup so parameter descriptions include links to structures,
+    instead of just their names (public issue 697).
+  * Resume publishing updated Vulkan 1.0 + KHR extensions and Vulkan 1.0 +
+    all extensions versions of the specification (public issue 722).
+  * Reapply fixes from public pull request 698 for
+    `VK_ANDROID_external_memory_android_hardware_buffer`, which accidentally
+    were reverted at some point (public pull request 724).
+  * Fix undefined format valid usage statements for slink:VkImageCreateInfo
+    in the presence of the
+    `VK_ANDROID_external_memory_android_hardware_buffer` extension (public
+    pull request 725).
+  * Miscellaneous markup consistency fixes (public pull request 728).
+
+Internal Issues:
+
+  * When building specifications containing vendor extensions, add terms to
+    the Khronos spec copyright specifying that the result is not a ratified
+    specification (internal issue 739).
+  * Change the value of the
+    pname:maxDescriptorSetUpdateAfterBindUniformBuffers minimum limit to 72
+    (6 times pname:maxPerStageDescriptorUpdateAfterBindUniformBuffers) in
+    the <<features-limits-required, Required Limits>> table (internal issue
+    1300).
+
+Other Issues:
+
+  * Fix link to resource image view compatibility table in the valid usage
+    statements for slink:VkImageFormatListCreateInfoKHR (internal pull
+    request 2711).
+
+-----------------------------------------------------
+
+Change log for June 10, 2018 Vulkan 1.1.77 spec update:
+
+  * Update release number to 77.
+
+Public Issues:
+
+  * Remove redundant asciidoctor ifdef in slink:VkDeviceCreateInfo valid
+    usage statement (public pull request 718).
+
+Internal Issues:
+
+  * Require that the returned slink:VkMemoryRequirements::pname:alignment
+    reflect the minimum alignment requirements for the buffer's usages, and
+    make dynamic offset alignment valid usage more explicit for
+    flink:vkBindBufferMemory and flink:vkCmdBindDescriptorSets (internal
+    issue 1170).
+  * Explicitly state that objects of type code:OpTypeImage,
+    code:OpTypeSampler, and code:OpTypeSampledImage must not be stored to in
+    the <<spirvenv-module-validation, Validation Rules within a Module>>
+    section (internal issue 1262).
+  * Clarify rules about validating descriptor set/binding against storage
+    class and descriptor type in the <<spirvenv-module-validation,
+    Validation Rules within a Module>> section, and add an anchor for and
+    references to the <<interfaces-resources-storage-class-correspondence,
+    Shader Resource and Storage Class Correspondence>> table (internal issue
+    1266).
+  * Use correct spelling of SPIR-V decoration code:NonWritable in several
+    places (internal issue 1298).
+
+Other Issues:
+
+  * Update specification links to files in the old
+    KhronosGroup/Vulkan-LoaderAndValidationLayers repository with
+    corresponding links into the new repositories that replace it.
+  * Move validity requirement for slink:VkSamplerCreateInfo into the valid
+    usage block instead of the body text, and give it a VUID.
+  * Use the full name of the "`style guide`" in a reference in the
+    description of slink:vkGetPhysicalDeviceProperties, update the
+    <<vulkan-styleguide, link to that document>>, and use the the full name
+    in the registry index page.
+
+-----------------------------------------------------
+
+Change log for May 25, 2018 Vulkan 1.1.76 spec update:
+
+  * Update release number to 76.
+
+Internal Issues:
+
+  * Add an exception clause to the license on `vk.xml`, enabling its use
+    with GPL-based projects (internal issue 1017).
+  * Remove the generated `vulkan_ext.[ch]` files, which are no longer
+    supported. Add `src/ext_loader/README.md` explaining why, and update
+    files in `xml/` to not generate them by default (internal issue 1268)
+
+Other Issues:
+
+  * Fix typos in valid usage statements for the
+    ftext:vkDrawIndexedIndirectCount* commands, replacing
+    sizeof(VkDrawIndirectComment) with sizeof(VkDrawIndexedIndirectCommand).
+  * Modify the <<spirvenv-module-validation, Validation Rules within a
+    Module>> section to require code:NonReadable or code:NonWriteable in
+    SPIR-V code for images with an image format of code:Unknown if one of
+    the requisite code:shaderImageReadWithoutFormat or
+    code:shaderImageWriteWithoutFormat features is disabled.
+
+New Extensions:
+
+  * `VK_KHR_get_display_properties2`
+  * `VK_KHR_draw_indirect_count`
+
+-----------------------------------------------------
+
+Change log for May 16, 2018 Vulkan 1.1.75 spec update:
+
+  * Update release number to 75.
+
+Github Issues:
+
+  * Use Github handles (e.g. @handle) for contact information in vk.xml,
+    when available (partial fix for public issue 630).
+  * Add size invariance guarantee to slink:VkMemoryRequirements for
+    buffer/image memory requirements (public issue 661).
+  * Correct scope (conditional constructs) in valid usage statement for
+    slink:VkBindImageMemoryInfo (public pull request 684).
+  * Clean up minor markup issues and typos in the
+    `VK_ANDROID_external_memory_android_hardware_buffer` extension appendix
+    (public pull request 698).
+  * Modify registry processing script to avoid irrelevant warnings of benign
+    enumerant redefinitions (public pull request 705).
+  * Fix some duplicate words and some misspelled "`stagess`" (public pull
+    request 712)
+
+Internal Issues:
+
+  * Enable continuous integration tests on the internal Khronos gitlab
+    server by adding a .gitlab-ci.yml file. Note: this does not implement CI
+    on the public Github repository (internal issue 408).
+  * Add link from description of depth clamping in the <<fragops-depth,
+    depth test>> section to the
+    slink:VkPipelineRasterizationStateCreateInfo::pname:depthClampEnable
+    parameter which enables it, making it easily searchable / findable
+    (internal issue 1125).
+  * Clarify that arrays of arrays of descriptors are not allowed in the
+    <<interfaces-resources-descset, Descriptor Set Interface>> and
+    <<interfaces-resources-setandbinding, DescriptorSet and Binding
+    Assignment>> sections (internal issue 1192).
+  * Comment out some redundant nested asciidoctor conditionals in the
+    slink:VkImageViewCreateInfo valid usage block, and explain in all cases
+    why the redundant conditional exist and are commented out (internal
+    issue 1231).
+  * Move a valid usage statement from slink:VkCommandPoolCreateInfo to the
+    parent flink:vkCreateCommandPool, where the device queue is known
+    (internal issue 1233).
+  * Add new slink:VkBaseInStructure and slink:VkBaseOutStructure types which
+    can be used by extensions and implementations for handling Vulkan
+    sType/pNext style structures in a more generic way (internal issue
+    1265).
+  * Clarify that
+    slink:VkAndroidHardwareBufferFormatPropertiesANDROID::pname:formatFeatures
+    only applies to external-format images. Add references to this in valid
+    usage statements that previously only referred to
+    slink:VkFormatProperties (internal issue 1244).
+  * Fix the description of elink:VkPipelineCreateFlagBits enumerant
+    ename:VK_PIPELINE_CREATE_VIEW_INDEX_FROM_DEVICE_INDEX_BIT to match the
+    name (internal issue 1279).
+  * Add a NOTE to the <<interfaces-resources-setandbinding, DescriptorSet
+    and Binding Assignment>> section making it clear that variables sharing
+    a storage class may use identical descriptor set and bindings.
+    Specifically state the sometimes misunderstood ability to have one or
+    more differently typed image descriptors sharing a descriptor set and
+    binding (internal SPIR-V issue 264).
+  * Make DynamicIndexing features and capabilities also control the
+    uniformity of the descriptor used in memory access instructions in the
+    <<interfaces-resources-descset, Descriptor Set Interface>> section. This
+    makes them also apply to variable_pointer usage, which can bypass the
+    array indexing operation (internal SPIR-V issue 289).
+
+Other Issues:
+
+  * Correct flink:vkCmdBlitImage limitations on cubic blits to be 2D only,
+    not 3D.
+  * Update valid usage statements for slink:VkRenderPassCreateInfo and
+    slink:VkInputAttachmentAspectReference.
+  * Move YCbCr-related VU statements from slink:VkDescriptorImageInfo to
+    slink:VkWriteDescriptorSet, where all needed information is known, and
+    remove redundant statements.
+  * Move SPIR-V restriction that images be of either sampled or storage
+    types from the <<interfaces-resources-descset, Descriptor Set
+    Interface>> section to the <<spirvenv-module-validation, Validation
+    Rules within a Module>> section of the SPIR-V appendix.
+
+-----------------------------------------------------
+
+Change log for April 21, 2018 Vulkan 1.1.74 spec update:
+
+  * Update release number to 74.
+
+Github Issues:
+
+  * Clarify which buffer locations are accessed in
+    flink:vkCmdCopyBufferToImage valid usage statements (public issue 676).
+  * Refine description of <<extended-functionality-extensions-dependencies,
+    extension dependencies>>, related NOTE in the
+    <<extended-functionality-extensions, Extensions>> section, and
+    "`Required Extensions`" glossary term (public pull request 693).
+  * Add support for specifying required Vulkan core version in `vk.xml` and
+    the extension metadoc generator (public issue 696).
+  * Update .gitignore for directory reorganization (public pull request
+    699).
+  * Fix typo (public pull request 703).
+
+Internal Issues:
+
+  * Update valid usage of slink:VkClearRect::pname:layerCount (internal
+    issue 1241).
+
+Other Issues:
+
+  * Fix typo in <<NV_geometry_shader_passthrough>> issues list.
+
+-----------------------------------------------------
+
+Change log for April 15, 2018 Vulkan 1.1.73 spec update:
+
+  * Update release number to 73.
+
+Github Issues:
+
+  * Refine swapchain association with surface for slink:VkSwapchainKHR, with
+    matching valid usage statements for slink:VkSwapchainCreateInfoKHR and
+    discussion following the <<swapchain-wsi-image-create-info>> table
+    (public issue 637).
+  * Re-remove several valid usage statements from slink:VkImageCreateInfo
+    that had previously been removed at the time that
+    ename:VK_IMAGE_CREATE_EXTENDED_USAGE_BIT was introduced. These
+    statements had incorrectly been restored due to an glitch while merging
+    from the old `1.0` branch to the current `master` branch (public issue
+    683).
+
+Internal Issues:
+
+  * Fix reference page generation and configure build to generate reference
+    pages 1.1 with all extensions, rather than core only, as was the case
+    for the 1.0 ref pages (internal issues 484, 1056, 1205).
+  * Require that
+    slink:VkMemoryDedicatedRequirements::pname:prefersDedicateAllocation is
+    ename:VK_TRUE when
+    slink:VkMemoryDedicatedRequirements::pname:requiresDedicateAllocation is
+    ename:VK_TRUE (internal issue 1222).
+  * Fix Ruby extension code so `diff_html` Makefile target works (internal
+    issue 1230).
+  * Update `genRelease` script to generate 1.1 + all extensions reference
+    pages - but not the single-page HTML / PDF versions, which are even
+    larger than the API spec (internal issue 1245).
+
+Other Issues:
+
+  * Add missing attributes to `vk.xml` for `VK_ANDROID_native_buffer`.
+  * Specify that the slink:VkAttachmentDescription::pname:format member is
+    the format of the image *view* that will be used for the attachment.
+  * Use core sname:VkPhysicalDeviceFeatures2 in the `structextends` `vk.xml`
+    attribute for sname:VkPhysicalDeviceDescriptorIndexingFeaturesEXT and
+    sname:VkPhysicalDeviceDescriptorIndexingPropertiesEXT, rather than the
+    KHR equivalent it was promoted from.
+  * Fix the "`Fragment Input Attachment Interface`" glossary entry to match
+    the specification body.
+  * Clarify the interaction of sRGB images used as storage or texel buffers
+    with <<textures-output-format-conversion, Texel Output Format
+    Conversion>>.
+  * Moved three valid usage statements from
+    slink:VkRenderPassMultiviewCreateInfo up to
+    slink:VkRenderPassCreateInfo, and added a new valid usage statement for
+    slink:VkRenderPassInputAttachmentAspectCreateInfo.
+  * Added valid usage statements for slink:VkBufferMemoryBarrier and
+    slink:VkImageMemoryBarrier reflecting the global requirement that
+    "`non-sparse resources must be bound to memory before being recorded to
+    command`".
+
+-----------------------------------------------------
+
+Change log for April 5, 2018 Vulkan 1.1.72 spec update:
+
+  * Update release number to 72.
+
+Github Issues:
+
+  * Restructure the repository to put the specification `Makefile` and
+    associated spec source material at the top level, `vk.xml` and
+    associated scripts material in `xml/`, and generated include and source
+    files in `include/vulkan/` and `src/ext_loader/`, respectively (public
+    issue 436).
+  * Add missing bullet point markup to flink:vkCmdCopyImage valid usage
+    statement, so it gets a VUID assigned (public issue 627).
+  * Fix broken links in a couple of extension appendices (public pull
+    request 665).
+  * Add the \<platform> tag to the index in section 4.1 of the registry
+    schema documentation, and add the protect= attribute of \<extension>
+    tags to the comments in `registry.rnc` (public issues 673, 678).
+  * Add missing valid usage statements for sparse image interactions to
+    flink:VkImageCreateInfo (public pull request 675).
+  * Fix improper usage and grammar of "`can: not`" (public pull request
+    681).
+  * Remove duplicate spec language and NOTE on present layout between the
+    flink:vkAcquireNextImageKHR and flink:vkAcquireNextImage2KHR commands
+    (public pull request 685).
+  * Fix some typos and markup issues (public pull request 689; public issues
+    642, 667, 687).
+  * Fix typo etext:VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_FENCE_FD_BIT ->
+    ename:VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT in the
+    <<external-semaphore-handle-types-compatibility, External semaphore
+    handle types compatibility>> table (public pull request 691).
+
+Internal Issues:
+
+  * Remove the need for the "`noautovalidity`" attribute on extension
+    structures in `vk.xml`. It is now implied by the "`structextends`"
+    attribute instead (internal issue 942).
+  * Replace uses of "`currently bound`" with "`bound`", since "`currently`"
+    is redundant and distracting, and add a corresponding rule to the style
+    guide (internal issue 993).
+  * Fixed subtle issues with the last updates to flink:vkAcquireNextImageKHR
+    language that had resulted in ambiguities (internal issue 1178).
+  * Make it clear that only one query of a given type is allowed at a time
+    by reordering valid usage statements for flink:vkCmdBeginQuery and
+    flink:vkCmdEndQuery, and removing redundant ones (internal issue 1213).
+  * Swapped OL1 and OL3 in `tessparamUL.svg` to match previous version, and
+    fixed where "`(no edge)`" appears (internal issue 1215).
+
+Other Issues:
+
+  * Fixed a minor problem with the valid usage statement extraction script,
+    and corresponding markup in the spec source.
+
+New Extensions:
+
+  * `VK_AMD_shader_core_properties`
+  * `VK_EXT_descriptor_indexing`
+  * `VK_NV_shader_subgroup_partitioned`
+
+-----------------------------------------------------
+
+Change log for March 16, 2018 Vulkan 1.1.71 spec update:
+
+  * First public update for Vulkan 1.1.
+
+Github Issues:
+
+  * Refer to standard sparse image block shape format tables explicitly in
+    the <<sparsememory-standard-shapes, Standard Sparse Image Block Shapes>>
+    section (public issue 93).
+  * Add the missing definition of the code:LocalInvocationIndex decoration
+    in the <<interfaces-builtin-variables, Built-In Variables>> section
+    (public issue 532).
+  * Clarify dynamic state definition in the introduction to the <<pipelines,
+    Pipelines>> section and the new <<pipelines-dynamic-state, Dynamic
+    State>> subsection (public issue 620).
+  * Clarified deprecation statement in the `VK_AMD_negative_viewport_height`
+    appendix (public issue 674).
+  * Fix parameter descriptions for flink:vkCreateIndirectCommandsLayoutNVX
+    (public issue 677).
+
+Internal Issues:
+
+  * Remove description of <<primsrast-points, rasterization point size>>
+    being taken from the tessellation control shader, since there are no
+    circumstances under which you can have TCS without TES (internal issue
+    522).
+  * Define <<copies-images-format-size-compatibility, _size-compatible_
+    image formats>> for flink:vkCmdCopyImage, add it to the glossary, and
+    use that definition for slink:VkImageViewCreateInfo (internal issue
+    771).
+  * Change brief descriptions of enumerant names, and of parameters which
+    are enumerants, from "`enum *indicates*`" to "`enum *specifies*`" for
+    consistency, and add a markup style guide rule (internal issue 862).
+  * Clarify how execution dependencies interact with
+    <<synchronization-submission-order, submission order>> at numerous
+    places in the <<renderpass, Render Pass>> and <<synchronization,
+    Synchronization>> chapters (internal issue 1062).
+  * Clarify statement in the <<interfaces-resources-setandbinding,
+    DescriptorSet and Binding Assignment>> section that only interface
+    variables statically used by the entry point used in a pipeline must be
+    present in the descriptor set layout (internal issue 1172).
+  * Flip sparse image diagrams with partially full mip levels vertically, to
+    match graph origins of other image diagrams (internal issue 1176).
+  * Update new SVG diagrams to have consistent style and base font size,
+    increase consistency of primitive topology diagrams, and add a section
+    to the style guide on creating and editing images in a consistent style
+    (internal issue 1177).
+  * Resolve problems with valid usage statement extraction by fixing
+    existing VUID tags for interfaces promoted to version 1.1 and fixing
+    conditional directives around
+    VUID-VkMemoryDedicatedAllocateInfo-image-01797 (internal issue 1184).
+  * Strip `KHR` suffixes from a few interfaces promoted to Vulkan 1.1 that
+    were missed previously (internal issue 1185).
+  * Restrict code:OpImageQuerySizeLod and code:OpImageQueryLevels to only
+    work on code:Image operands with their code:Sampled operand set to 1. In
+    other words, these operations are not defined to work with storage
+    images (internal issue 1193).
+  * Recycle extension slot for extension #82 in `vk.xml`. This extension was
+    never published (internal issue 1195).
+  * Add an issue to the `VK_KHR_maintenance1` appendix noting that zero
+    height viewports are allowed when this extension is enabled (internal
+    issue 1202).
+  * Fix slink:VkDescriptorSetLayoutBinding description so that shader stages
+    always use descriptor bindings, not the other way around (internal issue
+    1206).
+  * Fix field name for
+    slink:VkInputAttachmentAspectReference::pname:inputAttachmentIndex
+    (internal issue 1210).
+
+Other Issues:
+
+  * Fix a few broken links in the <<versions-1.1, Version 1.1>> appendix.
+  * Replace a few old refBegin/refEnd tags with open block markup around
+    interfaces, and remove old KHX VUID tags that were breaking the valid
+    usage statement extraction.
+  * Fix error codes accidentally tagged as success codes in `vk.xml` for
+    flink:vkGetSwapchainCounterEXT.
+  * Added valid usage statements for ftext:vkBind*Memory2 input structures
+    stext:VkBind*MemoryInfo, and fix a pname:image -> pname:buffer typo in a
+    couple of places.
+  * Fix swapped descriptions of elink:VkDescriptorType enums
+    ename:VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE and
+    ename:VK_DESCRIPTOR_TYPE_STORAGE_IMAGE (reported via tweet).
+
+New Extensions:
+
+  * `VK_ANDROID_external_memory_android_hardware_buffer`
+
+-----------------------------------------------------
+
+Change log for March 7, 2018 Vulkan 1.1.70 spec update:
+
+  * Vulkan 1.1 initial release. Bump API patch number and header version
+    number to 70 for this update. The patch number will be used for both
+    Vulkan 1.1 and Vulkan 1.0 updates, and continues to increment
+    continuously from the previous Vulkan 1.0.69 update.
+
+    NOTE: We are not publishing an updated 1.0.70 specification, or 1.1
+    reference pages, along with 1.1.70. There are still minor issues to work
+    out with those build targets. However, we will soon generate all three
+    types of documents as part of the regular spec update cycle.
+
+    NOTE: The GitHub KhronosGroup/Vulkan-Docs repository now maintains the
+    current specification in the `master` branch. The `1.0` branch is out of
+    date and will not be maintained, since we will be generating both 1.1
+    and 1.0 specifications from the `master` branch in the future.
+
+Github Issues:
+
+  * Clarify how mapped memory ranges are flushed in
+    flink:vkFlushMappedMemoryRanges (public issue 127).
+  * Specify that <<synchronization-pipeline-stages, Pipeline Stages>> are a
+    list of tasks that each command performs, rather than necessarily being
+    discrete pieces of hardware that one task flows through. Add a
+    "`synchronization command`" pipeline type which all synchronization
+    command execute (it's just TOP + BOTTOM), with an explanatory note
+    (public issue 554).
+
+Internal Issues:
+
+  * Regenerate all images used in the spec in Inkscape with a consistent
+    look-and-feel, and adjust image size attributes so they're all legible,
+    and not too large with respect to the spec body text (internal issue
+    701).
+  * Document in the <<extensions,extensions>> appendix and in the style
+    guide that `KHX` extensions are no longer supported or used in the
+    Vulkan 1.1 timeframe (internal issue 714).
+  * Remove the leftover equations_temp directory after PDF build completes
+    (internal issue 925).
+  * Update the <<credits, Credits (Informative)>> appendix to include
+    contributors to Vulkan 1.1, and to list them according to the API
+    version(s) they contributed to (internal issue 987).
+  * Add a NOTE to the introduction explaining that interfaces defined by
+    extensions which were promoted to Vulkan 1.1 are now expressed as
+    aliases of the Vulkan 1.1 type (internal issue 991).
+  * Instrument spec source conditionals so spec can be built with 1.1
+    features, extensions promoted to 1.1, or both (internal issues 992,
+    998).
+  * Modify the XML schema and tools to support explicit aliasing of types,
+    structures, and commands, and use this to express the promotion of 1.0
+    extensions to 1.1 core features, by making the extension interfaces
+    aliases of the core features they were promoted to. Mark up promoted
+    interfaces to allow still generating 1.0 + extension specifications
+    (internal issue 991).
+  * Platform names, along with corresponding preprocessor symbols to enable
+    extensions specific to those platforms, are now reserved in vk.xml using
+    the <platform> tag. Update the registry schema and schema specification
+    to match (internal issue 1011).
+  * Updated the <<textures-texel-replacement, Texel Replacement>> section to
+    clarify that reads from invalid texels for image resources result in
+    undefined values (internal issue 1014).
+  * Modify description of patch version so it continues to increment across
+    minor version changes (internal issue 1033).
+  * Clarify and unify language describing physical device-level core and
+    extension functionality in the <<fundamentals-validusage-extensions,
+    Valid Usage for Extensions>>, <<fundamentals-validusage-versions, Valid
+    Usage for Newer Core Versions>>, <<initialization-functionpointers
+    Command Function Pointers>>, <<initialization-phys-dev-extensions,
+    Extending Physical Device From Device Extensions>>
+    <<extended-functionality-instance-extensions-and-devices, Instance
+    Extensions and Device Extensions>> sections and for
+    flink:vkGetPhysicalDeviceImageFormatProperties2. This documents that
+    instance-level functionality is tied to the loader, and independent of
+    the ICD; physical device-level functionality is tied to the ICD, and
+    associated with device extensions; physical devices are treated more
+    uniformly between core and extensions; and instance and physical
+    versions can be different (internal issue 1048).
+  * Updated the <<commandbuffers-lifecycle, Command Buffer Lifecycle>>
+    section to clarify the ability for pending command buffers to transition
+    to the invalid state after submission, and add a command buffer
+    lifecycle diagram (internal issue 1050).
+  * Clarify that some flink:VkDescriptorUpdateTemplateCreateInfo parameters
+    are ignored when push descriptors are not supported (internal issue
+    1054).
+  * Specify that flink:vkCreateImage will return an error if the image is
+    too large, in a NOTE in the slink:VkImageFormatProperties description
+    (internal issue 1078).
+  * Remove near-duplicate NOTEs about when to query function pointers
+    dynamically in the <<initialization, Initialization>> chapter and
+    replace by extending the NOTE in the <<fundamentals-abi, Application
+    Binary Interface>> section (internal issue 1085).
+  * Restore missing references to "`Sparse Resource Features`" in the
+    flink:VkBufferCreateFlagBits description (internal issue 1086).
+  * Tidy up definitions of descriptor types in the `GL_KHR_vulkan_glsl`
+    specification, the <<descriptorsets, Resource Descriptors>> section and
+    its subsections, and the <<interfaces-resources-descset, Descriptor Set
+    Interface>> for consistency, reduction of duplicate information, and
+    removal of GLSL correspondance/examples (internal issue 1090).
+  * Correctly describe code:PrimitiveId as an Input for tessellation control
+    and evaluation shaders, not an Output (internal issue 1109).
+  * Relax the requirements on chroma offsets for nearest filtering in
+    <<textures-implict-reconstruction, Implicit Reconstruction>> (internal
+    issue 1116).
+
+Other Issues:
+
+  * Clarify the intended relationship between specification language and
+    certain terms defined in the Khronos Intellectual Property Rights
+    policy. Specific changes include:
+  ** Rewrote IP/Copyright preamble and introduction to better agree with
+     normative language both as laid out in the introduction, and the
+     Khronos IPR policy.
+  ** Added notion of fully informative sections, which are now tagged with
+     "`(Informative)`" in their titles.
+  ** Removed non-normative uses of the phrase "`not required`"
+  ** Clarified the distinction between terms "`optional`" and "`not
+     required:`" as they relate to the IPR Policy, and updated specification
+     text to use terms consistent with the intent.
+  ** Reduced additions to RFC 2119, and ensured the specification agreed
+     with the leaner language.
+  ** Removed the terms "`hardware`", "`software`", "`CPU`", and "`GPU`" from
+     normative text.
+  ** Moved several paragraphs that should not have been normative to
+     informative notes.
+  ** Clarified a number of definitions in the Glossary.
+  ** Updated the document writing guide to match new terminology changes.
+  * Explicitly state in the <<fundamentals-objectmodel-lifetime-acquire,
+    application memory lifetime>> language that that for objects other than
+    descriptor sets, a slink:VkDescriptorSetLayout object used in the
+    creation of another object (such as slink:VkPipelineLayout or
+    slink:VkDescriptorUpdateTemplateKHR) is only in use during the creation
+    of that object and can be safely destroyed afterwards.
+  * Updated the <<textures-scale-factor, Scale Factor Operation>> section to
+    use the ratio of anisotropy, rather than the integer sample rate, to
+    perform the LOD calculation. The spec still allows use of the sample
+    rate as the value used to calculate the LOD, but no longer requires it.
+  * Update `vulkan_ext.c` to include all platform-related definitions from
+    the Vulkan platform headers, following the split of the headers into
+    platform-specific and non-platform-specific files.
+  * Fix bogus anchor name in the <<commandbuffers, Command Buffers>> chapter
+    which accidentally duplicated an anchor in the pipelines chapter. There
+    were no reference to this anchor, fortunately.
+  * Add valid usage statement for slink:VkWriteDescriptorSet and
+    slink:VkCopyDescriptorSet requiring that the slink:VkDescriptorSetLayout
+    used to allocate the source and destination sets must not have been
+    destroyed at the time flink:vkUpdateDescriptorSets is called.
+  * Document mapping of subgroup barrier functions to SPIR-V, and clarify a
+    place where subgroupBarrier sounds like it's execution-only in the
+    standalone `GL_KHR_shader_subgroup` specification.
+  * Use an HTML stylesheet derived from the Asciidoctor `colony` theme, with
+    the default Arial font family replaced by the sans-serif Noto font
+    family.
+  * Numerous minor updates to README.adoc, build scripts, Makefiles, and
+    registry and style guide specifications to support Vulkan 1.1 outputs,
+    use them as defaults, and remove mention of `KHX` extensions, which are
+    no longer supported.
+
+
+New Extensions:
+
+  * `VK_EXT_vertex_attrib_divisor`
+
+-----------------------------------------------------
+
+Change log for February 19, 2018 Vulkan 1.0.69 spec update:
+
+  * Bump API patch number and header version number to 69 for this update.
+
+Github Issues:
+
+  * Clean up description of synchronization for flink:vkAcquireNextImageKHR
+    (public issue 626).
+  * Move valid usage statements requiring offset and extent to respect image
+    transfer granularity requirements of the queue family they are submitted
+    against from slink:VkImageCopy and slink:VkBufferImageCopy to the
+    corresponding flink:vkCmdCopyImage, flink:vkCmdCopyBufferToImage, and
+    flink:vkCmdCopyImageToBuffer commands, where are relevant information is
+    known (public issue 654).
+  * Clarify that flink:vkGetDeviceProcAddr only supports device-level
+    commands (public issue 655).
+
+Internal Issues:
+
+  * Associate each elink:VkDescriptorType with a type of descriptor, and
+    link to descriptions of those types (internal issue 860).
+  * Rework valid usage extraction script to better utilize and respond to
+    spec markup, and fix some spec markup accordingly (internal issues 846,
+    909, 945).
+  * Rephrase flink:vkCmdPushConstants valid usage to allow overlapping push
+    constant ranges in different shader stages (internal issue 1103).
+  * Fix problem with diff_html target in extension.rb (internal issue 1104).
+  * Modify valid usage statements for slink:VkClearDepthStencilValue,
+    slink:VkGraphicsPipelineCreateInfo, slink:VkViewport, and
+    flink:vkCmdSetDepthBounds, and the description of vkCmdSetDepthBias, to
+    clarify that clamping is applied if and only if the
+    `VK_EXT_depth_range_unrestricted` is not enabled (internal issue 1124),
+    in versions of the specification built with that extension included.
+  * Resolve contradictions and use of undefined "`per-sample shading`" term
+    in the <<primsrast-sampleshading, Sample Shading>> and
+    <<shaders-fragment-execution, Fragment Shader Execution>> sections; for
+    the <<features-features-sampleRateShading, sampleRateShading feature>>;
+    for code:FragCoord, code:SampleId, and code:SamplePosition; and for
+    slink:sname:VkPipelineMultisampleStateCreateInfo (internal issue 1134).
+  * Clarify the meaning of the ptext:maxDescriptorSet* limits in footnote 8
+    of the <<features-limits-required,Required Limits>> table (internal
+    issue 1139).
+  * Fix broken NOTE markup in slink:VkSamplerCreateInfo.txt (internal issue
+    1140).
+  * Remove extend comparison language from valid usage statement for
+    slink:VkImageCreateInfo, turning it into a simple validation of
+    pname:mipLevels against pname:maxMipLevels (internal issue 1151).
+  * Update valid usage statements for slink:VkImageCopy when the
+    `VK_KHR_maintenance1` extension is enabled to allow multi-slice 2D <->
+    3D copies when the pnaem:extent.depth parameter specifies the number of
+    layers being copied, and matches the
+    slink:VkImageSubresourceLayers.layerCount of the 2D image (internal
+    issue 1152).
+  * Rephrase memory / control barrier rules in the
+    <<spirvenv-module-validation, Validation Rules within a Module>> section
+    to avoid "`not use none`", which could be misconstrued to allow no
+    synchronization semantics, and only storage class semantics (internal
+    issue 1154).
+
+Other Issues:
+
+  * Move GLSL extension specifications to the KhronosGroup/GLSL repository
+    on Github.
+  * Add missing description of ename:VK_FILTER_CUBIC_IMG enum to
+    slink:VkFilter.
+  * Update description of code:PrimitiveId in the
+    <<interfaces-builtin-variables,Built-In Variables>> section to clarify
+    its behavior.
+  * Disallow disjoint images from being used with dedicated-memory images in
+    slink:VkMemoryDedicatedAllocateInfoKHR.
+  * Update README to suggest older versions of "mathematical" and
+    "ruby-gems" packages for use on Cygwin.
+  * Fix typos
+
+New Extensions:
+
+  * `VK_AMD_buffer_marker`
+
+-----------------------------------------------------
+
+Change log for January 15, 2018 Vulkan 1.0.68 spec update:
+
+  * Bump API patch number and header version number to 68 for this update.
+
+Github Issues:
+
+  * Added more details in the
+    <<extended-functionality-extensions-compatibility, Extension
+    Compatibility>> section, allowing explicit incompatibilities, and
+    simplify corresponding language in the style guide, which now defers to
+    the API Specification on this point (public issue 638).
+  * Fix typo in description of slink:VkCommandBufferLevel::pname:level
+    (public issue 651).
+  * Only include extension-dependent valid usage statement for
+    slink:VkImageSubresourceRange, and note that the extension names for
+    header files described in the <<boilerplate-wsi-header, Window
+    System-Specific Header Control>> section are only valid links, when the
+    specification being viewed is built with the corresponding extensions
+    enabled (public issue 652).
+
+Internal Issues:
+
+  * Add language to elink:VkResult specifying that when commands return an
+    error, output parameter contents are undefined instead of unmodified
+    (except for pname:sType and pname:pNext). Note that this is a behavior
+    change. Add notes calling out slink:VkImageFormatProperties as an
+    exception (internal issue 1118).
+  * Add "`general-purpose`" to the style guide, and correct existing uses of
+    "`general purpose`" as an adjective (internal issue 1121).
+  * Add the ename:VK_DEBUG_REPORT_OBJECT_TYPE_VALIDATION_CACHE_EXT_EXT token
+    for the `VK_EXT_validation_cache` extension, following the same naming
+    pattern as other tokens in the extension, but keep the old
+    ename:VK_DEBUG_REPORT_OBJECT_TYPE_VALIDATION_CACHE_EXT token around for
+    backwards compatibility (internal issue 1126).
+
+Other Issues:
+
+  * Specify that flink:vkCmdSetDiscardRectangleEXT does not affect copies or
+    clears, matching existing language for the scissor rectangle test.
+  * Move the <<boilerplate-sType, pname:sType>> definition from the
+    boilerplate appendix to the Fundamentals chapter, putting it together
+    with the valid usage of pname:sType rather than having the definition
+    split across two places.
+  * Inline all of the etext:Vk*Flags definitions, moving each one from the
+    boilerplate appendix to appear either after the corresponding
+    etext:Vk*FlagBits value if one is defined, or after the first structure
+    that includes them if not.
+
+-----------------------------------------------------
+
+Change log for January 5, 2018 Vulkan 1.0.67 spec update:
+
+  * Bump API patch number and header version number to 67 for this update.
+  * Update copyright dates to 2018
+
+Github Issues:
+
+  * Fix texture lookup functions in `GL_KHR_vulkan_glsl` specification
+    (public pull request 363).
+  * Clarify the state waited semaphores are left in when a call to
+    flink:vkQueuePresentKHR fails (public issue 572).
+  * Cleanup descriptions of slink:VkObjectTablePushConstantEntryNVX and
+    slink:VkObjectTableDescriptorSetEntryNVX (public issue 583)
+  * Remove redundant flink:vkCmdSetDiscardRectangleEXT valid usage
+    statements (public pull 586).
+  * Make dynamic state array length valid usage statements implicit for
+    flink:vkCmdSetViewportWScalingNV, flink:vkCmdSetDiscardRectangleEXT, and
+    flink:vkCmdSetViewport (public pull 589).
+  * Clarify meaning of window extent (0,0) in slink:VkSwapchainKHR for the
+    Windows and X11 platforms, in their respective extensions (public issue
+    590).
+  * Allow flink:vkGetPastPresentationTimingGOOGLE to return
+    ename:VK_INCOMPLETE (public issue 604).
+  * Add synchronization valid usage statements to flink:vkAcquireNextImage
+    (public pull 611).
+  * Fix some broken external links and internal xrefs (public pull 613).
+  * Clean up slink:VkViewport valid usage statements in the presence or
+    absence of relevant extensions (public pull 623).
+  * Remove
+    ename:VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL_KHR
+    token from VK_KHR_maintenance2 from the non-extension VU path for
+    slink:VkGraphicsPipelineCreateInfo (public issue 628).
+  * Miscellaneous minor markup fixes - extension name strings (public pull
+    631), Notes (pull 633), queue names emitted by generator scripts (pull
+    634), block formatting in slink:VkDescriptorUpdateTemplateEntryKHR (pull
+    635), ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG (pull
+    641), quotes and apostrophes (pull 643),
+  * Miscellaneous minor grammar fixes (public pull 644).
+  * Fix markup macros so usage like ptext:*Src* works (public pull 647).
+
+Internal Issues:
+
+  * Clarify in the `VK_KHR_surface` and `VK_KHR_swapchain` extensions that
+    parameter combinations which aren't supported for normal images are also
+    unsupported for presentable images, even if the parameter values are
+    individually supported as reported by the surface capability queries
+    (internal issue 1029).
+  * Fixed XML typo in the valid value field of the pname:sType member of
+    slink:VkPhysicalDeviceExternalMemoryHostPropertiesEXT (internal issue
+    1100).
+
+Other Issues:
+
+  * Add memory semantics validity rules to the <<spirvenv-module-validation,
+    Validation Rules within a Module>> section of the SPIR-V environment
+    appendix, and specify that sequentiality consistency is not supported.
+    This forbids certain cases like "`Load+Release`" that we don't expect to
+    ever be meaningful.
+  * Document mapping of OpenGL Shading Language barriers to SPIR-V scope and
+    semantics in the `GL_KHR_vulkan_glsl` specification.
+
+New Extensions:
+
+  * `VK_EXT_conservative_rasterization`
+
+-----------------------------------------------------
+
+Change log for November 27, 2017 Vulkan 1.0.66 spec update:
+
+  * Bump API patch number and header version number to 66 for this update.
+
+Github Issues:
+
+  * Clarified how and when ename:VK_ERROR_TOO_MANY_OBJECTS is generated in
+    flink:vkAllocate Memory, and remove incorrect valid usage statement
+    about exceeding the API limit (public issue 356).
+  * Minor clarification of the description of
+    flink:vkUpdateDescriptorSetWithTemplateKHR::pname:descriptorUpdateTemplate
+    (public issue 564).
+  * Minor fixes for flink:vkCmdSetViewportWScalingNV (public pull request
+    588).
+  * Fix random name markup issues (public pull request 603).
+  * Fix code:BuiltIn decoration typo in the <<fxvertex-attrib, Vertex
+    Attributes>> section (public pull request 606).
+  * Fix synchronization language following the definition of
+    flink:vkAcquireNextImageKHR (public issue 607).
+  * Restore descriptions of several commands and structures missing from the
+    generated spec due to a mistyped asciidoctor conditional (public issue
+    612).
+  * Fix 1.0.41 changelog to refer to public issues 403/404 (public issue
+    618).
+
+Internal Issues:
+
+  * Refactor valid usage statements with internal conditionals in
+    `copies.txt`, `pipelines.txt`, `renderpass.txt`, and `resources.txt` so
+    each branch of the conditional appears as a standalone statement which
+    can contain a separate VUID. This should have no impact on the generated
+    specs, but is necessary given the present state of the VU extractor and
+    the validation layer code that consumes them (internal issue 1043).
+  * Fix VkQueueGlobalPriorityEXT enum values missing _EXT suffix (internal
+    issue 1045).
+  * Clarified initial ownership of resources bound to shared memory objects,
+    (internal issue 1068).
+  * Fix duplicated valid usage ID tag for flink:vkCmdCopyImage, and make the
+    required layouts include ename:VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL in
+    both cases (internal issue 1084).
+
+Other Issues:
+
+  * Remove the noise functions from GLSL for SPIR-V for Vulkan in the
+    `GL_KHR_vulkan_glsl.txt` extension.
+
+New Extensions:
+
+  * `VK_EXT_external_memory_host`
+  * `VK_EXT_external_memory_dma_buf`
+  * `VK_EXT_queue_family_foreign`
+
+-----------------------------------------------------
+
+Change log for October 27, 2017 Vulkan 1.0.65 spec update:
+
+  * Bump API patch number and header version number to 65 for this update.
+
+Github Issues:
+
+  * Replaced inaccurate "`pixel`" with "`texel`" or "`compressed texel
+    block`" as appropriate in the <<sparsememory, Sparse Resources>> chapter
+    (public issue 86).
+  * Attempt to clarify security/integrity guarantees in the
+    <<fundamentals-errors, Errors>> section (public issue 147).
+  * Update the <<memory-device,Device Memory>> section with clarifications
+    and markup fixes (public pull request 194).
+  * Fix typo VkDeviceCreateInfo -> slink:VkDebugMarkerObjectNameInfoEXT in
+    sample code for `VK_EXT_debug_marker` extension (public pull request
+    227).
+  * Clarified slink:VkFramebufferCreateInfo language regarding concurrent
+    use of attachment resources during a render pass instance (public issue
+    299).
+  * Added overlap rules for destination regions in <<copies,copy commands>>.
+    Also unified the sparse and non-sparse source-destination overlap rules,
+    since the non-sparse rules were technically inaccurate in the face of
+    aliasing in flink:vkBindMemory2 - the new rules are true regardless
+    (public issue 317).
+  * Clarified the <<features-features-samplerAnisotropy,
+    pname:samplerAnisotropy feature>> to only affect the
+    slink:VkSamplerCreateInfo::pname:anisotropyEnable value, and that
+    pname:maxAnisotropy is ignored when pname:anisotropyEnable is VK_FALSE
+    (public issue 503).
+  * Clarify pointer valid usage statements to use "`valid pointer to valid
+    _object_`" terminology and update the
+    <<fundamentals-validusage-pointers,Valid Usage for Pointers>> section
+    accordingly (public pull request 547).
+  * Some operations that use integer coordinates can also accept a LOD to
+    sample from. Add a description of that selection and the validity
+    conditions in the new <<textures-integer-coordinate-operations, Integer
+    Texel Coordinate Operations>> section (public issue 548).
+  * Update stext:VkImageSubresource* valid usage statements (public pull
+    request 550).
+  * Added text tying ename:VK_OUT_OF_POOL_MEMORY error for
+    flink:vkAllocateDescriptorSets to the number of descriptor types in the
+    allocating pool. Removed redundant "`length`" text about number of
+    descriptors returned (public issue 582).
+  * Update slink:VkSwapchainCreateInfoKHR descriptions (public pull request
+    585).
+  * Update slink:VkPipelineViewportWScalingStateCreateInfoNV and related
+    structures' valid usage statements (public pull request 587).
+  * Change some dates to conform to ISO 8601 as specified in the style guide
+    (public pull request 601).
+  * Fix some math markup problems and be more consistent in use of asciidoc
+    math markup (public pull request 602).
+
+Internal Issues:
+
+  * Clarified that attribute reads from incomplete vertex buffer elements
+    are considered out of bounds accesses, in the
+    slink:VkPhysicalDeviceFeatures and flink:vkCmdBindVertexBuffers.txt
+    sections (internal issue 842).
+
+-----------------------------------------------------
+
+Change log for October 20, 2017 Vulkan 1.0.64 spec update:
+
+  * Bump API patch number and header version number to 64 for this update.
+
+Github Issues:
+
+  * Add chapter name to the PDF page footer (public pull request 458).
+  * Fix several mistaken references to the nonexistent etext:VK_DEVICE_LOST
+    status to etext:VK_ERROR_DEVICE_LOST (public pull request 502).
+  * Fix description of the tlink:PFN_vkDebugReportCallbackEXT debug report
+    callback function pointer to match the validation layer behavior (public
+    issue 534).
+  * Document experimental KHX extensions and alternate vendor author IDs
+    also ending in X in more detail in the <<extensions, Layers &
+    Extensions>> appendix, the extensions section of the style guide, and
+    the registry schema description document (public issues 536, 580).
+  * Fix references to ptext:pDepthStencil to properly refer to
+    pname:pDepthStencilState or pname:pRasterizationState as appropriate in
+    the slink:VkGraphicsPipelineCreateInfo description (public issue 542).
+  * Fix wrong parameter name in slink:VkPipelineMultisampleStateCreateInfo
+    valid usage (public pull request 571).
+
+Internal Issues:
+
+  * Update the style guide to describe how to write LaTeX math expressions
+    in table cells (internal issue 908).
+  * Define how framebuffer-local dependencies work between subpasses with
+    the same or different numbers of samples, in the
+    slink:VkSubpassDescription and <<synchronization-framebuffer-regions,
+    Framebuffer Region Dependencies>> sections. This clarifies which samples
+    in an input attachment you are allowed to access after a
+    framebuffer-local dependency (internal issue 915).
+  * Specify which storage classes can have an initializer in the
+    <<spirvenv-module-validation, Validation Rules within a Module>> section
+    (internal issue 1023).
+  * Use "LOD" consistently for "level-of-detail", to eliminate spelling
+    inconsistencies. The term is already standardized in the Glossary
+    (internal issue 1027).
+
+Other Issues:
+
+  * Fix false positives in Makefile dependencies when rules fail, by
+    deleting partially-made targets.
+
+New Extensions:
+
+  * `VK_AMD_shader_info`
+
+-----------------------------------------------------
+
+Change log for October 13, 2017 Vulkan 1.0.63 spec update:
+
+  * Bump API patch number and header version number to 63 for this update.
+
+Github Issues:
+
+  * Add missing valid usage statements for ptext:maxDescriptorSets*,
+    ptext:maxPerStageDescriptorInputAttachments, and
+    ptext:maxPerStageResources to slink:VkPipelineLayoutCreateInfo.txt,
+    flink:VkComputePipelineCreateInfo, and
+    flink:VkGraphicsPipelineCreateInfo (public issue 546).
+  * Fix typos in ftext:vkCmdDraw*AMD descriptions (public pull request 549).
+  * Fixed flink:vkCmdWriteTimestamp so it is not unnecessarily restricted to
+    queues supporting graphics or compute operations (public issue 558).
+  * Improvements to valid usage generator for output `*Flags` pointer
+    parameters and for some `void *` parameters (public pull requests 560,
+    562).
+  * Document `altlen` attribute in XML schema as valid C99 syntax and tweak
+    `vk.xml` to match (public pull request 566).
+  * Clarify when pname:fence is signaled by flink:vkQueueSubmit in a more
+    obvious place (public issue 577).
+
+Internal Issues:
+
+  * Specify a whitelist of supported SPIR-V Storage Classes in the
+    <<spirvenv-module-validation, Validation Rules within a Module>>
+    appendix (internal SPIR-V issue 166).
+  * Relax the shared semaphore wait timeout requirement in the
+    <<synchronization-semaphores-importing, Importing Semaphore Payloads>>
+    section (internal issue 820).
+  * Update the <<textures-image-level-selection, Image Level(s) Selection>>
+    equations so that the parameters returned by the level-of-detail query
+    appear explicitly, also fixing the issue that linear filtering would
+    select a level below the base level for magnification (internal issue
+    926).
+  * Disallow creation of a swapchain with zero pname:imageExtent in
+    slink:VkSurfaceCapabilitiesKHR and slink:VkSwapchainCreateInfoKHR
+    (internal issue 1020).
+
+Other Issues:
+
+  * Clarify in <<textures-operation-validation,Image View Validation>> that
+    the layout of subresources in an image view must have a layout that
+    matches that written into the descriptor, and that this section is about
+    validating image views, not images.
+
+New Extensions:
+
+  * `VK_EXT_global_priority`
+
+-----------------------------------------------------
+
+Change log for October 6, 2017 Vulkan 1.0.62 spec update:
+
+  * Bump API patch number and header version number to 62 for this update.
+
+Github Issues:
+
+  * Move asciidoc conditionals for `VK_KHR_maintenance1` in
+    slink:VkDescriptorSetAllocateInfo so valid usage statements for
+    `VK_KHR_push_descriptor` aren't accidentally removed when the first
+    extension isn't enabled (public issue 573).
+
+Internal Issues:
+
+  * Specify constraints on concurrent access to fences that share payload in
+    the <<synchronization-fences-importing, Importing Fence Payloads>> and
+    <<synchronization-semaphores-waiting-state, Semaphore State Requirements
+    For Wait Operations>> sections (internal issue 820).
+  * Define the term "`retired swapchain`", reorganize some swapchain
+    language, and improve language for pname:oldSwapchain in
+    flink:VkSwapchainCreateInfoKHR, the <<swapchain-wsi-image-create-info>>
+    table, flink:vkDestroySwapchainKHR, and flink:vkAcquireNextImage2KHX
+    (internal issue 869).
+  * Describe in the <<writing-arrays, Describing Properties of Array
+    Elements>> section of the style guide how and when to use "`each`" and
+    "`any`" to refer to properties of array elements, and make those uses in
+    the specification consistent (internal issue 884).
+  * Clarified that events cannot be used for cross-queue synchronization in
+    the <<synchronization-events, Events>> section and for
+    flink:vkCmdWaitEvents (internal issue 970).
+  * Add success and error codes to +vk.xml+ for
+    flink:vkCreateValidationCacheEXT (internal issue 995).
+  * Clarify aspect mask usage for image memory barriers of multi-plane
+    images in slink:VkImageSubresourceRange, slink:VkImageMemoryBarrier, and
+    the <<textures-layout-validation, Layout Validation>> section (internal
+    issue 996).
+
+Other Issues:
+
+  * Fixed typo in flink:VkRenderPassSampleLocationsBeginInfoEXT (renamed
+    field pname:pSubpassSampleLocations to
+    pname:pPostSubpassSampleLocations).
+  * Add missing buffer usage requirements for indirect draws in
+    flink:vkCmdDrawIndirect, flink:vkCmdDrawIndirectCountAMD,
+    flink:vkCmdDrawIndexedIndirect, and
+    flink:vkCmdDrawIndexedIndirectCountAMD.
+  * Modify Makefile to allow specification to build in git "`detached HEAD`"
+    state.
+  * Update valid usage ID generation script to allow recursively operating
+    on all `.txt` files in a specified directory, and move the `startVUID`
+    tracking information into a separate python file that is automatically
+    updated by the script.
+  * Fixed errors in API example code for
+    flink:vkUpdateDescriptorSetWithTemplateKHR and
+    flink:vkCmdPushDescriptorSetWithTemplateKHR.
+
+New Extensions:
+
+  * Add +vk.xml+ entries for pending `VK_ANDROID_native_buffer` extension
+    (note, this extension is not yet enabled).
+  * `VK_AMD_shader_image_load_store_lod`
+
+-----------------------------------------------------
+
+Change log for September 15, 2017 Vulkan 1.0.61 spec update:
+
+  * Bump API patch number and header version number to 61 for this update.
+
+Github Issues:
+
+  * Provide alternate length attributes (altlen=) in the XML schema, for
+    those using length attributes to generate code instead of documentation
+    (public issue 555).
+  * Fix erroneous references to `latex:` being used for asciidoc math
+    markup, rather than `latexmath:` (public pull request 556).
+  * Add author ID to XML for Kazan software renderer (public pull request
+    557).
+
+Internal Issues:
+
+  * Add the <<fundamentals-abi,Application Binary Interface>> section
+    describing platform ABI requirements and recommendations, add examples
+    of function and function pointer declarations to the
+    <<boilerplate-platform-specific-calling-conventions, Platform-Specific
+    Calling Conventions>> section, and remove related language that existed
+    elsewhere in the specification (internal issue 64).
+  * Describe where to document valid usage interactions of chained
+    structures in the style guide, and fix one case now appearing in
+    slink:VkBufferCreateInfo instead of the child
+    slink:VkDedicatedAllocationBufferCreateInfoNV structure (internal issue
+    715).
+  * Add example to the style guide of describing enumerated types which are
+    empty when the spec is built without relevant extensions enabled, and
+    apply it to existing examples for
+    elink:VkDescriptorSetLayoutCreateFlagBits and
+    elink:VkSubpassDescriptionFlagBits (internal issue 864).
+  * Add a note to the <<fundamentals-validusage-enums, Valid Usage for
+    Enumerated Types>> section that the special values suffixed with
+    etext:_BEGIN_RANGE, etext:_END_RANGE, etext:_RANGE_SIZE and
+    etext:_MAX_ENUM are not part of the API and should: not be used by
+    applications (internal issue 872).
+  * Added note to flink:vkCmdUpdateBuffers explaining the performance
+    penalty for copies done in this way, and why the upper copy limit is
+    what it is (internal issue 952).
+  * Update `VK_KHX_device_group` to split some functionality into the new
+    `VK_KHR_bind_memory2` extension, and rename that functionality (internal
+    issue 969).
+  * Remove *Status* fields from extension appendices, since they are by
+    definition published and complete by the time they reach the public
+    github repository (internal issue 973).
+
+Other Issues:
+
+  * Update Data Format specification dependency to version 1.2 and change
+    references to DF sections accordingly.
+  * Update XML to make the pname:pAllocator parameter of
+    flink:vkRegisterDeviceEventEXT and flink:vkRegisterDisplayEventEXT in
+    the `VK_EXT_display_control` extension as optional.
+
+New Extensions:
+
+  * `VK_KHR_bind_memory2`
+  * `VK_KHR_image_format_list`
+  * `VK_KHR_maintenance2`
+  * `VK_KHR_sampler_ycbcr_conversion`
+
+-----------------------------------------------------
+
+Change log for September 5, 2017 Vulkan 1.0.60 spec update:
+
+  * Bump API patch number and header version number to 60 for this update.
+
+Github Issues:
+
+  * Document that <<queries-timestamps, Timestamp Queries>> can only be
+    meaningfully compared when they are written from the same queue (public
+    issue 216).
+  * Document that the `<extension>` tag `type` attribute is required for
+    non-disabled extensions (derived from, but does not close public issue
+    354).
+  * Clean up registry schema length attribute descriptions to be consistent
+    and correct (public issue 555).
+
+Internal Issues:
+
+  * Replace as much of the hand-written extension appendix metadata as
+    possible with asciidoc includes generated from corresponding attributes
+    of +vk.xml+, and enhance the style guide to match. This avoids
+    inconsistencies between +vk.xml+ and the appendices, and produces a more
+    uniform style (internal issue 137).
+  * Remove the generated extDependency.{py,sh} files from the tree and
+    create them dynamically on demand instead, reducing merge conflicts
+    (internal issue 713).
+  * Add a prototype tool for generating in-place difference markup for
+    sections guarded by asciidoc conditionals, and new syntax for open
+    blocks to support it (internal issue 833).
+  * Remove unnecessary restriction of etext:*SYNC_FD_BIT_KHR external handle
+    types to the same physical device in the
+    slink:VkPhysicalDeviceIDPropertiesKHR,
+    flink:VkImportMemoryWin32HandleInfoKHR,
+    slink:VkImportFenceWin32HandleInfoKHR, slink:VkImportFenceFdInfoKHR,
+    slink:VkImportSemaphoreWin32HandleInfoKHR,
+    slink:VkImportSemaphoreFdInfoKHR
+    <<external-memory-handle-types-compatibility, External memory handle
+    types compatibility>>, <<external-semaphore-handle-types-compatibility,
+    External semaphore handle types compatibility>>, and
+    <<external-fence-handle-types-compatibility, External fence handle types
+    compatibility>> sections (internal issue 956).
+
+Other Issues:
+
+  * Remove dependency of +VK_KHX_device_group+ on +VK_KHR_swapchain+ (there
+    is an interaction, but not a strict dependency), and add a new
+    `extension` attribute to the `<require` XML tag to allow classifying a
+    subset of interfaces of an extension as requiring another extension.
+    Update the registry schema and documentation accordingly.
+
+New Extensions:
+
+  * `VK_AMD_shader_fragment_mask` (and related `GL_AMD_shader_fragment_mask`
+    GLSL extension)
+  * `VK_EXT_sample_locations`
+  * `VK_EXT_validation_cache`
+
+-----------------------------------------------------
+
+Change log for August 19, 2017 Vulkan 1.0.59 spec update:
+
+  * Bump API patch number and header version number to 59 for this update.
+
+Github Issues:
+
+  * Fix a few missing Implicit Valid Usage statements to indicate that a
+    common parent of two objects is required (public issue 497).
+  * Clarify render pass synchronization language for
+    slink:VkSubpassDependency and \<\<renderpass,render passes>> (public
+    issue 531).
+  * Rename ename:VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES2_EXT to
+    ename:VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_2_EXT for consistency, and
+    add an alias for backwards compatibility (public issue 539).
+
+Internal Issues:
+
+  * Add an explanation to the \<\<interfaces-builtin-variables-layer,
+    code:Layer>> description explaining that writing to invalid layers
+    results may or may not result in primitives being processed and fragment
+    shaders being run, and gives undefined results in the framebuffer
+    (internal issue 614)
+  * Add valid usage statement for slink:VkDescriptorSetLayoutBinding
+    requiring that input attachment descriptor bindings must not use
+    non-fragment stages (internal issue 933).
+
+Other Issues:
+
+  * Makes description of pname:loadOp and pname:storeOp easier to read in
+    the \<\<renderpass-load-store-ops>> section.
+
+New Extensions:
+
+  * `VK_EXT_shader_stencil_export`
+
+-----------------------------------------------------
+
+Change log for August 14, 2017 Vulkan 1.0.58 spec update:
+
+  * Bump API patch number and header version number to 58 for this update.
+
+Github Issues:
+
+  * Update the <<interfaces-resources-descset,Descriptor Set Interface>>
+    section to allow multiple variables with the same descriptor set/binding
+    decorations, and require that all variables that are statically used
+    must be consistent with the pipeline layout. Allow
+    ename:VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER to be used with texture
+    and sampler variables (public issues 522, 524).
+
+Internal Issues:
+
+  * Replace networkx package used for extension dependency generation with a
+    homegrown network dependency traverser (internal issue 713).
+  * Specify in the <<interfaces-fragmentoutput, Fragment Output Interface>>
+    section that if a fragment shader writes integers that cannot be
+    represented in the format of the colour attachment, then the result is
+    undefined (internal issue 893).
+  * Separate malformed valid usage statement for
+    slink:VkPipelineRasterizationStateCreateInfo into two (internal issue
+    918).
+  * Fix cases where the term 'pNext chain' is incorrectly used in reference
+    to functions, rather than their parameters. Replace 'pNext list' with
+    'pNext chain'. Fixed typo in the example code of
+    +VK_KHR_dedicated_allocation+ (internal issue 944).
+  * Fix typo in elink:VkExternalSemaphoreHandleTypeFlagBitsKHR enum
+    descriptions, replacing
+    etext:VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_FENCE_FD_BIT_KHR with
+    ename:VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT_KHR, and make the
+    description more consistent with
+    VK_EXTERNAL_FENCE_HANDLE_TYPE_SYNC_FD_BIT_KHR (internal issue 950).
+
+Other Issues:
+
+  * Clarify how pipeline stage masks affect
+    <<synchronization-pipeline-stages-masks, access and synchronization
+    scopes>>.
+  * Clarify that dedicated allocations do not allow aliasing in the
+    flink:vkBindBufferMemory and flink:vkBindImageMemory valid usage
+    statements.
+  * Correct specification of pname:dynamicCount for push_constant token in
+    slink:VkIndirectCommandsLayoutNVX.
+
+New Extensions:
+
+  * `VK_EXT_shader_viewport_index_layer`
+
+-----------------------------------------------------
+
+Change log for August 1, 2017 Vulkan 1.0.57 spec update:
+
+  * Bump API patch number and header version number to 57 for this update.
+
+Github Issues:
+
+  * Fix error in description of ename:VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK
+    block size (public issue 342).
+  * Update documentation of ename:VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT
+    to explicitly mention both graphics and compute pipelines (public issue
+    525).
+
+Internal Issues:
+
+  * Document that
+    slink:VkPhysicalDeviceLimits::pname:framebufferColorSampleCounts does
+    not cover integer formats (internal issue 550).
+  * Add a note under slink:VkImageViewCreateInfo describing how values meant
+    for one format can be sanitized when used via another format (internal
+    issue 927).
+  * Add valid usage statements to ftext:vkCmd* documenting that image
+    subresources used as attachments must not be accessed as non-attachments
+    in a render pass (internal issue 929).
+  * Remove obsolete 'validextensionstructs' attribute from +vk.xml+, the XML
+    schema, and the schema documentation (internal issue 946).
+
+New Extensions:
+
+  * `VK_AMD_mixed_attachment_samples`
+  * `VK_EXT_post_depth_coverage`
+  * `VK_KHR_relaxed_block_layout`
+
+-----------------------------------------------------
+
+Change log for July 21, 2017 Vulkan 1.0.56 spec update:
+
+  * Bump API patch number and header version number to 56 for this update.
+
+Github Issues:
+
+  * Add valid usage statements for commands introduced by
+    `VK_EXT_debug_report` and `VK_EXT_debug_marker` extensions, regarding
+    the valid pname:object and pname:objectType values (public issue 495).
+  * Modify `GL_KHR_vulkan_glsl` specification to document that uniform and
+    buffer block arrays each take only a single binding (public issue 514).
+  * Add `KHX` author tag to +vk.xml+ (public issue 526).
+
+Internal Issues:
+
+  * Document use of code: macro for non-Vulkan APIs in the style guide
+    (internal issue 863).
+  * Document that reference page open block delimiters must not contain
+    asciidoc section markup in the style guide (internal issue 898).
+  * Fix <<spirvenv,SPIR-V appendix>> to say
+    code:VariablePointersStorageBuffer instead of
+    code:VariablePointersUniformBufferBlock (internal issue 928).
+
+Other Commits:
+
+  * Add missing extension structures to dependency attributes in +vk.xml+.
+
+New Extenions:
+
+  * `VK_EXT_depth_range_unrestricted`
+
+-----------------------------------------------------
+
+Change log for July 15, 2017 Vulkan 1.0.55 spec update:
+
+  * Bump API patch number and header version number to 55 for this update.
+
+Github Issues:
+
+  * Removed unintended optional parameter in +vk.xml+ from the
+    pname:pWaitSemaphores member of slink:VkPresentInfoKHR, which resulted
+    in the generation of an incorrect implicit valid usage clause allowing
+    pname:pWaitSemaphores to be NULL even when pname:waitSemaphoreCount is
+    non-zero (public issue 491).
+  * Add missing attribute to +vk.xml+ documenting that
+    slink:VkSwapchainCounterCreateInfoEXT extends
+    slink:VkSwapchainCreateInfo (public issue 510).
+  * Add const qualifier for some `VK_EXT_debug_market` extension command
+    parameters that were missing it (public issue 513).
+  * Fix definition of q and level~base~ in
+    <<textures-image-level-selection,Image Level(s) Selection>> (public
+    issue 515).
+  * Clarify lifetime requirement for slink:VkRenderPass objects used in
+    object creation (public issue 516).
+  * Fix link to floating/normalized fixed-point conversion from
+    <<interfaces-fragmentoutput,Fragment Output Interface>> (public issue
+    521).
+
+Internal Issues:
+
+  * Update the style guide to include the general structure of a Vulkan
+    command name, the specific rule for using "`Get`" vs. "`Enumerate`" in
+    names, and a table of verbs commonly used in command names (spinoff of
+    internal issue 753).
+  * Clarified the behavior of automatic layout transitions in case of
+    attachment views that are 2D or 2D array views of 3D images. In
+    addition, restructured the valid usage clauses corresponding to the
+    members of the slink:VkImageSubresourceRange structure and added missing
+    valid usage clauses for its pname:baseMipLevel and pname:baseArrayLayer
+    members (internal issues 803, 849).
+  * Modify `GL_KHR_vulkan_glsl` specification to allow explicit std430 on a
+    push_constant declaration (internal issue 919).
+
+Other Commits:
+
+  * Modify <<synchronization-framebuffer-regions, Framebuffer Region
+    Dependencies>> to use synchronization scope terminology.
+  * Add ename:VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT to the
+    `VK_EXT_swapchain_colorspace` extension.
+  * Replace XML comments with `comment` attributes and/or tags, to enable
+    tools which transform the XML without loss of information.
+  * Replace `validextensionstructs` with `structextends`, which is tagged in
+    the child structure instead of the parent. This makes it slightly
+    simpler to add new structs to the XML, causes fewer merge conflicts, and
+    the information is kept localized to the extension structures where it
+    belongs. The old `validextensionstructs` attributes will be retained
+    until we're certain this doesn't cause problems with known consumers of
+    +vk.xml+.
+
+-----------------------------------------------------
+
+Change log for July 13, 2017 Vulkan 1.0.54 spec update:
+
+  * Bump API patch number and header version number to 54 for this update.
+
+Github Issues:
+
+Internal Issues:
+
+  * Fix tessellation domain to have an upper-left origin in the
+    <<img-tessellation-topology-ul, tessellation toplogy image>> and related
+    language. CTS and all implementations were already doing this, it was
+    just a documentation bug that it was flipped to lower-left (internal
+    issue 603).
+  * Add a section to the style guide describing how VUID tags are changed
+    and removed when the corresponding Valid Usage statements are modified
+    (internal issue 829).
+  * Add explicit Valid Usage statement to
+    slink:VkPipelineDynamicStateCreateInfo to require that members of
+    pname:pDynamicStates must be unique (internal issue 851).
+
+New Extensions:
+
+  * `VK_KHR_16bit_storage`
+  * `VK_KHR_dedicated_allocation`
+  * `VK_KHR_external_fence`
+  * `VK_KHR_external_fence_capabilities`
+  * `VK_KHR_external_fence_fd`
+  * `VK_KHR_external_fence_win32`
+  * `VK_KHR_get_memory_requirements2`
+  * `VK_KHR_storage_buffer_storage_class`
+  * `VK_KHR_variable_pointers`
+
+Extensions Promoted From KHX To KHR Status:
+
+  * `VK_KHR_external_memory`
+  * `VK_KHR_external_memory_capabilities`
+  * `VK_KHR_external_memory_fd`
+  * `VK_KHR_external_memory_win32`
+  * `VK_KHR_external_semaphore`
+  * `VK_KHR_external_semaphore_capabilities`
+  * `VK_KHR_external_semaphore_fd`
+  * `VK_KHR_external_semaphore_win32`
+  * `VK_KHR_win32_keyed_mutex`
+
+-----------------------------------------------------
+
+Change log for June 24, 2017 Vulkan 1.0.53 spec update:
+
+  * Bump API patch number and header version number to 53 for this update.
+
+Github Issues:
+
+Internal Issues:
+
+  * Clarify mappings of coordinates for mutable, compatible image views in
+    slink:VkImageViewCreateInfo (internal issue 815).
+  * Make ename:VK_BIND_SFR_BIT require a logical device with multiple
+    physical devices, so that standard sparse image block dimensions are
+    only required on systems that support multi-GPU (internal issue 835).
+  * Convert all files from use of // refBegin .. // refEnd comments to
+    delimit ref pages, to use of open blocks, and update style guide
+    accordingly (internal issue 839).
+  * Add valid usage for slink:VkWriteDescriptorSet when performing updates
+    to a ename:VK_STORAGE_IMAGE descriptor with layout
+    ename:VK_IMAGE_LAYOUT_GENERAL.
+  * Add a hack to the validity generator script to support an odd
+    interaction between flink:vkCmdFillBuffer and an extension (internal
+    issue 853).
+  * Remove redundant text describing slink:VkBufferCreateInfo::pname:usage,
+    which was already covered by implicit valid usage (internal issue 854).
+  * Update implicit validity generator script to properly handle the
+    pname:sType and pname:pNext members of "returnedonly" structures
+    (internal issue 874).
+  * Note that slink:VkApplicationInfo::pname:pApplicationName &
+    slink:VkApplicationInfo::pname:pEngineName are optional, and add missing
+    implicit valid usage statements for flink:vkDestroyInstance.
+  * Added missing valid usage for flink:vkCmdWriteTimestamp to require a
+    timestamp query pool.
+  * Simplify and/or split "`non-atomic`" valid usage statements.
+
+New Extensions:
+
+  * `VK_AMD_gpu_shader_int16`
+  * `VK_EXT_blend_operation_advanced`
+  * `VK_EXT_sampler_filter_minmax`
+  * `VK_NV_framebuffer_mixed_samples`
+
+-----------------------------------------------------
+
+Change log for June 13, 2017 Vulkan 1.0.52 spec update:
+
+  * Bump API patch number and header version number to 52 for this update.
+
+Github Issues:
+
+Internal Issues:
+
+  * Clarify behavior when non-coherent memory has
+    <<memory-device-unmap-does-not-flush, not been flushed before being
+    unmapped>> (internal issue 819).
+  * Fix description of code:WorkgroupSize builtin to note it decorates an
+    object, not a variable (internal issue 836).
+  * Fix asciidoc attributes so that trailing '{plus}' symbols in [eq] style
+    equations are rendered properly (internal issue 845).
+  * Add language to the "`Extension Handles, Objects, Enums, and Typedefs`"
+    section of the Procedures and Conventions document stating that any new
+    handle type requires a corresponding entry in the elink:VkObjectType
+    enumerated type (internal issue 856).
+  * Update style guide to use slink macro for Vulkan handle type names, and
+    define narrow conditions under which to use the *name and *text macros
+    instead of *link (internal issue 886).
+  * Add a dependency of the <<VK_KHX_device_group,VK_KHX_device_group>>
+    extension on VK_KHX_device_group_creation to +vk.xml+ and the extension
+    appendix.
+  * Change the copyright on Vulkan specification asciidoc *source* files to
+    CC-BY 4.0, and update the proprietary Khronos copyright applied to the
+    generated *output* formats (internal issue 327). This enables broader
+    re-use and modification of the Vulkan specification sources, while not
+    affecting the Reciprocal IP License between Vulkan Adopters and Working
+    Group Members.
+
+New Extensions:
+
+  * `VK_NV_fill_rectangle`
+  * `VK_NV_fragment_coverage_to_color`
+
+-----------------------------------------------------
+
+Change log for June 4, 2017 Vulkan 1.0.51 spec update:
+
+  * Bump API patch number and header version number to 51 for this update.
+
+Github Issues:
+
+  * Add Valid Usage statement to flink:vkCmdResolveImage to require that
+    source and destination image formats match (public issue 492).
+  * Specify that a code:char* parameter must: be a valid null-terminated
+    string in the <<fundamentals-implicit-validity, implicit valid usage>>
+    section (public issue 494).
+  * Removed unnecessary VU for slink:VkPhysicalDeviceFeatures which is
+    covered by ename:VK_ERROR_FEATURE_NOT_PRESENT already (public issue
+    496).
+  * Clarify valid usage of pname:pQueueFamilyIndices in
+    slink:VkBufferCreateInfo, slink:VkImageCreateInfo, and
+    slink:VkSwapchainCreateInfoKHR (public issue 501).
+  * Document that dependencies of enabled extensions must also be enabled in
+    the <<extended-functionality-extensions-dependencies, Extension
+    Dependencies>> section (public issue 507).
+
+Internal Issues:
+
+  * Change slink:VkMappedMemoryRange valid usage to allow pname:offset +
+    pname:size == size of the allocation. Also, if ename:VK_WHOLE_SIZE is
+    used, require the end of the mapping to be aligned to a multiple of
+    pname:nonCoherentAtomSize (internal issue 611).
+  * Add issue to `VK_KHR_win32_surface` about reusing window objects from a
+    different graphics API or Vulkan ICD (internal issue 639).
+  * Require locations on user in/out in `GL_KHR_vulkan_glsl` (internal issue
+    783).
+  * Added version info to the json validation output, and updated the schema
+    to match (internal issue 838).
+  * Restructure enumerated type descriptions separately from the command or
+    structure they are used in, allowing better reference page generation
+    (internal issue 841).
+  * Re-sort extension appendices to be in alphabetical order within each
+    author ID section.
+  * Fix enum naming and clarify behavior for
+    `VK_NVX_device_generated_commands` extension.
+
+-----------------------------------------------------
+
+Change log for May 20, 2017 Vulkan 1.0.50 spec update:
+
+  * Bump API patch number and header version number to 50 for this update.
+
+Github Issues:
+
+  * Fix numerous minor issues with the VK_EXT_debug_report extension (public
+    issues 478, 483, 486, 489, 490).
+
+Internal Issues:
+
+  * Update flink:vkAllocateDescriptorSets to specify conditions under which
+    to return ename:VK_ERROR_FRAGMENTED_POOL or
+    ename:VK_ERROR_OUT_OF_POOL_MEMORY instead of
+    out-of-host/out-of-device-memory, and improve the
+    <<fundamentals-errorcodes, description of those errors (internal issue
+    654).
+  * Add a NOTE documenting that flink:vkAcquireNextImageKHR can only signal
+    a single semaphore, and how to deal with that when multiple physical
+    devices in a logical device need to wait on it (internal issue 730).
+  * Improve description of pname:pNext chains of
+    slink:VkPhysicalDeviceImageFormatInfo2KHR and
+    slink:VkImageFormatProperties2KHR (internal issue 814).
+  * Clean up math markup issues in the <<textures, Image Operations>>
+    chapter (internal issue 818).
+  * Update validusage target to use more robust code for preprocessing, by
+    making direct use of Asciidoctor's preprocessor. Added uniqueItems check
+    to JSON vu schema and add clean_validusage target (internal issue 826).
+  * Update style guide to prohibit writing non-self-contained (on a single
+    bullet point) Valid Usage statements, and modify offending Valid Usage
+    statements in the Specification to match, to assist with automatic
+    extraction for the validation layers (internal issue 828).
+  * Add ename:VK_VALIDATION_CHECK_SHADERS_EXT to elink:VkValidationCheckEXT
+    of the `VK_EXT_validation_flags` extension, to selectively disable
+    shader validation.
+  * Remove duplicate valid usage statement for slink:VkImageMemoryBarrier.
+  * Modify reflow.py script to place VUID tag anchors standalone on a line
+    following their corresponding bullet point, and reflow the spec text
+    accordingly (this had been pending since the initial tag deployment).
+
+New Extensions:
+
+  * `VK_AMD_texture_gather_bias_lod`
+
+-----------------------------------------------------
+
+Change log for May 12, 2017 Vulkan 1.0.49 spec update:
+
+  * Bump API patch number and header version number to 49 for this update.
+
+Github Issues:
+
+  * Modify reference page extraction script to make internal links to spec
+    anchors refer to the core specification instead of being dangling links
+    (public issue 455).
+  * Fix GL_KHR_vulkan_glsl typo and add a nor-normative mapping to the newly
+    published StorageBuffer class (public issue 466).
+  * Both flink:vkEnumerateInstanceExtensionProperties and
+    flink:vkEnumerateDeviceExtensionProperties return
+    ename:VK_ERROR_LAYER_NOT_PRESENT, which covers the error case of an
+    application providing a layer name that wasn't returned by
+    ftext:vkEnumerate{Instance|Device}LayerProperties (public issue 487).
+  * The specification for flink:VkApplicationInfo::apiVersion says that the
+    driver must return ename:VK_ERROR_INCOMPATIBLE_DRIVER in the case that
+    pname:apiVersion specifies a non-supported version. That means that the
+    valid usage should not also state that, and so the VU statement is
+    removed. The VU had language about "`an effective substitute`" that
+    would have been lost, and so it was moved to the pname:apiVersion
+    description (public issue 488).
+
+Internal Issues:
+
+  * Modify implicit validity generator script to assign asciidoc anchors to
+    all valid usage statements it generates, and reflow.py script to insert
+    Valid Usage ID (VUID) tags into the specification source files for
+    explicit valid usage statements. This has no semantic effects on the
+    specification, but will support the validation layer's detection of
+    valid usage violations and allow it to link into the corresponding part
+    of the specification (internal issue 583).
+  * Assign VUID tags to all explicit VU statements and document
+    the process and tag format in the style guide (internal issue 583).
+  * Clarify the rules of whether to structure new functionality as instance
+    extensions, device extensions, or both in the
+    <<extended-functionality-instance-extensions-and-devices, Instance
+    Extensions and Device Extensions>> section (internal issue 749).
+  * Require that SPIR-V run-time arrays are only used with the
+    code:BufferBlock decoration (internal issue 750).
+  * Fix implicit and explicit valid usage statements for
+    slink:VkWriteDescriptorSet::pname:dstSet (internal issue 767)
+  * Fix SPIR-V code sample for ename:VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER
+    in the <<descriptorsets-uniformtexelbuffer, Uniform Texel Buffer>>
+    section (internal issue 770).
+  * Clarify that disabling depth testing also disables depth writes in the
+    <<fragops-ds-state, Depth and Stencil Operations>> section (internal
+    issue 775).
+  * flink:VkDescriptorImageInfo::pname:imageLayout must match the actual
+    imageLayout at the time the image is accessed. This was in the spec
+    text, but needed an associated valid usage statement.
+  * Note that only 32-bit atomic operations are supported in the
+    <<spirvenv-module-validation, Validation Rules within a Module>>
+    section.
+  * Note that code:UniformConstant variables must not have initializers in
+    the <<spirvenv-module-validation, Validation Rules within a Module>>
+    section.
+  * Add a new elink:VkObjectType enumeration to the core API, promoted from
+    elink:VkDebugObjectTypeEXT, since it is used for much more than just the
+    debug_report extension.
+
+New Extensions:
+
+  * `VK_KHR_get_surface_capabilities2`
+  * `VK_KHR_shared_presentable_image`
+
+-----------------------------------------------------
+
+Change log for April 15, 2017 Vulkan 1.0.48 spec update:
+
+  * Bump API patch number and header version number to 48 for this update.
+
+Internal Issues:
+
+  * Add missing VU statements for flink:vkUpdateDescriptorSets (internal
+    issue 333).
+  * Correct swapped ifdef/ifndef blocks for `VK_KHR_maintenance1` extension
+    (internal issue 776).
+
+-----------------------------------------------------
+
+Change log for April 8, 2017 Vulkan 1.0.47 spec update:
+
+  * Bump API patch number and header version number to 47 for this update.
+
+Github Issues:
+
+  * Allow <<synchronization-pipeline-barriers-subpass-self-dependencies,
+    self-dependencies>> (also described for slink:VkSubpassDependency) to
+    have earlier stages depend on later stages if all stages are
+    framebuffer-space (public issue 125).
+  * Clarify when pipeline state structures are ignored in the
+    slink:VkGraphicsPipelineCreateInfo strucure, when the tessellation
+    structure must be valid, and remove 'if `NULL`' descriptions from the
+    valid usage statements (public issue 445).
+  * Remove the obsolete "validextensionstructs" attribute for
+    flink:VkPresentRegionsKHR. This caused a pname:pNext valid usage
+    statement to be generated which wasn't consistent with what is stated in
+    the spec (public issue 481).
+
+Internal Issues:
+
+  * Clarify facingness of non-polygon fragments for slink:VkStencilOpState
+    and in the code:FrontFacing <<interfaces-builtin-variables,built-in
+    variable description>>. Define 'facingness' of a fragment as a distinct
+    term from facingness of a polygon (internal issue 662).
+  * Clarify that the texture compression features (e.g.
+    pname:textureCompressionBC) means that all formats of that type
+    (<<features-features-textureCompressionASTC_LDR,ASTC>>,
+    <<features-features-textureCompressionETC2,ETC2>>,
+    <<features-features-textureCompressionBC,BC>>) are supported, and that
+    support for individual formats may: queried separately (internal issue
+    663).
+  * Clarify in the valid usage for slink:VkBindImageMemoryInfoKHX that each
+    SFR rectangle must be a multiple of the sparse block size for each
+    aspect, e.g. in a depth/stencil image using separate depth/stencil
+    planes (internal issue 721).
+  * Re-remove KHX variants of KHR structure types after promotion (internal
+    issue 762).
+
+-----------------------------------------------------
+
+Change log for March 31, 2017 Vulkan 1.0.46 spec update:
+
+  * Bump API patch number and header version number to 46 for this update.
+
+Github Issues:
+
+  * Add language to the <<fundamentals-validusage-enums, Valid Usage for
+    Enumerated Types>> section allowing values to be returned from Vulkan
+    that are not present in extensions explicitly enabled by the
+    application, similar to existing language for bit flags in the
+    <<fundamentals-validusage-flags, Valid Usage for Flags>> section (public
+    issue 442).
+  * *Important*: run `gem update --pre asciidoctor-pdf` before trying to
+    build this version of the spec - 1.5.0.alpha15 is required for this
+    change. Removes the monkey patch currently used to draw valid usage
+    blocks across multiple pages which had numerous issues. A fixed version
+    was incorporated into Asciidoctor-PDF for the latest release, so the
+    monkey patch or any variant thereof is no longer required (public issue
+    465).
+
+Internal Issues:
+
+  * Add ename:VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR_EXT
+    to `VK_EXT_debug_report` extension
+  * Fix ptext:pNext member of
+    slink:VkPhysicalDeviceDiscardRectanglePropertiesEXT to be a non-const
+    pointer. Properties structures return values, so the chain should be
+    non-const.
+  * Explicitly remove gl_NumSamples from the `GL_KHR_vulkan_glsl` extension,
+    against 1.0 (internal issue 612).
+  * Add Valid Usage statements requiring that each structure type valid in a
+    ptext:pNext chain must: not appear more than once in a chain (internal
+    issue 752).
+  * Use ename:VK_USE_PLATFORM_WIN32_KHX in the
+    `VK_KHX_external_memory_win32` extension, rather than etext:_KHR
+    (internal issue 754).
+
+New Extensions:
+
+  * `VK_KHR_incremental_present`
+
+-----------------------------------------------------
+
+Change log for March 24, 2017 Vulkan 1.0.45 spec update:
+
+  * Bump API patch number and header version number to 45 for this update.
+
+Github Issues:
+
+  * Defined the lifetime of the memory pointed to by
+    slink:VkDisplayPropertiesKHR::pname:displayName to be equal to that of
+    its associated display handle (public issue 460).
+  * Correct several cases where the sparse memory feature name
+    pname:residencyNonResidentStrict was written as
+    pname:sparseResidencyNonResidentStrict (public issue 475).
+
+Internal Issues:
+
+  * Fix ptext:pNext member of slink:VkPhysicalDeviceGroupPropertiesKHX to be
+    a non-const pointer. Properties structures return values, so the chain
+    should be non-const.
+  * Clarify definition of memory aliasing to consistently use the terms
+    "linear" and "non-linear" when referring to resources, and define what
+    those terms mean.
+  * Modified XML schema and implicit validity scripts to generate language
+    for all ptext:pNext values in a ptext:pNext chain instead of just the
+    top level struct, and made `noautovalidity` functional for ptext:sType
+    and ptext:pNext (internal issue 535).
+  * Add more detail for BT2020 and scRGB color spaces in
+    `VK_EXT_swapchain_colorspace` extension (internal issue 632).
+  * Add naming rules for Extension Structure Names (structures added to the
+    ptext:pNext chain of a base structure) to the style guide (internal
+    issue 706).
+  * Define the glossary term "ptext:pNext chain", and use it consistently in
+    the spec (internal issue 744).
+
+-----------------------------------------------------
+
+Change log for March 17, 2017 Vulkan 1.0.44 spec update:
+
+  * Bump API patch number and header version number to 44 for this update.
+
+Github Issues:
+
+  * Fix description of <<features-extentperimagetype, Allowed Extent Values
+    Based On Image Type>> (public issue 290).
+  * Better specify VK_DEVICE_LOST behavior around flink:vkQueueSubmit,
+    flink:vkWaitForFences, and flink:vkGetFenceStatus (public issue 423).
+  * Clarify definition of flink:vkGetQueryPoolResults::pname:queryCount
+    (public issue 441).
+  * Simplify and clean up normative language. Remove shall and replace
+    recommend and variants with should wherever possible (public issue 448).
+  * Fix all dangling internal cross-references in the 1.0-extensions
+    specification, and add scripts/checkXrefs to find these in the future
+    (public issue 456).
+  * Reverse order of ChangeLog.txt entries so the most recent version is
+    documented first (public issue 463)
+  * Removes "become invalid" which clashes with invalid state for command
+    buffers. (public issue 467)
+  * Disallowed pending state in spec text for vkResetCommandBuffer, matching
+    valid usage (public issue 468)
+  * Removes sentence describing invalid state "like initial state". (public
+    issue 469)
+  * Disallows begin command buffer from resetting command buffers in the
+    "recording" state. (public issue 470)
+  * Removes mention of state from description of
+    VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT (public issue 471)
+  * Removed extra valid usage statement in VkSubmitInfo (public issue 472)
+
+Internal Issues:
+
+  * Clarify description of the pname:imageLayout member of
+    sname:VkDescriptorImageInfo.
+  * Fix typos where etext:VK_VIEW_TYPE* was used instead of
+    etext:VK_IMAGE_VIEW_TYPE.
+  * Removed the <<VK_KHR_display>> and <<VK_KHR_display_swapchain>> example
+    code from the specification and noted it has been moved to the Vulkan
+    SDK cube demo (internal issue 179).
+  * Reorder VkExternalMemoryHandleTypeFlagBitsNV description (internal issue
+    480).
+  * Clarify than an implementation is
+    <<fundamentals-validusage-flags,permitted to return 'undefined' bit
+    flags>> in a bitfield (internal issue 640).
+  * Break Valid Usage statements describing unrelated parameters into
+    separate statements, and add a style guide entry to follow this approach
+    (internal issue 685).
+  * Move valid usage statement for slink:VkImageCreateInfo from spec body to
+    the explicit valid usage block (internal issue 693).
+  * Fix typos in the descriptions of slink:VkDisplaySurfaceCreateInfoKHR,
+    flink:vkCreateDisplayModeKHR, and
+    flink:vkGetDisplayPlaneSupportedDisplaysKHR in the <<display,Presenting
+    Directly to Display Devices>> section (internal issue 698, 704, 716).
+  * Clarified that mandatory depth/stencil formats are only a requirement
+    for 2D images (internal issue 719).
+  * Clarify that variables decorated with DeviceIndex/ViewIndex must be in
+    the Input storage class (internal issue 733).
+  * Work around generator script problem with removal of Unicode literals
+    from Python 3.0-3.2 using `future` package (internal issue 737).
+  * Remove nonexistent structure type enums from vk.xml (internal issue
+    738).
+  * Fix validextensionstructs attributes for structures in the pname:pNext
+    chain for VkPresentInfoKHR, fixing implicit valid usage statements for
+    those structures (internal issue 740).
+
+-----------------------------------------------------
+
+Change log for March 10, 2017 Vulkan 1.0.43 spec update:
+
+  * Bump API patch number and header version number to 43 for this update.
+
+Github Issues:
+
+  * Make clearer that color write mask is applied regardless of whether
+    blending is enabled, by referring to the
+    <<framebuffer-color-write-mask,Color Write Mask>> section (public issue
+    241).
+  * Fix public issue 414:
+  ** Added two new command buffer states (invalid, pending), and an explicit
+     "command buffer lifecycle" section to explain them.
+  ** Replaced "pending execution" with "in the pending state".
+  ** Replaced a bunch of "this will invalidate the command buffer" language
+     with "this will move the command buffer to the invalid state", and added
+     validation language for what state those command buffers should be in.
+  ** Added additional validation language about what state a command buffer
+     should be in for various commands that affect it.
+  ** Added invalidation language to destroy commands in the lifetimes section
+     of fundamentals.
+  ** Added command buffers to list of objects which must not be deleted
+     whilst a (primary) command buffer is in the recording or pending state.
+  * Update `GL_KHR_vulkan_glsl` extension to allow anonymous push constant
+    blocks (public issue 428).
+
+Internal Issues:
+
+  * Document rules about extension interactions in the style guide (internal
+    issue 579).
+  * Require ename:VK_PRESENT_MODE_MAILBOX_KHR support in queries of surfaces
+    created with flink:vkCreateWaylandSurfaceKHR using the
+    VK_KHR_wayland_surface extension (internal issue 666).
+  * Remove Valid Usage constraints for flink:vkAllocateDescriptorSets when
+    the `VK_KHR_maintainance1` extension is present (internal issue 686).
+  * Remove undocumented KHX-variants of vkGetPhysicalDeviceProperties2KHR
+    and vkGetPhysicalDeviceImageFormatProperties2KHR from the
+    <<VK_KHX_external_memory_capabilities>> and
+    <<VK_KHX_external_semaphore_capabilities>> extensions.
+
+New Extensions:
+
+  * `VK_EXT_hdr_metadata`
+  * `VK_GOOGLE_display_timing`
+
+-----------------------------------------------------
+
+Change log for February 27, 2017 Vulkan 1.0.42 spec update:
+
+  * Bump API patch number and header version number to 42 for this update
+    (the first anniversary edition).
+
+Github Issues:
+
+  * Changed asciidoctor macros so cross-page links in the standalone
+    reference pages function properly (public issue 462).
+
+Internal Issues:
+
+  * Clarified host visibility discussion for slink:VkMemoryType,
+    flink:vkInvalidateMappedMemoryRanges, elink:VkAccessFlagBits, and the
+    <<synchronization-framebuffer-regions,Framebuffer Region Dependencies>>
+    section, removing duplicated information and adding a central definition
+    in the access types section (internal issue 552).
+  * Change description of
+    slink:vkGetPhysicalDeviceSurfacePresentModesKHR::pname:pPresentModes to
+    return an array of values, not structures (internal issue 699).
+
+New Extensions:
+
+  * Add a NOTE to the <<extensions,Layers & Extensions>> chapter describing
+    the experimental status of `KHX` extensions.
+  * Add new Khronos, Khronos Experimental, and vendor Vulkan extensions for
+    release at GDC:
+  ** VK_KHR_descriptor_update_template
+  ** VK_KHR_push_descriptor
+  ** VK_KHX_device_group
+  ** VK_KHX_device_group_creation
+  ** VK_KHX_external_memory
+  ** VK_KHX_external_memory_capabilities
+  ** VK_KHX_external_memory_fd
+  ** VK_KHX_external_memory_win32
+  ** VK_KHX_external_semaphore
+  ** VK_KHX_external_semaphore_capabilities
+  ** VK_KHX_external_semaphore_fd
+  ** VK_KHX_external_semaphore_win32
+  ** VK_KHX_multiview
+  ** VK_KHX_win32_keyed_mutex
+  ** VK_EXT_discard_rectangles
+  ** VK_MVK_ios_surface
+  ** VK_MVK_macos_surface
+  ** VK_NVX_multiview_per_view_attributes
+  ** VK_NV_clip_space_w_scaling
+  ** VK_NV_geometry_shader_passthrough
+  ** VK_NV_sample_mask_override_coverage
+  ** VK_NV_viewport_array2
+  ** VK_NV_viewport_swizzle
+  * Add new GLSL vendor extensions to support new builtin variables:
+  ** GL_EXT_device_group
+  ** GL_EXT_multiview
+
+-----------------------------------------------------
+
+Change log for February 17, 2017 Vulkan 1.0.41 spec update:
+
+  * Bump API patch number and header version number to 41 for this update.
+
+Github Issues:
+
+  * Made all uses of `NULL` vs. code:VK_NULL_HANDLE consistent (public issue
+    276).
+  * Clarify render pass compatibility in different usage scenarios (public
+    issues 403 and 404).
+  * Add valid usage statements to slink:VkFramebufferCreateInfo requiring
+    that the width, height, and number of layers of the framebuffer all be
+    nonzero (public issue 432).
+  * Allow `offset` and `align` in any GLSL version for the
+    `GL_KHR_vulkan_glsl` extension (public issue 435).
+  * Specify lifetime of string objects passed to the
+    tlink:PFN_vkDebugReportCallbackEXT user callback in the
+    +VK_EXT_debug_report+ extension (public issue 446).
+  * Fix inter-page links in multi-file reference pages (public issue 454).
+
+Internal Issues:
+
+  * Update valid usage language for slink:VkImageCreateInfo to disallow
+    creating images that have ename:VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT
+    set without other attachment usage bits
+    (ename:VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+    ename:VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, or
+    ename:VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) (internal issue 540).
+  * Disable `VK_EXT_swapchain_colorspace` extension until internal issues
+    640 and 661 are mutually resolved.
+  * Allow alternative mipmap level selection when [eq]#lambda == 0.5# during
+    texture <<textures-image-level-selection,Image Level(s) Selection>>
+    (internal issue 680).
+
+Other Issues:
+
+  * Add a clarification to the style guide that the extension revision
+    number is treated as a patch number, so that changes to published
+    extensions should only include bug fixes and spec clarifications.
+
+-----------------------------------------------------
+
+Change log for February 10, 2017 Vulkan 1.0.40 spec update:
+
+  * Bump API patch number and header version number to 40 for this update.
+  * There is a major build change in this release. We are now using the
+    Ruby-based ``asciidoctor'' implementation, rather than the Python-based
+    ``asciidoc'' implementation, to process the specification. While the
+    actual specification markup changes were minimal, this requires a new
+    set of build tools and a very different installation process, especially
+    because we now use an experimental direct-to-PDF backend for Asciidoctor
+    instead of Docbook->dblatex->PDF. It is no longer possible to build the
+    Specification using asciidoc. See doc/specs/vulkan/README.adoc
+    for some guidance on installing the new toolchain components.
+  * There are some minor rendering issues in the PDF output due to teething
+    problems with the asciidoctor toolchain, especially with mathematical
+    equations. We are aware of these and working on them.
+
+Github Issues:
+
+  * Updated sample code for the <<sparsememory-examples-basic,sparse
+    resource binding example>> (public issue 97).
+  * Modify line and point clipping behavior in the
+    <<vertexpostproc-clipping, Primitive Clipping>> section to allow for
+    pop-free behavior. The ability to check for which behavior is
+    implemented may be added a future feature or extension (public issue
+    113).
+  * Unify the discussions of implicit ordering throughout the spec, in
+    particular in the new sections <<drawing-primitive-order, Primitive
+    Order>>, <<primrast-order, Rasterization Order>>, and
+    <<synchronization-implicit, Implicit Synchronization Guarantees>>; the
+    discussion of <<synchronization-submission-order, submission order>>;
+    and references elsewhere to these sections (public issue 133).
+  * Clarify \<\<descriptorsets-compatibility,Pipeline Layout Compatibility>>
+    language and introduce the term ``identically defined'' (public issue
+    164).
+  * Add a dependency to the +VK_EXT_debug_marker+ extension that's needed to
+    reuse the object type enum from +VK_EXT_debug_report+, and moves the
+    definition of that enum into +VK_EXT_debug_report+ where it should be
+    (public issue 409).
+  * Remove redundant valid usage statement from slink:VkImageBlit (public
+    issue 421).
+  * Update GL_KHR_vulkan_glsl to allow the ternary operator to result in a
+    specialization constant (public issue 424).
+  * Fix valid usage for flink:VkPipelineShaderStageCreateInfo (public issue
+    426).
+  * Correct typo in New Objects list for <<VK_EXT_debug_report>> (public
+    issue 447).
+
+Internal Issues:
+
+  * Moved to asciidoctor for spec builds (internal issue 121).
+  * Update style guide to describe where to put new extensions-specific
+    asciidoc files, and what to name them (internal issue 626).
+  * Add src/spec/indexExt.py to autogenerate registry index entries linking
+    into the 1.0-extensions specification, instead of maintaining the index
+    manually. (internal issue 642).
+  * Autogenerate extension dependencies and lists of all extensions and all
+    KHR extensions from the "supported" attributes in +vk.xml+. Execute
+    +make config/extDependency.sh+ from +doc/specs/vulkan+ when a supported
+    extension is added to vk.xml, to regenerate the dependency script. The
+    consequence is that specifying a single extension to the +makeExt+
+    script will automatically enable all extensions it depends on as well,
+    and that the +makeAllExts+ and +makeKHR+ scripts do not need to be
+    updated when a new extension is supported (internal issue 648).
+  * Put extension appendices all at the same asciidoc section level, so KHR
+    WSI extensions show up in the HTML index (internal issue 648).
+
+Other Issues:
+
+  * Imbed images in the generated HTML specs instead of loading them from
+    the images/ directory.
+  * Fix missing EXT in extension name
+    (ename:VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME).
+  * Add new +VK_EXT_SMPTE_2086_metadata+ extension.
+  * In the <<platformCreateSurface_xlib,Xlib Surface>> section of the
+    `VK_KHR_xlib_surface` specification, add language warning users that
+    they always need to call code:XinitThreads.
+  * Use the term "presentable image" (rather than "swapchain image")
+    consistently in `VK_KHR_swapchain` and related extensions, and add a
+    glossary term defining it.
+  * Relocate the valid usage for samples of
+    flink:vkGetPhysicalDeviceSparseImageFormatProperties2KHR::pname:pFormatInfo
+    to be below the flink:VkPhysicalDeviceSparseImageFormatInfo2KHR
+    structure.
+
+-----------------------------------------------------
+
+Change log for January 23, 2017 Vulkan 1.0.39 spec update:
+
+  * Bump API patch number and header version number to 39 for this update.
+
+Github Issues:
+
+  * Clarified that only accesses via the specified buffer/image subresource
+    ranges are included in the access scopes (public issue 306).
+  * Add missing valid usage statements for flink:vkCreateComputePipelines
+    and flink:vkCreateGraphicsPipelines (public issue 427).
+
+Internal Issues:
+
+  * Add a Note to the <<invariance,Invariance>> appendix about a difference
+    between OpenGL and Vulkan with regards to how primitives derived from
+    offsets are handled (internal issue 355).
+  * Add the +<<VK_KHR_get_physical_device_properties2>>+,
+    +<<VK_KHR_maintenance1>>+, and +<<VK_KHR_shader_draw_parameters>>+
+    extensions (internal issue 448).
+  * Add the +<<VK_EXT_shader_subgroup_vote>>+ and
+    +<<VK_EXT_shader_subgroup_ballot>>+ extensions (internal issue 449).
+  * Update the texture level-of-detail equation in the
+    <<textures-scale-factor,Scale Factor Operation>> section to better
+    approximate the ellipse major and minor axes (internal issue 547).
+  * Forbid non-explicitly allowed uses of interface decorations in the
+    introduction to the <<interfaces,Shader Interfaces>> chapter (internal
+    issue 607).
+  * Replace use of MathJax with KaTeX, for improved load-time performance as
+    well as avoiding the scrolling-and-scrolling behavior due to MathJax
+    asynchronous rendering when loading at an anchor inside the spec. This
+    change also requires moving to HTML5 output for the spec instead of
+    XHTML, and there is a visible difference in that the chapter navigation
+    index is now in a scrollable sidebar instead of at the top of the
+    document. We may or may not retain the nav sidebar based on feedback
+    (internal issue 613).
+  * Improve consistency of markup and formatting in extension appendices
+    (internal issue 631).
+
+Other Issues:
+
+  * Add explicit valid usage statements to slink:VkImageCopy requiring that
+    the source and destination layer ranges be contained in their respective
+    source and destination images.
+  * Add valid usage language for swapchain of flink:vkAcquireNextImage. If
+    the swapchain has been replaced, then it should not be passed to
+    flink:vkAcquireNextImage.
+  * Add a valid usage statement to flink:vkCreateImageView, that the image
+    must have been created with an appropriate usage bit set.
+  * Noted that slink:VkDisplayPresentInfoKHR is a valid extension of
+    slink:VkPresentInfoKHR in the <<wsi_swapchain,WSI Swapchain>> section.
+  * Update valid usage for flink:vkCmdSetViewport and flink:vkCmdSetScissor
+    to account for the multiple viewport feature. If the feature is not
+    enabled, the parameters for these functions have required values that
+    are defined in the <<features-features-multiViewport,multiple
+    viewports>> section of the spec but were not reflected in the valid
+    usage text for these functions.
+  * Add the +<<VK_EXT_swapchain_colorspace>>+ extension defining common
+    color spaces.
+
+-----------------------------------------------------
+
+Change log for December 16, 2016 Vulkan 1.0.38 spec update:
+
+  * Bump API patch number and header version number to 38 for this update.
+
+Github Issues:
+
+  * Make ename:VK_PIPELINE_STAGE_HOST_BIT invalid for all stage masks,
+    except for flink:vkCmdWaitEvents (public issue 261).
+
+Internal Issues:
+
+  * Added validation language for flink:vkQueueBindSparse,
+    slink:VkPresentInfoKHR, and slink:VkSubmitInfo, and a note to the
+    <<synchronization-semaphores-waiting,Semaphore Waiting and Unsignaling>>
+    section to clarify that semaphores must be signaled and waited on in a
+    1:1 fashion (internal issue 546).
+  * Modify valid usage for slink:VkBufferImageCopy to only require
+    pname:bufferOffset to be a multiple of the image format's element size
+    when the format is not depth/stencil (internal issue 594).
+
+Other Issues:
+
+  * Vulkan(R) is now a registered trademark symbol, and this is reflected in
+    documents and copyright statements.
+
+-----------------------------------------------------
+
+Change log for December 10, 2016 Vulkan 1.0.37 spec update:
+
+  * Bump API patch number and header version number to 37 for this update.
+
+Github Issues:
+
+  * Add usability guarantees on the values returned by
+    flink:vkGetPhysicalDeviceSurfaceCapabilitiesKHR in the
+    slink:VkSurfaceCapabilitiesKHR structure and by
+    flink:vkGetPhysicalDeviceSurfaceFormatsKHR in the
+    pname:pSurfaceFormatCount parameter (public issue 385).
+  * Add elink:VkDebugReportObjectTypeEXT enumerants for new object types
+    introduced by new extensions (public issue 408).
+  * Add +VK_NVX_device_generated_commands+ etext:ACCESS bits and define how
+    they are used (public issue 415).
+  * Fix indentation for slink:VkDebugReportCallbackCreateInfoEXT member
+    descriptions (public issue 419).
+
+Internal Issues:
+
+  * Expand requirements memory binding of non-sparse images and buffers from
+    the <<resources-association,Resource Memory Association>> section into
+    valid usage statements for all of the applicable API calls (internal
+    issue 508).
+  * Explicitly state that valid usage of flink:vkCreateImage requires that
+    flink:vkGetPhysicalDeviceImageFormatProperties would return
+    ename:VK_SUCCESS for the requested image configuration (internal issue
+    598).
+
+-----------------------------------------------------
+
+Change log for December 1, 2016 Vulkan 1.0.36 spec update:
+
+  * Bump API patch number and header version number to 36 for this update.
+
+Github Issues:
+
+  * Fix "recorded with" terminology in the valid usage language for the
+    flink:vkCmdExecuteCommands::pname:pCommandBuffers parameter (public
+    issue 390).
+  * Modify +genvk.py+ to support specifying extensions to remove from output
+    generators, allowing the extension loader +vulkan_ext.c+ to be created
+    without WSI extensions which are statically exported by the Vulkan
+    loader (public issue 412).
+  * Added validation language for slink:VkSubpassDependency and in the
+    <<synchronization-access-types-supported,supported access types>>
+    section to catch access masks that include bits which are not supported
+    by pipeline stages in the stage masks (partially addresses
+    github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/1006 ).
+
+Internal Issues:
+
+  * Added validation language for flink:vkCmdWaitEvents,
+    flink:vkQueueSubmit, flink:VkRenderPassCreateInfo, and in the
+    <<synchronization-pipeline-stages-supported>> section to prevent
+    recording stage dependencies that aren't supported on the queue
+    (internal issue 516).
+  * Make a few changes that generalize spec language for use with possible
+    future extensions by adding glossary terms and generalizing ``feature''
+    to ``feature or extension'' where relevant (internal issues 448, 590).
+  * Added "pipeline type" attribute to +vk.xml+ for relevant commands and
+    utilize it in automatic generation of the Command Properties table
+    (internal issue 517).
+  * Specify that WSI implementations must provide both UNORM and sRGB
+    formats in the description of slink:VkColorSpaceKHR (internal issue
+    529).
+  * Remove nesting of explicit valid usage statements where it is not
+    meaningful (internal issue 583).
+
+Other Issues:
+
+  * Add validity language requiring that
+    slink:VkPushConstantRange::pname:offset be a multiple of 4, as stated in
+    the spec language.
+
+-----------------------------------------------------
+
+Change log for November 25, 2016 Vulkan 1.0.35 spec update:
+
+  * Bump API patch number and header version number to 35 for this update.
+
+Github Issues:
+
+  * Document in the <<memory-device-hostaccess,Host Access>> section that
+    mapping and unmapping does not invalidate or flush the mapped memory
+    (public issues 27, 126).
+  * Redefine the entire <<synchronization>> chapter in terms of consistent
+    and well defined terminology, that's called out at the start of the
+    chapter. This terminology is applied equally to all synchronization
+    types, including subpass dependencies, submissions, and much of the
+    implicit ordering stuff dotted around the spec. Key terms are laid out
+    in the <<synchronization-dependencies,Execution and Memory
+    Dependencies>> section at the top of the rewritten chapter (public
+    issues 128, 131, 132, 217, 299, 300, 302, 306, 322, 346, 347, 371, 407).
+  * Specify order of submission for batches in the
+    <<vkQueueSubmit,vkQueueSubmit>> and
+    <<vkQueueBindSparse,vkQueueBindSparse>> commands (public issue 371).
+  * Add valid usage statements to each of the WSI extension sections
+    indicating that the WSI-specific structure parameters must be valid, and
+    remove automatically generated valid usage statements now covered by the
+    manual sections (public issue 383).
+  * Clarify render pass compatibility for flink:vkCmdExecuteCommands (public
+    issue 390).
+
+Internal Issues:
+
+  * Update +vk.xml+ to make previously explicit valid usage statements for
+    <<vkDebugReportMessageEXT,vkDebugReportMessageEXT>> implicit instead
+    (internal issue 553).
+  * Add valid usage statement for slink:VkCreateImageInfo preventing
+    creation of 1D sparse images (internal issue 573).
+  * Fix Python scripts to always read/write files in utf-8 encoding, and a
+    logic error in reflib.py which could cause a fatal error for
+    malstructured asciidoc (internal issues 578, 586).
+
+-----------------------------------------------------
+
+Change log for November 18, 2016 Vulkan 1.0.34 spec update:
+
+  * Bump API patch number and header version number to 34 for this update.
+
+Github Issues:
+
+  * Allow vkUpdateDescriptorSets overflow to skip empty bindings. Clarify
+    that unused bindings have a descriptorCount of zero. Improve some valid
+    usage for vkUpdateDescriptorSets (public issue 256).
+  * Require that slink:VkImageSubresourceRange always define a non-empty
+    range of the resource (public issue 303).
+  * Added valid usage for slink:VkPresentInfoKHR on the layout of presented
+    images (public issue 397).
+
+Internal Issues:
+
+  * Add dependency in src/spec/Makefile so specversion.txt is regenerated
+    when needed (internal issue 462).
+  * Shorten the table of contents in the single-page ref page HTML output.
+    Still working on the PDF (internal issue 536).
+
+-----------------------------------------------------
+
+Change log for November 11, 2016 Vulkan 1.0.33 spec update:
+
+  * Bump API patch number and header version number to 33 for this update.
+
+Github Issues:
+
+  * Added implicit external synchronization parameters to
+    vkBegin/EndCommandBuffer, and fixed missing command pool host
+    synchronization from per-command lists (public issue 398).
+  * Started using git tags including the spec release number, such as
+    'v1.0.32-core', instead of tags including the date of release, such as
+    'v1.0-core-20161025' (public issue 405).
+
+Internal Issues:
+
+  * Add validity constraint for
+    slink:VkImportMemoryWin32HandleInfoNV::pname:handle (internal issue
+    #480).
+  * Add scripts to compare two Vulkan HTML specifications, derived from W3
+    htmldiff service (internal issue 525).
+  * Relax requirement that memoryTypeBits can't depend on format, to allow
+    it to differ only for depth/stencil formats (internal issue 544).
+  * Add a new generator script to create a simple extension loader for
+    Vulkan based on +vk.xml+ (internal issue 558).
+  * Add the overlooked requirement that buffer and image memory
+    alignment requirements must be a power of two in the
+    <<resources-association,Resource Memory Association>> section
+    (internal issue 569).
+
+Other Issues:
+
+  * Add a naming rule to the style guide for members of extension structures
+    defining array lengths which are the same as array lengths of the core
+    structure they are chained from.
+  * Add a new generator to create a simple extension loader in
+    +src/ext_loader/vulkan_ext.[ch]+ from +vk.xml+. This code can be
+    included in your project, and is expected to be packaged in the Vulkan
+    SDK provided by LunarG in the future.
+
+-----------------------------------------------------
+
+Change log for October 25, 2016 Vulkan 1.0.32 spec update:
+
+  * Bump API patch number and header version number to 32 for this update.
+
+Github Issues:
+
+  * Add automatic visibility operations to the presentation engineE when
+    doing a queue present in flink:vkAcquireNextImageKHR. Removed all
+    references to MEMORY_READ that referenced WSI - they no longer make
+    sense (some aspects of public issues 128, 131, 132, 261, and 298).
+  * Document valid non-boolean +externsync+ attribute values for <param>
+    tags in +vk.xml+ (public issue 265).
+  * Add valid usage to slink:VkImageCreateInfo requiring that
+    pname:arrayLayers be 1 for images of type ename:VK_IMAGE_TYPE_3D
+    (public issue 319).
+  * Add missing captions to figures in the <<textures,Image Operations>>
+    chapter (public issue 334).
+  * Clarify WSI interaction with exclusive sharing mode (public issue
+    344).
+  * Added explicit language clarifying the allowed queue usage of
+    resources created with ename:VK_SHARING_MODE_CONCURRENT (public
+    issue 386).
+  * Require that the
+    slink:VkDescriptorSetLayoutCreateInfo::pname:binding members of the
+    pname:pBindings array passed to
+    flink:vkDescriptorSetLayoutCreateInfo all be distinct (public issue
+    391).
+
+Internal Issues:
+
+  * Remove empty validity blocks from +vk.xml+ and suppressed broken
+    validity statements and added missing statements to explicit
+    validity. Doesn't affect output, other than some statements
+    appearing in another block now (internal issue 513).
+
+-----------------------------------------------------
+
+Change log for October 14, 2016 Vulkan 1.0.31 spec update:
+
+  * Bump API patch number and header version number to 31 for this update.
+
+Github Issues:
+
+  * Clarifying wording of slink:VkGraphicsPipelineCreateInfo parameters and
+    adding Valid Usage statements on render pass compatibility to the
+    <<drawing,drawing commands>> (public issue 375).
+  * Replace 'texel size' with 'element size', and add a definition to the
+    glossary (public issue 382).
+  * Clarify the description of ename:VK_ERROR_NATIVE_WINDOW_IN_USE_KHR to
+    make it accurate, but still generic (non-exhaustive). Remove two Valid
+    Usage statements describing error situations that will return
+    ename:VK_ERROR_NATIVE_WINDOW_IN_USE_KHR (public issue 387).
+  * Fix refBegin tag for elink:VkDebugReportFlagBitsEXT (public issue 392).
+  * The <<interfaces-builtin-variables,built-in variable>> code:PrimitiveId
+    in a fragment shader needs the code:Input storage class (public issue
+    393).
+
+Internal Issues:
+
+  * Unused ({y,z} and {height,depth} for 1D, z and depth for 2D) offsets
+    must be 0 and unused extents must be 1. Added basic offset and extent
+    valid usage for slink:VkImageResolve to match that of slink:VkImageCopy
+    (internal issue 413).
+  * Describe what flink:vkGetPhysicalDeviceImageFormatProperties returns for
+    pname:sampleCounts when for pname:usage only includes transfer-related
+    flags (internal issue 478).
+  * Remove mention of
+    slink:VkPhysicalDeviceLimits::pname:maxImageArrayLayers from the valid
+    usage for slink:VkImageCreateInfo::pname:arrayLayers (internal issue
+    520).
+  * Tag usages of ``dynamically uniform'' as glossary terms and add a
+    glossary entry pointing to the SPIR-V Specification's definition of the
+    term (internal issue 531).
+
+-----------------------------------------------------
+
+Change log for October 7, 2016 Vulkan 1.0.30 spec update:
+
+  * Bump API patch number and header version number to 30 for this update.
+
+Github Issues:
+
+  * Document missing pname:sType and pname:pNext parameters for
+    slink:VkCommandBufferInheritanceInfo (public issue 224).
+  * As promised, we are removing the example code, from the appendix, for
+    the VK_KHR_surface and VK_KHR_swapchain extensions. The cube demo
+    (shipped in the official Khronos SDK) has been updated, and is the
+    example code that we want people to look at for how to use these two
+    extensions (public issues 279, 308, and 311).
+  * Clarify the formats for which the slink:VkClearColorValue pname:float32
+    member is used. Also clean up related language for flink:vkCmdBlitImage
+    (public issue 369).
+  * Reword the <<invariance, Invariance>> appendix chapter to better match
+    Vulkan terminology (public issue 372).
+
+Internal Issues:
+
+  * Update slink:VkMemoryRequirements to not require a host_visible memory
+    type exists that can be bound to sparse buffers (internal issue 494).
+  * Modify the <<features-supported-sample-counts,Supported Sample Counts>>
+    language to allow multisampled depth-stencil images (internal issue
+    521).
+
+-----------------------------------------------------
+
+Change log for September 30, 2016 Vulkan 1.0.29 spec update:
+
+  * Bump API patch number and header version number to 29 for this update.
+
+Github Issues:
+
+  * Remove redundant constraint on
+    slink:VkCommandBufferInheritanceInfo::pname:queryFlags (public issue
+    224).
+  * Fix typo and remove link in Note in the
+    <<extended-functionality-instance-extensions-and-devices, Instance
+    Extensions and Device Extensions>> section (public issue 359).
+  * Fix erroneous validation statement for the pname:layout member of
+    slink:VkComputePipelineCreateInfo (public issue 362).
+
+Internal Issues:
+
+  * Restore long figure captions using asciidoc sidebar blocks, due to
+    restrictions of asciidoc syntax (internal issue 101).
+  * Replace most latexmath equations with comparable markup in straight
+    asciidoc, which significantly improves time required to fully load and
+    process the HTML forms of the Specification. There are known minor font
+    and alignment inconsistencies with MathJax and PDF rendering of
+    latexmath equations. Please do not file github issues about these. We
+    are aware of the inconsistencies and will make refinements over time,
+    while the performance improvements are compelling in at least some major
+    browsers (internal issue 313).
+  * Move handcoded validity statements from +vk.xml+ into the Specification
+    body, easing work in the single-branch model. Specify the distinction
+    between these explicit statements, and the implicit validity statements
+    inferred from vk.xml. Validity statements now appear in two blocks for
+    each command and structure - handcoded "Valid Usage" and the implicit
+    "Valid Usage (Implicit)" (internal issue 392).
+  * Add the +returnedonly="false"+ attribute to WSI output structures,
+    removing incorrectly generated implicit validity statements for
+    slink:VkDisplayPropertiesKHR, slink:VkDisplayPlanePropertiesKHR,
+    slink:VkDisplayModePropertiesKHR, slink:VkDisplayPlaneCapabilitiesKHR,
+    slink:VkSurfaceCapabilitiesKHR, and slink:VkSurfaceFormatKHR structures
+    (internal issue 486).
+  * Update slink:VkImageLayout to require the
+    ename:VK_IMAGE_USAGE_SAMPLED_BIT be set for sampled depth/stencil images
+    (internal issue 487).
+  * Use an explicit format specifier string for the date command invocation
+    in the +Makefile+ instead of the shorthand -R option, which doesn't work
+    on BSD and MaxOS X date commands (internal issue 500).
+
+Other Issues:
+
+  * Use the terms ``allocation scope'' and ``extension scope'' instead of
+    just ``scope'', and add them to the glossary.
+
+-----------------------------------------------------
+
+Change log for September 23, 2016 Vulkan 1.0.28 spec update:
+
+  * Bump API patch number and header version number to 28 for this update.
+
+Github Issues:
+
+  * Minor spelling and typography cleanup, add definitions of
+    ename:VK_FALSE and ename:VK_TRUE as just what their names say
+    (public issues 220, 318, 325, 365; internal issues 451, 496)
+  * Clarify that the pname:maxDescriptorSet limits in the
+    <<features-limits-required,Required Limits>> table are n *
+    maxPerStage limit (where n=number of supported stages) (public issue
+    254).
+  * Minor cleanup to <<boilerplate-platform-macros,Platform-Specific
+    Macro Definitions>> appendix (public issue 314).
+  * Add valid usage statement to slink:VkPipelineLayoutCreateInfo
+    disallowing multiple push constant ranges for the same shader stage
+    (public issue 340).
+  * Clarify the elink:VkSharingMode description of what executing the
+    "same" barriers means in case of ownership transfer (public issue
+    347).
+  * Rename copyright.txt and add COPYING.md to try and reduce confusion
+    about applicable copyrights (public issue 350).
+  * Extend the table in the <<boilerplate-wsi-header, Window System-Specific
+    Header Control>> section to describe the external headers included when
+    each etext:VK_USE_PLATFORM_* macro is defined (public issue 376).
+
+Internal Issues:
+
+  * Add "Revision History" to the PDF outputs following the table of
+    contents, to match HTML outputs (internal issue 43).
+  * Clarified that flink:vkMapMemory may fail due to virtual address
+    space limitations (internal issue 346).
+  * Add +refBody+ comment markup for ref page autoextraction when required
+    (internal issue 400).
+  * Document proper use of "mipmap" and "mip" in the style guide API
+    naming rules, matching the spelling rules (internal issue 471).
+  * Tweak the <<extensions,Layers and Extensions>> appendix to note that
+    the Specification may be built with arbitrary combinations of
+    extensions (internal issue 483).
+  * Remove incorrect statement allowing
+    slink:VkClearAttachment::pname:colorAttachment to be >=
+    slink:VkSubpassDescription::pname:colorAttachmentCount (internal
+    issue 488).
+  * The <<features-limits-viewportboundsrange,viewportBoundsRange>> is
+    expressed in terms of the pname:maxViewportDimensions but this is
+    actually two values. Clarify that it's based on the larger of the two
+    (if they differ) (internal issue 499).
+
+Other Issues:
+
+  * Reflowed text of the entire spec using the 'reflow' Makefile target, to
+    (hopefully) reduce future internal git churn as edits are made and
+    extensions added in return for one-time pain. This has no perceptible
+    effect on the spec outputs, but considerable changes on the asciidoc
+    source (internal issue 367).
+
+-----------------------------------------------------
+
+Change log for September 16, 2016 Vulkan 1.0.27 spec update:
+
+  * Bump API patch number and header version number to 27 for this update.
+
+Github Issues:
+
+  * Weaken flink:vkGetPipelineCacheData invariance conditions; previous
+    conditions were stronger than agreed and can't be guaranteed (public
+    issue 280).
+  * Add link to "Vulkan Loader Specification and Architecture Overview"
+    document to Normative References section (public issue 359).
+
+Internal Issues:
+
+  * Be more clear in the <<interfaces-resources-layout-std140, uniform
+    buffer layout>> section that block offsets can be out of order
+    (internal issue 396).
+  * Document that extension authors should add support for their extensions
+    to the validation layers (internal issue 398).
+  * Clarify that the valid range of depth clear values should be limited
+    to the 0..1 range and that copies to depth aspect must also be in this
+    range (internal issue 412).
+  * Specify ``a'' vs. ``an'' use in the style guide (internal issue 432).
+  * Increase the maximum pname:nonCoherentAtomSize value in the
+    <<features-limits-required,Required Limits>> section from 128 to 256
+    (internal issue 435).
+  * Fix vk_platform.h for compiler errors on some Android platforms
+    (internal issue 441).
+  * Clarify that slink:VkPhysicalDeviceFeatures::pname:pEnabledFeatures ==
+    `NULL` disables all features, including the "required" feature
+    pname:robustBufferAccess (internal issue 479).
+
+Other Issues:
+
+  * Expand style guide and make it more self-consistent.
+  * Use ISO 8601 date format everywhere.
+  * Emphasise the correct way of using
+    slink:VkSurfaceCapabilitiesKHR::pname:maxImageCount.
+  * Added +VK_EXT_validation_flags+ extension for validation flag mechanism.
+  * Fix an <<credits,author credit>> to include their current employer.
+
+-----------------------------------------------------
+
+Change log for September 6, 2016 Vulkan 1.0.26 spec update:
+
+  * Bump API patch number and header version number to 26 for this update.
+
+Github Issues:
+
+  * Bring sample code in the `VK_KHR_surface` and `VK_KHR_swapchain`
+    extension summary appendices up to date, and note they will be replaced
+    with pointers to the LunarG SDK examples in the future (public issue
+    279).
+  * Add a new <<fundamentals-commandsyntax-results-lifetime,Lifetime of
+    Retrieved Results>> section specifying that ftext:vkGet* and
+    ftext:VkEnumerate* results are invariant unless otherwise specified, and
+    specify behavior for individual commands which are not invariant (public
+    issue 280).
+  * Remove conflicting definition of
+    slink:VkDisplayPlaneCapabilitiesKHR::pname:maxSrcPosition and clean up
+    language of the remaining definition (public issue 351).
+  * Fix many minor spelling errors and add rules to the style guide to
+    prevent recurrences (public issue 352).
+
+Internal Issues:
+
+  * Remove redundant descriptions of the etext:VK_USE_PLATFORM_* macros from
+    the <<wsi,Window System Integration>> chapter in favor of the
+    description in the <<boilerplate-wsi-header,Window System-Specific
+    Header Control>> appendix (internal issue 6).
+  * Replace misleading 'can: be destroyed when not X' with more correct
+    'must: not be destroyed while X' in the
+    <<fundamentals-objectmodel-lifetime,Object Lifetime>> section. Disallow
+    destroying a pipeline layout while a command buffer using it is
+    recording (internal issue 241).
+  * Clarify that ename:VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT is valid for
+    all images used as attachments in elink:VkImageUsageFlagBits and the
+    slink:VkImageLayout validity language (internal issue 320).
+  * Note that <<extended-functionality-layers,Layers>> may wrap object
+    handles, but that this is a generally discouraged. A link to additional
+    information in the documentation for layer authors is provided (issue
+    398)
+  * Replace the mustnot: and shouldnot: macros with equivalent must: not and
+    should: not to get rid of non-English words while still highlighting
+    normative language (internal issue 407).
+  * Disallow creating multisampled images with
+    ename:VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT in the slink:VkImageLayout
+    validity language and the <<features-supported-sample-counts,Supported
+    Sample Counts>> section (internal issue 445).
+  * Fix typo so that flink:vkCmdDrawIndexedIndirect is defined in terms of
+    flink:vkCmdDrawIndexed rather than flink:vkCmdDrawIndirect (internal
+    issue 446).
+  * Reorganize the per-extension information sections to all be in the
+    <<extensions,Layers & Extensions>> appendix. Also fix a typo in
+    +VK_IMG_filter_cubic+ which incorrectly identified it as a +KHR+
+    extension (internal issue 461).
+
+Other Issues:
+
+  * Use asciidoc markup instead of latexmath to simplify diagrams in the
+    <<features-formats-non-packed,byte mapping tables>> for color formats.
+  * Fix a markup problem with the wildcarded enumerant names in a NOTE in
+    the <<textures-texel-replacement,Texel Replacement>> section.
+  * Fix missing attributes in the XML interface for
+    elink:VkExternalMemoryHandleTypeFlagBitsNV and
+    elink:VkExternalMemoryFeatureFlagBitsNV (KhronosGroup/Vulkan-Hpp issue
+    25)
+  * Cleanup reference page builds so only core pages are built for releases.
+
+-----------------------------------------------------
+
+Change log for August 26, 2016 Vulkan 1.0.25 spec update:
+
+  * Bump API patch number and header version number to 25 for this update.
+  * Structurally change the specification so that multiple extensions are
+    included in the +1.0+ git branch, and specifications will include or not
+    include those extensions at build time based on options passed to the
+    Makefile. See +doc/specs/vulkan/README.html+ and the ``Layers and
+    Extensions'' section of the ``Vulkan Documentation and Extensions''
+    document for more information on this change.
+  * Register and publish new extensions in the single-branch form:
+  ** +VK_NV_external_memory_capabilities+
+  ** +VK_NV_external_memory+
+  ** +VK_NV_external_memory_win32+
+  ** +VK_NV_win32_keyed_mutex+
+
+Github Issues:
+
+  * Clarify description of GetInstanceProcAddr and GetDeviceProcAddr (public
+    issue 212).
+  * Add SPIR-V <<textures-operation-validation, instruction validation>> for
+    single-sampled images (public issue 316).
+  * Fix spelling of ``tesselation'' in a few places and note it as an
+    exception to the American spelling rules convention (public issue
+    327).
+  * Fix Makefile to create output directory for ``styleguide''
+    target (public issue 329).
+  * Fix numerous minor issues with incorrectly tags on enumerant names and
+    table titles (public issue 330).
+  * Generate specversion.txt date in UTC time and RFC 2822 format
+    (public issue 335).
+  * Convert link to the SPIR-V Specification for
+    flink:VkShaderModuleCreateInfo into an internal link to the normative
+    reference (public issue 336).
+  * Add ename:VK_ERROR_OUT_OF_MEMORY error code to
+    flink:vkCreateDebugReportCallbackEXT (public issue 337).
+
+Internal Issues:
+
+  * Update style guide regarding use of code:NULL and dname:VK_NULL_HANDLE
+    (internal issue 393).
+  * Change the definition of latexmath:[$q$] in the
+    <<textures-image-level-selection,texture image level selection>> section
+    to be the index of the maximum defined level for the view, not the
+    number of levels in the view (internal issue 406).
+  * Allow developers to override dname:VK_DEFINE_NON_DISPATCHABLE_HANDLE
+    with their own binary-compatible definition (internal issue 439).
+  * Fix +vk_platform.h+ conditional logic causing compile failure with some
+    Android compilers (internal issue 441).
+  * Implement the single-branch model as described above (internal issue
+    461).
+
+-----------------------------------------------------
+
+Change log for August 12, 2016 Vulkan 1.0.24 spec update:
+
+  * Bump API patch number and header version number to 24 for this update.
+
+Github Issues:
+
+  * Fix type mismatch in swapchain image equivalency table (public issue
+    289).
+  * Fix a copy-and-paste error in the description of
+    flink:vkGetSwapchainImagesKHR::pname:pSwapchainImages, that said it
+    was an array of ``sname:VkSwapchainImageKHR structures'' instead of
+    an array of ``sname:VkImage handles'' (public issue 292).
+  * Specify that ename:VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT is only valid
+    for ename:VK_IMAGE_TYPE_2D images (public issue 293).
+  * Add a valid usage statement to flink:vkCmdExecuteCommands saying
+    that when called outside a render pass instance, the secondary
+    command buffers must not have been created with the
+    ename:VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT (public issue
+    297).
+  * Fix description of +VK_NO_STDINT_H+ in the
+    <<boilerplate-platform-macros,platform macros>> section (public
+    issue 314).
+
+Internal Issues:
+
+  * Normalize the language for the remaining built-in variables in the
+    <<interfaces-builtin-variables,Built-In Variables>> section. Fix
+    code:FrontFacing and code:HelperInvocation, as they should be of
+    code:boolean type rather than code:integer (internal issue 323).
+  * Clarify that when ename:VK_WHOLE_SIZE is used for a buffer
+    descriptor range, the effective range must still be within the max
+    buffer range (internal issue 426).
+  * Clarify that command buffers and descriptor sets are allocated
+    rather than created. Also clarify when the recording state of a
+    command buffer is relevant (internal issue 434).
+
+-----------------------------------------------------
+
+Change log for August 5, 2016 Vulkan 1.0.23 spec update:
+
+  * Bump API patch number and header version number to 23 for this update.
+
+Github Issues:
+
+  * Add explicit valid value attributes to pname:sType members in vk.xml
+    (public issue 34).
+  * Clarify usage of flink:vkGetInstanceProcAddr and
+    flink:vkGetDeviceProcAddr (public issue 225).
+  * Fix a copy-and-paste error in the description of
+    pname:pSwapchainImageCount saying that it was the count of ``format
+    pairs'' instead of ``swapchain images'' (public issue 292).
+  * flink:vkCmdExecuteCommandBuffers requires all command buffers to be
+    allocated from command pools created for the same queue family (public
+    issue 296).
+  * Remove bogus +optional+ attribute for
+    flink:vkEnumerateDeviceLayerProperties::pname:physicalDevice from vk.xml
+    (public issue 301).
+  * Clean up the <<resources-image-views-compatibility,image and image view
+    compatibility table>> reference and contents. Use full enumerant names.
+    Refer to pname:layerCount in the ``view parameters'' column instead of
+    pname:arrayLayers. Require N >= 1 for the cube array subview row, not
+    just arrayLayers >= 6 N (public issue 304).
+  * Modify description of <<resources-memory-aliasing,memory aliasing>> to
+    be consistent with the description of
+    <<resources-bufferimagegranularity,buffer image granularity>> (public
+    issue 307).
+
+Internal Issues:
+
+  * Describe remaining +vk_platform.h+ macros in the <<boilerplate,API
+    Boilerplate>> appendix (internal issue 6).
+  * Clarify
+    <<features-features-robustBufferAccess,pname:robustBufferAccess>>
+    feature behavior; what memory can be accessed, how bounds checking is
+    performed, and allowing for vectorization (internal issue 332).
+  * Document markup for automatic extraction of reference pages from the
+    spec sources in the style guide (internal issue 395).
+  * Allow flink:vkCreateDisplayModeKHR to return
+    ename:VK_ERROR_INITIALIZAION_FAILED_KHR if the user requests mode
+    parameters that the specified display does not support (internal issue
+    411).
+  * Remove atomic counters (atomic_uint style) from KHR_vulkan_glsl, and
+    more clearly remove the subroutine keyword alongside it (internal issue
+    421).
+  * Clarify behavior of flink:vkCmdBindDescriptorSets for descriptor sets
+    not contained in the layout (internal issue 427).
+
+Other Commits:
+
+  * Change the order in which members of sname:VkAttachmentDescription and
+    sname:VkPipelineInputAssemblyStateCreateInfo are described to match
+    their order in the structures.
+
+-----------------------------------------------------
+
+Change log for July 22, 2016 Vulkan 1.0.22 spec update:
+
+  * Bump API patch number and header version number to 22 for this update.
+
+Github Issues:
+
+  * Translate the subpass self-dependency language into concrete
+    validity statements, and added a validity statement about the
+    restrictions on layout parameters (public issue 267).
+  * Add validity requirement that
+    slink:VkAttachmentDescription::pname:finalLayout and
+    slink:VkAttachmentReference::pname:layout must not be
+    ename:VK_IMAGE_LAYOUT_UNDEFINED or
+    ename:VK_IMAGE_LAYOUT_PREINITIALIZED (public issue 268).
+  * Clarify that slink:VkSubpassDescription::pname:pResolveAttachments
+    layouts are used. Make language consistent with other attachment
+    arrays (public issue 270).
+  * Changed 64-bit definition for
+    dname:VK_DEFINE_NON_DISPATCHABLE_HANDLE to work for x32 platform in
+    +vk.xml+ and the resulting +vulkan.h+ (public issue 282).
+  * Add missing error return code for
+    flink:vkEnumerateInstanceExtensionProperties and
+    flink:vkEnumerateDeviceExtensionProperties (public issue 285)
+  * Fix several cases of stext::VkStructName.memberName markup to
+    stext::VkStructName::pname:memberName, to match other usage in the
+    spec, and describe this markup in the style guide (public issue
+    286).
+  * Modified validity language generation script to avoid redundant
+    common ancestor language if covered by generic parent language, and
+    used `Both' instead of `Each' when appropriate (public issue 288).
+
+Internal Issues:
+
+  * Add language about behavior of flink:vkAllocateDescriptorSets when
+    allocation fails due to fragmentation, a new error
+    ename:VK_ERROR_FRAGMENTED_POOL, and a Note explaining the situation
+    (internal issue 309).
+  * For the features of code:PointSize, code:ClipDistance, and
+    code:CullDistance, the SPIR-V capability is required to be declared
+    on use (read or write) rather than on decoration (internal issue
+    359).
+  * Have desktop versions of GLSL respect precision qualification
+    (code:mediump and code:lowp) when compiling for Vulkan. These will
+    get translated to SPIR-V's code:RelaxedPrecision decoration as they
+    do with OpenGL ES versions of GLSL (ESSL). The default precision of
+    all types is code:highp when using a desktop version (internal issue
+    360).
+  * Add validity statement for slink:VkImageCreateInfo specifying that
+    multisampled images must be two-dimensional, optimally tiled, and
+    with a single mipmap level (internal issue 369).
+  * Add validity statements to slink:VkImageViewCreateInfo disallowing
+    creation of images or image views with no supported features. Made
+    some slink:VkImageViewCreateInfo validity statements more precise
+    and consistent. Added a Note to the <<features,features>> chapter
+    about formats with no features (internal issue 371).
+  * Remove +manpages+ from default build targets. Nroff outputs
+    containing imbedded latexmath will not render properly. Fixing this
+    is a lot of work for limited use cases (internal issue 401).
+
+Other Commits:
+
+  * Fix flink:vkRenderPassBeginInfo::pname:clearValueCount validity
+    statement to be based on attachment indices rather than the number
+    of cleared attachments
+    (Vulkan-LoaderAndValidationLayers/issues/601).
+  * Convert registry documentation from LaTeX to asciidoc source and
+    rename from +src/spec/readme.tex+ to +src/spec/registry.txt+.
+  * Fix lack of Oxford commas in validity language.
+  * Lots of cleanup of generator scripts and Makefiles to move extension
+    list for generator into the script arguments instead of the body of
+    genvk.py, and express better dependencies between XML, scripts, and
+    generated files.
+
+-----------------------------------------------------
+
+Change log for July 15, 2016 Vulkan 1.0.21 spec update:
+
+  * Bump API patch number and header version number to 21 for this update.
+
+Github Issues:
+
+  * Clarify how <<features-supported-sample-counts,sample count queries>>
+    relate to the limits in slink:VkPhysicalDeviceLimits. (public issue
+    185).
+  * Clarify in the <<interfaces-iointerfaces,Shader Input and Output
+    Interfaces>> section that shader output variables have undefined values
+    until the shader writes to them (public issue 240).
+  * Specify the implicit value of image parameters that cannot be set in
+    slink:VkSwapchainCreateInfo::pname:flags, pname:imageType,
+    pname:mipLevels, pname:samples, pname:tiling, and pname:initialLayout
+    (public issue 243).
+  * Make use of code:NULL and code:VK_NULL_HANDLE consistent in the
+    VK_KHR_swapchain extension (public issue 276).
+
+Internal Issues:
+
+  * Clarify that presenting an image to a display surface swapchain applies
+    the display surface's mode, and that destroying a display surface
+    swapchain may reset the display's mode, in the VK_KHR_display_swapchain
+    extension (internal issue 247).
+  * Better describe what a slink:VkSurfaceKHR is, and that creating one does
+    not set a mode, in the VK_KHR_display extension. This is a round-about
+    way of pointing out that mode setting is not covered by the extension,
+    but rather is performed as a side effect of presentation (internal issue
+    247).
+  * Add more valid usage statements to flink:vkQueuePresentKHR command when
+    the VK_KHR_display_swapchain extension is present (internal issue
+    247).
+  * Add more includes to the VK_KHR_swapchain extension to better document
+    interactions with VK_KHR_display_swapchain (internal issue 247).
+  * Clarify restrictions on location aliasing in the
+    <<fxvertex,Fixed-Function Vertex Processing>> section (internal issue
+    370).
+  * Add mathematical description of blitting to flink:vkCmdBlitImage, and
+    link it to the <<textures,Image Operations>> chapter. Use mathematical
+    notation for ranges of texel coordinates in the <<textures,Image
+    Operations>> chapter. Fixed miscellaneous validity statements for
+    flink:vkCmdBlit and slink:VkImageBlit (internal issue 382).
+
+Other Commits:
+
+  * Added a valid usage rule to flink:VkGraphicsPipelineCreateInfo that the
+    ename:VK_PRIMITIVE_TOPOLOGY_PATCH_LIST topology must only be used when
+    tessellation shaders are used.
+  * Expand the style guide into a formal "Procedures and Conventions"
+    document. Add a API Naming Conventions section, move most of the API
+    Specification Appendix C (Layers and Extensions) content into the new
+    document, and define the resulting procedures as mandatory (where
+    relevant). This more clearly separates use vs. specification of Vulkan
+    APIs.
+  * Update vk_platform.h to handle 32-bit ARMv8 binaries.
+  * Various minor cleanups to the Makefile and build process.
+
+-----------------------------------------------------
+
+Change log for July 8, 2016 Vulkan 1.0.20 spec update:
+
+  * Bump API patch number and header version number to 20 for this
+    update.
+
+Github Issues:
+
+  * Replaced existing reference pages by text automatically extracted from
+    the specification source, or generated from vk.xml in some cases. This
+    is not a complete solution for the reference pages, but puts them in a
+    much better state. The ref pages (only) are now placed under a CC BY
+    open source license, which is more current than the obsolete license
+    previously used. Various minor tweaks to the Specification sources were
+    made to enable this, and a new ``API Boilerplate'' chapter added to
+    include definitions of all the entities in the API and +vulkan.h+ which
+    were not already described in some form in the document.
+
+    Further improvements to the pages should not edit them directly, but
+    instead concentrate on the specification source from which the ref pages
+    are being extracted (public issues 44, 55, 160; internal issue 389).
+
+-----------------------------------------------------
+
+Change log for July 1, 2016 Vulkan 1.0.19 spec update:
+
+  * Bump API patch number and header version number to 19 for this
+    update.
+
+Github Issues:
+
+  * Clarified how flink:vkGetImageSubresourceLayout interacts with image
+    layouts (public issue 247).
+  * Remove ename:VK_IMAGE_LAYOUT_PREINITIALIZED from valid usage rule for
+    slink:VkImageMemoryBarrier::pname:oldLayout. It is only valid if it is
+    the current layout (public issue 248).
+  * Modify valid usage for flink:vkBindBufferMemory so implementations are
+    free to require a different backing memory size than the buffer size
+    (public issue 251).
+  * Clarify that filtering rules for flink:vkCmdBlitImage always apply, and
+    are usually no-ops if the formats are the same (public issue 253).
+  * Remove 'non-sparse' from description of
+    flink:vkGetBufferMemoryRequirements and
+    flink:vkGetImageMemoryRequirements (public issue 257).
+  * Remove ename:VK_ERROR_LAYER_NOT_PRESENT error code from
+    flink:vkCreateDevice (public issue 259).
+  * Change "must: not" to "should: not" in constraint on when
+    flink:vkAcquireNextImageKHR is called in the VK_KHR_swapchain branch
+    (public issue 262).
+  * Change type of flink:vkCmdUpdateBuffer::pname:pData from
+    basetype:uint32_t* to basetype:void* (public issue 263).
+  * Change should: to must: in description of where additional segments are
+    placed in the <<[tessellation-tessellator-spacing,Tessellator Spacing>>
+    section (public issue 264).
+
+Internal Issues:
+
+  * Normalize the language of all the compute shader built-ins in the
+    <<interfaces-builtin-variables,Built-in Variables>> section (internal
+    issue 323).
+  * Remove definition of presentation engine internal queue lengths
+    associated with ename:VK_PRESENT_MODE_FIFO_KHR and
+    ename:VK_PRESENT_MODE_FIFO_RELAXED_KHR in the <<Window System
+    Integration,wsi>> chapter (internal issue 374).
+  * The language of a Note was too broad, and implied that loaders for a
+    given OS would statically export functions for WSI extensions that
+    were not relevant to (or supported on) the OS. Also, removed
+    "Khronos-provided" since the Android loader is not (internal issue 380)
+
+Other Commits:
+
+  * Add ename:VK_INCOMPLETE to list of return values for
+    flink:vkGetPipelineCacheData. Spec says this value is returnable, but it
+    was not listed in the error codes.
+  * Fix "correponds" typo in member definitions for
+    slink:VkSubpassDescription.
+
+-----------------------------------------------------
+
+Change log for June 24, 2016 Vulkan 1.0.18 spec update:
+
+  * Bump API patch number and header version number to 18 for this
+    update.
+
+Github Issues:
+
+  * Added "queue operation" terminology, and modified spec to actually
+    use this terminology (public issue 155). The act of submitting a
+    piece of work to a queue now generates "operations" for the queue to
+    execute, including operations to wait on/signal semaphores and
+    fences. Synchronization waits on these operations, making execution
+    dependency chains more obvious for semaphores and fences (though
+    additional work is still needed here). These changes include:
+  ** Overview of "queue submission" commands in chapter
+     <<devsandqueues-submission>>.
+  ** Updated descriptions for fence and semaphore waits and signals in
+     the synchronization chapter <<synchronization-semaphores-waiting>>,
+     <<synchronization-semaphores-signaling>> and
+     <<synchronization-fences-waiting>>.
+  ** Clarifications to semaphore and fence operation within queue
+     submission functions.
+  ** New glossary terms.
+  ** Moved device idle and queue wait idle to synchronization chapter in
+     order to describe them in terms of other synchronization
+     primitives.
+  ** Clarifications to semaphore and fence operation allowed removal of
+     the "implicit ordering guarantees" section, as this information is
+     now wholly covered where these primitives are described.
+  *** The "host writes" section of this is still there for now - in its
+      own section. This could probably be merged into other sections
+      later.
+  *** Modified fundamentals chapter on queue ordering to make sense in
+      context of the new changes, and avoid duplication.
+      <<fundamentals-queueoperation>>
+  * Added "aspect" and "component" definitions to the glossary, and made
+    sure these terms are referenced correctly (public issue 163).
+  * Update valid usage for ftext:vkGet*ProcAddr to only include
+    conditions that must be met to get a valid result. In particular,
+    it is okay to call flink:vkGetDeviceProcAddr with any string and will
+    get a code:NULL if that string is not a core Vulkan function or an
+    enabled extension function (addresses but does not fully close
+    public issue 214).
+  * Change the WSI extension dependencies to refer to version 1.0 of the
+    Vulkan API, instead of the pre-1.0-release internal revisions
+    numbers (public issue 238).
+  * Specified that <<interfaces-fragmentoutput,undeclared fragment
+    shader outputs>> result in undefined values input to the blending
+    unit or color attachment (public issue 240).
+  * Fix latexmath:[$\leq$] operators turning into Unicode left arrow symbols
+    (public issue 245).
+
+Internal Issues:
+
+  * Better documented that the registry XML "optional" tag for values
+    only applies when that value is the size of an array (internal issue
+    335).
+  * Add a stronger definition for the valid usages of
+    VkSpecializationMapEntry.size in the
+    <<pipelines-specialization-constants,Specialization Constants>>
+    section (internal issue 345).
+  * Change code:OpName to code:OpDecorate (along with appropriate
+    syntax) for vertex shader built-ins (internal issue 368).
+  * Add missing ref pages (those which are not currently stubs) to
+    apispec.txt for the single-page version of the ref pages (internal
+    issue 378).
+
+Other Commits:
+
+  * Fix example in the <<descriptorsets,Descriptor Sets>> section to use
+    M, N, and I, describing set, binding, and index, consistently
+    throughout the example code.
+
+-----------------------------------------------------
+
+Change log for June 17, 2016 Vulkan 1.0.17 spec update:
+
+  * Bump API patch number and header version number to 17 for this
+    update.
+
+Github Issues:
+
+  * Update description of vertex shader reuse in
+    <<shaders-vertex-execution>> (public issue 106).
+  * Simplify validity language around pname:ppEnabledExtensionNames and
+    pname:ppEnabledLayerNames (in the <<initialization-instances>> and
+    <<devsandqueues-device-creation>> sections) (public issue 214).
+  * Add missing validity rule to flink:vkCmdBeginRenderPass requiring
+    compatibility between slink:VkAttachmentDescription pname:initalLayout
+    members and the corresponding attached framebuffer images (public issue
+    233).
+  * Fix Unicode arrows appearing in output instead of relational operators
+    (public issue 239).
+  * Correctly describe the required number of elements for
+    code:TessLevelInner and code:TessLevelOuter arrays in the
+    <<interfaces-builtin-variables,Built-In Variables>> section as two and
+    four, respectively, instead of the other way around, and refer to this
+    section from the <<tessellation,Tessellation>> chapter (public issue
+    246).
+
+Internal Issues:
+
+  * Document deprecation of ename:VK_COLORSPACE_SRGB_NONLINEAR_KHR in the
+    VK_KHR_surface extension, and of
+    ename:VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT in the
+    VK_EXT_debug_report extension (internal issue 328).
+  * Added language to define what a valid usage statement is and should be,
+    with a note about some apparent weirdnesses this might entail (internal
+    issue 357).
+
+Other Commits:
+
+  * Added missing ename:VK_ERROR_DEVICE_LOST error to
+    flink:vkQueueBindSparse.
+
+-----------------------------------------------------
+
+Change log for June 10, 2016 Vulkan 1.0.16 spec update:
+
+  * Bump API patch number and header version number to 16 for this
+    update.
+
+Github Issues:
+
+  * Clarify that integer border values are meant to be 0/1, and that
+    integer texture lookups are sign-extended in the
+    <<textures-format-conversion,Format Conversion>> and
+    <<textures-texel-replacement,Texel Replacement>> sections (public
+    issue 52).
+  * Add logic to generate spec boilerplate without using the 'git'
+    command-line client, needed when building from a tarball or another
+    source of the Vulkan tree rather than a cloned git repo. Remove
+    boilerplate as part of 'clean' target (public issue 195).
+  * Document that color writes and clears to unused attachments have no
+    effect for slink:VkClearAttachment and
+    elink:VkColorComponentFlagBits (public issue 198).
+  * Fixed flink:vkCmdExecuteCommands validity statement for
+    sname:VkCommandBufferInheritanceInfo::pname:framebuffer. If used, it
+    must match the framebuffer in the current renderpass instance
+    (public issue 226).
+  * Added valid usage language to require for all functions that set
+    dynamic state that the currently bound graphics pipeline has the
+    corresponding dynamic state enabled (public issue 235).
+
+Internal Issues:
+
+  * Clarify for flink:vkEnumerateInstanceExtensionProperties, in the
+    <<extended-functionality-instance-extensions-and-devices, Instance
+    Extensions and Device Extensions>> section, and in the
+    <<glossary,Glossary>> section when functionality should be exposed
+    as an instance extension, as a device extension, or as both
+    (internal issue 109).
+  * Place WorkgroupSize in alphabetical order in the
+    <<interfaces-builtin-variables,Built-in Variables>> section
+    (internal issue 323).
+  * Corrects valid usage in vkEndRenderPass to only affect primary
+    render passes, as secondaries may be entirely within a render pass,
+    and should be able to be ended (previous language disallowed that)
+    (internal issue 338).
+  * Fix relational operator from <= to >= in the
+    <<features-extentperimagetype,Allowed Extent Values>> section
+    (internal issue 343).
+  * Disallow recursion under SPIR-V entry points in the
+    <<spirvenv-module-validation,Validation Rules within a Module>>
+    section (internal SPIR-V issue 37).
+
+Other Commits:
+
+  * Use standard Python ElementTree package instead of lxml.etree in
+    header / validation layer / include autogeneration from XML,
+    reducing platform dependencies.
+
+-----------------------------------------------------
+
+Change log for May 27, 2016 Vulkan 1.0.15 spec update:
+
+  * Bump API patch number and header version number to 15 for this
+    update.
+
+Github Issues:
+
+  * Fixed the <<glossary,Glossary>> entry for Fragment Input Attachment
+    Interface to specify code:UniformConstant storage class (public issue
+    156).
+  * Disallow lazily allocated memory for buffers in the description of
+    slink:VkMemoryRequirements::pname:memoryTypeBits (public issue 196).
+  * Add numbered figure captions (public issue 219).
+  * Fix output variable names in the <<fundamentals-fpfixedconv,Conversion
+    from Floating-Point to Normalized Fixed-Point>> section and related
+    minor normative language and markup cleanup (public issue 220).
+
+Internal Issues:
+
+  * Fix reference to nonexistent etext:VK_IMAGE_LAYOUT_TRANSFER_{SRC,DST}BIT
+    to the actual etext:VK_IMAGE_LAYOUT{SRC,DST}_OPTIMAL (internal issue
+    296).
+  * Update the <<sparsememory-sparse-memory-aliasing,Sparse Resource
+    Implementation Guidelines>> to refer to the correct feature names
+    (internal issue 305).
+
+-----------------------------------------------------
+
+Change log for May 20, 2016 Vulkan 1.0.14 spec update:
+
+  * Bump API patch number and header version number to 14 for this
+    update.
+
+Github Issues:
+
+  * Fix validity language for sname:VkCommandBufferAllocateInfo to
+    impose range limits on pname:commandBufferCount (public issue 178).
+  * Fix validity language for flink:vkCmdExecuteCommands to refer to the
+    correct structure names (public issue 179).
+  * Fix two copy-and-paste errors in the WSI queries, where the wrong
+    term was used for what was being returned (public issue 206).
+  * Add a note in the documentation of
+    flink:vkGetPhysicalDeviceSurfaceFormatsKHR, about what it means if
+    ename:VK_FORMAT_UNDEFINED is returned (public issue 207).
+
+Internal Issues:
+
+  * Clarify the usage and correct the name for the bitmask referenced in
+    <<queries-pipestats,Pipeline Statistics Queries>> (internal issue
+    334).
+
+Other Commits:
+
+  * Fix the names of decorations listed in the
+    <<interfaces-builtin-variables,Built-in Variables>> section such
+    that they match the SPIR-V specification.
+
+-----------------------------------------------------
+
+Change log for May 13, 2016 Vulkan 1.0.13 spec update:
+
+  * Bump API patch number and header version number to 13 for this
+    update.
+
+Github Issues:
+
+  * Improve the description of ename:VK_PRESENT_MODE_FIFO_RELAXED_KHR in the
+    VK_KHR_surface extension (public issue 174).
+  * Clarify use of etext:*_SIMULTANEOUS_USE_BIT for secondary command
+    buffers (public issue 182).
+  * Fix typos in VK_KHR_wayland_surface extension where code:wl_device was
+    used instead of code:wl_display (public issue 193).
+  * Replaced {apiname} with ``Vulkan'' in XML validity statements (public
+    issue 199).
+  * Fix dead links for WSI handle types (public issue 200).
+  * Use "signaled" instead of "signalled" spelling everywhere (public issue
+    201).
+  * Move readme.pdf target directory for XML schema documentation into the
+    target generation directory, instead of leaving it checked into the spec
+    source tree (public issue 203).
+  * Fix duplicate 'which which' typo in description of
+    elink:VkCommandPoolResetFlagBits (public issue 204).
+  * Move the <<Programmable Primitive Shading>> section up one level, out of
+    the <<drawing-primitive-topologies,Primitive Topologies>> section
+    (public issue 209).
+
+Internal Issues:
+
+  * Clarify in the <<pipelines-cache,Pipeline Cache>> section that
+    implementations should not manage the size of pipeline cache (internal
+    issue 192).
+  * Deprecate the concept of device layers and associated commands (internal
+    issue 255).
+  * Remove ename:VK_INCOMPLETE from the list of possible result codes of
+    flink:vkGetPhysicalDeviceSurfaceCapabilitiesKHR (internal issue 314).
+  * Add missing std140/std430 rule: the base alignment of a member following
+    a structure is a multiple of the structure's base alignment (internal
+    issue 321).
+  * Fixes naming of the single elink:VkColorSpaceKHR enum from
+    ename:VK_COLORSPACE_SRGB_NONLINEAR_KHR to
+    ename:VK_COLOR_SPACE_SRGB_NONLINEAR_KHR in XML/header and the
+    VK_KHR_swapchain and VK_KHR_surface extensions to match the style of the
+    typename (space and color are two words, not one) (internal issue 322).
+  * Make it clear that code:LocalInvocationID should only be applied to an
+    input variable and normalize the language describing
+    code:LocalInvocationID to the language for other compute shader
+    variables in the <<interfaces-builtin-variables,Built-in Variables>>
+    section, and add normative language (internal issue 323).
+  * Clarify in the <<fundamentals-returncodes,Return Codes>> section that
+    the result pointer may be modified for specific commands, even if a
+    runtime error is returned (internal issue 324).
+
+-----------------------------------------------------
+
+Change log for April 29, 2016 Vulkan 1.0.12 spec update:
+
+  * Bump API patch number and header version number to 12 for this
+    update.
+
+Github Issues:
+
+  * Change valid usage statements intended to be "sub-points" to
+    be actual sub-points (public issue 66).
+  * Replace double negation in description of
+    slink:VkRenderPassBeginInfo::pname:pClearValues (based on public
+    merge 142).
+  * Cleanup minor typos in spec, ref pages and XML, including those
+    proposed in public pull requests 144, 150, 151, 167, 168, 181, and
+    186.
+  * Use *strict subset* in describing the partial order of memory
+    property types for slink:VkMemoryType, and update the style guide
+    accordingly (public issue 190).
+  * Fix various "a image" -> "an image" typos (public issue 191).
+  * Note in the <<fundamentals-validusage,Valid Usage>> and
+    <<extensions-interactions,Extension Interactions>> sections that
+    structures defined by extensions which may be passed in structure
+    chains using the ptext:pNext member must include initial
+    ptext:sType and ptext:pNext members (public issue 192).
+
+Internal Issues:
+
+  * Remove duplicate language from the description of the pname:fence
+    parameter to flink:vkQueueSubmit and improve validity language
+    (internal issue 91).
+  * Added documentation for "optional" attribute to XML readme.tex/pdf
+    (internal issue 149).
+  * Clarify the host-side data validity rules and behavior of
+    flink:vkFlushMappedMemoryRanges and
+    flink:vkInvalidateMappedMemoryRanges (internal issue 266).
+
+Other Commits:
+
+  * Added clarification to flink:vkCmdFillBuffer regarding the use of
+    ename:VK_WHOLE_SIZE.
+  * Fixed and documented implementation of "validextensionstructs"
+    attribute. in XML processing scripts and readme.tex/pdf.
+  * Add missing validity statements to flink:vkResetEvent and
+    flink:vkCmdResetEvent.
+  * Fix validity for the
+    ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT flag.
+    Correct all the draw/dispatch commands to mention optimally tiled
+    images as well as linear tiled images, and say image VIEWS instead
+    of images. Add validity statement to flink:vkCmdBlitImage
+  * Replace the {apiname} macro with hardcoded "Vulkan", now that we have
+    committed to that name.
+  * Add the VK_AMD_rasterization_order extension to vk.xml.
+
+-----------------------------------------------------
+
+Change log for April 22, 2016 Vulkan 1.0.11 spec update:
+
+  * Bump API patch number and header version number to 11 for this
+    update.
+
+Github Issues:
+
+  * Clarify the WSI extension language by switching from the fuzzier
+    "ownership" language to more-consistent "acquire" language (public
+    issue 117).
+  * Clarify that memory barriers apply to all commands in the dependency
+    chains in the flink:vkGetRenderAreaGranularity command and the
+    <<synchronization-execution-and-memory-dependencies,Execution And
+    Memory Dependencies>> section (public issue 132).
+  * Clarify that a queue family is a set of queues in the
+    <<fundamentals-execmodel,Execution Model>> section (public issue
+    166).
+  * Removed requirement from valid usage language that
+    VkPresentInfoKHR::waitSemaphoreCount must be greater than 0 (public
+    issue 171).
+  * Fix broken internal links, describe structures consistently, use
+    consistent style for SPIR-V codewords, and tag normative terms that
+    were missing asciidoc tags (public issue 183 and ancillary
+    markup/normative language fixes).
+  * Fix typos for slink:VkPhysicalDeviceLimits member names in
+    slink:VkImageCreateInfo validity language (public issue 184).
+
+Internal Issues:
+
+  * Document that the requested patch version number specified as part
+    of slink:VkApplicationInfo::pname:apiVersion is ignored when
+    creating an instance (internal issue 176).
+  * Clarify handling of extension structs in the
+    <<fundamentals-validusageValid Usage>> section (internal issue 254).
+  * Update required slink:VkImageFormatProperties::pname:maxMipLevels to
+    be limited to the maximum allowed mipmap pyramid size corresponding
+    to the actual maximum supported size for the format (internal issue
+    256).
+  * Modify the <<features-extentperimagetype,Allowed Extent Values Based
+    On Image Type>> section so the allowed maximum extent is the maximum
+    image dimension supported for each dimension of the type of texture
+    being queried (internal issue 257).
+  * Clarify in the <<spirvenv-module-validation,Validation Rules within
+    a Module>> section that at least one of the code:LocalSize execution
+    mode or code:WorkgroupSize decoration is required for each compute
+    shader entry point in a shader module (internal issue 279).
+  * Add validity rules for formats in flink:vkCmdClearColorImage and
+    flink:vkCmdClearDepthStencilImage (internal issue 283).
+  * Clarify that slink:VkImageFormatProperties::pname:maxResourceSize is
+    an upper bound, and that it may not be possible to create an image
+    anywhere near that size (internal issue 284).
+
+Other Commits:
+
+  * Fix various minor markup errors reported by validation scripts.
+  * Change copyright from Khronos Free Use License to Apache 2.0 license
+    on relevant script/XML/header files. This does not affect the
+    specification source copyright.
+
+-----------------------------------------------------
+
+Change log for April 15, 2016 Vulkan 1.0.10 spec update:
+
+  * Bump API patch number and header version number to 10 for this
+    update.
+
+Github Issues:
+
+  * Slightly tweak the <<memory-allocation,Host Memory>> allocator language
+    so that an application wrapping the standard C alloc/free/realloc
+    functions is still correct - the previous language was too strong with
+    regards to freeing memory. Also made certain scenarios clearer - an
+    implementation may now continue without error if an allocation failed
+    and it is able to continue correctly (public issue 21).
+  * Require that etext:VK_*_CREATE_SPARSE_BINDING_BIT is set when the
+    corresponding etext:VK_*_CREATE_SPARSE_RESIDENCY_BIT is used, in the
+    <<sparsememory-miptail,Mip Tail Regions>> section and related commands
+    flink:vkCreateBuffer and flink:vkCreateImage (public issue 84).
+  * Update the <<features,Features, Limits, and Formats>> chapter to clarify
+    interactions between optional features and dynamic state for the
+    pname:depthBiasClamp and pname:wideLines features (public issue 89).
+  * Describe the code:WorkgroupSize builtin in the
+    <<interfaces-builtin-variables,Built-In Variables>> section, and update
+    the <<compute-shaders,Compute Shaders>> section to further clarify how
+    to set the number of workgroups to execute in a compute shader (public
+    issue 145).
+  * Use the term *image subresource* everywhere instead of *subresource*,
+    except for the special case of *host-accessible subresource*, which may
+    be either an image subresource or buffer range (public issue 120)
+  * Add a note to the <<features,Features, Limits, and Formats>> section
+    about extensibility of structures (Public issue 165).
+  * Fix return code flink:vkAcquireNextImageKHR when the timeout parameter
+    is 0 to ename:VK_NOT_READY instead of ename:VK_TIMEOUT (public issue
+    170).
+  * Fix typo in slink:VkLayerProperties::pname:apiVersion field (public
+    issue 172).
+
+Internal Issues:
+
+  * Fix a few minor internally-detected typos.
+  * Minor formatting tweaks to pseudocode in the <<resources,Resource
+    Creation>> chapter (internal issue 179).
+  * Fix typo in the definition of point sampling for
+    elink:VkCullModeFlagBits (internal issue 268).
+
+-----------------------------------------------------
+
+Change log for April 8, 2016 Vulkan 1.0.9 spec update:
+
+  * Bump API patch number and header version number to 9 for this
+    update.
+
+Github Issues:
+
+  * Fix memory type preorder definition and clarify example list and source
+    code for slink:VkMemoryRequirements and slink:VkMemoryHeap (public issue
+    26).
+  * Ensure slink:VkAllocationCallbacks are properly defined (public issue
+    73).
+  * Clarify the WSI extension language by switching from the fuzzier
+    "ownership" language to more-consistent "acquire" language (public issue
+    117).
+  * Add language allowing allocation and freeing of memory scoped to the
+    duration of any API command in the <<memory-allocation,Memory
+    Allocation>> section (public issue 136).
+  * Clarify the explicit location assignment always overrides the inherited
+    location in the <<interfaces-iointerfaces-locations,Location
+    Assignment>> section, even for the first member of a block (public issue
+    141).
+  * Fixed references to
+    slink:VkCommandBufferInheritanceInfo::pname:pipelineStatistics (public
+    issue 158).
+  * Fix name of slink:VkBufferCopy::pname:size field in validity language
+    for flink:vkCmdCopyBuffer (public issue 162).
+
+Internal Issues:
+
+  * Update GL_KHR_vulkan_glsl specification to clarify disallowance of
+    spec-const arrays in initializers (internal issue 248).
+  * Clarify <<interfaces-iointerfaces-matching,Interface Matching>> section
+    to state that user-defined variable interface must match too (internal
+    issue 250).
+
+-----------------------------------------------------
+
+Change log for April 1, 2016 Vulkan 1.0.8 spec update:
+
+  * Bump API patch number and header version number to 8 for this
+    update.
+
+Github Issues:
+
+  * Specify in the validity language for flink:vkBeginCommandBuffer that
+    pname:commandBuffer must not currently be pending execution (public
+    issue 96).
+  * Describe depth comparison using the correct temporary variable names
+    in the <<textures-depth-compare-operation,Depth Compare Operation>>
+    section (public issue 100).
+  * Clarify the order of descriptor update operations in the
+    flink:vkUpdateDescriptorSets command (public issue 115).
+  * Specify in the VK_KHR_swapchain extension that
+    flink:vkAcquireNextImageKHR's pname:semaphore and pname:fence
+    parameters cannot both be sname:VK_NULL_HANDLE (partly addresses,
+    but does not fully close, public issue 117 / internal issue 246).
+  * Change reference to the "lifetime" of a Vulkan command to
+    "duration", and define the "duration" term (public issue 135).
+  * Added valid usage language for slink:VkImageLayout to require both
+    pname:height and pname:depth to be 1 for 1D images and pname:depth
+    to be 1 for 2D images (public issue 137).
+  * Fix SPIR-V example code in the
+    <<descriptorsets-inputattachment,Input Attachment>> section to
+    properly decorate the code:InputAttachmentIndex (public issue 139).
+  * Fix reference to nonexistent pname:imageInfo in the description of
+    flink:VkWriteDescriptorSet to refer to pname:pImageInfo (public
+    issue 140).
+
+Internal Issues:
+
+  * Link to the fixed-function vertex chapter from the drawing chapter
+    (internal issue 110)
+  * Fix typo in slink:VkImageCreateInfo validity language:
+    ptext:maxExtent.sampleCounts -> pname:sampleCounts (internal issue
+    249).
+  * Explain why the non-core token etext:VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+    is used in the example in the
+    <<synchronization-semaphores,Semaphores>> section (internal issue
+    251).
+  * Attempt to clarify in the VK_KHR_android_surface extension's
+    <<platformQuerySupport_android,Android Platform Support>> section
+    that there is no Android-specific WSI query, and why (internal issue
+    252).
+
+Other Commits:
+
+  * Add missing language about ename:VK_INCOMPLETE being returned from
+    array queries when the passed array is too short, in the
+    VK_KHR_display, VK_KHR_swapchain, and VK_KHR_surface extensions.
+
+-----------------------------------------------------
+
+Change log for March 25, 2016 Vulkan 1.0.7 spec update:
+
+  * Bump API patch number and header version number to 7 for this
+    update.
+
+Github Issues:
+
+  * Fix slink:VkSpecializationMapEntry example to avoid C/C++ strict
+    aliasing issues (public issue 14).
+  * Clarify the meaning of "matching" in flink:vkCmdBindDescriptorSets
+    validity language (public issue 33).
+  * Add stub reference pages so xrefs to not-yet-written pages do not
+    generate 404 errors. However, the actual content of these pages
+    still needs to be filled in as time allows (public issue 44, but
+    does not close that issue out).
+  * Remove incorrect validity statement for
+    flink:vkGetImageSparseMemoryRequirements (public issue 85).
+  * Reword the
+    <<features-limits-bufferImageGranularity,bufferImageGranularity>>
+    feature in terms of "aliasing", and clarify that it applies to
+    bindings in the same memory object (public issue 90).
+  * Clarify the relationship of the slink:VkPhysicalDeviceLimits
+    pname:maxViewportDimensions and pname:viewportBoundsRange limits
+    (public issue 92).
+  * Specify sparse unbound texture replacement in the
+    <<textures-texel-replacement,Texel Replacement>> section
+    independently of robust buffer access language (public issue 100).
+  * Add the <<fundamentals-architecture-model,Architecture Model>>
+    section to explain architecture constraints Vulkan has chosen to
+    accept in order to enable portable and performant code (public issue
+    122).
+  * State that an object must not be destroyed until *all* (not *any*)
+    uses of that object have completed (public issue 123).
+  * Minor editorial cleanup (public issues 129, 134, 146, 148).
+  * Add validity language for layer and extension names to
+    slink:VkDeviceCreateInfo matching that used for
+    slink:VkInstanceCreateInfo (public issue 130).
+  * Clean up terminology for the case when the bits set in one bitmask
+    are a subset of the bits set in another bitmask (public issue 138).
+  * Document that input attachments are UniformConstant not Input, in
+    the <<interfaces-inputattachment,Fragment Input Attachment
+    Interface>> section (public glslang bug 169).
+
+Internal Issues:
+
+  * Add max enum values to "flag bits" enums (internal issue 136).
+  * Clarify language around the various uses of the term "block" in the
+    <<appendix-compressedtex-bc,Block Compressed Image Formats>> section
+    (internal issue 202).
+  * Removed "expand" dependency from <enums> groups in vk.xml and added
+    auto-generation code in the scripts to infer it instead, to ensure
+    consistency. This caused renaming of sname:VkColorSpaceKHR and
+    sname:VkPresentModeKHR etext:BEGIN_RANGE (etc.) tokens, but those
+    tokens are metadata, not part of the API, and the Vulkan WG is OK
+    with this change. This change adds ranges to two additional enums
+    that were missing them due to not defining the "expand" attribute
+    (internal issue 217).
+  * Tweak makefile to generate ref page nroff (.3) files in the right
+    output directory, working around an a2x limitation (internal issue
+    223).
+
+Other Commits:
+
+  * Add validity requirements for flink:vkCmdCopyQueryPoolResults
+    pname:dstBuffer parameter.
+  * Fix ref page build to generate .3 targets in the right output
+    directory.
+
+-----------------------------------------------------
+
+Change log for March 10, 2016 Vulkan 1.0.6 spec update:
+
+  * Bump API patch number and header version number to 6 for this
+    update.
+
+Github Issues:
+
+  * Define 'invocation group' for compute and graphics shaders. Cleanup
+    definition and use of 'workgroup', and add glossary entries (public
+    issue 1).
+  * Various minor editorial fixes (public issue 33).
+  * Clarify locations for block members in the
+    <<interfaces-iointerfaces-locations,Location Assignment>>
+    section (public issue 45).
+  * Editorial fixes for <<commandbuffer-allocation,Command Buffer
+    Allocation>> section (public issues 54, 59).
+  * Clarify behavior of depth test in the <<fragops-depth,Depth Test>>
+    section (public issues 80, 81).
+  * Remove discussion of return codes from
+    flink:vkGetPhysicalDeviceSparseImageFormatProperties and
+    flink:vkGetImageSparseMemoryRequirements, which do not return values
+    (public issue 82).
+  * Allow flink:vkCmdDrawIndirect and flink:vkCmdDrawIndexedIndirect
+    pname:drawCount of 0, as well as 1, when the multiDrawIndirect
+    feature is not supported (public issue 88).
+  * Remove confusing wording in the <<features-limits,Limits>>
+    section describing the slink:VkPhysicalDeviceLimits
+    pname:minTexelBufferOffsetAlignment,
+    pname:minUniformBufferOffsetAlignment, and
+    pname:minStorageBufferOffsetAlignment members as both minimums and
+    maximums (public issue 91).
+  * Clarified that only the RGB components should be affected in places
+    where sRGB is referred to in the spec, such as ASTC formats. Minor
+    re-wording to avoid "color space" when actively incorrect, now that
+    we refer to the Data Format Spec which actually makes a distinction
+    between color space and transfer function (public issue 94).
+  * Treat pname:pPropertyCount == 0 consistently in
+    flink:vkEnumerateInstanceLayerProperties and
+    flink:vkEnumerateDeviceLayerProperties (public issue 99)
+  * Cleanup minor editorial issues in chapters 14-17 (public issue 100).
+  * Clarify definition of flink:vkEnumerateInstanceExtensionProperties
+    and flink:vkEnumerateDeviceExtensionProperties (public issue 101).
+  * Define the flink:vkEnumerateInstanceExtensionProperties and
+    flink:vkEnumerateDeviceExtensionProperties pname:pLayerName
+    parameter to be a pointer to a null-terminated UTF-8 string (public
+    issue 101).
+  * Rearrange "Missing information" references in mandatory format
+    tables (public issue 101).
+  * Clarify that the enumerated extensions returned by
+    flink:vkEnumerateInstanceExtensionProperties and
+    flink:vkEnumerateDeviceExtensionProperties will only include
+    extensions provided by the platform or extensions implemented in
+    implicitly enabled layers (public issue 101).
+  * Miscellaneous editorial fixes. Include the Vulkan spec patch number
+    in the PDF title. Fix label on <<fig-non-strict-lines,Non
+    strict lines>> diagram. Use more easily distinguished symbols in
+    tables in the <<features-required-format-support,Required
+    Format Support>> section. Do not require FQDNs used as layer names be
+    encoded in lower case if not possible, in the
+    <<extensions-naming-conventions, Extension and Layer Naming
+    Conventions>> section (public issues 101, 119, 121).
+
+Internal Issues:
+
+  * Fixed excessive spacing in tables in XHTML (internal issue 18).
+  * Clarify that ename:VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
+    applies to secondary command buffers. Previously spec only referred
+    to the members of pname:pCommandBuffers being affected by this bit.
+    Added a separate slink:VkSubmitInfo Valid Usage restriction
+    specifying that ename:VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
+    also applies to any secondary command buffers that are recorded into
+    the primary command buffers in pname:pCommandBuffers (internal issue
+    106).
+  * Clarify that slink:VkDeviceCreateInfo::pname:pEnabledFeatures can be
+    NULL (internal issue 117).
+  * Remove "the value of" where it is redundant (e.g. speaking of an API
+    parameter, struct member, or SPIR-V variable, but not when speaking
+    of color components) (internal issue 175).
+  * Forced patch version to always be 0 in the header. Add a
+    "VK_API_VERSION_<major>_<minor>" macro for people to use to do the
+    right thing. Add a VK_HEADER_VERSION which captures the header
+    release number independent of the spec patch number (internal issue
+    176).
+  * Correct description of
+    slink:VkPipelineShaderStageCreateInfo::pname:pName to "a pointer to
+    a null-terminated UTF-8 string" (internal issue 197).
+
+Other Commits:
+
+  * Updated DataFormat spec reference to the new date for revision 5 of
+    that spec.
+  * Fixed KEEP option (to retain LaTeX intermediate files) in the
+    Makefile to be included when edited there, as well as set on the
+    command line.
+  * Reserve and add "VK_IMG_filter_cubic" to the registry, and implement
+    script functionality to add and remove validity from existing
+    functions. Includes schema and readme changes.
+  * Update GL_KHR_vulkan_glsl so push_constants do not have descriptor
+    sets.
+
+-----------------------------------------------------
+
+Change log for March 4, 2016 Vulkan 1.0.5 spec update:
+
+  * Bump API patch number to 5 for this update.
+
+Github Issues:
+
+  * Correctly describe slink:VkPhysicalDeviceProperties pname:deviceName
+    member as a string, not a pointer to a string. Also one typo fix for
+    "hetereogeneous" (public issue 4).
+  * Replace maynot: macro with may: not, and "may: or maynot:" with
+    "may:" (public issue 4).
+  * Clarify that redundantly setting the state of a fence or event has
+    no effect (public issue 4).
+  * Minor fixes to ref pages to track descriptions of memory bits that
+    changed in the core spec. Fix name of a member in the description of
+    sname:sname:VkPipelineMultisampleStateCreateInfo (public issues 8,
+    13).
+  * Remove redundant validity statement for
+    sname:VkGraphicsPipelineCreateInfo::pname:stageCount (public issue
+    14).
+  * Fix typos in chapters 7-9 (public issue 14).
+  * Clarify the example demonstrating the behavior of
+    code:OpMemoryBarrier in the
+    <<shaders-execution-memory-ordering,shader memory acces
+    ordering>> section (public issue 16).
+  * Specify that freeing mapped memory implicitly unmaps the memory in
+    the description of flink:vkFreeMemory (public issue 17).
+  * Forbid allocation callbacks from calling into the API in the
+    <<memory-allocation,memory allocation>> section (public issue
+    20).
+  * Add missing validity rules about size being greater than 0 and
+    offset being less than size of object. Fix
+    flink:VkMappedMemoryRange's misinterpretation of offset (public
+    issues 27, 31).
+  * Add validity rule disallowing overlapping source/destination
+    descriptors in flink:VkCopyDescriptorSet (public issue 32).
+  * Clarify that array and matrix stride has to be a multiple of the
+    base alignment of the array or matrix in the
+    <<interfaces-resources-layout,Offset and Stride Assignment>>
+    section (public issue 38).
+  * Correct parenthesis floor nesting error in equation for
+    <<textures-RGB-sexp,RGB to shared exponent conversion>>.
+    Clarify case of when exp' is forced to 0, avoiding log2(0) undefined
+    problem (public issue 40).
+  * Remove redundant statement from the code:FragDepth description in
+    the <<interfaces-builtin-variables,Built-In Variables>>
+    section (public issue 47).
+  * Define the clamping of the
+    <<textures-level-of-detail-operation,bias added to the scale
+    factor>> by linking to the slink:VkPhysicalDevice feature
+    pname:maxSamplerLodBias (public issue 64).
+  * Fix typo "optimal linear resources" and clarify the set of resources
+    <<features-limits-bufferImageGranularity,the
+    pname:bufferImageGranularity resource>> applies to (public issue
+    67).
+  * Replace 'descriptor accessed by a pipeline' language for
+    sname:VkDescriptorSetAllocateInfo with more precise phrasing about
+    binding a descriptor set before a command that invokes work using
+    that set (public issue 69).
+  * tstripadj.svg contained an Inkscape tag which caused Firefox and IE
+    11 to fail to render it, and was illegal SVG. Generating Plain SVG
+    from the Inkscape SVG source fixes this (public issue 70).
+  * Fix validity for sname:VkVertexInputBindingDescription and
+    sname:VkVertexInputAttributeDescription numbers (public issue 72).
+
+Internal Issues:
+
+  * Clarify the meaning of
+    ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT in
+    elink:VkFormatFeatureFlagBits with respect to depth compare
+    (internal issue 107).
+  * Added a note explaining that ename:VK_QUEUE_TRANSFER_BIT may or may
+    not be reported for a queue family that already supports
+    ename:VK_QUEUE_GRAPHICS_BIT or ename:VK_QUEUE_COMPUTE_BIT as the
+    former is a strict subset of the latter ones (internal issue 116).
+  * Add validity language for sname:VkDescriptorSetAllocateInfo about
+    exceeding the descriptor pool capacity (internal issue 140).
+  * Add ename:VK_INCOMPLETE success code for
+    flink:vkEnumeratePhysicalDevices query (internal issue 163).
+
+Other Commits:
+
+  * Add the VK_NV_glsl_shader extension definitions to the API.
+  * Update GL_KHR_vulkan_glsl with 1) origin_upper_left as default 2)
+    specialization array constant semantics.
+  * Corrected/updated Data Format Specification date.
+
+-----------------------------------------------------
+
+Change log for February 25, 2015 Vulkan 1.0.4 spec update:
+
+  * Bump API patch number from 3 to 4 for the first public update to the
+    spec. Add patch number to the spec title (this will be done
+    automatically from XML, later).
+  * Fixes for numerous editorial issues. Regularize descriptions of
+    variable-length array queries. Properly tag enumerants so they come
+    out in the right font (many were mislabeled in usage tags in vk.xml,
+    or not tagged). Spelling and markup corrections (public issue 4).
+  * Fix typos and clearly separate description of different types of
+    memory areas (public issue 5).
+  * Use standards-compliant preprocessor guard symbols on headers
+    (public issue 7).
+  * Note that Github users cannot currently set labels on issues, and
+    recommend a fallback approach (public issue 15).
+  * Use latexmath prefix on len= attributes (public issue 29).
+  * Make flink:vkCmdUpdateBuffer pname:dataSize limit consistent (public
+    issue 65).
+  * Add VK_KHR_mirror_clamp_to_edge extension to core API branch, as an
+    optional feature not introducing new commands or enums (internal
+    issue 104).
+  * Cleanup invariance language inherited from the GL specification to
+    not refer to nonexistent (GL-specific) state (internal issue 111).
+  * Modify the flink:vkCmdDrawIndexed pname:vertexOffset definition to
+    not be the "base offset within the index buffer" but rather the
+    "value added to the vertex index before indexing into the vertex
+    buffer" (internal issue 118).
+  * Fix drawing chapter in the "Programmable Primitive Shading" section
+    where it described categories of drawing commands. It referenced
+    flink:vkCmdDrawIndexed twice. Replace the second reference with
+    flink:vkCmdDrawIndexedIndirect (internal issue 119).
+  * Typo fixed in <<sparsememory-examples-advanced,Advanced Sparse
+    Resources>> sparse memory example (internal issue 122).
+  * Add flink:VkDisplayPlaneAlphaFlagsKHR to <require> section of
+    VK_KHR_display extension (internal issue 125)
+  * Add missing optional="false,true" to
+    flink:vkGetImageSparseMemoryRequirements
+    pname:pSparseMemoryRequirementCount parameter (internal issue 132)
+  * Rename ename:VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT to
+    ename:VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
+    (internal issue 133)
+  * Fix a handful of broken cross-references in the
+    <<samplers,Samplers>> chapter (internal issue 134).
+  * Fix "Input Attachement" GLSL example to use correct syntax (internal
+    issue 135).
+  * Update XML schema and documentation to accomodate recently added
+    attributes for validity. Add some introductory material describing
+    design choices and pointing to the public repository to file issues.
+  * Put include of validity in the core spec extensions chapter on its
+    own line, so that asciidoc is happy.
+  * Fix vertexOffset language to specify that it is the value added to
+    the vertex index before indexing into the vertex buffer, not the
+    base offset within the index buffer.
+  * Fix error in the description of flink:vkCmdNextSubpass.
+
+-----------------------------------------------------
+
+February 16, 2016 - Vulkan 1.0 initial public release
+

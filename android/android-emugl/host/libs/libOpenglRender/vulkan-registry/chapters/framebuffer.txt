@@ -1,0 +1,550 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[framebuffer]]
+= The Framebuffer
+
+
+[[framebuffer-blending]]
+== Blending
+
+Blending combines the incoming _source_ fragment's R, G, B, and A values
+with the _destination_ R, G, B, and A values of each sample stored in the
+framebuffer at the fragment's [eq]#(x~f~,y~f~)# location.
+Blending is performed for each pixel sample, rather than just once for each
+fragment.
+
+Source and destination values are combined according to the
+<<framebuffer-blendoperations,blend operation>>, quadruplets of source and
+destination weighting factors determined by the <<framebuffer-blendfactors,
+blend factors>>, and a <<framebuffer-blendconstants,blend constant>>, to
+obtain a new set of R, G, B, and A values, as described below.
+
+Blending is computed and applied separately to each color attachment used by
+the subpass, with separate controls for each attachment.
+
+Prior to performing the blend operation, signed and unsigned normalized
+fixed-point color components undergo an implied conversion to floating-point
+as specified by <<fundamentals-fixedfpconv,Conversion from Normalized
+Fixed-Point to Floating-Point>>.
+Blending computations are treated as if carried out in floating-point, and
+basic blend operations are performed with a precision and dynamic range no
+lower than that used to represent destination components.
+ifdef::VK_EXT_blend_operation_advanced[]
+<<framebuffer-blend-advanced,Advanced blending operations>> are performed
+with a precision and dynamic range no lower than the smaller of that used to
+represent destination components or that used to represent 16-bit
+floating-point values.
+endif::VK_EXT_blend_operation_advanced[]
+
+Blending applies only to fixed-point and floating-point color attachments.
+If the color attachment has an integer format, blending is not applied.
+
+The pipeline blend state is included in the
+sname:VkPipelineColorBlendStateCreateInfo structure during graphics pipeline
+creation:
+
+[open,refpage='VkPipelineColorBlendStateCreateInfo',desc='Structure specifying parameters of a newly created pipeline color blend state',type='structs']
+--
+
+The sname:VkPipelineColorBlendStateCreateInfo structure is defined as:
+
+include::../api/structs/VkPipelineColorBlendStateCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:logicOpEnable controls whether to apply <<framebuffer-logicop,
+    Logical Operations>>.
+  * pname:logicOp selects which logical operation to apply.
+  * pname:attachmentCount is the number of
+    sname:VkPipelineColorBlendAttachmentState elements in
+    pname:pAttachments.
+    This value must: equal the pname:colorAttachmentCount for the subpass in
+    which this pipeline is used.
+  * pname:pAttachments: is a pointer to array of per target attachment
+    states.
+  * pname:blendConstants is an array of four values used as the R, G, B, and
+    A components of the blend constant that are used in blending, depending
+    on the <<framebuffer-blendfactors,blend factor>>.
+
+Each element of the pname:pAttachments array is a
+slink:VkPipelineColorBlendAttachmentState structure specifying per-target
+blending state for each individual color attachment.
+If the <<features-features-independentBlend,independent blending>> feature
+is not enabled on the device, all slink:VkPipelineColorBlendAttachmentState
+elements in the pname:pAttachments array must: be identical.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineColorBlendStateCreateInfo-pAttachments-00605]]
+    If the <<features-features-independentBlend,independent blending>>
+    feature is not enabled, all elements of pname:pAttachments must: be
+    identical
+  * [[VUID-VkPipelineColorBlendStateCreateInfo-logicOpEnable-00606]]
+    If the <<features-features-logicOp,logic operations>> feature is not
+    enabled, pname:logicOpEnable must: be ename:VK_FALSE
+  * [[VUID-VkPipelineColorBlendStateCreateInfo-logicOpEnable-00607]]
+    If pname:logicOpEnable is ename:VK_TRUE, pname:logicOp must: be a valid
+    elink:VkLogicOp value
+****
+
+include::../validity/structs/VkPipelineColorBlendStateCreateInfo.txt[]
+--
+
+[open,refpage='VkPipelineColorBlendStateCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineColorBlendStateCreateFlags.txt[]
+
+sname:VkPipelineColorBlendStateCreateFlags is a bitmask type for setting a
+mask, but is currently reserved for future use.
+--
+
+[open,refpage='VkPipelineColorBlendAttachmentState',desc='Structure specifying a pipeline color blend attachment state',type='structs']
+--
+
+The sname:VkPipelineColorBlendAttachmentState structure is defined as:
+
+include::../api/structs/VkPipelineColorBlendAttachmentState.txt[]
+
+  * pname:blendEnable controls whether blending is enabled for the
+    corresponding color attachment.
+    If blending is not enabled, the source fragment's color for that
+    attachment is passed through unmodified.
+  * pname:srcColorBlendFactor selects which blend factor is used to
+    determine the source factors [eq]#(S~r~,S~g~,S~b~)#.
+  * pname:dstColorBlendFactor selects which blend factor is used to
+    determine the destination factors [eq]#(D~r~,D~g~,D~b~)#.
+  * pname:colorBlendOp selects which blend operation is used to calculate
+    the RGB values to write to the color attachment.
+  * pname:srcAlphaBlendFactor selects which blend factor is used to
+    determine the source factor [eq]#S~a~#.
+  * pname:dstAlphaBlendFactor selects which blend factor is used to
+    determine the destination factor [eq]#D~a~#.
+  * pname:alphaBlendOp selects which blend operation is use to calculate the
+    alpha values to write to the color attachment.
+  * pname:colorWriteMask is a bitmask of elink:VkColorComponentFlagBits
+    specifying which of the R, G, B, and/or A components are enabled for
+    writing, as described for the <<framebuffer-color-write-mask,Color Write
+    Mask>>.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineColorBlendAttachmentState-srcColorBlendFactor-00608]]
+    If the <<features-features-dualSrcBlend,dual source blending>> feature
+    is not enabled, pname:srcColorBlendFactor must: not be
+    ename:VK_BLEND_FACTOR_SRC1_COLOR,
+    ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+    ename:VK_BLEND_FACTOR_SRC1_ALPHA, or
+    ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
+  * [[VUID-VkPipelineColorBlendAttachmentState-dstColorBlendFactor-00609]]
+    If the <<features-features-dualSrcBlend,dual source blending>> feature
+    is not enabled, pname:dstColorBlendFactor must: not be
+    ename:VK_BLEND_FACTOR_SRC1_COLOR,
+    ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+    ename:VK_BLEND_FACTOR_SRC1_ALPHA, or
+    ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
+  * [[VUID-VkPipelineColorBlendAttachmentState-srcAlphaBlendFactor-00610]]
+    If the <<features-features-dualSrcBlend,dual source blending>> feature
+    is not enabled, pname:srcAlphaBlendFactor must: not be
+    ename:VK_BLEND_FACTOR_SRC1_COLOR,
+    ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+    ename:VK_BLEND_FACTOR_SRC1_ALPHA, or
+    ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
+  * [[VUID-VkPipelineColorBlendAttachmentState-dstAlphaBlendFactor-00611]]
+    If the <<features-features-dualSrcBlend,dual source blending>> feature
+    is not enabled, pname:dstAlphaBlendFactor must: not be
+    ename:VK_BLEND_FACTOR_SRC1_COLOR,
+    ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+    ename:VK_BLEND_FACTOR_SRC1_ALPHA, or
+    ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA
+ifdef::VK_EXT_blend_operation_advanced[]
+  * [[VUID-VkPipelineColorBlendAttachmentState-colorBlendOp-01406]]
+    If either of pname:colorBlendOp or pname:alphaBlendOp is an
+    <<framebuffer-blend-advanced,advanced blend operation>>, then
+    pname:colorBlendOp must: equal pname:alphaBlendOp
+  * [[VUID-VkPipelineColorBlendAttachmentState-advancedBlendIndependentBlend-01407]]
+    If
+    slink:VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT::pname:advancedBlendIndependentBlend
+    is ename:VK_FALSE and pname:colorBlendOp is an
+    <<framebuffer-blend-advanced,advanced blend operation>>, then
+    pname:colorBlendOp must: be the same for all attachments.
+  * [[VUID-VkPipelineColorBlendAttachmentState-advancedBlendIndependentBlend-01408]]
+    If
+    slink:VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT::pname:advancedBlendIndependentBlend
+    is ename:VK_FALSE and pname:alphaBlendOp is an
+    <<framebuffer-blend-advanced,advanced blend operation>>, then
+    pname:alphaBlendOp must: be the same for all attachments.
+  * [[VUID-VkPipelineColorBlendAttachmentState-advancedBlendAllOperations-01409]]
+    If
+    slink:VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT::pname:advancedBlendAllOperations
+    is ename:VK_FALSE, then pname:colorBlendOp must: not be
+    ename:VK_BLEND_OP_ZERO_EXT, ename:VK_BLEND_OP_SRC_EXT,
+    ename:VK_BLEND_OP_DST_EXT, ename:VK_BLEND_OP_SRC_OVER_EXT,
+    ename:VK_BLEND_OP_DST_OVER_EXT, ename:VK_BLEND_OP_SRC_IN_EXT,
+    ename:VK_BLEND_OP_DST_IN_EXT, ename:VK_BLEND_OP_SRC_OUT_EXT,
+    ename:VK_BLEND_OP_DST_OUT_EXT, ename:VK_BLEND_OP_SRC_ATOP_EXT,
+    ename:VK_BLEND_OP_DST_ATOP_EXT, ename:VK_BLEND_OP_XOR_EXT,
+    ename:VK_BLEND_OP_INVERT_EXT, ename:VK_BLEND_OP_INVERT_RGB_EXT,
+    ename:VK_BLEND_OP_LINEARDODGE_EXT, ename:VK_BLEND_OP_LINEARBURN_EXT,
+    ename:VK_BLEND_OP_VIVIDLIGHT_EXT, ename:VK_BLEND_OP_LINEARLIGHT_EXT,
+    ename:VK_BLEND_OP_PINLIGHT_EXT, ename:VK_BLEND_OP_HARDMIX_EXT,
+    ename:VK_BLEND_OP_PLUS_EXT, ename:VK_BLEND_OP_PLUS_CLAMPED_EXT,
+    ename:VK_BLEND_OP_PLUS_CLAMPED_ALPHA_EXT,
+    ename:VK_BLEND_OP_PLUS_DARKER_EXT, ename:VK_BLEND_OP_MINUS_EXT,
+    ename:VK_BLEND_OP_MINUS_CLAMPED_EXT, ename:VK_BLEND_OP_CONTRAST_EXT,
+    ename:VK_BLEND_OP_INVERT_OVG_EXT, ename:VK_BLEND_OP_RED_EXT,
+    ename:VK_BLEND_OP_GREEN_EXT, or ename:VK_BLEND_OP_BLUE_EXT
+  * [[VUID-VkPipelineColorBlendAttachmentState-colorBlendOp-01410]]
+    If pname:colorBlendOp or pname:alphaBlendOp is an
+    <<framebuffer-blend-advanced,advanced blend operation>>, then
+    slink:VkSubpassDescription::pname:colorAttachmentCount of the subpass
+    this pipeline is compiled against must: be less than or equal to
+    slink:VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT::advancedBlendMaxColorAttachments
+endif::VK_EXT_blend_operation_advanced[]
+****
+
+include::../validity/structs/VkPipelineColorBlendAttachmentState.txt[]
+--
+
+
+[[framebuffer-blendfactors]]
+=== Blend Factors
+
+[open,refpage='VkBlendFactor',desc='Framebuffer blending factors',type='enums']
+--
+
+The source and destination color and alpha blending factors are selected
+from the enum:
+
+include::../api/enums/VkBlendFactor.txt[]
+
+The semantics of each enum value is described in the table below:
+
+.Blend Factors
+[width="100%",options="header",align="center",cols="59%,28%,13%"]
+|====
+|elink:VkBlendFactor                            | RGB Blend Factors [eq]#(S~r~,S~g~,S~b~)# or [eq]#(D~r~,D~g~,D~b~)# | Alpha Blend Factor ([eq]#S~a~# or [eq]#D~a~#)
+|ename:VK_BLEND_FACTOR_ZERO                     | [eq]#(0,0,0)#                              | [eq]#0#
+|ename:VK_BLEND_FACTOR_ONE                      | [eq]#(1,1,1)#                              | [eq]#1#
+|ename:VK_BLEND_FACTOR_SRC_COLOR                | [eq]#(R~s0~,G~s0~,B~s0~)#                  | [eq]#A~s0~#
+|ename:VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR      | [eq]#(1-R~s0~,1-G~s0~,1-B~s0~)#            | [eq]#1-A~s0~#
+|ename:VK_BLEND_FACTOR_DST_COLOR                | [eq]#(R~d~,G~d~,B~d~)#                     | [eq]#A~d~#
+|ename:VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR      | [eq]#(1-R~d~,1-G~d~,1-B~d~)#               | [eq]#1-A~d~#
+|ename:VK_BLEND_FACTOR_SRC_ALPHA                | [eq]#(A~s0~,A~s0~,A~s0~)#                  | [eq]#A~s0~#
+|ename:VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA      | [eq]#(1-A~s0~,1-A~s0~,1-A~s0~)#            | [eq]#1-A~s0~#
+|ename:VK_BLEND_FACTOR_DST_ALPHA                | [eq]#(A~d~,A~d~,A~d~)#                     | [eq]#A~d~#
+|ename:VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA      | [eq]#(1-A~d~,1-A~d~,1-A~d~)#               | [eq]#1-A~d~#
+|ename:VK_BLEND_FACTOR_CONSTANT_COLOR           | [eq]#(R~c~,G~c~,B~c~)#                     | [eq]#A~c~#
+|ename:VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR | [eq]#(1-R~c~,1-G~c~,1-B~c~)#               | [eq]#1-A~c~#
+|ename:VK_BLEND_FACTOR_CONSTANT_ALPHA           | [eq]#(A~c~,A~c~,A~c~)#                     | [eq]#A~c~#
+|ename:VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA | [eq]#(1-A~c~,1-A~c~,1-A~c~)#               | [eq]#1-A~c~#
+|ename:VK_BLEND_FACTOR_SRC_ALPHA_SATURATE       | [eq]#(f,f,f)#; [eq]#f = min(A~s0~,1-A~d~)# | [eq]#1#
+|ename:VK_BLEND_FACTOR_SRC1_COLOR               | [eq]#(R~s1~,G~s1~,B~s1~)#                  | [eq]#A~s1~#
+|ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR     | [eq]#(1-R~s1~,1-G~s1~,1-B~s1~)#            | [eq]#1-A~s1~#
+|ename:VK_BLEND_FACTOR_SRC1_ALPHA               | [eq]#(A~s1~,A~s1~,A~s1~)#                  | [eq]#A~s1~#
+|ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA     | [eq]#(1-A~s1~,1-A~s1~,1-A~s1~)#            | [eq]#1-A~s1~#
+|====
+
+In this table, the following conventions are used:
+
+  * [eq]#R~s0~,G~s0~,B~s0~# and [eq]#A~s0~# represent the first source color
+    R, G, B, and A components, respectively, for the fragment output
+    location corresponding to the color attachment being blended.
+  * [eq]#R~s1~,G~s1~,B~s1~# and [eq]#A~s1~# represent the second source
+    color R, G, B, and A components, respectively, used in dual source
+    blending modes, for the fragment output location corresponding to the
+    color attachment being blended.
+  * [eq]#R~d~,G~d~,B~d~# and [eq]#A~d~# represent the R, G, B, and A
+    components of the destination color.
+    That is, the color currently in the corresponding color attachment for
+    this fragment/sample.
+  * [eq]#R~c~,G~c~,B~c~# and [eq]#A~c~# represent the blend constant R, G,
+    B, and A components, respectively.
+
+--
+
+[[framebuffer-blendconstants]]
+If the pipeline state object is created without the
+ename:VK_DYNAMIC_STATE_BLEND_CONSTANTS dynamic state enabled then the _blend
+constant_ [eq]#(R~c~,G~c~,B~c~,A~c~)# is specified via the
+pname:blendConstants member of slink:VkPipelineColorBlendStateCreateInfo.
+
+[open,refpage='vkCmdSetBlendConstants',desc='Set the values of blend constants',type='protos']
+--
+
+Otherwise, to dynamically set and change the blend constant, call:
+
+include::../api/protos/vkCmdSetBlendConstants.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:blendConstants is an array of four values specifying the R, G, B,
+    and A components of the blend constant color used in blending, depending
+    on the <<framebuffer-blendfactors,blend factor>>.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdSetBlendConstants-None-00612]]
+    The bound graphics pipeline must: have been created with the
+    ename:VK_DYNAMIC_STATE_BLEND_CONSTANTS dynamic state enabled
+****
+
+include::../validity/protos/vkCmdSetBlendConstants.txt[]
+--
+
+
+[[framebuffer-dsb]]
+=== Dual-Source Blending
+
+Blend factors that use the secondary color input
+[eq]#(R~s1~,G~s1~,B~s1~,A~s1~)# (ename:VK_BLEND_FACTOR_SRC1_COLOR,
+ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+ename:VK_BLEND_FACTOR_SRC1_ALPHA, and
+ename:VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA) may: consume implementation
+resources that could otherwise be used for rendering to multiple color
+attachments.
+Therefore, the number of color attachments that can: be used in a
+framebuffer may: be lower when using dual-source blending.
+
+Dual-source blending is only supported if the
+<<features-features-dualSrcBlend,pname:dualSrcBlend>> feature is enabled.
+
+The maximum number of color attachments that can: be used in a subpass when
+using dual-source blending functions is implementation-dependent and is
+reported as the pname:maxFragmentDualSrcAttachments member of
+sname:VkPhysicalDeviceLimits.
+
+When using a fragment shader with dual-source blending functions, the color
+outputs are bound to the first and second inputs of the blender using the
+code:Index decoration, as described in <<interfaces-fragmentoutput,Fragment
+Output Interface>>.
+If the second color input to the blender is not written in the shader, or if
+no output is bound to the second input of a blender, the result of the
+blending operation is not defined.
+
+
+[[framebuffer-blendoperations]]
+=== Blend Operations
+
+[open,refpage='VkBlendOp',desc='Framebuffer blending operations',type='enums']
+--
+
+Once the source and destination blend factors have been selected, they along
+with the source and destination components are passed to the blending
+operations.
+RGB and alpha components can: use different operations.
+Possible values of elink:VkBlendOp, specifying the operations, are:
+
+
+include::../api/enums/VkBlendOp.txt[]
+
+<<<
+
+The semantics of each basic blend operations is described in the table
+below:
+
+.Basic Blend Operations
+[width="100%",cols="45%,30%,25%",options="header",align="center"]
+|====
+|elink:VkBlendOp                             | RGB Components                    | Alpha Component
+
+|ename:VK_BLEND_OP_ADD
+| [eq]#R = R~s0~ {times} S~r~ {plus} R~d~ {times} D~r~# +
+  [eq]#G = G~s0~ {times} S~g~ {plus} G~d~ {times} D~g~# +
+  [eq]#B = B~s0~ {times} S~b~ {plus} B~d~ {times} D~b~#
+| [eq]#A = A~s0~ {times} S~a~ {plus} A~d~ {times} D~a~#
+
+|ename:VK_BLEND_OP_SUBTRACT
+| [eq]#R = R~s0~ {times} S~r~ - R~d~ {times} D~r~# +
+  [eq]#G = G~s0~ {times} S~g~ - G~d~ {times} D~g~# +
+  [eq]#B = B~s0~ {times} S~b~ - B~d~ {times} D~b~#
+| [eq]#A = A~s0~ {times} S~a~ - A~d~ {times} D~a~#
+
+|ename:VK_BLEND_OP_REVERSE_SUBTRACT
+| [eq]#R = R~d~ {times} D~r~ - R~s0~ {times} S~r~# +
+  [eq]#G = G~d~ {times} D~g~ - G~s0~ {times} S~g~# +
+  [eq]#B = B~d~ {times} D~b~ - B~s0~ {times} S~b~#
+| [eq]#A = A~d~ {times} D~a~ - A~s0~ {times} S~a~#
+
+|ename:VK_BLEND_OP_MIN
+| [eq]#R = min(R~s0~,R~d~)# +
+  [eq]#G = min(G~s0~,G~d~)# +
+  [eq]#B = min(B~s0~,B~d~)#
+| [eq]#A = min(A~s0~,A~d~)#
+
+|ename:VK_BLEND_OP_MAX
+| [eq]#R = max(R~s0~,R~d~)# +
+  [eq]#G = max(G~s0~,G~d~)# +
+  [eq]#B = max(B~s0~,B~d~)#
+| [eq]#A = max(A~s0~,A~d~)#
+|====
+
+In this table, the following conventions are used:
+
+  * [eq]#R~s0~, G~s0~, B~s0~# and [eq]#A~s0~# represent the first source
+    color R, G, B, and A components, respectively.
+  * [eq]#R~d~, G~d~, B~d~# and [eq]#A~d~# represent the R, G, B, and A
+    components of the destination color.
+    That is, the color currently in the corresponding color attachment for
+    this fragment/sample.
+  * [eq]#S~r~, S~g~, S~b~# and [eq]#S~a~# represent the source blend factor
+    R, G, B, and A components, respectively.
+  * [eq]#D~r~, D~g~, D~b~# and [eq]#D~a~# represent the destination blend
+    factor R, G, B, and A components, respectively.
+
+The blending operation produces a new set of values [eq]#R, G, B# and
+[eq]#A#, which are written to the framebuffer attachment.
+If blending is not enabled for this attachment, then [eq]#R, G, B# and
+[eq]#A# are assigned [eq]#R~s0~, G~s0~, B~s0~# and [eq]#A~s0~#,
+respectively.
+
+If the color attachment is fixed-point, the components of the source and
+destination values and blend factors are each clamped to [eq]#[0,1]# or
+[eq]#[-1,1]# respectively for an unsigned normalized or signed normalized
+color attachment prior to evaluating the blend operations.
+If the color attachment is floating-point, no clamping occurs.
+
+--
+
+If the numeric format of a framebuffer attachment uses sRGB encoding, the R,
+G, and B destination color values (after conversion from fixed-point to
+floating-point) are considered to be encoded for the sRGB color space and
+hence are linearized prior to their use in blending.
+Each R, G, and B component is converted from nonlinear to linear as
+described in the "`sRGB EOTF`" section of the <<data-format,Khronos Data
+Format Specification>>.
+If the format is not sRGB, no linearization is performed.
+
+If the numeric format of a framebuffer attachment uses sRGB encoding, then
+the final R, G and B values are converted into the nonlinear sRGB
+representation before being written to the framebuffer attachment as
+described in the "`sRGB EOTF^&#160;-1^`" section of the Khronos Data Format
+Specification.
+
+If the framebuffer color attachment numeric format is not sRGB encoded then
+the resulting [eq]#c~s~# values for R, G and B are unmodified.
+The value of A is never sRGB encoded.
+That is, the alpha component is always stored in memory as linear.
+
+If the framebuffer color attachment is ename:VK_ATTACHMENT_UNUSED, no writes
+are performed through that attachment.
+Framebuffer color attachments greater than or equal to
+sname:VkSubpassDescription::pname:colorAttachmentCount perform no writes.
+
+ifdef::VK_EXT_blend_operation_advanced[]
+include::VK_EXT_blend_operation_advanced/advanced_blend.txt[]
+endif::VK_EXT_blend_operation_advanced[]
+
+[[framebuffer-logicop]]
+== Logical Operations
+
+The application can: enable a _logical operation_ between the fragment's
+color values and the existing value in the framebuffer attachment.
+This logical operation is applied prior to updating the framebuffer
+attachment.
+Logical operations are applied only for signed and unsigned integer and
+normalized integer framebuffers.
+Logical operations are not applied to floating-point or sRGB format color
+attachments.
+
+[open,refpage='VkLogicOp',desc='Framebuffer logical operations',type='enums']
+--
+
+Logical operations are controlled by the pname:logicOpEnable and
+pname:logicOp members of slink:VkPipelineColorBlendStateCreateInfo.
+If pname:logicOpEnable is ename:VK_TRUE, then a logical operation selected
+by pname:logicOp is applied between each color attachment and the fragment's
+corresponding output value, and blending of all attachments is treated as if
+it were disabled.
+Any attachments using color formats for which logical operations are not
+supported simply pass through the color values unmodified.
+The logical operation is applied independently for each of the red, green,
+blue, and alpha components.
+The pname:logicOp is selected from the following operations:
+
+include::../api/enums/VkLogicOp.txt[]
+
+<<<
+
+The logical operations supported by Vulkan are summarized in the following
+table in which
+
+  * [eq]#{lnot}# is bitwise invert,
+  * [eq]#{land}# is bitwise and,
+  * [eq]#{lor}# is bitwise or,
+  * [eq]#{oplus}# is bitwise exclusive or,
+  * [eq]#s# is the fragment's [eq]#R~s0~, G~s0~, B~s0~# or [eq]#A~s0~#
+    component value for the fragment output corresponding to the color
+    attachment being updated, and
+  * [eq]#d# is the color attachment's [eq]#R, G, B# or [eq]#A# component
+    value:
+
+.Logical Operations
+[width="75%",options="header",align="center"]
+|====
+|Mode                            | Operation
+|ename:VK_LOGIC_OP_CLEAR         | [eq]#0#
+|ename:VK_LOGIC_OP_AND           | [eq]#s {land} d#
+|ename:VK_LOGIC_OP_AND_REVERSE   | [eq]#s {land} {lnot} d#
+|ename:VK_LOGIC_OP_COPY          | [eq]#s#
+|ename:VK_LOGIC_OP_AND_INVERTED  | [eq]#{lnot} s {land} d#
+|ename:VK_LOGIC_OP_NO_OP         | [eq]#d#
+|ename:VK_LOGIC_OP_XOR           | [eq]#s {oplus} d#
+|ename:VK_LOGIC_OP_OR            | [eq]#s {lor} d#
+|ename:VK_LOGIC_OP_NOR           | [eq]#{lnot} (s {lor} d)#
+|ename:VK_LOGIC_OP_EQUIVALENT    | [eq]#{lnot} (s {oplus} d)#
+|ename:VK_LOGIC_OP_INVERT        | [eq]#{lnot} d#
+|ename:VK_LOGIC_OP_OR_REVERSE    | [eq]#s {lor} {lnot} d#
+|ename:VK_LOGIC_OP_COPY_INVERTED | [eq]#{lnot} s#
+|ename:VK_LOGIC_OP_OR_INVERTED   | [eq]#{lnot} s {lor} d#
+|ename:VK_LOGIC_OP_NAND          | [eq]#{lnot} (s {land} d)#
+|ename:VK_LOGIC_OP_SET           | all 1s
+|====
+
+The result of the logical operation is then written to the color attachment
+as controlled by the component write mask, described in
+<<framebuffer-blendoperations,Blend Operations>>.
+
+--
+
+
+[[framebuffer-color-write-mask]]
+== Color Write Mask
+
+[open,refpage='VkColorComponentFlagBits',desc='Bitmask controlling which components are written to the framebuffer',type='enums']
+--
+
+Bits which can: be set in
+slink:VkPipelineColorBlendAttachmentState::pname:colorWriteMask to determine
+whether the final color values [eq]#R, G, B# and [eq]#A# are written to the
+framebuffer attachment are:
+
+include::../api/enums/VkColorComponentFlagBits.txt[]
+
+  * ename:VK_COLOR_COMPONENT_R_BIT specifies that the [eq]#R# value is
+    written to the color attachment for the appropriate sample.
+    Otherwise, the value in memory is unmodified.
+  * ename:VK_COLOR_COMPONENT_G_BIT specifies that the [eq]#G# value is
+    written to the color attachment for the appropriate sample.
+    Otherwise, the value in memory is unmodified.
+  * ename:VK_COLOR_COMPONENT_B_BIT specifies that the [eq]#B# value is
+    written to the color attachment for the appropriate sample.
+    Otherwise, the value in memory is unmodified.
+  * ename:VK_COLOR_COMPONENT_A_BIT specifies that the [eq]#A# value is
+    written to the color attachment for the appropriate sample.
+    Otherwise, the value in memory is unmodified.
+
+The color write mask operation is applied regardless of whether blending is
+enabled.
+
+--
+
+[open,refpage='VkColorComponentFlags',desc='Bitmask of VkColorComponentFlagBits',type='enums']
+--
+include::../api/flags/VkColorComponentFlags.txt[]
+
+sname:VkColorComponentFlags is a bitmask type for setting a mask of zero or
+more slink:VkColorComponentFlagBits.
+--

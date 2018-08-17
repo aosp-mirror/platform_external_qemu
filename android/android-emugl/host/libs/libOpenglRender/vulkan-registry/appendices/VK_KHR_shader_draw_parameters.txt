@@ -1,0 +1,109 @@
+// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+include::meta/VK_KHR_shader_draw_parameters.txt[]
+
+*Last Modified Date*::
+    2017-09-05
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+  - Requires the
+    https://www.khronos.org/registry/spir-v/extensions/KHR/SPV_KHR_shader_draw_parameters.html[+SPV_KHR_shader_draw_parameters+]
+    SPIR-V extension.
+  - Requires
+    https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shader_draw_parameters.txt[+GL_ARB_shader_draw_parameters+]
+    for GLSL source languages.
+  - Promoted to Vulkan 1.1 Core
+*Contributors*::
+  - Daniel Koch, NVIDIA Corporation
+  - Jeff Bolz, NVIDIA
+  - Daniel Rakos, AMD
+  - Jan-Harald Fredriksen, ARM
+  - John Kessenich, Google
+  - Stuart Smith, IMG
+
+This extension adds support for the following SPIR-V extension in Vulkan:
+
+  * +SPV_KHR_shader_draw_parameters+
+
+The extension provides access to three additional built-in shader variables
+in Vulkan:
+
+  * code:BaseInstance, which contains the pname:firstInstance parameter
+    passed to draw commands,
+  * code:BaseVertex, which contains the pname:firstVertex/pname:vertexOffset
+    parameter passed to draw commands, and
+  * code:DrawIndex, which contains the index of the draw call currently
+    being processed from an indirect draw call.
+
+When using GLSL source-based shader languages, the following variables from
++GL_ARB_shader_draw_parameters+ can map to these SPIR-V built-in
+decorations:
+
+  * `in int gl_BaseInstanceARB;` -> code:BaseInstance,
+  * `in int gl_BaseVertexARB;` -> code:BaseVertex, and
+  * `in int gl_DrawIDARB;` -> code:DrawIndex.
+
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+None.
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+None.
+
+=== New Functions
+
+None.
+
+=== New Built-In Variables
+
+  * <<interfaces-builtin-variables-baseinstance,code:BaseInstance>>
+  * <<interfaces-builtin-variables-basevertex,code:BaseVertex>>
+  * <<interfaces-builtin-variables-drawindex,code:DrawIndex>>
+
+=== New SPIR-V Capabilities
+
+  * <<spirvenv-capabilities,DrawParameters>>
+
+=== Promotion to Vulkan 1.1
+
+All functionality in this extension is included in core Vulkan 1.1, however
+a <<features-features-shaderDrawParameters,feature bit was added>> to
+distinguish whether it's actually available or not.
+
+=== Issues
+
+1) Is this the same functionality as +GL_ARB_shader_draw_parameters+?
+
+*RESOLVED*: It's actually a superset as it also adds in support for arrayed
+drawing commands.
+
+In GL for +GL_ARB_shader_draw_parameters+, code:gl_BaseVertexARB holds the
+integer value passed to the parameter to the command that resulted in the
+current shader invocation.
+In the case where the command has no code:baseVertex parameter, the value of
+code:gl_BaseVertexARB is zero.
+This means that code:gl_BaseVertexARB = code:baseVertex (for
+code:glDrawElements commands with code:baseVertex) or 0.
+In particular there are no code:glDrawArrays commands that take a
+code:baseVertex parameter.
+
+Now in Vulkan, we have code:BaseVertex = pname:vertexOffset (for indexed
+drawing commands) or pname:firstVertex (for arrayed drawing commands), and
+so Vulkan's version is really a superset of GL functionality.
+
+=== Version History
+
+  * Revision 1, 2016-10-05 (Daniel Koch)
+    - Internal revisions
