@@ -1,0 +1,73 @@
+// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+include::meta/VK_KHR_external_memory_fd.txt[]
+
+*Last Modified Date*::
+    2016-10-21
+*IP Status*::
+    No known IP claims.
+*Contributors*::
+  - James Jones, NVIDIA
+  - Jeff Juliano, NVIDIA
+
+An application may wish to reference device memory in multiple Vulkan
+logical devices or instances, in multiple processes, and/or in multiple
+APIs.
+This extension enables an application to export POSIX file descriptor
+handles from Vulkan memory objects and to import Vulkan memory objects from
+POSIX file descriptor handles exported from other Vulkan memory objects or
+from similar resources in other APIs.
+
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * ename:VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR
+  * ename:VK_STRUCTURE_TYPE_MEMORY_FD_PROPERTIES_KHR
+  * ename:VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR
+
+=== New Enums
+
+None.
+
+=== New Structs
+
+  * slink:VkImportMemoryFdInfoKHR
+  * slink:VkMemoryFdPropertiesKHR
+  * slink:VkMemoryGetFdInfoKHR
+
+=== New Functions
+
+  * flink:vkGetMemoryFdKHR
+  * flink:vkGetMemoryFdPropertiesKHR
+
+=== Issues
+
+1) Does the application need to close the file descriptor returned by
+flink:vkGetMemoryFdKHR?
+
+*RESOLVED*: Yes, unless it is passed back in to a driver instance to import
+the memory.
+A successful get call transfers ownership of the file descriptor to the
+application, and a successful import transfers it back to the driver.
+Destroying the original memory object will not close the file descriptor or
+remove its reference to the underlying memory resource associated with it.
+
+2) Do drivers ever need to expose multiple file descriptors per memory
+object?
+
+*RESOLVED*: No.
+This would indicate there are actually multiple memory objects, rather than
+a single memory object.
+
+3) How should the valid size and memory type for POSIX file descriptor
+memory handles created outside of Vulkan be specified?
+
+*RESOLVED*: The valid memory types are queried directly from the external
+handle.
+The size will be specified by future extensions that introduce such external
+memory handle types.
