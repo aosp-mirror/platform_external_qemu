@@ -1,0 +1,755 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[vertexpostproc]]
+= Fixed-Function Vertex Post-Processing
+
+After programmable vertex processing, the following fixed-function
+operations are applied to vertices of the resulting primitives:
+
+ifdef::VK_NV_viewport_swizzle[]
+  * Viewport swizzle (see <<vertexpostproc-viewport-swizzle,Viewport
+    Swizzle>>)
+endif::VK_NV_viewport_swizzle[]
+  * Flat shading (see <<vertexpostproc-flatshading>>).
+  * Primitive clipping, including client-defined half-spaces (see
+    <<vertexpostproc-clipping,Primitive Clipping>>).
+  * Shader output attribute clipping (see
+    <<vertexpostproc-clipping-shader-outputs,Clipping Shader Outputs>>).
+ifdef::VK_NV_clip_space_w_scaling[]
+  * Clip space W scaling (see <<vertexpostproc-viewportwscaling,Controlling
+    Viewport W Scaling>>).
+endif::VK_NV_clip_space_w_scaling[]
+  * Perspective division on clip coordinates (see
+    <<vertexpostproc-coord-transform,Coordinate Transformations>>).
+  * Viewport mapping, including depth range scaling (see
+    <<vertexpostproc-viewport,Controlling the Viewport>>).
+  * Front face determination for polygon primitives (see
+    <<primsrast-polygons-basic,Basic Polygon Rasterization>>).
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+TODO:Odd that this one link to a different chapter is in this list.
+====
+endif::editing-notes[]
+
+Next, rasterization is performed on primitives as described in chapter
+<<primsrast,Rasterization>>.
+
+ifdef::VK_NV_viewport_swizzle[]
+[[vertexpostproc-viewport-swizzle]]
+== Viewport Swizzle
+
+[open,refpage='VkPipelineViewportSwizzleStateCreateInfoNV',desc='Structure specifying swizzle applied to primitive clip coordinates',type='structs']
+--
+
+Each primitive sent to a given viewport has a swizzle and optional: negation
+applied to its clip coordinates.
+The swizzle that is applied depends on the viewport index, and is controlled
+by the sname:VkPipelineViewportSwizzleStateCreateInfoNV pipeline state:
+
+include::../api/structs/VkPipelineViewportSwizzleStateCreateInfoNV.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:viewportCount is the number of viewport swizzles used by the
+    pipeline.
+  * pname:pViewportSwizzles is a pointer to an array of
+    slink:VkViewportSwizzleNV structures, defining the viewport swizzles.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineViewportSwizzleStateCreateInfoNV-viewportCount-01215]]
+    pname:viewportCount must: match the pname:viewportCount set in
+    sname:VkPipelineViewportStateCreateInfo
+****
+
+include::../validity/structs/VkPipelineViewportSwizzleStateCreateInfoNV.txt[]
+--
+
+[open,refpage='VkPipelineViewportSwizzleStateCreateFlagsNV',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineViewportSwizzleStateCreateFlagsNV.txt[]
+
+sname:VkPipelineViewportSwizzleStateCreateFlagsNV is a bitmask type for
+setting a mask, but is currently reserved for future use.
+--
+
+The sname:VkPipelineViewportSwizzleStateCreateInfoNV state is set by adding
+an instance of this structure to the pname:pNext chain of an instance of the
+sname:VkPipelineViewportStateCreateInfo structure and setting the graphics
+pipeline state with flink:vkCreateGraphicsPipelines.
+
+Each viewport specified from 0 to pname:viewportCount - 1 has its x,y,z,w
+swizzle state set to the corresponding pname:x, pname:y, pname:z and pname:w
+in the slink:VkViewportSwizzleNV structure.
+Each component is of type elink:VkViewportCoordinateSwizzleNV, which
+determines the type of swizzle for that component.
+The value of pname:x computes the new x component of the position as:
+
+[source,c]
+---------------------------------------------------
+if (x == VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_X_NV) x' = x;
+if (x == VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_X_NV) x' = -x;
+if (x == VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_Y_NV) x' = y;
+if (x == VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_Y_NV) x' = -y;
+if (x == VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_Z_NV) x' = z;
+if (x == VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_Z_NV) x' = -z;
+if (x == VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_W_NV) x' = w;
+if (x == VK_VIEWPORT_COORDINATE_SWIZZLE_NEGATIVE_W_NV) x' = -w;
+---------------------------------------------------
+
+Similar selections are performed for the pname:y, pname:z, and pname:w
+coordinates.
+This swizzling is applied before clipping and perspective divide.
+If the swizzle for an active viewport index is not specified, the swizzle
+for pname:x is ename:VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_X_NV, pname:y
+is ename:VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_Y_NV, pname:z is
+ename:VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_Z_NV and pname:w is
+ename:VK_VIEWPORT_COORDINATE_SWIZZLE_POSITIVE_W_NV.
+
+Viewport swizzle parameters are specified by setting the pname:pNext pointer
+of sname:VkGraphicsPipelineCreateInfo to point to an instance of
+sname:VkPipelineViewportSwizzleStateCreateInfoNV.
+slink:VkPipelineViewportSwizzleStateCreateInfoNV uses
+sname:VkViewportSwizzleNV to set the viewport swizzle parameters.
+
+[open,refpage='VkViewportSwizzleNV',desc='Structure specifying a viewport swizzle',type='structs']
+--
+
+The sname:VkViewportSwizzleNV structure is defined as:
+
+include::../api/structs/VkViewportSwizzleNV.txt[]
+
+  * pname:x is a elink:VkViewportCoordinateSwizzleNV value specifying the
+    swizzle operation to apply to the x component of the primitive
+  * pname:y is a elink:VkViewportCoordinateSwizzleNV value specifying the
+    swizzle operation to apply to the y component of the primitive
+  * pname:z is a elink:VkViewportCoordinateSwizzleNV value specifying the
+    swizzle operation to apply to the z component of the primitive
+  * pname:w is a elink:VkViewportCoordinateSwizzleNV value specifying the
+    swizzle operation to apply to the w component of the primitive
+
+include::../validity/structs/VkViewportSwizzleNV.txt[]
+--
+
+[open,refpage='VkViewportCoordinateSwizzleNV',desc='Specify how a viewport coordinate is swizzled',type='enums']
+--
+
+Possible values of the elink:VkViewportSwizzleNV::pname:x, pname:y, pname:z,
+and pname:w members, specifying swizzling of the corresponding components of
+primitives, are:
+
+include::../api/enums/VkViewportCoordinateSwizzleNV.txt[]
+
+These values are described in detail in <<vertexpostproc-viewport-swizzle,
+Viewport Swizzle>>.
+
+--
+
+endif::VK_NV_viewport_swizzle[]
+
+[[vertexpostproc-flatshading]]
+== Flat Shading
+
+_Flat shading_ a vertex output attribute means to assign all vertices of the
+primitive the same value for that output.
+
+The output values assigned are those of the _provoking vertex_ of the
+primitive.
+The provoking vertex depends on the primitive topology, and is generally the
+"`first`" vertex of the primitive.
+For primitives not processed by tessellation or geometry shaders, the
+provoking vertex is selected from the input vertices according to the
+following table.
+
+<<<
+
+[[provoking-vertex-selection]]
+.Provoking vertex selection
+[align="center",cols="75%,25%"]
+|====
+| Primitive type of primitive [eq]#i#                       | Provoking vertex number
+| ename:VK_PRIMITIVE_TOPOLOGY_POINT_LIST                    | [eq]#i#
+| ename:VK_PRIMITIVE_TOPOLOGY_LINE_LIST                     | [eq]#2 i#
+| ename:VK_PRIMITIVE_TOPOLOGY_LINE_STRIP                    | [eq]#i#
+| ename:VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST                 | [eq]#3 i#
+| ename:VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP                | [eq]#i#
+| ename:VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN                  | [eq]#i {plus} 1#
+| ename:VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY      | [eq]#4 i {plus} 1#
+| ename:VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY     | [eq]#i {plus} 1#
+| ename:VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY  | [eq]#6 i#
+| ename:VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY | [eq]#2 i#
+|====
+
+.Caption
+****
+The <<provoking-vertex-selection,Provoking vertex selection>> table defines
+the output values used for flat shading the i^th^ primitive generated by
+drawing commands with the indicated primitive type, derived from the
+corresponding values of the vertex whose index is shown in the table.
+Primitives and vertices are numbered starting from zero.
+****
+
+Flat shading is applied to those vertex attributes that
+<<interfaces-iointerfaces-matching,match>> fragment input attributes which
+are decorated as code:Flat.
+
+If a geometry shader is active, the output primitive topology is either
+points, line strips, or triangle strips, and the selection of the provoking
+vertex behaves according to the corresponding row of the table.
+If a tessellation evaluation shader is active and a geometry shader is not
+active, the provoking vertex is undefined but must: be one of the vertices
+of the primitive.
+
+
+[[vertexpostproc-clipping]]
+== Primitive Clipping
+
+Primitives are culled against the _cull volume_ and then clipped to the
+_clip volume_.
+In clip coordinates, the _view volume_ is defined by:
+
+[latexmath]
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+\begin{array}{c}
+-w_c \leq x_c \leq w_c \\
+-w_c \leq y_c \leq w_c \\
+0 \leq z_c \leq w_c
+\end{array}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+This view volume can: be further restricted by as many as
+sname:VkPhysicalDeviceLimits::pname:maxClipDistances client-defined
+half-spaces.
+
+The cull volume is the intersection of up to
+sname:VkPhysicalDeviceLimits::pname:maxCullDistances client-defined
+half-spaces (if no client-defined cull half-spaces are enabled, culling
+against the cull volume is skipped).
+
+A shader must: write a single cull distance for each enabled cull half-space
+to elements of the code:CullDistance array.
+If the cull distance for any enabled cull half-space is negative for all of
+the vertices of the primitive under consideration, the primitive is
+discarded.
+Otherwise the primitive is clipped against the clip volume as defined below.
+
+The clip volume is the intersection of up to
+sname:VkPhysicalDeviceLimits::pname:maxClipDistances client-defined
+half-spaces with the view volume (if no client-defined clip half-spaces are
+enabled, the clip volume is the view volume).
+
+A shader must: write a single clip distance for each enabled clip half-space
+to elements of the code:ClipDistance array.
+Clip half-space [eq]#i# is then given by the set of points satisfying the
+inequality
+
+  :: [eq]#c~i~(**P**) {geq} 0#
+
+where [eq]#c~i~(**P**)# is the clip distance [eq]#i# at point [eq]#**P**#.
+For point primitives, [eq]#c~i~(**P**)# is simply the clip distance for the
+vertex in question.
+For line and triangle primitives, per-vertex clip distances are interpolated
+using a weighted mean, with weights derived according to the algorithms
+described in sections <<primsrast-lines-basic,Basic Line Segment
+Rasterization>> and <<primsrast-polygons-basic,Basic Polygon
+Rasterization>>, using the perspective interpolation equations.
+
+The number of client-defined clip and cull half-spaces that are enabled is
+determined by the explicit size of the built-in arrays code:ClipDistance and
+code:CullDistance, respectively, declared as an output in the interface of
+the entry point of the final shader stage before clipping.
+
+Depth clamping is enabled or disabled via the pname:depthClampEnable enable
+of the sname:VkPipelineRasterizationStateCreateInfo structure.
+If depth clamping is enabled, the plane equation
+
+  :: [eq]#0 {leq} z~c~ {leq} w~c~#
+
+(see the clip volume definition above) is ignored by view volume clipping
+(effectively, there is no near or far plane clipping).
+
+If the primitive under consideration is a point or line segment, then
+clipping passes it unchanged if its vertices lie entirely within the clip
+volume.
+
+ifndef::VK_VERSION_1_1,VK_KHR_maintenance2[]
+If a point's vertex lies outside of the clip volume, the entire primitive
+may: be discarded.
+endif::VK_VERSION_1_1,VK_KHR_maintenance2[]
+
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance2[]
+
+[open,refpage='VkPointClippingBehavior',desc='Enum specifying the point clipping behaviour',type='enums']
+--
+
+Possible values of
+slink:VkPhysicalDevicePointClippingProperties::pname:pointClippingBehavior,
+specifying clipping behavior of a point primitive whose vertex lies outside
+the clip volume, are:
+
+include::../api/enums/VkPointClippingBehavior.txt[]
+
+ifdef::VK_KHR_maintenance2[]
+or the equivalent
+
+include::../api/enums/VkPointClippingBehaviorKHR.txt[]
+endif::VK_KHR_maintenance2[]
+
+  * ename:VK_POINT_CLIPPING_BEHAVIOR_ALL_CLIP_PLANES specifies that the
+    primitive is discarded if the vertex lies outside any clip plane,
+    including the planes bounding the view volume.
+  * ename:VK_POINT_CLIPPING_BEHAVIOR_USER_CLIP_PLANES_ONLY specifies that
+    the primitive is discarded only if the vertex lies outside any user clip
+    plane.
+
+--
+
+endif::VK_VERSION_1_1,VK_KHR_maintenance2[]
+
+If either of a line segment's vertices lie outside of the clip volume, the
+line segment may: be clipped, with new vertex coordinates computed for each
+vertex that lies outside the clip volume.
+A clipped line segment endpoint lies on both the original line segment and
+the boundary of the clip volume.
+
+This clipping produces a value, [eq]#0 {leq} t {leq} 1#, for each clipped
+vertex.
+If the coordinates of a clipped vertex are [eq]#**P**# and the original
+vertices`' coordinates are [eq]#**P**~1~# and [eq]#**P**~2~#, then [eq]#t#
+is given by
+
+  :: [eq]#**P** = t **P**~1~ {plus} (1-t) **P**~2~#.
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+This is weird - it gives **P**, not t.
+====
+endif::editing-notes[]
+
+[eq]#t# is used to clip vertex output attributes as described in
+<<vertexpostproc-clipping-shader-outputs,Clipping Shader Outputs>>.
+
+If the primitive is a polygon, it passes unchanged if every one of its edges
+lie entirely inside the clip volume, and it is discarded if every one of its
+edges lie entirely outside the clip volume.
+If the edges of the polygon intersect the boundary of the clip volume, the
+intersecting edges are reconnected by new edges that lie along the boundary
+of the clip volume - in some cases requiring the introduction of new
+vertices into a polygon.
+
+If a polygon intersects an edge of the clip volume's boundary, the clipped
+polygon must: include a point on this boundary edge.
+
+Primitives rendered with user-defined half-spaces must: satisfy a
+complementarity criterion.
+Suppose a series of primitives is drawn where each vertex [eq]#i# has a
+single specified clip distance [eq]#d~i~# (or a number of similarly
+specified clip distances, if multiple half-spaces are enabled).
+Next, suppose that the same series of primitives are drawn again with each
+such clip distance replaced by [eq]#-d~i~# (and the graphics pipeline is
+otherwise the same).
+In this case, primitives must: not be missing any pixels, and pixels must:
+not be drawn twice in regions where those primitives are cut by the clip
+planes.
+
+
+[[vertexpostproc-clipping-shader-outputs]]
+== Clipping Shader Outputs
+
+Next, vertex output attributes are clipped.
+The output values associated with a vertex that lies within the clip volume
+are unaffected by clipping.
+If a primitive is clipped, however, the output values assigned to vertices
+produced by clipping are clipped.
+
+Let the output values assigned to the two vertices [eq]#**P**~1~# and
+[eq]#**P**~2~# of an unclipped edge be [eq]#**c**~1~# and [eq]#**c**~2~#.
+The value of [eq]#t# (see <<vertexpostproc-clipping,Primitive Clipping>>)
+for a clipped point [eq]#**P**# is used to obtain the output value
+associated with [eq]#**P**# as
+
+  :: [eq]#**c** = t **c**~1~ {plus} (1-t) **c**~2~#.
+
+(Multiplying an output value by a scalar means multiplying each of _x_, _y_,
+_z_, and _w_ by the scalar.)
+
+Since this computation is performed in clip space before division by
+[eq]#w~c~#, clipped output values are perspective-correct.
+
+Polygon clipping creates a clipped vertex along an edge of the clip volume's
+boundary.
+This situation is handled by noting that polygon clipping proceeds by
+clipping against one half-space at a time.
+Output value clipping is done in the same way, so that clipped points always
+occur at the intersection of polygon edges (possibly already clipped) with
+the clip volume's boundary.
+
+For vertex output attributes whose matching fragment input attributes are
+decorated with code:NoPerspective, the value of [eq]#t# used to obtain the
+output value associated with [eq]#**P**# will be adjusted to produce results
+that vary linearly in framebuffer space.
+
+Output attributes of integer or unsigned integer type must: always be flat
+shaded.
+Flat shaded attributes are constant over the primitive being rasterized (see
+<<primsrast-lines-basic,Basic Line Segment Rasterization>> and
+<<primsrast-polygons-basic,Basic Polygon Rasterization>>), and no
+interpolation is performed.
+The output value [eq]#**c**# is taken from either [eq]#**c**~1~# or
+[eq]#**c**~2~#, since flat shading has already occurred and the two values
+are identical.
+
+ifdef::VK_NV_clip_space_w_scaling[]
+include::VK_NV_clip_space_w_scaling/vertexpostproc.txt[]
+endif::VK_NV_clip_space_w_scaling[]
+
+[[vertexpostproc-coord-transform]]
+== Coordinate Transformations
+
+_Clip coordinates_ for a vertex result from shader execution, which yields a
+vertex coordinate code:Position.
+
+Perspective division on clip coordinates yields _normalized device
+coordinates_, followed by a _viewport_ transformation (see
+<<vertexpostproc-viewport,Controlling the Viewport>>) to convert these
+coordinates into _framebuffer coordinates_.
+
+If a vertex in clip coordinates has a position given by
+
+[latexmath]
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+\left(\begin{array}{c}
+x_c \\
+y_c \\
+z_c \\
+w_c
+\end{array}\right)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+then the vertex's normalized device coordinates are
+[latexmath]
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+\left(
+        \begin{array}{c}
+                x_d \\
+                y_d \\
+                z_d
+        \end{array}
+\right) =
+\left(
+        \begin{array}{c}
+                \frac{x_c}{w_c} \\
+                \frac{y_c}{w_c} \\
+                \frac{z_c}{w_c}
+        \end{array}
+\right)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+[[vertexpostproc-viewport]]
+== Controlling the Viewport
+
+The viewport transformation is determined by the selected viewport's width
+and height in pixels, [eq]#p~x~# and [eq]#p~y~#, respectively, and its
+center [eq]#(o~x~, o~y~)# (also in pixels), as well as its depth range min
+and max determining a depth range scale value [eq]#p~z~# and a depth range
+bias value [eq]#o~z~# (defined below).
+The vertex's framebuffer coordinates [eq]#(x~f~, y~f~, z~f~)# are given by
+
+  :: [eq]#x~f~ = (p~x~ / 2) x~d~ {plus} o~x~#
+  :: [eq]#y~f~ = (p~y~ / 2) y~d~ {plus} o~y~#
+  :: [eq]#z~f~ = p~z~ {times} z~d~ {plus} o~z~#
+
+Multiple viewports are available, numbered zero up to
+sname:VkPhysicalDeviceLimits::pname:maxViewports minus one.
+The number of viewports used by a pipeline is controlled by the
+pname:viewportCount member of the sname:VkPipelineViewportStateCreateInfo
+structure used in pipeline creation.
+
+[open,refpage='VkPipelineViewportStateCreateInfo',desc='Structure specifying parameters of a newly created pipeline viewport state',type='structs']
+--
+
+The sname:VkPipelineViewportStateCreateInfo structure is defined as:
+
+include::../api/structs/VkPipelineViewportStateCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:viewportCount is the number of viewports used by the pipeline.
+  * pname:pViewports is a pointer to an array of slink:VkViewport
+    structures, defining the viewport transforms.
+    If the viewport state is dynamic, this member is ignored.
+  * pname:scissorCount is the number of <<fragops-scissor,scissors>> and
+    must: match the number of viewports.
+  * pname:pScissors is a pointer to an array of slink:VkRect2D structures
+    which define the rectangular bounds of the scissor for the corresponding
+    viewport.
+    If the scissor state is dynamic, this member is ignored.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineViewportStateCreateInfo-viewportCount-01216]]
+    If the <<features-features-multiViewport,multiple viewports>> feature is
+    not enabled, pname:viewportCount must: be `1`
+  * [[VUID-VkPipelineViewportStateCreateInfo-scissorCount-01217]]
+    If the <<features-features-multiViewport,multiple viewports>> feature is
+    not enabled, pname:scissorCount must: be `1`
+  * [[VUID-VkPipelineViewportStateCreateInfo-viewportCount-01218]]
+    pname:viewportCount must: be between `1` and
+    sname:VkPhysicalDeviceLimits::pname:maxViewports, inclusive
+  * [[VUID-VkPipelineViewportStateCreateInfo-scissorCount-01219]]
+    pname:scissorCount must: be between `1` and
+    sname:VkPhysicalDeviceLimits::pname:maxViewports, inclusive
+  * [[VUID-VkPipelineViewportStateCreateInfo-scissorCount-01220]]
+    pname:scissorCount and pname:viewportCount must: be identical
+ifdef::VK_NV_clip_space_w_scaling[]
+  * [[VUID-VkPipelineViewportStateCreateInfo-viewportWScalingEnable-01726]]
+    If the pname:viewportWScalingEnable member of a
+    slink:VkPipelineViewportWScalingStateCreateInfoNV structure chained to
+    the pname:pNext chain is ename:VK_TRUE, the pname:viewportCount member
+    of the slink:VkPipelineViewportWScalingStateCreateInfoNV structure must:
+    be equal to pname:viewportCount
+endif::VK_NV_clip_space_w_scaling[]
+****
+
+include::../validity/structs/VkPipelineViewportStateCreateInfo.txt[]
+--
+
+[open,refpage='VkPipelineViewportStateCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineViewportStateCreateFlags.txt[]
+
+sname:VkPipelineViewportStateCreateFlags is a bitmask type for setting a
+mask, but is currently reserved for future use.
+--
+
+ifndef::VK_NV_viewport_array2+VK_EXT_shader_viewport_index_layer[]
+If a geometry shader is active and has an output variable decorated with
+code:ViewportIndex, the viewport transformation uses the viewport
+corresponding to the value assigned to code:ViewportIndex taken from an
+implementation-dependent vertex of each primitive.
+If code:ViewportIndex is outside the range zero to pname:viewportCount minus
+one for a primitive, or if the geometry shader did not assign a value to
+code:ViewportIndex for all vertices of a primitive due to flow control, the
+results of the viewport transformation of the vertices of such primitives
+are undefined.
+If no geometry shader is active, or if the geometry shader does not have an
+output decorated with code:ViewportIndex, the viewport numbered zero is used
+by the viewport transformation.
+endif::VK_NV_viewport_array2+VK_EXT_shader_viewport_index_layer[]
+
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+ifdef::VK_NV_viewport_array2[]
+A _vertex processing stage_ may direct each primitive to zero or more
+viewports.
+The destination viewports for a primitive are selected by the last active
+vertex processing stage that has an output variable decorated with
+code:ViewportIndex (selecting a single viewport) or code:ViewportMaskNV
+(selecting multiple viewports).
+The viewport transform uses the viewport corresponding to either the value
+assigned to code:ViewportIndex or one of the bits set in
+code:ViewportMaskNV, and taken from an implementation-dependent vertex of
+each primitive.
+If code:ViewportIndex or any of the bits in code:ViewportMaskNV are outside
+the range zero to pname:viewportCount minus one for a primitive, or if the
+last active vertex processing stage did not assign a value to either
+code:ViewportIndex or code:ViewportMaskNV for all vertices of a primitive
+due to flow control, the results of the viewport transformation of the
+vertices of such primitives are undefined.
+If the last vertex processing stage does not have an output decorated with
+code:ViewportIndex or code:ViewportMaskNV, the viewport numbered zero is
+used by the viewport transformation.
+endif::VK_NV_viewport_array2[]
+ifndef::VK_NV_viewport_array2[]
+ifdef::VK_EXT_shader_viewport_index_layer[]
+A _vertex processing stage_ can: direct each primitive to one of several
+viewports.
+The destination viewport for a primitive is selected by the last active
+vertex processing stage that has an output variable decorated with
+code:ViewportIndex.
+The viewport transform uses the viewport corresponding to the value assigned
+to code:ViewportIndex taken from an implementation-dependent vertex of each
+primitive.
+If code:ViewportIndex is outside the range zero to pname:viewportCount minus
+one for a primitive, or if the last active vertex processing stage did not
+assign a value to code:ViewportIndex for all vertices of a primitive due to
+flow control, the results of the viewport transformation of the vertices of
+such primitives are undefined.
+If the last vertex processing stage does not have an output decorated with
+code:ViewportIndex, the viewport numbered zero is used by the viewport
+transformation.
+endif::VK_EXT_shader_viewport_index_layer[]
+endif::VK_NV_viewport_array2[]
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+
+A single vertex can: be used in more than one individual primitive, in
+primitives such as ename:VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP.
+In this case, the viewport transformation is applied separately for each
+primitive.
+
+[open,refpage='vkCmdSetViewport',desc='Set the viewport on a command buffer',type='protos']
+--
+
+If the bound pipeline state object was not created with the
+ename:VK_DYNAMIC_STATE_VIEWPORT dynamic state enabled, viewport
+transformation parameters are specified using the pname:pViewports member of
+sname:VkPipelineViewportStateCreateInfo in the pipeline state object.
+If the pipeline state object was created with the
+ename:VK_DYNAMIC_STATE_VIEWPORT dynamic state enabled, the viewport
+transformation parameters are dynamically set and changed with the command:
+
+include::../api/protos/vkCmdSetViewport.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:firstViewport is the index of the first viewport whose parameters
+    are updated by the command.
+  * pname:viewportCount is the number of viewports whose parameters are
+    updated by the command.
+  * pname:pViewports is a pointer to an array of slink:VkViewport structures
+    specifying viewport parameters.
+
+The viewport parameters taken from element [eq]#i# of pname:pViewports
+replace the current state for the viewport index [eq]#pname:firstViewport
+{plus} i#, for [eq]#i# in [eq]#[0, pname:viewportCount)#.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdSetViewport-None-01221]]
+    The bound graphics pipeline must: have been created with the
+    ename:VK_DYNAMIC_STATE_VIEWPORT dynamic state enabled
+  * [[VUID-vkCmdSetViewport-firstViewport-01222]]
+    pname:firstViewport must: be less than
+    sname:VkPhysicalDeviceLimits::pname:maxViewports
+  * [[VUID-vkCmdSetViewport-firstViewport-01223]]
+    The sum of pname:firstViewport and pname:viewportCount must: be between
+    `1` and sname:VkPhysicalDeviceLimits::pname:maxViewports, inclusive
+  * [[VUID-vkCmdSetViewport-firstViewport-01224]]
+    If the <<features-features-multiViewport,multiple viewports>> feature is
+    not enabled, pname:firstViewport must: be `0`
+  * [[VUID-vkCmdSetViewport-viewportCount-01225]]
+    If the <<features-features-multiViewport,multiple viewports>> feature is
+    not enabled, pname:viewportCount must: be `1`
+****
+
+include::../validity/protos/vkCmdSetViewport.txt[]
+--
+
+Both slink:VkPipelineViewportStateCreateInfo and flink:vkCmdSetViewport use
+sname:VkViewport to set the viewport transformation parameters.
+
+[open,refpage='VkViewport',desc='Structure specifying a viewport',type='structs']
+--
+
+The sname:VkViewport structure is defined as:
+
+include::../api/structs/VkViewport.txt[]
+
+  * pname:x and pname:y are the viewport's upper left corner [eq]#(x,y)#.
+  * pname:width and pname:height are the viewport's width and height,
+    respectively.
+  * pname:minDepth and pname:maxDepth are the depth range for the viewport.
+    It is valid for pname:minDepth to be greater than or equal to
+    pname:maxDepth.
+
+The framebuffer depth coordinate [eq]#pname:z~f~# may: be represented using
+either a fixed-point or floating-point representation.
+However, a floating-point representation must: be used if the depth/stencil
+attachment has a floating-point depth component.
+If an [eq]#m#-bit fixed-point representation is used, we assume that it
+represents each value latexmath:[\frac{k}{2^m - 1}], where [eq]#k {elem} {
+0, 1, ..., 2^m^-1 }#, as [eq]#k# (e.g. 1.0 is represented in binary as a
+string of all ones).
+
+The viewport parameters shown in the above equations are found from these
+values as
+
+  :: [eq]#o~x~ = pname:x {plus} pname:width / 2#
+  :: [eq]#o~y~ = pname:y {plus} pname:height / 2#
+  :: [eq]#o~z~ = pname:minDepth#
+  :: [eq]#p~x~ = pname:width#
+  :: [eq]#p~y~ = pname:height#
+  :: [eq]#p~z~ = pname:maxDepth - pname:minDepth#.
+
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+The application can: specify a negative term for pname:height, which has the
+effect of negating the y coordinate in clip space before performing the
+transform.
+When using a negative pname:height, the application should: also adjust the
+pname:y value to point to the lower left corner of the viewport instead of
+the upper left corner.
+Using the negative pname:height allows the application to avoid having to
+negate the y component of the code:Position output from the last vertex
+processing stage in shaders that also target other graphics APIs.
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+
+The width and height of the <<features-limits-maxViewportDimensions,
+implementation-dependent maximum viewport dimensions>> must: be greater than
+or equal to the width and height of the largest image which can: be created
+and attached to a framebuffer.
+
+The floating-point viewport bounds are represented with an
+<<features-limits-viewportSubPixelBits,implementation-dependent precision>>.
+
+.Valid Usage
+****
+  * [[VUID-VkViewport-width-01770]]
+    pname:width must: be greater than `0.0`
+  * [[VUID-VkViewport-width-01771]]
+    pname:width must: be less than or equal to
+    sname:VkPhysicalDeviceLimits::pname:maxViewportDimensions[0]
+ifndef::VK_VERSION_1_1,VK_KHR_maintenance1,VK_AMD_negative_viewport_height[]
+  * [[VUID-VkViewport-height-01772]]
+    pname:height must: be greater than `0.0`
+endif::VK_VERSION_1_1,VK_KHR_maintenance1,VK_AMD_negative_viewport_height[]
+  * [[VUID-VkViewport-height-01773]]
+    The absolute value of pname:height must: be less than or equal to
+    sname:VkPhysicalDeviceLimits::pname:maxViewportDimensions[1]
+  * [[VUID-VkViewport-x-01774]]
+    pname:x must: be greater than or equal to pname:viewportBoundsRange[0]
+  * [[VUID-VkViewport-x-01232]]
+    [eq]#(pname:x {plus} pname:width)# must: be less than or equal to
+    pname:viewportBoundsRange[1]
+  * [[VUID-VkViewport-y-01775]]
+    pname:y must: be greater than or equal to pname:viewportBoundsRange[0]
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1,VK_AMD_negative_viewport_height[]
+  * [[VUID-VkViewport-y-01776]]
+    pname:y must: be less than or equal to pname:viewportBoundsRange[1]
+  * [[VUID-VkViewport-y-01777]]
+    [eq]#(pname:y {plus} pname:height)# must: be greater than or equal to
+    pname:viewportBoundsRange[0]
+endif::VK_VERSION_1_1,VK_KHR_maintenance1,VK_AMD_negative_viewport_height[]
+  * [[VUID-VkViewport-y-01233]]
+    [eq]#(pname:y {plus} pname:height)# must: be less than or equal to
+    pname:viewportBoundsRange[1]
+ifdef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-VkViewport-minDepth-01234]]
+    Unless `<<VK_EXT_depth_range_unrestricted>>` extension is enabled
+    pname:minDepth must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifndef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-VkViewport-minDepth-01234]]
+    pname:minDepth must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifdef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-VkViewport-maxDepth-01235]]
+    Unless `<<VK_EXT_depth_range_unrestricted>>` extension is enabled
+    pname:maxDepth must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifndef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-VkViewport-maxDepth-01235]]
+    pname:maxDepth must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+****
+
+include::../validity/structs/VkViewport.txt[]
+--

@@ -1,0 +1,957 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[writing]]
+= Writing Style
+
+
+[[writing-misc]]
+== Miscellaneous Grammar, Spelling, and Punctuation Issues
+
+=== Use the Oxford Comma (Serial Comma)
+
+When writing a sentence listing a series of items, include a comma before
+the "`and`" separating the last item.
+
+*Correct:* The red, green, blue, and alpha components.
+
+*Incorrect:* The red, green, blue and alpha components.
+
+Also see http://blog.oxforddictionaries.com/2011/06/oxford-comma/
+
+
+=== Date Format
+
+Whenever possible, write dates in the <<iso-8601,ISO 8601>> format:
+YYYY-MM-DD.
+
+If needed for consistency with existing dates, e.g. in appendix changelogs,
+you can also write "`Month DD, YYYY`" where "`Month`" is the English name of
+the month.
+
+Never use ambigious formats such as "`09/12/16`".
+
+[source,asciidoc]
+.Example Markup
+----
+  * 2016-09-12
+  * September 12, 2016
+----
+
+
+[[writing-misc-a-an]]
+=== A/An and Markup Macros
+
+Use "`a`" and "`an`" http://www.grammar.com/a-vs-an-when-to-use/[correctly],
+based on the *sound* of the letter beginning the following word.
+
+It is easy to get this wrong when talking about Vulkan API names tagged with
+the <<markup-macros,markup macros>>.
+For example, if you wanted to say:
+
+A ename:VK_ERROR_DEVICE_LOST error
+
+the correct way to mark this up in asciidoc would be:
+
+[source,asciidoc]
+----
+A ename:VK_ERROR_DEVICE_LOST error
+----
+
+However, on first glance at this it *appears* wrong, because the "`word`"
+following "`a`" is the macro name, "`ename{cl}`".
+That starts with a vowel, so the temptation is to say
+
+[source,asciidoc]
+----
+An ename:VK_ERROR_DEVICE_LOST error may occur.
+----
+
+What matters here is how the *output* document is formatted.
+
+
+=== Numbers in Text
+
+When describing the need for a small number of objects, smaller than ten,
+spell the number out (e.g. "`one`").
+If you are describing a literal value that is a small number, you may use a
+numeric value (e.g. "`1`").
+
+For example, instead of writing that a bitmask "`contains 1 or more bits`",
+write that it "`contains one or more bits`".
+A counter example is that it is okay to write "`For non-stereoscopic-3D
+applications, this value is 1.`"
+
+
+=== Use American Spelling Conventions
+
+In case of conflict, use American rather than British spelling conventions,
+except for noted exceptions in the table below.
+
+.Spelling
+[width="60%",options="header"]
+|====
+| Use Spelling  | Instead Of     | Comments
+| color         | colour         |
+| signaled      | signalled      |
+| tessellation  | tesselation    | Historical exception
+|====
+
+
+[[writing-arrays]]
+=== Describing Properties of Array Elements
+
+Many Vulkan parameters are arrays, or pointers to arrays.
+When describing array elements, use the terminology "`each element`" when
+the description applies uniformly and independently to every element of the
+array.
+For example:
+
+[source,asciidoc]
+.Example Markup
+----
+  * Each element of the pname:pCommandBuffers member of each element of
+    pname:pSubmits must: be in the <<commandbuffers-lifecycle, pending or
+    executable state>>.
+----
+
+Use the terminology "`any element`" when the description is of zero or more
+elements of the array sharing a property.
+For example:
+
+[source,asciidoc]
+.Example Markup
+----
+  * If any element of the pname:pCommandBuffers member of any element
+    of pname:pSubmits was not recorded with the
+    ename:VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT, it must: not be in
+    the <<commandbuffers-lifecycle, pending state>>.
+----
+
+Never use the redundant terminology "`any *given* element`".
+
+
+[[writing-compound-words]]
+=== Compound Words and Preferred Orthography
+
+Unless there is longstanding precedent in computer science literature, or
+the word is a noted exception in the table below, do not arbitrarily cram
+terms together.
+
+This does not apply to parameter names in the API, where capitalization is
+used to distinguish words.
+For example, it is proper to refer to the use of a pname:colorSpace member
+of a structure as a "`color space`" value.
+
+.Spelling
+[width="70%",options="header",cols="20%,20%,60%"]
+|====
+| Use Spelling  | Instead Of     | Comments
+| bit plane     | bitplane       |
+| compile time  | compile-time   | Per Wikipedia "`compile time`"
+| color space   | colorspace     |
+| double-buffer | doublebuffer   |
+| entry point   | entry-point
+                | Except if needed to disambiguate from surrounding terms
+| flat shading  | flatshading    |
+| GitHub        | Github         | Site's preferred spelling
+| LOD           | lod +
+                  level of detail +
+                  level-of-detail| Acronym for "`Level of Detail`"
+| mip level +
+  mip layer +
+  mip size  +
+  mip tail
+                | miplevel +
+                  miplayer +
+                  mipsize  +
+                  miptail        | "`mipmap *term*`" may be used in time
+3+h| Exceptions
+| mipmap        | mip map        | Exception for historical reasons
+| pname:pNext chain
+                | pname:pNext-chain +
+                  pname:pNext extension chain
+                                 |
+| general-purpose
+                | general purpose| When used as an adjective
+| swapchain     | swap chain     | Exception due to heavy use in WSI extensions
+| happen-before +
+  happen-after  | happen before +
+                  happen after   | As used in concurrent languages such as
+                                   C++11, Java and OpenCL C.
+|====
+
+==== Words With "Pre-" Prefixes
+
+// also: premultiply preorder prerotation predefined
+
+When using the prefix "`pre`" to indicate "`prior to`", such as in the words
+"`preinitialized`", "`preprocess`", and "`pretransform`", do not separate
+the prefix from the word with a hyphen.
+This list is not intended to be complete.
+
+
+[[writing-describing]]
+== Describing Commands and Parameters
+
+The <<vulkan-spec,Vulkan API Specification>> describes API commands followed
+by descriptions of their parameters, which are usually simple scalar types,
+handles or pointers to Vulkan objects or arrays of objects; enumerated types
+specifying values or bitmasks which affect the operation of a command; or
+structures containing combinations of scalar types and objects.
+The templates and examples shown and annotated here are based on the
+<<vulkan-spec,Vulkan API Specification>>.
+Do not vary from them without compelling need.
+
+Normative parts of the <<vulkan-spec,Vulkan API Specification>> should
+describe _what_ something does, rather than _how_ or _why_ an application
+would want to use it.
+
+When explicitly allowed by the Specification, the reserved value `NULL` may:
+be used for pointer parameters and members and dispatchable object handles,
+and the reserved value dname:VK_NULL_HANDLE may: be used for
+non-dispatchable Vulkan object handle parameters and members.
+Otherwise, pointers and handles must: refer to valid memory and valid Vulkan
+objects, respectively.
+
+
+[NOTE]
+.Guideline
+====
+As a simple example, say
+
+"`To create a command pool, call fname:vkCreateCommandPool`"
+
+rather than
+
+"`You/The application/The user can create a command pool by calling
+fname:vkCreateCommandPool`".
+
+====
+
+Explanations of _why_ and _how_ should largely be confined to reference
+documentation, sample code, tutorials, and other such documents.
+Occasional non-normative explanations can be included in the
+<<vulkan-spec,Vulkan API Specification>> using
+<<markup-informative-notes,informative notes>>.
+
+
+[[writing-latexmath]]
+== Math Markup
+
+There is a considerable amount of math in the documentation, ranging from
+simple arithmetic expressions to complicated conditionals.
+There are two ways of marking up math expressions, described below.
+
+=== Asciidoc Math Markup
+
+Where possible, math is marked up using straight asciidoc features.
+For commonality with LaTeX math (see below), some common LaTeX operators and
+names are defined as asciidoc attributes using the same names, expanding to
+the corresponding Unicode entities.
+The complete set of these attributes is found in `config/attribs.txt`.
+
+.Spelling
+[width="100%",options="header",cols="20%,20%,60%"]
+|====
+| Feature | Result | Sample Markup
+
+| Subscripts
+| [eq]#a~x~#
+| +++[eq]#a~x~#+++
+
+| Superscripts
+| [eq]#-2^(b-1)^#
+| +++[eq]#-2^(b-1)^#+++
+
+| Struct/parameter names as variables
+| [eq]#2^pname:bits^#
+| +++[eq]#2^pname:bits^#+++
+
+| Greek Letters (selected)
+| [eq]#{alpha}, {beta}, {gamma}, {delta}, {DeltaUpper}, {epsilon}, {lambda},
+  {rho}, {tau}#
+| +++[eq]#{alpha}, {beta}, {gamma}, {delta}, {DeltaUpper}, {epsilon}, {lambda},
+  {rho}, {tau}#+++
+
+| Fractions
+| [eq]#{onequarter} + {onehalf}#
+| +++[eq]#{onequarter} + {onehalf}#+++
+
+| Closed Ranges
+| [eq]#[0,1]#
+| +++[eq]#[0,1]#+++
+
+| Open Ranges
+| [eq]#[0,1)#
+| +++[eq]#[0,1)#+++
+
+| Arithmetic and Relational Operators
+| [eq]#a {times} b#, [eq]#a {leq} b#, [eq]#a {neq} b#, [eq]#a {geq} b#, [eq]#{vert}x{vert}#
+| +++[eq]#a {times} b#+++, +++[eq]#a {leq} b#+++, +++[eq]#a {neq} b#+++, +++[eq]#a {geq} b#+++, +++[eq]#{vert}x{vert}#+++
+
+| Floor
+| [eq]#{lfloor}w - {onehalf}{rfloor}#
+| +++[eq]#{lfloor}w - {onehalf}{rfloor}#+++
+
+| Ceiling
+| [eq]#{lceil}log~2~(max(pname:width, pname:height)){rceil} + 1#
+| +++[eq]#{lceil}log~2~(max(pname:width, pname:height)){rceil} + 1#+++
+
+| Logical and Set Operators
+| [eq]#{land} {lnot} {lor} {oplus} {elem}#
+| +++[eq]#{land} {lnot} {lor} {oplus} {elem}#+++
+
+| Partial Derivatives
+| [eq]#{partial}r~x~ / {partial}x = 0#
+| +++[eq]#{partial}r~x~ / {partial}x = 0#+++
+
+| Matrix/Vector Parameter Names
+| [eq]#**P** = t **P**~1~ + (1-t) **P**~2~#
+| +++[eq]#**P** = t **P**~1~ + (1-t) **P**~2~#+++
+
+|====
+
+
+=== LaTeX Math Markup
+
+Math markup more complex than easily supported in straight asciidoc markup
+(examples found in the Vulkan Specification include matrices, tensors,
+summation notation, conditional assignments, and division of complex
+expressions) are marked up using LaTeX math notation, which is either passed
+through to the KaTeX in-browser rendering script for HTML outputs, or passed
+through asciidoctor-mathematical for PDF outputs.
+
+[NOTE]
+.Note
+====
+There are font and style differences between LaTeX and asciidoc math markup
+which lead to minor visual inconsistencies.
+We'll try to make this better over time, but it's not significant enough to
+be a big priority.
+====
+
+While LaTeX math macros, including the amsmath package, are supported,
+general LaTeX constructs are not.
+
+_Inline math_ is encoded using the latexmath{cl} macro.
+For example:
+
+  * latexmath:[[0,1\]]
+  * latexmath:[\frac{1 - \frac{x}{2}}{x - 1}]
+  * latexmath:[\mathbf{c} = t \mathbf{c}_1 + (1-t) \mathbf{c}_2.]
+
+[source,asciidoc]
+.Example Markup
+----
+  * latexmath:[[0,1\]]
+  * latexmath:[\frac{1 - \frac{x}{2}}{x - 1}]
+  * latexmath:[\mathbf{c} = t \mathbf{c}_1 + (1-t) \mathbf{c}_2. ]
+----
+
+Note the escaped bracket in markup for the first expression, which is
+necessary to work around asciidoc macro parsing.
+
+_Block math_ is used for more complex equations.
+This example uses the `aligned` environment to delimit the expression.
+
+[latexmath]
++++++++++++++++++++
+\begin{aligned}
+c_{RGB} & =
+  \begin{cases}
+    \frac{c_{sRGB}}{12.92}                              & \text{for}\  c_{sRGB} \leq 0.04045 \\
+    \left ( \frac{c_{sRGB}+0.055}{1.055} \right )^{2.4} & \text{for}\  c_{sRGB} > 0.04045
+  \end{cases}
+\end{aligned}
++++++++++++++++++++
+
+[source,asciidoc]
+.Example Markup
+----
+[latexmath]
++++++++++++++++++++
+\begin{aligned}
+c_{RGB} & =
+  \begin{cases}
+    \frac{c_{sRGB}}{12.92}                              & \text{for}\  c_{sRGB} \leq 0.04045 \\
+    \left ( \frac{c_{sRGB}+0.055}{1.055} \right )^{2.4} & \text{for}\  c_{sRGB} > 0.04045
+  \end{cases}
+\end{aligned}
++++++++++++++++++++
+----
+
+[NOTE]
+.Note
+====
+The KaTeX processor used to render LaTeX math inside HTML documents does not
+support all features of LaTeX math.
+
+Similarly, the asciidoctor-mathematical processor does not support
+everything, though does have some support for AMSMath.
+
+Some workarounds we've had to make are:
+
+.LaTeX math replacements for KaTeX compatibility
+[width="70%",options="header",cols="20%,20%,60%"]
+|====
+| Replace              | With              | Comments
+| `\begin{equation}`   | _nothing_         | Unnecessary in blocks. Should not be used for inline.
+| `\end{equation}`     | _nothing_         | Unnecessary in blocks. Should not be used for inline.
+| `\begin{align*}`     | `\begin{aligned}` |
+| `\end{align*}`       | `\end{aligned}`   |
+| `\operatorname{foo}` | `\mathbin{foo}`   |
+| `{\rm A}`            | `\mathrm{A}`      |
+| `\text{for }`        | `\text{for}\ `    | Text ending in spaces is unpredictable - favour escaped spaces after text
+|====
+
+See https://github.com/Khan/KaTeX/wiki/Function-Support-in-KaTeX for a list
+of currently supported LaTeX functionality in KaTeX.
+You can also use the live katex preview tool on the KaTeX website to double
+check support, without building the whole spec:
+https://khan.github.io/KaTeX/
+
+See https://github.com/gjtorikian/mtex2MML/blob/master/SUPPORTED.md for the
+list of supported operations in the PDF build.
+\mathop in particular is not supported properly by the PDF build, but most
+other standard functionality is included.
+
+It is necessary to cross reference these two to make sure that support
+exists before using anything, but almost all standard functionality is
+supported for both.
+====
+
+This example is among the most complex expressions in the Vulkan
+specification:
+
+[latexmath]
++++++++++++++++++++
+V =
+  \begin{cases}
+    (-1)^S \times 0.0,                      & E = 0, M = 0     \\
+    (-1)^S \times 2^{-14} \times { M \over 2^{10} },
+                                            & E = 0,  M \neq 0 \\
+    (-1)^S \times 2^{E-15} \times { \left( 1 + { M \over 2^{10} } \right) },
+                                            & 0 < E < 31       \\
+    (-1)^S \times Inf,             & E = 31, M = 0             \\
+    NaN,                           & E = 31, M \neq 0
+  \end{cases}
++++++++++++++++++++
+
+[source,asciidoc]
+.Example Markup
+----
+[latexmath]
++++++++++++++++++++
+V =
+  \begin{cases}
+    (-1)^S \times 0.0,                      & E = 0, M = 0     \\
+    (-1)^S \times 2^{-14} \times { M \over 2^{10} },
+                                            & E = 0,  M \neq 0 \\
+    (-1)^S \times 2^{E-15} \times { \left( 1 + { M \over 2^{10} } \right) },
+                                            & 0 < E < 31       \\
+    (-1)^S \times Inf,             & E = 31, M = 0             \\
+    NaN,                           & E = 31, M \neq 0
+  \end{cases}
++++++++++++++++++++
+----
+
+
+[[writing-latexmath-in-table-cells]]
+=== LaTeX Math in Table Cells
+
+To use `[latexmath]` or `latexmath{cl}` constructs inside table cells, the
+cell separator must be `a|` instead of just `|`:
+
+[source,asciidoc]
+.Example Markup
+----
+.Advanced Blend Overlap Modes
+[width="80%",options="header"]
+|====
+| Overlap Mode                              | Weighting Equations
+| ename:VK_BLEND_OVERLAP_UNCORRELATED_EXT  a|
+[latexmath]
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                                              \begin{aligned}
+                                                p_0(A_s,A_d) & = A_sA_d \\
+                                                p_1(A_s,A_d) & = A_s(1-A_d) \\
+                                                p_2(A_s,A_d) & = A_d(1-A_s) \\
+                                              \end{aligned}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+----
+
+
+[[writing-pNext-chain]]
+== Describing Extension Structure Chains
+
+When describing an extension structure which is passed to an existing
+command by placing it in the pname:pNext chain of a structure parameter of
+that command, introduce the structure description in this fashion:
+
+[source,asciidoc]
+----
+When *performing an operation described by the extension struct*, add
+the slink:VkExtensionStructNameID to the pname:pNext chain of the
+slink:VkBaseExtensionStructName structure passed to the
+flink:vkBaseFunctionName command *saying what the extension struct
+does*.
+----
+
+
+[[writing-example]]
+== An Example Command Description
+
+The <<sample-command,next section>> is a sample based on the
+<<vulkan-spec,Vulkan API Specification>>, and describes a command in enough
+detail to see the different usage patterns and layout / markup used.
+Informative notes discussing markup and guidelines are interspersed with the
+example description to explain how and why it looks as it does.
+
+
+[[sample-command]]
+== Sample Command Description: Creating Command Pools
+
+// Three dashes are used here to allow the inner [source] block to show the
+// correct two dashes.
+
+[open,refpage='VkCreateCommandPool',desc='Create a new command pool object',type='protos']
+--
+To create a command pool, call:
+
+include::../api/protos/vkCreateCommandPool.txt[]
+
+[NOTE]
+.Guideline
+====
+Begin the command description with an open block delimiting the contents as
+a reference page.
+The open block contains several required attribute values, as described for
+<<writing-refpages, automatic extraction into a reference page>>.
+
+Use a short, active sentence when describing what commands do, instead of
+more passive phrasing like "`A command pool is created by calling:`" or
+"`The application may create a command pool by calling:`".
+
+After the description, include the autogenerated prototype for the command
+from the `../protos/` directory:
+
+// The 'subs=attributes+' and '{blank}--' are one way to allow the inner
+// [source] block to show the correct two dashes. See
+// http://discuss.asciidoctor.org/Another-markup-escaping-question-td5665.html
+
+[source,asciidoc,subs=attributes+]
+----
+[open,refpage='VkCreateCommandPool',desc='Create a new command pool object',type='protos']
+{blank}--
+To create a command pool, call:
+
+\include::../api/protos/vkCreateCommandPool.txt[]
+----
+
+Note that each autogenerated command, enumeration, flag, or structure
+definition include file also defines a corresponding asciidoc anchor which
+is the base name of the file.
+In this case, the anchor is named `vkCreateCommandPool`.
+====
+
+  * pname:device is the logical device that the command pool is created on.
+  * pname:pCreateInfo points to an instance of the
+    slink:VkCommandPoolCreateInfo structure containing information used to
+    create the command pool.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+  * pname:pCommandPool points to a handle in which the created command pool
+    object is returned.
+
+[NOTE]
+.Guideline
+====
+Each command parameter is described in a separate bullet list entry,
+followed by validity rules, then detailed descriptions of any new
+structures, flags, or enumerations introduced by this command.
+
+Each parameter should appear as a separate bullet list item beginning with
+the parameter name, in the same order as parameters appear in the command.
+This aids in extracting short descriptions of parameters for inclusion in
+annotated headers and similar documentation.
+Make sure to tag each parameter with the pname{cl} macro.
+
+Strive for compact notation, and in particular always try to use the
+phrasing "`pname{cl}param _is_`" rather than wordier forms such as
+"`pname{cl}param _specifies_`" or "`The pname{cl}param parameter
+specifies`".
+In general there is no need to describe a parameter which is a Vulkan object
+handle *as* a handle; for example, say "`pname{cl}device is the logical
+device`" rather than "`pname{cl}device is a handle to the logical device`".
+An exception is object creation functions, where a pointer to a handle of
+the proper type is used to return the newly created object.
+====
+
+include::../validity/protos/vkCreateCommandPool.txt[]
+--
+
+[NOTE]
+.Guideline
+====
+Some parameter and member validation language for commands and structures is
+_implicit_ (autogenerated from `vk.xml`), and included from the
+`../validity/` directories.
+All Vulkan command and structure language should include the autogenerated
+file at the end of their descriptions.
+It is harmless to include a nonexistent file, in the rare cases where no
+implicit validity language exists.
+
+[source,asciidoc,subs=attributes+]
+----
+\include::../validity/protos/vkCreateCommandPool.txt[]
+{blank}--
+----
+
+End the open block surrounding the command description after the implicit
+validity include.
+All content within the block will be extracted for the corresponding
+reference page.
+
+[NOTE]
+.Guideline
+====
+Open blocks delimiting reference page content should not themselves contain
+section headers, as asciidoctor can't render such nested content correctly.
+Reference pages should in general be relatively short, so this limitation is
+not severe.
+====
+
+Structures and enumerations first used as parameters of a command are
+described next.
+
+====
+
+// Three dashes are used here to allow the inner [source] block to show the
+// correct two dashes.
+
+[open,refpage='VkCommandPoolCreateInfo',desc='Structure specifying parameters of a newly created command pool',type='structs']
+--
+
+The sname:VkCommandPoolCreateInfo structure is defined as:
+
+include::../api/structs/VkCommandPoolCreateInfo.txt[]
+
+[NOTE]
+.Guideline
+====
+Begin the structure description with an open block delimiting the contents
+as a reference page, in the same fashion as described above for commands.
+The open block contains several required attribute values, as described for
+<<writing-refpages, automatic extraction into a reference page>>.
+
+Use a short, active paragraph to introduce the structure, usually just "`The
+sname:VkStructureName structure is defined as:`".
+
+After the description, include the autogenerated definition for the
+structure from the `../structs/` directory:
+
+[source,asciidoc,subs=attributes+]
+----
+[open,refpage='VkCommandPoolCreateInfo',desc='Structure specifying parameters of a newly created command pool',type='structs']
+{blank}--
+
+The sname:VkCommandPoolCreateInfo structure is defined as:
+
+\include::../api/structs/VkCommandPoolCreateInfo.txt[]
+----
+====
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is a bitmask of elink:VkCommandPoolCreateFlagBits indicating
+    usage behavior for the pool and command buffers allocated from it.
+  * pname:queueFamilyIndex designates a queue family as described in section
+    <<devsandqueues-queueprops,Queue Family Properties>>.
+    All command buffers allocated from this command pool must: be submitted
+    on queues from the same queue family.
+
+[NOTE]
+.Guideline
+====
+Each structure member is described in a separate bullet list entry.
+For the stext:Vk*CreateInfo structures in particular, there is standard
+boilerplate for the pname:sType and pname:pNext members, followed by the
+members specific to the structure.
+
+[source,asciidoc]
+----
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is a bitmask of elink:VkCommandPoolCreateFlagBits indicating
+    usage behavior for the pool and command buffers allocated from it.
+  * pname:queueFamilyIndex designates a queue family as described in section
+    <<devsandqueues-queueprops,Queue Family Properties>>.
+    All command buffers allocated from this command pool must: be submitted
+    on queues from the same queue family.
+----
+
+These entries should be short and functional, without describing details of
+e.g. new enumerant values, function of individual parameter settings, etc.
+They can refer to other types using the appropriate *link: macros or to
+related sections of the specification using asciidoc xrefs.
+
+In rare cases, an entry will cover multiple paragraphs.
+In these cases the normal list nesting and indentation guidelines cannot be
+applied due to limitations of the asciidoc parser.
+It is usually best to append a continuation block following the first
+paragraph of such a list item:
+
+// @@@ Use VkCommandBufferInheritanceInfo:framebuffer for a current example instead
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+This example is obsolete and incorrect.
+Use VkCommandBufferInheritanceInfo:framebuffer for a current example
+instead.
+====
+endif::editing-notes[]
+
+[source,asciidoc,subs=attributes+]
+----
+  * pname:flags is a bitmask indicating usage behavior for the pool and
+    command buffers allocated from it.
+    Bits which can: be set include:
++
+{blank}--
+// refBegin VkCommandPoolCreateFlagBits - Bitmask specifying usage behavior for a command pool
+\include::../api/enums/VkCommandPoolCreateFlagBits.txt[]
+{blank}--
++
+  ** ename:VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
+     indicates that command buffers allocated
+     from the pool will be short-lived.
+  ** ename:VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT
+     controls whether command buffers allocated from
+     the pool can: be individually reset.
+----
+====
+
+.Valid Usage
+****
+  * [[VUID-VkCommandPoolCreateInfo-queueFamilyIndex-00039]]
+    pname:queueFamilyIndex must: be the index of a queue family available in
+    the calling command's pname:device parameter
+****
+
+[NOTE]
+.Guideline
+====
+In addition to implicit validity language, there may be additional
+validation language which is explicit.
+Such language is written in a separate block in the specification,
+_preceding_ the validity include.
+The fname:vkCreateCommandPool example above has no such explicit language,
+but this example does have explicit language.
+====
+
+include::../validity/structs/VkCommandPoolCreateInfo.txt[]
+--
+
+[NOTE]
+.Guideline
+====
+Following the definition of structure members, add explicit validity
+language, following by including the implicit (automatically generated)
+validity language include for this structure:
+
+[source,asciidoc]
+----
+.Valid Usage
+****
+  * [[VUID-VkCommandPoolCreateInfo-queueFamilyIndex-00039]]
+    pname:queueFamilyIndex must: be the index of a queue family available in
+    the calling command's pname:device parameter
+****
+
+\include::../validity/structs/VkCommandPoolCreateInfo.txt[]
+----
+
+Each explicit Valid Usage statement should be a single, self-contained
+assertion, possibly involving multiple subexpressions or parameters.
+For example, instead of writing "`width, height, and depth must: all be
+greater than zero`", write each condition as a separate statement.
+In contrast, "`width {times} height must: be less than 1024`" is a single
+assertion involving multiple parameters.
+
+Do not use "`unless`" to call out exceptions - always write valid usage
+statements of the form "`if _A_ then _B_`".
+This may result in harder to read statements in a few cases, but maintains
+consistency.
+In many cases, it may lead to a simpler VU statement, or splitting one large
+VU into multiple new ones.
+
+Do not use nested lists or other writing structure where Valid Usage
+statements are not self-contained.
+This would make it impossible to extract semantically meaningful
+descriptions for each assigned <<appendix-vuid, Valid Usage ID Tag>>.
+
+Be clear on the distinction between a "`valid pointer`" and a "`pointer to a
+valid object`" when writing Valid Usage statements.
+See the "`Valid Usage`" section of the Vulkan Specification, and
+particularly the "`Valid Usage for Pointers`" section.
+
+Explicit Valid Usage statements must be assigned Valid Usage ID tags before
+publication.
+This process is described in the <<appendix-vuid, Valid Usage ID Tags>>
+appendix, but is normally performed only when preparing to integrate
+functionality into the Vulkan Specification prior to publication.
+It is something authors of new functionality should be aware of, but are not
+themselves responsible for.
+For example, when writing the explicit pname:queueFamilyIndex statement
+shown above, the tag
+
+[source,asciidoc]
+----
+[[VUID-VkCommandPoolCreateInfo-queueFamilyIndex-00039]]
+----
+
+was inserted by a script, not the original author.
+====
+
+
+[[writing-empty-enumerations]]
+== Markup For Empty Enumerated Types
+
+Sometimes an enumerated type has all values defined by extensions, and each
+enumerated value defined by the type will be surrounded by an asciidoc
+conditional for the corresponding extension.
+When a specification is built without any of those extensions enabled, the
+type should still be included, even though it is empty.
+In this case, the enumerated value descriptions must be followed by one
+additional conditional section which is only included when *none* of the
+relevant extensions are enabled.
+
+For example, the relevant part of the
+elink:VkDescriptorSetLayoutCreateFlagBits description, whose only value is
+defined by an extension, will look like this:
+
+[source,asciidoc,subs=attributes+]
+----
+\include::../api/enums/VkDescriptorSetLayoutCreateFlagBits.txt[]
+
+\ifdef::VK_KHR_push_descriptor[]
+  * ename:VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR specifies
+    that descriptor sets must: not be allocated using this layout, and
+    descriptors are instead pushed by flink:vkCmdPushDescriptorSetKHR.
+\endif::VK_KHR_push_descriptor[]
+
+\ifndef::VK_KHR_push_descriptor[]
+[NOTE]
+.Note
+====
+All bits for this type are defined by extensions, and none of those
+extensions are enabled in this build of the specification.
+====
+\endif::VK_KHR_push_descriptor[]
+----
+
+
+[[writing-refpages]]
+== Markup For Automatic Reference Page Extraction
+
+The Vulkan reference pages are (mostly) extracted from corresponding
+sections of the API Specification.
+This requires that the markup and writing conventions described above be
+adhered to rigidly.
+
+The extraction scripts for a given page rely on the existence of an asciidoc
+`open` block surrounding markup describing that page, with attributes used
+to specify properties of the reference page.
+Additional heuristics and non-asciidoc tags, described below, are used to
+identify subsections of a reference page in some cases.
+
+In general the open block introduction will look like:
+
+[source,asciidoc]
+----
+[open,refpage='name',desc='short description',type='pagetype',xrefs='xrefs']
+--
+----
+
+Attributes which can be set on the block are:
+
+  * *refpage* - the name of the reference page, e.g. the Vulkan interface
+    (command, structure, enumerant, handle, etc.) name. This attribute is
+    required.
+  * *desc* - short description / summary of the page, used in the page
+    title.
+    This attribute is required.
+  * *type* - type of the interface, which must match the directory name
+    following `api/` in the interface `include::` line within the block, and
+    must be one of `basetypes`, `defines`, `enums`, `flags`, `funcpointers`,
+    `handles`, `protos`, or `structs`.
+    This attribute is required.
+  * *xrefs* - list of whitespace-separated names of other reference pages
+    which should be added to the `See Also` section of this page.
+    Most cross-references are automatically generated based on the immediate
+    dependency information in `vk.xml`, but in some cases, such as referring
+    between `*FlagBits` and `*Flags` types, this additional tagging is
+    useful.
+    This attribute is optional.
+
+Attributes of the open block must be written in this format, using single
+quotes as delimiters (even though asciidoc markup also allows double
+quotes), and escape single quotes in e.g. the *desc* attribute value with
+backquotes.
+
+After the open block is started, the following markup should be provided:
+
+  * A single paragraph of text describing the definition of the interface.
+    This paragraph is optional, but strongly recommended.
+  * The `include` line for the interface, which must be consistent with the
+    page name and type in the open block attributes.
+    This paragraph is required.
+  * A bullet list describing function parameters, structure members,
+    enumerants in an enumerated type, etc.
+    This list should contain no empty lines, as the extraction script
+    classifies the uninterrupted block of text following the `include`
+    directive as the `Parameters` or `Members` section of the ref page.
+    This list is required, unless the interface has nothing to describe,
+    such as an empty structure or enumeration, or a function with no
+    parameters.
+  * Paragraphs of text making up the `Description` section of the ref page.
+    This section is optional.
+    If it is necessary due to constraints of asciidoc markup to have an
+    empty line in the bullet list section^1^, add a `// refBody` comment
+    immediately following the bullet list and preceding this section:
++
+[source,asciidoc]
+----
+// refBody
+----
++
+  * An explicit Valid Usage block.
+    This block is required if the interface has such Valid Usage
+    constraints.
+  * The `include` line for the implicit valid usage block.
+    This line is required for for commands and structures, but not for
+    interfaces such as enumerated types, which do not have implicit valid
+    usage blocks.
+  * Finally, a two-dash asciidoc delimiter closing the open block:
++
+[source,asciidoc]
+----
+--
+----
+
+1::
+    The only example of such markup in the 1.0.28 Vulkan Specification
+    source is the stext:VkPhysicalDeviceLimits structure description.
+
+All elements specifying an interface name (open block `refpage` attributes,
+interface `include` lines, and validity `include` lines) must use the same
+interface name, if present.
+Otherwise the extraction script is either unable to extract that page, or
+will extract the wrong text - and the language will be structurally
+incorrect, as well.
+The extraction process is somewhat fragile, so care should be taken and the
+results of reference page extraction verified after making changes to that
+portion of the specification source.
