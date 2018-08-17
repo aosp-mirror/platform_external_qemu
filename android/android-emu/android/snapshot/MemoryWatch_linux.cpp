@@ -205,6 +205,16 @@ public:
 };
 
 bool MemoryAccessWatch::isSupported() {
+    if (!android::featurecontrol::isEnabled(
+            android::featurecontrol::OnDemandSnapshotLoad)) {
+        return false;
+    }
+
+    if (android::featurecontrol::isEnabled(
+            android::featurecontrol::QuickbootFileBacked)) {
+        return false;
+    }
+
     base::ScopedFd ufd(int(syscall(__NR_userfaultfd, O_CLOEXEC)));
     return checkUserfaultFdCaps(ufd.get());
 }

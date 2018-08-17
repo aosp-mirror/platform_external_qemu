@@ -18,6 +18,7 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/MacSegvHandler.h"
 
@@ -180,12 +181,8 @@ public:
 
 // static
 bool MemoryAccessWatch::isSupported() {
-    // bug: 117473657
-    // Dangerous to use MemoryAccessWatch in general
-    return false;
-
-    // TODO: HAXM
-    // return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HVF;
+    return android::featurecontrol::isEnabled(
+            android::featurecontrol::OnDemandSnapshotLoad);
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
