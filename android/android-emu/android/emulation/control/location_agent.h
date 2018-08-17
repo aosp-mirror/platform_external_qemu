@@ -28,13 +28,17 @@ typedef struct QAndroidLocationAgent {
     // Query whether the device implementation supports GPS.
     bool (*gpsIsSupported)(void);
 
-    // Send a GPS location to the AVD using an NMEA sentence
+    // Send a GPS location to the AVD using NMEA sentences
     //   |latitude| and |longitude| are in degrees
     //   |metersElevation| is meters above sea level
+    //   |speed| is in knots
+    //   |heading| is degrees, -180..+360, 0=North, 90=East
     //   |nSatellites| is the number of satellites used
     //   |time| is UTC, in the format provided by gettimeofday()
     void (*gpsSendLoc)(double latitude, double longitude,
-                       double metersElevation, int nSatellites,
+                       double metersElevation,
+                       double speed, double heading,
+                       int nSatellites,
                        const struct timeval *time);
 
     // Get the current device location

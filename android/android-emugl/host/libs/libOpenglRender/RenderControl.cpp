@@ -366,6 +366,9 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
             glStr += "GL_OES_vertex_array_object ";
         }
 
+        // ASTC LDR compressed texture support.
+        glStr += "GL_KHR_texture_compression_astc_ldr ";
+
         if (emugl_feature_is_enabled(android::featurecontrol::IgnoreHostOpenGLErrors)) {
             glStr += kGLESNoHostError;
             glStr += " ";
