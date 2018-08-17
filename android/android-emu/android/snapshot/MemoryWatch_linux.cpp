@@ -54,7 +54,10 @@ static bool checkUserfaultFdCaps(int ufd) {
         return false;
     }
 
-    uffdio_api apiStruct = {UFFD_API};
+    uffdio_api apiStruct;
+    memset(&apiStruct, 0x0, sizeof(uffdio_api));
+    apiStruct.api = UFFD_API;
+
     if (ioctl(ufd, UFFDIO_API, &apiStruct)) {
         dwarning("UFFDIO_API failed: %s", strerror(errno));
         return false;
@@ -63,12 +66,10 @@ static bool checkUserfaultFdCaps(int ufd) {
     uint64_t ioctlMask = 1ull << _UFFDIO_REGISTER | 1ull << _UFFDIO_UNREGISTER;
 
     if (fc::isEnabled(Feature::QuickbootFileBacked)) {
-        if (!(apiStruct.features & UFFD_FEATURE_MISSING_SHMEM)) {
-            VERBOSE_PRINT(snapshot, 
-                "Using file-backed Quickboot, but "
-                "missing UFFD_FEATURE_MISSING_SHMEM.");
-            return false;
-        }
+        // It's possible for UFFD_FEATURE_MISSING_SHMEM to
+        // be returned in features but registering ranges
+        // still fail. To be safe, return false unconditionally.
+        return false;
     }
 
     if ((apiStruct.ioctls & ioctlMask) != ioctlMask) {
