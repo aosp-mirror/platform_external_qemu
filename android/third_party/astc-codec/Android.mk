@@ -54,6 +54,7 @@ LOCAL_SRC_FILES := \
     src/base/test/string_utils_test.cpp \
     src/base/test/type_traits_test.cpp \
     src/base/test/uint128_test.cpp \
+    src/decoder/test/partition_test.cc \
     src/decoder/test/physical_astc_block_test.cc \
     src/decoder/test/integer_sequence_codec_test.cc \
     src/decoder/test/intermediate_astc_block_test.cc \
@@ -63,10 +64,6 @@ LOCAL_SRC_FILES := \
     src/decoder/test/logical_astc_block_test.cc \
     src/decoder/test/codec_test.cc \
     src/decoder/test/footprint_test.cc \
-
-# TODO(b/112669735): Partition test is temporarily disabled. This isn't used for
-# decoding, so it does't influence using astc-codec in the emulator.
-#    src/decoder/test/partition_test.cc \
 
 LOCAL_COPY_FILES := \
     $(subst $(LOCAL_PATH),,$(wildcard $(LOCAL_PATH)/src/decoder/testdata/*.astc)) \
