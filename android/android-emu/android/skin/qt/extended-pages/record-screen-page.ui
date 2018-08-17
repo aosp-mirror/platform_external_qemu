@@ -55,7 +55,7 @@
      <bool>true</bool>
     </property>
     <property name="ColorGroup" stdset="0">
-     <string>Tool</string>
+     <string>Button</string>
     </property>
     <property name="report_metrics" stdset="0">
      <bool>false</bool>
@@ -312,7 +312,7 @@
        <bool>true</bool>
       </property>
       <property name="ColorGroup" stdset="0">
-       <string>Tool</string>
+       <string>Button</string>
       </property>
       <property name="report_metrics" stdset="0">
        <bool>false</bool>
