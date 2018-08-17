@@ -35,6 +35,7 @@ using android::base::LazyInstance;
 
 static constexpr double kGplexLon = -122.084;
 static constexpr double kGplexLat =   37.422;
+static constexpr double kGplexAlt =    5.0; // Meters
 static constexpr double MAX_SPEED =  666.0; // Arbitrary (~speed of sound in knots)
 
 static double getHeading(double startLat, double startLon, double endLat, double endLon);
@@ -683,7 +684,7 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
         *pOutLatitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_LATITUDE, kGplexLat).toDouble();
         *pOutLongitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_LONGITUDE, kGplexLon).toDouble();
-        *pOutAltitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_ALTITUDE, 0.0).toDouble();
+        *pOutAltitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_ALTITUDE, kGplexAlt).toDouble();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -692,7 +693,7 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
         *pOutLongitude = settings.value(Ui::Settings::LOCATION_RECENT_LONGITUDE,
                                      kGplexLon).toDouble();
         *pOutAltitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
-                                     0.0).toDouble();
+                                     kGplexAlt).toDouble();
     }
 }
 
