@@ -110,6 +110,10 @@ static const GLenum kGLES2BlendFuncs[] = {GL_ZERO,
                                           GL_ONE_MINUS_CONSTANT_ALPHA,
                                           GL_SRC_ALPHA_SATURATE};
 
+// Valid GENERATE_MIPMAP_HINT values
+static const GLenum kGLES2GenerateMipmapHints[] = {GL_DONT_CARE, GL_FASTEST,
+                                                   GL_NICEST};
+
 // Returns a string useful for failure messages describing |enumValue|.
 std::string describeGlEnum(GLenum enumValue);
 
