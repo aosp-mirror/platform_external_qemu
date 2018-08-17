@@ -69,6 +69,29 @@
       "revId": "1cee2db5c19105e1c41d6bcd466caca7cc1cf2f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "45964d72_186f479f",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 783,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-17T22:43:40Z",
+      "side": 1,
+      "message": "hmm, just occurred to me, this is doing I/O. Should this output to a RAM buffer and then flush to disk at the end to cause as little jitter as possible?\n\nAnd as the bit representation of those numbers, rather than ASCII (and read them back in with the Stream abstraction like snapshots)",
+      "range": {
+        "startLine": 783,
+        "startChar": 8,
+        "endLine": 783,
+        "endChar": 77
+      },
+      "revId": "1cee2db5c19105e1c41d6bcd466caca7cc1cf2f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
