@@ -116,6 +116,30 @@
       "revId": "1cee2db5c19105e1c41d6bcd466caca7cc1cf2f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fe0c29f_437bc4b6",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 783,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-17T22:51:59Z",
+      "side": 1,
+      "message": "Hmm.  This is intended mostly as a stop-gap feature for internal developers, so that we can compare emulator tracking with ground-truth, not a fully-fledged feature.  Ideally we would plumb this through the sensor stack as a POSE_6DOF: https://developer.android.com/reference/kotlin/android/hardware/Sensor#type_pose_6dof\n\nFor automation support, this is very good feedback though-- I\u0027ll keep that in mind.  We\u0027re already logging out a protobuf instead of a string, but we should definitely try to buffer it in memory and do flushes on another thread.",
+      "parentUuid": "beb417fb_fe05cca1",
+      "range": {
+        "startLine": 783,
+        "startChar": 8,
+        "endLine": 783,
+        "endChar": 77
+      },
+      "revId": "1cee2db5c19105e1c41d6bcd466caca7cc1cf2f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
