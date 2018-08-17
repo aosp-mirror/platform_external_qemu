@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a836a80d_b1ce8c00",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-17T22:33:01Z",
+      "side": 1,
+      "message": "nit:tabs",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 4
+      },
+      "revId": "1cee2db5c19105e1c41d6bcd466caca7cc1cf2f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa10252e_01e9cd24",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-17T22:33:01Z",
+      "side": 1,
+      "message": "nit: recording",
+      "range": {
+        "startLine": 168,
+        "startChar": 13,
+        "endLine": 168,
+        "endChar": 21
+      },
+      "revId": "1cee2db5c19105e1c41d6bcd466caca7cc1cf2f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
