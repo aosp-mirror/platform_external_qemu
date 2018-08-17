@@ -22,6 +22,8 @@
 OLD_LOCAL_PATH := $(LOCAL_PATH)
 LOCAL_PATH := $(call my-dir)
 
+ifeq (,$(CONFIG_MIN_BUILD))
+
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)-crash-service)
 $(call gen-hw-config-defs)
 
@@ -170,5 +172,7 @@ LOCAL_C_INCLUDES += \
 $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
+
+endif # !CONFIG_MIN_BUILD
 
 LOCAL_PATH := $(OLD_LOCAL_PATH)

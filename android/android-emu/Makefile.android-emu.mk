@@ -660,6 +660,8 @@ endif
 #
 #
 
+ifeq (,$(CONFIG_MIN_BUILD))
+
 $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
 $(call gen-hw-config-defs)
 
@@ -857,11 +859,15 @@ $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
 
+endif # !CONFIG_MIN_BUILD
+
 ###############################################################################
 #
 #  android-emu-metrics unit tests
 #
 #
+
+ifeq (,$(CONFIG_MIN_BUILD))
 
 $(call start-emulator-program, \
     android_emu_metrics$(BUILD_TARGET_SUFFIX)_unittests)
@@ -900,6 +906,7 @@ $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
 
+endif # !CONFIG_MIN_BUILD
 ##############################################################################
 #
 #  emulator-libui
@@ -978,6 +985,7 @@ $(call end-emulator-library)
 
 # emulator-libui unit tests
 
+ifeq (,$(CONFIG_MIN_BUILD))
 
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_libui_unittests)
 
@@ -1028,6 +1036,7 @@ $(call gen-hw-config-defs)
 
 $(call end-emulator-program)
 
+endif # CONFIG_MIN_BUILD
 # Done
 
 LOCAL_PATH := $(_ANDROID_EMU_OLD_LOCAL_PATH)
