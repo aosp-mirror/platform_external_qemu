@@ -17,6 +17,7 @@
 import argparse, cProfile, pdb, string, sys, time
 from reg import *
 from generator import write
+from cerealgenerator import CerealGenerator
 from cgenerator import CGeneratorOptions, COutputGenerator
 from docgenerator import DocGeneratorOptions, DocOutputGenerator
 from extensionmetadocgenerator import ExtensionMetaDocGeneratorOptions, ExtensionMetaDocOutputGenerator
@@ -179,6 +180,32 @@ def makeGenOpts(args):
             addExtensions     = addExtensionsPat,
             removeExtensions  = removeExtensionsPat,
             emitExtensions    = emitExtensionsPat)
+        ]
+
+    # Serializer for spec
+    genOpts['cereal'] = [
+            CerealGenerator,
+            CGeneratorOptions(
+                filename          = "Android.mk",
+                directory         = directory,
+                apiname           = 'vulkan',
+                profile           = None,
+                versions          = featuresPat,
+                emitversions      = featuresPat,
+                defaultExtensions = defaultExtensions,
+                addExtensions     = None,
+                removeExtensions  = removeExtensionsPat,
+                emitExtensions    = emitExtensionsPat,
+                prefixText        = prefixStrings + vkPrefixStrings,
+                genFuncPointers   = True,
+                protectFile       = protectFile,
+                protectFeature    = False,
+                protectProto      = '#ifndef',
+                protectProtoStr   = 'VK_NO_PROTOTYPES',
+                apicall           = 'VKAPI_ATTR ',
+                apientry          = 'VKAPI_CALL ',
+                apientryp         = 'VKAPI_PTR *',
+                alignFuncParam    = 48)
         ]
 
     # API host sync table files for spec
