@@ -1,0 +1,380 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[initialization]]
+= Initialization
+
+Before using Vulkan, an application must: initialize it by loading the
+Vulkan commands, and creating a sname:VkInstance object.
+
+
+[[initialization-functionpointers]]
+== Command Function Pointers
+
+[open,refpage='vkGetInstanceProcAddr',desc='Return a function pointer for a command',type='protos',xrefs='PFN_vkVoidFunction']
+--
+
+Vulkan commands are not necessarily exposed statically on a platform.
+Function pointers for all Vulkan commands can: be obtained with the command:
+
+include::../api/protos/vkGetInstanceProcAddr.txt[]
+
+  * pname:instance is the instance that the function pointer will be
+    compatible with, or `NULL` for commands not dependent on any instance.
+  * pname:pName is the name of the command to obtain.
+
+fname:vkGetInstanceProcAddr itself is obtained in a platform- and loader-
+specific manner.
+Typically, the loader library will export this command as a function symbol,
+so applications can: link against the loader library, or load it dynamically
+and look up the symbol using platform-specific APIs.
+
+The table below defines the various use cases for
+fname:vkGetInstanceProcAddr and expected return value ("`fp`" is "`function
+pointer`") for each case.
+
+The returned function pointer is of type tlink:PFN_vkVoidFunction, and must
+be cast to the type of the command being queried.
+
+.vkGetInstanceProcAddr behavior
+[width="80%",options="header"]
+|====
+| pname:instance   | pname:pName                                  | return value
+| *                | `NULL`                                       | undefined
+| invalid instance | *                                            | undefined
+ifdef::VK_VERSION_1_1[]
+| `NULL`           | flink:vkEnumerateInstanceVersion             | fp
+endif::VK_VERSION_1_1[]
+| `NULL`           | flink:vkEnumerateInstanceExtensionProperties | fp
+| `NULL`           | flink:vkEnumerateInstanceLayerProperties     | fp
+| `NULL`           | flink:vkCreateInstance                       | fp
+| `NULL`           | * (any pname:pName not covered above)        | `NULL`
+| instance         | core Vulkan command                          | fp^1^
+| instance         | enabled instance extension commands for pname:instance    | fp^1^
+| instance         | available device extension^2^ commands for pname:instance | fp^1^
+| instance         | * (any pname:pName not covered above)        | `NULL`
+|====
+
+1::
+    The returned function pointer must: only be called with a dispatchable
+    object (the first parameter) that is pname:instance or a child of
+    pname:instance, e.g. slink:VkInstance, slink:VkPhysicalDevice,
+    slink:VkDevice, slink:VkQueue, or slink:VkCommandBuffer.
+
+2::
+    An "`available device extension`" is a device extension supported by any
+    physical device enumerated by pname:instance.
+
+include::../validity/protos/vkGetInstanceProcAddr.txt[]
+--
+
+[open,refpage='vkGetDeviceProcAddr',desc='Return a function pointer for a command',type='protos',xrefs='PFN_vkVoidFunction']
+--
+
+In order to support systems with multiple Vulkan implementations, the
+function pointers returned by fname:vkGetInstanceProcAddr may: point to
+dispatch code that calls a different real implementation for different
+slink:VkDevice objects or their child objects.
+The overhead of the internal dispatch for slink:VkDevice objects can be
+avoided by obtaining device-specific function pointers for any commands that
+use a device or device-child object as their dispatchable object.
+Such function pointers can: be obtained with the command:
+
+include::../api/protos/vkGetDeviceProcAddr.txt[]
+
+The table below defines the various use cases for fname:vkGetDeviceProcAddr
+and expected return value for each case.
+
+The returned function pointer is of type tlink:PFN_vkVoidFunction, and must
+be cast to the type of the command being queried.
+The function pointer must: only be called with a dispatchable object (the
+first parameter) that is pname:device or a child of pname:device.
+
+.vkGetDeviceProcAddr behavior
+[width="80%",options="header"]
+|====
+| pname:device   | pname:pName                           | return value
+| `NULL`         | *                                     | undefined
+| invalid device | *                                     | undefined
+| device         | `NULL`                                | undefined
+| device         | core device-level Vulkan command      | fp
+| device         | enabled device extension commands     | fp
+| device         | * (any pname:pName not covered above) | `NULL`
+|====
+
+include::../validity/protos/vkGetDeviceProcAddr.txt[]
+
+--
+
+[open,refpage='PFN_vkVoidFunction',desc='Dummy function pointer type returned by queries',type='funcpointers',xrefs='vkGetDeviceProcAddr vkGetInstanceProcAddr']
+--
+
+The definition of tlink:PFN_vkVoidFunction is:
+
+include::../api/funcpointers/PFN_vkVoidFunction.txt[]
+
+--
+
+
+ifdef::VK_VERSION_1_1[]
+
+=== Extending Physical Device Core Functionality
+
+New core physical-device-level functionality can: be used when the
+physical-device version is greater than or equal to the version of Vulkan
+that added the new functionality.
+The Vulkan version supported by a physical device can: be obtained by
+calling flink:vkGetPhysicalDeviceProperties.
+
+endif::VK_VERSION_1_1[]
+
+
+ifdef::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+
+[[initialization-phys-dev-extensions]]
+=== Extending Physical Device From Device Extensions
+
+When the `<<VK_KHR_get_physical_device_properties2>>` extension is enabled,
+ifdef::VK_VERSION_1_1[]
+or when both the instance and the physical-device versions are at least 1.1,
+endif::VK_VERSION_1_1[]
+physical-device-level functionality of a device extension can: be used with
+a physical device if the corresponding extension is enumerated by
+flink:vkEnumerateDeviceExtensionProperties for that physical device, even
+before a logical device has been created.
+
+To obtain a function pointer for a physical-device-level command from a
+device extension, an application can: use flink:vkGetInstanceProcAddr.
+This function pointer may: point to dispatch code, which calls a different
+real implementation for different sname:VkPhysicalDevice objects.
+Behavior is undefined if an extension physical-device command is called on a
+physical device that does not support the extension.
+
+Device extensions may: define structures that can: be added to the
+ptext:pNext chain of physical-device-level commands.
+Behavior is undefined if such an extension structure is passed to a
+physical-device-level command for a physical device that does not support
+the extension.
+
+endif::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+
+
+[[initialization-instances]]
+== Instances
+
+[open,refpage='VkInstance',desc='Opaque handle to an instance object',type='handles']
+--
+
+There is no global state in Vulkan and all per-application state is stored
+in a sname:VkInstance object.
+Creating a sname:VkInstance object initializes the Vulkan library and allows
+the application to pass information about itself to the implementation.
+
+Instances are represented by sname:VkInstance handles:
+
+include::../api/handles/VkInstance.txt[]
+
+--
+
+ifdef::VK_VERSION_1_1[]
+
+[open,refpage='vkEnumerateInstanceVersion',desc='Query instance-level version before instance creation',type='protos']
+--
+
+The version of Vulkan that is supported by an instance may: be different
+than the version of Vulkan supported by a device or physical device.
+To query properties that can: be used in creating an instance, call:
+
+include::../api/protos/vkEnumerateInstanceVersion.txt[]
+
+  * pname:pApiVersion points to a code:uint32_t, which is the version of
+    Vulkan supported by instance-level functionality, encoded as described
+    in the <<fundamentals-versionnum,API Version Numbers and Semantics>>
+    section.
+
+include::../validity/protos/vkEnumerateInstanceVersion.txt[]
+
+--
+endif::VK_VERSION_1_1[]
+
+[open,refpage='vkCreateInstance',desc='Create a new Vulkan instance',type='protos']
+--
+
+To create an instance object, call:
+
+include::../api/protos/vkCreateInstance.txt[]
+
+  * pname:pCreateInfo points to an instance of slink:VkInstanceCreateInfo
+    controlling creation of the instance.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+  * pname:pInstance points a slink:VkInstance handle in which the resulting
+    instance is returned.
+
+fname:vkCreateInstance verifies that the requested layers exist.
+If not, fname:vkCreateInstance will return ename:VK_ERROR_LAYER_NOT_PRESENT.
+Next fname:vkCreateInstance verifies that the requested extensions are
+supported (e.g. in the implementation or in any enabled instance layer) and
+if any requested extension is not supported, fname:vkCreateInstance must:
+return ename:VK_ERROR_EXTENSION_NOT_PRESENT.
+After verifying and enabling the instance layers and extensions the
+sname:VkInstance object is created and returned to the application.
+If a requested extension is only supported by a layer, both the layer and
+the extension need to be specified at fname:vkCreateInstance time for the
+creation to succeed.
+
+.Valid Usage
+****
+  * [[VUID-vkCreateInstance-ppEnabledExtensionNames-01388]]
+    All <<extended-functionality-extensions-dependencies, required
+    extensions>> for each extension in the
+    slink:VkInstanceCreateInfo::pname:ppEnabledExtensionNames list must:
+    also be present in that list.
+****
+
+include::../validity/protos/vkCreateInstance.txt[]
+--
+
+[open,refpage='VkInstanceCreateInfo',desc='Structure specifying parameters of a newly created instance',type='structs']
+--
+
+The sname:VkInstanceCreateInfo structure is defined as:
+
+include::../api/structs/VkInstanceCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:pApplicationInfo is `NULL` or a pointer to an instance of
+    sname:VkApplicationInfo.
+    If not `NULL`, this information helps implementations recognize behavior
+    inherent to classes of applications.
+    slink:VkApplicationInfo is defined in detail below.
+  * pname:enabledLayerCount is the number of global layers to enable.
+  * pname:ppEnabledLayerNames is a pointer to an array of
+    pname:enabledLayerCount null-terminated UTF-8 strings containing the
+    names of layers to enable for the created instance.
+    See the <<extended-functionality-layers,Layers>> section for further
+    details.
+  * pname:enabledExtensionCount is the number of global extensions to
+    enable.
+  * pname:ppEnabledExtensionNames is a pointer to an array of
+    pname:enabledExtensionCount null-terminated UTF-8 strings containing the
+    names of extensions to enable.
+
+include::../validity/structs/VkInstanceCreateInfo.txt[]
+--
+
+[open,refpage='VkInstanceCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkInstanceCreateFlags.txt[]
+
+sname:VkInstanceCreateFlags is a bitmask type for setting a mask, but is
+currently reserved for future use.
+--
+
+ifdef::VK_EXT_validation_flags[]
+include::VK_EXT_validation_flags.txt[]
+endif::VK_EXT_validation_flags[]
+
+
+[open,refpage='VkApplicationInfo',desc='Structure specifying application info',type='structs']
+--
+
+The sname:VkApplicationInfo structure is defined as:
+
+include::../api/structs/VkApplicationInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:pApplicationName is `NULL` or is a pointer to a null-terminated
+    UTF-8 string containing the name of the application.
+  * pname:applicationVersion is an unsigned integer variable containing the
+    developer-supplied version number of the application.
+  * pname:pEngineName is `NULL` or is a pointer to a null-terminated UTF-8
+    string containing the name of the engine (if any) used to create the
+    application.
+  * pname:engineVersion is an unsigned integer variable containing the
+    developer-supplied version number of the engine used to create the
+    application.
+ifndef::VK_VERSION_1_1[]
+  * pname:apiVersion is the version of the Vulkan API against which the
+    application expects to run, encoded as described in the
+    <<fundamentals-versionnum,API Version Numbers and Semantics>> section.
+    If pname:apiVersion is 0 the implementation must: ignore it, otherwise
+    if the implementation does not support the requested pname:apiVersion,
+    or an effective substitute for pname:apiVersion, it must: return
+    ename:VK_ERROR_INCOMPATIBLE_DRIVER.
+endif::VK_VERSION_1_1[]
+ifdef::VK_VERSION_1_1[]
+  * pname:apiVersion must: be the highest version of Vulkan that the
+    application is designed to use, encoded as described in the
+    <<fundamentals-versionnum,API Version Numbers and Semantics>> section.
+endif::VK_VERSION_1_1[]
+    The patch version number specified in pname:apiVersion is ignored when
+    creating an instance object.
+    Only the major and minor versions of the instance must: match those
+    requested in pname:apiVersion.
+
+ifdef::VK_VERSION_1_1[]
+Vulkan 1.0 implementations were required to return
+ename:VK_ERROR_INCOMPATIBLE_DRIVER if pname:apiVersion was larger than 1.0.
+Implementations that support Vulkan 1.1 or later must: not return
+ename:VK_ERROR_INCOMPATIBLE_DRIVER for any value of pname:apiVersion.
+
+[NOTE]
+.Note
+====
+Because Vulkan 1.0 implementations may: fail with
+ename:VK_ERROR_INCOMPATIBLE_DRIVER, applications should: determine the
+version of Vulkan available before calling flink:vkCreateInstance.
+If the flink:vkGetInstanceProcAddr returns `NULL` for
+flink:vkEnumerateInstanceVersion, it is a Vulkan 1.0 implementation.
+Otherwise, the application can: call flink:vkEnumerateInstanceVersion to
+determine the version of Vulkan.
+====
+
+Implicit layers must: be disabled if they do not support a version at least
+as high as pname:apiVersion.
+See the <<LoaderAndLayerInterface, "Vulkan Loader Specification and
+Architecture Overview">> document for additional information.
+
+[NOTE]
+.Note
+====
+Providing a `NULL` sname:VkInstanceCreateInfo::pname:pApplicationInfo or
+providing an pname:apiVersion of 0 is equivalent to providing an
+pname:apiVersion of `VK_MAKE_VERSION(1,0,0)`.
+====
+endif::VK_VERSION_1_1[]
+
+include::../validity/structs/VkApplicationInfo.txt[]
+--
+
+[open,refpage='vkDestroyInstance',desc='Destroy an instance of Vulkan',type='protos']
+--
+
+To destroy an instance, call:
+
+include::../api/protos/vkDestroyInstance.txt[]
+
+  * pname:instance is the handle of the instance to destroy.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+
+.Valid Usage
+****
+  * [[VUID-vkDestroyInstance-instance-00629]]
+    All child objects created using pname:instance must: have been destroyed
+    prior to destroying pname:instance
+  * [[VUID-vkDestroyInstance-instance-00630]]
+    If sname:VkAllocationCallbacks were provided when pname:instance was
+    created, a compatible set of callbacks must: be provided here
+  * [[VUID-vkDestroyInstance-instance-00631]]
+    If no sname:VkAllocationCallbacks were provided when pname:instance was
+    created, pname:pAllocator must: be `NULL`
+****
+
+include::../validity/protos/vkDestroyInstance.txt[]
+--

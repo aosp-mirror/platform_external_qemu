@@ -1,0 +1,75 @@
+[open,refpage='vkGetPhysicalDeviceSurfaceCapabilities2EXT',desc='Query surface capabilities',type='protos']
+--
+
+To query the basic capabilities of a surface, needed in order to create a
+swapchain, call:
+
+include::../../api/protos/vkGetPhysicalDeviceSurfaceCapabilities2EXT.txt[]
+
+  * pname:physicalDevice is the physical device that will be associated with
+    the swapchain to be created, as described for
+    flink:vkCreateSwapchainKHR.
+  * pname:surface is the surface that will be associated with the swapchain.
+  * pname:pSurfaceCapabilities is a pointer to an instance of the
+    slink:VkSurfaceCapabilities2EXT structure in which the capabilities are
+    returned.
+
+fname:vkGetPhysicalDeviceSurfaceCapabilities2EXT behaves similarly to
+flink:vkGetPhysicalDeviceSurfaceCapabilitiesKHR, with the ability to return
+extended information by adding extension structures to the pname:pNext chain
+of its pname:pSurfaceCapabilities parameter.
+
+include::../../validity/protos/vkGetPhysicalDeviceSurfaceCapabilities2EXT.txt[]
+--
+
+[open,refpage='VkSurfaceCapabilities2EXT',desc='Structure describing capabilities of a surface',type='structs']
+--
+
+The sname:VkSurfaceCapabilities2EXT structure is defined as:
+
+include::../../api/structs/VkSurfaceCapabilities2EXT.txt[]
+
+All members of sname:VkSurfaceCapabilities2EXT are identical to the
+corresponding members of slink:VkSurfaceCapabilitiesKHR where one exists.
+The remaining members are:
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:supportedSurfaceCounters is a bitmask of
+    elink:VkSurfaceCounterFlagBitsEXT indicating the supported surface
+    counter types.
+
+.Valid Usage
+****
+  * [[VUID-VkSurfaceCapabilities2EXT-supportedSurfaceCounters-01246]]
+    pname:supportedSurfaceCounters must: not include
+    ename:VK_SURFACE_COUNTER_VBLANK_EXT unless the surface queried is a
+    <<wsi-display-surfaces,display surface>>.
+****
+
+include::../../validity/structs/VkSurfaceCapabilities2EXT.txt[]
+--
+
+[open,refpage='VkSurfaceCounterFlagBitsEXT',desc='Surface-relative counter types',type='enums']
+--
+
+Bits which can: be set in
+slink:VkSurfaceCapabilities2EXT::pname:supportedSurfaceCounters, indicating
+supported surface counter types, are:
+
+include::../../api/enums/VkSurfaceCounterFlagBitsEXT.txt[]
+
+  * ename:VK_SURFACE_COUNTER_VBLANK_EXT specifies a counter incrementing
+    once every time a vertical blanking period occurs on the display
+    associated with the surface.
+
+--
+
+[open,refpage='VkSurfaceCounterFlagsEXT',desc='Bitmask of VkSurfaceCounterFlagBitsEXT',type='enums']
+--
+include::../../api/flags/VkSurfaceCounterFlagsEXT.txt[]
+
+sname:VkSurfaceCounterFlagsEXT is a bitmask type for setting a mask of zero
+or more slink:VkSurfaceCounterFlagBitsEXT.
+--
+

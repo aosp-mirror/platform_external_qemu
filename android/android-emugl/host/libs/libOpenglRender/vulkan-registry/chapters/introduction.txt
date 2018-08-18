@@ -1,0 +1,151 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+
+[[introduction]]
+= Introduction
+
+This document, referred to as the "`Vulkan Specification`" or just the
+"`Specification`" hereafter, describes the Vulkan Application Programming
+Interface (API).
+Vulkan is a http://www.open-std.org/jtc1/sc22/wg14/www/standards[C99] API
+designed for explicit control of low-level graphics and compute
+functionality.
+
+The canonical version of the Specification is available in the official
+http://www.khronos.org/registry/vulkan/[Vulkan Registry]
+(http://www.khronos.org/registry/vulkan/).
+The source files used to generate the Vulkan specification are stored in the
+https://github.com/KhronosGroup/Vulkan-Docs[Vulkan Documentation Repository]
+(https://github.com/KhronosGroup/Vulkan-Docs).
+The source repository additionally has a public issue tracker and allows the
+submission of pull requests that improve the specification.
+
+
+[[introduction-conventions]]
+== Document Conventions
+
+The Vulkan specification is intended for use by both implementors of the API
+and application developers seeking to make use of the API, forming a
+contract between these parties.
+Specification text may address either party; typically the intended audience
+can be inferred from context, though some sections are defined to address
+only one of these parties.
+(For example, <<fundamentals-validusage>> sections only address application
+developers).
+Any requirements, prohibitions, recommendations or options defined by
+<<introduction-normative-terminology, normative terminology>> are imposed
+only on the audience of that text.
+
+[NOTE]
+.Note
+====
+Structure and enumerated types defined in extensions that were promoted to
+core in Vulkan 1.1 are now defined in terms of the equivalent Vulkan 1.1
+interfaces.
+This affects the Vulkan Specification, the Vulkan header files, and the
+corresponding XML Registry.
+====
+
+
+[[introduction-normative-terminology]]
+=== Normative Terminology
+
+Within this specification, the key words *must*, *required*, *should*,
+*recommended*, *may*, and *optional* are to be interpreted as described in
+http://www.ietf.org/rfc/rfc2119.txt[RFC 2119 - Key words for use in RFCs to
+Indicate Requirement Levels] (http://www.ietf.org/rfc/rfc2119.txt).
+These key words are highlighted in the specification for clarity.
+In text addressing application developers, their use expresses requirements
+that apply to application behavior.
+In text addressing implementors, their use expresses requirements that apply
+to implementations.
+
+In text addressing application developers, the additional key words *can*
+and *cannot* are to be interpreted as describing the capabilities of an
+application, as follows:
+
+*can*::
+This word means that the application is able to perform the action
+described.
+
+*cannot*::
+This word means that the API and/or the execution environment provide no
+mechanism through which the application can express or accomplish the action
+described.
+
+These key words are never used in text addressing implementors.
+
+[NOTE]
+.Note
+==================
+There is an important distinction between *cannot* and *must not*, as used
+in this Specification.
+*Cannot* means something the application literally is unable to express or
+accomplish through the API, while *must not* means something that the
+application is capable of expressing through the API, but that the
+consequences of doing so are undefined and potentially unrecoverable for the
+implementation.
+==================
+
+Unless otherwise noted in the section heading, all sections and appendices
+in this document are normative.
+
+
+[[introduction-technical-terminology]]
+=== Technical Terminology
+
+The Vulkan Specification makes use of common engineering and graphics terms
+such as *Pipeline*, *Shader*, and *Host* to identify and describe Vulkan API
+constructs and their attributes, states, and behaviors.
+The <<glossary,Glossary>> defines the basic meanings of these terms in the
+context of the Specification.
+The Specification text provides fuller definitions of the terms and may
+elaborate, extend, or clarify the <<glossary,Glossary>> definitions.
+When a term defined in the <<glossary,Glossary>> is used in normative
+language within the Specification, the definitions within the Specification
+govern and supersede any meanings the terms may have in other technical
+contexts (i.e. outside the Specification).
+
+
+[[introduction-normative-references]]
+=== Normative References
+
+References to external documents are considered normative references if the
+Specification uses any of the normative terms defined in
+<<introduction-normative-terminology>> to refer to them or their
+requirements, either as a whole or in part.
+
+The following documents are referenced by normative sections of the
+specification:
+
+[[ieee-754]]
+_IEEE Standard for Floating-Point Arithmetic_, IEEE Std 754-2008,
+http://dx.doi.org/10.1109/IEEESTD.2008.4610935, August, 2008.
+
+[[data-format]] A. Garrard, _Khronos Data Format Specification, version
+1.2_,
+https://www.khronos.org/registry/DataFormat/specs/1.2/dataformat.1.2.html,
+September, 2017.
+
+// If the author name is placed on a standalone line, we see the mysterious
+// asciidoc error 'list item index: expected 2 got 10'. Apparently the 'A.'
+// of the previous paragraph and the 'J.' of this one get misinterpreted.
+
+[[spirv-extended]] J. Kessenich, _SPIR-V Extended Instructions for GLSL,
+Version 1.00_, https://www.khronos.org/registry/spir-v/, February 10, 2016.
+
+[[spirv-spec]] J. Kessenich, B. Ouriel, and R. Krisch, _SPIR-V
+Specification, Version 1.3, Revision 2, Unified_,
+https://www.khronos.org/registry/spir-v/, May 11, 2018.
+
+[[vulkan-styleguide]] J. Leech and T. Hector, _Vulkan Documentation and
+Extensions: Procedures and Conventions_,
+https://www.khronos.org/registry/vulkan/specs/1.1/styleguide.html
+
+[[LoaderAndLayerInterface]]
+_Vulkan Loader Specification and Architecture Overview_,
+https://github.com/KhronosGroup/Vulkan-Loader/blob/master/loader/LoaderAndLayerInterface.md,
+August, 2016.
+

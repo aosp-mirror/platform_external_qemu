@@ -1,0 +1,216 @@
+include::meta/VK_EXT_debug_report.txt[]
+
+*Last Modified Date*::
+    2017-09-12
+*IP Status*::
+    No known IP claims.
+*Contributors*::
+  - Courtney Goeltzenleuchter, LunarG
+  - Dan Ginsburg, Valve
+  - Jon Ashburn, LunarG
+  - Mark Lobodzinski, LunarG
+
+Due to the nature of the Vulkan interface, there is very little error
+information available to the developer and application.
+By enabling optional validation layers and using the `VK_EXT_debug_report`
+extension, developers can: obtain much more detailed feedback on the
+application's use of Vulkan.
+This extension defines a way for layers and the implementation to call back
+to the application for events of interest to the application.
+
+=== New Object Types
+
+  * slink:VkDebugReportCallbackEXT
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
+  * Extending elink:VkResult:
+  ** ename:VK_ERROR_VALIDATION_FAILED_EXT
+
+=== New Enums
+
+  * elink:VkDebugReportFlagBitsEXT
+  * elink:VkDebugReportObjectTypeEXT
+
+=== New Structures
+
+  * slink:VkDebugReportCallbackCreateInfoEXT
+
+=== New Functions
+
+  * flink:vkCreateDebugReportCallbackEXT
+  * flink:vkDestroyDebugReportCallbackEXT
+  * flink:vkDebugReportMessageEXT
+
+=== New Function Pointers
+
+  * tlink:PFN_vkDebugReportCallbackEXT
+
+=== Examples
+
+`VK_EXT_debug_report` allows an application to register multiple callbacks
+with the validation layers.
+Some callbacks may log the information to a file, others may cause a debug
+break point or other application defined behavior.
+An application can: register callbacks even when no validation layers are
+enabled, but they will only be called for loader and, if implemented, driver
+events.
+
+To capture events that occur while creating or destroying an instance an
+application can: link a slink:VkDebugReportCallbackCreateInfoEXT structure
+to the pname:pNext element of the slink:VkInstanceCreateInfo structure given
+to flink:vkCreateInstance.
+This callback is only valid for the duration of the flink:vkCreateInstance
+and the flink:vkDestroyInstance call.
+Use flink:vkCreateDebugReportCallbackEXT to create persistent callback
+objects.
+
+Example uses: Create three callback objects.
+One will log errors and warnings to the debug console using Windows
+code:OutputDebugString.
+The second will cause the debugger to break at that callback when an error
+happens and the third will log warnings to stdout.
+[source,c++]
+------------------------------------------------------------------------------
+    VkResult res;
+    VkDebugReportCallbackEXT cb1, cb2, cb3;
+
+    VkDebugReportCallbackCreateInfoEXT callback1 = {
+            VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,    // sType
+            NULL,                                                       // pNext
+            VK_DEBUG_REPORT_ERROR_BIT_EXT |                             // flags
+            VK_DEBUG_REPORT_WARNING_BIT_EXT,
+            myOutputDebugString,                                        // pfnCallback
+            NULL                                                        // pUserData
+    };
+    res = vkCreateDebugReportCallbackEXT(instance, &callback1, &cb1);
+    if (res != VK_SUCCESS)
+       /* Do error handling for VK_ERROR_OUT_OF_MEMORY */
+
+    callback.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT;
+    callback.pfnCallback = myDebugBreak;
+    callback.pUserData = NULL;
+    res = vkCreateDebugReportCallbackEXT(instance, &callback, &cb2);
+    if (res != VK_SUCCESS)
+       /* Do error handling for VK_ERROR_OUT_OF_MEMORY */
+
+    VkDebugReportCallbackCreateInfoEXT callback3 = {
+            VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,    // sType
+            NULL,                                                       // pNext
+            VK_DEBUG_REPORT_WARNING_BIT_EXT,                            // flags
+            mystdOutLogger,                                             // pfnCallback
+            NULL                                                        // pUserData
+    };
+    res = vkCreateDebugReportCallbackEXT(instance, &callback3, &cb3);
+    if (res != VK_SUCCESS)
+       /* Do error handling for VK_ERROR_OUT_OF_MEMORY */
+
+    ...
+
+    /* remove callbacks when cleaning up */
+    vkDestroyDebugReportCallbackEXT(instance, cb1);
+    vkDestroyDebugReportCallbackEXT(instance, cb2);
+    vkDestroyDebugReportCallbackEXT(instance, cb3);
+------------------------------------------------------------------------------
+
+[NOTE]
+.Note
+====
+In the initial release of the `VK_EXT_debug_report` extension, the token
+ename:VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT was used.
+Starting in version 2 of the extension branch,
+ename:VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT is used
+instead for consistency with Vulkan naming rules.
+The older enum is still available for backwards compatibility.
+====
+
+[NOTE]
+.Note
+====
+In the initial release of the `VK_EXT_debug_report` extension, the token
+ename:VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_EXT was used.
+Starting in version 8 of the extension branch,
+ename:VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_CALLBACK_EXT_EXT is used
+instead for consistency with Vulkan naming rules.
+The older enum is still available for backwards compatibility.
+====
+
+
+=== Issues
+
+1) What is the hierarchy / seriousness of the message flags? E.g.
+etext:ERROR > etext:WARN > etext:PERF_WARN ...
+
+*RESOLVED*: There is no specific hierarchy.
+Each bit is independent and should be checked via bitwise AND.
+For example:
+
+[source,c++]
+----------------------------------------
+    if (localFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
+        process error message
+    }
+    if (localFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
+        process debug message
+    }
+----------------------------------------
+
+The validation layers do use them in a hierarchical way (etext:ERROR >
+etext:WARN > etext:PERF, etext:WARN > etext:DEBUG > etext:INFO) and they (at
+least at the time of this writing) only set one bit at a time.
+But it is not a requirement of this extension.
+
+It is possible that a layer may intercept and change, or augment the flags
+with extension values the application's debug report handler may not be
+familiar with, so it is important to treat each flag independently.
+
+2) Should there be a VU requiring
+slink:VkDebugReportCallbackCreateInfoEXT::pname:flags to be non-zero?
+
+*RESOLVED*: It may not be very useful, but we do not need VU statement
+requiring the sname:VkDebugReportCallbackCreateInfoEXT::pname:msgFlags at
+create-time to be non-zero.
+One can imagine that apps may prefer it as it allows them to set the mask as
+desired - including nothing - at runtime without having to check.
+
+3) What is the difference between ename:VK_DEBUG_REPORT_DEBUG_BIT_EXT and
+ename:VK_DEBUG_REPORT_INFORMATION_BIT_EXT?
+
+*RESOLVED*: ename:VK_DEBUG_REPORT_DEBUG_BIT_EXT specifies information that
+could be useful debugging the Vulkan implementation itself.
+
+=== Version History
+
+ * Revision 1, 2015-05-20 (Courtney Goetzenleuchter)
+   - Initial draft, based on LunarG KHR spec, other KHR specs
+
+ * Revision 2, 2016-02-16 (Courtney Goetzenleuchter)
+   - Update usage, documentation
+
+ * Revision 3, 2016-06-14 (Courtney Goetzenleuchter)
+   - Update VK_EXT_DEBUG_REPORT_SPEC_VERSION to indicate added support for
+     vkCreateInstance and vkDestroyInstance
+
+ * Revision 4, 2016-12-08 (Mark Lobodzinski)
+   - Added Display_KHR, DisplayModeKHR extension objects
+   - Added ObjectTable_NVX, IndirectCommandsLayout_NVX extension objects
+   - Bumped spec revision
+   - Retroactively added version history
+
+ * Revision 5, 2017-01-31 (Baldur Karlsson)
+   - Moved definition of elink:VkDebugReportObjectTypeEXT from debug marker
+     chapter
+
+ * Revision 6, 2017-01-31 (Baldur Karlsson)
+   - Added VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR_EXT
+
+ * Revision 7, 2017-04-20 (Courtney Goeltzenleuchter)
+   - Clarify wording and address questions from developers.
+
+ * Revision 8, 2017-04-21 (Courtney Goeltzenleuchter)
+   - Remove unused enum VkDebugReportErrorEXT
+
+ * Revision 9, 2017-09-12 (Tobias Hector)
+   - Added interactions with Vulkan 1.1

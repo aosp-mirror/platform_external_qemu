@@ -1,0 +1,796 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[samplers]]
+= Samplers
+
+[open,refpage='VkSampler',desc='Opaque handle to a sampler object',type='handles']
+--
+
+sname:VkSampler objects represent the state of an image sampler which is
+used by the implementation to read image data and apply filtering and other
+transformations for the shader.
+
+Samplers are represented by sname:VkSampler handles:
+
+include::../api/handles/VkSampler.txt[]
+
+--
+
+[open,refpage='vkCreateSampler',desc='Create a new sampler object',type='protos']
+--
+
+To create a sampler object, call:
+
+include::../api/protos/vkCreateSampler.txt[]
+
+  * pname:device is the logical device that creates the sampler.
+  * pname:pCreateInfo is a pointer to an instance of the
+    slink:VkSamplerCreateInfo structure specifying the state of the sampler
+    object.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+  * pname:pSampler points to a slink:VkSampler handle in which the resulting
+    sampler object is returned.
+
+include::../validity/protos/vkCreateSampler.txt[]
+--
+
+[open,refpage='VkSamplerCreateInfo',desc='Structure specifying parameters of a newly created sampler',type='structs']
+--
+
+The sname:VkSamplerCreateInfo structure is defined as:
+
+include::../api/structs/VkSamplerCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:magFilter is a elink:VkFilter value specifying the magnification
+    filter to apply to lookups.
+  * pname:minFilter is a elink:VkFilter value specifying the minification
+    filter to apply to lookups.
+  * pname:mipmapMode is a elink:VkSamplerMipmapMode value specifying the
+    mipmap filter to apply to lookups.
+  * pname:addressModeU is a elink:VkSamplerAddressMode value specifying the
+    addressing mode for outside [0..1] range for U coordinate.
+  * pname:addressModeV is a elink:VkSamplerAddressMode value specifying the
+    addressing mode for outside [0..1] range for V coordinate.
+  * pname:addressModeW is a elink:VkSamplerAddressMode value specifying the
+    addressing mode for outside [0..1] range for W coordinate.
+  * [[samplers-mipLodBias]] pname:mipLodBias is the bias to be added to
+    mipmap LOD (level-of-detail) calculation and bias provided by image
+    sampling functions in SPIR-V, as described in the
+    <<textures-level-of-detail-operation, Level-of-Detail Operation>>
+    section.
+  * [[samplers-maxAnisotropy]] pname:anisotropyEnable is ename:VK_TRUE to
+    enable anisotropic filtering, as described in the
+    <<textures-texel-anisotropic-filtering, Texel Anisotropic Filtering>>
+    section, or ename:VK_FALSE otherwise.
+  * pname:maxAnisotropy is the anisotropy value clamp used by the sampler
+    when pname:anisotropyEnable is ename:VK_TRUE.
+    If pname:anisotropyEnable is ename:VK_FALSE, pname:maxAnisotropy is
+    ignored.
+  * pname:compareEnable is ename:VK_TRUE to enable comparison against a
+    reference value during lookups, or ename:VK_FALSE otherwise.
+  ** Note: Some implementations will default to shader state if this member
+     does not match.
+  * pname:compareOp is a elink:VkCompareOp value specifying the comparison
+    function to apply to fetched data before filtering as described in the
+    <<textures-depth-compare-operation, Depth Compare Operation>> section.
+  * pname:minLod and pname:maxLod are the values used to clamp the computed
+    LOD value, as described in the <<textures-level-of-detail-operation,
+    Level-of-Detail Operation>> section.
+  * pname:borderColor is a elink:VkBorderColor value specifying the
+    predefined border color to use.
+  * [[samplers-unnormalizedCoordinates]] pname:unnormalizedCoordinates
+    controls whether to use unnormalized or normalized texel coordinates to
+    address texels of the image.
+    When set to ename:VK_TRUE, the range of the image coordinates used to
+    lookup the texel is in the range of zero to the image dimensions for x,
+    y and z.
+    When set to ename:VK_FALSE the range of image coordinates is zero to
+    one.
+    When pname:unnormalizedCoordinates is ename:VK_TRUE, samplers have the
+    following requirements:
+  ** pname:minFilter and pname:magFilter must: be equal.
+  ** pname:mipmapMode must: be ename:VK_SAMPLER_MIPMAP_MODE_NEAREST.
+  ** pname:minLod and pname:maxLod must: be zero.
+  ** pname:addressModeU and pname:addressModeV must: each be either
+     ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE or
+     ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER.
+  ** pname:anisotropyEnable must: be ename:VK_FALSE.
+  ** pname:compareEnable must: be ename:VK_FALSE.
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  ** The sampler must: not enable sampler Y'C~B~C~R~ conversion.
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * When pname:unnormalizedCoordinates is ename:VK_TRUE, images the sampler
+    is used with in the shader have the following requirements:
+  ** The pname:viewType must: be either ename:VK_IMAGE_VIEW_TYPE_1D or
+     ename:VK_IMAGE_VIEW_TYPE_2D.
+  ** The image view must: have a single layer and a single mip level.
+  * When pname:unnormalizedCoordinates is ename:VK_TRUE, image built-in
+    functions in the shader that use the sampler have the following
+    requirements:
+  ** The functions must: not use projection.
+  ** The functions must: not use offsets.
+
+[NOTE]
+.Mapping of OpenGL to Vulkan filter modes
+====
+pname:magFilter values of ename:VK_FILTER_NEAREST and ename:VK_FILTER_LINEAR
+directly correspond to code:GL_NEAREST and code:GL_LINEAR magnification
+filters.
+pname:minFilter and pname:mipmapMode combine to correspond to the similarly
+named OpenGL minification filter of code:GL_minFilter_MIPMAP_mipmapMode
+(e.g. pname:minFilter of ename:VK_FILTER_LINEAR and pname:mipmapMode of
+ename:VK_SAMPLER_MIPMAP_MODE_NEAREST correspond to
+code:GL_LINEAR_MIPMAP_NEAREST).
+
+There are no Vulkan filter modes that directly correspond to OpenGL
+minification filters of code:GL_LINEAR or code:GL_NEAREST, but they can: be
+emulated using ename:VK_SAMPLER_MIPMAP_MODE_NEAREST, pname:minLod = 0, and
+pname:maxLod = 0.25, and using pname:minFilter = ename:VK_FILTER_LINEAR or
+pname:minFilter = ename:VK_FILTER_NEAREST, respectively.
+
+Note that using a pname:maxLod of zero would cause
+<<textures-texel-filtering,magnification>> to always be performed, and the
+pname:magFilter to always be used.
+This is valid, just not an exact match for OpenGL behavior.
+Clamping the maximum LOD to 0.25 allows the [eq]#{lambda}# value to be
+non-zero and minification to be performed, while still always rounding down
+to the base level.
+If the pname:minFilter and pname:magFilter are equal, then using a
+pname:maxLod of zero also works.
+====
+
+The maximum number of sampler objects which can: be simultaneously created
+on a device is implementation-dependent and specified by the
+<<features-limits-maxSamplerAllocationCount,maxSamplerAllocationCount>>
+member of the slink:VkPhysicalDeviceLimits structure.
+If pname:maxSamplerAllocationCount is exceeded, fname:vkCreateSampler will
+return ename:VK_ERROR_TOO_MANY_OBJECTS.
+
+Since slink:VkSampler is a non-dispatchable handle type, implementations
+may: return the same handle for sampler state vectors that are identical.
+In such cases, all such objects would only count once against the
+pname:maxSamplerAllocationCount limit.
+
+.Valid Usage
+****
+  * [[VUID-VkSamplerCreateInfo-mipLodBias-01069]]
+    The absolute value of pname:mipLodBias must: be less than or equal to
+    sname:VkPhysicalDeviceLimits::pname:maxSamplerLodBias
+  * [[VUID-VkSamplerCreateInfo-maxLod-01973]]
+    pname:maxLod must: be greater than or equal to pname:minLod
+  * [[VUID-VkSamplerCreateInfo-anisotropyEnable-01070]]
+    If the <<features-features-samplerAnisotropy,anisotropic sampling>>
+    feature is not enabled, pname:anisotropyEnable must: be ename:VK_FALSE
+  * [[VUID-VkSamplerCreateInfo-anisotropyEnable-01071]]
+    If pname:anisotropyEnable is ename:VK_TRUE, pname:maxAnisotropy must: be
+    between `1.0` and
+    sname:VkPhysicalDeviceLimits::pname:maxSamplerAnisotropy, inclusive
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-VkSamplerCreateInfo-minFilter-01645]]
+    If <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~ conversion>> is
+    enabled and
+    ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_SEPARATE_RECONSTRUCTION_FILTER_BIT
+    is not set for the format, pname:minFilter and pname:magFilter must: be
+    equal to the sampler Y'C~B~C~R~ conversion's pname:chromaFilter
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-VkSamplerCreateInfo-unnormalizedCoordinates-01072]]
+    If pname:unnormalizedCoordinates is ename:VK_TRUE, pname:minFilter and
+    pname:magFilter must: be equal
+  * [[VUID-VkSamplerCreateInfo-unnormalizedCoordinates-01073]]
+    If pname:unnormalizedCoordinates is ename:VK_TRUE, pname:mipmapMode
+    must: be ename:VK_SAMPLER_MIPMAP_MODE_NEAREST
+  * [[VUID-VkSamplerCreateInfo-unnormalizedCoordinates-01074]]
+    If pname:unnormalizedCoordinates is ename:VK_TRUE, pname:minLod and
+    pname:maxLod must: be zero
+  * [[VUID-VkSamplerCreateInfo-unnormalizedCoordinates-01075]]
+    If pname:unnormalizedCoordinates is ename:VK_TRUE, pname:addressModeU
+    and pname:addressModeV must: each be either
+    ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE or
+    ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER
+  * [[VUID-VkSamplerCreateInfo-unnormalizedCoordinates-01076]]
+    If pname:unnormalizedCoordinates is ename:VK_TRUE,
+    pname:anisotropyEnable must: be ename:VK_FALSE
+  * [[VUID-VkSamplerCreateInfo-unnormalizedCoordinates-01077]]
+    If pname:unnormalizedCoordinates is ename:VK_TRUE, pname:compareEnable
+    must: be ename:VK_FALSE
+  * [[VUID-VkSamplerCreateInfo-addressModeU-01078]]
+    If any of pname:addressModeU, pname:addressModeV or pname:addressModeW
+    are ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER, pname:borderColor
+    must: be a valid elink:VkBorderColor value
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-VkSamplerCreateInfo-addressModeU-01646]]
+    If <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~ conversion>> is
+    enabled, pname:addressModeU, pname:addressModeV, and pname:addressModeW
+    must: be ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+    pname:anisotropyEnable must: be ename:VK_FALSE, and
+    pname:unnormalizedCoordinates must: be ename:VK_FALSE
+ifdef::VK_EXT_sampler_filter_minmax[]
+  * [[VUID-VkSamplerCreateInfo-None-01647]]
+    The sampler reduction mode must: be set to
+    ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT if
+    <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~ conversion>> is enabled
+endif::VK_EXT_sampler_filter_minmax[]
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-VkSamplerCreateInfo-addressModeU-01079]]
+    If the `<<VK_KHR_sampler_mirror_clamp_to_edge>>` extension is not
+    enabled, pname:addressModeU, pname:addressModeV and pname:addressModeW
+    must: not be ename:VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
+  * [[VUID-VkSamplerCreateInfo-compareEnable-01080]]
+    If pname:compareEnable is ename:VK_TRUE, pname:compareOp must: be a
+    valid elink:VkCompareOp value
+ifdef::VK_IMG_filter_cubic[]
+  * [[VUID-VkSamplerCreateInfo-magFilter-01081]]
+    If either pname:magFilter or pname:minFilter is
+    ename:VK_FILTER_CUBIC_IMG, pname:anisotropyEnable must: be
+    ename:VK_FALSE
+endif::VK_IMG_filter_cubic[]
+ifdef::VK_IMG_filter_cubic+VK_EXT_sampler_filter_minmax[]
+  * [[VUID-VkSamplerCreateInfo-magFilter-01422]]
+    If either pname:magFilter or pname:minFilter is
+    ename:VK_FILTER_CUBIC_IMG, the pname:reductionMode member of
+    slink:VkSamplerReductionModeCreateInfoEXT must: be
+    ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT
+endif::VK_IMG_filter_cubic+VK_EXT_sampler_filter_minmax[]
+ifdef::VK_EXT_sampler_filter_minmax[]
+  * [[VUID-VkSamplerCreateInfo-compareEnable-01423]]
+    If pname:compareEnable is ename:VK_TRUE, the pname:reductionMode member
+    of slink:VkSamplerReductionModeCreateInfoEXT must: be
+    ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT
+endif::VK_EXT_sampler_filter_minmax[]
+****
+
+include::../validity/structs/VkSamplerCreateInfo.txt[]
+--
+
+[open,refpage='VkSamplerCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkSamplerCreateFlags.txt[]
+
+sname:VkSamplerCreateFlags is a bitmask type for setting a mask, but is
+currently reserved for future use.
+--
+
+ifdef::VK_EXT_sampler_filter_minmax[]
+
+[open,refpage='VkSamplerReductionModeCreateInfoEXT',desc='Structure specifying sampler reduction mode',type='structs']
+--
+If the pname:pNext chain of slink:VkSamplerCreateInfo includes a
+sname:VkSamplerReductionModeCreateInfoEXT structure, then that structure
+includes a mode that controls how texture filtering combines texel values.
+
+The sname:VkSamplerReductionModeCreateInfoEXT structure is defined as:
+
+include::../api/structs/VkSamplerReductionModeCreateInfoEXT.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:reductionMode is an enum of type elink:VkSamplerReductionModeEXT
+    that controls how texture filtering combines texel values.
+
+If this structure is not present, pname:reductionMode is considered to be
+ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT.
+
+include::../validity/structs/VkSamplerReductionModeCreateInfoEXT.txt[]
+--
+
+[open,refpage='VkSamplerReductionModeEXT',desc='Specify reduction mode for texture filtering',type='enums']
+--
+Reduction modes are specified by elink:VkSamplerReductionModeEXT, which
+takes values:
+
+include::../api/enums/VkSamplerReductionModeEXT.txt[]
+
+  * ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT specifies that
+    texel values are combined by computing a weighted average of values in
+    the footprint, using weights as specified in
+    <<textures-unnormalized-to-integer,the image operations chapter>>.
+  * ename:VK_SAMPLER_REDUCTION_MODE_MIN_EXT specifies that texel values are
+    combined by taking the component-wise minimum of values in the footprint
+    with non-zero weights.
+  * ename:VK_SAMPLER_REDUCTION_MODE_MAX_EXT specifies that texel values are
+    combined by taking the component-wise maximum of values in the footprint
+    with non-zero weights.
+--
+
+endif::VK_EXT_sampler_filter_minmax[]
+
+[open,refpage='VkFilter',desc='Specify filters used for texture lookups',type='enums']
+--
+Possible values of the slink:VkSamplerCreateInfo::pname:magFilter and
+pname:minFilter parameters, specifying filters used for texture lookups,
+are:
+
+include::../api/enums/VkFilter.txt[]
+
+  * ename:VK_FILTER_NEAREST specifies nearest filtering.
+  * ename:VK_FILTER_LINEAR specifies linear filtering.
+ifdef::VK_IMG_filter_cubic[]
+  * ename:VK_FILTER_CUBIC_IMG specifies cubic filtering.
+endif::VK_IMG_filter_cubic[]
+
+These filters are described in detail in <<textures-texel-filtering, Texel
+Filtering>>.
+
+--
+
+[open,refpage='VkSamplerMipmapMode',desc='Specify mipmap mode used for texture lookups',type='enums']
+--
+
+Possible values of the slink:VkSamplerCreateInfo::pname:mipmapMode,
+specifying the mipmap mode used for texture lookups, are:
+
+include::../api/enums/VkSamplerMipmapMode.txt[]
+
+  * ename:VK_SAMPLER_MIPMAP_MODE_NEAREST specifies nearest filtering.
+  * ename:VK_SAMPLER_MIPMAP_MODE_LINEAR specifies linear filtering.
+
+These modes are described in detail in <<textures-texel-filtering, Texel
+Filtering>>.
+
+--
+
+[open,refpage='VkSamplerAddressMode',desc='Specify behavior of sampling with texture coordinates outside an image',type='enums']
+--
+
+Possible values of the slink:VkSamplerCreateInfo::ptext:addressMode*
+parameters, specifying the behavior of sampling with coordinates outside the
+range [eq]#[0,1]# for the respective [eq]#u#, [eq]#v#, or [eq]#w# coordinate
+as defined in the <<textures-wrapping-operation, Wrapping Operation>>
+section, are:
+
+include::../api/enums/VkSamplerAddressMode.txt[]
+
+  * ename:VK_SAMPLER_ADDRESS_MODE_REPEAT specifies that the repeat wrap mode
+    will be used.
+  * ename:VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT specifies that the
+    mirrored repeat wrap mode will be used.
+  * ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE specifies that the clamp to
+    edge wrap mode will be used.
+  * ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER specifies that the clamp
+    to border wrap mode will be used.
+  * ename:VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE specifies that the
+    mirror clamp to edge wrap mode will be used.
+    This is only valid if the `<<VK_KHR_sampler_mirror_clamp_to_edge>>`
+    extension is enabled.
+
+--
+
+[open,refpage='VkBorderColor',desc='Specify border color used for texture lookups',type='enums']
+--
+
+Possible values of slink:VkSamplerCreateInfo::pname:borderColor, specifying
+the border color used for texture lookups, are:
+
+include::../api/enums/VkBorderColor.txt[]
+
+  * ename:VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK specifies a transparent,
+    floating-point format, black color.
+  * ename:VK_BORDER_COLOR_INT_TRANSPARENT_BLACK specifies a transparent,
+    integer format, black color.
+  * ename:VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK specifies an opaque,
+    floating-point format, black color.
+  * ename:VK_BORDER_COLOR_INT_OPAQUE_BLACK specifies an opaque, integer
+    format, black color.
+  * ename:VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE specifies an opaque,
+    floating-point format, white color.
+  * ename:VK_BORDER_COLOR_INT_OPAQUE_WHITE specifies an opaque, integer
+    format, white color.
+
+These colors are described in detail in <<textures-texel-replacement, Texel
+Replacement>>.
+
+--
+
+[open,refpage='vkDestroySampler',desc='Destroy a sampler object',type='protos']
+--
+
+To destroy a sampler, call:
+
+include::../api/protos/vkDestroySampler.txt[]
+
+  * pname:device is the logical device that destroys the sampler.
+  * pname:sampler is the sampler to destroy.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+
+.Valid Usage
+****
+  * [[VUID-vkDestroySampler-sampler-01082]]
+    All submitted commands that refer to pname:sampler must: have completed
+    execution
+  * [[VUID-vkDestroySampler-sampler-01083]]
+    If sname:VkAllocationCallbacks were provided when pname:sampler was
+    created, a compatible set of callbacks must: be provided here
+  * [[VUID-vkDestroySampler-sampler-01084]]
+    If no sname:VkAllocationCallbacks were provided when pname:sampler was
+    created, pname:pAllocator must: be `NULL`
+****
+
+include::../validity/protos/vkDestroySampler.txt[]
+--
+
+
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+
+[[samplers-YCbCr-conversion]]
+== Sampler Y'C~B~C~R~ conversion
+
+[open,refpage='VkSamplerYcbcrConversionInfo',desc='Structure specifying Y\'CbCr conversion to a sampler or image view',type='structs']
+--
+
+To create a sampler with Y'C~B~C~R~ conversion enabled, add a
+slink:VkSamplerYcbcrConversionInfo to the pname:pNext chain of the
+slink:VkSamplerCreateInfo structure.
+To create a sampler Y'C~B~C~R~ conversion, the
+<<features-features-sampler-YCbCr-conversion,pname:samplerYcbcrConversion
+feature>> must: be enabled.
+Conversion must: be fixed at pipeline creation time, through use of a
+combined image sampler with an immutable sampler in
+sname:VkDescriptorSetLayoutBinding.
+
+A slink:VkSamplerYcbcrConversionInfo must: be provided for samplers to be
+used with image views that access ename:VK_IMAGE_ASPECT_COLOR_BIT if the
+format appears in <<features-formats-requiring-sampler-ycbcr-conversion>>
+ifdef::VK_ANDROID_external_memory_android_hardware_buffer[]
+, or if the image view has an
+<<memory-external-android-hardware-buffer-external-formats,external format>>
+endif::VK_ANDROID_external_memory_android_hardware_buffer[]
+.
+
+The sname:VkSamplerYcbcrConversionInfo structure is defined as:
+
+include::../api/structs/VkSamplerYcbcrConversionInfo.txt[]
+
+ifdef::VK_KHR_sampler_ycbcr_conversion[]
+or the equivalent
+
+include::../api/structs/VkSamplerYcbcrConversionInfoKHR.txt[]
+endif::VK_KHR_sampler_ycbcr_conversion[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:conversion is a slink:VkSamplerYcbcrConversion handle created with
+    flink:vkCreateSamplerYcbcrConversion.
+
+include::../validity/structs/VkSamplerYcbcrConversionInfo.txt[]
+
+--
+
+[open,refpage='VkSamplerYcbcrConversion',desc='',type='handles']
+--
+
+A sampler Y'C~B~C~R~ conversion is an opaque representation of a
+device-specific sampler Y'C~B~C~R~ conversion description, represented as a
+sname:VkSamplerYcbcrConversion handle:
+
+include::../api/handles/VkSamplerYcbcrConversion.txt[]
+
+ifdef::VK_KHR_sampler_ycbcr_conversion[]
+or the equivalent
+
+include::../api/handles/VkSamplerYcbcrConversionKHR.txt[]
+endif::VK_KHR_sampler_ycbcr_conversion[]
+
+--
+
+[open,refpage='vkCreateSamplerYcbcrConversion',desc='Create a new Ycbcr conversion',type='protos']
+--
+
+To create a slink:VkSamplerYcbcrConversion, call:
+
+ifdef::VK_VERSION_1_1[]
+include::../api/protos/vkCreateSamplerYcbcrConversion.txt[]
+endif::VK_VERSION_1_1[]
+
+ifdef::VK_VERSION_1_1+VK_KHR_sampler_ycbcr_conversion[or the equivalent command]
+
+ifdef::VK_KHR_sampler_ycbcr_conversion[]
+include::../api/protos/vkCreateSamplerYcbcrConversionKHR.txt[]
+endif::VK_KHR_sampler_ycbcr_conversion[]
+
+  * pname:device is the logical device that creates the sampler Y'C~B~C~R~
+    conversion.
+  * pname:pCreateInfo is a pointer to an instance of the
+    slink:VkSamplerYcbcrConversionCreateInfo specifying the requested
+    sampler Y'C~B~C~R~ conversion.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+  * pname:pYcbcrConversion points to a slink:VkSamplerYcbcrConversion handle
+    in which the resulting sampler Y'C~B~C~R~ conversion is returned.
+
+The interpretation of the configured sampler Y'C~B~C~R~ conversion is
+described in more detail in <<textures-sampler-YCbCr-conversion,the
+description of sampler Y'C~B~C~R~ conversion>> in the <<textures,Image
+Operations>> chapter.
+
+.Valid Usage
+****
+  * [[VUID-vkCreateSamplerYcbcrConversion-None-01648]]
+    The <<features-features-sampler-YCbCr-conversion, sampler Y'C~B~C~R~
+    conversion feature>> must: be enabled
+****
+
+include::../validity/protos/vkCreateSamplerYcbcrConversion.txt[]
+
+--
+
+[open,refpage='VkSamplerYcbcrConversionCreateInfo',desc='Structure specifying the parameters of the newly created conversion',type='structs']
+--
+
+The sname:VkSamplerYcbcrConversionCreateInfo structure is defined as:
+
+include::../api/structs/VkSamplerYcbcrConversionCreateInfo.txt[]
+
+ifdef::VK_KHR_sampler_ycbcr_conversion[]
+or the equivalent
+
+include::../api/structs/VkSamplerYcbcrConversionCreateInfoKHR.txt[]
+endif::VK_KHR_sampler_ycbcr_conversion[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:format is the format of the image from which color information
+    will be retrieved.
+  * pname:ycbcrModel describes the color matrix for conversion between color
+    models.
+  * pname:ycbcrRange describes whether the encoded values have headroom and
+    foot room, or whether the encoding uses the full numerical range.
+  * pname:components applies a _swizzle_ based on elink:VkComponentSwizzle
+    enums prior to range expansion and color model conversion.
+  * pname:xChromaOffset describes the
+    <<textures-chroma-reconstruction,sample location>> associated with
+    downsampled chroma channels in the x dimension.
+    pname:xChromaOffset has no effect for formats in which chroma channels
+    are the same resolution as the luma channel.
+  * pname:yChromaOffset describes the
+    <<textures-chroma-reconstruction,sample location>> associated with
+    downsampled chroma channels in the y dimension.
+    pname:yChromaOffset has no effect for formats in which the chroma
+    channels are not downsampled vertically.
+  * pname:chromaFilter is the filter for chroma reconstruction.
+  * pname:forceExplicitReconstruction can: be used to ensure that
+    reconstruction is done explicitly, if supported.
+
+[NOTE]
+.Note
+====
+Setting pname:forceExplicitReconstruction to ename:VK_TRUE may: have a
+performance penalty on implementations where explicit reconstruction is not
+the default mode of operation.
+====
+
+ifdef::VK_ANDROID_external_memory_android_hardware_buffer[]
+If the pname:pNext chain has an instance of slink:VkExternalFormatANDROID
+with non-zero pname:externalFormat member, the sampler Y'C~B~C~R~ conversion
+object represents an _external format conversion_, and pname:format must: be
+ename:VK_FORMAT_UNDEFINED.
+Such conversions must: only be used to sample image views with a matching
+<<memory-external-android-hardware-buffer-external-formats,external
+format>>.
+When creating an external format conversion, the value of pname:components
+is ignored.
+endif::VK_ANDROID_external_memory_android_hardware_buffer[]
+ifndef::VK_ANDROID_external_memory_android_hardware_buffer[]
+Sampler Y'C~B~C~R~ conversion objects do not support _external format
+conversion_ without additional extensions defining _external formats_.
+endif::VK_ANDROID_external_memory_android_hardware_buffer[]
+
+.Valid Usage
+****
+ifndef::VK_ANDROID_external_memory_android_hardware_buffer[]
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-format-01649]]
+    pname:format must: not be ename:VK_FORMAT_UNDEFINED
+endif::VK_ANDROID_external_memory_android_hardware_buffer[]
+ifdef::VK_ANDROID_external_memory_android_hardware_buffer[]
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-format-01904]]
+    If an external format conversion is being created, pname:format must: be
+    ename:VK_FORMAT_UNDEFINED, otherwise it must: not be
+    ename:VK_FORMAT_UNDEFINED.
+endif::VK_ANDROID_external_memory_android_hardware_buffer[]
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-format-01650]]
+    pname:format must: support
+    ename:VK_FORMAT_FEATURE_MIDPOINT_CHROMA_SAMPLES_BIT or
+    ename:VK_FORMAT_FEATURE_COSITED_CHROMA_SAMPLES_BIT
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-xChromaOffset-01651]]
+    If the format does not support
+    ename:VK_FORMAT_FEATURE_COSITED_CHROMA_SAMPLES_BIT, pname:xChromaOffset
+    and pname:yChromaOffset must: not be
+    ename:VK_CHROMA_LOCATION_COSITED_EVEN
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-xChromaOffset-01652]]
+    If the format does not support
+    ename:VK_FORMAT_FEATURE_MIDPOINT_CHROMA_SAMPLES_BIT, pname:xChromaOffset
+    and pname:yChromaOffset must: not be ename:VK_CHROMA_LOCATION_MIDPOINT
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-format-01653]]
+    pname:format must: represent unsigned normalized values (i.e. the format
+    must be a etext:UNORM format)
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-None-01654]]
+    If the format has a etext:_422 or etext:_420 suffix:
+    ** pname:components.g must: be ename:VK_COMPONENT_SWIZZLE_IDENTITY
+    ** pname:components.a must: be ename:VK_COMPONENT_SWIZZLE_IDENTITY,
+       ename:VK_COMPONENT_SWIZZLE_ONE, or ename:VK_COMPONENT_SWIZZLE_ZERO
+    ** pname:components.r must: be ename:VK_COMPONENT_SWIZZLE_IDENTITY or
+       ename:VK_COMPONENT_SWIZZLE_B
+    ** pname:components.b must: be ename:VK_COMPONENT_SWIZZLE_IDENTITY or
+       ename:VK_COMPONENT_SWIZZLE_R
+    ** If either pname:components.r or pname:components.b is
+       ename:VK_COMPONENT_SWIZZLE_IDENTITY, both values must: be
+       ename:VK_COMPONENT_SWIZZLE_IDENTITY
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-ycbcrModel-01655]]
+    If pname:ycbcrModel is not
+    ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY, then
+    pname:components.r, pname:components.g, and pname:components.b must:
+    correspond to channels of the pname:format; that is, pname:components.r,
+    pname:components.g, and pname:components.b must: not be
+    ename:VK_COMPONENT_SWIZZLE_ZERO or ename:VK_COMPONENT_SWIZZLE_ONE, and
+    must: not correspond to a channel which contains zero or one as a
+    consequence of <<textures-conversion-to-rgba,conversion to RGBA>>
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-forceExplicitReconstruction-01656]]
+    If the format does not support
+    ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_FORCEABLE_BIT,
+    pname:forceExplicitReconstruction must: be FALSE
+  * [[VUID-VkSamplerYcbcrConversionCreateInfo-chromaFilter-01657]]
+    If the format does not support
+    ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT,
+    pname:chromaFilter must: be ename:VK_FILTER_NEAREST
+****
+
+include::../validity/structs/VkSamplerYcbcrConversionCreateInfo.txt[]
+
+If pname:chromaFilter is ename:VK_FILTER_NEAREST, chroma samples are
+reconstructed to luma channel resolution using nearest-neighbour sampling.
+Otherwise, chroma samples are reconstructed using interpolation.
+More details can be found in <<textures-sampler-YCbCr-conversion,the
+description of sampler Y'C~B~C~R~ conversion>> in the <<textures,Image
+Operations>> chapter.
+
+--
+
+[open,refpage='VkSamplerYcbcrModelConversion',desc='Color model component of a color space',type='enums']
+--
+
+elink:VkSamplerYcbcrModelConversion defines the conversion from the source
+color model to the shader color model.
+Possible values are:
+
+include::../api/enums/VkSamplerYcbcrModelConversion.txt[]
+
+ifdef::VK_KHR_sampler_ycbcr_conversion[]
+or the equivalent
+
+include::../api/enums/VkSamplerYcbcrModelConversionKHR.txt[]
+endif::VK_KHR_sampler_ycbcr_conversion[]
+
+  * ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY specifies that the
+    input values to the conversion are unmodified.
+  * ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_IDENTITY specifies no
+    model conversion but the inputs are range expanded as for Y'C~B~C~R~.
+  * ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_709 specifies the color
+    model conversion from Y'C~B~C~R~ to R'G'B' defined in BT.709 and
+    described in the "`BT.709 Y’C~B~C~R~ conversion`" section of the
+    <<data-format,Khronos Data Format Specification>>.
+  * ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_601 specifies the color
+    model conversion from Y'C~B~C~R~ to R'G'B' defined in BT.601 and
+    described in the "`BT.601 Y’C~B~C~R~ conversion`" section of the
+    <<data-format,Khronos Data Format Specification>>.
+  * ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_2020 specifies the color
+    model conversion from Y'C~B~C~R~ to R'G'B' defined in BT.2020 and
+    described in the "`BT.2020 Y’C~B~C~R~ conversion`" section of the
+    <<data-format,Khronos Data Format Specification>>.
+
+In the etext:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_* color models, for the
+input to the sampler Y'C~B~C~R~ range expansion and model conversion:
+
+  * the Y (Y' luma) channel corresponds to the G channel of an RGB image.
+  * the CB (C~B~ or "`U`" blue color difference) channel corresponds to the
+    B channel of an RGB image.
+  * the CR (C~R~ or "`V`" red color difference) channel corresponds to the R
+    channel of an RGB image.
+  * the alpha channel, if present, is not modified by color model
+    conversion.
+
+These rules reflect the mapping of channels after the channel swizzle
+operation (controlled by
+slink:VkSamplerYcbcrConversionCreateInfo::pname:components).
+
+[NOTE]
+.Note
+====
+For example, an "`YUVA`" 32-bit format comprising four 8-bit channels can be
+implemented as ename:VK_FORMAT_R8G8B8A8_UNORM with a component mapping:
+
+  * pname:components.a = ename:VK_COMPONENT_SWIZZLE_IDENTITY
+  * pname:components.r = ename:VK_COMPONENT_SWIZZLE_B
+  * pname:components.g = ename:VK_COMPONENT_SWIZZLE_R
+  * pname:components.b = ename:VK_COMPONENT_SWIZZLE_G
+====
+
+--
+
+[open,refpage='VkSamplerYcbcrRange',desc='Range of encoded values in a color space',type='enums']
+--
+
+The elink:VkSamplerYcbcrRange enum describes whether color channels are
+encoded using the full range of numerical values or whether values are
+reserved for headroom and foot room.
+elink:VkSamplerYcbcrRange is defined as:
+
+include::../api/enums/VkSamplerYcbcrRange.txt[]
+
+ifdef::VK_KHR_sampler_ycbcr_conversion[]
+or the equivalent
+
+include::../api/enums/VkSamplerYcbcrRangeKHR.txt[]
+endif::VK_KHR_sampler_ycbcr_conversion[]
+
+  * ename:VK_SAMPLER_YCBCR_RANGE_ITU_FULL specifies that the full range of
+    the encoded values are valid and interpreted according to the ITU "`full
+    range`" quantization rules.
+  * ename:VK_SAMPLER_YCBCR_RANGE_ITU_NARROW specifies that headroom and foot
+    room are reserved in the numerical range of encoded values, and the
+    remaining values are expanded according to the ITU "`narrow range`"
+    quantization rules.
+
+The formulae for these conversions is described in the
+<<textures-sampler-YCbCr-conversion-rangeexpand,Sampler Y'C~B~C~R~ Range
+Expansion>> section of the <<textures,Image Operations>> chapter.
+
+No range modification takes place if pname:ycbcrModel is
+ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY; the pname:ycbcrRange
+field of sname:VkSamplerYcbcrConversionCreateInfo is ignored in this case.
+
+--
+
+[open,refpage='VkChromaLocation',desc='Position of downsampled chroma samples',type='enums']
+--
+
+The elink:VkChromaLocation enum, which defines the location of downsampled
+chroma channel samples relative to the luma samples, is defined as:
+
+include::../api/enums/VkChromaLocation.txt[]
+
+ifdef::VK_KHR_sampler_ycbcr_conversion[]
+or the equivalent
+
+include::../api/enums/VkChromaLocationKHR.txt[]
+endif::VK_KHR_sampler_ycbcr_conversion[]
+
+  * ename:VK_CHROMA_LOCATION_COSITED_EVEN specifies that downsampled chroma
+    samples are aligned with luma samples with even coordinates.
+  * ename:VK_CHROMA_LOCATION_MIDPOINT specifies that downsampled chroma
+    samples are located half way between each even luma sample and the
+    nearest higher odd luma sample.
+
+--
+
+[open,refpage='vkDestroySamplerYcbcrConversion',desc='Destroy a created Y\'CbCr conversion',type='protos']
+--
+
+To destroy a sampler Y'C~B~C~R~ conversion, call:
+
+ifdef::VK_VERSION_1_1[]
+include::../api/protos/vkDestroySamplerYcbcrConversion.txt[]
+endif::VK_VERSION_1_1[]
+
+ifdef::VK_VERSION_1_1+VK_KHR_sampler_ycbcr_conversion[or the equivalent command]
+
+ifdef::VK_KHR_sampler_ycbcr_conversion[]
+include::../api/protos/vkDestroySamplerYcbcrConversionKHR.txt[]
+endif::VK_KHR_sampler_ycbcr_conversion[]
+
+  * pname:device is the logical device that destroys the Y'C~B~C~R~
+    conversion.
+  * pname:ycbcrConversion is the conversion to destroy.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+
+include::../validity/protos/vkDestroySamplerYcbcrConversion.txt[]
+
+--
+
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
