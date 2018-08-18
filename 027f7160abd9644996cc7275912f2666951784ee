@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab5804d6_e9b07d3c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-18T21:12:37Z",
+      "side": 1,
+      "message": "This is going to be fragile either at the system image side (what if KernelParams.txt format changes in the future?) or at the emulator side (what if the emulator updates its method for parsing kernel parameters?)\n\nIt\u0027s much less coupling / complexity to have the system image build process generate a new kind of file just for verified boot parameters, and for that to be a defined file format that doesn\u0027t depend on other kernel parameters.",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 35
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9d4cba3_1a10f485",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-18T21:12:37Z",
+      "side": 1,
+      "message": "This is dangerous; if we simply read the file raw, it might not be formatted properly, or even contain malicious payload.\n\nInstead there should be an explicit format for verified boot information, and an explicit process for writing and reading that info. I recommend protobuf.",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 68
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf57ba7a_0f2b7c9d",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1415,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-18T21:12:37Z",
+      "side": 1,
+      "message": "We don\u0027t plan to keep supporting QEMU1 and actively want to turn it down, but as long as this doesn\u0027t change QEMU1 behavior it\u0027s OK.",
+      "range": {
+        "startLine": 1415,
+        "startChar": 18,
+        "endLine": 1415,
+        "endChar": 74
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f3d64bd_1e404715",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1420,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-18T21:12:37Z",
+      "side": 1,
+      "message": "This might be fragile to -wipe-data and attempt to edit files in the AVD directory. Do we really want to do this for all kernel parameters?",
+      "range": {
+        "startLine": 1417,
+        "startChar": 0,
+        "endLine": 1420,
+        "endChar": 0
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ceb09b94_38851f84",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-18T21:12:37Z",
+      "side": 1,
+      "message": "If the file is deleted, what is the worst case scenario? What if the file doesn\u0027t already exist when the AVD is booted for the first time? We would need to re-examine how we construct kernel parameters for every case. If we end up adding more kernel parameters to the kernel parameters file, it will be very difficult to track down breakages cause by incompatible kernel parameters files with different emulator versions.\n\nSo, can we make this specific to verified boot only? I.e., create a file just for the verified boot parameters, and read from the file outside of main-kernel-parmeters.cpp, and pass the verified boot parameters to |emulator_getKernelParameters| as an extra parameters. That way, it\u0027s much more obvious what\u0027s going on just from reading the code, and crash reports in this function will be a lot clearer as well as to what part of kernel parameters parsing failed.\n\nI recommend instead, creating a new class in android/android-emu/android/emulation just for parsing verified boot parameters into kernel parameters, and to have a specific case here for adding to |params| when there are kernel parameters for verified boot.",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 5
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69466a3e_7b2dacd6",
+        "filename": "android/android-emu/android/main-kernel-parameters.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-18T21:12:37Z",
+      "side": 1,
+      "message": "This is a bit too general for my taste --- since the purpose of this CL was for verified boot, perhaps this CL should just keep that scope, and just point to some data structure with pre-parsed verified boot options.",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 56
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "490bfc3c_78f41212",
+        "filename": "android/qemu1/android-qemu1-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-18T21:12:37Z",
+      "side": 1,
+      "message": "Let\u0027s assume QEMU1 doesn\u0027t need to support verified boot for now.",
+      "range": {
+        "startLine": 196,
+        "startChar": 80,
+        "endLine": 196,
+        "endChar": 134
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
