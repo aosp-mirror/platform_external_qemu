@@ -18,7 +18,7 @@
 import os, re, sys
 from generator import *
 
-# CerealGenerator - generates complete set of encoder, and decoder source
+# CerealGenerator - generates complete set of encoder and decoder source
 # while being agnostic to the stream implementation
 
 # ---- methods overriding base class ----
@@ -66,6 +66,8 @@ LOCAL_STATIC_LIBRARIES += $(cereal_STATIC_LIBRARIES)
 
 LOCAL_SRC_FILES := \\
     guest/goldfish_vk_frontend.cpp \\
+    guest/goldfish_vk_encoder.cpp \\
+    guest/goldfish_vk_marshaling.cpp \\
 
 $(call emugl-end-module)
 """
@@ -80,6 +82,12 @@ $(call emugl-end-module)
 #include "goldfish_vk_encoder.h"
 """
 
+        self.moduleImplFilePreambles[self.moduleKey("guest", "goldfish_vk_encoder")] = """
+#include "goldfish_vk_encoder.h"
+
+#include "goldfish_vk_marshaling.h"
+"""
+
 ################################################################################
     def beginFile(self, genOpts):
         OutputGenerator.beginFile(self, genOpts)
@@ -90,24 +98,35 @@ $(call emugl-end-module)
 
         self.beginModule("guest", "goldfish_vk_frontend")
         self.beginModule("guest", "goldfish_vk_encoder")
+        self.beginModule("guest", "goldfish_vk_marshaling")
 
     def endFile(self):
         OutputGenerator.endFile(self)
     def beginFeature(self, interface, emit):
         # Start processing in superclass
         OutputGenerator.beginFeature(self, interface, emit)
+
         self.appendHeader("guest", "goldfish_vk_frontend", "#ifdef %s\n" % self.featureName)
         self.appendImpl("guest", "goldfish_vk_frontend", "#ifdef %s\n" % self.featureName)
+
         self.appendHeader("guest", "goldfish_vk_encoder", "#ifdef %s\n" % self.featureName)
         self.appendImpl("guest", "goldfish_vk_encoder", "#ifdef %s\n" % self.featureName)
+
+        self.appendHeader("guest", "goldfish_vk_marshaling", "#ifdef %s\n" % self.featureName)
+        self.appendImpl("guest", "goldfish_vk_marshaling", "#ifdef %s\n" % self.featureName)
 
     def endFeature(self):
         # Finish processing in superclass
         OutputGenerator.endFeature(self)
+
         self.appendHeader("guest", "goldfish_vk_frontend", "#endif\n")
         self.appendImpl("guest", "goldfish_vk_frontend", "#endif\n")
+
         self.appendHeader("guest", "goldfish_vk_encoder", "#endif\n")
         self.appendImpl("guest", "goldfish_vk_encoder", "#endif\n")
+
+        self.appendHeader("guest", "goldfish_vk_marshaling", "#endif\n")
+        self.appendImpl("guest", "goldfish_vk_marshaling", "#endif\n")
 
     def moduleKey(self, directory, basename):
         return os.path.join(directory, basename)
@@ -233,6 +252,11 @@ $(call emugl-end-module)
             cmdInfoElem, name, "encode_",
             extraArgs = ["void* vkStream"])
 
+    def makeMarshalingProto(self, cmdInfoElem, name):
+        return self.makeFuncProto(
+            cmdInfoElem, name, "marshal_",
+            extraArgs = ["void* vkStream"])
+
     def makeValidateDef(self, cmdInfoElem, name):
         params = cmdInfoElem.findall('param')
 
@@ -252,6 +276,24 @@ $(call emugl-end-module)
 
         funcPrototype = \
             self.makeEncodeProto(cmdInfoElem, name)
+
+        self.swapCode();
+
+        self.beginBlock();
+
+        retType = cmdInfoElem.find('proto').find('type').text
+
+        if retType != "void":
+            self.stmt("return (%s)0" % retType)
+
+        self.endBlock();
+        return funcPrototype + self.swapCode()
+
+    def makeMarshalingDef(self, cmdInfoElem, name):
+        params = cmdInfoElem.findall('param')
+
+        funcPrototype = \
+            self.makeMarshalingProto(cmdInfoElem, name)
 
         self.swapCode();
 
@@ -346,3 +388,10 @@ $(call emugl-end-module)
 
         self.appendHeader("guest", "goldfish_vk_encoder", encoderDecl)
         self.appendImpl("guest", "goldfish_vk_encoder", encoderDef)
+
+        marshalingDecl = self.makeMarshalingProto(cmdinfo.elem, name) + ";\n"
+        marshalingDef = self.makeMarshalingDef(cmdinfo.elem, name) + ";\n"
+
+        self.appendHeader("guest", "goldfish_vk_marshaling", marshalingDecl)
+        self.appendImpl("guest", "goldfish_vk_marshaling", marshalingDef)
+
