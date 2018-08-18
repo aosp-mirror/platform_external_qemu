@@ -1,0 +1,1146 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[fragops]]
+= Fragment Operations
+
+Fragment operations execute on a per-fragment or per-sample basis, affecting
+whether or how a fragment or sample is written to the framebuffer.
+Some operations execute <<fragops-early, before fragment shading>>, and
+others <<fragops-late, after>>.
+Fragment operations always adhere to <<primrast-order,rasterization order>>.
+
+
+[[fragops-early]]
+== Early Per-Fragment Tests
+
+Once fragments are produced by rasterization, a number of per-fragment
+operations are performed prior to fragment shader execution.
+If a fragment is discarded during any of these operations, it will not be
+processed by any subsequent stage, including fragment shader execution.
+
+The <<fragops-scissor, scissor test>> and <<fragops-samplemask, sample mask
+generation>> are both always performed during early fragment tests.
+
+Fragment operations are performed in the following order:
+
+ifdef::VK_EXT_discard_rectangles[]
+  * the discard rectangles test (see <<fragops-discard-rectangles,Discard
+    Rectangles Test>>)
+endif::VK_EXT_discard_rectangles[]
+  * the scissor test (see <<fragops-scissor,Scissor Test>>)
+  * multisample fragment operations (see <<fragops-samplemask,Sample Mask>>)
+
+If early per-fragment operations are <<shaders-fragment-earlytest,enabled by
+the fragment shader>>, these operations are also performed:
+
+  * <<fragops-dbt, Depth bounds test>>
+  * <<fragops-stencil, Stencil test>>
+  * <<fragops-depth, Depth test>>
+  * <<fragops-samplecount, Sample counting>> for <<queries-occlusion,
+     occlusion queries>>
+
+ifdef::VK_EXT_post_depth_coverage[]
+If post-depth coverage operation is
+<<shaders-fragment-earlytest-postdepthcoverage,enabled by the fragment
+shader>>, the <<interfaces-builtin-variables-samplemask,code:SampleMask>>
+coverage is determined after the early stencil and depth tests.
+endif::VK_EXT_post_depth_coverage[]
+
+ifdef::VK_EXT_discard_rectangles[]
+[[fragops-discard-rectangles]]
+== Discard Rectangles Test
+
+[open,refpage='VkPipelineDiscardRectangleStateCreateInfoEXT',desc='Structure specifying discard rectangle',type='structs']
+--
+
+The discard rectangles test determines if fragment's framebuffer coordinates
+[eq]#(x~f~,y~f~)# are inclusive or exclusive to a set of discard-space
+rectangles.
+The discard rectangles are set with the
+sname:VkPipelineDiscardRectangleStateCreateInfoEXT pipeline state, which is
+defined as:
+
+include::../api/structs/VkPipelineDiscardRectangleStateCreateInfoEXT.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:discardRectangleMode is the mode used to determine whether
+    fragments that lie within the discard rectangle are discarded or not.
+  * pname:discardRectangleCount is the number of discard rectangles used by
+    the pipeline.
+  * pname:pDiscardRectangles is a pointer to an array of slink:VkRect2D
+    structures, defining the discard rectangles.
+    If the discard rectangle state is dynamic, this member is ignored.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineDiscardRectangleStateCreateInfoEXT-discardRectangleCount-00582]]
+    pname:discardRectangleCount must: be between `0` and
+    sname:VkPhysicalDeviceDiscardRectanglePropertiesEXT::pname:maxDiscardRectangles,
+    inclusive
+****
+
+include::../validity/structs/VkPipelineDiscardRectangleStateCreateInfoEXT.txt[]
+--
+
+[open,refpage='VkPipelineDiscardRectangleStateCreateFlagsEXT',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineDiscardRectangleStateCreateFlagsEXT.txt[]
+
+sname:VkPipelineDiscardRectangleStateCreateFlagsEXT is a bitmask type for
+setting a mask, but is currently reserved for future use.
+--
+
+The sname:VkPipelineDiscardRectangleStateCreateInfoEXT state is set by
+adding an instance of this structure to the pname:pNext chain of an instance
+of the sname:VkGraphicsPipelineCreateInfo structure and setting the graphics
+pipeline state with flink:vkCreateGraphicsPipelines.
+
+If the bound pipeline state object was not created with the
+ename:VK_DYNAMIC_STATE_DISCARD_RECTANGLE_EXT dynamic state enabled, discard
+rectangles are specified using the pname:pDiscardRectangles member of
+sname:VkPipelineDiscardRectangleStateCreateInfoEXT linked to the pipeline
+state object.
+
+[open,refpage='vkCmdSetDiscardRectangleEXT',desc='Set discard rectangles dynamically',type='protos']
+--
+
+If the pipeline state object was created with the
+ename:VK_DYNAMIC_STATE_DISCARD_RECTANGLE_EXT dynamic state enabled, the
+discard rectangles are dynamically set and changed with the command:
+
+include::../api/protos/vkCmdSetDiscardRectangleEXT.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:firstDiscardRectangle is the index of the first discard rectangle
+    whose state is updated by the command.
+  * pname:discardRectangleCount is the number of discard rectangles whose
+    state are updated by the command.
+  * pname:pDiscardRectangles is a pointer to an array of slink:VkRect2D
+    structures specifying discard rectangles.
+
+The discard rectangle taken from element [eq]#i# of pname:pDiscardRectangles
+replace the current state for the discard rectangle index
+[eq]#pname:firstDiscardRectangle {plus} i#, for [eq]#i# in [eq]#[0,
+pname:discardRectangleCount)#.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdSetDiscardRectangleEXT-None-00583]]
+    The bound graphics pipeline must: have been created with the
+    ename:VK_DYNAMIC_STATE_DISCARD_RECTANGLE_EXT dynamic state enabled
+  * [[VUID-vkCmdSetDiscardRectangleEXT-firstDiscardRectangle-00585]]
+    The sum of pname:firstDiscardRectangle and pname:discardRectangleCount
+    must: be less than or equal to
+    slink:VkPhysicalDeviceDiscardRectanglePropertiesEXT::pname:maxDiscardRectangles
+  * [[VUID-vkCmdSetDiscardRectangleEXT-x-00587]]
+    The pname:x and pname:y member of pname:offset in each slink:VkRect2D
+    element of pname:pDiscardRectangles must: be greater than or equal to
+    `0`
+  * [[VUID-vkCmdSetDiscardRectangleEXT-offset-00588]]
+    Evaluation of [eq]#(pname:offset.x {plus} pname:extent.width)# in each
+    slink:VkRect2D element of pname:pDiscardRectangles must: not cause a
+    signed integer addition overflow
+  * [[VUID-vkCmdSetDiscardRectangleEXT-offset-00589]]
+    Evaluation of [eq]#(pname:offset.y {plus} pname:extent.height)# in each
+    slink:VkRect2D element of pname:pDiscardRectangles must: not cause a
+    signed integer addition overflow
+****
+
+include::../validity/protos/vkCmdSetDiscardRectangleEXT.txt[]
+--
+
+The sname:VkOffset2D::pname:x and sname:VkOffset2D::pname:y values of the
+discard rectangle sname:VkRect2D specify the upper-left origin of the
+discard rectangle box.
+The lower-right corner of the discard rectangle box is specified as the
+sname:VkExtent2D::pname:width and sname:VkExtent2D::pname:height from the
+upper-left origin.
+
+If [eq]#pname:offset.x {leq} x~f~ < pname:offset.x {plus}
+pname:extent.width# and [eq]#pname:offset.y {leq} y~f~ < pname:offset.y
+{plus} pname:extent.height# for the selected discard rectangle, then the
+fragment is within the discard rectangle box.
+When the discard rectangle mode is
+ename:VK_DISCARD_RECTANGLE_MODE_INCLUSIVE_EXT a fragment within at least one
+of the active discard rectangle boxes passes the discard rectangle test;
+otherwise the fragment fails the discard rectangle test and is discarded.
+When the discard rectangle mode is
+ename:VK_DISCARD_RECTANGLE_MODE_EXCLUSIVE_EXT a fragment within at least one
+of the active discard rectangle boxes fails the discard rectangle test, and
+the fragment is discarded; otherwise the fragment passes the discard
+rectangles test.
+The discard rectangles test only applies to <<drawing, drawing commands>>,
+not to other commands like clears or copies.
+
+[open,refpage='VkDiscardRectangleModeEXT',desc='Specify the discard rectangle mode',type='enums']
+--
+
+Possible values of
+slink:VkPipelineDiscardRectangleStateCreateInfoEXT::pname:discardRectangleMode,
+specifying the behavior of the discard rectangle test, are:
+
+include::../api/enums/VkDiscardRectangleModeEXT.txt[]
+
+  * ename:VK_DISCARD_RECTANGLE_MODE_INCLUSIVE_EXT specifies that a fragment
+    within any discard rectangle satisfies the test.
+  * ename:VK_DISCARD_RECTANGLE_MODE_EXCLUSIVE_EXT specifies that a fragment
+    not within any of the discard rectangles satisfies the test.
+
+--
+
+endif::VK_EXT_discard_rectangles[]
+
+
+[[fragops-scissor]]
+== Scissor Test
+
+[open,refpage='vkCmdSetScissor',desc='Set the dynamic scissor rectangles on a command buffer',type='protos']
+--
+
+The scissor test determines if a fragment's framebuffer coordinates
+[eq]#(x~f~,y~f~)# lie within the scissor rectangle corresponding to the
+viewport index (see <<vertexpostproc-viewport,Controlling the Viewport>>)
+used by the primitive that generated the fragment.
+If the pipeline state object is created without
+ename:VK_DYNAMIC_STATE_SCISSOR enabled then the scissor rectangles are set
+by the slink:VkPipelineViewportStateCreateInfo state of the pipeline state
+object.
+Otherwise, to dynamically set the scissor rectangles call:
+
+include::../api/protos/vkCmdSetScissor.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:firstScissor is the index of the first scissor whose state is
+    updated by the command.
+  * pname:scissorCount is the number of scissors whose rectangles are
+    updated by the command.
+  * pname:pScissors is a pointer to an array of slink:VkRect2D structures
+    defining scissor rectangles.
+
+The scissor rectangles taken from element [eq]#i# of pname:pScissors replace
+the current state for the scissor index [eq]#pname:firstScissor {plus} i#,
+for [eq]#i# in [eq]#[0, pname:scissorCount)#.
+
+Each scissor rectangle is described by a slink:VkRect2D structure, with the
+pname:offset.x and pname:offset.y values determining the upper left corner
+of the scissor rectangle, and the pname:extent.width and pname:extent.height
+values determining the size in pixels.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdSetScissor-None-00590]]
+    The bound graphics pipeline must: have been created with the
+    ename:VK_DYNAMIC_STATE_SCISSOR dynamic state enabled
+  * [[VUID-vkCmdSetScissor-firstScissor-00591]]
+    pname:firstScissor must: be less than
+    sname:VkPhysicalDeviceLimits::pname:maxViewports
+  * [[VUID-vkCmdSetScissor-firstScissor-00592]]
+    The sum of pname:firstScissor and pname:scissorCount must: be between
+    `1` and sname:VkPhysicalDeviceLimits::pname:maxViewports, inclusive
+  * [[VUID-vkCmdSetScissor-firstScissor-00593]]
+    If the <<features-features-multiViewport,multiple viewports>> feature is
+    not enabled, pname:firstScissor must: be `0`
+  * [[VUID-vkCmdSetScissor-scissorCount-00594]]
+    If the <<features-features-multiViewport,multiple viewports>> feature is
+    not enabled, pname:scissorCount must: be `1`
+  * [[VUID-vkCmdSetScissor-x-00595]]
+    The pname:x and pname:y members of pname:offset must: be greater than or
+    equal to `0`
+  * [[VUID-vkCmdSetScissor-offset-00596]]
+    Evaluation of [eq]#(pname:offset.x {plus} pname:extent.width)# must: not
+    cause a signed integer addition overflow
+  * [[VUID-vkCmdSetScissor-offset-00597]]
+    Evaluation of [eq]#(pname:offset.y {plus} pname:extent.height)# must:
+    not cause a signed integer addition overflow
+****
+
+include::../validity/protos/vkCmdSetScissor.txt[]
+--
+
+If [eq]#pname:offset.x {leq} x~f~ < pname:offset.x {plus}
+pname:extent.width# and [eq]#pname:offset.y {leq} y~f~ < pname:offset.y
+{plus} pname:extent.height# for the selected scissor rectangle, then the
+scissor test passes.
+Otherwise, the test fails and the fragment is discarded.
+For points, lines, and polygons, the scissor rectangle for a primitive is
+selected in the same manner as the viewport (see
+<<vertexpostproc-viewport,Controlling the Viewport>>).
+The scissor rectangles test only applies to <<drawing, drawing commands>>,
+not to other commands like clears or copies.
+
+It is legal for [eq]#pname:offset.x {plus} pname:extent.width# or
+[eq]#pname:offset.y {plus} pname:extent.height# to exceed the dimensions of
+the framebuffer - the scissor test still applies as defined above.
+Rasterization does not produce fragments outside of the framebuffer, so such
+fragments never have the scissor test performed on them.
+
+The scissor test is always performed.
+Applications can: effectively disable the scissor test by specifying a
+scissor rectangle that encompasses the entire framebuffer.
+
+
+[[fragops-samplemask]]
+== Sample Mask
+
+This step modifies fragment coverage values based on the values in the
+pname:pSampleMask array member of
+slink:VkPipelineMultisampleStateCreateInfo, as described previously in
+section <<pipelines-graphics>>.
+
+pname:pSampleMask contains an array of static coverage information that is
+code:ANDed with the coverage information generated during rasterization.
+Bits that are zero disable coverage for the corresponding sample.
+Bit [eq]#B# of mask word [eq]#M# corresponds to sample [eq]#32 {times} M
+{plus} B#.
+The array is sized to a length of [eq]#{lceil} pname:rasterizationSamples /
+32 {rceil}# words.
+If pname:pSampleMask is `NULL`, it is treated as if the mask has all bits
+enabled, i.e. no coverage is removed from fragments.
+
+[open,refpage='VkSampleMask',desc='Mask of sample coverage information',type='basetypes',xrefs='VkPipelineMultisampleStateCreateInfo']
+--
+
+The elements of the sample mask array are of type basetype:VkSampleMask,
+each representing 32 bits of coverage information:
+
+include::../api/basetypes/VkSampleMask.txt[]
+
+--
+
+
+[[fragops-early-mode]]
+== Early Fragment Test Mode
+
+The depth bounds test, stencil test, depth test, and occlusion query sample
+counting are performed before fragment shading if and only if early fragment
+tests are enabled by the fragment shader (see
+<<shaders-fragment-earlytest,Early Fragment Tests>>).
+When early per-fragment operations are enabled, these operations are
+performed prior to fragment shader execution, and the stencil buffer, depth
+buffer, and occlusion query sample counts will be updated accordingly; these
+operations will not be performed again after fragment shader execution.
+
+If a pipeline's fragment shader has early fragment tests disabled, these
+operations are performed only after fragment program execution, in the order
+described below.
+If a pipeline does not contain a fragment shader, these operations are
+performed only once.
+
+If early fragment tests are enabled, any depth value computed by the
+fragment shader has no effect.
+Additionally, the depth test (including depth writes), stencil test
+(including stencil writes) and sample counting operations are performed even
+for fragments or samples that would be discarded after fragment shader
+execution due to per-fragment operations such as alpha-to-coverage tests, or
+due to the fragment being discarded by the shader itself.
+
+
+[[fragops-late]]
+== Late Per-Fragment Tests
+
+After programmable fragment processing, per-fragment operations are
+performed before blending and color output to the framebuffer.
+
+A fragment is produced by rasterization with framebuffer coordinates of
+[eq]#(x~f~,y~f~)# and depth [eq]#z#, as described in
+<<primsrast,Rasterization>>.
+The fragment is then modified by programmable fragment processing, which
+adds associated data as described in <<shaders,Shaders>>.
+The fragment is then further modified, and possibly discarded by the late
+per-fragment operations described in this chapter.
+Finally, if the fragment was not discarded, it is used to update the
+framebuffer at the fragment's framebuffer coordinates for any samples that
+remain covered.
+
+The depth bounds test, stencil test, and depth test are performed for each
+pixel sample, rather than just once for each fragment.
+Stencil and depth operations are performed for a pixel sample only if that
+sample's fragment coverage bit is a value of 1 when the fragment executes
+the corresponding stage of the graphics pipeline.
+If the corresponding coverage bit is 0, no operations are performed for that
+sample.
+Failure of the depth bounds, stencil, or depth test results in termination
+of the processing of that sample by means of disabling coverage for that
+sample, rather than discarding of the fragment.
+If, at any point, a fragment's coverage becomes zero for all samples, then
+the fragment is discarded.
+All operations are performed on the depth and stencil values stored in the
+depth/stencil attachment of the framebuffer.
+The contents of the color attachments are not modified at this point.
+
+The depth bounds test, stencil test, depth test, and occlusion query
+operations described in <<fragops-dbt,Depth Bounds Test>>,
+<<fragops-stencil,Stencil Test>>, <<fragops-depth,Depth Test>>,
+<<fragops-samplecount,Sample Counting>> are instead performed prior to
+fragment processing, as described in <<fragops-early-mode,Early Fragment
+Test Mode>>, if requested by the fragment shader.
+
+
+ifdef::VK_AMD_mixed_attachment_samples[]
+
+[[fragops-mixed-attachment-samples]]
+== Mixed attachment samples
+
+Special rules apply to per-fragment operations when the number of samples of
+the color attachments differs from the number of samples of the
+depth/stencil attachment used in a subpass.
+
+Let [eq]#C# be the number of color attachment samples and [eq]#D# be the
+number of depth/stencil attachment samples used by a given subpass.
+
+If [eq]#C < D# then only the first [eq]#C# number of samples are guaranteed
+to have a corresponding fragment shader invocation and thus a corresponding
+color output value, unless the fragment shaders produce inputs to the late
+per-fragment tests (e.g. by outputting to a variable decorated with the
+code:FragDepth built-in decoration).
+Implementations are allowed to produce fragment shader invocations for
+samples with indices greater than or equal to [eq]#C# but (other than
+potential side effects) the color outputs of fragment shader invocations
+corresponding to such samples are discarded.
+
+endif::VK_AMD_mixed_attachment_samples[]
+
+
+[[fragops-covg]]
+== Multisample Coverage
+
+ifndef::VK_NV_sample_mask_override_coverage[]
+If a fragment shader is active and its entry point's interface includes a
+built-in output variable decorated with code:SampleMask, the fragment
+coverage is code:ANDed with the bits of the sample mask to generate a new
+fragment coverage value.
+endif::VK_NV_sample_mask_override_coverage[]
+ifdef::VK_NV_sample_mask_override_coverage[]
+If a fragment shader is active and its entry point's interface includes a
+built-in output variable decorated with code:SampleMask and also decorated
+with code:OverrideCoverageNV the fragment coverage is replaced with the
+sample mask bits set in the shader.
+Otherwise if the built-in output variable decorated with code:SampleMask is
+not also decorated with code:OverrideCoverageNV then the fragment coverage
+is code:ANDed with the bits of the sample mask to generate a new fragment
+coverage value.
+endif::VK_NV_sample_mask_override_coverage[]
+If such a fragment shader did not assign a value to code:SampleMask due to
+flow of control, the value code:ANDed with the fragment coverage is
+undefined.
+If no fragment shader is active, or if the active fragment shader does not
+include code:SampleMask in its interface, the fragment coverage is not
+modified.
+
+Next, the fragment alpha and coverage values are modified based on the
+pname:alphaToCoverageEnable and pname:alphaToOneEnable members of the
+slink:VkPipelineMultisampleStateCreateInfo structure.
+
+All alpha values in this section refer only to the alpha component of the
+fragment shader output that has a code:Location and code:Index decoration of
+zero (see the <<interfaces-fragmentoutput,Fragment Output Interface>>
+section).
+If that shader output has an integer or unsigned integer type, then these
+operations are skipped.
+
+If pname:alphaToCoverageEnable is enabled, a temporary coverage value with
+pname:rasterizationSamples bits is generated where each bit is determined by
+the fragment's alpha value.
+The temporary coverage value is then ANDed with the fragment coverage value
+to generate a new fragment coverage value.
+
+No specific algorithm is specified for converting the alpha value to a
+temporary coverage mask.
+It is intended that the number of 1's in this value be proportional to the
+alpha value (clamped to [eq]#[0,1]#), with all 1's corresponding to a value
+of 1.0 and all 0's corresponding to 0.0.
+The algorithm may: be different at different pixel locations.
+
+[NOTE]
+.Note
+====
+Using different algorithms at different pixel location may: help to avoid
+artifacts caused by regular coverage sample locations.
+====
+
+Next, if pname:alphaToOneEnable is enabled, each alpha value is replaced by
+the maximum representable alpha value for fixed-point color buffers, or by
+1.0 for floating-point buffers.
+Otherwise, the alpha values are not changed.
+
+
+[[fragops-ds-state]]
+== Depth and Stencil Operations
+
+Pipeline state controlling the <<fragops-dbt,depth bounds tests>>,
+<<fragops-stencil,stencil test>>, and <<fragops-depth,depth test>> is
+specified through the members of the
+sname:VkPipelineDepthStencilStateCreateInfo structure.
+
+[open,refpage='VkPipelineDepthStencilStateCreateInfo',desc='Structure specifying parameters of a newly created pipeline depth stencil state',type='structs']
+--
+
+The sname:VkPipelineDepthStencilStateCreateInfo structure is defined as:
+
+include::../api/structs/VkPipelineDepthStencilStateCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:depthTestEnable controls whether <<fragops-depth,depth testing>>
+    is enabled.
+  * pname:depthWriteEnable controls whether <<fragops-depth-write,depth
+    writes>> are enabled when pname:depthTestEnable is ename:VK_TRUE.
+    Depth writes are always disabled when pname:depthTestEnable is
+    ename:VK_FALSE.
+  * pname:depthCompareOp is the comparison operator used in the
+    <<fragops-depth,depth test>>.
+  * pname:depthBoundsTestEnable controls whether <<fragops-dbt,depth bounds
+    testing>> is enabled.
+  * pname:stencilTestEnable controls whether <<fragops-stencil,stencil
+    testing>> is enabled.
+  * pname:front and pname:back control the parameters of the
+    <<fragops-stencil,stencil test>>.
+  * pname:minDepthBounds and pname:maxDepthBounds define the range of values
+    used in the <<fragops-dbt,depth bounds test>>.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineDepthStencilStateCreateInfo-depthBoundsTestEnable-00598]]
+    If the <<features-features-depthBounds,depth bounds testing>> feature is
+    not enabled, pname:depthBoundsTestEnable must: be ename:VK_FALSE
+****
+
+include::../validity/structs/VkPipelineDepthStencilStateCreateInfo.txt[]
+--
+
+[open,refpage='VkPipelineDepthStencilStateCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineDepthStencilStateCreateFlags.txt[]
+
+sname:VkPipelineDepthStencilStateCreateFlags is a bitmask type for setting a
+mask, but is currently reserved for future use.
+--
+
+
+[[fragops-dbt]]
+== Depth Bounds Test
+
+[open,refpage='vkCmdSetDepthBounds',desc='Set the depth bounds test values for a command buffer',type='protos']
+--
+
+The depth bounds test conditionally disables coverage of a sample based on
+the outcome of a comparison between the value [eq]#z~a~# in the depth
+attachment at location [eq]#(x~f~,y~f~)# (for the appropriate sample) and a
+range of values.
+The test is enabled or disabled by the pname:depthBoundsTestEnable member of
+slink:VkPipelineDepthStencilStateCreateInfo: If the pipeline state object is
+created without the ename:VK_DYNAMIC_STATE_DEPTH_BOUNDS dynamic state
+enabled then the range of values used in the depth bounds test are defined
+by the pname:minDepthBounds and pname:maxDepthBounds members of the
+slink:VkPipelineDepthStencilStateCreateInfo structure.
+Otherwise, to dynamically set the depth bounds range values call:
+
+include::../api/protos/vkCmdSetDepthBounds.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:minDepthBounds is the lower bound of the range of depth values
+    used in the depth bounds test.
+  * pname:maxDepthBounds is the upper bound of the range.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdSetDepthBounds-None-00599]]
+    The bound graphics pipeline must: have been created with the
+    ename:VK_DYNAMIC_STATE_DEPTH_BOUNDS dynamic state enabled
+ifdef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-vkCmdSetDepthBounds-minDepthBounds-00600]]
+    Unless the `<<VK_EXT_depth_range_unrestricted>>` extension is enabled
+    pname:minDepthBounds must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifndef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-vkCmdSetDepthBounds-minDepthBounds-00600]]
+    pname:minDepthBounds must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifdef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-vkCmdSetDepthBounds-maxDepthBounds-00601]]
+    Unless the `<<VK_EXT_depth_range_unrestricted>>` extension is enabled
+    pname:maxDepthBounds must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifndef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-vkCmdSetDepthBounds-maxDepthBounds-00601]]
+    pname:maxDepthBounds must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+****
+
+include::../validity/protos/vkCmdSetDepthBounds.txt[]
+--
+
+If [eq]#pname:minDepthBounds {leq} z~a~ {leq} pname:maxDepthBounds}#, then
+the depth bounds test passes.
+Otherwise, the test fails and the sample's coverage bit is cleared in the
+fragment.
+If there is no depth framebuffer attachment or if the depth bounds test is
+disabled, it is as if the depth bounds test always passes.
+
+
+[[fragops-stencil]]
+== Stencil Test
+
+The stencil test conditionally disables coverage of a sample based on the
+outcome of a comparison between the stencil value in the depth/stencil
+attachment at location [eq]#(x~f~,y~f~)# (for the appropriate sample) and a
+reference value.
+The stencil test also updates the value in the stencil attachment, depending
+on the test state, the stencil value and the stencil write masks.
+The test is enabled or disabled by the pname:stencilTestEnable member of
+slink:VkPipelineDepthStencilStateCreateInfo.
+
+When disabled, the stencil test and associated modifications are not made,
+and the sample's coverage is not modified.
+
+The stencil test is controlled with the pname:front and pname:back members
+of sname:VkPipelineDepthStencilStateCreateInfo which are of type
+sname:VkStencilOpState.
+
+[open,refpage='VkStencilOpState',desc='Structure specifying stencil operation state',type='structs']
+--
+
+The sname:VkStencilOpState structure is defined as:
+
+include::../api/structs/VkStencilOpState.txt[]
+
+  * pname:failOp is a elink:VkStencilOp value specifying the action
+    performed on samples that fail the stencil test.
+  * pname:passOp is a elink:VkStencilOp value specifying the action
+    performed on samples that pass both the depth and stencil tests.
+  * pname:depthFailOp is a elink:VkStencilOp value specifying the action
+    performed on samples that pass the stencil test and fail the depth test.
+  * pname:compareOp is a elink:VkCompareOp value specifying the comparison
+    operator used in the stencil test.
+  * pname:compareMask selects the bits of the unsigned integer stencil
+    values participating in the stencil test.
+  * pname:writeMask selects the bits of the unsigned integer stencil values
+    updated by the stencil test in the stencil framebuffer attachment.
+  * pname:reference is an integer reference value that is used in the
+    unsigned stencil comparison.
+
+include::../validity/structs/VkStencilOpState.txt[]
+--
+
+There are two sets of stencil-related state, the front stencil state set and
+the back stencil state set.
+Stencil tests and writes use the front set of stencil state when processing
+front-facing fragments and use the back set of stencil state when processing
+back-facing fragments.
+Fragments rasterized from non-polygon primitives (points and lines) are
+always considered front-facing.
+Fragments rasterized from polygon primitives inherit their facingness from
+the polygon, even if the polygon is rasterized as points or lines due to the
+current elink:VkPolygonMode.
+Whether a polygon is front- or back-facing is determined in the same manner
+used for face culling (see <<primsrast-polygons-basic,Basic Polygon
+Rasterization>>).
+
+The operation of the stencil test is also affected by the pname:compareMask,
+pname:writeMask, and pname:reference members of sname:VkStencilOpState set
+in the pipeline state object if the pipeline state object is created without
+the ename:VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK,
+ename:VK_DYNAMIC_STATE_STENCIL_WRITE_MASK, and
+ename:VK_DYNAMIC_STATE_STENCIL_REFERENCE dynamic states enabled,
+respectively.
+
+[open,refpage='vkCmdSetStencilCompareMask',desc='Set the stencil compare mask dynamic state',type='protos']
+--
+
+If the pipeline state object is created with the
+ename:VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK dynamic state enabled, then to
+dynamically set the stencil compare mask call:
+
+include::../api/protos/vkCmdSetStencilCompareMask.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:faceMask is a bitmask of elink:VkStencilFaceFlagBits specifying
+    the set of stencil state for which to update the compare mask.
+  * pname:compareMask is the new value to use as the stencil compare mask.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdSetStencilCompareMask-None-00602]]
+    The bound graphics pipeline must: have been created with the
+    ename:VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK dynamic state enabled
+****
+
+include::../validity/protos/vkCmdSetStencilCompareMask.txt[]
+--
+
+[open,refpage='VkStencilFaceFlagBits',desc='Bitmask specifying sets of stencil state for which to update the compare mask',type='enums']
+--
+
+Bits which can: be set in the
+flink:vkCmdSetStencilCompareMask::pname:faceMask parameter, and similar
+parameters of other commands specifying which stencil state to update
+stencil masks for, are:
+
+include::../api/enums/VkStencilFaceFlagBits.txt[]
+
+  * ename:VK_STENCIL_FACE_FRONT_BIT specifies that only the front set of
+    stencil state is updated.
+  * ename:VK_STENCIL_FACE_BACK_BIT specifies that only the back set of
+    stencil state is updated.
+  * ename:VK_STENCIL_FRONT_AND_BACK is the combination of
+    ename:VK_STENCIL_FACE_FRONT_BIT and ename:VK_STENCIL_FACE_BACK_BIT, and
+    specifies that both sets of stencil state are updated.
+
+--
+
+[open,refpage='VkStencilFaceFlags',desc='Bitmask of VkStencilFaceFlagBits',type='enums']
+--
+include::../api/flags/VkStencilFaceFlags.txt[]
+
+sname:VkStencilFaceFlags is a bitmask type for setting a mask of zero or
+more slink:VkStencilFaceFlagBits.
+--
+
+[open,refpage='vkCmdSetStencilWriteMask',desc='Set the stencil write mask dynamic state',type='protos']
+--
+
+If the pipeline state object is created with the
+ename:VK_DYNAMIC_STATE_STENCIL_WRITE_MASK dynamic state enabled, then to
+dynamically set the stencil write mask call:
+
+include::../api/protos/vkCmdSetStencilWriteMask.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:faceMask is a bitmask of elink:VkStencilFaceFlagBits specifying
+    the set of stencil state for which to update the write mask, as
+    described above for flink:vkCmdSetStencilCompareMask.
+  * pname:writeMask is the new value to use as the stencil write mask.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdSetStencilWriteMask-None-00603]]
+    The bound graphics pipeline must: have been created with the
+    ename:VK_DYNAMIC_STATE_STENCIL_WRITE_MASK dynamic state enabled
+****
+
+include::../validity/protos/vkCmdSetStencilWriteMask.txt[]
+--
+
+[open,refpage='vkCmdSetStencilReference',desc='Set the stencil reference dynamic state',type='protos']
+--
+
+If the pipeline state object is created with the
+ename:VK_DYNAMIC_STATE_STENCIL_REFERENCE dynamic state enabled, then to
+dynamically set the stencil reference value call:
+
+include::../api/protos/vkCmdSetStencilReference.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:faceMask is a bitmask of elink:VkStencilFaceFlagBits specifying
+    the set of stencil state for which to update the reference value, as
+    described above for flink:vkCmdSetStencilCompareMask.
+  * pname:reference is the new value to use as the stencil reference value.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdSetStencilReference-None-00604]]
+    The bound graphics pipeline must: have been created with the
+    ename:VK_DYNAMIC_STATE_STENCIL_REFERENCE dynamic state enabled
+****
+
+include::../validity/protos/vkCmdSetStencilReference.txt[]
+--
+
+pname:reference is an integer reference value that is used in the unsigned
+stencil comparison.
+The reference value used by stencil comparison must be within the range
+[eq]#[0,2^s^-1]# , where [eq]#s# is the number of bits in the stencil
+framebuffer attachment, otherwise the reference value is considered
+undefined.
+The [eq]#s# least significant bits of pname:compareMask are bitwise
+code:ANDed with both the reference and the stored stencil value, and the
+resulting masked values are those that participate in the comparison
+controlled by pname:compareOp.
+Let [eq]#R# be the masked reference value and [eq]#S# be the masked stored
+stencil value.
+
+[open,refpage='VkCompareOp',desc='Stencil comparison function',type='enums']
+--
+
+Possible values of slink:VkStencilOpState::pname:compareOp, specifying the
+stencil comparison function, are:
+
+include::../api/enums/VkCompareOp.txt[]
+
+  * ename:VK_COMPARE_OP_NEVER specifies that the test never passes.
+  * ename:VK_COMPARE_OP_LESS specifies that the test passes when [eq]#R <
+    S#.
+  * ename:VK_COMPARE_OP_EQUAL specifies that the test passes when [eq]#R =
+    S#.
+  * ename:VK_COMPARE_OP_LESS_OR_EQUAL specifies that the test passes when
+    [eq]#R {leq} S#.
+  * ename:VK_COMPARE_OP_GREATER specifies that the test passes when [eq]#R >
+    S#.
+  * ename:VK_COMPARE_OP_NOT_EQUAL specifies that the test passes when [eq]#R
+    {neq} S#.
+  * ename:VK_COMPARE_OP_GREATER_OR_EQUAL specifies that the test passes when
+    [eq]#R {geq} S#.
+  * ename:VK_COMPARE_OP_ALWAYS specifies that the test always passes.
+
+--
+
+[open,refpage='VkStencilOp',desc='Stencil comparison function',type='enums']
+--
+
+Possible values of the pname:failOp, pname:passOp, and pname:depthFailOp
+members of slink:VkStencilOpState, specifying what happens to the stored
+stencil value if this or certain subsequent tests fail or pass, are:
+
+include::../api/enums/VkStencilOp.txt[]
+
+  * ename:VK_STENCIL_OP_KEEP keeps the current value.
+  * ename:VK_STENCIL_OP_ZERO sets the value to 0.
+  * ename:VK_STENCIL_OP_REPLACE sets the value to pname:reference.
+  * ename:VK_STENCIL_OP_INCREMENT_AND_CLAMP increments the current value and
+    clamps to the maximum representable unsigned value.
+  * ename:VK_STENCIL_OP_DECREMENT_AND_CLAMP decrements the current value and
+    clamps to 0.
+  * ename:VK_STENCIL_OP_INVERT bitwise-inverts the current value.
+  * ename:VK_STENCIL_OP_INCREMENT_AND_WRAP increments the current value and
+    wraps to 0 when the maximum value would have been exceeded.
+  * ename:VK_STENCIL_OP_DECREMENT_AND_WRAP decrements the current value and
+    wraps to the maximum possible value when the value would go below 0.
+
+For purposes of increment and decrement, the stencil bits are considered as
+an unsigned integer.
+
+If the stencil test fails, the sample's coverage bit is cleared in the
+fragment.
+If there is no stencil framebuffer attachment, stencil modification cannot:
+occur, and it is as if the stencil tests always pass.
+
+If the stencil test passes, the pname:writeMask member of the
+slink:VkStencilOpState structures controls how the updated stencil value is
+written to the stencil framebuffer attachment.
+
+The least significant [eq]#s# bits of pname:writeMask, where [eq]#s# is the
+number of bits in the stencil framebuffer attachment, specify an integer
+mask.
+Where a [eq]#1# appears in this mask, the corresponding bit in the stencil
+value in the depth/stencil attachment is written; where a [eq]#0# appears,
+the bit is not written.
+The pname:writeMask value uses either the front-facing or back-facing state
+based on the facingness of the fragment.
+Fragments generated by front-facing primitives use the front mask and
+fragments generated by back-facing primitives use the back mask.
+
+--
+
+
+[[fragops-depth]]
+== Depth Test
+
+The depth test conditionally disables coverage of a sample based on the
+outcome of a comparison between the fragment's depth value at the sample
+location and the sample's depth value in the depth/stencil attachment at
+location [eq]#(x~f~,y~f~)#.
+The comparison is enabled or disabled with the pname:depthTestEnable member
+of the slink:VkPipelineDepthStencilStateCreateInfo structure.
+When disabled, the depth comparison and subsequent possible updates to the
+value of the depth component of the depth/stencil attachment are bypassed
+and the fragment is passed to the next operation.
+The stencil value, however, can: be modified as indicated above as if the
+depth test passed.
+If enabled, the comparison takes place and the depth/stencil attachment
+value can: subsequently be modified.
+
+The comparison is specified with the pname:depthCompareOp member of
+slink:VkPipelineDepthStencilStateCreateInfo.
+Let [eq]#pname:z~f~# be the incoming fragment's depth value for a sample,
+and let [eq]#z~a~# be the depth/stencil attachment value in memory for that
+sample.
+The depth test passes under the following conditions:
+
+  * ename:VK_COMPARE_OP_NEVER: the test never passes.
+  * ename:VK_COMPARE_OP_LESS: the test passes when [eq]#z~f~ < z~a~#.
+  * ename:VK_COMPARE_OP_EQUAL: the test passes when [eq]#z~f~ = z~a~#.
+  * ename:VK_COMPARE_OP_LESS_OR_EQUAL: the test passes when [eq]#z~f~ {leq}
+    z~a~#.
+  * ename:VK_COMPARE_OP_GREATER: the test passes when [eq]#z~f~ > z~a~#.
+  * ename:VK_COMPARE_OP_NOT_EQUAL: the test passes when [eq]#z~f~ {neq}
+    z~a~#.
+  * ename:VK_COMPARE_OP_GREATER_OR_EQUAL: the test passes when [eq]#z~f~
+    {geq} z~a~#.
+  * ename:VK_COMPARE_OP_ALWAYS: the test always passes.
+
+If slink:VkPipelineRasterizationStateCreateInfo::pname:depthClampEnable is
+enabled, before the incoming fragment's [eq]#pname:z~f~# is compared to
+[eq]#pname:z~a~#, [eq]#pname:z~f~# is clamped to [eq]#[min(n,f),max(n,f)]#,
+where [eq]#n# and [eq]#f# are the pname:minDepth and pname:maxDepth depth
+range values of the viewport used by this fragment, respectively.
+
+If the depth test fails, the sample's coverage bit is cleared in the
+fragment.
+The stencil value at the sample's location is updated according to the
+function currently in effect for depth test failure.
+
+[[fragops-depth-write]]
+If the depth test passes, the sample's (possibly clamped) [eq]#pname:z~f~#
+value is conditionally written to the depth framebuffer attachment based on
+the pname:depthWriteEnable member of
+slink:VkPipelineDepthStencilStateCreateInfo.
+If pname:depthWriteEnable is ename:VK_TRUE the value is written, and if it
+is ename:VK_FALSE the value is not written.
+ifdef::VK_EXT_depth_range_unrestricted[]
+If the depth framebuffer attachment is a fixed-point format and the depth
+value is outside of the `0.0` to `1.0` range the depth value is clamped
+between `0.0` and `1.0` inclusive before writing.
+endif::VK_EXT_depth_range_unrestricted[]
+The stencil value at the sample's location is updated according to the
+function currently in effect for depth test success.
+
+If there is no depth framebuffer attachment, it is as if the depth test
+always passes.
+
+
+[[fragops-samplecount]]
+== Sample Counting
+
+Occlusion queries use query pool entries to track the number of samples that
+pass all the per-fragment tests.
+The mechanism of collecting an occlusion query value is described in
+<<queries-occlusion,Occlusion Queries>>.
+
+The occlusion query sample counter increments by one for each sample with a
+coverage value of 1 in each fragment that survives all the per-fragment
+tests, including scissor, sample mask, alpha to coverage, stencil, and depth
+tests.
+
+ifdef::VK_NV_fragment_coverage_to_color[]
+
+[[fragops-coverage-to-color]]
+== Fragment Coverage To Color
+
+[open,refpage='VkPipelineCoverageToColorStateCreateInfoNV',desc='Structure specifying whether fragment coverage replaces a color',type='structs']
+--
+
+If the pname:pNext chain of slink:VkPipelineMultisampleStateCreateInfo
+includes a sname:VkPipelineCoverageToColorStateCreateInfoNV structure, then
+that structure controls whether the fragment coverage is substituted for a
+fragment color output and, if so, which output is replaced.
+
+The sname:VkPipelineCoverageToColorStateCreateInfoNV structure is defined
+as:
+
+include::../api/structs/VkPipelineCoverageToColorStateCreateInfoNV.txt[]
+
+  * pname:sType is the type of this structure
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure
+  * pname:flags is reserved for future use.
+  * pname:coverageToColorEnable controls whether the fragment coverage value
+    replaces a fragment color output.
+  * pname:coverageToColorLocation controls which fragment shader color
+    output value is replaced.
+
+If pname:coverageToColorEnable is ename:VK_TRUE, the fragment coverage
+information is treated as a bitmask with one bit for each sample (as in the
+<<fragops-samplemask,Sample Mask>> section), and this bitmask replaces the
+first component of the color value corresponding to the fragment shader
+output location with code:Location equal to pname:coverageToColorLocation
+and code:Index equal to zero.
+If the color attachment format has fewer bits than the sample coverage, the
+low bits of the sample coverage bitmask are taken without any clamping.
+If the color attachment format has more bits than the sample coverage, the
+high bits of the sample coverage bitmask are filled with zeros.
+
+If <<primsrast-sampleshading,Sample Shading>> is in use, the coverage
+bitmask only has bits set for samples that correspond to the fragment shader
+invocation that shades those samples.
+
+This pipeline stage occurs after sample counting and before blending, and is
+always performed after fragment shading regardless of the setting of
+code:EarlyFragmentTests.
+
+If pname:coverageToColorEnable is ename:VK_FALSE, these operations are
+skipped.
+If this structure is not present, it is as if pname:coverageToColorEnable is
+ename:VK_FALSE.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineCoverageToColorStateCreateInfoNV-coverageToColorEnable-01404]]
+    If pname:coverageToColorEnable is ename:VK_TRUE, then the render pass
+    subpass indicated by
+    slink:VkGraphicsPipelineCreateInfo::pname:renderPass and
+    slink:VkGraphicsPipelineCreateInfo::pname:subpass must: have a color
+    attachment at the location selected by pname:coverageToColorLocation,
+    with a elink:VkFormat of ename:VK_FORMAT_R8_UINT,
+    ename:VK_FORMAT_R8_SINT, ename:VK_FORMAT_R16_UINT,
+    ename:VK_FORMAT_R16_SINT, ename:VK_FORMAT_R32_UINT, or
+    ename:VK_FORMAT_R32_SINT
+****
+
+include::../validity/structs/VkPipelineCoverageToColorStateCreateInfoNV.txt[]
+--
+
+[open,refpage='VkPipelineCoverageToColorStateCreateFlagsNV',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineCoverageToColorStateCreateFlagsNV.txt[]
+
+sname:VkPipelineCoverageToColorStateCreateFlagsNV is a bitmask type for
+setting a mask, but is currently reserved for future use.
+--
+
+endif::VK_NV_fragment_coverage_to_color[]
+
+
+[[fragops-coverage-reduction]]
+== Coverage Reduction
+
+Coverage reduction generates a _color sample mask_ from the coverage mask,
+with one bit for each sample in the color attachment(s) for the subpass.
+If a bit in the color sample mask is 0, then blending and writing to the
+framebuffer are not performed for that sample.
+
+ifndef::VK_NV_framebuffer_mixed_samples[]
+
+Each color sample is associated with a unique rasterization sample, and the
+value of the coverage mask is assigned to the color sample mask.
+
+endif::VK_NV_framebuffer_mixed_samples[]
+
+ifdef::VK_NV_framebuffer_mixed_samples[]
+
+If the pipeline's
+slink:VkPipelineMultisampleStateCreateInfo::pname:rasterizationSamples is
+greater than one and the slink:VkAttachmentDescription::pname:samples of the
+color attachments is one, then the fragment's coverage is reduced from
+pname:rasterizationSamples bits to a single bit, where the color sample mask
+is 1 if any bit in the fragment's coverage is on, and 0 otherwise.
+
+If the pipeline's
+slink:VkPipelineMultisampleStateCreateInfo::pname:rasterizationSamples is
+greater than the slink:VkAttachmentDescription::pname:samples of the color
+attachments in the subpass, then the fragment's coverage is reduced from
+pname:rasterizationSamples bits to a color sample mask with
+slink:VkAttachmentDescription::pname:samples bits.
+There is an implementation-dependent association of raster samples to color
+samples.
+The reduced color sample mask is computed such that the bit for each color
+sample is 1 if any of the associated bits in the fragment's coverage is on,
+and 0 otherwise.
+
+
+[[fragops-coverage-modulation]]
+=== Coverage Modulation
+
+[open,refpage='VkPipelineCoverageModulationStateCreateInfoNV',desc='Structure specifying parameters controlling coverage modulation',type='structs']
+--
+
+As part of coverage reduction, fragment color values can: also be modulated
+(multiplied) by a value that is a function of fraction of covered
+rasterization samples associated with that color sample.
+
+Pipeline state controlling coverage reduction is specified through the
+members of the sname:VkPipelineCoverageModulationStateCreateInfoNV
+structure.
+
+The sname:VkPipelineCoverageModulationStateCreateInfoNV structure is defined
+as:
+
+include::../api/structs/VkPipelineCoverageModulationStateCreateInfoNV.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:coverageModulationMode controls which color components are
+    modulated and is of type elink:VkCoverageModulationModeNV.
+  * pname:coverageModulationTableEnable controls whether the modulation
+    factor is looked up from a table in pname:pCoverageModulationTable.
+  * pname:coverageModulationTableCount is the number of elements in
+    pname:pCoverageModulationTable.
+  * pname:pCoverageModulationTable is a table of modulation factors
+    containing a value for each number of covered samples.
+
+If pname:coverageModulationTableEnable is ename:VK_FALSE, then for each
+color sample the associated bits of the fragment's coverage are counted and
+divided by the number of associated bits to produce a modulation factor
+[eq]#R# in the range [eq]#(0,1]# (a value of zero would have been killed due
+to a color coverage of 0).
+Specifically:
+
+  * [eq]#N# = value of pname:rasterizationSamples
+  * [eq]#M# = value of slink:VkAttachmentDescription::pname:samples for any
+    color attachments
+  * [eq]#R = popcount(associated coverage bits) / (N / M)#
+
+If pname:coverageModulationTableEnable is ename:VK_TRUE, the value [eq]#R#
+is computed using a programmable lookup table.
+The lookup table has [eq]#N / M# elements, and the element of the table is
+selected by:
+
+  * [eq]#R = pname:pCoverageModulationTable[popcount(associated coverage
+    bits)-1]#
+
+Note that the table does not have an entry for [eq]#popcount(associated
+coverage bits) = 0#, because such samples would have been killed.
+
+The values of pname:pCoverageModulationTable may: be rounded to an
+implementation-dependent precision, which is at least as fine as [eq]#1 /
+N#, and clamped to [eq]#[0,1]#.
+
+For each color attachment with a floating point or normalized color format,
+each fragment output color value is replicated to [eq]#M# values which can:
+each be modulated (multiplied) by that color sample's associated value of
+[eq]#R#.
+Which components are modulated is controlled by
+pname:coverageModulationMode.
+
+If this structure is not present, it is as if coverageModulationMode is
+ename:VK_COVERAGE_MODULATION_MODE_NONE_NV.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineCoverageModulationStateCreateInfoNV-coverageModulationTableEnable-01405]]
+    If pname:coverageModulationTableEnable is ename:VK_TRUE,
+    pname:coverageModulationTableCount must: be equal to the number of
+    rasterization samples divided by the number of color samples in the
+    subpass.
+****
+
+include::../validity/structs/VkPipelineCoverageModulationStateCreateInfoNV.txt[]
+--
+
+[open,refpage='VkPipelineCoverageModulationStateCreateFlagsNV',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineCoverageModulationStateCreateFlagsNV.txt[]
+
+sname:VkPipelineCoverageModulationStateCreateFlagsNV is a bitmask type for
+setting a mask, but is currently reserved for future use.
+--
+
+[open,refpage='VkCoverageModulationModeNV',desc='Specify the discard rectangle mode',type='enums']
+--
+Possible values of
+slink:VkPipelineCoverageModulationStateCreateInfoNV::pname:coverageModulationMode,
+specifying which color components are modulated, are:
+
+include::../api/enums/VkCoverageModulationModeNV.txt[]
+
+  * ename:VK_COVERAGE_MODULATION_MODE_NONE_NV specifies that no components
+    are multiplied by the modulation factor.
+  * ename:VK_COVERAGE_MODULATION_MODE_RGB_NV specifies that the red, green,
+    and blue components are multiplied by the modulation factor.
+  * ename:VK_COVERAGE_MODULATION_MODE_ALPHA_NV specifies that the alpha
+    component is multiplied by the modulation factor.
+  * ename:VK_COVERAGE_MODULATION_MODE_RGBA_NV specifies that all components
+    are multiplied by the modulation factor.
+--
+
+endif::VK_NV_framebuffer_mixed_samples[]

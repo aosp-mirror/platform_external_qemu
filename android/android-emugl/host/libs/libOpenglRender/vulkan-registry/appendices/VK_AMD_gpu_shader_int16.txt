@@ -1,0 +1,26 @@
+include::meta/VK_AMD_gpu_shader_int16.txt[]
+
+*Last Modified Date*::
+     2017-06-08
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+  - Requires the
+    https://www.khronos.org/registry/spir-v/extensions/AMD/SPV_AMD_gpu_shader_int16.html[+SPV_AMD_gpu_shader_int16+]
+    SPIR-V extension.
+*Contributors*::
+  - Daniel Rakos, AMD
+  - Dominik Witczak, AMD
+  - Matthaeus G. Chajdas, AMD
+  - Rex Xu, AMD
+  - Timothy Lottes, AMD
+  - Zhi Cai, AMD
+
+This extension adds support for the following SPIR-V extension in Vulkan:
+
+  * +SPV_AMD_gpu_shader_int16+
+
+=== Version History
+
+ * Revision 1, 2017-06-18 (Dominik Witczak)
+   - First version.
