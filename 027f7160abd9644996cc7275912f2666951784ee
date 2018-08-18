@@ -117,6 +117,29 @@
     },
     {
       "key": {
+        "uuid": "76e9bd51_30c0fd47",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-18T21:23:02Z",
+      "side": 1,
+      "message": "Also, be sure to use params.add in the right way, as it looks like |params| expects single parameters at a time. From this comment, trying to pass multiple parameters in params.add[Format] seems to be asking for trouble.",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 226,
+        "endChar": 50
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "69466a3e_7b2dacd6",
         "filename": "android/android-emu/android/main-kernel-parameters.h",
         "patchSetId": 4
