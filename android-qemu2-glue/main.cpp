@@ -834,13 +834,30 @@ extern "C" int main(int argc, char** argv) {
     if (opts->audio && !strcmp(opts->audio, "none"))
         args.add("-no-audio");
 
-    // Just dont' use snapshots on 32 bit - crashes galore
-    if (System::get()->getProgramBitness() == 32) {
-        feature_set_enabled_override(kFeature_FastSnapshotV1, false);
-        feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
-    }
+    bool badSnapshots = false;
 
-    // Generic snapshots command line option
+    // Check situations where snapshots should be turned off
+    {
+        // Just dont' use snapshots on 32 bit - crashes galore
+        badSnapshots = badSnapshots || (System::get()->getProgramBitness() == 32);
+
+        // Bad generic snapshots command line option
+        if (opts->snapshot && opts->snapshot[0] == '\0') {
+            opts->snapshot = nullptr;
+            opts->no_snapshot_load = true;
+            opts->no_snapshot_save = true;
+            badSnapshots = true;
+        } else if (opts->snapshot) {
+            // Never save snapshot on exit if we are booting with a snapshot;
+            // it will overwrite quickboot state
+            opts->no_snapshot_save = true;
+        }
+
+        if (badSnapshots) {
+            feature_set_enabled_override(kFeature_FastSnapshotV1, false);
+            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
+        }
+    }
 
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
         if (!opts->no_snapshot_load) {
