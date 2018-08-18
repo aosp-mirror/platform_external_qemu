@@ -122,6 +122,11 @@ int physicalModel_record(PhysicalModel* model, const char* filename);
  */
 int physicalModel_playback(PhysicalModel* model, const char* filename);
 
+/* Start recording ground truth to the specified file.
+ * Returns 0 if successful.
+ */
+int physicalModel_recordGroundTruth(PhysicalModel* model, const char* filename);
+
 /* Stop all active recording and playback.
  * Returns 0 if successful.
  */
