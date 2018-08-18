@@ -2558,3 +2558,6 @@ void goldfish_frontend_vkGetQueueCheckpointDataNV(
 
 #endif
 
+
+#include <vulkan.h>
+
