@@ -1134,21 +1134,28 @@ extern const char* android_physical_model_get_parameter_name_from_id(
     return _physicalParamNameFromId(physical_parameter_id);
 }
 
-/* Start recording physical changes to the specified file */
+// Start recording physical changes to the specified file.
 extern int android_physical_model_record(const char* file_name) {
     HwSensors* hw = _sensorsState;
 
     return physicalModel_record(hw->physical_model, file_name);
 }
 
-/* Start playing back physical changes from the specified file */
+// Start playing back physical changes from the specified file.
 extern int android_physical_model_playback(const char* file_name) {
     HwSensors* hw = _sensorsState;
 
     return physicalModel_playback(hw->physical_model, file_name);
 }
 
-/* Stop all active recording and playback */
+// Start recording ground truth to the specified file.
+extern int android_physical_model_record_ground_truth(const char* file_name) {
+    HwSensors* hw = _sensorsState;
+
+    return physicalModel_recordGroundTruth(hw->physical_model, file_name);
+}
+
+// Stop all active recording and playback.
 extern int android_physical_model_stop_record_and_playback() {
     HwSensors* hw = _sensorsState;
 
