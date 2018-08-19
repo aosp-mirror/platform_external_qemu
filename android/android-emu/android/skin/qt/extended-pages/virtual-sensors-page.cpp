@@ -14,7 +14,7 @@
 #include "android/hw-sensors.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
-#include "android/physics/Physics.h"
+#include "android/physics/GlmHelpers.h"
 #include "android/skin/ui.h"
 
 #include "android/skin/qt/stylesheet.h"
@@ -312,7 +312,10 @@ void VirtualSensorsPage::startSensorUpdateTimer() {
 void VirtualSensorsPage::stopSensorUpdateTimer() {
     mBypassOrientationChecks = false;
     mAccelerationTimer.stop();
-    updateSensorValuesInUI();
+
+    // Do one last sync with the UI, but do it outside of this callback to
+    // prevent a deadlock.
+    QTimer::singleShot(0, this, SLOT(updateSensorValuesInUI()));
 }
 
 void VirtualSensorsPage::onVirtualSceneControlsEngaged(bool engaged) {
@@ -572,6 +575,8 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
     updateUIFromModelCurrentState();
 
     if (sSensorsAgent != nullptr) {
+        sSensorsAgent->advanceTime();
+
         glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
 
         glm::vec3 device_accelerometer;

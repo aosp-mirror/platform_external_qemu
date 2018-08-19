@@ -12,6 +12,7 @@
 
 #include "android/adb-server.h"
 #include "android/android.h"
+#include "android/automation/AutomationController.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/boot-properties.h"
 #include "android/car.h"
@@ -422,6 +423,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
+    android::automation::AutomationController::initialize();
 
     AvdFlavor flavor = avdInfo_getAvdFlavor(android_avdInfo);
     /* initialize the car data emulation if the system image is a Android Auto build */
