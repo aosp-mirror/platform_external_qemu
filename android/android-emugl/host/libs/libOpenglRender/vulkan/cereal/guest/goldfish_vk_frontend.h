@@ -5,6 +5,69 @@
 
 #ifdef VK_VERSION_1_0
 
+// genType for vk_platform
+// genType for VK_MAKE_VERSION
+// genType for VK_API_VERSION
+// genType for VK_API_VERSION_1_0
+// genType for VK_VERSION_MAJOR
+// genType for VK_VERSION_MINOR
+// genType for VK_VERSION_PATCH
+// genType for VK_HEADER_VERSION
+// genType for VK_NULL_HANDLE
+// genGroup for VkPipelineCacheHeaderVersion
+// genEnum for VK_LOD_CLAMP_NONE
+// genEnum for VK_REMAINING_MIP_LEVELS
+// genEnum for VK_REMAINING_ARRAY_LAYERS
+// genEnum for VK_WHOLE_SIZE
+// genEnum for VK_ATTACHMENT_UNUSED
+// genEnum for VK_TRUE
+// genEnum for VK_FALSE
+// genEnum for VK_QUEUE_FAMILY_IGNORED
+// genEnum for VK_SUBPASS_EXTERNAL
+// genGroup for VkResult
+// genGroup for VkStructureType
+// genType for void
+// genType for uint32_t
+// genType for VkFlags
+// genType for VkInstanceCreateFlags
+// genType for char
+// genType for VkApplicationInfo
+// genStruct for VkApplicationInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*     pNext
+// genStructOrUnionField:     const char*     pApplicationName
+// genStructOrUnionField:     uint32_t        applicationVersion
+// genStructOrUnionField:     const char*     pEngineName
+// genStructOrUnionField:     uint32_t        engineVersion
+// genStructOrUnionField:     uint32_t        apiVersion
+// genType for VkInstanceCreateInfo
+// genStruct for VkInstanceCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*     pNext
+// genStructOrUnionField:     VkInstanceCreateFlags  flags
+// genStructOrUnionField:     const VkApplicationInfo* pApplicationInfo
+// genStructOrUnionField:     uint32_t               enabledLayerCount
+// genStructOrUnionField:     const char* const*      ppEnabledLayerNames
+// genStructOrUnionField:     uint32_t               enabledExtensionCount
+// genStructOrUnionField:     const char* const*      ppEnabledExtensionNames
+// genType for size_t
+// genGroup for VkSystemAllocationScope
+// genType for PFN_vkAllocationFunction
+// genType for PFN_vkReallocationFunction
+// genType for PFN_vkFreeFunction
+// genGroup for VkInternalAllocationType
+// genType for PFN_vkInternalAllocationNotification
+// genType for PFN_vkInternalFreeNotification
+// genType for VkAllocationCallbacks
+// genStruct for VkAllocationCallbacks
+// genStructOrUnionField:     void*           pUserData
+// genStructOrUnionField:     PFN_vkAllocationFunction   pfnAllocation
+// genStructOrUnionField:     PFN_vkReallocationFunction pfnReallocation
+// genStructOrUnionField:     PFN_vkFreeFunction    pfnFree
+// genStructOrUnionField:     PFN_vkInternalAllocationNotification pfnInternalAllocation
+// genStructOrUnionField:     PFN_vkInternalFreeNotification pfnInternalFree
+// genType for VK_DEFINE_HANDLE
+// genType for VkInstance
 VkResult goldfish_frontend_vkCreateInstance(
     const VkInstanceCreateInfo* pCreateInfo,
     const VkAllocationCallbacks* pAllocator,
@@ -16,23 +79,112 @@ void goldfish_frontend_vkDestroyInstance(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkPhysicalDevice
 VkResult goldfish_frontend_vkEnumeratePhysicalDevices(
     VkInstance instance,
     uint32_t* pPhysicalDeviceCount,
     VkPhysicalDevice* pPhysicalDevices)
 ;
 
+// genType for VkBool32
+// genType for VkPhysicalDeviceFeatures
+// genStruct for VkPhysicalDeviceFeatures
+// genStructOrUnionField:     VkBool32               robustBufferAccess
+// genStructOrUnionField:     VkBool32               fullDrawIndexUint32
+// genStructOrUnionField:     VkBool32               imageCubeArray
+// genStructOrUnionField:     VkBool32               independentBlend
+// genStructOrUnionField:     VkBool32               geometryShader
+// genStructOrUnionField:     VkBool32               tessellationShader
+// genStructOrUnionField:     VkBool32               sampleRateShading
+// genStructOrUnionField:     VkBool32               dualSrcBlend
+// genStructOrUnionField:     VkBool32               logicOp
+// genStructOrUnionField:     VkBool32               multiDrawIndirect
+// genStructOrUnionField:     VkBool32               drawIndirectFirstInstance
+// genStructOrUnionField:     VkBool32               depthClamp
+// genStructOrUnionField:     VkBool32               depthBiasClamp
+// genStructOrUnionField:     VkBool32               fillModeNonSolid
+// genStructOrUnionField:     VkBool32               depthBounds
+// genStructOrUnionField:     VkBool32               wideLines
+// genStructOrUnionField:     VkBool32               largePoints
+// genStructOrUnionField:     VkBool32               alphaToOne
+// genStructOrUnionField:     VkBool32               multiViewport
+// genStructOrUnionField:     VkBool32               samplerAnisotropy
+// genStructOrUnionField:     VkBool32               textureCompressionETC2
+// genStructOrUnionField:     VkBool32               textureCompressionASTC_LDR
+// genStructOrUnionField:     VkBool32               textureCompressionBC
+// genStructOrUnionField:     VkBool32               occlusionQueryPrecise
+// genStructOrUnionField:     VkBool32               pipelineStatisticsQuery
+// genStructOrUnionField:     VkBool32               vertexPipelineStoresAndAtomics
+// genStructOrUnionField:     VkBool32               fragmentStoresAndAtomics
+// genStructOrUnionField:     VkBool32               shaderTessellationAndGeometryPointSize
+// genStructOrUnionField:     VkBool32               shaderImageGatherExtended
+// genStructOrUnionField:     VkBool32               shaderStorageImageExtendedFormats
+// genStructOrUnionField:     VkBool32               shaderStorageImageMultisample
+// genStructOrUnionField:     VkBool32               shaderStorageImageReadWithoutFormat
+// genStructOrUnionField:     VkBool32               shaderStorageImageWriteWithoutFormat
+// genStructOrUnionField:     VkBool32               shaderUniformBufferArrayDynamicIndexing
+// genStructOrUnionField:     VkBool32               shaderSampledImageArrayDynamicIndexing
+// genStructOrUnionField:     VkBool32               shaderStorageBufferArrayDynamicIndexing
+// genStructOrUnionField:     VkBool32               shaderStorageImageArrayDynamicIndexing
+// genStructOrUnionField:     VkBool32               shaderClipDistance
+// genStructOrUnionField:     VkBool32               shaderCullDistance
+// genStructOrUnionField:     VkBool32               shaderFloat64
+// genStructOrUnionField:     VkBool32               shaderInt64
+// genStructOrUnionField:     VkBool32               shaderInt16
+// genStructOrUnionField:     VkBool32               shaderResourceResidency
+// genStructOrUnionField:     VkBool32               shaderResourceMinLod
+// genStructOrUnionField:     VkBool32               sparseBinding
+// genStructOrUnionField:     VkBool32               sparseResidencyBuffer
+// genStructOrUnionField:     VkBool32               sparseResidencyImage2D
+// genStructOrUnionField:     VkBool32               sparseResidencyImage3D
+// genStructOrUnionField:     VkBool32               sparseResidency2Samples
+// genStructOrUnionField:     VkBool32               sparseResidency4Samples
+// genStructOrUnionField:     VkBool32               sparseResidency8Samples
+// genStructOrUnionField:     VkBool32               sparseResidency16Samples
+// genStructOrUnionField:     VkBool32               sparseResidencyAliased
+// genStructOrUnionField:     VkBool32               variableMultisampleRate
+// genStructOrUnionField:     VkBool32               inheritedQueries
 void goldfish_frontend_vkGetPhysicalDeviceFeatures(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceFeatures* pFeatures)
 ;
 
+// genGroup for VkFormat
+// genGroup for VkFormatFeatureFlagBits
+// genType for VkFormatFeatureFlags
+// genType for VkFormatProperties
+// genStruct for VkFormatProperties
+// genStructOrUnionField:     VkFormatFeatureFlags   linearTilingFeatures
+// genStructOrUnionField:     VkFormatFeatureFlags   optimalTilingFeatures
+// genStructOrUnionField:     VkFormatFeatureFlags   bufferFeatures
 void goldfish_frontend_vkGetPhysicalDeviceFormatProperties(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
     VkFormatProperties* pFormatProperties)
 ;
 
+// genGroup for VkImageType
+// genGroup for VkImageTiling
+// genGroup for VkImageUsageFlagBits
+// genType for VkImageUsageFlags
+// genGroup for VkImageCreateFlagBits
+// genType for VkImageCreateFlags
+// genType for VkExtent3D
+// genStruct for VkExtent3D
+// genStructOrUnionField:     uint32_t        width
+// genStructOrUnionField:     uint32_t        height
+// genStructOrUnionField:     uint32_t        depth
+// genGroup for VkSampleCountFlagBits
+// genType for VkSampleCountFlags
+// genType for uint64_t
+// genType for VkDeviceSize
+// genType for VkImageFormatProperties
+// genStruct for VkImageFormatProperties
+// genStructOrUnionField:     VkExtent3D             maxExtent
+// genStructOrUnionField:     uint32_t               maxMipLevels
+// genStructOrUnionField:     uint32_t               maxArrayLayers
+// genStructOrUnionField:     VkSampleCountFlags     sampleCounts
+// genStructOrUnionField:     VkDeviceSize           maxResourceSize
 VkResult goldfish_frontend_vkGetPhysicalDeviceImageFormatProperties(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
@@ -43,32 +195,217 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceImageFormatProperties(
     VkImageFormatProperties* pImageFormatProperties)
 ;
 
+// genGroup for VkPhysicalDeviceType
+// genType for uint8_t
+// genType for float
+// genType for int32_t
+// genType for VkPhysicalDeviceLimits
+// genStruct for VkPhysicalDeviceLimits
+// genStructOrUnionField:     uint32_t               maxImageDimension1D
+// genStructOrUnionField:     uint32_t               maxImageDimension2D
+// genStructOrUnionField:     uint32_t               maxImageDimension3D
+// genStructOrUnionField:     uint32_t               maxImageDimensionCube
+// genStructOrUnionField:     uint32_t               maxImageArrayLayers
+// genStructOrUnionField:     uint32_t               maxTexelBufferElements
+// genStructOrUnionField:     uint32_t               maxUniformBufferRange
+// genStructOrUnionField:     uint32_t               maxStorageBufferRange
+// genStructOrUnionField:     uint32_t               maxPushConstantsSize
+// genStructOrUnionField:     uint32_t               maxMemoryAllocationCount
+// genStructOrUnionField:     uint32_t               maxSamplerAllocationCount
+// genStructOrUnionField:     VkDeviceSize           bufferImageGranularity
+// genStructOrUnionField:     VkDeviceSize           sparseAddressSpaceSize
+// genStructOrUnionField:     uint32_t               maxBoundDescriptorSets
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorSamplers
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorUniformBuffers
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorStorageBuffers
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorSampledImages
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorStorageImages
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorInputAttachments
+// genStructOrUnionField:     uint32_t               maxPerStageResources
+// genStructOrUnionField:     uint32_t               maxDescriptorSetSamplers
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUniformBuffers
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUniformBuffersDynamic
+// genStructOrUnionField:     uint32_t               maxDescriptorSetStorageBuffers
+// genStructOrUnionField:     uint32_t               maxDescriptorSetStorageBuffersDynamic
+// genStructOrUnionField:     uint32_t               maxDescriptorSetSampledImages
+// genStructOrUnionField:     uint32_t               maxDescriptorSetStorageImages
+// genStructOrUnionField:     uint32_t               maxDescriptorSetInputAttachments
+// genStructOrUnionField:     uint32_t               maxVertexInputAttributes
+// genStructOrUnionField:     uint32_t               maxVertexInputBindings
+// genStructOrUnionField:     uint32_t               maxVertexInputAttributeOffset
+// genStructOrUnionField:     uint32_t               maxVertexInputBindingStride
+// genStructOrUnionField:     uint32_t               maxVertexOutputComponents
+// genStructOrUnionField:     uint32_t               maxTessellationGenerationLevel
+// genStructOrUnionField:     uint32_t               maxTessellationPatchSize
+// genStructOrUnionField:     uint32_t               maxTessellationControlPerVertexInputComponents
+// genStructOrUnionField:     uint32_t               maxTessellationControlPerVertexOutputComponents
+// genStructOrUnionField:     uint32_t               maxTessellationControlPerPatchOutputComponents
+// genStructOrUnionField:     uint32_t               maxTessellationControlTotalOutputComponents
+// genStructOrUnionField:     uint32_t               maxTessellationEvaluationInputComponents
+// genStructOrUnionField:     uint32_t               maxTessellationEvaluationOutputComponents
+// genStructOrUnionField:     uint32_t               maxGeometryShaderInvocations
+// genStructOrUnionField:     uint32_t               maxGeometryInputComponents
+// genStructOrUnionField:     uint32_t               maxGeometryOutputComponents
+// genStructOrUnionField:     uint32_t               maxGeometryOutputVertices
+// genStructOrUnionField:     uint32_t               maxGeometryTotalOutputComponents
+// genStructOrUnionField:     uint32_t               maxFragmentInputComponents
+// genStructOrUnionField:     uint32_t               maxFragmentOutputAttachments
+// genStructOrUnionField:     uint32_t               maxFragmentDualSrcAttachments
+// genStructOrUnionField:     uint32_t               maxFragmentCombinedOutputResources
+// genStructOrUnionField:     uint32_t               maxComputeSharedMemorySize
+// genStructOrUnionField:     uint32_t               maxComputeWorkGroupCount[3]
+// genStructOrUnionField:     uint32_t               maxComputeWorkGroupInvocations
+// genStructOrUnionField:     uint32_t               maxComputeWorkGroupSize[3]
+// genStructOrUnionField:     uint32_t               subPixelPrecisionBits
+// genStructOrUnionField:     uint32_t               subTexelPrecisionBits
+// genStructOrUnionField:     uint32_t               mipmapPrecisionBits
+// genStructOrUnionField:     uint32_t               maxDrawIndexedIndexValue
+// genStructOrUnionField:     uint32_t               maxDrawIndirectCount
+// genStructOrUnionField:     float                  maxSamplerLodBias
+// genStructOrUnionField:     float                  maxSamplerAnisotropy
+// genStructOrUnionField:     uint32_t               maxViewports
+// genStructOrUnionField:     uint32_t               maxViewportDimensions[2]
+// genStructOrUnionField:     float                  viewportBoundsRange[2]
+// genStructOrUnionField:     uint32_t               viewportSubPixelBits
+// genStructOrUnionField:     size_t                 minMemoryMapAlignment
+// genStructOrUnionField:     VkDeviceSize           minTexelBufferOffsetAlignment
+// genStructOrUnionField:     VkDeviceSize           minUniformBufferOffsetAlignment
+// genStructOrUnionField:     VkDeviceSize           minStorageBufferOffsetAlignment
+// genStructOrUnionField:     int32_t                minTexelOffset
+// genStructOrUnionField:     uint32_t               maxTexelOffset
+// genStructOrUnionField:     int32_t                minTexelGatherOffset
+// genStructOrUnionField:     uint32_t               maxTexelGatherOffset
+// genStructOrUnionField:     float                  minInterpolationOffset
+// genStructOrUnionField:     float                  maxInterpolationOffset
+// genStructOrUnionField:     uint32_t               subPixelInterpolationOffsetBits
+// genStructOrUnionField:     uint32_t               maxFramebufferWidth
+// genStructOrUnionField:     uint32_t               maxFramebufferHeight
+// genStructOrUnionField:     uint32_t               maxFramebufferLayers
+// genStructOrUnionField:     VkSampleCountFlags     framebufferColorSampleCounts
+// genStructOrUnionField:     VkSampleCountFlags     framebufferDepthSampleCounts
+// genStructOrUnionField:     VkSampleCountFlags     framebufferStencilSampleCounts
+// genStructOrUnionField:     VkSampleCountFlags     framebufferNoAttachmentsSampleCounts
+// genStructOrUnionField:     uint32_t               maxColorAttachments
+// genStructOrUnionField:     VkSampleCountFlags     sampledImageColorSampleCounts
+// genStructOrUnionField:     VkSampleCountFlags     sampledImageIntegerSampleCounts
+// genStructOrUnionField:     VkSampleCountFlags     sampledImageDepthSampleCounts
+// genStructOrUnionField:     VkSampleCountFlags     sampledImageStencilSampleCounts
+// genStructOrUnionField:     VkSampleCountFlags     storageImageSampleCounts
+// genStructOrUnionField:     uint32_t               maxSampleMaskWords
+// genStructOrUnionField:     VkBool32               timestampComputeAndGraphics
+// genStructOrUnionField:     float                  timestampPeriod
+// genStructOrUnionField:     uint32_t               maxClipDistances
+// genStructOrUnionField:     uint32_t               maxCullDistances
+// genStructOrUnionField:     uint32_t               maxCombinedClipAndCullDistances
+// genStructOrUnionField:     uint32_t               discreteQueuePriorities
+// genStructOrUnionField:     float                  pointSizeRange[2]
+// genStructOrUnionField:     float                  lineWidthRange[2]
+// genStructOrUnionField:     float                  pointSizeGranularity
+// genStructOrUnionField:     float                  lineWidthGranularity
+// genStructOrUnionField:     VkBool32               strictLines
+// genStructOrUnionField:     VkBool32               standardSampleLocations
+// genStructOrUnionField:     VkDeviceSize           optimalBufferCopyOffsetAlignment
+// genStructOrUnionField:     VkDeviceSize           optimalBufferCopyRowPitchAlignment
+// genStructOrUnionField:     VkDeviceSize           nonCoherentAtomSize
+// genType for VkPhysicalDeviceSparseProperties
+// genStruct for VkPhysicalDeviceSparseProperties
+// genStructOrUnionField:     VkBool32               residencyStandard2DBlockShape
+// genStructOrUnionField:     VkBool32               residencyStandard2DMultisampleBlockShape
+// genStructOrUnionField:     VkBool32               residencyStandard3DBlockShape
+// genStructOrUnionField:     VkBool32               residencyAlignedMipSize
+// genStructOrUnionField:     VkBool32               residencyNonResidentStrict
+// genEnum for VK_MAX_PHYSICAL_DEVICE_NAME_SIZE
+// genEnum for VK_UUID_SIZE
+// genType for VkPhysicalDeviceProperties
+// genStruct for VkPhysicalDeviceProperties
+// genStructOrUnionField:     uint32_t       apiVersion
+// genStructOrUnionField:     uint32_t       driverVersion
+// genStructOrUnionField:     uint32_t       vendorID
+// genStructOrUnionField:     uint32_t       deviceID
+// genStructOrUnionField:     VkPhysicalDeviceType deviceType
+// genStructOrUnionField:     char           deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE]
+// genStructOrUnionField:     uint8_t        pipelineCacheUUID[VK_UUID_SIZE]
+// genStructOrUnionField:     VkPhysicalDeviceLimits limits
+// genStructOrUnionField:     VkPhysicalDeviceSparseProperties sparseProperties
 void goldfish_frontend_vkGetPhysicalDeviceProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceProperties* pProperties)
 ;
 
+// genGroup for VkQueueFlagBits
+// genType for VkQueueFlags
+// genType for VkQueueFamilyProperties
+// genStruct for VkQueueFamilyProperties
+// genStructOrUnionField:     VkQueueFlags           queueFlags
+// genStructOrUnionField:     uint32_t               queueCount
+// genStructOrUnionField:     uint32_t               timestampValidBits
+// genStructOrUnionField:     VkExtent3D             minImageTransferGranularity
 void goldfish_frontend_vkGetPhysicalDeviceQueueFamilyProperties(
     VkPhysicalDevice physicalDevice,
     uint32_t* pQueueFamilyPropertyCount,
     VkQueueFamilyProperties* pQueueFamilyProperties)
 ;
 
+// genGroup for VkMemoryPropertyFlagBits
+// genType for VkMemoryPropertyFlags
+// genType for VkMemoryType
+// genStruct for VkMemoryType
+// genStructOrUnionField:     VkMemoryPropertyFlags  propertyFlags
+// genStructOrUnionField:     uint32_t               heapIndex
+// genGroup for VkMemoryHeapFlagBits
+// genType for VkMemoryHeapFlags
+// genType for VkMemoryHeap
+// genStruct for VkMemoryHeap
+// genStructOrUnionField:     VkDeviceSize           size
+// genStructOrUnionField:     VkMemoryHeapFlags      flags
+// genEnum for VK_MAX_MEMORY_TYPES
+// genEnum for VK_MAX_MEMORY_HEAPS
+// genType for VkPhysicalDeviceMemoryProperties
+// genStruct for VkPhysicalDeviceMemoryProperties
+// genStructOrUnionField:     uint32_t               memoryTypeCount
+// genStructOrUnionField:     VkMemoryType           memoryTypes[VK_MAX_MEMORY_TYPES]
+// genStructOrUnionField:     uint32_t               memoryHeapCount
+// genStructOrUnionField:     VkMemoryHeap           memoryHeaps[VK_MAX_MEMORY_HEAPS]
 void goldfish_frontend_vkGetPhysicalDeviceMemoryProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties* pMemoryProperties)
 ;
 
+// genType for PFN_vkVoidFunction
 PFN_vkVoidFunction goldfish_frontend_vkGetInstanceProcAddr(
     VkInstance instance,
     const char* pName)
 ;
 
+// genType for VkDevice
 PFN_vkVoidFunction goldfish_frontend_vkGetDeviceProcAddr(
     VkDevice device,
     const char* pName)
 ;
 
+// genType for VkDeviceCreateFlags
+// genGroup for VkDeviceQueueCreateFlagBits
+// genType for VkDeviceQueueCreateFlags
+// genType for VkDeviceQueueCreateInfo
+// genStruct for VkDeviceQueueCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*     pNext
+// genStructOrUnionField:     VkDeviceQueueCreateFlags    flags
+// genStructOrUnionField:     uint32_t        queueFamilyIndex
+// genStructOrUnionField:     uint32_t        queueCount
+// genStructOrUnionField:     const float*    pQueuePriorities
+// genType for VkDeviceCreateInfo
+// genStruct for VkDeviceCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*     pNext
+// genStructOrUnionField:     VkDeviceCreateFlags    flags
+// genStructOrUnionField:     uint32_t        queueCreateInfoCount
+// genStructOrUnionField:     const VkDeviceQueueCreateInfo* pQueueCreateInfos
+// genStructOrUnionField:     uint32_t               enabledLayerCount
+// genStructOrUnionField:     const char* const*      ppEnabledLayerNames
+// genStructOrUnionField:     uint32_t               enabledExtensionCount
+// genStructOrUnionField:     const char* const*      ppEnabledExtensionNames
+// genStructOrUnionField:     const VkPhysicalDeviceFeatures* pEnabledFeatures
 VkResult goldfish_frontend_vkCreateDevice(
     VkPhysicalDevice physicalDevice,
     const VkDeviceCreateInfo* pCreateInfo,
@@ -81,6 +418,11 @@ void goldfish_frontend_vkDestroyDevice(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genEnum for VK_MAX_EXTENSION_NAME_SIZE
+// genType for VkExtensionProperties
+// genStruct for VkExtensionProperties
+// genStructOrUnionField:     char            extensionName[VK_MAX_EXTENSION_NAME_SIZE]
+// genStructOrUnionField:     uint32_t        specVersion
 VkResult goldfish_frontend_vkEnumerateInstanceExtensionProperties(
     const char* pLayerName,
     uint32_t* pPropertyCount,
@@ -94,6 +436,13 @@ VkResult goldfish_frontend_vkEnumerateDeviceExtensionProperties(
     VkExtensionProperties* pProperties)
 ;
 
+// genEnum for VK_MAX_DESCRIPTION_SIZE
+// genType for VkLayerProperties
+// genStruct for VkLayerProperties
+// genStructOrUnionField:     char            layerName[VK_MAX_EXTENSION_NAME_SIZE]
+// genStructOrUnionField:     uint32_t        specVersion
+// genStructOrUnionField:     uint32_t        implementationVersion
+// genStructOrUnionField:     char            description[VK_MAX_DESCRIPTION_SIZE]
 VkResult goldfish_frontend_vkEnumerateInstanceLayerProperties(
     uint32_t* pPropertyCount,
     VkLayerProperties* pProperties)
@@ -105,6 +454,7 @@ VkResult goldfish_frontend_vkEnumerateDeviceLayerProperties(
     VkLayerProperties* pProperties)
 ;
 
+// genType for VkQueue
 void goldfish_frontend_vkGetDeviceQueue(
     VkDevice device,
     uint32_t queueFamilyIndex,
@@ -112,6 +462,23 @@ void goldfish_frontend_vkGetDeviceQueue(
     VkQueue* pQueue)
 ;
 
+// genType for VK_DEFINE_NON_DISPATCHABLE_HANDLE
+// genType for VkSemaphore
+// genGroup for VkPipelineStageFlagBits
+// genType for VkPipelineStageFlags
+// genType for VkCommandBuffer
+// genType for VkSubmitInfo
+// genStruct for VkSubmitInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     uint32_t       waitSemaphoreCount
+// genStructOrUnionField:     const VkSemaphore*     pWaitSemaphores
+// genStructOrUnionField:     const VkPipelineStageFlags*           pWaitDstStageMask
+// genStructOrUnionField:     uint32_t       commandBufferCount
+// genStructOrUnionField:     const VkCommandBuffer*     pCommandBuffers
+// genStructOrUnionField:     uint32_t       signalSemaphoreCount
+// genStructOrUnionField:     const VkSemaphore*     pSignalSemaphores
+// genType for VkFence
 VkResult goldfish_frontend_vkQueueSubmit(
     VkQueue queue,
     uint32_t submitCount,
@@ -127,6 +494,13 @@ VkResult goldfish_frontend_vkDeviceWaitIdle(
     VkDevice device)
 ;
 
+// genType for VkMemoryAllocateInfo
+// genStruct for VkMemoryAllocateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkDeviceSize           allocationSize
+// genStructOrUnionField:     uint32_t               memoryTypeIndex
+// genType for VkDeviceMemory
 VkResult goldfish_frontend_vkAllocateMemory(
     VkDevice device,
     const VkMemoryAllocateInfo* pAllocateInfo,
@@ -140,6 +514,7 @@ void goldfish_frontend_vkFreeMemory(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkMemoryMapFlags
 VkResult goldfish_frontend_vkMapMemory(
     VkDevice device,
     VkDeviceMemory memory,
@@ -154,6 +529,13 @@ void goldfish_frontend_vkUnmapMemory(
     VkDeviceMemory memory)
 ;
 
+// genType for VkMappedMemoryRange
+// genStruct for VkMappedMemoryRange
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkDeviceMemory         memory
+// genStructOrUnionField:     VkDeviceSize           offset
+// genStructOrUnionField:     VkDeviceSize           size
 VkResult goldfish_frontend_vkFlushMappedMemoryRanges(
     VkDevice device,
     uint32_t memoryRangeCount,
@@ -172,6 +554,7 @@ void goldfish_frontend_vkGetDeviceMemoryCommitment(
     VkDeviceSize* pCommittedMemoryInBytes)
 ;
 
+// genType for VkBuffer
 VkResult goldfish_frontend_vkBindBufferMemory(
     VkDevice device,
     VkBuffer buffer,
@@ -179,6 +562,7 @@ VkResult goldfish_frontend_vkBindBufferMemory(
     VkDeviceSize memoryOffset)
 ;
 
+// genType for VkImage
 VkResult goldfish_frontend_vkBindImageMemory(
     VkDevice device,
     VkImage image,
@@ -186,6 +570,11 @@ VkResult goldfish_frontend_vkBindImageMemory(
     VkDeviceSize memoryOffset)
 ;
 
+// genType for VkMemoryRequirements
+// genStruct for VkMemoryRequirements
+// genStructOrUnionField:     VkDeviceSize           size
+// genStructOrUnionField:     VkDeviceSize           alignment
+// genStructOrUnionField:     uint32_t               memoryTypeBits
 void goldfish_frontend_vkGetBufferMemoryRequirements(
     VkDevice device,
     VkBuffer buffer,
@@ -198,6 +587,22 @@ void goldfish_frontend_vkGetImageMemoryRequirements(
     VkMemoryRequirements* pMemoryRequirements)
 ;
 
+// genGroup for VkImageAspectFlagBits
+// genType for VkImageAspectFlags
+// genGroup for VkSparseImageFormatFlagBits
+// genType for VkSparseImageFormatFlags
+// genType for VkSparseImageFormatProperties
+// genStruct for VkSparseImageFormatProperties
+// genStructOrUnionField:     VkImageAspectFlags     aspectMask
+// genStructOrUnionField:     VkExtent3D             imageGranularity
+// genStructOrUnionField:     VkSparseImageFormatFlags flags
+// genType for VkSparseImageMemoryRequirements
+// genStruct for VkSparseImageMemoryRequirements
+// genStructOrUnionField:     VkSparseImageFormatProperties formatProperties
+// genStructOrUnionField:     uint32_t               imageMipTailFirstLod
+// genStructOrUnionField:     VkDeviceSize           imageMipTailSize
+// genStructOrUnionField:     VkDeviceSize           imageMipTailOffset
+// genStructOrUnionField:     VkDeviceSize           imageMipTailStride
 void goldfish_frontend_vkGetImageSparseMemoryRequirements(
     VkDevice device,
     VkImage image,
@@ -216,6 +621,62 @@ void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties(
     VkSparseImageFormatProperties* pProperties)
 ;
 
+// genGroup for VkSparseMemoryBindFlagBits
+// genType for VkSparseMemoryBindFlags
+// genType for VkSparseMemoryBind
+// genStruct for VkSparseMemoryBind
+// genStructOrUnionField:     VkDeviceSize           resourceOffset
+// genStructOrUnionField:     VkDeviceSize           size
+// genStructOrUnionField:     VkDeviceMemory         memory
+// genStructOrUnionField:     VkDeviceSize           memoryOffset
+// genStructOrUnionField:     VkSparseMemoryBindFlagsflags
+// genType for VkSparseBufferMemoryBindInfo
+// genStruct for VkSparseBufferMemoryBindInfo
+// genStructOrUnionField:     VkBuffer buffer
+// genStructOrUnionField:     uint32_t               bindCount
+// genStructOrUnionField:     const VkSparseMemoryBind* pBinds
+// genType for VkSparseImageOpaqueMemoryBindInfo
+// genStruct for VkSparseImageOpaqueMemoryBindInfo
+// genStructOrUnionField:     VkImage image
+// genStructOrUnionField:     uint32_t               bindCount
+// genStructOrUnionField:     const VkSparseMemoryBind* pBinds
+// genType for VkImageSubresource
+// genStruct for VkImageSubresource
+// genStructOrUnionField:     VkImageAspectFlags     aspectMask
+// genStructOrUnionField:     uint32_t               mipLevel
+// genStructOrUnionField:     uint32_t               arrayLayer
+// genType for VkOffset3D
+// genStruct for VkOffset3D
+// genStructOrUnionField:     int32_t        x
+// genStructOrUnionField:     int32_t        y
+// genStructOrUnionField:     int32_t        z
+// genType for VkSparseImageMemoryBind
+// genStruct for VkSparseImageMemoryBind
+// genStructOrUnionField:     VkImageSubresource     subresource
+// genStructOrUnionField:     VkOffset3D             offset
+// genStructOrUnionField:     VkExtent3D             extent
+// genStructOrUnionField:     VkDeviceMemory         memory
+// genStructOrUnionField:     VkDeviceSize           memoryOffset
+// genStructOrUnionField:     VkSparseMemoryBindFlagsflags
+// genType for VkSparseImageMemoryBindInfo
+// genStruct for VkSparseImageMemoryBindInfo
+// genStructOrUnionField:     VkImage image
+// genStructOrUnionField:     uint32_t               bindCount
+// genStructOrUnionField:     const VkSparseImageMemoryBind* pBinds
+// genType for VkBindSparseInfo
+// genStruct for VkBindSparseInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     uint32_t               waitSemaphoreCount
+// genStructOrUnionField:     const VkSemaphore*     pWaitSemaphores
+// genStructOrUnionField:     uint32_t               bufferBindCount
+// genStructOrUnionField:     const VkSparseBufferMemoryBindInfo* pBufferBinds
+// genStructOrUnionField:     uint32_t               imageOpaqueBindCount
+// genStructOrUnionField:     const VkSparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds
+// genStructOrUnionField:     uint32_t               imageBindCount
+// genStructOrUnionField:     const VkSparseImageMemoryBindInfo* pImageBinds
+// genStructOrUnionField:     uint32_t               signalSemaphoreCount
+// genStructOrUnionField:     const VkSemaphore*     pSignalSemaphores
 VkResult goldfish_frontend_vkQueueBindSparse(
     VkQueue queue,
     uint32_t bindInfoCount,
@@ -223,6 +684,13 @@ VkResult goldfish_frontend_vkQueueBindSparse(
     VkFence fence)
 ;
 
+// genGroup for VkFenceCreateFlagBits
+// genType for VkFenceCreateFlags
+// genType for VkFenceCreateInfo
+// genStruct for VkFenceCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkFenceCreateFlags     flags
 VkResult goldfish_frontend_vkCreateFence(
     VkDevice device,
     const VkFenceCreateInfo* pCreateInfo,
@@ -255,6 +723,12 @@ VkResult goldfish_frontend_vkWaitForFences(
     uint64_t timeout)
 ;
 
+// genType for VkSemaphoreCreateFlags
+// genType for VkSemaphoreCreateInfo
+// genStruct for VkSemaphoreCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkSemaphoreCreateFlags flags
 VkResult goldfish_frontend_vkCreateSemaphore(
     VkDevice device,
     const VkSemaphoreCreateInfo* pCreateInfo,
@@ -268,6 +742,13 @@ void goldfish_frontend_vkDestroySemaphore(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkEventCreateFlags
+// genType for VkEventCreateInfo
+// genStruct for VkEventCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkEventCreateFlags     flags
+// genType for VkEvent
 VkResult goldfish_frontend_vkCreateEvent(
     VkDevice device,
     const VkEventCreateInfo* pCreateInfo,
@@ -296,6 +777,19 @@ VkResult goldfish_frontend_vkResetEvent(
     VkEvent event)
 ;
 
+// genType for VkQueryPoolCreateFlags
+// genGroup for VkQueryType
+// genGroup for VkQueryPipelineStatisticFlagBits
+// genType for VkQueryPipelineStatisticFlags
+// genType for VkQueryPoolCreateInfo
+// genStruct for VkQueryPoolCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkQueryPoolCreateFlags flags
+// genStructOrUnionField:     VkQueryType            queryType
+// genStructOrUnionField:     uint32_t               queryCount
+// genStructOrUnionField:     VkQueryPipelineStatisticFlags pipelineStatistics
+// genType for VkQueryPool
 VkResult goldfish_frontend_vkCreateQueryPool(
     VkDevice device,
     const VkQueryPoolCreateInfo* pCreateInfo,
@@ -309,6 +803,8 @@ void goldfish_frontend_vkDestroyQueryPool(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genGroup for VkQueryResultFlagBits
+// genType for VkQueryResultFlags
 VkResult goldfish_frontend_vkGetQueryPoolResults(
     VkDevice device,
     VkQueryPool queryPool,
@@ -320,6 +816,21 @@ VkResult goldfish_frontend_vkGetQueryPoolResults(
     VkQueryResultFlags flags)
 ;
 
+// genGroup for VkBufferCreateFlagBits
+// genType for VkBufferCreateFlags
+// genGroup for VkBufferUsageFlagBits
+// genType for VkBufferUsageFlags
+// genGroup for VkSharingMode
+// genType for VkBufferCreateInfo
+// genStruct for VkBufferCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkBufferCreateFlags    flags
+// genStructOrUnionField:     VkDeviceSize           size
+// genStructOrUnionField:     VkBufferUsageFlags     usage
+// genStructOrUnionField:     VkSharingMode          sharingMode
+// genStructOrUnionField:     uint32_t               queueFamilyIndexCount
+// genStructOrUnionField:     const uint32_t*        pQueueFamilyIndices
 VkResult goldfish_frontend_vkCreateBuffer(
     VkDevice device,
     const VkBufferCreateInfo* pCreateInfo,
@@ -333,6 +844,17 @@ void goldfish_frontend_vkDestroyBuffer(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkBufferViewCreateFlags
+// genType for VkBufferViewCreateInfo
+// genStruct for VkBufferViewCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkBufferViewCreateFlagsflags
+// genStructOrUnionField:     VkBuffer               buffer
+// genStructOrUnionField:     VkFormat               format
+// genStructOrUnionField:     VkDeviceSize           offset
+// genStructOrUnionField:     VkDeviceSize           range
+// genType for VkBufferView
 VkResult goldfish_frontend_vkCreateBufferView(
     VkDevice device,
     const VkBufferViewCreateInfo* pCreateInfo,
@@ -346,6 +868,24 @@ void goldfish_frontend_vkDestroyBufferView(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genGroup for VkImageLayout
+// genType for VkImageCreateInfo
+// genStruct for VkImageCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkImageCreateFlags     flags
+// genStructOrUnionField:     VkImageType            imageType
+// genStructOrUnionField:     VkFormat               format
+// genStructOrUnionField:     VkExtent3D             extent
+// genStructOrUnionField:     uint32_t               mipLevels
+// genStructOrUnionField:     uint32_t               arrayLayers
+// genStructOrUnionField:     VkSampleCountFlagBits  samples
+// genStructOrUnionField:     VkImageTiling          tiling
+// genStructOrUnionField:     VkImageUsageFlags      usage
+// genStructOrUnionField:     VkSharingMode          sharingMode
+// genStructOrUnionField:     uint32_t               queueFamilyIndexCount
+// genStructOrUnionField:     const uint32_t*        pQueueFamilyIndices
+// genStructOrUnionField:     VkImageLayout          initialLayout
 VkResult goldfish_frontend_vkCreateImage(
     VkDevice device,
     const VkImageCreateInfo* pCreateInfo,
@@ -359,6 +899,13 @@ void goldfish_frontend_vkDestroyImage(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkSubresourceLayout
+// genStruct for VkSubresourceLayout
+// genStructOrUnionField:     VkDeviceSize           offset
+// genStructOrUnionField:     VkDeviceSize           size
+// genStructOrUnionField:     VkDeviceSize           rowPitch
+// genStructOrUnionField:     VkDeviceSize           arrayPitch
+// genStructOrUnionField:     VkDeviceSize           depthPitch
 void goldfish_frontend_vkGetImageSubresourceLayout(
     VkDevice device,
     VkImage image,
@@ -366,6 +913,33 @@ void goldfish_frontend_vkGetImageSubresourceLayout(
     VkSubresourceLayout* pLayout)
 ;
 
+// genType for VkImageViewCreateFlags
+// genGroup for VkImageViewType
+// genGroup for VkComponentSwizzle
+// genType for VkComponentMapping
+// genStruct for VkComponentMapping
+// genStructOrUnionField:     VkComponentSwizzle r
+// genStructOrUnionField:     VkComponentSwizzle g
+// genStructOrUnionField:     VkComponentSwizzle b
+// genStructOrUnionField:     VkComponentSwizzle a
+// genType for VkImageSubresourceRange
+// genStruct for VkImageSubresourceRange
+// genStructOrUnionField:     VkImageAspectFlags     aspectMask
+// genStructOrUnionField:     uint32_t               baseMipLevel
+// genStructOrUnionField:     uint32_t               levelCount
+// genStructOrUnionField:     uint32_t               baseArrayLayer
+// genStructOrUnionField:     uint32_t               layerCount
+// genType for VkImageViewCreateInfo
+// genStruct for VkImageViewCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkImageViewCreateFlags flags
+// genStructOrUnionField:     VkImage                image
+// genStructOrUnionField:     VkImageViewType        viewType
+// genStructOrUnionField:     VkFormat               format
+// genStructOrUnionField:     VkComponentMapping     components
+// genStructOrUnionField:     VkImageSubresourceRange subresourceRange
+// genType for VkImageView
 VkResult goldfish_frontend_vkCreateImageView(
     VkDevice device,
     const VkImageViewCreateInfo* pCreateInfo,
@@ -379,6 +953,15 @@ void goldfish_frontend_vkDestroyImageView(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkShaderModuleCreateFlags
+// genType for VkShaderModuleCreateInfo
+// genStruct for VkShaderModuleCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkShaderModuleCreateFlags flags
+// genStructOrUnionField:     size_t                 codeSize
+// genStructOrUnionField:     const uint32_t*            pCode
+// genType for VkShaderModule
 VkResult goldfish_frontend_vkCreateShaderModule(
     VkDevice device,
     const VkShaderModuleCreateInfo* pCreateInfo,
@@ -392,6 +975,15 @@ void goldfish_frontend_vkDestroyShaderModule(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkPipelineCacheCreateFlags
+// genType for VkPipelineCacheCreateInfo
+// genStruct for VkPipelineCacheCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineCacheCreateFlags    flags
+// genStructOrUnionField:     size_t                 initialDataSize
+// genStructOrUnionField:     const void*            pInitialData
+// genType for VkPipelineCache
 VkResult goldfish_frontend_vkCreatePipelineCache(
     VkDevice device,
     const VkPipelineCacheCreateInfo* pCreateInfo,
@@ -419,6 +1011,216 @@ VkResult goldfish_frontend_vkMergePipelineCaches(
     const VkPipelineCache* pSrcCaches)
 ;
 
+// genGroup for VkPipelineCreateFlagBits
+// genType for VkPipelineCreateFlags
+// genType for VkPipelineShaderStageCreateFlags
+// genGroup for VkShaderStageFlagBits
+// genType for VkSpecializationMapEntry
+// genStruct for VkSpecializationMapEntry
+// genStructOrUnionField:     uint32_t                     constantID
+// genStructOrUnionField:     uint32_t                     offset
+// genStructOrUnionField:     size_t size
+// genType for VkSpecializationInfo
+// genStruct for VkSpecializationInfo
+// genStructOrUnionField:     uint32_t               mapEntryCount
+// genStructOrUnionField:     const VkSpecializationMapEntry* pMapEntries
+// genStructOrUnionField:     size_t                 dataSize
+// genStructOrUnionField:     const void*            pData
+// genType for VkPipelineShaderStageCreateInfo
+// genStruct for VkPipelineShaderStageCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineShaderStageCreateFlags    flags
+// genStructOrUnionField:     VkShaderStageFlagBits  stage
+// genStructOrUnionField:     VkShaderModule         module
+// genStructOrUnionField:     const char*            pName
+// genStructOrUnionField:     const VkSpecializationInfo* pSpecializationInfo
+// genType for VkPipelineVertexInputStateCreateFlags
+// genGroup for VkVertexInputRate
+// genType for VkVertexInputBindingDescription
+// genStruct for VkVertexInputBindingDescription
+// genStructOrUnionField:     uint32_t               binding
+// genStructOrUnionField:     uint32_t               stride
+// genStructOrUnionField:     VkVertexInputRate      inputRate
+// genType for VkVertexInputAttributeDescription
+// genStruct for VkVertexInputAttributeDescription
+// genStructOrUnionField:     uint32_t               location
+// genStructOrUnionField:     uint32_t               binding
+// genStructOrUnionField:     VkFormat               format
+// genStructOrUnionField:     uint32_t               offset
+// genType for VkPipelineVertexInputStateCreateInfo
+// genStruct for VkPipelineVertexInputStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineVertexInputStateCreateFlags    flags
+// genStructOrUnionField:     uint32_t               vertexBindingDescriptionCount
+// genStructOrUnionField:     const VkVertexInputBindingDescription* pVertexBindingDescriptions
+// genStructOrUnionField:     uint32_t               vertexAttributeDescriptionCount
+// genStructOrUnionField:     const VkVertexInputAttributeDescription* pVertexAttributeDescriptions
+// genType for VkPipelineInputAssemblyStateCreateFlags
+// genGroup for VkPrimitiveTopology
+// genType for VkPipelineInputAssemblyStateCreateInfo
+// genStruct for VkPipelineInputAssemblyStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineInputAssemblyStateCreateFlags    flags
+// genStructOrUnionField:     VkPrimitiveTopology    topology
+// genStructOrUnionField:     VkBool32               primitiveRestartEnable
+// genType for VkPipelineTessellationStateCreateFlags
+// genType for VkPipelineTessellationStateCreateInfo
+// genStruct for VkPipelineTessellationStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineTessellationStateCreateFlags    flags
+// genStructOrUnionField:     uint32_t               patchControlPoints
+// genType for VkPipelineViewportStateCreateFlags
+// genType for VkViewport
+// genStruct for VkViewport
+// genStructOrUnionField:     float x
+// genStructOrUnionField:     float y
+// genStructOrUnionField:     float width
+// genStructOrUnionField:     float height
+// genStructOrUnionField:     float                       minDepth
+// genStructOrUnionField:     float                       maxDepth
+// genType for VkOffset2D
+// genStruct for VkOffset2D
+// genStructOrUnionField:     int32_t        x
+// genStructOrUnionField:     int32_t        y
+// genType for VkExtent2D
+// genStruct for VkExtent2D
+// genStructOrUnionField:     uint32_t        width
+// genStructOrUnionField:     uint32_t        height
+// genType for VkRect2D
+// genStruct for VkRect2D
+// genStructOrUnionField:     VkOffset2D     offset
+// genStructOrUnionField:     VkExtent2D     extent
+// genType for VkPipelineViewportStateCreateInfo
+// genStruct for VkPipelineViewportStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineViewportStateCreateFlags    flags
+// genStructOrUnionField:     uint32_t               viewportCount
+// genStructOrUnionField:     const VkViewport*      pViewports
+// genStructOrUnionField:     uint32_t               scissorCount
+// genStructOrUnionField:     const VkRect2D*        pScissors
+// genType for VkPipelineRasterizationStateCreateFlags
+// genGroup for VkPolygonMode
+// genGroup for VkCullModeFlagBits
+// genType for VkCullModeFlags
+// genGroup for VkFrontFace
+// genType for VkPipelineRasterizationStateCreateInfo
+// genStruct for VkPipelineRasterizationStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     VkPipelineRasterizationStateCreateFlags    flags
+// genStructOrUnionField:     VkBool32               depthClampEnable
+// genStructOrUnionField:     VkBool32               rasterizerDiscardEnable
+// genStructOrUnionField:     VkPolygonMode          polygonMode
+// genStructOrUnionField:     VkCullModeFlags        cullMode
+// genStructOrUnionField:     VkFrontFace            frontFace
+// genStructOrUnionField:     VkBool32               depthBiasEnable
+// genStructOrUnionField:     float                  depthBiasConstantFactor
+// genStructOrUnionField:     float                  depthBiasClamp
+// genStructOrUnionField:     float                  depthBiasSlopeFactor
+// genStructOrUnionField:     float                  lineWidth
+// genType for VkPipelineMultisampleStateCreateFlags
+// genType for VkSampleMask
+// genType for VkPipelineMultisampleStateCreateInfo
+// genStruct for VkPipelineMultisampleStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineMultisampleStateCreateFlags    flags
+// genStructOrUnionField:     VkSampleCountFlagBits  rasterizationSamples
+// genStructOrUnionField:     VkBool32               sampleShadingEnable
+// genStructOrUnionField:     float                  minSampleShading
+// genStructOrUnionField:     const VkSampleMask*    pSampleMask
+// genStructOrUnionField:     VkBool32               alphaToCoverageEnable
+// genStructOrUnionField:     VkBool32               alphaToOneEnable
+// genType for VkPipelineDepthStencilStateCreateFlags
+// genGroup for VkCompareOp
+// genGroup for VkStencilOp
+// genType for VkStencilOpState
+// genStruct for VkStencilOpState
+// genStructOrUnionField:     VkStencilOp            failOp
+// genStructOrUnionField:     VkStencilOp            passOp
+// genStructOrUnionField:     VkStencilOp            depthFailOp
+// genStructOrUnionField:     VkCompareOp            compareOp
+// genStructOrUnionField:     uint32_t               compareMask
+// genStructOrUnionField:     uint32_t               writeMask
+// genStructOrUnionField:     uint32_t               reference
+// genType for VkPipelineDepthStencilStateCreateInfo
+// genStruct for VkPipelineDepthStencilStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineDepthStencilStateCreateFlags    flags
+// genStructOrUnionField:     VkBool32               depthTestEnable
+// genStructOrUnionField:     VkBool32               depthWriteEnable
+// genStructOrUnionField:     VkCompareOp            depthCompareOp
+// genStructOrUnionField:     VkBool32               depthBoundsTestEnable
+// genStructOrUnionField:     VkBool32               stencilTestEnable
+// genStructOrUnionField:     VkStencilOpState       front
+// genStructOrUnionField:     VkStencilOpState       back
+// genStructOrUnionField:     float                  minDepthBounds
+// genStructOrUnionField:     float                  maxDepthBounds
+// genType for VkPipelineColorBlendStateCreateFlags
+// genGroup for VkLogicOp
+// genGroup for VkBlendFactor
+// genGroup for VkBlendOp
+// genGroup for VkColorComponentFlagBits
+// genType for VkColorComponentFlags
+// genType for VkPipelineColorBlendAttachmentState
+// genStruct for VkPipelineColorBlendAttachmentState
+// genStructOrUnionField:     VkBool32               blendEnable
+// genStructOrUnionField:     VkBlendFactor          srcColorBlendFactor
+// genStructOrUnionField:     VkBlendFactor          dstColorBlendFactor
+// genStructOrUnionField:     VkBlendOp              colorBlendOp
+// genStructOrUnionField:     VkBlendFactor          srcAlphaBlendFactor
+// genStructOrUnionField:     VkBlendFactor          dstAlphaBlendFactor
+// genStructOrUnionField:     VkBlendOp              alphaBlendOp
+// genStructOrUnionField:     VkColorComponentFlags  colorWriteMask
+// genType for VkPipelineColorBlendStateCreateInfo
+// genStruct for VkPipelineColorBlendStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineColorBlendStateCreateFlags    flags
+// genStructOrUnionField:     VkBool32               logicOpEnable
+// genStructOrUnionField:     VkLogicOp              logicOp
+// genStructOrUnionField:     uint32_t               attachmentCount
+// genStructOrUnionField:     const VkPipelineColorBlendAttachmentState* pAttachments
+// genStructOrUnionField:     float                  blendConstants[4]
+// genType for VkPipelineDynamicStateCreateFlags
+// genGroup for VkDynamicState
+// genType for VkPipelineDynamicStateCreateInfo
+// genStruct for VkPipelineDynamicStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineDynamicStateCreateFlags    flags
+// genStructOrUnionField:     uint32_t               dynamicStateCount
+// genStructOrUnionField:     const VkDynamicState*  pDynamicStates
+// genType for VkPipelineLayout
+// genType for VkRenderPass
+// genType for VkPipeline
+// genType for VkGraphicsPipelineCreateInfo
+// genStruct for VkGraphicsPipelineCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineCreateFlags  flags
+// genStructOrUnionField:     uint32_t               stageCount
+// genStructOrUnionField:     const VkPipelineShaderStageCreateInfo* pStages
+// genStructOrUnionField:     const VkPipelineVertexInputStateCreateInfo* pVertexInputState
+// genStructOrUnionField:     const VkPipelineInputAssemblyStateCreateInfo* pInputAssemblyState
+// genStructOrUnionField:     const VkPipelineTessellationStateCreateInfo* pTessellationState
+// genStructOrUnionField:     const VkPipelineViewportStateCreateInfo* pViewportState
+// genStructOrUnionField:     const VkPipelineRasterizationStateCreateInfo* pRasterizationState
+// genStructOrUnionField:     const VkPipelineMultisampleStateCreateInfo* pMultisampleState
+// genStructOrUnionField:     const VkPipelineDepthStencilStateCreateInfo* pDepthStencilState
+// genStructOrUnionField:     const VkPipelineColorBlendStateCreateInfo* pColorBlendState
+// genStructOrUnionField:     const VkPipelineDynamicStateCreateInfo* pDynamicState
+// genStructOrUnionField:     VkPipelineLayout       layout
+// genStructOrUnionField:     VkRenderPass           renderPass
+// genStructOrUnionField:     uint32_t               subpass
+// genStructOrUnionField:     VkPipeline      basePipelineHandle
+// genStructOrUnionField:     int32_t                basePipelineIndex
 VkResult goldfish_frontend_vkCreateGraphicsPipelines(
     VkDevice device,
     VkPipelineCache pipelineCache,
@@ -428,6 +1230,15 @@ VkResult goldfish_frontend_vkCreateGraphicsPipelines(
     VkPipeline* pPipelines)
 ;
 
+// genType for VkComputePipelineCreateInfo
+// genStruct for VkComputePipelineCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineCreateFlags  flags
+// genStructOrUnionField:     VkPipelineShaderStageCreateInfo stage
+// genStructOrUnionField:     VkPipelineLayout       layout
+// genStructOrUnionField:     VkPipeline      basePipelineHandle
+// genStructOrUnionField:     int32_t                basePipelineIndex
 VkResult goldfish_frontend_vkCreateComputePipelines(
     VkDevice device,
     VkPipelineCache pipelineCache,
@@ -443,6 +1254,23 @@ void goldfish_frontend_vkDestroyPipeline(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkPipelineLayoutCreateFlags
+// genType for VkDescriptorSetLayout
+// genType for VkShaderStageFlags
+// genType for VkPushConstantRange
+// genStruct for VkPushConstantRange
+// genStructOrUnionField:     VkShaderStageFlags     stageFlags
+// genStructOrUnionField:     uint32_t               offset
+// genStructOrUnionField:     uint32_t               size
+// genType for VkPipelineLayoutCreateInfo
+// genStruct for VkPipelineLayoutCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineLayoutCreateFlags    flags
+// genStructOrUnionField:     uint32_t               setLayoutCount
+// genStructOrUnionField:     const VkDescriptorSetLayout* pSetLayouts
+// genStructOrUnionField:     uint32_t               pushConstantRangeCount
+// genStructOrUnionField:     const VkPushConstantRange* pPushConstantRanges
 VkResult goldfish_frontend_vkCreatePipelineLayout(
     VkDevice device,
     const VkPipelineLayoutCreateInfo* pCreateInfo,
@@ -456,6 +1284,32 @@ void goldfish_frontend_vkDestroyPipelineLayout(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkSamplerCreateFlags
+// genGroup for VkFilter
+// genGroup for VkSamplerMipmapMode
+// genGroup for VkSamplerAddressMode
+// genGroup for VkBorderColor
+// genType for VkSamplerCreateInfo
+// genStruct for VkSamplerCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkSamplerCreateFlags   flags
+// genStructOrUnionField:     VkFilter               magFilter
+// genStructOrUnionField:     VkFilter               minFilter
+// genStructOrUnionField:     VkSamplerMipmapMode    mipmapMode
+// genStructOrUnionField:     VkSamplerAddressMode   addressModeU
+// genStructOrUnionField:     VkSamplerAddressMode   addressModeV
+// genStructOrUnionField:     VkSamplerAddressMode   addressModeW
+// genStructOrUnionField:     float                  mipLodBias
+// genStructOrUnionField:     VkBool32               anisotropyEnable
+// genStructOrUnionField:     float                  maxAnisotropy
+// genStructOrUnionField:     VkBool32               compareEnable
+// genStructOrUnionField:     VkCompareOp            compareOp
+// genStructOrUnionField:     float                  minLod
+// genStructOrUnionField:     float                  maxLod
+// genStructOrUnionField:     VkBorderColor          borderColor
+// genStructOrUnionField:     VkBool32               unnormalizedCoordinates
+// genType for VkSampler
 VkResult goldfish_frontend_vkCreateSampler(
     VkDevice device,
     const VkSamplerCreateInfo* pCreateInfo,
@@ -469,6 +1323,23 @@ void goldfish_frontend_vkDestroySampler(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genGroup for VkDescriptorSetLayoutCreateFlagBits
+// genType for VkDescriptorSetLayoutCreateFlags
+// genGroup for VkDescriptorType
+// genType for VkDescriptorSetLayoutBinding
+// genStruct for VkDescriptorSetLayoutBinding
+// genStructOrUnionField:     uint32_t               binding
+// genStructOrUnionField:     VkDescriptorType       descriptorType
+// genStructOrUnionField:     uint32_t descriptorCount
+// genStructOrUnionField:     VkShaderStageFlags     stageFlags
+// genStructOrUnionField:     const VkSampler*       pImmutableSamplers
+// genType for VkDescriptorSetLayoutCreateInfo
+// genStruct for VkDescriptorSetLayoutCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkDescriptorSetLayoutCreateFlags    flags
+// genStructOrUnionField:     uint32_t               bindingCount
+// genStructOrUnionField:     const VkDescriptorSetLayoutBinding* pBindings
 VkResult goldfish_frontend_vkCreateDescriptorSetLayout(
     VkDevice device,
     const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
@@ -482,6 +1353,21 @@ void goldfish_frontend_vkDestroyDescriptorSetLayout(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genGroup for VkDescriptorPoolCreateFlagBits
+// genType for VkDescriptorPoolCreateFlags
+// genType for VkDescriptorPoolSize
+// genStruct for VkDescriptorPoolSize
+// genStructOrUnionField:     VkDescriptorType       type
+// genStructOrUnionField:     uint32_t               descriptorCount
+// genType for VkDescriptorPoolCreateInfo
+// genStruct for VkDescriptorPoolCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkDescriptorPoolCreateFlags  flags
+// genStructOrUnionField:     uint32_t               maxSets
+// genStructOrUnionField:     uint32_t               poolSizeCount
+// genStructOrUnionField:     const VkDescriptorPoolSize* pPoolSizes
+// genType for VkDescriptorPool
 VkResult goldfish_frontend_vkCreateDescriptorPool(
     VkDevice device,
     const VkDescriptorPoolCreateInfo* pCreateInfo,
@@ -495,12 +1381,21 @@ void goldfish_frontend_vkDestroyDescriptorPool(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkDescriptorPoolResetFlags
 VkResult goldfish_frontend_vkResetDescriptorPool(
     VkDevice device,
     VkDescriptorPool descriptorPool,
     VkDescriptorPoolResetFlags flags)
 ;
 
+// genType for VkDescriptorSetAllocateInfo
+// genStruct for VkDescriptorSetAllocateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkDescriptorPool       descriptorPool
+// genStructOrUnionField:     uint32_t               descriptorSetCount
+// genStructOrUnionField:     const VkDescriptorSetLayout* pSetLayouts
+// genType for VkDescriptorSet
 VkResult goldfish_frontend_vkAllocateDescriptorSets(
     VkDevice device,
     const VkDescriptorSetAllocateInfo* pAllocateInfo,
@@ -514,6 +1409,39 @@ VkResult goldfish_frontend_vkFreeDescriptorSets(
     const VkDescriptorSet* pDescriptorSets)
 ;
 
+// genType for VkDescriptorImageInfo
+// genStruct for VkDescriptorImageInfo
+// genStructOrUnionField:     VkSampler       sampler
+// genStructOrUnionField:     VkImageView     imageView
+// genStructOrUnionField:     VkImageLayout   imageLayout
+// genType for VkDescriptorBufferInfo
+// genStruct for VkDescriptorBufferInfo
+// genStructOrUnionField:     VkBuffer               buffer
+// genStructOrUnionField:     VkDeviceSize           offset
+// genStructOrUnionField:     VkDeviceSize           range
+// genType for VkWriteDescriptorSet
+// genStruct for VkWriteDescriptorSet
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkDescriptorSet        dstSet
+// genStructOrUnionField:     uint32_t               dstBinding
+// genStructOrUnionField:     uint32_t               dstArrayElement
+// genStructOrUnionField:     uint32_t               descriptorCount
+// genStructOrUnionField:     VkDescriptorType       descriptorType
+// genStructOrUnionField:     const VkDescriptorImageInfo* pImageInfo
+// genStructOrUnionField:     const VkDescriptorBufferInfo* pBufferInfo
+// genStructOrUnionField:     const VkBufferView*    pTexelBufferView
+// genType for VkCopyDescriptorSet
+// genStruct for VkCopyDescriptorSet
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkDescriptorSet        srcSet
+// genStructOrUnionField:     uint32_t               srcBinding
+// genStructOrUnionField:     uint32_t               srcArrayElement
+// genStructOrUnionField:     VkDescriptorSet        dstSet
+// genStructOrUnionField:     uint32_t               dstBinding
+// genStructOrUnionField:     uint32_t               dstArrayElement
+// genStructOrUnionField:     uint32_t               descriptorCount
 void goldfish_frontend_vkUpdateDescriptorSets(
     VkDevice device,
     uint32_t descriptorWriteCount,
@@ -522,6 +1450,19 @@ void goldfish_frontend_vkUpdateDescriptorSets(
     const VkCopyDescriptorSet* pDescriptorCopies)
 ;
 
+// genType for VkFramebufferCreateFlags
+// genType for VkFramebufferCreateInfo
+// genStruct for VkFramebufferCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkFramebufferCreateFlags    flags
+// genStructOrUnionField:     VkRenderPass           renderPass
+// genStructOrUnionField:     uint32_t               attachmentCount
+// genStructOrUnionField:     const VkImageView*     pAttachments
+// genStructOrUnionField:     uint32_t               width
+// genStructOrUnionField:     uint32_t               height
+// genStructOrUnionField:     uint32_t               layers
+// genType for VkFramebuffer
 VkResult goldfish_frontend_vkCreateFramebuffer(
     VkDevice device,
     const VkFramebufferCreateInfo* pCreateInfo,
@@ -535,6 +1476,65 @@ void goldfish_frontend_vkDestroyFramebuffer(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkRenderPassCreateFlags
+// genGroup for VkAttachmentDescriptionFlagBits
+// genType for VkAttachmentDescriptionFlags
+// genGroup for VkAttachmentLoadOp
+// genGroup for VkAttachmentStoreOp
+// genType for VkAttachmentDescription
+// genStruct for VkAttachmentDescription
+// genStructOrUnionField:     VkAttachmentDescriptionFlags flags
+// genStructOrUnionField:     VkFormat               format
+// genStructOrUnionField:     VkSampleCountFlagBits  samples
+// genStructOrUnionField:     VkAttachmentLoadOp     loadOp
+// genStructOrUnionField:     VkAttachmentStoreOp    storeOp
+// genStructOrUnionField:     VkAttachmentLoadOp     stencilLoadOp
+// genStructOrUnionField:     VkAttachmentStoreOp    stencilStoreOp
+// genStructOrUnionField:     VkImageLayout          initialLayout
+// genStructOrUnionField:     VkImageLayout          finalLayout
+// genGroup for VkSubpassDescriptionFlagBits
+// genType for VkSubpassDescriptionFlags
+// genGroup for VkPipelineBindPoint
+// genType for VkAttachmentReference
+// genStruct for VkAttachmentReference
+// genStructOrUnionField:     uint32_t               attachment
+// genStructOrUnionField:     VkImageLayout          layout
+// genType for VkSubpassDescription
+// genStruct for VkSubpassDescription
+// genStructOrUnionField:     VkSubpassDescriptionFlags flags
+// genStructOrUnionField:     VkPipelineBindPoint    pipelineBindPoint
+// genStructOrUnionField:     uint32_t               inputAttachmentCount
+// genStructOrUnionField:     const VkAttachmentReference* pInputAttachments
+// genStructOrUnionField:     uint32_t               colorAttachmentCount
+// genStructOrUnionField:     const VkAttachmentReference* pColorAttachments
+// genStructOrUnionField:     const VkAttachmentReference* pResolveAttachments
+// genStructOrUnionField:     const VkAttachmentReference* pDepthStencilAttachment
+// genStructOrUnionField:     uint32_t               preserveAttachmentCount
+// genStructOrUnionField:     const uint32_t* pPreserveAttachments
+// genGroup for VkAccessFlagBits
+// genType for VkAccessFlags
+// genGroup for VkDependencyFlagBits
+// genType for VkDependencyFlags
+// genType for VkSubpassDependency
+// genStruct for VkSubpassDependency
+// genStructOrUnionField:     uint32_t               srcSubpass
+// genStructOrUnionField:     uint32_t               dstSubpass
+// genStructOrUnionField:     VkPipelineStageFlags   srcStageMask
+// genStructOrUnionField:     VkPipelineStageFlags   dstStageMask
+// genStructOrUnionField:     VkAccessFlags          srcAccessMask
+// genStructOrUnionField:     VkAccessFlags          dstAccessMask
+// genStructOrUnionField:     VkDependencyFlags      dependencyFlags
+// genType for VkRenderPassCreateInfo
+// genStruct for VkRenderPassCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkRenderPassCreateFlags    flags
+// genStructOrUnionField:     uint32_t   attachmentCount
+// genStructOrUnionField:     const VkAttachmentDescription* pAttachments
+// genStructOrUnionField:     uint32_t               subpassCount
+// genStructOrUnionField:     const VkSubpassDescription* pSubpasses
+// genStructOrUnionField:     uint32_t       dependencyCount
+// genStructOrUnionField:     const VkSubpassDependency* pDependencies
 VkResult goldfish_frontend_vkCreateRenderPass(
     VkDevice device,
     const VkRenderPassCreateInfo* pCreateInfo,
@@ -554,6 +1554,15 @@ void goldfish_frontend_vkGetRenderAreaGranularity(
     VkExtent2D* pGranularity)
 ;
 
+// genGroup for VkCommandPoolCreateFlagBits
+// genType for VkCommandPoolCreateFlags
+// genType for VkCommandPoolCreateInfo
+// genStruct for VkCommandPoolCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkCommandPoolCreateFlags   flags
+// genStructOrUnionField:     uint32_t               queueFamilyIndex
+// genType for VkCommandPool
 VkResult goldfish_frontend_vkCreateCommandPool(
     VkDevice device,
     const VkCommandPoolCreateInfo* pCreateInfo,
@@ -567,12 +1576,22 @@ void goldfish_frontend_vkDestroyCommandPool(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genGroup for VkCommandPoolResetFlagBits
+// genType for VkCommandPoolResetFlags
 VkResult goldfish_frontend_vkResetCommandPool(
     VkDevice device,
     VkCommandPool commandPool,
     VkCommandPoolResetFlags flags)
 ;
 
+// genGroup for VkCommandBufferLevel
+// genType for VkCommandBufferAllocateInfo
+// genStruct for VkCommandBufferAllocateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkCommandPool          commandPool
+// genStructOrUnionField:     VkCommandBufferLevel   level
+// genStructOrUnionField:     uint32_t               commandBufferCount
 VkResult goldfish_frontend_vkAllocateCommandBuffers(
     VkDevice device,
     const VkCommandBufferAllocateInfo* pAllocateInfo,
@@ -586,6 +1605,26 @@ void goldfish_frontend_vkFreeCommandBuffers(
     const VkCommandBuffer* pCommandBuffers)
 ;
 
+// genGroup for VkCommandBufferUsageFlagBits
+// genType for VkCommandBufferUsageFlags
+// genGroup for VkQueryControlFlagBits
+// genType for VkQueryControlFlags
+// genType for VkCommandBufferInheritanceInfo
+// genStruct for VkCommandBufferInheritanceInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkRenderPass    renderPass
+// genStructOrUnionField:     uint32_t               subpass
+// genStructOrUnionField:     VkFramebuffer   framebuffer
+// genStructOrUnionField:     VkBool32               occlusionQueryEnable
+// genStructOrUnionField:     VkQueryControlFlags    queryFlags
+// genStructOrUnionField:     VkQueryPipelineStatisticFlags pipelineStatistics
+// genType for VkCommandBufferBeginInfo
+// genStruct for VkCommandBufferBeginInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkCommandBufferUsageFlags  flags
+// genStructOrUnionField:     const VkCommandBufferInheritanceInfo*       pInheritanceInfo
 VkResult goldfish_frontend_vkBeginCommandBuffer(
     VkCommandBuffer commandBuffer,
     const VkCommandBufferBeginInfo* pBeginInfo)
@@ -595,6 +1634,8 @@ VkResult goldfish_frontend_vkEndCommandBuffer(
     VkCommandBuffer commandBuffer)
 ;
 
+// genGroup for VkCommandBufferResetFlagBits
+// genType for VkCommandBufferResetFlags
 VkResult goldfish_frontend_vkResetCommandBuffer(
     VkCommandBuffer commandBuffer,
     VkCommandBufferResetFlags flags)
@@ -643,6 +1684,8 @@ void goldfish_frontend_vkCmdSetDepthBounds(
     float maxDepthBounds)
 ;
 
+// genGroup for VkStencilFaceFlagBits
+// genType for VkStencilFaceFlags
 void goldfish_frontend_vkCmdSetStencilCompareMask(
     VkCommandBuffer commandBuffer,
     VkStencilFaceFlags faceMask,
@@ -672,6 +1715,7 @@ void goldfish_frontend_vkCmdBindDescriptorSets(
     const uint32_t* pDynamicOffsets)
 ;
 
+// genGroup for VkIndexType
 void goldfish_frontend_vkCmdBindIndexBuffer(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -733,6 +1777,11 @@ void goldfish_frontend_vkCmdDispatchIndirect(
     VkDeviceSize offset)
 ;
 
+// genType for VkBufferCopy
+// genStruct for VkBufferCopy
+// genStructOrUnionField:     VkDeviceSize                       srcOffset
+// genStructOrUnionField:     VkDeviceSize                       dstOffset
+// genStructOrUnionField:     VkDeviceSize size
 void goldfish_frontend_vkCmdCopyBuffer(
     VkCommandBuffer commandBuffer,
     VkBuffer srcBuffer,
@@ -741,6 +1790,19 @@ void goldfish_frontend_vkCmdCopyBuffer(
     const VkBufferCopy* pRegions)
 ;
 
+// genType for VkImageSubresourceLayers
+// genStruct for VkImageSubresourceLayers
+// genStructOrUnionField:     VkImageAspectFlags     aspectMask
+// genStructOrUnionField:     uint32_t               mipLevel
+// genStructOrUnionField:     uint32_t               baseArrayLayer
+// genStructOrUnionField:     uint32_t               layerCount
+// genType for VkImageCopy
+// genStruct for VkImageCopy
+// genStructOrUnionField:     VkImageSubresourceLayers srcSubresource
+// genStructOrUnionField:     VkOffset3D             srcOffset
+// genStructOrUnionField:     VkImageSubresourceLayers dstSubresource
+// genStructOrUnionField:     VkOffset3D             dstOffset
+// genStructOrUnionField:     VkExtent3D             extent
 void goldfish_frontend_vkCmdCopyImage(
     VkCommandBuffer commandBuffer,
     VkImage srcImage,
@@ -751,6 +1813,12 @@ void goldfish_frontend_vkCmdCopyImage(
     const VkImageCopy* pRegions)
 ;
 
+// genType for VkImageBlit
+// genStruct for VkImageBlit
+// genStructOrUnionField:     VkImageSubresourceLayers srcSubresource
+// genStructOrUnionField:     VkOffset3D             srcOffsets[2]
+// genStructOrUnionField:     VkImageSubresourceLayers dstSubresource
+// genStructOrUnionField:     VkOffset3D             dstOffsets[2]
 void goldfish_frontend_vkCmdBlitImage(
     VkCommandBuffer commandBuffer,
     VkImage srcImage,
@@ -762,6 +1830,14 @@ void goldfish_frontend_vkCmdBlitImage(
     VkFilter filter)
 ;
 
+// genType for VkBufferImageCopy
+// genStruct for VkBufferImageCopy
+// genStructOrUnionField:     VkDeviceSize           bufferOffset
+// genStructOrUnionField:     uint32_t               bufferRowLength
+// genStructOrUnionField:     uint32_t               bufferImageHeight
+// genStructOrUnionField:     VkImageSubresourceLayers imageSubresource
+// genStructOrUnionField:     VkOffset3D             imageOffset
+// genStructOrUnionField:     VkExtent3D             imageExtent
 void goldfish_frontend_vkCmdCopyBufferToImage(
     VkCommandBuffer commandBuffer,
     VkBuffer srcBuffer,
@@ -796,6 +1872,11 @@ void goldfish_frontend_vkCmdFillBuffer(
     uint32_t data)
 ;
 
+// genType for VkClearColorValue
+// genStruct for VkClearColorValue
+// genStructOrUnionField:     float                  float32[4]
+// genStructOrUnionField:     int32_t                int32[4]
+// genStructOrUnionField:     uint32_t               uint32[4]
 void goldfish_frontend_vkCmdClearColorImage(
     VkCommandBuffer commandBuffer,
     VkImage image,
@@ -805,6 +1886,10 @@ void goldfish_frontend_vkCmdClearColorImage(
     const VkImageSubresourceRange* pRanges)
 ;
 
+// genType for VkClearDepthStencilValue
+// genStruct for VkClearDepthStencilValue
+// genStructOrUnionField:     float                  depth
+// genStructOrUnionField:     uint32_t               stencil
 void goldfish_frontend_vkCmdClearDepthStencilImage(
     VkCommandBuffer commandBuffer,
     VkImage image,
@@ -814,6 +1899,20 @@ void goldfish_frontend_vkCmdClearDepthStencilImage(
     const VkImageSubresourceRange* pRanges)
 ;
 
+// genType for VkClearValue
+// genStruct for VkClearValue
+// genStructOrUnionField:     VkClearColorValue      color
+// genStructOrUnionField:     VkClearDepthStencilValue depthStencil
+// genType for VkClearAttachment
+// genStruct for VkClearAttachment
+// genStructOrUnionField:     VkImageAspectFlags     aspectMask
+// genStructOrUnionField:     uint32_t               colorAttachment
+// genStructOrUnionField:     VkClearValue           clearValue
+// genType for VkClearRect
+// genStruct for VkClearRect
+// genStructOrUnionField:     VkRect2D       rect
+// genStructOrUnionField:     uint32_t       baseArrayLayer
+// genStructOrUnionField:     uint32_t       layerCount
 void goldfish_frontend_vkCmdClearAttachments(
     VkCommandBuffer commandBuffer,
     uint32_t attachmentCount,
@@ -822,6 +1921,13 @@ void goldfish_frontend_vkCmdClearAttachments(
     const VkClearRect* pRects)
 ;
 
+// genType for VkImageResolve
+// genStruct for VkImageResolve
+// genStructOrUnionField:     VkImageSubresourceLayers srcSubresource
+// genStructOrUnionField:     VkOffset3D             srcOffset
+// genStructOrUnionField:     VkImageSubresourceLayers dstSubresource
+// genStructOrUnionField:     VkOffset3D             dstOffset
+// genStructOrUnionField:     VkExtent3D             extent
 void goldfish_frontend_vkCmdResolveImage(
     VkCommandBuffer commandBuffer,
     VkImage srcImage,
@@ -844,6 +1950,35 @@ void goldfish_frontend_vkCmdResetEvent(
     VkPipelineStageFlags stageMask)
 ;
 
+// genType for VkMemoryBarrier
+// genStruct for VkMemoryBarrier
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkAccessFlags          srcAccessMask
+// genStructOrUnionField:     VkAccessFlags          dstAccessMask
+// genType for VkBufferMemoryBarrier
+// genStruct for VkBufferMemoryBarrier
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkAccessFlags          srcAccessMask
+// genStructOrUnionField:     VkAccessFlags          dstAccessMask
+// genStructOrUnionField:     uint32_t               srcQueueFamilyIndex
+// genStructOrUnionField:     uint32_t               dstQueueFamilyIndex
+// genStructOrUnionField:     VkBuffer               buffer
+// genStructOrUnionField:     VkDeviceSize           offset
+// genStructOrUnionField:     VkDeviceSize           size
+// genType for VkImageMemoryBarrier
+// genStruct for VkImageMemoryBarrier
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkAccessFlags          srcAccessMask
+// genStructOrUnionField:     VkAccessFlags          dstAccessMask
+// genStructOrUnionField:     VkImageLayout          oldLayout
+// genStructOrUnionField:     VkImageLayout          newLayout
+// genStructOrUnionField:     uint32_t               srcQueueFamilyIndex
+// genStructOrUnionField:     uint32_t               dstQueueFamilyIndex
+// genStructOrUnionField:     VkImage                image
+// genStructOrUnionField:     VkImageSubresourceRange subresourceRange
 void goldfish_frontend_vkCmdWaitEvents(
     VkCommandBuffer commandBuffer,
     uint32_t eventCount,
@@ -918,6 +2053,16 @@ void goldfish_frontend_vkCmdPushConstants(
     const void* pValues)
 ;
 
+// genType for VkRenderPassBeginInfo
+// genStruct for VkRenderPassBeginInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkRenderPass           renderPass
+// genStructOrUnionField:     VkFramebuffer          framebuffer
+// genStructOrUnionField:     VkRect2D               renderArea
+// genStructOrUnionField:     uint32_t               clearValueCount
+// genStructOrUnionField:     const VkClearValue*    pClearValues
+// genGroup for VkSubpassContents
 void goldfish_frontend_vkCmdBeginRenderPass(
     VkCommandBuffer commandBuffer,
     const VkRenderPassBeginInfo* pRenderPassBegin,
@@ -939,14 +2084,67 @@ void goldfish_frontend_vkCmdExecuteCommands(
     const VkCommandBuffer* pCommandBuffers)
 ;
 
+// genType for VkDispatchIndirectCommand
+// genStruct for VkDispatchIndirectCommand
+// genStructOrUnionField:     uint32_t x
+// genStructOrUnionField:     uint32_t y
+// genStructOrUnionField:     uint32_t z
+// genType for VkDrawIndexedIndirectCommand
+// genStruct for VkDrawIndexedIndirectCommand
+// genStructOrUnionField:     uint32_t                       indexCount
+// genStructOrUnionField:     uint32_t                       instanceCount
+// genStructOrUnionField:     uint32_t                       firstIndex
+// genStructOrUnionField:     int32_t                        vertexOffset
+// genStructOrUnionField:     uint32_t firstInstance
+// genType for VkDrawIndirectCommand
+// genStruct for VkDrawIndirectCommand
+// genStructOrUnionField:     uint32_t                       vertexCount
+// genStructOrUnionField:     uint32_t                       instanceCount
+// genStructOrUnionField:     uint32_t                       firstVertex
+// genStructOrUnionField:     uint32_t firstInstance
+// genGroup for VkObjectType
+// genType for VkBaseOutStructure
+// genStruct for VkBaseOutStructure
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     struct VkBaseOutStructure* pNext
+// genType for VkBaseInStructure
+// genStruct for VkBaseInStructure
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const struct VkBaseInStructure* pNext
+// genGroup for VkVendorId
 #endif
 
 #ifdef VK_VERSION_1_1
 
+// genType for VK_API_VERSION_1_1
 VkResult goldfish_frontend_vkEnumerateInstanceVersion(
     uint32_t* pApiVersion)
 ;
 
+// genGroup for VkSubgroupFeatureFlagBits
+// genType for VkSubgroupFeatureFlags
+// genType for VkPhysicalDeviceSubgroupProperties
+// genStruct for VkPhysicalDeviceSubgroupProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                   pNext
+// genStructOrUnionField:     uint32_t                      subgroupSize
+// genStructOrUnionField:     VkShaderStageFlags            supportedStages
+// genStructOrUnionField:     VkSubgroupFeatureFlags        supportedOperations
+// genStructOrUnionField:     VkBool32 quadOperationsInAllStages
+// genType for VkBindBufferMemoryInfo
+// genStruct for VkBindBufferMemoryInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkBuffer                         buffer
+// genStructOrUnionField:     VkDeviceMemory                   memory
+// genStructOrUnionField:     VkDeviceSize                     memoryOffset
+// genType for VkBindImageMemoryInfo
+// genStruct for VkBindImageMemoryInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkImage                          image
+// genStructOrUnionField:     VkDeviceMemory                   memory
+// genStructOrUnionField:     VkDeviceSize                     memoryOffset
 VkResult goldfish_frontend_vkBindBufferMemory2(
     VkDevice device,
     uint32_t bindInfoCount,
@@ -959,6 +2157,64 @@ VkResult goldfish_frontend_vkBindImageMemory2(
     const VkBindImageMemoryInfo* pBindInfos)
 ;
 
+// genType for VkPhysicalDevice16BitStorageFeatures
+// genStruct for VkPhysicalDevice16BitStorageFeatures
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*      pNext
+// genStructOrUnionField:     VkBool32                         storageBuffer16BitAccess
+// genStructOrUnionField:     VkBool32                         uniformAndStorageBuffer16BitAccess
+// genStructOrUnionField:     VkBool32                         storagePushConstant16
+// genStructOrUnionField:     VkBool32                         storageInputOutput16
+// genType for VkMemoryDedicatedRequirements
+// genStruct for VkMemoryDedicatedRequirements
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkBool32                         prefersDedicatedAllocation
+// genStructOrUnionField:     VkBool32                         requiresDedicatedAllocation
+// genType for VkMemoryDedicatedAllocateInfo
+// genStruct for VkMemoryDedicatedAllocateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkImage          image
+// genStructOrUnionField:     VkBuffer         buffer
+// genGroup for VkPeerMemoryFeatureFlagBits
+// genType for VkPeerMemoryFeatureFlags
+// genGroup for VkMemoryAllocateFlagBits
+// genType for VkMemoryAllocateFlags
+// genType for VkMemoryAllocateFlagsInfo
+// genStruct for VkMemoryAllocateFlagsInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkMemoryAllocateFlags flags
+// genStructOrUnionField:     uint32_t                         deviceMask
+// genType for VkDeviceGroupRenderPassBeginInfo
+// genStruct for VkDeviceGroupRenderPassBeginInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         deviceMask
+// genStructOrUnionField:     uint32_t         deviceRenderAreaCount
+// genStructOrUnionField:     const VkRect2D*  pDeviceRenderAreas
+// genType for VkDeviceGroupCommandBufferBeginInfo
+// genStruct for VkDeviceGroupCommandBufferBeginInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         deviceMask
+// genType for VkDeviceGroupSubmitInfo
+// genStruct for VkDeviceGroupSubmitInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t         waitSemaphoreCount
+// genStructOrUnionField:     const uint32_t*    pWaitSemaphoreDeviceIndices
+// genStructOrUnionField:     uint32_t         commandBufferCount
+// genStructOrUnionField:     const uint32_t*    pCommandBufferDeviceMasks
+// genStructOrUnionField:     uint32_t         signalSemaphoreCount
+// genStructOrUnionField:     const uint32_t*  pSignalSemaphoreDeviceIndices
+// genType for VkDeviceGroupBindSparseInfo
+// genStruct for VkDeviceGroupBindSparseInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         resourceDeviceIndex
+// genStructOrUnionField:     uint32_t                         memoryDeviceIndex
 void goldfish_frontend_vkGetDeviceGroupPeerMemoryFeatures(
     VkDevice device,
     uint32_t heapIndex,
@@ -982,12 +2238,65 @@ void goldfish_frontend_vkCmdDispatchBase(
     uint32_t groupCountZ)
 ;
 
+// genType for VkBindBufferMemoryDeviceGroupInfo
+// genStruct for VkBindBufferMemoryDeviceGroupInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t         deviceIndexCount
+// genStructOrUnionField:     const uint32_t*  pDeviceIndices
+// genType for VkBindImageMemoryDeviceGroupInfo
+// genStruct for VkBindImageMemoryDeviceGroupInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t         deviceIndexCount
+// genStructOrUnionField:     const uint32_t*  pDeviceIndices
+// genStructOrUnionField:     uint32_t         splitInstanceBindRegionCount
+// genStructOrUnionField:     const VkRect2D*  pSplitInstanceBindRegions
+// genEnum for VK_MAX_DEVICE_GROUP_SIZE
+// genType for VkPhysicalDeviceGroupProperties
+// genStruct for VkPhysicalDeviceGroupProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t                         physicalDeviceCount
+// genStructOrUnionField:     VkPhysicalDevice                 physicalDevices[VK_MAX_DEVICE_GROUP_SIZE]
+// genStructOrUnionField:     VkBool32                         subsetAllocation
+// genType for VkDeviceGroupDeviceCreateInfo
+// genStruct for VkDeviceGroupDeviceCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         physicalDeviceCount
+// genStructOrUnionField:     const VkPhysicalDevice*  pPhysicalDevices
 VkResult goldfish_frontend_vkEnumeratePhysicalDeviceGroups(
     VkInstance instance,
     uint32_t* pPhysicalDeviceGroupCount,
     VkPhysicalDeviceGroupProperties* pPhysicalDeviceGroupProperties)
 ;
 
+// genType for VkBufferMemoryRequirementsInfo2
+// genStruct for VkBufferMemoryRequirementsInfo2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                                          pNext
+// genStructOrUnionField:     VkBuffer                                                             buffer
+// genType for VkImageMemoryRequirementsInfo2
+// genStruct for VkImageMemoryRequirementsInfo2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                                          pNext
+// genStructOrUnionField:     VkImage                                                              image
+// genType for VkImageSparseMemoryRequirementsInfo2
+// genStruct for VkImageSparseMemoryRequirementsInfo2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                                          pNext
+// genStructOrUnionField:     VkImage                                                              image
+// genType for VkMemoryRequirements2
+// genStruct for VkMemoryRequirements2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     VkMemoryRequirements                                                 memoryRequirements
+// genType for VkSparseImageMemoryRequirements2
+// genStruct for VkSparseImageMemoryRequirements2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                                       pNext
+// genStructOrUnionField:     VkSparseImageMemoryRequirements                                      memoryRequirements
 void goldfish_frontend_vkGetImageMemoryRequirements2(
     VkDevice device,
     const VkImageMemoryRequirementsInfo2* pInfo,
@@ -1007,6 +2316,59 @@ void goldfish_frontend_vkGetImageSparseMemoryRequirements2(
     VkSparseImageMemoryRequirements2* pSparseMemoryRequirements)
 ;
 
+// genType for VkPhysicalDeviceFeatures2
+// genStruct for VkPhysicalDeviceFeatures2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkPhysicalDeviceFeatures         features
+// genType for VkPhysicalDeviceProperties2
+// genStruct for VkPhysicalDeviceProperties2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkPhysicalDeviceProperties       properties
+// genType for VkFormatProperties2
+// genStruct for VkFormatProperties2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkFormatProperties               formatProperties
+// genType for VkImageFormatProperties2
+// genStruct for VkImageFormatProperties2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     VkImageFormatProperties          imageFormatProperties
+// genType for VkPhysicalDeviceImageFormatInfo2
+// genStruct for VkPhysicalDeviceImageFormatInfo2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     VkFormat                         format
+// genStructOrUnionField:     VkImageType                      type
+// genStructOrUnionField:     VkImageTiling                    tiling
+// genStructOrUnionField:     VkImageUsageFlags                usage
+// genStructOrUnionField:     VkImageCreateFlags flags
+// genType for VkQueueFamilyProperties2
+// genStruct for VkQueueFamilyProperties2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkQueueFamilyProperties          queueFamilyProperties
+// genType for VkPhysicalDeviceMemoryProperties2
+// genStruct for VkPhysicalDeviceMemoryProperties2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkPhysicalDeviceMemoryProperties memoryProperties
+// genType for VkSparseImageFormatProperties2
+// genStruct for VkSparseImageFormatProperties2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkSparseImageFormatProperties    properties
+// genType for VkPhysicalDeviceSparseImageFormatInfo2
+// genStruct for VkPhysicalDeviceSparseImageFormatInfo2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkFormat                         format
+// genStructOrUnionField:     VkImageType                      type
+// genStructOrUnionField:     VkSampleCountFlagBits            samples
+// genStructOrUnionField:     VkImageUsageFlags                usage
+// genStructOrUnionField:     VkImageTiling                    tiling
 void goldfish_frontend_vkGetPhysicalDeviceFeatures2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceFeatures2* pFeatures)
@@ -1047,18 +2409,139 @@ void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties2(
     VkSparseImageFormatProperties2* pProperties)
 ;
 
+// genType for VkCommandPoolTrimFlags
 void goldfish_frontend_vkTrimCommandPool(
     VkDevice device,
     VkCommandPool commandPool,
     VkCommandPoolTrimFlags flags)
 ;
 
+// genGroup for VkPointClippingBehavior
+// genType for VkPhysicalDevicePointClippingProperties
+// genStruct for VkPhysicalDevicePointClippingProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkPointClippingBehavior      pointClippingBehavior
+// genType for VkInputAttachmentAspectReference
+// genStruct for VkInputAttachmentAspectReference
+// genStructOrUnionField:     uint32_t                        subpass
+// genStructOrUnionField:     uint32_t                        inputAttachmentIndex
+// genStructOrUnionField:     VkImageAspectFlags              aspectMask
+// genType for VkRenderPassInputAttachmentAspectCreateInfo
+// genStruct for VkRenderPassInputAttachmentAspectCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                     pNext
+// genStructOrUnionField:     uint32_t                        aspectReferenceCount
+// genStructOrUnionField:     const VkInputAttachmentAspectReference* pAspectReferences
+// genType for VkImageViewUsageCreateInfo
+// genStruct for VkImageViewUsageCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     VkImageUsageFlags usage
+// genGroup for VkTessellationDomainOrigin
+// genType for VkPipelineTessellationDomainOriginStateCreateInfo
+// genStruct for VkPipelineTessellationDomainOriginStateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkTessellationDomainOrigin    domainOrigin
+// genType for VkRenderPassMultiviewCreateInfo
+// genStruct for VkRenderPassMultiviewCreateInfo
+// genStructOrUnionField:     VkStructureType        sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     uint32_t               subpassCount
+// genStructOrUnionField:     const uint32_t*     pViewMasks
+// genStructOrUnionField:     uint32_t               dependencyCount
+// genStructOrUnionField:     const int32_t*   pViewOffsets
+// genStructOrUnionField:     uint32_t               correlationMaskCount
+// genStructOrUnionField:     const uint32_t* pCorrelationMasks
+// genType for VkPhysicalDeviceMultiviewFeatures
+// genStruct for VkPhysicalDeviceMultiviewFeatures
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkBool32                         multiview
+// genStructOrUnionField:     VkBool32                         multiviewGeometryShader
+// genStructOrUnionField:     VkBool32                         multiviewTessellationShader
+// genType for VkPhysicalDeviceMultiviewProperties
+// genStruct for VkPhysicalDeviceMultiviewProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t                         maxMultiviewViewCount
+// genStructOrUnionField:     uint32_t                         maxMultiviewInstanceIndex
+// genType for VkPhysicalDeviceVariablePointerFeatures
+// genStruct for VkPhysicalDeviceVariablePointerFeatures
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkBool32                         variablePointersStorageBuffer
+// genStructOrUnionField:     VkBool32                         variablePointers
+// genType for VkPhysicalDeviceProtectedMemoryFeatures
+// genStruct for VkPhysicalDeviceProtectedMemoryFeatures
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                               pNext
+// genStructOrUnionField:     VkBool32                            protectedMemory
+// genType for VkPhysicalDeviceProtectedMemoryProperties
+// genStruct for VkPhysicalDeviceProtectedMemoryProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                               pNext
+// genStructOrUnionField:     VkBool32                            protectedNoFault
+// genType for VkDeviceQueueInfo2
+// genStruct for VkDeviceQueueInfo2
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                         pNext
+// genStructOrUnionField:     VkDeviceQueueCreateFlags            flags
+// genStructOrUnionField:     uint32_t                            queueFamilyIndex
+// genStructOrUnionField:     uint32_t                            queueIndex
+// genType for VkProtectedSubmitInfo
+// genStruct for VkProtectedSubmitInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                     pNext
+// genStructOrUnionField:     VkBool32                        protectedSubmit
 void goldfish_frontend_vkGetDeviceQueue2(
     VkDevice device,
     const VkDeviceQueueInfo2* pQueueInfo,
     VkQueue* pQueue)
 ;
 
+// genGroup for VkSamplerYcbcrModelConversion
+// genGroup for VkSamplerYcbcrRange
+// genGroup for VkChromaLocation
+// genType for VkSamplerYcbcrConversionCreateInfo
+// genStruct for VkSamplerYcbcrConversionCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkFormat                         format
+// genStructOrUnionField:     VkSamplerYcbcrModelConversion ycbcrModel
+// genStructOrUnionField:     VkSamplerYcbcrRange           ycbcrRange
+// genStructOrUnionField:     VkComponentMapping               components
+// genStructOrUnionField:     VkChromaLocation              xChromaOffset
+// genStructOrUnionField:     VkChromaLocation              yChromaOffset
+// genStructOrUnionField:     VkFilter                         chromaFilter
+// genStructOrUnionField:     VkBool32                         forceExplicitReconstruction
+// genType for VkSamplerYcbcrConversion
+// genType for VkSamplerYcbcrConversionInfo
+// genStruct for VkSamplerYcbcrConversionInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSamplerYcbcrConversion      conversion
+// genType for VkBindImagePlaneMemoryInfo
+// genStruct for VkBindImagePlaneMemoryInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkImageAspectFlagBits            planeAspect
+// genType for VkImagePlaneMemoryRequirementsInfo
+// genStruct for VkImagePlaneMemoryRequirementsInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkImageAspectFlagBits            planeAspect
+// genType for VkPhysicalDeviceSamplerYcbcrConversionFeatures
+// genStruct for VkPhysicalDeviceSamplerYcbcrConversionFeatures
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*      pNext
+// genStructOrUnionField:     VkBool32                         samplerYcbcrConversion
+// genType for VkSamplerYcbcrConversionImageFormatProperties
+// genStruct for VkSamplerYcbcrConversionImageFormatProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*      pNext
+// genStructOrUnionField:     uint32_t                         combinedImageSamplerDescriptorCount
 VkResult goldfish_frontend_vkCreateSamplerYcbcrConversion(
     VkDevice device,
     const VkSamplerYcbcrConversionCreateInfo* pCreateInfo,
@@ -1072,6 +2555,29 @@ void goldfish_frontend_vkDestroySamplerYcbcrConversion(
     const VkAllocationCallbacks* pAllocator)
 ;
 
+// genType for VkDescriptorUpdateTemplate
+// genType for VkDescriptorUpdateTemplateCreateFlags
+// genGroup for VkDescriptorUpdateTemplateType
+// genType for VkDescriptorUpdateTemplateEntry
+// genStruct for VkDescriptorUpdateTemplateEntry
+// genStructOrUnionField:     uint32_t                         dstBinding
+// genStructOrUnionField:     uint32_t                         dstArrayElement
+// genStructOrUnionField:     uint32_t                         descriptorCount
+// genStructOrUnionField:     VkDescriptorType                 descriptorType
+// genStructOrUnionField:     size_t                           offset
+// genStructOrUnionField:     size_t                           stride
+// genType for VkDescriptorUpdateTemplateCreateInfo
+// genStruct for VkDescriptorUpdateTemplateCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                                   pNext
+// genStructOrUnionField:     VkDescriptorUpdateTemplateCreateFlags    flags
+// genStructOrUnionField:     uint32_t                 descriptorUpdateEntryCount
+// genStructOrUnionField:     const VkDescriptorUpdateTemplateEntry* pDescriptorUpdateEntries
+// genStructOrUnionField:     VkDescriptorUpdateTemplateType templateType
+// genStructOrUnionField:     VkDescriptorSetLayout descriptorSetLayout
+// genStructOrUnionField:     VkPipelineBindPoint pipelineBindPoint
+// genStructOrUnionField:     VkPipelineLayoutpipelineLayout
+// genStructOrUnionField:     uint32_t set
 VkResult goldfish_frontend_vkCreateDescriptorUpdateTemplate(
     VkDevice device,
     const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
@@ -1092,34 +2598,156 @@ void goldfish_frontend_vkUpdateDescriptorSetWithTemplate(
     const void* pData)
 ;
 
+// genGroup for VkExternalMemoryHandleTypeFlagBits
+// genType for VkExternalMemoryHandleTypeFlags
+// genGroup for VkExternalMemoryFeatureFlagBits
+// genType for VkExternalMemoryFeatureFlags
+// genType for VkExternalMemoryProperties
+// genStruct for VkExternalMemoryProperties
+// genStructOrUnionField:     VkExternalMemoryFeatureFlags  externalMemoryFeatures
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlags exportFromImportedHandleTypes
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlags compatibleHandleTypes
+// genType for VkPhysicalDeviceExternalImageFormatInfo
+// genStruct for VkPhysicalDeviceExternalImageFormatInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagBits handleType
+// genType for VkExternalImageFormatProperties
+// genStruct for VkExternalImageFormatProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkExternalMemoryProperties externalMemoryProperties
+// genType for VkPhysicalDeviceExternalBufferInfo
+// genStruct for VkPhysicalDeviceExternalBufferInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkBufferCreateFlags flags
+// genStructOrUnionField:     VkBufferUsageFlags               usage
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagBits handleType
+// genType for VkExternalBufferProperties
+// genStruct for VkExternalBufferProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkExternalMemoryProperties    externalMemoryProperties
+// genEnum for VK_LUID_SIZE
+// genType for VkPhysicalDeviceIDProperties
+// genStruct for VkPhysicalDeviceIDProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint8_t                          deviceUUID[VK_UUID_SIZE]
+// genStructOrUnionField:     uint8_t                          driverUUID[VK_UUID_SIZE]
+// genStructOrUnionField:     uint8_t                          deviceLUID[VK_LUID_SIZE]
+// genStructOrUnionField:     uint32_t                         deviceNodeMask
+// genStructOrUnionField:     VkBool32                         deviceLUIDValid
 void goldfish_frontend_vkGetPhysicalDeviceExternalBufferProperties(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
     VkExternalBufferProperties* pExternalBufferProperties)
 ;
 
+// genType for VkExternalMemoryImageCreateInfo
+// genStruct for VkExternalMemoryImageCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlags handleTypes
+// genType for VkExternalMemoryBufferCreateInfo
+// genStruct for VkExternalMemoryBufferCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlags handleTypes
+// genType for VkExportMemoryAllocateInfo
+// genStruct for VkExportMemoryAllocateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlags handleTypes
+// genEnum for VK_QUEUE_FAMILY_EXTERNAL
+// genGroup for VkExternalFenceHandleTypeFlagBits
+// genType for VkExternalFenceHandleTypeFlags
+// genGroup for VkExternalFenceFeatureFlagBits
+// genType for VkExternalFenceFeatureFlags
+// genType for VkPhysicalDeviceExternalFenceInfo
+// genStruct for VkPhysicalDeviceExternalFenceInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalFenceHandleTypeFlagBits handleType
+// genType for VkExternalFenceProperties
+// genStruct for VkExternalFenceProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkExternalFenceHandleTypeFlags exportFromImportedHandleTypes
+// genStructOrUnionField:     VkExternalFenceHandleTypeFlags compatibleHandleTypes
+// genStructOrUnionField:     VkExternalFenceFeatureFlags externalFenceFeatures
 void goldfish_frontend_vkGetPhysicalDeviceExternalFenceProperties(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo,
     VkExternalFenceProperties* pExternalFenceProperties)
 ;
 
+// genGroup for VkFenceImportFlagBits
+// genType for VkFenceImportFlags
+// genType for VkExportFenceCreateInfo
+// genStruct for VkExportFenceCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalFenceHandleTypeFlags handleTypes
+// genGroup for VkSemaphoreImportFlagBits
+// genType for VkSemaphoreImportFlags
+// genGroup for VkExternalSemaphoreHandleTypeFlagBits
+// genType for VkExternalSemaphoreHandleTypeFlags
+// genType for VkExportSemaphoreCreateInfo
+// genStruct for VkExportSemaphoreCreateInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalSemaphoreHandleTypeFlags handleTypes
+// genGroup for VkExternalSemaphoreFeatureFlagBits
+// genType for VkExternalSemaphoreFeatureFlags
+// genType for VkPhysicalDeviceExternalSemaphoreInfo
+// genStruct for VkPhysicalDeviceExternalSemaphoreInfo
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalSemaphoreHandleTypeFlagBits handleType
+// genType for VkExternalSemaphoreProperties
+// genStruct for VkExternalSemaphoreProperties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkExternalSemaphoreHandleTypeFlags exportFromImportedHandleTypes
+// genStructOrUnionField:     VkExternalSemaphoreHandleTypeFlags compatibleHandleTypes
+// genStructOrUnionField:     VkExternalSemaphoreFeatureFlags externalSemaphoreFeatures
 void goldfish_frontend_vkGetPhysicalDeviceExternalSemaphoreProperties(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
     VkExternalSemaphoreProperties* pExternalSemaphoreProperties)
 ;
 
+// genType for VkPhysicalDeviceMaintenance3Properties
+// genStruct for VkPhysicalDeviceMaintenance3Properties
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t                         maxPerSetDescriptors
+// genStructOrUnionField:     VkDeviceSize                     maxMemoryAllocationSize
+// genType for VkDescriptorSetLayoutSupport
+// genStruct for VkDescriptorSetLayoutSupport
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*            pNext
+// genStructOrUnionField:     VkBool32         supported
 void goldfish_frontend_vkGetDescriptorSetLayoutSupport(
     VkDevice device,
     const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
     VkDescriptorSetLayoutSupport* pSupport)
 ;
 
+// genType for VkPhysicalDeviceShaderDrawParameterFeatures
+// genStruct for VkPhysicalDeviceShaderDrawParameterFeatures
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkBool32                         shaderDrawParameters
 #endif
 
 #ifdef VK_KHR_surface
 
+// genEnum for VK_KHR_SURFACE_SPEC_VERSION
+// genEnum for VK_KHR_SURFACE_EXTENSION_NAME
+// genType for VkSurfaceKHR
 void goldfish_frontend_vkDestroySurfaceKHR(
     VkInstance instance,
     VkSurfaceKHR surface,
@@ -1133,12 +2761,33 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceSupportKHR(
     VkBool32* pSupported)
 ;
 
+// genGroup for VkSurfaceTransformFlagBitsKHR
+// genType for VkSurfaceTransformFlagsKHR
+// genGroup for VkCompositeAlphaFlagBitsKHR
+// genType for VkCompositeAlphaFlagsKHR
+// genType for VkSurfaceCapabilitiesKHR
+// genStruct for VkSurfaceCapabilitiesKHR
+// genStructOrUnionField:     uint32_t                         minImageCount
+// genStructOrUnionField:     uint32_t                         maxImageCount
+// genStructOrUnionField:     VkExtent2D                       currentExtent
+// genStructOrUnionField:     VkExtent2D                       minImageExtent
+// genStructOrUnionField:     VkExtent2D                       maxImageExtent
+// genStructOrUnionField:     uint32_t                         maxImageArrayLayers
+// genStructOrUnionField:     VkSurfaceTransformFlagsKHR       supportedTransforms
+// genStructOrUnionField:     VkSurfaceTransformFlagBitsKHR    currentTransform
+// genStructOrUnionField:     VkCompositeAlphaFlagsKHR         supportedCompositeAlpha
+// genStructOrUnionField:     VkImageUsageFlags                supportedUsageFlags
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
     VkSurfaceCapabilitiesKHR* pSurfaceCapabilities)
 ;
 
+// genGroup for VkColorSpaceKHR
+// genType for VkSurfaceFormatKHR
+// genStruct for VkSurfaceFormatKHR
+// genStructOrUnionField:     VkFormat                         format
+// genStructOrUnionField:     VkColorSpaceKHR                  colorSpace
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceFormatsKHR(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
@@ -1146,6 +2795,7 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceFormatsKHR(
     VkSurfaceFormatKHR* pSurfaceFormats)
 ;
 
+// genGroup for VkPresentModeKHR
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfacePresentModesKHR(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
@@ -1157,6 +2807,31 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfacePresentModesKHR(
 
 #ifdef VK_KHR_swapchain
 
+// genEnum for VK_KHR_SWAPCHAIN_SPEC_VERSION
+// genEnum for VK_KHR_SWAPCHAIN_EXTENSION_NAME
+// genGroup for VkSwapchainCreateFlagBitsKHR
+// genType for VkSwapchainCreateFlagsKHR
+// genType for VkSwapchainKHR
+// genType for VkSwapchainCreateInfoKHR
+// genStruct for VkSwapchainCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSwapchainCreateFlagsKHR        flags
+// genStructOrUnionField:     VkSurfaceKHR                     surface
+// genStructOrUnionField:     uint32_t                         minImageCount
+// genStructOrUnionField:     VkFormat                         imageFormat
+// genStructOrUnionField:     VkColorSpaceKHR                  imageColorSpace
+// genStructOrUnionField:     VkExtent2D                       imageExtent
+// genStructOrUnionField:     uint32_t                         imageArrayLayers
+// genStructOrUnionField:     VkImageUsageFlags                imageUsage
+// genStructOrUnionField:     VkSharingMode                    imageSharingMode
+// genStructOrUnionField:     uint32_t         queueFamilyIndexCount
+// genStructOrUnionField:     const uint32_t*                  pQueueFamilyIndices
+// genStructOrUnionField:     VkSurfaceTransformFlagBitsKHR    preTransform
+// genStructOrUnionField:     VkCompositeAlphaFlagBitsKHR      compositeAlpha
+// genStructOrUnionField:     VkPresentModeKHR                 presentMode
+// genStructOrUnionField:     VkBool32                         clipped
+// genStructOrUnionField:     VkSwapchainKHR   oldSwapchain
 VkResult goldfish_frontend_vkCreateSwapchainKHR(
     VkDevice device,
     const VkSwapchainCreateInfoKHR* pCreateInfo,
@@ -1186,11 +2861,61 @@ VkResult goldfish_frontend_vkAcquireNextImageKHR(
     uint32_t* pImageIndex)
 ;
 
+// genType for VkPresentInfoKHR
+// genStruct for VkPresentInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*  pNext
+// genStructOrUnionField:     uint32_t         waitSemaphoreCount
+// genStructOrUnionField:     const VkSemaphore* pWaitSemaphores
+// genStructOrUnionField:     uint32_t                         swapchainCount
+// genStructOrUnionField:     const VkSwapchainKHR* pSwapchains
+// genStructOrUnionField:     const uint32_t* pImageIndices
+// genStructOrUnionField:     VkResult* pResults
 VkResult goldfish_frontend_vkQueuePresentKHR(
     VkQueue queue,
     const VkPresentInfoKHR* pPresentInfo)
 ;
 
+// genType for VkImageSwapchainCreateInfoKHR
+// genStruct for VkImageSwapchainCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSwapchainKHR   swapchain
+// genType for VkBindImageMemorySwapchainInfoKHR
+// genStruct for VkBindImageMemorySwapchainInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSwapchainKHR swapchain
+// genStructOrUnionField:     uint32_t                         imageIndex
+// genType for VkAcquireNextImageInfoKHR
+// genStruct for VkAcquireNextImageInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSwapchainKHR swapchain
+// genStructOrUnionField:     uint64_t                         timeout
+// genStructOrUnionField:     VkSemaphore semaphore
+// genStructOrUnionField:     VkFence fence
+// genStructOrUnionField:     uint32_t                         deviceMask
+// genGroup for VkDeviceGroupPresentModeFlagBitsKHR
+// genType for VkDeviceGroupPresentModeFlagsKHR
+// genType for VkDeviceGroupPresentCapabilitiesKHR
+// genStruct for VkDeviceGroupPresentCapabilitiesKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         presentMask[VK_MAX_DEVICE_GROUP_SIZE]
+// genStructOrUnionField:     VkDeviceGroupPresentModeFlagsKHR modes
+// genType for VkDeviceGroupPresentInfoKHR
+// genStruct for VkDeviceGroupPresentInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t         swapchainCount
+// genStructOrUnionField:     const uint32_t* pDeviceMasks
+// genStructOrUnionField:     VkDeviceGroupPresentModeFlagBitsKHR mode
+// genType for VkDeviceGroupSwapchainCreateInfoKHR
+// genStruct for VkDeviceGroupSwapchainCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDeviceGroupPresentModeFlagsKHR                         modes
 VkResult goldfish_frontend_vkGetDeviceGroupPresentCapabilitiesKHR(
     VkDevice device,
     VkDeviceGroupPresentCapabilitiesKHR* pDeviceGroupPresentCapabilities)
@@ -1219,6 +2944,64 @@ VkResult goldfish_frontend_vkAcquireNextImage2KHR(
 
 #ifdef VK_KHR_display
 
+// genGroup for VkDisplayPlaneAlphaFlagBitsKHR
+// genType for VkDisplayPlaneAlphaFlagsKHR
+// genType for VkDisplayKHR
+// genType for VkDisplayPropertiesKHR
+// genStruct for VkDisplayPropertiesKHR
+// genStructOrUnionField:     VkDisplayKHR                     display
+// genStructOrUnionField:     const char*                      displayName
+// genStructOrUnionField:     VkExtent2D                       physicalDimensions
+// genStructOrUnionField:     VkExtent2D                       physicalResolution
+// genStructOrUnionField:     VkSurfaceTransformFlagsKHR       supportedTransforms
+// genStructOrUnionField:     VkBool32                         planeReorderPossible
+// genStructOrUnionField:     VkBool32                         persistentContent
+// genType for VkDisplayModeParametersKHR
+// genStruct for VkDisplayModeParametersKHR
+// genStructOrUnionField:     VkExtent2D                       visibleRegion
+// genStructOrUnionField:     uint32_t   refreshRate
+// genType for VkDisplayModeKHR
+// genType for VkDisplayModePropertiesKHR
+// genStruct for VkDisplayModePropertiesKHR
+// genStructOrUnionField:     VkDisplayModeKHR                 displayMode
+// genStructOrUnionField:     VkDisplayModeParametersKHR       parameters
+// genType for VkDisplayModeCreateFlagsKHR
+// genType for VkDisplayModeCreateInfoKHR
+// genStruct for VkDisplayModeCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDisplayModeCreateFlagsKHR      flags
+// genStructOrUnionField:     VkDisplayModeParametersKHR       parameters
+// genType for VkDisplayPlaneCapabilitiesKHR
+// genStruct for VkDisplayPlaneCapabilitiesKHR
+// genStructOrUnionField:     VkDisplayPlaneAlphaFlagsKHR      supportedAlpha
+// genStructOrUnionField:     VkOffset2D                       minSrcPosition
+// genStructOrUnionField:     VkOffset2D                       maxSrcPosition
+// genStructOrUnionField:     VkExtent2D                       minSrcExtent
+// genStructOrUnionField:     VkExtent2D                       maxSrcExtent
+// genStructOrUnionField:     VkOffset2D                       minDstPosition
+// genStructOrUnionField:     VkOffset2D                       maxDstPosition
+// genStructOrUnionField:     VkExtent2D                       minDstExtent
+// genStructOrUnionField:     VkExtent2D                       maxDstExtent
+// genType for VkDisplayPlanePropertiesKHR
+// genStruct for VkDisplayPlanePropertiesKHR
+// genStructOrUnionField:     VkDisplayKHR                     currentDisplay
+// genStructOrUnionField:     uint32_t                         currentStackIndex
+// genType for VkDisplaySurfaceCreateFlagsKHR
+// genType for VkDisplaySurfaceCreateInfoKHR
+// genStruct for VkDisplaySurfaceCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDisplaySurfaceCreateFlagsKHR   flags
+// genStructOrUnionField:     VkDisplayModeKHR                 displayMode
+// genStructOrUnionField:     uint32_t                         planeIndex
+// genStructOrUnionField:     uint32_t                         planeStackIndex
+// genStructOrUnionField:     VkSurfaceTransformFlagBitsKHR    transform
+// genStructOrUnionField:     float                            globalAlpha
+// genStructOrUnionField:     VkDisplayPlaneAlphaFlagBitsKHR   alphaMode
+// genStructOrUnionField:     VkExtent2D                       imageExtent
+// genEnum for VK_KHR_DISPLAY_SPEC_VERSION
+// genEnum for VK_KHR_DISPLAY_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetPhysicalDeviceDisplayPropertiesKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t* pPropertyCount,
@@ -1271,6 +3054,15 @@ VkResult goldfish_frontend_vkCreateDisplayPlaneSurfaceKHR(
 
 #ifdef VK_KHR_display_swapchain
 
+// genType for VkDisplayPresentInfoKHR
+// genStruct for VkDisplayPresentInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkRect2D                         srcRect
+// genStructOrUnionField:     VkRect2D                         dstRect
+// genStructOrUnionField:     VkBool32                         persistent
+// genEnum for VK_KHR_DISPLAY_SWAPCHAIN_SPEC_VERSION
+// genEnum for VK_KHR_DISPLAY_SWAPCHAIN_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateSharedSwapchainsKHR(
     VkDevice device,
     uint32_t swapchainCount,
@@ -1283,6 +3075,19 @@ VkResult goldfish_frontend_vkCreateSharedSwapchainsKHR(
 
 #ifdef VK_KHR_xlib_surface
 
+// genType for VkXlibSurfaceCreateFlagsKHR
+// genType for X11/Xlib.h
+// genType for Display
+// genType for Window
+// genType for VkXlibSurfaceCreateInfoKHR
+// genStruct for VkXlibSurfaceCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkXlibSurfaceCreateFlagsKHR   flags
+// genStructOrUnionField:     Display*                         dpy
+// genStructOrUnionField:     Window                           window
+// genEnum for VK_KHR_XLIB_SURFACE_SPEC_VERSION
+// genEnum for VK_KHR_XLIB_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateXlibSurfaceKHR(
     VkInstance instance,
     const VkXlibSurfaceCreateInfoKHR* pCreateInfo,
@@ -1290,6 +3095,7 @@ VkResult goldfish_frontend_vkCreateXlibSurfaceKHR(
     VkSurfaceKHR* pSurface)
 ;
 
+// genType for VisualID
 VkBool32 goldfish_frontend_vkGetPhysicalDeviceXlibPresentationSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex,
@@ -1301,6 +3107,19 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceXlibPresentationSupportKHR(
 
 #ifdef VK_KHR_xcb_surface
 
+// genType for VkXcbSurfaceCreateFlagsKHR
+// genType for xcb/xcb.h
+// genType for xcb_connection_t
+// genType for xcb_window_t
+// genType for VkXcbSurfaceCreateInfoKHR
+// genStruct for VkXcbSurfaceCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkXcbSurfaceCreateFlagsKHR   flags
+// genStructOrUnionField:     xcb_connection_t*                connection
+// genStructOrUnionField:     xcb_window_t                     window
+// genEnum for VK_KHR_XCB_SURFACE_SPEC_VERSION
+// genEnum for VK_KHR_XCB_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateXcbSurfaceKHR(
     VkInstance instance,
     const VkXcbSurfaceCreateInfoKHR* pCreateInfo,
@@ -1308,6 +3127,7 @@ VkResult goldfish_frontend_vkCreateXcbSurfaceKHR(
     VkSurfaceKHR* pSurface)
 ;
 
+// genType for xcb_visualid_t
 VkBool32 goldfish_frontend_vkGetPhysicalDeviceXcbPresentationSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex,
@@ -1319,6 +3139,19 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceXcbPresentationSupportKHR(
 
 #ifdef VK_KHR_wayland_surface
 
+// genType for VkWaylandSurfaceCreateFlagsKHR
+// genType for wayland-client.h
+// genType for wl_display
+// genType for wl_surface
+// genType for VkWaylandSurfaceCreateInfoKHR
+// genStruct for VkWaylandSurfaceCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkWaylandSurfaceCreateFlagsKHR   flags
+// genStructOrUnionField:     struct wl_display*               display
+// genStructOrUnionField:     struct wl_surface*               surface
+// genEnum for VK_KHR_WAYLAND_SURFACE_SPEC_VERSION
+// genEnum for VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateWaylandSurfaceKHR(
     VkInstance instance,
     const VkWaylandSurfaceCreateInfoKHR* pCreateInfo,
@@ -1336,6 +3169,19 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceWaylandPresentationSupportKHR(
 
 #ifdef VK_KHR_mir_surface
 
+// genType for VkMirSurfaceCreateFlagsKHR
+// genType for mir_toolkit/client_types.h
+// genType for MirConnection
+// genType for MirSurface
+// genType for VkMirSurfaceCreateInfoKHR
+// genStruct for VkMirSurfaceCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkMirSurfaceCreateFlagsKHR   flags
+// genStructOrUnionField:     MirConnection*                   connection
+// genStructOrUnionField:     MirSurface*                      mirSurface
+// genEnum for VK_KHR_MIR_SURFACE_SPEC_VERSION
+// genEnum for VK_KHR_MIR_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateMirSurfaceKHR(
     VkInstance instance,
     const VkMirSurfaceCreateInfoKHR* pCreateInfo,
@@ -1353,6 +3199,16 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceMirPresentationSupportKHR(
 
 #ifdef VK_KHR_android_surface
 
+// genType for ANativeWindow
+// genType for VkAndroidSurfaceCreateFlagsKHR
+// genType for VkAndroidSurfaceCreateInfoKHR
+// genStruct for VkAndroidSurfaceCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                    pNext
+// genStructOrUnionField:     VkAndroidSurfaceCreateFlagsKHR flags
+// genStructOrUnionField:     struct ANativeWindow*    window
+// genEnum for VK_KHR_ANDROID_SURFACE_SPEC_VERSION
+// genEnum for VK_KHR_ANDROID_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateAndroidSurfaceKHR(
     VkInstance instance,
     const VkAndroidSurfaceCreateInfoKHR* pCreateInfo,
@@ -1364,6 +3220,19 @@ VkResult goldfish_frontend_vkCreateAndroidSurfaceKHR(
 
 #ifdef VK_KHR_win32_surface
 
+// genType for VkWin32SurfaceCreateFlagsKHR
+// genType for windows.h
+// genType for HINSTANCE
+// genType for HWND
+// genType for VkWin32SurfaceCreateInfoKHR
+// genStruct for VkWin32SurfaceCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkWin32SurfaceCreateFlagsKHR   flags
+// genStructOrUnionField:     HINSTANCE                        hinstance
+// genStructOrUnionField:     HWND                             hwnd
+// genEnum for VK_KHR_WIN32_SURFACE_SPEC_VERSION
+// genEnum for VK_KHR_WIN32_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateWin32SurfaceKHR(
     VkInstance instance,
     const VkWin32SurfaceCreateInfoKHR* pCreateInfo,
@@ -1380,14 +3249,44 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceWin32PresentationSupportKHR(
 
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 
+// genEnum for VK_KHR_SAMPLER_MIRROR_CLAMP_TO_EDGE_SPEC_VERSION
+// genEnum for VK_KHR_SAMPLER_MIRROR_CLAMP_TO_EDGE_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_multiview
 
+// genType for VkRenderPassMultiviewCreateInfoKHR
+// genStruct for VkRenderPassMultiviewCreateInfoKHR
+// genType for VkPhysicalDeviceMultiviewFeaturesKHR
+// genStruct for VkPhysicalDeviceMultiviewFeaturesKHR
+// genType for VkPhysicalDeviceMultiviewPropertiesKHR
+// genStruct for VkPhysicalDeviceMultiviewPropertiesKHR
+// genEnum for VK_KHR_MULTIVIEW_SPEC_VERSION
+// genEnum for VK_KHR_MULTIVIEW_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_get_physical_device_properties2
 
+// genType for VkPhysicalDeviceFeatures2KHR
+// genStruct for VkPhysicalDeviceFeatures2KHR
+// genType for VkPhysicalDeviceProperties2KHR
+// genStruct for VkPhysicalDeviceProperties2KHR
+// genType for VkFormatProperties2KHR
+// genStruct for VkFormatProperties2KHR
+// genType for VkImageFormatProperties2KHR
+// genStruct for VkImageFormatProperties2KHR
+// genType for VkPhysicalDeviceImageFormatInfo2KHR
+// genStruct for VkPhysicalDeviceImageFormatInfo2KHR
+// genType for VkQueueFamilyProperties2KHR
+// genStruct for VkQueueFamilyProperties2KHR
+// genType for VkPhysicalDeviceMemoryProperties2KHR
+// genStruct for VkPhysicalDeviceMemoryProperties2KHR
+// genType for VkSparseImageFormatProperties2KHR
+// genStruct for VkSparseImageFormatProperties2KHR
+// genType for VkPhysicalDeviceSparseImageFormatInfo2KHR
+// genStruct for VkPhysicalDeviceSparseImageFormatInfo2KHR
+// genEnum for VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_SPEC_VERSION
+// genEnum for VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
 void goldfish_frontend_vkGetPhysicalDeviceFeatures2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceFeatures2* pFeatures)
@@ -1432,6 +3331,22 @@ void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
 
 #ifdef VK_KHR_device_group
 
+// genType for VkPeerMemoryFeatureFlagsKHR
+// genGroup for VkPeerMemoryFeatureFlagBitsKHR
+// genType for VkMemoryAllocateFlagsKHR
+// genGroup for VkMemoryAllocateFlagBitsKHR
+// genType for VkMemoryAllocateFlagsInfoKHR
+// genStruct for VkMemoryAllocateFlagsInfoKHR
+// genType for VkDeviceGroupRenderPassBeginInfoKHR
+// genStruct for VkDeviceGroupRenderPassBeginInfoKHR
+// genType for VkDeviceGroupCommandBufferBeginInfoKHR
+// genStruct for VkDeviceGroupCommandBufferBeginInfoKHR
+// genType for VkDeviceGroupSubmitInfoKHR
+// genStruct for VkDeviceGroupSubmitInfoKHR
+// genType for VkDeviceGroupBindSparseInfoKHR
+// genStruct for VkDeviceGroupBindSparseInfoKHR
+// genEnum for VK_KHR_DEVICE_GROUP_SPEC_VERSION
+// genEnum for VK_KHR_DEVICE_GROUP_EXTENSION_NAME
 void goldfish_frontend_vkGetDeviceGroupPeerMemoryFeaturesKHR(
     VkDevice device,
     uint32_t heapIndex,
@@ -1455,14 +3370,23 @@ void goldfish_frontend_vkCmdDispatchBaseKHR(
     uint32_t groupCountZ)
 ;
 
+// genType for VkBindBufferMemoryDeviceGroupInfoKHR
+// genStruct for VkBindBufferMemoryDeviceGroupInfoKHR
+// genType for VkBindImageMemoryDeviceGroupInfoKHR
+// genStruct for VkBindImageMemoryDeviceGroupInfoKHR
 #endif
 
 #ifdef VK_KHR_shader_draw_parameters
 
+// genEnum for VK_KHR_SHADER_DRAW_PARAMETERS_SPEC_VERSION
+// genEnum for VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_maintenance1
 
+// genType for VkCommandPoolTrimFlagsKHR
+// genEnum for VK_KHR_MAINTENANCE1_SPEC_VERSION
+// genEnum for VK_KHR_MAINTENANCE1_EXTENSION_NAME
 void goldfish_frontend_vkTrimCommandPoolKHR(
     VkDevice device,
     VkCommandPool commandPool,
@@ -1473,6 +3397,13 @@ void goldfish_frontend_vkTrimCommandPoolKHR(
 
 #ifdef VK_KHR_device_group_creation
 
+// genType for VkPhysicalDeviceGroupPropertiesKHR
+// genStruct for VkPhysicalDeviceGroupPropertiesKHR
+// genType for VkDeviceGroupDeviceCreateInfoKHR
+// genStruct for VkDeviceGroupDeviceCreateInfoKHR
+// genEnum for VK_KHR_DEVICE_GROUP_CREATION_SPEC_VERSION
+// genEnum for VK_KHR_DEVICE_GROUP_CREATION_EXTENSION_NAME
+// genEnum for VK_MAX_DEVICE_GROUP_SIZE_KHR
 VkResult goldfish_frontend_vkEnumeratePhysicalDeviceGroupsKHR(
     VkInstance instance,
     uint32_t* pPhysicalDeviceGroupCount,
@@ -1483,6 +3414,25 @@ VkResult goldfish_frontend_vkEnumeratePhysicalDeviceGroupsKHR(
 
 #ifdef VK_KHR_external_memory_capabilities
 
+// genType for VkExternalMemoryHandleTypeFlagsKHR
+// genGroup for VkExternalMemoryHandleTypeFlagBitsKHR
+// genType for VkExternalMemoryFeatureFlagsKHR
+// genGroup for VkExternalMemoryFeatureFlagBitsKHR
+// genType for VkExternalMemoryPropertiesKHR
+// genStruct for VkExternalMemoryPropertiesKHR
+// genType for VkPhysicalDeviceExternalImageFormatInfoKHR
+// genStruct for VkPhysicalDeviceExternalImageFormatInfoKHR
+// genType for VkExternalImageFormatPropertiesKHR
+// genStruct for VkExternalImageFormatPropertiesKHR
+// genType for VkPhysicalDeviceExternalBufferInfoKHR
+// genStruct for VkPhysicalDeviceExternalBufferInfoKHR
+// genType for VkExternalBufferPropertiesKHR
+// genStruct for VkExternalBufferPropertiesKHR
+// genType for VkPhysicalDeviceIDPropertiesKHR
+// genStruct for VkPhysicalDeviceIDPropertiesKHR
+// genEnum for VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME
+// genEnum for VK_LUID_SIZE_KHR
 void goldfish_frontend_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
@@ -1493,10 +3443,50 @@ void goldfish_frontend_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
 
 #ifdef VK_KHR_external_memory
 
+// genType for VkExternalMemoryImageCreateInfoKHR
+// genStruct for VkExternalMemoryImageCreateInfoKHR
+// genType for VkExternalMemoryBufferCreateInfoKHR
+// genStruct for VkExternalMemoryBufferCreateInfoKHR
+// genType for VkExportMemoryAllocateInfoKHR
+// genStruct for VkExportMemoryAllocateInfoKHR
+// genEnum for VK_KHR_EXTERNAL_MEMORY_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME
+// genEnum for VK_QUEUE_FAMILY_EXTERNAL_KHR
 #endif
 
 #ifdef VK_KHR_external_memory_win32
 
+// genType for HANDLE
+// genType for LPCWSTR
+// genType for VkImportMemoryWin32HandleInfoKHR
+// genStruct for VkImportMemoryWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagBits handleType
+// genStructOrUnionField:     HANDLE           handle
+// genStructOrUnionField:     LPCWSTR          name
+// genType for SECURITY_ATTRIBUTES
+// genType for DWORD
+// genType for VkExportMemoryWin32HandleInfoKHR
+// genStruct for VkExportMemoryWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     const SECURITY_ATTRIBUTES* pAttributes
+// genStructOrUnionField:     DWORD                            dwAccess
+// genStructOrUnionField:     LPCWSTR                          name
+// genType for VkMemoryWin32HandlePropertiesKHR
+// genStruct for VkMemoryWin32HandlePropertiesKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t                         memoryTypeBits
+// genType for VkMemoryGetWin32HandleInfoKHR
+// genStruct for VkMemoryGetWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDeviceMemory                   memory
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagBits handleType
+// genEnum for VK_KHR_EXTERNAL_MEMORY_WIN32_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetMemoryWin32HandleKHR(
     VkDevice device,
     const VkMemoryGetWin32HandleInfoKHR* pGetWin32HandleInfo,
@@ -1514,6 +3504,26 @@ VkResult goldfish_frontend_vkGetMemoryWin32HandlePropertiesKHR(
 
 #ifdef VK_KHR_external_memory_fd
 
+// genType for int
+// genType for VkImportMemoryFdInfoKHR
+// genStruct for VkImportMemoryFdInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagBits handleType
+// genStructOrUnionField:     int                              fd
+// genType for VkMemoryFdPropertiesKHR
+// genStruct for VkMemoryFdPropertiesKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t                         memoryTypeBits
+// genType for VkMemoryGetFdInfoKHR
+// genStruct for VkMemoryGetFdInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDeviceMemory                   memory
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagBits handleType
+// genEnum for VK_KHR_EXTERNAL_MEMORY_FD_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetMemoryFdKHR(
     VkDevice device,
     const VkMemoryGetFdInfoKHR* pGetFdInfo,
@@ -1531,10 +3541,33 @@ VkResult goldfish_frontend_vkGetMemoryFdPropertiesKHR(
 
 #ifdef VK_KHR_win32_keyed_mutex
 
+// genType for VkWin32KeyedMutexAcquireReleaseInfoKHR
+// genStruct for VkWin32KeyedMutexAcquireReleaseInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t         acquireCount
+// genStructOrUnionField:     const VkDeviceMemory* pAcquireSyncs
+// genStructOrUnionField:     const uint64_t* pAcquireKeys
+// genStructOrUnionField:     const uint32_t* pAcquireTimeouts
+// genStructOrUnionField:     uint32_t         releaseCount
+// genStructOrUnionField:     const VkDeviceMemory* pReleaseSyncs
+// genStructOrUnionField:     const uint64_t* pReleaseKeys
+// genEnum for VK_KHR_WIN32_KEYED_MUTEX_SPEC_VERSION
+// genEnum for VK_KHR_WIN32_KEYED_MUTEX_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_external_semaphore_capabilities
 
+// genType for VkExternalSemaphoreHandleTypeFlagsKHR
+// genGroup for VkExternalSemaphoreHandleTypeFlagBitsKHR
+// genType for VkExternalSemaphoreFeatureFlagsKHR
+// genGroup for VkExternalSemaphoreFeatureFlagBitsKHR
+// genType for VkPhysicalDeviceExternalSemaphoreInfoKHR
+// genStruct for VkPhysicalDeviceExternalSemaphoreInfoKHR
+// genType for VkExternalSemaphorePropertiesKHR
+// genStruct for VkExternalSemaphorePropertiesKHR
+// genEnum for VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME
 void goldfish_frontend_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
@@ -1545,10 +3578,48 @@ void goldfish_frontend_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
 
 #ifdef VK_KHR_external_semaphore
 
+// genType for VkSemaphoreImportFlagsKHR
+// genGroup for VkSemaphoreImportFlagBitsKHR
+// genType for VkExportSemaphoreCreateInfoKHR
+// genStruct for VkExportSemaphoreCreateInfoKHR
+// genEnum for VK_KHR_EXTERNAL_SEMAPHORE_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_SEMAPHORE_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_external_semaphore_win32
 
+// genType for VkImportSemaphoreWin32HandleInfoKHR
+// genStruct for VkImportSemaphoreWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSemaphore    semaphore
+// genStructOrUnionField:     VkSemaphoreImportFlags flags
+// genStructOrUnionField:     VkExternalSemaphoreHandleTypeFlagBits handleType
+// genStructOrUnionField:     HANDLE           handle
+// genStructOrUnionField:     LPCWSTR          name
+// genType for VkExportSemaphoreWin32HandleInfoKHR
+// genStruct for VkExportSemaphoreWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     const SECURITY_ATTRIBUTES*       pAttributes
+// genStructOrUnionField:     DWORD                            dwAccess
+// genStructOrUnionField:     LPCWSTR                          name
+// genType for VkD3D12FenceSubmitInfoKHR
+// genStruct for VkD3D12FenceSubmitInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t         waitSemaphoreValuesCount
+// genStructOrUnionField:     const uint64_t* pWaitSemaphoreValues
+// genStructOrUnionField:     uint32_t         signalSemaphoreValuesCount
+// genStructOrUnionField:     const uint64_t* pSignalSemaphoreValues
+// genType for VkSemaphoreGetWin32HandleInfoKHR
+// genStruct for VkSemaphoreGetWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSemaphore                      semaphore
+// genStructOrUnionField:     VkExternalSemaphoreHandleTypeFlagBits handleType
+// genEnum for VK_KHR_EXTERNAL_SEMAPHORE_WIN32_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME
 VkResult goldfish_frontend_vkImportSemaphoreWin32HandleKHR(
     VkDevice device,
     const VkImportSemaphoreWin32HandleInfoKHR* pImportSemaphoreWin32HandleInfo)
@@ -1564,6 +3635,22 @@ VkResult goldfish_frontend_vkGetSemaphoreWin32HandleKHR(
 
 #ifdef VK_KHR_external_semaphore_fd
 
+// genType for VkImportSemaphoreFdInfoKHR
+// genStruct for VkImportSemaphoreFdInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSemaphore    semaphore
+// genStructOrUnionField:     VkSemaphoreImportFlags flags
+// genStructOrUnionField:     VkExternalSemaphoreHandleTypeFlagBits handleType
+// genStructOrUnionField:     int                              fd
+// genType for VkSemaphoreGetFdInfoKHR
+// genStruct for VkSemaphoreGetFdInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSemaphore                      semaphore
+// genStructOrUnionField:     VkExternalSemaphoreHandleTypeFlagBits handleType
+// genEnum for VK_KHR_EXTERNAL_SEMAPHORE_FD_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME
 VkResult goldfish_frontend_vkImportSemaphoreFdKHR(
     VkDevice device,
     const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo)
@@ -1579,6 +3666,13 @@ VkResult goldfish_frontend_vkGetSemaphoreFdKHR(
 
 #ifdef VK_KHR_push_descriptor
 
+// genType for VkPhysicalDevicePushDescriptorPropertiesKHR
+// genStruct for VkPhysicalDevicePushDescriptorPropertiesKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t                         maxPushDescriptors
+// genEnum for VK_KHR_PUSH_DESCRIPTOR_SPEC_VERSION
+// genEnum for VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME
 void goldfish_frontend_vkCmdPushDescriptorSetKHR(
     VkCommandBuffer commandBuffer,
     VkPipelineBindPoint pipelineBindPoint,
@@ -1600,14 +3694,44 @@ void goldfish_frontend_vkCmdPushDescriptorSetWithTemplateKHR(
 
 #ifdef VK_KHR_16bit_storage
 
+// genType for VkPhysicalDevice16BitStorageFeaturesKHR
+// genStruct for VkPhysicalDevice16BitStorageFeaturesKHR
+// genEnum for VK_KHR_16BIT_STORAGE_SPEC_VERSION
+// genEnum for VK_KHR_16BIT_STORAGE_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_incremental_present
 
+// genType for VkRectLayerKHR
+// genStruct for VkRectLayerKHR
+// genStructOrUnionField:     VkOffset2D                       offset
+// genStructOrUnionField:     VkExtent2D extent
+// genStructOrUnionField:     uint32_t                         layer
+// genType for VkPresentRegionKHR
+// genStruct for VkPresentRegionKHR
+// genStructOrUnionField:     uint32_t         rectangleCount
+// genStructOrUnionField:     const VkRectLayerKHR*   pRectangles
+// genType for VkPresentRegionsKHR
+// genStruct for VkPresentRegionsKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         swapchainCount
+// genStructOrUnionField:     const VkPresentRegionKHR*   pRegions
+// genEnum for VK_KHR_INCREMENTAL_PRESENT_SPEC_VERSION
+// genEnum for VK_KHR_INCREMENTAL_PRESENT_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_descriptor_update_template
 
+// genType for VkDescriptorUpdateTemplateKHR
+// genType for VkDescriptorUpdateTemplateCreateFlagsKHR
+// genGroup for VkDescriptorUpdateTemplateTypeKHR
+// genType for VkDescriptorUpdateTemplateEntryKHR
+// genStruct for VkDescriptorUpdateTemplateEntryKHR
+// genType for VkDescriptorUpdateTemplateCreateInfoKHR
+// genStruct for VkDescriptorUpdateTemplateCreateInfoKHR
+// genEnum for VK_KHR_DESCRIPTOR_UPDATE_TEMPLATE_SPEC_VERSION
+// genEnum for VK_KHR_DESCRIPTOR_UPDATE_TEMPLATE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateDescriptorUpdateTemplateKHR(
     VkDevice device,
     const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
@@ -1632,6 +3756,68 @@ void goldfish_frontend_vkUpdateDescriptorSetWithTemplateKHR(
 
 #ifdef VK_KHR_create_renderpass2
 
+// genEnum for VK_KHR_CREATE_RENDERPASS_2_SPEC_VERSION
+// genEnum for VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME
+// genType for VkAttachmentDescription2KHR
+// genStruct for VkAttachmentDescription2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkAttachmentDescriptionFlags flags
+// genStructOrUnionField:     VkFormat                                     format
+// genStructOrUnionField:     VkSampleCountFlagBits                        samples
+// genStructOrUnionField:     VkAttachmentLoadOp                           loadOp
+// genStructOrUnionField:     VkAttachmentStoreOp                          storeOp
+// genStructOrUnionField:     VkAttachmentLoadOp                           stencilLoadOp
+// genStructOrUnionField:     VkAttachmentStoreOp                          stencilStoreOp
+// genStructOrUnionField:     VkImageLayout                                initialLayout
+// genStructOrUnionField:     VkImageLayout                                finalLayout
+// genType for VkAttachmentReference2KHR
+// genStruct for VkAttachmentReference2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     uint32_t                          attachment
+// genStructOrUnionField:     VkImageLayout                     layout
+// genStructOrUnionField:     VkImageAspectFlags aspectMask
+// genType for VkSubpassDescription2KHR
+// genStruct for VkSubpassDescription2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                           pNext
+// genStructOrUnionField:     VkSubpassDescriptionFlags                   flags
+// genStructOrUnionField:     VkPipelineBindPoint                                         pipelineBindPoint
+// genStructOrUnionField:     uint32_t                                                    viewMask
+// genStructOrUnionField:     uint32_t                                    inputAttachmentCount
+// genStructOrUnionField:     const VkAttachmentReference2KHR* pInputAttachments
+// genStructOrUnionField:     uint32_t                                    colorAttachmentCount
+// genStructOrUnionField:     const VkAttachmentReference2KHR* pColorAttachments
+// genStructOrUnionField:     const VkAttachmentReference2KHR* pResolveAttachments
+// genStructOrUnionField:     const VkAttachmentReference2KHR*            pDepthStencilAttachment
+// genStructOrUnionField:     uint32_t                                    preserveAttachmentCount
+// genStructOrUnionField:     const uint32_t*               pPreserveAttachments
+// genType for VkSubpassDependency2KHR
+// genStruct for VkSubpassDependency2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     uint32_t                          srcSubpass
+// genStructOrUnionField:     uint32_t                          dstSubpass
+// genStructOrUnionField:     VkPipelineStageFlags              srcStageMask
+// genStructOrUnionField:     VkPipelineStageFlags              dstStageMask
+// genStructOrUnionField:     VkAccessFlags     srcAccessMask
+// genStructOrUnionField:     VkAccessFlags     dstAccessMask
+// genStructOrUnionField:     VkDependencyFlags dependencyFlags
+// genStructOrUnionField:     int32_t           viewOffset
+// genType for VkRenderPassCreateInfo2KHR
+// genStruct for VkRenderPassCreateInfo2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                              pNext
+// genStructOrUnionField:     VkRenderPassCreateFlags                  flags
+// genStructOrUnionField:     uint32_t                                 attachmentCount
+// genStructOrUnionField:     const VkAttachmentDescription2KHR* pAttachments
+// genStructOrUnionField:     uint32_t                                                 subpassCount
+// genStructOrUnionField:     const VkSubpassDescription2KHR*       pSubpasses
+// genStructOrUnionField:     uint32_t                                 dependencyCount
+// genStructOrUnionField:     const VkSubpassDependency2KHR*     pDependencies
+// genStructOrUnionField:     uint32_t                                 correlatedViewMaskCount
+// genStructOrUnionField:     const uint32_t*            pCorrelatedViewMasks
 VkResult goldfish_frontend_vkCreateRenderPass2KHR(
     VkDevice device,
     const VkRenderPassCreateInfo2KHR* pCreateInfo,
@@ -1639,12 +3825,21 @@ VkResult goldfish_frontend_vkCreateRenderPass2KHR(
     VkRenderPass* pRenderPass)
 ;
 
+// genType for VkSubpassBeginInfoKHR
+// genStruct for VkSubpassBeginInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkSubpassContents      contents
 void goldfish_frontend_vkCmdBeginRenderPass2KHR(
     VkCommandBuffer commandBuffer,
     const VkRenderPassBeginInfo*      pRenderPassBegin,
     const VkSubpassBeginInfoKHR*      pSubpassBeginInfo)
 ;
 
+// genType for VkSubpassEndInfoKHR
+// genStruct for VkSubpassEndInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
 void goldfish_frontend_vkCmdNextSubpass2KHR(
     VkCommandBuffer commandBuffer,
     const VkSubpassBeginInfoKHR*      pSubpassBeginInfo,
@@ -1660,6 +3855,13 @@ void goldfish_frontend_vkCmdEndRenderPass2KHR(
 
 #ifdef VK_KHR_shared_presentable_image
 
+// genType for VkSharedPresentSurfaceCapabilitiesKHR
+// genStruct for VkSharedPresentSurfaceCapabilitiesKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkImageUsageFlags sharedPresentSupportedUsageFlags
+// genEnum for VK_KHR_SHARED_PRESENTABLE_IMAGE_SPEC_VERSION
+// genEnum for VK_KHR_SHARED_PRESENTABLE_IMAGE_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetSwapchainStatusKHR(
     VkDevice device,
     VkSwapchainKHR swapchain)
@@ -1669,6 +3871,16 @@ VkResult goldfish_frontend_vkGetSwapchainStatusKHR(
 
 #ifdef VK_KHR_external_fence_capabilities
 
+// genType for VkExternalFenceHandleTypeFlagsKHR
+// genGroup for VkExternalFenceHandleTypeFlagBitsKHR
+// genType for VkExternalFenceFeatureFlagsKHR
+// genGroup for VkExternalFenceFeatureFlagBitsKHR
+// genType for VkPhysicalDeviceExternalFenceInfoKHR
+// genStruct for VkPhysicalDeviceExternalFenceInfoKHR
+// genType for VkExternalFencePropertiesKHR
+// genStruct for VkExternalFencePropertiesKHR
+// genEnum for VK_KHR_EXTERNAL_FENCE_CAPABILITIES_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME
 void goldfish_frontend_vkGetPhysicalDeviceExternalFencePropertiesKHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo,
@@ -1679,10 +3891,40 @@ void goldfish_frontend_vkGetPhysicalDeviceExternalFencePropertiesKHR(
 
 #ifdef VK_KHR_external_fence
 
+// genType for VkFenceImportFlagsKHR
+// genGroup for VkFenceImportFlagBitsKHR
+// genType for VkExportFenceCreateInfoKHR
+// genStruct for VkExportFenceCreateInfoKHR
+// genEnum for VK_KHR_EXTERNAL_FENCE_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_external_fence_win32
 
+// genType for VkImportFenceWin32HandleInfoKHR
+// genStruct for VkImportFenceWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                        pNext
+// genStructOrUnionField:     VkFence                          fence
+// genStructOrUnionField:     VkFenceImportFlags              flags
+// genStructOrUnionField:     VkExternalFenceHandleTypeFlagBits  handleType
+// genStructOrUnionField:     HANDLE                             handle
+// genStructOrUnionField:     LPCWSTR                            name
+// genType for VkExportFenceWin32HandleInfoKHR
+// genStruct for VkExportFenceWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                pNext
+// genStructOrUnionField:     const SECURITY_ATTRIBUTES* pAttributes
+// genStructOrUnionField:     DWORD                                      dwAccess
+// genStructOrUnionField:     LPCWSTR                                    name
+// genType for VkFenceGetWin32HandleInfoKHR
+// genStruct for VkFenceGetWin32HandleInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                            pNext
+// genStructOrUnionField:     VkFence                                fence
+// genStructOrUnionField:     VkExternalFenceHandleTypeFlagBits   handleType
+// genEnum for VK_KHR_EXTERNAL_FENCE_WIN32_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_FENCE_WIN32_EXTENSION_NAME
 VkResult goldfish_frontend_vkImportFenceWin32HandleKHR(
     VkDevice device,
     const VkImportFenceWin32HandleInfoKHR* pImportFenceWin32HandleInfo)
@@ -1698,6 +3940,22 @@ VkResult goldfish_frontend_vkGetFenceWin32HandleKHR(
 
 #ifdef VK_KHR_external_fence_fd
 
+// genType for VkImportFenceFdInfoKHR
+// genStruct for VkImportFenceFdInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                            pNext
+// genStructOrUnionField:     VkFence              fence
+// genStructOrUnionField:     VkFenceImportFlags  flags
+// genStructOrUnionField:     VkExternalFenceHandleTypeFlagBits   handleType
+// genStructOrUnionField:     int                                    fd
+// genType for VkFenceGetFdInfoKHR
+// genStruct for VkFenceGetFdInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                            pNext
+// genStructOrUnionField:     VkFence                                fence
+// genStructOrUnionField:     VkExternalFenceHandleTypeFlagBits   handleType
+// genEnum for VK_KHR_EXTERNAL_FENCE_FD_SPEC_VERSION
+// genEnum for VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME
 VkResult goldfish_frontend_vkImportFenceFdKHR(
     VkDevice device,
     const VkImportFenceFdInfoKHR* pImportFenceFdInfo)
@@ -1713,10 +3971,41 @@ VkResult goldfish_frontend_vkGetFenceFdKHR(
 
 #ifdef VK_KHR_maintenance2
 
+// genType for VkPhysicalDevicePointClippingPropertiesKHR
+// genStruct for VkPhysicalDevicePointClippingPropertiesKHR
+// genGroup for VkPointClippingBehaviorKHR
+// genType for VkRenderPassInputAttachmentAspectCreateInfoKHR
+// genStruct for VkRenderPassInputAttachmentAspectCreateInfoKHR
+// genType for VkInputAttachmentAspectReferenceKHR
+// genStruct for VkInputAttachmentAspectReferenceKHR
+// genType for VkImageViewUsageCreateInfoKHR
+// genStruct for VkImageViewUsageCreateInfoKHR
+// genGroup for VkTessellationDomainOriginKHR
+// genType for VkPipelineTessellationDomainOriginStateCreateInfoKHR
+// genStruct for VkPipelineTessellationDomainOriginStateCreateInfoKHR
+// genEnum for VK_KHR_MAINTENANCE2_SPEC_VERSION
+// genEnum for VK_KHR_MAINTENANCE2_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_get_surface_capabilities2
 
+// genType for VkPhysicalDeviceSurfaceInfo2KHR
+// genStruct for VkPhysicalDeviceSurfaceInfo2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     VkSurfaceKHR surface
+// genType for VkSurfaceCapabilities2KHR
+// genStruct for VkSurfaceCapabilities2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*   pNext
+// genStructOrUnionField:     VkSurfaceCapabilitiesKHR surfaceCapabilities
+// genType for VkSurfaceFormat2KHR
+// genStruct for VkSurfaceFormat2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     VkSurfaceFormatKHR surfaceFormat
+// genEnum for VK_KHR_GET_SURFACE_CAPABILITIES_2_SPEC_VERSION
+// genEnum for VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceCapabilities2KHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo,
@@ -1734,10 +4023,42 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceFormats2KHR(
 
 #ifdef VK_KHR_variable_pointers
 
+// genType for VkPhysicalDeviceVariablePointerFeaturesKHR
+// genStruct for VkPhysicalDeviceVariablePointerFeaturesKHR
+// genEnum for VK_KHR_VARIABLE_POINTERS_SPEC_VERSION
+// genEnum for VK_KHR_VARIABLE_POINTERS_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_get_display_properties2
 
+// genType for VkDisplayProperties2KHR
+// genStruct for VkDisplayProperties2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     VkDisplayPropertiesKHR displayProperties
+// genType for VkDisplayPlaneProperties2KHR
+// genStruct for VkDisplayPlaneProperties2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     VkDisplayPlanePropertiesKHR displayPlaneProperties
+// genType for VkDisplayModeProperties2KHR
+// genStruct for VkDisplayModeProperties2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     VkDisplayModePropertiesKHR displayModeProperties
+// genType for VkDisplayPlaneInfo2KHR
+// genStruct for VkDisplayPlaneInfo2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     VkDisplayModeKHR mode
+// genStructOrUnionField:     uint32_t planeIndex
+// genType for VkDisplayPlaneCapabilities2KHR
+// genStruct for VkDisplayPlaneCapabilities2KHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     VkDisplayPlaneCapabilitiesKHR capabilities
+// genEnum for VK_KHR_GET_DISPLAY_PROPERTIES_2_SPEC_VERSION
+// genEnum for VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetPhysicalDeviceDisplayProperties2KHR(
     VkPhysicalDevice physicalDevice,
     uint32_t* pPropertyCount,
@@ -1767,18 +4088,40 @@ VkResult goldfish_frontend_vkGetDisplayPlaneCapabilities2KHR(
 
 #ifdef VK_KHR_dedicated_allocation
 
+// genType for VkMemoryDedicatedRequirementsKHR
+// genStruct for VkMemoryDedicatedRequirementsKHR
+// genType for VkMemoryDedicatedAllocateInfoKHR
+// genStruct for VkMemoryDedicatedAllocateInfoKHR
+// genEnum for VK_KHR_DEDICATED_ALLOCATION_SPEC_VERSION
+// genEnum for VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_storage_buffer_storage_class
 
+// genEnum for VK_KHR_STORAGE_BUFFER_STORAGE_CLASS_SPEC_VERSION
+// genEnum for VK_KHR_STORAGE_BUFFER_STORAGE_CLASS_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_relaxed_block_layout
 
+// genEnum for VK_KHR_RELAXED_BLOCK_LAYOUT_SPEC_VERSION
+// genEnum for VK_KHR_RELAXED_BLOCK_LAYOUT_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_get_memory_requirements2
 
+// genType for VkBufferMemoryRequirementsInfo2KHR
+// genStruct for VkBufferMemoryRequirementsInfo2KHR
+// genType for VkImageMemoryRequirementsInfo2KHR
+// genStruct for VkImageMemoryRequirementsInfo2KHR
+// genType for VkImageSparseMemoryRequirementsInfo2KHR
+// genStruct for VkImageSparseMemoryRequirementsInfo2KHR
+// genType for VkMemoryRequirements2KHR
+// genStruct for VkMemoryRequirements2KHR
+// genType for VkSparseImageMemoryRequirements2KHR
+// genStruct for VkSparseImageMemoryRequirements2KHR
+// genEnum for VK_KHR_GET_MEMORY_REQUIREMENTS_2_SPEC_VERSION
+// genEnum for VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME
 void goldfish_frontend_vkGetImageMemoryRequirements2KHR(
     VkDevice device,
     const VkImageMemoryRequirementsInfo2* pInfo,
@@ -1802,10 +4145,36 @@ void goldfish_frontend_vkGetImageSparseMemoryRequirements2KHR(
 
 #ifdef VK_KHR_image_format_list
 
+// genType for VkImageFormatListCreateInfoKHR
+// genStruct for VkImageFormatListCreateInfoKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     uint32_t               viewFormatCount
+// genStructOrUnionField:     const VkFormat*      pViewFormats
+// genEnum for VK_KHR_IMAGE_FORMAT_LIST_SPEC_VERSION
+// genEnum for VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME
 #endif
 
 #ifdef VK_KHR_sampler_ycbcr_conversion
 
+// genType for VkSamplerYcbcrConversionCreateInfoKHR
+// genStruct for VkSamplerYcbcrConversionCreateInfoKHR
+// genType for VkSamplerYcbcrConversionInfoKHR
+// genStruct for VkSamplerYcbcrConversionInfoKHR
+// genType for VkBindImagePlaneMemoryInfoKHR
+// genStruct for VkBindImagePlaneMemoryInfoKHR
+// genType for VkImagePlaneMemoryRequirementsInfoKHR
+// genStruct for VkImagePlaneMemoryRequirementsInfoKHR
+// genType for VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR
+// genStruct for VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR
+// genType for VkSamplerYcbcrConversionImageFormatPropertiesKHR
+// genStruct for VkSamplerYcbcrConversionImageFormatPropertiesKHR
+// genType for VkSamplerYcbcrConversionKHR
+// genGroup for VkSamplerYcbcrModelConversionKHR
+// genGroup for VkSamplerYcbcrRangeKHR
+// genGroup for VkChromaLocationKHR
+// genEnum for VK_KHR_SAMPLER_YCBCR_CONVERSION_SPEC_VERSION
+// genEnum for VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateSamplerYcbcrConversionKHR(
     VkDevice device,
     const VkSamplerYcbcrConversionCreateInfo* pCreateInfo,
@@ -1823,6 +4192,12 @@ void goldfish_frontend_vkDestroySamplerYcbcrConversionKHR(
 
 #ifdef VK_KHR_bind_memory2
 
+// genType for VkBindBufferMemoryInfoKHR
+// genStruct for VkBindBufferMemoryInfoKHR
+// genType for VkBindImageMemoryInfoKHR
+// genStruct for VkBindImageMemoryInfoKHR
+// genEnum for VK_KHR_BIND_MEMORY_2_SPEC_VERSION
+// genEnum for VK_KHR_BIND_MEMORY_2_EXTENSION_NAME
 VkResult goldfish_frontend_vkBindBufferMemory2KHR(
     VkDevice device,
     uint32_t bindInfoCount,
@@ -1839,6 +4214,12 @@ VkResult goldfish_frontend_vkBindImageMemory2KHR(
 
 #ifdef VK_KHR_maintenance3
 
+// genType for VkPhysicalDeviceMaintenance3PropertiesKHR
+// genStruct for VkPhysicalDeviceMaintenance3PropertiesKHR
+// genType for VkDescriptorSetLayoutSupportKHR
+// genStruct for VkDescriptorSetLayoutSupportKHR
+// genEnum for VK_KHR_MAINTENANCE3_SPEC_VERSION
+// genEnum for VK_KHR_MAINTENANCE3_EXTENSION_NAME
 void goldfish_frontend_vkGetDescriptorSetLayoutSupportKHR(
     VkDevice device,
     const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
@@ -1849,6 +4230,8 @@ void goldfish_frontend_vkGetDescriptorSetLayoutSupportKHR(
 
 #ifdef VK_KHR_draw_indirect_count
 
+// genEnum for VK_KHR_DRAW_INDIRECT_COUNT_SPEC_VERSION
+// genEnum for VK_KHR_DRAW_INDIRECT_COUNT_EXTENSION_NAME
 void goldfish_frontend_vkCmdDrawIndirectCountKHR(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -1873,10 +4256,33 @@ void goldfish_frontend_vkCmdDrawIndexedIndirectCountKHR(
 
 #ifdef VK_KHR_8bit_storage
 
+// genType for VkPhysicalDevice8BitStorageFeaturesKHR
+// genStruct for VkPhysicalDevice8BitStorageFeaturesKHR
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*      pNext
+// genStructOrUnionField:     VkBool32                         storageBuffer8BitAccess
+// genStructOrUnionField:     VkBool32                         uniformAndStorageBuffer8BitAccess
+// genStructOrUnionField:     VkBool32                         storagePushConstant8
+// genEnum for VK_KHR_8BIT_STORAGE_SPEC_VERSION
+// genEnum for VK_KHR_8BIT_STORAGE_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_debug_report
 
+// genGroup for VkDebugReportObjectTypeEXT
+// genGroup for VkDebugReportFlagBitsEXT
+// genType for VkDebugReportFlagsEXT
+// genType for PFN_vkDebugReportCallbackEXT
+// genType for VkDebugReportCallbackCreateInfoEXT
+// genStruct for VkDebugReportCallbackCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDebugReportFlagsEXT            flags
+// genStructOrUnionField:     PFN_vkDebugReportCallbackEXT     pfnCallback
+// genStructOrUnionField:     void*            pUserData
+// genEnum for VK_EXT_DEBUG_REPORT_SPEC_VERSION
+// genEnum for VK_EXT_DEBUG_REPORT_EXTENSION_NAME
+// genType for VkDebugReportCallbackEXT
 VkResult goldfish_frontend_vkCreateDebugReportCallbackEXT(
     VkInstance instance,
     const VkDebugReportCallbackCreateInfoEXT* pCreateInfo,
@@ -1905,30 +4311,72 @@ void goldfish_frontend_vkDebugReportMessageEXT(
 
 #ifdef VK_NV_glsl_shader
 
+// genEnum for VK_NV_GLSL_SHADER_SPEC_VERSION
+// genEnum for VK_NV_GLSL_SHADER_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_depth_range_unrestricted
 
+// genEnum for VK_EXT_DEPTH_RANGE_UNRESTRICTED_SPEC_VERSION
+// genEnum for VK_EXT_DEPTH_RANGE_UNRESTRICTED_EXTENSION_NAME
 #endif
 
 #ifdef VK_IMG_filter_cubic
 
+// genEnum for VK_IMG_FILTER_CUBIC_SPEC_VERSION
+// genEnum for VK_IMG_FILTER_CUBIC_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_rasterization_order
 
+// genGroup for VkRasterizationOrderAMD
+// genType for VkPipelineRasterizationStateRasterizationOrderAMD
+// genStruct for VkPipelineRasterizationStateRasterizationOrderAMD
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkRasterizationOrderAMD          rasterizationOrder
+// genEnum for VK_AMD_RASTERIZATION_ORDER_SPEC_VERSION
+// genEnum for VK_AMD_RASTERIZATION_ORDER_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_shader_trinary_minmax
 
+// genEnum for VK_AMD_SHADER_TRINARY_MINMAX_SPEC_VERSION
+// genEnum for VK_AMD_SHADER_TRINARY_MINMAX_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_shader_explicit_vertex_parameter
 
+// genEnum for VK_AMD_SHADER_EXPLICIT_VERTEX_PARAMETER_SPEC_VERSION
+// genEnum for VK_AMD_SHADER_EXPLICIT_VERTEX_PARAMETER_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_debug_marker
 
+// genType for VkDebugMarkerObjectNameInfoEXT
+// genStruct for VkDebugMarkerObjectNameInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDebugReportObjectTypeEXT       objectType
+// genStructOrUnionField:     uint64_t                         object
+// genStructOrUnionField:     const char* pObjectName
+// genType for VkDebugMarkerObjectTagInfoEXT
+// genStruct for VkDebugMarkerObjectTagInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDebugReportObjectTypeEXT       objectType
+// genStructOrUnionField:     uint64_t                         object
+// genStructOrUnionField:     uint64_t                         tagName
+// genStructOrUnionField:     size_t                           tagSize
+// genStructOrUnionField:     const void*        pTag
+// genType for VkDebugMarkerMarkerInfoEXT
+// genStruct for VkDebugMarkerMarkerInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     const char* pMarkerName
+// genStructOrUnionField:     float            color[4]
+// genEnum for VK_EXT_DEBUG_MARKER_SPEC_VERSION
+// genEnum for VK_EXT_DEBUG_MARKER_EXTENSION_NAME
 VkResult goldfish_frontend_vkDebugMarkerSetObjectTagEXT(
     VkDevice device,
     const VkDebugMarkerObjectTagInfoEXT* pTagInfo)
@@ -1957,14 +4405,36 @@ void goldfish_frontend_vkCmdDebugMarkerInsertEXT(
 
 #ifdef VK_AMD_gcn_shader
 
+// genEnum for VK_AMD_GCN_SHADER_SPEC_VERSION
+// genEnum for VK_AMD_GCN_SHADER_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_dedicated_allocation
 
+// genType for VkDedicatedAllocationImageCreateInfoNV
+// genStruct for VkDedicatedAllocationImageCreateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkBool32                         dedicatedAllocation
+// genType for VkDedicatedAllocationBufferCreateInfoNV
+// genStruct for VkDedicatedAllocationBufferCreateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkBool32                         dedicatedAllocation
+// genType for VkDedicatedAllocationMemoryAllocateInfoNV
+// genStruct for VkDedicatedAllocationMemoryAllocateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkImage          image
+// genStructOrUnionField:     VkBuffer         buffer
+// genEnum for VK_NV_DEDICATED_ALLOCATION_SPEC_VERSION
+// genEnum for VK_NV_DEDICATED_ALLOCATION_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_draw_indirect_count
 
+// genEnum for VK_AMD_DRAW_INDIRECT_COUNT_SPEC_VERSION
+// genEnum for VK_AMD_DRAW_INDIRECT_COUNT_EXTENSION_NAME
 void goldfish_frontend_vkCmdDrawIndirectCountAMD(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -1989,22 +4459,54 @@ void goldfish_frontend_vkCmdDrawIndexedIndirectCountAMD(
 
 #ifdef VK_AMD_negative_viewport_height
 
+// genEnum for VK_AMD_NEGATIVE_VIEWPORT_HEIGHT_SPEC_VERSION
+// genEnum for VK_AMD_NEGATIVE_VIEWPORT_HEIGHT_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_gpu_shader_half_float
 
+// genEnum for VK_AMD_GPU_SHADER_HALF_FLOAT_SPEC_VERSION
+// genEnum for VK_AMD_GPU_SHADER_HALF_FLOAT_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_shader_ballot
 
+// genEnum for VK_AMD_SHADER_BALLOT_SPEC_VERSION
+// genEnum for VK_AMD_SHADER_BALLOT_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_texture_gather_bias_lod
 
+// genType for VkTextureLODGatherFormatPropertiesAMD
+// genStruct for VkTextureLODGatherFormatPropertiesAMD
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkBool32                         supportsTextureGatherLODBiasAMD
+// genEnum for VK_AMD_TEXTURE_GATHER_BIAS_LOD_SPEC_VERSION
+// genEnum for VK_AMD_TEXTURE_GATHER_BIAS_LOD_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_shader_info
 
+// genGroup for VkShaderInfoTypeAMD
+// genType for VkShaderResourceUsageAMD
+// genStruct for VkShaderResourceUsageAMD
+// genStructOrUnionField:     uint32_t numUsedVgprs
+// genStructOrUnionField:     uint32_t numUsedSgprs
+// genStructOrUnionField:     uint32_t ldsSizePerLocalWorkGroup
+// genStructOrUnionField:     size_t ldsUsageSizeInBytes
+// genStructOrUnionField:     size_t scratchMemUsageInBytes
+// genType for VkShaderStatisticsInfoAMD
+// genStruct for VkShaderStatisticsInfoAMD
+// genStructOrUnionField:     VkShaderStageFlags shaderStageMask
+// genStructOrUnionField:     VkShaderResourceUsageAMD resourceUsage
+// genStructOrUnionField:     uint32_t numPhysicalVgprs
+// genStructOrUnionField:     uint32_t numPhysicalSgprs
+// genStructOrUnionField:     uint32_t numAvailableVgprs
+// genStructOrUnionField:     uint32_t numAvailableSgprs
+// genStructOrUnionField:     uint32_t computeWorkGroupSize[3]
+// genEnum for VK_AMD_SHADER_INFO_SPEC_VERSION
+// genEnum for VK_AMD_SHADER_INFO_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetShaderInfoAMD(
     VkDevice device,
     VkPipeline pipeline,
@@ -2018,14 +4520,30 @@ VkResult goldfish_frontend_vkGetShaderInfoAMD(
 
 #ifdef VK_AMD_shader_image_load_store_lod
 
+// genEnum for VK_AMD_SHADER_IMAGE_LOAD_STORE_LOD_SPEC_VERSION
+// genEnum for VK_AMD_SHADER_IMAGE_LOAD_STORE_LOD_EXTENSION_NAME
 #endif
 
 #ifdef VK_IMG_format_pvrtc
 
+// genEnum for VK_IMG_FORMAT_PVRTC_SPEC_VERSION
+// genEnum for VK_IMG_FORMAT_PVRTC_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_external_memory_capabilities
 
+// genGroup for VkExternalMemoryHandleTypeFlagBitsNV
+// genType for VkExternalMemoryHandleTypeFlagsNV
+// genGroup for VkExternalMemoryFeatureFlagBitsNV
+// genType for VkExternalMemoryFeatureFlagsNV
+// genType for VkExternalImageFormatPropertiesNV
+// genStruct for VkExternalImageFormatPropertiesNV
+// genStructOrUnionField:     VkImageFormatProperties          imageFormatProperties
+// genStructOrUnionField:     VkExternalMemoryFeatureFlagsNV   externalMemoryFeatures
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagsNV exportFromImportedHandleTypes
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagsNV compatibleHandleTypes
+// genEnum for VK_NV_EXTERNAL_MEMORY_CAPABILITIES_SPEC_VERSION
+// genEnum for VK_NV_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetPhysicalDeviceExternalImageFormatPropertiesNV(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
@@ -2041,10 +4559,36 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceExternalImageFormatPropertiesNV(
 
 #ifdef VK_NV_external_memory
 
+// genType for VkExternalMemoryImageCreateInfoNV
+// genStruct for VkExternalMemoryImageCreateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagsNV handleTypes
+// genType for VkExportMemoryAllocateInfoNV
+// genStruct for VkExportMemoryAllocateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagsNV handleTypes
+// genEnum for VK_NV_EXTERNAL_MEMORY_SPEC_VERSION
+// genEnum for VK_NV_EXTERNAL_MEMORY_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_external_memory_win32
 
+// genType for VkImportMemoryWin32HandleInfoNV
+// genStruct for VkImportMemoryWin32HandleInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagsNV handleType
+// genStructOrUnionField:     HANDLE                           handle
+// genType for VkExportMemoryWin32HandleInfoNV
+// genStruct for VkExportMemoryWin32HandleInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     const SECURITY_ATTRIBUTES*       pAttributes
+// genStructOrUnionField:     DWORD                            dwAccess
+// genEnum for VK_NV_EXTERNAL_MEMORY_WIN32_SPEC_VERSION
+// genEnum for VK_NV_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetMemoryWin32HandleNV(
     VkDevice device,
     VkDeviceMemory memory,
@@ -2056,14 +4600,45 @@ VkResult goldfish_frontend_vkGetMemoryWin32HandleNV(
 
 #ifdef VK_NV_win32_keyed_mutex
 
+// genType for VkWin32KeyedMutexAcquireReleaseInfoNV
+// genStruct for VkWin32KeyedMutexAcquireReleaseInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         acquireCount
+// genStructOrUnionField:     const VkDeviceMemory*            pAcquireSyncs
+// genStructOrUnionField:     const uint64_t*                  pAcquireKeys
+// genStructOrUnionField:     const uint32_t*                  pAcquireTimeoutMilliseconds
+// genStructOrUnionField:     uint32_t                         releaseCount
+// genStructOrUnionField:     const VkDeviceMemory*            pReleaseSyncs
+// genStructOrUnionField:     const uint64_t*                  pReleaseKeys
+// genEnum for VK_NV_WIN32_KEYED_MUTEX_SPEC_VERSION
+// genEnum for VK_NV_WIN32_KEYED_MUTEX_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_validation_flags
 
+// genGroup for VkValidationCheckEXT
+// genType for VkValidationFlagsEXT
+// genStruct for VkValidationFlagsEXT
+// genStructOrUnionField:     VkStructureType                  sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         disabledValidationCheckCount
+// genStructOrUnionField:     const VkValidationCheckEXT* pDisabledValidationChecks
+// genEnum for VK_EXT_VALIDATION_FLAGS_SPEC_VERSION
+// genEnum for VK_EXT_VALIDATION_FLAGS_EXTENSION_NAME
 #endif
 
 #ifdef VK_NN_vi_surface
 
+// genType for VkViSurfaceCreateFlagsNN
+// genType for VkViSurfaceCreateInfoNN
+// genStruct for VkViSurfaceCreateInfoNN
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkViSurfaceCreateFlagsNN   flags
+// genStructOrUnionField:     void*                            window
+// genEnum for VK_NN_VI_SURFACE_SPEC_VERSION
+// genEnum for VK_NN_VI_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateViSurfaceNN(
     VkInstance instance,
     const VkViSurfaceCreateInfoNN* pCreateInfo,
@@ -2075,14 +4650,40 @@ VkResult goldfish_frontend_vkCreateViSurfaceNN(
 
 #ifdef VK_EXT_shader_subgroup_ballot
 
+// genEnum for VK_EXT_SHADER_SUBGROUP_BALLOT_SPEC_VERSION
+// genEnum for VK_EXT_SHADER_SUBGROUP_BALLOT_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_shader_subgroup_vote
 
+// genEnum for VK_EXT_SHADER_SUBGROUP_VOTE_SPEC_VERSION
+// genEnum for VK_EXT_SHADER_SUBGROUP_VOTE_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_conditional_rendering
 
+// genGroup for VkConditionalRenderingFlagBitsEXT
+// genType for VkConditionalRenderingFlagsEXT
+// genType for VkConditionalRenderingBeginInfoEXT
+// genStruct for VkConditionalRenderingBeginInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkBuffer                         buffer
+// genStructOrUnionField:     VkDeviceSize                     offset
+// genStructOrUnionField:     VkConditionalRenderingFlagsEXT    flags
+// genType for VkPhysicalDeviceConditionalRenderingFeaturesEXT
+// genStruct for VkPhysicalDeviceConditionalRenderingFeaturesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*        pNext
+// genStructOrUnionField:     VkBool32                           conditionalRendering
+// genStructOrUnionField:     VkBool32                           inheritedConditionalRendering
+// genType for VkCommandBufferInheritanceConditionalRenderingInfoEXT
+// genStruct for VkCommandBufferInheritanceConditionalRenderingInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                         pNext
+// genStructOrUnionField:     VkBool32                            conditionalRenderingEnable
+// genEnum for VK_EXT_CONDITIONAL_RENDERING_SPEC_VERSION
+// genEnum for VK_EXT_CONDITIONAL_RENDERING_EXTENSION_NAME
 void goldfish_frontend_vkCmdBeginConditionalRenderingEXT(
     VkCommandBuffer commandBuffer,
     const VkConditionalRenderingBeginInfoEXT* pConditionalRenderingBegin)
@@ -2096,6 +4697,115 @@ void goldfish_frontend_vkCmdEndConditionalRenderingEXT(
 
 #ifdef VK_NVX_device_generated_commands
 
+// genType for VkObjectTableNVX
+// genType for VkIndirectCommandsLayoutNVX
+// genGroup for VkIndirectCommandsLayoutUsageFlagBitsNVX
+// genType for VkIndirectCommandsLayoutUsageFlagsNVX
+// genGroup for VkObjectEntryUsageFlagBitsNVX
+// genType for VkObjectEntryUsageFlagsNVX
+// genGroup for VkIndirectCommandsTokenTypeNVX
+// genGroup for VkObjectEntryTypeNVX
+// genType for VkDeviceGeneratedCommandsFeaturesNVX
+// genStruct for VkDeviceGeneratedCommandsFeaturesNVX
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkBool32                         computeBindingPointSupport
+// genType for VkDeviceGeneratedCommandsLimitsNVX
+// genStruct for VkDeviceGeneratedCommandsLimitsNVX
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         maxIndirectCommandsLayoutTokenCount
+// genStructOrUnionField:     uint32_t                         maxObjectEntryCounts
+// genStructOrUnionField:     uint32_t                         minSequenceCountBufferOffsetAlignment
+// genStructOrUnionField:     uint32_t                         minSequenceIndexBufferOffsetAlignment
+// genStructOrUnionField:     uint32_t                         minCommandsTokenBufferOffsetAlignment
+// genType for VkIndirectCommandsTokenNVX
+// genStruct for VkIndirectCommandsTokenNVX
+// genStructOrUnionField:     VkIndirectCommandsTokenTypeNVX      tokenType
+// genStructOrUnionField:     VkBuffer                         buffer
+// genStructOrUnionField:     VkDeviceSize                     offset
+// genType for VkIndirectCommandsLayoutTokenNVX
+// genStruct for VkIndirectCommandsLayoutTokenNVX
+// genStructOrUnionField:     VkIndirectCommandsTokenTypeNVX      tokenType
+// genStructOrUnionField:     uint32_t                         bindingUnit
+// genStructOrUnionField:     uint32_t                         dynamicCount
+// genStructOrUnionField:     uint32_t                         divisor
+// genType for VkIndirectCommandsLayoutCreateInfoNVX
+// genStruct for VkIndirectCommandsLayoutCreateInfoNVX
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkPipelineBindPoint                      pipelineBindPoint
+// genStructOrUnionField:     VkIndirectCommandsLayoutUsageFlagsNVX    flags
+// genStructOrUnionField:     uint32_t                                 tokenCount
+// genStructOrUnionField:     const VkIndirectCommandsLayoutTokenNVX*  pTokens
+// genType for VkCmdProcessCommandsInfoNVX
+// genStruct for VkCmdProcessCommandsInfoNVX
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkObjectTableNVX                                         objectTable
+// genStructOrUnionField:     VkIndirectCommandsLayoutNVX                              indirectCommandsLayout
+// genStructOrUnionField:     uint32_t                                                 indirectCommandsTokenCount
+// genStructOrUnionField:     const VkIndirectCommandsTokenNVX*       pIndirectCommandsTokens
+// genStructOrUnionField:     uint32_t                                                 maxSequencesCount
+// genStructOrUnionField:     VkCommandBuffer                          targetCommandBuffer
+// genStructOrUnionField:     VkBuffer                                 sequencesCountBuffer
+// genStructOrUnionField:     VkDeviceSize                             sequencesCountOffset
+// genStructOrUnionField:     VkBuffer                                 sequencesIndexBuffer
+// genStructOrUnionField:     VkDeviceSize                             sequencesIndexOffset
+// genType for VkCmdReserveSpaceForCommandsInfoNVX
+// genStruct for VkCmdReserveSpaceForCommandsInfoNVX
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkObjectTableNVX                                         objectTable
+// genStructOrUnionField:     VkIndirectCommandsLayoutNVX                              indirectCommandsLayout
+// genStructOrUnionField:     uint32_t                                                 maxSequencesCount
+// genType for VkObjectTableCreateInfoNVX
+// genStruct for VkObjectTableCreateInfoNVX
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                                          objectCount
+// genStructOrUnionField:     const VkObjectEntryTypeNVX*       pObjectEntryTypes
+// genStructOrUnionField:     const uint32_t*                   pObjectEntryCounts
+// genStructOrUnionField:     const VkObjectEntryUsageFlagsNVX* pObjectEntryUsageFlags
+// genStructOrUnionField:     uint32_t maxUniformBuffersPerDescriptor
+// genStructOrUnionField:     uint32_t maxStorageBuffersPerDescriptor
+// genStructOrUnionField:     uint32_t maxStorageImagesPerDescriptor
+// genStructOrUnionField:     uint32_t maxSampledImagesPerDescriptor
+// genStructOrUnionField:     uint32_t maxPipelineLayouts
+// genType for VkObjectTableEntryNVX
+// genStruct for VkObjectTableEntryNVX
+// genStructOrUnionField:     VkObjectEntryTypeNVX         type
+// genStructOrUnionField:     VkObjectEntryUsageFlagsNVX   flags
+// genType for VkObjectTablePipelineEntryNVX
+// genStruct for VkObjectTablePipelineEntryNVX
+// genStructOrUnionField:     VkObjectEntryTypeNVX         type
+// genStructOrUnionField:     VkObjectEntryUsageFlagsNVX   flags
+// genStructOrUnionField:     VkPipeline                   pipeline
+// genType for VkObjectTableDescriptorSetEntryNVX
+// genStruct for VkObjectTableDescriptorSetEntryNVX
+// genStructOrUnionField:     VkObjectEntryTypeNVX         type
+// genStructOrUnionField:     VkObjectEntryUsageFlagsNVX   flags
+// genStructOrUnionField:     VkPipelineLayout             pipelineLayout
+// genStructOrUnionField:     VkDescriptorSet              descriptorSet
+// genType for VkObjectTableVertexBufferEntryNVX
+// genStruct for VkObjectTableVertexBufferEntryNVX
+// genStructOrUnionField:     VkObjectEntryTypeNVX         type
+// genStructOrUnionField:     VkObjectEntryUsageFlagsNVX   flags
+// genStructOrUnionField:     VkBuffer                     buffer
+// genType for VkObjectTableIndexBufferEntryNVX
+// genStruct for VkObjectTableIndexBufferEntryNVX
+// genStructOrUnionField:     VkObjectEntryTypeNVX         type
+// genStructOrUnionField:     VkObjectEntryUsageFlagsNVX   flags
+// genStructOrUnionField:     VkBuffer                     buffer
+// genStructOrUnionField:     VkIndexType                  indexType
+// genType for VkObjectTablePushConstantEntryNVX
+// genStruct for VkObjectTablePushConstantEntryNVX
+// genStructOrUnionField:     VkObjectEntryTypeNVX         type
+// genStructOrUnionField:     VkObjectEntryUsageFlagsNVX   flags
+// genStructOrUnionField:     VkPipelineLayout             pipelineLayout
+// genStructOrUnionField:     VkShaderStageFlags           stageFlags
+// genEnum for VK_NVX_DEVICE_GENERATED_COMMANDS_SPEC_VERSION
+// genEnum for VK_NVX_DEVICE_GENERATED_COMMANDS_EXTENSION_NAME
 void goldfish_frontend_vkCmdProcessCommandsNVX(
     VkCommandBuffer commandBuffer,
     const VkCmdProcessCommandsInfoNVX* pProcessCommandsInfo)
@@ -2158,6 +4868,19 @@ void goldfish_frontend_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(
 
 #ifdef VK_NV_clip_space_w_scaling
 
+// genType for VkViewportWScalingNV
+// genStruct for VkViewportWScalingNV
+// genStructOrUnionField:     float          xcoeff
+// genStructOrUnionField:     float          ycoeff
+// genType for VkPipelineViewportWScalingStateCreateInfoNV
+// genStruct for VkPipelineViewportWScalingStateCreateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkBool32               viewportWScalingEnable
+// genStructOrUnionField:     uint32_t               viewportCount
+// genStructOrUnionField:     const VkViewportWScalingNV*      pViewportWScalings
+// genEnum for VK_NV_CLIP_SPACE_W_SCALING_SPEC_VERSION
+// genEnum for VK_NV_CLIP_SPACE_W_SCALING_EXTENSION_NAME
 void goldfish_frontend_vkCmdSetViewportWScalingNV(
     VkCommandBuffer commandBuffer,
     uint32_t firstViewport,
@@ -2169,6 +4892,8 @@ void goldfish_frontend_vkCmdSetViewportWScalingNV(
 
 #ifdef VK_EXT_direct_mode_display
 
+// genEnum for VK_EXT_DIRECT_MODE_DISPLAY_SPEC_VERSION
+// genEnum for VK_EXT_DIRECT_MODE_DISPLAY_EXTENSION_NAME
 VkResult goldfish_frontend_vkReleaseDisplayEXT(
     VkPhysicalDevice physicalDevice,
     VkDisplayKHR display)
@@ -2178,12 +4903,16 @@ VkResult goldfish_frontend_vkReleaseDisplayEXT(
 
 #ifdef VK_EXT_acquire_xlib_display
 
+// genEnum for VK_EXT_ACQUIRE_XLIB_DISPLAY_SPEC_VERSION
+// genEnum for VK_EXT_ACQUIRE_XLIB_DISPLAY_EXTENSION_NAME
 VkResult goldfish_frontend_vkAcquireXlibDisplayEXT(
     VkPhysicalDevice physicalDevice,
     Display* dpy,
     VkDisplayKHR display)
 ;
 
+// genType for X11/extensions/Xrandr.h
+// genType for RROutput
 VkResult goldfish_frontend_vkGetRandROutputDisplayEXT(
     VkPhysicalDevice physicalDevice,
     Display* dpy,
@@ -2195,6 +4924,25 @@ VkResult goldfish_frontend_vkGetRandROutputDisplayEXT(
 
 #ifdef VK_EXT_display_surface_counter
 
+// genGroup for VkSurfaceCounterFlagBitsEXT
+// genType for VkSurfaceCounterFlagsEXT
+// genType for VkSurfaceCapabilities2EXT
+// genStruct for VkSurfaceCapabilities2EXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t                         minImageCount
+// genStructOrUnionField:     uint32_t                         maxImageCount
+// genStructOrUnionField:     VkExtent2D                       currentExtent
+// genStructOrUnionField:     VkExtent2D                       minImageExtent
+// genStructOrUnionField:     VkExtent2D                       maxImageExtent
+// genStructOrUnionField:     uint32_t                         maxImageArrayLayers
+// genStructOrUnionField:     VkSurfaceTransformFlagsKHR       supportedTransforms
+// genStructOrUnionField:     VkSurfaceTransformFlagBitsKHR    currentTransform
+// genStructOrUnionField:     VkCompositeAlphaFlagsKHR         supportedCompositeAlpha
+// genStructOrUnionField:     VkImageUsageFlags                supportedUsageFlags
+// genStructOrUnionField:     VkSurfaceCounterFlagsEXT supportedSurfaceCounters
+// genEnum for VK_EXT_DISPLAY_SURFACE_COUNTER_SPEC_VERSION
+// genEnum for VK_EXT_DISPLAY_SURFACE_COUNTER_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceCapabilities2EXT(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
@@ -2205,6 +4953,31 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceCapabilities2EXT(
 
 #ifdef VK_EXT_display_control
 
+// genGroup for VkDisplayPowerStateEXT
+// genGroup for VkDeviceEventTypeEXT
+// genGroup for VkDisplayEventTypeEXT
+// genType for VkDisplayPowerInfoEXT
+// genStruct for VkDisplayPowerInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDisplayPowerStateEXT           powerState
+// genType for VkDeviceEventInfoEXT
+// genStruct for VkDeviceEventInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDeviceEventTypeEXT             deviceEvent
+// genType for VkDisplayEventInfoEXT
+// genStruct for VkDisplayEventInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkDisplayEventTypeEXT            displayEvent
+// genType for VkSwapchainCounterCreateInfoEXT
+// genStruct for VkSwapchainCounterCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSurfaceCounterFlagsEXT         surfaceCounters
+// genEnum for VK_EXT_DISPLAY_CONTROL_SPEC_VERSION
+// genEnum for VK_EXT_DISPLAY_CONTROL_EXTENSION_NAME
 VkResult goldfish_frontend_vkDisplayPowerControlEXT(
     VkDevice device,
     VkDisplayKHR display,
@@ -2237,6 +5010,28 @@ VkResult goldfish_frontend_vkGetSwapchainCounterEXT(
 
 #ifdef VK_GOOGLE_display_timing
 
+// genType for VkRefreshCycleDurationGOOGLE
+// genStruct for VkRefreshCycleDurationGOOGLE
+// genStructOrUnionField:     uint64_t                         refreshDuration
+// genType for VkPastPresentationTimingGOOGLE
+// genStruct for VkPastPresentationTimingGOOGLE
+// genStructOrUnionField:     uint32_t                         presentID
+// genStructOrUnionField:     uint64_t                         desiredPresentTime
+// genStructOrUnionField:     uint64_t                         actualPresentTime
+// genStructOrUnionField:     uint64_t                         earliestPresentTime
+// genStructOrUnionField:     uint64_t                         presentMargin
+// genType for VkPresentTimeGOOGLE
+// genStruct for VkPresentTimeGOOGLE
+// genStructOrUnionField:     uint32_t                         presentID
+// genStructOrUnionField:     uint64_t                         desiredPresentTime
+// genType for VkPresentTimesInfoGOOGLE
+// genStruct for VkPresentTimesInfoGOOGLE
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t                         swapchainCount
+// genStructOrUnionField:     const VkPresentTimeGOOGLE*   pTimes
+// genEnum for VK_GOOGLE_DISPLAY_TIMING_SPEC_VERSION
+// genEnum for VK_GOOGLE_DISPLAY_TIMING_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetRefreshCycleDurationGOOGLE(
     VkDevice device,
     VkSwapchainKHR swapchain,
@@ -2254,26 +5049,73 @@ VkResult goldfish_frontend_vkGetPastPresentationTimingGOOGLE(
 
 #ifdef VK_NV_sample_mask_override_coverage
 
+// genEnum for VK_NV_SAMPLE_MASK_OVERRIDE_COVERAGE_SPEC_VERSION
+// genEnum for VK_NV_SAMPLE_MASK_OVERRIDE_COVERAGE_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_geometry_shader_passthrough
 
+// genEnum for VK_NV_GEOMETRY_SHADER_PASSTHROUGH_SPEC_VERSION
+// genEnum for VK_NV_GEOMETRY_SHADER_PASSTHROUGH_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_viewport_array2
 
+// genEnum for VK_NV_VIEWPORT_ARRAY2_SPEC_VERSION
+// genEnum for VK_NV_VIEWPORT_ARRAY2_EXTENSION_NAME
 #endif
 
 #ifdef VK_NVX_multiview_per_view_attributes
 
+// genType for VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX
+// genStruct for VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkBool32                         perViewPositionAllComponents
+// genEnum for VK_NVX_MULTIVIEW_PER_VIEW_ATTRIBUTES_SPEC_VERSION
+// genEnum for VK_NVX_MULTIVIEW_PER_VIEW_ATTRIBUTES_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_viewport_swizzle
 
+// genGroup for VkViewportCoordinateSwizzleNV
+// genType for VkViewportSwizzleNV
+// genStruct for VkViewportSwizzleNV
+// genStructOrUnionField:     VkViewportCoordinateSwizzleNV          x
+// genStructOrUnionField:     VkViewportCoordinateSwizzleNV          y
+// genStructOrUnionField:     VkViewportCoordinateSwizzleNV          z
+// genStructOrUnionField:     VkViewportCoordinateSwizzleNV          w
+// genType for VkPipelineViewportSwizzleStateCreateFlagsNV
+// genType for VkPipelineViewportSwizzleStateCreateInfoNV
+// genStruct for VkPipelineViewportSwizzleStateCreateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkPipelineViewportSwizzleStateCreateFlagsNV    flags
+// genStructOrUnionField:     uint32_t               viewportCount
+// genStructOrUnionField:     const VkViewportSwizzleNV*      pViewportSwizzles
+// genEnum for VK_NV_VIEWPORT_SWIZZLE_SPEC_VERSION
+// genEnum for VK_NV_VIEWPORT_SWIZZLE_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_discard_rectangles
 
+// genType for VkPhysicalDeviceDiscardRectanglePropertiesEXT
+// genStruct for VkPhysicalDeviceDiscardRectanglePropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                  pNext
+// genStructOrUnionField:     uint32_t               maxDiscardRectangles
+// genType for VkPipelineDiscardRectangleStateCreateFlagsEXT
+// genGroup for VkDiscardRectangleModeEXT
+// genType for VkPipelineDiscardRectangleStateCreateInfoEXT
+// genStruct for VkPipelineDiscardRectangleStateCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                                                      pNext
+// genStructOrUnionField:     VkPipelineDiscardRectangleStateCreateFlagsEXT                    flags
+// genStructOrUnionField:     VkDiscardRectangleModeEXT                                                        discardRectangleMode
+// genStructOrUnionField:     uint32_t                                                         discardRectangleCount
+// genStructOrUnionField:     const VkRect2D* pDiscardRectangles
+// genEnum for VK_EXT_DISCARD_RECTANGLES_SPEC_VERSION
+// genEnum for VK_EXT_DISCARD_RECTANGLES_EXTENSION_NAME
 void goldfish_frontend_vkCmdSetDiscardRectangleEXT(
     VkCommandBuffer commandBuffer,
     uint32_t firstDiscardRectangle,
@@ -2285,14 +5127,58 @@ void goldfish_frontend_vkCmdSetDiscardRectangleEXT(
 
 #ifdef VK_EXT_conservative_rasterization
 
+// genType for VkPhysicalDeviceConservativeRasterizationPropertiesEXT
+// genStruct for VkPhysicalDeviceConservativeRasterizationPropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                  pNext
+// genStructOrUnionField:     float                  primitiveOverestimationSize
+// genStructOrUnionField:     float                  maxExtraPrimitiveOverestimationSize
+// genStructOrUnionField:     float                  extraPrimitiveOverestimationSizeGranularity
+// genStructOrUnionField:     VkBool32               primitiveUnderestimation
+// genStructOrUnionField:     VkBool32               conservativePointAndLineRasterization
+// genStructOrUnionField:     VkBool32               degenerateTrianglesRasterized
+// genStructOrUnionField:     VkBool32               degenerateLinesRasterized
+// genStructOrUnionField:     VkBool32               fullyCoveredFragmentShaderInputVariable
+// genStructOrUnionField:     VkBool32               conservativeRasterizationPostDepthCoverage
+// genType for VkPipelineRasterizationConservativeStateCreateFlagsEXT
+// genGroup for VkConservativeRasterizationModeEXT
+// genType for VkPipelineRasterizationConservativeStateCreateInfoEXT
+// genStruct for VkPipelineRasterizationConservativeStateCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                                                      pNext
+// genStructOrUnionField:     VkPipelineRasterizationConservativeStateCreateFlagsEXT           flags
+// genStructOrUnionField:     VkConservativeRasterizationModeEXT                                               conservativeRasterizationMode
+// genStructOrUnionField:     float                                                                            extraPrimitiveOverestimationSize
+// genEnum for VK_EXT_CONSERVATIVE_RASTERIZATION_SPEC_VERSION
+// genEnum for VK_EXT_CONSERVATIVE_RASTERIZATION_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_swapchain_colorspace
 
+// genEnum for VK_EXT_SWAPCHAIN_COLOR_SPACE_SPEC_VERSION
+// genEnum for VK_EXT_SWAPCHAIN_COLOR_SPACE_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_hdr_metadata
 
+// genType for VkXYColorEXT
+// genStruct for VkXYColorEXT
+// genStructOrUnionField:     float   x
+// genStructOrUnionField:     float   y
+// genType for VkHdrMetadataEXT
+// genStruct for VkHdrMetadataEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*    pNext
+// genStructOrUnionField:     VkXYColorEXT   displayPrimaryRed
+// genStructOrUnionField:     VkXYColorEXT   displayPrimaryGreen
+// genStructOrUnionField:     VkXYColorEXT   displayPrimaryBlue
+// genStructOrUnionField:     VkXYColorEXT   whitePoint
+// genStructOrUnionField:     float          maxLuminance
+// genStructOrUnionField:     float          minLuminance
+// genStructOrUnionField:     float          maxContentLightLevel
+// genStructOrUnionField:     float          maxFrameAverageLightLevel
+// genEnum for VK_EXT_HDR_METADATA_SPEC_VERSION
+// genEnum for VK_EXT_HDR_METADATA_EXTENSION_NAME
 void goldfish_frontend_vkSetHdrMetadataEXT(
     VkDevice device,
     uint32_t swapchainCount,
@@ -2304,6 +5190,15 @@ void goldfish_frontend_vkSetHdrMetadataEXT(
 
 #ifdef VK_MVK_ios_surface
 
+// genType for VkIOSSurfaceCreateFlagsMVK
+// genType for VkIOSSurfaceCreateInfoMVK
+// genStruct for VkIOSSurfaceCreateInfoMVK
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                    pNext
+// genStructOrUnionField:     VkIOSSurfaceCreateFlagsMVK     flags
+// genStructOrUnionField:     const void*                                    pView
+// genEnum for VK_MVK_IOS_SURFACE_SPEC_VERSION
+// genEnum for VK_MVK_IOS_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateIOSSurfaceMVK(
     VkInstance instance,
     const VkIOSSurfaceCreateInfoMVK* pCreateInfo,
@@ -2315,6 +5210,15 @@ VkResult goldfish_frontend_vkCreateIOSSurfaceMVK(
 
 #ifdef VK_MVK_macos_surface
 
+// genType for VkMacOSSurfaceCreateFlagsMVK
+// genType for VkMacOSSurfaceCreateInfoMVK
+// genStruct for VkMacOSSurfaceCreateInfoMVK
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                    pNext
+// genStructOrUnionField:     VkMacOSSurfaceCreateFlagsMVK   flags
+// genStructOrUnionField:     const void*                                    pView
+// genEnum for VK_MVK_MACOS_SURFACE_SPEC_VERSION
+// genEnum for VK_MVK_MACOS_SURFACE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateMacOSSurfaceMVK(
     VkInstance instance,
     const VkMacOSSurfaceCreateInfoMVK* pCreateInfo,
@@ -2326,14 +5230,73 @@ VkResult goldfish_frontend_vkCreateMacOSSurfaceMVK(
 
 #ifdef VK_EXT_external_memory_dma_buf
 
+// genEnum for VK_EXT_EXTERNAL_MEMORY_DMA_BUF_SPEC_VERSION
+// genEnum for VK_EXT_EXTERNAL_MEMORY_DMA_BUF_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_queue_family_foreign
 
+// genEnum for VK_EXT_QUEUE_FAMILY_FOREIGN_SPEC_VERSION
+// genEnum for VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME
+// genEnum for VK_QUEUE_FAMILY_FOREIGN_EXT
 #endif
 
 #ifdef VK_EXT_debug_utils
 
+// genType for VkDebugUtilsObjectNameInfoEXT
+// genStruct for VkDebugUtilsObjectNameInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                            pNext
+// genStructOrUnionField:     VkObjectType                                           objectType
+// genStructOrUnionField:     uint64_t                                               objectHandle
+// genStructOrUnionField:     const char*      pObjectName
+// genType for VkDebugUtilsObjectTagInfoEXT
+// genStruct for VkDebugUtilsObjectTagInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                            pNext
+// genStructOrUnionField:     VkObjectType                           objectType
+// genStructOrUnionField:     uint64_t                               objectHandle
+// genStructOrUnionField:     uint64_t                               tagName
+// genStructOrUnionField:     size_t                                 tagSize
+// genStructOrUnionField:     const void*              pTag
+// genType for VkDebugUtilsLabelEXT
+// genStruct for VkDebugUtilsLabelEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                            pNext
+// genStructOrUnionField:     const char*      pLabelName
+// genStructOrUnionField:     float                  color[4]
+// genType for VkDebugUtilsMessengerCallbackDataFlagsEXT
+// genType for VkDebugUtilsMessengerCallbackDataEXT
+// genStruct for VkDebugUtilsMessengerCallbackDataEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                                        pNext
+// genStructOrUnionField:     VkDebugUtilsMessengerCallbackDataFlagsEXT                          flags
+// genStructOrUnionField:     const char*                                  pMessageIdName
+// genStructOrUnionField:     int32_t                                                            messageIdNumber
+// genStructOrUnionField:     const char*                                                  pMessage
+// genStructOrUnionField:     uint32_t                                                           queueLabelCount
+// genStructOrUnionField:     VkDebugUtilsLabelEXT*  pQueueLabels
+// genStructOrUnionField:     uint32_t                                                           cmdBufLabelCount
+// genStructOrUnionField:     VkDebugUtilsLabelEXT* pCmdBufLabels
+// genStructOrUnionField:     uint32_t                                                                           objectCount
+// genStructOrUnionField:     VkDebugUtilsObjectNameInfoEXT*             pObjects
+// genType for VkDebugUtilsMessengerCreateFlagsEXT
+// genGroup for VkDebugUtilsMessageSeverityFlagBitsEXT
+// genType for VkDebugUtilsMessageSeverityFlagsEXT
+// genGroup for VkDebugUtilsMessageTypeFlagBitsEXT
+// genType for VkDebugUtilsMessageTypeFlagsEXT
+// genType for PFN_vkDebugUtilsMessengerCallbackEXT
+// genType for VkDebugUtilsMessengerCreateInfoEXT
+// genStruct for VkDebugUtilsMessengerCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                          pNext
+// genStructOrUnionField:     VkDebugUtilsMessengerCreateFlagsEXT  flags
+// genStructOrUnionField:     VkDebugUtilsMessageSeverityFlagsEXT                  messageSeverity
+// genStructOrUnionField:     VkDebugUtilsMessageTypeFlagsEXT                      messageType
+// genStructOrUnionField:     PFN_vkDebugUtilsMessengerCallbackEXT                 pfnUserCallback
+// genStructOrUnionField:     void*                                pUserData
+// genEnum for VK_EXT_DEBUG_UTILS_SPEC_VERSION
+// genEnum for VK_EXT_DEBUG_UTILS_EXTENSION_NAME
 VkResult goldfish_frontend_vkSetDebugUtilsObjectNameEXT(
     VkDevice device,
     const VkDebugUtilsObjectNameInfoEXT* pNameInfo)
@@ -2372,6 +5335,7 @@ void goldfish_frontend_vkCmdInsertDebugUtilsLabelEXT(
     const VkDebugUtilsLabelEXT* pLabelInfo)
 ;
 
+// genType for VkDebugUtilsMessengerEXT
 VkResult goldfish_frontend_vkCreateDebugUtilsMessengerEXT(
     VkInstance instance,
     const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
@@ -2396,6 +5360,47 @@ void goldfish_frontend_vkSubmitDebugUtilsMessageEXT(
 
 #ifdef VK_ANDROID_external_memory_android_hardware_buffer
 
+// genType for VkAndroidHardwareBufferUsageANDROID
+// genStruct for VkAndroidHardwareBufferUsageANDROID
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                              pNext
+// genStructOrUnionField:     uint64_t                           androidHardwareBufferUsage
+// genType for VkAndroidHardwareBufferPropertiesANDROID
+// genStruct for VkAndroidHardwareBufferPropertiesANDROID
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                              pNext
+// genStructOrUnionField:     VkDeviceSize                       allocationSize
+// genStructOrUnionField:     uint32_t                           memoryTypeBits
+// genType for VkAndroidHardwareBufferFormatPropertiesANDROID
+// genStruct for VkAndroidHardwareBufferFormatPropertiesANDROID
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                              pNext
+// genStructOrUnionField:     VkFormat                           format
+// genStructOrUnionField:     uint64_t                           externalFormat
+// genStructOrUnionField:     VkFormatFeatureFlags               formatFeatures
+// genStructOrUnionField:     VkComponentMapping                 samplerYcbcrConversionComponents
+// genStructOrUnionField:     VkSamplerYcbcrModelConversion      suggestedYcbcrModel
+// genStructOrUnionField:     VkSamplerYcbcrRange                suggestedYcbcrRange
+// genStructOrUnionField:     VkChromaLocation                   suggestedXChromaOffset
+// genStructOrUnionField:     VkChromaLocation                   suggestedYChromaOffset
+// genType for AHardwareBuffer
+// genType for VkImportAndroidHardwareBufferInfoANDROID
+// genStruct for VkImportAndroidHardwareBufferInfoANDROID
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                        pNext
+// genStructOrUnionField:     struct AHardwareBuffer*            buffer
+// genType for VkMemoryGetAndroidHardwareBufferInfoANDROID
+// genStruct for VkMemoryGetAndroidHardwareBufferInfoANDROID
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                        pNext
+// genStructOrUnionField:     VkDeviceMemory                     memory
+// genType for VkExternalFormatANDROID
+// genStruct for VkExternalFormatANDROID
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                              pNext
+// genStructOrUnionField:     uint64_t                           externalFormat
+// genEnum for VK_ANDROID_EXTERNAL_MEMORY_ANDROID_HARDWARE_BUFFER_SPEC_VERSION
+// genEnum for VK_ANDROID_EXTERNAL_MEMORY_ANDROID_HARDWARE_BUFFER_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetAndroidHardwareBufferPropertiesANDROID(
     VkDevice device,
     const struct AHardwareBuffer* buffer,
@@ -2412,26 +5417,98 @@ VkResult goldfish_frontend_vkGetMemoryAndroidHardwareBufferANDROID(
 
 #ifdef VK_EXT_sampler_filter_minmax
 
+// genGroup for VkSamplerReductionModeEXT
+// genType for VkSamplerReductionModeCreateInfoEXT
+// genStruct for VkSamplerReductionModeCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkSamplerReductionModeEXT reductionMode
+// genType for VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT
+// genStruct for VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                  pNext
+// genStructOrUnionField:     VkBool32               filterMinmaxSingleComponentFormats
+// genStructOrUnionField:     VkBool32               filterMinmaxImageComponentMapping
+// genEnum for VK_EXT_SAMPLER_FILTER_MINMAX_SPEC_VERSION
+// genEnum for VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_gpu_shader_int16
 
+// genEnum for VK_AMD_GPU_SHADER_INT16_SPEC_VERSION
+// genEnum for VK_AMD_GPU_SHADER_INT16_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_mixed_attachment_samples
 
+// genEnum for VK_AMD_MIXED_ATTACHMENT_SAMPLES_SPEC_VERSION
+// genEnum for VK_AMD_MIXED_ATTACHMENT_SAMPLES_EXTENSION_NAME
 #endif
 
 #ifdef VK_AMD_shader_fragment_mask
 
+// genEnum for VK_AMD_SHADER_FRAGMENT_MASK_SPEC_VERSION
+// genEnum for VK_AMD_SHADER_FRAGMENT_MASK_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_shader_stencil_export
 
+// genEnum for VK_EXT_SHADER_STENCIL_EXPORT_SPEC_VERSION
+// genEnum for VK_EXT_SHADER_STENCIL_EXPORT_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_sample_locations
 
+// genType for VkSampleLocationEXT
+// genStruct for VkSampleLocationEXT
+// genStructOrUnionField:     float                            x
+// genStructOrUnionField:     float                            y
+// genType for VkSampleLocationsInfoEXT
+// genStruct for VkSampleLocationsInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkSampleCountFlagBits            sampleLocationsPerPixel
+// genStructOrUnionField:     VkExtent2D                       sampleLocationGridSize
+// genStructOrUnionField:     uint32_t                         sampleLocationsCount
+// genStructOrUnionField:     const VkSampleLocationEXT* pSampleLocations
+// genType for VkAttachmentSampleLocationsEXT
+// genStruct for VkAttachmentSampleLocationsEXT
+// genStructOrUnionField:     uint32_t                         attachmentIndex
+// genStructOrUnionField:     VkSampleLocationsInfoEXT         sampleLocationsInfo
+// genType for VkSubpassSampleLocationsEXT
+// genStruct for VkSubpassSampleLocationsEXT
+// genStructOrUnionField:     uint32_t                         subpassIndex
+// genStructOrUnionField:     VkSampleLocationsInfoEXT         sampleLocationsInfo
+// genType for VkRenderPassSampleLocationsBeginInfoEXT
+// genStruct for VkRenderPassSampleLocationsBeginInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     uint32_t         attachmentInitialSampleLocationsCount
+// genStructOrUnionField:     const VkAttachmentSampleLocationsEXT* pAttachmentInitialSampleLocations
+// genStructOrUnionField:     uint32_t         postSubpassSampleLocationsCount
+// genStructOrUnionField:     const VkSubpassSampleLocationsEXT* pPostSubpassSampleLocations
+// genType for VkPipelineSampleLocationsStateCreateInfoEXT
+// genStruct for VkPipelineSampleLocationsStateCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                      pNext
+// genStructOrUnionField:     VkBool32                         sampleLocationsEnable
+// genStructOrUnionField:     VkSampleLocationsInfoEXT         sampleLocationsInfo
+// genType for VkPhysicalDeviceSampleLocationsPropertiesEXT
+// genStruct for VkPhysicalDeviceSampleLocationsPropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkSampleCountFlags               sampleLocationSampleCounts
+// genStructOrUnionField:     VkExtent2D                       maxSampleLocationGridSize
+// genStructOrUnionField:     float                            sampleLocationCoordinateRange[2]
+// genStructOrUnionField:     uint32_t                         sampleLocationSubPixelBits
+// genStructOrUnionField:     VkBool32                         variableSampleLocations
+// genType for VkMultisamplePropertiesEXT
+// genStruct for VkMultisamplePropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkExtent2D                       maxSampleLocationGridSize
+// genEnum for VK_EXT_SAMPLE_LOCATIONS_SPEC_VERSION
+// genEnum for VK_EXT_SAMPLE_LOCATIONS_EXTENSION_NAME
 void goldfish_frontend_vkCmdSetSampleLocationsEXT(
     VkCommandBuffer commandBuffer,
     const VkSampleLocationsInfoEXT* pSampleLocationsInfo)
@@ -2447,26 +5524,95 @@ void goldfish_frontend_vkGetPhysicalDeviceMultisamplePropertiesEXT(
 
 #ifdef VK_EXT_blend_operation_advanced
 
+// genType for VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT
+// genStruct for VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkBool32                         advancedBlendCoherentOperations
+// genType for VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT
+// genStruct for VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t                         advancedBlendMaxColorAttachments
+// genStructOrUnionField:     VkBool32                         advancedBlendIndependentBlend
+// genStructOrUnionField:     VkBool32                         advancedBlendNonPremultipliedSrcColor
+// genStructOrUnionField:     VkBool32                         advancedBlendNonPremultipliedDstColor
+// genStructOrUnionField:     VkBool32                         advancedBlendCorrelatedOverlap
+// genStructOrUnionField:     VkBool32                         advancedBlendAllOperations
+// genGroup for VkBlendOverlapEXT
+// genType for VkPipelineColorBlendAdvancedStateCreateInfoEXT
+// genStruct for VkPipelineColorBlendAdvancedStateCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkBool32               srcPremultiplied
+// genStructOrUnionField:     VkBool32               dstPremultiplied
+// genStructOrUnionField:     VkBlendOverlapEXT      blendOverlap
+// genEnum for VK_EXT_BLEND_OPERATION_ADVANCED_SPEC_VERSION
+// genEnum for VK_EXT_BLEND_OPERATION_ADVANCED_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_fragment_coverage_to_color
 
+// genType for VkPipelineCoverageToColorStateCreateFlagsNV
+// genType for VkPipelineCoverageToColorStateCreateInfoNV
+// genStruct for VkPipelineCoverageToColorStateCreateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                                                      pNext
+// genStructOrUnionField:     VkPipelineCoverageToColorStateCreateFlagsNV                    flags
+// genStructOrUnionField:     VkBool32                         coverageToColorEnable
+// genStructOrUnionField:     uint32_t         coverageToColorLocation
+// genEnum for VK_NV_FRAGMENT_COVERAGE_TO_COLOR_SPEC_VERSION
+// genEnum for VK_NV_FRAGMENT_COVERAGE_TO_COLOR_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_framebuffer_mixed_samples
 
+// genType for VkPipelineCoverageModulationStateCreateFlagsNV
+// genGroup for VkCoverageModulationModeNV
+// genType for VkPipelineCoverageModulationStateCreateInfoNV
+// genStruct for VkPipelineCoverageModulationStateCreateInfoNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                                                                      pNext
+// genStructOrUnionField:     VkPipelineCoverageModulationStateCreateFlagsNV                   flags
+// genStructOrUnionField:     VkCoverageModulationModeNV                                                       coverageModulationMode
+// genStructOrUnionField:     VkBool32                                                                         coverageModulationTableEnable
+// genStructOrUnionField:     uint32_t                                                                         coverageModulationTableCount
+// genStructOrUnionField:     const float* pCoverageModulationTable
+// genEnum for VK_NV_FRAMEBUFFER_MIXED_SAMPLES_SPEC_VERSION
+// genEnum for VK_NV_FRAMEBUFFER_MIXED_SAMPLES_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_fill_rectangle
 
+// genEnum for VK_NV_FILL_RECTANGLE_SPEC_VERSION
+// genEnum for VK_NV_FILL_RECTANGLE_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_post_depth_coverage
 
+// genEnum for VK_EXT_POST_DEPTH_COVERAGE_SPEC_VERSION
+// genEnum for VK_EXT_POST_DEPTH_COVERAGE_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_validation_cache
 
+// genType for VkValidationCacheEXT
+// genType for VkValidationCacheCreateFlagsEXT
+// genType for VkValidationCacheCreateInfoEXT
+// genStruct for VkValidationCacheCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkValidationCacheCreateFlagsEXT    flags
+// genStructOrUnionField:     size_t                 initialDataSize
+// genStructOrUnionField:     const void*            pInitialData
+// genType for VkShaderModuleValidationCacheCreateInfoEXT
+// genStruct for VkShaderModuleValidationCacheCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     VkValidationCacheEXT    validationCache
+// genGroup for VkValidationCacheHeaderVersionEXT
+// genEnum for VK_EXT_VALIDATION_CACHE_SPEC_VERSION
+// genEnum for VK_EXT_VALIDATION_CACHE_EXTENSION_NAME
 VkResult goldfish_frontend_vkCreateValidationCacheEXT(
     VkDevice device,
     const VkValidationCacheCreateInfoEXT* pCreateInfo,
@@ -2498,18 +5644,118 @@ VkResult goldfish_frontend_vkGetValidationCacheDataEXT(
 
 #ifdef VK_EXT_descriptor_indexing
 
+// genGroup for VkDescriptorBindingFlagBitsEXT
+// genType for VkDescriptorBindingFlagsEXT
+// genType for VkDescriptorSetLayoutBindingFlagsCreateInfoEXT
+// genStruct for VkDescriptorSetLayoutBindingFlagsCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     uint32_t               bindingCount
+// genStructOrUnionField:     const VkDescriptorBindingFlagsEXT* pBindingFlags
+// genType for VkPhysicalDeviceDescriptorIndexingFeaturesEXT
+// genStruct for VkPhysicalDeviceDescriptorIndexingFeaturesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     VkBool32               shaderInputAttachmentArrayDynamicIndexing
+// genStructOrUnionField:     VkBool32               shaderUniformTexelBufferArrayDynamicIndexing
+// genStructOrUnionField:     VkBool32               shaderStorageTexelBufferArrayDynamicIndexing
+// genStructOrUnionField:     VkBool32               shaderUniformBufferArrayNonUniformIndexing
+// genStructOrUnionField:     VkBool32               shaderSampledImageArrayNonUniformIndexing
+// genStructOrUnionField:     VkBool32               shaderStorageBufferArrayNonUniformIndexing
+// genStructOrUnionField:     VkBool32               shaderStorageImageArrayNonUniformIndexing
+// genStructOrUnionField:     VkBool32               shaderInputAttachmentArrayNonUniformIndexing
+// genStructOrUnionField:     VkBool32               shaderUniformTexelBufferArrayNonUniformIndexing
+// genStructOrUnionField:     VkBool32               shaderStorageTexelBufferArrayNonUniformIndexing
+// genStructOrUnionField:     VkBool32               descriptorBindingUniformBufferUpdateAfterBind
+// genStructOrUnionField:     VkBool32               descriptorBindingSampledImageUpdateAfterBind
+// genStructOrUnionField:     VkBool32               descriptorBindingStorageImageUpdateAfterBind
+// genStructOrUnionField:     VkBool32               descriptorBindingStorageBufferUpdateAfterBind
+// genStructOrUnionField:     VkBool32               descriptorBindingUniformTexelBufferUpdateAfterBind
+// genStructOrUnionField:     VkBool32               descriptorBindingStorageTexelBufferUpdateAfterBind
+// genStructOrUnionField:     VkBool32               descriptorBindingUpdateUnusedWhilePending
+// genStructOrUnionField:     VkBool32               descriptorBindingPartiallyBound
+// genStructOrUnionField:     VkBool32               descriptorBindingVariableDescriptorCount
+// genStructOrUnionField:     VkBool32               runtimeDescriptorArray
+// genType for VkPhysicalDeviceDescriptorIndexingPropertiesEXT
+// genStruct for VkPhysicalDeviceDescriptorIndexingPropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                            pNext
+// genStructOrUnionField:     uint32_t               maxUpdateAfterBindDescriptorsInAllPools
+// genStructOrUnionField:     VkBool32               shaderUniformBufferArrayNonUniformIndexingNative
+// genStructOrUnionField:     VkBool32               shaderSampledImageArrayNonUniformIndexingNative
+// genStructOrUnionField:     VkBool32               shaderStorageBufferArrayNonUniformIndexingNative
+// genStructOrUnionField:     VkBool32               shaderStorageImageArrayNonUniformIndexingNative
+// genStructOrUnionField:     VkBool32               shaderInputAttachmentArrayNonUniformIndexingNative
+// genStructOrUnionField:     VkBool32               robustBufferAccessUpdateAfterBind
+// genStructOrUnionField:     VkBool32               quadDivergentImplicitLod
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorUpdateAfterBindSamplers
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorUpdateAfterBindUniformBuffers
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorUpdateAfterBindStorageBuffers
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorUpdateAfterBindSampledImages
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorUpdateAfterBindStorageImages
+// genStructOrUnionField:     uint32_t               maxPerStageDescriptorUpdateAfterBindInputAttachments
+// genStructOrUnionField:     uint32_t               maxPerStageUpdateAfterBindResources
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUpdateAfterBindSamplers
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUpdateAfterBindUniformBuffers
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUpdateAfterBindUniformBuffersDynamic
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUpdateAfterBindStorageBuffers
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUpdateAfterBindStorageBuffersDynamic
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUpdateAfterBindSampledImages
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUpdateAfterBindStorageImages
+// genStructOrUnionField:     uint32_t               maxDescriptorSetUpdateAfterBindInputAttachments
+// genType for VkDescriptorSetVariableDescriptorCountAllocateInfoEXT
+// genStruct for VkDescriptorSetVariableDescriptorCountAllocateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*            pNext
+// genStructOrUnionField:     uint32_t               descriptorSetCount
+// genStructOrUnionField:     const uint32_t* pDescriptorCounts
+// genType for VkDescriptorSetVariableDescriptorCountLayoutSupportEXT
+// genStruct for VkDescriptorSetVariableDescriptorCountLayoutSupportEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*            pNext
+// genStructOrUnionField:     uint32_t         maxVariableDescriptorCount
+// genEnum for VK_EXT_DESCRIPTOR_INDEXING_SPEC_VERSION
+// genEnum for VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_shader_viewport_index_layer
 
+// genEnum for VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_SPEC_VERSION
+// genEnum for VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_global_priority
 
+// genGroup for VkQueueGlobalPriorityEXT
+// genType for VkDeviceQueueGlobalPriorityCreateInfoEXT
+// genStruct for VkDeviceQueueGlobalPriorityCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                    pNext
+// genStructOrUnionField:     VkQueueGlobalPriorityEXT       globalPriority
+// genEnum for VK_EXT_GLOBAL_PRIORITY_SPEC_VERSION
+// genEnum for VK_EXT_GLOBAL_PRIORITY_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_external_memory_host
 
+// genType for VkImportMemoryHostPointerInfoEXT
+// genStruct for VkImportMemoryHostPointerInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void* pNext
+// genStructOrUnionField:     VkExternalMemoryHandleTypeFlagBits handleType
+// genStructOrUnionField:     void* pHostPointer
+// genType for VkMemoryHostPointerPropertiesEXT
+// genStruct for VkMemoryHostPointerPropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     uint32_t memoryTypeBits
+// genType for VkPhysicalDeviceExternalMemoryHostPropertiesEXT
+// genStruct for VkPhysicalDeviceExternalMemoryHostPropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void* pNext
+// genStructOrUnionField:     VkDeviceSize minImportedHostPointerAlignment
+// genEnum for VK_EXT_EXTERNAL_MEMORY_HOST_SPEC_VERSION
+// genEnum for VK_EXT_EXTERNAL_MEMORY_HOST_EXTENSION_NAME
 VkResult goldfish_frontend_vkGetMemoryHostPointerPropertiesEXT(
     VkDevice device,
     VkExternalMemoryHandleTypeFlagBits handleType,
@@ -2521,6 +5767,8 @@ VkResult goldfish_frontend_vkGetMemoryHostPointerPropertiesEXT(
 
 #ifdef VK_AMD_buffer_marker
 
+// genEnum for VK_AMD_BUFFER_MARKER_SPEC_VERSION
+// genEnum for VK_AMD_BUFFER_MARKER_EXTENSION_NAME
 void goldfish_frontend_vkCmdWriteBufferMarkerAMD(
     VkCommandBuffer commandBuffer,
     VkPipelineStageFlagBits pipelineStage,
@@ -2533,18 +5781,70 @@ void goldfish_frontend_vkCmdWriteBufferMarkerAMD(
 
 #ifdef VK_AMD_shader_core_properties
 
+// genType for VkPhysicalDeviceShaderCorePropertiesAMD
+// genStruct for VkPhysicalDeviceShaderCorePropertiesAMD
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*    pNext
+// genStructOrUnionField:     uint32_t shaderEngineCount
+// genStructOrUnionField:     uint32_t shaderArraysPerEngineCount
+// genStructOrUnionField:     uint32_t computeUnitsPerShaderArray
+// genStructOrUnionField:     uint32_t simdPerComputeUnit
+// genStructOrUnionField:     uint32_t wavefrontsPerSimd
+// genStructOrUnionField:     uint32_t wavefrontSize
+// genStructOrUnionField:     uint32_t sgprsPerSimd
+// genStructOrUnionField:     uint32_t minSgprAllocation
+// genStructOrUnionField:     uint32_t maxSgprAllocation
+// genStructOrUnionField:     uint32_t sgprAllocationGranularity
+// genStructOrUnionField:     uint32_t vgprsPerSimd
+// genStructOrUnionField:     uint32_t minVgprAllocation
+// genStructOrUnionField:     uint32_t maxVgprAllocation
+// genStructOrUnionField:     uint32_t vgprAllocationGranularity
+// genEnum for VK_AMD_SHADER_CORE_PROPERTIES_SPEC_VERSION
+// genEnum for VK_AMD_SHADER_CORE_PROPERTIES_EXTENSION_NAME
 #endif
 
 #ifdef VK_EXT_vertex_attribute_divisor
 
+// genType for VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT
+// genStruct for VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                  pNext
+// genStructOrUnionField:     uint32_t               maxVertexAttribDivisor
+// genType for VkVertexInputBindingDivisorDescriptionEXT
+// genStruct for VkVertexInputBindingDivisorDescriptionEXT
+// genStructOrUnionField:     uint32_t          binding
+// genStructOrUnionField:     uint32_t          divisor
+// genType for VkPipelineVertexInputDivisorStateCreateInfoEXT
+// genStruct for VkPipelineVertexInputDivisorStateCreateInfoEXT
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     const void*                         pNext
+// genStructOrUnionField:     uint32_t                            vertexBindingDivisorCount
+// genStructOrUnionField:     const VkVertexInputBindingDivisorDescriptionEXT*      pVertexBindingDivisors
+// genEnum for VK_EXT_VERTEX_ATTRIBUTE_DIVISOR_SPEC_VERSION
+// genEnum for VK_EXT_VERTEX_ATTRIBUTE_DIVISOR_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_shader_subgroup_partitioned
 
+// genEnum for VK_NV_SHADER_SUBGROUP_PARTITIONED_SPEC_VERSION
+// genEnum for VK_NV_SHADER_SUBGROUP_PARTITIONED_EXTENSION_NAME
 #endif
 
 #ifdef VK_NV_device_diagnostic_checkpoints
 
+// genType for VkQueueFamilyCheckpointPropertiesNV
+// genStruct for VkQueueFamilyCheckpointPropertiesNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*           pNext
+// genStructOrUnionField:     VkPipelineStageFlags checkpointExecutionStageMask
+// genType for VkCheckpointDataNV
+// genStruct for VkCheckpointDataNV
+// genStructOrUnionField:     VkStructureType sType
+// genStructOrUnionField:     void*                  pNext
+// genStructOrUnionField:     VkPipelineStageFlagBits   stage
+// genStructOrUnionField:     void* pCheckpointMarker
+// genEnum for VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_SPEC_VERSION
+// genEnum for VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME
 void goldfish_frontend_vkCmdSetCheckpointNV(
     VkCommandBuffer commandBuffer,
     const void* pCheckpointMarker)
@@ -2557,4 +5857,7 @@ void goldfish_frontend_vkGetQueueCheckpointDataNV(
 ;
 
 #endif
+
+
+#include <vulkan.h>
 

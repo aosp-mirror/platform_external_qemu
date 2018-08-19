@@ -20,6 +20,8 @@ LOCAL_STATIC_LIBRARIES += $(cereal_STATIC_LIBRARIES)
 
 LOCAL_SRC_FILES := \
     guest/goldfish_vk_frontend.cpp \
+    guest/goldfish_vk_encoder.cpp \
+    common/goldfish_vk_marshaling.cpp \
 
 $(call emugl-end-module)
 
