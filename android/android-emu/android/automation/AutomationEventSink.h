@@ -26,13 +26,16 @@ namespace automation {
 
 namespace pb = emulator_automation;
 
-// Receives automation events from other emulator subsystems so that they may
-// be recorded or streamed.
-
 enum class StreamEncoding { BinaryPbChunks, TextPb };
 
 // Forward declarations.
+class AutomationController;
 class AutomationControllerImpl;
+
+//
+// Receives automation events from other emulator subsystems so that they may
+// be recorded or streamed.
+//
 
 class AutomationEventSink {
     DISALLOW_COPY_AND_ASSIGN(AutomationEventSink);
@@ -42,10 +45,6 @@ class AutomationEventSink {
     AutomationEventSink() = default;
 
 public:
-    // Helper method to the global instance of the AutomationEventSink,
-    // equivalent to calling AnimationController::get().getEventSink().
-    static AutomationEventSink& get();
-
     // Register a stream to write recorded events out to.
     // |stream| - Stream pointer, assumes that the pointer remains valid until
     //            unregisterStream is called.
@@ -55,9 +54,8 @@ public:
     // Unregister a stream.
     void unregisterStream(android::base::Stream* stream);
 
-    // TODO(jwmcglynn): Create a time source that we can use to get
-    // current time.
-    void recordPhysicalModelEvent(pb::Time& time,
+    // Record an event from the physical model.
+    void recordPhysicalModelEvent(uint64_t timeNs,
                                   pb::PhysicalModelEvent& event);
 
 private:
