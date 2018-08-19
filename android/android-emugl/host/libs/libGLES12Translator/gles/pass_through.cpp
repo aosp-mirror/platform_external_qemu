@@ -18,7 +18,7 @@
 
 #if DEBUG
 #define DPRINT(fmt,...) do { \
-    DLOG("gles12 underlying: " fmt, ##__VA_ARGS__); \
+    GL_DLOG("gles12 underlying: " fmt, ##__VA_ARGS__); \
 } while(0)
 #else
 #define DPRINT(...)
