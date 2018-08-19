@@ -91,6 +91,7 @@ include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
 include $(EMUGL_PATH)/host/libs/libOpenGLESDispatch/Android.mk
 
 # Vulkan
+include $(EMUGL_PATH)/host/libs/libOpenglRender/vulkan/cereal/Android.mk
 include $(EMUGL_PATH)/host/libs/libOpenglRender/vulkan/Android.mk
 
 # Host shared libraries
