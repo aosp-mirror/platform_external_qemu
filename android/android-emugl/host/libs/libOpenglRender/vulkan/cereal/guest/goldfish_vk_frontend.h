@@ -634,7 +634,7 @@ void goldfish_frontend_vkCmdSetDepthBias(
 
 void goldfish_frontend_vkCmdSetBlendConstants(
     VkCommandBuffer commandBuffer,
-    const float blendConstants[4])
+    const float blendConstants)
 ;
 
 void goldfish_frontend_vkCmdSetDepthBounds(
@@ -1329,7 +1329,7 @@ VkResult goldfish_frontend_vkCreateWaylandSurfaceKHR(
 VkBool32 goldfish_frontend_vkGetPhysicalDeviceWaylandPresentationSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex,
-    struct wl_display* display)
+    wl_display* display)
 ;
 
 #endif
@@ -1641,19 +1641,19 @@ VkResult goldfish_frontend_vkCreateRenderPass2KHR(
 
 void goldfish_frontend_vkCmdBeginRenderPass2KHR(
     VkCommandBuffer commandBuffer,
-    const VkRenderPassBeginInfo*      pRenderPassBegin,
-    const VkSubpassBeginInfoKHR*      pSubpassBeginInfo)
+    const VkRenderPassBeginInfo* pRenderPassBegin,
+    const VkSubpassBeginInfoKHR* pSubpassBeginInfo)
 ;
 
 void goldfish_frontend_vkCmdNextSubpass2KHR(
     VkCommandBuffer commandBuffer,
-    const VkSubpassBeginInfoKHR*      pSubpassBeginInfo,
-    const VkSubpassEndInfoKHR*        pSubpassEndInfo)
+    const VkSubpassBeginInfoKHR* pSubpassBeginInfo,
+    const VkSubpassEndInfoKHR* pSubpassEndInfo)
 ;
 
 void goldfish_frontend_vkCmdEndRenderPass2KHR(
     VkCommandBuffer commandBuffer,
-    const VkSubpassEndInfoKHR*        pSubpassEndInfo)
+    const VkSubpassEndInfoKHR* pSubpassEndInfo)
 ;
 
 #endif
@@ -2136,7 +2136,7 @@ VkResult goldfish_frontend_vkRegisterObjectsNVX(
     VkDevice device,
     VkObjectTableNVX objectTable,
     uint32_t objectCount,
-    const VkObjectTableEntryNVX* const*    ppObjectTableEntries,
+    const VkObjectTableEntryNVX* const* ppObjectTableEntries,
     const uint32_t* pObjectIndices)
 ;
 
@@ -2398,14 +2398,14 @@ void goldfish_frontend_vkSubmitDebugUtilsMessageEXT(
 
 VkResult goldfish_frontend_vkGetAndroidHardwareBufferPropertiesANDROID(
     VkDevice device,
-    const struct AHardwareBuffer* buffer,
+    const AHardwareBuffer* buffer,
     VkAndroidHardwareBufferPropertiesANDROID* pProperties)
 ;
 
 VkResult goldfish_frontend_vkGetMemoryAndroidHardwareBufferANDROID(
     VkDevice device,
     const VkMemoryGetAndroidHardwareBufferInfoANDROID* pInfo,
-    struct AHardwareBuffer** pBuffer)
+    AHardwareBuffer** pBuffer)
 ;
 
 #endif
@@ -2557,4 +2557,7 @@ void goldfish_frontend_vkGetQueueCheckpointDataNV(
 ;
 
 #endif
+
+
+#include <vulkan.h>
 
