@@ -21,7 +21,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
 
-#include "android/automation/proto/automation.pb.h"
+#include "android/automation/AutomationEventSink.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
@@ -1001,6 +1001,9 @@ int PhysicalModelImpl::record(const char* filename) {
     mPlaybackState = PLAYBACK_STATE_RECORDING;
     mPlaybackAndRecordingStartTimeNs = mModelTimeNs;
     mRecordingAndPlaybackStream->putBe32(kPlaybackFileVersion);
+    automation::AutomationEventSink::get().registerStream(
+            mRecordingAndPlaybackStream.get(),
+            automation::StreamEncoding::BinaryPbChunks);
     return 0;
 }
 
@@ -1073,6 +1076,11 @@ int PhysicalModelImpl::playback(const char* filename) {
 }
 
 void PhysicalModelImpl::stopRecordAndPlayback() {
+    if (mRecordingAndPlaybackStream &&
+        mPlaybackState == PLAYBACK_STATE_RECORDING) {
+        automation::AutomationEventSink::get().unregisterStream(
+                mRecordingAndPlaybackStream.get());
+    }
     mRecordingAndPlaybackStream.reset(nullptr);
     mPlaybackState = PLAYBACK_STATE_NONE;
     mPlaybackAndRecordingStartTimeNs = 0;
@@ -1140,25 +1148,18 @@ template <typename ValueType>
 void PhysicalModelImpl::generateEvent(PhysicalParameter type,
                    PhysicalInterpolation mode,
                    ValueType value) {
-    if (mPlaybackState != PLAYBACK_STATE_RECORDING) {
-        return;
-    }
+    // TODO(jwmcglynn): For recordings we need some way to save the initial
+    // state.
+    pb::Time time;
+    time.set_timestamp(mModelTimeNs - mPlaybackAndRecordingStartTimeNs);
 
-    pb::RecordedEvent event;
-    event.set_stream_type(pb::RecordedEvent_StreamType_PHYSICAL_MODEL);
-    event.mutable_event_time()->set_timestamp(mModelTimeNs -
-                                              mPlaybackAndRecordingStartTimeNs);
+    pb::PhysicalModelEvent command;
+    command.set_type(toProto(type));
+    command.set_interpolation_method(toProto(mode));
+    setProtoValue(&command, value);
 
-    pb::PhysicalModelEvent* command = event.mutable_physical_model();
-    command->set_type(toProto(type));
-    command->set_interpolation_method(toProto(mode));
-    setProtoValue(command, value);
-
-    assert(mRecordingAndPlaybackStream.get());
-    std::string encodedProto;
-    if (event.SerializeToString(&encodedProto)) {
-        mRecordingAndPlaybackStream->putString(encodedProto);
-    }
+    automation::AutomationEventSink::get().recordPhysicalModelEvent(time,
+                                                                    command);
 }
 
 void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
