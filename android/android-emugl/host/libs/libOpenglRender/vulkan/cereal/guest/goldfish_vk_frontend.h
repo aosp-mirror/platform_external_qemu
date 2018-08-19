@@ -5,34 +5,40 @@
 
 #ifdef VK_VERSION_1_0
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateInstance len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateInstance(
     const VkInstanceCreateInfo* pCreateInfo,
     const VkAllocationCallbacks* pAllocator,
     VkInstance* pInstance)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyInstance len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyInstance(
     VkInstance instance,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEnumeratePhysicalDevices len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEnumeratePhysicalDevices(
     VkInstance instance,
     uint32_t* pPhysicalDeviceCount,
     VkPhysicalDevice* pPhysicalDevices)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceFeatures len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceFeatures(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceFeatures* pFeatures)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceFormatProperties len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceFormatProperties(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
     VkFormatProperties* pFormatProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceImageFormatProperties len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceImageFormatProperties(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
@@ -43,32 +49,38 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceImageFormatProperties(
     VkImageFormatProperties* pImageFormatProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceProperties len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceProperties* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceQueueFamilyProperties len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceQueueFamilyProperties(
     VkPhysicalDevice physicalDevice,
     uint32_t* pQueueFamilyPropertyCount,
     VkQueueFamilyProperties* pQueueFamilyProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceMemoryProperties len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceMemoryProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties* pMemoryProperties)
 ;
 
+/* VulkanType for return type: (vulkantype PFN_vkVoidFunction nonconst paramName vkGetInstanceProcAddr len None optional? False staticArrExpr  0) */
 PFN_vkVoidFunction goldfish_frontend_vkGetInstanceProcAddr(
     VkInstance instance,
     const char* pName)
 ;
 
+/* VulkanType for return type: (vulkantype PFN_vkVoidFunction nonconst paramName vkGetDeviceProcAddr len None optional? False staticArrExpr  0) */
 PFN_vkVoidFunction goldfish_frontend_vkGetDeviceProcAddr(
     VkDevice device,
     const char* pName)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDevice len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDevice(
     VkPhysicalDevice physicalDevice,
     const VkDeviceCreateInfo* pCreateInfo,
@@ -76,17 +88,20 @@ VkResult goldfish_frontend_vkCreateDevice(
     VkDevice* pDevice)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyDevice len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyDevice(
     VkDevice device,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEnumerateInstanceExtensionProperties len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEnumerateInstanceExtensionProperties(
     const char* pLayerName,
     uint32_t* pPropertyCount,
     VkExtensionProperties* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEnumerateDeviceExtensionProperties len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEnumerateDeviceExtensionProperties(
     VkPhysicalDevice physicalDevice,
     const char* pLayerName,
@@ -94,17 +109,20 @@ VkResult goldfish_frontend_vkEnumerateDeviceExtensionProperties(
     VkExtensionProperties* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEnumerateInstanceLayerProperties len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEnumerateInstanceLayerProperties(
     uint32_t* pPropertyCount,
     VkLayerProperties* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEnumerateDeviceLayerProperties len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEnumerateDeviceLayerProperties(
     VkPhysicalDevice physicalDevice,
     uint32_t* pPropertyCount,
     VkLayerProperties* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetDeviceQueue len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetDeviceQueue(
     VkDevice device,
     uint32_t queueFamilyIndex,
@@ -112,6 +130,7 @@ void goldfish_frontend_vkGetDeviceQueue(
     VkQueue* pQueue)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkQueueSubmit len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkQueueSubmit(
     VkQueue queue,
     uint32_t submitCount,
@@ -119,14 +138,17 @@ VkResult goldfish_frontend_vkQueueSubmit(
     VkFence fence)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkQueueWaitIdle len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkQueueWaitIdle(
     VkQueue queue)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkDeviceWaitIdle len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkDeviceWaitIdle(
     VkDevice device)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkAllocateMemory len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkAllocateMemory(
     VkDevice device,
     const VkMemoryAllocateInfo* pAllocateInfo,
@@ -134,12 +156,14 @@ VkResult goldfish_frontend_vkAllocateMemory(
     VkDeviceMemory* pMemory)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkFreeMemory len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkFreeMemory(
     VkDevice device,
     VkDeviceMemory memory,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkMapMemory len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkMapMemory(
     VkDevice device,
     VkDeviceMemory memory,
@@ -149,29 +173,34 @@ VkResult goldfish_frontend_vkMapMemory(
     void** ppData)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkUnmapMemory len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkUnmapMemory(
     VkDevice device,
     VkDeviceMemory memory)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkFlushMappedMemoryRanges len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkFlushMappedMemoryRanges(
     VkDevice device,
     uint32_t memoryRangeCount,
     const VkMappedMemoryRange* pMemoryRanges)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkInvalidateMappedMemoryRanges len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkInvalidateMappedMemoryRanges(
     VkDevice device,
     uint32_t memoryRangeCount,
     const VkMappedMemoryRange* pMemoryRanges)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetDeviceMemoryCommitment len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetDeviceMemoryCommitment(
     VkDevice device,
     VkDeviceMemory memory,
     VkDeviceSize* pCommittedMemoryInBytes)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkBindBufferMemory len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkBindBufferMemory(
     VkDevice device,
     VkBuffer buffer,
@@ -179,6 +208,7 @@ VkResult goldfish_frontend_vkBindBufferMemory(
     VkDeviceSize memoryOffset)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkBindImageMemory len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkBindImageMemory(
     VkDevice device,
     VkImage image,
@@ -186,18 +216,21 @@ VkResult goldfish_frontend_vkBindImageMemory(
     VkDeviceSize memoryOffset)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetBufferMemoryRequirements len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetBufferMemoryRequirements(
     VkDevice device,
     VkBuffer buffer,
     VkMemoryRequirements* pMemoryRequirements)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetImageMemoryRequirements len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetImageMemoryRequirements(
     VkDevice device,
     VkImage image,
     VkMemoryRequirements* pMemoryRequirements)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetImageSparseMemoryRequirements len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetImageSparseMemoryRequirements(
     VkDevice device,
     VkImage image,
@@ -205,6 +238,7 @@ void goldfish_frontend_vkGetImageSparseMemoryRequirements(
     VkSparseImageMemoryRequirements* pSparseMemoryRequirements)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceSparseImageFormatProperties len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
@@ -216,6 +250,7 @@ void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties(
     VkSparseImageFormatProperties* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkQueueBindSparse len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkQueueBindSparse(
     VkQueue queue,
     uint32_t bindInfoCount,
@@ -223,6 +258,7 @@ VkResult goldfish_frontend_vkQueueBindSparse(
     VkFence fence)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateFence len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateFence(
     VkDevice device,
     const VkFenceCreateInfo* pCreateInfo,
@@ -230,23 +266,27 @@ VkResult goldfish_frontend_vkCreateFence(
     VkFence* pFence)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyFence len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyFence(
     VkDevice device,
     VkFence fence,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkResetFences len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkResetFences(
     VkDevice device,
     uint32_t fenceCount,
     const VkFence* pFences)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetFenceStatus len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetFenceStatus(
     VkDevice device,
     VkFence fence)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkWaitForFences len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkWaitForFences(
     VkDevice device,
     uint32_t fenceCount,
@@ -255,6 +295,7 @@ VkResult goldfish_frontend_vkWaitForFences(
     uint64_t timeout)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateSemaphore len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateSemaphore(
     VkDevice device,
     const VkSemaphoreCreateInfo* pCreateInfo,
@@ -262,12 +303,14 @@ VkResult goldfish_frontend_vkCreateSemaphore(
     VkSemaphore* pSemaphore)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroySemaphore len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroySemaphore(
     VkDevice device,
     VkSemaphore semaphore,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateEvent len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateEvent(
     VkDevice device,
     const VkEventCreateInfo* pCreateInfo,
@@ -275,27 +318,32 @@ VkResult goldfish_frontend_vkCreateEvent(
     VkEvent* pEvent)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyEvent len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyEvent(
     VkDevice device,
     VkEvent event,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetEventStatus len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetEventStatus(
     VkDevice device,
     VkEvent event)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkSetEvent len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkSetEvent(
     VkDevice device,
     VkEvent event)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkResetEvent len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkResetEvent(
     VkDevice device,
     VkEvent event)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateQueryPool len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateQueryPool(
     VkDevice device,
     const VkQueryPoolCreateInfo* pCreateInfo,
@@ -303,12 +351,14 @@ VkResult goldfish_frontend_vkCreateQueryPool(
     VkQueryPool* pQueryPool)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyQueryPool len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyQueryPool(
     VkDevice device,
     VkQueryPool queryPool,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetQueryPoolResults len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetQueryPoolResults(
     VkDevice device,
     VkQueryPool queryPool,
@@ -320,6 +370,7 @@ VkResult goldfish_frontend_vkGetQueryPoolResults(
     VkQueryResultFlags flags)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateBuffer len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateBuffer(
     VkDevice device,
     const VkBufferCreateInfo* pCreateInfo,
@@ -327,12 +378,14 @@ VkResult goldfish_frontend_vkCreateBuffer(
     VkBuffer* pBuffer)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyBuffer len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyBuffer(
     VkDevice device,
     VkBuffer buffer,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateBufferView len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateBufferView(
     VkDevice device,
     const VkBufferViewCreateInfo* pCreateInfo,
@@ -340,12 +393,14 @@ VkResult goldfish_frontend_vkCreateBufferView(
     VkBufferView* pView)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyBufferView len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyBufferView(
     VkDevice device,
     VkBufferView bufferView,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateImage len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateImage(
     VkDevice device,
     const VkImageCreateInfo* pCreateInfo,
@@ -353,12 +408,14 @@ VkResult goldfish_frontend_vkCreateImage(
     VkImage* pImage)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyImage len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyImage(
     VkDevice device,
     VkImage image,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetImageSubresourceLayout len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetImageSubresourceLayout(
     VkDevice device,
     VkImage image,
@@ -366,6 +423,7 @@ void goldfish_frontend_vkGetImageSubresourceLayout(
     VkSubresourceLayout* pLayout)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateImageView len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateImageView(
     VkDevice device,
     const VkImageViewCreateInfo* pCreateInfo,
@@ -373,12 +431,14 @@ VkResult goldfish_frontend_vkCreateImageView(
     VkImageView* pView)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyImageView len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyImageView(
     VkDevice device,
     VkImageView imageView,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateShaderModule len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateShaderModule(
     VkDevice device,
     const VkShaderModuleCreateInfo* pCreateInfo,
@@ -386,12 +446,14 @@ VkResult goldfish_frontend_vkCreateShaderModule(
     VkShaderModule* pShaderModule)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyShaderModule len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyShaderModule(
     VkDevice device,
     VkShaderModule shaderModule,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreatePipelineCache len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreatePipelineCache(
     VkDevice device,
     const VkPipelineCacheCreateInfo* pCreateInfo,
@@ -399,12 +461,14 @@ VkResult goldfish_frontend_vkCreatePipelineCache(
     VkPipelineCache* pPipelineCache)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyPipelineCache len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyPipelineCache(
     VkDevice device,
     VkPipelineCache pipelineCache,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPipelineCacheData len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPipelineCacheData(
     VkDevice device,
     VkPipelineCache pipelineCache,
@@ -412,6 +476,7 @@ VkResult goldfish_frontend_vkGetPipelineCacheData(
     void* pData)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkMergePipelineCaches len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkMergePipelineCaches(
     VkDevice device,
     VkPipelineCache dstCache,
@@ -419,6 +484,7 @@ VkResult goldfish_frontend_vkMergePipelineCaches(
     const VkPipelineCache* pSrcCaches)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateGraphicsPipelines len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateGraphicsPipelines(
     VkDevice device,
     VkPipelineCache pipelineCache,
@@ -428,6 +494,7 @@ VkResult goldfish_frontend_vkCreateGraphicsPipelines(
     VkPipeline* pPipelines)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateComputePipelines len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateComputePipelines(
     VkDevice device,
     VkPipelineCache pipelineCache,
@@ -437,12 +504,14 @@ VkResult goldfish_frontend_vkCreateComputePipelines(
     VkPipeline* pPipelines)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyPipeline len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyPipeline(
     VkDevice device,
     VkPipeline pipeline,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreatePipelineLayout len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreatePipelineLayout(
     VkDevice device,
     const VkPipelineLayoutCreateInfo* pCreateInfo,
@@ -450,12 +519,14 @@ VkResult goldfish_frontend_vkCreatePipelineLayout(
     VkPipelineLayout* pPipelineLayout)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyPipelineLayout len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyPipelineLayout(
     VkDevice device,
     VkPipelineLayout pipelineLayout,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateSampler len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateSampler(
     VkDevice device,
     const VkSamplerCreateInfo* pCreateInfo,
@@ -463,12 +534,14 @@ VkResult goldfish_frontend_vkCreateSampler(
     VkSampler* pSampler)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroySampler len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroySampler(
     VkDevice device,
     VkSampler sampler,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDescriptorSetLayout len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDescriptorSetLayout(
     VkDevice device,
     const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
@@ -476,12 +549,14 @@ VkResult goldfish_frontend_vkCreateDescriptorSetLayout(
     VkDescriptorSetLayout* pSetLayout)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyDescriptorSetLayout len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyDescriptorSetLayout(
     VkDevice device,
     VkDescriptorSetLayout descriptorSetLayout,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDescriptorPool len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDescriptorPool(
     VkDevice device,
     const VkDescriptorPoolCreateInfo* pCreateInfo,
@@ -489,24 +564,28 @@ VkResult goldfish_frontend_vkCreateDescriptorPool(
     VkDescriptorPool* pDescriptorPool)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyDescriptorPool len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyDescriptorPool(
     VkDevice device,
     VkDescriptorPool descriptorPool,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkResetDescriptorPool len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkResetDescriptorPool(
     VkDevice device,
     VkDescriptorPool descriptorPool,
     VkDescriptorPoolResetFlags flags)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkAllocateDescriptorSets len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkAllocateDescriptorSets(
     VkDevice device,
     const VkDescriptorSetAllocateInfo* pAllocateInfo,
     VkDescriptorSet* pDescriptorSets)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkFreeDescriptorSets len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkFreeDescriptorSets(
     VkDevice device,
     VkDescriptorPool descriptorPool,
@@ -514,6 +593,7 @@ VkResult goldfish_frontend_vkFreeDescriptorSets(
     const VkDescriptorSet* pDescriptorSets)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkUpdateDescriptorSets len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkUpdateDescriptorSets(
     VkDevice device,
     uint32_t descriptorWriteCount,
@@ -522,6 +602,7 @@ void goldfish_frontend_vkUpdateDescriptorSets(
     const VkCopyDescriptorSet* pDescriptorCopies)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateFramebuffer len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateFramebuffer(
     VkDevice device,
     const VkFramebufferCreateInfo* pCreateInfo,
@@ -529,12 +610,14 @@ VkResult goldfish_frontend_vkCreateFramebuffer(
     VkFramebuffer* pFramebuffer)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyFramebuffer len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyFramebuffer(
     VkDevice device,
     VkFramebuffer framebuffer,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateRenderPass len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateRenderPass(
     VkDevice device,
     const VkRenderPassCreateInfo* pCreateInfo,
@@ -542,18 +625,21 @@ VkResult goldfish_frontend_vkCreateRenderPass(
     VkRenderPass* pRenderPass)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyRenderPass len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyRenderPass(
     VkDevice device,
     VkRenderPass renderPass,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetRenderAreaGranularity len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetRenderAreaGranularity(
     VkDevice device,
     VkRenderPass renderPass,
     VkExtent2D* pGranularity)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateCommandPool len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateCommandPool(
     VkDevice device,
     const VkCommandPoolCreateInfo* pCreateInfo,
@@ -561,24 +647,28 @@ VkResult goldfish_frontend_vkCreateCommandPool(
     VkCommandPool* pCommandPool)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyCommandPool len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyCommandPool(
     VkDevice device,
     VkCommandPool commandPool,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkResetCommandPool len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkResetCommandPool(
     VkDevice device,
     VkCommandPool commandPool,
     VkCommandPoolResetFlags flags)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkAllocateCommandBuffers len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkAllocateCommandBuffers(
     VkDevice device,
     const VkCommandBufferAllocateInfo* pAllocateInfo,
     VkCommandBuffer* pCommandBuffers)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkFreeCommandBuffers len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkFreeCommandBuffers(
     VkDevice device,
     VkCommandPool commandPool,
@@ -586,26 +676,31 @@ void goldfish_frontend_vkFreeCommandBuffers(
     const VkCommandBuffer* pCommandBuffers)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkBeginCommandBuffer len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkBeginCommandBuffer(
     VkCommandBuffer commandBuffer,
     const VkCommandBufferBeginInfo* pBeginInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEndCommandBuffer len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEndCommandBuffer(
     VkCommandBuffer commandBuffer)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkResetCommandBuffer len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkResetCommandBuffer(
     VkCommandBuffer commandBuffer,
     VkCommandBufferResetFlags flags)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBindPipeline len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBindPipeline(
     VkCommandBuffer commandBuffer,
     VkPipelineBindPoint pipelineBindPoint,
     VkPipeline pipeline)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetViewport len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetViewport(
     VkCommandBuffer commandBuffer,
     uint32_t firstViewport,
@@ -613,6 +708,7 @@ void goldfish_frontend_vkCmdSetViewport(
     const VkViewport* pViewports)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetScissor len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetScissor(
     VkCommandBuffer commandBuffer,
     uint32_t firstScissor,
@@ -620,11 +716,13 @@ void goldfish_frontend_vkCmdSetScissor(
     const VkRect2D* pScissors)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetLineWidth len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetLineWidth(
     VkCommandBuffer commandBuffer,
     float lineWidth)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetDepthBias len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetDepthBias(
     VkCommandBuffer commandBuffer,
     float depthBiasConstantFactor,
@@ -632,35 +730,41 @@ void goldfish_frontend_vkCmdSetDepthBias(
     float depthBiasSlopeFactor)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetBlendConstants len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetBlendConstants(
     VkCommandBuffer commandBuffer,
     const float blendConstants[4])
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetDepthBounds len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetDepthBounds(
     VkCommandBuffer commandBuffer,
     float minDepthBounds,
     float maxDepthBounds)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetStencilCompareMask len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetStencilCompareMask(
     VkCommandBuffer commandBuffer,
     VkStencilFaceFlags faceMask,
     uint32_t compareMask)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetStencilWriteMask len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetStencilWriteMask(
     VkCommandBuffer commandBuffer,
     VkStencilFaceFlags faceMask,
     uint32_t writeMask)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetStencilReference len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetStencilReference(
     VkCommandBuffer commandBuffer,
     VkStencilFaceFlags faceMask,
     uint32_t reference)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBindDescriptorSets len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBindDescriptorSets(
     VkCommandBuffer commandBuffer,
     VkPipelineBindPoint pipelineBindPoint,
@@ -672,6 +776,7 @@ void goldfish_frontend_vkCmdBindDescriptorSets(
     const uint32_t* pDynamicOffsets)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBindIndexBuffer len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBindIndexBuffer(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -679,6 +784,7 @@ void goldfish_frontend_vkCmdBindIndexBuffer(
     VkIndexType indexType)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBindVertexBuffers len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBindVertexBuffers(
     VkCommandBuffer commandBuffer,
     uint32_t firstBinding,
@@ -687,6 +793,7 @@ void goldfish_frontend_vkCmdBindVertexBuffers(
     const VkDeviceSize* pOffsets)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDraw len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDraw(
     VkCommandBuffer commandBuffer,
     uint32_t vertexCount,
@@ -695,6 +802,7 @@ void goldfish_frontend_vkCmdDraw(
     uint32_t firstInstance)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDrawIndexed len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDrawIndexed(
     VkCommandBuffer commandBuffer,
     uint32_t indexCount,
@@ -704,6 +812,7 @@ void goldfish_frontend_vkCmdDrawIndexed(
     uint32_t firstInstance)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDrawIndirect len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDrawIndirect(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -712,6 +821,7 @@ void goldfish_frontend_vkCmdDrawIndirect(
     uint32_t stride)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDrawIndexedIndirect len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDrawIndexedIndirect(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -720,6 +830,7 @@ void goldfish_frontend_vkCmdDrawIndexedIndirect(
     uint32_t stride)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDispatch len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDispatch(
     VkCommandBuffer commandBuffer,
     uint32_t groupCountX,
@@ -727,12 +838,14 @@ void goldfish_frontend_vkCmdDispatch(
     uint32_t groupCountZ)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDispatchIndirect len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDispatchIndirect(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
     VkDeviceSize offset)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdCopyBuffer len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdCopyBuffer(
     VkCommandBuffer commandBuffer,
     VkBuffer srcBuffer,
@@ -741,6 +854,7 @@ void goldfish_frontend_vkCmdCopyBuffer(
     const VkBufferCopy* pRegions)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdCopyImage len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdCopyImage(
     VkCommandBuffer commandBuffer,
     VkImage srcImage,
@@ -751,6 +865,7 @@ void goldfish_frontend_vkCmdCopyImage(
     const VkImageCopy* pRegions)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBlitImage len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBlitImage(
     VkCommandBuffer commandBuffer,
     VkImage srcImage,
@@ -762,6 +877,7 @@ void goldfish_frontend_vkCmdBlitImage(
     VkFilter filter)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdCopyBufferToImage len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdCopyBufferToImage(
     VkCommandBuffer commandBuffer,
     VkBuffer srcBuffer,
@@ -771,6 +887,7 @@ void goldfish_frontend_vkCmdCopyBufferToImage(
     const VkBufferImageCopy* pRegions)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdCopyImageToBuffer len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdCopyImageToBuffer(
     VkCommandBuffer commandBuffer,
     VkImage srcImage,
@@ -780,6 +897,7 @@ void goldfish_frontend_vkCmdCopyImageToBuffer(
     const VkBufferImageCopy* pRegions)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdUpdateBuffer len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdUpdateBuffer(
     VkCommandBuffer commandBuffer,
     VkBuffer dstBuffer,
@@ -788,6 +906,7 @@ void goldfish_frontend_vkCmdUpdateBuffer(
     const void* pData)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdFillBuffer len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdFillBuffer(
     VkCommandBuffer commandBuffer,
     VkBuffer dstBuffer,
@@ -796,6 +915,7 @@ void goldfish_frontend_vkCmdFillBuffer(
     uint32_t data)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdClearColorImage len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdClearColorImage(
     VkCommandBuffer commandBuffer,
     VkImage image,
@@ -805,6 +925,7 @@ void goldfish_frontend_vkCmdClearColorImage(
     const VkImageSubresourceRange* pRanges)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdClearDepthStencilImage len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdClearDepthStencilImage(
     VkCommandBuffer commandBuffer,
     VkImage image,
@@ -814,6 +935,7 @@ void goldfish_frontend_vkCmdClearDepthStencilImage(
     const VkImageSubresourceRange* pRanges)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdClearAttachments len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdClearAttachments(
     VkCommandBuffer commandBuffer,
     uint32_t attachmentCount,
@@ -822,6 +944,7 @@ void goldfish_frontend_vkCmdClearAttachments(
     const VkClearRect* pRects)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdResolveImage len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdResolveImage(
     VkCommandBuffer commandBuffer,
     VkImage srcImage,
@@ -832,18 +955,21 @@ void goldfish_frontend_vkCmdResolveImage(
     const VkImageResolve* pRegions)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetEvent len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetEvent(
     VkCommandBuffer commandBuffer,
     VkEvent event,
     VkPipelineStageFlags stageMask)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdResetEvent len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdResetEvent(
     VkCommandBuffer commandBuffer,
     VkEvent event,
     VkPipelineStageFlags stageMask)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdWaitEvents len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdWaitEvents(
     VkCommandBuffer commandBuffer,
     uint32_t eventCount,
@@ -858,6 +984,7 @@ void goldfish_frontend_vkCmdWaitEvents(
     const VkImageMemoryBarrier* pImageMemoryBarriers)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdPipelineBarrier len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdPipelineBarrier(
     VkCommandBuffer commandBuffer,
     VkPipelineStageFlags srcStageMask,
@@ -871,6 +998,7 @@ void goldfish_frontend_vkCmdPipelineBarrier(
     const VkImageMemoryBarrier* pImageMemoryBarriers)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBeginQuery len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBeginQuery(
     VkCommandBuffer commandBuffer,
     VkQueryPool queryPool,
@@ -878,12 +1006,14 @@ void goldfish_frontend_vkCmdBeginQuery(
     VkQueryControlFlags flags)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdEndQuery len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdEndQuery(
     VkCommandBuffer commandBuffer,
     VkQueryPool queryPool,
     uint32_t query)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdResetQueryPool len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdResetQueryPool(
     VkCommandBuffer commandBuffer,
     VkQueryPool queryPool,
@@ -891,6 +1021,7 @@ void goldfish_frontend_vkCmdResetQueryPool(
     uint32_t queryCount)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdWriteTimestamp len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdWriteTimestamp(
     VkCommandBuffer commandBuffer,
     VkPipelineStageFlagBits pipelineStage,
@@ -898,6 +1029,7 @@ void goldfish_frontend_vkCmdWriteTimestamp(
     uint32_t query)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdCopyQueryPoolResults len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdCopyQueryPoolResults(
     VkCommandBuffer commandBuffer,
     VkQueryPool queryPool,
@@ -909,6 +1041,7 @@ void goldfish_frontend_vkCmdCopyQueryPoolResults(
     VkQueryResultFlags flags)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdPushConstants len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdPushConstants(
     VkCommandBuffer commandBuffer,
     VkPipelineLayout layout,
@@ -918,21 +1051,25 @@ void goldfish_frontend_vkCmdPushConstants(
     const void* pValues)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBeginRenderPass len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBeginRenderPass(
     VkCommandBuffer commandBuffer,
     const VkRenderPassBeginInfo* pRenderPassBegin,
     VkSubpassContents contents)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdNextSubpass len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdNextSubpass(
     VkCommandBuffer commandBuffer,
     VkSubpassContents contents)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdEndRenderPass len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdEndRenderPass(
     VkCommandBuffer commandBuffer)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdExecuteCommands len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdExecuteCommands(
     VkCommandBuffer commandBuffer,
     uint32_t commandBufferCount,
@@ -943,22 +1080,26 @@ void goldfish_frontend_vkCmdExecuteCommands(
 
 #ifdef VK_VERSION_1_1
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEnumerateInstanceVersion len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEnumerateInstanceVersion(
     uint32_t* pApiVersion)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkBindBufferMemory2 len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkBindBufferMemory2(
     VkDevice device,
     uint32_t bindInfoCount,
     const VkBindBufferMemoryInfo* pBindInfos)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkBindImageMemory2 len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkBindImageMemory2(
     VkDevice device,
     uint32_t bindInfoCount,
     const VkBindImageMemoryInfo* pBindInfos)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetDeviceGroupPeerMemoryFeatures len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetDeviceGroupPeerMemoryFeatures(
     VkDevice device,
     uint32_t heapIndex,
@@ -967,11 +1108,13 @@ void goldfish_frontend_vkGetDeviceGroupPeerMemoryFeatures(
     VkPeerMemoryFeatureFlags* pPeerMemoryFeatures)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetDeviceMask len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetDeviceMask(
     VkCommandBuffer commandBuffer,
     uint32_t deviceMask)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDispatchBase len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDispatchBase(
     VkCommandBuffer commandBuffer,
     uint32_t baseGroupX,
@@ -982,24 +1125,28 @@ void goldfish_frontend_vkCmdDispatchBase(
     uint32_t groupCountZ)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEnumeratePhysicalDeviceGroups len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEnumeratePhysicalDeviceGroups(
     VkInstance instance,
     uint32_t* pPhysicalDeviceGroupCount,
     VkPhysicalDeviceGroupProperties* pPhysicalDeviceGroupProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetImageMemoryRequirements2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetImageMemoryRequirements2(
     VkDevice device,
     const VkImageMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetBufferMemoryRequirements2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetBufferMemoryRequirements2(
     VkDevice device,
     const VkBufferMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetImageSparseMemoryRequirements2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetImageSparseMemoryRequirements2(
     VkDevice device,
     const VkImageSparseMemoryRequirementsInfo2* pInfo,
@@ -1007,39 +1154,46 @@ void goldfish_frontend_vkGetImageSparseMemoryRequirements2(
     VkSparseImageMemoryRequirements2* pSparseMemoryRequirements)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceFeatures2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceFeatures2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceFeatures2* pFeatures)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceProperties2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceProperties2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceProperties2* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceFormatProperties2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceFormatProperties2(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
     VkFormatProperties2* pFormatProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceImageFormatProperties2 len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceImageFormatProperties2(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
     VkImageFormatProperties2* pImageFormatProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceQueueFamilyProperties2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceQueueFamilyProperties2(
     VkPhysicalDevice physicalDevice,
     uint32_t* pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2* pQueueFamilyProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceMemoryProperties2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceMemoryProperties2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties2* pMemoryProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceSparseImageFormatProperties2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties2(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceSparseImageFormatInfo2* pFormatInfo,
@@ -1047,18 +1201,21 @@ void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties2(
     VkSparseImageFormatProperties2* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkTrimCommandPool len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkTrimCommandPool(
     VkDevice device,
     VkCommandPool commandPool,
     VkCommandPoolTrimFlags flags)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetDeviceQueue2 len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetDeviceQueue2(
     VkDevice device,
     const VkDeviceQueueInfo2* pQueueInfo,
     VkQueue* pQueue)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateSamplerYcbcrConversion len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateSamplerYcbcrConversion(
     VkDevice device,
     const VkSamplerYcbcrConversionCreateInfo* pCreateInfo,
@@ -1066,12 +1223,14 @@ VkResult goldfish_frontend_vkCreateSamplerYcbcrConversion(
     VkSamplerYcbcrConversion* pYcbcrConversion)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroySamplerYcbcrConversion len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroySamplerYcbcrConversion(
     VkDevice device,
     VkSamplerYcbcrConversion ycbcrConversion,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDescriptorUpdateTemplate len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDescriptorUpdateTemplate(
     VkDevice device,
     const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
@@ -1079,12 +1238,14 @@ VkResult goldfish_frontend_vkCreateDescriptorUpdateTemplate(
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyDescriptorUpdateTemplate len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyDescriptorUpdateTemplate(
     VkDevice device,
     VkDescriptorUpdateTemplate descriptorUpdateTemplate,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkUpdateDescriptorSetWithTemplate len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkUpdateDescriptorSetWithTemplate(
     VkDevice device,
     VkDescriptorSet descriptorSet,
@@ -1092,24 +1253,28 @@ void goldfish_frontend_vkUpdateDescriptorSetWithTemplate(
     const void* pData)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceExternalBufferProperties len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceExternalBufferProperties(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
     VkExternalBufferProperties* pExternalBufferProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceExternalFenceProperties len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceExternalFenceProperties(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo,
     VkExternalFenceProperties* pExternalFenceProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceExternalSemaphoreProperties len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceExternalSemaphoreProperties(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
     VkExternalSemaphoreProperties* pExternalSemaphoreProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetDescriptorSetLayoutSupport len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetDescriptorSetLayoutSupport(
     VkDevice device,
     const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
@@ -1120,12 +1285,14 @@ void goldfish_frontend_vkGetDescriptorSetLayoutSupport(
 
 #ifdef VK_KHR_surface
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroySurfaceKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroySurfaceKHR(
     VkInstance instance,
     VkSurfaceKHR surface,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceSurfaceSupportKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex,
@@ -1133,12 +1300,14 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceSupportKHR(
     VkBool32* pSupported)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceSurfaceCapabilitiesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
     VkSurfaceCapabilitiesKHR* pSurfaceCapabilities)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceSurfaceFormatsKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceFormatsKHR(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
@@ -1146,6 +1315,7 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceFormatsKHR(
     VkSurfaceFormatKHR* pSurfaceFormats)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceSurfacePresentModesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfacePresentModesKHR(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
@@ -1157,6 +1327,7 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfacePresentModesKHR(
 
 #ifdef VK_KHR_swapchain
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateSwapchainKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateSwapchainKHR(
     VkDevice device,
     const VkSwapchainCreateInfoKHR* pCreateInfo,
@@ -1164,12 +1335,14 @@ VkResult goldfish_frontend_vkCreateSwapchainKHR(
     VkSwapchainKHR* pSwapchain)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroySwapchainKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroySwapchainKHR(
     VkDevice device,
     VkSwapchainKHR swapchain,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetSwapchainImagesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetSwapchainImagesKHR(
     VkDevice device,
     VkSwapchainKHR swapchain,
@@ -1177,6 +1350,7 @@ VkResult goldfish_frontend_vkGetSwapchainImagesKHR(
     VkImage* pSwapchainImages)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkAcquireNextImageKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkAcquireNextImageKHR(
     VkDevice device,
     VkSwapchainKHR swapchain,
@@ -1186,22 +1360,26 @@ VkResult goldfish_frontend_vkAcquireNextImageKHR(
     uint32_t* pImageIndex)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkQueuePresentKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkQueuePresentKHR(
     VkQueue queue,
     const VkPresentInfoKHR* pPresentInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetDeviceGroupPresentCapabilitiesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetDeviceGroupPresentCapabilitiesKHR(
     VkDevice device,
     VkDeviceGroupPresentCapabilitiesKHR* pDeviceGroupPresentCapabilities)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetDeviceGroupSurfacePresentModesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetDeviceGroupSurfacePresentModesKHR(
     VkDevice device,
     VkSurfaceKHR surface,
     VkDeviceGroupPresentModeFlagsKHR* pModes)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDevicePresentRectanglesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDevicePresentRectanglesKHR(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
@@ -1209,6 +1387,7 @@ VkResult goldfish_frontend_vkGetPhysicalDevicePresentRectanglesKHR(
     VkRect2D* pRects)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkAcquireNextImage2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkAcquireNextImage2KHR(
     VkDevice device,
     const VkAcquireNextImageInfoKHR* pAcquireInfo,
@@ -1219,18 +1398,21 @@ VkResult goldfish_frontend_vkAcquireNextImage2KHR(
 
 #ifdef VK_KHR_display
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceDisplayPropertiesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceDisplayPropertiesKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t* pPropertyCount,
     VkDisplayPropertiesKHR* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceDisplayPlanePropertiesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceDisplayPlanePropertiesKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t* pPropertyCount,
     VkDisplayPlanePropertiesKHR* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetDisplayPlaneSupportedDisplaysKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetDisplayPlaneSupportedDisplaysKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t planeIndex,
@@ -1238,6 +1420,7 @@ VkResult goldfish_frontend_vkGetDisplayPlaneSupportedDisplaysKHR(
     VkDisplayKHR* pDisplays)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetDisplayModePropertiesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetDisplayModePropertiesKHR(
     VkPhysicalDevice physicalDevice,
     VkDisplayKHR display,
@@ -1245,6 +1428,7 @@ VkResult goldfish_frontend_vkGetDisplayModePropertiesKHR(
     VkDisplayModePropertiesKHR* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDisplayModeKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDisplayModeKHR(
     VkPhysicalDevice physicalDevice,
     VkDisplayKHR display,
@@ -1253,6 +1437,7 @@ VkResult goldfish_frontend_vkCreateDisplayModeKHR(
     VkDisplayModeKHR* pMode)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetDisplayPlaneCapabilitiesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetDisplayPlaneCapabilitiesKHR(
     VkPhysicalDevice physicalDevice,
     VkDisplayModeKHR mode,
@@ -1260,6 +1445,7 @@ VkResult goldfish_frontend_vkGetDisplayPlaneCapabilitiesKHR(
     VkDisplayPlaneCapabilitiesKHR* pCapabilities)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDisplayPlaneSurfaceKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDisplayPlaneSurfaceKHR(
     VkInstance instance,
     const VkDisplaySurfaceCreateInfoKHR* pCreateInfo,
@@ -1271,6 +1457,7 @@ VkResult goldfish_frontend_vkCreateDisplayPlaneSurfaceKHR(
 
 #ifdef VK_KHR_display_swapchain
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateSharedSwapchainsKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateSharedSwapchainsKHR(
     VkDevice device,
     uint32_t swapchainCount,
@@ -1283,6 +1470,7 @@ VkResult goldfish_frontend_vkCreateSharedSwapchainsKHR(
 
 #ifdef VK_KHR_xlib_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateXlibSurfaceKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateXlibSurfaceKHR(
     VkInstance instance,
     const VkXlibSurfaceCreateInfoKHR* pCreateInfo,
@@ -1290,6 +1478,7 @@ VkResult goldfish_frontend_vkCreateXlibSurfaceKHR(
     VkSurfaceKHR* pSurface)
 ;
 
+/* VulkanType for return type: (vulkantype VkBool32 nonconst paramName vkGetPhysicalDeviceXlibPresentationSupportKHR len None optional? False staticArrExpr  0) */
 VkBool32 goldfish_frontend_vkGetPhysicalDeviceXlibPresentationSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex,
@@ -1301,6 +1490,7 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceXlibPresentationSupportKHR(
 
 #ifdef VK_KHR_xcb_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateXcbSurfaceKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateXcbSurfaceKHR(
     VkInstance instance,
     const VkXcbSurfaceCreateInfoKHR* pCreateInfo,
@@ -1308,6 +1498,7 @@ VkResult goldfish_frontend_vkCreateXcbSurfaceKHR(
     VkSurfaceKHR* pSurface)
 ;
 
+/* VulkanType for return type: (vulkantype VkBool32 nonconst paramName vkGetPhysicalDeviceXcbPresentationSupportKHR len None optional? False staticArrExpr  0) */
 VkBool32 goldfish_frontend_vkGetPhysicalDeviceXcbPresentationSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex,
@@ -1319,6 +1510,7 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceXcbPresentationSupportKHR(
 
 #ifdef VK_KHR_wayland_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateWaylandSurfaceKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateWaylandSurfaceKHR(
     VkInstance instance,
     const VkWaylandSurfaceCreateInfoKHR* pCreateInfo,
@@ -1326,6 +1518,7 @@ VkResult goldfish_frontend_vkCreateWaylandSurfaceKHR(
     VkSurfaceKHR* pSurface)
 ;
 
+/* VulkanType for return type: (vulkantype VkBool32 nonconst paramName vkGetPhysicalDeviceWaylandPresentationSupportKHR len None optional? False staticArrExpr  0) */
 VkBool32 goldfish_frontend_vkGetPhysicalDeviceWaylandPresentationSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex,
@@ -1336,6 +1529,7 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceWaylandPresentationSupportKHR(
 
 #ifdef VK_KHR_mir_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateMirSurfaceKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateMirSurfaceKHR(
     VkInstance instance,
     const VkMirSurfaceCreateInfoKHR* pCreateInfo,
@@ -1343,6 +1537,7 @@ VkResult goldfish_frontend_vkCreateMirSurfaceKHR(
     VkSurfaceKHR* pSurface)
 ;
 
+/* VulkanType for return type: (vulkantype VkBool32 nonconst paramName vkGetPhysicalDeviceMirPresentationSupportKHR len None optional? False staticArrExpr  0) */
 VkBool32 goldfish_frontend_vkGetPhysicalDeviceMirPresentationSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex,
@@ -1353,6 +1548,7 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceMirPresentationSupportKHR(
 
 #ifdef VK_KHR_android_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateAndroidSurfaceKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateAndroidSurfaceKHR(
     VkInstance instance,
     const VkAndroidSurfaceCreateInfoKHR* pCreateInfo,
@@ -1364,6 +1560,7 @@ VkResult goldfish_frontend_vkCreateAndroidSurfaceKHR(
 
 #ifdef VK_KHR_win32_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateWin32SurfaceKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateWin32SurfaceKHR(
     VkInstance instance,
     const VkWin32SurfaceCreateInfoKHR* pCreateInfo,
@@ -1371,6 +1568,7 @@ VkResult goldfish_frontend_vkCreateWin32SurfaceKHR(
     VkSurfaceKHR* pSurface)
 ;
 
+/* VulkanType for return type: (vulkantype VkBool32 nonconst paramName vkGetPhysicalDeviceWin32PresentationSupportKHR len None optional? False staticArrExpr  0) */
 VkBool32 goldfish_frontend_vkGetPhysicalDeviceWin32PresentationSupportKHR(
     VkPhysicalDevice physicalDevice,
     uint32_t queueFamilyIndex)
@@ -1388,39 +1586,46 @@ VkBool32 goldfish_frontend_vkGetPhysicalDeviceWin32PresentationSupportKHR(
 
 #ifdef VK_KHR_get_physical_device_properties2
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceFeatures2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceFeatures2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceFeatures2* pFeatures)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceProperties2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceProperties2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceProperties2* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceFormatProperties2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceFormatProperties2KHR(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
     VkFormatProperties2* pFormatProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceImageFormatProperties2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceImageFormatProperties2KHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
     VkImageFormatProperties2* pImageFormatProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceQueueFamilyProperties2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceQueueFamilyProperties2KHR(
     VkPhysicalDevice physicalDevice,
     uint32_t* pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2* pQueueFamilyProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceMemoryProperties2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceMemoryProperties2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties2* pMemoryProperties)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceSparseImageFormatProperties2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceSparseImageFormatInfo2* pFormatInfo,
@@ -1432,6 +1637,7 @@ void goldfish_frontend_vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
 
 #ifdef VK_KHR_device_group
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetDeviceGroupPeerMemoryFeaturesKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetDeviceGroupPeerMemoryFeaturesKHR(
     VkDevice device,
     uint32_t heapIndex,
@@ -1440,11 +1646,13 @@ void goldfish_frontend_vkGetDeviceGroupPeerMemoryFeaturesKHR(
     VkPeerMemoryFeatureFlags* pPeerMemoryFeatures)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetDeviceMaskKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetDeviceMaskKHR(
     VkCommandBuffer commandBuffer,
     uint32_t deviceMask)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDispatchBaseKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDispatchBaseKHR(
     VkCommandBuffer commandBuffer,
     uint32_t baseGroupX,
@@ -1463,6 +1671,7 @@ void goldfish_frontend_vkCmdDispatchBaseKHR(
 
 #ifdef VK_KHR_maintenance1
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkTrimCommandPoolKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkTrimCommandPoolKHR(
     VkDevice device,
     VkCommandPool commandPool,
@@ -1473,6 +1682,7 @@ void goldfish_frontend_vkTrimCommandPoolKHR(
 
 #ifdef VK_KHR_device_group_creation
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkEnumeratePhysicalDeviceGroupsKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkEnumeratePhysicalDeviceGroupsKHR(
     VkInstance instance,
     uint32_t* pPhysicalDeviceGroupCount,
@@ -1483,6 +1693,7 @@ VkResult goldfish_frontend_vkEnumeratePhysicalDeviceGroupsKHR(
 
 #ifdef VK_KHR_external_memory_capabilities
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceExternalBufferPropertiesKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalBufferInfo* pExternalBufferInfo,
@@ -1497,12 +1708,14 @@ void goldfish_frontend_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
 
 #ifdef VK_KHR_external_memory_win32
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetMemoryWin32HandleKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetMemoryWin32HandleKHR(
     VkDevice device,
     const VkMemoryGetWin32HandleInfoKHR* pGetWin32HandleInfo,
     HANDLE* pHandle)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetMemoryWin32HandlePropertiesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetMemoryWin32HandlePropertiesKHR(
     VkDevice device,
     VkExternalMemoryHandleTypeFlagBits handleType,
@@ -1514,12 +1727,14 @@ VkResult goldfish_frontend_vkGetMemoryWin32HandlePropertiesKHR(
 
 #ifdef VK_KHR_external_memory_fd
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetMemoryFdKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetMemoryFdKHR(
     VkDevice device,
     const VkMemoryGetFdInfoKHR* pGetFdInfo,
     int* pFd)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetMemoryFdPropertiesKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetMemoryFdPropertiesKHR(
     VkDevice device,
     VkExternalMemoryHandleTypeFlagBits handleType,
@@ -1535,6 +1750,7 @@ VkResult goldfish_frontend_vkGetMemoryFdPropertiesKHR(
 
 #ifdef VK_KHR_external_semaphore_capabilities
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceExternalSemaphorePropertiesKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
@@ -1549,11 +1765,13 @@ void goldfish_frontend_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
 
 #ifdef VK_KHR_external_semaphore_win32
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkImportSemaphoreWin32HandleKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkImportSemaphoreWin32HandleKHR(
     VkDevice device,
     const VkImportSemaphoreWin32HandleInfoKHR* pImportSemaphoreWin32HandleInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetSemaphoreWin32HandleKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetSemaphoreWin32HandleKHR(
     VkDevice device,
     const VkSemaphoreGetWin32HandleInfoKHR* pGetWin32HandleInfo,
@@ -1564,11 +1782,13 @@ VkResult goldfish_frontend_vkGetSemaphoreWin32HandleKHR(
 
 #ifdef VK_KHR_external_semaphore_fd
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkImportSemaphoreFdKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkImportSemaphoreFdKHR(
     VkDevice device,
     const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetSemaphoreFdKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetSemaphoreFdKHR(
     VkDevice device,
     const VkSemaphoreGetFdInfoKHR* pGetFdInfo,
@@ -1579,6 +1799,7 @@ VkResult goldfish_frontend_vkGetSemaphoreFdKHR(
 
 #ifdef VK_KHR_push_descriptor
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdPushDescriptorSetKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdPushDescriptorSetKHR(
     VkCommandBuffer commandBuffer,
     VkPipelineBindPoint pipelineBindPoint,
@@ -1588,6 +1809,7 @@ void goldfish_frontend_vkCmdPushDescriptorSetKHR(
     const VkWriteDescriptorSet* pDescriptorWrites)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdPushDescriptorSetWithTemplateKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdPushDescriptorSetWithTemplateKHR(
     VkCommandBuffer commandBuffer,
     VkDescriptorUpdateTemplate descriptorUpdateTemplate,
@@ -1608,6 +1830,7 @@ void goldfish_frontend_vkCmdPushDescriptorSetWithTemplateKHR(
 
 #ifdef VK_KHR_descriptor_update_template
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDescriptorUpdateTemplateKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDescriptorUpdateTemplateKHR(
     VkDevice device,
     const VkDescriptorUpdateTemplateCreateInfo* pCreateInfo,
@@ -1615,12 +1838,14 @@ VkResult goldfish_frontend_vkCreateDescriptorUpdateTemplateKHR(
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyDescriptorUpdateTemplateKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyDescriptorUpdateTemplateKHR(
     VkDevice device,
     VkDescriptorUpdateTemplate descriptorUpdateTemplate,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkUpdateDescriptorSetWithTemplateKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkUpdateDescriptorSetWithTemplateKHR(
     VkDevice device,
     VkDescriptorSet descriptorSet,
@@ -1632,6 +1857,7 @@ void goldfish_frontend_vkUpdateDescriptorSetWithTemplateKHR(
 
 #ifdef VK_KHR_create_renderpass2
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateRenderPass2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateRenderPass2KHR(
     VkDevice device,
     const VkRenderPassCreateInfo2KHR* pCreateInfo,
@@ -1639,18 +1865,21 @@ VkResult goldfish_frontend_vkCreateRenderPass2KHR(
     VkRenderPass* pRenderPass)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBeginRenderPass2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBeginRenderPass2KHR(
     VkCommandBuffer commandBuffer,
     const VkRenderPassBeginInfo*      pRenderPassBegin,
     const VkSubpassBeginInfoKHR*      pSubpassBeginInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdNextSubpass2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdNextSubpass2KHR(
     VkCommandBuffer commandBuffer,
     const VkSubpassBeginInfoKHR*      pSubpassBeginInfo,
     const VkSubpassEndInfoKHR*        pSubpassEndInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdEndRenderPass2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdEndRenderPass2KHR(
     VkCommandBuffer commandBuffer,
     const VkSubpassEndInfoKHR*        pSubpassEndInfo)
@@ -1660,6 +1889,7 @@ void goldfish_frontend_vkCmdEndRenderPass2KHR(
 
 #ifdef VK_KHR_shared_presentable_image
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetSwapchainStatusKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetSwapchainStatusKHR(
     VkDevice device,
     VkSwapchainKHR swapchain)
@@ -1669,6 +1899,7 @@ VkResult goldfish_frontend_vkGetSwapchainStatusKHR(
 
 #ifdef VK_KHR_external_fence_capabilities
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceExternalFencePropertiesKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceExternalFencePropertiesKHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceExternalFenceInfo* pExternalFenceInfo,
@@ -1683,11 +1914,13 @@ void goldfish_frontend_vkGetPhysicalDeviceExternalFencePropertiesKHR(
 
 #ifdef VK_KHR_external_fence_win32
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkImportFenceWin32HandleKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkImportFenceWin32HandleKHR(
     VkDevice device,
     const VkImportFenceWin32HandleInfoKHR* pImportFenceWin32HandleInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetFenceWin32HandleKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetFenceWin32HandleKHR(
     VkDevice device,
     const VkFenceGetWin32HandleInfoKHR* pGetWin32HandleInfo,
@@ -1698,11 +1931,13 @@ VkResult goldfish_frontend_vkGetFenceWin32HandleKHR(
 
 #ifdef VK_KHR_external_fence_fd
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkImportFenceFdKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkImportFenceFdKHR(
     VkDevice device,
     const VkImportFenceFdInfoKHR* pImportFenceFdInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetFenceFdKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetFenceFdKHR(
     VkDevice device,
     const VkFenceGetFdInfoKHR* pGetFdInfo,
@@ -1717,12 +1952,14 @@ VkResult goldfish_frontend_vkGetFenceFdKHR(
 
 #ifdef VK_KHR_get_surface_capabilities2
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceSurfaceCapabilities2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceCapabilities2KHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo,
     VkSurfaceCapabilities2KHR* pSurfaceCapabilities)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceSurfaceFormats2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceFormats2KHR(
     VkPhysicalDevice physicalDevice,
     const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo,
@@ -1738,18 +1975,21 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceFormats2KHR(
 
 #ifdef VK_KHR_get_display_properties2
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceDisplayProperties2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceDisplayProperties2KHR(
     VkPhysicalDevice physicalDevice,
     uint32_t* pPropertyCount,
     VkDisplayProperties2KHR* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceDisplayPlaneProperties2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceDisplayPlaneProperties2KHR(
     VkPhysicalDevice physicalDevice,
     uint32_t* pPropertyCount,
     VkDisplayPlaneProperties2KHR* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetDisplayModeProperties2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetDisplayModeProperties2KHR(
     VkPhysicalDevice physicalDevice,
     VkDisplayKHR display,
@@ -1757,6 +1997,7 @@ VkResult goldfish_frontend_vkGetDisplayModeProperties2KHR(
     VkDisplayModeProperties2KHR* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetDisplayPlaneCapabilities2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetDisplayPlaneCapabilities2KHR(
     VkPhysicalDevice physicalDevice,
     const VkDisplayPlaneInfo2KHR* pDisplayPlaneInfo,
@@ -1779,18 +2020,21 @@ VkResult goldfish_frontend_vkGetDisplayPlaneCapabilities2KHR(
 
 #ifdef VK_KHR_get_memory_requirements2
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetImageMemoryRequirements2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetImageMemoryRequirements2KHR(
     VkDevice device,
     const VkImageMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetBufferMemoryRequirements2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetBufferMemoryRequirements2KHR(
     VkDevice device,
     const VkBufferMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetImageSparseMemoryRequirements2KHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetImageSparseMemoryRequirements2KHR(
     VkDevice device,
     const VkImageSparseMemoryRequirementsInfo2* pInfo,
@@ -1806,6 +2050,7 @@ void goldfish_frontend_vkGetImageSparseMemoryRequirements2KHR(
 
 #ifdef VK_KHR_sampler_ycbcr_conversion
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateSamplerYcbcrConversionKHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateSamplerYcbcrConversionKHR(
     VkDevice device,
     const VkSamplerYcbcrConversionCreateInfo* pCreateInfo,
@@ -1813,6 +2058,7 @@ VkResult goldfish_frontend_vkCreateSamplerYcbcrConversionKHR(
     VkSamplerYcbcrConversion* pYcbcrConversion)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroySamplerYcbcrConversionKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroySamplerYcbcrConversionKHR(
     VkDevice device,
     VkSamplerYcbcrConversion ycbcrConversion,
@@ -1823,12 +2069,14 @@ void goldfish_frontend_vkDestroySamplerYcbcrConversionKHR(
 
 #ifdef VK_KHR_bind_memory2
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkBindBufferMemory2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkBindBufferMemory2KHR(
     VkDevice device,
     uint32_t bindInfoCount,
     const VkBindBufferMemoryInfo* pBindInfos)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkBindImageMemory2KHR len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkBindImageMemory2KHR(
     VkDevice device,
     uint32_t bindInfoCount,
@@ -1839,6 +2087,7 @@ VkResult goldfish_frontend_vkBindImageMemory2KHR(
 
 #ifdef VK_KHR_maintenance3
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetDescriptorSetLayoutSupportKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetDescriptorSetLayoutSupportKHR(
     VkDevice device,
     const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
@@ -1849,6 +2098,7 @@ void goldfish_frontend_vkGetDescriptorSetLayoutSupportKHR(
 
 #ifdef VK_KHR_draw_indirect_count
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDrawIndirectCountKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDrawIndirectCountKHR(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -1859,6 +2109,7 @@ void goldfish_frontend_vkCmdDrawIndirectCountKHR(
     uint32_t stride)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDrawIndexedIndirectCountKHR len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDrawIndexedIndirectCountKHR(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -1877,6 +2128,7 @@ void goldfish_frontend_vkCmdDrawIndexedIndirectCountKHR(
 
 #ifdef VK_EXT_debug_report
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDebugReportCallbackEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDebugReportCallbackEXT(
     VkInstance instance,
     const VkDebugReportCallbackCreateInfoEXT* pCreateInfo,
@@ -1884,12 +2136,14 @@ VkResult goldfish_frontend_vkCreateDebugReportCallbackEXT(
     VkDebugReportCallbackEXT* pCallback)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyDebugReportCallbackEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyDebugReportCallbackEXT(
     VkInstance instance,
     VkDebugReportCallbackEXT callback,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDebugReportMessageEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDebugReportMessageEXT(
     VkInstance instance,
     VkDebugReportFlagsEXT flags,
@@ -1929,25 +2183,30 @@ void goldfish_frontend_vkDebugReportMessageEXT(
 
 #ifdef VK_EXT_debug_marker
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkDebugMarkerSetObjectTagEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkDebugMarkerSetObjectTagEXT(
     VkDevice device,
     const VkDebugMarkerObjectTagInfoEXT* pTagInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkDebugMarkerSetObjectNameEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkDebugMarkerSetObjectNameEXT(
     VkDevice device,
     const VkDebugMarkerObjectNameInfoEXT* pNameInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDebugMarkerBeginEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDebugMarkerBeginEXT(
     VkCommandBuffer commandBuffer,
     const VkDebugMarkerMarkerInfoEXT* pMarkerInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDebugMarkerEndEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDebugMarkerEndEXT(
     VkCommandBuffer commandBuffer)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDebugMarkerInsertEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDebugMarkerInsertEXT(
     VkCommandBuffer commandBuffer,
     const VkDebugMarkerMarkerInfoEXT* pMarkerInfo)
@@ -1965,6 +2224,7 @@ void goldfish_frontend_vkCmdDebugMarkerInsertEXT(
 
 #ifdef VK_AMD_draw_indirect_count
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDrawIndirectCountAMD len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDrawIndirectCountAMD(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -1975,6 +2235,7 @@ void goldfish_frontend_vkCmdDrawIndirectCountAMD(
     uint32_t stride)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdDrawIndexedIndirectCountAMD len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdDrawIndexedIndirectCountAMD(
     VkCommandBuffer commandBuffer,
     VkBuffer buffer,
@@ -2005,6 +2266,7 @@ void goldfish_frontend_vkCmdDrawIndexedIndirectCountAMD(
 
 #ifdef VK_AMD_shader_info
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetShaderInfoAMD len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetShaderInfoAMD(
     VkDevice device,
     VkPipeline pipeline,
@@ -2026,6 +2288,7 @@ VkResult goldfish_frontend_vkGetShaderInfoAMD(
 
 #ifdef VK_NV_external_memory_capabilities
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceExternalImageFormatPropertiesNV len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceExternalImageFormatPropertiesNV(
     VkPhysicalDevice physicalDevice,
     VkFormat format,
@@ -2045,6 +2308,7 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceExternalImageFormatPropertiesNV(
 
 #ifdef VK_NV_external_memory_win32
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetMemoryWin32HandleNV len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetMemoryWin32HandleNV(
     VkDevice device,
     VkDeviceMemory memory,
@@ -2064,6 +2328,7 @@ VkResult goldfish_frontend_vkGetMemoryWin32HandleNV(
 
 #ifdef VK_NN_vi_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateViSurfaceNN len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateViSurfaceNN(
     VkInstance instance,
     const VkViSurfaceCreateInfoNN* pCreateInfo,
@@ -2083,11 +2348,13 @@ VkResult goldfish_frontend_vkCreateViSurfaceNN(
 
 #ifdef VK_EXT_conditional_rendering
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBeginConditionalRenderingEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBeginConditionalRenderingEXT(
     VkCommandBuffer commandBuffer,
     const VkConditionalRenderingBeginInfoEXT* pConditionalRenderingBegin)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdEndConditionalRenderingEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdEndConditionalRenderingEXT(
     VkCommandBuffer commandBuffer)
 ;
@@ -2096,16 +2363,19 @@ void goldfish_frontend_vkCmdEndConditionalRenderingEXT(
 
 #ifdef VK_NVX_device_generated_commands
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdProcessCommandsNVX len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdProcessCommandsNVX(
     VkCommandBuffer commandBuffer,
     const VkCmdProcessCommandsInfoNVX* pProcessCommandsInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdReserveSpaceForCommandsNVX len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdReserveSpaceForCommandsNVX(
     VkCommandBuffer commandBuffer,
     const VkCmdReserveSpaceForCommandsInfoNVX* pReserveSpaceInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateIndirectCommandsLayoutNVX len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateIndirectCommandsLayoutNVX(
     VkDevice device,
     const VkIndirectCommandsLayoutCreateInfoNVX* pCreateInfo,
@@ -2113,12 +2383,14 @@ VkResult goldfish_frontend_vkCreateIndirectCommandsLayoutNVX(
     VkIndirectCommandsLayoutNVX* pIndirectCommandsLayout)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyIndirectCommandsLayoutNVX len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyIndirectCommandsLayoutNVX(
     VkDevice device,
     VkIndirectCommandsLayoutNVX indirectCommandsLayout,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateObjectTableNVX len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateObjectTableNVX(
     VkDevice device,
     const VkObjectTableCreateInfoNVX* pCreateInfo,
@@ -2126,12 +2398,14 @@ VkResult goldfish_frontend_vkCreateObjectTableNVX(
     VkObjectTableNVX* pObjectTable)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyObjectTableNVX len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyObjectTableNVX(
     VkDevice device,
     VkObjectTableNVX objectTable,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkRegisterObjectsNVX len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkRegisterObjectsNVX(
     VkDevice device,
     VkObjectTableNVX objectTable,
@@ -2140,6 +2414,7 @@ VkResult goldfish_frontend_vkRegisterObjectsNVX(
     const uint32_t* pObjectIndices)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkUnregisterObjectsNVX len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkUnregisterObjectsNVX(
     VkDevice device,
     VkObjectTableNVX objectTable,
@@ -2148,6 +2423,7 @@ VkResult goldfish_frontend_vkUnregisterObjectsNVX(
     const uint32_t* pObjectIndices)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(
     VkPhysicalDevice physicalDevice,
     VkDeviceGeneratedCommandsFeaturesNVX* pFeatures,
@@ -2158,6 +2434,7 @@ void goldfish_frontend_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(
 
 #ifdef VK_NV_clip_space_w_scaling
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetViewportWScalingNV len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetViewportWScalingNV(
     VkCommandBuffer commandBuffer,
     uint32_t firstViewport,
@@ -2169,6 +2446,7 @@ void goldfish_frontend_vkCmdSetViewportWScalingNV(
 
 #ifdef VK_EXT_direct_mode_display
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkReleaseDisplayEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkReleaseDisplayEXT(
     VkPhysicalDevice physicalDevice,
     VkDisplayKHR display)
@@ -2178,12 +2456,14 @@ VkResult goldfish_frontend_vkReleaseDisplayEXT(
 
 #ifdef VK_EXT_acquire_xlib_display
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkAcquireXlibDisplayEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkAcquireXlibDisplayEXT(
     VkPhysicalDevice physicalDevice,
     Display* dpy,
     VkDisplayKHR display)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetRandROutputDisplayEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetRandROutputDisplayEXT(
     VkPhysicalDevice physicalDevice,
     Display* dpy,
@@ -2195,6 +2475,7 @@ VkResult goldfish_frontend_vkGetRandROutputDisplayEXT(
 
 #ifdef VK_EXT_display_surface_counter
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPhysicalDeviceSurfaceCapabilities2EXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceCapabilities2EXT(
     VkPhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
@@ -2205,12 +2486,14 @@ VkResult goldfish_frontend_vkGetPhysicalDeviceSurfaceCapabilities2EXT(
 
 #ifdef VK_EXT_display_control
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkDisplayPowerControlEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkDisplayPowerControlEXT(
     VkDevice device,
     VkDisplayKHR display,
     const VkDisplayPowerInfoEXT* pDisplayPowerInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkRegisterDeviceEventEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkRegisterDeviceEventEXT(
     VkDevice device,
     const VkDeviceEventInfoEXT* pDeviceEventInfo,
@@ -2218,6 +2501,7 @@ VkResult goldfish_frontend_vkRegisterDeviceEventEXT(
     VkFence* pFence)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkRegisterDisplayEventEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkRegisterDisplayEventEXT(
     VkDevice device,
     VkDisplayKHR display,
@@ -2226,6 +2510,7 @@ VkResult goldfish_frontend_vkRegisterDisplayEventEXT(
     VkFence* pFence)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetSwapchainCounterEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetSwapchainCounterEXT(
     VkDevice device,
     VkSwapchainKHR swapchain,
@@ -2237,12 +2522,14 @@ VkResult goldfish_frontend_vkGetSwapchainCounterEXT(
 
 #ifdef VK_GOOGLE_display_timing
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetRefreshCycleDurationGOOGLE len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetRefreshCycleDurationGOOGLE(
     VkDevice device,
     VkSwapchainKHR swapchain,
     VkRefreshCycleDurationGOOGLE* pDisplayTimingProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetPastPresentationTimingGOOGLE len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetPastPresentationTimingGOOGLE(
     VkDevice device,
     VkSwapchainKHR swapchain,
@@ -2274,6 +2561,7 @@ VkResult goldfish_frontend_vkGetPastPresentationTimingGOOGLE(
 
 #ifdef VK_EXT_discard_rectangles
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetDiscardRectangleEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetDiscardRectangleEXT(
     VkCommandBuffer commandBuffer,
     uint32_t firstDiscardRectangle,
@@ -2293,6 +2581,7 @@ void goldfish_frontend_vkCmdSetDiscardRectangleEXT(
 
 #ifdef VK_EXT_hdr_metadata
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkSetHdrMetadataEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkSetHdrMetadataEXT(
     VkDevice device,
     uint32_t swapchainCount,
@@ -2304,6 +2593,7 @@ void goldfish_frontend_vkSetHdrMetadataEXT(
 
 #ifdef VK_MVK_ios_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateIOSSurfaceMVK len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateIOSSurfaceMVK(
     VkInstance instance,
     const VkIOSSurfaceCreateInfoMVK* pCreateInfo,
@@ -2315,6 +2605,7 @@ VkResult goldfish_frontend_vkCreateIOSSurfaceMVK(
 
 #ifdef VK_MVK_macos_surface
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateMacOSSurfaceMVK len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateMacOSSurfaceMVK(
     VkInstance instance,
     const VkMacOSSurfaceCreateInfoMVK* pCreateInfo,
@@ -2334,44 +2625,53 @@ VkResult goldfish_frontend_vkCreateMacOSSurfaceMVK(
 
 #ifdef VK_EXT_debug_utils
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkSetDebugUtilsObjectNameEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkSetDebugUtilsObjectNameEXT(
     VkDevice device,
     const VkDebugUtilsObjectNameInfoEXT* pNameInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkSetDebugUtilsObjectTagEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkSetDebugUtilsObjectTagEXT(
     VkDevice device,
     const VkDebugUtilsObjectTagInfoEXT* pTagInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkQueueBeginDebugUtilsLabelEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkQueueBeginDebugUtilsLabelEXT(
     VkQueue queue,
     const VkDebugUtilsLabelEXT* pLabelInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkQueueEndDebugUtilsLabelEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkQueueEndDebugUtilsLabelEXT(
     VkQueue queue)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkQueueInsertDebugUtilsLabelEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkQueueInsertDebugUtilsLabelEXT(
     VkQueue queue,
     const VkDebugUtilsLabelEXT* pLabelInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdBeginDebugUtilsLabelEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdBeginDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer,
     const VkDebugUtilsLabelEXT* pLabelInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdEndDebugUtilsLabelEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdEndDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdInsertDebugUtilsLabelEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdInsertDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer,
     const VkDebugUtilsLabelEXT* pLabelInfo)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateDebugUtilsMessengerEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateDebugUtilsMessengerEXT(
     VkInstance instance,
     const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
@@ -2379,12 +2679,14 @@ VkResult goldfish_frontend_vkCreateDebugUtilsMessengerEXT(
     VkDebugUtilsMessengerEXT* pMessenger)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyDebugUtilsMessengerEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyDebugUtilsMessengerEXT(
     VkInstance instance,
     VkDebugUtilsMessengerEXT messenger,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkSubmitDebugUtilsMessageEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkSubmitDebugUtilsMessageEXT(
     VkInstance instance,
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -2396,12 +2698,14 @@ void goldfish_frontend_vkSubmitDebugUtilsMessageEXT(
 
 #ifdef VK_ANDROID_external_memory_android_hardware_buffer
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetAndroidHardwareBufferPropertiesANDROID len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetAndroidHardwareBufferPropertiesANDROID(
     VkDevice device,
     const struct AHardwareBuffer* buffer,
     VkAndroidHardwareBufferPropertiesANDROID* pProperties)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetMemoryAndroidHardwareBufferANDROID len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetMemoryAndroidHardwareBufferANDROID(
     VkDevice device,
     const VkMemoryGetAndroidHardwareBufferInfoANDROID* pInfo,
@@ -2432,11 +2736,13 @@ VkResult goldfish_frontend_vkGetMemoryAndroidHardwareBufferANDROID(
 
 #ifdef VK_EXT_sample_locations
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetSampleLocationsEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetSampleLocationsEXT(
     VkCommandBuffer commandBuffer,
     const VkSampleLocationsInfoEXT* pSampleLocationsInfo)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetPhysicalDeviceMultisamplePropertiesEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetPhysicalDeviceMultisamplePropertiesEXT(
     VkPhysicalDevice physicalDevice,
     VkSampleCountFlagBits samples,
@@ -2467,6 +2773,7 @@ void goldfish_frontend_vkGetPhysicalDeviceMultisamplePropertiesEXT(
 
 #ifdef VK_EXT_validation_cache
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkCreateValidationCacheEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkCreateValidationCacheEXT(
     VkDevice device,
     const VkValidationCacheCreateInfoEXT* pCreateInfo,
@@ -2474,12 +2781,14 @@ VkResult goldfish_frontend_vkCreateValidationCacheEXT(
     VkValidationCacheEXT* pValidationCache)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkDestroyValidationCacheEXT len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkDestroyValidationCacheEXT(
     VkDevice device,
     VkValidationCacheEXT validationCache,
     const VkAllocationCallbacks* pAllocator)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkMergeValidationCachesEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkMergeValidationCachesEXT(
     VkDevice device,
     VkValidationCacheEXT dstCache,
@@ -2487,6 +2796,7 @@ VkResult goldfish_frontend_vkMergeValidationCachesEXT(
     const VkValidationCacheEXT* pSrcCaches)
 ;
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetValidationCacheDataEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetValidationCacheDataEXT(
     VkDevice device,
     VkValidationCacheEXT validationCache,
@@ -2510,6 +2820,7 @@ VkResult goldfish_frontend_vkGetValidationCacheDataEXT(
 
 #ifdef VK_EXT_external_memory_host
 
+/* VulkanType for return type: (vulkantype VkResult nonconst paramName vkGetMemoryHostPointerPropertiesEXT len None optional? False staticArrExpr  0) */
 VkResult goldfish_frontend_vkGetMemoryHostPointerPropertiesEXT(
     VkDevice device,
     VkExternalMemoryHandleTypeFlagBits handleType,
@@ -2521,6 +2832,7 @@ VkResult goldfish_frontend_vkGetMemoryHostPointerPropertiesEXT(
 
 #ifdef VK_AMD_buffer_marker
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdWriteBufferMarkerAMD len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdWriteBufferMarkerAMD(
     VkCommandBuffer commandBuffer,
     VkPipelineStageFlagBits pipelineStage,
@@ -2545,11 +2857,13 @@ void goldfish_frontend_vkCmdWriteBufferMarkerAMD(
 
 #ifdef VK_NV_device_diagnostic_checkpoints
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkCmdSetCheckpointNV len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkCmdSetCheckpointNV(
     VkCommandBuffer commandBuffer,
     const void* pCheckpointMarker)
 ;
 
+/* VulkanType for return type: (vulkantype void nonconst paramName vkGetQueueCheckpointDataNV len None optional? False staticArrExpr  0) */
 void goldfish_frontend_vkGetQueueCheckpointDataNV(
     VkQueue queue,
     uint32_t* pCheckpointDataCount,
@@ -2557,4 +2871,7 @@ void goldfish_frontend_vkGetQueueCheckpointDataNV(
 ;
 
 #endif
+
+
+#include <vulkan.h>
 
