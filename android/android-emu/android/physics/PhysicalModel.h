@@ -26,24 +26,29 @@ ANDROID_BEGIN_HEADER
 struct QAndroidPhysicalStateAgent;
 struct Stream;
 
-/*
- * Implements a model of an ambient environment containing a rigid
- * body, and produces accurately simulated sensor values for various
- * sensors in this environment.
- *
- * The physical model should be updated with target ambient and rigid
- * body state, and regularly polled for the most recent sensor values.
- *
- * Components that only require updates when the model is actively
- * changing (i.e. not at rest) should register state change callbacks
- * via setStateChangingCallbacks.  TargetStateChange callbacks occur
- * on the same thread that setTargetXXXXXX is called from.  Sensor
- * state changing callbacks may occur on an arbitrary thread.
- */
+namespace emulator_automation {
+    class InitialState;
+    class PhysicalModelEvent;
+    }  // namespace emulator_automation
 
-typedef struct PhysicalModel {
-    /* Opaque pointer used by the physical model c api. */
-    void* opaque;
+    /*
+     * Implements a model of an ambient environment containing a rigid
+     * body, and produces accurately simulated sensor values for various
+     * sensors in this environment.
+     *
+     * The physical model should be updated with target ambient and rigid
+     * body state, and regularly polled for the most recent sensor values.
+     *
+     * Components that only require updates when the model is actively
+     * changing (i.e. not at rest) should register state change callbacks
+     * via setStateChangingCallbacks.  TargetStateChange callbacks occur
+     * on the same thread that setTargetXXXXXX is called from.  Sensor
+     * state changing callbacks may occur on an arbitrary thread.
+     */
+
+    typedef struct PhysicalModel {
+        /* Opaque pointer used by the physical model c api. */
+        void* opaque;
 } PhysicalModel;
 
 /* Allocate and initialize a physical model */
@@ -106,30 +111,37 @@ void physicalModel_getTransform(PhysicalModel* model,
 void physicalModel_setPhysicalStateAgent(PhysicalModel* model,
         const struct QAndroidPhysicalStateAgent* agent);
 
-/* Save the physical model state to the specified stream. */
-void physicalModel_save(PhysicalModel* model, Stream* f);
+/* Save the full physical model state to the specified stream. */
+void physicalModel_snapshotSave(PhysicalModel* model, Stream* f);
 
-/* Load the physical model state from the specified stream. */
-int physicalModel_load(PhysicalModel* model, Stream* f);
+/* Load the full physical model state from the specified stream. */
+int physicalModel_snapshotLoad(PhysicalModel* model, Stream* f);
 
-/* Start recording physical changes to the specified file.
+/* Get the current state of the physical model, used for automation.
  * Returns 0 if successful.
  */
-int physicalModel_record(PhysicalModel* model, const char* filename);
+int physicalModel_saveState(PhysicalModel* model,
+                            emulator_automation::InitialState* state);
 
-/* Start playing back physical changes from the specified file.
+/* Load physical model state, used for automation.
  * Returns 0 if successful.
  */
-int physicalModel_playback(PhysicalModel* model, const char* filename);
+int physicalModel_loadState(PhysicalModel* model,
+                             const emulator_automation::InitialState& state);
+
+/* Replay a PhysicalModel event. */
+void physicalModel_replayEvent(
+        PhysicalModel* model,
+        const emulator_automation::PhysicalModelEvent& event);
 
 /* Start recording ground truth to the specified file.
  * Returns 0 if successful.
  */
 int physicalModel_recordGroundTruth(PhysicalModel* model, const char* filename);
 
-/* Stop all active recording and playback.
+/* Stop recording ground truth.
  * Returns 0 if successful.
  */
-int physicalModel_stopRecordAndPlayback(PhysicalModel* model);
+int physicalModel_stopRecording(PhysicalModel* model);
 
 ANDROID_END_HEADER

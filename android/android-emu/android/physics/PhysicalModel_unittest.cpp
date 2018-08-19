@@ -320,7 +320,7 @@ TEST(PhysicalModel, SaveLoad) {
     android::base::MemStream modelStream;
     Stream* saveStream = asStream(&modelStream);
 
-    physicalModel_save(model, saveStream);
+    physicalModel_snapshotSave(model, saveStream);
 
     const uint32_t streamEndMarker = 1923789U;
     stream_put_be32(saveStream, streamEndMarker);
@@ -328,7 +328,7 @@ TEST(PhysicalModel, SaveLoad) {
     physicalModel_free(model);
 
     PhysicalModel* loadedModel = physicalModel_new(false);
-    physicalModel_load(loadedModel, saveStream);
+    physicalModel_snapshotLoad(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
 
@@ -368,14 +368,14 @@ TEST(PhysicalModel, SaveLoadOverrides) {
     android::base::MemStream modelStream;
     Stream* saveStream = asStream(&modelStream);
 
-    physicalModel_save(model, saveStream);
+    physicalModel_snapshotSave(model, saveStream);
     physicalModel_free(model);
 
     const uint32_t streamEndMarker = 349087U;
     stream_put_be32(saveStream, streamEndMarker);
 
     PhysicalModel* loadedModel = physicalModel_new(false);
-    physicalModel_load(loadedModel, saveStream);
+    physicalModel_snapshotLoad(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
 
@@ -455,14 +455,14 @@ TEST(PhysicalModel, SaveLoadTargets) {
     android::base::MemStream modelStream;
     Stream* saveStream = asStream(&modelStream);
 
-    physicalModel_save(model, saveStream);
+    physicalModel_snapshotSave(model, saveStream);
     physicalModel_free(model);
 
     const uint32_t streamEndMarker = 3489U;
     stream_put_be32(saveStream, streamEndMarker);
 
     PhysicalModel* loadedModel = physicalModel_new(false);
-    physicalModel_load(loadedModel, saveStream);
+    physicalModel_snapshotLoad(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
 

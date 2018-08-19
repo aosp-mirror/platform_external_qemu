@@ -19,6 +19,7 @@
 
 /* forward declaration */
 struct QAndroidPhysicalStateAgent;
+typedef struct PhysicalModel PhysicalModel;
 
 ANDROID_BEGIN_HEADER
 
@@ -150,6 +151,9 @@ extern int64_t android_sensors_get_time_offset();
 /* Get the current sensor delay (determines update rate) */
 extern int32_t android_sensors_get_delay_ms();
 
+/* Get the physical model instance. */
+extern PhysicalModel* android_physical_model_instance();
+
 /* Get physical model values */
 extern int android_physical_model_get(
     int physical_parameter, float* out_a, float* out_b, float* out_c,
@@ -178,16 +182,10 @@ extern int android_physical_model_get_parameter_id_from_name(
 extern const char* android_physical_model_get_parameter_name_from_id(
     int physical_parameter_id );
 
-// Start recording physical changes to the specified file.
-extern int android_physical_model_record(const char* file_name);
-
-// Start playing back physical changes from the specified file.
-extern int android_physical_model_playback(const char* file_name);
-
 // Start recording ground truth to the specified file.
 extern int android_physical_model_record_ground_truth(const char* file_name);
 
-// Stop all active recording and playback.
-extern int android_physical_model_stop_record_and_playback();
+// Stop recording ground truth.
+extern int android_physical_model_stop_recording();
 
 ANDROID_END_HEADER

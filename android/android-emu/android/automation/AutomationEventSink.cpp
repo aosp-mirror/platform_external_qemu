@@ -46,11 +46,11 @@ void AutomationEventSink::unregisterStream(android::base::Stream* stream) {
 }
 
 void AutomationEventSink::recordPhysicalModelEvent(
-        pb::Time& time,
+        uint64_t timeNs,
         pb::PhysicalModelEvent& event) {
     pb::RecordedEvent recordedEvent;
     recordedEvent.set_stream_type(pb::RecordedEvent_StreamType_PHYSICAL_MODEL);
-    *recordedEvent.mutable_event_time() = time;
+    recordedEvent.mutable_event_time()->set_timestamp(timeNs);
     *recordedEvent.mutable_physical_model() = event;
 
     handleEvent(recordedEvent);
@@ -73,6 +73,7 @@ void AutomationEventSink::handleEvent(pb::RecordedEvent& event) {
     if (!mTextStreams.empty() || VERBOSE_CHECK(automation)) {
         google::protobuf::TextFormat::Printer printer;
         printer.SetSingleLineMode(true);
+        printer.SetUseShortRepeatedPrimitives(true);
 
         std::string textProto;
         if (!printer.PrintToString(event, &textProto)) {

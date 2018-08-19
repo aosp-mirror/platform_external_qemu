@@ -15,14 +15,32 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/Result.h"
+#include "android/utils/looper.h"  // For DurationNs
 
-namespace android {
+namespace android { 
 namespace automation {
-
-// Controls recording and playback of emulator automation events.
 
 // Forward declarations.
 class AutomationEventSink;
+
+enum class StartError {
+    InvalidFilename,
+    FileOpenError,
+    AlreadyStarted,
+    InternalError,
+    PlaybackFileCorrupt
+};
+using StartResult = base::Result<void, StartError>;
+std::ostream& operator<<(std::ostream& os, const StartError& value);
+
+enum class StopError { NotStarted };
+using StopResult = base::Result<void, StopError>;
+std::ostream& operator<<(std::ostream& os, const StopError& value);
+
+//
+// Controls recording and playback of emulator automation events.
+//
 
 class AutomationController {
 protected:
@@ -38,6 +56,22 @@ public:
 
     // Get the event sink for recording automation events.
     virtual AutomationEventSink& getEventSink() = 0;
+
+    // Advance the state and process any playback events.
+    // Returns the current time.
+    virtual DurationNs advanceTime() = 0;
+
+    // Start a recording to a file.
+    virtual StartResult startRecording(android::base::StringView filename) = 0;
+
+    // Stops a recording to a file.
+    virtual StopResult stopRecording() = 0;
+
+    // Start a playback from a file.
+    virtual StartResult startPlayback(android::base::StringView filename) = 0;
+
+    // Stop playback from a file.
+    virtual StopResult stopPlayback() = 0;
 };
 
 }  // namespace automation
