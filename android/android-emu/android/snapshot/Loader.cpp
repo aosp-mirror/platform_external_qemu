@@ -177,6 +177,7 @@ void Loader::synchronize(bool isOnExit) {
         if (isOnExit) {
             mRamLoader->interrupt();
         } else {
+            fprintf(stderr, "%s: Join, invalidate gaps\n", __func__);
             mRamLoader->join();
             mRamLoader->invalidateGaps();
         }
@@ -185,6 +186,7 @@ void Loader::synchronize(bool isOnExit) {
         // need to rewrite the index and cannot use a previous index.
         // Otherwise, there will be a lot of confusing cases to handle.
         if (mRamLoader->didSwitchFileBacking()) {
+            fprintf(stderr, "%s: Heh, switched\n", __func__);
             mRamLoader.clear();
             return;
         }
