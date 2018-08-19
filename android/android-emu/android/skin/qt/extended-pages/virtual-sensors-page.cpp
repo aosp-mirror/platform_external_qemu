@@ -312,7 +312,10 @@ void VirtualSensorsPage::startSensorUpdateTimer() {
 void VirtualSensorsPage::stopSensorUpdateTimer() {
     mBypassOrientationChecks = false;
     mAccelerationTimer.stop();
-    updateSensorValuesInUI();
+
+    // Do one last sync with the UI, but do it outside of this callback to
+    // prevent a deadlock.
+    QTimer::singleShot(0, this, SLOT(updateSensorValuesInUI()));
 }
 
 void VirtualSensorsPage::onVirtualSceneControlsEngaged(bool engaged) {
@@ -572,6 +575,8 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
     updateUIFromModelCurrentState();
 
     if (sSensorsAgent != nullptr) {
+        sSensorsAgent->advanceTime();
+
         glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
 
         glm::vec3 device_accelerometer;

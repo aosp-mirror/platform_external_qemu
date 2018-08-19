@@ -3,7 +3,13 @@ syntax = "proto2";
 package emulator_automation;
 
 message Time {
-    optional int64 timestamp = 1;
+    optional uint64 timestamp = 1;
+}
+
+message InitialState {
+    optional uint32 version = 1;
+    optional Time initial_time = 2;
+    repeated PhysicalModelEvent physical_model = 3;
 }
 
 message RecordedEvent {
@@ -33,18 +39,13 @@ message PhysicalModelEvent {
         AMBIENT_MOTION = 9;
     }
 
-    enum InterpolationMethod {
-        Smooth = 0;
-        Step = 1;
-    }
-
     message ParameterValue {
-      repeated float data = 1;
+      repeated float data = 1 [packed=true];
     }
 
     optional ParameterType type = 1;
-    optional InterpolationMethod interpolation_method = 2;
-    optional ParameterValue value = 3;
+    optional ParameterValue current_value = 2;
+    optional ParameterValue target_value = 3;
 }
 
 message TouchEvent {
