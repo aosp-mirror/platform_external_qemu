@@ -248,7 +248,6 @@ TEST(InertialModel, MultipleTargets) {
     EXPECT_NEAR(singleIntegratedPosition.z, targetPosition.z, 0.05f);
 }
 
-
 TEST(InertialModel, TargetPosition) {
     TestSystem testSystem("/", System::kProgramBitness);
 
@@ -307,6 +306,44 @@ TEST(InertialModel, TargetVelocity) {
             oneSecondLaterRetrievedPosition.y, 0.0001f);
     EXPECT_NEAR(retrievedStablePosition.z + targetVelocity.z,
             oneSecondLaterRetrievedPosition.z, 0.0001f);
+}
+
+TEST(InertialModel, TargetPositionForVelocity) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    const glm::vec3 velocity(10.0f, -5.f, 1.f);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetVelocity(velocity, PHYSICAL_INTERPOLATION_STEP);
+
+    inertialModel.setCurrentTime(500000000UL);
+
+    const glm::vec3 targetPosition =
+            inertialModel.getPosition(PARAMETER_VALUE_TYPE_TARGET);
+
+    EXPECT_NEAR(targetPosition.x, 0.f, 0.0001f);
+    EXPECT_NEAR(targetPosition.y, 0.f, 0.0001f);
+    EXPECT_NEAR(targetPosition.z, 0.f, 0.0001f);
+}
+
+TEST(InertialModel, TargetVelocityForPosition) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    const glm::vec3 velocity(3.0f, 8.f, -2.f);
+    const glm::vec3 position(10.0f, -5.f, 1.f);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetVelocity(velocity, PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetPosition(position, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    const glm::vec3 targetVelocity =
+            inertialModel.getVelocity(PARAMETER_VALUE_TYPE_TARGET);
+
+    EXPECT_NEAR(targetVelocity.x, 0.f, 0.0001f);
+    EXPECT_NEAR(targetVelocity.y, 0.f, 0.0001f);
+    EXPECT_NEAR(targetVelocity.z, 0.f, 0.0001f);
 }
 
 TEST(InertialModel, CurrentInitialPositionValue) {
