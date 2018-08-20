@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "92ce1386_58da00fb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-20T18:35:20Z",
+      "side": 1,
+      "message": "Here\u0027s another scenario: Suppose we enable a new kernel command line feature, but it requires some changes to hypervisor on the host. Maybe some kind of paravirtualized clock or something like that.\n\nWith this current method of just copy/pasting all kernel parameters, we will at some point get mysterious bug reports of the emulator not working on certain machines (this is not theoretical, kernel features have broken KVM on some but not all KVM versions before). Then we debug for months trying to hunt it down until we realize it only happened for a particular subset of Linux users on particular kernel versions, in which case we\u0027d realize it was the kernel parameters.\n\nInstead, if the kernel parameters were a protobuf, the emulator wouldn\u0027t even try to consume any new kernel parameters unless the protobuf were updated, so older emulators wouldn\u0027t break due to that. The kernel parameters would generally be reified, allowing us to accept or reject each one for compatibility.\n\nI realize that if there is some critical fix that requires a kernel parmeter, the protobuf will be old in the current emulator and that would break. But we could just update the emulator side directly instead, if the fix is that critical.",
+      "parentUuid": "cb4fea95_d3708649",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 35
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b9d4cba3_1a10f485",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
