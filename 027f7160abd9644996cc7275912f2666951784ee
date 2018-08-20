@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4d7fadd8_b861ba1f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-20T18:19:32Z",
+      "side": 1,
+      "message": "I want to think on this a little more.  But to answer your questions.\n\n\u003e What if KernelParams.txt format changes in the future?\n\u003e What if the emulator updates its  method for parsing kernel parameters?\n\nWhy would these things happen?  If we need to have a new format, we could use a different filename, correct?\n\nThis makes the kernel params a \"black box\" according to the emulator.  Contract is between the system image and the provided kernel - both provided by the build process.  The emulators plays the role of transporting the data.\n\n\u003e It\u0027s much less coupling / complexity to have the system image build process generate a new kind of file just for verified boot parameters, and for that to be a defined file format that doesn\u0027t depend on other kernel parameters.\n\nI think it might be more coupling and complexity.  Here is why:\n\nIf we make the paramters known to the emulator, it needs to \"understand\" what these parameters are and how they might vary between different kernels.  Example: If a new kernel is released with a new feature (e.g. FEC), then the emulator code will have to be changed to recognize these parameters and old emulators will no be able to support the feature at all.  Basically a 2 way contract (sys image, kernel) becomes a three way contract with the emulator needing to stay in sync.",
+      "parentUuid": "ab5804d6_e9b07d3c",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 35
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b9d4cba3_1a10f485",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2018-08-18T21:12:37Z",
       "side": 1,
       "message": "This is dangerous; if we simply read the file raw, it might not be formatted properly, or even contain malicious payload.\n\nInstead there should be an explicit format for verified boot information, and an explicit process for writing and reading that info. I recommend protobuf.",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 68
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29f3240e_efdec109",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-20T18:19:32Z",
+      "side": 1,
+      "message": "\u003e This is dangerous; if we simply read the file raw, it might not be formatted properly, or even contain malicious payload.\n\nWith the raw system.img and kernel sitting there as peers, is the \"malicious payload\" really a concern?\n\n\u003e Instead there should be an explicit format for verified boot information, and an explicit process for writing and reading that info. I recommend protobuf.\n\nDoes the emulator have good support for protobuff already?",
+      "parentUuid": "b9d4cba3_1a10f485",
       "range": {
         "startLine": 20,
         "startChar": 0,
