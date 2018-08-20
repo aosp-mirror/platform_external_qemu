@@ -22,6 +22,30 @@
       "revId": "8e9a7e41cb2101f494f8c64cd88f97ec6cf4132d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fcb687c6_920d22b4",
+        "filename": "android/android-emu/android/hw-sensors.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-20T22:32:18Z",
+      "side": 1,
+      "message": "This was surprising to me, so I looked it up.  Apparently static_cast is well-defined by the standard here, and being a narrower cast is preferred for void*-\u003etype* casts.  TIL!  https://stackoverflow.com/questions/310451/should-i-use-static-cast-or-reinterpret-cast-when-casting-a-void-to-whatever\n\nUpdated with both sets of feedback.",
+      "parentUuid": "b57c057d_613a67d0",
+      "range": {
+        "startLine": 255,
+        "startChar": 25,
+        "endLine": 255,
+        "endChar": 41
+      },
+      "revId": "8e9a7e41cb2101f494f8c64cd88f97ec6cf4132d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
