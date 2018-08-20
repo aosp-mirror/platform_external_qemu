@@ -1240,6 +1240,12 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    args.add("-netdev");
+    args.add("user,id=mynet1");
+    args.add("-device");
+    args.addFormat("%s,netdev=mynet1", kTarget.networkDeviceType);
+
+
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     args.add("-device");
