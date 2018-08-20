@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "5602ef70_29bc5d33",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-20T20:09:10Z",
+      "side": 1,
+      "message": "To give an example of usage with fewer interfaces:\n\na. if (result.ok()) { } // no error, things are fine\n\nb. return result; // propagate error\nc. switch (*(result.err()) { // handle error\n}",
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "74f7e823_497053e7",
         "filename": "android/android-emu/android/base/Result.h",
         "patchSetId": 1
