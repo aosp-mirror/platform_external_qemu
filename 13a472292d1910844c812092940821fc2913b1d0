@@ -88,6 +88,29 @@
     },
     {
       "key": {
+        "uuid": "a8431fa9_0293c1b4",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-20T21:25:13Z",
+      "side": 1,
+      "message": "what about copy and move ctors for a compatible Result\u003c\u003e?\nThis will allow to write code like \"return otherCall()\" without investigating if it returned anything bad or good",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 62
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cd9ce683_bbfbd373",
         "filename": "android/android-emu/android/base/Result.h",
         "patchSetId": 1
@@ -104,6 +127,52 @@
         "startChar": 0,
         "endLine": 137,
         "endChar": 33
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a1c9e71_a8dd8102",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-20T21:25:13Z",
+      "side": 1,
+      "message": "can we have a const version returning cref and a non-const one returning ref?",
+      "range": {
+        "startLine": 149,
+        "startChar": 3,
+        "endLine": 153,
+        "endChar": 5
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e36a808_9d593aa6",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-20T21:25:13Z",
+      "side": 1,
+      "message": "these functions always return a copy, so there won\u0027t be a way to return some big object (string/vector) and move it out of the Result\u003c\u003e. Should these return references instead?",
+      "range": {
+        "startLine": 149,
+        "startChar": 0,
+        "endLine": 159,
+        "endChar": 5
       },
       "revId": "13a472292d1910844c812092940821fc2913b1d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
