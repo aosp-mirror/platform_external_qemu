@@ -68,6 +68,52 @@
       "revId": "13a472292d1910844c812092940821fc2913b1d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd9ce683_bbfbd373",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-20T20:02:49Z",
+      "side": 1,
+      "message": "Could it be simpler to reduce the number of interface functions if we only use ok() and the user would rely on operator bool for the isOk()?",
+      "range": {
+        "startLine": 137,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 33
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b6096cc_6ac908fc",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-20T20:02:49Z",
+      "side": 1,
+      "message": "Similar for unwrap(); is the common case going to be if (result.err()) { Crash \u003c\u003c \"FATAL: Something happened\"; }; in that case, we might not require these APIs.",
+      "range": {
+        "startLine": 149,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 0
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
