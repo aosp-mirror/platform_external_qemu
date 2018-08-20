@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b57c057d_613a67d0",
+        "filename": "android/android-emu/android/hw-sensors.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-20T21:30:04Z",
+      "side": 1,
+      "message": "nit: static_cast\u003c\u003e is enough here\nnit^2: use auto to not spell the type twice",
+      "range": {
+        "startLine": 255,
+        "startChar": 25,
+        "endLine": 255,
+        "endChar": 41
+      },
+      "revId": "8e9a7e41cb2101f494f8c64cd88f97ec6cf4132d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
