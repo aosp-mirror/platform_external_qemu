@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "cb4fea95_d3708649",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-20T18:28:08Z",
+      "side": 1,
+      "message": "I think if you\u0027re introducing a new file read to the emulator, with no explicit format, the burden of proof is on you to make sure it is stable against changes in any component.\n\nOn the last point, protobuf is a good way to manage changes in the features for the kernel.\n\nI guess we already have a 3-way contract between system images, kernel, and the emulator, except if we make it a black box as you\u0027re suggesting, we invite silent breakages once the kernel command line format given from the system image doesn\u0027t match either the kernel command line format or handling in the emulator.\n\nSo perhaps it is not less or more coupling and complexity, it\u0027s making the current coupling/complexity more explicit, and making future maintainers of system images/kernels/emulators spend less time chasing down weird failures.",
+      "parentUuid": "4d7fadd8_b861ba1f",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 35
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b9d4cba3_1a10f485",
         "filename": "/COMMIT_MSG",
         "patchSetId": 4
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "\u003e This is dangerous; if we simply read the file raw, it might not be formatted properly, or even contain malicious payload.\n\nWith the raw system.img and kernel sitting there as peers, is the \"malicious payload\" really a concern?\n\n\u003e Instead there should be an explicit format for verified boot information, and an explicit process for writing and reading that info. I recommend protobuf.\n\nDoes the emulator have good support for protobuff already?",
       "parentUuid": "b9d4cba3_1a10f485",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 68
+      },
+      "revId": "027f7160abd9644996cc7275912f2666951784ee",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "412a402a_02a0ec40",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-20T18:28:08Z",
+      "side": 1,
+      "message": "Well, I just mean that in general appending a raw string from a file out of nowhere it is very easy to break something---for example, what if someone else modifies the file but either adds extra carriage returns or newlines that dont\u0027 conform to expectations (like running on Windows?).\n\nOur current file reading avoids this, by having things like \"IniFile\" or protobuf. \n\nYes, the emulator already has good support for protobuf. Go to our repo and find . | grep \"\\.proto\" and there will be several examples. I strongly recommend using a protobuf to introduce these sort of things.",
+      "parentUuid": "29f3240e_efdec109",
       "range": {
         "startLine": 20,
         "startChar": 0,
