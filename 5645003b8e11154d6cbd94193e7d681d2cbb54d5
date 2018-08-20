@@ -22,6 +22,30 @@
       "revId": "5645003b8e11154d6cbd94193e7d681d2cbb54d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38fbf8ae_0716f850",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-20T23:10:16Z",
+      "side": 1,
+      "message": "PS 9 should resolve this issue by adding file locks",
+      "parentUuid": "0d7dc6bc_749999c7",
+      "range": {
+        "startLine": 299,
+        "startChar": 0,
+        "endLine": 300,
+        "endChar": 58
+      },
+      "revId": "5645003b8e11154d6cbd94193e7d681d2cbb54d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
