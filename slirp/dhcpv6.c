@@ -188,6 +188,8 @@ static void dhcpv6_info_request(Slirp *slirp, struct sockaddr_in6 *srcsas,
  */
 void dhcpv6_input(struct sockaddr_in6 *srcsas, struct mbuf *m)
 {
+    printf("calling dhcpv6_input \n" );
+    fflush(stdout);
     uint8_t *data = (uint8_t *)m->m_data + sizeof(struct udphdr);
     int data_len = m->m_len - sizeof(struct udphdr);
     uint32_t xid;
