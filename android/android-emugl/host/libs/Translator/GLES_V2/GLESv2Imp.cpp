@@ -230,6 +230,7 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
 
     img->saveableTexture->makeDirty();
     GLuint globalTexObj = img->globalTexObj->getGlobalName();
+    if (!globalTexObj) fprintf(stderr, "%s; wtf, global name is zero\n",__func__);
     ctx->blitFromReadBufferToTextureFlipped(
             globalTexObj, img->width, img->height,
             img->internalFormat, img->format, img->type);
@@ -352,6 +353,7 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
                         ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
         vbo->setBinded();
         const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+    if (!globalBufferName) fprintf(stderr, "%s; wtf, global name is zero\n",__func__);
         ctx->dispatcher().glBindBuffer(target, globalBufferName);
     } else {
         ctx->dispatcher().glBindBuffer(target, 0);
@@ -519,6 +521,7 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
                     ObjectDataPtr(new RenderbufferData()));
             globalRenderBufferName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::RENDERBUFFER, renderbuffer);
+            if (!globalRenderBufferName) fprintf(stderr, "%s; wtf, global name isStill zero\n",__func__);
         }
     }
     ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
@@ -542,6 +545,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
             ctx->shareGroup()->genName(NamedObjectType::TEXTURE, localTexName);
             globalTextureName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::TEXTURE, localTexName);
+            if (!globalTextureName) fprintf(stderr, "%s; wtf, global name isStill zero\n",__func__);
         }
 
         TextureData* texData = getTextureData(localTexName);
@@ -3661,7 +3665,10 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
     if (img) {
 
         // Could be from a bad snapshot; in this case, skip.
-        if (!img->globalTexObj) return;
+        if (!img->globalTexObj) {
+            fprintf(stderr, "%s: bad global name\n", __func__);
+            return;
+        }
 
         // Create the texture object in the underlying EGL implementation,
         // flag to the OpenGL layer to skip the image creation and map the
