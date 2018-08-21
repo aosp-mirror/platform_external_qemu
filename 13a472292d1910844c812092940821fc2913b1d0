@@ -272,6 +272,30 @@
     },
     {
       "key": {
+        "uuid": "9fac3cf3_98aa630c",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-21T22:18:48Z",
+      "side": 1,
+      "message": "Ack. That\u0027s a pretty awesome technique :)",
+      "parentUuid": "eb90a2fc_f63c9182",
+      "range": {
+        "startLine": 137,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 33
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a1c9e71_a8dd8102",
         "filename": "android/android-emu/android/base/Result.h",
         "patchSetId": 1
@@ -401,6 +425,30 @@
       "side": 1,
       "message": "It turns out that to properly support propagating move-only types, these unwrap helpers are required.  Ideally the common case should be either \"RETURN_IF_ERR(result);\" or \"switch (result.unwrapErr()) { ... }\"",
       "parentUuid": "0b6096cc_6ac908fc",
+      "range": {
+        "startLine": 149,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 0
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc747c03_7e4f0789",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-21T22:18:48Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6b858f49_d65df5d4",
       "range": {
         "startLine": 149,
         "startChar": 0,
