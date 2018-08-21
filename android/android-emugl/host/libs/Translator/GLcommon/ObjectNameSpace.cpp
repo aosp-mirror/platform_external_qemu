@@ -136,6 +136,7 @@ void NameSpace::preSave(GlobalNameSpace *globalNameSpace) {
 void NameSpace::onSave(android::base::Stream* stream) {
     stream->putBe32(m_objectDataMap.size());
     for (const auto& obj : m_objectDataMap) {
+        if (!getGlobalName(obj.first)) fprintf(stderr, "%s: no global name for %llu!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n", __func__, obj.first);
         stream->putBe64(obj.first);
         obj.second->onSave(stream, getGlobalName(obj.first));
     }
@@ -171,9 +172,13 @@ NameSpace::getGlobalName(ObjectLocalName p_localName)
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
         // object found - return its global name map
-        return (*n).second->getGlobalName();
+        auto res = (*n).second->getGlobalName();
+
+        if (!res) fprintf(stderr, "%s: has global name, but is zero: %u\n", __func__, res);
+        return res;
     }
 
+    // fprintf(stderr, "%s: does not exist: %llu\n", __func__, p_localName);
     // object does not exist;
     return 0;
 }
@@ -201,10 +206,13 @@ NamedObjectPtr NameSpace::getNamedObject(ObjectLocalName p_localName) {
 void
 NameSpace::deleteName(ObjectLocalName p_localName)
 {
+    fprintf(stderr, "%s: delete %llu\n", __func__, p_localName);
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
         m_globalToLocalMap.erase(n->second->getGlobalName());
         m_localToGlobalMap.erase(n);
+    } else {
+        fprintf(stderr, "%s: delete, but COULD NOT FIND %llu\n", __func__, p_localName);
     }
     m_objectDataMap.erase(p_localName);
 }
@@ -261,6 +269,9 @@ const ObjectDataPtr& NameSpace::getObjectDataPtr(
 
 void NameSpace::setObjectData(ObjectLocalName p_localName,
         ObjectDataPtr data) {
+    if (m_objectDataMap.find(p_localName) != m_objectDataMap.end()) {
+        fprintf(stderr, "%s: local name %llu already  has data!\n", __func__, p_localName);
+    }
     m_objectDataMap.emplace(p_localName, std::move(data));
 }
 
