@@ -74,8 +74,12 @@ void ShareGroup::onSave(android::base::Stream* stream) {
     if (m_saveStage == Saved) return;
     assert(m_saveStage == PreSaved);
     m_saveStage = Saved;
+    int i = 0;
     for (auto ns : m_nameSpace) {
+        fprintf(stderr, "%s: save type %i\n", __func__, i);
         ns->onSave(stream);
+        ++i;
+        fprintf(stderr, "%s: save type %i (finished)\n", __func__, i);
     }
 }
 

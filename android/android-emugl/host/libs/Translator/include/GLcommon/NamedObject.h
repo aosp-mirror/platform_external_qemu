@@ -21,14 +21,14 @@
 
 enum class NamedObjectType : short {
     NULLTYPE,
-    VERTEXBUFFER,
-    TEXTURE,
-    RENDERBUFFER,
+    VERTEXBUFFER, // bad
+    TEXTURE, // bad
+    RENDERBUFFER, // bad
     FRAMEBUFFER,
-    SHADER_OR_PROGRAM,
+    SHADER_OR_PROGRAM, // bad
     SAMPLER,
     QUERY,
-    VERTEX_ARRAY_OBJECT,
+    VERTEX_ARRAY_OBJECT, // bad
     NUM_OBJECT_TYPES  // Must be last
 };
 

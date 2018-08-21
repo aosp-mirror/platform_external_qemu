@@ -136,6 +136,7 @@ void NameSpace::preSave(GlobalNameSpace *globalNameSpace) {
 void NameSpace::onSave(android::base::Stream* stream) {
     stream->putBe32(m_objectDataMap.size());
     for (const auto& obj : m_objectDataMap) {
+        if (getGlobalName(obj.first)) fprintf(stderr, "%s: no global name for %llu!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n", __func__, obj.first);
         stream->putBe64(obj.first);
         obj.second->onSave(stream, getGlobalName(obj.first));
     }
@@ -261,6 +262,9 @@ const ObjectDataPtr& NameSpace::getObjectDataPtr(
 
 void NameSpace::setObjectData(ObjectLocalName p_localName,
         ObjectDataPtr data) {
+    if (m_objectDataMap.find(p_localName) != m_objectDataMap.end()) {
+        fprintf(stderr, "%s: local name %llu already  has data!\n", __func__, p_localName);
+    }
     m_objectDataMap.emplace(p_localName, std::move(data));
 }
 
