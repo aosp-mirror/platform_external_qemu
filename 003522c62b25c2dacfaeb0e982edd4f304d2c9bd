@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "9d45aba4_3c261da0",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-21T22:21:42Z",
+      "side": 1,
+      "message": "Sounds good, this lazyinstance in the get() could be a pattern we could use more :)",
+      "parentUuid": "7fbacd28_a67a6be4",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 56
+      },
+      "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "104ba455_a19da9f7",
         "filename": "android/android-emu/android/automation/AutomationController.h",
         "patchSetId": 1
@@ -272,6 +296,30 @@
       "side": 1,
       "message": "Yeah, I think it would make sense to add that, and I think that this current design is flexible to that.  However, I\u0027m not thinking about FPS/RAM usage streams, more like different kinds of user actions:\n\n- Physical model\n- GPS\n- Mouse/keyboard\n\nWhen adding that, I think I would add a \"filter\" parameter and use that to filter what gets sent to each stream.",
       "parentUuid": "8503995e_4c279a67",
+      "range": {
+        "startLine": 67,
+        "startChar": 9,
+        "endLine": 67,
+        "endChar": 22
+      },
+      "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d059fe1_0dab65ed",
+        "filename": "android/android-emu/android/automation/AutomationEventSink.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-21T22:21:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8f5e26ff_c1a570ea",
       "range": {
         "startLine": 67,
         "startChar": 9,
