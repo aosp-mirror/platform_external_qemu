@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3749c064_97758014",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5602ef70_29bc5d33",
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "74f7e823_497053e7",
         "filename": "android/android-emu/android/base/Result.h",
         "patchSetId": 1
@@ -39,6 +57,30 @@
       "revId": "13a472292d1910844c812092940821fc2913b1d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68042996_83c5a66d",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "74f7e823_497053e7",
+      "range": {
+        "startLine": 41,
+        "startChar": 53,
+        "endLine": 41,
+        "endChar": 62
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "8f378be5_6f85e21f",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c03de394_40367aa1",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 13
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee1bb49d_10f172b9",
         "filename": "android/android-emu/android/base/Result.h",
         "patchSetId": 1
@@ -85,6 +151,30 @@
       "revId": "13a472292d1910844c812092940821fc2913b1d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2021aa0_86cff2a9",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee1bb49d_10f172b9",
+      "range": {
+        "startLine": 73,
+        "startChar": 6,
+        "endLine": 73,
+        "endChar": 12
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "228f3d84_d5c97e3b",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "I added an explicit move constructor and verified that the implicit copy constructor works for \"return otherCall()\".",
+      "parentUuid": "a8431fa9_0293c1b4",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 62
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cd9ce683_bbfbd373",
         "filename": "android/android-emu/android/base/Result.h",
         "patchSetId": 1
@@ -131,6 +245,30 @@
       "revId": "13a472292d1910844c812092940821fc2913b1d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb90a2fc_f63c9182",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "This is a bit tricky but I made it work.  The difficulty is when we have a Result\u003cvoid, Error\u003e, where we can\u0027t actually return an Optional\u003cvoid\u003e.  However, with enable_if I added a \"bool ok()\" overload for that.",
+      "parentUuid": "cd9ce683_bbfbd373",
+      "range": {
+        "startLine": 137,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 33
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "3f313ec5_b5ea7541",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "After some changes I made, I think we specifically don\u0027t want to ref-returning versions.  As part of the changes to make sure we can propagate move-only types, I made it so that unwrap() and unwrapErr() moves the value out of the Result, making it invalid.  This is what Rust does too, but it has stronger compiler guarantees preventing the Result from being used again.\n\nSo instead of returning a ref, we should always move the value out in this case.",
+      "parentUuid": "7a1c9e71_a8dd8102",
+      "range": {
+        "startLine": 149,
+        "startChar": 3,
+        "endLine": 153,
+        "endChar": 5
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4e36a808_9d593aa6",
         "filename": "android/android-emu/android/base/Result.h",
         "patchSetId": 1
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "665d2995_7a403a2f",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "See above, this has been changed to std::move() the value out.",
+      "parentUuid": "4e36a808_9d593aa6",
+      "range": {
+        "startLine": 149,
+        "startChar": 0,
+        "endLine": 159,
+        "endChar": 5
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0b6096cc_6ac908fc",
         "filename": "android/android-emu/android/base/Result.h",
         "patchSetId": 1
@@ -200,6 +386,30 @@
       "revId": "13a472292d1910844c812092940821fc2913b1d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b858f49_d65df5d4",
+        "filename": "android/android-emu/android/base/Result.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T20:42:57Z",
+      "side": 1,
+      "message": "It turns out that to properly support propagating move-only types, these unwrap helpers are required.  Ideally the common case should be either \"RETURN_IF_ERR(result);\" or \"switch (result.unwrapErr()) { ... }\"",
+      "parentUuid": "0b6096cc_6ac908fc",
+      "range": {
+        "startLine": 149,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 0
+      },
+      "revId": "13a472292d1910844c812092940821fc2913b1d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
