@@ -252,13 +252,13 @@ static void _hwSensorClient_recv(void* opaque,
                                  uint8_t* msg,
                                  int msglen,
                                  QemudClient* client) {
-    HwSensorClient* cl = opaque;
+    auto cl = static_cast<HwSensorClient*>(opaque);
 
     _hwSensorClient_receive(cl, msg, msglen);
 }
 
 static void _hwSensorClient_close(void* opaque) {
-    HwSensorClient* cl = opaque;
+    auto cl = static_cast<HwSensorClient*>(opaque);
 
     /* the client is already closed here */
     cl->client = NULL;
@@ -269,7 +269,7 @@ static void _hwSensorClient_close(void* opaque) {
 static void _hwSensorClient_send(HwSensorClient* cl,
                                  const uint8_t* msg,
                                  int msglen) {
-    D("%s: '%s'", __FUNCTION__, quote_bytes((const void*)msg, msglen));
+    D("%s: '%s'", __FUNCTION__, quote_bytes((const char*)msg, msglen));
     qemud_client_send(cl->client, msg, msglen);
 }
 
@@ -285,8 +285,7 @@ static int _hwSensorClient_enabled(HwSensorClient* cl, int sensorId) {
  * within the guest.
  */
 static void _hwSensorClient_sanitizeSensorString(char* string, int maxlen) {
-    int i;
-    for (i = 0; i < maxlen && string[i] != '\0'; i++) {
+    for (int i = 0; i < maxlen && string[i] != '\0'; i++) {
         if (string[i] == ',') {
             string[i] = '.';
         }
@@ -350,7 +349,7 @@ SENSORS_LIST
  * to the HAL module, and re-arm the timer if necessary
  */
 static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
-    HwSensorClient* cl = opaque;
+    auto cl = static_cast<HwSensorClient*>(opaque);
     int64_t delay_ms = cl->delay_ms;
     const uint32_t mask = cl->enabledMask;
 
@@ -364,15 +363,14 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     // Update the current time on the physical model.
     physicalModel_setCurrentTime(cl->sensors->physical_model, now_ns);
 
-    AndroidSensor sensor_id;
-    for (sensor_id = 0; sensor_id < MAX_SENSORS; ++sensor_id) {
+    for (size_t sensor_id = 0; sensor_id < MAX_SENSORS; ++sensor_id) {
         if (!_hwSensorClient_enabled(cl, sensor_id)) {
             continue;
         }
         Sensor* sensor = &cl->sensors->sensors[sensor_id];
 
         serializeSensorValue(
-                cl->sensors->physical_model, sensor, sensor_id);
+                cl->sensors->physical_model, sensor, (AndroidSensor)sensor_id);
         _hwSensorClient_send(cl, (uint8_t*)sensor->serialized.value,
                              sensor->serialized.length);
     }
@@ -531,7 +529,7 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
 
 /* Saves sensor-specific client data to snapshot */
 static void _hwSensorClient_save(Stream* f, QemudClient* client, void* opaque) {
-    HwSensorClient* sc = opaque;
+    auto sc = static_cast<HwSensorClient*>(opaque);
 
     stream_put_be32(f, sc->delay_ms);
     stream_put_be32(f, sc->enabledMask);
@@ -540,7 +538,7 @@ static void _hwSensorClient_save(Stream* f, QemudClient* client, void* opaque) {
 
 /* Loads sensor-specific client data from snapshot */
 static int _hwSensorClient_load(Stream* f, QemudClient* client, void* opaque) {
-    HwSensorClient* sc = opaque;
+    auto sc = static_cast<HwSensorClient*>(opaque);
 
     sc->delay_ms = stream_get_be32(f);
     sc->enabledMask = stream_get_be32(f);
@@ -553,7 +551,7 @@ static QemudClient* _hwSensors_connect(void* opaque,
                                        QemudService* service,
                                        int channel,
                                        const char* client_param) {
-    HwSensors* sensors = opaque;
+    auto sensors = static_cast<HwSensors*>(opaque);
     HwSensorClient* cl = _hwSensorClient_new(sensors);
     QemudClient* client = qemud_client_new(
             service, channel, client_param, cl, _hwSensorClient_recv,
@@ -655,7 +653,7 @@ static void _hwSensors_setPhysicalParameterValue(HwSensors* h,
             SET_TARGET_FUNCTION_NAME(z)(\
                     h->physical_model,\
                     GET_TYPE_VALUE_FUNCTION_NAME(w)(a, b, c),\
-                    interpolation_mode);\
+                    (PhysicalInterpolation)interpolation_mode);\
             break;
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
@@ -711,15 +709,14 @@ static void _hwSensors_getPhysicalTransform(HwSensors* h,
  * when loaded.
  */
 static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
-    HwSensors* h = opaque;
+    auto h = static_cast<HwSensors*>(opaque);
 
     /* save a version number for compatibility. */
     stream_put_be32(f, SENSOR_FILE_VERSION);
 
     /* number of sensors. */
     stream_put_be32(f, MAX_SENSORS);
-    AndroidSensor sensor_id;
-    for (sensor_id = 0; sensor_id < MAX_SENSORS; sensor_id++) {
+    for (size_t sensor_id = 0; sensor_id < MAX_SENSORS; sensor_id++) {
         Sensor* s = &h->sensors[sensor_id];
         stream_put_be32(f, s->enabled);
     }
@@ -728,7 +725,7 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
 }
 
 static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
-    HwSensors* h = opaque;
+    auto h = static_cast<HwSensors*>(opaque);
 
     /* load version number to check compatibility. */
     const int32_t version_number = stream_get_be32(f);
@@ -747,8 +744,8 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
     }
 
     /* load sensor state, but ignore legacy values*/
-    AndroidSensor sensor_id;
-    for (sensor_id = 0; sensor_id < (AndroidSensor)num_sensors; sensor_id++) {
+    size_t sensor_id;
+    for (sensor_id = 0; sensor_id < num_sensors; sensor_id++) {
         Sensor* s = &h->sensors[sensor_id];
         s->enabled = stream_get_be32(f);
     }
