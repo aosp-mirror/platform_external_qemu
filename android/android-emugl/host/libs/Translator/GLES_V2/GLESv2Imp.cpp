@@ -230,6 +230,7 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
 
     img->saveableTexture->makeDirty();
     GLuint globalTexObj = img->globalTexObj->getGlobalName();
+    if (!globalTexObj) fprintf(stderr, "%s; wtf, global name is zero\n",__func__);
     ctx->blitFromReadBufferToTextureFlipped(
             globalTexObj, img->width, img->height,
             img->internalFormat, img->format, img->type);
@@ -352,6 +353,7 @@ GL_APICALL void  GL_APIENTRY glBindBuffer(GLenum target, GLuint buffer){
                         ->getObjectData(NamedObjectType::VERTEXBUFFER, buffer);
         vbo->setBinded();
         const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+    if (!globalBufferName) fprintf(stderr, "%s; wtf, global name is zero\n",__func__);
         ctx->dispatcher().glBindBuffer(target, globalBufferName);
     } else {
         ctx->dispatcher().glBindBuffer(target, 0);
@@ -519,6 +521,7 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
                     ObjectDataPtr(new RenderbufferData()));
             globalRenderBufferName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::RENDERBUFFER, renderbuffer);
+            if (!globalRenderBufferName) fprintf(stderr, "%s; wtf, global name isStill zero\n",__func__);
         }
     }
     ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
@@ -542,6 +545,10 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
             ctx->shareGroup()->genName(NamedObjectType::TEXTURE, localTexName);
             globalTextureName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::TEXTURE, localTexName);
+            if (!globalTextureName) {
+                fprintf(stderr, "%s; wtf, global name isStill zero\n",__func__);
+                abort();
+            }
         }
 
         TextureData* texData = getTextureData(localTexName);
@@ -913,6 +920,9 @@ GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
                                          ObjectDataPtr(programInfo));
         programInfo->addProgramName(ctx->shareGroup()->getGlobalName(
                          NamedObjectType::SHADER_OR_PROGRAM, localProgramName));
+        fprintf(stderr, "%s: new program. local %u global %u\n", __func__,
+                localProgramName,
+                ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, localProgramName));
         return localProgramName;
     }
     return 0;
@@ -3484,8 +3494,9 @@ static void s_unUseCurrentProgram() {
 GL_APICALL void  GL_APIENTRY glUseProgram(GLuint program){
     GET_CTX_V2();
     if(ctx->shareGroup().get()) {
-        const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
-                NamedObjectType::SHADER_OR_PROGRAM, program);
+        const GLuint globalProgramName =
+            program ?
+                ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program) : 0;
         SET_ERROR_IF(program!=0 && globalProgramName==0,GL_INVALID_VALUE);
         auto objData = ctx->shareGroup()->getObjectDataPtr(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
@@ -3661,7 +3672,10 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
     if (img) {
 
         // Could be from a bad snapshot; in this case, skip.
-        if (!img->globalTexObj) return;
+        if (!img->globalTexObj) {
+            fprintf(stderr, "%s: bad global name\n", __func__);
+            return;
+        }
 
         // Create the texture object in the underlying EGL implementation,
         // flag to the OpenGL layer to skip the image creation and map the
@@ -3673,6 +3687,8 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             // with |img|'s global GL texture id
             ctx->shareGroup()->replaceGlobalObject(NamedObjectType::TEXTURE, tex,
                                                    img->globalTexObj);
+            fprintf(stderr, "%s: replace local texture %llu with global %u\n", __func__, tex, img->globalTexObj->getGlobalName());
+
             ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexObj->getGlobalName());
             TextureData *texData = getTextureTargetData(target);
             SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);

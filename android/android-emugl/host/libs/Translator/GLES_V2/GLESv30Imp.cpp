@@ -54,6 +54,9 @@ GL_APICALL void GL_APIENTRY glBindBufferRange(GLenum target, GLuint index, GLuin
     ctx->bindIndexedBuffer(target, index, buffer, offset, size);
     if (ctx->shareGroup().get()) {
         const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        if (!globalBufferName) {
+            fprintf(stderr, "%s: wtf: is zero\n", __func__);
+        }
         ctx->dispatcher().glBindBufferRange(target, index, globalBufferName, offset, size);
     }
 }
@@ -66,6 +69,9 @@ GL_APICALL void GL_APIENTRY glBindBufferBase(GLenum target, GLuint index, GLuint
     ctx->bindIndexedBuffer(target, index, buffer);
     if (ctx->shareGroup().get()) {
         const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
+        if (!globalBufferName) {
+            fprintf(stderr, "%s: wtf: is zero\n", __func__);
+        }
         ctx->dispatcher().glBindBufferBase(target, index, globalBufferName);
     }
 }

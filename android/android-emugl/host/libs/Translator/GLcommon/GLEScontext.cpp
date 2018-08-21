@@ -2141,6 +2141,12 @@ bool GLEScontext::isFBO(ObjectLocalName p_localName) {
 
 ObjectLocalName GLEScontext::genFBOName(ObjectLocalName p_localName,
         bool genLocal) {
+
+    fprintf(stderr, "%s: gen fbo %llu local %d\n", __func__, p_localName, genLocal);
+
+    // if (!p_localName) {
+        // abort();
+    // }
     return m_fboNameSpace->genName(GenNameInfo(NamedObjectType::FRAMEBUFFER),
             p_localName, genLocal);
 }
@@ -2690,9 +2696,13 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     gl.glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // state restore
-    const GLuint globalProgramName = shareGroup()->getGlobalName(
-        NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
-    gl.glUseProgram(globalProgramName);
+    if (m_useProgram) {
+        const GLuint globalProgramName = shareGroup()->getGlobalName(
+                NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
+        gl.glUseProgram(globalProgramName);
+    } else {
+        gl.glUseProgram(0);
+    }
 
     gl.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
 
