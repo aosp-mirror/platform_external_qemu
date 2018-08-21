@@ -116,9 +116,12 @@ void GLESv2Context::initDefaultFBO(
 void GLESv2Context::initEmulatedVAO() {
     if (!isCoreProfile()) return;
 
+    fprintf(stderr, "%s: gen default VAO\n", __func__);
     // Create emulated default VAO
     genVAOName(0, false);
     dispatcher().glBindVertexArray(getVAOGlobalName(0));
+
+    fprintf(stderr, "%s: gen default VAO. global: %u\n", __func__, getVAOGlobalName(0));
 }
 
 void GLESv2Context::initEmulatedBuffers() {
@@ -178,7 +181,14 @@ GLESv2Context::~GLESv2Context() {
             &m_emulatedClientVBOs[0]);
     }
 
+
+    fprintf(stderr, "%s: delete vao 0\n", __func__);
     deleteVAO(0);
+    fprintf(stderr, "%s: delete vao 0 (end)\n", __func__);
+    // /auto defaultVAOGlobalName = getVAOGlobalName(0);
+    // /if (defaultVAOGlobalName) {
+    // /    dispatcher().glDeleteVertexArrays(1, &defaultVAOGlobalName);
+    // /}
 }
 
 void GLESv2Context::onSave(android::base::Stream* stream) const {

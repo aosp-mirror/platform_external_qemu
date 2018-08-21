@@ -74,8 +74,12 @@ void ShareGroup::onSave(android::base::Stream* stream) {
     if (m_saveStage == Saved) return;
     assert(m_saveStage == PreSaved);
     m_saveStage = Saved;
+    int i = 0;
     for (auto ns : m_nameSpace) {
+        fprintf(stderr, "%s: save for obj type %d\n", __func__, i);
         ns->onSave(stream);
+        fprintf(stderr, "%s: FINISHED save for obj type %d\n", __func__, i);
+        ++i;
     }
 }
 
@@ -209,6 +213,11 @@ ShareGroup::deleteName(NamedObjectType p_type, ObjectLocalName p_localName)
 
     emugl::Mutex::AutoLock lock(m_namespaceLock);
     ObjectDataAutoLock objDataLock(this);
+
+    if (p_type == NamedObjectType::SHADER_OR_PROGRAM) {
+        fprintf(stderr, "%s: deleting local shader or program %llu\n", __func__, p_localName);
+    }
+
     m_nameSpace[toIndex(p_type)]->deleteName(p_localName);
 }
 

@@ -52,8 +52,10 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
             // They are loaded by GlobalNameSpace before loading
             // share groups
             TextureData* texData = (TextureData*)data.get();
-            if (!texData->getGlobalName())
+            if (!texData->getGlobalName()) {
+                fprintf(stderr, "%s: zero texture loaded!\n", __func__);
                 continue;
+            }
 
             SaveableTexturePtr saveableTexture =
                     globalNameSpace->getSaveableTextureFromLoad(
@@ -82,7 +84,10 @@ void NameSpace::touchTextures() {
             continue;
         }
         const SaveableTexturePtr& saveableTexture = texData->getSaveableTexture();
-        if (!saveableTexture.get()) continue;
+        if (!saveableTexture.get()) {
+            fprintf(stderr, "%s: no saveable txture found\n", __func__);
+            continue;
+        }
 
         NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
         setGlobalObject(obj.first, texNamedObj);
@@ -137,6 +142,10 @@ void NameSpace::onSave(android::base::Stream* stream) {
     stream->putBe32(m_objectDataMap.size());
     for (const auto& obj : m_objectDataMap) {
         stream->putBe64(obj.first);
+        if (!getGlobalName(obj.first)) {
+            fprintf(stderr, "%s: zero global name!!!!!!!!!!!!!!!!1\n", __func__);
+            abort();
+        }
         obj.second->onSave(stream, getGlobalName(obj.first));
     }
 }
@@ -165,6 +174,9 @@ NameSpace::genName(GenNameInfo genNameInfo, ObjectLocalName p_localName, bool ge
 }
 
 
+static int nonexistCtr = 0;
+
+
 unsigned int
 NameSpace::getGlobalName(ObjectLocalName p_localName)
 {
@@ -174,6 +186,9 @@ NameSpace::getGlobalName(ObjectLocalName p_localName)
         return (*n).second->getGlobalName();
     }
 
+    fprintf(stderr, "%s: object %llu does not exist\n", __func__, p_localName);
+    ++nonexistCtr;
+    if (nonexistCtr > 200) abort();
     // object does not exist;
     return 0;
 }
@@ -201,12 +216,23 @@ NamedObjectPtr NameSpace::getNamedObject(ObjectLocalName p_localName) {
 void
 NameSpace::deleteName(ObjectLocalName p_localName)
 {
+    fprintf(stderr, "%s: delete %llu\n", __func__, p_localName);
     NamesMap::iterator n( m_localToGlobalMap.find(p_localName) );
     if (n != m_localToGlobalMap.end()) {
+
+    fprintf(stderr, "%s: global name: %u\n", __func__, n->second->getGlobalName());
+
+    if (!n->second->getGlobalName()) {
+        fprintf(stderr, "%s: goofed, tried to delete 0\n", __func__);
+        abort();
+    }
         m_globalToLocalMap.erase(n->second->getGlobalName());
         m_localToGlobalMap.erase(n);
-    }
+    } else {
     m_objectDataMap.erase(p_localName);
+    fprintf(stderr, "%s: goofed, %llu not in localToGlobal map\n", __func__, p_localName);
+    abort();
+    }
 }
 
 bool
@@ -223,6 +249,10 @@ NameSpace::setGlobalObject(ObjectLocalName p_localName,
         m_globalToLocalMap.erase(n->second->getGlobalName());
         (*n).second = p_namedObject;
     } else {
+        if (!p_namedObject) {
+            fprintf(stderr, "%s: tried to set global to 0 for %llu\n", __func__, p_localName);
+            abort();
+        }
         m_localToGlobalMap.emplace(p_localName, p_namedObject);
     }
     m_globalToLocalMap.emplace(p_namedObject->getGlobalName(), p_localName);
@@ -261,14 +291,24 @@ const ObjectDataPtr& NameSpace::getObjectDataPtr(
 
 void NameSpace::setObjectData(ObjectLocalName p_localName,
         ObjectDataPtr data) {
+    if (!data) {
+        fprintf(stderr, "%s: 0wned, added a null data ptr\n", __func__);
+    }
     m_objectDataMap.emplace(p_localName, std::move(data));
 }
 
 void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
+    if (!eglImage->globalTexObj) {
+        fprintf(stderr, "%s: goofed: tried to get null global tex obj\n", __func__);
+    }
+
     unsigned int globalName = eglImage->globalTexObj->getGlobalName();
     emugl::Mutex::AutoLock lock(m_lock);
 
-    if (!globalName) return;
+    if (!globalName) {
+        fprintf(stderr, "%s: goofed, global tex obj is 0\n", __func__);
+        return;
+    }
 
     const auto& saveableTexIt = m_textureMap.find(globalName);
     if (saveableTexIt == m_textureMap.end()) {

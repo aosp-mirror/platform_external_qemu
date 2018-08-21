@@ -77,10 +77,21 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
                 m_globalName = 0;
         }
     }
+
+    if (!m_globalName) {
+        fprintf(stderr, "%s: failed to create an object of type %d\n", __func__, (int)genNameInfo.m_type);
+        abort();
+    }
 }
 
 NamedObject::~NamedObject() {
     emugl::Mutex::AutoLock _lock(m_globalNameSpace->m_lock);
+
+    if (!m_globalName) {
+        fprintf(stderr, "%s: failed delete obj already 0\n", __func__);
+        abort();
+    }
+
     assert(GLEScontext::dispatcher().isInitialized());
     switch (m_type) {
     case NamedObjectType::VERTEXBUFFER:

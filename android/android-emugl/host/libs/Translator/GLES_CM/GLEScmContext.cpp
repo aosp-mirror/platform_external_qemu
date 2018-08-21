@@ -55,6 +55,8 @@ void GLEScmContext::init() {
 
         if (isCoreProfile()) {
             m_coreProfileEngine = new CoreProfileEngine(this);
+            genVAOName(0, false);
+            dispatcher().glBindVertexArray(getVAOGlobalName(0));
         } else if (isGles2Gles()) {
             m_coreProfileEngine = new CoreProfileEngine(this, true /* gles2gles */);
         }
