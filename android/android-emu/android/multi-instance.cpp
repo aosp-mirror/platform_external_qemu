@@ -37,7 +37,7 @@ bool android::multiinstance::initInstanceShareMode(
         android::base::createFileForShare(multiInstanceLock);
     }
     const char* mode =
-            sMultiInstanceState->shareMode == android::base::FileShare::Read
+            shareMode == android::base::FileShare::Read
                     ? "rb"
                     : "wb";
     sMultiInstanceState->sharedFile =
