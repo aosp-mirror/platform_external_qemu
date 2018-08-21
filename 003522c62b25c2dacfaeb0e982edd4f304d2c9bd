@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7fbacd28_a67a6be4",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T22:13:30Z",
+      "side": 1,
+      "message": "Yeah, I was intentionally diverging as an experiment.  The intent was to make it so that only get() could create an instance.  However, this has a fatal flaw, anyone can create an instance using LazyInstance\u003cAutomationController\u003e.  Given that I want to encapsulate functionality more, I\u0027m going to change this to a AutomationControllerImpl internal class instead of using this trick.\n\nI\u0027d like to keep this declared in the get() method, though, otherwise I\u0027d have to have the LazyInstance declared after the AutomationControllerImpl at file scope, which is less readable than having it in the method.\n\nclass AutomationControllerImpl { ... };\nstatic LazyInstance\u003cAutomationControllerImpl\u003e sInstance;",
+      "parentUuid": "b32f1dc5_0297ee6d",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 56
+      },
+      "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "104ba455_a19da9f7",
         "filename": "android/android-emu/android/automation/AutomationController.h",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6e18cc35_581dc1f1",
+        "filename": "android/android-emu/android/automation/AutomationController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T22:13:30Z",
+      "side": 1,
+      "message": "This is mainly for the \"friend class\" declaration.  This could potentially be:\n\nnamespace android {\nnamespace base {\n    template\u003cclass T\u003e struct LazyInstance;\n}  // namespace base.\nnamespace automation {\n    // ...\n\nHowever I think that\u0027s a bit too complicated for a forward declaration, so I opted to include the header directly.\n\nHowever, I revisited this design in patchset 2 and removed this.",
+      "parentUuid": "104ba455_a19da9f7",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 45
+      },
+      "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "bb6c5eb6_d092fcc8",
+        "filename": "android/android-emu/android/automation/AutomationController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T22:13:30Z",
+      "side": 1,
+      "message": "Yes, this is required.  I\u0027m using this trick so that I can keep the constructor private and require callers to use get().  Without it, the error is:\n\nandroid/android-emu/android/base/memory/LazyInstance.h:179:25: error: calling a private constructor of class \u0027android::automation::AutomationController\u0027\n\nHowever, I revisited this design and removed this in patchset 2.",
+      "parentUuid": "6c56f498_21a11bca",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 67
+      },
+      "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "41f995f0_b731cc09",
         "filename": "android/android-emu/android/automation/AutomationEventSink.cpp",
         "patchSetId": 1
@@ -91,6 +163,30 @@
       "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a92f741_ee442048",
+        "filename": "android/android-emu/android/automation/AutomationEventSink.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T22:13:30Z",
+      "side": 1,
+      "message": "Yep, I just confirmed that getString handles embedded NULs correctly.",
+      "parentUuid": "41f995f0_b731cc09",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "2fb217af_16ccbc3b",
+        "filename": "android/android-emu/android/automation/AutomationEventSink.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T22:13:30Z",
+      "side": 1,
+      "message": "Yeah, I\u0027m going to make this the canonical event separator for the text event stream.",
+      "parentUuid": "daa8450c_6cc8f48f",
+      "range": {
+        "startLine": 84,
+        "startChar": 0,
+        "endLine": 85,
+        "endChar": 28
+      },
+      "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8503995e_4c279a67",
         "filename": "android/android-emu/android/automation/AutomationEventSink.h",
         "patchSetId": 1
@@ -137,6 +257,30 @@
       "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f5e26ff_c1a570ea",
+        "filename": "android/android-emu/android/automation/AutomationEventSink.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-21T22:13:30Z",
+      "side": 1,
+      "message": "Yeah, I think it would make sense to add that, and I think that this current design is flexible to that.  However, I\u0027m not thinking about FPS/RAM usage streams, more like different kinds of user actions:\n\n- Physical model\n- GPS\n- Mouse/keyboard\n\nWhen adding that, I think I would add a \"filter\" parameter and use that to filter what gets sent to each stream.",
+      "parentUuid": "8503995e_4c279a67",
+      "range": {
+        "startLine": 67,
+        "startChar": 9,
+        "endLine": 67,
+        "endChar": 22
+      },
+      "revId": "003522c62b25c2dacfaeb0e982edd4f304d2c9bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
