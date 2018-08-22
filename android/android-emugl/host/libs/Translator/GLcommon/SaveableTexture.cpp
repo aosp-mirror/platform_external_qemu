@@ -19,12 +19,22 @@
 #include "android/base/ArraySize.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/Profiler.h"
+#include "android/base/StringView.h"
 #include "android/base/system/System.h"
+
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureUtils.h"
 
+#include "emugl/common/crash_reporter.h"
+#include "emugl/common/logging.h"
+
 #include <algorithm>
+
+using android::base::ScopedMemoryProfiler;
+using android::base::MemoryProfiler;
+using android::base::StringView;
 
 static const GLenum kTexParam[] = {
     GL_TEXTURE_MIN_FILTER,
@@ -392,6 +402,7 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
                     return std::make_pair(pname, value);
                 });
     } else if (m_target != 0) {
+        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
         fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
 }
@@ -454,11 +465,22 @@ void SaveableTexture::onSave(
         unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
                 m_maxMipmapLevel + 1;
 
-        bool isLowMem = android::base::System::isUnderMemoryPressure();
+        // bug: 112749908
+        // Texture saving causes hundreds of megabytes of memory ballooning.
+        // This could be behind nullptr dereferences in crash reports if
+        // the user ran out of commit charge on Windows, which is not measured
+        // in android::base::System::isUnderMemoryPressure.
+        //
+        // To debug this issue, avoid keeping the imgData buffers around,
+        // and log the memory usage.
+        //
+        // bool isLowMem = android::base::System::isUnderMemoryPressure();
+        bool isLowMem = true;
 
         auto saveTex = [this, stream, numLevels, &dispatcher, isLowMem](
                                 GLenum target, bool isDepth,
                                 std::unique_ptr<LevelImageData[]>& imgData) {
+
             if (m_isDirty) {
                 imgData.reset(new LevelImageData[numLevels]);
                 for (unsigned int level = 0; level < numLevels; level++) {
@@ -474,6 +496,29 @@ void SaveableTexture::onSave(
                     depth = level == 0 ? m_depth :
                         std::max<unsigned int>(
                             imgData.get()[level - 1].m_depth / 2, 1);
+
+                    ScopedMemoryProfiler::Callback memoryProfilerCallback =
+                        [this, level, width, height, depth]
+                        (StringView tag, StringView stage,
+                         MemoryProfiler::MemoryUsageBytes currentResident,
+                         MemoryProfiler::MemoryUsageBytes change) {
+
+                        double megabyte = 1024.0 * 1024.0;
+
+                        GL_LOG("%s %s: %f mb current. change: %f mb. texture:"
+                               "format 0x%x type 0x%x level 0x%x dims (%u, %u, %u)\n",
+                               c_str(tag).get(),
+                               c_str(stage).get(),
+                               (double)currentResident / megabyte,
+                               (double)change / megabyte,
+                               m_format,
+                               m_type,
+                               level,
+                               width, height, depth);
+                    };
+
+                    ScopedMemoryProfiler mem("saveTexture", memoryProfilerCallback);
+
                     android::base::SmallFixedVector<unsigned char, 16>& buffer
                         = imgData.get()[level].m_data;
                     if (!isGles2Gles()) {
@@ -612,8 +657,8 @@ void SaveableTexture::onSave(
     } else if (m_target != 0) {
         // SaveableTexture is uninitialized iff a texture hasn't been bound,
         // which will give m_target==0
-        fprintf(stderr, "Warning: texture target 0x%x not supported\n",
-                m_target);
+        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
+        fprintf(stderr, "Warning: texture target 0x%x not supported\n", m_target);
     }
 }
 
@@ -622,6 +667,10 @@ void SaveableTexture::restore() {
     m_loader(this);
     m_globalTexObj.reset(new NamedObject(
             GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
+    if (!m_globalTexObj) {
+        GL_LOG("SaveableTexture::%s: %p: could not allocate NamedObject for texture\n", __func__, this);
+        emugl_crash_reporter( "Fatal: could not allocate SaveableTexture m_globalTexObj\n");
+    }
     m_globalName = m_globalTexObj->getGlobalName();
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
@@ -823,6 +872,10 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
     eglImage->width = m_width;
     eglImage->texStorageLevels = m_texStorageLevels;
     eglImage->sync = nullptr;
+    if (!eglImage->globalTexObj) {
+        GL_LOG("%s: EGL image %p has no global texture object!\n",
+               __func__, eglImage);
+    }
 }
 
 void SaveableTexture::makeDirty() {
