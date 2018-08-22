@@ -24,6 +24,9 @@
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureUtils.h"
 
+#include "emugl/common/crash_reporter.h"
+#include "emugl/common/logging.h"
+
 #include <algorithm>
 
 static const GLenum kTexParam[] = {
@@ -392,6 +395,7 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
                     return std::make_pair(pname, value);
                 });
     } else if (m_target != 0) {
+        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
         fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
 }
@@ -454,7 +458,17 @@ void SaveableTexture::onSave(
         unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
                 m_maxMipmapLevel + 1;
 
-        bool isLowMem = android::base::System::isUnderMemoryPressure();
+        // bug: 112749908
+        // Texture saving causes hundreds of megabytes of memory ballooning.
+        // This could be behind nullptr dereferences in crash reports if
+        // the user ran out of commit charge on Windows, which is not measured
+        // in android::base::System::isUnderMemoryPressure.
+        //
+        // To debug this issue, avoid keeping the imgData buffers around,
+        // and log the memory usage.
+        //
+        // bool isLowMem = android::base::System::isUnderMemoryPressure();
+        bool isLowMem = true;
 
         auto saveTex = [this, stream, numLevels, &dispatcher, isLowMem](
                                 GLenum target, bool isDepth,
@@ -612,8 +626,8 @@ void SaveableTexture::onSave(
     } else if (m_target != 0) {
         // SaveableTexture is uninitialized iff a texture hasn't been bound,
         // which will give m_target==0
-        fprintf(stderr, "Warning: texture target 0x%x not supported\n",
-                m_target);
+        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
+        fprintf(stderr, "Warning: texture target 0x%x not supported\n", m_target);
     }
 }
 
@@ -622,6 +636,10 @@ void SaveableTexture::restore() {
     m_loader(this);
     m_globalTexObj.reset(new NamedObject(
             GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
+    if (!m_globalTexObj) {
+        GL_LOG("SaveableTexture::%s: %p: could not allocate NamedObject for texture\n", __func__, this);
+        emugl_crash_reporter( "Fatal: could not allocate SaveableTexture m_globalTexObj\n");
+    }
     m_globalName = m_globalTexObj->getGlobalName();
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
@@ -823,6 +841,10 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
     eglImage->width = m_width;
     eglImage->texStorageLevels = m_texStorageLevels;
     eglImage->sync = nullptr;
+    if (!eglImage->globalTexObj) {
+        GL_LOG("%s: EGL image %p has no global texture object!\n",
+               __func__, eglImage);
+    }
 }
 
 void SaveableTexture::makeDirty() {
