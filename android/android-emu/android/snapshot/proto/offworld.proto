@@ -5,7 +5,7 @@ package offworld;
 enum ModuleName {
   UNKNOWN = 0;
   SNAPSHOT = 1;
-  AR_TESTING = 2; // TODO jwmcglynn@: rename it as you like
+  AR_TESTING = 2;  // TODO(jwmcglynn): rename it as you like
 }
 
 message GuestSend {
@@ -24,12 +24,19 @@ message GuestSend {
       optional bytes metadata = 2;
       optional ShareMode share_mode = 3;
     }
+    message ForkReadOnlyInstances {
+      optional int32 num_instances = 1;
+    }
+    message DoneInstance {
+    }
     oneof function {
       CreateCheckpoint create_checkpoint_param = 1;
       GotoCheckpoint goto_checkpoint_param = 2;
+      ForkReadOnlyInstances fork_read_only_instances_param = 3;
+      DoneInstance done_instance_param = 4;
     }
   }
-  message ModuleArTesting { // TODO
+  message ModuleArTesting {  // TODO(jwmcglynn)
   }
   optional int32 version = 1;
   oneof module {
@@ -49,12 +56,19 @@ message GuestRecv {
     }
     message GotoCheckpoint {
     }
+    message ForkReadOnlyInstances {
+      optional int32 instance_id = 1;
+    }
+    message DoneInstance {
+    }
     oneof function {
       CreateCheckpoint create_checkpoint_param = 1;
       GotoCheckpoint goto_checkpoint_param = 2;
+      ForkReadOnlyInstances fork_read_only_instances_param = 3;
+      DoneInstance done_instance_param = 4;
     }
   }
-  message ModuleArTesting { // TODO
+  message ModuleArTesting {  // TODO(jwmcglynn)
   }
   optional int32 version = 1;
   oneof module {
