@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package android.verifiedboot;
+
+message VerifiedBootConfig {
+  optional int32 major_version = 1;
+
+  // Parameters that should be placed within the dm="" block
+  repeated string dm_param = 2;
+
+  // Parameters that should be placed outside of the dm="" block
+  repeated string param = 3;
+}
