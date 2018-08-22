@@ -57,6 +57,8 @@ bool android::multiinstance::updateInstanceShareMode(
         const char* snapshotName,
         base::FileShare shareMode) {
     assert(sMultiInstanceState.hasInstance());
+    printf("updating share mode %d -> %d\n", sMultiInstanceState->shareMode,
+            shareMode);
     if (sMultiInstanceState->shareMode == shareMode) {
         return true;
     }
