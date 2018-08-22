@@ -1707,10 +1707,6 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
         strstr(cstring,"GL_EXT_color_buffer_float")!=NULL)
         s_glSupport.GL_EXT_color_buffer_float = true;
 
-    if (::isCoreProfile() ||
-        strstr(cstring,"GL_EXT_color_buffer_half_float")!=NULL)
-        s_glSupport.ext_GL_EXT_color_buffer_half_float = true;
-
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
         s_glSupport.GL_OES_RGB8_RGBA8 = true;
 
