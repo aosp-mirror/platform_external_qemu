@@ -14,6 +14,7 @@
 #include "android/utils/stralloc.h"
 
 #include <string.h>
+#include <time.h>
 
 CSerialLine* android_gps_serial_line;
 // Set to true to ping guest for location updates every few seconds
@@ -47,24 +48,29 @@ android_gps_send_nmea( const char*  sentence )
 // Inputs: latitude:        Degrees
 //         longitude:       Degrees
 //         metersElevation: Meters above sea level
+//         speedKnots:      Speed in knots
+//         headingDegrees:  Heading -180..+360, 0=north, 90=east
 //         nSatellites:     Number of satellites used
 //         time:            UTC, in the format provided
 //                          by gettimeofday()
 
 void
 android_gps_send_location(double latitude, double longitude,
-                          double metersElevation, int nSatellites,
+                          double metersElevation,
+                          double speedKnots, double headingDegrees,
+                          int nSatellites,
                           const struct timeval *time)
 {
     STRALLOC_DEFINE(msgStr);
     STRALLOC_DEFINE(elevationStr);
     char* elevStrPtr;
 
-    int      deg, min;
-    char     hemi;
+    int      latDeg, latMin, latFraction;
+    int      lngDeg, lngMin, lngFraction;
+    char     hemiNS, hemiEW;
     int      hh = 0, mm = 0, ss = 0;
 
-    // Format overview:
+    // GPGGA format overview:
     //    time of fix      123519     12:35:19 UTC
     //    latitude         4807.038   48 degrees, 07.038 minutes
     //    north/south      N or S
@@ -87,29 +93,29 @@ android_gps_send_location(double latitude, double longitude,
 
     stralloc_add_format( msgStr, "$GPGGA,%02d%02d%02d", hh, mm, ss);
 
-    // then the latitude
-    hemi = 'N';
+    // Latitude
+    hemiNS = 'N';
     if (latitude < 0) {
-        hemi = 'S';
+        hemiNS = 'S';
         latitude = -latitude;
     }
-    deg = (int) latitude;
-    latitude = 60*(latitude - deg);
-    min = (int) latitude;
-    latitude = 10000*(latitude - min);
-    stralloc_add_format( msgStr, ",%02d%02d.%04d,%c", deg, min, (int)latitude, hemi );
+    latDeg = (int) latitude;
+    latitude = 60*(latitude - latDeg);
+    latMin = (int) latitude;
+    latFraction = 10000*(latitude - latMin);
+    stralloc_add_format(msgStr, ",%02d%02d.%04d,%c", latDeg, latMin, latFraction, hemiNS);
 
-    // The longitude
-    hemi = 'E';
+    // Longitude
+    hemiEW = 'E';
     if (longitude < 0) {
-        hemi = 'W';
+        hemiEW = 'W';
         longitude  = -longitude;
     }
-    deg = (int) longitude;
-    longitude = 60*(longitude - deg);
-    min = (int) longitude;
-    longitude = 10000*(longitude - min);
-    stralloc_add_format( msgStr, ",%02d%02d.%04d,%c", deg, min, (int)longitude, hemi );
+    lngDeg = (int) longitude;
+    longitude = 60*(longitude - lngDeg);
+    lngMin = (int) longitude;
+    lngFraction = 10000*(longitude - lngMin);
+    stralloc_add_format(msgStr, ",%02d%02d.%04d,%c", lngDeg, lngMin, lngFraction, hemiEW);
 
     // Bogus fix quality (1), satellite count, and bogus dilution
     stralloc_add_format( msgStr, ",1,6,");
@@ -135,6 +141,51 @@ android_gps_send_location(double latitude, double longitude,
 
     // Free it
     stralloc_reset(msgStr);
+
+    // GPRMC format overview:
+    // GPRMC,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,W*70
+    //         1    2    3    4    5     6    7    8      9     10  11 12
+    //      1  220516     Time Stamp
+    //      2  A          validity - A-ok, V-invalid
+    //      3  5133.82    current Latitude
+    //      4  N          North/South
+    //      5  00042.24   current Longitude
+    //      6  W          East/West
+    //      7  173.8      Speed in knots
+    //      8  231.8      True course
+    //      9  130694     Date Stamp (13 June 1994)
+    //     10  004.2      Variation
+    //     11  W          East/West
+    //     12  *70        checksum
+
+    STRALLOC_DEFINE(rmcStr);
+
+    // Time
+    stralloc_add_format(rmcStr, "$GPRMC,%02d%02d%02d,A", hh, mm, ss);
+
+    // Latitude
+    stralloc_add_format(rmcStr, ",%02d%02d.%04d,%c", latDeg, latMin, latFraction, hemiNS);
+
+    // Longitude
+    stralloc_add_format(rmcStr, ",%02d%02d.%04d,%c", lngDeg, lngMin, lngFraction, hemiEW);
+
+    // Speed in knots, course
+    if (headingDegrees < 0.0) headingDegrees += 360.0;
+    stralloc_add_format(rmcStr, ",%.2f,%.2f", speedKnots, headingDegrees);
+
+    // Date
+    time_t ttTime = time->tv_sec;
+    struct tm *pTm = gmtime(&ttTime);
+    stralloc_add_format(rmcStr, ",%02d%02d%02d", pTm->tm_mday, pTm->tm_mon+1, (pTm->tm_year)%100);
+
+    // Magnetic variation, cksum (both bogus)
+    stralloc_add_format(rmcStr, ",0.0,W*47");
+
+    // Send it
+    android_gps_send_nmea( stralloc_cstr(rmcStr) );
+
+    // Free it
+    stralloc_reset(rmcStr);
 }
 
 int

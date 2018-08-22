@@ -151,7 +151,7 @@ image.
        to be sent back to clients.
 
 
-  Implementation: android/hw-sensors.c
+  Implementation: android/hw-sensors.cpp
   Since:          SDK 1.5 (cupcake)
 
 

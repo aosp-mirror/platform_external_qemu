@@ -1,0 +1,238 @@
+// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+= Vulkan^(R)^ Documentation and Extensions: Procedures and Conventions
+Jon Leech, Tobias Hector
+:data-uri:
+:icons: font
+:toc2:
+:toclevels: 3
+:max-width: 100
+:numbered:
+:doctype: book
+:imagewidth: 800
+:fullimagewidth: width="800"
+:cl: &#x3a;
+
+// Various special / math symbols. This is easier to edit with than Unicode.
+include::config/attribs.txt[]
+
+:leveloffset: 1
+
+<<<<
+
+include::copyright-ccby.txt[]
+
+<<<<
+
+[[introduction]]
+= Introduction
+
+This document contains required procedures and conventions when writing
+specifications for new Vulkan APIs, extensions and layers, or related
+Khronos documentation such as white papers and tutorials; or contributing to
+existing Vulkan specifications.
+These are collectively referred to as _Vulkan Documentation_ or just
+_documentation_ below.
+The primary focus is the API Specification and API extensions, although all
+of the markup and most of the writing style is equally applicable to other
+documentation.
+
+The primary purpose is to achieve consistency across the API, as well as
+across all of our source and output documents.
+Consistency makes it easier for developers, editors, reviewers, and users of
+our documentation to understand and modify it.
+
+This document is now formally voted on and approved by the Vulkan Working
+Group.
+This means that unless explicitly stated otherwise, the procedures and
+conventions must be followed.
+If you have a strong desire to modify the procedures and conventions, such
+changes must be made through the normal Vulkan Working Group processes.
+
+
+[[introduction-terminology]]
+== Terminology
+
+The key words *must*, *required*, *should*, *recommend*, *may*, and
+*optional* in this document are to be interpreted as described in RFC 2119
+and by the Vulkan 1.1 Specification in the "`Terminology`" section.
+
+
+[[introduction-structure]]
+== Document Structure
+
+The style guide is broken into four sections:
+
+  * <<naming,API Naming Conventions>> - the required rules for choosing
+    names of Vulkan identifiers of all types.
+  * <<extensions,Extensions and Layers>> - the required procedures for
+    creating formal Vulkan extensions and layers.
+  * <<markup,Markup Style>> - the required and recommended markup style for
+    writing asciidoc and XML source that follows consistent formatting and
+    layout guidelines, tags special terms and phrases for proper processing
+    by the spec generation tools, etc.
+  * <<writing,Writing Style>> - the required and recommended writing style
+    for overall and fine-grained structure and conventions, normative
+    language use, API naming conventions, common words and phrases to use
+    and to avoid, linking and cross-referencing, etc.
+
+
+[[introduction-asciidoc]]
+== Asciidoc Markup
+
+Vulkan Documentation is primarily written in Asciidoc, a form of text markup
+language.
+Specifically we're using the version of Asciidoc that is actively maintained
+by asciidoctor, which is documented on its website at
+http://www.asciidoctor.org/.
+
+References to the Asciidoctor User Manual are to sections in the document at
+http://asciidoctor.org/docs/user-manual/.
+
+Asciidoctor is implemented in Ruby (https://www.ruby-lang.org/), which is
+available for Linux, MacOS, and Microsoft Windows.
+Multiple preview tools also exist for the language, primarily using
+AsciidoctorJ (https://github.com/asciidoctor/asciidoctorj) or asciidoctor.js
+(https://github.com/asciidoctor/asciidoctor.js).
+In particular, GitHub and GitLab both have asciidoc previews for .adoc or
+.asciidoc files in repositories, and live preview extensions exist for
+Chrome and Firefox.
+
+The Asciidoctor toolchain and build process are not addressed by this
+document, which concentrates solely on source documents.
+
+
+[[introduction-normative]]
+== Normative References
+
+Normative references are references to external documents or resources to
+which documentation authors must comply.
+
+[[iso-8601]]
+International Organization for Standardization, _Data elements and
+interchange formats -- Information interchange -- Representation of dates
+and times_, http://www.iso.org/iso/catalogue_detail?csnumber=40874,
+2004-12-01.
+Also see https://www.w3.org/QA/Tips/iso-date for colloquial examples.
+
+[[vulkan-docs]]
+Khronos Vulkan Working Group, +KhronosGroup/Vulkan-Docs+ project on GitHub,
+https://github.com/KhronosGroup/Vulkan-Docs, 2016-07-05.
+
+[[vulkan-spec]]
+Vulkan Working Group, _Vulkan 1.1.70 - A Specification_,
+https://www.khronos.org/registry/vulkan/, 2018-03-07
+
+Version 1.1.70 is the latest patch release of the Vulkan API Specification
+as of the time this reference was created, but that Specification is
+frequently updated with minor bugfixes and clarifications.
+When a more recent patch release is made, it becomes the normative reference
+for the API.
+
+
+// Chapters of the text are included below
+
+include::style/naming.txt[]
+
+include::style/extensions.txt[]
+
+include::style/markup.txt[]
+
+include::style/writing.txt[]
+
+include::style/misc.txt[]
+
+// Appendices are included below
+include::style/vuid.txt[]
+
+
+= Revision History
+
+* 2018-08-13 - Add %inline directive to the <<markup-sample-section-images,
+  Figures>> section (public pull request 734).
+* 2018-07-08 - Remove requirement to explicitly include extension appendices
+  in the <<extensions-documenting-extensions, Changes for New Extensions>>
+  section.
+* 2018-06-25 - Modify the process for <<extensions-vendor-id, Registering a
+  Vendor ID with Khronos>> to define vendor ID values as part of an
+  enumerated type.
+* 2018-03-07 - Updated for Vulkan 1.1 release.
+* 2018-01-10 - Move details of mandated extension compatibility from the
+  <<extensions-rules, General Rules/Guidelines>> section into the
+  Fundamentals section of the API Specification, where they are changed
+  slightly to allow explicit incompatibilies (public issue 638).
+* 2017-10-27 - Add language about proper use of "`valid pointer`" and
+  "`pointer to valid object`" for valid usage statements, in the
+  <<sample-command, Sample Command Description>> section (related to public
+  pull request 547).
+* 2017-10-15 - Describe how to write <<writing-latexmath-in-table-cells,
+  LaTeX Math in Table Cells>> (internal issue 908).
+* 2017-10-15 - Add more details of <<extensions-naming-author-IDs, `KHX`
+  extensions>> (public issues 536, 580).
+* 2017-09-10 - Add descriptions of <<writing-arrays, how to use `each` and
+  `any`>> to refer to properties of elments of arrays (internal issue 884).
+* 2017-09-10 - Add <<extensions-interactions-parent, Valid Usage and
+  Extension pname:pNext Chains>> language specifying where to describe
+  interactions of structures in a pname:pNext chain (internal issue 715).
+* 2017-09-10 - Add example of marking up an enumerated type all of whose
+  values are defined by extensions (internal issue 864).
+* 2017-08-25 - Add language to the <<extensions,API Versions, Extensions,
+  and Layers>> chapter describing how to write new API versions (internal
+  issue 892).
+* 2017-06-12 - Add sections describing when to use the
+  <<markup-macros-api-name, *name{cl}>> and <<markup-macros-api-text,
+  *text{cl}>> markup macros instead of the *link{cl} macros, and clarify
+  that slink{cl} should be used for handle as well as structure names
+  (internal issue 886).
+* 2017-05-08 - Add appendix describing <<appendix-vuid, Valid Usage ID
+  Tags>> and how they're generated.
+* 2017-03-19 - Add naming rule for <<naming-extension-structures, Extension
+  Structure Names>>.
+* 2017-02-11 - Finish transitioning to asciidoctor markup.
+* 2016-09-28 - Add asciidoc math markup guidelines.
+* 2016-09-16 - Make style guide markup more consistent with its own
+  recommendations.
+  Simplify some tables of preferred terms.
+  Add sections on block and table markup.
+* 2016-09-12 - Describe writing and markup style for labelled lists.
+  Require use of the ISO 8601 date format except in rare legacy cases.
+  Expand the description of <<markup-layout,Line Lengths>> and add a
+  description of markup for <<markup-footnotes,Footnotes>>.
+* 2016-09-08 - Add a writing section about proper use of
+  <<writing-misc-a-an,"`a`" and "`an`">> (internal issue 432).
+* 2016-08-30 - Remove mustnot{cl} and shouldnot{cl} macro definitions, which
+  are no longer used in the Specification (internal issue 407).
+* 2016-08-29 - Add spelling and compound word rules (public issue 352).
+* 2016-08-23 - Modify description of specifying extensions in the
+  <<extensions,Layers and Extensions>> chapter to refer to the new
+  single-branch model for extensions (internal issue 397).
+* 2016-07-26 - Add section describing <<writing-refpages,markup for
+  automatic reference page extraction>>.
+* 2016-07-18 - Add examples of function-parameter and structure-member
+  markup (based on public issue 286).
+* 2016-07-11 - Change the document title.
+* 2016-07-07 - Rename document, change license to CC BY, clarify required
+  and recommended actions, and reserve use of "`normative`" for the
+  Specifications.
+* 2016-06-26 - Move Layers and Extensions chapter from Appendix C of the
+  Vulkan API Specification and merge content with the naming guide.
+  Put extension and naming chapters into their own source files.
+* 2016-06-20 - Add API naming guide.
+* 2016-05-22 - Add markup and image creation rules, after fixing missing
+  figure captions for public issue 219.
+* 2016-05-01 - Include feedback from public issues 120 and 190.
+  Use consistent conventions for defining structures.
+  Use American rather than British spelling conventions.
+* 2016-03-12 - Recommend against "the value of".
+* 2016-02-26 - Replace use of the "maynot{cl}" macro with "may{cl} not".
+* 2016-02-16 - Place asciidoc conversion post-release.
+* 2016-02-09 - Added quotation mark convention.
+* 2016-02-01 - Add the Oxford Comma section and issue resolution.
+* 2016-01-26 - Add bullet-list style description of command parameters.
+* 2016-01-11 - Add "`Numbers in Text`" section from WSI work.
+* 2015-12-16 - Make "`begin / end`" preferred terms to "`start / finish`".
+* 2015-12-15 - Make "`implementation`" preferred term instead of "`system`".
+* 2015-12-13 - Add tlink{cl}/tname{cl} macros for function pointer types.
+* 2015-12-10 - Initial release for feedback.

@@ -1,0 +1,1510 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[fundamentals]]
+= Fundamentals
+
+This chapter introduces fundamental concepts including the Vulkan
+architecture and execution model, API syntax, queues, pipeline
+configurations, numeric representation, state and state queries, and the
+different types of objects and shaders.
+It provides a framework for interpreting more specific descriptions of
+commands and behavior in the remainder of the Specification.
+
+
+[[fundamentals-host-environment]]
+== Host and Device Environment
+
+The Vulkan Specification assumes and requires: the following properties of
+the host environment with respect to Vulkan implementations:
+
+  * The host must: have runtime support for 8, 16, 32 and 64-bit signed and
+    unsigned twos-complement integers, all addressable at the granularity of
+    their size in bytes.
+  * The host must: have runtime support for 32- and 64-bit floating-point
+    types satisfying the range and precision constraints in the
+    <<fundamentals-floatingpoint,Floating Point Computation>> section.
+  * The representation and endianness of these types on the host must: match
+    the representation and endianness of the same types on every physical
+    device supported.
+
+[NOTE]
+.Note
+====
+Since a variety of data types and structures in Vulkan may: be accessible by
+both host and physical device operations, the implementation should: be able
+to access such data efficiently in both paths in order to facilitate writing
+portable and performant applications.
+====
+
+[[fundamentals-execmodel]]
+== Execution Model
+
+This section outlines the execution model of a Vulkan system.
+
+Vulkan exposes one or more _devices_, each of which exposes one or more
+_queues_ which may: process work asynchronously to one another.
+The set of queues supported by a device is partitioned into _families_.
+Each family supports one or more types of functionality and may: contain
+multiple queues with similar characteristics.
+Queues within a single family are considered _compatible_ with one another,
+and work produced for a family of queues can: be executed on any queue
+within that family.
+This Specification defines four types of functionality that queues may:
+support: graphics, compute, transfer, and sparse memory management.
+
+[NOTE]
+.Note
+====
+A single device may: report multiple similar queue families rather than, or
+as well as, reporting multiple members of one or more of those families.
+This indicates that while members of those families have similar
+capabilities, they are _not_ directly compatible with one another.
+====
+
+Device memory is explicitly managed by the application.
+Each device may: advertise one or more heaps, representing different areas
+of memory.
+Memory heaps are either device local or host local, but are always visible
+to the device.
+Further detail about memory heaps is exposed via memory types available on
+that heap.
+Examples of memory areas that may: be available on an implementation
+include:
+
+  * _device local_ is memory that is physically connected to the device.
+  * _device local, host visible_ is device local memory that is visible to
+    the host.
+  * _host local, host visible_ is memory that is local to the host and
+    visible to the device and host.
+
+On other architectures, there may: only be a single heap that can: be used
+for any purpose.
+
+A Vulkan application controls a set of devices through the submission of
+command buffers which have recorded device commands issued via Vulkan
+library calls.
+The content of command buffers is specific to the underlying implementation
+and is opaque to the application.
+Once constructed, a command buffer can: be submitted once or many times to a
+queue for execution.
+Multiple command buffers can: be built in parallel by employing multiple
+threads within the application.
+
+Command buffers submitted to different queues may: execute in parallel or
+even out of order with respect to one another.
+Command buffers submitted to a single queue respect
+<<synchronization-submission-order, submission order>>, as described further
+in <<synchronization, synchronization chapter>>.
+Command buffer execution by the device is also asynchronous to host
+execution.
+Once a command buffer is submitted to a queue, control may: return to the
+application immediately.
+Synchronization between the device and host, and between different queues is
+the responsibility of the application.
+
+
+[[fundamentals-queueoperation]]
+=== Queue Operation
+
+Vulkan queues provide an interface to the execution engines of a device.
+Commands for these execution engines are recorded into command buffers ahead
+of execution time.
+These command buffers are then submitted to queues with a _queue submission_
+command for execution in a number of _batches_.
+Once submitted to a queue, these commands will begin and complete execution
+without further application intervention, though the order of this execution
+is dependent on a number of <<synchronization, implicit and explicit
+ordering constraints>>.
+
+Work is submitted to queues using queue submission commands that typically
+take the form ftext:vkQueue* (e.g. flink:vkQueueSubmit,
+flink:vkQueueBindSparse), and optionally take a list of semaphores upon
+which to wait before work begins and a list of semaphores to signal once
+work has completed.
+The work itself, as well as signaling and waiting on the semaphores are all
+_queue operations_.
+
+Queue operations on different queues have no implicit ordering constraints,
+and may: execute in any order.
+Explicit ordering constraints between queues can: be expressed with
+<<synchronization-semaphores,semaphores>> and
+<<synchronization-fences,fences>>.
+
+Command buffer submissions to a single queue respect
+<<synchronization-submission-order, submission order>> and other
+<<synchronization-implicit, implicit ordering guarantees>>, but otherwise
+may: overlap or execute out of order.
+Other types of batches and queue submissions against a single queue (e.g.
+<<sparsemem-memory-binding, sparse memory binding>>) have no implicit
+ordering constraints with any other queue submission or batch.
+Additional explicit ordering constraints between queue submissions and
+individual batches can be expressed with
+<<synchronization-semaphores,semaphores>> and
+<<synchronization-fences,fences>>.
+
+Before a fence or semaphore is signaled, it is guaranteed that any
+previously submitted queue operations have completed execution, and that
+memory writes from those queue operations are
+<<synchronization-dependencies-available-and-visible,available>> to future
+queue operations.
+Waiting on a signaled semaphore or fence guarantees that previous writes
+that are available are also
+<<synchronization-dependencies-available-and-visible,visible>> to subsequent
+commands.
+
+Command buffer boundaries, both between primary command buffers of the same
+or different batches or submissions as well as between primary and secondary
+command buffers, do not introduce any additional ordering constraints.
+In other words, submitting the set of command buffers (which can: include
+executing secondary command buffers) between any semaphore or fence
+operations execute the recorded commands as if they had all been recorded
+into a single primary command buffer, except that the current state is
+<<commandbuffers-statereset,reset>> on each boundary.
+Explicit ordering constraints can: be expressed with <<synchronization,
+explicit synchronization primitives>>.
+
+There are a few <<synchronization-implicit, implicit ordering guarantees>>
+between commands within a command buffer, but only covering a subset of
+execution.
+Additional explicit ordering constraints can be expressed with the various
+<<synchronization, explicit synchronization primitives>>.
+
+[NOTE]
+.Note
+====
+Implementations have significant freedom to overlap execution of work
+submitted to a queue, and this is common due to deep pipelining and
+parallelism in Vulkan devices.
+====
+
+[[fundamentals-queueoperation-command-types]]
+Commands recorded in command buffers either perform actions (draw, dispatch,
+clear, copy, query/timestamp operations, begin/end subpass operations), set
+state (bind pipelines, descriptor sets, and buffers, set dynamic state, push
+constants, set render pass/subpass state), or perform synchronization
+(set/wait events, pipeline barrier, render pass/subpass dependencies).
+Some commands perform more than one of these tasks.
+State setting commands update the _current state_ of the command buffer.
+Some commands that perform actions (e.g. draw/dispatch) do so based on the
+current state set cumulatively since the start of the command buffer.
+The work involved in performing action commands is often allowed to overlap
+or to be reordered, but doing so must: not alter the state to be used by
+each action command.
+In general, action commands are those commands that alter framebuffer
+attachments, read/write buffer or image memory, or write to query pools.
+
+Synchronization commands introduce explicit
+<<synchronization-dependencies,execution and memory dependencies>> between
+two sets of action commands, where the second set of commands depends on the
+first set of commands.
+These dependencies enforce that both the execution of certain
+<<synchronization-pipeline-stages, pipeline stages>> in the later set occur
+after the execution of certain stages in the source set, and that the
+effects of <<synchronization-global-memory-barriers,memory accesses>>
+performed by certain pipeline stages occur in order and are visible to each
+other.
+When not enforced by an explicit dependency or <<synchronization-implicit,
+implicit ordering guarantees>>, action commands may: overlap execution or
+execute out of order, and may: not see the side effects of each other's
+memory accesses.
+
+The device executes queue operations asynchronously with respect to the
+host.
+Control is returned to an application immediately following command buffer
+submission to a queue.
+The application must: synchronize work between the host and device as
+needed.
+
+
+[[fundamentals-objectmodel-overview]]
+== Object Model
+
+The devices, queues, and other entities in Vulkan are represented by Vulkan
+objects.
+At the API level, all objects are referred to by handles.
+There are two classes of handles, dispatchable and non-dispatchable.
+_Dispatchable_ handle types are a pointer to an opaque type.
+This pointer may: be used by layers as part of intercepting API commands,
+and thus each API command takes a dispatchable type as its first parameter.
+Each object of a dispatchable type must: have a unique handle value during
+its lifetime.
+
+_Non-dispatchable_ handle types are a 64-bit integer type whose meaning is
+implementation-dependent, and may: encode object information directly in the
+handle rather than acting as a reference to an underlying object.
+Objects of a non-dispatchable type may: not have unique handle values within
+a type or across types.
+If handle values are not unique, then destroying one such handle must: not
+cause identical handles of other types to become invalid, and must: not
+cause identical handles of the same type to become invalid if that handle
+value has been created more times than it has been destroyed.
+
+All objects created or allocated from a sname:VkDevice (i.e. with a
+sname:VkDevice as the first parameter) are private to that device, and must:
+not be used on other devices.
+
+
+[[fundamentals-objectmodel-lifetime]]
+=== Object Lifetime
+
+Objects are created or allocated by ftext:vkCreate* and ftext:vkAllocate*
+commands, respectively.
+Once an object is created or allocated, its "`structure`" is considered to
+be immutable, though the contents of certain object types is still free to
+change.
+Objects are destroyed or freed by ftext:vkDestroy* and ftext:vkFree*
+commands, respectively.
+
+Objects that are allocated (rather than created) take resources from an
+existing pool object or memory heap, and when freed return resources to that
+pool or heap.
+While object creation and destruction are generally expected to be
+low-frequency occurrences during runtime, allocating and freeing objects
+can: occur at high frequency.
+Pool objects help accommodate improved performance of the allocations and
+frees.
+
+It is an application's responsibility to track the lifetime of Vulkan
+objects, and not to destroy them while they are still in use.
+
+[[fundamentals-objectmodel-lifetime-acquire]]
+The ownership of application-owned memory is immediately acquired by any
+Vulkan command it is passed into.
+Ownership of such memory must: be released back to the application at the
+end of the duration of the command, so that the application can: alter or
+free this memory as soon as all the commands that acquired it have returned.
+
+The following object types are consumed when they are passed into a Vulkan
+command and not further accessed by the objects they are used to create.
+They must: not be destroyed in the duration of any API command they are
+passed into:
+
+  * sname:VkShaderModule
+  * sname:VkPipelineCache
+ifdef::VK_EXT_validation_cache[]
+  * sname:VkValidationCacheEXT
+endif::VK_EXT_validation_cache[]
+
+A sname:VkRenderPass object passed as a parameter to create another object
+is not further accessed by that object after the duration of the command it
+is passed into.
+A sname:VkRenderPass used in a command buffer follows the rules described
+below.
+
+A sname:VkPipelineLayout object must: not be destroyed while any command
+buffer that uses it is in the recording state.
+
+sname:VkDescriptorSetLayout objects may: be accessed by commands that
+operate on descriptor sets allocated using that layout, and those descriptor
+sets must: not be updated with flink:vkUpdateDescriptorSets after the
+descriptor set layout has been destroyed.
+Otherwise, a sname:VkDescriptorSetLayout object passed as a parameter to
+create another object is not further accessed by that object after the
+duration of the command it is passed into.
+
+The application must: not destroy any other type of Vulkan object until all
+uses of that object by the device (such as via command buffer execution)
+have completed.
+
+[[fundamentals-objectmodel-lifetime-cmdbuffers]]
+The following Vulkan objects must: not be destroyed while any command
+buffers using the object are in the <<commandbuffers-lifecycle, pending
+state>>:
+
+  * sname:VkEvent
+  * sname:VkQueryPool
+  * sname:VkBuffer
+  * sname:VkBufferView
+  * sname:VkImage
+  * sname:VkImageView
+  * sname:VkPipeline
+  * sname:VkSampler
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * basetype:VkSamplerYcbcrConversion
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * sname:VkDescriptorPool
+  * sname:VkFramebuffer
+  * sname:VkRenderPass
+  * sname:VkCommandBuffer
+  * sname:VkCommandPool
+  * sname:VkDeviceMemory
+  * sname:VkDescriptorSet
+ifdef::VK_NVX_device_generated_commands[]
+  * sname:VkObjectTableNVX
+  * sname:VkIndirectCommandsLayout
+endif::VK_NVX_device_generated_commands[]
+
+Destroying these objects will move any command buffers that are in the
+<<commandbuffers-lifecycle, recording or executable state>>, and are using
+those objects, to the <<commandbuffers-lifecycle, invalid state>>.
+
+The following Vulkan objects must: not be destroyed while any queue is
+executing commands that use the object:
+
+  * sname:VkFence
+  * sname:VkSemaphore
+  * sname:VkCommandBuffer
+  * sname:VkCommandPool
+
+In general, objects can: be destroyed or freed in any order, even if the
+object being freed is involved in the use of another object (e.g. use of a
+resource in a view, use of a view in a descriptor set, use of an object in a
+command buffer, binding of a memory allocation to a resource), as long as
+any object that uses the freed object is not further used in any way except
+to be destroyed or to be reset in such a way that it no longer uses the
+other object (such as resetting a command buffer).
+If the object has been reset, then it can: be used as if it never used the
+freed object.
+An exception to this is when there is a parent/child relationship between
+objects.
+In this case, the application must: not destroy a parent object before its
+children, except when the parent is explicitly defined to free its children
+when it is destroyed (e.g. for pool objects, as defined below).
+
+sname:VkCommandPool objects are parents of sname:VkCommandBuffer objects.
+sname:VkDescriptorPool objects are parents of sname:VkDescriptorSet objects.
+sname:VkDevice objects are parents of many object types (all that take a
+sname:VkDevice as a parameter to their creation).
+
+The following Vulkan objects have specific restrictions for when they can:
+be destroyed:
+
+  * sname:VkQueue objects cannot: be explicitly destroyed.
+    Instead, they are implicitly destroyed when the sname:VkDevice object
+    they are retrieved from is destroyed.
+  * Destroying a pool object implicitly frees all objects allocated from
+    that pool.
+    Specifically, destroying sname:VkCommandPool frees all
+    sname:VkCommandBuffer objects that were allocated from it, and
+    destroying sname:VkDescriptorPool frees all sname:VkDescriptorSet
+    objects that were allocated from it.
+  * sname:VkDevice objects can: be destroyed when all sname:VkQueue objects
+    retrieved from them are idle, and all objects created from them have
+    been destroyed.
+    This includes the following objects:
+  ** sname:VkFence
+  ** sname:VkSemaphore
+  ** sname:VkEvent
+  ** sname:VkQueryPool
+  ** sname:VkBuffer
+  ** sname:VkBufferView
+  ** sname:VkImage
+  ** sname:VkImageView
+  ** sname:VkShaderModule
+  ** sname:VkPipelineCache
+  ** sname:VkPipeline
+  ** sname:VkPipelineLayout
+  ** sname:VkSampler
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  ** basetype:VkSamplerYcbcrConversion
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  ** sname:VkDescriptorSetLayout
+  ** sname:VkDescriptorPool
+  ** sname:VkFramebuffer
+  ** sname:VkRenderPass
+  ** sname:VkCommandPool
+  ** sname:VkCommandBuffer
+  ** sname:VkDeviceMemory
+ifdef::VK_EXT_validation_cache[]
+  * sname:VkValidationCacheEXT
+endif::VK_EXT_validation_cache[]
+  * sname:VkPhysicalDevice objects cannot: be explicitly destroyed.
+    Instead, they are implicitly destroyed when the sname:VkInstance object
+    they are retrieved from is destroyed.
+  * sname:VkInstance objects can: be destroyed once all sname:VkDevice
+    objects created from any of its sname:VkPhysicalDevice objects have been
+    destroyed.
+
+
+ifdef::VK_VERSION_1_1,VK_KHR_external_memory_capabilities,VK_KHR_external_semaphore_capabilities,VK_KHR_external_fence_capabilities[]
+[[fundamentals-objectmodel-external]]
+=== External Object Handles
+
+As defined above, the scope of object handles created or allocated from a
+sname:VkDevice is limited to that logical device.
+Objects which are not in scope are said to be external.
+To bring an external object into scope, an external handle must: be exported
+from the object in the source scope and imported into the destination scope.
+
+[NOTE]
+.Note
+====
+The scope of external handles and their associated resources may: vary
+according to their type, but they can: generally be shared across process
+and API boundaries.
+====
+endif::VK_VERSION_1_1,VK_KHR_external_memory_capabilities,VK_KHR_external_semaphore_capabilities,VK_KHR_external_fence_capabilities[]
+
+
+[[fundamentals-abi]]
+== Application Binary Interface
+
+The mechanism by which Vulkan is made available to applications is platform-
+or implementation- defined.
+On many platforms the C interface described in this Specification is
+provided by a shared library.
+Since shared libraries can be changed independently of the applications that
+use them, they present particular compatibility challenges, and this
+Specification places some requirements on them.
+
+Shared library implementations must: use the default Application Binary
+Interface (ABI) of the standard C compiler for the platform, or provide
+customized API headers that cause application code to use the
+implementation's non-default ABI.
+An ABI in this context means the size, alignment, and layout of C data
+types; the procedure calling convention; and the naming convention for
+shared library symbols corresponding to C functions.
+Customizing the calling convention for a platform is usually accomplished by
+defining <<boilerplate-platform-specific-calling-conventions,calling
+convention macros>> appropriately in `vk_platform.h`.
+
+On platforms where Vulkan is provided as a shared library, library symbols
+beginning with "`vk`" and followed by a digit or uppercase letter are
+reserved for use by the implementation.
+Applications which use Vulkan must: not provide definitions of these
+symbols.
+This allows the Vulkan shared library to be updated with additional symbols
+for new API versions or extensions without causing symbol conflicts with
+existing applications.
+
+Shared library implementations should: provide library symbols for commands
+in the highest version of this Specification they support, and for
+ifdef::VK_KHR_surface[]
+<<wsi,Window System Integration>>
+endif::VK_KHR_surface[]
+ifndef::VK_KHR_surface[]
+Window System Integration
+endif::VK_KHR_surface[]
+extensions relevant to the platform.
+They may: also provide library symbols for commands defined by additional
+extensions.
+
+[NOTE]
+.Note
+====
+These requirements and recommendations are intended to allow implementors to
+take advantage of platform-specific conventions for SDKs, ABIs, library
+versioning mechanisms, etc.
+while still minimizing the code changes necessary to port applications or
+libraries between platforms.
+Platform vendors, or providers of the _de facto_ standard Vulkan shared
+library for a platform, are encouraged to document what symbols the shared
+library provides and how it will be versioned when new symbols are added.
+
+Applications should: only rely on shared library symbols for commands in the
+minimum core version required by the application.
+flink:vkGetInstanceProcAddr and flink:vkGetDeviceProcAddr should: be used to
+obtain function pointers for commands in core versions beyond the
+application's minimum required version.
+====
+
+
+[[fundamentals-commandsyntax]]
+== Command Syntax and Duration
+
+The Specification describes Vulkan commands as functions or procedures using
+C99 syntax.
+Language bindings for other languages such as C++ and JavaScript may: allow
+for stricter parameter passing, or object-oriented interfaces.
+
+Vulkan uses the standard C types for the base type of scalar parameters
+(e.g. types from `<stdint.h>`), with exceptions described below, or
+elsewhere in the text when appropriate:
+
+[open,refpage='VkBool32',desc='Vulkan boolean type',type='basetypes']
+--
+
+basetype:VkBool32 represents boolean `True` and `False` values, since C does
+not have a sufficiently portable built-in boolean type:
+
+include::../api/basetypes/VkBool32.txt[]
+
+ename:VK_TRUE represents a boolean *True* (integer 1) value, and
+ename:VK_FALSE a boolean *False* (integer 0) value.
+
+All values returned from a Vulkan implementation in a basetype:VkBool32 will
+be either ename:VK_TRUE or ename:VK_FALSE.
+
+Applications must: not pass any other values than ename:VK_TRUE or
+ename:VK_FALSE into a Vulkan implementation where a basetype:VkBool32 is
+expected.
+
+--
+
+[open,refpage='VkDeviceSize',desc='Vulkan device memory size and offsets',type='basetypes']
+--
+
+basetype:VkDeviceSize represents device memory size and offset values:
+
+include::../api/basetypes/VkDeviceSize.txt[]
+
+--
+
+Commands that create Vulkan objects are of the form ftext:vkCreate* and take
+stext:Vk*CreateInfo structures with the parameters needed to create the
+object.
+These Vulkan objects are destroyed with commands of the form
+ftext:vkDestroy*.
+
+The last in-parameter to each command that creates or destroys a Vulkan
+object is pname:pAllocator.
+The pname:pAllocator parameter can: be set to a non-`NULL` value such that
+allocations for the given object are delegated to an application provided
+callback; refer to the <<memory-allocation,Memory Allocation>> chapter for
+further details.
+
+Commands that allocate Vulkan objects owned by pool objects are of the form
+ftext:vkAllocate*, and take stext:Vk*AllocateInfo structures.
+These Vulkan objects are freed with commands of the form ftext:vkFree*.
+These objects do not take allocators; if host memory is needed, they will
+use the allocator that was specified when their parent pool was created.
+
+Commands are recorded into a command buffer by calling API commands of the
+form ftext:vkCmd*.
+Each such command may: have different restrictions on where it can: be used:
+in a primary and/or secondary command buffer, inside and/or outside a render
+pass, and in one or more of the supported queue types.
+These restrictions are documented together with the definition of each such
+command.
+
+The _duration_ of a Vulkan command refers to the interval between calling
+the command and its return to the caller.
+
+
+[[fundamentals-commandsyntax-results-lifetime]]
+=== Lifetime of Retrieved Results
+
+Information is retrieved from the implementation with commands of the form
+ftext:vkGet* and ftext:vkEnumerate*.
+
+Unless otherwise specified for an individual command, the results are
+_invariant_; that is, they will remain unchanged when retrieved again by
+calling the same command with the same parameters, so long as those
+parameters themselves all remain valid.
+
+
+[[fundamentals-threadingbehavior]]
+== Threading Behavior
+
+Vulkan is intended to provide scalable performance when used on multiple
+host threads.
+All commands support being called concurrently from multiple threads, but
+certain parameters, or components of parameters are defined to be
+_externally synchronized_.
+This means that the caller must: guarantee that no more than one thread is
+using such a parameter at a given time.
+
+More precisely, Vulkan commands use simple stores to update the state of
+Vulkan objects.
+A parameter declared as externally synchronized may: have its contents
+updated at any time during the host execution of the command.
+If two commands operate on the same object and at least one of the commands
+declares the object to be externally synchronized, then the caller must:
+guarantee not only that the commands do not execute simultaneously, but also
+that the two commands are separated by an appropriate memory barrier (if
+needed).
+
+[NOTE]
+.Note
+====
+Memory barriers are particularly relevant for hosts based on the ARM CPU
+architecture, which is more weakly ordered than many developers are
+accustomed to from x86/x64 programming.
+Fortunately, most higher-level synchronization primitives (like the pthread
+library) perform memory barriers as a part of mutual exclusion, so mutexing
+Vulkan objects via these primitives will have the desired effect.
+====
+
+Similarly the application must: avoid any potential data hazard of
+application-owned memory that has its
+<<fundamentals-objectmodel-lifetime-acquire,ownership temporarily acquired>>
+by a Vulkan command.
+While the ownership of application-owned memory remains acquired by a
+command the implementation may: read the memory at any point, and it may:
+write non-code:const qualified memory at any point.
+Parameters referring to non-code:const qualified application-owned memory
+are not marked explicitly as _externally synchronized_ in the Specification.
+
+Many object types are _immutable_, meaning the objects cannot: change once
+they have been created.
+These types of objects never need external synchronization, except that they
+must: not be destroyed while they are in use on another thread.
+In certain special cases mutable object parameters are internally
+synchronized, making external synchronization unnecessary.
+One example of this is the use of a sname:VkPipelineCache in
+fname:vkCreateGraphicsPipelines and fname:vkCreateComputePipelines, where
+external synchronization around such a heavyweight command would be
+impractical.
+The implementation must: internally synchronize the cache in this example,
+and may: be able to do so in the form of a much finer-grained mutex around
+the command.
+Any command parameters that are not labeled as externally synchronized are
+either not mutated by the command or are internally synchronized.
+Additionally, certain objects related to a command's parameters (e.g.
+command pools and descriptor pools) may: be affected by a command, and must:
+also be externally synchronized.
+These implicit parameters are documented as described below.
+
+Parameters of commands that are externally synchronized are listed below.
+
+include::../hostsynctable/parameters.txt[]
+
+There are also a few instances where a command can: take in a user allocated
+list whose contents are externally synchronized parameters.
+In these cases, the caller must: guarantee that at most one thread is using
+a given element within the list at a given time.
+These parameters are listed below.
+
+include::../hostsynctable/parameterlists.txt[]
+
+In addition, there are some implicit parameters that need to be externally
+synchronized.
+For example, all pname:commandBuffer parameters that need to be externally
+synchronized imply that the pname:commandPool that was passed in when
+creating that command buffer also needs to be externally synchronized.
+The implicit parameters and their associated object are listed below.
+
+include::../hostsynctable/implicit.txt[]
+
+
+[[fundamentals-errors]]
+== Errors
+
+Vulkan is a layered API.
+The lowest layer is the core Vulkan layer, as defined by this Specification.
+The application can: use additional layers above the core for debugging,
+validation, and other purposes.
+
+One of the core principles of Vulkan is that building and submitting command
+buffers should: be highly efficient.
+Thus error checking and validation of state in the core layer is minimal,
+although more rigorous validation can: be enabled through the use of layers.
+
+The core layer assumes applications are using the API correctly.
+Except as documented elsewhere in the Specification, the behavior of the
+core layer to an application using the API incorrectly is undefined, and
+may: include program termination.
+However, implementations must: ensure that incorrect usage by an application
+does not affect the integrity of the operating system, the Vulkan
+implementation, or other Vulkan client applications in the system.
+In particular, any guarantees made by an operating system about whether
+memory from one process can: be visible to another process or not must: not
+be violated by a Vulkan implementation for *any memory allocation*.
+Vulkan implementations are not required: to make additional security or
+integrity guarantees beyond those provided by the OS unless explicitly
+directed by the application's use of a particular feature or extension (e.g.
+via <<features-features-robustBufferAccess, robust buffer access>>).
+
+[NOTE]
+.Note
+====
+For instance, if an operating system guarantees that data in all its memory
+allocations are set to zero when newly allocated, the Vulkan implementation
+must: make the same guarantees for any allocations it controls (e.g.
+slink:VkDeviceMemory).
+====
+
+Applications can: request stronger robustness guarantees by enabling the
+pname:robustBufferAccess feature as described in <<features>>.
+
+Validation of correct API usage is left to validation layers.
+Applications should: be developed with validation layers enabled, to help
+catch and eliminate errors.
+Once validated, released applications should: not enable validation layers
+by default.
+
+
+[[fundamentals-validusage]]
+=== Valid Usage
+
+Valid usage defines a set of conditions which must: be met in order to
+achieve well-defined run-time behavior in an application.
+These conditions depend only on Vulkan state, and the parameters or objects
+whose usage is constrained by the condition.
+
+Some valid usage conditions have dependencies on run-time limits or feature
+availability.
+It is possible to validate these conditions against Vulkan's minimum
+supported values for these limits and features, or some subset of other
+known values.
+
+Valid usage conditions do not cover conditions where well-defined behavior
+(including returning an error code) exists.
+
+Valid usage conditions should: apply to the command or structure where
+complete information about the condition would be known during execution of
+an application.
+This is such that a validation layer or linter can: be written directly
+against these statements at the point they are specified.
+
+[NOTE]
+.Note
+====
+This does lead to some non-obvious places for valid usage statements.
+For instance, the valid values for a structure might depend on a separate
+value in the calling command.
+In this case, the structure itself will not reference this valid usage as it
+is impossible to determine validity from the structure that it is invalid -
+instead this valid usage would be attached to the calling command.
+
+Another example is draw state - the state setters are independent, and can
+cause a legitimately invalid state configuration between draw calls; so the
+valid usage statements are attached to the place where all state needs to be
+valid - at the draw command.
+====
+
+Valid usage conditions are described in a block labelled "`Valid Usage`"
+following each command or structure they apply to.
+
+
+[[fundamentals-implicit-validity]]
+=== Implicit Valid Usage
+
+Some valid usage conditions apply to all commands and structures in the API,
+unless explicitly denoted otherwise for a specific command or structure.
+These conditions are considered _implicit_, and are described in a block
+labelled "`Valid Usage (Implicit)`" following each command or structure they
+apply to.
+Implicit valid usage conditions are described in detail below.
+
+
+[[fundamentals-validusage-handles]]
+==== Valid Usage for Object Handles
+
+Any input parameter to a command that is an object handle must: be a valid
+object handle, unless otherwise specified.
+An object handle is valid if:
+
+  * It has been created or allocated by a previous, successful call to the
+    API.
+    Such calls are noted in the Specification.
+  * It has not been deleted or freed by a previous call to the API.
+    Such calls are noted in the Specification.
+  * Any objects used by that object, either as part of creation or
+    execution, must: also be valid.
+
+The reserved values dlink:VK_NULL_HANDLE and `NULL` can: be used in place of
+valid non-dispatchable handles and dispatchable handles, respectively, when
+_explicitly called out in the Specification_.
+Any command that creates an object successfully must: not return these
+values.
+It is valid to pass these values to ftext:vkDestroy* or ftext:vkFree*
+commands, which will silently ignore these values.
+
+
+[[fundamentals-validusage-pointers]]
+==== Valid Usage for Pointers
+
+Any parameter that is a pointer must: be a _valid pointer_ only if it is
+explicitly called out by a Valid Usage statement.
+
+A pointer is "`valid`" if it points at memory containing values of the
+number and type(s) expected by the command, and all fundamental types
+accessed through the pointer (e.g. as elements of an array or as members of
+a structure) satisfy the alignment requirements of the host processor.
+
+[[fundamentals-validusage-strings]]
+==== Valid Usage for Strings
+
+Any parameter that is a pointer to `char` must: be a finite sequence of
+values terminated by a null character, or if _explicitly called out in the
+Specification_, can: be `NULL`.
+
+
+[[fundamentals-validusage-enums]]
+==== Valid Usage for Enumerated Types
+
+Any parameter of an enumerated type must: be a valid enumerant for that
+type.
+A enumerant is valid if:
+
+  * The enumerant is defined as part of the enumerated type.
+  * The enumerant is not one of the special values defined for the
+    enumerated type, which are suffixed with etext:_BEGIN_RANGE,
+    etext:_END_RANGE, etext:_RANGE_SIZE or etext:_MAX_ENUM^1^.
+
+1::
+    The meaning of these special tokens is not exposed in the Vulkan
+    Specification.
+    They are not part of the API, and they should: not be used by
+    applications.
+    Their original intended use was for internal consumption by Vulkan
+    implementations.
+    Even that use will no longer be supported in the future, but they will
+    be retained for backwards compatibility reasons.
+
+Any enumerated type returned from a query command or otherwise output from
+Vulkan to the application must: not have a reserved value.
+Reserved values are values not defined by any extension for that enumerated
+type.
+
+[NOTE]
+.Note
+====
+This language is intended to accomodate cases such as "`hidden`" extensions
+known only to driver internals, or layers enabling extensions without
+knowledge of the application, without allowing return of values not defined
+by any extension.
+====
+
+
+[[fundamentals-validusage-flags]]
+==== Valid Usage for Flags
+
+[open,refpage='VkFlags',desc='Vulkan bitmasks',type='basetypes',xrefs='VkColorComponentFlags']
+--
+
+A collection of flags is represented by a bitmask using the type
+basetype:VkFlags:
+
+include::../api/basetypes/VkFlags.txt[]
+
+Bitmasks are passed to many commands and structures to compactly represent
+options, but basetype:VkFlags is not used directly in the API.
+Instead, a etext:Vk*Flags type which is an alias of basetype:VkFlags, and
+whose name matches the corresponding etext:Vk*FlagBits that are valid for
+that type, is used.
+
+--
+
+Any etext:Vk*Flags member or parameter used in the API as an input must: be
+a valid combination of bit flags.
+A valid combination is either zero or the bitwise OR of valid bit flags.
+A bit flag is valid if:
+
+  * The bit flag is defined as part of the etext:Vk*FlagBits type, where the
+    bits type is obtained by taking the flag type and replacing the trailing
+    etext:Flags with etext:FlagBits.
+    For example, a flag value of type elink:VkColorComponentFlags must:
+    contain only bit flags defined by elink:VkColorComponentFlagBits.
+  * The flag is allowed in the context in which it is being used.
+    For example, in some cases, certain bit flags or combinations of bit
+    flags are mutually exclusive.
+
+Any etext:Vk*Flags member or parameter returned from a query command or
+otherwise output from Vulkan to the application may: contain bit flags
+undefined in its corresponding etext:Vk*FlagBits type.
+An application cannot: rely on the state of these unspecified bits.
+
+
+[[fundamentals-validusage-sType]]
+==== Valid Usage for Structure Types
+
+Any parameter that is a structure containing a pname:sType member must: have
+a value of ptext:sType which is a valid elink:VkStructureType value matching
+the type of the structure.
+
+[open,refpage='VkStructureType',desc='Vulkan structure types (pname:stype)',type='enums']
+--
+Structure types supported by the Vulkan API include:
+
+include::../api/enums/VkStructureType.txt[]
+
+Each value corresponds to a particular structure with a pname:sType member
+with a matching name.
+As a general rule, the name of each ename:VkStructureType value is obtained
+by taking the name of the structure, stripping the leading etext:Vk,
+prefixing each capital letter with etext:_, converting the entire resulting
+string to upper case, and prefixing it with etext:VK_STRUCTURE_TYPE_.
+For example, structures of type sname:VkImageCreateInfo correspond to a
+ename:VkStructureType of ename:VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, and thus
+its pname:sType member must: equal that when it is passed to the API.
+
+The values ename:VK_STRUCTURE_TYPE_LOADER_INSTANCE_CREATE_INFO and
+ename:VK_STRUCTURE_TYPE_LOADER_DEVICE_CREATE_INFO are reserved for internal
+use by the loader, and do not have corresponding Vulkan structures in this
+Specification.
+--
+
+
+[[fundamentals-validusage-pNext]]
+==== Valid Usage for Structure Pointer Chains
+
+Any parameter that is a structure containing a `void*` ptext:pNext member
+must: have a value of pname:pNext that is either `NULL`, or points to a
+valid structure defined by an extension, containing ptext:sType and
+ptext:pNext members as described in the <<vulkan-styleguide,Vulkan
+Documentation and Extensions>> document in the section "`Extension
+Interactions`".
+The set of structures connected by ptext:pNext pointers is referred to as a
+_pname:pNext chain_.
+If that extension is supported by the implementation, then it must: be
+enabled.
+
+Each type of valid structure must: not appear more than once in a
+ptext:pNext chain.
+
+Any component of the implementation (the loader, any enabled layers, and
+drivers) must: skip over, without processing (other than reading the
+pname:sType and pname:pNext members) any structures in the chain with
+pname:sType values not defined by extensions supported by that component.
+
+Extension structures are not described in the base Vulkan Specification, but
+either in layered Specifications incorporating those extensions, or in
+separate vendor-provided documents.
+
+As a convenience to implementations and layers needing to iterate through a
+structure pointer chain, the Vulkan API provides the following base
+structures:
+
+include::../api/structs/VkBaseInStructure.txt[]
+
+include::../api/structs/VkBaseOutStructure.txt[]
+
+sname:VkBaseInStructure can be used to facilitate iterating through a
+read-only structure pointer chain.
+sname:VkBaseOutStructure can be used to facilitate iterating through a
+structure pointer chain that returns data back to the application.
+These structures allow for some type safety and can be used by Vulkan API
+functions that operate on generic inputs and outputs.
+
+[[fundamentals-validusage-nested-structs]]
+==== Valid Usage for Nested Structures
+
+The above conditions also apply recursively to members of structures
+provided as input to a command, either as a direct argument to the command,
+or themselves a member of another structure.
+
+Specifics on valid usage of each command are covered in their individual
+sections.
+
+
+[[fundamentals-validusage-extensions]]
+==== Valid Usage for Extensions
+
+Instance-level functionality or behavior added by an <<extensions, instance
+extension>> to the API must: not be used unless that extension is supported
+by the instance as determined by
+flink:vkEnumerateInstanceExtensionProperties, and that extension is enabled
+in slink:VkInstanceCreateInfo.
+
+Physical-device-level functionality or behavior added by an <<extensions,
+instance extension>> to the API must: not be used unless that extension is
+supported by the instance as determined by
+flink:vkEnumerateInstanceExtensionProperties, and that extension is enabled
+in slink:VkInstanceCreateInfo.
+
+Physical-device-level functionality or behavior added by a <<extensions,
+device extension>> to the API must: not be used unless the conditions
+described in <<initialization-phys-dev-extensions, Extending Physical Device
+Core Functionality>> are met.
+
+Device functionality or behavior added by a <<extensions, device extension>>
+to the API must: not be used unless that extension is supported by the
+device as determined by flink:vkEnumerateDeviceExtensionProperties, and that
+extension is enabled in slink:VkDeviceCreateInfo.
+
+
+[[fundamentals-validusage-versions]]
+==== Valid Usage for Newer Core Versions
+
+Instance-level functionality or behavior added by a <<versions, new core
+version>> of the API must: not be used unless it is supported by the
+instance as determined by flink:vkEnumerateInstanceVersion.
+
+Physical-device-level functionality or behavior added by a <<versions, new
+core version>> of the API must: not be used unless it is supported by the
+physical device as determined by flink:vkGetPhysicalDeviceProperties.
+
+Device-level functionality or behavior added by a <<versions, new core
+version>> of the API must: not be used unless it is supported by the device
+as determined by flink:vkGetPhysicalDeviceProperties.
+
+
+[[fundamentals-returncodes]]
+=== Return Codes
+
+[open,refpage='VkResult',desc='Vulkan command return codes',type='enums',xrefs='TBD']
+--
+
+While the core Vulkan API is not designed to capture incorrect usage, some
+circumstances still require return codes.
+Commands in Vulkan return their status via return codes that are in one of
+two categories:
+
+  * Successful completion codes are returned when a command needs to
+    communicate success or status information.
+    All successful completion codes are non-negative values.
+  * Run time error codes are returned when a command needs to communicate a
+    failure that could only be detected at run time.
+    All run time error codes are negative values.
+
+All return codes in Vulkan are reported via elink:VkResult return values.
+The possible codes are:
+
+include::../api/enums/VkResult.txt[]
+
+[[fundamentals-successcodes]]
+.Success Codes
+  * ename:VK_SUCCESS Command successfully completed
+  * ename:VK_NOT_READY A fence or query has not yet completed
+  * ename:VK_TIMEOUT A wait operation has not completed in the specified
+    time
+  * ename:VK_EVENT_SET An event is signaled
+  * ename:VK_EVENT_RESET An event is unsignaled
+  * ename:VK_INCOMPLETE A return array was too small for the result
+ifdef::VK_KHR_swapchain[]
+  * ename:VK_SUBOPTIMAL_KHR A swapchain no longer matches the surface
+    properties exactly, but can: still be used to present to the surface
+    successfully.
+endif::VK_KHR_swapchain[]
+
+[[fundamentals-errorcodes]]
+.Error codes
+  * ename:VK_ERROR_OUT_OF_HOST_MEMORY A host memory allocation has failed.
+  * ename:VK_ERROR_OUT_OF_DEVICE_MEMORY A device memory allocation has
+    failed.
+  * ename:VK_ERROR_INITIALIZATION_FAILED Initialization of an object could
+    not be completed for implementation-specific reasons.
+  * ename:VK_ERROR_DEVICE_LOST The logical or physical device has been lost.
+    See <<devsandqueues-lost-device,Lost Device>>
+  * ename:VK_ERROR_MEMORY_MAP_FAILED Mapping of a memory object has failed.
+  * ename:VK_ERROR_LAYER_NOT_PRESENT A requested layer is not present or
+    could not be loaded.
+  * ename:VK_ERROR_EXTENSION_NOT_PRESENT A requested extension is not
+    supported.
+  * ename:VK_ERROR_FEATURE_NOT_PRESENT A requested feature is not supported.
+  * ename:VK_ERROR_INCOMPATIBLE_DRIVER The requested version of Vulkan is
+    not supported by the driver or is otherwise incompatible for
+    implementation-specific reasons.
+  * ename:VK_ERROR_TOO_MANY_OBJECTS Too many objects of the type have
+    already been created.
+  * ename:VK_ERROR_FORMAT_NOT_SUPPORTED A requested format is not supported
+    on this device.
+  * ename:VK_ERROR_FRAGMENTED_POOL A pool allocation has failed due to
+    fragmentation of the pool's memory.
+    This must: only be returned if no attempt to allocate host or device
+    memory was made to accomodate the new allocation.
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+    This should: be returned in preference to
+    ename:VK_ERROR_OUT_OF_POOL_MEMORY, but only if the implementation is
+    certain that the pool allocation failure was due to fragmentation.
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+ifdef::VK_KHR_surface[]
+  * ename:VK_ERROR_SURFACE_LOST_KHR A surface is no longer available.
+  * ename:VK_ERROR_NATIVE_WINDOW_IN_USE_KHR The requested window is already
+    in use by Vulkan or another API in a manner which prevents it from being
+    used again.
+endif::VK_KHR_surface[]
+ifdef::VK_KHR_swapchain[]
+  * ename:VK_ERROR_OUT_OF_DATE_KHR A surface has changed in such a way that
+    it is no longer compatible with the swapchain, and further presentation
+    requests using the swapchain will fail.
+    Applications must: query the new surface properties and recreate their
+    swapchain if they wish to continue presenting to the surface.
+endif::VK_KHR_swapchain[]
+ifdef::VK_KHR_display_swapchain[]
+  * ename:VK_ERROR_INCOMPATIBLE_DISPLAY_KHR The display used by a swapchain
+    does not use the same presentable image layout, or is incompatible in a
+    way that prevents sharing an image.
+endif::VK_KHR_display_swapchain[]
+ifdef::VK_NV_glsl_shader[]
+  * ename:VK_ERROR_INVALID_SHADER_NV One or more shaders failed to compile
+    or link.
+    More details are reported back to the application via
+    `<<VK_EXT_debug_report>>` if enabled.
+endif::VK_NV_glsl_shader[]
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * ename:VK_ERROR_OUT_OF_POOL_MEMORY A pool memory allocation has failed.
+    This must: only be returned if no attempt to allocate host or device
+    memory was made to accomodate the new allocation.
+    If the failure was definitely due to fragmentation of the pool,
+    ename:VK_ERROR_FRAGMENTED_POOL should: be returned instead.
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+ifdef::VK_VERSION_1_1,VK_KHR_external_memory,VK_KHR_external_semaphore,VK_KHR_external_fence[]
+  * ename:VK_ERROR_INVALID_EXTERNAL_HANDLE An external handle is not a valid
+    handle of the specified type.
+endif::VK_VERSION_1_1,VK_KHR_external_memory,VK_KHR_external_semaphore,VK_KHR_external_fence[]
+ifdef::VK_EXT_descriptor_indexing[]
+  * ename:VK_ERROR_FRAGMENTATION_EXT A descriptor pool creation has failed
+    due to fragmentation.
+endif::VK_EXT_descriptor_indexing[]
+
+If a command returns a run time error, unless otherwise specified any output
+parameters will have undefined contents, except that if the output parameter
+is a structure with pname:sType and pname:pNext fields, those fields will be
+unmodified.
+Any structures chained from pname:pNext will also have undefined contents,
+except that pname:sType and pname:pNext will be unmodified.
+
+Out of memory errors do not damage any currently existing Vulkan objects.
+Objects that have already been successfully created can: still be used by
+the application.
+
+Performance-critical commands generally do not have return codes.
+If a run time error occurs in such commands, the implementation will defer
+reporting the error until a specified point.
+For commands that record into command buffers (ftext:vkCmd*) run time errors
+are reported by fname:vkEndCommandBuffer.
+
+--
+
+
+[[fundamentals-numerics]]
+== Numeric Representation and Computation
+
+Implementations normally perform computations in floating-point, and must:
+meet the range and precision requirements defined under "`Floating-Point
+Computation`" below.
+
+These requirements only apply to computations performed in Vulkan operations
+outside of shader execution, such as texture image specification and
+sampling, and per-fragment operations.
+Range and precision requirements during shader execution differ and are
+specified by the <<spirvenv-precision-operation, Precision and Operation of
+SPIR-V Instructions>> section.
+
+In some cases, the representation and/or precision of operations is
+implicitly limited by the specified format of vertex or texel data consumed
+by Vulkan.
+Specific floating-point formats are described later in this section.
+
+
+[[fundamentals-floatingpoint]]
+=== Floating-Point Computation
+
+Most floating-point computation is performed in SPIR-V shader modules.
+The properties of computation within shaders are constrained as defined by
+the <<spirvenv-precision-operation, Precision and Operation of SPIR-V
+Instructions>> section.
+
+Some floating-point computation is performed outside of shaders, such as
+viewport and depth range calculations.
+For these computations, we do not specify how floating-point numbers are to
+be represented, or the details of how operations on them are performed, but
+only place minimal requirements on representation and precision as described
+in the remainder of this section.
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+(Jon, Bug 14966) This is a rat's nest of complexity, both in terms of
+describing/enumerating places such computation may: take place (other than
+"`not shader code`") and in how implementations may: do it.
+We have consciously deferred the resolution of this issue to post-1.0, and
+in the meantime, the following language inherited from the OpenGL
+Specification is inserted as a placeholder.
+Hopefully it can: be tightened up considerably.
+====
+endif::editing-notes[]
+
+We require simply that numbers`' floating-point parts contain enough bits
+and that their exponent fields are large enough so that individual results
+of floating-point operations are accurate to about 1 part in 10^5^.
+The maximum representable magnitude for all floating-point values must: be
+at least 2^32^.
+
+  :: [eq]#x {times} 0 = 0 {times} x = 0# for any non-infinite and
+     non-[eq]#NaN# [eq]#x#.
+  :: [eq]#1 {times} x = x {times} 1 = x#.
+  :: [eq]#x {plus} 0 = 0 {plus} x = x#.
+  :: [eq]#0^0^ = 1#.
+
+Occasionally, further requirements will be specified.
+Most single-precision floating-point formats meet these requirements.
+
+The special values [eq]#Inf# and [eq]#-Inf# encode values with magnitudes
+too large to be represented; the special value [eq]#NaN# encodes {ldquo}Not
+A Number{rdquo} values resulting from undefined arithmetic operations such
+as [eq]#0 / 0#.
+Implementations may: support [eq]#Inf# and [eq]#NaN# in their floating-point
+computations.
+
+
+[[fundamentals-fp-conversion]]
+=== Floating-Point Format Conversions
+
+When a value is converted to a defined floating-point representation, finite
+values falling between two representable finite values are rounded to one or
+the other.
+The rounding mode is not defined.
+Finite values whose magnitude is larger than that of any representable
+finite value may be rounded either to the closest representable finite value
+or to the appropriately signed infinity.
+For unsigned destination formats any negative values are converted to zero.
+Positive infinity is converted to positive infinity; negative infinity is
+converted to negative infinity in signed formats and to zero in unsigned
+formats; and any [eq]#NaN# is converted to a [eq]#NaN#.
+
+
+[[fundamentals-fp16]]
+=== 16-Bit Floating-Point Numbers
+
+16-bit floating point numbers are defined in the "`16-bit floating point
+numbers`" section of the <<data-format,Khronos Data Format Specification>>.
+
+
+[[fundamentals-fp11]]
+=== Unsigned 11-Bit Floating-Point Numbers
+
+Unsigned 11-bit floating point numbers are defined in the "`Unsigned 11-bit
+floating point numbers`" section of the <<data-format,Khronos Data Format
+Specification>>.
+
+
+[[fundamentals-fp10]]
+=== Unsigned 10-Bit Floating-Point Numbers
+
+Unsigned 10-bit floating point numbers are defined in the "`Unsigned 10-bit
+floating point numbers`" section of the <<data-format,Khronos Data Format
+Specification>>.
+
+
+[[fundamentals-general]]
+=== General Requirements
+
+Any representable floating-point value in the appropriate format is legal as
+input to a Vulkan command that requires floating-point data.
+The result of providing a value that is not a floating-point number to such
+a command is unspecified, but must: not lead to Vulkan interruption or
+termination.
+For example, providing a negative zero (where applicable) or a denormalized
+number to an Vulkan command must: yield deterministic results, while
+providing a [eq]#NaN# or [eq]#Inf# yields unspecified results.
+
+Some calculations require division.
+In such cases (including implied divisions performed by vector
+normalization), division by zero produces an unspecified result but must:
+not lead to Vulkan interruption or termination.
+
+
+[[fundamentals-fixedconv]]
+== Fixed-Point Data Conversions
+
+When generic vertex attributes and pixel color or depth _components_ are
+represented as integers, they are often (but not always) considered to be
+_normalized_.
+Normalized integer values are treated specially when being converted to and
+from floating-point values, and are usually referred to as _normalized
+fixed-point_.
+
+In the remainder of this section, [eq]#b# denotes the bit width of the
+fixed-point integer representation.
+When the integer is one of the types defined by the API, [eq]#b# is the bit
+width of that type.
+When the integer comes from an <<resources-images,image>> containing color
+or depth component texels, [eq]#b# is the number of bits allocated to that
+component in its <<features-formats,specified image format>>.
+
+The signed and unsigned fixed-point representations are assumed to be
+[eq]#b#-bit binary two's-complement integers and binary unsigned integers,
+respectively.
+
+
+[[fundamentals-fixedfpconv]]
+=== Conversion from Normalized Fixed-Point to Floating-Point
+
+Unsigned normalized fixed-point integers represent numbers in the range
+[eq]#[0,1]#.
+The conversion from an unsigned normalized fixed-point value [eq]#c# to the
+corresponding floating-point value [eq]#f# is defined as
+
+[latexmath]
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+f = { c \over { 2^b - 1 } }
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Signed normalized fixed-point integers represent numbers in the range
+[eq]#[-1,1]#.
+The conversion from a signed normalized fixed-point value [eq]#c# to the
+corresponding floating-point value [eq]#f# is performed using
+
+[latexmath]
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+f = \max\left( {c \over {2^{b-1} - 1}}, -1.0 \right)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Only the range [eq]#[-2^b-1^ {plus} 1, 2^b-1^ - 1]# is used to represent
+signed fixed-point values in the range [eq]#[-1,1]#.
+For example, if [eq]#b = 8#, then the integer value [eq]#-127# corresponds
+to [eq]#-1.0# and the value 127 corresponds to [eq]#1.0#.
+Note that while zero is exactly expressible in this representation, one
+value ([eq]#-128# in the example) is outside the representable range, and
+must: be clamped before use.
+This equation is used everywhere that signed normalized fixed-point values
+are converted to floating-point.
+
+
+[[fundamentals-fpfixedconv]]
+=== Conversion from Floating-Point to Normalized Fixed-Point
+
+The conversion from a floating-point value [eq]#f# to the corresponding
+unsigned normalized fixed-point value [eq]#c# is defined by first clamping
+[eq]#f# to the range [eq]#[0,1]#, then computing
+
+  :: [eq]#c = convertFloatToUint(f {times} (2^b^ - 1), b)#
+
+where [eq]#convertFloatToUint}(r,b)# returns one of the two unsigned binary
+integer values with exactly [eq]#b# bits which are closest to the
+floating-point value [eq]#r#.
+Implementations should: round to nearest.
+If [eq]#r# is equal to an integer, then that integer value must: be
+returned.
+In particular, if [eq]#f# is equal to 0.0 or 1.0, then [eq]#c# must: be
+assigned 0 or [eq]#2^b^ - 1#, respectively.
+
+The conversion from a floating-point value [eq]#f# to the corresponding
+signed normalized fixed-point value [eq]#c# is performed by clamping [eq]#f#
+to the range [eq]#[-1,1]#, then computing
+
+  :: [eq]#c = convertFloatToInt(f {times} (2^b-1^ - 1), b)#
+
+where [eq]#convertFloatToInt(r,b)# returns one of the two signed
+two's-complement binary integer values with exactly [eq]#b# bits which are
+closest to the floating-point value [eq]#r#.
+Implementations should: round to nearest.
+If [eq]#r# is equal to an integer, then that integer value must: be
+returned.
+In particular, if [eq]#f# is equal to -1.0, 0.0, or 1.0, then [eq]#c# must:
+be assigned [eq]#-(2^b-1^ - 1)#, 0, or [eq]#2^b-1^ - 1#, respectively.
+
+This equation is used everywhere that floating-point values are converted to
+signed normalized fixed-point.
+
+
+[[fundamentals-versionnum]]
+== API Version Numbers and Semantics
+
+The Vulkan version number is used in several places in the API.
+In each such use, the API _major version number_, _minor version number_,
+and _patch version number_ are packed into a 32-bit integer as follows:
+
+  * The major version number is a 10-bit integer packed into bits 31-22.
+  * The minor version number is a 10-bit integer packed into bits 21-12.
+  * The patch version number is a 12-bit integer packed into bits 11-0.
+
+Differences in any of the Vulkan version numbers indicates a change to the
+API in some way, with each part of the version number indicating a different
+scope of changes.
+
+A difference in patch version numbers indicates that some usually small part
+of the Specification or header has been modified, typically to fix a bug,
+and may: have an impact on the behavior of existing functionality.
+Differences in this version number should: not affect either _full
+compatibility_ or _backwards compatibility_ between two versions, or add
+additional interfaces to the API.
+
+A difference in minor version numbers indicates that some amount of new
+functionality has been added.
+This will usually include new interfaces in the header, and may: also
+include behavior changes and bug fixes.
+Functionality may: be deprecated in a minor revision, but will not be
+removed.
+The patch version will continue to increment through minor version number
+changes since all minor versions are generated from the same source files,
+and changes to the source files may affect all minor versions within a major
+version.
+Differences in the patch version should: not affect backwards compatibility,
+but will affect full compatibility.
+The patch version of the Specification is taken from
+dlink:VK_HEADER_VERSION.
+
+A difference in major version numbers indicates a large set of changes to
+the API, potentially including new functionality and header interfaces,
+behavioral changes, removal of deprecated features, modification or outright
+replacement of any feature, and is thus very likely to break any and all
+compatibility.
+Differences in this version will typically require significant modification
+to an application in order for it to function.
+
+C language macros for manipulating version numbers are defined in the
+<<boilerplate-versions,Version Number Macros>> appendix.
+
+
+[[fundamentals-common-objects]]
+== Common Object Types
+
+Some types of Vulkan objects are used in many different structures and
+command parameters, and are described here.
+These types include _offsets_, _extents_, and _rectangles_.
+
+
+=== Offsets
+
+Offsets are used to describe a pixel location within an image or
+framebuffer, as an (x,y) location for two-dimensional images, or an (x,y,z)
+location for three-dimensional images.
+
+[open,refpage='VkOffset2D',desc='Structure specifying a two-dimensional offset',type='structs']
+--
+
+A two-dimensional offsets is defined by the structure:
+
+include::../api/structs/VkOffset2D.txt[]
+
+  * pname:x is the x offset.
+  * pname:y is the y offset.
+
+include::../validity/structs/VkOffset2D.txt[]
+--
+
+[open,refpage='VkOffset3D',desc='Structure specifying a three-dimensional offset',type='structs']
+--
+
+A three-dimensional offset is defined by the structure:
+
+include::../api/structs/VkOffset3D.txt[]
+
+  * pname:x is the x offset.
+  * pname:y is the y offset.
+  * pname:z is the z offset.
+
+include::../validity/structs/VkOffset3D.txt[]
+--
+
+
+=== Extents
+
+Extents are used to describe the size of a rectangular region of pixels
+within an image or framebuffer, as (width,height) for two-dimensional
+images, or as (width,height,depth) for three-dimensional images.
+
+[open,refpage='VkExtent2D',desc='Structure specifying a two-dimensional extent',type='structs']
+--
+
+A two-dimensional extent is defined by the structure:
+
+include::../api/structs/VkExtent2D.txt[]
+
+  * pname:width is the width of the extent.
+  * pname:height is the height of the extent.
+
+include::../validity/structs/VkExtent2D.txt[]
+--
+
+[open,refpage='VkExtent3D',desc='Structure specifying a three-dimensional extent',type='structs']
+--
+
+A three-dimensional extent is defined by the structure:
+
+include::../api/structs/VkExtent3D.txt[]
+
+  * pname:width is the width of the extent.
+  * pname:height is the height of the extent.
+  * pname:depth is the depth of the extent.
+
+include::../validity/structs/VkExtent3D.txt[]
+--
+
+
+=== Rectangles
+
+[open,refpage='VkRect2D',desc='Structure specifying a two-dimensional subregion',type='structs']
+--
+
+Rectangles are used to describe a specified rectangular region of pixels
+within an image or framebuffer.
+Rectangles include both an offset and an extent of the same dimensionality,
+as described above.
+Two-dimensional rectangles are defined by the structure
+
+include::../api/structs/VkRect2D.txt[]
+
+  * pname:offset is a slink:VkOffset2D specifying the rectangle offset.
+  * pname:extent is a slink:VkExtent2D specifying the rectangle extent.
+
+include::../validity/structs/VkRect2D.txt[]
+--
