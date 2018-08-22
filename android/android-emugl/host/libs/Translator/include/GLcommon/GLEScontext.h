@@ -96,7 +96,6 @@ struct GLSupport {
     bool GL_OES_RGB8_RGBA8 = false;
 
     bool GL_EXT_color_buffer_float = false;
-    bool ext_GL_EXT_color_buffer_half_float = false;
 };
 
 struct ArrayData {
