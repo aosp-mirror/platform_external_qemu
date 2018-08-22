@@ -1078,6 +1078,14 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
                 false /* don't write out the error code to protobuf; we just want
                          to check validity here */));
 
+        // bug: 113037359
+        // Don't auto-invalidate quickboot snapshot
+        // when switching to file-backed Quickboot from older version.
+        if (fc::isEnabled(fc::QuickbootFileBacked) &&
+            fileName == Quickboot::kDefaultBootSnapshot) {
+            snapshotIsValid = true;
+        }
+
         if (!snapshotIsValid && deleteInvalidsChoice != DeleteInvalidSnapshots::No) {
             invalidSnapshotNames.append(fileName);
         }
