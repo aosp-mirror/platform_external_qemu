@@ -44,6 +44,14 @@ extern "C" {
 #include "sysemu/sysemu.h"
 }
 
+#define DEBUG 1
+
+#if DEBUG
+#define D(...)  printf(__VA_ARGS__)
+#else
+#define D(...)  ((void)0)
+#endif
+
 namespace {
 struct DriveShare {
     std::vector<DriveInfo*> driveInfoList = {};
@@ -349,6 +357,7 @@ static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
 
 static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     const char* id = opts->id;
+    D("Re-init drive %s\n", id);
     if (!needRemount(id)) {
         return 0;
     }
@@ -425,6 +434,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
 
     int res = blk_insert_bs(blk, bs, errp);
     bdrv_unref(bs);
+    D("Re-init drive %s %s\n", id, res == 0 ? "Success" : "Failed");
     return res;
 }
 }
@@ -457,6 +467,7 @@ static bool isBaseOnDifferentSnapshot(const char* snapshot_name) {
 
 static bool updateDriveShareMode(const char* snapshotName,
                                  android::base::FileShare shareMode) {
+    D("Update drive share mode %d\n", shareMode);
     DriveInitParam param = {sDriveShare->blockDefaultType, snapshotName,
                             shareMode};
     Error* error = NULL;
