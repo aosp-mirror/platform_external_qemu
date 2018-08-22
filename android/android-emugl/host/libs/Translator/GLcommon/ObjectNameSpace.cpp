@@ -23,6 +23,7 @@
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/logging.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/TranslatorIfaces.h"
 
@@ -52,8 +53,11 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
             // They are loaded by GlobalNameSpace before loading
             // share groups
             TextureData* texData = (TextureData*)data.get();
-            if (!texData->getGlobalName())
+            if (!texData->getGlobalName()) {
+                GL_LOG("NameSpace::%s: %p: texture data %p is 0 texture\n",
+                       __func__, this, texData);
                 continue;
+            }
 
             SaveableTexturePtr saveableTexture =
                     globalNameSpace->getSaveableTextureFromLoad(
@@ -70,6 +74,11 @@ NameSpace::~NameSpace() {
 
 void NameSpace::postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr) {
     for (const auto& objData : m_objectDataMap) {
+        GL_LOG("NameSpace::%s: %p: try to load object %llu\n", __func__, this, objData.first);
+        if (!objData.second) {
+            emugl_crash_reporter(
+                    "Fatal: null object data ptr on restore\n");
+        }
         objData.second->postLoad(getObjDataPtr);
     }
 }
@@ -79,12 +88,23 @@ void NameSpace::touchTextures() {
     for (const auto& obj : m_objectDataMap) {
         TextureData* texData = (TextureData*)obj.second.get();
         if (!texData->needRestore()) {
+            GL_LOG("NameSpace::%s: %p: texture data %p does not need restore\n",
+                    __func__, this, texData);
             continue;
         }
         const SaveableTexturePtr& saveableTexture = texData->getSaveableTexture();
-        if (!saveableTexture.get()) continue;
+        if (!saveableTexture.get()) {
+            GL_LOG("NameSpace::%s: %p: warning: no saveableTexture for texture data %p\n",
+                    __func__, this, texData);
+            continue;
+        }
 
         NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
+        if (!texNamedObj) {
+            GL_LOG("NameSpace::%s: %p: fatal: global object null for texture data %p\n",
+                    __func__, this, texData);
+            emugl_crash_reporter("fatal: null global texture object in NameSpace::touchTextures");
+        }
         setGlobalObject(obj.first, texNamedObj);
         texData->setGlobalName(texNamedObj->getGlobalName());
         texData->restore(0, nullptr);
@@ -265,10 +285,20 @@ void NameSpace::setObjectData(ObjectLocalName p_localName,
 }
 
 void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
+    if (!eglImage->globalTexObj) {
+        GL_LOG("GlobalNameSpace::%s: %p: egl image %p with null texture object\n",
+               __func__, this, eglImage);
+        emugl_crash_reporter(
+                "Fatal: egl image with null texture object\n");
+    }
     unsigned int globalName = eglImage->globalTexObj->getGlobalName();
     emugl::Mutex::AutoLock lock(m_lock);
 
-    if (!globalName) return;
+    if (!globalName) {
+        GL_LOG("GlobalNameSpace::%s: %p: egl image %p has 0 texture object\n",
+               __func__, this, eglImage);
+        return;
+    }
 
     const auto& saveableTexIt = m_textureMap.find(globalName);
     if (saveableTexIt == m_textureMap.end()) {
@@ -283,8 +313,11 @@ void GlobalNameSpace::preSaveAddTex(TextureData* texture) {
     emugl::Mutex::AutoLock lock(m_lock);
     const auto& saveableTexIt = m_textureMap.find(texture->getGlobalName());
 
-    if (!texture->getGlobalName())
+    if (!texture->getGlobalName()) {
+        GL_LOG("GlobalNameSpace::%s: %p: texture data %p is 0 texture\n",
+               __func__, this, texture);
         return;
+    }
 
     if (saveableTexIt == m_textureMap.end()) {
         assert(texture->getSaveableTexture());
