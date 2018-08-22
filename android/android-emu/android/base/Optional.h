@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/Log.h"
 #include "android/base/TypeTraits.h"
 
 #include <cassert>
@@ -18,7 +19,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <stddef.h>
+#include <cstddef>
 
 // Optional<T> - a template class to store an optional value of type T.
 //
@@ -347,11 +348,11 @@ public:
     using base_flag::hasValue;
 
     T& value() {
-        assert(this->constructed());
+        CHECK(constructed()) << "Optional not constructed";
         return get();
     }
     constexpr const T& value() const {
-        assert(this->constructed());
+        CHECK(constructed()) << "Optional not constructed";
         return get();
     }
 
@@ -371,20 +372,20 @@ public:
 
     // Pointer-like operators
     T& operator*() {
-        assert(this->constructed());
+        CHECK(constructed()) << "Optional not constructed";
         return get();
     }
     constexpr const T& operator*() const {
-        assert(this->constructed());
+        CHECK(constructed()) << "Optional not constructed";
         return get();
     }
 
     T* operator->() {
-        assert(this->constructed());
+        CHECK(constructed()) << "Optional not constructed";
         return &get();
     }
     constexpr const T* operator->() const {
-        assert(this->constructed());
+        CHECK(constructed()) << "Optional not constructed";
         return &get();
     }
 
