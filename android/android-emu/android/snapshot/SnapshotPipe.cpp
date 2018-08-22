@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/AndroidMessagePipe.h"
@@ -28,6 +29,15 @@
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
 namespace {
+
+struct SnapshotCrossSession {
+    android::AndroidMessagePipe::DataBuffer sMetaData = {};
+    android::base::Lock sLock = {};
+    int sForkTotal = 0;
+    int sForkId = 0;
+};
+
+android::base::LazyInstance<SnapshotCrossSession> sSnapshotCrossSession;
 
 size_t getReadable(std::iostream& stream) {
     size_t beg = stream.tellg();
@@ -48,7 +58,7 @@ public:
                 override {
             // To avoid complicated synchronization issues, only 1 instance
             // of a SnapshotPipe is allowed at a time
-            if (sLock.tryLock()) {
+            if (sSnapshotCrossSession->sLock.tryLock()) {
                 return new SnapshotPipe(hwPipe, this);
             } else {
                 return nullptr;
@@ -58,7 +68,8 @@ public:
         android::AndroidPipe* load(void* hwPipe,
                                    const char* args,
                                    android::base::Stream* stream) override {
-            __attribute__((unused)) bool success = sLock.tryLock();
+            __attribute__((unused)) bool success
+                    = sSnapshotCrossSession->sLock.tryLock();
             assert(success);
             return new SnapshotPipe(hwPipe, this, stream);
         }
@@ -68,15 +79,15 @@ public:
                  android::base::Stream* loadStream = nullptr)
         : android::AndroidMessagePipe(hwPipe, service, decodeAndExecute,
         loadStream) {
-        ANDROID_IF_DEBUG(assert(sLock.isLocked()));
+        ANDROID_IF_DEBUG(assert(sSnapshotCrossSession->sLock.isLocked()));
         mIsLoad = static_cast<bool>(loadStream);
         if (mIsLoad) {
-            resetRecvPayload(std::move(sMetaData));
+            resetRecvPayload(std::move(sSnapshotCrossSession->sMetaData));
             // sMetaData should be cleared after the move
         }
     }
     ~SnapshotPipe() {
-        sLock.unlock();
+        sSnapshotCrossSession->sLock.unlock();
     }
 
 private:
@@ -144,7 +155,7 @@ private:
                         = gotoCheckpointParam.metadata();
                 offworld::GuestRecv::ModuleSnapshot::CreateCheckpoint guestRecv;
                 guestRecv.set_metadata(metadata);
-                encodeGuestRecvFrame(guestRecv, &sMetaData);
+                encodeGuestRecvFrame(guestRecv, &sSnapshotCrossSession->sMetaData);
                 gQAndroidVmOperations->vmStop();
                 android::base::FileShare shareMode =
                         android::multiinstance::getInstanceShareMode();
@@ -180,6 +191,16 @@ private:
                 *shouldReply = false;
                 break;
             }
+            case MS::FunctionCase::kForkReadOnlyInstancesParam: {
+                sSnapshotCrossSession->sForkTotal = snapshotPb
+                        .fork_read_only_instances_param()
+                        .num_instances();
+                sSnapshotCrossSession->sForkId = 0;
+                break;
+            }
+            case MS::FunctionCase::kDoneInstanceParam: {
+                break;
+            }
             default:
                 fprintf(stderr, "Error: offworld lib received unrecognized "
                         "message!");
@@ -188,12 +209,8 @@ private:
     }
     enum class OP : int32_t { Save = 0, Load = 1 };
     bool mIsLoad;
-    static DataBuffer sMetaData;
-    static android::base::Lock sLock;
 };
 
-android::AndroidMessagePipe::DataBuffer SnapshotPipe::sMetaData = {};
-android::base::Lock SnapshotPipe::sLock = {};
 
 }  // namespace
 
