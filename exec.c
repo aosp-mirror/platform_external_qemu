@@ -1592,7 +1592,11 @@ static int file_ram_open(const char *path,
                 path,
                 // Must be both, or we cannot CreateFileMapping with PAGE_READWRITE
                 GENERIC_READ | GENERIC_WRITE,
-                FILE_SHARE_READ,
+                // Need both read and write sharing to enable multiple instances.
+                // Even though we will not really be writing to the RAM file with
+                // multiple instances, the file needs to be opened to allow us to
+                // proceed.
+                FILE_SHARE_READ | FILE_SHARE_WRITE,
                 NULL,
                 // Need to fail on file-not-found to follow the same path as QEMU
                 OPEN_EXISTING,
