@@ -499,12 +499,12 @@ APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
     }
 
     if (!IsValidTextureTarget(target)) {
-        DLOG("Not a valid texture target!");
+        GL_DLOG("Not a valid texture target!");
         GLES_ERROR_INVALID_ENUM(target);
         return;
     }
 
-    DLOG("Get share group");
+    GL_DLOG("Get share group");
     ShareGroupPtr sg = c->GetShareGroup();
 
     bool first_use = false;
@@ -512,19 +512,19 @@ APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
 
     // Handle special-case 0 texture.
     if (texture == 0) {
-        DLOG("special-case 0 texture");
+        GL_DLOG("special-case 0 texture");
         tex = c->texture_context_.GetDefaultTextureData(target);
     } else {
-        DLOG("Not the 0 texture");
+        GL_DLOG("Not the 0 texture");
         tex = sg->GetTextureData(texture);
-        DLOG("Got texture data");
+        GL_DLOG("Got texture data");
         if (tex == NULL) {
             tex = sg->CreateTextureData(texture);
             first_use = true;
         }
     }
     if (tex == NULL) {
-        DLOG("tex is null, quit!");
+        GL_DLOG("tex is null, quit!");
     }
     LOG_ALWAYS_FATAL_IF(tex == NULL);
     if (!c->texture_context_.BindTextureToTarget(tex, target)) {
@@ -538,10 +538,10 @@ APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
     bool init_external_oes_as_2d = false;
     GLenum global_texture_target = target;
     if (tex->IsEglImageAttached()) {
-        DLOG("has egl image attached!");
+        GL_DLOG("has egl image attached!");
         global_texture_target = tex->GetAttachedEglImage()->global_texture_target;
     } else if (target == GL_TEXTURE_EXTERNAL_OES) {
-        DLOG("is external texture");
+        GL_DLOG("is external texture");
         // It is perfectly acceptable but problematic here to call
         // BindTexture(TEXTURE_EXTERNAL_OES, some_texture) before calling
         // EGLImageTargetTexture2DOES(). Since we are emulating
@@ -555,7 +555,7 @@ APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
     c->texture_context_.SetTargetTexture(target, texture, global_texture_target);
 
     if (init_external_oes_as_2d) {
-        DLOG("init_external_oes_as_2d true");
+        GL_DLOG("init_external_oes_as_2d true");
         // When a new TEXTURE_2D is used to back the TEXTURE_EXTERNAL_OES,
         // we need to set the default texture state to match that default state
         // required by the extension, where different from the defaults for a
@@ -576,12 +576,12 @@ APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
     // target matches the local target. If we are remapping the texture target,
     // we will not know until later which texture should be bound.
     if (target == global_texture_target) {
-        DLOG("target is global texture target, immediately call underlying bind");
+        GL_DLOG("target is global texture target, immediately call underlying bind");
         const GLuint global_texture_name =
             c->GetShareGroup()->GetTextureGlobalName(texture);
         PASS_THROUGH(c, BindTexture, target, global_texture_name);
     } 
-    DLOG("exit function");
+    GL_DLOG("exit function");
 }
 
 // Used in compositing the fragment shader output with the framebuffer.
@@ -1790,10 +1790,10 @@ APIENTRY_IMPL(void, EGLImageTargetTexture2DOES, GLenum target, GLeglImageOES buf
         return;
     }
 
-    DLOG("call underlying glEGLImageTargetTexture2DOES");
+    GL_DLOG("call underlying glEGLImageTargetTexture2DOES");
     PASS_THROUGH(c, EGLImageTargetTexture2DOES, target, buffer);
 
-    DLOG("should bind image to texture @ this point");
+    GL_DLOG("should bind image to texture @ this point");
 }
 
 // Set server state capabity.
@@ -2476,7 +2476,7 @@ APIENTRY_IMPL(void, GetFramebufferAttachmentParameteriv, GLenum target, GLenum a
             *params = 0;
             break;
         case GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE:
-            DLOG("UNIMPLEMENTED: GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE");
+            GL_DLOG("UNIMPLEMENTED: GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE");
             // PASS_THROUGH(c, GetFramebufferAttachmentParameteriv, target, attachment,
             //         pname, params);
             break;
@@ -4586,7 +4586,7 @@ APIENTRY_IMPL(void, TexImage2D, GLenum target, GLint level, GLint internalformat
     tex->Set(level, width, height, format, type);
 
     if (tex->IsEglImageAttached()) {
-        DLOG("egl image attached to this texture");
+        GL_DLOG("egl image attached to this texture");
         // This texture was a target of EGLImage, but now it is re-defined
         // so we need to detach from the EGLImage and re-generate a
         // global texture name for it, and reset the texture to be bound to a
@@ -4601,18 +4601,18 @@ APIENTRY_IMPL(void, TexImage2D, GLenum target, GLint level, GLint internalformat
     }
 
     c->texture_context_.EnsureCorrectBinding(target);
-    DLOG("call underlying");
+    GL_DLOG("call underlying");
     PASS_THROUGH(c, TexImage2D, target, level, internalformat, width, height,
             border, format, type, pixels);
-    DLOG("call RestoreBinding (called pass through)");
+    GL_DLOG("call RestoreBinding (called pass through)");
     c->texture_context_.RestoreBinding(target);
-    DLOG("Done restoring binding");
+    GL_DLOG("Done restoring binding");
 
     if (tex->IsAutoMipmap() && level == 0) {
         // TODO(crbug.com/441913): Update information for all levels.
         PASS_THROUGH(c, GenerateMipmap, target);
     }
-    DLOG("Exit");
+    GL_DLOG("Exit");
 }
 
 // Configure a texture object.

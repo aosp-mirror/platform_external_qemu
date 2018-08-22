@@ -78,10 +78,10 @@ GlesContext* CreateGles1Context(GlesContext* share,
 }
 
 GlesContext* GetCurrentGlesContext() {
-    DLOG("call");
+    GL_DLOG("call");
 
     GLES12ThreadInfo* res = GLES12ThreadInfo::get();
-    DLOG("res=%p rescxt=%p\n", res, res->context);
+    GL_DLOG("res=%p rescxt=%p\n", res, res->context);
     return res->context;
 }
 
@@ -114,7 +114,7 @@ TRANSLATOR_APIENTRY(void, set_current_gles_context, void* cxt_in) {
 
 TRANSLATOR_APIENTRY(void, make_current_setup, GLuint width, GLuint height) {
     GlesContext* cxt = GetCurrentGlesContext();
-    DLOG("width=%u height=%u cxt@%p", width, height, cxt);
+    GL_DLOG("width=%u height=%u cxt@%p", width, height, cxt);
     cxt->OnAttachSurface(NULL, width, height);
     cxt->OnMakeCurrent();
 }

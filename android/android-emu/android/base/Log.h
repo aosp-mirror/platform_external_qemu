@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/utils/debug.h"
 
 #include <errno.h>
@@ -22,6 +21,9 @@
 
 namespace android {
 namespace base {
+
+// Forward declarations.
+class StringView;
 
 enum LogSeverity {
     LOG_VERBOSE = -1,
