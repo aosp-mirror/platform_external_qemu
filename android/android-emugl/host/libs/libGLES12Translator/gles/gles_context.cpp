@@ -124,12 +124,12 @@ void GlesContext::Invalidate() {
 
 void GlesContext::Restore() {
   if (initialized_) {
-      DLOG("Context already initialized, go away.");
+      GL_DLOG("Context already initialized, go away.");
     return;
   }
 
   const int max_texture_units = UniformContext::kMaxTextureUnits;
-  DLOG("Initialize pointer, texture, and uniform contexts.");
+  GL_DLOG("Initialize pointer, texture, and uniform contexts.");
   if (version_ == kGles11) {
     pointer_context_.Init(kNumVertexAttributeKeys);
   } else if (version_ == kGles20) {
@@ -142,7 +142,7 @@ void GlesContext::Restore() {
 
   if (version_ == kGles11) {
       GLfloat values[4];
-      DLOG("Pass through glVertexAttrib4fv");
+      GL_DLOG("Pass through glVertexAttrib4fv");
       PASS_THROUGH(this, VertexAttrib4fv, kColorVertexAttribute,
               uniform_context_.GetColor().GetFloatArray(values));
       PASS_THROUGH(this, VertexAttrib4fv, kNormalVertexAttribute,
