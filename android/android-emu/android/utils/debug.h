@@ -64,7 +64,8 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(car, "Emulated car data")                                     \
     _VERBOSE_TAG(record, "Screen recording")                                   \
     _VERBOSE_TAG(snapshot, "Snapshots")                                        \
-    _VERBOSE_TAG(virtualscene, "virtual scene rendering")
+    _VERBOSE_TAG(virtualscene, "Virtual scene rendering")                      \
+    _VERBOSE_TAG(automation, "Automation")                                     \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
