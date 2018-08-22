@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+package android.verifiedboot;
+
+// Communicates verified boot parameters to the emulator.
+//
+// The system image build produces a textproto of the format below
+// The emulator then loads this text proto and processes it into
+// a set of kernel commandline parameters.
+
+message VerifiedBootConfig {
+    // Version number of this data.  The emulator will ignore
+    // configurations that have an unrecognized version number.
+    //
+    // The value of this can be incremented in the system image
+    // build inder the following cases:
+    //
+    //  1. New dm-verity features were added that older emulators
+    //     can not support
+    //  2. The proto format is changed with new or different fields.
+    optional int32 major_version = 1;
+
+    // Parameters that should be placed within the dm="" block
+    repeated string dm_param = 2;
+
+    // Parameters that should be placed outside of the dm="" block
+    repeated string param = 3;
+}

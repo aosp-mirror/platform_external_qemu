@@ -82,6 +82,11 @@ include $(_ANDROID_EMU_ROOT)/android/telephony/proto/SimAccessRulesProto.mk
 
 ###############################################################################
 #
+# Verified Boot Config protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/verified-boot/proto/VerifiedBootConfigProto.mk
+
+###############################################################################
+#
 # Automation protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/automation/proto/AutomationProto.mk
 
@@ -506,6 +511,7 @@ LOCAL_SRC_FILES := \
     android/utils/socket_drainer.cpp \
     android/utils/sockets.c \
     android/utils/looper.cpp \
+    android/verified-boot/load_config.cpp \
     android/virtualscene/MeshSceneObject.cpp \
     android/virtualscene/PosterInfo.cpp \
     android/virtualscene/PosterSceneObject.cpp \
@@ -638,6 +644,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
     $(AUTOMATION_PROTO_STATIC_LIBRARIES) \
+    ${VERIFIEDBOOTCFG_PROTO_STATIC_LIBRARIES} \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -829,6 +836,7 @@ LOCAL_SRC_FILES := \
   android/utils/string_unittest.cpp \
   android/utils/sockets_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \
+  android/verified-boot/load_config_unittest.cpp \
   android/virtualscene/TextureUtils_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
