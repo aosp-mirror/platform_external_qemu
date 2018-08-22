@@ -22,6 +22,7 @@
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
 
+#include "GLTestUtils.h"
 #include "OpenGLTestContext.h"
 
 #include <gtest/gtest.h>
@@ -39,7 +40,8 @@ using android::snapshot::TextureSaver;
 
 std::string describeGlEnum(GLenum enumValue) {
     std::ostringstream description;
-    description << "0x" << std::hex << enumValue;
+    description << "0x" << std::hex << enumValue
+                << " (" << getEnumString(enumValue) << ")";
     return description.str();
 }
 

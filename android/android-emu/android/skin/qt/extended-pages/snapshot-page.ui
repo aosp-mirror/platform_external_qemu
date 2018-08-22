@@ -724,9 +724,12 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
   <tabstop>defaultSnapshotDisplay</tabstop>
   <tabstop>snapshotDisplay</tabstop>
+  <tabstop>preview</tabstop>
   <tabstop>reduceInfoButton</tabstop>
+  <tabstop>selectionInfo</tabstop>
   <tabstop>enlargeInfoButton</tabstop>
   <tabstop>loadSnapshot</tabstop>
   <tabstop>editSnapshot</tabstop>
@@ -735,9 +738,7 @@
   <tabstop>saveQuickBootOnExit</tabstop>
   <tabstop>saveQuickBootNowButton</tabstop>
   <tabstop>loadQuickBootNowButton</tabstop>
-  <tabstop>preview</tabstop>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>selectionInfo</tabstop>
+  <tabstop>deleteInvalidSnapshots</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>

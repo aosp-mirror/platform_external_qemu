@@ -1915,6 +1915,12 @@ void FrameBuffer::onSave(Stream* stream,
     stream->putBe32(m_statsNumFrames);
     stream->putBe64(m_statsStartTime);
 
+    // Save all contexts.
+    // Note: some of the contexts might not be restored yet. In such situation
+    // we skip reading from GPU (for non-texture objects) or force a restore in
+    // previous eglPreSaveContext and eglSaveAllImages calls (for texture
+    // objects).
+    // TODO: skip reading from GPU even for texture objects.
     saveCollection(stream, m_contexts,
                    [](Stream* s, const RenderContextMap::value_type& pair) {
         pair.second->onSave(s);

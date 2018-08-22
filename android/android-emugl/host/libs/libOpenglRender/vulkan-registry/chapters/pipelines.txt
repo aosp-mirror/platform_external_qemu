@@ -1,0 +1,1755 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[pipelines]]
+= Pipelines
+
+The following <<pipelines-block-diagram,figure>> shows a block diagram of
+the Vulkan pipelines.
+Some Vulkan commands specify geometric objects to be drawn or computational
+work to be performed, while others specify state controlling how objects are
+handled by the various pipeline stages, or control data transfer between
+memory organized as images and buffers.
+Commands are effectively sent through a processing pipeline, either a
+_graphics pipeline_ or a _compute pipeline_.
+
+The first stage of the <<pipelines-graphics,graphics pipeline>>
+(<<drawing,Input Assembler>>) assembles vertices to form geometric
+primitives such as points, lines, and triangles, based on a requested
+primitive topology.
+In the next stage (<<shaders-vertex,Vertex Shader>>) vertices can: be
+transformed, computing positions and attributes for each vertex.
+If <<tessellation,tessellation>> and/or <<geometry,geometry>> shaders are
+supported, they can: then generate multiple primitives from a single input
+primitive, possibly changing the primitive topology or generating additional
+attribute data in the process.
+
+The final resulting primitives are <<vertexpostproc-clipping,clipped>> to a
+clip volume in preparation for the next stage, <<primsrast,Rasterization>>.
+The rasterizer produces a series of framebuffer addresses and values using a
+two-dimensional description of a point, line segment, or triangle.
+Each _fragment_ so produced is fed to the next stage
+(<<shaders-fragment,Fragment Shader>>) that performs operations on
+individual fragments before they finally alter the framebuffer.
+These operations include conditional updates into the framebuffer based on
+incoming and previously stored depth values (to effect <<fragops-depth,depth
+buffering>>), <<framebuffer-blending,blending>> of incoming fragment colors
+with stored colors, as well as <<framebuffer-blendoperations,masking>>,
+<<fragops-stencil,stenciling>>, and other <<framebuffer-logicop,logical
+operations>> on fragment values.
+
+Framebuffer operations read and write the color and depth/stencil
+attachments of the framebuffer for a given subpass of a <<renderpass,render
+pass instance>>.
+The attachments can: be used as input attachments in the fragment shader in
+a later subpass of the same render pass.
+
+The <<pipelines-compute,compute pipeline>> is a separate pipeline from the
+graphics pipeline, which operates on one-, two-, or three-dimensional
+workgroups which can: read from and write to buffer and image memory.
+
+This ordering is meant only as a tool for describing Vulkan, not as a strict
+rule of how Vulkan is implemented, and we present it only as a means to
+organize the various operations of the pipelines.
+Actual ordering guarantees between pipeline stages are explained in detail
+in the <<synchronization-pipeline-stages-order, synchronization chapter>>.
+
+[[pipelines-block-diagram]]
+[%inline]
+image::images/pipeline.svg[title="Block diagram of the Vulkan pipeline",align="center"]
+
+Each pipeline is controlled by a monolithic object created from a
+description of all of the shader stages and any relevant fixed-function
+stages.
+<<interfaces,Linking>> the whole pipeline together allows the optimization
+of shaders based on their input/outputs and eliminates expensive draw time
+state validation.
+
+A pipeline object is bound to the current state using
+flink:vkCmdBindPipeline.
+Any pipeline object state that is specified as <<pipelines-dynamic-state,
+dynamic>> is not applied to the current state when the pipeline object is
+bound, but is instead set by dynamic state setting commands.
+
+No state, including dynamic state, is inherited from one command buffer to
+another.
+
+
+[open,refpage='VkPipeline',desc='Opaque handle to a pipeline object',type='handles']
+--
+
+Compute and graphics pipelines are each represented by sname:VkPipeline
+handles:
+
+include::../api/handles/VkPipeline.txt[]
+
+--
+
+
+[[pipelines-compute]]
+== Compute Pipelines
+
+Compute pipelines consist of a single static compute shader stage and the
+pipeline layout.
+
+The compute pipeline represents a compute shader and is created by calling
+fname:vkCreateComputePipelines with pname:module and pname:pName selecting
+an entry point from a shader module, where that entry point defines a valid
+compute shader, in the sname:VkPipelineShaderStageCreateInfo structure
+contained within the sname:VkComputePipelineCreateInfo structure.
+
+[open,refpage='vkCreateComputePipelines',desc='Creates a new compute pipeline object',type='protos']
+--
+
+To create compute pipelines, call:
+
+include::../api/protos/vkCreateComputePipelines.txt[]
+
+  * pname:device is the logical device that creates the compute pipelines.
+  * pname:pipelineCache is either dlink:VK_NULL_HANDLE, indicating that
+    pipeline caching is disabled; or the handle of a valid
+    <<pipelines-cache,pipeline cache>> object, in which case use of that
+    cache is enabled for the duration of the command.
+  * pname:createInfoCount is the length of the pname:pCreateInfos and
+    pname:pPipelines arrays.
+  * pname:pCreateInfos is an array of slink:VkComputePipelineCreateInfo
+    structures.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+  * pname:pPipelines is a pointer to an array in which the resulting compute
+    pipeline objects are returned.
+ifdef::editing-notes[]
++
+[NOTE]
+.editing-note
+====
+TODO (Jon) - Should we say something like "`the i'th element of the
+pname:pPipelines array is created based on the corresponding element of the
+pname:pCreateInfos array`"? Also for flink:vkCreateGraphicsPipelines below.
+====
+endif::editing-notes[]
+
+.Valid Usage
+****
+  * [[VUID-vkCreateComputePipelines-flags-00695]]
+    If the pname:flags member of any element of pname:pCreateInfos contains
+    the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT flag, and the
+    pname:basePipelineIndex member of that same element is not `-1`,
+    pname:basePipelineIndex must: be less than the index into
+    pname:pCreateInfos that corresponds to that element
+  * [[VUID-vkCreateComputePipelines-flags-00696]]
+    If the pname:flags member of any element of pname:pCreateInfos contains
+    the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT flag, the base pipeline
+    must: have been created with the
+    ename:VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT flag set
+****
+
+include::../validity/protos/vkCreateComputePipelines.txt[]
+--
+
+[open,refpage='VkComputePipelineCreateInfo',desc='Structure specifying parameters of a newly created compute pipeline',type='structs']
+--
+
+The sname:VkComputePipelineCreateInfo structure is defined as:
+
+include::../api/structs/VkComputePipelineCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is a bitmask of elink:VkPipelineCreateFlagBits specifying
+    how the pipeline will be generated.
+  * pname:stage is a slink:VkPipelineShaderStageCreateInfo describing the
+    compute shader.
+  * pname:layout is the description of binding locations used by both the
+    pipeline and descriptor sets used with the pipeline.
+  * pname:basePipelineHandle is a pipeline to derive from
+  * pname:basePipelineIndex is an index into the pname:pCreateInfos
+    parameter to use as a pipeline to derive from
+
+The parameters pname:basePipelineHandle and pname:basePipelineIndex are
+described in more detail in <<pipelines-pipeline-derivatives,Pipeline
+Derivatives>>.
+
+pname:stage points to a structure of type
+sname:VkPipelineShaderStageCreateInfo.
+
+.Valid Usage
+****
+  * [[VUID-VkComputePipelineCreateInfo-flags-00697]]
+    If pname:flags contains the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT
+    flag, and pname:basePipelineIndex is -1, pname:basePipelineHandle must:
+    be a valid handle to a compute sname:VkPipeline
+  * [[VUID-VkComputePipelineCreateInfo-flags-00698]]
+    If pname:flags contains the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT
+    flag, and pname:basePipelineHandle is dlink:VK_NULL_HANDLE,
+    pname:basePipelineIndex must: be a valid index into the calling
+    command's pname:pCreateInfos parameter
+  * [[VUID-VkComputePipelineCreateInfo-flags-00699]]
+    If pname:flags contains the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT
+    flag, and pname:basePipelineIndex is not -1, pname:basePipelineHandle
+    must: be dlink:VK_NULL_HANDLE
+  * [[VUID-VkComputePipelineCreateInfo-flags-00700]]
+    If pname:flags contains the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT
+    flag, and pname:basePipelineHandle is not dlink:VK_NULL_HANDLE,
+    pname:basePipelineIndex must: be -1
+  * [[VUID-VkComputePipelineCreateInfo-stage-00701]]
+    The pname:stage member of pname:stage must: be
+    ename:VK_SHADER_STAGE_COMPUTE_BIT
+  * [[VUID-VkComputePipelineCreateInfo-stage-00702]]
+    The shader code for the entry point identified by pname:stage and the
+    rest of the state identified by this structure must: adhere to the
+    pipeline linking rules described in the <<interfaces,Shader Interfaces>>
+    chapter
+  * [[VUID-VkComputePipelineCreateInfo-layout-00703]]
+    pname:layout must: be
+    <<descriptorsets-pipelinelayout-consistency,consistent>> with the layout
+    of the compute shader specified in pname:stage
+  * [[VUID-VkComputePipelineCreateInfo-layout-01687]]
+    The number of resources in pname:layout accessible to the compute shader
+    stage must: be less than or equal to
+    sname:VkPhysicalDeviceLimits::pname:maxPerStageResources
+****
+
+include::../validity/structs/VkComputePipelineCreateInfo.txt[]
+--
+
+[open,refpage='VkPipelineShaderStageCreateInfo',desc='Structure specifying parameters of a newly created pipeline shader stage',type='structs']
+--
+
+The sname:VkPipelineShaderStageCreateInfo structure is defined as:
+
+include::../api/structs/VkPipelineShaderStageCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:stage is a elink:VkShaderStageFlagBits value specifying a single
+    pipeline stage.
+  * pname:module is a slink:VkShaderModule object that contains the shader
+    for this stage.
+  * pname:pName is a pointer to a null-terminated UTF-8 string specifying
+    the entry point name of the shader for this stage.
+  * pname:pSpecializationInfo is a pointer to slink:VkSpecializationInfo, as
+    described in <<pipelines-specialization-constants,Specialization
+    Constants>>, and can: be `NULL`.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00704]]
+    If the <<features-features-geometryShader,geometry shaders>> feature is
+    not enabled, pname:stage must: not be ename:VK_SHADER_STAGE_GEOMETRY_BIT
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00705]]
+    If the <<features-features-tessellationShader,tessellation shaders>>
+    feature is not enabled, pname:stage must: not be
+    ename:VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT or
+    ename:VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00706]]
+    pname:stage must: not be ename:VK_SHADER_STAGE_ALL_GRAPHICS, or
+    ename:VK_SHADER_STAGE_ALL
+  * [[VUID-VkPipelineShaderStageCreateInfo-pName-00707]]
+    pname:pName must: be the name of an code:OpEntryPoint in pname:module
+    with an execution model that matches pname:stage
+  * [[VUID-VkPipelineShaderStageCreateInfo-maxClipDistances-00708]]
+    If the identified entry point includes any variable in its interface
+    that is declared with the code:ClipDistance code:BuiltIn decoration,
+    that variable must: not have an array size greater than
+    sname:VkPhysicalDeviceLimits::pname:maxClipDistances
+  * [[VUID-VkPipelineShaderStageCreateInfo-maxCullDistances-00709]]
+    If the identified entry point includes any variable in its interface
+    that is declared with the code:CullDistance code:BuiltIn decoration,
+    that variable must: not have an array size greater than
+    sname:VkPhysicalDeviceLimits::pname:maxCullDistances
+  * [[VUID-VkPipelineShaderStageCreateInfo-maxCombinedClipAndCullDistances-00710]]
+    If the identified entry point includes any variables in its interface
+    that are declared with the code:ClipDistance or code:CullDistance
+    code:BuiltIn decoration, those variables must: not have array sizes
+    which sum to more than
+    sname:VkPhysicalDeviceLimits::pname:maxCombinedClipAndCullDistances
+  * [[VUID-VkPipelineShaderStageCreateInfo-maxSampleMaskWords-00711]]
+    If the identified entry point includes any variable in its interface
+    that is declared with the code:SampleMask code:BuiltIn decoration, that
+    variable must: not have an array size greater than
+    sname:VkPhysicalDeviceLimits::pname:maxSampleMaskWords
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00712]]
+    If pname:stage is ename:VK_SHADER_STAGE_VERTEX_BIT, the identified entry
+    point must: not include any input variable in its interface that is
+    decorated with code:CullDistance
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00713]]
+    If pname:stage is ename:VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT or
+    ename:VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, and the identified
+    entry point has an code:OpExecutionMode instruction that specifies a
+    patch size with code:OutputVertices, the patch size must: be greater
+    than `0` and less than or equal to
+    sname:VkPhysicalDeviceLimits::pname:maxTessellationPatchSize
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00714]]
+    If pname:stage is ename:VK_SHADER_STAGE_GEOMETRY_BIT, the identified
+    entry point must: have an code:OpExecutionMode instruction that
+    specifies a maximum output vertex count that is greater than `0` and
+    less than or equal to
+    sname:VkPhysicalDeviceLimits::pname:maxGeometryOutputVertices
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00715]]
+    If pname:stage is ename:VK_SHADER_STAGE_GEOMETRY_BIT, the identified
+    entry point must: have an code:OpExecutionMode instruction that
+    specifies an invocation count that is greater than `0` and less than or
+    equal to
+    sname:VkPhysicalDeviceLimits::pname:maxGeometryShaderInvocations
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00716]]
+    If pname:stage is ename:VK_SHADER_STAGE_GEOMETRY_BIT, and the identified
+    entry point writes to code:Layer for any primitive, it must: write the
+    same value to code:Layer for all vertices of a given primitive
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00717]]
+    If pname:stage is ename:VK_SHADER_STAGE_GEOMETRY_BIT, and the identified
+    entry point writes to code:ViewportIndex for any primitive, it must:
+    write the same value to code:ViewportIndex for all vertices of a given
+    primitive
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00718]]
+    If pname:stage is ename:VK_SHADER_STAGE_FRAGMENT_BIT, the identified
+    entry point must: not include any output variables in its interface
+    decorated with code:CullDistance
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-00719]]
+    If pname:stage is ename:VK_SHADER_STAGE_FRAGMENT_BIT, and the identified
+    entry point writes to code:FragDepth in any execution path, it must:
+    write to code:FragDepth in all execution paths
+ifdef::VK_EXT_shader_stencil_export[]
+  * [[VUID-VkPipelineShaderStageCreateInfo-stage-01511]]
+    If pname:stage is ename:VK_SHADER_STAGE_FRAGMENT_BIT, and the identified
+    entry point writes to code:FragStencilRefEXT in any execution path, it
+    must: write to code:FragStencilRefEXT in all execution paths
+endif::VK_EXT_shader_stencil_export[]
+****
+
+include::../validity/structs/VkPipelineShaderStageCreateInfo.txt[]
+--
+
+[open,refpage='VkPipelineShaderStageCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineShaderStageCreateFlags.txt[]
+
+sname:VkPipelineShaderStageCreateFlags is a bitmask type for setting a mask,
+but is currently reserved for future use.
+--
+
+[open,refpage='VkShaderStageFlagBits',desc='Bitmask specifying a pipeline stage',type='enums']
+--
+
+Commands and structures which need to specify one or more shader stages do
+so using a bitmask whose bits correspond to stages.
+Bits which can: be set to specify shader stages are:
+
+include::../api/enums/VkShaderStageFlagBits.txt[]
+
+  * ename:VK_SHADER_STAGE_VERTEX_BIT specifies the vertex stage.
+  * ename:VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT specifies the
+    tessellation control stage.
+  * ename:VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT specifies the
+    tessellation evaluation stage.
+  * ename:VK_SHADER_STAGE_GEOMETRY_BIT specifies the geometry stage.
+  * ename:VK_SHADER_STAGE_FRAGMENT_BIT specifies the fragment stage.
+  * ename:VK_SHADER_STAGE_COMPUTE_BIT specifies the compute stage.
+  * ename:VK_SHADER_STAGE_ALL_GRAPHICS is a combination of bits used as
+    shorthand to specify all graphics stages defined above (excluding the
+    compute stage).
+  * ename:VK_SHADER_STAGE_ALL is a combination of bits used as shorthand to
+    specify all shader stages supported by the device, including all
+    additional stages which are introduced by extensions.
+
+--
+
+[open,refpage='VkShaderStageFlags',desc='Bitmask of VkShaderStageFlagBits',type='enums']
+--
+include::../api/flags/VkShaderStageFlags.txt[]
+
+sname:VkShaderStageFlags is a bitmask type for setting a mask of zero or
+more slink:VkShaderStageFlagBits.
+--
+
+
+[[pipelines-graphics]]
+== Graphics Pipelines
+
+Graphics pipelines consist of multiple shader stages, multiple
+fixed-function pipeline stages, and a pipeline layout.
+
+[open,refpage='vkCreateGraphicsPipelines',desc='Create graphics pipelines',type='protos']
+--
+
+To create graphics pipelines, call:
+
+include::../api/protos/vkCreateGraphicsPipelines.txt[]
+
+  * pname:device is the logical device that creates the graphics pipelines.
+  * pname:pipelineCache is either dlink:VK_NULL_HANDLE, indicating that
+    pipeline caching is disabled; or the handle of a valid
+    <<pipelines-cache,pipeline cache>> object, in which case use of that
+    cache is enabled for the duration of the command.
+  * pname:createInfoCount is the length of the pname:pCreateInfos and
+    pname:pPipelines arrays.
+  * pname:pCreateInfos is an array of slink:VkGraphicsPipelineCreateInfo
+    structures.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+  * pname:pPipelines is a pointer to an array in which the resulting
+    graphics pipeline objects are returned.
+
+The slink:VkGraphicsPipelineCreateInfo structure includes an array of shader
+create info structures containing all the desired active shader stages, as
+well as creation info to define all relevant fixed-function stages, and a
+pipeline layout.
+
+.Valid Usage
+****
+  * [[VUID-vkCreateGraphicsPipelines-flags-00720]]
+    If the pname:flags member of any element of pname:pCreateInfos contains
+    the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT flag, and the
+    pname:basePipelineIndex member of that same element is not `-1`,
+    pname:basePipelineIndex must: be less than the index into
+    pname:pCreateInfos that corresponds to that element
+  * [[VUID-vkCreateGraphicsPipelines-flags-00721]]
+    If the pname:flags member of any element of pname:pCreateInfos contains
+    the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT flag, the base pipeline
+    must: have been created with the
+    ename:VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT flag set
+****
+
+include::../validity/protos/vkCreateGraphicsPipelines.txt[]
+--
+
+[open,refpage='VkGraphicsPipelineCreateInfo',desc='Structure specifying parameters of a newly created graphics pipeline',type='structs']
+--
+
+The sname:VkGraphicsPipelineCreateInfo structure is defined as:
+
+include::../api/structs/VkGraphicsPipelineCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is a bitmask of elink:VkPipelineCreateFlagBits specifying
+    how the pipeline will be generated.
+  * pname:stageCount is the number of entries in the pname:pStages array.
+  * pname:pStages is an array of size pname:stageCount structures of type
+    slink:VkPipelineShaderStageCreateInfo describing the set of the shader
+    stages to be included in the graphics pipeline.
+  * pname:pVertexInputState is a pointer to an instance of the
+    slink:VkPipelineVertexInputStateCreateInfo structure.
+  * pname:pInputAssemblyState is a pointer to an instance of the
+    slink:VkPipelineInputAssemblyStateCreateInfo structure which determines
+    input assembly behavior, as described in <<drawing, Drawing Commands>>.
+  * pname:pTessellationState is a pointer to an instance of the
+    slink:VkPipelineTessellationStateCreateInfo structure, and is ignored if
+    the pipeline does not include a tessellation control shader stage and
+    tessellation evaluation shader stage.
+  * pname:pViewportState is a pointer to an instance of the
+    slink:VkPipelineViewportStateCreateInfo structure, and is ignored if the
+    pipeline has rasterization disabled.
+  * pname:pRasterizationState is a pointer to an instance of the
+    slink:VkPipelineRasterizationStateCreateInfo structure.
+  * pname:pMultisampleState is a pointer to an instance of the
+    slink:VkPipelineMultisampleStateCreateInfo, and is ignored if the
+    pipeline has rasterization disabled.
+  * pname:pDepthStencilState is a pointer to an instance of the
+    slink:VkPipelineDepthStencilStateCreateInfo structure, and is ignored if
+    the pipeline has rasterization disabled or if the subpass of the render
+    pass the pipeline is created against does not use a depth/stencil
+    attachment.
+  * pname:pColorBlendState is a pointer to an instance of the
+    slink:VkPipelineColorBlendStateCreateInfo structure, and is ignored if
+    the pipeline has rasterization disabled or if the subpass of the render
+    pass the pipeline is created against does not use any color attachments.
+  * pname:pDynamicState is a pointer to
+    slink:VkPipelineDynamicStateCreateInfo and is used to indicate which
+    properties of the pipeline state object are dynamic and can: be changed
+    independently of the pipeline state.
+    This can: be `NULL`, which means no state in the pipeline is considered
+    dynamic.
+  * pname:layout is the description of binding locations used by both the
+    pipeline and descriptor sets used with the pipeline.
+  * pname:renderPass is a handle to a render pass object describing the
+    environment in which the pipeline will be used; the pipeline must: only
+    be used with an instance of any render pass compatible with the one
+    provided.
+    See <<renderpass-compatibility,Render Pass Compatibility>> for more
+    information.
+  * pname:subpass is the index of the subpass in the render pass where this
+    pipeline will be used.
+  * pname:basePipelineHandle is a pipeline to derive from.
+  * pname:basePipelineIndex is an index into the pname:pCreateInfos
+    parameter to use as a pipeline to derive from.
+
+The parameters pname:basePipelineHandle and pname:basePipelineIndex are
+described in more detail in <<pipelines-pipeline-derivatives,Pipeline
+Derivatives>>.
+
+pname:pStages points to an array of slink:VkPipelineShaderStageCreateInfo
+structures, which were previously described in <<pipelines-compute,Compute
+Pipelines>>.
+
+pname:pDynamicState points to a structure of type
+slink:VkPipelineDynamicStateCreateInfo.
+
+ifdef::VK_NV_glsl_shader[]
+If any shader stage fails to compile,
+ifdef::VK_EXT_debug_report[]
+the compile log will be reported back to the application, and
+endif::VK_EXT_debug_report[]
+ename:VK_ERROR_INVALID_SHADER_NV will be generated.
+endif::VK_NV_glsl_shader[]
+
+.Valid Usage
+****
+  * [[VUID-VkGraphicsPipelineCreateInfo-flags-00722]]
+    If pname:flags contains the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT
+    flag, and pname:basePipelineIndex is -1, pname:basePipelineHandle must:
+    be a valid handle to a graphics sname:VkPipeline
+  * [[VUID-VkGraphicsPipelineCreateInfo-flags-00723]]
+    If pname:flags contains the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT
+    flag, and pname:basePipelineHandle is dlink:VK_NULL_HANDLE,
+    pname:basePipelineIndex must: be a valid index into the calling
+    command's pname:pCreateInfos parameter
+  * [[VUID-VkGraphicsPipelineCreateInfo-flags-00724]]
+    If pname:flags contains the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT
+    flag, and pname:basePipelineIndex is not -1, pname:basePipelineHandle
+    must: be dlink:VK_NULL_HANDLE
+  * [[VUID-VkGraphicsPipelineCreateInfo-flags-00725]]
+    If pname:flags contains the ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT
+    flag, and pname:basePipelineHandle is not dlink:VK_NULL_HANDLE,
+    pname:basePipelineIndex must: be -1
+  * [[VUID-VkGraphicsPipelineCreateInfo-stage-00726]]
+    The pname:stage member of each element of pname:pStages must: be unique
+  * [[VUID-VkGraphicsPipelineCreateInfo-stage-00727]]
+    The pname:stage member of one element of pname:pStages must: be
+    ename:VK_SHADER_STAGE_VERTEX_BIT
+  * [[VUID-VkGraphicsPipelineCreateInfo-stage-00728]]
+    The pname:stage member of each element of pname:pStages must: not be
+    ename:VK_SHADER_STAGE_COMPUTE_BIT
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00729]]
+    If pname:pStages includes a tessellation control shader stage, it must:
+    include a tessellation evaluation shader stage
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00730]]
+    If pname:pStages includes a tessellation evaluation shader stage, it
+    must: include a tessellation control shader stage
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00731]]
+    If pname:pStages includes a tessellation control shader stage and a
+    tessellation evaluation shader stage, pname:pTessellationState must: be
+    a valid pointer to a valid sname:VkPipelineTessellationStateCreateInfo
+    structure
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00732]]
+    If pname:pStages includes tessellation shader stages, the shader code of
+    at least one stage must: contain an code:OpExecutionMode instruction
+    that specifies the type of subdivision in the pipeline
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00733]]
+    If pname:pStages includes tessellation shader stages, and the shader
+    code of both stages contain an code:OpExecutionMode instruction that
+    specifies the type of subdivision in the pipeline, they must: both
+    specify the same subdivision mode
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00734]]
+    If pname:pStages includes tessellation shader stages, the shader code of
+    at least one stage must: contain an code:OpExecutionMode instruction
+    that specifies the output patch size in the pipeline
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00735]]
+    If pname:pStages includes tessellation shader stages, and the shader
+    code of both contain an code:OpExecutionMode instruction that specifies
+    the out patch size in the pipeline, they must: both specify the same
+    patch size
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00736]]
+    If pname:pStages includes tessellation shader stages, the pname:topology
+    member of pname:pInputAssembly must: be
+    ename:VK_PRIMITIVE_TOPOLOGY_PATCH_LIST
+  * [[VUID-VkGraphicsPipelineCreateInfo-topology-00737]]
+    If the pname:topology member of pname:pInputAssembly is
+    ename:VK_PRIMITIVE_TOPOLOGY_PATCH_LIST, pname:pStages must: include
+    tessellation shader stages
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00738]]
+    If pname:pStages includes a geometry shader stage, and does not include
+    any tessellation shader stages, its shader code must: contain an
+    code:OpExecutionMode instruction that specifies an input primitive type
+    that is <<shaders-geometry-execution, compatible>> with the primitive
+    topology specified in pname:pInputAssembly
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00739]]
+    If pname:pStages includes a geometry shader stage, and also includes
+    tessellation shader stages, its shader code must: contain an
+    code:OpExecutionMode instruction that specifies an input primitive type
+    that is <<shaders-geometry-execution, compatible>> with the primitive
+    topology that is output by the tessellation stages
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00740]]
+    If pname:pStages includes a fragment shader stage and a geometry shader
+    stage, and the fragment shader code reads from an input variable that is
+    decorated with code:PrimitiveID, then the geometry shader code must:
+    write to a matching output variable, decorated with code:PrimitiveID, in
+    all execution paths
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00741]]
+    If pname:pStages includes a fragment shader stage, its shader code must:
+    not read from any input attachment that is defined as
+    ename:VK_ATTACHMENT_UNUSED in pname:subpass
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-00742]]
+    The shader code for the entry points identified by pname:pStages, and
+    the rest of the state identified by this structure must: adhere to the
+    pipeline linking rules described in the <<interfaces,Shader Interfaces>>
+    chapter
+// The block of VU below come in alternate versions when the extension is
+// enabled.
+ifndef::VK_VERSION_1_1,VK_KHR_maintenance2[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-00743]]
+    If rasterization is not disabled and pname:subpass uses a depth/stencil
+    attachment in pname:renderPass that has a layout of
+    ename:VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL in the
+    sname:VkAttachmentReference defined by pname:subpass, the
+    pname:depthWriteEnable member of pname:pDepthStencilState must: be
+    ename:VK_FALSE
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-00744]]
+    If rasterization is not disabled and pname:subpass uses a depth/stencil
+    attachment in pname:renderPass that has a layout of
+    ename:VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL in the
+    sname:VkAttachmentReference defined by pname:subpass, the pname:failOp,
+    pname:passOp and pname:depthFailOp members of each of the pname:front
+    and pname:back members of pname:pDepthStencilState must: be
+    ename:VK_STENCIL_OP_KEEP
+endif::VK_VERSION_1_1,VK_KHR_maintenance2[]
+// The nested ifdefs are there in anticipation of the hoped-for day when the
+// VU extractor and validation layers can handle VU with imbedded
+// conditionals. They are commented out until then.
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance2[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-01756]]
+    If rasterization is not disabled and pname:subpass uses a depth/stencil
+    attachment in pname:renderPass that has a layout of
+    ename:VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+// ifdef::VK_VERSION_1_1,VK_KHR_maintenance2[]
+    or ename:VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL
+// endif::VK_VERSION_1_1,VK_KHR_maintenance2[]
+    in the sname:VkAttachmentReference defined by pname:subpass, the
+    pname:depthWriteEnable member of pname:pDepthStencilState must: be
+    ename:VK_FALSE
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-01757]]
+    If rasterization is not disabled and pname:subpass uses a depth/stencil
+    attachment in pname:renderPass that has a layout of
+    ename:VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+// ifdef::VK_VERSION_1_1,VK_KHR_maintenance2[]
+    or ename:VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL
+// endif::VK_VERSION_1_1,VK_KHR_maintenance2[]
+    in the sname:VkAttachmentReference defined by pname:subpass, the
+    pname:failOp, pname:passOp and pname:depthFailOp members of each of the
+    pname:front and pname:back members of pname:pDepthStencilState must: be
+    ename:VK_STENCIL_OP_KEEP
+endif::VK_VERSION_1_1,VK_KHR_maintenance2[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-blendEnable-02023]]
+    If rasterization is not disabled and the subpass uses color attachments,
+    then for each color attachment in the subpass the pname:blendEnable
+    member of the corresponding element of the pname:pAttachment member of
+    pname:pColorBlendState must: be ename:VK_FALSE if the attached image's
+    <<resources-image-format-features,format features>> does not contain the
+    ename:VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT.
+  * [[VUID-VkGraphicsPipelineCreateInfo-attachmentCount-00746]]
+    If rasterization is not disabled and the subpass uses color attachments,
+    the pname:attachmentCount member of pname:pColorBlendState must: be
+    equal to the pname:colorAttachmentCount used to create pname:subpass
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-00747]]
+    If no element of the pname:pDynamicStates member of pname:pDynamicState
+    is ename:VK_DYNAMIC_STATE_VIEWPORT, the pname:pViewports member of
+    pname:pViewportState must: be a valid pointer to an array of
+    pname:pViewportState::pname:viewportCount valid sname:VkViewport
+    structures
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-00748]]
+    If no element of the pname:pDynamicStates member of pname:pDynamicState
+    is ename:VK_DYNAMIC_STATE_SCISSOR, the pname:pScissors member of
+    pname:pViewportState must: be a valid pointer to an array of
+    pname:pViewportState::pname:scissorCount sname:VkRect2D structures
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-00749]]
+    If the wide lines feature is not enabled, and no element of the
+    pname:pDynamicStates member of pname:pDynamicState is
+    ename:VK_DYNAMIC_STATE_LINE_WIDTH, the pname:lineWidth member of
+    pname:pRasterizationState must: be `1.0`
+  * [[VUID-VkGraphicsPipelineCreateInfo-rasterizerDiscardEnable-00750]]
+    If the pname:rasterizerDiscardEnable member of pname:pRasterizationState
+    is ename:VK_FALSE, pname:pViewportState must: be a valid pointer to a
+    valid sname:VkPipelineViewportStateCreateInfo structure
+  * [[VUID-VkGraphicsPipelineCreateInfo-rasterizerDiscardEnable-00751]]
+    If the pname:rasterizerDiscardEnable member of pname:pRasterizationState
+    is ename:VK_FALSE, pname:pMultisampleState must: be a valid pointer to a
+    valid sname:VkPipelineMultisampleStateCreateInfo structure
+  * [[VUID-VkGraphicsPipelineCreateInfo-rasterizerDiscardEnable-00752]]
+    If the pname:rasterizerDiscardEnable member of pname:pRasterizationState
+    is ename:VK_FALSE, and pname:subpass uses a depth/stencil attachment,
+    pname:pDepthStencilState must: be a valid pointer to a valid
+    sname:VkPipelineDepthStencilStateCreateInfo structure
+  * [[VUID-VkGraphicsPipelineCreateInfo-rasterizerDiscardEnable-00753]]
+    If the pname:rasterizerDiscardEnable member of pname:pRasterizationState
+    is ename:VK_FALSE, and pname:subpass uses color attachments,
+    pname:pColorBlendState must: be a valid pointer to a valid
+    sname:VkPipelineColorBlendStateCreateInfo structure
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-00754]]
+    If the depth bias clamping feature is not enabled, no element of the
+    pname:pDynamicStates member of pname:pDynamicState is
+    ename:VK_DYNAMIC_STATE_DEPTH_BIAS, and the pname:depthBiasEnable member
+    of pname:pRasterizationState is ename:VK_TRUE, the pname:depthBiasClamp
+    member of pname:pRasterizationState must: be `0.0`
+ifndef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-00755]]
+    If no element of the pname:pDynamicStates member of pname:pDynamicState
+    is ename:VK_DYNAMIC_STATE_DEPTH_BOUNDS, and the
+    pname:depthBoundsTestEnable member of pname:pDepthStencilState is
+    ename:VK_TRUE, the pname:minDepthBounds and pname:maxDepthBounds members
+    of pname:pDepthStencilState must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifdef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-00755]]
+    If the `<<VK_EXT_depth_range_unrestricted>>` extension is not enabled
+    and no element of the pname:pDynamicStates member of pname:pDynamicState
+    is ename:VK_DYNAMIC_STATE_DEPTH_BOUNDS, and the
+    pname:depthBoundsTestEnable member of pname:pDepthStencilState is
+    ename:VK_TRUE, the pname:minDepthBounds and pname:maxDepthBounds members
+    of pname:pDepthStencilState must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifdef::VK_EXT_sample_locations[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-01521]]
+    If no element of the pname:pDynamicStates member of pname:pDynamicState
+    is ename:VK_DYNAMIC_STATE_SAMPLE_LOCATIONS_EXT, and the
+    pname:sampleLocationsEnable member of a
+    slink:VkPipelineSampleLocationsStateCreateInfoEXT structure chained to
+    the pname:pNext chain of pname:pMultisampleState is ename:VK_TRUE,
+    pname:sampleLocationsInfo.sampleLocationGridSize.width must: evenly
+    divide
+    slink:VkMultisamplePropertiesEXT::pname:sampleLocationGridSize.width as
+    returned by flink:vkGetPhysicalDeviceMultisamplePropertiesEXT with a
+    pname:samples parameter equaling pname:rasterizationSamples
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-01522]]
+    If no element of the pname:pDynamicStates member of pname:pDynamicState
+    is ename:VK_DYNAMIC_STATE_SAMPLE_LOCATIONS_EXT, and the
+    pname:sampleLocationsEnable member of a
+    slink:VkPipelineSampleLocationsStateCreateInfoEXT structure chained to
+    the pname:pNext chain of pname:pMultisampleState is ename:VK_TRUE,
+    pname:sampleLocationsInfo.sampleLocationGridSize.height must: evenly
+    divide
+    slink:VkMultisamplePropertiesEXT::pname:sampleLocationGridSize.height as
+    returned by flink:vkGetPhysicalDeviceMultisamplePropertiesEXT with a
+    pname:samples parameter equaling pname:rasterizationSamples
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-01523]]
+    If no element of the pname:pDynamicStates member of pname:pDynamicState
+    is ename:VK_DYNAMIC_STATE_SAMPLE_LOCATIONS_EXT, and the
+    pname:sampleLocationsEnable member of a
+    slink:VkPipelineSampleLocationsStateCreateInfoEXT structure chained to
+    the pname:pNext chain of pname:pMultisampleState is ename:VK_TRUE,
+    pname:sampleLocationsInfo.sampleLocationsPerPixel must: equal
+    pname:rasterizationSamples
+  * [[VUID-VkGraphicsPipelineCreateInfo-sampleLocationsEnable-01524]]
+    If the pname:sampleLocationsEnable member of a
+    slink:VkPipelineSampleLocationsStateCreateInfoEXT structure chained to
+    the pname:pNext chain of pname:pMultisampleState is ename:VK_TRUE, the
+    fragment shader code must: not statically use the extended instruction
+    code:InterpolateAtSample
+endif::VK_EXT_sample_locations[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-layout-00756]]
+    pname:layout must: be
+    <<descriptorsets-pipelinelayout-consistency,consistent>> with all
+    shaders specified in pname:pStages
+ifndef::VK_AMD_mixed_attachment_samples[]
+ifndef::VK_NV_framebuffer_mixed_samples[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-00757]]
+    If pname:subpass uses color and/or depth/stencil attachments, then the
+    pname:rasterizationSamples member of pname:pMultisampleState must: be
+    the same as the sample count for those subpass attachments
+endif::VK_NV_framebuffer_mixed_samples[]
+endif::VK_AMD_mixed_attachment_samples[]
+ifdef::VK_AMD_mixed_attachment_samples[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-01505]]
+    If pname:subpass uses color and/or depth/stencil attachments, then the
+    pname:rasterizationSamples member of pname:pMultisampleState must: equal
+    the maximum of the sample counts of those subpass attachments
+endif::VK_AMD_mixed_attachment_samples[]
+ifdef::VK_NV_framebuffer_mixed_samples[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-01411]]
+    If pname:subpass has a depth/stencil attachment and depth test, stencil
+    test, or depth bounds test are enabled, then the
+    pname:rasterizationSamples member of pname:pMultisampleState must: be
+    the same as the sample count of the depth/stencil attachment
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-01412]]
+    If pname:subpass has any color attachments, then the
+    pname:rasterizationSamples member of pname:pMultisampleState must: be
+    greater than or equal to the sample count for those subpass attachments
+endif::VK_NV_framebuffer_mixed_samples[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-00758]]
+    If pname:subpass does not use any color and/or depth/stencil
+    attachments, then the pname:rasterizationSamples member of
+    pname:pMultisampleState must: follow the rules for a
+    <<renderpass-noattachments, zero-attachment subpass>>
+  * [[VUID-VkGraphicsPipelineCreateInfo-subpass-00759]]
+    pname:subpass must: be a valid subpass within pname:renderPass
+ifdef::VK_VERSION_1_1,VK_KHR_multiview[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-renderPass-00760]]
+    If the pname:renderPass has multiview enabled and pname:subpass has more
+    than one bit set in the view mask and pname:multiviewTessellationShader
+    is not enabled, then pname:pStages must: not include tessellation
+    shaders.
+  * [[VUID-VkGraphicsPipelineCreateInfo-renderPass-00761]]
+    If the pname:renderPass has multiview enabled and pname:subpass has more
+    than one bit set in the view mask and pname:multiviewGeometryShader is
+    not enabled, then pname:pStages must: not include a geometry shader.
+  * [[VUID-VkGraphicsPipelineCreateInfo-renderPass-00762]]
+    If the pname:renderPass has multiview enabled and pname:subpass has more
+    than one bit set in the view mask, shaders in the pipeline must: not
+    write to the code:Layer built-in output
+  * [[VUID-VkGraphicsPipelineCreateInfo-renderPass-00763]]
+    If the pname:renderPass has multiview enabled, then all shaders must:
+    not include variables decorated with the code:Layer built-in decoration
+    in their interfaces.
+endif::VK_VERSION_1_1,VK_KHR_multiview[]
+ifdef::VK_VERSION_1_1,VK_KHR_device_group[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-flags-00764]]
+    pname:flags must: not contain the ename:VK_PIPELINE_CREATE_DISPATCH_BASE
+    flag.
+endif::VK_VERSION_1_1,VK_KHR_device_group[]
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance2[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-pStages-01565]]
+    If pname:pStages includes a fragment shader stage and an input
+    attachment was referenced by the
+    slink:VkRenderPassInputAttachmentAspectCreateInfo at pname:renderPass
+    create time, its shader code must: not read from any aspect that was not
+    specified in the pname:aspectMask of the corresponding
+    slink:VkInputAttachmentAspectReference structure.
+endif::VK_VERSION_1_1,VK_KHR_maintenance2[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-layout-01688]]
+    The number of resources in pname:layout accessible to each shader stage
+    that is used by the pipeline must: be less than or equal to
+    sname:VkPhysicalDeviceLimits::pname:maxPerStageResources
+ifdef::VK_NV_clip_space_w_scaling[]
+  * [[VUID-VkGraphicsPipelineCreateInfo-pDynamicStates-01715]]
+    If no element of the pname:pDynamicStates member of pname:pDynamicState
+    is ename:VK_DYNAMIC_STATE_VIEWPORT_W_SCALING_NV, and the
+    pname:viewportWScalingEnable member of a
+    slink:VkPipelineViewportWScalingStateCreateInfoNV structure, chained to
+    the pname:pNext chain of pname:pViewportState, is ename:VK_TRUE, the
+    pname:pViewportWScalings member of the
+    slink:VkPipelineViewportWScalingStateCreateInfoNV must: be a pointer to
+    an array of
+    slink:VkPipelineViewportWScalingStateCreateInfoNV::pname:viewportCount
+    valid slink:VkViewportWScalingNV structures
+endif::VK_NV_clip_space_w_scaling[]
+****
+
+include::../validity/structs/VkGraphicsPipelineCreateInfo.txt[]
+--
+
+[open,refpage='VkPipelineCreateFlagBits',desc='Bitmask controlling how a pipeline is created',type='enums']
+--
+
+Possible values of the pname:flags member of
+slink:VkGraphicsPipelineCreateInfo and slink:VkComputePipelineCreateInfo,
+specifying how a pipeline is created, are:
+
+include::../api/enums/VkPipelineCreateFlagBits.txt[]
+
+  * ename:VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT specifies that the
+    created pipeline will not be optimized.
+    Using this flag may: reduce the time taken to create the pipeline.
+  * ename:VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT specifies that the
+    pipeline to be created is allowed to be the parent of a pipeline that
+    will be created in a subsequent call to flink:vkCreateGraphicsPipelines
+    or flink:vkCreateComputePipelines.
+  * ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT specifies that the pipeline to
+    be created will be a child of a previously created parent pipeline.
+ifdef::VK_VERSION_1_1,VK_KHR_device_group[]
+ifdef::VK_VERSION_1_1,VK_KHR_multiview[]
+  * ename:VK_PIPELINE_CREATE_VIEW_INDEX_FROM_DEVICE_INDEX_BIT specifies that
+    any shader input variables decorated as code:ViewIndex will be assigned
+    values as if they were decorated as code:DeviceIndex.
+endif::VK_VERSION_1_1,VK_KHR_multiview[]
+  * ename:VK_PIPELINE_CREATE_DISPATCH_BASE specifies that a compute pipeline
+    can: be used with flink:vkCmdDispatchBase with a non-zero base
+    workgroup.
+endif::VK_VERSION_1_1,VK_KHR_device_group[]
+
+It is valid to set both ename:VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT and
+ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT.
+This allows a pipeline to be both a parent and possibly a child in a
+pipeline hierarchy.
+See <<pipelines-pipeline-derivatives,Pipeline Derivatives>> for more
+information.
+
+--
+
+[open,refpage='VkPipelineCreateFlags',desc='Bitmask of VkPipelineCreateFlagBits',type='enums']
+--
+include::../api/flags/VkPipelineCreateFlags.txt[]
+
+sname:VkPipelineCreateFlags is a bitmask type for setting a mask of zero or
+more slink:VkPipelineCreateFlagBits.
+--
+
+[open,refpage='VkPipelineDynamicStateCreateInfo',desc='Structure specifying parameters of a newly created pipeline dynamic state',type='structs']
+--
+
+The sname:VkPipelineDynamicStateCreateInfo structure is defined as:
+
+include::../api/structs/VkPipelineDynamicStateCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:dynamicStateCount is the number of elements in the
+    pname:pDynamicStates array.
+  * pname:pDynamicStates is an array of elink:VkDynamicState values
+    specifying which pieces of pipeline state will use the values from
+    dynamic state commands rather than from pipeline state creation info.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineDynamicStateCreateInfo-pDynamicStates-01442]]
+    Each element of pname:pDynamicStates must: be unique
+****
+
+include::../validity/structs/VkPipelineDynamicStateCreateInfo.txt[]
+--
+
+[open,refpage='VkPipelineDynamicStateCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineDynamicStateCreateFlags.txt[]
+
+sname:VkPipelineDynamicStateCreateFlags is a bitmask type for setting a
+mask, but is currently reserved for future use.
+--
+
+[open,refpage='VkDynamicState',desc='Indicate which dynamic state is taken from dynamic state commands',type='enums']
+--
+
+The source of different pieces of dynamic state is specified by the
+slink:VkPipelineDynamicStateCreateInfo::pname:pDynamicStates property of the
+currently active pipeline, each of whose elements must: be one of the
+values:
+
+include::../api/enums/VkDynamicState.txt[]
+
+  * ename:VK_DYNAMIC_STATE_VIEWPORT specifies that the pname:pViewports
+    state in sname:VkPipelineViewportStateCreateInfo will be ignored and
+    must: be set dynamically with flink:vkCmdSetViewport before any draw
+    commands.
+    The number of viewports used by a pipeline is still specified by the
+    pname:viewportCount member of sname:VkPipelineViewportStateCreateInfo.
+  * ename:VK_DYNAMIC_STATE_SCISSOR specifies that the pname:pScissors state
+    in sname:VkPipelineViewportStateCreateInfo will be ignored and must: be
+    set dynamically with flink:vkCmdSetScissor before any draw commands.
+    The number of scissor rectangles used by a pipeline is still specified
+    by the pname:scissorCount member of
+    sname:VkPipelineViewportStateCreateInfo.
+  * ename:VK_DYNAMIC_STATE_LINE_WIDTH specifies that the pname:lineWidth
+    state in sname:VkPipelineRasterizationStateCreateInfo will be ignored
+    and must: be set dynamically with flink:vkCmdSetLineWidth before any
+    draw commands that generate line primitives for the rasterizer.
+  * ename:VK_DYNAMIC_STATE_DEPTH_BIAS specifies that the
+    pname:depthBiasConstantFactor, pname:depthBiasClamp and
+    pname:depthBiasSlopeFactor states in
+    sname:VkPipelineRasterizationStateCreateInfo will be ignored and must:
+    be set dynamically with flink:vkCmdSetDepthBias before any draws are
+    performed with pname:depthBiasEnable in
+    sname:VkPipelineRasterizationStateCreateInfo set to ename:VK_TRUE.
+  * ename:VK_DYNAMIC_STATE_BLEND_CONSTANTS specifies that the
+    pname:blendConstants state in sname:VkPipelineColorBlendStateCreateInfo
+    will be ignored and must: be set dynamically with
+    flink:vkCmdSetBlendConstants before any draws are performed with a
+    pipeline state with sname:VkPipelineColorBlendAttachmentState member
+    pname:blendEnable set to ename:VK_TRUE and any of the blend functions
+    using a constant blend color.
+  * ename:VK_DYNAMIC_STATE_DEPTH_BOUNDS specifies that the
+    pname:minDepthBounds and pname:maxDepthBounds states of
+    slink:VkPipelineDepthStencilStateCreateInfo will be ignored and must: be
+    set dynamically with flink:vkCmdSetDepthBounds before any draws are
+    performed with a pipeline state with
+    sname:VkPipelineDepthStencilStateCreateInfo member
+    pname:depthBoundsTestEnable set to ename:VK_TRUE.
+  * ename:VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK specifies that the
+    pname:compareMask state in sname:VkPipelineDepthStencilStateCreateInfo
+    for both pname:front and pname:back will be ignored and must: be set
+    dynamically with flink:vkCmdSetStencilCompareMask before any draws are
+    performed with a pipeline state with
+    sname:VkPipelineDepthStencilStateCreateInfo member
+    pname:stencilTestEnable set to ename:VK_TRUE
+  * ename:VK_DYNAMIC_STATE_STENCIL_WRITE_MASK specifies that the
+    pname:writeMask state in sname:VkPipelineDepthStencilStateCreateInfo for
+    both pname:front and pname:back will be ignored and must: be set
+    dynamically with flink:vkCmdSetStencilWriteMask before any draws are
+    performed with a pipeline state with
+    sname:VkPipelineDepthStencilStateCreateInfo member
+    pname:stencilTestEnable set to ename:VK_TRUE
+  * ename:VK_DYNAMIC_STATE_STENCIL_REFERENCE specifies that the
+    pname:reference state in sname:VkPipelineDepthStencilStateCreateInfo for
+    both pname:front and pname:back will be ignored and must: be set
+    dynamically with flink:vkCmdSetStencilReference before any draws are
+    performed with a pipeline state with
+    sname:VkPipelineDepthStencilStateCreateInfo member
+    pname:stencilTestEnable set to ename:VK_TRUE
+ifdef::VK_NV_clip_space_w_scaling[]
+  * ename:VK_DYNAMIC_STATE_VIEWPORT_W_SCALING_NV specifies that the
+    pname:pViewportScalings state in
+    sname:VkPipelineViewportWScalingStateCreateInfoNV will be ignored and
+    must: be set dynamically with flink:vkCmdSetViewportWScalingNV before
+    any draws are performed with a pipeline state with
+    sname:VkPipelineViewportWScalingStateCreateInfo member
+    pname:viewportScalingEnable set to ename:VK_TRUE
+endif::VK_NV_clip_space_w_scaling[]
+ifdef::VK_EXT_discard_rectangles[]
+  * ename:VK_DYNAMIC_STATE_DISCARD_RECTANGLES_EXT specifies that the
+    pname:pDiscardRectangles state in
+    slink:VkPipelineDiscardRectangleStateCreateInfoEXT will be ignored and
+    must: be set dynamically with flink:vkCmdSetDiscardRectangleEXT before
+    any draw or clear commands.
+    The elink:VkDiscardRectangleModeEXT and the number of active discard
+    rectangles is still specified by the pname:discardRectangleMode and
+    pname:discardRectangleCount members of
+    sname:VkPipelineDiscardRectangleStateCreateInfoEXT.
+endif::VK_EXT_discard_rectangles[]
+ifdef::VK_EXT_sample_locations[]
+  * ename:VK_DYNAMIC_STATE_SAMPLE_LOCATIONS_EXT specifies that the
+    pname:sampleLocationsInfo state in
+    slink:VkPipelineSampleLocationsStateCreateInfoEXT will be ignored and
+    must: be set dynamically with flink:vkCmdSetSampleLocationsEXT before
+    any draw or clear commands.
+    Enabling custom sample locations is still indicated by the
+    pname:sampleLocationsEnable member of
+    sname:VkPipelineSampleLocationsStateCreateInfoEXT.
+endif::VK_EXT_sample_locations[]
+
+--
+
+
+=== Valid Combinations of Stages for Graphics Pipelines
+
+If tessellation shader stages are omitted, the tessellation shading and
+fixed-function stages of the pipeline are skipped.
+
+If a geometry shader is omitted, the geometry shading stage is skipped.
+
+If a fragment shader is omitted, the results of fragment processing are
+undefined.
+Specifically, any fragment color outputs are considered to have undefined
+values, and the fragment depth is considered to be unmodified.
+This can: be useful for depth-only rendering.
+
+Presence of a shader stage in a pipeline is indicated by including a valid
+sname:VkPipelineShaderStageCreateInfo with pname:module and pname:pName
+selecting an entry point from a shader module, where that entry point is
+valid for the stage specified by pname:stage.
+
+Presence of some of the fixed-function stages in the pipeline is implicitly
+derived from enabled shaders and provided state.
+For example, the fixed-function tessellator is always present when the
+pipeline has valid Tessellation Control and Tessellation Evaluation shaders.
+
+.For example:
+  * Depth/stencil-only rendering in a subpass with no color attachments
+  ** Active Pipeline Shader Stages
+  *** Vertex Shader
+  ** Required: Fixed-Function Pipeline Stages
+  *** slink:VkPipelineVertexInputStateCreateInfo
+  *** slink:VkPipelineInputAssemblyStateCreateInfo
+  *** slink:VkPipelineViewportStateCreateInfo
+  *** slink:VkPipelineRasterizationStateCreateInfo
+  *** slink:VkPipelineMultisampleStateCreateInfo
+  *** slink:VkPipelineDepthStencilStateCreateInfo
+  * Color-only rendering in a subpass with no depth/stencil attachment
+  ** Active Pipeline Shader Stages
+  *** Vertex Shader
+  *** Fragment Shader
+  ** Required: Fixed-Function Pipeline Stages
+  *** slink:VkPipelineVertexInputStateCreateInfo
+  *** slink:VkPipelineInputAssemblyStateCreateInfo
+  *** slink:VkPipelineViewportStateCreateInfo
+  *** slink:VkPipelineRasterizationStateCreateInfo
+  *** slink:VkPipelineMultisampleStateCreateInfo
+  *** slink:VkPipelineColorBlendStateCreateInfo
+  * Rendering pipeline with tessellation and geometry shaders
+  ** Active Pipeline Shader Stages
+  *** Vertex Shader
+  *** Tessellation Control Shader
+  *** Tessellation Evaluation Shader
+  *** Geometry Shader
+  *** Fragment Shader
+  ** Required: Fixed-Function Pipeline Stages
+  *** slink:VkPipelineVertexInputStateCreateInfo
+  *** slink:VkPipelineInputAssemblyStateCreateInfo
+  *** slink:VkPipelineTessellationStateCreateInfo
+  *** slink:VkPipelineViewportStateCreateInfo
+  *** slink:VkPipelineRasterizationStateCreateInfo
+  *** slink:VkPipelineMultisampleStateCreateInfo
+  *** slink:VkPipelineDepthStencilStateCreateInfo
+  *** slink:VkPipelineColorBlendStateCreateInfo
+
+
+[[pipelines-destruction]]
+== Pipeline destruction
+
+[open,refpage='vkDestroyPipeline',desc='Destroy a pipeline object',type='protos']
+--
+
+To destroy a graphics or compute pipeline, call:
+
+include::../api/protos/vkDestroyPipeline.txt[]
+
+  * pname:device is the logical device that destroys the pipeline.
+  * pname:pipeline is the handle of the pipeline to destroy.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+
+.Valid Usage
+****
+  * [[VUID-vkDestroyPipeline-pipeline-00765]]
+    All submitted commands that refer to pname:pipeline must: have completed
+    execution
+  * [[VUID-vkDestroyPipeline-pipeline-00766]]
+    If sname:VkAllocationCallbacks were provided when pname:pipeline was
+    created, a compatible set of callbacks must: be provided here
+  * [[VUID-vkDestroyPipeline-pipeline-00767]]
+    If no sname:VkAllocationCallbacks were provided when pname:pipeline was
+    created, pname:pAllocator must: be `NULL`
+****
+
+include::../validity/protos/vkDestroyPipeline.txt[]
+--
+
+
+[[pipelines-multiple]]
+== Multiple Pipeline Creation
+
+Multiple pipelines can: be created simultaneously by passing an array of
+sname:VkGraphicsPipelineCreateInfo or sname:VkComputePipelineCreateInfo
+structures into the flink:vkCreateGraphicsPipelines and
+flink:vkCreateComputePipelines commands, respectively.
+Applications can: group together similar pipelines to be created in a single
+call, and implementations are encouraged to look for reuse opportunities
+within a group-create.
+
+When an application attempts to create many pipelines in a single command,
+it is possible that some subset may: fail creation.
+In that case, the corresponding entries in the pname:pPipelines output array
+will be filled with dlink:VK_NULL_HANDLE values.
+If any pipeline fails creation (for example, due to out of memory errors),
+the ftext:vkCreate*Pipelines commands will return an error code.
+The implementation will attempt to create all pipelines, and only return
+dlink:VK_NULL_HANDLE values for those that actually failed.
+
+
+[[pipelines-pipeline-derivatives]]
+== Pipeline Derivatives
+
+A pipeline derivative is a child pipeline created from a parent pipeline,
+where the child and parent are expected to have much commonality.
+The goal of derivative pipelines is that they be cheaper to create using the
+parent as a starting point, and that it be more efficient (on either host or
+device) to switch/bind between children of the same parent.
+
+A derivative pipeline is created by setting the
+ename:VK_PIPELINE_CREATE_DERIVATIVE_BIT flag in the
+stext:Vk*PipelineCreateInfo structure.
+If this is set, then exactly one of pname:basePipelineHandle or
+pname:basePipelineIndex members of the structure must: have a valid
+handle/index, and specifies the parent pipeline.
+If pname:basePipelineHandle is used, the parent pipeline must: have already
+been created.
+If pname:basePipelineIndex is used, then the parent is being created in the
+same command.
+dlink:VK_NULL_HANDLE acts as the invalid handle for
+pname:basePipelineHandle, and -1 is the invalid index for
+pname:basePipelineIndex.
+If pname:basePipelineIndex is used, the base pipeline must: appear earlier
+in the array.
+The base pipeline must: have been created with the
+ename:VK_PIPELINE_CREATE_ALLOW_DERIVATIVES_BIT flag set.
+
+
+[[pipelines-cache]]
+== Pipeline Cache
+
+[open,refpage='VkPipelineCache',desc='Opaque handle to a pipeline cache object',type='handles']
+--
+
+Pipeline cache objects allow the result of pipeline construction to be
+reused between pipelines and between runs of an application.
+Reuse between pipelines is achieved by passing the same pipeline cache
+object when creating multiple related pipelines.
+Reuse across runs of an application is achieved by retrieving pipeline cache
+contents in one run of an application, saving the contents, and using them
+to preinitialize a pipeline cache on a subsequent run.
+The contents of the pipeline cache objects are managed by the
+implementation.
+Applications can: manage the host memory consumed by a pipeline cache object
+and control the amount of data retrieved from a pipeline cache object.
+
+Pipeline cache objects are represented by sname:VkPipelineCache handles:
+
+include::../api/handles/VkPipelineCache.txt[]
+
+--
+
+[open,refpage='vkCreatePipelineCache',desc='Creates a new pipeline cache',type='protos']
+--
+
+To create pipeline cache objects, call:
+
+include::../api/protos/vkCreatePipelineCache.txt[]
+
+  * pname:device is the logical device that creates the pipeline cache
+    object.
+  * pname:pCreateInfo is a pointer to a slink:VkPipelineCacheCreateInfo
+    structure that contains the initial parameters for the pipeline cache
+    object.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+  * pname:pPipelineCache is a pointer to a slink:VkPipelineCache handle in
+    which the resulting pipeline cache object is returned.
+
+[NOTE]
+.Note
+====
+Applications can: track and manage the total host memory size of a pipeline
+cache object using the pname:pAllocator.
+Applications can: limit the amount of data retrieved from a pipeline cache
+object in fname:vkGetPipelineCacheData.
+Implementations should: not internally limit the total number of entries
+added to a pipeline cache object or the total host memory consumed.
+====
+
+Once created, a pipeline cache can: be passed to the
+fname:vkCreateGraphicsPipelines and fname:vkCreateComputePipelines commands.
+If the pipeline cache passed into these commands is not
+dlink:VK_NULL_HANDLE, the implementation will query it for possible reuse
+opportunities and update it with new content.
+The use of the pipeline cache object in these commands is internally
+synchronized, and the same pipeline cache object can: be used in multiple
+threads simultaneously.
+
+[NOTE]
+.Note
+====
+Implementations should: make every effort to limit any critical sections to
+the actual accesses to the cache, which is expected to be significantly
+shorter than the duration of the fname:vkCreateGraphicsPipelines and
+fname:vkCreateComputePipelines commands.
+====
+
+include::../validity/protos/vkCreatePipelineCache.txt[]
+--
+
+[open,refpage='VkPipelineCacheCreateInfo',desc='Structure specifying parameters of a newly created pipeline cache',type='structs']
+--
+
+The sname:VkPipelineCacheCreateInfo structure is defined as:
+
+include::../api/structs/VkPipelineCacheCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:initialDataSize is the number of bytes in pname:pInitialData.
+    If pname:initialDataSize is zero, the pipeline cache will initially be
+    empty.
+  * pname:pInitialData is a pointer to previously retrieved pipeline cache
+    data.
+    If the pipeline cache data is incompatible (as defined below) with the
+    device, the pipeline cache will be initially empty.
+    If pname:initialDataSize is zero, pname:pInitialData is ignored.
+
+.Valid Usage
+****
+  * [[VUID-VkPipelineCacheCreateInfo-initialDataSize-00768]]
+    If pname:initialDataSize is not `0`, it must: be equal to the size of
+    pname:pInitialData, as returned by fname:vkGetPipelineCacheData when
+    pname:pInitialData was originally retrieved
+  * [[VUID-VkPipelineCacheCreateInfo-initialDataSize-00769]]
+    If pname:initialDataSize is not `0`, pname:pInitialData must: have been
+    retrieved from a previous call to fname:vkGetPipelineCacheData
+****
+
+include::../validity/structs/VkPipelineCacheCreateInfo.txt[]
+--
+
+[open,refpage='VkPipelineCacheCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkPipelineCacheCreateFlags.txt[]
+
+sname:VkPipelineCacheCreateFlags is a bitmask type for setting a mask, but
+is currently reserved for future use.
+--
+
+[open,refpage='vkMergePipelineCaches',desc='Combine the data stores of pipeline caches',type='protos']
+--
+
+Pipeline cache objects can: be merged using the command:
+
+include::../api/protos/vkMergePipelineCaches.txt[]
+
+  * pname:device is the logical device that owns the pipeline cache objects.
+  * pname:dstCache is the handle of the pipeline cache to merge results
+    into.
+  * pname:srcCacheCount is the length of the pname:pSrcCaches array.
+  * pname:pSrcCaches is an array of pipeline cache handles, which will be
+    merged into pname:dstCache.
+    The previous contents of pname:dstCache are included after the merge.
+
+[NOTE]
+.Note
+====
+The details of the merge operation are implementation dependent, but
+implementations should: merge the contents of the specified pipelines and
+prune duplicate entries.
+====
+
+.Valid Usage
+****
+  * [[VUID-vkMergePipelineCaches-dstCache-00770]]
+    pname:dstCache must: not appear in the list of source caches
+****
+
+include::../validity/protos/vkMergePipelineCaches.txt[]
+--
+
+[open,refpage='vkGetPipelineCacheData',desc='Get the data store from a pipeline cache',type='protos']
+--
+
+Data can: be retrieved from a pipeline cache object using the command:
+
+include::../api/protos/vkGetPipelineCacheData.txt[]
+
+  * pname:device is the logical device that owns the pipeline cache.
+  * pname:pipelineCache is the pipeline cache to retrieve data from.
+  * pname:pDataSize is a pointer to a value related to the amount of data in
+    the pipeline cache, as described below.
+  * pname:pData is either `NULL` or a pointer to a buffer.
+
+If pname:pData is `NULL`, then the maximum size of the data that can: be
+retrieved from the pipeline cache, in bytes, is returned in pname:pDataSize.
+Otherwise, pname:pDataSize must: point to a variable set by the user to the
+size of the buffer, in bytes, pointed to by pname:pData, and on return the
+variable is overwritten with the amount of data actually written to
+pname:pData.
+
+If pname:pDataSize is less than the maximum size that can: be retrieved by
+the pipeline cache, at most pname:pDataSize bytes will be written to
+pname:pData, and fname:vkGetPipelineCacheData will return
+ename:VK_INCOMPLETE.
+Any data written to pname:pData is valid and can: be provided as the
+pname:pInitialData member of the sname:VkPipelineCacheCreateInfo structure
+passed to fname:vkCreatePipelineCache.
+
+Two calls to fname:vkGetPipelineCacheData with the same parameters must:
+retrieve the same data unless a command that modifies the contents of the
+cache is called between them.
+
+[[pipelines-cache-header]]
+Applications can: store the data retrieved from the pipeline cache, and use
+these data, possibly in a future run of the application, to populate new
+pipeline cache objects.
+The results of pipeline compiles, however, may: depend on the vendor ID,
+device ID, driver version, and other details of the device.
+To enable applications to detect when previously retrieved data is
+incompatible with the device, the initial bytes written to pname:pData must:
+be a header consisting of the following members:
+
+.Layout for pipeline cache header version ename:VK_PIPELINE_CACHE_HEADER_VERSION_ONE
+[width="85%",cols="8%,21%,71%",options="header"]
+|====
+| Offset | Size | Meaning
+| 0 | 4                    | length in bytes of the entire pipeline cache header
+                             written as a stream of bytes, with the least
+                             significant byte first
+| 4 | 4                    | a elink:VkPipelineCacheHeaderVersion value
+                             written as a stream of bytes, with the least
+                             significant byte first
+| 8 | 4                    | a vendor ID equal to
+                             sname:VkPhysicalDeviceProperties::pname:vendorID
+                             written as a stream of bytes, with the least
+                             significant byte first
+| 12 | 4                    | a device ID equal to
+                             sname:VkPhysicalDeviceProperties::pname:deviceID
+                             written as a stream of bytes, with the least
+                             significant byte first
+| 16 | ename:VK_UUID_SIZE   | a pipeline cache ID equal to
+                             sname:VkPhysicalDeviceProperties::pname:pipelineCacheUUID
+|====
+
+The first four bytes encode the length of the entire pipeline cache header,
+in bytes.
+This value includes all fields in the header including the pipeline cache
+version field and the size of the length field.
+
+The next four bytes encode the pipeline cache version, as described for
+elink:VkPipelineCacheHeaderVersion.
+A consumer of the pipeline cache should: use the cache version to interpret
+the remainder of the cache header.
+
+If pname:pDataSize is less than what is necessary to store this header,
+nothing will be written to pname:pData and zero will be written to
+pname:pDataSize.
+
+include::../validity/protos/vkGetPipelineCacheData.txt[]
+--
+
+[open,refpage='VkPipelineCacheHeaderVersion',desc='Encode pipeline cache version',type='enums',xrefs='vkCreatePipelineCache vkGetPipelineCacheData']
+--
+Possible values of the second group of four bytes in the header returned by
+flink:vkGetPipelineCacheData, encoding the pipeline cache version, are:
+
+include::../api/enums/VkPipelineCacheHeaderVersion.txt[]
+
+  * ename:VK_PIPELINE_CACHE_HEADER_VERSION_ONE specifies version one of the
+    pipeline cache.
+--
+
+[open,refpage='vkDestroyPipelineCache',desc='Destroy a pipeline cache object',type='protos']
+--
+
+To destroy a pipeline cache, call:
+
+include::../api/protos/vkDestroyPipelineCache.txt[]
+
+  * pname:device is the logical device that destroys the pipeline cache
+    object.
+  * pname:pipelineCache is the handle of the pipeline cache to destroy.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+
+.Valid Usage
+****
+  * [[VUID-vkDestroyPipelineCache-pipelineCache-00771]]
+    If sname:VkAllocationCallbacks were provided when pname:pipelineCache
+    was created, a compatible set of callbacks must: be provided here
+  * [[VUID-vkDestroyPipelineCache-pipelineCache-00772]]
+    If no sname:VkAllocationCallbacks were provided when pname:pipelineCache
+    was created, pname:pAllocator must: be `NULL`
+****
+
+include::../validity/protos/vkDestroyPipelineCache.txt[]
+--
+
+
+[[pipelines-specialization-constants]]
+== Specialization Constants
+
+Specialization constants are a mechanism whereby constants in a SPIR-V
+module can: have their constant value specified at the time the
+sname:VkPipeline is created.
+This allows a SPIR-V module to have constants that can: be modified while
+executing an application that uses the Vulkan API.
+
+[NOTE]
+.Note
+====
+Specialization constants are useful to allow a compute shader to have its
+local workgroup size changed at runtime by the user, for example.
+====
+
+Each instance of the sname:VkPipelineShaderStageCreateInfo structure
+contains a parameter pname:pSpecializationInfo, which can: be `NULL` to
+indicate no specialization constants, or point to a
+sname:VkSpecializationInfo structure.
+
+[open,refpage='VkSpecializationInfo',desc='Structure specifying specialization info',type='structs']
+--
+
+The sname:VkSpecializationInfo structure is defined as:
+
+include::../api/structs/VkSpecializationInfo.txt[]
+
+  * pname:mapEntryCount is the number of entries in the pname:pMapEntries
+    array.
+  * pname:pMapEntries is a pointer to an array of
+    sname:VkSpecializationMapEntry which maps constant IDs to offsets in
+    pname:pData.
+  * pname:dataSize is the byte size of the pname:pData buffer.
+  * pname:pData contains the actual constant values to specialize with.
+
+pname:pMapEntries points to a structure of type
+slink:VkSpecializationMapEntry.
+
+.Valid Usage
+****
+  * [[VUID-VkSpecializationInfo-offset-00773]]
+    The pname:offset member of each element of pname:pMapEntries must: be
+    less than pname:dataSize
+  * [[VUID-VkSpecializationInfo-pMapEntries-00774]]
+    The pname:size member of each element of pname:pMapEntries must: be less
+    than or equal to pname:dataSize minus pname:offset
+****
+
+include::../validity/structs/VkSpecializationInfo.txt[]
+--
+
+[open,refpage='VkSpecializationMapEntry',desc='Structure specifying a specialization map entry',type='structs']
+--
+
+The sname:VkSpecializationMapEntry structure is defined as:
+
+include::../api/structs/VkSpecializationMapEntry.txt[]
+
+  * pname:constantID is the ID of the specialization constant in SPIR-V.
+  * pname:offset is the byte offset of the specialization constant value
+    within the supplied data buffer.
+  * pname:size is the byte size of the specialization constant value within
+    the supplied data buffer.
+
+If a pname:constantID value is not a specialization constant ID used in the
+shader, that map entry does not affect the behavior of the pipeline.
+
+.Valid Usage
+****
+  * [[VUID-VkSpecializationMapEntry-constantID-00776]]
+    For a pname:constantID specialization constant declared in a shader,
+    pname:size must: match the byte size of the pname:constantID.
+    If the specialization constant is of type code:boolean, pname:size must:
+    be the byte size of basetype:VkBool32
+****
+
+include::../validity/structs/VkSpecializationMapEntry.txt[]
+--
+
+In human readable SPIR-V:
+
+[source,glsl]
+---------------------------------------------------
+OpDecorate %x SpecId 13 ; decorate .x component of WorkgroupSize with ID 13
+OpDecorate %y SpecId 42 ; decorate .y component of WorkgroupSize with ID 42
+OpDecorate %z SpecId 3  ; decorate .z component of WorkgroupSize with ID 3
+OpDecorate %wgsize BuiltIn WorkgroupSize ; decorate WorkgroupSize onto constant
+%i32 = OpTypeInt 32 0 ; declare an unsigned 32-bit type
+%uvec3 = OpTypeVector %i32 3 ; declare a 3 element vector type of unsigned 32-bit
+%x = OpSpecConstant %i32 1 ; declare the .x component of WorkgroupSize
+%y = OpSpecConstant %i32 1 ; declare the .y component of WorkgroupSize
+%z = OpSpecConstant %i32 1 ; declare the .z component of WorkgroupSize
+%wgsize = OpSpecConstantComposite %uvec3 %x %y %z ; declare WorkgroupSize
+---------------------------------------------------
+
+From the above we have three specialization constants, one for each of the
+x, y & z elements of the WorkgroupSize vector.
+
+Now to specialize the above via the specialization constants mechanism:
+
+[source,c++]
+---------------------------------------------------
+const VkSpecializationMapEntry entries[] =
+{
+    {
+        13,                             // constantID
+        0 * sizeof(uint32_t),           // offset
+        sizeof(uint32_t)                // size
+    },
+    {
+        42,                             // constantID
+        1 * sizeof(uint32_t),           // offset
+        sizeof(uint32_t)                // size
+    },
+    {
+        3,                              // constantID
+        2 * sizeof(uint32_t),           // offset
+        sizeof(uint32_t)                // size
+    }
+};
+
+const uint32_t data[] = { 16, 8, 4 }; // our workgroup size is 16x8x4
+
+const VkSpecializationInfo info =
+{
+    3,                                  // mapEntryCount
+    entries,                            // pMapEntries
+    3 * sizeof(uint32_t),               // dataSize
+    data,                               // pData
+};
+---------------------------------------------------
+
+Then when calling flink:vkCreateComputePipelines, and passing the
+sname:VkSpecializationInfo we defined as the pname:pSpecializationInfo
+parameter of slink:VkPipelineShaderStageCreateInfo, we will create a compute
+pipeline with the runtime specified local workgroup size.
+
+Another example would be that an application has a SPIR-V module that has
+some platform-dependent constants they wish to use.
+
+In human readable SPIR-V:
+
+// [source,glsl]
+[source,glsl]
+---------------------------------------------------
+OpDecorate %1 SpecId 0  ; decorate our signed 32-bit integer constant
+OpDecorate %2 SpecId 12 ; decorate our 32-bit floating-point constant
+%i32 = OpTypeInt 32 1   ; declare a signed 32-bit type
+%float = OpTypeFloat 32 ; declare a 32-bit floating-point type
+%1 = OpSpecConstant %i32 -1 ; some signed 32-bit integer constant
+%2 = OpSpecConstant %float 0.5 ; some 32-bit floating-point constant
+---------------------------------------------------
+
+From the above we have two specialization constants, one is a signed 32-bit
+integer and the second is a 32-bit floating-point.
+
+Now to specialize the above via the specialization constants mechanism:
+
+[source,c++]
+---------------------------------------------------
+struct SpecializationData {
+    int32_t data0;
+    float data1;
+};
+
+const VkSpecializationMapEntry entries[] =
+{
+    {
+        0,                                    // constantID
+        offsetof(SpecializationData, data0),  // offset
+        sizeof(SpecializationData::data0)     // size
+    },
+    {
+        12,                                   // constantID
+        offsetof(SpecializationData, data1),  // offset
+        sizeof(SpecializationData::data1)     // size
+    }
+};
+
+SpecializationData data;
+data.data0 = -42;    // set the data for the 32-bit integer
+data.data1 = 42.0f;  // set the data for the 32-bit floating-point
+
+const VkSpecializationInfo info =
+{
+    2,                                  // mapEntryCount
+    entries,                            // pMapEntries
+    sizeof(data),                       // dataSize
+    &data,                              // pData
+};
+---------------------------------------------------
+
+It is legal for a SPIR-V module with specializations to be compiled into a
+pipeline where no specialization info was provided.
+SPIR-V specialization constants contain default values such that if a
+specialization is not provided, the default value will be used.
+In the examples above, it would be valid for an application to only
+specialize some of the specialization constants within the SPIR-V module,
+and let the other constants use their default values encoded within the
+OpSpecConstant declarations.
+
+
+[[pipelines-binding]]
+== Pipeline Binding
+
+[open,refpage='vkCmdBindPipeline',desc='Bind a pipeline object to a command buffer',type='protos']
+--
+
+Once a pipeline has been created, it can: be bound to the command buffer
+using the command:
+
+include::../api/protos/vkCmdBindPipeline.txt[]
+
+  * pname:commandBuffer is the command buffer that the pipeline will be
+    bound to.
+  * pname:pipelineBindPoint is a elink:VkPipelineBindPoint value specifying
+    whether to bind to the compute or graphics bind point.
+    Binding one does not disturb the other.
+  * pname:pipeline is the pipeline to be bound.
+
+Once bound, a pipeline binding affects subsequent graphics or compute
+commands in the command buffer until a different pipeline is bound to the
+bind point.
+The pipeline bound to ename:VK_PIPELINE_BIND_POINT_COMPUTE controls the
+behavior of flink:vkCmdDispatch and flink:vkCmdDispatchIndirect.
+The pipeline bound to ename:VK_PIPELINE_BIND_POINT_GRAPHICS controls the
+behavior of all <<drawing, drawing commands>>.
+No other commands are affected by the pipeline state.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdBindPipeline-pipelineBindPoint-00777]]
+    If pname:pipelineBindPoint is ename:VK_PIPELINE_BIND_POINT_COMPUTE, the
+    sname:VkCommandPool that pname:commandBuffer was allocated from must:
+    support compute operations
+  * [[VUID-vkCmdBindPipeline-pipelineBindPoint-00778]]
+    If pname:pipelineBindPoint is ename:VK_PIPELINE_BIND_POINT_GRAPHICS, the
+    sname:VkCommandPool that pname:commandBuffer was allocated from must:
+    support graphics operations
+  * [[VUID-vkCmdBindPipeline-pipelineBindPoint-00779]]
+    If pname:pipelineBindPoint is ename:VK_PIPELINE_BIND_POINT_COMPUTE,
+    pname:pipeline must: be a compute pipeline
+  * [[VUID-vkCmdBindPipeline-pipelineBindPoint-00780]]
+    If pname:pipelineBindPoint is ename:VK_PIPELINE_BIND_POINT_GRAPHICS,
+    pname:pipeline must: be a graphics pipeline
+  * [[VUID-vkCmdBindPipeline-pipeline-00781]]
+    If the <<features-features-variableMultisampleRate,variable multisample
+    rate>> feature is not supported, pname:pipeline is a graphics pipeline,
+    the current subpass has no attachments, and this is not the first call
+    to this function with a graphics pipeline after transitioning to the
+    current subpass, then the sample count specified by this pipeline must:
+    match that set in the previous pipeline
+ifdef::VK_EXT_sample_locations[]
+  * [[VUID-vkCmdBindPipeline-variableSampleLocations-01525]]
+    If
+    slink:VkPhysicalDeviceSampleLocationsPropertiesEXT::pname:variableSampleLocations
+    is ename:VK_FALSE, and pname:pipeline is a graphics pipeline created
+    with a slink:VkPipelineSampleLocationsStateCreateInfoEXT structure
+    having its pname:sampleLocationsEnable member set to ename:VK_TRUE but
+    without ename:VK_DYNAMIC_STATE_SAMPLE_LOCATIONS_EXT enabled then the
+    current render pass instance must: have been begun by specifying a
+    slink:VkRenderPassSampleLocationsBeginInfoEXT structure whose
+    pname:pPostSubpassSampleLocations member contains an element with a
+    pname:subpassIndex matching the current subpass index and the
+    pname:sampleLocationsInfo member of that element must: match the
+    pname:sampleLocationsInfo specified in
+    slink:VkPipelineSampleLocationsStateCreateInfoEXT when the pipeline was
+    created
+endif::VK_EXT_sample_locations[]
+****
+
+include::../validity/protos/vkCmdBindPipeline.txt[]
+--
+
+[open,refpage='VkPipelineBindPoint',desc='Specify the bind point of a pipeline object to a command buffer',type='enums']
+--
+
+Possible values of flink:vkCmdBindPipeline::pname:pipelineBindPoint,
+specifying the bind point of a pipeline object, are:
+
+include::../api/enums/VkPipelineBindPoint.txt[]
+
+  * ename:VK_PIPELINE_BIND_POINT_COMPUTE specifies binding as a compute
+    pipeline.
+  * ename:VK_PIPELINE_BIND_POINT_GRAPHICS specifies binding as a graphics
+    pipeline.
+
+--
+
+
+[[pipelines-dynamic-state]]
+== Dynamic State
+
+When a pipeline object is bound, any pipeline object state that is not
+specified as dynamic is applied to the command buffer state.
+Pipeline object state that is specified as dynamic is not applied to the
+command buffer state at this time.
+Instead, dynamic state can: be modified at any time and persists for the
+lifetime of the command buffer, or until modified by another dynamic state
+setting command or another pipeline bind.
+
+When a pipeline object is bound, the following applies to each state
+parameter:
+
+  * If the state is not specified as dynamic in the new pipeline object,
+    then that command buffer state is overwritten by the state in the new
+    pipeline object.
+  * If the state is specified as dynamic in both the new and the previous
+    pipeline object, then that command buffer state is not disturbed.
+  * If the state is specified as dynamic in the new pipeline object but is
+    not specified as dynamic in the previous pipeline object, then that
+    command buffer state becomes undefined.
+    If the state is an array, then the entire array becomes undefined.
+  * If the state is an array specified as dynamic in both the new and the
+    previous pipeline object, and the array size is not the same in both
+    pipeline objects, then that command buffer state becomes undefined.
+
+Dynamic state setting commands must: not be issued for state that is not
+specified as dynamic in the bound pipeline object.
+
+Dynamic state that does not affect the result of operations can: be left
+undefined.
+
+[NOTE]
+.Note
+====
+For example, if blending is disabled by the pipeline object state then the
+dynamic color blend constants do not need to be specified in the command
+buffer, even if this state is specified as dynamic in the pipeline object.
+====
+
+ifdef::VK_AMD_shader_info[]
+include::VK_AMD_shader_info.txt[]
+endif::VK_AMD_shader_info[]

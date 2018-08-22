@@ -1,0 +1,76 @@
+// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[platformCreateSurface_android,platformCreateSurface_android]]
+
+=== Android Platform
+
+[open,refpage='vkCreateAndroidSurfaceKHR',desc='Create a slink:VkSurfaceKHR object for an Android native window',type='protos']
+--
+
+To create a sname:VkSurfaceKHR object for an Android native window, call:
+
+include::../../api/protos/vkCreateAndroidSurfaceKHR.txt[]
+
+  * pname:instance is the instance to associate the surface with.
+  * pname:pCreateInfo is a pointer to an instance of the
+    sname:VkAndroidSurfaceCreateInfoKHR structure containing parameters
+    affecting the creation of the surface object.
+  * pname:pAllocator is the allocator used for host memory allocated for the
+    surface object when there is no more specific allocator available (see
+    <<memory-allocation,Memory Allocation>>).
+  * pname:pSurface points to a slink:VkSurfaceKHR handle in which the
+    created surface object is returned.
+
+During the lifetime of a surface created using a particular
+code:ANativeWindow handle any attempts to create another surface for the
+same code:ANativeWindow and any attempts to connect to the same
+code:ANativeWindow through other platform mechanisms will fail.
+
+[NOTE]
+.Note
+====
+In particular, only one sname:VkSurfaceKHR can: exist at a time for a given
+window.
+Similarly, a native window cannot: be used by both a sname:VkSurfaceKHR and
+code:EGLSurface simultaneously.
+====
+
+If successful, fname:vkCreateAndroidSurfaceKHR increments the
+code:ANativeWindow's reference count, and fname:vkDestroySurfaceKHR will
+decrement it.
+
+On Android, when a swapchain's pname:imageExtent does not match the
+surface's pname:currentExtent, the presentable images will be scaled to the
+surface's dimensions during presentation.
+pname:minImageExtent is [eq]#(1,1)#, and pname:maxImageExtent is the maximum
+image size supported by the consumer.
+For the system compositor, pname:currentExtent is the window size (i.e. the
+consumer's preferred size).
+
+include::../../validity/protos/vkCreateAndroidSurfaceKHR.txt[]
+--
+
+[open,refpage='VkAndroidSurfaceCreateInfoKHR',desc='Structure specifying parameters of a newly created Android surface object',type='structs']
+--
+
+The sname:VkAndroidSurfaceCreateInfoKHR structure is defined as:
+
+include::../../api/structs/VkAndroidSurfaceCreateInfoKHR.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:window is a pointer to the code:ANativeWindow to associate the
+    surface with.
+
+.Valid Usage
+****
+  * [[VUID-VkAndroidSurfaceCreateInfoKHR-window-01248]]
+    pname:window must: point to a valid Android code:ANativeWindow.
+****
+
+include::../../validity/structs/VkAndroidSurfaceCreateInfoKHR.txt[]
+--
+
