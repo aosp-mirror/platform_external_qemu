@@ -19,6 +19,25 @@
 
 namespace emugl {
 
+struct GlStencilFunc {
+    GLenum func;
+    GLint ref;
+    GLuint mask;
+};
+
+struct GlStencilOp {
+    GLenum sfail;
+    GLenum dpfail;
+    GLenum dppass;
+};
+
+struct GlBlendFunc {
+    GLenum srcRGB;
+    GLenum dstRGB;
+    GLenum srcAlpha;
+    GLenum dstAlpha;
+};
+
 // Scissor box settings to attempt
 static const std::vector<GLint> kGLES2TestScissorBox = {2, 3, 10, 20};
 

@@ -19,6 +19,11 @@
 
 namespace emugl {
 
+struct GlSampleCoverage {
+    GLclampf value;
+    GLboolean invert;
+};
+
 // Sample coverage settings to attempt
 static const GlSampleCoverage kGLES2TestSampleCoverages[] = {{0.3, true},
                                                              {0, false}};

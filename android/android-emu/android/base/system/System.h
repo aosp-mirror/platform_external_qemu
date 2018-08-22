@@ -355,6 +355,10 @@ public:
     // a problem with the system when getting the current directory.
     virtual std::string getCurrentDirectory() const = 0;
 
+    // Set the current directory path. Returns true if the directory was
+    // successfully changed.
+    virtual bool setCurrentDirectory(StringView directory) = 0;
+
     // Return the path of a temporary directory appropriate for the system.
     virtual std::string getTempDir() const = 0;
 
