@@ -181,6 +181,12 @@ private:
                 *shouldReply = false;
                 break;
             }
+            case MS::FunctionCase::kForkReadOnlyInstancesParam: {
+                break;
+            }
+            case MS::FunctionCase::kDoneInstanceParam: {
+                break;
+            }
             default:
                 fprintf(stderr, "Error: offworld lib received unrecognized "
                         "message!");
