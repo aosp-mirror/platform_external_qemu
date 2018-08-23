@@ -140,12 +140,13 @@ static bool parseQemuOptForQcow2(bool wipeData) {
         images = image_paths_hw_arc;
     }
     int p;
+    QemuOptsList* optList = qemu_find_opts("drive");
     for (p = 0; p < count; p++) {
-        sDriveShare->srcImagePaths.emplace(
-                images[p].drive,
-                qemu_opt_get(qemu_opts_find(qemu_find_opts("drive"),
-                                            images[p].drive),
-                             "file"));
+        QemuOpts* opts = qemu_opts_find(optList, images[p].drive);
+        if (opts) {
+            sDriveShare->srcImagePaths.emplace(images[p].drive,
+                                               qemu_opt_get(opts, "file"));
+        }
         const char* backing_image_path = images[p].backing_image_path;
         if (!backing_image_path || *backing_image_path == '\0') {
             /* If the path is NULL or empty, just ignore it.*/
@@ -187,12 +188,6 @@ static bool parseQemuOptForQcow2(bool wipeData) {
             qcow2_image_path = qcow2_path_buffer;
             sDriveShare->srcImagePaths[images[p].drive] = qcow2_image_path;
         } else {
-            QemuOpts* opts =
-                    qemu_opts_find(qemu_find_opts("drive"), images[p].drive);
-            if (!opts) {
-                fprintf(stderr, "drive %s not found\n", images[p].drive);
-                continue;
-            }
             qcow2_image_path = qemu_opt_get(opts, "file");
             const char qcow2_suffix[] = "." QCOW2_SUFFIX;
             if (strcmp(qcow2_suffix, qcow2_image_path +
