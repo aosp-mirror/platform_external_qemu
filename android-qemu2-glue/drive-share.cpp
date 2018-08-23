@@ -141,11 +141,13 @@ static bool parseQemuOptForQcow2(bool wipeData) {
     }
     int p;
     for (p = 0; p < count; p++) {
-        sDriveShare->srcImagePaths.emplace(
-                images[p].drive,
-                qemu_opt_get(qemu_opts_find(qemu_find_opts("drive"),
-                                            images[p].drive),
-                             "file"));
+        if (qemu_opts_find(qemu_find_opts("drive"), images[p].drive)) {
+            sDriveShare->srcImagePaths.emplace(
+                    images[p].drive,
+                    qemu_opt_get(qemu_opts_find(qemu_find_opts("drive"),
+                                                images[p].drive),
+                                 "file"));
+        }
         const char* backing_image_path = images[p].backing_image_path;
         if (!backing_image_path || *backing_image_path == '\0') {
             /* If the path is NULL or empty, just ignore it.*/
