@@ -4728,12 +4728,21 @@ STEXI
 Run a script when the TAP interface specifed by -net-tap goes down.
 ETEXI
 
+
 DEF("mem-file-shared", 0, QEMU_OPTION_mem_file_shared,
 "-mem-file-shared (use with -mem-path) initializes RAM backing file (specified in -mem-path) as a shared mapping\n", QEMU_ARCH_ALL)
 STEXI
 @item -mem-file-shared
 @findex -mem-file-shared
 Map backing RAM file as shared to allow write through.
+ETEXI
+
+DEF("read-only", 0, QEMU_OPTION_read_only,
+    "-read-only mark the session as read-only and abandon all snapshot or any disk changes at exit.\n", QEMU_ARCH_ALL)
+STEXI
+@item -read-only
+@findex -read-only
+Abandon changes on exit
 ETEXI
 
 #endif  // CONFIG_ANDROID

@@ -9,18 +9,39 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include <algorithm>
 #include <errno.h>
 #include <cstdio>
 
 #include "android/base/files/FileShareOpen.h"
 #include "android/base/files/FileShareOpenImpl.h"
 #include "android/base/StringFormat.h"
+#include "android/base/threads/Thread.h"
 
 void android::base::createFileForShare(const char* filename) {
     void* handle = internal::openFileForShare(filename);
     if (handle) {
         internal::closeFileForShare(handle);
     }
+}
+
+FILE* android::base::fsopenWithTimeout(const char* filename, const char* mode,
+        android::base::FileShare fileshare, int timeoutMs) {
+    if (timeoutMs <= 0) {
+        return fsopen(filename, mode, fileshare);
+    }
+    FILE* ret = nullptr;
+    int waited = 0;
+    while (!ret && waited < timeoutMs) {
+        ret = fsopen(filename, mode, fileshare);
+        if (ret) {
+            return ret;
+        }
+        int wait = std::min(timeoutMs - waited, 200);
+        android::base::Thread::sleepMs(wait);
+        waited += wait;
+    }
+    return nullptr;
 }
 
 #ifdef _WIN32
@@ -47,9 +68,6 @@ FILE* android::base::fsopen(const char* filename,
     const Win32UnicodeString filenameW(filename);
     const Win32UnicodeString modeW(mode);
     FILE* file = _wfsopen(filenameW.c_str(), modeW.c_str(), shflag);
-    if (!file) {
-        fprintf(stderr, "%s open failed errno %d\n", filename, errno);
-    }
     return file;
 }
 
@@ -110,7 +128,6 @@ FILE* android::base::fsopen(const char* filename,
     int fd = fileno(file);
     if (flock(fd, operation | LOCK_NB) == -1) {
         fclose(file);
-        fprintf(stderr, "%s lock failed errno %d\n", filename, errno);
         return nullptr;
     }
     return file;
