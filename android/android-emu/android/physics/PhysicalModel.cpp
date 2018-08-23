@@ -780,10 +780,11 @@ void PhysicalModelImpl::getTransform(
     *out_timestamp = mModelTimeNs;
 
     if (mGroundTruthStream) {
-        fprintf(mGroundTruthStream->get(), "%" PRId64 " %f %f %f %f %f %f\n",
-                *out_timestamp, *out_translation_x, *out_translation_y,
-                *out_translation_z, *out_rotation_x, *out_rotation_y,
-                *out_rotation_z);
+        fprintf(mGroundTruthStream->get(),
+                "%" PRId64 " %" PRId64 " %f %f %f %f %f %f\n",
+                *out_timestamp, android_sensors_get_time_offset(),
+                *out_translation_x, *out_translation_y, *out_translation_z,
+                *out_rotation_x, *out_rotation_y, *out_rotation_z);
     }
 }
 
