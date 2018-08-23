@@ -16,6 +16,7 @@
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/debug.h"
 
 #include <fcntl.h>
@@ -42,6 +43,9 @@
 #endif
 #endif
 
+namespace fc = android::featurecontrol;
+using fc::Feature;
+
 namespace android {
 namespace snapshot {
 
@@ -50,13 +54,24 @@ static bool checkUserfaultFdCaps(int ufd) {
         return false;
     }
 
-    uffdio_api apiStruct = {UFFD_API};
+    uffdio_api apiStruct;
+    memset(&apiStruct, 0x0, sizeof(uffdio_api));
+    apiStruct.api = UFFD_API;
+
     if (ioctl(ufd, UFFDIO_API, &apiStruct)) {
         dwarning("UFFDIO_API failed: %s", strerror(errno));
         return false;
     }
 
     uint64_t ioctlMask = 1ull << _UFFDIO_REGISTER | 1ull << _UFFDIO_UNREGISTER;
+
+    if (fc::isEnabled(Feature::QuickbootFileBacked)) {
+        // It's possible for UFFD_FEATURE_MISSING_SHMEM to
+        // be returned in features but registering ranges
+        // still fail. To be safe, return false unconditionally.
+        return false;
+    }
+
     if ((apiStruct.ioctls & ioctlMask) != ioctlMask) {
         dwarning(
                 "Missing userfault features: %llu",

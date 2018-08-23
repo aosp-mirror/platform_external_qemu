@@ -146,11 +146,13 @@ int load_image_targphys_as(const char *filename,
     int size;
 
     size = get_image_size(filename);
-    if (size > max_sz) {
+    if (size < 0 || size > max_sz) {
         return -1;
     }
     if (size > 0) {
-        rom_add_file_fixed_as(filename, addr, -1, as);
+        if (rom_add_file_fixed_as(filename, addr, -1, as) < 0) {
+            return -1;
+        }
     }
     return size;
 }
@@ -166,7 +168,7 @@ int load_image_mr(const char *filename, MemoryRegion *mr)
 
     size = get_image_size(filename);
 
-    if (size > memory_region_size(mr)) {
+    if (size < 0 || size > memory_region_size(mr)) {
         return -1;
     }
     if (size > 0) {
@@ -448,6 +450,20 @@ int load_elf_ram(const char *filename,
                  int clear_lsb, int data_swab, AddressSpace *as,
                  bool load_rom)
 {
+    return load_elf_ram_sym(filename, translate_fn, translate_opaque,
+                            pentry, lowaddr, highaddr, big_endian,
+                            elf_machine, clear_lsb, data_swab, as,
+                            load_rom, NULL);
+}
+
+/* return < 0 if error, otherwise the number of bytes loaded in memory */
+int load_elf_ram_sym(const char *filename,
+                     uint64_t (*translate_fn)(void *, uint64_t),
+                     void *translate_opaque, uint64_t *pentry,
+                     uint64_t *lowaddr, uint64_t *highaddr, int big_endian,
+                     int elf_machine, int clear_lsb, int data_swab,
+                     AddressSpace *as, bool load_rom, symbol_fn_t sym_cb)
+{
     int fd, data_order, target_data_order, must_swab, ret = ELF_LOAD_FAILED;
     uint8_t e_ident[EI_NIDENT];
 
@@ -486,11 +502,11 @@ int load_elf_ram(const char *filename,
     if (e_ident[EI_CLASS] == ELFCLASS64) {
         ret = load_elf64(filename, fd, translate_fn, translate_opaque, must_swab,
                          pentry, lowaddr, highaddr, elf_machine, clear_lsb,
-                         data_swab, as, load_rom);
+                         data_swab, as, load_rom, sym_cb);
     } else {
         ret = load_elf32(filename, fd, translate_fn, translate_opaque, must_swab,
                          pentry, lowaddr, highaddr, elf_machine, clear_lsb,
-                         data_swab, as, load_rom);
+                         data_swab, as, load_rom, sym_cb);
     }
 
  fail:
@@ -611,8 +627,9 @@ static int load_uboot_image(const char *filename, hwaddr *ep, hwaddr *loadaddr,
         return -1;
 
     size = read(fd, hdr, sizeof(uboot_image_header_t));
-    if (size < 0)
+    if (size < sizeof(uboot_image_header_t)) {
         goto out;
+    }
 
     bswap_uboot_header(hdr);
 
@@ -727,8 +744,14 @@ int load_uimage_as(const char *filename, hwaddr *ep, hwaddr *loadaddr,
 /* Load a ramdisk.  */
 int load_ramdisk(const char *filename, hwaddr addr, uint64_t max_sz)
 {
+    return load_ramdisk_as(filename, addr, max_sz, NULL);
+}
+
+int load_ramdisk_as(const char *filename, hwaddr addr, uint64_t max_sz,
+                    AddressSpace *as)
+{
     return load_uboot_image(filename, NULL, &addr, NULL, IH_TYPE_RAMDISK,
-                            NULL, NULL, NULL);
+                            NULL, NULL, as);
 }
 
 /* Load a gzip-compressed kernel to a dynamically allocated buffer. */
@@ -986,7 +1009,7 @@ err:
 
 MemoryRegion *rom_add_blob(const char *name, const void *blob, size_t len,
                    size_t max_len, hwaddr addr, const char *fw_file_name,
-                   FWCfgReadCallback fw_callback, void *callback_opaque,
+                   FWCfgCallback fw_callback, void *callback_opaque,
                    AddressSpace *as, bool read_only)
 {
     MachineClass *mc = MACHINE_GET_CLASS(qdev_get_machine());
@@ -1020,7 +1043,7 @@ MemoryRegion *rom_add_blob(const char *name, const void *blob, size_t len,
         }
 
         fw_cfg_add_file_callback(fw_cfg, fw_file_name,
-                                 fw_callback, callback_opaque,
+                                 fw_callback, NULL, callback_opaque,
                                  data, rom->datasize, read_only);
     }
     return mr;
@@ -1101,20 +1124,22 @@ int rom_check_and_register_reset(void)
         if (rom->fw_file) {
             continue;
         }
-        if ((addr > rom->addr) && (as == rom->as)) {
-            fprintf(stderr, "rom: requested regions overlap "
-                    "(rom %s. free=0x" TARGET_FMT_plx
-                    ", addr=0x" TARGET_FMT_plx ")\n",
-                    rom->name, addr, rom->addr);
-            return -1;
+        if (!rom->mr) {
+            if ((addr > rom->addr) && (as == rom->as)) {
+                fprintf(stderr, "rom: requested regions overlap "
+                        "(rom %s. free=0x" TARGET_FMT_plx
+                        ", addr=0x" TARGET_FMT_plx ")\n",
+                        rom->name, addr, rom->addr);
+                return -1;
+            }
+            addr  = rom->addr;
+            addr += rom->romsize;
+            as = rom->as;
         }
-        addr  = rom->addr;
-        addr += rom->romsize;
         section = memory_region_find(rom->mr ? rom->mr : get_system_memory(),
                                      rom->addr, 1);
         rom->isrom = int128_nz(section.size) && memory_region_is_rom(section.mr);
         memory_region_unref(section.mr);
-        as = rom->as;
     }
     qemu_register_reset(rom_reset, NULL);
     roms_loaded = 1;

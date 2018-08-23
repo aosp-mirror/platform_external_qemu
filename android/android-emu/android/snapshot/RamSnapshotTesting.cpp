@@ -43,6 +43,21 @@ static void mockQemuPageSave(RamSaver& saver, const RamBlock& block) {
     }
 }
 
+RamBlock makeRam(android::base::StringView name,
+                 uint8_t* data,
+                 int64_t size) {
+    return {
+        c_str(name),
+        0x0,
+        data,
+        size,
+        kTestingPageSize,
+        0 /* flags */,
+        "" /* path */,
+        false /* readonly */,
+        false /* initFromRamFile */ };
+}
+
 void saveRamSingleBlock(const RamSaver::Flags flags,
                         const RamBlock& block,
                         android::base::StringView filename) {

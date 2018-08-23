@@ -88,6 +88,7 @@ CLANG_COMPILER_FLAGS= \
                       -D__STDC_CONSTANT_MACROS \
                       -D_LIBCPP_VERSION=__GLIBCPP__ \
                       -Wno-mismatched-tags \
+                      -Wno-\#warnings \
                       -Wno-unused-variable \
                       -Wno-deprecated-declarations \
                       -Wno-c++14-extensions \
@@ -208,7 +209,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
   # we need Win32 features that are available since Windows 7 (NT 6.1)
   BUILD_TARGET_CFLAGS += -DWINVER=0x601 -D_WIN32_WINNT=0x601 -mcx16
   # LARGEADDRESSAWARE gives more address space to 32-bit process
-  BUILD_TARGET_LDFLAGS32 += -Xlinker --large-address-aware
+  BUILD_TARGET_LDFLAGS32 += -Xlinker --large-address-aware -mcx16
   # Reduce the default stack reserve size on 32-bit Windows as we don't have
   # much space there.
   BUILD_TARGET_LDFLAGS32 += -Xlinker --stack -Xlinker 1048576

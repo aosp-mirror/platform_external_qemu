@@ -31,7 +31,6 @@
 #define  X86_IOMMU_GET_CLASS(obj) \
     OBJECT_GET_CLASS(X86IOMMUClass, obj, TYPE_X86_IOMMU_DEVICE)
 
-#define X86_IOMMU_PCI_DEVFN_MAX           256
 #define X86_IOMMU_SID_INVALID             (0xffff)
 
 typedef struct X86IOMMUState X86IOMMUState;
@@ -74,6 +73,7 @@ struct X86IOMMUState {
     SysBusDevice busdev;
     bool intr_supported;        /* Whether vIOMMU supports IR */
     bool dt_supported;          /* Whether vIOMMU supports DT */
+    bool pt_supported;          /* Whether vIOMMU supports pass-through */
     IommuType type;             /* IOMMU type - AMD/Intel     */
     QLIST_HEAD(, IEC_Notifier) iec_notifiers; /* IEC notify list */
 };

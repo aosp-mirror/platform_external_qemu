@@ -75,10 +75,22 @@ void androidSnapshot_list(void* opaque,
 // Notify snapshot interface that we are using file-backed RAM.
 void androidSnapshot_setRamFile(const char* path, int shared);
 
+// Marks the current RAM file as dirty; i.e.,
+// any failure to save completely will cause deletion next time
+// androidSnapshot_prepareAutosave is called.
+// |isDirty| determines whether the RAM file is set to dirty.
+void androidSnapshot_setRamFileDirty(const char* name, bool isDirty);
+bool androidSnapshot_isRamFileDirty(const char* name);
+
 // Retrieves path to potential RAM map of snapshot.
 // Creates the directory if needed.
 // Resulting pointer must be freed.
-const char* androidSnapshot_getRamFilePath(const char* name);
+// If there is insufficient disk space, returns NULL.
+// If the RAM size is now configured differently,
+// deletes the RAM file.
+// If the RAM file is still marked dirty,
+// deletes the entire snapshot.
+const char* androidSnapshot_prepareAutosave(int memSizeMb, const char* name);
 
 typedef enum {
     SNAPSHOT_RAM_FILE_NONE,

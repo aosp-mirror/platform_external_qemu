@@ -105,7 +105,7 @@ static void generic_loader_realize(DeviceState *dev, Error **errp)
             error_setg(errp, "data can not be specified when setting a "
                        "program counter");
             return;
-        } else if (!s->cpu_num) {
+        } else if (s->cpu_num == CPU_NONE) {
             error_setg(errp, "cpu_num must be specified when setting a "
                        "program counter");
             return;
@@ -137,20 +137,21 @@ static void generic_loader_realize(DeviceState *dev, Error **errp)
 #endif
 
     if (s->file) {
+        AddressSpace *as = s->cpu ? s->cpu->as :  NULL;
+
         if (!s->force_raw) {
             size = load_elf_as(s->file, NULL, NULL, &entry, NULL, NULL,
-                               big_endian, 0, 0, 0, s->cpu->as);
+                               big_endian, 0, 0, 0, as);
 
             if (size < 0) {
                 size = load_uimage_as(s->file, &entry, NULL, NULL, NULL, NULL,
-                                      s->cpu->as);
+                                      as);
             }
         }
 
         if (size < 0 || s->force_raw) {
             /* Default to the maximum size being the machine's ram size */
-            size = load_image_targphys_as(s->file, s->addr, ram_size,
-                                          s->cpu->as);
+            size = load_image_targphys_as(s->file, s->addr, ram_size, as);
         } else {
             s->addr = entry;
         }

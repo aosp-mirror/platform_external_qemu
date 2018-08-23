@@ -52,18 +52,67 @@ static void xtensa_core_class_init(ObjectClass *oc, void *data)
     cc->gdb_num_core_regs = config->gdb_regmap.num_regs;
 }
 
+static void init_libisa(XtensaConfig *config)
+{
+    unsigned i, j;
+    unsigned opcodes;
+
+    config->isa = xtensa_isa_init(config->isa_internal, NULL, NULL);
+    assert(xtensa_isa_maxlength(config->isa) <= MAX_INSN_LENGTH);
+    opcodes = xtensa_isa_num_opcodes(config->isa);
+    config->opcode_ops = g_new(XtensaOpcodeOps *, opcodes);
+
+    for (i = 0; i < opcodes; ++i) {
+        const char *opc_name = xtensa_opcode_name(config->isa, i);
+        XtensaOpcodeOps *ops = NULL;
+
+        assert(xtensa_opcode_num_operands(config->isa, i) <= MAX_OPCODE_ARGS);
+        if (!config->opcode_translators) {
+            ops = xtensa_find_opcode_ops(&xtensa_core_opcodes, opc_name);
+        } else {
+            for (j = 0; !ops && config->opcode_translators[j]; ++j) {
+                ops = xtensa_find_opcode_ops(config->opcode_translators[j],
+                                             opc_name);
+            }
+        }
+#ifdef DEBUG
+        if (ops == NULL) {
+            fprintf(stderr,
+                    "opcode translator not found for %s's opcode '%s'\n",
+                    config->name, opc_name);
+        }
+#endif
+        config->opcode_ops[i] = ops;
+    }
+}
+
 void xtensa_finalize_config(XtensaConfig *config)
 {
-    unsigned i, n = 0;
-
-    if (config->gdb_regmap.num_regs) {
-        return;
+    if (config->isa_internal) {
+        init_libisa(config);
     }
 
-    for (i = 0; config->gdb_regmap.reg[i].targno >= 0; ++i) {
-        n += (config->gdb_regmap.reg[i].type != 6);
+    if (config->gdb_regmap.num_regs == 0 ||
+        config->gdb_regmap.num_core_regs == 0) {
+        unsigned i;
+        unsigned n_regs = 0;
+        unsigned n_core_regs = 0;
+
+        for (i = 0; config->gdb_regmap.reg[i].targno >= 0; ++i) {
+            if (config->gdb_regmap.reg[i].type != 6) {
+                ++n_regs;
+                if ((config->gdb_regmap.reg[i].flags & 0x1) == 0) {
+                    ++n_core_regs;
+                }
+            }
+        }
+        if (config->gdb_regmap.num_regs == 0) {
+            config->gdb_regmap.num_regs = n_regs;
+        }
+        if (config->gdb_regmap.num_core_regs == 0) {
+            config->gdb_regmap.num_core_regs = n_core_regs;
+        }
     }
-    config->gdb_regmap.num_regs = n;
 }
 
 void xtensa_register_core(XtensaConfigList *node)
@@ -76,7 +125,7 @@ void xtensa_register_core(XtensaConfigList *node)
 
     node->next = xtensa_cores;
     xtensa_cores = node;
-    type.name = g_strdup_printf("%s-" TYPE_XTENSA_CPU, node->config->name);
+    type.name = g_strdup_printf(XTENSA_CPU_TYPE_NAME("%s"), node->config->name);
     type_register(&type);
     g_free((gpointer)type.name);
 }
@@ -113,28 +162,6 @@ void xtensa_breakpoint_handler(CPUState *cs)
     }
 }
 
-XtensaCPU *cpu_xtensa_init(const char *cpu_model)
-{
-    ObjectClass *oc;
-    XtensaCPU *cpu;
-    CPUXtensaState *env;
-
-    oc = cpu_class_by_name(TYPE_XTENSA_CPU, cpu_model);
-    if (oc == NULL) {
-        return NULL;
-    }
-
-    cpu = XTENSA_CPU(object_new(object_class_get_name(oc)));
-    env = &cpu->env;
-
-    xtensa_irq_init(env);
-
-    object_property_set_bool(OBJECT(cpu), true, "realized", NULL);
-
-    return cpu;
-}
-
-
 void xtensa_cpu_list(FILE *f, fprintf_function cpu_fprintf)
 {
     XtensaConfigList *core = xtensa_cores;
@@ -146,6 +173,7 @@ void xtensa_cpu_list(FILE *f, fprintf_function cpu_fprintf)
 
 hwaddr xtensa_cpu_get_phys_page_debug(CPUState *cs, vaddr addr)
 {
+#ifndef CONFIG_USER_ONLY
     XtensaCPU *cpu = XTENSA_CPU(cs);
     uint32_t paddr;
     uint32_t page_size;
@@ -160,7 +188,12 @@ hwaddr xtensa_cpu_get_phys_page_debug(CPUState *cs, vaddr addr)
         return paddr;
     }
     return ~0;
+#else
+    return addr;
+#endif
 }
+
+#ifndef CONFIG_USER_ONLY
 
 static uint32_t relocated_vector(CPUXtensaState *env, uint32_t vector)
 {
@@ -271,6 +304,11 @@ void xtensa_cpu_do_interrupt(CPUState *cs)
     }
     check_interrupts(env);
 }
+#else
+void xtensa_cpu_do_interrupt(CPUState *cs)
+{
+}
+#endif
 
 bool xtensa_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
 {
@@ -281,6 +319,25 @@ bool xtensa_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
     }
     return false;
 }
+
+#ifdef CONFIG_USER_ONLY
+
+int xtensa_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int size, int rw,
+                                int mmu_idx)
+{
+    XtensaCPU *cpu = XTENSA_CPU(cs);
+    CPUXtensaState *env = &cpu->env;
+
+    qemu_log_mask(CPU_LOG_INT,
+                  "%s: rw = %d, address = 0x%08" VADDR_PRIx ", size = %d\n",
+                  __func__, rw, address, size);
+    env->sregs[EXCVADDR] = address;
+    env->sregs[EXCCAUSE] = rw ? STORE_PROHIBITED_CAUSE : LOAD_PROHIBITED_CAUSE;
+    cs->exception_index = EXC_USER;
+    return 1;
+}
+
+#else
 
 static void reset_tlb_mmu_all_ways(CPUXtensaState *env,
         const xtensa_tlb *tlb, xtensa_tlb_entry entry[][MAX_TLB_WAY_SIZE])
@@ -742,3 +799,4 @@ void xtensa_runstall(CPUXtensaState *env, bool runstall)
         cpu_reset_interrupt(cpu, CPU_INTERRUPT_HALT);
     }
 }
+#endif

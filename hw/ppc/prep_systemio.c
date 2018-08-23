@@ -28,7 +28,7 @@
 #include "qemu/error-report.h" /* for error_report() */
 #include "sysemu/sysemu.h" /* for vm_stop() */
 #include "cpu.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 
 #define TYPE_PREP_SYSTEMIO "prep-systemio"
 #define PREP_SYSTEMIO(obj) \

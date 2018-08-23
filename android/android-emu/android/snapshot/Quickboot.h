@@ -39,7 +39,8 @@ public:
     void invalidate(base::StringView name);
 
 private:
-    void decideFailureReport(const base::Optional<FailureReason>& failureReason);
+    void decideFailureReport(base::StringView name,
+                             const base::Optional<FailureReason>& failureReason);
     void reportSuccessfulLoad(base::StringView name,
                               base::System::WallDuration startTimeMs);
     void reportSuccessfulSave(base::StringView name,

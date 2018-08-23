@@ -16,7 +16,7 @@
 #include "qemu/bitmap.h"
 #include "exec/address-spaces.h"
 #include "qemu/error-report.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 #include <libfdt.h>
 
 #define OV_MAXBYTES 256 /* not including length byte */

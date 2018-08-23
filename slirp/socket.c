@@ -61,33 +61,41 @@ socreate(Slirp *slirp)
 }
 
 /*
+ * Remove references to so from the given message queue.
+ */
+static void
+soqfree(struct socket *so, struct quehead *qh)
+{
+    struct mbuf *ifq;
+
+    for (ifq = (struct mbuf *) qh->qh_link;
+             (struct quehead *) ifq != qh;
+             ifq = ifq->ifq_next) {
+        if (ifq->ifq_so == so) {
+            struct mbuf *ifm;
+            ifq->ifq_so = NULL;
+            for (ifm = ifq->ifs_next; ifm != ifq; ifm = ifm->ifs_next) {
+                ifm->ifq_so = NULL;
+            }
+        }
+    }
+}
+
+/*
  * remque and free a socket, clobber cache
  */
 void
 sofree(struct socket *so)
 {
   Slirp *slirp = so->slirp;
-  struct mbuf *ifm;
 
-  for (ifm = (struct mbuf *) slirp->if_fastq.qh_link;
-       (struct quehead *) ifm != &slirp->if_fastq;
-       ifm = ifm->ifq_next) {
-    if (ifm->ifq_so == so) {
-      ifm->ifq_so = NULL;
-    }
-  }
-
-  for (ifm = (struct mbuf *) slirp->if_batchq.qh_link;
-       (struct quehead *) ifm != &slirp->if_batchq;
-       ifm = ifm->ifq_next) {
-    if (ifm->ifq_so == so) {
-      ifm->ifq_so = NULL;
-    }
-  }
+  soqfree(so, &slirp->if_fastq);
+  soqfree(so, &slirp->if_batchq);
 
   if (so->so_state) {
 	slirp_proxy->remove(so);
   }
+
   if (so->so_emu==EMU_RSH && so->extra) {
 	sofree(so->extra);
 	so->extra=NULL;
@@ -104,6 +112,9 @@ sofree(struct socket *so)
   if(so->so_next && so->so_prev)
     remque(so);  /* crashes if so is not in a queue */
 
+  if (so->so_tcpcb) {
+      free(so->so_tcpcb);
+  }
   free(so);
 }
 
@@ -346,33 +357,40 @@ sosendoob(struct socket *so)
 	if (sb->sb_rptr < sb->sb_wptr) {
 		/* We can send it directly */
 		n = slirp_send(so, sb->sb_rptr, so->so_urgc, (MSG_OOB)); /* |MSG_DONTWAIT)); */
-		so->so_urgc -= n;
-
-		DEBUG_MISC((dfd, " --- sent %d bytes urgent data, %d urgent bytes left\n", n, so->so_urgc));
 	} else {
 		/*
 		 * Since there's no sendv or sendtov like writev,
 		 * we must copy all data to a linear buffer then
 		 * send it all
 		 */
+		uint32_t urgc = so->so_urgc;
 		len = (sb->sb_data + sb->sb_datalen) - sb->sb_rptr;
-		if (len > so->so_urgc) len = so->so_urgc;
+		if (len > urgc) {
+			len = urgc;
+		}
 		memcpy(buff, sb->sb_rptr, len);
-		so->so_urgc -= len;
-		if (so->so_urgc) {
+		urgc -= len;
+		if (urgc) {
 			n = sb->sb_wptr - sb->sb_data;
-			if (n > so->so_urgc) n = so->so_urgc;
+			if (n > urgc) {
+				n = urgc;
+			}
 			memcpy((buff + len), sb->sb_data, n);
-			so->so_urgc -= n;
 			len += n;
 		}
 		n = slirp_send(so, buff, len, (MSG_OOB)); /* |MSG_DONTWAIT)); */
-#ifdef DEBUG
-		if (n != len)
-		   DEBUG_ERROR((dfd, "Didn't send all data urgently XXXXX\n"));
-#endif
-		DEBUG_MISC((dfd, " ---2 sent %d bytes urgent data, %d urgent bytes left\n", n, so->so_urgc));
 	}
+
+#ifdef DEBUG
+	if (n != len) {
+		DEBUG_ERROR((dfd, "Didn't send all data urgently XXXXX\n"));
+	}
+#endif
+	if (n < 0) {
+		return n;
+	}
+	so->so_urgc -= n;
+	DEBUG_MISC((dfd, " ---2 sent %d bytes urgent data, %d urgent bytes left\n", n, so->so_urgc));
 
 	sb->sb_cc -= n;
 	sb->sb_rptr += n;
@@ -398,7 +416,15 @@ sowrite(struct socket *so)
 	DEBUG_ARG("so = %p", so);
 
 	if (so->so_urgc) {
-		sosendoob(so);
+		uint32_t expected = so->so_urgc;
+		if (sosendoob(so) < expected) {
+			/* Treat a short write as a fatal error too,
+			 * rather than continuing on and sending the urgent
+			 * data as if it were non-urgent and leaving the
+			 * so_urgc count wrong.
+			 */
+			goto err_disconnected;
+		}
 		if (sb->sb_cc == 0)
 			return 0;
 	}
@@ -442,11 +468,7 @@ sowrite(struct socket *so)
 		return 0;
 
 	if (nn <= 0) {
-		DEBUG_MISC((dfd, " --- sowrite disconnected, so->so_state = %x, errno = %d\n",
-			so->so_state, errno));
-		sofcantsendmore(so);
-		tcp_sockclosed(sototcpcb(so));
-		return -1;
+		goto err_disconnected;
 	}
 
 #ifndef HAVE_READV
@@ -473,6 +495,13 @@ sowrite(struct socket *so)
 		sofcantsendmore(so);
 
 	return nn;
+
+err_disconnected:
+	DEBUG_MISC((dfd, " --- sowrite disconnected, so->so_state = %x, errno = %d\n",
+		    so->so_state, errno));
+	sofcantsendmore(so);
+	tcp_sockclosed(sototcpcb(so));
+	return -1;
 }
 
 /*

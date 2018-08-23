@@ -25,7 +25,7 @@
 #include "hw/i386/ioapic.h"
 #include "hw/pci/msi.h"
 #include "qemu/host-utils.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
 #include "hw/i386/pc.h"
 #include "hw/i386/apic-msidef.h"
 #include "qapi/error.h"

@@ -28,6 +28,7 @@
 #include "qemu/thread_local.h"
 #include "qemu/queue.h"
 #include "qemu/atomic.h"
+#include "qemu/sys_membarrier.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -80,7 +81,10 @@ static inline void rcu_read_lock(void)
     }
 
     ctr = atomic_read(&rcu_gp_ctr);
-    atomic_xchg(&p_rcu_reader->ctr, ctr);
+    atomic_set(&p_rcu_reader->ctr, ctr);
+
+    /* Write p_rcu_reader->ctr before reading RCU-protected pointers.  */
+    smp_mb_placeholder();
 }
 
 static inline void rcu_read_unlock(void)
@@ -92,7 +96,15 @@ static inline void rcu_read_unlock(void)
         return;
     }
 
-    atomic_xchg(&p_rcu_reader->ctr, 0);
+    /* Ensure that the critical section is seen to precede the
+     * store to p_rcu_reader->ctr.  Together with the following
+     * smp_mb_placeholder(), this ensures writes to p_rcu_reader->ctr
+     * are sequentially consistent.
+     */
+    atomic_store_release(&p_rcu_reader->ctr, 0);
+
+    /* Write p_rcu_reader->ctr before reading p_rcu_reader->waiting.  */
+    smp_mb_placeholder();
     if (unlikely(atomic_read(&p_rcu_reader->waiting))) {
         atomic_set(&p_rcu_reader->waiting, false);
         qemu_event_set(&rcu_gp_event);
@@ -106,7 +118,12 @@ extern void synchronize_rcu(void);
  */
 extern void rcu_register_thread(void);
 extern void rcu_unregister_thread(void);
-extern void rcu_after_fork(void);
+
+/*
+ * Support for fork().  fork() support is enabled at startup.
+ */
+extern void rcu_enable_atfork(void);
+extern void rcu_disable_atfork(void);
 
 struct rcu_head;
 typedef void RCUCBFunc(struct rcu_head *head);

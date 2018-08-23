@@ -15,9 +15,7 @@
 #include "qemu-common.h"
 #include "qapi/error.h"
 #include "qapi/string-input-visitor.h"
-#include "test-qapi-types.h"
 #include "test-qapi-visit.h"
-#include "qapi/qmp/types.h"
 
 typedef struct TestInputVisitorData {
     Visitor *v;
@@ -279,10 +277,10 @@ static void test_visitor_in_enum(TestInputVisitorData *data,
     Visitor *v;
     EnumOne i;
 
-    for (i = 0; EnumOne_lookup[i]; i++) {
+    for (i = 0; i < ENUM_ONE__MAX; i++) {
         EnumOne res = -1;
 
-        v = visitor_input_test_init(data, EnumOne_lookup[i]);
+        v = visitor_input_test_init(data, EnumOne_str(i));
 
         visit_type_EnumOne(v, NULL, &res, &err);
         g_assert(!err);

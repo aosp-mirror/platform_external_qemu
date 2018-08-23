@@ -15,9 +15,10 @@
 #include "hw/sysbus.h"
 #include "ui/console.h"
 #include "ui/pixel_ops.h"
-#include "hw/display/trace.h"
+#include "trace.h"
 #include "exec/address-spaces.h"
 #include "hw/display/goldfish_fb.h"
+#include "migration/register.h"
 
 #include <inttypes.h>
 
@@ -500,6 +501,12 @@ static const GraphicHwOps goldfish_fb_ops = {
     .gfx_update = goldfish_fb_update_display,
 };
 
+static SaveVMHandlers goldfish_vmhandlers= {
+    .save_state = goldfish_fb_save,
+    .load_state = goldfish_fb_load
+};
+
+
 static int goldfish_fb_init(SysBusDevice *sbdev)
 {
     DeviceState *dev = DEVICE(sbdev);
@@ -519,8 +526,8 @@ static int goldfish_fb_init(SysBusDevice *sbdev)
             "goldfish_fb", 0x100);
     sysbus_init_mmio(sbdev, &s->iomem);
 
-    register_savevm(dev, "goldfish_fb", 0, GOLDFISH_FB_SAVE_VERSION,
-                     goldfish_fb_save, goldfish_fb_load, s);
+    register_savevm_live(dev, "goldfish_fb", 0, GOLDFISH_FB_SAVE_VERSION,
+                     &goldfish_vmhandlers, s);
 
     return 0;
 }

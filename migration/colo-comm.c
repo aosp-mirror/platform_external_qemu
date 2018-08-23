@@ -12,8 +12,10 @@
  */
 
 #include "qemu/osdep.h"
-#include <migration/colo.h>
-#include "migration/trace.h"
+#include "migration.h"
+#include "migration/colo.h"
+#include "migration/vmstate.h"
+#include "trace.h"
 
 typedef struct {
      bool colo_requested;
@@ -32,11 +34,13 @@ COLOMode get_colo_mode(void)
     }
 }
 
-static void colo_info_pre_save(void *opaque)
+static int colo_info_pre_save(void *opaque)
 {
     COLOInfo *s = opaque;
 
     s->colo_requested = migrate_colo_enabled();
+
+    return 0;
 }
 
 static bool colo_info_need(void *opaque)

@@ -2,6 +2,7 @@
 #define TARGET_I386 1
 #define TARGET_NAME "i386"
 #define TARGET_I386 1
+#define CONFIG_TCG 1
 
 #ifdef __linux__
 

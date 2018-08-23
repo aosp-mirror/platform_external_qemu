@@ -21,13 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
 #include "cpu.h"
 #include "monitor/monitor.h"
 #include "monitor/hmp-target.h"
+#include "qapi/qmp/qdict.h"
 #include "hw/i386/pc.h"
 #include "sysemu/kvm.h"
+#include "sysemu/sev.h"
 #include "hmp.h"
+#include "qapi/error.h"
+#include "sev_i386.h"
+#include "qapi/qapi-commands-misc.h"
 
 
 static void print_pte(Monitor *mon, CPUArchState *env, hwaddr addr,
@@ -447,7 +453,7 @@ static void mem_info_la57(Monitor *mon, CPUArchState *env)
     start = -1;
     for (l0 = 0; l0 < 512; l0++) {
         cpu_physical_memory_read(pml5_addr + l0 * 8, &pml5e, 8);
-        pml4e = le64_to_cpu(pml5e);
+        pml5e = le64_to_cpu(pml5e);
         end = l0 << 48;
         if (!(pml5e & PG_PRESENT_MASK)) {
             prot = 0;
@@ -480,7 +486,7 @@ static void mem_info_la57(Monitor *mon, CPUArchState *env)
                 if (pdpe & PG_PSE_MASK) {
                     prot = pdpe & (PG_USER_MASK | PG_RW_MASK |
                             PG_PRESENT_MASK);
-                    prot &= pml4e;
+                    prot &= pml5e & pml4e;
                     mem_print(mon, &start, &last_prot, end, prot);
                     continue;
                 }
@@ -499,7 +505,7 @@ static void mem_info_la57(Monitor *mon, CPUArchState *env)
                     if (pde & PG_PSE_MASK) {
                         prot = pde & (PG_USER_MASK | PG_RW_MASK |
                                 PG_PRESENT_MASK);
-                        prot &= pml4e & pdpe;
+                        prot &= pml5e & pml4e & pdpe;
                         mem_print(mon, &start, &last_prot, end, prot);
                         continue;
                     }
@@ -513,7 +519,7 @@ static void mem_info_la57(Monitor *mon, CPUArchState *env)
                         if (pte & PG_PRESENT_MASK) {
                             prot = pte & (PG_USER_MASK | PG_RW_MASK |
                                     PG_PRESENT_MASK);
-                            prot &= pml4e & pdpe & pde;
+                            prot &= pml5e & pml4e & pdpe & pde;
                         } else {
                             prot = 0;
                         }
@@ -632,7 +638,15 @@ const MonitorDef *target_monitor_defs(void)
 
 void hmp_info_local_apic(Monitor *mon, const QDict *qdict)
 {
-    CPUState *cs = mon_get_cpu();
+    CPUState *cs;
+
+    if (qdict_haskey(qdict, "apic-id")) {
+        int id = qdict_get_try_int(qdict, "apic-id", 0);
+        cs = cpu_by_arch_id(id);
+    } else {
+        cs = mon_get_cpu();
+    }
+
 
     if (!cs) {
         monitor_printf(mon, "No CPU available\n");
@@ -650,4 +664,68 @@ void hmp_info_io_apic(Monitor *mon, const QDict *qdict)
     } else {
         ioapic_dump_state(mon, qdict);
     }
+}
+
+SevInfo *qmp_query_sev(Error **errp)
+{
+    SevInfo *info;
+
+    info = sev_get_info();
+    if (!info) {
+        error_setg(errp, "SEV feature is not available");
+        return NULL;
+    }
+
+    return info;
+}
+
+void hmp_info_sev(Monitor *mon, const QDict *qdict)
+{
+    SevInfo *info = sev_get_info();
+
+    if (info && info->enabled) {
+        monitor_printf(mon, "handle: %d\n", info->handle);
+        monitor_printf(mon, "state: %s\n", SevState_str(info->state));
+        monitor_printf(mon, "build: %d\n", info->build_id);
+        monitor_printf(mon, "api version: %d.%d\n",
+                       info->api_major, info->api_minor);
+        monitor_printf(mon, "debug: %s\n",
+                       info->policy & SEV_POLICY_NODBG ? "off" : "on");
+        monitor_printf(mon, "key-sharing: %s\n",
+                       info->policy & SEV_POLICY_NOKS ? "off" : "on");
+    } else {
+        monitor_printf(mon, "SEV is not enabled\n");
+    }
+
+    qapi_free_SevInfo(info);
+}
+
+SevLaunchMeasureInfo *qmp_query_sev_launch_measure(Error **errp)
+{
+    char *data;
+    SevLaunchMeasureInfo *info;
+
+    data = sev_get_launch_measurement();
+    if (!data) {
+        error_setg(errp, "Measurement is not available");
+        return NULL;
+    }
+
+    info = g_malloc0(sizeof(*info));
+    info->data = data;
+
+    return info;
+}
+
+SevCapability *qmp_query_sev_capabilities(Error **errp)
+{
+    SevCapability *data;
+
+    data = sev_get_capabilities();
+    if (!data) {
+        error_setg(errp, "SEV feature is not available");
+        return NULL;
+    }
+
+    return data;
 }

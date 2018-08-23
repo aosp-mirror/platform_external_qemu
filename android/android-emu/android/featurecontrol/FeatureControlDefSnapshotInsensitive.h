@@ -36,4 +36,6 @@ FEATURE_CONTROL_ITEM(LocationUiV2)
 FEATURE_CONTROL_ITEM(ScreenRecording)
 FEATURE_CONTROL_ITEM(VirtualScene)
 FEATURE_CONTROL_ITEM(GenericSnapshotsUI)
+// File-backed Quickboot
+FEATURE_CONTROL_ITEM(QuickbootFileBacked)
 // No guest feature flags seem safe to snapshot.

@@ -408,27 +408,25 @@ static void lsi_reg_writeb(LSIState *s, int offset, uint8_t val);
 static void lsi_execute_script(LSIState *s);
 static void lsi_reselect(LSIState *s, lsi_request *p);
 
-static inline int lsi_mem_read(LSIState *s, dma_addr_t addr,
+static inline void lsi_mem_read(LSIState *s, dma_addr_t addr,
                                void *buf, dma_addr_t len)
 {
     if (s->dmode & LSI_DMODE_SIOM) {
         address_space_read(&s->pci_io_as, addr, MEMTXATTRS_UNSPECIFIED,
                            buf, len);
-        return 0;
     } else {
-        return pci_dma_read(PCI_DEVICE(s), addr, buf, len);
+        pci_dma_read(PCI_DEVICE(s), addr, buf, len);
     }
 }
 
-static inline int lsi_mem_write(LSIState *s, dma_addr_t addr,
+static inline void lsi_mem_write(LSIState *s, dma_addr_t addr,
                                 const void *buf, dma_addr_t len)
 {
     if (s->dmode & LSI_DMODE_DIOM) {
         address_space_write(&s->pci_io_as, addr, MEMTXATTRS_UNSPECIFIED,
                             buf, len);
-        return 0;
     } else {
-        return pci_dma_write(PCI_DEVICE(s), addr, buf, len);
+        pci_dma_write(PCI_DEVICE(s), addr, buf, len);
     }
 }
 
@@ -2086,7 +2084,7 @@ static void lsi_scsi_reset(DeviceState *dev)
     lsi_soft_reset(s);
 }
 
-static void lsi_pre_save(void *opaque)
+static int lsi_pre_save(void *opaque)
 {
     LSIState *s = opaque;
 
@@ -2095,6 +2093,8 @@ static void lsi_pre_save(void *opaque)
         assert(s->current->dma_len == 0);
     }
     assert(QTAILQ_EMPTY(&s->queue));
+
+    return 0;
 }
 
 static const VMStateDescription vmstate_lsi_scsi = {
@@ -2247,6 +2247,10 @@ static const TypeInfo lsi_info = {
     .parent        = TYPE_PCI_DEVICE,
     .instance_size = sizeof(LSIState),
     .class_init    = lsi_class_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 static void lsi53c810_class_init(ObjectClass *klass, void *data)
@@ -2274,5 +2278,12 @@ void lsi53c895a_create(PCIBus *bus)
 {
     LSIState *s = LSI53C895A(pci_create_simple(bus, -1, "lsi53c895a"));
 
-    scsi_bus_legacy_handle_cmdline(&s->bus, false);
+    scsi_bus_legacy_handle_cmdline(&s->bus);
+}
+
+void lsi53c810_create(PCIBus *bus, int devfn)
+{
+    LSIState *s = LSI53C895A(pci_create_simple(bus, devfn, "lsi53c810"));
+
+    scsi_bus_legacy_handle_cmdline(&s->bus);
 }

@@ -34,15 +34,7 @@ do { printf("scsi-generic: " fmt , ## __VA_ARGS__); } while (0)
 do { fprintf(stderr, "scsi-generic: " fmt , ## __VA_ARGS__); } while (0)
 
 #include <scsi/sg.h>
-#include "block/scsi.h"
-
-#define SG_ERR_DRIVER_TIMEOUT  0x06
-#define SG_ERR_DRIVER_SENSE    0x08
-
-#define SG_ERR_DID_OK          0x00
-#define SG_ERR_DID_NO_CONNECT  0x01
-#define SG_ERR_DID_BUS_BUSY    0x02
-#define SG_ERR_DID_TIME_OUT    0x03
+#include "scsi/constants.h"
 
 #ifndef MAX_UINT
 #define MAX_UINT ((unsigned int)-1)
@@ -89,6 +81,7 @@ static void scsi_free_request(SCSIRequest *req)
 static void scsi_command_complete_noio(SCSIGenericReq *r, int ret)
 {
     int status;
+    SCSISense sense;
 
     assert(r->req.aiocb == NULL);
 
@@ -96,42 +89,15 @@ static void scsi_command_complete_noio(SCSIGenericReq *r, int ret)
         scsi_req_cancel_complete(&r->req);
         goto done;
     }
-    if (r->io_header.driver_status & SG_ERR_DRIVER_SENSE) {
-        r->req.sense_len = r->io_header.sb_len_wr;
+    status = sg_io_sense_from_errno(-ret, &r->io_header, &sense);
+    if (status == CHECK_CONDITION) {
+        if (r->io_header.driver_status & SG_ERR_DRIVER_SENSE) {
+            r->req.sense_len = r->io_header.sb_len_wr;
+        } else {
+            scsi_req_build_sense(&r->req, sense);
+        }
     }
 
-    if (ret != 0) {
-        switch (ret) {
-        case -EDOM:
-            status = TASK_SET_FULL;
-            break;
-        case -ENOMEM:
-            status = CHECK_CONDITION;
-            scsi_req_build_sense(&r->req, SENSE_CODE(TARGET_FAILURE));
-            break;
-        default:
-            status = CHECK_CONDITION;
-            scsi_req_build_sense(&r->req, SENSE_CODE(IO_ERROR));
-            break;
-        }
-    } else {
-        if (r->io_header.host_status == SG_ERR_DID_NO_CONNECT ||
-            r->io_header.host_status == SG_ERR_DID_BUS_BUSY ||
-            r->io_header.host_status == SG_ERR_DID_TIME_OUT ||
-            (r->io_header.driver_status & SG_ERR_DRIVER_TIMEOUT)) {
-            status = BUSY;
-            BADF("Driver Timeout\n");
-        } else if (r->io_header.host_status) {
-            status = CHECK_CONDITION;
-            scsi_req_build_sense(&r->req, SENSE_CODE(I_T_NEXUS_LOSS));
-        } else if (r->io_header.status) {
-            status = r->io_header.status;
-        } else if (r->io_header.driver_status & SG_ERR_DRIVER_SENSE) {
-            status = CHECK_CONDITION;
-        } else {
-            status = GOOD;
-        }
-    }
     DPRINTF("Command complete 0x%p tag=0x%x status=%d\n",
             r, r->req.tag, status);
 
@@ -228,17 +194,40 @@ static void scsi_read_complete(void * opaque, int ret)
             r->buf[3] |= 0x80;
         }
     }
-    if (s->type == TYPE_DISK &&
-        r->req.cmd.buf[0] == INQUIRY &&
-        r->req.cmd.buf[2] == 0xb0) {
-        uint32_t max_transfer =
-            blk_get_max_transfer(s->conf.blk) / s->blocksize;
+    if (r->req.cmd.buf[0] == INQUIRY) {
+        /*
+         *  EVPD set to zero returns the standard INQUIRY data.
+         *
+         *  Check if scsi_version is unset (-1) to avoid re-defining it
+         *  each time an INQUIRY with standard data is received.
+         *  scsi_version is initialized with -1 in scsi_generic_reset
+         *  and scsi_disk_reset, making sure that we'll set the
+         *  scsi_version after a reset. If the version field of the
+         *  INQUIRY response somehow changes after a guest reboot,
+         *  we'll be able to keep track of it.
+         *
+         *  On SCSI-2 and older, first 3 bits of byte 2 is the
+         *  ANSI-approved version, while on later versions the
+         *  whole byte 2 contains the version. Check if we're dealing
+         *  with a newer version and, in that case, assign the
+         *  whole byte.
+         */
+        if (s->scsi_version == -1 && !(r->req.cmd.buf[1] & 0x01)) {
+            s->scsi_version = r->buf[2] & 0x07;
+            if (s->scsi_version > 2) {
+                s->scsi_version = r->buf[2];
+            }
+        }
+        if (s->type == TYPE_DISK && r->req.cmd.buf[2] == 0xb0) {
+            uint32_t max_transfer =
+                blk_get_max_transfer(s->conf.blk) / s->blocksize;
 
-        assert(max_transfer);
-        stl_be_p(&r->buf[8], max_transfer);
-        /* Also take care of the opt xfer len. */
-        stl_be_p(&r->buf[12],
-                 MIN_NON_ZERO(max_transfer, ldl_be_p(&r->buf[12])));
+            assert(max_transfer);
+            stl_be_p(&r->buf[8], max_transfer);
+            /* Also take care of the opt xfer len. */
+            stl_be_p(&r->buf[12],
+                     MIN_NON_ZERO(max_transfer, ldl_be_p(&r->buf[12])));
+        }
     }
     scsi_req_data(&r->req, len);
     scsi_req_unref(&r->req);
@@ -406,7 +395,7 @@ static int read_naa_id(const uint8_t *p, uint64_t *p_wwn)
         }
         *p_wwn = 0;
         for (i = 8; i < 24; i++) {
-            char c = toupper(p[i]);
+            char c = qemu_toupper(p[i]);
             c -= (c >= '0' && c <= '9' ? '0' : 'A' - 10);
             *p_wwn = (*p_wwn << 4) | c;
         }
@@ -508,6 +497,7 @@ static void scsi_generic_reset(DeviceState *dev)
 {
     SCSIDevice *s = SCSI_DEVICE(dev);
 
+    s->scsi_version = s->default_scsi_version;
     scsi_device_purge_requests(s, SENSE_CODE(RESET));
 }
 
@@ -534,9 +524,10 @@ static void scsi_generic_realize(SCSIDevice *s, Error **errp)
     /* check we are using a driver managing SG_IO (version 3 and after */
     rc = blk_ioctl(s->conf.blk, SG_GET_VERSION_NUM, &sg_version);
     if (rc < 0) {
-        error_setg(errp, "cannot get SG_IO version number: %s.  "
-                         "Is this a SCSI device?",
-                         strerror(-rc));
+        error_setg_errno(errp, -rc, "cannot get SG_IO version number");
+        if (rc != -EPERM) {
+            error_append_hint(errp, "Is this a SCSI device?\n");
+        }
         return;
     }
     if (sg_version < 30000) {
@@ -547,6 +538,11 @@ static void scsi_generic_realize(SCSIDevice *s, Error **errp)
     /* get LUN of the /dev/sg? */
     if (blk_ioctl(s->conf.blk, SG_GET_SCSI_ID, &scsiid)) {
         error_setg(errp, "SG_GET_SCSI_ID ioctl failed");
+        return;
+    }
+    if (!blkconf_apply_backend_options(&s->conf,
+                                       blk_is_read_only(s->conf.blk),
+                                       true, errp)) {
         return;
     }
 
@@ -577,6 +573,8 @@ static void scsi_generic_realize(SCSIDevice *s, Error **errp)
 
     DPRINTF("block size %d\n", s->blocksize);
 
+    /* Only used by scsi-block, but initialize it nevertheless to be clean.  */
+    s->default_scsi_version = -1;
     scsi_generic_read_device_identification(s);
 }
 
@@ -599,6 +597,7 @@ static SCSIRequest *scsi_new_request(SCSIDevice *d, uint32_t tag, uint32_t lun,
 
 static Property scsi_generic_properties[] = {
     DEFINE_PROP_DRIVE("drive", SCSIDevice, conf.blk),
+    DEFINE_PROP_BOOL("share-rw", SCSIDevice, conf.share_rw, false),
     DEFINE_PROP_END_OF_LIST(),
 };
 

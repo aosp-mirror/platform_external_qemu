@@ -15,7 +15,7 @@
 #include "hw/sysbus.h"
 #include "qemu/timer.h"
 #include "qemu/log.h"
-#include "hw/timer/trace.h"
+#include "trace.h"
 
 /* qemu timers run at 1GHz.   We want something closer to 1MHz.  */
 #define SYSTICK_SCALE 1000ULL

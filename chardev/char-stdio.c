@@ -21,18 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "qemu/osdep.h"
+#include "qemu/option.h"
 #include "qemu/sockets.h"
 #include "qapi/error.h"
-#include "qemu-common.h"
-#include "sysemu/char.h"
+#include "chardev/char.h"
 
 #ifdef _WIN32
-#include "char-win.h"
-#include "char-win-stdio.h"
+#include "chardev/char-win.h"
+#include "chardev/char-win-stdio.h"
 #else
 #include <termios.h>
-#include "char-fd.h"
+#include "chardev/char-fd.h"
 #endif
 
 #ifndef _WIN32

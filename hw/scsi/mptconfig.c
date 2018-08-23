@@ -22,7 +22,7 @@
 
 #include "mptsas.h"
 #include "mpi.h"
-#include "hw/scsi/trace.h"
+#include "trace.h"
 
 /* Generic functions for marshaling and unmarshaling.  */
 

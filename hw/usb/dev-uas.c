@@ -13,13 +13,13 @@
 #include "qemu-common.h"
 #include "qemu/option.h"
 #include "qemu/config-file.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 #include "qemu/error-report.h"
 
 #include "hw/usb.h"
 #include "hw/usb/desc.h"
 #include "hw/scsi/scsi.h"
-#include "block/scsi.h"
+#include "scsi/constants.h"
 
 /* --------------------------------------------------------------------- */
 

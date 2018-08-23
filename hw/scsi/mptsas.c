@@ -30,8 +30,8 @@
 #include "hw/pci/msi.h"
 #include "qemu/iov.h"
 #include "hw/scsi/scsi.h"
-#include "block/scsi.h"
-#include "hw/scsi/trace.h"
+#include "scsi/constants.h"
+#include "trace.h"
 #include "qapi/error.h"
 #include "mptsas.h"
 #include "mpi.h"
@@ -1235,10 +1235,11 @@ static void *mptsas_load_request(QEMUFile *f, SCSIRequest *sreq)
 
     n = qemu_get_be32(f);
     /* TODO: add a way for SCSIBusInfo's load_request to fail,
-     * and fail migration instead of aborting here.
+     * and fail migration instead of asserting here.
+     * This is just one thing (there are probably more) that must be
+     * fixed before we can allow NDEBUG compilation.
      */
-
-    if (!(n >= 0)) abort();
+    assert(n >= 0);
 
     pci_dma_sglist_init(&req->qsg, pci, n);
     for (i = 0; i < n; i++) {
@@ -1311,7 +1312,7 @@ static void mptsas_scsi_realize(PCIDevice *dev, Error **errp)
     if (!s->sas_addr) {
         s->sas_addr = ((NAA_LOCALLY_ASSIGNED_ID << 24) |
                        IEEE_COMPANY_LOCALLY_ASSIGNED) << 36;
-        s->sas_addr |= (pci_bus_num(dev->bus) << 16);
+        s->sas_addr |= (pci_dev_bus_num(dev) << 16);
         s->sas_addr |= (PCI_SLOT(dev->devfn) << 8);
         s->sas_addr |= PCI_FUNC(dev->devfn);
     }
@@ -1438,6 +1439,10 @@ static const TypeInfo mptsas_info = {
     .parent = TYPE_PCI_DEVICE,
     .instance_size = sizeof(MPTSASState),
     .class_init = mptsas1068_class_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 static void mptsas_register_types(void)

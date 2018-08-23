@@ -16,7 +16,20 @@
 #include "android/snapshot/interface.h"
 
 #include <memory>
+#include <string>
 #include <stdint.h>
+
+struct SnapshotRamBlock {
+    const char* id;
+    int64_t startOffset;
+    uint8_t* hostPtr;
+    int64_t totalSize;
+    int32_t pageSize;
+    uint32_t flags;
+    std::string path;
+    bool readonly;
+    bool needRestoreFromRamFile;
+};
 
 namespace android {
 namespace snapshot {
@@ -28,6 +41,11 @@ class TextureLoader;
 using ITextureSaverPtr = std::shared_ptr<ITextureSaver>;
 using ITextureLoaderPtr = std::shared_ptr<ITextureLoader>;
 using ITextureLoaderWPtr = std::weak_ptr<ITextureLoader>;
+
+// Taken from exec.c, these #defines
+// are for the |flags| field in SnapshotRamBlock.
+#define SNAPSHOT_RAM_MAPPED_SHARED (1 << 1)
+#define SNAPSHOT_RAM_MAPPED (1 << 3)
 
 using RamBlock = ::SnapshotRamBlock;
 
@@ -99,6 +117,8 @@ constexpr uint64_t kDecommitChunkSize = 4096 * 4096; // 16 MB
 constexpr const char* kDefaultBootSnapshot = "default_boot";
 constexpr const char* kRamFileName = "ram.bin";
 constexpr const char* kTexturesFileName = "textures.bin";
+constexpr const char* kMappedRamFileName = "ram.img";
+constexpr const char* kMappedRamFileDirtyName = "ram.img.dirty";
 
 void resetSnapshotLiveness();
 bool isSnapshotAlive();

@@ -18,16 +18,19 @@
  * Contributions after 2012-01-13 are licensed under the terms of the
  * GNU GPL, version 2 or (at your option) any later version.
  */
+
 #include "qemu/osdep.h"
 #include "sysemu/sysemu.h"
 #include "hw/hw.h"
-#include "hw/i386/pc.h"
 #include "hw/acpi/acpi.h"
 #include "hw/nvram/fw_cfg.h"
 #include "qemu/config-file.h"
+#include "qapi/error.h"
 #include "qapi/opts-visitor.h"
-#include "qapi-visit.h"
-#include "qapi-event.h"
+#include "qapi/qapi-events-run-state.h"
+#include "qapi/qapi-visit-misc.h"
+#include "qemu/error-report.h"
+#include "qemu/option.h"
 
 struct acpi_table_header {
     uint16_t _length;         /* our length, not actual part of the hdr */
@@ -183,10 +186,9 @@ static void acpi_table_install(const char unsigned *blob, size_t bloblen,
     }
 
     if (has_header && le32_to_cpu(ext_hdr->length) != acpi_payload_size) {
-        fprintf(stderr,
-                "warning: ACPI table has wrong length, header says "
-                "%" PRIu32 ", actual size %zu bytes\n",
-                le32_to_cpu(ext_hdr->length), acpi_payload_size);
+        warn_report("ACPI table has wrong length, header says "
+                    "%" PRIu32 ", actual size %zu bytes",
+                    le32_to_cpu(ext_hdr->length), acpi_payload_size);
     }
     ext_hdr->length = cpu_to_le32(acpi_payload_size);
 
@@ -221,7 +223,7 @@ static void acpi_table_install(const char unsigned *blob, size_t bloblen,
     }
 
     if (!has_header && changed_fields == 0) {
-        fprintf(stderr, "warning: ACPI table: no headers are specified\n");
+        warn_report("ACPI table: no headers are specified");
     }
 
     /* recalculate checksum */
@@ -562,7 +564,7 @@ static void acpi_pm1_cnt_write(ACPIREGS *ar, uint16_t val)
         switch(sus_typ) {
         case 0: /* soft power off */
             qemu_system_invalidate_exit_snapshot();
-            qemu_system_shutdown_request();
+            qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
             break;
         case 1:
             qemu_system_suspend_request();
@@ -571,7 +573,7 @@ static void acpi_pm1_cnt_write(ACPIREGS *ar, uint16_t val)
             if (sus_typ == ar->pm1.cnt.s4_val) { /* S4 request */
                 qemu_system_invalidate_exit_snapshot();
                 qapi_event_send_suspend_disk(&error_abort);
-                qemu_system_shutdown_request();
+                qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
             }
             break;
         }
