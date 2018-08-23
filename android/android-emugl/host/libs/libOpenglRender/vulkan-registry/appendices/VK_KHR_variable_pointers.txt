@@ -1,0 +1,87 @@
+// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+include::meta/VK_KHR_variable_pointers.txt[]
+
+*Last Modified Date*::
+    2017-09-05
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+  - Requires the
+    https://www.khronos.org/registry/spir-v/extensions/KHR/SPV_KHR_variable_pointers.html[+SPV_KHR_variable_pointers+]
+    SPIR-V extension.
+  - Promoted to Vulkan 1.1 Core
+*Contributors*::
+  - John Kessenich, Google
+  - Neil Henning, Codeplay
+  - David Neto, Google
+  - Daniel Koch, Nvidia
+  - Graeme Leese, Broadcom
+  - Weifeng Zhang, Qualcomm
+  - Stephen Clarke, Imagination Technologies
+  - Jason Ekstrand, Intel
+  - Jesse Hall, Google
+
+The `VK_KHR_variable_pointers` extension allows implementations to indicate
+their level of support for the +SPV_KHR_variable_pointers+ SPIR-V extension.
+The SPIR-V extension allows shader modules to use invocation-private
+pointers into uniform and/or storage buffers, where the pointer values can
+be dynamic and non-uniform.
+
+The +SPV_KHR_variable_pointers+ extension introduces two capabilities.
+The first, code:VariablePointersStorageBuffer, must: be supported by all
+implementations of this extension.
+The second, code:VariablePointers, is optional.
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES_KHR
+
+=== New Structures
+
+  * slink:VkPhysicalDeviceVariablePointerFeaturesKHR
+
+=== New SPIR-V Capabilities
+
+  * <<spirvenv-capabilities-table-variablepointers,VariablePointersStorageBuffer>>
+  * <<spirvenv-capabilities-table-variablepointers,VariablePointers>>
+
+=== Promotion to Vulkan 1.1
+
+All functionality in this extension is included in core Vulkan 1.1, with the
+KHR suffix omitted, however support for the
+<<features-features-variablePointersStorageBuffer,
+pname:variablePointersStorageBuffer>> feature is made optional.
+The original type, enum and command names are still available as aliases of
+the core functionality.
+
+=== Issues
+
+1) Do we need an optional property for the SPIR-V
+code:VariablePointersStorageBuffer capability or should it be mandatory when
+this extension is advertised?
+
+*RESOLVED*: Add it as a distinct feature, but make support mandatory.
+Adding it as a feature makes the extension easier to include in a future
+core API version.
+In the extension, the feature is mandatory, so that presence of the
+extension guarantees some functionality.
+When included in a core API version, the feature would be optional.
+
+2) Can support for these capabilities vary between shader stages?
+
+*RESOLVED*: No, if the capability is supported in any stage it must be
+supported in all stages.
+
+3) Should the capabilities be features or limits?
+
+*RESOLVED*: Features, primarily for consistency with other similar
+extensions.
+
+=== Version History
+
+  * Revision 1, 2017-03-14 (Jesse Hall and John Kessenich)
+    - Internal revisions

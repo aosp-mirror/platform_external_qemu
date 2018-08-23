@@ -1,0 +1,640 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[naming]]
+= API Naming Conventions
+
+Identifiers in the Vulkan API (e.g. types, parameters, constants, etc.) all
+follow a set of naming rules, providing a consistent scheme for developers.
+
+The Vulkan C API uses prefixes as an implicit namespace control mechanism.
+Bindings to other languages can choose not to use these prefixes if the
+language provides an explicit namespace mechanism.
+
+
+== General Naming Rules
+
+Names of identifiers should generally be written with full words, avoiding
+abbreviations, as a concise description of what that identifier is.
+For example, the type of a structure containing information about how to
+create an instance is stext:VkInstanceCreateInfo.
+
+Abbreviations and prefixes are sometimes used in the API when they are in
+common use.
+All abbreviations and prefixes used in the API must be approved by the
+Vulkan working group, and be added to the <<naming-abbreviations,Common
+Abbreviations>> and <<naming-prefixes,Standard Prefixes>> sections,
+respectively.
+
+Whenever an abbreviation exists for a particular word, it should be used in
+place of the full word unless there is good reason not to.
+
+When a number is part of an identifier, it is treated as a word if it is a
+standalone number, such as the extension name token
+ename:VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME for the
++VK_KHR_get_memory_requirements2+ extension.
+For uses where the number is part of a common abbreviation such as etext:2D
+or etext:R8B8`, the entire abbreviation is treated as a word.
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+Unfortunately, there's an internal inconsistency here between extension name
+strings, such as VK_KHR_get_memory_requirements2, and tokens encoding those
+names, such as ename:VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME.
+====
+endif::editing-notes[]
+
+
+[[naming-preprocessor]]
+== Preprocessor Defines
+
+Preprocessor definitions include an underscore `_` as a delimiter between
+words, with every character in upper case.
+
+Each definition is prefixed with `VK_`, followed by the name.
+
+This rule applies to most declarations with the C Preprocessor's `#define`
+token, including macros and constants.
+There are however a few exceptions:
+
+  * The header guard for each header includes an additional underscore `_`
+    at the end of the identifier.
+  ** Example: `VULKAN_H_`
+  * Definitions that denote the presence of an extension follow the
+    <<extensions-naming-conventions-name-strings,extension name string
+    convention>>.
+  ** Example: `VK_KHR_sampler_mirror_clamp_to_edge`
+  * Three `VKAPI_*` definitions are defined by the platform header to alias
+    certain platform-specific identifiers related to calling conventions.
+  ** Examples: `VKAPI_ATTR`, `VKAPI_CALL` and `VKAPI_PTR`
+  * Preprocessor defines are occasionally used to create aliases between
+    other Vulkan identifiers, which usually happens when something was
+    originally misnamed.
+    In these cases, the fixed name is added to the API, and the old name is
+    made into an alias of that.
+    In these cases, the name will be whatever the original misnamed
+    identifier was.
+
+[source, c]
+.Example
+----
+// VK_VERSION_MAJOR (Macro)
+#define VK_VERSION_MAJOR(version) ((uint32_t)(version) >> 22)
+
+// VK_HEADER_VERSION (Base type)
+#define VK_HEADER_VERSION 10
+----
+
+
+== Type Names
+
+Type names are declared with no separator between words.
+Each word starts with a capital letter, and every other character in each
+word is lower case.
+
+Each type name is prefixed with `Vk`.
+
+This rule applies to all type definitions except <<naming-funcpointers,
+function pointer types>>, including struct and union types, handles, base
+typedefs, and enumerant types.
+
+[source, c]
+.Example
+----
+// VkImage (Handle)
+VK_NONDISP_HANDLE(VkImage)
+
+// VkFlags (Base type)
+typedef uint32_t VkFlags;
+
+// VkResult (Enum type)
+typedef enum VkResult {
+    ...
+};
+
+// VkApplicationInfo (Struct)
+typedef struct VkApplicationInfo {
+    ...
+} VkApplicationInfo;
+
+// VkClearColorValue (Union)
+typedef union VkClearColorValue {
+    ...
+} VkClearColorValue;
+----
+
+
+[[naming-extension-structures]]
+=== Extension Structure Names
+
+Structures which extend other structures through the pname:pNext chain
+should reflect the name of the base structure they extend.
+Currently there are two examples of such naming schemes.
+
+New structures which add extended object creation parameters to a base
+structure should use this naming scheme:
+
+.Extended Object Information Structures
+[width="60%",options="header"]
+|====
+| Base Structure Name | Extension Structure Name
+| `Vk__Object__CreateInfo`
+    | `Vk__ObjectName__CreateInfo__Author__`
+|====
+
+`_Object_` is the name of the object being created.
+`_Name_` is a short name for the extension or the new information added by
+that extension.
+`_Author_` is the author ID of the extension.
+
+New structures which extend API queries, such as the
+`vkGetPhysicalDeviceFeatures2KHR` and `vkGetPhysicalDeviceProperties2KHR`
+commands defined by the `VK_KHR_get_physical_device_properties2` extension,
+should use this naming scheme:
+
+.Extended Query Structures
+[width="60%",options="header"]
+|====
+| Base Structure Name | Extension Structure Name
+| `vkGetPhysicalDeviceFeatures2KHR`
+    | `VkPhysicalDevice__Name__Features__Author__`
+| `vkGetPhysicalDeviceProperties2KHR`
+    | `VkPhysicalDevice__Name__Properties__Author__`
+|====
+
+`_Name_` is a short name for the extension, or for the new feature or
+property being queried, such as `Multiview` or `DiscardRectangle`.
+`_Author_` is the author ID of the extension.
+
+
+== Enumerant Names
+
+Enumerants include an underscore `_` as a delimiter between words, with
+every character in upper case.
+
+Each enumerant name is prefixed with `VK_`.
+
+Enumerants are prefixed with the exact name of the type it belongs to,
+converted to the correct case (e.g. `VkStructureType` ->
+`VK_STRUCTURE_TYPE_*`).
+
+This rule applies to all enumerants, with one exception.
+
+  * The `VkResult` enumerants are split into two sub types: error and
+    success codes.
+  ** Success codes are not prefixed with anything other than `VK_`.
+  ** Error codes are prefixed with `VK_ERROR_`.
+
+[source, c]
+.Example
+----
+// VK_FORMAT_UNDEFINED, VK_FORMAT_R4G4_UNORM_PACK8 (Enumerants)
+typedef enum VkFormat {
+    VK_FORMAT_UNDEFINED = 0,
+    VK_FORMAT_R4G4_UNORM_PACK8 = 1,
+    ...
+};
+
+// VkResult codes (Exception)
+typedef enum VkResult {
+    VK_SUCCESS = 0,
+    ...
+    VK_ERROR_OUT_OF_HOST_MEMORY = -1,
+    ...
+} VkResult;
+----
+
+
+== Command Names
+
+Command names are declared with no separator between words.
+Each word starts with a capital letter, and every other character in each
+word is lower case.
+
+The structure of a command name should be as follows:
+
+`__prefix Verb Object Property__`
+
+`_prefix_`::
+    This is usually "vk", but will be "vkCmd" if it is a command used to
+    record into a command buffer, or "vkQueue" if it directly affects a
+    queue.
+
+`_Verb_`::
+    The verb that describes the action being performed.
+    A list of most verbs used in Vulkan is available <<command-names-verbs,
+    here>>.
+
+`_Object_`::
+    The name of the object being acted upon by the command.
+
+`_Property_`::
+    The property of the object which is being acted upon by the command, and
+    is omitted in cases where the whole object is being acted upon (e.g.
+    creation commands).
+
+These rules apply to all command declarations.
+
+[source, c]
+.Example
+----
+// Creation command
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateInstance( ... );
+
+// Command buffer recording command
+VKAPI_ATTR VkResult VKAPI_CALL vkCmdBindPipeline( ... );
+
+// Get command
+VKAPI_ATTR VkResult VKAPI_CALL vkGetQueryPoolResults( ... );
+----
+
+.Note
+[NOTE]
+====
+There are three exceptions to the above rule in the core Vulkan API:
+
+  * vkDeviceWaitIdle
+  * vkCmdNextSubpass
+  * vkCmdPipelineBarrier
+
+These names are left as-is to maintain compatibility.
+
+There are additionally a number of exceptions in a few existing extensions.
+====
+
+
+=== Query Commands
+
+A number of commands in the API are used to determine the properties of some
+object in the implementation.
+
+The queried properties may either be invariant, or they may: change based on
+application behaviour.
+If the results are not invariant, the lifetime of the results should be
+clearly described in the command description.
+See <<fundamentals-commandsyntax-results-lifetime,Lifetime of Retrieved
+Results>> in the specification for more information.
+
+These commands fall into two categories from a naming perspective:
+
+Capability Queries::
+
+These are commands which query capabilities of objects that an
+implementation can provide.
+Such commands use the verb "Enumerate" to identify themselves.
++
+e.g. `vkEnumeratePhysicalDeviceProperties`
++
+Whilst these commands describe properties of the named object, they do not
+accept a parameter of that object type - though they usually have a
+parameter for the parent type.
+
+Object State Queries::
+
+These commands are used to query the current properties of an object that
+has been created.
+Such commands use the verb "Get" to identify themselves.
++
+e.g. `vkGetPhysicalDeviceQueueFamilyProperties`
++
+These commands always have a parameter of the object type.
+
+
+[[command-names-verbs]]
+=== Command Verbs
+
+Below is a list of many of the verbs currently in use in core Vulkan and KHR
+extensions, along with their meanings.
+The list is not guaranteed to be up to date, but covers all core and KHR
+verbs at the time of writing.
+
+[%autowidth,options="header"]
+|===
+| Verb       | Meaning
+| Acquire    | Acquire ownership of an object from an external source
+| Allocate   | Allocates memory in a pool or memory heap and creates object - paired with "Free"
+| Begin      | Start of a range of command buffer commands with different behaviour than those outside the range - "End" marks the end of the range
+| Bind       | Binds an object to another object
+| Blit       | Performs a filtered and scaled copy of pixels from one image to another
+| Clear      | Sets all pixels in an image to the same value
+| Copy       | A raw copy of data from one object to another with no transformation of the data
+| Create     | Creates an object - paired with "Destroy"
+| Destroy    | Destroys an object - paired with "Create"
+| Dispatch   | Kicks off a set of compute tasks
+| Draw       | Kicks off a set of rasterization tasks
+| End        | End of a range of command buffer commands with different behaviour than those outside the range - "Begin" marks the start of the range
+| Enumerate  | Queries the capabilities of objects that could be created, before creating them
+| Execute    | Executes commands recorded in another command buffer
+| Fill       | Sets all data units in a buffer to the same value
+| Flush      | Flushes data from the host to the device
+| Free       | Destroys an object and then frees memory back to a pool or memory heap - paired with "Allocate"
+| Get        | Queries the state of an existing object
+| Import     | Imports the payload from an external object into a Vulkan object
+| Invalidate | Invalidates data on the host, forcing newer data on the device to be read
+| Map        | Maps an allocation into host memory - paired with "Unmap"
+| Merge      | Merges two objects
+| Present    | Presents an image to a surface
+| Push       | Pushes data to the device as part of a command stream
+| Release    | Releases ownership of an object to an external source
+| Reset      | Resets the state of an object to an initial state
+| Resolve    | Resolves multiple samples in a multisampled image to an image with one sample per pixel
+| Set        | Sets the state of an object
+| Submit     | Submits a set of commands to a queue
+| Unmap      | Unmaps an allocation from host memory - paired with "Map"
+| Update     | Updates entries in a descriptor set
+| Wait       | Waits for some signal
+| Write      | Writes values to an object
+|===
+
+
+[[naming-funcpointers]]
+=== Function Pointer Type Names
+
+Function pointer names are declared exactly as the equivalent statically
+declared command would be declared, but prefixed with `PFN_`, standing for
+"Pointer to FunctioN".
+
+[source, c]
+.Example
+----
+// PFN_vkCreateInstance (Function Pointer)
+typedef VkResult (VKAPI_PTR *PFN_vkCreateInstance)( ... );
+----
+
+
+== Function Parameter and Struct/Union Member Names
+
+Function parameter names are declared with no separator between words.
+Each new word, *except* for the first, starts with a capital letter.
+All other characters in the parameter name are in lower case.
+
+Members/parameters of a type that is not a base type should generally be
+named in a similar way to the type itself, with additional context added for
+clarity when necessary.
+
+Pointer members/parameters are prefixed with a number of `p` characters,
+with one `p` for each level of indirection.
+
+Function pointer members/parameters are prefixed with `pfn`.
+
+Any member that describes the size of a memory allocation should be suffixed
+with `Size`.
+If the context is self-evident from the structure name, then it may simply
+be named `size`.
+
+Any member that describes the number of something, such as an array length
+or number of internal allocations, should be suffixed with `Count`.
+The `size` rule overrides this rule, though it is possible to have multiple
+sizes (e.g. `sizeCount`).
+If the member is an array length, then the name of length should correspond
+to the name of the array member, usually `XYZCount` for an array named
+`pXYZs`.
+If a member of a chained extension structure is an array whose length must
+match the length of an array of the base structure, then the chained
+extension structure should include an array length member with the same name
+as the length in the base structure.
+
+These rules apply to all function parameters and struct/union members, with
+a single exception:
+
+  * The `sType` member of structures is abbreviated as it is used in almost
+    every structure.
+  ** The slightly odd naming prevents it clashing with any future variables.
+  ** The `s` stands for "`structure`", referring to its enumerant type.
+
+[source, c]
+.Example
+----
+// Function parameters, including a twice indirected pointer.
+VKAPI_ATTR VkResult VKAPI_CALL vkMapMemory(
+    VkDevice                                    device,
+    VkDeviceMemory                              memory,
+    VkDeviceSize                                offset,
+    VkDeviceSize                                size,
+    VkMemoryMapFlags                            flags,
+    void**                                      ppData);
+
+// Structure members, including the sType exception and a single indirected
+// pointer.
+typedef struct VkMemoryBarrier {
+    VkStructureType    sType;
+    const void*        pNext;
+    VkAccessFlags      srcAccessMask;
+    VkAccessFlags      dstAccessMask;
+} VkMemoryBarrier;
+
+// Function pointer members
+typedef struct VkAllocationCallbacks {
+    void*                                   pUserData;
+    PFN_vkAllocationFunction                pfnAllocation;
+    PFN_vkReallocationFunction              pfnReallocation;
+    PFN_vkFreeFunction                      pfnFree;
+    PFN_vkInternalAllocationNotification    pfnInternalAllocation;
+    PFN_vkInternalFreeNotification          pfnInternalFree;
+} VkAllocationCallbacks;
+
+// Size member (pCode is not a specific array of anything, it is just a
+// pointer to memory)
+typedef struct VkShaderModuleCreateInfo {
+    VkStructureType              sType;
+    const void*                  pNext;
+    VkShaderModuleCreateFlags    flags;
+    size_t                       codeSize;
+    const uint32_t*              pCode;
+} VkShaderModuleCreateInfo;
+
+// Count member
+typedef struct VkSparseImageMemoryBindInfo {
+    VkImage                           image;
+    uint32_t                          bindCount;
+    const VkSparseImageMemoryBind*    pBinds;
+} VkSparseImageMemoryBindInfo;
+----
+
+
+[[naming-extension-identifiers]]
+== Extension Identifier Naming Conventions
+
+Identifiers defined by an extension are modified by appending the
+extension's author ID to the end of the identifier, as described below.
+Author IDs are obtained as described in the
+<<extensions-naming-conventions,Extension and Layer Naming Conventions>>
+section.
+
+If an extension becomes part of core, a new version of the extension's
+identifiers should be created, that do not contain the author ID at the end
+of the identifier.
+The original identifiers should be kept in order to maintain source-level
+compatibility with existing applications making use of the earlier
+extension's identifiers.
+
+
+=== Extension Type Names
+
+Types defined by extensions have the author ID appended to the end of the
+type name.
+
+[source, c]
+.Example
+----
+// VkSurfaceFormatKHR (structure type with KHR appended)
+typedef struct VkSurfaceFormatKHR {
+    VkFormat           format;
+    VkColorSpaceKHR    colorSpace;
+} VkSurfaceFormatKHR;
+----
+
+
+=== Extension Enumerant Names
+
+Enumerants defined by extensions have the author ID appended to the end of
+the enumerant name, separated by an underscore.
+This includes the begin, end, range and max values added to enumeranted type
+definitions by the generator scripts.
+
+[NOTE]
+====
+There is one exception to this rule in the
+`VK_KHR_sampler_mirror_clamp_to_edge` extension.
+This functionality was included in the original spec, but quickly separated
+out at release.
+Due to this late change, the single enum exposed has retained its original
+identifier to avoid compatibility issues:
+ename:VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
+====
+
+[source, c]
+.Example
+----
+// VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR (enumerant with _KHR appended)
+typedef enum VkCompositeAlphaFlagBitsKHR {
+    VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR = 0x00000001,
+    ...
+} VkCompositeAlphaFlagBitsKHR;
+----
+
+
+=== Extension Function Names
+
+Function and function pointer type names defined by extensions have the
+author ID appended to the end of the name.
+
+[source, c]
+.Example
+----
+// vkDestroySurfaceKHR (function with KHR appended)
+VKAPI_ATTR void VKAPI_CALL vkDestroySurfaceKHR(
+    VkInstance                                  instance,
+    VkSurfaceKHR                                surface,
+    const VkAllocationCallbacks*                pAllocator);
+
+typedef void (VKAPI_PTR *PFN_vkDestroySurfaceKHR)(
+    VkInstance                                  instance,
+    VkSurfaceKHR                                surface,
+    const VkAllocationCallbacks*                pAllocator);
+----
+
+
+[[naming-abbreviations]]
+== Common Abbreviations
+
+Abbreviations and acronyms are sometimes used in the <<vulkan-spec,Vulkan
+API Specification>> and the Vulkan API where they are considered clear and
+commonplace.
+All such abbrevations used in the core API are defined here.
+Extensions should also use these abbreviations where appropriate.
+
+Src::
+    Source
+
+Dst::
+    Destination
+
+Min::
+    Minimum
+
+Max::
+    Maximum
+
+Rect::
+    Rectangle
+
+Info::
+    Information
+
+Lod::
+    Level of Detail
+
+Mip::
+    Related to a mipmap.
+    Use "`mipmap`" in full only when it is a standalone term.
+    If referred to some associating with a mipmap, such as levels, sampling
+    mode, size, tail images, etc., use "`mip`" as a standalone prefix word,
+    e.g. pname:maxMipLevels, ename:VK_MIP_MODE, etc.
+    This is analogous to the <<writing-compount-words,spelling conventions
+    for mip-related terms>>
+
+[NOTE]
+====
+The names pname:mipmapMode, pname:mipmapPrecisionBits,
+sname:VkSamplerMipmapMode, and
+ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT are exceptions to this
+general usage guideline, for historical reasons.
+====
+
+ID::
+    Identifier
+
+UUID::
+    Universally Unique Identifier
+
+Op::
+    Operation
+
+R::
+    Red color component
+
+G::
+    Green color component
+
+B::
+    Blue color component
+
+A::
+    Alpha color component
+
+
+[[naming-prefixes]]
+== Standard Prefixes
+
+Prefixes are used in the API to denote specific semantic meaning of Vulkan
+names, or as a label to avoid name clashes, and are explained here:
+
+VK/Vk/vk::
+    Vulkan namespace +
+    All types, commands, enumerants and C macro definitions in the Vulkan
+    specification are prefixed with these two characters, according to the
+    rules defined above.
+
+PFN/pfn::
+    Function Pointer +
+    Denotes that a type is a function pointer, or that a variable is of a
+    pointer type.
+
+p::
+    Pointer +
+    Variable is a pointer.
+
+vkCmd::
+    Commands that record commands in command buffers +
+    These API commands do not result in immediate processing on the device.
+    Instead, they record the requested action in a command buffer for
+    execution when the command buffer is submitted to a queue.
+
+s::
+    Structure +
+    Used to denote the etext:VK_STRUCTURE_TYPE* member of each structure in
+    pname:sType.

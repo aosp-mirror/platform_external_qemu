@@ -59,4 +59,23 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotCapability,
                         SnapshotGlDisableTest,
                         ::testing::ValuesIn(kGLES2CanBeDisabled));
 
+class SnapshotGlMipmapHintTest : public SnapshotSetValueTest<GLenum>,
+                                 public ::testing::WithParamInterface<GLenum> {
+    void stateCheck(GLenum expected) override {
+        EXPECT_TRUE(compareGlobalGlInt(gl, GL_GENERATE_MIPMAP_HINT, expected));
+    }
+    void stateChange() override {
+        gl->glHint(GL_GENERATE_MIPMAP_HINT, *m_changed_value);
+    }
+};
+
+TEST_P(SnapshotGlMipmapHintTest, DISABLED_PreserveHint) {
+    setExpectedValues(GL_DONT_CARE, GetParam());
+    doCheckedSnapshot();
+}
+
+INSTANTIATE_TEST_CASE_P(GLES2SnapshotHints,
+                        SnapshotGlMipmapHintTest,
+                        ::testing::ValuesIn(kGLES2GenerateMipmapHints));
+
 }  // namespace emugl

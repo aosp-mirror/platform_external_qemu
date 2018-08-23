@@ -1,0 +1,92 @@
+// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[platformCreateSurface_wayland,platformCreateSurface_wayland]]
+
+=== Wayland Platform
+
+[open,refpage='vkCreateWaylandSurfaceKHR',desc='Create a slink:VkSurfaceKHR object for a Wayland window',type='protos']
+--
+
+To create a sname:VkSurfaceKHR object for a Wayland surface, call:
+
+include::../../api/protos/vkCreateWaylandSurfaceKHR.txt[]
+
+  * pname:instance is the instance to associate the surface with.
+  * pname:pCreateInfo is a pointer to an instance of the
+    slink:VkWaylandSurfaceCreateInfoKHR structure containing parameters
+    affecting the creation of the surface object.
+  * pname:pAllocator is the allocator used for host memory allocated for the
+    surface object when there is no more specific allocator available (see
+    <<memory-allocation,Memory Allocation>>).
+  * pname:pSurface points to a slink:VkSurfaceKHR handle in which the
+    created surface object is returned.
+
+include::../../validity/protos/vkCreateWaylandSurfaceKHR.txt[]
+--
+
+[open,refpage='VkWaylandSurfaceCreateInfoKHR',desc='Structure specifying parameters of a newly created Wayland surface object',type='structs']
+--
+
+The sname:VkWaylandSurfaceCreateInfoKHR structure is defined as:
+
+include::../../api/structs/VkWaylandSurfaceCreateInfoKHR.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:display and pname:surface are pointers to the Wayland
+    code:wl_display and code:wl_surface to associate the surface with.
+
+.Valid Usage
+****
+  * [[VUID-VkWaylandSurfaceCreateInfoKHR-display-01304]]
+    pname:display must: point to a valid Wayland code:wl_display.
+  * [[VUID-VkWaylandSurfaceCreateInfoKHR-surface-01305]]
+    pname:surface must: point to a valid Wayland code:wl_surface.
+****
+
+include::../../validity/structs/VkWaylandSurfaceCreateInfoKHR.txt[]
+--
+
+On Wayland, pname:currentExtent is undefined [eq]#(0xFFFFFFFF, 0xFFFFFFFF)#.
+Whatever the application sets a swapchain's pname:imageExtent to will be the
+size of the window, after the first image is presented.
+pname:minImageExtent is [eq]#(1,1)#, and pname:maxImageExtent is the maximum
+supported surface size.
+Any calls to flink:vkGetPhysicalDeviceSurfacePresentModesKHR on a surface
+created with fname:vkCreateWaylandSurfaceKHR are required: to return
+ename:VK_PRESENT_MODE_MAILBOX_KHR as one of the valid present modes.
+
+Some Vulkan functions may: send protocol over the specified code:wl_display
+connection when using a swapchain or presentable images created from a
+sname:VkSurfaceKHR referring to a code:wl_surface.
+Applications must: therefore ensure that both the code:wl_display and the
+code:wl_surface remain valid for the lifetime of any sname:VkSwapchainKHR
+objects created from a particular code:wl_display and code:wl_surface.
+Also, calling flink:vkQueuePresentKHR will result in Vulkan sending
+code:wl_surface.commit requests to the underlying code:wl_surface of each
+sname:VkSwapchainKHR objects referenced by pname:pPresentInfo.
+If the swapchain is created with a present mode of
+ename:VK_PRESENT_MODE_MAILBOX_KHR or ename:VK_PRESENT_MODE_IMMEDIATE_KHR,
+then the corresponding code:wl_surface.attach, code:wl_surface.damage, and
+code:wl_surface.commit request must: be issued by the implementation during
+the call to flink:vkQueuePresentKHR and must: not be issued by the
+implementation outside of flink:vkQueuePresentKHR.
+This ensures that any Wayland requests sent by the client after the call to
+flink:vkQueuePresentKHR returns will be received by the compositor after the
+code:wl_surface.commit.
+Regardless of the mode of swapchain creation, a new code:wl_event_queue
+must: be created for each successful flink:vkCreateWaylandSurfaceKHR call,
+and every Wayland object created by the implementation must: be assigned to
+this event queue.
+If the platform provides Wayland 1.11 or greater, this must: be implemented
+by the use of Wayland proxy object wrappers, to avoid race conditions.
+
+If the application wishes to synchronize any window changes with a
+particular frame, such requests must: be sent to the Wayland display server
+prior to calling flink:vkQueuePresentKHR.
+For full control over interactions between Vulkan rendering and other
+Wayland protocol requests and events, a present mode of
+ename:VK_PRESENT_MODE_MAILBOX_KHR should: be used.

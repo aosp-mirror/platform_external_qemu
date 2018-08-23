@@ -30,14 +30,15 @@ typedef std::function<void(GLenum target, GLint level,
         glTexImage2D_t;
 
 ETC2ImageFormat getEtcFormat(GLenum internalformat);
+void getAstcFormats(const GLint** formats, size_t* formatsCount);
+bool isAstcFormat(GLenum internalformat);
 bool isEtcFormat(GLenum internalformat);
 bool isPaletteFormat(GLenum internalformat);
 int getCompressedFormats(int* formats);
-void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
-                                          GLenum internalformat, GLsizei width,
-                                          GLsizei height, GLint border,
-                                          GLsizei imageSize, const GLvoid* data,
-                                          glTexImage2D_t glTexImage2DPtr);
+void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
+                            GLenum internalformat, GLsizei width,
+                            GLsizei height, GLint border, GLsizei imageSize,
+                            const GLvoid* data, glTexImage2D_t glTexImage2DPtr);
 void deleteRenderbufferGlobal(GLuint rbo);
 GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat);
 
