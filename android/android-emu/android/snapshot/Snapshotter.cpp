@@ -616,7 +616,7 @@ void Snapshotter::handleGenericLoad(const char* name,
             }
         }
     } else {
-        if (reportMetrics) {
+        if (reportMetrics && hasLoader()) {
             appendSuccessfulLoad(name,
                     mLastLoadDuration ? *mLastLoadDuration : 0);
         }

@@ -22,6 +22,8 @@ enum class FileShare {
 };
 
 FILE* fsopen(const char* filename, const char* mode, FileShare fileshare);
+FILE* fsopenWithTimeout(const char* filename, const char* mode,
+        FileShare fileshare, int timeoutMs);
 
 bool updateFileShare(FILE* file, FileShare fileshare);
 
