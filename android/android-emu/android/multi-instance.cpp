@@ -21,8 +21,6 @@ namespace {
 struct MultiInstanceState {
     android::base::FileShare shareMode = android::base::FileShare::Write;
     FILE* sharedFile = nullptr;
-    android::multiinstance::UpdateDriveShareModeFunc updateDriveShareModeFunc =
-            nullptr;
 };
 static android::base::LazyInstance<MultiInstanceState> sMultiInstanceState =
         LAZY_INSTANCE_INIT;
@@ -54,33 +52,13 @@ bool android::multiinstance::initInstanceShareMode(
 }
 
 bool android::multiinstance::updateInstanceShareMode(
-        const char* snapshotName,
         base::FileShare shareMode) {
     assert(sMultiInstanceState.hasInstance());
-    if (sMultiInstanceState->shareMode == shareMode) {
-        return true;
-    }
     if (android::base::updateFileShare(sMultiInstanceState->sharedFile,
                                        shareMode)) {
-        if (sMultiInstanceState->updateDriveShareModeFunc) {
-            if (!sMultiInstanceState->updateDriveShareModeFunc(snapshotName,
-                                                               shareMode)) {
-                return false;
-            }
-        }
         sMultiInstanceState->shareMode = shareMode;
         return true;
     } else {
         return false;
     }
-}
-
-void android::multiinstance::setUpdateDriveShareModeFunc(
-        UpdateDriveShareModeFunc updateDriveShareModeFunc) {
-    sMultiInstanceState->updateDriveShareModeFunc = updateDriveShareModeFunc;
-}
-
-android::base::FileShare android::multiinstance::getInstanceShareMode() {
-    assert(sMultiInstanceState.hasInstance());
-    return sMultiInstanceState->shareMode;
 }

@@ -43,8 +43,8 @@ iov_from_buf(const struct iovec *iov, unsigned int iov_cnt,
 {
     if (__builtin_constant_p(bytes) && iov_cnt &&
         offset <= iov[0].iov_len && bytes <= iov[0].iov_len - offset) {
-      memcpy((char *)iov[0].iov_base + offset, buf, bytes);
-      return bytes;
+        memcpy(iov[0].iov_base + offset, buf, bytes);
+        return bytes;
     } else {
         return iov_from_buf_full(iov, iov_cnt, offset, buf, bytes);
     }
@@ -56,8 +56,8 @@ iov_to_buf(const struct iovec *iov, const unsigned int iov_cnt,
 {
     if (__builtin_constant_p(bytes) && iov_cnt &&
         offset <= iov[0].iov_len && bytes <= iov[0].iov_len - offset) {
-      memcpy(buf, (char *)iov[0].iov_base + offset, bytes);
-      return bytes;
+        memcpy(buf, iov[0].iov_base + offset, bytes);
+        return bytes;
     } else {
         return iov_to_buf_full(iov, iov_cnt, offset, buf, bytes);
     }

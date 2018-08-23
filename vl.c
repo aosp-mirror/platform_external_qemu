@@ -149,15 +149,9 @@ int main(int argc, char **argv)
 #undef socket_connect
 #undef socket_listen
 
-#include "android-qemu2-glue/android_qemud.h"
-#include "android-qemu2-glue/drive-share.h"
-#include "android-qemu2-glue/looper-qemu.h"
-#include "android-qemu2-glue/qemu-control-impl.h"
-#include "android-qemu2-glue/qemu-setup.h"
 #include "android/android.h"
 #include "android/base/process-control.h"
 #include "android/boot-properties.h"
-#include "android/camera/camera-service.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/cros.h"
 #include "android/emulation/bufprint_config_dirs.h"
@@ -177,12 +171,12 @@ int main(int argc, char **argv)
 #include "android/opengles.h"
 #include "android/session_phase_reporter.h"
 #include "android/skin/winsys.h"
-#include "android/snaphost-android.h"
 #include "android/snapshot.h"
+#include "android/snaphost-android.h"
 #include "android/snapshot/interface.h"
 #include "android/telephony/modem_driver.h"
-#include "android/ui-emu-agent.h"
 #include "android/update-check/update_check.h"
+#include "android/ui-emu-agent.h"
 #include "android/utils/async.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -193,12 +187,17 @@ int main(int argc, char **argv)
 #include "android/utils/looper.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
-#include "android/utils/socket_drainer.h"
 #include "android/utils/system.h"
+#include "android/utils/socket_drainer.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/timezone.h"
 #include "android/version.h"
 #include "android/wear-agent/android_wear_agent.h"
+#include "android-qemu2-glue/android_qemud.h"
+#include "android-qemu2-glue/looper-qemu.h"
+#include "android-qemu2-glue/qemu-control-impl.h"
+#include "android-qemu2-glue/qemu-setup.h"
+#include "android/camera/camera-service.h"
 
 #include "hw/input/goldfish_events.h"
 #include "hw/misc/goldfish_pstore.h"
@@ -724,9 +723,6 @@ static void process_cmd_properties(void) {
         }
     }
 }
-
-extern const char *android_get_quick_boot_name();
-
 #endif  // CONFIG_ANDROID
 
 /**
@@ -977,6 +973,184 @@ static bool read_file_to_buf(const char* file, uint8_t* buf, size_t size){
     return true;
 }
 
+static int create_qcow2_images(void) {
+    /* First, determine if any of the backing images have been altered.
+     * QCoW2 images won't work in that case, and need to be recreated (this
+     * will obliterate previous snapshots).
+     * The most reliable way to do this is to cache some sort of checksum of
+     * the image files, but we go the easier (and faster) route and cache the
+     * version number that is specified in build.prop.
+     */
+    const char* avd_data_dir = avdInfo_getContentPath(android_avdInfo);
+    static const char sysimg_version_number_cache_basename[] =
+        "version_num.cache";
+    char* sysimg_version_number_cache_path =
+        path_join(avd_data_dir, sysimg_version_number_cache_basename);
+    bool reset_version_number_cache = false;
+    if (!path_exists(sysimg_version_number_cache_path)) {
+        /* File with previously saved version number doesn't exist,
+         * we'll create it later.
+         */
+        reset_version_number_cache = true;
+    } else {
+        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "r");
+        int sysimg_version_number = -1;
+        /* If the file with version number contained an error, or the
+         * saved version number doesn't match the current one, we'll
+         * update it later.
+         */
+        reset_version_number_cache =
+            vn_cache_file == NULL ||
+            fscanf(vn_cache_file, "%d", &sysimg_version_number) != 1 ||
+            sysimg_version_number !=
+                avdInfo_getSysImgIncrementalVersion(android_avdInfo);
+        if (vn_cache_file) {
+            fclose(vn_cache_file);
+        }
+    }
+
+    /* List of paths to all images that can be mounted.*/
+    const DriveBackingPair image_paths[] = {
+        {"system", android_hw->disk_systemPartition_path ?: android_hw->disk_systemPartition_initPath},
+        {"vendor", android_hw->disk_vendorPartition_path ?: android_hw->disk_vendorPartition_initPath},
+        {"cache", android_hw->disk_cachePartition_path},
+        {"userdata", android_hw->disk_dataPartition_path},
+        {"sdcard", android_hw->hw_sdCard_path},
+        {"encrypt", android_hw->disk_encryptionKeyPartition_path},
+    };
+    /* List of paths to all images for cros.*/
+    const DriveBackingPair image_paths_hw_arc[] = {
+        {"system", android_hw->disk_systemPartition_initPath},
+        {"vendor", android_hw->disk_vendorPartition_initPath},
+        {"userdata", android_hw->disk_dataPartition_path},
+    };
+    int count = ARRAY_SIZE(image_paths);
+    const DriveBackingPair* images = image_paths;
+    if (android_hw->hw_arc) {
+        count = ARRAY_SIZE(image_paths_hw_arc);
+        images = image_paths_hw_arc;
+    }
+    int p;
+    for (p = 0; p < count; p++) {
+        const char* backing_image_path = images[p].backing_image_path;
+        if (!backing_image_path ||
+            *backing_image_path == '\0') {
+            /* If the path is NULL or empty, just ignore it.*/
+            continue;
+        }
+        char* image_basename = path_basename(backing_image_path);
+        char* qcow2_path_buffer = NULL;
+        const char* qcow2_image_path = NULL;
+        bool need_rebase = false;
+        // ChromeOS and Android pass parameters differently
+        if (android_hw->hw_arc) {
+            if (p < 2) {
+                /* System & vendor image are special cases, the backing image is
+                 * in the SDK folder, but the QCoW2 image that the emulator
+                 * uses is created on a per-AVD basis and is placed in the
+                 * AVD's data folder.
+                 */
+                const char qcow2_suffix[] = "." QCOW2_SUFFIX;
+                size_t path_size = strlen(image_basename) + sizeof(qcow2_suffix)
+                        + 1;
+                char* image_qcow2_basename = malloc(path_size);
+                bufprint(image_qcow2_basename, image_qcow2_basename + path_size,
+                        "%s%s", image_basename, qcow2_suffix);
+                qcow2_path_buffer =
+                    path_join(avd_data_dir, image_qcow2_basename);
+                free(image_qcow2_basename);
+            } else {
+                /* For all the other images except system image,
+                 * just create another file alongside them
+                 * with a 'qcow2' extension
+                 */
+                const char qcow2_suffix[] = "." QCOW2_SUFFIX;
+                size_t path_size = strlen(backing_image_path) + sizeof(
+                        qcow2_suffix) + 1;
+                qcow2_path_buffer = malloc(path_size);
+                bufprint(qcow2_path_buffer, qcow2_path_buffer + path_size,
+                        "%s%s", backing_image_path, qcow2_suffix);
+            }
+            qcow2_image_path = qcow2_path_buffer;
+        } else {
+            QemuOpts* opts = qemu_opts_find(qemu_find_opts("drive"),
+                    images[p].drive);
+            if (!opts) {
+                continue;
+            }
+            qcow2_image_path = qemu_opt_get(opts, "file");
+            const char qcow2_suffix[] = "." QCOW2_SUFFIX;
+            if (strcmp(qcow2_suffix, qcow2_image_path
+                    + strlen(qcow2_image_path) - strlen(qcow2_suffix))) {
+                // We are not using qcow2
+                continue;
+            }
+            if (qemu_opt_find(opts, "need-rebase")) {
+                need_rebase = true;
+                qemu_opt_unset(opts, "need-rebase");
+            }
+        }
+
+        Error* img_creation_error = NULL;
+        if (!path_exists(qcow2_image_path) ||
+            android_op_wipe_data ||
+            reset_version_number_cache) {
+            const char* fmt = "raw";
+            uint8_t buf[BLOCK_PROBE_BUF_SIZE];
+            BlockDriver *drv;
+            drv = bdrv_find_format("qcow2");
+            if (drv && read_file_to_buf(backing_image_path, buf, sizeof(buf)) &&
+                drv->bdrv_probe(buf, sizeof(buf), backing_image_path) >= 100) {
+                fmt = "qcow2";
+            }
+            bdrv_img_create(
+                qcow2_image_path,
+                QCOW2_SUFFIX,
+                /*absolute path only for sys vendor*/
+                p < 2 || need_rebase ? backing_image_path : image_basename,
+                fmt,
+                NULL,
+                -1,
+                0,
+                true,
+                &img_creation_error);
+        }
+        if (need_rebase) {
+            QDict *options = qdict_new();
+            qdict_put(options, "driver", qstring_from_str(QCOW2_SUFFIX));
+            Error *local_err = NULL;
+            BlockBackend *blk = blk_new_open(qcow2_image_path,
+                    NULL, options, BDRV_O_RDWR | BDRV_O_NO_BACKING, &local_err);
+            if (!blk) {
+                error_report("Could not open '%s': ", qcow2_image_path);
+                return 0;
+            }
+            BlockDriverState* bs = blk_bs(blk);
+            bdrv_change_backing_file(bs, backing_image_path, NULL);
+            blk_unref(blk);
+        }
+        free(image_basename);
+        free(qcow2_path_buffer);
+        if (img_creation_error) {
+            error_report("%s", error_get_pretty(img_creation_error));
+            return 0;
+        }
+    }
+
+    /* Update version number cache if necessary. */
+    if (reset_version_number_cache) {
+        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "w");
+        if (vn_cache_file) {
+            fprintf(vn_cache_file,
+                    "%d\n",
+                    avdInfo_getSysImgIncrementalVersion(android_avdInfo));
+            fclose(vn_cache_file);
+        }
+    }
+    free(sysimg_version_number_cache_path);
+
+    return 1;
+}
 #endif  // CONFIG_ANDROID
 
 
@@ -3373,7 +3547,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     const char *loadvm = NULL;
 #ifdef CONFIG_ANDROID
     bool snapshot_list = false;
-    bool read_only = false;
 #endif
     MachineClass *machine_class;
     const char *cpu_model;
@@ -4517,9 +4690,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 }
                 break;
 
-            case QEMU_OPTION_read_only:
-              read_only = true;
-              break;
 #endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
@@ -4568,6 +4738,15 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
     qemu_set_rng_random_generic_random_func(rng_random_generic_read_random_bytes);
     if (!qemu_android_emulation_early_setup()) {
+        return 1;
+    }
+
+    /* At this point, both block drivers and main loop have been initialized
+     * which means we can create the QCoW2 images to boot from.
+     * The QCoW2 images are backed by the "raw" images specified in the AVD
+     * config, and contain diffs to the backing image. Snapshot data is also
+     * written to QCoW2 images.*/
+    if(!create_qcow2_images()) {
         return 1;
     }
 
@@ -5188,20 +5367,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         qemu_opts_foreach(qemu_find_opts("drive"), drive_enable_snapshot,
                           NULL, NULL);
     }
-
-#ifdef CONFIG_ANDROID
-    if (android_drive_share_init(
-            android_op_wipe_data, read_only,
-            loadvm ? loadvm : android_get_quick_boot_name(),
-            machine_class->block_default_type)) {
-      return 1;
-    }
-#else   // CONFIG_ANDROID
     if (qemu_opts_foreach(qemu_find_opts("drive"), drive_init_func,
                           &machine_class->block_default_type, NULL)) {
         return 1;
     }
-#endif  // CONFIG_ANDROID
 
     if (!default_drive(default_cdrom, snapshot,
                        machine_class->block_default_type, 2, CDROM_OPTS)) {
